@@ -1,5 +1,14 @@
 # Agent 03: Sky And Aerial Perspective
 
+## Current Status
+
+This work packet is suspended. The skybox atmosphere renderer was removed from
+the runtime because the sky and ocean haze paths were visually inconsistent with
+the scene-object haze. `Skybox.svelte` now uses the native Three cubemap
+background/environment path; sky and ocean atmosphere integration should flow
+through the full-scene `depth-fog` post-processing pass instead of a skybox-only
+shader path.
+
 ## Mission
 
 Make the sky/background consume the unified atmosphere without changing the
@@ -12,10 +21,13 @@ Primary files:
 - `apps/game/src/threlte/systems/Skybox.svelte`
 - `apps/game/src/threlte/levels/skyboxPresets.ts`
 
-Create new files if appropriate:
+Suspended runtime experiment:
 
 - `apps/game/src/threlte/atmosphere/SkyAtmosphereRenderer.svelte`
 - `apps/game/src/threlte/atmosphere/skyAtmosphereMaterial.ts`
+
+These files were removed from the runtime rollback. Do not recreate them until a
+new sky/ocean fog contract is designed and verified against the object haze.
 
 Secondary files only if needed:
 

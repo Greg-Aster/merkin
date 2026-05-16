@@ -151,14 +151,14 @@
         ],
         "sourceAssetFingerprint": {
           "algorithm": "sha256",
-          "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+          "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
         },
         "sourceAssetFingerprints": [
           {
             "url": "/models/levels/observatory-environment.glb",
             "fingerprint": {
               "algorithm": "sha256",
-              "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+              "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
             }
           }
         ],
@@ -188,7 +188,7 @@
           "projectionHeightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
           "fingerprint": {
             "algorithm": "sha256",
-            "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+            "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
           }
         },
         "collisionCoverageBounds": {
@@ -210,22 +210,60 @@
     }
   },
   "visualChunks": {
-    "generatedAt": "2026-05-13T17:33:10.880Z",
+    "generatedAt": "2026-05-16T02:30:34.727Z",
     "generatedBy": "cook-terrain-glb-chunks",
-    "source": "source-glb",
-    "preservesSourceUvs": true,
-    "preservesSourceMaterialSlots": true,
     "chunkCount": 16,
-    "material": {
-      "name": "terrain-chunk-observatory-ground",
-      "baseColorFactor": [
-        0.18,
-        0.22,
-        0.18,
-        1
+    "sourceContract": {
+      "schemaVersion": 1,
+      "terrainSourceType": "glb-chunk-terrain",
+      "sourceAssetUrl": "/models/levels/observatory-environment.glb",
+      "sourceAssetUrls": [
+        "/models/levels/observatory-environment.glb"
       ],
-      "roughnessFactor": 0.94,
-      "metallicFactor": 0
+      "authoredSourceAssetUrls": [
+        "/models/levels/observatory-environment.glb"
+      ],
+      "sourceAssetFingerprint": {
+        "algorithm": "sha256",
+        "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+      },
+      "sourceAssetFingerprints": [
+        {
+          "url": "/models/levels/observatory-environment.glb",
+          "fingerprint": {
+            "algorithm": "sha256",
+            "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+          }
+        }
+      ],
+      "heightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
+      "heightmapFingerprint": {
+        "algorithm": "sha256",
+        "value": "9940d42617657bb0ed767695abc55f424a688dee1b4e6005a84eaa8e63c89f6f"
+      },
+      "sourceCoordinateSystem": "three-y-up-xz-ground",
+      "sourceBounds": {
+        "min": [
+          -199.5517120361328,
+          -1.8438290357589722,
+          -195.1022491455078
+        ],
+        "max": [
+          194.0009765625,
+          56.307861328125,
+          194.0846710205078
+        ]
+      },
+      "renderBakeMode": "source-glb-chunk-mesh",
+      "collisionBakeMode": "source-glb-heightfield-projection",
+      "collisionMeshSource": {
+        "type": "source-glb-heightfield-projection",
+        "url": "/models/levels/observatory-environment.glb",
+        "fingerprint": {
+          "algorithm": "sha256",
+          "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+        }
+      }
     },
     "activation": {
       "maxActiveChunksByTier": {
@@ -242,63 +280,22 @@
         "distance": 787.1053771972656
       }
     ],
-    "sourceContract": {
-      "schemaVersion": 1,
-      "terrainSourceType": "glb-chunk-terrain",
-      "sourceAssetUrl": "/models/levels/observatory-environment.glb",
-      "sourceAssetUrls": [
-        "/models/levels/observatory-environment.glb"
-      ],
-      "sourceAssetFingerprint": {
-        "algorithm": "sha256",
-        "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
-      },
-      "sourceCoordinateSystem": "three-y-up-xz-ground",
-      "sourceBounds": {
-        "min": [
-          -196.7517120361328,
-          -1.8438290357589722,
-          -194.6022491455078
-        ],
-        "max": [
-          196.8009765625,
-          56.307861328125,
-          194.5846710205078
-        ]
-      },
-      "renderBakeMode": "source-glb-chunk-mesh",
-      "collisionBakeMode": "source-glb-heightfield-projection",
-      "collisionMeshSource": {
-        "type": "source-glb-heightfield-projection",
-        "url": "/models/levels/observatory-environment.glb",
-        "projectionHeightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
-        "fingerprint": {
-          "algorithm": "sha256",
-          "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
-        }
-      },
-      "collisionCoverageBounds": {
-        "min": [
-          -199.5517120361328,
-          -1.8438290357589722,
-          -195.1022491455078
-        ],
-        "max": [
-          194.0009765625,
-          56.307861328125,
-          194.0846710205078
-        ]
-      },
-      "role": "walkable",
-      "vertexCount": 1691928,
-      "triangleCount": 563976
-    },
     "runtimeMode": "glb-chunk-terrain",
     "visualSource": "source-glb-chunks",
+    "source": "source-glb",
+    "preservesSourceUvs": true,
+    "preservesSourceMaterialSlots": true,
     "preservesSourceNormals": true,
     "preservesSourceTangents": false,
     "preservesSourceMeshGroups": true,
     "preservesTextureReferences": true,
+    "pbrRepair": {
+      "tool": "gltfGeneratedPbrRepair",
+      "repairedChunkCount": 0,
+      "addedNormalPrimitiveCount": 0,
+      "skippedNormalPrimitiveCount": 0,
+      "repairedImplicitMetallicMaterialCount": 0
+    },
     "product": {
       "type": "glb-chunk-terrain",
       "visualSource": "source-glb-chunks",
@@ -307,17 +304,24 @@
       "lods": [
         0
       ],
-      "generatedAt": "2026-05-13T17:33:10.880Z",
+      "generatedAt": "2026-05-16T02:30:34.727Z",
       "generatedBy": "cook-terrain-glb-chunks",
       "sourceAssetUrl": "/models/levels/observatory-environment.glb",
-      "sourceHash": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae",
+      "sourceHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
       "textureReferenceCount": 2,
       "preservesSourceUvs": true,
       "preservesSourceMaterialSlots": true,
       "preservesSourceNormals": true,
       "preservesSourceTangents": false,
       "preservesSourceMeshGroups": true,
-      "textureReferencesPreserved": true
+      "textureReferencesPreserved": true,
+      "pbrRepair": {
+        "tool": "gltfGeneratedPbrRepair",
+        "repairedChunkCount": 0,
+        "addedNormalPrimitiveCount": 0,
+        "skippedNormalPrimitiveCount": 0,
+        "repairedImplicitMetallicMaterialCount": 0
+      }
     },
     "chunks": [
       {
@@ -337,7 +341,7 @@
             -96.81147766113281
           ]
         },
-        "byteSize": 1898268,
+        "byteSize": 1898288,
         "triangleCount": 4083,
         "materialSlots": [
           {
@@ -363,7 +367,7 @@
             0.713060736656189
           ]
         },
-        "byteSize": 3525228,
+        "byteSize": 3525248,
         "triangleCount": 39100,
         "materialSlots": [
           {
@@ -389,7 +393,7 @@
             97.8233642578125
           ]
         },
-        "byteSize": 4728368,
+        "byteSize": 4728388,
         "triangleCount": 58706,
         "materialSlots": [
           {
@@ -415,7 +419,7 @@
             194.5846710205078
           ]
         },
-        "byteSize": 2554808,
+        "byteSize": 2554824,
         "triangleCount": 15765,
         "materialSlots": [
           {
@@ -441,7 +445,7 @@
             -96.63421630859375
           ]
         },
-        "byteSize": 2892992,
+        "byteSize": 2893012,
         "triangleCount": 23582,
         "materialSlots": [
           {
@@ -467,7 +471,7 @@
             0.4920962452888489
           ]
         },
-        "byteSize": 5127152,
+        "byteSize": 5127172,
         "triangleCount": 62943,
         "materialSlots": [
           {
@@ -493,7 +497,7 @@
             97.72954559326172
           ]
         },
-        "byteSize": 5522180,
+        "byteSize": 5522200,
         "triangleCount": 69054,
         "materialSlots": [
           {
@@ -519,7 +523,7 @@
             194.5846710205078
           ]
         },
-        "byteSize": 4494840,
+        "byteSize": 4494860,
         "triangleCount": 51125,
         "materialSlots": [
           {
@@ -545,7 +549,7 @@
             -96.7713623046875
           ]
         },
-        "byteSize": 3288020,
+        "byteSize": 3288036,
         "triangleCount": 32482,
         "materialSlots": [
           {
@@ -571,7 +575,7 @@
             0.3801000416278839
           ]
         },
-        "byteSize": 5010232,
+        "byteSize": 5010252,
         "triangleCount": 60666,
         "materialSlots": [
           {
@@ -597,7 +601,7 @@
             97.70820617675781
           ]
         },
-        "byteSize": 4951144,
+        "byteSize": 4951164,
         "triangleCount": 59348,
         "materialSlots": [
           {
@@ -623,7 +627,7 @@
             194.5846710205078
           ]
         },
-        "byteSize": 3052504,
+        "byteSize": 3052520,
         "triangleCount": 24805,
         "materialSlots": [
           {
@@ -649,7 +653,7 @@
             -95.53377532958984
           ]
         },
-        "byteSize": 2361036,
+        "byteSize": 2361056,
         "triangleCount": 14527,
         "materialSlots": [
           {
@@ -675,7 +679,7 @@
             0.2450827956199646
           ]
         },
-        "byteSize": 3628156,
+        "byteSize": 3628176,
         "triangleCount": 37014,
         "materialSlots": [
           {
@@ -701,7 +705,7 @@
             97.79862213134766
           ]
         },
-        "byteSize": 2194148,
+        "byteSize": 2194164,
         "triangleCount": 9140,
         "materialSlots": [
           {
@@ -727,7 +731,7 @@
             194.5846710205078
           ]
         },
-        "byteSize": 1781176,
+        "byteSize": 1781196,
         "triangleCount": 1636,
         "materialSlots": [
           {
@@ -743,10 +747,10 @@
   },
   "source": {
     "assetUrl": "/models/levels/observatory-environment.glb",
-    "assetHash": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae",
+    "assetHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
     "assetFingerprint": {
       "algorithm": "sha256",
-      "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+      "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
     },
     "assetByteSize": 31548740,
     "provenance": {

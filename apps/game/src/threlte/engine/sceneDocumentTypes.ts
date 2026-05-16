@@ -338,6 +338,7 @@ export interface SharedLevelStyleSettings {
       floor?: number
       ceiling?: number
       falloff?: number
+      fogVolumeColors?: boolean
       colorInfluence?: number
       mistOpacity?: number
       mistLayers?: number
@@ -729,6 +730,7 @@ export interface SharedLevelSkyboxSettings {
     backgroundIntensity?: number
     backgroundBlurriness?: number
     fogOpacity?: number
+    fogFalloff?: number
   }
 }
 

@@ -72,13 +72,11 @@ Visual smoke screenshots were written to:
 
 Known limitations:
 
-- Full `pnpm --dir apps/game exec biome check src/threlte` is still blocked by
-  existing unrelated Biome formatting/import diagnostics outside the
-  atmosphere-owned files. The targeted atmosphere-owned file check passed.
-- Required `GAME_NO_SERVER=1 GAME_DEV_PORT=4322 pnpm --dir apps/game
-  smoke:boot` was blocked by an unhealthy occupied shared dev-server port.
-- Isolated `GAME_DEV_PORT=4330 pnpm --dir apps/game smoke:boot` also failed
-  after the dev server stopped mid-run, leaving connection refused errors for
-  editor/level routes and observatory terrain assets.
+- Full `pnpm --dir apps/game exec biome check src/threlte` and the targeted
+  atmosphere-owned file check passed.
+- Required `pnpm --dir apps/game smoke:boot` passed on port 4322 after the
+  level readiness timeout was aligned with the shared browser harness default.
+- `GAME_DEV_PORT=4330 pnpm --dir apps/game smoke:visual -- --level=yggdrasil,observatory,solitude --write-artifacts --skip-baselines --artifact-dir apps/game/.visual-smoke/atmosphere-certification`
+  passed and refreshed the certification screenshots.
 - Standard ocean and planar reflector water paths participate in runtime
   atmosphere. The reflector path uses the projective atmosphere shader mode.

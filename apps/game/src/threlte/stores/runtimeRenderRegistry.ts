@@ -44,8 +44,10 @@ type RuntimePostProcessingDiagnosticRecord = {
   atmosphereId?: string
   passes: string[]
   ambientOcclusionEnabled?: boolean
+  depthFogEnabled?: boolean
   bloomEnabled?: boolean
   colorGradingEnabled?: boolean
+  depthFogReason?: string
   bloomReason?: string
   colorGradingReason?: string
   reason?: string

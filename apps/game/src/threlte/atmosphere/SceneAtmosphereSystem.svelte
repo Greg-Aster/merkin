@@ -19,6 +19,7 @@ export let levelId = ''
 export let atmosphere: RuntimeAtmosphereDefinition = DEFAULT_RUNTIME_ATMOSPHERE
 export let refreshKey = ''
 export let scanIntervalSeconds = 5
+export let materialFogEnabled = true
 
 const { scene, invalidate } = useThrelte()
 
@@ -41,6 +42,7 @@ function getAtmosphereKey(atmosphere: SceneAtmosphereDefinition) {
     atmosphere.heightFog.density,
     atmosphere.heightFog.floor,
     atmosphere.heightFog.ceiling,
+    atmosphere.heightFog.falloff,
     atmosphere.source.levelId ?? '',
     atmosphere.source.refreshKey ?? '',
   ].join('|')
@@ -78,23 +80,29 @@ function publishAtmosphereDiagnostic(
   const diagnostics = getSceneAtmosphereMaterialDiagnostics()
   const diagnosticSignature = JSON.stringify({
     atmosphere: getAtmosphereKey(sceneAtmosphere),
+    materialFogEnabled,
     diagnostics,
   })
   if (diagnosticSignature === lastDiagnosticSignature) return
   lastDiagnosticSignature = diagnosticSignature
 
+  const materialFogDelegated = sceneAtmosphere.enabled && !materialFogEnabled
   const level = !sceneAtmosphere.enabled
     ? 'idle'
-    : diagnostics.warningBypassedMaterialCount > 0
-      ? 'warning'
-      : diagnostics.heightParticipantCount > 0 ||
-          diagnostics.distanceParticipantCount > 0
-        ? 'ready'
-        : 'warning'
+    : materialFogDelegated
+      ? 'ready'
+      : diagnostics.warningBypassedMaterialCount > 0
+        ? 'warning'
+        : diagnostics.heightParticipantCount > 0 ||
+            diagnostics.distanceParticipantCount > 0
+          ? 'ready'
+          : 'warning'
 
   const message = !sceneAtmosphere.enabled
     ? 'Scene atmosphere disabled.'
-    : `Distance fog ${sceneAtmosphere.distanceFog.enabled ? 'on' : 'off'} density ${sceneAtmosphere.distanceFog.density.toFixed(5)}; height fog ${sceneAtmosphere.heightFog.enabled ? 'on' : 'off'} floor ${sceneAtmosphere.heightFog.floor.toFixed(2)} ceiling ${sceneAtmosphere.heightFog.ceiling.toFixed(2)} density ${sceneAtmosphere.heightFog.density.toFixed(5)}; materials ${diagnostics.distanceParticipantCount} distance / ${diagnostics.heightParticipantCount} height participants, ${diagnostics.warningBypassedMaterialCount} warning bypasses, ${diagnostics.expectedBypassedMaterialCount} expected bypasses.`
+    : materialFogDelegated
+      ? `Material scene fog delegated to the depth-fog post pass; distance fog ${sceneAtmosphere.distanceFog.enabled ? 'on' : 'off'} density ${sceneAtmosphere.distanceFog.density.toFixed(5)}; height fog ${sceneAtmosphere.heightFog.enabled ? 'on' : 'off'} floor ${sceneAtmosphere.heightFog.floor.toFixed(2)} ceiling ${sceneAtmosphere.heightFog.ceiling.toFixed(2)} falloff ${sceneAtmosphere.heightFog.falloff.toFixed(2)} density ${sceneAtmosphere.heightFog.density.toFixed(5)}.`
+      : `Distance fog ${sceneAtmosphere.distanceFog.enabled ? 'on' : 'off'} density ${sceneAtmosphere.distanceFog.density.toFixed(5)}; height fog ${sceneAtmosphere.heightFog.enabled ? 'on' : 'off'} floor ${sceneAtmosphere.heightFog.floor.toFixed(2)} ceiling ${sceneAtmosphere.heightFog.ceiling.toFixed(2)} falloff ${sceneAtmosphere.heightFog.falloff.toFixed(2)} density ${sceneAtmosphere.heightFog.density.toFixed(5)}; materials ${diagnostics.distanceParticipantCount} distance / ${diagnostics.heightParticipantCount} height participants, ${diagnostics.warningBypassedMaterialCount} warning bypasses, ${diagnostics.expectedBypassedMaterialCount} expected bypasses.`
 
   const meta = {
     levelId,
@@ -109,6 +117,9 @@ function publishAtmosphereDiagnostic(
     heightFogDensity: sceneAtmosphere.heightFog.density,
     heightFogFloor: sceneAtmosphere.heightFog.floor,
     heightFogCeiling: sceneAtmosphere.heightFog.ceiling,
+    heightFogFalloff: sceneAtmosphere.heightFog.falloff,
+    materialFogEnabled,
+    materialFogDelegated,
     ...diagnostics,
   }
 
@@ -125,6 +136,12 @@ function refreshAtmosphereParticipants(
   reason: string,
 ) {
   if (!scene) return
+  if (!materialFogEnabled) {
+    clearSceneAtmosphereMaterialRegistry()
+    publishAtmosphereDiagnostic(atmosphere, reason)
+    invalidate()
+    return
+  }
 
   refreshSceneAtmosphereParticipants(scene, {
     source: 'scene-scan',
@@ -148,7 +165,7 @@ async function refreshAtmosphereParticipantsAfterMount(
 }
 
 useTask(delta => {
-  if (!scene || scanIntervalSeconds <= 0) return
+  if (!scene || !materialFogEnabled || scanIntervalSeconds <= 0) return
 
   scanAccumulator += delta
   if (scanAccumulator < scanIntervalSeconds) return
@@ -163,16 +180,25 @@ $: activeAtmosphere = runtimeAtmosphereToSceneAtmosphereDefinition(atmosphere, {
 })
 
 $: {
-  const atmosphereKey = getAtmosphereKey(activeAtmosphere)
+  const atmosphereKey = `${getAtmosphereKey(activeAtmosphere)}|material:${materialFogEnabled ? 1 : 0}`
   if (atmosphereKey !== lastAtmosphereKey) {
     lastAtmosphereKey = atmosphereKey
-    setSceneAtmosphereDefinition(activeAtmosphere)
-    syncSceneFog(activeAtmosphere)
-    refreshAtmosphereParticipants(activeAtmosphere, 'settings-change')
-    void refreshAtmosphereParticipantsAfterMount(
-      activeAtmosphere,
-      'settings-change-deferred',
-    )
+    if (!materialFogEnabled) {
+      const disabledAtmosphere = createDisabledSceneAtmosphereDefinition()
+      setSceneAtmosphereDefinition(disabledAtmosphere)
+      syncSceneFog(disabledAtmosphere)
+      clearSceneAtmosphereMaterialRegistry()
+      publishAtmosphereDiagnostic(activeAtmosphere, 'delegated-to-depth-fog')
+      invalidate()
+    } else {
+      setSceneAtmosphereDefinition(activeAtmosphere)
+      syncSceneFog(activeAtmosphere)
+      refreshAtmosphereParticipants(activeAtmosphere, 'settings-change')
+      void refreshAtmosphereParticipantsAfterMount(
+        activeAtmosphere,
+        'settings-change-deferred',
+      )
+    }
   }
 }
 

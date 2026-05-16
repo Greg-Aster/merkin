@@ -21,6 +21,7 @@ export interface RuntimePostProcessingPolicy {
   ambientOcclusionRadius: number
   ambientOcclusionMinDistance: number
   ambientOcclusionMaxDistance: number
+  depthFogEnabled: boolean
   vignetteStrength: number
 }
 
@@ -71,6 +72,8 @@ export function resolveRuntimePostProcessingPolicy({
     !profilePost ||
     allowedPasses.size === 0 ||
     allowedPasses.has('ambient-occlusion')
+  const profileAllowsDepthFog =
+    !profilePost || allowedPasses.size === 0 || allowedPasses.has('depth-fog')
   const colorSaturation = clampNumber(grading.saturation, 0.35, 1.85)
   const colorContrast = clampNumber(grading.contrast, 0.55, 1.65)
   const colorWarmth = clampNumber(grading.warmth, 0.55, 1.45)
@@ -87,6 +90,14 @@ export function resolveRuntimePostProcessingPolicy({
     profileAllowsAmbientOcclusion &&
     (ambientOcclusion?.enabled ?? false) &&
     ambientOcclusionIntensity > 0.01
+  const depthFogEnabled =
+    profileAllowsPost &&
+    profileAllowsDepthFog &&
+    atmosphereEnabled &&
+    Boolean(
+      (atmosphere?.distanceFog.enabled && atmosphere.distanceFog.density > 0) ||
+        (atmosphere?.heightFog.enabled && atmosphere.heightFog.density > 0),
+    )
   const styleBloomIntensity = atmosphereEnabled
     ? atmosphere?.bloom.intensity ?? visualStyle.screenFx.bloomIntensity
     : 0
@@ -143,6 +154,7 @@ export function resolveRuntimePostProcessingPolicy({
     ambientOcclusionMaxDistance: ambientOcclusionEnabled
       ? clampNumber(ambientOcclusion?.maxDistance ?? 0.12, 0.02, 0.35)
       : 0.12,
+    depthFogEnabled,
     vignetteStrength: clampNumber(
       profileAllowsPost && profileAllowsVignette
         ? visualStyle.screenFx.vignetteStrength *

@@ -15,8 +15,6 @@
 import { T } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
-import { DEFAULT_RUNTIME_ATMOSPHERE } from '../../../atmosphere/buildRuntimeAtmosphere'
-import type { RuntimeAtmosphereDefinition } from '../../../atmosphere/runtimeAtmosphereTypes'
 import {
   underwaterConfigStore,
   underwaterFogDensity,
@@ -31,7 +29,6 @@ export let size: [number, number, number] = [100, 20, 100] // width, height, dep
 export let fogColor: number = 0x0a1922
 export let fogDensityScale = 1
 export let surfaceMistDensity = 0.003
-export let atmosphere: RuntimeAtmosphereDefinition = DEFAULT_RUNTIME_ATMOSPHERE
 
 // Component state
 let bubbleParticles: THREE.Points
@@ -46,53 +43,9 @@ $: transitionProgress = $underwaterStateStore.transitionProgress
 $: intensity = $underwaterIntensity
 $: fogDensity = $underwaterFogDensity
 $: config = $underwaterConfigStore
-$: resolvedAtmosphereFogColor = atmosphere.distanceFog.color
-$: resolvedAtmosphereFogDensity =
-  atmosphere.enabled && atmosphere.distanceFog.enabled
-    ? Math.max(0, atmosphere.distanceFog.density)
-    : 0
-$: resolvedAtmosphereHeightFogEnabled =
-  atmosphere.enabled && atmosphere.heightFog.enabled
-$: resolvedAtmosphereHeightFogColor = atmosphere.heightFog.color
-$: resolvedAtmosphereHeightFogDensity = resolvedAtmosphereHeightFogEnabled
-  ? Math.max(0, atmosphere.heightFog.density)
-  : 0
-$: resolvedAtmosphereHeightFogFloor = atmosphere.heightFog.floor
-$: resolvedAtmosphereHeightFogCeiling = Math.max(
-  resolvedAtmosphereHeightFogFloor + 0.001,
-  atmosphere.heightFog.ceiling,
-)
-$: atmosphereColor = new THREE.Color(
-  resolvedAtmosphereHeightFogEnabled
-    ? resolvedAtmosphereHeightFogColor
-    : resolvedAtmosphereFogColor,
-)
-$: atmosphereHeightFogBand = Math.max(
-  0.001,
-  resolvedAtmosphereHeightFogCeiling - resolvedAtmosphereHeightFogFloor,
-)
-$: atmosphereHeightFogBandFactor = resolvedAtmosphereHeightFogEnabled
-  ? Math.min(1.5, Math.max(0.35, 6 / atmosphereHeightFogBand))
-  : 0
-$: atmosphereTintInfluence = Math.min(
-  0.7,
-  0.22 +
-    resolvedAtmosphereFogDensity * 80 +
-    resolvedAtmosphereHeightFogDensity * 700 * atmosphereHeightFogBandFactor,
-)
-$: atmosphereDensityBoost =
-  resolvedAtmosphereFogDensity * 6 +
-  resolvedAtmosphereHeightFogDensity * 36 * atmosphereHeightFogBandFactor
-$: effectiveFogDensity = fogDensity * fogDensityScale + atmosphereDensityBoost
-$: effectiveSurfaceMistDensity = Math.max(
-  surfaceMistDensity,
-  resolvedAtmosphereFogDensity +
-    resolvedAtmosphereHeightFogDensity * 2 * atmosphereHeightFogBandFactor,
-)
-$: resolvedFogColor = new THREE.Color(fogColor).lerp(
-  atmosphereColor,
-  atmosphereTintInfluence,
-)
+$: effectiveFogDensity = fogDensity * fogDensityScale
+$: effectiveSurfaceMistDensity = Math.max(0, surfaceMistDensity)
+$: resolvedFogColor = new THREE.Color(fogColor)
 
 // Particle system setup
 let bubbleGeometry: THREE.BufferGeometry

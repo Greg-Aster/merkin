@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-15T02:11:13.599Z",
+  "generatedAt": "2026-05-16T00:00:03.582Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-tree-merged",
@@ -15,13 +15,13 @@
   "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.low.glb",
   "colliderSourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586"
+    "value": "faaa88d2df1a2c820395a9e71160890a571fdc88fdefdd4076f232605ad4404f"
   },
   "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+  "colliderCacheKey": "mesh-collision-manager-v2:faaa88d2df1a2c820395a9e71160890a571fdc88fdefdd4076f232605ad4404f:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
   "triangleCount": 14000,
   "vertexCount": 21237,
   "bounds": {
@@ -211,7 +211,7 @@
     "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.low.glb",
     "colliderSourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586"
+      "value": "faaa88d2df1a2c820395a9e71160890a571fdc88fdefdd4076f232605ad4404f"
     },
     "lodSourceTier": "low",
     "bakeConfig": {
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-15T02:11:13.599Z"
+    "generatedAt": "2026-05-16T00:00:03.582Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -245,7 +245,7 @@
     "sourceKind": "asset",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586"
+      "value": "faaa88d2df1a2c820395a9e71160890a571fdc88fdefdd4076f232605ad4404f"
     },
     "transformFingerprint": {
       "algorithm": "sha256",

@@ -132,6 +132,26 @@ function migrateLegacyFeatureAliases(settings: SharedLevelEditorSettings) {
   features.ocean = undefined
 }
 
+function migrateLegacyGroundVisualSource(settings: SharedLevelEditorSettings) {
+  const ground = settings.ground
+  if (!ground || ground.visualSource !== 'terrain-chunks') return
+
+  const terrain = settings.collision?.terrain
+  const renderChunks = ground.renderChunks ?? terrain?.renderChunks
+  const sourceGlbChunks =
+    ground.terrainVisualSource === 'source-glb-chunks' ||
+    ground.terrainRuntimeMode === 'glb-chunk-terrain' ||
+    terrain?.visualSource === 'source-glb-chunks' ||
+    terrain?.runtimeMode === 'glb-chunk-terrain' ||
+    terrain?.source === 'source-glb' ||
+    renderChunks?.type === 'glb-chunk-terrain'
+
+  ground.visualSource = sourceGlbChunks
+    ? 'source-glb-chunks'
+    : 'generated-heightmap-chunks'
+  ground.terrainVisualSource ??= ground.visualSource
+}
+
 function migrateLegacyObservatorySettings(settings: EditorSceneSettings): void {
   const observatory = settings.observatory as
     | (ObservatoryEditorSettings & {
@@ -163,6 +183,7 @@ export function normalizeLevelSceneSettings(
 
   migrateLegacyObservatorySettings(normalized)
   migrateLegacyFeatureAliases(normalized.level)
+  migrateLegacyGroundVisualSource(normalized.level)
 
   const workflow = getLevelCollisionWorkflow(levelId, normalized)
 

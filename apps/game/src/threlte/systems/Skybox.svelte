@@ -6,11 +6,6 @@
 import { useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
-import SkyAtmosphereRenderer from '../atmosphere/SkyAtmosphereRenderer.svelte'
-import {
-  DEFAULT_SKY_ATMOSPHERE,
-  type SkyAtmosphereDefinition,
-} from '../atmosphere/skyAtmosphereMaterial'
 import { runtimeDebugLog } from '../utils/runtimeLog'
 
 // The path to the FOLDER containing your 6 cubemap images
@@ -28,8 +23,6 @@ export let files: [string, string, string, string, string, string] = [
 export let backgroundIntensity = 1
 export let backgroundBlurriness = 0
 export let environmentIntensity = 1
-export let aerialPerspectiveBoost = 0
-export let atmosphere: SkyAtmosphereDefinition = DEFAULT_SKY_ATMOSPHERE
 
 const { scene } = useThrelte()
 
@@ -37,7 +30,6 @@ let mounted = false
 let loadedTexture: THREE.CubeTexture | null = null
 let loadSerial = 0
 let lastSkyboxKey = ''
-let skyboxVisible = false
 
 function finiteNumberOrDefault(value: number, fallback: number) {
   return Number.isFinite(value) ? value : fallback
@@ -66,11 +58,9 @@ function applySceneIntensitySettings(
   )
   scene.environmentIntensity = nextEnvironmentIntensity
 
-  skyboxVisible = Boolean(loadedTexture) && nextBackgroundIntensity > 0
-
   if (!loadedTexture) return
 
-  scene.background = null
+  scene.background = nextBackgroundIntensity > 0 ? loadedTexture : null
   scene.environment = nextEnvironmentIntensity > 0 ? loadedTexture : null
 }
 
@@ -129,18 +119,3 @@ $: applySceneIntensitySettings(
   environmentIntensity,
 )
 </script>
-
-<!-- 
-  The visible cubemap is rendered as atmosphere-aware geometry because native
-  Three scene backgrounds do not receive renderer-owned fog.
--->
-
-{#if skyboxVisible && loadedTexture}
-  <SkyAtmosphereRenderer
-    texture={loadedTexture}
-    {backgroundIntensity}
-    {backgroundBlurriness}
-    {aerialPerspectiveBoost}
-    {atmosphere}
-  />
-{/if}

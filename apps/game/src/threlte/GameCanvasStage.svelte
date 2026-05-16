@@ -2,6 +2,7 @@
 import { Canvas } from '@threlte/core'
 import { createEventDispatcher } from 'svelte'
 import { runtimeAtmosphereStore } from './atmosphere/runtimeAtmosphereStore'
+import type { RuntimeAtmosphereDefinition } from './atmosphere/runtimeAtmosphereTypes'
 import GameWorld from './core/GameWorld.svelte'
 import { qualitySettingsStore } from './features/performance/stores/performanceStore'
 import PerformanceSystem from './features/performance/systems/Performance.svelte'
@@ -61,7 +62,7 @@ export let normalizeLevelId: (levelId: string) => string = levelId => levelId
 let postProcessingComponent: any = null
 let postProcessingComponentPromise: Promise<any> | null = null
 
-type RuntimePostProcessingPass = 'bloom' | 'color-grading'
+type RuntimePostProcessingPass = 'bloom' | 'color-grading' | 'depth-fog'
 
 function forward(type: string, detail: unknown) {
   dispatch(type, detail)
@@ -75,6 +76,24 @@ function profileAllowsPostProcessingPass(
   return (
     profile.postProcessing.passes.length === 0 ||
     profile.postProcessing.passes.includes(pass)
+  )
+}
+
+function hasRuntimeFog(atmosphere: RuntimeAtmosphereDefinition) {
+  return (
+    atmosphere.enabled &&
+    ((atmosphere.distanceFog.enabled && atmosphere.distanceFog.density > 0) ||
+      (atmosphere.heightFog.enabled && atmosphere.heightFog.density > 0))
+  )
+}
+
+function shouldMountDepthFogPostPass(
+  profile: ResolvedRuntimeRenderProfile,
+  atmosphere: RuntimeAtmosphereDefinition,
+) {
+  return (
+    profileAllowsPostProcessingPass(profile, 'depth-fog') &&
+    hasRuntimeFog(atmosphere)
   )
 }
 
@@ -97,6 +116,10 @@ function publishUnmountedPostProcessingDiagnostics(
   profile: ResolvedRuntimeRenderProfile,
   atmosphereId: string,
 ) {
+  const depthFogMountEligible = shouldMountDepthFogPostPass(
+    profile,
+    $runtimeAtmosphereStore,
+  )
   const bloomReason = getUnmountedPostProcessingReason(
     profile,
     'bloom',
@@ -105,6 +128,11 @@ function publishUnmountedPostProcessingDiagnostics(
   const colorGradingReason = getUnmountedPostProcessingReason(
     profile,
     'color-grading',
+    mountReason,
+  )
+  const depthFogReason = getUnmountedPostProcessingReason(
+    profile,
+    'depth-fog',
     mountReason,
   )
   const passes = profile.postProcessing.enabled
@@ -116,8 +144,10 @@ function publishUnmountedPostProcessingDiagnostics(
     profileId: profile.id,
     passes,
     atmosphereId,
+    depthFogEnabled: false,
     bloomEnabled: false,
     colorGradingEnabled: false,
+    depthFogReason,
     bloomReason,
     colorGradingReason,
     reason: mountReason,
@@ -125,7 +155,7 @@ function publishUnmountedPostProcessingDiagnostics(
   setRuntimeDiagnostic('postProcessing', {
     label: 'Post Processing',
     level,
-    message: `${levelId}/${profile.id}/${profile.tier}: bloom off (${bloomReason}); color grading off (${colorGradingReason}); passes ${profile.postProcessing.enabled ? profile.postProcessing.passes.join(', ') || 'all' : 'disabled'}; component not mounted (${mountReason}).`,
+    message: `${levelId}/${profile.id}/${profile.tier}: depth fog off (${depthFogReason}); bloom off (${bloomReason}); color grading off (${colorGradingReason}); passes ${profile.postProcessing.enabled ? profile.postProcessing.passes.join(', ') || 'all' : 'disabled'}; component not mounted (${mountReason}).`,
     meta: {
       levelId,
       profileId: profile.id,
@@ -134,9 +164,12 @@ function publishUnmountedPostProcessingDiagnostics(
       atmosphereId,
       reason: mountReason,
       enablePostProcessing: $qualitySettingsStore.enablePostProcessing,
+      depthFogMountEligible,
       editorEnabled,
       gameplayEnabled,
       staticWorldReady,
+      depthFogEnabled: false,
+      depthFogReason,
       bloomEnabled: false,
       bloomReason,
       colorGradingEnabled: false,
@@ -166,8 +199,12 @@ async function ensurePostProcessingComponent() {
   return postProcessingComponentPromise
 }
 
+$: depthFogMountEligible = shouldMountDepthFogPostPass(
+  $runtimeRenderProfileStore,
+  $runtimeAtmosphereStore,
+)
 $: postProcessingEligible =
-  $qualitySettingsStore.enablePostProcessing &&
+  ($qualitySettingsStore.enablePostProcessing || depthFogMountEligible) &&
   staticWorldReady &&
   (editorEnabled || gameplayEnabled)
 $: if (postProcessingEligible && !postProcessingComponent) {
@@ -205,6 +242,7 @@ $: if (isInitialized && (!postProcessingEligible || !postProcessingComponent)) {
       message: `${currentLevel}: post-processing disabled for current quality or activation state.`,
       detail: {
         enablePostProcessing: $qualitySettingsStore.enablePostProcessing,
+        depthFogMountEligible,
         editorEnabled,
         gameplayEnabled,
         reason: mountReason,
@@ -244,6 +282,7 @@ $: if (isInitialized && (!postProcessingEligible || !postProcessingComponent)) {
         <svelte:component
           this={postProcessingComponent}
           levelId={currentLevel}
+          optionalPostProcessingEnabled={$qualitySettingsStore.enablePostProcessing}
           toneMappingExposure={1.0}
         />
       {/if}

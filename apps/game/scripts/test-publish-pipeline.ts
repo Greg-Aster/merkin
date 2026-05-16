@@ -13,10 +13,12 @@ import {
   applyGeneratedAssetToNode,
   createGeneratedAssetNode,
 } from '../src/threlte/editor/editorGeneratedAssetApplication.ts'
+import { upgradeLegacySceneDocument } from '../src/threlte/editor/defaultScenes.ts'
 import {
   computeEditorPublishBakePlan,
   createEditorPublishBakePlanMetadataFromReadiness,
 } from '../src/threlte/editor/editorPublishBakePlan.ts'
+import { normalizeLevelSceneSettings } from '../src/threlte/editor/editorLevelSetup.ts'
 import { buildEditorPublishReadinessViewModel } from '../src/threlte/editor/editorPublishReadiness.ts'
 import {
   validateEditorSceneDocument,
@@ -1831,6 +1833,85 @@ test('source GLB chunk ground is accepted by level validation', () => {
 
   const report = createLevelBuildReport(level)
   assert.deepEqual(report.errors, [])
+})
+
+test('scene settings normalization migrates legacy source GLB terrain visual source', () => {
+  const settings = normalizeLevelSceneSettings('fixture-level', {
+    level: {
+      ground: {
+        mode: 'terrain-chunks',
+        visualSource: 'terrain-chunks',
+        terrainRuntimeMode: 'glb-chunk-terrain',
+        terrainVisualSource: 'source-glb-chunks',
+        collisionSource: 'source-linked-terrain-collision',
+        terrainManifestUrl: '/terrain/fixture-level.manifest.json',
+        sourceAssetUrl: '/models/levels/fixture-level.glb',
+      },
+      collision: {
+        terrain: {
+          source: 'source-glb',
+          runtimeMode: 'glb-chunk-terrain',
+          visualSource: 'source-glb-chunks',
+          manifestUrl: '/terrain/fixture-level.manifest.json',
+          sourceAssetUrl: '/models/levels/fixture-level.glb',
+        },
+      },
+    },
+  })
+
+  assert.equal(settings.level?.ground?.visualSource, 'source-glb-chunks')
+})
+
+test('packaged scene upgrade restores required render profile and source GLB terrain contract', () => {
+  const upgraded = upgradeLegacySceneDocument({
+    levelId: 'observatory',
+    version: 1,
+    updatedAt: '2026-05-16T00:00:00.000Z',
+    settings: {
+      level: {
+        collision: {
+          terrain: {
+            source: 'baked-heightmap',
+            runtimeSource: 'built-in-manifest',
+            manifestUrl: '/terrain/observatory-environment.manifest.json',
+            dirty: false,
+          },
+        },
+        terrainSculpt: {
+          enabled: true,
+          autoBakeCollision: true,
+        },
+        ground: {
+          mode: 'terrain-chunks',
+          visualSource: 'generated-heightmap-chunks',
+          collisionSource: 'baked-heightfield',
+          terrainManifestUrl: '/terrain/observatory-environment.manifest.json',
+        },
+      },
+    },
+    nodes: [
+      {
+        id: 'observatory-ground-root',
+        name: 'Observatory Grounds',
+        kind: 'group',
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+      },
+    ],
+  } satisfies EditorSceneDocument)
+
+  assert.ok(upgraded.settings?.level?.renderProfile)
+  assert.equal(
+    upgraded.settings?.level?.collision?.terrain?.source,
+    'source-glb',
+  )
+  assert.equal(
+    upgraded.settings?.level?.ground?.visualSource,
+    'source-glb-chunks',
+  )
+  assert.equal(upgraded.settings?.level?.terrainSculpt?.enabled, false)
 })
 
 test('scene complexity budgets warn without blocking publish validation', () => {
@@ -4146,7 +4227,9 @@ test('editor terrain pipeline runner applies source GLB chunk products', () => {
           sourceAssetUrl: '/models/levels/fixture.glb',
         },
       },
-      ground: {},
+      ground: {
+        visualSource: 'terrain-chunks',
+      },
     },
     {
       manifestUrl: '/terrain/fixture-level.manifest.json',
@@ -4168,6 +4251,7 @@ test('editor terrain pipeline runner applies source GLB chunk products', () => {
   )
 
   assert.equal(next.ground?.terrainRuntimeMode, 'glb-chunk-terrain')
+  assert.equal(next.ground?.visualSource, 'source-glb-chunks')
   assert.equal(next.ground?.terrainVisualSource, 'source-glb-chunks')
   assert.equal(next.collision?.terrain?.runtimeMode, 'glb-chunk-terrain')
   assert.equal(next.collision?.terrain?.visualSource, 'source-glb-chunks')

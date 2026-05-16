@@ -57,12 +57,26 @@ function isValidMaterialFactor(value) {
   return Number.isFinite(value) && value >= 0 && value <= 1
 }
 
+function preservesSourceChunkMaterials(manifest) {
+  const visualChunks = manifest.visualChunks ?? {}
+  const product = visualChunks.product ?? {}
+  return (
+    visualChunks.visualSource === 'source-glb-chunks' ||
+    product.visualSource === 'source-glb-chunks' ||
+    visualChunks.preservesSourceMaterialSlots === true ||
+    product.preservesSourceMaterialSlots === true
+  )
+}
+
 function validateTerrainChunkMaterial(file, manifest, failures) {
   if (!manifest.assets?.chunksPath) return
 
   const material = manifest.visualChunks?.material
   if (!material) {
-    failures.push(`${file}: terrain visual chunks require visualChunks.material`)
+    if (preservesSourceChunkMaterials(manifest)) return
+    failures.push(
+      `${file}: terrain visual chunks require visualChunks.material`,
+    )
     return
   }
 
@@ -95,13 +109,16 @@ function validateTerrainChunkActivation(file, manifest, failures) {
 
   const activation = manifest.visualChunks?.activation
   if (!activation) {
-    failures.push(`${file}: terrain visual chunks require visualChunks.activation`)
+    failures.push(
+      `${file}: terrain visual chunks require visualChunks.activation`,
+    )
     return
   }
 
   const maxActiveChunks = activation.maxActiveChunks
   const tierLimits = activation.maxActiveChunksByTier ?? {}
-  const hasGlobalLimit = Number.isInteger(maxActiveChunks) && maxActiveChunks > 0
+  const hasGlobalLimit =
+    Number.isInteger(maxActiveChunks) && maxActiveChunks > 0
   const hasTierLimit = Object.values(tierLimits).some(
     value => Number.isInteger(value) && value > 0,
   )
@@ -180,7 +197,10 @@ function auditTerrainManifest({
     validateTerrainChunkMaterial(file, manifest, failures)
     validateTerrainChunkActivation(file, manifest, failures)
 
-    const chunkDir = join(publicDir, normalizePublicPath(manifest.assets.chunksPath))
+    const chunkDir = join(
+      publicDir,
+      normalizePublicPath(manifest.assets.chunksPath),
+    )
     if (!existsSync(chunkDir)) {
       failures.push(
         `${file}: missing terrain chunk directory ${manifest.assets.chunksPath}`,
@@ -205,7 +225,10 @@ function auditTerrainManifest({
   }
 
   const artifactPath = join(publicDir, normalizePublicPath(collision.url))
-  const metadataPath = join(publicDir, normalizePublicPath(collision.metadataUrl))
+  const metadataPath = join(
+    publicDir,
+    normalizePublicPath(collision.metadataUrl),
+  )
 
   if (!existsSync(artifactPath)) {
     failures.push(`${file}: missing collider artifact ${collision.url}`)

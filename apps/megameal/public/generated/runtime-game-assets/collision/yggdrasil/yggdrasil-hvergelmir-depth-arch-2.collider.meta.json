@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-15T02:11:05.280Z",
+  "generatedAt": "2026-05-16T00:04:19.230Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-hvergelmir-depth-arch-2",
@@ -15,13 +15,13 @@
   "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.low.glb",
   "colliderSourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7"
+    "value": "21ffd350111f8448826b83768bdf0a7303b2998e9e1b553aed2ddc1d746654fb"
   },
   "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "colliderCacheKey": "mesh-collision-manager-v2:21ffd350111f8448826b83768bdf0a7303b2998e9e1b553aed2ddc1d746654fb:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
   "triangleCount": 96,
   "vertexCount": 192,
   "bounds": {
@@ -211,7 +211,7 @@
     "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.low.glb",
     "colliderSourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7"
+      "value": "21ffd350111f8448826b83768bdf0a7303b2998e9e1b553aed2ddc1d746654fb"
     },
     "lodSourceTier": "low",
     "bakeConfig": {
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-15T02:11:05.280Z"
+    "generatedAt": "2026-05-16T00:04:19.230Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -245,7 +245,7 @@
     "sourceKind": "prefab",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7"
+      "value": "21ffd350111f8448826b83768bdf0a7303b2998e9e1b553aed2ddc1d746654fb"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
