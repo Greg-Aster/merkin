@@ -1157,6 +1157,7 @@ $: baseRuntimeAtmosphere = buildRuntimeAtmosphereFromGameplayStyleSettings(
     source: editorEnabled ? 'editor-preview' : 'scene-settings',
   },
 )
+$: fogStackEnabled = sharedLevelSettings.style?.fogEnabled ?? true
 $: fogVolumeColorsEnabled =
   sharedLevelSettings.style?.haze?.fogVolumeColors ?? true
 $: authoredFogVolumes = authoredGameplayNodes
@@ -1171,7 +1172,7 @@ $: authoredFogVolumes = authoredGameplayNodes
     }),
   )
 $: runtimeAtmosphere = withRuntimeAtmosphereFogVolumes(baseRuntimeAtmosphere, {
-  fogVolumes: authoredFogVolumes,
+  fogVolumes: fogStackEnabled ? authoredFogVolumes : [],
   playerPosition,
 })
 $: runtimeDistanceFog = runtimeAtmosphere.distanceFog
@@ -1425,6 +1426,19 @@ $: globalMistEnabled =
   globalMistLayers > 0 &&
   globalMistOpacity > 0.001 &&
   globalMistScale > 1
+$: aerialPerspectiveEnabled =
+  runtimeAtmosphere.enabled && runtimeAtmosphere.aerialPerspective.enabled
+$: skyAerialParticipation = aerialPerspectiveEnabled
+  ? clampNumber(runtimeAtmosphere.aerialPerspective.skyParticipation, 0, 1, 0)
+  : 0
+$: skyboxAerialPerspectiveBoost = aerialPerspectiveEnabled
+  ? clampNumber(
+      runtimeAtmosphere.aerialPerspective.horizonBoost * skyAerialParticipation,
+      0,
+      1,
+      0,
+    )
+  : 0
 $: sceneAtmosphereRefreshKey = [
   levelId,
   levelDefinition?.actors.length ?? 0,
@@ -1479,9 +1493,13 @@ $: skyEnvironmentIntensity = Math.max(
     1,
   ),
 )
-$: skyFogEnabled = runtimeAtmosphere.aerialPerspective.enabled
-$: skyFogParticipation = runtimeAtmosphere.aerialPerspective.skyParticipation
+$: skyFogEnabled = aerialPerspectiveEnabled
+$: skyFogParticipation = skyAerialParticipation
 $: skyFogFalloff = runtimeAtmosphere.aerialPerspective.skyFogFalloff
+$: skyAtmosphereParticipates =
+  skyBackgroundIntensity > 0 &&
+  skyFogEnabled &&
+  skyFogParticipation > 0.001
 $: oceanPlanarReflectorActive =
   Boolean(waterEnabled && waterSettings) &&
   resolvedRenderProfile.reflections.mode === 'planar'
@@ -1526,10 +1544,12 @@ $: atmosphereDiagnosticKey = [
   sharedLevelSettings.skyboxPreset ?? 'observatory',
   formatAtmosphereDiagnosticNumber(skyBackgroundIntensity),
   formatAtmosphereDiagnosticNumber(skyEnvironmentIntensity),
+  Number(fogStackEnabled),
   Number(skyFogEnabled),
   formatAtmosphereDiagnosticNumber(skyFogParticipation),
   formatAtmosphereDiagnosticNumber(skyFogFalloff),
   Number(fogVolumeColorsEnabled),
+  formatAtmosphereDiagnosticNumber(skyboxAerialPerspectiveBoost),
   oceanAtmosphereStatus,
   resolvedRenderProfile.id,
   resolvedRenderProfile.tier,
@@ -1547,12 +1567,13 @@ $: if (
   lastAtmosphereDiagnosticKey = atmosphereDiagnosticKey
   setRuntimeDiagnostic('atmosphere', {
     label: 'Atmosphere',
-    level: runtimeAtmosphere.enabled ? 'ready' : 'warning',
-    message: `${levelId}/${atmosphereSourceKind}/${atmosphereSourceProfile}: distance fog ${distanceFogEnabled ? 'on' : 'off'} density ${formatAtmosphereDiagnosticNumber(fogDensity, 5)}; height fog ${heightFogEnabled ? 'on' : 'off'} floor ${formatAtmosphereDiagnosticNumber(heightFogFloor, 2)} ceiling ${formatAtmosphereDiagnosticNumber(heightFogCeiling, 2)} density ${formatAtmosphereDiagnosticNumber(heightFogDensity, 5)}; sky fog ${skyFogEnabled ? 'on' : 'off'} amount ${formatAtmosphereDiagnosticNumber(skyFogParticipation, 2)} falloff ${formatAtmosphereDiagnosticNumber(skyFogFalloff, 2)}; full-scene depth fog ${depthFogProfileStatus}; material fog ${depthFogProfileParticipates ? 'delegated' : 'fallback'}; skybox native preset ${sharedLevelSettings.skyboxPreset ?? 'observatory'} env ${formatAtmosphereDiagnosticNumber(skyEnvironmentIntensity, 2)}; mist ${runtimeMist.enabled ? 'participating' : 'disabled'}; ${oceanAtmosphereStatus}; post profile ${resolvedRenderProfile.id}/${resolvedRenderProfile.tier} bloom ${bloomProfileStatus} color grading ${colorGradingProfileStatus}.`,
+    level: !fogStackEnabled || runtimeAtmosphere.enabled ? 'ready' : 'warning',
+    message: `${levelId}/${atmosphereSourceKind}/${atmosphereSourceProfile}: fog stack ${fogStackEnabled ? 'on' : 'off'}; distance fog ${distanceFogEnabled ? 'on' : 'off'} density ${formatAtmosphereDiagnosticNumber(fogDensity, 5)}; height fog ${heightFogEnabled ? 'on' : 'off'} floor ${formatAtmosphereDiagnosticNumber(heightFogFloor, 2)} ceiling ${formatAtmosphereDiagnosticNumber(heightFogCeiling, 2)} density ${formatAtmosphereDiagnosticNumber(heightFogDensity, 5)}; sky fog ${skyFogEnabled ? 'on' : 'off'} amount ${formatAtmosphereDiagnosticNumber(skyFogParticipation, 2)} falloff ${formatAtmosphereDiagnosticNumber(skyFogFalloff, 2)} aerial ${formatAtmosphereDiagnosticNumber(skyboxAerialPerspectiveBoost, 2)}; full-scene depth fog ${depthFogProfileStatus}; material fog ${depthFogProfileParticipates ? 'delegated' : 'fallback'}; skybox native preset ${sharedLevelSettings.skyboxPreset ?? 'observatory'} env ${formatAtmosphereDiagnosticNumber(skyEnvironmentIntensity, 2)}; mist ${runtimeMist.enabled ? 'participating' : 'disabled'}; ${oceanAtmosphereStatus}; post profile ${resolvedRenderProfile.id}/${resolvedRenderProfile.tier} bloom ${bloomProfileStatus} color grading ${colorGradingProfileStatus}.`,
     meta: {
       levelId,
       sourceKind: atmosphereSourceKind,
       sourceProfile: atmosphereSourceProfile,
+      fogStackEnabled,
       distanceFogEnabled,
       distanceFogDensity: fogDensity,
       heightFogEnabled,

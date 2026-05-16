@@ -182,6 +182,7 @@ function getInheritedSkyFogFalloff(
 
   <div class="tuple-group">
     <div class="tuple-label">Global Fog</div>
+    <label class="checkbox"><input type="checkbox" checked={levelSettings.style?.fogEnabled ?? true} on:change={(event) => updateLevelSetting(['style', 'fogEnabled'], (event.currentTarget as HTMLInputElement).checked)} /> Fog / Haze</label>
     <div class="editor-field-grid editor-mt-sm">
       <label class="editor-field">
         <span class="editor-field-label">Fog Color</span>
@@ -301,6 +302,7 @@ function getInheritedSkyFogFalloff(
             <option value={preset}>{preset}</option>
           {/each}
         </select>
+        <label class="checkbox"><input type="checkbox" checked={effectiveObservatorySettings.style?.fogEnabled ?? true} on:change={(event) => updateLevelSetting(['style', 'fogEnabled'], (event.currentTarget as HTMLInputElement).checked)} /> Fog / Haze</label>
         <div class="editor-field-grid editor-mt-sm">
           <label class="editor-field"><span class="editor-field-label">Fog Color</span><input class="text-input" type="color" value={effectiveObservatorySettings.style?.fog?.color ?? '#87CEEB'} on:input={(event) => updateLevelSetting(['style', 'fog', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
           <label class="editor-field"><span class="editor-field-label">Fog Density</span><input class="tuple-input" type="number" step="0.0005" value={effectiveObservatorySettings.style?.fog?.density ?? 0.002} on:change={(event) => updateLevelNumericSetting(['style', 'fog', 'density'], (event.currentTarget as HTMLInputElement).value)} /></label>
@@ -334,6 +336,7 @@ function getInheritedSkyFogFalloff(
           {/each}
         </select>
 
+        <label class="checkbox"><input type="checkbox" checked={effectiveSolitudeSettings.style?.fogEnabled ?? true} on:change={(event) => updateLevelSetting(['style', 'fogEnabled'], (event.currentTarget as HTMLInputElement).checked)} /> Fog / Haze</label>
         <div class="editor-field-grid editor-mt-sm">
           <label class="editor-field"><span class="editor-field-label">Fog Color</span><input class="text-input" type="color" value={effectiveSolitudeSettings.style?.fog?.color ?? '#43206c'} on:input={(event) => updateLevelSetting(['style', 'fog', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
           <label class="editor-field"><span class="editor-field-label">Fog Density</span><input class="tuple-input" type="number" step="0.00005" value={effectiveSolitudeSettings.style?.fog?.density ?? 0.00092} on:change={(event) => updateLevelNumericSetting(['style', 'fog', 'density'], (event.currentTarget as HTMLInputElement).value)} /></label>
@@ -446,6 +449,7 @@ function getInheritedSkyFogFalloff(
       </div>
       <div class="tuple-group">
         <div class="tuple-label">Atmosphere</div>
+        <label class="checkbox"><input type="checkbox" checked={levelSettings.style?.fogEnabled ?? true} on:change={(event) => updateLevelSetting(['style', 'fogEnabled'], (event.currentTarget as HTMLInputElement).checked)} /> Fog / Haze</label>
         <div class="editor-field-grid editor-mt-sm">
           <label class="editor-field"><span class="editor-field-label">Fog Color</span><input class="text-input" type="color" value={levelSettings.style?.fog?.color ?? '#5f76a8'} on:input={(event) => updateLevelSetting(['style', 'fog', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
           <label class="editor-field"><span class="editor-field-label">Fog Density</span><input class="tuple-input" type="number" step="0.0001" value={levelSettings.style?.fog?.density ?? 0.0035} on:change={(event) => updateLevelNumericSetting(['style', 'fog', 'density'], (event.currentTarget as HTMLInputElement).value)} /></label>
@@ -471,6 +475,7 @@ function getInheritedSkyFogFalloff(
       </div>
       <div class="tuple-group">
         <div class="tuple-label">Ship Atmosphere</div>
+        <label class="checkbox"><input type="checkbox" checked={levelSettings.style?.fogEnabled ?? true} on:change={(event) => updateLevelSetting(['style', 'fogEnabled'], (event.currentTarget as HTMLInputElement).checked)} /> Fog / Haze</label>
         <div class="editor-field-grid editor-mt-sm">
           <label class="editor-field"><span class="editor-field-label">Fog Color</span><input class="text-input" type="color" value={levelSettings.style?.fog?.color ?? '#080b12'} on:input={(event) => updateLevelSetting(['style', 'fog', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
           <label class="editor-field"><span class="editor-field-label">Fog Density</span><input class="tuple-input" type="number" step="0.0001" value={levelSettings.style?.fog?.density ?? 0.017} on:change={(event) => updateLevelNumericSetting(['style', 'fog', 'density'], (event.currentTarget as HTMLInputElement).value)} /></label>

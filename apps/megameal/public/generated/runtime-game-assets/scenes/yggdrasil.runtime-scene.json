@@ -157,6 +157,7 @@
         "style": {
           "preset": "monument",
           "enabled": true,
+          "fogEnabled": false,
           "fog": {
             "color": "#000000",
             "density": 0.0007
