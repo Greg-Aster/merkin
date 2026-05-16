@@ -11,22 +11,7 @@ on:
       - "packages/shared-audio/**"
       - "packages/shared-data/**"
       - ".github/workflows/game-engine-ci.yml"
-  push:
-    branches:
-      - main
-      - dev
-    paths:
-      - "apps/game/**"
-      - "apps/megameal/public/generated/hunyuan3d/**"
-      - "apps/megameal/public/generated/runtime-game-assets/**"
-      - "apps/megameal/public/generated/style-lab/**"
-      - "apps/megameal/public/terrain/**"
-      - "packages/shared-audio/**"
-      - "packages/shared-data/**"
-      - ".github/workflows/game-engine-ci.yml"
   workflow_dispatch:
-  schedule:
-    - cron: "23 9 * * *"
 
 permissions:
   contents: read
@@ -71,7 +56,7 @@ jobs:
   browser-smoke:
     name: Browser Smoke Reports
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -115,7 +100,7 @@ jobs:
   performance-certification:
     name: Performance Telemetry Report
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
