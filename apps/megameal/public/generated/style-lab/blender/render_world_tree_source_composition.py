@@ -14,25 +14,15 @@ if spec is None or spec.loader is None:
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
 
-OUTPUT_DIR = (
-    base.REPO_ROOT / "apps/megameal/public/generated/style-lab/blender/hunyuan3d-paint-test"
-)
-SOURCE_GLB = base.SOURCE_GLB
-TEXTURED_GLB = OUTPUT_DIR / "yggdrasil-world-tree-hunyuan3d-paint-reference-textured-face100k.glb"
-OUTPUT_BLEND = OUTPUT_DIR / "yggdrasil-world-tree-hunyuan3d-paint-face100k-comparison.blend"
-OUTPUT_RENDER = OUTPUT_DIR / "yggdrasil-world-tree-hunyuan3d-paint-face100k-comparison.png"
+OUTPUT_DIR = base.REPO_ROOT / "apps/megameal/public/generated/style-lab/blender/comfyui-flux-style-test"
+OUTPUT_BLEND = OUTPUT_DIR / "yggdrasil-world-tree-source-composition.blend"
+OUTPUT_RENDER = OUTPUT_DIR / "yggdrasil-world-tree-source-composition.png"
 
 
 def main() -> None:
-    if not TEXTURED_GLB.exists():
-        raise FileNotFoundError(TEXTURED_GLB)
-
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     base.clear_scene()
-    base.import_glb(SOURCE_GLB, x_offset=-12.0, scale=8.0)
-    base.import_glb(TEXTURED_GLB, x_offset=12.0, scale=8.0)
-    bpy.context.view_layer.update()
-    base.make_label("ORIGINAL GLB", (-12.0, 15.0, -15.0))
-    base.make_label("HUNYUAN3D PAINT TEXTURED GLB", (12.0, 15.0, -15.0))
+    base.import_glb(base.SOURCE_GLB, scale=8.0)
     bpy.context.view_layer.update()
     base.add_lighting_and_camera()
     base.render_settings()

@@ -1,0 +1,7 @@
+{
+  "source_glb": "/home/greggles/Merkin/apps/megameal/public/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+  "reference_image": "/home/greggles/ComfyUI/output/merkin/references/yggdrasil-world-tree-merged-1777083570498_00001_.png",
+  "output_glb": "/home/greggles/Merkin/apps/megameal/public/generated/style-lab/blender/hunyuan3d-paint-test/yggdrasil-world-tree-hunyuan3d-paint-reference-textured-face100k.glb",
+  "texture": true,
+  "face_count": 100000
+}

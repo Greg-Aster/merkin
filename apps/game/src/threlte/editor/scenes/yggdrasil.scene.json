@@ -1,7 +1,7 @@
 {
   "levelId": "yggdrasil",
   "version": 1,
-  "updatedAt": "2026-05-16T02:34:15.021Z",
+  "updatedAt": "2026-05-16T03:00:38.260Z",
   "settings": {
     "level": {
       "collision": {
@@ -136,7 +136,7 @@
         "enabled": true,
         "fog": {
           "color": "#000000",
-          "density": 0.72
+          "density": 0.0007
         },
         "editorBatch": {
           "presetId": "yggdrasil-abyssal-neon"
@@ -154,7 +154,7 @@
         }
       },
       "lighting": {
-        "ambientIntensity": 1,
+        "ambientIntensity": 2,
         "keyLightIntensity": 0.22,
         "fillLightIntensity": 0.08
       },

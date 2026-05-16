@@ -18,8 +18,9 @@ REFERENCE_IMAGE = Path(
     "/home/greggles/ComfyUI/output/merkin/references/yggdrasil-world-tree-merged-1777083570498_00001_.png"
 )
 OUTPUT_DIR = REPO_ROOT / "apps/megameal/public/generated/style-lab/blender/hunyuan3d-paint-test"
-OUTPUT_GLB = OUTPUT_DIR / "yggdrasil-world-tree-hunyuan3d-paint-reference-textured.glb"
-OUTPUT_REQUEST = OUTPUT_DIR / "hunyuan3d-paint-request.json"
+FACE_COUNT = 100000
+OUTPUT_GLB = OUTPUT_DIR / "yggdrasil-world-tree-hunyuan3d-paint-reference-textured-face100k.glb"
+OUTPUT_REQUEST = OUTPUT_DIR / "hunyuan3d-paint-face100k-request.json"
 
 
 def as_base64(path: Path) -> str:
@@ -37,7 +38,7 @@ def main() -> None:
         "image": as_base64(REFERENCE_IMAGE),
         "mesh": as_base64(SOURCE_GLB),
         "texture": True,
-        "face_count": 40000,
+        "face_count": FACE_COUNT,
     }
     OUTPUT_REQUEST.write_text(
         json.dumps(

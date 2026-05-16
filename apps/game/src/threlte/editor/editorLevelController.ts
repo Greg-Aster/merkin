@@ -10,6 +10,7 @@ import {
   upgradeLegacySceneDocument,
 } from './defaultScenes'
 import { sanitizeEditorNodeCollisionPolicy } from './editorCollisionLifecycle'
+import { normalizeLevelSceneSettings } from './editorLevelSetup'
 import { stripEditorSceneRuntimeData } from './editorPersistence'
 import {
   EDITOR_PUBLISH_BAKE_STEP_LABELS,
@@ -28,7 +29,6 @@ import {
   assertPublishableEditorSceneDocument,
   assertValidEditorSceneDocument,
 } from './editorSceneDocumentValidation'
-import { normalizeLevelSceneSettings } from './editorLevelSetup'
 import type { EditorSceneDocument } from './editorTypes'
 
 interface EditorLevelControllerDeps {
@@ -596,10 +596,7 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
       if (publishBlocker) {
         throw new Error(publishBlocker)
       }
-      assertPublishableEditorSceneDocument(
-        publishScene,
-        'Publish',
-      )
+      assertPublishableEditorSceneDocument(publishScene, 'Publish')
 
       startPublishPipeline(bakePlan)
 
