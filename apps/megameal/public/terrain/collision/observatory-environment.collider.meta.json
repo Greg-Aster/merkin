@@ -38,14 +38,14 @@
     ],
     "sourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+      "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
     },
     "sourceAssetFingerprints": [
       {
         "url": "/models/levels/observatory-environment.glb",
         "fingerprint": {
           "algorithm": "sha256",
-          "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+          "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
         }
       }
     ],
@@ -75,7 +75,7 @@
       "projectionHeightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
       "fingerprint": {
         "algorithm": "sha256",
-        "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+        "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
       }
     },
     "collisionCoverageBounds": {

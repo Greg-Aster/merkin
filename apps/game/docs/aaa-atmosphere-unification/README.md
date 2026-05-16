@@ -222,13 +222,11 @@ or streaming data changed.
 Validation and audits:
 pnpm --dir apps/game type-check passed.
 Targeted Biome check for atmosphere-owned files passed.
-pnpm --dir apps/game exec biome check src/threlte remains blocked by existing
-unrelated formatting/import diagnostics outside the atmosphere-owned files.
-Required smoke:boot on port 4322 was blocked by an unhealthy occupied shared
-port. Isolated boot smoke on port 4330 also failed when the dev server stopped
-mid-run, producing connection refused errors while loading observatory terrain.
-Visual smoke passed for yggdrasil, observatory, and solitude on an isolated
-server and wrote screenshots under
+pnpm --dir apps/game exec biome check src/threlte passed.
+Required pnpm --dir apps/game smoke:boot passed on port 4322 after the level
+readiness timeout was aligned with the shared browser harness default.
+Visual smoke passed for yggdrasil, observatory, and solitude on isolated port
+4330 and wrote screenshots under
 apps/game/.visual-smoke/atmosphere-certification/.
 
 Compatibility code to delete:

@@ -87,12 +87,13 @@ const DEFAULT_RENDER_PROFILE: ResolvedRuntimeRenderProfile = {
     enabled: true,
     passes: [
       'tone-mapping',
+      'depth-fog',
       'ambient-occlusion',
       'color-grading',
       'bloom',
       'vignette',
     ],
-    maxEnabledPasses: 5,
+    maxEnabledPasses: 6,
     ambientOcclusion: {
       enabled: true,
       intensity: 0.78,

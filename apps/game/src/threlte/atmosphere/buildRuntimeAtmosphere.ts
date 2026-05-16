@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import type {
   SceneSettings,
   SharedLevelEditorSettings,
@@ -56,6 +57,16 @@ function normalizeColor(value: string | undefined, fallback: string) {
   return typeof value === 'string' && value.length > 0 ? value : fallback
 }
 
+function blendHexColors(base: string, target: string, amount: number) {
+  try {
+    const from = new THREE.Color(normalizeColor(base, '#7b8797'))
+    const to = new THREE.Color(normalizeColor(target, base))
+    return `#${from.lerp(to, clampNumber(amount, 0, 1)).getHexString()}`
+  } catch {
+    return normalizeColor(base, '#7b8797')
+  }
+}
+
 function createDefaultAuthoredMetadata() {
   return {
     distanceFog: false,
@@ -96,6 +107,7 @@ export function runtimeVisualStyleToRuntimeAtmosphere(
     heightFogFloor + 0.001,
     finiteNumberOrDefault(heightFog.ceiling, heightFogFloor + 6),
   )
+  const heightFogFalloff = 1
   const mistOpacity = clampNumber(
     finiteNumberOrDefault(heightFog.mistOpacity, 0),
     0,
@@ -132,7 +144,7 @@ export function runtimeVisualStyleToRuntimeAtmosphere(
       density: heightFogDensity,
       floor: heightFogFloor,
       ceiling: heightFogCeiling,
-      falloff: 1,
+      falloff: heightFogFalloff,
       colorInfluence: clampNumber(
         finiteNumberOrDefault(heightFog.colorInfluence, 0.28),
         0,
@@ -144,6 +156,7 @@ export function runtimeVisualStyleToRuntimeAtmosphere(
       skyParticipation,
       skyOcclusion: resolveSkyOcclusion(distanceFogDensity, heightFogDensity),
       horizonBoost: resolveHorizonBoost(distanceFogDensity, heightFogDensity),
+      skyFogFalloff: heightFogFalloff,
     },
     mist: {
       enabled: mistOpacity > 0.001 && mistLayers > 0,
@@ -199,6 +212,7 @@ export function buildRuntimeAtmosphereFromLevelSettings(
       : base.id
 
   const distanceFogColor = normalizeColor(fog?.color, base.distanceFog.color)
+  const heightFogColor = normalizeColor(haze?.color, distanceFogColor)
   const distanceFogDensity = Math.max(
     0,
     finiteNumberOrDefault(fog?.density, base.distanceFog.density),
@@ -215,6 +229,10 @@ export function buildRuntimeAtmosphereFromLevelSettings(
     0,
     finiteNumberOrDefault(haze?.density, base.heightFog.density),
   )
+  const heightFogFalloff = Math.max(
+    0.001,
+    finiteNumberOrDefault(haze?.falloff, base.heightFog.falloff),
+  )
   const mistOpacity = clampNumber(
     finiteNumberOrDefault(haze?.mistOpacity, base.mist.opacity),
     0,
@@ -226,6 +244,8 @@ export function buildRuntimeAtmosphereFromLevelSettings(
   )
   const hasAuthoredSkyParticipation =
     typeof settings?.skybox?.fogOpacity === 'number'
+  const hasAuthoredSkyFogFalloff =
+    typeof settings?.skybox?.fogFalloff === 'number'
   const skyParticipation = clampNumber(
     finiteNumberOrDefault(
       hasAuthoredSkyParticipation
@@ -235,6 +255,10 @@ export function buildRuntimeAtmosphereFromLevelSettings(
     ),
     0,
     1,
+  )
+  const skyFogFalloff = Math.max(
+    0.001,
+    finiteNumberOrDefault(settings?.skybox?.fogFalloff, heightFogFalloff),
   )
   const skyOcclusion = resolveSkyOcclusion(distanceFogDensity, heightFogDensity)
   const horizonBoost = resolveHorizonBoost(distanceFogDensity, heightFogDensity)
@@ -260,7 +284,9 @@ export function buildRuntimeAtmosphereFromLevelSettings(
         distanceFog: Boolean(fog),
         heightFog: Boolean(haze),
         aerialPerspective:
-          hasAuthoredSkyParticipation || base.source.authored.aerialPerspective,
+          hasAuthoredSkyParticipation ||
+          hasAuthoredSkyFogFalloff ||
+          base.source.authored.aerialPerspective,
         mist: Boolean(haze),
         bloom: Boolean(bloom),
         colorGrading: Boolean(grading),
@@ -278,14 +304,11 @@ export function buildRuntimeAtmosphereFromLevelSettings(
         styleEnabled &&
         heightFogDensity > 0 &&
         heightFogCeiling > heightFogFloor,
-      color: normalizeColor(haze?.color, base.heightFog.color),
+      color: heightFogColor,
       density: heightFogDensity,
       floor: heightFogFloor,
       ceiling: heightFogCeiling,
-      falloff: Math.max(
-        0.001,
-        finiteNumberOrDefault(haze?.falloff, base.heightFog.falloff),
-      ),
+      falloff: heightFogFalloff,
       colorInfluence: clampNumber(
         finiteNumberOrDefault(
           haze?.colorInfluence,
@@ -301,11 +324,12 @@ export function buildRuntimeAtmosphereFromLevelSettings(
       skyParticipation,
       skyOcclusion,
       horizonBoost,
+      skyFogFalloff,
     },
     mist: {
       ...base.mist,
       enabled: styleEnabled && mistOpacity > 0.001 && mistLayers > 0,
-      color: normalizeColor(haze?.color, base.mist.color),
+      color: heightFogColor,
       opacity: mistOpacity,
       layers: mistLayers,
       height: Math.max(
@@ -439,8 +463,11 @@ export function withRuntimeAtmosphereFogVolumes(
     distanceFog: {
       ...atmosphere.distanceFog,
       enabled: atmosphere.enabled,
-      color:
-        strongestInfluence >= 0.5 ? targetColor : atmosphere.distanceFog.color,
+      color: blendHexColors(
+        atmosphere.distanceFog.color,
+        targetColor,
+        strongestInfluence,
+      ),
       density:
         atmosphere.distanceFog.density +
         (targetDensity - atmosphere.distanceFog.density) * strongestInfluence,

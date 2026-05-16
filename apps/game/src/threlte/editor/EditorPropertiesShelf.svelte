@@ -383,6 +383,23 @@ $: originalGeneratedVariantItem =
 $: generatedVariantCount = generatedVariantItems.filter(
   item => !item.isOriginalSource,
 ).length
+$: generatedReplacementMeshCount = generatedVariantItems.filter(
+  item => item.mode === 'generate',
+).length
+$: generatedTextureWrapCount = generatedVariantItems.filter(
+  item => item.mode === 'texture',
+).length
+$: generatedVariantCountSummary = [
+  generatedReplacementMeshCount
+    ? `${generatedReplacementMeshCount} replacement mesh${generatedReplacementMeshCount === 1 ? '' : 'es'}`
+    : '',
+  generatedTextureWrapCount
+    ? `${generatedTextureWrapCount} texture wrap${generatedTextureWrapCount === 1 ? '' : 's'}`
+    : '',
+  originalGeneratedVariantItem ? 'original mesh' : '',
+]
+  .filter(Boolean)
+  .join(' plus ')
 $: generatedVariantLabel =
   selectedGeneratedVariantItem?.name?.replace(/\.(gltf|glb)$/i, '') ??
   selectedNode?.name ??
@@ -473,7 +490,9 @@ function useAuthoredRenderedLightPreview() {
       <div class="variant-browser-header">
         <div>
           <div class="label">Generated Variants</div>
-          <div class="save-message">{generatedVariantCount} generated variant{generatedVariantCount === 1 ? '' : 's'}{originalGeneratedVariantItem ? ' plus original mesh' : ''}</div>
+          <div class="save-message">
+            {generatedVariantCountSummary || `${generatedVariantCount} generated variant${generatedVariantCount === 1 ? '' : 's'}`}
+          </div>
         </div>
         {#if generatedVariantItems.length > 0}
           <div class="variant-browser-count">

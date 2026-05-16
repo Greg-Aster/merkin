@@ -208,6 +208,7 @@ export function applyTerrainChunkCookPayload(
       ? {
           ...(settings.ground ?? {}),
           terrainRuntimeMode: 'glb-chunk-terrain',
+          visualSource: 'source-glb-chunks',
           terrainVisualSource: 'source-glb-chunks',
           fallbackSurfacePolicy:
             settings.ground?.fallbackSurfacePolicy ?? 'disabled',

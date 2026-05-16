@@ -21,6 +21,7 @@ export type SceneAtmosphereDefinition = {
     density: number
     floor: number
     ceiling: number
+    falloff: number
   }
   source: {
     levelId?: string
@@ -36,6 +37,7 @@ export type SceneAtmosphereDefinitionInput = {
   heightFogDensity: number
   heightFogFloor: number
   heightFogCeiling: number
+  heightFogFalloff: number
   levelId?: string
   refreshKey?: string
 }
@@ -142,6 +144,7 @@ function cloneSceneAtmosphereDefinition(
       density: atmosphere.heightFog.density,
       floor: atmosphere.heightFog.floor,
       ceiling: atmosphere.heightFog.ceiling,
+      falloff: atmosphere.heightFog.falloff,
     },
     source: {
       levelId: atmosphere.source.levelId,
@@ -164,6 +167,7 @@ export function createDisabledSceneAtmosphereDefinition(): SceneAtmosphereDefini
       density: 0,
       floor: 0,
       ceiling: 0.001,
+      falloff: 1,
     },
     source: {},
   }
@@ -181,6 +185,10 @@ export function resolveSceneAtmosphereDefinition(
   const heightFogDensity = Math.max(
     0,
     finiteNumberOrDefault(input.heightFogDensity, 0),
+  )
+  const heightFogFalloff = Math.max(
+    0.001,
+    finiteNumberOrDefault(input.heightFogFalloff, 1),
   )
   const distanceFogEnabled = distanceDensity > 0
   const heightFogEnabled =
@@ -201,6 +209,7 @@ export function resolveSceneAtmosphereDefinition(
       density: heightFogDensity,
       floor: heightFogFloor,
       ceiling: heightFogCeiling,
+      falloff: heightFogFalloff,
     },
     source: {
       levelId: input.levelId,
@@ -227,6 +236,7 @@ export function runtimeAtmosphereToSceneAtmosphereDefinition(
     heightFogDensity: atmosphere.heightFog.density,
     heightFogFloor: atmosphere.heightFog.floor,
     heightFogCeiling: atmosphere.heightFog.ceiling,
+    heightFogFalloff: atmosphere.heightFog.falloff,
     levelId: options.levelId ?? atmosphere.source.levelId,
     refreshKey: options.refreshKey ?? atmosphere.source.refreshKey,
   })

@@ -10,6 +10,11 @@ import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectCom
 import type { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js'
 import type { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import type { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
+import {
+  type DepthFogShaderUniforms,
+  createDepthFogShader,
+  updateDepthFogShaderUniforms,
+} from '../atmosphere/depthFogShader'
 import { runtimeAtmosphereStore } from '../atmosphere/runtimeAtmosphereStore'
 import { qualityLevelStore } from '../features/performance/stores/performanceStore'
 import {
@@ -45,11 +50,14 @@ type UnrealBloomPassModule =
 
 export let toneMappingExposure = 1.0
 export let levelId = ''
+export let optionalPostProcessingEnabled = true
 
 let composer: EffectComposer | null = null
 let ssaoPass: SSAOPass | null = null
 let bloomPass: UnrealBloomPass | null = null
 let colorGradingPass: ShaderPass | null = null
+let depthFogPass: (ShaderPass & { uniforms: DepthFogShaderUniforms }) | null =
+  null
 let effectComposerModule: EffectComposerModule | null = null
 let renderPassModule: RenderPassModule | null = null
 let shaderPassModule: ShaderPassModule | null = null
@@ -125,7 +133,7 @@ function ensureOverlay() {
 }
 
 function getPostProcessingPolicy() {
-  return resolveRuntimePostProcessingPolicy({
+  const policy = resolveRuntimePostProcessingPolicy({
     baseExposure: toneMappingExposure,
     visualStyle: $runtimeVisualStyleStore,
     bloom: $adaptiveBloomConfig,
@@ -133,16 +141,54 @@ function getPostProcessingPolicy() {
     renderProfile: $runtimeRenderProfileStore,
     atmosphere: $runtimeAtmosphereStore,
   })
+  if (optionalPostProcessingEnabled) return policy
+
+  return {
+    ...policy,
+    colorGradingEnabled: false,
+    colorSaturation: 1,
+    colorContrast: 1,
+    colorWarmth: 1,
+    bloomEnabled: false,
+    bloomStrength: 0,
+    ambientOcclusionEnabled: false,
+    ambientOcclusionIntensity: 0,
+    ambientOcclusionRadius: 0,
+    vignetteStrength: 0,
+  }
 }
 
 function disposeComposer() {
   ssaoPass?.dispose()
   bloomPass?.dispose()
+  depthFogPass?.material.dispose()
   composer?.dispose()
   composer = null
   ssaoPass = null
   bloomPass = null
   colorGradingPass = null
+  depthFogPass = null
+}
+
+function createDepthTexture(width: number, height: number) {
+  const depthTexture = new THREE.DepthTexture(width, height)
+  depthTexture.format = THREE.DepthFormat
+  depthTexture.type = THREE.UnsignedIntType
+  depthTexture.minFilter = THREE.NearestFilter
+  depthTexture.magFilter = THREE.NearestFilter
+  depthTexture.generateMipmaps = false
+  return depthTexture
+}
+
+function attachDepthTexture(renderTarget: THREE.WebGLRenderTarget | undefined) {
+  if (!renderTarget) return
+  if (renderTarget.depthTexture) return
+
+  renderTarget.depthBuffer = true
+  renderTarget.depthTexture = createDepthTexture(
+    renderTarget.width,
+    renderTarget.height,
+  )
 }
 
 async function ensurePostProcessingModules() {
@@ -216,6 +262,7 @@ async function setupComposer() {
   composerPassKey = getComposerPassKey(policy)
 
   if (
+    !policy.depthFogEnabled &&
     !policy.ambientOcclusionEnabled &&
     !policy.bloomEnabled &&
     !policy.colorGradingEnabled
@@ -230,6 +277,7 @@ async function setupComposer() {
     depthBuffer: true,
     stencilBuffer: false,
   })
+  attachDepthTexture(renderTarget)
 
   if ('samples' in renderTarget) {
     ;(renderTarget as THREE.WebGLRenderTarget & { samples?: number }).samples =
@@ -237,8 +285,46 @@ async function setupComposer() {
   }
 
   composer = new effectComposer.EffectComposer(renderer, renderTarget)
+  attachDepthTexture(
+    (composer as EffectComposer & { renderTarget1?: THREE.WebGLRenderTarget })
+      .renderTarget1,
+  )
+  attachDepthTexture(
+    (composer as EffectComposer & { renderTarget2?: THREE.WebGLRenderTarget })
+      .renderTarget2,
+  )
   autoRender.set(false)
   composer.addPass(new renderPass.RenderPass(scene, activeCamera))
+
+  if (policy.depthFogEnabled) {
+    depthFogPass = new shaderPass.ShaderPass(
+      createDepthFogShader(),
+    ) as ShaderPass & {
+      uniforms: DepthFogShaderUniforms
+    }
+    const originalRender = depthFogPass.render.bind(depthFogPass)
+    depthFogPass.render = (
+      nextRenderer,
+      writeBuffer,
+      readBuffer,
+      deltaTime,
+      maskActive,
+    ) => {
+      depthFogPass!.uniforms.tDepth.value = readBuffer.depthTexture ?? null
+      updateDepthFogSettings(
+        activePostProcessingPolicy ?? getPostProcessingPolicy(),
+      )
+      originalRender(
+        nextRenderer,
+        writeBuffer,
+        readBuffer,
+        deltaTime,
+        maskActive,
+      )
+    }
+    updateDepthFogSettings(policy)
+    composer.addPass(depthFogPass)
+  }
 
   if (policy.ambientOcclusionEnabled) {
     ssaoPass = new ssao.SSAOPass(
@@ -271,6 +357,7 @@ async function setupComposer() {
 
 function getComposerPassKey(policy = getPostProcessingPolicy()) {
   return [
+    policy.depthFogEnabled ? 'depth-fog' : 'no-depth-fog',
     policy.ambientOcclusionEnabled ? 'ao' : 'no-ao',
     policy.bloomEnabled ? 'bloom' : 'no-bloom',
     policy.colorGradingEnabled ? 'color' : 'no-color',
@@ -314,6 +401,17 @@ function updateAmbientOcclusionSettings(policy: RuntimePostProcessingPolicy) {
     (0.75 + policy.ambientOcclusionIntensity * 0.5)
 }
 
+function updateDepthFogSettings(policy: RuntimePostProcessingPolicy) {
+  const activeCamera = getActiveCamera()
+  if (!depthFogPass || !activeCamera) return
+
+  depthFogPass.enabled = policy.depthFogEnabled
+  updateDepthFogShaderUniforms(depthFogPass, {
+    atmosphere: $runtimeAtmosphereStore,
+    camera: activeCamera,
+  })
+}
+
 function updateColorGradingSettings(policy: RuntimePostProcessingPolicy) {
   if (!colorGradingPass) return
 
@@ -339,7 +437,7 @@ function updateOverlayStyle(policy: RuntimePostProcessingPolicy) {
   vignetteElement.style.opacity = '1'
 }
 
-function profileAllowsPostPass(pass: 'bloom' | 'color-grading') {
+function profileAllowsPostPass(pass: 'bloom' | 'color-grading' | 'depth-fog') {
   const postProcessing = $runtimeRenderProfileStore.postProcessing
   if (!postProcessing.enabled) return false
   return (
@@ -347,9 +445,32 @@ function profileAllowsPostPass(pass: 'bloom' | 'color-grading') {
   )
 }
 
+function getDepthFogParticipationReason(policy: RuntimePostProcessingPolicy) {
+  const profile = $runtimeRenderProfileStore
+  const atmosphere = $runtimeAtmosphereStore
+  if (policy.depthFogEnabled) return 'active'
+  if (!profile.postProcessing.enabled) return 'profile disabled'
+  if (!profileAllowsPostPass('depth-fog')) {
+    return `disabled by ${profile.tier} profile pass list`
+  }
+  if (!atmosphere.enabled) return 'atmosphere disabled'
+  if (
+    !(
+      (atmosphere.distanceFog.enabled && atmosphere.distanceFog.density > 0) ||
+      (atmosphere.heightFog.enabled && atmosphere.heightFog.density > 0)
+    )
+  ) {
+    return 'zero fog density'
+  }
+  return 'inactive'
+}
+
 function getBloomParticipationReason(policy: RuntimePostProcessingPolicy) {
   const profile = $runtimeRenderProfileStore
   if (policy.bloomEnabled) return 'active'
+  if (!optionalPostProcessingEnabled) {
+    return 'optional post-processing disabled by quality settings'
+  }
   if (!profile.postProcessing.enabled) return 'profile disabled'
   if (!profileAllowsPostPass('bloom')) {
     return `disabled by ${profile.tier} profile pass list`
@@ -366,6 +487,9 @@ function getColorGradingParticipationReason(
 ) {
   const profile = $runtimeRenderProfileStore
   if (policy.colorGradingEnabled) return 'active'
+  if (!optionalPostProcessingEnabled) {
+    return 'optional post-processing disabled by quality settings'
+  }
   if (!profile.postProcessing.enabled) return 'profile disabled'
   if (!profileAllowsPostPass('color-grading')) {
     return `disabled by ${profile.tier} profile pass list`
@@ -377,8 +501,10 @@ function publishPostProcessingDiagnostics(policy: RuntimePostProcessingPolicy) {
   if (!levelId) return
 
   const profile = $runtimeRenderProfileStore
+  const depthFogReason = getDepthFogParticipationReason(policy)
   const bloomReason = getBloomParticipationReason(policy)
   const colorGradingReason = getColorGradingParticipationReason(policy)
+  const depthFogEnabled = depthFogPass?.enabled ?? policy.depthFogEnabled
   const bloomEnabled = bloomPass?.enabled ?? policy.bloomEnabled
   const colorGradingEnabled =
     colorGradingPass?.enabled ?? policy.colorGradingEnabled
@@ -389,8 +515,10 @@ function publishPostProcessingDiagnostics(policy: RuntimePostProcessingPolicy) {
     atmosphereId: $runtimeAtmosphereStore.id,
     ambientOcclusionEnabled:
       ssaoPass?.enabled ?? policy.ambientOcclusionEnabled,
+    depthFogEnabled,
     bloomEnabled,
     colorGradingEnabled,
+    depthFogReason,
     bloomReason,
     colorGradingReason,
     reason: profile.postProcessing.enabled ? undefined : 'profile-disabled',
@@ -398,13 +526,15 @@ function publishPostProcessingDiagnostics(policy: RuntimePostProcessingPolicy) {
   setRuntimeDiagnostic('postProcessing', {
     label: 'Post Processing',
     level: profile.postProcessing.enabled ? 'ready' : 'warning',
-    message: `${levelId}/${profile.id}/${profile.tier}: bloom ${bloomEnabled ? `on strength ${policy.bloomStrength.toFixed(2)} threshold ${policy.bloomThreshold.toFixed(2)}` : `off (${bloomReason})`}; color grading ${colorGradingEnabled ? `on sat ${policy.colorSaturation.toFixed(2)} contrast ${policy.colorContrast.toFixed(2)} warmth ${policy.colorWarmth.toFixed(2)}` : `off (${colorGradingReason})`}; passes ${profile.postProcessing.enabled ? profile.postProcessing.passes.join(', ') || 'all' : 'disabled'}.`,
+    message: `${levelId}/${profile.id}/${profile.tier}: depth fog ${depthFogEnabled ? 'on' : `off (${depthFogReason})`}; bloom ${bloomEnabled ? `on strength ${policy.bloomStrength.toFixed(2)} threshold ${policy.bloomThreshold.toFixed(2)}` : `off (${bloomReason})`}; color grading ${colorGradingEnabled ? `on sat ${policy.colorSaturation.toFixed(2)} contrast ${policy.colorContrast.toFixed(2)} warmth ${policy.colorWarmth.toFixed(2)}` : `off (${colorGradingReason})`}; passes ${profile.postProcessing.enabled ? profile.postProcessing.passes.join(', ') || 'all' : 'disabled'}.`,
     meta: {
       levelId,
       profileId: profile.id,
       tier: profile.tier,
       enabled: profile.postProcessing.enabled,
       passes: profile.postProcessing.passes,
+      depthFogEnabled,
+      depthFogReason,
       bloomEnabled,
       bloomReason,
       bloomStrength: policy.bloomStrength,
@@ -414,6 +544,7 @@ function publishPostProcessingDiagnostics(policy: RuntimePostProcessingPolicy) {
       colorSaturation: policy.colorSaturation,
       colorContrast: policy.colorContrast,
       colorWarmth: policy.colorWarmth,
+      optionalPostProcessingEnabled,
     },
   })
   setRuntimeRenderLifecyclePhase({
@@ -427,25 +558,22 @@ function publishPostProcessingDiagnostics(policy: RuntimePostProcessingPolicy) {
       passes: profile.postProcessing.passes,
       ambientOcclusionEnabled:
         ssaoPass?.enabled ?? policy.ambientOcclusionEnabled,
+      depthFogEnabled,
+      depthFogReason,
       bloomEnabled,
       bloomReason,
       colorGradingEnabled,
       colorGradingReason,
+      optionalPostProcessingEnabled,
     },
   })
 }
 
 $: setQualityLevel($qualityLevelStore)
-$: activePostProcessingPolicy = resolveRuntimePostProcessingPolicy({
-  baseExposure: toneMappingExposure,
-  visualStyle: $runtimeVisualStyleStore,
-  bloom: $adaptiveBloomConfig,
-  toneMapping: $adaptiveToneMappingConfig,
-  renderProfile: $runtimeRenderProfileStore,
-  atmosphere: $runtimeAtmosphereStore,
-})
+$: activePostProcessingPolicy = getPostProcessingPolicy()
 $: updateRendererStyle(activePostProcessingPolicy)
 $: rebuildComposerIfPassesChanged(activePostProcessingPolicy)
+$: updateDepthFogSettings(activePostProcessingPolicy)
 $: updateAmbientOcclusionSettings(activePostProcessingPolicy)
 $: updateBloomSettings(activePostProcessingPolicy)
 $: updateColorGradingSettings(activePostProcessingPolicy)
@@ -458,13 +586,14 @@ onMount(() => {
   void setupComposer().then(() => {
     const policy = getPostProcessingPolicy()
     updateRendererStyle(policy)
+    updateDepthFogSettings(policy)
     updateAmbientOcclusionSettings(policy)
     updateBloomSettings(policy)
     updateColorGradingSettings(policy)
     updateOverlayStyle(policy)
     publishPostProcessingDiagnostics(policy)
 
-    runtimeDebugLog('Real bloom and SSAO post-processing loaded')
+    runtimeDebugLog('Runtime post-processing loaded')
   })
 })
 
@@ -473,6 +602,7 @@ useTask(
   () => {
     const activeCamera = getActiveCamera()
     if (!composer || !activeCamera) return
+    updateDepthFogSettings(activePostProcessingPolicy)
     composer.render()
   },
   {

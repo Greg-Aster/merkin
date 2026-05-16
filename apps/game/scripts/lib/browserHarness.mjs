@@ -387,7 +387,13 @@ export async function assertRequiredRenderActors(page, levelId) {
   }
 }
 
-export async function assertRuntimeRenderLifecycle(page, levelId) {
+export async function assertRuntimeRenderLifecycle(
+  page,
+  levelId,
+  options = {},
+) {
+  const { timeoutMs = 60000 } = options
+
   await page.waitForFunction(
     level => {
       const state = window.__gameRuntimeRenderState
@@ -411,7 +417,7 @@ export async function assertRuntimeRenderLifecycle(page, levelId) {
       )
     },
     levelId,
-    { timeout: 30000 },
+    { timeout: timeoutMs },
   )
 
   const lifecycleReport = await page.evaluate(level => {

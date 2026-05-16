@@ -16,10 +16,11 @@ export type AtmosphereShaderUniformInput = {
     density: number
     floor: number
     ceiling: number
+    falloff: number
   }
 }
 
-export const ATMOSPHERE_SHADER_CACHE_KEY = 'merkin-scene-atmosphere-v1'
+export const ATMOSPHERE_SHADER_CACHE_KEY = 'merkin-scene-atmosphere-v2'
 
 export function shaderSupportsAtmospherePatch(
   shader: AtmosphereShaderParameters,
@@ -60,6 +61,9 @@ export function setAtmosphereShaderUniforms(
   shader.uniforms.merkinHeightFogCeiling ??= {
     value: heightFog.ceiling,
   }
+  shader.uniforms.merkinHeightFogFalloff ??= {
+    value: heightFog.falloff,
+  }
   shader.uniforms.merkinHeightFogEnabled ??= {
     value: heightFog.enabled ? 1 : 0,
   }
@@ -71,6 +75,7 @@ export function setAtmosphereShaderUniforms(
   shader.uniforms.merkinHeightFogDensity.value = heightFog.density
   shader.uniforms.merkinHeightFogFloor.value = heightFog.floor
   shader.uniforms.merkinHeightFogCeiling.value = heightFog.ceiling
+  shader.uniforms.merkinHeightFogFalloff.value = heightFog.falloff
   shader.uniforms.merkinHeightFogEnabled.value = heightFog.enabled ? 1 : 0
 }
 
@@ -114,6 +119,7 @@ uniform vec3 merkinHeightFogColor;
 uniform float merkinHeightFogDensity;
 uniform float merkinHeightFogFloor;
 uniform float merkinHeightFogCeiling;
+uniform float merkinHeightFogFalloff;
 uniform float merkinHeightFogEnabled;
 varying vec3 vMerkinHeightFogWorldPosition;
       `.trim(),
@@ -127,6 +133,10 @@ float merkinHeightFogMask = 1.0 - smoothstep(
   merkinHeightFogFloor,
   merkinHeightFogCeiling,
   vMerkinHeightFogWorldPosition.y
+);
+merkinHeightFogMask = pow(
+  clamp(merkinHeightFogMask, 0.0, 1.0),
+  max(merkinHeightFogFalloff, 0.001)
 );
 float merkinHeightFogDepth = max(vFogDepth, 0.0);
 float merkinHeightFogStrength = max(merkinHeightFogDensity, 0.0) * merkinHeightFogEnabled;
@@ -176,6 +186,7 @@ uniform vec3 merkinHeightFogColor;
 uniform float merkinHeightFogDensity;
 uniform float merkinHeightFogFloor;
 uniform float merkinHeightFogCeiling;
+uniform float merkinHeightFogFalloff;
 uniform float merkinHeightFogEnabled;
 varying vec3 vMerkinAtmosphereWorldPosition;
 varying float vMerkinAtmosphereDepth;
@@ -194,6 +205,7 @@ void merkinApplyProjectiveSceneAtmosphere() {
     merkinHeightFogCeiling,
     vMerkinAtmosphereWorldPosition.y
   );
+  heightMask = pow(clamp(heightMask, 0.0, 1.0), max(merkinHeightFogFalloff, 0.001));
   float heightFogFactor = merkinHeightFogEnabled *
     heightMask *
     merkinAtmosphereExp2FogFactor(merkinHeightFogDensity, vMerkinAtmosphereDepth);

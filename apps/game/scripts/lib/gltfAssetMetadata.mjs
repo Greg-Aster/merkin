@@ -27,6 +27,11 @@ function emptyMetadata(path, error) {
     vertexCount: 0,
     triangleCount: 0,
     bounds: null,
+    geometryValidation: {
+      missingPositionPrimitiveCount: 0,
+      missingNormalPrimitiveCount: 0,
+      missingTexcoordPrimitiveCount: 0,
+    },
     materialCount: 0,
     materialSlots: 0,
     materials: [],
@@ -109,7 +114,8 @@ function readImageBytes({ json, bin, rootDir, image }) {
   if (Number.isInteger(image.bufferView)) {
     return getBufferViewBytes(json, bin, image.bufferView)
   }
-  if (typeof image.uri !== 'string' || image.uri.startsWith('data:')) return null
+  if (typeof image.uri !== 'string' || image.uri.startsWith('data:'))
+    return null
 
   const imagePath = join(rootDir, image.uri)
   return existsSync(imagePath) ? readFileSync(imagePath) : null
@@ -199,7 +205,11 @@ function getWebpDimensions(bytes) {
 
 function getImageDimensions(bytes) {
   if (!bytes) return null
-  return getPngDimensions(bytes) ?? getJpegDimensions(bytes) ?? getWebpDimensions(bytes)
+  return (
+    getPngDimensions(bytes) ??
+    getJpegDimensions(bytes) ??
+    getWebpDimensions(bytes)
+  )
 }
 
 function inferMimeType(image, bytes) {
@@ -290,20 +300,34 @@ function collectMaterials(json) {
   return (json.materials ?? []).map((material, index) => {
     const pbr = material.pbrMetallicRoughness ?? {}
     const extensions = getMaterialExtensions(material)
+    const metallicRoughnessTextureIndex = getTextureIndex(
+      pbr.metallicRoughnessTexture,
+    )
 
     return {
       index,
       name: material.name,
       alphaMode: material.alphaMode ?? 'OPAQUE',
       doubleSided: material.doubleSided === true,
+      pbrFactors: {
+        baseColorFactor: pbr.baseColorFactor ?? [1, 1, 1, 1],
+        metallicFactor: pbr.metallicFactor ?? 1,
+        roughnessFactor: pbr.roughnessFactor ?? 1,
+        emissiveFactor: material.emissiveFactor ?? [0, 0, 0],
+        hasExplicitMetallicFactor: pbr.metallicFactor !== undefined,
+        hasExplicitRoughnessFactor: pbr.roughnessFactor !== undefined,
+        hasMetallicRoughnessTexture: Number.isInteger(
+          metallicRoughnessTextureIndex,
+        ),
+      },
       pbrSlots: {
         baseColor: getPbrSlot(getTextureIndex(pbr.baseColorTexture), [
           pbr.baseColorFactor,
         ]),
-        metallicRoughness: getPbrSlot(
-          getTextureIndex(pbr.metallicRoughnessTexture),
-          [pbr.metallicFactor, pbr.roughnessFactor],
-        ),
+        metallicRoughness: getPbrSlot(metallicRoughnessTextureIndex, [
+          pbr.metallicFactor,
+          pbr.roughnessFactor,
+        ]),
         normal: getPbrSlot(getTextureIndex(material.normalTexture)),
         occlusion: getPbrSlot(getTextureIndex(material.occlusionTexture)),
         emissive: getPbrSlot(getTextureIndex(material.emissiveTexture), [
@@ -451,13 +475,35 @@ function getGeometryCounts(json) {
   return (json.meshes ?? []).reduce(
     (sum, mesh) => {
       for (const primitive of mesh.primitives ?? []) {
+        const attributes = primitive.attributes ?? {}
+        if (!Number.isInteger(attributes.POSITION)) {
+          sum.geometryValidation.missingPositionPrimitiveCount += 1
+        }
+        if (!Number.isInteger(attributes.NORMAL)) {
+          sum.geometryValidation.missingNormalPrimitiveCount += 1
+        }
+        if (!Number.isInteger(attributes.TEXCOORD_0)) {
+          sum.geometryValidation.missingTexcoordPrimitiveCount += 1
+        }
         sum.vertexCount += getPrimitiveVertexCount(json, primitive)
         sum.triangleCount += getPrimitiveTriangleCount(json, primitive)
-        sum.bounds = mergeBounds(sum.bounds, getPrimitiveBounds(json, primitive))
+        sum.bounds = mergeBounds(
+          sum.bounds,
+          getPrimitiveBounds(json, primitive),
+        )
       }
       return sum
     },
-    { vertexCount: 0, triangleCount: 0, bounds: null },
+    {
+      vertexCount: 0,
+      triangleCount: 0,
+      bounds: null,
+      geometryValidation: {
+        missingPositionPrimitiveCount: 0,
+        missingNormalPrimitiveCount: 0,
+        missingTexcoordPrimitiveCount: 0,
+      },
+    },
   )
 }
 
@@ -475,7 +521,9 @@ export function readGltfAssetMetadata(path) {
     const usedImageIndices = collectUsedImageIndices(json, json.textures ?? [])
     const textures = (json.textures ?? []).map((texture, index) => {
       const imageIndex = getTextureSourceIndex(texture)
-      const image = Number.isInteger(imageIndex) ? json.images?.[imageIndex] ?? {} : {}
+      const image = Number.isInteger(imageIndex)
+        ? json.images?.[imageIndex] ?? {}
+        : {}
       const imageBytes = readImageBytes({ json, bin, rootDir, image })
       const dimensions = getImageDimensions(imageBytes)
       const roles = [...(textureRoles.get(index) ?? [])].sort()
@@ -491,12 +539,11 @@ export function readGltfAssetMetadata(path) {
         byteLength: imageBytes?.byteLength ?? null,
         roles,
         colorSpace: getColorSpace(roles),
-        compression:
-          texture.extensions?.KHR_texture_basisu
-            ? 'basisu'
-            : texture.extensions?.EXT_texture_webp || mimeType === 'image/webp'
-              ? 'webp'
-              : 'none',
+        compression: texture.extensions?.KHR_texture_basisu
+          ? 'basisu'
+          : texture.extensions?.EXT_texture_webp || mimeType === 'image/webp'
+            ? 'webp'
+            : 'none',
       }
     })
     const unusedTextureCount = textures.filter(
@@ -548,6 +595,7 @@ export function readGltfAssetMetadata(path) {
       vertexCount: geometryCounts.vertexCount,
       triangleCount: geometryCounts.triangleCount,
       bounds: finalizeBounds(geometryCounts.bounds),
+      geometryValidation: geometryCounts.geometryValidation,
       materialCount: json.materials?.length ?? 0,
       materialSlots,
       materials,

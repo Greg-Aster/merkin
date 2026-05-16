@@ -23,6 +23,31 @@ authoring assets
 Do not add systems that depend on runtime hope, implicit ordering, hidden side
 effects, or components directly doing unrelated engine work.
 
+## Default Agent Operating Mode
+
+Treat bug fixes, feature requests, visual fixes, and level work as
+engine-system work unless the request is explicitly documentation-only or
+clearly isolated tooling. The default goal is not merely to make the symptom go
+away; it is to preserve and evolve the engine contract that owns the behavior.
+
+Before making a non-trivial edit, identify the owning subsystem and contract.
+Do not implement symptom-level fixes until the relevant manifest, loader,
+validator, readiness gate, collision layer, registry, service, or adapter path
+has been located. If the only apparent fix bypasses one of those systems, stop
+and propose the proper staged engine change instead.
+
+Agents must prefer durable engine changes over local patches:
+
+- use typed contracts, manifests, services, managers, stores, adapters, and
+  validators over component-local side effects
+- remove or stage out superseded compatibility code instead of layering more
+  branches on top of it
+- make temporary compatibility explicit with an owner, reason, and removal
+  condition
+- expand validation when a rule becomes important enough to preserve
+- create a separate work packet when the clean fix is larger than the current
+  request instead of mixing broad refactors into a narrow patch
+
 ## Core Engine Update Protocol
 
 When changing a core engine contract, update the dependent systems that consume
@@ -31,7 +56,8 @@ editor tools, manifests, generated outputs, tests, or diagnostics using the old
 shape unless the handoff explicitly marks them as a temporary compatibility
 surface with an owner and removal condition.
 
-Before editing, write down the impact map in the task notes or handoff:
+Before editing, write down the impact map in the task notes or handoff. If the
+map cannot be completed yet, inspect more of the owning system before editing.
 
 - core contract being changed
 - runtime consumers affected
@@ -39,6 +65,7 @@ Before editing, write down the impact map in the task notes or handoff:
 - manifest, generated asset, or source data changes required
 - validation, audit, or test updates required
 - compatibility code that will be deleted or intentionally retained
+- automation or guardrail that should prevent regression, or why none exists
 
 Keep the implementation staged:
 
@@ -154,6 +181,25 @@ Level manifests should be typed and validated. They should describe:
 Do not bypass manifests by hard-coding level-specific asset loading in random
 components unless the file is explicitly an adapter being retired.
 
+## Automation And Guardrails
+
+Architectural rules that can be checked should become scripts, tests, audits,
+or validation diagnostics. Do not rely on agent discipline when a repeatable
+check can reject the bad state.
+
+Prefer adding or extending guardrails for:
+
+- level-id special cases outside the allowed files listed above
+- manifests missing required render assets, collision assets, spawn points,
+  readiness criteria, or budget metadata
+- direct component asset loading that should flow through manifests or typed
+  loaders
+- runtime GLBs, textures, or generated chunks that exceed the documented budget
+- visible render geometry without corresponding collision proxies where
+  collision is required
+- player activation before manifest, render, collision, spawn, and critical
+  systems are ready
+
 ## Checks And Handoff
 
 For game code changes, run the most relevant checks available, usually:
@@ -180,7 +226,29 @@ For asset, level, collision, or manifest changes, also run or update the
 relevant audit/bake/validation script. If no validation script exists for the
 changed surface, call that out and consider adding one.
 
-Every handoff for game work must state:
+Every handoff for game work must include these sections:
+
+```md
+Architecture impact:
+- Contract changed:
+- Runtime systems touched:
+- Editor or authoring systems touched:
+- Manifest, generated data, or source assets touched:
+- Compatibility retained or deleted:
+- Guardrail added or missing:
+
+Validation:
+- Commands run:
+- Commands not run:
+- Asset, collision, manifest, or readiness checks:
+- Payload or budget impact:
+
+Risk:
+- Known gaps:
+- Follow-up work:
+```
+
+Every handoff must also explicitly state:
 
 - whether runtime payload size, collision, and required assets were considered
 - which checks or validation scripts were run

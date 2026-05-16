@@ -222,9 +222,11 @@ apps/game/.visual-smoke/atmosphere-certification/yggdrasil.png
 Commands run:
 pnpm --dir apps/game type-check
 pnpm --dir apps/game exec biome check src/threlte
+pnpm --dir apps/game exec biome check src/threlte/levels/SceneDocumentLevel.svelte scripts/visual-smoke-browser.mjs scripts/boot-check-browser.mjs scripts/lib/browserHarness.mjs
 pnpm --dir apps/game exec biome check src/threlte/atmosphere src/threlte/components/GroundMistLayer.svelte src/threlte/features/ocean/components/OceanComponent.svelte src/threlte/features/ocean/effects/UnderwaterEffect.svelte src/threlte/features/ocean/effects/UnderwaterOverlay.svelte src/threlte/features/performance/utils/runtimeVisualQualityPolicy.ts src/threlte/levels/SceneDocumentLevel.svelte src/threlte/styles/GameplayStyleProfiles.ts src/threlte/systems/SimplePostProcessing.svelte src/threlte/systems/Skybox.svelte src/threlte/stores/runtimeRenderRegistry.ts
 GAME_NO_SERVER=1 GAME_DEV_PORT=4322 pnpm --dir apps/game smoke:boot
 GAME_DEV_PORT=4330 pnpm --dir apps/game smoke:boot
+pnpm --dir apps/game smoke:boot
 GAME_DEV_PORT=4330 pnpm --dir apps/game smoke:visual -- --level=yggdrasil,observatory,solitude --write-artifacts --skip-baselines --artifact-dir apps/game/.visual-smoke/atmosphere-certification
 GAME_DEV_PORT=4330 pnpm --dir apps/game smoke:visual -- --level=yggdrasil --write-artifacts --skip-baselines --artifact-dir apps/game/.visual-smoke/atmosphere-certification
 rg -n "style\\.(haze|fog|bloom|colorGrading)" apps/game/src/threlte
@@ -232,14 +234,11 @@ rg -n "sceneFogMaterialPatch|SceneFogExp2|applySceneFogMaterial|resolveHeightFog
 rg -n "skybox.*veil|veil|overlay" apps/game/src/threlte/atmosphere apps/game/src/threlte/systems/Skybox.svelte
 rg -n "ocean.*fog|fog.*ocean|waterFog|oceanFog" apps/game/src/threlte
 Known blockers:
-Full src/threlte Biome check is blocked by unrelated existing formatting and
-organize-import diagnostics outside atmosphere-owned files. Required port 4322
-boot smoke is blocked by an unhealthy occupied shared dev server. Isolated port
-4330 boot smoke failed after the dev server stopped mid-run, causing connection
-refused errors for editor/level routes and observatory terrain assets.
+none for atmosphere certification. Existing editor Svelte unused-export warnings
+still appear during dev-server compilation, but the browser smoke harness filters
+them and the validation commands above pass.
 Next handoff needed:
-Resolve unrelated Biome debt and shared dev-server stability, then rerun the
-full required boot smoke on port 4322.
+None for atmosphere certification.
 ```
 
 ## Open Coordination Risks

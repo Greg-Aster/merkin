@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-15T02:10:37.058Z",
+  "generatedAt": "2026-05-16T00:00:00.068Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-root-northwest",
@@ -15,13 +15,13 @@
   "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/root-northwest/root-northwest-generated-2026-04-19T17-13-41-911Z.low.glb",
   "colliderSourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "ed7742afb10d38fdfab1a2748211f43d2a150e90ec9d2609e65dd672a7caecbd"
+    "value": "754a1c5de3096bf10604849f31aaedad98ae48033ddb0c093114cf87bc18e21e"
   },
   "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northwest.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northwest.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northwest.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:ed7742afb10d38fdfab1a2748211f43d2a150e90ec9d2609e65dd672a7caecbd:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+  "colliderCacheKey": "mesh-collision-manager-v2:754a1c5de3096bf10604849f31aaedad98ae48033ddb0c093114cf87bc18e21e:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
   "triangleCount": 11398,
   "vertexCount": 13588,
   "bounds": {
@@ -211,7 +211,7 @@
     "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/root-northwest/root-northwest-generated-2026-04-19T17-13-41-911Z.low.glb",
     "colliderSourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "ed7742afb10d38fdfab1a2748211f43d2a150e90ec9d2609e65dd672a7caecbd"
+      "value": "754a1c5de3096bf10604849f31aaedad98ae48033ddb0c093114cf87bc18e21e"
     },
     "lodSourceTier": "low",
     "bakeConfig": {
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-15T02:10:37.058Z"
+    "generatedAt": "2026-05-16T00:00:00.068Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -245,7 +245,7 @@
     "sourceKind": "asset",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "ed7742afb10d38fdfab1a2748211f43d2a150e90ec9d2609e65dd672a7caecbd"
+      "value": "754a1c5de3096bf10604849f31aaedad98ae48033ddb0c093114cf87bc18e21e"
     },
     "transformFingerprint": {
       "algorithm": "sha256",

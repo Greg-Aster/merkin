@@ -69,6 +69,22 @@ function restoreExactSkyImage() {
   updateLevelNumericSetting(['skybox', 'backgroundBlurriness'], '0')
   updateLevelNumericSetting(['skybox', 'fogOpacity'], '0')
 }
+
+function getInheritedHazeColor(
+  settings: SharedLevelEditorSettings | null | undefined,
+  fallback = '#7b8797',
+) {
+  return settings?.style?.haze?.color ?? settings?.style?.fog?.color ?? fallback
+}
+
+function getInheritedSkyFogFalloff(
+  settings: SharedLevelEditorSettings | null | undefined,
+  fallback = 1,
+) {
+  return (
+    settings?.skybox?.fogFalloff ?? settings?.style?.haze?.falloff ?? fallback
+  )
+}
 </script>
 
 <div class="editor-section">
@@ -102,7 +118,7 @@ function restoreExactSkyImage() {
     {/if}
     {#if skyImageDisabled}
       <div class="save-message">
-        Sky Image is 0, so the visible cubemap is disabled. Use Sky Image 1, Blur 0, and Sky Mist 0 for the unmodified source sky.
+        Sky Image is 0, so the visible cubemap is disabled. Use Sky Image 1, Blur 0, and Sky Fog 0 for the unmodified source sky.
       </div>
       <button
         class="full"
@@ -130,8 +146,12 @@ function restoreExactSkyImage() {
         <input class="tuple-input" type="number" step="0.05" min="0" value={levelSettings.skybox?.backgroundBlurriness ?? 0} on:input={(event) => updateLevelNumericSetting(['skybox', 'backgroundBlurriness'], (event.currentTarget as HTMLInputElement).value)} />
       </label>
       <label class="editor-field">
-        <span class="editor-field-label">Sky Mist</span>
-        <input class="tuple-input" type="number" step="0.01" min="0" max="1" value={levelSettings.skybox?.fogOpacity ?? 0} on:input={(event) => updateLevelNumericSetting(['skybox', 'fogOpacity'], (event.currentTarget as HTMLInputElement).value)} />
+        <span class="editor-field-label">Sky Fog</span>
+        <input class="tuple-input" type="number" step="0.01" min="0" max="1" value={levelSettings.skybox?.fogOpacity ?? 1} on:input={(event) => updateLevelNumericSetting(['skybox', 'fogOpacity'], (event.currentTarget as HTMLInputElement).value)} />
+      </label>
+      <label class="editor-field">
+        <span class="editor-field-label">Sky Falloff</span>
+        <input class="tuple-input" type="number" step="0.1" min="0.1" value={getInheritedSkyFogFalloff(levelSettings)} on:input={(event) => updateLevelNumericSetting(['skybox', 'fogFalloff'], (event.currentTarget as HTMLInputElement).value)} />
       </label>
       <label class="editor-field">
         <span class="editor-field-label">Sky Lighting</span>
@@ -157,7 +177,7 @@ function restoreExactSkyImage() {
         <input class="tuple-input" type="number" step="0.05" min="0" value={levelSettings.renderProfile?.qualityTiers?.tv?.reflections?.environmentIntensity ?? levelSettings.renderProfile?.reflections?.environmentIntensity ?? 1} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'qualityTiers', 'tv', 'reflections', 'environmentIntensity'], (event.currentTarget as HTMLInputElement).value)} />
       </label>
     </div>
-    <div class="save-message">For exact cubemap display use Sky Image 1, Blur 0, and Sky Mist 0. Sky Lighting controls cubemap IBL/reflection response, not the visible skybox image.</div>
+    <div class="save-message">For exact cubemap display use Sky Image 1, Blur 0, and Sky Fog 0. Sky Fog keeps the same atmosphere visible on the horizon; Sky Falloff controls how quickly it clears upward.</div>
   </div>
 
   <div class="tuple-group">
@@ -179,12 +199,16 @@ function restoreExactSkyImage() {
     <div class="editor-field-grid editor-field-grid--triple editor-mt-sm">
       <label class="editor-field"><span class="editor-field-label">Bloom Intensity</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.bloom?.intensity ?? 0.16} on:input={(event) => updateLevelNumericSetting(['style', 'bloom', 'intensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Bloom Threshold</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.bloom?.threshold ?? 0.86} on:input={(event) => updateLevelNumericSetting(['style', 'bloom', 'threshold'], (event.currentTarget as HTMLInputElement).value)} /></label>
-      <label class="editor-field"><span class="editor-field-label">Haze Color</span><input class="text-input" type="color" value={levelSettings.style?.haze?.color ?? '#22174f'} on:input={(event) => updateLevelSetting(['style', 'haze', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Haze Color</span><input class="text-input" type="color" value={getInheritedHazeColor(levelSettings)} on:input={(event) => updateLevelSetting(['style', 'haze', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Haze Density</span><input class="tuple-input" type="number" step="0.00005" value={levelSettings.style?.haze?.density ?? 0.00034} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'density'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Haze Floor</span><input class="tuple-input" type="number" step="0.1" value={levelSettings.style?.haze?.floor ?? 0.25} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'floor'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Haze Ceiling</span><input class="tuple-input" type="number" step="0.1" value={levelSettings.style?.haze?.ceiling ?? 11} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'ceiling'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Haze Falloff</span><input class="tuple-input" type="number" step="0.1" min="0.1" value={levelSettings.style?.haze?.falloff ?? 1} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'falloff'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="checkbox"><input type="checkbox" checked={levelSettings.style?.haze?.fogVolumeColors ?? true} on:change={(event) => updateLevelSetting(['style', 'haze', 'fogVolumeColors'], (event.currentTarget as HTMLInputElement).checked)} /> Fog Volume Colors</label>
       <label class="editor-field"><span class="editor-field-label">Mist Opacity</span><input class="tuple-input" type="number" step="0.01" value={levelSettings.style?.haze?.mistOpacity ?? 0.18} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'mistOpacity'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Mist Layers</span><input class="tuple-input" type="number" step="1" value={levelSettings.style?.haze?.mistLayers ?? 4} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'mistLayers'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Mist Height</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.haze?.mistHeight ?? 0.55} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'mistHeight'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Mist Spacing</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.haze?.mistSpacing ?? 0.45} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'mistSpacing'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Mist Scale</span><input class="tuple-input" type="number" step="10" value={levelSettings.style?.haze?.mistScale ?? 380} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'mistScale'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Mist Drift</span><input class="tuple-input" type="number" step="0.01" value={levelSettings.style?.haze?.mistDriftSpeed ?? 0.055} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'mistDriftSpeed'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Saturation</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.colorGrading?.saturation ?? 1.18} on:input={(event) => updateLevelNumericSetting(['style', 'colorGrading', 'saturation'], (event.currentTarget as HTMLInputElement).value)} /></label>
@@ -336,10 +360,14 @@ function restoreExactSkyImage() {
 
         <div class="tuple-label editor-mt-sm">Real Haze</div>
         <div class="editor-field-grid editor-mt-sm">
-          <label class="editor-field"><span class="editor-field-label">Haze Color</span><input class="text-input" type="color" value={effectiveSolitudeSettings.style?.haze?.color ?? solitudeProfile.runtime.heightFog?.color ?? '#231150'} on:input={(event) => updateLevelSetting(['style', 'haze', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
+          <label class="editor-field"><span class="editor-field-label">Haze Color</span><input class="text-input" type="color" value={getInheritedHazeColor(effectiveSolitudeSettings, solitudeProfile.runtime.heightFog?.color ?? '#231150')} on:input={(event) => updateLevelSetting(['style', 'haze', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
           <label class="editor-field"><span class="editor-field-label">Extra Density</span><input class="tuple-input" type="number" step="0.00005" value={effectiveSolitudeSettings.style?.haze?.density ?? solitudeProfile.runtime.heightFog?.density ?? 0.0005} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'density'], (event.currentTarget as HTMLInputElement).value)} /></label>
           <label class="editor-field"><span class="editor-field-label">Floor</span><input class="tuple-input" type="number" step="0.1" value={effectiveSolitudeSettings.style?.haze?.floor ?? solitudeProfile.runtime.heightFog?.floor ?? 0.2} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'floor'], (event.currentTarget as HTMLInputElement).value)} /></label>
           <label class="editor-field"><span class="editor-field-label">Ceiling</span><input class="tuple-input" type="number" step="0.1" value={effectiveSolitudeSettings.style?.haze?.ceiling ?? solitudeProfile.runtime.heightFog?.ceiling ?? 10} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'ceiling'], (event.currentTarget as HTMLInputElement).value)} /></label>
+          <label class="editor-field"><span class="editor-field-label">Falloff</span><input class="tuple-input" type="number" step="0.1" min="0.1" value={effectiveSolitudeSettings.style?.haze?.falloff ?? 1} on:input={(event) => updateLevelNumericSetting(['style', 'haze', 'falloff'], (event.currentTarget as HTMLInputElement).value)} /></label>
+          <label class="editor-field"><span class="editor-field-label">Sky Fog</span><input class="tuple-input" type="number" step="0.01" min="0" max="1" value={effectiveSolitudeSettings.skybox?.fogOpacity ?? 1} on:input={(event) => updateLevelNumericSetting(['skybox', 'fogOpacity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+          <label class="editor-field"><span class="editor-field-label">Sky Falloff</span><input class="tuple-input" type="number" step="0.1" min="0.1" value={getInheritedSkyFogFalloff(effectiveSolitudeSettings)} on:input={(event) => updateLevelNumericSetting(['skybox', 'fogFalloff'], (event.currentTarget as HTMLInputElement).value)} /></label>
+          <label class="checkbox"><input type="checkbox" checked={effectiveSolitudeSettings.style?.haze?.fogVolumeColors ?? true} on:change={(event) => updateLevelSetting(['style', 'haze', 'fogVolumeColors'], (event.currentTarget as HTMLInputElement).checked)} /> Fog Volume Colors</label>
           <label class="editor-field"><span class="editor-field-label">Mist Opacity</span><input class="tuple-input" type="number" step="0.01" value={effectiveSolitudeSettings.style?.haze?.mistOpacity ?? solitudeProfile.runtime.heightFog?.mistOpacity ?? 0.18} on:change={(event) => updateLevelNumericSetting(['style', 'haze', 'mistOpacity'], (event.currentTarget as HTMLInputElement).value)} /></label>
           <label class="editor-field"><span class="editor-field-label">Mist Layers</span><input class="tuple-input" type="number" step="1" value={effectiveSolitudeSettings.style?.haze?.mistLayers ?? solitudeProfile.runtime.heightFog?.mistLayers ?? 4} on:change={(event) => updateLevelNumericSetting(['style', 'haze', 'mistLayers'], (event.currentTarget as HTMLInputElement).value)} /></label>
           <label class="editor-field"><span class="editor-field-label">Mist Height</span><input class="tuple-input" type="number" step="0.05" value={effectiveSolitudeSettings.style?.haze?.mistHeight ?? solitudeProfile.runtime.heightFog?.mistHeight ?? 0.55} on:change={(event) => updateLevelNumericSetting(['style', 'haze', 'mistHeight'], (event.currentTarget as HTMLInputElement).value)} /></label>

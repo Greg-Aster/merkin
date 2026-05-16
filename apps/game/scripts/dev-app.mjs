@@ -1,7 +1,7 @@
-import fs from 'node:fs/promises'
-import path from 'node:path'
 import { spawn } from 'node:child_process'
+import fs from 'node:fs/promises'
 import { createServer } from 'node:net'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   clearRuntime,
@@ -272,7 +272,7 @@ async function keepAliveForExistingApp(origin) {
     `🎮 Reusing existing ${devModeLabel} game dev server at: ${origin}`,
   )
 
-  await new Promise((resolve) => {
+  await new Promise(resolve => {
     const interval = setInterval(() => {}, 60_000)
     const shutdown = () => {
       clearInterval(interval)
@@ -284,7 +284,9 @@ async function keepAliveForExistingApp(origin) {
   })
 }
 
-async function hasReusableAppServer({ allowMissingRuntimeMetadata = false } = {}) {
+async function hasReusableAppServer({
+  allowMissingRuntimeMetadata = false,
+} = {}) {
   const runtime = await readRuntime('game')
   let origin = ''
 
@@ -295,12 +297,12 @@ async function hasReusableAppServer({ allowMissingRuntimeMetadata = false } = {}
       await clearRuntime('game', runtime.pid ?? null)
     }
   } else if (runtime?.origin) {
-    if (!await probeOrigin(runtime.origin)) {
+    if (!(await probeOrigin(runtime.origin))) {
       await clearRuntime('game', runtime.pid ?? null)
     }
   }
 
-  if (!origin && await probeOrigin(appUrl)) {
+  if (!origin && (await probeOrigin(appUrl))) {
     origin = appUrl
   }
 
@@ -324,9 +326,12 @@ async function hasReusableAppServer({ allowMissingRuntimeMetadata = false } = {}
   }
 
   try {
-    const metadataResponse = await fetch(`${origin}/node_modules/.vite/deps/_metadata.json`, {
-      signal: AbortSignal.timeout(1500),
-    })
+    const metadataResponse = await fetch(
+      `${origin}/node_modules/.vite/deps/_metadata.json`,
+      {
+        signal: AbortSignal.timeout(1500),
+      },
+    )
 
     if (!metadataResponse.ok) {
       return ''
@@ -337,7 +342,9 @@ async function hasReusableAppServer({ allowMissingRuntimeMetadata = false } = {}
     const threlteSvelte = metadata?.optimized?.['@threlte/core/svelte']
 
     if (!threlteCore && !threlteSvelte) {
-      console.warn('⚠️ Existing game dev server has an invalid Vite dependency cache. Restarting it.')
+      console.warn(
+        '⚠️ Existing game dev server has an invalid Vite dependency cache. Restarting it.',
+      )
       return ''
     }
   } catch {
@@ -404,13 +411,17 @@ async function main() {
     throw error
   }
 
-  const astroProcess = spawnCommand('pnpm', ['astro', 'dev', '--host', host, '--port', port], {
-    env: {
-      ...process.env,
-      GAME_DEV_PORT: port,
-      GAME_DEV_MANUAL_REFRESH: manualRefresh ? '1' : '',
+  const astroProcess = spawnCommand(
+    'pnpm',
+    ['astro', 'dev', '--host', host, '--port', port, '--strictPort'],
+    {
+      env: {
+        ...process.env,
+        GAME_DEV_PORT: port,
+        GAME_DEV_MANUAL_REFRESH: manualRefresh ? '1' : '',
+      },
     },
-  })
+  )
 
   astroProcess.on('exit', (code, signal) => {
     void clearRuntime('game', astroProcess.pid ?? null)
@@ -424,7 +435,7 @@ async function main() {
     process.exit(code ?? 0)
   })
 
-  astroProcess.on('error', (error) => {
+  astroProcess.on('error', error => {
     console.error('❌ Failed to start game dev server:', error)
     void releaseStartupLock?.()
     process.exit(1)
@@ -463,7 +474,7 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+main().catch(error => {
   console.error('❌ Game dev bootstrap failed:', error)
   process.exit(1)
 })

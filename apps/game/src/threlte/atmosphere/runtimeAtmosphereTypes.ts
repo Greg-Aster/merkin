@@ -48,6 +48,7 @@ export interface RuntimeAerialPerspectiveSettings {
   skyParticipation: number
   skyOcclusion: number
   horizonBoost: number
+  skyFogFalloff: number
 }
 
 export interface RuntimeMistSettings {

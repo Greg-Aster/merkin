@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-15T16:01:26.306Z",
+  "generatedAt": "2026-05-16T01:13:07.849Z",
   "levelId": "yggdrasil",
   "sceneId": "yggdrasil",
   "source": {
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/yggdrasil.scene.json",
     "version": 1,
-    "updatedAt": "2026-05-15T16:01:49.078Z"
+    "updatedAt": "2026-05-16T02:34:15.021Z"
   },
   "levelDefinition": {
     "id": "yggdrasil",
     "version": 1,
-    "updatedAt": "2026-05-15T16:01:49.078Z",
+    "updatedAt": "2026-05-16T02:34:15.021Z",
     "spawn": {
       "player": [
         0,
@@ -158,33 +158,37 @@
           "preset": "monument",
           "enabled": true,
           "fog": {
-            "color": "#1a5fb4",
-            "density": 0.00072
+            "color": "#000000",
+            "density": 0.72
           },
           "editorBatch": {
             "presetId": "yggdrasil-abyssal-neon"
           },
           "haze": {
             "density": 0.0034,
-            "floor": 0.9
+            "floor": 0.9,
+            "ceiling": 4.8,
+            "falloff": 2.4,
+            "fogVolumeColors": false
           },
           "colorGrading": {
-            "brightness": 0.9
+            "brightness": 0.9,
+            "warmth": 0.9
           }
         },
         "lighting": {
-          "ambientIntensity": 0,
-          "keyLightIntensity": 0,
-          "fillLightIntensity": 0
+          "ambientIntensity": 1,
+          "keyLightIntensity": 0.22,
+          "fillLightIntensity": 0.08
         },
         "renderProfile": {
           "id": "yggdrasil-bifrost-canopy",
           "defaultTier": "desktop",
           "lighting": {
-            "ambientColor": "#d7e8bc",
-            "skyColor": "#e5f0d1",
-            "groundColor": "#182311",
-            "keyLightColor": "#fff2c0",
+            "ambientColor": "#1a5fb4",
+            "skyColor": "#ffffff",
+            "groundColor": "#1a5fb4",
+            "keyLightColor": "#ffffff",
             "fillLightColor": "#8fc7d7",
             "keyLightPosition": [
               24,
@@ -226,12 +230,13 @@
             "enabled": true,
             "passes": [
               "tone-mapping",
+              "depth-fog",
               "ambient-occlusion",
               "color-grading",
               "bloom",
               "vignette"
             ],
-            "maxEnabledPasses": 5,
+            "maxEnabledPasses": 6,
             "ambientOcclusion": {
               "enabled": true,
               "intensity": 0.8,
@@ -272,9 +277,10 @@
               "postProcessing": {
                 "passes": [
                   "tone-mapping",
+                  "depth-fog",
                   "color-grading"
                 ],
-                "maxEnabledPasses": 2
+                "maxEnabledPasses": 3
               }
             },
             "desktop": {
@@ -302,11 +308,12 @@
               "postProcessing": {
                 "passes": [
                   "tone-mapping",
+                  "depth-fog",
                   "color-grading",
                   "bloom",
                   "vignette"
                 ],
-                "maxEnabledPasses": 4
+                "maxEnabledPasses": 5
               }
             },
             "tv": {
@@ -334,12 +341,13 @@
               "postProcessing": {
                 "passes": [
                   "tone-mapping",
+                  "depth-fog",
                   "ambient-occlusion",
                   "color-grading",
                   "bloom",
                   "vignette"
                 ],
-                "maxEnabledPasses": 5,
+                "maxEnabledPasses": 6,
                 "ambientOcclusion": {
                   "enabled": true,
                   "intensity": 0.95,
@@ -429,7 +437,9 @@
         },
         "skybox": {
           "backgroundIntensity": 1,
-          "backgroundBlurriness": 0
+          "backgroundBlurriness": 0,
+          "fogOpacity": 1,
+          "fogFalloff": 3.4
         }
       }
     },
@@ -776,7 +786,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:9f98b7a5452f591e411944dba1e39ffde093fec58602461528bbb0d79c52b6a7:e105f73550332e4c1c0a7869f0aae82adc19785188d69cf88615c5db765d6b38:31365d1d2e99143a13c7228531b79d1ba861340a646ea2e47d78f8e6d1111c9d",
+            "colliderCacheKey": "mesh-collision-manager-v2:2c0084f2eb76a57e53f5292fd0f85785467a8e74320fbdae67c5fd96bafb38e9:e105f73550332e4c1c0a7869f0aae82adc19785188d69cf88615c5db765d6b38:31365d1d2e99143a13c7228531b79d1ba861340a646ea2e47d78f8e6d1111c9d",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -872,14 +882,14 @@
             "triangleCount": 4750,
             "generatedProduct": {
               "actorId": "yggdrasil-ground",
-              "cacheKey": "mesh-collision-manager-v2:9f98b7a5452f591e411944dba1e39ffde093fec58602461528bbb0d79c52b6a7:e105f73550332e4c1c0a7869f0aae82adc19785188d69cf88615c5db765d6b38:31365d1d2e99143a13c7228531b79d1ba861340a646ea2e47d78f8e6d1111c9d",
+              "cacheKey": "mesh-collision-manager-v2:2c0084f2eb76a57e53f5292fd0f85785467a8e74320fbdae67c5fd96bafb38e9:e105f73550332e4c1c0a7869f0aae82adc19785188d69cf88615c5db765d6b38:31365d1d2e99143a13c7228531b79d1ba861340a646ea2e47d78f8e6d1111c9d",
               "mode": "auto",
               "productId": "yggdrasil-ground:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "9f98b7a5452f591e411944dba1e39ffde093fec58602461528bbb0d79c52b6a7"
+                "value": "2c0084f2eb76a57e53f5292fd0f85785467a8e74320fbdae67c5fd96bafb38e9"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -963,7 +973,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-mound.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-mound.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+            "colliderCacheKey": "mesh-collision-manager-v2:b7396643867c3954c071e02f2b33ddf216eefb3939a7bf2d9dd995d7c7a91a0b:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -1059,14 +1069,14 @@
             "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "yggdrasil-mound",
-              "cacheKey": "mesh-collision-manager-v2:7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+              "cacheKey": "mesh-collision-manager-v2:b7396643867c3954c071e02f2b33ddf216eefb3939a7bf2d9dd995d7c7a91a0b:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "yggdrasil-mound:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e"
+                "value": "b7396643867c3954c071e02f2b33ddf216eefb3939a7bf2d9dd995d7c7a91a0b"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -1434,7 +1444,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-north.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-north.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:4a55acd79b7efc34b624331d2f1df1d0df104b73d41b4dcd622fc18b4c4f3a56:d8b1f5778074eeee24e3ebb863a33b98f114ebfcf356ce02f71887991b5c1b93:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+            "colliderCacheKey": "mesh-collision-manager-v2:53383c988cbef8240a3ccaf9749aacf74730c6491625d7406e9ddf5d9b89a65f:d8b1f5778074eeee24e3ebb863a33b98f114ebfcf356ce02f71887991b5c1b93:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -1530,14 +1540,14 @@
             "triangleCount": 11400,
             "generatedProduct": {
               "actorId": "yggdrasil-root-north",
-              "cacheKey": "mesh-collision-manager-v2:4a55acd79b7efc34b624331d2f1df1d0df104b73d41b4dcd622fc18b4c4f3a56:d8b1f5778074eeee24e3ebb863a33b98f114ebfcf356ce02f71887991b5c1b93:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+              "cacheKey": "mesh-collision-manager-v2:53383c988cbef8240a3ccaf9749aacf74730c6491625d7406e9ddf5d9b89a65f:d8b1f5778074eeee24e3ebb863a33b98f114ebfcf356ce02f71887991b5c1b93:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
               "mode": "auto",
               "productId": "yggdrasil-root-north:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "4a55acd79b7efc34b624331d2f1df1d0df104b73d41b4dcd622fc18b4c4f3a56"
+                "value": "53383c988cbef8240a3ccaf9749aacf74730c6491625d7406e9ddf5d9b89a65f"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -1621,7 +1631,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-south.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-south.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:d4292501134d55b92ba782513e4dbab60365828656374cd0ee8e2851906f1839:c4a52ecd381cb77afc765ead65e701a891153672d6a2c198b19b2bfd8c33720a:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+            "colliderCacheKey": "mesh-collision-manager-v2:dc58336f03ce9ca8c2dc9264553a7e9b6b9b0b662a95cadc1662758b42489c27:c4a52ecd381cb77afc765ead65e701a891153672d6a2c198b19b2bfd8c33720a:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -1717,14 +1727,14 @@
             "triangleCount": 4748,
             "generatedProduct": {
               "actorId": "yggdrasil-root-south",
-              "cacheKey": "mesh-collision-manager-v2:d4292501134d55b92ba782513e4dbab60365828656374cd0ee8e2851906f1839:c4a52ecd381cb77afc765ead65e701a891153672d6a2c198b19b2bfd8c33720a:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+              "cacheKey": "mesh-collision-manager-v2:dc58336f03ce9ca8c2dc9264553a7e9b6b9b0b662a95cadc1662758b42489c27:c4a52ecd381cb77afc765ead65e701a891153672d6a2c198b19b2bfd8c33720a:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
               "mode": "auto",
               "productId": "yggdrasil-root-south:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "d4292501134d55b92ba782513e4dbab60365828656374cd0ee8e2851906f1839"
+                "value": "dc58336f03ce9ca8c2dc9264553a7e9b6b9b0b662a95cadc1662758b42489c27"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -1808,7 +1818,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-east.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-east.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:500114aff935b68391b66f45ddfabb4f6d7f5505fa7379b554073c37194e512d:8c49f729ca30a76684762b76b9275cac2853e5f140d067f18cc070b0817b7d45:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+            "colliderCacheKey": "mesh-collision-manager-v2:ff0e7e790281cdbe8f10c2e65803a214f3e26ed00368d30fb59b39f1f6e516f9:8c49f729ca30a76684762b76b9275cac2853e5f140d067f18cc070b0817b7d45:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -1904,14 +1914,14 @@
             "triangleCount": 4750,
             "generatedProduct": {
               "actorId": "yggdrasil-root-east",
-              "cacheKey": "mesh-collision-manager-v2:500114aff935b68391b66f45ddfabb4f6d7f5505fa7379b554073c37194e512d:8c49f729ca30a76684762b76b9275cac2853e5f140d067f18cc070b0817b7d45:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+              "cacheKey": "mesh-collision-manager-v2:ff0e7e790281cdbe8f10c2e65803a214f3e26ed00368d30fb59b39f1f6e516f9:8c49f729ca30a76684762b76b9275cac2853e5f140d067f18cc070b0817b7d45:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
               "mode": "auto",
               "productId": "yggdrasil-root-east:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "500114aff935b68391b66f45ddfabb4f6d7f5505fa7379b554073c37194e512d"
+                "value": "ff0e7e790281cdbe8f10c2e65803a214f3e26ed00368d30fb59b39f1f6e516f9"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -1995,7 +2005,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-west.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-west.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:b8c64c09bb7a754ac6e2f7756576f471d9165fc26b346bfa401f86b2f87001e7:d78ee0b9ea6593abc08f45df077ac4ad34644608e9385644d1311845f658e103:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+            "colliderCacheKey": "mesh-collision-manager-v2:82410ede33225a911340c42892cbd0afcad7385f499c15064902308f5d8d8c7f:d78ee0b9ea6593abc08f45df077ac4ad34644608e9385644d1311845f658e103:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2091,14 +2101,14 @@
             "triangleCount": 11398,
             "generatedProduct": {
               "actorId": "yggdrasil-root-west",
-              "cacheKey": "mesh-collision-manager-v2:b8c64c09bb7a754ac6e2f7756576f471d9165fc26b346bfa401f86b2f87001e7:d78ee0b9ea6593abc08f45df077ac4ad34644608e9385644d1311845f658e103:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+              "cacheKey": "mesh-collision-manager-v2:82410ede33225a911340c42892cbd0afcad7385f499c15064902308f5d8d8c7f:d78ee0b9ea6593abc08f45df077ac4ad34644608e9385644d1311845f658e103:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
               "mode": "auto",
               "productId": "yggdrasil-root-west:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "b8c64c09bb7a754ac6e2f7756576f471d9165fc26b346bfa401f86b2f87001e7"
+                "value": "82410ede33225a911340c42892cbd0afcad7385f499c15064902308f5d8d8c7f"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2182,7 +2192,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northeast.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northeast.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:b15e37959667d73c5ee3c8813ffdb48d27a7c4952e2e7b32323ed40d1aa47089:fa10366a338d43bf29c8740d97a314e1b1a9c4d225026c5db4bcbaed6597712c:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+            "colliderCacheKey": "mesh-collision-manager-v2:a6c0b43ba6a951ac4f159ed1b614a5eeaeec328f78007fb453b6c3b700dfaf0c:fa10366a338d43bf29c8740d97a314e1b1a9c4d225026c5db4bcbaed6597712c:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2278,14 +2288,14 @@
             "triangleCount": 4750,
             "generatedProduct": {
               "actorId": "yggdrasil-root-northeast",
-              "cacheKey": "mesh-collision-manager-v2:b15e37959667d73c5ee3c8813ffdb48d27a7c4952e2e7b32323ed40d1aa47089:fa10366a338d43bf29c8740d97a314e1b1a9c4d225026c5db4bcbaed6597712c:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+              "cacheKey": "mesh-collision-manager-v2:a6c0b43ba6a951ac4f159ed1b614a5eeaeec328f78007fb453b6c3b700dfaf0c:fa10366a338d43bf29c8740d97a314e1b1a9c4d225026c5db4bcbaed6597712c:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
               "mode": "auto",
               "productId": "yggdrasil-root-northeast:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "b15e37959667d73c5ee3c8813ffdb48d27a7c4952e2e7b32323ed40d1aa47089"
+                "value": "a6c0b43ba6a951ac4f159ed1b614a5eeaeec328f78007fb453b6c3b700dfaf0c"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2369,7 +2379,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northwest.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northwest.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:ed7742afb10d38fdfab1a2748211f43d2a150e90ec9d2609e65dd672a7caecbd:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+            "colliderCacheKey": "mesh-collision-manager-v2:754a1c5de3096bf10604849f31aaedad98ae48033ddb0c093114cf87bc18e21e:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2465,14 +2475,14 @@
             "triangleCount": 11398,
             "generatedProduct": {
               "actorId": "yggdrasil-root-northwest",
-              "cacheKey": "mesh-collision-manager-v2:ed7742afb10d38fdfab1a2748211f43d2a150e90ec9d2609e65dd672a7caecbd:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+              "cacheKey": "mesh-collision-manager-v2:754a1c5de3096bf10604849f31aaedad98ae48033ddb0c093114cf87bc18e21e:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
               "mode": "auto",
               "productId": "yggdrasil-root-northwest:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "ed7742afb10d38fdfab1a2748211f43d2a150e90ec9d2609e65dd672a7caecbd"
+                "value": "754a1c5de3096bf10604849f31aaedad98ae48033ddb0c093114cf87bc18e21e"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2556,7 +2566,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southeast.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southeast.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:310bb538f8139d222639e197e95b63800b888f01903d8430ca051a28515143f8:7183112371b1695c1928be1bd88c2a370f483850286719ae3869fe22656b6aa9:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+            "colliderCacheKey": "mesh-collision-manager-v2:9e835f916456578e72c79a840db8ec35f2270bb23bbd09a2601381a6fb67aa9e:7183112371b1695c1928be1bd88c2a370f483850286719ae3869fe22656b6aa9:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2652,14 +2662,14 @@
             "triangleCount": 4750,
             "generatedProduct": {
               "actorId": "yggdrasil-root-southeast",
-              "cacheKey": "mesh-collision-manager-v2:310bb538f8139d222639e197e95b63800b888f01903d8430ca051a28515143f8:7183112371b1695c1928be1bd88c2a370f483850286719ae3869fe22656b6aa9:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+              "cacheKey": "mesh-collision-manager-v2:9e835f916456578e72c79a840db8ec35f2270bb23bbd09a2601381a6fb67aa9e:7183112371b1695c1928be1bd88c2a370f483850286719ae3869fe22656b6aa9:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
               "mode": "auto",
               "productId": "yggdrasil-root-southeast:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "310bb538f8139d222639e197e95b63800b888f01903d8430ca051a28515143f8"
+                "value": "9e835f916456578e72c79a840db8ec35f2270bb23bbd09a2601381a6fb67aa9e"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2743,7 +2753,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southwest.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southwest.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:46f128a488443b499281227b98420150918b789d69946ec5e7287d80b39ccae0:0d39c8e3f3908f581952214715b936eba47076669a6ce3df36de1878918c0914:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+            "colliderCacheKey": "mesh-collision-manager-v2:ee12c9a536322e500006b1e06df24a9288234f76c8dc30d43f7217d06df6a6bf:0d39c8e3f3908f581952214715b936eba47076669a6ce3df36de1878918c0914:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2839,14 +2849,14 @@
             "triangleCount": 4750,
             "generatedProduct": {
               "actorId": "yggdrasil-root-southwest",
-              "cacheKey": "mesh-collision-manager-v2:46f128a488443b499281227b98420150918b789d69946ec5e7287d80b39ccae0:0d39c8e3f3908f581952214715b936eba47076669a6ce3df36de1878918c0914:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+              "cacheKey": "mesh-collision-manager-v2:ee12c9a536322e500006b1e06df24a9288234f76c8dc30d43f7217d06df6a6bf:0d39c8e3f3908f581952214715b936eba47076669a6ce3df36de1878918c0914:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
               "mode": "auto",
               "productId": "yggdrasil-root-southwest:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "46f128a488443b499281227b98420150918b789d69946ec5e7287d80b39ccae0"
+                "value": "ee12c9a536322e500006b1e06df24a9288234f76c8dc30d43f7217d06df6a6bf"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -4659,7 +4669,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-arch.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-arch.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -4755,14 +4765,14 @@
             "triangleCount": 1043,
             "generatedProduct": {
               "actorId": "yggdrasil-arrival-arch",
-              "cacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-arrival-arch:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148"
+                "value": "e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -4846,7 +4856,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-left.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-left.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -4942,14 +4952,14 @@
             "triangleCount": 624,
             "generatedProduct": {
               "actorId": "yggdrasil-arrival-column-left",
-              "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-arrival-column-left:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+                "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -5033,7 +5043,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-right.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-right.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -5129,14 +5139,14 @@
             "triangleCount": 624,
             "generatedProduct": {
               "actorId": "yggdrasil-arrival-column-right",
-              "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-arrival-column-right:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+                "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -5282,7 +5292,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-portal-return.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-portal-return.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:8ecbfe6d38d78dd14f49d7b2bdc6a61099090219a0080498b92095f25e5550e6:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
+            "colliderCacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:8ecbfe6d38d78dd14f49d7b2bdc6a61099090219a0080498b92095f25e5550e6:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -5378,14 +5388,14 @@
             "triangleCount": 1043,
             "generatedProduct": {
               "actorId": "yggdrasil-portal-return",
-              "cacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:8ecbfe6d38d78dd14f49d7b2bdc6a61099090219a0080498b92095f25e5550e6:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
+              "cacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:8ecbfe6d38d78dd14f49d7b2bdc6a61099090219a0080498b92095f25e5550e6:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
               "mode": "trigger",
               "productId": "yggdrasil-portal-return:trigger:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148"
+                "value": "e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -5702,7 +5712,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-left.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-left.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -5798,14 +5808,14 @@
             "triangleCount": 624,
             "generatedProduct": {
               "actorId": "yggdrasil-shrine-urd-left",
-              "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-shrine-urd-left:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+                "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -5889,7 +5899,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-right.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-right.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -5985,14 +5995,14 @@
             "triangleCount": 624,
             "generatedProduct": {
               "actorId": "yggdrasil-shrine-urd-right",
-              "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-shrine-urd-right:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+                "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -6263,7 +6273,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-left.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-left.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -6359,14 +6369,14 @@
             "triangleCount": 624,
             "generatedProduct": {
               "actorId": "yggdrasil-shrine-mimir-left",
-              "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-shrine-mimir-left:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+                "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -6450,7 +6460,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-right.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-right.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -6546,14 +6556,14 @@
             "triangleCount": 624,
             "generatedProduct": {
               "actorId": "yggdrasil-shrine-mimir-right",
-              "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-shrine-mimir-right:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+                "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -6824,7 +6834,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-left.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-left.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -6920,14 +6930,14 @@
             "triangleCount": 624,
             "generatedProduct": {
               "actorId": "yggdrasil-shrine-hvergelmir-left",
-              "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-shrine-hvergelmir-left:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+                "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -7011,7 +7021,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-right.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-right.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -7107,14 +7117,14 @@
             "triangleCount": 624,
             "generatedProduct": {
               "actorId": "yggdrasil-shrine-hvergelmir-right",
-              "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-shrine-hvergelmir-right:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+                "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -7385,7 +7395,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -7481,14 +7491,14 @@
             "triangleCount": 434,
             "generatedProduct": {
               "actorId": "yggdrasil-shrine-urd-growth",
-              "cacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-shrine-urd-growth:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12"
+                "value": "8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -7572,7 +7582,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-growth.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-growth.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -7668,14 +7678,14 @@
             "triangleCount": 434,
             "generatedProduct": {
               "actorId": "yggdrasil-shrine-mimir-growth",
-              "cacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-shrine-mimir-growth:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12"
+                "value": "8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -7759,7 +7769,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-bench.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-bench.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb:8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:f9b25262d9004e19a35e544180c363030856115bd6b3d007d483416471d746fe:8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -7855,14 +7865,14 @@
             "triangleCount": 319,
             "generatedProduct": {
               "actorId": "yggdrasil-shrine-hvergelmir-bench",
-              "cacheKey": "mesh-collision-manager-v2:750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb:8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:f9b25262d9004e19a35e544180c363030856115bd6b3d007d483416471d746fe:8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-shrine-hvergelmir-bench:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb"
+                "value": "f9b25262d9004e19a35e544180c363030856115bd6b3d007d483416471d746fe"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -10203,7 +10213,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-perch-spire.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-perch-spire.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -10299,14 +10309,14 @@
             "triangleCount": 624,
             "generatedProduct": {
               "actorId": "yggdrasil-crown-perch-spire",
-              "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-crown-perch-spire:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+                "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -10808,7 +10818,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+            "colliderCacheKey": "mesh-collision-manager-v2:21ffd350111f8448826b83768bdf0a7303b2998e9e1b553aed2ddc1d746654fb:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -10904,14 +10914,14 @@
             "triangleCount": 96,
             "generatedProduct": {
               "actorId": "yggdrasil-hvergelmir-depth-arch-2",
-              "cacheKey": "mesh-collision-manager-v2:71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+              "cacheKey": "mesh-collision-manager-v2:21ffd350111f8448826b83768bdf0a7303b2998e9e1b553aed2ddc1d746654fb:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "yggdrasil-hvergelmir-depth-arch-2:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7"
+                "value": "21ffd350111f8448826b83768bdf0a7303b2998e9e1b553aed2ddc1d746654fb"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -13429,7 +13439,7 @@
       {
         "id": "yggdrasil-searoot-south",
         "name": "Sea Root SOUTH",
-        "kind": "primitive",
+        "kind": "asset",
         "parentId": "yggdrasil-terrain-group",
         "transform": {
           "position": [
@@ -13443,30 +13453,17 @@
             0
           ],
           "scale": [
-            1.377127764335957,
-            1.3771277643359572,
-            1.3771277643359572
+            1,
+            1,
+            1
           ]
         },
         "render": {
           "visible": true,
           "cullingPolicy": "runtime-budget",
-          "physicsAttachment": "inside-collider",
-          "primitive": {
-            "geometry": "cylinder",
-            "args": [
-              2.6,
-              4.4,
-              44,
-              12
-            ]
-          },
-          "material": {
-            "color": "#3f2d1c",
-            "emissive": "#140d08",
-            "emissiveIntensity": 0.03,
-            "metalness": 0.02,
-            "roughness": 0.98
+          "physicsAttachment": "outside-collider",
+          "asset": {
+            "url": "/generated/style-lab/sources/sea-root-south-2026-05-16T01-04-13-115Z/sea-root-south.glb"
           }
         },
         "physics": {
@@ -13474,53 +13471,55 @@
           "collision": {
             "intent": "blocker",
             "channel": "worldStatic",
-            "shape": "cylinder",
+            "shape": "cuboid",
             "quality": "primitive",
             "lodSourceTier": "source",
             "friction": 0.7,
             "restitution": 0,
             "generatedProduct": {
               "actorId": "yggdrasil-searoot-south",
-              "cacheKey": "mesh-collision-manager-v2:385fadd3abb7b3bb98f55238b2fd8a6939c0675b56a3b3cc67e1787248549327:969dee92ecec7097e00a50f6d62641a49a49c4a2466264b7343219af00ff52f2:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
+              "cacheKey": "mesh-collision-manager-v2:a4cfe974da61b18f7bab50b78fab39b47651d2bb02ccf707edca8ab6a78f2eee:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "yggdrasil-searoot-south:auto:primitive",
               "generatorVersion": "mesh-collision-manager-v2",
-              "sourceKind": "primitive",
+              "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "385fadd3abb7b3bb98f55238b2fd8a6939c0675b56a3b3cc67e1787248549327"
+                "value": "a4cfe974da61b18f7bab50b78fab39b47651d2bb02ccf707edca8ab6a78f2eee"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
-                "value": "969dee92ecec7097e00a50f6d62641a49a49c4a2466264b7343219af00ff52f2"
+                "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
-              "shape": "cylinder",
+              "shape": "cuboid",
               "localBounds": {
                 "min": [
-                  -4.4,
-                  -22,
-                  -4.4
+                  -0.5,
+                  -0.5,
+                  -0.5
                 ],
                 "max": [
-                  4.4,
-                  22,
-                  4.4
+                  0.5,
+                  0.5,
+                  0.5
                 ],
                 "size": [
-                  8.8,
-                  44,
-                  8.8
+                  1,
+                  1,
+                  1
                 ],
                 "center": [
                   0,
                   0,
                   0
                 ]
-              }
+              },
+              "sourceMeshUrl": "/generated/style-lab/sources/sea-root-south-2026-05-16T01-04-13-115Z/sea-root-south.glb",
+              "visualSourceMeshUrl": "/generated/style-lab/sources/sea-root-south-2026-05-16T01-04-13-115Z/sea-root-south.glb"
             }
           }
         }
@@ -18162,6 +18161,21 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb"
+          },
+          "material": {
+            "painterly": {
+              "enabled": true,
+              "preset": "world-tree-concept",
+              "strength": 0.82,
+              "brushScale": 0.24,
+              "paperGrain": 0.16,
+              "colorBleed": 0.52,
+              "edgeInk": 0.18,
+              "shadowColor": "#17202a",
+              "midColor": "#667448",
+              "highlightColor": "#dcb96a",
+              "coolColor": "#2a4d66"
+            }
           }
         },
         "physics": {
@@ -18174,7 +18188,7 @@
             "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v2:ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+            "colliderCacheKey": "mesh-collision-manager-v2:faaa88d2df1a2c820395a9e71160890a571fdc88fdefdd4076f232605ad4404f:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -18270,14 +18284,14 @@
             "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "yggdrasil-tree-merged",
-              "cacheKey": "mesh-collision-manager-v2:ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+              "cacheKey": "mesh-collision-manager-v2:faaa88d2df1a2c820395a9e71160890a571fdc88fdefdd4076f232605ad4404f:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "yggdrasil-tree-merged:auto:simplifiedMesh",
               "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586"
+                "value": "faaa88d2df1a2c820395a9e71160890a571fdc88fdefdd4076f232605ad4404f"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -18576,8 +18590,8 @@
   "buildReport": {
     "levelId": "yggdrasil",
     "actorCount": 173,
-    "assetActorCount": 42,
-    "primitiveActorCount": 38,
+    "assetActorCount": 43,
+    "primitiveActorCount": 37,
     "neverCullActorCount": 2,
     "gameplayFireflyActorCount": 32,
     "physicsActorCount": 101,
@@ -18860,6 +18874,7 @@
         "/generated/style-lab/sources/eagle-crown-ring-2026-05-15T00-12-50-055Z/eagle-crown-ring.glb",
         "/generated/style-lab/sources/outer-shoal-west-2026-05-14T23-57-16-228Z/outer-shoal-west.glb",
         "/generated/style-lab/sources/sea-root-east-2026-05-15T00-11-30-669Z/sea-root-east.glb",
+        "/generated/style-lab/sources/sea-root-south-2026-05-16T01-04-13-115Z/sea-root-south.glb",
         "/generated/style-lab/sources/sea-root-west-2026-05-14T23-56-36-932Z/sea-root-west.glb",
         "/generated/style-lab/sources/shore-stone-7-2026-05-15T00-08-17-541Z/shore-stone-7.glb",
         "/generated/style-lab/sources/shore-stone-8-2026-05-14T23-56-45-130Z/shore-stone-8.glb",
@@ -18998,7 +19013,7 @@
     },
     "errors": [],
     "warnings": [
-      "49 runtime assets exceed contract budget of 48."
+      "50 runtime assets exceed contract budget of 48."
     ]
   },
   "runtime": {
@@ -19275,6 +19290,7 @@
         "/generated/style-lab/sources/eagle-crown-ring-2026-05-15T00-12-50-055Z/eagle-crown-ring.glb",
         "/generated/style-lab/sources/outer-shoal-west-2026-05-14T23-57-16-228Z/outer-shoal-west.glb",
         "/generated/style-lab/sources/sea-root-east-2026-05-15T00-11-30-669Z/sea-root-east.glb",
+        "/generated/style-lab/sources/sea-root-south-2026-05-16T01-04-13-115Z/sea-root-south.glb",
         "/generated/style-lab/sources/sea-root-west-2026-05-14T23-56-36-932Z/sea-root-west.glb",
         "/generated/style-lab/sources/shore-stone-7-2026-05-15T00-08-17-541Z/shore-stone-7.glb",
         "/generated/style-lab/sources/shore-stone-8-2026-05-14T23-56-45-130Z/shore-stone-8.glb",
@@ -19360,6 +19376,7 @@
       "/generated/style-lab/sources/eagle-crown-ring-2026-05-15T00-12-50-055Z/eagle-crown-ring.glb",
       "/generated/style-lab/sources/outer-shoal-west-2026-05-14T23-57-16-228Z/outer-shoal-west.glb",
       "/generated/style-lab/sources/sea-root-east-2026-05-15T00-11-30-669Z/sea-root-east.glb",
+      "/generated/style-lab/sources/sea-root-south-2026-05-16T01-04-13-115Z/sea-root-south.glb",
       "/generated/style-lab/sources/sea-root-west-2026-05-14T23-56-36-932Z/sea-root-west.glb",
       "/generated/style-lab/sources/shore-stone-7-2026-05-15T00-08-17-541Z/shore-stone-7.glb",
       "/generated/style-lab/sources/shore-stone-8-2026-05-14T23-56-45-130Z/shore-stone-8.glb",
@@ -19412,14 +19429,14 @@
       },
       {
         "actorId": "yggdrasil-ground",
-        "cacheKey": "mesh-collision-manager-v2:9f98b7a5452f591e411944dba1e39ffde093fec58602461528bbb0d79c52b6a7:e105f73550332e4c1c0a7869f0aae82adc19785188d69cf88615c5db765d6b38:31365d1d2e99143a13c7228531b79d1ba861340a646ea2e47d78f8e6d1111c9d",
+        "cacheKey": "mesh-collision-manager-v2:2c0084f2eb76a57e53f5292fd0f85785467a8e74320fbdae67c5fd96bafb38e9:e105f73550332e4c1c0a7869f0aae82adc19785188d69cf88615c5db765d6b38:31365d1d2e99143a13c7228531b79d1ba861340a646ea2e47d78f8e6d1111c9d",
         "mode": "auto",
         "productId": "yggdrasil-ground:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "9f98b7a5452f591e411944dba1e39ffde093fec58602461528bbb0d79c52b6a7"
+          "value": "2c0084f2eb76a57e53f5292fd0f85785467a8e74320fbdae67c5fd96bafb38e9"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -19462,14 +19479,14 @@
       },
       {
         "actorId": "yggdrasil-mound",
-        "cacheKey": "mesh-collision-manager-v2:7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+        "cacheKey": "mesh-collision-manager-v2:b7396643867c3954c071e02f2b33ddf216eefb3939a7bf2d9dd995d7c7a91a0b:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "yggdrasil-mound:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e"
+          "value": "b7396643867c3954c071e02f2b33ddf216eefb3939a7bf2d9dd995d7c7a91a0b"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -19605,14 +19622,14 @@
       },
       {
         "actorId": "yggdrasil-root-north",
-        "cacheKey": "mesh-collision-manager-v2:4a55acd79b7efc34b624331d2f1df1d0df104b73d41b4dcd622fc18b4c4f3a56:d8b1f5778074eeee24e3ebb863a33b98f114ebfcf356ce02f71887991b5c1b93:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+        "cacheKey": "mesh-collision-manager-v2:53383c988cbef8240a3ccaf9749aacf74730c6491625d7406e9ddf5d9b89a65f:d8b1f5778074eeee24e3ebb863a33b98f114ebfcf356ce02f71887991b5c1b93:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
         "mode": "auto",
         "productId": "yggdrasil-root-north:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "4a55acd79b7efc34b624331d2f1df1d0df104b73d41b4dcd622fc18b4c4f3a56"
+          "value": "53383c988cbef8240a3ccaf9749aacf74730c6491625d7406e9ddf5d9b89a65f"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -19655,14 +19672,14 @@
       },
       {
         "actorId": "yggdrasil-root-south",
-        "cacheKey": "mesh-collision-manager-v2:d4292501134d55b92ba782513e4dbab60365828656374cd0ee8e2851906f1839:c4a52ecd381cb77afc765ead65e701a891153672d6a2c198b19b2bfd8c33720a:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "cacheKey": "mesh-collision-manager-v2:dc58336f03ce9ca8c2dc9264553a7e9b6b9b0b662a95cadc1662758b42489c27:c4a52ecd381cb77afc765ead65e701a891153672d6a2c198b19b2bfd8c33720a:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "mode": "auto",
         "productId": "yggdrasil-root-south:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "d4292501134d55b92ba782513e4dbab60365828656374cd0ee8e2851906f1839"
+          "value": "dc58336f03ce9ca8c2dc9264553a7e9b6b9b0b662a95cadc1662758b42489c27"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -19705,14 +19722,14 @@
       },
       {
         "actorId": "yggdrasil-root-east",
-        "cacheKey": "mesh-collision-manager-v2:500114aff935b68391b66f45ddfabb4f6d7f5505fa7379b554073c37194e512d:8c49f729ca30a76684762b76b9275cac2853e5f140d067f18cc070b0817b7d45:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "cacheKey": "mesh-collision-manager-v2:ff0e7e790281cdbe8f10c2e65803a214f3e26ed00368d30fb59b39f1f6e516f9:8c49f729ca30a76684762b76b9275cac2853e5f140d067f18cc070b0817b7d45:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "mode": "auto",
         "productId": "yggdrasil-root-east:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "500114aff935b68391b66f45ddfabb4f6d7f5505fa7379b554073c37194e512d"
+          "value": "ff0e7e790281cdbe8f10c2e65803a214f3e26ed00368d30fb59b39f1f6e516f9"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -19755,14 +19772,14 @@
       },
       {
         "actorId": "yggdrasil-root-west",
-        "cacheKey": "mesh-collision-manager-v2:b8c64c09bb7a754ac6e2f7756576f471d9165fc26b346bfa401f86b2f87001e7:d78ee0b9ea6593abc08f45df077ac4ad34644608e9385644d1311845f658e103:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+        "cacheKey": "mesh-collision-manager-v2:82410ede33225a911340c42892cbd0afcad7385f499c15064902308f5d8d8c7f:d78ee0b9ea6593abc08f45df077ac4ad34644608e9385644d1311845f658e103:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
         "mode": "auto",
         "productId": "yggdrasil-root-west:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "b8c64c09bb7a754ac6e2f7756576f471d9165fc26b346bfa401f86b2f87001e7"
+          "value": "82410ede33225a911340c42892cbd0afcad7385f499c15064902308f5d8d8c7f"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -19805,14 +19822,14 @@
       },
       {
         "actorId": "yggdrasil-root-northeast",
-        "cacheKey": "mesh-collision-manager-v2:b15e37959667d73c5ee3c8813ffdb48d27a7c4952e2e7b32323ed40d1aa47089:fa10366a338d43bf29c8740d97a314e1b1a9c4d225026c5db4bcbaed6597712c:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "cacheKey": "mesh-collision-manager-v2:a6c0b43ba6a951ac4f159ed1b614a5eeaeec328f78007fb453b6c3b700dfaf0c:fa10366a338d43bf29c8740d97a314e1b1a9c4d225026c5db4bcbaed6597712c:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "mode": "auto",
         "productId": "yggdrasil-root-northeast:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "b15e37959667d73c5ee3c8813ffdb48d27a7c4952e2e7b32323ed40d1aa47089"
+          "value": "a6c0b43ba6a951ac4f159ed1b614a5eeaeec328f78007fb453b6c3b700dfaf0c"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -19855,14 +19872,14 @@
       },
       {
         "actorId": "yggdrasil-root-northwest",
-        "cacheKey": "mesh-collision-manager-v2:ed7742afb10d38fdfab1a2748211f43d2a150e90ec9d2609e65dd672a7caecbd:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+        "cacheKey": "mesh-collision-manager-v2:754a1c5de3096bf10604849f31aaedad98ae48033ddb0c093114cf87bc18e21e:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
         "mode": "auto",
         "productId": "yggdrasil-root-northwest:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "ed7742afb10d38fdfab1a2748211f43d2a150e90ec9d2609e65dd672a7caecbd"
+          "value": "754a1c5de3096bf10604849f31aaedad98ae48033ddb0c093114cf87bc18e21e"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -19905,14 +19922,14 @@
       },
       {
         "actorId": "yggdrasil-root-southeast",
-        "cacheKey": "mesh-collision-manager-v2:310bb538f8139d222639e197e95b63800b888f01903d8430ca051a28515143f8:7183112371b1695c1928be1bd88c2a370f483850286719ae3869fe22656b6aa9:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "cacheKey": "mesh-collision-manager-v2:9e835f916456578e72c79a840db8ec35f2270bb23bbd09a2601381a6fb67aa9e:7183112371b1695c1928be1bd88c2a370f483850286719ae3869fe22656b6aa9:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "mode": "auto",
         "productId": "yggdrasil-root-southeast:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "310bb538f8139d222639e197e95b63800b888f01903d8430ca051a28515143f8"
+          "value": "9e835f916456578e72c79a840db8ec35f2270bb23bbd09a2601381a6fb67aa9e"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -19955,14 +19972,14 @@
       },
       {
         "actorId": "yggdrasil-root-southwest",
-        "cacheKey": "mesh-collision-manager-v2:46f128a488443b499281227b98420150918b789d69946ec5e7287d80b39ccae0:0d39c8e3f3908f581952214715b936eba47076669a6ce3df36de1878918c0914:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "cacheKey": "mesh-collision-manager-v2:ee12c9a536322e500006b1e06df24a9288234f76c8dc30d43f7217d06df6a6bf:0d39c8e3f3908f581952214715b936eba47076669a6ce3df36de1878918c0914:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "mode": "auto",
         "productId": "yggdrasil-root-southwest:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "46f128a488443b499281227b98420150918b789d69946ec5e7287d80b39ccae0"
+          "value": "ee12c9a536322e500006b1e06df24a9288234f76c8dc30d43f7217d06df6a6bf"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -20578,14 +20595,14 @@
       },
       {
         "actorId": "yggdrasil-arrival-arch",
-        "cacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-arrival-arch:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148"
+          "value": "e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -20628,14 +20645,14 @@
       },
       {
         "actorId": "yggdrasil-arrival-column-left",
-        "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-arrival-column-left:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+          "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -20678,14 +20695,14 @@
       },
       {
         "actorId": "yggdrasil-arrival-column-right",
-        "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-arrival-column-right:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+          "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -20728,14 +20745,14 @@
       },
       {
         "actorId": "yggdrasil-portal-return",
-        "cacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:8ecbfe6d38d78dd14f49d7b2bdc6a61099090219a0080498b92095f25e5550e6:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
+        "cacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:8ecbfe6d38d78dd14f49d7b2bdc6a61099090219a0080498b92095f25e5550e6:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "mode": "trigger",
         "productId": "yggdrasil-portal-return:trigger:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148"
+          "value": "e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -20828,14 +20845,14 @@
       },
       {
         "actorId": "yggdrasil-shrine-urd-left",
-        "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-shrine-urd-left:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+          "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -20878,14 +20895,14 @@
       },
       {
         "actorId": "yggdrasil-shrine-urd-right",
-        "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-shrine-urd-right:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+          "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -20978,14 +20995,14 @@
       },
       {
         "actorId": "yggdrasil-shrine-mimir-left",
-        "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-shrine-mimir-left:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+          "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -21028,14 +21045,14 @@
       },
       {
         "actorId": "yggdrasil-shrine-mimir-right",
-        "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-shrine-mimir-right:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+          "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -21128,14 +21145,14 @@
       },
       {
         "actorId": "yggdrasil-shrine-hvergelmir-left",
-        "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-shrine-hvergelmir-left:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+          "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -21178,14 +21195,14 @@
       },
       {
         "actorId": "yggdrasil-shrine-hvergelmir-right",
-        "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-shrine-hvergelmir-right:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+          "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -21278,14 +21295,14 @@
       },
       {
         "actorId": "yggdrasil-shrine-urd-growth",
-        "cacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-shrine-urd-growth:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12"
+          "value": "8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -21328,14 +21345,14 @@
       },
       {
         "actorId": "yggdrasil-shrine-mimir-growth",
-        "cacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-shrine-mimir-growth:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12"
+          "value": "8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -21378,14 +21395,14 @@
       },
       {
         "actorId": "yggdrasil-shrine-hvergelmir-bench",
-        "cacheKey": "mesh-collision-manager-v2:750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb:8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:f9b25262d9004e19a35e544180c363030856115bd6b3d007d483416471d746fe:8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-shrine-hvergelmir-bench:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb"
+          "value": "f9b25262d9004e19a35e544180c363030856115bd6b3d007d483416471d746fe"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -21823,14 +21840,14 @@
       },
       {
         "actorId": "yggdrasil-crown-perch-spire",
-        "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-crown-perch-spire:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f"
+          "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -21923,14 +21940,14 @@
       },
       {
         "actorId": "yggdrasil-hvergelmir-depth-arch-2",
-        "cacheKey": "mesh-collision-manager-v2:71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "cacheKey": "mesh-collision-manager-v2:21ffd350111f8448826b83768bdf0a7303b2998e9e1b553aed2ddc1d746654fb:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "yggdrasil-hvergelmir-depth-arch-2:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7"
+          "value": "21ffd350111f8448826b83768bdf0a7303b2998e9e1b553aed2ddc1d746654fb"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -22338,46 +22355,48 @@
       },
       {
         "actorId": "yggdrasil-searoot-south",
-        "cacheKey": "mesh-collision-manager-v2:385fadd3abb7b3bb98f55238b2fd8a6939c0675b56a3b3cc67e1787248549327:969dee92ecec7097e00a50f6d62641a49a49c4a2466264b7343219af00ff52f2:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
+        "cacheKey": "mesh-collision-manager-v2:a4cfe974da61b18f7bab50b78fab39b47651d2bb02ccf707edca8ab6a78f2eee:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "yggdrasil-searoot-south:auto:primitive",
         "generatorVersion": "mesh-collision-manager-v2",
-        "sourceKind": "primitive",
+        "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "385fadd3abb7b3bb98f55238b2fd8a6939c0675b56a3b3cc67e1787248549327"
+          "value": "a4cfe974da61b18f7bab50b78fab39b47651d2bb02ccf707edca8ab6a78f2eee"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
-          "value": "969dee92ecec7097e00a50f6d62641a49a49c4a2466264b7343219af00ff52f2"
+          "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
-        "shape": "cylinder",
+        "shape": "cuboid",
         "localBounds": {
           "min": [
-            -4.4,
-            -22,
-            -4.4
+            -0.5,
+            -0.5,
+            -0.5
           ],
           "max": [
-            4.4,
-            22,
-            4.4
+            0.5,
+            0.5,
+            0.5
           ],
           "size": [
-            8.8,
-            44,
-            8.8
+            1,
+            1,
+            1
           ],
           "center": [
             0,
             0,
             0
           ]
-        }
+        },
+        "sourceMeshUrl": "/generated/style-lab/sources/sea-root-south-2026-05-16T01-04-13-115Z/sea-root-south.glb",
+        "visualSourceMeshUrl": "/generated/style-lab/sources/sea-root-south-2026-05-16T01-04-13-115Z/sea-root-south.glb"
       },
       {
         "actorId": "yggdrasil-searoot-east",
@@ -23978,14 +23997,14 @@
       },
       {
         "actorId": "yggdrasil-tree-merged",
-        "cacheKey": "mesh-collision-manager-v2:ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+        "cacheKey": "mesh-collision-manager-v2:faaa88d2df1a2c820395a9e71160890a571fdc88fdefdd4076f232605ad4404f:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "yggdrasil-tree-merged:auto:simplifiedMesh",
         "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586"
+          "value": "faaa88d2df1a2c820395a9e71160890a571fdc88fdefdd4076f232605ad4404f"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -24098,10 +24117,10 @@
       "id": "yggdrasil-bifrost-canopy",
       "defaultTier": "desktop",
       "lighting": {
-        "ambientColor": "#d7e8bc",
-        "skyColor": "#e5f0d1",
-        "groundColor": "#182311",
-        "keyLightColor": "#fff2c0",
+        "ambientColor": "#1a5fb4",
+        "skyColor": "#ffffff",
+        "groundColor": "#1a5fb4",
+        "keyLightColor": "#ffffff",
         "fillLightColor": "#8fc7d7",
         "keyLightPosition": [
           24,
@@ -24143,12 +24162,13 @@
         "enabled": true,
         "passes": [
           "tone-mapping",
+          "depth-fog",
           "ambient-occlusion",
           "color-grading",
           "bloom",
           "vignette"
         ],
-        "maxEnabledPasses": 5,
+        "maxEnabledPasses": 6,
         "ambientOcclusion": {
           "enabled": true,
           "intensity": 0.8,
@@ -24189,9 +24209,10 @@
           "postProcessing": {
             "passes": [
               "tone-mapping",
+              "depth-fog",
               "color-grading"
             ],
-            "maxEnabledPasses": 2
+            "maxEnabledPasses": 3
           }
         },
         "desktop": {
@@ -24219,11 +24240,12 @@
           "postProcessing": {
             "passes": [
               "tone-mapping",
+              "depth-fog",
               "color-grading",
               "bloom",
               "vignette"
             ],
-            "maxEnabledPasses": 4
+            "maxEnabledPasses": 5
           }
         },
         "tv": {
@@ -24251,12 +24273,13 @@
           "postProcessing": {
             "passes": [
               "tone-mapping",
+              "depth-fog",
               "ambient-occlusion",
               "color-grading",
               "bloom",
               "vignette"
             ],
-            "maxEnabledPasses": 5,
+            "maxEnabledPasses": 6,
             "ambientOcclusion": {
               "enabled": true,
               "intensity": 0.95,

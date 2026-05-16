@@ -111,6 +111,15 @@ export interface RuntimeAssetMaterialMetadata {
   name?: string
   alphaMode: 'OPAQUE' | 'MASK' | 'BLEND' | string
   doubleSided: boolean
+  pbrFactors: {
+    baseColorFactor: [number, number, number, number]
+    metallicFactor: number
+    roughnessFactor: number
+    emissiveFactor: [number, number, number]
+    hasExplicitMetallicFactor: boolean
+    hasExplicitRoughnessFactor: boolean
+    hasMetallicRoughnessTexture: boolean
+  }
   pbrSlots: {
     baseColor: RuntimeAssetMaterialPbrSlot
     metallicRoughness: RuntimeAssetMaterialPbrSlot
@@ -137,6 +146,11 @@ export interface RuntimeAssetMetadata {
     size: [number, number, number]
     center: [number, number, number]
   } | null
+  geometryValidation: {
+    missingPositionPrimitiveCount: number
+    missingNormalPrimitiveCount: number
+    missingTexcoordPrimitiveCount: number
+  }
   assetLocalTransform?: AssetLocalTransformMetadata | null
   materialCount: number
   materialSlots: number

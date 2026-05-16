@@ -5,7 +5,10 @@ import type {
   LevelLifecycleStatus,
   LevelRegistryEntry,
 } from '../levels/levelRegistry'
-import { createDefaultSceneForLevel } from './defaultScenes'
+import {
+  createDefaultSceneForLevel,
+  upgradeLegacySceneDocument,
+} from './defaultScenes'
 import { sanitizeEditorNodeCollisionPolicy } from './editorCollisionLifecycle'
 import { stripEditorSceneRuntimeData } from './editorPersistence'
 import {
@@ -25,6 +28,7 @@ import {
   assertPublishableEditorSceneDocument,
   assertValidEditorSceneDocument,
 } from './editorSceneDocumentValidation'
+import { normalizeLevelSceneSettings } from './editorLevelSetup'
 import type { EditorSceneDocument } from './editorTypes'
 
 interface EditorLevelControllerDeps {
@@ -174,9 +178,14 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
       deps.createEmptyScene(targetLevelId),
   ) {
     const clonedScene = structuredClone(sourceScene) as EditorSceneDocument
+    const upgradedScene = upgradeLegacySceneDocument(clonedScene)
     const sanitizedScene = {
-      ...clonedScene,
-      nodes: (clonedScene.nodes ?? []).map(node =>
+      ...upgradedScene,
+      settings: normalizeLevelSceneSettings(
+        targetLevelId,
+        upgradedScene.settings,
+      ),
+      nodes: (upgradedScene.nodes ?? []).map(node =>
         node.collision
           ? {
               ...node,
@@ -572,14 +581,15 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
         .find(entry => entry.id === targetLevelId)
       const title =
         state.metadataTitle.trim() || existingEntry?.title || targetLevelId
+      const publishScene = createScenePayload(targetLevelId, scene)
       deps.setSaveMessage(`Checking publish readiness for ${title}`)
       const readiness = await loadEditorPublishReadiness({
         levelId: targetLevelId,
-        scene,
+        scene: publishScene,
       })
       const bakePlan = computeEditorPublishBakePlan({
         levelId: targetLevelId,
-        scene,
+        scene: publishScene,
         metadata: createEditorPublishBakePlanMetadataFromReadiness(readiness),
       })
       const publishBlocker = bakePlan.blockers[0]
@@ -587,10 +597,7 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
         throw new Error(publishBlocker)
       }
       assertPublishableEditorSceneDocument(
-        {
-          ...scene,
-          levelId: targetLevelId,
-        },
+        publishScene,
         'Publish',
       )
 
@@ -620,7 +627,7 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
         deps.setSaveMessage(
           `Publishing ${title}: ${EDITOR_PUBLISH_BAKE_STEP_LABELS['save-scene']}`,
         )
-        await runPublishBakeStep('save-scene', targetLevelId, scene)
+        await runPublishBakeStep('save-scene', targetLevelId, publishScene)
       }
 
       if (bakePlan.steps.includes('generate-heightmap')) {

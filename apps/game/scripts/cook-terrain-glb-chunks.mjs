@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import {
   existsSync,
   mkdirSync,
@@ -7,9 +8,9 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs'
-import { createHash } from 'node:crypto'
 import { dirname, extname, isAbsolute, join, relative } from 'node:path'
 import pathPosix from 'node:path/posix'
+import { repairGeneratedPbrGlb } from './lib/gltfGeneratedPbrRepair.mjs'
 import {
   discoverTerrainLevels,
   formatTerrainLevelList,
@@ -27,9 +28,24 @@ const publicRoot = join(repoRoot, 'apps/megameal/public')
 const COMPONENT_READERS = {
   5120: { size: 1, read: Buffer.prototype.readInt8, signed: true, max: 127 },
   5121: { size: 1, read: Buffer.prototype.readUInt8, signed: false, max: 255 },
-  5122: { size: 2, read: Buffer.prototype.readInt16LE, signed: true, max: 32767 },
-  5123: { size: 2, read: Buffer.prototype.readUInt16LE, signed: false, max: 65535 },
-  5125: { size: 4, read: Buffer.prototype.readUInt32LE, signed: false, max: 4294967295 },
+  5122: {
+    size: 2,
+    read: Buffer.prototype.readInt16LE,
+    signed: true,
+    max: 32767,
+  },
+  5123: {
+    size: 2,
+    read: Buffer.prototype.readUInt16LE,
+    signed: false,
+    max: 65535,
+  },
+  5125: {
+    size: 4,
+    read: Buffer.prototype.readUInt32LE,
+    signed: false,
+    max: 4294967295,
+  },
   5126: { size: 4, read: Buffer.prototype.readFloatLE, signed: true, max: 1 },
 }
 
@@ -273,11 +289,14 @@ function readAccessor(doc, accessorIndex) {
   const component = COMPONENT_READERS[accessor.componentType]
   const componentCount = ACCESSOR_COMPONENTS[accessor.type]
   if (!component || !componentCount) {
-    throw new Error(`Unsupported accessor format ${accessor.componentType}/${accessor.type}`)
+    throw new Error(
+      `Unsupported accessor format ${accessor.componentType}/${accessor.type}`,
+    )
   }
 
   const bufferView = doc.gltf.bufferViews?.[accessor.bufferView]
-  if (!bufferView) throw new Error(`Accessor ${accessorIndex} has no bufferView`)
+  if (!bufferView)
+    throw new Error(`Accessor ${accessorIndex} has no bufferView`)
 
   const buffer = doc.buffers[bufferView.buffer]
   const stride = bufferView.byteStride ?? component.size * componentCount
@@ -435,7 +454,11 @@ function extractSourcePrimitives(doc) {
     const mesh = doc.gltf.meshes?.[node.mesh]
 
     if (mesh) {
-      for (let primitiveIndex = 0; primitiveIndex < (mesh.primitives ?? []).length; primitiveIndex += 1) {
+      for (
+        let primitiveIndex = 0;
+        primitiveIndex < (mesh.primitives ?? []).length;
+        primitiveIndex += 1
+      ) {
         const primitive = mesh.primitives[primitiveIndex]
         if ((primitive.mode ?? 4) !== 4) continue
         const positionAccessorIndex = primitive.attributes?.POSITION
@@ -601,7 +624,10 @@ function getPart(chunk, primitive) {
 
 function cellIndex(value, min, max, grid) {
   const size = max - min || 1
-  return Math.max(0, Math.min(grid - 1, Math.floor(((value - min) / size) * grid)))
+  return Math.max(
+    0,
+    Math.min(grid - 1, Math.floor(((value - min) / size) * grid)),
+  )
 }
 
 function partitionPrimitives({ primitives, bounds, grid }) {
@@ -642,8 +668,18 @@ function partitionPrimitives({ primitives, bounds, grid }) {
       const cx = primitive.positions[c * 3]
       const cy = primitive.positions[c * 3 + 1]
       const cz = primitive.positions[c * 3 + 2]
-      const x = cellIndex((ax + bx + cx) / 3, bounds.min[0], bounds.max[0], grid)
-      const z = cellIndex((az + bz + cz) / 3, bounds.min[2], bounds.max[2], grid)
+      const x = cellIndex(
+        (ax + bx + cx) / 3,
+        bounds.min[0],
+        bounds.max[0],
+        grid,
+      )
+      const z = cellIndex(
+        (az + bz + cz) / 3,
+        bounds.min[2],
+        bounds.max[2],
+        grid,
+      )
       const chunk = byCell.get(`${x}:${z}`)
       const part = getPart(chunk, primitive)
       const ia = copyVertex(part, primitive, a)
@@ -689,14 +725,27 @@ function makeBufferView(bufferViews, chunks, typedArray, target) {
   return bufferViews.length - 1
 }
 
-function makeAccessor(accessors, bufferView, componentType, count, type, extras = {}) {
+function makeAccessor(
+  accessors,
+  bufferView,
+  componentType,
+  count,
+  type,
+  extras = {},
+) {
   accessors.push({ bufferView, componentType, count, type, ...extras })
   return accessors.length - 1
 }
 
-function appendSourceBufferView({ sourceDoc, sourceBufferViewIndex, bufferViews, chunks }) {
+function appendSourceBufferView({
+  sourceDoc,
+  sourceBufferViewIndex,
+  bufferViews,
+  chunks,
+}) {
   const sourceView = sourceDoc.gltf.bufferViews?.[sourceBufferViewIndex]
-  if (!sourceView) throw new Error(`Missing source image bufferView ${sourceBufferViewIndex}`)
+  if (!sourceView)
+    throw new Error(`Missing source image bufferView ${sourceBufferViewIndex}`)
   const sourceBuffer = sourceDoc.buffers[sourceView.buffer]
   const source = sourceBuffer.subarray(
     sourceView.byteOffset ?? 0,
@@ -713,14 +762,26 @@ function appendSourceBufferView({ sourceDoc, sourceBufferViewIndex, bufferViews,
 }
 
 function normalizeImageUri(uri, sourcePublicUrl) {
-  if (!uri || uri.startsWith('data:') || uri.startsWith('/') || /^[a-z]+:/i.test(uri)) {
+  if (
+    !uri ||
+    uri.startsWith('data:') ||
+    uri.startsWith('/') ||
+    /^[a-z]+:/i.test(uri)
+  ) {
     return uri
   }
-  const base = pathPosix.dirname(sourcePublicUrl.startsWith('/') ? sourcePublicUrl : `/${sourcePublicUrl}`)
+  const base = pathPosix.dirname(
+    sourcePublicUrl.startsWith('/') ? sourcePublicUrl : `/${sourcePublicUrl}`,
+  )
   return pathPosix.normalize(pathPosix.join(base, uri))
 }
 
-function copyMaterialState({ sourceDoc, sourcePublicUrl, bufferViews, chunks }) {
+function copyMaterialState({
+  sourceDoc,
+  sourcePublicUrl,
+  bufferViews,
+  chunks,
+}) {
   const gltf = sourceDoc.gltf
   const images = cloneJson(gltf.images)
   if (images) {
@@ -829,7 +890,8 @@ function writeChunkGlb(path, chunk, sourceDoc, sourcePublicUrl) {
         sourcePrimitiveIndex: part.primitiveIndex,
       },
     }
-    if (part.materialIndex !== undefined) primitive.material = part.materialIndex
+    if (part.materialIndex !== undefined)
+      primitive.material = part.materialIndex
     primitives.push(primitive)
   }
 
@@ -883,6 +945,49 @@ function getMaterialSlots(gltf, materialIndexes) {
     }))
 }
 
+function buildSourceFingerprint(sourceHash) {
+  return {
+    algorithm: 'sha256',
+    value: sourceHash,
+  }
+}
+
+function withSourceUrl(sourceAssetUrls, sourceAssetUrl) {
+  const urls = Array.isArray(sourceAssetUrls) ? sourceAssetUrls : []
+  return urls.includes(sourceAssetUrl) ? urls : [sourceAssetUrl, ...urls]
+}
+
+function buildVisualSourceContract({ manifest, source, sourceHash, bounds }) {
+  const current = manifest.visualChunks?.sourceContract ?? {}
+  const sourceAssetFingerprint = buildSourceFingerprint(sourceHash)
+
+  return {
+    ...current,
+    schemaVersion: current.schemaVersion ?? 1,
+    terrainSourceType: 'glb-chunk-terrain',
+    sourceAssetUrl: source.sourcePublicUrl,
+    sourceAssetUrls: withSourceUrl(
+      current.sourceAssetUrls,
+      source.sourcePublicUrl,
+    ),
+    sourceAssetFingerprint,
+    sourceCoordinateSystem:
+      current.sourceCoordinateSystem ?? 'three-y-up-xz-ground',
+    sourceBounds: current.sourceBounds ?? bounds,
+    renderBakeMode: 'source-glb-chunk-mesh',
+    collisionBakeMode:
+      current.collisionBakeMode ?? 'source-glb-heightfield-projection',
+    collisionMeshSource: {
+      ...(current.collisionMeshSource ?? {}),
+      type:
+        current.collisionMeshSource?.type ??
+        'source-glb-heightfield-projection',
+      url: source.sourcePublicUrl,
+      fingerprint: sourceAssetFingerprint,
+    },
+  }
+}
+
 function buildManifest({
   manifest,
   source,
@@ -895,6 +1000,7 @@ function buildManifest({
   chunksPath,
   bounds,
   lodDistance,
+  pbrRepairReport,
 }) {
   const primitiveByIndex = new Map(
     primitives.map(primitive => [primitive.sourceIndex, primitive]),
@@ -912,17 +1018,24 @@ function buildManifest({
     materialSlots: chunk.materialSlotsMetadata,
   }))
   const chunkCount = chunks.length
+  const sourceAssetFingerprint = buildSourceFingerprint(sourceHash)
   const preserves = {
     sourceUvs:
       sourceHasUvs &&
       chunks.every(chunk =>
         chunk.parts.every(part => {
           const primitive = primitiveByIndex.get(part.sourceIndex)
-          return !primitive?.uvs || part.uvs.length / 2 === part.positions.length / 3
+          return (
+            !primitive?.uvs || part.uvs.length / 2 === part.positions.length / 3
+          )
         }),
       ),
-    normals: chunks.some(chunk => chunk.parts.some(part => part.normals.length > 0)),
-    tangents: chunks.some(chunk => chunk.parts.some(part => part.tangents.length > 0)),
+    normals: chunks.some(chunk =>
+      chunk.parts.some(part => part.normals.length > 0),
+    ),
+    tangents: chunks.some(chunk =>
+      chunk.parts.some(part => part.tangents.length > 0),
+    ),
     materialSlots: true,
     meshGroups: true,
     textureReferences: sourceHasTextures,
@@ -946,10 +1059,7 @@ function buildManifest({
       ...(manifest.source ?? {}),
       assetUrl: source.sourcePublicUrl,
       assetHash: sourceHash,
-      assetFingerprint: {
-        algorithm: 'sha256',
-        value: sourceHash,
-      },
+      assetFingerprint: sourceAssetFingerprint,
     },
     physics: {
       ...(manifest.physics ?? {}),
@@ -959,6 +1069,7 @@ function buildManifest({
     },
     visualChunks: {
       ...(manifest.visualChunks ?? {}),
+      material: undefined,
       runtimeMode: 'glb-chunk-terrain',
       visualSource: 'source-glb-chunks',
       generatedAt: new Date().toISOString(),
@@ -971,6 +1082,13 @@ function buildManifest({
       preservesSourceTangents: preserves.tangents,
       preservesSourceMeshGroups: preserves.meshGroups,
       preservesTextureReferences: preserves.textureReferences,
+      sourceContract: buildVisualSourceContract({
+        manifest,
+        source,
+        sourceHash,
+        bounds,
+      }),
+      pbrRepair: pbrRepairReport,
       product: {
         type: 'glb-chunk-terrain',
         visualSource: 'source-glb-chunks',
@@ -988,11 +1106,10 @@ function buildManifest({
         preservesSourceTangents: preserves.tangents,
         preservesSourceMeshGroups: preserves.meshGroups,
         textureReferencesPreserved: preserves.textureReferences,
+        pbrRepair: pbrRepairReport,
       },
       chunks: chunkMetadata,
-      warnings: [
-        'LOD generation not configured; emitted LOD0 only.',
-      ],
+      warnings: ['LOD generation not configured; emitted LOD0 only.'],
       lods: [{ level: 0, distance: lodDistance }],
     },
   }
@@ -1084,12 +1201,15 @@ const sourceByteSize = statSync(source.sourceAssetPath).size
 const sourceDoc = loadGltfDocument(source.sourceAssetPath)
 const { primitives, bounds: sourceBounds } = extractSourcePrimitives(sourceDoc)
 if (!primitives.length) {
-  throw new Error(`No triangle mesh primitives found in ${source.sourceAssetUrl}`)
+  throw new Error(
+    `No triangle mesh primitives found in ${source.sourceAssetUrl}`,
+  )
 }
 
-const bounds = manifest.physics?.bounds?.min && manifest.physics?.bounds?.max
-  ? manifest.physics.bounds
-  : sourceBounds
+const bounds =
+  manifest.physics?.bounds?.min && manifest.physics?.bounds?.max
+    ? manifest.physics.bounds
+    : sourceBounds
 const maxDimension = Math.max(
   bounds.max[0] - bounds.min[0],
   bounds.max[2] - bounds.min[2],
@@ -1097,7 +1217,10 @@ const maxDimension = Math.max(
 const lodDistance = Number(getArg('lod0-distance', '')) || maxDimension * 2
 const chunks = partitionPrimitives({ primitives, bounds, grid })
 for (const chunk of chunks) {
-  chunk.materialSlotsMetadata = getMaterialSlots(sourceDoc.gltf, chunk.materialSlots)
+  chunk.materialSlotsMetadata = getMaterialSlots(
+    sourceDoc.gltf,
+    chunk.materialSlots,
+  )
 }
 const cookWarnings = [
   !hasGlbContract
@@ -1111,8 +1234,27 @@ if (!dryRun) {
   for (const chunk of chunks) {
     const path = join(chunksDir, `chunk_${chunk.x}_${chunk.z}_LOD0.glb`)
     writeChunkGlb(path, chunk, sourceDoc, source.sourcePublicUrl)
+    chunk.pbrRepair = repairGeneratedPbrGlb({ inputPath: path })
     chunk.byteSize = statSync(path).size
   }
+}
+
+const pbrRepairReport = {
+  tool: 'gltfGeneratedPbrRepair',
+  repairedChunkCount: chunks.filter(chunk => chunk.pbrRepair?.changed).length,
+  addedNormalPrimitiveCount: chunks.reduce(
+    (sum, chunk) => sum + (chunk.pbrRepair?.addedNormalPrimitiveCount ?? 0),
+    0,
+  ),
+  skippedNormalPrimitiveCount: chunks.reduce(
+    (sum, chunk) => sum + (chunk.pbrRepair?.skippedNormalPrimitiveCount ?? 0),
+    0,
+  ),
+  repairedImplicitMetallicMaterialCount: chunks.reduce(
+    (sum, chunk) =>
+      sum + (chunk.pbrRepair?.repairedImplicitMetallicMaterialCount ?? 0),
+    0,
+  ),
 }
 
 const nextManifest = buildManifest({
@@ -1122,12 +1264,14 @@ const nextManifest = buildManifest({
   sourceByteSize,
   primitives,
   textureReferenceCount:
-    (sourceDoc.gltf.textures?.length ?? 0) + (sourceDoc.gltf.images?.length ?? 0),
+    (sourceDoc.gltf.textures?.length ?? 0) +
+    (sourceDoc.gltf.images?.length ?? 0),
   grid,
   chunks,
   chunksPath: publicChunksPath,
   bounds,
   lodDistance,
+  pbrRepairReport,
 })
 
 if (!dryRun) {
@@ -1135,34 +1279,32 @@ if (!dryRun) {
 }
 
 console.log(
-  JSON.stringify(
-    {
-      success: true,
-      dryRun,
-      levelId: level.levelId,
-      manifestUrl: `/terrain/${level.id}.manifest.json`,
-      sourceAssetUrl: source.sourcePublicUrl,
-      sourceExists: true,
-      terrainContract,
-      sourceHash,
-      sourceByteSize,
-      chunksPath: publicChunksPath,
-      grid,
-      lods: nextManifest.visualChunks.lods,
-      chunkCount: chunks.length,
-      generatedFileCount: dryRun ? 0 : chunks.length,
-      totalTriangles: chunks.reduce((sum, chunk) => sum + chunk.triangleCount, 0),
-      preservation: {
-        sourceUvs: nextManifest.visualChunks.preservesSourceUvs,
-        normals: nextManifest.visualChunks.preservesSourceNormals,
-        tangents: nextManifest.visualChunks.preservesSourceTangents,
-        materialSlots: nextManifest.visualChunks.preservesSourceMaterialSlots,
-        meshGroups: nextManifest.visualChunks.preservesSourceMeshGroups,
-        textureReferences:
-          nextManifest.visualChunks.preservesTextureReferences,
-      },
-      warnings: nextManifest.visualChunks.warnings,
-      diagnostics: cookWarnings,
-    }
-  ),
+  JSON.stringify({
+    success: true,
+    dryRun,
+    levelId: level.levelId,
+    manifestUrl: `/terrain/${level.id}.manifest.json`,
+    sourceAssetUrl: source.sourcePublicUrl,
+    sourceExists: true,
+    terrainContract,
+    sourceHash,
+    sourceByteSize,
+    chunksPath: publicChunksPath,
+    grid,
+    lods: nextManifest.visualChunks.lods,
+    chunkCount: chunks.length,
+    generatedFileCount: dryRun ? 0 : chunks.length,
+    totalTriangles: chunks.reduce((sum, chunk) => sum + chunk.triangleCount, 0),
+    preservation: {
+      sourceUvs: nextManifest.visualChunks.preservesSourceUvs,
+      normals: nextManifest.visualChunks.preservesSourceNormals,
+      tangents: nextManifest.visualChunks.preservesSourceTangents,
+      materialSlots: nextManifest.visualChunks.preservesSourceMaterialSlots,
+      meshGroups: nextManifest.visualChunks.preservesSourceMeshGroups,
+      textureReferences: nextManifest.visualChunks.preservesTextureReferences,
+    },
+    pbrRepair: pbrRepairReport,
+    warnings: nextManifest.visualChunks.warnings,
+    diagnostics: cookWarnings,
+  }),
 )

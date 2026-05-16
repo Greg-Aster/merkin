@@ -1,4 +1,8 @@
-import type { EditorSceneDocument, EditorSceneNode } from './editorTypes'
+import type {
+  EditorSceneDocument,
+  EditorSceneNode,
+  SharedLevelEditorSettings,
+} from './editorTypes'
 import mirandaPackagedScene from './scenes/miranda.scene.json'
 import observatoryPackagedScene from './scenes/observatory.scene.json'
 import sciFiRoomPackagedScene from './scenes/sci-fi-room.scene.json'
@@ -24,6 +28,108 @@ const PACKAGED_DEFAULT_SCENES: Record<string, EditorSceneDocument> = {
 function getPackagedDefaultScene(levelId: string) {
   const scene = PACKAGED_DEFAULT_SCENES[levelId]
   return scene ? (structuredClone(scene) as EditorSceneDocument) : null
+}
+
+function isSourceGlbTerrainSettings(
+  settings: SharedLevelEditorSettings | undefined,
+) {
+  const terrain = settings?.collision?.terrain
+  const ground = settings?.ground
+  const renderChunks = ground?.renderChunks ?? terrain?.renderChunks
+
+  return (
+    terrain?.source === 'source-glb' ||
+    terrain?.runtimeMode === 'glb-chunk-terrain' ||
+    terrain?.visualSource === 'source-glb-chunks' ||
+    ground?.terrainRuntimeMode === 'glb-chunk-terrain' ||
+    ground?.terrainVisualSource === 'source-glb-chunks' ||
+    ground?.visualSource === 'source-glb-chunks' ||
+    renderChunks?.type === 'glb-chunk-terrain'
+  )
+}
+
+function hasSourceGlbAssetContract(
+  settings: SharedLevelEditorSettings | undefined,
+) {
+  const terrain = settings?.collision?.terrain
+  const ground = settings?.ground
+
+  return Boolean(
+    terrain?.sourceAssetUrl ||
+      terrain?.sourceAssetHash ||
+      terrain?.sourceAssetFingerprint?.value ||
+      ground?.sourceAssetUrl ||
+      ground?.sourceAssetHash ||
+      ground?.sourceAssetFingerprint?.value,
+  )
+}
+
+function getTerrainManifestUrl(settings: SharedLevelEditorSettings | undefined) {
+  return (
+    settings?.ground?.terrainManifestUrl ??
+    settings?.collision?.terrain?.manifestUrl ??
+    ''
+  )
+}
+
+function hydrateMissingPackagedLevelSettings(
+  scene: EditorSceneDocument,
+  defaultScene: EditorSceneDocument | null,
+): EditorSceneDocument {
+  const defaultLevel = defaultScene?.settings?.level
+  if (!defaultLevel) return scene
+
+  const currentSettings = scene.settings ?? {}
+  const currentLevel = currentSettings.level ?? {}
+  let nextLevel = currentLevel
+
+  if (!nextLevel.renderProfile && defaultLevel.renderProfile) {
+    nextLevel = {
+      ...nextLevel,
+      renderProfile: structuredClone(defaultLevel.renderProfile),
+    }
+  }
+
+  const defaultManifestUrl = getTerrainManifestUrl(defaultLevel)
+  const currentManifestUrl = getTerrainManifestUrl(nextLevel)
+  const usesPackagedTerrainManifest =
+    !currentManifestUrl ||
+    !defaultManifestUrl ||
+    currentManifestUrl === defaultManifestUrl
+
+  if (
+    usesPackagedTerrainManifest &&
+    isSourceGlbTerrainSettings(defaultLevel) &&
+    !hasSourceGlbAssetContract(nextLevel)
+  ) {
+    nextLevel = {
+      ...nextLevel,
+      collision: {
+        ...nextLevel.collision,
+        terrain: structuredClone(defaultLevel.collision?.terrain ?? {}),
+      },
+      ground: {
+        ...(nextLevel.ground ?? {}),
+        ...structuredClone(defaultLevel.ground ?? {}),
+      },
+      terrainSculpt: defaultLevel.terrainSculpt
+        ? structuredClone(defaultLevel.terrainSculpt)
+        : nextLevel.terrainSculpt,
+      terrainMigration: defaultLevel.terrainMigration
+        ? structuredClone(defaultLevel.terrainMigration)
+        : nextLevel.terrainMigration,
+    }
+  }
+
+  if (nextLevel === currentLevel) return scene
+
+  return {
+    ...scene,
+    settings: {
+      ...currentSettings,
+      level: nextLevel,
+    },
+  }
 }
 
 // Legacy migration: early sci-fi-room scene documents stored this planter as a
@@ -61,8 +167,14 @@ function normalizeSciFiPlanterB(
 export function upgradeLegacySceneDocument(
   scene: EditorSceneDocument,
 ): EditorSceneDocument {
+  const sceneWithPackagedSettings = hydrateMissingPackagedLevelSettings(
+    scene,
+    getPackagedDefaultScene(scene.levelId),
+  )
   const normalizedScene =
-    scene.levelId === 'sci-fi-room' ? normalizeSciFiPlanterB(scene) : scene
+    sceneWithPackagedSettings.levelId === 'sci-fi-room'
+      ? normalizeSciFiPlanterB(sceneWithPackagedSettings)
+      : sceneWithPackagedSettings
 
   const defaultScene = createDefaultSceneForLevel(normalizedScene.levelId)
   const nextVersion =

@@ -199,6 +199,24 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       .replace(/^-+|-+$/g, '')
   }
 
+  function addGeneratedVariantSlugCandidate(
+    candidates: string[],
+    value: string | null | undefined,
+  ) {
+    const slug = normalizeGeneratedVariantSlug(value ?? '')
+    if (slug && !candidates.includes(slug)) candidates.push(slug)
+  }
+
+  function addGeneratedVariantAssetUrlSlugCandidates(
+    candidates: string[],
+    assetUrl: string | null | undefined,
+  ) {
+    if (!assetUrl) return
+    const parts = assetUrl.split('/').filter(Boolean)
+    addGeneratedVariantSlugCandidate(candidates, parts.at(-1))
+    addGeneratedVariantSlugCandidate(candidates, parts.at(-2))
+  }
+
   function getReferenceImageLabel(
     metadata: Record<string, any> | null,
     slugCandidates: string[],
@@ -218,12 +236,37 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     assetUrl: string,
     directoryPath: string,
   ) {
-    const candidates = [
-      normalizeGeneratedVariantSlug(getPathFileName(assetUrl)),
-      normalizeGeneratedVariantSlug(getPathDirectoryName(directoryPath)),
-      normalizeGeneratedVariantSlug(deps.getAiSourceName(node)),
-      normalizeGeneratedVariantSlug(node.name),
-    ].filter(Boolean)
+    const candidates: string[] = []
+    const levelId = deps.getActiveSceneLevelId()
+    const levelPrefix = levelId ? `${levelId}-` : ''
+
+    addGeneratedVariantAssetUrlSlugCandidates(candidates, assetUrl)
+    addGeneratedVariantSlugCandidate(
+      candidates,
+      getPathDirectoryName(directoryPath),
+    )
+    addGeneratedVariantAssetUrlSlugCandidates(
+      candidates,
+      node.generation?.originalAssetUrl,
+    )
+    addGeneratedVariantAssetUrlSlugCandidates(
+      candidates,
+      node.collision?.assetLocalTransform?.sourceAssetUrl,
+    )
+    addGeneratedVariantAssetUrlSlugCandidates(
+      candidates,
+      node.generation?.lastBakedAssetUrl,
+    )
+    addGeneratedVariantSlugCandidate(candidates, deps.getAiSourceName(node))
+    addGeneratedVariantSlugCandidate(candidates, node.name)
+    addGeneratedVariantSlugCandidate(candidates, node.id)
+    if (levelPrefix && node.id.startsWith(levelPrefix)) {
+      addGeneratedVariantSlugCandidate(
+        candidates,
+        node.id.slice(levelPrefix.length),
+      )
+    }
+    addGeneratedVariantSlugCandidate(candidates, node.generation?.descriptor)
 
     return Array.from(new Set(candidates))
   }
@@ -308,6 +351,15 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     left: GeneratedVariantItem,
     right: GeneratedVariantItem,
   ) {
+    const modeRank = (item: GeneratedVariantItem) => {
+      if (item.mode === 'generate') return 0
+      if (item.mode === 'texture') return 1
+      return 2
+    }
+    const leftModeRank = modeRank(left)
+    const rightModeRank = modeRank(right)
+    if (leftModeRank !== rightModeRank) return leftModeRank - rightModeRank
+
     const leftTime = Date.parse(left.generatedAt ?? '')
     const rightTime = Date.parse(right.generatedAt ?? '')
     if (
@@ -374,22 +426,6 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     }
   }
 
-  async function getGeneratedVariantDirectoryItems(
-    directoryPath: string,
-    sourceLabel: string,
-    slugCandidates: string[],
-  ) {
-    try {
-      return await loadGeneratedVariantDirectory(
-        directoryPath,
-        sourceLabel,
-        slugCandidates,
-      )
-    } catch (error) {
-      return []
-    }
-  }
-
   async function collectRelatedGeneratedVariantItems(
     node: EditorSceneNode,
     assetUrl: string,
@@ -400,9 +436,9 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       assetUrl,
       directoryPath,
     )
-    const primarySlug = slugCandidates[0] ?? ''
     const itemMap = new Map<string, GeneratedVariantItem>()
     const originalItem = createOriginalGeneratedVariantItem(node)
+    const searchedDirectories = new Set<string>()
 
     function withOriginalItem(items: GeneratedVariantItem[]) {
       if (!originalItem || items.some(item => item.url === originalItem.url)) {
@@ -411,37 +447,30 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       return [originalItem, ...items]
     }
 
-    if (directoryPath.startsWith(deps.assetLibraryRootGenerated)) {
-      const currentGeneratedFolderItems =
-        await getGeneratedVariantDirectoryItems(
-          directoryPath,
-          'generated folder',
-          slugCandidates,
-        )
-
-      if (currentGeneratedFolderItems.length > 0) {
-        return withOriginalItem(currentGeneratedFolderItems)
-      }
-    }
-
-    if (primarySlug) {
-      const generatedFolderItems = await getGeneratedVariantDirectoryItems(
-        `${deps.assetLibraryRootGenerated}/${primarySlug}`,
-        `${primarySlug} generated`,
+    async function addVariantDirectory(directory: string, label: string) {
+      if (searchedDirectories.has(directory)) return
+      searchedDirectories.add(directory)
+      await addGeneratedVariantDirectory(
+        itemMap,
+        directory,
+        label,
         slugCandidates,
       )
-
-      if (generatedFolderItems.length > 0) {
-        return withOriginalItem(generatedFolderItems)
-      }
     }
 
-    await addGeneratedVariantDirectory(
-      itemMap,
+    await addVariantDirectory(
       directoryPath,
-      'current folder',
-      slugCandidates,
+      directoryPath.startsWith(deps.assetLibraryRootGenerated)
+        ? 'generated folder'
+        : 'source folder',
     )
+
+    for (const slug of slugCandidates) {
+      await addVariantDirectory(
+        `${deps.assetLibraryRootGenerated}/${slug}`,
+        `${slug} generated`,
+      )
+    }
 
     const currentItem = itemMap.get(assetUrl)
     const variantItems = Array.from(itemMap.values()).filter(

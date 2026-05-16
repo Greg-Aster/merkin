@@ -58,17 +58,49 @@ function isValidTextureMetadata(texture) {
   )
 }
 
+function isFiniteNumberArray(value, length) {
+  return (
+    Array.isArray(value) &&
+    value.length === length &&
+    value.every(component => Number.isFinite(component))
+  )
+}
+
+function isValidMaterialMetadata(material) {
+  const pbrFactors = material?.pbrFactors
+  return (
+    Number.isInteger(material?.index) &&
+    isFiniteNumberArray(pbrFactors?.baseColorFactor, 4) &&
+    Number.isFinite(pbrFactors?.metallicFactor) &&
+    Number.isFinite(pbrFactors?.roughnessFactor) &&
+    isFiniteNumberArray(pbrFactors?.emissiveFactor, 3) &&
+    typeof pbrFactors?.hasExplicitMetallicFactor === 'boolean' &&
+    typeof pbrFactors?.hasExplicitRoughnessFactor === 'boolean' &&
+    typeof pbrFactors?.hasMetallicRoughnessTexture === 'boolean'
+  )
+}
+
+function isValidGeometryValidation(validation) {
+  return (
+    Number.isInteger(validation?.missingPositionPrimitiveCount) &&
+    Number.isInteger(validation?.missingNormalPrimitiveCount) &&
+    Number.isInteger(validation?.missingTexcoordPrimitiveCount)
+  )
+}
+
 function isValidAssetMetadata(metadata) {
   return (
     metadata?.valid === true &&
     Number.isInteger(metadata.triangleCount) &&
     Number.isInteger(metadata.vertexCount) &&
+    isValidGeometryValidation(metadata.geometryValidation) &&
     Number.isInteger(metadata.materialSlots) &&
     Number.isInteger(metadata.textureCount) &&
     Number.isInteger(metadata.imageCount) &&
     Number.isFinite(metadata.textureBytes) &&
     Array.isArray(metadata.materials) &&
     metadata.materials.length === metadata.materialCount &&
+    metadata.materials.every(isValidMaterialMetadata) &&
     Boolean(metadata.materialValidation) &&
     Array.isArray(metadata.materialValidation.missingTextureReferences) &&
     Array.isArray(metadata.materialValidation.missingRecommendedSlots) &&

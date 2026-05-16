@@ -1,4 +1,7 @@
+import { createReadStream, statSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import { extname, resolve, sep } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import svelte from '@astrojs/svelte'
 import tailwind from '@astrojs/tailwind'
 import { defineConfig } from 'astro/config'
@@ -21,6 +24,9 @@ const gameDevManualRefresh =
   process.env.GAME_DEV_MANUAL_REFRESH === '1' ||
   process.env.GAME_DEV_HMR === '0' ||
   process.env.GAME_DEV_NO_HMR === '1'
+const megamealPublicRoot = fileURLToPath(
+  new URL('../megameal/public/', import.meta.url),
+)
 const normalizedBasePath =
   configuredBasePath === '/'
     ? '/'
@@ -39,6 +45,100 @@ function createEditorToolsApiPlugin() {
         }
 
         Promise.resolve(handleEditorToolsRequest(req, res)).catch(next)
+      })
+    },
+  }
+}
+
+const devPublicAssetFallbackPrefixes = ['/terrain/levels/']
+const devPublicAssetContentTypes = new Map([
+  ['.glb', 'model/gltf-binary'],
+  ['.gltf', 'model/gltf+json'],
+  ['.json', 'application/json'],
+])
+
+function resolveMegamealPublicAssetPath(pathname) {
+  const relativePath = decodeURIComponent(pathname).replace(/^\/+/, '')
+  if (!relativePath || relativePath.includes('\0')) return null
+
+  const absolutePath = resolve(megamealPublicRoot, relativePath)
+  const publicRootWithSeparator = megamealPublicRoot.endsWith(sep)
+    ? megamealPublicRoot
+    : `${megamealPublicRoot}${sep}`
+
+  if (
+    absolutePath !== megamealPublicRoot &&
+    !absolutePath.startsWith(publicRootWithSeparator)
+  ) {
+    return null
+  }
+
+  return absolutePath
+}
+
+function createMegamealPublicAssetFallbackPlugin() {
+  return {
+    name: 'merkin-megameal-public-asset-fallback',
+    apply: 'serve',
+    enforce: 'pre',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.method !== 'GET' && req.method !== 'HEAD') {
+          next()
+          return
+        }
+
+        const pathname = new URL(req.url || '/', 'http://localhost').pathname
+        if (
+          !devPublicAssetFallbackPrefixes.some(prefix =>
+            pathname.startsWith(prefix),
+          )
+        ) {
+          next()
+          return
+        }
+
+        const assetPath = resolveMegamealPublicAssetPath(pathname)
+        if (!assetPath) {
+          next()
+          return
+        }
+
+        let stats
+        try {
+          stats = statSync(assetPath)
+        } catch {
+          next()
+          return
+        }
+
+        if (!stats.isFile()) {
+          next()
+          return
+        }
+
+        const contentType =
+          devPublicAssetContentTypes.get(extname(assetPath).toLowerCase()) ??
+          'application/octet-stream'
+        res.statusCode = 200
+        res.setHeader('Content-Length', stats.size)
+        res.setHeader('Content-Type', contentType)
+        res.setHeader('Cache-Control', 'no-cache')
+
+        if (req.method === 'HEAD') {
+          res.end()
+          return
+        }
+
+        const stream = createReadStream(assetPath)
+        stream.on('error', error => {
+          if (res.headersSent) {
+            res.destroy(error)
+            return
+          }
+          next(error)
+        })
+        stream.pipe(res)
       })
     },
   }
@@ -161,6 +261,7 @@ export default defineConfig({
     },
     plugins: [
       wasm(),
+      createMegamealPublicAssetFallbackPlugin(),
       createDevRuntimePlugin('game', gameDevHost, {
         manualRefresh: gameDevManualRefresh,
         hmr: !gameDevManualRefresh,

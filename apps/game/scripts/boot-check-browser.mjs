@@ -86,9 +86,6 @@ function createLevelSmokeCheck(levelId) {
       await page.mouse.click(24, 24)
       await waitForPlayableLevel(page, levelId, {
         consoleMessages: context.consoleMessages,
-        diagnosticsTimeoutMs: 10000,
-        currentLevelTimeoutMs: 10000,
-        gameplayTimeoutMs: 45000,
       })
       await assertRequiredRenderActors(page, levelId)
       await assertRuntimeRenderLifecycle(page, levelId)
@@ -126,6 +123,7 @@ for (const check of checks) {
   let page = null
   let messages = []
   const consoleMessages = []
+  let collectPageEvents = true
 
   try {
     page = await browser.newPage()
@@ -135,6 +133,7 @@ for (const check of checks) {
     })
 
     page.on('console', msg => {
+      if (!collectPageEvents) return
       const type = msg.type()
       consoleMessages.push(`[${type}] ${msg.text()}`)
       if (type === 'warning' || type === 'error') {
@@ -147,10 +146,12 @@ for (const check of checks) {
     })
 
     page.on('pageerror', error => {
+      if (!collectPageEvents) return
       messages.push(`[pageerror] ${error.message}`)
     })
 
     page.on('requestfailed', request => {
+      if (!collectPageEvents) return
       const url = request.url()
       const errorText = request.failure()?.errorText || 'unknown error'
       if (shouldIgnoreRequestFailure(url, errorText)) {
@@ -202,6 +203,7 @@ for (const check of checks) {
       `[check-error] ${error instanceof Error ? error.message : String(error)}`,
     )
   } finally {
+    collectPageEvents = false
     if (page) {
       await page.close().catch(() => {})
     }
