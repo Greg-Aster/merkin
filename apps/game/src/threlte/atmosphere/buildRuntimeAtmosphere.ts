@@ -201,6 +201,7 @@ export function buildRuntimeAtmosphereFromLevelSettings(
 ): RuntimeAtmosphereDefinition {
   const base = options.base ?? DEFAULT_RUNTIME_ATMOSPHERE
   const styleEnabled = settings?.style?.enabled ?? true
+  const fogEnabled = settings?.style?.fogEnabled ?? true
   const fog = settings?.style?.fog
   const haze = settings?.style?.haze
   const grading = settings?.style?.colorGrading
@@ -264,6 +265,7 @@ export function buildRuntimeAtmosphereFromLevelSettings(
   const horizonBoost = resolveHorizonBoost(distanceFogDensity, heightFogDensity)
   const aerialPerspectiveEnabled =
     styleEnabled &&
+    fogEnabled &&
     skyParticipation > 0.001 &&
     (distanceFogDensity > 0 || heightFogDensity > 0)
 
@@ -294,7 +296,7 @@ export function buildRuntimeAtmosphereFromLevelSettings(
     },
     distanceFog: {
       ...base.distanceFog,
-      enabled: styleEnabled && distanceFogDensity > 0,
+      enabled: styleEnabled && fogEnabled && distanceFogDensity > 0,
       color: distanceFogColor,
       density: distanceFogDensity,
     },
@@ -302,6 +304,7 @@ export function buildRuntimeAtmosphereFromLevelSettings(
       ...base.heightFog,
       enabled:
         styleEnabled &&
+        fogEnabled &&
         heightFogDensity > 0 &&
         heightFogCeiling > heightFogFloor,
       color: heightFogColor,
@@ -328,7 +331,8 @@ export function buildRuntimeAtmosphereFromLevelSettings(
     },
     mist: {
       ...base.mist,
-      enabled: styleEnabled && mistOpacity > 0.001 && mistLayers > 0,
+      enabled:
+        styleEnabled && fogEnabled && mistOpacity > 0.001 && mistLayers > 0,
       color: heightFogColor,
       opacity: mistOpacity,
       layers: mistLayers,

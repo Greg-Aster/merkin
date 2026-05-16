@@ -328,6 +328,7 @@ export interface SharedLevelStyleSettings {
   style?: {
     preset?: EditorStylePreset
     enabled?: boolean
+    fogEnabled?: boolean
     fog?: {
       color?: string
       density?: number
