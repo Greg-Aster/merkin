@@ -184,7 +184,7 @@ function getPostProcessingPolicy(input?: {
     kuwaharaEnabled: false,
     kuwaharaRadius: 0,
     kuwaharaMix: 0,
-    kuwaharaResolutionScale: 0.5,
+    kuwaharaResolutionScale: 1,
     vignetteStrength: 0,
   }
 }

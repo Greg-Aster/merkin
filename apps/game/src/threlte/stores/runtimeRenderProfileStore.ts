@@ -108,7 +108,7 @@ const DEFAULT_RENDER_PROFILE: ResolvedRuntimeRenderProfile = {
       enabled: false,
       radius: 2,
       mix: 0.55,
-      resolutionScale: 0.75,
+      resolutionScale: 1,
     },
     bloom: {
       intensity: 1,

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-16T00:04:16.482Z",
+  "generatedAt": "2026-05-17T22:15:06.181Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-shrine-urd-growth",
@@ -21,7 +21,7 @@
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "colliderCacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:36cd5b4419bbae4b2b51484ad67a3fe63efa7fdb7c0407858b5193620b918771:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
   "triangleCount": 434,
   "vertexCount": 449,
   "bounds": {
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-16T00:04:16.482Z"
+    "generatedAt": "2026-05-17T22:15:06.181Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -242,14 +242,14 @@
     "mode": "auto",
     "productId": "yggdrasil-shrine-urd-growth:auto:simplifiedMesh",
     "generatorVersion": "mesh-collision-manager-v2",
-    "sourceKind": "prefab",
+    "sourceKind": "asset",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
       "value": "8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
-      "value": "b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a"
+      "value": "36cd5b4419bbae4b2b51484ad67a3fe63efa7fdb7c0407858b5193620b918771"
     },
     "policyFingerprint": {
       "algorithm": "sha256",

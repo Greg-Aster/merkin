@@ -15,6 +15,12 @@ export interface EditorStyleSceneCandidate {
   name: string
   kindLabel: string
   descriptor: string
+  reimagineState:
+    | 'mesh-reimagined'
+    | 'texture-restyled'
+    | 'style-baked'
+    | 'not-reimagined'
+  reimagineLabel: string
   selected: boolean
   status: string
 }
@@ -109,6 +115,82 @@ function isCuratedStyleCandidate(node: EditorSceneNode) {
   return true
 }
 
+function getAssetFileName(assetUrl: string) {
+  const normalizedUrl = assetUrl.split(/[?#]/)[0] ?? assetUrl
+  const parts = normalizedUrl.split('/').filter(Boolean)
+  return parts[parts.length - 1] ?? normalizedUrl
+}
+
+function isHunyuanAssetUrl(assetUrl: string) {
+  return /\/generated\/hunyuan3d\//i.test(assetUrl)
+}
+
+function isHunyuanTextureWrapAssetUrl(assetUrl: string) {
+  return (
+    isHunyuanAssetUrl(assetUrl) &&
+    /(?:^|-)texture-wrap-\d{4}-\d{2}-\d{2}t/i.test(
+      getAssetFileName(assetUrl),
+    )
+  )
+}
+
+function isHunyuanGeneratedMeshAssetUrl(assetUrl: string) {
+  return (
+    isHunyuanAssetUrl(assetUrl) &&
+    !isHunyuanTextureWrapAssetUrl(assetUrl) &&
+    /(?:^|-)generated-\d{4}-\d{2}-\d{2}t/i.test(getAssetFileName(assetUrl))
+  )
+}
+
+function getNodeGenerationAssetUrls(node: EditorSceneNode) {
+  return [node.asset?.url, node.generation?.lastBakedAssetUrl].filter(
+    (assetUrl): assetUrl is string => !!assetUrl,
+  )
+}
+
+export function hasMeshReimagineProduct(node: EditorSceneNode) {
+  return getNodeGenerationAssetUrls(node).some(assetUrl =>
+    isHunyuanGeneratedMeshAssetUrl(assetUrl),
+  )
+}
+
+function hasTextureRestyleProduct(node: EditorSceneNode) {
+  return getNodeGenerationAssetUrls(node).some(assetUrl =>
+    isHunyuanTextureWrapAssetUrl(assetUrl),
+  )
+}
+
+function getNodeReimagineState(node: EditorSceneNode): Pick<
+  EditorStyleSceneCandidate,
+  'reimagineState' | 'reimagineLabel'
+> {
+  if (hasMeshReimagineProduct(node)) {
+    return {
+      reimagineState: 'mesh-reimagined',
+      reimagineLabel: 'Mesh reimagined',
+    }
+  }
+
+  if (hasTextureRestyleProduct(node)) {
+    return {
+      reimagineState: 'texture-restyled',
+      reimagineLabel: 'Texture restyled only',
+    }
+  }
+
+  if (node.generation?.styleBakeProduct) {
+    return {
+      reimagineState: 'style-baked',
+      reimagineLabel: 'Style-baked only',
+    }
+  }
+
+  return {
+    reimagineState: 'not-reimagined',
+    reimagineLabel: 'Not reimagined',
+  }
+}
+
 export function buildStyleSceneCandidates(
   nodes: EditorSceneNode[],
   selectedIds: string[],
@@ -122,6 +204,7 @@ export function buildStyleSceneCandidates(
       name: node.name,
       kindLabel: getStyleCandidateKindLabel(node),
       descriptor: getDescriptor(node),
+      ...getNodeReimagineState(node),
       selected: selectedIds.includes(node.id),
       status: statusById[node.id] ?? '',
     }))
@@ -130,6 +213,19 @@ export function buildStyleSceneCandidates(
 export function getCuratedStyleBatchCandidateIds(nodes: EditorSceneNode[]) {
   return nodes
     .filter(node => canBakeSceneNode(node) && isCuratedStyleCandidate(node))
+    .map(node => node.id)
+}
+
+export function getUnreimaginedStyleBatchCandidateIds(
+  nodes: EditorSceneNode[],
+) {
+  return nodes
+    .filter(
+      node =>
+        canBakeSceneNode(node) &&
+        isCuratedStyleCandidate(node) &&
+        !hasMeshReimagineProduct(node),
+    )
     .map(node => node.id)
 }
 

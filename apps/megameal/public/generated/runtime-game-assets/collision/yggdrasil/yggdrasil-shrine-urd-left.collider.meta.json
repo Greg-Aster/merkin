@@ -1,164 +1,164 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-16T00:04:12.340Z",
+  "generatedAt": "2026-05-17T22:11:06.326Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-shrine-urd-left",
-  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+  "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.glb",
   "sourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+    "value": "5de942ac1a07614ef70d4c15075a0399d51bacd5f3eaf4781029e1082637105d"
   },
-  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.low.glb",
   "colliderSourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+    "value": "f88ef55d94215e5b3d1b31789dc1df015b239a853444620c969303dc9e30a79f"
   },
   "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-left.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-left.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-left.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
-  "triangleCount": 624,
-  "vertexCount": 527,
+  "colliderCacheKey": "mesh-collision-manager-v2:f88ef55d94215e5b3d1b31789dc1df015b239a853444620c969303dc9e30a79f:e6267bb78c7a667afe5ded3285d196a4e7d05abe729211af6b941ee0ac86986e:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 4750,
+  "vertexCount": 4692,
   "bounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -0.9951006770133972,
+      -0.9403154850006104,
+      -0.9402661323547363
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.9732133150100708,
+      0.8738935589790344,
+      0.9556305408477783
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.968313992023468,
+      1.8142090439796448,
+      1.8958966732025146
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.010943681001663208,
+      -0.033210963010787964,
+      0.007682204246520996
     ]
   },
   "rawColliderBounds": {
     "min": [
-      -32767,
-      -32767,
-      -32767
+      -32751,
+      -30091,
+      -31563
     ],
     "max": [
       32767,
-      32767,
-      32767
+      30175,
+      31519
     ],
     "size": [
-      65534,
-      65534,
-      65534
+      65518,
+      60266,
+      63082
     ],
     "center": [
-      0,
-      0,
-      0
+      8,
+      42,
+      -22
     ]
   },
   "visualLocalBounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -0.9951006770133972,
+      -0.9403154850006104,
+      -0.9402661323547363
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.9732133150100708,
+      0.8738935589790344,
+      0.9556305408477783
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.968313992023468,
+      1.8142090439796448,
+      1.8958966732025146
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.010943681001663208,
+      -0.033210963010787964,
+      0.007682204246520996
     ]
   },
   "colliderLocalBounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -0.9951006770133972,
+      -0.9403154850006104,
+      -0.9402661323547363
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.9732133150100708,
+      0.8738935589790344,
+      0.9556305408477783
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.968313992023468,
+      1.8142090439796448,
+      1.8958966732025146
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.010943681001663208,
+      -0.033210963010787964,
+      0.007682204246520996
     ]
   },
   "assetLocalTransform": {
     "schemaVersion": 1,
     "coordinateSpaceVersion": 1,
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.glb",
     "sourceNodeName": "urd Shrine Column Left",
     "visualLocalBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -0.9951006770133972,
+        -0.9403154850006104,
+        -0.9402661323547363
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.9732133150100708,
+        0.8738935589790344,
+        0.9556305408477783
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.968313992023468,
+        1.8142090439796448,
+        1.8958966732025146
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.010943681001663208,
+        -0.033210963010787964,
+        0.007682204246520996
       ]
     },
     "colliderLocalBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -0.9951006770133972,
+        -0.9403154850006104,
+        -0.9402661323547363
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.9732133150100708,
+        0.8738935589790344,
+        0.9556305408477783
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.968313992023468,
+        1.8142090439796448,
+        1.8958966732025146
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.010943681001663208,
+        -0.033210963010787964,
+        0.007682204246520996
       ]
     },
     "visualToPhysicsMatrix": [
@@ -201,25 +201,25 @@
   "provenance": {
     "sourceActorId": "yggdrasil-shrine-urd-left",
     "sourceActorName": "urd Shrine Column Left",
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.glb",
     "sourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+      "value": "5de942ac1a07614ef70d4c15075a0399d51bacd5f3eaf4781029e1082637105d"
     },
-    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.low.glb",
     "colliderSourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+      "value": "f88ef55d94215e5b3d1b31789dc1df015b239a853444620c969303dc9e30a79f"
     },
     "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "yggdrasil",
       "nodeId": "yggdrasil-shrine-urd-left",
-      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+      "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.low.glb",
       "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-16T00:04:12.340Z"
+    "generatedAt": "2026-05-17T22:11:06.326Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -242,14 +242,14 @@
     "mode": "auto",
     "productId": "yggdrasil-shrine-urd-left:auto:simplifiedMesh",
     "generatorVersion": "mesh-collision-manager-v2",
-    "sourceKind": "prefab",
+    "sourceKind": "asset",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+      "value": "f88ef55d94215e5b3d1b31789dc1df015b239a853444620c969303dc9e30a79f"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
-      "value": "d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d"
+      "value": "e6267bb78c7a667afe5ded3285d196a4e7d05abe729211af6b941ee0ac86986e"
     },
     "policyFingerprint": {
       "algorithm": "sha256",
@@ -258,42 +258,42 @@
     "shape": "trimesh",
     "localBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -0.9951006770133972,
+        -0.9403154850006104,
+        -0.9402661323547363
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.9732133150100708,
+        0.8738935589790344,
+        0.9556305408477783
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.968313992023468,
+        1.8142090439796448,
+        1.8958966732025146
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.010943681001663208,
+        -0.033210963010787964,
+        0.007682204246520996
       ]
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-left.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-left.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-    "triangleCount": 624,
-    "vertexCount": 527,
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.glb",
+    "triangleCount": 4750,
+    "vertexCount": 4692,
     "triangleBudget": 5000
   },
   "simplification": {
-    "requested": false,
-    "applied": false,
-    "sourceTriangleCount": 624,
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 14000,
     "targetTriangleBudget": 5000,
-    "ratio": 1,
+    "ratio": 0.3392857142857143,
     "tool": "gltf-transform",
-    "prepass": "none",
+    "prepass": "weld",
     "error": 0.05
   }
 }

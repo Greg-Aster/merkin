@@ -1,164 +1,164 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-16T00:04:10.959Z",
+  "generatedAt": "2026-05-17T22:11:04.802Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-arrival-column-right",
-  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+  "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.glb",
   "sourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+    "value": "e099108f4d021d231e48d209d6c121e233b6f4a9fb534a2b9b06d26bf40bf909"
   },
-  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.low.glb",
   "colliderSourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+    "value": "1813d0d9acaa78ac82fa12db7299acd2f3c455c26fa308045719e41065982eb0"
   },
   "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-right.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-right.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-right.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
-  "triangleCount": 624,
-  "vertexCount": 527,
+  "colliderCacheKey": "mesh-collision-manager-v2:1813d0d9acaa78ac82fa12db7299acd2f3c455c26fa308045719e41065982eb0:e60f5dc7ffeac8a34af62fdc2f176ea0af3fb902b903a75ffa64f7241e905632:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 4750,
+  "vertexCount": 5453,
   "bounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -1.000834345817566,
+      -0.941458523273468,
+      -0.6175516247749329
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.9747116565704346,
+      0.921014666557312,
+      0.5917518734931946
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.9755460023880005,
+      1.86247318983078,
+      1.2093034982681274
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.013061344623565674,
+      -0.010221928358078003,
+      -0.01289987564086914
     ]
   },
   "rawColliderBounds": {
     "min": [
-      -32767,
-      -32767,
-      -32767
+      -32635,
+      -30871,
+      -20026
     ],
     "max": [
       32767,
-      32767,
-      32767
+      30895,
+      20010
     ],
     "size": [
-      65534,
-      65534,
-      65534
+      65402,
+      61766,
+      40036
     ],
     "center": [
-      0,
-      0,
-      0
+      66,
+      12,
+      -8
     ]
   },
   "visualLocalBounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -1.000834345817566,
+      -0.941458523273468,
+      -0.6175516247749329
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.9747116565704346,
+      0.921014666557312,
+      0.5917518734931946
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.9755460023880005,
+      1.86247318983078,
+      1.2093034982681274
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.013061344623565674,
+      -0.010221928358078003,
+      -0.01289987564086914
     ]
   },
   "colliderLocalBounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -1.000834345817566,
+      -0.941458523273468,
+      -0.6175516247749329
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.9747116565704346,
+      0.921014666557312,
+      0.5917518734931946
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.9755460023880005,
+      1.86247318983078,
+      1.2093034982681274
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.013061344623565674,
+      -0.010221928358078003,
+      -0.01289987564086914
     ]
   },
   "assetLocalTransform": {
     "schemaVersion": 1,
     "coordinateSpaceVersion": 1,
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.glb",
     "sourceNodeName": "Arrival Column Right",
     "visualLocalBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -1.000834345817566,
+        -0.941458523273468,
+        -0.6175516247749329
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.9747116565704346,
+        0.921014666557312,
+        0.5917518734931946
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.9755460023880005,
+        1.86247318983078,
+        1.2093034982681274
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.013061344623565674,
+        -0.010221928358078003,
+        -0.01289987564086914
       ]
     },
     "colliderLocalBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -1.000834345817566,
+        -0.941458523273468,
+        -0.6175516247749329
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.9747116565704346,
+        0.921014666557312,
+        0.5917518734931946
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.9755460023880005,
+        1.86247318983078,
+        1.2093034982681274
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.013061344623565674,
+        -0.010221928358078003,
+        -0.01289987564086914
       ]
     },
     "visualToPhysicsMatrix": [
@@ -201,25 +201,25 @@
   "provenance": {
     "sourceActorId": "yggdrasil-arrival-column-right",
     "sourceActorName": "Arrival Column Right",
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.glb",
     "sourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+      "value": "e099108f4d021d231e48d209d6c121e233b6f4a9fb534a2b9b06d26bf40bf909"
     },
-    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.low.glb",
     "colliderSourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+      "value": "1813d0d9acaa78ac82fa12db7299acd2f3c455c26fa308045719e41065982eb0"
     },
     "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "yggdrasil",
       "nodeId": "yggdrasil-arrival-column-right",
-      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+      "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.low.glb",
       "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-16T00:04:10.959Z"
+    "generatedAt": "2026-05-17T22:11:04.802Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -242,14 +242,14 @@
     "mode": "auto",
     "productId": "yggdrasil-arrival-column-right:auto:simplifiedMesh",
     "generatorVersion": "mesh-collision-manager-v2",
-    "sourceKind": "prefab",
+    "sourceKind": "asset",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+      "value": "1813d0d9acaa78ac82fa12db7299acd2f3c455c26fa308045719e41065982eb0"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
-      "value": "67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb"
+      "value": "e60f5dc7ffeac8a34af62fdc2f176ea0af3fb902b903a75ffa64f7241e905632"
     },
     "policyFingerprint": {
       "algorithm": "sha256",
@@ -258,42 +258,42 @@
     "shape": "trimesh",
     "localBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -1.000834345817566,
+        -0.941458523273468,
+        -0.6175516247749329
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.9747116565704346,
+        0.921014666557312,
+        0.5917518734931946
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.9755460023880005,
+        1.86247318983078,
+        1.2093034982681274
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.013061344623565674,
+        -0.010221928358078003,
+        -0.01289987564086914
       ]
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-right.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-right.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-    "triangleCount": 624,
-    "vertexCount": 527,
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.glb",
+    "triangleCount": 4750,
+    "vertexCount": 5453,
     "triangleBudget": 5000
   },
   "simplification": {
-    "requested": false,
-    "applied": false,
-    "sourceTriangleCount": 624,
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 14000,
     "targetTriangleBudget": 5000,
-    "ratio": 1,
+    "ratio": 0.3392857142857143,
     "tool": "gltf-transform",
-    "prepass": "none",
+    "prepass": "weld",
     "error": 0.05
   }
 }

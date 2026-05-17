@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/shore-stone-11-2026-05-17T20-19-42-118Z/shore-stone-11.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "9a6a263797201a2417d67ce28e98007ae8a8a94a7e684ec6f8974deba82a0ca1"
+  },
+  "sourceName": "Shore Stone 11",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/shore-stone-11-2026-05-17T20-19-42-122Z/reference/shore-stone-11-reference-2026-05-17T20-20-51-530Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779049251624-wtd0dj",
+  "prompt": "object: low shoreline boulder or broken coastal slab resting near the edge of the island. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "9028d4c0bf783229289582e0f4026be70e5d3f147c1c90a3c04e153cfd1d6726"
+  },
+  "generatedAt": "2026-05-17T20:22:42.168Z"
+}

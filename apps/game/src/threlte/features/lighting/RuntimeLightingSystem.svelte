@@ -1,7 +1,7 @@
 <script lang="ts">
-import { T } from '@threlte/core'
+import { T, useTask, useThrelte } from '@threlte/core'
 import { onDestroy } from 'svelte'
-import type { DirectionalLight } from 'three'
+import type { Camera, DirectionalLight } from 'three'
 import {
   qualityLevelStore,
   qualitySettingsStore,
@@ -16,8 +16,13 @@ import RuntimeManagedPointLight from './RuntimeManagedPointLight.svelte'
 
 export let controller: RuntimeLightingController
 
+const { camera } = useThrelte()
+
 let snapshot: RuntimeLightingSnapshot
 let keyLightRef: DirectionalLight | null = null
+let activeCameraPosition: [number, number, number] | null = null
+let pointLightDistanceAccumulator = 0
+let pointLightBudgetRefreshToken = 0
 
 const unsubscribe = controller.subscribe(value => {
   snapshot = value
@@ -44,6 +49,93 @@ function isPointEmitter(emitter: RuntimeLightEmitter) {
   return emitter.kind === 'point'
 }
 
+function getActiveCamera(): Camera | null {
+  const candidate = camera as Camera & { current?: Camera | null }
+  const resolved = candidate?.current ?? candidate
+  return resolved?.position ? resolved : null
+}
+
+function updatePointLightBudgetCamera() {
+  const activeCamera = getActiveCamera()
+  if (!activeCamera) return
+
+  activeCameraPosition = [
+    activeCamera.position.x,
+    activeCamera.position.y,
+    activeCamera.position.z,
+  ]
+  pointLightBudgetRefreshToken += 1
+}
+
+function getPointEmitterDistanceToCamera(emitter: RuntimeLightEmitter) {
+  if (!activeCameraPosition || !emitter.position) return 0
+
+  const dx = emitter.position[0] - activeCameraPosition[0]
+  const dy = emitter.position[1] - activeCameraPosition[1]
+  const dz = emitter.position[2] - activeCameraPosition[2]
+  return Math.hypot(dx, dy, dz)
+}
+
+function getPointEmitterScore(
+  emitter: RuntimeLightEmitter,
+  distanceToCamera: number,
+) {
+  const budget = visibilityPolicy.pointLightBudget
+  const sourceRange = emitter.distance ?? budget.maxDistance
+  const rangeScore = Math.min(
+    Math.max(1, sourceRange),
+    Math.max(1, budget.maxDistance),
+  )
+  return (
+    (Math.max(0, emitter.intensity) * rangeScore) /
+    Math.max(1, distanceToCamera)
+  )
+}
+
+function resolveBudgetedPointEmitters(_refreshToken: number) {
+  const budget = visibilityPolicy.pointLightBudget
+  const enabledEmitters = pointEmitters.filter(
+    emitter => emitter.enabled !== false,
+  )
+  const unbudgetedEmitters = enabledEmitters.filter(
+    emitter => emitter.runtimeBudgeted === false,
+  )
+  const budgetedCandidates = enabledEmitters
+    .filter(emitter => emitter.runtimeBudgeted !== false && emitter.position)
+    .map((emitter, index) => {
+      const distanceToCamera = getPointEmitterDistanceToCamera(emitter)
+      return {
+        emitter,
+        index,
+        distanceToCamera,
+        score: getPointEmitterScore(emitter, distanceToCamera),
+      }
+    })
+    .filter(candidate => candidate.distanceToCamera <= budget.cullDistance)
+
+  if (!budget.enabled || budget.maxVisibleCount <= 0) {
+    return unbudgetedEmitters
+  }
+
+  budgetedCandidates.sort(
+    (a, b) =>
+      b.score - a.score ||
+      a.distanceToCamera - b.distanceToCamera ||
+      a.index - b.index,
+  )
+
+  const selectedBudgetedIds = new Set(
+    budgetedCandidates
+      .slice(0, budget.maxVisibleCount)
+      .map(candidate => candidate.emitter.id),
+  )
+
+  return enabledEmitters.filter(
+    emitter =>
+      emitter.runtimeBudgeted === false || selectedBudgetedIds.has(emitter.id),
+  )
+}
+
 $: environment = snapshot.environment
 $: visibilityPolicy = resolveRuntimeVisibilityPolicy(
   $qualityLevelStore,
@@ -52,7 +144,6 @@ $: visibilityPolicy = resolveRuntimeVisibilityPolicy(
 $: directionalShadowsEnabled =
   visibilityPolicy.shadowsEnabled &&
   environment.shadows.enabled &&
-  environment.renderProfileTier !== 'desktop' &&
   environment.shadows.maxCastingLights > 0
 $: keyLightShadowMapSize = Math.max(
   1,
@@ -62,7 +153,17 @@ $: shadowCameraSize = environment.shadows.cameraSize ?? 48
 $: shadowCameraFar = environment.shadows.cameraFar ?? 90
 $: ambientEmitters = snapshot.emitters.filter(isAmbientEmitter)
 $: pointEmitters = snapshot.emitters.filter(isPointEmitter)
+$: budgetedPointEmitters = resolveBudgetedPointEmitters(
+  pointLightBudgetRefreshToken,
+)
 $: applyKeyLightShadowBudget()
+
+useTask(delta => {
+  pointLightDistanceAccumulator += delta
+  if (pointLightDistanceAccumulator < 0.25) return
+  pointLightDistanceAccumulator = 0
+  updatePointLightBudgetCamera()
+})
 
 onDestroy(() => {
   unsubscribe()
@@ -98,8 +199,8 @@ onDestroy(() => {
       <T.AmbientLight color={emitter.color} intensity={emitter.intensity} />
     {/each}
 
-    {#each pointEmitters as emitter (emitter.id)}
-      <RuntimeManagedPointLight {emitter} />
-    {/each}
+		{#each budgetedPointEmitters as emitter (emitter.id)}
+			<RuntimeManagedPointLight {emitter} />
+		{/each}
   </T.Group>
 {/if}

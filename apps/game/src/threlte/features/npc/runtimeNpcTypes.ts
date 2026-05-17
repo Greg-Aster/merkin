@@ -54,6 +54,14 @@ export interface RuntimeNpcInteractionEvent {
   npc: RuntimeNpcComponent
 }
 
+export interface RuntimeNpcLightBurstEvent {
+  origin: [number, number, number]
+  strength: number
+  radius: number
+  progress: number
+  distance: number
+}
+
 export interface RuntimeNpcRegistrySnapshot {
   registrations: RuntimeNpcRegistration[]
   interactiveNpcIds: string[]

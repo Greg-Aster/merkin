@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/well-of-urd-ring/well-of-urd-ring-texture-wrap-2026-05-14T23-34-00-441Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "ebc8c358941abfba09003969773ded3b78d1074a935b6b74be895b2f804d0113"
+  },
+  "sourceName": "Well of Urd Ring",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/well-of-urd-ring-2026-05-17T17-52-00-900Z/reference/well-of-urd-ring-reference-2026-05-17T17-53-21-651Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779040401702-472uqw",
+  "prompt": "object: well of urd ring, carved circular stone ring around a sacred well. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "aca5e2ff765374a73c830ab3f98bff5fff83740aeff1dd2ef0baa2bb62102210"
+  },
+  "generatedAt": "2026-05-17T17:55:15.159Z"
+}

@@ -4,12 +4,14 @@ import { createEventDispatcher, onDestroy } from 'svelte'
 import * as THREE from 'three'
 import StarSprite from '../../../components/StarSprite.svelte'
 import type { NpcComponent } from '../../../engine/npcTypes'
+import { activeConversationSession } from '../../conversation/runtime'
 import ManagedLight from '../../lighting/ManagedLight.svelte'
 import RuntimeNpcInteractionTarget from '../RuntimeNpcInteractionTarget.svelte'
 import { npcInteractionEvents } from '../npcStateStore'
 import type {
   RuntimeNpcActor,
   RuntimeNpcInteractionEvent,
+  RuntimeNpcLightBurstEvent,
 } from '../runtimeNpcTypes'
 import {
   type ResolvedFireflyNpcPresentation,
@@ -26,16 +28,18 @@ export let actor: RuntimeNpcActor | null = null
 export let levelId = ''
 export let npc: NpcComponent
 export let selected = false
-export let activationStrength = 0
 export let interactionSystem: any = null
 export let interactiveEnabled = false
 
 let animationTime = 0
 let selectionBlend = 0
-let activationBlend = 0
 let interactionHovered = false
 let lastStateInteractionEventId = ''
-let stateActivationStrength = 0
+let interactionSelectedUntil = 0
+let lightBurstGlow = 0
+let shockwaveIgnited = false
+let shockwaveIgnition = 0
+const npcFireflyPointLightScale = 0.16
 
 function getMotionOffset(
   presentation: ResolvedFireflyNpcPresentation,
@@ -57,48 +61,98 @@ function getMotionOffset(
   ]
 }
 
-function getLightPulse(presentation: ResolvedFireflyNpcPresentation) {
-  const phase = getNpcPresentationAnimationPhase(npc.id || actorId)
-  const wave =
-    (Math.sin(animationTime * presentation.twinkleSpeed + phase) + 1) / 2
-  const threshold = 0.78
-  if (wave <= threshold) return 0
-  return Math.min(1, (wave - threshold) / (1 - threshold))
-}
-
 function getSpriteColor(presentation: ResolvedFireflyNpcPresentation) {
-  if (selectionBlend <= 0.01) return presentation.color
-
   const baseColor = new THREE.Color(presentation.color)
-  const selectedColor = new THREE.Color(presentation.secondaryColor)
-  return `#${baseColor.lerp(selectedColor, Math.min(1, selectionBlend)).getHexString()}`
+  if (presentation.shockwaveEnabled) {
+    baseColor.lerp(new THREE.Color('#ff1830'), Math.min(1, shockwaveIgnition))
+  }
+  return `#${baseColor.getHexString()}`
 }
 
-function getSpriteIntensity(
+function getLightDrivenSpriteIntensity(
   presentation: ResolvedFireflyNpcPresentation,
-  pulse: number,
 ) {
-  const selectedBoost = 1 + selectionBlend * 0.35
-  const activationBoost =
-    1 + activationBlend * presentation.lightBurstSpriteBoost
   return (
     presentation.spriteIntensity *
-    (0.68 + pulse * 0.72) *
-    selectedBoost *
-    activationBoost
+    Math.min(1.35, Math.max(0.72, presentation.lightIntensity / 3.2))
   )
 }
 
-function getLightIntensity(
+function getShockwaveBoost(presentation: ResolvedFireflyNpcPresentation) {
+  return presentation.shockwaveEnabled ? presentation.lightBurstBoost : 1
+}
+
+function getShockwaveIntensityMultiplier(
   presentation: ResolvedFireflyNpcPresentation,
-  pulse: number,
 ) {
-  const drive = Math.max(pulse * pulse, selectionBlend * 0.35, activationBlend)
-  return (
-    presentation.lightIntensity *
-    drive *
-    (1 + selectionBlend * presentation.selectionLightBoost)
+  if (!presentation.shockwaveEnabled) return 1
+  return 1 + shockwaveIgnition * 2.8 * getShockwaveBoost(presentation)
+}
+
+function getShockwaveDistanceMultiplier(
+  presentation: ResolvedFireflyNpcPresentation,
+) {
+  if (!presentation.shockwaveEnabled) return 1
+  return 1 + shockwaveIgnition * 1.1 * getShockwaveBoost(presentation)
+}
+
+function getShockwaveSpriteSizeMultiplier(
+  presentation: ResolvedFireflyNpcPresentation,
+) {
+  if (!presentation.shockwaveEnabled) return 1
+  return 1 + shockwaveIgnition * 0.55 * getShockwaveBoost(presentation)
+}
+
+function getShockwaveSpriteIntensity(
+  presentation: ResolvedFireflyNpcPresentation,
+) {
+  const lightDrivenSpriteIntensity = getLightDrivenSpriteIntensity(presentation)
+  if (!presentation.shockwaveEnabled) return lightDrivenSpriteIntensity
+
+  const shockwaveBoost = getShockwaveBoost(presentation)
+  return Math.max(
+    lightDrivenSpriteIntensity * (1 + shockwaveIgnition * 1.4 * shockwaveBoost),
+    0.72 + shockwaveIgnition * 0.65 * shockwaveBoost,
   )
+}
+
+function getSpriteVisualIntensity(
+  presentation: ResolvedFireflyNpcPresentation,
+) {
+  const shockwaveSpriteIntensity = getShockwaveSpriteIntensity(presentation)
+  return Math.max(
+    interactionHovered
+      ? Math.max(shockwaveSpriteIntensity * 1.2, 1.05)
+      : shockwaveSpriteIntensity,
+    shockwaveSpriteIntensity +
+      lightBurstGlow * presentation.lightBurstSpriteBoost,
+  )
+}
+
+function getLightIntensity(presentation: ResolvedFireflyNpcPresentation) {
+  const selectedBoost = 1 + selectionBlend * presentation.selectionLightBoost
+  const hoverBoost = interactionHovered
+    ? Math.max(presentation.lightIntensity * 1.18, presentation.lightIntensity)
+    : presentation.lightIntensity
+  return (
+    hoverBoost *
+    selectedBoost *
+    getShockwaveIntensityMultiplier(presentation) *
+    npcFireflyPointLightScale
+  )
+}
+
+function handleLightBurst(
+  burst: RuntimeNpcLightBurstEvent,
+  presentation: ResolvedFireflyNpcPresentation,
+) {
+  lightBurstGlow = Math.max(
+    lightBurstGlow,
+    (0.45 + burst.strength * 0.75) * presentation.lightBurstBoost,
+  )
+  if (presentation.shockwaveEnabled) {
+    shockwaveIgnited = true
+  }
 }
 
 useTask(delta => {
@@ -111,29 +165,35 @@ useTask(delta => {
     latestInteraction.id !== lastStateInteractionEventId
   ) {
     lastStateInteractionEventId = latestInteraction.id
-    stateActivationStrength = 1
+    const readOnlyDuration =
+      npc.conversation?.mode === 'read-only'
+        ? npc.conversation.durationMs ?? 7000
+        : npc.conversation?.mode === 'profile'
+          ? npc.conversation.fallback?.durationMs ?? 7000
+          : 7000
+    interactionSelectedUntil = Date.now() + Math.max(250, readOnlyDuration)
   }
-  stateActivationStrength = THREE.MathUtils.damp(
-    stateActivationStrength,
-    0,
-    3.6,
+  lightBurstGlow = Math.max(0, lightBurstGlow - delta * 1.25)
+  shockwaveIgnition = THREE.MathUtils.damp(
+    shockwaveIgnition,
+    shockwaveIgnited ? 1 : 0,
+    4.5,
     delta,
   )
-  const selectionTarget = selected || interactionHovered ? 1 : 0
+  const conversationSelected = $activeConversationSession?.npcId === npc.id
+  const interactionSelected = interactionSelectedUntil > Date.now()
+  const selectionTarget =
+    selected ||
+    interactionHovered ||
+    conversationSelected ||
+    interactionSelected
+      ? 1
+      : 0
   const selectionSpeed = selectionTarget > selectionBlend ? 7.5 : 5.5
   selectionBlend = THREE.MathUtils.damp(
     selectionBlend,
     selectionTarget,
     selectionSpeed,
-    delta,
-  )
-  activationBlend = THREE.MathUtils.damp(
-    activationBlend,
-    Math.max(
-      0,
-      Math.min(1, Math.max(activationStrength, stateActivationStrength)),
-    ),
-    4.5,
     delta,
   )
 })
@@ -147,14 +207,15 @@ onDestroy(() => {
 
 {#if presentation}
   {@const motionOffset = getMotionOffset(presentation)}
-  {@const pulse = getLightPulse(presentation)}
   {@const spriteColor = getSpriteColor(presentation)}
-  {@const spriteIntensity = getSpriteIntensity(presentation, pulse)}
-  {@const lightIntensity = getLightIntensity(presentation, pulse)}
+  {@const spriteVisualIntensity = getSpriteVisualIntensity(presentation)}
+  {@const spriteOpacityIntensity = Math.min(1, spriteVisualIntensity)}
+  {@const lightIntensity = getLightIntensity(presentation)}
+  {@const shockwaveSpriteIntensity = getShockwaveSpriteIntensity(presentation)}
+  {@const shockwaveSizeMultiplier =
+    getShockwaveSpriteSizeMultiplier(presentation)}
   {@const shouldRenderLight =
-    presentation.lightIntensity > 0 &&
-    presentation.lightDistance > 0 &&
-    (pulse > 0.02 || selectionBlend > 0.01 || activationBlend > 0.01)}
+    presentation.lightIntensity > 0 && presentation.lightDistance > 0}
   {#if shouldRenderLight}
     <ManagedLight
       id={`npc-firefly-light-${npc.id || actorId}`}
@@ -162,7 +223,8 @@ onDestroy(() => {
       position={motionOffset}
       color={spriteColor}
       intensity={lightIntensity}
-      distance={presentation.lightDistance * (0.82 + pulse * 0.18)}
+      distance={presentation.lightDistance *
+        getShockwaveDistanceMultiplier(presentation)}
       decay={presentation.lightDecay}
       runtimeBudgeted={presentation.lightBudgeted}
     />
@@ -170,15 +232,18 @@ onDestroy(() => {
   <StarSprite
     position={motionOffset}
     color={spriteColor}
-    size={presentation.size * (1 + selectionBlend * 0.18 + activationBlend * 0.1)}
-    intensity={Math.min(1.45, spriteIntensity)}
+    size={presentation.size *
+      (1 + lightBurstGlow * 0.08) *
+      shockwaveSizeMultiplier}
+    intensity={spriteOpacityIntensity}
     twinkleSpeed={presentation.twinkleSpeed}
     animationOffset={animationTime}
     starType="sparkle"
     isKeyElement={true}
     enableTwinkle={true}
     enableHoverScale={false}
-    glowBoost={1 + selectionBlend * 1.2 + activationBlend * 1.4}
+    glowBoost={(1 + selectionBlend * 1.2 + (interactionHovered ? 0.25 : 0)) *
+      (1 + Math.max(0, spriteVisualIntensity - 1) * 1.8)}
     opacity={1}
     isClickable={false}
     isHovered={interactionHovered}
@@ -196,14 +261,18 @@ onDestroy(() => {
       on:npcHover={(event) => {
         interactionHovered = event.detail.hovered
       }}
+      on:npcLightBurst={(event) => handleLightBurst(event.detail, presentation)}
     />
   {/if}
   {#if selectionBlend > 0.01}
     <StarSprite
       position={motionOffset}
-      color={presentation.secondaryColor}
-      size={presentation.size * (1.18 + selectionBlend * 0.24)}
-      intensity={selectionBlend * Math.max(0.9, spriteIntensity * 0.85)}
+      color={spriteColor}
+      size={presentation.size *
+        (1 + lightBurstGlow * 0.08) *
+        shockwaveSizeMultiplier}
+      intensity={selectionBlend *
+        Math.max(1.15, shockwaveSpriteIntensity * 0.95)}
       twinkleSpeed={presentation.twinkleSpeed}
       animationOffset={animationTime + 0.35}
       starType="sparkle"

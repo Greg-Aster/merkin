@@ -98,11 +98,8 @@
       },
       "lighting": {
         "ambientIntensity": 10.4,
-        "sunIntensity": 0.8,
-        "fillIntensity": 0.3,
-        "fallbackAmbientIntensity": 4.8,
-        "fallbackMoonlightIntensity": 0.45,
-        "fallbackFillLightIntensity": 0.2
+        "keyLightIntensity": 0.8,
+        "fillLightIntensity": 0.3
       },
       "renderProfile": {
         "id": "sci-fi-room-interior-courtyard",

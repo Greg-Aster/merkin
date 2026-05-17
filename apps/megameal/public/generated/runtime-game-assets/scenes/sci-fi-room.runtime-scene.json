@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-17T00:24:38.956Z",
+  "generatedAt": "2026-05-17T15:27:06.624Z",
   "levelId": "sci-fi-room",
   "sceneId": "sci-fi-room",
   "source": {
@@ -134,11 +134,8 @@
         },
         "lighting": {
           "ambientIntensity": 10.4,
-          "sunIntensity": 0.8,
-          "fillIntensity": 0.3,
-          "fallbackAmbientIntensity": 4.8,
-          "fallbackMoonlightIntensity": 0.45,
-          "fallbackFillLightIntensity": 0.2
+          "keyLightIntensity": 0.8,
+          "fillLightIntensity": 0.3
         },
         "renderProfile": {
           "id": "sci-fi-room-interior-courtyard",

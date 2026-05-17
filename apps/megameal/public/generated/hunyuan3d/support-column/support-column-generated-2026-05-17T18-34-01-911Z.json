@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+  },
+  "sourceName": "retro-futurist support column",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/urd-shrine-column-left-2026-05-17T18-31-15-644Z/reference/urd-shrine-column-left-reference-2026-05-17T18-32-20-510Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779042740627-e4uz11",
+  "prompt": "object: ritual support column placed beside a sacred well shrine, a freestanding vertical stone support. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "743330d69c9f941b4db6203efbfb2c0c63c6b09ea1ab5f41a930977fc87555d3"
+  },
+  "generatedAt": "2026-05-17T18:34:03.274Z"
+}

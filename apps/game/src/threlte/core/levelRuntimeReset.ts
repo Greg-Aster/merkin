@@ -3,7 +3,7 @@ import { resetRuntimeNpcRegistry } from '../features/npc/runtimeNpcRegistry'
 import { terrainActions } from '../features/terrain/terrainStore'
 import { resetPostProcessingState } from '../stores/postProcessingStore'
 import { resetRuntimeVisualStyle } from '../styles/runtimeVisualStyleStore'
-import { clearGltfCache } from '../utils/gltfAssetCache'
+import { evictUnusedGltfCacheEntries } from '../utils/gltfAssetCache'
 
 export interface LevelRuntimeResetServices {
   interactionSystem?: {
@@ -11,13 +11,27 @@ export interface LevelRuntimeResetServices {
   } | null
 }
 
-export function resetLevelRuntime(services: LevelRuntimeResetServices = {}) {
+export function clearLevelRuntimeInteractionState(
+  services: LevelRuntimeResetServices = {},
+) {
   services.interactionSystem?.clearInteractiveObjects?.()
   resetRuntimeNpcRegistry()
+}
 
+export function resetLevelRuntimeResources() {
   terrainActions.reset()
   resetPostProcessingState()
   resetRuntimeAtmosphere()
   resetRuntimeVisualStyle()
-  clearGltfCache()
+  evictUnusedGltfCacheEntries({
+    maxUnreferencedEntries: 0,
+    maxUnusedAgeMs: 0,
+    maxUnreferencedBytes: 0,
+    memoryPressure: 'high',
+  })
+}
+
+export function resetLevelRuntime(services: LevelRuntimeResetServices = {}) {
+  clearLevelRuntimeInteractionState(services)
+  resetLevelRuntimeResources()
 }

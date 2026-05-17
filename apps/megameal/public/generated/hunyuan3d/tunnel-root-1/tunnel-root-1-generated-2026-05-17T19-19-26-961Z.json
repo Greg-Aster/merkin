@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/tunnel-root-1-2026-05-17T19-16-14-618Z/tunnel-root-1.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "b5e40fd35d4701f528834596b7776e445e6ee9e6687b05bc75216c3144e72cf0"
+  },
+  "sourceName": "Tunnel Root 1",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/tunnel-root-1-2026-05-17T19-16-14-623Z/reference/tunnel-root-1-reference-2026-05-17T19-17-21-294Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779045441496-q1wtfl",
+  "prompt": "object: large tunnel-forming root beam in the Hvergelmir depth passage. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "6f6511f8abc6b144b4aaabf1c6b70bb76370dd055d820f3b53d973e6a12bfcef"
+  },
+  "generatedAt": "2026-05-17T19:19:28.639Z"
+}

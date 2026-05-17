@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "cae20f1bc1678777710a19e5b5cd280073d0aa47e4d13efa9965677db7fecad8"
+  },
+  "sourceName": "Yggdrasil Crown Ascent Merged",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/yggdrasil-crown-ascent-merged-2026-05-17T21-20-15-695Z/reference/yggdrasil-crown-ascent-merged-reference-2026-05-17T21-21-26-511Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779052886576-r3mhtx",
+  "prompt": "object: walkway with ramps, landings, final platform, and short crown bridge. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "c7ff53cccc2bc87e63c9c06010a935b87aaaed28a7cbae36aa9ff030689ab4c3"
+  },
+  "generatedAt": "2026-05-17T21:23:29.508Z"
+}

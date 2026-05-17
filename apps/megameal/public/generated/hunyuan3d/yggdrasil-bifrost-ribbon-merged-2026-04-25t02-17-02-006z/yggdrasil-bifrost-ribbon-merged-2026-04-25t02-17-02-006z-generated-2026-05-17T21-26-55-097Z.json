@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "d60f5676dbd3b3bc03591d01b253ae98affe79a9110313bc552f68263f38ec44"
+  },
+  "sourceName": "Yggdrasil Bifrost Ribbon Merged",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/yggdrasil-bifrost-ribbon-merged-2026-05-17T21-23-32-458Z/reference/yggdrasil-bifrost-ribbon-merged-reference-2026-05-17T21-24-43-801Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779053083847-6yr7hc",
+  "prompt": "object: merged luminous Bifrost rainbow runway ribbons embedded in the approach path. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "5fe8fd90ccdc034608d380ac9ba799a8cbdd4731c62327db844aa1cb7df8edc8"
+  },
+  "generatedAt": "2026-05-17T21:26:56.532Z"
+}

@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/sea-root-ne-2026-05-17T19-37-53-895Z/sea-root-ne.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "83feb40d6ad67a66b9e8335c0fac8d678c673f34d6250626157ac7027325b157"
+  },
+  "sourceName": "Sea Root NE",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/sea-root-ne-2026-05-17T19-37-53-899Z/reference/sea-root-ne-reference-2026-05-17T19-39-02-700Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779046742862-qjnvmm",
+  "prompt": "object: large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "70e2d25ae1f3200f62a82e103c1109f57313a8298d76c66a9fe0020b224eb13c"
+  },
+  "generatedAt": "2026-05-17T19:41:02.194Z"
+}

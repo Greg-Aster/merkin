@@ -57,6 +57,7 @@ export interface NpcFireflyPresentationConfig {
   selectionLightBoost?: number
   lightBurstSpriteBoost?: number
   lightBudgeted?: boolean
+  shockwaveEnabled?: boolean
 }
 
 export type NpcPresentationConfig = NpcFireflyPresentationConfig

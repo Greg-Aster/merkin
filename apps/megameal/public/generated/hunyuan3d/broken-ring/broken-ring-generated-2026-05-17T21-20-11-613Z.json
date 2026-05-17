@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "4391139b734ad56f9b5f59d74f5caff18244cd68e4e42da589018d90c6eee135"
+  },
+  "sourceName": "broken ancient stone ring ruin",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/drowned-ring-nw-2026-05-17T21-17-07-078Z/reference/drowned-ring-nw-reference-2026-05-17T21-18-18-061Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779052698114-ny2k2n",
+  "prompt": "object: half-submerged broken ring ruin resting on an outer shoal. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "29517731119210e007772ca0c78a975cb9de5c133df00ea38a539736d44098f9"
+  },
+  "generatedAt": "2026-05-17T21:20:12.974Z"
+}

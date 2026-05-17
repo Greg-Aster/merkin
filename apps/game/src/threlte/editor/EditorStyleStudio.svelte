@@ -66,6 +66,12 @@ export let styleSceneCandidates: Array<{
   name: string
   kindLabel: string
   descriptor: string
+  reimagineState:
+    | 'mesh-reimagined'
+    | 'texture-restyled'
+    | 'style-baked'
+    | 'not-reimagined'
+  reimagineLabel: string
   selected: boolean
   status: string
 }> = []
@@ -245,6 +251,7 @@ $: visibleStyleSceneCandidates = styleSceneCandidates.filter(candidate => {
     candidate.name,
     candidate.kindLabel,
     candidate.descriptor,
+    candidate.reimagineLabel,
     candidate.status,
   ]
     .join(' ')
@@ -288,12 +295,12 @@ $: styleRunLog = [
     <div>
       <div class="editor-status-title">
         {generationWorkspace
-          ? 'Regenerate assets without losing control of the level.'
+          ? 'AI Lab: texture restyle or full mesh reimagine.'
           : 'Configure final bake products before production.'}
       </div>
       <div class="editor-step-copy">
         {generationWorkspace
-          ? 'Pick scope, set the art direction, run one safe action, then review generated assets, collision status, and save state before publishing.'
+          ? 'Choose object scope first, then run either a same-mesh texture restyle or a full replacement mesh batch.'
           : 'Choose the object scope, tune deterministic bake settings, generate the product, then apply or rerun before publish.'}
       </div>
     </div>
@@ -318,9 +325,11 @@ $: styleRunLog = [
           style bake {styleBakeStatusLabel}
         </div>
       {/if}
-      <div class:ready={workspaceReady} class:warn={!workspaceReady} class="editor-chip">
-        {workspaceReady ? 'workspace ready' : 'workspace pending'}
-      </div>
+      {#if bakeWorkspace}
+        <div class:ready={workspaceReady} class:warn={!workspaceReady} class="editor-chip">
+          {workspaceReady ? 'workspace ready' : 'workspace pending'}
+        </div>
+      {/if}
     </div>
   </div>
 
@@ -329,8 +338,12 @@ $: styleRunLog = [
       <div class="editor-workflow-heading">
         <div class="editor-step-number">1</div>
         <div>
-          <div class="editor-step-title">Scope</div>
-          <div class="editor-step-copy">Choose whether this run affects the selected object or a curated batch. Keep broad scene runs filtered and intentional.</div>
+          <div class="editor-step-title">{generationWorkspace ? 'Batch Object List' : 'Scope'}</div>
+          <div class="editor-step-copy">
+            {generationWorkspace
+              ? 'Select individual objects, use the current scene selection, or select every visible candidate before starting a batch.'
+              : 'Choose whether this run affects the selected object or a curated batch. Keep broad scene runs filtered and intentional.'}
+          </div>
         </div>
       </div>
 
@@ -348,6 +361,12 @@ $: styleRunLog = [
       </div>
 
       <div class="button-row compact editor-mt-sm">
+        <button disabled={styleBatchBusy || selectedBakeableScopeCount === 0} on:click={() => emit('selectCurrentBatchCandidates')}>
+          Use Scene Selection
+        </button>
+        <button disabled={styleBatchBusy || totalBatchCount === 0} on:click={() => emit('selectUnreimaginedBatchCandidates')}>
+          Select Not Reimagined
+        </button>
         <button disabled={styleBatchBusy} on:click={() => emit('selectAllBatchCandidates')}>
           Select All
         </button>
@@ -373,6 +392,97 @@ $: styleRunLog = [
           <input type="checkbox" bind:checked={comfyUiLowVramMode} disabled={comfyUiBusy || hunyuanBusy || styleBatchBusy} />
           <span>Low VRAM launch mode</span>
         </label>
+      {/if}
+
+      {#if totalBatchCount > 0}
+        <div class="editor-candidate-outliner editor-mt-sm">
+          <div class="editor-candidate-header">
+            <span>Object</span>
+            <span>Type</span>
+            <span>Status</span>
+          </div>
+          <div class="editor-candidate-rows" role="tree">
+            {#if visibleStyleSceneCandidates.length === 0}
+              <div class="editor-candidate-empty">No scene candidates match the current filter.</div>
+            {/if}
+            {#each visibleStyleSceneCandidates as candidate (candidate.id)}
+              <div
+                class="editor-candidate-row"
+                class:active={focusedCandidate?.id === candidate.id}
+                class:selected={candidate.selected}
+                class:working={getCandidateState(candidate) === 'working'}
+                class:failed={getCandidateState(candidate) === 'failed'}
+                class:applied={getCandidateState(candidate) === 'applied'}
+              >
+                <label class="editor-candidate-check" title={candidate.selected ? 'Remove from batch' : 'Add to batch'}>
+                  <input
+                    type="checkbox"
+                    checked={candidate.selected}
+                    disabled={styleBatchBusy}
+                    on:change={(event) => emitBatchToggle(candidate.id, (event.currentTarget as HTMLInputElement).checked)}
+                  />
+                </label>
+                <button type="button" class="editor-candidate-name" on:click={() => focusCandidate(candidate.id)}>
+                  <span class="editor-candidate-label">{candidate.name}</span>
+                  <span class="editor-candidate-detail">{candidate.reimagineLabel}</span>
+                  {#if showCandidateDetails}
+                    <span class="editor-candidate-detail">{candidate.descriptor}</span>
+                  {/if}
+                </button>
+                <span class="editor-candidate-kind">{candidate.kindLabel}</span>
+                <span
+                  class="editor-candidate-status"
+                  class:ready={getCandidateState(candidate) === 'applied'}
+                  class:warn={getCandidateState(candidate) === 'working' || getCandidateState(candidate) === 'selected'}
+                  class:danger={getCandidateState(candidate) === 'failed' || getCandidateState(candidate) === 'cancelled'}
+                  title={candidate.status || getCandidateStateLabel(candidate)}
+                >
+                  {getCandidateStateLabel(candidate)}
+                </span>
+              </div>
+            {/each}
+          </div>
+        </div>
+        {#if focusedCandidate}
+          <div class="editor-candidate-detail-panel editor-mt-sm">
+            <div>
+              <div class="tuple-label">Focused Candidate</div>
+              <div class="editor-status-title">{focusedCandidate.name}</div>
+              <div class="save-message">{focusedCandidate.kindLabel}</div>
+            </div>
+            <div class="editor-chip-row">
+              <span class:ready={focusedCandidate.selected} class:warn={!focusedCandidate.selected} class="editor-chip">
+                {focusedCandidate.selected ? 'included in batch' : 'not in batch'}
+              </span>
+              <span
+                class:ready={focusedCandidate.reimagineState === 'mesh-reimagined'}
+                class:warn={focusedCandidate.reimagineState !== 'mesh-reimagined'}
+                class="editor-chip"
+              >
+                {focusedCandidate.reimagineLabel}
+              </span>
+              <span
+                class:ready={getCandidateState(focusedCandidate) === 'applied'}
+                class:warn={getCandidateState(focusedCandidate) === 'working'}
+                class:danger={getCandidateState(focusedCandidate) === 'failed'}
+                class="editor-chip"
+              >
+                {getCandidateStateLabel(focusedCandidate)}
+              </span>
+            </div>
+            <div class="tuple-group">
+              <div class="tuple-label">Object Descriptor</div>
+              <input
+                class="text-input"
+                value={focusedCandidate.descriptor}
+                disabled={styleBatchBusy}
+                placeholder="weathered pillar, ruined floor slab, retro-futurist bench"
+                on:input={(event) => emitBatchDescriptorUpdate(focusedCandidate.id, (event.currentTarget as HTMLInputElement).value)}
+              />
+            </div>
+            <div class="save-message">{focusedCandidate.status || `No ${generationWorkspace ? 'regeneration' : 'bake'} job has run for this object yet.`}</div>
+          </div>
+        {/if}
       {/if}
     </section>
 
@@ -563,10 +673,10 @@ $: styleRunLog = [
     <div class="editor-workflow-heading">
       <div class="editor-step-number">{generationWorkspace ? '3' : '4'}</div>
       <div>
-        <div class="editor-step-title">{generationWorkspace ? 'Run AI Generation' : 'Run Bake'}</div>
+        <div class="editor-step-title">{generationWorkspace ? 'Choose Output Type' : 'Run Bake'}</div>
         <div class="editor-step-copy">
           {generationWorkspace
-            ? 'Use texture generation to preserve the object. Use mesh replacement only when you want a new generated object.'
+            ? 'Texture restyle keeps the mesh. Full mesh reimagine replaces the geometry and needs collision/scale review.'
             : 'Generate object-preserving bake products for preview, runtime, or hero output before publish.'}
         </div>
       </div>
@@ -609,27 +719,27 @@ $: styleRunLog = [
 
       {#if generationWorkspace}
       <div class="editor-action-card">
-        <div class="editor-status-title">AI Texture Source</div>
-        <div class="save-message">Restyles selected geometry using generated texture source art while preserving object identity.</div>
+        <div class="editor-status-title">Texture Restyle (Same Mesh)</div>
+        <div class="save-message">Changes the visual surface while preserving the object, silhouette, transform, and collision contract.</div>
         <div class="button-row compact editor-mt-sm">
           <button disabled={!canBakeTexture || styleBusy || hunyuanBusy} on:click={() => emit('runRetexture')}>
-            {hunyuanBusy ? 'Working...' : 'AI Restyle Selected'}
+            {hunyuanBusy ? 'Working...' : 'Restyle Selected Texture'}
           </button>
           <button disabled={styleBatchBusy || !canBatchRetexture} on:click={() => emit('runBatchRetexture')}>
-            {styleBatchBusy ? 'Working...' : 'Restyle Batch'}
+            {styleBatchBusy ? 'Working...' : 'Restyle Selected Batch'}
           </button>
         </div>
       </div>
 
       <div class="editor-action-card danger">
-        <div class="editor-status-title">Reimagine As New Mesh</div>
-        <div class="save-message">Can change silhouette, topology, collision, and scale. Review before saving.</div>
+        <div class="editor-status-title">Full Mesh Reimagine (New Mesh)</div>
+        <div class="save-message">Replaces geometry and can change silhouette, topology, collision, and scale. Review before saving.</div>
         <div class="button-row compact editor-mt-sm">
           <button class="danger" disabled={!canReplaceMesh || styleBusy || hunyuanBusy} on:click={() => emit('runReimagine')}>
-            {hunyuanBusy ? 'Working...' : 'Replace Selected'}
+            {hunyuanBusy ? 'Working...' : 'Reimagine Selected Mesh'}
           </button>
           <button class="danger" disabled={styleBatchBusy || !canBatchReimagine} on:click={() => emit('runBatchReimagine')}>
-            {styleBatchBusy ? 'Working...' : 'Replace Batch'}
+            {styleBatchBusy ? 'Working...' : 'Reimagine Selected Batch'}
           </button>
         </div>
       </div>
@@ -641,6 +751,17 @@ $: styleRunLog = [
     {/if}
     {#if generationWorkspace && !hasReference && !hasStyleBrief}
       <div class="save-message">AI texture source generation needs a reference image or target look.</div>
+    {/if}
+
+    {#if styleBatchResumeAvailable && !styleBatchBusy}
+      <div class="editor-status-card editor-mt-sm">
+        <div class="editor-status-title">Saved Batch Ready To Resume</div>
+        <div class="save-message">{styleBatchResumeSummary}</div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={() => emit('resumeBatch')}>Resume Saved Batch</button>
+          <button class="danger" on:click={() => emit('discardBatch')}>Discard Saved Batch</button>
+        </div>
+      </div>
     {/if}
   </section>
 
@@ -707,117 +828,18 @@ $: styleRunLog = [
       <div class="save-message">No active {generationWorkspace ? 'regeneration' : 'bake'} messages yet.</div>
     {/if}
 
-    <div class="button-row compact editor-mt-sm">
-      <button disabled={!styleBatchBusy} on:click={() => emit('pauseBatch')}>
-        Pause Batch
-      </button>
-      <button class="danger" disabled={!styleBatchBusy} on:click={() => emit('cancelBatch')}>
-        Cancel Batch
-      </button>
-    </div>
-
-    {#if styleBatchResumeAvailable && !styleBatchBusy}
+    {#if styleBatchBusy}
       <div class="button-row compact editor-mt-sm">
-        <button on:click={() => emit('resumeBatch')}>Resume Last Session</button>
-        <button on:click={() => emit('discardBatch')}>Discard Saved Session</button>
+        <button on:click={() => emit('pauseBatch')}>
+          Pause Active Batch
+        </button>
+        <button class="danger" on:click={() => emit('cancelBatch')}>
+          Cancel Active Batch
+        </button>
       </div>
-      <div class="save-message">{styleBatchResumeSummary}</div>
     {/if}
-  </section>
 
-  {#if totalBatchCount > 0}
-    <section class="editor-workflow-step editor-mt-sm">
-      <div class="editor-workflow-heading">
-        <div class="editor-step-number">{generationWorkspace ? '5' : '6'}</div>
-        <div>
-          <div class="editor-step-title">Scene Candidate Browser</div>
-          <div class="editor-step-copy">
-            {visibleStyleSceneCandidates.length} visible of {totalBatchCount}. Status is shown per object during {generationWorkspace ? 'reimagine and restyle batches' : 'production bake batches'}.
-          </div>
-        </div>
-      </div>
-      <div class="editor-candidate-outliner editor-mt-sm">
-        <div class="editor-candidate-header">
-          <span>Object</span>
-          <span>Type</span>
-          <span>Status</span>
-        </div>
-        <div class="editor-candidate-rows" role="tree">
-          {#if visibleStyleSceneCandidates.length === 0}
-            <div class="editor-candidate-empty">No scene candidates match the current filter.</div>
-          {/if}
-          {#each visibleStyleSceneCandidates as candidate (candidate.id)}
-            <div
-              class="editor-candidate-row"
-              class:active={focusedCandidate?.id === candidate.id}
-              class:selected={candidate.selected}
-              class:working={getCandidateState(candidate) === 'working'}
-              class:failed={getCandidateState(candidate) === 'failed'}
-              class:applied={getCandidateState(candidate) === 'applied'}
-            >
-              <label class="editor-candidate-check" title={candidate.selected ? 'Remove from batch' : 'Add to batch'}>
-                <input
-                  type="checkbox"
-                  checked={candidate.selected}
-                  disabled={styleBatchBusy}
-                  on:change={(event) => emitBatchToggle(candidate.id, (event.currentTarget as HTMLInputElement).checked)}
-                />
-              </label>
-              <button type="button" class="editor-candidate-name" on:click={() => focusCandidate(candidate.id)}>
-                <span class="editor-candidate-label">{candidate.name}</span>
-                {#if showCandidateDetails}
-                  <span class="editor-candidate-detail">{candidate.descriptor}</span>
-                {/if}
-              </button>
-              <span class="editor-candidate-kind">{candidate.kindLabel}</span>
-              <span
-                class="editor-candidate-status"
-                class:ready={getCandidateState(candidate) === 'applied'}
-                class:warn={getCandidateState(candidate) === 'working' || getCandidateState(candidate) === 'selected'}
-                class:danger={getCandidateState(candidate) === 'failed' || getCandidateState(candidate) === 'cancelled'}
-                title={candidate.status || getCandidateStateLabel(candidate)}
-              >
-                {getCandidateStateLabel(candidate)}
-              </span>
-            </div>
-          {/each}
-        </div>
-      </div>
-      {#if focusedCandidate}
-        <div class="editor-candidate-detail-panel editor-mt-sm">
-          <div>
-            <div class="tuple-label">Focused Candidate</div>
-            <div class="editor-status-title">{focusedCandidate.name}</div>
-            <div class="save-message">{focusedCandidate.kindLabel}</div>
-          </div>
-          <div class="editor-chip-row">
-            <span class:ready={focusedCandidate.selected} class:warn={!focusedCandidate.selected} class="editor-chip">
-              {focusedCandidate.selected ? 'included in batch' : 'not in batch'}
-            </span>
-            <span
-              class:ready={getCandidateState(focusedCandidate) === 'applied'}
-              class:warn={getCandidateState(focusedCandidate) === 'working'}
-              class:danger={getCandidateState(focusedCandidate) === 'failed'}
-              class="editor-chip"
-            >
-              {getCandidateStateLabel(focusedCandidate)}
-            </span>
-          </div>
-          <div class="tuple-group">
-            <div class="tuple-label">Object Descriptor</div>
-            <input
-              class="text-input"
-              value={focusedCandidate.descriptor}
-              disabled={styleBatchBusy}
-              placeholder="weathered pillar, ruined floor slab, retro-futurist bench"
-              on:input={(event) => emitBatchDescriptorUpdate(focusedCandidate.id, (event.currentTarget as HTMLInputElement).value)}
-            />
-          </div>
-          <div class="save-message">{focusedCandidate.status || `No ${generationWorkspace ? 'regeneration' : 'bake'} job has run for this object yet.`}</div>
-        </div>
-      {/if}
-    </section>
-  {/if}
+  </section>
 
   {#if selectedNodes.length > 1}
     <div class="editor-status-card">

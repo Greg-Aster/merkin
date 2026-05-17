@@ -15,9 +15,14 @@ export let emitter: RuntimeLightEmitter
 
 const { camera } = useThrelte()
 const worldPosition = new THREE.Vector3()
+const lightVisibilityThreshold = 0.001
 
 let currentDistanceToCamera = 0
 let distanceAccumulator = 0
+let renderedIntensity = 0
+let renderedDistance = 0
+let renderedVisible = false
+let renderedLightInitialized = false
 
 function getActiveCamera(): THREE.Camera | null {
   const candidate = camera as THREE.Camera & { current?: THREE.Camera | null }
@@ -42,10 +47,13 @@ function updateCameraDistance() {
 
 function resolveLightBudget() {
   if (emitter.runtimeBudgeted === false) {
+    const intensity = Math.max(0, emitter.intensity)
+    const distance = Math.max(0, emitter.distance ?? 0)
     return {
-      visible: emitter.enabled !== false,
-      intensity: emitter.intensity,
-      distance: emitter.distance ?? 0,
+      visible:
+        emitter.enabled !== false && intensity > lightVisibilityThreshold,
+      intensity,
+      distance,
     }
   }
 
@@ -64,6 +72,12 @@ function resolveLightBudget() {
 
 $: pointPosition = getPointPosition()
 $: budgetedLight = resolveLightBudget()
+$: if (!renderedLightInitialized && budgetedLight) {
+  renderedIntensity = budgetedLight.intensity
+  renderedDistance = budgetedLight.distance
+  renderedVisible = budgetedLight.visible
+  renderedLightInitialized = true
+}
 
 useTask(delta => {
   distanceAccumulator += delta
@@ -71,14 +85,38 @@ useTask(delta => {
   distanceAccumulator = 0
   updateCameraDistance()
 })
+
+useTask(delta => {
+  const targetIntensity = budgetedLight.visible ? budgetedLight.intensity : 0
+  const targetDistance = budgetedLight.visible ? budgetedLight.distance : 0
+  const intensityDamping = targetIntensity > renderedIntensity ? 12 : 4.5
+  const distanceDamping = targetDistance > renderedDistance ? 10 : 4
+
+  renderedIntensity = THREE.MathUtils.damp(
+    renderedIntensity,
+    targetIntensity,
+    intensityDamping,
+    delta,
+  )
+  renderedDistance = THREE.MathUtils.damp(
+    renderedDistance,
+    targetDistance,
+    distanceDamping,
+    delta,
+  )
+  renderedVisible =
+    budgetedLight.visible ||
+    renderedIntensity > lightVisibilityThreshold ||
+    renderedDistance > lightVisibilityThreshold
+})
 </script>
 
 <T.PointLight
   position={pointPosition}
   color={emitter.color}
-  intensity={budgetedLight.intensity}
-  distance={budgetedLight.distance}
+  intensity={renderedIntensity}
+  distance={renderedDistance}
   decay={emitter.decay ?? 2}
-  visible={budgetedLight.visible}
+  visible={renderedVisible}
   castShadow={false}
 />

@@ -267,6 +267,11 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     const hasIncompleteEntries = !!finalSession?.entries.some(
       (entry: PersistedStyleBatchEntry) => entry.status !== 'applied',
     )
+    if (hasIncompleteEntries && finalSession) {
+      state.styleBatchPendingResume = persistStyleBatchSession(
+        resetQueuedStyleBatchEntriesForResume(finalSession),
+      )
+    }
     state.styleBatchStatus = getCompletedStyleBatchMessage(
       session,
       hasIncompleteEntries,
@@ -274,6 +279,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     state.saveMessage = state.styleBatchStatus
     if (!hasIncompleteEntries) {
       persistStyleBatchSession(null)
+      state.styleBatchPendingResume = null
     }
   }
 

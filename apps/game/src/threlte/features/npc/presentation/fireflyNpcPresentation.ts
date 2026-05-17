@@ -13,9 +13,11 @@ export interface ResolvedFireflyNpcPresentation {
   lightDistance: number
   lightDecay: number
   twinkleSpeed: number
+  lightBurstBoost: number
   selectionLightBoost: number
   lightBurstSpriteBoost: number
   lightBudgeted: boolean
+  shockwaveEnabled: boolean
   hoverHeight: number
   bobAmplitude: number
   bobSpeed: number
@@ -76,17 +78,19 @@ export function resolveFireflyNpcPresentation(
     lightDistance: finiteNumberOrDefault(presentation.lightDistance, 4.6, 0),
     lightDecay: finiteNumberOrDefault(presentation.lightDecay, 1.25, 0),
     twinkleSpeed: finiteNumberOrDefault(presentation.twinkleSpeed, 0.9, 0),
+    lightBurstBoost: finiteNumberOrDefault(presentation.lightBurstBoost, 1, 0),
     selectionLightBoost: finiteNumberOrDefault(
       presentation.selectionLightBoost,
-      1,
+      3,
       0,
     ),
     lightBurstSpriteBoost: finiteNumberOrDefault(
       presentation.lightBurstSpriteBoost,
-      0.3,
+      0.55,
       0,
     ),
     lightBudgeted: presentation.lightBudgeted ?? true,
+    shockwaveEnabled: presentation.shockwaveEnabled ?? false,
     hoverHeight: finiteNumberOrDefault(hoverWander?.hoverHeight, 0.28),
     bobAmplitude: finiteNumberOrDefault(hoverWander?.bobAmplitude, 0.08, 0),
     bobSpeed: finiteNumberOrDefault(hoverWander?.bobSpeed, 0.55, 0),

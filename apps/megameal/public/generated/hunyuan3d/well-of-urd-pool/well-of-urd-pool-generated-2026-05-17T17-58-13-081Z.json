@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/well-of-urd-pool-2026-05-17T17-55-17-304Z/well-of-urd-pool.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "ce665dfeb27021522737e86b800d6b8b12ce23abe031b64b73f885fccec5aa20"
+  },
+  "sourceName": "Well of Urd Pool",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/well-of-urd-pool-2026-05-17T17-55-17-316Z/reference/well-of-urd-pool-reference-2026-05-17T17-56-32-047Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779040592129-y8n5fl",
+  "prompt": "object: well of urd pool, low circular sacred water basin or well pool. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "b07a9ac909aa0964bad23958ae0d377eab90905c690f92ebc75d45d55fbefe30"
+  },
+  "generatedAt": "2026-05-17T17:58:14.544Z"
+}

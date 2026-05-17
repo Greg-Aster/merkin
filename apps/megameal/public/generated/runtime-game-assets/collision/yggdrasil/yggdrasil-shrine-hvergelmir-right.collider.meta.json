@@ -1,164 +1,164 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-16T00:04:15.802Z",
+  "generatedAt": "2026-05-17T22:11:13.730Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-shrine-hvergelmir-right",
-  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+  "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.glb",
   "sourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+    "value": "8a5a2a6daf53e4d3f2e45d3ef864312784bf7b8863e28e599b2819ebe7f9dd0c"
   },
-  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.low.glb",
   "colliderSourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+    "value": "17e1c735f25764360a1255f2fc0d4a7a06eff0ac38f1b1f0e28022e319708bfb"
   },
   "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-right.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-right.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-right.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
-  "triangleCount": 624,
-  "vertexCount": 527,
+  "colliderCacheKey": "mesh-collision-manager-v2:17e1c735f25764360a1255f2fc0d4a7a06eff0ac38f1b1f0e28022e319708bfb:ef82c0f4d90eebbc44fe4c835e4bf73cf9f815105cbbda842371c5340c886428:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 4748,
+  "vertexCount": 4745,
   "bounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -0.9440273642539978,
+      -1.000256061553955,
+      -0.8801249265670776
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.9170786142349243,
+      0.9736882448196411,
+      0.8250955939292908
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.8611059784889221,
+      1.9739443063735962,
+      1.7052205204963684
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.013474375009536743,
+      -0.013283908367156982,
+      -0.027514666318893433
     ]
   },
   "rawColliderBounds": {
     "min": [
+      -30843,
       -32767,
-      -32767,
-      -32767
+      -28311
     ],
     "max": [
-      32767,
-      32767,
-      32767
+      30879,
+      32763,
+      28283
     ],
     "size": [
-      65534,
-      65534,
-      65534
+      61722,
+      65530,
+      56594
     ],
     "center": [
-      0,
-      0,
-      0
+      18,
+      -2,
+      -14
     ]
   },
   "visualLocalBounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -0.9440273642539978,
+      -1.000256061553955,
+      -0.8801249265670776
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.9170786142349243,
+      0.9736882448196411,
+      0.8250955939292908
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.8611059784889221,
+      1.9739443063735962,
+      1.7052205204963684
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.013474375009536743,
+      -0.013283908367156982,
+      -0.027514666318893433
     ]
   },
   "colliderLocalBounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -0.9440273642539978,
+      -1.000256061553955,
+      -0.8801249265670776
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.9170786142349243,
+      0.9736882448196411,
+      0.8250955939292908
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.8611059784889221,
+      1.9739443063735962,
+      1.7052205204963684
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.013474375009536743,
+      -0.013283908367156982,
+      -0.027514666318893433
     ]
   },
   "assetLocalTransform": {
     "schemaVersion": 1,
     "coordinateSpaceVersion": 1,
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.glb",
     "sourceNodeName": "hvergelmir Shrine Column Right",
     "visualLocalBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -0.9440273642539978,
+        -1.000256061553955,
+        -0.8801249265670776
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.9170786142349243,
+        0.9736882448196411,
+        0.8250955939292908
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.8611059784889221,
+        1.9739443063735962,
+        1.7052205204963684
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.013474375009536743,
+        -0.013283908367156982,
+        -0.027514666318893433
       ]
     },
     "colliderLocalBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -0.9440273642539978,
+        -1.000256061553955,
+        -0.8801249265670776
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.9170786142349243,
+        0.9736882448196411,
+        0.8250955939292908
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.8611059784889221,
+        1.9739443063735962,
+        1.7052205204963684
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.013474375009536743,
+        -0.013283908367156982,
+        -0.027514666318893433
       ]
     },
     "visualToPhysicsMatrix": [
@@ -201,25 +201,25 @@
   "provenance": {
     "sourceActorId": "yggdrasil-shrine-hvergelmir-right",
     "sourceActorName": "hvergelmir Shrine Column Right",
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.glb",
     "sourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+      "value": "8a5a2a6daf53e4d3f2e45d3ef864312784bf7b8863e28e599b2819ebe7f9dd0c"
     },
-    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.low.glb",
     "colliderSourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+      "value": "17e1c735f25764360a1255f2fc0d4a7a06eff0ac38f1b1f0e28022e319708bfb"
     },
     "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "yggdrasil",
       "nodeId": "yggdrasil-shrine-hvergelmir-right",
-      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+      "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.low.glb",
       "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-16T00:04:15.802Z"
+    "generatedAt": "2026-05-17T22:11:13.730Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -242,14 +242,14 @@
     "mode": "auto",
     "productId": "yggdrasil-shrine-hvergelmir-right:auto:simplifiedMesh",
     "generatorVersion": "mesh-collision-manager-v2",
-    "sourceKind": "prefab",
+    "sourceKind": "asset",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+      "value": "17e1c735f25764360a1255f2fc0d4a7a06eff0ac38f1b1f0e28022e319708bfb"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
-      "value": "e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885"
+      "value": "ef82c0f4d90eebbc44fe4c835e4bf73cf9f815105cbbda842371c5340c886428"
     },
     "policyFingerprint": {
       "algorithm": "sha256",
@@ -258,42 +258,42 @@
     "shape": "trimesh",
     "localBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -0.9440273642539978,
+        -1.000256061553955,
+        -0.8801249265670776
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.9170786142349243,
+        0.9736882448196411,
+        0.8250955939292908
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.8611059784889221,
+        1.9739443063735962,
+        1.7052205204963684
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.013474375009536743,
+        -0.013283908367156982,
+        -0.027514666318893433
       ]
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-right.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-right.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-    "triangleCount": 624,
-    "vertexCount": 527,
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.glb",
+    "triangleCount": 4748,
+    "vertexCount": 4745,
     "triangleBudget": 5000
   },
   "simplification": {
-    "requested": false,
-    "applied": false,
-    "sourceTriangleCount": 624,
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 14000,
     "targetTriangleBudget": 5000,
-    "ratio": 1,
+    "ratio": 0.3392857142857143,
     "tool": "gltf-transform",
-    "prepass": "none",
+    "prepass": "weld",
     "error": 0.05
   }
 }

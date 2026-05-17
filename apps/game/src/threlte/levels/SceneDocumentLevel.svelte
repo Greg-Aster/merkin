@@ -55,6 +55,7 @@ import type {
   RenderProfileVisualBookmark,
   SceneSettings,
 } from '../engine/sceneDocumentTypes'
+import { resolveSceneFireflyFieldQuality } from '../engine/sceneFireflyField'
 import type { LevelRuntimeReadinessContract } from '../engine/types'
 import type { ActorDefinition, LevelDefinition } from '../engine/types'
 import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
@@ -68,6 +69,7 @@ import {
   type TerrainRuntimeComponentData,
   loadTerrainRuntimeComponentData,
 } from '../features/terrain/terrainManifest'
+import { terrainStore } from '../features/terrain/terrainStore'
 import { playerStateStore } from '../stores/gameStateStore'
 import { clearRuntimeColliderUrls } from '../stores/runtimeCollisionRegistry'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
@@ -710,6 +712,16 @@ function handleTerrainRuntimeReady() {
   pendingSceneReady = false
   pendingSpawnPosition = null
   activateSceneGameplay(levelId, spawnPosition)
+}
+
+function getSceneTerrainHeightAt(x: number, z: number) {
+  if (!terrainRuntimeReady) return null
+
+  const terrainManager = get(terrainStore).manager
+  if (!terrainManager) return null
+
+  const height = terrainManager.getHeightAt(x, z)
+  return Number.isFinite(height) ? height : null
 }
 
 function getRuntimeAssetTierCap(settings: SceneSettings) {
@@ -1449,14 +1461,8 @@ $: sceneAtmosphereRefreshKey = [
   terrainRuntimeReady ? 1 : 0,
 ].join('|')
 $: ambientIntensity = sharedLevelSettings.lighting?.ambientIntensity ?? 1.25
-$: keyLightIntensity =
-  sharedLevelSettings.lighting?.keyLightIntensity ??
-  sharedLevelSettings.lighting?.sunIntensity ??
-  0.65
-$: fillLightIntensity =
-  sharedLevelSettings.lighting?.fillLightIntensity ??
-  sharedLevelSettings.lighting?.fillIntensity ??
-  0.2
+$: keyLightIntensity = sharedLevelSettings.lighting?.keyLightIntensity ?? 0.65
+$: fillLightIntensity = sharedLevelSettings.lighting?.fillLightIntensity ?? 0.2
 $: resolvedRenderProfile = resolveRuntimeRenderProfile(
   sharedLevelSettings.renderProfile,
   $qualityLevelStore,
@@ -1481,6 +1487,14 @@ $: sceneFireflyFieldEnabled =
     false) &&
   (authoredFireflyActorCount === 0 ||
     sharedLevelSettings.fireflies?.allowWithAuthored === true)
+$: sceneFireflyFieldQuality = resolveSceneFireflyFieldQuality({
+  settings: sharedLevelSettings.fireflies,
+  qualityTier: $qualityLevelStore,
+  defaultCount: 36,
+  defaultLightCount: 8,
+  defaultSize: 0.58,
+  defaultSpriteIntensity: 1.45,
+})
 $: sceneStarMapEnabled = sharedLevelSettings.features?.starMap ?? false
 $: waterLevel = waterSettings?.level ?? waterSettings?.initialLevel ?? -0.16
 $: waterColor = parseSceneColor(waterSettings?.color, 0x050b14)
@@ -1778,22 +1792,33 @@ onDestroy(() => {
       <SceneFireflyField
         enabled={true}
         fieldId={`${levelId}-scene-fireflies`}
-        count={sharedLevelSettings.fireflies?.count ?? 36}
-        lightCount={sharedLevelSettings.fireflies?.lightCount ?? 8}
+        count={sceneFireflyFieldQuality.count}
+        lightCount={sceneFireflyFieldQuality.lightCount}
         radius={sharedLevelSettings.fireflies?.radius ?? 120}
         minHeight={sharedLevelSettings.fireflies?.minHeight ?? 2}
         maxHeight={sharedLevelSettings.fireflies?.maxHeight ?? 5}
         center={sharedLevelSettings.fireflies?.center ?? sharedLevelSettings.spawn?.position ?? [0, 0, 0]}
+        terrainFollow={sharedLevelSettings.fireflies?.terrainFollow ?? false}
+        terrainReady={terrainRuntimeReady}
+        getHeightAt={getSceneTerrainHeightAt}
+        distribution={sharedLevelSettings.fireflies?.distribution ?? 'uniform'}
+        densityExponent={sharedLevelSettings.fireflies?.densityExponent ?? 0.5}
+        palette={sharedLevelSettings.fireflies?.palette ?? []}
+        interactive={sharedLevelSettings.fireflies?.interactive}
         color={sharedLevelSettings.fireflies?.color ?? '#f4ffb8'}
         secondaryColor={sharedLevelSettings.fireflies?.secondaryColor ?? '#8defff'}
-        size={sharedLevelSettings.fireflies?.size ?? 0.58}
-        spriteIntensity={sharedLevelSettings.fireflies?.spriteIntensity ?? 1.45}
+        size={sceneFireflyFieldQuality.size}
+        spriteIntensity={sceneFireflyFieldQuality.spriteIntensity}
         lightIntensity={sharedLevelSettings.fireflies?.lightIntensity ?? 44}
         lightDistance={sharedLevelSettings.fireflies?.lightDistance ?? 28}
         lightDecay={sharedLevelSettings.fireflies?.lightDecay ?? 1.35}
+        lightBudgeted={sharedLevelSettings.fireflies?.lightBudgeted ?? true}
         twinkleSpeed={sharedLevelSettings.fireflies?.twinkleSpeed ?? 0.82}
         driftSpeed={sharedLevelSettings.fireflies?.driftSpeed ?? 0.28}
         sway={sharedLevelSettings.fireflies?.sway ?? 1.5}
+        {levelId}
+        {interactionSystem}
+        interactiveEnabled={!editorEnabled}
       />
     {/if}
 

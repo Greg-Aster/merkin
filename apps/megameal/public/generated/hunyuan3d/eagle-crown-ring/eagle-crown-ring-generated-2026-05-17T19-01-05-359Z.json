@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/eagle-crown-ring-2026-05-15T00-12-50-055Z/eagle-crown-ring.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "5080335800a3101c4e45dac8ead33cd3dde68a401df2dda7b6f8d01fe81e7f69"
+  },
+  "sourceName": "Eagle Crown Ring",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/eagle-crown-ring-2026-05-17T18-58-12-230Z/reference/eagle-crown-ring-reference-2026-05-17T18-59-18-916Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779044358982-jnebps",
+  "prompt": "object: high crown perch structure associated with the upper watch point, a perched landmark near the top of the tree. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "0162f1d550866d7ee2f1cd8ae2396441383e332effb645e8c80be44fb441aaf4"
+  },
+  "generatedAt": "2026-05-17T19:01:06.720Z"
+}

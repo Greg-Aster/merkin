@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/hvergelmir-basin-pool-2026-05-17T18-10-41-452Z/hvergelmir-basin-pool.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "9c543761f21d3afc1e9620d154aa5d113ea95c74821f2d034a2b279b81202167"
+  },
+  "sourceName": "Hvergelmir Basin Pool",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/hvergelmir-basin-pool-2026-05-17T18-10-41-456Z/reference/hvergelmir-basin-pool-reference-2026-05-17T18-11-48-260Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779041508487-8l2uvt",
+  "prompt": "object: hvergelmir basin pool, low circular sacred water basin or well pool. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "c80c54ec5d2ebcdb4505fc672a18b274dbdaeffef4c77ab705955d6f70c7329b"
+  },
+  "generatedAt": "2026-05-17T18:13:33.018Z"
+}

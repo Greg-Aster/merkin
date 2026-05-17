@@ -26,11 +26,14 @@ export function createEditorStyleBatchSessionController(
     return {
       ...session,
       entries: session.entries.map(entry =>
-        entry.status === 'queued' || entry.status === 'running'
+        entry.status === 'queued' ||
+        entry.status === 'running' ||
+        entry.status === 'failed'
           ? {
               ...entry,
               jobId: undefined,
               status: 'pending' as const,
+              previousError: entry.error,
               error: undefined,
             }
           : entry,

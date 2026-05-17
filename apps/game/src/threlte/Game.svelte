@@ -1,6 +1,6 @@
 <!-- Game application shell for UI state, route-level orchestration, and canvas mounting. -->
 <script lang="ts">
-import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+import { createEventDispatcher, onDestroy, onMount, tick } from 'svelte'
 
 import GameCanvasStage from './GameCanvasStage.svelte'
 import GameRuntimeDiagnostics from './core/GameRuntimeDiagnostics.svelte'
@@ -33,7 +33,10 @@ import {
 
 import MobileEnhancements from './ui/MobileEnhancements.svelte'
 
-import { resetLevelRuntime } from './core/levelRuntimeReset'
+import {
+  clearLevelRuntimeInteractionState,
+  resetLevelRuntimeResources,
+} from './core/levelRuntimeReset'
 
 import GameDebugPanel from './ui/GameDebugPanel.svelte'
 import GameErrorOverlay from './ui/GameErrorOverlay.svelte'
@@ -144,6 +147,10 @@ let staticWorldReady = false
 let worldUnloading = false
 let lastRuntimeResetLevel = ''
 let activeLevelLoadRequest = 0
+let runtimeResetToken = 0
+let runtimeResetPending = false
+let suppressCurrentLevelReset = false
+let physicsWorldSession = 0
 let deferredAudioCleanup: (() => void) | null = null
 let deferredGameplayCoreCleanup: (() => void) | null = null
 let editorSessionCleanup: (() => void) | null = null
@@ -182,7 +189,11 @@ $: homeLevelTitle = homeLevelEntry?.title ?? 'Home'
 $: selectedStar = $selectedStarStore
 $: isMobile = $isMobileStore
 $: error = $errorStore
-$: if (currentLevel && currentLevel !== lastRuntimeResetLevel) {
+$: if (
+  currentLevel &&
+  currentLevel !== lastRuntimeResetLevel &&
+  !suppressCurrentLevelReset
+) {
   resetRuntimeForLevelTransition(currentLevel)
 }
 $: playerReady = Boolean(playerComponent)
@@ -198,7 +209,12 @@ $: if (selectedStar) {
 
 $: selectedEvent = createTimelineEventFromStar(selectedStar)
 
-$: if (typeof window !== 'undefined' && isInitialized && currentLevel) {
+$: if (
+  typeof window !== 'undefined' &&
+  isInitialized &&
+  currentLevel &&
+  !runtimeResetPending
+) {
   void ensureLevelComponent(currentLevel)
 }
 
@@ -670,18 +686,73 @@ function resolveLevelId(levelType: string) {
   return getLevelRegistryEntry(levelType, levelRegistry)?.id ?? levelType
 }
 
-function resetRuntimeForLevelTransition(levelId: string) {
-  resetLevelRuntime({
+function waitForNextFrame() {
+  return new Promise<void>(resolve => {
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => resolve())
+      return
+    }
+
+    setTimeout(resolve, 0)
+  })
+}
+
+function beginRuntimeUnloadForLevel(levelId: string) {
+  runtimeResetToken += 1
+  const token = runtimeResetToken
+
+  clearLevelRuntimeInteractionState({
     interactionSystem,
   })
   lastRuntimeResetLevel = levelId
+  runtimeResetPending = true
   worldUnloading = true
   staticWorldReady = false
+  physicsReady = false
   gameplayEnabled = false
+  playerComponent = null
   activeLevelNote = null
   pendingLevelReturn = null
+  activeLevelLoadRequest += 1
   currentLevelComponent = null
   gameActions.selectStar(null)
+
+  return token
+}
+
+async function resetRuntimeResourcesAfterWorldUnmount(
+  levelId: string,
+  token: number,
+) {
+  await tick()
+  await waitForNextFrame()
+
+  if (token !== runtimeResetToken || lastRuntimeResetLevel !== levelId) {
+    return false
+  }
+
+  resetLevelRuntimeResources()
+
+  return token === runtimeResetToken && lastRuntimeResetLevel === levelId
+}
+
+function handleDeferredRuntimeResetError(error: unknown, token: number) {
+  if (token === runtimeResetToken) {
+    runtimeResetPending = false
+    worldUnloading = false
+  }
+  console.warn('Failed to reset level runtime resources:', error)
+}
+
+function resetRuntimeForLevelTransition(levelId: string) {
+  const token = beginRuntimeUnloadForLevel(levelId)
+  void resetRuntimeResourcesAfterWorldUnmount(levelId, token)
+    .then(cleaned => {
+      if (!cleaned || token !== runtimeResetToken) return
+      physicsWorldSession += 1
+      runtimeResetPending = false
+    })
+    .catch(error => handleDeferredRuntimeResetError(error, token))
 }
 
 function transitionToLevel(levelType: string) {
@@ -690,9 +761,22 @@ function transitionToLevel(levelType: string) {
     level: 'loading',
     message: `Transitioning to ${levelId}…`,
   })
-  resetRuntimeForLevelTransition(levelId)
-  gameActions.transitionToLevel(levelId)
-  debugLog(`🎮 Threlte store-based level transition: ${levelId}`)
+  suppressCurrentLevelReset = true
+  const token = beginRuntimeUnloadForLevel(levelId)
+  void resetRuntimeResourcesAfterWorldUnmount(levelId, token)
+    .then(cleaned => {
+      if (!cleaned || token !== runtimeResetToken) return
+      gameActions.transitionToLevel(levelId)
+      physicsWorldSession += 1
+      runtimeResetPending = false
+      debugLog(`🎮 Threlte store-based level transition: ${levelId}`)
+    })
+    .catch(error => handleDeferredRuntimeResetError(error, token))
+    .finally(() => {
+      if (token === runtimeResetToken) {
+        suppressCurrentLevelReset = false
+      }
+    })
 }
 
 // Mobile controls now handled through reactive stores - no event forwarding needed
@@ -796,6 +880,8 @@ onDestroy(() => {
         {editorEnabled}
         {editorPlaytestEnabled}
         {collisionOverlayEnabled}
+        {worldUnloading}
+        {physicsWorldSession}
         currentLevel={$currentLevelStore}
         {currentLevelComponent}
         {parsedTimelineEvents}

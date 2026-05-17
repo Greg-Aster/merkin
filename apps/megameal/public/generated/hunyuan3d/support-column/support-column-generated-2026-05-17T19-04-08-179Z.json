@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+  },
+  "sourceName": "retro-futurist support column",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/crown-spire-2026-05-17T19-01-08-485Z/reference/crown-spire-reference-2026-05-17T19-02-15-174Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779044535309-vabolz",
+  "prompt": "object: high crown perch structure associated with the upper watch point, a perched landmark near the top of the tree. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "5a261d3ac4baebc5a7fafbac8605acb7a7a0212ce22408ff26e9c3e5637b75b0"
+  },
+  "generatedAt": "2026-05-17T19:04:09.648Z"
+}

@@ -174,11 +174,8 @@ export const observatoryAtmospherePresets: ObservatoryAtmospherePresetDefinition
         },
         lighting: {
           ambientIntensity: 10.4,
-          sunIntensity: 0.8,
-          fillIntensity: 0.3,
-          fallbackAmbientIntensity: 4.8,
-          fallbackMoonlightIntensity: 0.45,
-          fallbackFillLightIntensity: 0.2,
+          keyLightIntensity: 0.8,
+          fillLightIntensity: 0.3,
         },
         features: {
           water: true,
@@ -229,11 +226,8 @@ export const observatoryAtmospherePresets: ObservatoryAtmospherePresetDefinition
         },
         lighting: {
           ambientIntensity: 8.8,
-          sunIntensity: 0.56,
-          fillIntensity: 0.24,
-          fallbackAmbientIntensity: 4.2,
-          fallbackMoonlightIntensity: 0.42,
-          fallbackFillLightIntensity: 0.18,
+          keyLightIntensity: 0.56,
+          fillLightIntensity: 0.24,
         },
         water: {
           size: {
@@ -277,11 +271,8 @@ export const observatoryAtmospherePresets: ObservatoryAtmospherePresetDefinition
         },
         lighting: {
           ambientIntensity: 7.2,
-          sunIntensity: 0.42,
-          fillIntensity: 0.26,
-          fallbackAmbientIntensity: 4,
-          fallbackMoonlightIntensity: 0.62,
-          fallbackFillLightIntensity: 0.24,
+          keyLightIntensity: 0.42,
+          fillLightIntensity: 0.26,
         },
         features: {
           water: true,
@@ -309,11 +300,8 @@ export const observatoryAtmospherePresets: ObservatoryAtmospherePresetDefinition
         },
         lighting: {
           ambientIntensity: 10.8,
-          sunIntensity: 0.86,
-          fillIntensity: 0.34,
-          fallbackAmbientIntensity: 5,
-          fallbackMoonlightIntensity: 0.48,
-          fallbackFillLightIntensity: 0.22,
+          keyLightIntensity: 0.86,
+          fillLightIntensity: 0.34,
         },
         water: {
           size: {
@@ -357,11 +345,8 @@ export const observatoryAtmospherePresets: ObservatoryAtmospherePresetDefinition
         },
         lighting: {
           ambientIntensity: 11.1,
-          sunIntensity: 0.78,
-          fillIntensity: 0.36,
-          fallbackAmbientIntensity: 5.1,
-          fallbackMoonlightIntensity: 0.5,
-          fallbackFillLightIntensity: 0.24,
+          keyLightIntensity: 0.78,
+          fillLightIntensity: 0.36,
         },
       },
     },

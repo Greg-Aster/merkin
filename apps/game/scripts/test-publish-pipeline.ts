@@ -53,12 +53,17 @@ import {
   validateRuntimeSceneManifest,
 } from '../src/threlte/engine/runtimeSceneManifest.ts'
 import { adaptSceneDocumentToLevelDefinition } from '../src/threlte/engine/sceneAdapter.ts'
+import { resolveSceneFireflyFieldQuality } from '../src/threlte/engine/sceneFireflyField.ts'
 import type {
   GeneratedCollisionProduct,
   LevelDefinition,
 } from '../src/threlte/engine/types.ts'
 import { CANONICAL_CONVERSATION_PROFILE_IDS } from '../src/threlte/features/conversation/characters/profileManifest.mjs'
 import { startNpcConversationFromComponent } from '../src/threlte/features/npc/index.ts'
+import {
+  resolveRuntimePointLightVisibility,
+  resolveRuntimeVisibilityPolicy,
+} from '../src/threlte/features/performance/utils/runtimeSceneBudget.ts'
 import {
   type TerrainManifest,
   validateTerrainManifestCollisionContract,
@@ -164,6 +169,10 @@ function createFireflyNpc(overrides: Partial<NpcComponent> = {}): NpcComponent {
       lightDistance: 7,
       lightDecay: 1.4,
       twinkleSpeed: 0.8,
+      lightBurstBoost: 1.25,
+      selectionLightBoost: 3,
+      lightBurstSpriteBoost: 0.55,
+      shockwaveEnabled: true,
     },
   }
 
@@ -1310,8 +1319,92 @@ test('runtime scene manifests preserve NPC firefly components and diagnostics', 
     actor => actor.id === 'fixture-firefly',
   )
   assert.equal(manifestFireflyActor?.npc?.id, 'fixture-firefly')
+  assert.equal(
+    manifestFireflyActor?.npc?.presentation.type === 'firefly'
+      ? manifestFireflyActor.npc.presentation.lightBurstBoost
+      : null,
+    1.25,
+  )
+  assert.equal(
+    manifestFireflyActor?.npc?.presentation.type === 'firefly'
+      ? manifestFireflyActor.npc.presentation.selectionLightBoost
+      : null,
+    3,
+  )
+  assert.equal(
+    manifestFireflyActor?.npc?.presentation.type === 'firefly'
+      ? manifestFireflyActor.npc.presentation.lightBurstSpriteBoost
+      : null,
+    0.55,
+  )
+  assert.equal(
+    manifestFireflyActor?.npc?.presentation.type === 'firefly'
+      ? manifestFireflyActor.npc.presentation.shockwaveEnabled
+      : null,
+    true,
+  )
   assert.deepEqual(validation.errors, [])
   assert.deepEqual(validation.warnings, [])
+})
+
+test('ambient firefly fields resolve quality-tier counts without authoring NPC actors', () => {
+  const quality = resolveSceneFireflyFieldQuality({
+    qualityTier: 'high',
+    settings: {
+      enabled: true,
+      count: 200,
+      lightCount: 25,
+      distribution: 'center-falloff',
+      densityExponent: 2,
+      qualityTiers: {
+        ultra_low: { count: 12, lightCount: 2 },
+        medium: { count: 80, lightCount: 8 },
+        high: { count: 200, lightCount: 25, size: 1.1 },
+      },
+    },
+  })
+
+  assert.equal(quality.tier, 'high')
+  assert.equal(quality.count, 200)
+  assert.equal(quality.lightCount, 25)
+  assert.equal(quality.size, 1.1)
+})
+
+test('runtime point-light budgets clamp visible count and source range', () => {
+  const policy = resolveRuntimeVisibilityPolicy('high', {
+    enableDynamicLighting: true,
+    enableShadows: true,
+    shadowMapSize: 1024,
+  })
+  const visible = resolveRuntimePointLightVisibility({
+    policy,
+    distanceToCamera: 6,
+    sourceIntensity: 10,
+    sourceDistance: 500,
+  })
+  const culled = resolveRuntimePointLightVisibility({
+    policy,
+    distanceToCamera: 29,
+    sourceIntensity: 10,
+    sourceDistance: 500,
+  })
+  const unlit = resolveRuntimePointLightVisibility({
+    policy,
+    distanceToCamera: 6,
+    sourceIntensity: 0,
+    sourceDistance: 500,
+  })
+
+  assert.equal(policy.pointLightBudget.maxVisibleCount, 8)
+  assert.equal(visible.visible, true)
+  assert.equal(visible.intensity, 8.8)
+  assert.equal(visible.distance, 16)
+  assert.equal(culled.visible, false)
+  assert.equal(culled.intensity, 0)
+  assert.equal(culled.distance, 0)
+  assert.equal(unlit.visible, false)
+  assert.equal(unlit.intensity, 0)
+  assert.equal(unlit.distance, 0)
 })
 
 test('NPC publish validation accepts canonical profile ids', () => {
@@ -1408,6 +1501,7 @@ test('NPC publish validation reports exact actor fields for invalid firefly data
           },
           presentation: {
             lightDistance: -1,
+            shockwaveEnabled: 'yes',
           } as any,
         }),
       },
@@ -1445,6 +1539,10 @@ test('NPC publish validation reports exact actor fields for invalid firefly data
   assert.match(
     errorText,
     /NPC actor "invalid-firefly" field "npc\.presentation\.lightDistance"/,
+  )
+  assert.match(
+    errorText,
+    /NPC actor "invalid-firefly" field "npc\.presentation\.shockwaveEnabled"/,
   )
   assert.match(
     errorText,
@@ -3725,6 +3823,57 @@ test('source guard keeps NPC interaction target independent from firefly motion 
   assert.match(
     failures.join('\n'),
     /generic NPC interaction targets must consume owner-provided transforms/,
+  )
+})
+
+test('source guard keeps ambient firefly motion dependent on elapsed frame time', () => {
+  const appRoot = mkdtempSync(join(tmpdir(), 'firefly-field-source-guard-'))
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/levels/SceneFireflyField.svelte'),
+    [
+      '{#each fireflies as firefly, index (firefly.id)}',
+      '  {@const fireflyPosition = getPosition(firefly)}',
+      '  {@const pulse = getPulse(firefly)}',
+      '{/each}',
+    ].join('\n'),
+  )
+
+  const failures = auditSourceGuards({ appRoot })
+
+  assert.match(
+    failures.join('\n'),
+    /ambient firefly field motion and light pulse must pass elapsed explicitly/,
+  )
+})
+
+test('source guard keeps dedicated NPC editor workspace wired', () => {
+  const appRoot = mkdtempSync(join(tmpdir(), 'npc-editor-source-guard-'))
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/editor/editorPanelTabs.ts'),
+    "export type EditorPanelTab = 'scene' | 'world'",
+  )
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/editor/EditorPanel.svelte'),
+    "{#if activeEditorTab === 'world'}{/if}",
+  )
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/editor/EditorEnvironmentPanel.svelte'),
+    "updateLevelSetting(['fireflies', 'count'], 12)",
+  )
+
+  const failures = auditSourceGuards({ appRoot })
+
+  assert.match(
+    failures.join('\n'),
+    /dedicated NPC editor tab must stay in the editor tab contract/,
+  )
+  assert.match(
+    failures.join('\n'),
+    /dedicated NPC editor workspace must render EditorNpcTabHost/,
+  )
+  assert.match(
+    failures.join('\n'),
+    /firefly field controls belong in the NPC editor workspace/,
   )
 })
 

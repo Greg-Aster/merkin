@@ -29,6 +29,7 @@ export interface PersistedStyleBatchEntry {
   metadataUrl?: string
   cached?: boolean
   error?: string
+  previousError?: string
 }
 
 export interface PersistedStyleBatchSession {

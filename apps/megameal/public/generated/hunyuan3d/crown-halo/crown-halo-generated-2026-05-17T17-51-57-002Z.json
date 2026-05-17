@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/crown-halo/crown-halo-texture-wrap-2026-05-14T23-31-40-865Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "2de04d2ed1a96707f95132faf6abfa8e76b7d82aec5d1e2a056c1987169d651e"
+  },
+  "sourceName": "Crown Halo",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/crown-halo-2026-05-17T17-48-54-422Z/reference/crown-halo-reference-2026-05-17T17-50-15-239Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779040215422-dwwu2s",
+  "prompt": "object: large circular halo or luminous ring suspended around the upper crown, a floating sacred ornament not a portal. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "ab3c88db30a158ce3b6054dcc4df53389fb2c5ea68600271cc80bcc769ee610b"
+  },
+  "generatedAt": "2026-05-17T17:51:58.189Z"
+}

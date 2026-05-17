@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-05-17T19:17:21.305Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Tunnel Root 1",
+  "sourceAssetUrl": "/generated/style-lab/sources/tunnel-root-1-2026-05-17T19-16-14-618Z/tunnel-root-1.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/tunnel-root-1-2026-05-17T19-16-14-618Z/tunnel-root-1.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/tunnel-root-1-2026-05-17T19-16-14-623Z/source/tunnel-root-1.glb",
+  "prompt": "object: large tunnel-forming root beam in the Hvergelmir depth passage. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "comfyUiLowVramMode": true,
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/tunnel-root-1-reference-2026-05-17T19-17-21-294Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/tunnel-root-1-2026-05-17T19-16-14-623Z/reference/tunnel-root-1-reference-2026-05-17T19-17-21-294Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/tunnel-root-1-reference-2026-05-17T19-17-21-294Z.png"
+}

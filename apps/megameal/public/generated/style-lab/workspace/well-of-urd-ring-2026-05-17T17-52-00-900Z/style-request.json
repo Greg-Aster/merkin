@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-05-17T17:53:21.657Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Well of Urd Ring",
+  "sourceAssetUrl": "/generated/hunyuan3d/well-of-urd-ring/well-of-urd-ring-texture-wrap-2026-05-14T23-34-00-441Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/well-of-urd-ring/well-of-urd-ring-texture-wrap-2026-05-14T23-34-00-441Z.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/well-of-urd-ring-2026-05-17T17-52-00-900Z/source/well-of-urd-ring.glb",
+  "prompt": "object: well of urd ring, carved circular stone ring around a sacred well. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "comfyUiLowVramMode": true,
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/well-of-urd-ring-reference-2026-05-17T17-53-21-651Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/well-of-urd-ring-2026-05-17T17-52-00-900Z/reference/well-of-urd-ring-reference-2026-05-17T17-53-21-651Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/well-of-urd-ring-reference-2026-05-17T17-53-21-651Z.png"
+}

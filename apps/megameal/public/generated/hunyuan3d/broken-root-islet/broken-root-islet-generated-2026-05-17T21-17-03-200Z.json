@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/broken-root-islet-2026-05-14T23-57-07-772Z/broken-root-islet.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "44d0df0da7495dedc427c572ffdaefcfda47b5d0093f6812addb75f85f78b7c7"
+  },
+  "sourceName": "Broken Root Islet",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/broken-root-islet-2026-05-17T21-14-17-771Z/reference/broken-root-islet-reference-2026-05-17T21-15-27-365Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779052527538-hwo64r",
+  "prompt": "object: small outer islet or shoal beyond the main island, a distant low landmass. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "2137018438320673168119b2a4f2e2fdcd91d86ffcee54c5869a6d5a832f42f8"
+  },
+  "generatedAt": "2026-05-17T21:17:04.882Z"
+}

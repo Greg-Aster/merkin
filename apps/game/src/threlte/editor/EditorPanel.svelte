@@ -21,6 +21,7 @@ import EditorCommandPalette from './EditorCommandPalette.svelte'
 import EditorCreateTabHost from './EditorCreateTabHost.svelte'
 import EditorInspectTabHost from './EditorInspectTabHost.svelte'
 import EditorMainToolbar from './EditorMainToolbar.svelte'
+import EditorNpcTabHost from './EditorNpcTabHost.svelte'
 import EditorOutputTabHost from './EditorOutputTabHost.svelte'
 import EditorPanelHeader from './EditorPanelHeader.svelte'
 import EditorPanelToolsDock from './EditorPanelToolsDock.svelte'
@@ -87,6 +88,7 @@ import {
   buildCreateTabProps,
   buildEnvironmentTabProps,
   buildInspectTabProps,
+  buildNpcTabProps,
   buildPlayerTabProps,
   buildSaveTabProps,
   buildSceneTabProps,
@@ -194,6 +196,7 @@ import {
   buildStyleSceneCandidates,
   getCuratedStyleBatchCandidateIds,
   getStyleBatchPresetById,
+  getUnreimaginedStyleBatchCandidateIds,
   reconcileStyleBatchSelection,
   stylePresetOptions,
 } from './editorStyleBatchSelection'
@@ -1954,6 +1957,13 @@ const editorPanelTabs: Array<{
     description: 'Environment, terrain, atmosphere, audio, and player setup',
   },
   {
+    id: 'npc',
+    icon: 'N',
+    label: 'NPC',
+    description:
+      'NPCs, conversations, ambient fields, and interaction authoring',
+  },
+  {
     id: 'performance',
     icon: '▥',
     label: 'Performance',
@@ -2247,6 +2257,43 @@ $: if (
 function selectAllStyleBatchCandidates() {
   styleBatchSelectionIds = styleSceneCandidates.map(candidate => candidate.id)
   styleBatchSelectionKey++
+}
+
+function selectCurrentStyleBatchCandidates() {
+  const selectedIds = selectedNodes
+    .filter(node => canUseStyleStudio(node))
+    .map(node => node.id)
+  const fallbackIds =
+    selectedIds.length === 0 && selectedNode && canUseStyleStudio(selectedNode)
+      ? [selectedNode.id]
+      : []
+  const nextIds = selectedIds.length > 0 ? selectedIds : fallbackIds
+
+  if (nextIds.length === 0) {
+    saveMessage =
+      'Select one or more geometry-backed scene objects before using scene selection as the AI batch.'
+    return
+  }
+
+  styleBatchSelectionIds = nextIds
+  styleBatchSelectionInitialized = true
+  styleBatchSelectionKey++
+  saveMessage = `Selected ${nextIds.length} scene object${nextIds.length === 1 ? '' : 's'} for the AI batch.`
+}
+
+function selectUnreimaginedStyleBatchCandidates() {
+  const nextIds = getUnreimaginedStyleBatchCandidateIds(editorNodes)
+
+  if (nextIds.length === 0) {
+    saveMessage =
+      'No unreimagined geometry candidates were found. Texture-only restyles and full mesh reimagines are tracked separately.'
+    return
+  }
+
+  styleBatchSelectionIds = nextIds
+  styleBatchSelectionInitialized = true
+  styleBatchSelectionKey++
+  saveMessage = `Selected ${nextIds.length} object${nextIds.length === 1 ? '' : 's'} that still need a full mesh reimagine.`
 }
 
 function clearStyleBatchCandidates() {
@@ -4387,6 +4434,22 @@ function setSaveMessageValue(value: string) {
   saveMessage = value
 }
 
+function removeSelectedNpc() {
+  const node = get(selectedEditorNodeStore)
+  if (!node?.npc) return
+
+  const nextNode = structuredClone(node)
+  nextNode.npc = undefined
+  executeSceneCommands([
+    {
+      type: 'replace-node',
+      nodeId: node.id,
+      node: nextNode,
+    },
+  ])
+  setSaveMessageValue(`Removed NPC component from ${node.name}`)
+}
+
 function setHierarchyFilterValue(value: string) {
   hierarchyFilter = value
 }
@@ -4597,6 +4660,7 @@ $: editorPanelPropContext = {
   setScaleSnap,
   setSurfaceSnapEnabled,
   setSurfaceSnapOffset,
+  removeSelectedNpc,
   undoScene,
   redoScene,
   updateLevelSetting,
@@ -4634,6 +4698,8 @@ $: editorPanelPropContext = {
   updateTupleField,
   applyStylePreset,
   selectAllStyleBatchCandidates,
+  selectCurrentStyleBatchCandidates,
+  selectUnreimaginedStyleBatchCandidates,
   clearStyleBatchCandidates,
   toggleStyleBatchCandidate,
   updateNodeStyleDescriptor,
@@ -4653,6 +4719,7 @@ $: editorPanelPropContext = {
 $: sceneTabProps = buildSceneTabProps(editorPanelPropContext)
 $: collisionTabProps = buildCollisionTabProps(editorPanelPropContext)
 $: environmentTabProps = buildEnvironmentTabProps(editorPanelPropContext)
+$: npcTabProps = buildNpcTabProps(editorPanelPropContext)
 $: playerTabProps = buildPlayerTabProps(editorPanelPropContext)
 $: createTabProps = buildCreateTabProps(editorPanelPropContext)
 $: inspectTabProps = buildInspectTabProps(editorPanelPropContext)
@@ -4930,6 +4997,16 @@ onDestroy(() => {
         </section>
       {/if}
 
+      {#if activeEditorTab === 'npc'}
+        <section class="editor-workspace" aria-label="NPC workspace">
+          <div class="editor-workspace-heading">
+            <div class="label">NPC Workspace</div>
+            <p>NPC actors, firefly fields, conversations, movement, lighting, and quality tiers.</p>
+          </div>
+          <EditorNpcTabHost {...npcTabProps} />
+        </section>
+      {/if}
+
       {#if activeEditorTab === 'performance'}
         <section class="editor-workspace" aria-label="Performance workspace">
           <div class="editor-workspace-heading">
@@ -5105,8 +5182,8 @@ onDestroy(() => {
       {#if activeEditorTab === 'ai'}
         <section class="editor-workspace" aria-label="AI Lab workspace">
           <div class="editor-workspace-heading">
-            <div class="label">Asset Regeneration</div>
-            <p>Scope the run, set art direction, regenerate assets, review output, then save and validate.</p>
+            <div class="label">AI Lab</div>
+            <p>Pick scene objects, choose texture restyle or full mesh reimagine, run or resume the batch, then review output.</p>
           </div>
           <EditorStyleTabHost
             workspaceMode="generation"
@@ -5132,8 +5209,8 @@ onDestroy(() => {
             bind:comfyUiLowVramMode
           />
           <details class="editor-section editor-advanced-block">
-            <summary class="label">Advanced AI Tools</summary>
-            <div class="save-message">Scratch generation, workflow-template browsing, direct Hunyuan job inspection, and manual apply controls live here.</div>
+            <summary class="label">Scratch Mesh And Workflow Debug</summary>
+            <div class="save-message">Manual scratch generation, workflow-template browsing, direct Hunyuan job inspection, and manual apply controls live here.</div>
             <EditorAiTabHost
               {...aiTabProps}
               bind:comfyUiApiUrl

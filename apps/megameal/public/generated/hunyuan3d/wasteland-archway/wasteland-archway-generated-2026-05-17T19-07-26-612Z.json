@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "615a1598f293233119865abc2743b600c77bb3a7d6a9a99f8fdeeda3d708a217"
+  },
+  "sourceName": "wasteland stone archway",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/lower-root-arch-2-2026-05-17T19-04-12-929Z/reference/lower-root-arch-2-reference-2026-05-17T19-05-19-734Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779044719806-8xpv6t",
+  "prompt": "object: arched entry structure marking the descent into the Hvergelmir depth area. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "fbdf404c913707644dd06fe1eb90e2d2111aabe2344fa757b4d13940d2c2e9ea"
+  },
+  "generatedAt": "2026-05-17T19:07:28.044Z"
+}

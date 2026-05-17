@@ -33,6 +33,8 @@ export let isMobile = false
 export let editorEnabled = false
 export let editorPlaytestEnabled = false
 export let collisionOverlayEnabled = false
+export let unloading = false
+export let physicsWorldSession = 0
 export let currentLevel = DEFAULT_LEVEL_ID
 export let currentLevelComponent: any = null
 export let parsedTimelineEvents: any[] = []
@@ -62,6 +64,7 @@ export let normalizeLevelId: (levelId: string) => string = levelId => levelId
 
 let activeLevelKey = currentLevel
 let activeLevelComponent = currentLevelComponent
+let activePhysicsWorldSession = physicsWorldSession
 let activeEditorPlaytestMode = editorPlaytestEnabled
 let previousEditorPlaytestEnabled = editorPlaytestEnabled
 let editorPlaytestRuntimeReady = false
@@ -250,7 +253,8 @@ function resetPhysicsReadiness() {
 }
 
 function resetWorldSession() {
-  worldSessionId += 1
+  worldSessionId = physicsWorldSession
+  activePhysicsWorldSession = physicsWorldSession
   activeLevelKey = currentLevel
   activeLevelComponent = currentLevelComponent
   activeEditorPlaytestMode = editorPlaytestEnabled
@@ -364,8 +368,14 @@ $: if (runtimeActivationStatus) {
   publishRuntimeActivationDiagnostic(runtimeActivationStatus)
 }
 $: if (
-  currentLevel !== activeLevelKey ||
+  currentLevelComponent &&
   currentLevelComponent !== activeLevelComponent
+) {
+  activeLevelComponent = currentLevelComponent
+}
+$: if (
+  physicsWorldSession !== activePhysicsWorldSession ||
+  currentLevel !== activeLevelKey
 ) {
   resetWorldSession()
 }
@@ -381,6 +391,7 @@ $: if (
         minSolverIterations: isMobile ? 8 : 16
       }}
       collisionDebugEnabled={collisionOverlayEnabled}
+      paused={unloading}
       on:physicsReady={() => {
         physicsReady = true
       }}

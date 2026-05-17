@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-17T00:24:38.956Z",
+  "generatedAt": "2026-05-17T15:27:06.624Z",
   "contentBuild": {
     "schemaVersion": 1,
-    "buildId": "runtime-assets-2026-05-17T00-24-38-956Z-85a96f6adcab",
-    "generatedAt": "2026-05-17T00:24:38.956Z",
+    "buildId": "runtime-assets-2026-05-17T15-27-06-624Z-0e3b908a4954",
+    "generatedAt": "2026-05-17T15:27:06.624Z",
     "builder": {
       "name": "cook-runtime-assets",
       "command": "pnpm --dir apps/game cook:runtime-assets"
     },
     "git": {
-      "branch": "dev",
-      "commit": "8a27dafed1398099aed4b44b6ba5bc5dc4cc26d1",
+      "branch": "main",
+      "commit": "85aa42a761d104ffe239100e2c9429c7fe03dbab",
       "dirty": true
     },
-    "fingerprint": "85a96f6adcab00bbd20df344cdc5ec1f6d0da4fddfd99eb1915490f828a9b20e",
+    "fingerprint": "0e3b908a4954fda0f065f70070a6d1eb368bd344e8523a1a90ef66ae01f73931",
     "rollback": {
       "strategy": "single-previous-manifest",
       "currentManifestUrl": "/generated/runtime-game-assets/manifest.json",
@@ -162,7 +162,7 @@
   "impostorAtlas": {
     "schemaVersion": 1,
     "strategy": "bounds-billboard-atlas",
-    "generatedAt": "2026-05-17T00:24:38.956Z",
+    "generatedAt": "2026-05-17T15:27:06.624Z",
     "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
     "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
     "tileSize": 256,
@@ -117833,7 +117833,7 @@
     "observatory": {
       "url": "/generated/runtime-game-assets/scenes/observatory.runtime-scene.json",
       "sourceScene": "apps/game/src/threlte/editor/scenes/observatory.scene.json",
-      "actorCount": 4,
+      "actorCount": 1,
       "requiredRenderActorCount": 0,
       "requiredAssetCount": 0,
       "runtimeAssetCount": 0,

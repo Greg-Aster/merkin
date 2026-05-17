@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-05-17T18:32:20.516Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "urd Shrine Column Left",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/urd-shrine-column-left-2026-05-17T18-31-15-644Z/source/urd-shrine-column-left.glb",
+  "prompt": "object: ritual support column placed beside a sacred well shrine, a freestanding vertical stone support. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "comfyUiLowVramMode": true,
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/urd-shrine-column-left-reference-2026-05-17T18-32-20-510Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/urd-shrine-column-left-2026-05-17T18-31-15-644Z/reference/urd-shrine-column-left-reference-2026-05-17T18-32-20-510Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/urd-shrine-column-left-reference-2026-05-17T18-32-20-510Z.png"
+}

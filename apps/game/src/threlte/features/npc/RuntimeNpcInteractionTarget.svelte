@@ -11,11 +11,13 @@ import type {
   RuntimeNpcActor,
   RuntimeNpcComponent,
   RuntimeNpcInteractionEvent,
+  RuntimeNpcLightBurstEvent,
 } from './runtimeNpcTypes'
 
 const dispatch = createEventDispatcher<{
   npcInteraction: RuntimeNpcInteractionEvent
   npcHover: { hovered: boolean }
+  npcLightBurst: RuntimeNpcLightBurstEvent
 }>()
 
 export let actor: RuntimeNpcActor
@@ -113,6 +115,9 @@ function syncInteractionRegistration(
       },
       onHover: (_data: unknown, hovered: boolean) => {
         dispatch('npcHover', { hovered })
+      },
+      onLightBurst: (_data: unknown, burst: RuntimeNpcLightBurstEvent) => {
+        dispatch('npcLightBurst', burst)
       },
     },
   })

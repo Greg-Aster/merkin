@@ -343,6 +343,18 @@ function validateFireflyPresentation({ actorId, presentation, errors }) {
       )
     }
   }
+
+  if (
+    presentation.shockwaveEnabled !== undefined &&
+    typeof presentation.shockwaveEnabled !== 'boolean'
+  ) {
+    pushIssue(
+      errors,
+      actorId,
+      'npc.presentation.shockwaveEnabled',
+      'must be a boolean.',
+    )
+  }
 }
 
 function validatePresentation({ actorId, npc, errors }) {

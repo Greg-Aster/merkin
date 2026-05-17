@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "261c4684fdd40680b54b3bc633e9cc28c15271dd41f834e86273ad00098a637a"
+  },
+  "sourceName": "Well of Mimir Root Shrine",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/well-of-mimir-root-shrine-2026-05-17T18-04-40-564Z/reference/well-of-mimir-root-shrine-reference-2026-05-17T18-05-49-261Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779041149323-s26mkf",
+  "prompt": "object: decorative sacred planter or root shrine object placed near a mythic well. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "43026e6f149d5219aa93c84614f97cd683d0e2379ab5c8e124c8b3b9c3c30c48"
+  },
+  "generatedAt": "2026-05-17T18:07:42.957Z"
+}

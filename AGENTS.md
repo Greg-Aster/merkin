@@ -10,6 +10,7 @@ These instructions apply to the whole repository. More specific `AGENTS.md` file
 - Do not revert unrelated dirty files or generated output unless explicitly asked.
 - Prefer existing helpers, shared packages, and local conventions over new abstractions.
 - Add abstractions only when they remove real duplication or clarify a shared contract.
+- Do not run smoke checks, browser boot checks, dev-server smoke tests, or full app smoke harnesses by default. The user will run the program and report runtime issues; use focused type checks, audits, unit tests, or generated-drift checks for validation unless the user explicitly requests a smoke check.
 
 ## Monorepo Boundaries
 
@@ -46,4 +47,3 @@ For stricter changed-file review before handing off a CSS-heavy change:
 ```bash
 pnpm --dir apps/megameal audit:css:changed
 ```
-

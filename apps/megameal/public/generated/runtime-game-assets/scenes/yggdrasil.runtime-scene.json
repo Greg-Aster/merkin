@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-17T00:24:38.956Z",
+  "generatedAt": "2026-05-17T15:27:06.624Z",
   "levelId": "yggdrasil",
   "sceneId": "yggdrasil",
   "source": {
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/yggdrasil.scene.json",
     "version": 1,
-    "updatedAt": "2026-05-17T02:18:06.268Z"
+    "updatedAt": "2026-05-17T17:40:29.057Z"
   },
   "levelDefinition": {
     "id": "yggdrasil",
     "version": 1,
-    "updatedAt": "2026-05-17T02:18:06.268Z",
+    "updatedAt": "2026-05-17T17:40:29.057Z",
     "spawn": {
       "player": [
         0,
-        3.7,
+        4.5,
         -118
       ],
       "rotation": [
@@ -77,7 +77,7 @@
         "spawn": {
           "position": [
             0,
-            3.7,
+            4.5,
             -118
           ],
           "rotation": [
@@ -230,8 +230,7 @@
               "ambient-occlusion",
               "color-grading",
               "bloom",
-              "vignette",
-              "kuwahara"
+              "vignette"
             ],
             "maxEnabledPasses": 6,
             "ambientOcclusion": {
@@ -248,7 +247,7 @@
             "toneMappingExposure": 0.98,
             "vignetteStrength": 0.6,
             "kuwahara": {
-              "enabled": true,
+              "enabled": false,
               "resolutionScale": 1,
               "mix": 1,
               "radius": 3
@@ -280,8 +279,7 @@
               "postProcessing": {
                 "passes": [
                   "tone-mapping",
-                  "color-grading",
-                  "kuwahara"
+                  "color-grading"
                 ],
                 "maxEnabledPasses": 3
               }
@@ -313,8 +311,7 @@
                   "tone-mapping",
                   "color-grading",
                   "bloom",
-                  "vignette",
-                  "kuwahara"
+                  "vignette"
                 ],
                 "maxEnabledPasses": 5
               }
@@ -347,8 +344,7 @@
                   "ambient-occlusion",
                   "color-grading",
                   "bloom",
-                  "vignette",
-                  "kuwahara"
+                  "vignette"
                 ],
                 "maxEnabledPasses": 6,
                 "ambientOcclusion": {
@@ -3211,7 +3207,8 @@
             "mode": "read-only",
             "title": "Well of Urd",
             "excerpt": "A sentinel glow hovers over Well of Urd.",
-            "body": "The waters of Well of Urd gather beneath one of Yggdrasil's great roots."
+            "body": "The waters of Well of Urd gather beneath one of Yggdrasil's great roots.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -3250,7 +3247,8 @@
               "mode": "read-only",
               "title": "Well of Urd",
               "excerpt": "A sentinel glow hovers over Well of Urd.",
-              "body": "The waters of Well of Urd gather beneath one of Yggdrasil's great roots."
+              "body": "The waters of Well of Urd gather beneath one of Yggdrasil's great roots.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -3540,7 +3538,8 @@
             "mode": "read-only",
             "title": "Well of Mimir",
             "excerpt": "A sentinel glow hovers over Well of Mimir.",
-            "body": "The waters of Well of Mimir gather beneath one of Yggdrasil's great roots."
+            "body": "The waters of Well of Mimir gather beneath one of Yggdrasil's great roots.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -3579,7 +3578,8 @@
               "mode": "read-only",
               "title": "Well of Mimir",
               "excerpt": "A sentinel glow hovers over Well of Mimir.",
-              "body": "The waters of Well of Mimir gather beneath one of Yggdrasil's great roots."
+              "body": "The waters of Well of Mimir gather beneath one of Yggdrasil's great roots.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -3869,7 +3869,8 @@
             "mode": "read-only",
             "title": "Hvergelmir Basin",
             "excerpt": "A sentinel glow hovers over Hvergelmir Basin.",
-            "body": "The waters of Hvergelmir Basin gather beneath one of Yggdrasil's great roots."
+            "body": "The waters of Hvergelmir Basin gather beneath one of Yggdrasil's great roots.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -3908,7 +3909,8 @@
               "mode": "read-only",
               "title": "Hvergelmir Basin",
               "excerpt": "A sentinel glow hovers over Hvergelmir Basin.",
-              "body": "The waters of Hvergelmir Basin gather beneath one of Yggdrasil's great roots."
+              "body": "The waters of Hvergelmir Basin gather beneath one of Yggdrasil's great roots.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -4638,7 +4640,8 @@
             "mode": "read-only",
             "title": "Caretaker of the Bough",
             "excerpt": "The firefly watches the roots and waits for travelers.",
-            "body": "Here stands Yggdrasil, ash of worlds, branch of heavens, root of memory. The wells gather at its feet and the old things still move in its shade."
+            "body": "Here stands Yggdrasil, ash of worlds, branch of heavens, root of memory. The wells gather at its feet and the old things still move in its shade.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -4677,7 +4680,8 @@
               "mode": "read-only",
               "title": "Caretaker of the Bough",
               "excerpt": "The firefly watches the roots and waits for travelers.",
-              "body": "Here stands Yggdrasil, ash of worlds, branch of heavens, root of memory. The wells gather at its feet and the old things still move in its shade."
+              "body": "Here stands Yggdrasil, ash of worlds, branch of heavens, root of memory. The wells gather at its feet and the old things still move in its shade.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -9331,7 +9335,8 @@
             "mode": "read-only",
             "title": "Root-Keeper of Yggdrasil",
             "excerpt": "A watchful spirit hovers where the central roots rise like a shrine.",
-            "body": "Traveler, do not mistake this tree for scenery. In the old Northern imagination, Yggdrasil binds heavens, worlds, roots, and the dead. Drink from no well lightly. Ask no branch to carry what you are unwilling to lose."
+            "body": "Traveler, do not mistake this tree for scenery. In the old Northern imagination, Yggdrasil binds heavens, worlds, roots, and the dead. Drink from no well lightly. Ask no branch to carry what you are unwilling to lose.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -9370,7 +9375,8 @@
               "mode": "read-only",
               "title": "Root-Keeper of Yggdrasil",
               "excerpt": "A watchful spirit hovers where the central roots rise like a shrine.",
-              "body": "Traveler, do not mistake this tree for scenery. In the old Northern imagination, Yggdrasil binds heavens, worlds, roots, and the dead. Drink from no well lightly. Ask no branch to carry what you are unwilling to lose."
+              "body": "Traveler, do not mistake this tree for scenery. In the old Northern imagination, Yggdrasil binds heavens, worlds, roots, and the dead. Drink from no well lightly. Ask no branch to carry what you are unwilling to lose.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -9430,7 +9436,8 @@
             "mode": "read-only",
             "title": "Huginn",
             "excerpt": "A pale spirit circles the lower crown like a thought given wings.",
-            "body": "Huginn, Thought, is one of the ravens most closely associated with Odin in later tradition. Here the raven is rendered as a spirit light: quick, circling, and restless."
+            "body": "Huginn, Thought, is one of the ravens most closely associated with Odin in later tradition. Here the raven is rendered as a spirit light: quick, circling, and restless.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -9469,7 +9476,8 @@
               "mode": "read-only",
               "title": "Huginn",
               "excerpt": "A pale spirit circles the lower crown like a thought given wings.",
-              "body": "Huginn, Thought, is one of the ravens most closely associated with Odin in later tradition. Here the raven is rendered as a spirit light: quick, circling, and restless."
+              "body": "Huginn, Thought, is one of the ravens most closely associated with Odin in later tradition. Here the raven is rendered as a spirit light: quick, circling, and restless.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -9529,7 +9537,8 @@
             "mode": "read-only",
             "title": "Muninn",
             "excerpt": "A second raven-spirit holds a wider orbit, slower and more deliberate.",
-            "body": "Muninn, Memory, completes the pair. In the level, the two raven spirits give motion and intelligence to the crown line without needing literal bird models."
+            "body": "Muninn, Memory, completes the pair. In the level, the two raven spirits give motion and intelligence to the crown line without needing literal bird models.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -9568,7 +9577,8 @@
               "mode": "read-only",
               "title": "Muninn",
               "excerpt": "A second raven-spirit holds a wider orbit, slower and more deliberate.",
-              "body": "Muninn, Memory, completes the pair. In the level, the two raven spirits give motion and intelligence to the crown line without needing literal bird models."
+              "body": "Muninn, Memory, completes the pair. In the level, the two raven spirits give motion and intelligence to the crown line without needing literal bird models.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -9628,7 +9638,8 @@
             "mode": "read-only",
             "title": "Dainn",
             "excerpt": "A green-gold light dips through the boughs, pausing where the leaves are thickest.",
-            "body": "One of the four stag spirits lingers where the branches broaden, evoking the old image of creatures feeding among the leaves."
+            "body": "One of the four stag spirits lingers where the branches broaden, evoking the old image of creatures feeding among the leaves.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -9667,7 +9678,8 @@
               "mode": "read-only",
               "title": "Dainn",
               "excerpt": "A green-gold light dips through the boughs, pausing where the leaves are thickest.",
-              "body": "One of the four stag spirits lingers where the branches broaden, evoking the old image of creatures feeding among the leaves."
+              "body": "One of the four stag spirits lingers where the branches broaden, evoking the old image of creatures feeding among the leaves.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -9727,7 +9739,8 @@
             "mode": "read-only",
             "title": "Dvalinn",
             "excerpt": "Another stag-spirit keeps to the western boughs, drifting in patient arcs.",
-            "body": "Together the stag spirits suggest the continual life and erosion within the canopy of Yggdrasil."
+            "body": "Together the stag spirits suggest the continual life and erosion within the canopy of Yggdrasil.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -9766,7 +9779,8 @@
               "mode": "read-only",
               "title": "Dvalinn",
               "excerpt": "Another stag-spirit keeps to the western boughs, drifting in patient arcs.",
-              "body": "Together the stag spirits suggest the continual life and erosion within the canopy of Yggdrasil."
+              "body": "Together the stag spirits suggest the continual life and erosion within the canopy of Yggdrasil.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -9826,7 +9840,8 @@
             "mode": "read-only",
             "title": "Serpent Omen",
             "excerpt": "A colder light drifts over the lower basin, never rising very high.",
-            "body": "Not every spirit around the world-tree is comforting. This one marks the unease and pressure associated with Hvergelmir and the gnawing root below."
+            "body": "Not every spirit around the world-tree is comforting. This one marks the unease and pressure associated with Hvergelmir and the gnawing root below.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -9865,7 +9880,8 @@
               "mode": "read-only",
               "title": "Serpent Omen",
               "excerpt": "A colder light drifts over the lower basin, never rising very high.",
-              "body": "Not every spirit around the world-tree is comforting. This one marks the unease and pressure associated with Hvergelmir and the gnawing root below."
+              "body": "Not every spirit around the world-tree is comforting. This one marks the unease and pressure associated with Hvergelmir and the gnawing root below.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -9925,7 +9941,8 @@
             "mode": "read-only",
             "title": "Bifrost Spark",
             "excerpt": "A shard of color drifts above the road into the roots.",
-            "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+            "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -9964,7 +9981,8 @@
               "mode": "read-only",
               "title": "Bifrost Spark",
               "excerpt": "A shard of color drifts above the road into the roots.",
-              "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+              "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -10024,7 +10042,8 @@
             "mode": "read-only",
             "title": "Bifrost Spark",
             "excerpt": "A shard of color drifts above the road into the roots.",
-            "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+            "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -10063,7 +10082,8 @@
               "mode": "read-only",
               "title": "Bifrost Spark",
               "excerpt": "A shard of color drifts above the road into the roots.",
-              "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+              "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -10123,7 +10143,8 @@
             "mode": "read-only",
             "title": "Bifrost Spark",
             "excerpt": "A shard of color drifts above the road into the roots.",
-            "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+            "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -10162,7 +10183,8 @@
               "mode": "read-only",
               "title": "Bifrost Spark",
               "excerpt": "A shard of color drifts above the road into the roots.",
-              "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+              "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -10921,7 +10943,8 @@
             "mode": "read-only",
             "title": "Eagle of the Crown",
             "excerpt": "A broad, regal spirit-light marks the eagle above the worlds.",
-            "body": "The crown-spirit moves in large, patient loops. It should read immediately as dominant and elevated, unlike the smaller, quicker wanderers below."
+            "body": "The crown-spirit moves in large, patient loops. It should read immediately as dominant and elevated, unlike the smaller, quicker wanderers below.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -10960,7 +10983,8 @@
               "mode": "read-only",
               "title": "Eagle of the Crown",
               "excerpt": "A broad, regal spirit-light marks the eagle above the worlds.",
-              "body": "The crown-spirit moves in large, patient loops. It should read immediately as dominant and elevated, unlike the smaller, quicker wanderers below."
+              "body": "The crown-spirit moves in large, patient loops. It should read immediately as dominant and elevated, unlike the smaller, quicker wanderers below.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -11020,7 +11044,8 @@
             "mode": "read-only",
             "title": "VeÃ°rfÃ¶lnir",
             "excerpt": "A smaller, sharper spirit circles close to the perch.",
-            "body": "VeÃ°rfÃ¶lnir is rendered as the quick, alert counterpoint to the slow and sovereign eagle-light."
+            "body": "VeÃ°rfÃ¶lnir is rendered as the quick, alert counterpoint to the slow and sovereign eagle-light.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -11059,7 +11084,8 @@
               "mode": "read-only",
               "title": "VeÃ°rfÃ¶lnir",
               "excerpt": "A smaller, sharper spirit circles close to the perch.",
-              "body": "VeÃ°rfÃ¶lnir is rendered as the quick, alert counterpoint to the slow and sovereign eagle-light."
+              "body": "VeÃ°rfÃ¶lnir is rendered as the quick, alert counterpoint to the slow and sovereign eagle-light.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -12165,7 +12191,8 @@
             "mode": "read-only",
             "title": "Nidhogg Omen",
             "excerpt": "A low, glacial light haunts the deeper tunnel between root and basin.",
-            "body": "This is not Nidhogg as a literal dragon model. It is an omen-light: low to the ground, colder than the other spirits, and visually associated with gnawing pressure beneath the tree."
+            "body": "This is not Nidhogg as a literal dragon model. It is an omen-light: low to the ground, colder than the other spirits, and visually associated with gnawing pressure beneath the tree.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -12204,7 +12231,8 @@
               "mode": "read-only",
               "title": "Nidhogg Omen",
               "excerpt": "A low, glacial light haunts the deeper tunnel between root and basin.",
-              "body": "This is not Nidhogg as a literal dragon model. It is an omen-light: low to the ground, colder than the other spirits, and visually associated with gnawing pressure beneath the tree."
+              "body": "This is not Nidhogg as a literal dragon model. It is an omen-light: low to the ground, colder than the other spirits, and visually associated with gnawing pressure beneath the tree.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -12295,7 +12323,8 @@
             "mode": "read-only",
             "title": "Threshold Spark",
             "excerpt": "A warm spark drifts near the foreground stones.",
-            "body": "These threshold sparks help stage the first view: they make the entry feel inhabited before the player reaches the main root court."
+            "body": "These threshold sparks help stage the first view: they make the entry feel inhabited before the player reaches the main root court.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -12334,7 +12363,8 @@
               "mode": "read-only",
               "title": "Threshold Spark",
               "excerpt": "A warm spark drifts near the foreground stones.",
-              "body": "These threshold sparks help stage the first view: they make the entry feel inhabited before the player reaches the main root court."
+              "body": "These threshold sparks help stage the first view: they make the entry feel inhabited before the player reaches the main root court.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -12394,7 +12424,8 @@
             "mode": "read-only",
             "title": "Threshold Spark",
             "excerpt": "A cooler spark marks the other side of the approach.",
-            "body": "Together the threshold sparks subtly pull the eye forward and inward toward the tree."
+            "body": "Together the threshold sparks subtly pull the eye forward and inward toward the tree.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -12433,7 +12464,8 @@
               "mode": "read-only",
               "title": "Threshold Spark",
               "excerpt": "A cooler spark marks the other side of the approach.",
-              "body": "Together the threshold sparks subtly pull the eye forward and inward toward the tree."
+              "body": "Together the threshold sparks subtly pull the eye forward and inward toward the tree.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -13030,7 +13062,8 @@
             "mode": "read-only",
             "title": "Ascent Guide Â· Lower Bough",
             "excerpt": "A warm guide-light marks the beginning of the climb.",
-            "body": "This guide spirit helps new visitors read the path upward."
+            "body": "This guide spirit helps new visitors read the path upward.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -13069,7 +13102,8 @@
               "mode": "read-only",
               "title": "Ascent Guide Â· Lower Bough",
               "excerpt": "A warm guide-light marks the beginning of the climb.",
-              "body": "This guide spirit helps new visitors read the path upward."
+              "body": "This guide spirit helps new visitors read the path upward.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -13129,7 +13163,8 @@
             "mode": "read-only",
             "title": "Ascent Guide Â· Mid Bough",
             "excerpt": "A cooler guide-light appears higher up, where the route starts to wrap the trunk.",
-            "body": "The mid-bough guide marks the turning point where the ascent becomes a true spiral around the world-tree."
+            "body": "The mid-bough guide marks the turning point where the ascent becomes a true spiral around the world-tree.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -13168,7 +13203,8 @@
               "mode": "read-only",
               "title": "Ascent Guide Â· Mid Bough",
               "excerpt": "A cooler guide-light appears higher up, where the route starts to wrap the trunk.",
-              "body": "The mid-bough guide marks the turning point where the ascent becomes a true spiral around the world-tree."
+              "body": "The mid-bough guide marks the turning point where the ascent becomes a true spiral around the world-tree.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -13228,7 +13264,8 @@
             "mode": "read-only",
             "title": "Ascent Guide Â· Crown Threshold",
             "excerpt": "Near the top, the guide-light slows, as if yielding the crown to older watchers.",
-            "body": "The upper guide spirit eases the handoff from traversal space to sacred crown space."
+            "body": "The upper guide spirit eases the handoff from traversal space to sacred crown space.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -13267,7 +13304,8 @@
               "mode": "read-only",
               "title": "Ascent Guide Â· Crown Threshold",
               "excerpt": "Near the top, the guide-light slows, as if yielding the crown to older watchers.",
-              "body": "The upper guide spirit eases the handoff from traversal space to sacred crown space."
+              "body": "The upper guide spirit eases the handoff from traversal space to sacred crown space.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -13301,7 +13339,7 @@
         "transform": {
           "position": [
             0,
-            1.9858620742907687,
+            2.7858620742907685,
             -118
           ],
           "rotation": [
@@ -13426,7 +13464,8 @@
             "mode": "read-only",
             "title": "Horizon Beacon 1",
             "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -13465,7 +13504,8 @@
               "mode": "read-only",
               "title": "Horizon Beacon 1",
               "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -13525,7 +13565,8 @@
             "mode": "read-only",
             "title": "Horizon Beacon 2",
             "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -13564,7 +13605,8 @@
               "mode": "read-only",
               "title": "Horizon Beacon 2",
               "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -13624,7 +13666,8 @@
             "mode": "read-only",
             "title": "Horizon Beacon 3",
             "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -13663,7 +13706,8 @@
               "mode": "read-only",
               "title": "Horizon Beacon 3",
               "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -13723,7 +13767,8 @@
             "mode": "read-only",
             "title": "Horizon Beacon 4",
             "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -13762,7 +13807,8 @@
               "mode": "read-only",
               "title": "Horizon Beacon 4",
               "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -13822,7 +13868,8 @@
             "mode": "read-only",
             "title": "Horizon Beacon 5",
             "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -13861,7 +13908,8 @@
               "mode": "read-only",
               "title": "Horizon Beacon 5",
               "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -13921,7 +13969,8 @@
             "mode": "read-only",
             "title": "Horizon Beacon 6",
             "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+            "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -13960,7 +14009,8 @@
               "mode": "read-only",
               "title": "Horizon Beacon 6",
               "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+              "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -17268,7 +17318,8 @@
             "mode": "read-only",
             "title": "Outer Shoal North Beacon",
             "excerpt": "A distant light hangs above the outer shoal.",
-            "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+            "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -17307,7 +17358,8 @@
               "mode": "read-only",
               "title": "Outer Shoal North Beacon",
               "excerpt": "A distant light hangs above the outer shoal.",
-              "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+              "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -17653,7 +17705,8 @@
             "mode": "read-only",
             "title": "Outer Shoal South Beacon",
             "excerpt": "A distant light hangs above the outer shoal.",
-            "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+            "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -17692,7 +17745,8 @@
               "mode": "read-only",
               "title": "Outer Shoal South Beacon",
               "excerpt": "A distant light hangs above the outer shoal.",
-              "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+              "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -18038,7 +18092,8 @@
             "mode": "read-only",
             "title": "Outer Shoal East Beacon",
             "excerpt": "A distant light hangs above the outer shoal.",
-            "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+            "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -18077,7 +18132,8 @@
               "mode": "read-only",
               "title": "Outer Shoal East Beacon",
               "excerpt": "A distant light hangs above the outer shoal.",
-              "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+              "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -18443,7 +18499,8 @@
             "mode": "read-only",
             "title": "Outer Shoal West Beacon",
             "excerpt": "A distant light hangs above the outer shoal.",
-            "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+            "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -18482,7 +18539,8 @@
               "mode": "read-only",
               "title": "Outer Shoal West Beacon",
               "excerpt": "A distant light hangs above the outer shoal.",
-              "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+              "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -18848,7 +18906,8 @@
             "mode": "read-only",
             "title": "Broken Root Islet Beacon",
             "excerpt": "A distant light hangs above the outer shoal.",
-            "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+            "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+            "durationMs": 7000
           },
           "behavior": {
             "type": "hover-wander",
@@ -18887,7 +18946,8 @@
               "mode": "read-only",
               "title": "Broken Root Islet Beacon",
               "excerpt": "A distant light hangs above the outer shoal.",
-              "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+              "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+              "durationMs": 7000
             },
             "behavior": {
               "type": "hover-wander",
@@ -19392,7 +19452,7 @@
               "runtimeActorId": "yggdrasil-player-spawn",
               "player": [
                 0,
-                3.7,
+                4.5,
                 -118
               ]
             },
@@ -19571,7 +19631,7 @@
       "spawn": {
         "player": [
           0,
-          3.7,
+          4.5,
           -118
         ],
         "valid": true,
@@ -19807,7 +19867,7 @@
               "runtimeActorId": "yggdrasil-player-spawn",
               "player": [
                 0,
-                3.7,
+                4.5,
                 -118
               ]
             },
@@ -19986,7 +20046,7 @@
       "spawn": {
         "player": [
           0,
-          3.7,
+          4.5,
           -118
         ],
         "valid": true,
@@ -24926,8 +24986,7 @@
           "ambient-occlusion",
           "color-grading",
           "bloom",
-          "vignette",
-          "kuwahara"
+          "vignette"
         ],
         "maxEnabledPasses": 6,
         "ambientOcclusion": {
@@ -24944,7 +25003,7 @@
         "toneMappingExposure": 0.98,
         "vignetteStrength": 0.6,
         "kuwahara": {
-          "enabled": true,
+          "enabled": false,
           "resolutionScale": 1,
           "mix": 1,
           "radius": 3
@@ -24976,8 +25035,7 @@
           "postProcessing": {
             "passes": [
               "tone-mapping",
-              "color-grading",
-              "kuwahara"
+              "color-grading"
             ],
             "maxEnabledPasses": 3
           }
@@ -25009,8 +25067,7 @@
               "tone-mapping",
               "color-grading",
               "bloom",
-              "vignette",
-              "kuwahara"
+              "vignette"
             ],
             "maxEnabledPasses": 5
           }
@@ -25043,8 +25100,7 @@
               "ambient-occlusion",
               "color-grading",
               "bloom",
-              "vignette",
-              "kuwahara"
+              "vignette"
             ],
             "maxEnabledPasses": 6,
             "ambientOcclusion": {

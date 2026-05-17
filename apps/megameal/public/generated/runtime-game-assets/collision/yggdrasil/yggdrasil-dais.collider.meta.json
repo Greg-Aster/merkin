@@ -1,164 +1,164 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-15T02:10:26.988Z",
+  "generatedAt": "2026-05-17T22:11:01.771Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-dais",
-  "sourceAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
-  "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+  "sourceAssetUrl": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.glb",
   "sourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "d688da798fe6bca82a669d215af2befab9e383f1bf26e073b46ad1c58316cdbf"
+    "value": "d842e8bd04bb78d3afbbc67b92b236a3b5e19b6ef7515d25ed57336d88d95ede"
   },
-  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.low.glb",
-  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.low.glb",
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.low.glb",
   "colliderSourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "6bf74b9774b52a5d7f95557258241a93b2ea4a4786e89ff6f6a0e0295a3a6ba3"
+    "value": "1d767b16731613b238d01f6595b983532b1613da2ec2ad078c01c5f9d86ae613"
   },
   "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:6bf74b9774b52a5d7f95557258241a93b2ea4a4786e89ff6f6a0e0295a3a6ba3:be54a1f5e05e7e5556172be4aa08f89dc5b185b9c0ba273a6fe5e92e6bbcb3d8:fd06eacdcd1c855df84154cdc78b13b7de37df3104672e59e6dcda5ebf43fb9b",
-  "triangleCount": 56,
-  "vertexCount": 62,
+  "colliderCacheKey": "mesh-collision-manager-v2:1d767b16731613b238d01f6595b983532b1613da2ec2ad078c01c5f9d86ae613:210904bf699fa8373b03ba75256ee97b3079f639a12b64bd3fd99ada1cb19d36:fd06eacdcd1c855df84154cdc78b13b7de37df3104672e59e6dcda5ebf43fb9b",
+  "triangleCount": 11394,
+  "vertexCount": 11169,
   "bounds": {
     "min": [
-      -36,
-      -1.600000023841858,
-      -36
+      -0.9985710382461548,
+      -0.21231570839881897,
+      -1.0002096891403198
     ],
     "max": [
-      36,
-      1.600000023841858,
-      36
+      0.9729703068733215,
+      0.17823654413223267,
+      0.9711297750473022
     ],
     "size": [
-      72,
-      3.200000047683716,
-      72
+      1.9715413451194763,
+      0.39055225253105164,
+      1.971339464187622
     ],
     "center": [
-      0,
-      0,
-      0
+      -0.012800365686416626,
+      -0.017039582133293152,
+      -0.014539957046508789
     ]
   },
   "rawColliderBounds": {
     "min": [
-      -31947,
-      -1456,
-      -32767
+      -32767,
+      -6472,
+      -32763
     ],
     "max": [
-      31947,
-      1456,
-      32767
+      32767,
+      6492,
+      32679
     ],
     "size": [
-      63894,
-      2912,
-      65534
+      65534,
+      12964,
+      65442
     ],
     "center": [
       0,
-      0,
-      0
+      10,
+      -42
     ]
   },
   "visualLocalBounds": {
     "min": [
-      -36,
-      -1.600000023841858,
-      -36
+      -0.9985710382461548,
+      -0.21231570839881897,
+      -1.0002096891403198
     ],
     "max": [
-      36,
-      1.600000023841858,
-      36
+      0.9729703068733215,
+      0.17823654413223267,
+      0.9711297750473022
     ],
     "size": [
-      72,
-      3.200000047683716,
-      72
+      1.9715413451194763,
+      0.39055225253105164,
+      1.971339464187622
     ],
     "center": [
-      0,
-      0,
-      0
+      -0.012800365686416626,
+      -0.017039582133293152,
+      -0.014539957046508789
     ]
   },
   "colliderLocalBounds": {
     "min": [
-      -36,
-      -1.600000023841858,
-      -36
+      -0.9985710382461548,
+      -0.21231570839881897,
+      -1.0002096891403198
     ],
     "max": [
-      36,
-      1.600000023841858,
-      36
+      0.9729703068733215,
+      0.17823654413223267,
+      0.9711297750473022
     ],
     "size": [
-      72,
-      3.200000047683716,
-      72
+      1.9715413451194763,
+      0.39055225253105164,
+      1.971339464187622
     ],
     "center": [
-      0,
-      0,
-      0
+      -0.012800365686416626,
+      -0.017039582133293152,
+      -0.014539957046508789
     ]
   },
   "assetLocalTransform": {
     "schemaVersion": 1,
     "coordinateSpaceVersion": 1,
-    "sourceAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.glb",
     "sourceNodeName": "Well Dais",
     "visualLocalBounds": {
       "min": [
-        -36,
-        -1.600000023841858,
-        -36
+        -0.9985710382461548,
+        -0.21231570839881897,
+        -1.0002096891403198
       ],
       "max": [
-        36,
-        1.600000023841858,
-        36
+        0.9729703068733215,
+        0.17823654413223267,
+        0.9711297750473022
       ],
       "size": [
-        72,
-        3.200000047683716,
-        72
+        1.9715413451194763,
+        0.39055225253105164,
+        1.971339464187622
       ],
       "center": [
-        0,
-        0,
-        0
+        -0.012800365686416626,
+        -0.017039582133293152,
+        -0.014539957046508789
       ]
     },
     "colliderLocalBounds": {
       "min": [
-        -36,
-        -1.600000023841858,
-        -36
+        -0.9985710382461548,
+        -0.21231570839881897,
+        -1.0002096891403198
       ],
       "max": [
-        36,
-        1.600000023841858,
-        36
+        0.9729703068733215,
+        0.17823654413223267,
+        0.9711297750473022
       ],
       "size": [
-        72,
-        3.200000047683716,
-        72
+        1.9715413451194763,
+        0.39055225253105164,
+        1.971339464187622
       ],
       "center": [
-        0,
-        0,
-        0
+        -0.012800365686416626,
+        -0.017039582133293152,
+        -0.014539957046508789
       ]
     },
     "visualToPhysicsMatrix": [
@@ -201,25 +201,25 @@
   "provenance": {
     "sourceActorId": "yggdrasil-dais",
     "sourceActorName": "Well Dais",
-    "sourceAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
-    "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.glb",
     "sourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "d688da798fe6bca82a669d215af2befab9e383f1bf26e073b46ad1c58316cdbf"
+      "value": "d842e8bd04bb78d3afbbc67b92b236a3b5e19b6ef7515d25ed57336d88d95ede"
     },
-    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.low.glb",
-    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.low.glb",
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.low.glb",
     "colliderSourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "6bf74b9774b52a5d7f95557258241a93b2ea4a4786e89ff6f6a0e0295a3a6ba3"
+      "value": "1d767b16731613b238d01f6595b983532b1613da2ec2ad078c01c5f9d86ae613"
     },
     "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "yggdrasil",
       "nodeId": "yggdrasil-dais",
-      "sourceAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
-      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.low.glb",
+      "sourceAssetUrl": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.low.glb",
       "lodSourceTier": "low",
       "intent": "walkable",
       "channel": "worldStatic",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-15T02:10:26.988Z"
+    "generatedAt": "2026-05-17T22:11:01.771Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -245,11 +245,11 @@
     "sourceKind": "asset",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "6bf74b9774b52a5d7f95557258241a93b2ea4a4786e89ff6f6a0e0295a3a6ba3"
+      "value": "1d767b16731613b238d01f6595b983532b1613da2ec2ad078c01c5f9d86ae613"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
-      "value": "be54a1f5e05e7e5556172be4aa08f89dc5b185b9c0ba273a6fe5e92e6bbcb3d8"
+      "value": "210904bf699fa8373b03ba75256ee97b3079f639a12b64bd3fd99ada1cb19d36"
     },
     "policyFingerprint": {
       "algorithm": "sha256",
@@ -258,42 +258,42 @@
     "shape": "trimesh",
     "localBounds": {
       "min": [
-        -36,
-        -1.600000023841858,
-        -36
+        -0.9985710382461548,
+        -0.21231570839881897,
+        -1.0002096891403198
       ],
       "max": [
-        36,
-        1.600000023841858,
-        36
+        0.9729703068733215,
+        0.17823654413223267,
+        0.9711297750473022
       ],
       "size": [
-        72,
-        3.200000047683716,
-        72
+        1.9715413451194763,
+        0.39055225253105164,
+        1.971339464187622
       ],
       "center": [
-        0,
-        0,
-        0
+        -0.012800365686416626,
+        -0.017039582133293152,
+        -0.014539957046508789
       ]
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.low.glb",
-    "visualSourceMeshUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
-    "triangleCount": 56,
-    "vertexCount": 62,
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.glb",
+    "triangleCount": 11394,
+    "vertexCount": 11169,
     "triangleBudget": 12000
   },
   "simplification": {
-    "requested": false,
-    "applied": false,
-    "sourceTriangleCount": 56,
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 14000,
     "targetTriangleBudget": 12000,
-    "ratio": 1,
+    "ratio": 0.8142857142857142,
     "tool": "gltf-transform",
-    "prepass": "none",
+    "prepass": "weld",
     "error": 0.05
   }
 }

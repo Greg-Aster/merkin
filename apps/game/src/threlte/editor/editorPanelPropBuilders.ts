@@ -252,6 +252,7 @@ export type EditorPanelPropBuilderContext = {
   setScaleSnap: (value: number) => void
   setSurfaceSnapEnabled: (value: boolean) => void
   setSurfaceSnapOffset: (value: number) => void
+  removeSelectedNpc: () => void
   undoScene: () => boolean
   redoScene: () => boolean
   updateLevelSetting: AnyFunction
@@ -288,6 +289,8 @@ export type EditorPanelPropBuilderContext = {
   updateTupleField: AnyFunction
   applyStylePreset: (presetId: string) => void
   selectAllStyleBatchCandidates: () => void
+  selectCurrentStyleBatchCandidates: () => void
+  selectUnreimaginedStyleBatchCandidates: () => void
   clearStyleBatchCandidates: () => void
   toggleStyleBatchCandidate: (candidateId: string, selected: boolean) => void
   updateNodeStyleDescriptor: (candidateId: string, descriptor: string) => void
@@ -430,6 +433,26 @@ export function buildEnvironmentTabProps(
     viewportShadingMode: editorState?.viewportShadingMode ?? 'rendered',
     onSetViewportLightingMode: context.setEditorViewportLightingMode,
     onSetViewportShadingMode: context.setEditorViewportShadingMode,
+  }
+}
+
+export function buildNpcTabProps(context: EditorPanelPropBuilderContext) {
+  return {
+    levelId: context.levelId,
+    editorScene: context.editorScene,
+    selectedNode: context.selectedNode,
+    selectedNodes: context.selectedNodes,
+    levelSettings: context.levelSettings,
+    updateLevelSetting: context.updateLevelSetting,
+    updateLevelNumericSetting: context.updateLevelNumericSetting,
+    onNpcChange: context.inspectorController.updateNpcField,
+    onAddFirefly: () =>
+      context.createController.addPrimitivePrefab('npc-firefly'),
+    onAddFireflyToSelection: context.createController.addFireflyToSelection,
+    onDuplicateSelection: context.createController.duplicateSelection,
+    onRemoveSelectedNpc: context.removeSelectedNpc,
+    onSelectNode: (nodeId: string) =>
+      context.handleHierarchySelection(nodeId, new MouseEvent('click')),
   }
 }
 
@@ -787,6 +810,9 @@ export function buildStyleTabProps(context: EditorPanelPropBuilderContext) {
     onRunRetexture: () => context.styleController.runStyleBake('texture'),
     onRunReimagine: () => context.styleController.runStyleBake('generate'),
     onSelectAllBatchCandidates: context.selectAllStyleBatchCandidates,
+    onSelectCurrentBatchCandidates: context.selectCurrentStyleBatchCandidates,
+    onSelectUnreimaginedBatchCandidates:
+      context.selectUnreimaginedStyleBatchCandidates,
     onClearBatchCandidates: context.clearStyleBatchCandidates,
     onPauseBatch: () => void context.styleController.pauseActiveHunyuanJobs(),
     onCancelBatch: () => void context.styleController.cancelActiveHunyuanJobs(),

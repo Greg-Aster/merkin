@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/well-of-mimir-ring-2026-05-17T17-58-17-639Z/well-of-mimir-ring.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "e5eed99c44519c024443ca7dd17a84b5db10616bacec47b20f9e17a1c591f1fe"
+  },
+  "sourceName": "Well of Mimir Ring",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/well-of-mimir-ring-2026-05-17T17-58-17-642Z/reference/well-of-mimir-ring-reference-2026-05-17T17-59-30-343Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779040770386-pyqgjs",
+  "prompt": "object: well of mimir ring, carved circular stone ring around a sacred well. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "5c05a5c51976a814ea7a492b7547700c1e306225adae77136f8fab100594a984"
+  },
+  "generatedAt": "2026-05-17T18:01:19.608Z"
+}

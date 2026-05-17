@@ -56,7 +56,7 @@ export type EditorNpcPatch =
     }
   | {
       scope: 'behaviorNumber'
-      field: 'radius' | 'speed' | 'bobAmplitude' | 'bobSpeed'
+      field: 'radius' | 'speed' | 'hoverHeight' | 'bobAmplitude' | 'bobSpeed'
       value: string
     }
   | {
@@ -73,7 +73,15 @@ export type EditorNpcPatch =
         | 'lightDistance'
         | 'lightDecay'
         | 'twinkleSpeed'
+        | 'lightBurstBoost'
+        | 'selectionLightBoost'
+        | 'lightBurstSpriteBoost'
       value: string
+    }
+  | {
+      scope: 'presentationBoolean'
+      field: 'shockwaveEnabled'
+      value: boolean
     }
 
 export function createDefaultFireflyNpc(options: {
@@ -107,6 +115,7 @@ export function createDefaultFireflyNpc(options: {
       type: 'hover-wander',
       radius: 0.16,
       speed: 0.18,
+      hoverHeight: 0.28,
       bobAmplitude: 0.08,
       bobSpeed: 0.55,
     },
@@ -120,6 +129,10 @@ export function createDefaultFireflyNpc(options: {
       lightDistance: 4.6,
       lightDecay: 1.25,
       twinkleSpeed: 0.9,
+      lightBurstBoost: 1.25,
+      selectionLightBoost: 3,
+      lightBurstSpriteBoost: 0.55,
+      shockwaveEnabled: false,
     },
   }
 }
@@ -253,6 +266,10 @@ export function applyEditorNpcPatch(
                 npc.behavior?.type === 'hover-wander'
                   ? npc.behavior.speed
                   : 0.18,
+              hoverHeight:
+                npc.behavior?.type === 'hover-wander'
+                  ? npc.behavior.hoverHeight
+                  : 0.28,
               bobAmplitude:
                 npc.behavior?.type === 'hover-wander'
                   ? npc.behavior.bobAmplitude
@@ -298,6 +315,17 @@ export function applyEditorNpcPatch(
       presentation: {
         ...npc.presentation,
         [patch.field]: numericValue,
+      },
+    }
+  }
+
+  if (patch.scope === 'presentationBoolean') {
+    if (npc.presentation.type !== 'firefly') return npc
+    return {
+      ...npc,
+      presentation: {
+        ...npc.presentation,
+        [patch.field]: patch.value,
       },
     }
   }

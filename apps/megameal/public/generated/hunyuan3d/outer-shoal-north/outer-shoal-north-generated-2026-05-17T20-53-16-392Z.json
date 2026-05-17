@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/outer-shoal-north-2026-05-17T20-50-17-626Z/outer-shoal-north.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "9486b77e8a63a1bbf4eb314fd4f99dc636d851cf53a287cf9692b7b8235fe281"
+  },
+  "sourceName": "Outer Shoal North",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/outer-shoal-north-2026-05-17T20-50-17-629Z/reference/outer-shoal-north-reference-2026-05-17T20-51-28-361Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779051088491-1w808t",
+  "prompt": "object: small outer islet or shoal beyond the main island, a distant low landmass. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "ec9dac2b511349c9ef34f33d26e9debcadab4417ddce02432631acd72b388b5b"
+  },
+  "generatedAt": "2026-05-17T20:53:18.123Z"
+}

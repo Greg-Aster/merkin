@@ -18,7 +18,7 @@ export type KuwaharaPassOptions = {
 
 const DEFAULT_RADIUS = 2
 const DEFAULT_MIX = 0.55
-const DEFAULT_RESOLUTION_SCALE = 0.75
+const DEFAULT_RESOLUTION_SCALE = 1
 const MIN_RADIUS = 1
 const MAX_RADIUS = 4
 const MIN_RESOLUTION_SCALE = 0.35

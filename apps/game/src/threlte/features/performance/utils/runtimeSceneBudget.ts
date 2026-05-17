@@ -18,6 +18,8 @@ export interface RuntimePropBudget {
 export interface RuntimePointLightBudget {
   enabled: boolean
   cullDistance: number
+  maxVisibleCount: number
+  maxDistance: number
   intensityScale: number
   rangeScale: number
 }
@@ -76,30 +78,40 @@ const POINT_LIGHT_BUDGETS: Record<RuntimeQualityTier, RuntimePointLightBudget> =
     ultra_low: {
       enabled: false,
       cullDistance: 0,
+      maxVisibleCount: 0,
+      maxDistance: 0,
       intensityScale: 0,
       rangeScale: 0,
     },
     low: {
       enabled: false,
       cullDistance: 0,
+      maxVisibleCount: 0,
+      maxDistance: 0,
       intensityScale: 0,
       rangeScale: 0,
     },
     medium: {
       enabled: true,
       cullDistance: 18,
+      maxVisibleCount: 4,
+      maxDistance: 10,
       intensityScale: 0.72,
       rangeScale: 0.75,
     },
     high: {
       enabled: true,
       cullDistance: 28,
+      maxVisibleCount: 8,
+      maxDistance: 16,
       intensityScale: 0.88,
       rangeScale: 0.9,
     },
     ultra: {
       enabled: true,
       cullDistance: 40,
+      maxVisibleCount: 12,
+      maxDistance: 24,
       intensityScale: 1,
       rangeScale: 1,
     },
@@ -123,6 +135,8 @@ export function getRuntimePointLightBudget(
       intensityScale: 0,
       rangeScale: 0,
       cullDistance: 0,
+      maxVisibleCount: 0,
+      maxDistance: 0,
     }
   }
 
@@ -206,12 +220,19 @@ export function resolveRuntimePointLightVisibility({
   sourceDistance: number
 }): RuntimePointLightVisibility {
   const budget = policy.pointLightBudget
-  const visible = budget.enabled && distanceToCamera <= budget.cullDistance
+  const sourceEnabled = sourceIntensity > 0
+  const visible =
+    sourceEnabled && budget.enabled && distanceToCamera <= budget.cullDistance
+  const sourceRange = sourceDistance > 0 ? sourceDistance : budget.maxDistance
+  const resolvedDistance = Math.min(
+    sourceRange * budget.rangeScale,
+    budget.maxDistance,
+  )
 
   return {
     visible,
     intensity: visible ? sourceIntensity * budget.intensityScale : 0,
-    distance: visible ? sourceDistance * budget.rangeScale : 0,
+    distance: visible ? resolvedDistance : 0,
   }
 }
 

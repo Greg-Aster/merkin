@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/island-shelf-2026-05-17T17-36-43-031Z/island-shelf.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "404ce80f47c4de4cdaffeed291bb707bec0afd77d45b73fd65ee05b3d18e6ef2"
+  },
+  "sourceName": "Island Shelf",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/island-shelf-2026-05-17T17-36-43-046Z/reference/island-shelf-reference-2026-05-17T17-38-57-030Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779039537966-e7xfui",
+  "prompt": "object: broad low outer island shelf of weathered sacred stone forming the perimeter terrace around the central island. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "cf11fb6e5b9978439c8ded54dc30bbd883d7eb2d086c2c0cc9f7c4a71f9585ee"
+  },
+  "generatedAt": "2026-05-17T17:41:16.331Z"
+}

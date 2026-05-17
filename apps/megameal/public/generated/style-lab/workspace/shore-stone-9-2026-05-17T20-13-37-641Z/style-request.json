@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-05-17T20:14:47.111Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Shore Stone 9",
+  "sourceAssetUrl": "/generated/style-lab/sources/shore-stone-9-2026-05-14T23-56-49-651Z/shore-stone-9.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/shore-stone-9-2026-05-14T23-56-49-651Z/shore-stone-9.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/shore-stone-9-2026-05-17T20-13-37-641Z/source/shore-stone-9.glb",
+  "prompt": "object: low shoreline boulder or broken coastal slab resting near the edge of the island. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "comfyUiLowVramMode": true,
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/shore-stone-9-reference-2026-05-17T20-14-47-105Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/shore-stone-9-2026-05-17T20-13-37-641Z/reference/shore-stone-9-reference-2026-05-17T20-14-47-105Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/shore-stone-9-reference-2026-05-17T20-14-47-105Z.png"
+}

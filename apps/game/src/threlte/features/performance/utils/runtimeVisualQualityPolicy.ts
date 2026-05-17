@@ -108,7 +108,7 @@ export function resolveRuntimePostProcessingPolicy({
   const kuwaharaRadius = Math.round(clampNumber(kuwahara?.radius ?? 2, 1, 4))
   const kuwaharaMix = clampNumber(kuwahara?.mix ?? 0.55, 0, 1)
   const kuwaharaResolutionScale = clampNumber(
-    kuwahara?.resolutionScale ?? 0.75,
+    kuwahara?.resolutionScale ?? 1,
     0.35,
     1,
   )
@@ -174,7 +174,7 @@ export function resolveRuntimePostProcessingPolicy({
     kuwaharaEnabled,
     kuwaharaRadius: kuwaharaEnabled ? kuwaharaRadius : 0,
     kuwaharaMix: kuwaharaEnabled ? kuwaharaMix : 0,
-    kuwaharaResolutionScale: kuwaharaEnabled ? kuwaharaResolutionScale : 0.75,
+    kuwaharaResolutionScale: kuwaharaEnabled ? kuwaharaResolutionScale : 1,
     vignetteStrength: clampNumber(
       profileAllowsPost && profileAllowsVignette
         ? visualStyle.screenFx.vignetteStrength *

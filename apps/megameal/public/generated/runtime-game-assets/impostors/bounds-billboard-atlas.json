@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "strategy": "bounds-billboard-atlas",
-  "generatedAt": "2026-05-17T00:24:38.956Z",
+  "generatedAt": "2026-05-17T15:27:06.624Z",
   "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
   "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
   "tileSize": 256,

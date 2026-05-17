@@ -2,6 +2,7 @@ export type EditorPanelTab =
   | 'scene'
   | 'create'
   | 'world'
+  | 'npc'
   | 'performance'
   | 'bake'
   | 'collision'

@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/approach-stone-1/approach-stone-1-texture-wrap-2026-05-15T00-00-50-964Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "69db73c77ec922ef1af6b83bee11297df9a6fef8a5bbc66a573459c17d0f7b81"
+  },
+  "sourceName": "Approach Stone 1",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/approach-stone-1-2026-05-17T18-13-35-958Z/reference/approach-stone-1-reference-2026-05-17T18-14-40-762Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779041680838-t5p8kv",
+  "prompt": "object: broad rectangular stepping slab set into the main approach route, a flat walkable path stone. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "40c8b1e83dd83d49b171e6de568082bf3a20accac1a84a68de9d7f0d936c32df"
+  },
+  "generatedAt": "2026-05-17T18:16:41.375Z"
+}

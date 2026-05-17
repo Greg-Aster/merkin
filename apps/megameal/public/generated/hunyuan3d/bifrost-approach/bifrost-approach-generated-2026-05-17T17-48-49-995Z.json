@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/bifrost-approach-2026-05-17T17-45-01-551Z/bifrost-approach.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "e0da066eeb25dc959277e3e427bc96cf0ebbbfdee53fb725d26a196fc521a812"
+  },
+  "sourceName": "Bifrost Approach",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/bifrost-approach-2026-05-17T17-45-01-566Z/reference/bifrost-approach-reference-2026-05-17T17-46-32-604Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779039992643-cxf5bs",
+  "prompt": "object: long straight ceremonial causeway of sacred stone leading toward the island center, a path rather than a bridge or arch. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "1edf1bb7fec9f756b10d52fe64c597ebd215f006abee7cba74a80441580118e3"
+  },
+  "generatedAt": "2026-05-17T17:48:51.393Z"
+}

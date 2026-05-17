@@ -1,7 +1,7 @@
 {
   "levelId": "yggdrasil",
   "version": 1,
-  "updatedAt": "2026-05-17T02:18:06.268Z",
+  "updatedAt": "2026-05-17T22:15:06.184Z",
   "settings": {
     "level": {
       "collision": {
@@ -207,8 +207,7 @@
             "ambient-occlusion",
             "color-grading",
             "bloom",
-            "vignette",
-            "kuwahara"
+            "vignette"
           ],
           "maxEnabledPasses": 6,
           "ambientOcclusion": {
@@ -225,7 +224,7 @@
           "toneMappingExposure": 0.98,
           "vignetteStrength": 0.6,
           "kuwahara": {
-            "enabled": true,
+            "enabled": false,
             "resolutionScale": 1,
             "mix": 1,
             "radius": 3
@@ -257,8 +256,7 @@
             "postProcessing": {
               "passes": [
                 "tone-mapping",
-                "color-grading",
-                "kuwahara"
+                "color-grading"
               ],
               "maxEnabledPasses": 3
             }
@@ -290,8 +288,7 @@
                 "tone-mapping",
                 "color-grading",
                 "bloom",
-                "vignette",
-                "kuwahara"
+                "vignette"
               ],
               "maxEnabledPasses": 5
             }
@@ -324,8 +321,7 @@
                 "ambient-occlusion",
                 "color-grading",
                 "bloom",
-                "vignette",
-                "kuwahara"
+                "vignette"
               ],
               "maxEnabledPasses": 6,
               "ambientOcclusion": {
@@ -464,7 +460,7 @@
     {
       "id": "yggdrasil-island-shelf",
       "name": "Island Shelf",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         0.9231075073586914,
@@ -477,9 +473,9 @@
         0
       ],
       "scale": [
-        1.1502737988572271,
-        1.1502737988572271,
-        1.1502737988572271
+        177.0727364796435,
+        13.630612244897959,
+        177.39072471414224
       ],
       "visible": true,
       "collision": {
@@ -490,25 +486,22 @@
         "lodTier": "source",
         "friction": 0.93
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          118,
-          152,
-          3.6,
-          48
-        ],
-        "color": "#43513a",
-        "emissive": "#000000",
-        "emissiveIntensity": 0,
-        "metalness": 0.03,
-        "roughness": 0.97
-      },
       "material": {
         "envMapIntensity": 0.08
       },
       "generation": {
-        "descriptor": "broad low outer island shelf of weathered sacred stone forming the perimeter terrace around the central island"
+        "descriptor": "broad low outer island shelf of weathered sacred stone forming the perimeter terrace around the central island",
+        "originalAssetUrl": "/generated/style-lab/sources/island-shelf-2026-05-17T17-36-43-031Z/island-shelf.glb",
+        "sourceVisualSize": [
+          349.68324,
+          4.14098,
+          349.68324
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/island-shelf/island-shelf-generated-2026-05-17T17-41-15-040Z.glb",
+        "lastBakedAt": "2026-05-17T17:41:18.318Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/island-shelf/island-shelf-generated-2026-05-17T17-41-15-040Z.glb"
       }
     },
     {
@@ -971,9 +964,9 @@
         0
       ],
       "scale": [
-        0.9139311852712282,
-        0.9139311852712282,
-        0.9139311852712282
+        38.39208175509056,
+        8.613455093304891,
+        38.39597677895809
       ],
       "visible": true,
       "collision": {
@@ -990,54 +983,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:6bf74b9774b52a5d7f95557258241a93b2ea4a4786e89ff6f6a0e0295a3a6ba3:be54a1f5e05e7e5556172be4aa08f89dc5b185b9c0ba273a6fe5e92e6bbcb3d8:fd06eacdcd1c855df84154cdc78b13b7de37df3104672e59e6dcda5ebf43fb9b",
+        "colliderCacheKey": "mesh-collision-manager-v2:1d767b16731613b238d01f6595b983532b1613da2ec2ad078c01c5f9d86ae613:210904bf699fa8373b03ba75256ee97b3079f639a12b64bd3fd99ada1cb19d36:fd06eacdcd1c855df84154cdc78b13b7de37df3104672e59e6dcda5ebf43fb9b",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.glb",
           "sourceNodeName": "Well Dais",
           "visualLocalBounds": {
             "min": [
-              -36,
-              -1.600000023841858,
-              -36
+              -0.9985710382461548,
+              -0.21231570839881897,
+              -1.0002096891403198
             ],
             "max": [
-              36,
-              1.600000023841858,
-              36
+              0.9729703068733215,
+              0.17823654413223267,
+              0.9711297750473022
             ],
             "size": [
-              72,
-              3.200000047683716,
-              72
+              1.9715413451194763,
+              0.39055225253105164,
+              1.971339464187622
             ],
             "center": [
-              0,
-              0,
-              0
+              -0.012800365686416626,
+              -0.017039582133293152,
+              -0.014539957046508789
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -36,
-              -1.600000023841858,
-              -36
+              -0.9985710382461548,
+              -0.21231570839881897,
+              -1.0002096891403198
             ],
             "max": [
-              36,
-              1.600000023841858,
-              36
+              0.9729703068733215,
+              0.17823654413223267,
+              0.9711297750473022
             ],
             "size": [
-              72,
-              3.200000047683716,
-              72
+              1.9715413451194763,
+              0.39055225253105164,
+              1.971339464187622
             ],
             "center": [
-              0,
-              0,
-              0
+              -0.012800365686416626,
+              -0.017039582133293152,
+              -0.014539957046508789
             ]
           },
           "visualToPhysicsMatrix": [
@@ -1077,23 +1070,29 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.low.glb",
-        "triangleCount": 56
+        "sourceAssetUrl": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.low.glb",
+        "triangleCount": 11394
       },
       "generation": {
         "descriptor": "raised circular carved stone dais at the center of the root court, surrounding the sacred well area",
-        "lastBakedAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
-        "lastBakedAt": "2026-05-11T23:09:54.413Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.glb",
+        "lastBakedAt": "2026-05-17T17:45:01.440Z",
+        "originalAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+        "sourceVisualSize": [
+          75.69152486343124,
+          3.3640710212411586,
+          75.69152486343124
+        ]
       },
       "asset": {
-        "url": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb"
+        "url": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-05-17T17-44-58-015Z.glb"
       }
     },
     {
       "id": "yggdrasil-bifrost-path",
       "name": "Bifrost Approach",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         2.2990735192896574,
@@ -1106,9 +1105,9 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        6.972305760604312,
+        0.6276306994267657,
+        57.16537410144781
       ],
       "visible": true,
       "collision": {
@@ -1119,21 +1118,19 @@
         "lodTier": "source",
         "friction": 0.88
       },
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          10,
-          0.9,
-          82
-        ],
-        "color": "#a18f6a",
-        "emissive": "#65416c",
-        "emissiveIntensity": 0.28,
-        "metalness": 0.3,
-        "roughness": 0.52
-      },
       "generation": {
-        "descriptor": "long straight ceremonial causeway of sacred stone leading toward the island center, a path rather than a bridge or arch"
+        "descriptor": "long straight ceremonial causeway of sacred stone leading toward the island center, a path rather than a bridge or arch",
+        "originalAssetUrl": "/generated/style-lab/sources/bifrost-approach-2026-05-17T17-45-01-551Z/bifrost-approach.glb",
+        "sourceVisualSize": [
+          13.77128,
+          1.23942,
+          112.92448
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/bifrost-approach/bifrost-approach-generated-2026-05-17T17-48-49-995Z.glb",
+        "lastBakedAt": "2026-05-17T17:48:54.330Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/bifrost-approach/bifrost-approach-generated-2026-05-17T17-48-49-995Z.glb"
       }
     },
     {
@@ -2280,15 +2277,15 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        50.0696402571114,
+        43.057291189494585,
+        0.9768304083627247
       ],
       "visible": true,
       "generation": {
         "descriptor": "large circular halo or luminous ring suspended around the upper crown, a floating sacred ornament not a portal",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/crown-halo/crown-halo-texture-wrap-2026-05-14T23-31-40-865Z.glb",
-        "lastBakedAt": "2026-05-15T00:12:33.996Z",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/crown-halo/crown-halo-generated-2026-05-17T17-51-57-002Z.glb",
+        "lastBakedAt": "2026-05-17T17:52:00.779Z",
         "originalAssetUrl": "/generated/style-lab/sources/crown-halo-2026-05-15T00-11-58-249Z/crown-halo.glb",
         "sourceVisualSize": [
           84.59466,
@@ -2306,7 +2303,7 @@
         "restitution": 0
       },
       "asset": {
-        "url": "/generated/hunyuan3d/crown-halo/crown-halo-texture-wrap-2026-05-14T23-31-40-865Z.glb"
+        "url": "/generated/hunyuan3d/crown-halo/crown-halo-generated-2026-05-17T17-51-57-002Z.glb"
       }
     },
     {
@@ -2325,15 +2322,15 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        11.924524265514854,
+        11.928471708959515,
+        0.8278847194334563
       ],
       "visible": true,
       "generation": {
         "descriptor": "well of urd ring, carved circular stone ring around a sacred well",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/well-of-urd-ring/well-of-urd-ring-texture-wrap-2026-05-14T23-34-00-441Z.glb",
-        "lastBakedAt": "2026-05-15T00:14:14.292Z",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/well-of-urd-ring/well-of-urd-ring-generated-2026-05-17T17-55-13-924Z.glb",
+        "lastBakedAt": "2026-05-17T17:55:17.210Z",
         "originalAssetUrl": "/generated/style-lab/sources/well-of-urd-ring-2026-05-15T00-13-16-827Z/well-of-urd-ring.glb",
         "sourceVisualSize": [
           23.41118,
@@ -2351,13 +2348,13 @@
         "restitution": 0
       },
       "asset": {
-        "url": "/generated/hunyuan3d/well-of-urd-ring/well-of-urd-ring-texture-wrap-2026-05-14T23-34-00-441Z.glb"
+        "url": "/generated/hunyuan3d/well-of-urd-ring/well-of-urd-ring-generated-2026-05-17T17-55-13-924Z.glb"
       }
     },
     {
       "id": "yggdrasil-well-urd-pool",
       "name": "Well of Urd Pool",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         -41.383419165446895,
@@ -2370,9 +2367,9 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        9.48569721034825,
+        2.260931428884146,
+        9.509972580481366
       ],
       "visible": true,
       "collision": {
@@ -2383,24 +2380,19 @@
         "lodTier": "source",
         "sensor": true
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          6.2,
-          6.8,
-          1.2,
-          16
-        ],
-        "color": "#7fb1c9",
-        "emissive": "#7fb1c9",
-        "emissiveIntensity": 0.18,
-        "metalness": 0.45,
-        "roughness": 0.18,
-        "transparent": true,
-        "opacity": 0.86
-      },
       "generation": {
-        "descriptor": "well of urd pool, low circular sacred water basin or well pool"
+        "descriptor": "well of urd pool, low circular sacred water basin or well pool",
+        "originalAssetUrl": "/generated/style-lab/sources/well-of-urd-pool-2026-05-17T17-55-17-304Z/well-of-urd-pool.glb",
+        "sourceVisualSize": [
+          18.72894,
+          1.65256,
+          18.72894
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/well-of-urd-pool/well-of-urd-pool-generated-2026-05-17T17-58-13-081Z.glb",
+        "lastBakedAt": "2026-05-17T17:58:17.549Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/well-of-urd-pool/well-of-urd-pool-generated-2026-05-17T17-58-13-081Z.glb"
       }
     },
     {
@@ -2436,7 +2428,8 @@
           "mode": "read-only",
           "title": "Well of Urd",
           "excerpt": "A sentinel glow hovers over Well of Urd.",
-          "body": "The waters of Well of Urd gather beneath one of Yggdrasil's great roots."
+          "body": "The waters of Well of Urd gather beneath one of Yggdrasil's great roots.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -2492,7 +2485,7 @@
     {
       "id": "yggdrasil-well-mimir-ring",
       "name": "Well of Mimir Ring",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         51.02185382149582,
@@ -2505,27 +2498,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335958,
-        1.377127764335958
+        11.86000729498065,
+        12.714027812729084,
+        0.7363333048164942
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "torus",
-        "args": [
-          8,
-          0.5,
-          12,
-          26
-        ],
-        "color": "#9a8e76",
-        "emissive": "#2d261d",
-        "emissiveIntensity": 0.05,
-        "metalness": 0.25,
-        "roughness": 0.82
-      },
       "generation": {
-        "descriptor": "well of mimir ring, carved circular stone ring around a sacred well"
+        "descriptor": "well of mimir ring, carved circular stone ring around a sacred well",
+        "originalAssetUrl": "/generated/style-lab/sources/well-of-mimir-ring-2026-05-17T17-58-17-639Z/well-of-mimir-ring.glb",
+        "sourceVisualSize": [
+          23.41118,
+          23.24048,
+          1.37712
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/well-of-mimir-ring/well-of-mimir-ring-generated-2026-05-17T18-01-18-242Z.glb",
+        "lastBakedAt": "2026-05-17T18:01:21.840Z"
       },
       "collision": {
         "mode": "auto",
@@ -2535,12 +2522,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/well-of-mimir-ring/well-of-mimir-ring-generated-2026-05-17T18-01-18-242Z.glb"
       }
     },
     {
       "id": "yggdrasil-well-mimir-pool",
       "name": "Well of Mimir Pool",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         51.02185382149582,
@@ -2553,9 +2543,9 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        9.518769249534962,
+        2.077437521999296,
+        9.494545270201765
       ],
       "visible": true,
       "collision": {
@@ -2566,24 +2556,19 @@
         "lodTier": "source",
         "sensor": true
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          6.2,
-          6.8,
-          1.2,
-          16
-        ],
-        "color": "#8ec0a4",
-        "emissive": "#8ec0a4",
-        "emissiveIntensity": 0.18,
-        "metalness": 0.45,
-        "roughness": 0.18,
-        "transparent": true,
-        "opacity": 0.86
-      },
       "generation": {
-        "descriptor": "well of mimir pool, low circular sacred water basin or well pool"
+        "descriptor": "well of mimir pool, low circular sacred water basin or well pool",
+        "originalAssetUrl": "/generated/style-lab/sources/well-of-mimir-pool-2026-05-17T18-01-21-920Z/well-of-mimir-pool.glb",
+        "sourceVisualSize": [
+          18.72894,
+          1.65256,
+          18.72894
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/well-of-mimir-pool/well-of-mimir-pool-generated-2026-05-17T18-04-36-850Z.glb",
+        "lastBakedAt": "2026-05-17T18:04:40.485Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/well-of-mimir-pool/well-of-mimir-pool-generated-2026-05-17T18-04-36-850Z.glb"
       }
     },
     {
@@ -2619,7 +2604,8 @@
           "mode": "read-only",
           "title": "Well of Mimir",
           "excerpt": "A sentinel glow hovers over Well of Mimir.",
-          "body": "The waters of Well of Mimir gather beneath one of Yggdrasil's great roots."
+          "body": "The waters of Well of Mimir gather beneath one of Yggdrasil's great roots.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -2660,22 +2646,30 @@
         0
       ],
       "scale": [
-        1.9279788700703406,
-        1.9279788700703395,
-        1.9279788700703406
+        1.5700371885365982,
+        2.0486695006761977,
+        1.059141857345643
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb"
+        "url": "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-05-17T18-07-41-545Z.glb"
       },
       "generation": {
-        "descriptor": "decorative sacred planter or root shrine object placed near a mythic well"
+        "descriptor": "decorative sacred planter or root shrine object placed near a mythic well",
+        "originalAssetUrl": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+        "sourceVisualSize": [
+          3.0318046125517126,
+          3.8067557193764836,
+          2.0870178470624428
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-05-17T18-07-41-545Z.glb",
+        "lastBakedAt": "2026-05-17T18:07:44.938Z"
       }
     },
     {
       "id": "yggdrasil-well-hvergelmir-ring",
       "name": "Hvergelmir Basin Ring",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         2.2990735192896574,
@@ -2688,27 +2682,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335958,
-        1.377127764335958
+        11.982260392461948,
+        14.722396077487362,
+        0.699471759447379
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "torus",
-        "args": [
-          8,
-          0.5,
-          12,
-          26
-        ],
-        "color": "#9a8e76",
-        "emissive": "#2d261d",
-        "emissiveIntensity": 0.05,
-        "metalness": 0.25,
-        "roughness": 0.82
-      },
       "generation": {
-        "descriptor": "hvergelmir basin ring, carved circular stone ring around a sacred well"
+        "descriptor": "hvergelmir basin ring, carved circular stone ring around a sacred well",
+        "originalAssetUrl": "/generated/style-lab/sources/hvergelmir-basin-ring-2026-05-17T18-07-45-020Z/hvergelmir-basin-ring.glb",
+        "sourceVisualSize": [
+          23.41118,
+          23.24048,
+          1.37712
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/hvergelmir-basin-ring/hvergelmir-basin-ring-generated-2026-05-17T18-10-36-665Z.glb",
+        "lastBakedAt": "2026-05-17T18:10:41.357Z"
       },
       "collision": {
         "mode": "auto",
@@ -2718,12 +2706,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/hvergelmir-basin-ring/hvergelmir-basin-ring-generated-2026-05-17T18-10-36-665Z.glb"
       }
     },
     {
       "id": "yggdrasil-well-hvergelmir-pool",
       "name": "Hvergelmir Basin Pool",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         2.2990735192896574,
@@ -2736,9 +2727,9 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        9.509103463682612,
+        2.040701407755001,
+        9.492427928475855
       ],
       "visible": true,
       "collision": {
@@ -2749,24 +2740,19 @@
         "lodTier": "source",
         "sensor": true
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          6.2,
-          6.8,
-          1.2,
-          16
-        ],
-        "color": "#8ca0d8",
-        "emissive": "#8ca0d8",
-        "emissiveIntensity": 0.18,
-        "metalness": 0.45,
-        "roughness": 0.18,
-        "transparent": true,
-        "opacity": 0.86
-      },
       "generation": {
-        "descriptor": "hvergelmir basin pool, low circular sacred water basin or well pool"
+        "descriptor": "hvergelmir basin pool, low circular sacred water basin or well pool",
+        "originalAssetUrl": "/generated/style-lab/sources/hvergelmir-basin-pool-2026-05-17T18-10-41-452Z/hvergelmir-basin-pool.glb",
+        "sourceVisualSize": [
+          18.72894,
+          1.65256,
+          18.72894
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/hvergelmir-basin-pool/hvergelmir-basin-pool-generated-2026-05-17T18-13-31-696Z.glb",
+        "lastBakedAt": "2026-05-17T18:13:35.870Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/hvergelmir-basin-pool/hvergelmir-basin-pool-generated-2026-05-17T18-13-31-696Z.glb"
       }
     },
     {
@@ -2802,7 +2788,8 @@
           "mode": "read-only",
           "title": "Hvergelmir Basin",
           "excerpt": "A sentinel glow hovers over Hvergelmir Basin.",
-          "body": "The waters of Hvergelmir Basin gather beneath one of Yggdrasil's great roots."
+          "body": "The waters of Hvergelmir Basin gather beneath one of Yggdrasil's great roots.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -2871,9 +2858,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        14.31931184421968,
+        4.517517386169794,
+        5.030297495839928
       ],
       "visible": true,
       "collision": {
@@ -2886,8 +2873,8 @@
       },
       "generation": {
         "descriptor": "broad rectangular stepping slab set into the main approach route, a flat walkable path stone",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/approach-stone-1/approach-stone-1-texture-wrap-2026-05-15T00-00-50-964Z.glb",
-        "lastBakedAt": "2026-05-15T00:15:06.873Z",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/approach-stone-1/approach-stone-1-generated-2026-05-17T18-16-39-754Z.glb",
+        "lastBakedAt": "2026-05-17T18:16:44.292Z",
         "originalAssetUrl": "/generated/style-lab/sources/approach-stone-1-2026-05-15T00-14-50-281Z/approach-stone-1.glb",
         "sourceVisualSize": [
           15.1484,
@@ -2896,7 +2883,7 @@
         ]
       },
       "asset": {
-        "url": "/generated/hunyuan3d/approach-stone-1/approach-stone-1-texture-wrap-2026-05-15T00-00-50-964Z.glb"
+        "url": "/generated/hunyuan3d/approach-stone-1/approach-stone-1-generated-2026-05-17T18-16-39-754Z.glb"
       }
     },
     {
@@ -2915,9 +2902,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        13.552541972562835,
+        6.188190887031545,
+        5.02891979347352
       ],
       "visible": true,
       "collision": {
@@ -2930,8 +2917,8 @@
       },
       "generation": {
         "descriptor": "broad rectangular stepping slab set into the main approach route, a flat walkable path stone",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/approach-stone-2/approach-stone-2-texture-wrap-2026-05-15T00-03-07-372Z.glb",
-        "lastBakedAt": "2026-05-15T00:15:27.659Z",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/approach-stone-2/approach-stone-2-generated-2026-05-17T18-19-31-221Z.glb",
+        "lastBakedAt": "2026-05-17T18:19:34.772Z",
         "originalAssetUrl": "/generated/style-lab/sources/approach-stone-2-2026-05-15T00-15-17-310Z/approach-stone-2.glb",
         "sourceVisualSize": [
           13.77128,
@@ -2940,7 +2927,7 @@
         ]
       },
       "asset": {
-        "url": "/generated/hunyuan3d/approach-stone-2/approach-stone-2-texture-wrap-2026-05-15T00-03-07-372Z.glb"
+        "url": "/generated/hunyuan3d/approach-stone-2/approach-stone-2-generated-2026-05-17T18-19-31-221Z.glb"
       }
     },
     {
@@ -3052,9 +3039,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        11.758258817685048,
+        4.110805970149253,
+        5.036429761469381
       ],
       "visible": true,
       "collision": {
@@ -3067,8 +3054,8 @@
       },
       "generation": {
         "descriptor": "broad rectangular stepping slab set into the main approach route, a flat walkable path stone",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/approach-stone-5/approach-stone-5-texture-wrap-2026-05-15T00-10-37-442Z.glb",
-        "lastBakedAt": "2026-05-15T00:38:13.374Z",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/approach-stone-5/approach-stone-5-generated-2026-05-17T18-22-11-356Z.glb",
+        "lastBakedAt": "2026-05-17T18:22:15.347Z",
         "originalAssetUrl": "/generated/style-lab/sources/approach-stone-5-2026-05-15T00-38-01-855Z/approach-stone-5.glb",
         "sourceVisualSize": [
           15.1484,
@@ -3084,13 +3071,13 @@
         "color": "#1c71d8"
       },
       "asset": {
-        "url": "/generated/hunyuan3d/approach-stone-5/approach-stone-5-texture-wrap-2026-05-15T00-10-37-442Z.glb"
+        "url": "/generated/hunyuan3d/approach-stone-5/approach-stone-5-generated-2026-05-17T18-22-11-356Z.glb"
       }
     },
     {
       "id": "yggdrasil-path-stone-6",
       "name": "Approach Stone 6",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         2.2990735192896574,
@@ -3103,9 +3090,9 @@
         0
       ],
       "scale": [
-        1.3771277643359572,
-        1.377127764335957,
-        1.3771277643359572
+        8.410866538001123,
+        3.045378151260504,
+        5.027236959519753
       ],
       "visible": true,
       "collision": {
@@ -3116,21 +3103,19 @@
         "lodTier": "source",
         "friction": 0.9
       },
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          10,
-          1,
-          7.2
-        ],
-        "color": "#9db0ff",
-        "emissive": "#9db0ff",
-        "emissiveIntensity": 0.22,
-        "metalness": 0.18,
-        "roughness": 0.72
-      },
       "generation": {
-        "descriptor": "broad rectangular stepping slab set into the main approach route, a flat walkable path stone"
+        "descriptor": "broad rectangular stepping slab set into the main approach route, a flat walkable path stone",
+        "originalAssetUrl": "/generated/style-lab/sources/approach-stone-6-2026-05-17T18-22-15-425Z/approach-stone-6.glb",
+        "sourceVisualSize": [
+          13.77128,
+          1.37712,
+          9.91532
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/approach-stone-6/approach-stone-6-generated-2026-05-17T18-25-16-260Z.glb",
+        "lastBakedAt": "2026-05-17T18:25:20.143Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/approach-stone-6/approach-stone-6-generated-2026-05-17T18-25-16-260Z.glb"
       }
     },
     {
@@ -3226,7 +3211,8 @@
           "mode": "read-only",
           "title": "Caretaker of the Bough",
           "excerpt": "The firefly watches the roots and waits for travelers.",
-          "body": "Here stands Yggdrasil, ash of worlds, branch of heavens, root of memory. The wells gather at its feet and the old things still move in its shade."
+          "body": "Here stands Yggdrasil, ash of worlds, branch of heavens, root of memory. The wells gather at its feet and the old things still move in its shade.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -3409,7 +3395,7 @@
     {
       "id": "yggdrasil-arrival-column-left",
       "name": "Arrival Column Left",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-arrival-group",
       "position": [
         -11.985300375869594,
@@ -3422,16 +3408,21 @@
         0
       ],
       "scale": [
-        1.6966214056618991,
-        2.043657602274559,
-        1.6966214056618991
+        1.4870833266488275,
+        8.204298478343155,
+        2.4069242747398594
       ],
       "visible": true,
-      "prefab": {
-        "type": "support-column"
-      },
       "generation": {
-        "descriptor": "vertical support column framing the arrival threshold or gate"
+        "descriptor": "vertical support column framing the arrival threshold or gate",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "sourceVisualSize": [
+          2.510999680379611,
+          16.18576821001451,
+          2.510999680379611
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-28-00-874Z.glb",
+        "lastBakedAt": "2026-05-17T18:28:04.879Z"
       },
       "collision": {
         "mode": "auto",
@@ -3447,54 +3438,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-left.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-left.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:70deeba3c6e00a6d73f4aa3d844bbd448d68445a09bb5ce69f33bed4e74ddcfd:513dbcf2f8595bc101b52690f231048165ac2d8e974ebffd54d3dc76ab4595b3:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-28-00-874Z.glb",
           "sourceNodeName": "Arrival Column Left",
           "visualLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.8723410367965698,
+              -1.0007565021514893,
+              -0.5454255938529968
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.8162059187889099,
+              0.9720819592475891,
+              0.4978076219558716
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.6885469555854797,
+              1.9728384613990784,
+              1.0432332158088684
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.028067559003829956,
+              -0.014337271451950073,
+              -0.023808985948562622
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.8723410367965698,
+              -1.0007565021514893,
+              -0.5454255938529968
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.8162059187889099,
+              0.9720819592475891,
+              0.4978076219558716
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.6885469555854797,
+              1.9728384613990784,
+              1.0432332158088684
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.028067559003829956,
+              -0.014337271451950073,
+              -0.023808985948562622
             ]
           },
           "visualToPhysicsMatrix": [
@@ -3534,15 +3525,18 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-        "triangleCount": 624
+        "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-28-00-874Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-28-00-874Z.low.glb",
+        "triangleCount": 4750
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-28-00-874Z.glb"
       }
     },
     {
       "id": "yggdrasil-arrival-column-right",
       "name": "Arrival Column Right",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-arrival-group",
       "position": [
         16.094885590046307,
@@ -3555,16 +3549,21 @@
         0
       ],
       "scale": [
-        1.6966214056618991,
-        2.043657602274559,
-        1.6966214056618991
+        1.27104471707969,
+        8.690438667805566,
+        2.0764075749438606
       ],
       "visible": true,
-      "prefab": {
-        "type": "support-column"
-      },
       "generation": {
-        "descriptor": "vertical support column framing the arrival threshold or gate"
+        "descriptor": "vertical support column framing the arrival threshold or gate",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "sourceVisualSize": [
+          2.510999680379611,
+          16.18576821001451,
+          2.510999680379611
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.glb",
+        "lastBakedAt": "2026-05-17T18:31:15.569Z"
       },
       "collision": {
         "mode": "auto",
@@ -3580,54 +3579,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-right.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-right.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:1813d0d9acaa78ac82fa12db7299acd2f3c455c26fa308045719e41065982eb0:e60f5dc7ffeac8a34af62fdc2f176ea0af3fb902b903a75ffa64f7241e905632:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.glb",
           "sourceNodeName": "Arrival Column Right",
           "visualLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -1.000834345817566,
+              -0.941458523273468,
+              -0.6175516247749329
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.9747116565704346,
+              0.921014666557312,
+              0.5917518734931946
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.9755460023880005,
+              1.86247318983078,
+              1.2093034982681274
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.013061344623565674,
+              -0.010221928358078003,
+              -0.01289987564086914
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -1.000834345817566,
+              -0.941458523273468,
+              -0.6175516247749329
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.9747116565704346,
+              0.921014666557312,
+              0.5917518734931946
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.9755460023880005,
+              1.86247318983078,
+              1.2093034982681274
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.013061344623565674,
+              -0.010221928358078003,
+              -0.01289987564086914
             ]
           },
           "visualToPhysicsMatrix": [
@@ -3667,9 +3666,12 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-        "triangleCount": 624
+        "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.low.glb",
+        "triangleCount": 4750
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-31-11-487Z.glb"
       }
     },
     {
@@ -4014,7 +4016,7 @@
     {
       "id": "yggdrasil-shrine-urd-left",
       "name": "urd Shrine Column Left",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-structures-group",
       "position": [
         -51.463994400386106,
@@ -4027,16 +4029,21 @@
         0
       ],
       "scale": [
-        1.2394149879023617,
-        1.514840540769553,
-        1.2394149879023617
+        0.9319288439356889,
+        6.613128146232422,
+        0.9675268643364604
       ],
       "visible": true,
-      "prefab": {
-        "type": "support-column"
-      },
       "generation": {
-        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "sourceVisualSize": [
+          1.8343341820954953,
+          11.99753708289486,
+          1.8343341820954953
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.glb",
+        "lastBakedAt": "2026-05-17T18:34:06.219Z"
       },
       "collision": {
         "mode": "auto",
@@ -4052,54 +4059,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-left.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-left.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:f88ef55d94215e5b3d1b31789dc1df015b239a853444620c969303dc9e30a79f:e6267bb78c7a667afe5ded3285d196a4e7d05abe729211af6b941ee0ac86986e:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.glb",
           "sourceNodeName": "urd Shrine Column Left",
           "visualLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.9951006770133972,
+              -0.9403154850006104,
+              -0.9402661323547363
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.9732133150100708,
+              0.8738935589790344,
+              0.9556305408477783
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.968313992023468,
+              1.8142090439796448,
+              1.8958966732025146
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.010943681001663208,
+              -0.033210963010787964,
+              0.007682204246520996
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.9951006770133972,
+              -0.9403154850006104,
+              -0.9402661323547363
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.9732133150100708,
+              0.8738935589790344,
+              0.9556305408477783
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.968313992023468,
+              1.8142090439796448,
+              1.8958966732025146
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.010943681001663208,
+              -0.033210963010787964,
+              0.007682204246520996
             ]
           },
           "visualToPhysicsMatrix": [
@@ -4139,15 +4146,18 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-        "triangleCount": 624
+        "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.low.glb",
+        "triangleCount": 4750
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-34-01-911Z.glb"
       }
     },
     {
       "id": "yggdrasil-shrine-urd-right",
       "name": "urd Shrine Column Right",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-structures-group",
       "position": [
         -31.30284393050769,
@@ -4160,16 +4170,21 @@
         0
       ],
       "scale": [
-        1.2394149879023617,
-        1.514840540769553,
-        1.2394149879023617
+        0.9313799490705645,
+        6.076609914451555,
+        1.1374446152339555
       ],
       "visible": true,
-      "prefab": {
-        "type": "support-column"
-      },
       "generation": {
-        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "sourceVisualSize": [
+          1.8343341820954953,
+          11.99753708289486,
+          1.8343341820954953
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-36-48-079Z.glb",
+        "lastBakedAt": "2026-05-17T18:36:52.710Z"
       },
       "collision": {
         "mode": "auto",
@@ -4185,54 +4200,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-right.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-right.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c948442fd77c1ad0532bcf80de5f49485c0f0698a4196f733c838eb060e45047:427c0e9a0057fbf5bc5864f1a1a6b66547d5a44865837bf8379710b78bf96ffc:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-36-48-079Z.glb",
           "sourceNodeName": "urd Shrine Column Right",
           "visualLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.9971282482147217,
+              -1.000685691833496,
+              -0.8244706392288208
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.9723570346832275,
+              0.9736859202384949,
+              0.7882100343704224
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.9694852828979492,
+              1.974371612071991,
+              1.6126806735992432
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.01238560676574707,
+              -0.01349988579750061,
+              -0.01813030242919922
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.9971282482147217,
+              -1.000685691833496,
+              -0.8244706392288208
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.9723570346832275,
+              0.9736859202384949,
+              0.7882100343704224
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.9694852828979492,
+              1.974371612071991,
+              1.6126806735992432
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.01238560676574707,
+              -0.01349988579750061,
+              -0.01813030242919922
             ]
           },
           "visualToPhysicsMatrix": [
@@ -4272,9 +4287,12 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-        "triangleCount": 624
+        "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-36-48-079Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-36-48-079Z.low.glb",
+        "triangleCount": 4750
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-36-48-079Z.glb"
       }
     },
     {
@@ -4413,7 +4431,7 @@
     {
       "id": "yggdrasil-shrine-mimir-left",
       "name": "mimir Shrine Column Left",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-structures-group",
       "position": [
         40.94127858655662,
@@ -4426,16 +4444,21 @@
         0
       ],
       "scale": [
-        1.2394149879023613,
-        1.514840540769553,
-        1.2394149879023613
+        1.1772286783911323,
+        6.072918880984248,
+        1.170632423351901
       ],
       "visible": true,
-      "prefab": {
-        "type": "support-column"
-      },
       "generation": {
-        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "sourceVisualSize": [
+          1.8343341820954946,
+          11.99753708289486,
+          1.8343341820954946
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-39-33-622Z.glb",
+        "lastBakedAt": "2026-05-17T18:39:37.420Z"
       },
       "collision": {
         "mode": "auto",
@@ -4451,54 +4474,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-left.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-left.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:fe742999ac840a08e4648dd8892f4c1e03f2988f1b534cb8d0158a6d5abeac0c:c6cff18fafb2f86800f177657b4665908372228b590562cf1f9f2201c8079361:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-39-33-622Z.glb",
           "sourceNodeName": "mimir Shrine Column Left",
           "visualLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.7790583968162537,
+              -1.0016028881072998,
+              -0.7852780818939209
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.7791277766227722,
+              0.9739686250686646,
+              0.78169184923172
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.5581861734390259,
+              1.9755715131759644,
+              1.5669699311256409
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              0.000034689903259277344,
+              -0.013817131519317627,
+              -0.0017931163311004639
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.7790583968162537,
+              -1.0016028881072998,
+              -0.7852780818939209
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.7791277766227722,
+              0.9739686250686646,
+              0.78169184923172
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.5581861734390259,
+              1.9755715131759644,
+              1.5669699311256409
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              0.000034689903259277344,
+              -0.013817131519317627,
+              -0.0017931163311004639
             ]
           },
           "visualToPhysicsMatrix": [
@@ -4538,15 +4561,18 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-        "triangleCount": 624
+        "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-39-33-622Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-39-33-622Z.low.glb",
+        "triangleCount": 4746
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-39-33-622Z.glb"
       }
     },
     {
       "id": "yggdrasil-shrine-mimir-right",
       "name": "mimir Shrine Column Right",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-structures-group",
       "position": [
         61.10242905643499,
@@ -4559,16 +4585,21 @@
         0
       ],
       "scale": [
-        1.2394149879023613,
-        1.514840540769553,
-        1.2394149879023613
+        0.9292755514835783,
+        6.4493872269977635,
+        0.9310679353221063
       ],
       "visible": true,
-      "prefab": {
-        "type": "support-column"
-      },
       "generation": {
-        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "sourceVisualSize": [
+          1.8343341820954946,
+          11.99753708289486,
+          1.8343341820954946
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-42-32-113Z.glb",
+        "lastBakedAt": "2026-05-17T18:42:36.586Z"
       },
       "collision": {
         "mode": "auto",
@@ -4584,54 +4615,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-right.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-right.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:367f9089d47c4e9fc2aa83f94bf8b8639c525b88332f665b8b5bb7d66c9da9bd:de8bc3e6ad25f018ad0bfd7ef6965e665146bac8b07f8322b042e1b68891d4ef:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-42-32-113Z.glb",
           "sourceNodeName": "mimir Shrine Column Right",
           "visualLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.9999499320983887,
+              -0.9471164345741272,
+              -0.9961839914321899
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.9739841818809509,
+              0.9131414890289307,
+              0.9739528894424438
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.9739341139793396,
+              1.8602579236030579,
+              1.9701368808746338
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.012982875108718872,
+              -0.016987472772598267,
+              -0.011115550994873047
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.9999499320983887,
+              -0.9471164345741272,
+              -0.9961839914321899
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.9739841818809509,
+              0.9131414890289307,
+              0.9739528894424438
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.9739341139793396,
+              1.8602579236030579,
+              1.9701368808746338
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.012982875108718872,
+              -0.016987472772598267,
+              -0.011115550994873047
             ]
           },
           "visualToPhysicsMatrix": [
@@ -4671,9 +4702,12 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-        "triangleCount": 624
+        "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-42-32-113Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-42-32-113Z.low.glb",
+        "triangleCount": 4750
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-42-32-113Z.glb"
       }
     },
     {
@@ -4812,7 +4846,7 @@
     {
       "id": "yggdrasil-shrine-hvergelmir-left",
       "name": "hvergelmir Shrine Column Left",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-structures-group",
       "position": [
         -7.78150171564955,
@@ -4825,16 +4859,21 @@
         0
       ],
       "scale": [
-        1.2394149879023615,
-        1.514840540769553,
-        1.2394149879023615
+        1.2254219935169317,
+        6.0812300205257594,
+        0.9862648031569214
       ],
       "visible": true,
-      "prefab": {
-        "type": "support-column"
-      },
       "generation": {
-        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "sourceVisualSize": [
+          1.834334182095495,
+          11.99753708289486,
+          1.834334182095495
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-45-11-443Z.glb",
+        "lastBakedAt": "2026-05-17T18:45:15.060Z"
       },
       "collision": {
         "mode": "auto",
@@ -4850,54 +4889,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-left.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-left.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:1acb1ce0ff31240f132decb2665f8b7ba59bf6f6807d1ef4fa3a8998b78489fc:f0f7b83618235d44b9c11679c67cf33984f391a5218c78b00f534e84d3023113:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-45-11-443Z.glb",
           "sourceNodeName": "hvergelmir Shrine Column Left",
           "visualLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.7649651169776917,
+              -1.000393033027649,
+              -0.8904935121536255
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.7319366335868835,
+              0.9724962115287781,
+              0.9693821668624878
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.4969017505645752,
+              1.972889244556427,
+              1.8598756790161133
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.016514241695404053,
+              -0.013948410749435425,
+              0.03944432735443115
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.7649651169776917,
+              -1.000393033027649,
+              -0.8904935121536255
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.7319366335868835,
+              0.9724962115287781,
+              0.9693821668624878
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.4969017505645752,
+              1.972889244556427,
+              1.8598756790161133
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.016514241695404053,
+              -0.013948410749435425,
+              0.03944432735443115
             ]
           },
           "visualToPhysicsMatrix": [
@@ -4937,15 +4976,18 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-        "triangleCount": 624
+        "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-45-11-443Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-45-11-443Z.low.glb",
+        "triangleCount": 4750
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-45-11-443Z.glb"
       }
     },
     {
       "id": "yggdrasil-shrine-hvergelmir-right",
       "name": "hvergelmir Shrine Column Right",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-structures-group",
       "position": [
         12.379648754228867,
@@ -4958,16 +5000,21 @@
         0
       ],
       "scale": [
-        1.2394149879023615,
-        1.514840540769553,
-        1.2394149879023615
+        0.9856182806380609,
+        6.077964417811514,
+        1.0757170230794237
       ],
       "visible": true,
-      "prefab": {
-        "type": "support-column"
-      },
       "generation": {
-        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "sourceVisualSize": [
+          1.834334182095495,
+          11.99753708289486,
+          1.834334182095495
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.glb",
+        "lastBakedAt": "2026-05-17T18:48:04.164Z"
       },
       "collision": {
         "mode": "auto",
@@ -4983,54 +5030,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-right.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-right.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:17e1c735f25764360a1255f2fc0d4a7a06eff0ac38f1b1f0e28022e319708bfb:ef82c0f4d90eebbc44fe4c835e4bf73cf9f815105cbbda842371c5340c886428:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.glb",
           "sourceNodeName": "hvergelmir Shrine Column Right",
           "visualLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.9440273642539978,
+              -1.000256061553955,
+              -0.8801249265670776
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.9170786142349243,
+              0.9736882448196411,
+              0.8250955939292908
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.8611059784889221,
+              1.9739443063735962,
+              1.7052205204963684
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.013474375009536743,
+              -0.013283908367156982,
+              -0.027514666318893433
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.9440273642539978,
+              -1.000256061553955,
+              -0.8801249265670776
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.9170786142349243,
+              0.9736882448196411,
+              0.8250955939292908
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.8611059784889221,
+              1.9739443063735962,
+              1.7052205204963684
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.013474375009536743,
+              -0.013283908367156982,
+              -0.027514666318893433
             ]
           },
           "visualToPhysicsMatrix": [
@@ -5070,9 +5117,12 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-        "triangleCount": 624
+        "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.low.glb",
+        "triangleCount": 4748
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T18-48-00-875Z.glb"
       }
     },
     {
@@ -5211,7 +5261,7 @@
     {
       "id": "yggdrasil-shrine-urd-growth",
       "name": "Urd Root Shrine",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-structures-group",
       "position": [
         -31.30284393050769,
@@ -5224,16 +5274,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        1.1023295812273362,
+        2.059770678587183,
+        1.2072945684040604
       ],
       "visible": true,
-      "prefab": {
-        "type": "growth-planter"
-      },
       "generation": {
-        "descriptor": "sacred planter or root shrine vessel containing ritual growth near a well"
+        "descriptor": "sacred planter or root shrine vessel containing ritual growth near a well",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+        "sourceVisualSize": [
+          1.7809016248392597,
+          4.062526904791073,
+          1.9235582899468213
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-51-24-217Z.glb",
+        "lastBakedAt": "2026-05-17T18:51:28.868Z"
       },
       "collision": {
         "mode": "auto",
@@ -5249,7 +5304,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:36cd5b4419bbae4b2b51484ad67a3fe63efa7fdb7c0407858b5193620b918771:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -5339,12 +5394,15 @@
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
         "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
         "triangleCount": 434
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-51-24-217Z.glb"
       }
     },
     {
       "id": "yggdrasil-shrine-mimir-growth",
       "name": "Mimir Root Shrine",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-structures-group",
       "position": [
         39.26118271406675,
@@ -5357,16 +5415,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        0.9584530567995585,
+        2.0665392778687566,
+        1.174304833793327
       ],
       "visible": true,
-      "prefab": {
-        "type": "growth-planter"
-      },
       "generation": {
-        "descriptor": "sacred planter or root shrine vessel containing ritual growth near a well"
+        "descriptor": "sacred planter or root shrine vessel containing ritual growth near a well",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+        "sourceVisualSize": [
+          1.7809016248392597,
+          4.062526904791073,
+          1.9235582899468213
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb",
+        "lastBakedAt": "2026-05-17T18:55:11.329Z"
       },
       "collision": {
         "mode": "auto",
@@ -5472,12 +5535,15 @@
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
         "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
         "triangleCount": 434
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb"
       }
     },
     {
       "id": "yggdrasil-shrine-hvergelmir-bench",
       "name": "Hvergelmir Bench",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-structures-group",
       "position": [
         -11.141693460629284,
@@ -5490,16 +5556,21 @@
         0
       ],
       "scale": [
-        1.3771277643359572,
-        1.377127764335957,
-        1.3771277643359572
+        1.9399831734895114,
+        1.4940685731242016,
+        1.9584745721565342
       ],
       "visible": true,
-      "prefab": {
-        "type": "bench-growth"
-      },
       "generation": {
-        "descriptor": "weathered sacred bench or seated shrine element with overgrowth"
+        "descriptor": "weathered sacred bench or seated shrine element with overgrowth",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+        "sourceVisualSize": [
+          3.8243664292268136,
+          2.9507854319202984,
+          3.748128636193175
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/bench-growth/bench-growth-generated-2026-05-17T18-58-08-187Z.glb",
+        "lastBakedAt": "2026-05-17T18:58:12.155Z"
       },
       "collision": {
         "mode": "auto",
@@ -5605,6 +5676,9 @@
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
         "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.low.glb",
         "triangleCount": 319
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/bench-growth/bench-growth-generated-2026-05-17T18-58-08-187Z.glb"
       }
     },
     {
@@ -6504,7 +6578,8 @@
           "mode": "read-only",
           "title": "Root-Keeper of Yggdrasil",
           "excerpt": "A watchful spirit hovers where the central roots rise like a shrine.",
-          "body": "Traveler, do not mistake this tree for scenery. In the old Northern imagination, Yggdrasil binds heavens, worlds, roots, and the dead. Drink from no well lightly. Ask no branch to carry what you are unwilling to lose."
+          "body": "Traveler, do not mistake this tree for scenery. In the old Northern imagination, Yggdrasil binds heavens, worlds, roots, and the dead. Drink from no well lightly. Ask no branch to carry what you are unwilling to lose.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -6562,7 +6637,8 @@
           "mode": "read-only",
           "title": "Huginn",
           "excerpt": "A pale spirit circles the lower crown like a thought given wings.",
-          "body": "Huginn, Thought, is one of the ravens most closely associated with Odin in later tradition. Here the raven is rendered as a spirit light: quick, circling, and restless."
+          "body": "Huginn, Thought, is one of the ravens most closely associated with Odin in later tradition. Here the raven is rendered as a spirit light: quick, circling, and restless.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -6620,7 +6696,8 @@
           "mode": "read-only",
           "title": "Muninn",
           "excerpt": "A second raven-spirit holds a wider orbit, slower and more deliberate.",
-          "body": "Muninn, Memory, completes the pair. In the level, the two raven spirits give motion and intelligence to the crown line without needing literal bird models."
+          "body": "Muninn, Memory, completes the pair. In the level, the two raven spirits give motion and intelligence to the crown line without needing literal bird models.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -6678,7 +6755,8 @@
           "mode": "read-only",
           "title": "Dainn",
           "excerpt": "A green-gold light dips through the boughs, pausing where the leaves are thickest.",
-          "body": "One of the four stag spirits lingers where the branches broaden, evoking the old image of creatures feeding among the leaves."
+          "body": "One of the four stag spirits lingers where the branches broaden, evoking the old image of creatures feeding among the leaves.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -6736,7 +6814,8 @@
           "mode": "read-only",
           "title": "Dvalinn",
           "excerpt": "Another stag-spirit keeps to the western boughs, drifting in patient arcs.",
-          "body": "Together the stag spirits suggest the continual life and erosion within the canopy of Yggdrasil."
+          "body": "Together the stag spirits suggest the continual life and erosion within the canopy of Yggdrasil.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -6794,7 +6873,8 @@
           "mode": "read-only",
           "title": "Serpent Omen",
           "excerpt": "A colder light drifts over the lower basin, never rising very high.",
-          "body": "Not every spirit around the world-tree is comforting. This one marks the unease and pressure associated with Hvergelmir and the gnawing root below."
+          "body": "Not every spirit around the world-tree is comforting. This one marks the unease and pressure associated with Hvergelmir and the gnawing root below.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -6852,7 +6932,8 @@
           "mode": "read-only",
           "title": "Bifrost Spark",
           "excerpt": "A shard of color drifts above the road into the roots.",
-          "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+          "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -6910,7 +6991,8 @@
           "mode": "read-only",
           "title": "Bifrost Spark",
           "excerpt": "A shard of color drifts above the road into the roots.",
-          "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+          "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -6968,7 +7050,8 @@
           "mode": "read-only",
           "title": "Bifrost Spark",
           "excerpt": "A shard of color drifts above the road into the roots.",
-          "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+          "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -7031,15 +7114,21 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        34.74528071404141,
+        21.615726010740705,
+        1.0708897914604594
       ],
       "visible": true,
       "generation": {
         "descriptor": "high crown perch structure associated with the upper watch point, a perched landmark near the top of the tree",
-        "lastBakedAssetUrl": "/generated/style-lab/sources/eagle-crown-ring-2026-05-15T00-12-50-055Z/eagle-crown-ring.glb",
-        "lastBakedAt": "2026-05-15T00:12:50.057Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/eagle-crown-ring/eagle-crown-ring-generated-2026-05-17T19-01-05-359Z.glb",
+        "lastBakedAt": "2026-05-17T19:01:08.413Z",
+        "originalAssetUrl": "/generated/style-lab/sources/eagle-crown-ring-2026-05-15T00-12-50-055Z/eagle-crown-ring.glb",
+        "sourceVisualSize": [
+          42.66512,
+          42.66512,
+          1.25504
+        ]
       },
       "collision": {
         "mode": "auto",
@@ -7051,7 +7140,7 @@
         "restitution": 0
       },
       "asset": {
-        "url": "/generated/style-lab/sources/eagle-crown-ring-2026-05-15T00-12-50-055Z/eagle-crown-ring.glb"
+        "url": "/generated/hunyuan3d/eagle-crown-ring/eagle-crown-ring-generated-2026-05-17T19-01-05-359Z.glb"
       }
     },
     {
@@ -7190,7 +7279,7 @@
     {
       "id": "yggdrasil-crown-perch-spire",
       "name": "Crown Spire",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-crown-perch-group",
       "position": [
         2.301367719938957,
@@ -7203,16 +7292,21 @@
         0
       ],
       "scale": [
-        1.368314146644207,
-        2.1379908541315733,
-        1.368314146644207
+        1.1638935463483948,
+        8.574569098695582,
+        1.2130008607567693
       ],
       "visible": true,
-      "prefab": {
-        "type": "support-column"
-      },
       "generation": {
-        "descriptor": "high crown perch structure associated with the upper watch point, a perched landmark near the top of the tree"
+        "descriptor": "high crown perch structure associated with the upper watch point, a perched landmark near the top of the tree",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "sourceVisualSize": [
+          2.025104937033426,
+          16.932887564722062,
+          2.025104937033426
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb",
+        "lastBakedAt": "2026-05-17T19:04:12.843Z"
       },
       "collision": {
         "mode": "auto",
@@ -7318,6 +7412,9 @@
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
         "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
         "triangleCount": 624
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb"
       }
     },
     {
@@ -7497,7 +7594,8 @@
           "mode": "read-only",
           "title": "Eagle of the Crown",
           "excerpt": "A broad, regal spirit-light marks the eagle above the worlds.",
-          "body": "The crown-spirit moves in large, patient loops. It should read immediately as dominant and elevated, unlike the smaller, quicker wanderers below."
+          "body": "The crown-spirit moves in large, patient loops. It should read immediately as dominant and elevated, unlike the smaller, quicker wanderers below.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -7555,7 +7653,8 @@
           "mode": "read-only",
           "title": "VeÃ°rfÃ¶lnir",
           "excerpt": "A smaller, sharper spirit circles close to the perch.",
-          "body": "VeÃ°rfÃ¶lnir is rendered as the quick, alert counterpoint to the slow and sovereign eagle-light."
+          "body": "VeÃ°rfÃ¶lnir is rendered as the quick, alert counterpoint to the slow and sovereign eagle-light.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -7640,7 +7739,7 @@
     {
       "id": "yggdrasil-hvergelmir-depth-arch-2",
       "name": "Lower Root Arch 2",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-hvergelmir-depth-group",
       "position": [
         2.301367719938957,
@@ -7653,16 +7752,21 @@
         -3.141592653589793
       ],
       "scale": [
-        1.8200120533464013,
-        1.8200120533464013,
-        1.8200120533464013
+        3.057348979385237,
+        8.052805575540097,
+        0.5723366401945489
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-archway"
-      },
       "generation": {
-        "descriptor": "arched entry structure marking the descent into the Hvergelmir depth area"
+        "descriptor": "arched entry structure marking the descent into the Hvergelmir depth area",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+        "sourceVisualSize": [
+          6.0060397760431234,
+          15.033299560641273,
+          1.1284074730747689
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/wasteland-archway/wasteland-archway-generated-2026-05-17T19-07-26-612Z.glb",
+        "lastBakedAt": "2026-05-17T19:07:31.268Z"
       },
       "collision": {
         "mode": "auto",
@@ -7768,12 +7872,15 @@
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
         "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.low.glb",
         "triangleCount": 96
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/wasteland-archway/wasteland-archway-generated-2026-05-17T19-07-26-612Z.glb"
       }
     },
     {
       "id": "yggdrasil-hvergelmir-depth-ring",
       "name": "Broken Root Ring",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-hvergelmir-depth-group",
       "position": [
         2.301367719938957,
@@ -7786,16 +7893,21 @@
         0
       ],
       "scale": [
-        2.159336334478781,
-        2.159336334478781,
-        2.159336334478781
+        6.251824571314167,
+        3.127500865594299,
+        0.5792500878321262
       ],
       "visible": true,
-      "prefab": {
-        "type": "broken-ring"
-      },
       "generation": {
-        "descriptor": "broken sacred ring ruin placed in the lower Hvergelmir sub-area"
+        "descriptor": "broken sacred ring ruin placed in the lower Hvergelmir sub-area",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+        "sourceVisualSize": [
+          12.308217106529051,
+          6.154108553264526,
+          1.0525900896050264
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T19-10-33-073Z.glb",
+        "lastBakedAt": "2026-05-17T19:10:37.689Z"
       },
       "collision": {
         "mode": "auto",
@@ -7901,6 +8013,9 @@
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
         "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
         "triangleCount": 218
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T19-10-33-073Z.glb"
       }
     },
     {
@@ -7919,16 +8034,24 @@
         0
       ],
       "scale": [
-        1.773740560464713,
-        1.7737405604647127,
-        1.773740560464713
+        0.7288546794435897,
+        1.7824907875402753,
+        0.6607886239079521
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-05-17T19-13-21-731Z.glb"
       },
       "generation": {
-        "descriptor": "tall cold-depth monolith placed in the Hvergelmir lower passage, a shrine-like standing stone"
+        "descriptor": "tall cold-depth monolith placed in the Hvergelmir lower passage, a shrine-like standing stone",
+        "originalAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+        "sourceVisualSize": [
+          1.2139657769876542,
+          3.5012397045181105,
+          1.2260272127988143
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-05-17T19-13-21-731Z.glb",
+        "lastBakedAt": "2026-05-17T19:13:26.075Z"
       }
     },
     {
@@ -7947,22 +8070,30 @@
         0
       ],
       "scale": [
-        1.773740560464713,
-        1.7737405604647127,
-        1.773740560464713
+        0.7683035941594966,
+        1.773929283038177,
+        0.7016695546264604
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-05-17T19-16-10-569Z.glb"
       },
       "generation": {
-        "descriptor": "tall cold-depth monolith placed in the Hvergelmir lower passage, a shrine-like standing stone"
+        "descriptor": "tall cold-depth monolith placed in the Hvergelmir lower passage, a shrine-like standing stone",
+        "originalAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
+        "sourceVisualSize": [
+          1.2139657769876542,
+          3.5012397045181105,
+          1.2260272127988143
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-05-17T19-16-10-569Z.glb",
+        "lastBakedAt": "2026-05-17T19:16:14.534Z"
       }
     },
     {
       "id": "yggdrasil-hvergelmir-tunnel-root-1",
       "name": "Tunnel Root 1",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-hvergelmir-depth-group",
       "position": [
         -5.961398866076786,
@@ -7975,27 +8106,21 @@
         0.3999999999999999
       ],
       "scale": [
-        1.377127764335957,
-        1.3771277643359572,
-        1.377127764335957
+        2.9518609201643224,
+        15.972090718345054,
+        3.1338491455997355
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.1,
-          2.2,
-          22,
-          10
-        ],
-        "color": "#402b1c",
-        "emissive": "#190f08",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.03,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "large tunnel-forming root beam in the Hvergelmir depth passage"
+        "descriptor": "large tunnel-forming root beam in the Hvergelmir depth passage",
+        "originalAssetUrl": "/generated/style-lab/sources/tunnel-root-1-2026-05-17T19-16-14-618Z/tunnel-root-1.glb",
+        "sourceVisualSize": [
+          5.7628,
+          30.29682,
+          6.05936
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/tunnel-root-1/tunnel-root-1-generated-2026-05-17T19-19-26-961Z.glb",
+        "lastBakedAt": "2026-05-17T19:19:30.940Z"
       },
       "collision": {
         "mode": "auto",
@@ -8005,12 +8130,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/tunnel-root-1/tunnel-root-1-generated-2026-05-17T19-19-26-961Z.glb"
       }
     },
     {
       "id": "yggdrasil-hvergelmir-tunnel-root-2",
       "name": "Tunnel Root 2",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-hvergelmir-depth-group",
       "position": [
         10.564134305954699,
@@ -8023,27 +8151,21 @@
         -0.42000000000000004
       ],
       "scale": [
-        1.377127764335957,
-        1.3771277643359576,
-        1.3771277643359572
+        6.194028246522927,
+        39.751587607043206,
+        3.0751928542427933
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.1,
-          2.2,
-          24,
-          10
-        ],
-        "color": "#402b1c",
-        "emissive": "#190f08",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.03,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "large tunnel-forming root beam in the Hvergelmir depth passage"
+        "descriptor": "large tunnel-forming root beam in the Hvergelmir depth passage",
+        "originalAssetUrl": "/generated/style-lab/sources/tunnel-root-2-2026-05-17T19-19-31-023Z/tunnel-root-2.glb",
+        "sourceVisualSize": [
+          5.7628,
+          33.05106,
+          6.05936
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/tunnel-root-2/tunnel-root-2-generated-2026-05-17T19-22-25-401Z.glb",
+        "lastBakedAt": "2026-05-17T19:22:29.227Z"
       },
       "collision": {
         "mode": "auto",
@@ -8053,12 +8175,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/tunnel-root-2/tunnel-root-2-generated-2026-05-17T19-22-25-401Z.glb"
       }
     },
     {
       "id": "yggdrasil-hvergelmir-tunnel-root-3",
       "name": "Tunnel Root 3",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-hvergelmir-depth-group",
       "position": [
         2.301367719938957,
@@ -8071,27 +8196,21 @@
         0
       ],
       "scale": [
-        1.3771277643359572,
-        1.377127764335957,
-        1.377127764335957
+        3.1834837298331964,
+        17.94607555677183,
+        3.467019825868037
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.25,
-          2.4,
-          20,
-          10
-        ],
-        "color": "#493220",
-        "emissive": "#1b1108",
-        "emissiveIntensity": 0.05,
-        "metalness": 0.03,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "large tunnel-forming root beam in the Hvergelmir depth passage"
+        "descriptor": "large tunnel-forming root beam in the Hvergelmir depth passage",
+        "originalAssetUrl": "/generated/style-lab/sources/tunnel-root-3-2026-05-17T19-22-29-303Z/tunnel-root-3.glb",
+        "sourceVisualSize": [
+          6.28668,
+          27.54256,
+          6.61022
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/tunnel-root-3/tunnel-root-3-generated-2026-05-17T19-25-33-271Z.glb",
+        "lastBakedAt": "2026-05-17T19:25:37.878Z"
       },
       "collision": {
         "mode": "auto",
@@ -8101,6 +8220,9 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/tunnel-root-3/tunnel-root-3-generated-2026-05-17T19-25-33-271Z.glb"
       }
     },
     {
@@ -8310,7 +8432,8 @@
           "mode": "read-only",
           "title": "Nidhogg Omen",
           "excerpt": "A low, glacial light haunts the deeper tunnel between root and basin.",
-          "body": "This is not Nidhogg as a literal dragon model. It is an omen-light: low to the ground, colder than the other spirits, and visually associated with gnawing pressure beneath the tree."
+          "body": "This is not Nidhogg as a literal dragon model. It is an omen-light: low to the ground, colder than the other spirits, and visually associated with gnawing pressure beneath the tree.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -8396,7 +8519,8 @@
           "mode": "read-only",
           "title": "Threshold Spark",
           "excerpt": "A warm spark drifts near the foreground stones.",
-          "body": "These threshold sparks help stage the first view: they make the entry feel inhabited before the player reaches the main root court."
+          "body": "These threshold sparks help stage the first view: they make the entry feel inhabited before the player reaches the main root court.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -8454,7 +8578,8 @@
           "mode": "read-only",
           "title": "Threshold Spark",
           "excerpt": "A cooler spark marks the other side of the approach.",
-          "body": "Together the threshold sparks subtly pull the eye forward and inward toward the tree."
+          "body": "Together the threshold sparks subtly pull the eye forward and inward toward the tree.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -8858,7 +8983,8 @@
           "mode": "read-only",
           "title": "Ascent Guide Â· Lower Bough",
           "excerpt": "A warm guide-light marks the beginning of the climb.",
-          "body": "This guide spirit helps new visitors read the path upward."
+          "body": "This guide spirit helps new visitors read the path upward.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -8916,7 +9042,8 @@
           "mode": "read-only",
           "title": "Ascent Guide Â· Mid Bough",
           "excerpt": "A cooler guide-light appears higher up, where the route starts to wrap the trunk.",
-          "body": "The mid-bough guide marks the turning point where the ascent becomes a true spiral around the world-tree."
+          "body": "The mid-bough guide marks the turning point where the ascent becomes a true spiral around the world-tree.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -8974,7 +9101,8 @@
           "mode": "read-only",
           "title": "Ascent Guide Â· Crown Threshold",
           "excerpt": "Near the top, the guide-light slows, as if yielding the crown to older watchers.",
-          "body": "The upper guide spirit eases the handoff from traversal space to sacred crown space."
+          "body": "The upper guide spirit eases the handoff from traversal space to sacred crown space.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -9081,7 +9209,8 @@
           "mode": "read-only",
           "title": "Horizon Beacon 1",
           "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -9139,7 +9268,8 @@
           "mode": "read-only",
           "title": "Horizon Beacon 2",
           "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -9197,7 +9327,8 @@
           "mode": "read-only",
           "title": "Horizon Beacon 3",
           "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -9255,7 +9386,8 @@
           "mode": "read-only",
           "title": "Horizon Beacon 4",
           "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -9313,7 +9445,8 @@
           "mode": "read-only",
           "title": "Horizon Beacon 5",
           "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -9371,7 +9504,8 @@
           "mode": "read-only",
           "title": "Horizon Beacon 6",
           "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -9399,7 +9533,7 @@
     {
       "id": "yggdrasil-searoot-north",
       "name": "Sea Root NORTH",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         2.2990735192896574,
@@ -9412,27 +9546,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.3771277643359572,
-        1.3771277643359572
+        6.198453291869552,
+        44.98479561686142,
+        6.141035775818384
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          2.6,
-          4.4,
-          44,
-          12
-        ],
-        "color": "#3f2d1c",
-        "emissive": "#140d08",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.02,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element",
+        "originalAssetUrl": "/generated/style-lab/sources/sea-root-north-2026-05-17T19-25-37-954Z/sea-root-north.glb",
+        "sourceVisualSize": [
+          12.11872,
+          60.59362,
+          12.11872
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/sea-root-north/sea-root-north-generated-2026-05-17T19-28-31-825Z.glb",
+        "lastBakedAt": "2026-05-17T19:28:34.495Z"
       },
       "collision": {
         "mode": "auto",
@@ -9442,12 +9570,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/sea-root-north/sea-root-north-generated-2026-05-17T19-28-31-825Z.glb"
       }
     },
     {
       "id": "yggdrasil-searoot-south",
       "name": "Sea Root SOUTH",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         2.2990735192896574,
@@ -9460,27 +9591,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.3771277643359572,
-        1.3771277643359572
+        6.1374280852443075,
+        32.7370280725261,
+        6.517403089102095
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          2.6,
-          4.4,
-          44,
-          12
-        ],
-        "color": "#3f2d1c",
-        "emissive": "#140d08",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.02,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element",
+        "originalAssetUrl": "/generated/style-lab/sources/sea-root-south-2026-05-17T19-28-34-575Z/sea-root-south.glb",
+        "sourceVisualSize": [
+          12.11872,
+          60.59362,
+          12.11872
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/sea-root-south/sea-root-south-generated-2026-05-17T19-31-34-603Z.glb",
+        "lastBakedAt": "2026-05-17T19:31:37.727Z"
       },
       "collision": {
         "mode": "auto",
@@ -9490,6 +9615,9 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/sea-root-south/sea-root-south-generated-2026-05-17T19-31-34-603Z.glb"
       }
     },
     {
@@ -9508,15 +9636,21 @@
         -1.18
       ],
       "scale": [
-        1,
-        1,
-        1
+        6.656442930901901,
+        30.793822291789485,
+        9.211973790230628
       ],
       "visible": true,
       "generation": {
         "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element",
-        "lastBakedAssetUrl": "/generated/style-lab/sources/sea-root-east-2026-05-15T00-11-30-669Z/sea-root-east.glb",
-        "lastBakedAt": "2026-05-15T00:11:30.683Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/sea-root-east/sea-root-east-generated-2026-05-17T19-34-27-649Z.glb",
+        "lastBakedAt": "2026-05-17T19:34:30.924Z",
+        "originalAssetUrl": "/generated/style-lab/sources/sea-root-east-2026-05-15T00-11-30-669Z/sea-root-east.glb",
+        "sourceVisualSize": [
+          12.11872,
+          60.59362,
+          12.11872
+        ]
       },
       "collision": {
         "mode": "auto",
@@ -9528,7 +9662,7 @@
         "restitution": 0
       },
       "asset": {
-        "url": "/generated/style-lab/sources/sea-root-east-2026-05-15T00-11-30-669Z/sea-root-east.glb"
+        "url": "/generated/hunyuan3d/sea-root-east/sea-root-east-generated-2026-05-17T19-34-27-649Z.glb"
       }
     },
     {
@@ -9547,15 +9681,21 @@
         1.18
       ],
       "scale": [
-        1,
-        1,
-        1
+        6.146143546881974,
+        31.54931792148287,
+        6.496788789175164
       ],
       "visible": true,
       "generation": {
         "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element",
-        "lastBakedAssetUrl": "/generated/style-lab/sources/sea-root-west-2026-05-14T23-56-36-932Z/sea-root-west.glb",
-        "lastBakedAt": "2026-05-14T23:56:36.935Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/sea-root-west/sea-root-west-generated-2026-05-17T19-37-48-870Z.glb",
+        "lastBakedAt": "2026-05-17T19:37:53.795Z",
+        "originalAssetUrl": "/generated/style-lab/sources/sea-root-west-2026-05-14T23-56-36-932Z/sea-root-west.glb",
+        "sourceVisualSize": [
+          12.11872,
+          60.59362,
+          12.11872
+        ]
       },
       "collision": {
         "mode": "auto",
@@ -9567,13 +9707,13 @@
         "restitution": 0
       },
       "asset": {
-        "url": "/generated/style-lab/sources/sea-root-west-2026-05-14T23-56-36-932Z/sea-root-west.glb"
+        "url": "/generated/hunyuan3d/sea-root-west/sea-root-west-generated-2026-05-17T19-37-48-870Z.glb"
       }
     },
     {
       "id": "yggdrasil-searoot-ne",
       "name": "Sea Root NE",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         117.97780572351004,
@@ -9586,27 +9726,21 @@
         -0.9200000000000006
       ],
       "scale": [
-        1.3771277643359574,
-        1.3771277643359578,
-        1.3771277643359574
+        4.768492020653624,
+        25.28566911142166,
+        4.771261744145759
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          2,
-          3.4,
-          36,
-          12
-        ],
-        "color": "#3f2d1c",
-        "emissive": "#140d08",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.02,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element",
+        "originalAssetUrl": "/generated/style-lab/sources/sea-root-ne-2026-05-17T19-37-53-895Z/sea-root-ne.glb",
+        "sourceVisualSize": [
+          9.36446,
+          49.5766,
+          9.36446
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/sea-root-ne/sea-root-ne-generated-2026-05-17T19-41-00-695Z.glb",
+        "lastBakedAt": "2026-05-17T19:41:04.240Z"
       },
       "collision": {
         "mode": "auto",
@@ -9616,12 +9750,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/sea-root-ne/sea-root-ne-generated-2026-05-17T19-41-00-695Z.glb"
       }
     },
     {
       "id": "yggdrasil-searoot-nw",
       "name": "Sea Root NW",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         -113.37965868493075,
@@ -9634,27 +9771,21 @@
         0.9200000000000006
       ],
       "scale": [
-        1.3771277643359574,
-        1.3771277643359578,
-        1.3771277643359574
+        7.126248021429441,
+        25.177800574893602,
+        7.9814366562116446
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          2,
-          3.4,
-          36,
-          12
-        ],
-        "color": "#3f2d1c",
-        "emissive": "#140d08",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.02,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element",
+        "originalAssetUrl": "/generated/style-lab/sources/sea-root-nw-2026-05-17T19-41-04-320Z/sea-root-nw.glb",
+        "sourceVisualSize": [
+          9.36446,
+          49.5766,
+          9.36446
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/sea-root-nw/sea-root-nw-generated-2026-05-17T19-43-51-539Z.glb",
+        "lastBakedAt": "2026-05-17T19:43:54.789Z"
       },
       "collision": {
         "mode": "auto",
@@ -9664,12 +9795,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/sea-root-nw/sea-root-nw-generated-2026-05-17T19-43-51-539Z.glb"
       }
     },
     {
       "id": "yggdrasil-searoot-se",
       "name": "Sea Root SE",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         117.97780572351004,
@@ -9682,27 +9816,21 @@
         -0.9200000000000006
       ],
       "scale": [
-        1.3771277643359574,
-        1.3771277643359578,
-        1.3771277643359574
+        4.757106862008006,
+        28.394061923689307,
+        5.111995458168201
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          2,
-          3.4,
-          36,
-          12
-        ],
-        "color": "#3f2d1c",
-        "emissive": "#140d08",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.02,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element",
+        "originalAssetUrl": "/generated/style-lab/sources/sea-root-se-2026-05-17T19-43-54-874Z/sea-root-se.glb",
+        "sourceVisualSize": [
+          9.36446,
+          49.5766,
+          9.36446
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/sea-root-se/sea-root-se-generated-2026-05-17T19-46-57-788Z.glb",
+        "lastBakedAt": "2026-05-17T19:47:01.873Z"
       },
       "collision": {
         "mode": "auto",
@@ -9712,12 +9840,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/sea-root-se/sea-root-se-generated-2026-05-17T19-46-57-788Z.glb"
       }
     },
     {
       "id": "yggdrasil-searoot-sw",
       "name": "Sea Root SW",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         -113.37965868493075,
@@ -9730,27 +9861,21 @@
         0.9200000000000006
       ],
       "scale": [
-        1.3771277643359574,
-        1.3771277643359578,
-        1.3771277643359574
+        4.792064109387153,
+        28.513930107897945,
+        4.746449461210173
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          2,
-          3.4,
-          36,
-          12
-        ],
-        "color": "#3f2d1c",
-        "emissive": "#140d08",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.02,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element",
+        "originalAssetUrl": "/generated/style-lab/sources/sea-root-sw-2026-05-17T19-47-01-946Z/sea-root-sw.glb",
+        "sourceVisualSize": [
+          9.36446,
+          49.5766,
+          9.36446
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/sea-root-sw/sea-root-sw-generated-2026-05-17T19-49-55-517Z.glb",
+        "lastBakedAt": "2026-05-17T19:49:58.316Z"
       },
       "collision": {
         "mode": "auto",
@@ -9760,12 +9885,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/sea-root-sw/sea-root-sw-generated-2026-05-17T19-49-55-517Z.glb"
       }
     },
     {
       "id": "yggdrasil-shorestone-1",
       "name": "Shore Stone 1",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         213.094972529478,
@@ -9778,26 +9906,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        6.274687889189272,
+        2.871453145905371,
+        4.887197842310188
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          9,
-          2.4,
-          7
-        ],
-        "color": "#6d685a",
-        "emissive": "#26221b",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.08,
-        "roughness": 0.94
-      },
       "generation": {
-        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-1-2026-05-17T19-49-58-392Z/shore-stone-1.glb",
+        "sourceVisualSize": [
+          12.39414,
+          3.3051,
+          9.6399
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-1/shore-stone-1-generated-2026-05-17T19-52-50-116Z.glb",
+        "lastBakedAt": "2026-05-17T19:52:54.810Z"
       },
       "collision": {
         "mode": "auto",
@@ -9807,12 +9930,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-stone-1/shore-stone-1-generated-2026-05-17T19-52-50-116Z.glb"
       }
     },
     {
       "id": "yggdrasil-shorestone-2",
       "name": "Shore Stone 2",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         189.12407772976826,
@@ -9825,27 +9951,21 @@
         0
       ],
       "scale": [
-        1.3771277643359572,
-        1.377127764335957,
-        1.3771277643359572
+        8.489038601999324,
+        2.9691836200391175,
+        8.110868527676512
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
-        "color": "#6d685a",
-        "emissive": "#26221b",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.08,
-        "roughness": 0.94
-      },
       "generation": {
-        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-2-2026-05-17T19-52-54-886Z/shore-stone-2.glb",
+        "sourceVisualSize": [
+          15.57416,
+          3.85596,
+          15.97468
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-2/shore-stone-2-generated-2026-05-17T19-55-56-822Z.glb",
+        "lastBakedAt": "2026-05-17T19:56:01.266Z"
       },
       "collision": {
         "mode": "auto",
@@ -9855,12 +9975,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-stone-2/shore-stone-2-generated-2026-05-17T19-55-56-822Z.glb"
       }
     },
     {
       "id": "yggdrasil-shorestone-3",
       "name": "Shore Stone 3",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         124.3488085599875,
@@ -9873,26 +9996,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        7.671008122506026,
+        2.5270667033672813,
+        5.186311009727125
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          11,
-          2.4,
-          7
-        ],
-        "color": "#6d685a",
-        "emissive": "#26221b",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.08,
-        "roughness": 0.94
-      },
       "generation": {
-        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-3-2026-05-17T19-56-01-344Z/shore-stone-3.glb",
+        "sourceVisualSize": [
+          15.1484,
+          3.3051,
+          9.6399
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-3/shore-stone-3-generated-2026-05-17T19-58-56-912Z.glb",
+        "lastBakedAt": "2026-05-17T19:59:01.734Z"
       },
       "collision": {
         "mode": "auto",
@@ -9902,12 +10020,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-stone-3/shore-stone-3-generated-2026-05-17T19-58-56-912Z.glb"
       }
     },
     {
       "id": "yggdrasil-shorestone-4",
       "name": "Shore Stone 4",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         26.507763443099165,
@@ -9920,27 +10041,21 @@
         0
       ],
       "scale": [
-        1.3771277643359572,
-        1.377127764335957,
-        1.3771277643359572
+        8.206082576348345,
+        3.8776749798873693,
+        9.288792752561374
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
-        "color": "#6d685a",
-        "emissive": "#26221b",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.08,
-        "roughness": 0.94
-      },
       "generation": {
-        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-4-2026-05-17T19-59-01-809Z/shore-stone-4.glb",
+        "sourceVisualSize": [
+          15.57416,
+          3.85596,
+          15.97468
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-4/shore-stone-4-generated-2026-05-17T20-01-55-917Z.glb",
+        "lastBakedAt": "2026-05-17T20:02:00.230Z"
       },
       "collision": {
         "mode": "auto",
@@ -9950,12 +10065,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-stone-4/shore-stone-4-generated-2026-05-17T20-01-55-917Z.glb"
       }
     },
     {
       "id": "yggdrasil-shorestone-5",
       "name": "Shore Stone 5",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         -70.0170934625354,
@@ -9968,26 +10086,21 @@
         -3.141592653589793
       ],
       "scale": [
-        1.3771277643359578,
-        1.377127764335957,
-        1.3771277643359578
+        6.973294309470039,
+        2.664028243487232,
+        5.00841672121949
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          10,
-          2.4,
-          7
-        ],
-        "color": "#6d685a",
-        "emissive": "#26221b",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.08,
-        "roughness": 0.94
-      },
       "generation": {
-        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-5-2026-05-17T20-02-00-304Z/shore-stone-5.glb",
+        "sourceVisualSize": [
+          13.77128,
+          3.3051,
+          9.6399
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-5/shore-stone-5-generated-2026-05-17T20-04-49-387Z.glb",
+        "lastBakedAt": "2026-05-17T20:04:52.776Z"
       },
       "collision": {
         "mode": "auto",
@@ -9997,12 +10110,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-stone-5/shore-stone-5-generated-2026-05-17T20-04-49-387Z.glb"
       }
     },
     {
       "id": "yggdrasil-shorestone-6",
       "name": "Shore Stone 6",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         -158.99183415271804,
@@ -10015,27 +10131,21 @@
         -3.141592653589793
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        7.890604734111543,
+        4.764679715302491,
+        8.123407068395627
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
-        "color": "#6d685a",
-        "emissive": "#26221b",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.08,
-        "roughness": 0.94
-      },
       "generation": {
-        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-6-2026-05-17T20-04-52-848Z/shore-stone-6.glb",
+        "sourceVisualSize": [
+          15.57416,
+          3.85596,
+          15.97468
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-6/shore-stone-6-generated-2026-05-17T20-07-37-262Z.glb",
+        "lastBakedAt": "2026-05-17T20:07:40.066Z"
       },
       "collision": {
         "mode": "auto",
@@ -10045,6 +10155,9 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-stone-6/shore-stone-6-generated-2026-05-17T20-07-37-262Z.glb"
       }
     },
     {
@@ -10063,15 +10176,21 @@
         -3.141592653589793
       ],
       "scale": [
-        1,
-        1,
-        1
+        6.2937418752031205,
+        2.4336204992268606,
+        4.885959310281909
       ],
       "visible": true,
       "generation": {
         "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
-        "lastBakedAssetUrl": "/generated/style-lab/sources/shore-stone-7-2026-05-15T00-08-17-541Z/shore-stone-7.glb",
-        "lastBakedAt": "2026-05-15T00:08:17.578Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-7/shore-stone-7-generated-2026-05-17T20-10-40-578Z.glb",
+        "lastBakedAt": "2026-05-17T20:10:44.631Z",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-7-2026-05-15T00-08-17-541Z/shore-stone-7.glb",
+        "sourceVisualSize": [
+          12.39414,
+          3.3051,
+          9.6399
+        ]
       },
       "collision": {
         "mode": "auto",
@@ -10083,7 +10202,7 @@
         "restitution": 0
       },
       "asset": {
-        "url": "/generated/style-lab/sources/shore-stone-7-2026-05-15T00-08-17-541Z/shore-stone-7.glb"
+        "url": "/generated/hunyuan3d/shore-stone-7/shore-stone-7-generated-2026-05-17T20-10-40-578Z.glb"
       }
     },
     {
@@ -10102,15 +10221,21 @@
         -3.141592653589793
       ],
       "scale": [
-        1,
-        1,
-        1
+        8.260050491121623,
+        3.7761325577295968,
+        8.103709265046062
       ],
       "visible": true,
       "generation": {
         "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
-        "lastBakedAssetUrl": "/generated/style-lab/sources/shore-stone-8-2026-05-14T23-56-45-130Z/shore-stone-8.glb",
-        "lastBakedAt": "2026-05-14T23:56:45.179Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-8/shore-stone-8-generated-2026-05-17T20-13-33-277Z.glb",
+        "lastBakedAt": "2026-05-17T20:13:37.568Z",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-8-2026-05-14T23-56-45-130Z/shore-stone-8.glb",
+        "sourceVisualSize": [
+          15.57416,
+          3.85596,
+          15.97468
+        ]
       },
       "collision": {
         "mode": "auto",
@@ -10122,7 +10247,7 @@
         "restitution": 0
       },
       "asset": {
-        "url": "/generated/style-lab/sources/shore-stone-8-2026-05-14T23-56-45-130Z/shore-stone-8.glb"
+        "url": "/generated/hunyuan3d/shore-stone-8/shore-stone-8-generated-2026-05-17T20-13-33-277Z.glb"
       }
     },
     {
@@ -10141,15 +10266,21 @@
         -3.141592653589793
       ],
       "scale": [
-        1,
-        1,
-        1
+        7.673572767337014,
+        2.6642000386922033,
+        4.893996161930001
       ],
       "visible": true,
       "generation": {
         "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
-        "lastBakedAssetUrl": "/generated/style-lab/sources/shore-stone-9-2026-05-14T23-56-49-651Z/shore-stone-9.glb",
-        "lastBakedAt": "2026-05-14T23:56:49.653Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-9/shore-stone-9-generated-2026-05-17T20-16-34-309Z.glb",
+        "lastBakedAt": "2026-05-17T20:16:39.020Z",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-9-2026-05-14T23-56-49-651Z/shore-stone-9.glb",
+        "sourceVisualSize": [
+          15.1484,
+          3.3051,
+          9.6399
+        ]
       },
       "collision": {
         "mode": "auto",
@@ -10161,13 +10292,13 @@
         "restitution": 0
       },
       "asset": {
-        "url": "/generated/style-lab/sources/shore-stone-9-2026-05-14T23-56-49-651Z/shore-stone-9.glb"
+        "url": "/generated/hunyuan3d/shore-stone-9/shore-stone-9-generated-2026-05-17T20-16-34-309Z.glb"
       }
     },
     {
       "id": "yggdrasil-shorestone-10",
       "name": "Shore Stone 10",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         -110.92778910882765,
@@ -10180,27 +10311,21 @@
         -3.141592653589793
       ],
       "scale": [
-        1.3771277643359574,
-        1.377127764335957,
-        1.3771277643359574
+        7.892364137595524,
+        2.8950822133793825,
+        8.094675395747613
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
-        "color": "#6d685a",
-        "emissive": "#26221b",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.08,
-        "roughness": 0.94
-      },
       "generation": {
-        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-10-2026-05-17T20-16-39-114Z/shore-stone-10.glb",
+        "sourceVisualSize": [
+          15.57416,
+          3.85596,
+          15.97468
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-10/shore-stone-10-generated-2026-05-17T20-19-38-041Z.glb",
+        "lastBakedAt": "2026-05-17T20:19:42.036Z"
       },
       "collision": {
         "mode": "auto",
@@ -10210,12 +10335,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-stone-10/shore-stone-10-generated-2026-05-17T20-19-38-041Z.glb"
       }
     },
     {
       "id": "yggdrasil-shorestone-11",
       "name": "Shore Stone 11",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         -22.852812115837075,
@@ -10228,26 +10356,21 @@
         3.141592653589793
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        6.993053298667534,
+        2.451963737258335,
+        5.103770687957306
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          10,
-          2.4,
-          7
-        ],
-        "color": "#6d685a",
-        "emissive": "#26221b",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.08,
-        "roughness": 0.94
-      },
       "generation": {
-        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-11-2026-05-17T20-19-42-118Z/shore-stone-11.glb",
+        "sourceVisualSize": [
+          13.77128,
+          3.3051,
+          9.6399
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-11/shore-stone-11-generated-2026-05-17T20-22-40-414Z.glb",
+        "lastBakedAt": "2026-05-17T20:22:43.527Z"
       },
       "collision": {
         "mode": "auto",
@@ -10257,12 +10380,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-stone-11/shore-stone-11-generated-2026-05-17T20-22-40-414Z.glb"
       }
     },
     {
       "id": "yggdrasil-shorestone-12",
       "name": "Shore Stone 12",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         77.32709676293314,
@@ -10275,27 +10401,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        8.027503736920776,
+        3.934331891274182,
+        9.194272098350465
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
-        "color": "#6d685a",
-        "emissive": "#26221b",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.08,
-        "roughness": 0.94
-      },
       "generation": {
-        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-12-2026-05-17T20-22-43-605Z/shore-stone-12.glb",
+        "sourceVisualSize": [
+          15.57416,
+          3.85596,
+          15.97468
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-12/shore-stone-12-generated-2026-05-17T20-25-43-715Z.glb",
+        "lastBakedAt": "2026-05-17T20:25:46.758Z"
       },
       "collision": {
         "mode": "auto",
@@ -10305,12 +10425,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-stone-12/shore-stone-12-generated-2026-05-17T20-25-43-715Z.glb"
       }
     },
     {
       "id": "yggdrasil-shorestone-13",
       "name": "Shore Stone 13",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         151.93039750416438,
@@ -10323,26 +10446,21 @@
         0
       ],
       "scale": [
-        1.3771277643359572,
-        1.377127764335957,
-        1.3771277643359572
+        6.280092827175257,
+        2.432510009420631,
+        5.2968811815904004
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          9,
-          2.4,
-          7
-        ],
-        "color": "#6d685a",
-        "emissive": "#26221b",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.08,
-        "roughness": 0.94
-      },
       "generation": {
-        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-13-2026-05-17T20-25-46-831Z/shore-stone-13.glb",
+        "sourceVisualSize": [
+          12.39414,
+          3.3051,
+          9.6399
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-13/shore-stone-13-generated-2026-05-17T20-28-41-090Z.glb",
+        "lastBakedAt": "2026-05-17T20:28:45.713Z"
       },
       "collision": {
         "mode": "auto",
@@ -10352,12 +10470,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-stone-13/shore-stone-13-generated-2026-05-17T20-28-41-090Z.glb"
       }
     },
     {
       "id": "yggdrasil-shorestone-14",
       "name": "Shore Stone 14",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         210.11415759905958,
@@ -10370,27 +10491,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        7.943730362753498,
+        3.5182116788321167,
+        8.095741985181581
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
-        "color": "#6d685a",
-        "emissive": "#26221b",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.08,
-        "roughness": 0.94
-      },
       "generation": {
-        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island",
+        "originalAssetUrl": "/generated/style-lab/sources/shore-stone-14-2026-05-17T20-28-45-791Z/shore-stone-14.glb",
+        "sourceVisualSize": [
+          15.57416,
+          3.85596,
+          15.97468
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-stone-14/shore-stone-14-generated-2026-05-17T20-31-35-259Z.glb",
+        "lastBakedAt": "2026-05-17T20:31:38.832Z"
       },
       "collision": {
         "mode": "auto",
@@ -10400,12 +10515,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-stone-14/shore-stone-14-generated-2026-05-17T20-31-35-259Z.glb"
       }
     },
     {
       "id": "yggdrasil-shelfbreak-1",
       "name": "Shelf Break 1",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         169.70321868966357,
@@ -10418,26 +10536,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        15.347622135316406,
+        4.908880274473109,
+        10.451156578228403
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
-        "color": "#4d5646",
-        "emissive": "#1a2017",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea",
+        "originalAssetUrl": "/generated/style-lab/sources/shelf-break-1-2026-05-17T20-31-38-909Z/shelf-break-1.glb",
+        "sourceVisualSize": [
+          30.29682,
+          4.4068,
+          13.77128
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shelf-break-1/shelf-break-1-generated-2026-05-17T20-34-49-162Z.glb",
+        "lastBakedAt": "2026-05-17T20:34:53.789Z"
       },
       "collision": {
         "mode": "auto",
@@ -10447,12 +10560,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shelf-break-1/shelf-break-1-generated-2026-05-17T20-34-49-162Z.glb"
       }
     },
     {
       "id": "yggdrasil-shelfbreak-2",
       "name": "Shelf Break 2",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         15.969637811195996,
@@ -10465,26 +10581,21 @@
         0
       ],
       "scale": [
-        1.3771277643359572,
-        1.377127764335957,
-        1.3771277643359572
+        15.344202017746445,
+        4.052453468697124,
+        23.226986001011976
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
-        "color": "#4d5646",
-        "emissive": "#1a2017",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea",
+        "originalAssetUrl": "/generated/style-lab/sources/shelf-break-2-2026-05-17T20-34-53-862Z/shelf-break-2.glb",
+        "sourceVisualSize": [
+          30.29682,
+          4.4068,
+          13.77128
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shelf-break-2/shelf-break-2-generated-2026-05-17T20-38-05-158Z.glb",
+        "lastBakedAt": "2026-05-17T20:38:08.808Z"
       },
       "collision": {
         "mode": "auto",
@@ -10494,12 +10605,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shelf-break-2/shelf-break-2-generated-2026-05-17T20-38-05-158Z.glb"
       }
     },
     {
       "id": "yggdrasil-shelfbreak-3",
       "name": "Shelf Break 3",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         -151.4345073591779,
@@ -10512,26 +10626,21 @@
         -3.141592653589793
       ],
       "scale": [
-        1.3771277643359567,
-        1.377127764335957,
-        1.3771277643359567
+        23.77041488827517,
+        7.1497176974495416,
+        6.977816962068931
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
-        "color": "#4d5646",
-        "emissive": "#1a2017",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea",
+        "originalAssetUrl": "/generated/style-lab/sources/shelf-break-3-2026-05-17T20-38-08-883Z/shelf-break-3.glb",
+        "sourceVisualSize": [
+          30.29682,
+          4.4068,
+          13.77128
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shelf-break-3/shelf-break-3-generated-2026-05-17T20-41-08-791Z.glb",
+        "lastBakedAt": "2026-05-17T20:41:13.444Z"
       },
       "collision": {
         "mode": "auto",
@@ -10541,12 +10650,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shelf-break-3/shelf-break-3-generated-2026-05-17T20-41-08-791Z.glb"
       }
     },
     {
       "id": "yggdrasil-shelfbreak-4",
       "name": "Shelf Break 4",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         -165.10507165108424,
@@ -10559,26 +10671,21 @@
         -3.141592653589793
       ],
       "scale": [
-        1.3771277643359572,
-        1.377127764335957,
-        1.3771277643359572
+        15.356023436866433,
+        2.2578364364836196,
+        7.011639155626611
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
-        "color": "#4d5646",
-        "emissive": "#1a2017",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea",
+        "originalAssetUrl": "/generated/style-lab/sources/shelf-break-4-2026-05-17T20-41-13-517Z/shelf-break-4.glb",
+        "sourceVisualSize": [
+          30.29682,
+          4.4068,
+          13.77128
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shelf-break-4/shelf-break-4-generated-2026-05-17T20-44-19-726Z.glb",
+        "lastBakedAt": "2026-05-17T20:44:24.602Z"
       },
       "collision": {
         "mode": "auto",
@@ -10588,12 +10695,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shelf-break-4/shelf-break-4-generated-2026-05-17T20-44-19-726Z.glb"
       }
     },
     {
       "id": "yggdrasil-shelfbreak-5",
       "name": "Shelf Break 5",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         -11.371490772616706,
@@ -10606,26 +10716,21 @@
         3.141592653589793
       ],
       "scale": [
-        1.3771277643359572,
-        1.377127764335957,
-        1.3771277643359572
+        41.51841802335142,
+        5.3899217221135025,
+        6.976544373182569
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
-        "color": "#4d5646",
-        "emissive": "#1a2017",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea",
+        "originalAssetUrl": "/generated/style-lab/sources/shelf-break-5-2026-05-17T20-44-24-684Z/shelf-break-5.glb",
+        "sourceVisualSize": [
+          30.29682,
+          4.4068,
+          13.77128
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shelf-break-5/shelf-break-5-generated-2026-05-17T20-47-17-100Z.glb",
+        "lastBakedAt": "2026-05-17T20:47:21.166Z"
       },
       "collision": {
         "mode": "auto",
@@ -10635,12 +10740,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shelf-break-5/shelf-break-5-generated-2026-05-17T20-47-17-100Z.glb"
       }
     },
     {
       "id": "yggdrasil-shelfbreak-6",
       "name": "Shelf Break 6",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         156.03265439775726,
@@ -10653,26 +10761,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        15.435195940575902,
+        2.3398109801422957,
+        7.313478491768455
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
-        "color": "#4d5646",
-        "emissive": "#1a2017",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.98
-      },
       "generation": {
-        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea",
+        "originalAssetUrl": "/generated/style-lab/sources/shelf-break-6-2026-05-17T20-47-21-243Z/shelf-break-6.glb",
+        "sourceVisualSize": [
+          30.29682,
+          4.4068,
+          13.77128
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shelf-break-6/shelf-break-6-generated-2026-05-17T20-50-14-459Z.glb",
+        "lastBakedAt": "2026-05-17T20:50:17.554Z"
       },
       "collision": {
         "mode": "auto",
@@ -10682,6 +10785,9 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shelf-break-6/shelf-break-6-generated-2026-05-17T20-50-14-459Z.glb"
       }
     },
     {
@@ -10837,7 +10943,7 @@
     {
       "id": "yggdrasil-islet-north",
       "name": "Outer Shoal North",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-outer-ruins-group",
       "position": [
         2.2990735192896574,
@@ -10850,27 +10956,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        33.47520669613621,
+        2.9290221299437893,
+        33.46808230552687
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          20.16,
-          24,
-          4.2,
-          22
-        ],
-        "color": "#545f4c",
-        "emissive": "#1c2219",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.04,
-        "roughness": 0.97
-      },
       "generation": {
-        "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass"
+        "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass",
+        "originalAssetUrl": "/generated/style-lab/sources/outer-shoal-north-2026-05-17T20-50-17-626Z/outer-shoal-north.glb",
+        "sourceVisualSize": [
+          65.4293,
+          5.78394,
+          66.10214
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/outer-shoal-north/outer-shoal-north-generated-2026-05-17T20-53-16-392Z.glb",
+        "lastBakedAt": "2026-05-17T20:53:20.014Z"
       },
       "collision": {
         "mode": "auto",
@@ -10880,6 +10980,9 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/outer-shoal-north/outer-shoal-north-generated-2026-05-17T20-53-16-392Z.glb"
       }
     },
     {
@@ -10913,7 +11016,7 @@
     {
       "id": "yggdrasil-drowned-ring-north",
       "name": "Drowned Ring north",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-outer-ruins-group",
       "position": [
         -5.963693066726085,
@@ -10926,16 +11029,21 @@
         0
       ],
       "scale": [
-        1.3082713761191591,
-        1.3082713761191591,
-        1.3082713761191591
+        3.8397732554164645,
+        2.3455162877216535,
+        0.325037443554625
       ],
       "visible": true,
-      "prefab": {
-        "type": "broken-ring"
-      },
       "generation": {
-        "descriptor": "half-submerged broken ring ruin resting on an outer shoal"
+        "descriptor": "half-submerged broken ring ruin resting on an outer shoal",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+        "sourceVisualSize": [
+          7.457146843879207,
+          3.7285734219396036,
+          0.6377299650030454
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T20-56-18-499Z.glb",
+        "lastBakedAt": "2026-05-17T20:56:23.321Z"
       },
       "collision": {
         "mode": "auto",
@@ -11041,6 +11149,9 @@
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
         "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
         "triangleCount": 218
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T20-56-18-499Z.glb"
       }
     },
     {
@@ -11076,7 +11187,8 @@
           "mode": "read-only",
           "title": "Outer Shoal North Beacon",
           "excerpt": "A distant light hangs above the outer shoal.",
-          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -11104,7 +11216,7 @@
     {
       "id": "yggdrasil-islet-south",
       "name": "Outer Shoal South",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-outer-ruins-group",
       "position": [
         2.2990735192896574,
@@ -11117,27 +11229,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        29.25349543420643,
+        2.9280731418388735,
+        29.89824252884793
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          16.8,
-          20,
-          4.2,
-          22
-        ],
-        "color": "#545f4c",
-        "emissive": "#1c2219",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.04,
-        "roughness": 0.97
-      },
       "generation": {
-        "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass"
+        "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass",
+        "originalAssetUrl": "/generated/style-lab/sources/outer-shoal-south-2026-05-17T20-56-23-392Z/outer-shoal-south.glb",
+        "sourceVisualSize": [
+          54.52442,
+          5.78394,
+          55.08512
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/outer-shoal-south/outer-shoal-south-generated-2026-05-17T20-59-12-373Z.glb",
+        "lastBakedAt": "2026-05-17T20:59:15.969Z"
       },
       "collision": {
         "mode": "auto",
@@ -11147,12 +11253,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/outer-shoal-south/outer-shoal-south-generated-2026-05-17T20-59-12-373Z.glb"
       }
     },
     {
       "id": "yggdrasil-drowned-ring-south",
       "name": "Drowned Ring south",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-outer-ruins-group",
       "position": [
         -3.2094375380541704,
@@ -11165,16 +11274,21 @@
         0
       ],
       "scale": [
-        1.308271376119159,
-        1.3082713761191591,
-        1.308271376119159
+        3.8089421002549835,
+        2.0386972617090073,
+        0.4393834761840441
       ],
       "visible": true,
-      "prefab": {
-        "type": "broken-ring"
-      },
       "generation": {
-        "descriptor": "half-submerged broken ring ruin resting on an outer shoal"
+        "descriptor": "half-submerged broken ring ruin resting on an outer shoal",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+        "sourceVisualSize": [
+          7.457146843879206,
+          3.7285734219396036,
+          0.6377299650030452
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb",
+        "lastBakedAt": "2026-05-17T21:02:19.496Z"
       },
       "collision": {
         "mode": "auto",
@@ -11280,6 +11394,9 @@
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
         "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
         "triangleCount": 218
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb"
       }
     },
     {
@@ -11315,7 +11432,8 @@
           "mode": "read-only",
           "title": "Outer Shoal South Beacon",
           "excerpt": "A distant light hangs above the outer shoal.",
-          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -11343,7 +11461,7 @@
     {
       "id": "yggdrasil-islet-east",
       "name": "Outer Shoal East",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-outer-ruins-group",
       "position": [
         330.0554814312475,
@@ -11356,27 +11474,21 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        32.38526333977689,
+        2.9277767091529405,
+        30.9913256068495
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          18.48,
-          22,
-          4.2,
-          22
-        ],
-        "color": "#545f4c",
-        "emissive": "#1c2219",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.04,
-        "roughness": 0.97
-      },
       "generation": {
-        "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass"
+        "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass",
+        "originalAssetUrl": "/generated/style-lab/sources/outer-shoal-east-2026-05-17T21-02-19-589Z/outer-shoal-east.glb",
+        "sourceVisualSize": [
+          59.97686,
+          5.78394,
+          60.59362
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/outer-shoal-east/outer-shoal-east-generated-2026-05-17T21-05-06-397Z.glb",
+        "lastBakedAt": "2026-05-17T21:05:10.822Z"
       },
       "collision": {
         "mode": "auto",
@@ -11386,12 +11498,15 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/outer-shoal-east/outer-shoal-east-generated-2026-05-17T21-05-06-397Z.glb"
       }
     },
     {
       "id": "yggdrasil-drowned-ring-east",
       "name": "Drowned Ring east",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-outer-ruins-group",
       "position": [
         321.79271484523167,
@@ -11404,16 +11519,21 @@
         0
       ],
       "scale": [
-        1.3082713761191591,
-        1.3082713761191591,
-        1.3082713761191591
+        3.7813612246355155,
+        1.9244448572060633,
+        0.46966503049184394
       ],
       "visible": true,
-      "prefab": {
-        "type": "broken-ring"
-      },
       "generation": {
-        "descriptor": "half-submerged broken ring ruin resting on an outer shoal"
+        "descriptor": "half-submerged broken ring ruin resting on an outer shoal",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+        "sourceVisualSize": [
+          7.457146843879207,
+          3.7285734219396036,
+          0.6377299650030454
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-08-20-319Z.glb",
+        "lastBakedAt": "2026-05-17T21:08:24.014Z"
       },
       "collision": {
         "mode": "auto",
@@ -11519,6 +11639,9 @@
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
         "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
         "triangleCount": 218
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-08-20-319Z.glb"
       }
     },
     {
@@ -11554,7 +11677,8 @@
           "mode": "read-only",
           "title": "Outer Shoal East Beacon",
           "excerpt": "A distant light hangs above the outer shoal.",
-          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -11595,15 +11719,21 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        46.139169151055164,
+        2.9343121239485783,
+        39.858090658117376
       ],
       "visible": true,
       "generation": {
         "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass",
-        "lastBakedAssetUrl": "/generated/style-lab/sources/outer-shoal-west-2026-05-14T23-57-16-228Z/outer-shoal-west.glb",
-        "lastBakedAt": "2026-05-14T23:57:16.230Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/outer-shoal-west/outer-shoal-west-generated-2026-05-17T21-11-07-686Z.glb",
+        "lastBakedAt": "2026-05-17T21:11:11.205Z",
+        "originalAssetUrl": "/generated/style-lab/sources/outer-shoal-west-2026-05-14T23-57-16-228Z/outer-shoal-west.glb",
+        "sourceVisualSize": [
+          70.88176,
+          5.78394,
+          71.61064
+        ]
       },
       "collision": {
         "mode": "auto",
@@ -11615,7 +11745,7 @@
         "restitution": 0
       },
       "asset": {
-        "url": "/generated/style-lab/sources/outer-shoal-west-2026-05-14T23-57-16-228Z/outer-shoal-west.glb"
+        "url": "/generated/hunyuan3d/outer-shoal-west/outer-shoal-west-generated-2026-05-17T21-11-07-686Z.glb"
       }
     },
     {
@@ -11649,7 +11779,7 @@
     {
       "id": "yggdrasil-drowned-ring-west",
       "name": "Drowned Ring west",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-outer-ruins-group",
       "position": [
         -341.98286756469963,
@@ -11662,16 +11792,21 @@
         0
       ],
       "scale": [
-        1.3082713761191591,
-        1.3082713761191591,
-        1.3082713761191591
+        3.775350008545482,
+        2.05743909302278,
+        0.3264216435496982
       ],
       "visible": true,
-      "prefab": {
-        "type": "broken-ring"
-      },
       "generation": {
-        "descriptor": "half-submerged broken ring ruin resting on an outer shoal"
+        "descriptor": "half-submerged broken ring ruin resting on an outer shoal",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+        "sourceVisualSize": [
+          7.457146843879207,
+          3.7285734219396036,
+          0.6377299650030454
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-14-13-866Z.glb",
+        "lastBakedAt": "2026-05-17T21:14:17.698Z"
       },
       "collision": {
         "mode": "auto",
@@ -11777,6 +11912,9 @@
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
         "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
         "triangleCount": 218
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-14-13-866Z.glb"
       }
     },
     {
@@ -11812,7 +11950,8 @@
           "mode": "read-only",
           "title": "Outer Shoal West Beacon",
           "excerpt": "A distant light hangs above the outer shoal.",
-          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -11853,15 +11992,21 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        25.76903849183427,
+        2.9357419119065264,
+        28.47724191806631
       ],
       "visible": true,
       "generation": {
         "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass",
-        "lastBakedAssetUrl": "/generated/style-lab/sources/broken-root-islet-2026-05-14T23-57-07-772Z/broken-root-islet.glb",
-        "lastBakedAt": "2026-05-14T23:57:07.774Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/broken-root-islet/broken-root-islet-generated-2026-05-17T21-17-03-200Z.glb",
+        "lastBakedAt": "2026-05-17T21:17:07.010Z",
+        "originalAssetUrl": "/generated/style-lab/sources/broken-root-islet-2026-05-14T23-57-07-772Z/broken-root-islet.glb",
+        "sourceVisualSize": [
+          49.07198,
+          5.78394,
+          49.5766
+        ]
       },
       "collision": {
         "mode": "auto",
@@ -11873,7 +12018,7 @@
         "restitution": 0
       },
       "asset": {
-        "url": "/generated/style-lab/sources/broken-root-islet-2026-05-14T23-57-07-772Z/broken-root-islet.glb"
+        "url": "/generated/hunyuan3d/broken-root-islet/broken-root-islet-generated-2026-05-17T21-17-03-200Z.glb"
       }
     },
     {
@@ -11907,7 +12052,7 @@
     {
       "id": "yggdrasil-drowned-ring-nw",
       "name": "Drowned Ring nw",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-outer-ruins-group",
       "position": [
         -264.86371276188595,
@@ -11920,16 +12065,21 @@
         -3.141592653589793
       ],
       "scale": [
-        1.3082713761191591,
-        1.3082713761191591,
-        1.3082713761191591
+        3.8682160202714013,
+        2.5291495427743134,
+        0.33045400443713296
       ],
       "visible": true,
-      "prefab": {
-        "type": "broken-ring"
-      },
       "generation": {
-        "descriptor": "half-submerged broken ring ruin resting on an outer shoal"
+        "descriptor": "half-submerged broken ring ruin resting on an outer shoal",
+        "originalAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+        "sourceVisualSize": [
+          7.457146843879207,
+          3.7285734219396036,
+          0.6377299650030454
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-20-11-613Z.glb",
+        "lastBakedAt": "2026-05-17T21:20:15.624Z"
       },
       "collision": {
         "mode": "auto",
@@ -12035,6 +12185,9 @@
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
         "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
         "triangleCount": 218
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-20-11-613Z.glb"
       }
     },
     {
@@ -12070,7 +12223,8 @@
           "mode": "read-only",
           "title": "Broken Root Islet Beacon",
           "excerpt": "A distant light hangs above the outer shoal.",
-          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
+          "durationMs": 7000
         },
         "behavior": {
           "type": "hover-wander",
@@ -12259,15 +12413,14 @@
         0
       ],
       "scale": [
-        0.256660776953556,
-        0.1572371663136277,
-        0.2752707830897524
+        8.122886369496445,
+        8.893056742718166,
+        8.930932627102505
       ],
       "visible": true,
       "locked": false,
       "asset": {
-        "url": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
-        "scale": 1
+        "url": "/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.glb"
       },
       "renderPolicy": {
         "cullingPolicy": "never",
@@ -12380,7 +12533,15 @@
       },
       "generation": {
         "family": "yggdrasil-crown-ascent-merged",
-        "descriptor": "walkway with ramps, landings, final platform, and short crown bridge"
+        "descriptor": "walkway with ramps, landings, final platform, and short crown bridge",
+        "originalAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+        "sourceVisualSize": [
+          15.884304295550299,
+          16.913882480110534,
+          17.627338963417298
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.glb",
+        "lastBakedAt": "2026-05-17T21:23:32.388Z"
       },
       "lastBakedAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
       "lastBakedAt": "2026-04-25T02:12:58.165Z"
@@ -12401,15 +12562,14 @@
         0
       ],
       "scale": [
-        1.377127764335957,
-        1.377127764335957,
-        1.377127764335957
+        13.851412368019751,
+        1.2148268916160523,
+        57.20185836645247
       ],
       "visible": true,
       "locked": false,
       "asset": {
-        "url": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
-        "scale": 1
+        "url": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon-merged-2026-04-25t02-17-02-006z/yggdrasil-bifrost-ribbon-merged-2026-04-25t02-17-02-006z-generated-2026-05-17T21-26-55-097Z.glb"
       },
       "material": {
         "transparent": true,
@@ -12420,7 +12580,15 @@
       },
       "generation": {
         "family": "yggdrasil-bifrost-ribbon-merged",
-        "descriptor": "merged luminous Bifrost rainbow runway ribbons embedded in the approach path"
+        "descriptor": "merged luminous Bifrost rainbow runway ribbons embedded in the approach path",
+        "originalAssetUrl": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+        "sourceVisualSize": [
+          12.187580714373219,
+          0.1377127764335957,
+          112.92447667554848
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon-merged-2026-04-25t02-17-02-006z/yggdrasil-bifrost-ribbon-merged-2026-04-25t02-17-02-006z-generated-2026-05-17T21-26-55-097Z.glb",
+        "lastBakedAt": "2026-05-17T21:26:59.662Z"
       },
       "lastBakedAssetUrl": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
       "lastBakedAt": "2026-04-25T02:17:02.008Z"

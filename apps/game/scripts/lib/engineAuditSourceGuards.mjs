@@ -44,6 +44,12 @@ const allowedDirectLightMountFiles = new Set([
 ])
 const runtimeNpcInteractionTargetFile =
   'src/threlte/features/npc/RuntimeNpcInteractionTarget.svelte'
+const sceneFireflyFieldFile = 'src/threlte/levels/SceneFireflyField.svelte'
+const editorPanelTabsFile = 'src/threlte/editor/editorPanelTabs.ts'
+const editorPanelFile = 'src/threlte/editor/EditorPanel.svelte'
+const editorEnvironmentPanelFile =
+  'src/threlte/editor/EditorEnvironmentPanel.svelte'
+const editorNpcTabHostFile = 'src/threlte/editor/EditorNpcTabHost.svelte'
 const directLightMountPattern =
   /<T\.(AmbientLight|HemisphereLight|DirectionalLight|PointLight|SpotLight)\b/
 const directLightConstructorPattern =
@@ -131,6 +137,42 @@ export function auditSourceGuards({ appRoot, editorApiRoutePaths = [] }) {
     ) {
       failures.push(
         `${file}: generic NPC interaction targets must consume owner-provided transforms and must not import firefly presentation motion helpers`,
+      )
+    }
+
+    if (
+      file === sceneFireflyFieldFile &&
+      (!/\bgetPosition\(\s*firefly\s*,\s*elapsed\s*\)/.test(source) ||
+        !/\bgetPulse\(\s*firefly\s*,\s*elapsed\s*\)/.test(source))
+    ) {
+      failures.push(
+        `${file}: ambient firefly field motion and light pulse must pass elapsed explicitly so Svelte invalidates sprite and light positions every frame`,
+      )
+    }
+
+    if (file === editorPanelTabsFile && !/\|\s*'npc'/.test(source)) {
+      failures.push(
+        `${file}: dedicated NPC editor tab must stay in the editor tab contract`,
+      )
+    }
+
+    if (
+      file === editorPanelFile &&
+      (!source.includes('EditorNpcTabHost') ||
+        !source.includes("activeEditorTab === 'npc'") ||
+        !existsSync(join(appRoot, editorNpcTabHostFile)))
+    ) {
+      failures.push(
+        `${file}: dedicated NPC editor workspace must render EditorNpcTabHost behind the npc tab`,
+      )
+    }
+
+    if (
+      file === editorEnvironmentPanelFile &&
+      source.includes("['fireflies'")
+    ) {
+      failures.push(
+        `${file}: firefly field controls belong in the NPC editor workspace, not the World/Environment panel`,
       )
     }
   }

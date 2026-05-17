@@ -46,6 +46,13 @@ const terrainColliderRoot = '/terrain/collision/'
 const colliderUrlSuffix = '.collider.glb'
 const parityCollisionIntents = new Set(['walkable', 'blocker'])
 const renderProfilePlatformTiers = ['mobile', 'desktop', 'tv']
+const legacyLightingKeys = [
+  'sunIntensity',
+  'fillIntensity',
+  'fallbackAmbientIntensity',
+  'fallbackMoonlightIntensity',
+  'fallbackFillLightIntensity',
+]
 const reflectionModes = new Set([
   'none',
   'static-environment',
@@ -122,6 +129,18 @@ function getGraphicsBudget(scene) {
 
 function getRenderProfile(scene) {
   return scene.settings?.level?.renderProfile ?? null
+}
+
+function getLightingContractFailures(scene) {
+  const lighting = scene.settings?.level?.lighting
+  if (!lighting || typeof lighting !== 'object') return []
+
+  return legacyLightingKeys
+    .filter(key => Object.prototype.hasOwnProperty.call(lighting, key))
+    .map(
+      key =>
+        `settings.level.lighting.${key} is retired; use keyLightIntensity/fillLightIntensity and renderProfile lighting fields`,
+    )
 }
 
 function getMissingGraphicsBudgetKeys(graphicsBudget) {
@@ -762,6 +781,7 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
   })
   const graphicsBudget = getGraphicsBudget(scene)
   const renderProfile = getRenderProfile(scene)
+  const lightingContractFailures = getLightingContractFailures(scene)
   const npcValidation = validateNpcLevelContract(
     {
       id: scene.levelId ?? file.replace(/\.scene\.json$/, ''),
@@ -1051,6 +1071,7 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
     npcValidationErrors: npcValidation.errors,
     npcValidationWarnings: npcValidation.warnings,
     deprecatedFields,
+    lightingContractFailures,
     oversizedAssetFiles,
     generatedStyleBakeProducts: generatedStyleBakeNodes.length,
     unmanagedStyleBakeProductIds: unmanagedStyleBakeProducts.map(
@@ -1152,6 +1173,11 @@ function validateSceneReport(report) {
   if (report.deprecatedFields.length > 0) {
     failures.push(
       `${report.file}: deprecated scene fields must be removed: ${report.deprecatedFields.join(', ')}`,
+    )
+  }
+  if (report.lightingContractFailures.length > 0) {
+    failures.push(
+      `${report.file}: ${report.lightingContractFailures.join('; ')}`,
     )
   }
   if (report.missingGraphicsBudgetKeys.length > 0) {

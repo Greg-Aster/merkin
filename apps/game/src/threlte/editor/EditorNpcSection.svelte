@@ -262,6 +262,22 @@ $: profileValidationMessage =
         />
       </label>
       <label class="editor-field">
+        <span class="editor-field-label">Hover Height</span>
+        <input
+          class="tuple-input"
+          type="number"
+          min="0"
+          step="0.05"
+          value={behavior.hoverHeight ?? 0.28}
+          on:change={(event) =>
+            onNpcChange({
+              scope: 'behaviorNumber',
+              field: 'hoverHeight',
+              value: (event.currentTarget as HTMLInputElement).value,
+            })}
+        />
+      </label>
+      <label class="editor-field">
         <span class="editor-field-label">Bob Amplitude</span>
         <input
           class="tuple-input"
@@ -421,9 +437,70 @@ $: profileValidationMessage =
               scope: 'presentationNumber',
               field: 'twinkleSpeed',
               value: (event.currentTarget as HTMLInputElement).value,
+          })}
+        />
+      </label>
+      <label class="editor-field">
+        <span class="editor-field-label">Light Burst Boost</span>
+        <input
+          class="tuple-input"
+          type="number"
+          min="0"
+          step="0.05"
+          value={fireflyPresentation.lightBurstBoost ?? 1}
+          on:change={(event) =>
+            onNpcChange({
+              scope: 'presentationNumber',
+              field: 'lightBurstBoost',
+              value: (event.currentTarget as HTMLInputElement).value,
+            })}
+        />
+      </label>
+      <label class="editor-field">
+        <span class="editor-field-label">Selection Light Boost</span>
+        <input
+          class="tuple-input"
+          type="number"
+          min="0"
+          step="0.05"
+          value={fireflyPresentation.selectionLightBoost ?? 3}
+          on:change={(event) =>
+            onNpcChange({
+              scope: 'presentationNumber',
+              field: 'selectionLightBoost',
+              value: (event.currentTarget as HTMLInputElement).value,
+            })}
+        />
+      </label>
+      <label class="editor-field">
+        <span class="editor-field-label">Burst Sprite Boost</span>
+        <input
+          class="tuple-input"
+          type="number"
+          min="0"
+          step="0.05"
+          value={fireflyPresentation.lightBurstSpriteBoost ?? 0.55}
+          on:change={(event) =>
+            onNpcChange({
+              scope: 'presentationNumber',
+              field: 'lightBurstSpriteBoost',
+              value: (event.currentTarget as HTMLInputElement).value,
             })}
         />
       </label>
     </div>
+    <label class="checkbox editor-mt-sm">
+      <input
+        type="checkbox"
+        checked={fireflyPresentation.shockwaveEnabled ?? false}
+        on:change={(event) =>
+          onNpcChange({
+            scope: 'presentationBoolean',
+            field: 'shockwaveEnabled',
+            value: (event.currentTarget as HTMLInputElement).checked,
+          })}
+      />
+      Shockwave Burst
+    </label>
   </div>
 {/if}

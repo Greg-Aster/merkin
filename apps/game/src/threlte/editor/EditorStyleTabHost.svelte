@@ -84,6 +84,8 @@ export let onExportBlender: () => void = () => {}
 export let onRunRetexture: () => void = () => {}
 export let onRunReimagine: () => void = () => {}
 export let onSelectAllBatchCandidates: () => void = () => {}
+export let onSelectCurrentBatchCandidates: () => void = () => {}
+export let onSelectUnreimaginedBatchCandidates: () => void = () => {}
 export let onClearBatchCandidates: () => void = () => {}
 export let onPauseBatch: () => void = () => {}
 export let onCancelBatch: () => void = () => {}
@@ -177,6 +179,8 @@ export let onUpdateBatchDescriptor: (
     on:runRetexture={onRunRetexture}
     on:runReimagine={onRunReimagine}
     on:selectAllBatchCandidates={onSelectAllBatchCandidates}
+    on:selectCurrentBatchCandidates={onSelectCurrentBatchCandidates}
+    on:selectUnreimaginedBatchCandidates={onSelectUnreimaginedBatchCandidates}
     on:clearBatchCandidates={onClearBatchCandidates}
     on:pauseBatch={onPauseBatch}
     on:cancelBatch={onCancelBatch}

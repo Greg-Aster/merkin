@@ -354,12 +354,7 @@ export interface SharedLevelLightingSettings {
   lighting?: {
     ambientIntensity?: number
     keyLightIntensity?: number
-    sunIntensity?: number
-    fillIntensity?: number
     fillLightIntensity?: number
-    fallbackAmbientIntensity?: number
-    fallbackMoonlightIntensity?: number
-    fallbackFillLightIntensity?: number
   }
 }
 
@@ -519,10 +514,32 @@ export interface SharedLevelFireflySettings {
     allowWithAuthored?: boolean
     count?: number
     lightCount?: number
+    qualityTiers?: Partial<
+      Record<
+        'ultra_low' | 'low' | 'medium' | 'high' | 'ultra',
+        {
+          count?: number
+          lightCount?: number
+          size?: number
+          spriteIntensity?: number
+        }
+      >
+    >
     radius?: number
     minHeight?: number
     maxHeight?: number
     center?: [number, number, number]
+    terrainFollow?: boolean
+    distribution?: 'uniform' | 'center-falloff'
+    densityExponent?: number
+    palette?: string[]
+    interactive?: {
+      enabled?: boolean
+      profileChance?: number
+      profileIds?: string[]
+      durationMs?: number
+      lostSoulResponses?: string[]
+    }
     color?: string
     secondaryColor?: string
     size?: number
@@ -530,6 +547,7 @@ export interface SharedLevelFireflySettings {
     lightIntensity?: number
     lightDistance?: number
     lightDecay?: number
+    lightBudgeted?: boolean
     twinkleSpeed?: number
     driftSpeed?: number
     sway?: number

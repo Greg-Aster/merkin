@@ -31,6 +31,8 @@ export let isMobile = false
 export let editorEnabled = false
 export let editorPlaytestEnabled = false
 export let collisionOverlayEnabled = false
+export let worldUnloading = false
+export let physicsWorldSession = 0
 export let currentLevel = DEFAULT_LEVEL_ID
 export let currentLevelComponent: any = null
 export let parsedTimelineEvents: any[] = []
@@ -311,6 +313,8 @@ $: if (isInitialized && (!postProcessingEligible || !postProcessingComponent)) {
         {editorEnabled}
         {editorPlaytestEnabled}
         {collisionOverlayEnabled}
+        unloading={worldUnloading}
+        {physicsWorldSession}
         {currentLevel}
         {currentLevelComponent}
         {parsedTimelineEvents}

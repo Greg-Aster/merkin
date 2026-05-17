@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "167b5823afe67463f7ecf51681c316ceb8d2ba6353029dacedad2290f1f28598"
+  },
+  "sourceName": "Depth Monolith Left",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/depth-monolith-left-2026-05-17T19-10-37-766Z/reference/depth-monolith-left-reference-2026-05-17T19-11-44-560Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779045104808-rufk34",
+  "prompt": "object: tall cold-depth monolith placed in the Hvergelmir lower passage, a shrine-like standing stone. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "5d938e421919a73f5b0de881a2d360b5d651dc97d11047d8ed98005c2eb235a6"
+  },
+  "generatedAt": "2026-05-17T19:13:23.389Z"
+}

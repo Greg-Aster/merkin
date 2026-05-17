@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-05-17T20:32:47.954Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Shelf Break 1",
+  "sourceAssetUrl": "/generated/style-lab/sources/shelf-break-1-2026-05-17T20-31-38-909Z/shelf-break-1.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/shelf-break-1-2026-05-17T20-31-38-909Z/shelf-break-1.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/shelf-break-1-2026-05-17T20-31-38-912Z/source/shelf-break-1.glb",
+  "prompt": "object: broken edge shelf fragment where the outer island terrace collapses toward the sea. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "comfyUiLowVramMode": true,
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/shelf-break-1-reference-2026-05-17T20-32-47-948Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/shelf-break-1-2026-05-17T20-31-38-912Z/reference/shelf-break-1-reference-2026-05-17T20-32-47-948Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/shelf-break-1-reference-2026-05-17T20-32-47-948Z.png"
+}

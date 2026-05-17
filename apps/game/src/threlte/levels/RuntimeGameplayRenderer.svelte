@@ -19,11 +19,13 @@ let markerHovered = false
 let lightBurstGlow = 0
 let animationTime = 0
 
+$: gameplay = node?.gameplay ?? null
+
 function registerInteractiveMarker(sprite: THREE.Sprite) {
   if (
     !interactiveEnabled ||
     !interactionSystem?.registerInteractiveObject ||
-    !node.gameplay
+    !gameplay
   )
     return
 
@@ -35,18 +37,18 @@ function registerInteractiveMarker(sprite: THREE.Sprite) {
     index: 0,
     handlers: {
       onClick: () => {
-        if (node.gameplay?.type === 'portal' && node.gameplay.targetLevelId) {
-          dispatch('portalTransition', { levelId: node.gameplay.targetLevelId })
+        if (gameplay.type === 'portal' && gameplay.targetLevelId) {
+          dispatch('portalTransition', { levelId: gameplay.targetLevelId })
           return
         }
 
-        if (node.gameplay?.type === 'note') {
+        if (gameplay.type === 'note') {
           dispatch('noteRead', {
-            title: node.gameplay.title || node.name,
-            author: node.gameplay.author || 'Recovered Fragment',
-            location: node.gameplay.location || 'Sci-Fi Room',
-            excerpt: node.gameplay.excerpt || '',
-            body: node.gameplay.body || node.gameplay.excerpt || '',
+            title: gameplay.title || node.name,
+            author: gameplay.author || 'Recovered Fragment',
+            location: gameplay.location || 'Sci-Fi Room',
+            excerpt: gameplay.excerpt || '',
+            body: gameplay.body || gameplay.excerpt || '',
           })
         }
       },
@@ -75,8 +77,8 @@ onDestroy(() => {
 })
 </script>
 
-{#if node.gameplay}
-  {#if node.gameplay.type === 'audio-region'}
+{#if gameplay}
+  {#if gameplay.type === 'audio-region'}
     {#if editorEnabled}
     <ProceduralMesh
       geometry="box"
@@ -84,8 +86,8 @@ onDestroy(() => {
       position={[0, 0, 0]}
       rotation={[0, 0, 0]}
       scale={[1, 1, 1]}
-      color={node.gameplay.markerColor ?? '#7ecbff'}
-      emissive={node.gameplay.markerColor ?? '#7ecbff'}
+      color={gameplay.markerColor ?? '#7ecbff'}
+      emissive={gameplay.markerColor ?? '#7ecbff'}
       emissiveIntensity={selected || markerHovered ? 0.4 : 0.12}
       metalness={0.08}
       roughness={0.92}
@@ -98,8 +100,8 @@ onDestroy(() => {
       position={[0, Math.max(0.3, node.scale[1] * 0.5), 0]}
       rotation={[Math.PI / 2, animationTime * 0.35, 0]}
       scale={[1, 1, 1]}
-      color={node.gameplay.markerColor ?? '#7ecbff'}
-      emissive={node.gameplay.markerColor ?? '#7ecbff'}
+      color={gameplay.markerColor ?? '#7ecbff'}
+      emissive={gameplay.markerColor ?? '#7ecbff'}
       emissiveIntensity={0.35}
       metalness={1}
       roughness={0.04}
@@ -107,7 +109,7 @@ onDestroy(() => {
       opacity={0.45}
     />
     {/if}
-  {:else if node.gameplay.type === 'fog-volume'}
+  {:else if gameplay.type === 'fog-volume'}
     {#if editorEnabled}
     <ProceduralMesh
       geometry="box"
@@ -115,8 +117,8 @@ onDestroy(() => {
       position={[0, 0, 0]}
       rotation={[0, 0, 0]}
       scale={[1, 1, 1]}
-      color={node.gameplay.fogColor ?? node.gameplay.markerColor ?? '#cfdcff'}
-      emissive={node.gameplay.fogColor ?? node.gameplay.markerColor ?? '#cfdcff'}
+      color={gameplay.fogColor ?? gameplay.markerColor ?? '#cfdcff'}
+      emissive={gameplay.fogColor ?? gameplay.markerColor ?? '#cfdcff'}
       emissiveIntensity={selected || markerHovered ? 0.28 : 0.08}
       metalness={0.02}
       roughness={1}
@@ -129,8 +131,8 @@ onDestroy(() => {
       position={[0, Math.max(0.3, node.scale[1] * 0.5), 0]}
       rotation={[Math.PI / 2, 0, Math.sin(animationTime * 0.3) * 0.25]}
       scale={[1, 1, 1]}
-      color={node.gameplay.fogColor ?? node.gameplay.markerColor ?? '#cfdcff'}
-      emissive={node.gameplay.fogColor ?? node.gameplay.markerColor ?? '#cfdcff'}
+      color={gameplay.fogColor ?? gameplay.markerColor ?? '#cfdcff'}
+      emissive={gameplay.fogColor ?? gameplay.markerColor ?? '#cfdcff'}
       emissiveIntensity={0.2}
       metalness={1}
       roughness={0.05}
@@ -138,7 +140,7 @@ onDestroy(() => {
       opacity={0.38}
     />
     {/if}
-  {:else if node.gameplay.type === 'mist-region'}
+  {:else if gameplay.type === 'mist-region'}
     {#if editorEnabled}
       <ProceduralMesh
         geometry="box"
@@ -146,8 +148,8 @@ onDestroy(() => {
         position={[0, 0, 0]}
         rotation={[0, 0, 0]}
         scale={[1, 1, 1]}
-        color={node.gameplay.mistColor ?? '#b992ff'}
-        emissive={node.gameplay.mistColor ?? '#b992ff'}
+        color={gameplay.mistColor ?? '#b992ff'}
+        emissive={gameplay.mistColor ?? '#b992ff'}
         emissiveIntensity={selected || markerHovered ? 0.34 : 0.1}
         metalness={0.02}
         roughness={1}
@@ -160,8 +162,8 @@ onDestroy(() => {
         position={[0, 0.18, 0]}
         rotation={[Math.PI / 2, 0, Math.sin(animationTime * 0.3) * 0.25]}
         scale={[1, 1, 1]}
-        color={node.gameplay.mistColor ?? '#b992ff'}
-        emissive={node.gameplay.mistColor ?? '#b992ff'}
+        color={gameplay.mistColor ?? '#b992ff'}
+        emissive={gameplay.mistColor ?? '#b992ff'}
         emissiveIntensity={0.24}
         metalness={1}
         roughness={0.05}
@@ -171,20 +173,20 @@ onDestroy(() => {
     {:else}
       <GroundMistLayer
         enabled={true}
-        color={node.gameplay.mistColor ?? '#241557'}
-        opacity={node.gameplay.mistOpacity ?? 0.14}
-        layers={Math.max(1, Math.round(node.gameplay.mistLayers ?? 3))}
+        color={gameplay.mistColor ?? '#241557'}
+        opacity={gameplay.mistOpacity ?? 0.14}
+        layers={Math.max(1, Math.round(gameplay.mistLayers ?? 3))}
         baseHeight={0}
-        heightStep={node.gameplay.mistSpacing ?? 0.45}
-        scale={node.gameplay.mistScale ?? 360}
-        driftSpeed={node.gameplay.mistDriftSpeed ?? 0.05}
+        heightStep={gameplay.mistSpacing ?? 0.45}
+        scale={gameplay.mistScale ?? 360}
+        driftSpeed={gameplay.mistDriftSpeed ?? 0.05}
       />
     {/if}
-  {:else if node.gameplay.type === 'note'}
+  {:else if gameplay.type === 'note'}
     <StarSprite
       position={[0, 0.16, 0]}
-      color={node.gameplay.markerColor ?? '#7ecbff'}
-      size={(node.gameplay.markerSize ?? 0.7) * (markerHovered ? 1.12 : 1 + lightBurstGlow * 0.1)}
+      color={gameplay.markerColor ?? '#7ecbff'}
+      size={(gameplay.markerSize ?? 0.7) * (markerHovered ? 1.12 : 1 + lightBurstGlow * 0.1)}
       intensity={Math.max(markerHovered ? 1.08 : 0.9, 0.9 + lightBurstGlow * 0.75)}
       twinkleSpeed={1}
       animationOffset={0}
@@ -199,12 +201,12 @@ onDestroy(() => {
   {:else}
     <ProceduralMesh
       geometry="torus"
-      args={[node.gameplay.type === 'portal' ? 1.4 : 0.38, node.gameplay.type === 'portal' ? 0.035 : 0.018, 12, 28]}
-      position={[0, node.gameplay.type === 'portal' ? 1.05 : 0.1, 0]}
+      args={[gameplay.type === 'portal' ? 1.4 : 0.38, gameplay.type === 'portal' ? 0.035 : 0.018, 12, 28]}
+      position={[0, gameplay.type === 'portal' ? 1.05 : 0.1, 0]}
       rotation={[Math.PI / 2, 0, 0]}
       scale={[1, 1, 1]}
-      color={node.gameplay.markerColor ?? '#7ecbff'}
-      emissive={node.gameplay.markerColor ?? '#7ecbff'}
+      color={gameplay.markerColor ?? '#7ecbff'}
+      emissive={gameplay.markerColor ?? '#7ecbff'}
       emissiveIntensity={Math.max(markerHovered ? 1.1 : 0.48, 0.48 + lightBurstGlow)}
       metalness={1}
       roughness={0.03}
@@ -213,9 +215,9 @@ onDestroy(() => {
     />
 
     <StarSprite
-      position={[0, node.gameplay.type === 'portal' ? 1.12 : 0.12, 0]}
-      color={node.gameplay.markerColor ?? '#7ecbff'}
-      size={(node.gameplay.markerSize ?? 0.7) * (markerHovered ? 1.15 : 1 + lightBurstGlow * 0.12)}
+      position={[0, gameplay.type === 'portal' ? 1.12 : 0.12, 0]}
+      color={gameplay.markerColor ?? '#7ecbff'}
+      size={(gameplay.markerSize ?? 0.7) * (markerHovered ? 1.15 : 1 + lightBurstGlow * 0.12)}
       intensity={Math.max(markerHovered ? 1.05 : 0.85, 0.85 + lightBurstGlow * 0.8)}
       twinkleSpeed={1.2}
       animationOffset={0}

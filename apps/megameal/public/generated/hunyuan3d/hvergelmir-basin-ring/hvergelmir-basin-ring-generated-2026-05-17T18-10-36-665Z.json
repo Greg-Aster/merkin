@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/hvergelmir-basin-ring-2026-05-17T18-07-45-020Z/hvergelmir-basin-ring.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "53064a7e5c653a74c95287772a603ac243c810d1b0441dde2ff3c646ddf51ad5"
+  },
+  "sourceName": "Hvergelmir Basin Ring",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/hvergelmir-basin-ring-2026-05-17T18-07-45-024Z/reference/hvergelmir-basin-ring-reference-2026-05-17T18-08-53-699Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779041333782-0qorru",
+  "prompt": "object: hvergelmir basin ring, carved circular stone ring around a sacred well. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "38b833b9df9b662295b60d690c490ba55b60d243bda45287c31511e7a01185ae"
+  },
+  "generatedAt": "2026-05-17T18:10:38.062Z"
+}

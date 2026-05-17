@@ -1,0 +1,23 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/shelf-break-2-2026-05-17T20-34-53-862Z/shelf-break-2.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "328f9c0ff3ae872d87355324ac5213096125f7a2f5d6b92ab3c9060691ae3919"
+  },
+  "sourceName": "Shelf Break 2",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/shelf-break-2-2026-05-17T20-34-53-865Z/reference/shelf-break-2-reference-2026-05-17T20-36-03-108Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1779050163212-mlkvgq",
+  "prompt": "object: broken edge shelf fragment where the outer island terrace collapses toward the sea. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "styleSettingsFingerprint": {
+    "algorithm": "sha256",
+    "value": "0164f6711e4d4febc7a6b4bdec88e04e8f5e5f1da5c56cc60af301e51f064763"
+  },
+  "generatedAt": "2026-05-17T20:38:06.881Z"
+}
