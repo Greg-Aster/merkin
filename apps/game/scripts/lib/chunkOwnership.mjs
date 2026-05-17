@@ -170,6 +170,8 @@ export const localChunkOwnershipRules = [
       '/src/threlte/editor/editorSceneDocumentValidation.ts',
       '/src/threlte/editor/editorHierarchyUtils.ts',
       '/src/threlte/editor/editorHistory.ts',
+      '/src/threlte/editor/editorNpcControls.ts',
+      '/src/threlte/editor/editorNpcPrefabs.ts',
       '/src/threlte/editor/editorPrefabFactory.ts',
       '/src/threlte/editor/editorLevelSetup.ts',
       '/src/threlte/editor/editorLevelPresets.ts',

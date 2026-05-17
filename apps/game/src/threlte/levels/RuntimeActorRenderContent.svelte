@@ -1,11 +1,11 @@
 <script lang="ts">
 import { onDestroy, onMount } from 'svelte'
-import AdaptivePointLight from '../components/AdaptivePointLight.svelte'
 import HeroProp from '../components/HeroProp.svelte'
 import ProceduralMesh from '../components/ProceduralMesh.svelte'
 import { getActorMeshRenderSource } from '../engine/actorRenderSource'
 import { usesLightweightRuntimeGameplayMarker } from '../engine/runtimeGameplayRenderPolicy'
 import type { ActorDefinition, RenderCullingPolicy } from '../engine/types'
+import ManagedLight from '../features/lighting/ManagedLight.svelte'
 import {
   markRuntimeActorRendered,
   markRuntimeAssetActorLoaded,
@@ -106,7 +106,9 @@ onDestroy(() => {
     reflectivity={material.reflectivity ?? 0.5}
   />
 {:else if light}
-  <AdaptivePointLight
+  <ManagedLight
+    id={`actor-light-${actor.id}`}
+    ownerId={actor.id}
     position={[0, 0, 0]}
     color={light.color}
     intensity={light.intensity}

@@ -2,6 +2,7 @@
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import EditorOutlinerDock from './EditorOutlinerDock.svelte'
 import EditorPropertiesDock from './EditorPropertiesDock.svelte'
+import type { EditorNpcPatch } from './editorNpcControls'
 import type {
   OutlinerDisplayMode,
   OutlinerModeOption,
@@ -193,6 +194,7 @@ export let onGameplayNumericChange: (field: any, value: string) => void =
   () => {}
 export let onGameplayBooleanChange: (field: any, value: boolean) => void =
   () => {}
+export let onNpcChange: (patch: EditorNpcPatch) => void = () => {}
 export let onStyleDescriptorChange: (value: string) => void = () => {}
 export let onApplyGeneratedVariant: (url: string) => void = () => {}
 export let onOpenSelectedInBlender: () => void = () => {}
@@ -395,6 +397,7 @@ function endSplitResize() {
         {onGameplayFieldChange}
         {onGameplayNumericChange}
         {onGameplayBooleanChange}
+        {onNpcChange}
         {onStyleDescriptorChange}
         {onApplyGeneratedVariant}
         {onOpenSelectedInBlender}

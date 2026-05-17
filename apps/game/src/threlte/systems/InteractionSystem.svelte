@@ -3,8 +3,7 @@
   
   This system provides unified click/hover detection for all interactive elements:
   - Stars (from StarMap)
-  - Fireflies (from scene-authored gameplay markers)
-  - Future interactive objects
+  - NPCs and authored gameplay objects
   
   Follows ECS architecture with centralized canvas event handling
   to avoid code duplication and ensure consistent behavior.
@@ -23,8 +22,8 @@ const { camera } = useThrelte()
 interface InteractiveObject {
   id: string
   sprite: THREE.Sprite
-  type: 'star' | 'firefly' | 'object'
-  data: any // Star data, firefly data, etc.
+  type: 'star' | 'object' | 'npc'
+  data: any
   index: number
   handlers: {
     onClick?: (data: any) => void
@@ -147,6 +146,13 @@ export function unregisterInteractiveObject(id: string) {
   removeInteractiveObject(id)
 }
 
+export function clearInteractiveObjects() {
+  interactiveObjectById.clear()
+  interactiveObjectBySprite.clear()
+  hoveredObjectId = null
+  syncInteractiveCollections()
+}
+
 export function registerStarSprites(
   sprites: THREE.Sprite[],
   stars: any[],
@@ -175,32 +181,6 @@ export function registerStarSprites(
   runtimeDebugLog(
     `🌟 InteractionSystem: Registered ${sprites.length} star sprites`,
   )
-}
-
-export function registerFireflySprites(
-  sprites: THREE.Sprite[],
-  fireflies: any[],
-  handlers: any,
-) {
-  removeInteractiveObjectsByType('firefly')
-
-  sprites.forEach((sprite, index) => {
-    const firefly = fireflies[index]
-    if (firefly) {
-      const object: InteractiveObject = {
-        id: `firefly_${firefly.id || index}`,
-        sprite,
-        type: 'firefly',
-        data: firefly,
-        index,
-        handlers,
-      }
-      interactiveObjectById.set(object.id, object)
-      interactiveObjectBySprite.set(sprite, object)
-    }
-  })
-
-  syncInteractiveCollections()
 }
 
 // --- UNIFIED INTERACTION LOGIC ---
@@ -625,8 +605,8 @@ export function getScreenPosition(worldPosition: THREE.Vector3): {
 export const interactionAPI = {
   registerInteractiveObject,
   unregisterInteractiveObject,
+  clearInteractiveObjects,
   registerStarSprites,
-  registerFireflySprites,
   triggerLightBurst,
   getScreenPosition,
 }

@@ -114,7 +114,9 @@ function compareJsonArtifact({ label, path, actual, expected, normalize }) {
 
   const normalizedActual = normalize(actual)
   const normalizedExpected = normalize(expected)
-  if (stableStringify(normalizedActual) === stableStringify(normalizedExpected)) {
+  if (
+    stableStringify(normalizedActual) === stableStringify(normalizedExpected)
+  ) {
     return []
   }
 
@@ -141,11 +143,18 @@ function validateReleaseManifests({ currentManifest, expectedManifest }) {
   }
 
   if (currentManifestUrl !== '/generated/runtime-game-assets/manifest.json') {
-    failures.push('runtime asset manifest rollback.currentManifestUrl is invalid')
+    failures.push(
+      'runtime asset manifest rollback.currentManifestUrl is invalid',
+    )
   }
 
-  if (previousManifestUrl !== '/generated/runtime-game-assets/manifest.previous.json') {
-    failures.push('runtime asset manifest rollback.previousManifestUrl is invalid')
+  if (
+    previousManifestUrl !==
+    '/generated/runtime-game-assets/manifest.previous.json'
+  ) {
+    failures.push(
+      'runtime asset manifest rollback.previousManifestUrl is invalid',
+    )
   }
 
   if (previousManifestUrl) {
@@ -160,9 +169,14 @@ function validateReleaseManifests({ currentManifest, expectedManifest }) {
         failures.push('runtime asset rollback manifest schemaVersion must be 1')
       }
       if (!previousManifest.contentBuild?.fingerprint) {
-        failures.push('runtime asset rollback manifest must include a contentBuild fingerprint')
+        failures.push(
+          'runtime asset rollback manifest must include a contentBuild fingerprint',
+        )
       }
-      if (!previousManifest.assets || typeof previousManifest.assets !== 'object') {
+      if (
+        !previousManifest.assets ||
+        typeof previousManifest.assets !== 'object'
+      ) {
         failures.push('runtime asset rollback manifest must include assets')
       }
     }

@@ -1,4 +1,5 @@
 import type { AssetLocalTransformMetadata } from './assetLocalTransform'
+import type { NpcComponent } from './npcTypes'
 
 export type Vec3 = [number, number, number]
 export type Euler3 = [number, number, number]
@@ -255,6 +256,7 @@ export interface ActorDefinition {
   collisionClassification?: CollisionClassification
   interaction?: InteractionComponent
   gameplay?: GameplayComponent
+  npc?: NpcComponent
   light?: LightComponent
   audioRegion?: AudioRegionComponent
   terrain?: TerrainComponent
@@ -356,7 +358,8 @@ export interface LevelBuildReport {
   assetActorCount: number
   primitiveActorCount: number
   neverCullActorCount: number
-  gameplayFireflyActorCount: number
+  npcActorCount: number
+  fireflyNpcActorCount: number
   physicsActorCount: number
   trimeshActorCount: number
   detailMeshActorCount: number

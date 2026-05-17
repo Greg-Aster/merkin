@@ -9,6 +9,15 @@ import { characterRegistry } from './CharacterRegistry'
 
 export { CharacterComponent } from './CharacterComponent'
 export { characterRegistry, CharacterRegistry } from './CharacterRegistry'
+export {
+  CANONICAL_CONVERSATION_PROFILE_IDS,
+  CONVERSATION_PROFILE_ALIAS_ENTRIES,
+} from './profileManifest.mjs'
+export {
+  KNOWN_CONVERSATION_PROFILE_IDS,
+  isKnownConversationProfileId,
+  normalizeConversationProfileId,
+} from '../../../engine/npcValidationCore.mjs'
 export type {
   CharacterDefinition,
   FireflyPersonality,
@@ -27,7 +36,7 @@ export {
   getFireflyConversationPrompts,
 } from './types'
 
-const isDev = import.meta.env.DEV
+const isDev = import.meta.env?.DEV ?? false
 
 // Compatibility layer for existing conversation system
 export class CharacterKnowledgeCompatibilityLayer {

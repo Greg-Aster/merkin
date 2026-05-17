@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-14T21:36:49.720Z",
-  "generatorVersion": "mesh-collision-manager-v1",
+  "generatedAt": "2026-05-17T02:20:33.722Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "sci-fi-room",
   "sourceActorId": "sci-fi-story-pillar",
   "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
@@ -11,12 +11,19 @@
     "algorithm": "sha256",
     "value": "79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "c7e8eb3d87c61e2457cefb7bff13c678743e05e1f90a727561a4e9f82ac88522"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-pillar.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-pillar.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-pillar.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v1:79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
-  "triangleCount": 604,
-  "vertexCount": 1812,
+  "colliderCacheKey": "mesh-collision-manager-v2:c7e8eb3d87c61e2457cefb7bff13c678743e05e1f90a727561a4e9f82ac88522:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
+  "triangleCount": 267,
+  "vertexCount": 210,
   "bounds": {
     "min": [
       -0.36000001430511475,
@@ -37,6 +44,28 @@
       0.04249998927116394,
       0.10853545293211936,
       0.0021460801362991333
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -7548,
+      -32767
+    ],
+    "max": [
+      32767,
+      7548,
+      32767
+    ],
+    "size": [
+      65534,
+      15096,
+      65534
+    ],
+    "center": [
+      0,
+      0,
+      0
     ]
   },
   "visualLocalBounds": {
@@ -178,34 +207,45 @@
       "algorithm": "sha256",
       "value": "79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "c7e8eb3d87c61e2457cefb7bff13c678743e05e1f90a727561a4e9f82ac88522"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "sci-fi-room",
       "nodeId": "sci-fi-story-pillar",
       "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.low.glb",
+      "lodSourceTier": "low",
       "intent": "trigger",
       "channel": "trigger",
       "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-14T21:36:49.720Z"
+    "generatedAt": "2026-05-17T02:20:33.722Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "trigger",
     "channel": "trigger",
-    "triangleBudget": 5000
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
   },
   "collisionProduct": {
     "actorId": "sci-fi-story-pillar",
+    "cacheKey": "mesh-collision-manager-v1:79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
     "mode": "trigger",
     "productId": "sci-fi-story-pillar:trigger:simplifiedMesh",
-    "generatorVersion": "mesh-collision-manager-v1",
+    "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "prefab",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506"
+      "value": "c7e8eb3d87c61e2457cefb7bff13c678743e05e1f90a727561a4e9f82ac88522"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
@@ -213,7 +253,7 @@
     },
     "policyFingerprint": {
       "algorithm": "sha256",
-      "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+      "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
     },
     "shape": "trimesh",
     "localBounds": {
@@ -240,16 +280,16 @@
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-pillar.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-pillar.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
-    "generatedAt": "2026-05-14T21:36:49.720Z",
-    "triangleCount": 604,
-    "vertexCount": 1812,
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+    "triangleCount": 267,
+    "vertexCount": 210,
     "triangleBudget": 5000
   },
   "simplification": {
     "requested": false,
     "applied": false,
-    "sourceTriangleCount": 604,
+    "sourceTriangleCount": 267,
     "targetTriangleBudget": 5000,
     "ratio": 1,
     "tool": "gltf-transform",

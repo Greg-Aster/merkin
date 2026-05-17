@@ -564,13 +564,20 @@ function addRuntimeSceneSection(
       ? 'Authoring runtime asset sets do not match the cooked scene manifest.'
       : '',
   ].filter(Boolean)
+  const warningDetails = validation.warnings ?? []
 
   addSection(viewModel, {
     id: 'runtime-scene-manifest',
     label: 'Cooked Scene Manifest',
-    severity: blockerDetails.length ? 'blocker' : 'ready',
+    severity: blockerDetails.length
+      ? 'blocker'
+      : warningDetails.length
+        ? 'warning'
+        : 'ready',
     detail: blockerDetails.length
       ? blockerDetails.slice(0, 2).join(' ')
+      : warningDetails.length
+        ? warningDetails.slice(0, 2).join(' ')
       : `${runtimeAssetUrls.length} cooked runtime assets, ${requiredAssetUrls.length} required.`,
   })
 

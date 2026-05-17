@@ -11,10 +11,11 @@
   - Performance optimized with LOD
 -->
 
-<script lang="ts">
+	<script lang="ts">
 import { T } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
+import ManagedLight from '../../lighting/ManagedLight.svelte'
 import {
   underwaterConfigStore,
   underwaterFogDensity,
@@ -278,11 +279,13 @@ $: if (bubbleMaterial && mistMaterial) {
       />
     {/if}
     
-    <!-- Underwater Ambient Light -->
-    <T.AmbientLight 
-      color={resolvedFogColor}
-      intensity={0.3 * transitionProgress}
-    />
+	    <ManagedLight
+	      id="underwater-ambient-light"
+	      ownerId="underwater-effect"
+	      kind="ambient"
+	      color={resolvedFogColor}
+	      intensity={0.3 * transitionProgress}
+	    />
     
     <!-- Underwater Fog (simulated with large transparent sphere) -->
     {#if config.enableColorGrading}

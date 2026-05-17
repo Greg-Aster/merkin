@@ -1,7 +1,7 @@
 {
   "levelId": "miranda",
   "version": 1,
-  "updatedAt": "2026-05-14T21:36:44.370Z",
+  "updatedAt": "2026-05-17T02:20:19.428Z",
   "settings": {
     "level": {
       "spawn": {
@@ -336,11 +336,11 @@
         "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:0e6463bc36efb1a3e83688a3d279248a8dd838c298b665636e190ec0b71c4991:0412f33af9fc3ad71c4092b8c6bb410b417ab97e599c2ab24a4ee4dfab14378d:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "colliderCacheKey": "mesh-collision-manager-v2:65e6aa45ed973c4ea0f987cb63826bda24e8efda22c1af825a5f80efbdf39128:0412f33af9fc3ad71c4092b8c6bb410b417ab97e599c2ab24a4ee4dfab14378d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -366,9 +366,11 @@
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
           ]
         },
-        "triangleCount": 804,
+        "triangleCount": 334,
         "sensor": false,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -496,11 +498,11 @@
         "channel": "trigger",
         "quality": "simplifiedMesh",
         "sensor": true,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "colliderCacheKey": "mesh-collision-manager-v2:3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -538,10 +540,12 @@
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
           ]
         },
-        "triangleCount": 604,
+        "triangleCount": 267,
         "friction": 0.7,
         "restitution": 0,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -740,11 +744,11 @@
         "channel": "trigger",
         "quality": "simplifiedMesh",
         "sensor": true,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-crew-note.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-crew-note.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "colliderCacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -782,10 +786,12 @@
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
           ]
         },
-        "triangleCount": 604,
+        "triangleCount": 267,
         "friction": 0.7,
         "restitution": 0,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -922,11 +928,11 @@
         "channel": "trigger",
         "quality": "simplifiedMesh",
         "sensor": true,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-first-officer-note.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-first-officer-note.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "colliderCacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -964,10 +970,12 @@
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
           ]
         },
-        "triangleCount": 604,
+        "triangleCount": 267,
         "friction": 0.7,
         "restitution": 0,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -1002,11 +1010,11 @@
         "channel": "trigger",
         "quality": "simplifiedMesh",
         "sensor": true,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-vault-fragment.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-vault-fragment.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "colliderCacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -1044,10 +1052,12 @@
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
           ]
         },
-        "triangleCount": 604,
+        "triangleCount": 267,
         "friction": 0.7,
         "restitution": 0,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -1086,11 +1096,11 @@
         "channel": "trigger",
         "quality": "simplifiedMesh",
         "sensor": true,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0:5794ee5e0f0f7ffca972ee693ceb932f15c9af46929f481753a1b200ba3a109c:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "colliderCacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:5794ee5e0f0f7ffca972ee693ceb932f15c9af46929f481753a1b200ba3a109c:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -1120,10 +1130,12 @@
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
           ]
         },
-        "triangleCount": 3648,
+        "triangleCount": 1043,
         "friction": 0.7,
         "restitution": 0,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -1322,11 +1334,11 @@
         "channel": "trigger",
         "quality": "simplifiedMesh",
         "sensor": true,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "colliderCacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -1364,10 +1376,12 @@
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
           ]
         },
-        "triangleCount": 604,
+        "triangleCount": 267,
         "friction": 0.7,
         "restitution": 0,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -1543,11 +1557,11 @@
         "channel": "trigger",
         "quality": "simplifiedMesh",
         "sensor": true,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-medbay-note.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-medbay-note.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "colliderCacheKey": "mesh-collision-manager-v2:3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -1585,10 +1599,12 @@
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
           ]
         },
-        "triangleCount": 604,
+        "triangleCount": 267,
         "friction": 0.7,
         "restitution": 0,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -1725,11 +1741,11 @@
         "channel": "trigger",
         "quality": "simplifiedMesh",
         "sensor": true,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-mess-note.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-mess-note.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "colliderCacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -1767,10 +1783,12 @@
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
           ]
         },
-        "triangleCount": 604,
+        "triangleCount": 267,
         "friction": 0.7,
         "restitution": 0,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -1804,11 +1822,11 @@
         "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-a.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-a.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:62c5289155f1ae1a6f0f67503bb3e5ce98441a4ce3e1d023e3acde0edb8dc20b:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "colliderCacheKey": "mesh-collision-manager-v2:0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3:62c5289155f1ae1a6f0f67503bb3e5ce98441a4ce3e1d023e3acde0edb8dc20b:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -1840,7 +1858,9 @@
         },
         "triangleCount": 60,
         "sensor": false,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -1865,11 +1885,11 @@
         "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:29c55a28f78ccbbc0bddc8f0e24c388f24d97549f58445228d1887a1b3caa758:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "colliderCacheKey": "mesh-collision-manager-v2:0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3:29c55a28f78ccbbc0bddc8f0e24c388f24d97549f58445228d1887a1b3caa758:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -1901,7 +1921,9 @@
         },
         "triangleCount": 60,
         "sensor": false,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -2131,11 +2153,11 @@
         "channel": "trigger",
         "quality": "simplifiedMesh",
         "sensor": true,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-brig-note.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-brig-note.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "colliderCacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -2173,10 +2195,12 @@
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
           ]
         },
-        "triangleCount": 604,
+        "triangleCount": 267,
         "friction": 0.7,
         "restitution": 0,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
+        "generationStatus": "ready"
       }
     },
     {
@@ -2549,11 +2573,11 @@
         "channel": "trigger",
         "quality": "simplifiedMesh",
         "sensor": true,
-        "lodTier": "source",
+        "lodTier": "low",
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-archive-note.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-archive-note.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v1:79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "colliderCacheKey": "mesh-collision-manager-v2:c7e8eb3d87c61e2457cefb7bff13c678743e05e1f90a727561a4e9f82ac88522:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
@@ -2591,10 +2615,12 @@
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
           ]
         },
-        "triangleCount": 604,
+        "triangleCount": 267,
         "friction": 0.7,
         "restitution": 0,
-        "maxTriangles": 5000
+        "maxTriangles": 5000,
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.low.glb",
+        "generationStatus": "ready"
       }
     }
   ]

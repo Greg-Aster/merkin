@@ -248,12 +248,13 @@ function toActor(
   collisionSource: 'authored' | 'default' | 'none'
   warning?: string
 } {
+  const npc = node.npc ?? null
   const collisionResult = resolveCollisionPolicy({
     levelId: scene.levelId,
     actorId: node.id,
     actorKind: getCollisionPolicyActorKind(node),
     visible: node.visible,
-    hasGameplay: Boolean(node.gameplay),
+    hasGameplay: Boolean(node.gameplay || npc),
     bodyType: getPhysicsBodyType(node),
     primitiveGeometry: getCollisionPolicyPrimitiveGeometry(node),
     levelSettings: scene.settings,
@@ -322,20 +323,29 @@ function toActor(
           data: node.gameplay as unknown as Record<string, unknown>,
         }
       : undefined,
-    interaction: node.gameplay
+    npc: npc ?? undefined,
+    interaction: npc
       ? {
           kind:
-            node.gameplay.type === 'portal'
-              ? 'portal'
-              : node.gameplay.type === 'note'
-                ? 'note'
-                : node.gameplay.type === 'firefly'
-                  ? 'conversation'
-                  : 'custom',
-          targetId: node.gameplay.targetLevelId,
-          data: node.gameplay as unknown as Record<string, unknown>,
+            npc.interaction.mode === 'disabled' ||
+            npc.conversation?.mode === 'none'
+              ? 'custom'
+              : 'conversation',
+          targetId: npc.id,
+          data: npc as unknown as Record<string, unknown>,
         }
-      : undefined,
+      : node.gameplay
+        ? {
+            kind:
+              node.gameplay.type === 'portal'
+                ? 'portal'
+                : node.gameplay.type === 'note'
+                  ? 'note'
+                  : 'custom',
+            targetId: node.gameplay.targetLevelId,
+            data: node.gameplay as unknown as Record<string, unknown>,
+          }
+        : undefined,
     audioRegion:
       node.gameplay?.type === 'audio-region' && node.gameplay.audioTrack
         ? {

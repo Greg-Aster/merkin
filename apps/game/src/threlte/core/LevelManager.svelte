@@ -1,19 +1,26 @@
 <script lang="ts">
 import { useTask, useThrelte } from '@threlte/core'
-import { onDestroy, onMount, setContext } from 'svelte'
-import { LightingManager } from '../features/lighting'
+import { getContext, onDestroy, onMount, setContext } from 'svelte'
+import {
+  RUNTIME_LIGHTING_CONTEXT,
+  RuntimeLightingController,
+} from '../features/lighting'
 import { recordSystemTiming } from '../features/performance/stores/performanceStore'
 import { runtimeDebugLog } from '../utils/runtimeLog'
 import { ECSWorldManager } from './ECSIntegration'
 import { type LevelContext, MessageType, SystemRegistry } from './LevelSystem'
 
 export let registry: SystemRegistry = new SystemRegistry()
-const lighting = new LightingManager(registry)
+const contextLighting = getContext<RuntimeLightingController | null>(
+  RUNTIME_LIGHTING_CONTEXT,
+)
+const lighting = contextLighting ?? new RuntimeLightingController(registry)
+const ownsLighting = !contextLighting
 const ecsWorld = new ECSWorldManager()
 const threlte = useThrelte()
 
 setContext('systemRegistry', registry)
-setContext('lightingManager', lighting)
+setContext(RUNTIME_LIGHTING_CONTEXT, lighting)
 setContext('ecsWorld', ecsWorld)
 
 const levelContext: LevelContext = {
@@ -34,7 +41,6 @@ onMount(() => {
   runtimeDebugLog('Level Manager: onMount triggered.')
 
   if (threlte.scene) {
-    lighting.initialize(threlte.scene)
     levelContext.scene = threlte.scene
     levelContext.camera = threlte.camera ?? null
     levelContext.renderer = threlte.renderer ?? null
@@ -46,6 +52,7 @@ onMount(() => {
 
 onDestroy(() => {
   runtimeDebugLog('Level Manager: Cleaning up.')
+  if (ownsLighting) lighting.dispose()
   registry.dispose()
 })
 
@@ -82,7 +89,7 @@ export function getRegistry() {
   return registry
 }
 
-export function getLightingManager() {
+export function getRuntimeLightingController() {
   return lighting
 }
 </script>

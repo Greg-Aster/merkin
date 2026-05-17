@@ -47,9 +47,14 @@ type RuntimePostProcessingDiagnosticRecord = {
   depthFogEnabled?: boolean
   bloomEnabled?: boolean
   colorGradingEnabled?: boolean
+  kuwaharaEnabled?: boolean
+  kuwaharaRadius?: number
+  kuwaharaMix?: number
+  kuwaharaResolutionScale?: number
   depthFogReason?: string
   bloomReason?: string
   colorGradingReason?: string
+  kuwaharaReason?: string
   reason?: string
 }
 

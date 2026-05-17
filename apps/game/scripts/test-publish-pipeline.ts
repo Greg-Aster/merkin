@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import test from 'node:test'
+import { upgradeLegacySceneDocument } from '../src/threlte/editor/defaultScenes.ts'
 import {
   applyCollisionLifecycleToPatch,
   materializeEditorNodeCollision,
@@ -13,12 +14,11 @@ import {
   applyGeneratedAssetToNode,
   createGeneratedAssetNode,
 } from '../src/threlte/editor/editorGeneratedAssetApplication.ts'
-import { upgradeLegacySceneDocument } from '../src/threlte/editor/defaultScenes.ts'
+import { normalizeLevelSceneSettings } from '../src/threlte/editor/editorLevelSetup.ts'
 import {
   computeEditorPublishBakePlan,
   createEditorPublishBakePlanMetadataFromReadiness,
 } from '../src/threlte/editor/editorPublishBakePlan.ts'
-import { normalizeLevelSceneSettings } from '../src/threlte/editor/editorLevelSetup.ts'
 import { buildEditorPublishReadinessViewModel } from '../src/threlte/editor/editorPublishReadiness.ts'
 import {
   validateEditorSceneDocument,
@@ -36,7 +36,6 @@ import {
 } from '../src/threlte/editor/editorTerrainPipelineRunner.ts'
 import type { EditorSceneDocument } from '../src/threlte/editor/editorTypes.ts'
 import { reviewCollisionContracts } from '../src/threlte/engine/collisionReview.ts'
-import { adaptSceneDocumentToLevelDefinition } from '../src/threlte/engine/sceneAdapter.ts'
 import {
   classifyTerrainAuthority,
   getTerrainAuthorityDiagnostics,
@@ -46,16 +45,20 @@ import {
   evaluateLevelRuntimeActivation,
 } from '../src/threlte/engine/levelRuntimeReadinessContract.ts'
 import { createLevelBuildReport } from '../src/threlte/engine/levelValidation.ts'
+import type { NpcComponent } from '../src/threlte/engine/npcTypes.ts'
 import {
   createRuntimeSceneManifest,
   getRuntimeSceneRequiredAssetUrls,
   getRuntimeSceneRuntimeAssetUrls,
   validateRuntimeSceneManifest,
 } from '../src/threlte/engine/runtimeSceneManifest.ts'
+import { adaptSceneDocumentToLevelDefinition } from '../src/threlte/engine/sceneAdapter.ts'
 import type {
   GeneratedCollisionProduct,
   LevelDefinition,
 } from '../src/threlte/engine/types.ts'
+import { CANONICAL_CONVERSATION_PROFILE_IDS } from '../src/threlte/features/conversation/characters/profileManifest.mjs'
+import { startNpcConversationFromComponent } from '../src/threlte/features/npc/index.ts'
 import {
   type TerrainManifest,
   validateTerrainManifestCollisionContract,
@@ -70,13 +73,12 @@ const {
 } = require('./editor-tools/sceneRoutes.cjs')
 const { handleStyleRoutes } = require('./editor-tools/styleRoutes.cjs')
 const {
-  adaptSceneDocumentToLevelDefinition: adaptRuntimeSceneDocumentToLevelDefinition,
+  adaptSceneDocumentToLevelDefinition:
+    adaptRuntimeSceneDocumentToLevelDefinition,
   createLevelBuildReport: createRuntimeSceneLevelBuildReport,
 } = await import('./lib/runtimeSceneManifest.mjs')
-const {
-  createGeneratedCollisionProduct,
-  validateGeneratedCollisionProduct,
-} = await import('./lib/meshCollisionProducts.mjs')
+const { createGeneratedCollisionProduct, validateGeneratedCollisionProduct } =
+  await import('./lib/meshCollisionProducts.mjs')
 const {
   createStyleBakeProduct,
   findReusableStyleBakeProduct,
@@ -90,9 +92,7 @@ const { auditRuntimeAssetManifestObject } = await import(
 const { auditSceneArchitecture } = await import(
   './lib/sceneArchitectureAudit.mjs'
 )
-const { auditSourceGuards } = await import(
-  './lib/engineAuditSourceGuards.mjs'
-)
+const { auditSourceGuards } = await import('./lib/engineAuditSourceGuards.mjs')
 const { isStyleBakeMetadata } = await import(
   './lib/runtimeAssetCookManifest.mjs'
 )
@@ -128,6 +128,159 @@ function createScene(
     },
     ...overrides,
   }
+}
+
+function createFireflyNpc(overrides: Partial<NpcComponent> = {}): NpcComponent {
+  const base: NpcComponent = {
+    id: 'fixture-firefly',
+    archetype: 'firefly',
+    displayName: 'Fixture Firefly',
+    interaction: {
+      enabled: true,
+      mode: 'click',
+      prompt: 'Listen',
+      eventKey: 'fixture_firefly',
+    },
+    conversation: {
+      mode: 'read-only',
+      title: 'Fixture Firefly',
+      body: 'A fixture firefly keeps a tiny contract alive.',
+      durationMs: 1000,
+    },
+    behavior: {
+      type: 'hover-wander',
+      radius: 0.8,
+      speed: 0.2,
+      hoverHeight: 0.4,
+      bobAmplitude: 0.1,
+      bobSpeed: 0.8,
+    },
+    presentation: {
+      type: 'firefly',
+      color: '#f4ffb8',
+      size: 0.5,
+      spriteIntensity: 1,
+      lightIntensity: 2,
+      lightDistance: 7,
+      lightDecay: 1.4,
+      twinkleSpeed: 0.8,
+    },
+  }
+
+  return {
+    ...base,
+    ...overrides,
+    interaction: {
+      ...base.interaction,
+      ...(overrides.interaction ?? {}),
+    },
+    conversation: overrides.conversation ?? base.conversation,
+    behavior: overrides.behavior ?? base.behavior,
+    presentation: {
+      ...base.presentation,
+      ...(overrides.presentation ?? {}),
+    },
+  }
+}
+
+function createNpcFixtureGroundNode(): EditorSceneDocument['nodes'][number] {
+  return {
+    id: 'fixture-ground',
+    name: 'Fixture Ground',
+    kind: 'primitive',
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+    scale: [1, 1, 1],
+    visible: true,
+    primitive: {
+      geometry: 'box',
+      args: [8, 0.5, 8],
+      color: '#334155',
+    },
+    collision: {
+      mode: 'auto',
+      quality: 'primitive',
+      intent: 'walkable',
+      channel: 'worldStatic',
+    },
+  }
+}
+
+function createNpcFixtureGroundProduct(): GeneratedCollisionProduct {
+  return {
+    actorId: 'fixture-ground',
+    mode: 'auto',
+    productId: 'fixture-ground:auto:primitive',
+    sourceKind: 'primitive',
+    sourceMeshFingerprint: 'fixture-ground-source',
+    transformFingerprint: 'fixture-ground-transform',
+    policyFingerprint: 'fixture-ground-policy',
+    shape: 'cuboid',
+    localBounds: {
+      min: [-4, -0.25, -4],
+      max: [4, 0.25, 4],
+      size: [8, 0.5, 8],
+      center: [0, 0, 0],
+    },
+    generatedAt: '2026-05-17T00:00:00.000Z',
+    generatorVersion: 'fixture-generator-v1',
+  }
+}
+
+function createNpcFixtureLevelSettings(
+  maxGameplayFireflies = 2,
+): EditorSceneDocument['settings'] {
+  return {
+    level: {
+      spawn: {
+        position: [0, 1, 0],
+        rotation: [0, 0, 0],
+      },
+      graphicsBudget: {
+        maxGameplayFireflies,
+      },
+      collision: {
+        roles: {
+          groundActorIds: ['fixture-ground'],
+        },
+        walkability: {
+          supportMaxDrop: 2,
+        },
+      },
+      ground: {
+        mode: 'scene-authored',
+        visualSource: 'scene-actors',
+        terrainRuntimeMode: 'scene-authored',
+        terrainVisualSource: 'scene-actors',
+        collisionSource: 'scene-colliders',
+        fallbackSurfacePolicy: 'disabled',
+        groundActorIds: ['fixture-ground'],
+      },
+    },
+  }
+}
+
+function createFireflyNpcScene(
+  npcOverrides: Partial<NpcComponent> = {},
+  nodeOverrides: Partial<EditorSceneDocument['nodes'][number]> = {},
+): EditorSceneDocument {
+  return createScene({
+    nodes: [
+      createNpcFixtureGroundNode(),
+      {
+        id: 'fixture-firefly',
+        name: 'Fixture Firefly',
+        kind: 'group',
+        position: [0, 1.4, 0],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+        npc: createFireflyNpc(npcOverrides),
+        ...nodeOverrides,
+      },
+    ],
+    settings: createNpcFixtureLevelSettings(2),
+  })
 }
 
 const fixtureBounds = {
@@ -870,14 +1023,11 @@ test('generated variant apply changes visual fit while lifecycle keeps mesh poli
 
   assert.ok(capturedPatch)
   const expectedScale = [
-    2.6116955496465626,
-    2.6116966600645566,
-    2.6116948994234765,
+    2.6116955496465626, 2.6116966600645566, 2.6116948994234765,
   ]
   assert.ok(
     capturedPatch.scale?.every(
-      (value, index) =>
-        Math.abs(value - expectedScale[index]) < 0.000001,
+      (value, index) => Math.abs(value - expectedScale[index]) < 0.000001,
     ),
   )
   assert.equal(capturedPatch.collision, undefined)
@@ -1084,6 +1234,294 @@ test('visible no-collision geometry can publish when explicitly classified', () 
   assert.deepEqual(review.classification['missing-collision'], [])
 })
 
+test('conversation profile manifest matches character definitions', () => {
+  const definitionIds = readdirSync(
+    join(
+      process.cwd(),
+      'src/threlte/features/conversation/characters/definitions',
+    ),
+  )
+    .filter(fileName => fileName.endsWith('.ts'))
+    .map(fileName => fileName.replace(/\.ts$/, ''))
+    .sort()
+
+  assert.deepEqual(
+    [...CANONICAL_CONVERSATION_PROFILE_IDS].sort(),
+    definitionIds,
+  )
+})
+
+test('public NPC barrel exports the component conversation bridge', async () => {
+  assert.equal(typeof startNpcConversationFromComponent, 'function')
+
+  const npcWithoutConversation = createFireflyNpc()
+  npcWithoutConversation.conversation = undefined
+
+  const result = await startNpcConversationFromComponent({
+    npc: npcWithoutConversation,
+    actorId: 'fixture-firefly',
+    levelId: 'fixture-level',
+  })
+
+  assert.equal(result.status, 'none')
+  assert.equal(result.eventKey, 'fixture_firefly')
+})
+
+test('runtime scene manifests preserve NPC firefly components and diagnostics', () => {
+  const scene = createFireflyNpcScene()
+  const groundProduct = createNpcFixtureGroundProduct()
+  const level = adaptSceneDocumentToLevelDefinition(scene, {
+    generatedCollisionProductsByActorId: new Map([
+      [groundProduct.actorId, groundProduct],
+    ]),
+  })
+  const report = createLevelBuildReport(level)
+
+  assert.deepEqual(report.errors, [])
+  assert.deepEqual(report.warnings, [])
+  assert.equal(report.npcActorCount, 1)
+  assert.equal(report.fireflyNpcActorCount, 1)
+  const fireflyActor = level.actors.find(
+    actor => actor.id === 'fixture-firefly',
+  )
+  assert.equal(fireflyActor?.npc?.id, 'fixture-firefly')
+
+  const runtimeLevel = adaptRuntimeSceneDocumentToLevelDefinition(scene)
+  const runtimeReport = createRuntimeSceneLevelBuildReport(runtimeLevel)
+  const runtimeFireflyActor = runtimeLevel.actors.find(
+    (actor: LevelDefinition['actors'][number]) =>
+      actor.id === 'fixture-firefly',
+  )
+  assert.equal(runtimeFireflyActor?.npc?.id, 'fixture-firefly')
+  assert.equal(runtimeReport.npcActorCount, 1)
+  assert.equal(runtimeReport.fireflyNpcActorCount, 1)
+
+  const manifest = createRuntimeSceneManifest({
+    scene,
+    sceneId: scene.levelId,
+    sourcePath: '/src/threlte/editor/scenes/fixture-level.scene.json',
+    levelDefinition: runtimeLevel,
+    buildReport: runtimeReport,
+    generatedAt: '2026-05-17T00:00:00.000Z',
+  })
+  const validation = validateRuntimeSceneManifest(manifest, scene.levelId)
+
+  const manifestFireflyActor = manifest.levelDefinition.actors.find(
+    actor => actor.id === 'fixture-firefly',
+  )
+  assert.equal(manifestFireflyActor?.npc?.id, 'fixture-firefly')
+  assert.deepEqual(validation.errors, [])
+  assert.deepEqual(validation.warnings, [])
+})
+
+test('NPC publish validation accepts canonical profile ids', () => {
+  const scene = createFireflyNpcScene({
+    conversation: {
+      mode: 'profile',
+      personalityId: 'elara-voss',
+    },
+  })
+  const level = adaptSceneDocumentToLevelDefinition(scene)
+  const report = createLevelBuildReport(level)
+
+  assert.deepEqual(report.errors, [])
+})
+
+test('runtime scene validation rejects missing NPC counters for non-NPC scenes', () => {
+  const scene = createScene({
+    nodes: [createNpcFixtureGroundNode()],
+    settings: createNpcFixtureLevelSettings(),
+  })
+  const groundProduct = createNpcFixtureGroundProduct()
+  const level = adaptSceneDocumentToLevelDefinition(scene, {
+    generatedCollisionProductsByActorId: new Map([
+      [groundProduct.actorId, groundProduct],
+    ]),
+  })
+  const report = createLevelBuildReport(level)
+  assert.deepEqual(report.errors, [])
+
+  const manifest = createRuntimeSceneManifest({
+    scene,
+    sceneId: scene.levelId,
+    sourcePath: '/src/threlte/editor/scenes/fixture-level.scene.json',
+    levelDefinition: level,
+    buildReport: report,
+    generatedAt: '2026-05-17T00:00:00.000Z',
+  })
+  ;(manifest.buildReport as any).npcActorCount = undefined
+  ;(manifest.buildReport as any).fireflyNpcActorCount = undefined
+
+  const validation = validateRuntimeSceneManifest(manifest, scene.levelId)
+  assert.match(validation.errors.join('\n'), /missing npcActorCount/)
+  assert.match(validation.errors.join('\n'), /missing fireflyNpcActorCount/)
+  assert.deepEqual(validation.warnings, [])
+})
+
+test('runtime scene validation rejects missing NPC counters when NPC actors exist', () => {
+  const scene = createFireflyNpcScene()
+  const groundProduct = createNpcFixtureGroundProduct()
+  const level = adaptSceneDocumentToLevelDefinition(scene, {
+    generatedCollisionProductsByActorId: new Map([
+      [groundProduct.actorId, groundProduct],
+    ]),
+  })
+  const report = createLevelBuildReport(level)
+  assert.deepEqual(report.errors, [])
+
+  const manifest = createRuntimeSceneManifest({
+    scene,
+    sceneId: scene.levelId,
+    sourcePath: '/src/threlte/editor/scenes/fixture-level.scene.json',
+    levelDefinition: level,
+    buildReport: report,
+    generatedAt: '2026-05-17T00:00:00.000Z',
+  })
+  ;(manifest.buildReport as any).npcActorCount = undefined
+  ;(manifest.buildReport as any).fireflyNpcActorCount = undefined
+
+  const validation = validateRuntimeSceneManifest(manifest, scene.levelId)
+  assert.match(validation.errors.join('\n'), /missing npcActorCount/)
+  assert.match(validation.errors.join('\n'), /missing fireflyNpcActorCount/)
+})
+
+test('NPC publish validation reports exact actor fields for invalid firefly data', () => {
+  const scene = createScene({
+    nodes: [
+      createNpcFixtureGroundNode(),
+      {
+        id: 'invalid-firefly',
+        name: 'Invalid Firefly',
+        kind: 'group',
+        position: [0, 1.2, 0],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+        npc: createFireflyNpc({
+          id: 'duplicate-firefly',
+          interaction: {
+            mode: 'proximity' as any,
+          },
+          conversation: {
+            mode: 'read-only',
+            body: '',
+          },
+          presentation: {
+            lightDistance: -1,
+          } as any,
+        }),
+      },
+      {
+        id: 'unknown-profile-firefly',
+        name: 'Unknown Profile Firefly',
+        kind: 'group',
+        position: [1, 1.2, 0],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+        npc: createFireflyNpc({
+          id: 'duplicate-firefly',
+          conversation: {
+            mode: 'profile',
+            personalityId: 'missing-profile',
+          },
+        }),
+      },
+    ],
+    settings: createNpcFixtureLevelSettings(1),
+  })
+  const level = adaptSceneDocumentToLevelDefinition(scene)
+  const report = createLevelBuildReport(level)
+  const errorText = report.errors.join('\n')
+
+  assert.match(
+    errorText,
+    /NPC actor "invalid-firefly" field "npc\.interaction\.mode"/,
+  )
+  assert.match(
+    errorText,
+    /NPC actor "invalid-firefly" field "npc\.conversation\.body"/,
+  )
+  assert.match(
+    errorText,
+    /NPC actor "invalid-firefly" field "npc\.presentation\.lightDistance"/,
+  )
+  assert.match(
+    errorText,
+    /NPC actor "unknown-profile-firefly" field "npc\.id" duplicates NPC id "duplicate-firefly"/,
+  )
+  assert.match(
+    errorText,
+    /NPC actor "unknown-profile-firefly" field "npc\.conversation\.personalityId"/,
+  )
+  assert.match(
+    errorText,
+    /2 authored firefly NPC actors exceed level budget of 1/,
+  )
+
+  const publishValidation = validatePublishableEditorSceneDocument(scene)
+  assert.equal(publishValidation.valid, false)
+  assert.match(
+    publishValidation.errors.join('\n'),
+    /Publish: NPC actor "invalid-firefly" field "npc\.conversation\.body"/,
+  )
+
+  const manifest = createRuntimeSceneManifest({
+    scene,
+    sceneId: scene.levelId,
+    sourcePath: '/src/threlte/editor/scenes/fixture-level.scene.json',
+    levelDefinition: level,
+    buildReport: report,
+    generatedAt: '2026-05-17T00:00:00.000Z',
+  })
+  assert.match(
+    validateRuntimeSceneManifest(manifest, scene.levelId).errors.join('\n'),
+    /NPC actor "unknown-profile-firefly" field "npc\.conversation\.personalityId"/,
+  )
+
+  const viewModel = buildEditorPublishReadinessViewModel({
+    levelId: scene.levelId,
+    scene,
+    runtimeAssetManifest: null,
+    runtimeScene: null,
+    prefabManifest: { prefabs: [], summary: { prefabCount: 0 } },
+    terrainManifest: null,
+  })
+  assert.match(
+    viewModel.blockers.map(item => item.detail).join('\n'),
+    /NPC actor "invalid-firefly" field "npc\.conversation\.body"/,
+  )
+})
+
+test('legacy firefly gameplay is rejected after Agent 07 cutoff', () => {
+  const scene = createScene({
+    nodes: [
+      createNpcFixtureGroundNode(),
+      {
+        id: 'legacy-firefly',
+        name: 'Legacy Firefly',
+        kind: 'group',
+        position: [0, 1.2, 0],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+        gameplay: {
+          type: 'firefly' as any,
+          body: 'A legacy firefly warning fixture.',
+        } as any,
+      },
+    ],
+    settings: createNpcFixtureLevelSettings(),
+  })
+  const level = adaptSceneDocumentToLevelDefinition(scene)
+  const report = createLevelBuildReport(level)
+
+  assert.match(
+    report.errors.join('\n'),
+    /Actor "legacy-firefly" field "gameplay\.type" uses legacy firefly gameplay data/,
+  )
+})
+
 test('policy-only mesh actors require generated mesh collision artifacts before runtime product', () => {
   const scene = createSceneAuthoredCollisionScene({
     collision: {
@@ -1115,7 +1553,9 @@ test('policy-only mesh actors require generated mesh collision artifacts before 
   assert.equal(runtimeActor?.physics?.collision.generatedProduct, undefined)
   assert.ok(
     collisionProductErrors.some((error: string) =>
-      error.includes('mesh-derived collision is missing a generated artifact URL'),
+      error.includes(
+        'mesh-derived collision is missing a generated artifact URL',
+      ),
     ),
   )
 })
@@ -1188,7 +1628,10 @@ test('editor scene adapter attaches only matching generated collision products',
       ],
     ]),
   })
-  assert.equal(staleLevel.actors[0].physics?.collision.generatedProduct, undefined)
+  assert.equal(
+    staleLevel.actors[0].physics?.collision.generatedProduct,
+    undefined,
+  )
 })
 
 test('failed generated collision can save but blocks publish', () => {
@@ -1309,7 +1752,11 @@ test('collision lifecycle preserves generated product metadata while stripping l
   assert.equal(patch.collision?.triangleBudget, undefined)
 })
 
-function writePublicFixtureFile(publicRoot: string, publicUrl: string, body: string) {
+function writePublicFixtureFile(
+  publicRoot: string,
+  publicUrl: string,
+  body: string,
+) {
   const filePath = join(publicRoot, publicUrl.replace(/^\/+/, ''))
   mkdirSync(dirname(filePath), { recursive: true })
   writeFileSync(filePath, body)
@@ -1531,7 +1978,9 @@ test('policy-only mesh-derived collision is rejected until a generated artifact 
   assert.equal(validation.product, null)
   assert.ok(
     validation.errors.some((error: string) =>
-      error.includes('mesh-derived collision is missing a generated artifact URL'),
+      error.includes(
+        'mesh-derived collision is missing a generated artifact URL',
+      ),
     ),
   )
 })
@@ -1787,7 +2236,7 @@ test('terrain authority classifier flags scene-authored baked-heightfield mixed 
 
   const diagnostics = getTerrainAuthorityDiagnostics(level)
   assert.ok(
-    diagnostics.errors.some((error) =>
+    diagnostics.errors.some(error =>
       error.includes('scene-authored terrain uses baked-heightfield collision'),
     ),
   )
@@ -2092,7 +2541,10 @@ test('runtime readiness contract captures required terrain and spawn gates', () 
 
   const runtimeSceneReport = createRuntimeSceneLevelBuildReport(level)
   assert.deepEqual(runtimeSceneReport.runtimeReadinessContract, readiness)
-  assert.equal(Object.hasOwn(runtimeSceneReport, 'requiredRenderActorIds'), false)
+  assert.equal(
+    Object.hasOwn(runtimeSceneReport, 'requiredRenderActorIds'),
+    false,
+  )
   assert.equal(Object.hasOwn(runtimeSceneReport, 'requiredAssetUrls'), false)
   assert.equal(Object.hasOwn(runtimeSceneReport, 'runtimeAssetUrls'), false)
 })
@@ -2467,8 +2919,9 @@ test('runtime readiness contract reports required collider urls', () => {
     '/generated/runtime-game-assets/collision/fixture-collision-mesh.collider.glb',
   ])
   assert.deepEqual(
-    readiness.publish.gates.find(gate => gate.id === 'required-collision-present')
-      ?.evidence.colliderUrls,
+    readiness.publish.gates.find(
+      gate => gate.id === 'required-collision-present',
+    )?.evidence.colliderUrls,
     readiness.runtime.requiredColliderUrls,
   )
 })
@@ -2779,8 +3232,16 @@ test('scene-authored terrain ignores stale baked terrain product fields', () => 
   assert.equal(pipeline.mode, 'scene-authored')
   assert.equal(pipeline.hasHeightmap, false)
   assert.equal(pipeline.hasCollider, false)
-  assert.equal(pipeline.commands.find(command => command.id === 'generate-heightmap')?.enabled, false)
-  assert.equal(pipeline.commands.find(command => command.id === 'bake-terrain-collision')?.enabled, false)
+  assert.equal(
+    pipeline.commands.find(command => command.id === 'generate-heightmap')
+      ?.enabled,
+    false,
+  )
+  assert.equal(
+    pipeline.commands.find(command => command.id === 'bake-terrain-collision')
+      ?.enabled,
+    false,
+  )
   assert.equal(plan.steps.includes('generate-heightmap'), false)
   assert.equal(plan.steps.includes('bake-terrain-collision'), false)
   assert.equal(plan.steps.includes('cook-terrain-chunks'), false)
@@ -2921,7 +3382,7 @@ function createJsonResponse() {
   const done = new Promise<{
     status: number
     payload: Record<string, unknown>
-  }>((resolve) => {
+  }>(resolve => {
     resolveResponse = resolve
   })
   const res = {
@@ -2997,7 +3458,8 @@ function createStyleRouteContext(publicDir: string, overrides = {}) {
       )
       return { code: 0, stdout: '', stderr: '' }
     },
-    toPublicAssetUrl: (filePath: string) => toFixturePublicUrl(publicDir, filePath),
+    toPublicAssetUrl: (filePath: string) =>
+      toFixturePublicUrl(publicDir, filePath),
     toRepoRelative: (filePath: string) => filePath,
     ...overrides,
   }
@@ -3006,7 +3468,10 @@ function createStyleRouteContext(publicDir: string, overrides = {}) {
 test('procedural style bake route returns selected-object product metadata', async () => {
   const publicDir = mkdtempSync(join(tmpdir(), 'style-bake-route-'))
   const sourceAssetUrl = '/generated/style-lab/sources/fixture/source.glb'
-  writeFixtureFile(join(publicDir, sourceAssetUrl.replace(/^\//, '')), 'source glb')
+  writeFixtureFile(
+    join(publicDir, sourceAssetUrl.replace(/^\//, '')),
+    'source glb',
+  )
   const req = createJsonRequest('/api/style/bake-procedural', {
     assetUrl: sourceAssetUrl,
     levelId: 'fixture-level',
@@ -3060,7 +3525,10 @@ test('procedural style bake route returns selected-object product metadata', asy
 test('procedural style bake route rejects stale style settings fingerprint', async () => {
   const publicDir = mkdtempSync(join(tmpdir(), 'style-bake-route-'))
   const sourceAssetUrl = '/generated/style-lab/sources/fixture/source.glb'
-  writeFixtureFile(join(publicDir, sourceAssetUrl.replace(/^\//, '')), 'source glb')
+  writeFixtureFile(
+    join(publicDir, sourceAssetUrl.replace(/^\//, '')),
+    'source glb',
+  )
   let bakeCalled = false
   const req = createJsonRequest('/api/style/bake-procedural', {
     assetUrl: sourceAssetUrl,
@@ -3089,14 +3557,20 @@ test('procedural style bake route rejects stale style settings fingerprint', asy
 
   assert.equal(response.status, 409)
   assert.equal(response.payload.success, false)
-  assert.match(String(response.payload.message), /settings fingerprint mismatch/)
+  assert.match(
+    String(response.payload.message),
+    /settings fingerprint mismatch/,
+  )
   assert.equal(bakeCalled, false)
 })
 
 test('procedural style bake route rejects stale cache key assertions', async () => {
   const publicDir = mkdtempSync(join(tmpdir(), 'style-bake-route-'))
   const sourceAssetUrl = '/generated/style-lab/sources/fixture/source.glb'
-  writeFixtureFile(join(publicDir, sourceAssetUrl.replace(/^\//, '')), 'source glb')
+  writeFixtureFile(
+    join(publicDir, sourceAssetUrl.replace(/^\//, '')),
+    'source glb',
+  )
   let bakeCalled = false
   const req = createJsonRequest('/api/style/bake-procedural', {
     assetUrl: sourceAssetUrl,
@@ -3146,10 +3620,7 @@ test('Blender style bake route reports backend unavailable', async () => {
   assert.equal(response.status, 503)
   assert.equal(response.payload.success, false)
   assert.equal(response.payload.mode, 'blender-geometry')
-  assert.match(
-    String(response.payload.message),
-    /Blender executable not found/,
-  )
+  assert.match(String(response.payload.message), /Blender executable not found/)
 })
 
 test('batch style bake cache reuses only clean products', () => {
@@ -3236,6 +3707,24 @@ test('source guard flags direct procedural style bake endpoint bypasses', () => 
   assert.doesNotMatch(
     failures.join('\n'),
     /editorStyleApi\.ts: direct \/api\/style\/bake-procedural/,
+  )
+})
+
+test('source guard keeps NPC interaction target independent from firefly motion helpers', () => {
+  const appRoot = mkdtempSync(join(tmpdir(), 'npc-target-source-guard-'))
+  writeFixtureFile(
+    join(
+      appRoot,
+      'src/threlte/features/npc/RuntimeNpcInteractionTarget.svelte',
+    ),
+    "import { resolveFireflyNpcPresentation } from './presentation/fireflyNpcPresentation'",
+  )
+
+  const failures = auditSourceGuards({ appRoot })
+
+  assert.match(
+    failures.join('\n'),
+    /generic NPC interaction targets must consume owner-provided transforms/,
   )
 })
 
@@ -3345,9 +3834,7 @@ test('source GLB terrain editor status exposes the GLB chunk cook command', () =
     }),
   })
 
-  const command = pipeline.commands.find(
-    (item) => item.id === 'cook-glb-chunks',
-  )
+  const command = pipeline.commands.find(item => item.id === 'cook-glb-chunks')
 
   assert.equal(pipeline.mode, 'glb-chunk-terrain')
   assert.equal(command?.enabled, true)
@@ -3386,7 +3873,9 @@ test('missing source GLB disables editor terrain bake and chunk cook commands', 
   })
 
   const bakeCommand = pipeline.commands.find(item => item.id === 'bake-terrain')
-  const cookCommand = pipeline.commands.find(item => item.id === 'cook-glb-chunks')
+  const cookCommand = pipeline.commands.find(
+    item => item.id === 'cook-glb-chunks',
+  )
 
   assert.equal(bakeCommand?.enabled, false)
   assert.equal(cookCommand?.enabled, false)
@@ -3974,6 +4463,103 @@ test('scene architecture audit flags unmanaged style-baked GLBs', () => {
   assert.equal(audit.totals.unmanagedStyleBakeProducts, 1)
 })
 
+test('scene architecture audit flags invalid NPC contracts', () => {
+  const root = mkdtempSync(join(tmpdir(), 'npc-scene-audit-'))
+  const sceneDir = join(root, 'scenes')
+  const publicDir = join(root, 'public')
+  const prefabCatalogPath = join(root, 'runtimePrefabCatalog.json')
+  writeFixtureFile(
+    prefabCatalogPath,
+    JSON.stringify({ types: [], assetUrls: {}, assetVariants: {} }),
+  )
+  writeFixtureFile(
+    join(sceneDir, 'fixture.scene.json'),
+    JSON.stringify(
+      createScene({
+        nodes: [
+          {
+            id: 'audit-firefly',
+            name: 'Audit Firefly',
+            kind: 'group',
+            position: [0, 1.2, 0],
+            rotation: [0, 0, 0],
+            scale: [1, 1, 1],
+            visible: true,
+            npc: createFireflyNpc({
+              conversation: {
+                mode: 'read-only',
+                body: '',
+              },
+            }),
+          },
+        ],
+        settings: {
+          level: {
+            spawn: {
+              position: [0, 1, 0],
+              rotation: [0, 0, 0],
+            },
+            graphicsBudget: {
+              maxRuntimeAssetBytes: 1048576,
+              maxRuntimeAssetFileBytes: 1048576,
+              maxGeometryActors: 4,
+              maxPrimitiveActors: 4,
+              maxNeverCullActors: 4,
+              maxGameplayFireflies: 4,
+              maxExplicitColliders: 4,
+              maxLightActors: 4,
+              maxEstimatedDrawCalls: 8,
+              maxAuthoredMaterialSlots: 8,
+              maxEstimatedTriangles: 1000,
+              maxAuthoredTextureBytes: 1048576,
+            },
+            renderProfile: {
+              id: 'fixture-render',
+              defaultTier: 'mobile',
+              shadows: {
+                enabled: false,
+                maxCastingLights: 0,
+              },
+              reflections: {
+                mode: 'none',
+                source: 'none',
+              },
+              postProcessing: {
+                passes: [],
+                maxEnabledPasses: 0,
+              },
+              visualBookmarks: [
+                {
+                  id: 'main',
+                  cameraPosition: [0, 2, 4],
+                  cameraTarget: [0, 0, 0],
+                },
+              ],
+              qualityTiers: {
+                mobile: {},
+                desktop: {},
+                tv: {},
+              },
+            },
+          },
+        },
+      }),
+    ),
+  )
+
+  const audit = auditSceneArchitecture({
+    sceneDir,
+    publicDir,
+    prefabCatalogPath,
+  })
+
+  assert.match(
+    audit.failures.join('\n'),
+    /NPC contract is invalid: NPC actor "audit-firefly" field "npc\.conversation\.body"/,
+  )
+  assert.equal(audit.totals.npcValidationErrors, 1)
+})
+
 test('source GLB terrain settings request scene terrain runtime loading', () => {
   const scene = createScene({
     settings: {
@@ -4256,10 +4842,7 @@ test('editor terrain pipeline runner applies source GLB chunk products', () => {
   assert.equal(next.collision?.terrain?.runtimeMode, 'glb-chunk-terrain')
   assert.equal(next.collision?.terrain?.visualSource, 'source-glb-chunks')
   assert.equal(next.collision?.terrain?.renderChunks?.type, 'glb-chunk-terrain')
-  assert.equal(
-    next.collision?.terrain?.renderChunks?.preservesSourceUvs,
-    true,
-  )
+  assert.equal(next.collision?.terrain?.renderChunks?.preservesSourceUvs, true)
   assert.equal(
     next.collision?.terrain?.renderChunks?.preservesSourceMaterialSlots,
     true,
@@ -4290,7 +4873,7 @@ test('heightmap dirty state regenerates before terrain bake work', () => {
   })
 
   assert.deepEqual(
-    plan.steps.filter((step) =>
+    plan.steps.filter(step =>
       ['generate-heightmap', 'bake-terrain-collision'].includes(step),
     ),
     ['generate-heightmap', 'bake-terrain-collision'],
@@ -4501,7 +5084,7 @@ test('publish build endpoint executes supported steps sequentially', async () =>
   assert.equal(response.status, 200)
   assert.equal(response.payload.success, true)
   assert.deepEqual(
-    calls.map((call) => call.args[2]),
+    calls.map(call => call.args[2]),
     [
       'bake:terrain-collision',
       'bake:scene-mesh-colliders',
@@ -4517,7 +5100,7 @@ test('publish build endpoint executes supported steps sequentially', async () =>
     ['cook:runtime-assets', '--', '--level=fixture-level'],
   )
   assert.deepEqual(
-    (response.payload.steps as Array<{ id: string }>).map((step) => step.id),
+    (response.payload.steps as Array<{ id: string }>).map(step => step.id),
     [
       'bake-terrain-collision',
       'bake-scene-mesh-colliders',

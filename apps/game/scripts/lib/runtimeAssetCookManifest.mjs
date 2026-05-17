@@ -122,8 +122,6 @@ export const tierConfigs = [
   },
 ]
 
-const yggdrasilWorldTreeSourceUrl =
-  '/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb'
 const anomalyClusterSourceUrls = [
   '/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb',
   '/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb',
@@ -139,35 +137,11 @@ const lodValidationExceptions = new Map(
   ]),
 )
 
-const assetCookTierOverrides = new Map([
-  [
-    yggdrasilWorldTreeSourceUrl,
-    {
-      high: {
-        simplifyError: 0.006,
-        recipe: 'hero-tree-source-retopology-high',
-      },
-      medium: {
-        simplifyError: 0.006,
-        recipe: 'hero-tree-source-retopology-medium',
-      },
-      low: {
-        simplifyRatio: 0.1,
-        simplifyError: 1,
-        recipe: 'hero-tree-source-retopology-low',
-        retopology: {
-          strategy: 'largest-triangle-area-prune',
-          maxTriangles: 14000,
-        },
-      },
-    },
-  ],
-])
-
-export function getAssetCookTierConfig(sourceUrl, tier) {
-  const override = assetCookTierOverrides.get(normalizePublicUrl(sourceUrl))?.[
-    tier.id
-  ]
+export function getAssetCookTierConfig(sourceUrl, tier, importMetadata = null) {
+  const override =
+    importMetadata?.cookOverrides?.tiers?.[tier.id] ??
+    importMetadata?.cookOverrides?.[tier.id] ??
+    null
   return override ? { ...tier, ...override } : tier
 }
 
@@ -676,6 +650,7 @@ function getAssetRuntimeUsage(asset, runtimeScenes) {
 
 function getLodValidation({
   sourceUrl,
+  importMetadata,
   sourceMetadata,
   variantMetadata,
   tier,
@@ -699,6 +674,8 @@ function getLodValidation({
     ratioOverage,
   })
   const sourceException =
+    importMetadata?.lodValidationExceptions?.tiers?.[tier.id] ??
+    importMetadata?.lodValidationExceptions?.[tier.id] ??
     lodValidationExceptions.get(normalizePublicUrl(sourceUrl))?.[tier.id] ??
     null
   const generated = Boolean(variantMetadata?.valid)
@@ -995,6 +972,12 @@ function createManifestEntry(context, asset, runtimeScenes, importManifest) {
   const sourceMetadata = sourceExists
     ? readGltfAssetMetadata(sourcePath)
     : undefined
+  const sourceUrl = asset.sourceUrl
+  const importMetadata = resolveRuntimeAssetImportMetadata({
+    context,
+    manifest: importManifest,
+    sourceUrl,
+  })
   const qualityVariants = {}
 
   for (const tier of tierConfigs) {
@@ -1002,7 +985,11 @@ function createManifestEntry(context, asset, runtimeScenes, importManifest) {
     const fullPath = resolvePublicPath(context, url)
     const exists = existsSync(fullPath)
     const variantMetadata = exists ? readGltfAssetMetadata(fullPath) : undefined
-    const cookTier = getAssetCookTierConfig(asset.sourceUrl, tier)
+    const cookTier = getAssetCookTierConfig(
+      asset.sourceUrl,
+      tier,
+      importMetadata,
+    )
     qualityVariants[tier.id] = {
       url,
       lodTier: tier.id,
@@ -1026,19 +1013,14 @@ function createManifestEntry(context, asset, runtimeScenes, importManifest) {
       },
       lodValidation: getLodValidation({
         sourceUrl: asset.sourceUrl,
+        importMetadata,
         sourceMetadata,
         variantMetadata,
-        tier,
+        tier: cookTier,
       }),
     }
   }
 
-  const sourceUrl = asset.sourceUrl
-  const importMetadata = resolveRuntimeAssetImportMetadata({
-    context,
-    manifest: importManifest,
-    sourceUrl,
-  })
   const styleBake = createStyleBakeProvenance({
     context,
     asset,

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-14T21:28:37.990Z",
-  "generatorVersion": "mesh-collision-manager-v1",
+  "generatedAt": "2026-05-17T02:21:00.604Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "sci-fi-room",
   "sourceActorId": "sci-fi-barrel",
   "sourceAssetUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
@@ -11,12 +11,19 @@
     "algorithm": "sha256",
     "value": "e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/models/polyhaven/Barrel_01/Barrel_01_1k.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/models/polyhaven/Barrel_01/Barrel_01_1k.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "a8b5b7fd2bd52a73dbe17906494a6a0c0b75b9fcb3d8e7d7793841210293214d"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v1:e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888:2046b0a7205c6bb54729aadf507bbaba73b76ad819d001ea4fbf1d98bb81cf6f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
-  "triangleCount": 2682,
-  "vertexCount": 2052,
+  "colliderCacheKey": "mesh-collision-manager-v2:a8b5b7fd2bd52a73dbe17906494a6a0c0b75b9fcb3d8e7d7793841210293214d:2046b0a7205c6bb54729aadf507bbaba73b76ad819d001ea4fbf1d98bb81cf6f:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+  "triangleCount": 749,
+  "vertexCount": 819,
   "bounds": {
     "min": [
       -0.2815175950527191,
@@ -37,6 +44,28 @@
       -2.9802322387695312e-8,
       0.43338572490029037,
       1.043081283569336e-7
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -20890,
+      -32767,
+      -20890
+    ],
+    "max": [
+      20890,
+      32767,
+      20890
+    ],
+    "size": [
+      41780,
+      65534,
+      41780
+    ],
+    "center": [
+      0,
+      0,
+      0
     ]
   },
   "visualLocalBounds": {
@@ -178,36 +207,45 @@
       "algorithm": "sha256",
       "value": "e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/models/polyhaven/Barrel_01/Barrel_01_1k.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/models/polyhaven/Barrel_01/Barrel_01_1k.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "a8b5b7fd2bd52a73dbe17906494a6a0c0b75b9fcb3d8e7d7793841210293214d"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "sci-fi-room",
       "nodeId": "sci-fi-barrel",
       "sourceAssetUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/models/polyhaven/Barrel_01/Barrel_01_1k.low.glb",
+      "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
-      "triangleBudget": 5000,
+      "triangleBudget": 20000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-14T21:28:37.990Z"
+    "generatedAt": "2026-05-17T02:21:00.604Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 5000
+    "triangleBudget": 20000,
+    "lodSourceTier": "low"
   },
   "collisionProduct": {
     "actorId": "sci-fi-barrel",
+    "cacheKey": "mesh-collision-manager-v1:e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888:2046b0a7205c6bb54729aadf507bbaba73b76ad819d001ea4fbf1d98bb81cf6f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
     "mode": "auto",
     "productId": "sci-fi-barrel:auto:simplifiedMesh",
-    "generatorVersion": "mesh-collision-manager-v1",
-    "generatedAt": "2026-05-14T21:28:37.990Z",
+    "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "asset",
-    "sourceMeshUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888"
+      "value": "a8b5b7fd2bd52a73dbe17906494a6a0c0b75b9fcb3d8e7d7793841210293214d"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
@@ -215,11 +253,9 @@
     },
     "policyFingerprint": {
       "algorithm": "sha256",
-      "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+      "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
     },
     "shape": "trimesh",
-    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.glb",
-    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.meta.json",
     "localBounds": {
       "min": [
         -0.2815175950527191,
@@ -242,15 +278,19 @@
         1.043081283569336e-7
       ]
     },
-    "triangleCount": 2682,
-    "vertexCount": 2052,
-    "triangleBudget": 5000
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/models/polyhaven/Barrel_01/Barrel_01_1k.low.glb",
+    "visualSourceMeshUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+    "triangleCount": 749,
+    "vertexCount": 819,
+    "triangleBudget": 20000
   },
   "simplification": {
     "requested": false,
     "applied": false,
-    "sourceTriangleCount": 2682,
-    "targetTriangleBudget": 5000,
+    "sourceTriangleCount": 749,
+    "targetTriangleBudget": 20000,
     "ratio": 1,
     "tool": "gltf-transform",
     "prepass": "none",

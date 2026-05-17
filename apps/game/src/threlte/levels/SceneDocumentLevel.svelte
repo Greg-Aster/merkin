@@ -104,7 +104,8 @@ import {
   loadCachedGltf,
 } from '../utils/gltfAssetCache'
 import RuntimeActorBranch from './RuntimeActorBranch.svelte'
-import SceneLighting from './SceneLighting.svelte'
+import SceneFireflyField from './SceneFireflyField.svelte'
+import SceneLightingProfile from './SceneLightingProfile.svelte'
 import { getSceneTerrainRuntimeRequest } from './sceneTerrainRuntime'
 import { resolveSkyboxPreset } from './skyboxPresets'
 
@@ -1469,6 +1470,17 @@ $: ambientParticlesEnabled =
   sharedLevelSettings.features?.ambientParticles ??
   sharedLevelSettings.ambientParticles?.enabled ??
   false
+$: authoredFireflyActorCount = levelActors.filter(
+  actor =>
+    actor.npc?.archetype === 'firefly' ||
+    actor.npc?.presentation.type === 'firefly',
+).length
+$: sceneFireflyFieldEnabled =
+  (sharedLevelSettings.features?.fireflies ??
+    sharedLevelSettings.fireflies?.enabled ??
+    false) &&
+  (authoredFireflyActorCount === 0 ||
+    sharedLevelSettings.fireflies?.allowWithAuthored === true)
 $: sceneStarMapEnabled = sharedLevelSettings.features?.starMap ?? false
 $: waterLevel = waterSettings?.level ?? waterSettings?.initialLevel ?? -0.16
 $: waterColor = parseSceneColor(waterSettings?.color, 0x050b14)
@@ -1497,9 +1509,7 @@ $: skyFogEnabled = aerialPerspectiveEnabled
 $: skyFogParticipation = skyAerialParticipation
 $: skyFogFalloff = runtimeAtmosphere.aerialPerspective.skyFogFalloff
 $: skyAtmosphereParticipates =
-  skyBackgroundIntensity > 0 &&
-  skyFogEnabled &&
-  skyFogParticipation > 0.001
+  skyBackgroundIntensity > 0 && skyFogEnabled && skyFogParticipation > 0.001
 $: oceanPlanarReflectorActive =
   Boolean(waterEnabled && waterSettings) &&
   resolvedRenderProfile.reflections.mode === 'planar'
@@ -1519,6 +1529,10 @@ $: depthFogProfileParticipates = renderProfileAllowsPostPass(
   resolvedRenderProfile,
   'depth-fog',
 )
+$: kuwaharaProfileParticipates = renderProfileAllowsPostPass(
+  resolvedRenderProfile,
+  'kuwahara',
+)
 $: bloomProfileStatus = getRenderProfilePostPassStatus(
   resolvedRenderProfile,
   'bloom',
@@ -1530,6 +1544,10 @@ $: colorGradingProfileStatus = getRenderProfilePostPassStatus(
 $: depthFogProfileStatus = getRenderProfilePostPassStatus(
   resolvedRenderProfile,
   'depth-fog',
+)
+$: kuwaharaProfileStatus = getRenderProfilePostPassStatus(
+  resolvedRenderProfile,
+  'kuwahara',
 )
 $: atmosphereDiagnosticKey = [
   levelId,
@@ -1556,9 +1574,11 @@ $: atmosphereDiagnosticKey = [
   Number(depthFogProfileParticipates),
   Number(bloomProfileParticipates),
   Number(colorGradingProfileParticipates),
+  Number(kuwaharaProfileParticipates),
   depthFogProfileStatus,
   bloomProfileStatus,
   colorGradingProfileStatus,
+  kuwaharaProfileStatus,
 ].join('|')
 $: if (
   levelDefinition &&
@@ -1568,7 +1588,7 @@ $: if (
   setRuntimeDiagnostic('atmosphere', {
     label: 'Atmosphere',
     level: !fogStackEnabled || runtimeAtmosphere.enabled ? 'ready' : 'warning',
-    message: `${levelId}/${atmosphereSourceKind}/${atmosphereSourceProfile}: fog stack ${fogStackEnabled ? 'on' : 'off'}; distance fog ${distanceFogEnabled ? 'on' : 'off'} density ${formatAtmosphereDiagnosticNumber(fogDensity, 5)}; height fog ${heightFogEnabled ? 'on' : 'off'} floor ${formatAtmosphereDiagnosticNumber(heightFogFloor, 2)} ceiling ${formatAtmosphereDiagnosticNumber(heightFogCeiling, 2)} density ${formatAtmosphereDiagnosticNumber(heightFogDensity, 5)}; sky fog ${skyFogEnabled ? 'on' : 'off'} amount ${formatAtmosphereDiagnosticNumber(skyFogParticipation, 2)} falloff ${formatAtmosphereDiagnosticNumber(skyFogFalloff, 2)} aerial ${formatAtmosphereDiagnosticNumber(skyboxAerialPerspectiveBoost, 2)}; full-scene depth fog ${depthFogProfileStatus}; material fog ${depthFogProfileParticipates ? 'delegated' : 'fallback'}; skybox native preset ${sharedLevelSettings.skyboxPreset ?? 'observatory'} env ${formatAtmosphereDiagnosticNumber(skyEnvironmentIntensity, 2)}; mist ${runtimeMist.enabled ? 'participating' : 'disabled'}; ${oceanAtmosphereStatus}; post profile ${resolvedRenderProfile.id}/${resolvedRenderProfile.tier} bloom ${bloomProfileStatus} color grading ${colorGradingProfileStatus}.`,
+    message: `${levelId}/${atmosphereSourceKind}/${atmosphereSourceProfile}: fog stack ${fogStackEnabled ? 'on' : 'off'}; distance fog ${distanceFogEnabled ? 'on' : 'off'} density ${formatAtmosphereDiagnosticNumber(fogDensity, 5)}; height fog ${heightFogEnabled ? 'on' : 'off'} floor ${formatAtmosphereDiagnosticNumber(heightFogFloor, 2)} ceiling ${formatAtmosphereDiagnosticNumber(heightFogCeiling, 2)} density ${formatAtmosphereDiagnosticNumber(heightFogDensity, 5)}; sky fog ${skyFogEnabled ? 'on' : 'off'} amount ${formatAtmosphereDiagnosticNumber(skyFogParticipation, 2)} falloff ${formatAtmosphereDiagnosticNumber(skyFogFalloff, 2)} aerial ${formatAtmosphereDiagnosticNumber(skyboxAerialPerspectiveBoost, 2)}; full-scene depth fog ${depthFogProfileStatus}; material fog ${depthFogProfileParticipates ? 'delegated' : 'fallback'}; skybox native preset ${sharedLevelSettings.skyboxPreset ?? 'observatory'} env ${formatAtmosphereDiagnosticNumber(skyEnvironmentIntensity, 2)}; mist ${runtimeMist.enabled ? 'participating' : 'disabled'}; ${oceanAtmosphereStatus}; post profile ${resolvedRenderProfile.id}/${resolvedRenderProfile.tier} bloom ${bloomProfileStatus} color grading ${colorGradingProfileStatus} kuwahara ${kuwaharaProfileStatus}.`,
     meta: {
       levelId,
       sourceKind: atmosphereSourceKind,
@@ -1601,8 +1621,10 @@ $: if (
       renderProfileTier: resolvedRenderProfile.tier,
       bloomProfileParticipates,
       colorGradingProfileParticipates,
+      kuwaharaProfileParticipates,
       bloomProfileStatus,
       colorGradingProfileStatus,
+      kuwaharaProfileStatus,
     },
   })
 }
@@ -1680,7 +1702,7 @@ onDestroy(() => {
       scale={globalMistScale}
       driftSpeed={finiteNumberOrDefault(runtimeMist.driftSpeed, 0.035)}
     />
-    <SceneLighting
+    <SceneLightingProfile
       {ambientIntensity}
       {keyLightIntensity}
       {fillLightIntensity}
@@ -1752,6 +1774,29 @@ onDestroy(() => {
       />
     {/if}
 
+    {#if sceneFireflyFieldEnabled}
+      <SceneFireflyField
+        enabled={true}
+        fieldId={`${levelId}-scene-fireflies`}
+        count={sharedLevelSettings.fireflies?.count ?? 36}
+        lightCount={sharedLevelSettings.fireflies?.lightCount ?? 8}
+        radius={sharedLevelSettings.fireflies?.radius ?? 120}
+        minHeight={sharedLevelSettings.fireflies?.minHeight ?? 2}
+        maxHeight={sharedLevelSettings.fireflies?.maxHeight ?? 5}
+        center={sharedLevelSettings.fireflies?.center ?? sharedLevelSettings.spawn?.position ?? [0, 0, 0]}
+        color={sharedLevelSettings.fireflies?.color ?? '#f4ffb8'}
+        secondaryColor={sharedLevelSettings.fireflies?.secondaryColor ?? '#8defff'}
+        size={sharedLevelSettings.fireflies?.size ?? 0.58}
+        spriteIntensity={sharedLevelSettings.fireflies?.spriteIntensity ?? 1.45}
+        lightIntensity={sharedLevelSettings.fireflies?.lightIntensity ?? 44}
+        lightDistance={sharedLevelSettings.fireflies?.lightDistance ?? 28}
+        lightDecay={sharedLevelSettings.fireflies?.lightDecay ?? 1.35}
+        twinkleSpeed={sharedLevelSettings.fireflies?.twinkleSpeed ?? 0.82}
+        driftSpeed={sharedLevelSettings.fireflies?.driftSpeed ?? 0.28}
+        sway={sharedLevelSettings.fireflies?.sway ?? 1.5}
+      />
+    {/if}
+
     {#if effectiveAudioRegions.length > 0}
       <AmbientAudioRegions regions={effectiveAudioRegions} enabled={true} />
     {/if}
@@ -1787,6 +1832,7 @@ onDestroy(() => {
           visibleActorIds={visibleActorIdsForRender}
           on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
           on:noteRead={(event) => dispatch('noteRead', event.detail)}
+          on:npcInteraction={(event) => dispatch('npcInteraction', event.detail)}
         />
       {/each}
     {/if}

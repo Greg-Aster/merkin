@@ -704,6 +704,7 @@ export function buildInspectTabProps(context: EditorPanelPropBuilderContext) {
       context.inspectorController.updateGameplayBooleanField,
     onGameplayNumericChange:
       context.inspectorController.updateGameplayNumericField,
+    onNpcChange: context.inspectorController.updateNpcField,
     onTransformChange: context.updateTupleField,
     onDuplicate: context.createController.duplicateSelection,
     onDelete: context.createController.deleteSelection,
@@ -1099,6 +1100,7 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
       context.inspectorController.updateGameplayNumericField,
     onGameplayBooleanChange:
       context.inspectorController.updateGameplayBooleanField,
+    onNpcChange: context.inspectorController.updateNpcField,
     onStyleDescriptorChange:
       context.inspectorController.updateSelectedNodeStyleDescriptor,
     onApplyGeneratedVariant:

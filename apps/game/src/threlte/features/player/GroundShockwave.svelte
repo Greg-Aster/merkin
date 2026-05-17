@@ -3,6 +3,7 @@ import { T } from '@threlte/core'
 import { useRapier } from '@threlte/rapier'
 import { onDestroy } from 'svelte'
 import * as THREE from 'three'
+import ManagedLight from '../lighting/ManagedLight.svelte'
 
 export let position: [number, number, number] = [0, 0, 0]
 export let radius = 1
@@ -195,13 +196,14 @@ onDestroy(() => {
     />
   </T.Mesh>
 
-  <T.PointLight
+  <ManagedLight
+    id={`ground-shockwave-core-${position[0]}-${position[1]}-${position[2]}`}
+    ownerId="ground-shockwave"
     position={[0, 0.3, 0]}
     color={lightColor}
     intensity={(enableContour ? lightIntensity * 0.45 : lightIntensity) * gameplayPointLightScale}
     distance={Math.max(3, lightDistance * 0.7)}
     decay={1.4}
-    castShadow={false}
   />
 
   {#if enableContour}
@@ -231,13 +233,14 @@ onDestroy(() => {
   </T.Mesh>
 
   {#each orbitLightPositions as lightPosition, index (`${index}-${lightPosition[0].toFixed(2)}-${lightPosition[2].toFixed(2)}`)}
-    <T.PointLight
+    <ManagedLight
+      id={`ground-shockwave-orbit-${index}-${position[0]}-${position[1]}-${position[2]}`}
+      ownerId="ground-shockwave"
       position={lightPosition}
       color={lightColor}
       intensity={lightIntensity * (0.3 + index * 0.05) * gameplayPointLightScale}
       distance={Math.max(3, lightDistance * 0.42)}
       decay={1.35}
-      castShadow={false}
     />
   {/each}
   {/if}

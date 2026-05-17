@@ -14,6 +14,7 @@ import {
   createLevelRuntimeReadinessContract,
   getActorRuntimeAssetUrl,
 } from './levelRuntimeReadinessContract'
+import { validateNpcLevelContract } from './npcValidation'
 import { hasTerrainRuntimeCollision } from './terrainRuntimeCollision'
 import type {
   ActorDefinition,
@@ -126,6 +127,17 @@ function getWalkabilityContractIssues(
   }
 
   return { errors, warnings }
+}
+
+function getMaxFireflyNpcCount(
+  level: LevelDefinition,
+  contract: ReturnType<typeof getLevelRuntimeContract>,
+) {
+  const authoredBudget = (level.settings as any)?.level?.graphicsBudget
+    ?.maxGameplayFireflies
+  if (Number.isFinite(authoredBudget)) return authoredBudget
+
+  return contract.maxFireflyNpcCount
 }
 
 function hasAuthoredColliderAsset(actor: ActorDefinition): boolean {
@@ -280,7 +292,8 @@ export function createLevelBuildReport(
   let assetActorCount = 0
   let primitiveActorCount = 0
   let neverCullActorCount = 0
-  let gameplayFireflyActorCount = 0
+  let npcActorCount = 0
+  let fireflyNpcActorCount = 0
   let defaultCollisionActorCount = 0
   let physicsActorCount = 0
   let trimeshActorCount = 0
@@ -321,10 +334,6 @@ export function createLevelBuildReport(
     if (actor.render?.cullingPolicy === 'never') {
       neverCullActorCount += 1
     }
-    if (actor.gameplay?.type === 'firefly') {
-      gameplayFireflyActorCount += 1
-    }
-
     if (actor.kind === 'asset' && !actor.render?.asset?.url) {
       errors.push(`Asset actor "${actor.id}" is missing a runtime asset URL.`)
     }
@@ -462,6 +471,15 @@ export function createLevelBuildReport(
   errors.push(...walkabilityIssues.errors)
   warnings.push(...walkabilityIssues.warnings)
 
+  const npcReport = validateNpcLevelContract(level, {
+    legacyFireflySeverity: 'error',
+    maxFireflyNpcCount: getMaxFireflyNpcCount(level, contract),
+  })
+  npcActorCount = npcReport.diagnostics.npcActorCount
+  fireflyNpcActorCount = npcReport.diagnostics.fireflyNpcActorCount
+  errors.push(...npcReport.errors)
+  warnings.push(...npcReport.warnings)
+
   if (defaultCollisionActorCount > contract.maxDefaultCollisionActors) {
     errors.push(
       `${defaultCollisionActorCount} actors are using implicit default collision; contract allows ${contract.maxDefaultCollisionActors}.`,
@@ -495,19 +513,14 @@ export function createLevelBuildReport(
     )
   }
 
-  if (gameplayFireflyActorCount > contract.maxGameplayFireflyCount) {
-    warnings.push(
-      `${gameplayFireflyActorCount} firefly gameplay actors exceed contract budget of ${contract.maxGameplayFireflyCount}. Use chunked/pooled marker presentation.`,
-    )
-  }
-
   return {
     levelId: level.id,
     actorCount: level.actors.length,
     assetActorCount,
     primitiveActorCount,
     neverCullActorCount,
-    gameplayFireflyActorCount,
+    npcActorCount,
+    fireflyNpcActorCount,
     physicsActorCount,
     trimeshActorCount,
     detailMeshActorCount,

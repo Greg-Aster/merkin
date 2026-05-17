@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-14T21:36:35.946Z",
-  "generatorVersion": "mesh-collision-manager-v1",
+  "generatedAt": "2026-05-17T02:20:09.346Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "miranda",
   "sourceActorId": "miranda-captain-log",
   "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
@@ -11,12 +11,19 @@
     "algorithm": "sha256",
     "value": "ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v1:ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
-  "triangleCount": 604,
-  "vertexCount": 1812,
+  "colliderCacheKey": "mesh-collision-manager-v2:3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
+  "triangleCount": 267,
+  "vertexCount": 210,
   "bounds": {
     "min": [
       -0.36000001430511475,
@@ -37,6 +44,28 @@
       0.04249998927116394,
       0.10853545293211936,
       0.0021460801362991333
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -7548,
+      -32767
+    ],
+    "max": [
+      32767,
+      7548,
+      32767
+    ],
+    "size": [
+      65534,
+      15096,
+      65534
+    ],
+    "center": [
+      0,
+      0,
+      0
     ]
   },
   "visualLocalBounds": {
@@ -178,34 +207,45 @@
       "algorithm": "sha256",
       "value": "ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "miranda",
       "nodeId": "miranda-captain-log",
       "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+      "lodSourceTier": "low",
       "intent": "trigger",
       "channel": "trigger",
       "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-14T21:36:35.946Z"
+    "generatedAt": "2026-05-17T02:20:09.346Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "trigger",
     "channel": "trigger",
-    "triangleBudget": 5000
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
   },
   "collisionProduct": {
     "actorId": "miranda-captain-log",
+    "cacheKey": "mesh-collision-manager-v1:ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
     "mode": "trigger",
     "productId": "miranda-captain-log:trigger:simplifiedMesh",
-    "generatorVersion": "mesh-collision-manager-v1",
+    "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "prefab",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78"
+      "value": "3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
@@ -213,7 +253,7 @@
     },
     "policyFingerprint": {
       "algorithm": "sha256",
-      "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+      "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
     },
     "shape": "trimesh",
     "localBounds": {
@@ -240,16 +280,16 @@
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
-    "generatedAt": "2026-05-14T21:36:35.946Z",
-    "triangleCount": 604,
-    "vertexCount": 1812,
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+    "triangleCount": 267,
+    "vertexCount": 210,
     "triangleBudget": 5000
   },
   "simplification": {
     "requested": false,
     "applied": false,
-    "sourceTriangleCount": 604,
+    "sourceTriangleCount": 267,
     "targetTriangleBudget": 5000,
     "ratio": 1,
     "tool": "gltf-transform",

@@ -13,6 +13,8 @@ import type {
   RuntimeGameplayRenderNode,
 } from '../engine/runtimeGameplayTypes'
 import type { ActorDefinition } from '../engine/types'
+import RuntimeNpcSystem from '../features/npc/RuntimeNpcSystem.svelte'
+import RuntimeFireflyNpc from '../features/npc/presentation/RuntimeFireflyNpc.svelte'
 import {
   markRuntimeActorMounted,
   unmarkRuntimeActorMounted,
@@ -33,6 +35,7 @@ $: mountCollision = shouldMountActorCollision(actor)
 $: renderVisualInsideCollider =
   !collisionOnly && shouldRenderVisualInsideCollider(actor)
 $: renderVisualOutsideCollider = renderVisual && !renderVisualInsideCollider
+$: actorHasNpc = Boolean(actor.npc)
 $: collisionProduct =
   collision && mountCollision
     ? createCollisionManagerRapierProduct({
@@ -70,6 +73,8 @@ $: gameplayNode = {
   scale: actor.transform.scale,
   gameplay: actor.gameplay?.data as RuntimeGameplayData | undefined,
 } satisfies RuntimeGameplayRenderNode
+$: shouldRenderNpcFirefly =
+  !collisionOnly && actor.npc?.presentation.type === 'firefly'
 
 onMount(() => {
   if (!levelId || collisionOnly) return
@@ -104,15 +109,39 @@ onDestroy(() => {
       <RuntimeActorRenderContent {actor} {levelId} />
     {/if}
 
+    {#if !collisionOnly}
+      <RuntimeNpcSystem
+        {actor}
+        {levelId}
+        {interactionSystem}
+        {interactiveEnabled}
+        bindInteractionTarget={!shouldRenderNpcFirefly}
+        on:npcInteraction
+      />
+    {/if}
+
     {#if !collisionOnly && actor.gameplay?.data}
       <RuntimeGameplayRenderer
         node={gameplayNode}
         selected={false}
         editorEnabled={false}
-        {interactionSystem}
-        {interactiveEnabled}
+        interactionSystem={actorHasNpc ? null : interactionSystem}
+        interactiveEnabled={interactiveEnabled && !actorHasNpc}
         on:portalTransition
         on:noteRead
+      />
+    {/if}
+
+    {#if shouldRenderNpcFirefly && actor.npc}
+      <RuntimeFireflyNpc
+        {actor}
+        actorId={actor.id}
+        {levelId}
+        npc={actor.npc}
+        selected={false}
+        {interactionSystem}
+        {interactiveEnabled}
+        on:npcInteraction
       />
     {/if}
 

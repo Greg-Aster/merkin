@@ -37,6 +37,17 @@ const allowedDefaultCameraFiles = new Set([
 const allowedStyleBakeEndpointCallFiles = new Set([
   'src/threlte/editor/editorStyleApi.ts',
 ])
+const allowedDirectLightMountFiles = new Set([
+  'src/threlte/features/lighting/RuntimeLightingSystem.svelte',
+  'src/threlte/features/lighting/RuntimeManagedPointLight.svelte',
+  'src/threlte/editor/EditorWorkbenchLighting.svelte',
+])
+const runtimeNpcInteractionTargetFile =
+  'src/threlte/features/npc/RuntimeNpcInteractionTarget.svelte'
+const directLightMountPattern =
+  /<T\.(AmbientLight|HemisphereLight|DirectionalLight|PointLight|SpotLight)\b/
+const directLightConstructorPattern =
+  /new\s+(AmbientLight|HemisphereLight|DirectionalLight|PointLight|SpotLight)\b/
 
 function getSourceFiles(dir, prefix = '') {
   const files = []
@@ -53,10 +64,7 @@ function getSourceFiles(dir, prefix = '') {
   return files
 }
 
-export function auditSourceGuards({
-  appRoot,
-  editorApiRoutePaths = [],
-}) {
+export function auditSourceGuards({ appRoot, editorApiRoutePaths = [] }) {
   const failures = []
   const sourceSceneDir = join(appRoot, 'src/threlte/editor/scenes')
 
@@ -76,9 +84,15 @@ export function auditSourceGuards({
     }
   }
 
-  for (const file of getSourceFiles(join(appRoot, 'src/threlte'), 'src/threlte')) {
+  for (const file of getSourceFiles(
+    join(appRoot, 'src/threlte'),
+    'src/threlte',
+  )) {
     const source = readFileSync(join(appRoot, file), 'utf8')
-    if (source.includes('makeDefault') && !allowedDefaultCameraFiles.has(file)) {
+    if (
+      source.includes('makeDefault') &&
+      !allowedDefaultCameraFiles.has(file)
+    ) {
       failures.push(
         `${file}: default scene cameras are only allowed in Player.svelte for gameplay and EditorViewportControls.svelte for editor orbit mode`,
       )
@@ -98,6 +112,25 @@ export function auditSourceGuards({
     ) {
       failures.push(
         `${file}: direct /api/style/bake-procedural calls must go through editorStyleBakeManager, not component-local or ad hoc fetch code`,
+      )
+    }
+
+    if (
+      (directLightMountPattern.test(source) ||
+        directLightConstructorPattern.test(source)) &&
+      !allowedDirectLightMountFiles.has(file)
+    ) {
+      failures.push(
+        `${file}: runtime lights must be registered through ManagedLight/SceneLightingProfile and mounted only by the runtime lighting system`,
+      )
+    }
+
+    if (
+      file === runtimeNpcInteractionTargetFile &&
+      source.includes('fireflyNpcPresentation')
+    ) {
+      failures.push(
+        `${file}: generic NPC interaction targets must consume owner-provided transforms and must not import firefly presentation motion helpers`,
       )
     }
   }

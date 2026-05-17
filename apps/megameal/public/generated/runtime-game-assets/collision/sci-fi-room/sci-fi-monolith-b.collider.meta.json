@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-14T21:37:06.488Z",
-  "generatorVersion": "mesh-collision-manager-v1",
+  "generatedAt": "2026-05-17T02:20:58.406Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "sci-fi-room",
   "sourceActorId": "sci-fi-monolith-b",
   "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
@@ -11,12 +11,19 @@
     "algorithm": "sha256",
     "value": "afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-monolith-b.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-monolith-b.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-monolith-b.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:e3858017f51ef3e34699792bb5412cf160bac77b606c32fbe6bb7e351d6075b4:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "colliderCacheKey": "mesh-collision-manager-v2:0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3:e3858017f51ef3e34699792bb5412cf160bac77b606c32fbe6bb7e351d6075b4:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
   "triangleCount": 60,
-  "vertexCount": 180,
+  "vertexCount": 120,
   "bounds": {
     "min": [
       -0.7099999785423279,
@@ -37,6 +44,28 @@
       0,
       0.06999999284744263,
       0.02000001072883606
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -32767,
+      -23074
+    ],
+    "max": [
+      32767,
+      32767,
+      23074
+    ],
+    "size": [
+      65534,
+      65534,
+      46148
+    ],
+    "center": [
+      0,
+      0,
+      0
     ]
   },
   "visualLocalBounds": {
@@ -178,34 +207,45 @@
       "algorithm": "sha256",
       "value": "afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "sci-fi-room",
       "nodeId": "sci-fi-monolith-b",
       "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+      "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
       "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-14T21:37:06.488Z"
+    "generatedAt": "2026-05-17T02:20:58.406Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 5000
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
   },
   "collisionProduct": {
     "actorId": "sci-fi-monolith-b",
+    "cacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:e3858017f51ef3e34699792bb5412cf160bac77b606c32fbe6bb7e351d6075b4:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
     "mode": "auto",
     "productId": "sci-fi-monolith-b:auto:simplifiedMesh",
-    "generatorVersion": "mesh-collision-manager-v1",
+    "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "prefab",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f"
+      "value": "0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
@@ -213,7 +253,7 @@
     },
     "policyFingerprint": {
       "algorithm": "sha256",
-      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+      "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
     },
     "shape": "trimesh",
     "localBounds": {
@@ -240,10 +280,10 @@
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-monolith-b.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-monolith-b.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
-    "generatedAt": "2026-05-14T21:37:06.488Z",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
     "triangleCount": 60,
-    "vertexCount": 180,
+    "vertexCount": 120,
     "triangleBudget": 5000
   },
   "simplification": {

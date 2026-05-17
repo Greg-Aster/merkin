@@ -149,6 +149,27 @@
         "maxRuntimeVariantBytes": 62914560,
         "maxTextureSize": 4096,
         "defaultTier": "medium"
+      },
+      "cookOverrides": {
+        "tiers": {
+          "high": {
+            "simplifyError": 0.006,
+            "recipe": "hero-tree-source-retopology-high"
+          },
+          "medium": {
+            "simplifyError": 0.006,
+            "recipe": "hero-tree-source-retopology-medium"
+          },
+          "low": {
+            "simplifyRatio": 0.1,
+            "simplifyError": 1,
+            "recipe": "hero-tree-source-retopology-low",
+            "retopology": {
+              "strategy": "largest-triangle-area-prune",
+              "maxTriangles": 14000
+            }
+          }
+        }
       }
     }
   }

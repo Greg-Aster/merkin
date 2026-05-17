@@ -1,7 +1,7 @@
 {
   "levelId": "yggdrasil",
   "version": 1,
-  "updatedAt": "2026-05-16T03:00:38.260Z",
+  "updatedAt": "2026-05-17T02:18:06.268Z",
   "settings": {
     "level": {
       "collision": {
@@ -134,39 +134,35 @@
       "style": {
         "preset": "monument",
         "enabled": true,
-        "fogEnabled": false,
         "fog": {
-          "color": "#000000",
-          "density": 0.0007
+          "color": "#1a5fb4",
+          "density": 0.00072
         },
         "editorBatch": {
           "presetId": "yggdrasil-abyssal-neon"
         },
         "haze": {
           "density": 0.0034,
-          "floor": 0.9,
-          "ceiling": 4.8,
-          "falloff": 2.4,
-          "fogVolumeColors": false
+          "floor": 0.9
         },
         "colorGrading": {
-          "brightness": 0.9,
-          "warmth": 0.9
-        }
+          "brightness": 0.9
+        },
+        "fogEnabled": false
       },
       "lighting": {
         "ambientIntensity": 2,
-        "keyLightIntensity": 0.22,
-        "fillLightIntensity": 0.08
+        "keyLightIntensity": 0,
+        "fillLightIntensity": 0
       },
       "renderProfile": {
         "id": "yggdrasil-bifrost-canopy",
         "defaultTier": "desktop",
         "lighting": {
-          "ambientColor": "#1a5fb4",
-          "skyColor": "#ffffff",
-          "groundColor": "#1a5fb4",
-          "keyLightColor": "#ffffff",
+          "ambientColor": "#d7e8bc",
+          "skyColor": "#e5f0d1",
+          "groundColor": "#182311",
+          "keyLightColor": "#fff2c0",
           "fillLightColor": "#8fc7d7",
           "keyLightPosition": [
             24,
@@ -208,11 +204,11 @@
           "enabled": true,
           "passes": [
             "tone-mapping",
-            "depth-fog",
             "ambient-occlusion",
             "color-grading",
             "bloom",
-            "vignette"
+            "vignette",
+            "kuwahara"
           ],
           "maxEnabledPasses": 6,
           "ambientOcclusion": {
@@ -227,7 +223,13 @@
             "threshold": 0.88
           },
           "toneMappingExposure": 0.98,
-          "vignetteStrength": 0.6
+          "vignetteStrength": 0.6,
+          "kuwahara": {
+            "enabled": true,
+            "resolutionScale": 1,
+            "mix": 1,
+            "radius": 3
+          }
         },
         "qualityTiers": {
           "mobile": {
@@ -255,8 +257,8 @@
             "postProcessing": {
               "passes": [
                 "tone-mapping",
-                "depth-fog",
-                "color-grading"
+                "color-grading",
+                "kuwahara"
               ],
               "maxEnabledPasses": 3
             }
@@ -286,10 +288,10 @@
             "postProcessing": {
               "passes": [
                 "tone-mapping",
-                "depth-fog",
                 "color-grading",
                 "bloom",
-                "vignette"
+                "vignette",
+                "kuwahara"
               ],
               "maxEnabledPasses": 5
             }
@@ -319,11 +321,11 @@
             "postProcessing": {
               "passes": [
                 "tone-mapping",
-                "depth-fog",
                 "ambient-occlusion",
                 "color-grading",
                 "bloom",
-                "vignette"
+                "vignette",
+                "kuwahara"
               ],
               "maxEnabledPasses": 6,
               "ambientOcclusion": {
@@ -415,9 +417,7 @@
       },
       "skybox": {
         "backgroundIntensity": 1,
-        "backgroundBlurriness": 0,
-        "fogOpacity": 1,
-        "fogFalloff": 3.4
+        "backgroundBlurriness": 0
       }
     }
   },
@@ -699,7 +699,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:2c0084f2eb76a57e53f5292fd0f85785467a8e74320fbdae67c5fd96bafb38e9:e105f73550332e4c1c0a7869f0aae82adc19785188d69cf88615c5db765d6b38:31365d1d2e99143a13c7228531b79d1ba861340a646ea2e47d78f8e6d1111c9d",
+        "colliderCacheKey": "mesh-collision-manager-v2:9f98b7a5452f591e411944dba1e39ffde093fec58602461528bbb0d79c52b6a7:e105f73550332e4c1c0a7869f0aae82adc19785188d69cf88615c5db765d6b38:31365d1d2e99143a13c7228531b79d1ba861340a646ea2e47d78f8e6d1111c9d",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -863,7 +863,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-mound.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-mound.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:b7396643867c3954c071e02f2b33ddf216eefb3939a7bf2d9dd995d7c7a91a0b:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+        "colliderCacheKey": "mesh-collision-manager-v2:7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1171,7 +1171,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-north.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-north.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:53383c988cbef8240a3ccaf9749aacf74730c6491625d7406e9ddf5d9b89a65f:d8b1f5778074eeee24e3ebb863a33b98f114ebfcf356ce02f71887991b5c1b93:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+        "colliderCacheKey": "mesh-collision-manager-v2:4a55acd79b7efc34b624331d2f1df1d0df104b73d41b4dcd622fc18b4c4f3a56:d8b1f5778074eeee24e3ebb863a33b98f114ebfcf356ce02f71887991b5c1b93:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1312,7 +1312,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-south.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-south.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:dc58336f03ce9ca8c2dc9264553a7e9b6b9b0b662a95cadc1662758b42489c27:c4a52ecd381cb77afc765ead65e701a891153672d6a2c198b19b2bfd8c33720a:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "colliderCacheKey": "mesh-collision-manager-v2:d4292501134d55b92ba782513e4dbab60365828656374cd0ee8e2851906f1839:c4a52ecd381cb77afc765ead65e701a891153672d6a2c198b19b2bfd8c33720a:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1453,7 +1453,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-east.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-east.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:ff0e7e790281cdbe8f10c2e65803a214f3e26ed00368d30fb59b39f1f6e516f9:8c49f729ca30a76684762b76b9275cac2853e5f140d067f18cc070b0817b7d45:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "colliderCacheKey": "mesh-collision-manager-v2:500114aff935b68391b66f45ddfabb4f6d7f5505fa7379b554073c37194e512d:8c49f729ca30a76684762b76b9275cac2853e5f140d067f18cc070b0817b7d45:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1594,7 +1594,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-west.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-west.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:82410ede33225a911340c42892cbd0afcad7385f499c15064902308f5d8d8c7f:d78ee0b9ea6593abc08f45df077ac4ad34644608e9385644d1311845f658e103:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+        "colliderCacheKey": "mesh-collision-manager-v2:b8c64c09bb7a754ac6e2f7756576f471d9165fc26b346bfa401f86b2f87001e7:d78ee0b9ea6593abc08f45df077ac4ad34644608e9385644d1311845f658e103:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1735,7 +1735,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northeast.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northeast.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:a6c0b43ba6a951ac4f159ed1b614a5eeaeec328f78007fb453b6c3b700dfaf0c:fa10366a338d43bf29c8740d97a314e1b1a9c4d225026c5db4bcbaed6597712c:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "colliderCacheKey": "mesh-collision-manager-v2:b15e37959667d73c5ee3c8813ffdb48d27a7c4952e2e7b32323ed40d1aa47089:fa10366a338d43bf29c8740d97a314e1b1a9c4d225026c5db4bcbaed6597712c:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1876,7 +1876,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northwest.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northwest.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:754a1c5de3096bf10604849f31aaedad98ae48033ddb0c093114cf87bc18e21e:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+        "colliderCacheKey": "mesh-collision-manager-v2:ed7742afb10d38fdfab1a2748211f43d2a150e90ec9d2609e65dd672a7caecbd:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -2017,7 +2017,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southeast.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southeast.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:9e835f916456578e72c79a840db8ec35f2270bb23bbd09a2601381a6fb67aa9e:7183112371b1695c1928be1bd88c2a370f483850286719ae3869fe22656b6aa9:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "colliderCacheKey": "mesh-collision-manager-v2:310bb538f8139d222639e197e95b63800b888f01903d8430ca051a28515143f8:7183112371b1695c1928be1bd88c2a370f483850286719ae3869fe22656b6aa9:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -2158,7 +2158,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southwest.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southwest.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:ee12c9a536322e500006b1e06df24a9288234f76c8dc30d43f7217d06df6a6bf:0d39c8e3f3908f581952214715b936eba47076669a6ce3df36de1878918c0914:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "colliderCacheKey": "mesh-collision-manager-v2:46f128a488443b499281227b98420150918b789d69946ec5e7287d80b39ccae0:0d39c8e3f3908f581952214715b936eba47076669a6ce3df36de1878918c0914:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -2424,28 +2424,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#d8e8ff",
-        "markerSize": 0.7,
-        "wanderEnabled": true,
-        "wanderRadius": 0.55,
-        "wanderSpeed": 0.32,
-        "hoverHeight": 0.45,
-        "bobAmplitude": 0.2,
-        "bobSpeed": 1.15,
-        "twinkleSpeed": 1.1,
-        "lightIntensity": 3.8,
-        "lightDistance": 8,
-        "lightDecay": 1.4,
-        "spriteIntensity": 1.1,
-        "title": "Well of Urd",
-        "author": "World-Root Spirit",
-        "location": "Yggdrasil",
-        "excerpt": "A sentinel glow hovers over Well of Urd.",
-        "body": "The waters of Well of Urd gather beneath one of Yggdrasil's great roots.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-well-urd-marker",
+        "archetype": "firefly",
+        "displayName": "World-Root Spirit",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Well of Urd",
+          "excerpt": "A sentinel glow hovers over Well of Urd.",
+          "body": "The waters of Well of Urd gather beneath one of Yggdrasil's great roots."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.55,
+          "speed": 0.32,
+          "hoverHeight": 0.45,
+          "bobAmplitude": 0.2,
+          "bobSpeed": 1.15
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#d8e8ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.7,
+          "spriteIntensity": 1.1,
+          "lightIntensity": 3.8,
+          "lightDistance": 8,
+          "lightDecay": 1.4,
+          "twinkleSpeed": 1.1,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -2594,28 +2607,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#d6ffd8",
-        "markerSize": 0.7,
-        "wanderEnabled": true,
-        "wanderRadius": 0.55,
-        "wanderSpeed": 0.32,
-        "hoverHeight": 0.45,
-        "bobAmplitude": 0.2,
-        "bobSpeed": 1.15,
-        "twinkleSpeed": 1.1,
-        "lightIntensity": 3.8,
-        "lightDistance": 8,
-        "lightDecay": 1.4,
-        "spriteIntensity": 1.1,
-        "title": "Well of Mimir",
-        "author": "World-Root Spirit",
-        "location": "Yggdrasil",
-        "excerpt": "A sentinel glow hovers over Well of Mimir.",
-        "body": "The waters of Well of Mimir gather beneath one of Yggdrasil's great roots.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-well-mimir-marker",
+        "archetype": "firefly",
+        "displayName": "World-Root Spirit",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Well of Mimir",
+          "excerpt": "A sentinel glow hovers over Well of Mimir.",
+          "body": "The waters of Well of Mimir gather beneath one of Yggdrasil's great roots."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.55,
+          "speed": 0.32,
+          "hoverHeight": 0.45,
+          "bobAmplitude": 0.2,
+          "bobSpeed": 1.15
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#d6ffd8",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.7,
+          "spriteIntensity": 1.1,
+          "lightIntensity": 3.8,
+          "lightDistance": 8,
+          "lightDecay": 1.4,
+          "twinkleSpeed": 1.1,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -2764,28 +2790,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#d8d8ff",
-        "markerSize": 0.7,
-        "wanderEnabled": true,
-        "wanderRadius": 0.55,
-        "wanderSpeed": 0.32,
-        "hoverHeight": 0.45,
-        "bobAmplitude": 0.2,
-        "bobSpeed": 1.15,
-        "twinkleSpeed": 1.1,
-        "lightIntensity": 3.8,
-        "lightDistance": 8,
-        "lightDecay": 1.4,
-        "spriteIntensity": 1.1,
-        "title": "Hvergelmir Basin",
-        "author": "World-Root Spirit",
-        "location": "Yggdrasil",
-        "excerpt": "A sentinel glow hovers over Hvergelmir Basin.",
-        "body": "The waters of Hvergelmir Basin gather beneath one of Yggdrasil's great roots.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-well-hvergelmir-marker",
+        "archetype": "firefly",
+        "displayName": "World-Root Spirit",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Hvergelmir Basin",
+          "excerpt": "A sentinel glow hovers over Hvergelmir Basin.",
+          "body": "The waters of Hvergelmir Basin gather beneath one of Yggdrasil's great roots."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.55,
+          "speed": 0.32,
+          "hoverHeight": 0.45,
+          "bobAmplitude": 0.2,
+          "bobSpeed": 1.15
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#d8d8ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.7,
+          "spriteIntensity": 1.1,
+          "lightIntensity": 3.8,
+          "lightDistance": 8,
+          "lightDecay": 1.4,
+          "twinkleSpeed": 1.1,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -3174,30 +3213,43 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#fff1a6",
-        "markerSize": 0.72,
-        "wanderEnabled": true,
-        "wanderRadius": 0.9,
-        "wanderSpeed": 0.22,
-        "hoverHeight": 0.5,
-        "bobAmplitude": 0.18,
-        "bobSpeed": 1,
-        "twinkleSpeed": 1,
-        "lightIntensity": 4.4,
-        "lightDistance": 9,
-        "lightDecay": 1.3,
-        "spriteIntensity": 1.2,
-        "title": "Caretaker of the Bough",
-        "author": "A Whisper in the Bark",
-        "location": "Yggdrasil",
-        "excerpt": "The firefly watches the roots and waits for travelers.",
-        "body": "Here stands Yggdrasil, ash of worlds, branch of heavens, root of memory. The wells gather at its feet and the old things still move in its shade.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
-      },
-      "parentId": "yggdrasil-story-encounters-group"
+      "parentId": "yggdrasil-story-encounters-group",
+      "npc": {
+        "id": "yggdrasil-story-firefly",
+        "archetype": "firefly",
+        "displayName": "A Whisper in the Bark",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Caretaker of the Bough",
+          "excerpt": "The firefly watches the roots and waits for travelers.",
+          "body": "Here stands Yggdrasil, ash of worlds, branch of heavens, root of memory. The wells gather at its feet and the old things still move in its shade."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.9,
+          "speed": 0.22,
+          "hoverHeight": 0.5,
+          "bobAmplitude": 0.18,
+          "bobSpeed": 1
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#fff1a6",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.72,
+          "spriteIntensity": 1.2,
+          "lightIntensity": 4.4,
+          "lightDistance": 9,
+          "lightDecay": 1.3,
+          "twinkleSpeed": 1,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
+      }
     },
     {
       "id": "yggdrasil-arrival-group",
@@ -3262,7 +3314,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-arch.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-arch.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -3395,7 +3447,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-left.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-left.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -3528,7 +3580,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-right.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-column-right.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:67653c1165e416141a0f324b8dd3a636ccd50d8f564a3d8b41ce19bc06d3c7bb:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -3723,7 +3775,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-portal-return.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-portal-return.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:8ecbfe6d38d78dd14f49d7b2bdc6a61099090219a0080498b92095f25e5550e6:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
+        "colliderCacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:8ecbfe6d38d78dd14f49d7b2bdc6a61099090219a0080498b92095f25e5550e6:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -4000,7 +4052,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-left.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-left.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -4133,7 +4185,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-right.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-right.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:d3e70642d644e85785a34422117d06f4b35816e9d089e0e75444d2eaa985ae4d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -4399,7 +4451,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-left.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-left.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -4532,7 +4584,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-right.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-right.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:c3df57be4b3271d3a4c5c8119165d4d6fd6928276b0687c9c00cecf48ccf5806:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -4798,7 +4850,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-left.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-left.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -4931,7 +4983,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-right.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-right.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:e400ede65739018111157a28f8163a8ea744c43b2963f7fdcf94b71392755885:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -5197,7 +5249,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -5330,7 +5382,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-growth.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-growth.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -5463,7 +5515,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-bench.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-bench.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:f9b25262d9004e19a35e544180c363030856115bd6b3d007d483416471d746fe:8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb:8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -6440,28 +6492,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#fff1a6",
-        "markerSize": 0.92,
-        "wanderEnabled": true,
-        "wanderRadius": 1.35,
-        "wanderSpeed": 0.16,
-        "hoverHeight": 0.62,
-        "bobAmplitude": 0.11,
-        "bobSpeed": 0.84,
-        "twinkleSpeed": 0.82,
-        "lightIntensity": 5.8,
-        "lightDistance": 12,
-        "lightDecay": 1.15,
-        "spriteIntensity": 1.4,
-        "title": "Root-Keeper of Yggdrasil",
-        "author": "The Bark Remembers",
-        "location": "Yggdrasil",
-        "excerpt": "A watchful spirit hovers where the central roots rise like a shrine.",
-        "body": "Traveler, do not mistake this tree for scenery. In the old Northern imagination, Yggdrasil binds heavens, worlds, roots, and the dead. Drink from no well lightly. Ask no branch to carry what you are unwilling to lose.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-spirit-guardian",
+        "archetype": "firefly",
+        "displayName": "The Bark Remembers",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Root-Keeper of Yggdrasil",
+          "excerpt": "A watchful spirit hovers where the central roots rise like a shrine.",
+          "body": "Traveler, do not mistake this tree for scenery. In the old Northern imagination, Yggdrasil binds heavens, worlds, roots, and the dead. Drink from no well lightly. Ask no branch to carry what you are unwilling to lose."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.35,
+          "speed": 0.16,
+          "hoverHeight": 0.62,
+          "bobAmplitude": 0.11,
+          "bobSpeed": 0.84
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#fff1a6",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.92,
+          "spriteIntensity": 1.4,
+          "lightIntensity": 5.8,
+          "lightDistance": 12,
+          "lightDecay": 1.15,
+          "twinkleSpeed": 0.82,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -6485,28 +6550,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#b6ecff",
-        "markerSize": 0.44,
-        "wanderEnabled": true,
-        "wanderRadius": 1.9,
-        "wanderSpeed": 0.54,
-        "hoverHeight": 0.82,
-        "bobAmplitude": 0.09,
-        "bobSpeed": 1.9,
-        "twinkleSpeed": 1.85,
-        "lightIntensity": 2.4,
-        "lightDistance": 5.2,
-        "lightDecay": 1.35,
-        "spriteIntensity": 0.95,
-        "title": "Huginn",
-        "author": "Raven-Thought",
-        "location": "Yggdrasil",
-        "excerpt": "A pale spirit circles the lower crown like a thought given wings.",
-        "body": "Huginn, Thought, is one of the ravens most closely associated with Odin in later tradition. Here the raven is rendered as a spirit light: quick, circling, and restless.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-spirit-huginn",
+        "archetype": "firefly",
+        "displayName": "Raven-Thought",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Huginn",
+          "excerpt": "A pale spirit circles the lower crown like a thought given wings.",
+          "body": "Huginn, Thought, is one of the ravens most closely associated with Odin in later tradition. Here the raven is rendered as a spirit light: quick, circling, and restless."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.9,
+          "speed": 0.54,
+          "hoverHeight": 0.82,
+          "bobAmplitude": 0.09,
+          "bobSpeed": 1.9
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#b6ecff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.44,
+          "spriteIntensity": 0.95,
+          "lightIntensity": 2.4,
+          "lightDistance": 5.2,
+          "lightDecay": 1.35,
+          "twinkleSpeed": 1.85,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -6530,28 +6608,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#d9d0ff",
-        "markerSize": 0.5,
-        "wanderEnabled": true,
-        "wanderRadius": 1.35,
-        "wanderSpeed": 0.22,
-        "hoverHeight": 0.9,
-        "bobAmplitude": 0.06,
-        "bobSpeed": 0.9,
-        "twinkleSpeed": 0.75,
-        "lightIntensity": 2.9,
-        "lightDistance": 6.3,
-        "lightDecay": 1.35,
-        "spriteIntensity": 1,
-        "title": "Muninn",
-        "author": "Raven-Memory",
-        "location": "Yggdrasil",
-        "excerpt": "A second raven-spirit holds a wider orbit, slower and more deliberate.",
-        "body": "Muninn, Memory, completes the pair. In the level, the two raven spirits give motion and intelligence to the crown line without needing literal bird models.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-spirit-muninn",
+        "archetype": "firefly",
+        "displayName": "Raven-Memory",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Muninn",
+          "excerpt": "A second raven-spirit holds a wider orbit, slower and more deliberate.",
+          "body": "Muninn, Memory, completes the pair. In the level, the two raven spirits give motion and intelligence to the crown line without needing literal bird models."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.35,
+          "speed": 0.22,
+          "hoverHeight": 0.9,
+          "bobAmplitude": 0.06,
+          "bobSpeed": 0.9
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#d9d0ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.5,
+          "spriteIntensity": 1,
+          "lightIntensity": 2.9,
+          "lightDistance": 6.3,
+          "lightDecay": 1.35,
+          "twinkleSpeed": 0.75,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -6575,28 +6666,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#dfff9a",
-        "markerSize": 0.4,
-        "wanderEnabled": true,
-        "wanderRadius": 2.2,
-        "wanderSpeed": 0.34,
-        "hoverHeight": 0.56,
-        "bobAmplitude": 0.15,
-        "bobSpeed": 1.25,
-        "twinkleSpeed": 1.35,
-        "lightIntensity": 2,
-        "lightDistance": 4.8,
-        "lightDecay": 1.35,
-        "spriteIntensity": 0.86,
-        "title": "Dainn",
-        "author": "Leaf-Browser",
-        "location": "Yggdrasil",
-        "excerpt": "A green-gold light dips through the boughs, pausing where the leaves are thickest.",
-        "body": "One of the four stag spirits lingers where the branches broaden, evoking the old image of creatures feeding among the leaves.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-spirit-stag-east",
+        "archetype": "firefly",
+        "displayName": "Leaf-Browser",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Dainn",
+          "excerpt": "A green-gold light dips through the boughs, pausing where the leaves are thickest.",
+          "body": "One of the four stag spirits lingers where the branches broaden, evoking the old image of creatures feeding among the leaves."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 2.2,
+          "speed": 0.34,
+          "hoverHeight": 0.56,
+          "bobAmplitude": 0.15,
+          "bobSpeed": 1.25
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#dfff9a",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.4,
+          "spriteIntensity": 0.86,
+          "lightIntensity": 2,
+          "lightDistance": 4.8,
+          "lightDecay": 1.35,
+          "twinkleSpeed": 1.35,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -6620,28 +6724,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#ffd89a",
-        "markerSize": 0.42,
-        "wanderEnabled": true,
-        "wanderRadius": 2.4,
-        "wanderSpeed": 0.28,
-        "hoverHeight": 0.58,
-        "bobAmplitude": 0.13,
-        "bobSpeed": 1.18,
-        "twinkleSpeed": 1.1,
-        "lightIntensity": 2.1,
-        "lightDistance": 5,
-        "lightDecay": 1.35,
-        "spriteIntensity": 0.88,
-        "title": "Dvalinn",
-        "author": "Leaf-Browser",
-        "location": "Yggdrasil",
-        "excerpt": "Another stag-spirit keeps to the western boughs, drifting in patient arcs.",
-        "body": "Together the stag spirits suggest the continual life and erosion within the canopy of Yggdrasil.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-spirit-stag-west",
+        "archetype": "firefly",
+        "displayName": "Leaf-Browser",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Dvalinn",
+          "excerpt": "Another stag-spirit keeps to the western boughs, drifting in patient arcs.",
+          "body": "Together the stag spirits suggest the continual life and erosion within the canopy of Yggdrasil."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 2.4,
+          "speed": 0.28,
+          "hoverHeight": 0.58,
+          "bobAmplitude": 0.13,
+          "bobSpeed": 1.18
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#ffd89a",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.42,
+          "spriteIntensity": 0.88,
+          "lightIntensity": 2.1,
+          "lightDistance": 5,
+          "lightDecay": 1.35,
+          "twinkleSpeed": 1.1,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -6665,28 +6782,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#a9b8ff",
-        "markerSize": 0.38,
-        "wanderEnabled": true,
-        "wanderRadius": 0.9,
-        "wanderSpeed": 0.14,
-        "hoverHeight": 0.16,
-        "bobAmplitude": 0.04,
-        "bobSpeed": 0.7,
-        "twinkleSpeed": 0.55,
-        "lightIntensity": 1.7,
-        "lightDistance": 4.2,
-        "lightDecay": 1.35,
-        "spriteIntensity": 0.78,
-        "title": "Serpent Omen",
-        "author": "Cold Root Whisper",
-        "location": "Yggdrasil",
-        "excerpt": "A colder light drifts over the lower basin, never rising very high.",
-        "body": "Not every spirit around the world-tree is comforting. This one marks the unease and pressure associated with Hvergelmir and the gnawing root below.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-spirit-root-serpent",
+        "archetype": "firefly",
+        "displayName": "Cold Root Whisper",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Serpent Omen",
+          "excerpt": "A colder light drifts over the lower basin, never rising very high.",
+          "body": "Not every spirit around the world-tree is comforting. This one marks the unease and pressure associated with Hvergelmir and the gnawing root below."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.9,
+          "speed": 0.14,
+          "hoverHeight": 0.16,
+          "bobAmplitude": 0.04,
+          "bobSpeed": 0.7
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#a9b8ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.38,
+          "spriteIntensity": 0.78,
+          "lightIntensity": 1.7,
+          "lightDistance": 4.2,
+          "lightDecay": 1.35,
+          "twinkleSpeed": 0.55,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -6710,28 +6840,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#ffcf7f",
-        "markerSize": 0.46,
-        "wanderEnabled": true,
-        "wanderRadius": 0.8,
-        "wanderSpeed": 0.52,
-        "hoverHeight": 0.22,
-        "bobAmplitude": 0.1,
-        "bobSpeed": 1.8,
-        "twinkleSpeed": 1.8,
-        "lightIntensity": 2.2,
-        "lightDistance": 5,
-        "lightDecay": 1.4,
-        "spriteIntensity": 1,
-        "title": "Bifrost Spark",
-        "author": "Rainbow Road Residue",
-        "location": "Bifrost Approach",
-        "excerpt": "A shard of color drifts above the road into the roots.",
-        "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-bifrost-spark-1",
+        "archetype": "firefly",
+        "displayName": "Rainbow Road Residue",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Bifrost Spark",
+          "excerpt": "A shard of color drifts above the road into the roots.",
+          "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.8,
+          "speed": 0.52,
+          "hoverHeight": 0.22,
+          "bobAmplitude": 0.1,
+          "bobSpeed": 1.8
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#ffcf7f",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.46,
+          "spriteIntensity": 1,
+          "lightIntensity": 2.2,
+          "lightDistance": 5,
+          "lightDecay": 1.4,
+          "twinkleSpeed": 1.8,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -6755,28 +6898,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#89d3ff",
-        "markerSize": 0.46,
-        "wanderEnabled": true,
-        "wanderRadius": 0.8,
-        "wanderSpeed": 0.52,
-        "hoverHeight": 0.22,
-        "bobAmplitude": 0.1,
-        "bobSpeed": 1.8,
-        "twinkleSpeed": 1.8,
-        "lightIntensity": 2.2,
-        "lightDistance": 5,
-        "lightDecay": 1.4,
-        "spriteIntensity": 1,
-        "title": "Bifrost Spark",
-        "author": "Rainbow Road Residue",
-        "location": "Bifrost Approach",
-        "excerpt": "A shard of color drifts above the road into the roots.",
-        "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-bifrost-spark-2",
+        "archetype": "firefly",
+        "displayName": "Rainbow Road Residue",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Bifrost Spark",
+          "excerpt": "A shard of color drifts above the road into the roots.",
+          "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.8,
+          "speed": 0.52,
+          "hoverHeight": 0.22,
+          "bobAmplitude": 0.1,
+          "bobSpeed": 1.8
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#89d3ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.46,
+          "spriteIntensity": 1,
+          "lightIntensity": 2.2,
+          "lightDistance": 5,
+          "lightDecay": 1.4,
+          "twinkleSpeed": 1.8,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -6800,28 +6956,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#d8a4ff",
-        "markerSize": 0.46,
-        "wanderEnabled": true,
-        "wanderRadius": 0.8,
-        "wanderSpeed": 0.52,
-        "hoverHeight": 0.22,
-        "bobAmplitude": 0.1,
-        "bobSpeed": 1.8,
-        "twinkleSpeed": 1.8,
-        "lightIntensity": 2.2,
-        "lightDistance": 5,
-        "lightDecay": 1.4,
-        "spriteIntensity": 1,
-        "title": "Bifrost Spark",
-        "author": "Rainbow Road Residue",
-        "location": "Bifrost Approach",
-        "excerpt": "A shard of color drifts above the road into the roots.",
-        "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-bifrost-spark-3",
+        "archetype": "firefly",
+        "displayName": "Rainbow Road Residue",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Bifrost Spark",
+          "excerpt": "A shard of color drifts above the road into the roots.",
+          "body": "This little spark traces the memory of the rainbow bridge, turning the approach into something more ceremonial than architectural."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.8,
+          "speed": 0.52,
+          "hoverHeight": 0.22,
+          "bobAmplitude": 0.1,
+          "bobSpeed": 1.8
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#d8a4ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.46,
+          "spriteIntensity": 1,
+          "lightIntensity": 2.2,
+          "lightDistance": 5,
+          "lightDecay": 1.4,
+          "twinkleSpeed": 1.8,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -7059,7 +7228,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-perch-spire.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-perch-spire.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -7316,28 +7485,41 @@
         1.7103926833052592
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#fff1bf",
-        "markerSize": 0.86,
-        "wanderEnabled": true,
-        "wanderRadius": 1.6,
-        "wanderSpeed": 0.12,
-        "hoverHeight": 0.55,
-        "bobAmplitude": 0.06,
-        "bobSpeed": 0.7,
-        "twinkleSpeed": 0.7,
-        "lightIntensity": 4.9,
-        "lightDistance": 10.5,
-        "lightDecay": 1.25,
-        "spriteIntensity": 1.3,
-        "title": "Eagle of the Crown",
-        "author": "Upper Bough Witness",
-        "location": "Highest Boughs",
-        "excerpt": "A broad, regal spirit-light marks the eagle above the worlds.",
-        "body": "The crown-spirit moves in large, patient loops. It should read immediately as dominant and elevated, unlike the smaller, quicker wanderers below.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-spirit-eagle",
+        "archetype": "firefly",
+        "displayName": "Upper Bough Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Eagle of the Crown",
+          "excerpt": "A broad, regal spirit-light marks the eagle above the worlds.",
+          "body": "The crown-spirit moves in large, patient loops. It should read immediately as dominant and elevated, unlike the smaller, quicker wanderers below."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.6,
+          "speed": 0.12,
+          "hoverHeight": 0.55,
+          "bobAmplitude": 0.06,
+          "bobSpeed": 0.7
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#fff1bf",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.86,
+          "spriteIntensity": 1.3,
+          "lightIntensity": 4.9,
+          "lightDistance": 10.5,
+          "lightDecay": 1.25,
+          "twinkleSpeed": 0.7,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -7361,28 +7543,41 @@
         1.7103926833052592
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#d8f5ff",
-        "markerSize": 0.42,
-        "wanderEnabled": true,
-        "wanderRadius": 0.6,
-        "wanderSpeed": 0.5,
-        "hoverHeight": 0.42,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 1.45,
-        "twinkleSpeed": 1.7,
-        "lightIntensity": 2.1,
-        "lightDistance": 4.6,
-        "lightDecay": 1.6,
-        "spriteIntensity": 0.92,
-        "title": "VeÃ°rfÃ¶lnir",
-        "author": "Hawk in the Crown",
-        "location": "Highest Boughs",
-        "excerpt": "A smaller, sharper spirit circles close to the perch.",
-        "body": "VeÃ°rfÃ¶lnir is rendered as the quick, alert counterpoint to the slow and sovereign eagle-light.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-spirit-vedrfolnir",
+        "archetype": "firefly",
+        "displayName": "Hawk in the Crown",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "VeÃ°rfÃ¶lnir",
+          "excerpt": "A smaller, sharper spirit circles close to the perch.",
+          "body": "VeÃ°rfÃ¶lnir is rendered as the quick, alert counterpoint to the slow and sovereign eagle-light."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.6,
+          "speed": 0.5,
+          "hoverHeight": 0.42,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 1.45
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#d8f5ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.42,
+          "spriteIntensity": 0.92,
+          "lightIntensity": 2.1,
+          "lightDistance": 4.6,
+          "lightDecay": 1.6,
+          "twinkleSpeed": 1.7,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -7483,7 +7678,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:21ffd350111f8448826b83768bdf0a7303b2998e9e1b553aed2ddc1d746654fb:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -8103,28 +8298,41 @@
         1.3771277643359572
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#b3c2ff",
-        "markerSize": 0.58,
-        "wanderEnabled": true,
-        "wanderRadius": 1.1,
-        "wanderSpeed": 0.16,
-        "hoverHeight": 0.14,
-        "bobAmplitude": 0.05,
-        "bobSpeed": 0.85,
-        "twinkleSpeed": 0.65,
-        "lightIntensity": 2.6,
-        "lightDistance": 5.6,
-        "lightDecay": 1.7,
-        "spriteIntensity": 0.88,
-        "title": "Nidhogg Omen",
-        "author": "Cold Root Whisper",
-        "location": "Hvergelmir Depths",
-        "excerpt": "A low, glacial light haunts the deeper tunnel between root and basin.",
-        "body": "This is not Nidhogg as a literal dragon model. It is an omen-light: low to the ground, colder than the other spirits, and visually associated with gnawing pressure beneath the tree.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-spirit-nidhogg",
+        "archetype": "firefly",
+        "displayName": "Cold Root Whisper",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Nidhogg Omen",
+          "excerpt": "A low, glacial light haunts the deeper tunnel between root and basin.",
+          "body": "This is not Nidhogg as a literal dragon model. It is an omen-light: low to the ground, colder than the other spirits, and visually associated with gnawing pressure beneath the tree."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.1,
+          "speed": 0.16,
+          "hoverHeight": 0.14,
+          "bobAmplitude": 0.05,
+          "bobSpeed": 0.85
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#b3c2ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.58,
+          "spriteIntensity": 0.88,
+          "lightIntensity": 2.6,
+          "lightDistance": 5.6,
+          "lightDecay": 1.7,
+          "twinkleSpeed": 0.65,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -8176,28 +8384,41 @@
         1.5423830960562719
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#ffd7a1",
-        "markerSize": 0.44,
-        "wanderEnabled": true,
-        "wanderRadius": 0.8,
-        "wanderSpeed": 0.48,
-        "hoverHeight": 0.3,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 1.7,
-        "twinkleSpeed": 1.6,
-        "lightIntensity": 2.1,
-        "lightDistance": 4.8,
-        "lightDecay": 1.45,
-        "spriteIntensity": 0.95,
-        "title": "Threshold Spark",
-        "author": "Rainbow Road Residue",
-        "location": "Rainbow Threshold",
-        "excerpt": "A warm spark drifts near the foreground stones.",
-        "body": "These threshold sparks help stage the first view: they make the entry feel inhabited before the player reaches the main root court.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-arrival-foreground-spark-left",
+        "archetype": "firefly",
+        "displayName": "Rainbow Road Residue",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Threshold Spark",
+          "excerpt": "A warm spark drifts near the foreground stones.",
+          "body": "These threshold sparks help stage the first view: they make the entry feel inhabited before the player reaches the main root court."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.8,
+          "speed": 0.48,
+          "hoverHeight": 0.3,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 1.7
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#ffd7a1",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.44,
+          "spriteIntensity": 0.95,
+          "lightIntensity": 2.1,
+          "lightDistance": 4.8,
+          "lightDecay": 1.45,
+          "twinkleSpeed": 1.6,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -8221,28 +8442,41 @@
         1.5423830960562719
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#b7e3ff",
-        "markerSize": 0.44,
-        "wanderEnabled": true,
-        "wanderRadius": 0.8,
-        "wanderSpeed": 0.44,
-        "hoverHeight": 0.28,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 1.6,
-        "twinkleSpeed": 1.6,
-        "lightIntensity": 2.1,
-        "lightDistance": 4.8,
-        "lightDecay": 1.45,
-        "spriteIntensity": 0.95,
-        "title": "Threshold Spark",
-        "author": "Rainbow Road Residue",
-        "location": "Rainbow Threshold",
-        "excerpt": "A cooler spark marks the other side of the approach.",
-        "body": "Together the threshold sparks subtly pull the eye forward and inward toward the tree.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-arrival-foreground-spark-right",
+        "archetype": "firefly",
+        "displayName": "Rainbow Road Residue",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Threshold Spark",
+          "excerpt": "A cooler spark marks the other side of the approach.",
+          "body": "Together the threshold sparks subtly pull the eye forward and inward toward the tree."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.8,
+          "speed": 0.44,
+          "hoverHeight": 0.28,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 1.6
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#b7e3ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.44,
+          "spriteIntensity": 0.95,
+          "lightIntensity": 2.1,
+          "lightDistance": 4.8,
+          "lightDecay": 1.45,
+          "twinkleSpeed": 1.6,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -8612,28 +8846,41 @@
         1.3771277643359572
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#ffd58f",
-        "markerSize": 0.5,
-        "wanderEnabled": true,
-        "wanderRadius": 0.8,
-        "wanderSpeed": 0.34,
-        "hoverHeight": 0.35,
-        "bobAmplitude": 0.12,
-        "bobSpeed": 1.05,
-        "twinkleSpeed": 1.2,
-        "lightIntensity": 2.4,
-        "lightDistance": 5.6,
-        "lightDecay": 1.5,
-        "spriteIntensity": 1,
-        "title": "Ascent Guide Â· Lower Bough",
-        "author": "Ascent Spirit",
-        "location": "Crown Ascent",
-        "excerpt": "A warm guide-light marks the beginning of the climb.",
-        "body": "This guide spirit helps new visitors read the path upward.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-crown-guide-low",
+        "archetype": "firefly",
+        "displayName": "Ascent Spirit",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Ascent Guide Â· Lower Bough",
+          "excerpt": "A warm guide-light marks the beginning of the climb.",
+          "body": "This guide spirit helps new visitors read the path upward."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.8,
+          "speed": 0.34,
+          "hoverHeight": 0.35,
+          "bobAmplitude": 0.12,
+          "bobSpeed": 1.05
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#ffd58f",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.5,
+          "spriteIntensity": 1,
+          "lightIntensity": 2.4,
+          "lightDistance": 5.6,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 1.2,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -8657,28 +8904,41 @@
         1.3771277643359572
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#b8eaff",
-        "markerSize": 0.5,
-        "wanderEnabled": true,
-        "wanderRadius": 1.1,
-        "wanderSpeed": 0.28,
-        "hoverHeight": 0.35,
-        "bobAmplitude": 0.12,
-        "bobSpeed": 1.05,
-        "twinkleSpeed": 1.2,
-        "lightIntensity": 2.4,
-        "lightDistance": 5.6,
-        "lightDecay": 1.5,
-        "spriteIntensity": 1,
-        "title": "Ascent Guide Â· Mid Bough",
-        "author": "Ascent Spirit",
-        "location": "Crown Ascent",
-        "excerpt": "A cooler guide-light appears higher up, where the route starts to wrap the trunk.",
-        "body": "The mid-bough guide marks the turning point where the ascent becomes a true spiral around the world-tree.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-crown-guide-mid",
+        "archetype": "firefly",
+        "displayName": "Ascent Spirit",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Ascent Guide Â· Mid Bough",
+          "excerpt": "A cooler guide-light appears higher up, where the route starts to wrap the trunk.",
+          "body": "The mid-bough guide marks the turning point where the ascent becomes a true spiral around the world-tree."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.1,
+          "speed": 0.28,
+          "hoverHeight": 0.35,
+          "bobAmplitude": 0.12,
+          "bobSpeed": 1.05
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#b8eaff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.5,
+          "spriteIntensity": 1,
+          "lightIntensity": 2.4,
+          "lightDistance": 5.6,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 1.2,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -8702,28 +8962,41 @@
         1.3771277643359572
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f6efb3",
-        "markerSize": 0.58,
-        "wanderEnabled": true,
-        "wanderRadius": 0.8,
-        "wanderSpeed": 0.2,
-        "hoverHeight": 0.35,
-        "bobAmplitude": 0.12,
-        "bobSpeed": 1.05,
-        "twinkleSpeed": 1.2,
-        "lightIntensity": 3.1,
-        "lightDistance": 5.6,
-        "lightDecay": 1.5,
-        "spriteIntensity": 1,
-        "title": "Ascent Guide Â· Crown Threshold",
-        "author": "Ascent Spirit",
-        "location": "Crown Ascent",
-        "excerpt": "Near the top, the guide-light slows, as if yielding the crown to older watchers.",
-        "body": "The upper guide spirit eases the handoff from traversal space to sacred crown space.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-crown-guide-high",
+        "archetype": "firefly",
+        "displayName": "Ascent Spirit",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Ascent Guide Â· Crown Threshold",
+          "excerpt": "Near the top, the guide-light slows, as if yielding the crown to older watchers.",
+          "body": "The upper guide spirit eases the handoff from traversal space to sacred crown space."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 0.8,
+          "speed": 0.2,
+          "hoverHeight": 0.35,
+          "bobAmplitude": 0.12,
+          "bobSpeed": 1.05
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#f6efb3",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.58,
+          "spriteIntensity": 1,
+          "lightIntensity": 3.1,
+          "lightDistance": 5.6,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 1.2,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -8796,28 +9069,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#dff8ff",
-        "markerSize": 0.52,
-        "wanderEnabled": true,
-        "wanderRadius": 1.8,
-        "wanderSpeed": 0.18,
-        "hoverHeight": 0.28,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 0.8,
-        "twinkleSpeed": 0.9,
-        "lightIntensity": 2.5,
-        "lightDistance": 7.5,
-        "lightDecay": 1.5,
-        "spriteIntensity": 0.95,
-        "title": "Horizon Beacon 1",
-        "author": "Outer Ring Witness",
-        "location": "Far Root Sea",
-        "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-        "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-horizon-firefly-1",
+        "archetype": "firefly",
+        "displayName": "Outer Ring Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Horizon Beacon 1",
+          "excerpt": "A distant watcher marks the farther edge of the world-root island.",
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.8,
+          "speed": 0.18,
+          "hoverHeight": 0.28,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 0.8
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#dff8ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.52,
+          "spriteIntensity": 0.95,
+          "lightIntensity": 2.5,
+          "lightDistance": 7.5,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 0.9,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -8841,28 +9127,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f1e7a9",
-        "markerSize": 0.52,
-        "wanderEnabled": true,
-        "wanderRadius": 1.8,
-        "wanderSpeed": 0.18,
-        "hoverHeight": 0.28,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 0.8,
-        "twinkleSpeed": 0.9,
-        "lightIntensity": 2.5,
-        "lightDistance": 7.5,
-        "lightDecay": 1.5,
-        "spriteIntensity": 0.95,
-        "title": "Horizon Beacon 2",
-        "author": "Outer Ring Witness",
-        "location": "Far Root Sea",
-        "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-        "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-horizon-firefly-2",
+        "archetype": "firefly",
+        "displayName": "Outer Ring Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Horizon Beacon 2",
+          "excerpt": "A distant watcher marks the farther edge of the world-root island.",
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.8,
+          "speed": 0.18,
+          "hoverHeight": 0.28,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 0.8
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#f1e7a9",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.52,
+          "spriteIntensity": 0.95,
+          "lightIntensity": 2.5,
+          "lightDistance": 7.5,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 0.9,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -8886,28 +9185,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#dff8ff",
-        "markerSize": 0.52,
-        "wanderEnabled": true,
-        "wanderRadius": 1.8,
-        "wanderSpeed": 0.18,
-        "hoverHeight": 0.28,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 0.8,
-        "twinkleSpeed": 0.9,
-        "lightIntensity": 2.5,
-        "lightDistance": 7.5,
-        "lightDecay": 1.5,
-        "spriteIntensity": 0.95,
-        "title": "Horizon Beacon 3",
-        "author": "Outer Ring Witness",
-        "location": "Far Root Sea",
-        "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-        "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-horizon-firefly-3",
+        "archetype": "firefly",
+        "displayName": "Outer Ring Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Horizon Beacon 3",
+          "excerpt": "A distant watcher marks the farther edge of the world-root island.",
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.8,
+          "speed": 0.18,
+          "hoverHeight": 0.28,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 0.8
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#dff8ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.52,
+          "spriteIntensity": 0.95,
+          "lightIntensity": 2.5,
+          "lightDistance": 7.5,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 0.9,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -8931,28 +9243,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f1e7a9",
-        "markerSize": 0.52,
-        "wanderEnabled": true,
-        "wanderRadius": 1.8,
-        "wanderSpeed": 0.18,
-        "hoverHeight": 0.28,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 0.8,
-        "twinkleSpeed": 0.9,
-        "lightIntensity": 2.5,
-        "lightDistance": 7.5,
-        "lightDecay": 1.5,
-        "spriteIntensity": 0.95,
-        "title": "Horizon Beacon 4",
-        "author": "Outer Ring Witness",
-        "location": "Far Root Sea",
-        "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-        "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-horizon-firefly-4",
+        "archetype": "firefly",
+        "displayName": "Outer Ring Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Horizon Beacon 4",
+          "excerpt": "A distant watcher marks the farther edge of the world-root island.",
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.8,
+          "speed": 0.18,
+          "hoverHeight": 0.28,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 0.8
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#f1e7a9",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.52,
+          "spriteIntensity": 0.95,
+          "lightIntensity": 2.5,
+          "lightDistance": 7.5,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 0.9,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -8976,28 +9301,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#dff8ff",
-        "markerSize": 0.52,
-        "wanderEnabled": true,
-        "wanderRadius": 1.8,
-        "wanderSpeed": 0.18,
-        "hoverHeight": 0.28,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 0.8,
-        "twinkleSpeed": 0.9,
-        "lightIntensity": 2.5,
-        "lightDistance": 7.5,
-        "lightDecay": 1.5,
-        "spriteIntensity": 0.95,
-        "title": "Horizon Beacon 5",
-        "author": "Outer Ring Witness",
-        "location": "Far Root Sea",
-        "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-        "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-horizon-firefly-5",
+        "archetype": "firefly",
+        "displayName": "Outer Ring Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Horizon Beacon 5",
+          "excerpt": "A distant watcher marks the farther edge of the world-root island.",
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.8,
+          "speed": 0.18,
+          "hoverHeight": 0.28,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 0.8
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#dff8ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.52,
+          "spriteIntensity": 0.95,
+          "lightIntensity": 2.5,
+          "lightDistance": 7.5,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 0.9,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -9021,28 +9359,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f1e7a9",
-        "markerSize": 0.52,
-        "wanderEnabled": true,
-        "wanderRadius": 1.8,
-        "wanderSpeed": 0.18,
-        "hoverHeight": 0.28,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 0.8,
-        "twinkleSpeed": 0.9,
-        "lightIntensity": 2.5,
-        "lightDistance": 7.5,
-        "lightDecay": 1.5,
-        "spriteIntensity": 0.95,
-        "title": "Horizon Beacon 6",
-        "author": "Outer Ring Witness",
-        "location": "Far Root Sea",
-        "excerpt": "A distant watcher marks the farther edge of the world-root island.",
-        "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-horizon-firefly-6",
+        "archetype": "firefly",
+        "displayName": "Outer Ring Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Horizon Beacon 6",
+          "excerpt": "A distant watcher marks the farther edge of the world-root island.",
+          "body": "These horizon beacons are there to make the outer edge of Yggdrasilâ€™s domain feel inhabited and deep, not abruptly finished."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.8,
+          "speed": 0.18,
+          "hoverHeight": 0.28,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 0.8
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#f1e7a9",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.52,
+          "spriteIntensity": 0.95,
+          "lightIntensity": 2.5,
+          "lightDistance": 7.5,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 0.9,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -9096,7 +9447,7 @@
     {
       "id": "yggdrasil-searoot-south",
       "name": "Sea Root SOUTH",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-terrain-group",
       "position": [
         2.2990735192896574,
@@ -9109,15 +9460,27 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        1.377127764335957,
+        1.3771277643359572,
+        1.3771277643359572
       ],
       "visible": true,
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          2.6,
+          4.4,
+          44,
+          12
+        ],
+        "color": "#3f2d1c",
+        "emissive": "#140d08",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.02,
+        "roughness": 0.98
+      },
       "generation": {
-        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element",
-        "lastBakedAssetUrl": "/generated/style-lab/sources/sea-root-south-2026-05-16T01-04-13-115Z/sea-root-south.glb",
-        "lastBakedAt": "2026-05-16T01:04:13.164Z"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
       },
       "collision": {
         "mode": "auto",
@@ -9127,9 +9490,6 @@
         "lodTier": "source",
         "friction": 0.7,
         "restitution": 0
-      },
-      "asset": {
-        "url": "/generated/style-lab/sources/sea-root-south-2026-05-16T01-04-13-115Z/sea-root-south.glb"
       }
     },
     {
@@ -10704,28 +11064,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#d9f2ff",
-        "markerSize": 0.5,
-        "wanderEnabled": true,
-        "wanderRadius": 1.2,
-        "wanderSpeed": 0.16,
-        "hoverHeight": 0.32,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 0.9,
-        "twinkleSpeed": 0.85,
-        "lightIntensity": 2.3,
-        "lightDistance": 6.5,
-        "lightDecay": 1.5,
-        "spriteIntensity": 0.92,
-        "title": "Outer Shoal North Beacon",
-        "author": "Sea Root Witness",
-        "location": "Outer Shoal North",
-        "excerpt": "A distant light hangs above the outer shoal.",
-        "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-outer-beacon-north",
+        "archetype": "firefly",
+        "displayName": "Sea Root Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Outer Shoal North Beacon",
+          "excerpt": "A distant light hangs above the outer shoal.",
+          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.2,
+          "speed": 0.16,
+          "hoverHeight": 0.32,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 0.9
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#d9f2ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.5,
+          "spriteIntensity": 0.92,
+          "lightIntensity": 2.3,
+          "lightDistance": 6.5,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 0.85,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -10930,28 +11303,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f4e4a2",
-        "markerSize": 0.5,
-        "wanderEnabled": true,
-        "wanderRadius": 1.2,
-        "wanderSpeed": 0.16,
-        "hoverHeight": 0.32,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 0.9,
-        "twinkleSpeed": 0.85,
-        "lightIntensity": 2.3,
-        "lightDistance": 6.5,
-        "lightDecay": 1.5,
-        "spriteIntensity": 0.92,
-        "title": "Outer Shoal South Beacon",
-        "author": "Sea Root Witness",
-        "location": "Outer Shoal South",
-        "excerpt": "A distant light hangs above the outer shoal.",
-        "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-outer-beacon-south",
+        "archetype": "firefly",
+        "displayName": "Sea Root Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Outer Shoal South Beacon",
+          "excerpt": "A distant light hangs above the outer shoal.",
+          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.2,
+          "speed": 0.16,
+          "hoverHeight": 0.32,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 0.9
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#f4e4a2",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.5,
+          "spriteIntensity": 0.92,
+          "lightIntensity": 2.3,
+          "lightDistance": 6.5,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 0.85,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -11156,28 +11542,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#d9f2ff",
-        "markerSize": 0.5,
-        "wanderEnabled": true,
-        "wanderRadius": 1.2,
-        "wanderSpeed": 0.16,
-        "hoverHeight": 0.32,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 0.9,
-        "twinkleSpeed": 0.85,
-        "lightIntensity": 2.3,
-        "lightDistance": 6.5,
-        "lightDecay": 1.5,
-        "spriteIntensity": 0.92,
-        "title": "Outer Shoal East Beacon",
-        "author": "Sea Root Witness",
-        "location": "Outer Shoal East",
-        "excerpt": "A distant light hangs above the outer shoal.",
-        "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-outer-beacon-east",
+        "archetype": "firefly",
+        "displayName": "Sea Root Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Outer Shoal East Beacon",
+          "excerpt": "A distant light hangs above the outer shoal.",
+          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.2,
+          "speed": 0.16,
+          "hoverHeight": 0.32,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 0.9
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#d9f2ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.5,
+          "spriteIntensity": 0.92,
+          "lightIntensity": 2.3,
+          "lightDistance": 6.5,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 0.85,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -11401,28 +11800,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f4e4a2",
-        "markerSize": 0.5,
-        "wanderEnabled": true,
-        "wanderRadius": 1.2,
-        "wanderSpeed": 0.16,
-        "hoverHeight": 0.32,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 0.9,
-        "twinkleSpeed": 0.85,
-        "lightIntensity": 2.3,
-        "lightDistance": 6.5,
-        "lightDecay": 1.5,
-        "spriteIntensity": 0.92,
-        "title": "Outer Shoal West Beacon",
-        "author": "Sea Root Witness",
-        "location": "Outer Shoal West",
-        "excerpt": "A distant light hangs above the outer shoal.",
-        "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-outer-beacon-west",
+        "archetype": "firefly",
+        "displayName": "Sea Root Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Outer Shoal West Beacon",
+          "excerpt": "A distant light hangs above the outer shoal.",
+          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.2,
+          "speed": 0.16,
+          "hoverHeight": 0.32,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 0.9
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#f4e4a2",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.5,
+          "spriteIntensity": 0.92,
+          "lightIntensity": 2.3,
+          "lightDistance": 6.5,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 0.85,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -11646,28 +12058,41 @@
         1.377127764335957
       ],
       "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#d9f2ff",
-        "markerSize": 0.5,
-        "wanderEnabled": true,
-        "wanderRadius": 1.2,
-        "wanderSpeed": 0.16,
-        "hoverHeight": 0.32,
-        "bobAmplitude": 0.08,
-        "bobSpeed": 0.9,
-        "twinkleSpeed": 0.85,
-        "lightIntensity": 2.3,
-        "lightDistance": 6.5,
-        "lightDecay": 1.5,
-        "spriteIntensity": 0.92,
-        "title": "Broken Root Islet Beacon",
-        "author": "Sea Root Witness",
-        "location": "Broken Root Islet",
-        "excerpt": "A distant light hangs above the outer shoal.",
-        "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach.",
-        "selectionLightBoost": 0.65,
-        "lightBurstSpriteBoost": 0.18
+      "npc": {
+        "id": "yggdrasil-outer-beacon-nw",
+        "archetype": "firefly",
+        "displayName": "Sea Root Witness",
+        "interaction": {
+          "mode": "click",
+          "prompt": "Listen"
+        },
+        "conversation": {
+          "mode": "read-only",
+          "title": "Broken Root Islet Beacon",
+          "excerpt": "A distant light hangs above the outer shoal.",
+          "body": "These outer beacons make the sea around Yggdrasil feel inhabited and give the perimeter a convincing mythic reach."
+        },
+        "behavior": {
+          "type": "hover-wander",
+          "radius": 1.2,
+          "speed": 0.16,
+          "hoverHeight": 0.32,
+          "bobAmplitude": 0.08,
+          "bobSpeed": 0.9
+        },
+        "presentation": {
+          "type": "firefly",
+          "color": "#d9f2ff",
+          "secondaryColor": "#f5f1a8",
+          "size": 0.5,
+          "spriteIntensity": 0.92,
+          "lightIntensity": 2.3,
+          "lightDistance": 6.5,
+          "lightDecay": 1.5,
+          "twinkleSpeed": 0.85,
+          "selectionLightBoost": 0.65,
+          "lightBurstSpriteBoost": 0.18
+        }
       }
     },
     {
@@ -11706,7 +12131,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:faaa88d2df1a2c820395a9e71160890a571fdc88fdefdd4076f232605ad4404f:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+        "colliderCacheKey": "mesh-collision-manager-v2:ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -11816,22 +12241,7 @@
         "lastBakedAt": "2026-04-25T02:24:43.329Z"
       },
       "lastBakedAssetUrl": "/generated/hunyuan3d/yggdrasil-world-tree/yggdrasil-world-tree-merged-2026-04-25T02-07-36-925Z.glb",
-      "lastBakedAt": "2026-04-25T02:07:36.927Z",
-      "material": {
-        "painterly": {
-          "enabled": true,
-          "preset": "world-tree-concept",
-          "strength": 0.82,
-          "brushScale": 0.24,
-          "paperGrain": 0.16,
-          "colorBleed": 0.52,
-          "edgeInk": 0.18,
-          "shadowColor": "#17202a",
-          "midColor": "#667448",
-          "highlightColor": "#dcb96a",
-          "coolColor": "#2a4d66"
-        }
-      }
+      "lastBakedAt": "2026-04-25T02:07:36.927Z"
     },
     {
       "id": "yggdrasil-crown-ascent-merged",

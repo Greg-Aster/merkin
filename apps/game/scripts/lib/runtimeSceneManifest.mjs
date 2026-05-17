@@ -16,6 +16,7 @@ import {
   createLevelRuntimeReadinessContract,
   getActorRuntimeAssetUrl as getActorRuntimeAssetUrlCore,
 } from '../../src/threlte/engine/levelRuntimeReadinessContractCore.mjs'
+import { validateNpcLevelContract } from '../../src/threlte/engine/npcValidationCore.mjs'
 import {
   getMeshCollisionPolicyDescriptor,
   validateGeneratedCollisionProduct,
@@ -292,6 +293,7 @@ function getCollision(node, scene, options = {}) {
 
 function toActor(scene, node, options = {}) {
   const collision = getCollision(node, scene, options)
+  const npc = node.npc ?? null
 
   return {
     id: node.id,
@@ -346,20 +348,29 @@ function toActor(scene, node, options = {}) {
           data: node.gameplay,
         }
       : undefined,
-    interaction: node.gameplay
+    npc: npc ? clone(npc) : undefined,
+    interaction: npc
       ? {
           kind:
-            node.gameplay.type === 'portal'
-              ? 'portal'
-              : node.gameplay.type === 'note'
-                ? 'note'
-                : node.gameplay.type === 'firefly'
-                  ? 'conversation'
-                  : 'custom',
-          targetId: node.gameplay.targetLevelId,
-          data: node.gameplay,
+            npc.interaction?.mode === 'disabled' ||
+            npc.conversation?.mode === 'none'
+              ? 'custom'
+              : 'conversation',
+          targetId: npc.id,
+          data: clone(npc),
         }
-      : undefined,
+      : node.gameplay
+        ? {
+            kind:
+              node.gameplay.type === 'portal'
+                ? 'portal'
+                : node.gameplay.type === 'note'
+                  ? 'note'
+                  : 'custom',
+            targetId: node.gameplay.targetLevelId,
+            data: node.gameplay,
+          }
+        : undefined,
     audioRegion:
       node.gameplay?.type === 'audio-region' && node.gameplay.audioTrack
         ? {
@@ -517,6 +528,14 @@ function getWalkabilityContractIssues(level, actors, runtimeReadinessContract) {
   return { errors, warnings }
 }
 
+function getMaxFireflyNpcCount(level, contract) {
+  const authoredBudget =
+    level.settings?.level?.graphicsBudget?.maxGameplayFireflies
+  if (Number.isFinite(authoredBudget)) return authoredBudget
+
+  return contract.maxFireflyNpcCount
+}
+
 export function createLevelBuildReport(level, options = {}) {
   const contract = getLevelRuntimeContract(level.id)
   const runtimeReadinessContract = createLevelRuntimeReadinessContract(level, {
@@ -537,7 +556,8 @@ export function createLevelBuildReport(level, options = {}) {
   let assetActorCount = 0
   let primitiveActorCount = 0
   let neverCullActorCount = 0
-  let gameplayFireflyActorCount = 0
+  let npcActorCount = 0
+  let fireflyNpcActorCount = 0
   let defaultCollisionActorCount = 0
   let physicsActorCount = 0
   let trimeshActorCount = 0
@@ -552,7 +572,6 @@ export function createLevelBuildReport(level, options = {}) {
       'runtimeAssets.requiredAssetActorIds is no longer supported; use runtimeAssets.requiredRenderActorIds.',
     )
   }
-
   for (const actor of level.actors) {
     if (actorIds.has(actor.id)) duplicateActorIds.add(actor.id)
     actorIds.add(actor.id)
@@ -561,7 +580,6 @@ export function createLevelBuildReport(level, options = {}) {
     if (actor.kind === 'asset') assetActorCount += 1
     if (actor.kind === 'primitive') primitiveActorCount += 1
     if (actor.render?.cullingPolicy === 'never') neverCullActorCount += 1
-    if (actor.gameplay?.type === 'firefly') gameplayFireflyActorCount += 1
     if (actor.kind === 'asset' && !actor.render?.asset?.url) {
       errors.push(`Asset actor "${actor.id}" is missing a runtime asset URL.`)
     }
@@ -666,6 +684,16 @@ export function createLevelBuildReport(level, options = {}) {
   )
   errors.push(...walkabilityIssues.errors)
   warnings.push(...walkabilityIssues.warnings)
+
+  const npcReport = validateNpcLevelContract(level, {
+    legacyFireflySeverity: 'error',
+    maxFireflyNpcCount: getMaxFireflyNpcCount(level, contract),
+  })
+  npcActorCount = npcReport.diagnostics.npcActorCount
+  fireflyNpcActorCount = npcReport.diagnostics.fireflyNpcActorCount
+  errors.push(...npcReport.errors)
+  warnings.push(...npcReport.warnings)
+
   if (defaultCollisionActorCount > contract.maxDefaultCollisionActors) {
     errors.push(
       `${defaultCollisionActorCount} actors are using implicit default collision; contract allows ${contract.maxDefaultCollisionActors}.`,
@@ -694,19 +722,14 @@ export function createLevelBuildReport(level, options = {}) {
       `${neverCullActorCount} never-cull render actors exceed contract budget of ${contract.maxNeverCullActorCount}.`,
     )
   }
-  if (gameplayFireflyActorCount > contract.maxGameplayFireflyCount) {
-    warnings.push(
-      `${gameplayFireflyActorCount} firefly gameplay actors exceed contract budget of ${contract.maxGameplayFireflyCount}. Use chunked/pooled marker presentation.`,
-    )
-  }
-
   return {
     levelId: level.id,
     actorCount: level.actors.length,
     assetActorCount,
     primitiveActorCount,
     neverCullActorCount,
-    gameplayFireflyActorCount,
+    npcActorCount,
+    fireflyNpcActorCount,
     physicsActorCount,
     trimeshActorCount,
     detailMeshActorCount,

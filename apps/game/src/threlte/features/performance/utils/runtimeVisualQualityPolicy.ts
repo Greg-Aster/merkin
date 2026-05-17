@@ -22,6 +22,10 @@ export interface RuntimePostProcessingPolicy {
   ambientOcclusionMinDistance: number
   ambientOcclusionMaxDistance: number
   depthFogEnabled: boolean
+  kuwaharaEnabled: boolean
+  kuwaharaRadius: number
+  kuwaharaMix: number
+  kuwaharaResolutionScale: number
   vignetteStrength: number
 }
 
@@ -74,6 +78,8 @@ export function resolveRuntimePostProcessingPolicy({
     allowedPasses.has('ambient-occlusion')
   const profileAllowsDepthFog =
     !profilePost || allowedPasses.size === 0 || allowedPasses.has('depth-fog')
+  const profileAllowsKuwahara =
+    !profilePost || allowedPasses.size === 0 || allowedPasses.has('kuwahara')
   const colorSaturation = clampNumber(grading.saturation, 0.35, 1.85)
   const colorContrast = clampNumber(grading.contrast, 0.55, 1.65)
   const colorWarmth = clampNumber(grading.warmth, 0.55, 1.45)
@@ -98,6 +104,16 @@ export function resolveRuntimePostProcessingPolicy({
       (atmosphere?.distanceFog.enabled && atmosphere.distanceFog.density > 0) ||
         (atmosphere?.heightFog.enabled && atmosphere.heightFog.density > 0),
     )
+  const kuwahara = profilePost?.kuwahara
+  const kuwaharaRadius = Math.round(clampNumber(kuwahara?.radius ?? 2, 1, 4))
+  const kuwaharaMix = clampNumber(kuwahara?.mix ?? 0.55, 0, 1)
+  const kuwaharaResolutionScale = clampNumber(
+    kuwahara?.resolutionScale ?? 0.75,
+    0.35,
+    1,
+  )
+  const kuwaharaEnabled =
+    profileAllowsPost && profileAllowsKuwahara && (kuwahara?.enabled ?? false)
   const styleBloomIntensity = atmosphereEnabled
     ? atmosphere?.bloom.intensity ?? visualStyle.screenFx.bloomIntensity
     : 0
@@ -155,6 +171,10 @@ export function resolveRuntimePostProcessingPolicy({
       ? clampNumber(ambientOcclusion?.maxDistance ?? 0.12, 0.02, 0.35)
       : 0.12,
     depthFogEnabled,
+    kuwaharaEnabled,
+    kuwaharaRadius: kuwaharaEnabled ? kuwaharaRadius : 0,
+    kuwaharaMix: kuwaharaEnabled ? kuwaharaMix : 0,
+    kuwaharaResolutionScale: kuwaharaEnabled ? kuwaharaResolutionScale : 0.75,
     vignetteStrength: clampNumber(
       profileAllowsPost && profileAllowsVignette
         ? visualStyle.screenFx.vignetteStrength *

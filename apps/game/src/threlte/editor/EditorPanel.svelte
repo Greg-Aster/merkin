@@ -2073,7 +2073,7 @@ const createQuickNodeActions = [
   },
   {
     label: 'NPC Firefly',
-    action: () => createController.addPrimitivePrefab('firefly'),
+    action: () => createController.addPrimitivePrefab('npc-firefly'),
   },
   {
     label: 'Audio Region',
@@ -2158,6 +2158,12 @@ function getSimilarNodeIds(node: EditorSceneNode | null) {
       .map(candidate => candidate.id)
   }
 
+  if (node.npc?.archetype) {
+    return editorNodes
+      .filter(candidate => candidate.npc?.archetype === node.npc?.archetype)
+      .map(candidate => candidate.id)
+  }
+
   if (node.gameplay?.type) {
     return editorNodes
       .filter(candidate => candidate.gameplay?.type === node.gameplay?.type)
@@ -2173,6 +2179,7 @@ function getSimilarNodeLabel(node: EditorSceneNode | null) {
   if (!node) return 'matching nodes'
   if (node.prefab?.type) return `${node.prefab.type} prefabs`
   if (node.asset?.url) return 'matching asset instances'
+  if (node.npc?.archetype) return `${node.npc.archetype} NPCs`
   if (node.gameplay?.type) return `${node.gameplay.type} helpers`
   return `${node.kind} nodes`
 }

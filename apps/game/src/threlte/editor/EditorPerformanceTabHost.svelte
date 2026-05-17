@@ -162,12 +162,12 @@ $: performanceMetrics = [
       runtimeContract.maxNeverCullActorCount,
   },
   {
-    label: 'Fireflies',
-    value: buildReport?.gameplayFireflyActorCount ?? 0,
-    budget: runtimeContract.maxGameplayFireflyCount,
+    label: 'Firefly NPCs',
+    value: buildReport?.fireflyNpcActorCount ?? 0,
+    budget: runtimeContract.maxFireflyNpcCount,
     over:
-      (buildReport?.gameplayFireflyActorCount ?? 0) >
-      runtimeContract.maxGameplayFireflyCount,
+      (buildReport?.fireflyNpcActorCount ?? 0) >
+      runtimeContract.maxFireflyNpcCount,
   },
 ]
 $: performanceSystems = [

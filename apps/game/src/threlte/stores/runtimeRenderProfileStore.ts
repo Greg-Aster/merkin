@@ -49,6 +49,9 @@ export interface ResolvedRuntimeRenderProfile {
     ambientOcclusion: Required<
       NonNullable<RenderProfilePostProcessingSettings['ambientOcclusion']>
     >
+    kuwahara: Required<
+      NonNullable<RenderProfilePostProcessingSettings['kuwahara']>
+    >
   }
   visualBookmarks: RenderProfileVisualBookmark[]
 }
@@ -101,6 +104,12 @@ const DEFAULT_RENDER_PROFILE: ResolvedRuntimeRenderProfile = {
       minDistance: 0.006,
       maxDistance: 0.12,
     },
+    kuwahara: {
+      enabled: false,
+      radius: 2,
+      mix: 0.55,
+      resolutionScale: 0.75,
+    },
     bloom: {
       intensity: 1,
       threshold: 0.86,
@@ -133,6 +142,7 @@ function mergePostProcessingSettings(
       base.ambientOcclusion,
       override?.ambientOcclusion,
     ),
+    kuwahara: mergeRecord(base.kuwahara, override?.kuwahara),
   }
 }
 

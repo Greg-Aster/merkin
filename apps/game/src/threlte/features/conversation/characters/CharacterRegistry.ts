@@ -1,23 +1,58 @@
 /**
  * Modern Character Registry with Auto-Discovery
  *
- * ECS-aligned registry that dynamically loads character definitions
- * No manual imports or mappings required - just drop character files in /characters/
+ * ECS-aligned registry that dynamically loads character definitions from the
+ * shared canonical profile manifest.
  */
 
+import { normalizeConversationProfileId } from '../../../engine/npcValidationCore.mjs'
+import { CANONICAL_CONVERSATION_PROFILE_IDS } from './profileManifest.mjs'
 import type { CharacterDefinition } from './types'
-const isDev = import.meta.env.DEV
 
 type CharacterModule = {
   character: CharacterDefinition
 }
 
-const characterDefinitionModules = import.meta.glob<CharacterModule>(
-  './definitions/*.ts',
-)
+type ImportMetaWithVite = ImportMeta & {
+  env?: { DEV?: boolean }
+  glob?: <T>(pattern: string) => Record<string, () => Promise<T>>
+}
+
+const importMeta = import.meta as ImportMetaWithVite
+const isDev = Boolean(importMeta.env?.DEV)
+
+const nodeCharacterDefinitionModules: Record<
+  string,
+  () => Promise<CharacterModule>
+> = {
+  './definitions/ava-chen.ts': () => import('./definitions/ava-chen.ts'),
+  './definitions/eleanor-kim.ts': () => import('./definitions/eleanor-kim.ts'),
+  './definitions/elara-voss.ts': () => import('./definitions/elara-voss.ts'),
+  './definitions/gregory-aster.ts': () =>
+    import('./definitions/gregory-aster.ts'),
+  './definitions/helena-zhao.ts': () => import('./definitions/helena-zhao.ts'),
+  './definitions/kaelen-vance.ts': () =>
+    import('./definitions/kaelen-vance.ts'),
+  './definitions/maya-okafor.ts': () => import('./definitions/maya-okafor.ts'),
+  './definitions/merkin.ts': () => import('./definitions/merkin.ts'),
+  './definitions/soren-klein.ts': () => import('./definitions/soren-klein.ts'),
+  './definitions/vex-kanarath.ts': () =>
+    import('./definitions/vex-kanarath.ts'),
+}
+
+const characterDefinitionModules =
+  typeof importMeta.glob === 'function'
+    ? importMeta.glob<CharacterModule>('./definitions/*.ts')
+    : nodeCharacterDefinitionModules
 
 function getCharacterIdFromModulePath(path: string) {
   return path.replace(/^\.\/definitions\//, '').replace(/\.ts$/, '')
+}
+
+function getDiscoveredCharacterIds() {
+  return Object.keys(characterDefinitionModules)
+    .map(getCharacterIdFromModulePath)
+    .sort()
 }
 
 export class CharacterRegistry {
@@ -26,18 +61,30 @@ export class CharacterRegistry {
   private _availableCharacterIds: string[] | null = null
 
   /**
-   * Get list of all available character IDs by scanning the definitions directory
+   * Get list of all available character IDs from the shared profile manifest.
    */
   async getAvailableCharacterIds(): Promise<string[]> {
     if (this._availableCharacterIds) {
       return this._availableCharacterIds
     }
 
-    this._availableCharacterIds = Object.keys(characterDefinitionModules)
-      .map(getCharacterIdFromModulePath)
-      .sort()
+    this._availableCharacterIds = [...CANONICAL_CONVERSATION_PROFILE_IDS].sort()
 
     if (isDev) {
+      const discoveredCharacterIds = getDiscoveredCharacterIds()
+      const manifestIds = new Set(this._availableCharacterIds)
+      const missingManifestIds = discoveredCharacterIds.filter(
+        id => !manifestIds.has(id),
+      )
+      const missingDefinitionIds = this._availableCharacterIds.filter(
+        id => !characterDefinitionModules[`./definitions/${id}.ts`],
+      )
+      if (missingManifestIds.length > 0 || missingDefinitionIds.length > 0) {
+        console.warn('Character profile manifest is out of sync', {
+          missingManifestIds,
+          missingDefinitionIds,
+        })
+      }
       console.log(
         `📚 Discovered ${this._availableCharacterIds.length} available characters`,
       )
@@ -46,83 +93,10 @@ export class CharacterRegistry {
   }
 
   /**
-   * Normalize character ID to handle various formats
-   * firefly_elara_elara -> elara-voss
-   * firefly_elara -> elara-voss
-   * dr-elara-voss -> elara-voss
-   * Gregory-aster -> gregory-aster
-   */
-  private normalizeId(characterId: string | undefined): string {
-    if (!characterId) {
-      if (isDev) {
-        console.warn('⚠️ normalizeId called with undefined characterId')
-      }
-      return ''
-    }
-
-    // Convert to lowercase for case-insensitive handling
-    const lowerCharacterId = characterId.toLowerCase()
-
-    // Handle duplicate ID patterns (firefly_name_name -> firefly_name)
-    const duplicatePattern = /^firefly_(\w+)_\1$/
-    const duplicateMatch = lowerCharacterId.match(duplicatePattern)
-    if (duplicateMatch) {
-      return this.normalizeId(`firefly_${duplicateMatch[1]}`)
-    }
-
-    // Handle firefly_ prefix patterns
-    if (lowerCharacterId.startsWith('firefly_')) {
-      const name = lowerCharacterId.replace('firefly_', '')
-      return this.mapNameToId(name)
-    }
-
-    // Handle dr- prefix patterns
-    if (lowerCharacterId.startsWith('dr-')) {
-      return lowerCharacterId
-    }
-
-    // Handle plain names (including properly formatted IDs like gregory-aster)
-    return this.mapNameToId(lowerCharacterId)
-  }
-
-  /**
-   * Map character names to their canonical file IDs
-   */
-  private mapNameToId(name: string): string {
-    // Convert to lowercase for case-insensitive matching
-    const lowerName = name.toLowerCase()
-
-    const nameMapping: Record<string, string> = {
-      ava: 'ava-chen',
-      helena: 'helena-zhao',
-      elara: 'elara-voss',
-      eleanor: 'eleanor-kim',
-      gregory: 'gregory-aster',
-      kaelen: 'kaelen-vance',
-      soren: 'soren-klein',
-      vex: 'vex-kanarath',
-      merkin: 'merkin',
-      maya: 'maya-okafor',
-      // Also handle full IDs that are already formatted correctly
-      'gregory-aster': 'gregory-aster',
-      'ava-chen': 'ava-chen',
-      'helena-zhao': 'helena-zhao',
-      'elara-voss': 'elara-voss',
-      'eleanor-kim': 'eleanor-kim',
-      'kaelen-vance': 'kaelen-vance',
-      'soren-klein': 'soren-klein',
-      'vex-kanarath': 'vex-kanarath',
-      'maya-okafor': 'maya-okafor',
-    }
-
-    return nameMapping[lowerName] || lowerName
-  }
-
-  /**
    * Get character definition with auto-loading
    */
   async getCharacter(characterId: string): Promise<CharacterDefinition | null> {
-    const normalizedId = this.normalizeId(characterId)
+    const normalizedId = normalizeConversationProfileId(characterId)
 
     // Return cached if already loaded
     if (this.characters.has(normalizedId)) {
@@ -166,14 +140,15 @@ export class CharacterRegistry {
    * Check if character exists (without loading)
    */
   async hasCharacter(characterId: string): Promise<boolean> {
-    const normalizedId = this.normalizeId(characterId)
+    const normalizedId = normalizeConversationProfileId(characterId)
 
     if (this.loaded.has(normalizedId)) {
       return true
     }
 
-    return Boolean(
-      characterDefinitionModules[`./definitions/${normalizedId}.ts`],
+    return (
+      CANONICAL_CONVERSATION_PROFILE_IDS.includes(normalizedId) &&
+      Boolean(characterDefinitionModules[`./definitions/${normalizedId}.ts`])
     )
   }
 

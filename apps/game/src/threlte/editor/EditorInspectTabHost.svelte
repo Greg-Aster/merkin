@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
+import type { EditorNpcPatch } from './editorNpcControls'
 import type {
   EditorCollisionLodSourceTier,
   EditorCollisionMode,
@@ -114,6 +115,7 @@ export let onGameplayBooleanChange: (field: any, value: boolean) => void =
   () => {}
 export let onGameplayNumericChange: (field: any, value: string) => void =
   () => {}
+export let onNpcChange: (patch: EditorNpcPatch) => void = () => {}
 export let onTransformChange: (
   field: 'position' | 'rotation' | 'scale',
   index: number,

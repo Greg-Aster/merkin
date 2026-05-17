@@ -25,6 +25,7 @@ $: childActors = actors.filter(child => {
   {collisionOnly}
   on:portalTransition
   on:noteRead
+  on:npcInteraction
 >
   {#each childActors as child (child.id)}
     <svelte:self
@@ -37,6 +38,7 @@ $: childActors = actors.filter(child => {
       {collisionOnly}
       on:portalTransition
       on:noteRead
+      on:npcInteraction
     />
   {/each}
 </RuntimeActorNode>

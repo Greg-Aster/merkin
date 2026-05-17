@@ -26,6 +26,10 @@ import {
   conversationUIState,
   isConversationActive,
 } from './features/conversation/runtime'
+import {
+  type RuntimeNpcInteractionEvent,
+  startNpcConversationFromComponent,
+} from './features/npc'
 
 import MobileEnhancements from './ui/MobileEnhancements.svelte'
 
@@ -731,6 +735,15 @@ function handlePlayerLightBurst(detail: any) {
   dispatch('lightBurst', detail)
 }
 
+function handleNpcInteraction(detail: RuntimeNpcInteractionEvent) {
+  void startNpcConversationFromComponent({
+    npc: detail.npc,
+    actorId: detail.actorId,
+    levelId: detail.levelId,
+  })
+  dispatch('npcInteraction', detail)
+}
+
 // Lifecycle
 onMount(async () => {
   debugLog('🎮 Starting MEGAMEAL Game with Threlte...')
@@ -820,6 +833,7 @@ onDestroy(() => {
         on:noteRead={(e) => { activeLevelNote = e.detail }}
         on:portalTransition={(e) => { transitionToLevel(e.detail.levelId) }}
         on:requestLevelReturn={(e) => { handleLevelReturnRequest(e.detail) }}
+        on:npcInteraction={(e) => handleNpcInteraction(e.detail)}
       />
     {/if}
   

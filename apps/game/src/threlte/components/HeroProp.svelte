@@ -11,6 +11,7 @@ import {
 } from '../engine/runtimeAssetManifest'
 import { traceRuntimeCulling } from '../engine/runtimeCullingTrace'
 import type { SceneMaterialData } from '../engine/sceneDocumentTypes'
+import ManagedLight from '../features/lighting/ManagedLight.svelte'
 import {
   qualityLevelStore,
   qualitySettingsStore,
@@ -568,6 +569,14 @@ onDestroy(() => {
       <T.BoxGeometry args={[1.6, 1.6, 1.6]} />
       <T.MeshBasicMaterial color="#ff3355" wireframe={true} transparent opacity={0.95} />
     </T.Mesh>
-    <T.PointLight position={[0, 2.2, 0]} color="#ff3355" intensity={1.2} distance={6} decay={2} />
+    <ManagedLight
+      id={`hero-prop-load-error-${url}`}
+      ownerId={`hero-prop-load-error-${url}`}
+      position={[0, 2.2, 0]}
+      color="#ff3355"
+      intensity={1.2}
+      distance={6}
+      decay={2}
+    />
   </T.Group>
 {/if}

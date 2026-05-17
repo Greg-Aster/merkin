@@ -6,6 +6,7 @@ import {
   fitGeneratedAssetToSource,
 } from './editorGeneratedAssetApplication'
 import { getDefaultChildPointLightPosition } from './editorLightPlacement'
+import { type EditorNpcPatch, applyEditorNpcPatch } from './editorNpcControls'
 import type {
   EditorCollisionLodSourceTier,
   EditorCollisionMode,
@@ -1517,15 +1518,9 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
-  function updateGameplayBooleanField(field: 'wanderEnabled', value: boolean) {
+  function updateGameplayBooleanField(_field: never, _value: boolean) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.gameplay) return
-    deps.patchNode(selectedNode.id, {
-      gameplay: {
-        ...selectedNode.gameplay,
-        [field]: value,
-      },
-    })
   }
 
   function updateGameplayNumericField(
@@ -1538,18 +1533,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       | 'mistLayers'
       | 'mistSpacing'
       | 'mistScale'
-      | 'mistDriftSpeed'
-      | 'wanderRadius'
-      | 'wanderSpeed'
-      | 'hoverHeight'
-      | 'bobAmplitude'
-      | 'bobSpeed'
-      | 'twinkleSpeed'
-      | 'lightIntensity'
-      | 'lightDistance'
-      | 'lightDecay'
-      | 'spriteIntensity'
-      | 'lightBurstBoost',
+      | 'mistDriftSpeed',
     value: string,
   ) {
     const selectedNode = deps.getSelectedNode()
@@ -1561,6 +1545,14 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
         ...selectedNode.gameplay,
         [field]: numeric,
       },
+    })
+  }
+
+  function updateNpcField(patch: EditorNpcPatch) {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode?.npc) return
+    deps.patchNode(selectedNode.id, {
+      npc: applyEditorNpcPatch(selectedNode.npc, patch),
     })
   }
 
@@ -1634,5 +1626,6 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     updateGameplayField,
     updateGameplayBooleanField,
     updateGameplayNumericField,
+    updateNpcField,
   }
 }

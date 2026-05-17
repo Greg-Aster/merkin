@@ -15,6 +15,7 @@ export type {
   EditorNodeCollisionProductData,
   EditorNodeLegacyCollisionCompatibility,
   EditorNodeKind,
+  EditorNpcData,
   EditorNodePhysicsData,
   EditorPrefabData,
   EditorPrefabType,

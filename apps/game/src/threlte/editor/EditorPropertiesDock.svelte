@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import EditorPropertiesShelf from './EditorPropertiesShelf.svelte'
+import type { EditorNpcPatch } from './editorNpcControls'
 import type {
   EditorCollisionLodSourceTier,
   EditorCollisionMode,
@@ -139,6 +140,7 @@ export let onGameplayNumericChange: (field: any, value: string) => void =
   () => {}
 export let onGameplayBooleanChange: (field: any, value: boolean) => void =
   () => {}
+export let onNpcChange: (patch: EditorNpcPatch) => void = () => {}
 export let onStyleDescriptorChange: (value: string) => void = () => {}
 export let onApplyGeneratedVariant: (url: string) => void = () => {}
 export let onOpenSelectedInBlender: () => void = () => {}
@@ -258,6 +260,7 @@ export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
       {onGameplayFieldChange}
       {onGameplayNumericChange}
       {onGameplayBooleanChange}
+      {onNpcChange}
       {onStyleDescriptorChange}
       onSelectGeneratedVariant={(url) => { selectedGeneratedVariantUrl = url }}
       {onApplyGeneratedVariant}

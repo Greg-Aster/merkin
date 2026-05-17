@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-14T21:36:47.492Z",
-  "generatorVersion": "mesh-collision-manager-v1",
+  "generatedAt": "2026-05-17T02:20:30.488Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "sci-fi-room",
   "sourceActorId": "sci-fi-anomaly-d",
   "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
@@ -11,12 +11,19 @@
     "algorithm": "sha256",
     "value": "968aaf4671ee2fba71361f6737386d8a2d714096029790e79be05625c20574e0"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "51d9cbb133cc34571f2093668a5cfa389d99651ec94d3eda5891bc3832667e4c"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-d.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-d.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-d.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v1:968aaf4671ee2fba71361f6737386d8a2d714096029790e79be05625c20574e0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
-  "triangleCount": 820,
-  "vertexCount": 561,
+  "colliderCacheKey": "mesh-collision-manager-v2:51d9cbb133cc34571f2093668a5cfa389d99651ec94d3eda5891bc3832667e4c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 267,
+  "vertexCount": 278,
   "bounds": {
     "min": [
       -1.340000033378601,
@@ -32,6 +39,28 @@
       2.680000066757202,
       2.680000066757202,
       1.1909111738204956
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -32767,
+      -32767
+    ],
+    "max": [
+      32767,
+      32767,
+      32767
+    ],
+    "size": [
+      65534,
+      65534,
+      65534
     ],
     "center": [
       0,
@@ -178,34 +207,45 @@
       "algorithm": "sha256",
       "value": "968aaf4671ee2fba71361f6737386d8a2d714096029790e79be05625c20574e0"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "51d9cbb133cc34571f2093668a5cfa389d99651ec94d3eda5891bc3832667e4c"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "sci-fi-room",
       "nodeId": "sci-fi-anomaly-d",
       "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.low.glb",
+      "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
       "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-14T21:36:47.492Z"
+    "generatedAt": "2026-05-17T02:20:30.488Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 5000
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
   },
   "collisionProduct": {
     "actorId": "sci-fi-anomaly-d",
+    "cacheKey": "mesh-collision-manager-v1:968aaf4671ee2fba71361f6737386d8a2d714096029790e79be05625c20574e0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
     "mode": "auto",
     "productId": "sci-fi-anomaly-d:auto:simplifiedMesh",
-    "generatorVersion": "mesh-collision-manager-v1",
+    "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "prefab",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "968aaf4671ee2fba71361f6737386d8a2d714096029790e79be05625c20574e0"
+      "value": "51d9cbb133cc34571f2093668a5cfa389d99651ec94d3eda5891bc3832667e4c"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
@@ -213,7 +253,7 @@
     },
     "policyFingerprint": {
       "algorithm": "sha256",
-      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+      "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
     },
     "shape": "trimesh",
     "localBounds": {
@@ -240,16 +280,16 @@
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-d.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-d.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
-    "generatedAt": "2026-05-14T21:36:47.492Z",
-    "triangleCount": 820,
-    "vertexCount": 561,
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
+    "triangleCount": 267,
+    "vertexCount": 278,
     "triangleBudget": 5000
   },
   "simplification": {
     "requested": false,
     "applied": false,
-    "sourceTriangleCount": 820,
+    "sourceTriangleCount": 267,
     "targetTriangleBudget": 5000,
     "ratio": 1,
     "tool": "gltf-transform",

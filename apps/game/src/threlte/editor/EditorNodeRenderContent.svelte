@@ -3,10 +3,10 @@ import { T } from '@threlte/core'
 import { setContext } from 'svelte'
 import { writable } from 'svelte/store'
 import * as THREE from 'three'
-import AdaptivePointLight from '../components/AdaptivePointLight.svelte'
 import HeroProp from '../components/HeroProp.svelte'
 import ProceduralMesh from '../components/ProceduralMesh.svelte'
 import { getSceneNodeMeshRenderSource } from '../engine/actorRenderSource'
+import ManagedLight from '../features/lighting/ManagedLight.svelte'
 import RuntimePrefabNode from '../levels/RuntimePrefabNode.svelte'
 import { EDITOR_MATERIAL_OVERRIDE_CONTEXT } from '../utils/materialOverrideContext'
 import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
@@ -19,7 +19,11 @@ $: assetNode = meshSource.kind === 'asset' ? meshSource.asset : null
 $: prefabNode = meshSource.kind === 'prefab' ? meshSource.prefab : null
 $: primitiveNode = meshSource.kind === 'primitive' ? meshSource.primitive : null
 $: lightNode = node.kind === 'light' ? node.light ?? null : null
-$: renderKey = `${node.id}:${node.kind}:${assetNode?.url ?? prefabNode?.type ?? primitiveNode?.geometry ?? lightNode?.color ?? 'group'}`
+$: fireflyNpcPresentation =
+  node.npc?.archetype === 'firefly' && node.npc.presentation.type === 'firefly'
+    ? node.npc.presentation
+    : null
+$: renderKey = `${node.id}:${node.kind}:${assetNode?.url ?? prefabNode?.type ?? primitiveNode?.geometry ?? lightNode?.color ?? fireflyNpcPresentation?.color ?? 'group'}`
 
 const materialOverrideStore = writable<EditorMaterialData | null>(null)
 setContext(EDITOR_MATERIAL_OVERRIDE_CONTEXT, materialOverrideStore)
@@ -98,7 +102,9 @@ $: materialOverrideStore.set(
       opacity={primitiveNode.opacity ?? 1}
     />
   {:else if lightNode}
-    <AdaptivePointLight
+    <ManagedLight
+      id={`editor-light-${node.id}`}
+      ownerId={node.id}
       position={[0, 0, 0]}
       color={lightNode.color}
       intensity={lightNode.intensity}
@@ -117,6 +123,45 @@ $: materialOverrideStore.set(
       emissiveIntensity={0.7}
       metalness={1}
       roughness={0.05}
+    />
+  {:else if fireflyNpcPresentation && editorEnabled}
+    <ManagedLight
+      id={`editor-npc-firefly-light-${node.id}`}
+      ownerId={node.id}
+      position={[0, 0, 0]}
+      color={fireflyNpcPresentation.color}
+      intensity={fireflyNpcPresentation.lightIntensity}
+      distance={fireflyNpcPresentation.lightDistance}
+      decay={fireflyNpcPresentation.lightDecay ?? 1.25}
+      runtimeBudgeted={!editorEnabled}
+    />
+    <ProceduralMesh
+      geometry="icosahedron"
+      args={[fireflyNpcPresentation.size, 0]}
+      position={[0, 0, 0]}
+      rotation={[0, 0, 0]}
+      scale={[1, 1, 1]}
+      color={fireflyNpcPresentation.color}
+      emissive={fireflyNpcPresentation.color}
+      emissiveIntensity={fireflyNpcPresentation.spriteIntensity}
+      metalness={1}
+      roughness={0.05}
+      transparent={true}
+      opacity={0.88}
+    />
+    <ProceduralMesh
+      geometry="torus"
+      args={[fireflyNpcPresentation.size * 0.9, 0.015, 10, 20]}
+      position={[0, 0, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+      scale={[1, 1, 1]}
+      color={fireflyNpcPresentation.secondaryColor ?? fireflyNpcPresentation.color}
+      emissive={fireflyNpcPresentation.secondaryColor ?? fireflyNpcPresentation.color}
+      emissiveIntensity={fireflyNpcPresentation.spriteIntensity * 0.35}
+      metalness={1}
+      roughness={0.04}
+      transparent={true}
+      opacity={0.55}
     />
   {:else if node.kind === 'group' && editorEnabled}
     <ProceduralMesh

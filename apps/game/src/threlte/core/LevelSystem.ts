@@ -1,7 +1,7 @@
 /** Component registry and message bus for modular level subsystems. */
 
 import * as THREE from 'three'
-import type { LightingManager } from '../features/lighting/LightingManager'
+import type { RuntimeLightingController } from '../features/lighting/RuntimeLightingController'
 import { runtimeDebugLog } from '../utils/runtimeLog'
 
 // Core interfaces that any level component must implement
@@ -20,7 +20,7 @@ export interface LevelContext {
   renderer: THREE.WebGLRenderer | null
   eventBus: EventTarget
   registry: SystemRegistry
-  lighting: LightingManager
+  lighting: RuntimeLightingController
   ecsWorld?: unknown
 }
 

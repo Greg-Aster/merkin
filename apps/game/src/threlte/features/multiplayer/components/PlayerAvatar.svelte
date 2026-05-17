@@ -3,6 +3,7 @@
 import { T, useTask } from '@threlte/core'
 import * as THREE from 'three'
 import StarSprite from '../../../components/StarSprite.svelte'
+import ManagedLight from '../../lighting/ManagedLight.svelte'
 import { qualitySettingsStore } from '../../performance/stores/performanceStore'
 
 // This prop allows the parent component to set the position.
@@ -29,12 +30,12 @@ const baseLightColor = new THREE.Color(playerColor)
 const targetChargeColor = new THREE.Color('#f3fdff')
 const currentLightColor = new THREE.Color(playerColor)
 
-let pointLight: THREE.PointLight
 let lightIntensity = baseLightIntensity
 let spriteIntensity = baseSpriteIntensity
 let spriteSize = playerSize
 let chargeCoreIntensity = 0
 let chargeCoreSize = playerSize * 0.6
+let lightColor = `#${currentLightColor.getHexString()}`
 
 $: playerPointLightEnabled = $qualitySettingsStore.enableDynamicLighting
 
@@ -56,10 +57,7 @@ useTask(() => {
   chargeCoreIntensity = 4 + lightening * 18
   chargeCoreSize = playerSize * (0.52 + lightening * 0.16)
   currentLightColor.copy(baseLightColor).lerp(targetChargeColor, lightening)
-
-  if (pointLight) {
-    pointLight.color.copy(currentLightColor)
-  }
+  lightColor = `#${currentLightColor.getHexString()}`
 
   // Animate position for a gentle wandering effect.
   const wanderTime = time * wanderSpeed
@@ -96,13 +94,13 @@ useTask(() => {
 
   <!-- The integrated light source for the firefly -->
   {#if playerPointLightEnabled}
-    <T.PointLight
-      bind:ref={pointLight}
-      color={currentLightColor}
+    <ManagedLight
+      id="player-avatar-light"
+      ownerId="player-avatar"
+      color={lightColor}
       intensity={lightIntensity * lightIntensityScale}
       distance={lightDistance}
       decay={lightDecay}
-      castShadow={false}
     />
   {/if}
 </T.Group>

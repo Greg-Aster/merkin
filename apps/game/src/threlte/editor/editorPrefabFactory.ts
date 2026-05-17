@@ -1,3 +1,4 @@
+import { createEditorFireflyNpcNode } from './editorNpcPrefabs'
 import type { EditorPrefabType, EditorSceneNode } from './editorTypes'
 
 interface CreateEditorPrefabFactoryOptions {
@@ -73,39 +74,15 @@ export function createEditorPrefabFactory(
         },
       })
     },
-    addFireflyDialogue(parentId: string | null = null) {
-      return addNode({
-        id: createId('firefly'),
-        name: 'Firefly Dialogue',
-        kind: 'group',
-        parentId,
-        position: [0, 2.4, 0],
-        rotation: [0, 0, 0],
-        scale: [1, 1, 1],
-        visible: true,
-        gameplay: {
-          type: 'firefly',
-          markerColor: '#ff4658',
-          markerSize: 0.58,
-          wanderEnabled: true,
-          wanderRadius: 0.16,
-          wanderSpeed: 0.18,
-          hoverHeight: 0.28,
-          bobAmplitude: 0.08,
-          bobSpeed: 0.55,
-          twinkleSpeed: 0.9,
-          lightIntensity: 1.15,
-          lightDistance: 4.6,
-          lightDecay: 1.25,
-          spriteIntensity: 1.15,
-          lightBurstBoost: 1.25,
+    addFireflyNpc(parentId: string | null = null) {
+      return addNode(
+        createEditorFireflyNpcNode({
+          id: createId('npc-firefly'),
+          name: 'Firefly NPC',
+          parentId,
           title: 'Firefly Encounter',
-          author: 'The Firefly',
-          location: 'Current Level',
-          excerpt: 'A patient glow waits for authored dialogue.',
-          body: 'Write this firefly conversation for the current level.',
-        },
-      })
+        }),
+      )
     },
     addAmbientAudioRegion(parentId: string | null = null) {
       return addNode({

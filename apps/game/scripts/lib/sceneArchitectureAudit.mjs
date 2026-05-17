@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { getTerrainAuthorityDiagnostics } from '../../src/threlte/engine/groundContractCore.mjs'
+import { validateNpcLevelContract } from '../../src/threlte/engine/npcValidationCore.mjs'
 import { findDeprecatedSceneFields } from './deprecatedSceneFields.mjs'
 
 const requiredGraphicsBudgetKeys = [
@@ -68,6 +69,7 @@ const postProcessingPasses = new Set([
   'vignette',
   'anti-aliasing',
   'depth-fog',
+  'kuwahara',
 ])
 
 function getCollisionMode(collision) {
@@ -96,13 +98,13 @@ function normalizePublicPath(path) {
 
 function getSceneFiles(sceneDir) {
   return readdirSync(sceneDir)
-    .filter((file) => file.endsWith('.scene.json'))
+    .filter(file => file.endsWith('.scene.json'))
     .sort()
 }
 
 function getNonRuntimeSceneJsonFiles(sceneDir) {
   return readdirSync(sceneDir)
-    .filter((file) => file.endsWith('.json') && !file.endsWith('.scene.json'))
+    .filter(file => file.endsWith('.json') && !file.endsWith('.scene.json'))
     .sort()
 }
 
@@ -124,7 +126,7 @@ function getRenderProfile(scene) {
 
 function getMissingGraphicsBudgetKeys(graphicsBudget) {
   return requiredGraphicsBudgetKeys.filter(
-    (key) => !Number.isFinite(graphicsBudget?.[key]),
+    key => !Number.isFinite(graphicsBudget?.[key]),
   )
 }
 
@@ -160,10 +162,10 @@ function estimatePrimitiveTriangles(node) {
 function getMaterialTextureUrls(nodes) {
   return [
     ...new Set(
-      nodes.flatMap((node) =>
+      nodes.flatMap(node =>
         materialTextureKeys
-          .map((key) => node.material?.[key])
-          .filter((value) => typeof value === 'string' && value.length > 0),
+          .map(key => node.material?.[key])
+          .filter(value => typeof value === 'string' && value.length > 0),
       ),
     ),
   ].sort()
@@ -543,7 +545,7 @@ function getRenderProfileFailures({
     failures.push(`${file}: renderProfile.postProcessing.passes is required`)
   } else {
     const invalidPasses = basePost.passes.filter(
-      (pass) => !postProcessingPasses.has(pass),
+      pass => !postProcessingPasses.has(pass),
     )
     if (invalidPasses.length > 0) {
       failures.push(
@@ -655,7 +657,7 @@ function getRenderProfileFailures({
       )
     } else if (Array.isArray(tierPasses)) {
       const invalidPasses = tierPasses.filter(
-        (pass) => !postProcessingPasses.has(pass),
+        pass => !postProcessingPasses.has(pass),
       )
       if (invalidPasses.length > 0) {
         failures.push(
@@ -677,7 +679,7 @@ export function isFiniteVec3(value) {
   return (
     Array.isArray(value) &&
     value.length === 3 &&
-    value.every((component) => Number.isFinite(component))
+    value.every(component => Number.isFinite(component))
   )
 }
 
@@ -731,7 +733,7 @@ function readPrefabCatalog(prefabCatalogPath) {
   return {
     types: new Set(
       Array.isArray(catalog.types)
-        ? catalog.types.filter((type) => typeof type === 'string')
+        ? catalog.types.filter(type => typeof type === 'string')
         : [],
     ),
     assetUrls:
@@ -760,6 +762,20 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
   })
   const graphicsBudget = getGraphicsBudget(scene)
   const renderProfile = getRenderProfile(scene)
+  const npcValidation = validateNpcLevelContract(
+    {
+      id: scene.levelId ?? file.replace(/\.scene\.json$/, ''),
+      settings: scene.settings,
+      nodes,
+    },
+    {
+      legacyFireflySeverity: 'error',
+      maxFireflyNpcCount: getBudgetLimit(
+        graphicsBudget,
+        'maxGameplayFireflies',
+      ),
+    },
+  )
   const missingGraphicsBudgetKeys = getMissingGraphicsBudgetKeys(graphicsBudget)
   const visualOnlyActorIds = new Set(
     Array.isArray(scene.settings?.level?.collision?.roles?.visualOnlyActorIds)
@@ -769,27 +785,26 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
   const spawnPosition = scene.settings?.level?.spawn?.position
   const geometryNodes = nodes.filter(isGeometryNode)
   const prefabNodes = nodes.filter(
-    (node) => node.kind === 'prefab' || node.prefab,
+    node => node.kind === 'prefab' || node.prefab,
   )
   const unknownPrefabNodes = prefabNodes.filter(
-    (node) => !runtimePrefabCatalog.types.has(node.prefab?.type),
+    node => !runtimePrefabCatalog.types.has(node.prefab?.type),
   )
-  const primitiveNodes = nodes.filter((node) => node.kind === 'primitive')
+  const primitiveNodes = nodes.filter(node => node.kind === 'primitive')
   const lightNodes = nodes.filter(isLightNode)
   const neverCullNodes = nodes.filter(
-    (node) => node.renderPolicy?.cullingPolicy === 'never',
+    node => node.renderPolicy?.cullingPolicy === 'never',
   )
-  const gameplayFireflies = nodes.filter(
-    (node) => node.gameplay?.type === 'firefly',
-  )
-  const explicitCollision = geometryNodes.filter((node) => node.collision)
+  const legacyFireflyGameplayCount =
+    npcValidation.diagnostics.legacyFireflyGameplayActorCount
+  const explicitCollision = geometryNodes.filter(node => node.collision)
   const missingCollisionIntent = explicitCollision.filter(
-    (node) => !collisionIntents.has(node.collision?.intent),
+    node => !collisionIntents.has(node.collision?.intent),
   )
   const missingCollisionChannel = explicitCollision.filter(
-    (node) => !collisionChannels.has(node.collision?.channel),
+    node => !collisionChannels.has(node.collision?.channel),
   )
-  const invalidCollisionChannel = explicitCollision.filter((node) => {
+  const invalidCollisionChannel = explicitCollision.filter(node => {
     const intent = node.collision?.intent
     const channel = node.collision?.channel
     if (!collisionChannels.has(channel)) return false
@@ -799,41 +814,41 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
     return channel === 'trigger' || channel === 'detail'
   })
   const unmappedRuntimeCollision = explicitCollision.filter(
-    (node) =>
+    node =>
       isCollisionEnabled(node.collision) &&
       !collisionChannels.has(node.collision?.channel),
   )
   const triggerWithoutSensor = explicitCollision.filter(
-    (node) =>
+    node =>
       isCollisionEnabled(node.collision) &&
       node.collision?.intent === 'trigger' &&
       node.collision?.sensor !== true,
   )
   const detailMeshBlocking = explicitCollision.filter(
-    (node) =>
+    node =>
       isCollisionEnabled(node.collision) &&
       node.collision?.intent === 'detailMesh' &&
       node.collision?.sensor !== true,
   )
   const disabledCollision = explicitCollision.filter(
-    (node) => !isCollisionEnabled(node.collision),
+    node => !isCollisionEnabled(node.collision),
   )
   const collisionOnlyProxies = explicitCollision.filter(
-    (node) =>
+    node =>
       isCollisionEnabled(node.collision) &&
       parityCollisionIntents.has(node.collision?.intent) &&
       node.visible === false,
   )
   const collisionRenderParityFailures = []
   const authoredMaterialSlots = geometryNodes.filter(
-    (node) => node.material || node.primitive,
+    node => node.material || node.primitive,
   )
   const estimatedTriangles = primitiveNodes.reduce(
     (sum, node) => sum + estimatePrimitiveTriangles(node),
     0,
   )
   const materialTextureUrls = getMaterialTextureUrls(nodes)
-  const materialTextureFiles = materialTextureUrls.map((url) => {
+  const materialTextureFiles = materialTextureUrls.map(url => {
     const fullPath = resolvePublicAssetPath(publicDir, url)
     const exists = existsSync(fullPath)
     const sizeBytes = exists ? statSync(fullPath).size : 0
@@ -845,45 +860,45 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
     }
   })
   const missingMaterialTextureFiles = materialTextureFiles.filter(
-    (texture) => !texture.exists,
+    texture => !texture.exists,
   )
   const authoredTextureBytes = materialTextureFiles.reduce(
     (sum, texture) => sum + texture.sizeBytes,
     0,
   )
   const detailMeshWithoutBudget = explicitCollision.filter(
-    (node) =>
+    node =>
       isCollisionEnabled(node.collision) &&
       node.collision?.intent === 'detailMesh' &&
       !Number.isFinite(getCollisionTriangleBudget(node.collision)),
   )
   const explicitTrimesh = explicitCollision.filter(
-    (node) =>
+    node =>
       isCollisionEnabled(node.collision) && node.collision?.shape === 'trimesh',
   )
   const assetPrimitiveCollision = explicitCollision.filter(
-    (node) =>
+    node =>
       node.kind === 'asset' &&
       isCollisionEnabled(node.collision) &&
       node.collision?.shape !== 'trimesh',
   )
   const assetTrimeshMissingCollider = explicitTrimesh.filter(
-    (node) => node.kind === 'asset' && !node.collision?.colliderUrl,
+    node => node.kind === 'asset' && !node.collision?.colliderUrl,
   )
   const assetTrimeshColliderConventionFailures = explicitTrimesh.filter(
-    (node) =>
+    node =>
       node.kind === 'asset' &&
       getColliderUrlConventionError(node.collision?.colliderUrl),
   )
   const assetTrimeshColliderArtifactFailures = explicitTrimesh
-    .filter((node) => node.kind === 'asset')
-    .flatMap((node) => getColliderArtifactFailures({ publicDir, node }))
+    .filter(node => node.kind === 'asset')
+    .flatMap(node => getColliderArtifactFailures({ publicDir, node }))
   const assetTrimeshLegacyColliderMetadata = explicitTrimesh.filter(
-    (node) =>
+    node =>
       node.kind === 'asset' && hasLegacyColliderMetadata({ publicDir, node }),
   )
   const missingDefaultCollision = geometryNodes.filter(
-    (node) =>
+    node =>
       node.visible !== false &&
       !node.gameplay &&
       !node.collision &&
@@ -892,14 +907,14 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
   const assetUrls = [
     ...new Set(
       nodes
-        .flatMap((node) => [
+        .flatMap(node => [
           getAssetUrl(node),
           getPrefabAssetUrl(node, runtimePrefabCatalog),
         ])
         .filter(Boolean),
     ),
   ].sort()
-  const assetFiles = assetUrls.map((url) => {
+  const assetFiles = assetUrls.map(url => {
     const fullPath = resolvePublicAssetPath(publicDir, url)
     const exists = existsSync(fullPath)
     const sizeBytes = exists ? statSync(fullPath).size : 0
@@ -910,9 +925,9 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
       sizeBytes,
     }
   })
-  const missingAssetFiles = assetFiles.filter((asset) => !asset.exists)
+  const missingAssetFiles = assetFiles.filter(asset => !asset.exists)
   const oversizedAssetFiles = assetFiles.filter(
-    (asset) =>
+    asset =>
       asset.sizeBytes >
       getBudgetLimit(graphicsBudget, 'maxRuntimeAssetFileBytes'),
   )
@@ -925,14 +940,14 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
       !largest || asset.sizeBytes > largest.sizeBytes ? asset : largest,
     null,
   )
-  const generatedStyleBakeNodes = geometryNodes.filter((node) => {
+  const generatedStyleBakeNodes = geometryNodes.filter(node => {
     const assetUrl = getAssetUrl(node)
     return (
       isGeneratedStyleBakeAssetUrl(assetUrl) ||
       Boolean(getStyleBakeProduct(node))
     )
   })
-  const unmanagedStyleBakeProducts = generatedStyleBakeNodes.filter((node) => {
+  const unmanagedStyleBakeProducts = generatedStyleBakeNodes.filter(node => {
     const product = getStyleBakeProduct(node)
     const assetUrl = getAssetUrl(node)
     if (!product) return true
@@ -941,7 +956,7 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
       getStyleBakeProductAssetUrl(product) !== assetUrl
     )
   })
-  const styleBakeMissingMetadata = generatedStyleBakeNodes.filter((node) => {
+  const styleBakeMissingMetadata = generatedStyleBakeNodes.filter(node => {
     const product = getStyleBakeProduct(node)
     const metadataUrl = getStyleBakeProductMetadataUrl(product)
     if (!metadataUrl) return true
@@ -962,7 +977,11 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
     primitiveNodes: primitiveNodes.length,
     lightNodes: lightNodes.length,
     neverCullNodes: neverCullNodes.length,
-    gameplayFireflies: gameplayFireflies.length,
+    gameplayFireflies: legacyFireflyGameplayCount,
+    npcActors: npcValidation.diagnostics.npcActorCount,
+    fireflyNpcActors: npcValidation.diagnostics.fireflyNpcActorCount,
+    legacyGameplayFireflies:
+      npcValidation.diagnostics.legacyFireflyGameplayActorCount,
     explicitCollision: explicitCollision.length,
     estimatedDrawCalls: geometryNodes.length,
     authoredMaterialSlots: authoredMaterialSlots.length,
@@ -994,50 +1013,50 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
     hasBom,
     spawnPosition,
     hasValidSpawn: isFiniteVec3(spawnPosition),
-    explicitTrimeshIds: explicitTrimesh.map((node) => node.id),
-    assetPrimitiveCollisionIds: assetPrimitiveCollision.map((node) => node.id),
+    explicitTrimeshIds: explicitTrimesh.map(node => node.id),
+    assetPrimitiveCollisionIds: assetPrimitiveCollision.map(node => node.id),
     assetTrimeshMissingColliderIds: assetTrimeshMissingCollider.map(
-      (node) => node.id,
+      node => node.id,
     ),
     assetTrimeshColliderConventionFailureIds:
       assetTrimeshColliderConventionFailures.map(
-        (node) =>
+        node =>
           `${node.id}: ${getColliderUrlConventionError(node.collision?.colliderUrl)}`,
       ),
     assetTrimeshColliderArtifactFailureIds:
       assetTrimeshColliderArtifactFailures,
     assetTrimeshLegacyColliderMetadataIds:
-      assetTrimeshLegacyColliderMetadata.map((node) => node.id),
-    missingCollisionIntentIds: missingCollisionIntent.map((node) => node.id),
-    missingCollisionChannelIds: missingCollisionChannel.map((node) => node.id),
-    invalidCollisionChannelIds: invalidCollisionChannel.map((node) => node.id),
-    unmappedRuntimeCollisionIds: unmappedRuntimeCollision.map(
-      (node) => node.id,
-    ),
-    triggerWithoutSensorIds: triggerWithoutSensor.map((node) => node.id),
-    detailMeshBlockingIds: detailMeshBlocking.map((node) => node.id),
-    detailMeshWithoutBudgetIds: detailMeshWithoutBudget.map((node) => node.id),
-    collisionOnlyProxyIds: collisionOnlyProxies.map((node) => node.id),
+      assetTrimeshLegacyColliderMetadata.map(node => node.id),
+    missingCollisionIntentIds: missingCollisionIntent.map(node => node.id),
+    missingCollisionChannelIds: missingCollisionChannel.map(node => node.id),
+    invalidCollisionChannelIds: invalidCollisionChannel.map(node => node.id),
+    unmappedRuntimeCollisionIds: unmappedRuntimeCollision.map(node => node.id),
+    triggerWithoutSensorIds: triggerWithoutSensor.map(node => node.id),
+    detailMeshBlockingIds: detailMeshBlocking.map(node => node.id),
+    detailMeshWithoutBudgetIds: detailMeshWithoutBudget.map(node => node.id),
+    collisionOnlyProxyIds: collisionOnlyProxies.map(node => node.id),
     collisionRenderParityFailureIds: collisionRenderParityFailures.map(
-      (node) => node.id,
+      node => node.id,
     ),
-    missingDefaultCollisionIds: missingDefaultCollision.map((node) => node.id),
+    missingDefaultCollisionIds: missingDefaultCollision.map(node => node.id),
     unknownPrefabReferenceIds: unknownPrefabNodes.map(
-      (node) => `${node.id}:${node.prefab?.type ?? 'missing-type'}`,
+      node => `${node.id}:${node.prefab?.type ?? 'missing-type'}`,
     ),
-    missingAssetFileUrls: missingAssetFiles.map((asset) => asset.url),
+    missingAssetFileUrls: missingAssetFiles.map(asset => asset.url),
     missingMaterialTextureFileUrls: missingMaterialTextureFiles.map(
-      (texture) => texture.url,
+      texture => texture.url,
     ),
     terrainAuthorityErrors: terrainAuthorityDiagnostics.errors,
     terrainAuthorityWarnings: terrainAuthorityDiagnostics.warnings,
+    npcValidationErrors: npcValidation.errors,
+    npcValidationWarnings: npcValidation.warnings,
     deprecatedFields,
     oversizedAssetFiles,
     generatedStyleBakeProducts: generatedStyleBakeNodes.length,
     unmanagedStyleBakeProductIds: unmanagedStyleBakeProducts.map(
-      (node) => node.id,
+      node => node.id,
     ),
-    styleBakeMissingMetadataIds: styleBakeMissingMetadata.map((node) => {
+    styleBakeMissingMetadataIds: styleBakeMissingMetadata.map(node => {
       const metadataUrl = getStyleBakeProductMetadataUrl(
         getStyleBakeProduct(node),
       )
@@ -1183,6 +1202,14 @@ function validateSceneReport(report) {
       `${report.file}: terrain authority contract is invalid: ${report.terrainAuthorityErrors.join('; ')}`,
     )
   }
+  if (report.npcValidationErrors.length > 0) {
+    failures.push(
+      `${report.file}: NPC contract is invalid: ${report.npcValidationErrors.join('; ')}`,
+    )
+  }
+  for (const warning of report.npcValidationWarnings) {
+    warnings.push(`${report.file}: ${warning}`)
+  }
   for (const asset of report.oversizedAssetFiles) {
     warnings.push(
       `${report.file}: runtime asset exceeds ${formatBytes(report.graphicsBudget.maxRuntimeAssetFileBytes)} budget: ${asset.url} (${formatBytes(asset.sizeBytes)})`,
@@ -1219,14 +1246,6 @@ function validateSceneReport(report) {
     metricKey: 'neverCullNodes',
     budgetKey: 'maxNeverCullActors',
     label: 'never-cull render actors',
-  })
-  pushBudgetWarning({
-    warnings,
-    report,
-    metricKey: 'gameplayFireflies',
-    budgetKey: 'maxGameplayFireflies',
-    label: 'firefly gameplay actors',
-    guidance: 'use chunked or pooled marker presentation',
   })
   pushBudgetWarning({
     warnings,
@@ -1294,6 +1313,10 @@ export function summarizeSceneReports(reports) {
       lightNodes: sum.lightNodes + report.lightNodes,
       neverCullNodes: sum.neverCullNodes + report.neverCullNodes,
       gameplayFireflies: sum.gameplayFireflies + report.gameplayFireflies,
+      npcActors: sum.npcActors + report.npcActors,
+      fireflyNpcActors: sum.fireflyNpcActors + report.fireflyNpcActors,
+      legacyGameplayFireflies:
+        sum.legacyGameplayFireflies + report.legacyGameplayFireflies,
       explicitCollision: sum.explicitCollision + report.explicitCollision,
       estimatedDrawCalls: sum.estimatedDrawCalls + report.estimatedDrawCalls,
       authoredMaterialSlots:
@@ -1342,6 +1365,10 @@ export function summarizeSceneReports(reports) {
         sum.terrainAuthorityWarnings + report.terrainAuthorityWarnings.length,
       terrainAuthorityErrors:
         sum.terrainAuthorityErrors + report.terrainAuthorityErrors.length,
+      npcValidationErrors:
+        sum.npcValidationErrors + report.npcValidationErrors.length,
+      npcValidationWarnings:
+        sum.npcValidationWarnings + report.npcValidationWarnings.length,
       deprecatedFields: sum.deprecatedFields + report.deprecatedFields.length,
       assetFiles: sum.assetFiles + report.assetFiles,
       totalRuntimeAssetBytes:
@@ -1353,7 +1380,8 @@ export function summarizeSceneReports(reports) {
         sum.unmanagedStyleBakeProducts +
         report.unmanagedStyleBakeProductIds.length,
       styleBakeMissingMetadata:
-        sum.styleBakeMissingMetadata + report.styleBakeMissingMetadataIds.length,
+        sum.styleBakeMissingMetadata +
+        report.styleBakeMissingMetadataIds.length,
     }),
     {
       nodes: 0,
@@ -1364,6 +1392,9 @@ export function summarizeSceneReports(reports) {
       lightNodes: 0,
       neverCullNodes: 0,
       gameplayFireflies: 0,
+      npcActors: 0,
+      fireflyNpcActors: 0,
+      legacyGameplayFireflies: 0,
       explicitCollision: 0,
       estimatedDrawCalls: 0,
       authoredMaterialSlots: 0,
@@ -1389,6 +1420,8 @@ export function summarizeSceneReports(reports) {
       missingDefaultCollision: 0,
       terrainAuthorityWarnings: 0,
       terrainAuthorityErrors: 0,
+      npcValidationErrors: 0,
+      npcValidationWarnings: 0,
       deprecatedFields: 0,
       assetFiles: 0,
       totalRuntimeAssetBytes: 0,
@@ -1406,12 +1439,12 @@ export function auditSceneArchitecture({
   prefabCatalogPath,
 }) {
   const runtimePrefabCatalog = readPrefabCatalog(prefabCatalogPath)
-  const reports = getSceneFiles(sceneDir).map((file) =>
+  const reports = getSceneFiles(sceneDir).map(file =>
     auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }),
   )
   const nonRuntimeSceneJsonFiles = getNonRuntimeSceneJsonFiles(sceneDir)
   const failures = nonRuntimeSceneJsonFiles.map(
-    (file) =>
+    file =>
       `${file}: editor/scenes must contain production *.scene.json files only; move backups to authoring/scene-backups`,
   )
   const warnings = []

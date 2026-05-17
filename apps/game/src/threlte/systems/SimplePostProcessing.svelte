@@ -7,6 +7,7 @@ import { useTask, useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
+import type { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
 import type { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js'
 import type { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import type { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
@@ -16,24 +17,35 @@ import {
   updateDepthFogShaderUniforms,
 } from '../atmosphere/depthFogShader'
 import { runtimeAtmosphereStore } from '../atmosphere/runtimeAtmosphereStore'
-import { qualityLevelStore } from '../features/performance/stores/performanceStore'
+import type { RuntimeAtmosphereDefinition } from '../atmosphere/runtimeAtmosphereTypes'
+import {
+  qualityLevelStore,
+  qualitySettingsStore,
+} from '../features/performance/stores/performanceStore'
 import {
   type RuntimePostProcessingPolicy,
   resolveRuntimePostProcessingPolicy,
 } from '../features/performance/utils/runtimeVisualQualityPolicy'
 import {
+  type BloomConfig,
+  type ToneMappingConfig,
   adaptiveBloomConfig,
   adaptiveToneMappingConfig,
   setQualityLevel,
 } from '../stores/postProcessingStore'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
-import { runtimeRenderProfileStore } from '../stores/runtimeRenderProfileStore'
+import {
+  type ResolvedRuntimeRenderProfile,
+  runtimeRenderProfileStore,
+} from '../stores/runtimeRenderProfileStore'
 import {
   setRuntimePostProcessingDiagnostics,
   setRuntimeRenderLifecyclePhase,
 } from '../stores/runtimeRenderRegistry'
 import { runtimeVisualStyleStore } from '../styles/runtimeVisualStyleStore'
+import type { RuntimeVisualStyleSettings } from '../styles/runtimeVisualStyleStore'
 import { runtimeDebugLog } from '../utils/runtimeLog'
+import { KuwaharaDepthMaskPass, KuwaharaPass } from './KuwaharaPass'
 
 const { renderer, scene, camera, size, autoRender, renderStage } = useThrelte()
 
@@ -43,6 +55,8 @@ type RenderPassModule =
   typeof import('three/examples/jsm/postprocessing/RenderPass.js')
 type ShaderPassModule =
   typeof import('three/examples/jsm/postprocessing/ShaderPass.js')
+type OutputPassModule =
+  typeof import('three/examples/jsm/postprocessing/OutputPass.js')
 type SSAOPassModule =
   typeof import('three/examples/jsm/postprocessing/SSAOPass.js')
 type UnrealBloomPassModule =
@@ -56,11 +70,16 @@ let composer: EffectComposer | null = null
 let ssaoPass: SSAOPass | null = null
 let bloomPass: UnrealBloomPass | null = null
 let colorGradingPass: ShaderPass | null = null
+let preToneMappingPass: OutputPass | null = null
+let kuwaharaDepthMaskPass: KuwaharaDepthMaskPass | null = null
+let kuwaharaPass: KuwaharaPass | null = null
+let outputPass: OutputPass | null = null
 let depthFogPass: (ShaderPass & { uniforms: DepthFogShaderUniforms }) | null =
   null
 let effectComposerModule: EffectComposerModule | null = null
 let renderPassModule: RenderPassModule | null = null
 let shaderPassModule: ShaderPassModule | null = null
+let outputPassModule: OutputPassModule | null = null
 let ssaoPassModule: SSAOPassModule | null = null
 let unrealBloomPassModule: UnrealBloomPassModule | null = null
 let postProcessingModulesPromise: Promise<boolean> | null = null
@@ -132,16 +151,24 @@ function ensureOverlay() {
   overlayContainer.appendChild(vignetteElement)
 }
 
-function getPostProcessingPolicy() {
+function getPostProcessingPolicy(input?: {
+  renderProfile?: ResolvedRuntimeRenderProfile
+  visualStyle?: RuntimeVisualStyleSettings
+  bloom?: BloomConfig
+  toneMapping?: ToneMappingConfig
+  atmosphere?: RuntimeAtmosphereDefinition
+  optionalEnabled?: boolean
+  baseExposure?: number
+}) {
   const policy = resolveRuntimePostProcessingPolicy({
-    baseExposure: toneMappingExposure,
-    visualStyle: $runtimeVisualStyleStore,
-    bloom: $adaptiveBloomConfig,
-    toneMapping: $adaptiveToneMappingConfig,
-    renderProfile: $runtimeRenderProfileStore,
-    atmosphere: $runtimeAtmosphereStore,
+    baseExposure: input?.baseExposure ?? toneMappingExposure,
+    visualStyle: input?.visualStyle ?? $runtimeVisualStyleStore,
+    bloom: input?.bloom ?? $adaptiveBloomConfig,
+    toneMapping: input?.toneMapping ?? $adaptiveToneMappingConfig,
+    renderProfile: input?.renderProfile ?? $runtimeRenderProfileStore,
+    atmosphere: input?.atmosphere ?? $runtimeAtmosphereStore,
   })
-  if (optionalPostProcessingEnabled) return policy
+  if (input?.optionalEnabled ?? optionalPostProcessingEnabled) return policy
 
   return {
     ...policy,
@@ -154,6 +181,10 @@ function getPostProcessingPolicy() {
     ambientOcclusionEnabled: false,
     ambientOcclusionIntensity: 0,
     ambientOcclusionRadius: 0,
+    kuwaharaEnabled: false,
+    kuwaharaRadius: 0,
+    kuwaharaMix: 0,
+    kuwaharaResolutionScale: 0.5,
     vignetteStrength: 0,
   }
 }
@@ -162,11 +193,20 @@ function disposeComposer() {
   ssaoPass?.dispose()
   bloomPass?.dispose()
   depthFogPass?.material.dispose()
+  colorGradingPass?.material.dispose()
+  preToneMappingPass?.dispose()
+  kuwaharaDepthMaskPass?.dispose()
+  kuwaharaPass?.dispose()
+  outputPass?.dispose()
   composer?.dispose()
   composer = null
   ssaoPass = null
   bloomPass = null
   colorGradingPass = null
+  preToneMappingPass = null
+  kuwaharaDepthMaskPass = null
+  kuwaharaPass = null
+  outputPass = null
   depthFogPass = null
 }
 
@@ -191,11 +231,64 @@ function attachDepthTexture(renderTarget: THREE.WebGLRenderTarget | undefined) {
   )
 }
 
+function getComposerLogicalSize() {
+  if (!renderer) return new THREE.Vector2($size.width, $size.height)
+  return renderer.getSize(new THREE.Vector2())
+}
+
+function createPostProcessingRenderTarget(width: number, height: number) {
+  const renderTarget = new THREE.WebGLRenderTarget(width, height, {
+    format: THREE.RGBAFormat,
+    type: THREE.HalfFloatType,
+    depthBuffer: true,
+    stencilBuffer: false,
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+  })
+  renderTarget.texture.colorSpace = THREE.LinearSRGBColorSpace
+  renderTarget.texture.generateMipmaps = false
+  renderTarget.texture.wrapS = THREE.ClampToEdgeWrapping
+  renderTarget.texture.wrapT = THREE.ClampToEdgeWrapping
+  return renderTarget
+}
+
+function createRendererStateOutputPass(
+  outputPassFactory: OutputPassModule,
+  override: {
+    toneMapping?: THREE.WebGLRenderer['toneMapping']
+    outputColorSpace?: THREE.WebGLRenderer['outputColorSpace']
+  } = {},
+) {
+  const pass = new outputPassFactory.OutputPass()
+  const originalRender = pass.render.bind(pass)
+  pass.render = (
+    nextRenderer,
+    writeBuffer,
+    readBuffer,
+    deltaTime,
+    maskActive,
+  ) => {
+    const previousToneMapping = nextRenderer.toneMapping
+    const previousOutputColorSpace = nextRenderer.outputColorSpace
+    if (override.toneMapping !== undefined) {
+      nextRenderer.toneMapping = override.toneMapping
+    }
+    if (override.outputColorSpace !== undefined) {
+      nextRenderer.outputColorSpace = override.outputColorSpace
+    }
+    originalRender(nextRenderer, writeBuffer, readBuffer, deltaTime, maskActive)
+    nextRenderer.toneMapping = previousToneMapping
+    nextRenderer.outputColorSpace = previousOutputColorSpace
+  }
+  return pass
+}
+
 async function ensurePostProcessingModules() {
   if (
     effectComposerModule &&
     renderPassModule &&
     shaderPassModule &&
+    outputPassModule &&
     ssaoPassModule &&
     unrealBloomPassModule
   ) {
@@ -207,17 +300,28 @@ async function ensurePostProcessingModules() {
       import('three/examples/jsm/postprocessing/EffectComposer.js'),
       import('three/examples/jsm/postprocessing/RenderPass.js'),
       import('three/examples/jsm/postprocessing/ShaderPass.js'),
+      import('three/examples/jsm/postprocessing/OutputPass.js'),
       import('three/examples/jsm/postprocessing/SSAOPass.js'),
       import('three/examples/jsm/postprocessing/UnrealBloomPass.js'),
     ])
-      .then(([effectComposer, renderPass, shaderPass, ssao, unrealBloom]) => {
-        effectComposerModule = effectComposer
-        renderPassModule = renderPass
-        shaderPassModule = shaderPass
-        ssaoPassModule = ssao
-        unrealBloomPassModule = unrealBloom
-        return true
-      })
+      .then(
+        ([
+          effectComposer,
+          renderPass,
+          shaderPass,
+          outputPassFactory,
+          ssao,
+          unrealBloom,
+        ]) => {
+          effectComposerModule = effectComposer
+          renderPassModule = renderPass
+          shaderPassModule = shaderPass
+          outputPassModule = outputPassFactory
+          ssaoPassModule = ssao
+          unrealBloomPassModule = unrealBloom
+          return true
+        },
+      )
       .catch(error => {
         postProcessingModulesPromise = null
         console.warn('Failed to load post-processing effects:', error)
@@ -244,6 +348,7 @@ async function setupComposer() {
   const effectComposer = effectComposerModule
   const renderPass = renderPassModule
   const shaderPass = shaderPassModule
+  const outputPassFactory = outputPassModule
   const ssao = ssaoPassModule
   const unrealBloom = unrealBloomPassModule
   if (
@@ -252,6 +357,7 @@ async function setupComposer() {
     !effectComposer ||
     !renderPass ||
     !shaderPass ||
+    !outputPassFactory ||
     !ssao ||
     !unrealBloom
   )
@@ -265,18 +371,18 @@ async function setupComposer() {
     !policy.depthFogEnabled &&
     !policy.ambientOcclusionEnabled &&
     !policy.bloomEnabled &&
-    !policy.colorGradingEnabled
+    !policy.colorGradingEnabled &&
+    !policy.kuwaharaEnabled
   ) {
     autoRender.set(true)
     return
   }
 
-  const renderTarget = new THREE.WebGLRenderTarget($size.width, $size.height, {
-    format: THREE.RGBAFormat,
-    type: THREE.UnsignedByteType,
-    depthBuffer: true,
-    stencilBuffer: false,
-  })
+  const composerSize = getComposerLogicalSize()
+  const renderTarget = createPostProcessingRenderTarget(
+    composerSize.width,
+    composerSize.height,
+  )
   attachDepthTexture(renderTarget)
 
   if ('samples' in renderTarget) {
@@ -285,6 +391,8 @@ async function setupComposer() {
   }
 
   composer = new effectComposer.EffectComposer(renderer, renderTarget)
+  composer.setPixelRatio(renderer.getPixelRatio())
+  composer.setSize(composerSize.width, composerSize.height)
   attachDepthTexture(
     (composer as EffectComposer & { renderTarget1?: THREE.WebGLRenderTarget })
       .renderTarget1,
@@ -295,6 +403,12 @@ async function setupComposer() {
   )
   autoRender.set(false)
   composer.addPass(new renderPass.RenderPass(scene, activeCamera))
+
+  if (policy.kuwaharaEnabled) {
+    kuwaharaDepthMaskPass = new KuwaharaDepthMaskPass()
+    kuwaharaDepthMaskPass.setCamera(activeCamera)
+    composer.addPass(kuwaharaDepthMaskPass)
+  }
 
   if (policy.depthFogEnabled) {
     depthFogPass = new shaderPass.ShaderPass(
@@ -330,21 +444,37 @@ async function setupComposer() {
     ssaoPass = new ssao.SSAOPass(
       scene,
       activeCamera,
-      $size.width,
-      $size.height,
+      composerSize.width,
+      composerSize.height,
       8,
     )
     ssaoPass.output = ssao.SSAOPass.OUTPUT.Default
     composer.addPass(ssaoPass)
   }
 
-  if (policy.bloomEnabled) {
-    bloomPass = new unrealBloom.UnrealBloomPass(
-      new THREE.Vector2($size.width, $size.height),
-      0,
-      0.22,
-      0.9,
+  if (policy.kuwaharaEnabled) {
+    preToneMappingPass = createRendererStateOutputPass(outputPassFactory, {
+      outputColorSpace: THREE.LinearSRGBColorSpace,
+    })
+    composer.addPass(preToneMappingPass)
+
+    kuwaharaPass = new KuwaharaPass(
+      composerSize.width * renderer.getPixelRatio(),
+      composerSize.height * renderer.getPixelRatio(),
+      {
+        radius: policy.kuwaharaRadius,
+        mix: policy.kuwaharaMix,
+        resolutionScale: policy.kuwaharaResolutionScale,
+        depthMask: kuwaharaDepthMaskPass?.texture ?? null,
+        depthAware: Boolean(kuwaharaDepthMaskPass),
+      },
     )
+    composer.addPass(kuwaharaPass)
+    updateKuwaharaSettings(policy)
+  }
+
+  if (policy.bloomEnabled) {
+    bloomPass = new unrealBloom.UnrealBloomPass(composerSize, 0, 0.22, 0.9)
     composer.addPass(bloomPass)
   }
 
@@ -353,6 +483,16 @@ async function setupComposer() {
     composer.addPass(colorGradingPass)
     updateColorGradingSettings(policy)
   }
+
+  outputPass = createRendererStateOutputPass(
+    outputPassFactory,
+    policy.kuwaharaEnabled
+      ? {
+          toneMapping: THREE.NoToneMapping,
+        }
+      : {},
+  )
+  composer.addPass(outputPass)
 }
 
 function getComposerPassKey(policy = getPostProcessingPolicy()) {
@@ -361,6 +501,7 @@ function getComposerPassKey(policy = getPostProcessingPolicy()) {
     policy.ambientOcclusionEnabled ? 'ao' : 'no-ao',
     policy.bloomEnabled ? 'bloom' : 'no-bloom',
     policy.colorGradingEnabled ? 'color' : 'no-color',
+    policy.kuwaharaEnabled ? 'kuwahara' : 'no-kuwahara',
   ].join(':')
 }
 
@@ -421,10 +562,25 @@ function updateColorGradingSettings(policy: RuntimePostProcessingPolicy) {
   colorGradingPass.uniforms.warmth.value = policy.colorWarmth
 }
 
-function updateComposerSize(width: number, height: number) {
-  if (!composer) return
-  composer.setSize(width, height)
-  ssaoPass?.setSize(width, height)
+function updateKuwaharaSettings(policy: RuntimePostProcessingPolicy) {
+  if (!kuwaharaPass) return
+
+  kuwaharaPass.enabled = policy.kuwaharaEnabled
+  kuwaharaPass.radius = policy.kuwaharaRadius
+  kuwaharaPass.mix = policy.kuwaharaMix
+  kuwaharaPass.resolutionScale = policy.kuwaharaResolutionScale
+}
+
+function updateComposerSize(
+  _width: number,
+  _height: number,
+  _canvasScale: number,
+) {
+  if (!composer || !renderer) return
+  const composerSize = getComposerLogicalSize()
+  const pixelRatio = renderer.getPixelRatio()
+  composer.setPixelRatio(pixelRatio)
+  composer.setSize(composerSize.width, composerSize.height)
 }
 
 function updateOverlayStyle(policy: RuntimePostProcessingPolicy) {
@@ -437,7 +593,9 @@ function updateOverlayStyle(policy: RuntimePostProcessingPolicy) {
   vignetteElement.style.opacity = '1'
 }
 
-function profileAllowsPostPass(pass: 'bloom' | 'color-grading' | 'depth-fog') {
+function profileAllowsPostPass(
+  pass: 'bloom' | 'color-grading' | 'depth-fog' | 'kuwahara',
+) {
   const postProcessing = $runtimeRenderProfileStore.postProcessing
   if (!postProcessing.enabled) return false
   return (
@@ -497,6 +655,20 @@ function getColorGradingParticipationReason(
   return 'neutral color grade'
 }
 
+function getKuwaharaParticipationReason(policy: RuntimePostProcessingPolicy) {
+  const profile = $runtimeRenderProfileStore
+  if (policy.kuwaharaEnabled) return 'active'
+  if (!optionalPostProcessingEnabled) {
+    return 'optional post-processing disabled by quality settings'
+  }
+  if (!profile.postProcessing.enabled) return 'profile disabled'
+  if (!profileAllowsPostPass('kuwahara')) {
+    return `disabled by ${profile.tier} profile pass list`
+  }
+  if (!profile.postProcessing.kuwahara.enabled) return 'disabled by profile'
+  return 'inactive'
+}
+
 function publishPostProcessingDiagnostics(policy: RuntimePostProcessingPolicy) {
   if (!levelId) return
 
@@ -504,10 +676,12 @@ function publishPostProcessingDiagnostics(policy: RuntimePostProcessingPolicy) {
   const depthFogReason = getDepthFogParticipationReason(policy)
   const bloomReason = getBloomParticipationReason(policy)
   const colorGradingReason = getColorGradingParticipationReason(policy)
+  const kuwaharaReason = getKuwaharaParticipationReason(policy)
   const depthFogEnabled = depthFogPass?.enabled ?? policy.depthFogEnabled
   const bloomEnabled = bloomPass?.enabled ?? policy.bloomEnabled
   const colorGradingEnabled =
     colorGradingPass?.enabled ?? policy.colorGradingEnabled
+  const kuwaharaEnabled = kuwaharaPass?.enabled ?? policy.kuwaharaEnabled
   setRuntimePostProcessingDiagnostics(levelId, {
     enabled: Boolean(composer) && profile.postProcessing.enabled,
     profileId: profile.id,
@@ -518,15 +692,20 @@ function publishPostProcessingDiagnostics(policy: RuntimePostProcessingPolicy) {
     depthFogEnabled,
     bloomEnabled,
     colorGradingEnabled,
+    kuwaharaEnabled,
+    kuwaharaRadius: policy.kuwaharaRadius,
+    kuwaharaMix: policy.kuwaharaMix,
+    kuwaharaResolutionScale: policy.kuwaharaResolutionScale,
     depthFogReason,
     bloomReason,
     colorGradingReason,
+    kuwaharaReason,
     reason: profile.postProcessing.enabled ? undefined : 'profile-disabled',
   })
   setRuntimeDiagnostic('postProcessing', {
     label: 'Post Processing',
     level: profile.postProcessing.enabled ? 'ready' : 'warning',
-    message: `${levelId}/${profile.id}/${profile.tier}: depth fog ${depthFogEnabled ? 'on' : `off (${depthFogReason})`}; bloom ${bloomEnabled ? `on strength ${policy.bloomStrength.toFixed(2)} threshold ${policy.bloomThreshold.toFixed(2)}` : `off (${bloomReason})`}; color grading ${colorGradingEnabled ? `on sat ${policy.colorSaturation.toFixed(2)} contrast ${policy.colorContrast.toFixed(2)} warmth ${policy.colorWarmth.toFixed(2)}` : `off (${colorGradingReason})`}; passes ${profile.postProcessing.enabled ? profile.postProcessing.passes.join(', ') || 'all' : 'disabled'}.`,
+    message: `${levelId}/${profile.id}/${profile.tier}: depth fog ${depthFogEnabled ? 'on' : `off (${depthFogReason})`}; bloom ${bloomEnabled ? `on strength ${policy.bloomStrength.toFixed(2)} threshold ${policy.bloomThreshold.toFixed(2)}` : `off (${bloomReason})`}; color grading ${colorGradingEnabled ? `on sat ${policy.colorSaturation.toFixed(2)} contrast ${policy.colorContrast.toFixed(2)} warmth ${policy.colorWarmth.toFixed(2)}` : `off (${colorGradingReason})`}; kuwahara ${kuwaharaEnabled ? `on radius ${policy.kuwaharaRadius} mix ${policy.kuwaharaMix.toFixed(2)} res ${policy.kuwaharaResolutionScale.toFixed(2)}` : `off (${kuwaharaReason})`}; passes ${profile.postProcessing.enabled ? profile.postProcessing.passes.join(', ') || 'all' : 'disabled'}.`,
     meta: {
       levelId,
       profileId: profile.id,
@@ -544,6 +723,11 @@ function publishPostProcessingDiagnostics(policy: RuntimePostProcessingPolicy) {
       colorSaturation: policy.colorSaturation,
       colorContrast: policy.colorContrast,
       colorWarmth: policy.colorWarmth,
+      kuwaharaEnabled,
+      kuwaharaReason,
+      kuwaharaRadius: policy.kuwaharaRadius,
+      kuwaharaMix: policy.kuwaharaMix,
+      kuwaharaResolutionScale: policy.kuwaharaResolutionScale,
       optionalPostProcessingEnabled,
     },
   })
@@ -564,20 +748,38 @@ function publishPostProcessingDiagnostics(policy: RuntimePostProcessingPolicy) {
       bloomReason,
       colorGradingEnabled,
       colorGradingReason,
+      kuwaharaEnabled,
+      kuwaharaReason,
+      kuwaharaRadius: policy.kuwaharaRadius,
+      kuwaharaMix: policy.kuwaharaMix,
+      kuwaharaResolutionScale: policy.kuwaharaResolutionScale,
       optionalPostProcessingEnabled,
     },
   })
 }
 
 $: setQualityLevel($qualityLevelStore)
-$: activePostProcessingPolicy = getPostProcessingPolicy()
+$: activePostProcessingPolicy = getPostProcessingPolicy({
+  renderProfile: $runtimeRenderProfileStore,
+  visualStyle: $runtimeVisualStyleStore,
+  bloom: $adaptiveBloomConfig,
+  toneMapping: $adaptiveToneMappingConfig,
+  atmosphere: $runtimeAtmosphereStore,
+  optionalEnabled: optionalPostProcessingEnabled,
+  baseExposure: toneMappingExposure,
+})
 $: updateRendererStyle(activePostProcessingPolicy)
 $: rebuildComposerIfPassesChanged(activePostProcessingPolicy)
 $: updateDepthFogSettings(activePostProcessingPolicy)
 $: updateAmbientOcclusionSettings(activePostProcessingPolicy)
 $: updateBloomSettings(activePostProcessingPolicy)
 $: updateColorGradingSettings(activePostProcessingPolicy)
-$: updateComposerSize($size.width, $size.height)
+$: updateKuwaharaSettings(activePostProcessingPolicy)
+$: updateComposerSize(
+  $size.width,
+  $size.height,
+  $qualitySettingsStore.canvasScale,
+)
 $: updateOverlayStyle(activePostProcessingPolicy)
 $: publishPostProcessingDiagnostics(activePostProcessingPolicy)
 
@@ -590,6 +792,7 @@ onMount(() => {
     updateAmbientOcclusionSettings(policy)
     updateBloomSettings(policy)
     updateColorGradingSettings(policy)
+    updateKuwaharaSettings(policy)
     updateOverlayStyle(policy)
     publishPostProcessingDiagnostics(policy)
 
@@ -599,11 +802,12 @@ onMount(() => {
 
 useTask(
   'simple-postprocessing-render',
-  () => {
+  delta => {
     const activeCamera = getActiveCamera()
     if (!composer || !activeCamera) return
+    kuwaharaDepthMaskPass?.setCamera(activeCamera)
     updateDepthFogSettings(activePostProcessingPolicy)
-    composer.render()
+    composer.render(delta)
   },
   {
     stage: renderStage,

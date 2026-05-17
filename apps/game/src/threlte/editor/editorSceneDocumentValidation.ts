@@ -1,4 +1,5 @@
 import { createLevelBuildReport } from '../engine/levelValidation'
+import { validateNpcNodes } from '../engine/npcValidation'
 import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
 import type { EditorSceneDocument } from './editorTypes'
 
@@ -237,6 +238,13 @@ export function validateEditorSceneDocument(
 ): EditorSceneDocumentValidationResult {
   const errors = validateSceneShape(value)
   const warnings: string[] = []
+  if (errors.length === 0 && isRecord(value) && Array.isArray(value.nodes)) {
+    const npcValidation = validateNpcNodes(
+      value.nodes as EditorSceneDocument['nodes'],
+    )
+    errors.push(...npcValidation.errors)
+    warnings.push(...npcValidation.warnings)
+  }
 
   return {
     valid: errors.length === 0,

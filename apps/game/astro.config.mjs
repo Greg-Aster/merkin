@@ -192,6 +192,7 @@ function createClientManualChunksPlugin() {
 
       return {
         build: {
+          emptyOutDir: false,
           rollupOptions: {
             output: {
               manualChunks: resolveGameManualChunk,
@@ -222,7 +223,9 @@ function createPhysicsRuntimeFullReloadPlugin() {
       if (gameDevManualRefresh) return
 
       const file = ctx.file.replaceAll('\\', '/')
-      if (!physicsRuntimeHotUpdatePatterns.some(pattern => pattern.test(file))) {
+      if (
+        !physicsRuntimeHotUpdatePatterns.some(pattern => pattern.test(file))
+      ) {
         return
       }
 
@@ -275,6 +278,7 @@ export default defineConfig({
       exclude: ['three', '@dimforge/rapier3d', '@dimforge/rapier3d-compat'],
     },
     build: {
+      emptyOutDir: false,
       rollupOptions: {
         onwarn(warning, warn) {
           if (
