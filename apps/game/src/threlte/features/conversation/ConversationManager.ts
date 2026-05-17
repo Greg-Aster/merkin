@@ -19,7 +19,7 @@ import type {
 
 // Import the Memory Manager Agent
 import type { MemoryBundle } from './MemoryManagerAgent'
-const isDev = import.meta.env.DEV
+const isDev = import.meta.env?.DEV ?? false
 
 export class ConversationManager {
   private config: ConversationSystemConfig

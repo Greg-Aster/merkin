@@ -1,5 +1,5 @@
 <script lang="ts">
-import { createEventDispatcher } from 'svelte'
+import { createEventDispatcher, onDestroy, setContext } from 'svelte'
 import { evaluateLevelRuntimeActivation } from '../engine/levelRuntimeReadinessContract'
 import {
   type RuntimePlayerSettings,
@@ -11,6 +11,11 @@ import type {
   LevelRuntimeActivationStatus,
   LevelRuntimeReadinessContract,
 } from '../engine/types'
+import {
+  RUNTIME_LIGHTING_CONTEXT,
+  RuntimeLightingController,
+  RuntimeLightingSystem,
+} from '../features/lighting'
 import { DEFAULT_LEVEL_ID } from '../levels/levelRegistry'
 import { runtimeLoadedColliderUrlsStore } from '../stores/runtimeCollisionRegistry'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
@@ -21,6 +26,8 @@ import type {
 } from './levelRuntimeEvents'
 
 const dispatch = createEventDispatcher()
+const runtimeLighting = new RuntimeLightingController()
+setContext(RUNTIME_LIGHTING_CONTEXT, runtimeLighting)
 
 export let isMobile = false
 export let editorEnabled = false
@@ -276,6 +283,10 @@ function resetWorldSession() {
   editorSceneSettingsOverride = null
 }
 
+onDestroy(() => {
+  runtimeLighting.dispose()
+})
+
 $: editorEditPlayerPosition =
   editorPlaytestResumePosition ??
   editorPlaytestSpawnPosition ??
@@ -374,6 +385,8 @@ $: if (
         physicsReady = true
       }}
     >
+      <RuntimeLightingSystem controller={runtimeLighting} />
+
       {#if currentLevelComponent}
         <svelte:component
           this={currentLevelComponent}
@@ -391,6 +404,7 @@ $: if (
           on:requestLevelReturn={(e) => forward('requestLevelReturn', e.detail)}
           on:staticWorldReady={(e) => handleStaticWorldReady(e.detail)}
           on:playerLevelPosition={(e) => handlePlayerLevelPosition(e.detail)}
+          on:npcInteraction={(e) => forward('npcInteraction', e.detail)}
         />
       {/if}
 

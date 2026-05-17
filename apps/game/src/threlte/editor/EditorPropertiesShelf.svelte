@@ -1,10 +1,12 @@
 <script lang="ts">
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import EditorAssetPreview from './EditorAssetPreview.svelte'
+import EditorNpcSection from './EditorNpcSection.svelte'
 import {
   describeNodeCollisionSource,
   resolveNodeCollision,
 } from './editorCollisionDefaults'
+import type { EditorNpcPatch } from './editorNpcControls'
 import type {
   EditorCollisionLodSourceTier,
   EditorCollisionMode,
@@ -79,23 +81,12 @@ type GameplayNumericField =
   | 'audioVolume'
   | 'regionFalloff'
   | 'fogDensity'
-  | 'wanderRadius'
-  | 'wanderSpeed'
-  | 'hoverHeight'
-  | 'bobAmplitude'
-  | 'bobSpeed'
-  | 'twinkleSpeed'
-  | 'lightIntensity'
-  | 'lightDistance'
-  | 'lightDecay'
-  | 'spriteIntensity'
-  | 'lightBurstBoost'
   | 'mistOpacity'
   | 'mistLayers'
   | 'mistSpacing'
   | 'mistScale'
   | 'mistDriftSpeed'
-type GameplayBooleanField = 'wanderEnabled'
+type GameplayBooleanField = never
 
 export let selectedNode: EditorSceneNode | null = null
 export let selectedNodes: EditorSceneNode[] = []
@@ -190,6 +181,7 @@ export let onGameplayBooleanChange: (
   field: GameplayBooleanField,
   value: boolean,
 ) => void = () => {}
+export let onNpcChange: (patch: EditorNpcPatch) => void = () => {}
 export let onStyleDescriptorChange: (value: string) => void = () => {}
 export let onSelectGeneratedVariant: (url: string) => void = () => {}
 export let onApplyGeneratedVariant: (url: string) => void = () => {}
@@ -359,6 +351,9 @@ $: selectedGameplaySummary = selectedNode?.gameplay
     ? `${selectedNode.gameplay.type}: ${selectedNode.gameplay.title}`
     : selectedNode.gameplay.type
   : 'none'
+$: selectedNpcSummary = selectedNode?.npc
+  ? `${selectedNode.npc.archetype}: ${selectedNode.npc.displayName ?? selectedNode.npc.id}`
+  : 'none'
 $: filteredAssetBrowserItems = assetBrowserItems.filter(
   item =>
     !assetBrowserFilter.trim() ||
@@ -455,8 +450,10 @@ function useAuthoredRenderedLightPreview() {
       <div class="editor-chip-row">
         <span class="editor-chip ready">transform editable</span>
         <span class:ready={Boolean(effectiveCollision)} class:warn={!effectiveCollision} class="editor-chip">collision: {selectedCollisionMode}</span>
+        <span class:ready={Boolean(selectedNode.npc)} class="editor-chip">npc: {selectedNode.npc ? 'configured' : 'none'}</span>
         <span class:ready={Boolean(selectedNode.gameplay)} class="editor-chip">gameplay: {selectedNode.gameplay ? 'configured' : 'none'}</span>
       </div>
+      <div class="save-message">NPC: {selectedNpcSummary}</div>
       <div class="save-message">Gameplay: {selectedGameplaySummary}</div>
     </div>
     <div class="save-message">Next: adjust transform, visibility, material, collision, or gameplay details below.</div>
@@ -736,6 +733,13 @@ function useAuthoredRenderedLightPreview() {
     </div>
   {/if}
 
+  {#if selectedNode.npc}
+    <div class="editor-section compact-surface">
+      <div class="label">NPC</div>
+      <EditorNpcSection npc={selectedNode.npc} {onNpcChange} />
+    </div>
+  {/if}
+
   {#if selectedNode.gameplay}
     <div class="editor-section compact-surface">
       <div class="label">Gameplay</div>
@@ -757,73 +761,6 @@ function useAuthoredRenderedLightPreview() {
           <div class="tuple-label">Target Level</div>
           <input class="text-input" value={selectedNode.gameplay.targetLevelId ?? ''} on:input={(e) => onGameplayFieldChange('targetLevelId', (e.currentTarget as HTMLInputElement).value)} />
         </div>
-      {:else if selectedNode.gameplay.type === 'firefly'}
-        <div class="tuple-group">
-          <div class="tuple-label">Title</div>
-          <input class="text-input" value={selectedNode.gameplay.title ?? ''} on:input={(e) => onGameplayFieldChange('title', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Author</div>
-          <input class="text-input" value={selectedNode.gameplay.author ?? ''} on:input={(e) => onGameplayFieldChange('author', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Location</div>
-          <input class="text-input" value={selectedNode.gameplay.location ?? ''} on:input={(e) => onGameplayFieldChange('location', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Excerpt</div>
-          <textarea rows="3" value={selectedNode.gameplay.excerpt ?? ''} on:input={(e) => onGameplayFieldChange('excerpt', (e.currentTarget as HTMLTextAreaElement).value)}></textarea>
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Body</div>
-          <textarea rows="5" value={selectedNode.gameplay.body ?? ''} on:input={(e) => onGameplayFieldChange('body', (e.currentTarget as HTMLTextAreaElement).value)}></textarea>
-        </div>
-        <label class="checkbox"><input type="checkbox" checked={selectedNode.gameplay.wanderEnabled ?? true} on:change={(e) => onGameplayBooleanChange('wanderEnabled', (e.currentTarget as HTMLInputElement).checked)} /> Wander</label>
-        <div class="tuple-group">
-          <div class="tuple-label">Wander Radius</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.wanderRadius ?? 0.16} on:change={(e) => onGameplayNumericChange('wanderRadius', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Wander Speed</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.wanderSpeed ?? 0.18} on:change={(e) => onGameplayNumericChange('wanderSpeed', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Glow Intensity</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.lightIntensity ?? 1.15} on:change={(e) => onGameplayNumericChange('lightIntensity', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Glow Distance</div>
-          <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.lightDistance ?? 4.6} on:change={(e) => onGameplayNumericChange('lightDistance', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Glow Decay</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.lightDecay ?? 1.25} on:change={(e) => onGameplayNumericChange('lightDecay', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Sprite Intensity</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.spriteIntensity ?? 1.15} on:change={(e) => onGameplayNumericChange('spriteIntensity', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Burst Glow Boost</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.lightBurstBoost ?? 1.25} on:change={(e) => onGameplayNumericChange('lightBurstBoost', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Hover Height</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.hoverHeight ?? 0.28} on:change={(e) => onGameplayNumericChange('hoverHeight', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Bob Amplitude</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobAmplitude ?? 0.08} on:change={(e) => onGameplayNumericChange('bobAmplitude', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Bob Speed</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobSpeed ?? 0.55} on:change={(e) => onGameplayNumericChange('bobSpeed', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Twinkle Speed</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.twinkleSpeed ?? 0.9} on:change={(e) => onGameplayNumericChange('twinkleSpeed', (e.currentTarget as HTMLInputElement).value)} />
-        </div>
-        <div class="save-message">Glow controls drive nearby scene lighting; sprite intensity controls the visible core and halo; burst glow boost scales the player light-release reaction.</div>
       {:else if selectedNode.gameplay.type === 'note'}
         <div class="tuple-group">
           <div class="tuple-label">Title</div>

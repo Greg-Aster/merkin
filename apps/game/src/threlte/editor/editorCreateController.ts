@@ -7,6 +7,7 @@ import {
   canHostPointLight,
   getDefaultChildPointLightPosition,
 } from './editorLightPlacement'
+import { createEditorFireflyNpcNode } from './editorNpcPrefabs'
 import type { EditorPrefabType, EditorSceneNode } from './editorStore'
 
 interface EditorCreateControllerDeps {
@@ -25,7 +26,7 @@ interface EditorCreateControllerDeps {
   editorPrefabs: {
     addAnomaly: (parentId?: string | null) => void
     addMarker: (parentId?: string | null) => void
-    addFireflyDialogue: (parentId?: string | null) => void
+    addFireflyNpc: (parentId?: string | null) => void
     addAmbientAudioRegion: (parentId?: string | null) => void
     addFogVolume: (parentId?: string | null) => void
     addMistRegion: (parentId?: string | null) => void
@@ -51,7 +52,7 @@ export function createEditorCreateController(deps: EditorCreateControllerDeps) {
       | 'anomaly'
       | 'marker'
       | 'light'
-      | 'firefly'
+      | 'npc-firefly'
       | 'audio-region'
       | 'fog-volume'
       | 'mist-region',
@@ -59,7 +60,7 @@ export function createEditorCreateController(deps: EditorCreateControllerDeps) {
     const parentId = deps.getSelectedNode()?.id ?? null
     if (type === 'anomaly') deps.editorPrefabs.addAnomaly(parentId)
     else if (type === 'marker') deps.editorPrefabs.addMarker(parentId)
-    else if (type === 'firefly') deps.editorPrefabs.addFireflyDialogue(parentId)
+    else if (type === 'npc-firefly') deps.editorPrefabs.addFireflyNpc(parentId)
     else if (type === 'audio-region')
       deps.editorPrefabs.addAmbientAudioRegion(parentId)
     else if (type === 'fog-volume') deps.editorPrefabs.addFogVolume(parentId)
@@ -103,28 +104,21 @@ export function createEditorCreateController(deps: EditorCreateControllerDeps) {
         targetNode.parentId ?? null,
         targetWorldMatrix,
       )
-      const fireflyId = `firefly-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+      const fireflyId = `npc-firefly-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 
-      deps.addNode({
-        id: fireflyId,
-        name: `${targetNode.name} Firefly`,
-        kind: 'group',
-        parentId: targetNode.parentId ?? null,
-        position: localTransform.position,
-        rotation: [0, 0, 0],
-        scale: [1, 1, 1],
-        visible: true,
-        gameplay: {
-          type: 'firefly',
-          markerColor: '#f5f1a8',
-          markerSize: 0.52,
+      deps.addNode(
+        createEditorFireflyNpcNode({
+          id: fireflyId,
+          name: `${targetNode.name} Firefly`,
+          parentId: targetNode.parentId ?? null,
+          position: localTransform.position,
+          displayName: `${targetNode.name} Firefly`,
           title: targetNode.name,
-          author: 'Pillar Firefly',
-          location: deps.getActiveSceneLevelId(),
           excerpt: `A patient glow hovers above ${targetNode.name}.`,
           body: `A solitary firefly keeps watch above ${targetNode.name}.`,
-        },
-      })
+          color: '#f5f1a8',
+        }),
+      )
 
       createdIds.push(fireflyId)
     }
@@ -132,7 +126,7 @@ export function createEditorCreateController(deps: EditorCreateControllerDeps) {
     if (createdIds.length > 0) {
       deps.setSelectedNodes(createdIds, createdIds[0] ?? null)
       deps.setSaveMessage(
-        `Added ${createdIds.length} firefl${createdIds.length === 1 ? 'y' : 'ies'} to selection`,
+        `Added ${createdIds.length} NPC firefl${createdIds.length === 1 ? 'y' : 'ies'} to selection`,
       )
     }
   }

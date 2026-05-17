@@ -1,10 +1,12 @@
 <script lang="ts">
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import EditorAssetPreview from './EditorAssetPreview.svelte'
+import EditorNpcSection from './EditorNpcSection.svelte'
 import {
   describeNodeCollisionSource,
   resolveNodeCollision,
 } from './editorCollisionDefaults'
+import type { EditorNpcPatch } from './editorNpcControls'
 import type {
   EditorCollisionLodSourceTier,
   EditorCollisionMode,
@@ -71,17 +73,6 @@ type GameplayNumericField =
   | 'mistSpacing'
   | 'mistScale'
   | 'mistDriftSpeed'
-  | 'wanderRadius'
-  | 'wanderSpeed'
-  | 'hoverHeight'
-  | 'bobAmplitude'
-  | 'bobSpeed'
-  | 'twinkleSpeed'
-  | 'lightIntensity'
-  | 'lightDistance'
-  | 'lightDecay'
-  | 'spriteIntensity'
-  | 'lightBurstBoost'
 
 type AssetBrowserItem = {
   name: string
@@ -209,14 +200,13 @@ export let onGameplayFieldChange: (
   field: GameplayField,
   value: string,
 ) => void = () => {}
-export let onGameplayBooleanChange: (
-  field: 'wanderEnabled',
-  value: boolean,
-) => void = () => {}
+export let onGameplayBooleanChange: (field: never, value: boolean) => void =
+  () => {}
 export let onGameplayNumericChange: (
   field: GameplayNumericField,
   value: string,
 ) => void = () => {}
+export let onNpcChange: (patch: EditorNpcPatch) => void = () => {}
 export let onTransformChange: (
   field: 'position' | 'rotation' | 'scale',
   index: number,
@@ -644,6 +634,13 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
       <div class="tuple-group"><div class="tuple-label">Light Decay</div><input class="tuple-input" type="number" min="0" step="0.1" value={selectedNode.light.decay} on:input={(e) => onLightNumericChange('decay', (e.currentTarget as HTMLInputElement).value)} /></div>
     {/if}
 
+    {#if selectedNode.npc}
+      <div class="tuple-group">
+        <div class="tuple-label">NPC</div>
+        <EditorNpcSection npc={selectedNode.npc} {onNpcChange} />
+      </div>
+    {/if}
+
     {#if selectedNode.gameplay}
       <div class="tuple-group">
         <div class="tuple-label">Gameplay Type</div>
@@ -662,25 +659,6 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
           <div class="tuple-label">Target Level</div>
           <input class="text-input" value={selectedNode.gameplay.targetLevelId ?? ''} on:input={(e) => onGameplayFieldChange('targetLevelId', (e.currentTarget as HTMLInputElement).value)} />
         </div>
-      {:else if selectedNode.gameplay.type === 'firefly'}
-        <div class="tuple-group"><div class="tuple-label">Title</div><input class="text-input" value={selectedNode.gameplay.title ?? ''} on:input={(e) => onGameplayFieldChange('title', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Author</div><input class="text-input" value={selectedNode.gameplay.author ?? ''} on:input={(e) => onGameplayFieldChange('author', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Location</div><input class="text-input" value={selectedNode.gameplay.location ?? ''} on:input={(e) => onGameplayFieldChange('location', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Excerpt</div><textarea rows="3" value={selectedNode.gameplay.excerpt ?? ''} on:input={(e) => onGameplayFieldChange('excerpt', (e.currentTarget as HTMLTextAreaElement).value)}></textarea></div>
-        <div class="tuple-group"><div class="tuple-label">Body</div><textarea rows="5" value={selectedNode.gameplay.body ?? ''} on:input={(e) => onGameplayFieldChange('body', (e.currentTarget as HTMLTextAreaElement).value)}></textarea></div>
-        <label class="checkbox"><input type="checkbox" checked={selectedNode.gameplay.wanderEnabled ?? true} on:change={(e) => onGameplayBooleanChange('wanderEnabled', (e.currentTarget as HTMLInputElement).checked)} /> Wander</label>
-        <div class="tuple-group"><div class="tuple-label">Wander Radius</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.wanderRadius ?? 0.16} on:change={(e) => onGameplayNumericChange('wanderRadius', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Wander Speed</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.wanderSpeed ?? 0.18} on:change={(e) => onGameplayNumericChange('wanderSpeed', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Glow Intensity</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.lightIntensity ?? 1.15} on:change={(e) => onGameplayNumericChange('lightIntensity', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Glow Distance</div><input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.lightDistance ?? 4.6} on:change={(e) => onGameplayNumericChange('lightDistance', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Glow Decay</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.lightDecay ?? 1.25} on:change={(e) => onGameplayNumericChange('lightDecay', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Sprite Intensity</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.spriteIntensity ?? 1.15} on:change={(e) => onGameplayNumericChange('spriteIntensity', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Burst Glow Boost</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.lightBurstBoost ?? 1.25} on:change={(e) => onGameplayNumericChange('lightBurstBoost', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Hover Height</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.hoverHeight ?? 0.28} on:change={(e) => onGameplayNumericChange('hoverHeight', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Bob Amplitude</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobAmplitude ?? 0.08} on:change={(e) => onGameplayNumericChange('bobAmplitude', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Bob Speed</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobSpeed ?? 0.55} on:change={(e) => onGameplayNumericChange('bobSpeed', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="tuple-group"><div class="tuple-label">Twinkle Speed</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.twinkleSpeed ?? 0.9} on:change={(e) => onGameplayNumericChange('twinkleSpeed', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="save-message">Adjust luminance with the glow controls, use burst glow boost for the player light-release reaction, and tune motion with wander/hover/bob/twinkle controls.</div>
       {:else if selectedNode.gameplay.type === 'note'}
         <div class="tuple-group"><div class="tuple-label">Title</div><input class="text-input" value={selectedNode.gameplay.title ?? ''} on:input={(e) => onGameplayFieldChange('title', (e.currentTarget as HTMLInputElement).value)} /></div>
         <div class="tuple-group"><div class="tuple-label">Author</div><input class="text-input" value={selectedNode.gameplay.author ?? ''} on:input={(e) => onGameplayFieldChange('author', (e.currentTarget as HTMLInputElement).value)} /></div>

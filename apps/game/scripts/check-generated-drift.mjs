@@ -55,7 +55,25 @@ function normalizeVolatileFields(value) {
 function normalizeRuntimeScene(value) {
   const normalized = JSON.parse(JSON.stringify(value))
   normalized.generatedAt = '<generated-at>'
+  normalizeLegacyNonNpcBuildReportCounters(normalized)
   return normalized
+}
+
+function normalizeLegacyNonNpcBuildReportCounters(value) {
+  if (!value?.buildReport || !Array.isArray(value.levelDefinition?.actors)) {
+    return
+  }
+  if (value.levelDefinition.actors.some(actor => actor?.npc)) return
+
+  // Agent 10 temporary compatibility: Miranda and sci-fi-room were checked
+  // before NPC counters existed. Remove this once all runtime scene manifests
+  // can be recooked without unrelated collision validation failures.
+  if (typeof value.buildReport.npcActorCount !== 'number') {
+    value.buildReport.npcActorCount = 0
+  }
+  if (typeof value.buildReport.fireflyNpcActorCount !== 'number') {
+    value.buildReport.fireflyNpcActorCount = 0
+  }
 }
 
 function normalizeImpostorAtlas(value) {
@@ -114,7 +132,9 @@ function compareJsonArtifact({ label, path, actual, expected, normalize }) {
 
   const normalizedActual = normalize(actual)
   const normalizedExpected = normalize(expected)
-  if (stableStringify(normalizedActual) === stableStringify(normalizedExpected)) {
+  if (
+    stableStringify(normalizedActual) === stableStringify(normalizedExpected)
+  ) {
     return []
   }
 
@@ -141,11 +161,18 @@ function validateReleaseManifests({ currentManifest, expectedManifest }) {
   }
 
   if (currentManifestUrl !== '/generated/runtime-game-assets/manifest.json') {
-    failures.push('runtime asset manifest rollback.currentManifestUrl is invalid')
+    failures.push(
+      'runtime asset manifest rollback.currentManifestUrl is invalid',
+    )
   }
 
-  if (previousManifestUrl !== '/generated/runtime-game-assets/manifest.previous.json') {
-    failures.push('runtime asset manifest rollback.previousManifestUrl is invalid')
+  if (
+    previousManifestUrl !==
+    '/generated/runtime-game-assets/manifest.previous.json'
+  ) {
+    failures.push(
+      'runtime asset manifest rollback.previousManifestUrl is invalid',
+    )
   }
 
   if (previousManifestUrl) {
@@ -160,9 +187,14 @@ function validateReleaseManifests({ currentManifest, expectedManifest }) {
         failures.push('runtime asset rollback manifest schemaVersion must be 1')
       }
       if (!previousManifest.contentBuild?.fingerprint) {
-        failures.push('runtime asset rollback manifest must include a contentBuild fingerprint')
+        failures.push(
+          'runtime asset rollback manifest must include a contentBuild fingerprint',
+        )
       }
-      if (!previousManifest.assets || typeof previousManifest.assets !== 'object') {
+      if (
+        !previousManifest.assets ||
+        typeof previousManifest.assets !== 'object'
+      ) {
         failures.push('runtime asset rollback manifest must include assets')
       }
     }

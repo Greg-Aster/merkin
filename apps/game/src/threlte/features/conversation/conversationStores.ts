@@ -8,6 +8,7 @@
 import { derived, get, readable, writable } from 'svelte/store'
 import type { ConversationManager } from './ConversationManager'
 import type {
+  ConversationContext,
   ConversationSession,
   ConversationStores,
   ConversationSystemConfig,
@@ -16,7 +17,7 @@ import type {
   NPCConversationComponent,
   NPCPersonality,
 } from './types'
-const isDev = import.meta.env.DEV
+const isDev = import.meta.env?.DEV ?? false
 
 // ================================
 // Configuration
@@ -45,8 +46,8 @@ const defaultConfig: ConversationSystemConfig = {
   batchRequestDelay: 100,
 
   // Debug
-  enableLogging: import.meta.env.DEV,
-  enableDebugUI: import.meta.env.DEV,
+  enableLogging: isDev,
+  enableDebugUI: isDev,
 }
 
 // ================================
@@ -212,12 +213,13 @@ export const conversationActions = {
     }
   },
 
-  // Start a read-only conversation for generic fireflies
+  // Start a read-only authored NPC conversation
   startReadOnlyConversation(
     npcId: string,
     personality: NPCPersonality,
     message: string,
     duration: number = 4000,
+    context: Partial<ConversationContext> = {},
   ): void {
     // Add the personality to availableNPCs so the derived store can find it
     availableNPCs.update(npcs => {
@@ -226,8 +228,7 @@ export const conversationActions = {
       return newNPCs
     })
 
-    // Create a mock session for read-only mode
-    const mockSession = {
+    const mockSession: ConversationSession = {
       id: `readonly_${npcId}_${Date.now()}`,
       npcId,
       personality,
@@ -236,8 +237,13 @@ export const conversationActions = {
       lastInteraction: Date.now(),
       messages: [],
       context: {
-        location: 'read-only-firefly',
-        timeOfDay: 'night' as const,
+        location: context.location ?? 'read-only-npc',
+        timeOfDay: context.timeOfDay ?? 'night',
+        playerLevel: context.playerLevel,
+        gameState: context.gameState,
+        environmentData: context.environmentData,
+        previousConversations: context.previousConversations,
+        relationshipLevel: context.relationshipLevel,
       },
     }
 

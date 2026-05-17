@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "mode": "ai-texture-source",
+  "status": "experimental-source",
+  "generatedAt": null,
+  "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+  "styleImageUrl": "/generated/style-lab/blender/comfyui-flux-style-test/yggdrasil-world-tree-flux-depth-aquarelle-paint-test-strong.png",
+  "styleImagePath": "apps/megameal/public/generated/style-lab/blender/comfyui-flux-style-test/yggdrasil-world-tree-flux-depth-aquarelle-paint-test-strong.png",
+  "outputs": {
+    "textureUrl": "/generated/style-lab/blender/comfyui-projection-bake-test/yggdrasil-world-tree-comfyui-single-view-projection-basecolor.png",
+    "texturePath": "apps/megameal/public/generated/style-lab/blender/comfyui-projection-bake-test/yggdrasil-world-tree-comfyui-single-view-projection-basecolor.png",
+    "glbUrl": "/generated/style-lab/blender/comfyui-projection-bake-test/yggdrasil-world-tree-comfyui-single-view-projection.glb",
+    "glbPath": "apps/megameal/public/generated/style-lab/blender/comfyui-projection-bake-test/yggdrasil-world-tree-comfyui-single-view-projection.glb",
+    "comparisonRenderUrl": "/generated/style-lab/blender/comfyui-projection-bake-test/yggdrasil-world-tree-comfyui-single-view-projection-comparison.png",
+    "comparisonRenderPath": "apps/megameal/public/generated/style-lab/blender/comfyui-projection-bake-test/yggdrasil-world-tree-comfyui-single-view-projection-comparison.png"
+  },
+  "coverage": null,
+  "diagnostics": {
+    "status": "requires-regeneration",
+    "reason": "Companion metadata was added after the existing projection artifact was generated."
+  },
+  "runtimePolicy": {
+    "eligibleForRuntimeCook": false,
+    "promotionPath": "StyleBakeManager style bake product metadata",
+    "removalCondition": "Replace with deterministic style bake product before committing runtime asset references."
+  }
+}

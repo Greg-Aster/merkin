@@ -10,7 +10,7 @@
 
 import type { NPCPersonality } from './types'
 import { type ContextResult, worldKnowledge } from './worldKnowledge'
-const isDev = import.meta.env.DEV
+const isDev = import.meta.env?.DEV ?? false
 
 // ================================
 // Memory Manager Interfaces

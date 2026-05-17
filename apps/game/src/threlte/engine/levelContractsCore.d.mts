@@ -8,7 +8,7 @@ export interface LevelRuntimeContract {
   maxRuntimeAssetCount: number
   maxPrimitiveActorCount: number
   maxNeverCullActorCount: number
-  maxGameplayFireflyCount: number
+  maxFireflyNpcCount: number
 }
 
 export function getLevelRuntimeContract(levelId: string): LevelRuntimeContract

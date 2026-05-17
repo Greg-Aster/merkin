@@ -5,6 +5,10 @@ import { dirname, join } from 'node:path'
 import { repairGeneratedPbrGlb } from './gltfGeneratedPbrRepair.mjs'
 import { retopologizeGlbLodByTriangleArea } from './gltfLodRetopology.mjs'
 import {
+  readRuntimeAssetImportManifest,
+  resolveRuntimeAssetImportMetadata,
+} from './runtimeAssetImportManifest.mjs'
+import {
   getAssetCookTierConfig,
   getCookedPublicUrl,
   resolvePublicPath,
@@ -40,7 +44,13 @@ export function cookRuntimeAssetVariant({
   const inputPath = resolvePublicPath(context, sourceUrl)
   const outputUrl = getCookedPublicUrl(sourceUrl, tier.id)
   const outputPath = resolvePublicPath(context, outputUrl)
-  const cookTier = getAssetCookTierConfig(sourceUrl, tier)
+  const importManifest = readRuntimeAssetImportManifest(context)
+  const importMetadata = resolveRuntimeAssetImportMetadata({
+    context,
+    manifest: importManifest,
+    sourceUrl,
+  })
+  const cookTier = getAssetCookTierConfig(sourceUrl, tier, importMetadata)
 
   if (!existsSync(inputPath)) {
     throw new Error(`Missing source asset: ${sourceUrl}`)

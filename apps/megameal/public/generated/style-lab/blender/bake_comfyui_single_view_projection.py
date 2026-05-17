@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import math
+from datetime import datetime, timezone
 from pathlib import Path
 
 import bpy
@@ -28,8 +30,24 @@ STYLE_IMAGE = (
 )
 OUTPUT_TEXTURE = OUTPUT_DIR / "yggdrasil-world-tree-comfyui-single-view-projection-basecolor.png"
 OUTPUT_GLB = OUTPUT_DIR / "yggdrasil-world-tree-comfyui-single-view-projection.glb"
+OUTPUT_METADATA = OUTPUT_GLB.with_suffix(".json")
 OUTPUT_BLEND = OUTPUT_DIR / "yggdrasil-world-tree-comfyui-single-view-projection-comparison.blend"
 OUTPUT_RENDER = OUTPUT_DIR / "yggdrasil-world-tree-comfyui-single-view-projection-comparison.png"
+
+
+def repo_relative(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(base.REPO_ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def public_url(path: Path) -> str | None:
+    relative_path = repo_relative(path)
+    public_prefix = "apps/megameal/public/"
+    if relative_path.startswith(public_prefix):
+        return "/" + relative_path[len(public_prefix) :]
+    return None
 
 
 def load_pixels(path: Path) -> tuple[np.ndarray, bpy.types.Image]:
@@ -39,12 +57,38 @@ def load_pixels(path: Path) -> tuple[np.ndarray, bpy.types.Image]:
     return pixels, image
 
 
-def first_base_color_image() -> bpy.types.Image:
+def image_asset_key(image: bpy.types.Image) -> str:
+    filepath = bpy.path.abspath(image.filepath) if image.filepath else ""
+    return filepath or image.name
+
+
+def base_color_images() -> list[bpy.types.Image]:
+    images_by_key: dict[str, bpy.types.Image] = {}
     for material in bpy.data.materials:
         for node in base.base_color_texture_nodes(material):
             if node.image and node.image.size[0] > 0 and node.image.size[1] > 0:
-                return node.image
-    raise RuntimeError("No base-color image found on source material")
+                images_by_key.setdefault(image_asset_key(node.image), node.image)
+    return list(images_by_key.values())
+
+
+def single_supported_mesh() -> bpy.types.Object:
+    meshes = [obj for obj in base.mesh_objects() if obj.data.uv_layers.active]
+    if len(meshes) != 1:
+        raise RuntimeError(
+            "ComfyUI single-view projection only supports one UV-mapped mesh. "
+            f"Found {len(meshes)}; promote multi-mesh projection through StyleBakeManager before runtime use."
+        )
+    return meshes[0]
+
+
+def single_supported_base_color_image() -> bpy.types.Image:
+    images = base_color_images()
+    if len(images) != 1:
+        raise RuntimeError(
+            "ComfyUI single-view projection only supports one base-color texture atlas. "
+            f"Found {len(images)}; use the formal style bake product pipeline for multi-material sources."
+        )
+    return images[0]
 
 
 def image_pixels(image: bpy.types.Image) -> np.ndarray:
@@ -120,11 +164,19 @@ def triangle_records(obj: bpy.types.Object, camera: bpy.types.Object, scene: bpy
             if area < 1e-8:
                 continue
 
+            world_normal = (obj.matrix_world.to_3x3() @ polygon.normal).normalized()
+            world_center = sum(world_points, Vector()) / len(world_points)
+            view_direction = (camera.location - world_center).normalized()
+            facing_weight = max(0.0, float(world_normal.dot(view_direction)))
+            if facing_weight <= 0.02:
+                continue
+
             records.append(
                 {
                     "uv": np.array(uvs, dtype=np.float32),
                     "screen": p,
                     "depth": np.array(depths, dtype=np.float32),
+                    "weight": facing_weight,
                 }
             )
 
@@ -171,12 +223,15 @@ def bake_projection(
     styled_pixels: np.ndarray,
     source_pixels: np.ndarray,
     zbuffer: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, dict]:
     texture = source_pixels.copy()
     texture_h, texture_w, _ = texture.shape
     style_h, style_w, _ = styled_pixels.shape
     painted = np.zeros((texture_h, texture_w), dtype=bool)
     depth_epsilon = 0.003
+    visible_triangle_count = 0
+    visible_sample_count = 0
+    visible_weight_sum = 0.0
 
     for record in records:
         uv_pixels = record["uv"].copy()
@@ -202,12 +257,22 @@ def bake_projection(
         sx = (w0 * screen[0, 0] + w1 * screen[1, 0] + w2 * screen[2, 0]) * (style_w - 1)
         sy = (w0 * screen[0, 1] + w1 * screen[1, 1] + w2 * screen[2, 1]) * (style_h - 1)
         depth = w0 * record["depth"][0] + w1 * record["depth"][1] + w2 * record["depth"][2]
-
+        screen_bounds = (sx >= 0) & (sx <= style_w - 1) & (sy >= 0) & (sy <= style_h - 1)
         sx_i = np.clip(np.rint(sx).astype(np.int32), 0, style_w - 1)
         sy_i = np.clip(np.rint(sy).astype(np.int32), 0, style_h - 1)
-        visible = uv_mask & np.isfinite(zbuffer[sy_i, sx_i]) & (depth <= zbuffer[sy_i, sx_i] + depth_epsilon)
+        zbuffer_depth = zbuffer[sy_i, sx_i]
+        visible = (
+            uv_mask
+            & screen_bounds
+            & np.isfinite(zbuffer_depth)
+            & (depth <= zbuffer_depth + depth_epsilon)
+        )
         if not np.any(visible):
             continue
+        visible_samples = int(visible.sum())
+        visible_triangle_count += 1
+        visible_sample_count += visible_samples
+        visible_weight_sum += visible_samples * float(record["weight"])
 
         color = sample_nearest(styled_pixels, sx, sy)
         patch = texture[min_y : max_y + 1, min_x : max_x + 1]
@@ -215,7 +280,20 @@ def bake_projection(
         painted[min_y : max_y + 1, min_x : max_x + 1] |= visible
 
     texture[:, :, 3] = 1.0
-    return texture, painted
+    average_facing_weight = (
+        visible_weight_sum / visible_sample_count if visible_sample_count else 0.0
+    )
+    print(
+        "Projection visible UV triangles: "
+        f"{visible_triangle_count}; samples: {visible_sample_count}; "
+        f"average facing weight: {average_facing_weight:.3f}"
+    )
+    return texture, painted, {
+        "depthEpsilon": depth_epsilon,
+        "visibleTriangleCount": visible_triangle_count,
+        "visibleSampleCount": visible_sample_count,
+        "averageFacingWeight": average_facing_weight,
+    }
 
 
 def save_texture(pixels: np.ndarray) -> bpy.types.Image:
@@ -228,51 +306,107 @@ def save_texture(pixels: np.ndarray) -> bpy.types.Image:
     return image
 
 
-def apply_texture(image: bpy.types.Image) -> None:
+def apply_texture(image: bpy.types.Image, source_image_key: str) -> int:
+    replaced_node_count = 0
     for material in bpy.data.materials:
         material.use_nodes = True
-        texture_nodes = base.base_color_texture_nodes(material)
-        if texture_nodes:
-            for node in texture_nodes:
-                node.image = image
-        else:
-            nodes = material.node_tree.nodes
-            links = material.node_tree.links
-            texture = nodes.new("ShaderNodeTexImage")
-            texture.image = image
-            principled = base.first_principled_node(material)
-            if principled:
-                links.new(texture.outputs["Color"], principled.inputs["Base Color"])
+        texture_nodes = [
+            node
+            for node in base.base_color_texture_nodes(material)
+            if node.image and image_asset_key(node.image) == source_image_key
+        ]
+        if not texture_nodes:
+            continue
+        replaced_node_count += len(texture_nodes)
+        for node in texture_nodes:
+            node.image = image
         principled = base.first_principled_node(material)
         if principled:
             if "Roughness" in principled.inputs:
                 principled.inputs["Roughness"].default_value = 0.95
             if "Metallic" in principled.inputs:
                 principled.inputs["Metallic"].default_value = 0.0
+    return replaced_node_count
 
 
-def export_projected_glb() -> tuple[int, int]:
+def write_metadata(coverage: float, diagnostics: dict) -> None:
+    metadata = {
+        "schemaVersion": 1,
+        "mode": "ai-texture-source",
+        "status": "experimental-source",
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
+        "sourceAssetUrl": public_url(base.SOURCE_GLB),
+        "sourceAssetPath": repo_relative(base.SOURCE_GLB),
+        "styleImageUrl": public_url(STYLE_IMAGE),
+        "styleImagePath": repo_relative(STYLE_IMAGE),
+        "outputs": {
+            "textureUrl": public_url(OUTPUT_TEXTURE),
+            "texturePath": repo_relative(OUTPUT_TEXTURE),
+            "glbUrl": public_url(OUTPUT_GLB),
+            "glbPath": repo_relative(OUTPUT_GLB),
+            "comparisonRenderUrl": public_url(OUTPUT_RENDER),
+            "comparisonRenderPath": repo_relative(OUTPUT_RENDER),
+        },
+        "coverage": coverage,
+        "diagnostics": diagnostics,
+        "runtimePolicy": {
+            "eligibleForRuntimeCook": False,
+            "promotionPath": "StyleBakeManager style bake product metadata",
+            "removalCondition": "Replace with deterministic style bake product before committing runtime asset references.",
+        },
+    }
+    OUTPUT_METADATA.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+
+
+def export_projected_glb() -> tuple[int, int, dict]:
     base.clear_scene()
-    base.import_glb(base.SOURCE_GLB)
+    base.import_glb(base.SOURCE_GLB, scale=8.0)
     bpy.context.view_layer.update()
     base.add_lighting_and_camera()
+    bpy.context.view_layer.update()
     scene = bpy.context.scene
     camera = scene.camera
     if camera is None:
         raise RuntimeError("Projection camera was not created")
 
-    obj = base.largest_mesh_object()
+    obj = single_supported_mesh()
     styled_pixels, _ = load_pixels(STYLE_IMAGE)
-    source_pixels = image_pixels(first_base_color_image())
+    source_image = single_supported_base_color_image()
+    source_pixels = image_pixels(source_image)
 
     records = triangle_records(obj, camera, scene)
+    print(f"Projection records: {len(records)}")
+    if records:
+        screens = np.concatenate([record["screen"] for record in records], axis=0)
+        uvs = np.concatenate([record["uv"] for record in records], axis=0)
+        print(
+            "Projection screen range: "
+            f"x={screens[:, 0].min():.3f}..{screens[:, 0].max():.3f} "
+            f"y={screens[:, 1].min():.3f}..{screens[:, 1].max():.3f}; "
+            f"uv x={uvs[:, 0].min():.3f}..{uvs[:, 0].max():.3f} "
+            f"uv y={uvs[:, 1].min():.3f}..{uvs[:, 1].max():.3f}"
+        )
     zbuffer = build_depth_buffer(records, styled_pixels.shape[1], styled_pixels.shape[0])
-    projected_pixels, painted = bake_projection(records, styled_pixels, source_pixels, zbuffer)
+    projected_pixels, painted, diagnostics = bake_projection(
+        records,
+        styled_pixels,
+        source_pixels,
+        zbuffer,
+    )
     baked_image = save_texture(projected_pixels)
-    apply_texture(baked_image)
+
+    base.clear_scene()
+    base.import_glb(base.SOURCE_GLB)
+    bpy.context.view_layer.update()
+    reimport_source_image = single_supported_base_color_image()
+    baked_image = bpy.data.images.load(str(OUTPUT_TEXTURE), check_existing=True)
+    diagnostics["replacedBaseColorTextureNodes"] = apply_texture(
+        baked_image,
+        image_asset_key(reimport_source_image),
+    )
 
     bpy.ops.export_scene.gltf(filepath=str(OUTPUT_GLB), export_format="GLB", use_selection=False)
-    return int(painted.sum()), int(painted.size)
+    return int(painted.sum()), int(painted.size), diagnostics
 
 
 def render_comparison() -> None:
@@ -294,11 +428,13 @@ def main() -> None:
     if not STYLE_IMAGE.exists():
         raise FileNotFoundError(STYLE_IMAGE)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    painted_count, total_count = export_projected_glb()
+    painted_count, total_count, diagnostics = export_projected_glb()
     render_comparison()
     coverage = painted_count / max(total_count, 1)
+    write_metadata(coverage, diagnostics)
     print(f"Wrote {OUTPUT_TEXTURE}")
     print(f"Wrote {OUTPUT_GLB}")
+    print(f"Wrote {OUTPUT_METADATA}")
     print(f"Wrote {OUTPUT_BLEND}")
     print(f"Wrote {OUTPUT_RENDER}")
     print(f"Projected UV coverage: {coverage:.2%}")

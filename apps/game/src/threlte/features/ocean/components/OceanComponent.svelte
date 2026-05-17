@@ -20,13 +20,17 @@ import {
   BaseLevelComponent,
   ComponentType,
   type LevelContext,
-  type LightingData,
   MessageType,
   type SystemMessage,
 } from '../../../core/LevelSystem'
 import { playerStateStore } from '../../../stores/gameStateStore'
 import { setRuntimeDiagnostic } from '../../../stores/runtimeDiagnosticsStore'
 import { runtimeDebugLog } from '../../../utils/runtimeLog'
+import {
+  RUNTIME_LIGHTING_CONTEXT,
+  type RuntimeLightingController,
+  type RuntimeLightingSnapshot,
+} from '../../lighting'
 import { qualityLevelStore, qualitySettingsStore } from '../../performance'
 import UnderwaterEffect from '../effects/UnderwaterEffect.svelte'
 import {
@@ -74,7 +78,9 @@ export let reflectionTint: number = 0x8899aa
 
 // --- CONTEXT & MANAGERS ---
 const registry = getContext('systemRegistry')
-const lightingManager = getContext('lightingManager')
+const runtimeLighting = getContext<RuntimeLightingController | null>(
+  RUNTIME_LIGHTING_CONTEXT,
+)
 
 // --- STATE ---
 let oceanMesh: THREE.Mesh
@@ -272,15 +278,15 @@ class OceanComponent extends BaseLevelComponent {
   protected async onInitialize(): Promise<void> {
     runtimeDebugLog('🌊 Ocean: Initializing...')
     await this.createOcean()
-    if (lightingManager) {
-      unsubscribeLighting = lightingManager.subscribe(
-        (lighting: LightingData) => {
+    if (runtimeLighting) {
+      unsubscribeLighting = runtimeLighting.subscribe(
+        (lighting: RuntimeLightingSnapshot) => {
           this.updateOceanLighting(lighting)
         },
       )
       runtimeDebugLog('🌊 Ocean: Connected to lighting system')
     } else {
-      console.warn('🌊 Ocean: No lightingManager found in context!')
+      console.warn('🌊 Ocean: No runtime lighting controller found in context!')
     }
   }
 
@@ -341,7 +347,7 @@ class OceanComponent extends BaseLevelComponent {
 
   protected onMessage(message: SystemMessage): void {
     if (message.type === MessageType.LIGHTING_UPDATE) {
-      this.updateOceanLighting(message.data)
+      this.updateOceanLighting(message.data as RuntimeLightingSnapshot)
     }
   }
 
@@ -451,7 +457,7 @@ class OceanComponent extends BaseLevelComponent {
     oceanMaterial = undefined as unknown as THREE.Material
   }
 
-  private updateOceanLighting(lighting: LightingData): void {
+  private updateOceanLighting(lighting: RuntimeLightingSnapshot): void {
     // MeshStandardMaterial automatically receives lighting from Three.js lights.
 
     // Only log significant changes (but less frequently)

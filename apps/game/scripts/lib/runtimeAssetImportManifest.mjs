@@ -148,6 +148,11 @@ export function resolveRuntimeAssetImportMetadata({
       explicit?.collisionPolicy,
     ),
     targetBudgets: mergePolicy(family?.targetBudgets, explicit?.targetBudgets),
+    cookOverrides: mergePolicy(family?.cookOverrides, explicit?.cookOverrides),
+    lodValidationExceptions: mergePolicy(
+      family?.lodValidationExceptions,
+      explicit?.lodValidationExceptions,
+    ),
     naming: family?.naming ?? null,
   }
 }

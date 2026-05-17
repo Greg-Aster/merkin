@@ -1,5 +1,6 @@
 import { getGeneratedCollisionProductMountError } from './generatedCollisionProductRuntime'
 import { getRuntimeGroundContract } from './groundContract'
+import { validateNpcLevelContract } from './npcValidation'
 import type { SceneDocument } from './sceneDocumentTypes'
 import type {
   GeneratedCollisionProduct,
@@ -40,6 +41,7 @@ export interface RuntimeSceneManifest {
 export interface RuntimeSceneManifestValidationResult {
   valid: boolean
   errors: string[]
+  warnings: string[]
 }
 
 export function getRuntimeSceneManifestUrl(levelId: string) {
@@ -247,6 +249,27 @@ function sameStringSet(left: string[], right: string[]) {
   return left.every(value => rightSet.has(value))
 }
 
+function getBuildReportNpcCount(
+  buildReport: LevelBuildReport,
+  field: 'npcActorCount' | 'fireflyNpcActorCount',
+  expectedCount: number,
+  errors: string[],
+  warnings: string[],
+) {
+  const authoredCount = buildReport[field]
+  if (typeof authoredCount === 'number') return authoredCount
+
+  if (expectedCount === 0) {
+    warnings.push(
+      `Build report is missing ${field}; temporarily defaulting to 0 for non-NPC runtime scenes until Agent 10 recooks all checked runtime scene manifests.`,
+    )
+    return 0
+  }
+
+  errors.push(`Build report is missing ${field}.`)
+  return null
+}
+
 const forbiddenRuntimeActorFields = new Set([
   'editor',
   'legacyKind',
@@ -259,8 +282,10 @@ export function validateRuntimeSceneManifest(
   expectedLevelId = manifest.levelId,
 ): RuntimeSceneManifestValidationResult {
   const errors: string[] = []
+  const warnings: string[] = []
   const buildReport = manifest.buildReport
   const runtime = manifest.runtime
+  const npcValidation = validateNpcLevelContract(manifest.levelDefinition)
 
   if (manifest.levelId !== expectedLevelId) {
     errors.push(
@@ -289,6 +314,38 @@ export function validateRuntimeSceneManifest(
   if (buildReport.errors.length > 0) {
     errors.push(
       `Cooked level build report contains ${buildReport.errors.length} error(s).`,
+    )
+  }
+  errors.push(...npcValidation.errors)
+  warnings.push(...npcValidation.warnings)
+  const npcActorCount = getBuildReportNpcCount(
+    buildReport,
+    'npcActorCount',
+    npcValidation.diagnostics.npcActorCount,
+    errors,
+    warnings,
+  )
+  if (
+    npcActorCount !== null &&
+    npcActorCount !== npcValidation.diagnostics.npcActorCount
+  ) {
+    errors.push(
+      `Build report npcActorCount ${npcActorCount} does not match runtime level NPC count ${npcValidation.diagnostics.npcActorCount}.`,
+    )
+  }
+  const fireflyNpcActorCount = getBuildReportNpcCount(
+    buildReport,
+    'fireflyNpcActorCount',
+    npcValidation.diagnostics.fireflyNpcActorCount,
+    errors,
+    warnings,
+  )
+  if (
+    fireflyNpcActorCount !== null &&
+    fireflyNpcActorCount !== npcValidation.diagnostics.fireflyNpcActorCount
+  ) {
+    errors.push(
+      `Build report fireflyNpcActorCount ${fireflyNpcActorCount} does not match runtime level firefly NPC count ${npcValidation.diagnostics.fireflyNpcActorCount}.`,
     )
   }
   if (
@@ -413,5 +470,6 @@ export function validateRuntimeSceneManifest(
   return {
     valid: errors.length === 0,
     errors,
+    warnings,
   }
 }

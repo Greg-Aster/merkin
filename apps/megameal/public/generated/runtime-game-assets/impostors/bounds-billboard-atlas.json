@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "strategy": "bounds-billboard-atlas",
-  "generatedAt": "2026-05-16T01:13:07.849Z",
+  "generatedAt": "2026-05-17T00:24:38.956Z",
   "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
   "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
   "tileSize": 256,
@@ -11,7 +11,7 @@
   },
   "columns": 10,
   "rows": 9,
-  "entryCount": 84,
+  "entryCount": 83,
   "entries": [
     {
       "sourceUrl": "/generated/hunyuan3d/approach-stone-1/approach-stone-1-texture-wrap-2026-05-15T00-00-50-964Z.glb",
@@ -3344,9 +3344,9 @@
       }
     },
     {
-      "sourceUrl": "/generated/style-lab/sources/sea-root-south-2026-05-16T01-04-13-115Z/sea-root-south.glb",
+      "sourceUrl": "/generated/style-lab/sources/sea-root-west-2026-05-14T23-56-36-932Z/sea-root-west.glb",
       "index": 74,
-      "color": "hsl(195 75% 57%)",
+      "color": "hsl(290 66% 44%)",
       "cell": {
         "x": 1024,
         "y": 1792,
@@ -3389,9 +3389,9 @@
       }
     },
     {
-      "sourceUrl": "/generated/style-lab/sources/sea-root-west-2026-05-14T23-56-36-932Z/sea-root-west.glb",
+      "sourceUrl": "/generated/style-lab/sources/shore-stone-7-2026-05-15T00-08-17-541Z/shore-stone-7.glb",
       "index": 75,
-      "color": "hsl(290 66% 44%)",
+      "color": "hsl(180 68% 42%)",
       "cell": {
         "x": 1280,
         "y": 1792,
@@ -3402,51 +3402,6 @@
         "u0": 0.5,
         "v0": 0.7778,
         "u1": 0.6,
-        "v1": 0.8889
-      },
-      "billboardRect": {
-        "x": 108.54,
-        "y": 30.72,
-        "width": 38.91,
-        "height": 194.56
-      },
-      "bounds": {
-        "min": [
-          -4.400000095367432,
-          -22,
-          -4.400000095367432
-        ],
-        "max": [
-          4.400000095367432,
-          22,
-          4.400000095367432
-        ],
-        "size": [
-          8.800000190734863,
-          44,
-          8.800000190734863
-        ],
-        "center": [
-          0,
-          0,
-          0
-        ]
-      }
-    },
-    {
-      "sourceUrl": "/generated/style-lab/sources/shore-stone-7-2026-05-15T00-08-17-541Z/shore-stone-7.glb",
-      "index": 76,
-      "color": "hsl(180 68% 42%)",
-      "cell": {
-        "x": 1536,
-        "y": 1792,
-        "width": 256,
-        "height": 256
-      },
-      "uv": {
-        "u0": 0.6,
-        "v0": 0.7778,
-        "u1": 0.7,
         "v1": 0.8889
       },
       "billboardRect": {
@@ -3480,18 +3435,18 @@
     },
     {
       "sourceUrl": "/generated/style-lab/sources/shore-stone-8-2026-05-14T23-56-45-130Z/shore-stone-8.glb",
-      "index": 77,
+      "index": 76,
       "color": "hsl(302 74% 56%)",
       "cell": {
-        "x": 1792,
+        "x": 1536,
         "y": 1792,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.7,
+        "u0": 0.6,
         "v0": 0.7778,
-        "u1": 0.8,
+        "u1": 0.7,
         "v1": 0.8889
       },
       "billboardRect": {
@@ -3525,18 +3480,18 @@
     },
     {
       "sourceUrl": "/generated/style-lab/sources/shore-stone-9-2026-05-14T23-56-49-651Z/shore-stone-9.glb",
-      "index": 78,
+      "index": 77,
       "color": "hsl(216 60% 42%)",
       "cell": {
-        "x": 2048,
+        "x": 1792,
         "y": 1792,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.8,
+        "u0": 0.7,
         "v0": 0.7778,
-        "u1": 0.9,
+        "u1": 0.8,
         "v1": 0.8889
       },
       "billboardRect": {
@@ -3570,18 +3525,18 @@
     },
     {
       "sourceUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
-      "index": 79,
+      "index": 78,
       "color": "hsl(17 49% 59%)",
       "cell": {
-        "x": 2304,
+        "x": 2048,
         "y": 1792,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.9,
+        "u0": 0.8,
         "v0": 0.7778,
-        "u1": 1,
+        "u1": 0.9,
         "v1": 0.8889
       },
       "billboardRect": {
@@ -3615,19 +3570,19 @@
     },
     {
       "sourceUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
-      "index": 80,
+      "index": 79,
       "color": "hsl(309 73% 45%)",
       "cell": {
-        "x": 0,
-        "y": 2048,
+        "x": 2304,
+        "y": 1792,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0,
-        "v0": 0.8889,
-        "u1": 0.1,
-        "v1": 1
+        "u0": 0.9,
+        "v0": 0.7778,
+        "u1": 1,
+        "v1": 0.8889
       },
       "billboardRect": {
         "x": 65.76,
@@ -3660,18 +3615,18 @@
     },
     {
       "sourceUrl": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
-      "index": 81,
+      "index": 80,
       "color": "hsl(89 65% 59%)",
       "cell": {
-        "x": 256,
+        "x": 0,
         "y": 2048,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.1,
+        "u0": 0,
         "v0": 0.8889,
-        "u1": 0.2,
+        "u1": 0.1,
         "v1": 1
       },
       "billboardRect": {
@@ -3705,18 +3660,18 @@
     },
     {
       "sourceUrl": "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
-      "index": 82,
+      "index": 81,
       "color": "hsl(21 49% 45%)",
       "cell": {
-        "x": 512,
+        "x": 256,
         "y": 2048,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.2,
+        "u0": 0.1,
         "v0": 0.8889,
-        "u1": 0.3,
+        "u1": 0.2,
         "v1": 1
       },
       "billboardRect": {
@@ -3750,18 +3705,18 @@
     },
     {
       "sourceUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
-      "index": 83,
+      "index": 82,
       "color": "hsl(259 63% 49%)",
       "cell": {
-        "x": 768,
+        "x": 512,
         "y": 2048,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.3,
+        "u0": 0.2,
         "v0": 0.8889,
-        "u1": 0.4,
+        "u1": 0.3,
         "v1": 1
       },
       "billboardRect": {

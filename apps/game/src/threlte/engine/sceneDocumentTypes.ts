@@ -1,4 +1,5 @@
 import type { AssetLocalTransformMetadata } from './assetLocalTransform'
+import type { NpcComponent } from './npcTypes'
 import type { RuntimePrefabType } from './runtimePrefabCatalog'
 import type {
   CollisionChannel,
@@ -194,27 +195,9 @@ export type EditorNodeCollisionData = EditorNodeCollisionPolicy &
   EditorNodeLegacyCollisionCompatibility
 
 export interface EditorGameplayData {
-  type:
-    | 'portal'
-    | 'note'
-    | 'firefly'
-    | 'audio-region'
-    | 'fog-volume'
-    | 'mist-region'
+  type: 'portal' | 'note' | 'audio-region' | 'fog-volume' | 'mist-region'
   markerColor?: string
   markerSize?: number
-  wanderEnabled?: boolean
-  wanderRadius?: number
-  wanderSpeed?: number
-  hoverHeight?: number
-  bobAmplitude?: number
-  bobSpeed?: number
-  twinkleSpeed?: number
-  lightIntensity?: number
-  lightDistance?: number
-  lightDecay?: number
-  spriteIntensity?: number
-  lightBurstBoost?: number
   targetLevelId?: string
   title?: string
   author?: string
@@ -273,6 +256,8 @@ export interface EditorGenerationData {
   lastBakedAt?: string
 }
 
+export type EditorNpcData = NpcComponent
+
 export interface EditorSceneNode {
   id: string
   name: string
@@ -292,6 +277,7 @@ export interface EditorSceneNode {
   physics?: EditorNodePhysicsData
   collision?: EditorNodeCollisionData
   gameplay?: EditorGameplayData
+  npc?: EditorNpcData
   generation?: EditorGenerationData
 }
 
@@ -399,6 +385,7 @@ export type RenderProfilePostPass =
   | 'vignette'
   | 'anti-aliasing'
   | 'depth-fog'
+  | 'kuwahara'
 
 export interface RenderProfileShadowSettings {
   enabled?: boolean
@@ -434,6 +421,12 @@ export interface RenderProfilePostProcessingSettings {
     radius?: number
     minDistance?: number
     maxDistance?: number
+  }
+  kuwahara?: {
+    enabled?: boolean
+    radius?: number
+    mix?: number
+    resolutionScale?: number
   }
   toneMappingExposure?: number
   vignetteStrength?: number
@@ -515,6 +508,29 @@ export interface SharedLevelAmbientParticleSettings {
     secondaryColor?: string
     size?: number
     opacity?: number
+    driftSpeed?: number
+    sway?: number
+  }
+}
+
+export interface SharedLevelFireflySettings {
+  fireflies?: {
+    enabled?: boolean
+    allowWithAuthored?: boolean
+    count?: number
+    lightCount?: number
+    radius?: number
+    minHeight?: number
+    maxHeight?: number
+    center?: [number, number, number]
+    color?: string
+    secondaryColor?: string
+    size?: number
+    spriteIntensity?: number
+    lightIntensity?: number
+    lightDistance?: number
+    lightDecay?: number
+    twinkleSpeed?: number
     driftSpeed?: number
     sway?: number
   }
@@ -799,6 +815,7 @@ export interface SharedLevelEditorSettings
     SharedLevelRenderProfileSettings,
     SharedLevelWaterSettings,
     SharedLevelAmbientParticleSettings,
+    SharedLevelFireflySettings,
     SharedLevelAmbientAudioSettings,
     SharedLevelCollisionSettings,
     SharedLevelGroundSettings,

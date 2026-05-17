@@ -1,4 +1,8 @@
 <script lang="ts">
+import type {
+  RenderProfilePlatformTier,
+  RenderProfilePostPass,
+} from '../engine/sceneDocumentTypes'
 import { getSolitudeAtmosphereProfile } from '../styles/GameplayStyleProfiles'
 import EditorAmbientAudioPresetControls from './EditorAmbientAudioPresetControls.svelte'
 import EditorAtmospherePresetPicker from './EditorAtmospherePresetPicker.svelte'
@@ -19,6 +23,24 @@ import type {
 type EnvironmentPanelProfile = NonNullable<
   SharedLevelEditorSettings['editorPanels']
 >['environment']
+
+const defaultRenderOutputPasses: RenderProfilePostPass[] = [
+  'tone-mapping',
+  'depth-fog',
+  'ambient-occlusion',
+  'color-grading',
+  'bloom',
+  'vignette',
+]
+const renderOutputPassOrder: RenderProfilePostPass[] = [
+  ...defaultRenderOutputPasses,
+  'kuwahara',
+]
+const renderProfileTiers: RenderProfilePlatformTier[] = [
+  'mobile',
+  'desktop',
+  'tv',
+]
 
 export let levelSettings: SharedLevelEditorSettings
 export let effectiveObservatorySettings: ObservatoryEditorSettings
@@ -85,6 +107,100 @@ function getInheritedSkyFogFalloff(
     settings?.skybox?.fogFalloff ?? settings?.style?.haze?.falloff ?? fallback
   )
 }
+
+function getRenderOutputPasses(): RenderProfilePostPass[] {
+  const passes = levelSettings.renderProfile?.postProcessing?.passes
+  return Array.isArray(passes) && passes.length > 0
+    ? passes
+    : defaultRenderOutputPasses
+}
+
+function hasRenderOutputPass(pass: RenderProfilePostPass) {
+  return getRenderOutputPasses().includes(pass)
+}
+
+function setRenderOutputPass(pass: RenderProfilePostPass, enabled: boolean) {
+  const passSet = new Set(getRenderOutputPasses())
+  if (enabled) {
+    passSet.add(pass)
+  } else {
+    passSet.delete(pass)
+  }
+  const nextPasses = renderOutputPassOrder.filter(entry => passSet.has(entry))
+  updateLevelSetting(['renderProfile', 'postProcessing', 'passes'], nextPasses)
+  const maxEnabledPasses =
+    levelSettings.renderProfile?.postProcessing?.maxEnabledPasses
+  if (
+    enabled &&
+    Number.isFinite(maxEnabledPasses) &&
+    Number(maxEnabledPasses) < nextPasses.length
+  ) {
+    updateLevelSetting(
+      ['renderProfile', 'postProcessing', 'maxEnabledPasses'],
+      nextPasses.length,
+    )
+  }
+}
+
+function getTierRenderOutputPasses(
+  tier: RenderProfilePlatformTier,
+): RenderProfilePostPass[] | null {
+  const passes =
+    levelSettings.renderProfile?.qualityTiers?.[tier]?.postProcessing?.passes
+  return Array.isArray(passes) ? passes : null
+}
+
+function setTierRenderOutputPass(
+  tier: RenderProfilePlatformTier,
+  pass: RenderProfilePostPass,
+  enabled: boolean,
+) {
+  const tierPasses = getTierRenderOutputPasses(tier)
+  if (!tierPasses) return
+
+  const passSet = new Set(tierPasses)
+  if (enabled) {
+    passSet.add(pass)
+  } else {
+    passSet.delete(pass)
+  }
+  const nextPasses = renderOutputPassOrder.filter(entry => passSet.has(entry))
+  updateLevelSetting(
+    ['renderProfile', 'qualityTiers', tier, 'postProcessing', 'passes'],
+    nextPasses,
+  )
+
+  const maxEnabledPasses =
+    levelSettings.renderProfile?.qualityTiers?.[tier]?.postProcessing
+      ?.maxEnabledPasses
+  if (
+    enabled &&
+    Number.isFinite(maxEnabledPasses) &&
+    Number(maxEnabledPasses) < nextPasses.length
+  ) {
+    updateLevelSetting(
+      [
+        'renderProfile',
+        'qualityTiers',
+        tier,
+        'postProcessing',
+        'maxEnabledPasses',
+      ],
+      nextPasses.length,
+    )
+  }
+}
+
+function setKuwaharaEnabled(enabled: boolean) {
+  setRenderOutputPass('kuwahara', enabled)
+  for (const tier of renderProfileTiers) {
+    setTierRenderOutputPass(tier, 'kuwahara', enabled)
+  }
+  updateLevelSetting(
+    ['renderProfile', 'postProcessing', 'kuwahara', 'enabled'],
+    enabled,
+  )
+}
 </script>
 
 <div class="editor-section">
@@ -99,6 +215,27 @@ function getInheritedSkyFogFalloff(
     <label class="checkbox"><input type="checkbox" checked={levelSettings.features?.conversations ?? false} on:change={(event) => updateLevelSetting(['features', 'conversations'], (event.currentTarget as HTMLInputElement).checked)} /> Conversations</label>
     <label class="checkbox"><input type="checkbox" checked={levelSettings.features?.water ?? false} on:change={(event) => updateLevelSetting(['features', 'water'], (event.currentTarget as HTMLInputElement).checked)} /> Water</label>
     <label class="checkbox"><input type="checkbox" checked={levelSettings.features?.ambientParticles ?? false} on:change={(event) => updateLevelSetting(['features', 'ambientParticles'], (event.currentTarget as HTMLInputElement).checked)} /> Ambient Particles</label>
+  </div>
+
+  <div class="tuple-group">
+    <div class="tuple-label">Firefly Field</div>
+    <label class="checkbox"><input type="checkbox" checked={levelSettings.fireflies?.enabled ?? levelSettings.features?.fireflies ?? false} on:change={(event) => updateLevelSetting(['fireflies', 'enabled'], (event.currentTarget as HTMLInputElement).checked)} /> Ambient Field</label>
+    <label class="checkbox"><input type="checkbox" checked={levelSettings.fireflies?.allowWithAuthored ?? false} on:change={(event) => updateLevelSetting(['fireflies', 'allowWithAuthored'], (event.currentTarget as HTMLInputElement).checked)} /> Keep Field With Authored Fireflies</label>
+    <div class="editor-field-grid editor-mt-sm">
+      <label class="editor-field"><span class="editor-field-label">Count</span><input class="tuple-input" type="number" step="1" value={levelSettings.fireflies?.count ?? 36} on:change={(event) => updateLevelNumericSetting(['fireflies', 'count'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Light Count</span><input class="tuple-input" type="number" step="1" value={levelSettings.fireflies?.lightCount ?? 8} on:change={(event) => updateLevelNumericSetting(['fireflies', 'lightCount'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Radius</span><input class="tuple-input" type="number" step="1" value={levelSettings.fireflies?.radius ?? 120} on:change={(event) => updateLevelNumericSetting(['fireflies', 'radius'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Min Height</span><input class="tuple-input" type="number" step="0.1" value={levelSettings.fireflies?.minHeight ?? 2} on:change={(event) => updateLevelNumericSetting(['fireflies', 'minHeight'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Max Height</span><input class="tuple-input" type="number" step="0.1" value={levelSettings.fireflies?.maxHeight ?? 5} on:change={(event) => updateLevelNumericSetting(['fireflies', 'maxHeight'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Primary Color</span><input class="text-input" type="color" value={levelSettings.fireflies?.color ?? '#f4ffb8'} on:input={(event) => updateLevelSetting(['fireflies', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Accent Color</span><input class="text-input" type="color" value={levelSettings.fireflies?.secondaryColor ?? '#8defff'} on:input={(event) => updateLevelSetting(['fireflies', 'secondaryColor'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Sprite Size</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.fireflies?.size ?? 0.58} on:change={(event) => updateLevelNumericSetting(['fireflies', 'size'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Sprite Intensity</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.fireflies?.spriteIntensity ?? 1.45} on:change={(event) => updateLevelNumericSetting(['fireflies', 'spriteIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Light Intensity</span><input class="tuple-input" type="number" step="1" value={levelSettings.fireflies?.lightIntensity ?? 44} on:change={(event) => updateLevelNumericSetting(['fireflies', 'lightIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Light Distance</span><input class="tuple-input" type="number" step="1" value={levelSettings.fireflies?.lightDistance ?? 28} on:change={(event) => updateLevelNumericSetting(['fireflies', 'lightDistance'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Sway</span><input class="tuple-input" type="number" step="0.1" value={levelSettings.fireflies?.sway ?? 1.5} on:change={(event) => updateLevelNumericSetting(['fireflies', 'sway'], (event.currentTarget as HTMLInputElement).value)} /></label>
+    </div>
+    <div class="save-message">Ambient fields are non-clickable atmosphere. Add NPC Firefly nodes when the player should inspect, hear, or talk to one.</div>
   </div>
 
   <div class="tuple-group">
@@ -251,6 +388,14 @@ function getInheritedSkyFogFalloff(
   <div class="tuple-group">
     <div class="tuple-label">Render Output</div>
     <div class="editor-field-grid editor-field-grid--triple editor-mt-sm">
+      <label class="checkbox"><input type="checkbox" checked={levelSettings.renderProfile?.postProcessing?.enabled ?? true} on:change={(event) => updateLevelSetting(['renderProfile', 'postProcessing', 'enabled'], (event.currentTarget as HTMLInputElement).checked)} /> Post FX</label>
+      <label class="checkbox"><input type="checkbox" checked={hasRenderOutputPass('depth-fog')} on:change={(event) => setRenderOutputPass('depth-fog', (event.currentTarget as HTMLInputElement).checked)} /> Depth Fog</label>
+      <label class="checkbox"><input type="checkbox" checked={hasRenderOutputPass('bloom')} on:change={(event) => setRenderOutputPass('bloom', (event.currentTarget as HTMLInputElement).checked)} /> Bloom</label>
+      <label class="checkbox"><input type="checkbox" checked={hasRenderOutputPass('color-grading')} on:change={(event) => setRenderOutputPass('color-grading', (event.currentTarget as HTMLInputElement).checked)} /> Color Grade</label>
+      <label class="checkbox"><input type="checkbox" checked={hasRenderOutputPass('vignette')} on:change={(event) => setRenderOutputPass('vignette', (event.currentTarget as HTMLInputElement).checked)} /> Vignette</label>
+      <label class="checkbox"><input type="checkbox" checked={(levelSettings.renderProfile?.postProcessing?.kuwahara?.enabled ?? false) && hasRenderOutputPass('kuwahara')} on:change={(event) => setKuwaharaEnabled((event.currentTarget as HTMLInputElement).checked)} /> Kuwahara</label>
+    </div>
+    <div class="editor-field-grid editor-field-grid--triple editor-mt-sm">
       <label class="editor-field"><span class="editor-field-label">Exposure</span><input class="tuple-input" type="number" step="0.05" min="0" value={levelSettings.renderProfile?.postProcessing?.toneMappingExposure ?? 1} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'postProcessing', 'toneMappingExposure'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Vignette</span><input class="tuple-input" type="number" step="0.05" min="0" value={levelSettings.renderProfile?.postProcessing?.vignetteStrength ?? 1} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'postProcessing', 'vignetteStrength'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">AO Intensity</span><input class="tuple-input" type="number" step="0.05" min="0" value={levelSettings.renderProfile?.postProcessing?.ambientOcclusion?.intensity ?? 0.78} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'postProcessing', 'ambientOcclusion', 'intensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
@@ -259,6 +404,9 @@ function getInheritedSkyFogFalloff(
       <label class="editor-field"><span class="editor-field-label">AO Max</span><input class="tuple-input" type="number" step="0.01" min="0" value={levelSettings.renderProfile?.postProcessing?.ambientOcclusion?.maxDistance ?? 0.12} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'postProcessing', 'ambientOcclusion', 'maxDistance'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Bloom Scale</span><input class="tuple-input" type="number" step="0.05" min="0" value={levelSettings.renderProfile?.postProcessing?.bloom?.intensity ?? 1} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'postProcessing', 'bloom', 'intensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Bloom Cutoff</span><input class="tuple-input" type="number" step="0.01" min="0" max="1" value={levelSettings.renderProfile?.postProcessing?.bloom?.threshold ?? 0.86} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'postProcessing', 'bloom', 'threshold'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Kuwahara Radius</span><input class="tuple-input" type="number" step="1" min="1" max="4" value={levelSettings.renderProfile?.postProcessing?.kuwahara?.radius ?? 2} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'postProcessing', 'kuwahara', 'radius'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Kuwahara Mix</span><input class="tuple-input" type="number" step="0.05" min="0" max="1" value={levelSettings.renderProfile?.postProcessing?.kuwahara?.mix ?? 0.55} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'postProcessing', 'kuwahara', 'mix'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Kuwahara Res</span><input class="tuple-input" type="number" step="0.05" min="0.35" max="1" value={levelSettings.renderProfile?.postProcessing?.kuwahara?.resolutionScale ?? 0.75} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'postProcessing', 'kuwahara', 'resolutionScale'], (event.currentTarget as HTMLInputElement).value)} /></label>
     </div>
   </div>
 

@@ -1,20 +1,18 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import {
-  validateEditorSceneDocument,
-} from '../src/threlte/editor/editorSceneDocumentValidation.ts'
+import { validateEditorSceneDocument } from '../src/threlte/editor/editorSceneDocumentValidation.ts'
 import type { EditorSceneDocument } from '../src/threlte/editor/editorTypes.ts'
 import { normalizeCollisionPolicy } from '../src/threlte/engine/collisionPolicy.ts'
-import { adaptSceneDocumentToLevelDefinition } from '../src/threlte/engine/sceneAdapter.ts'
 import {
   createRuntimeSceneManifest,
   validateRuntimeSceneManifest,
 } from '../src/threlte/engine/runtimeSceneManifest.ts'
+import { adaptSceneDocumentToLevelDefinition } from '../src/threlte/engine/sceneAdapter.ts'
 import {
-  isGeneratedCollisionProductStale,
   type GeneratedCollisionProduct,
   type LevelBuildReport,
   type LevelDefinition,
+  isGeneratedCollisionProductStale,
 } from '../src/threlte/engine/types.ts'
 
 function createScene(
@@ -248,7 +246,8 @@ test('runtime scene manifest exposes generated collision products', () => {
     assetActorCount: 1,
     primitiveActorCount: 0,
     neverCullActorCount: 0,
-    gameplayFireflyActorCount: 0,
+    npcActorCount: 0,
+    fireflyNpcActorCount: 0,
     physicsActorCount: 1,
     trimeshActorCount: 1,
     detailMeshActorCount: 0,
@@ -319,8 +318,8 @@ test('runtime scene manifest exposes generated collision products', () => {
   ])
 
   const staleManifest = structuredClone(manifest) as typeof manifest
-  delete (staleManifest.runtime.generatedCollisionProducts?.[0] as any)
-    .generatedAt
+  ;(staleManifest.runtime.generatedCollisionProducts?.[0] as any).generatedAt =
+    undefined
 
   assert.equal(
     validateRuntimeSceneManifest(staleManifest).errors.some(error =>
@@ -334,8 +333,8 @@ test('runtime scene manifest exposes generated collision products', () => {
     .generatedCollisionProducts?.[0] as any
   primitiveProxyProduct.shape = 'cuboid'
   primitiveProxyProduct.sourceKind = 'asset'
-  delete primitiveProxyProduct.artifactUrl
-  delete primitiveProxyProduct.metadataUrl
+  primitiveProxyProduct.artifactUrl = undefined
+  primitiveProxyProduct.metadataUrl = undefined
   const primitiveProxyCollision = primitiveProxyManifest.levelDefinition
     .actors[0].physics!.collision as any
   primitiveProxyCollision.quality = 'primitive'
@@ -363,8 +362,9 @@ test('runtime scene manifest exposes generated collision products', () => {
   )
 
   const missingProductManifest = structuredClone(manifest) as typeof manifest
-  delete (missingProductManifest.levelDefinition.actors[0].physics!
-    .collision as any).generatedProduct
+  ;(
+    missingProductManifest.levelDefinition.actors[0].physics!.collision as any
+  ).generatedProduct = undefined
   missingProductManifest.runtime.generatedCollisionProducts = []
 
   assert.match(

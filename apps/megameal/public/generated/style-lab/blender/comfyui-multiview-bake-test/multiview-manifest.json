@@ -1,0 +1,110 @@
+[
+  {
+    "name": "front",
+    "azimuth_deg": -90.0,
+    "elevation_factor": 0.18,
+    "mode": "ai-texture-source-view",
+    "status": "experimental-source",
+    "source_asset_url": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_asset_path": "apps/megameal/public/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_image": "/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-front.png",
+    "source_image_path": "apps/megameal/public/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-front.png",
+    "camera_location": [
+      -0.09936261177062988,
+      -28.28097915649414,
+      2.7597062587738037
+    ],
+    "ortho_scale": 22.59026336669922,
+    "backfilled_from_existing_image": false
+  },
+  {
+    "name": "back",
+    "azimuth_deg": 90.0,
+    "elevation_factor": 0.18,
+    "mode": "ai-texture-source-view",
+    "status": "experimental-source",
+    "source_asset_url": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_asset_path": "apps/megameal/public/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_image": "/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-back.png",
+    "source_image_path": "apps/megameal/public/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-back.png",
+    "camera_location": [
+      -0.09936261177062988,
+      28.347061157226562,
+      2.7597062587738037
+    ],
+    "ortho_scale": 22.59026336669922,
+    "backfilled_from_existing_image": true
+  },
+  {
+    "name": "left",
+    "azimuth_deg": 180.0,
+    "elevation_factor": 0.18,
+    "mode": "ai-texture-source-view",
+    "status": "experimental-source",
+    "source_asset_url": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_asset_path": "apps/megameal/public/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_image": "/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-left.png",
+    "source_image_path": "apps/megameal/public/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-left.png",
+    "camera_location": [
+      -28.41338348388672,
+      0.03304028511047363,
+      2.7597062587738037
+    ],
+    "ortho_scale": 22.59026336669922,
+    "backfilled_from_existing_image": false
+  },
+  {
+    "name": "right",
+    "azimuth_deg": 0.0,
+    "elevation_factor": 0.18,
+    "mode": "ai-texture-source-view",
+    "status": "experimental-source",
+    "source_asset_url": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_asset_path": "apps/megameal/public/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_image": "/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-right.png",
+    "source_image_path": "apps/megameal/public/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-right.png",
+    "camera_location": [
+      28.21465826034546,
+      0.03304028511047363,
+      2.7597062587738037
+    ],
+    "ortho_scale": 22.59026336669922,
+    "backfilled_from_existing_image": true
+  },
+  {
+    "name": "front_top",
+    "azimuth_deg": -90.0,
+    "elevation_factor": 0.95,
+    "mode": "ai-texture-source-view",
+    "status": "experimental-source",
+    "source_asset_url": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_asset_path": "apps/megameal/public/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_image": "/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-front_top.png",
+    "source_image_path": "apps/megameal/public/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-front_top.png",
+    "camera_location": [
+      -0.09936261177062988,
+      -28.28097915649414,
+      14.755915641784668
+    ],
+    "ortho_scale": 22.59026336669922,
+    "backfilled_from_existing_image": true
+  },
+  {
+    "name": "back_top",
+    "azimuth_deg": 90.0,
+    "elevation_factor": 0.95,
+    "mode": "ai-texture-source-view",
+    "status": "experimental-source",
+    "source_asset_url": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_asset_path": "apps/megameal/public/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "source_image": "/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-back_top.png",
+    "source_image_path": "apps/megameal/public/generated/style-lab/blender/comfyui-multiview-bake-test/source-views/yggdrasil-world-tree-source-back_top.png",
+    "camera_location": [
+      -0.09936261177062988,
+      28.347061157226562,
+      14.755915641784668
+    ],
+    "ortho_scale": 22.59026336669922,
+    "backfilled_from_existing_image": false
+  }
+]

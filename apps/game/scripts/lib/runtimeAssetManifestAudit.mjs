@@ -29,6 +29,7 @@ const renderProfilePostPasses = new Set([
   'vignette',
   'anti-aliasing',
   'depth-fog',
+  'kuwahara',
 ])
 const heroAuthoredPbrSourceUrls = new Set([
   '/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb',

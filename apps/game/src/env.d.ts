@@ -17,3 +17,8 @@ interface Performance {
 interface Window {
   THREE?: unknown
 }
+
+declare module '*.glsl?raw' {
+  const source: string
+  export default source
+}

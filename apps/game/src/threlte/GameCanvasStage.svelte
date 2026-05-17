@@ -62,7 +62,11 @@ export let normalizeLevelId: (levelId: string) => string = levelId => levelId
 let postProcessingComponent: any = null
 let postProcessingComponentPromise: Promise<any> | null = null
 
-type RuntimePostProcessingPass = 'bloom' | 'color-grading' | 'depth-fog'
+type RuntimePostProcessingPass =
+  | 'bloom'
+  | 'color-grading'
+  | 'depth-fog'
+  | 'kuwahara'
 
 function forward(type: string, detail: unknown) {
   dispatch(type, detail)
@@ -135,6 +139,11 @@ function publishUnmountedPostProcessingDiagnostics(
     'depth-fog',
     mountReason,
   )
+  const kuwaharaReason = getUnmountedPostProcessingReason(
+    profile,
+    'kuwahara',
+    mountReason,
+  )
   const passes = profile.postProcessing.enabled
     ? profile.postProcessing.passes
     : []
@@ -147,15 +156,17 @@ function publishUnmountedPostProcessingDiagnostics(
     depthFogEnabled: false,
     bloomEnabled: false,
     colorGradingEnabled: false,
+    kuwaharaEnabled: false,
     depthFogReason,
     bloomReason,
     colorGradingReason,
+    kuwaharaReason,
     reason: mountReason,
   })
   setRuntimeDiagnostic('postProcessing', {
     label: 'Post Processing',
     level,
-    message: `${levelId}/${profile.id}/${profile.tier}: depth fog off (${depthFogReason}); bloom off (${bloomReason}); color grading off (${colorGradingReason}); passes ${profile.postProcessing.enabled ? profile.postProcessing.passes.join(', ') || 'all' : 'disabled'}; component not mounted (${mountReason}).`,
+    message: `${levelId}/${profile.id}/${profile.tier}: depth fog off (${depthFogReason}); bloom off (${bloomReason}); color grading off (${colorGradingReason}); kuwahara off (${kuwaharaReason}); passes ${profile.postProcessing.enabled ? profile.postProcessing.passes.join(', ') || 'all' : 'disabled'}; component not mounted (${mountReason}).`,
     meta: {
       levelId,
       profileId: profile.id,
@@ -174,6 +185,8 @@ function publishUnmountedPostProcessingDiagnostics(
       bloomReason,
       colorGradingEnabled: false,
       colorGradingReason,
+      kuwaharaEnabled: false,
+      kuwaharaReason,
     },
   })
 }
@@ -204,7 +217,9 @@ $: depthFogMountEligible = shouldMountDepthFogPostPass(
   $runtimeAtmosphereStore,
 )
 $: postProcessingEligible =
-  ($qualitySettingsStore.enablePostProcessing || depthFogMountEligible) &&
+  (editorEnabled ||
+    $qualitySettingsStore.enablePostProcessing ||
+    depthFogMountEligible) &&
   staticWorldReady &&
   (editorEnabled || gameplayEnabled)
 $: if (postProcessingEligible && !postProcessingComponent) {
@@ -282,7 +297,7 @@ $: if (isInitialized && (!postProcessingEligible || !postProcessingComponent)) {
         <svelte:component
           this={postProcessingComponent}
           levelId={currentLevel}
-          optionalPostProcessingEnabled={$qualitySettingsStore.enablePostProcessing}
+          optionalPostProcessingEnabled={editorEnabled || $qualitySettingsStore.enablePostProcessing}
           toneMappingExposure={1.0}
         />
       {/if}
@@ -321,6 +336,7 @@ $: if (isInitialized && (!postProcessingEligible || !postProcessingComponent)) {
         on:noteRead={(e) => forward('noteRead', e.detail)}
         on:portalTransition={(e) => forward('portalTransition', e.detail)}
         on:requestLevelReturn={(e) => forward('requestLevelReturn', e.detail)}
+        on:npcInteraction={(e) => forward('npcInteraction', e.detail)}
         on:playerInteraction={(e) => forward('playerInteraction', e.detail)}
         on:lightBurst={(e) => forward('lightBurst', e.detail)}
       />

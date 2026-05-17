@@ -155,7 +155,7 @@ function openSelectedAssetInAi() {
           </div>
         {/if}
         <div class="button-row compact editor-mt-sm">
-          <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onAddFireflyToSelection} disabled={selectedNodesCount === 0}>Add Firefly To Selection</button>
+          <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onAddFireflyToSelection} disabled={selectedNodesCount === 0}>Add NPC Firefly To Selection</button>
         </div>
       </div>
     </details>

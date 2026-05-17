@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-15T00:21:04.032Z",
+  "generatedAt": "2026-05-17T00:24:38.956Z",
   "levelId": "solitude",
   "sceneId": "solitude",
   "source": {
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/solitude.scene.json",
     "version": 1,
-    "updatedAt": "2026-05-14T21:29:59.771Z"
+    "updatedAt": "2026-05-17T00:44:28.394Z"
   },
   "levelDefinition": {
     "id": "solitude",
     "version": 1,
-    "updatedAt": "2026-05-14T21:29:59.771Z",
+    "updatedAt": "2026-05-17T00:44:28.394Z",
     "spawn": {
       "player": [
         0,
@@ -424,10 +424,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:68f63130f6fa1763b9b2c888e91296a96c2f7f48c97268c997664f61d8e8a0cc:99f17c516af36ee43d130bf98c7135bd07b55caea21c4227644805ae461a285a:ab033e1df88e71c810b4fca94607cf6db3c0d51ef6db7838e001cc658da09d66",
+            "colliderCacheKey": "mesh-collision-manager-v2:29320044051c4acf2f595c17e0663af56979174f1bee6aad99e10998fe225f62:99f17c516af36ee43d130bf98c7135bd07b55caea21c4227644805ae461a285a:d9d54ca7d4cfde061217595b07069900ffba69c03e6185e82fd52452d92ba1f9",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -457,24 +457,24 @@
               },
               "colliderLocalBounds": {
                 "min": [
-                  -0.8996759057044983,
+                  -0.9005722403526306,
                   -1.0030039548873901,
                   -0.9492046236991882
                 ],
                 "max": [
-                  0.8806980848312378,
-                  0.97152179479599,
-                  0.9208857417106628
+                  0.8823164701461792,
+                  0.9736996293067932,
+                  0.9215630292892456
                 ],
                 "size": [
-                  1.780373990535736,
-                  1.9745257496833801,
-                  1.870090365409851
+                  1.7828887104988098,
+                  1.9767035841941833,
+                  1.8707676529884338
                 ],
                 "center": [
-                  -0.009488910436630249,
-                  -0.015741080045700073,
-                  -0.014159440994262695
+                  -0.009127885103225708,
+                  -0.014652162790298462,
+                  -0.013820797204971313
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -515,21 +515,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 19000,
+            "triangleCount": 13998,
             "generatedProduct": {
               "actorId": "solitude-ground-plateau",
-              "cacheKey": "mesh-collision-manager-v1:68f63130f6fa1763b9b2c888e91296a96c2f7f48c97268c997664f61d8e8a0cc:99f17c516af36ee43d130bf98c7135bd07b55caea21c4227644805ae461a285a:ab033e1df88e71c810b4fca94607cf6db3c0d51ef6db7838e001cc658da09d66",
+              "cacheKey": "mesh-collision-manager-v2:29320044051c4acf2f595c17e0663af56979174f1bee6aad99e10998fe225f62:99f17c516af36ee43d130bf98c7135bd07b55caea21c4227644805ae461a285a:d9d54ca7d4cfde061217595b07069900ffba69c03e6185e82fd52452d92ba1f9",
               "mode": "auto",
               "productId": "solitude-ground-plateau:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "68f63130f6fa1763b9b2c888e91296a96c2f7f48c97268c997664f61d8e8a0cc"
+                "value": "29320044051c4acf2f595c17e0663af56979174f1bee6aad99e10998fe225f62"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -537,36 +538,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "ab033e1df88e71c810b4fca94607cf6db3c0d51ef6db7838e001cc658da09d66"
+                "value": "d9d54ca7d4cfde061217595b07069900ffba69c03e6185e82fd52452d92ba1f9"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
-                  -0.8996759057044983,
+                  -0.9005722403526306,
                   -1.0030039548873901,
                   -0.9492046236991882
                 ],
                 "max": [
-                  0.8806980848312378,
-                  0.97152179479599,
-                  0.9208857417106628
+                  0.8823164701461792,
+                  0.9736996293067932,
+                  0.9215630292892456
                 ],
                 "size": [
-                  1.780373990535736,
-                  1.9745257496833801,
-                  1.870090365409851
+                  1.7828887104988098,
+                  1.9767035841941833,
+                  1.8707676529884338
                 ],
                 "center": [
-                  -0.009488910436630249,
-                  -0.015741080045700073,
-                  -0.014159440994262695
+                  -0.009127885103225708,
+                  -0.014652162790298462,
+                  -0.013820797204971313
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
-              "triangleCount": 19000,
-              "vertexCount": 22218,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+              "triangleCount": 13998,
+              "vertexCount": 17828,
               "triangleBudget": 20000
             }
           }
@@ -622,10 +624,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:e68a3b4987c59e03667e641decde57d5039206d2b7322ec11b475df729d03580:34b339f63c9a9eb28c8e9bcdb82f80f6d29b79c1c852b3671d5f38820e1b4ed0:d7126a84503a79acc2b85e9d7dde4fda53d7eceb20271e49be0ad434841ae978",
+            "colliderCacheKey": "mesh-collision-manager-v2:f615e91aa62cdd8bc37ae300e384f291be1966a051dd81699d6e688857a3cb94:34b339f63c9a9eb28c8e9bcdb82f80f6d29b79c1c852b3671d5f38820e1b4ed0:8560612c957137f6a8c48b310972dcc1a91b33ad373d53ba0644fa9db5ff2290",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -655,24 +657,24 @@
               },
               "colliderLocalBounds": {
                 "min": [
-                  -0.955689549446106,
-                  -0.9478588104248047,
-                  -0.9953939318656921
+                  -0.9581931829452515,
+                  -0.9524890184402466,
+                  -0.996408998966217
                 ],
                 "max": [
-                  0.9321647882461548,
+                  0.9342905879020691,
                   0.9272300004959106,
-                  0.9637094140052795
+                  0.9679255485534668
                 ],
                 "size": [
-                  1.8878543376922607,
-                  1.8750888109207153,
-                  1.9591033458709717
+                  1.8924837708473206,
+                  1.8797190189361572,
+                  1.9643345475196838
                 ],
                 "center": [
-                  -0.011762380599975586,
-                  -0.010314404964447021,
-                  -0.0158422589302063
+                  -0.011951297521591187,
+                  -0.012629508972167969,
+                  -0.014241725206375122
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -713,21 +715,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 12000,
-            "triangleCount": 4750,
+            "triangleCount": 11398,
             "generatedProduct": {
               "actorId": "solitude-ground-dais",
-              "cacheKey": "mesh-collision-manager-v1:e68a3b4987c59e03667e641decde57d5039206d2b7322ec11b475df729d03580:34b339f63c9a9eb28c8e9bcdb82f80f6d29b79c1c852b3671d5f38820e1b4ed0:d7126a84503a79acc2b85e9d7dde4fda53d7eceb20271e49be0ad434841ae978",
+              "cacheKey": "mesh-collision-manager-v2:f615e91aa62cdd8bc37ae300e384f291be1966a051dd81699d6e688857a3cb94:34b339f63c9a9eb28c8e9bcdb82f80f6d29b79c1c852b3671d5f38820e1b4ed0:8560612c957137f6a8c48b310972dcc1a91b33ad373d53ba0644fa9db5ff2290",
               "mode": "auto",
               "productId": "solitude-ground-dais:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "e68a3b4987c59e03667e641decde57d5039206d2b7322ec11b475df729d03580"
+                "value": "f615e91aa62cdd8bc37ae300e384f291be1966a051dd81699d6e688857a3cb94"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -735,36 +738,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "d7126a84503a79acc2b85e9d7dde4fda53d7eceb20271e49be0ad434841ae978"
+                "value": "8560612c957137f6a8c48b310972dcc1a91b33ad373d53ba0644fa9db5ff2290"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
-                  -0.955689549446106,
-                  -0.9478588104248047,
-                  -0.9953939318656921
+                  -0.9581931829452515,
+                  -0.9524890184402466,
+                  -0.996408998966217
                 ],
                 "max": [
-                  0.9321647882461548,
+                  0.9342905879020691,
                   0.9272300004959106,
-                  0.9637094140052795
+                  0.9679255485534668
                 ],
                 "size": [
-                  1.8878543376922607,
-                  1.8750888109207153,
-                  1.9591033458709717
+                  1.8924837708473206,
+                  1.8797190189361572,
+                  1.9643345475196838
                 ],
                 "center": [
-                  -0.011762380599975586,
-                  -0.010314404964447021,
-                  -0.0158422589302063
+                  -0.011951297521591187,
+                  -0.012629508972167969,
+                  -0.014241725206375122
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 5376,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+              "triangleCount": 11398,
+              "vertexCount": 11095,
               "triangleBudget": 12000
             }
           }
@@ -842,10 +846,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:b0658c9b9d2f697a8b668362dccee6bb06cc6ff5856136c884c00d8b6b0b60f0:5d224ac4c13ffe3063fd5bf5fdd3f3d07abf2d5631a3aa447fa93d5c821a0d7f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:93f843e9dc21cdc451f4bb953a404ba43e84eed84f3bd8048f8173c86e5a3565:5d224ac4c13ffe3063fd5bf5fdd3f3d07abf2d5631a3aa447fa93d5c821a0d7f:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -875,24 +879,24 @@
               },
               "colliderLocalBounds": {
                 "min": [
-                  -0.7818410992622375,
-                  -1.0001593828201294,
-                  -0.7797887325286865
+                  -0.7825126647949219,
+                  -1.0004767179489136,
+                  -0.782132089138031
                 ],
                 "max": [
-                  0.7538681626319885,
-                  0.9738057255744934,
+                  0.7572198510169983,
+                  0.9741035103797913,
                   0.7610894441604614
                 ],
                 "size": [
-                  1.535709261894226,
-                  1.9739651083946228,
-                  1.540878176689148
+                  1.5397325158119202,
+                  1.9745802283287048,
+                  1.5432215332984924
                 ],
                 "center": [
-                  -0.013986468315124512,
-                  -0.013176828622817993,
-                  -0.009349644184112549
+                  -0.012646406888961792,
+                  -0.013186603784561157,
+                  -0.01052132248878479
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -933,21 +937,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4750,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-pillar-1",
-              "cacheKey": "mesh-collision-manager-v1:b0658c9b9d2f697a8b668362dccee6bb06cc6ff5856136c884c00d8b6b0b60f0:5d224ac4c13ffe3063fd5bf5fdd3f3d07abf2d5631a3aa447fa93d5c821a0d7f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:93f843e9dc21cdc451f4bb953a404ba43e84eed84f3bd8048f8173c86e5a3565:5d224ac4c13ffe3063fd5bf5fdd3f3d07abf2d5631a3aa447fa93d5c821a0d7f:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-pillar-1:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "b0658c9b9d2f697a8b668362dccee6bb06cc6ff5856136c884c00d8b6b0b60f0"
+                "value": "93f843e9dc21cdc451f4bb953a404ba43e84eed84f3bd8048f8173c86e5a3565"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -955,36 +960,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
-                  -0.7818410992622375,
-                  -1.0001593828201294,
-                  -0.7797887325286865
+                  -0.7825126647949219,
+                  -1.0004767179489136,
+                  -0.782132089138031
                 ],
                 "max": [
-                  0.7538681626319885,
-                  0.9738057255744934,
+                  0.7572198510169983,
+                  0.9741035103797913,
                   0.7610894441604614
                 ],
                 "size": [
-                  1.535709261894226,
-                  1.9739651083946228,
-                  1.540878176689148
+                  1.5397325158119202,
+                  1.9745802283287048,
+                  1.5432215332984924
                 ],
                 "center": [
-                  -0.013986468315124512,
-                  -0.013176828622817993,
-                  -0.009349644184112549
+                  -0.012646406888961792,
+                  -0.013186603784561157,
+                  -0.01052132248878479
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 4069,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 9897,
               "triangleBudget": 20000
             }
           }
@@ -1040,10 +1046,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-2.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-2.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:cec80297a319b91883474aa36cf322322705ac28066b71177370ef5dcf038e73:4a3e021ec24bbd55302033c8a84fc72dec06796205207ead4054a82f1f3683e1:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:f02bde8d173c6035d0af66754a60e600699b8ba79fc7e3a0fb2e1f73e651cf2d:4a3e021ec24bbd55302033c8a84fc72dec06796205207ead4054a82f1f3683e1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -1073,24 +1079,24 @@
               },
               "colliderLocalBounds": {
                 "min": [
-                  -0.5948081612586975,
-                  -1.0000596046447754,
+                  -0.5962746739387512,
+                  -1.0003606081008911,
                   -0.44824808835983276
                 ],
                 "max": [
-                  0.5684415698051453,
-                  0.9735748171806335,
-                  0.4249148964881897
+                  0.5691162943840027,
+                  0.9743054509162903,
+                  0.4258885681629181
                 ],
                 "size": [
-                  1.1632497310638428,
-                  1.973634421825409,
-                  0.8731629848480225
+                  1.165390968322754,
+                  1.9746660590171814,
+                  0.8741366565227509
                 ],
                 "center": [
-                  -0.013183295726776123,
-                  -0.013242393732070923,
-                  -0.011666595935821533
+                  -0.013579189777374268,
+                  -0.013027578592300415,
+                  -0.011179760098457336
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -1131,21 +1137,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4750,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-pillar-2",
-              "cacheKey": "mesh-collision-manager-v1:cec80297a319b91883474aa36cf322322705ac28066b71177370ef5dcf038e73:4a3e021ec24bbd55302033c8a84fc72dec06796205207ead4054a82f1f3683e1:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:f02bde8d173c6035d0af66754a60e600699b8ba79fc7e3a0fb2e1f73e651cf2d:4a3e021ec24bbd55302033c8a84fc72dec06796205207ead4054a82f1f3683e1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-pillar-2:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "cec80297a319b91883474aa36cf322322705ac28066b71177370ef5dcf038e73"
+                "value": "f02bde8d173c6035d0af66754a60e600699b8ba79fc7e3a0fb2e1f73e651cf2d"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -1153,36 +1160,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
-                  -0.5948081612586975,
-                  -1.0000596046447754,
+                  -0.5962746739387512,
+                  -1.0003606081008911,
                   -0.44824808835983276
                 ],
                 "max": [
-                  0.5684415698051453,
-                  0.9735748171806335,
-                  0.4249148964881897
+                  0.5691162943840027,
+                  0.9743054509162903,
+                  0.4258885681629181
                 ],
                 "size": [
-                  1.1632497310638428,
-                  1.973634421825409,
-                  0.8731629848480225
+                  1.165390968322754,
+                  1.9746660590171814,
+                  0.8741366565227509
                 ],
                 "center": [
-                  -0.013183295726776123,
-                  -0.013242393732070923,
-                  -0.011666595935821533
+                  -0.013579189777374268,
+                  -0.013027578592300415,
+                  -0.011179760098457336
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-2.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-2.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 3878,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 9987,
               "triangleBudget": 20000
             }
           }
@@ -1238,10 +1246,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-3.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-3.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:c5b8c5490c520db6051ad5d6cce248ce2e184ef8dc9c2650683a6e76388a68ee:3a73a13fb8798297c0aeaff1c6e32369ccb438fb3844f9c96d52b47cd191fb61:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:7c70cd3f1da6d88186107b25824deb59d59566bef6f8c3e91ce3897edcb08aa1:3a73a13fb8798297c0aeaff1c6e32369ccb438fb3844f9c96d52b47cd191fb61:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -1271,24 +1279,24 @@
               },
               "colliderLocalBounds": {
                 "min": [
-                  -0.5999825596809387,
-                  -0.9997504353523254,
-                  -0.6671329736709595
+                  -0.6000218391418457,
+                  -1.0001929998397827,
+                  -0.6678562164306641
                 ],
                 "max": [
-                  0.5725367069244385,
-                  0.973395824432373,
-                  0.6427481770515442
+                  0.574096143245697,
+                  0.9739822745323181,
+                  0.6432415246963501
                 ],
                 "size": [
-                  1.1725192666053772,
-                  1.9731462597846985,
-                  1.3098811507225037
+                  1.1741179823875427,
+                  1.9741752743721008,
+                  1.3110977411270142
                 ],
                 "center": [
-                  -0.013722926378250122,
-                  -0.013177305459976196,
-                  -0.012192398309707642
+                  -0.01296284794807434,
+                  -0.0131053626537323,
+                  -0.012307345867156982
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -1329,21 +1337,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4750,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-pillar-3",
-              "cacheKey": "mesh-collision-manager-v1:c5b8c5490c520db6051ad5d6cce248ce2e184ef8dc9c2650683a6e76388a68ee:3a73a13fb8798297c0aeaff1c6e32369ccb438fb3844f9c96d52b47cd191fb61:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:7c70cd3f1da6d88186107b25824deb59d59566bef6f8c3e91ce3897edcb08aa1:3a73a13fb8798297c0aeaff1c6e32369ccb438fb3844f9c96d52b47cd191fb61:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-pillar-3:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "c5b8c5490c520db6051ad5d6cce248ce2e184ef8dc9c2650683a6e76388a68ee"
+                "value": "7c70cd3f1da6d88186107b25824deb59d59566bef6f8c3e91ce3897edcb08aa1"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -1351,36 +1360,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
-                  -0.5999825596809387,
-                  -0.9997504353523254,
-                  -0.6671329736709595
+                  -0.6000218391418457,
+                  -1.0001929998397827,
+                  -0.6678562164306641
                 ],
                 "max": [
-                  0.5725367069244385,
-                  0.973395824432373,
-                  0.6427481770515442
+                  0.574096143245697,
+                  0.9739822745323181,
+                  0.6432415246963501
                 ],
                 "size": [
-                  1.1725192666053772,
-                  1.9731462597846985,
-                  1.3098811507225037
+                  1.1741179823875427,
+                  1.9741752743721008,
+                  1.3110977411270142
                 ],
                 "center": [
-                  -0.013722926378250122,
-                  -0.013177305459976196,
-                  -0.012192398309707642
+                  -0.01296284794807434,
+                  -0.0131053626537323,
+                  -0.012307345867156982
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-3.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-3.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 3959,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 9564,
               "triangleBudget": 20000
             }
           }
@@ -1436,10 +1446,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-4.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-4.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:42a59fbdd79e08a1088b0b936156b897de6334b2c6e47e204ba36d7c662704aa:aaecaedb3e469c0b22cdf5a16976230264c54c1fb3606dffc834d2fdb81ce0b1:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:47a2779cbad61d5f64b016fab4294af77fade4f6a6c50c1a7f873442da010a33:aaecaedb3e469c0b22cdf5a16976230264c54c1fb3606dffc834d2fdb81ce0b1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -1470,23 +1480,23 @@
               "colliderLocalBounds": {
                 "min": [
                   -0.8772475719451904,
-                  -1.0004348754882812,
+                  -1.0007864236831665,
                   -0.8618723154067993
                 ],
                 "max": [
-                  0.8478924632072449,
+                  0.8484272360801697,
                   0.9724119305610657,
-                  0.8435716032981873
+                  0.8466414213180542
                 ],
                 "size": [
-                  1.7251400351524353,
-                  1.972846806049347,
-                  1.7054439187049866
+                  1.72567480802536,
+                  1.9731983542442322,
+                  1.7085137367248535
                 ],
                 "center": [
-                  -0.014677554368972778,
-                  -0.014011472463607788,
-                  -0.00915035605430603
+                  -0.014410167932510376,
+                  -0.014187246561050415,
+                  -0.007615447044372559
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -1527,21 +1537,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4748,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-pillar-4",
-              "cacheKey": "mesh-collision-manager-v1:42a59fbdd79e08a1088b0b936156b897de6334b2c6e47e204ba36d7c662704aa:aaecaedb3e469c0b22cdf5a16976230264c54c1fb3606dffc834d2fdb81ce0b1:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:47a2779cbad61d5f64b016fab4294af77fade4f6a6c50c1a7f873442da010a33:aaecaedb3e469c0b22cdf5a16976230264c54c1fb3606dffc834d2fdb81ce0b1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-pillar-4:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "42a59fbdd79e08a1088b0b936156b897de6334b2c6e47e204ba36d7c662704aa"
+                "value": "47a2779cbad61d5f64b016fab4294af77fade4f6a6c50c1a7f873442da010a33"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -1549,36 +1560,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
                   -0.8772475719451904,
-                  -1.0004348754882812,
+                  -1.0007864236831665,
                   -0.8618723154067993
                 ],
                 "max": [
-                  0.8478924632072449,
+                  0.8484272360801697,
                   0.9724119305610657,
-                  0.8435716032981873
+                  0.8466414213180542
                 ],
                 "size": [
-                  1.7251400351524353,
-                  1.972846806049347,
-                  1.7054439187049866
+                  1.72567480802536,
+                  1.9731983542442322,
+                  1.7085137367248535
                 ],
                 "center": [
-                  -0.014677554368972778,
-                  -0.014011472463607788,
-                  -0.00915035605430603
+                  -0.014410167932510376,
+                  -0.014187246561050415,
+                  -0.007615447044372559
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-4.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-4.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
-              "triangleCount": 4748,
-              "vertexCount": 5041,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 11993,
               "triangleBudget": 20000
             }
           }
@@ -1634,10 +1646,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-5.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-5.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:da29193eb3bd7fc7037602e2e08df2237f48b0f624509fe73b081fc4ade2f636:9831630751bc7bcde523987287096305715c6099088c6f930fb5898e1e4f6f31:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:c0170e35dca7046c3f6cc72c164d42cadcc19ffb114384ee786d443ef463fd72:9831630751bc7bcde523987287096305715c6099088c6f930fb5898e1e4f6f31:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -1667,24 +1679,24 @@
               },
               "colliderLocalBounds": {
                 "min": [
-                  -0.5266964435577393,
-                  -0.9999573230743408,
-                  -0.5896561145782471
+                  -0.528046727180481,
+                  -1.0001945495605469,
+                  -0.590805172920227
                 ],
                 "max": [
-                  0.49962934851646423,
-                  0.9636422991752625,
-                  0.5626178979873657
+                  0.5011919736862183,
+                  0.9642621874809265,
+                  0.5638434290885925
                 ],
                 "size": [
-                  1.0263257920742035,
-                  1.9635996222496033,
-                  1.1522740125656128
+                  1.0292387008666992,
+                  1.9644567370414734,
+                  1.1546486020088196
                 ],
                 "center": [
-                  -0.013533547520637512,
-                  -0.018157511949539185,
-                  -0.013519108295440674
+                  -0.013427376747131348,
+                  -0.01796618103981018,
+                  -0.01348087191581726
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -1725,21 +1737,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4750,
+            "triangleCount": 13998,
             "generatedProduct": {
               "actorId": "solitude-pillar-5",
-              "cacheKey": "mesh-collision-manager-v1:da29193eb3bd7fc7037602e2e08df2237f48b0f624509fe73b081fc4ade2f636:9831630751bc7bcde523987287096305715c6099088c6f930fb5898e1e4f6f31:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:c0170e35dca7046c3f6cc72c164d42cadcc19ffb114384ee786d443ef463fd72:9831630751bc7bcde523987287096305715c6099088c6f930fb5898e1e4f6f31:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-pillar-5:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "da29193eb3bd7fc7037602e2e08df2237f48b0f624509fe73b081fc4ade2f636"
+                "value": "c0170e35dca7046c3f6cc72c164d42cadcc19ffb114384ee786d443ef463fd72"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -1747,36 +1760,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
-                  -0.5266964435577393,
-                  -0.9999573230743408,
-                  -0.5896561145782471
+                  -0.528046727180481,
+                  -1.0001945495605469,
+                  -0.590805172920227
                 ],
                 "max": [
-                  0.49962934851646423,
-                  0.9636422991752625,
-                  0.5626178979873657
+                  0.5011919736862183,
+                  0.9642621874809265,
+                  0.5638434290885925
                 ],
                 "size": [
-                  1.0263257920742035,
-                  1.9635996222496033,
-                  1.1522740125656128
+                  1.0292387008666992,
+                  1.9644567370414734,
+                  1.1546486020088196
                 ],
                 "center": [
-                  -0.013533547520637512,
-                  -0.018157511949539185,
-                  -0.013519108295440674
+                  -0.013427376747131348,
+                  -0.01796618103981018,
+                  -0.01348087191581726
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-5.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-5.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 4740,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
+              "triangleCount": 13998,
+              "vertexCount": 11600,
               "triangleBudget": 20000
             }
           }
@@ -1832,10 +1846,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-6.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-6.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:9b0a7e957f99626c32386f9b4879a03a400b8f459abbda375105f10802e14dcc:a4f03351df246ac711aeaec6baa63e9dd6e23bf8391123be98bb7cd314082adf:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:10fdb650a1fa305f581b5b632a620567b1cc30f77e591c7056686dba22985fe0:a4f03351df246ac711aeaec6baa63e9dd6e23bf8391123be98bb7cd314082adf:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -1870,19 +1884,19 @@
                   -0.5648727416992188
                 ],
                 "max": [
-                  0.5745194554328918,
-                  0.973398745059967,
-                  0.5606939196586609
+                  0.5764304995536804,
+                  0.9737722277641296,
+                  0.5614635944366455
                 ],
                 "size": [
-                  1.1747580170631409,
-                  1.9736765027046204,
-                  1.1255666613578796
+                  1.1766690611839294,
+                  1.974049985408783,
+                  1.1263363361358643
                 ],
                 "center": [
-                  -0.012859553098678589,
-                  -0.01343950629234314,
-                  -0.0020894110202789307
+                  -0.011904031038284302,
+                  -0.01325276494026184,
+                  -0.001704573631286621
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -1923,21 +1937,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4748,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-pillar-6",
-              "cacheKey": "mesh-collision-manager-v1:9b0a7e957f99626c32386f9b4879a03a400b8f459abbda375105f10802e14dcc:a4f03351df246ac711aeaec6baa63e9dd6e23bf8391123be98bb7cd314082adf:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:10fdb650a1fa305f581b5b632a620567b1cc30f77e591c7056686dba22985fe0:a4f03351df246ac711aeaec6baa63e9dd6e23bf8391123be98bb7cd314082adf:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-pillar-6:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "9b0a7e957f99626c32386f9b4879a03a400b8f459abbda375105f10802e14dcc"
+                "value": "10fdb650a1fa305f581b5b632a620567b1cc30f77e591c7056686dba22985fe0"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -1945,7 +1960,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -1955,26 +1970,27 @@
                   -0.5648727416992188
                 ],
                 "max": [
-                  0.5745194554328918,
-                  0.973398745059967,
-                  0.5606939196586609
+                  0.5764304995536804,
+                  0.9737722277641296,
+                  0.5614635944366455
                 ],
                 "size": [
-                  1.1747580170631409,
-                  1.9736765027046204,
-                  1.1255666613578796
+                  1.1766690611839294,
+                  1.974049985408783,
+                  1.1263363361358643
                 ],
                 "center": [
-                  -0.012859553098678589,
-                  -0.01343950629234314,
-                  -0.0020894110202789307
+                  -0.011904031038284302,
+                  -0.01325276494026184,
+                  -0.001704573631286621
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-6.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-6.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
-              "triangleCount": 4748,
-              "vertexCount": 4605,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 11392,
               "triangleBudget": 20000
             }
           }
@@ -2074,10 +2090,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:2b251350dafe10c4891ed180721aff24eab4cde505fad41daf5876af6ea31791:c488adea2a71fea601613aeef38178895137ecfaaa3b4ac052b444791e034d6c:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:bbc04baf9f520c2862587006aaa8062909c026a04cf6026406297eb7b1a43295:c488adea2a71fea601613aeef38178895137ecfaaa3b4ac052b444791e034d6c:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2107,24 +2123,24 @@
               },
               "colliderLocalBounds": {
                 "min": [
-                  -0.3959961235523224,
-                  -1.00007963180542,
-                  -0.41185587644577026
+                  -0.3966028690338135,
+                  -1.0001673698425293,
+                  -0.4122299253940582
                 ],
                 "max": [
-                  0.3703550398349762,
-                  0.9735575914382935,
-                  0.38577237725257874
+                  0.3706434965133667,
+                  0.9736790657043457,
+                  0.3860882818698883
                 ],
                 "size": [
-                  0.7663511633872986,
-                  1.9736372232437134,
-                  0.797628253698349
+                  0.7672463655471802,
+                  1.973846435546875,
+                  0.7983182072639465
                 ],
                 "center": [
-                  -0.012820541858673096,
-                  -0.013261020183563232,
-                  -0.013041749596595764
+                  -0.012979686260223389,
+                  -0.013244152069091797,
+                  -0.013070821762084961
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -2165,21 +2181,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4750,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-pillar-8",
-              "cacheKey": "mesh-collision-manager-v1:2b251350dafe10c4891ed180721aff24eab4cde505fad41daf5876af6ea31791:c488adea2a71fea601613aeef38178895137ecfaaa3b4ac052b444791e034d6c:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:bbc04baf9f520c2862587006aaa8062909c026a04cf6026406297eb7b1a43295:c488adea2a71fea601613aeef38178895137ecfaaa3b4ac052b444791e034d6c:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-pillar-8:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "2b251350dafe10c4891ed180721aff24eab4cde505fad41daf5876af6ea31791"
+                "value": "bbc04baf9f520c2862587006aaa8062909c026a04cf6026406297eb7b1a43295"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2187,36 +2204,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
-                  -0.3959961235523224,
-                  -1.00007963180542,
-                  -0.41185587644577026
+                  -0.3966028690338135,
+                  -1.0001673698425293,
+                  -0.4122299253940582
                 ],
                 "max": [
-                  0.3703550398349762,
-                  0.9735575914382935,
-                  0.38577237725257874
+                  0.3706434965133667,
+                  0.9736790657043457,
+                  0.3860882818698883
                 ],
                 "size": [
-                  0.7663511633872986,
-                  1.9736372232437134,
-                  0.797628253698349
+                  0.7672463655471802,
+                  1.973846435546875,
+                  0.7983182072639465
                 ],
                 "center": [
-                  -0.012820541858673096,
-                  -0.013261020183563232,
-                  -0.013041749596595764
+                  -0.012979686260223389,
+                  -0.013244152069091797,
+                  -0.013070821762084961
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 4405,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 10132,
               "triangleBudget": 20000
             }
           }
@@ -2272,10 +2290,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-9.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-9.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:7f1d594464484f1baf9828c547dc3e147a7ed7fdb933a5dd08a568e240a380ce:c5209be76c727c44b3a599742311041a2245c8776ed9a5d67ffcf8c9d612ae65:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:1fd94fa7c127e3bc070dad3c90e4634ac331915d80f510408bb0f83905517a92:c5209be76c727c44b3a599742311041a2245c8776ed9a5d67ffcf8c9d612ae65:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2305,24 +2323,24 @@
               },
               "colliderLocalBounds": {
                 "min": [
-                  -0.5356743335723877,
-                  -1.000184178352356,
-                  -0.6013422608375549
+                  -0.5359225273132324,
+                  -1.0002118349075317,
+                  -0.6033742427825928
                 ],
                 "max": [
-                  0.5100782513618469,
+                  0.5107831954956055,
                   0.9740860462188721,
-                  0.5759803056716919
+                  0.5761327147483826
                 ],
                 "size": [
-                  1.0457525849342346,
-                  1.974270224571228,
-                  1.1773225665092468
+                  1.046705722808838,
+                  1.9742978811264038,
+                  1.1795069575309753
                 ],
                 "center": [
-                  -0.012798041105270386,
-                  -0.013049066066741943,
-                  -0.012680977582931519
+                  -0.012569665908813477,
+                  -0.013062894344329834,
+                  -0.013620764017105103
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -2363,21 +2381,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4750,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-pillar-9",
-              "cacheKey": "mesh-collision-manager-v1:7f1d594464484f1baf9828c547dc3e147a7ed7fdb933a5dd08a568e240a380ce:c5209be76c727c44b3a599742311041a2245c8776ed9a5d67ffcf8c9d612ae65:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:1fd94fa7c127e3bc070dad3c90e4634ac331915d80f510408bb0f83905517a92:c5209be76c727c44b3a599742311041a2245c8776ed9a5d67ffcf8c9d612ae65:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-pillar-9:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "7f1d594464484f1baf9828c547dc3e147a7ed7fdb933a5dd08a568e240a380ce"
+                "value": "1fd94fa7c127e3bc070dad3c90e4634ac331915d80f510408bb0f83905517a92"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2385,36 +2404,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
-                  -0.5356743335723877,
-                  -1.000184178352356,
-                  -0.6013422608375549
+                  -0.5359225273132324,
+                  -1.0002118349075317,
+                  -0.6033742427825928
                 ],
                 "max": [
-                  0.5100782513618469,
+                  0.5107831954956055,
                   0.9740860462188721,
-                  0.5759803056716919
+                  0.5761327147483826
                 ],
                 "size": [
-                  1.0457525849342346,
-                  1.974270224571228,
-                  1.1773225665092468
+                  1.046705722808838,
+                  1.9742978811264038,
+                  1.1795069575309753
                 ],
                 "center": [
-                  -0.012798041105270386,
-                  -0.013049066066741943,
-                  -0.012680977582931519
+                  -0.012569665908813477,
+                  -0.013062894344329834,
+                  -0.013620764017105103
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-9.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-9.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 4328,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 10407,
               "triangleBudget": 20000
             }
           }
@@ -2470,10 +2490,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-10.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-10.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:157b80603979d7d007c332368834f2dd91f05ed867e670266da32507147587f9:cb6626e848ad754050bf46a461997252a2a49cb9b8bd7542f3899c2b2a9d9c82:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:a1c278a970080243349f54d0a1e98b171cde005a34924c981b9741221ef673f6:cb6626e848ad754050bf46a461997252a2a49cb9b8bd7542f3899c2b2a9d9c82:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2503,24 +2523,24 @@
               },
               "colliderLocalBounds": {
                 "min": [
-                  -0.5815596580505371,
-                  -1.000173568725586,
+                  -0.5818926095962524,
+                  -1.0005899667739868,
                   -0.8734685182571411
                 ],
                 "max": [
-                  0.549156129360199,
+                  0.5566704273223877,
                   0.9736887812614441,
-                  0.8525679111480713
+                  0.8537846803665161
                 ],
                 "size": [
-                  1.130715787410736,
-                  1.97386234998703,
-                  1.7260364294052124
+                  1.1385630369186401,
+                  1.974278748035431,
+                  1.7272531986236572
                 ],
                 "center": [
-                  -0.016201764345169067,
-                  -0.013242393732070923,
-                  -0.010450303554534912
+                  -0.012611091136932373,
+                  -0.013450592756271362,
+                  -0.0098419189453125
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -2561,21 +2581,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4750,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-pillar-10",
-              "cacheKey": "mesh-collision-manager-v1:157b80603979d7d007c332368834f2dd91f05ed867e670266da32507147587f9:cb6626e848ad754050bf46a461997252a2a49cb9b8bd7542f3899c2b2a9d9c82:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:a1c278a970080243349f54d0a1e98b171cde005a34924c981b9741221ef673f6:cb6626e848ad754050bf46a461997252a2a49cb9b8bd7542f3899c2b2a9d9c82:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-pillar-10:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "157b80603979d7d007c332368834f2dd91f05ed867e670266da32507147587f9"
+                "value": "a1c278a970080243349f54d0a1e98b171cde005a34924c981b9741221ef673f6"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2583,36 +2604,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
-                  -0.5815596580505371,
-                  -1.000173568725586,
+                  -0.5818926095962524,
+                  -1.0005899667739868,
                   -0.8734685182571411
                 ],
                 "max": [
-                  0.549156129360199,
+                  0.5566704273223877,
                   0.9736887812614441,
-                  0.8525679111480713
+                  0.8537846803665161
                 ],
                 "size": [
-                  1.130715787410736,
-                  1.97386234998703,
-                  1.7260364294052124
+                  1.1385630369186401,
+                  1.974278748035431,
+                  1.7272531986236572
                 ],
                 "center": [
-                  -0.016201764345169067,
-                  -0.013242393732070923,
-                  -0.010450303554534912
+                  -0.012611091136932373,
+                  -0.013450592756271362,
+                  -0.0098419189453125
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-10.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-10.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 5254,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 12652,
               "triangleBudget": 20000
             }
           }
@@ -2668,10 +2690,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-11.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-11.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:52d46e35c3fd5a0c38abc9c77f3cb7c8160299a99ba695a65865f5924275f592:4f0dc5fe0a94fcdc07a0e18443ab19773dad5c873046bc3cfd0b4c51352c5c3d:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:1f9aad47cf04005aaca9ef7ec1abfd94fabea2d2af462466c55f4c31c687597c:4f0dc5fe0a94fcdc07a0e18443ab19773dad5c873046bc3cfd0b4c51352c5c3d:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2702,22 +2724,22 @@
               "colliderLocalBounds": {
                 "min": [
                   -0.9434459209442139,
-                  -0.9939280152320862,
+                  -0.9954308867454529,
                   -0.9447097182273865
                 ],
                 "max": [
-                  0.9115718007087708,
-                  0.9731823205947876,
+                  0.912825882434845,
+                  0.9741824865341187,
                   0.8962405323982239
                 ],
                 "size": [
-                  1.8550177216529846,
-                  1.9671103358268738,
+                  1.8562718033790588,
+                  1.9696133732795715,
                   1.8409502506256104
                 ],
                 "center": [
-                  -0.015937060117721558,
-                  -0.010372847318649292,
+                  -0.015310019254684448,
+                  -0.010624200105667114,
                   -0.0242345929145813
                 ]
               },
@@ -2759,21 +2781,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4750,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-pillar-11",
-              "cacheKey": "mesh-collision-manager-v1:52d46e35c3fd5a0c38abc9c77f3cb7c8160299a99ba695a65865f5924275f592:4f0dc5fe0a94fcdc07a0e18443ab19773dad5c873046bc3cfd0b4c51352c5c3d:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:1f9aad47cf04005aaca9ef7ec1abfd94fabea2d2af462466c55f4c31c687597c:4f0dc5fe0a94fcdc07a0e18443ab19773dad5c873046bc3cfd0b4c51352c5c3d:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-pillar-11:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "52d46e35c3fd5a0c38abc9c77f3cb7c8160299a99ba695a65865f5924275f592"
+                "value": "1f9aad47cf04005aaca9ef7ec1abfd94fabea2d2af462466c55f4c31c687597c"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2781,36 +2804,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
                   -0.9434459209442139,
-                  -0.9939280152320862,
+                  -0.9954308867454529,
                   -0.9447097182273865
                 ],
                 "max": [
-                  0.9115718007087708,
-                  0.9731823205947876,
+                  0.912825882434845,
+                  0.9741824865341187,
                   0.8962405323982239
                 ],
                 "size": [
-                  1.8550177216529846,
-                  1.9671103358268738,
+                  1.8562718033790588,
+                  1.9696133732795715,
                   1.8409502506256104
                 ],
                 "center": [
-                  -0.015937060117721558,
-                  -0.010372847318649292,
+                  -0.015310019254684448,
+                  -0.010624200105667114,
                   -0.0242345929145813
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-11.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-11.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 4931,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 12039,
               "triangleBudget": 20000
             }
           }
@@ -2866,10 +2890,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-12.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-12.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:21b205facbf651e5280afcbfeaeb617d29d4322d667e08cc79f444f515cb33e8:0b9ffd63996e8ea3a38658e3b8171052309fbaca6cfece83e38bece37c11c8e6:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:a35e3d075080f6a8ca1fe89fefdf3f72b40425632e3d03e624a7c8b51229055d:0b9ffd63996e8ea3a38658e3b8171052309fbaca6cfece83e38bece37c11c8e6:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2899,24 +2923,24 @@
               },
               "colliderLocalBounds": {
                 "min": [
-                  -0.6520611047744751,
-                  -0.9995940923690796,
-                  -0.6156224608421326
+                  -0.6531798243522644,
+                  -1.0002329349517822,
+                  -0.6166970133781433
                 ],
                 "max": [
-                  0.6271432638168335,
-                  0.973311185836792,
-                  0.622107744216919
+                  0.6274647116661072,
+                  0.9740968346595764,
+                  0.6246123909950256
                 ],
                 "size": [
-                  1.2792043685913086,
-                  1.9729052782058716,
-                  1.2377302050590515
+                  1.2806445360183716,
+                  1.9743297696113586,
+                  1.241309404373169
                 ],
                 "center": [
-                  -0.0124589204788208,
-                  -0.013141453266143799,
-                  0.0032426416873931885
+                  -0.012857556343078613,
+                  -0.013068050146102905,
+                  0.003957688808441162
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -2957,21 +2981,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4750,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-pillar-12",
-              "cacheKey": "mesh-collision-manager-v1:21b205facbf651e5280afcbfeaeb617d29d4322d667e08cc79f444f515cb33e8:0b9ffd63996e8ea3a38658e3b8171052309fbaca6cfece83e38bece37c11c8e6:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:a35e3d075080f6a8ca1fe89fefdf3f72b40425632e3d03e624a7c8b51229055d:0b9ffd63996e8ea3a38658e3b8171052309fbaca6cfece83e38bece37c11c8e6:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-pillar-12:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "21b205facbf651e5280afcbfeaeb617d29d4322d667e08cc79f444f515cb33e8"
+                "value": "a35e3d075080f6a8ca1fe89fefdf3f72b40425632e3d03e624a7c8b51229055d"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2979,36 +3004,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
-                  -0.6520611047744751,
-                  -0.9995940923690796,
-                  -0.6156224608421326
+                  -0.6531798243522644,
+                  -1.0002329349517822,
+                  -0.6166970133781433
                 ],
                 "max": [
-                  0.6271432638168335,
-                  0.973311185836792,
-                  0.622107744216919
+                  0.6274647116661072,
+                  0.9740968346595764,
+                  0.6246123909950256
                 ],
                 "size": [
-                  1.2792043685913086,
-                  1.9729052782058716,
-                  1.2377302050590515
+                  1.2806445360183716,
+                  1.9743297696113586,
+                  1.241309404373169
                 ],
                 "center": [
-                  -0.0124589204788208,
-                  -0.013141453266143799,
-                  0.0032426416873931885
+                  -0.012857556343078613,
+                  -0.013068050146102905,
+                  0.003957688808441162
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-12.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-12.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 3926,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 9647,
               "triangleBudget": 20000
             }
           }
@@ -3036,54 +3062,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-1",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 1",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 1.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 1.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 1."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-1",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 1",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 1.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 1.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-1",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 1",
+              "excerpt": "A patient glow hovers above Solitude Pillar 1.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 1."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3109,54 +3159,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-2",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 2",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 2.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 2.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 2."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-2",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 2",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 2.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 2.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-2",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 2",
+              "excerpt": "A patient glow hovers above Solitude Pillar 2.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 2."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3182,54 +3256,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-3",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 3",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 3.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 3.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 3."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-3",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 3",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 3.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 3.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-3",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 3",
+              "excerpt": "A patient glow hovers above Solitude Pillar 3.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 3."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3255,54 +3353,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-4",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 4",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 4.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 4.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 4."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-4",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 4",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 4.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 4.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-4",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 4",
+              "excerpt": "A patient glow hovers above Solitude Pillar 4.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 4."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3328,54 +3450,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-5",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 5",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 5.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 5.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 5."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-5",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 5",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 5.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 5.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-5",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 5",
+              "excerpt": "A patient glow hovers above Solitude Pillar 5.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 5."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3401,54 +3547,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-6",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 6",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 6.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 6.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 6."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-6",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 6",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 6.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 6.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-6",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 6",
+              "excerpt": "A patient glow hovers above Solitude Pillar 6.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 6."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3474,54 +3644,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-7",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 7",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 7.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 7.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 7."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-7",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 7",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 7.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 7.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-7",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 7",
+              "excerpt": "A patient glow hovers above Solitude Pillar 7.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 7."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3547,54 +3741,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-8",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 8",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 8.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 8.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 8."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-8",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 8",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 8.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 8.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-8",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 8",
+              "excerpt": "A patient glow hovers above Solitude Pillar 8.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 8."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3620,54 +3838,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-9",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 9",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 9.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 9.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 9."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-9",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 9",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 9.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 9.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-9",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 9",
+              "excerpt": "A patient glow hovers above Solitude Pillar 9.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 9."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3693,54 +3935,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-10",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 10",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 10.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 10.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 10."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-10",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 10",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 10.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 10.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-10",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 10",
+              "excerpt": "A patient glow hovers above Solitude Pillar 10.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 10."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3766,54 +4032,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-11",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 11",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 11.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 11.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 11."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-11",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 11",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 11.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 11.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-11",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 11",
+              "excerpt": "A patient glow hovers above Solitude Pillar 11.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 11."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3839,54 +4129,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
+        "npc": {
+          "id": "solitude-pillar-firefly-12",
+          "archetype": "firefly",
+          "displayName": "Pillar Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude Pillar 12",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A patient glow hovers above Solitude Pillar 12.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 12.",
+            "body": "A solitary firefly keeps watch above Solitude Pillar 12."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
+            "hoverHeight": 0.28,
+            "bobAmplitude": 0.08,
+            "bobSpeed": 0.55
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.52,
+            "spriteIntensity": 1.15,
             "lightIntensity": 1.15,
             "lightDistance": 4.6,
             "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
             "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "lightBurstBoost": 1.4
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-pillar-firefly-12",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.52,
-            "title": "Solitude Pillar 12",
-            "author": "Pillar Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A patient glow hovers above Solitude Pillar 12.",
-            "body": "A solitary firefly keeps watch above Solitude Pillar 12.",
-            "lightIntensity": 1.15,
-            "lightDistance": 4.6,
-            "lightDecay": 1.25,
-            "spriteIntensity": 1.15,
-            "lightBurstBoost": 1.4,
-            "twinkleSpeed": 0.9,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "bobSpeed": 0.55,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-pillar-firefly-12",
+            "archetype": "firefly",
+            "displayName": "Pillar Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude Pillar 12",
+              "excerpt": "A patient glow hovers above Solitude Pillar 12.",
+              "body": "A solitary firefly keeps watch above Solitude Pillar 12."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.55
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.52,
+              "spriteIntensity": 1.15,
+              "lightIntensity": 1.15,
+              "lightDistance": 4.6,
+              "lightDecay": 1.25,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 1.4
+            }
           }
         }
       },
@@ -3940,10 +4254,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-east.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-east.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:cbe37eb3d3fd497307e1a5fa3314f848836375a7e1d6db3fb9ef104bfc1e4ed4:d0ba450664e444794ec5bfc7e477e48215d5f8384a83dbe903cefe8e496bd981:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:67646052a2f66ee136bd98012a9a2cf223398e0d57cd32fe7922a3c3ede4e5ea:d0ba450664e444794ec5bfc7e477e48215d5f8384a83dbe903cefe8e496bd981:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -3973,23 +4287,23 @@
               },
               "colliderLocalBounds": {
                 "min": [
-                  -0.3017815947532654,
-                  -0.9541022181510925,
+                  -0.30635887384414673,
+                  -0.9567339420318604,
                   -0.997004508972168
                 ],
                 "max": [
                   0.28787562251091003,
-                  0.9302521347999573,
+                  0.9307903051376343,
                   0.9734286069869995
                 ],
                 "size": [
-                  0.5896572172641754,
-                  1.8843543529510498,
+                  0.5942344963550568,
+                  1.8875242471694946,
                   1.9704331159591675
                 ],
                 "center": [
-                  -0.006952986121177673,
-                  -0.011925041675567627,
+                  -0.009241625666618347,
+                  -0.012971818447113037,
                   -0.011787950992584229
                 ]
               },
@@ -4031,21 +4345,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4750,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-ring-fragment-east",
-              "cacheKey": "mesh-collision-manager-v1:cbe37eb3d3fd497307e1a5fa3314f848836375a7e1d6db3fb9ef104bfc1e4ed4:d0ba450664e444794ec5bfc7e477e48215d5f8384a83dbe903cefe8e496bd981:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:67646052a2f66ee136bd98012a9a2cf223398e0d57cd32fe7922a3c3ede4e5ea:d0ba450664e444794ec5bfc7e477e48215d5f8384a83dbe903cefe8e496bd981:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-ring-fragment-east:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbe37eb3d3fd497307e1a5fa3314f848836375a7e1d6db3fb9ef104bfc1e4ed4"
+                "value": "67646052a2f66ee136bd98012a9a2cf223398e0d57cd32fe7922a3c3ede4e5ea"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -4053,36 +4368,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
-                  -0.3017815947532654,
-                  -0.9541022181510925,
+                  -0.30635887384414673,
+                  -0.9567339420318604,
                   -0.997004508972168
                 ],
                 "max": [
                   0.28787562251091003,
-                  0.9302521347999573,
+                  0.9307903051376343,
                   0.9734286069869995
                 ],
                 "size": [
-                  0.5896572172641754,
-                  1.8843543529510498,
+                  0.5942344963550568,
+                  1.8875242471694946,
                   1.9704331159591675
                 ],
                 "center": [
-                  -0.006952986121177673,
-                  -0.011925041675567627,
+                  -0.009241625666618347,
+                  -0.012971818447113037,
                   -0.011787950992584229
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-east.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-east.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 4254,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 10867,
               "triangleBudget": 20000
             }
           }
@@ -4138,10 +4454,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:f8465c10721bdda7c4ed3c3700037886ba09a38cc3b83d68e71a2ae98a908e3d:7c54bb49d13a20e6cb872c32fda32c68be4eab84d55a305028acc2f8067bac7e:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+            "colliderCacheKey": "mesh-collision-manager-v2:2d702293583a0105d805351e8296657c9ea6eb2d743b29e985204593b98bf280:7c54bb49d13a20e6cb872c32fda32c68be4eab84d55a305028acc2f8067bac7e:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -4172,23 +4488,23 @@
               "colliderLocalBounds": {
                 "min": [
                   -0.99843829870224,
-                  -0.8746134042739868,
+                  -0.8751745223999023,
                   -0.9793640375137329
                 ],
                 "max": [
-                  0.9737012386322021,
-                  0.8356838822364807,
-                  0.9003065228462219
+                  0.9737838506698608,
+                  0.8361713290214539,
+                  0.9003127217292786
                 ],
                 "size": [
-                  1.9721395373344421,
-                  1.7102972865104675,
-                  1.8796705603599548
+                  1.9722221493721008,
+                  1.7113458514213562,
+                  1.8796767592430115
                 ],
                 "center": [
-                  -0.012368530035018921,
-                  -0.019464761018753052,
-                  -0.03952875733375549
+                  -0.012327224016189575,
+                  -0.019501596689224243,
+                  -0.03952565789222717
                 ]
               },
               "visualToPhysicsMatrix": [
@@ -4229,21 +4545,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 20000,
-            "triangleCount": 4750,
+            "triangleCount": 14000,
             "generatedProduct": {
               "actorId": "solitude-ring-fragment-west",
-              "cacheKey": "mesh-collision-manager-v1:f8465c10721bdda7c4ed3c3700037886ba09a38cc3b83d68e71a2ae98a908e3d:7c54bb49d13a20e6cb872c32fda32c68be4eab84d55a305028acc2f8067bac7e:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+              "cacheKey": "mesh-collision-manager-v2:2d702293583a0105d805351e8296657c9ea6eb2d743b29e985204593b98bf280:7c54bb49d13a20e6cb872c32fda32c68be4eab84d55a305028acc2f8067bac7e:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
               "mode": "auto",
               "productId": "solitude-ring-fragment-west:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "asset",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "f8465c10721bdda7c4ed3c3700037886ba09a38cc3b83d68e71a2ae98a908e3d"
+                "value": "2d702293583a0105d805351e8296657c9ea6eb2d743b29e985204593b98bf280"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -4251,36 +4568,37 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+                "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
               },
               "shape": "trimesh",
               "localBounds": {
                 "min": [
                   -0.99843829870224,
-                  -0.8746134042739868,
+                  -0.8751745223999023,
                   -0.9793640375137329
                 ],
                 "max": [
-                  0.9737012386322021,
-                  0.8356838822364807,
-                  0.9003065228462219
+                  0.9737838506698608,
+                  0.8361713290214539,
+                  0.9003127217292786
                 ],
                 "size": [
-                  1.9721395373344421,
-                  1.7102972865104675,
-                  1.8796705603599548
+                  1.9722221493721008,
+                  1.7113458514213562,
+                  1.8796767592430115
                 ],
                 "center": [
-                  -0.012368530035018921,
-                  -0.019464761018753052,
-                  -0.03952875733375549
+                  -0.012327224016189575,
+                  -0.019501596689224243,
+                  -0.03952565789222717
                 ]
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.meta.json",
-              "sourceMeshUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
-              "triangleCount": 4750,
-              "vertexCount": 5561,
+              "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.low.glb",
+              "visualSourceMeshUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
+              "triangleCount": 14000,
+              "vertexCount": 13091,
               "triangleBudget": 20000
             }
           }
@@ -4307,54 +4625,78 @@
             2
           ]
         },
-        "gameplay": {
-          "type": "firefly",
-          "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.62,
+        "npc": {
+          "id": "solitude-firefly",
+          "archetype": "firefly",
+          "displayName": "The Firefly",
+          "interaction": {
+            "mode": "click",
+            "prompt": "Listen"
+          },
+          "conversation": {
+            "mode": "read-only",
             "title": "Solitude",
-            "author": "The Firefly",
-            "location": "The Solitude Plain",
             "excerpt": "A single patient glow waits at the center of the ruined ring.",
-            "body": "This is a place for solitude. You are alone here.\n\nThe pillars keep their distance so the sky can speak without interruption.",
-            "bobSpeed": 0.5,
-            "twinkleSpeed": 0.9,
-            "lightDistance": 30,
-            "lightIntensity": 15,
-            "lightDecay": 1,
-            "spriteIntensity": 1.2,
-            "lightBurstBoost": 2,
+            "body": "This is a place for solitude. You are alone here.\n\nThe pillars keep their distance so the sky can speak without interruption."
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.16,
+            "speed": 0.18,
             "hoverHeight": 0.28,
             "bobAmplitude": 0.08,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "bobSpeed": 0.5
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#ff4658",
+            "secondaryColor": "#f5f1a8",
+            "size": 0.62,
+            "spriteIntensity": 1.2,
+            "lightIntensity": 15,
+            "lightDistance": 30,
+            "lightDecay": 1,
+            "twinkleSpeed": 0.9,
+            "lightBurstBoost": 2
           }
         },
         "interaction": {
           "kind": "conversation",
+          "targetId": "solitude-firefly",
           "data": {
-            "type": "firefly",
-            "markerColor": "#ff4658",
-            "markerSize": 0.62,
-            "title": "Solitude",
-            "author": "The Firefly",
-            "location": "The Solitude Plain",
-            "excerpt": "A single patient glow waits at the center of the ruined ring.",
-            "body": "This is a place for solitude. You are alone here.\n\nThe pillars keep their distance so the sky can speak without interruption.",
-            "bobSpeed": 0.5,
-            "twinkleSpeed": 0.9,
-            "lightDistance": 30,
-            "lightIntensity": 15,
-            "lightDecay": 1,
-            "spriteIntensity": 1.2,
-            "lightBurstBoost": 2,
-            "hoverHeight": 0.28,
-            "bobAmplitude": 0.08,
-            "wanderEnabled": true,
-            "wanderRadius": 0.16,
-            "wanderSpeed": 0.18
+            "id": "solitude-firefly",
+            "archetype": "firefly",
+            "displayName": "The Firefly",
+            "interaction": {
+              "mode": "click",
+              "prompt": "Listen"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Solitude",
+              "excerpt": "A single patient glow waits at the center of the ruined ring.",
+              "body": "This is a place for solitude. You are alone here.\n\nThe pillars keep their distance so the sky can speak without interruption."
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.16,
+              "speed": 0.18,
+              "hoverHeight": 0.28,
+              "bobAmplitude": 0.08,
+              "bobSpeed": 0.5
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#ff4658",
+              "secondaryColor": "#f5f1a8",
+              "size": 0.62,
+              "spriteIntensity": 1.2,
+              "lightIntensity": 15,
+              "lightDistance": 30,
+              "lightDecay": 1,
+              "twinkleSpeed": 0.9,
+              "lightBurstBoost": 2
+            }
           }
         }
       },
@@ -4459,7 +4801,8 @@
     "assetActorCount": 16,
     "primitiveActorCount": 0,
     "neverCullActorCount": 0,
-    "gameplayFireflyActorCount": 13,
+    "npcActorCount": 13,
+    "fireflyNpcActorCount": 13,
     "physicsActorCount": 15,
     "trimeshActorCount": 15,
     "detailMeshActorCount": 0,
@@ -4882,14 +5225,14 @@
     "generatedCollisionProducts": [
       {
         "actorId": "solitude-ground-plateau",
-        "cacheKey": "mesh-collision-manager-v1:68f63130f6fa1763b9b2c888e91296a96c2f7f48c97268c997664f61d8e8a0cc:99f17c516af36ee43d130bf98c7135bd07b55caea21c4227644805ae461a285a:ab033e1df88e71c810b4fca94607cf6db3c0d51ef6db7838e001cc658da09d66",
+        "cacheKey": "mesh-collision-manager-v2:29320044051c4acf2f595c17e0663af56979174f1bee6aad99e10998fe225f62:99f17c516af36ee43d130bf98c7135bd07b55caea21c4227644805ae461a285a:d9d54ca7d4cfde061217595b07069900ffba69c03e6185e82fd52452d92ba1f9",
         "mode": "auto",
         "productId": "solitude-ground-plateau:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "68f63130f6fa1763b9b2c888e91296a96c2f7f48c97268c997664f61d8e8a0cc"
+          "value": "29320044051c4acf2f595c17e0663af56979174f1bee6aad99e10998fe225f62"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -4897,48 +5240,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "ab033e1df88e71c810b4fca94607cf6db3c0d51ef6db7838e001cc658da09d66"
+          "value": "d9d54ca7d4cfde061217595b07069900ffba69c03e6185e82fd52452d92ba1f9"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
-            -0.8996759057044983,
+            -0.9005722403526306,
             -1.0030039548873901,
             -0.9492046236991882
           ],
           "max": [
-            0.8806980848312378,
-            0.97152179479599,
-            0.9208857417106628
+            0.8823164701461792,
+            0.9736996293067932,
+            0.9215630292892456
           ],
           "size": [
-            1.780373990535736,
-            1.9745257496833801,
-            1.870090365409851
+            1.7828887104988098,
+            1.9767035841941833,
+            1.8707676529884338
           ],
           "center": [
-            -0.009488910436630249,
-            -0.015741080045700073,
-            -0.014159440994262695
+            -0.009127885103225708,
+            -0.014652162790298462,
+            -0.013820797204971313
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
-        "triangleCount": 19000,
-        "vertexCount": 22218,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+        "triangleCount": 13998,
+        "vertexCount": 17828,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-ground-dais",
-        "cacheKey": "mesh-collision-manager-v1:e68a3b4987c59e03667e641decde57d5039206d2b7322ec11b475df729d03580:34b339f63c9a9eb28c8e9bcdb82f80f6d29b79c1c852b3671d5f38820e1b4ed0:d7126a84503a79acc2b85e9d7dde4fda53d7eceb20271e49be0ad434841ae978",
+        "cacheKey": "mesh-collision-manager-v2:f615e91aa62cdd8bc37ae300e384f291be1966a051dd81699d6e688857a3cb94:34b339f63c9a9eb28c8e9bcdb82f80f6d29b79c1c852b3671d5f38820e1b4ed0:8560612c957137f6a8c48b310972dcc1a91b33ad373d53ba0644fa9db5ff2290",
         "mode": "auto",
         "productId": "solitude-ground-dais:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "e68a3b4987c59e03667e641decde57d5039206d2b7322ec11b475df729d03580"
+          "value": "f615e91aa62cdd8bc37ae300e384f291be1966a051dd81699d6e688857a3cb94"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -4946,48 +5290,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "d7126a84503a79acc2b85e9d7dde4fda53d7eceb20271e49be0ad434841ae978"
+          "value": "8560612c957137f6a8c48b310972dcc1a91b33ad373d53ba0644fa9db5ff2290"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
-            -0.955689549446106,
-            -0.9478588104248047,
-            -0.9953939318656921
+            -0.9581931829452515,
+            -0.9524890184402466,
+            -0.996408998966217
           ],
           "max": [
-            0.9321647882461548,
+            0.9342905879020691,
             0.9272300004959106,
-            0.9637094140052795
+            0.9679255485534668
           ],
           "size": [
-            1.8878543376922607,
-            1.8750888109207153,
-            1.9591033458709717
+            1.8924837708473206,
+            1.8797190189361572,
+            1.9643345475196838
           ],
           "center": [
-            -0.011762380599975586,
-            -0.010314404964447021,
-            -0.0158422589302063
+            -0.011951297521591187,
+            -0.012629508972167969,
+            -0.014241725206375122
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 5376,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+        "triangleCount": 11398,
+        "vertexCount": 11095,
         "triangleBudget": 12000
       },
       {
         "actorId": "solitude-pillar-1",
-        "cacheKey": "mesh-collision-manager-v1:b0658c9b9d2f697a8b668362dccee6bb06cc6ff5856136c884c00d8b6b0b60f0:5d224ac4c13ffe3063fd5bf5fdd3f3d07abf2d5631a3aa447fa93d5c821a0d7f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:93f843e9dc21cdc451f4bb953a404ba43e84eed84f3bd8048f8173c86e5a3565:5d224ac4c13ffe3063fd5bf5fdd3f3d07abf2d5631a3aa447fa93d5c821a0d7f:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-pillar-1:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "b0658c9b9d2f697a8b668362dccee6bb06cc6ff5856136c884c00d8b6b0b60f0"
+          "value": "93f843e9dc21cdc451f4bb953a404ba43e84eed84f3bd8048f8173c86e5a3565"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -4995,48 +5340,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
-            -0.7818410992622375,
-            -1.0001593828201294,
-            -0.7797887325286865
+            -0.7825126647949219,
+            -1.0004767179489136,
+            -0.782132089138031
           ],
           "max": [
-            0.7538681626319885,
-            0.9738057255744934,
+            0.7572198510169983,
+            0.9741035103797913,
             0.7610894441604614
           ],
           "size": [
-            1.535709261894226,
-            1.9739651083946228,
-            1.540878176689148
+            1.5397325158119202,
+            1.9745802283287048,
+            1.5432215332984924
           ],
           "center": [
-            -0.013986468315124512,
-            -0.013176828622817993,
-            -0.009349644184112549
+            -0.012646406888961792,
+            -0.013186603784561157,
+            -0.01052132248878479
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 4069,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 9897,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-pillar-2",
-        "cacheKey": "mesh-collision-manager-v1:cec80297a319b91883474aa36cf322322705ac28066b71177370ef5dcf038e73:4a3e021ec24bbd55302033c8a84fc72dec06796205207ead4054a82f1f3683e1:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:f02bde8d173c6035d0af66754a60e600699b8ba79fc7e3a0fb2e1f73e651cf2d:4a3e021ec24bbd55302033c8a84fc72dec06796205207ead4054a82f1f3683e1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-pillar-2:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "cec80297a319b91883474aa36cf322322705ac28066b71177370ef5dcf038e73"
+          "value": "f02bde8d173c6035d0af66754a60e600699b8ba79fc7e3a0fb2e1f73e651cf2d"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5044,48 +5390,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
-            -0.5948081612586975,
-            -1.0000596046447754,
+            -0.5962746739387512,
+            -1.0003606081008911,
             -0.44824808835983276
           ],
           "max": [
-            0.5684415698051453,
-            0.9735748171806335,
-            0.4249148964881897
+            0.5691162943840027,
+            0.9743054509162903,
+            0.4258885681629181
           ],
           "size": [
-            1.1632497310638428,
-            1.973634421825409,
-            0.8731629848480225
+            1.165390968322754,
+            1.9746660590171814,
+            0.8741366565227509
           ],
           "center": [
-            -0.013183295726776123,
-            -0.013242393732070923,
-            -0.011666595935821533
+            -0.013579189777374268,
+            -0.013027578592300415,
+            -0.011179760098457336
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-2.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-2.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 3878,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 9987,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-pillar-3",
-        "cacheKey": "mesh-collision-manager-v1:c5b8c5490c520db6051ad5d6cce248ce2e184ef8dc9c2650683a6e76388a68ee:3a73a13fb8798297c0aeaff1c6e32369ccb438fb3844f9c96d52b47cd191fb61:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:7c70cd3f1da6d88186107b25824deb59d59566bef6f8c3e91ce3897edcb08aa1:3a73a13fb8798297c0aeaff1c6e32369ccb438fb3844f9c96d52b47cd191fb61:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-pillar-3:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "c5b8c5490c520db6051ad5d6cce248ce2e184ef8dc9c2650683a6e76388a68ee"
+          "value": "7c70cd3f1da6d88186107b25824deb59d59566bef6f8c3e91ce3897edcb08aa1"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5093,48 +5440,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
-            -0.5999825596809387,
-            -0.9997504353523254,
-            -0.6671329736709595
+            -0.6000218391418457,
+            -1.0001929998397827,
+            -0.6678562164306641
           ],
           "max": [
-            0.5725367069244385,
-            0.973395824432373,
-            0.6427481770515442
+            0.574096143245697,
+            0.9739822745323181,
+            0.6432415246963501
           ],
           "size": [
-            1.1725192666053772,
-            1.9731462597846985,
-            1.3098811507225037
+            1.1741179823875427,
+            1.9741752743721008,
+            1.3110977411270142
           ],
           "center": [
-            -0.013722926378250122,
-            -0.013177305459976196,
-            -0.012192398309707642
+            -0.01296284794807434,
+            -0.0131053626537323,
+            -0.012307345867156982
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-3.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-3.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 3959,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 9564,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-pillar-4",
-        "cacheKey": "mesh-collision-manager-v1:42a59fbdd79e08a1088b0b936156b897de6334b2c6e47e204ba36d7c662704aa:aaecaedb3e469c0b22cdf5a16976230264c54c1fb3606dffc834d2fdb81ce0b1:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:47a2779cbad61d5f64b016fab4294af77fade4f6a6c50c1a7f873442da010a33:aaecaedb3e469c0b22cdf5a16976230264c54c1fb3606dffc834d2fdb81ce0b1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-pillar-4:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "42a59fbdd79e08a1088b0b936156b897de6334b2c6e47e204ba36d7c662704aa"
+          "value": "47a2779cbad61d5f64b016fab4294af77fade4f6a6c50c1a7f873442da010a33"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5142,48 +5490,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
             -0.8772475719451904,
-            -1.0004348754882812,
+            -1.0007864236831665,
             -0.8618723154067993
           ],
           "max": [
-            0.8478924632072449,
+            0.8484272360801697,
             0.9724119305610657,
-            0.8435716032981873
+            0.8466414213180542
           ],
           "size": [
-            1.7251400351524353,
-            1.972846806049347,
-            1.7054439187049866
+            1.72567480802536,
+            1.9731983542442322,
+            1.7085137367248535
           ],
           "center": [
-            -0.014677554368972778,
-            -0.014011472463607788,
-            -0.00915035605430603
+            -0.014410167932510376,
+            -0.014187246561050415,
+            -0.007615447044372559
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-4.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-4.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
-        "triangleCount": 4748,
-        "vertexCount": 5041,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 11993,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-pillar-5",
-        "cacheKey": "mesh-collision-manager-v1:da29193eb3bd7fc7037602e2e08df2237f48b0f624509fe73b081fc4ade2f636:9831630751bc7bcde523987287096305715c6099088c6f930fb5898e1e4f6f31:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:c0170e35dca7046c3f6cc72c164d42cadcc19ffb114384ee786d443ef463fd72:9831630751bc7bcde523987287096305715c6099088c6f930fb5898e1e4f6f31:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-pillar-5:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "da29193eb3bd7fc7037602e2e08df2237f48b0f624509fe73b081fc4ade2f636"
+          "value": "c0170e35dca7046c3f6cc72c164d42cadcc19ffb114384ee786d443ef463fd72"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5191,48 +5540,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
-            -0.5266964435577393,
-            -0.9999573230743408,
-            -0.5896561145782471
+            -0.528046727180481,
+            -1.0001945495605469,
+            -0.590805172920227
           ],
           "max": [
-            0.49962934851646423,
-            0.9636422991752625,
-            0.5626178979873657
+            0.5011919736862183,
+            0.9642621874809265,
+            0.5638434290885925
           ],
           "size": [
-            1.0263257920742035,
-            1.9635996222496033,
-            1.1522740125656128
+            1.0292387008666992,
+            1.9644567370414734,
+            1.1546486020088196
           ],
           "center": [
-            -0.013533547520637512,
-            -0.018157511949539185,
-            -0.013519108295440674
+            -0.013427376747131348,
+            -0.01796618103981018,
+            -0.01348087191581726
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-5.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-5.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 4740,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
+        "triangleCount": 13998,
+        "vertexCount": 11600,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-pillar-6",
-        "cacheKey": "mesh-collision-manager-v1:9b0a7e957f99626c32386f9b4879a03a400b8f459abbda375105f10802e14dcc:a4f03351df246ac711aeaec6baa63e9dd6e23bf8391123be98bb7cd314082adf:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:10fdb650a1fa305f581b5b632a620567b1cc30f77e591c7056686dba22985fe0:a4f03351df246ac711aeaec6baa63e9dd6e23bf8391123be98bb7cd314082adf:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-pillar-6:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "9b0a7e957f99626c32386f9b4879a03a400b8f459abbda375105f10802e14dcc"
+          "value": "10fdb650a1fa305f581b5b632a620567b1cc30f77e591c7056686dba22985fe0"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5240,7 +5590,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -5250,38 +5600,39 @@
             -0.5648727416992188
           ],
           "max": [
-            0.5745194554328918,
-            0.973398745059967,
-            0.5606939196586609
+            0.5764304995536804,
+            0.9737722277641296,
+            0.5614635944366455
           ],
           "size": [
-            1.1747580170631409,
-            1.9736765027046204,
-            1.1255666613578796
+            1.1766690611839294,
+            1.974049985408783,
+            1.1263363361358643
           ],
           "center": [
-            -0.012859553098678589,
-            -0.01343950629234314,
-            -0.0020894110202789307
+            -0.011904031038284302,
+            -0.01325276494026184,
+            -0.001704573631286621
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-6.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-6.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
-        "triangleCount": 4748,
-        "vertexCount": 4605,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 11392,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-pillar-8",
-        "cacheKey": "mesh-collision-manager-v1:2b251350dafe10c4891ed180721aff24eab4cde505fad41daf5876af6ea31791:c488adea2a71fea601613aeef38178895137ecfaaa3b4ac052b444791e034d6c:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:bbc04baf9f520c2862587006aaa8062909c026a04cf6026406297eb7b1a43295:c488adea2a71fea601613aeef38178895137ecfaaa3b4ac052b444791e034d6c:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-pillar-8:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "2b251350dafe10c4891ed180721aff24eab4cde505fad41daf5876af6ea31791"
+          "value": "bbc04baf9f520c2862587006aaa8062909c026a04cf6026406297eb7b1a43295"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5289,48 +5640,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
-            -0.3959961235523224,
-            -1.00007963180542,
-            -0.41185587644577026
+            -0.3966028690338135,
+            -1.0001673698425293,
+            -0.4122299253940582
           ],
           "max": [
-            0.3703550398349762,
-            0.9735575914382935,
-            0.38577237725257874
+            0.3706434965133667,
+            0.9736790657043457,
+            0.3860882818698883
           ],
           "size": [
-            0.7663511633872986,
-            1.9736372232437134,
-            0.797628253698349
+            0.7672463655471802,
+            1.973846435546875,
+            0.7983182072639465
           ],
           "center": [
-            -0.012820541858673096,
-            -0.013261020183563232,
-            -0.013041749596595764
+            -0.012979686260223389,
+            -0.013244152069091797,
+            -0.013070821762084961
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 4405,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 10132,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-pillar-9",
-        "cacheKey": "mesh-collision-manager-v1:7f1d594464484f1baf9828c547dc3e147a7ed7fdb933a5dd08a568e240a380ce:c5209be76c727c44b3a599742311041a2245c8776ed9a5d67ffcf8c9d612ae65:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:1fd94fa7c127e3bc070dad3c90e4634ac331915d80f510408bb0f83905517a92:c5209be76c727c44b3a599742311041a2245c8776ed9a5d67ffcf8c9d612ae65:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-pillar-9:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "7f1d594464484f1baf9828c547dc3e147a7ed7fdb933a5dd08a568e240a380ce"
+          "value": "1fd94fa7c127e3bc070dad3c90e4634ac331915d80f510408bb0f83905517a92"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5338,48 +5690,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
-            -0.5356743335723877,
-            -1.000184178352356,
-            -0.6013422608375549
+            -0.5359225273132324,
+            -1.0002118349075317,
+            -0.6033742427825928
           ],
           "max": [
-            0.5100782513618469,
+            0.5107831954956055,
             0.9740860462188721,
-            0.5759803056716919
+            0.5761327147483826
           ],
           "size": [
-            1.0457525849342346,
-            1.974270224571228,
-            1.1773225665092468
+            1.046705722808838,
+            1.9742978811264038,
+            1.1795069575309753
           ],
           "center": [
-            -0.012798041105270386,
-            -0.013049066066741943,
-            -0.012680977582931519
+            -0.012569665908813477,
+            -0.013062894344329834,
+            -0.013620764017105103
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-9.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-9.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 4328,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 10407,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-pillar-10",
-        "cacheKey": "mesh-collision-manager-v1:157b80603979d7d007c332368834f2dd91f05ed867e670266da32507147587f9:cb6626e848ad754050bf46a461997252a2a49cb9b8bd7542f3899c2b2a9d9c82:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:a1c278a970080243349f54d0a1e98b171cde005a34924c981b9741221ef673f6:cb6626e848ad754050bf46a461997252a2a49cb9b8bd7542f3899c2b2a9d9c82:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-pillar-10:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "157b80603979d7d007c332368834f2dd91f05ed867e670266da32507147587f9"
+          "value": "a1c278a970080243349f54d0a1e98b171cde005a34924c981b9741221ef673f6"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5387,48 +5740,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
-            -0.5815596580505371,
-            -1.000173568725586,
+            -0.5818926095962524,
+            -1.0005899667739868,
             -0.8734685182571411
           ],
           "max": [
-            0.549156129360199,
+            0.5566704273223877,
             0.9736887812614441,
-            0.8525679111480713
+            0.8537846803665161
           ],
           "size": [
-            1.130715787410736,
-            1.97386234998703,
-            1.7260364294052124
+            1.1385630369186401,
+            1.974278748035431,
+            1.7272531986236572
           ],
           "center": [
-            -0.016201764345169067,
-            -0.013242393732070923,
-            -0.010450303554534912
+            -0.012611091136932373,
+            -0.013450592756271362,
+            -0.0098419189453125
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-10.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-10.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 5254,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 12652,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-pillar-11",
-        "cacheKey": "mesh-collision-manager-v1:52d46e35c3fd5a0c38abc9c77f3cb7c8160299a99ba695a65865f5924275f592:4f0dc5fe0a94fcdc07a0e18443ab19773dad5c873046bc3cfd0b4c51352c5c3d:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:1f9aad47cf04005aaca9ef7ec1abfd94fabea2d2af462466c55f4c31c687597c:4f0dc5fe0a94fcdc07a0e18443ab19773dad5c873046bc3cfd0b4c51352c5c3d:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-pillar-11:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "52d46e35c3fd5a0c38abc9c77f3cb7c8160299a99ba695a65865f5924275f592"
+          "value": "1f9aad47cf04005aaca9ef7ec1abfd94fabea2d2af462466c55f4c31c687597c"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5436,48 +5790,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
             -0.9434459209442139,
-            -0.9939280152320862,
+            -0.9954308867454529,
             -0.9447097182273865
           ],
           "max": [
-            0.9115718007087708,
-            0.9731823205947876,
+            0.912825882434845,
+            0.9741824865341187,
             0.8962405323982239
           ],
           "size": [
-            1.8550177216529846,
-            1.9671103358268738,
+            1.8562718033790588,
+            1.9696133732795715,
             1.8409502506256104
           ],
           "center": [
-            -0.015937060117721558,
-            -0.010372847318649292,
+            -0.015310019254684448,
+            -0.010624200105667114,
             -0.0242345929145813
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-11.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-11.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 4931,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 12039,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-pillar-12",
-        "cacheKey": "mesh-collision-manager-v1:21b205facbf651e5280afcbfeaeb617d29d4322d667e08cc79f444f515cb33e8:0b9ffd63996e8ea3a38658e3b8171052309fbaca6cfece83e38bece37c11c8e6:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:a35e3d075080f6a8ca1fe89fefdf3f72b40425632e3d03e624a7c8b51229055d:0b9ffd63996e8ea3a38658e3b8171052309fbaca6cfece83e38bece37c11c8e6:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-pillar-12:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "21b205facbf651e5280afcbfeaeb617d29d4322d667e08cc79f444f515cb33e8"
+          "value": "a35e3d075080f6a8ca1fe89fefdf3f72b40425632e3d03e624a7c8b51229055d"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5485,48 +5840,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
-            -0.6520611047744751,
-            -0.9995940923690796,
-            -0.6156224608421326
+            -0.6531798243522644,
+            -1.0002329349517822,
+            -0.6166970133781433
           ],
           "max": [
-            0.6271432638168335,
-            0.973311185836792,
-            0.622107744216919
+            0.6274647116661072,
+            0.9740968346595764,
+            0.6246123909950256
           ],
           "size": [
-            1.2792043685913086,
-            1.9729052782058716,
-            1.2377302050590515
+            1.2806445360183716,
+            1.9743297696113586,
+            1.241309404373169
           ],
           "center": [
-            -0.0124589204788208,
-            -0.013141453266143799,
-            0.0032426416873931885
+            -0.012857556343078613,
+            -0.013068050146102905,
+            0.003957688808441162
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-12.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-12.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 3926,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 9647,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-ring-fragment-east",
-        "cacheKey": "mesh-collision-manager-v1:cbe37eb3d3fd497307e1a5fa3314f848836375a7e1d6db3fb9ef104bfc1e4ed4:d0ba450664e444794ec5bfc7e477e48215d5f8384a83dbe903cefe8e496bd981:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:67646052a2f66ee136bd98012a9a2cf223398e0d57cd32fe7922a3c3ede4e5ea:d0ba450664e444794ec5bfc7e477e48215d5f8384a83dbe903cefe8e496bd981:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-ring-fragment-east:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "cbe37eb3d3fd497307e1a5fa3314f848836375a7e1d6db3fb9ef104bfc1e4ed4"
+          "value": "67646052a2f66ee136bd98012a9a2cf223398e0d57cd32fe7922a3c3ede4e5ea"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5534,48 +5890,49 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
-            -0.3017815947532654,
-            -0.9541022181510925,
+            -0.30635887384414673,
+            -0.9567339420318604,
             -0.997004508972168
           ],
           "max": [
             0.28787562251091003,
-            0.9302521347999573,
+            0.9307903051376343,
             0.9734286069869995
           ],
           "size": [
-            0.5896572172641754,
-            1.8843543529510498,
+            0.5942344963550568,
+            1.8875242471694946,
             1.9704331159591675
           ],
           "center": [
-            -0.006952986121177673,
-            -0.011925041675567627,
+            -0.009241625666618347,
+            -0.012971818447113037,
             -0.011787950992584229
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-east.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-east.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 4254,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 10867,
         "triangleBudget": 20000
       },
       {
         "actorId": "solitude-ring-fragment-west",
-        "cacheKey": "mesh-collision-manager-v1:f8465c10721bdda7c4ed3c3700037886ba09a38cc3b83d68e71a2ae98a908e3d:7c54bb49d13a20e6cb872c32fda32c68be4eab84d55a305028acc2f8067bac7e:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "cacheKey": "mesh-collision-manager-v2:2d702293583a0105d805351e8296657c9ea6eb2d743b29e985204593b98bf280:7c54bb49d13a20e6cb872c32fda32c68be4eab84d55a305028acc2f8067bac7e:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "mode": "auto",
         "productId": "solitude-ring-fragment-west:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "asset",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "f8465c10721bdda7c4ed3c3700037886ba09a38cc3b83d68e71a2ae98a908e3d"
+          "value": "2d702293583a0105d805351e8296657c9ea6eb2d743b29e985204593b98bf280"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -5583,36 +5940,37 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+          "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
         },
         "shape": "trimesh",
         "localBounds": {
           "min": [
             -0.99843829870224,
-            -0.8746134042739868,
+            -0.8751745223999023,
             -0.9793640375137329
           ],
           "max": [
-            0.9737012386322021,
-            0.8356838822364807,
-            0.9003065228462219
+            0.9737838506698608,
+            0.8361713290214539,
+            0.9003127217292786
           ],
           "size": [
-            1.9721395373344421,
-            1.7102972865104675,
-            1.8796705603599548
+            1.9722221493721008,
+            1.7113458514213562,
+            1.8796767592430115
           ],
           "center": [
-            -0.012368530035018921,
-            -0.019464761018753052,
-            -0.03952875733375549
+            -0.012327224016189575,
+            -0.019501596689224243,
+            -0.03952565789222717
           ]
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.meta.json",
-        "sourceMeshUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
-        "triangleCount": 4750,
-        "vertexCount": 5561,
+        "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.low.glb",
+        "visualSourceMeshUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
+        "triangleCount": 14000,
+        "vertexCount": 13091,
         "triangleBudget": 20000
       }
     ],

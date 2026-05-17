@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-16T01:13:07.849Z",
+  "generatedAt": "2026-05-17T00:24:38.956Z",
   "levelId": "observatory",
   "sceneId": "observatory",
   "source": {
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/observatory.scene.json",
     "version": 1,
-    "updatedAt": "2026-05-16T02:27:42.740Z"
+    "updatedAt": "2026-05-17T00:23:09.000Z"
   },
   "levelDefinition": {
     "id": "observatory",
     "version": 1,
-    "updatedAt": "2026-05-16T02:27:42.740Z",
+    "updatedAt": "2026-05-17T00:23:09.000Z",
     "spawn": {
       "player": [
         -137.2,
@@ -190,7 +190,7 @@
           "maxGeometryActors": 0,
           "maxPrimitiveActors": 8,
           "maxNeverCullActors": 4,
-          "maxGameplayFireflies": 0,
+          "maxGameplayFireflies": 8,
           "maxExplicitColliders": 0,
           "maxLightActors": 0,
           "maxEstimatedDrawCalls": 0,
@@ -373,6 +373,30 @@
           "styles": true,
           "water": true
         },
+        "fireflies": {
+          "enabled": true,
+          "allowWithAuthored": true,
+          "count": 72,
+          "lightCount": 10,
+          "radius": 110,
+          "minHeight": 2.4,
+          "maxHeight": 7.2,
+          "center": [
+            -137.2,
+            1.8,
+            -49.5
+          ],
+          "color": "#f4ffb8",
+          "secondaryColor": "#8defff",
+          "size": 0.52,
+          "spriteIntensity": 1.25,
+          "lightIntensity": 34,
+          "lightDistance": 22,
+          "lightDecay": 1.45,
+          "twinkleSpeed": 0.78,
+          "driftSpeed": 0.22,
+          "sway": 1.15
+        },
         "style": {
           "preset": "monument",
           "enabled": true,
@@ -426,16 +450,331 @@
             0.1808657926171221
           ]
         }
+      },
+      {
+        "id": "observatory-archive-firefly",
+        "name": "Archive Firefly",
+        "kind": "empty",
+        "transform": {
+          "position": [
+            -137.2,
+            3.8,
+            -49.5
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.25,
+            1.25,
+            1.25
+          ]
+        },
+        "npc": {
+          "id": "observatory-archive-firefly",
+          "archetype": "firefly",
+          "displayName": "Archive Firefly",
+          "interaction": {
+            "enabled": true,
+            "mode": "click",
+            "prompt": "Listen",
+            "eventKey": "observatory_firefly_archive"
+          },
+          "conversation": {
+            "mode": "read-only",
+            "title": "Archive Firefly",
+            "excerpt": "A warm light circles the old landing stones.",
+            "body": "The observatory remembers by reflection. The water keeps the sky below you, and the sky keeps the way ahead.",
+            "durationMs": 7000
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 0.8,
+            "speed": 0.2,
+            "hoverHeight": 0.45,
+            "bobAmplitude": 0.16,
+            "bobSpeed": 0.9
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#f4ffb8",
+            "size": 0.62,
+            "spriteIntensity": 1.25,
+            "lightIntensity": 3.2,
+            "lightDistance": 9,
+            "lightDecay": 1.35,
+            "twinkleSpeed": 0.85,
+            "selectionLightBoost": 1.1,
+            "lightBurstSpriteBoost": 0.24
+          }
+        },
+        "interaction": {
+          "kind": "conversation",
+          "targetId": "observatory-archive-firefly",
+          "data": {
+            "id": "observatory-archive-firefly",
+            "archetype": "firefly",
+            "displayName": "Archive Firefly",
+            "interaction": {
+              "enabled": true,
+              "mode": "click",
+              "prompt": "Listen",
+              "eventKey": "observatory_firefly_archive"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Archive Firefly",
+              "excerpt": "A warm light circles the old landing stones.",
+              "body": "The observatory remembers by reflection. The water keeps the sky below you, and the sky keeps the way ahead.",
+              "durationMs": 7000
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 0.8,
+              "speed": 0.2,
+              "hoverHeight": 0.45,
+              "bobAmplitude": 0.16,
+              "bobSpeed": 0.9
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#f4ffb8",
+              "size": 0.62,
+              "spriteIntensity": 1.25,
+              "lightIntensity": 3.2,
+              "lightDistance": 9,
+              "lightDecay": 1.35,
+              "twinkleSpeed": 0.85,
+              "selectionLightBoost": 1.1,
+              "lightBurstSpriteBoost": 0.24
+            }
+          }
+        }
+      },
+      {
+        "id": "observatory-lantern-firefly",
+        "name": "Lantern Firefly",
+        "kind": "empty",
+        "transform": {
+          "position": [
+            -128.8,
+            4.6,
+            -42.4
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.1,
+            1.1,
+            1.1
+          ]
+        },
+        "npc": {
+          "id": "observatory-lantern-firefly",
+          "archetype": "firefly",
+          "displayName": "Lantern Firefly",
+          "interaction": {
+            "enabled": true,
+            "mode": "click",
+            "prompt": "Ask",
+            "eventKey": "observatory_firefly_lantern"
+          },
+          "conversation": {
+            "mode": "profile",
+            "personalityId": "elara-voss",
+            "fallback": {
+              "body": "The lantern-light points toward the instruments. If the deeper voice is sleeping, this small glow can still answer with memory.",
+              "durationMs": 7000
+            }
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 1.1,
+            "speed": 0.17,
+            "hoverHeight": 0.55,
+            "bobAmplitude": 0.14,
+            "bobSpeed": 0.76
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#8defff",
+            "secondaryColor": "#dff8ff",
+            "size": 0.56,
+            "spriteIntensity": 1.1,
+            "lightIntensity": 2.6,
+            "lightDistance": 8,
+            "lightDecay": 1.45,
+            "twinkleSpeed": 0.92,
+            "selectionLightBoost": 0.9,
+            "lightBurstSpriteBoost": 0.2
+          }
+        },
+        "interaction": {
+          "kind": "conversation",
+          "targetId": "observatory-lantern-firefly",
+          "data": {
+            "id": "observatory-lantern-firefly",
+            "archetype": "firefly",
+            "displayName": "Lantern Firefly",
+            "interaction": {
+              "enabled": true,
+              "mode": "click",
+              "prompt": "Ask",
+              "eventKey": "observatory_firefly_lantern"
+            },
+            "conversation": {
+              "mode": "profile",
+              "personalityId": "elara-voss",
+              "fallback": {
+                "body": "The lantern-light points toward the instruments. If the deeper voice is sleeping, this small glow can still answer with memory.",
+                "durationMs": 7000
+              }
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 1.1,
+              "speed": 0.17,
+              "hoverHeight": 0.55,
+              "bobAmplitude": 0.14,
+              "bobSpeed": 0.76
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#8defff",
+              "secondaryColor": "#dff8ff",
+              "size": 0.56,
+              "spriteIntensity": 1.1,
+              "lightIntensity": 2.6,
+              "lightDistance": 8,
+              "lightDecay": 1.45,
+              "twinkleSpeed": 0.92,
+              "selectionLightBoost": 0.9,
+              "lightBurstSpriteBoost": 0.2
+            }
+          }
+        }
+      },
+      {
+        "id": "observatory-tide-firefly",
+        "name": "Tide Firefly",
+        "kind": "empty",
+        "transform": {
+          "position": [
+            -145.5,
+            3.2,
+            -56.8
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "npc": {
+          "id": "observatory-tide-firefly",
+          "archetype": "firefly",
+          "displayName": "Tide Firefly",
+          "interaction": {
+            "enabled": true,
+            "mode": "click",
+            "prompt": "Watch",
+            "cooldownMs": 3000,
+            "eventKey": "observatory_firefly_tide"
+          },
+          "conversation": {
+            "mode": "read-only",
+            "title": "Tide Firefly",
+            "excerpt": "A cool light keeps near the edge where the water rises.",
+            "body": "When the tide climbs, keep to stone and reflected stars. The dark water is beautiful, but it is not a path.",
+            "durationMs": 5500
+          },
+          "behavior": {
+            "type": "hover-wander",
+            "radius": 1.35,
+            "speed": 0.14,
+            "hoverHeight": 0.32,
+            "bobAmplitude": 0.1,
+            "bobSpeed": 0.62
+          },
+          "presentation": {
+            "type": "firefly",
+            "color": "#dff8ff",
+            "secondaryColor": "#8defff",
+            "size": 0.5,
+            "spriteIntensity": 0.95,
+            "lightIntensity": 2,
+            "lightDistance": 7,
+            "lightDecay": 1.55,
+            "twinkleSpeed": 0.75,
+            "selectionLightBoost": 0.75,
+            "lightBurstSpriteBoost": 0.16
+          }
+        },
+        "interaction": {
+          "kind": "conversation",
+          "targetId": "observatory-tide-firefly",
+          "data": {
+            "id": "observatory-tide-firefly",
+            "archetype": "firefly",
+            "displayName": "Tide Firefly",
+            "interaction": {
+              "enabled": true,
+              "mode": "click",
+              "prompt": "Watch",
+              "cooldownMs": 3000,
+              "eventKey": "observatory_firefly_tide"
+            },
+            "conversation": {
+              "mode": "read-only",
+              "title": "Tide Firefly",
+              "excerpt": "A cool light keeps near the edge where the water rises.",
+              "body": "When the tide climbs, keep to stone and reflected stars. The dark water is beautiful, but it is not a path.",
+              "durationMs": 5500
+            },
+            "behavior": {
+              "type": "hover-wander",
+              "radius": 1.35,
+              "speed": 0.14,
+              "hoverHeight": 0.32,
+              "bobAmplitude": 0.1,
+              "bobSpeed": 0.62
+            },
+            "presentation": {
+              "type": "firefly",
+              "color": "#dff8ff",
+              "secondaryColor": "#8defff",
+              "size": 0.5,
+              "spriteIntensity": 0.95,
+              "lightIntensity": 2,
+              "lightDistance": 7,
+              "lightDecay": 1.55,
+              "twinkleSpeed": 0.75,
+              "selectionLightBoost": 0.75,
+              "lightBurstSpriteBoost": 0.16
+            }
+          }
+        }
       }
     ]
   },
   "buildReport": {
     "levelId": "observatory",
-    "actorCount": 1,
+    "actorCount": 4,
     "assetActorCount": 0,
     "primitiveActorCount": 0,
     "neverCullActorCount": 0,
-    "gameplayFireflyActorCount": 0,
+    "npcActorCount": 3,
+    "fireflyNpcActorCount": 3,
     "physicsActorCount": 0,
     "trimeshActorCount": 0,
     "detailMeshActorCount": 0,

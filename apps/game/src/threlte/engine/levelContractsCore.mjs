@@ -8,7 +8,7 @@ const DEFAULT_RUNTIME_CONTRACT = {
   maxRuntimeAssetCount: 60,
   maxPrimitiveActorCount: 80,
   maxNeverCullActorCount: 4,
-  maxGameplayFireflyCount: 40,
+  maxFireflyNpcCount: 40,
 }
 
 const LEVEL_RUNTIME_CONTRACTS = {
@@ -20,7 +20,7 @@ const LEVEL_RUNTIME_CONTRACTS = {
     maxTrimeshActors: 0,
     maxRuntimeAssetCount: 0,
     maxPrimitiveActorCount: 8,
-    maxGameplayFireflyCount: 0,
+    maxFireflyNpcCount: 8,
   },
   solitude: {
     requiredActorIds: [
@@ -37,7 +37,7 @@ const LEVEL_RUNTIME_CONTRACTS = {
     maxTrimeshActors: 16,
     maxRuntimeAssetCount: 24,
     maxPrimitiveActorCount: 16,
-    maxGameplayFireflyCount: 16,
+    maxFireflyNpcCount: 16,
   },
   'sci-fi-room': {
     requiredActorIds: [
@@ -55,7 +55,7 @@ const LEVEL_RUNTIME_CONTRACTS = {
     maxTrimeshActors: 38,
     maxRuntimeAssetCount: 32,
     maxPrimitiveActorCount: 24,
-    maxGameplayFireflyCount: 0,
+    maxFireflyNpcCount: 0,
   },
   yggdrasil: {
     requiredActorIds: [
@@ -76,7 +76,7 @@ const LEVEL_RUNTIME_CONTRACTS = {
     maxRuntimeAssetCount: 48,
     maxPrimitiveActorCount: 80,
     maxNeverCullActorCount: 4,
-    maxGameplayFireflyCount: 40,
+    maxFireflyNpcCount: 40,
   },
 }
 

@@ -47,7 +47,7 @@ export interface ContextResult {
   totalRelevance: number
 }
 
-const isDev = import.meta.env.DEV
+const isDev = import.meta.env?.DEV ?? false
 
 // Character knowledge has been moved to individual files in characterKnowledge/
 // This file now focuses purely on world events, locations, and relationships

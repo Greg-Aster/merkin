@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-14T21:28:44.167Z",
-  "generatorVersion": "mesh-collision-manager-v1",
+  "generatedAt": "2026-05-17T00:44:14.740Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "solitude",
   "sourceActorId": "solitude-pillar-1",
   "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
@@ -11,32 +11,61 @@
     "algorithm": "sha256",
     "value": "b0658c9b9d2f697a8b668362dccee6bb06cc6ff5856136c884c00d8b6b0b60f0"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "93f843e9dc21cdc451f4bb953a404ba43e84eed84f3bd8048f8173c86e5a3565"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v1:b0658c9b9d2f697a8b668362dccee6bb06cc6ff5856136c884c00d8b6b0b60f0:5d224ac4c13ffe3063fd5bf5fdd3f3d07abf2d5631a3aa447fa93d5c821a0d7f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
-  "triangleCount": 4750,
-  "vertexCount": 4069,
+  "colliderCacheKey": "mesh-collision-manager-v2:93f843e9dc21cdc451f4bb953a404ba43e84eed84f3bd8048f8173c86e5a3565:5d224ac4c13ffe3063fd5bf5fdd3f3d07abf2d5631a3aa447fa93d5c821a0d7f:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+  "triangleCount": 14000,
+  "vertexCount": 9897,
   "bounds": {
     "min": [
-      -0.7818410992622375,
-      -1.0001593828201294,
-      -0.7797887325286865
+      -0.7825126647949219,
+      -1.0004767179489136,
+      -0.782132089138031
     ],
     "max": [
-      0.7538681626319885,
-      0.9738057255744934,
+      0.7572198510169983,
+      0.9741035103797913,
       0.7610894441604614
     ],
     "size": [
-      1.535709261894226,
-      1.9739651083946228,
-      1.540878176689148
+      1.5397325158119202,
+      1.9745802283287048,
+      1.5432215332984924
     ],
     "center": [
-      -0.013986468315124512,
-      -0.013176828622817993,
-      -0.009349644184112549
+      -0.012646406888961792,
+      -0.013186603784561157,
+      -0.01052132248878479
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -25539,
+      -32767,
+      -25615
+    ],
+    "max": [
+      25539,
+      32767,
+      25615
+    ],
+    "size": [
+      51078,
+      65534,
+      51230
+    ],
+    "center": [
+      0,
+      0,
+      0
     ]
   },
   "visualLocalBounds": {
@@ -63,24 +92,24 @@
   },
   "colliderLocalBounds": {
     "min": [
-      -0.7818410992622375,
-      -1.0001593828201294,
-      -0.7797887325286865
+      -0.7825126647949219,
+      -1.0004767179489136,
+      -0.782132089138031
     ],
     "max": [
-      0.7538681626319885,
-      0.9738057255744934,
+      0.7572198510169983,
+      0.9741035103797913,
       0.7610894441604614
     ],
     "size": [
-      1.535709261894226,
-      1.9739651083946228,
-      1.540878176689148
+      1.5397325158119202,
+      1.9745802283287048,
+      1.5432215332984924
     ],
     "center": [
-      -0.013986468315124512,
-      -0.013176828622817993,
-      -0.009349644184112549
+      -0.012646406888961792,
+      -0.013186603784561157,
+      -0.01052132248878479
     ]
   },
   "assetLocalTransform": {
@@ -112,24 +141,24 @@
     },
     "colliderLocalBounds": {
       "min": [
-        -0.7818410992622375,
-        -1.0001593828201294,
-        -0.7797887325286865
+        -0.7825126647949219,
+        -1.0004767179489136,
+        -0.782132089138031
       ],
       "max": [
-        0.7538681626319885,
-        0.9738057255744934,
+        0.7572198510169983,
+        0.9741035103797913,
         0.7610894441604614
       ],
       "size": [
-        1.535709261894226,
-        1.9739651083946228,
-        1.540878176689148
+        1.5397325158119202,
+        1.9745802283287048,
+        1.5432215332984924
       ],
       "center": [
-        -0.013986468315124512,
-        -0.013176828622817993,
-        -0.009349644184112549
+        -0.012646406888961792,
+        -0.013186603784561157,
+        -0.01052132248878479
       ]
     },
     "visualToPhysicsMatrix": [
@@ -178,36 +207,45 @@
       "algorithm": "sha256",
       "value": "b0658c9b9d2f697a8b668362dccee6bb06cc6ff5856136c884c00d8b6b0b60f0"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "93f843e9dc21cdc451f4bb953a404ba43e84eed84f3bd8048f8173c86e5a3565"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "solitude",
       "nodeId": "solitude-pillar-1",
       "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.low.glb",
+      "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
-      "triangleBudget": 5000,
+      "triangleBudget": 20000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-14T21:28:44.167Z"
+    "generatedAt": "2026-05-17T00:44:14.740Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 5000
+    "triangleBudget": 20000,
+    "lodSourceTier": "low"
   },
   "collisionProduct": {
     "actorId": "solitude-pillar-1",
+    "cacheKey": "mesh-collision-manager-v1:b0658c9b9d2f697a8b668362dccee6bb06cc6ff5856136c884c00d8b6b0b60f0:5d224ac4c13ffe3063fd5bf5fdd3f3d07abf2d5631a3aa447fa93d5c821a0d7f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
     "mode": "auto",
     "productId": "solitude-pillar-1:auto:simplifiedMesh",
-    "generatorVersion": "mesh-collision-manager-v1",
-    "generatedAt": "2026-05-14T21:28:44.167Z",
+    "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "asset",
-    "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "b0658c9b9d2f697a8b668362dccee6bb06cc6ff5856136c884c00d8b6b0b60f0"
+      "value": "93f843e9dc21cdc451f4bb953a404ba43e84eed84f3bd8048f8173c86e5a3565"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
@@ -215,45 +253,47 @@
     },
     "policyFingerprint": {
       "algorithm": "sha256",
-      "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+      "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
     },
     "shape": "trimesh",
-    "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.glb",
-    "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.meta.json",
     "localBounds": {
       "min": [
-        -0.7818410992622375,
-        -1.0001593828201294,
-        -0.7797887325286865
+        -0.7825126647949219,
+        -1.0004767179489136,
+        -0.782132089138031
       ],
       "max": [
-        0.7538681626319885,
-        0.9738057255744934,
+        0.7572198510169983,
+        0.9741035103797913,
         0.7610894441604614
       ],
       "size": [
-        1.535709261894226,
-        1.9739651083946228,
-        1.540878176689148
+        1.5397325158119202,
+        1.9745802283287048,
+        1.5432215332984924
       ],
       "center": [
-        -0.013986468315124512,
-        -0.013176828622817993,
-        -0.009349644184112549
+        -0.012646406888961792,
+        -0.013186603784561157,
+        -0.01052132248878479
       ]
     },
-    "triangleCount": 4750,
-    "vertexCount": 4069,
-    "triangleBudget": 5000
+    "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
+    "triangleCount": 14000,
+    "vertexCount": 9897,
+    "triangleBudget": 20000
   },
   "simplification": {
-    "requested": true,
-    "applied": true,
-    "sourceTriangleCount": 50000,
-    "targetTriangleBudget": 5000,
-    "ratio": 0.095,
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 14000,
+    "targetTriangleBudget": 20000,
+    "ratio": 1,
     "tool": "gltf-transform",
-    "prepass": "weld",
+    "prepass": "none",
     "error": 0.05
   }
 }
