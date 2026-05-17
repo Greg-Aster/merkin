@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-14T21:36:53.335Z",
-  "generatorVersion": "mesh-collision-manager-v1",
+  "generatedAt": "2026-05-17T02:20:39.379Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "sci-fi-room",
   "sourceActorId": "sci-fi-command-fin-left",
   "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
@@ -11,12 +11,19 @@
     "algorithm": "sha256",
     "value": "ecdf6052626fcc8cb38086663299ba582dbe7ec94f886d5367fe4e22767d2321"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/command-fin/command-fin.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "cf6306c06ab3c48fa2f477513990709a9c3a3eaac8dcb6c85dd4a1269a9cbdfa"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-command-fin-left.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-command-fin-left.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-command-fin-left.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v1:ecdf6052626fcc8cb38086663299ba582dbe7ec94f886d5367fe4e22767d2321:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "colliderCacheKey": "mesh-collision-manager-v2:cf6306c06ab3c48fa2f477513990709a9c3a3eaac8dcb6c85dd4a1269a9cbdfa:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
   "triangleCount": 12,
-  "vertexCount": 36,
+  "vertexCount": 24,
   "bounds": {
     "min": [
       -0.10999999940395355,
@@ -32,6 +39,28 @@
       0.2199999988079071,
       3.5999999046325684,
       1.399999976158142
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -2004,
+      -32767,
+      -12741
+    ],
+    "max": [
+      2004,
+      32767,
+      12741
+    ],
+    "size": [
+      4008,
+      65534,
+      25482
     ],
     "center": [
       0,
@@ -178,34 +207,45 @@
       "algorithm": "sha256",
       "value": "ecdf6052626fcc8cb38086663299ba582dbe7ec94f886d5367fe4e22767d2321"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/command-fin/command-fin.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "cf6306c06ab3c48fa2f477513990709a9c3a3eaac8dcb6c85dd4a1269a9cbdfa"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "sci-fi-room",
       "nodeId": "sci-fi-command-fin-left",
       "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.low.glb",
+      "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
       "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-14T21:36:53.335Z"
+    "generatedAt": "2026-05-17T02:20:39.379Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 5000
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
   },
   "collisionProduct": {
     "actorId": "sci-fi-command-fin-left",
+    "cacheKey": "mesh-collision-manager-v1:ecdf6052626fcc8cb38086663299ba582dbe7ec94f886d5367fe4e22767d2321:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
     "mode": "auto",
     "productId": "sci-fi-command-fin-left:auto:simplifiedMesh",
-    "generatorVersion": "mesh-collision-manager-v1",
+    "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "prefab",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "ecdf6052626fcc8cb38086663299ba582dbe7ec94f886d5367fe4e22767d2321"
+      "value": "cf6306c06ab3c48fa2f477513990709a9c3a3eaac8dcb6c85dd4a1269a9cbdfa"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
@@ -213,7 +253,7 @@
     },
     "policyFingerprint": {
       "algorithm": "sha256",
-      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+      "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
     },
     "shape": "trimesh",
     "localBounds": {
@@ -240,10 +280,10 @@
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-command-fin-left.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-command-fin-left.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
-    "generatedAt": "2026-05-14T21:36:53.335Z",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
     "triangleCount": 12,
-    "vertexCount": 36,
+    "vertexCount": 24,
     "triangleBudget": 5000
   },
   "simplification": {

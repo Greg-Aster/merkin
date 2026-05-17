@@ -1327,7 +1327,7 @@ test('NPC publish validation accepts canonical profile ids', () => {
   assert.deepEqual(report.errors, [])
 })
 
-test('runtime scene validation temporarily defaults missing NPC counters for non-NPC scenes', () => {
+test('runtime scene validation rejects missing NPC counters for non-NPC scenes', () => {
   const scene = createScene({
     nodes: [createNpcFixtureGroundNode()],
     settings: createNpcFixtureLevelSettings(),
@@ -1353,9 +1353,9 @@ test('runtime scene validation temporarily defaults missing NPC counters for non
   ;(manifest.buildReport as any).fireflyNpcActorCount = undefined
 
   const validation = validateRuntimeSceneManifest(manifest, scene.levelId)
-  assert.deepEqual(validation.errors, [])
-  assert.match(validation.warnings.join('\n'), /missing npcActorCount/)
-  assert.match(validation.warnings.join('\n'), /missing fireflyNpcActorCount/)
+  assert.match(validation.errors.join('\n'), /missing npcActorCount/)
+  assert.match(validation.errors.join('\n'), /missing fireflyNpcActorCount/)
+  assert.deepEqual(validation.warnings, [])
 })
 
 test('runtime scene validation rejects missing NPC counters when NPC actors exist', () => {

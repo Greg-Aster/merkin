@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-14T21:36:50.422Z",
-  "generatorVersion": "mesh-collision-manager-v1",
+  "generatedAt": "2026-05-17T02:20:34.882Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "sci-fi-room",
   "sourceActorId": "sci-fi-story-bench",
   "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
@@ -11,12 +11,19 @@
     "algorithm": "sha256",
     "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-bench.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-bench.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-bench.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
-  "triangleCount": 604,
-  "vertexCount": 1812,
+  "colliderCacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
+  "triangleCount": 267,
+  "vertexCount": 210,
   "bounds": {
     "min": [
       -0.36000001430511475,
@@ -37,6 +44,28 @@
       0.04249998927116394,
       0.10853545293211936,
       0.0021460801362991333
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -7548,
+      -32767
+    ],
+    "max": [
+      32767,
+      7548,
+      32767
+    ],
+    "size": [
+      65534,
+      15096,
+      65534
+    ],
+    "center": [
+      0,
+      0,
+      0
     ]
   },
   "visualLocalBounds": {
@@ -178,34 +207,45 @@
       "algorithm": "sha256",
       "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "sci-fi-room",
       "nodeId": "sci-fi-story-bench",
       "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+      "lodSourceTier": "low",
       "intent": "trigger",
       "channel": "trigger",
       "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-14T21:36:50.422Z"
+    "generatedAt": "2026-05-17T02:20:34.882Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "trigger",
     "channel": "trigger",
-    "triangleBudget": 5000
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
   },
   "collisionProduct": {
     "actorId": "sci-fi-story-bench",
+    "cacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
     "mode": "trigger",
     "productId": "sci-fi-story-bench:trigger:simplifiedMesh",
-    "generatorVersion": "mesh-collision-manager-v1",
+    "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "prefab",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
+      "value": "aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
@@ -213,7 +253,7 @@
     },
     "policyFingerprint": {
       "algorithm": "sha256",
-      "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+      "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
     },
     "shape": "trimesh",
     "localBounds": {
@@ -240,16 +280,16 @@
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-bench.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-bench.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-    "generatedAt": "2026-05-14T21:36:50.422Z",
-    "triangleCount": 604,
-    "vertexCount": 1812,
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+    "triangleCount": 267,
+    "vertexCount": 210,
     "triangleBudget": 5000
   },
   "simplification": {
     "requested": false,
     "applied": false,
-    "sourceTriangleCount": 604,
+    "sourceTriangleCount": 267,
     "targetTriangleBudget": 5000,
     "ratio": 1,
     "tool": "gltf-transform",

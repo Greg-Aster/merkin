@@ -55,25 +55,7 @@ function normalizeVolatileFields(value) {
 function normalizeRuntimeScene(value) {
   const normalized = JSON.parse(JSON.stringify(value))
   normalized.generatedAt = '<generated-at>'
-  normalizeLegacyNonNpcBuildReportCounters(normalized)
   return normalized
-}
-
-function normalizeLegacyNonNpcBuildReportCounters(value) {
-  if (!value?.buildReport || !Array.isArray(value.levelDefinition?.actors)) {
-    return
-  }
-  if (value.levelDefinition.actors.some(actor => actor?.npc)) return
-
-  // Agent 10 temporary compatibility: Miranda and sci-fi-room were checked
-  // before NPC counters existed. Remove this once all runtime scene manifests
-  // can be recooked without unrelated collision validation failures.
-  if (typeof value.buildReport.npcActorCount !== 'number') {
-    value.buildReport.npcActorCount = 0
-  }
-  if (typeof value.buildReport.fireflyNpcActorCount !== 'number') {
-    value.buildReport.fireflyNpcActorCount = 0
-  }
 }
 
 function normalizeImpostorAtlas(value) {

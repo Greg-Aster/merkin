@@ -7,12 +7,12 @@
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/yggdrasil.scene.json",
     "version": 1,
-    "updatedAt": "2026-05-16T23:33:41.965Z"
+    "updatedAt": "2026-05-17T02:18:06.268Z"
   },
   "levelDefinition": {
     "id": "yggdrasil",
     "version": 1,
-    "updatedAt": "2026-05-16T23:33:41.965Z",
+    "updatedAt": "2026-05-17T02:18:06.268Z",
     "spawn": {
       "player": [
         0,
@@ -230,9 +230,10 @@
               "ambient-occlusion",
               "color-grading",
               "bloom",
-              "vignette"
+              "vignette",
+              "kuwahara"
             ],
-            "maxEnabledPasses": 5,
+            "maxEnabledPasses": 6,
             "ambientOcclusion": {
               "enabled": true,
               "intensity": 0.8,
@@ -245,7 +246,13 @@
               "threshold": 0.88
             },
             "toneMappingExposure": 0.98,
-            "vignetteStrength": 0.6
+            "vignetteStrength": 0.6,
+            "kuwahara": {
+              "enabled": true,
+              "resolutionScale": 1,
+              "mix": 1,
+              "radius": 3
+            }
           },
           "qualityTiers": {
             "mobile": {
@@ -273,9 +280,10 @@
               "postProcessing": {
                 "passes": [
                   "tone-mapping",
-                  "color-grading"
+                  "color-grading",
+                  "kuwahara"
                 ],
-                "maxEnabledPasses": 2
+                "maxEnabledPasses": 3
               }
             },
             "desktop": {
@@ -305,9 +313,10 @@
                   "tone-mapping",
                   "color-grading",
                   "bloom",
-                  "vignette"
+                  "vignette",
+                  "kuwahara"
                 ],
-                "maxEnabledPasses": 4
+                "maxEnabledPasses": 5
               }
             },
             "tv": {
@@ -338,9 +347,10 @@
                   "ambient-occlusion",
                   "color-grading",
                   "bloom",
-                  "vignette"
+                  "vignette",
+                  "kuwahara"
                 ],
-                "maxEnabledPasses": 5,
+                "maxEnabledPasses": 6,
                 "ambientOcclusion": {
                   "enabled": true,
                   "intensity": 0.95,
@@ -24916,9 +24926,10 @@
           "ambient-occlusion",
           "color-grading",
           "bloom",
-          "vignette"
+          "vignette",
+          "kuwahara"
         ],
-        "maxEnabledPasses": 5,
+        "maxEnabledPasses": 6,
         "ambientOcclusion": {
           "enabled": true,
           "intensity": 0.8,
@@ -24931,7 +24942,13 @@
           "threshold": 0.88
         },
         "toneMappingExposure": 0.98,
-        "vignetteStrength": 0.6
+        "vignetteStrength": 0.6,
+        "kuwahara": {
+          "enabled": true,
+          "resolutionScale": 1,
+          "mix": 1,
+          "radius": 3
+        }
       },
       "qualityTiers": {
         "mobile": {
@@ -24959,9 +24976,10 @@
           "postProcessing": {
             "passes": [
               "tone-mapping",
-              "color-grading"
+              "color-grading",
+              "kuwahara"
             ],
-            "maxEnabledPasses": 2
+            "maxEnabledPasses": 3
           }
         },
         "desktop": {
@@ -24991,9 +25009,10 @@
               "tone-mapping",
               "color-grading",
               "bloom",
-              "vignette"
+              "vignette",
+              "kuwahara"
             ],
-            "maxEnabledPasses": 4
+            "maxEnabledPasses": 5
           }
         },
         "tv": {
@@ -25024,9 +25043,10 @@
               "ambient-occlusion",
               "color-grading",
               "bloom",
-              "vignette"
+              "vignette",
+              "kuwahara"
             ],
-            "maxEnabledPasses": 5,
+            "maxEnabledPasses": 6,
             "ambientOcclusion": {
               "enabled": true,
               "intensity": 0.95,

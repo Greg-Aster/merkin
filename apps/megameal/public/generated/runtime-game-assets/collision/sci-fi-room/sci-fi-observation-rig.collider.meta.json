@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-14T21:37:04.351Z",
-  "generatorVersion": "mesh-collision-manager-v1",
+  "generatedAt": "2026-05-17T02:20:52.341Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "sci-fi-room",
   "sourceActorId": "sci-fi-observation-rig",
   "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
@@ -11,12 +11,19 @@
     "algorithm": "sha256",
     "value": "9e418dd1d980c3dc2dc1ebf894f95f8f066b966205e32d05173a6e8faae3cc3f"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "4fb753799aa432851ff7abb4d76dff463c77e0d53f80cd09af8ab8d375d929bb"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-observation-rig.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-observation-rig.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-observation-rig.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v1:9e418dd1d980c3dc2dc1ebf894f95f8f066b966205e32d05173a6e8faae3cc3f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
-  "triangleCount": 100,
-  "vertexCount": 300,
+  "colliderCacheKey": "mesh-collision-manager-v2:4fb753799aa432851ff7abb4d76dff463c77e0d53f80cd09af8ab8d375d929bb:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 82,
+  "vertexCount": 102,
   "bounds": {
     "min": [
       4.827145576477051,
@@ -37,6 +44,28 @@
       5.588687419891357,
       1.5499822422862053,
       22.25033473968506
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -17098,
+      -32535,
+      -32767
+    ],
+    "max": [
+      17098,
+      32535,
+      32767
+    ],
+    "size": [
+      34196,
+      65070,
+      65534
+    ],
+    "center": [
+      0,
+      0,
+      0
     ]
   },
   "visualLocalBounds": {
@@ -178,34 +207,45 @@
       "algorithm": "sha256",
       "value": "9e418dd1d980c3dc2dc1ebf894f95f8f066b966205e32d05173a6e8faae3cc3f"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "4fb753799aa432851ff7abb4d76dff463c77e0d53f80cd09af8ab8d375d929bb"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "sci-fi-room",
       "nodeId": "sci-fi-observation-rig",
       "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+      "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
       "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-14T21:37:04.351Z"
+    "generatedAt": "2026-05-17T02:20:52.341Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 5000
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
   },
   "collisionProduct": {
     "actorId": "sci-fi-observation-rig",
+    "cacheKey": "mesh-collision-manager-v1:9e418dd1d980c3dc2dc1ebf894f95f8f066b966205e32d05173a6e8faae3cc3f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
     "mode": "auto",
     "productId": "sci-fi-observation-rig:auto:simplifiedMesh",
-    "generatorVersion": "mesh-collision-manager-v1",
+    "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "prefab",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "9e418dd1d980c3dc2dc1ebf894f95f8f066b966205e32d05173a6e8faae3cc3f"
+      "value": "4fb753799aa432851ff7abb4d76dff463c77e0d53f80cd09af8ab8d375d929bb"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
@@ -213,7 +253,7 @@
     },
     "policyFingerprint": {
       "algorithm": "sha256",
-      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+      "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
     },
     "shape": "trimesh",
     "localBounds": {
@@ -240,16 +280,16 @@
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-observation-rig.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-observation-rig.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
-    "generatedAt": "2026-05-14T21:37:04.351Z",
-    "triangleCount": 100,
-    "vertexCount": 300,
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+    "triangleCount": 82,
+    "vertexCount": 102,
     "triangleBudget": 5000
   },
   "simplification": {
     "requested": false,
     "applied": false,
-    "sourceTriangleCount": 100,
+    "sourceTriangleCount": 82,
     "targetTriangleBudget": 5000,
     "ratio": 1,
     "tool": "gltf-transform",

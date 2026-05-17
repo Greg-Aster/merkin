@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-14T21:27:39.853Z",
-  "generatorVersion": "mesh-collision-manager-v1",
+  "generatedAt": "2026-05-17T02:20:44.915Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "sci-fi-room",
   "sourceActorId": "sci-fi-aircon-command",
   "sourceAssetUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
@@ -11,32 +11,61 @@
     "algorithm": "sha256",
     "value": "f19d85c76948903047c2846068aeaa376d5e956a410675268cb6cb6aac5d97c2"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "94e3be8cbfdb5ce5971e5cec829570452e2032f405c491c87738950f65e6abe4"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v1:f19d85c76948903047c2846068aeaa376d5e956a410675268cb6cb6aac5d97c2:ae4fdee19ee91aa3ebf9ca987fdd677618a167ceb76c07fd5b5a026b34637a4f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
-  "triangleCount": 4616,
-  "vertexCount": 4814,
+  "colliderCacheKey": "mesh-collision-manager-v2:94e3be8cbfdb5ce5971e5cec829570452e2032f405c491c87738950f65e6abe4:ae4fdee19ee91aa3ebf9ca987fdd677618a167ceb76c07fd5b5a026b34637a4f:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+  "triangleCount": 5090,
+  "vertexCount": 5172,
   "bounds": {
     "min": [
-      -0.3909999132156372,
-      -0.32005539536476135,
+      -0.392697811126709,
+      -0.32006561756134033,
       -0.21596616506576538
     ],
     "max": [
-      0.4050728678703308,
+      0.4072735011577606,
       0.6078314781188965,
       0.15819303691387177
     ],
     "size": [
-      0.796072781085968,
-      0.9278868734836578,
+      0.7999713122844696,
+      0.9278970956802368,
       0.37415920197963715
     ],
     "center": [
-      0.007036477327346802,
-      0.14388804137706757,
+      0.007287845015525818,
+      0.14388293027877808,
       -0.028886564075946808
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -28111,
+      -32767,
+      -13213
+    ],
+    "max": [
+      28111,
+      32767,
+      13213
+    ],
+    "size": [
+      56222,
+      65534,
+      26426
+    ],
+    "center": [
+      0,
+      0,
+      0
     ]
   },
   "visualLocalBounds": {
@@ -63,23 +92,23 @@
   },
   "colliderLocalBounds": {
     "min": [
-      -0.3909999132156372,
-      -0.32005539536476135,
+      -0.392697811126709,
+      -0.32006561756134033,
       -0.21596616506576538
     ],
     "max": [
-      0.4050728678703308,
+      0.4072735011577606,
       0.6078314781188965,
       0.15819303691387177
     ],
     "size": [
-      0.796072781085968,
-      0.9278868734836578,
+      0.7999713122844696,
+      0.9278970956802368,
       0.37415920197963715
     ],
     "center": [
-      0.007036477327346802,
-      0.14388804137706757,
+      0.007287845015525818,
+      0.14388293027877808,
       -0.028886564075946808
     ]
   },
@@ -112,23 +141,23 @@
     },
     "colliderLocalBounds": {
       "min": [
-        -0.3909999132156372,
-        -0.32005539536476135,
+        -0.392697811126709,
+        -0.32006561756134033,
         -0.21596616506576538
       ],
       "max": [
-        0.4050728678703308,
+        0.4072735011577606,
         0.6078314781188965,
         0.15819303691387177
       ],
       "size": [
-        0.796072781085968,
-        0.9278868734836578,
+        0.7999713122844696,
+        0.9278970956802368,
         0.37415920197963715
       ],
       "center": [
-        0.007036477327346802,
-        0.14388804137706757,
+        0.007287845015525818,
+        0.14388293027877808,
         -0.028886564075946808
       ]
     },
@@ -178,36 +207,45 @@
       "algorithm": "sha256",
       "value": "f19d85c76948903047c2846068aeaa376d5e956a410675268cb6cb6aac5d97c2"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "94e3be8cbfdb5ce5971e5cec829570452e2032f405c491c87738950f65e6abe4"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "sci-fi-room",
       "nodeId": "sci-fi-aircon-command",
       "sourceAssetUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.low.glb",
+      "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
-      "triangleBudget": 5000,
+      "triangleBudget": 20000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-14T21:27:39.853Z"
+    "generatedAt": "2026-05-17T02:20:44.915Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 5000
+    "triangleBudget": 20000,
+    "lodSourceTier": "low"
   },
   "collisionProduct": {
     "actorId": "sci-fi-aircon-command",
+    "cacheKey": "mesh-collision-manager-v1:f19d85c76948903047c2846068aeaa376d5e956a410675268cb6cb6aac5d97c2:ae4fdee19ee91aa3ebf9ca987fdd677618a167ceb76c07fd5b5a026b34637a4f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
     "mode": "auto",
     "productId": "sci-fi-aircon-command:auto:simplifiedMesh",
-    "generatorVersion": "mesh-collision-manager-v1",
-    "generatedAt": "2026-05-14T21:27:39.853Z",
+    "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "asset",
-    "sourceMeshUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "f19d85c76948903047c2846068aeaa376d5e956a410675268cb6cb6aac5d97c2"
+      "value": "94e3be8cbfdb5ce5971e5cec829570452e2032f405c491c87738950f65e6abe4"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
@@ -215,45 +253,47 @@
     },
     "policyFingerprint": {
       "algorithm": "sha256",
-      "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+      "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
     },
     "shape": "trimesh",
-    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.glb",
-    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.meta.json",
     "localBounds": {
       "min": [
-        -0.3909999132156372,
-        -0.32005539536476135,
+        -0.392697811126709,
+        -0.32006561756134033,
         -0.21596616506576538
       ],
       "max": [
-        0.4050728678703308,
+        0.4072735011577606,
         0.6078314781188965,
         0.15819303691387177
       ],
       "size": [
-        0.796072781085968,
-        0.9278868734836578,
+        0.7999713122844696,
+        0.9278970956802368,
         0.37415920197963715
       ],
       "center": [
-        0.007036477327346802,
-        0.14388804137706757,
+        0.007287845015525818,
+        0.14388293027877808,
         -0.028886564075946808
       ]
     },
-    "triangleCount": 4616,
-    "vertexCount": 4814,
-    "triangleBudget": 5000
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.low.glb",
+    "visualSourceMeshUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
+    "triangleCount": 5090,
+    "vertexCount": 5172,
+    "triangleBudget": 20000
   },
   "simplification": {
-    "requested": true,
-    "applied": true,
-    "sourceTriangleCount": 18986,
-    "targetTriangleBudget": 5000,
-    "ratio": 0.25018434636047615,
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 5090,
+    "targetTriangleBudget": 20000,
+    "ratio": 1,
     "tool": "gltf-transform",
-    "prepass": "weld",
+    "prepass": "none",
     "error": 0.05
   }
 }

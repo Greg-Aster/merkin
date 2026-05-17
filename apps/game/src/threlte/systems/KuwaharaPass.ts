@@ -68,7 +68,7 @@ export class KuwaharaDepthMaskPass extends Pass {
         texelSize: { value: new THREE.Vector2(1, 1) },
         cameraNear: { value: 0.1 },
         cameraFar: { value: 1000 },
-        isOrthographic: { value: false },
+        kuwaharaIsOrthographic: { value: false },
       },
       vertexShader: fullscreenVertexShader,
       fragmentShader: depthMaskFragmentShader,
@@ -92,7 +92,7 @@ export class KuwaharaDepthMaskPass extends Pass {
       | null
     this.depthMaskMaterial.uniforms.cameraNear.value = depthCamera?.near ?? 0.1
     this.depthMaskMaterial.uniforms.cameraFar.value = depthCamera?.far ?? 1000
-    this.depthMaskMaterial.uniforms.isOrthographic.value = Boolean(
+    this.depthMaskMaterial.uniforms.kuwaharaIsOrthographic.value = Boolean(
       depthCamera?.isOrthographicCamera,
     )
   }
@@ -205,8 +205,8 @@ export class KuwaharaPass extends Pass {
         nearDepthMix: { value: 1 },
         farDepthMix: { value: 0.45 },
         edgePreserveStrength: { value: 0.82 },
-        distanceFadeStart: { value: 0.18 },
-        distanceFadeEnd: { value: 0.78 },
+        distanceFadeStart: { value: 35 },
+        distanceFadeEnd: { value: 170 },
         farRadiusScale: { value: 0.55 },
         edgeRadiusScale: { value: 0.45 },
       },

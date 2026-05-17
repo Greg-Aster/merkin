@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-15T00:21:04.032Z",
+  "generatedAt": "2026-05-17T00:24:38.956Z",
   "levelId": "miranda",
   "sceneId": "miranda",
   "source": {
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/miranda.scene.json",
     "version": 1,
-    "updatedAt": "2026-05-14T21:36:44.370Z"
+    "updatedAt": "2026-05-17T02:20:19.428Z"
   },
   "levelDefinition": {
     "id": "miranda",
     "version": 1,
-    "updatedAt": "2026-05-14T21:36:44.370Z",
+    "updatedAt": "2026-05-17T02:20:19.428Z",
     "spawn": {
       "player": [
         0,
@@ -357,10 +357,10 @@
             "friction": 0.88,
             "generatedProduct": {
               "actorId": "miranda-floor-main",
-              "cacheKey": "mesh-collision-manager-v1:fc0682ca9e7f43246187ebc895b8f3daa58a0e7d1d994b1d9296d0fb563c0c3c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:00e2c21d31ff2a210d4e5c13e27220509d66add77f571b1d8101d788b370ecfb",
+              "cacheKey": "mesh-collision-manager-v2:fc0682ca9e7f43246187ebc895b8f3daa58a0e7d1d994b1d9296d0fb563c0c3c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:9473f12e397281f7d881d58ee2777b01f02053ec92dee627ba4264bbc651e27f",
               "mode": "auto",
               "productId": "miranda-floor-main:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -372,7 +372,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "00e2c21d31ff2a210d4e5c13e27220509d66add77f571b1d8101d788b370ecfb"
+                "value": "9473f12e397281f7d881d58ee2777b01f02053ec92dee627ba4264bbc651e27f"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -454,10 +454,10 @@
             "friction": 0.88,
             "generatedProduct": {
               "actorId": "miranda-floor-upper",
-              "cacheKey": "mesh-collision-manager-v1:1ff54d794d02bfea36bd88f9d9af0e08b5747d4f39b71c1e73944f6175a328fe:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:00e2c21d31ff2a210d4e5c13e27220509d66add77f571b1d8101d788b370ecfb",
+              "cacheKey": "mesh-collision-manager-v2:1ff54d794d02bfea36bd88f9d9af0e08b5747d4f39b71c1e73944f6175a328fe:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:9473f12e397281f7d881d58ee2777b01f02053ec92dee627ba4264bbc651e27f",
               "mode": "auto",
               "productId": "miranda-floor-upper:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -469,7 +469,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "00e2c21d31ff2a210d4e5c13e27220509d66add77f571b1d8101d788b370ecfb"
+                "value": "9473f12e397281f7d881d58ee2777b01f02053ec92dee627ba4264bbc651e27f"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -608,10 +608,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:0e6463bc36efb1a3e83688a3d279248a8dd838c298b665636e190ec0b71c4991:0412f33af9fc3ad71c4092b8c6bb410b417ab97e599c2ab24a4ee4dfab14378d:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+            "colliderCacheKey": "mesh-collision-manager-v2:65e6aa45ed973c4ea0f987cb63826bda24e8efda22c1af825a5f80efbdf39128:0412f33af9fc3ad71c4092b8c6bb410b417ab97e599c2ab24a4ee4dfab14378d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -699,21 +699,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
             "triangleBudget": 5000,
-            "triangleCount": 804,
+            "triangleCount": 334,
             "generatedProduct": {
               "actorId": "miranda-cockpit-console",
-              "cacheKey": "mesh-collision-manager-v1:0e6463bc36efb1a3e83688a3d279248a8dd838c298b665636e190ec0b71c4991:0412f33af9fc3ad71c4092b8c6bb410b417ab97e599c2ab24a4ee4dfab14378d:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+              "cacheKey": "mesh-collision-manager-v2:65e6aa45ed973c4ea0f987cb63826bda24e8efda22c1af825a5f80efbdf39128:0412f33af9fc3ad71c4092b8c6bb410b417ab97e599c2ab24a4ee4dfab14378d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "miranda-cockpit-console:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "0e6463bc36efb1a3e83688a3d279248a8dd838c298b665636e190ec0b71c4991"
+                "value": "65e6aa45ed973c4ea0f987cb63826bda24e8efda22c1af825a5f80efbdf39128"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -721,7 +722,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+                "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -748,9 +749,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
-              "triangleCount": 804,
-              "vertexCount": 2388,
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+              "triangleCount": 334,
+              "vertexCount": 399,
               "triangleBudget": 5000
             }
           }
@@ -810,10 +812,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-cockpit-panel-left",
-              "cacheKey": "mesh-collision-manager-v1:c2fad96f425f27c7e6b3d3001c441e26d7430c9a980916346c0d023178136349:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:c2fad96f425f27c7e6b3d3001c441e26d7430c9a980916346c0d023178136349:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-cockpit-panel-left:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -825,7 +827,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -908,10 +910,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-cockpit-panel-center",
-              "cacheKey": "mesh-collision-manager-v1:b88910fdf10ad0bea60483e68d4c019b42684b256085a972e715db6328d487b3:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:b88910fdf10ad0bea60483e68d4c019b42684b256085a972e715db6328d487b3:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-cockpit-panel-center:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -923,7 +925,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -1006,10 +1008,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-cockpit-panel-right",
-              "cacheKey": "mesh-collision-manager-v1:c2fad96f425f27c7e6b3d3001c441e26d7430c9a980916346c0d023178136349:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:c2fad96f425f27c7e6b3d3001c441e26d7430c9a980916346c0d023178136349:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-cockpit-panel-right:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -1021,7 +1023,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -1088,10 +1090,10 @@
             "channel": "trigger",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+            "colliderCacheKey": "mesh-collision-manager-v2:3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -1179,21 +1181,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": true,
             "triangleBudget": 5000,
-            "triangleCount": 604,
+            "triangleCount": 267,
             "generatedProduct": {
               "actorId": "miranda-captain-log",
-              "cacheKey": "mesh-collision-manager-v1:ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+              "cacheKey": "mesh-collision-manager-v2:3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
               "mode": "trigger",
               "productId": "miranda-captain-log:trigger:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78"
+                "value": "3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -1201,7 +1204,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+                "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -1228,9 +1231,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
-              "triangleCount": 604,
-              "vertexCount": 1812,
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+              "triangleCount": 267,
+              "vertexCount": 210,
               "triangleBudget": 5000
             }
           }
@@ -1338,10 +1342,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-bunk-port-a",
-              "cacheKey": "mesh-collision-manager-v1:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-bunk-port-a:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -1353,7 +1357,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -1436,10 +1440,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-bunk-port-b",
-              "cacheKey": "mesh-collision-manager-v1:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-bunk-port-b:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -1451,7 +1455,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -1534,10 +1538,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-bunk-starboard-a",
-              "cacheKey": "mesh-collision-manager-v1:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-bunk-starboard-a:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -1549,7 +1553,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -1632,10 +1636,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-bunk-starboard-b",
-              "cacheKey": "mesh-collision-manager-v1:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-bunk-starboard-b:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -1647,7 +1651,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -1730,10 +1734,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-locker-bank",
-              "cacheKey": "mesh-collision-manager-v1:78c270f9c3dd6ea664404d6d244329363dddca0734826eefdb1bd003941d6046:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:78c270f9c3dd6ea664404d6d244329363dddca0734826eefdb1bd003941d6046:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-locker-bank:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -1745,7 +1749,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -1812,10 +1816,10 @@
             "channel": "trigger",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-crew-note.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-crew-note.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+            "colliderCacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -1903,21 +1907,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": true,
             "triangleBudget": 5000,
-            "triangleCount": 604,
+            "triangleCount": 267,
             "generatedProduct": {
               "actorId": "miranda-crew-note",
-              "cacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+              "cacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
               "mode": "trigger",
               "productId": "miranda-crew-note:trigger:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c"
+                "value": "5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -1925,7 +1930,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+                "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -1952,9 +1957,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-crew-note.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-crew-note.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
-              "triangleCount": 604,
-              "vertexCount": 1812,
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+              "triangleCount": 267,
+              "vertexCount": 210,
               "triangleBudget": 5000
             }
           }
@@ -2062,10 +2068,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-captains-desk",
-              "cacheKey": "mesh-collision-manager-v1:5f002a31be91a9b20e0ea228f8cf976cf38fa8923a073e07b1ac5a7e11fc860d:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:5f002a31be91a9b20e0ea228f8cf976cf38fa8923a073e07b1ac5a7e11fc860d:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-captains-desk:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -2077,7 +2083,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -2161,10 +2167,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-captains-chair",
-              "cacheKey": "mesh-collision-manager-v1:cd6cffc7098f387ca87fb8bfe0190e03cf5c18d06ec8278609c0fdb39e3af4ac:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+              "cacheKey": "mesh-collision-manager-v2:cd6cffc7098f387ca87fb8bfe0190e03cf5c18d06ec8278609c0fdb39e3af4ac:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
               "mode": "auto",
               "productId": "miranda-captains-chair:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -2176,7 +2182,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+                "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
               },
               "shape": "cylinder",
               "localBounds": {
@@ -2259,10 +2265,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-safe",
-              "cacheKey": "mesh-collision-manager-v1:66ea4cd9022b1a2bf1d6cd505889e8b4a9ffe0d2ce7d2069718516436d0d7b9b:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:66ea4cd9022b1a2bf1d6cd505889e8b4a9ffe0d2ce7d2069718516436d0d7b9b:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-safe:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -2274,7 +2280,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -2341,10 +2347,10 @@
             "channel": "trigger",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-first-officer-note.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-first-officer-note.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+            "colliderCacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2432,21 +2438,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": true,
             "triangleBudget": 5000,
-            "triangleCount": 604,
+            "triangleCount": 267,
             "generatedProduct": {
               "actorId": "miranda-first-officer-note",
-              "cacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+              "cacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
               "mode": "trigger",
               "productId": "miranda-first-officer-note:trigger:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
+                "value": "aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2454,7 +2461,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+                "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -2481,9 +2488,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-first-officer-note.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-first-officer-note.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-              "triangleCount": 604,
-              "vertexCount": 1812,
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+              "triangleCount": 267,
+              "vertexCount": 210,
               "triangleBudget": 5000
             }
           }
@@ -2553,10 +2561,10 @@
             "channel": "trigger",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-vault-fragment.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-vault-fragment.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+            "colliderCacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2644,21 +2652,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": true,
             "triangleBudget": 5000,
-            "triangleCount": 604,
+            "triangleCount": 267,
             "generatedProduct": {
               "actorId": "miranda-vault-fragment",
-              "cacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+              "cacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
               "mode": "trigger",
               "productId": "miranda-vault-fragment:trigger:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c"
+                "value": "5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2666,7 +2675,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+                "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -2693,9 +2702,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-vault-fragment.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-vault-fragment.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
-              "triangleCount": 604,
-              "vertexCount": 1812,
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+              "triangleCount": 267,
+              "vertexCount": 210,
               "triangleBudget": 5000
             }
           }
@@ -2786,10 +2796,10 @@
             "channel": "trigger",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0:5794ee5e0f0f7ffca972ee693ceb932f15c9af46929f481753a1b200ba3a109c:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+            "colliderCacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:5794ee5e0f0f7ffca972ee693ceb932f15c9af46929f481753a1b200ba3a109c:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -2877,21 +2887,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": true,
             "triangleBudget": 5000,
-            "triangleCount": 3648,
+            "triangleCount": 1043,
             "generatedProduct": {
               "actorId": "miranda-return-portal",
-              "cacheKey": "mesh-collision-manager-v1:8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0:5794ee5e0f0f7ffca972ee693ceb932f15c9af46929f481753a1b200ba3a109c:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+              "cacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:5794ee5e0f0f7ffca972ee693ceb932f15c9af46929f481753a1b200ba3a109c:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
               "mode": "trigger",
               "productId": "miranda-return-portal:trigger:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0"
+                "value": "e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -2899,7 +2910,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+                "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -2926,9 +2937,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
-              "triangleCount": 3648,
-              "vertexCount": 4990,
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+              "triangleCount": 1043,
+              "vertexCount": 756,
               "triangleBudget": 5000
             }
           }
@@ -3030,10 +3042,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-engine-core",
-              "cacheKey": "mesh-collision-manager-v1:87682712fa438f2191c5519698825ea58cf6f24a1a15ead52d112ffe2c5cf9e2:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+              "cacheKey": "mesh-collision-manager-v2:87682712fa438f2191c5519698825ea58cf6f24a1a15ead52d112ffe2c5cf9e2:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
               "mode": "auto",
               "productId": "miranda-engine-core:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -3045,7 +3057,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+                "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
               },
               "shape": "cylinder",
               "localBounds": {
@@ -3129,10 +3141,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-engine-column-a",
-              "cacheKey": "mesh-collision-manager-v1:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+              "cacheKey": "mesh-collision-manager-v2:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
               "mode": "auto",
               "productId": "miranda-engine-column-a:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -3144,7 +3156,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+                "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
               },
               "shape": "cylinder",
               "localBounds": {
@@ -3228,10 +3240,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-engine-column-b",
-              "cacheKey": "mesh-collision-manager-v1:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+              "cacheKey": "mesh-collision-manager-v2:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
               "mode": "auto",
               "productId": "miranda-engine-column-b:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -3243,7 +3255,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+                "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
               },
               "shape": "cylinder",
               "localBounds": {
@@ -3327,10 +3339,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-engine-column-c",
-              "cacheKey": "mesh-collision-manager-v1:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+              "cacheKey": "mesh-collision-manager-v2:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
               "mode": "auto",
               "productId": "miranda-engine-column-c:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -3342,7 +3354,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+                "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
               },
               "shape": "cylinder",
               "localBounds": {
@@ -3426,10 +3438,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-engine-column-d",
-              "cacheKey": "mesh-collision-manager-v1:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+              "cacheKey": "mesh-collision-manager-v2:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
               "mode": "auto",
               "productId": "miranda-engine-column-d:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -3441,7 +3453,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+                "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
               },
               "shape": "cylinder",
               "localBounds": {
@@ -3508,10 +3520,10 @@
             "channel": "trigger",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+            "colliderCacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -3599,21 +3611,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": true,
             "triangleBudget": 5000,
-            "triangleCount": 604,
+            "triangleCount": 267,
             "generatedProduct": {
               "actorId": "miranda-engine-note",
-              "cacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+              "cacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
               "mode": "trigger",
               "productId": "miranda-engine-note:trigger:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
+                "value": "aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -3621,7 +3634,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+                "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -3648,9 +3661,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-              "triangleCount": 604,
-              "vertexCount": 1812,
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+              "triangleCount": 267,
+              "vertexCount": 210,
               "triangleBudget": 5000
             }
           }
@@ -3760,10 +3774,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-med-pod-a",
-              "cacheKey": "mesh-collision-manager-v1:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-med-pod-a:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -3775,7 +3789,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -3860,10 +3874,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-med-pod-b",
-              "cacheKey": "mesh-collision-manager-v1:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-med-pod-b:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -3875,7 +3889,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -3960,10 +3974,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-med-pod-c",
-              "cacheKey": "mesh-collision-manager-v1:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-med-pod-c:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -3975,7 +3989,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -4060,10 +4074,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-med-pod-d",
-              "cacheKey": "mesh-collision-manager-v1:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-med-pod-d:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -4075,7 +4089,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -4142,10 +4156,10 @@
             "channel": "trigger",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-medbay-note.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-medbay-note.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+            "colliderCacheKey": "mesh-collision-manager-v2:3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -4233,21 +4247,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": true,
             "triangleBudget": 5000,
-            "triangleCount": 604,
+            "triangleCount": 267,
             "generatedProduct": {
               "actorId": "miranda-medbay-note",
-              "cacheKey": "mesh-collision-manager-v1:ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+              "cacheKey": "mesh-collision-manager-v2:3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
               "mode": "trigger",
               "productId": "miranda-medbay-note:trigger:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78"
+                "value": "3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -4255,7 +4270,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+                "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -4282,9 +4297,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-medbay-note.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-medbay-note.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
-              "triangleCount": 604,
-              "vertexCount": 1812,
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+              "triangleCount": 267,
+              "vertexCount": 210,
               "triangleBudget": 5000
             }
           }
@@ -4392,10 +4408,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-mess-table-a",
-              "cacheKey": "mesh-collision-manager-v1:351fe1fbab871e4a0d211b3898a7e5098b5d7ce466bfacd7fa871bf560ffcfa6:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:351fe1fbab871e4a0d211b3898a7e5098b5d7ce466bfacd7fa871bf560ffcfa6:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-mess-table-a:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -4407,7 +4423,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -4490,10 +4506,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-mess-table-b",
-              "cacheKey": "mesh-collision-manager-v1:fedced2659038a195bda86c9f80e816320dd22e3f1ec5900fd1318668301aa20:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:fedced2659038a195bda86c9f80e816320dd22e3f1ec5900fd1318668301aa20:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-mess-table-b:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -4505,7 +4521,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -4588,10 +4604,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-mess-counter",
-              "cacheKey": "mesh-collision-manager-v1:2233aba2b5bc57f27f6f652d94c249d6b6a87935b460bf1d5b80655f0322cf0d:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:2233aba2b5bc57f27f6f652d94c249d6b6a87935b460bf1d5b80655f0322cf0d:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-mess-counter:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -4603,7 +4619,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -4670,10 +4686,10 @@
             "channel": "trigger",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-mess-note.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-mess-note.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+            "colliderCacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -4761,21 +4777,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": true,
             "triangleBudget": 5000,
-            "triangleCount": 604,
+            "triangleCount": 267,
             "generatedProduct": {
               "actorId": "miranda-mess-note",
-              "cacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+              "cacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
               "mode": "trigger",
               "productId": "miranda-mess-note:trigger:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
+                "value": "aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -4783,7 +4800,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+                "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -4810,9 +4827,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-mess-note.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-mess-note.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-              "triangleCount": 604,
-              "vertexCount": 1812,
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+              "triangleCount": 267,
+              "vertexCount": 210,
               "triangleBudget": 5000
             }
           }
@@ -4903,10 +4921,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-a.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-a.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:62c5289155f1ae1a6f0f67503bb3e5ce98441a4ce3e1d023e3acde0edb8dc20b:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+            "colliderCacheKey": "mesh-collision-manager-v2:0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3:62c5289155f1ae1a6f0f67503bb3e5ce98441a4ce3e1d023e3acde0edb8dc20b:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -4994,6 +5012,7 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
@@ -5001,14 +5020,14 @@
             "triangleCount": 60,
             "generatedProduct": {
               "actorId": "miranda-chapel-monolith-a",
-              "cacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:62c5289155f1ae1a6f0f67503bb3e5ce98441a4ce3e1d023e3acde0edb8dc20b:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+              "cacheKey": "mesh-collision-manager-v2:0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3:62c5289155f1ae1a6f0f67503bb3e5ce98441a4ce3e1d023e3acde0edb8dc20b:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "miranda-chapel-monolith-a:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f"
+                "value": "0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -5016,7 +5035,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+                "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -5043,9 +5062,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-a.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-a.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
               "triangleCount": 60,
-              "vertexCount": 180,
+              "vertexCount": 120,
               "triangleBudget": 5000
             }
           }
@@ -5088,10 +5108,10 @@
             "channel": "worldStatic",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:29c55a28f78ccbbc0bddc8f0e24c388f24d97549f58445228d1887a1b3caa758:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+            "colliderCacheKey": "mesh-collision-manager-v2:0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3:29c55a28f78ccbbc0bddc8f0e24c388f24d97549f58445228d1887a1b3caa758:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -5179,6 +5199,7 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": false,
@@ -5186,14 +5207,14 @@
             "triangleCount": 60,
             "generatedProduct": {
               "actorId": "miranda-chapel-monolith-b",
-              "cacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:29c55a28f78ccbbc0bddc8f0e24c388f24d97549f58445228d1887a1b3caa758:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+              "cacheKey": "mesh-collision-manager-v2:0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3:29c55a28f78ccbbc0bddc8f0e24c388f24d97549f58445228d1887a1b3caa758:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
               "mode": "auto",
               "productId": "miranda-chapel-monolith-b:auto:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f"
+                "value": "0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -5201,7 +5222,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+                "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -5228,9 +5249,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
               "triangleCount": 60,
-              "vertexCount": 180,
+              "vertexCount": 120,
               "triangleBudget": 5000
             }
           }
@@ -5290,10 +5312,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-chapel-altar",
-              "cacheKey": "mesh-collision-manager-v1:b90c75f65d4917813c23c55922dbe3570e030756268a480b2958bea72b15259f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:b90c75f65d4917813c23c55922dbe3570e030756268a480b2958bea72b15259f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-chapel-altar:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -5305,7 +5327,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -5410,10 +5432,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-brig-cell-a",
-              "cacheKey": "mesh-collision-manager-v1:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-brig-cell-a:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -5425,7 +5447,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -5508,10 +5530,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-brig-cell-b",
-              "cacheKey": "mesh-collision-manager-v1:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-brig-cell-b:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -5523,7 +5545,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -5606,10 +5628,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-brig-cell-c",
-              "cacheKey": "mesh-collision-manager-v1:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-brig-cell-c:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -5621,7 +5643,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -5704,10 +5726,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-brig-cell-d",
-              "cacheKey": "mesh-collision-manager-v1:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-brig-cell-d:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -5719,7 +5741,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -5802,10 +5824,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-brig-desk",
-              "cacheKey": "mesh-collision-manager-v1:1758d12edf12a0cf31fb3cd3f6b1f900a9bb299f5334ff090185d36ec72ecb6f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:1758d12edf12a0cf31fb3cd3f6b1f900a9bb299f5334ff090185d36ec72ecb6f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-brig-desk:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -5817,7 +5839,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -5884,10 +5906,10 @@
             "channel": "trigger",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-brig-note.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-brig-note.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+            "colliderCacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -5975,21 +5997,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": true,
             "triangleBudget": 5000,
-            "triangleCount": 604,
+            "triangleCount": 267,
             "generatedProduct": {
               "actorId": "miranda-brig-note",
-              "cacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+              "cacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
               "mode": "trigger",
               "productId": "miranda-brig-note:trigger:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c"
+                "value": "5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -5997,7 +6020,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+                "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -6024,9 +6047,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-brig-note.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-brig-note.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
-              "triangleCount": 604,
-              "vertexCount": 1812,
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+              "triangleCount": 267,
+              "vertexCount": 210,
               "triangleBudget": 5000
             }
           }
@@ -6134,10 +6158,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-cargo-stack-a",
-              "cacheKey": "mesh-collision-manager-v1:b318db3a6e37626ab948a48539f1a4ad774bce47e79bacd5f2e096d1a9301301:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:b318db3a6e37626ab948a48539f1a4ad774bce47e79bacd5f2e096d1a9301301:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-cargo-stack-a:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -6149,7 +6173,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -6232,10 +6256,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-cargo-stack-b",
-              "cacheKey": "mesh-collision-manager-v1:b7a66d9b3195d5ca5f8f5341d33e444f00f15f1f8981670a4194ad3c90cc1a29:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:b7a66d9b3195d5ca5f8f5341d33e444f00f15f1f8981670a4194ad3c90cc1a29:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-cargo-stack-b:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -6247,7 +6271,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -6330,10 +6354,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-cargo-stack-c",
-              "cacheKey": "mesh-collision-manager-v1:a4d72455b279c3e42283ebb8bd04018c09ff068f4a1c1fc37879b38b567723b3:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:a4d72455b279c3e42283ebb8bd04018c09ff068f4a1c1fc37879b38b567723b3:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-cargo-stack-c:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -6345,7 +6369,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -6428,10 +6452,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-cargo-stack-d",
-              "cacheKey": "mesh-collision-manager-v1:3290ca62bc59129f8d28158cb016222a6f638cc02281aa6603450dd5dd1c5a88:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:3290ca62bc59129f8d28158cb016222a6f638cc02281aa6603450dd5dd1c5a88:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-cargo-stack-d:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -6443,7 +6467,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -6599,10 +6623,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-server-bank-a",
-              "cacheKey": "mesh-collision-manager-v1:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-server-bank-a:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -6614,7 +6638,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -6697,10 +6721,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-server-bank-b",
-              "cacheKey": "mesh-collision-manager-v1:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-server-bank-b:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -6712,7 +6736,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -6795,10 +6819,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-server-bank-c",
-              "cacheKey": "mesh-collision-manager-v1:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-server-bank-c:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -6810,7 +6834,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -6893,10 +6917,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-server-bank-d",
-              "cacheKey": "mesh-collision-manager-v1:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-server-bank-d:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -6908,7 +6932,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -6991,10 +7015,10 @@
             "restitution": 0,
             "generatedProduct": {
               "actorId": "miranda-server-bank-e",
-              "cacheKey": "mesh-collision-manager-v1:07055b6321c0f01ee34a4bf3eddbc3846a60e604fbc6dd296c502e467da74ecb:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+              "cacheKey": "mesh-collision-manager-v2:07055b6321c0f01ee34a4bf3eddbc3846a60e604fbc6dd296c502e467da74ecb:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
               "mode": "auto",
               "productId": "miranda-server-bank-e:auto:primitive",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "primitive",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
@@ -7006,7 +7030,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+                "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
               },
               "shape": "cuboid",
               "localBounds": {
@@ -7102,10 +7126,10 @@
             "channel": "trigger",
             "shape": "trimesh",
             "quality": "simplifiedMesh",
-            "lodSourceTier": "source",
+            "lodSourceTier": "low",
             "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-archive-note.collider.glb",
             "colliderMetadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-archive-note.collider.meta.json",
-            "colliderCacheKey": "mesh-collision-manager-v1:79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+            "colliderCacheKey": "mesh-collision-manager-v2:c7e8eb3d87c61e2457cefb7bff13c678743e05e1f90a727561a4e9f82ac88522:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
             "assetLocalTransform": {
               "schemaVersion": 1,
               "coordinateSpaceVersion": 1,
@@ -7193,21 +7217,22 @@
               ]
             },
             "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+            "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.low.glb",
             "friction": 0.7,
             "restitution": 0,
             "sensor": true,
             "triangleBudget": 5000,
-            "triangleCount": 604,
+            "triangleCount": 267,
             "generatedProduct": {
               "actorId": "miranda-archive-note",
-              "cacheKey": "mesh-collision-manager-v1:79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+              "cacheKey": "mesh-collision-manager-v2:c7e8eb3d87c61e2457cefb7bff13c678743e05e1f90a727561a4e9f82ac88522:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
               "mode": "trigger",
               "productId": "miranda-archive-note:trigger:simplifiedMesh",
-              "generatorVersion": "mesh-collision-manager-v1",
+              "generatorVersion": "mesh-collision-manager-v2",
               "sourceKind": "prefab",
               "sourceMeshFingerprint": {
                 "algorithm": "sha256",
-                "value": "79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506"
+                "value": "c7e8eb3d87c61e2457cefb7bff13c678743e05e1f90a727561a4e9f82ac88522"
               },
               "transformFingerprint": {
                 "algorithm": "sha256",
@@ -7215,7 +7240,7 @@
               },
               "policyFingerprint": {
                 "algorithm": "sha256",
-                "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+                "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
               },
               "shape": "trimesh",
               "localBounds": {
@@ -7242,9 +7267,10 @@
               },
               "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-archive-note.collider.glb",
               "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-archive-note.collider.meta.json",
-              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
-              "triangleCount": 604,
-              "vertexCount": 1812,
+              "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.low.glb",
+              "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+              "triangleCount": 267,
+              "vertexCount": 210,
               "triangleBudget": 5000
             }
           }
@@ -7284,7 +7310,8 @@
     "assetActorCount": 0,
     "primitiveActorCount": 40,
     "neverCullActorCount": 0,
-    "gameplayFireflyActorCount": 0,
+    "npcActorCount": 0,
+    "fireflyNpcActorCount": 0,
     "physicsActorCount": 53,
     "trimeshActorCount": 13,
     "detailMeshActorCount": 0,
@@ -7664,10 +7691,10 @@
     "generatedCollisionProducts": [
       {
         "actorId": "miranda-floor-main",
-        "cacheKey": "mesh-collision-manager-v1:fc0682ca9e7f43246187ebc895b8f3daa58a0e7d1d994b1d9296d0fb563c0c3c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:00e2c21d31ff2a210d4e5c13e27220509d66add77f571b1d8101d788b370ecfb",
+        "cacheKey": "mesh-collision-manager-v2:fc0682ca9e7f43246187ebc895b8f3daa58a0e7d1d994b1d9296d0fb563c0c3c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:9473f12e397281f7d881d58ee2777b01f02053ec92dee627ba4264bbc651e27f",
         "mode": "auto",
         "productId": "miranda-floor-main:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -7679,7 +7706,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "00e2c21d31ff2a210d4e5c13e27220509d66add77f571b1d8101d788b370ecfb"
+          "value": "9473f12e397281f7d881d58ee2777b01f02053ec92dee627ba4264bbc651e27f"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -7707,10 +7734,10 @@
       },
       {
         "actorId": "miranda-floor-upper",
-        "cacheKey": "mesh-collision-manager-v1:1ff54d794d02bfea36bd88f9d9af0e08b5747d4f39b71c1e73944f6175a328fe:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:00e2c21d31ff2a210d4e5c13e27220509d66add77f571b1d8101d788b370ecfb",
+        "cacheKey": "mesh-collision-manager-v2:1ff54d794d02bfea36bd88f9d9af0e08b5747d4f39b71c1e73944f6175a328fe:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:9473f12e397281f7d881d58ee2777b01f02053ec92dee627ba4264bbc651e27f",
         "mode": "auto",
         "productId": "miranda-floor-upper:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -7722,7 +7749,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "00e2c21d31ff2a210d4e5c13e27220509d66add77f571b1d8101d788b370ecfb"
+          "value": "9473f12e397281f7d881d58ee2777b01f02053ec92dee627ba4264bbc651e27f"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -7750,14 +7777,14 @@
       },
       {
         "actorId": "miranda-cockpit-console",
-        "cacheKey": "mesh-collision-manager-v1:0e6463bc36efb1a3e83688a3d279248a8dd838c298b665636e190ec0b71c4991:0412f33af9fc3ad71c4092b8c6bb410b417ab97e599c2ab24a4ee4dfab14378d:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "cacheKey": "mesh-collision-manager-v2:65e6aa45ed973c4ea0f987cb63826bda24e8efda22c1af825a5f80efbdf39128:0412f33af9fc3ad71c4092b8c6bb410b417ab97e599c2ab24a4ee4dfab14378d:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "miranda-cockpit-console:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "0e6463bc36efb1a3e83688a3d279248a8dd838c298b665636e190ec0b71c4991"
+          "value": "65e6aa45ed973c4ea0f987cb63826bda24e8efda22c1af825a5f80efbdf39128"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -7765,7 +7792,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+          "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -7792,17 +7819,18 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
-        "triangleCount": 804,
-        "vertexCount": 2388,
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+        "triangleCount": 334,
+        "vertexCount": 399,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-cockpit-panel-left",
-        "cacheKey": "mesh-collision-manager-v1:c2fad96f425f27c7e6b3d3001c441e26d7430c9a980916346c0d023178136349:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:c2fad96f425f27c7e6b3d3001c441e26d7430c9a980916346c0d023178136349:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-cockpit-panel-left:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -7814,7 +7842,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -7842,10 +7870,10 @@
       },
       {
         "actorId": "miranda-cockpit-panel-center",
-        "cacheKey": "mesh-collision-manager-v1:b88910fdf10ad0bea60483e68d4c019b42684b256085a972e715db6328d487b3:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:b88910fdf10ad0bea60483e68d4c019b42684b256085a972e715db6328d487b3:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-cockpit-panel-center:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -7857,7 +7885,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -7885,10 +7913,10 @@
       },
       {
         "actorId": "miranda-cockpit-panel-right",
-        "cacheKey": "mesh-collision-manager-v1:c2fad96f425f27c7e6b3d3001c441e26d7430c9a980916346c0d023178136349:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:c2fad96f425f27c7e6b3d3001c441e26d7430c9a980916346c0d023178136349:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-cockpit-panel-right:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -7900,7 +7928,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -7928,14 +7956,14 @@
       },
       {
         "actorId": "miranda-captain-log",
-        "cacheKey": "mesh-collision-manager-v1:ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "cacheKey": "mesh-collision-manager-v2:3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "mode": "trigger",
         "productId": "miranda-captain-log:trigger:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78"
+          "value": "3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -7943,7 +7971,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+          "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -7970,17 +7998,18 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-captain-log.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
-        "triangleCount": 604,
-        "vertexCount": 1812,
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+        "triangleCount": 267,
+        "vertexCount": 210,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-bunk-port-a",
-        "cacheKey": "mesh-collision-manager-v1:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-bunk-port-a:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -7992,7 +8021,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -8020,10 +8049,10 @@
       },
       {
         "actorId": "miranda-bunk-port-b",
-        "cacheKey": "mesh-collision-manager-v1:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-bunk-port-b:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8035,7 +8064,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -8063,10 +8092,10 @@
       },
       {
         "actorId": "miranda-bunk-starboard-a",
-        "cacheKey": "mesh-collision-manager-v1:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-bunk-starboard-a:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8078,7 +8107,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -8106,10 +8135,10 @@
       },
       {
         "actorId": "miranda-bunk-starboard-b",
-        "cacheKey": "mesh-collision-manager-v1:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:7e50124aea7f9ac9a24059ffb2aa471653f80f77d0354e0b0e4568f084343b79:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-bunk-starboard-b:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8121,7 +8150,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -8149,10 +8178,10 @@
       },
       {
         "actorId": "miranda-locker-bank",
-        "cacheKey": "mesh-collision-manager-v1:78c270f9c3dd6ea664404d6d244329363dddca0734826eefdb1bd003941d6046:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:78c270f9c3dd6ea664404d6d244329363dddca0734826eefdb1bd003941d6046:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-locker-bank:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8164,7 +8193,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -8192,14 +8221,14 @@
       },
       {
         "actorId": "miranda-crew-note",
-        "cacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "cacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "mode": "trigger",
         "productId": "miranda-crew-note:trigger:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c"
+          "value": "5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -8207,7 +8236,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+          "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -8234,17 +8263,18 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-crew-note.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-crew-note.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
-        "triangleCount": 604,
-        "vertexCount": 1812,
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+        "triangleCount": 267,
+        "vertexCount": 210,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-captains-desk",
-        "cacheKey": "mesh-collision-manager-v1:5f002a31be91a9b20e0ea228f8cf976cf38fa8923a073e07b1ac5a7e11fc860d:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:5f002a31be91a9b20e0ea228f8cf976cf38fa8923a073e07b1ac5a7e11fc860d:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-captains-desk:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8256,7 +8286,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -8284,10 +8314,10 @@
       },
       {
         "actorId": "miranda-captains-chair",
-        "cacheKey": "mesh-collision-manager-v1:cd6cffc7098f387ca87fb8bfe0190e03cf5c18d06ec8278609c0fdb39e3af4ac:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+        "cacheKey": "mesh-collision-manager-v2:cd6cffc7098f387ca87fb8bfe0190e03cf5c18d06ec8278609c0fdb39e3af4ac:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
         "mode": "auto",
         "productId": "miranda-captains-chair:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8299,7 +8329,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+          "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
         },
         "shape": "cylinder",
         "localBounds": {
@@ -8327,10 +8357,10 @@
       },
       {
         "actorId": "miranda-safe",
-        "cacheKey": "mesh-collision-manager-v1:66ea4cd9022b1a2bf1d6cd505889e8b4a9ffe0d2ce7d2069718516436d0d7b9b:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:66ea4cd9022b1a2bf1d6cd505889e8b4a9ffe0d2ce7d2069718516436d0d7b9b:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-safe:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8342,7 +8372,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -8370,14 +8400,14 @@
       },
       {
         "actorId": "miranda-first-officer-note",
-        "cacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "cacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "mode": "trigger",
         "productId": "miranda-first-officer-note:trigger:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
+          "value": "aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -8385,7 +8415,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+          "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -8412,21 +8442,22 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-first-officer-note.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-first-officer-note.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-        "triangleCount": 604,
-        "vertexCount": 1812,
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+        "triangleCount": 267,
+        "vertexCount": 210,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-vault-fragment",
-        "cacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "cacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "mode": "trigger",
         "productId": "miranda-vault-fragment:trigger:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c"
+          "value": "5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -8434,7 +8465,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+          "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -8461,21 +8492,22 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-vault-fragment.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-vault-fragment.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
-        "triangleCount": 604,
-        "vertexCount": 1812,
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+        "triangleCount": 267,
+        "vertexCount": 210,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-return-portal",
-        "cacheKey": "mesh-collision-manager-v1:8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0:5794ee5e0f0f7ffca972ee693ceb932f15c9af46929f481753a1b200ba3a109c:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "cacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:5794ee5e0f0f7ffca972ee693ceb932f15c9af46929f481753a1b200ba3a109c:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "mode": "trigger",
         "productId": "miranda-return-portal:trigger:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0"
+          "value": "e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -8483,7 +8515,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+          "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -8510,17 +8542,18 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
-        "triangleCount": 3648,
-        "vertexCount": 4990,
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+        "triangleCount": 1043,
+        "vertexCount": 756,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-engine-core",
-        "cacheKey": "mesh-collision-manager-v1:87682712fa438f2191c5519698825ea58cf6f24a1a15ead52d112ffe2c5cf9e2:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+        "cacheKey": "mesh-collision-manager-v2:87682712fa438f2191c5519698825ea58cf6f24a1a15ead52d112ffe2c5cf9e2:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
         "mode": "auto",
         "productId": "miranda-engine-core:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8532,7 +8565,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+          "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
         },
         "shape": "cylinder",
         "localBounds": {
@@ -8560,10 +8593,10 @@
       },
       {
         "actorId": "miranda-engine-column-a",
-        "cacheKey": "mesh-collision-manager-v1:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+        "cacheKey": "mesh-collision-manager-v2:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
         "mode": "auto",
         "productId": "miranda-engine-column-a:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8575,7 +8608,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+          "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
         },
         "shape": "cylinder",
         "localBounds": {
@@ -8603,10 +8636,10 @@
       },
       {
         "actorId": "miranda-engine-column-b",
-        "cacheKey": "mesh-collision-manager-v1:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+        "cacheKey": "mesh-collision-manager-v2:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
         "mode": "auto",
         "productId": "miranda-engine-column-b:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8618,7 +8651,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+          "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
         },
         "shape": "cylinder",
         "localBounds": {
@@ -8646,10 +8679,10 @@
       },
       {
         "actorId": "miranda-engine-column-c",
-        "cacheKey": "mesh-collision-manager-v1:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+        "cacheKey": "mesh-collision-manager-v2:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
         "mode": "auto",
         "productId": "miranda-engine-column-c:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8661,7 +8694,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+          "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
         },
         "shape": "cylinder",
         "localBounds": {
@@ -8689,10 +8722,10 @@
       },
       {
         "actorId": "miranda-engine-column-d",
-        "cacheKey": "mesh-collision-manager-v1:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7",
+        "cacheKey": "mesh-collision-manager-v2:63e3db882d1629f53dc11e142791b8610941005ff416368b396393862a5f64f7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033",
         "mode": "auto",
         "productId": "miranda-engine-column-d:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8704,7 +8737,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "26ba559a86e452c71dfe996d5f52e1fd3d3c8bc44875e9c73f9b5b7b2d0defb7"
+          "value": "f407a9a8ca5c59ecef001641c1340727922912a3d646681c9674a45e4bbcd033"
         },
         "shape": "cylinder",
         "localBounds": {
@@ -8732,14 +8765,14 @@
       },
       {
         "actorId": "miranda-engine-note",
-        "cacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "cacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "mode": "trigger",
         "productId": "miranda-engine-note:trigger:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
+          "value": "aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -8747,7 +8780,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+          "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -8774,17 +8807,18 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-        "triangleCount": 604,
-        "vertexCount": 1812,
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+        "triangleCount": 267,
+        "vertexCount": 210,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-med-pod-a",
-        "cacheKey": "mesh-collision-manager-v1:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-med-pod-a:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8796,7 +8830,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -8824,10 +8858,10 @@
       },
       {
         "actorId": "miranda-med-pod-b",
-        "cacheKey": "mesh-collision-manager-v1:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-med-pod-b:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8839,7 +8873,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -8867,10 +8901,10 @@
       },
       {
         "actorId": "miranda-med-pod-c",
-        "cacheKey": "mesh-collision-manager-v1:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-med-pod-c:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8882,7 +8916,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -8910,10 +8944,10 @@
       },
       {
         "actorId": "miranda-med-pod-d",
-        "cacheKey": "mesh-collision-manager-v1:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:577562b06dec0747f7020c92beceb6a4794092fea9d30fb1486ca56b1aeab4c0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-med-pod-d:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -8925,7 +8959,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -8953,14 +8987,14 @@
       },
       {
         "actorId": "miranda-medbay-note",
-        "cacheKey": "mesh-collision-manager-v1:ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "cacheKey": "mesh-collision-manager-v2:3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "mode": "trigger",
         "productId": "miranda-medbay-note:trigger:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78"
+          "value": "3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -8968,7 +9002,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+          "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -8995,17 +9029,18 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-medbay-note.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-medbay-note.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
-        "triangleCount": 604,
-        "vertexCount": 1812,
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+        "triangleCount": 267,
+        "vertexCount": 210,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-mess-table-a",
-        "cacheKey": "mesh-collision-manager-v1:351fe1fbab871e4a0d211b3898a7e5098b5d7ce466bfacd7fa871bf560ffcfa6:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:351fe1fbab871e4a0d211b3898a7e5098b5d7ce466bfacd7fa871bf560ffcfa6:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-mess-table-a:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9017,7 +9052,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9045,10 +9080,10 @@
       },
       {
         "actorId": "miranda-mess-table-b",
-        "cacheKey": "mesh-collision-manager-v1:fedced2659038a195bda86c9f80e816320dd22e3f1ec5900fd1318668301aa20:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:fedced2659038a195bda86c9f80e816320dd22e3f1ec5900fd1318668301aa20:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-mess-table-b:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9060,7 +9095,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9088,10 +9123,10 @@
       },
       {
         "actorId": "miranda-mess-counter",
-        "cacheKey": "mesh-collision-manager-v1:2233aba2b5bc57f27f6f652d94c249d6b6a87935b460bf1d5b80655f0322cf0d:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:2233aba2b5bc57f27f6f652d94c249d6b6a87935b460bf1d5b80655f0322cf0d:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-mess-counter:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9103,7 +9138,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9131,14 +9166,14 @@
       },
       {
         "actorId": "miranda-mess-note",
-        "cacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "cacheKey": "mesh-collision-manager-v2:aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "mode": "trigger",
         "productId": "miranda-mess-note:trigger:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
+          "value": "aac3c0603b501554d64bf3b4531eba4b172ff0b5642d448a6950288d820e90c7"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -9146,7 +9181,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+          "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -9173,21 +9208,22 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-mess-note.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-mess-note.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-        "triangleCount": 604,
-        "vertexCount": 1812,
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+        "triangleCount": 267,
+        "vertexCount": 210,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-chapel-monolith-a",
-        "cacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:62c5289155f1ae1a6f0f67503bb3e5ce98441a4ce3e1d023e3acde0edb8dc20b:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "cacheKey": "mesh-collision-manager-v2:0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3:62c5289155f1ae1a6f0f67503bb3e5ce98441a4ce3e1d023e3acde0edb8dc20b:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "miranda-chapel-monolith-a:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f"
+          "value": "0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -9195,7 +9231,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+          "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -9222,21 +9258,22 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-a.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-a.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
         "triangleCount": 60,
-        "vertexCount": 180,
+        "vertexCount": 120,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-chapel-monolith-b",
-        "cacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:29c55a28f78ccbbc0bddc8f0e24c388f24d97549f58445228d1887a1b3caa758:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "cacheKey": "mesh-collision-manager-v2:0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3:29c55a28f78ccbbc0bddc8f0e24c388f24d97549f58445228d1887a1b3caa758:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "mode": "auto",
         "productId": "miranda-chapel-monolith-b:auto:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f"
+          "value": "0d0c7eeaa4aacd6e32ae971430372f14fc0abdfe09a9c9166c84f91f543482a3"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -9244,7 +9281,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+          "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -9271,17 +9308,18 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
         "triangleCount": 60,
-        "vertexCount": 180,
+        "vertexCount": 120,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-chapel-altar",
-        "cacheKey": "mesh-collision-manager-v1:b90c75f65d4917813c23c55922dbe3570e030756268a480b2958bea72b15259f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:b90c75f65d4917813c23c55922dbe3570e030756268a480b2958bea72b15259f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-chapel-altar:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9293,7 +9331,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9321,10 +9359,10 @@
       },
       {
         "actorId": "miranda-brig-cell-a",
-        "cacheKey": "mesh-collision-manager-v1:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-brig-cell-a:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9336,7 +9374,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9364,10 +9402,10 @@
       },
       {
         "actorId": "miranda-brig-cell-b",
-        "cacheKey": "mesh-collision-manager-v1:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-brig-cell-b:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9379,7 +9417,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9407,10 +9445,10 @@
       },
       {
         "actorId": "miranda-brig-cell-c",
-        "cacheKey": "mesh-collision-manager-v1:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-brig-cell-c:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9422,7 +9460,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9450,10 +9488,10 @@
       },
       {
         "actorId": "miranda-brig-cell-d",
-        "cacheKey": "mesh-collision-manager-v1:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:399e42b869d24a75427d98290ba4c2303ef4f1658c0ea2672acdb8685da1588e:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-brig-cell-d:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9465,7 +9503,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9493,10 +9531,10 @@
       },
       {
         "actorId": "miranda-brig-desk",
-        "cacheKey": "mesh-collision-manager-v1:1758d12edf12a0cf31fb3cd3f6b1f900a9bb299f5334ff090185d36ec72ecb6f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:1758d12edf12a0cf31fb3cd3f6b1f900a9bb299f5334ff090185d36ec72ecb6f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-brig-desk:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9508,7 +9546,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9536,14 +9574,14 @@
       },
       {
         "actorId": "miranda-brig-note",
-        "cacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "cacheKey": "mesh-collision-manager-v2:5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "mode": "trigger",
         "productId": "miranda-brig-note:trigger:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c"
+          "value": "5f024765272f22e7adf4ec9bd29337c98744ef90fa32b8f5668cff85bd77597f"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -9551,7 +9589,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+          "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -9578,17 +9616,18 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-brig-note.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-brig-note.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
-        "triangleCount": 604,
-        "vertexCount": 1812,
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+        "triangleCount": 267,
+        "vertexCount": 210,
         "triangleBudget": 5000
       },
       {
         "actorId": "miranda-cargo-stack-a",
-        "cacheKey": "mesh-collision-manager-v1:b318db3a6e37626ab948a48539f1a4ad774bce47e79bacd5f2e096d1a9301301:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:b318db3a6e37626ab948a48539f1a4ad774bce47e79bacd5f2e096d1a9301301:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-cargo-stack-a:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9600,7 +9639,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9628,10 +9667,10 @@
       },
       {
         "actorId": "miranda-cargo-stack-b",
-        "cacheKey": "mesh-collision-manager-v1:b7a66d9b3195d5ca5f8f5341d33e444f00f15f1f8981670a4194ad3c90cc1a29:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:b7a66d9b3195d5ca5f8f5341d33e444f00f15f1f8981670a4194ad3c90cc1a29:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-cargo-stack-b:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9643,7 +9682,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9671,10 +9710,10 @@
       },
       {
         "actorId": "miranda-cargo-stack-c",
-        "cacheKey": "mesh-collision-manager-v1:a4d72455b279c3e42283ebb8bd04018c09ff068f4a1c1fc37879b38b567723b3:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:a4d72455b279c3e42283ebb8bd04018c09ff068f4a1c1fc37879b38b567723b3:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-cargo-stack-c:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9686,7 +9725,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9714,10 +9753,10 @@
       },
       {
         "actorId": "miranda-cargo-stack-d",
-        "cacheKey": "mesh-collision-manager-v1:3290ca62bc59129f8d28158cb016222a6f638cc02281aa6603450dd5dd1c5a88:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:3290ca62bc59129f8d28158cb016222a6f638cc02281aa6603450dd5dd1c5a88:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-cargo-stack-d:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9729,7 +9768,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9757,10 +9796,10 @@
       },
       {
         "actorId": "miranda-server-bank-a",
-        "cacheKey": "mesh-collision-manager-v1:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-server-bank-a:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9772,7 +9811,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9800,10 +9839,10 @@
       },
       {
         "actorId": "miranda-server-bank-b",
-        "cacheKey": "mesh-collision-manager-v1:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-server-bank-b:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9815,7 +9854,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9843,10 +9882,10 @@
       },
       {
         "actorId": "miranda-server-bank-c",
-        "cacheKey": "mesh-collision-manager-v1:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-server-bank-c:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9858,7 +9897,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9886,10 +9925,10 @@
       },
       {
         "actorId": "miranda-server-bank-d",
-        "cacheKey": "mesh-collision-manager-v1:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:f7f010db3f1a1a903923fef5a42c6df26435e0937fee2615a69415db8c3e446c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-server-bank-d:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9901,7 +9940,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9929,10 +9968,10 @@
       },
       {
         "actorId": "miranda-server-bank-e",
-        "cacheKey": "mesh-collision-manager-v1:07055b6321c0f01ee34a4bf3eddbc3846a60e604fbc6dd296c502e467da74ecb:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe",
+        "cacheKey": "mesh-collision-manager-v2:07055b6321c0f01ee34a4bf3eddbc3846a60e604fbc6dd296c502e467da74ecb:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8",
         "mode": "auto",
         "productId": "miranda-server-bank-e:auto:primitive",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "primitive",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
@@ -9944,7 +9983,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "6301edb2d5934a61201d1cc48a8eb0b1e6f82456329baaa5ede45d4b88fa2afe"
+          "value": "a3ff08f17d17c90f6fc880be770e079d66db3f4460da15798ebb5a493450dcb8"
         },
         "shape": "cuboid",
         "localBounds": {
@@ -9972,14 +10011,14 @@
       },
       {
         "actorId": "miranda-archive-note",
-        "cacheKey": "mesh-collision-manager-v1:79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "cacheKey": "mesh-collision-manager-v2:c7e8eb3d87c61e2457cefb7bff13c678743e05e1f90a727561a4e9f82ac88522:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "mode": "trigger",
         "productId": "miranda-archive-note:trigger:simplifiedMesh",
-        "generatorVersion": "mesh-collision-manager-v1",
+        "generatorVersion": "mesh-collision-manager-v2",
         "sourceKind": "prefab",
         "sourceMeshFingerprint": {
           "algorithm": "sha256",
-          "value": "79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506"
+          "value": "c7e8eb3d87c61e2457cefb7bff13c678743e05e1f90a727561a4e9f82ac88522"
         },
         "transformFingerprint": {
           "algorithm": "sha256",
@@ -9987,7 +10026,7 @@
         },
         "policyFingerprint": {
           "algorithm": "sha256",
-          "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+          "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
         },
         "shape": "trimesh",
         "localBounds": {
@@ -10014,9 +10053,10 @@
         },
         "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-archive-note.collider.glb",
         "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-archive-note.collider.meta.json",
-        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
-        "triangleCount": 604,
-        "vertexCount": 1812,
+        "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.low.glb",
+        "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+        "triangleCount": 267,
+        "vertexCount": 210,
         "triangleBudget": 5000
       }
     ],

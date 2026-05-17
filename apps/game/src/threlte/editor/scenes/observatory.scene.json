@@ -1,7 +1,7 @@
 {
   "levelId": "observatory",
   "version": 1,
-  "updatedAt": "2026-05-17T00:23:09.000Z",
+  "updatedAt": "2026-05-17T02:19:52.771Z",
   "settings": {
     "level": {
       "collision": {
@@ -10,11 +10,12 @@
         },
         "terrain": {
           "source": "source-glb",
+          "runtimeSource": "built-in-manifest",
+          "manifestUrl": "/terrain/observatory-environment.manifest.json",
+          "dirty": false,
           "runtimeMode": "glb-chunk-terrain",
           "visualSource": "source-glb-chunks",
           "fallbackSurfacePolicy": "disabled",
-          "runtimeSource": "built-in-manifest",
-          "manifestUrl": "/terrain/observatory-environment.manifest.json",
           "sourceAssetUrl": "/models/levels/observatory-environment.glb",
           "renderChunks": {
             "type": "glb-chunk-terrain",
@@ -22,7 +23,9 @@
             "manifestUrl": "/terrain/observatory-environment.manifest.json",
             "chunksPath": "/terrain/levels/observatory-environment/",
             "chunkCount": 16,
-            "lods": [0],
+            "lods": [
+              0
+            ],
             "generatedBy": "cook-terrain-glb-chunks",
             "sourceAssetUrl": "/models/levels/observatory-environment.glb",
             "sourceHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
@@ -33,7 +36,6 @@
             "preservesSourceMeshGroups": true,
             "textureReferencesPreserved": true
           },
-          "dirty": false,
           "sourceAssetHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
           "sourceAssetFingerprint": {
             "algorithm": "sha256",
@@ -71,7 +73,11 @@
         "audio": "courtyard-breeze"
       },
       "spawn": {
-        "position": [-137.2, 1.8, -49.5]
+        "position": [
+          -137.2,
+          1.8,
+          -49.5
+        ]
       },
       "ground": {
         "mode": "terrain-chunks",
@@ -97,7 +103,9 @@
           "manifestUrl": "/terrain/observatory-environment.manifest.json",
           "chunksPath": "/terrain/levels/observatory-environment/",
           "chunkCount": 16,
-          "lods": [0],
+          "lods": [
+            0
+          ],
           "generatedBy": "cook-terrain-glb-chunks",
           "sourceAssetUrl": "/models/levels/observatory-environment.glb",
           "sourceHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
@@ -176,8 +184,16 @@
           "groundColor": "#273043",
           "keyLightColor": "#f5f7ff",
           "fillLightColor": "#8aa7d0",
-          "keyLightPosition": [40, 80, -35],
-          "fillLightPosition": [-55, 32, 48]
+          "keyLightPosition": [
+            40,
+            80,
+            -35
+          ],
+          "fillLightPosition": [
+            -55,
+            32,
+            48
+          ]
         },
         "shadows": {
           "enabled": false,
@@ -203,9 +219,18 @@
         },
         "postProcessing": {
           "enabled": true,
-          "passes": ["tone-mapping", "color-grading"],
-          "maxEnabledPasses": 2,
-          "toneMappingExposure": 0.94
+          "passes": [
+            "tone-mapping",
+            "color-grading",
+            "kuwahara"
+          ],
+          "maxEnabledPasses": 3,
+          "toneMappingExposure": 0.94,
+          "kuwahara": {
+            "enabled": true,
+            "mix": 1,
+            "resolutionScale": 1
+          }
         },
         "qualityTiers": {
           "mobile": {
@@ -231,8 +256,11 @@
               "estimatedRenderPasses": 0
             },
             "postProcessing": {
-              "passes": ["tone-mapping"],
-              "maxEnabledPasses": 1
+              "passes": [
+                "tone-mapping",
+                "kuwahara"
+              ],
+              "maxEnabledPasses": 2
             }
           },
           "desktop": {
@@ -257,8 +285,12 @@
               "estimatedRenderPasses": 0
             },
             "postProcessing": {
-              "passes": ["tone-mapping", "color-grading"],
-              "maxEnabledPasses": 2
+              "passes": [
+                "tone-mapping",
+                "color-grading",
+                "kuwahara"
+              ],
+              "maxEnabledPasses": 3
             }
           },
           "tv": {
@@ -283,8 +315,12 @@
               "estimatedRenderPasses": 0
             },
             "postProcessing": {
-              "passes": ["tone-mapping", "color-grading"],
-              "maxEnabledPasses": 2
+              "passes": [
+                "tone-mapping",
+                "color-grading",
+                "kuwahara"
+              ],
+              "maxEnabledPasses": 3
             }
           }
         },
@@ -292,9 +328,21 @@
           {
             "id": "spawn-terrain-gate",
             "label": "Observatory terrain gate",
-            "playerPosition": [-137.2, 1.8, -49.5],
-            "cameraPosition": [-132, 7.5, -41],
-            "cameraTarget": [-137.2, 2.2, -49.5],
+            "playerPosition": [
+              -137.2,
+              1.8,
+              -49.5
+            ],
+            "cameraPosition": [
+              -132,
+              7.5,
+              -41
+            ],
+            "cameraTarget": [
+              -137.2,
+              2.2,
+              -49.5
+            ],
             "viewport": {
               "width": 1280,
               "height": 720
@@ -319,7 +367,11 @@
         "radius": 110,
         "minHeight": 2.4,
         "maxHeight": 7.2,
-        "center": [-137.2, 1.8, -49.5],
+        "center": [
+          -137.2,
+          1.8,
+          -49.5
+        ],
         "color": "#f4ffb8",
         "secondaryColor": "#8defff",
         "size": 0.52,
@@ -367,18 +419,42 @@
       "id": "observatory-ground-root",
       "name": "Observatory Grounds",
       "kind": "group",
-      "position": [0, 0, 0],
-      "rotation": [0, 0, 0],
-      "scale": [0.1808657926171221, 0.1808657926171221, 0.1808657926171221],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.1808657926171221,
+        0.1808657926171221,
+        0.1808657926171221
+      ],
       "visible": true
     },
     {
       "id": "observatory-archive-firefly",
       "name": "Archive Firefly",
       "kind": "group",
-      "position": [-137.2, 3.8, -49.5],
-      "rotation": [0, 0, 0],
-      "scale": [1.25, 1.25, 1.25],
+      "position": [
+        -137.2,
+        3.8,
+        -49.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.25,
+        1.25,
+        1.25
+      ],
       "visible": true,
       "npc": {
         "id": "observatory-archive-firefly",
@@ -423,9 +499,21 @@
       "id": "observatory-lantern-firefly",
       "name": "Lantern Firefly",
       "kind": "group",
-      "position": [-128.8, 4.6, -42.4],
-      "rotation": [0, 0, 0],
-      "scale": [1.1, 1.1, 1.1],
+      "position": [
+        -128.8,
+        4.6,
+        -42.4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ],
       "visible": true,
       "npc": {
         "id": "observatory-lantern-firefly",
@@ -472,9 +560,21 @@
       "id": "observatory-tide-firefly",
       "name": "Tide Firefly",
       "kind": "group",
-      "position": [-145.5, 3.2, -56.8],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -145.5,
+        3.2,
+        -56.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "npc": {
         "id": "observatory-tide-firefly",

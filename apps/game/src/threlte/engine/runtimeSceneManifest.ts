@@ -252,19 +252,10 @@ function sameStringSet(left: string[], right: string[]) {
 function getBuildReportNpcCount(
   buildReport: LevelBuildReport,
   field: 'npcActorCount' | 'fireflyNpcActorCount',
-  expectedCount: number,
   errors: string[],
-  warnings: string[],
 ) {
   const authoredCount = buildReport[field]
   if (typeof authoredCount === 'number') return authoredCount
-
-  if (expectedCount === 0) {
-    warnings.push(
-      `Build report is missing ${field}; temporarily defaulting to 0 for non-NPC runtime scenes until Agent 10 recooks all checked runtime scene manifests.`,
-    )
-    return 0
-  }
 
   errors.push(`Build report is missing ${field}.`)
   return null
@@ -321,9 +312,7 @@ export function validateRuntimeSceneManifest(
   const npcActorCount = getBuildReportNpcCount(
     buildReport,
     'npcActorCount',
-    npcValidation.diagnostics.npcActorCount,
     errors,
-    warnings,
   )
   if (
     npcActorCount !== null &&
@@ -336,9 +325,7 @@ export function validateRuntimeSceneManifest(
   const fireflyNpcActorCount = getBuildReportNpcCount(
     buildReport,
     'fireflyNpcActorCount',
-    npcValidation.diagnostics.fireflyNpcActorCount,
     errors,
-    warnings,
   )
   if (
     fireflyNpcActorCount !== null &&

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-14T21:28:37.251Z",
-  "generatorVersion": "mesh-collision-manager-v1",
+  "generatedAt": "2026-05-17T02:20:56.140Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "sci-fi-room",
   "sourceActorId": "sci-fi-planter-d",
   "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
@@ -11,32 +11,61 @@
     "algorithm": "sha256",
     "value": "f4681f68333eb9a21e779a3f24cdddc7c919763e3cdf4faf906f6ae54bcccbac"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "f00cd382916ff8701a950cd60643b5afa56f4d856d095124b4061a5efc8a5ee7"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v1:f4681f68333eb9a21e779a3f24cdddc7c919763e3cdf4faf906f6ae54bcccbac:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
-  "triangleCount": 4750,
-  "vertexCount": 5255,
+  "colliderCacheKey": "mesh-collision-manager-v2:f00cd382916ff8701a950cd60643b5afa56f4d856d095124b4061a5efc8a5ee7:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+  "triangleCount": 14000,
+  "vertexCount": 13025,
   "bounds": {
     "min": [
-      -0.6663235425949097,
-      -0.999711811542511,
+      -0.6667150855064392,
+      -1.0003488063812256,
       -0.5741834044456482
     ],
     "max": [
       0.6377129554748535,
-      0.9680868983268738,
-      0.5804874300956726
+      0.9705517292022705,
+      0.5826324820518494
     ],
     "size": [
-      1.3040364980697632,
-      1.9677987098693848,
-      1.1546708345413208
+      1.3044280409812927,
+      1.970900535583496,
+      1.1568158864974976
     ],
     "center": [
-      -0.014305293560028076,
-      -0.015812456607818604,
-      0.003152012825012207
+      -0.014501065015792847,
+      -0.014898538589477539,
+      0.004224538803100586
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -21682,
+      -32767,
+      -19234
+    ],
+    "max": [
+      21682,
+      32767,
+      19234
+    ],
+    "size": [
+      43364,
+      65534,
+      38468
+    ],
+    "center": [
+      0,
+      0,
+      0
     ]
   },
   "visualLocalBounds": {
@@ -63,24 +92,24 @@
   },
   "colliderLocalBounds": {
     "min": [
-      -0.6663235425949097,
-      -0.999711811542511,
+      -0.6667150855064392,
+      -1.0003488063812256,
       -0.5741834044456482
     ],
     "max": [
       0.6377129554748535,
-      0.9680868983268738,
-      0.5804874300956726
+      0.9705517292022705,
+      0.5826324820518494
     ],
     "size": [
-      1.3040364980697632,
-      1.9677987098693848,
-      1.1546708345413208
+      1.3044280409812927,
+      1.970900535583496,
+      1.1568158864974976
     ],
     "center": [
-      -0.014305293560028076,
-      -0.015812456607818604,
-      0.003152012825012207
+      -0.014501065015792847,
+      -0.014898538589477539,
+      0.004224538803100586
     ]
   },
   "assetLocalTransform": {
@@ -112,24 +141,24 @@
     },
     "colliderLocalBounds": {
       "min": [
-        -0.6663235425949097,
-        -0.999711811542511,
+        -0.6667150855064392,
+        -1.0003488063812256,
         -0.5741834044456482
       ],
       "max": [
         0.6377129554748535,
-        0.9680868983268738,
-        0.5804874300956726
+        0.9705517292022705,
+        0.5826324820518494
       ],
       "size": [
-        1.3040364980697632,
-        1.9677987098693848,
-        1.1546708345413208
+        1.3044280409812927,
+        1.970900535583496,
+        1.1568158864974976
       ],
       "center": [
-        -0.014305293560028076,
-        -0.015812456607818604,
-        0.003152012825012207
+        -0.014501065015792847,
+        -0.014898538589477539,
+        0.004224538803100586
       ]
     },
     "visualToPhysicsMatrix": [
@@ -178,36 +207,45 @@
       "algorithm": "sha256",
       "value": "f4681f68333eb9a21e779a3f24cdddc7c919763e3cdf4faf906f6ae54bcccbac"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "f00cd382916ff8701a950cd60643b5afa56f4d856d095124b4061a5efc8a5ee7"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "sci-fi-room",
       "nodeId": "sci-fi-planter-d",
       "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.low.glb",
+      "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
-      "triangleBudget": 5000,
+      "triangleBudget": 20000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-14T21:28:37.251Z"
+    "generatedAt": "2026-05-17T02:20:56.140Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 5000
+    "triangleBudget": 20000,
+    "lodSourceTier": "low"
   },
   "collisionProduct": {
     "actorId": "sci-fi-planter-d",
+    "cacheKey": "mesh-collision-manager-v1:f4681f68333eb9a21e779a3f24cdddc7c919763e3cdf4faf906f6ae54bcccbac:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
     "mode": "auto",
     "productId": "sci-fi-planter-d:auto:simplifiedMesh",
-    "generatorVersion": "mesh-collision-manager-v1",
-    "generatedAt": "2026-05-14T21:28:37.251Z",
+    "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "asset",
-    "sourceMeshUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "f4681f68333eb9a21e779a3f24cdddc7c919763e3cdf4faf906f6ae54bcccbac"
+      "value": "f00cd382916ff8701a950cd60643b5afa56f4d856d095124b4061a5efc8a5ee7"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
@@ -215,45 +253,47 @@
     },
     "policyFingerprint": {
       "algorithm": "sha256",
-      "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+      "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
     },
     "shape": "trimesh",
-    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.glb",
-    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.meta.json",
     "localBounds": {
       "min": [
-        -0.6663235425949097,
-        -0.999711811542511,
+        -0.6667150855064392,
+        -1.0003488063812256,
         -0.5741834044456482
       ],
       "max": [
         0.6377129554748535,
-        0.9680868983268738,
-        0.5804874300956726
+        0.9705517292022705,
+        0.5826324820518494
       ],
       "size": [
-        1.3040364980697632,
-        1.9677987098693848,
-        1.1546708345413208
+        1.3044280409812927,
+        1.970900535583496,
+        1.1568158864974976
       ],
       "center": [
-        -0.014305293560028076,
-        -0.015812456607818604,
-        0.003152012825012207
+        -0.014501065015792847,
+        -0.014898538589477539,
+        0.004224538803100586
       ]
     },
-    "triangleCount": 4750,
-    "vertexCount": 5255,
-    "triangleBudget": 5000
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+    "triangleCount": 14000,
+    "vertexCount": 13025,
+    "triangleBudget": 20000
   },
   "simplification": {
-    "requested": true,
-    "applied": true,
-    "sourceTriangleCount": 50000,
-    "targetTriangleBudget": 5000,
-    "ratio": 0.095,
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 14000,
+    "targetTriangleBudget": 20000,
+    "ratio": 1,
     "tool": "gltf-transform",
-    "prepass": "weld",
+    "prepass": "none",
     "error": 0.05
   }
 }

@@ -7,12 +7,12 @@
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/observatory.scene.json",
     "version": 1,
-    "updatedAt": "2026-05-17T00:23:09.000Z"
+    "updatedAt": "2026-05-17T02:19:52.771Z"
   },
   "levelDefinition": {
     "id": "observatory",
     "version": 1,
-    "updatedAt": "2026-05-17T00:23:09.000Z",
+    "updatedAt": "2026-05-17T02:19:52.771Z",
     "spawn": {
       "player": [
         -137.2,
@@ -34,11 +34,11 @@
           "terrain": {
             "source": "source-glb",
             "dirty": false,
+            "runtimeSource": "built-in-manifest",
+            "manifestUrl": "/terrain/observatory-environment.manifest.json",
             "runtimeMode": "glb-chunk-terrain",
             "visualSource": "source-glb-chunks",
             "fallbackSurfacePolicy": "disabled",
-            "runtimeSource": "built-in-manifest",
-            "manifestUrl": "/terrain/observatory-environment.manifest.json",
             "sourceAssetUrl": "/models/levels/observatory-environment.glb",
             "renderChunks": {
               "type": "glb-chunk-terrain",
@@ -244,10 +244,16 @@
             "enabled": true,
             "passes": [
               "tone-mapping",
-              "color-grading"
+              "color-grading",
+              "kuwahara"
             ],
-            "maxEnabledPasses": 2,
-            "toneMappingExposure": 0.94
+            "maxEnabledPasses": 3,
+            "toneMappingExposure": 0.94,
+            "kuwahara": {
+              "enabled": true,
+              "mix": 1,
+              "resolutionScale": 1
+            }
           },
           "qualityTiers": {
             "mobile": {
@@ -274,9 +280,10 @@
               },
               "postProcessing": {
                 "passes": [
-                  "tone-mapping"
+                  "tone-mapping",
+                  "kuwahara"
                 ],
-                "maxEnabledPasses": 1
+                "maxEnabledPasses": 2
               }
             },
             "desktop": {
@@ -303,9 +310,10 @@
               "postProcessing": {
                 "passes": [
                   "tone-mapping",
-                  "color-grading"
+                  "color-grading",
+                  "kuwahara"
                 ],
-                "maxEnabledPasses": 2
+                "maxEnabledPasses": 3
               }
             },
             "tv": {
@@ -332,9 +340,10 @@
               "postProcessing": {
                 "passes": [
                   "tone-mapping",
-                  "color-grading"
+                  "color-grading",
+                  "kuwahara"
                 ],
-                "maxEnabledPasses": 2
+                "maxEnabledPasses": 3
               }
             }
           },
@@ -1198,10 +1207,16 @@
         "enabled": true,
         "passes": [
           "tone-mapping",
-          "color-grading"
+          "color-grading",
+          "kuwahara"
         ],
-        "maxEnabledPasses": 2,
-        "toneMappingExposure": 0.94
+        "maxEnabledPasses": 3,
+        "toneMappingExposure": 0.94,
+        "kuwahara": {
+          "enabled": true,
+          "mix": 1,
+          "resolutionScale": 1
+        }
       },
       "qualityTiers": {
         "mobile": {
@@ -1228,9 +1243,10 @@
           },
           "postProcessing": {
             "passes": [
-              "tone-mapping"
+              "tone-mapping",
+              "kuwahara"
             ],
-            "maxEnabledPasses": 1
+            "maxEnabledPasses": 2
           }
         },
         "desktop": {
@@ -1257,9 +1273,10 @@
           "postProcessing": {
             "passes": [
               "tone-mapping",
-              "color-grading"
+              "color-grading",
+              "kuwahara"
             ],
-            "maxEnabledPasses": 2
+            "maxEnabledPasses": 3
           }
         },
         "tv": {
@@ -1286,9 +1303,10 @@
           "postProcessing": {
             "passes": [
               "tone-mapping",
-              "color-grading"
+              "color-grading",
+              "kuwahara"
             ],
-            "maxEnabledPasses": 2
+            "maxEnabledPasses": 3
           }
         }
       },

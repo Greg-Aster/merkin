@@ -27,6 +27,7 @@ Post-audit repair packets:
 14. `AGENT_14_CONVERSATION_EXPORT_AND_BUILD_GATE.md`
 15. `AGENT_15_FIREFLY_HIT_TARGET_MOTION_OWNERSHIP.md`
 16. `AGENT_16_GENERATED_DRIFT_AND_FINAL_CERTIFICATION.md`
+17. `AGENT_17_AGENT_16_RETRY_CERTIFICATION.md`
 
 The goal is not to patch fireflies back in as a one-off. The goal is a clean
 NPC system that fireflies use as one archetype, with authored scene data,
@@ -40,3 +41,7 @@ Packets 13-16 exist because the next implementation pass still left a broken
 client build, a firefly hit-target motion ownership gap, and whole-repo
 generated/collision certification blockers. Read packet 13 before assigning
 packets 14-16.
+
+Packet 17 exists because Agent 16 stopped on a stale build blocker. The current
+tree now passes the build precondition, so packet 17 narrows the retry to the
+remaining generated collision, runtime manifest, and certification work.
