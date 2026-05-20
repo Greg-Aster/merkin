@@ -10,7 +10,6 @@ import type { EditorTerrainStatusSnapshot } from './editorTerrainPipeline'
 export let editorScene: EditorSceneDocument | null = null
 export let levelId = ''
 export let terrainCollisionBakePending = false
-export let terrainHeightmapGeneratePending = false
 export let terrainChunkCookPending = false
 export let worldPartitionCookPending = false
 export let groundTerrainPublishPending = false
@@ -24,7 +23,6 @@ export let saveMessage = ''
 
 export let onOpenCollisionTools: () => void = () => {}
 export let onBakeTerrain: () => void = () => {}
-export let onGenerateTerrainHeightmap: () => void = () => {}
 export let onBakeTerrainCollision: () => void = () => {}
 export let onCookTerrainChunks: () => void = () => {}
 export let onCookWorldPartition: () => void = () => {}
@@ -39,7 +37,6 @@ export let onOpenOutput: () => void = () => {}
   {editorScene}
   {levelId}
   {terrainCollisionBakePending}
-  {terrainHeightmapGeneratePending}
   {terrainChunkCookPending}
   {worldPartitionCookPending}
   {groundTerrainPublishPending}
@@ -51,7 +48,6 @@ export let onOpenOutput: () => void = () => {}
   {saveMessage}
   {onOpenCollisionTools}
   {onBakeTerrain}
-  {onGenerateTerrainHeightmap}
   {onBakeTerrainCollision}
   {onCookTerrainChunks}
   {onCookWorldPartition}

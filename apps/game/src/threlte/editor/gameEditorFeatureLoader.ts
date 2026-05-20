@@ -94,7 +94,6 @@ export function createGameEditorFeatureLoader() {
           import('./EditorCircleSelectOverlay.svelte'),
           import('./EditorMarqueeOverlay.svelte'),
           import('./EditorSceneLayer.svelte'),
-          import('./EditorTerrainSculptLayer.svelte'),
           import('./EditorViewportControls.svelte'),
           import('./EditorWorkbenchLighting.svelte'),
         ])
@@ -105,7 +104,6 @@ export function createGameEditorFeatureLoader() {
               editorCircleSelectOverlayModule,
               editorMarqueeOverlayModule,
               editorSceneLayerModule,
-              editorTerrainSculptLayerModule,
               editorViewportControlsModule,
               editorWorkbenchLightingModule,
             ]) => {
@@ -130,10 +128,7 @@ export function createGameEditorFeatureLoader() {
                   editorSceneLayerModule,
                   'editor scene layer',
                 ),
-                editorTerrainSculptLayerComponent: getModuleDefault(
-                  editorTerrainSculptLayerModule,
-                  'editor terrain sculpt layer',
-                ),
+                editorTerrainSculptLayerComponent: null,
                 editorViewportControlsComponent: getModuleDefault(
                   editorViewportControlsModule,
                   'editor viewport controls',

@@ -12,7 +12,6 @@ import type { TerrainRuntimeReadyDetail } from '../types'
 const dispatch = createEventDispatcher()
 
 export let collision: TerrainConfig['collision'] | undefined = undefined
-export let heightmapUrl = ''
 export let terrainResolution = 0
 export let terrainWorldSize = 0
 export let terrainWorldSizeX: number | undefined = undefined
@@ -72,8 +71,6 @@ function dispatchReady() {
   readySignature = signature
   const detail: TerrainRuntimeReadyDetail = {
     source: 'baked-collider',
-    heightmapUrl,
-    heightmapReady: true,
     collisionReady: true,
     bounds,
     resolution: terrainResolution,

@@ -1268,7 +1268,6 @@ function addTerrainSection(
       })
     : { errors: [], warnings: [] }
   const requiresBakedTerrain =
-    terrainAuthority?.mode === 'heightfield-terrain' ||
     terrainAuthority?.collisionSource === 'source-linked-terrain-collision'
   const terrainManifestRequired =
     requiresBakedTerrain || terrainAuthority?.mode === 'glb-chunk-terrain'
@@ -1282,9 +1281,6 @@ function addTerrainSection(
     missingSourceAssetMessage,
     terrainManifestRequired && !terrainManifestUrl
       ? 'Terrain manifest URL is missing.'
-      : '',
-    terrainProductsRequired && terrainSettings?.heightmapDirty
-      ? 'Terrain source basket changed; generate the heightmap before publishing.'
       : '',
     terrainProductsRequired && terrainSettings?.dirty
       ? 'Terrain collision has editor changes that need a bake.'
@@ -1305,12 +1301,11 @@ function addTerrainSection(
     ...terrainCollisionContractDiagnostics.warnings,
     terrainManifestRequired &&
     terrainManifest &&
-    !terrainManifest.visualChunks?.chunkCount &&
-    terrainAuthority?.mode !== 'heightfield-terrain'
+    !terrainManifest.visualChunks?.chunkCount
       ? 'Terrain manifest has no cooked visual chunks.'
       : '',
     requiresBakedTerrain && terrainChunksStale
-      ? 'Terrain visual chunks are older than the current heightmap/collision state.'
+      ? 'Terrain visual chunks are older than the current source terrain state.'
       : '',
   ].filter(Boolean)
 
@@ -1337,23 +1332,12 @@ function addTerrainSection(
       reason: 'Bake dirty terrain collision edits.',
     })
   }
-  if (terrainSettings?.heightmapDirty) {
-    addUniqueCommand(viewModel.commands, {
-      id: 'generate-heightmap',
-      command: 'pnpm --dir apps/game generate:terrain-heightmap',
-      reason: 'Generate Heightmap from the recorded terrain source.',
-    })
-  }
   if (warnings.length || terrainChunksStale) {
     addUniqueCommand(viewModel.commands, {
-      id: glbChunkTerrainRequested
-        ? 'cook-terrain-glb-chunks'
-        : 'cook-terrain-chunks',
-      command: glbChunkTerrainRequested
-        ? 'pnpm --dir apps/game cook:terrain-glb-chunks'
-        : 'pnpm --dir apps/game cook:terrain-chunks',
+      id: 'cook-terrain-glb-chunks',
+      command: 'pnpm --dir apps/game cook:terrain-glb-chunks',
       reason: terrainChunksStale
-        ? 'Cook terrain visual chunks after heightmap or collision changes.'
+        ? 'Cook terrain visual chunks after source terrain or collision changes.'
         : 'Cook missing terrain visual chunks.',
     })
   }

@@ -7,7 +7,6 @@ import type { TerrainState, TerrainStats } from './types'
 
 const initialState: TerrainState = {
   isReady: false,
-  heightData: null,
   resolution: 0,
   worldSize: 0,
   bounds: null,
@@ -22,11 +21,11 @@ export const terrainStore = writable<TerrainState>(initialState)
 export const terrainStatsStore = derived(
   terrainStore,
   ($terrain): TerrainStats => ({
-    memoryUsage: $terrain.heightData ? $terrain.heightData.length * 4 : 0,
+    memoryUsage: 0,
     resolution: $terrain.resolution
       ? `${$terrain.resolution}x${$terrain.resolution}`
       : '0x0',
-    sampleCount: $terrain.heightData ? $terrain.heightData.length : 0,
+    sampleCount: 0,
     chunksVisible: $terrain.visibleChunks.length,
   }),
 )

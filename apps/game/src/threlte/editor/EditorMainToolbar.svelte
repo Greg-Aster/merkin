@@ -62,9 +62,8 @@ let bakeMenuOpen = false
 
 const bakeCommandIds = [
   'bake-terrain',
-  'generate-terrain-heightmap',
   'bake-terrain-collision',
-  'cook-terrain-chunks',
+  'cook-terrain-glb-chunks',
   'cook-world-partition',
   'bake-mesh-collider',
   'validate-terrain-contract',

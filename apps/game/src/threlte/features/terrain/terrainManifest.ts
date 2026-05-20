@@ -23,7 +23,6 @@ type TerrainManifestCollisionTerrain = Partial<
 export type TerrainRuntimeComponentSource =
   | 'built-in-manifest'
   | 'editor-manifest'
-  | 'generated-heightmap'
 
 export type TerrainManifest = {
   id?: string
@@ -33,7 +32,6 @@ export type TerrainManifest = {
     fallbackSurfacePolicy?: TerrainFallbackSurfacePolicy
   }
   assets?: {
-    heightmap?: string
     chunksPath?: string
     sourceGlb?: string
     sourceGltf?: string
@@ -84,7 +82,7 @@ export type TerrainManifest = {
     generatedAt?: string
     generatedBy?: string
     chunkCount?: number
-    source?: 'generated-heightmap' | 'source-glb'
+    source?: 'source-glb'
     preservesSourceUvs?: boolean
     preservesSourceMaterialSlots?: boolean
     preservesSourceNormals?: boolean
@@ -106,22 +104,11 @@ export type TerrainManifest = {
   }
 }
 
-export type HeightmapConfig = {
-  bounds?: TerrainConfig['bounds']
-  heightOffset?: number
-  heightScale?: number
-  minHeight?: number
-  maxHeight?: number
-  worldSizeX?: number
-  worldSizeZ?: number
-}
-
 export interface TerrainRuntimeComponentData {
   levelId: string
   source: TerrainRuntimeComponentSource
   manifestUrl?: string
   manifest: TerrainManifest
-  heightmapConfig: HeightmapConfig | null
   config: TerrainConfig
   runtime: {
     collisionStrategy: 'baked-terrain-mesh'
@@ -138,7 +125,7 @@ type TerrainRuntimeGroundContractInput = {
 }
 
 const GLB_TERRAIN_COLLISION_BAKE_MODES = new Set([
-  'source-glb-heightfield-projection',
+  'source-glb-collision-mesh',
   'dedicated-collision-glb',
   'simplified-source-glb',
   'selected-terrain-walkable-mesh',
@@ -157,17 +144,11 @@ function getManifestRuntimeMode(manifest: TerrainManifest): TerrainRuntimeMode {
   if (
     manifest.runtime?.visualSource === 'source-glb-chunks' ||
     manifest.visualChunks?.source === 'source-glb' ||
-    manifest.assets?.sourceGlb
-  ) {
-    return 'glb-chunk-terrain'
-  }
-  if (
-    manifest.assets?.heightmap ||
-    manifest.collision?.terrain ||
-    manifest.visualChunks?.chunkCount ||
+    manifest.assets?.sourceGlb ||
+    manifest.assets?.sourceAssetUrl ||
     manifest.assets?.chunksPath
   ) {
-    return 'heightfield-terrain'
+    return 'glb-chunk-terrain'
   }
   return 'scene-authored'
 }
@@ -176,23 +157,16 @@ function getManifestVisualSource(
   manifest: TerrainManifest,
 ): TerrainVisualSource {
   if (manifest.runtime?.visualSource) return manifest.runtime.visualSource
-  if (
-    manifest.visualChunks?.source === 'source-glb' ||
-    manifest.assets?.sourceGlb
-  ) {
+  if (manifest.assets?.chunksPath || manifest.visualChunks?.chunkCount) {
     return 'source-glb-chunks'
   }
-  if (manifest.assets?.chunksPath || manifest.visualChunks?.chunkCount) {
-    return 'generated-heightmap-chunks'
-  }
-  if (manifest.assets?.heightmap) return 'heightmap-surface'
   return 'none'
 }
 
 function canonicalRuntimeVisualSource(
   value: TerrainRuntimeGroundContractInput['visualSource'],
 ): TerrainVisualSource | null {
-  if (value === 'terrain-chunks') return 'generated-heightmap-chunks'
+  if (value === 'terrain-chunks') return 'source-glb-chunks'
   if (value) return value
   return null
 }
@@ -211,8 +185,7 @@ export function normalizeTerrainManifest(
       mode: runtimeMode,
       visualSource,
       fallbackSurfacePolicy:
-        manifest.runtime?.fallbackSurfacePolicy ??
-        (visualSource === 'heightmap-surface' ? 'always' : 'disabled'),
+        manifest.runtime?.fallbackSurfacePolicy ?? 'disabled',
     },
     assets: {
       ...manifest.assets,
@@ -229,11 +202,7 @@ export function normalizeTerrainManifest(
     visualChunks: manifest.visualChunks
       ? {
           ...manifest.visualChunks,
-          source:
-            manifest.visualChunks.source ??
-            (visualSource === 'source-glb-chunks'
-              ? 'source-glb'
-              : 'generated-heightmap'),
+          source: 'source-glb',
           product: {
             chunksPath: manifest.assets?.chunksPath,
             chunkCount: manifest.visualChunks.chunkCount,
@@ -313,15 +282,13 @@ function boundsOverlap(
   right: TerrainConfig['bounds'] | undefined,
 ) {
   if (!isFiniteBounds(left) || !isFiniteBounds(right)) return true
-  const leftBounds = left
-  const rightBounds = right
   return (
-    leftBounds.min[0] <= rightBounds.max[0] &&
-    leftBounds.max[0] >= rightBounds.min[0] &&
-    leftBounds.min[1] <= rightBounds.max[1] &&
-    leftBounds.max[1] >= rightBounds.min[1] &&
-    leftBounds.min[2] <= rightBounds.max[2] &&
-    leftBounds.max[2] >= rightBounds.min[2]
+    left.min[0] <= right.max[0] &&
+    left.max[0] >= right.min[0] &&
+    left.min[1] <= right.max[1] &&
+    left.max[1] >= right.min[1] &&
+    left.min[2] <= right.max[2] &&
+    left.max[2] >= right.min[2]
   )
 }
 
@@ -330,12 +297,11 @@ function boundsContainPointXZ(
   point: [number, number, number] | undefined,
 ) {
   if (!isFiniteBounds(bounds) || !point) return true
-  const finiteBounds = bounds
   return (
-    point[0] >= finiteBounds.min[0] &&
-    point[0] <= finiteBounds.max[0] &&
-    point[2] >= finiteBounds.min[2] &&
-    point[2] <= finiteBounds.max[2]
+    point[0] >= bounds.min[0] &&
+    point[0] <= bounds.max[0] &&
+    point[2] >= bounds.min[2] &&
+    point[2] <= bounds.max[2]
   )
 }
 
@@ -362,16 +328,12 @@ export function validateTerrainManifestCollisionContract(input: {
     )
     return { errors, warnings }
   }
-
   if (!collisionContract.sourceAssetUrl) {
     errors.push(
       `${levelId}: terrain collision sourceContract.sourceAssetUrl is missing.`,
     )
   }
-  if (
-    !collisionContract.sourceAssetFingerprint?.value &&
-    !collisionContract.heightmapFingerprint?.value
-  ) {
+  if (!collisionContract.sourceAssetFingerprint?.value) {
     errors.push(
       `${levelId}: terrain collision sourceContract has no source hash.`,
     )
@@ -447,18 +409,6 @@ export function validateTerrainManifestCollisionContract(input: {
         `${levelId}: terrain render chunk source hash does not match collision source hash.`,
       )
     }
-    if (
-      visualContract.heightmapFingerprint?.value &&
-      collisionContract.heightmapFingerprint?.value &&
-      !fingerprintsMatch(
-        visualContract.heightmapFingerprint,
-        collisionContract.heightmapFingerprint,
-      )
-    ) {
-      errors.push(
-        `${levelId}: terrain render chunk heightmap hash does not match collision heightmap hash.`,
-      )
-    }
     if (visualContract.terrainSourceType === 'glb-chunk-terrain') {
       if (
         !GLB_TERRAIN_COLLISION_BAKE_MODES.has(
@@ -505,14 +455,6 @@ export function validateTerrainManifestCollisionContract(input: {
         )
       }
     }
-    if (
-      visualContract.terrainSourceType === 'glb-chunk-terrain' &&
-      collisionContract.collisionBakeMode === 'heightfield-projection'
-    ) {
-      errors.push(
-        `${levelId}: glb-chunk-terrain must use source-linked collision, not generic heightfield projection.`,
-      )
-    }
   } else {
     warnings.push(
       `${levelId}: terrain visual chunks have no sourceContract metadata to compare against collision.`,
@@ -549,7 +491,7 @@ export function resolveTerrainRuntimeVisualContract(input: {
     explicitManifestRuntime?.fallbackSurfacePolicy ??
     groundContract?.fallbackSurfacePolicy ??
     manifest.runtime?.fallbackSurfacePolicy ??
-    (visualSource === 'heightmap-surface' ? 'always' : 'disabled')
+    'disabled'
 
   if (
     groundContract?.terrainRuntimeMode &&
@@ -560,7 +502,6 @@ export function resolveTerrainRuntimeVisualContract(input: {
       `Terrain manifest runtime mode ${explicitManifestRuntime.mode} overrides scene runtime mode ${groundContract.terrainRuntimeMode}.`,
     )
   }
-
   if (
     sceneVisualSource &&
     explicitManifestRuntime?.visualSource &&
@@ -570,42 +511,11 @@ export function resolveTerrainRuntimeVisualContract(input: {
       `Terrain manifest visual source ${explicitManifestRuntime.visualSource} overrides scene ground visual source ${sceneVisualSource}.`,
     )
   }
-
-  if (
-    groundContract?.fallbackSurfacePolicy &&
-    explicitManifestRuntime?.fallbackSurfacePolicy &&
-    groundContract.fallbackSurfacePolicy !==
-      explicitManifestRuntime.fallbackSurfacePolicy
-  ) {
-    diagnostics.push(
-      `Terrain manifest fallback surface policy ${explicitManifestRuntime.fallbackSurfacePolicy} overrides scene fallback surface policy ${groundContract.fallbackSurfacePolicy}.`,
-    )
-  }
-
-  if (
-    (visualSource === 'generated-heightmap-chunks' ||
-      visualSource === 'source-glb-chunks') &&
-    !manifest.assets?.chunksPath
-  ) {
-    diagnostics.push(
-      `Terrain visual source ${visualSource} requires assets.chunksPath.`,
-    )
-  }
-
-  if (
-    (visualSource === 'heightmap-surface' ||
-      fallbackSurfacePolicy === 'until-required-chunks-ready' ||
-      fallbackSurfacePolicy === 'always' ||
-      fallbackSurfacePolicy === 'debug-only') &&
-    !manifest.assets?.heightmap
-  ) {
-    diagnostics.push(
-      'Terrain heightmap surface visuals are enabled, but assets.heightmap is missing.',
-    )
+  if (visualSource === 'source-glb-chunks' && !manifest.assets?.chunksPath) {
+    diagnostics.push('Terrain visual source source-glb-chunks requires assets.chunksPath.')
   }
   if (
-    (visualSource === 'generated-heightmap-chunks' ||
-      visualSource === 'source-glb-chunks') &&
+    visualSource === 'source-glb-chunks' &&
     fallbackSurfacePolicy === 'always'
   ) {
     diagnostics.push(
@@ -656,69 +566,19 @@ function getVisualChunkMaterial(
   }
 }
 
-export function getHeightmapConfigUrl(manifest: TerrainManifest) {
-  return manifest.assets?.heightmap?.replace('_heightmap.png', '_config.json')
-}
-
-export async function loadHeightmapConfig(manifest: TerrainManifest) {
-  const heightmapConfigUrl = getHeightmapConfigUrl(manifest)
-  if (!heightmapConfigUrl) return null
-
-  const response = await fetch(heightmapConfigUrl)
-  if (!response.ok) return null
-  return normalizeHeightmapConfig((await response.json()) as HeightmapConfig)
-}
-
-export function normalizeHeightmapConfig(
-  heightmapConfig: HeightmapConfig | null | undefined,
-): HeightmapConfig | null {
-  if (!heightmapConfig) return null
-
-  const minHeight =
-    heightmapConfig.minHeight ?? heightmapConfig.heightOffset ?? undefined
-  const maxHeight =
-    heightmapConfig.maxHeight ??
-    (heightmapConfig.heightOffset !== undefined &&
-    heightmapConfig.heightScale !== undefined
-      ? heightmapConfig.heightOffset + heightmapConfig.heightScale
-      : undefined)
-  const worldSizeX =
-    heightmapConfig.worldSizeX ??
-    getWorldSizeFromBounds(heightmapConfig.bounds, 'x')
-  const worldSizeZ =
-    heightmapConfig.worldSizeZ ??
-    getWorldSizeFromBounds(heightmapConfig.bounds, 'z')
-
-  return {
-    ...heightmapConfig,
-    minHeight,
-    maxHeight,
-    worldSizeX,
-    worldSizeZ,
-  }
-}
-
 export function buildTerrainConfigFromManifest(
   manifest: TerrainManifest,
-  heightmapConfig: HeightmapConfig | null = null,
 ): TerrainConfig {
   manifest = normalizeTerrainManifest(manifest)
-  const normalizedHeightmapConfig = normalizeHeightmapConfig(heightmapConfig)
   const physics = manifest.physics ?? {}
-  const bounds = normalizedHeightmapConfig?.bounds ?? physics.bounds
+  const bounds = physics.bounds
   const worldSize = physics.worldSize ?? 1
   const worldSizeX =
-    normalizedHeightmapConfig?.worldSizeX ??
-    physics.worldSizeX ??
-    getWorldSizeFromBounds(bounds ?? undefined, 'x')
+    physics.worldSizeX ?? getWorldSizeFromBounds(bounds ?? undefined, 'x')
   const worldSizeZ =
-    normalizedHeightmapConfig?.worldSizeZ ??
-    physics.worldSizeZ ??
-    getWorldSizeFromBounds(bounds ?? undefined, 'z')
-  const minHeight =
-    normalizedHeightmapConfig?.minHeight ?? physics.minHeight ?? 0
-  const maxHeight =
-    normalizedHeightmapConfig?.maxHeight ?? physics.maxHeight ?? minHeight
+    physics.worldSizeZ ?? getWorldSizeFromBounds(bounds ?? undefined, 'z')
+  const minHeight = physics.minHeight ?? bounds?.min[1] ?? 0
+  const maxHeight = physics.maxHeight ?? bounds?.max[1] ?? minHeight
   const gridX = physics.gridX || 1
   const gridY = physics.gridY || 1
   const chunksPath = manifest.assets?.chunksPath
@@ -726,7 +586,6 @@ export function buildTerrainConfigFromManifest(
   const hasExplicitVisualChunkLods = visualChunkLods.length > 0
 
   return {
-    heightmapUrl: manifest.assets?.heightmap ?? '',
     worldSize,
     worldSizeX,
     worldSizeZ,
@@ -758,30 +617,23 @@ export function createTerrainRuntimeComponentData(input: {
   source: TerrainRuntimeComponentSource
   manifest: TerrainManifest
   manifestUrl?: string
-  heightmapConfig?: HeightmapConfig | null
   boundsFallback?: TerrainConfig['bounds'] | null
   groundContract?: TerrainRuntimeGroundContractInput | null
 }): TerrainRuntimeComponentData {
-  const manifest = normalizeTerrainManifest(input.manifest)
-  const heightmapConfig = normalizeHeightmapConfig(
-    input.heightmapConfig
-      ? {
-          ...input.heightmapConfig,
-          bounds:
-            input.heightmapConfig.bounds ?? input.boundsFallback ?? undefined,
-        }
-      : input.boundsFallback
-        ? { bounds: input.boundsFallback }
-        : null,
-  )
+  const manifest = normalizeTerrainManifest({
+    ...input.manifest,
+    physics: {
+      ...input.manifest.physics,
+      bounds: input.manifest.physics?.bounds ?? input.boundsFallback ?? undefined,
+    },
+  })
 
   return {
     levelId: input.levelId,
     source: input.source,
     manifestUrl: input.manifestUrl,
     manifest,
-    heightmapConfig,
-    config: buildTerrainConfigFromManifest(manifest, heightmapConfig),
+    config: buildTerrainConfigFromManifest(manifest),
     runtime: {
       collisionStrategy: 'baked-terrain-mesh',
       visualContract: resolveTerrainRuntimeVisualContract({
@@ -800,10 +652,5 @@ export async function loadTerrainRuntimeComponentData(input: {
   boundsFallback?: TerrainConfig['bounds'] | null
   groundContract?: TerrainRuntimeGroundContractInput | null
 }): Promise<TerrainRuntimeComponentData> {
-  const heightmapConfig = await loadHeightmapConfig(input.manifest)
-
-  return createTerrainRuntimeComponentData({
-    ...input,
-    heightmapConfig,
-  })
+  return createTerrainRuntimeComponentData(input)
 }

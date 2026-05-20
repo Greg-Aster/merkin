@@ -11,11 +11,9 @@ type PublishContractsResponse = {
   success?: boolean
   message?: string
   terrainProducts?: {
-    heightmapUrl?: string
     colliderUrl?: string
     chunksPath?: string
     dirty?: boolean
-    heightmapDirty?: boolean
     chunksStale?: boolean
   }
 }

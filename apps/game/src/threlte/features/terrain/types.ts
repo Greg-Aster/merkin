@@ -13,7 +13,6 @@ export type { TerrainConfig, TerrainChunk }
 
 export interface TerrainState {
   isReady: boolean
-  heightData: Float32Array | null
   resolution: number
   worldSize: number
   bounds: {
@@ -34,8 +33,6 @@ export interface TerrainStats {
 
 export interface TerrainRuntimeReadyDetail {
   source: 'baked-collider'
-  heightmapUrl: string
-  heightmapReady: boolean
   collisionReady: boolean
   visualReady?: boolean
   bounds: TerrainState['bounds']

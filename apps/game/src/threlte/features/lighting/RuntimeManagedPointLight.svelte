@@ -1,6 +1,7 @@
 <script lang="ts">
 import { T, useTask, useThrelte } from '@threlte/core'
 import * as THREE from 'three'
+import type { QualitySettings } from '../performance/OptimizationManager'
 import {
   qualityLevelStore,
   qualitySettingsStore,
@@ -32,46 +33,58 @@ function getActiveCamera(): THREE.Camera | null {
     : null
 }
 
-function getPointPosition(): [number, number, number] {
-  return emitter.position ?? [0, 0, 0]
+function getPointPosition(
+  pointEmitter: RuntimeLightEmitter,
+): [number, number, number] {
+  return pointEmitter.position ?? [0, 0, 0]
 }
 
 function updateCameraDistance() {
   const activeCamera = getActiveCamera()
   if (!activeCamera) return
 
-  const position = getPointPosition()
+  const position = getPointPosition(emitter)
   worldPosition.set(position[0], position[1], position[2])
   currentDistanceToCamera = activeCamera.position.distanceTo(worldPosition)
 }
 
-function resolveLightBudget() {
-  if (emitter.runtimeBudgeted === false) {
-    const intensity = Math.max(0, emitter.intensity)
-    const distance = Math.max(0, emitter.distance ?? 0)
+function resolveLightBudget(
+  pointEmitter: RuntimeLightEmitter,
+  distanceToCamera: number,
+  qualityLevel: string,
+  qualitySettings: QualitySettings,
+) {
+  if (pointEmitter.runtimeBudgeted === false) {
+    const intensity = Math.max(0, pointEmitter.intensity)
+    const distance = Math.max(0, pointEmitter.distance ?? 0)
     return {
       visible:
-        emitter.enabled !== false && intensity > lightVisibilityThreshold,
+        pointEmitter.enabled !== false && intensity > lightVisibilityThreshold,
       intensity,
       distance,
     }
   }
 
-  const policy = resolveRuntimeVisibilityPolicy($qualityLevelStore, {
-    ...$qualitySettingsStore,
-    enableDynamicLighting: $qualitySettingsStore.enableDynamicLighting,
+  const policy = resolveRuntimeVisibilityPolicy(qualityLevel, {
+    ...qualitySettings,
+    enableDynamicLighting: qualitySettings.enableDynamicLighting,
   })
 
   return resolveRuntimePointLightVisibility({
     policy,
-    distanceToCamera: currentDistanceToCamera,
-    sourceIntensity: emitter.intensity,
-    sourceDistance: emitter.distance ?? 0,
+    distanceToCamera,
+    sourceIntensity: pointEmitter.intensity,
+    sourceDistance: pointEmitter.distance ?? 0,
   })
 }
 
-$: pointPosition = getPointPosition()
-$: budgetedLight = resolveLightBudget()
+$: pointPosition = getPointPosition(emitter)
+$: budgetedLight = resolveLightBudget(
+  emitter,
+  currentDistanceToCamera,
+  $qualityLevelStore,
+  $qualitySettingsStore,
+)
 $: if (!renderedLightInitialized && budgetedLight) {
   renderedIntensity = budgetedLight.intensity
   renderedDistance = budgetedLight.distance

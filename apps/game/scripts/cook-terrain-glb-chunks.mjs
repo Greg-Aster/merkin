@@ -976,12 +976,10 @@ function buildVisualSourceContract({ manifest, source, sourceHash, bounds }) {
     sourceBounds: current.sourceBounds ?? bounds,
     renderBakeMode: 'source-glb-chunk-mesh',
     collisionBakeMode:
-      current.collisionBakeMode ?? 'source-glb-heightfield-projection',
+      current.collisionBakeMode ?? 'source-glb-collision-mesh',
     collisionMeshSource: {
       ...(current.collisionMeshSource ?? {}),
-      type:
-        current.collisionMeshSource?.type ??
-        'source-glb-heightfield-projection',
+      type: current.collisionMeshSource?.type ?? 'source-glb',
       url: source.sourcePublicUrl,
       fingerprint: sourceAssetFingerprint,
     },
@@ -1191,7 +1189,7 @@ if (!source.exists) {
 
 if (!dryRun && !hasGlbContract && !allowModeUpgrade) {
   throw new Error(
-    `Refusing to overwrite ${level.levelId} heightfield terrain chunks as source-glb-chunks. Declare runtimeMode="glb-chunk-terrain" / visualSource="source-glb-chunks", or pass --allow-mode-upgrade intentionally.`,
+    `Refusing to overwrite ${level.levelId} terrain chunks as source-glb-chunks. Declare runtimeMode="glb-chunk-terrain" / visualSource="source-glb-chunks", or pass --allow-mode-upgrade intentionally.`,
   )
 }
 
@@ -1224,7 +1222,7 @@ for (const chunk of chunks) {
 }
 const cookWarnings = [
   !hasGlbContract
-    ? 'Terrain is not currently declared as glb-chunk-terrain/source-glb-chunks; dry-run did not modify the heightfield manifest.'
+    ? 'Terrain is not currently declared as glb-chunk-terrain/source-glb-chunks; dry-run did not modify the manifest.'
     : '',
 ].filter(Boolean)
 

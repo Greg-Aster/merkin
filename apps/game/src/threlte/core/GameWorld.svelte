@@ -1,5 +1,10 @@
 <script lang="ts">
 import { createEventDispatcher, onDestroy, setContext } from 'svelte'
+import {
+  createEditorRuntimePreviewPlan,
+  resolveEditorRuntimeCameraControl,
+  resolveEditorRuntimePlayerLevelReady,
+} from '../engine/editorRuntimePreviewPlan'
 import { evaluateLevelRuntimeActivation } from '../engine/levelRuntimeReadinessContract'
 import {
   type RuntimePlayerSettings,
@@ -65,8 +70,8 @@ export let normalizeLevelId: (levelId: string) => string = levelId => levelId
 let activeLevelKey = currentLevel
 let activeLevelComponent = currentLevelComponent
 let activePhysicsWorldSession = physicsWorldSession
-let activeEditorPlaytestMode = editorPlaytestEnabled
-let previousEditorPlaytestEnabled = editorPlaytestEnabled
+let activeEditorRuntimePreview = editorPlaytestEnabled
+let previousEditorRuntimePreview = editorPlaytestEnabled
 let editorPlaytestRuntimeReady = false
 let worldSessionId = 0
 let levelPlayerPosition: PlayerLevelPositionDetail['position'] | null = null
@@ -102,6 +107,11 @@ let editorPlaytestStartRotation: PlayerLevelPositionDetail['rotation'] | null =
 let editorPlaytestPlayerSettings: RuntimePlayerSettings =
   resolveRuntimePlayerSettings(null)
 let editorSceneSettingsOverride: SceneSettings | null = null
+let editorRuntimePreviewPlan = createEditorRuntimePreviewPlan({
+  editorEnabled,
+  playtestEnabled: editorPlaytestEnabled,
+  collisionOverlayEnabled,
+})
 
 function forward(type: string, detail: unknown) {
   dispatch(type, detail)
@@ -114,8 +124,6 @@ function getStringArray(value: unknown) {
 }
 
 function handleStaticWorldReady(detail: StaticWorldReadyDetail) {
-  if (editorEnabled && activeEditorPlaytestMode) return
-
   const runtimeReadinessContract = detail.metadata?.runtimeReadinessContract
   levelRuntimeReadinessContract =
     runtimeReadinessContract &&
@@ -184,7 +192,13 @@ function handleEditorPlaytestSpawn(detail: PlayerLevelPositionDetail) {
 }
 
 function handleEditorPlaytestReady(detail: StaticWorldReadyDetail) {
-  if (!editorEnabled || !activeEditorPlaytestMode) return
+  if (
+    !editorEnabled ||
+    !activeEditorRuntimePreview ||
+    editorRuntimePreviewPlan.levelRuntime.ownsReadiness
+  ) {
+    return
+  }
 
   editorPlaytestPlayerSettings = resolveRuntimePlayerSettings(
     detail.metadata?.player,
@@ -257,8 +271,8 @@ function resetWorldSession() {
   activePhysicsWorldSession = physicsWorldSession
   activeLevelKey = currentLevel
   activeLevelComponent = currentLevelComponent
-  activeEditorPlaytestMode = editorPlaytestEnabled
-  previousEditorPlaytestEnabled = editorPlaytestEnabled
+  activeEditorRuntimePreview = editorRuntimePreviewPlan.player.mount
+  previousEditorRuntimePreview = editorRuntimePreviewPlan.player.mount
   resetPhysicsReadiness()
   levelPlayerPosition = null
   levelPlayerRotation = null
@@ -308,12 +322,12 @@ $: editorRuntimePlayerRotation =
   editorPlaytestSpawnRotation ??
   levelPlayerRotation
 $: activePlayerPosition = editorEnabled
-  ? activeEditorPlaytestMode
+  ? activeEditorRuntimePreview
     ? editorRuntimePlayerPosition
     : editorEditPlayerPosition
   : levelPlayerPosition
 $: activePlayerRotation = editorEnabled
-  ? activeEditorPlaytestMode
+  ? activeEditorRuntimePreview
     ? editorRuntimePlayerRotation
     : editorEditPlayerRotation
   : levelPlayerRotation
@@ -327,9 +341,14 @@ $: playerLightIntensityScale = activePlayerSettings.lightIntensityScale
 $: if (!playerComponentRef) {
   playerReady = false
 }
-$: if (editorPlaytestEnabled !== previousEditorPlaytestEnabled) {
-  activeEditorPlaytestMode = editorPlaytestEnabled
-  if (activeEditorPlaytestMode) {
+$: editorRuntimePreviewPlan = createEditorRuntimePreviewPlan({
+  editorEnabled,
+  playtestEnabled: editorPlaytestEnabled,
+  collisionOverlayEnabled,
+})
+$: if (editorRuntimePreviewPlan.player.mount !== previousEditorRuntimePreview) {
+  activeEditorRuntimePreview = editorRuntimePreviewPlan.player.mount
+  if (activeEditorRuntimePreview) {
     editorPlaytestStartPosition =
       editorPlaytestResumePosition ?? editorPlaytestSpawnPosition
     editorPlaytestStartRotation =
@@ -339,14 +358,23 @@ $: if (editorPlaytestEnabled !== previousEditorPlaytestEnabled) {
     editorPlaytestStartPosition = null
     editorPlaytestStartRotation = null
   }
-  previousEditorPlaytestEnabled = editorPlaytestEnabled
+  previousEditorRuntimePreview = editorRuntimePreviewPlan.player.mount
 }
-$: playerLevelReady =
-  editorEnabled && activeEditorPlaytestMode
-    ? editorPlaytestRuntimeReady
-    : staticWorldReady
+$: playerLevelReady = resolveEditorRuntimePlayerLevelReady({
+  editorEnabled,
+  playerMounted: activeEditorRuntimePreview,
+  staticWorldReady,
+  editorRuntimeReady: editorPlaytestRuntimeReady,
+  levelRuntimeOwnsReadiness:
+    editorRuntimePreviewPlan.levelRuntime.ownsReadiness,
+})
+$: editorRuntimeCameraControl = resolveEditorRuntimeCameraControl({
+  editorEnabled,
+  playerCameraRequested: editorRuntimePreviewPlan.player.cameraEnabled,
+  playerLevelReady,
+})
 $: gameplayActivationRequested = Boolean(
-  (!editorEnabled || activeEditorPlaytestMode) &&
+  (!editorEnabled || editorRuntimePreviewPlan.player.gameplayInputEnabled) &&
     playerLevelReady &&
     activePlayerPosition &&
     physicsReady &&
@@ -416,6 +444,7 @@ $: if (
           on:staticWorldReady={(e) => handleStaticWorldReady(e.detail)}
           on:playerLevelPosition={(e) => handlePlayerLevelPosition(e.detail)}
           on:npcInteraction={(e) => forward('npcInteraction', e.detail)}
+          editorRuntimePreviewEnabled={editorRuntimePreviewPlan.levelRuntime.ownsRuntimeActors}
         />
       {/if}
 
@@ -423,7 +452,7 @@ $: if (
         <svelte:component
           this={editorViewportControlsComponent}
           enabled={editorEnabled}
-          useActiveCamera={activeEditorPlaytestMode}
+          useActiveCamera={editorRuntimeCameraControl.editorUsesActiveCamera}
         />
       {/if}
 
@@ -438,7 +467,7 @@ $: if (
           jumpForce={playerJumpForce}
           lightIntensityScale={playerLightIntensityScale}
           {gameplayEnabled}
-          cameraEnabled={!editorEnabled || activeEditorPlaytestMode}
+          cameraEnabled={editorRuntimeCameraControl.playerCameraEnabled}
           on:playerReadyChange={(e) => {
             playerReady = Boolean(e.detail?.ready)
           }}
@@ -461,7 +490,8 @@ $: if (
             this={editorSceneLayerComponent}
             levelId={currentLevel}
             {editorEnabled}
-            playtestEnabled={activeEditorPlaytestMode}
+            playtestEnabled={activeEditorRuntimePreview}
+            playtestRuntimeReady={staticWorldReady}
             playtestPlayerPosition={editorPlaytestResumePosition}
             playtestPlayerRotation={editorPlaytestResumeRotation}
             interactionSystem={interactionSystemRef}

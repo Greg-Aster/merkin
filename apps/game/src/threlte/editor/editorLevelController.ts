@@ -363,7 +363,6 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
     return plan.steps.filter(
       step =>
         step !== 'save-scene' &&
-        step !== 'generate-heightmap' &&
         step !== 'deploy-registry',
     )
   }
@@ -484,22 +483,6 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
       return postPublishStep(
         step,
         `${EDITOR_API_BASE}/api/editor-terrain/bake-collision`,
-        { levelId: targetLevelId },
-      )
-    }
-
-    if (step === 'generate-heightmap') {
-      return postPublishStep(
-        step,
-        `${EDITOR_API_BASE}/api/editor-terrain/generate-heightmap`,
-        { levelId: targetLevelId, bakeCollision: false },
-      )
-    }
-
-    if (step === 'cook-terrain-chunks') {
-      return postPublishStep(
-        step,
-        `${EDITOR_API_BASE}/api/editor-terrain/cook-chunks`,
         { levelId: targetLevelId },
       )
     }
@@ -625,13 +608,6 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
           `Publishing ${title}: ${EDITOR_PUBLISH_BAKE_STEP_LABELS['save-scene']}`,
         )
         await runPublishBakeStep('save-scene', targetLevelId, publishScene)
-      }
-
-      if (bakePlan.steps.includes('generate-heightmap')) {
-        deps.setSaveMessage(
-          `Publishing ${title}: ${EDITOR_PUBLISH_BAKE_STEP_LABELS['generate-heightmap']}`,
-        )
-        await runPublishBakeStep('generate-heightmap', targetLevelId, scene)
       }
 
       deps.setSaveMessage(`Publishing ${title}: running publish build`)

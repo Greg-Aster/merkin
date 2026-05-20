@@ -146,10 +146,47 @@ function migrateLegacyGroundVisualSource(settings: SharedLevelEditorSettings) {
     terrain?.source === 'source-glb' ||
     renderChunks?.type === 'glb-chunk-terrain'
 
-  ground.visualSource = sourceGlbChunks
-    ? 'source-glb-chunks'
-    : 'generated-heightmap-chunks'
+  ground.visualSource = 'source-glb-chunks'
   ground.terrainVisualSource ??= ground.visualSource
+}
+
+function migrateRetiredLightingFields(settings: SharedLevelEditorSettings) {
+  const lighting = settings.lighting as
+    | (NonNullable<SharedLevelEditorSettings['lighting']> & {
+        sunIntensity?: number
+        fillIntensity?: number
+        fallbackAmbientIntensity?: number
+        fallbackMoonlightIntensity?: number
+        fallbackFillLightIntensity?: number
+      })
+    | undefined
+  if (!lighting) return
+
+  const {
+    sunIntensity,
+    fillIntensity,
+    fallbackAmbientIntensity: _fallbackAmbientIntensity,
+    fallbackMoonlightIntensity: _fallbackMoonlightIntensity,
+    fallbackFillLightIntensity: _fallbackFillLightIntensity,
+    ...nextLighting
+  } = lighting
+
+  if (
+    nextLighting.keyLightIntensity === undefined &&
+    Number.isFinite(sunIntensity)
+  ) {
+    nextLighting.keyLightIntensity = sunIntensity
+  }
+  if (
+    nextLighting.fillLightIntensity === undefined &&
+    Number.isFinite(fillIntensity)
+  ) {
+    nextLighting.fillLightIntensity = fillIntensity
+  }
+
+  settings.lighting = nextLighting as NonNullable<
+    SharedLevelEditorSettings['lighting']
+  >
 }
 
 function migrateLegacyObservatorySettings(settings: EditorSceneSettings): void {
@@ -184,6 +221,7 @@ export function normalizeLevelSceneSettings(
   migrateLegacyObservatorySettings(normalized)
   migrateLegacyFeatureAliases(normalized.level)
   migrateLegacyGroundVisualSource(normalized.level)
+  migrateRetiredLightingFields(normalized.level)
 
   const workflow = getLevelCollisionWorkflow(levelId, normalized)
 
@@ -194,12 +232,8 @@ export function normalizeLevelSceneSettings(
           colliderBudget: workflow.colliderBudget,
         },
         terrain: {
-          source:
-            workflow.terrainCollision === 'heightmap'
-              ? 'baked-heightmap'
-              : workflow.terrainCollision,
+          source: workflow.terrainCollision,
           runtimeSource:
-            workflow.terrainCollision === 'heightmap' ||
             workflow.terrainCollision === 'source-glb'
               ? 'built-in-manifest'
               : undefined,
@@ -213,7 +247,7 @@ export function normalizeLevelSceneSettings(
         },
       },
       terrainSculpt: {
-        enabled: workflow.terrainCollision === 'heightmap',
+        enabled: false,
         autoBakeCollision: true,
       },
     },

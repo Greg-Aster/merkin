@@ -166,15 +166,12 @@ export type EditorPanelPropBuilderContext = {
   terrainCollisionSettings: Record<string, any> | null
   collisionBudget: LevelCollisionBudget
   terrainCollisionBakePending: boolean
-  terrainHeightmapGeneratePending: boolean
   terrainChunkCookPending: boolean
   terrainStatusSnapshot: EditorTerrainStatusSnapshot | null
   worldPartitionCookPending: boolean
   groundTerrainPublishPending: boolean
   selectedTerrainSourceName: string
   selectedTerrainSourceAssetUrl: string
-  heightmapSourceNodes: EditorSceneNode[]
-  heightmapCandidateNodes: EditorSceneNode[]
   editorStyleStudioComponent: any
   stylePresetOptions: Array<any>
   styleBusy: boolean
@@ -265,7 +262,6 @@ export type EditorPanelPropBuilderContext = {
   bakeTerrainCollision: () => Promise<void>
   bakeTerrainPipeline: () => Promise<void>
   validateTerrainContract: () => Promise<void>
-  generateTerrainHeightmapFromSelection: () => Promise<void>
   cookTerrainChunks: () => Promise<void>
   cookWorldPartition: () => Promise<void>
   publishGroundTerrainContracts: () => Promise<void>
@@ -320,7 +316,6 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
     terrainSculptSettings: context.terrainSculptSettings,
     terrainCollisionSettings: context.terrainCollisionSettings,
     terrainCollisionBakePending: context.terrainCollisionBakePending,
-    terrainHeightmapGeneratePending: context.terrainHeightmapGeneratePending,
     terrainChunkCookPending: context.terrainChunkCookPending,
     selectedTerrainSourceAssetUrl: context.selectedTerrainSourceAssetUrl,
     terrainBrushMode: editorState?.terrainBrushMode ?? 'raise',
@@ -380,12 +375,9 @@ export function buildCollisionTabProps(context: EditorPanelPropBuilderContext) {
     terrainCollisionSettings: context.terrainCollisionSettings,
     terrainStatus: context.terrainStatusSnapshot,
     terrainCollisionBakePending: context.terrainCollisionBakePending,
-    terrainHeightmapGeneratePending: context.terrainHeightmapGeneratePending,
     terrainChunkCookPending: context.terrainChunkCookPending,
     selectedNode: context.selectedNode,
     selectedNodes: context.selectedNodes,
-    heightmapSourceNodes: context.heightmapSourceNodes,
-    heightmapCandidateNodes: context.heightmapCandidateNodes,
     selectedTerrainSourceName: context.selectedTerrainSourceName,
     selectedTerrainSourceAssetUrl: context.selectedTerrainSourceAssetUrl,
     onSetCollisionOverlayEnabled: context.setCollisionOverlayEnabled,
@@ -396,8 +388,6 @@ export function buildCollisionTabProps(context: EditorPanelPropBuilderContext) {
     onClearTerrainSources: context.clearTerrainSourceBasket,
     onBakeTerrainCollision: () => void context.bakeTerrainCollision(),
     onBakeTerrain: () => void context.bakeTerrainPipeline(),
-    onGenerateTerrainHeightmap: () =>
-      void context.generateTerrainHeightmapFromSelection(),
     onCookTerrainChunks: () => void context.cookTerrainChunks(),
     onSelectCollisionReviewActor: (actorId: string) =>
       context.handleHierarchySelection(actorId, new MouseEvent('click')),
@@ -919,7 +909,6 @@ export function buildSaveTabProps(context: EditorPanelPropBuilderContext) {
     terrainStatus: context.terrainStatusSnapshot,
     terrainPipelinePending:
       context.terrainCollisionBakePending ||
-      context.terrainHeightmapGeneratePending ||
       context.terrainChunkCookPending,
     worldPartitionCookPending: context.worldPartitionCookPending,
     publishPipelineState: context.publishPipelineState,
@@ -944,7 +933,6 @@ export function buildWorkflowTabProps(context: EditorPanelPropBuilderContext) {
     levelId: context.levelId,
     editorScene: context.editorScene,
     terrainCollisionBakePending: context.terrainCollisionBakePending,
-    terrainHeightmapGeneratePending: context.terrainHeightmapGeneratePending,
     terrainChunkCookPending: context.terrainChunkCookPending,
     worldPartitionCookPending: context.worldPartitionCookPending,
     groundTerrainPublishPending: context.groundTerrainPublishPending,
@@ -959,8 +947,6 @@ export function buildWorkflowTabProps(context: EditorPanelPropBuilderContext) {
       context.setActiveEditorTab('collision')
     },
     onBakeTerrain: () => void context.bakeTerrainPipeline(),
-    onGenerateTerrainHeightmap: () =>
-      void context.generateTerrainHeightmapFromSelection(),
     onBakeTerrainCollision: () => void context.bakeTerrainCollision(),
     onCookTerrainChunks: () => void context.cookTerrainChunks(),
     onCookWorldPartition: () => void context.cookWorldPartition(),

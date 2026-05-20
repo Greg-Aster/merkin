@@ -11,6 +11,8 @@ export let selectedNodeIds: string[] = []
 export let sceneSettings: EditorSceneSettings | null = null
 export let interactionSystem: any = null
 export let interactiveEnabled = false
+export let renderAuthoringVisuals = true
+export let renderAuthoringGameplay = true
 
 $: childNodes = nodes.filter(child => child.parentId === node.id)
 </script>
@@ -22,6 +24,8 @@ $: childNodes = nodes.filter(child => child.parentId === node.id)
   {sceneSettings}
   {interactionSystem}
   {interactiveEnabled}
+  {renderAuthoringVisuals}
+  {renderAuthoringGameplay}
   on:portalTransition
   on:noteRead
 >
@@ -35,6 +39,8 @@ $: childNodes = nodes.filter(child => child.parentId === node.id)
       {sceneSettings}
       {interactionSystem}
       {interactiveEnabled}
+      {renderAuthoringVisuals}
+      {renderAuthoringGameplay}
       on:portalTransition
       on:noteRead
     />

@@ -4,13 +4,10 @@ import { classifyTerrainAuthority } from '../../src/threlte/engine/groundContrac
 
 const terrainModes = new Set([
   'scene-authored',
-  'heightfield-terrain',
   'glb-chunk-terrain',
 ])
 const visualSources = new Set([
   'scene-actors',
-  'heightmap-surface',
-  'generated-heightmap-chunks',
   'source-glb-chunks',
   'none',
 ])
@@ -21,13 +18,12 @@ const fallbackSurfacePolicies = new Set([
   'always',
 ])
 const collisionSources = new Set([
-  'baked-heightfield',
   'scene-colliders',
   'source-linked-terrain-collision',
 ])
 const transitionWarningStatuses = new Set(['transitional', 'planned'])
 const glbTerrainCollisionBakeModes = new Set([
-  'source-glb-heightfield-projection',
+  'source-glb-collision-mesh',
   'dedicated-collision-glb',
   'simplified-source-glb',
   'selected-terrain-walkable-mesh',
@@ -274,8 +270,6 @@ function validateTerrainMigration({
     fallbackSurfacePolicy: migration?.fallbackSurfacePolicy ?? 'missing',
     migrationTarget: migration?.targetMode ?? 'missing',
     migrationStatus: migration?.status ?? 'missing',
-    generatedHeightmapStatus:
-      migration?.generatedTerrainProducts?.heightmap?.status ?? 'none',
     generatedVisualChunkStatus:
       migration?.generatedTerrainProducts?.visualChunks?.status ?? 'none',
     collisionProductStatus:
@@ -373,23 +367,12 @@ function validateTerrainMigration({
     }
   }
 
-  if (migration.currentMode === 'heightfield-terrain') {
-    if (migration.collisionSource !== 'baked-heightfield') {
-      failures.push(`${file}: heightfield-terrain requires baked-heightfield collision`)
-    }
-    if (!['heightmap-surface', 'generated-heightmap-chunks'].includes(migration.authoritativeVisualSource)) {
-      failures.push(
-        `${file}: heightfield-terrain visual source must be heightmap-surface or generated-heightmap-chunks`,
-      )
-    }
-  }
-
   if (
     migration.currentMode === 'scene-authored' &&
     migration.collisionSource !== 'scene-colliders'
   ) {
     failures.push(
-      `${file}: scene-authored terrain must use scene-colliders collision; baked heightfields are only valid for heightfield-terrain.`,
+      `${file}: scene-authored terrain must use scene-colliders collision.`,
     )
   }
   if (
@@ -433,7 +416,7 @@ function validateTerrainMigration({
       sceneFile: file,
       migration,
       message:
-        'heightmap fallback surface is enabled as primary terrain while chunks are authoritative',
+        'fallback surface is enabled as primary terrain while chunks are authoritative',
     })
   }
 
@@ -477,7 +460,7 @@ function validateTerrainMigration({
     failures.push(`${file}: scene-authored terrain cannot mark render chunks authoritative`)
   }
   if (authority.mixedAuthority) {
-    const message = `${file}: scene-authored terrain uses baked-heightfield collision; migrate to scene-colliders, true heightfield-terrain, or glb-chunk-terrain before final terrain authority gate`
+    const message = `${file}: scene-authored terrain uses source-linked terrain collision; migrate to scene-colliders or glb-chunk-terrain before final terrain authority gate`
     if (enforceFinalAuthority) {
       failures.push(message)
     } else {
@@ -495,10 +478,10 @@ function validateTerrainMigration({
     migration.currentMode === 'scene-authored' &&
     migration.status === 'complete' &&
     migration.renderChunks?.present === true &&
-    migration.renderChunks?.source === 'generated-heightmap'
+    migration.renderChunks?.source !== 'source-glb'
   ) {
     failures.push(
-      `${file}: completed scene-authored terrain cannot retain generated heightmap visual chunks`,
+      `${file}: completed scene-authored terrain cannot retain non-source terrain visual chunks`,
     )
   }
   if (
@@ -515,14 +498,6 @@ function validateTerrainMigration({
         `${file}: completed scene-authored terrain has ${staleChunkFiles} stale generated visual chunk files under /terrain/levels/${scene.levelId}/`,
       )
     }
-  }
-  if (manifest?.assets?.heightmap) {
-    validateGeneratedProductRecord({
-      failures,
-      file,
-      label: 'heightmap',
-      product: getGeneratedProductRecord(migration, 'heightmap'),
-    })
   }
   if (hasTerrainChunks(manifest)) {
     validateGeneratedProductRecord({
@@ -636,14 +611,14 @@ function validateManifestContract({
   if (
     runtime.mode === 'scene-authored' &&
     hasTerrainChunks(manifest) &&
-    manifest.visualChunks?.source === 'generated-heightmap'
+    manifest.visualChunks?.source !== 'source-glb'
   ) {
     const retainedChunks = getGeneratedProductRecord(
       migration,
       'visualChunks',
     )
     if (retainedChunks) {
-      const message = `${file}: generated heightmap chunks retained (${retainedChunks.status}) because ${retainedChunks.reason} Target removal: ${retainedChunks.targetRemovalCondition}`
+      const message = `${file}: non-source terrain chunks retained (${retainedChunks.status}) because ${retainedChunks.reason} Target removal: ${retainedChunks.targetRemovalCondition}`
       if (
         migration?.status === 'complete' ||
         retainedChunks.status === 'retained-unreferenced-visuals'
@@ -654,7 +629,7 @@ function validateManifestContract({
       }
     } else {
       failures.push(
-        `${file}: generated heightmap chunks are present but scene terrain visuals are authoritative; document terrainMigration.generatedTerrainProducts.visualChunks`,
+        `${file}: non-source terrain chunks are present but scene terrain visuals are authoritative; document terrainMigration.generatedTerrainProducts.visualChunks`,
       )
     }
   }

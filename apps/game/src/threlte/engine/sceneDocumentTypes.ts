@@ -353,6 +353,7 @@ export interface SharedLevelStyleSettings {
 export interface SharedLevelLightingSettings {
   lighting?: {
     ambientIntensity?: number
+    hemisphereIntensity?: number
     keyLightIntensity?: number
     fillLightIntensity?: number
   }
@@ -568,17 +569,11 @@ export interface SharedLevelAmbientAudioSettings {
 export type TerrainRuntimeComponentSource =
   | 'built-in-manifest'
   | 'editor-manifest'
-  | 'generated-heightmap'
 export type LevelCollisionBudget = 'mobile' | 'balanced' | 'desktop'
 export type LevelGroundMode = 'terrain-chunks' | 'hybrid' | 'scene-authored'
-export type TerrainRuntimeMode =
-  | 'scene-authored'
-  | 'heightfield-terrain'
-  | 'glb-chunk-terrain'
+export type TerrainRuntimeMode = 'scene-authored' | 'glb-chunk-terrain'
 export type TerrainVisualSource =
   | 'scene-actors'
-  | 'heightmap-surface'
-  | 'generated-heightmap-chunks'
   | 'source-glb-chunks'
   | 'none'
 export type TerrainFallbackSurfacePolicy =
@@ -588,7 +583,6 @@ export type TerrainFallbackSurfacePolicy =
   | 'always'
 export type LevelGroundVisualSource = TerrainVisualSource | 'terrain-chunks'
 export type LevelGroundCollisionSource =
-  | 'baked-heightfield'
   | 'scene-colliders'
   | 'source-linked-terrain-collision'
 export type TerrainMigrationStatus = 'complete' | 'transitional' | 'planned'
@@ -600,7 +594,7 @@ export interface TerrainSourceAssetFingerprint {
 }
 
 export interface TerrainRenderChunkProductMetadata {
-  type?: 'heightfield-terrain' | 'glb-chunk-terrain'
+  type?: 'glb-chunk-terrain'
   visualSource?: TerrainVisualSource
   url?: string
   chunksPath?: string
@@ -638,7 +632,7 @@ export interface TerrainMigrationSettings {
   renderChunks?: {
     present?: boolean
     authoritative?: boolean
-    source?: 'none' | 'generated-heightmap' | 'source-glb'
+    source?: 'none' | 'source-glb'
   }
   fallbackSurfacePolicy?: TerrainFallbackSurfacePolicy
   targetMode?: TerrainRuntimeMode
@@ -662,14 +656,12 @@ export interface LevelCollisionRoleSettings {
 export interface SharedLevelCollisionSettings {
   collision?: {
     terrain?: {
-      source?: 'baked-heightmap' | 'source-glb' | 'scene-authored' | 'none'
+      source?: 'source-glb' | 'scene-authored' | 'none'
       runtimeSource?: TerrainRuntimeComponentSource
       runtimeMode?: TerrainRuntimeMode
       visualSource?: TerrainVisualSource
       fallbackSurfacePolicy?: TerrainFallbackSurfacePolicy
       manifestUrl?: string
-      heightmapUrl?: string
-      heightmapResolution?: number
       sourceAssetUrl?: string
       sourceAssetUrls?: string[]
       sourceAssetHash?: string
@@ -688,7 +680,6 @@ export interface SharedLevelCollisionSettings {
       triangleCount?: number
       vertexCount?: number
       dirty?: boolean
-      heightmapDirty?: boolean
       lastGeneratedAt?: string
       heightOverrideCount?: number
       chunksPath?: string

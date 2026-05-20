@@ -9,17 +9,15 @@ import {
 } from './editorTerrainPipeline'
 
 type TerrainCollisionSettings = {
-  source?: 'baked-heightmap' | 'source-glb' | 'scene-authored' | 'none'
+  source?: 'source-glb' | 'scene-authored' | 'none'
   runtimeSource?: TerrainRuntimeComponentSource
   manifestUrl?: string
-  heightmapUrl?: string
   sourceAssetUrl?: string
   sourceAssetUrls?: string[]
   sourceNodeId?: string
   sourceNodeIds?: string[]
   sourceName?: string
   dirty?: boolean
-  heightmapDirty?: boolean
   chunksPath?: string
   lastGeneratedAt?: string
   lastChunksGeneratedAt?: string
@@ -35,21 +33,32 @@ export let terrainCollisionSettings: TerrainCollisionSettings | null = null
 export let terrainStatus: EditorTerrainStatusSnapshot | null = null
 export let selectedTerrainSourceName = ''
 export let selectedTerrainSourceAssetUrl = ''
+export let terrainSourceImportPending = false
+export let terrainCollisionBakePending = false
+export let terrainChunkCookPending = false
 export let worldPartitionCookPending = false
 export let environmentTabProps: Record<string, unknown> = {}
 export let playerTabProps: Record<string, unknown> = {}
+export let onImportTerrainSource: (input: {
+  file?: File | null
+  sourcePath?: string
+}) => void = () => {}
+export let onBakeTerrainCollision: () => void = () => {}
+export let onCookTerrainChunks: () => void = () => {}
 export let onCookWorldPartition: () => void = () => {}
 export let onBakeTerrain: () => void = () => {}
 
 let activeWorldSubflow: 'environment' | 'player' | 'terrain' | '' =
   'environment'
+let terrainSourcePathInput = ''
+let terrainSourceFile: File | null = null
 
 $: sceneNodes = editorScene?.nodes ?? []
 $: terrainSourceCount =
   terrainCollisionSettings?.sourceNodeIds?.length ??
   (terrainCollisionSettings?.sourceNodeId ? 1 : 0)
 $: terrainState = terrainCollisionSettings?.manifestUrl
-  ? terrainCollisionSettings.dirty || terrainCollisionSettings.heightmapDirty
+  ? terrainCollisionSettings.dirty
     ? 'terrain products need refresh'
     : 'terrain manifest ready'
   : terrainSculptSettings?.enabled
@@ -62,6 +71,26 @@ $: terrainPipeline = describeEditorTerrainPipeline({
   selectedTerrainSourceAssetUrl,
   terrainStatus,
 })
+$: terrainImportDisabled =
+  terrainSourceImportPending ||
+  (!terrainSourceFile && terrainSourcePathInput.trim().length === 0)
+$: cookChunkCommand =
+  terrainPipeline.commands.find(command => command.id === 'cook-glb-chunks')
+$: bakeCollisionCommand = terrainPipeline.commands.find(
+  command => command.id === 'bake-terrain-collision',
+)
+
+function selectTerrainSourceFile(event: Event) {
+  terrainSourceFile =
+    (event.currentTarget as HTMLInputElement).files?.item(0) ?? null
+}
+
+function importTerrainSource() {
+  onImportTerrainSource({
+    file: terrainSourceFile,
+    sourcePath: terrainSourcePathInput.trim(),
+  })
+}
 </script>
 
 <div class="editor-section">
@@ -137,6 +166,34 @@ $: terrainPipeline = describeEditorTerrainPipeline({
   <div class="save-message">
     Source: {selectedTerrainSourceName || selectedTerrainSourceAssetUrl || terrainCollisionSettings?.sourceName || 'select terrain source objects'}
   </div>
+  <div class="editor-field-stack">
+    <label>
+      <span class="tuple-label">Blender Terrain File</span>
+      <input
+        class="text-input"
+        type="file"
+        accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+        on:change={selectTerrainSourceFile}
+      />
+    </label>
+    <label>
+      <span class="tuple-label">Terrain Source Path</span>
+      <input
+        class="text-input"
+        bind:value={terrainSourcePathInput}
+        placeholder="/models/levels/observatory.glb or /absolute/path/from/blender.glb"
+      />
+    </label>
+    <button
+      class="full"
+      disabled={terrainImportDisabled}
+      data-sfx-hover="hover-emphasis"
+      data-sfx-click="confirm"
+      on:click={importTerrainSource}
+    >
+      {terrainSourceImportPending ? 'Importing Terrain Source...' : 'Apply Blender Terrain Source'}
+    </button>
+  </div>
   <div class="save-message">
     Source existence: {terrainPipeline.sourceExistenceStatus.detail}
   </div>
@@ -148,13 +205,33 @@ $: terrainPipeline = describeEditorTerrainPipeline({
   </div>
   <button
     class="full"
-    disabled={!terrainPipeline.commands.find(command => command.id === 'bake-terrain')?.enabled}
+    disabled={terrainSourceImportPending || terrainChunkCookPending || terrainCollisionBakePending || !terrainPipeline.commands.find(command => command.id === 'bake-terrain')?.enabled}
     title={terrainPipeline.commands.find(command => command.id === 'bake-terrain')?.reason ?? ''}
     data-sfx-hover="hover-emphasis"
     data-sfx-click="confirm"
     on:click={onBakeTerrain}
   >
     Bake Terrain
+  </button>
+  <button
+    class="full"
+    disabled={terrainChunkCookPending || !cookChunkCommand?.enabled}
+    title={cookChunkCommand?.reason ?? ''}
+    data-sfx-hover="hover-emphasis"
+    data-sfx-click="confirm"
+    on:click={onCookTerrainChunks}
+  >
+    {terrainChunkCookPending ? 'Cooking Terrain Chunks...' : 'Cook Terrain Chunks'}
+  </button>
+  <button
+    class="full"
+    disabled={terrainCollisionBakePending || !bakeCollisionCommand?.enabled}
+    title={bakeCollisionCommand?.reason ?? ''}
+    data-sfx-hover="hover-emphasis"
+    data-sfx-click="confirm"
+    on:click={onBakeTerrainCollision}
+  >
+    {terrainCollisionBakePending ? 'Baking Source-Linked Collision...' : 'Bake Source-Linked Collision'}
   </button>
   <button
     class="full"

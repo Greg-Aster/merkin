@@ -3,7 +3,7 @@
  *
  * Unified terrain system that consolidates:
  * - Visual chunk rendering with LOD
- * - Physics collision from heightmap
+ * - Physics collision from baked source-linked collider assets
  * - Height queries for gameplay
  */
 
@@ -19,14 +19,10 @@ export { terrainStore, terrainStatsStore, terrainActions } from './terrainStore'
 export {
   buildTerrainConfigFromManifest,
   createTerrainRuntimeComponentData,
-  getHeightmapConfigUrl,
-  loadHeightmapConfig,
   loadTerrainRuntimeComponentData,
-  normalizeHeightmapConfig,
 } from './terrainManifest'
 
 export type {
-  HeightmapConfig,
   TerrainManifest,
   TerrainRuntimeComponentData,
   TerrainRuntimeComponentSource,

@@ -115,11 +115,9 @@ export type RuntimePrefabManifest = {
 export type TerrainManifest = {
   id?: string
   runtime?: {
-    mode?: 'scene-authored' | 'heightfield-terrain' | 'glb-chunk-terrain'
+    mode?: 'scene-authored' | 'glb-chunk-terrain'
     visualSource?:
       | 'scene-actors'
-      | 'heightmap-surface'
-      | 'generated-heightmap-chunks'
       | 'source-glb-chunks'
       | 'none'
     fallbackSurfacePolicy?:
@@ -129,7 +127,6 @@ export type TerrainManifest = {
       | 'always'
   }
   assets?: {
-    heightmap?: string
     chunksPath?: string
     sourceGlb?: string
     sourceAssetUrl?: string
@@ -161,11 +158,11 @@ export type TerrainManifest = {
   visualChunks?: {
     chunkCount?: number
     sourceContract?: TerrainSourceContract
-    source?: 'generated-heightmap' | 'source-glb'
+    source?: 'source-glb'
     preservesSourceUvs?: boolean
     preservesSourceMaterialSlots?: boolean
     product?: {
-      type?: 'heightfield-terrain' | 'glb-chunk-terrain'
+      type?: 'glb-chunk-terrain'
       chunksPath?: string
       chunkCount?: number
       sourceAssetUrl?: string
@@ -220,10 +217,8 @@ export interface EditorPublishWorkflowStep {
 
 export type EditorPublishBakeStep =
   | 'save-scene'
-  | 'generate-heightmap'
   | 'bake-terrain-collision'
   | 'bake-scene-mesh-colliders'
-  | 'cook-terrain-chunks'
   | 'cook-terrain-glb-chunks'
   | 'cook-world-partition'
   | 'cook-runtime-assets'

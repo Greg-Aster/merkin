@@ -67,20 +67,24 @@ function updatePointLightBudgetCamera() {
   pointLightBudgetRefreshToken += 1
 }
 
-function getPointEmitterDistanceToCamera(emitter: RuntimeLightEmitter) {
-  if (!activeCameraPosition || !emitter.position) return 0
+function getPointEmitterDistanceToCamera(
+  emitter: RuntimeLightEmitter,
+  cameraPosition: [number, number, number] | null,
+) {
+  if (!cameraPosition || !emitter.position) return 0
 
-  const dx = emitter.position[0] - activeCameraPosition[0]
-  const dy = emitter.position[1] - activeCameraPosition[1]
-  const dz = emitter.position[2] - activeCameraPosition[2]
+  const dx = emitter.position[0] - cameraPosition[0]
+  const dy = emitter.position[1] - cameraPosition[1]
+  const dz = emitter.position[2] - cameraPosition[2]
   return Math.hypot(dx, dy, dz)
 }
 
 function getPointEmitterScore(
   emitter: RuntimeLightEmitter,
   distanceToCamera: number,
+  policy: ReturnType<typeof resolveRuntimeVisibilityPolicy>,
 ) {
-  const budget = visibilityPolicy.pointLightBudget
+  const budget = policy.pointLightBudget
   const sourceRange = emitter.distance ?? budget.maxDistance
   const rangeScore = Math.min(
     Math.max(1, sourceRange),
@@ -92,23 +96,29 @@ function getPointEmitterScore(
   )
 }
 
-function resolveBudgetedPointEmitters(_refreshToken: number) {
-  const budget = visibilityPolicy.pointLightBudget
-  const enabledEmitters = pointEmitters.filter(
-    emitter => emitter.enabled !== false,
-  )
+function resolveBudgetedPointEmitters(
+  emitters: RuntimeLightEmitter[],
+  policy: ReturnType<typeof resolveRuntimeVisibilityPolicy>,
+  cameraPosition: [number, number, number] | null,
+  _refreshToken: number,
+) {
+  const budget = policy.pointLightBudget
+  const enabledEmitters = emitters.filter(emitter => emitter.enabled !== false)
   const unbudgetedEmitters = enabledEmitters.filter(
     emitter => emitter.runtimeBudgeted === false,
   )
   const budgetedCandidates = enabledEmitters
     .filter(emitter => emitter.runtimeBudgeted !== false && emitter.position)
     .map((emitter, index) => {
-      const distanceToCamera = getPointEmitterDistanceToCamera(emitter)
+      const distanceToCamera = getPointEmitterDistanceToCamera(
+        emitter,
+        cameraPosition,
+      )
       return {
         emitter,
         index,
         distanceToCamera,
-        score: getPointEmitterScore(emitter, distanceToCamera),
+        score: getPointEmitterScore(emitter, distanceToCamera, policy),
       }
     })
     .filter(candidate => candidate.distanceToCamera <= budget.cullDistance)
@@ -154,6 +164,9 @@ $: shadowCameraFar = environment.shadows.cameraFar ?? 90
 $: ambientEmitters = snapshot.emitters.filter(isAmbientEmitter)
 $: pointEmitters = snapshot.emitters.filter(isPointEmitter)
 $: budgetedPointEmitters = resolveBudgetedPointEmitters(
+  pointEmitters,
+  visibilityPolicy,
+  activeCameraPosition,
   pointLightBudgetRefreshToken,
 )
 $: applyKeyLightShadowBudget()

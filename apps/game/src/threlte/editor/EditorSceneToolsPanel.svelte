@@ -27,11 +27,9 @@ export let terrainBrushSize = 24
 export let terrainBrushStrength = 0.35
 export let terrainBrushFalloff = 0.55
 export let terrainCollisionSettings: {
-  source?: 'baked-heightmap' | 'source-glb' | 'scene-authored' | 'none'
+  source?: 'source-glb' | 'scene-authored' | 'none'
   runtimeSource?: TerrainRuntimeComponentSource
   manifestUrl?: string
-  heightmapUrl?: string
-  heightmapResolution?: number
   sourceAssetUrl?: string
   sourceNodeId?: string
   sourceName?: string
@@ -49,7 +47,6 @@ export let terrainCollisionSettings: {
   chunkCount?: number
 } | null = null
 export let terrainCollisionBakePending = false
-export let terrainHeightmapGeneratePending = false
 export let terrainChunkCookPending = false
 export let selectedTerrainSourceAssetUrl = ''
 export let transformMode = 'translate'

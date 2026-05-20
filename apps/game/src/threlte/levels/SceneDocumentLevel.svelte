@@ -122,6 +122,7 @@ const dispatch = createEventDispatcher()
 export let levelId: string
 export let position: [number, number, number] = [0, 0, 0]
 export let editorEnabled = false
+export let editorRuntimePreviewEnabled = false
 export let editorSceneSettingsOverride: SceneSettings | null = null
 export let interactionSystem: any = null
 export let timelineEvents: any[] = []
@@ -1128,6 +1129,8 @@ $: levelSettings = (
     ? editorSceneSettingsOverride
     : levelDefinition?.settings ?? {}
 ) as SceneSettings
+$: runtimeGameplayRenderingEnabled =
+  !editorEnabled || editorRuntimePreviewEnabled
 $: sharedLevelSettings = levelSettings.level ?? {}
 $: activeSkyboxPreset = resolveSkyboxPreset(sharedLevelSettings.skyboxPreset)
 $: authoredGameplayNodes = (() => {
@@ -1461,6 +1464,8 @@ $: sceneAtmosphereRefreshKey = [
   terrainRuntimeReady ? 1 : 0,
 ].join('|')
 $: ambientIntensity = sharedLevelSettings.lighting?.ambientIntensity ?? 1.25
+$: hemisphereIntensity =
+  sharedLevelSettings.lighting?.hemisphereIntensity ?? 0.38
 $: keyLightIntensity = sharedLevelSettings.lighting?.keyLightIntensity ?? 0.65
 $: fillLightIntensity = sharedLevelSettings.lighting?.fillLightIntensity ?? 0.2
 $: resolvedRenderProfile = resolveRuntimeRenderProfile(
@@ -1718,6 +1723,7 @@ onDestroy(() => {
     />
     <SceneLightingProfile
       {ambientIntensity}
+      {hemisphereIntensity}
       {keyLightIntensity}
       {fillLightIntensity}
       renderProfile={resolvedRenderProfile}
@@ -1818,7 +1824,7 @@ onDestroy(() => {
         sway={sharedLevelSettings.fireflies?.sway ?? 1.5}
         {levelId}
         {interactionSystem}
-        interactiveEnabled={!editorEnabled}
+        interactiveEnabled={runtimeGameplayRenderingEnabled}
       />
     {/if}
 
@@ -1846,7 +1852,7 @@ onDestroy(() => {
       />
     {/if}
 
-    {#if !editorEnabled && renderActorsReady}
+    {#if runtimeGameplayRenderingEnabled && renderActorsReady}
       {#each visibleRootActors as actor (actor.id)}
         <RuntimeActorBranch
           {actor}

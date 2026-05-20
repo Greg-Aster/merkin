@@ -10,7 +10,6 @@ export type CollisionRole =
   | 'detail'
 
 export type TerrainCollisionSource =
-  | 'heightmap'
   | 'source-glb'
   | 'scene-authored'
   | 'none'
@@ -60,7 +59,6 @@ function resolveTerrainCollisionSource(
   source: string | null | undefined,
   fallback: TerrainCollisionSource,
 ): TerrainCollisionSource {
-  if (source === 'baked-heightmap') return 'heightmap'
   if (
     source === 'source-glb' ||
     source === 'scene-authored' ||

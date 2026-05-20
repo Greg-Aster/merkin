@@ -429,21 +429,17 @@ export function reviewCollisionContracts(input: {
     groundSettings?.terrainRuntimeMode ?? terrainSettings?.runtimeMode
   const terrainCollisionSource =
     groundSettings?.collisionSource ??
-    (terrainSettings?.source === 'baked-heightmap'
-      ? 'baked-heightfield'
+    (terrainSettings?.source === 'source-glb'
+      ? 'source-linked-terrain-collision'
       : undefined)
 
-  if (
-    terrainRuntimeMode === 'glb-chunk-terrain' &&
-    terrainCollisionSource === 'baked-heightfield'
-  ) {
+  if (terrainRuntimeMode === 'glb-chunk-terrain' && !terrainCollisionSource) {
     createFinding(findings, {
-      code: 'glb-terrain-heightfield-collision',
+      code: 'glb-terrain-source-linked-collision-missing',
       severity: 'error',
-      message:
-        'GLB chunk terrain is configured with generic heightfield collision.',
+      message: 'GLB chunk terrain is missing source-linked collision.',
       recommendation:
-        'Use source-linked terrain collision from the same GLB contract, a dedicated collision GLB, a simplified source GLB collider, or a selected walkable mesh collider.',
+        'Bake collision from the same GLB contract, a dedicated collision GLB, a simplified source GLB collider, or a selected walkable mesh collider.',
     })
   }
 

@@ -15,11 +15,9 @@ type EditorLevelOption = {
 }
 
 type TerrainCollisionSettings = {
-  source?: 'baked-heightmap' | 'source-glb' | 'scene-authored' | 'none'
+  source?: 'source-glb' | 'scene-authored' | 'none'
   runtimeSource?: TerrainRuntimeComponentSource
   manifestUrl?: string
-  heightmapUrl?: string
-  heightmapResolution?: number
   sourceAssetUrl?: string
   sourceAssetUrls?: string[]
   sourceNodeId?: string
@@ -36,7 +34,6 @@ type TerrainCollisionSettings = {
   triangleCount?: number
   vertexCount?: number
   dirty?: boolean
-  heightmapDirty?: boolean
   lastGeneratedAt?: string
   heightOverrideCount?: number
   chunksPath?: string
@@ -64,7 +61,6 @@ export let viewportLightingMode = 'authored'
 export let terrainSculptSettings: TerrainSculptSettings | null = null
 export let terrainCollisionSettings: TerrainCollisionSettings | null = null
 export let terrainCollisionBakePending = false
-export let terrainHeightmapGeneratePending = false
 export let terrainChunkCookPending = false
 export let worldPartitionCookPending = false
 export let groundTerrainPublishPending = false
@@ -124,7 +120,6 @@ export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
   {terrainSculptSettings}
   {terrainCollisionSettings}
   {terrainCollisionBakePending}
-  {terrainHeightmapGeneratePending}
   {terrainChunkCookPending}
   {worldPartitionCookPending}
   {groundTerrainPublishPending}

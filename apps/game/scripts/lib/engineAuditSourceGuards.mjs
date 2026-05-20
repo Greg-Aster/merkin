@@ -15,7 +15,6 @@ const forbiddenDuplicateInteractionFiles = [
 
 const retiredToolsEndpoints = [
   '/api/project-file',
-  '/api/generate-heightmap',
   '/api/analyze-glb',
   '/api/process-level',
   '/api/generate-level',
@@ -198,6 +197,16 @@ export function auditSourceGuards({ appRoot, editorApiRoutePaths = [] }) {
       if (scene && Object.prototype.hasOwnProperty.call(scene, 'engine')) {
         failures.push(
           `${file}: source scene documents must not persist generated engine.levelDefinition data; generate runtime engine data in memory or cooked manifests only`,
+        )
+      }
+
+      const lighting = scene?.settings?.level?.lighting
+      if (
+        lighting &&
+        !Object.prototype.hasOwnProperty.call(lighting, 'hemisphereIntensity')
+      ) {
+        failures.push(
+          `${file}: settings.level.lighting.hemisphereIntensity must be explicit so scene sky light does not rely on hidden SceneLightingProfile defaults`,
         )
       }
     }

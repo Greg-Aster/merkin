@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const { createHash } = require('crypto')
 const { spawn } = require('child_process')
 
 function readRequestBody(req, callback) {
@@ -51,6 +52,151 @@ function runPnpmScript(repoRoot, scriptName, args, callback) {
   })
 }
 
+function timestampKey() {
+  return new Date().toISOString().replace(/[:.]/g, '-')
+}
+
+function slugify(value = 'asset') {
+  return (
+    String(value || 'asset')
+      .trim()
+      .toLowerCase()
+      .replace(/\.(glb|gltf)$/i, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'asset'
+  )
+}
+
+function isGltfTerrainAsset(value) {
+  return /\.(glb|gltf)$/i.test(String(value || '').split('?')[0] ?? '')
+}
+
+function fingerprintFile(filePath) {
+  return createHash('sha256').update(fs.readFileSync(filePath)).digest('hex')
+}
+
+function isPathInside(childPath, rootPath) {
+  const resolvedChild = path.resolve(childPath)
+  const resolvedRoot = path.resolve(rootPath)
+  return (
+    resolvedChild === resolvedRoot ||
+    resolvedChild.startsWith(`${resolvedRoot}${path.sep}`)
+  )
+}
+
+function resolveLocalTerrainSourcePath(sourcePath, repoRoot) {
+  const trimmed = String(sourcePath || '').trim()
+  if (!trimmed) return ''
+  const candidate = path.isAbsolute(trimmed)
+    ? trimmed
+    : path.resolve(repoRoot, trimmed)
+  return fs.existsSync(candidate) ? candidate : ''
+}
+
+function materializeImportedTerrainSource({
+  levelId,
+  sourcePath,
+  sourceAssetUrl,
+  fileName,
+  fileBase64,
+  GAME_PUBLIC_ROOT,
+  REPO_ROOT,
+  resolvePublicAssetPath,
+  toPublicAssetUrl,
+}) {
+  if (sourceAssetUrl) {
+    if (!sourceAssetUrl.startsWith('/')) {
+      throw new Error('Terrain source URL must start with "/".')
+    }
+    if (!isGltfTerrainAsset(sourceAssetUrl)) {
+      throw new Error('Terrain source must be a .glb or .gltf asset.')
+    }
+    const publicPath = resolvePublicAssetPath(sourceAssetUrl)
+    if (!fs.existsSync(publicPath)) {
+      throw new Error(`Terrain source not found: ${sourceAssetUrl}`)
+    }
+    return {
+      sourceAssetUrl,
+      sourcePath: publicPath,
+      copied: false,
+    }
+  }
+
+  if (sourcePath && String(sourcePath).trim().startsWith('/')) {
+    const localSourcePath = resolveLocalTerrainSourcePath(sourcePath, REPO_ROOT)
+    if (!localSourcePath) {
+      try {
+        const publicPath = resolvePublicAssetPath(sourcePath)
+        if (fs.existsSync(publicPath)) {
+          if (!isGltfTerrainAsset(sourcePath)) {
+            throw new Error('Terrain source must be a .glb or .gltf asset.')
+          }
+          return {
+            sourceAssetUrl: sourcePath,
+            sourcePath: publicPath,
+            copied: false,
+          }
+        }
+      } catch {
+        // Fall through to the regular missing-file error below.
+      }
+    }
+  }
+
+  const extension = path.extname(fileName || sourcePath || '').toLowerCase()
+  if (!['.glb', '.gltf'].includes(extension)) {
+    throw new Error('Terrain source must be a .glb or .gltf file.')
+  }
+
+  const outputDirectory = path.join(
+    GAME_PUBLIC_ROOT,
+    'models',
+    'levels',
+    slugify(levelId),
+  )
+  fs.mkdirSync(outputDirectory, { recursive: true })
+  if (!isPathInside(outputDirectory, GAME_PUBLIC_ROOT)) {
+    throw new Error('Terrain source output resolves outside the public root.')
+  }
+
+  const outputPath = path.join(
+    outputDirectory,
+    `${slugify(fileName || path.basename(sourcePath) || `${levelId}-terrain`)}-${timestampKey()}${extension}`,
+  )
+  if (!isPathInside(outputPath, outputDirectory)) {
+    throw new Error('Terrain source output resolves outside the level folder.')
+  }
+
+  if (fileBase64) {
+    fs.writeFileSync(outputPath, Buffer.from(String(fileBase64), 'base64'))
+  } else {
+    const localSourcePath = resolveLocalTerrainSourcePath(sourcePath, REPO_ROOT)
+    if (!localSourcePath) {
+      throw new Error(`Terrain source file not found: ${sourcePath}`)
+    }
+    if (!isGltfTerrainAsset(localSourcePath)) {
+      throw new Error('Terrain source must be a .glb or .gltf file.')
+    }
+    if (fs.statSync(localSourcePath).isDirectory()) {
+      throw new Error('Terrain source must be a file, not a directory.')
+    }
+    if (isPathInside(localSourcePath, GAME_PUBLIC_ROOT)) {
+      return {
+        sourceAssetUrl: toPublicAssetUrl(localSourcePath),
+        sourcePath: localSourcePath,
+        copied: false,
+      }
+    }
+    fs.copyFileSync(localSourcePath, outputPath)
+  }
+
+  return {
+    sourceAssetUrl: toPublicAssetUrl(outputPath),
+    sourcePath: outputPath,
+    copied: true,
+  }
+}
+
 function isIsoDateBefore(left, right) {
   if (!left || !right) return false
   const leftTime = Date.parse(left)
@@ -70,29 +216,16 @@ function getSceneTerrainPublishState(scene) {
     terrainRuntimeMode === 'glb-chunk-terrain' ||
     terrainVisualSource === 'source-glb-chunks' ||
     renderChunks?.type === 'glb-chunk-terrain'
-  const heightfieldTerrain =
-    terrainRuntimeMode === 'heightfield-terrain' ||
-    ground?.terrainRuntimeMode === 'heightfield-terrain'
   const sceneAuthoredTerrain =
     terrainRuntimeMode === 'scene-authored' ||
     ground?.terrainRuntimeMode === 'scene-authored' ||
     ground?.collisionSource === 'scene-colliders'
-  const bakedTerrainEnabled =
-    !sceneAuthoredTerrain &&
-    !glbChunkTerrain &&
-    (heightfieldTerrain ||
-      terrain?.source === 'baked-heightmap' ||
-      terrain?.runtimeSource === 'generated-heightmap' ||
-      terrain?.runtimeSource === 'editor-manifest' ||
-      ground?.collisionSource === 'baked-heightfield')
+  const bakedTerrainEnabled = glbChunkTerrain && !sceneAuthoredTerrain
   const chunksStale =
     Boolean(terrain?.lastGeneratedAt) &&
     (!terrain?.lastChunksGeneratedAt ||
       isIsoDateBefore(terrain.lastChunksGeneratedAt, terrain.lastGeneratedAt))
   const staleReasons = [
-    terrain?.heightmapDirty
-      ? 'terrain source basket changed after the last generated heightmap'
-      : '',
     terrain?.dirty ? 'terrain collision is marked dirty' : '',
     bakedTerrainEnabled && !terrain?.colliderUrl
       ? 'baked terrain collision artifact is missing'
@@ -101,7 +234,7 @@ function getSceneTerrainPublishState(scene) {
       ? 'baked terrain collision metadata is missing'
       : '',
     bakedTerrainEnabled && chunksStale
-      ? 'terrain visual chunks are older than the current heightmap/collision state'
+      ? 'terrain visual chunks are older than the current source terrain state'
       : '',
   ].filter(Boolean)
 
@@ -109,13 +242,11 @@ function getSceneTerrainPublishState(scene) {
     bakedTerrainEnabled,
     staleReasons,
     products: {
-      heightmapUrl: terrain?.heightmapUrl ?? '',
       colliderUrl: terrain?.colliderUrl ?? '',
       metadataUrl: terrain?.metadataUrl ?? '',
       chunksPath: terrain?.chunksPath ?? '',
       lastGeneratedAt: terrain?.lastGeneratedAt ?? '',
       lastChunksGeneratedAt: terrain?.lastChunksGeneratedAt ?? '',
-      heightmapDirty: Boolean(terrain?.heightmapDirty),
       dirty: Boolean(terrain?.dirty),
       chunksStale,
     },
@@ -281,21 +412,17 @@ function handleTerrainRoutes(req, res, route, context) {
     return true
   }
 
-  if (
-    pathname === '/api/editor-terrain/generate-heightmap' &&
-    req.method === 'POST'
-  ) {
+  if (pathname === '/api/editor-terrain/import-source' && req.method === 'POST') {
     readRequestBody(req, body => {
       try {
         const {
           levelId,
-          nodeId,
-          sourceAssetUrl,
-          sources,
-          resolution = 512,
-          bakeCollision = true,
+          sourcePath = '',
+          sourceAssetUrl = '',
+          fileName = '',
+          fileBase64 = '',
+          sourceName = '',
         } = JSON.parse(body || '{}')
-
         if (!levelId) {
           sendJson(res, 400, { success: false, message: 'levelId is required' })
           return
@@ -304,201 +431,43 @@ function handleTerrainRoutes(req, res, route, context) {
         const scenePath = getEditorScenePath(levelId)
         const scene = fs.existsSync(scenePath) ? readJsonFile(scenePath) : null
         const manifestPath = ensureTerrainManifestForLevel(levelId, scene)
-        const sourceNode =
-          nodeId && scene?.nodes
-            ? scene.nodes.find(node => node.id === nodeId)
-            : null
-        const resolvedSourceUrl = sourceAssetUrl || sourceNode?.asset?.url || ''
-        const sceneSourceList = getTerrainSourceDescriptorsFromScene(scene)
-        const sourceList = Array.isArray(sources) && sources.length > 0
-          ? sources
-          : sceneSourceList
-
-        if (!resolvedSourceUrl && sourceList.length === 0) {
-          sendJson(res, 400, {
-            success: false,
-            message:
-              'Select an asset, primitive, or group before generating a terrain heightmap.',
-          })
-          return
-        }
-
-        const assetSources =
-          sourceList.length > 0
-            ? sourceList.filter(source => source?.sourceAssetUrl)
-            : [{ sourceAssetUrl: resolvedSourceUrl }]
-        for (const source of assetSources) {
-          const sourcePath = resolvePublicAssetPath(source.sourceAssetUrl)
-          if (!fs.existsSync(sourcePath)) {
-            sendJson(res, 400, {
-              success: false,
-              message: `Source mesh not found: ${source.sourceAssetUrl}`,
-            })
-            return
-          }
-        }
-
-        const sourcePath = resolvedSourceUrl
-          ? resolvePublicAssetPath(resolvedSourceUrl)
-          : ''
-        if (resolvedSourceUrl && !fs.existsSync(sourcePath)) {
-          sendJson(res, 400, {
-            success: false,
-            message: `Source mesh not found: ${resolvedSourceUrl}`,
-          })
-          return
-        }
-
-        const args = [
-          '--dir',
-          'apps/game',
-          'generate:terrain-heightmap',
-          '--',
-          `--level=${levelId}`,
-          `--resolution=${resolution}`,
-        ]
-        if (sourceList.length > 0) {
-          args.push(`--sources=${JSON.stringify(sourceList)}`)
-        } else {
-          args.push(
-            `--source=${resolvedSourceUrl}`,
-            `--sourceName=${sourceNode?.name || path.basename(sourcePath)}`,
-            `--position=${JSON.stringify(sourceNode?.position || [0, 0, 0])}`,
-            `--rotation=${JSON.stringify(sourceNode?.rotation || [0, 0, 0])}`,
-            `--scale=${JSON.stringify(sourceNode?.scale || [1, 1, 1])}`,
-          )
-        }
-
-        const child = spawn('pnpm', args, {
-          cwd: REPO_ROOT,
-          stdio: 'pipe',
-          shell: process.platform === 'win32',
+        const imported = materializeImportedTerrainSource({
+          levelId,
+          sourcePath,
+          sourceAssetUrl,
+          fileName,
+          fileBase64,
+          GAME_PUBLIC_ROOT,
+          REPO_ROOT,
+          resolvePublicAssetPath,
+          toPublicAssetUrl,
         })
+        const sourceHash = fingerprintFile(imported.sourcePath)
+        const stats = fs.statSync(imported.sourcePath)
 
-        let stdout = ''
-        let stderr = ''
-
-        child.stdout.on('data', chunk => {
-          stdout += chunk.toString()
-        })
-        child.stderr.on('data', chunk => {
-          stderr += chunk.toString()
-        })
-
-        child.on('close', code => {
-          if (code !== 0) {
-            sendJson(res, 500, {
-              success: false,
-              message:
-                stderr ||
-                stdout ||
-                `Terrain heightmap generation failed with exit code ${code}`,
-            })
-            return
-          }
-
-          const generated = parseLastJsonLine(stdout)
-
-          const finish = (collisionPayload = null) => {
-            sendJson(res, 200, {
-              success: true,
-              ...generated,
-              collision: collisionPayload?.collision ?? null,
-              collisionMetadata: collisionPayload?.metadata ?? null,
-              stdout,
-            })
-          }
-
-          if (!bakeCollision) {
-            finish()
-            return
-          }
-
-          const bakeChild = spawn(
-            'pnpm',
-            [
-              '--dir',
-              'apps/game',
-              'bake:terrain-collision',
-              '--',
-              `--level=${levelId}`,
-            ],
-            {
-              cwd: REPO_ROOT,
-              stdio: 'pipe',
-              shell: process.platform === 'win32',
-            },
-          )
-
-          let bakeStdout = ''
-          let bakeStderr = ''
-          bakeChild.stdout.on('data', chunk => {
-            bakeStdout += chunk.toString()
-          })
-          bakeChild.stderr.on('data', chunk => {
-            bakeStderr += chunk.toString()
-          })
-          bakeChild.on('close', bakeCode => {
-            if (bakeCode !== 0) {
-              sendJson(res, 500, {
-                success: false,
-                message:
-                  bakeStderr ||
-                  bakeStdout ||
-                  `Terrain collision bake failed with exit code ${bakeCode}`,
-                heightmap: generated,
-              })
-              return
-            }
-
-            try {
-              const manifest = JSON.parse(
-                fs.readFileSync(manifestPath, 'utf8').replace(/^\uFEFF/, ''),
-              )
-              const metadataUrl = manifest?.collision?.terrain?.metadataUrl
-              const metadataPath = metadataUrl
-                ? path.join(GAME_PUBLIC_ROOT, metadataUrl.replace(/^\/+/, ''))
-                : ''
-              const metadata =
-                metadataPath && fs.existsSync(metadataPath)
-                  ? JSON.parse(
-                      fs
-                        .readFileSync(metadataPath, 'utf8')
-                        .replace(/^\uFEFF/, ''),
-                    )
-                  : null
-              finish({
-                collision: manifest.collision?.terrain ?? null,
-                metadata,
-              })
-            } catch (readError) {
-              sendJson(res, 500, {
-                success: false,
-                message: `Heightmap generated and collision baked, but reading metadata failed: ${readError.message}`,
-                heightmap: generated,
-              })
-            }
-          })
-          bakeChild.on('error', error => {
-            sendJson(res, 500, {
-              success: false,
-              message: `Collision bake process error: ${error.message}`,
-              heightmap: generated,
-            })
-          })
-        })
-
-        child.on('error', error => {
-          sendJson(res, 500, {
-            success: false,
-            message: `Heightmap generation process error: ${error.message}`,
-          })
+        sendJson(res, 200, {
+          success: true,
+          levelId,
+          sourceName:
+            sourceName ||
+            path.basename(fileName || sourcePath || imported.sourceAssetUrl),
+          sourceAssetUrl: imported.sourceAssetUrl,
+          sourceAssetHash: sourceHash,
+          sourceAssetFingerprint: {
+            algorithm: 'sha256',
+            value: sourceHash,
+          },
+          sourceSizeBytes: stats.size,
+          copied: imported.copied,
+          manifestUrl: toPublicAssetUrl(manifestPath),
+          manifestPath: toRepoRelative(manifestPath),
+          sourcePath: toRepoRelative(imported.sourcePath),
         })
       } catch (error) {
-        console.error('Editor terrain heightmap generation error:', error)
+        console.error('Editor terrain source import error:', error)
         sendJson(res, 500, {
           success: false,
-          message: `Terrain heightmap generation failed: ${error.message}`,
+          message: `Terrain source import failed: ${error.message}`,
         })
       }
     })
@@ -521,7 +490,7 @@ function handleTerrainRoutes(req, res, route, context) {
         if (!manifestPath) {
           sendJson(res, 400, {
             success: false,
-            message: `Level "${levelId}" does not use the baked heightmap terrain workflow.`,
+            message: `Level "${levelId}" does not use the baked terrain workflow.`,
           })
           return
         }
@@ -620,8 +589,6 @@ function handleTerrainRoutes(req, res, route, context) {
         const {
           levelId,
           grid = 4,
-          lodResolutions = '33,17,9',
-          mode = '',
         } = JSON.parse(body || '{}')
         if (!levelId) {
           sendJson(res, 400, { success: false, message: 'levelId is required' })
@@ -636,26 +603,14 @@ function handleTerrainRoutes(req, res, route, context) {
           })
           return
         }
-        const scenePath = getEditorScenePath(levelId)
-        const scene = fs.existsSync(scenePath) ? readJsonFile(scenePath) : null
-        const useSourceGlbCook =
-          mode === 'glb-chunk-terrain' ||
-          mode === 'source-glb-chunks' ||
-          sceneUsesSourceGlbTerrain(scene)
-        const scriptName = useSourceGlbCook
-          ? 'cook:terrain-glb-chunks'
-          : 'cook:terrain-chunks'
         const cookArgs = [
           '--dir',
           'apps/game',
-          scriptName,
+          'cook:terrain-glb-chunks',
           '--',
           `--level=${levelId}`,
           `--grid=${grid}`,
         ]
-        if (!useSourceGlbCook) {
-          cookArgs.push(`--lod-resolutions=${lodResolutions}`)
-        }
 
         const child = spawn(
           'pnpm',
@@ -790,7 +745,7 @@ function handleTerrainRoutes(req, res, route, context) {
                   engineAudit: true,
                   terrainProducts: terrainPublishState.products,
                   message: terrainPublishState.bakedTerrainEnabled
-                    ? 'Published with current terrain heightmap, baked collision, and cooked visual chunk products.'
+                    ? 'Published with current terrain projection, baked collision, and cooked visual chunk products.'
                     : 'Published without baked terrain products; scene-authored ground is active.',
                   cookStdout: cookResult.stdout,
                   auditStdout: auditResult.stdout,

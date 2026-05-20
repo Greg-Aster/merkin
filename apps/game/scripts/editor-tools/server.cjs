@@ -34,10 +34,6 @@ const RETIRED_ENDPOINTS = new Map([
     replacementEndpoint: '/api/browse',
     message: 'Direct project-file reads are retired. Use the level editor asset browser or a specific editor API instead.',
   }],
-  ['/api/generate-heightmap', {
-    replacementEndpoint: '/api/editor-terrain/generate-heightmap',
-    message: 'Legacy heightmap generation is retired. Use the editor terrain workflow so heightmaps, collision, and manifests stay in sync.',
-  }],
   ['/api/analyze-glb', {
     replacementEndpoint: '/api/style/inspect',
     message: 'Legacy GLB analysis is retired. Use the editor asset/style inspection workflow.',
@@ -51,8 +47,8 @@ const RETIRED_ENDPOINTS = new Map([
     message: 'Legacy level generation is retired. Create levels through the level editor save/create workflow.',
   }],
   ['/api/unified-pipeline', {
-    replacementEndpoint: '/api/editor-terrain/generate-heightmap',
-    message: 'Legacy unified terrain pipeline is retired. Use editor terrain generation, collision bake, and chunk cook actions.',
+    replacementEndpoint: '/api/editor-terrain/import-source',
+    message: 'Legacy unified terrain pipeline is retired. Use source GLB import, chunk cook, collision bake, and validation actions.',
   }],
   ['/api/levels/scan', {
     replacementEndpoint: '/api/level-registry',
@@ -99,7 +95,7 @@ const ACTIVE_EDITOR_API_ENDPOINTS = new Set([
   '/api/editor-scene/blender-import-delta',
   '/api/editor-collision/bake-mesh-collider',
   '/api/editor-terrain/status',
-  '/api/editor-terrain/generate-heightmap',
+  '/api/editor-terrain/import-source',
   '/api/editor-terrain/bake-collision',
   '/api/editor-terrain/cook-chunks',
   '/api/editor-terrain/publish-contracts',

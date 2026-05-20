@@ -20,6 +20,8 @@ export let selected = false
 export let sceneSettings: EditorSceneSettings | null = null
 export let interactionSystem: any = null
 export let interactiveEnabled = false
+export let renderAuthoringVisuals = true
+export let renderAuthoringGameplay = true
 
 const { camera } = useThrelte()
 let group: THREE.Group
@@ -124,7 +126,7 @@ onDestroy(() => {
       {editorEnabled}
       {sceneSettings}
     >
-      {#if effectiveVisible}
+      {#if effectiveVisible && renderAuthoringVisuals}
         <EditorNodeRenderContent {node} {editorEnabled} />
       {/if}
     </EditorNodePhysicsBody>
@@ -136,15 +138,17 @@ onDestroy(() => {
 
   <EditorNodeGizmos {selected} />
 
-  <RuntimeGameplayRenderer
-    {node}
-    {selected}
-    {editorEnabled}
-    {interactionSystem}
-    {interactiveEnabled}
-    on:portalTransition
-    on:noteRead
-  />
+  {#if renderAuthoringGameplay}
+    <RuntimeGameplayRenderer
+      {node}
+      {selected}
+      {editorEnabled}
+      {interactionSystem}
+      {interactiveEnabled}
+      on:portalTransition
+      on:noteRead
+    />
+  {/if}
 
   <slot />
 </T.Group>

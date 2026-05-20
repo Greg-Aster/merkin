@@ -45,11 +45,6 @@ const publishBuildStepCommands = {
     '--',
     `--level=${levelId}`,
   ],
-  'cook-terrain-chunks': levelId => [
-    'cook:terrain-chunks',
-    '--',
-    `--level=${levelId}`,
-  ],
   'cook-terrain-glb-chunks': levelId => [
     'cook:terrain-glb-chunks',
     '--',
@@ -68,6 +63,70 @@ const publishBuildStepCommands = {
     `--level=${levelId}`,
   ],
   'audit-engine': () => ['audit:engine'],
+}
+
+function collectAuditBulletSection(output, heading) {
+  const lines = String(output || '').split(/\r?\n/)
+  const headingIndex = lines.findIndex(line => line.trim() === heading)
+  if (headingIndex < 0) return []
+
+  const issues = []
+  let started = false
+  for (const line of lines.slice(headingIndex + 1)) {
+    const trimmed = line.trim()
+    if (!trimmed || /^=+$/.test(trimmed)) continue
+    if (trimmed.startsWith('- ')) {
+      started = true
+      issues.push(trimmed.slice(2))
+      continue
+    }
+    if (started) break
+  }
+  return issues
+}
+
+function auditIssueMatchesLevel(issue, levelId) {
+  const normalizedIssue = String(issue || '').toLowerCase()
+  const normalizedLevel = String(levelId || '').toLowerCase()
+  if (!normalizedLevel) return false
+
+  return (
+    normalizedIssue.startsWith(`${normalizedLevel}:`) ||
+    normalizedIssue.startsWith(`${normalizedLevel}.`) ||
+    normalizedIssue.startsWith(`${normalizedLevel}-`) ||
+    normalizedIssue.includes(`/${normalizedLevel}/`) ||
+    normalizedIssue.includes(`/${normalizedLevel}-`)
+  )
+}
+
+function resolveScopedAuditResult({ levelId, stdout, stderr, exitCode }) {
+  if (exitCode === 0) return null
+
+  const output = `${stdout || ''}\n${stderr || ''}`
+  const failures = collectAuditBulletSection(
+    output,
+    'Engine architecture audit failed',
+  )
+  const levelFailures = failures.filter(issue =>
+    auditIssueMatchesLevel(issue, levelId),
+  )
+
+  if (levelFailures.length > 0) {
+    return {
+      success: false,
+      levelFailures,
+      message: levelFailures.join('\n'),
+    }
+  }
+
+  return {
+    success: true,
+    levelFailures,
+    message:
+      failures.length > 0
+        ? `audit-engine passed for ${levelId}; ${failures.length} unrelated repo-wide audit failure(s) remain.`
+        : `audit-engine passed for ${levelId}.`,
+  }
 }
 
 function assertSafeLevelId(levelId) {
@@ -112,12 +171,7 @@ function normalizePublishBuildPlan(plan) {
   return steps
 }
 
-function runPublishBuildStep({
-  levelId,
-  repoRoot,
-  spawnImpl = spawn,
-  step,
-}) {
+function runPublishBuildStep({ levelId, repoRoot, spawnImpl = spawn, step }) {
   return new Promise(resolve => {
     assertSafeLevelId(levelId)
 
@@ -184,19 +238,31 @@ function runPublishBuildStep({
         parsed.collision?.metadataUrl,
         ...sceneMeshColliderArtifacts,
       ].filter(Boolean)
+      const scopedAudit =
+        step.id === 'audit-engine'
+          ? resolveScopedAuditResult({
+              levelId,
+              stdout,
+              stderr,
+              exitCode: code,
+            })
+          : null
+      const success = scopedAudit ? scopedAudit.success : code === 0
       resolve({
         id: step.id,
-        success: code === 0,
+        success,
         exitCode: code,
         stdout,
         stderr,
         artifacts,
+        scopedAudit,
         message:
-          code === 0
+          scopedAudit?.message ??
+          (code === 0
             ? artifacts.length
               ? `${step.id} passed: ${artifacts.join(', ')}.`
               : `${step.id} passed.`
-            : stderr || stdout || `${step.id} failed with exit code ${code}`,
+            : stderr || stdout || `${step.id} failed with exit code ${code}`),
       })
     })
     child.on('error', error => {

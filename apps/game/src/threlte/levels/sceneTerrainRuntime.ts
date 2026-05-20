@@ -1,7 +1,7 @@
 import type { SceneSettings } from '../engine/sceneDocumentTypes'
 import type { TerrainRuntimeComponentSource } from '../features/terrain/terrainManifest'
 
-type SceneTerrainRuntimeSource = 'baked-heightmap' | 'source-glb'
+type SceneTerrainRuntimeSource = 'source-glb'
 
 type SceneTerrainCollisionSettings = {
   source?: string
@@ -10,7 +10,6 @@ type SceneTerrainCollisionSettings = {
 }
 
 const TERRAIN_RUNTIME_SOURCES = new Set<string>([
-  'baked-heightmap',
   'source-glb',
 ] satisfies SceneTerrainRuntimeSource[])
 

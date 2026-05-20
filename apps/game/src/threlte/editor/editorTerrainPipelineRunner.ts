@@ -1,12 +1,4 @@
-import type { EditorSceneNode, SharedLevelEditorSettings } from './editorTypes'
-
-export type HeightmapSourceDescriptor = {
-  nodeId: string
-  sourceName: string
-  sourceAssetUrl?: string
-  primitive?: EditorSceneNode['primitive']
-  matrix: number[]
-}
+import type { SharedLevelEditorSettings } from './editorTypes'
 
 type TerrainCookPayload = {
   manifestUrl?: string
@@ -26,6 +18,19 @@ type TerrainCookPayload = {
   }
 }
 
+type TerrainSourceImportPayload = {
+  manifestUrl?: string
+  sourceAssetUrl: string
+  sourceAssetHash?: string
+  sourceAssetFingerprint?: {
+    algorithm?: string
+    value?: string
+  }
+  sourceName?: string
+  sourceSizeBytes?: number
+  copied?: boolean
+}
+
 type TerrainCollisionPayload = {
   manifestUrl?: string
   collision?: {
@@ -35,52 +40,99 @@ type TerrainCollisionPayload = {
     triangleCount?: number
     vertexCount?: number
   }
-  metadata?: {
-    sourceHeightmap?: string
-    heightOverrideCount?: number
+}
+
+export function buildTerrainChunkCookRequest(input: { levelId: string }) {
+  return {
+    levelId: input.levelId,
+    mode: 'glb-chunk-terrain',
   }
 }
 
-type TerrainHeightmapPayload = TerrainCollisionPayload & {
-  heightmapUrl?: string
-  resolution?: number
+export function buildTerrainSourceImportRequest(input: {
+  levelId: string
+  sourcePath?: string
   sourceAssetUrl?: string
-  sourceAssetUrls?: string[]
-  sourceNodeIds?: string[]
+  fileName?: string
+  fileBase64?: string
   sourceName?: string
-  sourceTriangleCount?: number
-  bounds?: {
-    min: [number, number, number]
-    max: [number, number, number]
-  }
-  collisionMetadata?: {
-    sourceHeightmap?: string
-    heightOverrideCount?: number
-  }
-}
-
-export function buildTerrainHeightmapRequest(input: {
-  levelId: string
-  nodeId?: string
-  sources: HeightmapSourceDescriptor[]
-  resolution?: number
 }) {
   return {
     levelId: input.levelId,
-    nodeId: input.nodeId,
-    sources: input.sources,
-    resolution: input.resolution ?? 512,
-    bakeCollision: true,
+    sourcePath: input.sourcePath ?? '',
+    sourceAssetUrl: input.sourceAssetUrl ?? '',
+    fileName: input.fileName ?? '',
+    fileBase64: input.fileBase64 ?? '',
+    sourceName: input.sourceName ?? '',
   }
 }
 
-export function buildTerrainChunkCookRequest(input: {
-  levelId: string
-  sourceGlbCook: boolean
-}) {
+export function applyTerrainSourceImportPayload(
+  settings: SharedLevelEditorSettings,
+  payload: TerrainSourceImportPayload,
+): SharedLevelEditorSettings {
+  const terrain = settings.collision?.terrain ?? {}
+  const nextSourceAssetUrl = payload.sourceAssetUrl
+  const nextSourceName = payload.sourceName || nextSourceAssetUrl
+  const sourceAssetFingerprint =
+    payload.sourceAssetFingerprint ??
+    (payload.sourceAssetHash
+      ? {
+          algorithm: 'sha256',
+          value: payload.sourceAssetHash,
+        }
+      : undefined)
+
   return {
-    levelId: input.levelId,
-    mode: input.sourceGlbCook ? 'glb-chunk-terrain' : 'heightfield-terrain',
+    ...settings,
+    ground: {
+      ...(settings.ground ?? {}),
+      mode: 'terrain-chunks',
+      visualSource: 'source-glb-chunks',
+      terrainRuntimeMode: 'glb-chunk-terrain',
+      terrainVisualSource: 'source-glb-chunks',
+      collisionSource: 'source-linked-terrain-collision',
+      fallbackSurfacePolicy: 'disabled',
+      terrainManifestUrl: payload.manifestUrl ?? settings.ground?.terrainManifestUrl,
+      sourceAssetUrl: nextSourceAssetUrl,
+      sourceAssetHash: payload.sourceAssetHash,
+      sourceAssetFingerprint,
+      renderChunks: undefined,
+      collisionProduct: undefined,
+    },
+    collision: {
+      ...(settings.collision ?? {}),
+      terrain: {
+        ...terrain,
+        source: 'source-glb',
+        runtimeSource: 'built-in-manifest',
+        runtimeMode: 'glb-chunk-terrain',
+        visualSource: 'source-glb-chunks',
+        fallbackSurfacePolicy: 'disabled',
+        manifestUrl: payload.manifestUrl ?? terrain.manifestUrl,
+        sourceAssetUrl: nextSourceAssetUrl,
+        sourceAssetUrls: [nextSourceAssetUrl],
+        sourceAssetHash: payload.sourceAssetHash,
+        sourceAssetFingerprint,
+        sourceName: nextSourceName,
+        renderChunks: undefined,
+        chunksPath: undefined,
+        chunkGrid: undefined,
+        chunkCount: undefined,
+        chunkLods: undefined,
+        colliderUrl: undefined,
+        metadataUrl: undefined,
+        colliderResolution: undefined,
+        triangleCount: undefined,
+        vertexCount: undefined,
+        sourceBounds: undefined,
+        sourceTriangleCount: undefined,
+        lastGeneratedAt: undefined,
+        lastChunksGeneratedAt: undefined,
+        heightOverrideCount: undefined,
+        dirty: true,
+      },
+    },
   }
 }
 
@@ -92,21 +144,31 @@ export function applyTerrainCollisionBakePayload(
   },
 ): SharedLevelEditorSettings {
   const collision = payload.collision
-  const metadata = payload.metadata
 
   return {
     ...settings,
+    ground: {
+      ...(settings.ground ?? {}),
+      terrainRuntimeMode: 'glb-chunk-terrain',
+      visualSource: 'source-glb-chunks',
+      terrainVisualSource: 'source-glb-chunks',
+      collisionSource: 'source-linked-terrain-collision',
+      fallbackSurfacePolicy: settings.ground?.fallbackSurfacePolicy ?? 'disabled',
+      terrainManifestUrl:
+        payload.manifestUrl ?? settings.ground?.terrainManifestUrl,
+    },
     collision: {
       ...(settings.collision ?? {}),
       terrain: {
         ...(settings.collision?.terrain ?? {}),
-        source: 'baked-heightmap',
+        source: 'source-glb',
         runtimeSource: 'editor-manifest',
+        runtimeMode: 'glb-chunk-terrain',
+        visualSource: 'source-glb-chunks',
+        fallbackSurfacePolicy:
+          settings.collision?.terrain?.fallbackSurfacePolicy ?? 'disabled',
         manifestUrl:
           payload.manifestUrl ?? settings.collision?.terrain?.manifestUrl,
-        heightmapUrl:
-          metadata?.sourceHeightmap ??
-          settings.collision?.terrain?.heightmapUrl,
         colliderUrl: collision?.url ?? settings.collision?.terrain?.colliderUrl,
         metadataUrl:
           collision?.metadataUrl ?? settings.collision?.terrain?.metadataUrl,
@@ -119,74 +181,7 @@ export function applyTerrainCollisionBakePayload(
         vertexCount:
           collision?.vertexCount ?? settings.collision?.terrain?.vertexCount,
         dirty: options.sourceStillDirty,
-        heightmapDirty: options.sourceStillDirty,
         lastGeneratedAt: new Date().toISOString(),
-        heightOverrideCount:
-          metadata?.heightOverrideCount ??
-          settings.collision?.terrain?.heightOverrideCount,
-      },
-    },
-  }
-}
-
-export function applyTerrainHeightmapPayload(
-  settings: SharedLevelEditorSettings,
-  payload: TerrainHeightmapPayload,
-  options: {
-    selectedNodeId?: string
-    selectedTerrainSourceName: string
-  },
-): SharedLevelEditorSettings {
-  const collision = payload.collision
-  const metadata = payload.collisionMetadata
-
-  return {
-    ...settings,
-    collision: {
-      ...(settings.collision ?? {}),
-      terrain: {
-        ...(settings.collision?.terrain ?? {}),
-        source: 'baked-heightmap',
-        runtimeSource: 'generated-heightmap',
-        manifestUrl:
-          payload.manifestUrl ?? settings.collision?.terrain?.manifestUrl,
-        heightmapUrl:
-          payload.heightmapUrl ?? settings.collision?.terrain?.heightmapUrl,
-        heightmapResolution:
-          payload.resolution ??
-          settings.collision?.terrain?.heightmapResolution,
-        sourceAssetUrl:
-          payload.sourceAssetUrl ?? settings.collision?.terrain?.sourceAssetUrl,
-        sourceAssetUrls:
-          payload.sourceAssetUrls ??
-          settings.collision?.terrain?.sourceAssetUrls,
-        sourceNodeId: options.selectedNodeId,
-        sourceNodeIds:
-          payload.sourceNodeIds ?? settings.collision?.terrain?.sourceNodeIds,
-        sourceName: payload.sourceName ?? options.selectedTerrainSourceName,
-        sourceTriangleCount:
-          payload.sourceTriangleCount ??
-          settings.collision?.terrain?.sourceTriangleCount,
-        sourceBounds:
-          payload.bounds ?? settings.collision?.terrain?.sourceBounds,
-        colliderUrl: collision?.url ?? settings.collision?.terrain?.colliderUrl,
-        metadataUrl:
-          collision?.metadataUrl ?? settings.collision?.terrain?.metadataUrl,
-        colliderResolution:
-          collision?.colliderResolution ??
-          settings.collision?.terrain?.colliderResolution,
-        triangleCount:
-          collision?.triangleCount ??
-          settings.collision?.terrain?.triangleCount,
-        vertexCount:
-          collision?.vertexCount ?? settings.collision?.terrain?.vertexCount,
-        dirty: false,
-        heightmapDirty: false,
-        lastGeneratedAt: new Date().toISOString(),
-        lastChunksGeneratedAt: '',
-        heightOverrideCount:
-          metadata?.heightOverrideCount ??
-          settings.collision?.terrain?.heightOverrideCount,
       },
     },
   }
@@ -195,40 +190,29 @@ export function applyTerrainHeightmapPayload(
 export function applyTerrainChunkCookPayload(
   settings: SharedLevelEditorSettings,
   payload: TerrainCookPayload,
-  options: {
-    sourceGlbCook: boolean
-  },
 ): SharedLevelEditorSettings {
   const terrain = settings.collision?.terrain
   const renderChunks = terrain?.renderChunks
 
   return {
     ...settings,
-    ground: options.sourceGlbCook
-      ? {
+    ground: {
           ...(settings.ground ?? {}),
           terrainRuntimeMode: 'glb-chunk-terrain',
           visualSource: 'source-glb-chunks',
           terrainVisualSource: 'source-glb-chunks',
           fallbackSurfacePolicy:
             settings.ground?.fallbackSurfacePolicy ?? 'disabled',
-        }
-      : settings.ground,
+        },
     collision: {
       ...(settings.collision ?? {}),
       terrain: {
         ...(terrain ?? {}),
-        source: options.sourceGlbCook ? terrain?.source : 'baked-heightmap',
+        source: 'source-glb',
         runtimeSource: terrain?.runtimeSource ?? 'editor-manifest',
-        runtimeMode: options.sourceGlbCook
-          ? 'glb-chunk-terrain'
-          : terrain?.runtimeMode,
-        visualSource: options.sourceGlbCook
-          ? 'source-glb-chunks'
-          : terrain?.visualSource,
-        fallbackSurfacePolicy: options.sourceGlbCook
-          ? terrain?.fallbackSurfacePolicy ?? 'disabled'
-          : terrain?.fallbackSurfacePolicy,
+        runtimeMode: 'glb-chunk-terrain',
+        visualSource: 'source-glb-chunks',
+        fallbackSurfacePolicy: terrain?.fallbackSurfacePolicy ?? 'disabled',
         manifestUrl: payload.manifestUrl ?? terrain?.manifestUrl,
         chunksPath: payload.chunksPath ?? terrain?.chunksPath,
         chunkGrid: payload.grid ?? terrain?.chunkGrid,
@@ -236,8 +220,7 @@ export function applyTerrainChunkCookPayload(
         chunkLods: payload.lods ?? terrain?.chunkLods,
         sourceAssetUrl: payload.sourceAssetUrl ?? terrain?.sourceAssetUrl,
         sourceAssetHash: payload.sourceHash ?? terrain?.sourceAssetHash,
-        renderChunks: options.sourceGlbCook
-          ? {
+        renderChunks: {
               ...(renderChunks ?? {}),
               type: 'glb-chunk-terrain',
               visualSource: 'source-glb-chunks',
@@ -265,8 +248,7 @@ export function applyTerrainChunkCookPayload(
               textureReferencesPreserved:
                 payload.preservation?.textureReferences ??
                 renderChunks?.textureReferencesPreserved,
-            }
-          : renderChunks,
+            },
         lastChunksGeneratedAt: new Date().toISOString(),
       },
     },

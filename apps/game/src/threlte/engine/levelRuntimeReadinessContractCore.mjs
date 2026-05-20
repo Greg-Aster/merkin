@@ -55,11 +55,9 @@ function hasTerrainRuntimeCollision(level, options = {}) {
   const ground = level?.settings?.level?.ground
   return Boolean(
     hasString(options.runtimeTerrainManifestUrl) ||
-      ((terrain?.source === 'baked-heightmap' ||
-        terrain?.source === 'source-glb') &&
+      (terrain?.source === 'source-glb' &&
         hasString(terrain.manifestUrl)) ||
-      ((ground?.collisionSource === 'baked-heightfield' ||
-        ground?.collisionSource === 'source-linked-terrain-collision') &&
+      (ground?.collisionSource === 'source-linked-terrain-collision' &&
         hasString(ground.terrainManifestUrl)),
   )
 }

@@ -210,9 +210,7 @@ export interface AudioRegionComponent {
 }
 
 export interface TerrainComponent {
-  source:
-    | { kind: 'heightmap'; url?: string; generated?: boolean }
-    | { kind: 'mesh'; url: string }
+  source: { kind: 'mesh'; url: string }
   worldSize?: number
   worldSizeX?: number
   worldSizeZ?: number

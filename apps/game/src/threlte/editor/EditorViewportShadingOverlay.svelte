@@ -53,7 +53,6 @@ function isSkippableObject(object: THREE.Object3D) {
     if (
       current.userData.editorViewportOverlay ||
       current.name.startsWith('editor-selection-outline') ||
-      current.name.startsWith('editor-heightmap-source-preview') ||
       current.name.startsWith('editor-workbench-lighting') ||
       current.type.includes('Helper') ||
       current.type.includes('TransformControls')

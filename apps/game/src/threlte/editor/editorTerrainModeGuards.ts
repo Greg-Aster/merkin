@@ -8,11 +8,10 @@ export type EditorTerrainModeGuardInput = {
   renderChunkType?: string | null
   terrainSource?: string | null
   terrainSculptEnabled?: boolean | null
-  hasHeightfieldChunks?: boolean | null
 }
 
 export function canonicalTerrainVisualSource(value: string | null | undefined) {
-  return value === 'terrain-chunks' ? 'generated-heightmap-chunks' : value
+  return value === 'terrain-chunks' ? 'source-glb-chunks' : value
 }
 
 export function isSourceGlbChunkTerrain(input: EditorTerrainModeGuardInput) {
@@ -25,22 +24,5 @@ export function isSourceGlbChunkTerrain(input: EditorTerrainModeGuardInput) {
       'source-glb-chunks' ||
     input.renderChunkType === 'glb-chunk-terrain' ||
     input.terrainSource === 'source-glb'
-  )
-}
-
-export function isGeneratedHeightmapChunkTerrain(
-  input: EditorTerrainModeGuardInput,
-) {
-  if (isSourceGlbChunkTerrain(input)) return false
-
-  return (
-    input.terrainSculptEnabled === true ||
-    input.groundMode === 'terrain-chunks' ||
-    input.groundMode === 'hybrid' ||
-    canonicalTerrainVisualSource(input.groundVisualSource) ===
-      'generated-heightmap-chunks' ||
-    input.groundTerrainVisualSource === 'generated-heightmap-chunks' ||
-    input.renderChunkType === 'heightfield-terrain' ||
-    input.hasHeightfieldChunks === true
   )
 }

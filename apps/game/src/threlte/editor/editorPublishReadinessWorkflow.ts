@@ -172,18 +172,6 @@ export function addPublishReadinessWorkflow(
   })
 
   addWorkflowStep(viewModel, {
-    id: 'generate-heightmap',
-    label: 'Generate Heightmap',
-    command: 'pnpm --dir apps/game generate:terrain-heightmap',
-    expectedOutput:
-      'Heightmap image, terrain manifest bounds, and source provenance.',
-    reason: commandIds.has('generate-heightmap')
-      ? 'Terrain source basket changed.'
-      : 'Required only when heightfield terrain sources changed.',
-    required: commandIds.has('generate-heightmap'),
-  })
-
-  addWorkflowStep(viewModel, {
     id: 'bake-terrain-collision',
     label: 'Bake Terrain Collision',
     command: 'pnpm --dir apps/game bake:terrain-collision',
@@ -204,18 +192,6 @@ export function addPublishReadinessWorkflow(
       ? 'Mesh-derived collision products are dirty, stale, missing, malformed, or over budget.'
       : 'Required only when scene mesh collision products changed.',
     required: commandIds.has('bake-scene-mesh-colliders'),
-  })
-
-  addWorkflowStep(viewModel, {
-    id: 'cook-terrain-chunks',
-    label: 'Cook Heightfield Chunks',
-    command: 'pnpm --dir apps/game cook:terrain-chunks',
-    expectedOutput:
-      'Runtime terrain chunk meshes referenced by terrain manifest.',
-    reason: commandIds.has('cook-terrain-chunks')
-      ? 'Terrain visual chunks are missing from the manifest.'
-      : 'Required only when terrain visuals or heightmap changed.',
-    required: commandIds.has('cook-terrain-chunks'),
   })
 
   addWorkflowStep(viewModel, {

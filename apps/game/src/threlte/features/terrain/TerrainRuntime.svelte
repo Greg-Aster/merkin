@@ -10,7 +10,6 @@ import {
   type BakedTerrainCollider,
   loadBakedTerrainCollider,
 } from './bakedTerrainCollider'
-import HeightmapSurface from './components/HeightmapSurface.svelte'
 import TerrainChunk from './components/TerrainChunk.svelte'
 import TerrainCollider from './components/TerrainCollider.svelte'
 import type { TerrainRuntimeVisualContract } from './terrainManifest'
@@ -20,9 +19,9 @@ import type { TerrainRuntimeReadyDetail } from './types'
 export let levelId: string
 export let config: TerrainConfig
 export let visualContract: TerrainRuntimeVisualContract = {
-  mode: 'heightfield-terrain',
-  visualSource: 'heightmap-surface',
-  fallbackSurfacePolicy: 'always',
+  mode: 'glb-chunk-terrain',
+  visualSource: 'source-glb-chunks',
+  fallbackSurfacePolicy: 'disabled',
   diagnostics: [],
 }
 export let collisionStrategy: 'baked-terrain-mesh' = 'baked-terrain-mesh'
@@ -43,20 +42,14 @@ let visualReady = false
 let fallbackSurfaceActive = false
 let visualDiagnosticSignature = ''
 
-$: usesPrimaryVisualChunks =
-  visualContract.visualSource === 'generated-heightmap-chunks' ||
-  visualContract.visualSource === 'source-glb-chunks'
-$: usesPrimaryHeightmapSurface =
-  visualContract.visualSource === 'heightmap-surface'
-$: showVisualSurface = usesPrimaryHeightmapSurface || fallbackSurfaceActive
+$: usesPrimaryVisualChunks = visualContract.visualSource === 'source-glb-chunks'
 $: showVisualChunks = usesPrimaryVisualChunks
 
 function getReadySignature(detail: TerrainRuntimeReadyDetail) {
   return [
     levelId,
-    config.heightmapUrl,
     detail.source,
-    detail.collision?.url ?? 'heightmap',
+    detail.collision?.url ?? 'collision',
     detail.collision?.triangleCount ?? 0,
     detail.visual?.authoritativeSource ?? visualContract.visualSource,
     detail.visual?.fallbackSurfaceActive ? 'fallback' : 'primary',
@@ -121,12 +114,7 @@ function setTerrainCollisionReady(detail: TerrainRuntimeReadyDetail) {
 }
 
 function getFallbackSurfaceActive() {
-  if (!usesPrimaryVisualChunks) return false
-  if (visualContract.fallbackSurfacePolicy !== 'until-required-chunks-ready') {
-    return false
-  }
-  if (failedChunkUrls.size > 0) return true
-  return activeChunkUrls.some(url => !loadedChunkUrls.has(url))
+  return false
 }
 
 function updateTerrainVisualDiagnostics() {
@@ -151,8 +139,6 @@ function updateTerrainVisualDiagnostics() {
     message = `Terrain visuals for ${levelId} are scene-authored actors.`
   } else if (visualContract.visualSource === 'none') {
     message = `Terrain runtime visual rendering disabled for ${levelId}.`
-  } else if (usesPrimaryHeightmapSurface) {
-    message = `Heightmap terrain visual ready on ${levelId}.`
   } else if (usesPrimaryVisualChunks) {
     if (!config.chunkPathTemplate) {
       level = 'error'
@@ -169,12 +155,10 @@ function updateTerrainVisualDiagnostics() {
       message = fallbackSurfaceActive
         ? `Fallback terrain surface active for ${levelId}; ${failedActiveChunkCount} required terrain chunk(s) failed to load.`
         : `${failedActiveChunkCount} required terrain chunk(s) failed to load on ${levelId}.`
-      visualReady = fallbackSurfaceActive
+      visualReady = false
     } else if (pendingActiveChunkCount > 0) {
       level = fallbackSurfaceActive ? 'warning' : 'loading'
-      message = fallbackSurfaceActive
-        ? `Fallback terrain surface active for ${levelId}; waiting for ${pendingActiveChunkCount} required terrain chunk(s).`
-        : `Loading ${pendingActiveChunkCount} required terrain chunk(s) for ${levelId}.`
+      message = `Loading ${pendingActiveChunkCount} required terrain chunk(s) for ${levelId}.`
       visualReady = true
     } else {
       message = `Terrain chunk visuals ready on ${levelId}.`
@@ -291,7 +275,6 @@ onMount(async () => {
     terrainStore.update(state => ({
       ...state,
       isReady: true,
-      heightData: manager.getHeightData(),
       resolution: manager.getResolution(),
       worldSize: manager.getWorldSize(),
       bounds: manager.getBounds(),
@@ -299,10 +282,9 @@ onMount(async () => {
     }))
     setRuntimeDiagnostic('terrain', {
       level: 'loading',
-      message: `Terrain height data ready for ${levelId}; loading collision.`,
+      message: `Terrain source bounds ready for ${levelId}; loading collision.`,
       meta: {
         levelId,
-        heightmapUrl: config.heightmapUrl,
         chunksPath: config.chunkPathTemplate,
       },
     })
@@ -339,7 +321,6 @@ onMount(async () => {
         message: `Terrain ready on ${levelId}.`,
         meta: {
           levelId,
-          heightmapUrl: config.heightmapUrl,
           collisionUrl: config.collision.url,
           triangleCount: bakedCollider.triangleCount,
           visualChunks: Boolean(config.chunkPathTemplate),
@@ -350,8 +331,6 @@ onMount(async () => {
       })
       setTerrainCollisionReady({
         source: 'baked-collider',
-        heightmapUrl: config.heightmapUrl,
-        heightmapReady: true,
         collisionReady: true,
         bounds: config.bounds,
         resolution: manager.getResolution(),
@@ -421,18 +400,16 @@ $: {
 </script>
 
 <T.Group>
-  {#if $terrainStore.isReady && $terrainStore.heightData}
+  {#if $terrainStore.isReady}
     {#if bakedCollider}
       <T.Group name={`${levelId}-terrain-physics`}>
       <TerrainCollider
-        heightData={$terrainStore.heightData}
         resolution={$terrainStore.resolution}
         worldSize={$terrainStore.worldSize}
         worldSizeX={$terrainStore.manager?.getWorldSizeX()}
         worldSizeZ={$terrainStore.manager?.getWorldSizeZ()}
         bounds={$terrainStore.bounds}
         collision={config.collision}
-        heightmapUrl={config.heightmapUrl}
         terrainResolution={$terrainStore.resolution}
         terrainWorldSize={$terrainStore.worldSize}
         terrainWorldSizeX={$terrainStore.manager?.getWorldSizeX()}
@@ -444,18 +421,6 @@ $: {
     {/if}
 
     <T.Group name={`${levelId}-terrain-visual-lod`}>
-      {#if showVisualSurface}
-        <HeightmapSurface
-          heightData={$terrainStore.heightData}
-          resolution={$terrainStore.resolution}
-          worldSize={$terrainStore.worldSize}
-          worldSizeX={$terrainStore.manager?.getWorldSizeX()}
-          worldSizeZ={$terrainStore.manager?.getWorldSizeZ()}
-          bounds={$terrainStore.bounds}
-          verticalOffset={config.chunkPathTemplate ? -0.06 : 0}
-        />
-      {/if}
-
       {#if showVisualChunks}
         {#each visibleChunks as chunk (chunk.id)}
           {#if chunk.currentLod !== -1 && config.chunkPathTemplate}

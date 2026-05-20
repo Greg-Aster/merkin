@@ -201,20 +201,26 @@ import {
   stylePresetOptions,
 } from './editorStyleBatchSelection'
 import { createEditorStyleController } from './editorStyleController'
-import { isGeneratedHeightmapChunkTerrain } from './editorTerrainModeGuards'
 import {
   type EditorTerrainStatusSnapshot,
   describeEditorTerrainPipeline,
   planEditorTerrainBakeSteps,
 } from './editorTerrainPipeline'
 import {
-  type HeightmapSourceDescriptor,
+  applyTerrainSourceImportPayload,
   applyTerrainChunkCookPayload,
   applyTerrainCollisionBakePayload,
-  applyTerrainHeightmapPayload,
+  buildTerrainSourceImportRequest,
   buildTerrainChunkCookRequest,
-  buildTerrainHeightmapRequest,
 } from './editorTerrainPipelineRunner'
+
+type TerrainSourceDescriptor = {
+  nodeId: string
+  sourceName: string
+  sourceAssetUrl?: string
+  primitive?: EditorSceneNode['primitive']
+  matrix: number[]
+}
 
 export let levelId: string
 
@@ -236,9 +242,9 @@ let editorViewportHeight = 900
 let lastAppliedLayoutPreset: EditorLayoutPreset = 'default'
 let buildWorkflowOpen = true
 let buildOutputOpen = false
-let heightmapSourceNodes: EditorSceneNode[] = []
-let heightmapCandidateNodes: EditorSceneNode[] = []
-let heightmapSourceDescriptors: HeightmapSourceDescriptor[] = []
+let terrainProjectionSourceNodes: EditorSceneNode[] = []
+let terrainProjectionCandidateNodes: EditorSceneNode[] = []
+let terrainProjectionSourceDescriptors: TerrainSourceDescriptor[] = []
 let canUndo = false
 let canRedo = false
 let importBuffer = ''
@@ -252,8 +258,8 @@ let blenderSceneExportResult: {
 } | null = null
 let publishPipelineState: EditorPublishPipelineState =
   createInitialEditorPublishPipelineState()
+let terrainSourceImportPending = false
 let terrainCollisionBakePending = false
-let terrainHeightmapGeneratePending = false
 let terrainChunkCookPending = false
 let worldPartitionCookPending = false
 let groundTerrainPublishPending = false
@@ -1667,7 +1673,7 @@ $: selectedNodeColliderSize =
   resolveNodeCollision(selectedNode, editorScene?.settings)?.size ??
   getNodeVisualColliderSize(selectedNode)
 
-function canBakeHeightmapSource(node: EditorSceneNode) {
+function canBakeTerrainProjectionSource(node: EditorSceneNode) {
   return Boolean(
     node.asset?.url ||
       node.primitive ||
@@ -1675,14 +1681,14 @@ function canBakeHeightmapSource(node: EditorSceneNode) {
   )
 }
 
-function resolveHeightmapSourceAssetUrl(node: EditorSceneNode) {
+function resolveTerrainProjectionSourceAssetUrl(node: EditorSceneNode) {
   if (node.asset?.url) return node.asset.url
   if (node.prefab)
     return getPrefabAssetUrl(node.prefab.type, node.prefab.variant)
   return ''
 }
 
-function getHeightmapSelectionRootIds() {
+function getTerrainProjectionSelectionRootIds() {
   const roots = selectedNodes.length
     ? selectedNodes
     : selectedNode
@@ -1694,21 +1700,21 @@ function getHeightmapSelectionRootIds() {
   )
 }
 
-function getHeightmapSourceNodes() {
+function getTerrainProjectionSourceNodes() {
   const basketIds = terrainCollisionSettings?.sourceNodeIds ?? []
   if (basketIds.length > 0) {
     const idSet = new Set(basketIds)
     return editorNodes.filter(
-      node => idSet.has(node.id) && canBakeHeightmapSource(node),
+      node => idSet.has(node.id) && canBakeTerrainProjectionSource(node),
     )
   }
 
   return []
 }
 
-function getHeightmapCandidateNodes() {
+function getTerrainProjectionCandidateNodes() {
   const sourceIds = new Set<string>()
-  const rootIds = getHeightmapSelectionRootIds()
+  const rootIds = getTerrainProjectionSelectionRootIds()
 
   for (const rootId of rootIds) {
     collectSubtreeIds(editorNodes, rootId).forEach(nodeId => {
@@ -1719,38 +1725,38 @@ function getHeightmapCandidateNodes() {
   }
 
   return editorNodes.filter(
-    node => sourceIds.has(node.id) && canBakeHeightmapSource(node),
+    node => sourceIds.has(node.id) && canBakeTerrainProjectionSource(node),
   )
 }
 
-function getHeightmapSourceDescriptors() {
-  if (heightmapSourceNodes.length === 0) return []
+function getTerrainProjectionSourceDescriptors() {
+  if (terrainProjectionSourceNodes.length === 0) return []
 
   const getWorldMatrix = createWorldMatrixResolver(editorNodes)
-  return heightmapSourceNodes.map(node => {
-    const sourceAssetUrl = resolveHeightmapSourceAssetUrl(node)
+  return terrainProjectionSourceNodes.map(node => {
+    const sourceAssetUrl = resolveTerrainProjectionSourceAssetUrl(node)
     return {
       nodeId: node.id,
       sourceName: node.name,
       ...(sourceAssetUrl ? { sourceAssetUrl } : {}),
       ...(node.primitive ? { primitive: node.primitive } : {}),
       matrix: getWorldMatrix(node.id).toArray(),
-    } satisfies HeightmapSourceDescriptor
+    } satisfies TerrainSourceDescriptor
   })
 }
 
-$: heightmapCandidateNodes = getHeightmapCandidateNodes()
-$: heightmapSourceNodes = getHeightmapSourceNodes()
-$: heightmapSourceDescriptors = getHeightmapSourceDescriptors()
+$: terrainProjectionCandidateNodes = getTerrainProjectionCandidateNodes()
+$: terrainProjectionSourceNodes = getTerrainProjectionSourceNodes()
+$: terrainProjectionSourceDescriptors = getTerrainProjectionSourceDescriptors()
 $: selectedTerrainSourceName =
-  heightmapSourceNodes.length === 0
+  terrainProjectionSourceNodes.length === 0
     ? ''
-    : heightmapSourceNodes.length === 1
-      ? heightmapSourceNodes[0].name
-      : `${selectedNode?.name ?? 'Selection'} (${heightmapSourceNodes.length} sources)`
+    : terrainProjectionSourceNodes.length === 1
+      ? terrainProjectionSourceNodes[0].name
+      : `${selectedNode?.name ?? 'Selection'} (${terrainProjectionSourceNodes.length} sources)`
 $: selectedTerrainSourceAssetUrl =
-  heightmapSourceDescriptors[0]?.sourceAssetUrl ??
-  (heightmapSourceDescriptors.length > 0 ? 'procedural-terrain-sources' : '')
+  terrainProjectionSourceDescriptors[0]?.sourceAssetUrl ??
+  (terrainProjectionSourceDescriptors.length > 0 ? 'procedural-terrain-sources' : '')
 $: nextTerrainStatusKey = JSON.stringify({
   levelId: activeSceneLevelId || levelId || editorScene?.levelId || '',
   updatedAt: editorScene?.updatedAt ?? '',
@@ -1773,7 +1779,7 @@ function setTerrainSourceBasket(sourceNodes: EditorSceneNode[]) {
   const sourceAssetUrls = Array.from(
     new Set(
       sourceNodes
-        .map(resolveHeightmapSourceAssetUrl)
+        .map(resolveTerrainProjectionSourceAssetUrl)
         .filter((url): url is string => Boolean(url)),
     ),
   )
@@ -1788,8 +1794,10 @@ function setTerrainSourceBasket(sourceNodes: EditorSceneNode[]) {
     const terrain = settings.collision?.terrain ?? {}
     const baseTerrain = {
       ...terrain,
-      source: 'baked-heightmap' as const,
+      source: 'source-glb' as const,
       runtimeSource: terrain.runtimeSource ?? 'editor-manifest',
+      runtimeMode: 'glb-chunk-terrain' as const,
+      visualSource: 'source-glb-chunks' as const,
       sourceNodeIds,
       sourceNodeId: sourceNodeIds[0],
       sourceAssetUrls,
@@ -1801,7 +1809,7 @@ function setTerrainSourceBasket(sourceNodes: EditorSceneNode[]) {
         ? {
             ...baseTerrain,
             dirty: true,
-            heightmapDirty: true,
+            dirty: true,
           }
         : {
             ...baseTerrain,
@@ -1812,8 +1820,6 @@ function setTerrainSourceBasket(sourceNodes: EditorSceneNode[]) {
             sourceNodeId: undefined,
             sourceNodeIds: [],
             sourceTriangleCount: undefined,
-            heightmapUrl: undefined,
-            heightmapResolution: undefined,
             manifestUrl: undefined,
             colliderUrl: undefined,
             metadataUrl: undefined,
@@ -1828,7 +1834,7 @@ function setTerrainSourceBasket(sourceNodes: EditorSceneNode[]) {
             lastGeneratedAt: undefined,
             lastChunksGeneratedAt: undefined,
             dirty: true,
-            heightmapDirty: true,
+            dirty: true,
           }
 
     return {
@@ -1842,19 +1848,19 @@ function setTerrainSourceBasket(sourceNodes: EditorSceneNode[]) {
 }
 
 function addSelectedTerrainSourcesToBasket() {
-  if (heightmapCandidateNodes.length === 0) {
+  if (terrainProjectionCandidateNodes.length === 0) {
     saveMessage =
       'Select terrain source meshes, primitives, prefabs, or groups first'
     return
   }
 
-  setTerrainSourceBasket([...heightmapSourceNodes, ...heightmapCandidateNodes])
-  saveMessage = `Added ${heightmapCandidateNodes.length} terrain source candidate(s)`
+  setTerrainSourceBasket([...terrainProjectionSourceNodes, ...terrainProjectionCandidateNodes])
+  saveMessage = `Added ${terrainProjectionCandidateNodes.length} terrain source candidate(s)`
 }
 
 function removeTerrainSourceFromBasket(nodeId: string) {
   setTerrainSourceBasket(
-    heightmapSourceNodes.filter(node => node.id !== nodeId),
+    terrainProjectionSourceNodes.filter(node => node.id !== nodeId),
   )
   saveMessage = 'Removed terrain source from basket'
 }
@@ -2641,6 +2647,20 @@ function readFileAsText(file: File) {
   })
 }
 
+function readFileAsBase64(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.addEventListener('load', () => {
+      const value = String(reader.result ?? '')
+      resolve(value.includes(',') ? value.split(',').pop() ?? '' : value)
+    })
+    reader.addEventListener('error', () => {
+      reject(reader.error ?? new Error('File read failed'))
+    })
+    reader.readAsDataURL(file)
+  })
+}
+
 async function importLevelFromBlenderDeltaFile(file: File) {
   const scene = get(editorSceneStore)
   if (!scene) {
@@ -2968,20 +2988,14 @@ function buildEditorCommands(): EditorCommand[] {
     terrainStatus: terrainStatusSnapshot,
   })
   const terrainPipelineBusy =
+    terrainSourceImportPending ||
     terrainCollisionBakePending ||
-    terrainHeightmapGeneratePending ||
     terrainChunkCookPending
   const terrainCommand = (id: string) =>
     terrainPipeline.commands.find(command => command.id === id)
   const bakeTerrainCommand = terrainCommand('bake-terrain')
-  const generateHeightmapCommand = terrainCommand('generate-heightmap')
   const bakeTerrainCollisionCommand = terrainCommand('bake-terrain-collision')
-  const heightfieldChunkCommand = terrainCommand('cook-heightfield-chunks')
-  const glbChunkCommand = terrainCommand('cook-glb-chunks')
-  const cookChunkCommand =
-    terrainPipeline.mode === 'glb-chunk-terrain' || !heightfieldChunkCommand
-      ? glbChunkCommand
-      : heightfieldChunkCommand
+  const cookChunkCommand = terrainCommand('cook-glb-chunks')
 
   return [
     {
@@ -3058,7 +3072,7 @@ function buildEditorCommands(): EditorCommand[] {
       id: 'bake-terrain',
       label: 'Bake Terrain',
       description:
-        'Make runtime terrain current: generate heightmap if needed, bake collision, cook chunks, then validate.',
+        'Make runtime terrain current: cook GLB chunks, bake collision, then validate.',
       category: 'World',
       ownerWorkspace: 'build',
       enabled: !terrainPipelineBusy && Boolean(bakeTerrainCommand?.enabled),
@@ -3075,33 +3089,6 @@ function buildEditorCommands(): EditorCommand[] {
       run: () => {
         openOwnerWorkspace('build')
         void bakeTerrainPipeline()
-      },
-    },
-    {
-      id: 'generate-terrain-heightmap',
-      label: 'Generate Heightmap',
-      description:
-        generateHeightmapCommand?.reason ??
-        'Generate a heightmap from the selected terrain source.',
-      category: 'World',
-      ownerWorkspace: 'build',
-      enabled:
-        !terrainHeightmapGeneratePending &&
-        Boolean(generateHeightmapCommand?.enabled),
-      disabledReason: terrainHeightmapGeneratePending
-        ? 'Terrain heightmap generation is already running.'
-        : generateHeightmapCommand?.enabled
-          ? undefined
-          : generateHeightmapCommand?.reason ??
-            'Terrain heightmap generation is blocked.',
-      status: terrainHeightmapGeneratePending
-        ? 'experimental'
-        : generateHeightmapCommand?.enabled
-          ? 'ready'
-          : 'experimental',
-      run: () => {
-        openOwnerWorkspace('build')
-        void generateTerrainHeightmapFromSelection()
       },
     },
     {
@@ -3132,7 +3119,7 @@ function buildEditorCommands(): EditorCommand[] {
       },
     },
     {
-      id: 'cook-terrain-chunks',
+      id: 'cook-terrain-glb-chunks',
       label: 'Cook Terrain Chunks',
       description:
         cookChunkCommand?.reason ??
@@ -3917,7 +3904,9 @@ function setTerrainAutoBake(enabled: boolean) {
       ...(settings.collision ?? {}),
       terrain: {
         ...(settings.collision?.terrain ?? {}),
-        source: 'baked-heightmap',
+        source: 'source-glb',
+        runtimeMode: 'glb-chunk-terrain',
+        visualSource: 'source-glb-chunks',
         runtimeSource:
           settings.collision?.terrain?.runtimeSource ?? 'editor-manifest',
       },
@@ -3948,6 +3937,10 @@ async function bakeTerrainCollision() {
   saveMessage = 'Baking terrain collision...'
 
   try {
+    await levelController.saveSceneDocumentToDisk(
+      activeSceneLevelId,
+      get(editorSceneStore),
+    )
     const response = await fetch(
       `${EDITOR_API_BASE}/api/editor-terrain/bake-collision`,
       {
@@ -3961,15 +3954,12 @@ async function bakeTerrainCollision() {
       throw new Error(payload?.message ?? 'Terrain collision bake failed')
     }
 
-    const sourceStillDirty = Boolean(terrainCollisionSettings?.heightmapDirty)
     updateLevelSceneSettings(settings =>
       applyTerrainCollisionBakePayload(settings, payload, {
-        sourceStillDirty,
+        sourceStillDirty: false,
       }),
     )
-    saveMessage = sourceStillDirty
-      ? 'Terrain collision baked from existing heightmap; source basket still needs heightmap generation'
-      : 'Terrain collision baked'
+    saveMessage = 'Terrain collision baked'
     return true
   } catch (error) {
     console.error('Terrain collision bake failed:', error)
@@ -3978,58 +3968,6 @@ async function bakeTerrainCollision() {
     return false
   } finally {
     terrainCollisionBakePending = false
-  }
-}
-
-async function generateTerrainHeightmapFromSelection() {
-  if (terrainHeightmapGeneratePending) return false
-  if (heightmapSourceDescriptors.length === 0) {
-    saveMessage =
-      'Select a mesh asset, primitive, prefab, or group to generate the terrain heightmap'
-    return false
-  }
-
-  terrainHeightmapGeneratePending = true
-  saveMessage = `Generating terrain heightmap from ${selectedTerrainSourceName}...`
-
-  try {
-    const response = await fetch(
-      `${EDITOR_API_BASE}/api/editor-terrain/generate-heightmap`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-          buildTerrainHeightmapRequest({
-            levelId: activeSceneLevelId,
-            nodeId: selectedNode?.id,
-            sources: heightmapSourceDescriptors,
-            resolution: terrainCollisionSettings?.heightmapResolution ?? 512,
-          }),
-        ),
-      },
-    )
-    const payload = await response.json()
-    if (!payload?.success) {
-      throw new Error(payload?.message ?? 'Terrain heightmap generation failed')
-    }
-
-    updateLevelSceneSettings(settings =>
-      applyTerrainHeightmapPayload(settings, payload, {
-        selectedNodeId: selectedNode?.id,
-        selectedTerrainSourceName,
-      }),
-    )
-    saveMessage = `Generated heightmap and collision from ${selectedTerrainSourceName}`
-    return true
-  } catch (error) {
-    console.error('Terrain heightmap generation failed:', error)
-    saveMessage =
-      error instanceof Error
-        ? error.message
-        : 'Terrain heightmap generation failed'
-    return false
-  } finally {
-    terrainHeightmapGeneratePending = false
   }
 }
 
@@ -4072,6 +4010,61 @@ async function refreshTerrainStatusSnapshot(
   terrainStatusSnapshot = snapshot
 }
 
+async function importTerrainSource(input: {
+  file?: File | null
+  sourcePath?: string
+}) {
+  if (terrainSourceImportPending) return false
+  const sourcePath = input.sourcePath?.trim() ?? ''
+  const file = input.file ?? null
+  if (!file && !sourcePath) {
+    saveMessage = 'Choose a Blender GLB/GLTF file or enter a terrain source path'
+    return false
+  }
+
+  terrainSourceImportPending = true
+  saveMessage = file
+    ? `Importing terrain source ${file.name}...`
+    : `Importing terrain source ${sourcePath}...`
+
+  try {
+    const fileBase64 = file ? await readFileAsBase64(file) : ''
+    const response = await fetch(
+      `${EDITOR_API_BASE}/api/editor-terrain/import-source`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          buildTerrainSourceImportRequest({
+            levelId: activeSceneLevelId,
+            sourcePath,
+            fileName: file?.name ?? '',
+            fileBase64,
+            sourceName: file?.name ?? sourcePath,
+          }),
+        ),
+      },
+    )
+    const payload = await response.json()
+    if (!payload?.success) {
+      throw new Error(payload?.message ?? 'Terrain source import failed')
+    }
+
+    updateLevelSceneSettings(settings =>
+      applyTerrainSourceImportPayload(settings, payload),
+    )
+    saveMessage = `Imported terrain source ${payload.sourceAssetUrl}; save and bake terrain products next`
+    return true
+  } catch (error) {
+    console.error('Terrain source import failed:', error)
+    saveMessage =
+      error instanceof Error ? error.message : 'Terrain source import failed'
+    return false
+  } finally {
+    terrainSourceImportPending = false
+  }
+}
+
 async function cookTerrainChunks() {
   if (terrainChunkCookPending) return false
   const scene = get(editorSceneStore)
@@ -4083,21 +4076,20 @@ async function cookTerrainChunks() {
     terrainStatus,
   })
   const cookCommand = pipeline.commands.find(
-    command =>
-      command.id === 'cook-glb-chunks' ||
-      command.id === 'cook-heightfield-chunks',
+    command => command.id === 'cook-glb-chunks',
   )
   if (pipeline.mode === 'glb-chunk-terrain' && !cookCommand?.enabled) {
     saveMessage = cookCommand?.reason ?? 'Terrain chunk cook is blocked'
     return false
   }
-  const sourceGlbCook = pipeline.mode === 'glb-chunk-terrain'
   terrainChunkCookPending = true
-  saveMessage = sourceGlbCook
-    ? 'Cooking source GLB terrain chunks...'
-    : 'Cooking terrain visual chunks...'
+  saveMessage = 'Cooking source GLB terrain chunks...'
 
   try {
+    await levelController.saveSceneDocumentToDisk(
+      activeSceneLevelId,
+      get(editorSceneStore),
+    )
     const response = await fetch(
       `${EDITOR_API_BASE}/api/editor-terrain/cook-chunks`,
       {
@@ -4106,7 +4098,6 @@ async function cookTerrainChunks() {
         body: JSON.stringify(
           buildTerrainChunkCookRequest({
             levelId: activeSceneLevelId,
-            sourceGlbCook,
           }),
         ),
       },
@@ -4117,13 +4108,9 @@ async function cookTerrainChunks() {
     }
 
     updateLevelSceneSettings(settings =>
-      applyTerrainChunkCookPayload(settings, payload, {
-        sourceGlbCook,
-      }),
+      applyTerrainChunkCookPayload(settings, payload),
     )
-    saveMessage = sourceGlbCook
-      ? `Cooked ${payload.chunkCount ?? 0} source GLB terrain chunks`
-      : `Cooked ${payload.chunkCount ?? 0} terrain visual chunks`
+    saveMessage = `Cooked ${payload.chunkCount ?? 0} source GLB terrain chunks`
     return true
   } catch (error) {
     console.error('Terrain chunk cook failed:', error)
@@ -4163,7 +4150,6 @@ async function validateTerrainContract() {
 async function bakeTerrainPipeline() {
   if (
     terrainCollisionBakePending ||
-    terrainHeightmapGeneratePending ||
     terrainChunkCookPending
   ) {
     saveMessage = 'Terrain pipeline is already running'
@@ -4200,15 +4186,6 @@ async function bakeTerrainPipeline() {
       terrainCollisionSettings?.renderChunks?.type ??
       groundSettings?.renderChunks?.type,
   })
-  const appendStepBeforeValidation = (step: (typeof steps)[number]) => {
-    if (steps.includes(step)) return
-    const validationIndex = steps.indexOf('validation')
-    if (validationIndex === -1) {
-      steps.push(step)
-    } else {
-      steps.splice(validationIndex, 0, step)
-    }
-  }
   saveMessage =
     pipeline.mode === 'scene-authored'
       ? 'Validating scene-authored terrain...'
@@ -4220,62 +4197,40 @@ async function bakeTerrainPipeline() {
     return
   }
 
+  try {
+    saveMessage = 'Saving terrain source contract before bake...'
+    await levelController.saveSceneDocumentToDisk(
+      activeSceneLevelId,
+      get(editorSceneStore),
+    )
+  } catch (error) {
+    console.error('Terrain source contract save failed:', error)
+    saveMessage =
+      error instanceof Error
+        ? error.message
+        : 'Terrain source contract save failed'
+    return
+  }
+
   if (pipeline.mode === 'glb-chunk-terrain') {
     if (steps.includes('source-glb-chunks') && !(await cookTerrainChunks())) {
       return
+    }
+    const currentTerrain =
+      get(editorSceneStore)?.settings?.level?.collision?.terrain
+    if (
+      steps.includes('collision') ||
+      Boolean(currentTerrain?.dirty) ||
+      !currentTerrain?.colliderUrl ||
+      !currentTerrain?.metadataUrl
+    ) {
+      if (!(await bakeTerrainCollision())) return
     }
     if (steps.includes('validation') && !(await validateTerrainContract())) {
       return
     }
     saveMessage = `Terrain runtime products current: ${steps.join(', ')}`
     return
-  }
-
-  if (steps.includes('heightmap')) {
-    if (!(await generateTerrainHeightmapFromSelection())) return
-  }
-
-  const currentTerrain =
-    get(editorSceneStore)?.settings?.level?.collision?.terrain
-  if (
-    steps.includes('collision') ||
-    Boolean(currentTerrain?.dirty) ||
-    !currentTerrain?.colliderUrl ||
-    !currentTerrain?.metadataUrl
-  ) {
-    appendStepBeforeValidation('collision')
-    if (!(await bakeTerrainCollision())) return
-  }
-
-  const refreshedTerrain =
-    get(editorSceneStore)?.settings?.level?.collision?.terrain
-  const chunksStale =
-    Boolean(refreshedTerrain?.lastGeneratedAt) &&
-    (!refreshedTerrain?.lastChunksGeneratedAt ||
-      Date.parse(String(refreshedTerrain.lastChunksGeneratedAt)) <
-        Date.parse(String(refreshedTerrain.lastGeneratedAt)))
-  const terrainChunkRuntimeRequested = isGeneratedHeightmapChunkTerrain({
-    terrainSculptEnabled: terrainSculptSettings?.enabled,
-    groundMode: groundSettings?.mode,
-    groundVisualSource: groundSettings?.visualSource,
-    groundTerrainVisualSource: groundSettings?.terrainVisualSource,
-    groundTerrainRuntimeMode: groundSettings?.terrainRuntimeMode,
-    terrainRuntimeMode: refreshedTerrain?.runtimeMode,
-    terrainVisualSource: refreshedTerrain?.visualSource,
-    renderChunkType:
-      refreshedTerrain?.renderChunks?.type ??
-      groundSettings?.renderChunks?.type,
-    terrainSource: refreshedTerrain?.source,
-    hasHeightfieldChunks: Boolean(refreshedTerrain?.chunksPath),
-  })
-  const needsChunks =
-    terrainChunkRuntimeRequested &&
-    (chunksStale ||
-      !refreshedTerrain?.chunksPath ||
-      !refreshedTerrain?.chunkCount)
-  if (steps.includes('chunks') || needsChunks) {
-    appendStepBeforeValidation('chunks')
-    if (!(await cookTerrainChunks())) return
   }
 
   if (steps.includes('validation') && !(await validateTerrainContract())) return
@@ -4574,15 +4529,14 @@ $: editorPanelPropContext = {
   terrainCollisionSettings,
   collisionBudget,
   terrainCollisionBakePending,
-  terrainHeightmapGeneratePending,
   terrainChunkCookPending,
   terrainStatusSnapshot,
   worldPartitionCookPending,
   groundTerrainPublishPending,
   selectedTerrainSourceName,
   selectedTerrainSourceAssetUrl,
-  heightmapSourceNodes,
-  heightmapCandidateNodes,
+  terrainProjectionSourceNodes,
+  terrainProjectionCandidateNodes,
   editorStyleStudioComponent,
   stylePresetOptions,
   styleBusy,
@@ -4674,7 +4628,6 @@ $: editorPanelPropContext = {
   bakeTerrainCollision,
   bakeTerrainPipeline,
   validateTerrainContract,
-  generateTerrainHeightmapFromSelection,
   cookTerrainChunks,
   cookWorldPartition,
   publishGroundTerrainContracts,
@@ -4988,9 +4941,15 @@ onDestroy(() => {
             terrainStatus={terrainStatusSnapshot}
             {selectedTerrainSourceName}
             {selectedTerrainSourceAssetUrl}
+            {terrainSourceImportPending}
+            {terrainCollisionBakePending}
+            {terrainChunkCookPending}
             {worldPartitionCookPending}
             {environmentTabProps}
             {playerTabProps}
+            onImportTerrainSource={(input) => void importTerrainSource(input)}
+            onBakeTerrainCollision={() => void bakeTerrainCollision()}
+            onCookTerrainChunks={() => void cookTerrainChunks()}
             onCookWorldPartition={() => void cookWorldPartition()}
             onBakeTerrain={() => void bakeTerrainPipeline()}
           />

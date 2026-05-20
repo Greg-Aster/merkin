@@ -1,25 +1,19 @@
 const GROUND_MODES = new Set(['terrain-chunks', 'hybrid', 'scene-authored'])
 const GROUND_VISUAL_SOURCES = new Set([
   'scene-actors',
-  'heightmap-surface',
-  'generated-heightmap-chunks',
   'source-glb-chunks',
   'none',
 ])
 const GROUND_COLLISION_SOURCES = new Set([
-  'baked-heightfield',
   'scene-colliders',
   'source-linked-terrain-collision',
 ])
 const TERRAIN_RUNTIME_MODES = new Set([
   'scene-authored',
-  'heightfield-terrain',
   'glb-chunk-terrain',
 ])
 const TERRAIN_VISUAL_SOURCES = new Set([
   'scene-actors',
-  'heightmap-surface',
-  'generated-heightmap-chunks',
   'source-glb-chunks',
   'none',
 ])
@@ -60,7 +54,6 @@ export function shouldRenderTerrainVisualChunks(levelId, settings) {
   )
   return (
     ground?.mode === 'hybrid' ||
-    visualSource === 'generated-heightmap-chunks' ||
     visualSource === 'source-glb-chunks'
   )
 }
@@ -74,15 +67,13 @@ function getTerrainCollisionSettings(level) {
 }
 
 function canonicalTerrainVisualSource(value) {
-  if (value === 'terrain-chunks') return 'generated-heightmap-chunks'
+  if (value === 'terrain-chunks') return 'source-glb-chunks'
   return value
 }
 
 function isTerrainChunkVisualSource(value) {
   const source = canonicalTerrainVisualSource(value)
-  return (
-    source === 'generated-heightmap-chunks' || source === 'source-glb-chunks'
-  )
+  return source === 'source-glb-chunks'
 }
 
 function getManifestRuntime(manifest) {
@@ -124,12 +115,11 @@ function getTerrainRuntimeMode({ ground, terrain, manifest }) {
     return 'scene-authored'
   }
   if (
-    terrain?.source === 'baked-heightmap' ||
-    ground?.collisionSource === 'baked-heightfield' ||
+    terrain?.source === 'source-glb' ||
     ground?.collisionSource === 'source-linked-terrain-collision' ||
     manifest?.collision?.terrain
   ) {
-    return 'heightfield-terrain'
+    return 'glb-chunk-terrain'
   }
   return 'scene-authored'
 }
@@ -149,7 +139,7 @@ function getTerrainVisualSource({ ground, terrain, manifest }) {
     return 'scene-actors'
   }
   if (ground?.mode === 'terrain-chunks' || ground?.mode === 'hybrid') {
-    return 'generated-heightmap-chunks'
+    return 'source-glb-chunks'
   }
   return 'none'
 }
@@ -167,7 +157,7 @@ function getTerrainFallbackSurfacePolicy({
     terrain?.fallbackSurfacePolicy ??
     undefined
   if (TERRAIN_FALLBACK_SURFACE_POLICIES.has(String(policy))) return policy
-  return visualSource === 'source-glb-chunks' ? 'disabled' : 'always'
+  return 'disabled'
 }
 
 function getConfiguredTerrainVisualSources({ ground, terrain, manifest }) {
@@ -231,7 +221,6 @@ function getTerrainCollisionAuthority({ ground, terrain }) {
   if (GROUND_COLLISION_SOURCES.has(String(ground?.collisionSource))) {
     return ground.collisionSource
   }
-  if (terrain?.source === 'baked-heightmap') return 'baked-heightfield'
   if (terrain?.source === 'source-glb') return 'source-linked-terrain-collision'
   return undefined
 }
@@ -290,7 +279,7 @@ export function classifyTerrainAuthority(input) {
     mixedAuthority:
       mode === 'scene-authored' &&
       visualSource === 'scene-actors' &&
-      collisionSource === 'baked-heightfield',
+      collisionSource === 'source-linked-terrain-collision',
   }
 }
 
@@ -339,33 +328,16 @@ export function getTerrainAuthorityDiagnostics(input) {
     )
   }
   if (
-    runtimeMode === 'glb-chunk-terrain' &&
-    visualSource === 'generated-heightmap-chunks'
-  ) {
-    errors.push(
-      `${levelId}: glb-chunk-terrain cannot use generated heightmap chunks as the authoritative visual path.`,
-    )
-  }
-  if (
-    runtimeMode === 'heightfield-terrain' &&
-    preservesSourceAuthoring({ ground, manifest })
-  ) {
-    errors.push(
-      `${levelId}: heightfield-terrain cannot preserve source GLB UVs or material slots.`,
-    )
-  }
-  if (
     visualSource === 'source-glb-chunks' &&
     fallbackSurfacePolicy !== 'disabled' &&
     fallbackSurfacePolicy !== 'debug-only'
   ) {
     warnings.push(
-      `${levelId}: source GLB chunks are authoritative while the fallback heightmap surface policy is "${fallbackSurfacePolicy}"; only debug-only is allowed during migration.`,
+      `${levelId}: source GLB chunks are authoritative while fallbackSurfacePolicy is "${fallbackSurfacePolicy}"; only disabled or debug-only is allowed.`,
     )
   }
   if (
-    (visualSource === 'generated-heightmap-chunks' ||
-      visualSource === 'source-glb-chunks') &&
+    visualSource === 'source-glb-chunks' &&
     fallbackSurfacePolicy === 'always'
   ) {
     warnings.push(
@@ -378,7 +350,7 @@ export function getTerrainAuthorityDiagnostics(input) {
     )
   }
   if (authority.mixedAuthority) {
-    const message = `${levelId}: scene-authored terrain uses baked-heightfield collision; migrate to scene-colliders, true heightfield-terrain, or glb-chunk-terrain before final terrain authority gate.`
+    const message = `${levelId}: scene-authored terrain uses source-linked terrain collision; use scene-colliders or glb-chunk-terrain before final terrain authority gate.`
     errors.push(message)
   }
 
@@ -388,8 +360,7 @@ export function getTerrainAuthorityDiagnostics(input) {
 function hasBakedTerrainRuntime(level) {
   const terrain = getTerrainCollisionSettings(level)
   return (
-    (terrain?.source === 'baked-heightmap' ||
-      terrain?.source === 'source-glb') &&
+    terrain?.source === 'source-glb' &&
     typeof terrain.manifestUrl === 'string'
   )
 }
@@ -440,7 +411,7 @@ export function validateLevelGroundContract(level, actorsById) {
     )
   ) {
     errors.push(
-      `${levelId}: terrain-chunks ground must render generated-heightmap-chunks or source-glb-chunks.`,
+      `${levelId}: terrain-chunks ground must render source-glb-chunks.`,
     )
   }
   if (mode === 'scene-authored' && collisionSource !== 'scene-colliders') {
@@ -478,20 +449,11 @@ export function validateLevelGroundContract(level, actorsById) {
   }
 
   if (
-    collisionSource === 'baked-heightfield' ||
     collisionSource === 'source-linked-terrain-collision'
   ) {
-    if (
-      runtimeMode === 'glb-chunk-terrain' &&
-      collisionSource === 'baked-heightfield'
-    ) {
-      errors.push(
-        `${levelId}: glb-chunk-terrain must use source-linked terrain collision.`,
-      )
-    }
     if (!hasBakedTerrainRuntime(level)) {
       errors.push(
-        `${levelId}: ${collisionSource} ground collision requires settings.level.collision.terrain.source=baked-heightmap or source-glb and a manifestUrl.`,
+        `${levelId}: ${collisionSource} ground collision requires settings.level.collision.terrain.source=source-glb and a manifestUrl.`,
       )
     }
     if (

@@ -1,6 +1,7 @@
 <script lang="ts">
 import { T } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount, tick } from 'svelte'
+import { createEditorRuntimePreviewPlan } from '../engine/editorRuntimePreviewPlan'
 import { resolveRuntimePlayerSettings } from '../engine/runtimePlayerSettings'
 import { loadRuntimeSceneDocument } from '../engine/runtimeSceneDocumentLoader'
 import { adaptSceneDocumentToLevelDefinition } from '../engine/sceneAdapter'
@@ -10,13 +11,11 @@ import type {
   LevelDefinition,
 } from '../engine/types'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
-import EditorHeightmapSourceOverlay from './EditorHeightmapSourceOverlay.svelte'
 import EditorPlayerSpawnMarker from './EditorPlayerSpawnMarker.svelte'
 import EditorPlaytestPlayerMarker from './EditorPlaytestPlayerMarker.svelte'
 import EditorSceneBranch from './EditorSceneBranch.svelte'
 import EditorSelectionOutlineOverlay from './EditorSelectionOutlineOverlay.svelte'
 import EditorViewportShadingOverlay from './EditorViewportShadingOverlay.svelte'
-import { heightmapSourcePreviewNodeIdsStore } from './editorHeightmapSourcePreview'
 import {
   loadEditorSceneDocument,
   loadImmediateEditorSceneDocument,
@@ -37,6 +36,7 @@ const dispatch = createEventDispatcher()
 export let levelId: string
 export let editorEnabled = false
 export let playtestEnabled = false
+export let playtestRuntimeReady = false
 export let interactionSystem: any = null
 export let playtestPlayerPosition: [number, number, number] | null = null
 export let playtestPlayerRotation: [number, number, number] | null = null
@@ -67,6 +67,17 @@ let activeLoadToken = 0
 let playtestSpawnSignature = ''
 let playtestReadySignature = ''
 let playtestReadyToken = 0
+let runtimePreviewSceneReady = false
+let runtimePreviewPlan = createEditorRuntimePreviewPlan({
+  editorEnabled,
+  playtestEnabled,
+  collisionOverlayEnabled,
+})
+let runtimeActorsCanRender = false
+let runtimePreviewOwnsAuthoring = false
+let authoringInteractiveEnabled = false
+let renderAuthoringVisuals = true
+let renderAuthoringGameplay = true
 
 const unsubscribeNodes = editorNodesStore.subscribe(value => {
   editorNodes = value
@@ -183,6 +194,7 @@ function clearPlaytestRuntimeScene() {
   playtestLevelDefinition = null
   playtestActors = []
   playtestRootActors = []
+  runtimePreviewSceneReady = false
   playtestReadySignature = ''
   playtestReadyToken += 1
 }
@@ -327,7 +339,7 @@ function loadRuntimeActorBranchComponent() {
 
 function syncPlaytestRuntimeScene() {
   if (
-    (!playtestEnabled && !collisionOverlayEnabled) ||
+    !runtimePreviewPlan.runtimeActors.mount ||
     !editorScene ||
     editorScene.levelId !== levelId
   ) {
@@ -348,12 +360,16 @@ function syncPlaytestRuntimeScene() {
     playtestLevelDefinition = nextLevelDefinition
     playtestActors = nextLevelDefinition.actors
     playtestRootActors = playtestActors.filter(actor => !actor.parentId)
+    runtimePreviewSceneReady = true
     setRuntimeDiagnostic('editorPlaytestRender', {
       label: 'Editor Playtest Render',
       level: 'ready',
-      message: `${levelId}: live playtest rendering ${playtestActors.length} actor(s) through the runtime actor path.`,
+      message: `${levelId}: editor collision overlay rendering ${playtestActors.length} actor(s) through the runtime actor path.`,
       meta: {
         levelId,
+        previewMode: runtimePreviewPlan.mode,
+        runtimeActors: runtimePreviewPlan.runtimeActors,
+        authoring: runtimePreviewPlan.authoring,
         actorCount: playtestActors.length,
         rootActorCount: playtestRootActors.length,
         sceneVersion: playtestLevelDefinition.version,
@@ -415,19 +431,49 @@ $: if (levelId && levelId !== previousLevelId) {
   void loadEditorScene(levelId)
 }
 
-$: if (playtestEnabled && editorScene) {
+$: runtimePreviewPlan = createEditorRuntimePreviewPlan({
+  editorEnabled,
+  playtestEnabled,
+  collisionOverlayEnabled,
+})
+
+$: runtimeActorsCanRender =
+  runtimePreviewSceneReady && Boolean(RuntimeActorBranchComponent)
+
+$: runtimePreviewOwnsAuthoring =
+  runtimePreviewPlan.mode === 'runtime-preview' &&
+  (runtimePreviewPlan.levelRuntime.ownsRuntimeActors
+    ? playtestRuntimeReady
+    : runtimeActorsCanRender)
+
+$: authoringInteractiveEnabled = runtimePreviewOwnsAuthoring
+  ? runtimePreviewPlan.authoring.interactive
+  : runtimePreviewPlan.mode === 'runtime-preview'
+    ? false
+    : runtimePreviewPlan.authoring.interactive
+
+$: renderAuthoringVisuals = runtimePreviewOwnsAuthoring
+  ? runtimePreviewPlan.authoring.renderVisuals
+  : true
+
+$: renderAuthoringGameplay = runtimePreviewOwnsAuthoring
+  ? runtimePreviewPlan.authoring.renderGameplay
+  : true
+
+$: if (
+  playtestEnabled &&
+  editorScene &&
+  !runtimePreviewPlan.levelRuntime.ownsReadiness
+) {
   dispatchEditorPlaytestSpawn()
 }
 
-$: if (
-  (playtestEnabled || collisionOverlayEnabled) &&
-  !RuntimeActorBranchComponent
-) {
+$: if (runtimePreviewPlan.runtimeActors.mount && !RuntimeActorBranchComponent) {
   void loadRuntimeActorBranchComponent()
 }
 
 $: if (
-  (playtestEnabled || collisionOverlayEnabled) &&
+  runtimePreviewPlan.runtimeActors.mount &&
   levelId &&
   levelId !== runtimeCollisionProductsRequestLevelId
 ) {
@@ -456,6 +502,7 @@ $: if (!playtestEnabled) {
 
 $: if (
   playtestEnabled &&
+  !runtimePreviewPlan.levelRuntime.ownsReadiness &&
   RuntimeActorBranchComponent &&
   playtestLevelDefinition
 ) {
@@ -497,7 +544,7 @@ onDestroy(() => {
     {/if}
   {/if}
 
-  {#if playtestEnabled}
+  {#if playtestEnabled && runtimeActorsCanRender}
     {#if RuntimeActorBranchComponent}
       {#each playtestRootActors as actor (actor.id)}
         <svelte:component
@@ -505,9 +552,9 @@ onDestroy(() => {
           {actor}
           actors={playtestActors}
           {levelId}
-          interactionSystem={editorEnabled ? null : interactionSystem}
-          interactiveEnabled={!editorEnabled}
-          collisionOnly={editorEnabled}
+          {interactionSystem}
+          interactiveEnabled={runtimePreviewPlan.runtimeActors.interactive}
+          collisionOnly={runtimePreviewPlan.runtimeActors.collisionOnly}
           on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
           on:noteRead={(event) => dispatch('noteRead', event.detail)}
         />
@@ -515,7 +562,7 @@ onDestroy(() => {
     {/if}
   {/if}
 
-  {#if !playtestEnabled}
+  {#if runtimePreviewPlan.mode !== 'runtime-preview'}
     {#if collisionOverlayEnabled && RuntimeActorBranchComponent}
       {#each playtestRootActors as actor (actor.id)}
         <svelte:component
@@ -531,7 +578,7 @@ onDestroy(() => {
     {/if}
   {/if}
 
-  {#if editorEnabled}
+  {#if editorEnabled && runtimePreviewPlan.authoring.mount}
     {#each rootNodes as node (node.id)}
       <EditorSceneBranch
         node={node}
@@ -541,15 +588,13 @@ onDestroy(() => {
         {selectedNodeIds}
         sceneSettings={editorScene?.settings ?? null}
         {interactionSystem}
-        interactiveEnabled={playtestEnabled}
+        interactiveEnabled={authoringInteractiveEnabled}
+        {renderAuthoringVisuals}
+        {renderAuthoringGameplay}
         on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
         on:noteRead={(event) => dispatch('noteRead', event.detail)}
       />
     {/each}
-  {/if}
-
-  {#if editorEnabled && $heightmapSourcePreviewNodeIdsStore.length > 0}
-    <EditorHeightmapSourceOverlay />
   {/if}
 
   {#if editorEnabled && selectedNodeIds.length > 0}

@@ -1,7 +1,7 @@
 {
   "levelId": "observatory",
   "version": 1,
-  "updatedAt": "2026-05-17T14:34:02.091Z",
+  "updatedAt": "2026-05-20T03:30:29.790Z",
   "settings": {
     "level": {
       "collision": {
@@ -140,12 +140,6 @@
         "status": "complete",
         "blockers": [],
         "generatedTerrainProducts": {
-          "heightmap": {
-            "path": "/terrain/heightmaps/observatory-environment_heightmap.png",
-            "status": "source-derived-collision-input",
-            "reason": "The heightmap is retained as the intermediate collision mesh input for source-linked terrain collision.",
-            "targetRemovalCondition": "Remove only if replaced by a dedicated simplified collision mesh cooked from the same source GLB."
-          },
           "visualChunks": {
             "path": "/terrain/levels/observatory-environment/",
             "status": "source-glb-authoritative",
@@ -461,9 +455,10 @@
         }
       },
       "lighting": {
-        "ambientIntensity": 0.22,
-        "keyLightIntensity": 0.42,
-        "fillLightIntensity": 0.26
+        "ambientIntensity": 0.2,
+        "hemisphereIntensity": 0.38,
+        "fillLightIntensity": 0.2,
+        "keyLightIntensity": 0.2
       },
       "player": {
         "lightIntensityScale": 2

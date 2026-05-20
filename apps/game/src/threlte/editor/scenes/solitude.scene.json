@@ -120,6 +120,7 @@
       },
       "lighting": {
         "ambientIntensity": 0.46,
+        "hemisphereIntensity": 0.38,
         "keyLightIntensity": 0.96,
         "fillLightIntensity": 0.34
       },

@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
-import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from 'node:fs'
 import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
@@ -16,6 +22,7 @@ import {
 } from '../src/threlte/editor/editorGeneratedAssetApplication.ts'
 import { normalizeLevelSceneSettings } from '../src/threlte/editor/editorLevelSetup.ts'
 import {
+  EDITOR_PUBLISH_BAKE_STEP_LABELS,
   computeEditorPublishBakePlan,
   createEditorPublishBakePlanMetadataFromReadiness,
 } from '../src/threlte/editor/editorPublishBakePlan.ts'
@@ -30,9 +37,8 @@ import {
 } from '../src/threlte/editor/editorTerrainPipeline.ts'
 import {
   applyTerrainChunkCookPayload,
-  applyTerrainHeightmapPayload,
+  applyTerrainSourceImportPayload,
   buildTerrainChunkCookRequest,
-  buildTerrainHeightmapRequest,
 } from '../src/threlte/editor/editorTerrainPipelineRunner.ts'
 import type { EditorSceneDocument } from '../src/threlte/editor/editorTypes.ts'
 import { reviewCollisionContracts } from '../src/threlte/engine/collisionReview.ts'
@@ -76,6 +82,7 @@ const {
   normalizePublishBuildPlan,
   runPublishBuildPlan,
 } = require('./editor-tools/sceneRoutes.cjs')
+const { handleTerrainRoutes } = require('./editor-tools/terrainRoutes.cjs')
 const { handleStyleRoutes } = require('./editor-tools/styleRoutes.cjs')
 const {
   adaptSceneDocumentToLevelDefinition:
@@ -299,10 +306,6 @@ const fixtureBounds = {
 const fixtureSourceFingerprint = {
   algorithm: 'sha256',
   value: 'a'.repeat(64),
-}
-const fixtureHeightmapFingerprint = {
-  algorithm: 'sha256',
-  value: 'b'.repeat(64),
 }
 const fixtureStyleSourceFingerprint = {
   algorithm: 'sha256',
@@ -1370,6 +1373,35 @@ test('ambient firefly fields resolve quality-tier counts without authoring NPC a
   assert.equal(quality.size, 1.1)
 })
 
+test('Observatory source scene uses the recovered ambient firefly lighting contract', () => {
+  const scene = JSON.parse(
+    readFileSync(
+      join(process.cwd(), 'src/threlte/editor/scenes/observatory.scene.json'),
+      'utf8',
+    ),
+  )
+  const fireflies = scene.settings?.level?.fireflies
+  const authoredFireflyNpcCount = (scene.nodes ?? []).filter(
+    (node: any) =>
+      node.npc?.archetype === 'firefly' ||
+      node.npc?.presentation?.type === 'firefly',
+  ).length
+
+  assert.equal(authoredFireflyNpcCount, 0)
+  assert.equal(fireflies?.enabled, true)
+  assert.equal(fireflies?.count, 200)
+  assert.equal(fireflies?.lightCount, 25)
+  assert.equal(fireflies?.lightIntensity, 50)
+  assert.equal(fireflies?.lightDistance, 500)
+  assert.equal(fireflies?.lightBudgeted, false)
+  assert.equal(fireflies?.terrainFollow, true)
+  assert.equal(fireflies?.distribution, 'center-falloff')
+  assert.equal(fireflies?.densityExponent, 2)
+  assert.deepEqual(fireflies?.center, [0, 0, 0])
+  assert.equal(fireflies?.qualityTiers?.high?.count, 200)
+  assert.equal(fireflies?.qualityTiers?.high?.lightCount, 25)
+})
+
 test('runtime point-light budgets clamp visible count and source range', () => {
   const policy = resolveRuntimeVisibilityPolicy('high', {
     enableDynamicLighting: true,
@@ -2298,49 +2330,6 @@ test('generated asset add-to-scene records visual bounds for diagnostics', async
   assert.deepEqual(addedNode?.scale, [1, 1, 1])
 })
 
-test('terrain authority classifier flags scene-authored baked-heightfield mixed authority', () => {
-  const level = {
-    id: 'fixture-level',
-    settings: {
-      level: {
-        ground: {
-          mode: 'scene-authored',
-          visualSource: 'scene-actors',
-          terrainRuntimeMode: 'scene-authored',
-          terrainVisualSource: 'scene-actors',
-          collisionSource: 'baked-heightfield',
-          fallbackSurfacePolicy: 'disabled',
-          groundActorIds: ['fixture-ground'],
-          terrainManifestUrl: '/terrain/fixture-level.manifest.json',
-        },
-        collision: {
-          terrain: {
-            source: 'baked-heightmap',
-            runtimeMode: 'scene-authored',
-            visualSource: 'none',
-            fallbackSurfacePolicy: 'disabled',
-            manifestUrl: '/terrain/fixture-level.manifest.json',
-          },
-        },
-      },
-    },
-  }
-
-  const authority = classifyTerrainAuthority(level)
-  assert.equal(authority.mode, 'scene-authored')
-  assert.equal(authority.visualSource, 'scene-actors')
-  assert.equal(authority.collisionSource, 'baked-heightfield')
-  assert.equal(authority.mixedAuthority, true)
-
-  const diagnostics = getTerrainAuthorityDiagnostics(level)
-  assert.ok(
-    diagnostics.errors.some(error =>
-      error.includes('scene-authored terrain uses baked-heightfield collision'),
-    ),
-  )
-  assert.equal(diagnostics.warnings.length, 0)
-})
-
 test('source GLB chunk ground is accepted by level validation', () => {
   const level = {
     id: 'fixture-level',
@@ -2409,6 +2398,30 @@ test('scene settings normalization migrates legacy source GLB terrain visual sou
   assert.equal(settings.level?.ground?.visualSource, 'source-glb-chunks')
 })
 
+test('scene settings normalization removes retired lighting fields', () => {
+  const settings = normalizeLevelSceneSettings('fixture-level', {
+    level: {
+      lighting: {
+        ambientIntensity: 0.2,
+        sunIntensity: 0.42,
+        fillIntensity: 0.26,
+        fallbackAmbientIntensity: 4,
+        fallbackMoonlightIntensity: 0.62,
+        fallbackFillLightIntensity: 0.24,
+      } as any,
+    },
+  })
+
+  const lighting = settings.level?.lighting as Record<string, unknown>
+  assert.equal(lighting.keyLightIntensity, 0.42)
+  assert.equal(lighting.fillLightIntensity, 0.26)
+  assert.equal(Object.hasOwn(lighting, 'sunIntensity'), false)
+  assert.equal(Object.hasOwn(lighting, 'fillIntensity'), false)
+  assert.equal(Object.hasOwn(lighting, 'fallbackAmbientIntensity'), false)
+  assert.equal(Object.hasOwn(lighting, 'fallbackMoonlightIntensity'), false)
+  assert.equal(Object.hasOwn(lighting, 'fallbackFillLightIntensity'), false)
+})
+
 test('packaged scene upgrade restores required render profile and source GLB terrain contract', () => {
   const upgraded = upgradeLegacySceneDocument({
     levelId: 'observatory',
@@ -2418,8 +2431,10 @@ test('packaged scene upgrade restores required render profile and source GLB ter
       level: {
         collision: {
           terrain: {
-            source: 'baked-heightmap',
+            source: 'source-glb',
             runtimeSource: 'built-in-manifest',
+            runtimeMode: 'glb-chunk-terrain',
+            visualSource: 'source-glb-chunks',
             manifestUrl: '/terrain/observatory-environment.manifest.json',
             dirty: false,
           },
@@ -2430,8 +2445,8 @@ test('packaged scene upgrade restores required render profile and source GLB ter
         },
         ground: {
           mode: 'terrain-chunks',
-          visualSource: 'generated-heightmap-chunks',
-          collisionSource: 'baked-heightfield',
+          visualSource: 'source-glb-chunks',
+          collisionSource: 'source-linked-terrain-collision',
           terrainManifestUrl: '/terrain/observatory-environment.manifest.json',
         },
       },
@@ -3310,11 +3325,10 @@ test('scene-authored terrain ignores stale baked terrain product fields', () => 
         },
         collision: {
           terrain: {
-            source: 'baked-heightmap',
+            source: 'scene-authored',
             runtimeMode: 'scene-authored',
             visualSource: 'none',
             manifestUrl: '/terrain/obsolete-fixture.manifest.json',
-            heightmapDirty: true,
             dirty: true,
           },
         },
@@ -3328,21 +3342,132 @@ test('scene-authored terrain ignores stale baked terrain product fields', () => 
   })
 
   assert.equal(pipeline.mode, 'scene-authored')
-  assert.equal(pipeline.hasHeightmap, false)
   assert.equal(pipeline.hasCollider, false)
-  assert.equal(
-    pipeline.commands.find(command => command.id === 'generate-heightmap')
-      ?.enabled,
-    false,
-  )
   assert.equal(
     pipeline.commands.find(command => command.id === 'bake-terrain-collision')
       ?.enabled,
     false,
   )
-  assert.equal(plan.steps.includes('generate-heightmap'), false)
   assert.equal(plan.steps.includes('bake-terrain-collision'), false)
-  assert.equal(plan.steps.includes('cook-terrain-chunks'), false)
+  assert.equal(plan.steps.includes('cook-terrain-glb-chunks'), false)
+})
+
+test('imported Blender terrain source switches the level to GLB chunk terrain', () => {
+  const settings = applyTerrainSourceImportPayload(
+    {
+      ground: {
+        mode: 'scene-authored',
+        visualSource: 'scene-actors',
+        collisionSource: 'scene-colliders',
+      },
+      collision: {
+        terrain: {
+          source: 'scene-authored',
+          chunksPath: '/terrain/levels/old/',
+          chunkCount: 4,
+          colliderUrl: '/terrain/collision/old.collider.bin',
+          metadataUrl: '/terrain/collision/old.collider.meta.json',
+        },
+      },
+    },
+    {
+      manifestUrl: '/terrain/fixture-level.manifest.json',
+      sourceAssetUrl: '/models/levels/fixture-level/blender-terrain.glb',
+      sourceAssetHash: 'abc123',
+      sourceAssetFingerprint: {
+        algorithm: 'sha256',
+        value: 'abc123',
+      },
+      sourceName: 'blender-terrain.glb',
+    },
+  )
+  const scene = createScene({
+    settings: { level: settings },
+  })
+  const pipeline = describeEditorTerrainPipeline({ scene })
+
+  assert.equal(settings.collision?.terrain?.source, 'source-glb')
+  assert.equal(settings.collision?.terrain?.runtimeMode, 'glb-chunk-terrain')
+  assert.equal(settings.collision?.terrain?.visualSource, 'source-glb-chunks')
+  assert.equal(settings.collision?.terrain?.chunksPath, undefined)
+  assert.equal(settings.collision?.terrain?.colliderUrl, undefined)
+  assert.equal(settings.ground?.collisionSource, 'source-linked-terrain-collision')
+  assert.equal(pipeline.mode, 'glb-chunk-terrain')
+  assert.equal(
+    pipeline.commands.find(command => command.id === 'cook-glb-chunks')
+      ?.enabled,
+    true,
+  )
+})
+
+test('editor terrain import route copies a Blender GLB source into public terrain assets', async () => {
+  const repoRoot = mkdtempSync(join(tmpdir(), 'terrain-import-repo-'))
+  const publicRoot = join(repoRoot, 'apps/megameal/public')
+  const sourceRoot = join(repoRoot, 'blender-export')
+  mkdirSync(sourceRoot, { recursive: true })
+  const sourcePath = join(sourceRoot, 'observatory-terrain.glb')
+  writeFileSync(sourcePath, 'fixture glb bytes')
+
+  const route = {
+    pathname: '/api/editor-terrain/import-source',
+    parsedUrl: { query: {} },
+  }
+  const req = createJsonRequest(route.pathname, {
+    levelId: 'observatory',
+    sourcePath,
+  })
+  const { done, res } = createJsonResponse()
+  const handled = handleTerrainRoutes(
+    req,
+    res,
+    route,
+    createTerrainRouteContext(publicRoot, repoRoot),
+  )
+  const response = await done
+
+  assert.equal(handled, true)
+  assert.equal(response.status, 200)
+  assert.equal(response.payload.success, true)
+  assert.match(
+    String(response.payload.sourceAssetUrl),
+    /^\/models\/levels\/observatory\/observatory-terrain-/,
+  )
+  assert.equal(response.payload.copied, true)
+  assert.equal(
+    typeof (response.payload.sourceAssetFingerprint as any)?.value,
+    'string',
+  )
+})
+
+test('editor terrain import route accepts an existing public GLB URL', async () => {
+  const repoRoot = mkdtempSync(join(tmpdir(), 'terrain-import-public-'))
+  const publicRoot = join(repoRoot, 'apps/megameal/public')
+  const publicAssetPath = join(publicRoot, 'models/levels/source.glb')
+  mkdirSync(dirname(publicAssetPath), { recursive: true })
+  writeFileSync(publicAssetPath, 'fixture public glb bytes')
+
+  const route = {
+    pathname: '/api/editor-terrain/import-source',
+    parsedUrl: { query: {} },
+  }
+  const req = createJsonRequest(route.pathname, {
+    levelId: 'observatory',
+    sourcePath: '/models/levels/source.glb',
+  })
+  const { done, res } = createJsonResponse()
+  const handled = handleTerrainRoutes(
+    req,
+    res,
+    route,
+    createTerrainRouteContext(publicRoot, repoRoot),
+  )
+  const response = await done
+
+  assert.equal(handled, true)
+  assert.equal(response.status, 200)
+  assert.equal(response.payload.success, true)
+  assert.equal(response.payload.sourceAssetUrl, '/models/levels/source.glb')
+  assert.equal(response.payload.copied, false)
 })
 
 function createGlbTerrainManifest(
@@ -3356,7 +3481,6 @@ function createGlbTerrainManifest(
       fallbackSurfacePolicy: 'disabled',
     },
     assets: {
-      heightmap: '/terrain/heightmaps/fixture-level_heightmap.png',
       chunksPath: '/terrain/levels/fixture-level/',
       sourceGlb: '/models/levels/fixture-level.glb',
     },
@@ -3372,7 +3496,7 @@ function createGlbTerrainManifest(
         sourceCoordinateSystem: 'three-y-up-xz-ground',
         sourceBounds: fixtureBounds,
         renderBakeMode: 'source-glb-chunk-mesh',
-        collisionBakeMode: 'source-glb-heightfield-projection',
+        collisionBakeMode: 'source-glb-collision-mesh',
         collisionCoverageBounds: fixtureBounds,
         role: 'walkable',
         vertexCount: 128,
@@ -3401,17 +3525,13 @@ function createGlbTerrainManifest(
               fingerprint: fixtureSourceFingerprint,
             },
           ],
-          heightmapUrl: '/terrain/heightmaps/fixture-level_heightmap.png',
-          heightmapFingerprint: fixtureHeightmapFingerprint,
           sourceCoordinateSystem: 'three-y-up-xz-ground',
           sourceBounds: fixtureBounds,
           renderBakeMode: 'source-glb-chunk-mesh',
-          collisionBakeMode: 'source-glb-heightfield-projection',
+          collisionBakeMode: 'source-glb-collision-mesh',
           collisionMeshSource: {
-            type: 'source-glb-heightfield-projection',
+            type: 'source-glb',
             url: '/models/levels/fixture-level.glb',
-            projectionHeightmapUrl:
-              '/terrain/heightmaps/fixture-level_heightmap.png',
             fingerprint: fixtureSourceFingerprint,
           },
           collisionCoverageBounds: fixtureBounds,
@@ -3497,6 +3617,44 @@ function createJsonResponse() {
   }
 
   return { done, res }
+}
+
+function createTerrainRouteContext(publicRoot: string, repoRoot: string) {
+  const terrainRoot = join(publicRoot, 'terrain')
+  return {
+    GAME_PUBLIC_ROOT: publicRoot,
+    REPO_ROOT: repoRoot,
+    ensureTerrainManifestForLevel(levelId: string) {
+      mkdirSync(terrainRoot, { recursive: true })
+      const manifestPath = join(terrainRoot, `${levelId}.manifest.json`)
+      writeFileSync(
+        manifestPath,
+        `${JSON.stringify({ id: levelId, assets: {} }, null, 2)}\n`,
+      )
+      return manifestPath
+    },
+    getEditorScenePath(levelId: string) {
+      return join(repoRoot, `${levelId}.scene.json`)
+    },
+    getTerrainManifestPathForLevel(levelId: string) {
+      return join(terrainRoot, `${levelId}.manifest.json`)
+    },
+    readJsonFile(path: string) {
+      return JSON.parse(readFileSync(path, 'utf8'))
+    },
+    resolvePublicAssetPath(assetUrl: string) {
+      return join(publicRoot, assetUrl.replace(/^\/+/, ''))
+    },
+    toPublicAssetUrl(path: string) {
+      return `/${path
+        .slice(publicRoot.length)
+        .replace(/^[\\/]+/, '')
+        .replace(/\\/g, '/')}`
+    },
+    toRepoRelative(path: string) {
+      return path
+    },
+  }
 }
 
 function writeFixtureFile(filePath: string, contents = 'fixture') {
@@ -3846,6 +4004,33 @@ test('source guard keeps ambient firefly motion dependent on elapsed frame time'
   )
 })
 
+test('source guard requires explicit scene hemisphere lighting', () => {
+  const appRoot = mkdtempSync(join(tmpdir(), 'scene-lighting-source-guard-'))
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/editor/scenes/fixture.scene.json'),
+    JSON.stringify({
+      levelId: 'fixture',
+      settings: {
+        level: {
+          lighting: {
+            ambientIntensity: 0.2,
+            keyLightIntensity: 0.4,
+            fillLightIntensity: 0.1,
+          },
+        },
+      },
+      nodes: [],
+    }),
+  )
+
+  const failures = auditSourceGuards({ appRoot })
+
+  assert.match(
+    failures.join('\n'),
+    /settings\.level\.lighting\.hemisphereIntensity must be explicit/,
+  )
+})
+
 test('source guard keeps dedicated NPC editor workspace wired', () => {
   const appRoot = mkdtempSync(join(tmpdir(), 'npc-editor-source-guard-'))
   writeFixtureFile(
@@ -3909,13 +4094,19 @@ test('terrain dirty state includes terrain bake and chunk work', () => {
         level: {
           collision: {
             terrain: {
-              source: 'baked-heightmap',
+              source: 'source-glb',
+              runtimeMode: 'glb-chunk-terrain',
+              visualSource: 'source-glb-chunks',
               manifestUrl: '/terrain/fixture-level.manifest.json',
+              sourceAssetUrl: '/models/levels/fixture-level.glb',
               dirty: true,
             },
           },
-          terrainSculpt: {
-            enabled: true,
+          ground: {
+            mode: 'terrain-chunks',
+            terrainRuntimeMode: 'glb-chunk-terrain',
+            terrainVisualSource: 'source-glb-chunks',
+            collisionSource: 'source-linked-terrain-collision',
           },
         },
       },
@@ -3923,7 +4114,7 @@ test('terrain dirty state includes terrain bake and chunk work', () => {
   })
 
   assert.ok(plan.steps.includes('bake-terrain-collision'))
-  assert.ok(plan.steps.includes('cook-terrain-chunks'))
+  assert.ok(plan.steps.includes('cook-terrain-glb-chunks'))
 })
 
 test('source GLB terrain schedules GLB chunk cook before runtime assets', () => {
@@ -3952,7 +4143,6 @@ test('source GLB terrain schedules GLB chunk cook before runtime assets', () => 
   })
 
   assert.ok(plan.steps.includes('cook-terrain-glb-chunks'))
-  assert.equal(plan.steps.includes('cook-terrain-chunks'), false)
   assert.ok(
     plan.steps.indexOf('cook-terrain-glb-chunks') <
       plan.steps.indexOf('cook-runtime-assets'),
@@ -4032,61 +4222,6 @@ test('missing source GLB disables editor terrain bake and chunk cook commands', 
   assert.match(pipeline.blockers.join('\n'), /Source asset missing/)
 })
 
-test('primitive terrain source stays valid without an external source asset', () => {
-  const pipeline = describeEditorTerrainPipeline({
-    scene: createScene({
-      nodes: [
-        {
-          id: 'terrain-plane',
-          name: 'Terrain Plane',
-          kind: 'primitive',
-          position: [0, 0, 0],
-          rotation: [0, 0, 0],
-          scale: [1, 1, 1],
-          visible: true,
-          primitive: {
-            geometry: 'box',
-            args: [1, 1, 1],
-            color: '#888888',
-          },
-        },
-      ],
-      settings: {
-        level: {
-          collision: {
-            terrain: {
-              source: 'baked-heightmap',
-              sourceNodeIds: ['terrain-plane'],
-              heightmapDirty: true,
-              colliderUrl: '/terrain/colliders/fixture.mmtc',
-              metadataUrl: '/terrain/colliders/fixture.metadata.json',
-            },
-          },
-        },
-      },
-    }),
-    terrainStatus: {
-      sourceAssets: [
-        {
-          nodeId: 'terrain-plane',
-          sourceType: 'primitive',
-          sourceName: 'Terrain Plane',
-          exists: true,
-        },
-      ],
-    },
-    selectedTerrainSourceAssetUrl: 'procedural-terrain-sources',
-  })
-
-  const generateCommand = pipeline.commands.find(
-    item => item.id === 'generate-heightmap',
-  )
-
-  assert.equal(generateCommand?.enabled, true)
-  assert.deepEqual(pipeline.sourceGlbUrls, [])
-  assert.equal(pipeline.sourceExistenceStatus.state, 'ready')
-})
-
 test('source existence status only trusts the recorded GLB URL', () => {
   const pipeline = describeEditorTerrainPipeline({
     scene: createScene({
@@ -4134,7 +4269,7 @@ test('publish readiness blocks GLB terrain when the recorded source asset is mis
         },
         collision: {
           terrain: {
-            source: 'baked-heightmap',
+            source: 'source-glb',
             runtimeMode: 'glb-chunk-terrain',
             visualSource: 'source-glb-chunks',
             manifestUrl: '/terrain/fixture-level.manifest.json',
@@ -4742,10 +4877,10 @@ test('GLB terrain collision contract accepts matching source-derived provenance'
   assert.deepEqual(diagnostics.errors, [])
 })
 
-test('GLB terrain collision contract rejects generic heightfield projection', () => {
+test('GLB terrain collision contract rejects non-source-linked collision modes', () => {
   const diagnostics = validateTerrainManifestCollisionContract({
     manifest: createGlbTerrainManifest({
-      collisionBakeMode: 'heightfield-projection',
+      collisionBakeMode: 'unknown-collision-mode',
     }),
     levelId: 'fixture-level',
     spawnPoint: [5, 1, 5],
@@ -4753,20 +4888,23 @@ test('GLB terrain collision contract rejects generic heightfield projection', ()
 
   assert.match(
     diagnostics.errors.join('\n'),
-    /must use source-linked collision, not generic heightfield projection/,
+    /collision bake mode must be source-linked/,
   )
 })
 
 test('GLB terrain collision contract requires render source hash provenance', () => {
   const diagnostics = validateTerrainManifestCollisionContract({
     manifest: createGlbTerrainManifest({
-      sourceAssetUrl: '/terrain/heightmaps/fixture-level_heightmap.png',
+      sourceAssetUrl: '/models/levels/other-level.glb',
       sourceAssetUrls: [
-        '/terrain/heightmaps/fixture-level_heightmap.png',
+        '/models/levels/other-level.glb',
         '/models/levels/fixture-level.glb',
       ],
       authoredSourceAssetUrls: ['/models/levels/fixture-level.glb'],
-      sourceAssetFingerprint: fixtureHeightmapFingerprint,
+      sourceAssetFingerprint: {
+        algorithm: 'sha256',
+        value: 'b'.repeat(64),
+      },
       sourceAssetFingerprints: [],
     }),
     levelId: 'fixture-level',
@@ -4843,7 +4981,6 @@ test('editor terrain bake planner keeps terrain modes explicit', () => {
     planEditorTerrainBakeSteps({
       pipeline: {
         mode: 'scene-authored',
-        hasHeightmap: false,
         hasCollider: false,
         hasSource: false,
       },
@@ -4853,53 +4990,21 @@ test('editor terrain bake planner keeps terrain modes explicit', () => {
   assert.deepEqual(
     planEditorTerrainBakeSteps({
       pipeline: {
-        mode: 'heightfield-terrain',
-        hasHeightmap: true,
+        mode: 'glb-chunk-terrain',
         hasCollider: false,
         hasSource: true,
       },
       terrain: {
         dirty: true,
-        lastGeneratedAt: '2026-05-12T00:00:00.000Z',
         lastChunksGeneratedAt: '2026-05-11T00:00:00.000Z',
       },
-      terrainSculptEnabled: true,
       groundMode: 'terrain-chunks',
     }),
-    ['collision', 'chunks', 'validation'],
+    ['source-glb-chunks', 'collision', 'validation'],
   )
 })
 
 test('editor terrain pipeline runner builds stable backend requests', () => {
-  assert.deepEqual(
-    buildTerrainHeightmapRequest({
-      levelId: 'fixture-level',
-      nodeId: 'terrain-source',
-      sources: [
-        {
-          nodeId: 'terrain-source',
-          sourceName: 'Terrain Source',
-          sourceAssetUrl: '/models/levels/fixture.glb',
-          matrix: [1, 0, 0, 0],
-        },
-      ],
-      resolution: 256,
-    }),
-    {
-      levelId: 'fixture-level',
-      nodeId: 'terrain-source',
-      sources: [
-        {
-          nodeId: 'terrain-source',
-          sourceName: 'Terrain Source',
-          sourceAssetUrl: '/models/levels/fixture.glb',
-          matrix: [1, 0, 0, 0],
-        },
-      ],
-      resolution: 256,
-      bakeCollision: true,
-    },
-  )
   assert.deepEqual(
     buildTerrainChunkCookRequest({
       levelId: 'fixture-level',
@@ -4909,48 +5014,6 @@ test('editor terrain pipeline runner builds stable backend requests', () => {
       levelId: 'fixture-level',
       mode: 'glb-chunk-terrain',
     },
-  )
-})
-
-test('editor terrain pipeline runner applies generated heightmap products', () => {
-  const next = applyTerrainHeightmapPayload(
-    {
-      collision: {
-        terrain: {
-          dirty: true,
-          heightmapDirty: true,
-          chunksPath: '/terrain/levels/old/',
-        },
-      },
-    },
-    {
-      manifestUrl: '/terrain/fixture-level.manifest.json',
-      heightmapUrl: '/terrain/heightmaps/fixture-level_heightmap.png',
-      resolution: 512,
-      sourceAssetUrl: '/models/levels/fixture.glb',
-      sourceNodeIds: ['terrain-source'],
-      sourceName: 'Terrain Source',
-      collision: {
-        url: '/terrain/collision/fixture-level.collider.bin',
-        metadataUrl: '/terrain/collision/fixture-level.collider.meta.json',
-        triangleCount: 128,
-        vertexCount: 81,
-      },
-    },
-    {
-      selectedNodeId: 'terrain-source',
-      selectedTerrainSourceName: 'Terrain Source',
-    },
-  )
-
-  assert.equal(next.collision?.terrain?.source, 'baked-heightmap')
-  assert.equal(next.collision?.terrain?.runtimeSource, 'generated-heightmap')
-  assert.equal(next.collision?.terrain?.heightmapDirty, false)
-  assert.equal(next.collision?.terrain?.dirty, false)
-  assert.equal(next.collision?.terrain?.lastChunksGeneratedAt, '')
-  assert.equal(
-    next.collision?.terrain?.colliderUrl,
-    '/terrain/collision/fixture-level.collider.bin',
   )
 })
 
@@ -4998,38 +5061,6 @@ test('editor terrain pipeline runner applies source GLB chunk products', () => {
   )
 })
 
-test('heightmap dirty state regenerates before terrain bake work', () => {
-  const plan = computeEditorPublishBakePlan({
-    levelId: 'fixture-level',
-    scene: createScene({
-      settings: {
-        level: {
-          collision: {
-            terrain: {
-              source: 'baked-heightmap',
-              manifestUrl: '/terrain/fixture-level.manifest.json',
-              sourceNodeIds: ['fixture-asset'],
-              sourceAssetUrls: ['/generated/runtime-game-assets/fixture.glb'],
-              heightmapDirty: true,
-            },
-          },
-          terrainSculpt: {
-            enabled: true,
-          },
-        },
-      },
-    }),
-  })
-
-  assert.deepEqual(
-    plan.steps.filter(step =>
-      ['generate-heightmap', 'bake-terrain-collision'].includes(step),
-    ),
-    ['generate-heightmap', 'bake-terrain-collision'],
-  )
-  assert.equal(plan.blockers.length, 0)
-})
-
 test('world partition capability includes partition cook work', () => {
   const plan = computeEditorPublishBakePlan({
     levelId: 'fixture-level',
@@ -5056,16 +5087,22 @@ test('readiness metadata drives the same bake plan used by the publish button', 
         level: {
           collision: {
             terrain: {
-              source: 'baked-heightmap',
+              source: 'source-glb',
+              runtimeMode: 'glb-chunk-terrain',
+              visualSource: 'source-glb-chunks',
               manifestUrl: '/terrain/fixture-level.manifest.json',
               colliderUrl: '/terrain/colliders/fixture-level.mmtc',
               metadataUrl: '/terrain/colliders/fixture-level.metadata.json',
+              sourceAssetUrl: '/models/levels/fixture-level.glb',
               chunksPath: '/terrain/levels/fixture-level/',
               chunkCount: 48,
             },
           },
-          terrainSculpt: {
-            enabled: true,
+          ground: {
+            mode: 'terrain-chunks',
+            terrainRuntimeMode: 'glb-chunk-terrain',
+            terrainVisualSource: 'source-glb-chunks',
+            collisionSource: 'source-linked-terrain-collision',
           },
         },
       },
@@ -5079,8 +5116,8 @@ test('readiness metadata drives the same bake plan used by the publish button', 
           reason: 'Regenerate dirty mesh colliders.',
         },
         {
-          id: 'cook-terrain-chunks',
-          command: 'pnpm --dir apps/game cook:terrain-chunks',
+          id: 'cook-terrain-glb-chunks',
+          command: 'pnpm --dir apps/game cook:terrain-glb-chunks',
           reason: 'Cook stale terrain visual chunks.',
         },
         {
@@ -5113,7 +5150,7 @@ test('readiness metadata drives the same bake plan used by the publish button', 
     }),
   })
 
-  assert.ok(plan.steps.includes('cook-terrain-chunks'))
+  assert.ok(plan.steps.includes('cook-terrain-glb-chunks'))
   assert.ok(plan.steps.includes('bake-scene-mesh-colliders'))
   assert.ok(plan.steps.includes('cook-runtime-assets'))
   assert.ok(plan.steps.includes('audit-engine'))
@@ -5214,7 +5251,6 @@ test('publish build endpoint executes supported steps sequentially', async () =>
       steps: [
         'bake-terrain-collision',
         'bake-scene-mesh-colliders',
-        'cook-terrain-chunks',
         'cook-terrain-glb-chunks',
         'cook-world-partition',
         'cook-runtime-assets',
@@ -5237,7 +5273,6 @@ test('publish build endpoint executes supported steps sequentially', async () =>
     [
       'bake:terrain-collision',
       'bake:scene-mesh-colliders',
-      'cook:terrain-chunks',
       'cook:terrain-glb-chunks',
       'cook:world-partition',
       'cook:runtime-assets',
@@ -5253,13 +5288,91 @@ test('publish build endpoint executes supported steps sequentially', async () =>
     [
       'bake-terrain-collision',
       'bake-scene-mesh-colliders',
-      'cook-terrain-chunks',
       'cook-terrain-glb-chunks',
       'cook-world-partition',
       'cook-runtime-assets',
       'audit-engine',
     ],
   )
+})
+
+test('publish-build endpoint scopes audit failures to the requested level', async () => {
+  const { calls, spawnImpl } = createSpawnStub({
+    'audit:engine': {
+      stderr: [
+        'Engine architecture audit failed',
+        '================================',
+        '- yggdrasil.scene.json: asset trimesh collider artifacts are missing or invalid',
+        '- yggdrasil: runtime asset "/generated/style-lab/sources/root.glb" has no usable medium or source metadata',
+        '',
+      ].join('\n'),
+    },
+  })
+  const route = {
+    pathname: '/api/editor-scene/publish-build',
+    parsedUrl: { query: {} },
+  }
+  const req = createJsonRequest(route.pathname, {
+    levelId: 'observatory',
+    plan: {
+      steps: ['cook-runtime-assets', 'audit-engine'],
+    },
+  })
+  const { done, res } = createJsonResponse()
+  const handled = handleSceneRoutes(req, res, route, {
+    REPO_ROOT: process.cwd(),
+    spawnImpl,
+  })
+  const response = await done
+
+  assert.equal(handled, true)
+  assert.equal(response.status, 200)
+  assert.equal(response.payload.success, true)
+  assert.deepEqual(
+    calls.map(call => call.args[2]),
+    ['cook:runtime-assets', 'audit:engine'],
+  )
+  const auditStep = response.payload.steps.find(
+    (step: { id: string }) => step.id === 'audit-engine',
+  )
+  assert.equal(auditStep.success, true)
+  assert.equal(auditStep.exitCode, 1)
+  assert.match(auditStep.message, /passed for observatory/)
+})
+
+test('publish-build endpoint fails audit failures for the requested level', async () => {
+  const { spawnImpl } = createSpawnStub({
+    'audit:engine': {
+      stderr: [
+        'Engine architecture audit failed',
+        '================================',
+        '- observatory.scene.json: settings.level.lighting.sunIntensity is retired',
+        '',
+      ].join('\n'),
+    },
+  })
+  const route = {
+    pathname: '/api/editor-scene/publish-build',
+    parsedUrl: { query: {} },
+  }
+  const req = createJsonRequest(route.pathname, {
+    levelId: 'observatory',
+    plan: {
+      steps: ['cook-runtime-assets', 'audit-engine'],
+    },
+  })
+  const { done, res } = createJsonResponse()
+  const handled = handleSceneRoutes(req, res, route, {
+    REPO_ROOT: process.cwd(),
+    spawnImpl,
+  })
+  const response = await done
+
+  assert.equal(handled, true)
+  assert.equal(response.status, 500)
+  assert.equal(response.payload.success, false)
+  assert.equal(response.payload.failedStep, 'audit-engine')
+  assert.match(response.payload.message, /observatory\.scene\.json/)
 })
 
 test('publish-build endpoint does not update registry after failed build', async () => {

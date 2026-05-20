@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import {
   existsSync,
   mkdirSync,
@@ -5,9 +6,7 @@ import {
   renameSync,
   writeFileSync,
 } from 'node:fs'
-import { createHash } from 'node:crypto'
-import { dirname, join } from 'node:path'
-import { inflateSync } from 'node:zlib'
+import { dirname, extname, join, relative } from 'node:path'
 import {
   discoverTerrainLevels,
   formatTerrainLevelList,
@@ -19,9 +18,23 @@ const repoRoot = new URL('../../..', import.meta.url).pathname.replace(
   '$1',
 )
 const publicRoot = join(repoRoot, 'apps/megameal/public')
-
-const MAGIC = 0x4d4d5443 // MMTC
+const MAGIC = 0x4d4d5443
 const VERSION = 1
+const COMPONENT_READERS = {
+  5120: { size: 1, read: Buffer.prototype.readInt8, max: 127, signed: true },
+  5121: { size: 1, read: Buffer.prototype.readUInt8, max: 255 },
+  5122: { size: 2, read: Buffer.prototype.readInt16LE, max: 32767, signed: true },
+  5123: { size: 2, read: Buffer.prototype.readUInt16LE, max: 65535 },
+  5125: { size: 4, read: Buffer.prototype.readUInt32LE, max: 4294967295 },
+  5126: { size: 4, read: Buffer.prototype.readFloatLE },
+}
+const ACCESSOR_COMPONENTS = {
+  SCALAR: 1,
+  VEC2: 2,
+  VEC3: 3,
+  VEC4: 4,
+  MAT4: 16,
+}
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8').replace(/^\uFEFF/, ''))
@@ -40,6 +53,17 @@ function fingerprintFile(path) {
   }
 }
 
+function firstString(...values) {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim()
+    if (Array.isArray(value)) {
+      const match = value.find(item => typeof item === 'string' && item.trim())
+      if (match) return match.trim()
+    }
+  }
+  return ''
+}
+
 function normalizePublicUrl(value) {
   return typeof value === 'string' && value.startsWith('/') ? value : ''
 }
@@ -51,47 +75,12 @@ function resolvePublicPath(publicUrl) {
   return fullPath.startsWith(publicRoot) ? fullPath : ''
 }
 
-function fingerprintPublicAsset(publicUrl) {
-  const path = resolvePublicPath(publicUrl)
-  if (!path || !existsSync(path)) return null
-  return fingerprintFile(path)
+function toPublicUrl(assetPath) {
+  const normalized = relative(publicRoot, assetPath).split('\\').join('/')
+  return normalized.startsWith('..') ? assetPath : `/${normalized}`
 }
 
-function uniqueStrings(values) {
-  return [...new Set(values.filter(value => typeof value === 'string' && value))]
-}
-
-function firstString(...values) {
-  for (const value of values) {
-    if (typeof value === 'string' && value.trim()) return value.trim()
-    if (Array.isArray(value)) {
-      const match = value.find(
-        item => typeof item === 'string' && item.trim(),
-      )
-      if (match) return match.trim()
-    }
-  }
-  return ''
-}
-
-function getTerrainRuntimeMode(manifest) {
-  return manifest.runtime?.mode
-}
-
-function getTerrainVisualSource(manifest) {
-  return manifest.runtime?.visualSource
-}
-
-function isGlbChunkTerrainContract(manifest) {
-  return (
-    getTerrainRuntimeMode(manifest) === 'glb-chunk-terrain' ||
-    getTerrainVisualSource(manifest) === 'source-glb-chunks' ||
-    manifest.visualChunks?.source === 'source-glb' ||
-    manifest.visualChunks?.product?.type === 'glb-chunk-terrain'
-  )
-}
-
-function resolvePrimaryTerrainSourceAssetUrl(manifest, heightConfig) {
+function resolveTerrainSourceAssetUrl(manifest) {
   return normalizePublicUrl(
     firstString(
       manifest.source?.assetUrl,
@@ -100,389 +89,346 @@ function resolvePrimaryTerrainSourceAssetUrl(manifest, heightConfig) {
       manifest.assets?.sourceAssetUrl,
       manifest.assets?.terrainSource,
       manifest.visualChunks?.product?.sourceAssetUrl,
-      manifest.assets?.environment,
-      heightConfig.sourceAssetUrl,
-      heightConfig.sourceAssetUrls,
     ),
   )
 }
 
-function resolveTerrainSourceAssetUrls(manifest, heightConfig) {
-  return uniqueStrings([
-    resolvePrimaryTerrainSourceAssetUrl(manifest, heightConfig),
-    ...(Array.isArray(heightConfig.sourceAssetUrls)
-      ? heightConfig.sourceAssetUrls
-      : []),
-    heightConfig.sourceAssetUrl,
-    manifest.source?.assetUrl,
-    manifest.assets?.sourceGlb,
-    manifest.assets?.sourceGltf,
-    manifest.assets?.sourceAssetUrl,
-    manifest.assets?.terrainSource,
-    manifest.visualChunks?.product?.sourceAssetUrl,
-    manifest.assets?.environment,
-  ].map(normalizePublicUrl))
-}
-
-function buildTerrainSourceContract({
-  manifest,
-  heightConfig,
-  heightmapUrl,
-  bounds,
-  collisionBounds,
-  vertexCount,
-  triangleCount,
-}) {
-  const sourceAssetUrls = resolveTerrainSourceAssetUrls(manifest, heightConfig)
-  const glbChunkTerrain = isGlbChunkTerrainContract(manifest)
-  const primarySourceAssetUrl = glbChunkTerrain
-    ? resolvePrimaryTerrainSourceAssetUrl(manifest, heightConfig)
-    : ''
-  const sourceAssetFingerprints = sourceAssetUrls
-    .map(url => ({
-      url,
-      fingerprint: fingerprintPublicAsset(url),
-    }))
-    .filter(entry => entry.fingerprint)
-  const heightmapFingerprint = fingerprintPublicAsset(heightmapUrl)
-  const fingerprintedSourceUrl =
-    (primarySourceAssetUrl &&
-      sourceAssetFingerprints.find(entry => entry.url === primarySourceAssetUrl)
-        ?.url) ||
-    sourceAssetFingerprints[0]?.url
-  const sourceAssetUrl = fingerprintedSourceUrl || heightmapUrl
-  const sourceAssetFingerprint =
-    sourceAssetFingerprints.find(entry => entry.url === sourceAssetUrl)
-      ?.fingerprint ?? heightmapFingerprint
-  const collisionBakeMode = glbChunkTerrain
-    ? 'source-glb-heightfield-projection'
-    : 'heightfield-projection'
-  const collisionMeshSource = glbChunkTerrain
-    ? {
-        type: 'source-glb-heightfield-projection',
-        url: sourceAssetUrl,
-        projectionHeightmapUrl: heightmapUrl,
-        ...(sourceAssetFingerprint ? { fingerprint: sourceAssetFingerprint } : {}),
-      }
-    : {
-        type: 'heightmap',
-        url: heightmapUrl,
-        ...(heightmapFingerprint ? { fingerprint: heightmapFingerprint } : {}),
-      }
-
-  return {
-    schemaVersion: 1,
-    terrainSourceType: glbChunkTerrain
-      ? 'glb-chunk-terrain'
-      : sourceAssetUrls.length > 0
-        ? 'heightfield-terrain'
-        : 'heightfield-procedural',
-    sourceAssetUrl,
-    sourceAssetUrls: uniqueStrings([sourceAssetUrl, ...sourceAssetUrls]),
-    ...(sourceAssetUrls.length > 0 ? { authoredSourceAssetUrls: sourceAssetUrls } : {}),
-    ...(sourceAssetFingerprint ? { sourceAssetFingerprint } : {}),
-    ...(sourceAssetFingerprints.length > 0
-      ? { sourceAssetFingerprints }
-      : {}),
-    heightmapUrl,
-    ...(heightmapFingerprint ? { heightmapFingerprint } : {}),
-    sourceCoordinateSystem: 'three-y-up-xz-ground',
-    sourceBounds: bounds,
-    renderBakeMode: glbChunkTerrain
-      ? 'source-glb-chunk-mesh'
-      : 'heightfield-chunk-mesh',
-    collisionBakeMode,
-    collisionMeshSource,
-    collisionCoverageBounds: collisionBounds,
-    role: 'walkable',
-    vertexCount,
-    triangleCount,
-  }
-}
-
-function assertPngSignature(buffer) {
-  const signature = '89504e470d0a1a0a'
-  if (buffer.subarray(0, 8).toString('hex') !== signature) {
-    throw new Error('Invalid PNG signature')
-  }
-}
-
-function parsePng(path) {
-  const buffer = readFileSync(path)
-  assertPngSignature(buffer)
-
-  let offset = 8
-  let width = 0
-  let height = 0
-  let bitDepth = 0
-  let colorType = 0
-  let interlace = 0
-  const idatChunks = []
-
-  while (offset < buffer.length) {
-    const length = buffer.readUInt32BE(offset)
-    const type = buffer.toString('ascii', offset + 4, offset + 8)
-    const dataStart = offset + 8
-    const dataEnd = dataStart + length
-
-    if (type === 'IHDR') {
-      width = buffer.readUInt32BE(dataStart)
-      height = buffer.readUInt32BE(dataStart + 4)
-      bitDepth = buffer[dataStart + 8]
-      colorType = buffer[dataStart + 9]
-      interlace = buffer[dataStart + 12]
-    } else if (type === 'IDAT') {
-      idatChunks.push(buffer.subarray(dataStart, dataEnd))
-    } else if (type === 'IEND') {
-      break
-    }
-
-    offset = dataEnd + 4
-  }
-
-  if (bitDepth !== 8) {
-    throw new Error(`Unsupported PNG bit depth: ${bitDepth}`)
-  }
-  if (interlace !== 0) {
-    throw new Error('Interlaced PNG heightmaps are not supported')
-  }
-
-  const channels =
-    colorType === 0
-      ? 1
-      : colorType === 2
-        ? 3
-        : colorType === 6
-          ? 4
-          : null
-  if (!channels) {
-    throw new Error(`Unsupported PNG color type: ${colorType}`)
-  }
-
-  const inflated = inflateSync(Buffer.concat(idatChunks))
-  const stride = width * channels
-  const pixels = new Uint8Array(width * height * channels)
-  let sourceOffset = 0
-  let previousRow = new Uint8Array(stride)
-
-  for (let y = 0; y < height; y += 1) {
-    const filter = inflated[sourceOffset]
-    sourceOffset += 1
-    const row = new Uint8Array(inflated.subarray(sourceOffset, sourceOffset + stride))
-    sourceOffset += stride
-    const out = new Uint8Array(stride)
-
-    for (let x = 0; x < stride; x += 1) {
-      const left = x >= channels ? out[x - channels] : 0
-      const up = previousRow[x] ?? 0
-      const upLeft = x >= channels ? previousRow[x - channels] ?? 0 : 0
-      let predictor = 0
-
-      if (filter === 1) predictor = left
-      else if (filter === 2) predictor = up
-      else if (filter === 3) predictor = Math.floor((left + up) / 2)
-      else if (filter === 4) {
-        const p = left + up - upLeft
-        const pa = Math.abs(p - left)
-        const pb = Math.abs(p - up)
-        const pc = Math.abs(p - upLeft)
-        predictor = pa <= pb && pa <= pc ? left : pb <= pc ? up : upLeft
-      } else if (filter !== 0) {
-        throw new Error(`Unsupported PNG filter: ${filter}`)
-      }
-
-      out[x] = (row[x] + predictor) & 0xff
-    }
-
-    pixels.set(out, y * stride)
-    previousRow = out
-  }
-
-  return { width, height, channels, pixels }
-}
-
-function getSampleIndices(resolution, targetResolution) {
-  const sampleStep = Math.max(1, Math.ceil(resolution / targetResolution))
-  const indices = []
-  for (let index = 0; index < resolution; index += sampleStep) {
-    indices.push(index)
-  }
-  if (indices[indices.length - 1] !== resolution - 1) {
-    indices.push(resolution - 1)
-  }
-  return { indices, sampleStep }
-}
-
-function getSceneTerrainOverrides(level) {
-  const scenePath = join(
-    repoRoot,
-    'apps/game/src/threlte/editor/scenes',
-    `${level.levelId}.scene.json`,
-  )
-
-  try {
-    const scene = readJson(scenePath)
-    return (
-      scene.settings?.[level.sceneSettingsKey]?.terrainSculpt
-        ?.heightOverrides ??
-      scene.settings?.level?.terrainSculpt?.heightOverrides ??
-      {}
+function resolveTerrainSourceAsset(manifest) {
+  const sourceAssetUrl = resolveTerrainSourceAssetUrl(manifest)
+  const sourceAssetPath = resolvePublicPath(sourceAssetUrl)
+  if (!sourceAssetUrl || !sourceAssetPath || !existsSync(sourceAssetPath)) {
+    throw new Error(
+      'Terrain collision bake requires a source GLB/GLTF under the public asset root.',
     )
-  } catch {
-    return {}
+  }
+  if (!/\.(glb|gltf)$/i.test(sourceAssetPath)) {
+    throw new Error('Terrain collision source asset must be a GLB or GLTF file.')
+  }
+  return {
+    sourceAssetUrl,
+    sourceAssetPath,
+    sourcePublicUrl: toPublicUrl(sourceAssetPath),
+    fingerprint: fingerprintFile(sourceAssetPath),
   }
 }
 
-function getHeightData(manifest, heightConfig, png, heightOverrides) {
-  if (png.width !== png.height) {
-    throw new Error(`Expected square heightmap, got ${png.width}x${png.height}`)
+function readDataUri(uri) {
+  const match = uri.match(/^data:.*?;base64,(.*)$/)
+  if (!match) throw new Error('Only base64 GLTF data URIs are supported')
+  return Buffer.from(match[1], 'base64')
+}
+
+function parseGlb(path) {
+  const buffer = readFileSync(path)
+  if (buffer.readUInt32LE(0) !== 0x46546c67) {
+    throw new Error(`${path} is not a GLB file`)
+  }
+  if (buffer.readUInt32LE(4) !== 2) {
+    throw new Error('Only GLB version 2 is supported')
   }
 
-  const resolution = png.width
-  const heightOffset = heightConfig.heightOffset ?? manifest.physics.minHeight
-  const heightScale =
-    heightConfig.heightScale ??
-    manifest.physics.maxHeight - manifest.physics.minHeight
-  const heightData = new Float32Array(resolution * resolution)
+  let json = null
+  let bin = null
+  let offset = 12
+  while (offset < buffer.byteLength) {
+    const chunkLength = buffer.readUInt32LE(offset)
+    const chunkType = buffer.readUInt32LE(offset + 4)
+    const chunk = buffer.subarray(offset + 8, offset + 8 + chunkLength)
+    if (chunkType === 0x4e4f534a) json = JSON.parse(chunk.toString('utf8'))
+    if (chunkType === 0x004e4942) bin = Buffer.from(chunk)
+    offset += 8 + chunkLength
+  }
+  if (!json) throw new Error(`${path} has no JSON chunk`)
+  return { json, glbBin: bin ?? Buffer.alloc(0), path }
+}
 
-  for (let z = 0; z < resolution; z += 1) {
-    for (let x = 0; x < resolution; x += 1) {
-      const index = z * resolution + x
-      const pixelOffset = index * png.channels
-      const grayscale = png.pixels[pixelOffset] / 255
-      heightData[index] = heightOffset + grayscale * heightScale
+function loadGltfDocument(path) {
+  const extension = extname(path).toLowerCase()
+  const parsed =
+    extension === '.glb'
+      ? parseGlb(path)
+      : { json: readJson(path), glbBin: null, path }
+  const gltf = parsed.json
+  const buffers = (gltf.buffers ?? []).map((buffer, index) => {
+    if (index === 0 && parsed.glbBin && !buffer.uri) return parsed.glbBin
+    if (!buffer.uri) throw new Error(`Buffer ${index} has no URI`)
+    if (buffer.uri.startsWith('data:')) return readDataUri(buffer.uri)
+    return readFileSync(join(dirname(path), buffer.uri))
+  })
+  return { gltf, buffers, path }
+}
+
+function readAccessor(doc, accessorIndex) {
+  const accessor = doc.gltf.accessors?.[accessorIndex]
+  if (!accessor) throw new Error(`Missing accessor ${accessorIndex}`)
+  if (accessor.sparse) throw new Error('Sparse accessors are not supported')
+
+  const component = COMPONENT_READERS[accessor.componentType]
+  const componentCount = ACCESSOR_COMPONENTS[accessor.type]
+  if (!component || !componentCount) {
+    throw new Error(
+      `Unsupported accessor format ${accessor.componentType}/${accessor.type}`,
+    )
+  }
+
+  const bufferView = doc.gltf.bufferViews?.[accessor.bufferView]
+  if (!bufferView) throw new Error(`Accessor ${accessorIndex} has no bufferView`)
+
+  const buffer = doc.buffers[bufferView.buffer]
+  const stride = bufferView.byteStride ?? component.size * componentCount
+  const baseOffset = (bufferView.byteOffset ?? 0) + (accessor.byteOffset ?? 0)
+  const values = new Float32Array(accessor.count * componentCount)
+
+  for (let item = 0; item < accessor.count; item += 1) {
+    const itemOffset = baseOffset + item * stride
+    for (let c = 0; c < componentCount; c += 1) {
+      const offset = itemOffset + c * component.size
+      let value = component.read.call(buffer, offset)
+      if (accessor.normalized && accessor.componentType !== 5126) {
+        value = component.signed
+          ? Math.max(value / component.max, -1)
+          : value / component.max
+      }
+      values[item * componentCount + c] = value
     }
   }
 
-  let overrideCount = 0
-  for (const [rawIndex, rawHeight] of Object.entries(heightOverrides ?? {})) {
-    const index = Number(rawIndex)
-    const height = Number(rawHeight)
-    if (
-      !Number.isInteger(index) ||
-      index < 0 ||
-      index >= heightData.length ||
-      !Number.isFinite(height)
-    ) {
-      continue
+  return { values, count: accessor.count, componentCount }
+}
+
+function readIndices(doc, primitive, vertexCount) {
+  if (primitive.indices === undefined) {
+    return Uint32Array.from({ length: vertexCount }, (_, index) => index)
+  }
+  const accessor = readAccessor(doc, primitive.indices)
+  return Uint32Array.from(accessor.values, value => value)
+}
+
+function identityMatrix() {
+  return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+}
+
+function multiplyMatrices(a, b) {
+  const out = new Array(16).fill(0)
+  for (let row = 0; row < 4; row += 1) {
+    for (let col = 0; col < 4; col += 1) {
+      for (let k = 0; k < 4; k += 1) {
+        out[col * 4 + row] += a[k * 4 + row] * b[col * 4 + k]
+      }
     }
-    heightData[index] = height
-    overrideCount += 1
+  }
+  return out
+}
+
+function composeNodeMatrix(node) {
+  if (Array.isArray(node.matrix) && node.matrix.length === 16) {
+    return node.matrix.slice()
+  }
+  const [tx, ty, tz] = node.translation ?? [0, 0, 0]
+  const [x, y, z, w] = node.rotation ?? [0, 0, 0, 1]
+  const [sx, sy, sz] = node.scale ?? [1, 1, 1]
+  const x2 = x + x
+  const y2 = y + y
+  const z2 = z + z
+  const xx = x * x2
+  const xy = x * y2
+  const xz = x * z2
+  const yy = y * y2
+  const yz = y * z2
+  const zz = z * z2
+  const wx = w * x2
+  const wy = w * y2
+  const wz = w * z2
+
+  return [
+    (1 - (yy + zz)) * sx,
+    (xy + wz) * sx,
+    (xz - wy) * sx,
+    0,
+    (xy - wz) * sy,
+    (1 - (xx + zz)) * sy,
+    (yz + wx) * sy,
+    0,
+    (xz + wy) * sz,
+    (yz - wx) * sz,
+    (1 - (xx + yy)) * sz,
+    0,
+    tx,
+    ty,
+    tz,
+    1,
+  ]
+}
+
+function transformPoint(matrix, x, y, z) {
+  return [
+    matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12],
+    matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13],
+    matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14],
+  ]
+}
+
+function expandBounds(bounds, x, y, z) {
+  bounds.min[0] = Math.min(bounds.min[0], x)
+  bounds.min[1] = Math.min(bounds.min[1], y)
+  bounds.min[2] = Math.min(bounds.min[2], z)
+  bounds.max[0] = Math.max(bounds.max[0], x)
+  bounds.max[1] = Math.max(bounds.max[1], y)
+  bounds.max[2] = Math.max(bounds.max[2], z)
+}
+
+function emptyBounds() {
+  return {
+    min: [Infinity, Infinity, Infinity],
+    max: [-Infinity, -Infinity, -Infinity],
+  }
+}
+
+function sanitizeBounds(bounds) {
+  if (!Number.isFinite(bounds.min[0])) return { min: [0, 0, 0], max: [0, 0, 0] }
+  return bounds
+}
+
+function getRootNodeIndexes(gltf) {
+  const scene = gltf.scenes?.[gltf.scene ?? 0]
+  if (scene?.nodes?.length) return scene.nodes
+  const childNodes = new Set()
+  for (const node of gltf.nodes ?? []) {
+    for (const child of node.children ?? []) childNodes.add(child)
+  }
+  return (gltf.nodes ?? [])
+    .map((_, index) => index)
+    .filter(index => !childNodes.has(index))
+}
+
+function collectColliderGeometry(doc) {
+  const positions = []
+  const indices = []
+  const bounds = emptyBounds()
+
+  function visitNode(nodeIndex, parentMatrix) {
+    const node = doc.gltf.nodes?.[nodeIndex]
+    if (!node) return
+    const matrix = multiplyMatrices(parentMatrix, composeNodeMatrix(node))
+    const mesh = doc.gltf.meshes?.[node.mesh]
+
+    if (mesh) {
+      for (const primitive of mesh.primitives ?? []) {
+        if ((primitive.mode ?? 4) !== 4) continue
+        const positionAccessorIndex = primitive.attributes?.POSITION
+        if (positionAccessorIndex === undefined) continue
+
+        const position = readAccessor(doc, positionAccessorIndex)
+        const primitiveIndices = readIndices(doc, primitive, position.count)
+        const vertexOffset = positions.length / 3
+
+        for (let i = 0; i < position.count; i += 1) {
+          const sourceOffset = i * 3
+          const [x, y, z] = transformPoint(
+            matrix,
+            position.values[sourceOffset],
+            position.values[sourceOffset + 1],
+            position.values[sourceOffset + 2],
+          )
+          positions.push(x, y, z)
+          expandBounds(bounds, x, y, z)
+        }
+        for (const index of primitiveIndices) indices.push(vertexOffset + index)
+      }
+    }
+
+    for (const child of node.children ?? []) visitNode(child, matrix)
+  }
+
+  for (const nodeIndex of getRootNodeIndexes(doc.gltf)) {
+    visitNode(nodeIndex, identityMatrix())
   }
 
   return {
-    resolution,
-    heightData,
-    heightOverrideCount: overrideCount,
+    vertices: Float32Array.from(positions),
+    indices: Uint32Array.from(indices),
+    bounds: sanitizeBounds(bounds),
   }
 }
 
-function buildCollider(
-  manifest,
-  heightConfig,
-  png,
-  targetResolution,
-  heightOverrides = {},
-) {
-  const { resolution, heightData, heightOverrideCount } = getHeightData(
-    manifest,
-    heightConfig,
-    png,
-    heightOverrides,
-  )
-  const { indices: xIndices, sampleStep } = getSampleIndices(
-    resolution,
-    targetResolution,
-  )
-  const zIndices = xIndices
-  const cols = xIndices.length
-  const rows = zIndices.length
-  const bounds = heightConfig.bounds ?? manifest.physics.bounds
-  const width = bounds.max[0] - bounds.min[0]
-  const depth = bounds.max[2] - bounds.min[2]
-  const center = [
+function getBoundsCenter(bounds) {
+  return [
     (bounds.min[0] + bounds.max[0]) / 2,
-    0,
+    (bounds.min[1] + bounds.max[1]) / 2,
     (bounds.min[2] + bounds.max[2]) / 2,
   ]
-  const vertices = new Float32Array(cols * rows * 3)
-  const triangleCount = (cols - 1) * (rows - 1) * 2
-  const indices = new Uint32Array(triangleCount * 3)
+}
 
-  for (let z = 0; z < rows; z += 1) {
-    const sourceZ = zIndices[z]
-    const localZ = (z / (rows - 1) - 0.5) * depth
-    for (let x = 0; x < cols; x += 1) {
-      const sourceX = xIndices[x]
-      const vertexOffset = (z * cols + x) * 3
-      vertices[vertexOffset] = (x / (cols - 1) - 0.5) * width
-      vertices[vertexOffset + 1] = heightData[sourceZ * resolution + sourceX]
-      vertices[vertexOffset + 2] = localZ
-    }
-  }
-
-  let indexOffset = 0
-  for (let z = 0; z < rows - 1; z += 1) {
-    for (let x = 0; x < cols - 1; x += 1) {
-      const topLeft = z * cols + x
-      const topRight = topLeft + 1
-      const bottomLeft = topLeft + cols
-      const bottomRight = bottomLeft + 1
-      indices[indexOffset++] = topLeft
-      indices[indexOffset++] = bottomLeft
-      indices[indexOffset++] = topRight
-      indices[indexOffset++] = topRight
-      indices[indexOffset++] = bottomLeft
-      indices[indexOffset++] = bottomRight
-    }
-  }
-
+function buildColliderMeta({ source, geometry }) {
+  const vertexCount = geometry.vertices.length / 3
+  const indexCount = geometry.indices.length
+  const triangleCount = Math.floor(indexCount / 3)
   return {
-    vertices,
-    indices,
-    meta: {
-      type: 'baked-terrain-mesh',
-      version: VERSION,
-      sourceHeightmap: manifest.assets.heightmap,
-      sourceResolution: resolution,
-      colliderResolution: Math.max(rows, cols),
-      sampleStep,
-      vertexCount: vertices.length / 3,
-      indexCount: indices.length,
+    type: 'baked-terrain-mesh',
+    version: VERSION,
+    sourceAssetUrl: source.sourcePublicUrl,
+    sourceAssetFingerprint: source.fingerprint,
+    sourceResolution: 0,
+    colliderResolution: 0,
+    sampleStep: 1,
+    vertexCount,
+    indexCount,
+    triangleCount,
+    bounds: geometry.bounds,
+    center: getBoundsCenter(geometry.bounds),
+    sourceContract: {
+      schemaVersion: 1,
+      terrainSourceType: 'glb-chunk-terrain',
+      sourceAssetUrl: source.sourcePublicUrl,
+      sourceAssetUrls: [source.sourcePublicUrl],
+      authoredSourceAssetUrls: [source.sourcePublicUrl],
+      sourceAssetFingerprint: source.fingerprint,
+      sourceAssetFingerprints: [
+        { url: source.sourcePublicUrl, fingerprint: source.fingerprint },
+      ],
+      sourceCoordinateSystem: 'three-y-up-xz-ground',
+      sourceBounds: geometry.bounds,
+      renderBakeMode: 'source-glb-chunk-mesh',
+      collisionBakeMode: 'source-glb-collision-mesh',
+      collisionMeshSource: {
+        type: 'source-glb',
+        url: source.sourcePublicUrl,
+        fingerprint: source.fingerprint,
+      },
+      collisionCoverageBounds: geometry.bounds,
+      role: 'walkable',
+      vertexCount,
       triangleCount,
-      bounds,
-      center,
-      heightOverrideCount,
     },
   }
 }
 
-function writeColliderBinary(path, collider) {
+function writeColliderBinary(path, geometry, meta) {
   mkdirSync(dirname(path), { recursive: true })
-  const headerBytes = 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4
+  const headerBytes = 32
   const buffer = Buffer.alloc(
-    headerBytes + collider.vertices.byteLength + collider.indices.byteLength,
+    headerBytes + geometry.vertices.byteLength + geometry.indices.byteLength,
   )
   let offset = 0
   buffer.writeUInt32LE(MAGIC, offset)
   offset += 4
   buffer.writeUInt32LE(VERSION, offset)
   offset += 4
-  buffer.writeUInt32LE(collider.meta.vertexCount, offset)
+  buffer.writeUInt32LE(meta.vertexCount, offset)
   offset += 4
-  buffer.writeUInt32LE(collider.meta.indexCount, offset)
+  buffer.writeUInt32LE(meta.indexCount, offset)
   offset += 4
-  buffer.writeUInt32LE(collider.meta.triangleCount, offset)
+  buffer.writeUInt32LE(meta.triangleCount, offset)
   offset += 4
-  buffer.writeUInt32LE(collider.meta.sourceResolution, offset)
+  buffer.writeUInt32LE(meta.sourceResolution, offset)
   offset += 4
-  buffer.writeUInt32LE(collider.meta.colliderResolution, offset)
+  buffer.writeUInt32LE(meta.colliderResolution, offset)
   offset += 4
-  buffer.writeUInt32LE(collider.meta.sampleStep, offset)
+  buffer.writeUInt32LE(meta.sampleStep, offset)
   offset += 4
-  Buffer.from(collider.vertices.buffer).copy(buffer, offset)
-  offset += collider.vertices.byteLength
-  Buffer.from(collider.indices.buffer).copy(buffer, offset)
+  Buffer.from(geometry.vertices.buffer).copy(buffer, offset)
+  offset += geometry.vertices.byteLength
+  Buffer.from(geometry.indices.buffer).copy(buffer, offset)
   writeFileSync(path, buffer)
 }
 
@@ -491,11 +437,17 @@ function updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, met
     manifest.physics ?? {}
   return {
     ...manifest,
+    runtime: {
+      ...(manifest.runtime ?? {}),
+      mode: 'glb-chunk-terrain',
+      visualSource: 'source-glb-chunks',
+      fallbackSurfacePolicy: manifest.runtime?.fallbackSurfacePolicy ?? 'disabled',
+    },
     collision: {
       ...(manifest.collision ?? {}),
       terrain: {
         type: 'baked-terrain-mesh',
-        sourceLinked: Boolean(meta.sourceContract?.sourceAssetUrl),
+        sourceLinked: true,
         url: publicBinaryPath,
         metadataUrl: publicMetaPath,
         triangleCount: meta.triangleCount,
@@ -510,14 +462,16 @@ function updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, met
     visualChunks: manifest.visualChunks
       ? {
           ...manifest.visualChunks,
+          source: 'source-glb',
           sourceContract:
-            manifest.visualChunks.source === 'source-glb'
-              ? manifest.visualChunks.sourceContract ?? meta.sourceContract
-              : meta.sourceContract,
+            manifest.visualChunks.sourceContract ?? meta.sourceContract,
         }
       : manifest.visualChunks,
     physics: {
       ...physicsWithoutLegacyTrimesh,
+      bounds: physicsWithoutLegacyTrimesh.bounds ?? meta.bounds,
+      minHeight: physicsWithoutLegacyTrimesh.minHeight ?? meta.bounds.min[1],
+      maxHeight: physicsWithoutLegacyTrimesh.maxHeight ?? meta.bounds.max[1],
       type: 'baked-terrain-mesh',
     },
   }
@@ -543,41 +497,26 @@ if (levelsToBake.length === 0) {
 
 for (const level of levelsToBake) {
   const manifest = readJson(level.manifestPath)
-  const heightmapPath = join(publicRoot, manifest.assets.heightmap.replace(/^\//, ''))
-  const heightConfigPath = heightmapPath.replace('_heightmap.png', '_config.json')
-  const heightConfig = readJson(heightConfigPath)
-  const png = parsePng(heightmapPath)
-  const heightOverrides = getSceneTerrainOverrides(level)
-  const collider = buildCollider(
-    manifest,
-    heightConfig,
-    png,
-    level.targetResolution,
-    heightOverrides,
-  )
-  collider.meta.sourceContract = buildTerrainSourceContract({
-    manifest,
-    heightConfig,
-    heightmapUrl: manifest.assets.heightmap,
-    bounds: heightConfig.bounds ?? manifest.physics?.bounds ?? collider.meta.bounds,
-    collisionBounds: collider.meta.bounds,
-    vertexCount: collider.meta.vertexCount,
-    triangleCount: collider.meta.triangleCount,
-  })
+  const source = resolveTerrainSourceAsset(manifest)
+  const geometry = collectColliderGeometry(loadGltfDocument(source.sourceAssetPath))
+  if (geometry.indices.length < 3) {
+    throw new Error(`No triangle mesh primitives found in ${source.sourceAssetUrl}`)
+  }
+  const meta = buildColliderMeta({ source, geometry })
   const publicBinaryPath = `/terrain/collision/${level.id}.collider.bin`
   const publicMetaPath = `/terrain/collision/${level.id}.collider.meta.json`
   const binaryPath = join(publicRoot, publicBinaryPath.replace(/^\//, ''))
   const metaPath = join(publicRoot, publicMetaPath.replace(/^\//, ''))
 
-  writeColliderBinary(binaryPath, collider)
-  writeJson(metaPath, collider.meta)
+  writeColliderBinary(binaryPath, geometry, meta)
+  writeJson(metaPath, meta)
   writeJson(
     level.manifestPath,
-    updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, collider.meta),
+    updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, meta),
   )
 
   console.log(
-    `[bake-terrain-collision] ${level.id}: ${collider.meta.vertexCount} vertices, ${collider.meta.triangleCount} triangles, ${collider.meta.heightOverrideCount} editor height overrides -> ${publicBinaryPath}`,
+    `[bake-terrain-collision] ${level.id}: ${meta.vertexCount} vertices, ${meta.triangleCount} triangles from ${source.sourcePublicUrl} -> ${publicBinaryPath}`,
   )
   console.log(
     JSON.stringify({
@@ -587,11 +526,11 @@ for (const level of levelsToBake) {
       collision: {
         url: publicBinaryPath,
         metadataUrl: publicMetaPath,
-        triangleCount: collider.meta.triangleCount,
-        vertexCount: collider.meta.vertexCount,
-        colliderResolution: collider.meta.colliderResolution,
+        triangleCount: meta.triangleCount,
+        vertexCount: meta.vertexCount,
+        colliderResolution: meta.colliderResolution,
       },
-      metadata: collider.meta,
+      metadata: meta,
     }),
   )
 }
