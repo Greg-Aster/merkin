@@ -44,17 +44,22 @@ const demoVideos = [
 ---
 
 <section
-  class="absolute inset-0 isolate cursor-pointer overflow-hidden bg-black text-white"
+  class="portal-demo-player absolute inset-0 isolate cursor-pointer overflow-hidden bg-black text-white"
   aria-label="MEGAMEAL demo video"
   data-portal-demo-player
   data-videos={JSON.stringify(demoVideos)}
 >
   <video
-    class="absolute inset-0 h-full w-full bg-black object-contain"
+    class="portal-demo-player__video absolute inset-0 h-full w-full bg-black object-contain"
     playsinline
     preload="none"
     data-portal-demo-video
   ></video>
+  <div class="portal-demo-player__glitch" aria-hidden="true">
+    <span class="portal-demo-player__glitch-band portal-demo-player__glitch-band--one"></span>
+    <span class="portal-demo-player__glitch-band portal-demo-player__glitch-band--two"></span>
+    <span class="portal-demo-player__glitch-band portal-demo-player__glitch-band--three"></span>
+  </div>
 </section>
 
 <script>
@@ -71,6 +76,12 @@ const demoVideos = [
   const demoActiveClass = 'megameal-portal-demo-active'
   const demoAudioSuspensionReason = 'portal-demo'
   const audioConfigChangeEvent = 'megameal:audio-config-change'
+  const channelGlitchClass = 'is-channel-glitching'
+  const handoffGlitchStartProgress = 0.78
+  const handoffGlitchResetProgress = 0.38
+  const initialGlitchDurationMs = 900
+  const clipGlitchDurationMs = 1450
+  const clipSwapDelayMs = 720
 
   const getStoredLastIndex = () => {
     try {
@@ -155,6 +166,49 @@ const demoVideos = [
     let hasSuspendedSiteAudio = false
     let selectedClip: PortalDemoClip | null = null
     let isSwitchingClips = false
+    let hasStartedDemoPlayback = false
+    let handoffGlitchTriggered = false
+    let clipTransitionToken = 0
+    let clipSwapTimeout = 0
+    let glitchClearTimeout = 0
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+    const clearClipSwapTimer = () => {
+      if (!clipSwapTimeout) return
+
+      window.clearTimeout(clipSwapTimeout)
+      clipSwapTimeout = 0
+    }
+
+    const clearGlitchClearTimer = () => {
+      if (!glitchClearTimeout) return
+
+      window.clearTimeout(glitchClearTimeout)
+      glitchClearTimeout = 0
+    }
+
+    const prefersReducedMotion = () => reducedMotionQuery.matches
+
+    const setChannelGlitching = (isGlitching: boolean) => {
+      container.classList.toggle(
+        channelGlitchClass,
+        isGlitching && !prefersReducedMotion(),
+      )
+    }
+
+    const triggerChannelGlitch = (durationMs: number) => {
+      if (prefersReducedMotion()) {
+        setChannelGlitching(false)
+        return
+      }
+
+      clearGlitchClearTimer()
+      setChannelGlitching(true)
+      glitchClearTimeout = window.setTimeout(() => {
+        glitchClearTimeout = 0
+        setChannelGlitching(false)
+      }, durationMs)
+    }
 
     const setSiteAudioSuspended = (isSuspended: boolean) => {
       if (hasSuspendedSiteAudio === isSuspended) return
@@ -193,12 +247,7 @@ const demoVideos = [
       return selectedClip
     }
 
-    const prepareRandomClip = () => {
-      if (hasLoadedClip) return
-
-      const clip = getSelectedClip()
-      if (!clip) return
-
+    const setVideoClip = (clip: PortalDemoClip) => {
       if (video.poster !== clip.poster) {
         video.poster = clip.poster
       }
@@ -209,9 +258,18 @@ const demoVideos = [
       hasLoadedClip = true
     }
 
+    const prepareRandomClip = () => {
+      if (hasLoadedClip) return
+
+      const clip = getSelectedClip()
+      if (!clip) return
+
+      setVideoClip(clip)
+    }
+
     const playDemoVideo = () => {
       applyDemoAudioPreference()
-      video
+      return video
         .play()
         .then(() => {
           isSwitchingClips = false
@@ -222,17 +280,25 @@ const demoVideos = [
         })
     }
 
+    const playInitialDemoVideo = () => {
+      hasStartedDemoPlayback = true
+      handoffGlitchTriggered = true
+      triggerChannelGlitch(initialGlitchDurationMs)
+      void playDemoVideo()
+    }
+
     const toggleDemoPlayback = () => {
       if (slide.dataset.active !== 'true') return
+      if (isSwitchingClips) return
 
       if (video.paused) {
-        playDemoVideo()
+        void playDemoVideo()
       } else {
         video.pause()
       }
     }
 
-    const loadRandomClip = (force = false) => {
+    const loadRandomClip = (force = false, withTransition = false) => {
       if (hasLoadedClip && !force) return
       if (force) {
         selectedClip = null
@@ -241,14 +307,27 @@ const demoVideos = [
       const clip = getSelectedClip()
       if (!clip) return
 
+      if (withTransition && !prefersReducedMotion()) {
+        const transitionToken = ++clipTransitionToken
+        isSwitchingClips = true
+        clearClipSwapTimer()
+        triggerChannelGlitch(clipGlitchDurationMs)
+        video.pause()
+        clipSwapTimeout = window.setTimeout(() => {
+          clipSwapTimeout = 0
+          if (transitionToken !== clipTransitionToken) return
+          if (slide.dataset.active !== 'true') return
+
+          setVideoClip(clip)
+          void playDemoVideo()
+        }, clipSwapDelayMs)
+        return
+      }
+
       isSwitchingClips = true
       video.pause()
-      video.poster = clip.poster
-      video.preload = 'auto'
-      video.src = clip.src
-      video.load()
-      hasLoadedClip = true
-      playDemoVideo()
+      setVideoClip(clip)
+      void playDemoVideo()
     }
 
     const syncDemoActiveState = () => {
@@ -263,13 +342,35 @@ const demoVideos = [
 
     const activateIfVisible = () => {
       if (!syncDemoActiveState()) return
-      if (hasLoadedClip) {
-        if (video.paused) {
-          playDemoVideo()
-        }
-      } else {
-        loadRandomClip()
+      if (!hasLoadedClip) {
+        prepareRandomClip()
       }
+
+      if (!video.paused) return
+
+      if (!hasStartedDemoPlayback) {
+        playInitialDemoVideo()
+        return
+      }
+
+      void playDemoVideo()
+    }
+
+    const syncDemoHandoffGlitch = (progress: number) => {
+      if (hasStartedDemoPlayback || prefersReducedMotion()) return
+
+      if (progress < handoffGlitchResetProgress) {
+        handoffGlitchTriggered = false
+        setChannelGlitching(false)
+        return
+      }
+
+      if (handoffGlitchTriggered || progress < handoffGlitchStartProgress) {
+        return
+      }
+
+      handoffGlitchTriggered = true
+      triggerChannelGlitch(initialGlitchDurationMs)
     }
 
     video.addEventListener('play', applyDemoAudioPreference, { signal })
@@ -283,7 +384,7 @@ const demoVideos = [
       },
       { signal },
     )
-    video.addEventListener('ended', () => loadRandomClip(true), { signal })
+    video.addEventListener('ended', () => loadRandomClip(true, true), { signal })
     container.addEventListener(
       'click',
       event => {
@@ -308,6 +409,7 @@ const demoVideos = [
         if (detail?.phase !== 'standard-banner') return
         const progress = Number(detail.progress) || 0
 
+        syncDemoHandoffGlitch(progress)
         if (progress > 0.08) {
           prepareRandomClip()
         }
@@ -323,6 +425,11 @@ const demoVideos = [
     ;(window as any)[cleanupKey] = () => {
       observer.disconnect()
       abortController.abort()
+      clearClipSwapTimer()
+      clearGlitchClearTimer()
+      clipTransitionToken += 1
+      handoffGlitchTriggered = false
+      setChannelGlitching(false)
       document.documentElement.classList.remove(demoActiveClass)
       video.pause()
       setSiteAudioSuspended(false)
