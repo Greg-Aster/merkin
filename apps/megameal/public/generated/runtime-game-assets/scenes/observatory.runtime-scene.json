@@ -7,12 +7,12 @@
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/observatory.scene.json",
     "version": 1,
-    "updatedAt": "2026-05-20T03:30:29.790Z"
+    "updatedAt": "2026-05-20T04:22:58.798Z"
   },
   "levelDefinition": {
     "id": "observatory",
     "version": 1,
-    "updatedAt": "2026-05-20T03:30:29.790Z",
+    "updatedAt": "2026-05-20T04:22:58.798Z",
     "spawn": {
       "player": [
         -137.2,
@@ -33,37 +33,23 @@
           },
           "terrain": {
             "source": "source-glb",
-            "dirty": false,
+            "dirty": true,
             "runtimeSource": "built-in-manifest",
             "manifestUrl": "/terrain/observatory-environment.manifest.json",
             "runtimeMode": "glb-chunk-terrain",
             "visualSource": "source-glb-chunks",
             "fallbackSurfacePolicy": "disabled",
-            "sourceAssetUrl": "/models/levels/observatory-environment.glb",
-            "renderChunks": {
-              "type": "glb-chunk-terrain",
-              "visualSource": "source-glb-chunks",
-              "manifestUrl": "/terrain/observatory-environment.manifest.json",
-              "chunksPath": "/terrain/levels/observatory-environment/",
-              "chunkCount": 16,
-              "lods": [
-                0
-              ],
-              "generatedBy": "cook-terrain-glb-chunks",
-              "sourceAssetUrl": "/models/levels/observatory-environment.glb",
-              "sourceHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
-              "preservesSourceUvs": true,
-              "preservesSourceMaterialSlots": true,
-              "preservesSourceNormals": true,
-              "preservesSourceTangents": false,
-              "preservesSourceMeshGroups": true,
-              "textureReferencesPreserved": true
-            },
+            "sourceAssetUrl": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
             "sourceAssetHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
             "sourceAssetFingerprint": {
               "algorithm": "sha256",
               "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
-            }
+            },
+            "sourceAssetUrls": [
+              "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb"
+            ],
+            "sourceName": "observatory-environment.glb",
+            "heightmapDirty": false
           },
           "defaults": {
             "primitiveCollisionByDefault": true,
@@ -114,39 +100,11 @@
           "groundActorIds": [],
           "terrainManifestUrl": "/terrain/observatory-environment.manifest.json",
           "requiredWalkableSurfaceId": "observatory-terrain",
-          "sourceAssetUrl": "/models/levels/observatory-environment.glb",
+          "sourceAssetUrl": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
           "sourceAssetHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
           "sourceAssetFingerprint": {
             "algorithm": "sha256",
             "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
-          },
-          "renderChunks": {
-            "type": "glb-chunk-terrain",
-            "visualSource": "source-glb-chunks",
-            "manifestUrl": "/terrain/observatory-environment.manifest.json",
-            "chunksPath": "/terrain/levels/observatory-environment/",
-            "chunkCount": 16,
-            "lods": [
-              0
-            ],
-            "generatedBy": "cook-terrain-glb-chunks",
-            "sourceAssetUrl": "/models/levels/observatory-environment.glb",
-            "sourceHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
-            "preservesSourceUvs": true,
-            "preservesSourceMaterialSlots": true,
-            "preservesSourceNormals": true,
-            "preservesSourceTangents": false,
-            "preservesSourceMeshGroups": true,
-            "textureReferencesPreserved": true
-          },
-          "collisionProduct": {
-            "url": "/terrain/collision/observatory-environment.collider.bin",
-            "metadataUrl": "/terrain/collision/observatory-environment.collider.meta.json",
-            "manifestUrl": "/terrain/observatory-environment.manifest.json",
-            "triangleCount": 32768,
-            "vertexCount": 16641,
-            "colliderResolution": 129,
-            "generatedBy": "bake-terrain-collision"
           }
         },
         "terrainMigration": {
@@ -421,12 +379,13 @@
           }
         },
         "lighting": {
-          "ambientIntensity": 0.2,
-          "fillLightIntensity": 0.2,
-          "keyLightIntensity": 0.2
+          "ambientIntensity": 0,
+          "fillLightIntensity": 0,
+          "keyLightIntensity": 0,
+          "hemisphereIntensity": 0.38
         },
         "player": {
-          "lightIntensityScale": 2
+          "lightIntensityScale": 0.5
         }
       }
     },
@@ -1119,39 +1078,11 @@
       "groundActorIds": [],
       "terrainManifestUrl": "/terrain/observatory-environment.manifest.json",
       "requiredWalkableSurfaceId": "observatory-terrain",
-      "sourceAssetUrl": "/models/levels/observatory-environment.glb",
+      "sourceAssetUrl": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
       "sourceAssetHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
       "sourceAssetFingerprint": {
         "algorithm": "sha256",
         "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
-      },
-      "renderChunks": {
-        "type": "glb-chunk-terrain",
-        "visualSource": "source-glb-chunks",
-        "manifestUrl": "/terrain/observatory-environment.manifest.json",
-        "chunksPath": "/terrain/levels/observatory-environment/",
-        "chunkCount": 16,
-        "lods": [
-          0
-        ],
-        "generatedBy": "cook-terrain-glb-chunks",
-        "sourceAssetUrl": "/models/levels/observatory-environment.glb",
-        "sourceHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
-        "preservesSourceUvs": true,
-        "preservesSourceMaterialSlots": true,
-        "preservesSourceNormals": true,
-        "preservesSourceTangents": false,
-        "preservesSourceMeshGroups": true,
-        "textureReferencesPreserved": true
-      },
-      "collisionProduct": {
-        "url": "/terrain/collision/observatory-environment.collider.bin",
-        "metadataUrl": "/terrain/collision/observatory-environment.collider.meta.json",
-        "manifestUrl": "/terrain/observatory-environment.manifest.json",
-        "triangleCount": 32768,
-        "vertexCount": 16641,
-        "colliderResolution": 129,
-        "generatedBy": "bake-terrain-collision"
       }
     },
     "renderProfile": {

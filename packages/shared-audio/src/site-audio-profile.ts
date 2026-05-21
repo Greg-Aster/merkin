@@ -326,7 +326,7 @@ export const siteSfxProfile: Record<AudioSfxId, AudioSfxConfig> = {
     id: 'portal-impact',
     src: '/audio/sfx/portal-impact.mp3',
     volume: 0.62,
-    rate: 0.35,
+    rate: 0.95,
     cooldownMs: 1200,
     interrupt: false,
     preload: true,

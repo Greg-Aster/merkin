@@ -23,7 +23,7 @@ function getStarTexture() {
     center,
     center,
   )
-  gradient.addColorStop(0, 'rgb(255 255 255 / 0.86)')
+  gradient.addColorStop(0, 'rgb(255 255 255 / 1)')
   gradient.addColorStop(0.12, 'rgb(235 252 255 / 0.76)')
   gradient.addColorStop(0.32, 'rgb(125 211 252 / 0.34)')
   gradient.addColorStop(0.68, 'rgb(99 102 241 / 0.11)')
@@ -111,6 +111,7 @@ export let axialSpinInputScale = 0
 export let pointSizeScale = 1
 export let opacityScale = 1
 export let motionEnabled = true
+export let densityMultiplier = 1
 
 let points: Points | null = null
 
@@ -129,10 +130,10 @@ const color = new Color()
 const haloColor = new Color()
 const particleCapacityStep = 128
 const particleMotionScale = 0.62
-const particlePointSizeScale = 4.8
-const haloPointSizeScale = 3.05
-const coreAlphaScale = 0.72
-const haloAlphaScale = 0.62
+const particlePointSizeScale = 5.25
+const haloPointSizeScale = 2.55
+const coreAlphaScale = 1
+const haloAlphaScale = 0.9
 
 function createParticleMaterial() {
   return new ShaderMaterial({
@@ -180,15 +181,30 @@ function wrapCentered(value: number, span: number) {
   return ((((value + halfSpan) % span) + span) % span) - halfSpan
 }
 
+function hashUnit(value: number) {
+  return Math.abs(Math.sin(value * 12.9898) * 43758.5453) % 1
+}
+
+function getRenderParticleCount() {
+  if (!particles.length) return 0
+
+  return Math.max(
+    particles.length,
+    Math.floor(particles.length * Math.max(1, densityMultiplier)),
+  )
+}
+
 function syncGeometryAttributes() {
-  if (particleCapacity >= particles.length) {
-    coreGeometry.setDrawRange(0, particles.length)
-    haloGeometry.setDrawRange(0, particles.length)
+  const renderParticleCount = getRenderParticleCount()
+
+  if (particleCapacity >= renderParticleCount) {
+    coreGeometry.setDrawRange(0, renderParticleCount)
+    haloGeometry.setDrawRange(0, renderParticleCount)
     return
   }
 
   particleCapacity =
-    Math.ceil(particles.length / particleCapacityStep) * particleCapacityStep
+    Math.ceil(renderParticleCount / particleCapacityStep) * particleCapacityStep
   positions = new Float32Array(particleCapacity * 3)
   coreColors = new Float32Array(particleCapacity * 3)
   haloColors = new Float32Array(particleCapacity * 3)
@@ -206,13 +222,16 @@ function syncGeometryAttributes() {
   haloGeometry.setAttribute('pointSize', new BufferAttribute(haloSizes, 1))
   coreGeometry.setAttribute('pointAlpha', new BufferAttribute(coreAlphas, 1))
   haloGeometry.setAttribute('pointAlpha', new BufferAttribute(haloAlphas, 1))
-  coreGeometry.setDrawRange(0, particles.length)
-  haloGeometry.setDrawRange(0, particles.length)
+  coreGeometry.setDrawRange(0, renderParticleCount)
+  haloGeometry.setDrawRange(0, renderParticleCount)
 }
 
 $: syncGeometryAttributes()
 
 useTask(() => {
+  const renderParticleCount = getRenderParticleCount()
+  if (renderParticleCount <= 0) return
+
   const time = motionEnabled ? performance.now() * 0.001 : 0
   const motionTime = time * particleMotionScale
   const pointerX = motionEnabled && Number.isFinite(input.x) ? input.x : 0
@@ -227,7 +246,23 @@ useTask(() => {
   coreMaterial.uniforms.pixelRatio.value = pixelRatio
   haloMaterial.uniforms.pixelRatio.value = pixelRatio
 
-  particles.forEach((particle, index) => {
+  for (let index = 0; index < renderParticleCount; index += 1) {
+    const sourceIndex = index % particles.length
+    const variantIndex = Math.floor(index / particles.length)
+    const particle = particles[sourceIndex]
+    const variantA = variantIndex === 0 ? 0.5 : hashUnit(sourceIndex + variantIndex * 113)
+    const variantB = variantIndex === 0 ? 0.5 : hashUnit(sourceIndex + variantIndex * 197)
+    const variantC = variantIndex === 0 ? 0.5 : hashUnit(sourceIndex + variantIndex * 281)
+    const variantD = variantIndex === 0 ? particle.shape : hashUnit(sourceIndex + variantIndex * 337)
+    const variantAngle = particle.phase + variantA * Math.PI * 2 + variantIndex * 1.618
+    const variantDistance = variantIndex === 0
+      ? 0
+      : (0.24 + variantB * 1.28) * (0.72 + particle.radialT * 0.54)
+    const variantScale = variantIndex === 0 ? 1 : 0.82 + variantC * 0.32
+    const variantOpacity = 1
+    const sizeVariance = variantIndex === 0
+      ? 0.7 + variantD * 0.62
+      : 0.46 + variantD * 1.18
     const spin = particle.angle + motionTime * particle.speed + inputDragX * 0.42
     const pulse = Math.sin(time * 1.25 + index) * 0.22 + 0.78
     const centerWeight = 1 - particle.radialT
@@ -265,39 +300,49 @@ useTask(() => {
 
     const baseX =
       particle.anchorX +
+      Math.cos(variantAngle) * variantDistance * (1.1 + particle.strayT * 0.3) +
       Math.cos(groupedSpin) * reactiveRadius +
       pointerX * 0.08
     const baseZ =
       particle.anchorZ +
       particle.zOffset +
+      Math.sin(variantAngle) * variantDistance * 0.82 +
       Math.sin(groupedSpin) * reactiveRadius * 0.72
 
     positions[index * 3] = baseX * axialCos - baseZ * axialSin
     positions[index * 3 + 1] =
       wrapCentered(
-        particle.anchorY + particle.height + verticalScroll,
+        particle.anchorY +
+          particle.height +
+          (variantB - 0.5) * (variantIndex === 0 ? 0 : 1.25) +
+          verticalScroll,
         scrollSpan,
       ) +
       Math.sin(motionTime * 1.1 + particle.phase) *
         (0.05 + particle.clusterStrength * 0.11)
     positions[index * 3 + 2] = baseX * axialSin + baseZ * axialCos
 
-    color.setHSL(hue, 0.86, 0.7 + centerWeight * 0.2)
+    color.setHSL(hue, 0.78, 0.46 + centerWeight * 0.16)
     coreColors[index * 3] = color.r
     coreColors[index * 3 + 1] = color.g
     coreColors[index * 3 + 2] = color.b
 
-    haloColor.setHSL(particle.hueOffset + 0.04, 0.96, 0.56)
+    haloColor.setHSL(particle.hueOffset + 0.04, 0.82, 0.32)
     haloColors[index * 3] = haloColor.r
     haloColors[index * 3 + 1] = haloColor.g
     haloColors[index * 3 + 2] = haloColor.b
 
-    const spriteScale = particle.size * flare * (1.26 + pulse * 0.5)
+    const spriteScale =
+      particle.size *
+      flare *
+      (1.18 + pulse * 0.46) *
+      variantScale *
+      sizeVariance
     coreSizes[index] = spriteScale * particlePointSizeScale * pointSizeScale
     haloSizes[index] = coreSizes[index] * haloPointSizeScale
-    coreAlphas[index] = coreAlpha * opacityScale
-    haloAlphas[index] = haloAlpha * opacityScale
-  })
+    coreAlphas[index] = coreAlpha * opacityScale * variantOpacity
+    haloAlphas[index] = haloAlpha * opacityScale * variantOpacity
+  }
 
   const positionAttribute = coreGeometry.getAttribute('position')
   const coreColorAttribute = coreGeometry.getAttribute('pointColor')

@@ -67,8 +67,8 @@ let screenRail: THREE.Group | null = null
 const screenNodes: THREE.Group[] = []
 let portraitMobile = false
 let logoSceneMounted = false, activeLogoModelSrc = '', pendingLogoModelSrc = ''
-let particleLimit = 960
-let introParticleLimit = 320
+let particleLimit = 1250
+let introParticleLimit = 560
 let particleExpansionElapsed = 0
 let logoIntroStartedAt = 0
 let atmosphereReveal = 0
@@ -79,11 +79,11 @@ let carouselComponentPromise: Promise<void> | null = null
 let screenOrbitInitialized = false
 let logoImpactSfxIntroStartedAt = 0
 
-const particleCount = 960
+const particleCount = 1250
 const particleExpansionChunk = 64
 const particleExpansionInterval = 0.14
 const particleSizeMultiplier = 2.18
-const particleClusterCount = 18
+const particleClusterCount = homeIntroParticleClusters.length
 const primaryScreenIndex = 0
 const screenOrbitRadiusX = 5.25
 const screenOrbitRadiusZ = 3.75
@@ -105,9 +105,10 @@ const logoTargetSize = new Vector3(4.68, 2.24, 1.44)
 const logoIntroDuration = 2.05
 const logoImpactDuration = 0.42
 const logoRotationOffset = Math.PI
-const logoFloatPitchAmplitude = 0.022
-const logoFloatYawAmplitude = 0.04
-const logoFloatRollAmplitude = 0.016
+const logoFloatPitchAmplitude = 0.038
+const logoFloatYawAmplitude = 0.064
+const logoFloatRollAmplitude = 0.026
+const logoFloatScaleAmplitude = 0.012
 const gltfLoader = new GLTFLoader()
 gltfLoader.setMeshoptDecoder(MeshoptDecoder)
 let activeBannerSyncKey = ''
@@ -132,8 +133,14 @@ $: starColumnPosition = portraitMobile
   ? ([0, 0.08, -2.02] as [number, number, number])
   : ([0, 0, -1.86] as [number, number, number])
 $: starColumnScale = portraitMobile
-  ? ([1.58, 1, 1.08] as [number, number, number])
-  : ([1.04, 1, 0.98] as [number, number, number])
+  ? ([1.82, 1, 1.14] as [number, number, number])
+  : ([1.38, 1, 1.06] as [number, number, number])
+$: particleDensityMultiplier =
+  sceneQuality === 'lean'
+    ? 1.1
+    : sceneQuality === 'balanced'
+      ? 1.55
+      : 1.8
 $: emblemScale = portraitMobile
   ? ([3.64, 3.64, 3.64] as [number, number, number])
   : ([3.98, 3.98, 3.98] as [number, number, number])
@@ -145,21 +152,22 @@ $: logoModelSrc = getHomeIntroLogoModelSrc(sceneQuality)
 $: particleLimit =
   sceneQuality === 'lean'
     ? portraitMobile
-      ? 220
-      : 280
+      ? 260
+      : 360
     : sceneQuality === 'balanced'
-      ? 600
+      ? 820
       : particleCount
 $: introParticleLimit =
   sceneQuality === 'lean'
     ? particleLimit
     : sceneQuality === 'balanced'
-      ? 260
-      : 320
+      ? 420
+      : 560
 
 function syncViewportMode() {
   if (typeof window === 'undefined') return
-  portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
+  portraitMobile =
+    window.innerWidth <= 760 && window.innerHeight > window.innerWidth
 }
 
 function shouldMountCarousel() {
@@ -393,14 +401,14 @@ function createParticle(index: number) {
   const angle = randomB * Math.PI * 2
   const verticalAngle = (randomC - 0.5) * Math.PI
   const strayT =
-    randomE > 0.74 ? ((randomE - 0.74) / 0.26) ** 0.72 : 0
+    randomE > 0.68 ? ((randomE - 0.68) / 0.32) ** 0.72 : 0
   const edgeAngle = randomF * Math.PI * 2
   const radius =
-    clusterCenter.spread * (0.1 + radialT * (0.82 + strayT * 1.45))
+    clusterCenter.spread * (0.1 + radialT * (0.82 + strayT * 1.75))
   const anchorX =
-    clusterCenter.x * (1 - strayT * 0.58) + Math.cos(edgeAngle) * strayT * 2.8
+    clusterCenter.x * (1 - strayT * 0.48) + Math.cos(edgeAngle) * strayT * 3.6
   const anchorZ =
-    clusterCenter.z + Math.sin(edgeAngle) * strayT * 1.25
+    clusterCenter.z + Math.sin(edgeAngle) * strayT * 1.6
 
   return {
     anchorX,
@@ -552,6 +560,16 @@ function getSelectedScreenIndex(wheel: number) {
   )
 }
 
+function getBannerSelectedScreenIndex(selectedIndex: number) {
+  const reveal = clamp01(Number.isFinite(input.reveal) ? input.reveal : 0)
+
+  if (selectedIndex < 1) {
+    return Math.max(0, Math.min(1, Math.max(selectedIndex, reveal)))
+  }
+
+  return selectedIndex
+}
+
 function syncBannerToFrontScreen(selectedIndex: number) {
   if (typeof window === 'undefined') return
 
@@ -626,7 +644,7 @@ function updateScreenOrbit(wheel: number, ease: number) {
   const selectedIndex = getSelectedScreenIndex(wheel)
   const visualSelectedIndex = getHomeIntroRestedScreenIndex(selectedIndex)
   activeScreenIndex = clampScreenIndex(Math.round(selectedIndex))
-  syncBannerToFrontScreen(selectedIndex)
+  syncBannerToFrontScreen(getBannerSelectedScreenIndex(selectedIndex))
   syncScreenMediaLoadStates(selectedIndex)
   const snapToTarget = !screenOrbitInitialized
   let positionedAnyScreen = false
@@ -743,20 +761,31 @@ useTask(delta => {
   if (logoMeshRoot) {
     const logoBaseY = portraitMobile ? 0.2 : 0.08
     const logoBaseZ = portraitMobile ? -1.45 : -1.05
-    const logoDriftX = Math.sin(time * 0.31) * (portraitMobile ? 0.012 : 0.018)
+    const logoFloatScale = portraitMobile ? 0.78 : 1
+    const logoDriftX =
+      Math.sin(time * 0.31) * (portraitMobile ? 0.026 : 0.038)
     const logoStartY = logoBaseY
     const logoStartZ = portraitMobile ? 2.65 : 1.9
-    const logoRestY = logoBaseY + logoScrollRise + Math.sin(time * 0.38) * 0.025
-    const logoRestZ = logoBaseZ + Math.sin(time * 0.24) * 0.018
+    const logoRestY =
+      logoBaseY +
+      logoScrollRise +
+      Math.sin(time * 0.38) * 0.052 * logoFloatScale
+    const logoRestZ =
+      logoBaseZ + Math.sin(time * 0.24 + 0.6) * 0.034 * logoFloatScale
     const logoTargetY = logoStartY + (logoRestY - logoStartY) * logoIntroDrop
     const logoTargetZ = logoStartZ + (logoRestZ - logoStartZ) * logoIntroDrop
     const logoTargetScale = 2.35 + (1 - 2.35) * logoIntroScale
-    const logoFloatScale = portraitMobile ? 0.82 : 1
-    const logoFloatPitch = Math.sin(time * 0.34) * logoFloatPitchAmplitude * logoFloatScale
+    const logoFloatPitch =
+      Math.sin(time * 0.34) * logoFloatPitchAmplitude * logoFloatScale
     const logoFloatYaw =
       Math.sin(time * 0.26 + 0.85) * logoFloatYawAmplitude * logoFloatScale
     const logoFloatRoll =
       Math.sin(time * 0.21 + 1.6) * logoFloatRollAmplitude * logoFloatScale
+    const logoIdleScale =
+      1 +
+      Math.sin(time * 0.29 + 1.1) *
+        logoFloatScaleAmplitude *
+        logoFloatScale
 
     if (logoIntroRaw < 1) {
       logoMeshRoot.position.set(0, logoTargetY, logoTargetZ)
@@ -765,7 +794,9 @@ useTask(delta => {
       logoMeshRoot.position.x += (logoDriftX - logoMeshRoot.position.x) * ease
       logoMeshRoot.position.y += (logoRestY - logoMeshRoot.position.y) * ease
       logoMeshRoot.position.z += (logoRestZ - logoMeshRoot.position.z) * ease
-      logoMeshRoot.scale.setScalar(logoMeshRoot.scale.x + (1 - logoMeshRoot.scale.x) * ease)
+      logoMeshRoot.scale.setScalar(
+        logoMeshRoot.scale.x + (logoIdleScale - logoMeshRoot.scale.x) * ease,
+      )
     }
     logoMeshRoot.rotation.x =
       -0.075 - logoCarouselPhase * 0.075 + logoFloatPitch + input.dragY * 0.035
@@ -923,6 +954,7 @@ useTask(delta => {
 			scrollStep={effectScrollStepY}
 			scrollSpan={particleScrollSpan}
 			{atmosphereReveal}
+			densityMultiplier={particleDensityMultiplier}
 		/>
 	</T.Group>
 
@@ -936,10 +968,10 @@ useTask(delta => {
 				hueCycleSpeed={0.01}
 				opacity={0.5}
 				size={0.3}
-				haloOpacity={0.96}
+				haloOpacity={1}
 				emitter={true}
 				emitterAngle={0.18}
-				emitterSize={1.52}
+				emitterSize={1.16}
 				emitterOpacity={1}
 				emitterFrontFacing={true}
 				emitterFrontOffset={1.65}
@@ -956,10 +988,10 @@ useTask(delta => {
 				hueCycleSpeed={0.009}
 				opacity={0.9}
 				size={0.27}
-				haloOpacity={0.86}
+				haloOpacity={1}
 				emitter={true}
 				emitterAngle={2.24}
-				emitterSize={1.34}
+				emitterSize={1.04}
 				emitterOpacity={1}
 				emitterFrontFacing={true}
 				emitterFrontOffset={1.55}
@@ -976,10 +1008,10 @@ useTask(delta => {
 				hueCycleSpeed={0.008}
 				opacity={0.9}
 				size={0.24}
-				haloOpacity={0.78}
+				haloOpacity={1}
 				emitter={true}
 				emitterAngle={4.18}
-				emitterSize={1.18}
+				emitterSize={0.94}
 				emitterOpacity={1}
 				emitterFrontFacing={true}
 				emitterFrontOffset={1.45}

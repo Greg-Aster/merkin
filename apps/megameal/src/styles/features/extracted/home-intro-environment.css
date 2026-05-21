@@ -128,17 +128,24 @@
       radial-gradient(circle at 50% 48%, rgb(15 23 42 / 0.84), rgb(2 6 23 / 0.98) 64%),
       rgb(2 6 23);
     opacity: 1;
-    transition: opacity 1800ms ease-out;
+    visibility: visible;
+    transition:
+      opacity 420ms ease-out,
+      visibility 0ms linear;
   }
 
   .home-intro-environment--background-ready .home-intro-background-curtain {
     opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 420ms ease-out,
+      visibility 0ms linear 420ms;
   }
 
   .home-intro-environment canvas {
     position: relative;
     z-index: 1;
-    filter: brightness(0.92) saturate(1.28) contrast(1.24);
+    filter: none;
   }
 
   .home-intro-environment--screen-hover canvas {

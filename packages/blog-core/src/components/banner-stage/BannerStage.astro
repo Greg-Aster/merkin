@@ -31,10 +31,12 @@ type LegacyPost = {
 type StandardBannerItem = {
 	type?: string;
 	src?: string;
+	portalVideoSrc?: string;
 	alt?: string;
 	fallbackImage?: import("astro").ImageMetadata | string;
 	preload?: "none" | "metadata" | "auto";
 	playbackRate?: number;
+	portalPlaybackRate?: number;
 	holdMs?: number;
 	sceneId?: string;
 	weight?: number;
@@ -426,6 +428,14 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
                   const slideIndex = isPortalBannerMode ? index + 1 : index
                   const isInitiallyActive = !isPortalBannerMode && index === 0
                   const isInitialSlide = isInitiallyActive
+                  const slideVideoSrc =
+                    isPortalBannerMode && typeof item.portalVideoSrc === 'string'
+                      ? item.portalVideoSrc
+                      : item.src
+                  const slidePlaybackRate =
+                    isPortalBannerMode && typeof item.portalPlaybackRate === 'number'
+                      ? item.portalPlaybackRate
+                      : item.playbackRate
                   const shouldShowPreviewCard =
                     !!previewDetails &&
                     item.showPreviewCard !== false &&
@@ -476,11 +486,11 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
                           {isVideoItem ? (
                             <>
                               <video
-                                src={isInitialSlide ? item.src : undefined}
-                                data-src={isInitialSlide ? undefined : item.src}
-                                data-playback-rate={typeof item.playbackRate ===
+                                src={isInitialSlide ? slideVideoSrc : undefined}
+                                data-src={isInitialSlide ? undefined : slideVideoSrc}
+                                data-playback-rate={typeof slidePlaybackRate ===
                                 'number'
-                                  ? item.playbackRate
+                                  ? slidePlaybackRate
                                   : undefined}
                                 autoplay={bannerConfig.standardBannerConfig.video.autoplay}
                                 muted={bannerConfig.standardBannerConfig.video.muted}

@@ -12,6 +12,7 @@ import {
   type AdaptiveCanvasDprController,
 } from '@/utils/adaptiveCanvasDpr'
 import HomeIntroEnvironmentScene from './HomeIntroEnvironmentScene.svelte'
+import HomeIntroPostProcessing from './HomeIntroPostProcessing.svelte'
 import {
   homeIntroMaxWheelForOffset,
   homeIntroIntroOffsetScreens,
@@ -102,7 +103,7 @@ const createRenderer = (canvas: HTMLCanvasElement) => {
 
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 1.08
+  renderer.toneMappingExposure = 0.92
   renderer.setClearColor(0x000000, 0)
 
   return renderer
@@ -213,7 +214,8 @@ function getHomeSceneQuality(nextDpr: number): SceneQuality {
 
   const { compactViewport, devicePixelRatio, lowMemoryDevice, reducedData } = getHomeQualityContext()
 
-  if (reducedData || lowMemoryDevice || compactViewport || nextDpr <= 1.01) return 'lean'
+  if (reducedData || lowMemoryDevice || compactViewport) return 'lean'
+  if (devicePixelRatio > 1.1 && nextDpr <= 1.01) return 'lean'
   if (devicePixelRatio > 1.5 || nextDpr < 1.45) return 'balanced'
 
   return 'high'
@@ -762,6 +764,12 @@ onDestroy(() => {
 			{sceneQuality}
 			hoveredScreenIndex={portalHoverActive ? activeScreenIndex : -1}
 			onLogoReady={handleLogoReady}
+		/>
+		<HomeIntroPostProcessing
+			{input}
+			{sceneQuality}
+			{activeScreenIndex}
+			{backgroundReady}
 		/>
 	</Canvas>
 

@@ -23,7 +23,7 @@
     position: absolute;
     inset: 0;
     overflow: hidden;
-    background: rgb(2 6 23);
+    background: #000;
   }
 
   .megameal-portal-background-slide__video {
@@ -32,6 +32,12 @@
     height: 100%;
     object-fit: cover;
     object-position: center;
+    opacity: 0;
+    transition: opacity 1400ms ease;
+  }
+
+  .megameal-portal-background-slide.is-video-visible .megameal-portal-background-slide__video {
+    opacity: 1;
   }
 
   .megameal-portal-background-slide__shade {
@@ -167,6 +173,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .megameal-portal-background-slide__video {
+      transition: none;
+    }
+
     .megameal-home-intro__environment {
       animation: none;
       opacity: 1;

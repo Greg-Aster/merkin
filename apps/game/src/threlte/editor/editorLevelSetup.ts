@@ -153,11 +153,11 @@ function migrateLegacyGroundVisualSource(settings: SharedLevelEditorSettings) {
 function migrateRetiredLightingFields(settings: SharedLevelEditorSettings) {
   const lighting = settings.lighting as
     | (NonNullable<SharedLevelEditorSettings['lighting']> & {
-        sunIntensity?: number
-        fillIntensity?: number
-        fallbackAmbientIntensity?: number
-        fallbackMoonlightIntensity?: number
-        fallbackFillLightIntensity?: number
+      sunIntensity?: number
+      fillIntensity?: number
+      fallbackAmbientIntensity?: number
+      fallbackMoonlightIntensity?: number
+      fallbackFillLightIntensity?: number
       })
     | undefined
   if (!lighting) return
@@ -166,7 +166,7 @@ function migrateRetiredLightingFields(settings: SharedLevelEditorSettings) {
     sunIntensity,
     fillIntensity,
     fallbackAmbientIntensity: _fallbackAmbientIntensity,
-    fallbackMoonlightIntensity: _fallbackMoonlightIntensity,
+    fallbackMoonlightIntensity,
     fallbackFillLightIntensity: _fallbackFillLightIntensity,
     ...nextLighting
   } = lighting
@@ -183,6 +183,13 @@ function migrateRetiredLightingFields(settings: SharedLevelEditorSettings) {
   ) {
     nextLighting.fillLightIntensity = fillIntensity
   }
+  if (
+    nextLighting.hemisphereIntensity === undefined &&
+    Number.isFinite(fallbackMoonlightIntensity)
+  ) {
+    nextLighting.hemisphereIntensity = fallbackMoonlightIntensity
+  }
+  nextLighting.hemisphereIntensity ??= 0.38
 
   settings.lighting = nextLighting as NonNullable<
     SharedLevelEditorSettings['lighting']

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-17T15:27:06.624Z",
+  "generatedAt": "2026-05-20T03:21:19.830Z",
   "levelId": "solitude",
   "sceneId": "solitude",
   "source": {
@@ -156,6 +156,7 @@
         },
         "lighting": {
           "ambientIntensity": 0.46,
+          "hemisphereIntensity": 0.38,
           "keyLightIntensity": 0.96,
           "fillLightIntensity": 0.34
         },

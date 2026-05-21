@@ -1373,7 +1373,7 @@ test('ambient firefly fields resolve quality-tier counts without authoring NPC a
   assert.equal(quality.size, 1.1)
 })
 
-test('Observatory source scene uses the recovered ambient firefly lighting contract', () => {
+test('Observatory source scene preserves ambient field lighting and authored firefly NPCs', () => {
   const scene = JSON.parse(
     readFileSync(
       join(process.cwd(), 'src/threlte/editor/scenes/observatory.scene.json'),
@@ -1387,8 +1387,9 @@ test('Observatory source scene uses the recovered ambient firefly lighting contr
       node.npc?.presentation?.type === 'firefly',
   ).length
 
-  assert.equal(authoredFireflyNpcCount, 0)
+  assert.equal(authoredFireflyNpcCount, 3)
   assert.equal(fireflies?.enabled, true)
+  assert.equal(fireflies?.allowWithAuthored, true)
   assert.equal(fireflies?.count, 200)
   assert.equal(fireflies?.lightCount, 25)
   assert.equal(fireflies?.lightIntensity, 50)
@@ -2415,6 +2416,7 @@ test('scene settings normalization removes retired lighting fields', () => {
   const lighting = settings.level?.lighting as Record<string, unknown>
   assert.equal(lighting.keyLightIntensity, 0.42)
   assert.equal(lighting.fillLightIntensity, 0.26)
+  assert.equal(lighting.hemisphereIntensity, 0.62)
   assert.equal(Object.hasOwn(lighting, 'sunIntensity'), false)
   assert.equal(Object.hasOwn(lighting, 'fillIntensity'), false)
   assert.equal(Object.hasOwn(lighting, 'fallbackAmbientIntensity'), false)

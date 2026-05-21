@@ -59,10 +59,12 @@ export type BannerType =
 export interface VideoBannerItem {
   type: 'video'
   src: string // Path to video file (e.g., '/videos/banner1.webm')
+  portalVideoSrc?: string // Optional portal-only video override
   fallbackImage: ImageMetadata // Fallback image for unsupported browsers
   alt: string // Alt text for accessibility
   preload?: 'none' | 'metadata' | 'auto' // Video preload behavior
   playbackRate?: number // Optional playback speed (0.5 = half speed, 1 = normal)
+  portalPlaybackRate?: number // Optional portal-only playback speed override
   holdMs?: number // Optional slide-specific dwell time
   sceneId?: string // Optional scene identifier for billboard rotations
   weight?: number // Relative probability when shuffle rotation is enabled

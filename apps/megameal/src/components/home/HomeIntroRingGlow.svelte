@@ -134,7 +134,7 @@ useTask(() => {
   const time = performance.now() * 0.001
   if (hueCycleBase !== null) {
     const hue = (((hueCycleBase + time * hueCycleSpeed) % 1) + 1) % 1
-    animatedColor = `hsl(${Math.round(hue * 360)} 94% 72%)`
+    animatedColor = `hsl(${Math.round(hue * 360)} 86% 48%)`
   } else {
     animatedColor = color
   }

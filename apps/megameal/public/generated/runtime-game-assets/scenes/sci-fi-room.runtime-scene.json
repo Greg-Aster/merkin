@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-17T15:27:06.624Z",
+  "generatedAt": "2026-05-20T03:21:19.830Z",
   "levelId": "sci-fi-room",
   "sceneId": "sci-fi-room",
   "source": {
@@ -134,6 +134,7 @@
         },
         "lighting": {
           "ambientIntensity": 10.4,
+          "hemisphereIntensity": 0.38,
           "keyLightIntensity": 0.8,
           "fillLightIntensity": 0.3
         },

@@ -1,5 +1,6 @@
 ---
-import { siteConfig } from '@/config/config'
+const portalIntroBackgroundVideo = '/assets/banner/universbg0001-0121.webm'
+const portalIntroBackgroundPlaybackRate = 0.25
 ---
 
 <div class="megameal-portal-background-slide" aria-hidden="true">
@@ -9,27 +10,51 @@ import { siteConfig } from '@/config/config'
     muted
     playsinline
     preload="none"
-    data-src={siteConfig.banner.video}
-    data-playback-rate={siteConfig.banner.playbackRate ?? 1}
+    data-src={portalIntroBackgroundVideo}
+    data-playback-rate={portalIntroBackgroundPlaybackRate}
   ></video>
   <div class="megameal-portal-background-slide__shade"></div>
 </div>
 
 <script>
-  const video = document.currentScript
-    ?.previousElementSibling
-    ?.querySelector<HTMLVideoElement>('.megameal-portal-background-slide__video')
+  const slide = document.querySelector<HTMLElement>('.megameal-portal-background-slide')
+  const video = slide?.querySelector<HTMLVideoElement>('.megameal-portal-background-slide__video')
 
   if (video) {
     const configuredRate = Number(video.dataset.playbackRate)
     const playbackRate =
       Number.isFinite(configuredRate) && configuredRate > 0 ? configuredRate : 1
+    const minimumBlackDelayMs = 650
+    const revealReadyAt = performance.now() + minimumBlackDelayMs
     let loaded = false
+    let visible = false
+    let revealTimeout = 0
 
     video.playbackRate = playbackRate
     video.addEventListener('play', () => {
       video.playbackRate = playbackRate
     })
+
+    const revealVideo = () => {
+      if (visible || video.readyState < 2) return
+      const remainingDelay = revealReadyAt - performance.now()
+      if (remainingDelay > 0) {
+        if (!revealTimeout) {
+          revealTimeout = window.setTimeout(() => {
+            revealTimeout = 0
+            revealVideo()
+          }, remainingDelay)
+        }
+        return
+      }
+
+      visible = true
+      slide?.classList.add('is-video-visible')
+    }
+
+    video.addEventListener('loadeddata', revealVideo)
+    video.addEventListener('canplay', revealVideo)
+    video.addEventListener('playing', revealVideo)
 
     const loadBackgroundVideo = () => {
       if (loaded) return
@@ -41,7 +66,8 @@ import { siteConfig } from '@/config/config'
       video.src = source
       video.removeAttribute('data-src')
       video.load()
-      video.play().catch(() => {})
+      video.play().then(revealVideo).catch(() => {})
+      window.requestAnimationFrame(revealVideo)
     }
 
     const loadAfterScroll = () => {

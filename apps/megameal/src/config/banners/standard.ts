@@ -187,10 +187,12 @@ const bannerEntries: BannerEntry[] = [
       sceneId: 'timeline-billboard',
       weight: 2,
       src: `${import.meta.env.BASE_URL}assets/banner/universbg0001-0121.webm`,
+      portalVideoSrc: `${import.meta.env.BASE_URL}assets/banner/golden-era.webm`,
       fallbackImage: timelineMapFallback,
       alt: 'Timeline map and chronology overview',
       preload: 'none', // Don't preload video until needed
       playbackRate: 0.1, // Slow down this clip to make it more readable as a banner
+      portalPlaybackRate: 0.25,
     },
     link: '/timeline/',
   },

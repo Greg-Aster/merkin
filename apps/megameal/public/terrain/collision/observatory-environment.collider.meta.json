@@ -1,13 +1,17 @@
 {
   "type": "baked-terrain-mesh",
   "version": 1,
-  "sourceHeightmap": "/terrain/heightmaps/observatory-environment_heightmap.png",
-  "sourceResolution": 1024,
-  "colliderResolution": 129,
-  "sampleStep": 8,
-  "vertexCount": 16641,
-  "indexCount": 98304,
-  "triangleCount": 32768,
+  "sourceAssetUrl": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+  },
+  "sourceResolution": 0,
+  "colliderResolution": 0,
+  "sampleStep": 1,
+  "vertexCount": 721624,
+  "indexCount": 1691928,
+  "triangleCount": 563976,
   "bounds": {
     "min": [
       -199.5517120361328,
@@ -22,19 +26,18 @@
   },
   "center": [
     -2.7753677368164062,
-    0,
+    27.232016146183014,
     -0.5087890625
   ],
-  "heightOverrideCount": 0,
   "sourceContract": {
     "schemaVersion": 1,
     "terrainSourceType": "glb-chunk-terrain",
-    "sourceAssetUrl": "/models/levels/observatory-environment.glb",
+    "sourceAssetUrl": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
     "sourceAssetUrls": [
-      "/models/levels/observatory-environment.glb"
+      "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb"
     ],
     "authoredSourceAssetUrls": [
-      "/models/levels/observatory-environment.glb"
+      "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb"
     ],
     "sourceAssetFingerprint": {
       "algorithm": "sha256",
@@ -42,18 +45,13 @@
     },
     "sourceAssetFingerprints": [
       {
-        "url": "/models/levels/observatory-environment.glb",
+        "url": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
         "fingerprint": {
           "algorithm": "sha256",
           "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
         }
       }
     ],
-    "heightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
-    "heightmapFingerprint": {
-      "algorithm": "sha256",
-      "value": "9940d42617657bb0ed767695abc55f424a688dee1b4e6005a84eaa8e63c89f6f"
-    },
     "sourceCoordinateSystem": "three-y-up-xz-ground",
     "sourceBounds": {
       "min": [
@@ -68,11 +66,10 @@
       ]
     },
     "renderBakeMode": "source-glb-chunk-mesh",
-    "collisionBakeMode": "source-glb-heightfield-projection",
+    "collisionBakeMode": "source-glb-collision-mesh",
     "collisionMeshSource": {
-      "type": "source-glb-heightfield-projection",
-      "url": "/models/levels/observatory-environment.glb",
-      "projectionHeightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
+      "type": "source-glb",
+      "url": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
       "fingerprint": {
         "algorithm": "sha256",
         "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
@@ -91,7 +88,7 @@
       ]
     },
     "role": "walkable",
-    "vertexCount": 16641,
-    "triangleCount": 32768
+    "vertexCount": 721624,
+    "triangleCount": 563976
   }
 }
