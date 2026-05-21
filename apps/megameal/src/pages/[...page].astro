@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro'
 import PostPage from '../components/PostPage.astro'
 import Pagination from '../components/control/Pagination.astro'
 import PortalHeroBackgroundSlide from '../components/home/PortalHeroBackgroundSlide.astro'
+import PortalDemoVideoPlayer from '../components/home/PortalDemoVideoPlayer.astro'
 import PortalHeroSlide from '../components/home/PortalHeroSlide.astro'
 import FactsWidget from '../components/widget/FactsWidget.astro'
 import { PAGE_SIZE } from '../constants/constants'
@@ -33,6 +34,11 @@ import '../styles/pages/dynamic-page.css'
   {isFirstPage && (
     <Fragment slot="banner-slide-content">
       <PortalHeroBackgroundSlide />
+    </Fragment>
+  )}
+  {isFirstPage && (
+    <Fragment slot="portal-demo-content">
+      <PortalDemoVideoPlayer />
     </Fragment>
   )}
   {!isFirstPage && (

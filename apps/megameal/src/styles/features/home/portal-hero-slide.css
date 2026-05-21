@@ -134,6 +134,12 @@
     display: none !important;
   }
 
+  html.megameal-portal-demo-active .portal-sponsored-overlay.facts-widget-overlay {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
   @keyframes intro-environment-fade {
     from {
       opacity: 0;

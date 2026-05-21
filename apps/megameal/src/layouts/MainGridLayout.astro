@@ -91,6 +91,7 @@ const resolvedOneColumn = isContentPost
   : Astro.props.oneColumn
 const usesArchiveBanner =
   !isContentPost && layoutPost?.data?.bannerType === 'archive'
+const hasPortalDemoContent = Astro.slots.has('portal-demo-content')
 const sharedProps: Omit<Props, 'homeLayout'> & {
   homeLayout?: 'default' | 'portal'
 } = {
@@ -134,6 +135,11 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   <Fragment slot="overlay">
     <slot name="overlay" />
   </Fragment>
+  {hasPortalDemoContent && (
+    <Fragment slot="portal-demo-content">
+      <slot name="portal-demo-content" />
+    </Fragment>
+  )}
   {(isTimelineRoute || isTimeline2DRoute) && (
     <Fragment slot="timeline-banner-content">
       {isTimelineRoute ? (

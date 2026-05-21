@@ -122,6 +122,7 @@ class SiteAudioManager {
     }
 
     this.emit()
+    this.notifyConfigChange()
   }
 
   setMasterVolume(nextVolume: number): void {
@@ -134,6 +135,7 @@ class SiteAudioManager {
     }
 
     this.emit()
+    this.notifyConfigChange()
   }
 
   setAmbienceVolume(nextVolume: number): void {
@@ -714,6 +716,16 @@ class SiteAudioManager {
   private emit(): void {
     const state = this.getState()
     this.listeners.forEach(listener => listener(state))
+  }
+
+  private notifyConfigChange(): void {
+    if (typeof window === 'undefined') return
+
+    window.dispatchEvent(
+      new CustomEvent('megameal:audio-config-change', {
+        detail: this.getState(),
+      }),
+    )
   }
 }
 

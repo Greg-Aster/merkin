@@ -18,15 +18,82 @@ let audioState: SiteAudioState = {
 let panelOpen = false
 let panelElement: HTMLDivElement | null = null
 let isMobileViewport = false
+let showAudioNudge = false
+let audioNudgeFading = false
+let audioNudgeDismissed = false
+let audioNudgeFadeTimer: number | null = null
+const audioNudgeDismissedStorageKey = 'megameal-site-audio-nudge-dismissed-v2'
 
 const syncAudioForCurrentPage = () => {
   if (typeof window === 'undefined') return
   siteAudioManager.syncForPath(window.location.pathname)
 }
 
+const readAudioNudgeDismissed = () => {
+  if (typeof window === 'undefined') return true
+
+  try {
+    return window.sessionStorage.getItem(audioNudgeDismissedStorageKey) === 'true'
+  } catch {
+    return false
+  }
+}
+
+const writeAudioNudgeDismissed = () => {
+  if (typeof window === 'undefined') return
+
+  try {
+    window.sessionStorage.setItem(audioNudgeDismissedStorageKey, 'true')
+  } catch {
+    // sessionStorage can be unavailable in restricted browser modes.
+  }
+}
+
+const clearAudioNudgeFadeTimer = () => {
+  if (audioNudgeFadeTimer === null || typeof window === 'undefined') return
+  window.clearTimeout(audioNudgeFadeTimer)
+  audioNudgeFadeTimer = null
+}
+
+const revealAudioNudge = () => {
+  clearAudioNudgeFadeTimer()
+  audioNudgeFading = false
+  showAudioNudge = true
+}
+
+const dismissAudioNudge = (options: { remember?: boolean } = {}) => {
+  if (!showAudioNudge && audioNudgeDismissed) return
+
+  audioNudgeDismissed = true
+  if (options.remember ?? true) {
+    writeAudioNudgeDismissed()
+  }
+
+  if (!showAudioNudge || typeof window === 'undefined') {
+    showAudioNudge = false
+    audioNudgeFading = false
+    return
+  }
+
+  audioNudgeFading = true
+  clearAudioNudgeFadeTimer()
+  audioNudgeFadeTimer = window.setTimeout(() => {
+    showAudioNudge = false
+    audioNudgeFading = false
+    audioNudgeFadeTimer = null
+  }, 220)
+}
+
 const toggleAudio = async () => {
   await siteAudioManager.unlockFromGesture()
   siteAudioManager.toggle()
+  dismissAudioNudge({ remember: false })
+}
+
+const enableAudioFromNudge = async () => {
+  await siteAudioManager.unlockFromGesture()
+  siteAudioManager.setEnabled(true)
+  dismissAudioNudge({ remember: false })
 }
 
 const setMasterVolume = (event: Event) => {
@@ -53,6 +120,7 @@ const syncViewportMode = () => {
 }
 
 const handleAudioButtonClick = () => {
+  dismissAudioNudge()
   if (isMobileViewport && !panelOpen && !audioState.enabled) {
     toggleAudio()
     return
@@ -64,9 +132,16 @@ const handleAudioButtonClick = () => {
 onMount(() => {
   siteAudioManager.initialize()
   syncViewportMode()
+  audioNudgeDismissed = readAudioNudgeDismissed()
 
   const unsubscribe = siteAudioManager.subscribe(state => {
     audioState = state
+    if (state.enabled || !state.hasConfiguredTracks || panelOpen || audioNudgeDismissed) {
+      showAudioNudge = false
+      return
+    }
+
+    revealAudioNudge()
   })
 
   document.addEventListener('astro:page-load', syncAudioForCurrentPage)
@@ -92,15 +167,41 @@ onMount(() => {
 
   document.addEventListener('click', handlePointerDown)
 
+  const handleNudgeIgnore = (event: Event) => {
+    const target = event.target as Node | null
+    if (target && panelElement?.contains(target)) return
+    dismissAudioNudge()
+  }
+
+  const handleNudgeScroll = () => {
+    dismissAudioNudge()
+  }
+
+  document.addEventListener('click', handleNudgeIgnore)
+  document.addEventListener('keydown', handleNudgeIgnore)
+  window.addEventListener('wheel', handleNudgeScroll, { passive: true })
+  window.addEventListener('scroll', handleNudgeScroll, { passive: true })
+  window.addEventListener('touchmove', handleNudgeScroll, { passive: true })
+
   return () => {
+    clearAudioNudgeFadeTimer()
     unsubscribe()
     document.removeEventListener('astro:page-load', syncAudioForCurrentPage)
     document.removeEventListener('pointerdown', handleFirstGesture)
     document.removeEventListener('keydown', handleFirstGesture)
     document.removeEventListener('click', handlePointerDown)
+    document.removeEventListener('click', handleNudgeIgnore)
+    document.removeEventListener('keydown', handleNudgeIgnore)
+    window.removeEventListener('wheel', handleNudgeScroll)
+    window.removeEventListener('scroll', handleNudgeScroll)
+    window.removeEventListener('touchmove', handleNudgeScroll)
     mediaQuery.removeEventListener('change', handleViewportChange)
   }
 })
+
+$: if (audioState.enabled || panelOpen) {
+  showAudioNudge = false
+}
 
 $: buttonLabel = panelOpen
   ? 'Close sound controls'
@@ -140,6 +241,33 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
       class="nav-action-icon"
     />
   </button>
+
+  {#if showAudioNudge}
+    <div
+      class="site-audio-nudge"
+      class:site-audio-nudge--hiding={audioNudgeFading}
+      role="dialog"
+      aria-label="Sound suggestion"
+    >
+      <div class="site-audio-nudge__copy">
+        <div class="site-audio-nudge__title">Best with sound</div>
+        <p>Experience MEGAMEAL with the ambient mix on.</p>
+      </div>
+      <button
+        type="button"
+        class="site-audio-nudge__switch"
+        role="switch"
+        aria-checked={audioState.enabled}
+        aria-label="Turn on site sound"
+        on:click={enableAudioFromNudge}
+      >
+        <span>Sound</span>
+        <span class="site-audio-nudge__switch-track" aria-hidden="true">
+          <span class="site-audio-nudge__switch-thumb"></span>
+        </span>
+      </button>
+    </div>
+  {/if}
 
   {#if panelOpen}
     <div class="site-audio-panel card-base2">

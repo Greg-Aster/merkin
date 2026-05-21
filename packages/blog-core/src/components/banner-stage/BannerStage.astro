@@ -155,6 +155,7 @@ const {
 	bannerHeightMobile,
 } = Astro.props;
 const hasTimelineBannerSlot = Astro.slots.has("timeline-banner-content");
+const hasPortalDemoContent = Astro.slots.has("portal-demo-content");
 
 const scene = resolveLegacyBannerScene(currentBannerType);
 
@@ -208,6 +209,8 @@ const transparentPixel =
 const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
 	.map((item, index) => ({ item, originalIndex: index }))
 	.filter(({ item }) => !isPortalBannerMode || item.sceneId !== "home-intro");
+const portalSlideIndexOffset =
+	isPortalBannerMode ? (hasPortalDemoContent ? 2 : 1) : 0;
 ---
 
 <div
@@ -411,6 +414,29 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
                 </div>
               </div>
             )}
+            {isPortalBannerMode && hasPortalDemoContent && (
+              <div
+                class="banner-slide absolute inset-0 w-full h-full transition-opacity"
+                style="opacity: 0; pointer-events: none;"
+                data-banner-index="1"
+                data-active="false"
+                data-portal-standard-slide="true"
+                data-portal-demo-slide="true"
+              >
+                <div
+                  class="banner-link group w-full h-full relative"
+                  data-has-link="false"
+                  aria-label="MEGA MEAL demo video"
+                >
+                  <div
+                    class="banner-media-layer w-full h-full overflow-hidden"
+                    data-banner-media-type="portal-demo"
+                  >
+                    <slot name="portal-demo-content" />
+                  </div>
+                </div>
+              </div>
+            )}
             {standardBannerEntries.length > 0
               ? standardBannerEntries.map(({ item, originalIndex }, index) => {
                   const bannerLink = bannerConfig.standardBannerConfig.getBannerLink(
@@ -420,12 +446,14 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
                     bannerConfig.standardBannerConfig.getBannerItemPreviewDetails(
                       originalIndex,
                     )
-                  const isClickable = bannerLink !== null
+                  const isClickable = !isPortalBannerMode && bannerLink !== null
                   const isVideoItem =
                     bannerConfig.standardBannerConfig.isVideoBannerItem(item)
                   const isImageItem =
                     bannerConfig.standardBannerConfig.isImageBannerItem(item)
-                  const slideIndex = isPortalBannerMode ? index + 1 : index
+                  const slideIndex = isPortalBannerMode
+                    ? index + portalSlideIndexOffset
+                    : index
                   const isInitiallyActive = !isPortalBannerMode && index === 0
                   const isInitialSlide = isInitiallyActive
                   const slideVideoSrc =
@@ -437,9 +465,12 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
                       ? item.portalPlaybackRate
                       : item.playbackRate
                   const shouldShowPreviewCard =
+                    !isPortalBannerMode &&
                     !!previewDetails &&
                     item.showPreviewCard !== false &&
                     (isClickable || !!item.sceneId)
+                  const isPortalStandardSlide =
+                    isPortalBannerMode && !hasPortalDemoContent
 
                   return (
                     <div
@@ -455,7 +486,7 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
                         ? item.holdMs
                         : undefined}
                       data-scene-id={item.sceneId || undefined}
-                      data-portal-standard-slide={isPortalBannerMode ? 'true' : undefined}
+                      data-portal-standard-slide={isPortalStandardSlide ? 'true' : undefined}
                       data-banner-weight={typeof item.weight === 'number'
                         ? item.weight
                         : undefined}
@@ -1173,6 +1204,10 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
       rgb(3 8 18);
   }
 
+  #standard-banner-container.banner-portal-demo-handoff {
+    background: transparent;
+  }
+
   #standard-banner-container.banner-portal-wiping .banner-slide {
     transition:
       opacity var(--banner-portal-crossfade-duration) var(--banner-portal-crossfade-easing) !important;
@@ -1192,6 +1227,11 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
     transform: none !important;
     pointer-events: none !important;
     overflow: hidden;
+  }
+
+  #standard-banner-container.banner-portal-demo-handoff .banner-slide.banner-portal-wipe-outgoing,
+  #standard-banner-container.banner-portal-demo-handoff .banner-slide.banner-portal-wipe-incoming {
+    filter: none !important;
   }
 
   #standard-banner-container .banner-media-layer::after {
@@ -1218,6 +1258,11 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
   #standard-banner-container.banner-portal-wiping .banner-slide.banner-portal-wipe-outgoing .banner-media-layer::after,
   #standard-banner-container.banner-portal-wiping .banner-slide.banner-portal-wipe-incoming .banner-media-layer::after {
     opacity: 1;
+  }
+
+  #standard-banner-container.banner-portal-demo-handoff .banner-slide.banner-portal-wipe-outgoing .banner-media-layer::after,
+  #standard-banner-container.banner-portal-demo-handoff .banner-slide.banner-portal-wipe-incoming .banner-media-layer::after {
+    opacity: 0;
   }
 
   #standard-banner-container.banner-portal-wiping .banner-slide:not(.banner-portal-wipe-outgoing):not(.banner-portal-wipe-incoming) {
@@ -1493,6 +1538,12 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
     let portalStandardModeActive = false
     const activePauseReasons = new Set()
 
+    const isPortalDemoSlide = slide =>
+      slide?.dataset.portalDemoSlide === 'true'
+    const hasPortalDemoSlide = slides.some(isPortalDemoSlide)
+    const shouldDisablePortalStandardRotation = () =>
+      portalStandardModeActive && hasPortalDemoSlide
+
     const getSlideDuration = slideIndex => {
       const slide = slides[slideIndex]
       const configuredHold = Number(slide?.dataset.bannerHoldMs)
@@ -1519,8 +1570,10 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
       return copy
     }
 
-    const getRotatableSlideIndices = () =>
-      slides
+    const getRotatableSlideIndices = () => {
+      if (shouldDisablePortalStandardRotation()) return []
+
+      return slides
         .map((_, index) => index)
         .filter(index => {
           const slide = slides[index]
@@ -1528,8 +1581,13 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
             return false
           }
 
+          if (portalStandardModeActive && isPortalDemoSlide(slide)) {
+            return false
+          }
+
           return !(preserveFirstSlide && index === 0)
         })
+    }
 
     const rebuildRotationBag = () => {
       const weightedIndices = getRotatableSlideIndices().flatMap(index =>
@@ -1768,6 +1826,12 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
 
     const queueNextSlide = delay => {
       clearScheduledAdvance()
+      if (shouldDisablePortalStandardRotation()) {
+        stopProgressLoop()
+        dispatchBannerState()
+        return
+      }
+
       currentSlideDuration = Math.max(250, delay)
       remainingSlideDuration = currentSlideDuration
       slideDeadline = performance.now() + currentSlideDuration
@@ -1782,6 +1846,7 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
     const startBannerAnimation = () => {
       if (!slides.length || slides.length <= 1 || !animationConfig.enabled) return
       if (activePauseReasons.size > 0) return
+      if (shouldDisablePortalStandardRotation()) return
       queueNextSlide(Math.max(250, remainingSlideDuration))
     }
 
@@ -1872,6 +1937,7 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
         portalCleanupFrameId = null
       }
       standardBannerContainer?.classList.remove('banner-portal-wiping')
+      standardBannerContainer?.classList.remove('banner-portal-demo-handoff')
       slides.forEach(slide => {
         slide.classList.remove(
           'banner-portal-wipe-incoming',
@@ -1929,6 +1995,8 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
     const startPortalStandardBanner = startIndex => {
       if (!slides[startIndex]) return
 
+      const isPortalDemoSlide = slides[startIndex]?.dataset.portalDemoSlide === 'true'
+
       portalStandardModeActive = true
       activePauseReasons.delete('portal-sync')
       clearScheduledAdvance()
@@ -1936,7 +2004,12 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
       clearPortalWipe()
       showSlide(startIndex)
 
-      if (slides.length > 1 && animationConfig.enabled && activePauseReasons.size === 0) {
+      if (
+        !isPortalDemoSlide &&
+        slides.length > 1 &&
+        animationConfig.enabled &&
+        activePauseReasons.size === 0
+      ) {
         queueNextSlide(getSlideDuration(startIndex))
       }
     }
@@ -1952,6 +2025,8 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
         slides[currentSlideIndex]?.dataset.portalStandardSlide === 'true'
           ? currentSlideIndex
           : fallbackFromIndex
+      const isDemoHandoff =
+        slides[toIndex]?.dataset.portalDemoSlide === 'true'
       const progress = prefersReducedMotion
         ? 1
         : Math.min(1, Math.max(0, Number(detail?.progress) || 0))
@@ -1982,6 +2057,10 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
       }
 
       standardBannerContainer?.classList.add('banner-portal-wiping')
+      standardBannerContainer?.classList.toggle(
+        'banner-portal-demo-handoff',
+        isDemoHandoff,
+      )
       slides.forEach((slide, index) => {
         const isOutgoing = index === fromIndex
         const isIncoming = index === toIndex
@@ -2045,6 +2124,7 @@ const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
       }
 
       standardBannerContainer?.classList.add('banner-portal-wiping')
+      standardBannerContainer?.classList.remove('banner-portal-demo-handoff')
       slides.forEach((slide, index) => {
         const isOutgoing = index === fromIndex
         const isIncoming = index === toIndex

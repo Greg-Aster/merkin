@@ -570,6 +570,7 @@ const basePath = import.meta.env.BASE_URL || '/'
 const isHomePage = pathsEqual(currentPath, basePath)
 const isPortalHome = isHomePage && homeLayout === 'portal'
 const isPostRoute = Boolean(post)
+const hasPortalDemoContent = Astro.slots.has('portal-demo-content')
 
 // =====================================================================
 // ⭐ NEW: Determine oneColumn mode from props or post data
@@ -834,6 +835,11 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
     <slot name="banner-slide-content" slot="banner-slide-content" />
     <slot name="banner-overlay-content" slot="banner-overlay-content" />
     <slot name="timeline-banner-content" slot="timeline-banner-content" />
+    {hasPortalDemoContent && (
+      <Fragment slot="portal-demo-content">
+        <slot name="portal-demo-content" />
+      </Fragment>
+    )}
     <RightRailContent
       slot="banner-mobile-right-rail"
       currentPath={currentPath}

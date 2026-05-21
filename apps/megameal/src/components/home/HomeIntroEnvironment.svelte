@@ -66,6 +66,7 @@ let lastPortalDragSfxAt = -Infinity
 let portalRevealSfxPlayed = false
 const backgroundRevealDelayMs = 1100
 const backgroundRevealFallbackDelayMs = 2600
+const portalDemoActiveClass = 'megameal-portal-demo-active'
 const wheelMomentumDecay = 2.4
 const wheelMomentumImpulse = 5.2
 const wheelMomentumMaxVelocity = 4.8
@@ -129,6 +130,13 @@ function isInsideShell(clientX: number, clientY: number) {
     clientX <= bounds.right &&
     clientY >= bounds.top &&
     clientY <= bounds.bottom
+  )
+}
+
+function isPortalDemoActive() {
+  return (
+    typeof document !== 'undefined' &&
+    document.documentElement.classList.contains(portalDemoActiveClass)
   )
 }
 
@@ -375,7 +383,9 @@ function smoothWheelStep(delta: number) {
 function isInteractiveTarget(eventTarget: EventTarget | null) {
   return (
     eventTarget instanceof Element &&
-    !!eventTarget.closest('a, button, input, textarea, select, [role="button"]')
+    !!eventTarget.closest(
+      'a, button, input, textarea, select, [role="button"], [data-portal-demo-player]',
+    )
   )
 }
 
@@ -407,6 +417,7 @@ function applyDragDelta(
 }
 
 function handlePointerDown(event: PointerEvent) {
+  if (isPortalDemoActive()) return
   if (event.pointerType === 'touch' || isInteractiveTarget(event.target)) return
   if (!isInsideShell(event.clientX, event.clientY)) return
 
@@ -453,6 +464,7 @@ function handlePointerMove(event: PointerEvent) {
 }
 
 function navigateActiveScreen() {
+  if (isPortalDemoActive()) return
   if (typeof window === 'undefined' || !activeScreen.href) return
 
   playPortalSfx('portal-activate')
@@ -497,6 +509,7 @@ function handlePointerUp(event?: PointerEvent) {
   }
 
   const shouldNavigate =
+    !isPortalDemoActive() &&
     !!event &&
     pointerDownStartedOnScreen &&
     pointerDragDistance <= 8 &&
@@ -521,6 +534,7 @@ function getChangedTouch(event: TouchEvent) {
 }
 
 function handleTouchStart(event: TouchEvent) {
+  if (isPortalDemoActive()) return
   if (isInteractiveTarget(event.target)) return
 
   const touch = event.changedTouches[0]
@@ -564,6 +578,7 @@ function handleTouchEnd(event: TouchEvent) {
   if (!touch) return
 
   const shouldNavigate =
+    !isPortalDemoActive() &&
     event.type === 'touchend' &&
     activeTouchId !== null &&
     pointerDownStartedOnScreen &&
