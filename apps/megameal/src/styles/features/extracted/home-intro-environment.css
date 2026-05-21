@@ -321,7 +321,7 @@
     }
 
     :root[data-megameal-mobile-ad-visible='true'] .home-intro-copy--feature {
-      bottom: var(--megameal-mobile-ad-clearance, max(7.5rem, calc(env(safe-area-inset-bottom) + 6.95rem)));
+      bottom: var(--megameal-mobile-ad-clearance, max(6.8rem, calc(env(safe-area-inset-bottom) + 6.25rem)));
     }
 
     .home-intro-copy h2 {
@@ -438,7 +438,7 @@
     }
 
     :root[data-megameal-mobile-ad-visible='true'] .home-intro-copy--feature {
-      bottom: var(--megameal-mobile-ad-clearance, max(7.3rem, calc(env(safe-area-inset-bottom) + 6.75rem)));
+      bottom: var(--megameal-mobile-ad-clearance, max(6.65rem, calc(env(safe-area-inset-bottom) + 6.1rem)));
     }
 
     .home-intro-copy p {

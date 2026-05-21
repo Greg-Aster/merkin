@@ -277,9 +277,12 @@ import '../../styles/features/facts-widget/motion-responsive.css'
     let expandTimeoutId
     let collapseTimeoutId
     let scrollIdleTimeoutId
+    let privacyAdvanceTimeoutId
+    let privacyNoticeInteracted = false
     let cleanupOverlayActivityListeners = () => {}
     const overlayScrollIdleDelay = 7000
     const overlayRestoreIdleDelay = 4200
+    const privacyNoticeAutoAdvanceDelay = 7200
 
     const specialFactLinks = {
       Explainer: '/posts/explainer/',
@@ -375,8 +378,45 @@ import '../../styles/features/facts-widget/motion-responsive.css'
 
     const showRandomFact = () => {
       if (!facts.length || widget.classList.contains('is-dismissed')) return
+      if (isOverlay && widget.dataset.pinned === 'true') return
+      if (hasFirstPrivacyNotice && currentIndex === 0 && privacyNoticeInteracted) return
       currentIndex = getRandomFactIndex()
+      privacyNoticeInteracted = false
       applyFact(facts[currentIndex] || fallbackFact)
+    }
+
+    const clearPrivacyAdvanceTimer = () => {
+      window.clearTimeout(privacyAdvanceTimeoutId)
+    }
+
+    const schedulePrivacyNoticeAdvance = () => {
+      clearPrivacyAdvanceTimer()
+      if (
+        !hasFirstPrivacyNotice ||
+        currentIndex !== 0 ||
+        privacyNoticeInteracted ||
+        facts.length < 2 ||
+        widget.classList.contains('is-dismissed')
+      ) {
+        return
+      }
+
+      privacyAdvanceTimeoutId = window.setTimeout(() => {
+        if (
+          currentIndex !== 0 ||
+          privacyNoticeInteracted ||
+          widget.classList.contains('is-dismissed')
+        ) {
+          return
+        }
+        showRandomFact()
+      }, privacyNoticeAutoAdvanceDelay)
+    }
+
+    const markPrivacyNoticeInteracted = () => {
+      if (!hasFirstPrivacyNotice || currentIndex !== 0) return
+      privacyNoticeInteracted = true
+      clearPrivacyAdvanceTimer()
     }
 
     const setExpanded = expanded => {
@@ -415,7 +455,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
         if (!isMobilePersistentOverlay() || widget.classList.contains('is-dismissed')) return
 
         const bounds = widget.getBoundingClientRect()
-        const clearance = Math.max(0, window.innerHeight - bounds.top) + 24
+        const clearance = Math.max(0, window.innerHeight - bounds.top) + 12
         root.style.setProperty('--megameal-mobile-ad-clearance', `${Math.ceil(clearance)}px`)
       })
     }
@@ -457,7 +497,6 @@ import '../../styles/features/facts-widget/motion-responsive.css'
 
     const startRotation = () => {
       if (!facts.length) return
-      if (isOverlay) return
       // Respect prefers-reduced-motion: disable auto-rotation if user prefers reduced motion
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         return
@@ -477,6 +516,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
       window.clearTimeout(expandTimeoutId)
       window.clearTimeout(collapseTimeoutId)
       window.clearTimeout(scrollIdleTimeoutId)
+      clearPrivacyAdvanceTimer()
       cleanupOverlayActivityListeners()
       setPinned(false)
       setExpanded(false)
@@ -488,10 +528,23 @@ import '../../styles/features/facts-widget/motion-responsive.css'
       widget.classList.remove('is-dismissed')
       window.sessionStorage.removeItem(storageKey)
       applyFact(facts[currentIndex] || fallbackFact)
+      schedulePrivacyNoticeAdvance()
       setPinned(false)
       setExpanded(false)
       scheduleScrollIdle(overlayRestoreIdleDelay)
       startRotation()
+    }
+
+    const collapseOverlaySelection = () => {
+      if (!isOverlay || widget.classList.contains('is-dismissed')) return
+      if (widget.dataset.pinned !== 'true' && widget.dataset.expanded !== 'true') return
+
+      window.clearTimeout(expandTimeoutId)
+      window.clearTimeout(collapseTimeoutId)
+      setPinned(false)
+      setExpanded(false)
+      startRotation()
+      schedulePrivacyNoticeAdvance()
     }
 
     widget.addEventListener('click', event => {
@@ -503,6 +556,8 @@ import '../../styles/features/facts-widget/motion-responsive.css'
       const action = actionTarget.getAttribute('data-action')
       if (action === 'next') {
         event.preventDefault()
+        privacyNoticeInteracted = false
+        clearPrivacyAdvanceTimer()
         showRandomFact()
       }
       if (action === 'dismiss' && isDismissible) {
@@ -518,6 +573,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
     if (facts.length) {
       currentIndex = hasFirstPrivacyNotice ? 0 : getRandomFactIndex()
       applyFact(facts[currentIndex] || fallbackFact)
+      schedulePrivacyNoticeAdvance()
     } else {
       applyFact(fallbackFact)
     }
@@ -551,12 +607,23 @@ import '../../styles/features/facts-widget/motion-responsive.css'
         const nextPinned = widget.dataset.pinned !== 'true'
         setPinned(nextPinned)
         setExpanded(nextPinned || widget.matches(':hover'))
+        if (nextPinned) {
+          markPrivacyNoticeInteracted()
+          window.clearInterval(intervalId)
+        } else {
+          startRotation()
+          schedulePrivacyNoticeAdvance()
+        }
         emitSfx(nextPinned ? 'panel-open' : 'panel-back')
       })
     }
 
+    widget.addEventListener('pointerdown', markPrivacyNoticeInteracted, { passive: true })
+    widget.addEventListener('focusin', markPrivacyNoticeInteracted)
+
     widget.addEventListener('mouseenter', () => {
       window.clearInterval(intervalId)
+      markPrivacyNoticeInteracted()
       window.clearTimeout(collapseTimeoutId)
       if (isOverlay && !prefersTouchUi && widget.dataset.pinned !== 'true') {
         expandTimeoutId = window.setTimeout(() => setExpanded(true), 210)
@@ -573,6 +640,11 @@ import '../../styles/features/facts-widget/motion-responsive.css'
     if (isOverlay) {
       const activityController = new AbortController()
       const activitySignal = activityController.signal
+      const handleOutsidePointerDown = event => {
+        const target = event.target
+        if (target instanceof Node && widget.contains(target)) return
+        collapseOverlaySelection()
+      }
       const handleKeyNavigation = event => {
         if (
           event.key === 'PageDown' ||
@@ -591,6 +663,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
       window.addEventListener('wheel', markUserIsNavigating, { passive: true, signal: activitySignal })
       window.addEventListener('touchmove', markUserIsNavigating, { passive: true, signal: activitySignal })
       window.addEventListener('keydown', handleKeyNavigation, { signal: activitySignal })
+      document.addEventListener('pointerdown', handleOutsidePointerDown, { passive: true, signal: activitySignal })
 
       cleanupOverlayActivityListeners = () => {
         activityController.abort()

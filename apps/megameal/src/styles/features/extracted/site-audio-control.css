@@ -232,20 +232,17 @@
     cursor: pointer;
   }
 
-  .site-audio-panel__note {
-    margin: 0.75rem 0 0;
-    font-size: 0.74rem;
-    line-height: 1.45;
-    color: rgba(148, 163, 184, 0.9);
-  }
-
   @media (max-width: 767px) {
     .site-audio-nudge {
       position: fixed;
-      top: 4.25rem;
+      top: max(4.75rem, calc(env(safe-area-inset-top) + 4rem));
       right: 0.75rem;
       left: 0.75rem;
       width: auto;
+      max-height: min(12rem, calc(100vh - 5.75rem));
+      max-height: min(12rem, calc(100dvh - 5.75rem));
+      overflow: auto;
+      overscroll-behavior: contain;
     }
 
     .site-audio-nudge::before {
@@ -257,11 +254,31 @@
       left: 0.75rem;
       right: 0.75rem;
       top: auto;
-      bottom: max(0.75rem, env(safe-area-inset-bottom));
+      bottom: max(0.75rem, calc(env(safe-area-inset-bottom) + 0.75rem));
       width: auto;
-      max-height: min(72vh, 24rem);
+      max-height: min(70vh, 24rem);
+      max-height: min(
+        24rem,
+        calc(100dvh - max(5.25rem, calc(env(safe-area-inset-top) + 4.5rem)) - max(1rem, calc(env(safe-area-inset-bottom) + 0.75rem)))
+      );
       overflow: auto;
+      overscroll-behavior: contain;
       border-radius: 1.15rem;
       z-index: 120;
+    }
+
+    @supports not (height: 100dvh) {
+      .site-audio-nudge {
+        max-height: min(12rem, calc(100vh - 5.75rem));
+        max-height: min(12rem, calc(100svh - 5.75rem));
+      }
+
+      .site-audio-panel {
+        max-height: min(70vh, 24rem);
+        max-height: min(
+          24rem,
+          calc(100svh - max(5.25rem, calc(env(safe-area-inset-top) + 4.5rem)) - max(1rem, calc(env(safe-area-inset-bottom) + 0.75rem)))
+        );
+      }
     }
   }

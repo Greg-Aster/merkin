@@ -76,6 +76,7 @@
 
   @media (max-width: 640px) {
     .facts-widget-overlay[data-mobile-persistent='true'] {
+      --facts-mobile-persistent-height: 6.75rem;
       right: 0.55rem;
       bottom: max(0.55rem, env(safe-area-inset-bottom));
       left: 0.55rem;
@@ -154,9 +155,9 @@
       display: none;
     }
 
-    .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-actions,
-    .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-fineprint,
-    .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-selection-hint,
+    .facts-widget-overlay[data-mobile-persistent='true'][data-expanded='false'] .facts-widget-actions,
+    .facts-widget-overlay[data-mobile-persistent='true'][data-expanded='false'] .facts-widget-fineprint,
+    .facts-widget-overlay[data-mobile-persistent='true'][data-expanded='false'] .facts-widget-selection-hint,
     .facts-widget-overlay[data-mobile-persistent='true'][data-fact-role='privacy-notice'][data-expanded='false'] .facts-widget-actions {
       display: none;
     }
@@ -169,14 +170,56 @@
       gap: 0.28rem;
     }
 
+    .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-body:has(.facts-widget-media:not(.is-hidden)) {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) clamp(4.75rem, 24vw, 6.25rem);
+      grid-template-areas:
+        "label label"
+        "headline media"
+        "text media";
+      align-items: start;
+      column-gap: 0.55rem;
+      row-gap: 0.24rem;
+    }
+
+    .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-label-row {
+      grid-area: label;
+    }
+
+    .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-headline {
+      grid-area: headline;
+    }
+
+    .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-media {
+      grid-area: media;
+      width: 100%;
+      aspect-ratio: 1 / 0.78;
+      max-height: 4.35rem;
+      align-self: start;
+      border-radius: 0.48rem;
+    }
+
+    .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-media-video,
+    .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-media-img {
+      max-height: 4.35rem;
+    }
+
+    .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-text {
+      grid-area: text;
+    }
+
     .facts-widget-overlay .facts-widget-headline {
       font-size: 0.86rem;
       line-height: 1.1;
     }
 
     .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-headline {
+      display: -webkit-box;
+      overflow: hidden;
       font-size: 0.78rem;
       line-height: 1.08;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
     }
 
     .facts-widget-overlay .facts-widget-text {
@@ -186,9 +229,12 @@
     }
 
     .facts-widget-overlay[data-mobile-persistent='true'] .facts-widget-text {
+      display: -webkit-box;
+      overflow: hidden;
       font-size: 0.64rem;
       line-height: 1.24;
       max-height: 2rem;
+      -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
     }
 
@@ -233,6 +279,12 @@
       width: auto;
     }
 
+    .facts-widget-overlay[data-mobile-persistent='true'][data-expanded='false'] .facts-widget-frame {
+      height: var(--facts-mobile-persistent-height);
+      max-height: var(--facts-mobile-persistent-height);
+      overflow: hidden;
+    }
+
     .facts-widget-overlay[data-expanded='true'] {
       left: 0.75rem;
       right: 0.75rem;
@@ -249,5 +301,19 @@
     .facts-widget-overlay[data-expanded='true'] .facts-widget-frame {
       max-height: min(54svh, 20rem);
       overflow: auto;
+    }
+
+    .facts-widget-overlay[data-mobile-persistent='true'][data-expanded='true'] .facts-widget-frame {
+      height: auto;
+      max-height: min(54svh, 20rem);
+      overflow: auto;
+    }
+
+    .facts-widget-overlay[data-mobile-persistent='true'][data-expanded='true'] .facts-widget-headline,
+    .facts-widget-overlay[data-mobile-persistent='true'][data-expanded='true'] .facts-widget-text {
+      display: block;
+      max-height: none;
+      overflow: visible;
+      -webkit-line-clamp: unset;
     }
   }

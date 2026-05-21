@@ -3,6 +3,10 @@
     --navbar-action-icon-size: 20px;
   }
 
+  #navbar.onload-animation.loaded {
+    transform: none;
+  }
+
   #navbar .nav-action-button {
     width: var(--navbar-action-size);
     min-width: var(--navbar-action-size);

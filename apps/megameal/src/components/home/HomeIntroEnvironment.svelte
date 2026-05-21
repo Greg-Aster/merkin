@@ -93,6 +93,12 @@ $: maxWheel =
   homeIntroMaxWheelForOffset(introOffsetScreens) +
   homeIntroStandardBannerPhaseScreens / homeIntroWheelToScreenRatio
 $: activeScreen = homeIntroScreens[activeScreenIndex] ?? homeIntroScreens[0]
+$: hoveredScreenIndex =
+  portraitMobile && revealProgress > 0.08
+    ? activeScreenIndex
+    : portalHoverActive
+      ? activeScreenIndex
+      : -1
 
 const createRenderer = (canvas: HTMLCanvasElement) => {
   const renderer = new THREE.WebGLRenderer({
@@ -777,7 +783,7 @@ onDestroy(() => {
 			{input}
 			{titleImageSrc}
 			{sceneQuality}
-			hoveredScreenIndex={portalHoverActive ? activeScreenIndex : -1}
+			{hoveredScreenIndex}
 			onLogoReady={handleLogoReady}
 		/>
 		<HomeIntroPostProcessing

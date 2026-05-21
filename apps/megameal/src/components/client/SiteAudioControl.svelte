@@ -16,13 +16,58 @@ let audioState: SiteAudioState = {
   suspensionReason: null,
 }
 let panelOpen = false
+let shellElement: HTMLDivElement | null = null
 let panelElement: HTMLDivElement | null = null
+let nudgeElement: HTMLDivElement | null = null
 let isMobileViewport = false
 let showAudioNudge = false
 let audioNudgeFading = false
 let audioNudgeDismissed = false
 let audioNudgeFadeTimer: number | null = null
 const audioNudgeDismissedStorageKey = 'megameal-site-audio-nudge-dismissed-v2'
+
+const portalToBody = (node: HTMLElement, enabled: boolean) => {
+  if (typeof document === 'undefined') {
+    return {}
+  }
+
+  const marker = document.createComment('site-audio-portal')
+  let portaled = false
+
+  const moveToBody = () => {
+    if (portaled || !node.parentNode || !document.body) return
+    node.parentNode.insertBefore(marker, node)
+    document.body.appendChild(node)
+    portaled = true
+  }
+
+  const restore = () => {
+    if (!portaled) return
+    const parent = marker.parentNode
+    if (parent) {
+      parent.insertBefore(node, marker)
+      parent.removeChild(marker)
+    }
+    portaled = false
+  }
+
+  if (enabled) {
+    moveToBody()
+  }
+
+  return {
+    update(nextEnabled: boolean) {
+      if (nextEnabled) {
+        moveToBody()
+      } else {
+        restore()
+      }
+    },
+    destroy() {
+      restore()
+    },
+  }
+}
 
 const syncAudioForCurrentPage = () => {
   if (typeof window === 'undefined') return
@@ -119,10 +164,22 @@ const syncViewportMode = () => {
   isMobileViewport = window.matchMedia('(max-width: 767px)').matches
 }
 
-const handleAudioButtonClick = () => {
+const targetIsInsideAudioControl = (target: EventTarget | null) => {
+  if (!(target instanceof Node)) return false
+  return Boolean(
+    shellElement?.contains(target) ||
+      panelElement?.contains(target) ||
+      nudgeElement?.contains(target),
+  )
+}
+
+const handleAudioButtonClick = async () => {
   dismissAudioNudge()
-  if (isMobileViewport && !panelOpen && !audioState.enabled) {
-    toggleAudio()
+  await siteAudioManager.unlockFromGesture()
+
+  if (isMobileViewport) {
+    panelOpen = false
+    siteAudioManager.setEnabled(!audioState.enabled)
     return
   }
 
@@ -147,7 +204,7 @@ onMount(() => {
   document.addEventListener('astro:page-load', syncAudioForCurrentPage)
 
   const handleFirstGesture = () => {
-    siteAudioManager.unlockFromGesture()
+    void siteAudioManager.unlockFromGesture()
   }
   const mediaQuery = window.matchMedia('(max-width: 767px)')
   const handleViewportChange = () => {
@@ -156,20 +213,22 @@ onMount(() => {
   document.addEventListener('pointerdown', handleFirstGesture, {
     passive: true,
   })
+  document.addEventListener('touchstart', handleFirstGesture, {
+    passive: true,
+  })
   document.addEventListener('keydown', handleFirstGesture)
   mediaQuery.addEventListener('change', handleViewportChange)
 
   const handlePointerDown = (event: MouseEvent) => {
-    if (!panelOpen || !panelElement) return
-    if (panelElement.contains(event.target as Node)) return
+    if (!panelOpen) return
+    if (targetIsInsideAudioControl(event.target)) return
     panelOpen = false
   }
 
   document.addEventListener('click', handlePointerDown)
 
   const handleNudgeIgnore = (event: Event) => {
-    const target = event.target as Node | null
-    if (target && panelElement?.contains(target)) return
+    if (targetIsInsideAudioControl(event.target)) return
     dismissAudioNudge()
   }
 
@@ -188,6 +247,7 @@ onMount(() => {
     unsubscribe()
     document.removeEventListener('astro:page-load', syncAudioForCurrentPage)
     document.removeEventListener('pointerdown', handleFirstGesture)
+    document.removeEventListener('touchstart', handleFirstGesture)
     document.removeEventListener('keydown', handleFirstGesture)
     document.removeEventListener('click', handlePointerDown)
     document.removeEventListener('click', handleNudgeIgnore)
@@ -207,14 +267,16 @@ $: buttonLabel = panelOpen
   ? 'Close sound controls'
   : isMobileViewport && !audioState.enabled
     ? 'Enable site sound'
+    : isMobileViewport
+      ? 'Disable site sound'
     : 'Open sound controls'
 $: buttonTitle = audioState.enabled
   ? audioState.activeTrackLabel
     ? isMobileViewport
-      ? `Sound is on. ${audioState.activeTrackLabel}. Tap for mix controls.`
+      ? `Sound is on. ${audioState.activeTrackLabel}. Tap to turn off.`
       : `Sound controls. Current ambience: ${audioState.activeTrackLabel}`
     : isMobileViewport
-      ? 'Sound is on. Tap for mix controls.'
+      ? 'Sound is on. Tap to turn off.'
       : 'Sound controls'
   : audioState.hasConfiguredTracks
     ? isMobileViewport
@@ -226,7 +288,7 @@ $: ambienceVolumePercent = Math.round(audioState.ambienceVolume * 100)
 $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
 </script>
 
-<div class="site-audio-shell" bind:this={panelElement}>
+<div class="site-audio-shell" bind:this={shellElement}>
   <button
     type="button"
     aria-label={buttonLabel}
@@ -248,6 +310,8 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
       class:site-audio-nudge--hiding={audioNudgeFading}
       role="dialog"
       aria-label="Sound suggestion"
+      bind:this={nudgeElement}
+      use:portalToBody={isMobileViewport}
     >
       <div class="site-audio-nudge__copy">
         <div class="site-audio-nudge__title">Best with sound</div>
@@ -270,7 +334,11 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
   {/if}
 
   {#if panelOpen}
-    <div class="site-audio-panel card-base2">
+    <div
+      class="site-audio-panel card-base2"
+      bind:this={panelElement}
+      use:portalToBody={isMobileViewport}
+    >
       <div class="site-audio-panel__header">
         <div>
           <div class="site-audio-panel__kicker">Sound Mix</div>
@@ -326,16 +394,6 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
           on:input={setSfxVolume}
         />
       </label>
-
-      <p class="site-audio-panel__note">
-        {#if audioState.enabled && audioState.suspended}
-          Ambience is paused while another media player is active.
-        {:else if audioState.enabled}
-          Route ambience changes automatically, while effects stay available for interactions across the site.
-        {:else}
-          Audio stays off until you enable it.
-        {/if}
-      </p>
     </div>
   {/if}
 </div>
