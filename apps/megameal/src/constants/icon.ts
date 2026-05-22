@@ -32,11 +32,6 @@ export const defaultFavicons: Favicon[] = [
     sizes: '128x128',
   },
   {
-    src: '/thumb/favicon-dark-180.png',
-    theme: 'dark',
-    sizes: '180x180',
-  },
-  {
     src: '/thumb/favicon-dark-192.png',
     theme: 'dark',
     sizes: '192x192',

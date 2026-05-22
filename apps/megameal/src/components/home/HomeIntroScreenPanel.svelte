@@ -5,6 +5,7 @@ import {
   AdditiveBlending,
   DoubleSide,
   FrontSide,
+  LinearFilter,
   NormalBlending,
   SRGBColorSpace,
   CanvasTexture,
@@ -133,6 +134,9 @@ function disposeScreenModel() {
 
 function configureMediaTexture(texture: Texture, invertY = false) {
   texture.colorSpace = SRGBColorSpace
+  texture.generateMipmaps = false
+  texture.minFilter = LinearFilter
+  texture.magFilter = LinearFilter
 
   if (invertY) {
     texture.repeat.y = -1

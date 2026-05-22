@@ -1,8 +1,8 @@
 import {
   CanvasTexture,
   RepeatWrapping,
-  SRGBColorSpace,
 } from 'three'
+import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 
 export function createCausticTexture() {
   const canvas = document.createElement('canvas')
@@ -51,11 +51,10 @@ export function createCausticTexture() {
   }
 
   const texture = new CanvasTexture(canvas)
-  texture.colorSpace = SRGBColorSpace
   texture.wrapS = RepeatWrapping
   texture.wrapT = RepeatWrapping
   texture.repeat.set(1.2, 0.84)
-  texture.needsUpdate = true
+  configureGeneratedCanvasTexture(texture)
 
   return texture
 }
@@ -76,9 +75,7 @@ export function createSheenTexture() {
   context.fillStyle = gradient
   context.fillRect(0, 0, canvas.width, canvas.height)
 
-  const texture = new CanvasTexture(canvas)
-  texture.colorSpace = SRGBColorSpace
-  texture.needsUpdate = true
+  const texture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
 
   return texture
 }
@@ -138,11 +135,10 @@ export function createFrostedScrimTexture() {
   }
 
   const texture = new CanvasTexture(canvas)
-  texture.colorSpace = SRGBColorSpace
   texture.wrapS = RepeatWrapping
   texture.wrapT = RepeatWrapping
   texture.repeat.set(1.04, 1.18)
-  texture.needsUpdate = true
+  configureGeneratedCanvasTexture(texture)
 
   return texture
 }

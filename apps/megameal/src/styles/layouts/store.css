@@ -10,10 +10,6 @@
   opacity: 1;
 }
 
-.parallax-bg.is-scrolling {
-  will-change: transform;
-}
-
 #parallax-banner {
   opacity: 0;
   transition: opacity 0.5s ease-out;
@@ -22,4 +18,3 @@
 #parallax-banner.loaded {
   opacity: 1;
 }
-

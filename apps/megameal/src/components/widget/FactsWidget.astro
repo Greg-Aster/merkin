@@ -344,6 +344,9 @@ import '../../styles/features/facts-widget/motion-responsive.css'
           mediaVideoEl.classList.remove('is-hidden')
           mediaImgEl.classList.add('is-hidden')
           mediaEl.classList.remove('is-hidden')
+          mediaVideoEl.defaultMuted = true
+          mediaVideoEl.muted = true
+          mediaVideoEl.playsInline = true
           mediaVideoEl.load()
           mediaVideoEl.play().catch(() => {})
         } else if (fact.image) {

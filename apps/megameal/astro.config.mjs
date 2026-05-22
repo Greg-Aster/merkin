@@ -219,7 +219,7 @@ export default defineConfig({
       noExternal: [/^@fontsource/, 'katex'],
     },
     optimizeDeps: {
-      include: ['mammoth'],
+      include: ['mammoth', 'overlayscrollbars', 'photoswipe', 'photoswipe/lightbox'],
       force: isDev,
     },
     server: {

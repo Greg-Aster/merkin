@@ -20,6 +20,7 @@ class SiteSfxManager {
   private howls = new Map<SiteSfxId, Howl>()
   private lastPlayedAt = new Map<SiteSfxId, number>()
   private initialized = false
+  private audioUnlocked = false
 
   initialize(): void {
     if (this.initialized || typeof window === 'undefined') return
@@ -31,17 +32,40 @@ class SiteSfxManager {
     }
   }
 
-  async unlockFromGesture(): Promise<void> {
-    if (typeof window === 'undefined') return
+  hasUnlockedAudio(): boolean {
+    if (this.audioUnlocked) return true
+
+    const contextState = Howler.ctx?.state
+    return contextState === 'running'
+  }
+
+  async unlockFromGesture(): Promise<boolean> {
+    if (typeof window === 'undefined') return false
 
     try {
+      const userActivation = (navigator as Navigator & {
+        userActivation?: { isActive?: boolean }
+      }).userActivation
+      if (!this.hasUnlockedAudio() && userActivation?.isActive === false) {
+        return false
+      }
+
       const ctx = Howler.ctx
       if (ctx && ctx.state === 'suspended') {
         await ctx.resume()
       }
+      this.audioUnlocked = ctx ? ctx.state === 'running' : true
+      return this.audioUnlocked
     } catch (error) {
       console.warn('Site SFX unlock failed:', error)
+      return false
     }
+  }
+
+  playIfUnlocked(id: SiteSfxId): void {
+    if (!this.hasUnlockedAudio()) return
+
+    this.play(id)
   }
 
   play(id: SiteSfxId): void {

@@ -34,11 +34,6 @@
         opacity: 1;
     }
 
-    /* Only apply will-change when actively scrolling */
-    .parallax-bg.is-scrolling {
-        will-change: transform;
-    }
-    
     #parallax-banner {
         @apply opacity-0 transition-opacity duration-500;
         

@@ -140,10 +140,6 @@
     pointer-events: none;
   }
 
-  .portal-demo-player__video {
-    will-change: filter, transform;
-  }
-
   .portal-demo-player__glitch {
     position: absolute;
     inset: 0;

@@ -188,12 +188,13 @@ onMount(() => {
     lastPointerAt = window.performance.now()
     const sfxId = resolvePointerSfx(event.target)
     if (sfxId) {
-      await siteSfxManager.unlockFromGesture()
-      siteSfxManager.play(sfxId)
+      if (await siteSfxManager.unlockFromGesture()) {
+        siteSfxManager.play(sfxId)
+      }
     }
   }
 
-  const handleMouseOver = async (event: MouseEvent) => {
+  const handleMouseOver = (event: MouseEvent) => {
     const anchor = getHoverAnchor(event.target)
     if (!anchor || anchor === lastHoverAnchor) return
 
@@ -203,8 +204,7 @@ onMount(() => {
     lastHoverAnchor = anchor
     const sfxId = resolveHoverSfx(anchor)
     if (sfxId) {
-      await siteSfxManager.unlockFromGesture()
-      siteSfxManager.play(sfxId)
+      siteSfxManager.playIfUnlocked(sfxId)
     }
   }
 
@@ -219,7 +219,7 @@ onMount(() => {
     lastHoverAnchor = null
   }
 
-  const handleFocusIn = async (event: FocusEvent) => {
+  const handleFocusIn = (event: FocusEvent) => {
     const target = event.target instanceof HTMLElement ? event.target : null
     if (!target || target === lastFocusTarget) return
     if (window.performance.now() - lastPointerAt < 140) return
@@ -227,8 +227,7 @@ onMount(() => {
     lastFocusTarget = target
     const sfxId = resolveFocusSfx(target)
     if (sfxId) {
-      await siteSfxManager.unlockFromGesture()
-      siteSfxManager.play(sfxId)
+      siteSfxManager.playIfUnlocked(sfxId)
     }
   }
 
@@ -244,12 +243,13 @@ onMount(() => {
 
     const sfxId = resolveKeySfx(event.target)
     if (sfxId) {
-      await siteSfxManager.unlockFromGesture()
-      siteSfxManager.play(sfxId)
+      if (await siteSfxManager.unlockFromGesture()) {
+        siteSfxManager.play(sfxId)
+      }
     }
   }
 
-  const handleWheel = async (event: WheelEvent) => {
+  const handleWheel = (event: WheelEvent) => {
     const target = event.target instanceof HTMLElement ? event.target : null
     if (target?.closest('input, textarea, select, [contenteditable="true"]'))
       return
@@ -259,16 +259,14 @@ onMount(() => {
     if (now - lastScrollSfxAt < 650) return
 
     lastScrollSfxAt = now
-    await siteSfxManager.unlockFromGesture()
-    siteSfxManager.play('scroll')
+    siteSfxManager.playIfUnlocked('scroll')
   }
 
-  const handleCustomSfx = async (event: Event) => {
+  const handleCustomSfx = (event: Event) => {
     const customEvent = event as CustomEvent<{ id?: SiteSfxId }>
     const sfxId = customEvent.detail?.id
     if (sfxId) {
-      await siteSfxManager.unlockFromGesture()
-      siteSfxManager.play(sfxId)
+      siteSfxManager.playIfUnlocked(sfxId)
     }
   }
 

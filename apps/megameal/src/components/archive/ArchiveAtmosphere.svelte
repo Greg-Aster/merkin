@@ -95,7 +95,7 @@
   <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.42),transparent_18%,transparent_82%,rgba(0,0,0,0.48))]"></div>
 
   <div
-    class="absolute inset-[-10%] opacity-30 mix-blend-screen transition-transform duration-500 ease-out will-change-transform [background-image:linear-gradient(rgba(94,234,212,0.09)_1px,transparent_1px),linear-gradient(90deg,rgba(56,189,248,0.08)_1px,transparent_1px)] [background-size:5.5rem_5.5rem]"
+    class="absolute inset-[-10%] opacity-30 mix-blend-screen transition-transform duration-500 ease-out [background-image:linear-gradient(rgba(94,234,212,0.09)_1px,transparent_1px),linear-gradient(90deg,rgba(56,189,248,0.08)_1px,transparent_1px)] [background-size:5.5rem_5.5rem]"
     style={`transform: translate3d(${pointerX * 0.5}px, ${driftY + pointerY * 0.5}px, 0);`}
   ></div>
 

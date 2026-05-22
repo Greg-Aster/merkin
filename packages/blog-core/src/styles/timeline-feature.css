@@ -239,7 +239,6 @@
     inset: 0;
     z-index: 10;
     transform-origin: top left;
-    will-change: transform;
   }
 
   .timeline-stage.is-dragging {

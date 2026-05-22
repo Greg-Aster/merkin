@@ -1,6 +1,7 @@
 <script lang="ts" context="module">
-import { CanvasTexture, SRGBColorSpace } from 'three'
+import { CanvasTexture } from 'three'
 import type { Texture } from 'three'
+import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 
 let sharedGlowTexture: Texture | null = null
 let sharedRingGlowTexture: Texture | null = null
@@ -31,9 +32,7 @@ function getGlowTexture() {
   context.fillStyle = gradient
   context.fillRect(0, 0, canvas.width, canvas.height)
 
-  sharedGlowTexture = new CanvasTexture(canvas)
-  sharedGlowTexture.colorSpace = SRGBColorSpace
-  sharedGlowTexture.needsUpdate = true
+  sharedGlowTexture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
 
   return sharedGlowTexture
 }
@@ -68,9 +67,9 @@ function getRingGlowTexture() {
   context.fillStyle = gradient
   context.fillRect(0, 0, canvas.width, canvas.height)
 
-  sharedRingGlowTexture = new CanvasTexture(canvas)
-  sharedRingGlowTexture.colorSpace = SRGBColorSpace
-  sharedRingGlowTexture.needsUpdate = true
+  sharedRingGlowTexture = configureGeneratedCanvasTexture(
+    new CanvasTexture(canvas),
+  )
 
   return sharedRingGlowTexture
 }

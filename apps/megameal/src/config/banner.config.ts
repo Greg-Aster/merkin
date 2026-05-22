@@ -569,12 +569,6 @@ export function determineBannerConfiguration(
   defaultBannerLink = '',
 ) {
   // ⭐ NEW: Check user's saved banner type preference
-  if (import.meta.env.DEV) {
-    console.log(
-      '🏗️ Banner config starting. Default type:',
-      bannerConfig.defaultBannerType,
-    )
-  }
   if (
     typeof window !== 'undefined' &&
     localStorage.getItem('defaultBannerType')

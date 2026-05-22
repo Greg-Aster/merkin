@@ -57,6 +57,7 @@ export const navBarConfig: NavBarConfig = {
     {
       name: 'Game',
       url: 'https://game.megameal.org/',
+      external: true,
     },
     3,
     1,

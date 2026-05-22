@@ -109,11 +109,6 @@
         z-index: var(--banner-z-default);
     }
 
-    /* Only apply will-change during active transitions */
-    .banner-slide.is-transitioning {
-        will-change: opacity;
-    }
-
     /* Banner content (images and videos) - shared styling */
     .banner-image,
     .banner-video {

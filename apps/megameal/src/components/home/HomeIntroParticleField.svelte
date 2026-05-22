@@ -1,6 +1,7 @@
 <script lang="ts" context="module">
-import { CanvasTexture, SRGBColorSpace } from 'three'
+import { CanvasTexture } from 'three'
 import type { Texture } from 'three'
+import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 
 let sharedStarTexture: Texture | null = null
 
@@ -53,9 +54,7 @@ function getStarTexture() {
   context.stroke()
   context.restore()
 
-  const texture = new CanvasTexture(canvas)
-  texture.colorSpace = SRGBColorSpace
-  texture.needsUpdate = true
+  const texture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
   sharedStarTexture = texture
 
   return sharedStarTexture

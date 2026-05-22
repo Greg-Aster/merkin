@@ -6,7 +6,6 @@ import {
   Euler,
   FrontSide,
   LinearFilter,
-  LinearMipmapLinearFilter,
   Quaternion,
   SRGBColorSpace,
   Vector3,
@@ -295,7 +294,8 @@ function tuneLogoModel(model: THREE.Object3D) {
       if (material.map) {
         material.map.colorSpace = SRGBColorSpace
         material.map.anisotropy = sceneQuality === 'high' ? 4 : 2
-        material.map.minFilter = LinearMipmapLinearFilter
+        material.map.generateMipmaps = false
+        material.map.minFilter = LinearFilter
         material.map.magFilter = LinearFilter
         material.map.needsUpdate = true
       }
@@ -321,9 +321,7 @@ function playLogoImpactSfx(introStartedAt: number) {
   }
 
   logoImpactSfxIntroStartedAt = introStartedAt
-  void siteSfxManager.unlockFromGesture().finally(() => {
-    siteSfxManager.play('portal-impact')
-  })
+  siteSfxManager.playIfUnlocked('portal-impact')
 }
 
 async function loadLogoModel(sourceUrl: string) {

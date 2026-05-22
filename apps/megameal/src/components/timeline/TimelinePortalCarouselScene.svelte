@@ -1,6 +1,7 @@
 <script lang="ts" context="module">
-import { CanvasTexture, SRGBColorSpace } from 'three'
+import { CanvasTexture } from 'three'
 import type { Texture } from 'three'
+import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 
 type TimelineStarTextureVariant = 0 | 1 | 2 | 3
 
@@ -67,9 +68,7 @@ function getTimelineStarTexture(variant: TimelineStarTextureVariant = 0) {
   context.fill()
   context.restore()
 
-  const texture = new CanvasTexture(canvas)
-  texture.colorSpace = SRGBColorSpace
-  texture.needsUpdate = true
+  const texture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
   sharedTimelineStarTextures.set(variant, texture)
 
   return texture
@@ -116,9 +115,9 @@ function getTimelineOrbitTexture() {
   context.stroke()
   context.restore()
 
-  sharedTimelineOrbitTexture = new CanvasTexture(canvas)
-  sharedTimelineOrbitTexture.colorSpace = SRGBColorSpace
-  sharedTimelineOrbitTexture.needsUpdate = true
+  sharedTimelineOrbitTexture = configureGeneratedCanvasTexture(
+    new CanvasTexture(canvas),
+  )
 
   return sharedTimelineOrbitTexture
 }

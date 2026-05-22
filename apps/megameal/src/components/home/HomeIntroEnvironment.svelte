@@ -262,22 +262,30 @@ function clampScreenIndex(value: number) {
   )
 }
 
-function playPortalSfx(id: SiteSfxId) {
+function playPortalSfx(
+  id: SiteSfxId,
+  options: { unlockFromGesture?: boolean } = {},
+) {
   if (typeof window === 'undefined') return
 
-  void siteSfxManager.unlockFromGesture().finally(() => {
-    siteSfxManager.play(id)
-  })
+  if (options.unlockFromGesture) {
+    void siteSfxManager.unlockFromGesture().then((unlocked) => {
+      if (unlocked) siteSfxManager.play(id)
+    })
+    return
+  }
+
+  siteSfxManager.playIfUnlocked(id)
 }
 
-function playPortalDragSfx() {
+function playPortalDragSfx(options: { unlockFromGesture?: boolean } = {}) {
   if (typeof window === 'undefined') return
 
   const now = window.performance.now()
   if (now - lastPortalDragSfxAt < 420) return
 
   lastPortalDragSfxAt = now
-  playPortalSfx('portal-drag')
+  playPortalSfx('portal-drag', options)
 }
 
 function syncPortalHoverActive(nextActive: boolean) {
@@ -366,7 +374,10 @@ function scheduleScrollDrivenWheel() {
   scrollFrame = window.requestAnimationFrame(runScrollDrivenWheelFrame)
 }
 
-function smoothWheelStep(delta: number) {
+function smoothWheelStep(
+  delta: number,
+  options: { unlockFromGesture?: boolean } = {},
+) {
   const direction = Math.sign(delta)
   if (
     direction === 0 ||
@@ -381,7 +392,7 @@ function smoothWheelStep(delta: number) {
     -wheelMomentumMaxVelocity,
     wheelMomentumMaxVelocity,
   )
-  playPortalDragSfx()
+  playPortalDragSfx(options)
   scheduleScrollDrivenWheel()
   return true
 }
@@ -437,7 +448,7 @@ function handlePointerDown(event: PointerEvent) {
   pointerDragDistance = 0
   pointerDownStartedOnScreen = isPointerOverActiveScreen(event.clientX, event.clientY)
   updatePointer(event.clientX, event.clientY)
-  playPortalDragSfx()
+  playPortalDragSfx({ unlockFromGesture: true })
 
   try {
     shell?.setPointerCapture(event.pointerId)
@@ -557,7 +568,7 @@ function handleTouchStart(event: TouchEvent) {
   pointerDragDistance = 0
   pointerDownStartedOnScreen = isPointerOverActiveScreen(touch.clientX, touch.clientY)
   updatePointer(touch.clientX, touch.clientY)
-  playPortalDragSfx()
+  playPortalDragSfx({ unlockFromGesture: true })
 }
 
 function handleTouchMove(event: TouchEvent) {
@@ -644,7 +655,7 @@ function handleKeyboardScroll(event: KeyboardEvent) {
   const step = stepByKey[event.key]
   if (step === undefined) return
 
-  if (smoothWheelStep(step)) {
+  if (smoothWheelStep(step, { unlockFromGesture: true })) {
     event.preventDefault()
   }
 }

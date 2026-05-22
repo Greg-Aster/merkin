@@ -65,6 +65,9 @@ const portalIntroBackgroundPlaybackRate = 0.25
       window.removeEventListener('scroll', loadAfterScroll)
       video.src = source
       video.removeAttribute('data-src')
+      video.defaultMuted = true
+      video.muted = true
+      video.playsInline = true
       video.load()
       video.play().then(revealVideo).catch(() => {})
       window.requestAnimationFrame(revealVideo)

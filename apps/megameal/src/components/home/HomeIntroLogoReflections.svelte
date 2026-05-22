@@ -1,6 +1,7 @@
 <script lang="ts" context="module">
-import { CanvasTexture, SRGBColorSpace } from 'three'
+import { CanvasTexture } from 'three'
 import type { Texture } from 'three'
+import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 
 let sharedReflectionTexture: Texture | null = null
 
@@ -31,9 +32,9 @@ function getReflectionTexture() {
   context.fillStyle = verticalFade
   context.fillRect(0, 0, canvas.width, canvas.height)
 
-  sharedReflectionTexture = new CanvasTexture(canvas)
-  sharedReflectionTexture.colorSpace = SRGBColorSpace
-  sharedReflectionTexture.needsUpdate = true
+  sharedReflectionTexture = configureGeneratedCanvasTexture(
+    new CanvasTexture(canvas),
+  )
 
   return sharedReflectionTexture
 }

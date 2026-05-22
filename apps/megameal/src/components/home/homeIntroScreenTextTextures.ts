@@ -1,7 +1,5 @@
-import {
-  CanvasTexture,
-  SRGBColorSpace,
-} from 'three'
+import { CanvasTexture } from 'three'
+import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 
 type ScreenTextTextureOptions = {
   kicker?: string
@@ -118,9 +116,7 @@ export function createScreenTextTexture({
     context.fillText(label, x + 28, 434)
   }
 
-  const texture = new CanvasTexture(canvas)
-  texture.colorSpace = SRGBColorSpace
-  texture.needsUpdate = true
+  const texture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
 
   return texture
 }
@@ -147,9 +143,7 @@ export function createTextMediaBlurTextureController(frameInterval = 1 / 24) {
       return
     }
 
-    texture = new CanvasTexture(canvas)
-    texture.colorSpace = SRGBColorSpace
-    texture.needsUpdate = true
+    texture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
   }
 
   function update(time: number, video: HTMLVideoElement | null, opacity: number, enabled: boolean) {
