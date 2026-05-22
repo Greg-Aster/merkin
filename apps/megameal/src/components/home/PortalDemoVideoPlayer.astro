@@ -167,7 +167,7 @@ const demoVideos = [
     let selectedClip: PortalDemoClip | null = null
     let isSwitchingClips = false
     let hasStartedDemoPlayback = false
-    let userActivatedDemoAudio = false
+    let browserAudioActivated = false
     let handoffGlitchTriggered = false
     let clipTransitionToken = 0
     let clipSwapTimeout = 0
@@ -226,10 +226,21 @@ const demoVideos = [
       )
     }
 
+    const hasBrowserAudioActivation = () => {
+      const userActivation = navigator.userActivation
+
+      return (
+        browserAudioActivated ||
+        userActivation?.hasBeenActive === true ||
+        userActivation?.isActive === true
+      )
+    }
+
     const applyDemoAudioPreference = () => {
       const siteAudioEnabled = getStoredSiteAudioEnabled()
       const masterVolume = siteAudioEnabled ? getStoredMasterVolume() : 0
-      const isAudible = userActivatedDemoAudio && siteAudioEnabled && masterVolume > 0
+      const isAudible =
+        hasBrowserAudioActivation() && siteAudioEnabled && masterVolume > 0
 
       video.controls = false
       video.defaultMuted = !isAudible
@@ -239,6 +250,11 @@ const demoVideos = [
       if (slide.dataset.active === 'true' && !video.paused) {
         setSiteAudioSuspended(isAudible)
       }
+    }
+
+    const markBrowserAudioActivated = () => {
+      browserAudioActivated = true
+      applyDemoAudioPreference()
     }
 
     const getSelectedClip = () => {
@@ -391,12 +407,20 @@ const demoVideos = [
       event => {
         event.preventDefault()
         event.stopPropagation()
-        userActivatedDemoAudio = true
         toggleDemoPlayback()
       },
       { signal },
     )
     window.addEventListener(audioConfigChangeEvent, applyDemoAudioPreference, { signal })
+    document.addEventListener('pointerdown', markBrowserAudioActivated, {
+      passive: true,
+      signal,
+    })
+    document.addEventListener('touchstart', markBrowserAudioActivated, {
+      passive: true,
+      signal,
+    })
+    document.addEventListener('keydown', markBrowserAudioActivated, { signal })
 
     const observer = new MutationObserver(activateIfVisible)
     observer.observe(slide, {
