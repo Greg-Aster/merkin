@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-22T01:17:38.051Z",
+  "generatedAt": "2026-05-22T04:01:59.666Z",
   "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts;/home/greggles/Merkin/apps/megameal/src/content/cookbook;/home/greggles/Merkin/apps/megameal/src/content/videos;/home/greggles/Merkin/apps/megameal/src/content/products;/home/greggles/Merkin/apps/megameal/src/content/reader",
   "count": 55,
   "items": [
@@ -933,8 +933,8 @@
       "uniqueId": "miranda-fragments"
     },
     {
-      "title": "The Perfect Miranda Bloody Mary",
-      "description": "A reconstructed cocktail from the Miranda records, translated into a reality-compliant recipe that should not collapse local causality.",
+      "title": "The Perfect Miranda Bloody Mary: Reconstructed Recipe of a Legendary Cocktail",
+      "description": "A theoretical reconstruction of the most significant cocktail in temporal history, which may have contributed to the sudden destruction of an entire star system and the strange temporal anomaly at the Bibimbap Saloon.",
       "slug": "perfect-miranda-bloody-mary",
       "sourcePath": "cookbook/perfect-miranda-bloody-mary.mdx",
       "url": "/cookbook/perfect-miranda-bloody-mary/",
@@ -954,6 +954,11 @@
         "Bloody Mary",
         "Miranda System",
         "Temporal Anomaly",
+        "Culinary History",
+        "Brunch Cocktails",
+        "Vodka Drinks",
+        "Galaxy-Famous Recipes",
+        "Temporal Resonance",
         "Quantum Mixology"
       ],
       "timelineYear": 28042,
@@ -1128,9 +1133,9 @@
     {
       "title": "The Miranda Incident",
       "description": "Recovered documents and artifacts relating to the destruction of the Miranda System and the Perfect Bloody Mary that created a causality nexus.",
-      "slug": "timelines/the miranda incident",
-      "sourcePath": "posts/timelines/The Miranda Incident.mdx",
-      "url": "/posts/timelines/the miranda incident/",
+      "slug": "timelines/the-miranda-incident",
+      "sourcePath": "posts/timelines/the-miranda-incident.mdx",
+      "url": "/posts/timelines/the-miranda-incident/",
       "contentType": "posts",
       "sourceCollection": "posts",
       "year": 28042,
@@ -1150,7 +1155,7 @@
       "timelineYear": 28042,
       "timelineEra": "singularity-conflict",
       "timelineLocation": "Miranda Star System, Bibimbap Saloon",
-      "uniqueId": "timelines/the miranda incident",
+      "uniqueId": "timelines/the-miranda-incident",
       "bannerData": {
         "videoId": "c-idCx4hqkA",
         "category": "MEGA MEAL",
@@ -1271,8 +1276,8 @@
       }
     },
     {
-      "title": "Chromatic Meat Cake",
-      "description": "Chef Aura Lumina's layered barbecue cake: bready, smoky, luminous, and frosted with a tangy cream-cheese barbecue glaze.",
+      "title": "Meat Cake",
+      "description": "Indulge in Chef Aura Lumina's molecular marvel: a layered meat cake with bioluminescent hues and a surprising candied sweetmeat crumble.",
       "slug": "meat-cake",
       "sourcePath": "cookbook/meat-cake.mdx",
       "url": "/cookbook/meat-cake/",
@@ -1284,20 +1289,20 @@
       "isKeyEvent": false,
       "isLevel": false,
       "levelId": null,
-      "location": "Orbital Culinary Spire, The Zenith Palate",
+      "location": "Orbital Culinary Spire 'The Zenith Palate'",
       "isDraft": false,
       "showInTimeline": true,
       "tags": [
         "Recipe",
-        "Barbecue",
-        "Zelephant",
-        "Cornbread",
+        "Carrot Cake",
+        "Ginger",
+        "Candied Meat",
         "Sci-Fi Food",
         "Molecular Gastronomy"
       ],
       "timelineYear": 31287,
       "timelineEra": "golden-age",
-      "timelineLocation": "Orbital Culinary Spire, The Zenith Palate",
+      "timelineLocation": "Orbital Culinary Spire 'The Zenith Palate'",
       "uniqueId": "meat-cake"
     },
     {
@@ -1357,8 +1362,8 @@
       }
     },
     {
-      "title": "Zelephant and Black Quarnivorian Truffle Roast",
-      "description": "Chef Valerius Rex's legendary and tragically impossible roast, adapted with terrestrial substitutions for the modern kitchen.",
+      "title": "A Culinary Memory: Zelephant & Black Quarnivorian Truffle Roast",
+      "description": "Chef Executif Valerius Rex, formerly of the W Corporation Celestial Boardroom, shares his legendary, and now tragically impossible, recipe for Zelephant Truffle Roast.",
       "slug": "zelephant-truffle-roast",
       "sourcePath": "cookbook/zelephant-truffle-roast.mdx",
       "url": "/cookbook/zelephant-truffle-roast/",
@@ -1493,8 +1498,8 @@
       "uniqueId": "the-dip"
     },
     {
-      "title": "The Galactic Cookbook",
-      "description": "A live e-reader edition of the MegaMeal cookbook: recipes, substitutions, culinary field notes, and legally survivable fragments from the archive.",
+      "title": "The Galactic Cookbook: A Culinary Compendium",
+      "description": "A comprehensive collection of recipes, beverages, and culinary traditions spanning millennia - from the golden age of corporate excess to the chromatic innovations of the neo-sensoria era.",
       "slug": "cookbook-index",
       "sourcePath": "cookbook/cookbook-index.mdx",
       "url": "/cookbook/",

@@ -39,6 +39,8 @@ const cookbookBannerPost = {
 }
 
 const isRecipe = entry.data.kind === 'recipe'
+const hasRecipeModeSections =
+  isRecipe && entry.body.includes('data-recipe-mode')
 const originalPdfPath = path.join(
   process.cwd(),
   'public',
@@ -184,7 +186,7 @@ function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
           </section>
         )}
 
-        {isRecipe && (
+        {hasRecipeModeSections && (
           <section class="my-6 rounded-lg border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.06]" aria-label="Recipe version controls">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -264,7 +266,7 @@ function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
         </nav>
       </article>
 
-      {isRecipe && (
+      {isRecipe && hasRecipeModeSections && (
         <div class="mt-4 grid gap-3 sm:grid-cols-2">
           <a
             href={terrestrialDownloadUrl}
@@ -295,6 +297,23 @@ function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
           </a>
         </div>
       )}
+
+      {isRecipe && !hasRecipeModeSections && (
+        <div class="mt-4">
+          <a
+            href={originalDownloadUrl}
+            download={hasOriginalPdf ? `${entry.slug}.original.pdf` : undefined}
+            class="block w-full overflow-hidden font-bold active:scale-95"
+            data-sfx-hover="hover-emphasis"
+            data-sfx-click="confirm"
+          >
+            <div class="card-base btn-card flex min-h-[4.5rem] w-full items-center justify-center gap-3 rounded-lg px-4 py-3">
+              <Icon name="material-symbols:description-rounded" class="shrink-0 text-[1.5rem] text-[var(--primary)]" />
+              <span class="text-black/80 dark:text-white/80">Recipe PDF</span>
+            </div>
+          </a>
+        </div>
+      )}
     </main>
   </div>
 </MainGridLayout>
@@ -312,7 +331,7 @@ function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
     )
     const storageKey = 'megameal-cookbook-recipe-mode-v2'
 
-    const setMode = (mode) => {
+    const setMode = (mode: string | null) => {
       const nextMode = mode === 'terrestrial' ? 'terrestrial' : 'original'
       reader.dataset.recipeMode = nextMode
       window.localStorage?.setItem(storageKey, nextMode)

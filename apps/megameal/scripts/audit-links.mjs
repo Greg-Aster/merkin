@@ -111,7 +111,11 @@ function candidatePathsForUrlPath(urlPath) {
   const hasExtension = path.extname(basename) !== ''
 
   if (decodedPath.endsWith('/')) {
-    return [path.join(distDir, normalizedPath, 'index.html')]
+    const htmlFilePath = normalizedPath.replace(/\/+$/, '')
+    return [
+      path.join(distDir, normalizedPath, 'index.html'),
+      path.join(distDir, `${htmlFilePath}.html`),
+    ]
   }
 
   if (hasExtension) {

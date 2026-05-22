@@ -74,4 +74,4 @@ The case gained additional interest following the post-extinction emergence of m
 
 The case remains open in missing persons databases, though active investigation has been suspended due to the planet's quarantine status and the passage of time since the disappearance. Standard missing person protocols apply, with identity protection maintained per galactic privacy directives.
 
-*Missing Person #QN-7749's case file is accessible through the [Qarnivor Missing Persons Database](/posts/timeline/snuggloids-commercial/) along with thousands of other unresolved disappearances from the pre-extinction period.*
+*Missing Person #QN-7749's case file is accessible through the [Qarnivor Missing Persons Database](/posts/timelines/snuggloids-commercial/) along with thousands of other unresolved disappearances from the pre-extinction period.*

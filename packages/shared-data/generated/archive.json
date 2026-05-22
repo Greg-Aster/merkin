@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-22T01:17:38.041Z",
+  "generatedAt": "2026-05-22T04:01:59.656Z",
   "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts;/home/greggles/Merkin/apps/megameal/src/content/cookbook;/home/greggles/Merkin/apps/megameal/src/content/videos;/home/greggles/Merkin/apps/megameal/src/content/reader;/home/greggles/Merkin/apps/megameal/src/content/products;/home/greggles/Merkin/apps/megameal/src/content/about",
   "count": 78,
   "items": [
@@ -69,34 +69,6 @@
       "seriesPart": 3,
       "seriesTitle": "The Snuggloid Emergence",
       "contentFormat": "report"
-    },
-    {
-      "id": "cookbook-index",
-      "slug": "cookbook-index",
-      "sourcePath": "cookbook/cookbook-index.mdx",
-      "collection": "cookbook",
-      "url": "/cookbook/",
-      "title": "The Galactic Cookbook",
-      "description": "A live e-reader edition of the MegaMeal cookbook: recipes, substitutions, culinary field notes, and legally survivable fragments from the archive.",
-      "published": "2026-05-04T00:00:00.000Z",
-      "updated": null,
-      "draft": false,
-      "tags": [
-        "Cookbook",
-        "Recipe Collection",
-        "Culinary History",
-        "Galactic Cuisine",
-        "Archive"
-      ],
-      "category": "Cookbook",
-      "image": "/posts/cookbook/cookbook.png",
-      "timelineYear": 35000,
-      "timelineEra": "preservation-era",
-      "timelineLocation": "The Great Culinary Archives, Sector 7",
-      "isKeyEvent": true,
-      "showInTimeline": true,
-      "isLevel": false,
-      "levelId": null
     },
     {
       "id": "mega-meal-explained",
@@ -177,6 +149,34 @@
       "image": "/posts/building.png",
       "bannerType": "image",
       "isKeyEvent": false,
+      "isLevel": false,
+      "levelId": null
+    },
+    {
+      "id": "cookbook-index",
+      "slug": "cookbook-index",
+      "sourcePath": "cookbook/cookbook-index.mdx",
+      "collection": "cookbook",
+      "url": "/cookbook/",
+      "title": "The Galactic Cookbook: A Culinary Compendium",
+      "description": "A comprehensive collection of recipes, beverages, and culinary traditions spanning millennia - from the golden age of corporate excess to the chromatic innovations of the neo-sensoria era.",
+      "published": "2025-06-10T00:00:00.000Z",
+      "updated": null,
+      "draft": false,
+      "tags": [
+        "Cookbook",
+        "Recipe Collection",
+        "Culinary History",
+        "Galactic Cuisine",
+        "Archive"
+      ],
+      "category": "Cookbook",
+      "image": "/posts/cookbook/cookbook.png",
+      "timelineYear": 35000,
+      "timelineEra": "preservation-era",
+      "timelineLocation": "The Great Culinary Archives, Sector 7",
+      "isKeyEvent": true,
+      "showInTimeline": true,
       "isLevel": false,
       "levelId": null
     },
@@ -554,16 +554,16 @@
       "sourcePath": "cookbook/meat-cake.mdx",
       "collection": "cookbook",
       "url": "/cookbook/meat-cake/",
-      "title": "Chromatic Meat Cake",
-      "description": "Chef Aura Lumina's layered barbecue cake: bready, smoky, luminous, and frosted with a tangy cream-cheese barbecue glaze.",
+      "title": "Meat Cake",
+      "description": "Indulge in Chef Aura Lumina's molecular marvel: a layered meat cake with bioluminescent hues and a surprising candied sweetmeat crumble.",
       "published": "2025-05-28T00:00:00.000Z",
       "updated": null,
       "draft": false,
       "tags": [
         "Recipe",
-        "Barbecue",
-        "Zelephant",
-        "Cornbread",
+        "Carrot Cake",
+        "Ginger",
+        "Candied Meat",
         "Sci-Fi Food",
         "Molecular Gastronomy"
       ],
@@ -571,7 +571,7 @@
       "image": "/posts/timeline/chromatic-cake.png",
       "timelineYear": 31287,
       "timelineEra": "golden-age",
-      "timelineLocation": "Orbital Culinary Spire, The Zenith Palate",
+      "timelineLocation": "Orbital Culinary Spire 'The Zenith Palate'",
       "isKeyEvent": false,
       "showInTimeline": true,
       "isLevel": false,
@@ -583,8 +583,8 @@
       "sourcePath": "cookbook/zelephant-truffle-roast.mdx",
       "collection": "cookbook",
       "url": "/cookbook/zelephant-truffle-roast/",
-      "title": "Zelephant and Black Quarnivorian Truffle Roast",
-      "description": "Chef Valerius Rex's legendary and tragically impossible roast, adapted with terrestrial substitutions for the modern kitchen.",
+      "title": "A Culinary Memory: Zelephant & Black Quarnivorian Truffle Roast",
+      "description": "Chef Executif Valerius Rex, formerly of the W Corporation Celestial Boardroom, shares his legendary, and now tragically impossible, recipe for Zelephant Truffle Roast.",
       "published": "2025-05-27T00:00:00.000Z",
       "updated": null,
       "draft": false,
@@ -655,7 +655,7 @@
       "category": "Store Announcement",
       "bannerType": "image",
       "bannerData": {
-        "image": "/posts/store/store-banner-placeholder.png"
+        "image": "/assets/banner/store-page.webp"
       },
       "isKeyEvent": false,
       "isLevel": false,
@@ -788,11 +788,11 @@
       "levelId": null
     },
     {
-      "id": "timelines/the miranda incident",
-      "slug": "timelines/the miranda incident",
-      "sourcePath": "posts/timelines/The Miranda Incident.mdx",
+      "id": "timelines/the-miranda-incident",
+      "slug": "timelines/the-miranda-incident",
+      "sourcePath": "posts/timelines/the-miranda-incident.mdx",
       "collection": "posts",
-      "url": "/posts/timelines/the miranda incident/",
+      "url": "/posts/timelines/the-miranda-incident/",
       "title": "The Miranda Incident",
       "description": "Recovered documents and artifacts relating to the destruction of the Miranda System and the Perfect Bloody Mary that created a causality nexus.",
       "published": "2025-04-21T00:00:00.000Z",
@@ -864,8 +864,8 @@
       "sourcePath": "cookbook/perfect-miranda-bloody-mary.mdx",
       "collection": "cookbook",
       "url": "/cookbook/perfect-miranda-bloody-mary/",
-      "title": "The Perfect Miranda Bloody Mary",
-      "description": "A reconstructed cocktail from the Miranda records, translated into a reality-compliant recipe that should not collapse local causality.",
+      "title": "The Perfect Miranda Bloody Mary: Reconstructed Recipe of a Legendary Cocktail",
+      "description": "A theoretical reconstruction of the most significant cocktail in temporal history, which may have contributed to the sudden destruction of an entire star system and the strange temporal anomaly at the Bibimbap Saloon.",
       "published": "2025-04-15T00:00:00.000Z",
       "updated": null,
       "draft": false,
@@ -874,6 +874,11 @@
         "Bloody Mary",
         "Miranda System",
         "Temporal Anomaly",
+        "Culinary History",
+        "Brunch Cocktails",
+        "Vodka Drinks",
+        "Galaxy-Famous Recipes",
+        "Temporal Resonance",
         "Quantum Mixology"
       ],
       "category": "Cookbook",
@@ -1231,7 +1236,7 @@
       ],
       "category": "MEGA MEAL",
       "yIndex": -1,
-      "image": "/posts/generic/contruction.png",
+      "image": "/posts/timeline/end-of-time.png",
       "bannerType": "timeline",
       "bannerData": {
         "category": "MEGA MEAL",
@@ -1297,7 +1302,7 @@
         "Corporate Empire"
       ],
       "category": "MEGA MEAL",
-      "image": "/posts/snuggloids-commercial/snuggloid-ad.jpg",
+      "image": "/ads/snuggloids.png",
       "bannerType": "video",
       "bannerData": {
         "videoId": "UxQ3zU77RX0"
@@ -1396,7 +1401,7 @@
         "Cosmic Entities"
       ],
       "category": "MEGA MEAL",
-      "image": "/posts/generic/imagenotfoupng",
+      "image": "/posts/timeline/snuggloid-entity.png",
       "bannerType": "archive",
       "timelineYear": 28144,
       "timelineEra": "conflict-epoch",

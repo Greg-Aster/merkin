@@ -12,18 +12,27 @@ This report captures the current generated-site link audit plus the build/style 
 ## Status Summary
 
 - Type check: passing.
-- Link audit: failing with 111 missing internal targets from 164 references.
-- Build: generates pages, then fails in the built HTML audit because `dist/audio/sfx/audition/index.html` does not contain an `<html>` element and is not an Astro redirect shell.
-- CSS audit: exits 0, but reports oversized component errors and warnings listed below.
-- Existing build warnings:
+- Link audit: passing after remediation. The latest run checked 36,806 internal references across 341 built HTML files with no missing internal targets.
+- Build: passing after a clean rebuild. The built HTML audit now accepts only the expected Astro redirect shells and no longer fails on `dist/audio/sfx/audition/index.html`.
+- CSS audit: exits 0, but still reports oversized component errors and warnings listed below.
+- Remaining build warnings:
   - PostCSS warning: a plugin does not pass the `from` option to `postcss.parse`.
   - Vite chunk warning: some chunks are larger than 550 KB after minification.
-  - `astro-compress` prints `-NaN undefined` reduction lines for some JS assets.
 
 Already fixed before this report:
 
 - The Game nav item is marked external so it no longer generates `/https:/game.megameal.org/`.
 - The missing `/thumb/favicon-dark-180.png` icon reference was removed.
+
+Fixed in this remediation pass:
+
+- Added a canonical `/posts/` route that redirects to `/archive/`.
+- Unified archive tag/category path generation around the rendered archive taxonomy, so linked tag and category pages are generated.
+- Corrected broken content links and image references to existing canonical routes/assets.
+- Renamed the Miranda incident source file to match the canonical slug and regenerated shared data.
+- Converted the static SFX audition page into a valid HTML document.
+- Updated the link audit path resolver to recognize Astro static HTML files such as `404.html` when canonical links point at slash routes like `/404/`.
+- Removed the local `astro-compress` action override that forced every compression result to count as passed, which cleared the malformed `-NaN undefined` reporting.
 
 ## High Priority Buckets
 
@@ -33,11 +42,15 @@ Already fixed before this report:
 
 Recommended fix: either create a real `/posts/` index/redirect route or update those links to the intended route, likely `/archive/`.
 
+Resolution: fixed with an Astro `/posts/` redirect route to `/archive/`.
+
 ### Archive Tag And Category Routes
 
 Most broken links are generated archive tag/category links, especially `/archive/tag/*` and `/archive/category/*`.
 
 Recommended fix: make the archive tag/category static paths derive from all tags and categories that are rendered as links, or stop linking tags/categories that do not have generated pages.
+
+Resolution: fixed by deriving generated archive tag/category routes from the same generated archive records used by the rendered archive links.
 
 ### Missing Image Assets
 
@@ -48,6 +61,8 @@ These are broken image references rather than page links:
 - `/posts/snuggloids-commercial/snuggloid-ad.jpg`
 
 Recommended fix: restore the assets at those public paths or update the content references to existing assets.
+
+Resolution: fixed by updating content references to existing canonical assets.
 
 ### Suspected Slug Mismatches
 
@@ -63,6 +78,8 @@ These look like content links pointing at the wrong slug:
 
 Recommended fix: inspect the source content for each reference and point it to the canonical generated route.
 
+Resolution: fixed by updating the content links to canonical generated routes and renaming the Miranda incident source file to the canonical slug.
+
 ## Build Issues
 
 ### Built HTML Audit Failure
@@ -76,6 +93,8 @@ Recommended fix: inspect the source content for each reference and point it to t
 
 Recommended fix: inspect the source route/component that emits `/audio/sfx/audition/` and either make it a valid HTML document or add an intentional exception only if this file is meant to be non-page output.
 
+Resolution: fixed by making `public/audio/sfx/audition/index.html` a valid HTML document.
+
 ### PostCSS Warning
 
 Build and dev server output include:
@@ -86,6 +105,8 @@ This may cause imported assets to be incorrectly transformed.
 ```
 
 Recommended fix: identify which local or third-party PostCSS plugin calls `postcss.parse` without `from`. This is probably not causing the 404s, but it is worth tracing separately.
+
+Trace result: the local PostCSS config only registers `postcss-nesting`. Tailwind 3.4.19 contains internal `postcss.parse` call sites without a `from` option in its preflight/rule generation path, so this should be treated as dependency-level unless the project migrates Tailwind versions or carries a package patch.
 
 ### Large Chunk Warning
 
@@ -98,6 +119,8 @@ Recommended fix: inspect the Vite chunk report only after the link/build failure
 `astro-compress` prints `-NaN undefined` reduction lines for some JS assets.
 
 Recommended fix: inspect whether this is only malformed reporting or whether those specific assets are skipped/miscompressed.
+
+Resolution: fixed by removing the local `Action.Passed: async () => true` override from `astro-compress` config. The follow-up build log no longer contains `NaN undefined` or `Cannot compress` lines.
 
 ## CSS Audit Issues
 
@@ -124,7 +147,9 @@ Warnings:
 - `src/pages/store/[slug].astro:1` - 487 nonblank lines.
 - `src/pages/store.astro:1` - 477 nonblank lines.
 
-## Broken Link Targets
+## Original Broken Link Targets
+
+This list is preserved as the original failure evidence. The current link audit passes after the remediation above.
 
 `pnpm --dir apps/megameal audit:links` found the following missing internal targets.
 

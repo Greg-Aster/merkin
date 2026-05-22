@@ -81,4 +81,4 @@ Dr. Elara Voss is remembered as a brilliant scholar whose work on extinction eve
 
 The mystery of her true relationship to the events she studied with such clinical precision remains forever unsolved, buried with the secrets and language she chose to take to her grave. Her death represents the final closing of the book on Qarnivor's indigenous legacy—a world now remembered only through the clinical observations of its destroyers and the academic analysis of its sole surviving daughter, who chose silence over preservation.
 
-*Dr. Voss's professional archives remain accessible through the [Galactic Historical Database](/posts/timeline/spork-uprising/), though her personal experiences, cultural knowledge, and the last words of an extinct civilization were lost to her final act of privacy.*
+*Dr. Voss's professional archives remain accessible through the [Galactic Historical Database](/posts/timelines/spork-uprising/), though her personal experiences, cultural knowledge, and the last words of an extinct civilization were lost to her final act of privacy.*

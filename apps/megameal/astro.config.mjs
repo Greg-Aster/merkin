@@ -164,9 +164,6 @@ export default defineConfig({
     Compress({
       CSS: false,
       Image: false,
-      Action: {
-        Passed: async () => true,
-      },
     }),
     mdx(),
   ],

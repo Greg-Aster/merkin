@@ -114,7 +114,7 @@ preWrittenReviews:
     date: "Filed from archival cross-reference"
     comment: "The first edition handles the Miranda material responsibly. It preserves the standard-grade version, keeps the dangerous phrasing at arm's length, and understands that some recipes are worth reading about even when they should never be repeated exactly."
     linkLabel: "Read the incident file"
-    linkHref: "/posts/timelines/miranda-incident/"
+    linkHref: "/posts/timelines/the-miranda-incident/"
     flags:
       - "incident-adjacent note"
   - author: "Clean Plate Society Relay"

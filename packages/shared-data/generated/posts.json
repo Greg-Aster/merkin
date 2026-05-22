@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-22T01:17:38.011Z",
+  "generatedAt": "2026-05-22T04:01:59.604Z",
   "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts",
   "count": 26,
   "items": [
@@ -179,7 +179,7 @@
       "category": "Store Announcement",
       "bannerType": "image",
       "bannerData": {
-        "image": "/posts/store/store-banner-placeholder.png"
+        "image": "/assets/banner/store-page.webp"
       },
       "isKeyEvent": false,
       "isLevel": false,
@@ -284,11 +284,11 @@
       "levelId": null
     },
     {
-      "id": "timelines/the miranda incident",
-      "slug": "timelines/the miranda incident",
-      "sourcePath": "timelines/The Miranda Incident.mdx",
+      "id": "timelines/the-miranda-incident",
+      "slug": "timelines/the-miranda-incident",
+      "sourcePath": "timelines/the-miranda-incident.mdx",
       "collection": "posts",
-      "url": "/posts/timelines/the miranda incident/",
+      "url": "/posts/timelines/the-miranda-incident/",
       "title": "The Miranda Incident",
       "description": "Recovered documents and artifacts relating to the destruction of the Miranda System and the Perfect Bloody Mary that created a causality nexus.",
       "published": "2025-04-21T00:00:00.000Z",
@@ -671,7 +671,7 @@
       ],
       "category": "MEGA MEAL",
       "yIndex": -1,
-      "image": "/posts/generic/contruction.png",
+      "image": "/posts/timeline/end-of-time.png",
       "bannerType": "timeline",
       "bannerData": {
         "category": "MEGA MEAL",
@@ -737,7 +737,7 @@
         "Corporate Empire"
       ],
       "category": "MEGA MEAL",
-      "image": "/posts/snuggloids-commercial/snuggloid-ad.jpg",
+      "image": "/ads/snuggloids.png",
       "bannerType": "video",
       "bannerData": {
         "videoId": "UxQ3zU77RX0"
@@ -836,7 +836,7 @@
         "Cosmic Entities"
       ],
       "category": "MEGA MEAL",
-      "image": "/posts/generic/imagenotfoupng",
+      "image": "/posts/timeline/snuggloid-entity.png",
       "bannerType": "archive",
       "timelineYear": 28144,
       "timelineEra": "conflict-epoch",

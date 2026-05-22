@@ -25,7 +25,7 @@ export const SERIES_CONFIG: Record<string, SeriesConfig> = {
     description:
       'The Perfect Miranda Bloody Mary. A recipe that cracked time itself. Follow the investigation into the cocktail that broke causality.',
     color: '#ef4444',
-    startSlug: 'timelines/The Miranda Incident',
+    startSlug: 'timelines/the-miranda-incident',
     featuredImage: '/posts/timeline/golden-era.png',
   },
   'snuggloid-emergence': {

@@ -1,19 +1,13 @@
 ---
 import ArchivePanel from '@components/ArchivePanel.astro'
-import I18nKey from '@i18n/i18nKey'
-import { i18n } from '@i18n/translation'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
-import { getSortedPosts } from '@utils/content-utils'
+import {
+  formatArchiveTaxonomyLabel,
+  getArchiveTags,
+} from '@utils/archiveTaxonomy'
 
 export async function getStaticPaths() {
-  const posts = await getSortedPosts()
-
-  const allTags = posts.reduce<Set<string>>((acc, post) => {
-    post.data.tags.forEach(tag => acc.add(tag.toLowerCase()))
-    return acc
-  }, new Set())
-
-  return Array.from(allTags).map(tag => ({
+  return getArchiveTags().map(tag => ({
     params: {
       tag,
     },
@@ -21,6 +15,9 @@ export async function getStaticPaths() {
 }
 
 const tag = decodeURIComponent(Astro.params.tag as string).toLowerCase()
+const tagLabel = formatArchiveTaxonomyLabel(tag)
+const title = `Tag: ${tagLabel}`
+const description = `Archive entries tagged ${tagLabel} in the MEGA MEAL SAGA.`
 const archiveLayoutPost = {
   data: {
     bannerType: 'none',
@@ -30,8 +27,8 @@ const archiveLayoutPost = {
 ---
 
 <MainGridLayout
-  title={i18n(I18nKey.archive)}
-  description={i18n(I18nKey.archive)}
+  title={title}
+  description={description}
   post={archiveLayoutPost}
 >
     <ArchivePanel tags={[tag]}></ArchivePanel>
