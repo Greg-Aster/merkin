@@ -1,16 +1,43 @@
 ---
+import type { CollectionEntry } from 'astro:content'
 import MainGridLayout from './MainGridLayout.astro'
 
 interface Props {
-  title: string
-  description: string
+  title?: string
+  description?: string
+  entry?: Pick<CollectionEntry<'quizzes'>, 'slug' | 'data'>
+  post?: {
+    slug: string
+    data: {
+      title?: string
+      description?: string
+      bannerType?: CollectionEntry<'quizzes'>['data']['bannerType']
+      showToc?: boolean
+      oneColumn?: boolean
+    }
+  }
 }
 
-const { title, description } = Astro.props
+const { entry } = Astro.props
+const title = Astro.props.title ?? entry?.data.title
+const description = Astro.props.description ?? entry?.data.description
+const layoutPost = entry
+  ? {
+      slug: entry.slug,
+      data: {
+        title: entry.data.title,
+        description: entry.data.description,
+        bannerType: entry.data.bannerType,
+        showToc: false,
+        oneColumn: true,
+      },
+    }
+  : Astro.props.post
 ---
 <MainGridLayout
   title={title}
   description={description}
+  post={layoutPost}
   oneColumn={true}
 >
   <div class="container mx-auto px-4 py-8">

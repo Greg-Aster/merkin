@@ -1,66 +1,78 @@
 <script>
+import {
+  ensureCurrentBannerLayoutConfig,
+  syncLegacyLayoutFields,
+} from './bannerLayoutAdmin'
+
 export let bannerConfig
 export let handleChange = () => {}
+
+ensureCurrentBannerLayoutConfig(bannerConfig)
+
+function handleLayoutChange() {
+  syncLegacyLayoutFields(bannerConfig)
+  handleChange()
+}
 </script>
 
 <div class="space-y-4 pt-6 mt-6 border-t border-neutral-200 dark:border-neutral-700">
-  <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Layout Settings</h4>
+  <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Banner Layout Profiles</h4>
 
   <div class="space-y-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label for="banner-height-desktop" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Desktop Height
+          Standard Desktop Height
         </label>
         <input
           type="text"
           id="banner-height-desktop"
-          bind:value={bannerConfig.layout.height.desktop}
-          on:input={handleChange}
+          bind:value={bannerConfig.layoutProfiles.standard.stageHeight.desktop}
+          on:input={handleLayoutChange}
           class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-          placeholder="e.g., 50vh"
+          placeholder="e.g., 90vh"
         />
       </div>
       <div>
         <label for="banner-height-mobile" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Mobile Height
+          Standard Mobile Height
         </label>
         <input
           type="text"
           id="banner-height-mobile"
-          bind:value={bannerConfig.layout.height.mobile}
-          on:input={handleChange}
+          bind:value={bannerConfig.layoutProfiles.standard.stageHeight.mobile}
+          on:input={handleLayoutChange}
           class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-          placeholder="e.g., 30vh"
+          placeholder="e.g., clamp(32rem, 76svh, 40rem)"
         />
       </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label for="banner-overlap-desktop" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Desktop Content Overlap
+        <label for="content-gap-desktop" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+          Desktop Content Gap
         </label>
         <input
           type="text"
-          id="banner-overlap-desktop"
-          bind:value={bannerConfig.layout.overlap.desktop}
-          on:input={handleChange}
+          id="content-gap-desktop"
+          bind:value={bannerConfig.layoutProfiles.standard.contentTop.desktop}
+          on:input={handleLayoutChange}
           class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-          placeholder="e.g., 3.5rem"
+          placeholder="e.g., 1rem"
         />
       </div>
       <div>
-        <label for="banner-overlap-mobile" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Mobile Content Overlap
+        <label for="content-gap-mobile" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+          Mobile Content Gap
         </label>
         <input
           type="text"
-          id="banner-overlap-mobile"
-          bind:value={bannerConfig.layout.overlap.mobile}
-          on:input={handleChange}
+          id="content-gap-mobile"
+          bind:value={bannerConfig.layoutProfiles.standard.contentTop.mobile}
+          on:input={handleLayoutChange}
           class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-          placeholder="e.g., 2rem"
+          placeholder="e.g., 1rem"
         />
       </div>
     </div>
@@ -73,90 +85,144 @@ export let handleChange = () => {}
         type="number"
         id="banner-max-width"
         bind:value={bannerConfig.layout.maxWidth}
-        on:input={handleChange}
+        on:input={handleLayoutChange}
         class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-        placeholder="e.g., 1920"
+        placeholder="e.g., 3840"
       />
     </div>
   </div>
 </div>
 
 <div class="space-y-4 pt-6 mt-6 border-t border-neutral-200 dark:border-neutral-700">
-  <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Navbar Spacing</h4>
+  <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Stage Top Gap</h4>
 
-  <div class="space-y-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label for="navbar-spacing-standard" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Standard Banner Spacing
-        </label>
-        <input
-          type="text"
-          id="navbar-spacing-standard"
-          bind:value={bannerConfig.navbarSpacing.standard}
-          on:input={handleChange}
-          class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-          placeholder="e.g., 0"
-        />
-        <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-          Space between navbar and standard banner
-        </p>
-      </div>
-      <div>
-        <label for="navbar-spacing-timeline" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Timeline Banner Spacing
-        </label>
-        <input
-          type="text"
-          id="navbar-spacing-timeline"
-          bind:value={bannerConfig.navbarSpacing.timeline}
-          on:input={handleChange}
-          class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-          placeholder="e.g., 4.5rem"
-        />
-        <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-          Space between navbar and timeline banner
-        </p>
-      </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label for="stage-top-standard" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+        Standard Desktop
+      </label>
+      <input
+        type="text"
+        id="stage-top-standard"
+        bind:value={bannerConfig.layoutProfiles.standard.stageTop.desktop}
+        on:input={handleLayoutChange}
+        class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+      />
     </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label for="navbar-spacing-video" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Video Banner Spacing
-        </label>
-        <input
-          type="text"
-          id="navbar-spacing-video"
-          bind:value={bannerConfig.navbarSpacing.video}
-          on:input={handleChange}
-          class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-          placeholder="e.g., 4.5rem"
-        />
-        <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-          Space between navbar and video banner
-        </p>
-      </div>
-      <div>
-        <label for="navbar-spacing-image" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Image Banner Spacing
-        </label>
-        <input
-          type="text"
-          id="navbar-spacing-image"
-          bind:value={bannerConfig.navbarSpacing.image}
-          on:input={handleChange}
-          class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-          placeholder="e.g., 4.5rem"
-        />
-        <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-          Space between navbar and image banner
-        </p>
-      </div>
+    <div>
+      <label for="stage-top-standard-mobile" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+        Standard Mobile
+      </label>
+      <input
+        type="text"
+        id="stage-top-standard-mobile"
+        bind:value={bannerConfig.layoutProfiles.standard.stageTop.mobile}
+        on:input={handleLayoutChange}
+        class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+      />
     </div>
+    <div>
+      <label for="stage-top-image" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+        Image Desktop
+      </label>
+      <input
+        type="text"
+        id="stage-top-image"
+        bind:value={bannerConfig.layoutProfiles.image.stageTop.desktop}
+        on:input={handleLayoutChange}
+        class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+      />
+    </div>
+    <div>
+      <label for="stage-top-video-mobile" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+        Video Mobile
+      </label>
+      <input
+        type="text"
+        id="stage-top-video-mobile"
+        bind:value={bannerConfig.layoutProfiles.video.stageTop.mobile}
+        on:input={handleLayoutChange}
+        class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+      />
+    </div>
+    <div>
+      <label for="stage-top-none" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+        None Desktop
+      </label>
+      <input
+        type="text"
+        id="stage-top-none"
+        bind:value={bannerConfig.layoutProfiles.none.stageTop.desktop}
+        on:input={handleLayoutChange}
+        class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+      />
+    </div>
+    <div>
+      <label for="stage-top-none-mobile" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+        None Mobile
+      </label>
+      <input
+        type="text"
+        id="stage-top-none-mobile"
+        bind:value={bannerConfig.layoutProfiles.none.stageTop.mobile}
+        on:input={handleLayoutChange}
+        class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+      />
+    </div>
+  </div>
+</div>
 
-    <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-sm text-blue-800 dark:text-blue-200">
-      <p>These settings control the space between your navbar and different banner types. Increase values to add more space below the navbar.</p>
+<div class="space-y-4 pt-6 mt-6 border-t border-neutral-200 dark:border-neutral-700">
+  <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Panel Top Offset</h4>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label for="panel-top-standard" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+        Standard Desktop
+      </label>
+      <input
+        type="text"
+        id="panel-top-standard"
+        bind:value={bannerConfig.layoutProfiles.standard.panelTop.desktop}
+        on:input={handleLayoutChange}
+        class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+      />
+    </div>
+    <div>
+      <label for="panel-top-standard-mobile" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+        Standard Mobile
+      </label>
+      <input
+        type="text"
+        id="panel-top-standard-mobile"
+        bind:value={bannerConfig.layoutProfiles.standard.panelTop.mobile}
+        on:input={handleLayoutChange}
+        class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+      />
+    </div>
+    <div>
+      <label for="panel-top-none" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+        None Desktop
+      </label>
+      <input
+        type="text"
+        id="panel-top-none"
+        bind:value={bannerConfig.layoutProfiles.none.panelTop.desktop}
+        on:input={handleLayoutChange}
+        class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+      />
+    </div>
+    <div>
+      <label for="panel-top-none-mobile" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+        None Mobile
+      </label>
+      <input
+        type="text"
+        id="panel-top-none-mobile"
+        bind:value={bannerConfig.layoutProfiles.none.panelTop.mobile}
+        on:input={handleLayoutChange}
+        class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+      />
     </div>
   </div>
 </div>

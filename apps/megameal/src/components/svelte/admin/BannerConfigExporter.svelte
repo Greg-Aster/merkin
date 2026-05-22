@@ -31,7 +31,16 @@ import banner7 from '@assets/banner/0007'
 import banner8 from '@assets/banner/0008'
 
 // Banner type definitions
-export type BannerType = 'standard' | 'video' | 'image' | 'timeline';
+export type BannerType =
+  | 'standard'
+  | 'video'
+  | 'image'
+  | 'timeline'
+  | 'assistant'
+  | 'cookbook'
+  | 'archive'
+  | 'reader'
+  | 'none';
 
 // Banner data type for each banner type
 export interface StandardBannerData {
@@ -78,17 +87,22 @@ export interface BannerConfig {
     direction: 'forward' | 'reverse' | 'alternate'
   }
   
-  // Layout settings
+  // Banner layout profiles are the source of truth for spacing and height.
+  layoutProfiles: Record<BannerType, {
+    stageTop: { desktop: string; mobile: string }
+    stageHeight: { desktop: string; mobile: string }
+    panelTop: { desktop: string; mobile: string }
+    contentTop: { desktop: string; mobile: string }
+    stageAspectRatio?: { desktop?: string; mobile?: string }
+  }>
+
+  // Legacy layout fields kept for older consumers
   layout: {
-    height: {
-      desktop: string          // CSS value (e.g., '50vh')
-      mobile: string           // CSS value (e.g., '30vh')
-    }
-    overlap: {
-      desktop: string          // CSS value (e.g., '3.5rem')
-      mobile: string           // CSS value (e.g., '2rem')
-    }
-    maxWidth: number           // Maximum width in pixels
+    height: string
+    mobileHeight?: string
+    maxWidth: number
+    mainContentOffset: string
+    mainContentOffsetMobile?: string
   }
   
   // Visual settings
@@ -107,12 +121,16 @@ export interface BannerConfig {
     value: string              // CSS color or gradient
   }
   
-  // Navbar spacing settings
-  navbarSpacing: {
-    standard: string         // For standard animated banner
-    timeline: string         // For timeline banner
-    video: string            // For video banner
-    image: string            // For image banner
+  // Legacy navbar and panel spacing mirrors layoutProfiles
+  navbar: {
+    height: string
+    spacing: Record<BannerType, string>
+    mobileBannerGap?: string
+    mobilePortraitSpacing: string
+  }
+
+  panel: {
+    top: Record<string, string>
   }
 }
 
@@ -123,13 +141,7 @@ export interface BannerConfig {
 export const bannerConfig: BannerConfig = ${JSON.stringify(
     {
       ...bannerConfig,
-      // Ensure navbarSpacing exists even if it's not in the current config
-      navbarSpacing: bannerConfig.navbarSpacing || {
-        standard: '0',
-        timeline: '4.5rem',
-        video: '4.5rem',
-        image: '4.5rem',
-      },
+      layoutProfiles: bannerConfig.layoutProfiles,
     },
     null,
     2,
@@ -149,15 +161,15 @@ export const bannerConfig: BannerConfig = ${JSON.stringify(
 
 /**
  * Get appropriate banner dimensions based on screen size
- * @returns Object with height and overlap values
+ * @returns Object with desktop or mobile banner height
  */
 export function getResponsiveBannerDimensions(isMobile: boolean = false): {
   height: string;
-  overlap: string;
 } {
   return {
-    height: isMobile ? bannerConfig.layout.height.mobile : bannerConfig.layout.height.desktop,
-    overlap: isMobile ? bannerConfig.layout.overlap.mobile : bannerConfig.layout.overlap.desktop
+    height: isMobile
+      ? bannerConfig.layout.mobileHeight || bannerConfig.layout.height
+      : bannerConfig.layout.height
   };
 }
 

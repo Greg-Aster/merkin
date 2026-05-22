@@ -1,21 +1,31 @@
 ---
 import { getCollection } from 'astro:content'
+import Markdown from '@components/misc/Markdown.astro'
 import Quiz from '../../components/quiz/Quiz.svelte'
 import QuizLayout from '../../layouts/QuizLayout.astro'
 
 export async function getStaticPaths() {
   const quizEntries = await getCollection('quizzes')
   return quizEntries.map(entry => ({
-    params: { slug: entry.id },
-    props: { quiz: entry.data },
+    params: { slug: entry.slug },
+    props: { entry },
   }))
 }
 
-const { quiz } = Astro.props
+const { entry } = Astro.props
+const quiz = entry.data
+const { Content } = await entry.render()
+const hasQuizBody = typeof entry.body === 'string' && entry.body.trim().length > 0
 ---
-<QuizLayout title={quiz.title} description={quiz.description}>
+<QuizLayout entry={entry}>
   <h1 class="text-4xl font-bold mb-2 text-center" style="color: var(--primary)">{quiz.title}</h1>
   <p class="text-center text-xl text-75 mb-8">{quiz.description}</p>
+
+  {hasQuizBody && (
+    <Markdown class="mb-8 markdown-content max-md:prose-sm">
+      <Content />
+    </Markdown>
+  )}
   
   <Quiz 
     client:load

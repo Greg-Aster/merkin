@@ -127,6 +127,8 @@ interface Props {
 	mobileNavbarSpacing: string;
 	bannerHeight: string;
 	bannerHeightMobile: string;
+	bannerAspectRatio?: string;
+	bannerAspectRatioMobile?: string;
 }
 
 const {
@@ -153,6 +155,8 @@ const {
 	mobileNavbarSpacing,
 	bannerHeight,
 	bannerHeightMobile,
+	bannerAspectRatio = "auto",
+	bannerAspectRatioMobile = bannerAspectRatio,
 } = Astro.props;
 const hasTimelineBannerSlot = Astro.slots.has("timeline-banner-content");
 const hasPortalDemoContent = Astro.slots.has("portal-demo-content");
@@ -920,6 +924,8 @@ const portalSlideIndexOffset =
     'mobile-navbar-spacing': mobileNavbarSpacing,
     'banner-height': bannerHeight,
     'banner-height-mobile': bannerHeightMobile,
+    'banner-aspect-ratio': bannerAspectRatio,
+    'banner-aspect-ratio-mobile': bannerAspectRatioMobile,
   }}
 >
   #banner-container {
@@ -938,6 +944,7 @@ const portalSlideIndexOffset =
     margin: 0 auto;
     padding: 0;
     height: var(--banner-height);
+    aspect-ratio: var(--banner-aspect-ratio);
   }
 
   #banner-container .banner-content-wrapper {
@@ -992,6 +999,7 @@ const portalSlideIndexOffset =
 
     #banner-container .banner-aspect-container {
       height: var(--banner-height-mobile, var(--banner-height));
+      aspect-ratio: var(--banner-aspect-ratio-mobile, var(--banner-aspect-ratio));
     }
 
     #banner-container.portal-banner-mode.banner-only-mode {

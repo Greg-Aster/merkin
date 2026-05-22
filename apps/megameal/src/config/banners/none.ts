@@ -22,6 +22,9 @@
  * - Configure placeholder height if consistent spacing is needed
  *
  * MAINTENANCE NOTES:
+ * - Cross-page spacing for the none banner is owned by
+ *   `banners/layout.ts`. Keep this file focused on none-banner data and
+ *   legacy helpers.
  * - Adjust placeholder height if site layout requires consistent spacing
  * - Modify spacing settings to align with overall site design
  * - Update fallback styling to match site theme

@@ -1,19 +1,12 @@
 <script>
 import { createEventDispatcher, onMount } from 'svelte'
 import BannerLayoutSpacingSettings from './BannerLayoutSpacingSettings.svelte'
+import { ensureCurrentBannerLayoutConfig } from './bannerLayoutAdmin'
 
 // Props
 export let bannerConfig
 
-// Initialize navbarSpacing if it doesn't exist
-if (!bannerConfig.navbarSpacing) {
-  bannerConfig.navbarSpacing = {
-    standard: '0',
-    timeline: '4.5rem',
-    video: '4.5rem',
-    image: '4.5rem',
-  }
-}
+ensureCurrentBannerLayoutConfig(bannerConfig)
 
 // Local state
 let isBannerSequence = false
@@ -86,15 +79,7 @@ onMount(() => {
     bannerConfig.defaultBannerData = {}
   }
 
-  // Initialize navbar spacing if it doesn't exist
-  if (!bannerConfig.navbarSpacing) {
-    bannerConfig.navbarSpacing = {
-      standard: '0',
-      timeline: '4.5rem',
-      video: '4.5rem',
-      image: '4.5rem',
-    }
-  }
+  ensureCurrentBannerLayoutConfig(bannerConfig)
 })
 
 // Function to toggle banner type

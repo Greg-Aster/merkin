@@ -180,6 +180,7 @@ function normalizeCssSize(
 
   const trimmedValue = value.trim()
   if (!trimmedValue) return fallback
+  if (trimmedValue === 'auto') return trimmedValue
 
   // Keep valid CSS expressions as-is.
   if (
@@ -665,10 +666,15 @@ const { hasPostBanner } = bannerType
 // ⭐ RESTORED: Use working layout values
 const {
   mainPanelTop, // This controls the overlap (WORKING)
+  mainPanelTopMobile,
   navbarSpacing, // This controls navbar spacing (WORKING + MOBILE PORTRAIT FIX)
+  navbarSpacingMobile,
   bannerHeight,
   bannerHeightMobile,
+  bannerAspectRatio = 'auto',
+  bannerAspectRatioMobile,
   mainContentOffset,
+  mainContentOffsetMobile,
 } = layout
 
 const resolvedBannerHeight = normalizeCssSize(
@@ -681,9 +687,15 @@ const resolvedBannerHeightMobile = normalizeCssSize(
 )
 
 const mobileMainPanelTop =
-  currentBannerType === 'standard'
+  mainPanelTopMobile ??
+  (currentBannerType === 'standard'
     ? bannerConfig.panel?.top?.mobilePortrait ?? mainPanelTop
-    : mainPanelTop
+    : mainPanelTop)
+const mobileNavbarSpacing =
+  navbarSpacingMobile ??
+  bannerConfig.navbar.mobileBannerGap ??
+  bannerConfig.navbar.mobilePortraitSpacing
+const mobileMainContentOffset = mainContentOffsetMobile ?? mainContentOffset
 const mobilePortraitRightRailHeroStyle =
   siteConfig.rightRail?.mobilePortraitHero?.style ?? 'banner-overlay'
 const shouldShowMobilePortraitRightRailHero =
@@ -827,10 +839,11 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
     currentPath={currentPath}
     isHomePage={isHomePage}
     navbarSpacing={navbarSpacing}
-    mobileNavbarSpacing={bannerConfig.navbar.mobileBannerGap ??
-      bannerConfig.navbar.mobilePortraitSpacing}
+    mobileNavbarSpacing={mobileNavbarSpacing}
     bannerHeight={resolvedBannerHeight}
     bannerHeightMobile={resolvedBannerHeightMobile}
+    bannerAspectRatio={bannerAspectRatio}
+    bannerAspectRatioMobile={bannerAspectRatioMobile ?? bannerAspectRatio}
   >
     <slot name="banner-slide-content" slot="banner-slide-content" />
     <slot name="banner-overlay-content" slot="banner-overlay-content" />
@@ -862,7 +875,6 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
       <div
         id="main-grid"
         class:list={[gridLayoutClasses, { 'has-right-rail': shouldShowRightRail }]}
-        style={`margin-top: ${mainContentOffset};`}
         data-sidebar={initialSidebarState}
         data-mobile-right-rail-hero={shouldShowMobilePortraitRightRailHero ? mobilePortraitRightRailHeroStyle : 'default'}
       >
@@ -1036,11 +1048,10 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
   'main-panel-top': mainPanelTop,
   'mobile-main-panel-top': mobileMainPanelTop,
   'navbar-spacing': navbarSpacing,
-  'mobile-navbar-spacing':
-    bannerConfig.navbar.mobileBannerGap ??
-    bannerConfig.navbar.mobilePortraitSpacing,
+  'mobile-navbar-spacing': mobileNavbarSpacing,
   'banner-height': resolvedBannerHeight,
   'banner-height-mobile': resolvedBannerHeightMobile,
+  'main-content-offset-mobile': mobileMainContentOffset,
 }}>
   /* ⭐ CRITICAL: Explicit mobile touch scrolling enablement */
   html, body {
@@ -1061,6 +1072,12 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
   /* ⭐ ESSENTIAL: Main grid margin */
   #main-grid {
     margin-top: var(--main-content-offset);
+  }
+
+  @media (max-width: 767px) {
+    #main-grid {
+      margin-top: var(--main-content-offset-mobile, var(--main-content-offset));
+    }
   }
 
   :global(html:has(#banner-container.portal-banner-mode.banner-only-mode)),

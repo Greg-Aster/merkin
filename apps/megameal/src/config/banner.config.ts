@@ -20,6 +20,13 @@ import type {
 
 import { assistantBannerConfig } from './banners/assistant'
 import { imageBannerConfig } from './banners/image'
+import {
+  bannerLayoutProfiles,
+  createLegacyNavbarSpacing,
+  createLegacyPanelTop,
+  resolveBannerLayout,
+} from './banners/layout'
+import type { BannerLayoutProfiles } from './banners/layout'
 import { noneBannerConfig } from './banners/none'
 // Import banner configurations
 import { standardBannerConfig } from './banners/standard'
@@ -135,6 +142,7 @@ export interface BannerConfig {
 
   // Actual working configuration
   dimensions: BannerDimensions
+  layoutProfiles: BannerLayoutProfiles
 
   // WORKING: Layout values used by MainGridLayout.astro
   layout: {
@@ -142,6 +150,7 @@ export interface BannerConfig {
     mobileHeight?: string
     maxWidth: number
     mainContentOffset: string
+    mainContentOffsetMobile?: string
   }
 
   // WORKING: Visual config used by existing code
@@ -191,6 +200,7 @@ export interface BannerConfig {
       reader?: string
       standard: string // ⭐ THIS IS YOUR BANNER OVERLAP CONTROL!
       none: string
+      mobilePortrait?: string
     }
   }
 
@@ -242,13 +252,15 @@ export const bannerConfig: BannerConfig = {
     padding: '0', // ✅ FIXED: No padding (was clamp issue)
     borderRadius: '.5rem', // Standard Tailwind radius
   },
+  layoutProfiles: bannerLayoutProfiles,
 
   // WORKING: Layout used by MainGridLayout.astro
   layout: {
-    height: '90vh',
-    mobileHeight: 'clamp(32rem, 76svh, 40rem)',
+    height: bannerLayoutProfiles.standard.stageHeight.desktop,
+    mobileHeight: bannerLayoutProfiles.standard.stageHeight.mobile,
     maxWidth: 3840,
-    mainContentOffset: '1rem',
+    mainContentOffset: bannerLayoutProfiles.standard.contentTop.desktop,
+    mainContentOffsetMobile: bannerLayoutProfiles.standard.contentTop.mobile,
   },
 
   // WORKING: Visual config used by existing code
@@ -272,35 +284,14 @@ export const bannerConfig: BannerConfig = {
   // 🎯 FIXED: Navbar spacing - Mobile portrait now accounts for always-visible navbar
   navbar: {
     height: '5rem',
-    spacing: {
-      standard: '3rem', // ✅ Desktop spacing
-      timeline: '5.5rem', // ✅ Desktop spacing
-      video: '5.5rem', // ✅ Desktop spacing
-      image: '4rem', // ✅ Desktop spacing
-      assistant: '5.5rem', // ✅ Desktop spacing
-      cookbook: '5.5rem',
-      archive: '5.5rem',
-      reader: '5.5rem',
-      none: '-7.5rem', // ✅ Desktop spacing
-    },
-    // No extra mobile banner offset: navbar stays in normal flow above the banner
-    mobileBannerGap: '2.75rem',
-    mobilePortraitSpacing: '0.75rem',
+    spacing: createLegacyNavbarSpacing(),
+    mobileBannerGap: bannerLayoutProfiles.standard.stageTop.mobile,
+    mobilePortraitSpacing: bannerLayoutProfiles.standard.stageTop.mobile,
   },
 
   // 🎯 FIXED: THE REAL OVERLAP SYSTEM - NO MORE clamp() ISSUES
   panel: {
-    top: {
-      video: '0',
-      image: '0',
-      timeline: '0',
-      assistant: '0',
-      cookbook: '0',
-      archive: '0',
-      reader: '0',
-      standard: '-1.5rem', // ✅ Reduced overlap for better content visibility
-      none: '12rem', // ✅ WORKING VALUE
-    },
+    top: createLegacyPanelTop(),
   },
 
   // WORKING: Parallax configuration - ENABLED BY DEFAULT
@@ -598,6 +589,11 @@ export function determineBannerConfiguration(
   }
 
   if (isFullscreenModeActive()) {
+    const resolvedLayout = resolveBannerLayout('none', {
+      fullscreen: true,
+      profiles: bannerConfig.layoutProfiles,
+    })
+
     return {
       postData: getBannerDataFromPost(post),
       bannerType: {
@@ -623,12 +619,18 @@ export function determineBannerConfiguration(
         readerBannerData: null,
       },
       layout: {
-        mainPanelTop: bannerConfig.panel.top.none,
-        navbarSpacing: '0rem',
-        bannerHeight: '0',
+        mainPanelTop: resolvedLayout.panelTop,
+        mainPanelTopMobile: resolvedLayout.panelTopMobile,
+        navbarSpacing: resolvedLayout.stageTop,
+        navbarSpacingMobile: resolvedLayout.stageTopMobile,
+        bannerHeight: resolvedLayout.stageHeight,
+        bannerHeightMobile: resolvedLayout.stageHeightMobile,
+        bannerAspectRatio: resolvedLayout.stageAspectRatio,
+        bannerAspectRatioMobile: resolvedLayout.stageAspectRatioMobile,
         bannerOverlap: '0',
         dynamicOverlap: '0',
-        mainContentOffset: bannerConfig.layout.mainContentOffset,
+        mainContentOffset: resolvedLayout.contentTop,
+        mainContentOffsetMobile: resolvedLayout.contentTopMobile,
       },
       finalBannerLink: '',
       currentBannerType: 'none' as BannerType,
@@ -638,23 +640,9 @@ export function determineBannerConfiguration(
   const postData = getBannerDataFromPost(post)
   const bannerType = determineBannerType(post, postData)
   const bannerDataSources = getBannerDataSources(bannerType, post)
-
-  // 🎯 THE REAL WORKING VALUES - RESTORED
-  const mainPanelTop = getPanelTopPosition(bannerType.currentBannerType)
-
-  // ⭐ SIMPLIFIED: Always use regular spacing - CSS handles mobile portrait now
-  const navbarSpacing =
-    bannerConfig.navbar.spacing[bannerType.currentBannerType]
-
-  const bannerHeight =
-    bannerType.currentBannerType === 'cookbook'
-      ? 'clamp(28rem, 58vh, 38rem)'
-      : bannerConfig.layout.height
-  const bannerHeightMobile =
-    bannerType.currentBannerType === 'cookbook'
-      ? 'clamp(30rem, 62svh, 34rem)'
-      : bannerConfig.layout.mobileHeight ?? bannerConfig.layout.height
-  const mainContentOffset = bannerConfig.layout.mainContentOffset
+  const resolvedLayout = resolveBannerLayout(bannerType.currentBannerType, {
+    profiles: bannerConfig.layoutProfiles,
+  })
 
   const finalBannerLink = postData?.bannerLink || defaultBannerLink
 
@@ -663,13 +651,18 @@ export function determineBannerConfiguration(
     bannerType,
     bannerDataSources,
     layout: {
-      mainPanelTop, // 🎯 THIS CONTROLS OVERLAP! (RESTORED)
-      navbarSpacing, // ⭐ SIMPLIFIED - CSS handles mobile portrait
-      bannerHeight,
-      bannerHeightMobile,
+      mainPanelTop: resolvedLayout.panelTop,
+      mainPanelTopMobile: resolvedLayout.panelTopMobile,
+      navbarSpacing: resolvedLayout.stageTop,
+      navbarSpacingMobile: resolvedLayout.stageTopMobile,
+      bannerHeight: resolvedLayout.stageHeight,
+      bannerHeightMobile: resolvedLayout.stageHeightMobile,
+      bannerAspectRatio: resolvedLayout.stageAspectRatio,
+      bannerAspectRatioMobile: resolvedLayout.stageAspectRatioMobile,
       bannerOverlap: '0', // Removed unused value
       dynamicOverlap: '0', // Removed unused value
-      mainContentOffset,
+      mainContentOffset: resolvedLayout.contentTop,
+      mainContentOffsetMobile: resolvedLayout.contentTopMobile,
     },
     finalBannerLink,
     currentBannerType: bannerType.currentBannerType,
@@ -682,7 +675,7 @@ export function determineBannerConfiguration(
 
 export function getResponsiveBannerDimensions(): { height: string } {
   return {
-    height: bannerConfig.layout.height,
+    height: bannerConfig.layoutProfiles.standard.stageHeight.desktop,
   }
 }
 
@@ -699,26 +692,9 @@ export function getBannerAnimationSettings(): BannerAnimationConfig {
 
 // 🎯 THE FUNCTION THAT CONTROLS OVERLAP! - RESTORED
 export function getPanelTopPosition(bannerType: BannerType): string {
-  switch (bannerType) {
-    case 'video':
-      return bannerConfig.panel.top.video
-    case 'image':
-      return bannerConfig.panel.top.image
-    case 'timeline':
-      return bannerConfig.panel.top.timeline
-    case 'assistant':
-      return bannerConfig.panel.top.assistant
-    case 'cookbook':
-      return bannerConfig.panel.top.cookbook ?? bannerConfig.panel.top.video
-    case 'archive':
-      return bannerConfig.panel.top.archive ?? bannerConfig.panel.top.video
-    case 'reader':
-      return bannerConfig.panel.top.reader ?? bannerConfig.panel.top.video
-    case 'none':
-      return bannerConfig.panel.top.none
-    default:
-      return bannerConfig.panel.top.standard // ⭐ THIS IS YOUR OVERLAP!
-  }
+  return resolveBannerLayout(bannerType, {
+    profiles: bannerConfig.layoutProfiles,
+  }).panelTop
 }
 
 export function getPageSpecificOverlap(pageType: string): string {
@@ -731,7 +707,7 @@ export function getNavbarHeight(): string {
 }
 
 export function getMainContentOffset(): string {
-  return bannerConfig.layout.mainContentOffset
+  return bannerConfig.layoutProfiles.standard.contentTop.desktop
 }
 
 export function getBannerLink(index: number): string | null {
@@ -798,6 +774,5 @@ export type {
   LinkPreviewInfo,
   BannerAnimationConfig,
 } from './banners/types'
-;(bannerConfig as any).panel ??= {}
-;(bannerConfig as any).panel.top ??= {}
-;(bannerConfig as any).panel.top.mobilePortrait = '1.75rem'
+export type { BannerLayoutProfile, ResolvedBannerLayout } from './banners/layout'
+export { bannerLayoutProfiles, resolveBannerLayout } from './banners/layout'

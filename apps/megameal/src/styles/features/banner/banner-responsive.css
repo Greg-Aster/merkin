@@ -1,17 +1,4 @@
 @media (max-width: 768px) {
-  body:has(#banner-container[data-banner-scene='none']):not(:has([data-videos-archive])) #main-panel-wrapper {
-    top: 2.75rem !important;
-  }
-
-  #banner-container.has-video-banner {
-    margin-top: calc(3.375rem + 0.65rem) !important;
-  }
-
-  #banner-container.has-video-banner .banner-aspect-container {
-    height: auto !important;
-    aspect-ratio: 16 / 9;
-  }
-
   #banner-container:has(.featured-product-shell) .banner-aspect-container {
     height: min(72rem, calc(100dvh - 6rem)) !important;
   }

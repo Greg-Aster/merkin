@@ -319,34 +319,45 @@ const reviewsCollection = defineCollection({
   }),
 })
 
-// ADD QUIZZES COLLECTION
+const quizOutcomeSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  emoji: z.string().optional(),
+})
+
+const quizNodeSchema = z.object({
+  text: z.string(),
+  options: z
+    .array(
+      z.object({
+        text: z.string(),
+        trait: z.string().optional(),
+        next: z.string(),
+      }),
+    )
+    .min(1),
+})
+
 const quizzesCollection = defineCollection({
-  type: 'data',
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    initialQuestion: z.string(), // The ID of the first question
-    outcomes: z.record(
-      z.object({
-        title: z.string(),
-        description: z.string(),
-      }),
-    ),
-    // Questions are now a map of nodes, not an array
-    nodes: z.record(
-      z.object({
-        text: z.string(),
-        options: z
-          .array(
-            z.object({
-              text: z.string(),
-              trait: z.string().optional(), // Trait is now optional
-              next: z.string(), // ID of the next question or an OUTCOME
-            }),
-          )
-          .min(1),
-      }),
-    ),
+    bannerType: z
+      .enum([
+        'none',
+        'standard',
+        'image',
+        'video',
+        'timeline',
+        'assistant',
+        'cookbook',
+        'archive',
+        'reader',
+      ])
+      .default('none'),
+    initialQuestion: z.string(),
+    outcomes: z.record(quizOutcomeSchema),
+    nodes: z.record(quizNodeSchema),
   }),
 })
 
