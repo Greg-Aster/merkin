@@ -1,19 +1,12 @@
 <script lang="ts">
-import { formatTimelineYearRange } from '@merkin/shared-content'
 import { createEventDispatcher } from 'svelte'
-import {
-  clamp,
-  type TimelinePortalEraSegment,
-} from './timelinePortalCarouselModel'
+import { clamp } from './timelinePortalCarouselModel'
 
-export let eraSegments: TimelinePortalEraSegment[] = []
-export let activeEraKey: string | undefined = undefined
 export let maxWheel = 0
 export let value = 0
 export let valueText = 'Timeline position'
 export let keyboardStep = 0.82
 export let pageStep = 1.64
-export let getEraMarkerStyle: (eraSegment: TimelinePortalEraSegment) => string = () => ''
 
 const dispatch = createEventDispatcher<{
   positionchange: { value: number }
@@ -23,25 +16,6 @@ let sliderTrack: HTMLDivElement | null = null
 let sliderPointerId: number | null = null
 
 $: sliderPercent = maxWheel > 0 ? (value / maxWheel) * 100 : 0
-
-function getEraBandStyle(eraSegment: TimelinePortalEraSegment) {
-  const startPercent = maxWheel > 0 ? (eraSegment.startIndex / maxWheel) * 100 : 0
-  const endPercent = maxWheel > 0 ? (eraSegment.endIndex / maxWheel) * 100 : startPercent
-  const boundedStart = clamp(startPercent, 0, 100)
-  const width = Math.max(endPercent - startPercent, eraSegment.eventCount > 0 ? 1.2 : 0.7)
-
-  return [
-    `left: ${boundedStart}%`,
-    `width: ${clamp(width, 0.7, Math.max(0.7, 100 - boundedStart))}%`,
-  ].join(';')
-}
-
-function getEraBandClasses(eraSegment: TimelinePortalEraSegment) {
-  return [
-    'pointer-events-none absolute top-1/2 h-3 -translate-y-1/2 rounded-full bg-cyan-200/13 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] transition duration-300',
-    activeEraKey === eraSegment.key ? 'bg-cyan-200/30 ring-1 ring-cyan-100/40' : '',
-  ].join(' ')
-}
 
 function setTimelinePosition(nextValue: number) {
   dispatch('positionchange', { value: clamp(nextValue, 0, maxWheel) })
@@ -131,14 +105,6 @@ function handleSliderKeydown(event: KeyboardEvent) {
   <div class="pointer-events-none absolute inset-x-3 top-1/2 h-px -translate-y-1/2 bg-cyan-50/18"></div>
   <div class="pointer-events-none absolute inset-x-3 top-1/2 h-3 -translate-y-1/2 rounded-full bg-cyan-950/42 shadow-[inset_0_0_1rem_rgba(6,182,212,0.28)]"></div>
 
-  {#each eraSegments.filter(segment => !segment.isOverlapping) as eraSegment (eraSegment.key)}
-    <div
-      class={getEraBandClasses(eraSegment)}
-      style={getEraBandStyle(eraSegment)}
-      aria-hidden="true"
-    ></div>
-  {/each}
-
   <div
     class="pointer-events-none absolute left-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-[linear-gradient(90deg,rgba(34,211,238,0.92),rgba(255,255,255,0.9))] shadow-[0_0_1.1rem_rgba(103,232,249,0.7)] transition-[width] duration-200"
     style={`width: ${sliderPercent}%`}
@@ -150,26 +116,4 @@ function handleSliderKeydown(event: KeyboardEvent) {
     <span class="absolute inset-1 rounded-full border border-cyan-100/32 bg-cyan-100/18"></span>
     <span class="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-50 shadow-[0_0_1rem_rgba(255,255,255,0.92)]"></span>
   </div>
-  {#each eraSegments as eraSegment (eraSegment.key)}
-    <div
-      class="absolute grid h-5 w-5 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-slate-950/70 bg-slate-950/62 shadow-[0_0_0.85rem_currentColor] transition duration-300"
-      class:h-4={eraSegment.isOverlapping}
-      class:w-4={eraSegment.isOverlapping}
-      class:rotate-45={eraSegment.isOverlapping}
-      class:scale-110={activeEraKey === eraSegment.key}
-      class:ring-2={activeEraKey === eraSegment.key}
-      class:ring-cyan-50={activeEraKey === eraSegment.key}
-      class:shadow-lg={activeEraKey === eraSegment.key}
-      style={getEraMarkerStyle(eraSegment)}
-      title={`${eraSegment.displayName}: ${formatTimelineYearRange(eraSegment.startYear, eraSegment.endYear)}`}
-      aria-hidden="true"
-    >
-      <span
-        class="h-2.5 w-2.5 rounded-full bg-white shadow-[0_0_0.8rem_currentColor]"
-        class:h-2={eraSegment.isOverlapping}
-        class:w-2={eraSegment.isOverlapping}
-        class:rounded-sm={eraSegment.isOverlapping}
-      ></span>
-    </div>
-  {/each}
 </div>

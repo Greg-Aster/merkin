@@ -19,7 +19,6 @@ import TimelineViewModeButton from './TimelineViewModeButton.svelte'
 import {
   clamp,
   createTimelinePortalModel,
-  getEraMarkerColor,
   getSelectedCardWidth,
   getStatusWidth,
   getTimelineDockWidth,
@@ -625,17 +624,6 @@ function getStarControlStyle(position: TimelineStarScreenPosition) {
   ].join(';')
 }
 
-function getEraMarkerStyle(eraSegment: (typeof eraSegments)[number]) {
-  const percent = maxWheel > 0 ? (eraSegment.startIndex / maxWheel) * 100 : 0
-  const color = getEraMarkerColor(eraSegment.key)
-  return [
-    `left: ${percent}%`,
-    `top: ${eraSegment.isOverlapping ? 'calc(50% + 0.72rem)' : '50%'}`,
-    `--timeline-marker-color: ${color}`,
-    `color: ${color}`,
-  ].join(';')
-}
-
 function getActiveEraSegment(position: number) {
   const mainSegments = eraSegments.filter(segment => !segment.isOverlapping)
   return (
@@ -1021,14 +1009,11 @@ onDestroy(() => {
     </div>
 
     <TimelinePositionSlider
-      {eraSegments}
-      activeEraKey={activeEraSegment?.key}
       {maxWheel}
       value={input.wheel}
       valueText={timelinePositionText}
       keyboardStep={keyboardWheelStep}
       pageStep={pageWheelStep}
-      {getEraMarkerStyle}
       on:positionchange={(event) => setTimelinePosition(event.detail.value)}
     />
   </div>

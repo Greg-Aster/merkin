@@ -25,7 +25,7 @@
   #navbar .mobile-menu-tools {
     margin-bottom: 0.45rem;
     padding-bottom: 0.45rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--line-divider);
   }
 
   #navbar .mobile-menu-tools__button {
@@ -35,12 +35,16 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 0.7rem 0.75rem;
-    border-radius: 0.85rem;
-    color: rgba(255, 255, 255, 0.84);
+    border-radius: 0.5rem;
+    color: rgb(0 0 0 / 0.75);
     font-weight: 700;
     transition:
       background-color 180ms ease,
       color 180ms ease;
+  }
+
+  :root.dark #navbar .mobile-menu-tools__button {
+    color: rgb(255 255 255 / 0.75);
   }
 
   #navbar .mobile-menu-tools__button:hover,
@@ -113,14 +117,6 @@
       margin-inline: 0 !important;
       min-height: 3.25rem;
       height: auto;
-      border-radius: 0 !important;
-      background:
-        radial-gradient(circle at 15% 0%, rgba(125, 211, 252, 0.11), transparent 28%),
-        linear-gradient(180deg, rgba(5, 11, 20, 0.94), rgba(7, 14, 24, 0.84)) !important;
-      backdrop-filter: blur(14px) saturate(1.05);
-      box-shadow:
-        0 12px 28px rgba(2, 6, 23, 0.26),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.05) !important;
     }
 
     body:has(#megameal-timeline-route-marker) #navbar .navbar-shell {
@@ -147,20 +143,12 @@
     }
 
     #navbar .nav-action-button {
-      border: 1px solid rgba(125, 211, 252, 0.14);
-      background: rgba(15, 23, 42, 0.62);
-      color: rgba(226, 232, 240, 0.88);
-    }
-
-    #navbar .nav-action-button:hover {
-      border-color: rgba(125, 211, 252, 0.28);
-      background: rgba(8, 47, 73, 0.52);
-      color: rgb(226, 232, 240);
+      border: 0;
     }
 
     #navbar .nav-action-icon,
     #navbar .nav-action-button > svg {
-      color: rgb(125 211 252);
+      color: currentColor;
     }
 
     #nav-menu-panel {

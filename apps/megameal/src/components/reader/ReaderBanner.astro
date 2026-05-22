@@ -40,8 +40,8 @@ const sections = [
   <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-slate-950/55 to-black/90"></div>
   <div class="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(34,211,238,0.18),transparent_32%),radial-gradient(circle_at_78%_38%,rgba(248,113,113,0.16),transparent_28%)]"></div>
 
-  <div class="relative z-10 mx-auto grid h-full max-w-[var(--page-width)] grid-rows-[1fr_auto] gap-4 px-4 py-6 md:px-8 md:py-10">
-    <div class="grid min-h-0 items-center gap-6 md:grid-cols-[minmax(16rem,0.8fr)_minmax(0,1.4fr)]">
+  <div class="relative z-10 mx-auto grid h-full w-full min-w-0 max-w-[var(--page-width)] content-center grid-rows-[auto_auto] gap-3 px-4 py-4 md:gap-4 md:px-8 md:py-10">
+    <div class="grid min-h-0 min-w-0 items-center gap-6 md:grid-cols-[minmax(16rem,0.8fr)_minmax(0,1.4fr)]">
       <div class="hidden md:block">
         <div class="max-w-sm rounded-lg border border-white/20 bg-black/40 p-4 shadow-2xl backdrop-blur">
           <div class="mb-3 flex items-center justify-between gap-3 border-b border-white/15 pb-3">
@@ -96,7 +96,7 @@ const sections = [
         </div>
       </div>
 
-      <div class="max-w-4xl">
+      <div class="min-w-0 max-w-4xl">
         <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-white/80 backdrop-blur">
           <Icon name="material-symbols:chrome-reader-mode-outline-rounded" class="text-base text-cyan-200" />
           Universal Reader
@@ -139,21 +139,22 @@ const sections = [
     </div>
 
     <nav
-      class="rounded-lg border border-white/15 bg-black/45 p-2 backdrop-blur"
+      class="min-w-0 rounded-lg border border-white/15 bg-black/45 p-2 backdrop-blur"
       aria-label="Reader shelf"
     >
       <div class="mb-2 flex items-center justify-between gap-3 px-2 text-xs font-bold uppercase tracking-[0.14em] text-white/60">
         <span>{entries.length} Entries Indexed</span>
         <span>E-Reader Shelf</span>
       </div>
-      <div class="flex gap-2 overflow-x-auto pb-1">
+      <div class="min-w-0 overflow-x-auto pb-1">
+        <div class="flex w-max gap-2">
         {entries.map((entry, index) => {
           const isActive = entry.slug === activeSlug
           return (
             <a
               href={firstContactManualHref(entry)}
               class:list={[
-                'grid min-w-[14rem] grid-cols-[3.5rem_minmax(0,1fr)] gap-2 rounded-md border p-2 transition active:scale-[0.98]',
+                'grid w-56 shrink-0 grid-cols-[3.5rem_minmax(0,1fr)] gap-2 rounded-md border p-2 transition active:scale-[0.98]',
                 isActive
                   ? 'border-cyan-300 bg-white/15'
                   : 'border-white/10 bg-white/5 hover:border-white/25 hover:bg-white/10',
@@ -180,6 +181,7 @@ const sections = [
             </a>
           )
         })}
+        </div>
       </div>
     </nav>
   </div>

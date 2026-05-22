@@ -1,4 +1,5 @@
 <script lang="ts">
+import Icon from '@iconify/svelte/dist/Icon.svelte'
 import { createEventDispatcher } from 'svelte'
 
 export let step = 0.2
@@ -8,7 +9,7 @@ type PanControl = {
   title: string
   x: number
   y: number
-  path?: string
+  icon?: string
   reset?: boolean
 }
 
@@ -18,9 +19,9 @@ const dispatch = createEventDispatcher<{
 }>()
 
 const buttonClass =
-  'grid h-7 w-7 place-items-center rounded-md border border-cyan-100/20 bg-cyan-950/50 text-cyan-100 shadow-[0_0_0.8rem_rgba(8,145,178,0.16)] transition hover:border-cyan-100/45 hover:bg-cyan-900/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200'
+  'inline-flex h-7 w-7 items-center justify-center rounded-md border border-cyan-100/20 bg-cyan-950/50 p-0 leading-none text-cyan-100 shadow-[0_0_0.8rem_rgba(8,145,178,0.16)] transition hover:border-cyan-100/45 hover:bg-cyan-900/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200'
 const resetButtonClass =
-  'grid h-7 w-7 place-items-center rounded-md border border-cyan-100/20 bg-slate-950/60 text-cyan-100 shadow-[0_0_0.8rem_rgba(8,145,178,0.16)] transition hover:border-cyan-100/45 hover:bg-cyan-900/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200'
+  'inline-flex h-7 w-7 items-center justify-center rounded-md border border-cyan-100/20 bg-slate-950/60 p-0 leading-none text-cyan-100 shadow-[0_0_0.8rem_rgba(8,145,178,0.16)] transition hover:border-cyan-100/45 hover:bg-cyan-900/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200'
 
 $: controls = [
   {
@@ -28,20 +29,21 @@ $: controls = [
     title: 'Pan left',
     x: -step,
     y: 0,
-    path: 'M15 5 8 12l7 7',
+    icon: 'material-symbols:keyboard-arrow-left-rounded',
   },
   {
     label: 'Pan camera up',
     title: 'Pan up',
     x: 0,
     y: step,
-    path: 'm5 15 7-7 7 7',
+    icon: 'material-symbols:keyboard-arrow-up-rounded',
   },
   {
     label: 'Reset camera pan',
     title: 'Center camera',
     x: 0,
     y: 0,
+    icon: 'mdi:crosshairs-gps',
     reset: true,
   },
   {
@@ -49,14 +51,14 @@ $: controls = [
     title: 'Pan down',
     x: 0,
     y: -step,
-    path: 'm5 9 7 7 7-7',
+    icon: 'material-symbols:keyboard-arrow-down-rounded',
   },
   {
     label: 'Pan camera right',
     title: 'Pan right',
     x: step,
     y: 0,
-    path: 'm9 5 7 7-7 7',
+    icon: 'material-symbols:keyboard-arrow-right-rounded',
   },
 ] satisfies PanControl[]
 
@@ -83,14 +85,7 @@ function handleControl(control: PanControl) {
       title={control.title}
       on:click={() => handleControl(control)}
     >
-      <svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-        {#if control.reset}
-          <path d="M12 3v4M12 17v4M3 12h4M17 12h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
-          <circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="2.2" />
-        {:else if control.path}
-          <path d={control.path} fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
-        {/if}
-      </svg>
+      <Icon icon={control.icon ?? 'mdi:circle-small'} class="block h-4 w-4 shrink-0" aria-hidden="true" />
     </button>
   {/each}
 </div>
