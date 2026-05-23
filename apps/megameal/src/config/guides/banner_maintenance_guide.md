@@ -13,7 +13,7 @@ defaultBannerType: 'timeline',  // Options: 'standard', 'timeline', 'video', 'im
 The system automatically uses the correct configuration for each type:
 - **standard**: Uses `standardBannerConfig` (cycles through bannerList images)
 - **timeline**: Uses `timelineBannerConfig` (interactive timeline)
-- **video**: Uses `videoBannerConfig` (YouTube embed)
+- **video**: Uses `videoBannerConfig` data with the shared BannerStage YouTube embed
 - **image**: Uses `imageBannerConfig` (single static image)
 - **assistant**: Uses `assistantBannerConfig` (Bleepy AI assistant)
 - **none**: No banner displayed
@@ -40,6 +40,7 @@ videoBannerConfig: {
   videoId: "YOUR_YOUTUBE_VIDEO_ID_HERE" // YouTube video ID
 },
 ```
+Video iframe behavior is owned by `BannerStage.astro`; keep user-facing videos click-to-play there so embedded views remain user-initiated.
 
 **Image Banner:**
 ```typescript

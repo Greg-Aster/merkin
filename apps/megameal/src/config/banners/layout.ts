@@ -44,6 +44,9 @@ const defaultBannerStageTop = {
   mobile: '2.75rem',
 }
 
+// Canonical banner spacing contract for Megameal. Shared layout and
+// banner-stage components consume these resolved values instead of owning
+// route-specific gap overrides.
 export const bannerLayoutProfiles = {
   standard: {
     stageTop: { desktop: '3rem', mobile: '2.75rem' },

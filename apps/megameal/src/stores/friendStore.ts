@@ -62,6 +62,24 @@ interface FriendApiPost {
 // Constants for localStorage keys
 const FRIENDS_STORAGE_KEY = 'blogFriends'
 const FRIEND_CONTENT_ENABLED_KEY = 'friendContentEnabled'
+const FRIEND_CONTENT_DEBUG_KEY = 'friendContentDebug'
+
+function isFriendContentDebugEnabled(): boolean {
+  if (import.meta.env.DEV) return true
+  if (typeof localStorage === 'undefined') return false
+
+  try {
+    return localStorage.getItem(FRIEND_CONTENT_DEBUG_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+function debugFriendLog(...args: unknown[]): void {
+  if (isFriendContentDebugEnabled()) {
+    console.log(...args)
+  }
+}
 
 // Create a single unified store for all friends
 export const friends = writable<Friend[]>([])
@@ -159,7 +177,7 @@ export function isFriendContentEnabled(): boolean {
   if (typeof window === 'undefined') return true
   // Log this to help debug
   const isEnabled = localStorage.getItem(FRIEND_CONTENT_ENABLED_KEY) !== 'false'
-  console.log('Friend content enabled status:', isEnabled)
+  debugFriendLog('Friend content enabled status:', isEnabled)
   return isEnabled
 }
 
@@ -167,11 +185,11 @@ export function getFriendContent(): FriendPost[] {
   const allFriends = get(friends)
   let allPosts: FriendPost[] = []
 
-  console.log('getFriendContent called, found', allFriends.length, 'friends')
+  debugFriendLog('getFriendContent called, found', allFriends.length, 'friends')
 
   // Process all friends, both temporary and permanent
   allFriends.forEach(friend => {
-    console.log(
+    debugFriendLog(
       `Friend "${friend.name}" has ${friend.posts?.length || 0} posts (${friend.isPermanent ? 'permanent' : 'temporary'})`,
     )
     if (friend.posts && friend.posts.length > 0) {
@@ -199,7 +217,7 @@ export function getFriendContent(): FriendPost[] {
 
   // Create sample friend post if needed for debugging
   if (allPosts.length === 0 && allFriends.length > 0) {
-    console.log('Creating sample friend post for debugging')
+    debugFriendLog('Creating sample friend post for debugging')
     allPosts = [
       {
         id: `sample-post-${Date.now()}`,
@@ -218,7 +236,7 @@ export function getFriendContent(): FriendPost[] {
     ]
   }
 
-  console.log('Total friend posts found:', allPosts.length)
+  debugFriendLog('Total friend posts found:', allPosts.length)
 
   // Sort by date (newest first)
   return allPosts.sort(
@@ -352,7 +370,7 @@ export async function validateSite(url: string): Promise<{
 }> {
   try {
     const formattedUrl = formatUrl(url)
-    console.log('Validating site:', formattedUrl)
+    debugFriendLog('Validating site:', formattedUrl)
 
     // Fetch the homepage HTML
     try {
@@ -363,7 +381,7 @@ export async function validateSite(url: string): Promise<{
       })
 
       if (response.ok) {
-        console.log('Site exists, fetched HTML successfully')
+        debugFriendLog('Site exists, fetched HTML successfully')
         const html = await response.text()
 
         // Create a DOM parser to extract info from HTML
@@ -400,7 +418,7 @@ export async function validateSite(url: string): Promise<{
           url: formattedUrl,
         }
 
-        console.log('Extracted site info from HTML:', siteInfo)
+        debugFriendLog('Extracted site info from HTML:', siteInfo)
 
         return {
           valid: true,
@@ -408,10 +426,10 @@ export async function validateSite(url: string): Promise<{
           siteInfo,
         }
       } else {
-        console.log(`Failed to fetch site HTML: ${response.status}`)
+        debugFriendLog(`Failed to fetch site HTML: ${response.status}`)
       }
     } catch (error) {
-      console.log('Error fetching site HTML:', error)
+      debugFriendLog('Error fetching site HTML:', error)
     }
 
     // Fallback to just using the hostname
@@ -449,14 +467,14 @@ export async function fetchFriendContent(
 ): Promise<FriendPost[]> {
   try {
     const formattedUrl = formatUrl(friendUrl)
-    console.log(`Fetching content from ${formattedUrl}`)
+    debugFriendLog(`Fetching content from ${formattedUrl}`)
 
     // Method 1: Try RSS feed first with enhanced CORS handling
     const rssPaths = ['/rss.xml', '/feed.xml', '/feed', '/rss', '/atom.xml']
 
     for (const path of rssPaths) {
       const rssUrl = `${formattedUrl}${path}`
-      console.log('Checking for RSS feed at:', rssUrl)
+      debugFriendLog('Checking for RSS feed at:', rssUrl)
 
       try {
         // First approach: Direct fetch with CORS
@@ -477,7 +495,7 @@ export async function fetchFriendContent(
 
           if (response.ok) {
             const rssText = await response.text()
-            console.log(
+            debugFriendLog(
               `Found RSS feed at ${rssUrl}, size: ${rssText.length} bytes`,
             )
 
@@ -496,7 +514,7 @@ export async function fetchFriendContent(
             const items = Array.from(rssDoc.querySelectorAll('item, entry'))
 
             if (items.length > 0) {
-              console.log(`Found ${items.length} posts in RSS feed`)
+              debugFriendLog(`Found ${items.length} posts in RSS feed`)
 
               const mappedPosts = items.map((item, index) => {
                 const title =
@@ -587,7 +605,7 @@ export async function fetchFriendContent(
                         .map(t => t.trim())
                         .filter(Boolean)
                     } catch (e) {
-                      console.log('Error parsing tags:', e)
+                      debugFriendLog('Error parsing tags:', e)
                     }
                   }
 
@@ -683,7 +701,7 @@ export async function fetchFriendContent(
               const validPosts = mappedPosts.filter(post =>
                 hasValidDate(post.published),
               )
-              console.log(
+              debugFriendLog(
                 `Filtered out ${mappedPosts.length - validPosts.length} RSS posts with invalid dates`,
               )
 
@@ -691,7 +709,7 @@ export async function fetchFriendContent(
             }
           }
         } catch (directError) {
-          console.log(`Direct fetch failed for ${rssUrl}:`, directError)
+          debugFriendLog(`Direct fetch failed for ${rssUrl}:`, directError)
         }
 
         // Second approach: Try with no-cors mode to check if resource exists
@@ -704,21 +722,21 @@ export async function fetchFriendContent(
           })
 
           // If we get here, resource exists, but we can't read it due to CORS
-          console.log(`Found RSS at ${rssUrl} but can't read due to CORS`)
+          debugFriendLog(`Found RSS at ${rssUrl} but can't read due to CORS`)
         } catch (noCorsError) {
-          console.log(`No resource exists at ${rssUrl}`)
+          debugFriendLog(`No resource exists at ${rssUrl}`)
         }
       } catch (e) {
-        console.log(`Error checking RSS at ${rssUrl}:`, e)
+        debugFriendLog(`Error checking RSS at ${rssUrl}:`, e)
       }
     }
 
-    console.log('No working RSS feeds found')
+    debugFriendLog('No working RSS feeds found')
 
     // Method 2: Check for common Astro API endpoints
     try {
       const apiUrl = `${formattedUrl}/api/posts.json`
-      console.log('Checking for posts API:', apiUrl)
+      debugFriendLog('Checking for posts API:', apiUrl)
 
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -728,10 +746,10 @@ export async function fetchFriendContent(
 
       if (response.ok) {
         const data: { posts?: FriendApiPost[] } = await response.json()
-        console.log('Found posts API, parsing data')
+        debugFriendLog('Found posts API, parsing data')
 
         if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
-          console.log(`Found ${data.posts.length} posts in API response`)
+          debugFriendLog(`Found ${data.posts.length} posts in API response`)
 
           return data.posts.map((post: FriendApiPost) => {
             const wordCount = post.wordCount || 100
@@ -763,12 +781,12 @@ export async function fetchFriendContent(
         }
       }
     } catch (error) {
-      console.log('Error fetching posts API:', error)
+      debugFriendLog('Error fetching posts API:', error)
     }
 
     // Method 3: HTML scraping for Astro/MDX sites
     try {
-      console.log(
+      debugFriendLog(
         'Scraping HTML for blog posts with improved Astro/MDX selectors',
       )
 
@@ -783,14 +801,14 @@ export async function fetchFriendContent(
         const parser = new DOMParser()
         const doc = parser.parseFromString(html, 'text/html')
 
-        console.log('Extracting data from HTML', doc.title)
+        debugFriendLog('Extracting data from HTML', doc.title)
 
         // DIRECT DATE EXTRACTION: First look for elements with data-post-date attribute (PostCard.astro)
-        console.log('Looking for data-post-date attributes in the HTML')
+        debugFriendLog('Looking for data-post-date attributes in the HTML')
         const elementsWithDates = Array.from(
           doc.querySelectorAll('[data-post-date]'),
         )
-        console.log(
+        debugFriendLog(
           `Found ${elementsWithDates.length} elements with data-post-date attributes`,
         )
 
@@ -803,13 +821,13 @@ export async function fetchFriendContent(
 
         // Fallback to generic article selectors if needed
         if (postElements.length === 0) {
-          console.log('No post cards found, trying generic article selectors')
+          debugFriendLog('No post cards found, trying generic article selectors')
           postElements = Array.from(
             doc.querySelectorAll('article, .post, a[href*="/posts/"]'),
           )
         }
 
-        console.log(`Found ${postElements.length} potential post elements`)
+        debugFriendLog(`Found ${postElements.length} potential post elements`)
 
         // Track slugs to avoid duplicates
         const processedSlugs = new Set<string>()
@@ -829,7 +847,7 @@ export async function fetchFriendContent(
                 published = new Date(directDateStr)
                 if (!Number.isNaN(published.getTime())) {
                   foundDate = true
-                  console.log(`Found direct date attribute: ${directDateStr}`)
+                  debugFriendLog(`Found direct date attribute: ${directDateStr}`)
                 }
               } catch (e) {
                 /* Continue if this fails */
@@ -842,7 +860,7 @@ export async function fetchFriendContent(
                 published = new Date(Number.parseInt(directTimestamp))
                 if (!Number.isNaN(published.getTime())) {
                   foundDate = true
-                  console.log(
+                  debugFriendLog(
                     `Found direct timestamp attribute: ${directTimestamp}`,
                   )
                 }
@@ -861,7 +879,7 @@ export async function fetchFriendContent(
                     published = new Date(dateStr)
                     if (!Number.isNaN(published.getTime())) {
                       foundDate = true
-                      console.log(
+                      debugFriendLog(
                         `Found time element with datetime: ${dateStr}`,
                       )
                     }
@@ -874,7 +892,7 @@ export async function fetchFriendContent(
 
             // Skip this post if we couldn't find a valid date
             if (!foundDate || !published) {
-              console.log('Skipping post - no valid date found')
+              debugFriendLog('Skipping post - no valid date found')
               continue
             }
 
@@ -887,13 +905,13 @@ export async function fetchFriendContent(
                   )
 
             if (!linkEl) {
-              console.log('Skipping post - no link element found')
+              debugFriendLog('Skipping post - no link element found')
               continue
             }
 
             const href = linkEl.getAttribute('href')
             if (!href) {
-              console.log('Skipping post - no href attribute found')
+              debugFriendLog('Skipping post - no href attribute found')
               continue
             }
 
@@ -916,7 +934,7 @@ export async function fetchFriendContent(
 
             // Skip if we've already processed this slug
             if (!slug || processedSlugs.has(slug)) {
-              console.log(`Skipping duplicate slug: ${slug}`)
+              debugFriendLog(`Skipping duplicate slug: ${slug}`)
               continue
             }
             processedSlugs.add(slug)
@@ -944,11 +962,11 @@ export async function fetchFriendContent(
 
             // Skip posts with generic titles
             if (title.startsWith('Post ') && /^\d+$/.test(title.substring(5))) {
-              console.log(`Skipping generic title: ${title}`)
+              debugFriendLog(`Skipping generic title: ${title}`)
               continue
             }
             if (!title) {
-              console.log('Skipping post - no title found')
+              debugFriendLog('Skipping post - no title found')
               continue
             }
 
@@ -1021,7 +1039,7 @@ export async function fetchFriendContent(
                 : directImage.startsWith('/')
                   ? `${formattedUrl}${directImage}`
                   : `${formattedUrl}/${directImage}`
-              console.log(`Found direct image attribute: ${image}`)
+              debugFriendLog(`Found direct image attribute: ${image}`)
             }
 
             // Method 2: Try to extract image from HTML content (images specifically inside this post element)
@@ -1041,7 +1059,7 @@ export async function fetchFriendContent(
                       : src.startsWith('/')
                         ? `${formattedUrl}${src}`
                         : `${formattedUrl}/${src}`
-                    console.log(`Found post image container: ${image}`)
+                    debugFriendLog(`Found post image container: ${image}`)
                   }
                 }
               }
@@ -1061,7 +1079,7 @@ export async function fetchFriendContent(
                     : src.startsWith('/')
                       ? `${formattedUrl}${src}`
                       : `${formattedUrl}/${src}`
-                  console.log(`Found post meta image: ${image}`)
+                  debugFriendLog(`Found post meta image: ${image}`)
                 }
               }
             }
@@ -1095,7 +1113,7 @@ export async function fetchFriendContent(
                           : imagePath.startsWith('/')
                             ? `${formattedUrl}${imagePath}`
                             : `${formattedUrl}/${imagePath}`
-                        console.log(`Found image in frontmatter: ${image}`)
+                        debugFriendLog(`Found image in frontmatter: ${image}`)
                         break
                       }
                     }
@@ -1121,9 +1139,9 @@ export async function fetchFriendContent(
                       : metaImage.startsWith('/')
                         ? `${formattedUrl}${metaImage}`
                         : `${formattedUrl}/${metaImage}`
-                    console.log(`Found og:image meta tag: ${image}`)
+                    debugFriendLog(`Found og:image meta tag: ${image}`)
                   } else {
-                    console.log(`Skipping site banner image: ${metaImage}`)
+                    debugFriendLog(`Skipping site banner image: ${metaImage}`)
                   }
                 }
               }
@@ -1141,16 +1159,16 @@ export async function fetchFriendContent(
                     : src.startsWith('/')
                       ? `${formattedUrl}${src}`
                       : `${formattedUrl}/${src}`
-                  console.log(`Found generic image: ${image}`)
+                  debugFriendLog(`Found generic image: ${image}`)
                 }
               }
             }
 
             // Log image extraction result
             if (image) {
-              console.log(`Successfully extracted image: ${image}`)
+              debugFriendLog(`Successfully extracted image: ${image}`)
             } else {
-              console.log('No image found for this post')
+              debugFriendLog('No image found for this post')
             }
 
             // Extract word count and reading time from data attributes if available
@@ -1196,7 +1214,7 @@ export async function fetchFriendContent(
               readingTime,
             })
 
-            console.log(
+            debugFriendLog(
               `Successfully extracted post: "${title}" with date ${published.toISOString()}`,
             )
           } catch (err) {
@@ -1204,23 +1222,23 @@ export async function fetchFriendContent(
           }
         }
 
-        console.log(
+        debugFriendLog(
           `Successfully extracted ${posts.length} posts with metadata`,
         )
 
         // Only return posts that have valid dates
         const validPosts = posts.filter(post => hasValidDate(post.published))
-        console.log(`Filtered to ${validPosts.length} posts with valid dates`)
+        debugFriendLog(`Filtered to ${validPosts.length} posts with valid dates`)
 
         // Return posts with metadata
         return validPosts.length > 0 ? validPosts : []
       }
     } catch (error) {
-      console.log('Error with enhanced HTML scraping:', error)
+      debugFriendLog('Error with enhanced HTML scraping:', error)
     }
 
     // If we get here, we couldn't find any posts
-    console.log(
+    debugFriendLog(
       'Could not find any posts, creating a fallback placeholder post',
     )
 

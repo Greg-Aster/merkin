@@ -19,11 +19,46 @@ import '../../styles/layouts/store.css'
 export interface Props {
   title: string
   description: string
+  ambientAudio?: {
+    id?: string
+    src: string
+    label: string
+    loop?: boolean
+    volume?: number
+    html5?: boolean
+  }
   // Add other props if Layout.astro expects them (e.g., lang, banner for OG tags)
 }
-const { title, description, ...rest } = Astro.props // Capture other potential props for Layout
+const { title, description, ambientAudio, ...rest } = Astro.props // Capture other potential props for Layout
+const pageAmbientTrack = ambientAudio
+  ? {
+      id:
+        ambientAudio.id ??
+        `page-ambient:${Astro.url.pathname.replace(/\/+$/, '') || '/'}`,
+      src: ambientAudio.src,
+      label: ambientAudio.label,
+      loop: ambientAudio.loop,
+      volume: ambientAudio.volume,
+      html5: ambientAudio.html5,
+    }
+  : null
+const pageAmbientTrackJson = pageAmbientTrack
+  ? JSON.stringify(pageAmbientTrack).replace(/</g, '\\u003c')
+  : null
 ---
 <Layout title={title} description={description} {...rest}>
+  <Fragment slot="head">
+    {pageAmbientTrackJson && (
+      <script
+        is:inline
+        id="megameal-page-ambient-track"
+        type="application/json"
+        set:html={pageAmbientTrackJson}
+      />
+    )}
+    <slot name="head" />
+  </Fragment>
+
   <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-2 md:px-4 mx-auto">
     <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all duration-300">
       <Navbar />

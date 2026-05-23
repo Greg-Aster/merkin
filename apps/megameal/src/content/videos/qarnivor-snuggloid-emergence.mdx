@@ -5,7 +5,7 @@ description: "A video archive and field-note adaptation of the Qarnivor account,
 videoId: "uXagUhT1fb0"
 channelName: "Mysterious Witness"
 image: "/posts/Mega-Meal-3/title-2.jpg"
-tags: [MEGA MEAL, Qarnivor, Snuggloid, Video Essay, Field Report]
+tags: [MEGA MEAL, Qarnivor, Snuggloid, Archive, Field Report]
 category: "MEGA MEAL"
 draft: false
 showInTimeline: true
@@ -29,124 +29,90 @@ related:
 ---
 
 import ImageWrapper from '../../components/misc/ImageWrapper.astro'
+import '../../styles/features/extracted/review-essay.css'
 
-<section className="card-base2 rounded-2xl p-5 md:p-7">
-  <div className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-[var(--primary)]">
-    {'Appendix A'}
-  </div>
-  <h2 className="mb-4 text-2xl font-black leading-tight text-black/90 dark:text-white/90 md:text-3xl">
-    {'A rare account from after the extinction event.'}
-  </h2>
-  <p className="mb-5 text-base leading-relaxed text-black/70 dark:text-white/70 md:text-lg">
-    {`Qarnivor plays less like a conventional sequel chapter and more like a contaminated document that escaped the archive. The transmission has the flat patience of a field report, but the images keep insisting on myth: a ruined planet, a witness whose reliability is already fractured, and small glowing bodies appearing where extinction should have left nothing soft enough to survive.`}
-  </p>
-  <div className="grid gap-3 sm:grid-cols-3">
-    <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
-      <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
-        {'Source'}
-      </div>
-      <div className="mt-1 font-bold text-black/85 dark:text-white/85">
-        {'Eyewitness account'}
-      </div>
-    </div>
-    <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
-      <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
-        {'Location'}
-      </div>
-      <div className="mt-1 font-bold text-black/85 dark:text-white/85">
-        {'Qarnivor'}
-      </div>
-    </div>
-    <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
-      <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
-        {'Anomaly'}
-      </div>
-      <div className="mt-1 font-bold text-black/85 dark:text-white/85">
-        {'Snuggloids'}
-      </div>
-    </div>
-  </div>
-</section>
+<article className="review-essay review-essay--archive" aria-labelledby="qarnivor-review-title">
+  <header className="review-essay__masthead">
+    <p className="review-essay__kicker">Appendix A / Pre-Extinction Record</p>
+    <h2 id="qarnivor-review-title" className="review-essay__title">The Qarnivor Account Refuses to Explain What It Found</h2>
+    <p className="review-essay__dek">A compact set of historical excerpts, field annotations, and later scientific cross-references around one unstable claim: the Snuggloid emergence may have begun before the extinction of Qarnivor had fully ended.</p>
+  </header>
 
-## Archival Note
-
-Immediately following the events on planet Qarnivor after the Corporate Empire, there exists a single account of an encounter with the Snuggloids that is of some scholarly interest.
-
-Despite the incomplete transcript and unreliable nature of the narrator, the account is believed to come from the enigmatic figure mentioned in Qarnivor historical records as the name redacted for legal reasons. Her documented visit shortly after the nuclear devastation gives the film its best texture: not exposition, exactly, but the feeling of evidence being handled with gloves.
-
-Of particular note is the timeline between the emergence of the Snuggloids and the extinction of the Qarnivores. It was previously assumed there was no overlap between these two events. If this account is taken at face value and assumed correct, the movie is not simply documenting an aftermath. It is circling the moment one disaster becomes another species' origin story.
-
-<section className="card-base2 rounded-2xl p-5 md:p-6">
-  <div className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
-    {'Galactic Time Scale B Historical Documents'}
-  </div>
-  <blockquote className="mb-0 text-lg leading-relaxed text-black/75 dark:text-white/75">
-    {`Immediately following the events on planet Qarnivor after the Corporate Empire, there exists a single account of an encounter with the Snuggloids. Of particular note: the timeline between the emergence of the Snuggloids and the extinction of the Qarnivores.`}
-  </blockquote>
-</section>
-
-## The Witness Problem
-
-The narrator's description of glowing fur and entities that phased in and out of visibility aligns with later scientific observations of the Snuggloids. That does not make the account reliable. It makes it difficult to dismiss, which is where the short film finds its best tension.
-
-There is also the Starbug reference, which appears in several other historical accounts across different extinction events. The problem with recurring impossible details is that they can be coincidence, contamination, or evidence. Historical departments prefer the first two options because they involve less paperwork; Qarnivor keeps calmly offering the third anyway.
-
-<div className="my-6 grid gap-4 md:grid-cols-2">
-  <ImageWrapper
-    src="/posts/Mega-Meal-3/title-1.jpg"
-    alt="A Qarnivor title frame"
-    class="aspect-video rounded-2xl shadow-lg"
-  />
-  <ImageWrapper
-    src="/posts/Mega-Meal-3/MM3-title.png"
-    alt="MEGA MEAL 3 title frame"
-    class="aspect-video rounded-2xl shadow-lg"
-  />
-</div>
-
-## Why It Matters
-
-If the witness account is correct, the Snuggloids were not simply discovered after the devastation. They may have emerged during the final collapse, while the Qarnivore extinction event was still unfolding.
-
-That changes the shape of the event. It suggests the Snuggloids were not only survivors, scavengers, or cute little post-apocalyptic anomalies. They may have been observers. They may have been participants. They may have been something waiting for the correct amount of ruin.
-
-Qarnivor does not resolve that question. It gives the account a place to breathe.
-
-<section className="grid gap-4 md:grid-cols-2">
-  <a
-    href="/posts/timelines/snuggaliod-emergence/"
-    className="card-base btn-card rounded-2xl p-4 transition"
-    data-sfx-hover="hover-soft"
-    data-sfx-click="soft"
-  >
+  <figure className="review-essay__hero">
     <ImageWrapper
-      src="/posts/timeline/snuggloid-entity.png"
-      alt="Snuggloid entity"
-      class="mb-4 aspect-video rounded-xl"
+      src="/posts/Mega-Meal-3/title-2.jpg"
+      alt="A Qarnivor field record title image"
+      class="review-essay__image review-essay__image--hero"
+      loading="eager"
+      sizes="(max-width: 1024px) 100vw, 1100px"
     />
-    <div className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
-      {'Scientific Analysis'}
+    <figcaption>
+      The surviving transmission gives no clean origin point. It shows a ruin, a witness, and evidence that something else was already moving through the aftermath.
+    </figcaption>
+  </figure>
+
+  <section className="review-essay__chapter">
+    <div className="review-essay__chapter-copy">
+      <p className="review-essay__section-label">Galactic Time Scale B</p>
+      <h3>A document classified before the evidence was understood</h3>
+      <p>The oldest surviving citation places this material under <strong>MEGA MEAL - Appendix A</strong> and marks it as a <strong>Pre-Extinction Event</strong>. That classification is the first problem. The account appears immediately after the Corporate Empire's involvement on Qarnivor, yet it describes entities later cataloged as Snuggloids.</p>
+      <p>The file weakens itself on purpose: incomplete transcript, unreliable narrator, scholarly interest. The archive does not trust the witness, but it cannot discard her.</p>
     </div>
-    <div className="mt-1 text-lg font-black text-black/85 dark:text-white/85">
-      {'Read the Snuggloid emergence file'}
+    <div className="review-essay__image-grid review-essay__image-grid--stacked">
+      <ImageWrapper src="/posts/Mega-Meal-3/MM3-title.png" alt="MEGA MEAL 3 archive title frame" class="review-essay__image" />
     </div>
-  </a>
-  <a
-    href="/videos/mega-meal-explained/"
-    className="card-base btn-card rounded-2xl p-4 transition"
-    data-sfx-hover="hover-soft"
-    data-sfx-click="soft"
-  >
-    <ImageWrapper
-      src="/posts/Mega-Meal-Explained/mme-title.jpg"
-      alt="MEGA MEAL title"
-      class="mb-4 aspect-video rounded-xl"
-    />
-    <div className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
-      {'Core Transmission'}
+  </section>
+
+  <aside className="review-essay__pullquote">
+    <blockquote>
+      <p>"Of particular note: the timeline between the emergence of the Snuggloids and the extinction of the Qarnivores."</p>
+      <cite>Galactic Time Scale B Historical Documents</cite>
+    </blockquote>
+  </aside>
+
+  <section className="review-essay__chapter review-essay__chapter--split-notes" aria-label="Core archive contradictions">
+    <div className="review-essay__note">
+      <p className="review-essay__section-label">The Redacted Witness</p>
+      <h3>The record names a source and then obscures her</h3>
+      <p>The account is believed to originate with the figure listed in Qarnivor records as <em>(name redacted for legal reasons)</em>. The material does not make her easier to trust. It makes her harder to ignore: "glowing fur" and bodies that "phased in and out of visibility" align too closely with later Snuggloid observations.</p>
     </div>
-    <div className="mt-1 text-lg font-black text-black/85 dark:text-white/85">
-      {'Return to the core MEGA MEAL review'}
+
+    <div className="review-essay__note">
+      <p className="review-essay__section-label">The Overlap Problem</p>
+      <h3>The contradiction is chronological, not biological</h3>
+      <p>Earlier scholarship assumed the extinction of the Qarnivores and the emergence of the Snuggloids were separate events. One ended. The other followed. Appendix A damages that clean sequence by placing the encounter close enough to the devastation that aftermath and emergence blur.</p>
+      <p>If the account is taken at face value, the Snuggloids may have been present during the final collapse. That does not solve the mystery. It opens the worse one: witnesses, beneficiaries, contaminants, or participants?</p>
     </div>
-  </a>
-</section>
+  </section>
+
+  <section className="review-essay__chapter" aria-label="Qarnivor evidence fragments">
+    <div className="review-essay__chapter-copy">
+      <p className="review-essay__section-label">Scraps of Data</p>
+      <h3>Too thin to trust, too specific to ignore</h3>
+      <p>The archive preserves no complete chain of custody. What remains is a few visual records, later scientific matches, and repeated phrases that appear to have survived independent copying. None of it establishes causation. It does explain why Appendix A keeps being reopened.</p>
+    </div>
+    <ul className="m-0 list-disc space-y-3 self-start rounded-lg border border-black/10 bg-black/[0.03] p-5 pl-8 text-sm leading-relaxed text-black/70 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/70">
+      <li><strong>Missing interval:</strong> how long after detonation was the witness account recorded?</li>
+      <li><strong>Entity match:</strong> why do the observed traits match later Snuggloid science?</li>
+      <li><strong>Starbug recurrence:</strong> why does the same impossible detail appear across extinction accounts?</li>
+    </ul>
+  </section>
+
+  <section className="review-essay__coda review-essay__coda--with-summary">
+    <div>
+      <p className="review-essay__section-label">Open Questions</p>
+      <h3>The record closes without becoming settled history</h3>
+      <p>This article belongs to the Digital Consciousness Chronicles because it concerns what appears after civilizational collapse and what those appearances do to history. The Spork Uprising remains the broader cause-chain; Appendix A is narrower and more corrosive.</p>
+      <p>The responsible conclusion is also the least satisfying one: the Qarnivor file does not explain the emergence. It preserves the questions that make explanation difficult.</p>
+    </div>
+    <aside className="review-essay__archive-summary" aria-label="Archive status">
+      <p className="review-essay__section-label">Unresolved File</p>
+      <ul>
+        <li>Transmission incomplete</li>
+        <li>Witness reliability disputed</li>
+        <li>Emergence sequence unsettled</li>
+        <li>Emergence disputed</li>
+      </ul>
+    </aside>
+  </section>
+</article>

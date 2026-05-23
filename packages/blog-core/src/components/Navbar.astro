@@ -30,7 +30,7 @@ const isAuthenticated = false
     <div class="absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
     <div class:list={[
         className,
-        "card-base !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto flex items-center justify-between px-4"]}>
+        "card-base !overflow-visible max-w-[var(--page-width)] h-[var(--navbar-height,4.5rem)] !rounded-t-none mx-auto flex items-center justify-between px-4"]}>
         
         <!-- Admin Navbar Component (handles login, settings toggle, etc.) -->
         <AdminNavbar client:load siteTitle={siteConfig.title} />

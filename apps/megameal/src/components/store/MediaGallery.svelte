@@ -1,4 +1,9 @@
 <script lang="ts">
+import {
+  buildYouTubeEmbedUrl,
+  youtubeEmbedAllow,
+  youtubeEmbedReferrerPolicy,
+} from '@merkin/blog-core/utils/youtube-embed'
 import { onDestroy, onMount } from 'svelte'
 import '../../styles/features/store/media-gallery.css'
 
@@ -15,12 +20,14 @@ interface Props {
   items: MediaItem[]
   autoPlayInterval?: number
   class?: string
+  embedOrigin?: string
 }
 
 const {
   items = [],
   autoPlayInterval = 5000,
   class: className = '',
+  embedOrigin,
 }: Props = $props()
 
 let currentIndex = $state(0)
@@ -102,6 +109,15 @@ function thumbBg(item: MediaItem): string {
 function isVideoType(item: MediaItem) {
   return item.type === 'youtube' || item.type === 'video'
 }
+
+function youtubeSrc(item: MediaItem): string {
+  return item.videoId
+    ? buildYouTubeEmbedUrl(item.videoId, {
+        controls: true,
+        origin: embedOrigin,
+      })
+    : ''
+}
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
@@ -153,11 +169,12 @@ function isVideoType(item: MediaItem) {
         {:else if item.type === 'youtube'}
           {#if i === currentIndex}
             <iframe
-              src={`https://www.youtube-nocookie.com/embed/${item.videoId}?enablejsapi=1&rel=0&modestbranding=1`}
+              src={youtubeSrc(item)}
               title={item.caption ?? item.alt ?? 'Product video'}
               class="w-full h-full"
               frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow={youtubeEmbedAllow}
+              referrerpolicy={youtubeEmbedReferrerPolicy}
               allowfullscreen
             ></iframe>
           {:else}
@@ -244,4 +261,3 @@ function isVideoType(item: MediaItem) {
     </div>
   {/if}
 </div>
-

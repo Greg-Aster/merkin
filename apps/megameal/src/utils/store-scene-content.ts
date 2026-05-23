@@ -1,4 +1,5 @@
 import type { CollectionEntry } from 'astro:content'
+import { buildYouTubeEmbedUrl } from '@merkin/blog-core/utils/youtube-embed'
 import type {
   MediaAsset,
   PanelConfig,
@@ -45,7 +46,9 @@ function toSceneMediaAsset(
     return {
       id: item.id ?? `asset-${index}`,
       type: 'iframe',
-      src: `https://www.youtube.com/embed/${item.videoId}`,
+      src: buildYouTubeEmbedUrl(item.videoId, {
+        controls: true,
+      }),
       thumbnail: resolveAsset(item.thumbnail) || poster,
       poster,
       alt: item.alt || fallbackAlt,

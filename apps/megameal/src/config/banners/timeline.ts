@@ -163,7 +163,7 @@ export const timelineBannerEraConfig: EraConfigMap = {
 
   'ancient-epoch': {
     ...defaultEraConfig['ancient-epoch'],
-    backgroundImage: '/posts/timeline/ancient-epoch.png',
+    backgroundImage: '/posts/timeline/awakening-era.png',
     zoomLevel: 2.5,
   },
 
@@ -187,7 +187,7 @@ export const timelineBannerEraConfig: EraConfigMap = {
 
   'transcendent-age': {
     ...defaultEraConfig['transcendent-age'],
-    backgroundImage: '/posts/timeline/transcendent-age.png',
+    backgroundImage: '/posts/timeline/evolution.png',
     zoomLevel: 2.5,
   },
 
@@ -199,7 +199,7 @@ export const timelineBannerEraConfig: EraConfigMap = {
 
   'final-epoch': {
     ...defaultEraConfig['final-epoch'],
-    backgroundImage: '/posts/timeline/final-epoch.png',
+    backgroundImage: '/posts/timeline/end-of-time.png',
     zoomLevel: 2.5,
   },
 }

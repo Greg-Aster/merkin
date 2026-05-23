@@ -128,7 +128,7 @@ import '../styles/features/extracted/post-card.css'
         <ImageWrapper 
           src={image} 
           basePath={path.join("content/posts/", getDir(entry.id))} 
-          alt="Cover Image of the Post"
+          alt={`${title} cover image`}
           class="postcard-image postcard-image-fix w-full h-full object-cover" />
       </div>
     </a>

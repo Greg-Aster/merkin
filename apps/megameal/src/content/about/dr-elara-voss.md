@@ -17,13 +17,13 @@ socialLinks:
   - name: "Historical Studies"
     url: "/posts/"
     icon: "book-open"
-backgroundImage: "/posts/timeline/archive-vault.png"
+backgroundImage: "/posts/timeline/archive.png"
 bannerType: "timeline"
 bannerData:
   category: "MEGA MEAL"
   startYear: 2.8e4
   endYear: 2.805e4
-  background: "/posts/timeline/archive-vault.png"
+  background: "/posts/timeline/archive.png"
 ---
 
 

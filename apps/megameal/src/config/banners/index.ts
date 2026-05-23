@@ -113,23 +113,7 @@ export {
 // VIDEO BANNER SPECIFIC EXPORTS
 // =====================================================================
 
-// Export video banner configuration objects
-export {
-  videoParameters,
-  qualityPreferences,
-  aspectRatioConfig,
-  videoFallbackConfig,
-  videoLoadingConfig,
-} from './video'
-
-// Export video banner helper functions
-export {
-  getVideoEmbedUrl,
-  extractVideoId,
-  validateVideoBannerConfig,
-  getVideoThumbnail,
-  getVideoIframeAttributes,
-} from './video'
+export { validateVideoBannerConfig } from './video'
 
 // =====================================================================
 // IMAGE BANNER SPECIFIC EXPORTS

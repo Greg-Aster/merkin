@@ -322,6 +322,16 @@ export const siteSfxProfile: Record<AudioSfxId, AudioSfxConfig> = {
     interrupt: false,
     preload: true,
   },
+  'portal-glitch': {
+    id: 'portal-glitch',
+    src: '/audio/sfx/22-kenney-forceField_001.mp3',
+    volume: 0.26,
+    rate: 1.06,
+    rateJitter: 0.045,
+    cooldownMs: 720,
+    interrupt: false,
+    preload: true,
+  },
   'portal-impact': {
     id: 'portal-impact',
     src: '/audio/sfx/portal-impact.mp3',

@@ -5,6 +5,7 @@ import {
   siteAudioConfig,
   siteSfxProfile,
 } from '../config/audio'
+import { markSiteAudioUnlocked } from './site-audio-activation'
 
 export type SiteSfxId = AudioSfxId
 
@@ -35,17 +36,21 @@ class SiteSfxManager {
   hasUnlockedAudio(): boolean {
     if (this.audioUnlocked) return true
 
-    const contextState = Howler.ctx?.state
-    return contextState === 'running'
+    if (Howler.ctx?.state !== 'running') return false
+
+    this.setAudioUnlocked()
+    return true
   }
 
   async unlockFromGesture(): Promise<boolean> {
     if (typeof window === 'undefined') return false
 
     try {
-      const userActivation = (navigator as Navigator & {
-        userActivation?: { isActive?: boolean }
-      }).userActivation
+      const userActivation = (
+        navigator as Navigator & {
+          userActivation?: { isActive?: boolean }
+        }
+      ).userActivation
       if (!this.hasUnlockedAudio() && userActivation?.isActive === false) {
         return false
       }
@@ -54,7 +59,9 @@ class SiteSfxManager {
       if (ctx && ctx.state === 'suspended') {
         await ctx.resume()
       }
-      this.audioUnlocked = ctx ? ctx.state === 'running' : true
+      if (ctx ? ctx.state === 'running' : true) {
+        this.setAudioUnlocked()
+      }
       return this.audioUnlocked
     } catch (error) {
       console.warn('Site SFX unlock failed:', error)
@@ -107,10 +114,18 @@ class SiteSfxManager {
       preload: true,
       html5: config.html5 ?? false,
       onloaderror: (_soundId: number, error: unknown) => {
-        console.warn(`Site SFX load failed for "${config.id}"`, config.src, error)
+        console.warn(
+          `Site SFX load failed for "${config.id}"`,
+          config.src,
+          error,
+        )
       },
       onplayerror: (_soundId: number, error: unknown) => {
-        console.warn(`Site SFX play failed for "${config.id}"`, config.src, error)
+        console.warn(
+          `Site SFX play failed for "${config.id}"`,
+          config.src,
+          error,
+        )
         howl.once('unlock', () => {
           howl.play()
         })
@@ -174,6 +189,11 @@ class SiteSfxManager {
 
     const randomized = baseRate + (Math.random() * jitter * 2 - jitter)
     return Math.min(1.25, Math.max(0.65, randomized))
+  }
+
+  private setAudioUnlocked(): void {
+    this.audioUnlocked = true
+    markSiteAudioUnlocked()
   }
 }
 

@@ -315,17 +315,3 @@ export function resetSpecialPageState() {
 
 <!-- This component doesn't render anything visible, it just manages state and behavior -->
 <div style="display: none;"></div>
-
-<style>
-  /* Fullscreen mode overrides - highest priority */
-  :global(body.fullscreen-mode #main-grid > .layout-sidebar,
-          body.fullscreen-mode #main-grid > .layout-right-rail,
-          body.fullscreen-mode #banner-container) {
-    display: none !important;
-  }
-
-  :global(body.fullscreen-mode #main-grid) {
-    grid-template-columns: 1fr !important;
-  }
-
-</style>

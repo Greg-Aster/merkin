@@ -537,7 +537,7 @@ $: if (activeTab === 'browse') {
     duration={3000}
   />
   
-  <h1 class="text-3xl font-bold text-black/90 dark:text-white/90 mb-6">Post Editor</h1>
+  <h2 class="text-3xl font-bold text-black/90 dark:text-white/90 mb-6">Post Editor</h2>
   
   <!-- Tab Navigation -->
   <div class="border-b border-neutral-200 dark:border-neutral-700 mb-6">

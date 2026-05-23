@@ -52,6 +52,7 @@ const {
   category,
   listingStyle,
   listingLabel,
+  ambientAudio,
 } = product.data
 const hasProductBody = (product.body ?? '').trim().length > 0
 
@@ -197,7 +198,7 @@ const flagshipShowcase = isShowcaseProduct
   : null
 ---
 
-<StoreLayout title={name} description={tagline}>
+<StoreLayout title={name} description={tagline} ambientAudio={ambientAudio}>
   <div class="container mx-auto max-w-6xl px-3 py-5 sm:px-4 md:py-6">
 
     {/* Breadcrumb */}
@@ -219,10 +220,12 @@ const flagshipShowcase = isShowcaseProduct
 
     {isShowcaseProduct && flagshipShowcase ? (
       <section class="flagship-product-shell">
+        <h1 class="sr-only">{name}</h1>
         <FeaturedProductBanner
-          client:load
+          client:only="svelte"
           product={flagshipShowcase.product}
           relatedProducts={flagshipShowcase.relatedProducts}
+          embedOrigin={Astro.url.origin}
           showBannerControls={false}
           showFullProductLink={false}
           kickerLabel={showcaseKickerLabel}
@@ -274,6 +277,7 @@ const flagshipShowcase = isShowcaseProduct
             client:load
             items={mediaItems}
             autoPlayInterval={7000}
+            embedOrigin={Astro.url.origin}
             class="shadow-2xl"
           />
         ) : (

@@ -17,7 +17,8 @@ const { entry, entries } = Astro.props
 const visibleEntries = entries
   .filter(item => item.data.draft !== true)
   .sort((a, b) => (a.data.page ?? 999) - (b.data.page ?? 999))
-const { Content } = await entry.render()
+const { Content, headings } = await entry.render()
+const contentOwnsPageHeading = headings.some(heading => heading.depth === 1)
 
 const currentIndex = visibleEntries.findIndex(item => item.slug === entry.slug)
 const previousEntry = currentIndex > 0 ? visibleEntries[currentIndex - 1] : null
@@ -148,9 +149,15 @@ function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
 
         <div class="grid gap-5 md:grid-cols-[minmax(0,1fr)_12rem] md:items-start">
           <div>
-            <h1 class="mb-3 text-3xl font-black leading-tight text-black/90 dark:text-white/90 md:text-5xl">
-              {entry.data.title}
-            </h1>
+            {contentOwnsPageHeading ? (
+              <div class="mb-3 text-3xl font-black leading-tight text-black/90 dark:text-white/90 md:text-5xl">
+                {entry.data.title}
+              </div>
+            ) : (
+              <h1 class="mb-3 text-3xl font-black leading-tight text-black/90 dark:text-white/90 md:text-5xl">
+                {entry.data.title}
+              </h1>
+            )}
             <p class="text-base leading-relaxed text-black/65 dark:text-white/65 md:text-lg">
               {entry.data.description}
             </p>
@@ -158,7 +165,7 @@ function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
           {entry.data.image && (
             <img
               src={entry.data.image}
-              alt=""
+              alt={`${entry.data.title} illustration`}
               loading="eager"
               decoding="async"
               class="aspect-[4/5] w-full rounded-lg object-cover"

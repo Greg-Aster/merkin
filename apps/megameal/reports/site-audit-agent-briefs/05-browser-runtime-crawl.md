@@ -51,6 +51,35 @@ Use both mobile and desktop viewport widths.
 - Are click/tap interactions blocked by overlays?
 - Are audio/video components blocked, muted unexpectedly, or throwing autoplay errors?
 
+## Layout And Canvas Classification
+
+When collecting off-viewport elements, classify results before reporting them as
+failures. Do not treat intentional decorative or hidden-state placement as a
+layout defect just because it crosses the viewport edge.
+
+Classify separately:
+
+- `actionable`: visible controls, links, form elements, text, images, or media
+  whose usable/readable box escapes the viewport.
+- `allowed-overscan`: full-bleed banner, hero, background, portal, canvas,
+  decorative, or `aria-hidden` elements that intentionally extend past the
+  viewport.
+- `hidden-state`: controls intentionally parked off-screen until active, such as
+  a dormant back-to-top affordance.
+
+Only `actionable` items should be counted as layout failures. Include the
+selector or identifying class names for every actionable item.
+
+Canvas checks must not rely on WebGL `readPixels()` alone. Some WebGL surfaces
+can return an empty drawing-buffer read while the composited page screenshot is
+visibly nonblank. For every canvas-heavy page:
+
+- record direct canvas readback if available;
+- capture a screenshot;
+- sample the screenshot region covered by each visible canvas; and
+- report a canvas failure only when both the direct readback and the
+  screenshot-region sample are blank or effectively uniform.
+
 ## Deliverable
 
 Create `apps/megameal/reports/<date>-browser-runtime-crawl.md`.
@@ -63,4 +92,3 @@ Include:
 - Console errors.
 - Failed network requests.
 - Screenshots only if they materially document a layout/runtime issue.
-

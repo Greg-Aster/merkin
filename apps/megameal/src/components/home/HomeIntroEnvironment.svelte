@@ -61,12 +61,17 @@ let canvasDpr = 1
 let adaptiveDprController: AdaptiveCanvasDprController | null = null
 let sceneQuality: SceneQuality = 'high'
 let portalHoverActive = false
+let portalVisible = true
+let portalEffectsVisible = true
+let logoEffectsVisible = true
 let lastScreenSfxIndex = activeScreenIndex
 let lastPortalDragSfxAt = -Infinity
 let portalRevealSfxPlayed = false
 const backgroundRevealDelayMs = 1100
 const backgroundRevealFallbackDelayMs = 2600
 const portalDemoActiveClass = 'megameal-portal-demo-active'
+const standardBannerPhaseClass = 'megameal-home-standard-banner-phase'
+const logoEffectsRevealCutoff = 0.68
 const wheelMomentumDecay = 2.4
 const wheelMomentumImpulse = 5.2
 const wheelMomentumMaxVelocity = 4.8
@@ -162,7 +167,7 @@ function isPointerOverActiveScreen(clientX: number, clientY: number) {
   )
 }
 
-function isShellVisible() {
+function isShellInViewport() {
   if (!shell) return false
 
   const bounds = shell.getBoundingClientRect()
@@ -172,6 +177,56 @@ function isShellVisible() {
     bounds.right > 0 &&
     bounds.left < window.innerWidth
   )
+}
+
+function isShellVisible() {
+  if (!shell || !isShellInViewport()) return false
+  if (document.documentElement.classList.contains(standardBannerPhaseClass)) {
+    return false
+  }
+
+  const style = window.getComputedStyle(shell)
+  return style.display !== 'none' && style.visibility !== 'hidden'
+}
+
+function isLogoEffectRangeVisible() {
+  return input.reveal < logoEffectsRevealCutoff
+}
+
+function syncPortalVisibility() {
+  const nextInViewport = isShellInViewport()
+  const nextEffectsVisible = isShellVisible()
+  const nextLogoEffectsVisible =
+    nextEffectsVisible && isLogoEffectRangeVisible()
+  const visibilityChanged = portalVisible !== nextInViewport
+  const effectsVisibilityChanged = portalEffectsVisible !== nextEffectsVisible
+  const logoEffectsVisibilityChanged =
+    logoEffectsVisible !== nextLogoEffectsVisible
+
+  if (visibilityChanged) {
+    portalVisible = nextInViewport
+  }
+  if (effectsVisibilityChanged) {
+    portalEffectsVisible = nextEffectsVisible
+  }
+  if (logoEffectsVisibilityChanged) {
+    logoEffectsVisible = nextLogoEffectsVisible
+  }
+  if (!nextEffectsVisible) {
+    input.active = false
+    activePointerId = null
+    activeTouchId = null
+    pointerDownStartedOnScreen = false
+    syncPortalHoverActive(false)
+  }
+  if (!nextInViewport) {
+    wheelVelocity = 0
+    if (scrollFrame) {
+      window.cancelAnimationFrame(scrollFrame)
+      scrollFrame = 0
+      lastScrollFrameAt = 0
+    }
+  }
 }
 
 function syncViewportMode() {
@@ -326,7 +381,7 @@ function syncStandardBannerPhaseClass() {
     homeIntroStandardBannerPhaseScreens
 
   document.documentElement.classList.toggle(
-    'megameal-home-standard-banner-phase',
+    standardBannerPhaseClass,
     phaseProgress > 0.18,
   )
 }
@@ -336,6 +391,7 @@ function updateScrollDrivenWheel() {
   input.wheel = clamp(virtualWheel, 0, maxWheel)
   syncRevealProgress()
   syncStandardBannerPhaseClass()
+  syncPortalVisibility()
   syncActiveScreenFromWheel(input.wheel)
 }
 
@@ -436,6 +492,7 @@ function applyDragDelta(
 function handlePointerDown(event: PointerEvent) {
   if (isPortalDemoActive()) return
   if (event.pointerType === 'touch' || isInteractiveTarget(event.target)) return
+  if (!isShellVisible()) return
   if (!isInsideShell(event.clientX, event.clientY)) return
 
   input.active = true
@@ -553,6 +610,7 @@ function getChangedTouch(event: TouchEvent) {
 function handleTouchStart(event: TouchEvent) {
   if (isPortalDemoActive()) return
   if (isInteractiveTarget(event.target)) return
+  if (!isShellVisible()) return
 
   const touch = event.changedTouches[0]
   if (!touch || !isInsideShell(touch.clientX, touch.clientY)) return
@@ -614,10 +672,14 @@ function handleTouchEnd(event: TouchEvent) {
 }
 
 function handleWheel(event: WheelEvent) {
-  if (!shell || (!isInsideShell(event.clientX, event.clientY) && !isShellVisible())) {
+  const effectsVisible = isShellVisible()
+  if (
+    !shell ||
+    !isShellInViewport() ||
+    !isInsideShell(event.clientX, event.clientY)
+  ) {
     return
   }
-
   event.preventDefault()
   const viewportHeight = Math.max(window.innerHeight, 1)
   const wheelDelta = (event.deltaY / viewportHeight) * mouseWheelSensitivity
@@ -626,7 +688,9 @@ function handleWheel(event: WheelEvent) {
     -mouseWheelMomentumMaxVelocity,
     mouseWheelMomentumMaxVelocity,
   )
-  playPortalDragSfx()
+  if (effectsVisible) {
+    playPortalDragSfx()
+  }
   scheduleScrollDrivenWheel()
 }
 
@@ -670,6 +734,7 @@ function handlePortalAdvance(event: Event) {
 
 function handleResize() {
   syncViewportMode()
+  syncPortalVisibility()
   syncCanvasDpr()
   syncPortalHoverActive(false)
   scheduleScrollDrivenWheel()
@@ -721,9 +786,16 @@ onMount(() => {
   })
   adaptiveDprController.start()
   updateScrollDrivenWheel()
+  syncPortalVisibility()
   backgroundRevealFallbackTimeout = window.setTimeout(() => {
     revealBackground()
   }, backgroundRevealFallbackDelayMs)
+
+  const portalVisibilityObserver =
+    'IntersectionObserver' in window && shell
+      ? new IntersectionObserver(syncPortalVisibility)
+      : null
+  portalVisibilityObserver?.observe(shell)
 
   window.addEventListener('pointerdown', handlePointerDown)
   window.addEventListener('pointermove', handlePointerMove)
@@ -737,8 +809,10 @@ onMount(() => {
   window.addEventListener('keydown', handleKeyboardScroll)
   window.addEventListener('merkin:portal-advance', handlePortalAdvance)
   window.addEventListener('resize', handleResize)
+  window.addEventListener('scroll', syncPortalVisibility, { passive: true })
 
   return () => {
+    portalVisibilityObserver?.disconnect()
     window.removeEventListener('pointerdown', handlePointerDown)
     window.removeEventListener('pointermove', handlePointerMove)
     window.removeEventListener('pointerup', handlePointerUp)
@@ -751,6 +825,7 @@ onMount(() => {
     window.removeEventListener('keydown', handleKeyboardScroll)
     window.removeEventListener('merkin:portal-advance', handlePortalAdvance)
     window.removeEventListener('resize', handleResize)
+    window.removeEventListener('scroll', syncPortalVisibility)
     if (scrollFrame) {
       window.cancelAnimationFrame(scrollFrame)
       scrollFrame = 0
@@ -758,7 +833,7 @@ onMount(() => {
     }
     adaptiveDprController?.stop()
     adaptiveDprController = null
-    document.documentElement.classList.remove('megameal-home-standard-banner-phase')
+    document.documentElement.classList.remove(standardBannerPhaseClass)
     clearBackgroundRevealTimers()
   }
 })
@@ -774,7 +849,7 @@ onDestroy(() => {
   adaptiveDprController?.stop()
   adaptiveDprController = null
   if (typeof document !== 'undefined') {
-    document.documentElement.classList.remove('megameal-home-standard-banner-phase')
+    document.documentElement.classList.remove(standardBannerPhaseClass)
   }
   clearBackgroundRevealTimers()
 })
@@ -795,6 +870,9 @@ onDestroy(() => {
 			{titleImageSrc}
 			{sceneQuality}
 			{hoveredScreenIndex}
+			{portalVisible}
+			motionEnabled={portalEffectsVisible}
+			logoEffectsEnabled={logoEffectsVisible}
 			onLogoReady={handleLogoReady}
 		/>
 		<HomeIntroPostProcessing
@@ -802,6 +880,7 @@ onDestroy(() => {
 			{sceneQuality}
 			{activeScreenIndex}
 			{backgroundReady}
+			portalVisible={logoEffectsVisible}
 		/>
 	</Canvas>
 

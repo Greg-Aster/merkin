@@ -2,6 +2,7 @@
 import Icon from '@iconify/svelte/dist/Icon.svelte'
 import { onMount } from 'svelte'
 import { type SiteAudioState, siteAudioManager } from '../../utils/site-audio'
+import { addSiteAudioActivationListeners } from '../../utils/site-audio-activation'
 
 import '../../styles/features/extracted/site-audio-control.css'
 let audioState: SiteAudioState = {
@@ -78,7 +79,9 @@ const readAudioNudgeDismissed = () => {
   if (typeof window === 'undefined') return true
 
   try {
-    return window.sessionStorage.getItem(audioNudgeDismissedStorageKey) === 'true'
+    return (
+      window.sessionStorage.getItem(audioNudgeDismissedStorageKey) === 'true'
+    )
   } catch {
     return false
   }
@@ -193,7 +196,12 @@ onMount(() => {
 
   const unsubscribe = siteAudioManager.subscribe(state => {
     audioState = state
-    if (state.enabled || !state.hasConfiguredTracks || panelOpen || audioNudgeDismissed) {
+    if (
+      state.enabled ||
+      !state.hasConfiguredTracks ||
+      panelOpen ||
+      audioNudgeDismissed
+    ) {
       showAudioNudge = false
       return
     }
@@ -203,20 +211,15 @@ onMount(() => {
 
   document.addEventListener('astro:page-load', syncAudioForCurrentPage)
 
-  const handleFirstGesture = () => {
-    void siteAudioManager.unlockFromGesture()
-  }
+  const stopListeningForAudioActivation = addSiteAudioActivationListeners(
+    () => {
+      void siteAudioManager.unlockFromGesture()
+    },
+  )
   const mediaQuery = window.matchMedia('(max-width: 767px)')
   const handleViewportChange = () => {
     syncViewportMode()
   }
-  document.addEventListener('pointerdown', handleFirstGesture, {
-    passive: true,
-  })
-  document.addEventListener('touchstart', handleFirstGesture, {
-    passive: true,
-  })
-  document.addEventListener('keydown', handleFirstGesture)
   mediaQuery.addEventListener('change', handleViewportChange)
 
   const handlePointerDown = (event: MouseEvent) => {
@@ -246,9 +249,7 @@ onMount(() => {
     clearAudioNudgeFadeTimer()
     unsubscribe()
     document.removeEventListener('astro:page-load', syncAudioForCurrentPage)
-    document.removeEventListener('pointerdown', handleFirstGesture)
-    document.removeEventListener('touchstart', handleFirstGesture)
-    document.removeEventListener('keydown', handleFirstGesture)
+    stopListeningForAudioActivation()
     document.removeEventListener('click', handlePointerDown)
     document.removeEventListener('click', handleNudgeIgnore)
     document.removeEventListener('keydown', handleNudgeIgnore)
@@ -269,7 +270,7 @@ $: buttonLabel = panelOpen
     ? 'Enable site sound'
     : isMobileViewport
       ? 'Disable site sound'
-    : 'Open sound controls'
+      : 'Open sound controls'
 $: buttonTitle = audioState.enabled
   ? audioState.activeTrackLabel
     ? isMobileViewport

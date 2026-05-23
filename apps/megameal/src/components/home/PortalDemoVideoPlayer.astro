@@ -64,6 +64,12 @@ const demoVideos = [
 
 <script>
   import { siteAudioConfig } from '../../config/audio'
+  import {
+    addSiteAudioActivationListeners,
+    hasSiteAudioUserActivation,
+    siteAudioUnlockedEvent,
+  } from '../../utils/site-audio-activation'
+  import { siteSfxManager } from '../../utils/site-sfx'
 
   type PortalDemoClip = {
     src: string
@@ -167,7 +173,7 @@ const demoVideos = [
     let selectedClip: PortalDemoClip | null = null
     let isSwitchingClips = false
     let hasStartedDemoPlayback = false
-    let browserAudioActivated = false
+    let siteAudioActivated = hasSiteAudioUserActivation()
     let handoffGlitchTriggered = false
     let clipTransitionToken = 0
     let clipSwapTimeout = 0
@@ -204,6 +210,7 @@ const demoVideos = [
       }
 
       clearGlitchClearTimer()
+      siteSfxManager.playIfUnlocked('portal-glitch')
       setChannelGlitching(true)
       glitchClearTimeout = window.setTimeout(() => {
         glitchClearTimeout = 0
@@ -226,21 +233,15 @@ const demoVideos = [
       )
     }
 
-    const hasBrowserAudioActivation = () => {
-      const userActivation = navigator.userActivation
-
-      return (
-        browserAudioActivated ||
-        userActivation?.hasBeenActive === true ||
-        userActivation?.isActive === true
-      )
+    const hasAudiblePlaybackActivation = () => {
+      return siteAudioActivated || hasSiteAudioUserActivation()
     }
 
     const applyDemoAudioPreference = () => {
       const siteAudioEnabled = getStoredSiteAudioEnabled()
       const masterVolume = siteAudioEnabled ? getStoredMasterVolume() : 0
       const isAudible =
-        hasBrowserAudioActivation() && siteAudioEnabled && masterVolume > 0
+        hasAudiblePlaybackActivation() && siteAudioEnabled && masterVolume > 0
 
       video.controls = false
       video.defaultMuted = !isAudible
@@ -252,9 +253,14 @@ const demoVideos = [
       }
     }
 
-    const markBrowserAudioActivated = () => {
-      browserAudioActivated = true
+    const markSiteAudioActivated = () => {
+      siteAudioActivated = true
       applyDemoAudioPreference()
+    }
+
+    const unlockDemoAudioFromGesture = () => {
+      markSiteAudioActivated()
+      void siteSfxManager.unlockFromGesture()
     }
 
     const getSelectedClip = () => {
@@ -407,20 +413,19 @@ const demoVideos = [
       event => {
         event.preventDefault()
         event.stopPropagation()
+        void siteSfxManager.unlockFromGesture()
+        markSiteAudioActivated()
         toggleDemoPlayback()
       },
       { signal },
     )
-    window.addEventListener(audioConfigChangeEvent, applyDemoAudioPreference, { signal })
-    document.addEventListener('pointerdown', markBrowserAudioActivated, {
-      passive: true,
+    window.addEventListener(audioConfigChangeEvent, applyDemoAudioPreference, {
       signal,
     })
-    document.addEventListener('touchstart', markBrowserAudioActivated, {
-      passive: true,
+    window.addEventListener(siteAudioUnlockedEvent, markSiteAudioActivated, {
       signal,
     })
-    document.addEventListener('keydown', markBrowserAudioActivated, { signal })
+    addSiteAudioActivationListeners(unlockDemoAudioFromGesture, { signal })
 
     const observer = new MutationObserver(activateIfVisible)
     observer.observe(slide, {

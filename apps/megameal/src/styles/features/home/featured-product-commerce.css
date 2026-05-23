@@ -123,6 +123,20 @@
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
+	.featured-product-facts {
+		display: grid;
+		gap: 0.65rem;
+	}
+
+	.featured-product-facts__kicker {
+		margin: 0;
+		color: rgb(125 211 252 / 0.78);
+		font-size: 0.68rem;
+		font-weight: 800;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+	}
+
 	.featured-product-commerce-note a,
 	.featured-product-meta div,
 	.featured-product-spec-grid div {
@@ -165,11 +179,31 @@
 		gap: 0.7rem;
 	}
 
+	.featured-product-meta--facts div {
+		padding: 0.78rem 0.82rem;
+	}
+
 	.featured-product-cta-row,
 	.featured-product-panel-actions {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.7rem;
+	}
+
+	.featured-product-detail-nav {
+		padding: 0.85rem 1rem;
+		border: 1px solid rgb(148 163 184 / 0.16);
+		border-radius: 1.25rem;
+		background:
+			radial-gradient(circle at 12% 18%, rgb(125 211 252 / 0.08), transparent 26%),
+			linear-gradient(180deg, rgb(15 23 42 / 0.76), rgb(2 6 23 / 0.9));
+		box-shadow:
+			inset 0 1px 0 rgb(255 255 255 / 0.05),
+			0 18px 48px rgb(2 6 23 / 0.26);
+	}
+
+	.featured-product-panel-actions--full {
+		justify-content: center;
 	}
 
 	.featured-product-financing + .featured-product-cta-row {

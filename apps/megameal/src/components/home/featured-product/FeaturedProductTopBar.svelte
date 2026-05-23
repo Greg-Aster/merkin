@@ -37,7 +37,7 @@ $: unitsSoldText = formatRegistryCount(product.stockRegistry?.unitsSold, 'No Dat
 <div class="featured-product-topbar">
   <div>
     <p class="featured-product-kicker">{kickerLabel}</p>
-    <h1>{product.name}</h1>
+    <h2 class="featured-product-topbar__title">{product.name}</h2>
     {#if product.brand}
       <p class="featured-product-sellerline">
         Certified by <strong>{product.brand}</strong> with a 99.6% containment score

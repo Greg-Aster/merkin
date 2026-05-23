@@ -17,13 +17,13 @@ socialLinks:
   - name: "System Logs"
     url: "/posts/"
     icon: "terminal"
-backgroundImage: "/posts/timeline/data-fragments.png"
+backgroundImage: "/posts/timeline/bartender.png"
 bannerType: "timeline"
 bannerData:
   category: "MEGA MEAL"
   startYear: 2.8042e4
   endYear: 2.8042e4
-  background: "/posts/timeline/data-fragments.png"
+  background: "/posts/timeline/bartender.png"
 ---
 
 <div className="flex flex-col md:flex-row gap-6 mb-8">

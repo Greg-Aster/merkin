@@ -98,6 +98,7 @@ export let emitterSize = 0.72
 export let emitterOpacity = 0.86
 export let emitterFrontFacing = false
 export let emitterFrontOffset = 1.35
+export let motionEnabled = true
 
 let group: Group | null = null
 let emitterGroup: Group | null = null
@@ -128,6 +129,7 @@ $: emitterPosition = [
 ] as [number, number, number]
 
 useTask(() => {
+  if (!motionEnabled) return
   if (!group) return
 
   const time = performance.now() * 0.001

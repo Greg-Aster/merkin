@@ -54,10 +54,8 @@ const mediaKinds = Array.from(
   ),
 ).slice(0, 3)
 
-const specHighlights = (product.data.specifications ?? []).slice(0, 2)
 const reviewCount = product.data.preWrittenReviews?.length ?? 0
 const questionCount = product.data.qanda?.length ?? 0
-const assetCount = mediaItems.length
 const brand = product.data.brand ?? 'MegaMeal Merchant Services'
 const shippingNote = product.data.shippingNote
 const sku = product.data.sku
@@ -105,14 +103,6 @@ const availabilityDisplay: Record<
 const availabilityTone =
   availabilityDisplay[product.data.availability ?? 'coming_soon'] ??
   availabilityDisplay.coming_soon
-
-const deterministicValue = Array.from(product.data.name).reduce(
-  (sum, char, index) => sum + char.charCodeAt(0) * (index + 1),
-  0,
-)
-const observedToday = 180 + (deterministicValue % 1400)
-const watchCount = 40 + (deterministicValue % 620)
-const sellerScore = (96 + (deterministicValue % 34) / 10).toFixed(1)
 ---
 
 <article class="marketplace-card-shell h-full rounded-[1.6rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.98))] shadow-[0_20px_60px_rgba(2,6,23,0.32)] overflow-hidden">
@@ -147,10 +137,6 @@ const sellerScore = (96 + (deterministicValue % 34) / 10).toFixed(1)
 					<span>Seller</span>
 					<strong>{brand}</strong>
 				</div>
-				<div>
-					<span>Trust</span>
-					<strong>{sellerScore}%</strong>
-				</div>
 			</div>
 
 			<div class="marketplace-card__heading">
@@ -180,25 +166,6 @@ const sellerScore = (96 + (deterministicValue % 34) / 10).toFixed(1)
 				{sku && <strong>SKU {sku}</strong>}
 			</div>
 
-			{product.data.description && (
-				<p class="marketplace-card__description">{product.data.description}</p>
-			)}
-
-			<div class="marketplace-card__signals">
-				<div>
-					<span>Observed today</span>
-					<strong>{observedToday.toLocaleString()}</strong>
-				</div>
-				<div>
-					<span>Watchers</span>
-					<strong>{watchCount.toLocaleString()}</strong>
-				</div>
-				<div>
-					<span>Assets</span>
-					<strong>{assetCount}</strong>
-				</div>
-			</div>
-
 			<div class="marketplace-card__subgrid">
 				<div class="marketplace-card__rating">
 					<div class="marketplace-card__stars" aria-hidden="true">
@@ -216,17 +183,6 @@ const sellerScore = (96 + (deterministicValue % 34) / 10).toFixed(1)
 				</div>
 			</div>
 
-			{specHighlights.length > 0 && (
-				<div class="marketplace-card__specs">
-					{specHighlights.map((spec) => (
-						<div>
-							<span>{spec.label}</span>
-							<strong>{spec.value}</strong>
-						</div>
-					))}
-				</div>
-			)}
-
 			{shippingNote && (
 				<div class="marketplace-card__shipping">
 					<Icon name="mdi:truck-fast-outline" class="h-4 w-4" />
@@ -238,10 +194,6 @@ const sellerScore = (96 + (deterministicValue % 34) / 10).toFixed(1)
 				<div class="marketplace-card__footer-actions">
 					<span class="marketplace-card__cta">
 						Inspect listing <Icon name="mdi:arrow-right" class="h-4 w-4" />
-					</span>
-					<span class="marketplace-card__watch">
-						<Icon name="mdi:eye-outline" class="h-4 w-4" />
-						{watchCount.toLocaleString()} tracking
 					</span>
 				</div>
 				<p>Policy, media, and review trail available inside listing.</p>

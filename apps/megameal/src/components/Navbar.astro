@@ -41,7 +41,7 @@ import '../styles/features/extracted/navbar.css'
         
         <div class="flex items-center justify-start min-w-0">
             <div id="admin-navbar-shell" class="hidden">
-                <AdminNavbar client:load siteTitle={siteConfig.title} />
+                <AdminNavbar client:only="svelte" siteTitle={siteConfig.title} />
             </div>
             <a
               id="public-home-link"
@@ -119,7 +119,7 @@ import '../styles/features/extracted/navbar.css'
             <div class="store-cart-nav-action hidden">
                 <StoreCartButton client:load />
             </div>
-            <SiteAudioControl client:idle />
+            <SiteAudioControl client:only="svelte" />
             {!siteConfig.themeColor.fixed && (
                     <button aria-label="Display Settings" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="nav-action-button btn-plain scale-animation rounded-lg active:scale-90 !hidden md:!inline-flex" id="display-settings-switch">
                         <Icon name="material-symbols:palette-outline" class="nav-action-icon"></Icon>
@@ -157,7 +157,7 @@ import '../styles/features/extracted/navbar.css'
                 )}
             </div>
         </NavMenuPanel>
-        <DisplaySettings client:idle></DisplaySettings>
+        <DisplaySettings client:only="svelte"></DisplaySettings>
     </div>
 </div>
 

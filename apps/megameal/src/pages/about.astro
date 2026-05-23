@@ -109,6 +109,8 @@ function isVideoMedia(src?: string) {
   backgroundImage="none"
 >
 
+  <h1 class="sr-only">{i18n(I18nKey.about)}</h1>
+
   <!-- Dynamic Content Section (About/Team Member) -->
   {aboutConfig.content.enabled && (
     <div id="dynamic-content-section" class="card-base flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32 mb-4">

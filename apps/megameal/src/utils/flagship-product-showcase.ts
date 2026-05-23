@@ -1,4 +1,5 @@
 import type { CollectionEntry } from 'astro:content'
+import { buildYouTubeEmbedUrl } from '@merkin/blog-core/utils/youtube-embed'
 
 function toSlug(product: CollectionEntry<'products'>) {
   return product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')
@@ -36,8 +37,26 @@ export function buildFlagshipProductShowcase(
     }))
 
   const baseMedia = product.data.media ?? []
+  const imageMediaItems = baseMedia.filter(
+    item => item.type === 'image' && item.src,
+  )
+  const galleryImages =
+    imageMediaItems.length > 0
+      ? imageMediaItems
+      : product.data.image
+        ? [
+            {
+              id: 'fallback-image',
+              type: 'image' as const,
+              src: product.data.image,
+              alt: product.data.name,
+              caption: 'Primary product image',
+            },
+          ]
+        : []
+  const primaryImageMedia = galleryImages[0]
   const imageMedia =
-    baseMedia.find(item => item.type === 'image' && item.src) ??
+    primaryImageMedia ??
     (product.data.image
       ? {
           id: 'fallback-image',
@@ -56,6 +75,8 @@ export function buildFlagshipProductShowcase(
     ? `https://img.youtube.com/vi/${youtubeMedia.videoId}/hqdefault.jpg`
     : undefined
   const fallbackThumb =
+    primaryImageMedia?.thumbnail ??
+    primaryImageMedia?.src ??
     imageMedia?.thumbnail ??
     imageMedia?.src ??
     product.data.image ??
@@ -63,21 +84,21 @@ export function buildFlagshipProductShowcase(
     '/ads/snuggloids.png'
 
   const media = [
-    ...(imageMedia
-      ? [
-          {
-            id: imageMedia.id ?? 'primary-image',
-            type: 'image' as const,
-            src: imageMedia.src ?? fallbackThumb,
-            alt: imageMedia.alt ?? product.data.name,
-            caption:
-              imageMedia.caption ??
-              'Commercial still from the companion program.',
-            thumbnail: imageMedia.thumbnail ?? fallbackThumb,
-            poster: imageMedia.poster,
-          },
-        ]
-      : []),
+    ...galleryImages.map((galleryImage, index) => ({
+      id:
+        galleryImage.id ??
+        (index === 0 ? 'primary-image' : `product-image-${index + 1}`),
+      type: 'image' as const,
+      src: galleryImage.src ?? fallbackThumb,
+      alt: galleryImage.alt ?? product.data.name,
+      caption:
+        galleryImage.caption ??
+        (index === 0
+          ? 'Commercial still from the companion program.'
+          : `${product.data.name} product gallery image.`),
+      thumbnail: galleryImage.thumbnail ?? galleryImage.src ?? fallbackThumb,
+      poster: galleryImage.poster,
+    })),
     ...(modelMedia?.src
       ? [
           {
@@ -94,12 +115,14 @@ export function buildFlagshipProductShowcase(
           },
         ]
       : []),
-    ...(youtubeMedia
+    ...(youtubeMedia?.videoId
       ? [
           {
             id: youtubeMedia.id ?? 'commercial',
             type: 'iframe' as const,
-            src: `https://www.youtube.com/embed/${youtubeMedia.videoId}`,
+            src: buildYouTubeEmbedUrl(youtubeMedia.videoId, {
+              controls: true,
+            }),
             alt: youtubeMedia.alt ?? `${product.data.name} commercial`,
             caption:
               youtubeMedia.caption ??

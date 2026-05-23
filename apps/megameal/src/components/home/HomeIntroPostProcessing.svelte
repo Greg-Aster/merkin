@@ -9,6 +9,7 @@ import {
 } from 'three'
 import type { Object3D } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js'
+import { siteSfxManager } from '@/utils/site-sfx'
 
 type IntroInputState = {
   x: number
@@ -90,6 +91,7 @@ export let input: IntroInputState
 export let sceneQuality: SceneQuality = 'high'
 export let activeScreenIndex = 0
 export let backgroundReady = false
+export let portalVisible = true
 
 const { autoRender, camera, dpr, renderStage, renderer, scene, size } = useThrelte()
 
@@ -110,6 +112,7 @@ let nextIdleBurstAt = 0
 let prefersReducedMotion = false
 let reducedMotionQuery: MediaQueryList | null = null
 let lastBackgroundReady = backgroundReady
+let lastPortalVisible = portalVisible
 const previousClearColor = new Color()
 
 function getTimeSeconds() {
@@ -206,6 +209,17 @@ function triggerBurst(duration: number, intensity: number) {
   burstDuration = duration
   burstIntensity = intensity
   burstUntil = Math.max(burstUntil, now + duration)
+  siteSfxManager.playIfUnlocked('portal-glitch')
+}
+
+function syncPortalVisibilityState(now: number) {
+  if (portalVisible === lastPortalVisible) return
+
+  lastPortalVisible = portalVisible
+  burstUntil = 0
+  if (portalVisible && !prefersReducedMotion) {
+    scheduleNextIdleBurst(now, true)
+  }
 }
 
 function updateGlitchUniforms(strength: number) {
@@ -345,6 +359,9 @@ function renderLogoGlitchFrame(strength: number) {
 
 function getGlitchStrength() {
   const now = getTimeSeconds()
+  syncPortalVisibilityState(now)
+  if (!portalVisible) return 0
+
   const reveal = Number.isFinite(input.reveal) ? input.reveal : 0
   const sceneVisible = backgroundReady || reveal > 0.035
   const canGlitch = !prefersReducedMotion && sceneVisible
@@ -416,6 +433,11 @@ onMount(() => {
 
 useTask(() => {
   if (!logoRenderTarget || !glitchMaterial || !glitchQuad) return
+
+  if (!portalVisible) {
+    syncPortalVisibilityState(getTimeSeconds())
+    return
+  }
 
   syncTargetSize()
   const strength = getGlitchStrength()

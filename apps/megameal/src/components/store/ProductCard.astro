@@ -172,7 +172,7 @@ const ratingLabel =
     : 'Not rated'
 ---
 
-<div
+<article
   class:list={[
     "card-base group flex flex-col w-full overflow-hidden relative product-card rounded-[var(--radius-large)]",
     "transition-all duration-300 ease-in-out",
@@ -182,11 +182,8 @@ const ratingLabel =
   ]}
   style={style}
   data-product-id={product.id}
-  role="link"
-  tabindex="0"
   aria-labelledby={`product-title-${product.id}`}
   onclick={`if (!event.target.closest('a, button, .card-expansion-trigger, .tab-link, .details-content')) { window.location.href = '${productHref}'; }`}
-  onkeydown={`if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('a, button, .card-expansion-trigger, .tab-link, .details-content')) { event.preventDefault(); window.location.href = '${productHref}'; }`}
 >
   <ProductCardThumbnail
     availabilityClasses={availBadge.classes}
@@ -215,6 +212,7 @@ const ratingLabel =
     canBuyExternal={canBuyExternal}
     currentAvailability={currentAvailability}
     description={description}
+    embedOrigin={Astro.url.origin}
     hasPreWrittenReviews={hasPreWrittenReviews}
     hasQandA={hasQandA}
     hasSpecifications={hasSpecifications}
@@ -227,7 +225,7 @@ const ratingLabel =
     sku={sku}
     stripePaymentLink={stripePaymentLink}
   />
-</div>
+</article>
 
   <ProductCardClient
     descriptionData={product.data.description}

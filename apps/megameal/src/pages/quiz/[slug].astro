@@ -28,7 +28,7 @@ const hasQuizBody = typeof entry.body === 'string' && entry.body.trim().length >
   )}
   
   <Quiz 
-    client:load
+    client:only="svelte"
     initialQuestion={quiz.initialQuestion}
     nodes={quiz.nodes}
     outcomes={quiz.outcomes}

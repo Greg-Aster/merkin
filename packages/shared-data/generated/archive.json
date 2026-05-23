@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-22T04:01:59.656Z",
+  "generatedAt": "2026-05-22T22:58:21.389Z",
   "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts;/home/greggles/Merkin/apps/megameal/src/content/cookbook;/home/greggles/Merkin/apps/megameal/src/content/videos;/home/greggles/Merkin/apps/megameal/src/content/reader;/home/greggles/Merkin/apps/megameal/src/content/products;/home/greggles/Merkin/apps/megameal/src/content/about",
   "count": 78,
   "items": [
@@ -112,7 +112,7 @@
         "MEGA MEAL",
         "Qarnivor",
         "Snuggloid",
-        "Video Essay",
+        "Archive",
         "Field Report"
       ],
       "category": "MEGA MEAL",
@@ -1127,23 +1127,24 @@
       "sourcePath": "videos/snuggloids-commercial.mdx",
       "collection": "videos",
       "url": "/videos/snuggloids-commercial/",
-      "title": "Snuggloids | Parody Commercial | Not a real Product",
-      "description": "A recovered parody commercial for the Snuggloids comfort-companion line, preserved here as pre-extinction Qarnivor media.",
+      "title": "Snuggloids | Recovered Commercial Archive",
+      "description": "A recovered companion-pet commercial preserved as advertising, pre-emergence incident evidence, and an unresolved Snuggloid origin problem.",
       "published": "2025-03-26T00:00:00.000Z",
       "updated": null,
       "draft": false,
       "tags": [
         "Commercial",
         "Snuggloid",
+        "Snuggaloid",
         "Qarnivor",
-        "Parody",
+        "Archive",
         "Pre-Extinction"
       ],
       "category": "Commercials",
       "image": "https://img.youtube.com/vi/UxQ3zU77RX0/hqdefault.jpg",
       "timelineYear": 27995,
       "timelineEra": "conflict-epoch",
-      "timelineLocation": "Planet Qarnivor, Pre-Extinction Media Networks",
+      "timelineLocation": "Attributed to Planet Qarnivor, Pre-Extinction Media Networks",
       "isKeyEvent": false,
       "showInTimeline": true,
       "isLevel": false,
@@ -1557,7 +1558,7 @@
         "category": "MEGA MEAL",
         "startYear": 28000,
         "endYear": 28050,
-        "background": "/posts/timeline/archive-vault.png"
+        "background": "/posts/timeline/archive.png"
       },
       "isKeyEvent": false,
       "isLevel": false,
@@ -1647,7 +1648,7 @@
         "category": "MEGA MEAL",
         "startYear": 28140,
         "endYear": 28144,
-        "background": "/posts/timeline/qarnivor-surface.png"
+        "background": "/posts/timeline/linda-sue.png"
       },
       "isKeyEvent": false,
       "isLevel": false,
@@ -1707,7 +1708,7 @@
         "category": "MEGA MEAL",
         "startYear": 28000,
         "endYear": 28100,
-        "background": "/posts/timeline/qarnivor-wasteland.png"
+        "background": "/posts/timeline/witness.png"
       },
       "isKeyEvent": false,
       "isLevel": false,
@@ -1825,7 +1826,7 @@
         "category": "MEGA MEAL",
         "startYear": 28042,
         "endYear": 28042,
-        "background": "/posts/timeline/data-fragments.png"
+        "background": "/posts/timeline/bartender.png"
       },
       "isKeyEvent": false,
       "isLevel": false,
@@ -2011,7 +2012,7 @@
       "collection": "videos",
       "url": "/videos/beyond-the-minds-ai/",
       "title": "Beyond the Minds AI - Now with 4K Tentacles",
-      "description": "An adjacent AI-media parody about inspirational landscape content, tentacles, and the uneasy optimism of generated spectacle.",
+      "description": "Beyond the Minds AI - Now with 4K Tentacles! | Heartwarming Landscapes - with Tentacles",
       "published": "2023-09-29T00:00:00.000Z",
       "updated": null,
       "draft": false,
@@ -2038,8 +2039,8 @@
       "sourcePath": "videos/crateclip-xl-commercial.mdx",
       "collection": "videos",
       "url": "/videos/crateclip-xl-commercial/",
-      "title": "CrateClip XL - Parody Commercial",
-      "description": "A practical-object parody commercial for a milk-crate shelf stabilizer, filed with the consumer goods material because the sales language knows too much.",
+      "title": "CrateClip XL | Commercial Archive",
+      "description": "A Civic Basement Systems commercial record for the CrateClip XL, a 3D-printed milk-crate shelf stabilizer with limited promises and extensive claim denial.",
       "published": "2023-09-24T00:00:00.000Z",
       "updated": null,
       "draft": false,
@@ -2047,8 +2048,8 @@
         "Commercial",
         "Store",
         "CrateClip XL",
-        "Parody",
-        "Consumer Goods"
+        "Consumer Goods",
+        "Civic Basement Systems"
       ],
       "category": "Commercials",
       "image": "https://img.youtube.com/vi/5J-fAKIR_kc/hqdefault.jpg",
@@ -2276,7 +2277,7 @@
       "collection": "products",
       "url": "/store/sad-snax/",
       "title": "Sad Snax",
-      "description": "Sad Snax is a bland, flavor-reduced shelf snack intended for low-expectation situations: late nights, emergency drawers, unplanned office lock-ins, and any moment where eating something is preferable to continuing without ceremony. Texture approximates cardboard. Cardboard has, in some tests, shown more personality.",
+      "description": "Sad Snax is a red, low-flavor nutrient paste in a wrapper that treats opening as a structural disagreement. It waits patiently in emergency kits, outliving better rations, worse plans, and most printed expiration-label technology.",
       "published": null,
       "updated": null,
       "draft": false,
@@ -2303,6 +2304,7 @@
       "draft": false,
       "tags": [],
       "category": "companions",
+      "image": "/store/snuggaloids/snug-ref-22.webp",
       "timelineYear": 27995,
       "timelineEra": "conflict-epoch",
       "timelineLocation": "Planet Qarnivor, Companion Division Catalog",

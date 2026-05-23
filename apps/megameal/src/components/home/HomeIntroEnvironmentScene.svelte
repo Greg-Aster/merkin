@@ -46,6 +46,9 @@ export let titleImageSrc = ''
 export let sceneQuality: SceneQuality = 'high'
 export let onLogoReady: (() => void) | undefined
 export let hoveredScreenIndex = -1
+export let portalVisible = true
+export let motionEnabled = true
+export let logoEffectsEnabled = true
 
 let world: THREE.Group | null = null
 let camera: THREE.PerspectiveCamera | null = null
@@ -677,14 +680,20 @@ function updateScreenOrbit(wheel: number, ease: number) {
 }
 
 useTask(delta => {
-  const time = performance.now() * 0.001
-  const ease = 1 - Math.exp(-delta * 4.8)
-  const pointerX = Number.isFinite(input.x) ? input.x : 0
-  const pointerY = Number.isFinite(input.y) ? input.y : 0
+  if (!portalVisible) return
+
   const wheel = Number.isFinite(input.wheel) ? input.wheel : 0
   effectWheel = wheel
   const introOffsetScreens = getIntroOffsetScreens()
   const selectedIndex = getSelectedScreenIndex(effectWheel)
+  syncBannerToFrontScreen(getBannerSelectedScreenIndex(selectedIndex))
+  syncScreenMediaLoadStates(selectedIndex)
+  if (!motionEnabled) return
+
+  const time = performance.now() * 0.001
+  const ease = 1 - Math.exp(-delta * 4.8)
+  const pointerX = Number.isFinite(input.x) ? input.x : 0
+  const pointerY = Number.isFinite(input.y) ? input.y : 0
   const visualSelectedIndex = getHomeIntroRestedScreenIndex(selectedIndex)
   const visualScrollScreens =
     visualSelectedIndex - primaryScreenIndex + introOffsetScreens
@@ -706,7 +715,7 @@ useTask(delta => {
     logoImpactElapsed >= 0 ? clamp01(logoImpactElapsed / logoImpactDuration) : 1
   const logoImpactStrength =
     logoImpactElapsed >= 0 && logoImpactRaw < 1 ? (1 - logoImpactRaw) ** 2 : 0
-  if (logoImpactElapsed >= 0) {
+  if (logoEffectsEnabled && logoImpactElapsed >= 0 && logoImpactRaw < 1) {
     playLogoImpactSfx(logoIntroStartedAt)
   }
   atmosphereReveal = smoothstep((logoIntroRaw - 0.72) / 0.28)
@@ -937,6 +946,7 @@ useTask(delta => {
 						primary={screen.primary}
 						active={index === activeScreenIndex}
 						shouldLoadMedia={screenMediaLoadStates[index]}
+						{motionEnabled}
 						{sceneQuality}
 					/>
 				</T.Group>
@@ -953,6 +963,7 @@ useTask(delta => {
 			scrollSpan={particleScrollSpan}
 			{atmosphereReveal}
 			densityMultiplier={particleDensityMultiplier}
+			{motionEnabled}
 		/>
 	</T.Group>
 
@@ -974,6 +985,7 @@ useTask(delta => {
 				emitterFrontFacing={true}
 				emitterFrontOffset={1.65}
 				{atmosphereReveal}
+				{motionEnabled}
 			/>
 		</T.Group>
 
@@ -994,6 +1006,7 @@ useTask(delta => {
 				emitterFrontFacing={true}
 				emitterFrontOffset={1.55}
 				{atmosphereReveal}
+				{motionEnabled}
 			/>
 		</T.Group>
 
@@ -1014,6 +1027,7 @@ useTask(delta => {
 				emitterFrontFacing={true}
 				emitterFrontOffset={1.45}
 				{atmosphereReveal}
+				{motionEnabled}
 			/>
 		</T.Group>
 

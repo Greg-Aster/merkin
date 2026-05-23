@@ -15,7 +15,9 @@ export const SITE_AMBIENCE_TRACK_IDS = [
   'lab-drive',
 ] as const
 
-export type SiteAmbienceTrackId = (typeof SITE_AMBIENCE_TRACK_IDS)[number]
+export type SiteAmbienceTrackId =
+  | (typeof SITE_AMBIENCE_TRACK_IDS)[number]
+  | (string & {})
 
 export const AUDIO_SFX_IDS = [
   'select',
@@ -38,6 +40,7 @@ export const AUDIO_SFX_IDS = [
   'portal-hover',
   'portal-drag',
   'portal-cycle',
+  'portal-glitch',
   'portal-impact',
   'portal-activate',
 ] as const

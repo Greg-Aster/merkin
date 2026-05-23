@@ -15,6 +15,10 @@ export let open = false
 export let selectedMedia: ProductMedia | null = null
 export let productName = ''
 export let onClose: () => void
+
+function modelVariant(name: string) {
+  return name.toLowerCase().includes('snuggaloid') ? 'snuggaloid' : 'generic'
+}
 </script>
 
 {#if open}
@@ -35,7 +39,7 @@ export let onClose: () => void
         <div class="featured-product-modal__model">
           <ProceduralModelViewer
             label={selectedMedia.alt || 'Expanded containment render'}
-            variant="snuggaloid"
+            variant={modelVariant(productName)}
             fullscreen={true}
             assetUrl={selectedMedia.src}
           />

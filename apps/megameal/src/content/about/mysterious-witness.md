@@ -17,13 +17,13 @@ socialLinks:
   - name: "Field Reports"
     url: "/posts/"
     icon: "document"
-backgroundImage: "/posts/timeline/qarnivor-wasteland.png"
+backgroundImage: "/posts/timeline/witness.png"
 bannerType: "timeline"
 bannerData:
   category: "MEGA MEAL"
   startYear: 2.8e4
   endYear: 2.81e4
-  background: "/posts/timeline/qarnivor-wasteland.png"
+  background: "/posts/timeline/witness.png"
 ---
 
 <div className="flex flex-col md:flex-row gap-6 mb-8">

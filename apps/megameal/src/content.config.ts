@@ -59,6 +59,15 @@ const productDataPointSchema = z.object({
   value: z.string(),
 })
 
+const ambientAudioSchema = z.object({
+  id: z.string().optional(),
+  src: z.string(),
+  label: z.string(),
+  loop: z.boolean().optional(),
+  volume: z.number().min(0).max(1).optional(),
+  html5: z.boolean().optional(),
+})
+
 const productActionLinkSchema = z.object({
   label: z.string(),
   href: z.string(),
@@ -280,6 +289,9 @@ const productsCollection = defineCollection({
     // Optional badge text override (defaults to availability label)
     badge: z.string().optional(),
     rating: z.number().optional(),
+    // Optional product-owned ambience track. StoreLayout exposes this to the
+    // client audio manager before route-level fallback tracks are considered.
+    ambientAudio: ambientAudioSchema.optional(),
     // Unified media array — replaces image + additionalImages
     // Supports mixed types: image, local webm video, YouTube embed
     media: z.array(mediaAssetSchema).optional(),

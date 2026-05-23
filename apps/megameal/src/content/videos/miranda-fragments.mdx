@@ -16,20 +16,139 @@ isKeyEvent: false
 related:
   - title: "The Miranda Incident"
     href: "/posts/timelines/the-miranda-incident/"
-    eyebrow: "Source File"
+    eyebrow: "Captain's Log"
     image: "/posts/timeline/supernova.png"
-  - title: "MEGA MEAL Movie Trailer Explained"
-    href: "/videos/mega-meal-explained/"
-    eyebrow: "Core Video"
-    image: "/posts/Mega-Meal-Explained/mme-title.jpg"
-  - title: "The Timeline"
-    href: "/timeline/"
-    eyebrow: "Universe Context"
-    image: "/posts/timeline/universe.png"
+  - title: "The Mechanical Observer"
+    href: "/posts/timelines/miranda-bloody-mary/mechanical-observer-account/"
+    eyebrow: "Recovered Data"
+    image: "/posts/timeline/robot.png"
+  - title: "The Perfect Miranda Bloody Mary"
+    href: "/cookbook/perfect-miranda-bloody-mary/"
+    eyebrow: "Recipe Fragment"
+    image: "/posts/timeline/bartender.png"
 ---
 
-## Archive Context
+import ImageWrapper from '../../components/misc/ImageWrapper.astro'
+import '../../styles/features/extracted/review-essay.css'
+import '../../styles/features/extracted/review-essay-evidence.css'
 
-This video sits beside the Miranda Incident materials as a looser, more visual fragment: part trailer, part recovered evidence board, part warning label. It is not a clean explainer. It works more like a damaged exhibit from the same universe, where the MEGA MEAL signal keeps bleeding into unrelated disasters.
+<article className="review-essay review-essay--archive review-essay--miranda" aria-labelledby="miranda-fragments-title">
+  <header className="review-essay__masthead">
+    <p className="review-essay__kicker">Miranda Temporal Archive / Mixed Media Transmission</p>
+    <h2 id="miranda-fragments-title" className="review-essay__title">The Video Is Only the Recovered Signal</h2>
+    <p className="review-essay__dek">Miranda Fragments belongs beside the long incident record, witness accounts, recipe reconstruction, and classified archive notices. The video is the transmission; the surrounding files are the evidence trail that makes it matter.</p>
+  </header>
 
-The archive treats it as adjacent core media because the Miranda event is one of the places where food, causality, and corporate myth become difficult to separate.
+  <figure className="review-essay__hero">
+    <ImageWrapper
+      src="/posts/timeline/supernova.png"
+      alt="The Miranda system collapsing into a stellar catastrophe"
+      class="review-essay__image review-essay__image--hero"
+      loading="eager"
+      sizes="(max-width: 1024px) 100vw, 1100px"
+    />
+    <figcaption>
+      The fragment is not a clean explainer. It is a transmission recovered from the edge of a catastrophe: a star, a saloon, a drink order, and too many witnesses remembering incompatible versions of the same moment.
+    </figcaption>
+  </figure>
+
+  <section className="review-essay__chapter">
+    <div className="review-essay__chapter-copy">
+      <p className="review-essay__section-label">Archive Context</p>
+      <h3>A short video attached to a much larger case file</h3>
+      <p>The current video page had been reduced to a summary, which made the Miranda material feel disconnected from the archive it came from. The legacy file makes the intended structure clearer: this transmission sits downstream of Captain Zhao's logs, the Bibimbap Saloon data, the old man's reconstructed testimony, and the Perfect Miranda Bloody Mary.</p>
+      <p>That supporting material should not be hidden behind one generic timeline link. The Miranda story works because each document contradicts the last one in a different way.</p>
+    </div>
+    <div className="review-essay__image-grid review-essay__image-grid--stacked">
+      <ImageWrapper src="/posts/timeline/singularity-conflict.png" alt="Singularity conflict archive image" class="review-essay__image" />
+    </div>
+  </section>
+
+  <aside className="review-essay__pullquote">
+    <blockquote>
+      <p>"Some say you can still taste the celery salt in the nebula debris."</p>
+      <cite>Captain Helena Zhao, Salvage Vessel Second Breakfast</cite>
+    </blockquote>
+  </aside>
+
+  <section className="review-essay__chapter review-essay__chapter--split-notes" aria-label="Miranda fragment reading notes">
+    <div className="review-essay__note">
+      <p className="review-essay__section-label">What the Fragment Shows</p>
+      <h3>The signal behaves like evidence, not promotion</h3>
+      <p>The mixed-media form is useful because Miranda is not one story. It is a damaged chain of custody: stellar collapse, temporal loops, dream-state testimony, corrupted service logs, and a recipe that appears to have become a causal anchor.</p>
+    </div>
+
+    <div className="review-essay__note">
+      <p className="review-essay__section-label">What It Needs Around It</p>
+      <h3>The surrounding documents carry the mystery</h3>
+      <p>Without the supporting files, the video reads like a loose mood piece. With them, it becomes the visible shard of a larger archive: the mechanical witness, the unreliable human reconstruction, the suspected temporal visitor, and the classified records that refuse to stay closed.</p>
+    </div>
+  </section>
+
+  <section className="review-essay__evidence" aria-label="Miranda supporting files">
+    <div className="review-essay__evidence-heading">
+      <p className="review-essay__section-label">Recovered Files</p>
+      <h3>The documents that should sit beside the video</h3>
+    </div>
+
+    <div className="review-essay__evidence-grid">
+      <a href="/posts/timelines/the-miranda-incident/" className="review-essay__evidence-card" data-sfx-hover="hover-soft" data-sfx-click="soft">
+        <ImageWrapper src="/posts/timeline/supernova.png" alt="" class="review-essay__evidence-image" />
+        <span className="review-essay__evidence-label">Captain's Log</span>
+        <strong>The Miranda Incident</strong>
+        <span>Captain Zhao's primary record of the stellar collapse, debris field, and impossible afterimages.</span>
+      </a>
+
+      <a href="/posts/timelines/miranda-bloody-mary/" className="review-essay__evidence-card" data-sfx-hover="hover-soft" data-sfx-click="soft">
+        <ImageWrapper src="/posts/timeline/singularity-conflict.png" alt="" class="review-essay__evidence-image" />
+        <span className="review-essay__evidence-label">Historical Analysis</span>
+        <strong>The Iron Bombing of Miranda</strong>
+        <span>The broader scientific file: stellar acceleration, causal isolation bubbles, and extraction rumors.</span>
+      </a>
+
+      <a href="/posts/timelines/miranda-bloody-mary/mechanical-observer-account/" className="review-essay__evidence-card" data-sfx-hover="hover-soft" data-sfx-click="soft">
+        <ImageWrapper src="/posts/timeline/robot.png" alt="" class="review-essay__evidence-image" />
+        <span className="review-essay__evidence-label">Recovered Data</span>
+        <strong>The Mechanical Observer</strong>
+        <span>RW-78's corrupted service logs from 1,342 iterations inside the Bibimbap Saloon loop.</span>
+      </a>
+
+      <a href="/posts/timelines/miranda-bloody-mary/old-mans-account/" className="review-essay__evidence-card" data-sfx-hover="hover-soft" data-sfx-click="soft">
+        <ImageWrapper src="/posts/timeline/oldman.png" alt="" class="review-essay__evidence-image" />
+        <span className="review-essay__evidence-label">AI Reconstruction</span>
+        <strong>The Old Man's Tale</strong>
+        <span>Fruzzy's simulated memory of a card game, a purple force, and a time loop that will not stay fixed.</span>
+      </a>
+
+      <a href="/posts/timelines/miranda-bloody-mary/sandwich-thief-account/" className="review-essay__evidence-card" data-sfx-hover="hover-soft" data-sfx-click="soft">
+        <ImageWrapper src="/posts/timeline/sandwich-thief.png" alt="" class="review-essay__evidence-image" />
+        <span className="review-essay__evidence-label">Unverified Dossier</span>
+        <strong>The Sandwich Thief's Journey</strong>
+        <span>A speculative file on the fedora-wearing visitor who may have known the collapse was coming.</span>
+      </a>
+
+      <a href="/cookbook/perfect-miranda-bloody-mary/" className="review-essay__evidence-card" data-sfx-hover="hover-soft" data-sfx-click="soft">
+        <ImageWrapper src="/posts/timeline/bartender.png" alt="" class="review-essay__evidence-image" />
+        <span className="review-essay__evidence-label">Recipe Fragment</span>
+        <strong>The Perfect Miranda Bloody Mary</strong>
+        <span>The reconstructed cocktail that turns culinary folklore into a temporal hazard.</span>
+      </a>
+    </div>
+  </section>
+
+  <section className="review-essay__coda review-essay__coda--with-summary">
+    <div>
+      <p className="review-essay__section-label">Reading Order</p>
+      <h3>The fragment should point outward</h3>
+      <p>This page should function as a video entry and an archive junction. Watch the transmission first, then move into the Miranda Incident logs and the supporting files. The point is not to solve the event. The point is to show how much of the event survives only as incompatible records.</p>
+    </div>
+    <aside className="review-essay__archive-summary" aria-label="Miranda archive status">
+      <p className="review-essay__section-label">Archive Status</p>
+      <ul>
+        <li>Primary record restored</li>
+        <li>Witness files linked</li>
+        <li>Recipe fragment surfaced</li>
+      </ul>
+    </aside>
+  </section>
+</article>

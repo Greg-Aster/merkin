@@ -1,4 +1,9 @@
 <script lang="ts">
+import {
+  buildYouTubeEmbedUrl,
+  youtubeEmbedAllow,
+  youtubeEmbedReferrerPolicy,
+} from '../../../../utils/youtube-embed'
 import { marked } from 'marked'
 import { createEventDispatcher, onMount } from 'svelte'
 import { generateSlugFromTitle } from '../utils/postUtils'
@@ -455,11 +460,15 @@ onMount(() => {
               <p class="text-xs mb-1 text-neutral-700 dark:text-neutral-300">Video Preview:</p>
               <div class="relative pt-[56.25%] bg-black">
                 <iframe 
-                  src={`https://www.youtube.com/embed/${post.banner.videoId}?autoplay=0&controls=1`}
+                  src={buildYouTubeEmbedUrl(post.banner.videoId, {
+                    autoplay: false,
+                    controls: true,
+                  })}
                   title="YouTube video preview" 
                   class="absolute top-0 left-0 w-full h-full"
                   frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
+                  allow={youtubeEmbedAllow}
+                  referrerpolicy={youtubeEmbedReferrerPolicy}
                 ></iframe>
               </div>
             </div>

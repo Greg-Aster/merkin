@@ -31,6 +31,8 @@
 
 import type { ImageBannerData } from './types'
 
+const DEFAULT_IMAGE_BANNER_URL = '/assets/banner/posters/universe-poster.webp'
+
 // =====================================================================
 // IMAGE BANNER DATA CONFIGURATION
 // =====================================================================
@@ -52,7 +54,7 @@ import type { ImageBannerData } from './types'
  * - CDN URLs: 'https://cdn.example.com/optimized/banner.webp'
  */
 export const imageBannerData: ImageBannerData = {
-  imageUrl: '/path/to/your/default/image.jpg', // Replace with actual image path
+  imageUrl: DEFAULT_IMAGE_BANNER_URL,
 }
 
 // =====================================================================
@@ -140,7 +142,7 @@ export const imageDisplayConfig = {
 export const imageFallbackConfig = {
   enabled: true, // Enable fallback when image fails
   fallbackType: 'gradient' as const, // 'image', 'color', or 'gradient'
-  fallbackImage: '/assets/banner/fallback.jpg', // Fallback image path
+  fallbackImage: DEFAULT_IMAGE_BANNER_URL, // Fallback image path
   fallbackColor: '#1f2937', // Fallback solid color
   fallbackGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', // Fallback gradient
   showErrorMessage: false, // Show error message to users
@@ -262,10 +264,6 @@ export function validateImageBannerConfig(config: ImageBannerData): {
   // Check if image URL is provided
   if (!config.imageUrl || config.imageUrl.trim() === '') {
     errors.push('Image URL is required for image banner')
-  } else if (config.imageUrl === '/path/to/your/default/image.jpg') {
-    errors.push(
-      'Default placeholder image URL detected. Please set a real image URL.',
-    )
   } else {
     // Validate URL format
     try {

@@ -112,12 +112,12 @@ const videoBannerPost = {
             href={item.href}
             data-sfx-hover="hover-soft"
             data-sfx-click="soft"
-            class="card-base btn-card rounded-2xl w-full min-h-[6rem] overflow-hidden active:scale-95 grid grid-cols-[7rem_minmax(0,1fr)] gap-3 p-3 text-left md:grid-cols-1 md:grid-rows-[auto_1fr]"
+            class="card-base btn-card rounded-2xl w-full min-h-[6rem] overflow-hidden active:scale-95 !grid grid-cols-[7rem_minmax(0,1fr)] gap-3 p-3 text-left md:grid-cols-1 md:grid-rows-[auto_1fr]"
           >
             {item.image && (
               <img
                 src={item.image}
-                alt=""
+                alt={`${item.title} thumbnail`}
                 loading="lazy"
                 decoding="async"
                 class="aspect-video w-full rounded-xl object-cover"

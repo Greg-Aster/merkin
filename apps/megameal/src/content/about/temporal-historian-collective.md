@@ -17,7 +17,7 @@ socialLinks:
   - name: "Temporal Studies"
     url: "/posts/"
     icon: "clock"
-backgroundImage: "/posts/timeline/collective-consciousness.png"
+backgroundImage: "/posts/timeline/HistorianCollective.png"
 bannerType: "timeline"
 bannerData:
   category: "MEGA MEAL"

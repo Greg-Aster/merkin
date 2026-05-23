@@ -4,6 +4,7 @@ import {
   getTrackForPathname,
   siteAudioConfig,
 } from '../config/audio'
+import { markSiteAudioUnlocked } from './site-audio-activation'
 
 declare global {
   interface Window {
@@ -40,6 +41,59 @@ export interface SiteAudioState {
 }
 
 type SiteAudioListener = (state: SiteAudioState) => void
+type YouTubeEngagementAction = 'play' | 'pause' | 'ended' | 'cued'
+type PageAmbientTrackConfig = Omit<SiteAudioTrackConfig, 'routes'> & {
+  routes?: string[]
+}
+type VideoAnalyticsWindow = Window & {
+  plausible?: (
+    eventName: string,
+    options?: { props?: Record<string, string> },
+  ) => void
+  gtag?: (
+    command: 'event',
+    eventName: string,
+    params: Record<string, string>,
+  ) => void
+}
+
+export function resolvePageAmbientTrackConfig(
+  payloadText: string | null | undefined,
+  pathname: string,
+): SiteAudioTrackConfig | null {
+  if (!payloadText) return null
+
+  try {
+    const parsed = JSON.parse(payloadText) as PageAmbientTrackConfig
+    if (!parsed || typeof parsed !== 'object') return null
+    if (
+      typeof parsed.src !== 'string' ||
+      parsed.src.length === 0 ||
+      typeof parsed.label !== 'string' ||
+      parsed.label.length === 0
+    ) {
+      return null
+    }
+
+    return {
+      id:
+        typeof parsed.id === 'string' && parsed.id.length > 0
+          ? parsed.id
+          : `page-ambient:${pathname.replace(/\/+$/, '') || '/'}`,
+      src: parsed.src,
+      label: parsed.label,
+      routes: [pathname],
+      loop: parsed.loop,
+      volume:
+        typeof parsed.volume === 'number'
+          ? Math.min(1, Math.max(0, parsed.volume))
+          : undefined,
+      html5: parsed.html5,
+    }
+  } catch {
+    return null
+  }
+}
 
 class SiteAudioManager {
   private enabled = siteAudioConfig.enabledByDefault
@@ -116,7 +170,7 @@ class SiteAudioManager {
       this.stopCurrentTrack()
     } else if (typeof window !== 'undefined') {
       this.pendingPathname = window.location.pathname
-      if (!this.suspended && this.audioUnlocked) {
+      if (!this.suspended && this.hasUnlockedAudio()) {
         this.syncForPath(window.location.pathname, true)
       }
     }
@@ -166,7 +220,9 @@ class SiteAudioManager {
       return
     }
 
-    if ((!this.audioUnlocked && !userInitiated) || this.suspended) {
+    const hasUnlockedAudio = this.hasUnlockedAudio()
+
+    if ((!hasUnlockedAudio && !userInitiated) || this.suspended) {
       if (!this.suspended) {
         this.stopCurrentTrack()
       }
@@ -174,16 +230,16 @@ class SiteAudioManager {
       return
     }
 
-    const nextTrack = getTrackForPathname(pathname)
+    const nextTrack = this.getTrackForCurrentPage(pathname)
     if (!nextTrack) {
       this.stopCurrentTrack()
       this.emit()
       return
     }
 
-    if (this.currentTrack?.id === nextTrack.id && this.currentHowl) {
+    if (this.currentHowl && this.isCurrentTrack(nextTrack)) {
       if (
-        (userInitiated || this.audioUnlocked) &&
+        (userInitiated || hasUnlockedAudio) &&
         !this.suspended &&
         !this.currentHowl.playing()
       ) {
@@ -195,6 +251,32 @@ class SiteAudioManager {
 
     this.swapTrack(nextTrack)
     this.emit()
+  }
+
+  private getTrackForCurrentPage(pathname: string): SiteAudioTrackConfig | null {
+    return this.readPageAmbientTrack(pathname) ?? getTrackForPathname(pathname)
+  }
+
+  private readPageAmbientTrack(pathname: string): SiteAudioTrackConfig | null {
+    if (typeof document === 'undefined') return null
+
+    const payload = document.getElementById('megameal-page-ambient-track')
+    if (!payload) return null
+
+    return resolvePageAmbientTrackConfig(payload.textContent, pathname)
+  }
+
+  private isCurrentTrack(nextTrack: SiteAudioTrackConfig): boolean {
+    if (!this.currentTrack) return false
+
+    return (
+      this.currentTrack.id === nextTrack.id &&
+      this.currentTrack.src === nextTrack.src &&
+      this.currentTrack.label === nextTrack.label &&
+      this.currentTrack.loop === nextTrack.loop &&
+      this.currentTrack.volume === nextTrack.volume &&
+      this.currentTrack.html5 === nextTrack.html5
+    )
   }
 
   private swapTrack(nextTrack: SiteAudioTrackConfig): void {
@@ -239,7 +321,7 @@ class SiteAudioManager {
     nextHowl.once('play', () => {
       nextHowl.fade(0, targetVolume, siteAudioConfig.fadeDurationMs)
     })
-    if (this.audioUnlocked && !this.suspended) {
+    if (this.hasUnlockedAudio() && !this.suspended) {
       nextHowl.play()
     }
 
@@ -253,25 +335,45 @@ class SiteAudioManager {
     }
   }
 
-  async unlockFromGesture(): Promise<void> {
-    if (typeof window === 'undefined') return
+  async unlockFromGesture(): Promise<boolean> {
+    if (typeof window === 'undefined') return false
+
+    if (this.hasUnlockedAudio()) {
+      this.setAudioUnlocked()
+      if (this.enabled && this.pendingPathname && !this.suspended) {
+        this.syncForPath(this.pendingPathname, true)
+      } else {
+        this.emit()
+      }
+
+      return true
+    }
 
     try {
       const ctx = Howler.ctx
       if (ctx && ctx.state === 'suspended') {
         await ctx.resume()
       }
-      this.audioUnlocked = true
+      if (ctx ? ctx.state === 'running' : true) {
+        this.setAudioUnlocked()
+      }
     } catch (error) {
       console.warn('Site audio unlock failed:', error)
-      return
+      return false
     }
 
-    if (this.enabled && this.pendingPathname && !this.suspended) {
+    if (
+      this.audioUnlocked &&
+      this.enabled &&
+      this.pendingPathname &&
+      !this.suspended
+    ) {
       this.syncForPath(this.pendingPathname, true)
     } else {
       this.emit()
     }
+
+    return this.audioUnlocked
   }
 
   suspendAmbience(reason = 'external-media'): void {
@@ -293,7 +395,7 @@ class SiteAudioManager {
     this.suspended = false
     this.suspensionReason = null
 
-    if (this.enabled && this.audioUnlocked) {
+    if (this.enabled && this.hasUnlockedAudio()) {
       if (this.currentHowl && this.currentTrack) {
         this.resumeCurrentTrack()
       } else if (this.pendingPathname) {
@@ -415,6 +517,20 @@ class SiteAudioManager {
       siteAudioConfig.sfxVolumeStorageKey,
       String(volume),
     )
+  }
+
+  private hasUnlockedAudio(): boolean {
+    if (this.audioUnlocked) return true
+
+    if (Howler.ctx?.state !== 'running') return false
+
+    this.setAudioUnlocked()
+    return true
+  }
+
+  private setAudioUnlocked(): void {
+    this.audioUnlocked = true
+    markSiteAudioUnlocked()
   }
 
   private resolveTrackVolume(track: SiteAudioTrackConfig): number {
@@ -618,24 +734,74 @@ class SiteAudioManager {
     if (!this.youtubeApiPromise) {
       this.youtubeApiPromise = new Promise<void>((resolve, reject) => {
         const existingScript = document.querySelector<HTMLScriptElement>(
-          'script[data-megameal-youtube-api="true"]',
+          'script[data-megameal-youtube-api="true"], script[src*="youtube.com/iframe_api"]',
         )
         const previousReady = window.onYouTubeIframeAPIReady
+        let waitTimeout: number | null = null
+        let remainingChecks = 200
+        let settled = false
 
-        window.onYouTubeIframeAPIReady = () => {
-          previousReady?.()
-          resolve()
+        const cleanup = () => {
+          if (waitTimeout !== null) {
+            window.clearTimeout(waitTimeout)
+            waitTimeout = null
+          }
+
+          if (window.onYouTubeIframeAPIReady === handleReady) {
+            window.onYouTubeIframeAPIReady = previousReady
+          }
         }
 
-        if (existingScript) return
+        const settle = (callback: () => void) => {
+          if (settled) return
+
+          settled = true
+          cleanup()
+          callback()
+        }
+
+        const waitForPlayer = () => {
+          if (waitTimeout !== null) {
+            window.clearTimeout(waitTimeout)
+            waitTimeout = null
+          }
+
+          if (window.YT?.Player) {
+            settle(resolve)
+            return
+          }
+
+          remainingChecks -= 1
+          if (remainingChecks <= 0) {
+            settle(() =>
+              reject(new Error('Timed out waiting for YouTube iframe API')),
+            )
+            return
+          }
+
+          waitTimeout = window.setTimeout(waitForPlayer, 50)
+        }
+
+        const handleReady = () => {
+          previousReady?.()
+          waitForPlayer()
+        }
+
+        window.onYouTubeIframeAPIReady = handleReady
+
+        if (existingScript) {
+          waitForPlayer()
+          return
+        }
 
         const script = document.createElement('script')
         script.src = 'https://www.youtube.com/iframe_api'
         script.async = true
         script.dataset.megamealYoutubeApi = 'true'
         script.onerror = () =>
-          reject(new Error('Failed to load YouTube iframe API'))
+          settle(() => reject(new Error('Failed to load YouTube iframe API')))
         document.head.appendChild(script)
+        waitForPlayer()
       }).catch(error => {
         this.youtubeApiPromise = null
         console.warn('Unable to initialize YouTube iframe API:', error)
@@ -649,8 +815,8 @@ class SiteAudioManager {
     const youtubeApi = window.YT
     if (this.boundYouTubeFrames.has(frame) || !youtubeApi?.Player) return
 
-    const normalizedSrc = this.normalizeYouTubeSrc(frame.src)
-    if (normalizedSrc !== frame.src) {
+    if (!this.hasNormalizedYouTubeSrc(frame.src)) {
+      const normalizedSrc = this.normalizeYouTubeSrc(frame.src)
       frame.src = normalizedSrc
     }
 
@@ -667,12 +833,20 @@ class SiteAudioManager {
         onStateChange: (event: { data: number }) => {
           if (event.data === youtubeApi.PlayerState.PLAYING) {
             this.activeYouTubePlayers.add(frame.id)
+            this.emitYouTubeEngagement(frame, 'play')
           } else if (
             event.data === youtubeApi.PlayerState.PAUSED ||
             event.data === youtubeApi.PlayerState.ENDED ||
             event.data === youtubeApi.PlayerState.CUED
           ) {
             this.activeYouTubePlayers.delete(frame.id)
+            if (event.data === youtubeApi.PlayerState.PAUSED) {
+              this.emitYouTubeEngagement(frame, 'pause')
+            } else if (event.data === youtubeApi.PlayerState.ENDED) {
+              this.emitYouTubeEngagement(frame, 'ended')
+            } else {
+              this.emitYouTubeEngagement(frame, 'cued')
+            }
           }
 
           this.syncEmbeddedMediaSuspension()
@@ -710,6 +884,82 @@ class SiteAudioManager {
       return url.toString()
     } catch {
       return src
+    }
+  }
+
+  private hasNormalizedYouTubeSrc(src: string): boolean {
+    try {
+      const url = new URL(src, window.location.origin)
+      if (
+        url.hostname !== 'www.youtube.com' &&
+        url.hostname !== 'www.youtube-nocookie.com'
+      ) {
+        return true
+      }
+
+      return (
+        url.searchParams.get('enablejsapi') === '1' &&
+        url.searchParams.get('playsinline') === '1' &&
+        url.searchParams.get('origin') === window.location.origin
+      )
+    } catch {
+      return true
+    }
+  }
+
+  private emitYouTubeEngagement(
+    frame: HTMLIFrameElement,
+    action: YouTubeEngagementAction,
+  ): void {
+    if (typeof window === 'undefined') return
+
+    const detail = {
+      action,
+      videoId: this.extractYouTubeVideoId(frame.src),
+      title: frame.title.replace(/\s+-\s+YouTube video player$/, ''),
+      src: frame.src,
+      pagePath: window.location.pathname,
+      source:
+        frame.dataset.videoBannerIframe === 'true'
+          ? 'video-banner'
+          : 'youtube-embed',
+    }
+
+    window.dispatchEvent(
+      new CustomEvent('megameal:youtube-engagement', { detail }),
+    )
+
+    this.trackVideoAnalytics(`youtube_${action}`, {
+      action: detail.action,
+      video_id: detail.videoId,
+      video_title: detail.title,
+      page_path: detail.pagePath,
+      source: detail.source,
+    })
+  }
+
+  private trackVideoAnalytics(
+    eventName: string,
+    props: Record<string, string>,
+  ): void {
+    const analyticsWindow = window as VideoAnalyticsWindow
+
+    try {
+      analyticsWindow.plausible?.(eventName, { props })
+      analyticsWindow.gtag?.('event', eventName, props)
+    } catch {
+      // Analytics providers must never block media playback.
+    }
+  }
+
+  private extractYouTubeVideoId(src: string): string {
+    try {
+      const url = new URL(src, window.location.origin)
+      if (!url.pathname.startsWith('/embed/')) return ''
+
+      return url.pathname.split('/embed/')[1]?.split('/')[0] ?? ''
+    } catch {
+      return ''
     }
   }
 

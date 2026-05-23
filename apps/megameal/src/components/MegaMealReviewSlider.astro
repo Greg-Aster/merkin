@@ -50,16 +50,14 @@ const defaultIndex = modes.findIndex(m => m.id === defaultMode)
       <div class="review-mode-slider__track" aria-hidden="true">
         <div class="review-mode-slider__fill" data-fill></div>
         {modes.map((mode, i) => (
-          <button
-            type="button"
+          <span
             class="review-mode-slider__stop"
             data-stop={i}
             data-mode={mode.id}
-            tabindex="-1"
             aria-hidden="true"
           >
             <span class="review-mode-slider__stop-dot"></span>
-          </button>
+          </span>
         ))}
       </div>
 

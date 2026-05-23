@@ -144,24 +144,28 @@ import '../../styles/features/facts-widget/motion-responsive.css'
           class:list={['facts-widget-media', !(initialFact.image || initialFact.video) && 'is-hidden']}
           data-fact-media
         >
-          <video
-            class:list={['facts-widget-media-video', !initialFact.video && 'is-hidden']}
-            data-fact-media-video
-            autoplay
-            loop
-            muted
-            playsinline
-            preload="none"
-            src={initialFact.video || ''}
-          ></video>
-          <img
-            class:list={['facts-widget-media-img', !initialFact.image && 'is-hidden']}
-            data-fact-media-img
-            src={initialFact.image || ''}
-            alt={initialFact.headline || ''}
-            loading="lazy"
-            decoding="async"
-          />
+          {initialFact.video && (
+            <video
+              class="facts-widget-media-video"
+              data-fact-media-video
+              autoplay
+              loop
+              muted
+              playsinline
+              preload="none"
+              src={initialFact.video}
+            ></video>
+          )}
+          {initialFact.image && (
+            <img
+              class="facts-widget-media-img"
+              data-fact-media-img
+              src={initialFact.image}
+              alt={initialFact.headline || ''}
+              loading="lazy"
+              decoding="async"
+            />
+          )}
         </div>
 
         <p class="facts-widget-text" data-fact-text>{initialFact.text}</p>
@@ -257,8 +261,8 @@ import '../../styles/features/facts-widget/motion-responsive.css'
     const sponsorEl = widget.querySelector('[data-fact-sponsor]')
     const finePrintEl = widget.querySelector('[data-fact-fineprint]')
     const mediaEl = widget.querySelector('[data-fact-media]')
-    const mediaVideoEl = widget.querySelector('[data-fact-media-video]')
-    const mediaImgEl = widget.querySelector('[data-fact-media-img]')
+    let mediaVideoEl = widget.querySelector('[data-fact-media-video]')
+    let mediaImgEl = widget.querySelector('[data-fact-media-img]')
     const cookieActionsEl = widget.querySelector('[data-fact-cookie-actions]')
     const cookieChoiceEls = Array.from(widget.querySelectorAll('[data-fact-cookie-choice]'))
     const frameEl = widget.querySelector('.facts-widget-frame')
@@ -288,6 +292,36 @@ import '../../styles/features/facts-widget/motion-responsive.css'
       Explainer: '/posts/explainer/',
       Timeline: '/timeline/',
       'Mega-Meal-3': '/videos/qarnivor-snuggloid-emergence/',
+    }
+
+    const ensureMediaVideo = () => {
+      if (mediaVideoEl || !mediaEl) return mediaVideoEl
+
+      mediaVideoEl = document.createElement('video')
+      mediaVideoEl.className = 'facts-widget-media-video is-hidden'
+      mediaVideoEl.dataset.factMediaVideo = ''
+      mediaVideoEl.autoplay = true
+      mediaVideoEl.loop = true
+      mediaVideoEl.muted = true
+      mediaVideoEl.defaultMuted = true
+      mediaVideoEl.playsInline = true
+      mediaVideoEl.preload = 'none'
+      mediaEl.prepend(mediaVideoEl)
+
+      return mediaVideoEl
+    }
+
+    const ensureMediaImage = () => {
+      if (mediaImgEl || !mediaEl) return mediaImgEl
+
+      mediaImgEl = document.createElement('img')
+      mediaImgEl.className = 'facts-widget-media-img is-hidden'
+      mediaImgEl.dataset.factMediaImg = ''
+      mediaImgEl.loading = 'lazy'
+      mediaImgEl.decoding = 'async'
+      mediaEl.append(mediaImgEl)
+
+      return mediaImgEl
     }
 
     const resolveHref = fact => {
@@ -338,29 +372,37 @@ import '../../styles/features/facts-widget/motion-responsive.css'
         finePrintEl.classList.add('is-hidden')
       }
 
-      if (mediaEl && mediaVideoEl && mediaImgEl) {
+      if (mediaEl) {
         if (fact.video) {
-          mediaVideoEl.setAttribute('src', fact.video)
-          mediaVideoEl.classList.remove('is-hidden')
-          mediaImgEl.classList.add('is-hidden')
+          const videoEl = ensureMediaVideo()
+          const imageEl = mediaImgEl
+          if (!videoEl) return
+
+          videoEl.setAttribute('src', fact.video)
+          videoEl.classList.remove('is-hidden')
+          imageEl?.classList.add('is-hidden')
           mediaEl.classList.remove('is-hidden')
-          mediaVideoEl.defaultMuted = true
-          mediaVideoEl.muted = true
-          mediaVideoEl.playsInline = true
-          mediaVideoEl.load()
-          mediaVideoEl.play().catch(() => {})
+          videoEl.defaultMuted = true
+          videoEl.muted = true
+          videoEl.playsInline = true
+          videoEl.load()
+          videoEl.play().catch(() => {})
         } else if (fact.image) {
-          mediaImgEl.setAttribute('src', fact.image)
-          mediaImgEl.setAttribute('alt', fact.headline || '')
-          mediaImgEl.classList.remove('is-hidden')
-          mediaVideoEl.classList.add('is-hidden')
-          mediaVideoEl.pause()
+          const imageEl = ensureMediaImage()
+          if (!imageEl) return
+
+          imageEl.setAttribute('src', fact.image)
+          imageEl.setAttribute('alt', fact.headline || '')
+          imageEl.classList.remove('is-hidden')
+          mediaVideoEl?.classList.add('is-hidden')
+          mediaVideoEl?.pause()
           mediaEl.classList.remove('is-hidden')
         } else {
-          mediaVideoEl.pause()
-          mediaVideoEl.removeAttribute('src')
-          mediaVideoEl.classList.add('is-hidden')
-          mediaImgEl.classList.add('is-hidden')
+          mediaVideoEl?.pause()
+          mediaVideoEl?.removeAttribute('src')
+          mediaVideoEl?.classList.add('is-hidden')
+          mediaImgEl?.removeAttribute('src')
+          mediaImgEl?.classList.add('is-hidden')
           mediaEl.classList.add('is-hidden')
         }
       }

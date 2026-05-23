@@ -17,13 +17,13 @@ socialLinks:
   - name: "Final Articles"
     url: "/posts/"
     icon: "radio"
-backgroundImage: "/posts/timeline/qarnivor-surface.png"
+backgroundImage: "/posts/timeline/linda-sue.png"
 bannerType: "timeline"
 bannerData:
   category: "MEGA MEAL"
   startYear: 2.814e4
   endYear: 2.8144e4
-  background: "/posts/timeline/qarnivor-surface.png"
+  background: "/posts/timeline/linda-sue.png"
 ---
 
   <div className="md:w-2/3">

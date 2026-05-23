@@ -1,4 +1,5 @@
 <script lang="ts">
+import { extractYouTubeVideoId } from '@merkin/blog-core/utils/youtube-embed'
 import { onMount } from 'svelte'
 import { cart } from '../../stores/cartStore'
 import {
@@ -28,6 +29,7 @@ export let showBannerControls = true
 export let showFullProductLink = true
 export let kickerLabel = 'Featured Product'
 export let relatedProducts: RelatedProduct[] = []
+export let embedOrigin: string | undefined = undefined
 
 let selectedIndex = 0
 let activePanel: FeaturedProductPanel | null = null
@@ -161,8 +163,8 @@ function formatCurrency(value?: number) {
 function thumbnailFor(media: ProductMedia) {
   if (media.thumbnail) return media.thumbnail
   if (media.poster) return media.poster
-  if (media.type === 'iframe' && media.src.includes('youtube.com/embed/')) {
-    const videoId = media.src.split('/embed/')[1]?.split('?')[0]
+  if (media.type === 'iframe') {
+    const videoId = extractYouTubeVideoId(media.src)
     if (videoId) return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
   }
   return media.src
@@ -344,14 +346,12 @@ onMount(() => {
       {selectMedia}
       {thumbnailFor}
       {openZoom}
+      {embedOrigin}
     />
 
     <FeaturedProductPurchaseSheet
       {product}
       {currentTone}
-      {activePanel}
-      {hasIngredientsPanel}
-      {hasAssurancePanel}
       {displayedPriceText}
       priceDriftActive={Boolean(priceDriftQuirk)}
       {priceGlitching}
@@ -361,9 +361,62 @@ onMount(() => {
       {ctaFeedback}
       {showFullProductLink}
       {renderStars}
-      {togglePanel}
       {handlePrimaryAction}
     />
+  </div>
+
+  <div class="featured-product-detail-nav">
+    <div
+      class="featured-product-panel-actions featured-product-panel-actions--full"
+      aria-label="Product detail sections"
+    >
+      <button
+        type="button"
+        class:active={activePanel === 'specifications'}
+        onclick={() => togglePanel('specifications')}
+      >
+        Specifications
+      </button>
+      {#if hasIngredientsPanel}
+        <button
+          type="button"
+          class:active={activePanel === 'ingredients'}
+          onclick={() => togglePanel('ingredients')}
+        >
+          Ingredients
+        </button>
+      {/if}
+      <button
+        type="button"
+        class:active={activePanel === 'qanda'}
+        onclick={() => togglePanel('qanda')}
+      >
+        Q&A
+      </button>
+      <button
+        type="button"
+        class:active={activePanel === 'reviews'}
+        onclick={() => togglePanel('reviews')}
+      >
+        Reviews
+      </button>
+      {#if hasAssurancePanel}
+        <button
+          type="button"
+          class:active={activePanel === 'assurance'}
+          onclick={() => togglePanel('assurance')}
+        >
+          Assurance
+        </button>
+      {/if}
+      <button
+        type="button"
+        class:active={activePanel === 'warnings'}
+        onclick={() => togglePanel('warnings')}
+      >
+        Warnings
+      </button>
+    </div>
   </div>
 
   {#if activePanel}

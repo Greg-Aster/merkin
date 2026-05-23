@@ -3,6 +3,10 @@ import { Image } from "astro:assets";
 import { siteConfig } from "@/config/config";
 import { Icon } from "astro-icon/components";
 import { url } from "../../utils/url-utils";
+import {
+	buildYouTubeEmbedUrl,
+	youtubeEmbedReferrerPolicy,
+} from "../../utils/youtube-embed";
 import ImageWrapper from "../misc/ImageWrapper.astro";
 import TimelineController from "../timeline/TimelineBanner.astro";
 import { resolveLegacyBannerScene } from "./legacySceneRegistry";
@@ -194,20 +198,20 @@ const hasAssistantBanner = scene?.id === "assistant";
 const hasCookbookBanner = scene?.id === "cookbook";
 const hasArchiveBanner = scene?.id === "archive";
 const hasReaderBanner = scene?.id === "reader";
-const videoBannerId =
+const videoBannerData =
 	hasPostBanner && post?.data?.bannerType === "video"
-		? post.data.bannerData?.videoId
-		: bannerDataSources.videoBannerData?.videoId;
-const videoBannerParams = new URLSearchParams({
-	autoplay: "0",
-	mute: "0",
-	controls: "1",
-	enablejsapi: "1",
-	playsinline: "1",
-	rel: "0",
-	modestbranding: "1",
-	iv_load_policy: "3",
-});
+		? post.data.bannerData
+		: bannerDataSources.videoBannerData;
+const videoBannerId =
+	videoBannerData?.videoId;
+const videoBannerSrc = videoBannerId
+	? buildYouTubeEmbedUrl(videoBannerId, {
+			controls: true,
+			mute: false,
+			origin: Astro.url.origin,
+		})
+	: "";
+const videoBannerTitle = title || post?.data?.title || "YouTube video";
 const transparentPixel =
 	"data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
 const standardBannerEntries = bannerConfig.standardBannerConfig.bannerList
@@ -239,14 +243,18 @@ const portalSlideIndexOffset =
     <div class="banner-container-video">
       <div class="banner-aspect-container">
         <div class="banner-content-wrapper">
-          <iframe
-            src={`https://www.youtube-nocookie.com/embed/${videoBannerId}?${videoBannerParams.toString()}`}
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
-            allowfullscreen
-            class="absolute top-0 left-0 w-full h-full"
-          ></iframe>
+          {videoBannerId && (
+            <iframe
+              src={videoBannerSrc}
+              title={`${videoBannerTitle} - YouTube video player`}
+              frameborder="0"
+              referrerpolicy={youtubeEmbedReferrerPolicy}
+              allowfullscreen
+              data-video-banner-iframe="true"
+              data-youtube-video-id={videoBannerId}
+              class="absolute top-0 left-0 w-full h-full border-0"
+            ></iframe>
+          )}
         </div>
       </div>
     </div>
@@ -495,7 +503,8 @@ const portalSlideIndexOffset =
                         ? item.weight
                         : undefined}
                     >
-                      <div
+                      <a
+                        href={isClickable ? bannerLink : undefined}
                         class:list={[
                           'banner-link group w-full h-full relative',
                           isClickable ? 'cursor-pointer' : '',
@@ -503,8 +512,6 @@ const portalSlideIndexOffset =
                         data-has-link={isClickable}
                         data-href={bannerLink}
                         aria-label={`Banner ${index + 1}${isClickable ? ' - Click to visit link' : ' - Interactive slide'}`}
-                        role={isClickable ? 'button' : undefined}
-                        tabindex={isClickable ? '0' : undefined}
                       >
                         {isClickable && (
                           <div class="banner-hover-overlay absolute inset-0 w-full h-full transition-all duration-300 opacity-0 group-hover:opacity-30 bg-black pointer-events-none z-10"></div>
@@ -887,7 +894,7 @@ const portalSlideIndexOffset =
                             </div>
                           )
                         )}
-                      </div>
+                      </a>
                     </div>
                   )
                 })

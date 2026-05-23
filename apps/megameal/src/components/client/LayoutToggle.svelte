@@ -4,14 +4,14 @@ import { onMount } from 'svelte'
 import '../../styles/features/layout-toggle.css'
 
 // Appearance configuration
-export const position:
+export let position:
   | 'top-right'
   | 'top-left'
   | 'bottom-right'
   | 'bottom-left' = 'top-right'
-export const variant: 'full' | 'minimal' = 'full' // Controls appearance
-export const showLabels = true // Only applies to 'full' variant
-export const size: 'sm' | 'md' | 'lg' = 'md' // Only applies to 'minimal' variant
+export let variant: 'full' | 'minimal' = 'full' // Controls appearance
+export let showLabels = true // Only applies to 'full' variant
+export let size: 'sm' | 'md' | 'lg' = 'md' // Only applies to 'minimal' variant
 
 let isOneColumn = false
 let isTransitioning = false
@@ -245,4 +245,3 @@ $: shouldHideToggle = isFullscreenMode
     </div>
   {/if}
 {/if}
-

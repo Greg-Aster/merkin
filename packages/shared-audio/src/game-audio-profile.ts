@@ -194,6 +194,16 @@ export const gameAudioProfile: GameAudioProfile = {
       interrupt: false,
       preload: true,
     },
+    'portal-glitch': {
+      id: 'portal-glitch',
+      src: '/audio/sfx/10-oga50-teleport_02.ogg',
+      volume: 0.18,
+      rate: 1.06,
+      rateJitter: 0.045,
+      cooldownMs: 720,
+      interrupt: false,
+      preload: true,
+    },
     'portal-impact': {
       id: 'portal-impact',
       src: '/audio/sfx/portal-impact.mp3',

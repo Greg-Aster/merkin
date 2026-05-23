@@ -3,14 +3,10 @@ import type {
   AvailabilityTone,
   CtaFeedback,
   FeaturedProduct,
-  FeaturedProductPanel,
 } from './types'
 
 export let product: FeaturedProduct
 export let currentTone: AvailabilityTone
-export let activePanel: FeaturedProductPanel | null
-export let hasIngredientsPanel: boolean
-export let hasAssurancePanel: boolean
 export let displayedPriceText: string
 export let priceDriftActive: boolean
 export let priceGlitching: boolean
@@ -20,11 +16,23 @@ export let primaryButtonLabel: string
 export let ctaFeedback: CtaFeedback | null
 export let showFullProductLink: boolean
 export let renderStars: (rating?: number) => boolean[]
-export let togglePanel: (panel: FeaturedProductPanel) => void
 export let handlePrimaryAction: () => void
+
+const preferredFactLabels = new Set([
+  'material',
+  'dimensions',
+  'weight',
+  'origin',
+  'construction',
+  'interior',
+])
 
 function formatRegistryCount(value: number | null | undefined, fallback: string) {
   return typeof value === 'number' ? value.toLocaleString() : fallback
+}
+
+function factLabelKey(label: string) {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
 }
 
 $: availableUnitsText = formatRegistryCount(
@@ -34,6 +42,13 @@ $: availableUnitsText = formatRegistryCount(
 $: unitsSoldText = formatRegistryCount(product.stockRegistry?.unitsSold, 'No Data')
 $: displaySpecs = product.specifications.filter(
   spec => !spec.label.toLowerCase().includes('warning'),
+)
+$: preferredFacts = displaySpecs.filter(spec =>
+  preferredFactLabels.has(factLabelKey(spec.label)),
+)
+$: productFacts = (preferredFacts.length > 0 ? preferredFacts : displaySpecs).slice(
+  0,
+  6,
 )
 </script>
 
@@ -99,29 +114,18 @@ $: displaySpecs = product.specifications.filter(
     {/if}
   </div>
 
-  {#if product.description}
-    <p class="featured-product-description">{product.description}</p>
+  {#if product.alternateAction || showFullProductLink}
+    <div class="featured-product-cta-row">
+      {#if product.alternateAction}
+        <a href={product.alternateAction.href} class="featured-product-secondary">
+          {product.alternateAction.label}
+        </a>
+      {/if}
+      {#if showFullProductLink}
+        <a href={product.href} class="featured-product-secondary">Full product page</a>
+      {/if}
+    </div>
   {/if}
-
-  <div class="featured-product-meta">
-    {#each displaySpecs.slice(0, 4) as spec}
-      <div>
-        <span>{spec.label}</span>
-        <strong>{spec.value}</strong>
-      </div>
-    {/each}
-  </div>
-
-  <div class="featured-product-cta-row">
-    {#if product.alternateAction}
-      <a href={product.alternateAction.href} class="featured-product-secondary">
-        {product.alternateAction.label}
-      </a>
-    {/if}
-    {#if showFullProductLink}
-      <a href={product.href} class="featured-product-secondary">Full product page</a>
-    {/if}
-  </div>
   <div class="featured-product-commerce-note">
     <a href={product.stockRegistry?.adoptionHref ?? product.href}>
       <span>Availability</span>
@@ -133,52 +137,17 @@ $: displaySpecs = product.specifications.filter(
     </a>
   </div>
 
-  <div class="featured-product-panel-actions">
-    <button
-      type="button"
-      class:active={activePanel === 'specifications'}
-      onclick={() => togglePanel('specifications')}
-    >
-      Specifications
-    </button>
-    {#if hasIngredientsPanel}
-      <button
-        type="button"
-        class:active={activePanel === 'ingredients'}
-        onclick={() => togglePanel('ingredients')}
-      >
-        Ingredients
-      </button>
-    {/if}
-    <button
-      type="button"
-      class:active={activePanel === 'qanda'}
-      onclick={() => togglePanel('qanda')}
-    >
-      Q&A
-    </button>
-    <button
-      type="button"
-      class:active={activePanel === 'reviews'}
-      onclick={() => togglePanel('reviews')}
-    >
-      Reviews
-    </button>
-    {#if hasAssurancePanel}
-      <button
-        type="button"
-        class:active={activePanel === 'assurance'}
-        onclick={() => togglePanel('assurance')}
-      >
-        Assurance
-      </button>
-    {/if}
-    <button
-      type="button"
-      class:active={activePanel === 'warnings'}
-      onclick={() => togglePanel('warnings')}
-    >
-      Warnings
-    </button>
-  </div>
+  {#if productFacts.length > 0}
+    <section class="featured-product-facts" aria-label="Product facts">
+      <p class="featured-product-facts__kicker">Product Facts</p>
+      <div class="featured-product-meta featured-product-meta--facts">
+        {#each productFacts as spec}
+          <div>
+            <span>{spec.label}</span>
+            <strong>{spec.value}</strong>
+          </div>
+        {/each}
+      </div>
+    </section>
+  {/if}
 </aside>

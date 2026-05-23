@@ -3,9 +3,17 @@ import { onDestroy } from 'svelte'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
+import {
+  addViewerLighting,
+  configureViewerShadowMap,
+  createViewerFloor,
+  getViewerToneMappingExposure,
+  positionViewerFloorForObject,
+  type ProceduralModelViewerVariant,
+} from './proceduralModelLighting'
 import '../../styles/features/home/procedural-model-viewer.css'
 export let label = '3D product preview'
-export let variant: 'snuggaloid' | 'generic' = 'generic'
+export let variant: ProceduralModelViewerVariant = 'generic'
 export let fullscreen = false
 export let assetUrl = '/models/polyhaven/Barrel_01/Barrel_01_1k.gltf'
 
@@ -16,6 +24,7 @@ let renderer: THREE.WebGLRenderer | null = null
 let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | null = null
 let previewObject: THREE.Object3D | null = null
+let floorMesh: THREE.Mesh | null = null
 let baseCameraPosition = new THREE.Vector3(2.6, 1.5, 4.4)
 let frameId = 0
 let loadToken = 0
@@ -88,6 +97,16 @@ function destroyViewer() {
   }
 
   previewObject = null
+  if (floorMesh) {
+    floorMesh.geometry.dispose()
+    const materials = Array.isArray(floorMesh.material)
+      ? floorMesh.material
+      : [floorMesh.material]
+    for (const material of materials) {
+      material.dispose?.()
+    }
+    floorMesh = null
+  }
   scene = null
   camera = null
 
@@ -163,8 +182,8 @@ function buildFallbackMaterial() {
 }
 
 function stylePreviewMesh(mesh: THREE.Mesh) {
-  mesh.castShadow = false
-  mesh.receiveShadow = false
+  mesh.castShadow = true
+  mesh.receiveShadow = true
 
   if (variant !== 'snuggaloid') return
 
@@ -298,7 +317,8 @@ async function loadModelPreview() {
   })
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = variant === 'snuggaloid' ? 1.16 : 1
+  renderer.toneMappingExposure = getViewerToneMappingExposure(variant)
+  configureViewerShadowMap(renderer)
   renderer.setPixelRatio(pixelRatio)
   renderer.setSize(width, height, false)
 
@@ -310,31 +330,9 @@ async function loadModelPreview() {
     100,
   )
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5))
-
-  const hemisphereLight = new THREE.HemisphereLight(0xf8fafc, 0x1e1b4b, 1.2)
-  scene.add(hemisphereLight)
-
-  const spotLight = new THREE.SpotLight(0xfff1c1, 42, 24, 0.42, 0.44)
-  spotLight.position.set(4.8, 8, 5.4)
-  scene.add(spotLight)
-  scene.add(spotLight.target)
-
-  const rimLight = new THREE.DirectionalLight(0xd8b4fe, 0.8)
-  rimLight.position.set(-5, 3, -4)
-  scene.add(rimLight)
-
-  const floor = new THREE.Mesh(
-    new THREE.CircleGeometry(4.2, 64),
-    new THREE.MeshBasicMaterial({
-      color: variant === 'snuggaloid' ? 0xf472b6 : 0x60a5fa,
-      transparent: true,
-      opacity: 0.16,
-    }),
-  )
-  floor.rotation.x = -Math.PI / 2
-  floor.position.y = -1.35
-  scene.add(floor)
+  addViewerLighting(scene, variant)
+  floorMesh = createViewerFloor(variant)
+  scene.add(floorMesh)
 
   resizeObserver = new ResizeObserver(() => {
     if (!canvas || !renderer || !camera) return
@@ -362,6 +360,9 @@ async function loadModelPreview() {
     })
     scene.add(previewObject)
     fitCameraToObject(previewObject)
+    if (floorMesh) {
+      positionViewerFloorForObject(floorMesh, previewObject)
+    }
     status = ''
     renderFrame()
   } catch (error) {

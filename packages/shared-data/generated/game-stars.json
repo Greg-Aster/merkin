@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-22T04:01:59.666Z",
+  "generatedAt": "2026-05-22T22:58:21.402Z",
   "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts;/home/greggles/Merkin/apps/megameal/src/content/cookbook;/home/greggles/Merkin/apps/megameal/src/content/videos;/home/greggles/Merkin/apps/megameal/src/content/products;/home/greggles/Merkin/apps/megameal/src/content/reader",
   "count": 55,
   "items": [
@@ -72,7 +72,7 @@
     },
     {
       "title": "Beyond the Minds AI - Now with 4K Tentacles",
-      "description": "An adjacent AI-media parody about inspirational landscape content, tentacles, and the uneasy optimism of generated spectacle.",
+      "description": "Beyond the Minds AI - Now with 4K Tentacles! | Heartwarming Landscapes - with Tentacles",
       "slug": "beyond-the-minds-ai",
       "sourcePath": "videos/beyond-the-minds-ai.mdx",
       "url": "/videos/beyond-the-minds-ai/",
@@ -123,8 +123,8 @@
       "uniqueId": "crateclip-xl"
     },
     {
-      "title": "CrateClip XL - Parody Commercial",
-      "description": "A practical-object parody commercial for a milk-crate shelf stabilizer, filed with the consumer goods material because the sales language knows too much.",
+      "title": "CrateClip XL | Commercial Archive",
+      "description": "A Civic Basement Systems commercial record for the CrateClip XL, a 3D-printed milk-crate shelf stabilizer with limited promises and extensive claim denial.",
       "slug": "crateclip-xl-commercial",
       "sourcePath": "videos/crateclip-xl-commercial.mdx",
       "url": "/videos/crateclip-xl-commercial/",
@@ -143,8 +143,8 @@
         "Commercial",
         "Store",
         "CrateClip XL",
-        "Parody",
-        "Consumer Goods"
+        "Consumer Goods",
+        "Civic Basement Systems"
       ],
       "timelineYear": 2023,
       "timelineEra": "ancient-epoch",
@@ -810,8 +810,8 @@
       "uniqueId": "snuggaloids"
     },
     {
-      "title": "Snuggloids | Parody Commercial | Not a real Product",
-      "description": "A recovered parody commercial for the Snuggloids comfort-companion line, preserved here as pre-extinction Qarnivor media.",
+      "title": "Snuggloids | Recovered Commercial Archive",
+      "description": "A recovered companion-pet commercial preserved as advertising, pre-emergence incident evidence, and an unresolved Snuggloid origin problem.",
       "slug": "snuggloids-commercial",
       "sourcePath": "videos/snuggloids-commercial.mdx",
       "url": "/videos/snuggloids-commercial/",
@@ -823,19 +823,20 @@
       "isKeyEvent": false,
       "isLevel": false,
       "levelId": null,
-      "location": "Planet Qarnivor, Pre-Extinction Media Networks",
+      "location": "Attributed to Planet Qarnivor, Pre-Extinction Media Networks",
       "isDraft": false,
       "showInTimeline": true,
       "tags": [
         "Commercial",
         "Snuggloid",
+        "Snuggaloid",
         "Qarnivor",
-        "Parody",
+        "Archive",
         "Pre-Extinction"
       ],
       "timelineYear": 27995,
       "timelineEra": "conflict-epoch",
-      "timelineLocation": "Planet Qarnivor, Pre-Extinction Media Networks",
+      "timelineLocation": "Attributed to Planet Qarnivor, Pre-Extinction Media Networks",
       "uniqueId": "snuggloids-commercial"
     },
     {
@@ -1208,7 +1209,7 @@
         "MEGA MEAL",
         "Qarnivor",
         "Snuggloid",
-        "Video Essay",
+        "Archive",
         "Field Report"
       ],
       "timelineYear": 28144,
@@ -1392,7 +1393,7 @@
     },
     {
       "title": "Sad Snax",
-      "description": "Sad Snax is a bland, flavor-reduced shelf snack intended for low-expectation situations: late nights, emergency drawers, unplanned office lock-ins, and any moment where eating something is preferable to continuing without ceremony. Texture approximates cardboard. Cardboard has, in some tests, shown more personality.",
+      "description": "Sad Snax is a red, low-flavor nutrient paste in a wrapper that treats opening as a structural disagreement. It waits patiently in emergency kits, outliving better rations, worse plans, and most printed expiration-label technology.",
       "slug": "sad-snax",
       "sourcePath": "products/sad-snax.md",
       "url": "/store/sad-snax/",

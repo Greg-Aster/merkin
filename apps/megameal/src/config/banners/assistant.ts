@@ -32,6 +32,9 @@
 
 import type { AssistantBannerData } from './types'
 
+const DEFAULT_ASSISTANT_BACKGROUND = '/assets/banner/home-intro-stills/community.webp'
+const DEFAULT_ASSISTANT_AVATAR = '/assets/avatar/avatar.png'
+
 type AssistantThemeStyle = {
   background: string
   text: string
@@ -55,7 +58,7 @@ type AssistantThemeStyle = {
  * - Use high-resolution images for crisp display across devices
  */
 export const assistantBannerData: AssistantBannerData = {
-  imageUrl: '/path/to/assistant/background.jpg', // Optional background for assistant banner
+  imageUrl: DEFAULT_ASSISTANT_BACKGROUND, // Optional background for assistant banner
 }
 
 // =====================================================================
@@ -69,7 +72,7 @@ export const assistantBannerData: AssistantBannerData = {
 export const assistantPersonality = {
   name: 'Bleepy', // Assistant name
   title: 'AI Assistant', // Assistant title/role
-  avatar: '/assets/assistant/bleepy.png', // Assistant avatar image
+  avatar: DEFAULT_ASSISTANT_AVATAR, // Assistant avatar image
 
   // Personality traits
   personality: {
@@ -440,31 +443,18 @@ export function validateAssistantBannerConfig(config: AssistantBannerData): {
 
   // Check background image if provided
   if (config.imageUrl) {
-    if (config.imageUrl === '/path/to/assistant/background.jpg') {
-      warnings.push(
-        'Default placeholder background URL detected. Consider setting a real background image.',
-      )
-    } else {
-      try {
-        if (
-          !config.imageUrl.startsWith('/') &&
-          !config.imageUrl.startsWith('http')
-        ) {
-          warnings.push(
-            'Background image path should be absolute or relative URL',
-          )
-        }
-      } catch {
-        warnings.push('Invalid background image URL format')
+    try {
+      if (
+        !config.imageUrl.startsWith('/') &&
+        !config.imageUrl.startsWith('http')
+      ) {
+        warnings.push(
+          'Background image path should be absolute or relative URL',
+        )
       }
+    } catch {
+      warnings.push('Invalid background image URL format')
     }
-  }
-
-  // Validate personality configuration
-  if (assistantPersonality.avatar === '/assets/assistant/bleepy.png') {
-    warnings.push(
-      'Default assistant avatar path detected. Consider customizing the avatar.',
-    )
   }
 
   // Check if required features are properly configured

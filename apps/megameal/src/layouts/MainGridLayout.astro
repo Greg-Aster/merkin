@@ -142,6 +142,7 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   )}
   {(isTimelineRoute || isTimeline2DRoute) && (
     <Fragment slot="timeline-banner-content">
+      <h1 class="sr-only">{isTimelineRoute ? 'Timeline' : 'Timeline - 2D'}</h1>
       {isTimelineRoute ? (
         <>
           <div id="megameal-timeline-route-marker" hidden></div>

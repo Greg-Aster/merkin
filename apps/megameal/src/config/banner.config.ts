@@ -283,7 +283,7 @@ export const bannerConfig: BannerConfig = {
 
   // 🎯 FIXED: Navbar spacing - Mobile portrait now accounts for always-visible navbar
   navbar: {
-    height: '5rem',
+    height: 'var(--navbar-height)',
     spacing: createLegacyNavbarSpacing(),
     mobileBannerGap: bannerLayoutProfiles.standard.stageTop.mobile,
     mobilePortraitSpacing: bannerLayoutProfiles.standard.stageTop.mobile,

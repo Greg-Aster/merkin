@@ -43,6 +43,7 @@ export let title = ''
 export let stat = ''
 export let ctaLabel = ''
 export let hovered = false
+export let motionEnabled = true
 
 const threlte = useThrelte()
 
@@ -184,6 +185,8 @@ function ensureVideoLoaded() {
 
 function syncVideoPlayback() {
   if (!videoSrc) return
+
+  if (!motionEnabled) return videoElement?.pause()
 
   if (shouldLoadMedia && (active || hovered)) {
     ensureVideoLoaded()
@@ -337,7 +340,7 @@ $: if (loader && shouldLoadMedia) {
   ensureMediaTexturesLoaded()
 }
 
-$: if (mounted && videoSrc && (active || hovered || videoElement)) {
+$: if (mounted && videoSrc && (active || hovered || videoElement || !motionEnabled)) {
   syncVideoPlayback()
 }
 
@@ -346,6 +349,8 @@ $: if (mounted && (kicker || title || stat || ctaLabel)) {
 }
 
 useTask(delta => {
+  if (!motionEnabled) return
+
   const time = performance.now() * 0.001
   const ease = 1 - Math.exp(-delta * 8)
 

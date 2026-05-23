@@ -200,7 +200,7 @@ const videoBannerPost = featuredVideo
                 <div class="relative aspect-video overflow-hidden bg-slate-950">
                   <img
                     src={getVideoThumbnail(video)}
-                    alt=""
+                    alt={`${video.data.title} thumbnail`}
                     loading="lazy"
                     decoding="async"
                     class="h-full w-full object-cover transition duration-500 group-hover:scale-105"

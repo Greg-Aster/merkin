@@ -95,11 +95,56 @@
 			grid-template-columns: 1fr;
 		}
 
-		.featured-product-thumbs {
+		.featured-product-media-layout {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr);
+			gap: 0.7rem;
+			width: 100%;
+			min-width: 0;
+		}
+
+		.featured-product-media-main {
+			display: contents;
+		}
+
+		.featured-product-thumbs-shell {
 			order: 2;
+			grid-column: 1;
+			grid-row: auto;
+			width: 100%;
+			min-width: 0;
+		}
+
+		.featured-product-thumbs {
 			flex-direction: row;
 			overflow-x: auto;
 			padding-bottom: 0.2rem;
+		}
+
+		.featured-product-thumbs-shell--scrollable .featured-product-thumbs {
+			padding-right: 3rem;
+		}
+
+		.featured-product-thumbs-shell--scrollable::after {
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0.2rem;
+			width: 4.2rem;
+			pointer-events: none;
+			content: "";
+			background: linear-gradient(90deg, transparent, rgb(2 6 23 / 0.92));
+		}
+
+		.featured-product-thumbs-scroll {
+			top: 50%;
+			right: 0.45rem;
+			bottom: auto;
+			transform: translateY(-50%);
+		}
+
+		.featured-product-thumbs-scroll:hover {
+			transform: translateY(-50%) translateX(-1px);
 		}
 
 		.featured-product-thumbs button {
@@ -108,10 +153,20 @@
 
 		.featured-product-viewer {
 			order: 1;
+			grid-column: 1;
+			grid-row: auto;
+		}
+
+		.featured-product-media-summary {
+			order: 3;
+			grid-column: 1;
+			grid-row: auto;
 		}
 
 		.featured-product-sheet {
-			order: 3;
+			order: 4;
+			grid-column: 1;
+			grid-row: auto;
 			padding: 0;
 		}
 	}
@@ -126,6 +181,8 @@
 		.featured-product-utilitybar,
 		.featured-product-topbar,
 		.featured-product-stage,
+		.featured-product-media-layout,
+		.featured-product-detail-nav,
 		.featured-product-panel,
 		.featured-product-related {
 			width: 100%;
@@ -151,7 +208,7 @@
 			display: none;
 		}
 
-		.featured-product-topbar h1,
+		.featured-product-topbar__title,
 		.featured-product-panel h2,
 		.featured-product-related h2 {
 			font-size: 1.28rem;
@@ -164,8 +221,30 @@
 			padding: 0.7rem;
 		}
 
+		.featured-product-detail-nav {
+			padding: 0.65rem;
+			border-radius: 1rem;
+		}
+
+		.featured-product-panel-actions--full {
+			flex-wrap: nowrap;
+			justify-content: flex-start;
+			overflow-x: auto;
+			padding-bottom: 0.15rem;
+			scroll-snap-type: x proximity;
+			scrollbar-width: none;
+		}
+
+		.featured-product-panel-actions--full button {
+			flex: 0 0 auto;
+			scroll-snap-align: start;
+		}
+
 		.featured-product-thumbs,
+		.featured-product-thumbs-shell,
+		.featured-product-media-layout,
 		.featured-product-viewer,
+		.featured-product-media-summary,
 		.featured-product-sheet {
 			width: 100%;
 			max-width: 100%;

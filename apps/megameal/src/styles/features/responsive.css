@@ -263,11 +263,6 @@
     min-width: 0;
   }
 
-  .marketplace-card__signals,
-  .marketplace-card__specs {
-    grid-template-columns: 1fr;
-  }
-
   .marketplace-card__sellerline,
   .marketplace-card__offer-row,
   .marketplace-card__subgrid,
