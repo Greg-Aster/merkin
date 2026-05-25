@@ -258,9 +258,9 @@ const demoVideos = [
       applyDemoAudioPreference()
     }
 
-    const unlockDemoAudioFromGesture = () => {
+    const unlockDemoAudioFromGesture = (event?: Event) => {
       markSiteAudioActivated()
-      void siteSfxManager.unlockFromGesture()
+      void siteSfxManager.unlockFromGesture(event)
     }
 
     const getSelectedClip = () => {
@@ -413,7 +413,7 @@ const demoVideos = [
       event => {
         event.preventDefault()
         event.stopPropagation()
-        void siteSfxManager.unlockFromGesture()
+        void siteSfxManager.unlockFromGesture(event)
         markSiteAudioActivated()
         toggleDemoPlayback()
       },

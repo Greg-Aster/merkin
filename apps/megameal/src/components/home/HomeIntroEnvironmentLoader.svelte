@@ -23,12 +23,12 @@ function cleanupAll() {
   cleanupCallbacks = []
 }
 
-function playPortalAwakenSfx(options: { unlockFromGesture?: boolean } = {}) {
+function playPortalAwakenSfx(options: { unlockEvent?: Event } = {}) {
   if (awakenSfxPlayed || typeof window === 'undefined') return
 
   awakenSfxPlayed = true
-  if (options.unlockFromGesture) {
-    void siteSfxManager.unlockFromGesture().then((unlocked) => {
+  if (options.unlockEvent) {
+    void siteSfxManager.unlockFromGesture(options.unlockEvent).then((unlocked) => {
       if (unlocked) siteSfxManager.play('portal-awaken')
     })
     return
@@ -37,10 +37,10 @@ function playPortalAwakenSfx(options: { unlockFromGesture?: boolean } = {}) {
   siteSfxManager.playIfUnlocked('portal-awaken')
 }
 
-async function loadEnvironment(options: { unlockAudio?: boolean } = {}) {
+async function loadEnvironment(options: { unlockEvent?: Event } = {}) {
   if (loadStarted) return
   loadStarted = true
-  playPortalAwakenSfx({ unlockFromGesture: options.unlockAudio })
+  playPortalAwakenSfx({ unlockEvent: options.unlockEvent })
   cleanupAll()
 
   try {
@@ -56,15 +56,11 @@ function waitForIntent() {
   const controller = new AbortController()
   const { signal } = controller
   const start = (event?: Event) => {
-    const unlockAudio =
-      event?.type === 'pointerdown' ||
-      event?.type === 'keydown' ||
-      event?.type === 'touchstart'
-
-    void loadEnvironment({ unlockAudio })
+    void loadEnvironment({ unlockEvent: event })
   }
 
   window.addEventListener('merkin:portal-advance', start, { signal })
+  window.addEventListener('click', start, { signal })
   window.addEventListener('pointerdown', start, { signal, passive: true })
   window.addEventListener('keydown', start, { signal })
   window.addEventListener('touchstart', start, { signal, passive: true })

@@ -12,7 +12,6 @@ export const th: Translation = {
 
   [Key.configs]: 'การตั้งค่า',
   [Key.friends]: 'เพื่อน',
-  [Key.newPost]: 'โพสต์ใหม่',
 
   [Key.tags]: 'ป้ายกำกับ',
   [Key.categories]: 'หมวดหมู่',

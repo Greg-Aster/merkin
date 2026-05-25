@@ -62,7 +62,6 @@ function manualClientChunks(id) {
     if (normalizedId.includes('photoswipe')) return 'vendor-photoswipe';
     if (normalizedId.includes('marked') || normalizedId.includes('markdown-it')) return 'vendor-markdown';
     if (normalizedId.includes('katex')) return 'vendor-katex';
-    if (normalizedId.includes('mammoth')) return 'vendor-mammoth';
     if (normalizedId.includes('overlayscrollbars')) return 'vendor-overlayscrollbars';
     if (normalizedId.includes('howler')) return 'vendor-audio';
     if (normalizedId.includes('chart.js')) return 'vendor-chart';
@@ -154,7 +153,6 @@ export default defineConfig({
         !page.includes('/feed') &&
         !page.includes('/rss') &&
         !page.includes('/atom') &&
-        page !== '/new-post/' &&
         page !== '/configs/' &&
         page !== '/friends/' &&
         page !== '/feed.xml' &&
@@ -216,7 +214,7 @@ export default defineConfig({
       noExternal: [/^@fontsource/, 'katex'],
     },
     optimizeDeps: {
-      include: ['mammoth', 'overlayscrollbars', 'photoswipe', 'photoswipe/lightbox'],
+      include: ['overlayscrollbars', 'photoswipe', 'photoswipe/lightbox'],
       force: isDev,
     },
     server: {

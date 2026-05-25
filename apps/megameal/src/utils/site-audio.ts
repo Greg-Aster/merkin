@@ -4,7 +4,10 @@ import {
   getTrackForPathname,
   siteAudioConfig,
 } from '../config/audio'
-import { markSiteAudioUnlocked } from './site-audio-activation'
+import {
+  canAttemptSiteAudioUnlock,
+  markSiteAudioUnlocked,
+} from './site-audio-activation'
 
 declare global {
   interface Window {
@@ -335,7 +338,7 @@ class SiteAudioManager {
     }
   }
 
-  async unlockFromGesture(): Promise<boolean> {
+  async unlockFromGesture(event?: Event): Promise<boolean> {
     if (typeof window === 'undefined') return false
 
     if (this.hasUnlockedAudio()) {
@@ -348,6 +351,7 @@ class SiteAudioManager {
 
       return true
     }
+    if (!canAttemptSiteAudioUnlock(event)) return false
 
     try {
       const ctx = Howler.ctx

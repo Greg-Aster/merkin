@@ -12,7 +12,6 @@ export const en: Translation = {
 
   [Key.configs]: 'Configs',
   [Key.friends]: 'Friends',
-  [Key.newPost]: 'New Post',
 
   [Key.tags]: 'Tags',
   [Key.categories]: 'Categories',

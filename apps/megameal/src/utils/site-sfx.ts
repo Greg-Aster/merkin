@@ -5,7 +5,10 @@ import {
   siteAudioConfig,
   siteSfxProfile,
 } from '../config/audio'
-import { markSiteAudioUnlocked } from './site-audio-activation'
+import {
+  canAttemptSiteAudioUnlock,
+  markSiteAudioUnlocked,
+} from './site-audio-activation'
 
 export type SiteSfxId = AudioSfxId
 
@@ -42,18 +45,12 @@ class SiteSfxManager {
     return true
   }
 
-  async unlockFromGesture(): Promise<boolean> {
+  async unlockFromGesture(event?: Event): Promise<boolean> {
     if (typeof window === 'undefined') return false
 
     try {
-      const userActivation = (
-        navigator as Navigator & {
-          userActivation?: { isActive?: boolean }
-        }
-      ).userActivation
-      if (!this.hasUnlockedAudio() && userActivation?.isActive === false) {
-        return false
-      }
+      if (this.hasUnlockedAudio()) return true
+      if (!canAttemptSiteAudioUnlock(event)) return false
 
       const ctx = Howler.ctx
       if (ctx && ctx.state === 'suspended') {

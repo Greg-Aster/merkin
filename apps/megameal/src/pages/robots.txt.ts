@@ -4,7 +4,6 @@ const robotsTxt = `
 User-agent: *
 Allow: /
 Disallow: /configs/
-Disallow: /new-post/
 Disallow: /friends/
 
 Sitemap: ${new URL('sitemap-index.xml', import.meta.env.SITE).href}

@@ -12,7 +12,6 @@ export const ko: Translation = {
 
   [Key.configs]: '설정',
   [Key.friends]: '친구',
-  [Key.newPost]: '새 게시물',
 
   [Key.tags]: '태그',
   [Key.categories]: '카테고리',

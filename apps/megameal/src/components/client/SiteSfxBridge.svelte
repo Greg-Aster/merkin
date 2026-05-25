@@ -182,13 +182,13 @@ onMount(() => {
   let lastFocusTarget: HTMLElement | null = null
   let lastPointerAt = -Infinity
 
-  const handlePointerDown = async (event: PointerEvent) => {
+  const handleClick = async (event: MouseEvent) => {
     if (event.button !== 0) return
 
     lastPointerAt = window.performance.now()
     const sfxId = resolvePointerSfx(event.target)
     if (sfxId) {
-      if (await siteSfxManager.unlockFromGesture()) {
+      if (await siteSfxManager.unlockFromGesture(event)) {
         siteSfxManager.play(sfxId)
       }
     }
@@ -243,7 +243,7 @@ onMount(() => {
 
     const sfxId = resolveKeySfx(event.target)
     if (sfxId) {
-      if (await siteSfxManager.unlockFromGesture()) {
+      if (await siteSfxManager.unlockFromGesture(event)) {
         siteSfxManager.play(sfxId)
       }
     }
@@ -270,7 +270,7 @@ onMount(() => {
     }
   }
 
-  document.addEventListener('pointerdown', handlePointerDown, true)
+  document.addEventListener('click', handleClick, true)
   document.addEventListener('mouseover', handleMouseOver, true)
   document.addEventListener('mouseout', handleMouseOut, true)
   document.addEventListener('focusin', handleFocusIn, true)
@@ -280,7 +280,7 @@ onMount(() => {
   document.addEventListener('megameal:sfx', handleCustomSfx)
 
   return () => {
-    document.removeEventListener('pointerdown', handlePointerDown, true)
+    document.removeEventListener('click', handleClick, true)
     document.removeEventListener('mouseover', handleMouseOver, true)
     document.removeEventListener('mouseout', handleMouseOut, true)
     document.removeEventListener('focusin', handleFocusIn, true)

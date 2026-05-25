@@ -11,7 +11,6 @@ pnpm type-check       # TypeScript validation (run before any PR)
 pnpm audit:css        # Full CSS architecture audit
 pnpm audit:css:changed  # Audit only changed files (faster for reviews)
 pnpm lint:fix         # Biome lint + format in one pass
-pnpm new-post         # Scaffold a new post via interactive script
 ```
 
 The `AGENTS.md` in this directory lists additional required checks for frontend/style changes.

@@ -12,7 +12,6 @@ export const es: Translation = {
 
   [Key.configs]: 'Configuraciones',
   [Key.friends]: 'Amigos',
-  [Key.newPost]: 'Nueva Publicación',
 
   [Key.tags]: 'Etiquetas',
   [Key.categories]: 'Categorías',

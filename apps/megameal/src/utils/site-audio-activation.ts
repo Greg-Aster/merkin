@@ -6,16 +6,7 @@ const keyboardActivationIgnoredKeys = new Set([
   'Shift',
 ])
 
-const documentActivationEvents = [
-  'pointerdown',
-  'pointerup',
-  'mousedown',
-  'touchstart',
-  'touchend',
-  'contextmenu',
-] as const
-
-const wheelActivationThreshold = 4
+const documentActivationEvents = ['click', 'touchstart', 'touchend'] as const
 
 export const siteAudioUnlockedEvent = 'megameal:audio-unlocked'
 
@@ -39,6 +30,14 @@ export function hasSiteAudioUserActivation(): boolean {
   )
 }
 
+export function hasActiveSiteAudioGesture(): boolean {
+  if (typeof navigator === 'undefined') return true
+
+  const userActivation = (navigator as NavigatorWithUserActivation)
+    .userActivation
+  return userActivation?.isActive !== false
+}
+
 export function markSiteAudioUnlocked(): void {
   if (siteAudioUnlocked || typeof window === 'undefined') {
     siteAudioUnlocked = true
@@ -60,17 +59,16 @@ export function isSiteAudioActivationGesture(event: Event): boolean {
     )
   }
 
-  if (event instanceof WheelEvent) {
-    return (
-      Math.max(
-        Math.abs(event.deltaX),
-        Math.abs(event.deltaY),
-        Math.abs(event.deltaZ),
-      ) >= wheelActivationThreshold
-    )
+  if (event instanceof MouseEvent) {
+    return event.type === 'click' && event.button === 0
   }
 
-  return true
+  return event.type === 'touchstart' || event.type === 'touchend'
+}
+
+export function canAttemptSiteAudioUnlock(event?: Event): boolean {
+  if (event && !isSiteAudioActivationGesture(event)) return false
+  return hasActiveSiteAudioGesture()
 }
 
 export function addSiteAudioActivationListeners(
@@ -101,13 +99,11 @@ export function addSiteAudioActivationListeners(
     document.addEventListener(eventName, activationHandler, gestureOptions)
   })
   document.addEventListener('keydown', activationHandler, keyboardOptions)
-  window.addEventListener('wheel', activationHandler, gestureOptions)
 
   return () => {
     documentActivationEvents.forEach(eventName => {
       document.removeEventListener(eventName, activationHandler, gestureOptions)
     })
     document.removeEventListener('keydown', activationHandler, keyboardOptions)
-    window.removeEventListener('wheel', activationHandler, gestureOptions)
   }
 }

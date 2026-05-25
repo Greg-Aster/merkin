@@ -32,7 +32,7 @@ export const LinkPresets: { [key in LinkPreset]: NavBarLink } = {
     url: '/friends/',
   },
   [LinkPreset.NewPost]: {
-    name: i18n(I18nKey.newPost),
-    url: '/new-post/',
+    name: i18n(I18nKey.configs),
+    url: '/configs/',
   },
 }

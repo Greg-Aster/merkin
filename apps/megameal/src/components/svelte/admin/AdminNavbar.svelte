@@ -104,15 +104,6 @@ function handleClickOutside(event) {
    class="absolute left-0 mt-1 w-48 rounded-lg shadow-lg card-base float-panel py-1 z-50"
    transition:slide={{ duration: 150, axis: 'y' }}
  >
-   <a href="/new-post/" data-sfx-hover="hover-soft" data-sfx-click="soft" class="block px-4 py-2 text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200">
-     <div class="flex items-center">
-       <svg xmlns="http://www.w3.org/2000/svg" class="text-[1.25rem] mr-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-       </svg>
-       New Post
-     </div>
-   </a>
    <a href="/configs/" data-sfx-hover="hover-soft" data-sfx-click="soft" class="block px-4 py-2 text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200">
      <div class="flex items-center">
        <svg xmlns="http://www.w3.org/2000/svg" class="text-[1.25rem] mr-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -166,4 +157,3 @@ function handleClickOutside(event) {
 </div>
 
 </div>
-

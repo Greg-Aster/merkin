@@ -12,7 +12,6 @@ export const ja: Translation = {
 
   [Key.configs]: '設定',
   [Key.friends]: '友達',
-  [Key.newPost]: '新規投稿',
 
   [Key.tags]: 'タグ',
   [Key.categories]: 'カテゴリ',

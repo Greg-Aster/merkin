@@ -319,12 +319,12 @@ function clampScreenIndex(value: number) {
 
 function playPortalSfx(
   id: SiteSfxId,
-  options: { unlockFromGesture?: boolean } = {},
+  options: { unlockEvent?: Event; unlockFromGesture?: boolean } = {},
 ) {
   if (typeof window === 'undefined') return
 
-  if (options.unlockFromGesture) {
-    void siteSfxManager.unlockFromGesture().then((unlocked) => {
+  if (options.unlockEvent || options.unlockFromGesture) {
+    void siteSfxManager.unlockFromGesture(options.unlockEvent).then((unlocked) => {
       if (unlocked) siteSfxManager.play(id)
     })
     return
@@ -333,7 +333,9 @@ function playPortalSfx(
   siteSfxManager.playIfUnlocked(id)
 }
 
-function playPortalDragSfx(options: { unlockFromGesture?: boolean } = {}) {
+function playPortalDragSfx(
+  options: { unlockEvent?: Event; unlockFromGesture?: boolean } = {},
+) {
   if (typeof window === 'undefined') return
 
   const now = window.performance.now()
@@ -432,7 +434,7 @@ function scheduleScrollDrivenWheel() {
 
 function smoothWheelStep(
   delta: number,
-  options: { unlockFromGesture?: boolean } = {},
+  options: { unlockEvent?: Event; unlockFromGesture?: boolean } = {},
 ) {
   const direction = Math.sign(delta)
   if (
@@ -505,7 +507,7 @@ function handlePointerDown(event: PointerEvent) {
   pointerDragDistance = 0
   pointerDownStartedOnScreen = isPointerOverActiveScreen(event.clientX, event.clientY)
   updatePointer(event.clientX, event.clientY)
-  playPortalDragSfx({ unlockFromGesture: true })
+  playPortalDragSfx({ unlockEvent: event })
 
   try {
     shell?.setPointerCapture(event.pointerId)
@@ -626,7 +628,7 @@ function handleTouchStart(event: TouchEvent) {
   pointerDragDistance = 0
   pointerDownStartedOnScreen = isPointerOverActiveScreen(touch.clientX, touch.clientY)
   updatePointer(touch.clientX, touch.clientY)
-  playPortalDragSfx({ unlockFromGesture: true })
+  playPortalDragSfx({ unlockEvent: event })
 }
 
 function handleTouchMove(event: TouchEvent) {
@@ -719,7 +721,7 @@ function handleKeyboardScroll(event: KeyboardEvent) {
   const step = stepByKey[event.key]
   if (step === undefined) return
 
-  if (smoothWheelStep(step, { unlockFromGesture: true })) {
+  if (smoothWheelStep(step, { unlockEvent: event })) {
     event.preventDefault()
   }
 }

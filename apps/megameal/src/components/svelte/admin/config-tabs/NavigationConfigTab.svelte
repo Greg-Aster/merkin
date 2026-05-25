@@ -17,7 +17,6 @@ const linkPresets = {
   4: { name: 'Projects', url: '/projects/' },
   5: { name: 'Configs', url: '/configs/' },
   6: { name: 'Friends', url: '/friends/' },
-  7: { name: 'New Post', url: '/new-post/' },
 }
 const reordering = false
 

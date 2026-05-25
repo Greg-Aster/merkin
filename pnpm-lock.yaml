@@ -652,9 +652,6 @@ importers:
       katex:
         specifier: ^0.16.21
         version: 0.16.28
-      mammoth:
-        specifier: ^1.9.0
-        version: 1.11.0
       markdown-it:
         specifier: ^14.1.0
         version: 14.1.1

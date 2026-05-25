@@ -50,7 +50,6 @@ This is a working map of the Astro routes in `apps/megameal/src/pages`.
 | --- | --- | --- |
 | `/login/` | Login page | `src/pages/login.astro` |
 | `/configs/` | Site configuration/admin page | `src/pages/configs.astro` |
-| `/new-post/` | New post/editor page | `src/pages/new-post.astro` |
 | `/friends/` | Friends/admin content page | `src/pages/friends.astro` |
 
 ## Labs

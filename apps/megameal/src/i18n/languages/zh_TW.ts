@@ -12,7 +12,6 @@ export const zh_TW: Translation = {
 
   [Key.configs]: '配置',
   [Key.friends]: '友鏈',
-  [Key.newPost]: '新文章',
 
   [Key.tags]: '標籤',
   [Key.categories]: '分類',

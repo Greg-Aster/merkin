@@ -9,7 +9,6 @@ enum I18nKey {
 
   configs = 'configs',
   friends = 'friends',
-  newPost = 'newPost',
 
   tags = 'tags',
   categories = 'categories',
