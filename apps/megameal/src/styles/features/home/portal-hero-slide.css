@@ -81,6 +81,13 @@
     pointer-events: none;
   }
 
+  .portal-demo-player__overlay {
+    z-index: 2;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    opacity: .9;
+  }
+
   .portal-demo-player__glitch {
     position: absolute;
     inset: 0;

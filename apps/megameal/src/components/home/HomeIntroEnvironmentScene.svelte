@@ -1,4 +1,5 @@
 <script lang="ts">
+import { siteSfxManager } from '@/utils/site-sfx'
 import { T, useTask } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import {
@@ -11,7 +12,6 @@ import {
   Vector3,
 } from 'three'
 import type * as THREE from 'three'
-import { siteSfxManager } from '@/utils/site-sfx'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import HomeIntroParticleField from './HomeIntroParticleField.svelte'
@@ -108,6 +108,7 @@ const logoTargetSize = new Vector3(4.68, 2.24, 1.44)
 const logoIntroDuration = 2.05
 const logoImpactDuration = 0.42
 const logoRotationOffset = Math.PI
+const portalLightTransmissionScale = 0.48
 const logoFloatPitchAmplitude = 0.038
 const logoFloatYawAmplitude = 0.064
 const logoFloatRollAmplitude = 0.026
@@ -550,7 +551,7 @@ function updateLogoSearchLight(
     logoLightTarget.z + frontOffset,
   )
   light.position.copy(logoSearchLightPosition)
-  light.intensity = atmosphereReveal * intensity
+  light.intensity = atmosphereReveal * intensity * portalLightTransmissionScale
 
   if (light.target !== target) {
     light.target = target
