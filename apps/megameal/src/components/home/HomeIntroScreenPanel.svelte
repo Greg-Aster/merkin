@@ -10,6 +10,7 @@ import {
   SRGBColorSpace,
   CanvasTexture,
   type Group,
+  type Mesh,
   type Texture,
   type WebGLRenderer,
   TextureLoader,
@@ -26,6 +27,8 @@ import {
   disposeHomeIntroScreenModel,
   loadHomeIntroScreenModelInstance,
 } from './homeIntroScreenModel'
+import { homeIntroReflectionOnlyUserDataKey } from './homeIntroReflectionOnly'
+import { HomeIntroScreenContentRenderer } from './homeIntroScreenContentRenderer'
 
 type SceneQuality = 'high' | 'balanced' | 'lean'
 
@@ -50,9 +53,12 @@ const threlte = useThrelte()
 let titleTexture: Texture | null = null
 let stillTexture: Texture | null = null
 let screenTextTexture: CanvasTexture | null = null
+let screenContentTexture: Texture | null = null
 let videoTexture: VideoTexture | null = null
 let panelRoot: Group | null = null
 let screenModel: THREE.Object3D | null = null
+let screenContentMesh: Mesh | null = null
+let screenContentRenderer: HomeIntroScreenContentRenderer | null = null
 let loader: TextureLoader | null = null
 let screenLoadAbortController: AbortController | null = null
 let screenModelRequested = false
@@ -69,6 +75,8 @@ let titleMediaOpacity = 1
 let videoMediaOpacity = 0
 let textOpacity = primary ? 0.72 : 0.58
 let textScrimOpacity = primary ? 0.34 : 0.42
+let mediaTint = '#ffffff'
+let titleMediaTint = '#ffffff'
 let videoElement: HTMLVideoElement | null = null
 
 const additiveBlending = AdditiveBlending
@@ -77,18 +85,25 @@ const doubleSide = DoubleSide
 const frontSide = FrontSide
 const frameWidth = 3.18
 const frameHeight = 1.78
+const screenModelZ = -0.07
 const mediaWidth = frameWidth * .95
 const mediaHeight = frameHeight * .95
 const titleWidth = mediaWidth
 const titleHeight = mediaHeight
 const fallbackWidth = 2.76
 const fallbackHeight = 0.44
-const mediaSurfaceZ = -0.034
-const textScrimSurfaceZ = -0.028
-const textSurfaceZ = -0.018
+const mediaSurfaceZ = -0.16
 const textWidth = 2.54
 const textHeight = 1.24
 const screenVideoPlaybackRate = 0.33
+
+function getTextureTint(opacity: number) {
+  const channel = Math.round(Math.min(1, Math.max(0, opacity)) * 255)
+    .toString(16)
+    .padStart(2, '0')
+
+  return `#${channel}${channel}${channel}`
+}
 
 function getRenderer() {
   const renderer = threlte.renderer as
@@ -121,6 +136,12 @@ function disposeVideoElement() {
 function disposeScreenTextTexture() {
   screenTextTexture?.dispose()
   screenTextTexture = null
+}
+
+function disposeScreenContentRenderer() {
+  screenContentRenderer?.dispose()
+  screenContentRenderer = null
+  screenContentTexture = null
 }
 
 function disposeStillTexture() {
@@ -257,6 +278,7 @@ function cleanupPanel() {
   disposeVideoTexture()
   disposeVideoElement()
   disposeScreenTextTexture()
+  disposeScreenContentRenderer()
 }
 
 onMount(() => {
@@ -336,6 +358,40 @@ function loadStillTexture() {
   })
 }
 
+function ensureScreenContentRenderer() {
+  if (screenContentRenderer) return screenContentRenderer
+
+  screenContentRenderer = new HomeIntroScreenContentRenderer({
+    mediaWidth,
+    mediaHeight,
+    textWidth,
+    textHeight,
+  })
+  screenContentTexture = screenContentRenderer.texture
+
+  return screenContentRenderer
+}
+
+function renderScreenContent() {
+  const renderer = getRenderer()
+  if (!renderer || !mounted) return
+
+  const screenRenderer = ensureScreenContentRenderer()
+
+  screenRenderer.render(renderer, {
+    fallbackColor: primary ? '#67e8f9' : '#8b5cf6',
+    fallbackOpacity: primary ? 0.32 : 0.16,
+    mediaTexture: primary ? titleTexture : stillTexture,
+    mediaTint: primary ? titleMediaTint : mediaTint,
+    screenTextTexture,
+    textOpacity,
+    textScrimOpacity,
+    videoMediaOpacity,
+    videoReady,
+    videoTexture,
+  })
+}
+
 $: if (loader && shouldLoadMedia) {
   ensureMediaTexturesLoaded()
 }
@@ -348,43 +404,52 @@ $: if (mounted && (kicker || title || stat || ctaLabel)) {
   syncScreenTextTexture()
 }
 
-useTask(delta => {
-  if (!motionEnabled) return
+$: mediaTint = getTextureTint(mediaOpacity)
+$: titleMediaTint = getTextureTint(titleMediaOpacity)
+$: if (screenContentMesh) {
+  screenContentMesh.userData[homeIntroReflectionOnlyUserDataKey] =
+    Boolean(screenModel)
+}
 
+useTask(delta => {
   const time = performance.now() * 0.001
   const ease = 1 - Math.exp(-delta * 8)
 
-  hoverBlend += ((hovered ? 1 : 0) - hoverBlend) * ease
-  const baseTitleOpacity = 0.9
-  const baseMediaOpacity = primary ? 0.76 : 0.62
-  videoMediaOpacity = videoReady ? hoverBlend : 0
-  titleMediaOpacity =
-    baseTitleOpacity +
-    (1 - baseTitleOpacity) * hoverBlend -
-    videoMediaOpacity * 0.72
-  mediaOpacity = baseMediaOpacity + (1 - baseMediaOpacity) * hoverBlend
-  const baseTextOpacity = primary ? 0.96 : 0.88
-  textOpacity = videoSrc ? baseTextOpacity * (1 - hoverBlend) : baseTextOpacity
-  const baseTextScrimOpacity = primary ? 0.48 : 0.54
-  textScrimOpacity = videoSrc ? baseTextScrimOpacity * (1 - hoverBlend) : baseTextScrimOpacity
+  if (motionEnabled) {
+    hoverBlend += ((hovered ? 1 : 0) - hoverBlend) * ease
+    const baseTitleOpacity = 0.9
+    const baseMediaOpacity = primary ? 0.76 : 0.62
+    videoMediaOpacity = videoReady ? hoverBlend : 0
+    titleMediaOpacity =
+      baseTitleOpacity +
+      (1 - baseTitleOpacity) * hoverBlend -
+      videoMediaOpacity * 0.72
+    mediaOpacity = baseMediaOpacity + (1 - baseMediaOpacity) * hoverBlend
+    const baseTextOpacity = primary ? 0.96 : 0.88
+    textOpacity = videoSrc ? baseTextOpacity * (1 - hoverBlend) : baseTextOpacity
+    const baseTextScrimOpacity = primary ? 0.48 : 0.54
+    textScrimOpacity = videoSrc ? baseTextScrimOpacity * (1 - hoverBlend) : baseTextScrimOpacity
 
-  if (panelRoot) {
-    panelRoot.position.z = hoverBlend * 0.045
-    panelRoot.rotation.x = hoverBlend * -0.018
-    panelRoot.rotation.y = Math.sin(time * 0.8 + index) * hoverBlend * 0.018
-    const scale = 1 + hoverBlend * 0.028
-    panelRoot.scale.set(scale, scale, scale)
+    if (panelRoot) {
+      panelRoot.position.z = hoverBlend * 0.045
+      panelRoot.rotation.x = hoverBlend * -0.018
+      panelRoot.rotation.y = Math.sin(time * 0.8 + index) * hoverBlend * 0.018
+      const scale = 1 + hoverBlend * 0.028
+      panelRoot.scale.set(scale, scale, scale)
+    }
   }
+
+  renderScreenContent()
 })
 </script>
 
 <T.Group bind:ref={panelRoot}>
 	{#if screenModel}
-		<T.Group position={[0, 0, -0.07]}>
+		<T.Group position={[0, 0, screenModelZ]}>
 			<T is={screenModel} />
 		</T.Group>
 	{:else}
-		<T.Mesh position={[0, 0, -0.07]} renderOrder={12}>
+		<T.Mesh position={[0, 0, screenModelZ]} renderOrder={12}>
 			<T.PlaneGeometry args={[frameWidth, frameHeight]} />
 			<T.MeshPhysicalMaterial
 				color="#f8fafc"
@@ -411,56 +476,20 @@ useTask(delta => {
 		</T.Mesh>
 	{/if}
 
-	{#if primary && titleTexture}
-		<T.Mesh position={[0, 0.02, mediaSurfaceZ]}>
-			<T.PlaneGeometry args={[titleWidth, titleHeight]} />
+	{#if screenContentTexture}
+		<T.Mesh
+			bind:ref={screenContentMesh}
+			position={[0, primary ? 0.02 : 0, mediaSurfaceZ]}
+			visible={!screenModel}
+		>
+			<T.PlaneGeometry args={[primary ? titleWidth : mediaWidth, primary ? titleHeight : mediaHeight]} />
 			<T.MeshBasicMaterial
-				map={titleTexture}
+				map={screenContentTexture}
 				side={frontSide}
-				transparent={true}
-				opacity={titleMediaOpacity}
 				blending={normalBlending}
-				depthWrite={false}
+				depthWrite={true}
 			/>
 		</T.Mesh>
-		{#if videoTexture && videoReady}
-			<T.Mesh position={[0, 0.02, mediaSurfaceZ + 0.002]}>
-				<T.PlaneGeometry args={[titleWidth, titleHeight]} />
-				<T.MeshBasicMaterial
-					map={videoTexture}
-					side={frontSide}
-					transparent={true}
-					opacity={videoMediaOpacity}
-					blending={normalBlending}
-					depthWrite={false}
-				/>
-			</T.Mesh>
-		{/if}
-	{:else if stillTexture}
-		<T.Mesh position={[0, 0, mediaSurfaceZ]}>
-			<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
-			<T.MeshBasicMaterial
-				map={stillTexture}
-				side={frontSide}
-				transparent={true}
-				opacity={mediaOpacity}
-				blending={normalBlending}
-				depthWrite={false}
-			/>
-		</T.Mesh>
-		{#if videoTexture && videoReady}
-			<T.Mesh position={[0, 0, mediaSurfaceZ + 0.002]}>
-				<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
-				<T.MeshBasicMaterial
-					map={videoTexture}
-					side={frontSide}
-					transparent={true}
-					opacity={videoMediaOpacity}
-					blending={normalBlending}
-					depthWrite={false}
-				/>
-			</T.Mesh>
-		{/if}
 	{:else}
 		<T.Mesh position={[0, 0.02, mediaSurfaceZ]}>
 			<T.PlaneGeometry args={[fallbackWidth, fallbackHeight]} />
@@ -471,36 +500,6 @@ useTask(delta => {
 				opacity={primary ? 0.32 : 0.16}
 				blending={additiveBlending}
 				depthWrite={false}
-			/>
-		</T.Mesh>
-	{/if}
-
-	{#if screenTextTexture}
-		<T.Mesh position={[0, primary ? 0.02 : 0, textScrimSurfaceZ]} renderOrder={20}>
-			<T.PlaneGeometry args={[primary ? titleWidth : mediaWidth, primary ? titleHeight : mediaHeight]} />
-			<T.MeshBasicMaterial
-				color="#020617"
-				side={doubleSide}
-				transparent={true}
-				opacity={textScrimOpacity}
-				blending={normalBlending}
-				depthWrite={false}
-				depthTest={false}
-			/>
-		</T.Mesh>
-	{/if}
-
-	{#if screenTextTexture}
-		<T.Mesh position={[0, 0.01, textSurfaceZ]} renderOrder={21}>
-			<T.PlaneGeometry args={[textWidth, textHeight]} />
-			<T.MeshBasicMaterial
-				map={screenTextTexture}
-				side={doubleSide}
-				transparent={true}
-				opacity={textOpacity}
-				blending={normalBlending}
-				depthWrite={false}
-				depthTest={false}
 			/>
 		</T.Mesh>
 	{/if}

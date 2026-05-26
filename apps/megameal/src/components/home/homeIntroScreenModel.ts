@@ -1,7 +1,5 @@
 import {
   Box3,
-  DoubleSide,
-  MeshPhysicalMaterial,
   Vector3,
 } from 'three'
 import type * as THREE from 'three'
@@ -70,86 +68,6 @@ function fitScreenModel(
   )
 }
 
-function isGlassSourceMaterial(material: THREE.Material) {
-  return material.transparent || material.opacity < 0.75
-}
-
-function cloneSourceColor(
-  material: THREE.Material,
-  fallback: number,
-) {
-  const sourceColor = (material as THREE.MeshStandardMaterial).color
-  return sourceColor?.isColor ? sourceColor.clone() : fallback
-}
-
-function cloneSourceEmissive(
-  material: THREE.Material,
-  fallback: number,
-) {
-  const sourceEmissive = (material as THREE.MeshStandardMaterial).emissive
-  return sourceEmissive?.isColor ? sourceEmissive.clone() : fallback
-}
-
-function createScreenGlassMaterial(sourceMaterial: THREE.Material) {
-  const sourceOpacity = Math.min(1, Math.max(0, sourceMaterial.opacity || 1))
-
-  return new MeshPhysicalMaterial({
-    name: sourceMaterial.name,
-    color: cloneSourceColor(sourceMaterial, 0xf8fafc),
-    side: DoubleSide,
-    transparent: true,
-    opacity: Math.max(sourceOpacity, 0.24),
-    roughness: 0.08,
-    metalness: 0.02,
-    transmission: 0.72,
-    thickness: 1.1,
-    ior: 1.62,
-    reflectivity: 0.74,
-    clearcoat: 1,
-    clearcoatRoughness: 0.08,
-    iridescence: 0.24,
-    iridescenceIOR: 1.36,
-    iridescenceThicknessRange: [120, 380],
-    attenuationColor: 0x67e8f9,
-    attenuationDistance: 1.9,
-    emissive: 0x06263a,
-    emissiveIntensity: 0.035,
-    depthWrite: false,
-    depthTest: true,
-  })
-}
-
-function createScreenFrameMaterial(sourceMaterial: THREE.Material) {
-  return new MeshPhysicalMaterial({
-    name: sourceMaterial.name,
-    color: cloneSourceColor(sourceMaterial, 0x160a3f),
-    emissive: cloneSourceEmissive(sourceMaterial, 0x1e1b4b),
-    emissiveIntensity: 0.58,
-    side: DoubleSide,
-    roughness: 0.16,
-    metalness: 0.34,
-    clearcoat: 0.78,
-    clearcoatRoughness: 0.14,
-    reflectivity: 0.52,
-    transparent: sourceMaterial.transparent || sourceMaterial.opacity < 1,
-    opacity: sourceMaterial.opacity,
-    depthWrite: false,
-    depthTest: true,
-  })
-}
-
-function createPortalScreenMaterial(sourceMaterial: THREE.Material) {
-  const material = isGlassSourceMaterial(sourceMaterial)
-    ? createScreenGlassMaterial(sourceMaterial)
-    : createScreenFrameMaterial(sourceMaterial)
-
-  material.envMapIntensity = isGlassSourceMaterial(sourceMaterial) ? 1.15 : 0.65
-  material.needsUpdate = true
-  sourceMaterial.dispose()
-
-  return material
-}
-
 function tuneScreenModel(model: THREE.Object3D) {
   model.traverse(item => {
     const mesh = item as THREE.Mesh
@@ -159,14 +77,6 @@ function tuneScreenModel(model: THREE.Object3D) {
     mesh.receiveShadow = false
     mesh.frustumCulled = false
     mesh.renderOrder = 12
-
-    if (Array.isArray(mesh.material)) {
-      mesh.material = mesh.material.map(material =>
-        createPortalScreenMaterial(material),
-      )
-    } else if (mesh.material) {
-      mesh.material = createPortalScreenMaterial(mesh.material)
-    }
   })
 }
 

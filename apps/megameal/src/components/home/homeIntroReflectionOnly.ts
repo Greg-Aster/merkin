@@ -1,0 +1,2 @@
+export const homeIntroReflectionOnlyUserDataKey =
+  'homeIntroReflectionOnly'

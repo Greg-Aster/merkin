@@ -16,6 +16,7 @@ import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.j
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import HomeIntroParticleField from './HomeIntroParticleField.svelte'
 import HomeIntroRingGlow from './HomeIntroRingGlow.svelte'
+import HomeIntroSceneBackdrop from './HomeIntroSceneBackdrop.svelte'
 import { getHomeIntroLogoModelSrc } from './homeIntroLogoAssets'
 import { homeIntroParticleClusters } from './homeIntroParticleClusters'
 import { hashHomeIntroUnit } from './homeIntroSceneMath'
@@ -137,6 +138,16 @@ $: starColumnPosition = portraitMobile
 $: starColumnScale = portraitMobile
   ? ([1.82, 1, 1.14] as [number, number, number])
   : ([1.38, 1, 1.06] as [number, number, number])
+$: sceneBackdropSrc =
+  portalScreens[activeScreenIndex]?.webglStillSrc ??
+  portalScreens[activeScreenIndex]?.stillSrc ??
+  ''
+$: sceneBackdropPosition = portraitMobile
+  ? ([0, 0.08, -4.4] as [number, number, number])
+  : ([0, 0, -4.2] as [number, number, number])
+$: sceneBackdropSize = portraitMobile
+  ? ([8.2, 12.4] as [number, number])
+  : ([16, 9] as [number, number])
 $: particleDensityMultiplier =
   sceneQuality === 'lean'
     ? 1.1
@@ -922,6 +933,12 @@ useTask(delta => {
 />
 
 <T.Group bind:ref={world} position={[0, 0, 0]} scale={[sceneScale, sceneScale, sceneScale]}>
+	<HomeIntroSceneBackdrop
+		src={sceneBackdropSrc}
+		position={sceneBackdropPosition}
+		size={sceneBackdropSize}
+	/>
+
 	{#if carouselComponentReady && ScreenPanel}
 		<T.Group bind:ref={screenRail} position={railPosition} visible={screenOrbitInitialized}>
 			{#each screens as screen, index}

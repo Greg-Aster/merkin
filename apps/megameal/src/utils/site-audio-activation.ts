@@ -6,7 +6,12 @@ const keyboardActivationIgnoredKeys = new Set([
   'Shift',
 ])
 
-const documentActivationEvents = ['click', 'touchstart', 'touchend'] as const
+const documentActivationEvents = [
+  'click',
+  'touchstart',
+  'touchend',
+  'wheel',
+] as const
 
 export const siteAudioUnlockedEvent = 'megameal:audio-unlocked'
 
@@ -38,6 +43,15 @@ export function hasActiveSiteAudioGesture(): boolean {
   return userActivation?.isActive !== false
 }
 
+function isWheelActivationGesture(event: Event): event is WheelEvent {
+  return (
+    typeof WheelEvent !== 'undefined' &&
+    event instanceof WheelEvent &&
+    event.isTrusted &&
+    (event.deltaX !== 0 || event.deltaY !== 0 || event.deltaZ !== 0)
+  )
+}
+
 export function markSiteAudioUnlocked(): void {
   if (siteAudioUnlocked || typeof window === 'undefined') {
     siteAudioUnlocked = true
@@ -59,6 +73,10 @@ export function isSiteAudioActivationGesture(event: Event): boolean {
     )
   }
 
+  if (isWheelActivationGesture(event)) {
+    return true
+  }
+
   if (event instanceof MouseEvent) {
     return event.type === 'click' && event.button === 0
   }
@@ -68,6 +86,9 @@ export function isSiteAudioActivationGesture(event: Event): boolean {
 
 export function canAttemptSiteAudioUnlock(event?: Event): boolean {
   if (event && !isSiteAudioActivationGesture(event)) return false
+  if (event && isWheelActivationGesture(event)) {
+    return true
+  }
   return hasActiveSiteAudioGesture()
 }
 

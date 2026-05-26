@@ -249,7 +249,7 @@ onMount(() => {
     }
   }
 
-  const handleWheel = (event: WheelEvent) => {
+  const handleWheel = async (event: WheelEvent) => {
     const target = event.target instanceof HTMLElement ? event.target : null
     if (target?.closest('input, textarea, select, [contenteditable="true"]'))
       return
@@ -259,7 +259,9 @@ onMount(() => {
     if (now - lastScrollSfxAt < 650) return
 
     lastScrollSfxAt = now
-    siteSfxManager.playIfUnlocked('scroll')
+    if (await siteSfxManager.unlockFromGesture(event)) {
+      siteSfxManager.play('scroll')
+    }
   }
 
   const handleCustomSfx = (event: Event) => {
