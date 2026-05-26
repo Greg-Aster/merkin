@@ -36,6 +36,11 @@ type IntroInputState = {
 
 type SceneQuality = 'high' | 'balanced' | 'lean'
 
+type PortalAdvanceDetail = {
+  direction?: number
+  step?: number
+}
+
 export let titleImageSrc = ''
 
 let shell: HTMLDivElement | null = null
@@ -729,7 +734,18 @@ function handleKeyboardScroll(event: KeyboardEvent) {
 function handlePortalAdvance(event: Event) {
   if (!isShellVisible()) return
 
-  if (smoothWheelStep(keyboardWheelStep)) {
+  const detail =
+    event instanceof CustomEvent
+      ? (event.detail as PortalAdvanceDetail | null)
+      : null
+  const direction = detail?.direction && Number.isFinite(detail.direction)
+    ? Math.sign(detail.direction)
+    : 1
+  const step = detail?.step && Number.isFinite(detail.step)
+    ? Math.abs(detail.step)
+    : keyboardWheelStep
+
+  if (smoothWheelStep(step * direction)) {
     event.preventDefault()
   }
 }

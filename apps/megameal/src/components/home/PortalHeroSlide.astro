@@ -1,6 +1,7 @@
 ---
 import HomeIntroEnvironmentLoader from './HomeIntroEnvironmentLoader.svelte'
 import '../../styles/features/home/portal-hero-slide.css'
+import '../../styles/features/home/portal-hero-scroll-cue.css'
 ---
 
 <section class="megameal-home-intro" aria-label="MEGAMEAL portal introduction">
@@ -17,27 +18,87 @@ import '../../styles/features/home/portal-hero-slide.css'
   <button
     class="megameal-home-intro__scroll-cue"
     type="button"
-    aria-label="Scroll to portal destinations"
+    aria-label="Nudge portal destinations up or down"
+    data-joystick-direction="idle"
     data-sfx-hover="portal-hover"
     data-sfx-click="portal-cycle"
   >
-    <span class="megameal-home-intro__scroll-cue-icon" aria-hidden="true"></span>
+    <span class="megameal-home-intro__scroll-cue-arrow megameal-home-intro__scroll-cue-arrow--up" aria-hidden="true"></span>
+    <span class="megameal-home-intro__scroll-cue-stick" aria-hidden="true"></span>
+    <span class="megameal-home-intro__scroll-cue-arrow megameal-home-intro__scroll-cue-arrow--down" aria-hidden="true"></span>
   </button>
 </section>
 
 <script>
+  type PortalAdvanceDetail = {
+    direction?: number
+    step?: number
+  }
+
   const bindPortalScrollCue = () => {
     const cue = document.querySelector<HTMLButtonElement>('.megameal-home-intro__scroll-cue')
     if (!cue || cue.dataset.portalScrollCueBound === 'true') return
 
     cue.dataset.portalScrollCueBound = 'true'
-    cue.addEventListener('click', () => {
-      const portalAdvanceEvent = new CustomEvent('merkin:portal-advance', {
+    const joystickDeadzoneRatio = 0.18
+    const joystickDragThreshold = 7
+    const joystickInitialRepeatDelayMs = 360
+    const joystickRepeatDelayMs = 230
+    let activePointerId: number | null = null
+    let activeDirection = 0
+    let pointerStartY = 0
+    let pointerDispatched = false
+    let pointerDragged = false
+    let suppressNextClick = false
+    let repeatTimeout = 0
+    let idleTimeout = 0
+
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const getScrollBehavior = (): ScrollBehavior =>
+      motionQuery.matches ? 'auto' : 'smooth'
+
+    const setCueDirection = (direction: number) => {
+      window.clearTimeout(idleTimeout)
+      cue.dataset.joystickDirection =
+        direction < 0 ? 'up' : direction > 0 ? 'down' : 'idle'
+      cue.style.setProperty(
+        '--scroll-cue-stick-y',
+        direction < 0 ? '-1' : direction > 0 ? '1' : '0',
+      )
+
+      if (direction !== 0) {
+        idleTimeout = window.setTimeout(() => setCueDirection(0), 220)
+      }
+    }
+
+    const readDirectionFromPointer = (clientY: number) => {
+      const rect = cue.getBoundingClientRect()
+      const offsetY = clientY - (rect.top + rect.height / 2)
+      const deadzone = rect.height * joystickDeadzoneRatio
+      if (Math.abs(offsetY) <= deadzone) return 0
+
+      return offsetY < 0 ? -1 : 1
+    }
+
+    const dispatchPortalAdvance = (direction: number) => {
+      const portalAdvanceEvent = new CustomEvent<PortalAdvanceDetail>('merkin:portal-advance', {
         bubbles: true,
         cancelable: true,
+        detail: { direction },
       })
       window.dispatchEvent(portalAdvanceEvent)
-      if (portalAdvanceEvent.defaultPrevented) return
+      return portalAdvanceEvent.defaultPrevented
+    }
+
+    const runFallbackScroll = (direction: number) => {
+      const behavior = getScrollBehavior()
+      if (direction < 0) {
+        window.scrollBy({
+          top: -window.innerHeight * 0.82,
+          behavior,
+        })
+        return
+      }
 
       const hero = document.getElementById('banner-container')
       const candidates = Array.from(
@@ -47,9 +108,6 @@ import '../../styles/features/home/portal-hero-slide.css'
         const rect = element.getBoundingClientRect()
         return rect.top > window.innerHeight * 0.35
       })
-      const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-      const behavior: ScrollBehavior = motionQuery.matches ? 'auto' : 'smooth'
-
       if (target) {
         target.scrollIntoView({ behavior, block: 'start' })
         return
@@ -61,6 +119,127 @@ import '../../styles/features/home/portal-hero-slide.css'
         top: window.scrollY + Math.max(heroBottom, window.innerHeight * 0.82),
         behavior,
       })
+    }
+
+    const advancePortal = (direction: number) => {
+      const normalizedDirection = direction < 0 ? -1 : 1
+      setCueDirection(normalizedDirection)
+      if (!dispatchPortalAdvance(normalizedDirection)) {
+        runFallbackScroll(normalizedDirection)
+      }
+    }
+
+    const clearRepeat = () => {
+      if (!repeatTimeout) return
+
+      window.clearTimeout(repeatTimeout)
+      repeatTimeout = 0
+    }
+
+    const scheduleRepeat = () => {
+      clearRepeat()
+      if (activeDirection === 0) return
+
+      const repeat = () => {
+        if (activePointerId === null || activeDirection === 0) {
+          clearRepeat()
+          return
+        }
+
+        advancePortal(activeDirection)
+        pointerDispatched = true
+        repeatTimeout = window.setTimeout(repeat, joystickRepeatDelayMs)
+      }
+
+      repeatTimeout = window.setTimeout(repeat, joystickInitialRepeatDelayMs)
+    }
+
+    const endJoystick = () => {
+      const shouldSuppressClick = pointerDispatched || pointerDragged
+
+      if (activePointerId !== null) {
+        try {
+          cue.releasePointerCapture(activePointerId)
+        } catch {
+          // The browser may release capture automatically on cancellation.
+        }
+      }
+
+      suppressNextClick = suppressNextClick || shouldSuppressClick
+      activePointerId = null
+      activeDirection = 0
+      pointerStartY = 0
+      pointerDispatched = false
+      pointerDragged = false
+      clearRepeat()
+      setCueDirection(0)
+    }
+
+    cue.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return
+
+      activePointerId = event.pointerId
+      pointerStartY = event.clientY
+      pointerDispatched = false
+      pointerDragged = false
+      activeDirection = readDirectionFromPointer(event.clientY)
+
+      try {
+        cue.setPointerCapture(event.pointerId)
+      } catch {
+        // Window-level pointer events still finish the interaction.
+      }
+
+      if (activeDirection !== 0) {
+        event.preventDefault()
+        advancePortal(activeDirection)
+        pointerDispatched = true
+        scheduleRepeat()
+      }
+    })
+
+    cue.addEventListener('pointermove', (event) => {
+      if (activePointerId === null || event.pointerId !== activePointerId) return
+
+      if (Math.abs(event.clientY - pointerStartY) > joystickDragThreshold) {
+        pointerDragged = true
+      }
+
+      const nextDirection = readDirectionFromPointer(event.clientY)
+      if (nextDirection === activeDirection) return
+
+      activeDirection = nextDirection
+      if (activeDirection === 0) {
+        clearRepeat()
+        setCueDirection(0)
+        return
+      }
+
+      event.preventDefault()
+      advancePortal(activeDirection)
+      pointerDispatched = true
+      scheduleRepeat()
+    })
+
+    cue.addEventListener('pointerup', endJoystick)
+    cue.addEventListener('pointercancel', endJoystick)
+    cue.addEventListener('lostpointercapture', endJoystick)
+
+    cue.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+
+      event.preventDefault()
+      advancePortal(event.key === 'ArrowUp' ? -1 : 1)
+    })
+
+    cue.addEventListener('click', (event) => {
+      if (suppressNextClick) {
+        event.preventDefault()
+        suppressNextClick = false
+        return
+      }
+
+      advancePortal(1)
     })
   }
 

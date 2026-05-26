@@ -58,6 +58,7 @@ let videoTexture: VideoTexture | null = null
 let panelRoot: Group | null = null
 let screenModel: THREE.Object3D | null = null
 let screenContentMesh: Mesh | null = null
+let screenContentMaterial: THREE.MeshBasicMaterial | null = null
 let screenContentRenderer: HomeIntroScreenContentRenderer | null = null
 let loader: TextureLoader | null = null
 let screenLoadAbortController: AbortController | null = null
@@ -86,8 +87,8 @@ const frontSide = FrontSide
 const frameWidth = 3.18
 const frameHeight = 1.78
 const screenModelZ = -0.07
-const mediaWidth = frameWidth * .95
-const mediaHeight = frameHeight * .95
+const mediaWidth = frameWidth * 1.1
+const mediaHeight = frameHeight * 1.1
 const titleWidth = mediaWidth
 const titleHeight = mediaHeight
 const fallbackWidth = 2.76
@@ -406,9 +407,29 @@ $: if (mounted && (kicker || title || stat || ctaLabel)) {
 
 $: mediaTint = getTextureTint(mediaOpacity)
 $: titleMediaTint = getTextureTint(titleMediaOpacity)
-$: if (screenContentMesh) {
-  screenContentMesh.userData[homeIntroReflectionOnlyUserDataKey] =
-    Boolean(screenModel)
+$: if (screenContentMesh && screenContentMaterial) {
+  const reflectionOnly = Boolean(screenModel)
+  const canWriteMainPass = !reflectionOnly
+
+  screenContentMesh.userData[homeIntroReflectionOnlyUserDataKey] = reflectionOnly
+  screenContentMesh.visible = true
+  screenContentMaterial.colorWrite = canWriteMainPass
+  screenContentMaterial.depthWrite = canWriteMainPass
+  screenContentMesh.onBeforeRender = renderer => {
+    const renderTarget = renderer.getRenderTarget()
+    const renderTargetName = renderTarget?.texture?.name ?? ''
+    const canWriteGlassPass =
+      Boolean(renderTarget) &&
+      renderTargetName !== 'HomeIntroLogoGlitch.logo'
+    const canWriteCurrentPass = !reflectionOnly || canWriteGlassPass
+
+    screenContentMaterial!.colorWrite = canWriteCurrentPass
+    screenContentMaterial!.depthWrite = canWriteCurrentPass
+  }
+  screenContentMesh.onAfterRender = () => {
+    screenContentMaterial!.colorWrite = canWriteMainPass
+    screenContentMaterial!.depthWrite = canWriteMainPass
+  }
 }
 
 useTask(delta => {
@@ -417,17 +438,17 @@ useTask(delta => {
 
   if (motionEnabled) {
     hoverBlend += ((hovered ? 1 : 0) - hoverBlend) * ease
-    const baseTitleOpacity = 0.9
-    const baseMediaOpacity = primary ? 0.76 : 0.62
+    const baseTitleOpacity = 0.94
+    const baseMediaOpacity = primary ? 0.92 : 0.86
     videoMediaOpacity = videoReady ? hoverBlend : 0
     titleMediaOpacity =
       baseTitleOpacity +
       (1 - baseTitleOpacity) * hoverBlend -
-      videoMediaOpacity * 0.72
+      videoMediaOpacity * 0.18
     mediaOpacity = baseMediaOpacity + (1 - baseMediaOpacity) * hoverBlend
     const baseTextOpacity = primary ? 0.96 : 0.88
     textOpacity = videoSrc ? baseTextOpacity * (1 - hoverBlend) : baseTextOpacity
-    const baseTextScrimOpacity = primary ? 0.48 : 0.54
+    const baseTextScrimOpacity = primary ? 0.38 : 0.44
     textScrimOpacity = videoSrc ? baseTextScrimOpacity * (1 - hoverBlend) : baseTextScrimOpacity
 
     if (panelRoot) {
@@ -480,10 +501,10 @@ useTask(delta => {
 		<T.Mesh
 			bind:ref={screenContentMesh}
 			position={[0, primary ? 0.02 : 0, mediaSurfaceZ]}
-			visible={!screenModel}
 		>
 			<T.PlaneGeometry args={[primary ? titleWidth : mediaWidth, primary ? titleHeight : mediaHeight]} />
 			<T.MeshBasicMaterial
+				bind:ref={screenContentMaterial}
 				map={screenContentTexture}
 				side={frontSide}
 				blending={normalBlending}

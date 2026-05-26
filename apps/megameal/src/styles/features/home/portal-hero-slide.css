@@ -70,65 +70,6 @@
     border: 0;
   }
 
-  .megameal-home-intro__scroll-cue {
-    position: absolute;
-    left: 50%;
-    bottom: max(1.1rem, env(safe-area-inset-bottom));
-    z-index: 5;
-    display: grid;
-    align-items: center;
-    justify-items: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    padding: 0;
-    border: 1px solid rgb(103 232 249 / 0.18);
-    border-radius: 50%;
-    background:
-      radial-gradient(circle at 50% 0%, rgb(103 232 249 / 0.08), transparent 70%),
-      rgb(2 6 23 / 0.2);
-    color: rgb(236 254 255 / 0.56);
-    box-shadow:
-      0 0.65rem 1.8rem rgb(0 0 0 / 0.18),
-      inset 0 1px 0 rgb(255 255 255 / 0.05);
-    opacity: 0.72;
-    pointer-events: auto;
-    cursor: pointer;
-    transform: translateX(-50%);
-    transition:
-      border-color 160ms ease,
-      background-color 160ms ease,
-      color 160ms ease,
-      opacity 160ms ease,
-      transform 160ms ease;
-  }
-
-  .megameal-home-intro__scroll-cue:hover,
-  .megameal-home-intro__scroll-cue:focus-visible {
-    border-color: rgb(165 243 252 / 0.68);
-    background-color: rgb(8 47 73 / 0.36);
-    color: rgb(255 255 255);
-    opacity: 1;
-    outline: none;
-    transform: translate(-50%, -0.12rem);
-  }
-
-  .megameal-home-intro__scroll-cue:focus-visible {
-    box-shadow:
-      0 0 0 3px rgb(103 232 249 / 0.24),
-      0 0.65rem 1.8rem rgb(0 0 0 / 0.18),
-      inset 0 1px 0 rgb(255 255 255 / 0.05);
-  }
-
-  .megameal-home-intro__scroll-cue-icon {
-    width: 0.44rem;
-    height: 0.44rem;
-    border-right: 2px solid currentColor;
-    border-bottom: 2px solid currentColor;
-    opacity: 0.84;
-    transform: translateY(-0.12rem) rotate(45deg);
-    animation: portal-scroll-cue-float 1600ms ease-in-out 2200ms infinite;
-  }
-
   html:not(.megameal-home-standard-banner-phase) #banner-container.banner-only-mode #standard-banner-container .banner-billboard,
   html:not(.megameal-home-standard-banner-phase) #banner-container.banner-only-mode #standard-banner-container .banner-title-display {
     display: none !important;
@@ -306,16 +247,6 @@
     }
   }
 
-  @keyframes portal-scroll-cue-float {
-    0%,
-    100% {
-      transform: translateY(-0.12rem) rotate(45deg);
-    }
-    50% {
-      transform: translateY(0.12rem) rotate(45deg);
-    }
-  }
-
   @keyframes portal-demo-channel-flash {
     0% {
       opacity: 0.82;
@@ -485,10 +416,6 @@
     .megameal-home-intro {
       padding: 1rem;
     }
-
-    .megameal-home-intro__scroll-cue {
-      bottom: max(0.72rem, env(safe-area-inset-bottom));
-    }
   }
 
   @media (max-width: 640px) and (orientation: portrait) {
@@ -507,10 +434,6 @@
       animation: none;
       opacity: 1;
       transform: none;
-    }
-
-    .megameal-home-intro__scroll-cue-icon {
-      animation: none;
     }
 
     .portal-demo-player__glitch,

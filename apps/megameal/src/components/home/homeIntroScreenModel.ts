@@ -19,24 +19,7 @@ function loadSharedScreenModel() {
 }
 
 function cloneScreenModel(source: THREE.Object3D) {
-  const model = source.clone(true)
-
-  model.traverse(item => {
-    const mesh = item as THREE.Mesh
-    if (!mesh.isMesh) return
-
-    if (mesh.geometry) {
-      mesh.geometry = mesh.geometry.clone()
-    }
-
-    if (Array.isArray(mesh.material)) {
-      mesh.material = mesh.material.map(material => material.clone())
-    } else if (mesh.material) {
-      mesh.material = mesh.material.clone()
-    }
-  })
-
-  return model
+  return source.clone(true)
 }
 
 function fitScreenModel(
@@ -80,25 +63,9 @@ function tuneScreenModel(model: THREE.Object3D) {
   })
 }
 
-function disposeMaterial(material: THREE.Material) {
-  material.dispose()
-}
-
-export function disposeHomeIntroScreenModel(model: THREE.Object3D | null) {
-  model?.traverse(item => {
-    const mesh = item as THREE.Mesh
-    if (!mesh.isMesh) return
-
-    mesh.geometry?.dispose()
-
-    const materials = Array.isArray(mesh.material)
-      ? mesh.material
-      : [mesh.material]
-
-    materials.forEach(material => {
-      if (material) disposeMaterial(material)
-    })
-  })
+export function disposeHomeIntroScreenModel(_model: THREE.Object3D | null) {
+  // Geometry and materials are shared by all screen clones through loadSharedScreenModel().
+  // Individual panel teardown must not dispose the shared GLB assets.
 }
 
 export async function loadHomeIntroScreenModelInstance(
