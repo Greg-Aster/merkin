@@ -10,8 +10,9 @@ const documentActivationEvents = [
   'click',
   'touchstart',
   'touchend',
-  'wheel',
 ] as const
+
+const wheelActivationThreshold = 4
 
 export const siteAudioUnlockedEvent = 'megameal:audio-unlocked'
 
@@ -47,8 +48,11 @@ function isWheelActivationGesture(event: Event): event is WheelEvent {
   return (
     typeof WheelEvent !== 'undefined' &&
     event instanceof WheelEvent &&
-    event.isTrusted &&
-    (event.deltaX !== 0 || event.deltaY !== 0 || event.deltaZ !== 0)
+    Math.max(
+      Math.abs(event.deltaX),
+      Math.abs(event.deltaY),
+      Math.abs(event.deltaZ),
+    ) >= wheelActivationThreshold
   )
 }
 
@@ -120,11 +124,13 @@ export function addSiteAudioActivationListeners(
     document.addEventListener(eventName, activationHandler, gestureOptions)
   })
   document.addEventListener('keydown', activationHandler, keyboardOptions)
+  window.addEventListener('wheel', activationHandler, gestureOptions)
 
   return () => {
     documentActivationEvents.forEach(eventName => {
       document.removeEventListener(eventName, activationHandler, gestureOptions)
     })
     document.removeEventListener('keydown', activationHandler, keyboardOptions)
+    window.removeEventListener('wheel', activationHandler, gestureOptions)
   }
 }

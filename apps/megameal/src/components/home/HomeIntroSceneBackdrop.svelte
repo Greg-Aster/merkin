@@ -100,6 +100,7 @@ function updateReflectionProbe() {
 
   if (!scene || !renderer || !texture || !backdropMesh) return
 
+  const backdropWasVisible = backdropMesh.visible
   const currentEnvironment = scene.environment
   if (currentEnvironment === reflectionTarget.texture) {
     scene.environment = previousEnvironment
@@ -107,6 +108,7 @@ function updateReflectionProbe() {
 
   const reflectionOnlyVisibility = showReflectionOnlyObjects(scene)
 
+  backdropMesh.visible = true
   reflectionProbe.position.set(
     probePosition[0],
     probePosition[1],
@@ -117,6 +119,7 @@ function updateReflectionProbe() {
     reflectionProbe.update(renderer, scene)
   } finally {
     restoreVisibility(reflectionOnlyVisibility)
+    backdropMesh.visible = backdropWasVisible
   }
   scene.environment = reflectionTarget.texture
 
@@ -212,7 +215,7 @@ $: if (mounted) {
 </script>
 
 {#if texture}
-	<T.Mesh bind:ref={backdropMesh} {position} renderOrder={-20}>
+	<T.Mesh bind:ref={backdropMesh} {position} visible={false}>
 		<T.PlaneGeometry args={size} />
 		<T.MeshBasicMaterial
 			map={texture}

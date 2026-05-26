@@ -13,10 +13,6 @@ import {
 } from 'three'
 
 type HomeIntroScreenContentRendererOptions = {
-  mediaWidth: number
-  mediaHeight: number
-  textWidth: number
-  textHeight: number
   renderWidth?: number
   renderHeight?: number
 }
@@ -26,9 +22,6 @@ type HomeIntroScreenContentRendererState = {
   fallbackOpacity: number
   mediaTexture: Texture | null
   mediaTint: string
-  screenTextTexture: Texture | null
-  textOpacity: number
-  textScrimOpacity: number
   videoMediaOpacity: number
   videoReady: boolean
   videoTexture: Texture | null
@@ -51,29 +44,12 @@ export class HomeIntroScreenContentRenderer {
     depthTest: false,
     depthWrite: false,
   })
-  private readonly scrimMaterial = new MeshBasicMaterial({
-    color: '#020617',
-    transparent: true,
-    opacity: 0,
-    depthTest: false,
-    depthWrite: false,
-  })
-  private readonly textMaterial = new MeshBasicMaterial({
-    transparent: true,
-    opacity: 0,
-    depthTest: false,
-    depthWrite: false,
-  })
   private readonly previousClearColor = new Color()
 
   constructor({
-    mediaWidth,
-    mediaHeight,
-    textWidth,
-    textHeight,
     renderWidth = 1024,
     renderHeight = 576,
-  }: HomeIntroScreenContentRendererOptions) {
+  }: HomeIntroScreenContentRendererOptions = {}) {
     this.target = new WebGLRenderTarget(renderWidth, renderHeight, {
       depthBuffer: false,
       stencilBuffer: false,
@@ -84,10 +60,6 @@ export class HomeIntroScreenContentRenderer {
     this.texture = this.target.texture
 
     const fullSurfaceGeometry = new PlaneGeometry(2, 2)
-    const textSurfaceGeometry = new PlaneGeometry(
-      (textWidth / mediaWidth) * 2,
-      (textHeight / mediaHeight) * 2,
-    )
 
     const mediaMesh = new Mesh(fullSurfaceGeometry, this.mediaMaterial)
     mediaMesh.position.z = -0.04
@@ -96,14 +68,6 @@ export class HomeIntroScreenContentRenderer {
     const videoMesh = new Mesh(fullSurfaceGeometry.clone(), this.videoMaterial)
     videoMesh.position.z = -0.03
     this.scene.add(videoMesh)
-
-    const scrimMesh = new Mesh(fullSurfaceGeometry.clone(), this.scrimMaterial)
-    scrimMesh.position.z = -0.02
-    this.scene.add(scrimMesh)
-
-    const textMesh = new Mesh(textSurfaceGeometry, this.textMaterial)
-    textMesh.position.set(0, 0.02, -0.01)
-    this.scene.add(textMesh)
   }
 
   render(renderer: WebGLRenderer, state: HomeIntroScreenContentRendererState) {
@@ -142,9 +106,6 @@ export class HomeIntroScreenContentRenderer {
     fallbackOpacity,
     mediaTexture,
     mediaTint,
-    screenTextTexture,
-    textOpacity,
-    textScrimOpacity,
     videoMediaOpacity,
     videoReady,
     videoTexture,
@@ -158,11 +119,5 @@ export class HomeIntroScreenContentRenderer {
     this.videoMaterial.map = videoTexture
     this.videoMaterial.opacity = videoTexture && videoReady ? videoMediaOpacity : 0
     this.videoMaterial.needsUpdate = true
-
-    this.scrimMaterial.opacity = screenTextTexture ? textScrimOpacity : 0
-
-    this.textMaterial.map = screenTextTexture
-    this.textMaterial.opacity = screenTextTexture ? textOpacity : 0
-    this.textMaterial.needsUpdate = true
   }
 }

@@ -75,7 +75,6 @@ let mediaOpacity = 1
 let titleMediaOpacity = 1
 let videoMediaOpacity = 0
 let textOpacity = primary ? 0.72 : 0.58
-let textScrimOpacity = primary ? 0.34 : 0.42
 let mediaTint = '#ffffff'
 let titleMediaTint = '#ffffff'
 let videoElement: HTMLVideoElement | null = null
@@ -96,6 +95,7 @@ const fallbackHeight = 0.44
 const mediaSurfaceZ = -0.16
 const textWidth = 2.54
 const textHeight = 1.24
+const textSurfaceZ = -0.018
 const screenVideoPlaybackRate = 0.33
 
 function getTextureTint(opacity: number) {
@@ -362,12 +362,7 @@ function loadStillTexture() {
 function ensureScreenContentRenderer() {
   if (screenContentRenderer) return screenContentRenderer
 
-  screenContentRenderer = new HomeIntroScreenContentRenderer({
-    mediaWidth,
-    mediaHeight,
-    textWidth,
-    textHeight,
-  })
+  screenContentRenderer = new HomeIntroScreenContentRenderer()
   screenContentTexture = screenContentRenderer.texture
 
   return screenContentRenderer
@@ -384,9 +379,6 @@ function renderScreenContent() {
     fallbackOpacity: primary ? 0.32 : 0.16,
     mediaTexture: primary ? titleTexture : stillTexture,
     mediaTint: primary ? titleMediaTint : mediaTint,
-    screenTextTexture,
-    textOpacity,
-    textScrimOpacity,
     videoMediaOpacity,
     videoReady,
     videoTexture,
@@ -448,8 +440,6 @@ useTask(delta => {
     mediaOpacity = baseMediaOpacity + (1 - baseMediaOpacity) * hoverBlend
     const baseTextOpacity = primary ? 0.96 : 0.88
     textOpacity = videoSrc ? baseTextOpacity * (1 - hoverBlend) : baseTextOpacity
-    const baseTextScrimOpacity = primary ? 0.38 : 0.44
-    textScrimOpacity = videoSrc ? baseTextScrimOpacity * (1 - hoverBlend) : baseTextScrimOpacity
 
     if (panelRoot) {
       panelRoot.position.z = hoverBlend * 0.045
@@ -520,6 +510,20 @@ useTask(delta => {
 				transparent={true}
 				opacity={primary ? 0.32 : 0.16}
 				blending={additiveBlending}
+				depthWrite={false}
+			/>
+		</T.Mesh>
+	{/if}
+
+	{#if screenTextTexture}
+		<T.Mesh position={[0, 0.01, textSurfaceZ]} renderOrder={21}>
+			<T.PlaneGeometry args={[textWidth, textHeight]} />
+			<T.MeshBasicMaterial
+				map={screenTextTexture}
+				side={frontSide}
+				transparent={true}
+				opacity={textOpacity}
+				blending={normalBlending}
 				depthWrite={false}
 			/>
 		</T.Mesh>

@@ -8,6 +8,10 @@ import {
   canAttemptSiteAudioUnlock,
   markSiteAudioUnlocked,
 } from './site-audio-activation'
+import {
+  canUnlockWithoutHowlerContext,
+  ensureHowlerAudioContext,
+} from './site-howler-context'
 
 declare global {
   interface Window {
@@ -354,11 +358,11 @@ class SiteAudioManager {
     if (!canAttemptSiteAudioUnlock(event)) return false
 
     try {
-      const ctx = Howler.ctx
+      const ctx = ensureHowlerAudioContext()
       if (ctx && ctx.state === 'suspended') {
         await ctx.resume()
       }
-      if (ctx ? ctx.state === 'running' : true) {
+      if (ctx ? ctx.state === 'running' : canUnlockWithoutHowlerContext()) {
         this.setAudioUnlocked()
       }
     } catch (error) {
