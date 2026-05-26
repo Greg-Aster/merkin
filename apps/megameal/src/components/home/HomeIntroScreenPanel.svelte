@@ -22,7 +22,10 @@ import {
   releaseHomeIntroKtx2Loader,
   retainHomeIntroKtx2Loader,
 } from './homeIntroKtx2Loader'
-import { createScreenTextTexture } from './homeIntroScreenTextTextures'
+import {
+  createScreenInfoTickerTextureController,
+  createScreenTextTexture,
+} from './homeIntroScreenTextTextures'
 import {
   disposeHomeIntroScreenModel,
   loadHomeIntroScreenModelInstance,
@@ -43,6 +46,7 @@ export let active = primary
 export let sceneQuality: SceneQuality = 'high'
 export let kicker = ''
 export let title = ''
+export let description = ''
 export let stat = ''
 export let ctaLabel = ''
 export let hovered = false
@@ -53,6 +57,7 @@ const threlte = useThrelte()
 let titleTexture: Texture | null = null
 let stillTexture: Texture | null = null
 let screenTextTexture: CanvasTexture | null = null
+let screenInfoTexture: CanvasTexture | null = null
 let screenContentTexture: Texture | null = null
 let videoTexture: VideoTexture | null = null
 let panelRoot: Group | null = null
@@ -75,9 +80,11 @@ let mediaOpacity = 1
 let titleMediaOpacity = 1
 let videoMediaOpacity = 0
 let textOpacity = primary ? 0.72 : 0.58
+let infoTextOpacity = 0
 let mediaTint = '#ffffff'
 let titleMediaTint = '#ffffff'
 let videoElement: HTMLVideoElement | null = null
+const screenInfoTicker = createScreenInfoTickerTextureController()
 
 const additiveBlending = AdditiveBlending
 const normalBlending = NormalBlending
@@ -137,6 +144,11 @@ function disposeVideoElement() {
 function disposeScreenTextTexture() {
   screenTextTexture?.dispose()
   screenTextTexture = null
+}
+
+function disposeScreenInfoTexture() {
+  screenInfoTicker.dispose()
+  screenInfoTexture = null
 }
 
 function disposeScreenContentRenderer() {
@@ -279,6 +291,7 @@ function cleanupPanel() {
   disposeVideoTexture()
   disposeVideoElement()
   disposeScreenTextTexture()
+  disposeScreenInfoTexture()
   disposeScreenContentRenderer()
 }
 
@@ -377,7 +390,7 @@ function renderScreenContent() {
   screenRenderer.render(renderer, {
     fallbackColor: primary ? '#67e8f9' : '#8b5cf6',
     fallbackOpacity: primary ? 0.32 : 0.16,
-    mediaTexture: primary ? titleTexture : stillTexture,
+    mediaTexture: primary ? (titleTexture ?? stillTexture) : stillTexture,
     mediaTint: primary ? titleMediaTint : mediaTint,
     videoMediaOpacity,
     videoReady,
@@ -439,7 +452,8 @@ useTask(delta => {
       videoMediaOpacity * 0.18
     mediaOpacity = baseMediaOpacity + (1 - baseMediaOpacity) * hoverBlend
     const baseTextOpacity = primary ? 0.96 : 0.88
-    textOpacity = videoSrc ? baseTextOpacity * (1 - hoverBlend) : baseTextOpacity
+    textOpacity = baseTextOpacity * (1 - hoverBlend)
+    infoTextOpacity = Math.max(0, (hoverBlend - 0.34) / 0.66) * 0.92
 
     if (panelRoot) {
       panelRoot.position.z = hoverBlend * 0.045
@@ -448,6 +462,17 @@ useTask(delta => {
       const scale = 1 + hoverBlend * 0.028
       panelRoot.scale.set(scale, scale, scale)
     }
+  }
+
+  if (infoTextOpacity > 0.01) {
+    screenInfoTexture = screenInfoTicker.update({
+      ctaLabel,
+      description,
+      kicker,
+      stat,
+      time,
+      title,
+    })
   }
 
   renderScreenContent()
@@ -523,6 +548,20 @@ useTask(delta => {
 				side={frontSide}
 				transparent={true}
 				opacity={textOpacity}
+				blending={normalBlending}
+				depthWrite={false}
+			/>
+		</T.Mesh>
+	{/if}
+
+	{#if screenInfoTexture}
+		<T.Mesh position={[0, 0.018, textSurfaceZ + 0.006]} renderOrder={22}>
+			<T.PlaneGeometry args={[textWidth, textHeight]} />
+			<T.MeshBasicMaterial
+				map={screenInfoTexture}
+				side={frontSide}
+				transparent={true}
+				opacity={infoTextOpacity}
 				blending={normalBlending}
 				depthWrite={false}
 			/>

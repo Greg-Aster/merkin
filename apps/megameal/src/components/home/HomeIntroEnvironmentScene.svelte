@@ -465,6 +465,7 @@ const screens = Array.from({ length: screenCount }, (_, index) => {
     sceneId: portalScreens[index].sceneId,
     kicker: portalScreens[index].kicker,
     title: portalScreens[index].title,
+    description: portalScreens[index].description,
     stat: portalScreens[index].stat,
     ctaLabel: portalScreens[index].ctaLabel,
     stillSrc: portalScreens[index].webglStillSrc ?? portalScreens[index].stillSrc,
@@ -957,6 +958,7 @@ useTask(delta => {
 						videoSrc={screen.videoSrc}
 						kicker={screen.kicker}
 						title={screen.title}
+						description={screen.description}
 						stat={screen.stat}
 						ctaLabel={screen.ctaLabel}
 						hovered={index === hoveredScreenIndex}

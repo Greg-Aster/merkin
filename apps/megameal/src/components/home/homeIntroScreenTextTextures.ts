@@ -8,6 +8,11 @@ type ScreenTextTextureOptions = {
   ctaLabel?: string
 }
 
+type ScreenInfoTickerOptions = ScreenTextTextureOptions & {
+  description?: string
+  time: number
+}
+
 function wrapCanvasText(
   context: CanvasRenderingContext2D,
   value: string,
@@ -119,6 +124,138 @@ export function createScreenTextTexture({
   const texture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
 
   return texture
+}
+
+export function createScreenInfoTickerTextureController(frameInterval = 1 / 24) {
+  let canvas: HTMLCanvasElement | null = null
+  let context: CanvasRenderingContext2D | null = null
+  let texture: CanvasTexture | null = null
+  let lastUpdateAt = 0
+
+  function ensureTexture() {
+    if (texture || typeof document === 'undefined') return
+
+    canvas = document.createElement('canvas')
+    canvas.width = 1024
+    canvas.height = 512
+    context = canvas.getContext('2d', {
+      alpha: true,
+      willReadFrequently: false,
+    })
+
+    if (!context) {
+      canvas = null
+      return
+    }
+
+    texture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
+  }
+
+  function drawTerminalLine(
+    value: string,
+    x: number,
+    y: number,
+    color = 'rgba(224, 242, 254, 0.9)',
+  ) {
+    if (!context) return
+
+    context.fillStyle = color
+    context.shadowColor = 'rgba(34, 211, 238, 0.4)'
+    context.shadowBlur = 8
+    context.fillText(value, x, y)
+    context.shadowBlur = 0
+  }
+
+  function update({
+    ctaLabel = '',
+    description = '',
+    kicker = '',
+    stat = '',
+    time,
+    title = '',
+  }: ScreenInfoTickerOptions) {
+    ensureTexture()
+    if (!canvas || !context || !texture) return texture
+    if (time - lastUpdateAt < frameInterval) return texture
+
+    const ctx = context
+    const { width, height } = canvas
+    const header = (kicker || 'PORTAL NODE').toUpperCase()
+    const sectionTitle = (title || 'MEGA MEAL SAGA').toUpperCase()
+    const status = (stat || 'Signal available').toUpperCase()
+    const route = (ctaLabel || 'Inspect section').toUpperCase()
+    const brief =
+      description ||
+      'Supplemental section information is available from this portal destination.'
+
+    ctx.clearRect(0, 0, width, height)
+
+    ctx.textBaseline = 'top'
+    ctx.font = '800 28px "JetBrains Mono", ui-monospace, monospace'
+    drawTerminalLine(`// ${header}`, 48, 54, 'rgba(103, 232, 249, 0.92)')
+
+    ctx.font = '800 32px "JetBrains Mono", ui-monospace, monospace'
+    const briefLines = wrapCanvasText(ctx, brief.toUpperCase(), 850).slice(0, 5)
+    const terminalLines = [
+      `> CONNECT ${sectionTitle}`,
+      `> LOAD SECTION_BRIEF`,
+      `  STATUS: ${status}`,
+      `  ROUTE: ${route}`,
+      ...briefLines.map(line => `  ${line}`),
+      '> INDEX READY',
+      '> AWAITING USER INPUT_',
+    ]
+
+    const terminalTop = 104
+    const lineHeight = 46
+    const terminalHeight = 344
+    const feedSpan = terminalLines.length * lineHeight
+    const scrollOffset = (time * 42) % feedSpan
+
+    ctx.save()
+    ctx.beginPath()
+    ctx.rect(48, terminalTop, 928, terminalHeight)
+    ctx.clip()
+    for (
+      let blockY = terminalTop - scrollOffset;
+      blockY < terminalTop + terminalHeight;
+      blockY += feedSpan
+    ) {
+      terminalLines.forEach((line, index) => {
+        const lineY = blockY + index * lineHeight
+        if (lineY < terminalTop - lineHeight || lineY > terminalTop + terminalHeight) {
+          return
+        }
+
+        const isCommand = line.startsWith('>')
+        const isMeta = line.trim().startsWith('STATUS') || line.trim().startsWith('ROUTE')
+        const color = isCommand
+          ? 'rgba(103, 232, 249, 0.92)'
+          : isMeta
+            ? 'rgba(251, 191, 36, 0.82)'
+            : 'rgba(224, 242, 254, 0.88)'
+        drawTerminalLine(line, 56, lineY, color)
+      })
+    }
+    ctx.restore()
+
+    texture.needsUpdate = true
+    lastUpdateAt = time
+    return texture
+  }
+
+  function dispose() {
+    texture?.dispose()
+    texture = null
+    canvas = null
+    context = null
+    lastUpdateAt = 0
+  }
+
+  return {
+    dispose,
+    update,
+  }
 }
 
 export function createTextMediaBlurTextureController(frameInterval = 1 / 24) {
