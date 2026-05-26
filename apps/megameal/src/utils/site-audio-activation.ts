@@ -8,6 +8,9 @@ const keyboardActivationIgnoredKeys = new Set([
 
 const documentActivationEvents = [
   'click',
+  'pointerdown',
+  'mousedown',
+  'auxclick',
   'touchstart',
   'touchend',
 ] as const
@@ -56,6 +59,19 @@ function isWheelActivationGesture(event: Event): event is WheelEvent {
   )
 }
 
+function isPointerAudioActivationGesture(event: Event): event is MouseEvent {
+  if (!(event instanceof MouseEvent)) return false
+
+  if (event.type === 'click') return event.button === 0
+
+  return (
+    (event.type === 'pointerdown' ||
+      event.type === 'mousedown' ||
+      event.type === 'auxclick') &&
+    (event.button === 0 || event.button === 1)
+  )
+}
+
 export function markSiteAudioUnlocked(): void {
   if (siteAudioUnlocked || typeof window === 'undefined') {
     siteAudioUnlocked = true
@@ -81,8 +97,8 @@ export function isSiteAudioActivationGesture(event: Event): boolean {
     return true
   }
 
-  if (event instanceof MouseEvent) {
-    return event.type === 'click' && event.button === 0
+  if (isPointerAudioActivationGesture(event)) {
+    return true
   }
 
   return event.type === 'touchstart' || event.type === 'touchend'
@@ -91,7 +107,7 @@ export function isSiteAudioActivationGesture(event: Event): boolean {
 export function canAttemptSiteAudioUnlock(event?: Event): boolean {
   if (event && !isSiteAudioActivationGesture(event)) return false
   if (event && isWheelActivationGesture(event)) {
-    return true
+    return hasSiteAudioUserActivation()
   }
   return hasActiveSiteAudioGesture()
 }

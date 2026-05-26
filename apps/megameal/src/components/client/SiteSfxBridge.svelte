@@ -194,6 +194,18 @@ onMount(() => {
     }
   }
 
+  const handlePointerDown = async (event: PointerEvent) => {
+    if (event.pointerType !== 'mouse' || event.button !== 1) return
+
+    lastPointerAt = window.performance.now()
+    const sfxId = resolvePointerSfx(event.target)
+    if (sfxId) {
+      if (await siteSfxManager.unlockFromGesture(event)) {
+        siteSfxManager.play(sfxId)
+      }
+    }
+  }
+
   const handleMouseOver = (event: MouseEvent) => {
     const anchor = getHoverAnchor(event.target)
     if (!anchor || anchor === lastHoverAnchor) return
@@ -273,6 +285,7 @@ onMount(() => {
   }
 
   document.addEventListener('click', handleClick, true)
+  document.addEventListener('pointerdown', handlePointerDown, true)
   document.addEventListener('mouseover', handleMouseOver, true)
   document.addEventListener('mouseout', handleMouseOut, true)
   document.addEventListener('focusin', handleFocusIn, true)
@@ -283,6 +296,7 @@ onMount(() => {
 
   return () => {
     document.removeEventListener('click', handleClick, true)
+    document.removeEventListener('pointerdown', handlePointerDown, true)
     document.removeEventListener('mouseover', handleMouseOver, true)
     document.removeEventListener('mouseout', handleMouseOut, true)
     document.removeEventListener('focusin', handleFocusIn, true)
