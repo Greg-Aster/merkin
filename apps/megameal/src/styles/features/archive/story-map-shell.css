@@ -44,7 +44,7 @@
 
   .archive-map-toolbar {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 31rem);
     gap: 1rem;
     align-items: center;
     padding: clamp(0.9rem, 2vw, 1.2rem);
@@ -69,6 +69,135 @@
     position: relative;
     z-index: 1;
     max-width: 42rem;
+  }
+
+  .archive-toolbar-controls {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .archive-search-field,
+  .archive-select-field {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+    border: 1px solid color-mix(in srgb, var(--archive-accent) 22%, transparent);
+    border-radius: 0.85rem;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02)),
+      rgba(0,0,0,0.34);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 0 22px color-mix(in srgb, var(--archive-accent) 7%, transparent);
+  }
+
+  .archive-search-field {
+    min-height: 2.85rem;
+    padding: 0 0.8rem;
+  }
+
+  .archive-search-field svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    color: color-mix(in srgb, var(--archive-accent) 72%, white);
+  }
+
+  .archive-search-field input,
+  .archive-select-field select {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: white;
+    font: inherit;
+    outline: none;
+  }
+
+  .archive-search-field input {
+    font-size: 0.86rem;
+  }
+
+  .archive-search-field input::placeholder {
+    color: oklch(0.72 0.03 var(--hue) / 0.72);
+  }
+
+  .archive-filter-row,
+  .archive-bulk-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .archive-select-field {
+    min-height: 2.55rem;
+    padding: 0.35rem 0.65rem;
+  }
+
+  .archive-select-field span {
+    color: color-mix(in srgb, var(--archive-accent) 70%, white);
+    font-size: 0.58rem;
+    font-weight: 850;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .archive-select-field select {
+    color-scheme: dark;
+    font-size: 0.76rem;
+    font-weight: 760;
+  }
+
+  .archive-bulk-actions button {
+    min-height: 2.35rem;
+    border: 1px solid color-mix(in srgb, var(--archive-accent) 24%, transparent);
+    border-radius: 0.75rem;
+    background: rgba(0,0,0,0.28);
+    color: oklch(0.8 0.03 var(--hue));
+    font-size: 0.66rem;
+    font-weight: 850;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: border-color 0.22s ease, background 0.22s ease, color 0.22s ease;
+  }
+
+  .archive-locked-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.45rem;
+    border: 1px solid color-mix(in srgb, var(--archive-accent) 28%, transparent);
+    border-radius: 0.8rem;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.018)),
+      rgba(0,0,0,0.32);
+    color: color-mix(in srgb, var(--archive-accent) 78%, white);
+    font-size: 0.68rem;
+    font-weight: 880;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: border-color 0.22s ease, background 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
+  }
+
+  .archive-locked-toggle svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .archive-bulk-actions button:hover,
+  .archive-locked-toggle:hover,
+  .archive-locked-toggle.is-active {
+    border-color: color-mix(in srgb, var(--archive-accent) 48%, white);
+    background: color-mix(in srgb, var(--archive-accent) 12%, rgba(0,0,0,0.34));
+    color: white;
+  }
+
+  .archive-locked-toggle.is-active {
+    box-shadow: 0 0 24px color-mix(in srgb, var(--archive-accent) 13%, transparent);
   }
 
   .archive-view-switch {
@@ -153,11 +282,75 @@
     gap: 1.1rem;
   }
 
+  .archive-filter-status {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid oklch(0.38 0.06 var(--hue) / 0.26);
+    border-radius: 0.85rem;
+    padding: 0.65rem 0.8rem;
+    background:
+      linear-gradient(90deg, rgba(34,211,238,0.08), rgba(255,255,255,0.025)),
+      rgba(0,0,0,0.28);
+    color: oklch(0.78 0.04 var(--hue));
+    font-size: 0.72rem;
+    font-weight: 820;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
   .archive-arc-card {
     --archive-accent: oklch(0.72 0.15 245);
     display: grid;
     gap: 1rem;
     padding: clamp(1rem, 2.4vw, 1.35rem);
+  }
+
+  .archive-arc-card[hidden] {
+    display: none;
+  }
+
+  .archive-arc-summary {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 0.75rem;
+    cursor: pointer;
+    list-style: none;
+    padding-right: 3rem;
+  }
+
+  .archive-arc-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .archive-arc-open-indicator {
+    position: absolute;
+    top: 0.05rem;
+    right: 0;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid color-mix(in srgb, var(--archive-accent) 32%, transparent);
+    border-radius: 0.75rem;
+    background: rgba(0,0,0,0.3);
+    color: color-mix(in srgb, var(--archive-accent) 72%, white);
+    transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+  }
+
+  .archive-arc-open-indicator svg {
+    width: 1.2rem;
+    height: 1.2rem;
+    transition: transform 0.22s ease;
+  }
+
+  .archive-arc-card[open] .archive-arc-open-indicator {
+    border-color: color-mix(in srgb, var(--archive-accent) 52%, white);
+    background: color-mix(in srgb, var(--archive-accent) 13%, rgba(0,0,0,0.36));
+  }
+
+  .archive-arc-card[open] .archive-arc-open-indicator svg {
+    transform: rotate(180deg);
   }
 
   .archive-arc-card[data-archive-tone='signal'] {
@@ -231,7 +424,19 @@
   .archive-arc-description {
     position: relative;
     z-index: 1;
-    min-height: 3.2rem;
     margin: 0;
     font-size: 0.9rem;
+  }
+
+  .archive-access-line--summary {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .archive-access-line--summary span {
+    border: 1px solid color-mix(in srgb, var(--archive-accent) 24%, transparent);
+    border-radius: 999px;
+    padding: 0.28rem 0.48rem;
+    background: rgba(0,0,0,0.26);
   }

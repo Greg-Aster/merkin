@@ -1,11 +1,29 @@
-﻿  .archive-record-list {
+  .archive-record-list {
     position: relative;
     z-index: 1;
     display: grid;
     gap: 0.48rem;
     margin: 0;
-    padding: 0;
+    padding: 0.3rem 0 0 1.2rem;
     list-style: none;
+  }
+
+  .archive-record-list::before {
+    content: '';
+    position: absolute;
+    top: 0.3rem;
+    bottom: 0.2rem;
+    left: 0.35rem;
+    width: 1px;
+    background:
+      linear-gradient(
+        180deg,
+        transparent,
+        color-mix(in srgb, var(--archive-accent) 55%, transparent) 12%,
+        color-mix(in srgb, var(--archive-accent) 32%, transparent) 86%,
+        transparent
+      );
+    box-shadow: 0 0 16px color-mix(in srgb, var(--archive-accent) 26%, transparent);
   }
 
   .story-archive-map[data-view='list'] .archive-map-grid {
@@ -13,7 +31,7 @@
   }
 
   .story-archive-map[data-view='list'] .archive-node-map,
-  .story-archive-map[data-view='list'] .archive-access-line {
+  .story-archive-map[data-view='list'] .archive-access-line:not(.archive-access-line--summary) {
     display: none;
   }
 
@@ -22,8 +40,40 @@
   }
 
   .story-archive-map[data-view='list'] .archive-record-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.6rem;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .archive-record-list > li {
+    position: relative;
+  }
+
+  .archive-record-list > li[hidden] {
+    display: none;
+  }
+
+  .archive-record-list > li::before {
+    content: '';
+    position: absolute;
+    top: 1.65rem;
+    left: -0.84rem;
+    width: 0.72rem;
+    height: 1px;
+    background: color-mix(in srgb, var(--archive-accent) 52%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--archive-accent) 30%, transparent);
+  }
+
+  .archive-record-list > li::after {
+    content: '';
+    position: absolute;
+    top: 1.43rem;
+    left: -0.96rem;
+    width: 0.28rem;
+    height: 0.28rem;
+    border: 1px solid color-mix(in srgb, var(--archive-accent) 64%, white);
+    border-radius: 999px;
+    background: rgba(0,0,0,0.7);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--archive-accent) 34%, transparent);
   }
 
   .archive-record {
@@ -95,4 +145,3 @@
     width: 0.95rem;
     height: 0.95rem;
   }
-

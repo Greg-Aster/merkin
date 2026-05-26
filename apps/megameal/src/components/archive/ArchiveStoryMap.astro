@@ -98,8 +98,17 @@ function formatYear(value: string | null | undefined) {
 }
 
 function getTimelineLabel(post: ArchivePost) {
-  if (typeof post.timelineYear === 'number') return formatTimelineYear(post.timelineYear)
+  if (typeof post.timelineYear === 'number') {
+    return formatTimelineYear(post.timelineYear)
+  }
   return formatYear(post.published)
+}
+
+function getCollectionLabel(value: string | null | undefined) {
+  if (!value) return 'Record'
+  return value
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, character => character.toUpperCase())
 }
 
 function getNodeStyle(index: number, total: number) {
@@ -215,6 +224,10 @@ const archiveGroups: ArchiveGroup[] = Array.from(grouped.entries())
     }),
   }))
 
+const collectionFilters = Array.from(
+  new Set(archiveManifest.items.map(post => post.collection).filter(Boolean)),
+).sort((a, b) => getCollectionLabel(a).localeCompare(getCollectionLabel(b)))
+
 import '../../styles/features/archive/story-map-shell.css'
 import '../../styles/features/archive/story-map-nodes.css'
 import '../../styles/features/archive/story-map-records.css'
@@ -224,45 +237,104 @@ import '../../styles/features/archive/story-map-responsive.css'
 <section class="story-archive-map" data-view="list" aria-labelledby="story-archive-map-title">
   <div class="archive-map-toolbar">
     <div class="archive-map-toolbar__copy">
-      <div class="archive-map-kicker">Browse Records</div>
-      <h2 id="story-archive-map-title">Choose a route through the records.</h2>
-      <p>List view is built for scanning. Node view shows how each archive file sits inside the broader story graph.</p>
+      <div class="archive-map-kicker">Archive Retrieval Console</div>
+      <h2 id="story-archive-map-title">Search the library stacks.</h2>
+      <p>Search, filter, and open only the archive files you need. Node view keeps the same retrieval controls with the map layer visible.</p>
     </div>
-    <div class="archive-view-switch" role="group" aria-label="Archive display mode">
-      <button type="button" class="archive-view-switch__button is-active" data-archive-view-button data-view-target="list" data-sfx-hover="hover-soft" data-sfx-click="soft" aria-pressed="true">
-        <Icon name="mdi:format-list-bulleted-square" />
-        <span>List View</span>
-      </button>
-      <button type="button" class="archive-view-switch__button" data-archive-view-button data-view-target="node" data-sfx-hover="hover-soft" data-sfx-click="soft" aria-pressed="false">
-        <Icon name="mdi:vector-polyline" />
-        <span>Node View</span>
+    <div class="archive-toolbar-controls">
+      <label class="archive-search-field">
+        <Icon name="mdi:magnify" />
+        <span class="sr-only">Search archive records</span>
+        <input
+          type="search"
+          data-archive-search
+          placeholder="Search title, file, year, or type"
+          autocomplete="off"
+        />
+      </label>
+      <div class="archive-filter-row">
+        <label class="archive-select-field">
+          <span>Access</span>
+          <select data-archive-access-filter aria-label="Filter by access">
+            <option value="open" selected>Open records</option>
+            <option value="all">All access</option>
+            <option value="restricted">Restricted</option>
+          </select>
+        </label>
+        <label class="archive-select-field">
+          <span>Type</span>
+          <select data-archive-type-filter aria-label="Filter by record type">
+            <option value="all">All types</option>
+            {collectionFilters.map(collection => (
+              <option value={collection}>{getCollectionLabel(collection)}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div class="archive-view-switch" role="group" aria-label="Archive display mode">
+        <button type="button" class="archive-view-switch__button is-active" data-archive-view-button data-view-target="list" data-sfx-hover="hover-soft" data-sfx-click="soft" aria-pressed="true">
+          <Icon name="mdi:format-list-bulleted-square" />
+          <span>List</span>
+        </button>
+        <button type="button" class="archive-view-switch__button" data-archive-view-button data-view-target="node" data-sfx-hover="hover-soft" data-sfx-click="soft" aria-pressed="false">
+          <Icon name="mdi:vector-polyline" />
+          <span>Node</span>
+        </button>
+      </div>
+      <div class="archive-bulk-actions" role="group" aria-label="Archive group controls">
+        <button type="button" data-archive-expand-all>Open all</button>
+        <button type="button" data-archive-collapse-all>Seal all</button>
+      </div>
+      <button type="button" class="archive-locked-toggle" data-archive-show-locked>
+        <Icon name="mdi:lock-open-variant-outline" />
+        <span>Show locked</span>
       </button>
     </div>
+  </div>
+
+  <div class="archive-filter-status" data-archive-filter-status aria-live="polite">
+    Showing all archive records.
   </div>
 
   <div class="archive-map-grid">
     {archiveGroups.map((group) => {
       const openCount = group.posts.filter(post => !post.draft).length
       const restrictedGroupCount = group.posts.length - openCount
+      const groupCollections = Array.from(
+        new Set(group.posts.map(post => post.collection).filter(Boolean)),
+      )
 
       return (
-        <article
+        <details
           class="archive-arc-card"
           data-archive-tone={group.tone}
+          data-archive-group
+          data-group-title={group.title}
+          data-group-description={group.description}
+          data-group-collections={groupCollections.join(' ')}
           style={`--archive-bg-1: url('${group.previewImages[0]}'); --archive-bg-2: url('${group.previewImages[1] ?? group.previewImages[0]}'); --archive-bg-3: url('${group.previewImages[2] ?? group.previewImages[0]}');`}
         >
-          <div class="archive-arc-card__header">
-            <div>
-              <div class="archive-arc-kicker">Archive File</div>
-              <h3>{group.title}</h3>
+          <summary class="archive-arc-summary">
+            <div class="archive-arc-card__header">
+              <div>
+                <div class="archive-arc-kicker">Archive File</div>
+                <h3>{group.title}</h3>
+              </div>
+              <div class="archive-arc-count">
+                <span>{group.posts.length}</span>
+                <small>records</small>
+              </div>
             </div>
-            <div class="archive-arc-count">
-              <span>{group.posts.length}</span>
-              <small>records</small>
+            <p class="archive-arc-description">{group.description}</p>
+            <div class="archive-access-line archive-access-line--summary">
+              <span>{openCount} open</span>
+              <span>{restrictedGroupCount} restricted</span>
+              <span>{groupCollections.map(getCollectionLabel).join(' / ')}</span>
             </div>
-          </div>
-
-          <p class="archive-arc-description">{group.description}</p>
+            <div class="archive-arc-open-indicator" aria-hidden="true">
+              <Icon name="mdi:chevron-down" />
+            </div>
+          </summary>
 
           <div class="archive-node-map" aria-hidden="true">
             <div class="archive-node-map__backdrop">
@@ -294,15 +366,19 @@ import '../../styles/features/archive/story-map-responsive.css'
             <span>{restrictedGroupCount} restricted</span>
           </div>
 
-          <ol class="archive-record-list">
+          <ol class="archive-record-list" data-archive-record-list>
             {group.posts.map((post, index) => {
               const isLocked = post.draft === true
+              const access = isLocked ? 'restricted' : 'open'
+              const collection = post.collection ?? ''
+              const collectionLabel = getCollectionLabel(collection)
+              const timelineLabel = getTimelineLabel(post)
               const content = (
                 <>
                   <span class="archive-record-index">{String(index + 1).padStart(2, '0')}</span>
                   <span class="archive-record-main">
                     <strong>{post.title}</strong>
-                    <small>{getTimelineLabel(post)} · {isLocked ? 'Restricted record' : `${post.collection} entry point`}</small>
+                    <small>{timelineLabel} &middot; {isLocked ? 'Restricted record' : `${collectionLabel} entry point`}</small>
                   </span>
                   <span class="archive-record-status">
                     <Icon name={isLocked ? 'mdi:lock-outline' : 'mdi:arrow-right'} />
@@ -312,7 +388,14 @@ import '../../styles/features/archive/story-map-responsive.css'
               )
 
               return (
-                <li>
+                <li
+                  data-archive-record
+                  data-record-title={post.title}
+                  data-record-access={access}
+                  data-record-type={collection}
+                  data-record-year={timelineLabel}
+                  data-record-search={`${post.title} ${group.title} ${group.description} ${collectionLabel} ${timelineLabel} ${isLocked ? 'restricted locked' : 'open'}`.toLowerCase()}
+                >
                   {isLocked ? (
                     <div class="archive-record archive-record--locked" aria-label={`${post.title}, restricted record`}>
                       {content}
@@ -326,7 +409,7 @@ import '../../styles/features/archive/story-map-responsive.css'
               )
             })}
           </ol>
-        </article>
+        </details>
       )
     })}
   </div>
@@ -337,6 +420,16 @@ import '../../styles/features/archive/story-map-responsive.css'
 
   archiveMaps.forEach((map) => {
     const buttons = map.querySelectorAll('[data-archive-view-button]')
+    const groups = Array.from(
+      map.querySelectorAll<HTMLDetailsElement>('[data-archive-group]'),
+    )
+    const searchInput = map.querySelector<HTMLInputElement>('[data-archive-search]')
+    const accessFilter = map.querySelector<HTMLSelectElement>('[data-archive-access-filter]')
+    const typeFilter = map.querySelector<HTMLSelectElement>('[data-archive-type-filter]')
+    const status = map.querySelector<HTMLElement>('[data-archive-filter-status]')
+    const expandAll = map.querySelector<HTMLButtonElement>('[data-archive-expand-all]')
+    const collapseAll = map.querySelector<HTMLButtonElement>('[data-archive-collapse-all]')
+    const showLocked = map.querySelector<HTMLButtonElement>('[data-archive-show-locked]')
 
     const setView = (nextView: string) => {
       map.setAttribute('data-view', nextView)
@@ -347,11 +440,91 @@ import '../../styles/features/archive/story-map-responsive.css'
       })
     }
 
+    const normalize = (value: string) => value.trim().toLowerCase()
+
+    const filtersAreActive = () =>
+      Boolean(normalize(searchInput?.value ?? '')) ||
+      accessFilter?.value !== 'all' ||
+      typeFilter?.value !== 'all'
+
+    const applyFilters = () => {
+      const query = normalize(searchInput?.value ?? '')
+      const access = accessFilter?.value ?? 'all'
+      const type = typeFilter?.value ?? 'all'
+      let visibleRecordCount = 0
+      let visibleGroupCount = 0
+
+      groups.forEach((group) => {
+        const records = Array.from(
+          group.querySelectorAll<HTMLElement>('[data-archive-record]'),
+        )
+        let groupMatchCount = 0
+
+        records.forEach((record) => {
+          const matchesQuery =
+            !query ||
+            (record.dataset.recordSearch ?? '').includes(query) ||
+            (group.dataset.groupTitle ?? '').toLowerCase().includes(query)
+          const matchesAccess =
+            access === 'all' || record.dataset.recordAccess === access
+          const matchesType = type === 'all' || record.dataset.recordType === type
+          const isVisible = matchesQuery && matchesAccess && matchesType
+
+          record.hidden = !isVisible
+          if (isVisible) {
+            groupMatchCount += 1
+            visibleRecordCount += 1
+          }
+        })
+
+        const groupIsVisible = groupMatchCount > 0
+        group.hidden = !groupIsVisible
+        group.dataset.matchCount = String(groupMatchCount)
+        if (groupIsVisible) visibleGroupCount += 1
+        if (filtersAreActive()) {
+          group.open = groupIsVisible
+        }
+      })
+
+      if (status) {
+        status.textContent = filtersAreActive()
+          ? `Showing ${visibleRecordCount} record${visibleRecordCount === 1 ? '' : 's'} in ${visibleGroupCount} archive file${visibleGroupCount === 1 ? '' : 's'}.`
+          : `Showing all ${visibleRecordCount} archive records in ${visibleGroupCount} archive files.`
+      }
+    }
+
     buttons.forEach((button) => {
       button.addEventListener('click', () => {
         const nextView = button.getAttribute('data-view-target') || 'node'
         setView(nextView)
       })
     })
+
+    searchInput?.addEventListener('input', applyFilters)
+    accessFilter?.addEventListener('change', applyFilters)
+    typeFilter?.addEventListener('change', applyFilters)
+    expandAll?.addEventListener('click', () => {
+      groups.forEach(group => {
+        if (!group.hidden) group.open = true
+      })
+    })
+    collapseAll?.addEventListener('click', () => {
+      groups.forEach(group => {
+        group.open = false
+      })
+    })
+    showLocked?.addEventListener('click', () => {
+      if (!accessFilter) return
+
+      const nextAccess = accessFilter.value === 'all' ? 'open' : 'all'
+      accessFilter.value = nextAccess
+      showLocked.classList.toggle('is-active', nextAccess === 'all')
+      showLocked.querySelector('span')?.replaceChildren(
+        document.createTextNode(nextAccess === 'all' ? 'Hide locked' : 'Show locked'),
+      )
+      applyFilters()
+    })
+
+    applyFilters()
   })
 </script>

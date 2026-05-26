@@ -18,7 +18,12 @@
       grid-template-columns: 1fr;
     }
 
-    .story-archive-map[data-view='list'] .archive-record-list {
+    .archive-toolbar-controls {
+      width: 100%;
+    }
+
+    .archive-filter-row,
+    .archive-bulk-actions {
       grid-template-columns: 1fr;
     }
   }
@@ -55,6 +60,15 @@
       align-items: flex-start;
     }
 
+    .archive-arc-summary {
+      padding-right: 2.65rem;
+    }
+
+    .archive-arc-open-indicator {
+      width: 2rem;
+      height: 2rem;
+    }
+
     .archive-record {
       grid-template-columns: auto minmax(0, 1fr);
     }
@@ -74,12 +88,13 @@
     }
 
     .archive-node-map,
-    .archive-access-line {
+    .archive-access-line:not(.archive-access-line--summary) {
       display: none;
     }
 
     .archive-record-list {
       display: grid;
       gap: 0.55rem;
+      padding-left: 1rem;
     }
   }
