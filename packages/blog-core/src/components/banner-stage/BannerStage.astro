@@ -483,6 +483,7 @@ const portalSlideIndexOffset =
                     (isClickable || !!item.sceneId)
                   const isPortalStandardSlide =
                     isPortalBannerMode && !hasPortalDemoContent
+                  const BannerLinkElement = isClickable ? 'a' : 'div'
 
                   return (
                     <div
@@ -503,7 +504,7 @@ const portalSlideIndexOffset =
                         ? item.weight
                         : undefined}
                     >
-                      <a
+                      <BannerLinkElement
                         href={isClickable ? bannerLink : undefined}
                         class:list={[
                           'banner-link group w-full h-full relative',
@@ -894,7 +895,7 @@ const portalSlideIndexOffset =
                             </div>
                           )
                         )}
-                      </a>
+                      </BannerLinkElement>
                     </div>
                   )
                 })

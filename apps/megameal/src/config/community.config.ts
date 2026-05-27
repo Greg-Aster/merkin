@@ -48,7 +48,7 @@ export const communityConfig: CommunityConfig = {
     ],
   },
   discord: {
-    enabled: true,
+    enabled: false,
     title: 'Discord Community',
     description:
       'Our Discord server is the heart of our real-time community. Connect with other members, share ideas, get help, and stay updated on the latest developments.',
