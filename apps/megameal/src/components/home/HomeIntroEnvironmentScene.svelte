@@ -1,23 +1,17 @@
 <script lang="ts">
 import { siteSfxManager } from '@/utils/site-sfx'
 import { T, useTask } from '@threlte/core'
-import { onDestroy, onMount } from 'svelte'
+import { onMount } from 'svelte'
 import {
-  Box3,
   Euler,
-  FrontSide,
-  LinearFilter,
   Quaternion,
-  SRGBColorSpace,
   Vector3,
 } from 'three'
 import type * as THREE from 'three'
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import HomeIntroLogoModel from './HomeIntroLogoModel.svelte'
 import HomeIntroParticleField from './HomeIntroParticleField.svelte'
 import HomeIntroRingGlow from './HomeIntroRingGlow.svelte'
 import HomeIntroSceneBackdrop from './HomeIntroSceneBackdrop.svelte'
-import { getHomeIntroLogoModelSrc } from './homeIntroLogoAssets'
 import { homeIntroParticleClusters } from './homeIntroParticleClusters'
 import { hashHomeIntroUnit } from './homeIntroSceneMath'
 import {
@@ -58,7 +52,6 @@ let ringGlowA: THREE.Group | null = null
 let ringGlowB: THREE.Group | null = null
 let ringGlowC: THREE.Group | null = null
 let logoMeshRoot: THREE.Group | null = null
-let logoModel: THREE.Object3D | null = null
 let logoSearchLightA: THREE.SpotLight | null = null
 let logoSearchLightB: THREE.SpotLight | null = null
 let logoSearchLightC: THREE.SpotLight | null = null
@@ -69,7 +62,6 @@ let starColumn: THREE.Group | null = null
 let screenRail: THREE.Group | null = null
 const screenNodes: THREE.Group[] = []
 let portraitMobile = false
-let logoSceneMounted = false, activeLogoModelSrc = '', pendingLogoModelSrc = ''
 let particleLimit = 1250
 let introParticleLimit = 560
 let particleExpansionElapsed = 0
@@ -99,12 +91,8 @@ const logoEmitterOffsetY = -1.22
 const logoEmitterParticleScrollRatio = 0.16
 const targetScreenEuler = new Euler(0, 0, 0, 'YXZ')
 const targetScreenQuaternion = new Quaternion()
-const logoBounds = new Box3()
-const logoCenter = new Vector3()
-const logoSize = new Vector3()
 const logoLightTarget = new Vector3(0, 0, -1.05)
 const logoSearchLightPosition = new Vector3()
-const logoTargetSize = new Vector3(4.68, 2.24, 1.44)
 const logoIntroDuration = 2.05
 const logoImpactDuration = 0.42
 const logoRotationOffset = Math.PI
@@ -113,8 +101,6 @@ const logoFloatPitchAmplitude = 0.038
 const logoFloatYawAmplitude = 0.064
 const logoFloatRollAmplitude = 0.026
 const logoFloatScaleAmplitude = 0.012
-const gltfLoader = new GLTFLoader()
-gltfLoader.setMeshoptDecoder(MeshoptDecoder)
 let activeBannerSyncKey = ''
 let effectWheel = 0
 let activeScreenIndex = primaryScreenIndex
@@ -162,7 +148,6 @@ $: emblemBaseY = portraitMobile ? 0.08 : -0.04
 $: logoIntroStartPosition = portraitMobile
   ? ([0, 0.2, 2.65] as [number, number, number])
   : ([0, 0.08, 1.9] as [number, number, number])
-$: logoModelSrc = getHomeIntroLogoModelSrc(sceneQuality)
 $: particleLimit =
   sceneQuality === 'lean'
     ? portraitMobile
@@ -216,116 +201,6 @@ function loadCarouselComponent() {
   return carouselComponentPromise
 }
 
-function disposeObjectResources(object: THREE.Object3D) {
-  object.traverse(child => {
-    const mesh = child as THREE.Mesh
-    const geometry = mesh.geometry
-    const material = mesh.material
-
-    geometry?.dispose?.()
-
-    const disposeMaterialTextures = (item: THREE.Material) => {
-      Object.values(item).forEach(value => {
-        const texture = value as THREE.Texture | undefined
-        texture?.isTexture && texture.dispose()
-      })
-    }
-
-    if (Array.isArray(material)) {
-      material.forEach(item => {
-        disposeMaterialTextures(item)
-        item.dispose()
-      })
-    } else {
-      material && disposeMaterialTextures(material)
-      material?.dispose?.()
-    }
-  })
-}
-
-function disposeLogoModel() {
-  if (!logoModel) return
-
-  logoModel.parent?.remove(logoModel)
-  disposeObjectResources(logoModel)
-  logoModel = null
-}
-
-function fitLogoModel(model: THREE.Object3D) {
-  model.updateMatrixWorld(true)
-  logoBounds.setFromObject(model)
-  if (logoBounds.isEmpty()) return
-
-  logoBounds.getCenter(logoCenter)
-  logoBounds.getSize(logoSize)
-
-  const scale = Math.min(
-    logoTargetSize.x / Math.max(logoSize.x, 0.001),
-    logoTargetSize.y / Math.max(logoSize.y, 0.001),
-    logoTargetSize.z / Math.max(logoSize.z, 0.001),
-  )
-
-  model.scale.setScalar(scale)
-  model.position.set(
-    -logoCenter.x * scale,
-    -logoCenter.y * scale,
-    -logoCenter.z * scale,
-  )
-}
-
-function tuneLogoModel(model: THREE.Object3D) {
-  model.traverse(child => {
-    const mesh = child as THREE.Mesh
-    if (!mesh.isMesh) return
-
-    mesh.castShadow = false
-    mesh.receiveShadow = false
-    mesh.frustumCulled = false
-
-    const materials = Array.isArray(mesh.material)
-      ? mesh.material
-      : [mesh.material]
-
-    materials.forEach(item => {
-      const material = item as THREE.MeshStandardMaterial | undefined
-      if (!material?.isMeshStandardMaterial) return
-
-      material.emissive.set(0, 0, 0)
-      material.emissiveIntensity = 0
-      material.metalness = Math.max(
-        material.metalness,
-        sceneQuality === 'lean' ? 0.18 : 0.34,
-      )
-      material.roughness = Math.min(
-        material.roughness,
-        sceneQuality === 'lean' ? 0.48 : 0.32,
-      )
-      material.envMapIntensity = 0.45
-      material.side = FrontSide
-      material.transparent = false
-      material.depthWrite = true
-      material.depthTest = true
-
-      if (material.map) {
-        material.map.colorSpace = SRGBColorSpace
-        material.map.anisotropy = sceneQuality === 'high' ? 4 : 2
-        material.map.generateMipmaps = false
-        material.map.minFilter = LinearFilter
-        material.map.magFilter = LinearFilter
-        material.map.needsUpdate = true
-      }
-
-      material.needsUpdate = true
-    })
-  })
-}
-
-function attachLogoModel() {
-  if (!logoMeshRoot || !logoModel || logoModel.parent === logoMeshRoot) return
-  logoModel.parent?.remove(logoModel)
-  logoMeshRoot.add(logoModel)
-}
-
 function playLogoImpactSfx(introStartedAt: number) {
   if (
     typeof window === 'undefined' ||
@@ -339,67 +214,22 @@ function playLogoImpactSfx(introStartedAt: number) {
   siteSfxManager.playIfUnlocked('portal-impact')
 }
 
-async function loadLogoModel(sourceUrl: string) {
-  pendingLogoModelSrc = sourceUrl
-
-  try {
-    const gltf = await gltfLoader.loadAsync(sourceUrl)
-    const model = gltf.scene ?? gltf.scenes?.[0]
-    if (!model) {
-      if (pendingLogoModelSrc === sourceUrl) {
-        pendingLogoModelSrc = ''
-      }
-      return
-    }
-
-    if (pendingLogoModelSrc !== sourceUrl) {
-      disposeObjectResources(model)
-      return
-    }
-
-    disposeLogoModel()
-    logoModel = model
-    activeLogoModelSrc = sourceUrl
-    pendingLogoModelSrc = ''
-    fitLogoModel(logoModel)
-    tuneLogoModel(logoModel)
-    attachLogoModel()
+function handleLogoReady() {
+  if (!logoIntroStartedAt) {
     logoIntroStartedAt = performance.now() * 0.001
-    onLogoReady?.()
-  } catch (error) {
-    if (pendingLogoModelSrc === sourceUrl) {
-      pendingLogoModelSrc = ''
-    }
-    console.error('Failed to load portal logo mesh:', error)
   }
+
+  onLogoReady?.()
 }
 
 onMount(() => {
-  logoSceneMounted = true
   syncViewportMode()
   window.addEventListener('resize', syncViewportMode)
 
   return () => {
-    logoSceneMounted = false
     window.removeEventListener('resize', syncViewportMode)
   }
 })
-
-onDestroy(() => {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('resize', syncViewportMode)
-  }
-  disposeLogoModel()
-})
-
-$: attachLogoModel()
-$: if (
-  logoSceneMounted &&
-  logoModelSrc !== activeLogoModelSrc &&
-  logoModelSrc !== pendingLogoModelSrc
-) {
-  void loadLogoModel(logoModelSrc)
-}
 
 function createParticle(index: number) {
   const cluster = index % particleClusterCount
@@ -1054,4 +884,25 @@ useTask(delta => {
 	</T.Group>
 </T.Group>
 
-<T.Group bind:ref={logoMeshRoot} position={logoIntroStartPosition} scale={[2.35, 2.35, 2.35]} />
+<T.Group bind:ref={logoMeshRoot} position={logoIntroStartPosition} scale={[2.35, 2.35, 2.35]}>
+	<T.Group>
+		<HomeIntroLogoModel
+			{sceneQuality}
+			animatedAtlasSrc="/assets/sprites/sprite-rest-atlas.webp"
+			animatedAtlasColumns={6}
+			animatedAtlasRows={4}
+			animatedAtlasFrames={23}
+			animatedAtlasFps={6}
+			animatedAtlasBlendMode="multiply"
+			animatedAtlasIntensity={.7}
+			animatedAtlasBaseIntensity={.7}
+			animatedAtlasUvOffsetX={0}
+			animatedAtlasUvOffsetY={0}
+			animatedAtlasUvScaleX={.92}
+			animatedAtlasUvScaleY={0.8}
+			animatedAtlasUvFlipX={false}
+			animatedAtlasUvFlipY={false}
+			onReady={handleLogoReady}
+		/>
+	</T.Group>
+</T.Group>

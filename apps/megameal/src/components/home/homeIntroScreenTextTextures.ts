@@ -1,5 +1,5 @@
-import { CanvasTexture } from 'three'
 import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
+import { CanvasTexture } from 'three'
 
 type ScreenTextTextureOptions = {
   kicker?: string
@@ -11,6 +11,66 @@ type ScreenTextTextureOptions = {
 type ScreenInfoTickerOptions = ScreenTextTextureOptions & {
   description?: string
   time: number
+}
+
+const retroComputerTextOpacity = 0.74
+const retroComputerTextScale = 1.5
+
+const retroComputerGlyphs: Record<string, readonly string[]> = {
+  ' ': ['000', '000', '000', '000', '000', '000', '000'],
+  '!': ['010', '010', '010', '010', '010', '000', '010'],
+  '"': ['101', '101', '101', '000', '000', '000', '000'],
+  '#': ['01010', '01010', '11111', '01010', '11111', '01010', '01010'],
+  '&': ['01100', '10010', '10100', '01000', '10101', '10010', '01101'],
+  "'": ['010', '010', '010', '000', '000', '000', '000'],
+  '(': ['001', '010', '100', '100', '100', '010', '001'],
+  ')': ['100', '010', '001', '001', '001', '010', '100'],
+  '+': ['00000', '00100', '00100', '11111', '00100', '00100', '00000'],
+  ',': ['000', '000', '000', '000', '000', '010', '100'],
+  '-': ['00000', '00000', '00000', '11111', '00000', '00000', '00000'],
+  '.': ['000', '000', '000', '000', '000', '000', '010'],
+  '/': ['00001', '00010', '00100', '01000', '10000', '00000', '00000'],
+  ':': ['000', '010', '000', '000', '000', '010', '000'],
+  ';': ['000', '010', '000', '000', '000', '010', '100'],
+  '>': ['10000', '01000', '00100', '00010', '00100', '01000', '10000'],
+  '?': ['01110', '10001', '00001', '00010', '00100', '00000', '00100'],
+  _: ['00000', '00000', '00000', '00000', '00000', '00000', '11111'],
+  '0': ['01110', '10001', '10011', '10101', '11001', '10001', '01110'],
+  '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+  '2': ['01110', '10001', '00001', '00010', '00100', '01000', '11111'],
+  '3': ['11110', '00001', '00001', '01110', '00001', '00001', '11110'],
+  '4': ['00010', '00110', '01010', '10010', '11111', '00010', '00010'],
+  '5': ['11111', '10000', '10000', '11110', '00001', '00001', '11110'],
+  '6': ['01110', '10000', '10000', '11110', '10001', '10001', '01110'],
+  '7': ['11111', '00001', '00010', '00100', '01000', '01000', '01000'],
+  '8': ['01110', '10001', '10001', '01110', '10001', '10001', '01110'],
+  '9': ['01110', '10001', '10001', '01111', '00001', '00001', '01110'],
+  A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
+  B: ['11110', '10001', '10001', '11110', '10001', '10001', '11110'],
+  C: ['01111', '10000', '10000', '10000', '10000', '10000', '01111'],
+  D: ['11110', '10001', '10001', '10001', '10001', '10001', '11110'],
+  E: ['11111', '10000', '10000', '11110', '10000', '10000', '11111'],
+  F: ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
+  G: ['01111', '10000', '10000', '10011', '10001', '10001', '01111'],
+  H: ['10001', '10001', '10001', '11111', '10001', '10001', '10001'],
+  I: ['11111', '00100', '00100', '00100', '00100', '00100', '11111'],
+  J: ['00111', '00010', '00010', '00010', '10010', '10010', '01100'],
+  K: ['10001', '10010', '10100', '11000', '10100', '10010', '10001'],
+  L: ['10000', '10000', '10000', '10000', '10000', '10000', '11111'],
+  M: ['10001', '11011', '10101', '10101', '10001', '10001', '10001'],
+  N: ['10001', '11001', '10101', '10011', '10001', '10001', '10001'],
+  O: ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
+  P: ['11110', '10001', '10001', '11110', '10000', '10000', '10000'],
+  Q: ['01110', '10001', '10001', '10001', '10101', '10010', '01101'],
+  R: ['11110', '10001', '10001', '11110', '10100', '10010', '10001'],
+  S: ['01111', '10000', '10000', '01110', '00001', '00001', '11110'],
+  T: ['11111', '00100', '00100', '00100', '00100', '00100', '00100'],
+  U: ['10001', '10001', '10001', '10001', '10001', '10001', '01110'],
+  V: ['10001', '10001', '10001', '10001', '10001', '01010', '00100'],
+  W: ['10001', '10001', '10001', '10101', '10101', '10101', '01010'],
+  X: ['10001', '10001', '01010', '00100', '01010', '10001', '10001'],
+  Y: ['10001', '10001', '01010', '00100', '00100', '00100', '00100'],
+  Z: ['11111', '00001', '00010', '00100', '01000', '10000', '11111'],
 }
 
 function wrapCanvasText(
@@ -35,6 +95,73 @@ function wrapCanvasText(
 
   if (line) lines.push(line)
   return lines
+}
+
+function measureRetroComputerText(
+  value: string,
+  scale = retroComputerTextScale,
+) {
+  return Array.from(value.toUpperCase()).reduce((width, character, index) => {
+    const glyph = retroComputerGlyphs[character] ?? retroComputerGlyphs['?']
+    const glyphWidth = glyph[0]?.length ?? 5
+    const spacing = index === 0 ? 0 : scale
+
+    return width + spacing + glyphWidth * scale
+  }, 0)
+}
+
+function wrapRetroComputerText(
+  value: string,
+  maxWidth: number,
+  scale = retroComputerTextScale,
+) {
+  const words = value.split(/\s+/).filter(Boolean)
+  const lines: string[] = []
+  let line = ''
+
+  words.forEach(word => {
+    const nextLine = line ? `${line} ${word}` : word
+    if (measureRetroComputerText(nextLine, scale) <= maxWidth || !line) {
+      line = nextLine
+      return
+    }
+
+    lines.push(line)
+    line = word
+  })
+
+  if (line) lines.push(line)
+  return lines
+}
+
+function drawRetroComputerText(
+  context: CanvasRenderingContext2D,
+  value: string,
+  x: number,
+  y: number,
+  color: string,
+  scale = retroComputerTextScale,
+) {
+  let cursorX = x
+
+  context.fillStyle = color
+  Array.from(value.toUpperCase()).forEach(character => {
+    const glyph = retroComputerGlyphs[character] ?? retroComputerGlyphs['?']
+    glyph.forEach((row, rowIndex) => {
+      Array.from(row).forEach((pixel, columnIndex) => {
+        if (pixel !== '1') return
+
+        context.fillRect(
+          Math.round(cursorX + columnIndex * scale),
+          Math.round(y + rowIndex * scale),
+          scale,
+          scale,
+        )
+      })
+    })
+
+    cursorX += ((glyph[0]?.length ?? 5) + 1) * scale
+  })
 }
 
 export function createScreenTextTexture({
@@ -126,7 +253,9 @@ export function createScreenTextTexture({
   return texture
 }
 
-export function createScreenInfoTickerTextureController(frameInterval = 1 / 24) {
+export function createScreenInfoTickerTextureController(
+  frameInterval = 1 / 24,
+) {
   let canvas: HTMLCanvasElement | null = null
   let context: CanvasRenderingContext2D | null = null
   let texture: CanvasTexture | null = null
@@ -148,6 +277,7 @@ export function createScreenInfoTickerTextureController(frameInterval = 1 / 24) 
       return
     }
 
+    context.imageSmoothingEnabled = false
     texture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
   }
 
@@ -159,11 +289,13 @@ export function createScreenInfoTickerTextureController(frameInterval = 1 / 24) 
   ) {
     if (!context) return
 
-    context.fillStyle = color
+    context.save()
+    context.globalAlpha = retroComputerTextOpacity
     context.shadowColor = 'rgba(34, 211, 238, 0.4)'
     context.shadowBlur = 8
-    context.fillText(value, x, y)
+    drawRetroComputerText(context, value, x, y, color)
     context.shadowBlur = 0
+    context.restore()
   }
 
   function update({
@@ -191,11 +323,12 @@ export function createScreenInfoTickerTextureController(frameInterval = 1 / 24) 
     ctx.clearRect(0, 0, width, height)
 
     ctx.textBaseline = 'top'
-    ctx.font = '800 28px "JetBrains Mono", ui-monospace, monospace'
     drawTerminalLine(`// ${header}`, 48, 54, 'rgba(103, 232, 249, 0.92)')
 
-    ctx.font = '800 32px "JetBrains Mono", ui-monospace, monospace'
-    const briefLines = wrapCanvasText(ctx, brief.toUpperCase(), 850).slice(0, 5)
+    const briefLines = wrapRetroComputerText(brief.toUpperCase(), 850).slice(
+      0,
+      5,
+    )
     const terminalLines = [
       `> CONNECT ${sectionTitle}`,
       `> LOAD SECTION_BRIEF`,
@@ -223,12 +356,16 @@ export function createScreenInfoTickerTextureController(frameInterval = 1 / 24) 
     ) {
       terminalLines.forEach((line, index) => {
         const lineY = blockY + index * lineHeight
-        if (lineY < terminalTop - lineHeight || lineY > terminalTop + terminalHeight) {
+        if (
+          lineY < terminalTop - lineHeight ||
+          lineY > terminalTop + terminalHeight
+        ) {
           return
         }
 
         const isCommand = line.startsWith('>')
-        const isMeta = line.trim().startsWith('STATUS') || line.trim().startsWith('ROUTE')
+        const isMeta =
+          line.trim().startsWith('STATUS') || line.trim().startsWith('ROUTE')
         const color = isCommand
           ? 'rgba(103, 232, 249, 0.92)'
           : isMeta
@@ -283,7 +420,12 @@ export function createTextMediaBlurTextureController(frameInterval = 1 / 24) {
     texture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
   }
 
-  function update(time: number, video: HTMLVideoElement | null, opacity: number, enabled: boolean) {
+  function update(
+    time: number,
+    video: HTMLVideoElement | null,
+    opacity: number,
+    enabled: boolean,
+  ) {
     if (
       !enabled ||
       opacity <= 0.01 ||

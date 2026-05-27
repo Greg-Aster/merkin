@@ -1,0 +1,498 @@
+<script lang="ts">
+import { T, useTask } from '@threlte/core'
+import { onDestroy, onMount } from 'svelte'
+import {
+  Box3,
+  BufferAttribute,
+  ClampToEdgeWrapping,
+  FrontSide,
+  LinearFilter,
+  SRGBColorSpace,
+  type Texture,
+  TextureLoader,
+  Vector3,
+} from 'three'
+import type * as THREE from 'three'
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { getHomeIntroLogoModelSrc } from './homeIntroLogoAssets'
+
+type SceneQuality = 'high' | 'balanced' | 'lean'
+type AnimatedAtlasBlendMode = 'emissive' | 'multiply'
+type AnimatedAtlasUniforms = {
+  animatedAtlasStrength: { value: number }
+}
+
+export let sceneQuality: SceneQuality = 'high'
+export let animatedAtlasSrc = ''
+export let animatedAtlasColumns = 6
+export let animatedAtlasRows = 4
+export let animatedAtlasFrames = 23
+export let animatedAtlasFps = 3
+export let animatedAtlasBlendMode: AnimatedAtlasBlendMode = 'emissive'
+export let animatedAtlasIntensity = 0.5
+export let animatedAtlasBaseIntensity = 1
+export let animatedAtlasUvOffsetX = 0
+export let animatedAtlasUvOffsetY = 0
+export let animatedAtlasUvScaleX = 1
+export let animatedAtlasUvScaleY = 1
+export let animatedAtlasUvFlipX = false
+export let animatedAtlasUvFlipY = false
+export let onReady: (() => void) | undefined
+
+let logoModel: THREE.Object3D | null = null
+let mounted = false
+let activeLogoModelSrc = ''
+let pendingLogoModelSrc = ''
+let atlasTexture: Texture | null = null
+let activeAtlasSrc = ''
+let pendingAtlasSrc = ''
+let atlasElapsed = 0
+let activeAtlasFrame = -1
+let readyNotified = false
+let uvRevisionKey = ''
+
+const gltfLoader = new GLTFLoader()
+gltfLoader.setMeshoptDecoder(MeshoptDecoder)
+const textureLoader = new TextureLoader()
+const originalMaterialColors = new WeakMap<
+  THREE.MeshStandardMaterial,
+  THREE.Color
+>()
+const originalMaterialMaps = new WeakMap<
+  THREE.MeshStandardMaterial,
+  Texture | null
+>()
+const animatedAtlasUniforms = new WeakMap<
+  THREE.MeshStandardMaterial,
+  AnimatedAtlasUniforms
+>()
+
+const logoBounds = new Box3()
+const logoCenter = new Vector3()
+const logoSize = new Vector3()
+const logoTargetSize = new Vector3(4.68, 2.24, 1.44)
+const uvBounds = new Box3()
+
+$: logoModelSrc = getHomeIntroLogoModelSrc(sceneQuality)
+
+function disposeObjectResources(object: THREE.Object3D) {
+  object.traverse(child => {
+    const mesh = child as THREE.Mesh
+    const geometry = mesh.geometry
+    const material = mesh.material
+
+    geometry?.dispose?.()
+
+    const disposeMaterialTextures = (item: THREE.Material) => {
+      Object.values(item).forEach(value => {
+        const texture = value as THREE.Texture | undefined
+        if (texture?.isTexture && texture !== atlasTexture) {
+          texture.dispose()
+        }
+      })
+    }
+
+    if (Array.isArray(material)) {
+      material.forEach(item => {
+        disposeMaterialTextures(item)
+        item.dispose()
+      })
+    } else {
+      material && disposeMaterialTextures(material)
+      material?.dispose?.()
+    }
+  })
+}
+
+function disposeLogoModel() {
+  if (!logoModel) return
+
+  logoModel.parent?.remove(logoModel)
+  disposeObjectResources(logoModel)
+  logoModel = null
+}
+
+function disposeAtlasTexture() {
+  atlasTexture?.dispose()
+  atlasTexture = null
+  activeAtlasSrc = ''
+  activeAtlasFrame = -1
+}
+
+function notifyReady() {
+  if (readyNotified) return
+
+  readyNotified = true
+  onReady?.()
+}
+
+function fitLogoModel(model: THREE.Object3D) {
+  model.updateMatrixWorld(true)
+  logoBounds.setFromObject(model)
+  if (logoBounds.isEmpty()) return
+
+  logoBounds.getCenter(logoCenter)
+  logoBounds.getSize(logoSize)
+
+  const scale = Math.min(
+    logoTargetSize.x / Math.max(logoSize.x, 0.001),
+    logoTargetSize.y / Math.max(logoSize.y, 0.001),
+    logoTargetSize.z / Math.max(logoSize.z, 0.001),
+  )
+
+  model.scale.setScalar(scale)
+  model.position.set(
+    -logoCenter.x * scale,
+    -logoCenter.y * scale,
+    -logoCenter.z * scale,
+  )
+}
+
+function ensurePlanarUvAttribute(mesh: THREE.Mesh) {
+  const geometry = mesh.geometry
+  const position = geometry?.getAttribute('position') as
+    | THREE.BufferAttribute
+    | undefined
+  if (!geometry || !position) return
+
+  geometry.computeBoundingBox()
+  if (!geometry.boundingBox) return
+
+  uvBounds.copy(geometry.boundingBox)
+  const sizeX = Math.max(uvBounds.max.x - uvBounds.min.x, 0.001)
+  const sizeY = Math.max(uvBounds.max.y - uvBounds.min.y, 0.001)
+  const uvs = new Float32Array(position.count * 2)
+
+  for (let index = 0; index < position.count; index += 1) {
+    const baseU = (position.getX(index) - uvBounds.min.x) / sizeX
+    const baseV = (position.getY(index) - uvBounds.min.y) / sizeY
+    const projectedU = animatedAtlasUvFlipX ? 1 - baseU : baseU
+    const projectedV = animatedAtlasUvFlipY ? 1 - baseV : baseV
+
+    uvs[index * 2] =
+      (projectedU - 0.5) * animatedAtlasUvScaleX + 0.5 + animatedAtlasUvOffsetX
+    uvs[index * 2 + 1] =
+      (projectedV - 0.5) * animatedAtlasUvScaleY + 0.5 + animatedAtlasUvOffsetY
+  }
+
+  geometry.setAttribute('uv', new BufferAttribute(uvs, 2))
+  geometry.getAttribute('uv').needsUpdate = true
+}
+
+function getAnimatedAtlasUniforms(
+  material: THREE.MeshStandardMaterial,
+): AnimatedAtlasUniforms {
+  let uniforms = animatedAtlasUniforms.get(material)
+  if (!uniforms) {
+    uniforms = {
+      animatedAtlasStrength: { value: animatedAtlasIntensity },
+    }
+    animatedAtlasUniforms.set(material, uniforms)
+  }
+
+  return uniforms
+}
+
+function installAnimatedAtlasShader(material: THREE.MeshStandardMaterial) {
+  if (material.userData.homeIntroAnimatedAtlasShader) return
+
+  const previousOnBeforeCompile = material.onBeforeCompile.bind(material)
+  const previousCustomProgramCacheKey =
+    material.customProgramCacheKey.bind(material)
+  const uniforms = getAnimatedAtlasUniforms(material)
+
+  material.onBeforeCompile = (shader, renderer) => {
+    previousOnBeforeCompile(shader, renderer)
+    shader.uniforms.animatedAtlasStrength = uniforms.animatedAtlasStrength
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        '#include <common>',
+        '#include <common>\nuniform float animatedAtlasStrength;',
+      )
+      .replace(
+        '#include <map_fragment>',
+        `
+#ifdef USE_MAP
+  vec4 sampledDiffuseColor = texture2D( map, vMapUv );
+  #ifdef DECODE_VIDEO_TEXTURE
+    sampledDiffuseColor = sRGBTransferEOTF( sampledDiffuseColor );
+  #endif
+  float animatedAtlasMix = clamp(
+    sampledDiffuseColor.a * animatedAtlasStrength,
+    0.0,
+    1.0
+  );
+  vec3 animatedAtlasMultipliedColor =
+    diffuseColor.rgb * sampledDiffuseColor.rgb;
+  diffuseColor.rgb = mix(
+    diffuseColor.rgb,
+    animatedAtlasMultipliedColor,
+    animatedAtlasMix
+  );
+#endif
+`,
+      )
+  }
+
+  material.customProgramCacheKey = () =>
+    `${previousCustomProgramCacheKey()}:home-intro-animated-atlas-multiply`
+  material.userData.homeIntroAnimatedAtlasShader = true
+}
+
+function tuneLogoModel(model: THREE.Object3D) {
+  model.traverse(child => {
+    const mesh = child as THREE.Mesh
+    if (!mesh.isMesh) return
+
+    mesh.castShadow = false
+    mesh.receiveShadow = false
+    mesh.frustumCulled = false
+
+    const materials = Array.isArray(mesh.material)
+      ? mesh.material
+      : [mesh.material]
+
+    materials.forEach(item => {
+      const material = item as THREE.MeshStandardMaterial | undefined
+      if (!material?.isMeshStandardMaterial) return
+      if (!originalMaterialColors.has(material)) {
+        originalMaterialColors.set(material, material.color.clone())
+      }
+      if (!originalMaterialMaps.has(material)) {
+        originalMaterialMaps.set(material, material.map)
+      }
+
+      material.emissive.set(0, 0, 0)
+      material.emissiveIntensity = 0
+      material.metalness = Math.max(
+        material.metalness,
+        sceneQuality === 'lean' ? 0.18 : 0.34,
+      )
+      material.roughness = Math.min(
+        material.roughness,
+        sceneQuality === 'lean' ? 0.48 : 0.32,
+      )
+      material.envMapIntensity = 0.45
+      material.side = FrontSide
+      material.transparent = false
+      material.depthWrite = true
+      material.depthTest = true
+
+      if (material.map) {
+        material.map.colorSpace = SRGBColorSpace
+        material.map.anisotropy = sceneQuality === 'high' ? 4 : 2
+        material.map.generateMipmaps = false
+        material.map.minFilter = LinearFilter
+        material.map.magFilter = LinearFilter
+        material.map.needsUpdate = true
+      }
+
+      material.needsUpdate = true
+    })
+  })
+}
+
+function syncAtlasFrame(frame: number) {
+  if (!atlasTexture || frame === activeAtlasFrame) return
+
+  const clampedFrame = Math.max(0, Math.min(animatedAtlasFrames - 1, frame))
+  const column = clampedFrame % animatedAtlasColumns
+  const row = Math.floor(clampedFrame / animatedAtlasColumns)
+
+  atlasTexture.repeat.set(1 / animatedAtlasColumns, 1 / animatedAtlasRows)
+  atlasTexture.offset.set(
+    column / animatedAtlasColumns,
+    1 - (row + 1) / animatedAtlasRows,
+  )
+  atlasTexture.needsUpdate = true
+  activeAtlasFrame = clampedFrame
+}
+
+function configureAtlasTexture(texture: Texture) {
+  texture.colorSpace = SRGBColorSpace
+  texture.generateMipmaps = false
+  texture.minFilter = LinearFilter
+  texture.magFilter = LinearFilter
+  texture.wrapS = ClampToEdgeWrapping
+  texture.wrapT = ClampToEdgeWrapping
+  texture.needsUpdate = true
+}
+
+function applyAnimatedAtlasToModel() {
+  if (!logoModel || !atlasTexture) return
+
+  uvRevisionKey = [
+    animatedAtlasBlendMode,
+    animatedAtlasIntensity,
+    animatedAtlasBaseIntensity,
+    animatedAtlasUvOffsetX,
+    animatedAtlasUvOffsetY,
+    animatedAtlasUvScaleX,
+    animatedAtlasUvScaleY,
+    animatedAtlasUvFlipX,
+    animatedAtlasUvFlipY,
+  ].join(':')
+
+  logoModel.traverse(child => {
+    const mesh = child as THREE.Mesh
+    if (!mesh.isMesh) return
+
+    ensurePlanarUvAttribute(mesh)
+    const materials = Array.isArray(mesh.material)
+      ? mesh.material
+      : [mesh.material]
+
+    materials.forEach(item => {
+      const material = item as THREE.MeshStandardMaterial | undefined
+      if (!material?.isMeshStandardMaterial) return
+
+      const originalColor = originalMaterialColors.get(material)
+      if (originalColor) {
+        material.color
+          .copy(originalColor)
+          .multiplyScalar(animatedAtlasBaseIntensity)
+      }
+      const uniforms = getAnimatedAtlasUniforms(material)
+      uniforms.animatedAtlasStrength.value = animatedAtlasIntensity
+
+      if (animatedAtlasBlendMode === 'multiply') {
+        installAnimatedAtlasShader(material)
+        material.map = atlasTexture
+        material.emissiveMap = null
+        material.emissive.set(0, 0, 0)
+        material.emissiveIntensity = 0
+      } else {
+        material.map = originalMaterialMaps.get(material) ?? null
+        material.emissiveMap = atlasTexture
+        material.emissive.set(1, 1, 1)
+        material.emissiveIntensity = animatedAtlasIntensity
+      }
+      material.needsUpdate = true
+    })
+  })
+}
+
+async function loadAnimatedAtlas(sourceUrl: string) {
+  pendingAtlasSrc = sourceUrl
+
+  textureLoader.load(
+    sourceUrl,
+    texture => {
+      if (!mounted || pendingAtlasSrc !== sourceUrl) {
+        texture.dispose()
+        return
+      }
+
+      disposeAtlasTexture()
+      configureAtlasTexture(texture)
+      atlasTexture = texture
+      activeAtlasSrc = sourceUrl
+      pendingAtlasSrc = ''
+      atlasElapsed = 0
+      syncAtlasFrame(0)
+      applyAnimatedAtlasToModel()
+    },
+    undefined,
+    () => {
+      if (pendingAtlasSrc === sourceUrl) pendingAtlasSrc = ''
+    },
+  )
+}
+
+async function loadLogoModel(sourceUrl: string) {
+  pendingLogoModelSrc = sourceUrl
+
+  try {
+    const gltf = await gltfLoader.loadAsync(sourceUrl)
+    const model = gltf.scene ?? gltf.scenes?.[0]
+    if (!model) {
+      if (pendingLogoModelSrc === sourceUrl) pendingLogoModelSrc = ''
+      return
+    }
+
+    if (!mounted || pendingLogoModelSrc !== sourceUrl) {
+      disposeObjectResources(model)
+      return
+    }
+
+    disposeLogoModel()
+    fitLogoModel(model)
+    tuneLogoModel(model)
+    logoModel = model
+    activeLogoModelSrc = sourceUrl
+    pendingLogoModelSrc = ''
+    applyAnimatedAtlasToModel()
+    notifyReady()
+  } catch (error) {
+    if (pendingLogoModelSrc === sourceUrl) pendingLogoModelSrc = ''
+    console.error('Failed to load portal logo mesh:', error)
+  }
+}
+
+onMount(() => {
+  mounted = true
+
+  return () => {
+    mounted = false
+    disposeLogoModel()
+    disposeAtlasTexture()
+  }
+})
+
+onDestroy(() => {
+  mounted = false
+  disposeLogoModel()
+  disposeAtlasTexture()
+})
+
+$: if (
+  mounted &&
+  logoModelSrc !== activeLogoModelSrc &&
+  logoModelSrc !== pendingLogoModelSrc
+) {
+  void loadLogoModel(logoModelSrc)
+}
+
+$: if (
+  mounted &&
+  animatedAtlasSrc &&
+  animatedAtlasSrc !== activeAtlasSrc &&
+  animatedAtlasSrc !== pendingAtlasSrc
+) {
+  void loadAnimatedAtlas(animatedAtlasSrc)
+}
+
+$: if (mounted && logoModel && atlasTexture) {
+  const nextUvRevisionKey = [
+    animatedAtlasBlendMode,
+    animatedAtlasIntensity,
+    animatedAtlasBaseIntensity,
+    animatedAtlasUvOffsetX,
+    animatedAtlasUvOffsetY,
+    animatedAtlasUvScaleX,
+    animatedAtlasUvScaleY,
+    animatedAtlasUvFlipX,
+    animatedAtlasUvFlipY,
+  ].join(':')
+
+  if (nextUvRevisionKey !== uvRevisionKey) {
+    applyAnimatedAtlasToModel()
+  }
+}
+
+useTask(delta => {
+  if (!atlasTexture || animatedAtlasFrames <= 1 || animatedAtlasFps <= 0) {
+    return
+  }
+
+  atlasElapsed += delta
+  syncAtlasFrame(
+    Math.floor(atlasElapsed * animatedAtlasFps) % animatedAtlasFrames,
+  )
+})
+</script>
+
+{#if logoModel}
+	<T is={logoModel} />
+{/if}
