@@ -8,8 +8,8 @@ import {
   SRGBColorSpace,
   Scene,
   type Texture,
-  type WebGLRenderer,
   WebGLRenderTarget,
+  type WebGLRenderer,
 } from 'three'
 
 type HomeIntroScreenContentRendererOptions = {
@@ -45,6 +45,9 @@ export class HomeIntroScreenContentRenderer {
     depthWrite: false,
   })
   private readonly previousClearColor = new Color()
+  private lastMediaTexture: Texture | null = null
+  private lastVideoTexture: Texture | null = null
+  private lastMediaTransparent = false
 
   constructor({
     renderWidth = 1024,
@@ -110,14 +113,28 @@ export class HomeIntroScreenContentRenderer {
     videoReady,
     videoTexture,
   }: HomeIntroScreenContentRendererState) {
+    const nextMediaTransparent = !mediaTexture
+    const mediaMaterialNeedsUpdate =
+      this.lastMediaTexture !== mediaTexture ||
+      this.lastMediaTransparent !== nextMediaTransparent
+
     this.mediaMaterial.map = mediaTexture
     this.mediaMaterial.color.set(mediaTexture ? mediaTint : fallbackColor)
-    this.mediaMaterial.transparent = !mediaTexture
+    this.mediaMaterial.transparent = nextMediaTransparent
     this.mediaMaterial.opacity = mediaTexture ? 1 : fallbackOpacity
-    this.mediaMaterial.needsUpdate = true
+    if (mediaMaterialNeedsUpdate) {
+      this.mediaMaterial.needsUpdate = true
+    }
+    this.lastMediaTexture = mediaTexture
+    this.lastMediaTransparent = nextMediaTransparent
 
+    const videoMaterialNeedsUpdate = this.lastVideoTexture !== videoTexture
     this.videoMaterial.map = videoTexture
-    this.videoMaterial.opacity = videoTexture && videoReady ? videoMediaOpacity : 0
-    this.videoMaterial.needsUpdate = true
+    this.videoMaterial.opacity =
+      videoTexture && videoReady ? videoMediaOpacity : 0
+    if (videoMaterialNeedsUpdate) {
+      this.videoMaterial.needsUpdate = true
+    }
+    this.lastVideoTexture = videoTexture
   }
 }

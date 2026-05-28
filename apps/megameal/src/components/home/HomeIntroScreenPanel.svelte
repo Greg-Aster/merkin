@@ -3,18 +3,18 @@ import { T, useTask, useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import {
   AdditiveBlending,
+  CanvasTexture,
   DoubleSide,
   FrontSide,
+  type Group,
   LinearFilter,
+  type Mesh,
   NormalBlending,
   SRGBColorSpace,
-  CanvasTexture,
-  type Group,
-  type Mesh,
   type Texture,
-  type WebGLRenderer,
   TextureLoader,
   VideoTexture,
+  type WebGLRenderer,
 } from 'three'
 import type * as THREE from 'three'
 import {
@@ -22,16 +22,16 @@ import {
   releaseHomeIntroKtx2Loader,
   retainHomeIntroKtx2Loader,
 } from './homeIntroKtx2Loader'
-import {
-  createScreenInfoTickerTextureController,
-  createScreenTextTexture,
-} from './homeIntroScreenTextTextures'
+import { homeIntroReflectionOnlyUserDataKey } from './homeIntroReflectionOnly'
+import { HomeIntroScreenContentRenderer } from './homeIntroScreenContentRenderer'
 import {
   disposeHomeIntroScreenModel,
   loadHomeIntroScreenModelInstance,
 } from './homeIntroScreenModel'
-import { homeIntroReflectionOnlyUserDataKey } from './homeIntroReflectionOnly'
-import { HomeIntroScreenContentRenderer } from './homeIntroScreenContentRenderer'
+import {
+  createScreenInfoTickerTextureController,
+  createScreenTextTexture,
+} from './homeIntroScreenTextTextures'
 
 type SceneQuality = 'high' | 'balanced' | 'lean'
 
@@ -65,6 +65,8 @@ let screenModel: THREE.Object3D | null = null
 let screenContentMesh: Mesh | null = null
 let screenContentMaterial: THREE.MeshBasicMaterial | null = null
 let screenContentRenderer: HomeIntroScreenContentRenderer | null = null
+let screenContentRendered = false
+let screenContentRenderKey = ''
 let loader: TextureLoader | null = null
 let screenLoadAbortController: AbortController | null = null
 let screenModelRequested = false
@@ -155,6 +157,8 @@ function disposeScreenContentRenderer() {
   screenContentRenderer?.dispose()
   screenContentRenderer = null
   screenContentTexture = null
+  screenContentRendered = false
+  screenContentRenderKey = ''
 }
 
 function disposeStillTexture() {
@@ -259,7 +263,10 @@ async function loadScreenModel() {
   screenLoadAbortController = controller
 
   try {
-    const model = await loadHomeIntroScreenModelInstance(frameWidth, frameHeight)
+    const model = await loadHomeIntroScreenModelInstance(
+      frameWidth,
+      frameHeight,
+    )
 
     if (!mounted || controller.signal.aborted || !model) {
       disposeHomeIntroScreenModel(model)
@@ -381,28 +388,60 @@ function ensureScreenContentRenderer() {
   return screenContentRenderer
 }
 
+function getScreenContentTextureKey(texture: Texture | null) {
+  return texture ? `${texture.uuid}@${texture.version}` : 'none'
+}
+
 function renderScreenContent() {
   const renderer = getRenderer()
   if (!renderer || !mounted) return
 
-  const screenRenderer = ensureScreenContentRenderer()
-
-  screenRenderer.render(renderer, {
+  const renderState = {
     fallbackColor: primary ? '#67e8f9' : '#8b5cf6',
     fallbackOpacity: primary ? 0.32 : 0.16,
-    mediaTexture: primary ? (titleTexture ?? stillTexture) : stillTexture,
+    mediaTexture: primary ? titleTexture ?? stillTexture : stillTexture,
     mediaTint: primary ? titleMediaTint : mediaTint,
     videoMediaOpacity,
     videoReady,
     videoTexture,
-  })
+  }
+  const nextRenderKey = [
+    renderState.fallbackColor,
+    renderState.fallbackOpacity.toFixed(3),
+    getScreenContentTextureKey(renderState.mediaTexture),
+    renderState.mediaTint,
+    renderState.videoMediaOpacity.toFixed(3),
+    renderState.videoReady ? 'ready' : 'pending',
+    getScreenContentTextureKey(renderState.videoTexture),
+  ].join(':')
+  const hasLiveVideo =
+    Boolean(videoTexture && videoReady && videoMediaOpacity > 0.001) &&
+    videoElement?.paused === false
+
+  if (
+    screenContentRendered &&
+    nextRenderKey === screenContentRenderKey &&
+    !hasLiveVideo
+  ) {
+    return
+  }
+
+  const screenRenderer = ensureScreenContentRenderer()
+
+  screenRenderer.render(renderer, renderState)
+  screenContentRendered = true
+  screenContentRenderKey = nextRenderKey
 }
 
 $: if (loader && shouldLoadMedia) {
   ensureMediaTexturesLoaded()
 }
 
-$: if (mounted && videoSrc && (active || hovered || videoElement || !motionEnabled)) {
+$: if (
+  mounted &&
+  videoSrc &&
+  (active || hovered || videoElement || !motionEnabled)
+) {
   syncVideoPlayback()
 }
 
@@ -416,7 +455,8 @@ $: if (screenContentMesh && screenContentMaterial) {
   const reflectionOnly = Boolean(screenModel)
   const canWriteMainPass = !reflectionOnly
 
-  screenContentMesh.userData[homeIntroReflectionOnlyUserDataKey] = reflectionOnly
+  screenContentMesh.userData[homeIntroReflectionOnlyUserDataKey] =
+    reflectionOnly
   screenContentMesh.visible = true
   screenContentMaterial.colorWrite = canWriteMainPass
   screenContentMaterial.depthWrite = canWriteMainPass
@@ -424,8 +464,7 @@ $: if (screenContentMesh && screenContentMaterial) {
     const renderTarget = renderer.getRenderTarget()
     const renderTargetName = renderTarget?.texture?.name ?? ''
     const canWriteGlassPass =
-      Boolean(renderTarget) &&
-      renderTargetName !== 'HomeIntroLogoGlitch.logo'
+      Boolean(renderTarget) && renderTargetName !== 'HomeIntroLogoGlitch.logo'
     const canWriteCurrentPass = !reflectionOnly || canWriteGlassPass
 
     screenContentMaterial!.colorWrite = canWriteCurrentPass

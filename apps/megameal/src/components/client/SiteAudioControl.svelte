@@ -132,14 +132,14 @@ const dismissAudioNudge = (options: { remember?: boolean } = {}) => {
   }, 220)
 }
 
-const toggleAudio = async (event?: Event) => {
-  await siteAudioManager.unlockFromGesture(event)
+const toggleAudio = async () => {
+  await siteAudioManager.unlockFromGesture()
   siteAudioManager.toggle()
   dismissAudioNudge({ remember: false })
 }
 
-const enableAudioFromNudge = async (event: MouseEvent) => {
-  await siteAudioManager.unlockFromGesture(event)
+const enableAudioFromNudge = async () => {
+  await siteAudioManager.unlockFromGesture()
   siteAudioManager.setEnabled(true)
   dismissAudioNudge({ remember: false })
 }
@@ -176,9 +176,9 @@ const targetIsInsideAudioControl = (target: EventTarget | null) => {
   )
 }
 
-const handleAudioButtonClick = async (event: MouseEvent) => {
+const handleAudioButtonClick = async () => {
   dismissAudioNudge()
-  await siteAudioManager.unlockFromGesture(event)
+  await siteAudioManager.unlockFromGesture()
 
   if (isMobileViewport) {
     panelOpen = false
@@ -212,8 +212,8 @@ onMount(() => {
   document.addEventListener('astro:page-load', syncAudioForCurrentPage)
 
   const stopListeningForAudioActivation = addSiteAudioActivationListeners(
-    event => {
-      void siteAudioManager.unlockFromGesture(event)
+    () => {
+      void siteAudioManager.unlockFromGesture()
     },
   )
   const mediaQuery = window.matchMedia('(max-width: 767px)')

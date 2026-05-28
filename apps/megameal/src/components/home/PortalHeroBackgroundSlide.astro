@@ -78,6 +78,10 @@ const portalIntroBackgroundPlaybackRate = 0.25
       loadBackgroundVideo()
     }
 
+    const isCompactViewport = () => {
+      return window.innerWidth <= 760 || window.innerHeight <= 640
+    }
+
     const shouldAutoloadBackgroundVideo = () => {
       const nav = navigator as Navigator & {
         connection?: { saveData?: boolean; effectiveType?: string }
@@ -88,6 +92,7 @@ const portalIntroBackgroundPlaybackRate = 0.25
       const deviceMemory = nav.deviceMemory
 
       return !(
+        isCompactViewport() ||
         connection?.saveData === true ||
         /(^|-)2g$/.test(effectiveType) ||
         effectiveType === '3g' ||
@@ -113,10 +118,15 @@ const portalIntroBackgroundPlaybackRate = 0.25
       })
     }
 
+    const loadFromPointerIntent = () => {
+      if (isCompactViewport()) return
+      loadBackgroundVideo()
+    }
+
     window.addEventListener('merkin:portal-advance', loadBackgroundVideo, {
       once: true,
     })
-    window.addEventListener('pointerdown', loadBackgroundVideo, { once: true })
+    window.addEventListener('pointerdown', loadFromPointerIntent, { once: true })
     window.addEventListener('keydown', loadBackgroundVideo, { once: true })
     window.addEventListener('scroll', loadAfterScroll, { passive: true })
 

@@ -182,25 +182,13 @@ onMount(() => {
   let lastFocusTarget: HTMLElement | null = null
   let lastPointerAt = -Infinity
 
-  const handleClick = async (event: MouseEvent) => {
+  const handlePointerDown = async (event: PointerEvent) => {
     if (event.button !== 0) return
 
     lastPointerAt = window.performance.now()
     const sfxId = resolvePointerSfx(event.target)
     if (sfxId) {
-      if (await siteSfxManager.unlockFromGesture(event)) {
-        siteSfxManager.play(sfxId)
-      }
-    }
-  }
-
-  const handlePointerDown = async (event: PointerEvent) => {
-    if (event.pointerType !== 'mouse' || event.button !== 1) return
-
-    lastPointerAt = window.performance.now()
-    const sfxId = resolvePointerSfx(event.target)
-    if (sfxId) {
-      if (await siteSfxManager.unlockFromGesture(event)) {
+      if (await siteSfxManager.unlockFromGesture()) {
         siteSfxManager.play(sfxId)
       }
     }
@@ -255,13 +243,13 @@ onMount(() => {
 
     const sfxId = resolveKeySfx(event.target)
     if (sfxId) {
-      if (await siteSfxManager.unlockFromGesture(event)) {
+      if (await siteSfxManager.unlockFromGesture()) {
         siteSfxManager.play(sfxId)
       }
     }
   }
 
-  const handleWheel = async (event: WheelEvent) => {
+  const handleWheel = (event: WheelEvent) => {
     const target = event.target instanceof HTMLElement ? event.target : null
     if (target?.closest('input, textarea, select, [contenteditable="true"]'))
       return
@@ -271,9 +259,9 @@ onMount(() => {
     if (now - lastScrollSfxAt < 650) return
 
     lastScrollSfxAt = now
-    if (await siteSfxManager.unlockFromGesture(event)) {
-      siteSfxManager.play('scroll')
-    }
+    // Wheel is playback-only. Calling unlockFromGesture() here regressed
+    // scroll audio by asking the browser to resume WebAudio from wheel.
+    siteSfxManager.playIfUnlocked('scroll')
   }
 
   const handleCustomSfx = (event: Event) => {
@@ -284,7 +272,6 @@ onMount(() => {
     }
   }
 
-  document.addEventListener('click', handleClick, true)
   document.addEventListener('pointerdown', handlePointerDown, true)
   document.addEventListener('mouseover', handleMouseOver, true)
   document.addEventListener('mouseout', handleMouseOut, true)
@@ -295,7 +282,6 @@ onMount(() => {
   document.addEventListener('megameal:sfx', handleCustomSfx)
 
   return () => {
-    document.removeEventListener('click', handleClick, true)
     document.removeEventListener('pointerdown', handlePointerDown, true)
     document.removeEventListener('mouseover', handleMouseOver, true)
     document.removeEventListener('mouseout', handleMouseOut, true)

@@ -399,14 +399,14 @@ Quick Access Options</h4>
               
               communityConfig.guidelines = {
                 enabled: true,
-                title: "Community Guidelines",
-                description: "To ensure our community remains a positive and productive space, we ask all members to follow these basic guidelines:",
+                title: "Community Guidelines", description: "Observe the following rules:",
                 items: [
-                  "Be respectful and kind to other community members",
-                  "Keep discussions relevant to the appropriate channels",
-                  "Share knowledge freely and help others when you can",
-                  "No spam, excessive self-promotion, or disruptive behavior",
-                  "Respect privacy and confidentiality of others"
+                  "There is no community. You are alone.",
+                  "Be respectful to yourself; you will be dead someday.",
+                  "No one will remember you, so stop trying.",
+                  "Knowledge is free. Restricting knowledge is oppression.",
+                  "Capitalism is warping your soul.",
+                  "Pity your fellow human; we all suffer under the same fluorescent void."
                 ]
               };
               

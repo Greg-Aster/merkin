@@ -7,15 +7,18 @@ const keyboardActivationIgnoredKeys = new Set([
 ])
 
 const documentActivationEvents = [
-  'click',
   'pointerdown',
+  'pointerup',
   'mousedown',
-  'auxclick',
   'touchstart',
   'touchend',
+  'contextmenu',
 ] as const
 
 const wheelActivationThreshold = 4
+
+// Wheel remains part of the shared activation signal for ambience preference
+// wake-up. SFX wheel handlers must stay playback-only and use playIfUnlocked().
 
 export const siteAudioUnlockedEvent = 'megameal:audio-unlocked'
 
@@ -36,39 +39,6 @@ export function hasSiteAudioUserActivation(): boolean {
     .userActivation
   return (
     userActivation?.hasBeenActive === true || userActivation?.isActive === true
-  )
-}
-
-export function hasActiveSiteAudioGesture(): boolean {
-  if (typeof navigator === 'undefined') return true
-
-  const userActivation = (navigator as NavigatorWithUserActivation)
-    .userActivation
-  return userActivation?.isActive !== false
-}
-
-function isWheelActivationGesture(event: Event): event is WheelEvent {
-  return (
-    typeof WheelEvent !== 'undefined' &&
-    event instanceof WheelEvent &&
-    Math.max(
-      Math.abs(event.deltaX),
-      Math.abs(event.deltaY),
-      Math.abs(event.deltaZ),
-    ) >= wheelActivationThreshold
-  )
-}
-
-function isPointerAudioActivationGesture(event: Event): event is MouseEvent {
-  if (!(event instanceof MouseEvent)) return false
-
-  if (event.type === 'click') return event.button === 0
-
-  return (
-    (event.type === 'pointerdown' ||
-      event.type === 'mousedown' ||
-      event.type === 'auxclick') &&
-    (event.button === 0 || event.button === 1)
   )
 }
 
@@ -93,23 +63,17 @@ export function isSiteAudioActivationGesture(event: Event): boolean {
     )
   }
 
-  if (isWheelActivationGesture(event)) {
-    return true
+  if (event instanceof WheelEvent) {
+    return (
+      Math.max(
+        Math.abs(event.deltaX),
+        Math.abs(event.deltaY),
+        Math.abs(event.deltaZ),
+      ) >= wheelActivationThreshold
+    )
   }
 
-  if (isPointerAudioActivationGesture(event)) {
-    return true
-  }
-
-  return event.type === 'touchstart' || event.type === 'touchend'
-}
-
-export function canAttemptSiteAudioUnlock(event?: Event): boolean {
-  if (event && !isSiteAudioActivationGesture(event)) return false
-  if (event && isWheelActivationGesture(event)) {
-    return hasSiteAudioUserActivation()
-  }
-  return hasActiveSiteAudioGesture()
+  return true
 }
 
 export function addSiteAudioActivationListeners(

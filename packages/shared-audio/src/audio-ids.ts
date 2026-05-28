@@ -4,7 +4,6 @@ export const SITE_AMBIENCE_TRACK_IDS = [
   'timeline-drift',
   'commercial-hum',
   'checkout-signal',
-  'playfloor-loop',
   'audit-quiz',
   'shadow-broadcast',
   'shadow-broadcast-alt',

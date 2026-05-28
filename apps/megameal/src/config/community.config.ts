@@ -166,15 +166,16 @@ export const communityConfig: CommunityConfig = {
   },
   guidelines: {
     enabled: true,
-    title: 'Community Guidelines',
+    title: 'Community Guidelines for the Alone',
     description:
-      'To ensure our community remains a positive and productive space, we ask all members to follow these basic guidelines:',
+      'The community hub is an emergency pamphlet for solitary organisms pretending the void has a comments section. Observe the following rites:',
     items: [
-      'Be respectful and kind to other community members',
-      'Keep discussions relevant to the appropriate channels',
-      'Share knowledge freely and help others when you can',
-      'No spam, excessive self-promotion, or disruptive behavior',
-      'Respect privacy and confidentiality of others',
+      'There is no community. You are alone with the signal.',
+      'Be respectful to yourself; you will be dead someday.',
+      'No one will remember you, so stop trying so hard.',
+      'Knowledge is free. Restricting knowledge is oppression with better branding.',
+      'Capitalism is warping your soul into a collectible utensil.',
+      'Pity your fellow human; we all suffer under the same fluorescent void.',
     ],
   },
 }

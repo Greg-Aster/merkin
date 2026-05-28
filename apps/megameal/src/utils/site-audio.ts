@@ -4,14 +4,7 @@ import {
   getTrackForPathname,
   siteAudioConfig,
 } from '../config/audio'
-import {
-  canAttemptSiteAudioUnlock,
-  markSiteAudioUnlocked,
-} from './site-audio-activation'
-import {
-  canUnlockWithoutHowlerContext,
-  ensureHowlerAudioContext,
-} from './site-howler-context'
+import { markSiteAudioUnlocked } from './site-audio-activation'
 
 declare global {
   interface Window {
@@ -260,7 +253,9 @@ class SiteAudioManager {
     this.emit()
   }
 
-  private getTrackForCurrentPage(pathname: string): SiteAudioTrackConfig | null {
+  private getTrackForCurrentPage(
+    pathname: string,
+  ): SiteAudioTrackConfig | null {
     return this.readPageAmbientTrack(pathname) ?? getTrackForPathname(pathname)
   }
 
@@ -342,7 +337,7 @@ class SiteAudioManager {
     }
   }
 
-  async unlockFromGesture(event?: Event): Promise<boolean> {
+  async unlockFromGesture(): Promise<boolean> {
     if (typeof window === 'undefined') return false
 
     if (this.hasUnlockedAudio()) {
@@ -355,14 +350,13 @@ class SiteAudioManager {
 
       return true
     }
-    if (!canAttemptSiteAudioUnlock(event)) return false
 
     try {
-      const ctx = ensureHowlerAudioContext()
+      const ctx = Howler.ctx
       if (ctx && ctx.state === 'suspended') {
         await ctx.resume()
       }
-      if (ctx ? ctx.state === 'running' : canUnlockWithoutHowlerContext()) {
+      if (ctx ? ctx.state === 'running' : true) {
         this.setAudioUnlocked()
       }
     } catch (error) {

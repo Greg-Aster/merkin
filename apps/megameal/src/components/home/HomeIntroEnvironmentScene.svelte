@@ -2,11 +2,7 @@
 import { siteSfxManager } from '@/utils/site-sfx'
 import { T, useTask } from '@threlte/core'
 import { onMount } from 'svelte'
-import {
-  Euler,
-  Quaternion,
-  Vector3,
-} from 'three'
+import { Euler, Quaternion, Vector3 } from 'three'
 import type * as THREE from 'three'
 import HomeIntroLogoModel from './HomeIntroLogoModel.svelte'
 import HomeIntroParticleField from './HomeIntroParticleField.svelte'
@@ -34,7 +30,8 @@ type IntroInputState = {
 }
 
 type SceneQuality = 'high' | 'balanced' | 'lean'
-type ScreenPanelComponent = typeof import('./HomeIntroScreenPanel.svelte').default
+type ScreenPanelComponent =
+  typeof import('./HomeIntroScreenPanel.svelte').default
 
 export let input: IntroInputState
 export let titleImageSrc = ''
@@ -53,11 +50,7 @@ let ringGlowB: THREE.Group | null = null
 let ringGlowC: THREE.Group | null = null
 let logoMeshRoot: THREE.Group | null = null
 let logoSearchLightA: THREE.SpotLight | null = null
-let logoSearchLightB: THREE.SpotLight | null = null
-let logoSearchLightC: THREE.SpotLight | null = null
 let logoSearchTargetA: THREE.Group | null = null
-let logoSearchTargetB: THREE.Group | null = null
-let logoSearchTargetC: THREE.Group | null = null
 let starColumn: THREE.Group | null = null
 let screenRail: THREE.Group | null = null
 const screenNodes: THREE.Group[] = []
@@ -89,6 +82,7 @@ const effectScrollStepY = screenStepY * homeIntroWheelToScreenRatio
 const particleScrollSpan = 48
 const logoEmitterOffsetY = -1.22
 const logoEmitterParticleScrollRatio = 0.16
+const screenPanelMountOverscan = 2.25
 const targetScreenEuler = new Euler(0, 0, 0, 'YXZ')
 const targetScreenQuaternion = new Quaternion()
 const logoLightTarget = new Vector3(0, 0, -1.05)
@@ -109,6 +103,10 @@ let activeScreenIndex = primaryScreenIndex
 const portalScreens = homeIntroScreens
 const screenCount = portalScreens.length
 let screenMediaLoadStates = Array.from(
+  { length: screenCount },
+  (_, index) => index === primaryScreenIndex,
+)
+let screenPanelMountStates = Array.from(
   { length: screenCount },
   (_, index) => index === primaryScreenIndex,
 )
@@ -138,11 +136,7 @@ $: sceneBackdropSize = portraitMobile
   ? ([8.2, 12.4] as [number, number])
   : ([16, 9] as [number, number])
 $: particleDensityMultiplier =
-  sceneQuality === 'lean'
-    ? 1.1
-    : sceneQuality === 'balanced'
-      ? 1.55
-      : 1.8
+  sceneQuality === 'lean' ? 1.1 : sceneQuality === 'balanced' ? 1.55 : 1.8
 $: emblemScale = portraitMobile
   ? ([3.64, 3.64, 3.64] as [number, number, number])
   : ([3.98, 3.98, 3.98] as [number, number, number])
@@ -189,17 +183,17 @@ function mountCarousel() {
 }
 
 function loadCarouselComponent() {
-  carouselComponentPromise ??= import('./HomeIntroScreenPanel.svelte').then(
-    screenPanelModule => {
+  carouselComponentPromise ??= import('./HomeIntroScreenPanel.svelte')
+    .then(screenPanelModule => {
       primeScreenLayoutForCurrentWheel()
       ScreenPanel = screenPanelModule.default
       carouselComponentReady = true
-    },
-  ).catch(error => {
-    carouselMounted = false
-    carouselComponentReady = false
-    console.error('Failed to load portal carousel:', error)
-  })
+    })
+    .catch(error => {
+      carouselMounted = false
+      carouselComponentReady = false
+      console.error('Failed to load portal carousel:', error)
+    })
 
   return carouselComponentPromise
 }
@@ -246,15 +240,12 @@ function createParticle(index: number) {
   const radialT = randomA ** 1.25
   const angle = randomB * Math.PI * 2
   const verticalAngle = (randomC - 0.5) * Math.PI
-  const strayT =
-    randomE > 0.68 ? ((randomE - 0.68) / 0.32) ** 0.72 : 0
+  const strayT = randomE > 0.68 ? ((randomE - 0.68) / 0.32) ** 0.72 : 0
   const edgeAngle = randomF * Math.PI * 2
-  const radius =
-    clusterCenter.spread * (0.1 + radialT * (0.82 + strayT * 1.75))
+  const radius = clusterCenter.spread * (0.1 + radialT * (0.82 + strayT * 1.75))
   const anchorX =
     clusterCenter.x * (1 - strayT * 0.48) + Math.cos(edgeAngle) * strayT * 3.6
-  const anchorZ =
-    clusterCenter.z + Math.sin(edgeAngle) * strayT * 1.6
+  const anchorZ = clusterCenter.z + Math.sin(edgeAngle) * strayT * 1.6
 
   return {
     anchorX,
@@ -302,7 +293,8 @@ const screens = Array.from({ length: screenCount }, (_, index) => {
     description: portalScreens[index].description,
     stat: portalScreens[index].stat,
     ctaLabel: portalScreens[index].ctaLabel,
-    stillSrc: portalScreens[index].webglStillSrc ?? portalScreens[index].stillSrc,
+    stillSrc:
+      portalScreens[index].webglStillSrc ?? portalScreens[index].stillSrc,
     ktx2Src: portalScreens[index].ktx2StillSrc ?? '',
     videoSrc: portalScreens[index].videoSrc,
     primary: index === primaryScreenIndex,
@@ -340,7 +332,9 @@ function updateParticleExpansion(delta: number) {
   particleExpansionElapsed += delta
   if (particleExpansionElapsed < particleExpansionInterval) return
 
-  const chunks = Math.floor(particleExpansionElapsed / particleExpansionInterval)
+  const chunks = Math.floor(
+    particleExpansionElapsed / particleExpansionInterval,
+  )
   particleExpansionElapsed -= chunks * particleExpansionInterval
   syncParticleBudget(
     Math.min(targetLimit, particles.length + particleExpansionChunk * chunks),
@@ -450,6 +444,24 @@ function syncScreenMediaLoadStates(selectedIndex: number) {
   }
 }
 
+function syncScreenPanelMountStates(selectedIndex: number) {
+  let changed = false
+  const activeIndex = clampScreenIndex(Math.round(selectedIndex))
+  const next = screenPanelMountStates.map((mounted, index) => {
+    const shouldMount =
+      index === primaryScreenIndex ||
+      index === activeIndex ||
+      Math.abs(index - selectedIndex) <= screenPanelMountOverscan
+
+    if (shouldMount !== mounted) changed = true
+    return shouldMount
+  })
+
+  if (changed) {
+    screenPanelMountStates = next
+  }
+}
+
 function getScreenOrbitTarget(index: number, visualSelectedIndex: number) {
   const offset = index - visualSelectedIndex
   const depth = Math.abs(offset)
@@ -459,8 +471,7 @@ function getScreenOrbitTarget(index: number, visualSelectedIndex: number) {
   const stepY = screenStepY * (portraitMobile ? 0.9 : 1)
   const x = Math.sin(spiral) * orbitRadiusX
   const y = -offset * stepY
-  const z =
-    screenOrbitCenterZ + Math.cos(spiral) * orbitRadiusZ - depth * 0.08
+  const z = screenOrbitCenterZ + Math.cos(spiral) * orbitRadiusZ - depth * 0.08
   const outwardYaw = Math.atan2(
     x / orbitRadiusX,
     (z - screenOrbitCenterZ) / orbitRadiusZ,
@@ -478,6 +489,7 @@ function primeScreenLayoutForCurrentWheel() {
   const visualSelectedIndex = getHomeIntroRestedScreenIndex(selectedIndex)
   activeScreenIndex = clampScreenIndex(Math.round(selectedIndex))
   syncScreenMediaLoadStates(selectedIndex)
+  syncScreenPanelMountStates(selectedIndex)
 
   screens.forEach((screen, index) => {
     const target = getScreenOrbitTarget(index, visualSelectedIndex)
@@ -493,6 +505,7 @@ function updateScreenOrbit(wheel: number, ease: number) {
   activeScreenIndex = clampScreenIndex(Math.round(selectedIndex))
   syncBannerToFrontScreen(getBannerSelectedScreenIndex(selectedIndex))
   syncScreenMediaLoadStates(selectedIndex)
+  syncScreenPanelMountStates(selectedIndex)
   const snapToTarget = !screenOrbitInitialized
   let positionedAnyScreen = false
 
@@ -534,6 +547,7 @@ useTask(delta => {
   const selectedIndex = getSelectedScreenIndex(effectWheel)
   syncBannerToFrontScreen(getBannerSelectedScreenIndex(selectedIndex))
   syncScreenMediaLoadStates(selectedIndex)
+  syncScreenPanelMountStates(selectedIndex)
   if (!motionEnabled) return
 
   const time = performance.now() * 0.001
@@ -546,10 +560,10 @@ useTask(delta => {
   const spiralPhase = visualSelectedIndex * screenAngleStep
   const logoCarouselPhase = visualScrollScreens * screenAngleStep
   const screenVerticalStep = screenStepY * (portraitMobile ? 0.9 : 1)
-  const logoScrollRise =
-    Math.max(0, visualScrollScreens) *
-    screenVerticalStep
-  const revealProgress = clamp01(Number.isFinite(input.reveal) ? input.reveal : 0)
+  const logoScrollRise = Math.max(0, visualScrollScreens) * screenVerticalStep
+  const revealProgress = clamp01(
+    Number.isFinite(input.reveal) ? input.reveal : 0,
+  )
   const logoIntroElapsed = logoIntroStartedAt
     ? Math.max(0, time - logoIntroStartedAt)
     : 0
@@ -615,8 +629,7 @@ useTask(delta => {
     const logoBaseY = portraitMobile ? 0.2 : 0.08
     const logoBaseZ = portraitMobile ? -1.45 : -1.05
     const logoFloatScale = portraitMobile ? 0.78 : 1
-    const logoDriftX =
-      Math.sin(time * 0.31) * (portraitMobile ? 0.026 : 0.038)
+    const logoDriftX = Math.sin(time * 0.31) * (portraitMobile ? 0.026 : 0.038)
     const logoStartY = logoBaseY
     const logoStartZ = portraitMobile ? 2.65 : 1.9
     const logoRestY =
@@ -635,10 +648,7 @@ useTask(delta => {
     const logoFloatRoll =
       Math.sin(time * 0.21 + 1.6) * logoFloatRollAmplitude * logoFloatScale
     const logoIdleScale =
-      1 +
-      Math.sin(time * 0.29 + 1.1) *
-        logoFloatScaleAmplitude *
-        logoFloatScale
+      1 + Math.sin(time * 0.29 + 1.1) * logoFloatScaleAmplitude * logoFloatScale
 
     if (logoIntroRaw < 1) {
       logoMeshRoot.position.set(0, logoTargetY, logoTargetZ)
@@ -654,7 +664,10 @@ useTask(delta => {
     logoMeshRoot.rotation.x =
       -0.075 - logoCarouselPhase * 0.075 + logoFloatPitch + input.dragY * 0.035
     logoMeshRoot.rotation.y =
-      logoRotationOffset - logoCarouselPhase + logoFloatYaw + input.dragX * 0.035
+      logoRotationOffset -
+      logoCarouselPhase +
+      logoFloatYaw +
+      input.dragX * 0.035
     logoMeshRoot.rotation.z = 0.045 - logoCarouselPhase * 0.05 + logoFloatRoll
     logoMeshRoot.getWorldPosition(logoLightTarget)
   } else {
@@ -670,30 +683,10 @@ useTask(delta => {
     logoSearchTargetA,
     time,
     0,
-    180,
-    3.05,
-    11.4,
-    6.5,
-  )
-  updateLogoSearchLight(
-    logoSearchLightB,
-    logoSearchTargetB,
-    time,
-    Math.PI * 0.72,
-    154,
-    2.75,
-    1.12,
-    6,
-  )
-  updateLogoSearchLight(
-    logoSearchLightC,
-    logoSearchTargetC,
-    time,
-    Math.PI * 1.38,
-    130,
-    2.45,
-    1.02,
-    5.6,
+    320,
+    2.85,
+    1.36,
+    6.25,
   )
 
   if (starColumn) {
@@ -740,8 +733,6 @@ useTask(delta => {
 
 <T.AmbientLight intensity={0.0} color="#dbeafe" />
 <T.Group bind:ref={logoSearchTargetA} />
-<T.Group bind:ref={logoSearchTargetB} />
-<T.Group bind:ref={logoSearchTargetC} />
 <T.SpotLight
 	bind:ref={logoSearchLightA}
 	color="#dff7ff"
@@ -749,22 +740,6 @@ useTask(delta => {
 	decay={1.02}
 	angle={0.9}
 	penumbra={0.98}
-/>
-<T.SpotLight
-	bind:ref={logoSearchLightB}
-	color="#8b5cf6"
-	distance={15.7}
-	decay={1.04}
-	angle={0.94}
-	penumbra={0.98}
-/>
-<T.SpotLight
-	bind:ref={logoSearchLightC}
-	color="#67e8f9"
-	distance={15}
-	decay={1.06}
-	angle={0.98}
-	penumbra={0.99}
 />
 
 <T.Group bind:ref={world} position={[0, 0, 0]} scale={[sceneScale, sceneScale, sceneScale]}>
@@ -783,25 +758,27 @@ useTask(delta => {
 					rotation={screen.rotation}
 					scale={[screen.scale, screen.scale, screen.scale]}
 				>
-					<svelte:component
-						this={ScreenPanel}
-						{index}
-						imageSrc={screen.primary ? titleImageSrc : ""}
-						stillSrc={screen.stillSrc}
-						ktx2Src={screen.ktx2Src}
-						videoSrc={screen.videoSrc}
-						kicker={screen.kicker}
-						title={screen.title}
-						description={screen.description}
-						stat={screen.stat}
-						ctaLabel={screen.ctaLabel}
-						hovered={index === hoveredScreenIndex}
-						primary={screen.primary}
-						active={index === activeScreenIndex}
-						shouldLoadMedia={screenMediaLoadStates[index]}
-						{motionEnabled}
-						{sceneQuality}
-					/>
+					{#if screenPanelMountStates[index]}
+						<svelte:component
+							this={ScreenPanel}
+							{index}
+							imageSrc={screen.primary ? titleImageSrc : ""}
+							stillSrc={screen.stillSrc}
+							ktx2Src={screen.ktx2Src}
+							videoSrc={screen.videoSrc}
+							kicker={screen.kicker}
+							title={screen.title}
+							description={screen.description}
+							stat={screen.stat}
+							ctaLabel={screen.ctaLabel}
+							hovered={index === hoveredScreenIndex}
+							primary={screen.primary}
+							active={index === activeScreenIndex}
+							shouldLoadMedia={screenMediaLoadStates[index]}
+							{motionEnabled}
+							{sceneQuality}
+						/>
+					{/if}
 				</T.Group>
 			{/each}
 		</T.Group>

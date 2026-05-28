@@ -1,6 +1,6 @@
 <script lang="ts">
-import { onDestroy, onMount } from 'svelte'
 import { siteSfxManager } from '@/utils/site-sfx'
+import { onDestroy, onMount } from 'svelte'
 import '../../styles/features/extracted/home-intro-environment.css'
 
 type HomeIntroEnvironmentComponent =
@@ -19,16 +19,25 @@ function addCleanup(callback: () => void) {
 }
 
 function cleanupAll() {
-  cleanupCallbacks.forEach((callback) => callback())
+  cleanupCallbacks.forEach(callback => callback())
   cleanupCallbacks = []
 }
 
-function playPortalAwakenSfx(options: { unlockEvent?: Event } = {}) {
+function isDirectAudioIntent(event?: Event): boolean {
+  return (
+    event?.type === 'click' ||
+    event?.type === 'pointerdown' ||
+    event?.type === 'keydown' ||
+    event?.type === 'touchstart'
+  )
+}
+
+function playPortalAwakenSfx(options: { unlockFromGesture?: boolean } = {}) {
   if (awakenSfxPlayed || typeof window === 'undefined') return
 
   awakenSfxPlayed = true
-  if (options.unlockEvent) {
-    void siteSfxManager.unlockFromGesture(options.unlockEvent).then((unlocked) => {
+  if (options.unlockFromGesture) {
+    void siteSfxManager.unlockFromGesture().then(unlocked => {
       if (unlocked) siteSfxManager.play('portal-awaken')
     })
     return
@@ -37,10 +46,43 @@ function playPortalAwakenSfx(options: { unlockEvent?: Event } = {}) {
   siteSfxManager.playIfUnlocked('portal-awaken')
 }
 
-async function loadEnvironment(options: { unlockEvent?: Event } = {}) {
+function getDeviceLoadingHints() {
+  const nav = navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string }
+    deviceMemory?: number
+  }
+
+  return {
+    connection: nav.connection,
+    deviceMemory: nav.deviceMemory,
+  }
+}
+
+function isCompactViewport() {
+  return window.innerWidth <= 760 || window.innerHeight <= 640
+}
+
+function shouldAutoloadEnvironment() {
+  const { connection, deviceMemory } = getDeviceLoadingHints()
+  const effectiveType = connection?.effectiveType ?? ''
+
+  return !(
+    isCompactViewport() ||
+    connection?.saveData === true ||
+    /(^|-)2g$/.test(effectiveType) ||
+    effectiveType === '3g' ||
+    (typeof deviceMemory === 'number' && deviceMemory <= 4)
+  )
+}
+
+function shouldLoadFromPointerIntent() {
+  return !isCompactViewport()
+}
+
+async function loadEnvironment(options: { unlockFromGesture?: boolean } = {}) {
   if (loadStarted) return
   loadStarted = true
-  playPortalAwakenSfx({ unlockEvent: options.unlockEvent })
+  playPortalAwakenSfx({ unlockFromGesture: options.unlockFromGesture })
   cleanupAll()
 
   try {
@@ -56,16 +98,29 @@ function waitForIntent() {
   const controller = new AbortController()
   const { signal } = controller
   const start = (event?: Event) => {
-    void loadEnvironment({ unlockEvent: event })
+    void loadEnvironment({ unlockFromGesture: isDirectAudioIntent(event) })
+  }
+  const startFromPointerIntent = (event?: Event) => {
+    if (!shouldLoadFromPointerIntent()) return
+    start(event)
   }
 
   window.addEventListener('merkin:portal-advance', start, { signal })
   window.addEventListener('click', start, { signal })
-  window.addEventListener('pointerdown', start, { signal, passive: true })
+  window.addEventListener('pointerdown', startFromPointerIntent, {
+    signal,
+    passive: true,
+  })
   window.addEventListener('keydown', start, { signal })
-  window.addEventListener('touchstart', start, { signal, passive: true })
+  window.addEventListener('touchstart', startFromPointerIntent, {
+    signal,
+    passive: true,
+  })
   window.addEventListener('wheel', start, { signal, passive: true })
-  window.addEventListener('touchmove', start, { signal, passive: true })
+  window.addEventListener('touchmove', startFromPointerIntent, {
+    signal,
+    passive: true,
+  })
   window.addEventListener(
     'scroll',
     () => {
@@ -122,9 +177,15 @@ function scheduleLoadingWindow() {
 }
 
 onMount(() => {
-  scheduleLoadingWindow()
+  const shouldAutoload = shouldAutoloadEnvironment()
+
+  if (shouldAutoload) {
+    scheduleLoadingWindow()
+  }
   waitForIntent()
-  scheduleAutoload()
+  if (shouldAutoload) {
+    scheduleAutoload()
+  }
 })
 
 onDestroy(() => {

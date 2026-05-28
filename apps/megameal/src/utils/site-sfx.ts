@@ -5,22 +5,9 @@ import {
   siteAudioConfig,
   siteSfxProfile,
 } from '../config/audio'
-import {
-  canAttemptSiteAudioUnlock,
-  markSiteAudioUnlocked,
-} from './site-audio-activation'
-import {
-  canUnlockWithoutHowlerContext,
-  ensureHowlerAudioContext,
-} from './site-howler-context'
+import { markSiteAudioUnlocked } from './site-audio-activation'
 
 export type SiteSfxId = AudioSfxId
-
-declare global {
-  interface Window {
-    playSiteSfx?: (id: SiteSfxId) => void
-  }
-}
 
 const sfxConfigMap: Record<SiteSfxId, AudioSfxConfig> = siteSfxProfile
 
@@ -35,9 +22,6 @@ class SiteSfxManager {
 
     this.initialized = true
     Howler.autoUnlock = true
-    window.playSiteSfx = (id: SiteSfxId) => {
-      this.play(id)
-    }
   }
 
   hasUnlockedAudio(): boolean {
@@ -49,18 +33,26 @@ class SiteSfxManager {
     return true
   }
 
-  async unlockFromGesture(event?: Event): Promise<boolean> {
+  async unlockFromGesture(): Promise<boolean> {
     if (typeof window === 'undefined') return false
 
     try {
-      if (this.hasUnlockedAudio()) return true
-      if (!canAttemptSiteAudioUnlock(event)) return false
+      // Call this only from direct activation handlers. Wheel and touchmove
+      // paths should use playIfUnlocked so they never trigger autoplay blocks.
+      const userActivation = (
+        navigator as Navigator & {
+          userActivation?: { isActive?: boolean }
+        }
+      ).userActivation
+      if (!this.hasUnlockedAudio() && userActivation?.isActive === false) {
+        return false
+      }
 
-      const ctx = ensureHowlerAudioContext()
+      const ctx = Howler.ctx
       if (ctx && ctx.state === 'suspended') {
         await ctx.resume()
       }
-      if (ctx ? ctx.state === 'running' : canUnlockWithoutHowlerContext()) {
+      if (ctx ? ctx.state === 'running' : true) {
         this.setAudioUnlocked()
       }
       return this.audioUnlocked
