@@ -101,6 +101,8 @@ const logoFloatPitchAmplitude = 0.038
 const logoFloatYawAmplitude = 0.064
 const logoFloatRollAmplitude = 0.026
 const logoFloatScaleAmplitude = 0.012
+const fullLogoAtlasSrc = '/assets/sprites/sprite-rest-atlas.webp'
+const leanLogoAtlasSrc = '/assets/sprites/sprite-rest-atlas-lean.webp'
 let activeBannerSyncKey = ''
 let effectWheel = 0
 let activeScreenIndex = primaryScreenIndex
@@ -148,6 +150,7 @@ $: emblemBaseY = portraitMobile ? 0.08 : -0.04
 $: logoIntroStartPosition = portraitMobile
   ? ([0, 0.2, 2.65] as [number, number, number])
   : ([0, 0.08, 1.9] as [number, number, number])
+$: logoAtlasSrc = sceneQuality === 'lean' ? leanLogoAtlasSrc : fullLogoAtlasSrc
 $: particleLimit =
   sceneQuality === 'lean'
     ? portraitMobile
@@ -888,7 +891,7 @@ useTask(delta => {
 	<T.Group>
 		<HomeIntroLogoModel
 			{sceneQuality}
-			animatedAtlasSrc="/assets/sprites/sprite-rest-atlas.webp"
+			animatedAtlasSrc={logoAtlasSrc}
 			animatedAtlasColumns={6}
 			animatedAtlasRows={4}
 			animatedAtlasFrames={23}

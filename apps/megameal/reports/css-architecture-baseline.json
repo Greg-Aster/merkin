@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-27",
+  "command": "pnpm --dir apps/megameal audit:css",
+  "description": "Known CSS/frontend architecture debt. Strict audits may pass with these entries, but new entries or measured growth beyond maxValue should fail.",
+  "thresholds": {
+    "styleBlockWarnLines": 80,
+    "styleBlockErrorLines": 140,
+    "componentWarnLines": 450,
+    "componentErrorLines": 750,
+    "cssWarnLines": 500,
+    "cssErrorLines": 900
+  },
+  "policy": [
+    "Do not add entries to this baseline to approve new CSS fragmentation without explicit user approval.",
+    "When cleanup reduces or removes one of these entries, update the baseline downward in the same change.",
+    "Existing oversized components may be touched for bug fixes, but their nonblank line count should not increase."
+  ],
+  "issues": [
+    {
+      "rule": "oversized-component",
+      "file": "src/components/archive/ArchiveStoryMap.astro",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 485
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/bleepy/Bleepy.astro",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 550
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/client/Profile.svelte",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 507
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/home/HomeIntroEnvironment.svelte",
+      "line": 1,
+      "severity": "error",
+      "metric": "nonblank-lines",
+      "maxValue": 800
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/home/HomeIntroEnvironmentScene.svelte",
+      "line": 1,
+      "severity": "error",
+      "metric": "nonblank-lines",
+      "maxValue": 824
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/home/HomeIntroScreenPanel.svelte",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 498
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/svelte/admin/AdminConfigPanel.svelte",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 735
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/svelte/admin/config-tabs/CommunityConfigTab.svelte",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 748
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/svelte/admin/config-tabs/ProfileConfigTab.svelte",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 546
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/svelte/admin/config-tabs/appearance/BannerSettings.svelte",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 729
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/timeline/TimelinePortalCarousel.svelte",
+      "line": 1,
+      "severity": "error",
+      "metric": "nonblank-lines",
+      "maxValue": 894
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/timeline/TimelinePortalCarouselScene.svelte",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 626
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/components/widget/FactsWidget.astro",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 647
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/pages/store/[slug].astro",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 491
+    },
+    {
+      "rule": "oversized-component",
+      "file": "src/pages/store.astro",
+      "line": 1,
+      "severity": "warn",
+      "metric": "nonblank-lines",
+      "maxValue": 477
+    }
+  ]
+}

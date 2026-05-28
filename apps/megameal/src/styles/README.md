@@ -14,3 +14,5 @@ Use this folder for styles that are shared beyond a single component:
 Keep styles inside `.astro` or `.svelte` files when they are tightly scoped to that component and are not reused elsewhere. If the same visual pattern appears in multiple files, promote it to `foundation/` or a feature-level CSS file and reuse a named class.
 
 Tailwind is still active in this app. Prefer Tailwind utilities for simple spacing, layout, typography, and responsive rules; prefer shared CSS classes for repeated visual systems like cards, panels, buttons, banners, and interaction states.
+
+Before adding a new CSS surface, follow the reuse gate in `../../docs/frontend-architecture-guardrails.md` and verify that `reports/css-architecture-baseline.json` is not being expanded to hide new debt.

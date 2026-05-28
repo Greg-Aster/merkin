@@ -8,6 +8,7 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const appRoot = path.resolve(scriptDir, '..')
 const repoRoot = path.resolve(appRoot, '..', '..')
 const srcRoot = path.join(appRoot, 'src')
+const baselinePath = path.join(appRoot, 'reports/css-architecture-baseline.json')
 
 const args = new Set(process.argv.slice(2))
 const scanAll = args.has('--all') || !args.has('--changed')
@@ -101,14 +102,63 @@ function lineNumberAt(text, index) {
   return text.slice(0, index).split(/\r?\n/).length
 }
 
-function addIssue(issues, severity, rule, file, message, line = 1) {
+function addIssue(issues, severity, rule, file, message, line = 1, metadata = {}) {
   issues.push({
     severity,
     rule,
     file: relativeToApp(file),
     line,
     message,
+    ...metadata,
   })
+}
+
+function getIssueKey(issue) {
+  return `${issue.rule}:${issue.file}:${issue.line}`
+}
+
+function readBaseline() {
+  if (!existsSync(baselinePath)) return null
+
+  const rawBaseline = JSON.parse(readFileSync(baselinePath, 'utf8'))
+  const issues = Array.isArray(rawBaseline.issues) ? rawBaseline.issues : []
+
+  return {
+    ...rawBaseline,
+    issuesByKey: new Map(issues.map(issue => [getIssueKey(issue), issue])),
+  }
+}
+
+function classifyIssueAgainstBaseline(issue, baseline) {
+  if (!baseline) return { state: 'untracked' }
+
+  const baselineIssue = baseline.issuesByKey.get(getIssueKey(issue))
+  if (!baselineIssue) return { state: 'new' }
+
+  if (
+    typeof issue.value === 'number' &&
+    typeof baselineIssue.maxValue === 'number' &&
+    issue.value > baselineIssue.maxValue
+  ) {
+    return { state: 'expanded', baselineIssue }
+  }
+
+  if (
+    typeof issue.value !== 'number' &&
+    baselineIssue.message &&
+    baselineIssue.message !== issue.message
+  ) {
+    return { state: 'changed', baselineIssue }
+  }
+
+  return { state: 'baseline', baselineIssue }
+}
+
+function annotateIssuesWithBaseline(issues, baseline) {
+  return issues.map(issue => ({
+    ...issue,
+    baseline: classifyIssueAgainstBaseline(issue, baseline),
+  }))
 }
 
 function collectImports(files) {
@@ -155,6 +205,7 @@ function auditStyleBlocks(file, text, issues) {
         file,
         `<style> block has ${lines} nonblank lines. Move shared CSS to src/styles or keep only tightly scoped component behavior.`,
         line,
+        { metric: 'nonblank-lines', value: lines },
       )
     } else if (lines >= STYLE_BLOCK_WARN_LINES) {
       addIssue(
@@ -164,6 +215,7 @@ function auditStyleBlocks(file, text, issues) {
         file,
         `<style> block has ${lines} nonblank lines. Consider extracting reusable styles.`,
         line,
+        { metric: 'nonblank-lines', value: lines },
       )
     }
   }
@@ -180,6 +232,8 @@ function auditComponentSize(file, text, issues) {
       'oversized-component',
       file,
       `Component has ${lines} nonblank lines. Split structure, behavior, or styles before adding more.`,
+      1,
+      { metric: 'nonblank-lines', value: lines },
     )
   } else if (lines >= COMPONENT_WARN_LINES) {
     addIssue(
@@ -188,6 +242,8 @@ function auditComponentSize(file, text, issues) {
       'oversized-component',
       file,
       `Component has ${lines} nonblank lines. Treat new additions carefully.`,
+      1,
+      { metric: 'nonblank-lines', value: lines },
     )
   }
 }
@@ -237,6 +293,8 @@ function auditCssFile(file, text, importedCss, issues) {
       'oversized-css-file',
       file,
       `CSS file has ${lines} nonblank lines. Split by layout or feature before adding more.`,
+      1,
+      { metric: 'nonblank-lines', value: lines },
     )
   } else if (lines >= CSS_WARN_LINES) {
     addIssue(
@@ -245,6 +303,8 @@ function auditCssFile(file, text, importedCss, issues) {
       'oversized-css-file',
       file,
       `CSS file has ${lines} nonblank lines. Consider splitting by layout or feature.`,
+      1,
+      { metric: 'nonblank-lines', value: lines },
     )
   }
 }
@@ -281,15 +341,35 @@ function auditDuplicateCss(cssFiles, issues) {
   }
 }
 
-function formatIssues(issues, modeLabel) {
+function formatBaselineState(issue) {
+  const state = issue.baseline?.state
+  if (state === 'baseline') return 'baseline'
+  if (state === 'expanded') {
+    const maxValue = issue.baseline?.baselineIssue?.maxValue
+    return `expanded beyond baseline${maxValue ? ` max ${maxValue}` : ''}`
+  }
+  if (state === 'new') return 'new debt'
+  if (state === 'changed') return 'changed from baseline'
+  return null
+}
+
+function formatIssues(issues, modeLabel, baselineSummary = null) {
   if (issues.length === 0) {
-    return `CSS architecture audit passed (${modeLabel}).`
+    const baselineText = baselineSummary
+      ? ` Baseline: ${baselineSummary.baselineCount} existing, ${baselineSummary.newCount} new.`
+      : ''
+    return `CSS architecture audit passed (${modeLabel}).${baselineText}`
   }
 
-  const lines = [`CSS architecture audit found ${issues.length} item(s) (${modeLabel}):`]
+  const countText = baselineSummary
+    ? `; ${baselineSummary.baselineCount} baseline, ${baselineSummary.newCount} new`
+    : ''
+  const lines = [`CSS architecture audit found ${issues.length} item(s) (${modeLabel}${countText}):`]
   for (const issue of issues) {
+    const baselineState = formatBaselineState(issue)
+    const baselineText = baselineState ? ` [${baselineState}]` : ''
     lines.push(
-      `- ${issue.severity.toUpperCase()} ${issue.rule}: ${issue.file}:${issue.line} - ${issue.message}`,
+      `- ${issue.severity.toUpperCase()} ${issue.rule}: ${issue.file}:${issue.line} - ${issue.message}${baselineText}`,
     )
   }
   return lines.join('\n')
@@ -318,12 +398,25 @@ for (const file of filesToAudit) {
   }
 }
 
-if (scanAll) {
+if (scanAll || strict) {
   auditDuplicateCss(
     allFiles.filter(file => cssExtensions.has(path.extname(file))),
     issues,
   )
 }
+
+const baseline = readBaseline()
+const annotatedIssues = annotateIssuesWithBaseline(issues, baseline)
+const newBaselineIssues = baseline
+  ? annotatedIssues.filter(issue => issue.baseline.state !== 'baseline')
+  : []
+const baselineSummary = baseline
+  ? {
+      path: relativeToApp(baselinePath),
+      baselineCount: annotatedIssues.length - newBaselineIssues.length,
+      newCount: newBaselineIssues.length,
+    }
+  : null
 
 const modeLabel = scanChanged
   ? changedScanUnavailable
@@ -334,15 +427,23 @@ const modeLabel = scanChanged
 if (json) {
   console.log(
     JSON.stringify(
-      { mode: modeLabel, changedScanUnavailable, issues },
+      {
+        mode: modeLabel,
+        changedScanUnavailable,
+        baseline: baselineSummary,
+        issues: annotatedIssues,
+        newIssues: newBaselineIssues,
+      },
       null,
       2,
     ),
   )
 } else {
-  console.log(formatIssues(issues, modeLabel))
+  console.log(formatIssues(annotatedIssues, modeLabel, baselineSummary))
 }
 
-if (strict && issues.some(issue => issue.severity === 'error')) {
+if (strict && baseline && newBaselineIssues.length > 0) {
+  process.exitCode = 1
+} else if (strict && !baseline && issues.some(issue => issue.severity === 'error')) {
   process.exitCode = 1
 }

@@ -305,7 +305,7 @@ function syncAtlasFrame(frame: number) {
     column / animatedAtlasColumns,
     1 - (row + 1) / animatedAtlasRows,
   )
-  atlasTexture.needsUpdate = true
+  atlasTexture.updateMatrix()
   activeAtlasFrame = clampedFrame
 }
 

@@ -14,7 +14,7 @@ type ScreenInfoTickerOptions = ScreenTextTextureOptions & {
 }
 
 const retroComputerTextOpacity = 0.74
-const retroComputerTextScale = 1.5
+const retroComputerTextScale = 2
 
 const retroComputerGlyphs: Record<string, readonly string[]> = {
   ' ': ['000', '000', '000', '000', '000', '000', '000'],

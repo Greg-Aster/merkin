@@ -73,4 +73,4 @@ Targets:
 - Make `audit:css:strict` usable in normal agent handoffs once the existing baseline is reduced.
 - Require agents to explain any new CSS surface area.
 
-Status: active. `audit:css` and `audit:css:changed` run; changed-file mode falls back to the full audit when the sandbox blocks Git child-process access. Remaining audit items are component-size debt and Bleepy component-local sidecar CSS, not large style blocks or oversized CSS files.
+Status: active. `audit:css` and `audit:css:changed` run; changed-file mode falls back to the full audit when the sandbox blocks Git child-process access. `apps/megameal/reports/css-architecture-baseline.json` now records current component-size debt so `audit:css:strict` can block new or expanded issues without requiring an all-at-once cleanup.

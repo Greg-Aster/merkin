@@ -23,6 +23,8 @@ Before adding CSS:
 4. Add feature CSS under `src/styles/` if multiple files need the same visual system.
 5. Add component-scoped CSS only when the style is local and unlikely to be reused.
 
+Read `docs/frontend-architecture-guardrails.md` before frontend/style work. Treat it as the local reuse contract for component and CSS ownership.
+
 ## Avoid
 
 - New large `<style>` blocks in pages.
@@ -30,6 +32,8 @@ Before adding CSS:
 - Adding standalone CSS files outside `src/styles/` unless they are imported sidecars for a specific component and cannot reasonably be shared.
 - Inline `style` attributes for reusable visuals.
 - New global selectors from a component file.
+- Growing files listed in `reports/css-architecture-baseline.json` without reducing or extracting another responsibility in the same owner area.
+- Updating the CSS architecture baseline to accept new debt unless the user explicitly approves that tradeoff.
 
 ## Required Checks
 
@@ -51,6 +55,12 @@ For CSS-heavy work, include changed-file audit output or a summary:
 pnpm --dir apps/megameal audit:css:changed
 ```
 
+For changes that add CSS, new components, or new frontend ownership surfaces, also run the baseline gate:
+
+```bash
+pnpm --dir apps/megameal audit:css:strict
+```
+
 ## Handoff Notes
 
 Every agent handoff for frontend/style work must state:
@@ -58,4 +68,6 @@ Every agent handoff for frontend/style work must state:
 - Whether new CSS was added.
 - Where the CSS lives.
 - Why it was not implemented with existing utilities/classes/components.
+- Which existing components/classes/style files were inspected before adding CSS.
 - Whether `type-check` and the CSS audit were run.
+- Whether `audit:css:strict` passed or any remaining items are pre-existing baseline debt.
