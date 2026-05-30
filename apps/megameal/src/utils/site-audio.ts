@@ -56,6 +56,11 @@ type VideoAnalyticsWindow = Window & {
     params: Record<string, string>,
   ) => void
 }
+type NavigatorWithUserActivation = Navigator & {
+  userActivation?: {
+    isActive?: boolean
+  }
+}
 
 export function resolvePageAmbientTrackConfig(
   payloadText: string | null | undefined,
@@ -135,7 +140,9 @@ class SiteAudioManager {
     this.masterVolume = this.readStoredMasterVolume()
     this.ambienceVolume = this.readStoredAmbienceVolume()
     this.sfxVolume = this.readStoredSfxVolume()
-    Howler.autoUnlock = true
+    // The app owns audio activation so WebAudio resume attempts stay behind
+    // known gesture gates instead of Howler also trying from scroll/touch fallbacks.
+    Howler.autoUnlock = false
     Howler.autoSuspend = false
     Howler.html5PoolSize = 12
 
@@ -439,6 +446,12 @@ class SiteAudioManager {
     }
 
     try {
+      const userActivation = (navigator as NavigatorWithUserActivation)
+        .userActivation
+      if (userActivation?.isActive === false) {
+        return false
+      }
+
       const ctx = Howler.ctx
       if (ctx && ctx.state === 'suspended') {
         await ctx.resume()

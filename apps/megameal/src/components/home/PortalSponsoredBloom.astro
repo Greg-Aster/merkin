@@ -1,26 +1,35 @@
 ---
+import type { TimelineFact } from '../../config/timelineFacts'
 import {
   megaMealUniverseFacts,
+  privacyNoticeTimelineFact,
   resolveTimelineFactHref,
 } from '../../config/timelineFacts'
 import '../../styles/features/facts-widget/core.css'
 import '../../styles/features/home/portal-sponsored-bloom.css'
 
+const toSponsoredFact = (fact: TimelineFact, id: string) => ({
+  id,
+  eyebrow: fact.eyebrow ?? 'Sponsored Placement',
+  headline: fact.headline ?? 'Sponsored Message',
+  text: fact.text,
+  ctaText: fact.ctaText ?? 'Comply',
+  href: resolveTimelineFactHref(fact) ?? '/posts/explainer/',
+  sponsor: fact.sponsor ?? 'Consumer Satisfaction Bureau',
+  finePrint: fact.finePrint ?? '',
+  theme: fact.theme ?? 'default',
+  image: fact.image ?? '',
+  video: fact.video ?? '',
+  cookieActions: fact.cookieActions ?? [],
+})
+
+const privacyNoticeFact = toSponsoredFact(
+  privacyNoticeTimelineFact,
+  'privacy-notice',
+)
 const sponsoredFacts = megaMealUniverseFacts
   .filter(fact => fact.type === 'advertisement')
-  .map((fact, index) => ({
-    id: `sponsored-${index}`,
-    eyebrow: fact.eyebrow ?? 'Sponsored Placement',
-    headline: fact.headline ?? 'Sponsored Message',
-    text: fact.text,
-    ctaText: fact.ctaText ?? 'Comply',
-    href: resolveTimelineFactHref(fact) ?? '/posts/explainer/',
-    sponsor: fact.sponsor ?? 'Consumer Satisfaction Bureau',
-    finePrint: fact.finePrint ?? '',
-    theme: fact.theme ?? 'default',
-    image: fact.image ?? '',
-    video: fact.video ?? '',
-  }))
+  .map((fact, index) => toSponsoredFact(fact, `sponsored-${index}`))
 
 const bloomId = `portal-sponsored-bloom-${Math.random().toString(36).slice(2, 10)}`
 ---
@@ -36,7 +45,7 @@ const bloomId = `portal-sponsored-bloom-${Math.random().toString(36).slice(2, 10
   <div class="portal-sponsored-bloom__stage" data-bloom-stage></div>
 </section>
 
-<script is:inline define:vars={{ bloomId, sponsoredFacts }}>
+<script is:inline define:vars={{ bloomId, privacyNoticeFact, sponsoredFacts }}>
   ;(() => {
     const cleanupKey = '__megamealPortalSponsoredBloomCleanup'
     window[cleanupKey]?.()
@@ -64,6 +73,9 @@ const bloomId = `portal-sponsored-bloom-${Math.random().toString(36).slice(2, 10
     const prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)',
     )
+    const initialSpawnDelayMs = 5000
+    const minSpawnDelayMs = 8000
+    const maxSpawnDelayMs = 12000
     let stopped = false
     let started = false
     let completed = false
@@ -72,7 +84,7 @@ const bloomId = `portal-sponsored-bloom-${Math.random().toString(36).slice(2, 10
     let nextFactIndex = 0
     let pointerStart = null
     let shuffledFacts = []
-    let placementZones = []
+    let placementHistory = []
 
     const randomUnit = () => {
       if (window.crypto?.getRandomValues) {
@@ -147,6 +159,9 @@ const bloomId = `portal-sponsored-bloom-${Math.random().toString(36).slice(2, 10
       const hasMedia = Boolean(fact.image || fact.video)
       card.className = 'portal-sponsored-bloom__card facts-widget-container facts-widget-portal'
       card.dataset.factTheme = fact.theme || 'default'
+      card.dataset.factRole = fact.cookieActions?.length
+        ? 'privacy-notice'
+        : 'standard'
       card.dataset.expanded = 'true'
       card.dataset.bloomDensity =
         options.primary || hasMedia || randomUnit() > 0.34
@@ -210,6 +225,23 @@ const bloomId = `portal-sponsored-bloom-${Math.random().toString(36).slice(2, 10
       link.dataset.sfxHover = 'hover-soft'
       actionRow.append(link)
 
+      if (fact.cookieActions?.length) {
+        link.hidden = true
+        const cookieActions = document.createElement('div')
+        cookieActions.className = 'facts-widget-cookie-actions'
+        fact.cookieActions.forEach((label, index) => {
+          const button = document.createElement('button')
+          button.type = 'button'
+          button.className = 'facts-widget-cookie-choice'
+          button.textContent = label
+          button.tabIndex = -1
+          button.dataset.factCookieChoice = String(index)
+          button.dataset.sfxClick = 'sweep'
+          cookieActions.append(button)
+        })
+        actionRow.append(cookieActions)
+      }
+
       const finePrint = createText('p', 'facts-widget-fineprint', fact.finePrint)
       if (!fact.finePrint) finePrint.classList.add('is-hidden')
 
@@ -241,41 +273,102 @@ const bloomId = `portal-sponsored-bloom-${Math.random().toString(36).slice(2, 10
       return card
     }
 
-    const createPlacementZones = () => {
-      const compact = window.matchMedia('(max-width: 640px)').matches
-      const zones = compact
-        ? [
-            { x: [4, 8], y: [7, 13], width: [9.75, 12] },
-            { x: [48, 58], y: [9, 17], width: [9.75, 12.5] },
-            { x: [8, 16], y: [28, 39], width: [10, 13] },
-            { x: [40, 52], y: [35, 47], width: [10, 13.5] },
-            { x: [4, 12], y: [53, 64], width: [9.75, 12.25] },
-            { x: [45, 55], y: [62, 73], width: [9.75, 12.5] },
-            { x: [18, 30], y: [74, 84], width: [10, 13] },
-          ]
-        : [
-            { x: [3, 10], y: [8, 16], width: [12, 16] },
-            { x: [27, 39], y: [6, 14], width: [13, 18] },
-            { x: [61, 74], y: [8, 18], width: [12, 17] },
-            { x: [5, 14], y: [29, 43], width: [13, 19] },
-            { x: [34, 47], y: [27, 41], width: [14, 21] },
-            { x: [68, 80], y: [30, 45], width: [12, 18] },
-            { x: [3, 13], y: [56, 71], width: [11, 16] },
-            { x: [29, 43], y: [58, 75], width: [13, 20] },
-            { x: [57, 70], y: [55, 71], width: [12, 18] },
-            { x: [42, 54], y: [72, 83], width: [12, 17] },
-          ]
+    const rememberPlacement = placement => {
+      placementHistory.push(placement)
+      if (placementHistory.length > 18) {
+        placementHistory.shift()
+      }
+    }
 
-      return shuffle(zones)
+    const rememberPrimaryPlacement = () => {
+      const rootFontSize =
+        Number.parseFloat(
+          window.getComputedStyle(document.documentElement).fontSize,
+        ) || 16
+      const viewportWidth = Math.max(window.innerWidth, 320)
+      const viewportHeight = Math.max(window.innerHeight, 420)
+      const compact = window.matchMedia('(max-width: 640px)').matches
+      const widthPx = compact
+        ? viewportWidth - rootFontSize * 1.1
+        : Math.min(14.25 * rootFontSize, viewportWidth - rootFontSize)
+      const heightPx = Math.min(
+        compact ? 8.2 * rootFontSize : 25 * rootFontSize,
+        viewportHeight * 0.58,
+      )
+      const right = compact
+        ? rootFontSize * 0.55
+        : clamp(viewportWidth * 0.03, rootFontSize * 0.9, rootFontSize * 2)
+      const bottom = rootFontSize * 0.9
+
+      rememberPlacement({
+        centerX: viewportWidth - right - widthPx / 2,
+        centerY: viewportHeight - bottom - heightPx / 2,
+        radius: Math.hypot(widthPx, heightPx) * 0.34,
+      })
+    }
+
+    const scorePlacementCandidate = candidate => {
+      if (placementHistory.length === 0) return randomUnit()
+
+      const nearestClearance = Math.min(
+        ...placementHistory.map(placement => {
+          const distance = Math.hypot(
+            candidate.centerX - placement.centerX,
+            candidate.centerY - placement.centerY,
+          )
+          return distance / Math.max(1, candidate.radius + placement.radius)
+        }),
+      )
+      const centerBias =
+        Math.abs(candidate.centerX / candidate.viewportWidth - 0.5) +
+        Math.abs(candidate.centerY / candidate.viewportHeight - 0.5)
+      const bottomRightPenalty =
+        candidate.centerX > candidate.viewportWidth * 0.68 &&
+        candidate.centerY > candidate.viewportHeight * 0.55
+          ? 0.55
+          : 0
+
+      return nearestClearance + centerBias * 0.18 + randomUnit() * 0.42 - bottomRightPenalty
+    }
+
+    const createPlacementCandidate = (order, metrics) => {
+      const cycle = Math.floor(order / 8)
+      const widthMin = metrics.compact ? 9.75 : 11.5
+      const widthMax = metrics.compact ? 14.5 : 22.5
+      const widthRem = Math.min(
+        metrics.maxWidthRem,
+        randomBetween(widthMin, widthMax) * Math.max(0.82, 1 - cycle * 0.035),
+      )
+      const widthPx = widthRem * metrics.rootFontSize
+      const estimatedHeightPx =
+        widthPx * (metrics.compact ? randomBetween(0.72, 0.92) : randomBetween(0.62, 0.78))
+      const maxLeftPx = Math.max(
+        metrics.margin,
+        metrics.viewportWidth - widthPx - metrics.margin,
+      )
+      const maxTopPx = Math.max(
+        metrics.margin,
+        metrics.viewportHeight - estimatedHeightPx - metrics.margin,
+      )
+      const leftPx = randomBetween(metrics.margin, maxLeftPx)
+      const topPx = randomBetween(metrics.margin, maxTopPx)
+
+      return {
+        leftPx,
+        topPx,
+        widthRem,
+        widthPx,
+        estimatedHeightPx,
+        centerX: leftPx + widthPx / 2,
+        centerY: topPx + estimatedHeightPx / 2,
+        radius: Math.hypot(widthPx, estimatedHeightPx) * 0.34,
+        viewportWidth: metrics.viewportWidth,
+        viewportHeight: metrics.viewportHeight,
+      }
     }
 
     const createPlacement = order => {
-      if (placementZones.length === 0) {
-        placementZones = createPlacementZones()
-      }
-
-      const zone = placementZones[order % placementZones.length]
-      const cycle = Math.floor(order / placementZones.length)
+      const compact = window.matchMedia('(max-width: 640px)').matches
       const rootFontSize =
         Number.parseFloat(
           window.getComputedStyle(document.documentElement).fontSize,
@@ -284,28 +377,32 @@ const bloomId = `portal-sponsored-bloom-${Math.random().toString(36).slice(2, 10
       const viewportHeight = Math.max(window.innerHeight, 420)
       const margin = rootFontSize * 0.55
       const maxWidthRem = Math.max(8.5, (viewportWidth - margin * 2) / rootFontSize)
-      const widthRem = Math.min(
+      const metrics = {
+        compact,
+        rootFontSize,
+        viewportWidth,
+        viewportHeight,
+        margin,
         maxWidthRem,
-        randomBetween(zone.width[0], zone.width[1]) *
-          Math.max(0.82, 1 - cycle * 0.035),
+      }
+      const candidateCount = compact ? 12 : 22
+      const candidates = Array.from({ length: candidateCount }, () =>
+        createPlacementCandidate(order, metrics),
       )
-      const widthPx = widthRem * rootFontSize
-      const estimatedHeightPx = widthPx * (viewportWidth < 640 ? 0.82 : 0.72)
-      const leftPx = clamp(
-        (randomBetween(zone.x[0], zone.x[1]) / 100) * viewportWidth,
-        margin,
-        viewportWidth - widthPx - margin,
-      )
-      const topPx = clamp(
-        (randomBetween(zone.y[0], zone.y[1]) / 100) * viewportHeight,
-        margin,
-        viewportHeight - estimatedHeightPx - margin,
-      )
+      const placement = candidates
+        .map(candidate => ({
+          candidate,
+          score: scorePlacementCandidate(candidate),
+        }))
+        .reduce((best, entry) => (entry.score > best.score ? entry : best))
+        .candidate
+
+      rememberPlacement(placement)
 
       return {
-        left: (leftPx / viewportWidth) * 100,
-        top: (topPx / viewportHeight) * 100,
-        widthRem,
+        left: (placement.leftPx / viewportWidth) * 100,
+        top: (placement.topPx / viewportHeight) * 100,
+        widthRem: placement.widthRem,
         rotate: randomBetween(-4.8, 4.8),
       }
     }
@@ -336,7 +433,9 @@ const bloomId = `portal-sponsored-bloom-${Math.random().toString(36).slice(2, 10
       clearSpawnTimer()
     }
 
-    const scheduleNextSpawn = (delay = randomBetween(4200, 7000)) => {
+    const scheduleNextSpawn = (
+      delay = randomBetween(minSpawnDelayMs, maxSpawnDelayMs),
+    ) => {
       clearSpawnTimer()
       if (stopped || completed) return
       if (nextFactIndex >= shuffledFacts.length) {
@@ -356,8 +455,8 @@ const bloomId = `portal-sponsored-bloom-${Math.random().toString(36).slice(2, 10
         stage.append(card)
         scheduleNextSpawn(
           prefersReducedMotion.matches
-            ? randomBetween(6200, 8200)
-            : randomBetween(2800, 5600),
+            ? maxSpawnDelayMs
+            : randomBetween(minSpawnDelayMs, maxSpawnDelayMs),
         )
       }, delay)
     }
@@ -375,23 +474,33 @@ const bloomId = `portal-sponsored-bloom-${Math.random().toString(36).slice(2, 10
       }
 
       shuffledFacts = shuffle(facts)
-      placementZones = createPlacementZones()
-      const firstFact = shuffledFacts[0]
+      placementHistory = []
+      const firstFact = privacyNoticeFact || shuffledFacts[0]
       if (!firstFact) {
         stopBloom()
         return
       }
 
       started = true
-      nextFactIndex = 1
+      nextFactIndex = privacyNoticeFact ? 0 : 1
       root.dataset.state = 'active'
-      stage.append(
-        createCard(firstFact, {
-          primary: true,
-          order: 0,
-        }),
-      )
-      scheduleNextSpawn(prefersReducedMotion.matches ? 7600 : 5200)
+      spawnTimeout = window.setTimeout(() => {
+        spawnTimeout = 0
+        if (stopped) return
+
+        stage.append(
+          createCard(firstFact, {
+            primary: true,
+            order: 0,
+          }),
+        )
+        rememberPrimaryPlacement()
+        scheduleNextSpawn(
+          prefersReducedMotion.matches
+            ? maxSpawnDelayMs
+            : randomBetween(minSpawnDelayMs, maxSpawnDelayMs),
+        )
+      }, initialSpawnDelayMs)
     }
 
     function stopBloom() {

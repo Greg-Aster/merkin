@@ -2,6 +2,7 @@
 import type { TimelineFact } from '../../config/timelineFacts'
 import {
   megaMealUniverseFacts,
+  privacyNoticeTimelineFact,
   resolveTimelineFactHref,
 } from '../../config/timelineFacts'
 
@@ -40,26 +41,10 @@ const filteredFacts = megaMealUniverseFacts.filter(fact =>
   factTypes.includes(fact.type),
 )
 
-const privacyNoticeFact = {
-  type: 'advertisement',
-  eyebrow: 'Cookie Refusal Desk',
-  headline: 'No Cookies. No Personal Data. No Appetite For Either.',
-  text: "This site doesn't use cookies, and we don't care about your personal data. Thank you for choosing MEGAMEAL.",
-  sponsor: 'Privacy Indifference Department',
-  finePrint:
-    'Your refusal has been accepted before you were asked.',
-  theme: 'morale',
-  cookieActions: [
-    'Reject All Cookies',
-    'Reject Every Cookie',
-    'Reject Cookies Again',
-  ],
-} as TimelineFact & { cookieActions: string[] }
-
 const shouldShowPrivacyNoticeFirst =
   showPrivacyNoticeFirst && variant === 'overlay'
 const availableFacts = shouldShowPrivacyNoticeFirst
-  ? [privacyNoticeFact, ...filteredFacts]
+  ? [privacyNoticeTimelineFact, ...filteredFacts]
   : filteredFacts
 
 const fallbackFact: TimelineFact = {

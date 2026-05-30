@@ -15,6 +15,7 @@ export interface TimelineFact {
   headlineSizeClass?: string
   fontFamilyClass?: string
   ctaButtonClass?: string
+  cookieActions?: string[]
   image?: string
   video?: string
 }
@@ -31,6 +32,21 @@ export function resolveTimelineFactHref(fact: TimelineFact): string | null {
   if (fact.link.startsWith('/')) return fact.link
   if (specialFactLinks[fact.link]) return specialFactLinks[fact.link]
   return `/posts/${fact.link}/`
+}
+
+export const privacyNoticeTimelineFact: TimelineFact = {
+  type: 'advertisement',
+  eyebrow: 'Cookie Refusal Desk',
+  headline: 'No Cookies. No Personal Data. No Appetite For Either.',
+  text: "This site doesn't use cookies, and we don't care about your personal data. Thank you for choosing MEGAMEAL.",
+  sponsor: 'Privacy Indifference Department',
+  finePrint: 'Your refusal has been accepted before you were asked.',
+  theme: 'morale',
+  cookieActions: [
+    'Reject All Cookies',
+    'Reject Every Cookie',
+    'Reject Cookies Again',
+  ],
 }
 
 export const megaMealUniverseFacts: TimelineFact[] = [

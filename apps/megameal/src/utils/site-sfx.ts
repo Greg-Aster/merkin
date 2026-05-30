@@ -21,7 +21,9 @@ class SiteSfxManager {
     if (this.initialized || typeof window === 'undefined') return
 
     this.initialized = true
-    Howler.autoUnlock = true
+    // SiteAudioControl provides the shared unlock path; SFX should not add a
+    // second Howler auto-unlock layer that can trip autoplay warnings.
+    Howler.autoUnlock = false
   }
 
   hasUnlockedAudio(): boolean {

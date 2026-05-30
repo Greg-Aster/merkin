@@ -17,8 +17,8 @@ const documentActivationEvents = [
 
 const wheelActivationThreshold = 4
 
-// Wheel remains part of the shared activation signal for ambience preference
-// wake-up. SFX wheel handlers must stay playback-only and use playIfUnlocked().
+// Wheel can wake ambience only after the browser has recorded a real user
+// activation. Calling WebAudio resume from wheel alone creates autoplay warnings.
 
 export const siteAudioUnlockedEvent = 'megameal:audio-unlocked'
 
@@ -69,7 +69,7 @@ export function isSiteAudioActivationGesture(event: Event): boolean {
         Math.abs(event.deltaX),
         Math.abs(event.deltaY),
         Math.abs(event.deltaZ),
-      ) >= wheelActivationThreshold
+      ) >= wheelActivationThreshold && hasSiteAudioUserActivation()
     )
   }
 
