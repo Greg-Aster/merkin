@@ -21,8 +21,6 @@ export function buildTimelineManifest(
   const sortedItems = sortTimelineEvents(items)
 
   return {
-    generatedAt: new Date().toISOString(),
-    sourceRoot: postsManifest.sourceRoot,
     count: sortedItems.length,
     items: sortedItems,
   }
@@ -48,8 +46,6 @@ export async function buildTimelineManifestFromContentRoots(
   const sortedItems = sortTimelineEvents(items)
 
   return {
-    generatedAt: new Date().toISOString(),
-    sourceRoot: contentRoots.map(entry => entry.root).join(';'),
     count: sortedItems.length,
     items: sortedItems,
   }

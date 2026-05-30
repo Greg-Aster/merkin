@@ -1,6 +1,4 @@
 {
-  "generatedAt": "2026-05-28T17:55:36.817Z",
-  "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts;/home/greggles/Merkin/apps/megameal/src/content/cookbook;/home/greggles/Merkin/apps/megameal/src/content/videos;/home/greggles/Merkin/apps/megameal/src/content/reader;/home/greggles/Merkin/apps/megameal/src/content/products;/home/greggles/Merkin/apps/megameal/src/content/about",
   "count": 78,
   "items": [
     {
@@ -304,7 +302,7 @@
         "Cosmic Horror"
       ],
       "category": "MEGA MEAL",
-      "image": "/posts/timeline/chronos.png",
+      "image": "/first-contact/aliens.webp",
       "bannerType": "image",
       "bannerData": {
         "category": "MEGA MEAL",
@@ -496,7 +494,7 @@
         "Cosmic Horror"
       ],
       "category": "MEGA MEAL",
-      "image": "/posts/timeline/chronos.png",
+      "image": "/first-contact/forward-wide.webp",
       "bannerType": "image",
       "bannerData": {
         "category": "MEGA MEAL",
@@ -1951,7 +1949,7 @@
       "collection": "about",
       "url": "/about/merkin/",
       "title": "About Merkin Lord of Love and Light",
-      "description": "Learn about Merkin, the ancient god of love and acceptance who serves as curator of the MEGAMEAL Universe after eons of cosmic conflict.",
+      "description": "Learn about Merkin, the ancient god of love and acceptance.",
       "published": "2024-10-15T00:00:00.000Z",
       "updated": "2024-12-20T00:00:00.000Z",
       "draft": false,

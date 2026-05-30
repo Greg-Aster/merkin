@@ -74,7 +74,7 @@ export const navBarConfig: NavBarConfig = {
           url: '/quiz/',
         },
         {
-          name: 'Merkin Gallery',
+          name: 'Merkin',
           url: '/merkin/',
         },
         {

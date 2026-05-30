@@ -18,8 +18,6 @@ export function buildGameStarsManifest(
   )
 
   return {
-    generatedAt: new Date().toISOString(),
-    sourceRoot: timelineManifest.sourceRoot,
     count: items.length,
     items,
   }

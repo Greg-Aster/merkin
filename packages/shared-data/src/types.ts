@@ -1,8 +1,6 @@
 import type { SharedPost, SharedTimelineEvent } from '@merkin/shared-content'
 
 export type SharedManifestMeta = {
-  generatedAt: string
-  sourceRoot: string
   count: number
 }
 

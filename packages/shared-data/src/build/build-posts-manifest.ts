@@ -81,8 +81,6 @@ export async function buildPostsManifest(
   const items = await loadSharedPosts(contentRoot)
 
   return {
-    generatedAt: new Date().toISOString(),
-    sourceRoot: toPosixPath(contentRoot),
     count: items.length,
     items,
   }
@@ -102,8 +100,6 @@ export async function buildArchiveManifestFromContentRoots(
   const items = sortPosts(contentGroups.flat())
 
   return {
-    generatedAt: new Date().toISOString(),
-    sourceRoot: contentRoots.map(entry => toPosixPath(entry.root)).join(';'),
     count: items.length,
     items,
   }
