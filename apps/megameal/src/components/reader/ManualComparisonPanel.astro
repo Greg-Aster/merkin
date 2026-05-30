@@ -1,0 +1,68 @@
+---
+import ManualListGrid from './ManualListGrid.astro'
+import ManualPanel from './ManualPanel.astro'
+
+type Tone =
+  | 'blue'
+  | 'cyan'
+  | 'gray'
+  | 'green'
+  | 'orange'
+  | 'purple'
+  | 'red'
+  | 'teal'
+  | 'yellow'
+type IconStyle = 'soft' | 'solid'
+
+interface Props {
+  tone?: Tone
+  icon: string
+  iconStyle?: IconStyle
+  title: string
+  subtitle: string
+  leftTitle: string
+  leftItems: string[]
+  rightTitle: string
+  rightItems: string[]
+  class?: string
+}
+
+const {
+  tone = 'blue',
+  icon,
+  iconStyle = 'solid',
+  title,
+  subtitle,
+  leftTitle,
+  leftItems,
+  rightTitle,
+  rightItems,
+  class: className = '',
+} = Astro.props
+
+const cards = [
+  {
+    tone,
+    title: leftTitle,
+    items: leftItems,
+  },
+  {
+    tone,
+    title: rightTitle,
+    items: rightItems,
+  },
+]
+const wrapperClass = ['mb-6', className].filter(Boolean).join(' ')
+---
+
+<ManualPanel
+  tone={tone}
+  emphasis="strong"
+  icon={icon}
+  iconStyle={iconStyle}
+  title={title}
+  subtitle={subtitle}
+  class={wrapperClass}
+>
+  <ManualListGrid cards={cards} />
+</ManualPanel>

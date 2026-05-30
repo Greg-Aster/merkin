@@ -28,22 +28,19 @@ contentFormat: "manual"
 lang: ""
 mascotContext: "You've ignored every warning, dismissed every statistic, and somehow found yourself in an active first contact scenario. This chapter contains the emergency protocols that probably won't save you, but will at least ensure your final moments are properly documented for insurance purposes."
 ---
+import ManualChapterHero from '../../../components/reader/ManualChapterHero.astro'
+import ManualChapterIndex from '../../../components/reader/ManualChapterIndex.astro'
+import ManualListGrid from '../../../components/reader/ManualListGrid.astro'
+import ManualNotice from '../../../components/reader/ManualNotice.astro'
+import ManualPanel from '../../../components/reader/ManualPanel.astro'
 
-<div className="bg-gradient-to-br from-black/80 to-red-900/40 border-2 border-red-500/60 rounded-xl p-8 mb-8">
-  <div className="flex items-center gap-4 mb-6">
-    <div className="w-16 h-16 bg-red-500/20 rounded-lg flex items-center justify-center">
-      <span className="text-red-400 text-2xl">🆘</span>
-    </div>
-    <div>
-      <div className="text-3xl font-bold text-red-400">Chapter 5</div>
-      <p className="text-red-300 text-lg">The "All Hope is Lost, You Fool" Protocol</p>
-    </div>
-  </div>
-  
-  <blockquote className="text-red-200 text-lg leading-relaxed">
-    So, you've ignored every meticulously researched warning in this Admonition. You've blundered into a first contact situation despite clear evidence that helpful aliens achieve 77% elimination rates through customer service excellence and hostile aliens maintain 54% elimination rates through military superiority. The multi-colored jello is forming at your feet, or perhaps that nice entity is offering to upgrade your biology beyond survival compatibility. What now, traveler?
-  </blockquote>
-</div>
+<ManualChapterHero
+  chapter="Chapter 5"
+  title={`The "All Hope is Lost, You Fool" Protocol`}
+  icon="🆘"
+  quote="So, you've ignored every meticulously researched warning in this Admonition. You've blundered into a first contact situation despite clear evidence that helpful aliens achieve 77% elimination rates through customer service excellence and hostile aliens maintain 54% elimination rates through military superiority. The multi-colored jello is forming at your feet, or perhaps that nice entity is offering to upgrade your biology beyond survival compatibility. What now, traveler?"
+  quoteMarks={false}
+/>
 
 ## Chapter Overview
 
@@ -55,89 +52,43 @@ The protocols contained herein represent the distilled wisdom of 23,847 emergenc
 
 ## Chapter Index
 
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-  <div className="lg:col-span-2">
-    <div className="bg-red-900/15 border border-red-500/30 rounded-lg p-6">
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 p-3 bg-red-900/20 rounded border border-red-500/20">
-          <span className="w-8 h-8 bg-blue-500 rounded text-white text-sm flex items-center justify-center font-bold">5.1</span>
-          <span className="text-gray-200 font-semibold">Emergency Threat Classification and Response Matrix</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-red-900/20 rounded border border-red-500/20">
-          <span className="w-8 h-8 bg-orange-500 rounded text-white text-sm flex items-center justify-center font-bold">5.2</span>
-          <span className="text-gray-200 font-semibold">Corporate Emergency Response Infrastructure</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-red-900/20 rounded border border-red-500/20">
-          <span className="w-8 h-8 bg-purple-500 rounded text-white text-sm flex items-center justify-center font-bold">5.3</span>
-          <span className="text-gray-200 font-semibold">Bi-Smart Emergency Equipment Catalog</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-red-900/20 rounded border border-red-500/20">
-          <span className="w-8 h-8 bg-green-500 rounded text-white text-sm flex items-center justify-center font-bold">5.4</span>
-          <span className="text-gray-200 font-semibold">Threat-Specific Emergency Protocols</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-red-900/20 rounded border border-red-500/20">
-          <span className="w-8 h-8 bg-gray-500 rounded text-white text-sm flex items-center justify-center font-bold">5.5</span>
-          <span className="text-gray-200 font-semibold">The Final Broadcast: When All Systems Fail</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div className="space-y-4">
-    <div className="bg-red-900/15 border border-red-500/30 rounded-lg p-4">
-      <div className="text-red-400 font-bold text-sm mb-3 flex items-center gap-2">
-        <span className="w-60 h-5 bg-red-500 rounded text-white text-xs flex items-center justify-center">🆘 Emergency Priorities</span>
-      </div>
-      <div className="space-y-1 text-xs">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-          <span className="text-gray-300">Immediate threat classification (helpful vs hostile)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-          <span className="text-gray-300">Corporate emergency response activation</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-          <span className="text-gray-300">Equipment deployment and survival probability assessment</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-          <span className="text-gray-300">Threat-specific protocol implementation</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-          <span className="text-gray-300">Final documentation and epitaph broadcasting</span>
-        </div>
-      </div>
-    </div>
-    
-    <div className="bg-gray-900/15 border border-gray-500/30 rounded-lg p-4">
-      <div className="text-gray-400 font-bold text-sm mb-3 flex items-center gap-2">
-        <span className="w-60 h-5 bg-gray-500 rounded text-white text-xs flex items-center justify-center">📊 Emergency Statistics</span>
-      </div>
-      <div className="space-y-1 text-xs text-gray-300">
-        <div>• Emergency protocol success rate: 0.003%</div>
-        <div>• ITE response time: 6-8 geological epochs</div>
-        <div>• Corporate liability transfer: 99.97% efficiency</div>
-        <div>• Hail Mary device durability: Survives users</div>
-        <div>• Final broadcast accuracy: Depressingly precise</div>
-        <div>• Bi-Smart bankruptcy prevention: 847 occasions</div>
-        <div>• Smooth jazz survival rate: 100% (device only)</div>
-      </div>
-    </div>
-  </div>
-</div>
+<ManualChapterIndex
+  items={[
+    { number: '5.1', title: 'Emergency Threat Classification and Response Matrix' },
+    { number: '5.2', title: 'Corporate Emergency Response Infrastructure' },
+    { number: '5.3', title: 'Bi-Smart Emergency Equipment Catalog' },
+    { number: '5.4', title: 'Threat-Specific Emergency Protocols' },
+    { number: '5.5', title: 'The Final Broadcast: When All Systems Fail' },
+  ]}
+  sidebarPanels={[
+    {
+      title: '🆘 Emergency Priorities',
+      items: [
+        { tone: 'red', label: 'Immediate threat classification', detail: 'helpful vs hostile' },
+        { tone: 'orange', label: 'Corporate emergency response activation' },
+        { tone: 'yellow', label: 'Equipment deployment and survival probability assessment' },
+        { tone: 'green', label: 'Threat-specific protocol implementation' },
+        { tone: 'blue', label: 'Final documentation and epitaph broadcasting' },
+      ],
+    },
+    {
+      title: '📊 Emergency Statistics',
+      lines: [
+        '• Emergency protocol success rate: 0.003%',
+        '• ITE response time: 6-8 geological epochs',
+        '• Corporate liability transfer: 99.97% efficiency',
+        '• Hail Mary device durability: Survives users',
+        '• Final broadcast accuracy: Depressingly precise',
+        '• Bi-Smart bankruptcy prevention: 847 occasions',
+        '• Smooth jazz survival rate: 100% (device only)',
+      ],
+    },
+  ]}
+/>
 
-<div className="bg-gradient-to-r from-red-900/40 to-black/20 border border-red-500/50 rounded-lg p-6 mt-6">
-  <div className="flex items-center gap-3 mb-4">
-    <span className="text-red-400 text-2xl">⚠️</span>
-    <h3 className="text-red-400 font-bold text-xl">Protocol Activation Warning</h3>
-  </div>
-  <p className="text-red-200 leading-relaxed">
-    This chapter represents the final stage of first contact crisis management. If you are consulting these protocols, you have already ignored Chapters 3 and 4's comprehensive threat analysis and prevention strategies. The procedures documented herein are designed for immediate implementation during active contact scenarios, though success rates remain statistically negligible due to the mathematical impossibility of surviving cosmic-scale entities through emergency protocols alone.
-  </p>
-</div>
+<ManualNotice tone="red" title="Protocol Activation Warning" icon="⚠️" class="mt-6">
+  This chapter represents the final stage of first contact crisis management. If you are consulting these protocols, you have already ignored Chapters 3 and 4's comprehensive threat analysis and prevention strategies. The procedures documented herein are designed for immediate implementation during active contact scenarios, though success rates remain statistically negligible due to the mathematical impossibility of surviving cosmic-scale entities through emergency protocols alone.
+</ManualNotice>
 
 ---
 
@@ -147,52 +98,58 @@ When faced with an active first contact scenario, the first critical step involv
 
 ### Rapid Threat Assessment Protocol
 
-<div className="bg-blue-900/15 border-2 border-blue-500/50 rounded-lg p-6 mb-6">
-  <div className="flex items-center gap-4 mb-4">
-    <div className="w-16 h-16 bg-blue-500/20 rounded-lg flex items-center justify-center">
-      <span className="text-blue-400 text-2xl">🎯</span>
-    </div>
-    <div className="flex-1">
-      <h4 className="text-blue-400 font-bold text-lg">EMERGENCY CLASSIFICATION FRAMEWORK</h4>
-      <p className="text-blue-300 text-sm">Rapid identification of threat type and appropriate response protocols</p>
-    </div>
-  </div>
+<ManualPanel
+  tone="blue"
+  emphasis="strong"
+  icon="🎯"
+  title="EMERGENCY CLASSIFICATION FRAMEWORK"
+  subtitle="Rapid identification of threat type and appropriate response protocols"
+  class="mb-6"
+>
+  <p>
+    <strong>Primary Classification Question:</strong> Is the entity offering assistance, announcing elimination intent, or simply existing in your vicinity without apparent awareness of your presence?
+  </p>
 
-  **Primary Classification Question:** Is the entity offering assistance, announcing elimination intent, or simply existing in your vicinity without apparent awareness of your presence?
-
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-    <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
-      <h6 className="text-blue-400 font-bold text-sm mb-3">Helpful Entity Indicators</h6>
-      <div className="space-y-2 text-xs text-blue-200">
-        <div>• Offers to "improve" your biology or technology</div>
-        <div>• Expresses concern for your "optimization potential"</div>
-        <div>• Mentions "customer service" or "assistance protocols"</div>
-        <div>• Demonstrates patience with your reluctance to accept help</div>
-        <div>• Maintains polite conversation during enhancement procedures</div>
-      </div>
-    </div>
-    <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
-      <h6 className="text-red-400 font-bold text-sm mb-3">Hostile Entity Indicators</h6>
-      <div className="space-y-2 text-xs text-red-200">
-        <div>• Announces elimination intent without customer service</div>
-        <div>• Deploys military forces without negotiation offers</div>
-        <div>• Treats your species as resource inventory</div>
-        <div>• References territorial acquisition or expansion</div>
-        <div>• Demonstrates immediate threat recognition capability</div>
-      </div>
-    </div>
-    <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
-      <h6 className="text-purple-400 font-bold text-sm mb-3">Indifferent Entity Indicators</h6>
-      <div className="space-y-2 text-xs text-purple-200">
-        <div>• Massive scale operations you're too small to register</div>
-        <div>• Infrastructure projects spanning geological time</div>
-        <div>• No direct communication or awareness</div>
-        <div>• Casual reality modification during routine maintenance</div>
-        <div>• Environmental changes that accidentally eliminate biospheres</div>
-      </div>
-    </div>
-  </div>
-</div>
+  <ManualListGrid
+    columns={3}
+    class="mt-4"
+    cards={[
+      {
+        tone: 'blue',
+        title: 'Helpful Entity Indicators',
+        items: [
+          'Offers to "improve" your biology or technology',
+          'Expresses concern for your "optimization potential"',
+          'Mentions "customer service" or "assistance protocols"',
+          'Demonstrates patience with your reluctance to accept help',
+          'Maintains polite conversation during enhancement procedures',
+        ],
+      },
+      {
+        tone: 'red',
+        title: 'Hostile Entity Indicators',
+        items: [
+          'Announces elimination intent without customer service',
+          'Deploys military forces without negotiation offers',
+          'Treats your species as resource inventory',
+          'References territorial acquisition or expansion',
+          'Demonstrates immediate threat recognition capability',
+        ],
+      },
+      {
+        tone: 'purple',
+        title: 'Indifferent Entity Indicators',
+        items: [
+          "Massive scale operations you're too small to register",
+          'Infrastructure projects spanning geological time',
+          'No direct communication or awareness',
+          'Casual reality modification during routine maintenance',
+          'Environmental changes that accidentally eliminate biospheres',
+        ],
+      },
+    ]}
+  />
+</ManualPanel>
 
 ### Emergency Response Time Matrix
 

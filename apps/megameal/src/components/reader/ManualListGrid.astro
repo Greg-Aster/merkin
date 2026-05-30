@@ -1,0 +1,99 @@
+---
+type Tone =
+  | 'blue'
+  | 'cyan'
+  | 'gray'
+  | 'green'
+  | 'orange'
+  | 'purple'
+  | 'red'
+  | 'teal'
+  | 'yellow'
+
+interface ManualListCard {
+  tone?: Tone
+  title: string
+  items?: string[]
+  body?: string
+}
+
+interface Props {
+  cards: ManualListCard[]
+  columns?: 2 | 3
+  class?: string
+}
+
+const {
+  cards,
+  columns = 2,
+  class: className = '',
+} = Astro.props
+
+const toneClasses: Record<Tone, { card: string; title: string; body: string }> = {
+  blue: {
+    card: 'border-blue-500/30 bg-blue-900/20',
+    title: 'text-blue-400',
+    body: 'text-blue-200',
+  },
+  cyan: {
+    card: 'border-cyan-500/30 bg-cyan-900/20',
+    title: 'text-cyan-400',
+    body: 'text-cyan-200',
+  },
+  gray: {
+    card: 'border-gray-500/30 bg-gray-900/40',
+    title: 'text-gray-300',
+    body: 'text-gray-300',
+  },
+  green: {
+    card: 'border-green-500/30 bg-green-900/20',
+    title: 'text-green-400',
+    body: 'text-green-200',
+  },
+  orange: {
+    card: 'border-orange-500/30 bg-orange-900/20',
+    title: 'text-orange-400',
+    body: 'text-orange-200',
+  },
+  purple: {
+    card: 'border-purple-500/30 bg-purple-900/20',
+    title: 'text-purple-400',
+    body: 'text-purple-200',
+  },
+  red: {
+    card: 'border-red-500/30 bg-red-900/20',
+    title: 'text-red-400',
+    body: 'text-red-200',
+  },
+  teal: {
+    card: 'border-teal-500/30 bg-teal-900/20',
+    title: 'text-teal-400',
+    body: 'text-teal-200',
+  },
+  yellow: {
+    card: 'border-yellow-500/30 bg-yellow-900/20',
+    title: 'text-yellow-400',
+    body: 'text-yellow-200',
+  },
+}
+
+const columnClass = columns === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'
+---
+
+<div class:list={['grid grid-cols-1 gap-4', columnClass, className]}>
+  {cards.map(card => {
+    const selected = toneClasses[card.tone ?? 'gray']
+
+    return (
+      <article class:list={['rounded-lg border p-4', selected.card]}>
+        <h4 class:list={['mb-3 text-sm font-bold', selected.title]}>{card.title}</h4>
+        {card.body && <p class="mb-3 text-sm leading-relaxed text-gray-300">{card.body}</p>}
+        {card.items && card.items.length > 0 && (
+          <ul class:list={['list-disc space-y-2 pl-4 text-xs', selected.body]}>
+            {card.items.map(item => <li>{item}</li>)}
+          </ul>
+        )}
+      </article>
+    )
+  })}
+</div>

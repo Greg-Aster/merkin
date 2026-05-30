@@ -1,7 +1,7 @@
 import type {
   AudioSfxConfig,
-  AudioStorageKeys,
   AudioSfxId,
+  AudioStorageKeys,
   SiteAmbienceTrackId,
 } from './audio-ids'
 
@@ -59,6 +59,20 @@ export const siteAudioConfig: SiteAudioConfig = {
       volume: 0.9,
     },
     {
+      id: 'home-whistle-drift',
+      src: '/audio/ambient/Whistling Dreams.mp3',
+      label: 'Whistling Dreams',
+      routes: ['/'],
+      volume: 0.64,
+    },
+    {
+      id: 'home-shadow-waltz',
+      src: '/audio/ambient/Shadow Waltz.mp3',
+      label: 'Shadow Waltz',
+      routes: ['/'],
+      volume: 0.7,
+    },
+    {
       id: 'community-signal',
       src: '/audio/ambient/Whistling Dreams.mp3',
       label: 'Whistling Dreams',
@@ -66,11 +80,25 @@ export const siteAudioConfig: SiteAudioConfig = {
       volume: 0.68,
     },
     {
+      id: 'community-drive',
+      src: '/audio/ambient/Faster.mp3',
+      label: 'Faster',
+      routes: ['/community'],
+      volume: 0.58,
+    },
+    {
       id: 'about-glow',
-      src: '/audio/ambient/Untitled.mp3',
+      src: '/audio/ambient/2nd half_2nd half(1).mp3',
       label: 'Signal Bloom',
       routes: ['/about'],
-      volume: 0.7,
+      volume: 0.64,
+    },
+    {
+      id: 'about-whistle-drift',
+      src: '/audio/ambient/Whistling Dreams.mp3',
+      label: 'Whistling Dreams',
+      routes: ['/about'],
+      volume: 0.6,
     },
     {
       id: 'timeline-drift',
@@ -86,6 +114,32 @@ export const siteAudioConfig: SiteAudioConfig = {
       volume: 0.84,
     },
     {
+      id: 'timeline-drive',
+      src: '/audio/ambient/Faster.mp3',
+      label: 'Faster',
+      routes: [
+        '/timeline',
+        '/posts/timeline',
+        '/posts/explainer',
+        '/posts/timelines',
+        '/archive',
+      ],
+      volume: 0.58,
+    },
+    {
+      id: 'timeline-dark-delight',
+      src: '/audio/ambient/Dark Shadows of Delight.mp3',
+      label: 'Dark Shadows of Delight',
+      routes: [
+        '/timeline',
+        '/posts/timeline',
+        '/posts/explainer',
+        '/posts/timelines',
+        '/archive',
+      ],
+      volume: 0.68,
+    },
+    {
       id: 'commercial-hum',
       src: '/audio/ambient/Dark Shadows of Delight.mp3',
       label: 'Dark Shadows of Delight',
@@ -93,36 +147,53 @@ export const siteAudioConfig: SiteAudioConfig = {
       volume: 0.78,
     },
     {
+      id: 'commercial-whistle',
+      src: '/audio/ambient/Whistling Dreams.mp3',
+      label: 'Whistling Dreams',
+      routes: ['/store', '/store-placeholder'],
+      volume: 0.56,
+    },
+    {
       id: 'checkout-signal',
-      src: '/audio/ambient/piano synth.mp3',
+      src: '/audio/ambient/2nd half_2nd half(1).mp3',
       label: 'Checkout Signal',
       routes: ['/store/checkout'],
       volume: 0.62,
     },
     {
+      id: 'checkout-whistle',
+      src: '/audio/ambient/Whistling Dreams.mp3',
+      label: 'Whistling Dreams',
+      routes: ['/store/checkout'],
+      volume: 0.56,
+    },
+    {
       id: 'audit-quiz',
-      src: '/audio/ambient/meta_3.mp3',
+      src: '/audio/ambient/Faster.mp3',
       label: 'Audit Quiz',
       routes: ['/quiz'],
-      volume: 0.75,
+      volume: 0.6,
+    },
+    {
+      id: 'audit-quiz-shadow',
+      src: '/audio/ambient/Shadow Waltz.mp3',
+      label: 'Shadow Waltz',
+      routes: ['/quiz'],
+      volume: 0.64,
     },
     {
       id: 'shadow-broadcast',
-      src: '/audio/ambient/Wicked Shadows Whisper.mp3',
-      label: 'Wicked Shadows Whisper',
+      src: '/audio/ambient/Shadow Waltz.mp3',
+      label: 'Shadow Waltz',
       routes: ['/posts'],
       volume: 0.7,
-      hashModulo: 3,
-      hashRemainder: 0,
     },
     {
       id: 'shadow-broadcast-alt',
-      src: '/audio/ambient/Untitled.mp3',
+      src: '/audio/ambient/Dark Shadows of Delight.mp3',
       label: 'Archive Pulse',
       routes: ['/posts'],
-      volume: 0.66,
-      hashModulo: 3,
-      hashRemainder: 1,
+      volume: 0.64,
     },
     {
       id: 'shadow-broadcast-soft',
@@ -130,8 +201,13 @@ export const siteAudioConfig: SiteAudioConfig = {
       label: 'Whistling Dreams',
       routes: ['/posts'],
       volume: 0.64,
-      hashModulo: 3,
-      hashRemainder: 2,
+    },
+    {
+      id: 'shadow-broadcast-drive',
+      src: '/audio/ambient/Faster.mp3',
+      label: 'Faster',
+      routes: ['/posts'],
+      volume: 0.58,
     },
     {
       id: 'quiet-gate',
@@ -141,16 +217,37 @@ export const siteAudioConfig: SiteAudioConfig = {
       volume: 0.62,
     },
     {
+      id: 'quiet-gate-signal',
+      src: '/audio/ambient/2nd half_2nd half(1).mp3',
+      label: 'Quiet Signal',
+      routes: ['/friends', '/login', '/privacy'],
+      volume: 0.56,
+    },
+    {
       id: 'admin-grid',
-      src: '/audio/ambient/piano synth.mp3',
-      label: 'Piano Synth',
+      src: '/audio/ambient/portal-deck.mp3',
+      label: 'Portal Deck',
       routes: ['/host', '/new-post', '/configs'],
-      volume: 0.66,
+      volume: 0.54,
+    },
+    {
+      id: 'admin-grid-drive',
+      src: '/audio/ambient/Faster.mp3',
+      label: 'Faster',
+      routes: ['/host', '/new-post', '/configs'],
+      volume: 0.52,
     },
     {
       id: 'lab-drive',
       src: '/audio/ambient/Faster.mp3',
       label: 'Faster',
+      routes: ['/labs'],
+      volume: 0.62,
+    },
+    {
+      id: 'lab-shadow',
+      src: '/audio/ambient/Shadow Waltz.mp3',
+      label: 'Shadow Waltz',
       routes: ['/labs'],
       volume: 0.62,
     },
@@ -368,6 +465,10 @@ function getStablePathHash(pathname: string): number {
 export function getTrackForPathname(
   pathname: string,
 ): SiteAudioTrackConfig | null {
+  return getTracksForPathname(pathname)[0] ?? null
+}
+
+export function getTracksForPathname(pathname: string): SiteAudioTrackConfig[] {
   const normalizedPath = normalizeAudioPathname(pathname)
   const pathHash = getStablePathHash(normalizedPath)
 
@@ -397,5 +498,10 @@ export function getTrackForPathname(
       return b.matchedRouteLength - a.matchedRouteLength
     })
 
-  return matches[0]?.track ?? null
+  const bestRouteLength = matches[0]?.matchedRouteLength
+  if (typeof bestRouteLength !== 'number') return []
+
+  return matches
+    .filter(match => match.matchedRouteLength === bestRouteLength)
+    .map(match => match.track)
 }

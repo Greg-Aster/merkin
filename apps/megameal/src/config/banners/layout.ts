@@ -100,8 +100,8 @@ export const bannerLayoutProfiles = {
   reader: {
     stageTop: { ...defaultBannerStageTop },
     stageHeight: {
-      desktop: 'clamp(44rem, 78vh, 48rem)',
-      mobile: 'clamp(32rem, 62svh, 36rem)',
+      desktop: 'clamp(34rem, 58vh, 38rem)',
+      mobile: 'clamp(28rem, 52svh, 32rem)',
     },
     panelTop: { desktop: '0', mobile: '0' },
     contentTop: { ...defaultContentTop },

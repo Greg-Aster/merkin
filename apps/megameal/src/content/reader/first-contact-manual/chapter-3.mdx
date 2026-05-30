@@ -28,22 +28,19 @@ contentFormat: "manual"
 lang: ""
 mascotContext: "Now that you know what's out there and how they organize, let's discuss the accidental ways they'll eliminate you. This comprehensive analysis focuses on helpful aliens and cosmic indifference—because the universe's most dangerous entities are often the ones trying to help."
 ---
+import ManualChapterHero from '../../../components/reader/ManualChapterHero.astro'
+import ManualChapterIndex from '../../../components/reader/ManualChapterIndex.astro'
+import ManualChapterLink from '../../../components/reader/ManualChapterLink.astro'
+import ManualComparisonPanel from '../../../components/reader/ManualComparisonPanel.astro'
+import ManualNotice from '../../../components/reader/ManualNotice.astro'
 
-<div className="bg-gradient-to-br from-blue-900/50 to-purple-900/30 border-2 border-blue-500/60 rounded-xl p-8 mb-8">
-  <div className="flex items-center gap-4 mb-6">
-    <div className="w-16 h-16 bg-blue-500/20 rounded-lg flex items-center justify-center">
-      <span className="text-blue-400 text-2xl">🤝</span>
-    </div>
-    <div>
-      <div className="text-3xl font-bold text-blue-400">Chapter 3</div>
-      <p className="text-blue-300 text-lg">The Complete Guide to First Contact Catastrophes</p>
-    </div>
-  </div>
-  
-  <blockquote className="text-blue-200 text-lg leading-relaxed">
-    Welcome to the comprehensive analysis of why first contact scenarios consistently transform from "exciting scientific opportunity" to "existential catastrophe requiring extensive therapy and potentially new bodies"—not through malicious intent, but through helpful assistance and cosmic indifference. This chapter explains why human survival strategies are mathematically inadequate against entities trying to help you, and how these inadequacies manifest as creative extinction events through customer service excellence.
-  </blockquote>
-</div>
+<ManualChapterHero
+  chapter="Chapter 3"
+  title="The Complete Guide to First Contact Catastrophes"
+  icon="🤝"
+  quote={`Welcome to the comprehensive analysis of why first contact scenarios consistently transform from "exciting scientific opportunity" to "existential catastrophe requiring extensive therapy and potentially new bodies"—not through malicious intent, but through helpful assistance and cosmic indifference. This chapter explains why human survival strategies are mathematically inadequate against entities trying to help you, and how these inadequacies manifest as creative extinction events through customer service excellence.`}
+  quoteMarks={false}
+/>
 
 ## Chapter Overview
 
@@ -55,89 +52,43 @@ This chapter examines the fundamental impossibility of defending against cosmic-
 
 ## Chapter Index
 
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-  <div className="lg:col-span-2">
-    <div className="bg-blue-900/15 border border-blue-500/30 rounded-lg p-6">
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 p-3 bg-blue-900/20 rounded border border-blue-500/20">
-          <span className="w-8 h-8 bg-blue-500 rounded text-white text-sm flex items-center justify-center font-bold">3.1</span>
-          <span className="text-gray-200 font-semibold">Why Your Survival Strategy Is Adorably Inadequate</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-blue-900/20 rounded border border-blue-500/20">
-          <span className="w-8 h-8 bg-blue-500 rounded text-white text-sm flex items-center justify-center font-bold">3.2</span>
-          <span className="text-gray-200 font-semibold">The Universe's Accidental Elimination Catalog</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-blue-900/20 rounded border border-blue-500/20">
-          <span className="w-8 h-8 bg-blue-500 rounded text-white text-sm flex items-center justify-center font-bold">3.3</span>
-          <span className="text-gray-200 font-semibold">Six Primary Helpful Disaster Mechanisms</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-blue-900/20 rounded border border-blue-500/20">
-          <span className="w-8 h-8 bg-blue-500 rounded text-white text-sm flex items-center justify-center font-bold">3.4</span>
-          <span className="text-gray-200 font-semibold">The Evasion Doctrine: Statistical Survival Principles</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div className="space-y-4">
-    <div className="bg-orange-900/15 border border-orange-500/30 rounded-lg p-4">
-      <div className="text-orange-400 font-bold text-sm mb-3 flex items-center gap-2">
-        <span className="w-60 h-5 bg-orange-500 rounded text-white text-xs flex items-center justify-center">🤝 Disaster Categories</span>
-      </div>
-      <div className="space-y-1 text-xs">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-          <span className="text-gray-300">Helpful Accidents (they're trying to help)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-          <span className="text-gray-300">Scale Mismatches (you're too small to notice)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-cyan-500 rounded-full"></span>
-          <span className="text-gray-300">Communication Errors (lost in translation)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-          <span className="text-gray-300">Contamination Events (they're infectious)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-          <span className="text-gray-300">Technical Failures (physics stops working)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-          <span className="text-gray-300">Psychological Overwhelm (enlightenment as trauma)</span>
-        </div>
-      </div>
-    </div>
-    
-    <div className="bg-red-900/15 border border-red-500/30 rounded-lg p-4">
-      <div className="text-red-400 font-bold text-sm mb-3 flex items-center gap-2">
-        <span className="w-60 h-5 bg-red-500 rounded text-white text-xs flex items-center justify-center">💀 Statistical Reality</span>
-      </div>
-      <div className="space-y-1 text-xs text-gray-300">
-        <div>• Successful peaceful contact: 0.003%</div>
-        <div>• Helpful alien survival rate: 23%</div>
-        <div>• Hostile alien survival rate: 46%</div>
-        <div>• Customer service disasters: 89%</div>
-        <div>• Accidental elimination: 77%</div>
-        <div>• Therapy required afterward: 94%</div>
-        <div>• Career change to safer profession: 78%</div>
-      </div>
-    </div>
-  </div>
-</div>
+<ManualChapterIndex
+  items={[
+    { number: '3.1', title: 'Why Your Survival Strategy Is Adorably Inadequate' },
+    { number: '3.2', title: "The Universe's Accidental Elimination Catalog" },
+    { number: '3.3', title: 'Six Primary Helpful Disaster Mechanisms' },
+    { number: '3.4', title: 'The Evasion Doctrine: Statistical Survival Principles' },
+  ]}
+  sidebarPanels={[
+    {
+      title: '🤝 Disaster Categories',
+      items: [
+        { tone: 'blue', label: 'Helpful Accidents', detail: "they're trying to help" },
+        { tone: 'purple', label: 'Scale Mismatches', detail: "you're too small to notice" },
+        { tone: 'cyan', label: 'Communication Errors', detail: 'lost in translation' },
+        { tone: 'green', label: 'Contamination Events', detail: "they're infectious" },
+        { tone: 'yellow', label: 'Technical Failures', detail: 'physics stops working' },
+        { tone: 'red', label: 'Psychological Overwhelm', detail: 'enlightenment as trauma' },
+      ],
+    },
+    {
+      title: '💀 Statistical Reality',
+      lines: [
+        '• Successful peaceful contact: 0.003%',
+        '• Helpful alien survival rate: 23%',
+        '• Hostile alien survival rate: 46%',
+        '• Customer service disasters: 89%',
+        '• Accidental elimination: 77%',
+        '• Therapy required afterward: 94%',
+        '• Career change to safer profession: 78%',
+      ],
+    },
+  ]}
+/>
 
-<div className="bg-gradient-to-r from-blue-900/40 to-black/20 border border-blue-500/50 rounded-lg p-6 mt-6">
-  <div className="flex items-center gap-3 mb-4">
-    <span className="text-blue-400 text-2xl">⚠️</span>
-    <h3 className="text-blue-400 font-bold text-xl">Critical Warning</h3>
-  </div>
-  <p className="text-blue-200 leading-relaxed">
-    This chapter documents both the theoretical inevitability and practical implementation of first contact catastrophes through helpful assistance rather than hostile intent. Understanding these frameworks may itself represent a vulnerability—some disaster mechanisms are activated by comprehension itself, mathematical proofs contained herein have been known to cause existential despair, and exposure to detailed elimination catalogs has resulted in persistent cosmic perspective disorder in 23% of readers.
-  </p>
-</div>
+<ManualNotice tone="blue" title="Critical Warning" icon="⚠️" class="mt-6">
+  This chapter documents both the theoretical inevitability and practical implementation of first contact catastrophes through helpful assistance rather than hostile intent. Understanding these frameworks may itself represent a vulnerability—some disaster mechanisms are activated by comprehension itself, mathematical proofs contained herein have been known to cause existential despair, and exposure to detailed elimination catalogs has resulted in persistent cosmic perspective disorder in 23% of readers.
+</ManualNotice>
 
 ---
 
@@ -147,43 +98,30 @@ Human survival strategies evolved for terrestrial threats—predators with simil
 
 ### The Great Cognitive Mismatch
 
-<div className="bg-blue-900/15 border-2 border-blue-500/50 rounded-lg p-6 mb-6">
-  <div className="flex items-center gap-4 mb-4">
-    <div className="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center">
-      <span className="text-white font-bold text-2xl">⚠️</span>
-    </div>
-    <div>
-      <h3 className="text-2xl font-bold text-blue-400 mb-2">The Assistance Mismatch</h3>
-      <p className="text-blue-300 text-sm">Why evolution prepared us for the wrong type of help entirely</p>
-    </div>
-  </div>
-  
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div className="bg-blue-900/20 p-4 rounded border border-blue-500/30">
-      <h4 className="text-blue-400 font-bold mb-3">What We're Optimized For</h4>
-      <ul className="text-gray-300 text-sm space-y-2">
-        <li>Help from similar biological entities (fellow humans)</li>
-        <li>Assistance using familiar technology (tools we understand)</li>
-        <li>Aid that respects human biological limitations (survivable improvements)</li>
-        <li>Help that operates on human timescales (minutes, not millennia)</li>
-        <li>Assistance following comprehensible physics (laws that make sense)</li>
-        <li>Single-category help with predictable consequences (one improvement at a time)</li>
-      </ul>
-    </div>
-    
-    <div className="bg-blue-900/20 p-4 rounded border border-blue-500/30">
-      <h4 className="text-blue-400 font-bold mb-3">What We Actually Receive Out There</h4>
-      <ul className="text-gray-300 text-sm space-y-2">
-        <li>Assistance from reality-manipulating entities (cosmic customer service)</li>
-        <li>Help using incomprehensible technology (magic-level improvements)</li>
-        <li>Aid that ignores biological constraints (death-level enhancements)</li>
-        <li>Assistance on geological timescales (patience of mountains)</li>
-        <li>Help that treats physics as suggestions (universe warranty void)</li>
-        <li>Multi-vector assistance creating impossible contradictions (help overload)</li>
-      </ul>
-    </div>
-  </div>
-</div>
+<ManualComparisonPanel
+  tone="blue"
+  icon="⚠️"
+  title="The Assistance Mismatch"
+  subtitle="Why evolution prepared us for the wrong type of help entirely"
+  leftTitle="What We're Optimized For"
+  leftItems={[
+    'Help from similar biological entities (fellow humans)',
+    'Assistance using familiar technology (tools we understand)',
+    'Aid that respects human biological limitations (survivable improvements)',
+    'Help that operates on human timescales (minutes, not millennia)',
+    'Assistance following comprehensible physics (laws that make sense)',
+    'Single-category help with predictable consequences (one improvement at a time)',
+  ]}
+  rightTitle="What We Actually Receive Out There"
+  rightItems={[
+    'Assistance from reality-manipulating entities (cosmic customer service)',
+    'Help using incomprehensible technology (magic-level improvements)',
+    'Aid that ignores biological constraints (death-level enhancements)',
+    'Assistance on geological timescales (patience of mountains)',
+    'Help that treats physics as suggestions (universe warranty void)',
+    'Multi-vector assistance creating impossible contradictions (help overload)',
+  ]}
+/>
 
 ### Scale Blindness: The Helpful Limitation
 
@@ -915,26 +853,19 @@ The evidence demands complete revision of human first contact doctrine when faci
 
 **Final Truth:** The universe is not only stranger than you imagine—it's more helpful than you can survive. Your best strategy is not preparation for beneficial contact, but prevention of helpful contact through comprehensive assistance avoidance protocols and strategic cultivation of cosmic unimportance.
 
-  {/* Chapter 4 */}
-  <a href="/reader/first-contact-manual/chapter-4/" className="group block bg-gradient-to-br from-red-900/40 to-orange-900/20 border-2 border-red-500/40 rounded-lg p-6 transition-all duration-300 hover:border-red-400 hover:bg-red-900/50 hover:shadow-2xl hover:shadow-red-500/10">
-    <div className="flex items-center gap-4 mb-4">
-      <div className="w-16 h-16 bg-red-500/20 rounded-lg flex items-center justify-center text-red-400 text-2xl font-bold transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">4</div>
-      <div className="flex-1">
-        <h3 className="text-red-300 font-bold text-xl leading-tight">When They Actually Want You Dead</h3>
-        <p className="text-red-400 text-sm font-jetbrains-mono">Hostile elimination through superior military doctrine</p>
-      </div>
-    </div>
-    <div className="bg-red-900/20 border border-red-500/30 rounded p-4">
-      <p className="text-red-200 text-sm leading-relaxed">
-        A comprehensive analysis of hostile first contact scenarios where alien civilizations actively hunt, eliminate, or conquer human civilization through deliberate military action, resource competition, and predatory behavior. Covers why hostile aliens are statistically less dangerous than helpful ones.
-      </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <span className="bg-yellow-900/40 text-yellow-300 px-2 py-1 rounded text-xs">Dark Forest Theory</span>
-        <span className="bg-red-900/40 text-red-300 px-2 py-1 rounded text-xs">Military Doctrine</span>
-        <span className="bg-purple-900/40 text-purple-300 px-2 py-1 rounded text-xs">Resource Competition</span>
-      </div>
-    </div>
-  </a>
+<ManualChapterLink
+  href="/reader/first-contact-manual/chapter-4/"
+  number="4"
+  title="When They Actually Want You Dead"
+  subtitle="Hostile elimination through superior military doctrine"
+  tone="red"
+  description="A comprehensive analysis of hostile first contact scenarios where alien civilizations actively hunt, eliminate, or conquer human civilization through deliberate military action, resource competition, and predatory behavior. Covers why hostile aliens are statistically less dangerous than helpful ones."
+  tags={[
+    { tone: 'yellow', label: 'Dark Forest Theory' },
+    { tone: 'red', label: 'Military Doctrine' },
+    { tone: 'purple', label: 'Resource Competition' },
+  ]}
+/>
 
 ---
 

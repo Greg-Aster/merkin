@@ -1,0 +1,117 @@
+---
+type Tone = 'blue' | 'green' | 'orange' | 'purple' | 'red'
+type TagTone = Tone | 'yellow'
+
+interface Tag {
+  tone: TagTone
+  label: string
+}
+
+interface Props {
+  href: string
+  number: string
+  title: string
+  subtitle: string
+  tone?: Tone
+  description?: string
+  tags?: Tag[]
+}
+
+const {
+  href,
+  number,
+  title,
+  subtitle,
+  tone = 'blue',
+  description,
+  tags = [],
+} = Astro.props
+
+const toneClasses: Record<Tone, { card: string; number: string; title: string; subtitle: string; body: string; panel: string }> = {
+  blue: {
+    card: 'border-blue-500/40 bg-gradient-to-br from-blue-900/40 to-cyan-900/20 hover:border-blue-400 hover:bg-blue-900/50 hover:shadow-blue-500/10',
+    number: 'bg-blue-500/20 text-blue-400',
+    title: 'text-blue-300',
+    subtitle: 'text-blue-400',
+    body: 'text-blue-200',
+    panel: 'border-blue-500/30 bg-blue-900/20',
+  },
+  green: {
+    card: 'border-green-500/40 bg-gradient-to-br from-green-900/40 to-blue-900/20 hover:border-green-400 hover:bg-green-900/50 hover:shadow-green-500/10',
+    number: 'bg-green-500/20 text-green-400',
+    title: 'text-green-300',
+    subtitle: 'text-green-400',
+    body: 'text-green-200',
+    panel: 'border-green-500/30 bg-green-900/20',
+  },
+  orange: {
+    card: 'border-orange-500/40 bg-gradient-to-br from-orange-900/40 to-red-900/20 hover:border-orange-400 hover:bg-orange-900/50 hover:shadow-orange-500/10',
+    number: 'bg-orange-500/20 text-orange-400',
+    title: 'text-orange-300',
+    subtitle: 'text-orange-400',
+    body: 'text-orange-200',
+    panel: 'border-orange-500/30 bg-orange-900/20',
+  },
+  purple: {
+    card: 'border-purple-500/40 bg-gradient-to-br from-purple-900/40 to-pink-900/20 hover:border-purple-400 hover:bg-purple-900/50 hover:shadow-purple-500/10',
+    number: 'bg-purple-500/20 text-purple-400',
+    title: 'text-purple-300',
+    subtitle: 'text-purple-400',
+    body: 'text-purple-200',
+    panel: 'border-purple-500/30 bg-purple-900/20',
+  },
+  red: {
+    card: 'border-red-500/40 bg-gradient-to-br from-red-900/40 to-orange-900/20 hover:border-red-400 hover:bg-red-900/50 hover:shadow-red-500/10',
+    number: 'bg-red-500/20 text-red-400',
+    title: 'text-red-300',
+    subtitle: 'text-red-400',
+    body: 'text-red-200',
+    panel: 'border-red-500/30 bg-red-900/20',
+  },
+}
+
+const tagClasses: Record<TagTone, string> = {
+  blue: 'bg-blue-900/40 text-blue-300',
+  green: 'bg-green-900/40 text-green-300',
+  orange: 'bg-orange-900/40 text-orange-300',
+  purple: 'bg-purple-900/40 text-purple-300',
+  red: 'bg-red-900/40 text-red-300',
+  yellow: 'bg-yellow-900/40 text-yellow-300',
+}
+
+const selected = toneClasses[tone]
+---
+
+<a
+  href={href}
+  class:list={[
+    'group block rounded-lg border-2 p-6 transition-all duration-300 hover:shadow-2xl',
+    selected.card,
+  ]}
+>
+  <div class="mb-4 flex items-center gap-4">
+    <div class:list={[
+      'flex h-16 w-16 items-center justify-center rounded-lg text-2xl font-bold transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6',
+      selected.number,
+    ]}>
+      {number}
+    </div>
+    <div class="flex-1">
+      <h3 class:list={['text-xl font-bold leading-tight', selected.title]}>{title}</h3>
+      <p class:list={['text-sm font-jetbrains-mono', selected.subtitle]}>{subtitle}</p>
+    </div>
+  </div>
+
+  {description && (
+    <div class:list={['rounded border p-4', selected.panel]}>
+      <p class:list={['text-sm leading-relaxed', selected.body]}>{description}</p>
+      {tags.length > 0 && (
+        <div class="mt-3 flex flex-wrap gap-2">
+          {tags.map(tag => (
+            <span class:list={['rounded px-2 py-1 text-xs', tagClasses[tag.tone]]}>{tag.label}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  )}
+</a>

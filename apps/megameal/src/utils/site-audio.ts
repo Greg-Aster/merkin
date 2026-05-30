@@ -1,7 +1,7 @@
 import { Howl, Howler } from 'howler'
 import {
   type SiteAudioTrackConfig,
-  getTrackForPathname,
+  getTracksForPathname,
   siteAudioConfig,
 } from '../config/audio'
 import { markSiteAudioUnlocked } from './site-audio-activation'
@@ -60,38 +60,46 @@ type VideoAnalyticsWindow = Window & {
 export function resolvePageAmbientTrackConfig(
   payloadText: string | null | undefined,
   pathname: string,
-): SiteAudioTrackConfig | null {
-  if (!payloadText) return null
+): SiteAudioTrackConfig[] {
+  if (!payloadText) return []
 
   try {
-    const parsed = JSON.parse(payloadText) as PageAmbientTrackConfig
-    if (!parsed || typeof parsed !== 'object') return null
-    if (
-      typeof parsed.src !== 'string' ||
-      parsed.src.length === 0 ||
-      typeof parsed.label !== 'string' ||
-      parsed.label.length === 0
-    ) {
-      return null
-    }
+    const parsed = JSON.parse(payloadText) as
+      | PageAmbientTrackConfig
+      | PageAmbientTrackConfig[]
+    const tracks = Array.isArray(parsed) ? parsed : [parsed]
 
-    return {
-      id:
-        typeof parsed.id === 'string' && parsed.id.length > 0
-          ? parsed.id
-          : `page-ambient:${pathname.replace(/\/+$/, '') || '/'}`,
-      src: parsed.src,
-      label: parsed.label,
-      routes: [pathname],
-      loop: parsed.loop,
-      volume:
-        typeof parsed.volume === 'number'
-          ? Math.min(1, Math.max(0, parsed.volume))
-          : undefined,
-      html5: parsed.html5,
-    }
+    return tracks.flatMap((track, index) => {
+      if (!track || typeof track !== 'object') return []
+      if (
+        typeof track.src !== 'string' ||
+        track.src.length === 0 ||
+        typeof track.label !== 'string' ||
+        track.label.length === 0
+      ) {
+        return []
+      }
+
+      return [
+        {
+          id:
+            typeof track.id === 'string' && track.id.length > 0
+              ? track.id
+              : `page-ambient:${pathname.replace(/\/+$/, '') || '/'}:${index}`,
+          src: track.src,
+          label: track.label,
+          routes: [pathname],
+          loop: track.loop,
+          volume:
+            typeof track.volume === 'number'
+              ? Math.min(1, Math.max(0, track.volume))
+              : undefined,
+          html5: track.html5,
+        },
+      ]
+    })
   } catch {
-    return null
+    return []
   }
 }
 
@@ -101,6 +109,8 @@ class SiteAudioManager {
   private ambienceVolume = siteAudioConfig.defaultAmbienceVolume
   private sfxVolume = siteAudioConfig.defaultSfxVolume
   private currentTrack: SiteAudioTrackConfig | null = null
+  private currentTrackPool: SiteAudioTrackConfig[] = []
+  private queuedTrackPool: SiteAudioTrackConfig[] = []
   private currentHowl: Howl | null = null
   private listeners = new Set<SiteAudioListener>()
   private initialized = false
@@ -230,14 +240,23 @@ class SiteAudioManager {
       return
     }
 
-    const nextTrack = this.getTrackForCurrentPage(pathname)
-    if (!nextTrack) {
+    const nextTrackPool = this.getTracksForCurrentPage(pathname)
+    if (nextTrackPool.length === 0) {
       this.stopCurrentTrack()
       this.emit()
       return
     }
 
-    if (this.currentHowl && this.isCurrentTrack(nextTrack)) {
+    const currentTrack = this.currentTrack
+    if (
+      this.currentHowl &&
+      currentTrack &&
+      nextTrackPool.some(track => this.isSameTrack(currentTrack, track))
+    ) {
+      this.currentTrackPool = nextTrackPool
+      this.queuedTrackPool = this.queuedTrackPool.filter(queueTrack =>
+        nextTrackPool.some(track => this.isSameTrack(queueTrack, track)),
+      )
       if (
         (userInitiated || hasUnlockedAudio) &&
         !this.suspended &&
@@ -249,35 +268,44 @@ class SiteAudioManager {
       return
     }
 
+    this.currentTrackPool = nextTrackPool
+    this.queuedTrackPool = []
+    const nextTrack = this.pickNextTrack()
+    if (!nextTrack) {
+      this.stopCurrentTrack()
+      this.emit()
+      return
+    }
+
     this.swapTrack(nextTrack)
     this.emit()
   }
 
-  private getTrackForCurrentPage(
-    pathname: string,
-  ): SiteAudioTrackConfig | null {
-    return this.readPageAmbientTrack(pathname) ?? getTrackForPathname(pathname)
+  private getTracksForCurrentPage(pathname: string): SiteAudioTrackConfig[] {
+    const pageTracks = this.readPageAmbientTracks(pathname)
+    return pageTracks.length > 0 ? pageTracks : getTracksForPathname(pathname)
   }
 
-  private readPageAmbientTrack(pathname: string): SiteAudioTrackConfig | null {
-    if (typeof document === 'undefined') return null
+  private readPageAmbientTracks(pathname: string): SiteAudioTrackConfig[] {
+    if (typeof document === 'undefined') return []
 
     const payload = document.getElementById('megameal-page-ambient-track')
-    if (!payload) return null
+    if (!payload) return []
 
     return resolvePageAmbientTrackConfig(payload.textContent, pathname)
   }
 
-  private isCurrentTrack(nextTrack: SiteAudioTrackConfig): boolean {
-    if (!this.currentTrack) return false
-
+  private isSameTrack(
+    currentTrack: SiteAudioTrackConfig,
+    nextTrack: SiteAudioTrackConfig,
+  ): boolean {
     return (
-      this.currentTrack.id === nextTrack.id &&
-      this.currentTrack.src === nextTrack.src &&
-      this.currentTrack.label === nextTrack.label &&
-      this.currentTrack.loop === nextTrack.loop &&
-      this.currentTrack.volume === nextTrack.volume &&
-      this.currentTrack.html5 === nextTrack.html5
+      currentTrack.id === nextTrack.id &&
+      currentTrack.src === nextTrack.src &&
+      currentTrack.label === nextTrack.label &&
+      currentTrack.loop === nextTrack.loop &&
+      currentTrack.volume === nextTrack.volume &&
+      currentTrack.html5 === nextTrack.html5
     )
   }
 
@@ -287,10 +315,14 @@ class SiteAudioManager {
 
     const nextHowl = new Howl({
       src: [encodeURI(nextTrack.src)],
-      loop: nextTrack.loop ?? true,
+      loop: this.shouldLoopTrack(nextTrack),
       volume: 0,
       html5: nextTrack.html5 ?? false,
       preload: true,
+      onend: () => {
+        if (this.currentHowl !== nextHowl) return
+        this.playNextTrackFromPool(nextTrack)
+      },
       onplayerror: (_soundId: number, error: unknown) => {
         console.warn(
           `Site ambience play failed for "${nextTrack.id}"`,
@@ -334,6 +366,61 @@ class SiteAudioManager {
         previousHowl.stop()
         previousHowl.unload()
       }, siteAudioConfig.fadeDurationMs + 50)
+    }
+  }
+
+  private shouldLoopTrack(track: SiteAudioTrackConfig): boolean {
+    if (this.currentTrackPool.length <= 1) return track.loop ?? true
+
+    return track.loop === true
+  }
+
+  private pickNextTrack(
+    previousTrack: SiteAudioTrackConfig | null = this.currentTrack,
+  ): SiteAudioTrackConfig | null {
+    if (this.currentTrackPool.length === 0) return null
+    if (this.currentTrackPool.length === 1) return this.currentTrackPool[0]
+
+    if (this.queuedTrackPool.length === 0) {
+      const candidates = this.currentTrackPool.filter(track => {
+        return !previousTrack || !this.isSameTrack(previousTrack, track)
+      })
+      this.queuedTrackPool = this.shuffleTracks(
+        candidates.length > 0 ? candidates : this.currentTrackPool,
+      )
+    }
+
+    return this.queuedTrackPool.shift() ?? null
+  }
+
+  private shuffleTracks(
+    tracks: SiteAudioTrackConfig[],
+  ): SiteAudioTrackConfig[] {
+    const shuffled = [...tracks]
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1))
+      const current = shuffled[index]
+      shuffled[index] = shuffled[swapIndex]
+      shuffled[swapIndex] = current
+    }
+
+    return shuffled
+  }
+
+  private playNextTrackFromPool(previousTrack: SiteAudioTrackConfig): void {
+    if (
+      !this.enabled ||
+      this.suspended ||
+      !this.hasUnlockedAudio() ||
+      this.currentTrackPool.length <= 1
+    ) {
+      return
+    }
+
+    const nextTrack = this.pickNextTrack(previousTrack)
+    if (nextTrack) {
+      this.swapTrack(nextTrack)
+      this.emit()
     }
   }
 
@@ -411,6 +498,8 @@ class SiteAudioManager {
   private stopCurrentTrack(): void {
     if (!this.currentHowl) {
       this.currentTrack = null
+      this.currentTrackPool = []
+      this.queuedTrackPool = []
       this.suspendedHowl = null
       return
     }
@@ -420,6 +509,8 @@ class SiteAudioManager {
 
     this.currentHowl = null
     this.currentTrack = null
+    this.currentTrackPool = []
+    this.queuedTrackPool = []
     if (this.suspendedHowl === howlToStop) {
       this.suspendedHowl = null
     }

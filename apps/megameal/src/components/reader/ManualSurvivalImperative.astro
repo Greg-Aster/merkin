@@ -1,0 +1,25 @@
+---
+interface Props {
+  imageSrc?: string
+  imageAlt?: string
+  class?: string
+}
+
+const {
+  imageSrc = '/first-contact/dont.webp',
+  imageAlt = "Critical survival imperative: don't approach, don't signal, don't investigate, don't even think.",
+  class: className = '',
+} = Astro.props
+---
+
+<figure class:list={['mb-8 overflow-hidden rounded-xl', className]}>
+  <img
+    src={imageSrc}
+    alt={imageAlt}
+    width="2048"
+    height="650"
+    class="block h-auto w-full"
+    loading="eager"
+    decoding="async"
+  />
+</figure>

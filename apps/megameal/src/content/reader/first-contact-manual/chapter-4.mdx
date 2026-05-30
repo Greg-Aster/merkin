@@ -28,22 +28,19 @@ contentFormat: "manual"
 lang: ""
 mascotContext: "Chapter 3 covered helpful aliens who accidentally eliminate you through customer service. This chapter covers the ones who eliminate you on purpose through superior military doctrine, predatory instincts, and competitive resource economics. Spoiler alert: intentional elimination proves significantly more efficient than accidental elimination."
 ---
+import ManualChapterHero from '../../../components/reader/ManualChapterHero.astro'
+import ManualChapterIndex from '../../../components/reader/ManualChapterIndex.astro'
+import ManualChapterLink from '../../../components/reader/ManualChapterLink.astro'
+import ManualComparisonPanel from '../../../components/reader/ManualComparisonPanel.astro'
+import ManualNotice from '../../../components/reader/ManualNotice.astro'
 
-<div className="bg-gradient-to-br from-red-900/60 to-black/40 border-2 border-red-500/80 rounded-xl p-8 mb-8">
-  <div className="flex items-center gap-4 mb-6">
-    <div className="w-16 h-16 bg-red-500/30 rounded-lg flex items-center justify-center">
-      <span className="text-red-400 text-2xl">⚔️</span>
-    </div>
-    <div>
-      <div className="text-3xl font-bold text-red-400">Chapter 4</div>
-      <p className="text-red-300 text-lg">When They Actually Want You Dead</p>
-    </div>
-  </div>
-  
-  <blockquote className="text-red-200 text-lg leading-relaxed">
-    While Chapter 3 examined the existential horror of helpful aliens who eliminate you through customer service excellence, this chapter addresses a more straightforward category of cosmic nightmare: civilizations that want you dead and possess the military sophistication to make it happen efficiently. These entities don't accidentally eliminate you while trying to help—they deliberately eliminate you because your continued existence interferes with their strategic objectives, resource requirements, or entertainment preferences.
-  </blockquote>
-</div>
+<ManualChapterHero
+  chapter="Chapter 4"
+  title="When They Actually Want You Dead"
+  icon="⚔️"
+  quote="While Chapter 3 examined the existential horror of helpful aliens who eliminate you through customer service excellence, this chapter addresses a more straightforward category of cosmic nightmare: civilizations that want you dead and possess the military sophistication to make it happen efficiently. These entities don't accidentally eliminate you while trying to help—they deliberately eliminate you because your continued existence interferes with their strategic objectives, resource requirements, or entertainment preferences."
+  quoteMarks={false}
+/>
 
 ## Chapter Overview
 
@@ -55,107 +52,55 @@ This chapter examines why human military strategy proves laughably inadequate ag
 
 ## Chapter Index
 
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-  <div className="lg:col-span-2">
-    <div className="bg-red-900/15 border border-red-500/30 rounded-lg p-6">
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 p-3 bg-red-900/20 rounded border border-red-500/20">
-          <span className="w-8 h-8 bg-red-500 rounded text-white text-sm flex items-center justify-center font-bold">4.1</span>
-          <span className="text-gray-200 font-semibold">Why Military Strategy Is Laughably Inadequate</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-red-900/20 rounded border border-red-500/20">
-          <span className="w-8 h-8 bg-red-500 rounded text-white text-sm flex items-center justify-center font-bold">4.2</span>
-          <span className="text-gray-200 font-semibold">Hostile Elimination Methodologies</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-red-900/20 rounded border border-red-500/20">
-          <span className="w-8 h-8 bg-red-500 rounded text-white text-sm flex items-center justify-center font-bold">4.3</span>
-          <span className="text-gray-200 font-semibold">Primary Hostile Engagement Patterns</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-red-900/20 rounded border border-red-500/20">
-          <span className="w-8 h-8 bg-red-500 rounded text-white text-sm flex items-center justify-center font-bold">4.4</span>
-          <span className="text-gray-200 font-semibold">Case File Analysis: Hostile Encounter Documentation</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-red-900/20 rounded border border-red-500/20">
-          <span className="w-8 h-8 bg-red-500 rounded text-white text-sm flex items-center justify-center font-bold">4.5</span>
-          <span className="text-gray-200 font-semibold">Military Evasion Doctrine</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div className="space-y-4">
-    <div className="bg-orange-900/15 border border-orange-500/30 rounded-lg p-4">
-      <div className="text-orange-400 font-bold text-sm mb-3 flex items-center gap-2">
-        <span className="w-60 h-5 bg-orange-500 rounded text-white text-xs flex items-center justify-center">⚔️ Hostile Categories</span>
-      </div>
-      <div className="space-y-1 text-xs">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-          <span className="text-gray-300">Resource Competitors (Dark Forest theory)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-          <span className="text-gray-300">Predatory Hunters (sport and sustenance)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-          <span className="text-gray-300">Military Conquest (territorial expansion)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-          <span className="text-gray-300">Economic Exploitation (resource harvesting)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-          <span className="text-gray-300">Environmental Warfare (planetary modification)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-          <span className="text-gray-300">Entertainment Industry (cosmic gladiator games)</span>
-        </div>
-      </div>
-    </div>
-    
-    <div className="bg-red-900/15 border border-red-500/30 rounded-lg p-4">
-      <div className="text-red-400 font-bold text-sm mb-3 flex items-center gap-2">
-        <span className="w-60 h-5 bg-red-500 rounded text-white text-xs flex items-center justify-center">💀 Military Statistics</span>
-      </div>
-      <div className="space-y-1 text-xs text-gray-300">
-        <div>• Hostile alien survival rate: 46%</div>
-        <div>• Helpful alien survival rate: 23%</div>
-        <div>• Reason: Hostile intent enables rapid threat recognition</div>
-        <div>• Average engagement duration: 12 minutes</div>
-        <div>• Military response effectiveness: 0.2%</div>
-        <div>• Successful evacuation rate: 45.8%</div>
-        <div>• Career change to civilian life: 89%</div>
-      </div>
-    </div>
-    
-    <div className="bg-gray-900/15 border border-gray-500/30 rounded-lg p-4">
-      <div className="text-gray-400 font-bold text-sm mb-3 flex items-center gap-2">
-        <span className="w-60 h-5 bg-gray-500 rounded text-white text-xs flex items-center justify-center">📊 Engagement Types</span>
-      </div>
-      <div className="space-y-1 text-xs text-gray-300">
-        <div>• Preemptive Strike Operations (most common)</div>
-        <div>• Resource Acquisition Raids (pragmatic)</div>
-        <div>• Territorial Expansion Campaigns (systematic)</div>
-        <div>• Environmental Warfare (planetary scale)</div>
-        <div>• Economic Exploitation (species commoditization)</div>
-        <div>• Entertainment Harvesting (cosmic TV)</div>
-      </div>
-    </div>
-  </div>
-</div>
+<ManualChapterIndex
+  items={[
+    { number: '4.1', title: 'Why Military Strategy Is Laughably Inadequate' },
+    { number: '4.2', title: 'Hostile Elimination Methodologies' },
+    { number: '4.3', title: 'Primary Hostile Engagement Patterns' },
+    { number: '4.4', title: 'Case File Analysis: Hostile Encounter Documentation' },
+    { number: '4.5', title: 'Military Evasion Doctrine' },
+  ]}
+  sidebarPanels={[
+    {
+      title: '⚔️ Hostile Categories',
+      items: [
+        { tone: 'red', label: 'Resource Competitors', detail: 'Dark Forest theory' },
+        { tone: 'orange', label: 'Predatory Hunters', detail: 'sport and sustenance' },
+        { tone: 'yellow', label: 'Military Conquest', detail: 'territorial expansion' },
+        { tone: 'green', label: 'Economic Exploitation', detail: 'resource harvesting' },
+        { tone: 'blue', label: 'Environmental Warfare', detail: 'planetary modification' },
+        { tone: 'purple', label: 'Entertainment Industry', detail: 'cosmic gladiator games' },
+      ],
+    },
+    {
+      title: '💀 Military Statistics',
+      lines: [
+        '• Hostile alien survival rate: 46%',
+        '• Helpful alien survival rate: 23%',
+        '• Reason: Hostile intent enables rapid threat recognition',
+        '• Average engagement duration: 12 minutes',
+        '• Military response effectiveness: 0.2%',
+        '• Successful evacuation rate: 45.8%',
+        '• Career change to civilian life: 89%',
+      ],
+    },
+    {
+      title: '📊 Engagement Types',
+      lines: [
+        '• Preemptive Strike Operations (most common)',
+        '• Resource Acquisition Raids (pragmatic)',
+        '• Territorial Expansion Campaigns (systematic)',
+        '• Environmental Warfare (planetary scale)',
+        '• Economic Exploitation (species commoditization)',
+        '• Entertainment Harvesting (cosmic TV)',
+      ],
+    },
+  ]}
+/>
 
-<div className="bg-gradient-to-r from-red-900/40 to-black/20 border border-red-500/50 rounded-lg p-6 mt-6">
-  <div className="flex items-center gap-3 mb-4">
-    <span className="text-red-400 text-2xl">⚠️</span>
-    <h3 className="text-red-400 font-bold text-xl">Critical Distinction</h3>
-  </div>
-  <p className="text-red-200 leading-relaxed">
-    Hostile first contact scenarios differ fundamentally from helpful-accident scenarios in one crucial respect: threat recognition occurs immediately rather than gradually. When entities announce their intention to eliminate you, human psychology triggers appropriate fear responses enabling rapid evacuation. Paradoxically, this makes deliberately hostile aliens statistically less dangerous than helpful ones, though individual encounters remain spectacularly lethal.
-  </p>
-</div>
+<ManualNotice tone="red" title="Critical Distinction" icon="⚠️" class="mt-6">
+  Hostile first contact scenarios differ fundamentally from helpful-accident scenarios in one crucial respect: threat recognition occurs immediately rather than gradually. When entities announce their intention to eliminate you, human psychology triggers appropriate fear responses enabling rapid evacuation. Paradoxically, this makes deliberately hostile aliens statistically less dangerous than helpful ones, though individual encounters remain spectacularly lethal.
+</ManualNotice>
 
 ---
 
@@ -165,43 +110,30 @@ Human military doctrine evolved to address terrestrial conflicts between approxi
 
 ### The Fundamental Military Mismatch
 
-<div className="bg-red-900/15 border-2 border-red-500/50 rounded-lg p-6 mb-6">
-  <div className="flex items-center gap-4 mb-4">
-    <div className="w-16 h-16 bg-red-500 rounded-lg flex items-center justify-center">
-      <span className="text-white font-bold text-2xl">⚔️</span>
-    </div>
-    <div>
-      <h3 className="text-2xl font-bold text-red-400 mb-2">The Strategic Impossibility</h3>
-      <p className="text-red-300 text-sm">Why military evolution prepared us for the wrong type of war entirely</p>
-    </div>
-  </div>
-  
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div className="bg-red-900/20 p-4 rounded border border-red-500/30">
-      <h4 className="text-red-400 font-bold mb-3">What Our Military Is Designed For</h4>
-      <ul className="text-gray-300 text-sm space-y-2">
-        <li>Roughly equivalent technological opponents (peer adversaries)</li>
-        <li>Conflicts over terrestrial resources within Earth parameters</li>
-        <li>Combat operations on human timescales (hours to months)</li>
-        <li>Enemies detectable by conventional sensors (visible targets)</li>
-        <li>Adversaries operating under familiar physics (Newton's laws)</li>
-        <li>Strategic objectives comprehensible to human psychology</li>
-      </ul>
-    </div>
-    
-    <div className="bg-red-900/20 p-4 rounded border border-red-500/30">
-      <h4 className="text-red-400 font-bold mb-3">What We Actually Face In Cosmic Warfare</h4>
-      <ul className="text-gray-300 text-sm space-y-2">
-        <li>Technology gaps spanning geological eras (godlike capabilities)</li>
-        <li>Resource conflicts over galactic territories and stellar energy</li>
-        <li>Military campaigns planned across millennia (geological patience)</li>
-        <li>Enemies operating invisibly across multiple dimensions</li>
-        <li>Adversaries that edit physics to tactical advantage</li>
-        <li>Strategic objectives based on incomprehensible philosophies</li>
-      </ul>
-    </div>
-  </div>
-</div>
+<ManualComparisonPanel
+  tone="red"
+  icon="⚔️"
+  title="The Strategic Impossibility"
+  subtitle="Why military evolution prepared us for the wrong type of war entirely"
+  leftTitle="What Our Military Is Designed For"
+  leftItems={[
+    'Roughly equivalent technological opponents (peer adversaries)',
+    'Conflicts over terrestrial resources within Earth parameters',
+    'Combat operations on human timescales (hours to months)',
+    'Enemies detectable by conventional sensors (visible targets)',
+    "Adversaries operating under familiar physics (Newton's laws)",
+    'Strategic objectives comprehensible to human psychology',
+  ]}
+  rightTitle="What We Actually Face In Cosmic Warfare"
+  rightItems={[
+    'Technology gaps spanning geological eras (godlike capabilities)',
+    'Resource conflicts over galactic territories and stellar energy',
+    'Military campaigns planned across millennia (geological patience)',
+    'Enemies operating invisibly across multiple dimensions',
+    'Adversaries that edit physics to tactical advantage',
+    'Strategic objectives based on incomprehensible philosophies',
+  ]}
+/>
 
 ### Strategic Doctrine Failures: Why Everything We Know Is Wrong
 
@@ -1737,47 +1669,35 @@ When facing entities that can manipulate reality, time, and space as military as
 ## Chapter References and Equipment Guide
 
 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-  <a href="/reader/first-contact-manual/chapter-5/" className="group block bg-gradient-to-br from-purple-900/40 to-pink-900/20 border-2 border-purple-500/40 rounded-lg p-6 transition-all duration-300 hover:border-purple-400 hover:bg-purple-900/50 hover:shadow-2xl hover:shadow-purple-500/10">
-    <div className="flex items-center gap-4 mb-4">
-      <div className="w-16 h-16 bg-purple-500/20 rounded-lg flex items-center justify-center text-purple-400 text-2xl font-bold transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">5</div>
-      <div className="flex-1">
-        <h3 className="text-purple-300 font-bold text-xl leading-tight">Advanced Threat Recognition</h3>
-        <p className="text-purple-400 text-sm font-jetbrains-mono">Detection methodologies for cosmic nightmare identification</p>
-      </div>
-    </div>
-    <div className="bg-purple-900/20 border border-purple-500/30 rounded p-4">
-      <p className="text-purple-200 text-sm leading-relaxed">
-        Practical detection methodologies for identifying cosmic threats before they identify you. Covers sensor limitations, recognition protocols, stealth entities, and why most xenobiological threats remain invisible until the moment they decide to eliminate you. Essential field operative survival techniques and equipment recommendations.
-      </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <span className="bg-yellow-900/40 text-yellow-300 px-2 py-1 rounded text-xs">Detection Arrays</span>
-        <span className="bg-red-900/40 text-red-300 px-2 py-1 rounded text-xs">Stealth Entities</span>
-        <span className="bg-blue-900/40 text-blue-300 px-2 py-1 rounded text-xs">Sensor Limitations</span>
-        <span className="bg-green-900/40 text-green-300 px-2 py-1 rounded text-xs">Field Equipment</span>
-      </div>
-    </div>
-  </a>
+  <ManualChapterLink
+    href="/reader/first-contact-manual/chapter-5/"
+    number="5"
+    title="Advanced Threat Recognition"
+    subtitle="Detection methodologies for cosmic nightmare identification"
+    tone="purple"
+    description="Practical detection methodologies for identifying cosmic threats before they identify you. Covers sensor limitations, recognition protocols, stealth entities, and why most xenobiological threats remain invisible until the moment they decide to eliminate you. Essential field operative survival techniques and equipment recommendations."
+    tags={[
+      { tone: 'yellow', label: 'Detection Arrays' },
+      { tone: 'red', label: 'Stealth Entities' },
+      { tone: 'blue', label: 'Sensor Limitations' },
+      { tone: 'green', label: 'Field Equipment' },
+    ]}
+  />
 
-  <a href="/reader/first-contact-manual/chapter-3/" className="group block bg-gradient-to-br from-blue-900/40 to-cyan-900/20 border-2 border-blue-500/40 rounded-lg p-6 transition-all duration-300 hover:border-blue-400 hover:bg-blue-900/50 hover:shadow-2xl hover:shadow-blue-500/10">
-    <div className="flex items-center gap-4 mb-4">
-      <div className="w-16 h-16 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400 text-2xl font-bold transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">3</div>
-      <div className="flex-1">
-        <h3 className="text-blue-300 font-bold text-xl leading-tight">Helpful Alien Disasters</h3>
-        <p className="text-blue-400 text-sm font-jetbrains-mono">When customer service becomes extinction</p>
-      </div>
-    </div>
-    <div className="bg-blue-900/20 border border-blue-500/30 rounded p-4">
-      <p className="text-blue-200 text-sm leading-relaxed">
-        Complete analysis of why helpful aliens achieve 77% elimination rates through customer service excellence. Covers the politeness problem, scale mismatches, communication catastrophes, and why entities trying to help you represent humanity's most dangerous threat category.
-      </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <span className="bg-green-900/40 text-green-300 px-2 py-1 rounded text-xs">Customer Service</span>
-        <span className="bg-orange-900/40 text-orange-300 px-2 py-1 rounded text-xs">Scale Mismatches</span>
-        <span className="bg-purple-900/40 text-purple-300 px-2 py-1 rounded text-xs">Communication Hazards</span>
-        <span className="bg-red-900/40 text-red-300 px-2 py-1 rounded text-xs">Jello Apocalypse</span>
-      </div>
-    </div>
-  </a>
+  <ManualChapterLink
+    href="/reader/first-contact-manual/chapter-3/"
+    number="3"
+    title="Helpful Alien Disasters"
+    subtitle="When customer service becomes extinction"
+    tone="blue"
+    description="Complete analysis of why helpful aliens achieve 77% elimination rates through customer service excellence. Covers the politeness problem, scale mismatches, communication catastrophes, and why entities trying to help you represent humanity's most dangerous threat category."
+    tags={[
+      { tone: 'green', label: 'Customer Service' },
+      { tone: 'orange', label: 'Scale Mismatches' },
+      { tone: 'purple', label: 'Communication Hazards' },
+      { tone: 'red', label: 'Jello Apocalypse' },
+    ]}
+  />
 </div>
 
 ---

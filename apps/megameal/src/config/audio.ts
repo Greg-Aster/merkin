@@ -1,5 +1,6 @@
 export {
   getTrackForPathname,
+  getTracksForPathname,
   normalizeAudioPathname,
   siteAudioConfig,
   siteAudioStorageKeys,

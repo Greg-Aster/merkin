@@ -34,6 +34,12 @@ const readerBannerPost = {
     showToc: false,
   },
 }
+
+const readerArticleClass = [
+  'card-base relative z-10 scroll-mt-24 overflow-hidden rounded-lg text-white',
+  "bg-[linear-gradient(rgba(2,8,14,0.88),rgba(2,8,14,0.95)),url('/first-contact/background.webp')] bg-cover bg-top bg-no-repeat md:bg-fixed",
+  'border border-cyan-300/20 px-5 py-5 shadow-2xl shadow-cyan-950/30 md:px-9 md:py-7',
+].join(' ')
 ---
 
 <MainGridLayout
@@ -52,8 +58,8 @@ const readerBannerPost = {
 
   <div class="w-full">
     <main class="min-w-0">
-      <article id="reader-page" class="card-base z-10 scroll-mt-24 rounded-lg px-5 py-5 md:px-9 md:py-7">
-        <nav class="mb-5 flex items-center justify-between gap-3 rounded-lg border border-black/10 bg-black/[0.03] p-2 dark:border-white/10 dark:bg-white/[0.06]" aria-label="Reader controls">
+      <article id="reader-page" class={readerArticleClass}>
+        <nav class="mb-5 flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/30 p-2 backdrop-blur-sm" aria-label="Reader controls">
           <a
             href={previousEntry ? firstContactManualHref(previousEntry, '#reader-page') : '#'}
             class:list={[
@@ -73,7 +79,7 @@ const readerBannerPost = {
             <div class="text-xs font-bold uppercase tracking-[0.14em] text-[var(--primary)]">
               Entry {currentIndex + 1} of {entries.length}
             </div>
-            <div class="truncate text-sm font-bold text-black/60 dark:text-white/60">
+            <div class="truncate text-sm font-bold text-white/60">
               Universal Reader
             </div>
           </div>
@@ -94,35 +100,40 @@ const readerBannerPost = {
           </a>
         </nav>
 
-        <div class="mb-4 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-black/45 dark:text-white/45">
+        <div class="mb-4 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-white/45">
           <span>{FIRST_CONTACT_MANUAL_TITLE}</span>
           <span aria-hidden="true">/</span>
           <span>Entry {currentIndex + 1}</span>
         </div>
 
-        <div class="grid gap-5 md:grid-cols-[minmax(0,1fr)_12rem] md:items-start">
+        <div class="grid gap-5 md:items-start">
           <div>
-            <h1 class="mb-3 text-3xl font-black leading-tight text-black/90 dark:text-white/90 md:text-5xl">
+            <h1 class="mb-3 text-3xl font-black leading-tight text-white/90 md:text-5xl">
               {entry.data.title}
             </h1>
-            <p class="text-base leading-relaxed text-black/65 dark:text-white/65 md:text-lg">
+            <p class="text-base leading-relaxed text-white/65 md:text-lg">
               {entry.data.description}
             </p>
           </div>
-          <img
-            src={entry.data.image || '/posts/timeline/dont.png'}
-            alt={`${entry.data.title} illustration`}
-            loading="eager"
-            decoding="async"
-            class="aspect-[4/5] w-full rounded-lg object-cover"
-          />
         </div>
 
-        <Markdown class="markdown-content">
+        {entry.data.image && (
+          <figure class="my-8 overflow-hidden rounded-xl border border-cyan-500/30 bg-black/30 shadow-2xl shadow-cyan-500/10">
+            <img
+              src={entry.data.image}
+              alt={`${entry.data.title} illustration`}
+              loading="eager"
+              decoding="async"
+              class="aspect-video w-full object-cover"
+            />
+          </figure>
+        )}
+
+        <Markdown class="markdown-content prose-invert">
           <Content />
         </Markdown>
 
-        <nav class="mt-8 flex items-center justify-between gap-3 border-t border-dashed border-black/10 pt-5 dark:border-white/10" aria-label="Reader controls">
+        <nav class="mt-8 flex items-center justify-between gap-3 border-t border-dashed border-white/10 pt-5" aria-label="Reader controls">
           <a
             href={previousEntry ? firstContactManualHref(previousEntry, '#reader-page') : '#'}
             class:list={[
@@ -137,7 +148,7 @@ const readerBannerPost = {
               <span class="block text-xs font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
                 Previous
               </span>
-              <span class="line-clamp-1 block text-sm font-bold text-black/70 dark:text-white/70">
+              <span class="line-clamp-1 block text-sm font-bold text-white/70">
                 {previousEntry?.data.title ?? 'Start of book'}
               </span>
             </span>
@@ -156,7 +167,7 @@ const readerBannerPost = {
               <span class="block text-xs font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
                 Next
               </span>
-              <span class="line-clamp-1 block text-sm font-bold text-black/70 dark:text-white/70">
+              <span class="line-clamp-1 block text-sm font-bold text-white/70">
                 {nextEntry?.data.title ?? 'End of book'}
               </span>
             </span>

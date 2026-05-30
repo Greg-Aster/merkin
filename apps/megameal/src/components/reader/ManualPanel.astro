@@ -1,0 +1,137 @@
+---
+type Tone =
+  | 'blue'
+  | 'cyan'
+  | 'gray'
+  | 'green'
+  | 'orange'
+  | 'purple'
+  | 'red'
+  | 'teal'
+  | 'yellow'
+type Emphasis = 'subtle' | 'strong'
+type IconStyle = 'soft' | 'solid'
+
+interface Props {
+  tone?: Tone
+  emphasis?: Emphasis
+  icon?: string
+  iconStyle?: IconStyle
+  title?: string
+  subtitle?: string
+  class?: string
+}
+
+const {
+  tone = 'blue',
+  emphasis = 'subtle',
+  icon,
+  iconStyle = 'soft',
+  title,
+  subtitle,
+  class: className = '',
+} = Astro.props
+
+const toneClasses: Record<Tone, {
+  panel: string
+  iconSoft: string
+  iconSolid: string
+  title: string
+  subtitle: string
+}> = {
+  blue: {
+    panel: 'border-blue-500/50 bg-blue-900/15',
+    iconSoft: 'bg-blue-500/20 text-blue-400',
+    iconSolid: 'bg-blue-500 text-white',
+    title: 'text-blue-400',
+    subtitle: 'text-blue-300',
+  },
+  cyan: {
+    panel: 'border-cyan-500/50 bg-cyan-900/15',
+    iconSoft: 'bg-cyan-500/20 text-cyan-400',
+    iconSolid: 'bg-cyan-500 text-white',
+    title: 'text-cyan-400',
+    subtitle: 'text-cyan-300',
+  },
+  gray: {
+    panel: 'border-gray-500/50 bg-gray-900/50',
+    iconSoft: 'bg-gray-500/20 text-gray-300',
+    iconSolid: 'bg-gray-500 text-white',
+    title: 'text-gray-300',
+    subtitle: 'text-gray-400',
+  },
+  green: {
+    panel: 'border-green-500/50 bg-green-900/15',
+    iconSoft: 'bg-green-500/20 text-green-400',
+    iconSolid: 'bg-green-500 text-white',
+    title: 'text-green-400',
+    subtitle: 'text-green-300',
+  },
+  orange: {
+    panel: 'border-orange-500/50 bg-orange-900/15',
+    iconSoft: 'bg-orange-500/20 text-orange-400',
+    iconSolid: 'bg-orange-500 text-white',
+    title: 'text-orange-400',
+    subtitle: 'text-orange-300',
+  },
+  purple: {
+    panel: 'border-purple-500/50 bg-purple-900/15',
+    iconSoft: 'bg-purple-500/20 text-purple-400',
+    iconSolid: 'bg-purple-500 text-white',
+    title: 'text-purple-400',
+    subtitle: 'text-purple-300',
+  },
+  red: {
+    panel: 'border-red-500/50 bg-red-900/15',
+    iconSoft: 'bg-red-500/20 text-red-400',
+    iconSolid: 'bg-red-500 text-white',
+    title: 'text-red-400',
+    subtitle: 'text-red-300',
+  },
+  teal: {
+    panel: 'border-teal-500/50 bg-teal-900/15',
+    iconSoft: 'bg-teal-500/20 text-teal-400',
+    iconSolid: 'bg-teal-500 text-white',
+    title: 'text-teal-400',
+    subtitle: 'text-teal-300',
+  },
+  yellow: {
+    panel: 'border-yellow-500/50 bg-yellow-900/15',
+    iconSoft: 'bg-yellow-500/20 text-yellow-400',
+    iconSolid: 'bg-yellow-500 text-white',
+    title: 'text-yellow-400',
+    subtitle: 'text-yellow-300',
+  },
+}
+
+const selected = toneClasses[tone]
+const iconClass = iconStyle === 'solid' ? selected.iconSolid : selected.iconSoft
+---
+
+<section
+  class:list={[
+    'rounded-lg p-6',
+    emphasis === 'strong' ? 'border-2' : 'border',
+    selected.panel,
+    className,
+  ]}
+>
+  {(icon || title || subtitle) && (
+    <header class="mb-4 flex items-center gap-4">
+      {icon && (
+        <div class:list={['flex h-16 w-16 shrink-0 items-center justify-center rounded-lg', iconClass]}>
+          <span class="text-2xl font-bold">{icon}</span>
+        </div>
+      )}
+
+      <div class="min-w-0 flex-1">
+        {title && <h3 class:list={['text-xl font-bold leading-tight', selected.title]}>{title}</h3>}
+        {subtitle && <p class:list={['mt-1 text-sm', selected.subtitle]}>{subtitle}</p>}
+      </div>
+    </header>
+  )}
+
+  <div class="leading-relaxed text-gray-300">
+    <slot />
+  </div>
+</section>

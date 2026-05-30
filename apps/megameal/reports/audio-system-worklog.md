@@ -87,3 +87,12 @@
 - `git diff --check`: passed.
 - `pnpm --dir apps/megameal audit:css`: passed with 15 existing baseline items and 0 new CSS audit items.
 - `pnpm --dir apps/megameal exec biome check ...`: failed on existing full-file format/import-order debt in `HomeIntroEnvironment.svelte` and `HomeIntroEnvironmentLoader.svelte`; no formatter write was run because it would create broad unrelated churn during this audio cleanup.
+
+### Ambient playlist support
+
+- Kept one Howler-based ambience system; no second playback engine was added.
+- `getTracksForPathname()` now returns every matching track at the most specific route length, so duplicate route entries become a page playlist.
+- `siteAudioManager` now stores the current track pool, picks a random first track, and advances through a shuffled queue when a non-looping pooled track ends.
+- Single-track pages still loop as before.
+- Page-level ambient payloads now accept either one track object or an array of track objects.
+- Validation: `pnpm --dir apps/megameal type-check`, `pnpm --filter @merkin/shared-audio type-check`, focused `pnpm --dir apps/megameal exec biome check ...`, `git diff --check`, and `pnpm --dir apps/megameal audit:css:changed` passed.

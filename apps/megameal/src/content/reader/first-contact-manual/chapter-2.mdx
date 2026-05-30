@@ -28,26 +28,18 @@ contentFormat: "manual"
 lang: ""
 mascotContext: "Meet the neighbors! This comprehensive field guide covers the types of alien civilizations you might encounter, organized by their unique approaches to making your existence difficult. Each entry includes survival tips, threat assessment, and practical advice from someone who's been there."
 ---
+import ManualChapterHero from '../../../components/reader/ManualChapterHero.astro'
+import ManualChapterIndex from '../../../components/reader/ManualChapterIndex.astro'
+import ManualChapterLink from '../../../components/reader/ManualChapterLink.astro'
+import ManualNotice from '../../../components/reader/ManualNotice.astro'
 
-<div className="bg-gradient-to-br from-blue-900/30 to-cyan-900/20 border-2 border-blue-500/50 rounded-xl p-8 mb-8">
-  <div className="flex items-center gap-4 mb-6">
-    <div className="w-16 h-16 bg-blue-500/20 rounded-lg flex items-center justify-center">
-      <span className="text-blue-400 text-5xl">🏛️</span>
-    </div>
-    <div>
-      <div className="text-3xl font-bold text-blue-400">Chapter 2</div>
-      <div className="text-blue-300 text-lg">A Bestiary of Civilizations</div>
-    </div>
-  </div>
-  
-  <blockquote className="text-blue-200 text-lg leading-relaxed italic border-l-4 border-blue-400 pl-6">
-    "The universe, it seems, has a perverse sense of humor when it comes to technological encounters. The scientific consensus indicates that millions, perhaps billions, of civilizations could exist in our galaxy alone. However, the probability of any two societies encountering each other at a precisely comparable stage of technological development is, to put it mildly, infinitesimally small."
-  </blockquote>
-  
-  <div className="text-right mt-4">
-    <cite className="text-blue-300 text-sm">- Overheard broadcast, Cygnus 555 alpha </cite>
-  </div>
-</div>
+<ManualChapterHero
+  chapter="Chapter 2"
+  title="A Bestiary of Civilizations"
+  icon="🏛️"
+  quote="The universe, it seems, has a perverse sense of humor when it comes to technological encounters. The scientific consensus indicates that millions, perhaps billions, of civilizations could exist in our galaxy alone. However, the probability of any two societies encountering each other at a precisely comparable stage of technological development is, to put it mildly, infinitesimally small."
+  cite="Overheard broadcast, Cygnus 555 alpha"
+/>
 
 ---
 
@@ -61,77 +53,25 @@ This chapter provides classification frameworks for understanding the magnificen
  
 ## Chapter Index
 
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-  <div className="lg:col-span-2">
-    <div className="bg-blue-900/15 border border-blue-500/30 rounded-lg p-6">
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 p-3 bg-blue-900/20 rounded border border-blue-500/20">
-          <span className="w-8 h-8 bg-blue-500 rounded text-white text-sm flex items-center justify-center font-bold">2.1</span>
-          <span className="text-gray-200 font-semibold">The Technological Gap Paradox</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-blue-900/20 rounded border border-blue-500/20">
-          <span className="w-8 h-8 bg-blue-500 rounded text-white text-sm flex items-center justify-center font-bold">2.2</span>
-          <span className="text-gray-200 font-semibold">Energy-Based Classifications: The Power Hierarchy</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-blue-900/20 rounded border border-blue-500/20">
-          <span className="w-8 h-8 bg-blue-500 rounded text-white text-sm flex items-center justify-center font-bold">2.3</span>
-          <span className="text-gray-200 font-semibold">Organizational Matrices: Collective Intelligence Patterns</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-blue-900/20 rounded border border-blue-500/20">
-          <span className="w-8 h-8 bg-blue-500 rounded text-white text-sm flex items-center justify-center font-bold">2.4</span>
-          <span className="text-gray-200 font-semibold">Alternative Biochemistries: Beyond Carbon Assumptions</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-blue-900/20 rounded border border-blue-500/20">
-          <span className="w-8 h-8 bg-blue-500 rounded text-white text-sm flex items-center justify-center font-bold">2.5</span>
-          <span className="text-gray-200 font-semibold">Post-Biological Evolution: When Matter Becomes Optional</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-blue-900/20 rounded border border-blue-500/20">
-          <span className="w-8 h-8 bg-blue-500 rounded text-white text-sm flex items-center justify-center font-bold">2.6</span>
-          <span className="text-gray-200 font-semibold">Case Study: The Kepler-442 Cosmic Architects</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div className="lg:col-span-1">
-    <div className="bg-gray-900/50 border border-gray-500/50 rounded-lg p-4 sticky top-4">
-      <div className="text-gray-300 font-bold text-lg mb-3 flex items-center gap-2">
-        <span className="w-6 h-5 bg-gray-500 rounded text-white text-xs flex items-center justify-center">🎯</span>
-        <span>Classification Types</span>
-      </div>
-      <div className="space-y-2 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-          <span className="text-yellow-400 font-semibold">RESOURCE COMPETITORS</span>
-          <span className="text-gray-400 text-xs ml-auto">Rational actors</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-          <span className="text-blue-400 font-semibold">COSMIC ARCHITECTS</span>
-          <span className="text-gray-400 text-xs ml-auto">Indifferent builders</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-          <span className="text-purple-400 font-semibold">LOGIC INCOMPATIBLE</span>
-          <span className="text-gray-400 text-xs ml-auto">Systemic impossibility</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <span className="text-red-400 font-semibold">POST-BIOLOGICAL</span>
-          <span className="text-gray-400 text-xs ml-auto">Reality editors</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          <span className="text-green-400 font-semibold">EXOTIC CHEMISTRY</span>
-          <span className="text-gray-400 text-xs ml-auto">Environmental incompatible</span>
-        </div>
-      </div>
-      <div className="mt-3 p-2 bg-gray-800/50 rounded border border-gray-600/30">
-        <p className="text-xs text-gray-400 italic">Each type represents fundamentally different approaches to existence and expansion.</p>
-      </div>
-    </div>
-  </div>
-</div>
+<ManualChapterIndex
+  items={[
+    { number: '2.1', title: 'The Technological Gap Paradox' },
+    { number: '2.2', title: 'Energy-Based Classifications: The Power Hierarchy' },
+    { number: '2.3', title: 'Organizational Matrices: Collective Intelligence Patterns' },
+    { number: '2.4', title: 'Alternative Biochemistries: Beyond Carbon Assumptions' },
+    { number: '2.5', title: 'Post-Biological Evolution: When Matter Becomes Optional' },
+    { number: '2.6', title: 'Case Study: The Kepler-442 Cosmic Architects' },
+  ]}
+  sidebarTitle="🎯 Classification Types"
+  sidebarItems={[
+    { tone: 'yellow', label: 'RESOURCE COMPETITORS', detail: 'Rational actors' },
+    { tone: 'blue', label: 'COSMIC ARCHITECTS', detail: 'Indifferent builders' },
+    { tone: 'purple', label: 'LOGIC INCOMPATIBLE', detail: 'Systemic impossibility' },
+    { tone: 'red', label: 'POST-BIOLOGICAL', detail: 'Reality editors' },
+    { tone: 'green', label: 'EXOTIC CHEMISTRY', detail: 'Environmental incompatible' },
+  ]}
+  sidebarNote="Each type represents fundamentally different approaches to existence and expansion."
+/>
 
 ---
 
@@ -197,11 +137,9 @@ While we often think of technological development as linear progression, the rea
 
 The Planck Scale Manipulation civilizations of Grimace 581c, for instance, treat spacetime fabric editing as casually as we might adjust a thermostat. Their "primitive" ancestors merely achieved dimensional traversal—a capability that would render our physics textbooks into quaint historical curiosities.
 
-<div className="bg-orange-900/20 border-l-4 border-orange-500 p-4 my-6">
-  <p className="text-orange-200 leading-relaxed">
-    <span className="text-orange-400 font-bold">The Contact Paradox:</span> The technological gap ensures that beneficial contact requires the more advanced civilization to exercise deliberate restraint—essentially, cosmic charity. This transforms first contact from diplomatic negotiation into hoping that cosmic entities find your existence charming rather than inconvenient.
-  </p>
-</div>
+<ManualNotice tone="orange" variant="bar">
+  <span className="text-orange-400 font-bold">The Contact Paradox:</span> The technological gap ensures that beneficial contact requires the more advanced civilization to exercise deliberate restraint—essentially, cosmic charity. This transforms first contact from diplomatic negotiation into hoping that cosmic entities find your existence charming rather than inconvenient.
+</ManualNotice>
 
 Understanding this paradox reveals why the universe has seemingly produced no successful inter-civilizational alliances, despite the mathematical certainty of abundant intelligence. Each species develops in isolation, reaching technological maturity separated by gulfs that make meaningful cooperation impossible. We exist in a cosmos of cosmic hermits, each locked in their own developmental trajectory.
 
@@ -1031,26 +969,19 @@ The diversity of civilizational types ensures that contact scenarios involve not
 
 ---
 
-  {/* Chapter 3 */}
-  <a href="/reader/first-contact-manual/chapter-3/" className="group block bg-gradient-to-br from-orange-900/40 to-red-900/20 border-2 border-orange-500/40 rounded-lg p-6 transition-all duration-300 hover:border-orange-400 hover:bg-orange-900/50 hover:shadow-2xl hover:shadow-orange-500/10">
-    <div className="flex items-center gap-4 mb-4">
-      <div className="w-16 h-16 bg-orange-500/20 rounded-lg flex items-center justify-center text-orange-400 text-2xl font-bold transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">3</div>
-      <div className="flex-1">
-        <h3 className="text-orange-300 font-bold text-xl leading-tight">Xenobiological Field Methodologies</h3>
-        <p className="text-orange-400 text-sm font-mono">Most threats remain undetectable until annihilation.</p>
-      </div>
-    </div>
-    <div className="bg-orange-900/20 border border-orange-500/30 rounded p-4">
-      <p className="text-orange-200 text-sm leading-relaxed">
-        Practical detection methodologies for identifying cosmic threats before they identify you. Covers sensor limitations, recognition protocols, and why most xenobiological entities remain invisible until the moment they decide to eliminate you. Essential field operative survival techniques.
-      </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <span className="bg-yellow-900/40 text-yellow-300 px-2 py-1 rounded text-xs">Detection Arrays</span>
-        <span className="bg-red-900/40 text-red-300 px-2 py-1 rounded text-xs">Stealth Entities</span>
-        <span className="bg-blue-900/40 text-blue-300 px-2 py-1 rounded text-xs">Sensor Limitations</span>
-      </div>
-    </div>
-  </a>
+<ManualChapterLink
+  href="/reader/first-contact-manual/chapter-3/"
+  number="3"
+  title="Xenobiological Field Methodologies"
+  subtitle="Most threats remain undetectable until annihilation."
+  tone="orange"
+  description="Practical detection methodologies for identifying cosmic threats before they identify you. Covers sensor limitations, recognition protocols, and why most xenobiological entities remain invisible until the moment they decide to eliminate you. Essential field operative survival techniques."
+  tags={[
+    { tone: 'yellow', label: 'Detection Arrays' },
+    { tone: 'red', label: 'Stealth Entities' },
+    { tone: 'blue', label: 'Sensor Limitations' },
+  ]}
+/>
 
 ---
 

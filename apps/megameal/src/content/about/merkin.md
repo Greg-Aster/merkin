@@ -1,10 +1,10 @@
 ---
 title: "About Merkin Lord of Love and Light"
-description: "Learn about Merkin, the ancient god of love and acceptance who serves as curator of the MEGAMEAL Universe after eons of cosmic conflict."
+description: "Learn about Merkin, the ancient god of love and acceptance."
 name: "Merkin Lord of Love and Light"
-role: "God of Love & Acceptance, Curator of the MEGAMEAL Universe"
+role: "God of Love & Acceptance"
 avatar: "/about/video/merkin.webm"
-bio: "Ancient deity of love who found purpose in chronicling the cosmos"
+bio: "Ancient deity"
 published: 2024-10-15
 updated: 2024-12-20
 tags: ["MEGAMEAL", "Divine", "Cosmic", "Love", "Ancient Gods"]
@@ -28,17 +28,17 @@ bannerData:
 
 ## The Divine Chronicler
 
-Merkin Lord of Love and Light is far more than a simple curator—he is an ancient deity, the God of Love and Acceptance, whose divine essence has become interwoven with the very fabric of the MEGAMEAL Universe. With his distinctive pink mohawk and an unexpectedly muscular form that belies his gentle nature, Merkin embodies the paradox of divine power tempered by infinite compassion.
+Merkin Lord of Love and Light is far more than a simple curator—he is an ancient deity, the God of Love and Acceptance, whose divine essence has become interwoven with the very fabric of the MEGAMEAL Universe. His distinctive pink hair and an muscular form may seem intimidating, but that belies his gentle nature, Merkin embodies divine power tempered by infinite compassion.
 
 ## Ancient Origins & The Great War
 
-In the primordial ages, before time had learned to keep proper records, Merkin stood as part of a pantheon of benevolent gods who served as the universe's defense against creeping eldritch horrors. Alongside his sister **Chronara, the Goddess of Time**, and his ally **Garfunkel, the Reaper of Soles**, Merkin wielded the immeasurable power of love itself against the ancient Lovecraftian entities that sought to corrupt reality.
+In the primordial ages, before time, Merkin stood as part of a pantheon of benevolent gods who served as the universe's defense against creeping eldritch horrors. Alongside **Chronara, the Goddess of Time**, and **Garfunkel, the Reaper of Soles**, Merkin wielded the immeasurable power of love itself against the ancient horrors that sought to corrupt reality.
 
 The cosmic war was devastating. Worlds crumbled, entire civilizations vanished, and even gods fell. Merkin himself was defeated, his divine form torn asunder and cast into the deepest nightmare dimensions. Yet love, as it turns out, is remarkably difficult to destroy. His essence survived—a bodiless force of affection and acceptance embedded in the quantum foam of existence itself.
 
 ## Rebirth & Renewed Purpose
 
-Eons later, when the universe had almost forgotten the taste of divine love, Merkin was reborn. In this new incarnation, he discovered a profound affection for humanity and their endearingly chaotic existence. Where once he fought cosmic horrors with divine fury, he now found purpose in gentler pursuits: reading, observing the beautiful mundanity of mortal lives, and eventually, curating the strange tapestry of the MEGAMEAL Universe.
+Eons later, when the universe had almost forgotten the taste of divine love, Merkin was reborn. In this new incarnation, he discovered a profound affection for humanity and their endearingly chaotic existence. Where once he fought cosmic horrors with divine fury, he now found purpose in gentler pursuits: reading, observing the beautiful mundanity of mortal lives.
 
 ## The Curator's Philosophy
 

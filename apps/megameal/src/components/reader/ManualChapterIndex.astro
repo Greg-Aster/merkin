@@ -1,0 +1,168 @@
+---
+type Tone = 'blue' | 'cyan' | 'gray' | 'green' | 'orange' | 'purple' | 'red' | 'yellow'
+
+interface IndexItem {
+  number: string
+  title: string
+  href?: string
+  summary?: string
+  sections?: IndexSection[]
+}
+
+interface IndexSection {
+  number?: string
+  title: string
+  href?: string
+}
+
+interface SidebarItem {
+  tone: Tone
+  label: string
+  detail?: string
+}
+
+interface SidebarPanel {
+  title: string
+  items?: SidebarItem[]
+  lines?: string[]
+  note?: string
+}
+
+interface Props {
+  title?: string
+  items: IndexItem[]
+  sidebarTitle?: string
+  sidebarItems?: SidebarItem[]
+  sidebarNote?: string
+  sidebarPanels?: SidebarPanel[]
+  class?: string
+}
+
+const {
+  title,
+  items,
+  sidebarTitle,
+  sidebarItems = [],
+  sidebarNote,
+  sidebarPanels,
+  class: className = '',
+} = Astro.props
+
+const toneClasses: Record<Tone, { dot: string; text: string }> = {
+  blue: { dot: 'bg-blue-500', text: 'text-blue-400' },
+  cyan: { dot: 'bg-cyan-500', text: 'text-cyan-400' },
+  gray: { dot: 'bg-gray-500', text: 'text-gray-300' },
+  green: { dot: 'bg-green-500', text: 'text-green-400' },
+  orange: { dot: 'bg-orange-500', text: 'text-orange-400' },
+  purple: { dot: 'bg-purple-500', text: 'text-purple-400' },
+  red: { dot: 'bg-red-500', text: 'text-red-400' },
+  yellow: { dot: 'bg-yellow-500', text: 'text-yellow-400' },
+}
+
+const panels = sidebarPanels ?? (
+  sidebarTitle
+    ? [{ title: sidebarTitle, items: sidebarItems, note: sidebarNote }]
+    : []
+)
+const hasPanels = panels.length > 0
+const hasDetailedItems = items.some(item => item.href || item.summary || item.sections?.length)
+---
+
+<div class:list={['mb-6 grid grid-cols-1 gap-6', hasPanels && 'lg:grid-cols-3', className]}>
+  <div class:list={[hasPanels && 'lg:col-span-2']}>
+    <div class="rounded-lg border border-blue-500/30 bg-blue-900/15 p-6">
+      {title && (
+        <div class="mb-4 flex items-center gap-2 text-2xl font-bold text-blue-400">
+          {title}
+        </div>
+      )}
+
+      {hasDetailedItems ? (
+        <div class="divide-y divide-blue-500/20 border-y border-blue-500/20">
+          {items.map(item => (
+            <section class="grid gap-3 py-5 first:pt-0 last:pb-0 md:grid-cols-[4.5rem_minmax(0,1fr)]">
+              <div class="font-jetbrains-mono text-xs font-bold uppercase tracking-wide text-blue-300">
+                {item.number}
+              </div>
+              <div class="min-w-0">
+                <h3 class="m-0 text-lg font-bold leading-tight text-gray-100">
+                  {item.href ? (
+                    <a href={item.href} class="text-gray-100 no-underline hover:text-blue-200 hover:no-underline">
+                      {item.title}
+                    </a>
+                  ) : (
+                    item.title
+                  )}
+                </h3>
+                {item.summary && <p class="mt-2 text-sm leading-relaxed text-gray-400">{item.summary}</p>}
+                {item.sections && (
+                  <div class="mt-4 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+                    {item.sections.map(section => (
+                      <div class="grid grid-cols-[3.25rem_minmax(0,1fr)] gap-2 text-sm">
+                        {section.number && (
+                          <span class="font-jetbrains-mono text-xs font-bold text-blue-300">{section.number}</span>
+                        )}
+                        {!section.number && <span></span>}
+                        {section.href ? (
+                          <a href={section.href} class="text-gray-300 no-underline hover:text-blue-200 hover:no-underline">
+                            {section.title}
+                          </a>
+                        ) : (
+                          <span class="text-gray-300">{section.title}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <div class="space-y-3">
+          {items.map(item => (
+            <div class="flex items-center gap-3 rounded border border-blue-500/20 bg-blue-900/20 p-3">
+              <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-blue-500 text-sm font-bold text-white">
+                {item.number}
+              </span>
+              <span class="font-semibold text-gray-200">{item.title}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+
+  {hasPanels && (
+    <div class="space-y-4 lg:sticky lg:top-4 lg:col-span-1">
+      {panels.map(panel => (
+        <div class="rounded-lg border border-gray-500/50 bg-gray-900/50 p-4">
+          <div class="mb-3 flex items-center gap-2 text-lg font-bold text-gray-300">
+            {panel.title}
+          </div>
+          {panel.items && (
+            <div class="space-y-2 text-sm">
+              {panel.items.map(item => (
+                <div class="flex items-center gap-2">
+                  <div class:list={['h-3 w-3 shrink-0 rounded-full', toneClasses[item.tone].dot]}></div>
+                  <span class:list={['font-semibold', toneClasses[item.tone].text]}>{item.label}</span>
+                  {item.detail && <span class="ml-auto text-xs text-gray-400">{item.detail}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+          {panel.lines && (
+            <div class="space-y-1 text-xs text-gray-300">
+              {panel.lines.map(line => <div>{line}</div>)}
+            </div>
+          )}
+          {panel.note && (
+            <div class="mt-3 rounded border border-gray-600/30 bg-gray-800/50 p-2">
+              <p class="text-xs italic text-gray-400">{panel.note}</p>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )}
+</div>

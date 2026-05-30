@@ -16,34 +16,38 @@ import '../../styles/features/pagination.css'
 import '../../styles/features/responsive.css'
 import '../../styles/layouts/store.css'
 
+type StoreAmbientAudioTrack = {
+  id?: string
+  src: string
+  label: string
+  loop?: boolean
+  volume?: number
+  html5?: boolean
+}
+
 export interface Props {
   title: string
   description: string
-  ambientAudio?: {
-    id?: string
-    src: string
-    label: string
-    loop?: boolean
-    volume?: number
-    html5?: boolean
-  }
+  ambientAudio?: StoreAmbientAudioTrack | StoreAmbientAudioTrack[]
   // Add other props if Layout.astro expects them (e.g., lang, banner for OG tags)
 }
 const { title, description, ambientAudio, ...rest } = Astro.props // Capture other potential props for Layout
-const pageAmbientTrack = ambientAudio
-  ? {
-      id:
-        ambientAudio.id ??
-        `page-ambient:${Astro.url.pathname.replace(/\/+$/, '') || '/'}`,
-      src: ambientAudio.src,
-      label: ambientAudio.label,
-      loop: ambientAudio.loop,
-      volume: ambientAudio.volume,
-      html5: ambientAudio.html5,
-    }
-  : null
-const pageAmbientTrackJson = pageAmbientTrack
-  ? JSON.stringify(pageAmbientTrack).replace(/</g, '\\u003c')
+const pageAmbientTracks = ambientAudio
+  ? (Array.isArray(ambientAudio) ? ambientAudio : [ambientAudio]).map(
+      (track, index) => ({
+        id:
+          track.id ??
+          `page-ambient:${Astro.url.pathname.replace(/\/+$/, '') || '/'}:${index}`,
+        src: track.src,
+        label: track.label,
+        loop: track.loop,
+        volume: track.volume,
+        html5: track.html5,
+      }),
+    )
+  : []
+const pageAmbientTrackJson = pageAmbientTracks.length
+  ? JSON.stringify(pageAmbientTracks).replace(/</g, '\\u003c')
   : null
 ---
 <Layout title={title} description={description} {...rest}>

@@ -67,6 +67,10 @@ const ambientAudioSchema = z.object({
   volume: z.number().min(0).max(1).optional(),
   html5: z.boolean().optional(),
 })
+const ambientAudioConfigSchema = z.union([
+  ambientAudioSchema,
+  z.array(ambientAudioSchema).min(1),
+])
 
 const productActionLinkSchema = z.object({
   label: z.string(),
@@ -158,6 +162,12 @@ const megamealPostsSchema = postsSchema.extend({
     .optional(),
 })
 
+const merkinMediaSchema = mediaAssetSchema.extend({
+  type: z.enum(['image', 'video']),
+  src: z.string(),
+  alt: z.string(),
+})
+
 // Define the 'posts' collection
 const postsCollection = defineCollection({
   schema: megamealPostsSchema,
@@ -218,6 +228,17 @@ const cookbookCollection = defineCollection({
 
 const readerCollection = defineCollection({
   schema: postsSchema,
+})
+
+const merkinCollection = defineCollection({
+  schema: z.object({
+    title: z.string(),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    description: z.string().optional(),
+    caption: z.string(),
+    media: merkinMediaSchema,
+    draft: z.boolean().optional().default(false),
+  }),
 })
 
 // Rest of collections remain unchanged
@@ -291,7 +312,7 @@ const productsCollection = defineCollection({
     rating: z.number().optional(),
     // Optional product-owned ambience track. StoreLayout exposes this to the
     // client audio manager before route-level fallback tracks are considered.
-    ambientAudio: ambientAudioSchema.optional(),
+    ambientAudio: ambientAudioConfigSchema.optional(),
     // Unified media array — replaces image + additionalImages
     // Supports mixed types: image, local webm video, YouTube embed
     media: z.array(mediaAssetSchema).optional(),
@@ -379,6 +400,7 @@ export const collections = {
   videos: videosCollection,
   cookbook: cookbookCollection,
   reader: readerCollection,
+  merkin: merkinCollection,
   spec: specCollection,
   team: teamCollection,
   friends: friendsCollection,
