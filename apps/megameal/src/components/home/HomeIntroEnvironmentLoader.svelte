@@ -46,39 +46,6 @@ function playPortalAwakenSfx(options: { unlockFromGesture?: boolean } = {}) {
   siteSfxManager.playIfUnlocked('portal-awaken')
 }
 
-function getDeviceLoadingHints() {
-  const nav = navigator as Navigator & {
-    connection?: { saveData?: boolean; effectiveType?: string }
-    deviceMemory?: number
-  }
-
-  return {
-    connection: nav.connection,
-    deviceMemory: nav.deviceMemory,
-  }
-}
-
-function isCompactViewport() {
-  return window.innerWidth <= 760 || window.innerHeight <= 640
-}
-
-function shouldAutoloadEnvironment() {
-  const { connection, deviceMemory } = getDeviceLoadingHints()
-  const effectiveType = connection?.effectiveType ?? ''
-
-  return !(
-    isCompactViewport() ||
-    connection?.saveData === true ||
-    /(^|-)2g$/.test(effectiveType) ||
-    effectiveType === '3g' ||
-    (typeof deviceMemory === 'number' && deviceMemory <= 4)
-  )
-}
-
-function shouldLoadFromPointerIntent() {
-  return !isCompactViewport()
-}
-
 async function loadEnvironment(options: { unlockFromGesture?: boolean } = {}) {
   if (loadStarted) return
   loadStarted = true
@@ -100,24 +67,20 @@ function waitForIntent() {
   const start = (event?: Event) => {
     void loadEnvironment({ unlockFromGesture: isDirectAudioIntent(event) })
   }
-  const startFromPointerIntent = (event?: Event) => {
-    if (!shouldLoadFromPointerIntent()) return
-    start(event)
-  }
 
   window.addEventListener('merkin:portal-advance', start, { signal })
   window.addEventListener('click', start, { signal })
-  window.addEventListener('pointerdown', startFromPointerIntent, {
+  window.addEventListener('pointerdown', start, {
     signal,
     passive: true,
   })
   window.addEventListener('keydown', start, { signal })
-  window.addEventListener('touchstart', startFromPointerIntent, {
+  window.addEventListener('touchstart', start, {
     signal,
     passive: true,
   })
   window.addEventListener('wheel', start, { signal, passive: true })
-  window.addEventListener('touchmove', startFromPointerIntent, {
+  window.addEventListener('touchmove', start, {
     signal,
     passive: true,
   })
@@ -177,15 +140,9 @@ function scheduleLoadingWindow() {
 }
 
 onMount(() => {
-  const shouldAutoload = shouldAutoloadEnvironment()
-
-  if (shouldAutoload) {
-    scheduleLoadingWindow()
-  }
+  scheduleLoadingWindow()
   waitForIntent()
-  if (shouldAutoload) {
-    scheduleAutoload()
-  }
+  scheduleAutoload()
 })
 
 onDestroy(() => {
