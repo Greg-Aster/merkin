@@ -57,6 +57,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     sponsor: 'Guest Recovery Bureau',
     finePrint: 'Survey completion may improve your assigned future.',
     theme: 'recovery',
+    image: '/assets/banner/home-intro-stills/home-intro.webp',
   },
   {
     type: 'advertisement',
@@ -80,6 +81,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     sponsor: 'Public Morale Office',
     finePrint: 'Complaint volume may be used to rank loyalty.',
     theme: 'morale',
+    image: '/assets/banner/home-intro-stills/community.webp',
   },
   {
     type: 'advertisement',
@@ -91,6 +93,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     sponsor: 'Department of Narrative Access',
     finePrint: 'Recommended for first-time witnesses and returning survivors.',
     theme: 'archive',
+    image: '/assets/banner/home-intro-stills/archive.webp',
   },
   {
     type: 'advertisement',
@@ -102,6 +105,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     sponsor: 'Chronology Compliance Office',
     finePrint: 'Map accuracy not guaranteed during singularity weather.',
     theme: 'chronology',
+    image: '/assets/banner/home-intro-stills/timeline.webp',
   },
   {
     type: 'advertisement',
@@ -113,6 +117,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     sponsor: 'Observatory Personnel Division',
     finePrint: 'External deployment. Emotional damage billed separately.',
     theme: 'observatory',
+    image: '/assets/banner/game.webp',
   },
   {
     type: 'advertisement',
@@ -149,6 +154,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     finePrint:
       'Membership includes surveillance, terms, and occasional blessings.',
     theme: 'loyalty',
+    image: '/assets/banner/store-page.webp',
   },
   {
     type: 'advertisement',
@@ -160,6 +166,20 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     sponsor: 'Interstellar Orientation Bureau',
     finePrint: 'Guidance may be ceremonial, practical, or dangerously literal.',
     theme: 'storymode',
+    image: '/first-contact/forward-wide.webp',
+  },
+  {
+    type: 'advertisement',
+    eyebrow: 'Divine Gallery',
+    headline: 'Receive The Merkin Blessing Of Love And Light',
+    text: 'A devotional image feed for witnesses who need less judgment, more glow, and a legally immeasurable amount of acceptance.',
+    ctaText: 'Visit Merkin Gallery',
+    href: '/merkin/',
+    sponsor: 'Office of Radical Acceptance',
+    finePrint:
+      'Blessings may arrive as neon, tenderness, or sudden emotional leg day.',
+    theme: 'comfort',
+    image: '/merkin/2026-05-30-neon-chapel.webp',
   },
   {
     type: 'advertisement',

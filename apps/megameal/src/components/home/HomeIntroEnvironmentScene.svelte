@@ -66,6 +66,7 @@ let ScreenPanel: ScreenPanelComponent | null = null
 let carouselComponentPromise: Promise<void> | null = null
 let screenOrbitInitialized = false
 let logoImpactSfxIntroStartedAt = 0
+let portalIntroReadyDispatched = false
 
 const particleCount = 1250
 const particleExpansionChunk = 64
@@ -211,6 +212,20 @@ function playLogoImpactSfx(introStartedAt: number) {
   siteSfxManager.playIfUnlocked('portal-impact')
 }
 
+function dispatchPortalIntroReady() {
+  if (typeof window === 'undefined' || portalIntroReadyDispatched) return
+
+  portalIntroReadyDispatched = true
+  document.documentElement.dataset.megamealPortalIntroReady = 'true'
+  window.dispatchEvent(
+    new CustomEvent('megameal:portal-intro-ready', {
+      detail: {
+        phase: 'logo-settled',
+      },
+    }),
+  )
+}
+
 function handleLogoReady() {
   if (!logoIntroStartedAt) {
     logoIntroStartedAt = performance.now() * 0.001
@@ -225,6 +240,7 @@ onMount(() => {
 
   return () => {
     window.removeEventListener('resize', syncViewportMode)
+    delete document.documentElement.dataset.megamealPortalIntroReady
   }
 })
 
@@ -577,6 +593,9 @@ useTask(delta => {
     logoImpactElapsed >= 0 && logoImpactRaw < 1 ? (1 - logoImpactRaw) ** 2 : 0
   if (logoEffectsEnabled && logoImpactElapsed >= 0 && logoImpactRaw < 1) {
     playLogoImpactSfx(logoIntroStartedAt)
+  }
+  if (logoIntroRaw >= 1 && revealProgress < 0.08) {
+    dispatchPortalIntroReady()
   }
   atmosphereReveal = smoothstep((logoIntroRaw - 0.72) / 0.28)
   activeScreenIndex = clampScreenIndex(Math.round(selectedIndex))

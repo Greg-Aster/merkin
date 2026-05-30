@@ -2,10 +2,10 @@
 import type { GetStaticPaths } from 'astro'
 import PostPage from '../components/PostPage.astro'
 import Pagination from '../components/control/Pagination.astro'
-import PortalHeroBackgroundSlide from '../components/home/PortalHeroBackgroundSlide.astro'
 import PortalDemoVideoPlayer from '../components/home/PortalDemoVideoPlayer.astro'
+import PortalHeroBackgroundSlide from '../components/home/PortalHeroBackgroundSlide.astro'
 import PortalHeroSlide from '../components/home/PortalHeroSlide.astro'
-import FactsWidget from '../components/widget/FactsWidget.astro'
+import PortalSponsoredBloom from '../components/home/PortalSponsoredBloom.astro'
 import { PAGE_SIZE } from '../constants/constants'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
 import { getSortedPosts } from '../utils/content-utils'
@@ -52,17 +52,8 @@ import '../styles/pages/dynamic-page.css'
     </div>
   )}
   {isFirstPage && (
-    <FactsWidget
+    <PortalSponsoredBloom
       slot="overlay"
-      class="portal-sponsored-overlay"
-      variant="overlay"
-      dismissible={true}
-      storageKey="megameal-home-sponsored-overlay-dismissed"
-      kicker="Sponsored"
-      title="Sponsored"
-      footerText="Floating promotions are a service, not an intrusion."
-      showPrivacyNoticeFirst={true}
-      mobilePersistent={true}
     />
   )}
 </MainGridLayout>
