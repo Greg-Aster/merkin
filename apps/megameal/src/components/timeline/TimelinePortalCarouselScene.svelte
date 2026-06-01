@@ -1,7 +1,7 @@
 <script lang="ts" context="module">
+import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 import { CanvasTexture } from 'three'
 import type { Texture } from 'three'
-import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 
 type TimelineStarTextureVariant = 0 | 1 | 2 | 3
 
@@ -127,7 +127,7 @@ function getTimelineOrbitTexture() {
 import { T, useTask } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import type * as THREE from 'three'
-import { AdditiveBlending, Color, Vector3 } from 'three'
+import { AdditiveBlending, Color, OrthographicCamera, Vector3 } from 'three'
 import HomeIntroParticleField from '../home/HomeIntroParticleField.svelte'
 import { homeIntroParticleClusters } from '../home/homeIntroParticleClusters'
 import { hashHomeIntroUnit } from '../home/homeIntroSceneMath'
@@ -140,8 +140,13 @@ type TimelineCarouselInput = {
   dragX: number
   dragY: number
   wheel: number
+  mapZoom: number
+  mapOrbitX: number
+  mapOrbitY: number
   active: boolean
 }
+
+type TimelineViewMode = 'travel' | 'map'
 
 export type TimelineCarouselScreen = {
   kicker: string
@@ -169,16 +174,18 @@ export let input: TimelineCarouselInput
 export let screens: TimelineCarouselScreen[] = []
 export let selectedScreenIndex = -1
 export let hoveredScreenIndex = -1
+export let viewMode: TimelineViewMode = 'travel'
 
 const dispatch = createEventDispatcher<{
   starpositions: { positions: TimelineStarScreenPosition[] }
 }>()
 
-let camera: THREE.PerspectiveCamera | null = null
+let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera | null = null
 let world: THREE.Group | null = null
 let starRail: THREE.Group | null = null
 let starColumn: THREE.Group | null = null
 let portraitMobile = false
+let viewportAspect = 16 / 9
 let starAnimationTime = 0
 let activeStarIntensities: number[] = []
 
@@ -195,6 +202,14 @@ const particleSizeMultiplier = 2.18
 const particleCount = 1200
 const effectScrollStepY = screenStepZ * 2.35
 const particleScrollSpan = 48
+const mapTimelineDepthScale = 8.5
+const mapDesktopTimelineDepthScale = 15.5
+const mapStarXScale = 30
+const mapEraLaneSpread = 520
+const mapDesktopLaneSpread = 320
+const mapPortraitVerticalOffset = 165
+const mapOrbitMaxYaw = 0.34
+const mapOrbitMaxPitch = 0.24
 const starColor = '#67c7d6'
 const activeStarColor = '#dffbff'
 const starGlowColor = '#0891b2'
@@ -214,6 +229,8 @@ $: cameraFov = portraitMobile ? 48 : 44
 $: railPosition = portraitMobile
   ? ([0, 0.08, -0.58] as [number, number, number])
   : ([0, 0, -0.34] as [number, number, number])
+$: mapCameraFrame = getTimelineMapCameraFrame()
+$: mapCameraPosition = getTimelineMapCameraPosition()
 $: activeCameraPosition = input ? getCameraTimelinePosition(input.wheel) : cameraPosition
 $: starColumnPosition = portraitMobile
   ? ([0, 0.02, -1.1] as [number, number, number])
@@ -226,6 +243,7 @@ $: timelineStarIndexes = screens.map((_, index) => index)
 function syncViewportMode() {
   if (typeof window === 'undefined') return
   portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
+  viewportAspect = Math.max(0.4, window.innerWidth / Math.max(window.innerHeight, 1))
 }
 
 function createParticle(index: number) {
@@ -296,6 +314,67 @@ function getCameraTimelinePosition(selectedIndex: number) {
     railPosition[0] + cameraPosition[0] + panX * panScaleX,
     railPosition[1] + cameraPosition[1] + panY * panScaleY,
     cameraPosition[2] - visualSelectedIndex * getTimelineStepZ(),
+  ] as [number, number, number]
+}
+
+function clampValue(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function getMapZoom() {
+  return clampValue(Number.isFinite(input?.mapZoom) ? input.mapZoom : 1, 0.55, 2.8)
+}
+
+function getMapOrbitX() {
+  return clampValue(Number.isFinite(input?.mapOrbitX) ? input.mapOrbitX : 0, -1, 1)
+}
+
+function getMapOrbitY() {
+  return clampValue(Number.isFinite(input?.mapOrbitY) ? input.mapOrbitY : 0, -1, 1)
+}
+
+function getTimelineMapCameraFrame() {
+  const stepZ = getTimelineStepZ() * (portraitMobile ? mapTimelineDepthScale : mapDesktopTimelineDepthScale)
+  const timelineSpan = Math.max(1, screens.length - 1) * stepZ
+
+  if (!portraitMobile) {
+    const baseWidth = Math.max(timelineSpan + 190, 720)
+    const baseHeight = Math.max(baseWidth / Math.max(viewportAspect, 0.4), mapDesktopLaneSpread + 180, 360)
+    const height = baseHeight / getMapZoom()
+    const width = height * viewportAspect
+
+    return {
+      width,
+      height,
+      centerX: 0,
+      centerY: 0,
+    }
+  }
+
+  const starFieldWidth = screenOrbitRadiusX * 5.4
+  const depthFrame = timelineSpan + 7.5
+  const widthFrame = starFieldWidth / Math.max(viewportAspect, 0.4)
+  const baseHeight = Math.max(18, depthFrame, widthFrame) * 1.26
+  const height = baseHeight / getMapZoom()
+  const width = height * viewportAspect
+
+  return {
+    width,
+    height,
+    centerX: 0,
+    centerY: screenOrbitCenterZ - timelineSpan / 2 + mapPortraitVerticalOffset,
+  }
+}
+
+function getTimelineMapCameraPosition(frame = mapCameraFrame) {
+  const panX = Number.isFinite(input?.panX) ? input.panX : 0
+  const panY = Number.isFinite(input?.panY) ? input.panY : 0
+  const panScale = 0.34
+
+  return [
+    frame.centerX + railPosition[0] + panX * frame.width * panScale,
+    frame.centerY + panY * frame.height * panScale,
+    620,
   ] as [number, number, number]
 }
 
@@ -490,6 +569,45 @@ function getTimelineStarTarget(index: number, visualSelectedIndex: number) {
   const offset = index - visualSelectedIndex
   const depth = Math.abs(offset)
   const anchor = getTimelineStarAnchor(index)
+  if (viewMode === 'map') {
+    if (!portraitMobile) {
+      const desktopTimelineStep = getTimelineStepZ() * mapDesktopTimelineDepthScale
+      const timelineSpan = Math.max(1, screens.length - 1) * desktopTimelineStep
+      const eraLane = (getEraHash(getScreenEraKey(index), 887) - 0.5) * mapDesktopLaneSpread
+      const localJitterX = (getStarHash(index, 4567) - 0.5) * 28
+      const localJitterY = (getStarHash(index, 4889) - 0.5) * 38
+      const localDepth = (getStarHash(index, 6043) - 0.5) * 26
+
+      return {
+        x: -timelineSpan / 2 + index * desktopTimelineStep + anchor.x * 2.8 + localJitterX,
+        y: anchor.y * 17 + eraLane + localJitterY,
+        z: localDepth + anchor.x * 1.6,
+        pitch: 0,
+        yaw: 0,
+        roll: 0,
+        scale: 10.4,
+        depth,
+      }
+    }
+
+    const responsiveXScale = mapStarXScale * 0.68
+    const responsiveLaneSpread = mapEraLaneSpread * 0.58
+    const eraLane = (getEraHash(getScreenEraKey(index), 887) - 0.5) * responsiveLaneSpread
+    const localJitter = (getStarHash(index, 4567) - 0.5) * 25
+    const localDepth = (getStarHash(index, 6043) - 0.5) * 22
+
+    return {
+      x: anchor.x * responsiveXScale + anchor.y * 0.72 + eraLane + localJitter,
+      y: screenOrbitCenterZ - index * getTimelineStepZ() * mapTimelineDepthScale + mapPortraitVerticalOffset,
+      z: localDepth + anchor.x * 1.8,
+      pitch: 0,
+      yaw: 0,
+      roll: 0,
+      scale: portraitMobile ? 8.2 : 10.4,
+      depth,
+    }
+  }
+
   const cameraTimelinePosition = getCameraTimelinePosition(visualSelectedIndex)
   const cameraLocalX = cameraTimelinePosition[0] - railPosition[0]
   const cameraLocalY = cameraTimelinePosition[1] - railPosition[1]
@@ -499,7 +617,8 @@ function getTimelineStarTarget(index: number, visualSelectedIndex: number) {
   const distanceToCamera = Math.max(1, Math.hypot(deltaX, deltaZ))
   const yaw = Math.atan2(deltaX, deltaZ) * 0.84
   const pitch = Math.atan2(anchor.y - cameraLocalY, distanceToCamera) * 0.58
-  const depthScale = Math.max(0.56, 1 - depth * 0.045)
+  const depthScale =
+    viewMode === 'map' ? 1 : Math.max(0.56, 1 - depth * 0.045)
 
   return {
     x: anchor.x,
@@ -594,8 +713,23 @@ useTask(delta => {
   })
 
   if (camera) {
-    camera.position.set(targetCameraPosition[0], targetCameraPosition[1], targetCameraPosition[2])
-    camera.rotation.set(0, 0, 0)
+    if (viewMode === 'map') {
+      const currentMapCameraFrame = getTimelineMapCameraFrame()
+      const currentMapCameraPosition = getTimelineMapCameraPosition(currentMapCameraFrame)
+      camera.position.set(currentMapCameraPosition[0], currentMapCameraPosition[1], currentMapCameraPosition[2])
+      camera.rotation.set(0, 0, 0)
+      if (camera instanceof OrthographicCamera) {
+        camera.left = -currentMapCameraFrame.width / 2
+        camera.right = currentMapCameraFrame.width / 2
+        camera.top = currentMapCameraFrame.height / 2
+        camera.bottom = -currentMapCameraFrame.height / 2
+        camera.zoom = 1
+        camera.updateProjectionMatrix()
+      }
+    } else {
+      camera.position.set(targetCameraPosition[0], targetCameraPosition[1], targetCameraPosition[2])
+      camera.rotation.set(0, 0, 0)
+    }
   }
 
   if (world) {
@@ -615,8 +749,12 @@ useTask(delta => {
   }
 
   if (starRail) {
+    const targetRailRotationX = viewMode === 'map' ? -getMapOrbitY() * mapOrbitMaxPitch : 0
+    const targetRailRotationY = viewMode === 'map' ? getMapOrbitX() * mapOrbitMaxYaw : 0
+
     starRail.rotation.z += (0 - starRail.rotation.z) * ease
-    starRail.rotation.x += (0 - starRail.rotation.x) * ease
+    starRail.rotation.x += (targetRailRotationX - starRail.rotation.x) * ease
+    starRail.rotation.y += (targetRailRotationY - starRail.rotation.y) * ease
     starRail.position.x = railPosition[0]
     starRail.position.y = railPosition[1]
     starRail.position.z = railPosition[2]
@@ -626,7 +764,23 @@ useTask(delta => {
 })
 </script>
 
-<T.PerspectiveCamera bind:ref={camera} makeDefault position={activeCameraPosition} fov={cameraFov} />
+{#if viewMode === 'map'}
+  <T.OrthographicCamera
+    bind:ref={camera}
+    makeDefault
+    position={mapCameraPosition}
+    rotation={[0, 0, 0]}
+    left={-mapCameraFrame.width / 2}
+    right={mapCameraFrame.width / 2}
+    top={mapCameraFrame.height / 2}
+    bottom={-mapCameraFrame.height / 2}
+    zoom={1}
+    near={0.1}
+    far={1600}
+  />
+{:else}
+  <T.PerspectiveCamera bind:ref={camera} makeDefault position={activeCameraPosition} fov={cameraFov} />
+{/if}
 
 <T.Group bind:ref={world} position={[0, 0, 0]} scale={[sceneScale, sceneScale, sceneScale]}>
   <T.Group bind:ref={starRail} position={railPosition}>

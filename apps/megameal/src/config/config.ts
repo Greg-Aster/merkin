@@ -70,6 +70,10 @@ export const navBarConfig: NavBarConfig = {
           url: '/cookbook/',
         },
         {
+          name: 'First Contact Manual',
+          url: '/reader/first-contact-manual/',
+        },
+        {
           name: 'Quizzes',
           url: '/quiz/',
         },

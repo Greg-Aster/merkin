@@ -9,12 +9,11 @@ import {
   constellationPatterns,
   defaultEraConfig,
 } from '@/config/timelineconfig'
-import Bleepy from '@components/bleepy/Bleepy.astro'
 import CompactArchiveBanner from '@components/archive/CompactArchiveBanner.astro'
+import Bleepy from '@components/bleepy/Bleepy.astro'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
-import LegacyTimelineBanner from '@components/timeline/TimelineBanner.astro'
-import TimelinePortalCarousel from '@components/timeline/TimelinePortalCarousel.svelte'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
+import TimelinePortalCarousel from '@components/timeline/TimelinePortalCarousel.svelte'
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
 import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
 import '@/styles/features/banner/banner-base.css'
@@ -142,32 +141,14 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   )}
   {(isTimelineRoute || isTimeline2DRoute) && (
     <Fragment slot="timeline-banner-content">
-      <h1 class="sr-only">{isTimelineRoute ? 'Timeline' : 'Timeline - 2D'}</h1>
-      {isTimelineRoute ? (
-        <>
-          <div id="megameal-timeline-route-marker" hidden></div>
-          <TimelinePortalCarousel
-            events={timelineManifest.items}
-            eraConfig={defaultEraConfig}
-            client:only="svelte"
-          />
-        </>
-      ) : (
-        <div class="relative h-full w-full">
-          <LegacyTimelineBanner
-            id="megameal-legacy-timeline"
-            bannerHeight="100%"
-            mobileHeight="100%"
-            compact={false}
-          />
-          <a
-            href="/timeline/"
-            class="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-lg border border-cyan-100/25 bg-slate-950/78 px-4 py-2 font-mono text-[0.68rem] font-black uppercase tracking-[0.18em] text-cyan-100 shadow-[0_0_1.2rem_rgba(8,145,178,0.24)] backdrop-blur-md transition hover:border-cyan-100/55 hover:bg-cyan-950/78 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200"
-          >
-            3D
-          </a>
-        </div>
-      )}
+      <h1 class="sr-only">{isTimelineRoute ? 'Timeline' : 'Timeline Map'}</h1>
+      <div id="megameal-timeline-route-marker" hidden></div>
+      <TimelinePortalCarousel
+        events={timelineManifest.items}
+        eraConfig={defaultEraConfig}
+        initialViewMode={isTimeline2DRoute ? 'map' : 'travel'}
+        client:only="svelte"
+      />
     </Fragment>
   )}
   {hasCustomBannerSlideContent ? (

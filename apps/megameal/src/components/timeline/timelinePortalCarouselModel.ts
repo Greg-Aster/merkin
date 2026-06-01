@@ -36,6 +36,9 @@ export type TimelineCarouselInput = {
   dragX: number
   dragY: number
   wheel: number
+  mapZoom: number
+  mapOrbitX: number
+  mapOrbitY: number
   active: boolean
 }
 

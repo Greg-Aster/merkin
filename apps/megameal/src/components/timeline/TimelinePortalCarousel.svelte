@@ -1,12 +1,12 @@
 <script lang="ts">
-import { Canvas } from '@threlte/core'
+import {
+  type AdaptiveCanvasDprController,
+  createAdaptiveCanvasDprController,
+} from '@/utils/adaptiveCanvasDpr'
 import { formatTimelineYear } from '@merkin/shared-content'
+import { Canvas } from '@threlte/core'
 import { onDestroy, onMount, tick } from 'svelte'
 import * as THREE from 'three'
-import {
-  createAdaptiveCanvasDprController,
-  type AdaptiveCanvasDprController,
-} from '@/utils/adaptiveCanvasDpr'
 import TimelineAutoplayButton from './TimelineAutoplayButton.svelte'
 import TimelineCameraPanControls from './TimelineCameraPanControls.svelte'
 import TimelineConstellationOverlay, {
@@ -17,21 +17,23 @@ import TimelinePositionSlider from './TimelinePositionSlider.svelte'
 import TimelineSelectedRecord from './TimelineSelectedRecord.svelte'
 import TimelineViewModeButton from './TimelineViewModeButton.svelte'
 import {
+  type TimelineCarouselInput,
+  type TimelinePortalEraConfig,
+  type TimelinePortalEvent,
   clamp,
   createTimelinePortalModel,
   getSelectedCardWidth,
   getStatusWidth,
   getTimelineDockWidth,
   getTimelineSideMargin,
-  type TimelineCarouselInput,
-  type TimelinePortalEraConfig,
-  type TimelinePortalEvent,
 } from './timelinePortalCarouselModel'
 
 import '../../styles/features/extracted/home-intro-environment.css'
 
 export let events: TimelinePortalEvent[] = []
 export let eraConfig: TimelinePortalEraConfig = {}
+
+type TimelineViewMode = 'travel' | 'map'
 
 type TimelineStarScreenPosition = {
   index: number
@@ -47,6 +49,8 @@ type TimelineStarPositionEvent = CustomEvent<{
   positions: TimelineStarScreenPosition[]
 }>
 
+export let initialViewMode: TimelineViewMode = 'travel'
+
 let shell: HTMLDivElement | null = null
 let panPointerId: number | null = null
 let lastPanClientX = 0
@@ -55,6 +59,8 @@ let panStartClientX = 0
 let panStartClientY = 0
 let hasDraggedScenePan = false
 let lastTouchCenterY: number | null = null
+let lastTouchPanClientX: number | null = null
+let lastTouchPanClientY: number | null = null
 let virtualWheel = 0
 let wheelVelocity = 0
 let scrollFrame = 0
@@ -89,6 +95,11 @@ const pageWheelStep = 1.64
 const clickAwayDragThreshold = 7
 const cameraPanStep = 0.2
 const cameraPanLimit = 1.18
+const mapZoomMin = 0.55
+const mapZoomMax = 2.8
+const mapZoomStep = 1.16
+const mapOrbitLimit = 1
+const mapKeyboardOrbitStep = 0.18
 const defaultTimelineEraKey = 'golden-age'
 const autoplaySpeed = 0.34
 const autoplayTurnMinSpeedScale = 0.14
@@ -105,8 +116,12 @@ const input: TimelineCarouselInput = {
   dragX: 0,
   dragY: 0,
   wheel: 0,
+  mapZoom: 1,
+  mapOrbitX: 0,
+  mapOrbitY: 0,
   active: false,
 }
+let viewMode: TimelineViewMode = initialViewMode
 
 $: timelineModel = createTimelinePortalModel(events, eraConfig)
 $: sortedEvents = timelineModel.events
@@ -146,9 +161,11 @@ $: selectedGuideLine = getSelectedGuideLine(selectedCardAnchor, selectedScreenIn
 $: timelinePositionText = activeTimelineEvent
   ? `${formatTimelineYear(activeTimelineEvent.year)} / ${activeEraSegment?.displayName ?? 'Unknown Era'}`
   : 'Timeline position'
+$: isMapMode = viewMode === 'map'
 $: if (!hasInitializedDefaultPosition && screens.length > 0) {
   initializeDefaultTimelinePosition()
 }
+$: if (isMapMode) pauseAutoplay()
 
 const createRenderer = (canvas: HTMLCanvasElement) => {
   const renderer = new THREE.WebGLRenderer({
@@ -361,7 +378,7 @@ function runAutoplayFrame(timestamp: number) {
 }
 
 function playAutoplay() {
-  if (isAutoplaying || maxWheel <= 0) return
+  if (isMapMode || isAutoplaying || maxWheel <= 0) return
   if (virtualWheel >= maxWheel) autoplayDirection = -1
   if (virtualWheel <= 0) autoplayDirection = 1
 
@@ -400,7 +417,7 @@ function toggleAutoplay() {
 }
 
 function startInitialAutoplay() {
-  if (hasStartedInitialAutoplay || !hasMounted || !hasInitializedDefaultPosition || maxWheel <= 0) return
+  if (isMapMode || hasStartedInitialAutoplay || !hasMounted || !hasInitializedDefaultPosition || maxWheel <= 0) return
 
   hasStartedInitialAutoplay = true
   playAutoplay()
@@ -413,6 +430,13 @@ function isInteractiveTarget(eventTarget: EventTarget | null) {
       'a, button, input, textarea, select, [role="button"], [data-timeline-interactive]',
     )
   )
+}
+
+function isSceneDragBlockedTarget(eventTarget: EventTarget | null) {
+  if (!(eventTarget instanceof Element)) return false
+  if (isMapMode && eventTarget.closest('[data-timeline-star-control]')) return false
+
+  return isInteractiveTarget(eventTarget)
 }
 
 function applyPositionDelta(deltaY: number, wheelDistance: number) {
@@ -434,12 +458,35 @@ function setCameraPan(panX: number, panY: number) {
 
 function panCameraBy(deltaX: number, deltaY: number) {
   pauseAutoplay()
-  setCameraPan(input.panX + deltaX, input.panY + deltaY)
+  const mapScale = isMapMode ? 0.72 / Math.max(input.mapZoom, mapZoomMin) : 1
+  setCameraPan(input.panX + deltaX * mapScale, input.panY + deltaY * mapScale)
 }
 
-function resetCameraPan() {
+function setMapZoom(zoom: number) {
+  input.mapZoom = clamp(zoom, mapZoomMin, mapZoomMax)
+}
+
+function zoomMapBy(multiplier: number) {
+  if (!isMapMode) return
+  pauseAutoplay()
+  setMapZoom(input.mapZoom * multiplier)
+}
+
+function orbitMapBy(deltaX: number, deltaY: number) {
+  if (!isMapMode) return
+  pauseAutoplay()
+  input.mapOrbitX = clamp(input.mapOrbitX + deltaX, -mapOrbitLimit, mapOrbitLimit)
+  input.mapOrbitY = clamp(input.mapOrbitY + deltaY, -mapOrbitLimit, mapOrbitLimit)
+}
+
+function resetCameraView() {
   pauseAutoplay()
   setCameraPan(0, 0)
+  if (isMapMode) {
+    input.mapZoom = 1
+    input.mapOrbitX = 0
+    input.mapOrbitY = 0
+  }
 }
 
 function applyCameraPanDrag(deltaX: number, deltaY: number) {
@@ -450,14 +497,14 @@ function applyCameraPanDrag(deltaX: number, deltaY: number) {
   const xDistance = Math.max(bounds.width, 1)
   const yDistance = Math.max(bounds.height, 1)
 
-  setCameraPan(
-    input.panX - (deltaX / xDistance) * 3.1,
-    input.panY + (deltaY / yDistance) * 2.7,
-  )
+  const panScaleX = isMapMode ? 2.15 / Math.max(input.mapZoom, mapZoomMin) : 3.1
+  const panScaleY = isMapMode ? 2.15 / Math.max(input.mapZoom, mapZoomMin) : 2.7
+
+  setCameraPan(input.panX - (deltaX / xDistance) * panScaleX, input.panY + (deltaY / yDistance) * panScaleY)
 }
 
 function handleScenePointerDown(event: PointerEvent) {
-  if (!shell || event.button !== 0 || !event.isPrimary || isInteractiveTarget(event.target)) return
+  if (!shell || event.button !== 0 || !event.isPrimary || isSceneDragBlockedTarget(event.target)) return
 
   pauseAutoplay()
   event.preventDefault()
@@ -513,9 +560,24 @@ function handlePointerMove(event: PointerEvent) {
 }
 
 function handleTouchStart(event: TouchEvent) {
-  if (isInteractiveTarget(event.target)) return
+  if (isSceneDragBlockedTarget(event.target)) return
+  if (isMapMode && event.touches.length === 1) {
+    const touch = event.touches[0]
+    if (!isInsideShell(touch.clientX, touch.clientY)) return
+
+    lastTouchCenterY = null
+    lastTouchPanClientX = touch.clientX
+    lastTouchPanClientY = touch.clientY
+    input.active = true
+    wheelVelocity = 0
+    updatePointer(touch.clientX, touch.clientY)
+    return
+  }
+
   if (event.touches.length < 2) {
     lastTouchCenterY = null
+    lastTouchPanClientX = null
+    lastTouchPanClientY = null
     input.active = false
     return
   }
@@ -524,12 +586,31 @@ function handleTouchStart(event: TouchEvent) {
   if (!isInsideShell(touchA.clientX, touchA.clientY) && !isInsideShell(touchB.clientX, touchB.clientY)) return
 
   lastTouchCenterY = (touchA.clientY + touchB.clientY) / 2
+  lastTouchPanClientX = null
+  lastTouchPanClientY = null
   input.active = true
   wheelVelocity = 0
   updatePointer((touchA.clientX + touchB.clientX) / 2, lastTouchCenterY)
 }
 
 function handleTouchMove(event: TouchEvent) {
+  if (
+    isMapMode &&
+    event.touches.length === 1 &&
+    lastTouchPanClientX !== null &&
+    lastTouchPanClientY !== null
+  ) {
+    event.preventDefault()
+    const touch = event.touches[0]
+    const deltaX = touch.clientX - lastTouchPanClientX
+    const deltaY = touch.clientY - lastTouchPanClientY
+    lastTouchPanClientX = touch.clientX
+    lastTouchPanClientY = touch.clientY
+    updatePointer(touch.clientX, touch.clientY)
+    applyCameraPanDrag(deltaX, deltaY)
+    return
+  }
+
   if (event.touches.length < 2 || lastTouchCenterY === null) return
 
   event.preventDefault()
@@ -539,13 +620,19 @@ function handleTouchMove(event: TouchEvent) {
   const deltaY = (touchCenterY - lastTouchCenterY) * 2.15
   const touchWheelDistance = Math.max(220, Math.min(window.innerHeight * 0.46, 360))
   updatePointer(touchCenterX, touchCenterY)
-  applyPositionDelta(deltaY, touchWheelDistance)
+  if (isMapMode) {
+    setMapZoom(input.mapZoom * Math.exp(-deltaY * 0.0026))
+  } else {
+    applyPositionDelta(deltaY, touchWheelDistance)
+  }
   lastTouchCenterY = touchCenterY
 }
 
 function handleTouchEnd() {
   input.active = false
   lastTouchCenterY = null
+  lastTouchPanClientX = null
+  lastTouchPanClientY = null
 }
 
 function handleWheel(event: WheelEvent) {
@@ -553,6 +640,12 @@ function handleWheel(event: WheelEvent) {
 
   pauseAutoplay()
   event.preventDefault()
+  updatePointer(event.clientX, event.clientY)
+  if (isMapMode) {
+    setMapZoom(input.mapZoom * Math.exp(-event.deltaY * 0.0018))
+    return
+  }
+
   const viewportHeight = Math.max(window.innerHeight, 1)
   const wheelDelta = -(event.deltaY / viewportHeight) * mouseWheelSensitivity
   wheelVelocity = clamp(
@@ -572,6 +665,27 @@ function handleKeyboardScroll(event: KeyboardEvent) {
     isInteractiveTarget(event.target) ||
     !isShellVisible()
   ) {
+    return
+  }
+
+  if (isMapMode) {
+    const key = event.key.toLowerCase()
+    let handledMapKey = true
+
+    if (event.key === 'ArrowLeft') panCameraBy(-cameraPanStep, 0)
+    else if (event.key === 'ArrowRight') panCameraBy(cameraPanStep, 0)
+    else if (event.key === 'ArrowUp') panCameraBy(0, cameraPanStep)
+    else if (event.key === 'ArrowDown') panCameraBy(0, -cameraPanStep)
+    else if (key === '=' || key === '+') zoomMapBy(mapZoomStep)
+    else if (key === '-' || key === '_') zoomMapBy(1 / mapZoomStep)
+    else if (key === 'a') orbitMapBy(-mapKeyboardOrbitStep, 0)
+    else if (key === 'd') orbitMapBy(mapKeyboardOrbitStep, 0)
+    else if (key === 'w') orbitMapBy(0, -mapKeyboardOrbitStep)
+    else if (key === 's') orbitMapBy(0, mapKeyboardOrbitStep)
+    else if (key === '0') resetCameraView()
+    else handledMapKey = false
+
+    if (handledMapKey) event.preventDefault()
     return
   }
 
@@ -887,6 +1001,7 @@ onDestroy(() => {
   class:cursor-grabbing={panPointerId !== null}
   style="--portal-reveal-progress: 1"
   data-timeline-shell="true"
+  data-timeline-view-mode={viewMode}
   on:pointerdown|capture={handleScenePointerDown}
   on:pointermove|capture={handleScenePointerMove}
   on:pointerup|capture={handleScenePointerUp}
@@ -900,6 +1015,7 @@ onDestroy(() => {
       {screens}
       {selectedScreenIndex}
       hoveredScreenIndex={hoveredStarIndex}
+      {viewMode}
       on:starpositions={handleStarPositions}
     />
   </Canvas>
@@ -941,6 +1057,7 @@ onDestroy(() => {
         aria-label={`${selectedScreenIndex === control.index ? 'Open' : 'Select'} timeline record: ${control.screen.title}`}
         title={control.screen.title}
         data-timeline-interactive
+        data-timeline-star-control
         on:mouseenter={() => setHoveredStar(control.index)}
         on:mouseleave={() => clearHoveredStar(control.index)}
         on:focus={() => setHoveredStar(control.index)}
@@ -986,26 +1103,36 @@ onDestroy(() => {
       <div class="flex min-w-0 items-center justify-center gap-2">
         <TimelineCameraPanControls
           step={cameraPanStep}
+          showMapControls={isMapMode}
           on:pan={(event) => panCameraBy(event.detail.x, event.detail.y)}
-          on:reset={resetCameraPan}
+          on:zoom={(event) => zoomMapBy(event.detail.multiplier)}
+          on:orbit={(event) => orbitMapBy(event.detail.x, event.detail.y)}
+          on:reset={resetCameraView}
         />
 
-        <TimelineViewModeButton on:click={pauseAutoplay} />
+        <TimelineViewModeButton {viewMode} on:click={pauseAutoplay} />
 
-        <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
+        {#if !isMapMode}
+          <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
+        {/if}
       </div>
     </div>
 
     <div class="flex min-w-0 items-center justify-center gap-2 md:hidden">
       <TimelineCameraPanControls
         step={cameraPanStep}
+        showMapControls={isMapMode}
         on:pan={(event) => panCameraBy(event.detail.x, event.detail.y)}
-        on:reset={resetCameraPan}
+        on:zoom={(event) => zoomMapBy(event.detail.multiplier)}
+        on:orbit={(event) => orbitMapBy(event.detail.x, event.detail.y)}
+        on:reset={resetCameraView}
       />
 
-      <TimelineViewModeButton on:click={pauseAutoplay} />
+      <TimelineViewModeButton {viewMode} on:click={pauseAutoplay} />
 
-      <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
+      {#if !isMapMode}
+        <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
+      {/if}
     </div>
 
     <TimelinePositionSlider
