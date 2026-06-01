@@ -22,7 +22,7 @@
         --banner-indicator-size-mobile: 0.375rem;
         
         /* Banner loading indicator properties - NEEDED BY SITE */
-        --banner-loading-bg: color-mix(in srgb, black 85%, transparent);
+        --banner-loading-bg: color-mix(in srgb, var(--card-bg) 92%, transparent);
         --banner-loading-border-radius: 0.75rem;
         --banner-loading-padding: 1rem 1.5rem;
         --banner-loading-gap: 0.75rem;
@@ -42,6 +42,10 @@
         --banner-z-navigation: 40;
         --banner-z-loading: 50;
         --banner-z-title: 45;
+    }
+
+    :root.dark {
+        --banner-loading-bg: color-mix(in srgb, black 85%, transparent);
     }
 
     /* ===================================================================
