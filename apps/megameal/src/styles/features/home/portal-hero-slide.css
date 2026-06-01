@@ -14,6 +14,11 @@
   }
 
   html.megameal-home-standard-banner-phase .megameal-home-intro {
+    pointer-events: none;
+  }
+
+  html.megameal-home-standard-banner-phase .megameal-home-intro__environment,
+  html.megameal-home-standard-banner-phase .megameal-home-intro__screen-reader-copy {
     visibility: hidden;
     opacity: 0;
     pointer-events: none;

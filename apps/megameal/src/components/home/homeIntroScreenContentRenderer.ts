@@ -128,13 +128,15 @@ export class HomeIntroScreenContentRenderer {
     this.lastMediaTexture = mediaTexture
     this.lastMediaTransparent = nextMediaTransparent
 
-    const videoMaterialNeedsUpdate = this.lastVideoTexture !== videoTexture
-    this.videoMaterial.map = videoTexture
+    const activeVideoTexture = videoReady ? videoTexture : null
+    const videoMaterialNeedsUpdate =
+      this.lastVideoTexture !== activeVideoTexture
+    this.videoMaterial.map = activeVideoTexture
     this.videoMaterial.opacity =
-      videoTexture && videoReady ? videoMediaOpacity : 0
+      activeVideoTexture ? videoMediaOpacity : 0
     if (videoMaterialNeedsUpdate) {
       this.videoMaterial.needsUpdate = true
     }
-    this.lastVideoTexture = videoTexture
+    this.lastVideoTexture = activeVideoTexture
   }
 }

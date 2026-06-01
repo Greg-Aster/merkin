@@ -1,21 +1,21 @@
 <script lang="ts">
-import { Canvas } from '@threlte/core'
-import { onDestroy, onMount } from 'svelte'
-import * as THREE from 'three'
+import {
+  type AdaptiveCanvasDprController,
+  createAdaptiveCanvasDprController,
+} from '@/utils/adaptiveCanvasDpr'
 import { navigateWithMegamealTransition } from '@/utils/megamealRouteTransitions'
 import {
   type SiteSfxId,
   siteSfxManager,
 } from '@/utils/site-sfx'
-import {
-  createAdaptiveCanvasDprController,
-  type AdaptiveCanvasDprController,
-} from '@/utils/adaptiveCanvasDpr'
+import { Canvas } from '@threlte/core'
+import { onDestroy, onMount } from 'svelte'
+import * as THREE from 'three'
 import HomeIntroEnvironmentScene from './HomeIntroEnvironmentScene.svelte'
 import HomeIntroPostProcessing from './HomeIntroPostProcessing.svelte'
 import {
-  homeIntroMaxWheelForOffset,
   homeIntroIntroOffsetScreens,
+  homeIntroMaxWheelForOffset,
   homeIntroMobileIntroOffsetScreens,
   homeIntroScreens,
   homeIntroStandardBannerPhaseScreens,
@@ -154,6 +154,17 @@ function isPortalDemoActive() {
     typeof document !== 'undefined' &&
     document.documentElement.classList.contains(portalDemoActiveClass)
   )
+}
+
+function isStandardBannerPhaseActive() {
+  return (
+    typeof document !== 'undefined' &&
+    document.documentElement.classList.contains(standardBannerPhaseClass)
+  )
+}
+
+function canControlPortal() {
+  return isShellVisible() || isPortalDemoActive() || isStandardBannerPhaseActive()
 }
 
 function isPointerOverActiveScreen(clientX: number, clientY: number) {
@@ -615,9 +626,10 @@ function getChangedTouch(event: TouchEvent) {
 }
 
 function handleTouchStart(event: TouchEvent) {
-  if (isPortalDemoActive()) return
-  if (isInteractiveTarget(event.target)) return
-  if (!isShellVisible()) return
+  const isDemoOrStandardPhase =
+    isPortalDemoActive() || isStandardBannerPhaseActive()
+  if (!isDemoOrStandardPhase && isInteractiveTarget(event.target)) return
+  if (!canControlPortal()) return
 
   const touch = event.changedTouches[0]
   if (!touch || !isInsideShell(touch.clientX, touch.clientY)) return
@@ -708,7 +720,7 @@ function handleKeyboardScroll(event: KeyboardEvent) {
     event.metaKey ||
     event.shiftKey ||
     isInteractiveTarget(event.target) ||
-    !isShellVisible()
+    !canControlPortal()
   ) {
     return
   }
@@ -732,7 +744,7 @@ function handleKeyboardScroll(event: KeyboardEvent) {
 }
 
 function handlePortalAdvance(event: Event) {
-  if (!isShellVisible()) return
+  if (!canControlPortal()) return
 
   const detail =
     event instanceof CustomEvent
