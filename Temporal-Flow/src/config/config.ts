@@ -1,4 +1,4 @@
-import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'
+import { DARK_MODE } from '@constants/constants.ts'
 import type {
   LicenseConfig,
   NavBarConfig,
@@ -18,7 +18,7 @@ export const siteConfig: SiteConfig = {
     fixed: false
   },
   transparency: 0.9, // Single value from 0 to 1
-  defaultTheme: LIGHT_MODE,
+  defaultTheme: DARK_MODE,
   banner: {
     enable: false,
     src: "/assets/banner/0001.png",

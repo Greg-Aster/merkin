@@ -7,28 +7,7 @@ export const FIRST_CONTACT_MANUAL_TITLE =
   "The Interstellar Traveler's First Contact Manual"
 export const FIRST_CONTACT_MANUAL_DESCRIPTION =
   'An unvarnished survival manual for first contact, cosmic indifference, hostile civilizations, and other reasons to stay quiet.'
-
-export const FIRST_CONTACT_MANUAL_POST_ORDER = [
-  'first-contact-manual/index',
-  'first-contact-manual/forward',
-  'first-contact-manual/chapter-1',
-  'first-contact-manual/chapter-2',
-  'first-contact-manual/chapter-3',
-  'first-contact-manual/chapter-4',
-  'first-contact-manual/chapter-5',
-  'first-contact-manual/afterword',
-] as const
-
-const firstContactReaderSlugs: Record<string, string> = {
-  'first-contact-manual/index': '',
-  'first-contact-manual/forward': 'forward',
-  'first-contact-manual/chapter-1': 'chapter-1',
-  'first-contact-manual/chapter-2': 'chapter-2',
-  'first-contact-manual/chapter-3': 'chapter-3',
-  'first-contact-manual/chapter-4': 'chapter-4',
-  'first-contact-manual/chapter-5': 'chapter-5',
-  'first-contact-manual/afterword': 'afterword',
-}
+const FIRST_CONTACT_MANUAL_SLUG_PREFIX = `${FIRST_CONTACT_MANUAL_BOOK_SLUG}/`
 
 const firstContactLegacyPostSlugs: Record<string, string> = {
   'timelines/first-contact-index': 'first-contact-manual/index',
@@ -39,15 +18,29 @@ const firstContactLegacyPostSlugs: Record<string, string> = {
   'timelines/first-contact-4': 'first-contact-manual/chapter-4',
   'timelines/first-contact-5': 'first-contact-manual/chapter-5',
   'timelines/first-contact-afterword': 'first-contact-manual/afterword',
-  'timelines/first-contact-working-copy': 'first-contact-manual/forward',
+  'timelines/first-contact-working-copy': 'first-contact-manual/working-copy',
 }
 
-const firstContactOrder: Map<string, number> = new Map(
-  FIRST_CONTACT_MANUAL_POST_ORDER.map((slug, index) => [slug, index]),
-)
+function firstContactManualLocalSlug(slug: string) {
+  return slug.startsWith(FIRST_CONTACT_MANUAL_SLUG_PREFIX)
+    ? slug.slice(FIRST_CONTACT_MANUAL_SLUG_PREFIX.length)
+    : slug
+}
+
+function firstContactManualSortKey(slug: string) {
+  const localSlug = firstContactManualLocalSlug(slug)
+  const chapterMatch = /^chapter-(\d+)$/.exec(localSlug)
+
+  if (localSlug === 'index') return 0
+  if (localSlug === 'forward') return 10
+  if (chapterMatch) return 100 + Number(chapterMatch[1])
+  if (localSlug === 'afterword') return 10000
+
+  return 11000
+}
 
 export function isFirstContactManualEntry(entry: ReaderEntry) {
-  return firstContactOrder.has(entry.slug)
+  return entry.slug.startsWith(FIRST_CONTACT_MANUAL_SLUG_PREFIX)
 }
 
 export function sortFirstContactManualEntries(
@@ -55,11 +48,12 @@ export function sortFirstContactManualEntries(
 ) {
   return entries
     .filter(isFirstContactManualEntry)
-    .sort(
-      (a, b) =>
-        (firstContactOrder.get(a.slug) ?? 999) -
-        (firstContactOrder.get(b.slug) ?? 999),
-    )
+    .sort((a, b) => {
+      const sortDelta =
+        firstContactManualSortKey(a.slug) - firstContactManualSortKey(b.slug)
+
+      return sortDelta || a.slug.localeCompare(b.slug)
+    })
 }
 
 export function firstContactManualHref(
@@ -68,7 +62,8 @@ export function firstContactManualHref(
 ) {
   const postSlug =
     typeof entryOrSlug === 'string' ? entryOrSlug : entryOrSlug.slug
-  const readerSlug = firstContactReaderSlugs[postSlug]
+  const localSlug = firstContactManualLocalSlug(postSlug)
+  const readerSlug = localSlug === 'index' ? '' : localSlug
   const base = readerSlug
     ? `/reader/${FIRST_CONTACT_MANUAL_BOOK_SLUG}/${readerSlug}/`
     : `/reader/${FIRST_CONTACT_MANUAL_BOOK_SLUG}/`

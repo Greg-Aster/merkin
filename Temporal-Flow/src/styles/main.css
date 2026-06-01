@@ -28,6 +28,7 @@
 
         /* 🎯 SURFACE COLORS - Light mode */
         --card-bg: oklch(0.98 0.01 var(--hue));
+        --card-surface-bg: oklch(0.95 0.025 var(--hue));
         --text-color: oklch(0.2 0.01 var(--hue));
         --border-color: oklch(0.8 0.01 var(--hue));
         --surface-1: oklch(0.95 0.01 var(--hue));
@@ -66,6 +67,7 @@
     /* 🎯 DARK MODE - Controlled by the app theme switcher */
     :root.dark {
         --card-bg: oklch(0.15 0.01 var(--hue));
+        --card-surface-bg: oklch(0.24 0.03 var(--hue));
         --text-color: oklch(0.9 0.01 var(--hue));
         --border-color: oklch(0.3 0.01 var(--hue));
         --surface-1: oklch(0.2 0.01 var(--hue));
@@ -263,7 +265,7 @@
      */
     .card-base {
         @apply rounded-xl overflow-hidden transition-all duration-300;
-        background-color: color-mix(in srgb, var(--card-bg), transparent calc((1 - var(--bg-opacity)) * 100%));
+        background-color: color-mix(in srgb, var(--card-surface-bg, var(--card-bg)), transparent calc((1 - var(--bg-opacity)) * 100%));
         backdrop-filter: blur(3px);
         box-sizing: border-box;
         border: none;
@@ -276,7 +278,7 @@
 
     .card-base2 {
         @apply rounded-xl overflow-hidden transition-all duration-300;
-        background-color: color-mix(in srgb, var(--card-bg), transparent calc((1 - var(--bg-opacity)) * 100%));
+        background-color: color-mix(in srgb, var(--card-surface-bg, var(--card-bg)), transparent calc((1 - var(--bg-opacity)) * 100%));
         backdrop-filter: blur(3px);
         box-sizing: border-box;
         border: 1px solid color-mix(in srgb, var(--primary) calc(var(--card-border-subtle-opacity) * 100%), transparent);
