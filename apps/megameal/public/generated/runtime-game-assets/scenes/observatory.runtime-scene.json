@@ -33,12 +33,22 @@
           },
           "terrain": {
             "source": "source-glb",
-            "dirty": true,
-            "runtimeSource": "built-in-manifest",
+            "dirty": false,
+            "runtimeSource": "editor-manifest",
             "manifestUrl": "/terrain/observatory-environment.manifest.json",
             "runtimeMode": "glb-chunk-terrain",
             "visualSource": "source-glb-chunks",
             "fallbackSurfacePolicy": "disabled",
+            "bakePreset": "desktop",
+            "targetTriangles": 25000,
+            "maxBytes": 6291456,
+            "colliderUrl": "/terrain/collision/observatory-environment.collider.bin",
+            "metadataUrl": "/terrain/collision/observatory-environment.collider.meta.json",
+            "colliderResolution": 24642,
+            "triangleCount": 24642,
+            "vertexCount": 12544,
+            "byteSize": 446264,
+            "sourceTriangleCount": 563976,
             "sourceAssetUrl": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
             "sourceAssetHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
             "sourceAssetFingerprint": {
@@ -49,7 +59,20 @@
               "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb"
             ],
             "sourceName": "observatory-environment.glb",
-            "heightmapDirty": false
+            "collisionProduct": {
+              "url": "/terrain/collision/observatory-environment.collider.bin",
+              "metadataUrl": "/terrain/collision/observatory-environment.collider.meta.json",
+              "manifestUrl": "/terrain/observatory-environment.manifest.json",
+              "triangleCount": 24642,
+              "vertexCount": 12544,
+              "byteSize": 446264,
+              "bakeMode": "editor-walkable-surface",
+              "preset": "desktop",
+              "targetTriangles": 25000,
+              "maxBytes": 6291456,
+              "colliderResolution": 24642,
+              "generatedBy": "editor-terrain-bake"
+            }
           },
           "defaults": {
             "primitiveCollisionByDefault": true,
@@ -121,12 +144,6 @@
           "status": "complete",
           "blockers": [],
           "generatedTerrainProducts": {
-            "heightmap": {
-              "path": "/terrain/heightmaps/observatory-environment_heightmap.png",
-              "status": "source-derived-collision-input",
-              "reason": "The heightmap is retained as the intermediate collision mesh input for source-linked terrain collision.",
-              "targetRemovalCondition": "Remove only if replaced by a dedicated simplified collision mesh cooked from the same source GLB."
-            },
             "visualChunks": {
               "path": "/terrain/levels/observatory-environment/",
               "status": "source-glb-authoritative",
@@ -135,9 +152,9 @@
             },
             "collision": {
               "path": "/terrain/collision/observatory-environment.collider.bin",
-              "status": "source-linked-terrain-collision",
-              "reason": "Gameplay collision is source-linked projected terrain derived from the same source GLB contract as the visual chunks.",
-              "targetRemovalCondition": "Replace only with a newer source-linked collision cook or dedicated simplified source-GLB collider."
+              "status": "editor-walkable-surface",
+              "reason": "Gameplay collision is the editor-baked walkable surface derived from the same source GLB contract as the visual chunks.",
+              "targetRemovalCondition": "Replace only with a newer editor-baked walkable surface from the level editor terrain bake."
             }
           },
           "warningsBecomeBlockersAfterMigration": []

@@ -2,7 +2,7 @@
 
 ## Goal
 
-Bring collision authoring, runtime physics, terrain heightmaps, and editor
+Bring collision authoring, runtime physics, and editor
 diagnostics closer to a professional game-engine workflow for a static
 Threlte/Three.js browser game.
 
@@ -30,8 +30,6 @@ branches, brittle per-level exceptions, or hidden runtime behavior.
   is missing.
 - Mesh-to-collider authoring is manual and URL-driven instead of a guided
   pipeline.
-- Terrain heightmap, ground plane, baked collider, and visual chunks are present
-  but difficult to understand and validate from the editor.
 - Existing audits pass even when gameplay collision authoring is confusing or
   physically wrong.
 
@@ -49,13 +47,10 @@ branches, brittle per-level exceptions, or hidden runtime behavior.
 4. `AAA_COLLISION_SYSTEM_AGENT_04_MESH_COLLIDER_BAKE_PIPELINE.md`
    - Owns selected mesh to collider asset generation and metadata.
 
-5. `AAA_COLLISION_SYSTEM_AGENT_05_TERRAIN_HEIGHTMAP_WORKFLOW.md`
-   - Owns terrain source selection, heightmap, bake, cook, and publish UX.
-
-6. `AAA_COLLISION_SYSTEM_AGENT_06_DIAGNOSTICS_AND_AUDITS.md`
+5. `AAA_COLLISION_SYSTEM_AGENT_06_DIAGNOSTICS_AND_AUDITS.md`
    - Owns collision review reports, editor diagnostics, and validation gates.
 
-7. `AAA_COLLISION_SYSTEM_AGENT_07_SCENE_MIGRATION_AND_CLEANUP.md`
+6. `AAA_COLLISION_SYSTEM_AGENT_07_SCENE_MIGRATION_AND_CLEANUP.md`
    - Owns migrating authored scenes after the shared systems are ready.
 
 ## Suggested Order

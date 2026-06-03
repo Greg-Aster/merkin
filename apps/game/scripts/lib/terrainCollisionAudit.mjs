@@ -151,7 +151,6 @@ function auditTerrainManifest({
   terrainDir,
   publicDir,
   requiredChunkedManifests,
-  terrainTriangleBudget,
   failures,
 }) {
   const fullPath = join(terrainDir, file)
@@ -293,9 +292,20 @@ function auditTerrainManifest({
       failures,
     })
 
-    if (header.triangleCount > terrainTriangleBudget) {
+    if (
+      metadata.sourceContract?.collisionBakeMode !==
+      'editor-walkable-surface'
+    ) {
       failures.push(
-        `${file}: terrain collider exceeds triangle budget ${header.triangleCount}/${terrainTriangleBudget}`,
+        `${file}: terrain collider must be baked as editor-walkable-surface`,
+      )
+    }
+    if (!Number.isFinite(metadata.byteSize) || metadata.byteSize <= 0) {
+      failures.push(`${file}: terrain collider metadata must record byteSize`)
+    }
+    if (!Number.isFinite(metadata.targetTriangles)) {
+      failures.push(
+        `${file}: terrain collider metadata must record targetTriangles`,
       )
     }
     if (header.indexCount !== header.triangleCount * 3) {
@@ -338,7 +348,6 @@ export function auditTerrainCollision({
   publicDir,
   bakedTerrainManifests,
   requiredChunkedManifests,
-  terrainTriangleBudget,
 }) {
   const failures = []
   const terrainManifestFiles = readdirSync(terrainDir)
@@ -350,7 +359,6 @@ export function auditTerrainCollision({
       terrainDir,
       publicDir,
       requiredChunkedManifests,
-      terrainTriangleBudget,
       failures,
     }),
   )

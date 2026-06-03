@@ -149,7 +149,6 @@ $: terrainPipeline = describeEditorTerrainPipeline({
       <div class="save-message">Source existence: {terrainPipeline.sourceExistenceStatus.detail}</div>
       <div class="save-message">Source provenance: {terrainPipeline.sourceHash || terrainPipeline.sourceProvenance}</div>
       <div class="save-message">Runtime manifest: {terrainPipeline.manifestUrl || 'none recorded'}</div>
-      <div class="save-message">Fallback surface: {terrainPipeline.fallbackSurfaceStatus.detail}</div>
       {#each terrainPipeline.blockers as blocker}
         <div class="save-message error-message">{blocker}</div>
       {/each}

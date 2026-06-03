@@ -73,7 +73,7 @@ At minimum audit:
 - Collision overlay
 - Collision policy/budget
 - Mesh collider bake
-- Terrain heightmap/collision/chunk cook
+- Terrain collision/chunk cook
 - World partition cook
 - Publish readiness/publish build
 - Runtime diagnostics/output

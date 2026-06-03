@@ -23,9 +23,8 @@ const collisionSources = new Set([
 ])
 const transitionWarningStatuses = new Set(['transitional', 'planned'])
 const glbTerrainCollisionBakeModes = new Set([
-  'source-glb-collision-mesh',
   'dedicated-collision-glb',
-  'simplified-source-glb',
+  'editor-walkable-surface',
   'selected-terrain-walkable-mesh',
 ])
 

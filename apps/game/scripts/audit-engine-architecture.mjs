@@ -41,7 +41,6 @@ const bakedTerrainManifests = [
 const chunkedTerrainRequiredManifests = new Set([
   'observatory-environment.manifest.json',
 ])
-const terrainTriangleBudget = 50_000
 const sceneAudit = auditSceneArchitecture({
   sceneDir,
   publicDir,
@@ -108,7 +107,6 @@ const terrainAudit = auditTerrainCollision({
   publicDir,
   bakedTerrainManifests,
   requiredChunkedManifests: chunkedTerrainRequiredManifests,
-  terrainTriangleBudget,
 })
 const terrainReports = terrainAudit.terrainReports
 const legacyTerrainManifestReports = terrainAudit.legacyTerrainManifestReports

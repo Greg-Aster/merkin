@@ -198,7 +198,7 @@ function importTerrainSource() {
     Source existence: {terrainPipeline.sourceExistenceStatus.detail}
   </div>
   <div class="save-message">
-    Authoritative visual source: {terrainPipeline.authoritativeVisualSource} · fallback: {terrainPipeline.fallbackSurfaceStatus.detail}
+    Authoritative visual source: {terrainPipeline.authoritativeVisualSource}
   </div>
   <div class="save-message">
     Manifest: {terrainCollisionSettings?.manifestUrl || 'none'} · chunks: {terrainCollisionSettings?.chunksPath || 'none'}

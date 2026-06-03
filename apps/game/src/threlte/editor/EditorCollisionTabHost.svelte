@@ -11,11 +11,22 @@ type TerrainCollisionSettings = {
   sourceAssetUrl?: string
   sourceAssetUrls?: string[]
   sourceName?: string
+  bakePreset?: 'mobile' | 'desktop' | 'high'
+  targetTriangles?: number
+  maxBytes?: number
+  collisionSourceAssetUrl?: string
   colliderUrl?: string
   metadataUrl?: string
   colliderResolution?: number
   triangleCount?: number
   vertexCount?: number
+  collisionProduct?: {
+    byteSize?: number
+    bakeMode?: string
+    preset?: string
+    targetTriangles?: number
+    maxBytes?: number
+  }
   dirty?: boolean
 }
 
@@ -27,6 +38,8 @@ export let selectedTerrainSourceName = ''
 export let selectedTerrainSourceAssetUrl = ''
 export let terrainCollisionBakePending = false
 export let terrainChunkCookPending = false
+export let onUpdateTerrainBakeSettings: (patch: Record<string, unknown>) => void =
+  () => {}
 export let onBakeTerrainCollision: () => void = () => {}
 export let onCookTerrainChunks: () => void = () => {}
 export let onBakeTerrain: () => void = () => {}
@@ -53,6 +66,18 @@ $: sourceLabel =
   selectedTerrainSourceAssetUrl ||
   selectedTerrainSourceName ||
   'no source GLB recorded'
+$: bakePreset = terrainCollisionSettings?.bakePreset ?? 'desktop'
+$: targetTriangles = terrainCollisionSettings?.targetTriangles ?? 25000
+$: maxBytes = terrainCollisionSettings?.maxBytes ?? 6291456
+$: colliderByteSize =
+  terrainCollisionSettings?.collisionProduct?.byteSize ??
+  0
+
+function updateNumberSetting(key: string, value: string) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed) || parsed <= 0) return
+  onUpdateTerrainBakeSettings({ [key]: parsed })
+}
 </script>
 
 <div class="editor-section">
@@ -84,6 +109,33 @@ $: sourceLabel =
     Mesh: {terrainCollisionSettings?.triangleCount ?? 0} triangles, {terrainCollisionSettings?.vertexCount ?? 0} vertices
     {terrainCollisionSettings?.dirty ? ' - bake needed' : ''}
   </div>
+  <div class="save-message">
+    Bake: {terrainCollisionSettings?.collisionProduct?.bakeMode ?? 'editor-walkable-surface'} · {colliderByteSize} bytes
+  </div>
+  <label class="editor-field">
+    <span>Preset</span>
+    <select
+      class="text-input"
+      value={bakePreset}
+      on:change={(event) => onUpdateTerrainBakeSettings({ bakePreset: (event.currentTarget as HTMLSelectElement).value })}
+    >
+      <option value="mobile">Mobile · 10k / 3 MB</option>
+      <option value="desktop">Desktop · 25k / 6 MB</option>
+      <option value="high">High · 50k / 10 MB</option>
+    </select>
+  </label>
+  <label class="editor-field">
+    <span>Target triangles</span>
+    <input class="tuple-input" type="number" min="1" step="1000" value={targetTriangles} on:change={(event) => updateNumberSetting('targetTriangles', (event.currentTarget as HTMLInputElement).value)} />
+  </label>
+  <label class="editor-field">
+    <span>Max bytes</span>
+    <input class="tuple-input" type="number" min="1" step="524288" value={maxBytes} on:change={(event) => updateNumberSetting('maxBytes', (event.currentTarget as HTMLInputElement).value)} />
+  </label>
+  <label class="editor-field">
+    <span>Collision source GLB</span>
+    <input class="text-input" type="text" value={terrainCollisionSettings?.collisionSourceAssetUrl ?? ''} on:change={(event) => onUpdateTerrainBakeSettings({ collisionSourceAssetUrl: (event.currentTarget as HTMLInputElement).value.trim() })} />
+  </label>
   <button
     class="full"
     disabled={!fullBakeCommand?.enabled || terrainCollisionBakePending || terrainChunkCookPending}

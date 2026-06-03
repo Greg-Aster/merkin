@@ -115,6 +115,7 @@ import {
   type EditorSceneNode,
   type EditorStylePreset,
   type LevelCollisionBudget,
+  type TerrainColliderBakePreset,
   addEmptyNode,
   addNode,
   applyEditorLayoutPreset,
@@ -3931,6 +3932,33 @@ function setCollisionBudget(budget: LevelCollisionBudget) {
   saveMessage = `Collision budget set to ${budget}`
 }
 
+function updateTerrainBakeSettings(
+  patch: Partial<{
+    bakePreset: TerrainColliderBakePreset
+    targetTriangles: number
+    maxBytes: number
+    collisionSourceAssetUrl: string
+  }>,
+) {
+  updateLevelSceneSettings(settings => ({
+    ...settings,
+    collision: {
+      ...(settings.collision ?? {}),
+      terrain: {
+        ...(settings.collision?.terrain ?? {}),
+        ...patch,
+        source: 'source-glb',
+        runtimeMode: 'glb-chunk-terrain',
+        visualSource: 'source-glb-chunks',
+        runtimeSource:
+          settings.collision?.terrain?.runtimeSource ?? 'editor-manifest',
+        dirty: true,
+      },
+    },
+  }))
+  saveMessage = 'Terrain bake settings updated; bake required'
+}
+
 async function bakeTerrainCollision() {
   if (terrainCollisionBakePending) return false
   terrainCollisionBakePending = true
@@ -4531,6 +4559,7 @@ $: editorPanelPropContext = {
   terrainCollisionBakePending,
   terrainChunkCookPending,
   terrainStatusSnapshot,
+  updateTerrainBakeSettings,
   worldPartitionCookPending,
   groundTerrainPublishPending,
   selectedTerrainSourceName,

@@ -975,11 +975,9 @@ function buildVisualSourceContract({ manifest, source, sourceHash, bounds }) {
       current.sourceCoordinateSystem ?? 'three-y-up-xz-ground',
     sourceBounds: current.sourceBounds ?? bounds,
     renderBakeMode: 'source-glb-chunk-mesh',
-    collisionBakeMode:
-      current.collisionBakeMode ?? 'source-glb-collision-mesh',
+    collisionBakeMode: 'editor-walkable-surface',
     collisionMeshSource: {
-      ...(current.collisionMeshSource ?? {}),
-      type: current.collisionMeshSource?.type ?? 'source-glb',
+      type: 'editor-walkable-surface',
       url: source.sourcePublicUrl,
       fingerprint: sourceAssetFingerprint,
     },

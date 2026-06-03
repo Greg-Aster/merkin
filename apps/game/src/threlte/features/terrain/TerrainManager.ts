@@ -25,13 +25,12 @@ export type TerrainSourceContract = {
   }
   renderBakeMode?: 'source-glb-chunk-mesh'
   collisionBakeMode?:
-    | 'source-glb-collision-mesh'
     | 'dedicated-collision-glb'
-    | 'simplified-source-glb'
+    | 'editor-walkable-surface'
     | 'selected-terrain-walkable-mesh'
     | 'scene-authored-collision'
   collisionMeshSource?: {
-    type?: 'dedicated-glb' | 'source-glb' | 'scene-actors'
+    type?: 'dedicated-glb' | 'editor-walkable-surface' | 'scene-actors'
     url?: string
     fingerprint?: {
       algorithm?: string

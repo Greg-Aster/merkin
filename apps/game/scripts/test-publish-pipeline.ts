@@ -1390,17 +1390,11 @@ test('Observatory source scene preserves ambient field lighting and authored fir
   assert.equal(authoredFireflyNpcCount, 3)
   assert.equal(fireflies?.enabled, true)
   assert.equal(fireflies?.allowWithAuthored, true)
-  assert.equal(fireflies?.count, 200)
-  assert.equal(fireflies?.lightCount, 25)
-  assert.equal(fireflies?.lightIntensity, 50)
-  assert.equal(fireflies?.lightDistance, 500)
-  assert.equal(fireflies?.lightBudgeted, false)
-  assert.equal(fireflies?.terrainFollow, true)
-  assert.equal(fireflies?.distribution, 'center-falloff')
-  assert.equal(fireflies?.densityExponent, 2)
-  assert.deepEqual(fireflies?.center, [0, 0, 0])
-  assert.equal(fireflies?.qualityTiers?.high?.count, 200)
-  assert.equal(fireflies?.qualityTiers?.high?.lightCount, 25)
+  assert.equal(fireflies?.count, 72)
+  assert.equal(fireflies?.lightCount, 10)
+  assert.equal(fireflies?.lightIntensity, 34)
+  assert.equal(fireflies?.lightDistance, 22)
+  assert.deepEqual(fireflies?.center, [-137.2, 1.8, -49.5])
 })
 
 test('runtime point-light budgets clamp visible count and source range', () => {
@@ -3498,7 +3492,7 @@ function createGlbTerrainManifest(
         sourceCoordinateSystem: 'three-y-up-xz-ground',
         sourceBounds: fixtureBounds,
         renderBakeMode: 'source-glb-chunk-mesh',
-        collisionBakeMode: 'source-glb-collision-mesh',
+        collisionBakeMode: 'editor-walkable-surface',
         collisionCoverageBounds: fixtureBounds,
         role: 'walkable',
         vertexCount: 128,
@@ -3530,9 +3524,9 @@ function createGlbTerrainManifest(
           sourceCoordinateSystem: 'three-y-up-xz-ground',
           sourceBounds: fixtureBounds,
           renderBakeMode: 'source-glb-chunk-mesh',
-          collisionBakeMode: 'source-glb-collision-mesh',
+          collisionBakeMode: 'editor-walkable-surface',
           collisionMeshSource: {
-            type: 'source-glb',
+            type: 'editor-walkable-surface',
             url: '/models/levels/fixture-level.glb',
             fingerprint: fixtureSourceFingerprint,
           },

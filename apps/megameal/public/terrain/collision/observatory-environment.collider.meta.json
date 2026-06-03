@@ -6,16 +6,23 @@
     "algorithm": "sha256",
     "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
   },
-  "sourceResolution": 0,
-  "colliderResolution": 0,
-  "sampleStep": 1,
-  "vertexCount": 721624,
-  "indexCount": 1691928,
-  "triangleCount": 563976,
+  "bakeMode": "editor-walkable-surface",
+  "preset": "desktop",
+  "targetTriangles": 25000,
+  "maxBytes": 6291456,
+  "byteSize": 446264,
+  "sourceTriangleCount": 563976,
+  "sourceVertexCount": 721624,
+  "sourceResolution": 563976,
+  "colliderResolution": 24642,
+  "sampleStep": 23,
+  "vertexCount": 12544,
+  "indexCount": 73926,
+  "triangleCount": 24642,
   "bounds": {
     "min": [
       -199.5517120361328,
-      -1.8438290357589722,
+      -1.5331727266311646,
       -195.1022491455078
     ],
     "max": [
@@ -26,12 +33,24 @@
   },
   "center": [
     -2.7753677368164062,
-    27.232016146183014,
+    27.387344300746918,
     -0.5087890625
   ],
+  "surface": {
+    "algorithm": "editor-walkable-grid",
+    "resolution": 112,
+    "sourceTriangleCount": 563976,
+    "outputTriangleCount": 24642
+  },
+  "bakeSettings": {
+    "preset": "desktop",
+    "targetTriangles": 25000,
+    "maxBytes": 6291456
+  },
   "sourceContract": {
     "schemaVersion": 1,
     "terrainSourceType": "glb-chunk-terrain",
+    "runtimeMode": "editor-baked-terrain",
     "sourceAssetUrl": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
     "sourceAssetUrls": [
       "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb"
@@ -66,19 +85,25 @@
       ]
     },
     "renderBakeMode": "source-glb-chunk-mesh",
-    "collisionBakeMode": "source-glb-collision-mesh",
+    "collisionBakeMode": "editor-walkable-surface",
     "collisionMeshSource": {
-      "type": "source-glb",
+      "type": "editor-walkable-surface",
       "url": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
       "fingerprint": {
         "algorithm": "sha256",
         "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+      },
+      "surface": {
+        "algorithm": "editor-walkable-grid",
+        "resolution": 112,
+        "sourceTriangleCount": 563976,
+        "outputTriangleCount": 24642
       }
     },
     "collisionCoverageBounds": {
       "min": [
         -199.5517120361328,
-        -1.8438290357589722,
+        -1.5331727266311646,
         -195.1022491455078
       ],
       "max": [
@@ -88,7 +113,12 @@
       ]
     },
     "role": "walkable",
-    "vertexCount": 721624,
-    "triangleCount": 563976
+    "sourceVertexCount": 721624,
+    "sourceTriangleCount": 563976,
+    "vertexCount": 12544,
+    "triangleCount": 24642,
+    "byteSize": 446264,
+    "targetTriangles": 25000,
+    "maxBytes": 6291456
   }
 }

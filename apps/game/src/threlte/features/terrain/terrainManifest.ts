@@ -125,9 +125,8 @@ type TerrainRuntimeGroundContractInput = {
 }
 
 const GLB_TERRAIN_COLLISION_BAKE_MODES = new Set([
-  'source-glb-collision-mesh',
   'dedicated-collision-glb',
-  'simplified-source-glb',
+  'editor-walkable-surface',
   'selected-terrain-walkable-mesh',
 ])
 

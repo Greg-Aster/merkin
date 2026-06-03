@@ -168,6 +168,7 @@ export type EditorPanelPropBuilderContext = {
   terrainCollisionBakePending: boolean
   terrainChunkCookPending: boolean
   terrainStatusSnapshot: EditorTerrainStatusSnapshot | null
+  updateTerrainBakeSettings: (patch: Record<string, unknown>) => void
   worldPartitionCookPending: boolean
   groundTerrainPublishPending: boolean
   selectedTerrainSourceName: string
@@ -383,6 +384,7 @@ export function buildCollisionTabProps(context: EditorPanelPropBuilderContext) {
     onSetCollisionOverlayEnabled: context.setCollisionOverlayEnabled,
     onSetCollisionBudget: context.setCollisionBudget,
     onSetTerrainAutoBake: context.setTerrainAutoBake,
+    onUpdateTerrainBakeSettings: context.updateTerrainBakeSettings,
     onAddSelectedTerrainSources: context.addSelectedTerrainSourcesToBasket,
     onRemoveTerrainSource: context.removeTerrainSourceFromBasket,
     onClearTerrainSources: context.clearTerrainSourceBasket,

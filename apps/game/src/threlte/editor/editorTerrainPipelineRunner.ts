@@ -1,5 +1,10 @@
 import type { SharedLevelEditorSettings } from './editorTypes'
 
+type TerrainColliderBakePreset = 'mobile' | 'desktop' | 'high'
+type TerrainCollisionBakeMode =
+  | 'editor-walkable-surface'
+  | 'dedicated-collision-glb'
+
 type TerrainCookPayload = {
   manifestUrl?: string
   chunksPath?: string
@@ -39,6 +44,11 @@ type TerrainCollisionPayload = {
     colliderResolution?: number
     triangleCount?: number
     vertexCount?: number
+    byteSize?: number
+    bakeMode?: TerrainCollisionBakeMode
+    preset?: TerrainColliderBakePreset
+    targetTriangles?: number
+    maxBytes?: number
   }
 }
 
@@ -180,6 +190,45 @@ export function applyTerrainCollisionBakePayload(
           settings.collision?.terrain?.triangleCount,
         vertexCount:
           collision?.vertexCount ?? settings.collision?.terrain?.vertexCount,
+        byteSize:
+          collision?.byteSize ?? settings.collision?.terrain?.collisionProduct?.byteSize,
+        bakePreset:
+          collision?.preset ?? settings.collision?.terrain?.bakePreset,
+        targetTriangles:
+          collision?.targetTriangles ??
+          settings.collision?.terrain?.targetTriangles,
+        maxBytes:
+          collision?.maxBytes ?? settings.collision?.terrain?.maxBytes,
+        collisionProduct: {
+          ...(settings.collision?.terrain?.collisionProduct ?? {}),
+          url: collision?.url ?? settings.collision?.terrain?.colliderUrl,
+          metadataUrl:
+            collision?.metadataUrl ?? settings.collision?.terrain?.metadataUrl,
+          manifestUrl:
+            payload.manifestUrl ?? settings.collision?.terrain?.manifestUrl,
+          triangleCount:
+            collision?.triangleCount ??
+            settings.collision?.terrain?.triangleCount,
+          vertexCount:
+            collision?.vertexCount ?? settings.collision?.terrain?.vertexCount,
+          byteSize:
+            collision?.byteSize ??
+            settings.collision?.terrain?.collisionProduct?.byteSize,
+          bakeMode:
+            collision?.bakeMode ??
+            settings.collision?.terrain?.collisionProduct?.bakeMode,
+          preset:
+            collision?.preset ??
+            settings.collision?.terrain?.collisionProduct?.preset,
+          targetTriangles:
+            collision?.targetTriangles ??
+            settings.collision?.terrain?.collisionProduct?.targetTriangles,
+          maxBytes:
+            collision?.maxBytes ??
+            settings.collision?.terrain?.collisionProduct?.maxBytes,
+          generatedAt: new Date().toISOString(),
+          generatedBy: 'editor-terrain-bake',
+        },
         dirty: options.sourceStillDirty,
         lastGeneratedAt: new Date().toISOString(),
       },

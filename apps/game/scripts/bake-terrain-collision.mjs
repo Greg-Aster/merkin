@@ -4,12 +4,14 @@ import {
   mkdirSync,
   readFileSync,
   renameSync,
+  statSync,
   writeFileSync,
 } from 'node:fs'
 import { dirname, extname, join, relative } from 'node:path'
 import {
   discoverTerrainLevels,
   formatTerrainLevelList,
+  readTerrainSceneSettings,
   resolveTerrainLevel,
 } from './lib/terrainManifestDiscovery.mjs'
 
@@ -20,6 +22,21 @@ const repoRoot = new URL('../../..', import.meta.url).pathname.replace(
 const publicRoot = join(repoRoot, 'apps/megameal/public')
 const MAGIC = 0x4d4d5443
 const VERSION = 1
+const DEFAULT_TERRAIN_COLLIDER_PRESET = 'desktop'
+const TERRAIN_COLLIDER_PRESETS = {
+  mobile: {
+    targetTriangles: 10_000,
+    maxBytes: 3 * 1024 * 1024,
+  },
+  desktop: {
+    targetTriangles: 25_000,
+    maxBytes: 6 * 1024 * 1024,
+  },
+  high: {
+    targetTriangles: 50_000,
+    maxBytes: 10 * 1024 * 1024,
+  },
+}
 const COMPONENT_READERS = {
   5120: { size: 1, read: Buffer.prototype.readInt8, max: 127, signed: true },
   5121: { size: 1, read: Buffer.prototype.readUInt8, max: 255 },
@@ -93,8 +110,15 @@ function resolveTerrainSourceAssetUrl(manifest) {
   )
 }
 
-function resolveTerrainSourceAsset(manifest) {
-  const sourceAssetUrl = resolveTerrainSourceAssetUrl(manifest)
+function resolveTerrainSourceAsset(manifest, sceneSettings) {
+  const sourceAssetUrl =
+    normalizePublicUrl(
+      firstString(
+        sceneSettings?.collision?.terrain?.collisionSourceAssetUrl,
+        sceneSettings?.collision?.terrain?.sourceAssetUrl,
+        sceneSettings?.collision?.terrain?.sourceAssetUrls,
+      ),
+    ) || resolveTerrainSourceAssetUrl(manifest)
   const sourceAssetPath = resolvePublicPath(sourceAssetUrl)
   if (!sourceAssetUrl || !sourceAssetPath || !existsSync(sourceAssetPath)) {
     throw new Error(
@@ -109,6 +133,78 @@ function resolveTerrainSourceAsset(manifest) {
     sourceAssetPath,
     sourcePublicUrl: toPublicUrl(sourceAssetPath),
     fingerprint: fingerprintFile(sourceAssetPath),
+  }
+}
+
+function parseArgs(argv) {
+  const parsed = {}
+  for (const arg of argv) {
+    const match = arg.match(/^--([^=]+)=(.*)$/)
+    if (match) parsed[match[1]] = match[2]
+  }
+  return parsed
+}
+
+function chooseNumber(...values) {
+  for (const value of values) {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed) && parsed > 0) return parsed
+  }
+  return undefined
+}
+
+function normalizeBakePreset(value) {
+  const normalized = String(value || DEFAULT_TERRAIN_COLLIDER_PRESET)
+  return Object.hasOwn(TERRAIN_COLLIDER_PRESETS, normalized)
+    ? normalized
+    : DEFAULT_TERRAIN_COLLIDER_PRESET
+}
+
+function resolveTerrainBakeSettings({ level, manifest, args }) {
+  const sceneSettings = readTerrainSceneSettings(repoRoot, level)
+  const terrain = sceneSettings?.collision?.terrain ?? {}
+  const manifestSettings = manifest.collision?.terrain?.bakeSettings ?? {}
+  const preset = normalizeBakePreset(
+    args.preset ?? terrain.bakePreset ?? manifestSettings.preset,
+  )
+  const presetDefaults = TERRAIN_COLLIDER_PRESETS[preset]
+  const targetTriangles = Math.floor(
+    chooseNumber(
+      args['target-triangles'],
+      args['triangle-budget'],
+      args['max-triangles'],
+      terrain.targetTriangles,
+      terrain.maxTriangles,
+      terrain.triangleBudget,
+      manifestSettings.targetTriangles,
+      presetDefaults.targetTriangles,
+    ),
+  )
+  const maxBytes = Math.floor(
+    chooseNumber(
+      args['max-bytes'],
+      args['byte-budget'],
+      terrain.maxBytes,
+      terrain.maxColliderBytes,
+      manifestSettings.maxBytes,
+      presetDefaults.maxBytes,
+    ),
+  )
+  if (!Number.isFinite(targetTriangles) || targetTriangles <= 0) {
+    throw new Error('Terrain target triangle budget must be positive.')
+  }
+  if (!Number.isFinite(maxBytes) || maxBytes <= 0) {
+    throw new Error('Terrain max byte budget must be positive.')
+  }
+
+  return {
+    sceneSettings,
+    bake: {
+      mode: 'editor-walkable-surface',
+      preset,
+      targetTriangles,
+      maxBytes,
+    },
   }
 }
 
@@ -359,26 +455,172 @@ function getBoundsCenter(bounds) {
   ]
 }
 
-function buildColliderMeta({ source, geometry }) {
+function getTriangleCount(geometry) {
+  return Math.floor(geometry.indices.length / 3)
+}
+
+function estimateGridColliderBytes(resolution) {
+  const vertexCount = resolution * resolution
+  const triangleCount = (resolution - 1) * (resolution - 1) * 2
+  return 32 + vertexCount * 3 * 4 + triangleCount * 3 * 4
+}
+
+function createEditorWalkableSurfaceGeometry(geometry, bake) {
+  const targetResolution = Math.max(
+    2,
+    Math.floor(Math.sqrt(bake.targetTriangles / 2)) + 1,
+  )
+  let resolution = targetResolution
+  while (resolution > 2 && (resolution - 1) * (resolution - 1) * 2 > bake.targetTriangles) {
+    resolution -= 1
+  }
+  while (resolution > 2 && estimateGridColliderBytes(resolution) > bake.maxBytes) {
+    resolution -= 1
+  }
+
+  const bounds = sanitizeBounds(geometry.bounds)
+  const width = Math.max(0.0001, bounds.max[0] - bounds.min[0])
+  const depth = Math.max(0.0001, bounds.max[2] - bounds.min[2])
+  const cellCount = resolution * resolution
+  const heights = new Float32Array(cellCount)
+  const filled = new Uint8Array(cellCount)
+  heights.fill(-Infinity)
+
+  for (let offset = 0; offset < geometry.vertices.length; offset += 3) {
+    const x = geometry.vertices[offset]
+    const y = geometry.vertices[offset + 1]
+    const z = geometry.vertices[offset + 2]
+    const xi = Math.max(
+      0,
+      Math.min(resolution - 1, Math.round(((x - bounds.min[0]) / width) * (resolution - 1))),
+    )
+    const zi = Math.max(
+      0,
+      Math.min(resolution - 1, Math.round(((z - bounds.min[2]) / depth) * (resolution - 1))),
+    )
+    const index = zi * resolution + xi
+    heights[index] = Math.max(heights[index], y)
+    filled[index] = 1
+  }
+
+  for (let pass = 0; pass < resolution * 2; pass += 1) {
+    let changed = false
+    const nextHeights = new Float32Array(heights)
+    const nextFilled = new Uint8Array(filled)
+    for (let z = 0; z < resolution; z += 1) {
+      for (let x = 0; x < resolution; x += 1) {
+        const index = z * resolution + x
+        if (filled[index]) continue
+        let total = 0
+        let count = 0
+        for (let nz = Math.max(0, z - 1); nz <= Math.min(resolution - 1, z + 1); nz += 1) {
+          for (let nx = Math.max(0, x - 1); nx <= Math.min(resolution - 1, x + 1); nx += 1) {
+            const neighbor = nz * resolution + nx
+            if (!filled[neighbor]) continue
+            total += heights[neighbor]
+            count += 1
+          }
+        }
+        if (count > 0) {
+          nextHeights[index] = total / count
+          nextFilled[index] = 1
+          changed = true
+        }
+      }
+    }
+    heights.set(nextHeights)
+    filled.set(nextFilled)
+    if (!changed) break
+  }
+
+  const projectedBounds = emptyBounds()
+  const vertices = new Float32Array(cellCount * 3)
+  for (let z = 0; z < resolution; z += 1) {
+    for (let x = 0; x < resolution; x += 1) {
+      const cell = z * resolution + x
+      const offset = cell * 3
+      const vx = bounds.min[0] + (width * x) / (resolution - 1)
+      const vy = Number.isFinite(heights[cell]) ? heights[cell] : bounds.min[1]
+      const vz = bounds.min[2] + (depth * z) / (resolution - 1)
+      vertices[offset] = vx
+      vertices[offset + 1] = vy
+      vertices[offset + 2] = vz
+      expandBounds(projectedBounds, vx, vy, vz)
+    }
+  }
+
+  const indices = new Uint32Array((resolution - 1) * (resolution - 1) * 6)
+  let writeIndex = 0
+  for (let z = 0; z < resolution - 1; z += 1) {
+    for (let x = 0; x < resolution - 1; x += 1) {
+      const a = z * resolution + x
+      const b = a + 1
+      const c = a + resolution
+      const d = c + 1
+      indices[writeIndex++] = a
+      indices[writeIndex++] = c
+      indices[writeIndex++] = b
+      indices[writeIndex++] = b
+      indices[writeIndex++] = c
+      indices[writeIndex++] = d
+    }
+  }
+
+  return {
+    vertices,
+    indices,
+    bounds: sanitizeBounds(projectedBounds),
+    surfaceResolution: resolution,
+  }
+}
+
+function buildColliderMeta({
+  source,
+  sourceGeometry,
+  geometry,
+  bake,
+  binaryBytes,
+  surface,
+}) {
   const vertexCount = geometry.vertices.length / 3
   const indexCount = geometry.indices.length
   const triangleCount = Math.floor(indexCount / 3)
+  const sourceVertexCount = sourceGeometry.vertices.length / 3
+  const sourceTriangleCount = getTriangleCount(sourceGeometry)
+  const sourceBounds = sourceGeometry.bounds
   return {
     type: 'baked-terrain-mesh',
     version: VERSION,
     sourceAssetUrl: source.sourcePublicUrl,
     sourceAssetFingerprint: source.fingerprint,
-    sourceResolution: 0,
-    colliderResolution: 0,
-    sampleStep: 1,
+    bakeMode: 'editor-walkable-surface',
+    preset: bake.preset,
+    targetTriangles: bake.targetTriangles,
+    maxBytes: bake.maxBytes,
+    byteSize: binaryBytes,
+    sourceTriangleCount,
+    sourceVertexCount,
+    sourceResolution: sourceTriangleCount,
+    colliderResolution: triangleCount,
+    sampleStep: Math.max(
+      1,
+      Math.ceil(sourceTriangleCount / Math.max(1, triangleCount)),
+    ),
     vertexCount,
     indexCount,
     triangleCount,
     bounds: geometry.bounds,
     center: getBoundsCenter(geometry.bounds),
+    surface,
+    bakeSettings: {
+      preset: bake.preset,
+      targetTriangles: bake.targetTriangles,
+      maxBytes: bake.maxBytes,
+    },
     sourceContract: {
       schemaVersion: 1,
       terrainSourceType: 'glb-chunk-terrain',
+      runtimeMode: 'editor-baked-terrain',
       sourceAssetUrl: source.sourcePublicUrl,
       sourceAssetUrls: [source.sourcePublicUrl],
       authoredSourceAssetUrls: [source.sourcePublicUrl],
@@ -387,20 +629,30 @@ function buildColliderMeta({ source, geometry }) {
         { url: source.sourcePublicUrl, fingerprint: source.fingerprint },
       ],
       sourceCoordinateSystem: 'three-y-up-xz-ground',
-      sourceBounds: geometry.bounds,
+      sourceBounds,
       renderBakeMode: 'source-glb-chunk-mesh',
-      collisionBakeMode: 'source-glb-collision-mesh',
+      collisionBakeMode: 'editor-walkable-surface',
       collisionMeshSource: {
-        type: 'source-glb',
+        type: 'editor-walkable-surface',
         url: source.sourcePublicUrl,
         fingerprint: source.fingerprint,
+        surface,
       },
       collisionCoverageBounds: geometry.bounds,
       role: 'walkable',
+      sourceVertexCount,
+      sourceTriangleCount,
       vertexCount,
       triangleCount,
+      byteSize: binaryBytes,
+      targetTriangles: bake.targetTriangles,
+      maxBytes: bake.maxBytes,
     },
   }
+}
+
+function getColliderBinaryByteLength(geometry) {
+  return 32 + geometry.vertices.byteLength + geometry.indices.byteLength
 }
 
 function writeColliderBinary(path, geometry, meta) {
@@ -439,6 +691,7 @@ function updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, met
     ...manifest,
     runtime: {
       ...(manifest.runtime ?? {}),
+      terrainAuthority: 'editor-baked-terrain',
       mode: 'glb-chunk-terrain',
       visualSource: 'source-glb-chunks',
       fallbackSurfacePolicy: manifest.runtime?.fallbackSurfacePolicy ?? 'disabled',
@@ -452,6 +705,12 @@ function updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, met
         metadataUrl: publicMetaPath,
         triangleCount: meta.triangleCount,
         vertexCount: meta.vertexCount,
+        byteSize: meta.byteSize,
+        bakeMode: meta.bakeMode,
+        preset: meta.preset,
+        targetTriangles: meta.targetTriangles,
+        maxBytes: meta.maxBytes,
+        bakeSettings: meta.bakeSettings,
         colliderResolution: meta.colliderResolution,
         sampleStep: meta.sampleStep,
         bounds: meta.bounds,
@@ -463,8 +722,21 @@ function updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, met
       ? {
           ...manifest.visualChunks,
           source: 'source-glb',
-          sourceContract:
-            manifest.visualChunks.sourceContract ?? meta.sourceContract,
+          sourceContract: {
+            ...(manifest.visualChunks.sourceContract ?? {}),
+            terrainSourceType: 'glb-chunk-terrain',
+            runtimeMode: 'editor-baked-terrain',
+            sourceAssetUrl: meta.sourceContract.sourceAssetUrl,
+            sourceAssetUrls: meta.sourceContract.sourceAssetUrls,
+            sourceAssetFingerprint: meta.sourceContract.sourceAssetFingerprint,
+            sourceCoordinateSystem: meta.sourceContract.sourceCoordinateSystem,
+            sourceBounds:
+              manifest.visualChunks.sourceContract?.sourceBounds ??
+              meta.sourceContract.sourceBounds,
+            renderBakeMode: 'source-glb-chunk-mesh',
+            collisionBakeMode: 'editor-walkable-surface',
+            collisionMeshSource: meta.sourceContract.collisionMeshSource,
+          },
         }
       : manifest.visualChunks,
     physics: {
@@ -477,9 +749,8 @@ function updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, met
   }
 }
 
-const requestedLevel =
-  process.argv.find(arg => arg.startsWith('--level='))?.split('=')[1] ??
-  process.argv[2]
+const args = parseArgs(process.argv.slice(2))
+const requestedLevel = args.level ?? process.argv[2]
 const terrainLevels = discoverTerrainLevels({ repoRoot, publicRoot })
 const requestedTerrainLevel = resolveTerrainLevel(terrainLevels, requestedLevel)
 const levelsToBake = requestedLevel
@@ -497,18 +768,38 @@ if (levelsToBake.length === 0) {
 
 for (const level of levelsToBake) {
   const manifest = readJson(level.manifestPath)
-  const source = resolveTerrainSourceAsset(manifest)
-  const geometry = collectColliderGeometry(loadGltfDocument(source.sourceAssetPath))
-  if (geometry.indices.length < 3) {
+  const { sceneSettings, bake } = resolveTerrainBakeSettings({
+    level,
+    manifest,
+    args,
+  })
+  const source = resolveTerrainSourceAsset(manifest, sceneSettings)
+  const sourceGeometry = collectColliderGeometry(loadGltfDocument(source.sourceAssetPath))
+  if (sourceGeometry.indices.length < 3) {
     throw new Error(`No triangle mesh primitives found in ${source.sourceAssetUrl}`)
   }
-  const meta = buildColliderMeta({ source, geometry })
+  const geometry = createEditorWalkableSurfaceGeometry(sourceGeometry, bake)
+  const binaryBytes = getColliderBinaryByteLength(geometry)
+  const meta = buildColliderMeta({
+    source,
+    sourceGeometry,
+    geometry,
+    bake,
+    binaryBytes,
+    surface: {
+      algorithm: 'editor-walkable-grid',
+      resolution: geometry.surfaceResolution,
+      sourceTriangleCount: getTriangleCount(sourceGeometry),
+      outputTriangleCount: getTriangleCount(geometry),
+    },
+  })
   const publicBinaryPath = `/terrain/collision/${level.id}.collider.bin`
   const publicMetaPath = `/terrain/collision/${level.id}.collider.meta.json`
   const binaryPath = join(publicRoot, publicBinaryPath.replace(/^\//, ''))
   const metaPath = join(publicRoot, publicMetaPath.replace(/^\//, ''))
 
   writeColliderBinary(binaryPath, geometry, meta)
+  meta.byteSize = statSync(binaryPath).size
   writeJson(metaPath, meta)
   writeJson(
     level.manifestPath,
@@ -516,7 +807,7 @@ for (const level of levelsToBake) {
   )
 
   console.log(
-    `[bake-terrain-collision] ${level.id}: ${meta.vertexCount} vertices, ${meta.triangleCount} triangles from ${source.sourcePublicUrl} -> ${publicBinaryPath}`,
+    `[bake-terrain-collision] ${level.id}: ${meta.vertexCount} vertices, ${meta.triangleCount}/${bake.targetTriangles} triangles, ${meta.byteSize}/${bake.maxBytes} bytes from ${source.sourcePublicUrl} -> ${publicBinaryPath}`,
   )
   console.log(
     JSON.stringify({
@@ -528,6 +819,11 @@ for (const level of levelsToBake) {
         metadataUrl: publicMetaPath,
         triangleCount: meta.triangleCount,
         vertexCount: meta.vertexCount,
+        byteSize: meta.byteSize,
+        bakeMode: meta.bakeMode,
+        preset: meta.preset,
+        targetTriangles: meta.targetTriangles,
+        maxBytes: meta.maxBytes,
         colliderResolution: meta.colliderResolution,
       },
       metadata: meta,

@@ -69,7 +69,6 @@ export type EditorTerrainPipelineState = {
   renderChunkStatus: EditorTerrainPipelineStatus
   collisionStatus: EditorTerrainPipelineStatus
   sourceExistenceStatus: EditorTerrainPipelineStatus
-  fallbackSurfaceStatus: EditorTerrainPipelineStatus
   dirtyStatus: EditorTerrainPipelineStatus
   publishStatus: EditorTerrainPipelineStatus
   blockers: string[]
@@ -412,16 +411,6 @@ export function describeEditorTerrainPipeline(input: {
               detail: 'no terrain source asset or source node is recorded',
             }
 
-  const fallbackSurfaceStatus: EditorTerrainPipelineStatus =
-    {
-          label: 'Fallback surface',
-          state: 'inactive',
-          detail:
-            mode === 'glb-chunk-terrain'
-              ? 'no fallback surface is defined for GLB chunks'
-              : 'not used by scene-authored terrain',
-        }
-
   const dirtyStatus: EditorTerrainPipelineStatus = collisionDirty
       ? {
           label: 'Dirty state',
@@ -553,7 +542,6 @@ export function describeEditorTerrainPipeline(input: {
     renderChunkStatus,
     collisionStatus,
     sourceExistenceStatus,
-    fallbackSurfaceStatus,
     dirtyStatus,
     publishStatus,
     blockers,

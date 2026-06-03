@@ -620,10 +620,17 @@ export interface TerrainCollisionProductMetadata {
   manifestUrl?: string
   triangleCount?: number
   vertexCount?: number
+  byteSize?: number
+  bakeMode?: 'editor-walkable-surface' | 'dedicated-collision-glb'
+  preset?: TerrainColliderBakePreset
+  targetTriangles?: number
+  maxBytes?: number
   colliderResolution?: number
   generatedAt?: string
   generatedBy?: string
 }
+
+export type TerrainColliderBakePreset = 'mobile' | 'desktop' | 'high'
 
 export interface TerrainMigrationSettings {
   currentMode?: TerrainRuntimeMode
@@ -669,6 +676,10 @@ export interface SharedLevelCollisionSettings {
       sourceNodeId?: string
       sourceNodeIds?: string[]
       sourceName?: string
+      bakePreset?: TerrainColliderBakePreset
+      targetTriangles?: number
+      maxBytes?: number
+      collisionSourceAssetUrl?: string
       sourceTriangleCount?: number
       sourceBounds?: {
         min: [number, number, number]
@@ -679,6 +690,7 @@ export interface SharedLevelCollisionSettings {
       colliderResolution?: number
       triangleCount?: number
       vertexCount?: number
+      byteSize?: number
       dirty?: boolean
       lastGeneratedAt?: string
       heightOverrideCount?: number

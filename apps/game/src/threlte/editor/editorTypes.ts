@@ -46,6 +46,7 @@ export type {
   SharedLevelTerrainSculptSettings,
   SharedLevelWaterSettings,
   SolitudeEditorSettings,
+  TerrainColliderBakePreset,
   TerrainMigrationSettings,
   TerrainMigrationStatus,
 } from '../engine/sceneDocumentTypes'
