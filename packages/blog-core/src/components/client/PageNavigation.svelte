@@ -18,6 +18,9 @@ const managedHeadSelector = [
 	'link[rel="alternate"]',
 	'link[rel="icon"]',
 ].join(",");
+const styleResourceSelector = ['link[rel~="stylesheet"][href]', "style"].join(
+	",",
+);
 
 let abortController: AbortController | null = null;
 let cleanupNavigation: (() => void) | null = null;
@@ -61,6 +64,144 @@ function shouldHandleLink(anchor: HTMLAnchorElement, event: MouseEvent) {
 
 function dispatchPageEvent(name: string, detail: Record<string, unknown>) {
 	document.dispatchEvent(new CustomEvent(name, { detail }));
+}
+
+function isStylesheetLink(element: Element): element is HTMLLinkElement {
+	return (
+		element.tagName.toLowerCase() === "link" &&
+		element
+			.getAttribute("rel")
+			?.toLowerCase()
+			.split(/\s+/)
+			.includes("stylesheet") === true &&
+		element.hasAttribute("href")
+	);
+}
+
+function isStyleElement(element: Element): element is HTMLStyleElement {
+	return element.tagName.toLowerCase() === "style";
+}
+
+function getStyleResourceKey(element: Element, baseUrl: string) {
+	if (isStylesheetLink(element)) {
+		const href = element.getAttribute("href");
+		if (!href) return "";
+
+		return [
+			"link",
+			new URL(href, baseUrl).href,
+			element.getAttribute("media") ?? "",
+			element.getAttribute("integrity") ?? "",
+			element.getAttribute("crossorigin") ?? "",
+		].join("::");
+	}
+
+	if (isStyleElement(element)) {
+		return [
+			"style",
+			element.getAttribute("media") ?? "",
+			element.getAttribute("data-astro-id") ?? "",
+			element.getAttribute("data-vite-dev-id") ?? "",
+			element.textContent ?? "",
+		].join("::");
+	}
+
+	return "";
+}
+
+function collectStyleResources(root: ParentNode, baseUrl: string) {
+	return Array.from(root.querySelectorAll(styleResourceSelector))
+		.map((element) => ({
+			element,
+			key: getStyleResourceKey(element, baseUrl),
+		}))
+		.filter((resource) => resource.key);
+}
+
+function waitForStylesheetLoad(link: HTMLLinkElement, signal?: AbortSignal) {
+	return new Promise<void>((resolve, reject) => {
+		if (signal?.aborted) {
+			reject(new DOMException("Navigation aborted", "AbortError"));
+			return;
+		}
+
+		let settled = false;
+		const cleanup = () => {
+			window.clearTimeout(timeout);
+			link.removeEventListener("load", finish);
+			link.removeEventListener("error", fail);
+			signal?.removeEventListener("abort", abort);
+		};
+		const settle = (callback: () => void) => {
+			if (settled) return;
+			settled = true;
+			cleanup();
+			callback();
+		};
+		const finish = () => settle(resolve);
+		const fail = () =>
+			settle(() =>
+				reject(new Error(`Unable to load stylesheet: ${link.href}`)),
+			);
+		const abort = () =>
+			settle(() =>
+				reject(new DOMException("Navigation aborted", "AbortError")),
+			);
+		const timeout = window.setTimeout(finish, 5000);
+
+		link.addEventListener("load", finish);
+		link.addEventListener("error", fail);
+		signal?.addEventListener("abort", abort);
+	});
+}
+
+async function prepareStyleResources(
+	nextDocument: Document,
+	pageUrl: string,
+	signal?: AbortSignal,
+) {
+	const currentResources = collectStyleResources(
+		document.head,
+		window.location.href,
+	);
+	const nextResources = collectStyleResources(nextDocument.head, pageUrl);
+	const currentKeys = new Set(currentResources.map(({ key }) => key));
+	const nextKeys = new Set(nextResources.map(({ key }) => key));
+	const staleElements = currentResources
+		.filter(({ key }) => !nextKeys.has(key))
+		.map(({ element }) => element);
+	const addedElements: Element[] = [];
+	const loadPromises: Array<Promise<void>> = [];
+
+	for (const { element, key } of nextResources) {
+		if (currentKeys.has(key)) continue;
+
+		const importedElement = document.importNode(element, true);
+		addedElements.push(importedElement);
+
+		if (isStylesheetLink(importedElement)) {
+			const href = importedElement.getAttribute("href");
+			if (href) importedElement.href = new URL(href, pageUrl).href;
+			loadPromises.push(waitForStylesheetLoad(importedElement, signal));
+		}
+
+		document.head.appendChild(importedElement);
+	}
+
+	try {
+		await Promise.all(loadPromises);
+	} catch (error) {
+		for (const element of addedElements) {
+			element.remove();
+		}
+		throw error;
+	}
+
+	return () => {
+		for (const element of staleElements) {
+			element.remove();
+		}
+	};
 }
 
 function updateManagedHead(nextDocument: Document) {
@@ -179,6 +320,11 @@ async function navigate(url: URL, options: NavigationOptions = {}) {
 		}
 
 		const nextDocument = new DOMParser().parseFromString(html, "text/html");
+		const finishStyleTransition = await prepareStyleResources(
+			nextDocument,
+			url.href,
+			abortController.signal,
+		);
 
 		if (!swapContainers(nextDocument)) {
 			window.location.href = url.href;
@@ -186,6 +332,7 @@ async function navigate(url: URL, options: NavigationOptions = {}) {
 		}
 
 		updateManagedHead(nextDocument);
+		finishStyleTransition();
 
 		if (options.pushState !== false) {
 			history.pushState({ merkinNavigation: true }, "", url.href);
