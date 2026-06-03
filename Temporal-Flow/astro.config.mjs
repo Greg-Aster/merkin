@@ -2,7 +2,6 @@
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
-import swup from "@swup/astro";
 import Compress from "astro-compress";
 import icon from "astro-icon";
 import { defineConfig } from "astro/config";
@@ -29,7 +28,6 @@ function manualClientChunks(id) {
   if (!id.includes('node_modules')) return undefined;
 
   if (id.includes('photoswipe')) return 'vendor-photoswipe';
-  if (id.includes('@swup') || id.includes('/swup/')) return 'vendor-swup';
   if (id.includes('marked') || id.includes('markdown-it')) return 'vendor-markdown';
   if (id.includes('katex')) return 'vendor-katex';
   if (id.includes('mammoth')) return 'vendor-mammoth';
@@ -207,20 +205,6 @@ export default defineConfig({
   integrations: [
     corsMiddleware(), // Add the CORS middleware as an integration
     tailwind(),
-    swup({
-      theme: false,
-      animationClass: "transition-swup-", // see https://swup.js.org/options/#animationselector
-      // the default value `transition-` cause transition delay
-      // when the Tailwind class `transition-all` is used
-      containers: ["#banner-container", "#main-grid"],
-      smoothScrolling: true,
-      cache: true,
-      preload: true,
-      accessibility: true,
-      updateHead: true,
-      updateBodyClass: false,
-      globalInstance: true,
-    }),
     icon({
       include: {
         "preprocess: viteProcess(),": ["*"],

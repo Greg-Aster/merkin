@@ -1,7 +1,9 @@
 import { Howl, Howler } from 'howler'
 import {
   type SiteAudioTrackConfig,
+  clampSiteAudioVolume,
   getTracksForPathname,
+  readSiteAudioVolume,
   siteAudioConfig,
 } from '../config/audio'
 import { markSiteAudioUnlocked } from './site-audio-activation'
@@ -41,6 +43,9 @@ export interface SiteAudioState {
 }
 
 type SiteAudioListener = (state: SiteAudioState) => void
+type SiteAudioSyncOptions = {
+  forceRescore?: boolean
+}
 type YouTubeEngagementAction = 'play' | 'pause' | 'ended' | 'cued'
 type PageAmbientTrackConfig = Omit<SiteAudioTrackConfig, 'routes'> & {
   routes?: string[]
@@ -197,7 +202,10 @@ class SiteAudioManager {
   }
 
   setMasterVolume(nextVolume: number): void {
-    const clampedVolume = Math.min(1, Math.max(0, nextVolume))
+    const clampedVolume = clampSiteAudioVolume(
+      nextVolume,
+      siteAudioConfig.defaultMasterVolume,
+    )
     this.masterVolume = clampedVolume
     this.writeStoredMasterVolume(clampedVolume)
 
@@ -210,7 +218,10 @@ class SiteAudioManager {
   }
 
   setAmbienceVolume(nextVolume: number): void {
-    const clampedVolume = Math.min(1, Math.max(0, nextVolume))
+    const clampedVolume = clampSiteAudioVolume(
+      nextVolume,
+      siteAudioConfig.defaultAmbienceVolume,
+    )
     this.ambienceVolume = clampedVolume
     this.writeStoredAmbienceVolume(clampedVolume)
 
@@ -222,14 +233,22 @@ class SiteAudioManager {
   }
 
   setSfxVolume(nextVolume: number): void {
-    const clampedVolume = Math.min(1, Math.max(0, nextVolume))
+    const clampedVolume = clampSiteAudioVolume(
+      nextVolume,
+      siteAudioConfig.defaultSfxVolume,
+    )
     this.sfxVolume = clampedVolume
     this.writeStoredSfxVolume(clampedVolume)
     this.emit()
   }
 
-  syncForPath(pathname: string, userInitiated = false): void {
+  syncForPath(
+    pathname: string,
+    userInitiated = false,
+    options: SiteAudioSyncOptions = {},
+  ): void {
     this.pendingPathname = pathname
+    const forceRescore = options.forceRescore === true
 
     if (!this.enabled) {
       this.stopCurrentTrack()
@@ -256,6 +275,7 @@ class SiteAudioManager {
 
     const currentTrack = this.currentTrack
     if (
+      !forceRescore &&
       this.currentHowl &&
       currentTrack &&
       nextTrackPool.some(track => this.isSameTrack(currentTrack, track))
@@ -277,9 +297,25 @@ class SiteAudioManager {
 
     this.currentTrackPool = nextTrackPool
     this.queuedTrackPool = []
-    const nextTrack = this.pickNextTrack()
+    const nextTrack = this.pickNextTrack(currentTrack)
     if (!nextTrack) {
       this.stopCurrentTrack()
+      this.emit()
+      return
+    }
+
+    if (
+      this.currentHowl &&
+      currentTrack &&
+      this.isSameTrack(currentTrack, nextTrack)
+    ) {
+      if (
+        (userInitiated || hasUnlockedAudio) &&
+        !this.suspended &&
+        !this.currentHowl.playing()
+      ) {
+        this.currentHowl.play()
+      }
       this.emit()
       return
     }
@@ -552,12 +588,10 @@ class SiteAudioManager {
     if (typeof window === 'undefined')
       return siteAudioConfig.defaultMasterVolume
 
-    const stored = Number(
-      window.localStorage.getItem(siteAudioConfig.masterVolumeStorageKey),
+    return this.readStoredVolume(
+      siteAudioConfig.masterVolumeStorageKey,
+      siteAudioConfig.defaultMasterVolume,
     )
-    if (!Number.isFinite(stored)) return siteAudioConfig.defaultMasterVolume
-
-    return Math.min(1, Math.max(0, stored))
   }
 
   private writeStoredMasterVolume(volume: number): void {
@@ -572,21 +606,11 @@ class SiteAudioManager {
     if (typeof window === 'undefined')
       return siteAudioConfig.defaultAmbienceVolume
 
-    const stored = Number(
-      window.localStorage.getItem(siteAudioConfig.ambienceVolumeStorageKey),
+    return this.readStoredVolume(
+      siteAudioConfig.ambienceVolumeStorageKey,
+      siteAudioConfig.defaultAmbienceVolume,
+      siteAudioConfig.legacyVolumeStorageKey,
     )
-    if (Number.isFinite(stored)) {
-      return Math.min(1, Math.max(0, stored))
-    }
-
-    const legacy = Number(
-      window.localStorage.getItem(siteAudioConfig.legacyVolumeStorageKey),
-    )
-    if (Number.isFinite(legacy)) {
-      return Math.min(1, Math.max(0, legacy))
-    }
-
-    return siteAudioConfig.defaultAmbienceVolume
   }
 
   private writeStoredAmbienceVolume(volume: number): void {
@@ -600,21 +624,11 @@ class SiteAudioManager {
   private readStoredSfxVolume(): number {
     if (typeof window === 'undefined') return siteAudioConfig.defaultSfxVolume
 
-    const stored = Number(
-      window.localStorage.getItem(siteAudioConfig.sfxVolumeStorageKey),
+    return this.readStoredVolume(
+      siteAudioConfig.sfxVolumeStorageKey,
+      siteAudioConfig.defaultSfxVolume,
+      siteAudioConfig.legacyVolumeStorageKey,
     )
-    if (Number.isFinite(stored)) {
-      return Math.min(1, Math.max(0, stored))
-    }
-
-    const legacy = Number(
-      window.localStorage.getItem(siteAudioConfig.legacyVolumeStorageKey),
-    )
-    if (Number.isFinite(legacy)) {
-      return Math.min(1, Math.max(0, legacy))
-    }
-
-    return siteAudioConfig.defaultSfxVolume
   }
 
   private writeStoredSfxVolume(volume: number): void {
@@ -623,6 +637,24 @@ class SiteAudioManager {
       siteAudioConfig.sfxVolumeStorageKey,
       String(volume),
     )
+  }
+
+  private readStoredVolume(
+    storageKey: string,
+    fallback: number,
+    legacyStorageKey?: string,
+  ): number {
+    const stored = readSiteAudioVolume(window.localStorage.getItem(storageKey))
+    if (stored !== null) return stored
+
+    if (legacyStorageKey) {
+      const legacy = readSiteAudioVolume(
+        window.localStorage.getItem(legacyStorageKey),
+      )
+      if (legacy !== null) return legacy
+    }
+
+    return fallback
   }
 
   private hasUnlockedAudio(): boolean {
@@ -821,9 +853,12 @@ class SiteAudioManager {
       frames.push(root)
     }
 
-    if ('querySelectorAll' in root) {
+    const queryableRoot = root as {
+      querySelectorAll?: unknown
+    }
+    if (typeof queryableRoot.querySelectorAll === 'function') {
       frames.push(
-        ...Array.from(root.querySelectorAll('iframe')).filter(
+        ...Array.from(queryableRoot.querySelectorAll('iframe')).filter(
           (frame): frame is HTMLIFrameElement =>
             frame instanceof HTMLIFrameElement && this.isYouTubeEmbed(frame),
         ),

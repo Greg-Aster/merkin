@@ -2,6 +2,7 @@ import { Howl, Howler } from 'howler'
 import {
   type AudioSfxConfig,
   type AudioSfxId,
+  readSiteAudioVolume,
   siteAudioConfig,
   siteSfxProfile,
 } from '../config/audio'
@@ -21,7 +22,7 @@ class SiteSfxManager {
     if (this.initialized || typeof window === 'undefined') return
 
     this.initialized = true
-    // SiteAudioControl provides the shared unlock path; SFX should not add a
+    // SiteAudioRuntime provides the shared unlock path; SFX should not add a
     // second Howler auto-unlock layer that can trip autoplay warnings.
     Howler.autoUnlock = false
   }
@@ -142,32 +143,38 @@ class SiteSfxManager {
     if (typeof window === 'undefined')
       return siteAudioConfig.defaultMasterVolume
 
-    const stored = Number(
-      window.localStorage.getItem(siteAudioConfig.masterVolumeStorageKey),
+    return this.getStoredVolume(
+      siteAudioConfig.masterVolumeStorageKey,
+      siteAudioConfig.defaultMasterVolume,
     )
-    if (!Number.isFinite(stored)) return siteAudioConfig.defaultMasterVolume
-
-    return Math.min(1, Math.max(0, stored))
   }
 
   private getSfxVolume(): number {
     if (typeof window === 'undefined') return siteAudioConfig.defaultSfxVolume
 
-    const stored = Number(
-      window.localStorage.getItem(siteAudioConfig.sfxVolumeStorageKey),
+    return this.getStoredVolume(
+      siteAudioConfig.sfxVolumeStorageKey,
+      siteAudioConfig.defaultSfxVolume,
+      siteAudioConfig.legacyVolumeStorageKey,
     )
-    if (Number.isFinite(stored)) {
-      return Math.min(1, Math.max(0, stored))
+  }
+
+  private getStoredVolume(
+    storageKey: string,
+    fallback: number,
+    legacyStorageKey?: string,
+  ): number {
+    const stored = readSiteAudioVolume(window.localStorage.getItem(storageKey))
+    if (stored !== null) return stored
+
+    if (legacyStorageKey) {
+      const legacy = readSiteAudioVolume(
+        window.localStorage.getItem(legacyStorageKey),
+      )
+      if (legacy !== null) return legacy
     }
 
-    const legacy = Number(
-      window.localStorage.getItem(siteAudioConfig.legacyVolumeStorageKey),
-    )
-    if (Number.isFinite(legacy)) {
-      return Math.min(1, Math.max(0, legacy))
-    }
-
-    return siteAudioConfig.defaultSfxVolume
+    return fallback
   }
 
   private getResolvedVolume(config: AudioSfxConfig): number {

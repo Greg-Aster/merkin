@@ -71,7 +71,7 @@ const demoVideos = [
 </section>
 
 <script>
-  import { siteAudioConfig } from '../../config/audio'
+  import { readSiteAudioVolume, siteAudioConfig } from '../../config/audio'
   import {
     addSiteAudioActivationListeners,
     hasSiteAudioUserActivation,
@@ -140,11 +140,11 @@ const demoVideos = [
 
   const getStoredMasterVolume = () => {
     try {
-      const stored = Number(
+      const stored = readSiteAudioVolume(
         window.localStorage.getItem(siteAudioConfig.masterVolumeStorageKey),
       )
-      if (Number.isFinite(stored)) {
-        return Math.min(1, Math.max(0, stored))
+      if (stored !== null) {
+        return stored
       }
     } catch {
       // localStorage can be unavailable in restricted browser modes.

@@ -36,6 +36,9 @@ function refreshVideoBanner() {
 
 // Set up a MutationObserver to watch for changes to the DOM
 function setupVideoObserver() {
+  if (window.__videoBannerObserverReady) return
+  window.__videoBannerObserverReady = true
+
   console.log('Setting up video observer')
 
   // Create an observer instance
@@ -69,9 +72,8 @@ function setupVideoObserver() {
 
   console.log('Observer started')
 
-  // Also handle Swup events directly
-  document.addEventListener('swup:contentReplaced', () => {
-    console.log('Swup content replaced event detected')
+  document.addEventListener('astro:page-load', () => {
+    console.log('Page content replaced event detected')
     setTimeout(refreshVideoBanner, 200)
   })
 }

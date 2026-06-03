@@ -11,6 +11,7 @@ import {
 } from '@/config/timelineconfig'
 import CompactArchiveBanner from '@components/archive/CompactArchiveBanner.astro'
 import Bleepy from '@components/bleepy/Bleepy.astro'
+import SiteAudioRuntime from '@components/client/SiteAudioRuntime.svelte'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
 import TimelinePortalCarousel from '@components/timeline/TimelinePortalCarousel.svelte'
@@ -119,7 +120,6 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
     initMegamealRouteTransitions()
   </script>
   <slot />
-  <SiteSfxBridge client:load />
   <!-- MEGAMEAL-specific: Bleepy AI assistant mascot -->
   {Astro.props.showMascot && (
     <Fragment slot="mascot">
@@ -133,6 +133,8 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   )}
   <Fragment slot="overlay">
     <slot name="overlay" />
+    <SiteAudioRuntime client:load />
+    <SiteSfxBridge client:load />
   </Fragment>
   {hasPortalDemoContent && (
     <Fragment slot="portal-demo-content">

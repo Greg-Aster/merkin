@@ -31,8 +31,8 @@ class BannerManager {
 
     // Setup event listeners if not already set
     if (!this.listenersInitialized) {
-      // Listen for Swup page transitions
-      document.addEventListener('swup:contentReplaced', () => {
+      // Listen for Svelte-managed page swaps
+      document.addEventListener('astro:page-load', () => {
         // Allow a short delay for the new DOM to fully render
         setTimeout(() => this.handlePageTransition(), 50)
       })
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bannerManager.init()
 })
 
-// If the document is already loaded (which can happen with Swup)
+// If the document is already loaded, initialize after the current task.
 if (
   document.readyState === 'complete' ||
   document.readyState === 'interactive'

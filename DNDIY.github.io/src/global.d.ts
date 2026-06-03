@@ -1,8 +1,8 @@
-import type { AstroIntegration } from '@swup/astro'
+export {}
 
 declare global {
   interface Window {
-    // type from '@swup/astro' is incorrect
-    swup: AstroIntegration
+    bannerManager?: unknown
+    timelineControllers?: Record<string, unknown>
   }
 }

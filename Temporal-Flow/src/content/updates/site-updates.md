@@ -27,7 +27,7 @@ Location: Core template
 Mileage: v0.0.1
 
 Enabled the shared right-rail system so the homepage can carry lightweight project updates without changing the overall shell layout.
-This same pass also stabilized banner behavior during Swup navigation so post pages keep their intended visual identity when moving between routes.
+This same pass also stabilized banner behavior during route changes so post pages keep their intended visual identity when moving between pages.
 
 ## 2026-03-05 | Updates feed foundation
 Location: Content system

@@ -10,6 +10,7 @@ import { url } from '../../utils/url-utils'
 // State
 let isAuthenticated = false
 let friendContentEnabled = false
+let removePageLoadListener: (() => void) | null = null
 
 function hasValidAuth() {
   const authed = localStorage.getItem('isAuthenticated') === 'true'
@@ -270,25 +271,18 @@ onMount(() => {
     setTimeout(enhanceArchive, 500)
   }
 
-  // Set up for Swup page transitions
+  // Re-run after Svelte-managed page swaps.
   if (typeof window !== 'undefined') {
-    // Function to handle Swup page transitions
-    const handlePageTransition = () => {
+    const handlePageLoad = () => {
       if (isAuthenticated && friendContentEnabled) {
         // Use a delay to ensure DOM is ready
         setTimeout(enhanceArchive, 500)
       }
     }
 
-    // Check if Swup is available
-    if (window.swup?.hooks) {
-      // Register with Swup hooks for page transitions
-      window.swup.hooks.on('page:view', handlePageTransition)
-    } else {
-      // Set up a listener for when Swup becomes available
-      document.addEventListener('swup:enable', () => {
-        window.swup.hooks.on('page:view', handlePageTransition)
-      })
+    document.addEventListener('astro:page-load', handlePageLoad)
+    removePageLoadListener = () => {
+      document.removeEventListener('astro:page-load', handlePageLoad)
     }
   }
 
@@ -302,6 +296,7 @@ onDestroy(() => {
     'friend-content-toggled',
     handleFriendContentToggle,
   )
+  removePageLoadListener?.()
 })
 </script>
   

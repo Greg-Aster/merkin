@@ -33,7 +33,6 @@
     "@iconify-json/mdi": "^1.2.3",
     "@iconify/svelte": "^5.0.0",
     "@merkin/blog-core": "workspace:*",
-    "@swup/astro": "^1.5.0",
     "@tailwindcss/typography": "^0.5.16",
     "astro": "5.18.0",
     "astro-compress": "^2.3.6",

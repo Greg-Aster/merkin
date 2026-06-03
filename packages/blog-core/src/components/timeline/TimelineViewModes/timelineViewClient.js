@@ -544,9 +544,21 @@ export function getTimelineCore(timelineId) {
   return timelineCoreRegistry.get(timelineId) ?? null
 }
 
+function resolveTimelineRoot(root) {
+  if (root instanceof Event) return document
+  if (root && typeof root.querySelectorAll === 'function') return root
+  return document
+}
+
 export function destroyTimelineViews(root = document) {
+  const resolvedRoot = resolveTimelineRoot(root)
+
   for (const [timelineId, instance] of timelineCoreRegistry.entries()) {
-    if (root === document || root.contains?.(instance.container) || !instance.container.isConnected) {
+    if (
+      resolvedRoot === document ||
+      resolvedRoot.contains?.(instance.container) ||
+      !instance.container.isConnected
+    ) {
       instance.destroy()
       timelineCoreRegistry.delete(timelineId)
     }
@@ -554,6 +566,8 @@ export function destroyTimelineViews(root = document) {
 }
 
 export function initTimelineViews(root = document) {
+  const resolvedRoot = resolveTimelineRoot(root)
+
   for (const [timelineId, instance] of timelineCoreRegistry.entries()) {
     if (!instance.container.isConnected) {
       instance.destroy()
@@ -561,7 +575,7 @@ export function initTimelineViews(root = document) {
     }
   }
 
-  root
+  resolvedRoot
     .querySelectorAll('[data-timeline-shell="true"]')
     .forEach((container) => {
       if (!(container instanceof HTMLElement)) return

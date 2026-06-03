@@ -1,7 +1,11 @@
 export {
+  clampSiteAudioVolume,
+  defaultSiteAudioVolume,
   getTrackForPathname,
   getTracksForPathname,
+  minimumSiteAudioVolume,
   normalizeAudioPathname,
+  readSiteAudioVolume,
   siteAudioConfig,
   siteAudioStorageKeys,
   siteSfxProfile,

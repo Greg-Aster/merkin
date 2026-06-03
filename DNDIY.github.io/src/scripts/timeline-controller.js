@@ -22,16 +22,6 @@ function initAllTimelineControllers() {
 document.addEventListener('DOMContentLoaded', initAllTimelineControllers)
 document.addEventListener('astro:page-load', initAllTimelineControllers)
 
-// Add Swup hooks if available
-if (window.swup?.hooks) {
-  window.swup.hooks.on('content:replace', initAllTimelineControllers)
-}
-document.addEventListener('swup:enable', () => {
-  if (window.swup?.hooks) {
-    window.swup.hooks.on('content:replace', initAllTimelineControllers)
-  }
-})
-
 // Main controller initialization function
 function initTimelineController(controllerId) {
   // Check if controller already initialized

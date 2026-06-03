@@ -39,6 +39,29 @@ export const siteAudioStorageKeys: AudioStorageKeys = {
   sfxVolume: 'megameal-site-audio-sfx-volume',
 }
 
+export const defaultSiteAudioVolume = 0.5
+export const minimumSiteAudioVolume = 0.01
+
+export function clampSiteAudioVolume(
+  volume: number,
+  fallback = defaultSiteAudioVolume,
+): number {
+  if (!Number.isFinite(volume)) return fallback
+
+  return Math.min(1, Math.max(minimumSiteAudioVolume, volume))
+}
+
+export function readSiteAudioVolume(
+  storedVolume: string | null,
+): number | null {
+  if (storedVolume === null || storedVolume.trim().length === 0) return null
+
+  const parsedVolume = Number(storedVolume)
+  if (!Number.isFinite(parsedVolume) || parsedVolume <= 0) return null
+
+  return clampSiteAudioVolume(parsedVolume)
+}
+
 export const siteAudioConfig: SiteAudioConfig = {
   enabledByDefault: false,
   storageKey: siteAudioStorageKeys.enabled,
@@ -47,9 +70,9 @@ export const siteAudioConfig: SiteAudioConfig = {
   ambienceVolumeStorageKey: siteAudioStorageKeys.ambienceVolume,
   sfxVolumeStorageKey: siteAudioStorageKeys.sfxVolume,
   fadeDurationMs: 900,
-  defaultMasterVolume: 1,
-  defaultAmbienceVolume: 0.42,
-  defaultSfxVolume: 0.48,
+  defaultMasterVolume: defaultSiteAudioVolume,
+  defaultAmbienceVolume: defaultSiteAudioVolume,
+  defaultSfxVolume: defaultSiteAudioVolume,
   tracks: [
     {
       id: 'portal-deck',
@@ -140,6 +163,62 @@ export const siteAudioConfig: SiteAudioConfig = {
       volume: 0.6,
     },
     {
+      id: 'video-archive-shadow',
+      src: '/audio/ambient/Shadow Waltz.mp3',
+      label: 'Shadow Waltz',
+      routes: ['/videos'],
+      volume: 0.62,
+    },
+    {
+      id: 'video-archive-signal',
+      src: '/audio/ambient/Dark Shadows of Delight.mp3',
+      label: 'Archive Pulse',
+      routes: ['/videos'],
+      volume: 0.58,
+    },
+    {
+      id: 'cookbook-drift',
+      src: '/audio/ambient/Whistling Dreams.mp3',
+      label: 'Whistling Dreams',
+      routes: ['/cookbook'],
+      volume: 0.56,
+    },
+    {
+      id: 'cookbook-dream',
+      src: '/audio/ambient/Dreamy ambient video game(2).mp3',
+      label: 'Dreamy Ambient',
+      routes: ['/cookbook'],
+      volume: 0.52,
+    },
+    {
+      id: 'reader-signal',
+      src: '/audio/ambient/2nd half_2nd half(1).mp3',
+      label: 'Signal Bloom',
+      routes: ['/reader'],
+      volume: 0.58,
+    },
+    {
+      id: 'reader-dream',
+      src: '/audio/ambient/Dreamy ambient video game(2).mp3',
+      label: 'Dreamy Ambient',
+      routes: ['/reader'],
+      volume: 0.5,
+    },
+    {
+      id: 'merkin-gallery-glow',
+      src: '/audio/ambient/2nd half_2nd half(1).mp3',
+      label: 'Signal Bloom',
+      routes: ['/merkin'],
+      volume: 0.58,
+    },
+    {
+      id: 'merkin-gallery-whistle',
+      src: '/audio/ambient/Whistling Dreams.mp3',
+      label: 'Whistling Dreams',
+      routes: ['/merkin'],
+      volume: 0.56,
+    },
+    {
       id: 'timeline-drift',
       src: '/audio/ambient/Shadow Waltz.mp3',
       label: 'Shadow Waltz',
@@ -191,6 +270,20 @@ export const siteAudioConfig: SiteAudioConfig = {
       label: 'Whistling Dreams',
       routes: ['/store', '/store-placeholder'],
       volume: 0.56,
+    },
+    {
+      id: 'snuggaloid-registry',
+      src: '/audio/ambient/portal-deck.mp3',
+      label: 'Portal Deck',
+      routes: ['/snuggaloids'],
+      volume: 0.52,
+    },
+    {
+      id: 'snuggaloid-whistle',
+      src: '/audio/ambient/Whistling Dreams.mp3',
+      label: 'Whistling Dreams',
+      routes: ['/snuggaloids'],
+      volume: 0.54,
     },
     {
       id: 'checkout-signal',

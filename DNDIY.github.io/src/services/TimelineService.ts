@@ -20,6 +20,10 @@ import type {
 // TimelineService.ts - Server-side timeline service
 import { getSortedPosts } from '../utils/content-utils'
 
+function parseTimelineYear(year: number | string): number {
+  return typeof year === 'number' ? year : Number.parseInt(year, 10)
+}
+
 // Modified getTimelineEvents function to include banner posts
 export async function getTimelineEvents(
   options: {
@@ -57,7 +61,7 @@ export async function getTimelineEvents(
     .map(post => {
       // If post has timelineYear, use that directly
       if (post.data.timelineYear) {
-        const year = parseInt(post.data.timelineYear)
+        const year = parseTimelineYear(post.data.timelineYear)
         return {
           title: post.data.title,
           description: post.data.description || '',
@@ -75,7 +79,7 @@ export async function getTimelineEvents(
       else if (post.data.bannerType === 'timeline' && post.data.bannerData) {
         // For banner posts, we'll use the post's publication year if no timelineYear is specified
         const year = post.data.timelineYear
-          ? parseInt(post.data.timelineYear)
+          ? parseTimelineYear(post.data.timelineYear)
           : post.data.published?.getFullYear() || new Date().getFullYear()
 
         return {

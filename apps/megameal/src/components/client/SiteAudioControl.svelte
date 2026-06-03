@@ -1,15 +1,15 @@
 <script lang="ts">
 import Icon from '@iconify/svelte/dist/Icon.svelte'
 import { onMount } from 'svelte'
+import { minimumSiteAudioVolume, siteAudioConfig } from '../../config/audio'
 import { type SiteAudioState, siteAudioManager } from '../../utils/site-audio'
-import { addSiteAudioActivationListeners } from '../../utils/site-audio-activation'
 
 import '../../styles/features/extracted/site-audio-control.css'
 let audioState: SiteAudioState = {
   enabled: false,
-  masterVolume: 1,
-  ambienceVolume: 0.42,
-  sfxVolume: 0.48,
+  masterVolume: siteAudioConfig.defaultMasterVolume,
+  ambienceVolume: siteAudioConfig.defaultAmbienceVolume,
+  sfxVolume: siteAudioConfig.defaultSfxVolume,
   activeTrackId: null,
   activeTrackLabel: null,
   hasConfiguredTracks: false,
@@ -64,11 +64,6 @@ const portalToBody = (node: HTMLElement, enabled: boolean) => {
       restore()
     },
   }
-}
-
-const syncAudioForCurrentPage = () => {
-  if (typeof window === 'undefined') return
-  siteAudioManager.syncForPath(window.location.pathname)
 }
 
 const clearPanelCloseTimer = () => {
@@ -155,20 +150,12 @@ const handleDocumentKeyDown = (event: KeyboardEvent) => {
 }
 
 onMount(() => {
-  siteAudioManager.initialize()
   syncViewportMode()
 
   const unsubscribe = siteAudioManager.subscribe(state => {
     audioState = state
   })
 
-  document.addEventListener('astro:page-load', syncAudioForCurrentPage)
-
-  const stopListeningForAudioActivation = addSiteAudioActivationListeners(
-    () => {
-      void siteAudioManager.unlockFromGesture()
-    },
-  )
   const mediaQuery = window.matchMedia('(max-width: 767px)')
   const handleViewportChange = () => {
     syncViewportMode()
@@ -187,15 +174,15 @@ onMount(() => {
   return () => {
     clearPanelCloseTimer()
     unsubscribe()
-    document.removeEventListener('astro:page-load', syncAudioForCurrentPage)
-    stopListeningForAudioActivation()
     document.removeEventListener('click', handlePointerDown)
     document.removeEventListener('keydown', handleDocumentKeyDown)
     mediaQuery.removeEventListener('change', handleViewportChange)
   }
 })
 
-$: buttonLabel = audioState.enabled ? 'Turn site sound off' : 'Turn site sound on'
+$: buttonLabel = audioState.enabled
+  ? 'Turn site sound off'
+  : 'Turn site sound on'
 $: buttonTitle = audioState.enabled
   ? audioState.activeTrackLabel
     ? `Sound is on. Current ambience: ${audioState.activeTrackLabel}.`
@@ -272,7 +259,7 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
         <span>{masterVolumePercent}%</span>
         <input
           type="range"
-          min="0"
+          min={minimumSiteAudioVolume}
           max="1"
           step="0.01"
           value={audioState.masterVolume}
@@ -285,7 +272,7 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
         <span>{ambienceVolumePercent}%</span>
         <input
           type="range"
-          min="0"
+          min={minimumSiteAudioVolume}
           max="1"
           step="0.01"
           value={audioState.ambienceVolume}
@@ -298,7 +285,7 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
         <span>{sfxVolumePercent}%</span>
         <input
           type="range"
-          min="0"
+          min={minimumSiteAudioVolume}
           max="1"
           step="0.01"
           value={audioState.sfxVolume}
