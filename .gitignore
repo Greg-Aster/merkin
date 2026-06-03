@@ -68,6 +68,9 @@ apps/blender/hunyuan3d-direct/outputs/
 # Local source audio libraries and downloaded packs
 Archive/audio-packs/
 
+# Local AI training archives
+merkin-lora-good.tar.gz
+
 # Archived large media (cleanup guardrails)
 **/posts/Mega-Meal-Explained/gif/title4.gif
 **/posts/Mega-Meal-Explained/gif/running-480p.gif
