@@ -70,7 +70,7 @@ function resolvePointerSfx(target: EventTarget | null): SiteSfxId | null {
   }
 
   if (element.closest('.site-audio-button')) {
-    return 'panel-open'
+    return 'soft'
   }
 
   if (element.closest('.site-audio-panel')) {

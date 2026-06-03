@@ -17,15 +17,11 @@ let audioState: SiteAudioState = {
   suspensionReason: null,
 }
 let panelOpen = false
+let panelPinned = false
 let shellElement: HTMLDivElement | null = null
 let panelElement: HTMLDivElement | null = null
-let nudgeElement: HTMLDivElement | null = null
 let isMobileViewport = false
-let showAudioNudge = false
-let audioNudgeFading = false
-let audioNudgeDismissed = false
-let audioNudgeFadeTimer: number | null = null
-const audioNudgeDismissedStorageKey = 'megameal-site-audio-nudge-dismissed-v2'
+let panelCloseTimer: number | null = null
 
 const portalToBody = (node: HTMLElement, enabled: boolean) => {
   if (typeof document === 'undefined') {
@@ -75,73 +71,20 @@ const syncAudioForCurrentPage = () => {
   siteAudioManager.syncForPath(window.location.pathname)
 }
 
-const readAudioNudgeDismissed = () => {
-  if (typeof window === 'undefined') return true
-
-  try {
-    return (
-      window.sessionStorage.getItem(audioNudgeDismissedStorageKey) === 'true'
-    )
-  } catch {
-    return false
-  }
+const clearPanelCloseTimer = () => {
+  if (panelCloseTimer === null || typeof window === 'undefined') return
+  window.clearTimeout(panelCloseTimer)
+  panelCloseTimer = null
 }
 
-const writeAudioNudgeDismissed = () => {
-  if (typeof window === 'undefined') return
-
-  try {
-    window.sessionStorage.setItem(audioNudgeDismissedStorageKey, 'true')
-  } catch {
-    // sessionStorage can be unavailable in restricted browser modes.
-  }
-}
-
-const clearAudioNudgeFadeTimer = () => {
-  if (audioNudgeFadeTimer === null || typeof window === 'undefined') return
-  window.clearTimeout(audioNudgeFadeTimer)
-  audioNudgeFadeTimer = null
-}
-
-const revealAudioNudge = () => {
-  clearAudioNudgeFadeTimer()
-  audioNudgeFading = false
-  showAudioNudge = true
-}
-
-const dismissAudioNudge = (options: { remember?: boolean } = {}) => {
-  if (!showAudioNudge && audioNudgeDismissed) return
-
-  audioNudgeDismissed = true
-  if (options.remember ?? true) {
-    writeAudioNudgeDismissed()
-  }
-
-  if (!showAudioNudge || typeof window === 'undefined') {
-    showAudioNudge = false
-    audioNudgeFading = false
-    return
-  }
-
-  audioNudgeFading = true
-  clearAudioNudgeFadeTimer()
-  audioNudgeFadeTimer = window.setTimeout(() => {
-    showAudioNudge = false
-    audioNudgeFading = false
-    audioNudgeFadeTimer = null
-  }, 220)
-}
-
-const toggleAudio = async () => {
+const setAudioEnabledFromGesture = async (nextEnabled: boolean) => {
   await siteAudioManager.unlockFromGesture()
-  siteAudioManager.toggle()
-  dismissAudioNudge({ remember: false })
+  siteAudioManager.setEnabled(nextEnabled)
 }
 
-const enableAudioFromNudge = async () => {
-  await siteAudioManager.unlockFromGesture()
-  siteAudioManager.setEnabled(true)
-  dismissAudioNudge({ remember: false })
+const toggleAudio = () => {
+  openMixerPanel()
+  void setAudioEnabledFromGesture(!audioState.enabled)
 }
 
 const setMasterVolume = (event: Event) => {
@@ -170,43 +113,53 @@ const syncViewportMode = () => {
 const targetIsInsideAudioControl = (target: EventTarget | null) => {
   if (!(target instanceof Node)) return false
   return Boolean(
-    shellElement?.contains(target) ||
-      panelElement?.contains(target) ||
-      nudgeElement?.contains(target),
+    shellElement?.contains(target) || panelElement?.contains(target),
   )
 }
 
-const handleAudioButtonClick = async () => {
-  dismissAudioNudge()
-  await siteAudioManager.unlockFromGesture()
+const closeMixerPanel = () => {
+  clearPanelCloseTimer()
+  panelPinned = false
+  panelOpen = false
+}
 
-  if (isMobileViewport) {
+const openMixerPanel = () => {
+  clearPanelCloseTimer()
+  panelOpen = true
+}
+
+const pinMixerPanel = () => {
+  clearPanelCloseTimer()
+  panelPinned = true
+  panelOpen = true
+}
+
+const scheduleMixerPanelClose = () => {
+  if (panelPinned || typeof window === 'undefined') return
+  clearPanelCloseTimer()
+  panelCloseTimer = window.setTimeout(() => {
     panelOpen = false
-    siteAudioManager.setEnabled(!audioState.enabled)
-    return
-  }
+    panelCloseTimer = null
+  }, 180)
+}
 
-  panelOpen = !panelOpen
+const handleAudioControlFocusOut = (event: FocusEvent) => {
+  if (targetIsInsideAudioControl(event.relatedTarget)) return
+  scheduleMixerPanelClose()
+}
+
+const handleDocumentKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && panelOpen) {
+    closeMixerPanel()
+  }
 }
 
 onMount(() => {
   siteAudioManager.initialize()
   syncViewportMode()
-  audioNudgeDismissed = readAudioNudgeDismissed()
 
   const unsubscribe = siteAudioManager.subscribe(state => {
     audioState = state
-    if (
-      state.enabled ||
-      !state.hasConfiguredTracks ||
-      panelOpen ||
-      audioNudgeDismissed
-    ) {
-      showAudioNudge = false
-      return
-    }
-
-    revealAudioNudge()
   })
 
   document.addEventListener('astro:page-load', syncAudioForCurrentPage)
@@ -225,79 +178,57 @@ onMount(() => {
   const handlePointerDown = (event: MouseEvent) => {
     if (!panelOpen) return
     if (targetIsInsideAudioControl(event.target)) return
-    panelOpen = false
+    closeMixerPanel()
   }
 
   document.addEventListener('click', handlePointerDown)
-
-  const handleNudgeIgnore = (event: Event) => {
-    if (targetIsInsideAudioControl(event.target)) return
-    dismissAudioNudge()
-  }
-
-  const handleNudgeScroll = () => {
-    dismissAudioNudge()
-  }
-
-  document.addEventListener('click', handleNudgeIgnore)
-  document.addEventListener('keydown', handleNudgeIgnore)
-  window.addEventListener('wheel', handleNudgeScroll, { passive: true })
-  window.addEventListener('scroll', handleNudgeScroll, { passive: true })
-  window.addEventListener('touchmove', handleNudgeScroll, { passive: true })
+  document.addEventListener('keydown', handleDocumentKeyDown)
 
   return () => {
-    clearAudioNudgeFadeTimer()
+    clearPanelCloseTimer()
     unsubscribe()
     document.removeEventListener('astro:page-load', syncAudioForCurrentPage)
     stopListeningForAudioActivation()
     document.removeEventListener('click', handlePointerDown)
-    document.removeEventListener('click', handleNudgeIgnore)
-    document.removeEventListener('keydown', handleNudgeIgnore)
-    window.removeEventListener('wheel', handleNudgeScroll)
-    window.removeEventListener('scroll', handleNudgeScroll)
-    window.removeEventListener('touchmove', handleNudgeScroll)
+    document.removeEventListener('keydown', handleDocumentKeyDown)
     mediaQuery.removeEventListener('change', handleViewportChange)
   }
 })
 
-$: if (audioState.enabled || panelOpen) {
-  showAudioNudge = false
-}
-
-$: buttonLabel = panelOpen
-  ? 'Close sound controls'
-  : isMobileViewport && !audioState.enabled
-    ? 'Enable site sound'
-    : isMobileViewport
-      ? 'Disable site sound'
-      : 'Open sound controls'
+$: buttonLabel = audioState.enabled ? 'Turn site sound off' : 'Turn site sound on'
 $: buttonTitle = audioState.enabled
   ? audioState.activeTrackLabel
-    ? isMobileViewport
-      ? `Sound is on. ${audioState.activeTrackLabel}. Tap to turn off.`
-      : `Sound controls. Current ambience: ${audioState.activeTrackLabel}`
-    : isMobileViewport
-      ? 'Sound is on. Tap to turn off.'
-      : 'Sound controls'
+    ? `Sound is on. Current ambience: ${audioState.activeTrackLabel}.`
+    : 'Sound is on.'
   : audioState.hasConfiguredTracks
-    ? isMobileViewport
-      ? 'Enable site sound'
-      : 'Open sound controls'
-    : 'Open sound controls. Tracks can be added later.'
+    ? 'Turn site sound on'
+    : 'Site sound has no configured tracks yet.'
 $: masterVolumePercent = Math.round(audioState.masterVolume * 100)
 $: ambienceVolumePercent = Math.round(audioState.ambienceVolume * 100)
 $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
 </script>
 
-<div class="site-audio-shell" bind:this={shellElement}>
+<div
+  class="site-audio-shell"
+  bind:this={shellElement}
+  on:pointerenter={openMixerPanel}
+  on:pointerleave={scheduleMixerPanelClose}
+  on:focusin={openMixerPanel}
+  on:focusout={handleAudioControlFocusOut}
+>
   <button
     type="button"
     aria-label={buttonLabel}
+    aria-pressed={audioState.enabled}
     aria-expanded={panelOpen}
+    aria-controls="site-audio-panel"
+    aria-haspopup="dialog"
     title={buttonTitle}
     class="nav-action-button btn-plain scale-animation rounded-lg active:scale-90 site-audio-button"
     class:site-audio-button--enabled={audioState.enabled}
-    on:click={handleAudioButtonClick}
+    data-sfx-hover="hover-soft"
+    data-sfx-click="soft"
+    on:click={toggleAudio}
   >
     <Icon
       icon={audioState.enabled ? 'material-symbols:volume-up-rounded' : 'material-symbols:volume-off-rounded'}
@@ -305,40 +236,19 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
     />
   </button>
 
-  {#if showAudioNudge}
-    <div
-      class="site-audio-nudge"
-      class:site-audio-nudge--hiding={audioNudgeFading}
-      role="dialog"
-      aria-label="Sound suggestion"
-      bind:this={nudgeElement}
-      use:portalToBody={isMobileViewport}
-    >
-      <div class="site-audio-nudge__copy">
-        <div class="site-audio-nudge__title">Best with sound</div>
-        <p>Experience MEGAMEAL with the ambient mix on.</p>
-      </div>
-      <button
-        type="button"
-        class="site-audio-nudge__switch"
-        role="switch"
-        aria-checked={audioState.enabled}
-        aria-label="Turn on site sound"
-        on:click={enableAudioFromNudge}
-      >
-        <span>Sound</span>
-        <span class="site-audio-nudge__switch-track" aria-hidden="true">
-          <span class="site-audio-nudge__switch-thumb"></span>
-        </span>
-      </button>
-    </div>
-  {/if}
-
   {#if panelOpen}
     <div
+      id="site-audio-panel"
       class="site-audio-panel card-base2"
+      role="dialog"
+      aria-label="Sound mix controls"
       bind:this={panelElement}
       use:portalToBody={isMobileViewport}
+      on:pointerenter={openMixerPanel}
+      on:pointerleave={scheduleMixerPanelClose}
+      on:pointerdown={pinMixerPanel}
+      on:focusin={openMixerPanel}
+      on:focusout={handleAudioControlFocusOut}
     >
       <div class="site-audio-panel__header">
         <div>
