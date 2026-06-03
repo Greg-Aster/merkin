@@ -8,6 +8,7 @@ type NavigationOptions = {
 
 const containerSelectors = ["#banner-container", "#main-grid"];
 const htmlCache = new Map<string, string>();
+const routeManagedBodyClasses = ["is-home", "lg:is-home"];
 const managedHeadSelector = [
 	'meta[name="description"]',
 	'meta[name="author"]',
@@ -64,6 +65,41 @@ function shouldHandleLink(anchor: HTMLAnchorElement, event: MouseEvent) {
 
 function dispatchPageEvent(name: string, detail: Record<string, unknown>) {
 	document.dispatchEvent(new CustomEvent(name, { detail }));
+}
+
+function syncBodyRouteClasses(nextDocument: Document) {
+	for (const className of routeManagedBodyClasses) {
+		document.body.classList.toggle(
+			className,
+			nextDocument.body.classList.contains(className),
+		);
+	}
+}
+
+function syncElementAttributes(currentElement: Element, nextElement: Element) {
+	const nextAttributeNames = new Set(
+		Array.from(nextElement.attributes, (attribute) => attribute.name),
+	);
+
+	for (const attribute of Array.from(currentElement.attributes)) {
+		if (!nextAttributeNames.has(attribute.name)) {
+			currentElement.removeAttribute(attribute.name);
+		}
+	}
+
+	for (const attribute of Array.from(nextElement.attributes)) {
+		currentElement.setAttribute(attribute.name, attribute.value);
+	}
+}
+
+function syncPersistentShellState(nextDocument: Document) {
+	syncBodyRouteClasses(nextDocument);
+
+	const currentTopRow = document.getElementById("top-row");
+	const nextTopRow = nextDocument.getElementById("top-row");
+	if (currentTopRow && nextTopRow) {
+		syncElementAttributes(currentTopRow, nextTopRow);
+	}
 }
 
 function isStylesheetLink(element: Element): element is HTMLLinkElement {
@@ -310,6 +346,7 @@ async function navigate(url: URL, options: NavigationOptions = {}) {
 	abortController = new AbortController();
 
 	dispatchPageEvent("merkin:navigation-start", { url: url.href });
+	dispatchPageEvent("astro:before-preparation", { url: url.href });
 	document.documentElement.dataset.navigation = "loading";
 
 	try {
@@ -332,6 +369,7 @@ async function navigate(url: URL, options: NavigationOptions = {}) {
 		}
 
 		updateManagedHead(nextDocument);
+		syncPersistentShellState(nextDocument);
 		finishStyleTransition();
 
 		if (options.pushState !== false) {
@@ -341,6 +379,7 @@ async function navigate(url: URL, options: NavigationOptions = {}) {
 		syncScroll(url, options.restoreHash);
 		focusMainContent();
 
+		dispatchPageEvent("astro:after-swap", { url: url.href });
 		dispatchPageEvent("astro:page-load", { url: url.href });
 		dispatchPageEvent("merkin:page-load", { url: url.href });
 		dispatchPageEvent("merkin:navigation-complete", { url: url.href });

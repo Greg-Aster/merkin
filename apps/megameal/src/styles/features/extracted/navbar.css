@@ -54,45 +54,6 @@
     outline: none;
   }
 
-  body:has(#megameal-timeline-route-marker) #navbar .navbar-shell {
-    border-color: transparent !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-  }
-
-  body:has(#megameal-timeline-route-marker) #navbar .absolute.hidden {
-    display: none !important;
-  }
-
-  body:has(#megameal-timeline-route-marker) #navbar #public-home-link img {
-    opacity: 0.18;
-  }
-
-  body:has(#megameal-timeline-route-marker) #navbar #public-home-link:hover img,
-  body:has(#megameal-timeline-route-marker) #navbar #public-home-link:focus-visible img {
-    opacity: 0.72;
-  }
-
-  body:has(#megameal-timeline-route-marker) #navbar .nav-action-button {
-    border-color: rgb(125 211 252 / 0.12);
-    background: rgb(2 6 23 / 0.18);
-    color: rgb(226 232 240 / 0.76);
-    backdrop-filter: blur(5px) saturate(1.05);
-  }
-
-  body:has(#megameal-timeline-route-marker) #navbar .nav-action-button:hover,
-  body:has(#megameal-timeline-route-marker) #navbar .nav-action-button:focus-visible {
-    border-color: rgb(125 211 252 / 0.3);
-    background: rgb(8 47 73 / 0.34);
-    color: rgb(236 254 255);
-  }
-
-  body:has(#megameal-timeline-route-marker) #navbar .nav-action-icon,
-  body:has(#megameal-timeline-route-marker) #navbar .nav-action-button > svg {
-    color: rgb(165 243 252 / 0.82);
-  }
-
   @media (max-width: 767px) {
     #top-row {
       width: 100vw !important;
@@ -117,12 +78,6 @@
       margin-inline: 0 !important;
       min-height: 3.25rem;
       height: auto;
-    }
-
-    body:has(#megameal-timeline-route-marker) #navbar .navbar-shell {
-      background: transparent !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
     }
 
     #navbar #public-nav-shell {
