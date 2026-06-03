@@ -2,11 +2,25 @@
 import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import SnuggaloidRegistryList from '../../components/snuggaloids/SnuggaloidRegistryList.svelte'
+import ProductCustomizer from '../../components/store/ProductCustomizer.svelte'
+import { buildSnuggaloidCustomizerConfig } from '../../config/snuggaloidCustomizer'
 import StoreLayout from '../../layouts/store/StoreLayout.astro'
 
 const units = (
   await getCollection('snuggaloids', ({ data }) => data.draft !== true)
 ).sort((a, b) => a.data.unitId.localeCompare(b.data.unitId))
+const products = await getCollection('products', ({ data }) => data.draft !== true)
+const snuggaloidsProduct = products.find(product => {
+  const slug = product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')
+  return slug === 'snuggaloids'
+})
+const snuggaloidsPrice = snuggaloidsProduct?.data.price ?? 104.99
+const snuggaloidsStoreHref = '/store/snuggaloids/'
+const snuggaloidsCustomizer = buildSnuggaloidCustomizerConfig({
+  basePrice: snuggaloidsPrice,
+  href: snuggaloidsStoreHref,
+  image: snuggaloidsProduct?.data.image,
+})
 
 const statusLabels: Record<string, string> = {
   preview: 'Preview Only',
@@ -23,6 +37,8 @@ const registryUnits = units.map(unit => ({
   adoptionStatus: unit.data.adoptionStatus,
   statusLabel: statusLabels[unit.data.adoptionStatus],
   image: unit.data.image,
+  price: unit.data.price,
+  sku: unit.data.sku,
   temperament: unit.data.temperament,
   size: unit.data.size,
   exterior: unit.data.exterior,
@@ -48,7 +64,16 @@ const registryUnits = units.map(unit => ({
     </nav>
 
     <section class="rounded-2xl border border-slate-700/50 bg-slate-950/80 p-4 shadow-2xl shadow-slate-950/30 sm:p-6 md:rounded-3xl md:p-8">
-      <SnuggaloidRegistryList client:load units={registryUnits} />
+      <SnuggaloidRegistryList
+        client:load
+        units={registryUnits}
+        adoptionPrice={snuggaloidsPrice}
+        productHref={snuggaloidsStoreHref}
+      />
     </section>
+
+    <div id="customize" class="mt-6 scroll-mt-24 md:mt-8">
+      <ProductCustomizer client:load config={snuggaloidsCustomizer} />
+    </div>
   </div>
 </StoreLayout>

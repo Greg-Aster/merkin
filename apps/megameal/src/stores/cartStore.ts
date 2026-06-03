@@ -8,6 +8,15 @@ export interface CartItem {
   sku?: string
   href?: string
   image?: string
+  kind?: string
+  description?: string
+  options?: CartItemOption[]
+  quantityLocked?: boolean
+}
+
+export interface CartItemOption {
+  label: string
+  value: string
 }
 
 const CART_STORAGE_KEY = 'megameal-cart'
@@ -29,15 +38,30 @@ function isCartItem(value: unknown): value is CartItem {
 function normalizeCartItems(items: unknown): CartItem[] {
   if (!Array.isArray(items)) return []
 
-  return items.filter(isCartItem).map(item => ({
-    id: item.id,
-    name: item.name,
-    price: item.price,
-    quantity: Math.max(1, Math.floor(item.quantity)),
-    sku: item.sku,
-    href: item.href,
-    image: item.image,
-  }))
+  return items.filter(isCartItem).map(item => {
+    const quantityLocked = item.quantityLocked === true
+    return {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: quantityLocked ? 1 : Math.max(1, Math.floor(item.quantity)),
+      sku: item.sku,
+      href: item.href,
+      image: item.image,
+      kind: item.kind,
+      description: item.description,
+      options: Array.isArray(item.options)
+        ? item.options.filter(
+            option =>
+              option &&
+              typeof option === 'object' &&
+              typeof (option as CartItemOption).label === 'string' &&
+              typeof (option as CartItemOption).value === 'string',
+          )
+        : undefined,
+      quantityLocked,
+    }
+  })
 }
 
 function loadFromStorage(): CartItem[] {
@@ -86,21 +110,29 @@ function createCartStore() {
 
     add(item: Omit<CartItem, 'quantity'> & { quantity?: number }) {
       update(items => {
-        const quantityToAdd = Math.max(1, Math.floor(item.quantity ?? 1))
+        const quantityToAdd = item.quantityLocked
+          ? 1
+          : Math.max(1, Math.floor(item.quantity ?? 1))
         const existing = items.find(i => i.id === item.id)
         let next: CartItem[]
         if (existing) {
-          next = items.map(i =>
-            i.id === item.id
-              ? {
-                  ...i,
-                  quantity: i.quantity + quantityToAdd,
-                  sku: item.sku ?? i.sku,
-                  href: item.href ?? i.href,
-                  image: item.image ?? i.image,
-                }
-              : i,
-          )
+          next = items.map(i => {
+            if (i.id !== item.id) return i
+
+            const quantityLocked =
+              i.quantityLocked || item.quantityLocked === true
+            return {
+              ...i,
+              quantity: quantityLocked ? 1 : i.quantity + quantityToAdd,
+              sku: item.sku ?? i.sku,
+              href: item.href ?? i.href,
+              image: item.image ?? i.image,
+              kind: item.kind ?? i.kind,
+              description: item.description ?? i.description,
+              options: item.options ?? i.options,
+              quantityLocked,
+            }
+          })
         } else {
           next = [...items, { ...item, quantity: quantityToAdd }]
         }
@@ -122,7 +154,11 @@ function createCartStore() {
         const next =
           quantity <= 0
             ? items.filter(i => i.id !== id)
-            : items.map(i => (i.id === id ? { ...i, quantity } : i))
+            : items.map(i =>
+                i.id === id
+                  ? { ...i, quantity: i.quantityLocked ? 1 : quantity }
+                  : i,
+              )
         saveToStorage(next)
         return next
       })

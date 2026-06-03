@@ -24,6 +24,19 @@ stockRegistry:
   adoptionHref: "/snuggaloids/#adoption"
   unitsAvailable: null
   unitsSold: null
+alternateAction:
+  label: "Snuggaloid Registry"
+  href: "/snuggaloids/"
+  row: "secondary"
+alternateActions:
+  - label: "Adoption List"
+    href: "/snuggaloids/#adoption"
+  - label: "Customize Your Own"
+    href: "/snuggaloids/#customize"
+    variant: "mutation"
+featuredCommerce:
+  showPrimaryAction: false
+  showStockRegistrySummary: false
 description: "Anxious home? Quiet children? Unexplained screaming from the ventilation shaft? A licensed Snuggloid can help smooth the atmosphere. These companions offer a unique sense of presence. They're soft, they're silent, and their unblinking gaze is surprisingly comforting."
 realDescription: "Distribution is being expanded — your region is not yet approved but we are working on it."
 shippingNote: "Snuggloid distribution is currently limited to approved regions. Your area is not yet approved. They are patient. You should be too."
@@ -92,8 +105,8 @@ media:
     caption: "High-detail bonded-unit scan. Drag to inspect the current domestic form; stop if it starts inspecting you back."
   - type: youtube
     id: "commercial"
-    videoId: "n_cgEvkZ-U0"
-    thumbnail: "/store/snuggaloids/snug-ref-04.webp"
+    videoId: "UxQ3zU77RX0"
+    thumbnail: "https://img.youtube.com/vi/UxQ3zU77RX0/hqdefault.jpg"
     alt: "Snuggaloids official companion program commercial"
     caption: "Snuggaloids™ — Official Companion Program Commercial"
   - type: video

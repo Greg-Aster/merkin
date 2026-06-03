@@ -254,20 +254,39 @@
 		transform: translateY(-1px);
 	}
 
-	.featured-product-secondary,
-	.featured-product-panel-actions button,
-	.featured-product-panel__header button,
-	.featured-product-modal__close {
-		border: 1px solid rgb(125 211 252 / 0.34);
+		.featured-product-secondary,
+		.featured-product-panel-actions button,
+		.featured-product-panel__header button,
+		.featured-product-modal__close {
+			border: 1px solid rgb(125 211 252 / 0.34);
 		background:
 			linear-gradient(180deg, rgb(8 47 73 / 0.86), rgb(15 23 42 / 0.92));
 		color: rgb(224 242 254);
 		box-shadow:
-			inset 0 1px 0 rgb(255 255 255 / 0.08),
-			0 8px 24px rgb(2 6 23 / 0.22);
-	}
+				inset 0 1px 0 rgb(255 255 255 / 0.08),
+				0 8px 24px rgb(2 6 23 / 0.22);
+		}
 
-	.featured-product-panel-actions button.active {
+		.featured-product-secondary--mutation {
+			border-color: rgb(34 197 94 / 0.42);
+			background:
+				linear-gradient(135deg, rgb(20 83 45 / 0.76), rgb(112 26 117 / 0.38)),
+				rgb(15 23 42 / 0.86);
+			color: rgb(220 252 231);
+			box-shadow:
+				inset 0 1px 0 rgb(255 255 255 / 0.08),
+				0 12px 28px rgb(20 83 45 / 0.22);
+		}
+
+		.featured-product-secondary--mutation:hover {
+			border-color: rgb(134 239 172 / 0.68);
+			background:
+				linear-gradient(135deg, rgb(22 101 52 / 0.86), rgb(190 24 93 / 0.42)),
+				rgb(15 23 42 / 0.9);
+			color: rgb(240 253 244);
+		}
+
+		.featured-product-panel-actions button.active {
 		border-color: rgb(34 197 94 / 0.6);
 		background:
 			linear-gradient(135deg, rgb(22 163 74 / 0.92), rgb(14 165 233 / 0.8));

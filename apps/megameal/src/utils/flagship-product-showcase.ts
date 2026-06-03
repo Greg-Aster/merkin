@@ -163,6 +163,8 @@ export function buildFlagshipProductShowcase(
       price: product.data.price,
       availability: product.data.availability,
       alternateAction: product.data.alternateAction,
+      alternateActions: product.data.alternateActions,
+      featuredCommerce: product.data.featuredCommerce,
       rating: product.data.rating,
       sku: product.data.sku,
       stockRegistry: product.data.stockRegistry,

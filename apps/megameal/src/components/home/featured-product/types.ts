@@ -46,6 +46,8 @@ export type RelatedProduct = {
 export type ProductActionLink = {
   label: string
   href: string
+  variant?: 'default' | 'mutation'
+  row?: 'primary' | 'secondary'
 }
 
 export type ProductStockRegistry = {
@@ -56,6 +58,11 @@ export type ProductStockRegistry = {
   unitsSold?: number | null
 }
 
+export type ProductFeaturedCommerce = {
+  showPrimaryAction?: boolean
+  showStockRegistrySummary?: boolean
+}
+
 export type FeaturedProduct = {
   name: string
   tagline?: string
@@ -64,6 +71,8 @@ export type FeaturedProduct = {
   price?: number
   availability?: string
   alternateAction?: ProductActionLink
+  alternateActions?: ProductActionLink[]
+  featuredCommerce?: ProductFeaturedCommerce
   rating?: number
   sku?: string
   stockRegistry?: ProductStockRegistry

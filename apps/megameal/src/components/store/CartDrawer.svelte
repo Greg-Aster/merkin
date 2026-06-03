@@ -143,24 +143,45 @@ const emptyMessage =
                 {#if item.sku}
                   <p class="text-xs text-slate-500">SKU: {item.sku}</p>
                 {/if}
+                {#if item.description}
+                  <p class="mt-2 text-xs leading-5 text-slate-400">{item.description}</p>
+                {/if}
+                {#if item.options?.length}
+                  <dl class="mt-2 grid gap-1 text-xs text-slate-400">
+                    {#each item.options as option}
+                      <div class="grid grid-cols-[7rem_minmax(0,1fr)] gap-2">
+                        <dt class="truncate uppercase tracking-[0.14em] text-slate-500">
+                          {option.label}
+                        </dt>
+                        <dd class="text-slate-300">{option.value}</dd>
+                      </div>
+                    {/each}
+                  </dl>
+                {/if}
                 <p class="text-emerald-400 text-sm font-semibold mt-1">${item.price.toFixed(2)} each</p>
               </div>
               <div class="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
-                <button
-                  onclick={() => cart.updateQuantity(item.id, item.quantity - 1)}
-                  aria-label="Decrease quantity"
-                  data-sfx-hover="hover-soft"
-                  data-sfx-click="soft"
-                  class="w-7 h-7 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center transition text-sm font-bold"
-                >−</button>
-                <span class="w-6 text-center text-slate-200 text-sm">{item.quantity}</span>
-                <button
-                  onclick={() => cart.updateQuantity(item.id, item.quantity + 1)}
-                  aria-label="Increase quantity"
-                  data-sfx-hover="hover-soft"
-                  data-sfx-click="select"
-                  class="w-7 h-7 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center transition text-sm font-bold"
-                >+</button>
+                {#if item.quantityLocked}
+                  <span class="rounded bg-slate-800 px-2 py-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
+                    One-off
+                  </span>
+                {:else}
+                  <button
+                    onclick={() => cart.updateQuantity(item.id, item.quantity - 1)}
+                    aria-label="Decrease quantity"
+                    data-sfx-hover="hover-soft"
+                    data-sfx-click="soft"
+                    class="w-7 h-7 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center transition text-sm font-bold"
+                  >−</button>
+                  <span class="w-6 text-center text-slate-200 text-sm">{item.quantity}</span>
+                  <button
+                    onclick={() => cart.updateQuantity(item.id, item.quantity + 1)}
+                    aria-label="Increase quantity"
+                    data-sfx-hover="hover-soft"
+                    data-sfx-click="select"
+                    class="w-7 h-7 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center transition text-sm font-bold"
+                  >+</button>
+                {/if}
                 <button
                   onclick={() => cart.remove(item.id)}
                   aria-label="Remove item"

@@ -75,6 +75,8 @@ const ambientAudioConfigSchema = z.union([
 const productActionLinkSchema = z.object({
   label: z.string(),
   href: z.string(),
+  variant: z.enum(['default', 'mutation']).optional().default('default'),
+  row: z.enum(['primary', 'secondary']).optional().default('primary'),
 })
 
 const productStockRegistrySchema = z.object({
@@ -83,6 +85,11 @@ const productStockRegistrySchema = z.object({
   adoptionHref: z.string().optional(),
   unitsAvailable: z.number().int().nonnegative().nullable().optional(),
   unitsSold: z.number().int().nonnegative().nullable().optional(),
+})
+
+const productFeaturedCommerceSchema = z.object({
+  showPrimaryAction: z.boolean().optional().default(true),
+  showStockRegistrySummary: z.boolean().optional().default(true),
 })
 
 const snuggaloidRegistryCollection = defineCollection({
@@ -94,6 +101,8 @@ const snuggaloidRegistryCollection = defineCollection({
       .optional()
       .default('preview'),
     image: z.string().optional(),
+    price: z.number().optional(),
+    sku: z.string().optional(),
     gallery: z.array(mediaAssetSchema).optional().default([]),
     temperament: z.string().optional(),
     size: z.string().optional(),
@@ -305,6 +314,8 @@ const productsCollection = defineCollection({
     // Separate reality-layer description shown below the fiction copy
     realDescription: z.string().optional(),
     alternateAction: productActionLinkSchema.optional(),
+    alternateActions: z.array(productActionLinkSchema).optional(),
+    featuredCommerce: productFeaturedCommerceSchema.optional(),
     // Shipping note shown on available/coming_soon products
     shippingNote: z.string().optional(),
     // Optional badge text override (defaults to availability label)

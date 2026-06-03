@@ -1,4 +1,7 @@
 <script lang="ts">
+import { onMount } from 'svelte'
+import { cart } from '../../stores/cartStore'
+
 type SnuggaloidUnit = {
   id: string
   name: string
@@ -6,6 +9,8 @@ type SnuggaloidUnit = {
   adoptionStatus: string
   statusLabel: string
   image?: string
+  price?: number
+  sku?: string
   temperament?: string
   size?: string
   exterior?: string
@@ -17,20 +22,91 @@ type SnuggaloidUnit = {
 }
 
 export let units: SnuggaloidUnit[] = []
+export let adoptionPrice = 104.99
+export let productHref = '/store/snuggaloids/'
+export let showAdoptionActions = true
 
 let showRegistry = true
 let showAdoption = true
+let feedbackUnitId: string | null = null
+
+onMount(() => {
+  cart.init()
+  applyHashMode()
+  window.addEventListener('hashchange', applyHashMode)
+
+  return () => {
+    window.removeEventListener('hashchange', applyHashMode)
+  }
+})
+
+$: availableUnits = units.filter(
+  unit => unit.adoptionStatus === 'available' && !unit.easterEgg,
+)
 
 $: visibleUnits = units.filter(unit => {
   if (!showRegistry && !showAdoption) return unit.easterEgg
   if (unit.easterEgg) return false
-  return showRegistry || showAdoption
+  if (showRegistry && showAdoption) return true
+  if (showRegistry) return true
+  return unit.adoptionStatus === 'available'
 })
 
 $: emptyState =
   !showRegistry && !showAdoption
     ? 'Suppressed record channel open.'
     : 'No Snuggaloids match the selected channel.'
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(value)
+}
+
+function adoptionItemPrice(unit: SnuggaloidUnit) {
+  return unit.price ?? adoptionPrice
+}
+
+function applyHashMode() {
+  if (window.location.hash === '#adoption') {
+    showRegistry = false
+    showAdoption = true
+  }
+
+  if (window.location.hash === '#registry') {
+    showRegistry = true
+    showAdoption = false
+  }
+}
+
+function addUnitToCart(unit: SnuggaloidUnit) {
+  if (unit.adoptionStatus !== 'available') return
+
+  cart.add({
+    id: `snuggaloid-adoption:${unit.unitId}`,
+    name: `Adopt ${unit.name}`,
+    price: adoptionItemPrice(unit),
+    sku: unit.sku ?? unit.unitId,
+    href: productHref,
+    image: unit.image,
+    kind: 'snuggaloid-adoption',
+    description:
+      unit.adoptionNote ??
+      'One-off Snuggaloid adoption record. Quantity is locked to one unit.',
+    options: [
+      { label: 'Unit', value: unit.unitId },
+      { label: 'Status', value: unit.statusLabel },
+      ...(unit.temperament
+        ? [{ label: 'Temperament', value: unit.temperament }]
+        : []),
+      ...(unit.size ? [{ label: 'Size', value: unit.size }] : []),
+    ],
+    quantityLocked: true,
+  })
+  feedbackUnitId = unit.unitId
+  document.dispatchEvent(new CustomEvent('megameal:cart:open'))
+}
 </script>
 
 <div class="flex flex-col gap-4 border-b border-slate-800 pb-5 md:flex-row md:items-end md:justify-between">
@@ -44,6 +120,9 @@ $: emptyState =
     <p class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-400">
       Known units, prototype bios, adoption status, and handling notes.
       Registry records can be factual, suspicious, incomplete, or all three.
+    </p>
+    <p class="mt-3 text-xs uppercase tracking-[0.18em] text-emerald-200/70">
+      {availableUnits.length} adoptable unit{availableUnits.length === 1 ? '' : 's'} currently cleared
     </p>
   </div>
 
@@ -162,6 +241,33 @@ $: emptyState =
                     <li>{warning}</li>
                   {/each}
                 </ul>
+              </div>
+            {/if}
+
+            {#if showAdoptionActions}
+              <div class="grid gap-2 border-t border-slate-800 pt-4">
+                <div class="flex items-center justify-between gap-3 text-sm">
+                  <span class="text-slate-500">Adoption fee</span>
+                  <strong class="text-emerald-300">{formatCurrency(adoptionItemPrice(unit))}</strong>
+                </div>
+                {#if unit.adoptionStatus === 'available'}
+                  <button
+                    type="button"
+                    class="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-black uppercase tracking-[0.08em] text-slate-950 transition hover:bg-emerald-300"
+                    on:click={() => addUnitToCart(unit)}
+                  >
+                    Adopt this Snuggaloid
+                  </button>
+                  {#if feedbackUnitId === unit.unitId}
+                    <p class="text-xs leading-5 text-emerald-200/80">
+                      Adoption record added to your cart.
+                    </p>
+                  {/if}
+                {:else}
+                  <p class="rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm leading-6 text-slate-500">
+                    This registry record is not cleared for adoption.
+                  </p>
+                {/if}
               </div>
             {/if}
           </div>

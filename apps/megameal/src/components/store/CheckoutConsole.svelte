@@ -87,6 +87,23 @@ function completeCheckout() {
                       {item.sku}
                     </p>
                   {/if}
+                  {#if item.description}
+                    <p class="mt-2 max-w-xl text-sm leading-6 text-slate-400">
+                      {item.description}
+                    </p>
+                  {/if}
+                  {#if item.options?.length}
+                    <dl class="mt-3 grid gap-2 text-sm text-slate-400 sm:grid-cols-2">
+                      {#each item.options as option}
+                        <div class="rounded-xl border border-white/10 bg-slate-950/60 p-3">
+                          <dt class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                            {option.label}
+                          </dt>
+                          <dd class="mt-1 text-slate-200">{option.value}</dd>
+                        </div>
+                      {/each}
+                    </dl>
+                  {/if}
                   {#if item.href}
                     <a
                       href={item.href}
@@ -99,7 +116,9 @@ function completeCheckout() {
                   {/if}
                 </div>
                 <div class="text-left sm:text-right">
-                  <p class="text-sm text-slate-400">Qty {item.quantity}</p>
+                  <p class="text-sm text-slate-400">
+                    {item.quantityLocked ? 'One-off' : `Qty ${item.quantity}`}
+                  </p>
                   <p class="mt-1 font-semibold text-emerald-400">
                     ${(item.price * item.quantity).toFixed(2)}
                   </p>
