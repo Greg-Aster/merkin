@@ -1,164 +1,164 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-15T02:11:14.522Z",
+  "generatedAt": "2026-06-04T19:34:05.983Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-crown-ascent-merged",
-  "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
-  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+  "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.glb",
   "sourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "cae20f1bc1678777710a19e5b5cd280073d0aa47e4d13efa9965677db7fecad8"
+    "value": "a674c7569b204bc8db24f6bce5b34c0be50db8f2ff51b2bf0a299244cb197fcf"
   },
-  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
-  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.low.glb",
   "colliderSourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "4fdf765845405bf900fdb5987c4b885be1bee8c875e2c3984ff3519e82cac0b2"
+    "value": "b6950148c1c9065b4b92a7814244e057ba3a3ed06c245cd3ae22161378a7450c"
   },
   "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:4fdf765845405bf900fdb5987c4b885be1bee8c875e2c3984ff3519e82cac0b2:e37bc69a079b08177269f1d571be2fca7bad9203a8d09e75b47e8e5fcf7e30d1:c99d3fbf9e4068877391e488774737d5ac08477ae3c0ca2359ff1634b3be3cc0",
-  "triangleCount": 396,
-  "vertexCount": 792,
+  "colliderCacheKey": "mesh-collision-manager-v2:b6950148c1c9065b4b92a7814244e057ba3a3ed06c245cd3ae22161378a7450c:def0bc1e2a17da77d07d854451a02d71531f0cbf13956f980df4633cd476addb:c99d3fbf9e4068877391e488774737d5ac08477ae3c0ca2359ff1634b3be3cc0",
+  "triangleCount": 4810,
+  "vertexCount": 6450,
   "bounds": {
     "min": [
-      -6.372000217437744,
-      -0.550000011920929,
-      -10.043999671936035
+      -0.9878063201904297,
+      -0.9677425026893616,
+      -1.0001391172409058
     ],
     "max": [
-      6.372000217437744,
-      0.550000011920929,
-      10.043999671936035
+      0.9676888585090637,
+      0.9341762661933899,
+      0.973598062992096
     ],
     "size": [
-      12.744000434875488,
-      1.100000023841858,
-      20.08799934387207
+      1.9554951786994934,
+      1.9019187688827515,
+      1.9737371802330017
     ],
     "center": [
-      0,
-      0,
-      0
+      -0.010058730840682983,
+      -0.01678311824798584,
+      -0.013270527124404907
     ]
   },
   "rawColliderBounds": {
     "min": [
-      -32767,
-      -4148,
-      -32767
+      -31879,
+      -31439,
+      -32591
     ],
     "max": [
-      32767,
-      4148,
-      32767
+      31991,
+      31571,
+      32731
     ],
     "size": [
-      65534,
-      8296,
-      65534
+      63870,
+      63010,
+      65322
     ],
     "center": [
-      0,
-      0,
-      0
+      56,
+      66,
+      70
     ]
   },
   "visualLocalBounds": {
     "min": [
-      -6.372000217437744,
-      -0.550000011920929,
-      -10.043999671936035
+      -0.9878063201904297,
+      -0.9677425026893616,
+      -1.0001391172409058
     ],
     "max": [
-      6.372000217437744,
-      0.550000011920929,
-      10.043999671936035
+      0.9676888585090637,
+      0.9341762661933899,
+      0.973598062992096
     ],
     "size": [
-      12.744000434875488,
-      1.100000023841858,
-      20.08799934387207
+      1.9554951786994934,
+      1.9019187688827515,
+      1.9737371802330017
     ],
     "center": [
-      0,
-      0,
-      0
+      -0.010058730840682983,
+      -0.01678311824798584,
+      -0.013270527124404907
     ]
   },
   "colliderLocalBounds": {
     "min": [
-      -6.372000217437744,
-      -0.550000011920929,
-      -10.043999671936035
+      -0.9878063201904297,
+      -0.9677425026893616,
+      -1.0001391172409058
     ],
     "max": [
-      6.372000217437744,
-      0.550000011920929,
-      10.043999671936035
+      0.9676888585090637,
+      0.9341762661933899,
+      0.973598062992096
     ],
     "size": [
-      12.744000434875488,
-      1.100000023841858,
-      20.08799934387207
+      1.9554951786994934,
+      1.9019187688827515,
+      1.9737371802330017
     ],
     "center": [
-      0,
-      0,
-      0
+      -0.010058730840682983,
+      -0.01678311824798584,
+      -0.013270527124404907
     ]
   },
   "assetLocalTransform": {
     "schemaVersion": 1,
     "coordinateSpaceVersion": 1,
-    "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.glb",
     "sourceNodeName": "Yggdrasil Crown Ascent Merged",
     "visualLocalBounds": {
       "min": [
-        -6.372000217437744,
-        -0.550000011920929,
-        -10.043999671936035
+        -0.9878063201904297,
+        -0.9677425026893616,
+        -1.0001391172409058
       ],
       "max": [
-        6.372000217437744,
-        0.550000011920929,
-        10.043999671936035
+        0.9676888585090637,
+        0.9341762661933899,
+        0.973598062992096
       ],
       "size": [
-        12.744000434875488,
-        1.100000023841858,
-        20.08799934387207
+        1.9554951786994934,
+        1.9019187688827515,
+        1.9737371802330017
       ],
       "center": [
-        0,
-        0,
-        0
+        -0.010058730840682983,
+        -0.01678311824798584,
+        -0.013270527124404907
       ]
     },
     "colliderLocalBounds": {
       "min": [
-        -6.372000217437744,
-        -0.550000011920929,
-        -10.043999671936035
+        -0.9878063201904297,
+        -0.9677425026893616,
+        -1.0001391172409058
       ],
       "max": [
-        6.372000217437744,
-        0.550000011920929,
-        10.043999671936035
+        0.9676888585090637,
+        0.9341762661933899,
+        0.973598062992096
       ],
       "size": [
-        12.744000434875488,
-        1.100000023841858,
-        20.08799934387207
+        1.9554951786994934,
+        1.9019187688827515,
+        1.9737371802330017
       ],
       "center": [
-        0,
-        0,
-        0
+        -0.010058730840682983,
+        -0.01678311824798584,
+        -0.013270527124404907
       ]
     },
     "visualToPhysicsMatrix": [
@@ -201,25 +201,25 @@
   "provenance": {
     "sourceActorId": "yggdrasil-crown-ascent-merged",
     "sourceActorName": "Yggdrasil Crown Ascent Merged",
-    "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
-    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.glb",
     "sourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "cae20f1bc1678777710a19e5b5cd280073d0aa47e4d13efa9965677db7fecad8"
+      "value": "a674c7569b204bc8db24f6bce5b34c0be50db8f2ff51b2bf0a299244cb197fcf"
     },
-    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
-    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.low.glb",
     "colliderSourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "4fdf765845405bf900fdb5987c4b885be1bee8c875e2c3984ff3519e82cac0b2"
+      "value": "b6950148c1c9065b4b92a7814244e057ba3a3ed06c245cd3ae22161378a7450c"
     },
     "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "yggdrasil",
       "nodeId": "yggdrasil-crown-ascent-merged",
-      "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
-      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
+      "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.low.glb",
       "lodSourceTier": "low",
       "intent": "walkable",
       "channel": "worldStatic",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-15T02:11:14.522Z"
+    "generatedAt": "2026-06-04T19:34:05.983Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -238,18 +238,18 @@
   },
   "collisionProduct": {
     "actorId": "yggdrasil-crown-ascent-merged",
-    "cacheKey": "mesh-collision-manager-v2:4fdf765845405bf900fdb5987c4b885be1bee8c875e2c3984ff3519e82cac0b2:e37bc69a079b08177269f1d571be2fca7bad9203a8d09e75b47e8e5fcf7e30d1:c99d3fbf9e4068877391e488774737d5ac08477ae3c0ca2359ff1634b3be3cc0",
+    "cacheKey": "mesh-collision-manager-v2:b6950148c1c9065b4b92a7814244e057ba3a3ed06c245cd3ae22161378a7450c:def0bc1e2a17da77d07d854451a02d71531f0cbf13956f980df4633cd476addb:26794c34eee65d3461143f470fe657faeea5c841ca437ba1e21f7663911ea412",
     "mode": "auto",
     "productId": "yggdrasil-crown-ascent-merged:auto:simplifiedMesh",
     "generatorVersion": "mesh-collision-manager-v2",
     "sourceKind": "asset",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "4fdf765845405bf900fdb5987c4b885be1bee8c875e2c3984ff3519e82cac0b2"
+      "value": "b6950148c1c9065b4b92a7814244e057ba3a3ed06c245cd3ae22161378a7450c"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
-      "value": "e37bc69a079b08177269f1d571be2fca7bad9203a8d09e75b47e8e5fcf7e30d1"
+      "value": "def0bc1e2a17da77d07d854451a02d71531f0cbf13956f980df4633cd476addb"
     },
     "policyFingerprint": {
       "algorithm": "sha256",
@@ -258,42 +258,42 @@
     "shape": "trimesh",
     "localBounds": {
       "min": [
-        -6.372000217437744,
-        -0.550000011920929,
-        -10.043999671936035
+        -0.9878063201904297,
+        -0.9677425026893616,
+        -1.0001391172409058
       ],
       "max": [
-        6.372000217437744,
-        0.550000011920929,
-        10.043999671936035
+        0.9676888585090637,
+        0.9341762661933899,
+        0.973598062992096
       ],
       "size": [
-        12.744000434875488,
-        1.100000023841858,
-        20.08799934387207
+        1.9554951786994934,
+        1.9019187688827515,
+        1.9737371802330017
       ],
       "center": [
-        0,
-        0,
-        0
+        -0.010058730840682983,
+        -0.01678311824798584,
+        -0.013270527124404907
       ]
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
-    "visualSourceMeshUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
-    "triangleCount": 396,
-    "vertexCount": 792,
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.glb",
+    "triangleCount": 4810,
+    "vertexCount": 6450,
     "triangleBudget": 5000
   },
   "simplification": {
-    "requested": false,
-    "applied": false,
-    "sourceTriangleCount": 396,
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 14000,
     "targetTriangleBudget": 5000,
-    "ratio": 1,
+    "ratio": 0.3392857142857143,
     "tool": "gltf-transform",
-    "prepass": "none",
+    "prepass": "weld",
     "error": 0.05
   }
 }

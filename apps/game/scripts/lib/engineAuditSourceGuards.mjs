@@ -12,6 +12,9 @@ const forbiddenLegacyStyleFiles = [
 const forbiddenDuplicateInteractionFiles = [
   'src/threlte/systems/Interaction.svelte',
 ]
+const forbiddenRuntimeFireflyPopulationFiles = [
+  'src/threlte/levels/SceneFireflyField.svelte',
+]
 
 const retiredToolsEndpoints = [
   '/api/project-file',
@@ -43,16 +46,209 @@ const allowedDirectLightMountFiles = new Set([
 ])
 const runtimeNpcInteractionTargetFile =
   'src/threlte/features/npc/RuntimeNpcInteractionTarget.svelte'
-const sceneFireflyFieldFile = 'src/threlte/levels/SceneFireflyField.svelte'
 const editorPanelTabsFile = 'src/threlte/editor/editorPanelTabs.ts'
 const editorPanelFile = 'src/threlte/editor/EditorPanel.svelte'
 const editorEnvironmentPanelFile =
   'src/threlte/editor/EditorEnvironmentPanel.svelte'
+const editorFireflyFieldControlsFile =
+  'src/threlte/editor/EditorFireflyFieldControls.svelte'
 const editorNpcTabHostFile = 'src/threlte/editor/EditorNpcTabHost.svelte'
+const runtimeLightingSystemFile =
+  'src/threlte/features/lighting/RuntimeLightingSystem.svelte'
+const runtimeSceneBudgetFile =
+  'src/threlte/features/performance/utils/runtimeSceneBudget.ts'
+const runtimeFireflyNpcFile =
+  'src/threlte/features/npc/presentation/RuntimeFireflyNpc.svelte'
 const directLightMountPattern =
   /<T\.(AmbientLight|HemisphereLight|DirectionalLight|PointLight|SpotLight)\b/
 const directLightConstructorPattern =
   /new\s+(AmbientLight|HemisphereLight|DirectionalLight|PointLight|SpotLight)\b/
+const requiredAmbientFireflyFields = [
+  'enabled',
+  'allowWithAuthored',
+  'count',
+  'activeLightPercent',
+  'radius',
+  'minHeight',
+  'maxHeight',
+  'center',
+  'color',
+  'secondaryColor',
+  'palette',
+  'size',
+  'twinkleSpeed',
+  'driftSpeed',
+  'sway',
+  'lighting',
+]
+const requiredAmbientFireflyLightingFields = [
+  'spriteIntensity',
+  'lightIntensity',
+  'lightDistance',
+  'lightDecay',
+  'minimumLightIntensityScale',
+  'lightBudgeted',
+  'selectionHoldSeconds',
+  'selectionFadeSeconds',
+  'pulseThreshold',
+  'pulseSoftness',
+  'blinkPeriodSecondsMin',
+  'blinkPeriodSecondsMax',
+  'blinkFadeSeconds',
+]
+const legacyFireflyNpcLightingFields = [
+  'spriteIntensity',
+  'lightIntensity',
+  'lightDistance',
+  'lightDecay',
+  'lightBudgeted',
+]
+
+function isRecord(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+function hasOwn(value, key) {
+  return Object.prototype.hasOwnProperty.call(value, key)
+}
+
+function getSourceBlock(source, marker) {
+  const start = source.indexOf(marker)
+  if (start < 0) return ''
+  const nextExport = source.indexOf('\nexport ', start + marker.length)
+  return source.slice(start, nextExport < 0 ? undefined : nextExport)
+}
+
+function getSelfClosingComponentBlocks(source, componentName) {
+  return Array.from(
+    source.matchAll(new RegExp(`<${componentName}\\b[\\s\\S]*?\\/>`, 'g')),
+    match => match[0],
+  )
+}
+
+function getRuntimeFireflyNpcRenderContractFailures(file, source) {
+  const failures = []
+  const spriteBlocks = getSelfClosingComponentBlocks(source, 'StarSprite')
+  const lightBlocks = getSelfClosingComponentBlocks(source, 'ManagedLight')
+
+  if (
+    spriteBlocks.length === 0 ||
+    spriteBlocks.some(block => !block.includes('starType="sparkle"'))
+  ) {
+    failures.push(
+      `${file}: firefly NPC sprites must render StarSprite with explicit starType="sparkle" so they do not fall back to random square/cropped sprite defaults`,
+    )
+  }
+
+  if (
+    spriteBlocks.length === 0 ||
+    lightBlocks.length === 0 ||
+    spriteBlocks.some(block => !block.includes('color={spriteColor}')) ||
+    lightBlocks.some(block => !block.includes('color={spriteColor}'))
+  ) {
+    failures.push(
+      `${file}: firefly NPC StarSprite and ManagedLight color props must both use spriteColor so visual tint and emitted light stay coupled`,
+    )
+  }
+
+  if (
+    !/\bgetFireflyPulse\b/.test(source) ||
+    !/\bminimumLightIntensityScale\b/.test(source) ||
+    !/\bpulseThreshold\b/.test(source) ||
+    !/\bpulseSoftness\b/.test(source) ||
+    !/\bgetLightIntensity\(\s*presentation\s*,\s*lightPulse\s*,\s*blinkScale\s*,?\s*\)/.test(
+      source,
+    )
+  ) {
+    failures.push(
+      `${file}: firefly NPC lights must pulse through shared firefly lighting settings so ambient and authored fireflies blink slowly through the same contract`,
+    )
+  }
+
+  if (
+    !/\bshouldRenderLight\b/.test(source) ||
+    !/\blightIntensity\s*>\s*0\.001\b/.test(source) ||
+    !/\blightDistance\s*>\s*0\.001\b/.test(source)
+  ) {
+    failures.push(
+      `${file}: firefly NPC lights must not mount ManagedLight while the blink duty cycle has driven light intensity or distance to zero`,
+    )
+  }
+
+  return failures
+}
+
+function getImplicitFireflyFailures(file, scene) {
+  const features = scene?.settings?.level?.features
+  if (features?.fireflies !== true) return []
+
+  const fireflies = scene?.settings?.level?.fireflies
+  if (!isRecord(fireflies)) {
+    return [
+      `${file}: settings.level.features.fireflies is true but settings.level.fireflies is missing; author an explicit fireflies block or disable the feature`,
+    ]
+  }
+
+  const failures = []
+  if (fireflies.enabled !== true) {
+    failures.push(
+      `${file}: settings.level.features.fireflies is true but settings.level.fireflies.enabled is not true`,
+    )
+  }
+
+  const missingFireflyFields = requiredAmbientFireflyFields.filter(
+    key => !hasOwn(fireflies, key),
+  )
+  if (missingFireflyFields.length > 0) {
+    failures.push(
+      `${file}: settings.level.fireflies must explicitly define ${missingFireflyFields.join(', ')} so the ambient field does not rely on hidden defaults`,
+    )
+  }
+
+  const lighting = fireflies.lighting
+  if (!isRecord(lighting)) {
+    failures.push(
+      `${file}: settings.level.fireflies.lighting must be explicit when the ambient field is enabled`,
+    )
+  } else {
+    const missingLightingFields = requiredAmbientFireflyLightingFields.filter(
+      key => !hasOwn(lighting, key),
+    )
+    if (missingLightingFields.length > 0) {
+      failures.push(
+        `${file}: settings.level.fireflies.lighting must explicitly define ${missingLightingFields.join(', ')} so firefly lights do not rely on hidden defaults`,
+      )
+    }
+  }
+
+  return failures
+}
+
+function getLegacyFireflyNpcLightingFailures(file, nodes) {
+  if (!Array.isArray(nodes)) return []
+
+  const failures = []
+  for (const node of nodes) {
+    const presentation = node?.npc?.presentation
+    if (
+      node?.npc?.archetype !== 'firefly' &&
+      presentation?.type !== 'firefly'
+    ) {
+      continue
+    }
+
+    const legacyFields = legacyFireflyNpcLightingFields.filter(key =>
+      hasOwn(presentation ?? {}, key),
+    )
+    if (legacyFields.length > 0) {
+      failures.push(
+        `${file}: firefly NPC actor "${node.id ?? '<unknown>'}" uses retired per-NPC light fields ${legacyFields.join(', ')}; migrate shared light metadata to settings.level.fireflies.lighting`,
+      )
+    }
+  }
+
+  return failures
+}
 
 function getSourceFiles(dir, prefix = '') {
   const files = []
@@ -85,6 +281,14 @@ export function auditSourceGuards({ appRoot, editorApiRoutePaths = [] }) {
     if (existsSync(join(appRoot, file))) {
       failures.push(
         `${file}: duplicate interaction system must stay removed; use systems/InteractionSystem.svelte`,
+      )
+    }
+  }
+
+  for (const file of forbiddenRuntimeFireflyPopulationFiles) {
+    if (existsSync(join(appRoot, file))) {
+      failures.push(
+        `${file}: generated firefly populations must be manifest-backed NPC actors; do not reintroduce component-local firefly field spawning`,
       )
     }
   }
@@ -139,14 +343,42 @@ export function auditSourceGuards({ appRoot, editorApiRoutePaths = [] }) {
       )
     }
 
+    if (file === runtimeFireflyNpcFile) {
+      failures.push(...getRuntimeFireflyNpcRenderContractFailures(file, source))
+    }
+
     if (
-      file === sceneFireflyFieldFile &&
-      (!/\bgetPosition\(\s*firefly\s*,\s*elapsed\s*\)/.test(source) ||
-        !/\bgetPulse\(\s*firefly\s*,\s*elapsed\s*\)/.test(source))
+      file === runtimeLightingSystemFile &&
+      /\bresolveMutedPointEmitter\b/.test(source)
     ) {
       failures.push(
-        `${file}: ambient firefly field motion and light pulse must pass elapsed explicitly so Svelte invalidates sprite and light positions every frame`,
+        `${file}: runtime lighting must not mount inactive point lights; omit unselected budgeted emitters instead of returning muted emitters`,
       )
+    }
+
+    if (file === runtimeSceneBudgetFile) {
+      const pointLightBudgetBlock = getSourceBlock(
+        source,
+        'export interface RuntimePointLightBudget',
+      )
+      const pointLightVisibilityBlock = getSourceBlock(
+        source,
+        'export function resolveRuntimePointLightVisibility',
+      )
+      if (/\bcullDistance\b/.test(pointLightBudgetBlock)) {
+        failures.push(
+          `${file}: RuntimePointLightBudget must not expose hidden point-light player-distance caps; budget by count and authored range`,
+        )
+      }
+      if (
+        /\bdistanceTo(Camera|Player)\b|\bcullDistance\b/.test(
+          pointLightVisibilityBlock,
+        )
+      ) {
+        failures.push(
+          `${file}: resolveRuntimePointLightVisibility must not reintroduce point-light player-distance culling`,
+        )
+      }
     }
 
     if (file === editorPanelTabsFile && !/\|\s*'npc'/.test(source)) {
@@ -172,6 +404,17 @@ export function auditSourceGuards({ appRoot, editorApiRoutePaths = [] }) {
     ) {
       failures.push(
         `${file}: firefly field controls belong in the NPC editor workspace, not the World/Environment panel`,
+      )
+    }
+
+    if (
+      file === editorFireflyFieldControlsFile &&
+      (source.includes("['fireflies', 'lightCount']") ||
+        source.includes("'lightCount'") ||
+        /\bLight Count\b/.test(source))
+    ) {
+      failures.push(
+        `${file}: firefly editor must expose activeLightPercent controls instead of lightCount controls`,
       )
     }
   }
@@ -209,6 +452,9 @@ export function auditSourceGuards({ appRoot, editorApiRoutePaths = [] }) {
           `${file}: settings.level.lighting.hemisphereIntensity must be explicit so scene sky light does not rely on hidden SceneLightingProfile defaults`,
         )
       }
+
+      failures.push(...getImplicitFireflyFailures(file, scene))
+      failures.push(...getLegacyFireflyNpcLightingFailures(file, scene?.nodes))
     }
   }
 

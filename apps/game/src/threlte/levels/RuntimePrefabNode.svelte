@@ -6,6 +6,10 @@ import {
   type RuntimePrefabData,
   resolveRuntimePrefabDescriptor,
 } from '../engine/runtimePrefabCatalog'
+import type {
+  RenderLightingParticipation,
+  RenderShadowParticipation,
+} from '../engine/types'
 import { evaluateRuntimePrefabLoopChannel } from '../engine/runtimePrefabLoopChannels'
 import {
   type RuntimePrefabVfxBaseState,
@@ -17,6 +21,9 @@ import {
 export let prefab: RuntimePrefabData
 export let levelId: string | null = null
 export let runtimeCulling: boolean
+export let lighting: RenderLightingParticipation = 'lit'
+export let castShadow: RenderShadowParticipation = 'auto'
+export let receiveShadow: RenderShadowParticipation = 'auto'
 
 let time = 0
 let assetGroup: THREE.Group | undefined
@@ -206,6 +213,9 @@ $: applyAssetAnimation()
       url={descriptor.assetUrl}
       {levelId}
       {runtimeCulling}
+      {lighting}
+      {castShadow}
+      {receiveShadow}
       cloneMaterials={Boolean(descriptor.assetVfx)}
       on:load={handleAssetLoad}
     />

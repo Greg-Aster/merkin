@@ -4,6 +4,7 @@ import {
 } from './actorRenderSource'
 import { resolveCollisionPolicy } from './collisionPolicy'
 import type { SceneDocument, SceneNode } from './sceneDocumentTypes'
+import { createSceneFireflyPopulationActors } from './sceneFireflyField'
 import type {
   ActorDefinition,
   CollisionClassification,
@@ -373,6 +374,11 @@ export function adaptSceneDocumentToLevelDefinition(
   scene: SceneDocument,
   options: SceneAdapterOptions = {},
 ): LevelDefinition {
+  const authoredActors = scene.nodes.map(
+    node => toActor(scene, node, options).actor,
+  )
+  const populationActors = createSceneFireflyPopulationActors(scene)
+
   return {
     id: scene.levelId,
     version: scene.version,
@@ -382,7 +388,7 @@ export function adaptSceneDocumentToLevelDefinition(
       rotation: getSpawnRotation(scene),
     },
     settings: scene.settings as Record<string, unknown>,
-    actors: scene.nodes.map(node => toActor(scene, node, options).actor),
+    actors: [...authoredActors, ...populationActors],
   }
 }
 

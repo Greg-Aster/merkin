@@ -47,6 +47,20 @@ export const STAR_TYPES = [
   'subtle',
 ] as const
 
+const STAR_TEXTURE_DEFAULT_SIZE = 256
+const STAR_TEXTURE_BOUNDS_PADDING = 8
+const STAR_TEXTURE_GLOW_LAYERS = [
+  { radiusMultiplier: 15, opacity: 0.04, blur: 25 },
+  { radiusMultiplier: 10, opacity: 0.08, blur: 20 },
+  { radiusMultiplier: 6, opacity: 0.15, blur: 15 },
+  { radiusMultiplier: 3, opacity: 0.25, blur: 8 },
+] as const
+
+export interface BoundedEnhancedStarTexture {
+  canvas: HTMLCanvasElement
+  scaleMultiplier: number
+}
+
 /**
  * Simple hash function for consistent randomization
  */
@@ -90,6 +104,43 @@ export function getSizeFactor(isKeyEvent: boolean): number {
   return isKeyEvent ? 1.2 : 0.85 + Math.random() * 0.3
 }
 
+function getStarShapeExtentMultiplier(starType: string) {
+  switch (starType) {
+    case 'classic':
+      return 2
+    case 'sparkle':
+      return 3
+    case 'refraction':
+      return 4
+    case 'halo':
+      return 2.8
+    case 'subtle':
+      return 2.5
+    case 'point':
+    default:
+      return 1.2
+  }
+}
+
+function resolveBoundedRadiusScale(
+  finalRadius: number,
+  starType: string,
+  size: number,
+) {
+  const drawableExtent = Math.max(1, size / 2 - STAR_TEXTURE_BOUNDS_PADDING)
+  const shapeExtentMultiplier = getStarShapeExtentMultiplier(starType)
+  const scaleLimits = [
+    drawableExtent / Math.max(1, finalRadius * shapeExtentMultiplier),
+    ...STAR_TEXTURE_GLOW_LAYERS.map(layer => {
+      const radiusBudget = drawableExtent - layer.blur
+      if (radiusBudget <= 0) return 0
+      return radiusBudget / Math.max(1, finalRadius * layer.radiusMultiplier)
+    }),
+  ]
+
+  return Math.max(0.01, Math.min(1, ...scaleLimits))
+}
+
 /**
  * Enhanced star texture generation for Three.js
  */
@@ -97,27 +148,66 @@ export function createEnhancedStarTexture(
   color: string,
   starType: string,
   isKeyEvent = false,
-  size = 256,
+  size = STAR_TEXTURE_DEFAULT_SIZE,
+): HTMLCanvasElement {
+  const baseRadius = isKeyEvent ? size * 0.04 : size * 0.03
+  const finalRadius = baseRadius * getSizeFactor(isKeyEvent)
+  return drawEnhancedStarTexture(color, starType, size, finalRadius)
+}
+
+/**
+ * Enhanced texture with enough transparent bounds for the full glow footprint.
+ *
+ * The scale multiplier lets sprite renderers preserve the authored world size
+ * while keeping blurred canvas pixels inside the texture instead of clipped at
+ * the square edge.
+ */
+export function createBoundedEnhancedStarTexture(
+  color: string,
+  starType: string,
+  isKeyEvent = false,
+  size = STAR_TEXTURE_DEFAULT_SIZE,
+): BoundedEnhancedStarTexture {
+  const baseRadius = isKeyEvent ? size * 0.04 : size * 0.03
+  const nominalFinalRadius = baseRadius * getSizeFactor(isKeyEvent)
+  const radiusScale = resolveBoundedRadiusScale(
+    nominalFinalRadius,
+    starType,
+    size,
+  )
+
+  return {
+    canvas: drawEnhancedStarTexture(
+      color,
+      starType,
+      size,
+      nominalFinalRadius * radiusScale,
+    ),
+    scaleMultiplier: 1 / radiusScale,
+  }
+}
+
+function drawEnhancedStarTexture(
+  color: string,
+  starType: string,
+  size: number,
+  finalRadius: number,
 ): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
   canvas.width = canvas.height = size
   const ctx = canvas.getContext('2d')!
 
   const center = size / 2
-  const baseRadius = isKeyEvent ? size * 0.04 : size * 0.03
-  const sizeFactor = getSizeFactor(isKeyEvent)
-  const finalRadius = baseRadius * sizeFactor
 
   // Clear canvas
   ctx.clearRect(0, 0, size, size)
 
   // Enhanced multi-layer glow
-  const glowLayers = [
-    { radius: finalRadius * 15, opacity: 0.04, blur: 25 },
-    { radius: finalRadius * 10, opacity: 0.08, blur: 20 },
-    { radius: finalRadius * 6, opacity: 0.15, blur: 15 },
-    { radius: finalRadius * 3, opacity: 0.25, blur: 8 },
-  ]
+  const glowLayers = STAR_TEXTURE_GLOW_LAYERS.map(layer => ({
+    radius: finalRadius * layer.radiusMultiplier,
+    opacity: layer.opacity,
+    blur: layer.blur,
+  }))
 
   glowLayers.forEach(layer => {
     ctx.save()

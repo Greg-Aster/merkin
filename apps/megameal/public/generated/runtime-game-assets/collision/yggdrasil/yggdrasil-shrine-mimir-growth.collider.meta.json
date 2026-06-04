@@ -1,164 +1,164 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-16T00:04:17.177Z",
+  "generatedAt": "2026-06-04T19:33:44.669Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-shrine-mimir-growth",
-  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
-  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+  "sourceAssetUrl": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb",
   "sourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "28f078b578898fbca87fbfc83fa3bf7963afb8d9f6bbf353993c63efc46c7914"
+    "value": "626c445cadbb03215e253181f8e860bb763995144fb029a01019ec8278603d57"
   },
-  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
-  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.low.glb",
   "colliderSourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1"
+    "value": "89abc48ab1c6f671dcd6297a67fa513ea522e5031653950a2d821a8781e6e5d7"
   },
   "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-growth.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-growth.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-growth.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
-  "triangleCount": 434,
-  "vertexCount": 449,
+  "colliderCacheKey": "mesh-collision-manager-v2:89abc48ab1c6f671dcd6297a67fa513ea522e5031653950a2d821a8781e6e5d7:609f17aff95064e692ec56cb51eab703919cf6fbdb29791f005e09542a39a0d6:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 5220,
+  "vertexCount": 7351,
   "bounds": {
     "min": [
-      -0.5899999737739563,
-      -0.5899999737739563,
-      -0.5
+      -0.9385361075401306,
+      -0.9913320541381836,
+      -0.8355563879013062
     ],
     "max": [
-      0.5899999737739563,
-      2.950000047683716,
-      0.5
+      0.919564425945282,
+      0.9745348691940308,
+      0.8024851679801941
     ],
     "size": [
-      1.1799999475479126,
-      3.540000021457672,
-      1
+      1.8581005334854126,
+      1.9658669233322144,
+      1.6380415558815002
     ],
     "center": [
-      0,
-      1.1800000369548798,
-      0
+      -0.009485840797424316,
+      -0.008398592472076416,
+      -0.01653560996055603
     ]
   },
   "rawColliderBounds": {
     "min": [
-      -32767,
-      -32767,
-      -32767
+      -30863,
+      -32687,
+      -26935
     ],
     "max": [
+      30215,
       32767,
-      32767,
-      32767
+      26611
     ],
     "size": [
-      65534,
-      65534,
-      65534
+      61078,
+      65454,
+      53546
     ],
     "center": [
-      0,
-      0,
-      0
+      -324,
+      40,
+      -162
     ]
   },
   "visualLocalBounds": {
     "min": [
-      -0.5899999737739563,
-      -0.5899999737739563,
-      -0.5
+      -0.9385361075401306,
+      -0.9913320541381836,
+      -0.8355563879013062
     ],
     "max": [
-      0.5899999737739563,
-      2.950000047683716,
-      0.5
+      0.919564425945282,
+      0.9745348691940308,
+      0.8024851679801941
     ],
     "size": [
-      1.1799999475479126,
-      3.540000021457672,
-      1
+      1.8581005334854126,
+      1.9658669233322144,
+      1.6380415558815002
     ],
     "center": [
-      0,
-      1.1800000369548798,
-      0
+      -0.009485840797424316,
+      -0.008398592472076416,
+      -0.01653560996055603
     ]
   },
   "colliderLocalBounds": {
     "min": [
-      -0.5899999737739563,
-      -0.5899999737739563,
-      -0.5
+      -0.9385361075401306,
+      -0.9913320541381836,
+      -0.8355563879013062
     ],
     "max": [
-      0.5899999737739563,
-      2.950000047683716,
-      0.5
+      0.919564425945282,
+      0.9745348691940308,
+      0.8024851679801941
     ],
     "size": [
-      1.1799999475479126,
-      3.540000021457672,
-      1
+      1.8581005334854126,
+      1.9658669233322144,
+      1.6380415558815002
     ],
     "center": [
-      0,
-      1.1800000369548798,
-      0
+      -0.009485840797424316,
+      -0.008398592472076416,
+      -0.01653560996055603
     ]
   },
   "assetLocalTransform": {
     "schemaVersion": 1,
     "coordinateSpaceVersion": 1,
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb",
     "sourceNodeName": "Mimir Root Shrine",
     "visualLocalBounds": {
       "min": [
-        -0.5899999737739563,
-        -0.5899999737739563,
-        -0.5
+        -0.9385361075401306,
+        -0.9913320541381836,
+        -0.8355563879013062
       ],
       "max": [
-        0.5899999737739563,
-        2.950000047683716,
-        0.5
+        0.919564425945282,
+        0.9745348691940308,
+        0.8024851679801941
       ],
       "size": [
-        1.1799999475479126,
-        3.540000021457672,
-        1
+        1.8581005334854126,
+        1.9658669233322144,
+        1.6380415558815002
       ],
       "center": [
-        0,
-        1.1800000369548798,
-        0
+        -0.009485840797424316,
+        -0.008398592472076416,
+        -0.01653560996055603
       ]
     },
     "colliderLocalBounds": {
       "min": [
-        -0.5899999737739563,
-        -0.5899999737739563,
-        -0.5
+        -0.9385361075401306,
+        -0.9913320541381836,
+        -0.8355563879013062
       ],
       "max": [
-        0.5899999737739563,
-        2.950000047683716,
-        0.5
+        0.919564425945282,
+        0.9745348691940308,
+        0.8024851679801941
       ],
       "size": [
-        1.1799999475479126,
-        3.540000021457672,
-        1
+        1.8581005334854126,
+        1.9658669233322144,
+        1.6380415558815002
       ],
       "center": [
-        0,
-        1.1800000369548798,
-        0
+        -0.009485840797424316,
+        -0.008398592472076416,
+        -0.01653560996055603
       ]
     },
     "visualToPhysicsMatrix": [
@@ -201,25 +201,25 @@
   "provenance": {
     "sourceActorId": "yggdrasil-shrine-mimir-growth",
     "sourceActorName": "Mimir Root Shrine",
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
-    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb",
     "sourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "28f078b578898fbca87fbfc83fa3bf7963afb8d9f6bbf353993c63efc46c7914"
+      "value": "626c445cadbb03215e253181f8e860bb763995144fb029a01019ec8278603d57"
     },
-    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
-    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.low.glb",
     "colliderSourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1"
+      "value": "89abc48ab1c6f671dcd6297a67fa513ea522e5031653950a2d821a8781e6e5d7"
     },
     "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "yggdrasil",
       "nodeId": "yggdrasil-shrine-mimir-growth",
-      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
-      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
+      "sourceAssetUrl": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.low.glb",
       "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-16T00:04:17.177Z"
+    "generatedAt": "2026-06-04T19:33:44.669Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -238,18 +238,18 @@
   },
   "collisionProduct": {
     "actorId": "yggdrasil-shrine-mimir-growth",
-    "cacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+    "cacheKey": "mesh-collision-manager-v2:f9b25262d9004e19a35e544180c363030856115bd6b3d007d483416471d746fe:609f17aff95064e692ec56cb51eab703919cf6fbdb29791f005e09542a39a0d6:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
     "mode": "auto",
     "productId": "yggdrasil-shrine-mimir-growth:auto:simplifiedMesh",
     "generatorVersion": "mesh-collision-manager-v2",
-    "sourceKind": "prefab",
+    "sourceKind": "asset",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1"
+      "value": "89abc48ab1c6f671dcd6297a67fa513ea522e5031653950a2d821a8781e6e5d7"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
-      "value": "b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a"
+      "value": "609f17aff95064e692ec56cb51eab703919cf6fbdb29791f005e09542a39a0d6"
     },
     "policyFingerprint": {
       "algorithm": "sha256",
@@ -258,42 +258,42 @@
     "shape": "trimesh",
     "localBounds": {
       "min": [
-        -0.5899999737739563,
-        -0.5899999737739563,
-        -0.5
+        -0.9385361075401306,
+        -0.9913320541381836,
+        -0.8355563879013062
       ],
       "max": [
-        0.5899999737739563,
-        2.950000047683716,
-        0.5
+        0.919564425945282,
+        0.9745348691940308,
+        0.8024851679801941
       ],
       "size": [
-        1.1799999475479126,
-        3.540000021457672,
-        1
+        1.8581005334854126,
+        1.9658669233322144,
+        1.6380415558815002
       ],
       "center": [
-        0,
-        1.1800000369548798,
-        0
+        -0.009485840797424316,
+        -0.008398592472076416,
+        -0.01653560996055603
       ]
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-growth.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-growth.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
-    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
-    "triangleCount": 434,
-    "vertexCount": 449,
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb",
+    "triangleCount": 5220,
+    "vertexCount": 7351,
     "triangleBudget": 5000
   },
   "simplification": {
-    "requested": false,
-    "applied": false,
-    "sourceTriangleCount": 434,
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 14000,
     "targetTriangleBudget": 5000,
-    "ratio": 1,
+    "ratio": 0.3392857142857143,
     "tool": "gltf-transform",
-    "prepass": "none",
+    "prepass": "weld",
     "error": 0.05
   }
 }

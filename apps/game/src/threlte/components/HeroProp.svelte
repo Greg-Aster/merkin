@@ -11,6 +11,10 @@ import {
 } from '../engine/runtimeAssetManifest'
 import { traceRuntimeCulling } from '../engine/runtimeCullingTrace'
 import type { SceneMaterialData } from '../engine/sceneDocumentTypes'
+import type {
+  RenderLightingParticipation,
+  RenderShadowParticipation,
+} from '../engine/types'
 import ManagedLight from '../features/lighting/ManagedLight.svelte'
 import {
   qualityLevelStore,
@@ -42,6 +46,9 @@ const dispatch = createEventDispatcher()
 export let url: string
 export let levelId: string | null = null
 export let runtimeCulling = true
+export let lighting: RenderLightingParticipation = 'lit'
+export let castShadow: RenderShadowParticipation = 'auto'
+export let receiveShadow: RenderShadowParticipation = 'auto'
 export let materialOverride: SceneMaterialData | null = null
 export let cloneMaterials = false
 
@@ -263,13 +270,28 @@ function getScaledBoundingRadius() {
   return Math.max(1, propBoundingSphere.radius * maxWorldScale)
 }
 
-function applyRuntimePropBudget() {
+function resolveShadowParticipation(
+  participation: RenderShadowParticipation,
+  defaultEnabled: boolean,
+) {
+  switch (participation) {
+    case 'enabled':
+      return true
+    case 'disabled':
+      return false
+    case 'auto':
+    default:
+      return defaultEnabled
+  }
+}
+
+function applyRuntimePropBudget(
+  qualityLevel = $qualityLevelStore,
+  qualitySettings = $qualitySettingsStore,
+) {
   if (!scene) return
 
-  const policy = resolveRuntimeVisibilityPolicy(
-    $qualityLevelStore,
-    $qualitySettingsStore,
-  )
+  const policy = resolveRuntimeVisibilityPolicy(qualityLevel, qualitySettings)
   const scaledBoundingRadius = getScaledBoundingRadius()
   const visibility = resolveRuntimePropVisibility({
     policy,
@@ -301,8 +323,19 @@ function applyRuntimePropBudget() {
   }
 
   sceneMeshes.forEach(mesh => {
-    mesh.castShadow = visibility.castShadow
-    mesh.receiveShadow = visibility.receiveShadow
+    const participatesInLighting = lighting === 'lit'
+    const defaultCastShadow = runtimeCulling
+      ? visibility.castShadow
+      : policy.shadowsEnabled
+    const defaultReceiveShadow = runtimeCulling
+      ? visibility.receiveShadow
+      : policy.shadowsEnabled
+    mesh.castShadow =
+      participatesInLighting &&
+      resolveShadowParticipation(castShadow, defaultCastShadow)
+    mesh.receiveShadow =
+      participatesInLighting &&
+      resolveShadowParticipation(receiveShadow, defaultReceiveShadow)
     mesh.frustumCulled = visibility.frustumCulled
   })
 }
@@ -498,20 +531,24 @@ $: if (resolvedUrl && resolvedUrl !== loadedUrl) {
   void loadSceneFromUrl(resolvedUrl)
 }
 
-$: if (scene) {
-  if (inEditorContext) {
-    syncObjectMaterialOverride(
-      scene,
-      effectiveMaterialOverride,
-      materialOverrideState,
-    )
-  } else {
-    syncObjectMaterialOverride(scene, materialOverride, materialOverrideState)
+$: {
+  const qualityLevel = $qualityLevelStore
+  const qualitySettings = $qualitySettingsStore
+  if (scene) {
+    if (inEditorContext) {
+      syncObjectMaterialOverride(
+        scene,
+        effectiveMaterialOverride,
+        materialOverrideState,
+      )
+    } else {
+      syncObjectMaterialOverride(scene, materialOverride, materialOverrideState)
+    }
+    applyOverrideTexturesToScene()
+    applyRuntimePropBudget(qualityLevel, qualitySettings)
+    applyRuntimeMaterialStyle()
+    syncAtmosphereRegistration()
   }
-  applyOverrideTexturesToScene()
-  applyRuntimePropBudget()
-  applyRuntimeMaterialStyle()
-  syncAtmosphereRegistration()
 }
 
 $: {

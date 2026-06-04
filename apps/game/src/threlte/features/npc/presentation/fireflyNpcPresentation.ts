@@ -16,6 +16,17 @@ export interface ResolvedFireflyNpcPresentation {
   lightIntensity: number
   lightDistance: number
   lightDecay: number
+  minimumLightIntensityScale: number
+  pulseThreshold: number
+  pulseSoftness: number
+  activeLightPercent: number
+  blinkPeriodSecondsMin: number
+  blinkPeriodSecondsMax: number
+  blinkFadeSeconds: number
+  populationId?: string
+  populationIndex?: number
+  populationCount?: number
+  lightPhase?: number
   twinkleSpeed: number
   lightBurstBoost: number
   selectionLightBoost: number
@@ -60,6 +71,16 @@ export function getNpcPresentationAnimationPhase(id: string) {
   )
 }
 
+export function getNpcPresentationStableUnit(id: string, salt: string) {
+  const stableKey = `${id}:${salt}`
+  let hash = 2166136261
+  for (let index = 0; index < stableKey.length; index += 1) {
+    hash ^= stableKey.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+  return (hash >>> 0) / 4294967295
+}
+
 export function resolveFireflyNpcPresentation(
   npc: NpcComponent,
   fireflyLighting: ResolvedSceneFireflyLighting = DEFAULT_SCENE_FIREFLY_LIGHTING,
@@ -78,6 +99,17 @@ export function resolveFireflyNpcPresentation(
     lightIntensity: fireflyLighting.lightIntensity,
     lightDistance: fireflyLighting.lightDistance,
     lightDecay: fireflyLighting.lightDecay,
+    minimumLightIntensityScale: fireflyLighting.minimumLightIntensityScale,
+    pulseThreshold: fireflyLighting.pulseThreshold,
+    pulseSoftness: fireflyLighting.pulseSoftness,
+    activeLightPercent: fireflyLighting.activeLightPercent,
+    blinkPeriodSecondsMin: fireflyLighting.blinkPeriodSecondsMin,
+    blinkPeriodSecondsMax: fireflyLighting.blinkPeriodSecondsMax,
+    blinkFadeSeconds: fireflyLighting.blinkFadeSeconds,
+    populationId: presentation.populationId,
+    populationIndex: presentation.populationIndex,
+    populationCount: presentation.populationCount,
+    lightPhase: presentation.lightPhase,
     twinkleSpeed: finiteNumberOrDefault(presentation.twinkleSpeed, 0.9, 0),
     lightBurstBoost: finiteNumberOrDefault(presentation.lightBurstBoost, 1, 0),
     selectionLightBoost: finiteNumberOrDefault(

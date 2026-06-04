@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-20T03:21:19.830Z",
+  "generatedAt": "2026-06-04T18:24:29.085Z",
   "levelId": "sci-fi-room",
   "sceneId": "sci-fi-room",
   "source": {
@@ -109,7 +109,7 @@
         },
         "features": {
           "vegetation": true,
-          "fireflies": true,
+          "fireflies": false,
           "starMap": true,
           "conversations": true,
           "styles": true

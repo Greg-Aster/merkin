@@ -2,6 +2,10 @@ import { getGeneratedCollisionProductMountError } from './generatedCollisionProd
 import { getRuntimeGroundContract } from './groundContract'
 import { validateNpcLevelContract } from './npcValidation'
 import type { SceneDocument } from './sceneDocumentTypes'
+import {
+  getSceneFireflyLightEmitterIndices,
+  resolveSceneFireflyFieldQuality,
+} from './sceneFireflyField'
 import type {
   GeneratedCollisionProduct,
   LevelBuildReport,
@@ -34,8 +38,21 @@ export interface RuntimeSceneManifest {
     terrainManifestUrl?: string
     ground?: Record<string, unknown>
     renderProfile?: Record<string, unknown> | null
+    fireflyPopulation?: RuntimeFireflyPopulationManifest
     worldPartitionUrl?: string
   }
+}
+
+export interface RuntimeFireflyPopulationManifest {
+  fieldId: string
+  count: number
+  activeLightPercent: number
+  activeLightCount: number
+  generatedActorIds: string[]
+  activeLightActorIds: string[]
+  blinkPeriodSecondsMin: number
+  blinkPeriodSecondsMax: number
+  blinkFadeSeconds: number
 }
 
 export interface RuntimeSceneManifestValidationResult {
@@ -67,6 +84,55 @@ function getRuntimeAssetTierCap(levelDefinition: LevelDefinition) {
 
 function getRuntimeRenderProfile(levelDefinition: LevelDefinition) {
   return (levelDefinition.settings as any)?.level?.renderProfile ?? null
+}
+
+function getSceneFireflyFieldId(levelId: string) {
+  return `${levelId}-scene-fireflies`
+}
+
+function isGeneratedSceneFireflyPopulationActor(
+  actor: LevelDefinition['actors'][number],
+) {
+  return actor.npc?.state?.key === 'scene-firefly-population'
+}
+
+function getRuntimeFireflyPopulationManifest(
+  levelDefinition: LevelDefinition,
+): RuntimeFireflyPopulationManifest | undefined {
+  const fireflies = (levelDefinition.settings as any)?.level?.fireflies
+  if (!fireflies?.enabled) return undefined
+
+  const generatedActors = levelDefinition.actors.filter(
+    isGeneratedSceneFireflyPopulationActor,
+  )
+  if (generatedActors.length === 0) return undefined
+
+  const quality = resolveSceneFireflyFieldQuality({
+    settings: fireflies,
+    qualityTier: 'medium',
+    defaultCount: 36,
+    defaultLightCount: 8,
+    defaultSize: 0.58,
+    defaultSpriteIntensity: 1.45,
+  })
+  const activeLightEmitterIndices = getSceneFireflyLightEmitterIndices(
+    quality.count,
+    quality.activeLightCount,
+  )
+
+  return {
+    fieldId: getSceneFireflyFieldId(levelDefinition.id),
+    count: quality.count,
+    activeLightPercent: quality.activeLightPercent,
+    activeLightCount: quality.activeLightCount,
+    generatedActorIds: generatedActors.map(actor => actor.id),
+    activeLightActorIds: generatedActors
+      .filter((actor, index) => activeLightEmitterIndices.has(index))
+      .map(actor => actor.id),
+    blinkPeriodSecondsMin: quality.lighting.blinkPeriodSecondsMin,
+    blinkPeriodSecondsMax: quality.lighting.blinkPeriodSecondsMax,
+    blinkFadeSeconds: quality.lighting.blinkFadeSeconds,
+  }
 }
 
 function toStringArray(value: unknown): string[] | undefined {
@@ -171,6 +237,9 @@ export function createRuntimeSceneManifest(input: {
       terrainManifestUrl: getTerrainManifestUrl(input.levelDefinition),
       ground: getRuntimeGroundContract(input.levelDefinition),
       renderProfile: getRuntimeRenderProfile(input.levelDefinition),
+      fireflyPopulation: getRuntimeFireflyPopulationManifest(
+        input.levelDefinition,
+      ),
       worldPartitionUrl: input.worldPartitionUrl,
     },
   }
@@ -334,6 +403,48 @@ export function validateRuntimeSceneManifest(
     errors.push(
       `Build report fireflyNpcActorCount ${fireflyNpcActorCount} does not match runtime level firefly NPC count ${npcValidation.diagnostics.fireflyNpcActorCount}.`,
     )
+  }
+  if (runtime.fireflyPopulation) {
+    const expectedPopulation = getRuntimeFireflyPopulationManifest(
+      manifest.levelDefinition,
+    )
+    if (!expectedPopulation) {
+      errors.push(
+        'Runtime fireflyPopulation is present but no generated scene firefly actors were found.',
+      )
+    } else {
+      if (
+        runtime.fireflyPopulation.count !== expectedPopulation.count ||
+        runtime.fireflyPopulation.activeLightCount !==
+          expectedPopulation.activeLightCount ||
+        runtime.fireflyPopulation.activeLightPercent !==
+          expectedPopulation.activeLightPercent
+      ) {
+        errors.push(
+          'Runtime fireflyPopulation count or active-light values do not match the resolved firefly contract.',
+        )
+      }
+      if (
+        !sameStringSet(
+          runtime.fireflyPopulation.generatedActorIds,
+          expectedPopulation.generatedActorIds,
+        )
+      ) {
+        errors.push(
+          'Runtime fireflyPopulation generatedActorIds do not match generated firefly NPC actors.',
+        )
+      }
+      if (
+        !sameStringSet(
+          runtime.fireflyPopulation.activeLightActorIds,
+          expectedPopulation.activeLightActorIds,
+        )
+      ) {
+        errors.push(
+          'Runtime fireflyPopulation activeLightActorIds do not match the resolved active-light contract.',
+        )
+      }
+    }
   }
   if (
     !sameStringSet(

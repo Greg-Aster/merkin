@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-16T00:00:00.068Z",
+  "generatedAt": "2026-06-04T19:33:23.711Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-root-northwest",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-16T00:00:00.068Z"
+    "generatedAt": "2026-06-04T19:33:23.711Z"
   },
   "collision": {
     "shape": "trimesh",

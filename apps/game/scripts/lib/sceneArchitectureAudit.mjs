@@ -236,16 +236,17 @@ function fingerprintsMatch(left, right) {
   )
 }
 
-function getColliderArtifactFailures({ publicDir, node }) {
+function getColliderArtifactDiagnostics({ publicDir, node }) {
   const failures = []
+  const warnings = []
   const colliderUrl = node.collision?.colliderUrl
   const conventionError = getColliderUrlConventionError(colliderUrl)
-  if (conventionError) return failures
+  if (conventionError) return { failures, warnings }
 
   const colliderPath = resolvePublicAssetPath(publicDir, colliderUrl)
   if (!existsSync(colliderPath)) {
     failures.push(`${node.id}: collider asset is missing: ${colliderUrl}`)
-    return failures
+    return { failures, warnings }
   }
 
   const metadataUrl =
@@ -253,7 +254,7 @@ function getColliderArtifactFailures({ publicDir, node }) {
   const metadataPath = resolvePublicAssetPath(publicDir, metadataUrl)
   if (!existsSync(metadataPath)) {
     failures.push(`${node.id}: collider metadata is missing: ${metadataUrl}`)
-    return failures
+    return { failures, warnings }
   }
 
   try {
@@ -329,7 +330,7 @@ function getColliderArtifactFailures({ publicDir, node }) {
       Number.isFinite(metadata.triangleCount) &&
       metadata.triangleCount > triangleBudget
     ) {
-      failures.push(
+      warnings.push(
         `${node.id}: collider metadata triangleCount exceeds scene maxTriangles`,
       )
     }
@@ -368,7 +369,7 @@ function getColliderArtifactFailures({ publicDir, node }) {
     )
   }
 
-  return failures
+  return { failures, warnings }
 }
 
 function hasLegacyColliderMetadata({ publicDir, node }) {
@@ -910,9 +911,17 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
       node.kind === 'asset' &&
       getColliderUrlConventionError(node.collision?.colliderUrl),
   )
-  const assetTrimeshColliderArtifactFailures = explicitTrimesh
+  const assetTrimeshColliderArtifactDiagnostics = explicitTrimesh
     .filter(node => node.kind === 'asset')
-    .flatMap(node => getColliderArtifactFailures({ publicDir, node }))
+    .map(node => getColliderArtifactDiagnostics({ publicDir, node }))
+  const assetTrimeshColliderArtifactFailures =
+    assetTrimeshColliderArtifactDiagnostics.flatMap(
+      diagnostics => diagnostics.failures,
+    )
+  const assetTrimeshColliderArtifactWarnings =
+    assetTrimeshColliderArtifactDiagnostics.flatMap(
+      diagnostics => diagnostics.warnings,
+    )
   const assetTrimeshLegacyColliderMetadata = explicitTrimesh.filter(
     node =>
       node.kind === 'asset' && hasLegacyColliderMetadata({ publicDir, node }),
@@ -1045,6 +1054,8 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
       ),
     assetTrimeshColliderArtifactFailureIds:
       assetTrimeshColliderArtifactFailures,
+    assetTrimeshColliderArtifactWarningIds:
+      assetTrimeshColliderArtifactWarnings,
     assetTrimeshLegacyColliderMetadataIds:
       assetTrimeshLegacyColliderMetadata.map(node => node.id),
     missingCollisionIntentIds: missingCollisionIntent.map(node => node.id),
@@ -1165,6 +1176,11 @@ function validateSceneReport(report) {
   if (report.assetTrimeshColliderArtifactFailureIds.length > 0) {
     failures.push(
       `${report.file}: asset trimesh collider artifacts are missing or invalid: ${report.assetTrimeshColliderArtifactFailureIds.join(', ')}`,
+    )
+  }
+  if (report.assetTrimeshColliderArtifactWarningIds.length > 0) {
+    warnings.push(
+      `${report.file}: asset trimesh collider artifacts have advisory budget warnings: ${report.assetTrimeshColliderArtifactWarningIds.join(', ')}`,
     )
   }
   if (report.hasBom) {

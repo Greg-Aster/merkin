@@ -20,6 +20,7 @@ import type {
 import {
   type ResolvedFireflyNpcPresentation,
   getNpcPresentationAnimationPhase,
+  getNpcPresentationStableUnit,
   resolveFireflyNpcPresentation,
 } from './fireflyNpcPresentation'
 
@@ -46,10 +47,46 @@ let lightBurstGlow = 0
 let shockwaveIgnited = false
 let shockwaveIgnition = 0
 
+function clamp01(value: number) {
+  return Math.max(0, Math.min(1, value))
+}
+
+function smoothStep(value: number) {
+  const resolved = clamp01(value)
+  return resolved * resolved * (3 - 2 * resolved)
+}
+
+function getStableFireflyId() {
+  return npc.id || actorId || 'firefly-npc'
+}
+
+function getNormalizedLightPhase(presentation: ResolvedFireflyNpcPresentation) {
+  if (
+    typeof presentation.lightPhase === 'number' &&
+    Number.isFinite(presentation.lightPhase)
+  ) {
+    return ((presentation.lightPhase % 1) + 1) % 1
+  }
+  if (
+    typeof presentation.populationIndex === 'number' &&
+    Number.isFinite(presentation.populationIndex) &&
+    typeof presentation.populationCount === 'number' &&
+    Number.isFinite(presentation.populationCount) &&
+    presentation.populationCount > 0
+  ) {
+    return (
+      (((presentation.populationIndex / presentation.populationCount) % 1) +
+        1) %
+      1
+    )
+  }
+  return getNpcPresentationStableUnit(getStableFireflyId(), 'blink-phase')
+}
+
 function getMotionOffset(
   presentation: ResolvedFireflyNpcPresentation,
 ): [number, number, number] {
-  const phase = getNpcPresentationAnimationPhase(npc.id || actorId)
+  const phase = getNpcPresentationAnimationPhase(getStableFireflyId())
 
   return [
     presentation.wanderEnabled
@@ -76,9 +113,11 @@ function getSpriteColor(presentation: ResolvedFireflyNpcPresentation) {
 
 function getLightDrivenSpriteIntensity(
   presentation: ResolvedFireflyNpcPresentation,
+  pulse: number,
 ) {
   return (
     presentation.spriteIntensity *
+    (0.52 + pulse * 0.82) *
     Math.min(1.35, Math.max(0.72, presentation.lightIntensity / 3.2))
   )
 }
@@ -110,8 +149,12 @@ function getShockwaveSpriteSizeMultiplier(
 
 function getShockwaveSpriteIntensity(
   presentation: ResolvedFireflyNpcPresentation,
+  pulse: number,
 ) {
-  const lightDrivenSpriteIntensity = getLightDrivenSpriteIntensity(presentation)
+  const lightDrivenSpriteIntensity = getLightDrivenSpriteIntensity(
+    presentation,
+    pulse,
+  )
   if (!presentation.shockwaveEnabled) return lightDrivenSpriteIntensity
 
   const shockwaveBoost = getShockwaveBoost(presentation)
@@ -123,8 +166,12 @@ function getShockwaveSpriteIntensity(
 
 function getSpriteVisualIntensity(
   presentation: ResolvedFireflyNpcPresentation,
+  pulse: number,
 ) {
-  const shockwaveSpriteIntensity = getShockwaveSpriteIntensity(presentation)
+  const shockwaveSpriteIntensity = getShockwaveSpriteIntensity(
+    presentation,
+    pulse,
+  )
   return Math.max(
     interactionHovered
       ? Math.max(shockwaveSpriteIntensity * 1.2, 1.05)
@@ -134,15 +181,97 @@ function getSpriteVisualIntensity(
   )
 }
 
-function getLightIntensity(presentation: ResolvedFireflyNpcPresentation) {
+function getFireflyPulse(presentation: ResolvedFireflyNpcPresentation) {
+  const phase = getNpcPresentationAnimationPhase(getStableFireflyId())
+  const wave =
+    (Math.sin(animationTime * presentation.twinkleSpeed + phase) + 1) / 2
+  const threshold = Math.max(0, Math.min(0.95, presentation.pulseThreshold))
+  const softness = Math.max(0.01, Math.min(1, presentation.pulseSoftness))
+  const normalized =
+    threshold <= 0
+      ? wave
+      : Math.max(0, Math.min(1, (wave - threshold) / (1 - threshold)))
+  const gated = normalized * normalized * (3 - 2 * normalized)
+  return THREE.MathUtils.lerp(gated, wave, softness)
+}
+
+function getFireflyBlinkPeriod(presentation: ResolvedFireflyNpcPresentation) {
+  const minPeriod = Math.max(0.25, presentation.blinkPeriodSecondsMin)
+  const maxPeriod = Math.max(minPeriod, presentation.blinkPeriodSecondsMax)
+  return THREE.MathUtils.lerp(
+    minPeriod,
+    maxPeriod,
+    getNpcPresentationStableUnit(getStableFireflyId(), 'blink-period'),
+  )
+}
+
+function getFireflyBlinkScale(presentation: ResolvedFireflyNpcPresentation) {
+  const activeLightPercent = clamp01(presentation.activeLightPercent)
+  if (activeLightPercent <= 0) return 0
+  if (activeLightPercent >= 1) return 1
+
+  const periodSeconds = getFireflyBlinkPeriod(presentation)
+  const activeSeconds = Math.max(0, periodSeconds * activeLightPercent)
+  if (activeSeconds <= 0) return 0
+
+  const phaseSeconds = getNormalizedLightPhase(presentation) * periodSeconds
+  const cycleTime = (animationTime + phaseSeconds) % periodSeconds
+  if (cycleTime >= activeSeconds) return 0
+
+  const fadeSeconds = Math.min(
+    Math.max(0, presentation.blinkFadeSeconds),
+    activeSeconds * 0.5,
+  )
+  if (fadeSeconds <= 0) return 1
+
+  return Math.min(
+    smoothStep(cycleTime / fadeSeconds),
+    smoothStep((activeSeconds - cycleTime) / fadeSeconds),
+  )
+}
+
+function getVisualPulse(
+  presentation: ResolvedFireflyNpcPresentation,
+  pulse: number,
+  blinkScale: number,
+) {
+  if (clamp01(presentation.activeLightPercent) >= 1) return pulse
+  return Math.max(pulse * 0.35, blinkScale)
+}
+
+function getLightIntensity(
+  presentation: ResolvedFireflyNpcPresentation,
+  pulse: number,
+  blinkScale: number,
+) {
+  const baseGlow = Math.max(
+    0,
+    Math.min(1, presentation.minimumLightIntensityScale),
+  )
+  const pulseScale = baseGlow + (1 - baseGlow) * pulse * pulse
   const selectedBoost = 1 + selectionBlend * presentation.selectionLightBoost
   const hoverBoost = interactionHovered
     ? Math.max(presentation.lightIntensity * 1.18, presentation.lightIntensity)
     : presentation.lightIntensity
   return (
     hoverBoost *
+    pulseScale *
+    blinkScale *
     selectedBoost *
     getShockwaveIntensityMultiplier(presentation)
+  )
+}
+
+function getLightDistance(
+  presentation: ResolvedFireflyNpcPresentation,
+  pulse: number,
+  blinkScale: number,
+) {
+  return (
+    presentation.lightDistance *
+    (0.72 + pulse * 0.28) *
+    (0.35 + blinkScale * 0.65) *
+    getShockwaveDistanceMultiplier(presentation)
   )
 }
 
@@ -212,14 +341,33 @@ onDestroy(() => {
 {#if presentation}
   {@const motionOffset = getMotionOffset(presentation)}
   {@const spriteColor = getSpriteColor(presentation)}
-  {@const spriteVisualIntensity = getSpriteVisualIntensity(presentation)}
+  {@const pulse = getFireflyPulse(presentation)}
+  {@const blinkScale = getFireflyBlinkScale(presentation)}
+  {@const visualPulse = getVisualPulse(presentation, pulse, blinkScale)}
+  {@const lightPulse = pulse * blinkScale}
+  {@const spriteVisualIntensity = getSpriteVisualIntensity(
+    presentation,
+    visualPulse,
+  )}
   {@const spriteOpacityIntensity = Math.min(1, spriteVisualIntensity)}
-  {@const lightIntensity = getLightIntensity(presentation)}
-  {@const shockwaveSpriteIntensity = getShockwaveSpriteIntensity(presentation)}
+  {@const lightIntensity = getLightIntensity(
+    presentation,
+    lightPulse,
+    blinkScale,
+  )}
+  {@const lightDistance = getLightDistance(
+    presentation,
+    lightPulse,
+    blinkScale,
+  )}
+  {@const shockwaveSpriteIntensity = getShockwaveSpriteIntensity(
+    presentation,
+    visualPulse,
+  )}
   {@const shockwaveSizeMultiplier =
     getShockwaveSpriteSizeMultiplier(presentation)}
   {@const shouldRenderLight =
-    presentation.lightIntensity > 0 && presentation.lightDistance > 0}
+    lightIntensity > 0.001 && lightDistance > 0.001}
   {#if shouldRenderLight}
     <ManagedLight
       id={`npc-firefly-light-${npc.id || actorId}`}
@@ -227,10 +375,13 @@ onDestroy(() => {
       position={motionOffset}
       color={spriteColor}
       intensity={lightIntensity}
-      distance={presentation.lightDistance *
-        getShockwaveDistanceMultiplier(presentation)}
+      distance={lightDistance}
       decay={presentation.lightDecay}
       runtimeBudgeted={presentation.lightBudgeted}
+      budgetGroup="firefly-npc"
+      priority={8 + lightPulse * 4 + selectionBlend * 12 + lightBurstGlow * 6}
+      stableSelectionKey={`firefly-npc:${npc.id || actorId}`}
+      selectionHint="firefly-npc"
     />
   {/if}
   <StarSprite

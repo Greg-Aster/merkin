@@ -3,6 +3,10 @@ import { T } from '@threlte/core'
 import { createEventDispatcher } from 'svelte'
 import HeroProp from '../../../components/HeroProp.svelte'
 import type { SceneMaterialData } from '../../../engine/sceneDocumentTypes'
+import type {
+  RenderLightingParticipation,
+  RenderShadowParticipation,
+} from '../../../engine/types'
 
 const dispatch = createEventDispatcher()
 
@@ -12,6 +16,9 @@ export let lod: number
 export let pathTemplate: string
 export let levelId: string | null = null
 export let materialOverride: SceneMaterialData | null = null
+export let lighting: RenderLightingParticipation = 'lit'
+export let castShadow: RenderShadowParticipation = 'auto'
+export let receiveShadow: RenderShadowParticipation = 'auto'
 
 $: url = pathTemplate
   .replace('{x}', x.toString())
@@ -29,12 +36,15 @@ function handleError(event: CustomEvent) {
 
 <!-- Place the GLB at world origin; its internal geometry is already in world space -->
 <T.Group position={[0, 0, 0]}>
-  <!-- Visual only - no collision (terrain physics handled by TriMesh collider) -->
+  <!-- Render-only terrain visual; terrain physics is handled by the TriMesh collider. -->
   <HeroProp
     {url}
     {levelId}
     {materialOverride}
     runtimeCulling={false}
+    {lighting}
+    {castShadow}
+    {receiveShadow}
     cloneMaterials={true}
     on:load={handleLoad}
     on:error={handleError}

@@ -37,6 +37,8 @@ export type RenderCullingPolicy = 'runtime-budget' | 'never'
 export type RenderPhysicsAttachmentPolicy =
   | 'inside-collider'
   | 'outside-collider'
+export type RenderLightingParticipation = 'lit' | 'visual-only' | 'unlit'
+export type RenderShadowParticipation = 'auto' | 'enabled' | 'disabled'
 export type CollisionIntent =
   | 'none'
   | 'walkable'
@@ -133,6 +135,9 @@ export interface RenderComponent {
   visible: boolean
   cullingPolicy: RenderCullingPolicy
   physicsAttachment: RenderPhysicsAttachmentPolicy
+  lighting?: RenderLightingParticipation
+  castShadow?: RenderShadowParticipation
+  receiveShadow?: RenderShadowParticipation
   primitive?: {
     geometry: PrimitiveGeometryKind
     args: number[]

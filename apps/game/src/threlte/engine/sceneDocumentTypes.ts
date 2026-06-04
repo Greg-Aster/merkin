@@ -75,6 +75,10 @@ export interface EditorLightData {
   intensity: number
   distance: number
   decay: number
+  runtimeBudgeted?: boolean
+  budgetGroup?: RuntimeLightBudgetGroup
+  priority?: number
+  castsShadow?: boolean
 }
 
 export interface EditorPrefabData {
@@ -359,6 +363,32 @@ export interface SharedLevelLightingSettings {
   }
 }
 
+export type RuntimeLightBudgetGroup =
+  | 'player'
+  | 'authored'
+  | 'firefly-npc'
+  | 'shockwave'
+  | 'ambient-vfx'
+  | 'diagnostic'
+
+export interface RuntimePointLightGroupBudgetSettings {
+  maxVisibleCount?: number
+  priority?: number
+}
+
+export interface RuntimePointLightBudgetSettings {
+  enabled?: boolean
+  maxVisibleCount?: number
+  maxDistance?: number
+  intensityScale?: number
+  rangeScale?: number
+  selectionHoldSeconds?: number
+  selectionHysteresis?: number
+  groupBudgets?: Partial<
+    Record<RuntimeLightBudgetGroup, RuntimePointLightGroupBudgetSettings>
+  >
+}
+
 export type RenderProfilePlatformTier = 'mobile' | 'desktop' | 'tv'
 export type RenderProfileReflectionMode =
   | 'none'
@@ -436,6 +466,7 @@ export interface RenderProfileLightingSettings {
   fillLightColor?: string
   keyLightPosition?: [number, number, number]
   fillLightPosition?: [number, number, number]
+  pointLightBudget?: RuntimePointLightBudgetSettings
 }
 
 export interface RenderProfileVisualBookmark {
@@ -452,6 +483,7 @@ export interface RenderProfileVisualBookmark {
 }
 
 export interface RenderProfileTierSettings {
+  lighting?: RenderProfileLightingSettings
   shadows?: RenderProfileShadowSettings
   reflections?: RenderProfileReflectionSettings
   postProcessing?: RenderProfilePostProcessingSettings
@@ -516,6 +548,14 @@ export interface SharedLevelFireflyLightingSettings {
   lightDecay?: number
   minimumLightIntensityScale?: number
   lightBudgeted?: boolean
+  selectionHoldSeconds?: number
+  selectionFadeSeconds?: number
+  pulseThreshold?: number
+  pulseSoftness?: number
+  activeLightPercent?: number
+  blinkPeriodSecondsMin?: number
+  blinkPeriodSecondsMax?: number
+  blinkFadeSeconds?: number
 }
 
 export interface SharedLevelFireflySettings {
@@ -523,12 +563,19 @@ export interface SharedLevelFireflySettings {
     enabled?: boolean
     allowWithAuthored?: boolean
     count?: number
+    activeLightPercent?: number
+    /** @deprecated Use activeLightPercent so active lights scale with count. */
     lightCount?: number
     qualityTiers?: Partial<
       Record<
         'ultra_low' | 'low' | 'medium' | 'high' | 'ultra',
         {
           count?: number
+          activeLightPercent?: number
+          blinkPeriodSecondsMin?: number
+          blinkPeriodSecondsMax?: number
+          blinkFadeSeconds?: number
+          /** @deprecated Use activeLightPercent so active lights scale with count. */
           lightCount?: number
           size?: number
           lighting?: SharedLevelFireflyLightingSettings
@@ -577,10 +624,7 @@ export type TerrainRuntimeComponentSource =
 export type LevelCollisionBudget = 'mobile' | 'balanced' | 'desktop'
 export type LevelGroundMode = 'terrain-chunks' | 'hybrid' | 'scene-authored'
 export type TerrainRuntimeMode = 'scene-authored' | 'glb-chunk-terrain'
-export type TerrainVisualSource =
-  | 'scene-actors'
-  | 'source-glb-chunks'
-  | 'none'
+export type TerrainVisualSource = 'scene-actors' | 'source-glb-chunks' | 'none'
 export type TerrainFallbackSurfacePolicy =
   | 'disabled'
   | 'debug-only'

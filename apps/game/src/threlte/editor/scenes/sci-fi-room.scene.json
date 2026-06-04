@@ -73,7 +73,7 @@
       },
       "features": {
         "vegetation": true,
-        "fireflies": true,
+        "fireflies": false,
         "starMap": true,
         "conversations": true,
         "styles": true

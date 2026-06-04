@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-17T22:11:01.771Z",
+  "generatedAt": "2026-06-04T19:33:15.281Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-dais",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-17T22:11:01.771Z"
+    "generatedAt": "2026-06-04T19:33:15.281Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -238,7 +238,7 @@
   },
   "collisionProduct": {
     "actorId": "yggdrasil-dais",
-    "cacheKey": "mesh-collision-manager-v2:6bf74b9774b52a5d7f95557258241a93b2ea4a4786e89ff6f6a0e0295a3a6ba3:be54a1f5e05e7e5556172be4aa08f89dc5b185b9c0ba273a6fe5e92e6bbcb3d8:fd06eacdcd1c855df84154cdc78b13b7de37df3104672e59e6dcda5ebf43fb9b",
+    "cacheKey": "mesh-collision-manager-v2:1d767b16731613b238d01f6595b983532b1613da2ec2ad078c01c5f9d86ae613:210904bf699fa8373b03ba75256ee97b3079f639a12b64bd3fd99ada1cb19d36:fd06eacdcd1c855df84154cdc78b13b7de37df3104672e59e6dcda5ebf43fb9b",
     "mode": "auto",
     "productId": "yggdrasil-dais:auto:simplifiedMesh",
     "generatorVersion": "mesh-collision-manager-v2",

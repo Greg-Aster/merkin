@@ -2,6 +2,10 @@
 import { T } from '@threlte/core'
 import { getContext, onDestroy } from 'svelte'
 import * as THREE from 'three'
+import type {
+  RenderLightingParticipation,
+  RenderShadowParticipation,
+} from '../engine/types'
 import {
   EDITOR_MATERIAL_OVERRIDE_CONTEXT,
   type EditorMaterialOverrideStore,
@@ -36,6 +40,9 @@ export let thickness = 0
 export let reflectivity = 0.5
 export let name = ''
 export let userData: Record<string, any> = {}
+export let lighting: RenderLightingParticipation = 'lit'
+export let castShadow: RenderShadowParticipation = 'auto'
+export let receiveShadow: RenderShadowParticipation = 'auto'
 
 type OverrideTextureSet = {
   map: THREE.Texture | null
@@ -152,6 +159,11 @@ $: needsPhysicalMaterial =
   resolvedThickness > 0.001 ||
   Math.abs(resolvedIor - 1.5) > 0.001 ||
   Math.abs(resolvedReflectivity - 0.5) > 0.001
+$: participatesInLighting = lighting === 'lit'
+$: resolvedCastShadow =
+  participatesInLighting && castShadow !== 'disabled'
+$: resolvedReceiveShadow =
+  participatesInLighting && receiveShadow !== 'disabled'
 $: void syncOverrideTextures()
 
 onDestroy(() => {
@@ -161,7 +173,15 @@ onDestroy(() => {
 })
 </script>
 
-<T.Mesh {name} {userData} {position} {rotation} {scale}>
+<T.Mesh
+  {name}
+  {userData}
+  {position}
+  {rotation}
+  {scale}
+  castShadow={resolvedCastShadow}
+  receiveShadow={resolvedReceiveShadow}
+>
   {#if geometry === 'box'}
     <T.BoxGeometry args={args} />
   {:else if geometry === 'cylinder'}
@@ -178,7 +198,17 @@ onDestroy(() => {
     <T.TorusGeometry args={args} />
   {/if}
 
-  {#if needsPhysicalMaterial}
+  {#if !participatesInLighting}
+    <T.MeshBasicMaterial
+      color={resolvedEmissive}
+      transparent={resolvedTransparent}
+      opacity={resolvedOpacity}
+      wireframe={resolvedWireframe}
+      side={resolvedSide}
+      map={overrideTextures.map}
+      alphaMap={overrideTextures.alphaMap}
+    />
+  {:else if needsPhysicalMaterial}
     <T.MeshPhysicalMaterial
       color={resolvedColor}
       emissive={resolvedEmissive}

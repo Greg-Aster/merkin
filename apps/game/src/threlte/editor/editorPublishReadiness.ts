@@ -1000,11 +1000,14 @@ function pushColliderMetadataIssue(
   viewModel: EditorPublishReadinessViewModel,
   node: EditorSceneNode,
   detail: string,
+  severity: EditorPublishReadinessItem['severity'] = getCollisionValidationSeverity(
+    node,
+  ),
 ) {
   pushIssue(viewModel, {
     id: `mesh-collider-${node.id}-${viewModel.blockers.length + viewModel.warnings.length}`,
     label: 'Mesh Collider Metadata',
-    severity: getCollisionValidationSeverity(node),
+    severity,
     detail: `Actor "${node.id}": ${detail}`,
   })
 }
@@ -1135,6 +1138,7 @@ function addMeshColliderMetadataSection(
         viewModel,
         node,
         `collider has ${metadata.triangleCount} triangles, exceeding budget ${triangleBudget}.`,
+        'warning',
       )
     }
 

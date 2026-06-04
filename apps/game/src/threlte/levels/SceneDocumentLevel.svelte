@@ -106,7 +106,6 @@ import {
   loadCachedGltf,
 } from '../utils/gltfAssetCache'
 import RuntimeActorBranch from './RuntimeActorBranch.svelte'
-import SceneFireflyField from './SceneFireflyField.svelte'
 import SceneLightingProfile from './SceneLightingProfile.svelte'
 import { getSceneTerrainRuntimeRequest } from './sceneTerrainRuntime'
 import { resolveSkyboxPreset } from './skyboxPresets'
@@ -1481,17 +1480,6 @@ $: ambientParticlesEnabled =
   sharedLevelSettings.features?.ambientParticles ??
   sharedLevelSettings.ambientParticles?.enabled ??
   false
-$: authoredFireflyActorCount = levelActors.filter(
-  actor =>
-    actor.npc?.archetype === 'firefly' ||
-    actor.npc?.presentation.type === 'firefly',
-).length
-$: sceneFireflyFieldEnabled =
-  (sharedLevelSettings.features?.fireflies ??
-    sharedLevelSettings.fireflies?.enabled ??
-    false) &&
-  (authoredFireflyActorCount === 0 ||
-    sharedLevelSettings.fireflies?.allowWithAuthored === true)
 $: sceneFireflyFieldQuality = resolveSceneFireflyFieldQuality({
   settings: sharedLevelSettings.fireflies,
   qualityTier: $qualityLevelStore,
@@ -1792,36 +1780,6 @@ onDestroy(() => {
         driftSpeed={sharedLevelSettings.ambientParticles?.driftSpeed ?? 0.22}
         sway={sharedLevelSettings.ambientParticles?.sway ?? 0.85}
         center={[0, 0, 0]}
-      />
-    {/if}
-
-    {#if sceneFireflyFieldEnabled}
-      <SceneFireflyField
-        enabled={true}
-        fieldId={`${levelId}-scene-fireflies`}
-        count={sceneFireflyFieldQuality.count}
-        lightCount={sceneFireflyFieldQuality.lightCount}
-        radius={sharedLevelSettings.fireflies?.radius ?? 120}
-        minHeight={sharedLevelSettings.fireflies?.minHeight ?? 2}
-        maxHeight={sharedLevelSettings.fireflies?.maxHeight ?? 5}
-        center={sharedLevelSettings.fireflies?.center ?? sharedLevelSettings.spawn?.position ?? [0, 0, 0]}
-        terrainFollow={sharedLevelSettings.fireflies?.terrainFollow ?? false}
-        terrainReady={terrainRuntimeReady}
-        getHeightAt={getSceneTerrainHeightAt}
-        distribution={sharedLevelSettings.fireflies?.distribution ?? 'uniform'}
-        densityExponent={sharedLevelSettings.fireflies?.densityExponent ?? 0.5}
-        palette={sharedLevelSettings.fireflies?.palette ?? []}
-        interactive={sharedLevelSettings.fireflies?.interactive}
-        color={sharedLevelSettings.fireflies?.color ?? '#f4ffb8'}
-        secondaryColor={sharedLevelSettings.fireflies?.secondaryColor ?? '#8defff'}
-        size={sceneFireflyFieldQuality.size}
-        lighting={sceneFireflyLighting}
-        twinkleSpeed={sharedLevelSettings.fireflies?.twinkleSpeed ?? 0.82}
-        driftSpeed={sharedLevelSettings.fireflies?.driftSpeed ?? 0.28}
-        sway={sharedLevelSettings.fireflies?.sway ?? 1.5}
-        {levelId}
-        {interactionSystem}
-        interactiveEnabled={runtimeGameplayRenderingEnabled}
       />
     {/if}
 

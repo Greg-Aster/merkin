@@ -49,6 +49,10 @@ export interface NpcFireflyPresentationConfig {
   secondaryColor?: string
   size: number
   twinkleSpeed?: number
+  populationId?: string
+  populationIndex?: number
+  populationCount?: number
+  lightPhase?: number
   lightBurstBoost?: number
   selectionLightBoost?: number
   lightBurstSpriteBoost?: number

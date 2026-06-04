@@ -6,6 +6,7 @@
 import { useTask, useThrelte } from '@threlte/core'
 import { createEventDispatcher, onMount } from 'svelte'
 import { setRuntimeDiagnostic } from '../../../stores/runtimeDiagnosticsStore'
+import { runtimeLightingTelemetryStore } from '../../../stores/runtimeLightingTelemetry'
 import { recordRuntimeProductionTelemetry } from '../../../stores/runtimeProductionTelemetry'
 import {
   evictUnusedGltfCacheEntries,
@@ -270,6 +271,7 @@ onMount(() => {
             }
           : null,
         scene: collectSceneStats(),
+        lighting: $runtimeLightingTelemetryStore,
         streaming: collectStreamingStats(),
         gltfCache: getGltfCacheStats(),
         quality: optimizationManager.getOptimizationLevel(),
@@ -368,11 +370,12 @@ useTask(() => {
       setRuntimeDiagnostic('rendererFrame', {
         label: 'Renderer Frame',
         level: 'ready',
-        message: `${renderInfo.calls} draw call(s), ${renderInfo.triangles} triangle(s), ${memory.textures} texture(s).`,
+        message: `${renderInfo.calls} draw call(s), ${renderInfo.triangles} triangle(s), ${memory.textures} texture(s), firefly lights ${$runtimeLightingTelemetryStore.fireflyPointLights.active}/${$runtimeLightingTelemetryStore.fireflyPointLights.total}.`,
         meta: {
           renderInfo,
           memory,
           scene: collectSceneStats(),
+          lighting: $runtimeLightingTelemetryStore,
         },
       })
       setRuntimeDiagnostic('performancePressure', {

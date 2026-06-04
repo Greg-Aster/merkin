@@ -486,7 +486,8 @@ function bakeColliderAsset({
   return simplification
 }
 
-function assertColliderMetadata({ metadata, outputPath, triangleBudget }) {
+function validateColliderMetadata({ metadata, triangleBudget }) {
+  const warnings = []
   if (!metadata.valid) {
     throw new Error(`Generated collider is invalid: ${metadata.errors.join(' ')}`)
   }
@@ -494,14 +495,14 @@ function assertColliderMetadata({ metadata, outputPath, triangleBudget }) {
     throw new Error('Generated collider has no triangles.')
   }
   if (metadata.triangleCount > triangleBudget) {
-    rmSync(outputPath, { force: true })
-    throw new Error(
+    warnings.push(
       `Generated collider has ${metadata.triangleCount} triangles, exceeding budget ${triangleBudget}.`,
     )
   }
   if (!metadata.bounds) {
     throw new Error('Generated collider metadata is missing bounds.')
   }
+  return warnings
 }
 
 function updateSceneNode({
@@ -659,9 +660,8 @@ function main() {
     simplifyError: Number(args['simplify-error'] ?? defaultSimplifyError),
   })
   const colliderMetadata = readGltfAssetMetadata(colliderPath)
-  assertColliderMetadata({
+  const warnings = validateColliderMetadata({
     metadata: colliderMetadata,
-    outputPath: colliderPath,
     triangleBudget,
   })
 
@@ -808,6 +808,7 @@ function main() {
     metadataUrl,
     colliderPath: toRepoRelative(colliderPath),
     metadataPath: toRepoRelative(metadataPath),
+    warnings,
     scenePath: toRepoRelative(scenePath),
     sceneUpdated: Boolean(args.writeScene),
     collision,

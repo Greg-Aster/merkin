@@ -121,7 +121,12 @@ $: materialOverrideStore.set(
       intensity={lightNode.intensity}
       distance={lightNode.distance}
       decay={lightNode.decay}
+      castsShadow={lightNode.castsShadow ?? false}
       runtimeBudgeted={!editorEnabled}
+      budgetGroup={lightNode.budgetGroup ?? 'authored'}
+      priority={lightNode.priority ?? 0}
+      stableSelectionKey={`editor-light:${node.id}`}
+      selectionHint="editor-light"
     />
     <ProceduralMesh
       geometry="icosahedron"
@@ -145,6 +150,10 @@ $: materialOverrideStore.set(
       distance={fireflyLighting.lightDistance}
       decay={fireflyLighting.lightDecay}
       runtimeBudgeted={!editorEnabled}
+      budgetGroup="firefly-npc"
+      priority={8}
+      stableSelectionKey={`editor-firefly-npc:${node.id}`}
+      selectionHint="editor-firefly-npc"
     />
     <ProceduralMesh
       geometry="icosahedron"

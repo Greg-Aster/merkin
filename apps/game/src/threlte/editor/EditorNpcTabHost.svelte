@@ -44,6 +44,7 @@ $: selectedFireflyFieldQuality = resolveSceneFireflyFieldQuality({
 $: selectedNodesWithoutNpc = selectedNodes.filter(node => !node.npc).length
 $: fieldEnabled =
   levelSettings.fireflies?.enabled ?? levelSettings.features?.fireflies ?? false
+$: selectedFireflyActivePercent = `${(selectedFireflyFieldQuality.activeLightPercent * 100).toFixed(1).replace(/\.0$/, '')}%`
 </script>
 
 <div class="editor-section">
@@ -61,7 +62,7 @@ $: fieldEnabled =
         field {fieldEnabled ? 'on' : 'off'}
       </span>
       <span class="editor-chip">
-        high tier {selectedFireflyFieldQuality.count}/{selectedFireflyFieldQuality.lightCount}
+        high tier {selectedFireflyFieldQuality.count} · {selectedFireflyActivePercent} active ({selectedFireflyFieldQuality.activeLightCount})
       </span>
     </div>
   </div>

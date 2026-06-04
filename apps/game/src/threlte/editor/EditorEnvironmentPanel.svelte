@@ -1,5 +1,7 @@
 <script lang="ts">
 import type {
+  RuntimeLightBudgetGroup,
+  RuntimePointLightBudgetSettings,
   RenderProfilePlatformTier,
   RenderProfilePostPass,
 } from '../engine/sceneDocumentTypes'
@@ -23,6 +25,20 @@ import type {
 type EnvironmentPanelProfile = NonNullable<
   SharedLevelEditorSettings['editorPanels']
 >['environment']
+type PointLightBudgetScope = {
+  id: 'shared' | RenderProfilePlatformTier
+  label: string
+  path: string[]
+  budget: RuntimePointLightBudgetSettings | undefined
+  fallback: RuntimePointLightBudgetSettings
+}
+type PointLightBudgetNumericField =
+  | 'maxVisibleCount'
+  | 'maxDistance'
+  | 'intensityScale'
+  | 'rangeScale'
+  | 'selectionHoldSeconds'
+  | 'selectionHysteresis'
 
 const defaultRenderOutputPasses: RenderProfilePostPass[] = [
   'tone-mapping',
@@ -41,6 +57,68 @@ const renderProfileTiers: RenderProfilePlatformTier[] = [
   'desktop',
   'tv',
 ]
+const runtimeLightBudgetGroups: RuntimeLightBudgetGroup[] = [
+  'player',
+  'authored',
+  'firefly-npc',
+  'shockwave',
+  'ambient-vfx',
+  'diagnostic',
+]
+const defaultPointLightBudgets: Record<
+  'shared' | RenderProfilePlatformTier,
+  Required<
+    Pick<
+      RuntimePointLightBudgetSettings,
+      | 'enabled'
+      | 'maxVisibleCount'
+      | 'maxDistance'
+      | 'intensityScale'
+      | 'rangeScale'
+      | 'selectionHoldSeconds'
+      | 'selectionHysteresis'
+    >
+  >
+> = {
+  shared: {
+    enabled: true,
+    maxVisibleCount: 8,
+    maxDistance: 16,
+    intensityScale: 0.88,
+    rangeScale: 0.9,
+    selectionHoldSeconds: 2.2,
+    selectionHysteresis: 0.16,
+  },
+  mobile: {
+    enabled: false,
+    maxVisibleCount: 0,
+    maxDistance: 0,
+    intensityScale: 0,
+    rangeScale: 0,
+    selectionHoldSeconds: 0,
+    selectionHysteresis: 0,
+  },
+  desktop: {
+    enabled: true,
+    maxVisibleCount: 8,
+    maxDistance: 16,
+    intensityScale: 0.88,
+    rangeScale: 0.9,
+    selectionHoldSeconds: 2.2,
+    selectionHysteresis: 0.16,
+  },
+  tv: {
+    enabled: true,
+    maxVisibleCount: 12,
+    maxDistance: 24,
+    intensityScale: 1,
+    rangeScale: 1,
+    selectionHoldSeconds: 2.8,
+    selectionHysteresis: 0.14,
+  },
+}
+
+let pointLightBudgetScopes: PointLightBudgetScope[] = []
 
 export let levelSettings: SharedLevelEditorSettings
 export let effectiveObservatorySettings: ObservatoryEditorSettings
@@ -80,6 +158,37 @@ $: viewportMaskReason =
 $: skyImageIntensity = Number(levelSettings.skybox?.backgroundIntensity ?? 1)
 $: skyImageDisabled =
   Number.isFinite(skyImageIntensity) && skyImageIntensity <= 0
+$: sharedPointLightBudget =
+  levelSettings.renderProfile?.lighting?.pointLightBudget
+$: pointLightBudgetScopes = [
+  {
+    id: 'shared',
+    label: 'Shared',
+    path: ['renderProfile', 'lighting', 'pointLightBudget'],
+    budget: sharedPointLightBudget,
+    fallback: defaultPointLightBudgets.shared,
+  },
+  ...renderProfileTiers.map(
+    (tier): PointLightBudgetScope => ({
+      id: tier,
+      label: formatPlatformTierLabel(tier),
+      path: [
+        'renderProfile',
+        'qualityTiers',
+        tier,
+        'lighting',
+        'pointLightBudget',
+      ],
+      budget:
+        levelSettings.renderProfile?.qualityTiers?.[tier]?.lighting
+          ?.pointLightBudget,
+      fallback: mergePointLightBudget(
+        defaultPointLightBudgets[tier],
+        sharedPointLightBudget,
+      ),
+    }),
+  ),
+]
 
 function useAuthoredRenderedPreview() {
   onSetViewportShadingMode('rendered')
@@ -200,6 +309,39 @@ function setKuwaharaEnabled(enabled: boolean) {
     ['renderProfile', 'postProcessing', 'kuwahara', 'enabled'],
     enabled,
   )
+}
+
+function mergePointLightBudget(
+  base: RuntimePointLightBudgetSettings,
+  override: RuntimePointLightBudgetSettings | undefined,
+): RuntimePointLightBudgetSettings {
+  return {
+    ...base,
+    ...(override ?? {}),
+  }
+}
+
+function getPointLightBudgetEnabled(scope: PointLightBudgetScope) {
+  return scope.budget?.enabled ?? scope.fallback.enabled ?? true
+}
+
+function getPointLightBudgetNumber(
+  scope: PointLightBudgetScope,
+  field: PointLightBudgetNumericField,
+) {
+  const value = scope.budget?.[field] ?? scope.fallback[field]
+  return typeof value === 'number' && Number.isFinite(value) ? value : ''
+}
+
+function formatPlatformTierLabel(tier: RenderProfilePlatformTier) {
+  return tier === 'tv' ? 'TV' : `${tier[0]?.toUpperCase()}${tier.slice(1)}`
+}
+
+function formatBudgetGroupLabel(group: RuntimeLightBudgetGroup) {
+  return group
+    .split('-')
+    .map(part => `${part[0]?.toUpperCase()}${part.slice(1)}`)
+    .join(' ')
 }
 </script>
 
@@ -339,6 +481,7 @@ function setKuwaharaEnabled(enabled: boolean) {
     <div class="tuple-label">Global Lighting</div>
     <div class="editor-field-grid editor-field-grid--triple editor-mt-sm">
       <label class="editor-field"><span class="editor-field-label">Ambient</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.ambientIntensity ?? 0.75} on:input={(event) => updateLevelNumericSetting(['lighting', 'ambientIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Hemisphere</span><input class="tuple-input" type="number" step="0.05" min="0" value={levelSettings.lighting?.hemisphereIntensity ?? 0.38} on:input={(event) => updateLevelNumericSetting(['lighting', 'hemisphereIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Key</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.keyLightIntensity ?? 0.7} on:input={(event) => updateLevelNumericSetting(['lighting', 'keyLightIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Fill</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.fillLightIntensity ?? 0.22} on:input={(event) => updateLevelNumericSetting(['lighting', 'fillLightIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
     </div>
@@ -360,6 +503,169 @@ function setKuwaharaEnabled(enabled: boolean) {
       <label class="editor-field"><span class="editor-field-label">Fill X</span><input class="tuple-input" type="number" step="1" value={levelSettings.renderProfile?.lighting?.fillLightPosition?.[0] ?? -16} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'lighting', 'fillLightPosition', 0], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Fill Y</span><input class="tuple-input" type="number" step="1" value={levelSettings.renderProfile?.lighting?.fillLightPosition?.[1] ?? 10} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'lighting', 'fillLightPosition', 1], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Fill Z</span><input class="tuple-input" type="number" step="1" value={levelSettings.renderProfile?.lighting?.fillLightPosition?.[2] ?? 18} on:input={(event) => updateLevelNumericSetting(['renderProfile', 'lighting', 'fillLightPosition', 2], (event.currentTarget as HTMLInputElement).value)} /></label>
+    </div>
+  </div>
+
+  <div class="tuple-group">
+    <div class="tuple-label">Point-Light Runtime Budget</div>
+    {#each pointLightBudgetScopes as scope}
+      <div class="tuple-label editor-mt-sm">{scope.label}</div>
+      <div class="editor-field-grid editor-field-grid--triple editor-mt-sm">
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            checked={getPointLightBudgetEnabled(scope)}
+            on:change={(event) =>
+              updateLevelSetting(
+                [...scope.path, 'enabled'],
+                (event.currentTarget as HTMLInputElement).checked,
+              )}
+          />
+          Enabled
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Max Visible</span>
+          <input
+            class="tuple-input"
+            type="number"
+            min="0"
+            step="1"
+            value={getPointLightBudgetNumber(scope, 'maxVisibleCount')}
+            on:change={(event) =>
+              updateLevelNumericSetting(
+                [...scope.path, 'maxVisibleCount'],
+                (event.currentTarget as HTMLInputElement).value,
+              )}
+          />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Max Range</span>
+          <input
+            class="tuple-input"
+            type="number"
+            min="0"
+            step="1"
+            value={getPointLightBudgetNumber(scope, 'maxDistance')}
+            on:change={(event) =>
+              updateLevelNumericSetting(
+                [...scope.path, 'maxDistance'],
+                (event.currentTarget as HTMLInputElement).value,
+              )}
+          />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Intensity Scale</span>
+          <input
+            class="tuple-input"
+            type="number"
+            min="0"
+            step="0.05"
+            value={getPointLightBudgetNumber(scope, 'intensityScale')}
+            on:change={(event) =>
+              updateLevelNumericSetting(
+                [...scope.path, 'intensityScale'],
+                (event.currentTarget as HTMLInputElement).value,
+              )}
+          />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Range Scale</span>
+          <input
+            class="tuple-input"
+            type="number"
+            min="0"
+            step="0.05"
+            value={getPointLightBudgetNumber(scope, 'rangeScale')}
+            on:change={(event) =>
+              updateLevelNumericSetting(
+                [...scope.path, 'rangeScale'],
+                (event.currentTarget as HTMLInputElement).value,
+              )}
+          />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Hold Seconds</span>
+          <input
+            class="tuple-input"
+            type="number"
+            min="0"
+            step="0.1"
+            value={getPointLightBudgetNumber(scope, 'selectionHoldSeconds')}
+            on:change={(event) =>
+              updateLevelNumericSetting(
+                [...scope.path, 'selectionHoldSeconds'],
+                (event.currentTarget as HTMLInputElement).value,
+              )}
+          />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Hysteresis</span>
+          <input
+            class="tuple-input"
+            type="number"
+            min="0"
+            step="0.01"
+            value={getPointLightBudgetNumber(scope, 'selectionHysteresis')}
+            on:change={(event) =>
+              updateLevelNumericSetting(
+                [...scope.path, 'selectionHysteresis'],
+                (event.currentTarget as HTMLInputElement).value,
+              )}
+          />
+        </label>
+      </div>
+    {/each}
+    <div class="save-message">Shared values seed the render profile; platform tiers can override the same point-light budget contract for mobile, desktop, and TV.</div>
+  </div>
+
+  <div class="tuple-group">
+    <div class="tuple-label">Point-Light Group Budgets</div>
+    <div class="editor-field-grid editor-field-grid--triple editor-mt-sm">
+      {#each runtimeLightBudgetGroups as group}
+        <label class="editor-field">
+          <span class="editor-field-label">{formatBudgetGroupLabel(group)} Max</span>
+          <input
+            class="tuple-input"
+            type="number"
+            min="0"
+            step="1"
+            value={levelSettings.renderProfile?.lighting?.pointLightBudget?.groupBudgets?.[group]?.maxVisibleCount ?? ''}
+            on:change={(event) =>
+              updateLevelNumericSetting(
+                [
+                  'renderProfile',
+                  'lighting',
+                  'pointLightBudget',
+                  'groupBudgets',
+                  group,
+                  'maxVisibleCount',
+                ],
+                (event.currentTarget as HTMLInputElement).value,
+              )}
+          />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">{formatBudgetGroupLabel(group)} Priority</span>
+          <input
+            class="tuple-input"
+            type="number"
+            step="0.1"
+            value={levelSettings.renderProfile?.lighting?.pointLightBudget?.groupBudgets?.[group]?.priority ?? ''}
+            on:change={(event) =>
+              updateLevelNumericSetting(
+                [
+                  'renderProfile',
+                  'lighting',
+                  'pointLightBudget',
+                  'groupBudgets',
+                  group,
+                  'priority',
+                ],
+                (event.currentTarget as HTMLInputElement).value,
+              )}
+          />
+        </label>
+      {/each}
     </div>
   </div>
 

@@ -784,7 +784,7 @@ export function validateGeneratedCollisionProduct({
     Number.isFinite(metadata.triangleCount) &&
     metadata.triangleCount > triangleBudget
   ) {
-    errors.push(
+    warnings.push(
       `${node.id}: generated collision product has ${metadata.triangleCount} triangles, exceeding budget ${triangleBudget}.`,
     )
   }

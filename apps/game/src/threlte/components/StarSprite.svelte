@@ -12,7 +12,10 @@
 import { T, useTask } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
-import { createEnhancedStarTexture, getStarType } from '../../utils/starUtils'
+import {
+  createBoundedEnhancedStarTexture,
+  getStarType,
+} from '../../utils/starUtils'
 
 // Props for customization
 export let position: [number, number, number] = [0, 0, 0]
@@ -39,6 +42,7 @@ let sprite: THREE.Sprite
 let material: THREE.SpriteMaterial
 let texture: THREE.CanvasTexture
 let baseScale: number = size
+let textureScale: number = 1
 let lastVisualSignature = ''
 
 function getResolvedColor() {
@@ -47,10 +51,31 @@ function getResolvedColor() {
     : color
 }
 
-function applyMaterialGlowBoost() {
+function clampUnit(value: number) {
+  if (!Number.isFinite(value)) return 0
+  return Math.min(1, Math.max(0, value))
+}
+
+function getSpriteOpacity(twinkle = 1, hoverGlow = 0) {
+  return clampUnit(
+    opacity * intensity * Math.max(0, glowBoost) * twinkle * (1 + hoverGlow),
+  )
+}
+
+function getSpriteScale(twinkle = 1, hoverScale = 1) {
+  const animationScale = enableTwinkle ? size * twinkle * hoverScale : 1
+  return baseScale * animationScale * textureScale
+}
+
+function applyMaterialColorContract() {
   if (!material) return
-  const baseColor = new THREE.Color(getResolvedColor())
-  material.color.copy(baseColor).multiplyScalar(Math.max(0, glowBoost))
+  material.color.set(0xffffff)
+  material.toneMapped = false
+}
+
+function applyMaterialOpacity(twinkle = 1, hoverGlow = 0) {
+  if (!material) return
+  material.opacity = getSpriteOpacity(twinkle, hoverGlow)
 }
 
 function disposeSpriteResources() {
@@ -84,12 +109,14 @@ function createStarSprite() {
   // Create enhanced star texture like StarMap (ONCE, not every frame)
   const resolvedStarType =
     starType ?? getStarType(`sprite_${position.join('_')}`, isKeyElement)
-  const canvas = createEnhancedStarTexture(
+  const spriteTexture = createBoundedEnhancedStarTexture(
     hexColor,
     resolvedStarType,
     isKeyElement,
   )
-  texture = new THREE.CanvasTexture(canvas)
+  textureScale = spriteTexture.scaleMultiplier
+  texture = new THREE.CanvasTexture(spriteTexture.canvas)
+  texture.colorSpace = THREE.SRGBColorSpace
   texture.needsUpdate = true
 
   // Create sprite material with additive blending for glow effect
@@ -100,12 +127,13 @@ function createStarSprite() {
     blending: THREE.AdditiveBlending, // This creates the beautiful glow
     depthWrite: false, // Prevents z-fighting
     depthTest: true, // Test depth but don't write - allows proper sorting
-    opacity: opacity * intensity,
+    opacity: getSpriteOpacity(),
   })
-  applyMaterialGlowBoost()
+  applyMaterialColorContract()
 
   if (sprite) {
     sprite.material = material
+    sprite.scale.setScalar(getSpriteScale())
     // Ensure fireflies render after ocean surface
     sprite.renderOrder = 1
   }
@@ -115,11 +143,11 @@ $: createStarSprite()
 
 // Update material opacity when intensity changes (this is the glow effect!)
 $: if (material) {
-  material.opacity = opacity * intensity
+  applyMaterialOpacity()
 }
 
 $: if (material) {
-  applyMaterialGlowBoost()
+  applyMaterialColorContract()
 }
 
 // Animation loop for twinkling
@@ -140,20 +168,17 @@ useTask(() => {
   const hoverGlow = isHovered && isClickable ? 0.4 : 0.0
 
   // Apply twinkling to scale and opacity with hover effects
-  const finalScale = baseScale * size * twinkle * hoverScale
-  const finalOpacity = opacity * intensity * twinkle * (1.0 + hoverGlow)
+  const finalScale = getSpriteScale(twinkle, hoverScale)
 
   sprite.scale.setScalar(finalScale)
-  if (material) {
-    material.opacity = Math.min(1, finalOpacity)
-  }
+  applyMaterialOpacity(twinkle, hoverGlow)
 })
 
 // Update base scale when size prop changes
 $: {
   baseScale = size
   if (sprite) {
-    sprite.scale.setScalar(baseScale)
+    sprite.scale.setScalar(getSpriteScale())
   }
 }
 
@@ -176,6 +201,6 @@ onDestroy(() => {
 <T.Sprite
   bind:ref={sprite}
   position={position}
-  scale={size}
+  scale={size * textureScale}
   {material}
 />

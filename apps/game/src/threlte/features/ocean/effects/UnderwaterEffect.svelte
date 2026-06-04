@@ -285,6 +285,10 @@ $: if (bubbleMaterial && mistMaterial) {
 	      kind="ambient"
 	      color={resolvedFogColor}
 	      intensity={0.3 * transitionProgress}
+	      budgetGroup="ambient-vfx"
+	      priority={4}
+	      stableSelectionKey="underwater-ambient-light"
+	      selectionHint="underwater-ambient"
 	    />
     
     <!-- Underwater Fog (simulated with large transparent sphere) -->

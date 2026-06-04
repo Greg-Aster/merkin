@@ -1,164 +1,164 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-15T02:11:09.693Z",
+  "generatedAt": "2026-06-04T19:33:59.786Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-drowned-ring-south",
-  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+  "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb",
   "sourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "4391139b734ad56f9b5f59d74f5caff18244cd68e4e42da589018d90c6eee135"
+    "value": "1898f8b5e309da1cc90bd81e3d0093568cdb15b126cec7c6d31eee4c3a393beb"
   },
-  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
-  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.low.glb",
   "colliderSourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "b0da44e171867f94431164f05f33f772b4110f46e8ac6864aba885348bf1edfe"
+    "value": "7417db6f3cfd5d582f17d3b9bc16febf29e4cbeb352986a749f3e41d0e923877"
   },
   "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-south.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-south.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-south.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:b0da44e171867f94431164f05f33f772b4110f46e8ac6864aba885348bf1edfe:9428c2a26d49c904081db684e470175d4010d6dccd2a3cfe4515f5fe25ffdc43:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
-  "triangleCount": 218,
-  "vertexCount": 136,
+  "colliderCacheKey": "mesh-collision-manager-v2:7417db6f3cfd5d582f17d3b9bc16febf29e4cbeb352986a749f3e41d0e923877:7e8509cb2bd69954ced7bd9f2e0f99978849dde51d6e7791f5229dbd42e538e9:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 4748,
+  "vertexCount": 4702,
   "bounds": {
     "min": [
-      -2.8499999046325684,
-      0,
-      -0.24373197555541992
+      -0.9902454018592834,
+      -0.9355183839797974,
+      -0.7484915852546692
     ],
     "max": [
-      2.8499999046325684,
-      2.8499999046325684,
-      0.24373197555541992
+      0.9675481915473938,
+      0.8933879137039185,
+      0.7029206156730652
     ],
     "size": [
-      5.699999809265137,
-      2.8499999046325684,
-      0.48746395111083984
+      1.9577935934066772,
+      1.8289062976837158,
+      1.4514122009277344
     ],
     "center": [
-      0,
-      1.4249999523162842,
-      0
+      -0.011348605155944824,
+      -0.021065235137939453,
+      -0.022785484790802002
     ]
   },
   "rawColliderBounds": {
     "min": [
-      -32767,
-      -16386,
-      -2800
+      -32595,
+      -30583,
+      -24274
     ],
     "max": [
       32767,
-      16386,
-      2800
+      30615,
+      24274
     ],
     "size": [
-      65534,
-      32772,
-      5600
+      65362,
+      61198,
+      48548
     ],
     "center": [
-      0,
-      0,
+      86,
+      16,
       0
     ]
   },
   "visualLocalBounds": {
     "min": [
-      -2.8499999046325684,
-      0,
-      -0.24373197555541992
+      -0.9902454018592834,
+      -0.9355183839797974,
+      -0.7484915852546692
     ],
     "max": [
-      2.8499999046325684,
-      2.8499999046325684,
-      0.24373197555541992
+      0.9675481915473938,
+      0.8933879137039185,
+      0.7029206156730652
     ],
     "size": [
-      5.699999809265137,
-      2.8499999046325684,
-      0.48746395111083984
+      1.9577935934066772,
+      1.8289062976837158,
+      1.4514122009277344
     ],
     "center": [
-      0,
-      1.4249999523162842,
-      0
+      -0.011348605155944824,
+      -0.021065235137939453,
+      -0.022785484790802002
     ]
   },
   "colliderLocalBounds": {
     "min": [
-      -2.8499999046325684,
-      0,
-      -0.24373197555541992
+      -0.9902454018592834,
+      -0.9355183839797974,
+      -0.7484915852546692
     ],
     "max": [
-      2.8499999046325684,
-      2.8499999046325684,
-      0.24373197555541992
+      0.9675481915473938,
+      0.8933879137039185,
+      0.7029206156730652
     ],
     "size": [
-      5.699999809265137,
-      2.8499999046325684,
-      0.48746395111083984
+      1.9577935934066772,
+      1.8289062976837158,
+      1.4514122009277344
     ],
     "center": [
-      0,
-      1.4249999523162842,
-      0
+      -0.011348605155944824,
+      -0.021065235137939453,
+      -0.022785484790802002
     ]
   },
   "assetLocalTransform": {
     "schemaVersion": 1,
     "coordinateSpaceVersion": 1,
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb",
     "sourceNodeName": "Drowned Ring south",
     "visualLocalBounds": {
       "min": [
-        -2.8499999046325684,
-        0,
-        -0.24373197555541992
+        -0.9902454018592834,
+        -0.9355183839797974,
+        -0.7484915852546692
       ],
       "max": [
-        2.8499999046325684,
-        2.8499999046325684,
-        0.24373197555541992
+        0.9675481915473938,
+        0.8933879137039185,
+        0.7029206156730652
       ],
       "size": [
-        5.699999809265137,
-        2.8499999046325684,
-        0.48746395111083984
+        1.9577935934066772,
+        1.8289062976837158,
+        1.4514122009277344
       ],
       "center": [
-        0,
-        1.4249999523162842,
-        0
+        -0.011348605155944824,
+        -0.021065235137939453,
+        -0.022785484790802002
       ]
     },
     "colliderLocalBounds": {
       "min": [
-        -2.8499999046325684,
-        0,
-        -0.24373197555541992
+        -0.9902454018592834,
+        -0.9355183839797974,
+        -0.7484915852546692
       ],
       "max": [
-        2.8499999046325684,
-        2.8499999046325684,
-        0.24373197555541992
+        0.9675481915473938,
+        0.8933879137039185,
+        0.7029206156730652
       ],
       "size": [
-        5.699999809265137,
-        2.8499999046325684,
-        0.48746395111083984
+        1.9577935934066772,
+        1.8289062976837158,
+        1.4514122009277344
       ],
       "center": [
-        0,
-        1.4249999523162842,
-        0
+        -0.011348605155944824,
+        -0.021065235137939453,
+        -0.022785484790802002
       ]
     },
     "visualToPhysicsMatrix": [
@@ -201,25 +201,25 @@
   "provenance": {
     "sourceActorId": "yggdrasil-drowned-ring-south",
     "sourceActorName": "Drowned Ring south",
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb",
     "sourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "4391139b734ad56f9b5f59d74f5caff18244cd68e4e42da589018d90c6eee135"
+      "value": "1898f8b5e309da1cc90bd81e3d0093568cdb15b126cec7c6d31eee4c3a393beb"
     },
-    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
-    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.low.glb",
     "colliderSourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "b0da44e171867f94431164f05f33f772b4110f46e8ac6864aba885348bf1edfe"
+      "value": "7417db6f3cfd5d582f17d3b9bc16febf29e4cbeb352986a749f3e41d0e923877"
     },
     "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "yggdrasil",
       "nodeId": "yggdrasil-drowned-ring-south",
-      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
+      "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.low.glb",
       "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-15T02:11:09.693Z"
+    "generatedAt": "2026-06-04T19:33:59.786Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -238,18 +238,18 @@
   },
   "collisionProduct": {
     "actorId": "yggdrasil-drowned-ring-south",
-    "cacheKey": "mesh-collision-manager-v2:b0da44e171867f94431164f05f33f772b4110f46e8ac6864aba885348bf1edfe:9428c2a26d49c904081db684e470175d4010d6dccd2a3cfe4515f5fe25ffdc43:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+    "cacheKey": "mesh-collision-manager-v2:7417db6f3cfd5d582f17d3b9bc16febf29e4cbeb352986a749f3e41d0e923877:7e8509cb2bd69954ced7bd9f2e0f99978849dde51d6e7791f5229dbd42e538e9:1ebe8352d2df77e44672a6b396e771572cd45b60444246a8bff6da0ba2669710",
     "mode": "auto",
     "productId": "yggdrasil-drowned-ring-south:auto:simplifiedMesh",
     "generatorVersion": "mesh-collision-manager-v2",
-    "sourceKind": "prefab",
+    "sourceKind": "asset",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "b0da44e171867f94431164f05f33f772b4110f46e8ac6864aba885348bf1edfe"
+      "value": "7417db6f3cfd5d582f17d3b9bc16febf29e4cbeb352986a749f3e41d0e923877"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
-      "value": "9428c2a26d49c904081db684e470175d4010d6dccd2a3cfe4515f5fe25ffdc43"
+      "value": "7e8509cb2bd69954ced7bd9f2e0f99978849dde51d6e7791f5229dbd42e538e9"
     },
     "policyFingerprint": {
       "algorithm": "sha256",
@@ -258,42 +258,42 @@
     "shape": "trimesh",
     "localBounds": {
       "min": [
-        -2.8499999046325684,
-        0,
-        -0.24373197555541992
+        -0.9902454018592834,
+        -0.9355183839797974,
+        -0.7484915852546692
       ],
       "max": [
-        2.8499999046325684,
-        2.8499999046325684,
-        0.24373197555541992
+        0.9675481915473938,
+        0.8933879137039185,
+        0.7029206156730652
       ],
       "size": [
-        5.699999809265137,
-        2.8499999046325684,
-        0.48746395111083984
+        1.9577935934066772,
+        1.8289062976837158,
+        1.4514122009277344
       ],
       "center": [
-        0,
-        1.4249999523162842,
-        0
+        -0.011348605155944824,
+        -0.021065235137939453,
+        -0.022785484790802002
       ]
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-south.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-south.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
-    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-    "triangleCount": 218,
-    "vertexCount": 136,
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb",
+    "triangleCount": 4748,
+    "vertexCount": 4702,
     "triangleBudget": 5000
   },
   "simplification": {
-    "requested": false,
-    "applied": false,
-    "sourceTriangleCount": 218,
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 14000,
     "targetTriangleBudget": 5000,
-    "ratio": 1,
+    "ratio": 0.3392857142857143,
     "tool": "gltf-transform",
-    "prepass": "none",
+    "prepass": "weld",
     "error": 0.05
   }
 }

@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-20T03:21:19.830Z",
+  "generatedAt": "2026-06-04T18:24:29.085Z",
   "contentBuild": {
     "schemaVersion": 1,
-    "buildId": "runtime-assets-2026-05-20T03-21-19-830Z-98d417f54c36",
-    "generatedAt": "2026-05-20T03:21:19.830Z",
+    "buildId": "runtime-assets-2026-06-04T18-24-29-085Z-0d3c5208c473",
+    "generatedAt": "2026-06-04T18:24:29.085Z",
     "builder": {
       "name": "cook-runtime-assets",
       "command": "pnpm --dir apps/game cook:runtime-assets"
     },
     "git": {
       "branch": "main",
-      "commit": "bb257153d709739e01fd6309fe1b01d6c90ca9eb",
+      "commit": "a5c067aa5f8dc3cd3551824e4afd7e3cb811ef8f",
       "dirty": true
     },
-    "fingerprint": "98d417f54c3677e49610ae9c4a8b4b97e752751b3fc2961b8e2594872d1c5a15",
+    "fingerprint": "0d3c5208c473289215f8c72103ae956c7d0f53430a6ed317f4a69d22eb4473e6",
     "rollback": {
       "strategy": "single-previous-manifest",
       "currentManifestUrl": "/generated/runtime-game-assets/manifest.json",
@@ -162,7 +162,7 @@
   "impostorAtlas": {
     "schemaVersion": 1,
     "strategy": "bounds-billboard-atlas",
-    "generatedAt": "2026-05-20T03:21:19.830Z",
+    "generatedAt": "2026-06-04T18:24:29.085Z",
     "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
     "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
     "tileSize": 256,
@@ -158667,7 +158667,7 @@
     "observatory": {
       "url": "/generated/runtime-game-assets/scenes/observatory.runtime-scene.json",
       "sourceScene": "apps/game/src/threlte/editor/scenes/observatory.scene.json",
-      "actorCount": 4,
+      "actorCount": 204,
       "requiredRenderActorCount": 0,
       "requiredAssetCount": 0,
       "runtimeAssetCount": 0,
@@ -158703,19 +158703,7 @@
       "requiredRenderActorCount": 13,
       "requiredAssetCount": 12,
       "runtimeAssetCount": 100,
-      "buildErrors": [
-        "yggdrasil-shrine-mimir-growth: generated collision transform fingerprint is stale.",
-        "yggdrasil-shrine-hvergelmir-bench: generated collision transform fingerprint is stale.",
-        "yggdrasil-crown-perch-spire: generated collision transform fingerprint is stale.",
-        "yggdrasil-hvergelmir-depth-arch-2: generated collision transform fingerprint is stale.",
-        "yggdrasil-hvergelmir-depth-ring: generated collision transform fingerprint is stale.",
-        "yggdrasil-drowned-ring-north: generated collision transform fingerprint is stale.",
-        "yggdrasil-drowned-ring-south: generated collision transform fingerprint is stale.",
-        "yggdrasil-drowned-ring-east: generated collision transform fingerprint is stale.",
-        "yggdrasil-drowned-ring-west: generated collision transform fingerprint is stale.",
-        "yggdrasil-drowned-ring-nw: generated collision transform fingerprint is stale.",
-        "yggdrasil-crown-ascent-merged: generated collision transform fingerprint is stale."
-      ],
+      "buildErrors": [],
       "buildWarnings": [
         "100 runtime assets exceed contract budget of 48."
       ]

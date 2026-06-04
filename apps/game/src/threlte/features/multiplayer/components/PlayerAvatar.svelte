@@ -98,5 +98,9 @@ useTask(() => {
     distance={lightDistance}
     decay={lightDecay}
     runtimeBudgeted={false}
+    budgetGroup="player"
+    priority={100}
+    stableSelectionKey="player-avatar-light"
+    selectionHint="player-avatar"
   />
 </T.Group>

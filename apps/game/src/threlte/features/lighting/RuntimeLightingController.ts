@@ -1,7 +1,20 @@
 import { type Readable, writable } from 'svelte/store'
 import { MessageType, type SystemRegistry } from '../../core/LevelSystem'
+import type { RuntimeLightBudgetGroup } from '../../engine/sceneDocumentTypes'
+
+export type { RuntimeLightBudgetGroup } from '../../engine/sceneDocumentTypes'
 
 export type RuntimeLightEmitterKind = 'ambient' | 'point'
+export type RuntimeLightBudgetClass = RuntimeLightBudgetGroup
+
+export interface RuntimeLightBudgetMetadata {
+  budgeted: boolean
+  group: RuntimeLightBudgetGroup
+  budgetClass: RuntimeLightBudgetClass
+  priority: number
+  stableKey: string
+  selectionHint?: string
+}
 
 export interface RuntimeLightingEnvironment {
   ambientIntensity: number
@@ -35,8 +48,17 @@ export interface RuntimeLightEmitter {
   position?: [number, number, number]
   distance?: number
   decay?: number
-  runtimeBudgeted?: boolean
+  castsShadow?: boolean
+  budget: RuntimeLightBudgetMetadata
   enabled?: boolean
+}
+
+export interface RuntimeResolvedPointLightEmitter
+  extends RuntimeLightEmitter {
+  kind: 'point'
+  position: [number, number, number]
+  distance: number
+  decay: number
 }
 
 export interface RuntimeLightingSnapshot {
@@ -101,6 +123,26 @@ function cloneEmitter(emitter: RuntimeLightEmitter): RuntimeLightEmitter {
   return {
     ...emitter,
     position: emitter.position ? [...emitter.position] : undefined,
+    budget: cloneBudgetMetadata(emitter),
+  }
+}
+
+function cloneBudgetMetadata(
+  emitter: RuntimeLightEmitter,
+): RuntimeLightBudgetMetadata {
+  const budget = emitter.budget
+  const group = budget?.group ?? 'authored'
+  return {
+    budgeted: budget?.budgeted ?? true,
+    group,
+    budgetClass: budget?.budgetClass ?? group,
+    priority:
+      typeof budget?.priority === 'number' && Number.isFinite(budget.priority)
+        ? budget.priority
+        : 0,
+    stableKey:
+      budget?.stableKey || `${group}:${emitter.ownerId || emitter.id}`,
+    selectionHint: budget?.selectionHint || undefined,
   }
 }
 

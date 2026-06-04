@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-15T02:10:58.732Z",
+  "generatedAt": "2026-06-04T19:33:48.115Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-lore-hvergelmir",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-15T02:10:58.732Z"
+    "generatedAt": "2026-06-04T19:33:48.115Z"
   },
   "collision": {
     "shape": "trimesh",

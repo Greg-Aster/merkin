@@ -1,164 +1,164 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-16T00:04:18.555Z",
+  "generatedAt": "2026-06-04T19:33:52.291Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-crown-perch-spire",
-  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+  "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb",
   "sourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+    "value": "7adbd23628deb8b11d7b1f38b9766aedb2a372e3cbf92003df11bf3943589ad8"
   },
-  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.low.glb",
   "colliderSourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+    "value": "c231d5075430495f4e849ec2228e0d3b187eb8f4629e2d7b15883a60a73a0b9e"
   },
   "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-perch-spire.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-perch-spire.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-perch-spire.collider.meta.json",
-  "colliderCacheKey": "mesh-collision-manager-v2:e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21:5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
-  "triangleCount": 624,
-  "vertexCount": 527,
+  "colliderCacheKey": "mesh-collision-manager-v2:c231d5075430495f4e849ec2228e0d3b187eb8f4629e2d7b15883a60a73a0b9e:f65c82097a40cda655ea76ac9923303da547707432c4ac70a346e02e6b0b3981:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 6830,
+  "vertexCount": 9844,
   "bounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -0.8806772232055664,
+      -1.0005301237106323,
+      -0.8487055897712708
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.8592628240585327,
+      0.9742498397827148,
+      0.8207847476005554
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.7399400472640991,
+      1.9747799634933472,
+      1.6694903373718262
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.010707199573516846,
+      -0.01314014196395874,
+      -0.013960421085357666
     ]
   },
   "rawColliderBounds": {
     "min": [
-      -32767,
-      -32767,
-      -32767
+      -28879,
+      -32751,
+      -27735
     ],
     "max": [
+      28823,
       32767,
-      32767,
-      32767
+      27667
     ],
     "size": [
-      65534,
-      65534,
-      65534
+      57702,
+      65518,
+      55402
     ],
     "center": [
-      0,
-      0,
-      0
+      -28,
+      8,
+      -34
     ]
   },
   "visualLocalBounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -0.8806772232055664,
+      -1.0005301237106323,
+      -0.8487055897712708
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.8592628240585327,
+      0.9742498397827148,
+      0.8207847476005554
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.7399400472640991,
+      1.9747799634933472,
+      1.6694903373718262
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.010707199573516846,
+      -0.01314014196395874,
+      -0.013960421085357666
     ]
   },
   "colliderLocalBounds": {
     "min": [
-      -0.7400000095367432,
-      -3.7200000286102295,
-      -0.7400000095367432
+      -0.8806772232055664,
+      -1.0005301237106323,
+      -0.8487055897712708
     ],
     "max": [
-      0.7400000095367432,
-      4.199999809265137,
-      0.7400000095367432
+      0.8592628240585327,
+      0.9742498397827148,
+      0.8207847476005554
     ],
     "size": [
-      1.4800000190734863,
-      7.919999837875366,
-      1.4800000190734863
+      1.7399400472640991,
+      1.9747799634933472,
+      1.6694903373718262
     ],
     "center": [
-      0,
-      0.2399998903274536,
-      0
+      -0.010707199573516846,
+      -0.01314014196395874,
+      -0.013960421085357666
     ]
   },
   "assetLocalTransform": {
     "schemaVersion": 1,
     "coordinateSpaceVersion": 1,
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb",
     "sourceNodeName": "Crown Spire",
     "visualLocalBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -0.8806772232055664,
+        -1.0005301237106323,
+        -0.8487055897712708
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.8592628240585327,
+        0.9742498397827148,
+        0.8207847476005554
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.7399400472640991,
+        1.9747799634933472,
+        1.6694903373718262
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.010707199573516846,
+        -0.01314014196395874,
+        -0.013960421085357666
       ]
     },
     "colliderLocalBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -0.8806772232055664,
+        -1.0005301237106323,
+        -0.8487055897712708
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.8592628240585327,
+        0.9742498397827148,
+        0.8207847476005554
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.7399400472640991,
+        1.9747799634933472,
+        1.6694903373718262
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.010707199573516846,
+        -0.01314014196395874,
+        -0.013960421085357666
       ]
     },
     "visualToPhysicsMatrix": [
@@ -201,25 +201,25 @@
   "provenance": {
     "sourceActorId": "yggdrasil-crown-perch-spire",
     "sourceActorName": "Crown Spire",
-    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb",
     "sourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+      "value": "7adbd23628deb8b11d7b1f38b9766aedb2a372e3cbf92003df11bf3943589ad8"
     },
-    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.low.glb",
     "colliderSourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+      "value": "c231d5075430495f4e849ec2228e0d3b187eb8f4629e2d7b15883a60a73a0b9e"
     },
     "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "yggdrasil",
       "nodeId": "yggdrasil-crown-perch-spire",
-      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
+      "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.low.glb",
       "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-16T00:04:18.555Z"
+    "generatedAt": "2026-06-04T19:33:52.291Z"
   },
   "collision": {
     "shape": "trimesh",
@@ -238,18 +238,18 @@
   },
   "collisionProduct": {
     "actorId": "yggdrasil-crown-perch-spire",
-    "cacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+    "cacheKey": "mesh-collision-manager-v2:c231d5075430495f4e849ec2228e0d3b187eb8f4629e2d7b15883a60a73a0b9e:f65c82097a40cda655ea76ac9923303da547707432c4ac70a346e02e6b0b3981:1ebe8352d2df77e44672a6b396e771572cd45b60444246a8bff6da0ba2669710",
     "mode": "auto",
     "productId": "yggdrasil-crown-perch-spire:auto:simplifiedMesh",
     "generatorVersion": "mesh-collision-manager-v2",
-    "sourceKind": "prefab",
+    "sourceKind": "asset",
     "sourceMeshFingerprint": {
       "algorithm": "sha256",
-      "value": "e4fd2bc8e433066bebf6fb2ab6cea6af44e7996fcbab22d2332a350b04f03c21"
+      "value": "c231d5075430495f4e849ec2228e0d3b187eb8f4629e2d7b15883a60a73a0b9e"
     },
     "transformFingerprint": {
       "algorithm": "sha256",
-      "value": "5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0"
+      "value": "f65c82097a40cda655ea76ac9923303da547707432c4ac70a346e02e6b0b3981"
     },
     "policyFingerprint": {
       "algorithm": "sha256",
@@ -258,42 +258,42 @@
     "shape": "trimesh",
     "localBounds": {
       "min": [
-        -0.7400000095367432,
-        -3.7200000286102295,
-        -0.7400000095367432
+        -0.8806772232055664,
+        -1.0005301237106323,
+        -0.8487055897712708
       ],
       "max": [
-        0.7400000095367432,
-        4.199999809265137,
-        0.7400000095367432
+        0.8592628240585327,
+        0.9742498397827148,
+        0.8207847476005554
       ],
       "size": [
-        1.4800000190734863,
-        7.919999837875366,
-        1.4800000190734863
+        1.7399400472640991,
+        1.9747799634933472,
+        1.6694903373718262
       ],
       "center": [
-        0,
-        0.2399998903274536,
-        0
+        -0.010707199573516846,
+        -0.01314014196395874,
+        -0.013960421085357666
       ]
     },
     "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-perch-spire.collider.glb",
     "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-perch-spire.collider.meta.json",
-    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-    "triangleCount": 624,
-    "vertexCount": 527,
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb",
+    "triangleCount": 6830,
+    "vertexCount": 9844,
     "triangleBudget": 5000
   },
   "simplification": {
-    "requested": false,
-    "applied": false,
-    "sourceTriangleCount": 624,
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 14000,
     "targetTriangleBudget": 5000,
-    "ratio": 1,
+    "ratio": 0.3392857142857143,
     "tool": "gltf-transform",
-    "prepass": "none",
+    "prepass": "weld",
     "error": 0.05
   }
 }

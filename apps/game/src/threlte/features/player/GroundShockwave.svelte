@@ -204,6 +204,10 @@ onDestroy(() => {
     intensity={(enableContour ? lightIntensity * 0.45 : lightIntensity) * gameplayPointLightScale}
     distance={Math.max(3, lightDistance * 0.7)}
     decay={1.4}
+    budgetGroup="shockwave"
+    priority={18}
+    stableSelectionKey={`ground-shockwave-core:${position.join(':')}`}
+    selectionHint="ground-shockwave-core"
   />
 
   {#if enableContour}
@@ -241,6 +245,10 @@ onDestroy(() => {
       intensity={lightIntensity * (0.3 + index * 0.05) * gameplayPointLightScale}
       distance={Math.max(3, lightDistance * 0.42)}
       decay={1.35}
+      budgetGroup="shockwave"
+      priority={12}
+      stableSelectionKey={`ground-shockwave-orbit:${index}:${position.join(':')}`}
+      selectionHint="ground-shockwave-orbit"
     />
   {/each}
   {/if}

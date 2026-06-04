@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "generatedBy": "mesh-collision-manager",
-  "generatedAt": "2026-05-15T02:11:02.435Z",
+  "generatedAt": "2026-06-04T19:33:50.861Z",
   "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-crown-perch-rig",
@@ -227,7 +227,7 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-15T02:11:02.435Z"
+    "generatedAt": "2026-06-04T19:33:50.861Z"
   },
   "collision": {
     "shape": "trimesh",

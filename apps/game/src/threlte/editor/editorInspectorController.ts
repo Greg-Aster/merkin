@@ -7,6 +7,7 @@ import {
 } from './editorGeneratedAssetApplication'
 import { getDefaultChildPointLightPosition } from './editorLightPlacement'
 import { type EditorNpcPatch, applyEditorNpcPatch } from './editorNpcControls'
+import type { RuntimeLightBudgetGroup } from '../engine/sceneDocumentTypes'
 import type {
   EditorCollisionLodSourceTier,
   EditorCollisionMode,
@@ -30,6 +31,29 @@ type LibraryItem = {
   name: string
   path: string
   isDirectory: boolean
+}
+type LightEditableField =
+  | 'intensity'
+  | 'distance'
+  | 'decay'
+  | 'priority'
+  | 'runtimeBudgeted'
+  | 'budgetGroup'
+  | 'castsShadow'
+
+const runtimeLightBudgetGroups: RuntimeLightBudgetGroup[] = [
+  'player',
+  'authored',
+  'firefly-npc',
+  'shockwave',
+  'ambient-vfx',
+  'diagnostic',
+]
+
+function isRuntimeLightBudgetGroup(
+  value: string,
+): value is RuntimeLightBudgetGroup {
+  return runtimeLightBudgetGroups.includes(value as RuntimeLightBudgetGroup)
 }
 
 type EditorPanelTab =
@@ -1457,11 +1481,42 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
   }
 
   function updateLightNumericField(
-    field: 'intensity' | 'distance' | 'decay',
+    field: LightEditableField,
     value: string,
   ) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.light) return
+
+    if (field === 'runtimeBudgeted' || field === 'castsShadow') {
+      deps.patchNode(selectedNode.id, {
+        light: {
+          ...selectedNode.light,
+          [field]: value === 'true' || value === '1',
+        },
+      })
+      return
+    }
+
+    if (field === 'budgetGroup') {
+      deps.patchNode(selectedNode.id, {
+        light: {
+          ...selectedNode.light,
+          budgetGroup: isRuntimeLightBudgetGroup(value) ? value : undefined,
+        },
+      })
+      return
+    }
+
+    if (field === 'priority' && value.trim() === '') {
+      deps.patchNode(selectedNode.id, {
+        light: {
+          ...selectedNode.light,
+          priority: undefined,
+        },
+      })
+      return
+    }
+
     const numeric = Number(value)
     if (Number.isNaN(numeric)) return
     deps.patchNode(selectedNode.id, {

@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { RuntimeLightBudgetGroup } from '../engine/sceneDocumentTypes'
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import EditorAssetPreview from './EditorAssetPreview.svelte'
 import EditorNpcSection from './EditorNpcSection.svelte'
@@ -64,7 +65,14 @@ type MaterialNumericField =
   | 'thickness'
   | 'reflectivity'
 
-type LightNumericField = 'intensity' | 'distance' | 'decay'
+type LightEditableField =
+  | 'intensity'
+  | 'distance'
+  | 'decay'
+  | 'priority'
+  | 'runtimeBudgeted'
+  | 'budgetGroup'
+  | 'castsShadow'
 type GameplayTextField =
   | 'title'
   | 'author'
@@ -165,7 +173,7 @@ export let onPrimitiveArgChange: (index: number, value: string) => void =
   () => {}
 export let onLightColorChange: (value: string) => void = () => {}
 export let onLightNumericChange: (
-  field: LightNumericField,
+  field: LightEditableField,
   value: string,
 ) => void = () => {}
 export let onPlaceLightAtParentBounds: () => void = () => {}
@@ -282,6 +290,17 @@ const collisionLodSourceTierOptions: Array<{
   { value: 'high', label: 'High' },
   { value: 'medium', label: 'Medium' },
   { value: 'low', label: 'Low' },
+]
+const lightBudgetGroupOptions: Array<{
+  value: RuntimeLightBudgetGroup
+  label: string
+}> = [
+  { value: 'player', label: 'Player' },
+  { value: 'authored', label: 'Authored' },
+  { value: 'firefly-npc', label: 'Firefly NPC' },
+  { value: 'shockwave', label: 'Shockwave' },
+  { value: 'ambient-vfx', label: 'Ambient VFX' },
+  { value: 'diagnostic', label: 'Diagnostic' },
 ]
 
 $: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
@@ -723,6 +742,67 @@ function useAuthoredRenderedLightPreview() {
       <div class="tuple-group">
         <div class="tuple-label">Light Decay</div>
         <input class="tuple-input" type="number" min="0" step="0.1" value={selectedNode.light.decay} on:input={(e) => onLightNumericChange('decay', (e.currentTarget as HTMLInputElement).value)} />
+      </div>
+      <div class="tuple-group">
+        <div class="tuple-label">Runtime Light Budget</div>
+        <div class="tuple-row editor-mt-sm">
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              checked={selectedNode.light.runtimeBudgeted ?? true}
+              on:change={(e) =>
+                onLightNumericChange(
+                  'runtimeBudgeted',
+                  (e.currentTarget as HTMLInputElement).checked ? 'true' : 'false',
+                )}
+            />
+            Budgeted
+          </label>
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              checked={selectedNode.light.castsShadow ?? false}
+              on:change={(e) =>
+                onLightNumericChange(
+                  'castsShadow',
+                  (e.currentTarget as HTMLInputElement).checked ? 'true' : 'false',
+                )}
+            />
+            Shadow Participant
+          </label>
+        </div>
+        <div class="editor-field-grid editor-mt-sm">
+          <label class="editor-field">
+            <span class="editor-field-label">Budget Group</span>
+            <select
+              class="text-input"
+              value={selectedNode.light.budgetGroup ?? 'authored'}
+              on:change={(e) =>
+                onLightNumericChange(
+                  'budgetGroup',
+                  (e.currentTarget as HTMLSelectElement).value,
+                )}
+            >
+              {#each lightBudgetGroupOptions as option}
+                <option value={option.value}>{option.label}</option>
+              {/each}
+            </select>
+          </label>
+          <label class="editor-field">
+            <span class="editor-field-label">Priority</span>
+            <input
+              class="tuple-input"
+              type="number"
+              step="0.1"
+              value={selectedNode.light.priority ?? ''}
+              on:change={(e) =>
+                onLightNumericChange(
+                  'priority',
+                  (e.currentTarget as HTMLInputElement).value,
+                )}
+            />
+          </label>
+        </div>
       </div>
       <div class="save-message">Distance is the point light radius. Move the light node if it is inside the mesh.</div>
       {#if selectedNode.parentId}

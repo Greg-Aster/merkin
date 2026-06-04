@@ -101,9 +101,10 @@ const {
 const { auditRuntimeAssetManifestObject } = await import(
   './lib/runtimeAssetManifestAudit.mjs'
 )
-const { auditSceneArchitecture } = await import(
+const { auditSceneArchitecture, isFiniteVec3 } = await import(
   './lib/sceneArchitectureAudit.mjs'
 )
+const { auditRuntimeScenes } = await import('./lib/runtimeSceneAudit.mjs')
 const { auditSourceGuards } = await import('./lib/engineAuditSourceGuards.mjs')
 const { isStyleBakeMetadata } = await import(
   './lib/runtimeAssetCookManifest.mjs'
@@ -1352,7 +1353,7 @@ test('ambient firefly fields resolve quality-tier counts without authoring NPC a
     settings: {
       enabled: true,
       count: 200,
-      lightCount: 25,
+      activeLightPercent: 0.125,
       distribution: 'center-falloff',
       densityExponent: 2,
       lighting: {
@@ -1363,11 +1364,11 @@ test('ambient firefly fields resolve quality-tier counts without authoring NPC a
         minimumLightIntensityScale: 0.14,
       },
       qualityTiers: {
-        ultra_low: { count: 12, lightCount: 2 },
-        medium: { count: 80, lightCount: 8 },
+        ultra_low: { count: 12, activeLightPercent: 0.167 },
+        medium: { count: 80, activeLightPercent: 0.1 },
         high: {
           count: 200,
-          lightCount: 25,
+          activeLightPercent: 0.125,
           size: 1.1,
           lighting: {
             spriteIntensity: 1.8,
@@ -1383,6 +1384,8 @@ test('ambient firefly fields resolve quality-tier counts without authoring NPC a
 
   assert.equal(quality.tier, 'high')
   assert.equal(quality.count, 200)
+  assert.equal(quality.activeLightPercent, 0.125)
+  assert.equal(quality.activeLightCount, 25)
   assert.equal(quality.lightCount, 25)
   assert.equal(quality.size, 1.1)
   assert.equal(quality.lighting.spriteIntensity, 1.8)
@@ -1410,15 +1413,45 @@ test('Observatory source scene preserves ambient field lighting and authored fir
   assert.equal(authoredFireflyNpcCount, 3)
   assert.equal(fireflies?.enabled, true)
   assert.equal(fireflies?.allowWithAuthored, true)
-  assert.equal(fireflies?.count, 72)
-  assert.equal(fireflies?.lightCount, 10)
+  assert.equal(fireflies?.count, 200)
+  assert.equal(fireflies?.activeLightPercent, 0.32)
+  assert.equal(fireflies?.lightCount, undefined)
+  assert.equal(fireflies?.radius, 282)
+  assert.equal(fireflies?.distribution, 'uniform')
+  assert.equal(fireflies?.terrainFollow, true)
+  assert.deepEqual(fireflies?.palette, [
+    '#f4ffb8',
+    '#8defff',
+    '#dff8ff',
+    '#c7b6ff',
+    '#ffd58f',
+  ])
   assert.equal(fireflies?.lightIntensity, undefined)
   assert.equal(fireflies?.lightDistance, undefined)
-  assert.equal(fireflies?.lighting?.lightIntensity, 68)
-  assert.equal(fireflies?.lighting?.lightDistance, 22)
-  assert.equal(fireflies?.lighting?.lightDecay, 1.45)
-  assert.equal(fireflies?.lighting?.minimumLightIntensityScale, 0.16)
-  assert.deepEqual(fireflies?.center, [-137.2, 1.8, -49.5])
+  assert.equal(fireflies?.lighting?.spriteIntensity, 1.08)
+  assert.equal(fireflies?.lighting?.lightIntensity, 90)
+  assert.equal(fireflies?.lighting?.lightDistance, 34)
+  assert.equal(fireflies?.lighting?.lightDecay, 1.6)
+  assert.equal(fireflies?.lighting?.minimumLightIntensityScale, 0.04)
+  assert.equal(fireflies?.lighting?.pulseThreshold, 0.42)
+  assert.equal(fireflies?.lighting?.pulseSoftness, 0.82)
+  assert.equal(fireflies?.lighting?.selectionHoldSeconds, 3.2)
+  assert.equal(fireflies?.lighting?.selectionFadeSeconds, 1.2)
+  assert.equal(fireflies?.lighting?.blinkPeriodSecondsMin, 12)
+  assert.equal(fireflies?.lighting?.blinkPeriodSecondsMax, 22)
+  assert.equal(fireflies?.lighting?.blinkFadeSeconds, 2.2)
+  assert.equal(fireflies?.twinkleSpeed, 0.34)
+  assert.equal(fireflies?.driftSpeed, 0.12)
+  assert.equal(fireflies?.sway, 0.72)
+  assert.deepEqual(fireflies?.center, [-2.8, 1.8, -0.5])
+  const pointLightBudget =
+    scene.settings?.level?.renderProfile?.lighting?.pointLightBudget
+  assert.equal(pointLightBudget?.maxVisibleCount, 72)
+  assert.equal(
+    pointLightBudget?.groupBudgets?.['firefly-npc']?.maxVisibleCount,
+    64,
+  )
+  assert.equal(pointLightBudget?.groupBudgets?.['firefly-field'], undefined)
   for (const node of scene.nodes ?? []) {
     if (
       node.npc?.archetype === 'firefly' ||
@@ -3432,7 +3465,10 @@ test('imported Blender terrain source switches the level to GLB chunk terrain', 
   assert.equal(settings.collision?.terrain?.visualSource, 'source-glb-chunks')
   assert.equal(settings.collision?.terrain?.chunksPath, undefined)
   assert.equal(settings.collision?.terrain?.colliderUrl, undefined)
-  assert.equal(settings.ground?.collisionSource, 'source-linked-terrain-collision')
+  assert.equal(
+    settings.ground?.collisionSource,
+    'source-linked-terrain-collision',
+  )
   assert.equal(pipeline.mode, 'glb-chunk-terrain')
   assert.equal(
     pipeline.commands.find(command => command.id === 'cook-glb-chunks')
@@ -4025,15 +4061,26 @@ test('source guard keeps NPC interaction target independent from firefly motion 
   )
 })
 
-test('source guard keeps ambient firefly motion dependent on elapsed frame time', () => {
-  const appRoot = mkdtempSync(join(tmpdir(), 'firefly-field-source-guard-'))
+test('source guard keeps shared firefly NPC presentation contract', () => {
+  const appRoot = mkdtempSync(join(tmpdir(), 'firefly-visual-source-guard-'))
   writeFixtureFile(
-    join(appRoot, 'src/threlte/levels/SceneFireflyField.svelte'),
+    join(
+      appRoot,
+      'src/threlte/features/npc/presentation/RuntimeFireflyNpc.svelte',
+    ),
     [
-      '{#each fireflies as firefly, index (firefly.id)}',
-      '  {@const fireflyPosition = getPosition(firefly)}',
-      '  {@const pulse = getPulse(firefly)}',
-      '{/each}',
+      '{@const spriteColor = getSpriteColor(presentation)}',
+      '<ManagedLight',
+      '  color={presentation.secondaryColor}',
+      '/>',
+      '<StarSprite',
+      '  color={spriteColor}',
+      '  starType="sparkle"',
+      '/>',
+      '<StarSprite',
+      '  color={presentation.secondaryColor}',
+      '  starType="point"',
+      '/>',
     ].join('\n'),
   )
 
@@ -4041,7 +4088,58 @@ test('source guard keeps ambient firefly motion dependent on elapsed frame time'
 
   assert.match(
     failures.join('\n'),
-    /ambient firefly field motion and light pulse must pass elapsed explicitly/,
+    /firefly NPC sprites must render StarSprite with explicit starType="sparkle"/,
+  )
+  assert.match(
+    failures.join('\n'),
+    /firefly NPC StarSprite and ManagedLight color props must both use spriteColor/,
+  )
+  assert.match(
+    failures.join('\n'),
+    /firefly NPC lights must pulse through shared firefly lighting settings/,
+  )
+  assert.match(
+    failures.join('\n'),
+    /firefly NPC lights must not mount ManagedLight while the blink duty cycle has driven light intensity or distance to zero/,
+  )
+})
+
+test('source guard rejects muted point-light mounts', () => {
+  const appRoot = mkdtempSync(join(tmpdir(), 'firefly-point-light-guard-'))
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/features/lighting/RuntimeLightingSystem.svelte'),
+    [
+      'function resolveMutedPointEmitter(emitter) {',
+      '  return { ...emitter, intensity: 0, distance: 0 }',
+      '}',
+    ].join('\n'),
+  )
+
+  const failures = auditSourceGuards({ appRoot })
+
+  assert.match(
+    failures.join('\n'),
+    /runtime lighting must not mount inactive point lights/,
+  )
+})
+
+test('source guard rejects firefly editor lightCount controls', () => {
+  const appRoot = mkdtempSync(join(tmpdir(), 'firefly-editor-control-guard-'))
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/editor/EditorFireflyFieldControls.svelte'),
+    [
+      '<label>',
+      '  <span>Light Count</span>',
+      `  <input value={fireflies.lightCount} />`,
+      '</label>',
+    ].join('\n'),
+  )
+
+  const failures = auditSourceGuards({ appRoot })
+
+  assert.match(
+    failures.join('\n'),
+    /firefly editor must expose activeLightPercent controls/,
   )
 })
 
@@ -4069,6 +4167,283 @@ test('source guard requires explicit scene hemisphere lighting', () => {
   assert.match(
     failures.join('\n'),
     /settings\.level\.lighting\.hemisphereIntensity must be explicit/,
+  )
+})
+
+test('source guard rejects implicit firefly fields and retired NPC light metadata', () => {
+  const appRoot = mkdtempSync(join(tmpdir(), 'firefly-source-guard-'))
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/levels/SceneFireflyField.svelte'),
+    '<script>export let count = 0</script>',
+  )
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/editor/scenes/fixture.scene.json'),
+    JSON.stringify({
+      levelId: 'fixture',
+      settings: {
+        level: {
+          features: {
+            fireflies: true,
+          },
+          lighting: {
+            hemisphereIntensity: 0.2,
+          },
+        },
+      },
+      nodes: [
+        {
+          id: 'legacy-light-firefly',
+          npc: {
+            archetype: 'firefly',
+            presentation: {
+              type: 'firefly',
+              color: '#f4ffb8',
+              size: 0.5,
+              lightIntensity: 4,
+              lightDistance: 8,
+            },
+          },
+        },
+      ],
+    }),
+  )
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/editor/scenes/partial.scene.json'),
+    JSON.stringify({
+      levelId: 'partial',
+      settings: {
+        level: {
+          features: {
+            fireflies: true,
+          },
+          lighting: {
+            hemisphereIntensity: 0.2,
+          },
+          fireflies: {
+            enabled: true,
+            allowWithAuthored: true,
+            count: 12,
+            activeLightPercent: 0.167,
+            radius: 20,
+            minHeight: 1,
+            maxHeight: 3,
+            center: [0, 1, 0],
+            color: '#f4ffb8',
+            secondaryColor: '#8defff',
+            size: 0.5,
+            lighting: {
+              spriteIntensity: 1,
+              lightIntensity: 2,
+              lightDistance: 8,
+              lightDecay: 1.4,
+              minimumLightIntensityScale: 0.16,
+              lightBudgeted: true,
+            },
+            twinkleSpeed: 0.4,
+            driftSpeed: 0.12,
+            sway: 0.5,
+          },
+        },
+      },
+      nodes: [],
+    }),
+  )
+
+  const failures = auditSourceGuards({ appRoot })
+
+  assert.match(
+    failures.join('\n'),
+    /settings\.level\.features\.fireflies is true but settings\.level\.fireflies is missing/,
+  )
+  assert.match(
+    failures.join('\n'),
+    /settings\.level\.fireflies must explicitly define palette/,
+  )
+  assert.match(
+    failures.join('\n'),
+    /settings\.level\.fireflies\.lighting must explicitly define selectionHoldSeconds, selectionFadeSeconds, pulseThreshold, pulseSoftness, blinkPeriodSecondsMin, blinkPeriodSecondsMax, blinkFadeSeconds/,
+  )
+  assert.match(
+    failures.join('\n'),
+    /firefly NPC actor "legacy-light-firefly" uses retired per-NPC light fields lightIntensity, lightDistance/,
+  )
+  assert.match(
+    failures.join('\n'),
+    /generated firefly populations must be manifest-backed NPC actors/,
+  )
+})
+
+test('source guard rejects hidden point-light player-distance caps', () => {
+  const appRoot = mkdtempSync(join(tmpdir(), 'point-light-source-guard-'))
+  writeFixtureFile(
+    join(
+      appRoot,
+      'src/threlte/features/performance/utils/runtimeSceneBudget.ts',
+    ),
+    [
+      'export interface RuntimePointLightBudget {',
+      '  cullDistance: number',
+      '}',
+      'export function resolveRuntimePointLightVisibility({ distanceToCamera }) {',
+      '  return distanceToCamera <= 20',
+      '}',
+    ].join('\n'),
+  )
+
+  const failures = auditSourceGuards({ appRoot })
+
+  assert.match(
+    failures.join('\n'),
+    /RuntimePointLightBudget must not expose hidden point-light player-distance caps/,
+  )
+  assert.match(
+    failures.join('\n'),
+    /resolveRuntimePointLightVisibility must not reintroduce point-light player-distance culling/,
+  )
+})
+
+test('runtime scene audit rejects missing hemisphere lighting and source drift', () => {
+  const appRoot = mkdtempSync(join(tmpdir(), 'runtime-scene-lighting-audit-'))
+  const runtimeSceneDir = join(appRoot, 'public/generated/scenes')
+  const sourceLighting = {
+    ambientIntensity: 0.2,
+    hemisphereIntensity: 0.38,
+    keyLightIntensity: 0.4,
+    fillLightIntensity: 0.1,
+  }
+  const sourceFireflies = {
+    enabled: true,
+    allowWithAuthored: true,
+    count: 12,
+    activeLightPercent: 0.167,
+    radius: 20,
+    minHeight: 1,
+    maxHeight: 3,
+    center: [0, 1, 0],
+    color: '#f4ffb8',
+    secondaryColor: '#8defff',
+    terrainFollow: true,
+    distribution: 'center-falloff',
+    densityExponent: 1.7,
+    palette: ['#f4ffb8', '#8defff'],
+    size: 0.5,
+    lighting: {
+      spriteIntensity: 1,
+      lightIntensity: 2,
+      lightDistance: 8,
+      lightDecay: 1.4,
+      minimumLightIntensityScale: 0.16,
+      lightBudgeted: true,
+      selectionHoldSeconds: 2.4,
+      selectionFadeSeconds: 0.9,
+      pulseThreshold: 0.48,
+      pulseSoftness: 0.72,
+      blinkPeriodSecondsMin: 5.5,
+      blinkPeriodSecondsMax: 10,
+      blinkFadeSeconds: 1.4,
+    },
+    twinkleSpeed: 0.4,
+    driftSpeed: 0.12,
+    sway: 0.5,
+  }
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/levels/level-registry.json'),
+    JSON.stringify([
+      {
+        id: 'fixture',
+        deployed: true,
+        source: {
+          kind: 'scene',
+        },
+      },
+    ]),
+  )
+  writeFixtureFile(
+    join(appRoot, 'src/threlte/editor/scenes/fixture.scene.json'),
+    JSON.stringify({
+      levelId: 'fixture',
+      settings: {
+        level: {
+          features: {
+            fireflies: true,
+          },
+          fireflies: sourceFireflies,
+          lighting: sourceLighting,
+        },
+      },
+      nodes: [],
+    }),
+  )
+  writeFixtureFile(
+    join(runtimeSceneDir, 'fixture.runtime-scene.json'),
+    JSON.stringify({
+      schemaVersion: 1,
+      levelId: 'fixture',
+      runtime: {
+        renderProfile: {
+          id: 'fixture-render',
+        },
+      },
+      levelDefinition: {
+        id: 'fixture',
+        spawn: {
+          player: [0, 1, 0],
+        },
+        actors: [],
+        settings: {
+          level: {
+            features: {
+              fireflies: true,
+            },
+            fireflies: {
+              ...sourceFireflies,
+              distribution: 'uniform',
+            },
+            lighting: {
+              ambientIntensity: 0.2,
+              keyLightIntensity: 0.4,
+              fillLightIntensity: 0.1,
+            },
+            graphicsBudget: {},
+            renderProfile: {
+              id: 'fixture-render',
+            },
+          },
+        },
+      },
+      buildReport: {
+        levelId: 'fixture',
+        errors: [],
+        runtimeReadinessContract: {
+          runtime: {
+            requiredRenderActorIds: [],
+            requiredAssetUrls: [],
+          },
+          runtimeAssetUrls: [],
+        },
+      },
+    }),
+  )
+
+  const audit = auditRuntimeScenes({
+    appRoot,
+    runtimeSceneDir,
+    isFiniteVec3,
+    readJsonFile: (fullPath: string) =>
+      JSON.parse(readFileSync(fullPath, 'utf8')),
+  })
+
+  assert.match(
+    audit.failures.join('\n'),
+    /cooked runtime scene settings\.level\.lighting\.hemisphereIntensity must be explicit/,
+  )
+  assert.match(
+    audit.failures.join('\n'),
+    /source\/runtime lighting and firefly settings drift/,
+  )
+  assert.match(
+    audit.failures.join('\n'),
+    /enabled firefly field must cook 12 generated firefly NPC actor\(s\); found 0/,
   )
 })
 

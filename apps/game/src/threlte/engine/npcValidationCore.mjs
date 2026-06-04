@@ -309,9 +309,7 @@ function validateFireflyPresentation({ actorId, presentation, errors }) {
     )
   }
 
-  for (const [field, rule] of [
-    ['npc.presentation.size', 'positive'],
-  ]) {
+  for (const [field, rule] of [['npc.presentation.size', 'positive']]) {
     const value = presentation[field.replace('npc.presentation.', '')]
     if (rule === 'positive' && !isPositiveFinite(value)) {
       pushIssue(errors, actorId, field, 'must be a positive finite number.')
@@ -338,6 +336,44 @@ function validateFireflyPresentation({ actorId, presentation, errors }) {
         'must be a positive finite number.',
       )
     }
+  }
+
+  if (
+    presentation.populationId !== undefined &&
+    !isNonEmptyString(presentation.populationId)
+  ) {
+    pushIssue(
+      errors,
+      actorId,
+      'npc.presentation.populationId',
+      'must be a non-empty string when authored.',
+    )
+  }
+
+  for (const field of ['populationIndex', 'lightPhase']) {
+    if (
+      presentation[field] !== undefined &&
+      !isNonNegativeFinite(presentation[field])
+    ) {
+      pushIssue(
+        errors,
+        actorId,
+        `npc.presentation.${field}`,
+        'must be a non-negative finite number.',
+      )
+    }
+  }
+
+  if (
+    presentation.populationCount !== undefined &&
+    !isPositiveFinite(presentation.populationCount)
+  ) {
+    pushIssue(
+      errors,
+      actorId,
+      'npc.presentation.populationCount',
+      'must be a positive finite number.',
+    )
   }
 
   if (

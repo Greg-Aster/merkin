@@ -130,6 +130,24 @@ function mergeRecord<T extends object>(
   }
 }
 
+function mergeLightingSettings(
+  base: RenderProfileLightingSettings,
+  override: RenderProfileLightingSettings | undefined,
+): RenderProfileLightingSettings {
+  return {
+    ...base,
+    ...(override ?? {}),
+    pointLightBudget: {
+      ...(base.pointLightBudget ?? {}),
+      ...(override?.pointLightBudget ?? {}),
+      groupBudgets: {
+        ...(base.pointLightBudget?.groupBudgets ?? {}),
+        ...(override?.pointLightBudget?.groupBudgets ?? {}),
+      },
+    },
+  }
+}
+
 function mergePostProcessingSettings(
   base: ResolvedRuntimeRenderProfile['postProcessing'],
   override: RenderProfilePostProcessingSettings | undefined,
@@ -188,9 +206,12 @@ export function resolveRuntimeRenderProfile(
   return {
     id: profileSettings?.id ?? DEFAULT_RENDER_PROFILE.id,
     tier,
-    lighting: mergeRecord(
-      DEFAULT_RENDER_PROFILE.lighting,
-      profileSettings?.lighting,
+    lighting: mergeLightingSettings(
+      mergeLightingSettings(
+        DEFAULT_RENDER_PROFILE.lighting,
+        profileSettings?.lighting,
+      ),
+      tierSettings?.lighting,
     ),
     shadows,
     reflections,

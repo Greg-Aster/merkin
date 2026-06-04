@@ -1,7 +1,7 @@
 {
   "levelId": "yggdrasil",
   "version": 1,
-  "updatedAt": "2026-05-17T22:15:06.184Z",
+  "updatedAt": "2026-06-04T19:34:05.996Z",
   "settings": {
     "level": {
       "collision": {
@@ -117,6 +117,18 @@
         "water": true,
         "styles": true,
         "ambientParticles": true
+      },
+      "fireflies": {
+        "enabled": false,
+        "allowWithAuthored": false,
+        "lighting": {
+          "spriteIntensity": 1,
+          "lightIntensity": 2.5,
+          "lightDistance": 6,
+          "lightDecay": 1.45,
+          "minimumLightIntensityScale": 0.16,
+          "lightBudgeted": true
+        }
       },
       "ambientParticles": {
         "enabled": true,
@@ -693,7 +705,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:9f98b7a5452f591e411944dba1e39ffde093fec58602461528bbb0d79c52b6a7:e105f73550332e4c1c0a7869f0aae82adc19785188d69cf88615c5db765d6b38:31365d1d2e99143a13c7228531b79d1ba861340a646ea2e47d78f8e6d1111c9d",
+        "colliderCacheKey": "mesh-collision-manager-v2:2c0084f2eb76a57e53f5292fd0f85785467a8e74320fbdae67c5fd96bafb38e9:e105f73550332e4c1c0a7869f0aae82adc19785188d69cf88615c5db765d6b38:31365d1d2e99143a13c7228531b79d1ba861340a646ea2e47d78f8e6d1111c9d",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -857,7 +869,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-mound.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-mound.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+        "colliderCacheKey": "mesh-collision-manager-v2:b7396643867c3954c071e02f2b33ddf216eefb3939a7bf2d9dd995d7c7a91a0b:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1169,7 +1181,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-north.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-north.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:4a55acd79b7efc34b624331d2f1df1d0df104b73d41b4dcd622fc18b4c4f3a56:d8b1f5778074eeee24e3ebb863a33b98f114ebfcf356ce02f71887991b5c1b93:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+        "colliderCacheKey": "mesh-collision-manager-v2:53383c988cbef8240a3ccaf9749aacf74730c6491625d7406e9ddf5d9b89a65f:d8b1f5778074eeee24e3ebb863a33b98f114ebfcf356ce02f71887991b5c1b93:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1310,7 +1322,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-south.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-south.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:d4292501134d55b92ba782513e4dbab60365828656374cd0ee8e2851906f1839:c4a52ecd381cb77afc765ead65e701a891153672d6a2c198b19b2bfd8c33720a:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "colliderCacheKey": "mesh-collision-manager-v2:dc58336f03ce9ca8c2dc9264553a7e9b6b9b0b662a95cadc1662758b42489c27:c4a52ecd381cb77afc765ead65e701a891153672d6a2c198b19b2bfd8c33720a:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1451,7 +1463,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-east.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-east.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:500114aff935b68391b66f45ddfabb4f6d7f5505fa7379b554073c37194e512d:8c49f729ca30a76684762b76b9275cac2853e5f140d067f18cc070b0817b7d45:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "colliderCacheKey": "mesh-collision-manager-v2:ff0e7e790281cdbe8f10c2e65803a214f3e26ed00368d30fb59b39f1f6e516f9:8c49f729ca30a76684762b76b9275cac2853e5f140d067f18cc070b0817b7d45:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1592,7 +1604,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-west.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-west.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:b8c64c09bb7a754ac6e2f7756576f471d9165fc26b346bfa401f86b2f87001e7:d78ee0b9ea6593abc08f45df077ac4ad34644608e9385644d1311845f658e103:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+        "colliderCacheKey": "mesh-collision-manager-v2:82410ede33225a911340c42892cbd0afcad7385f499c15064902308f5d8d8c7f:d78ee0b9ea6593abc08f45df077ac4ad34644608e9385644d1311845f658e103:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1733,7 +1745,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northeast.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northeast.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:b15e37959667d73c5ee3c8813ffdb48d27a7c4952e2e7b32323ed40d1aa47089:fa10366a338d43bf29c8740d97a314e1b1a9c4d225026c5db4bcbaed6597712c:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "colliderCacheKey": "mesh-collision-manager-v2:a6c0b43ba6a951ac4f159ed1b614a5eeaeec328f78007fb453b6c3b700dfaf0c:fa10366a338d43bf29c8740d97a314e1b1a9c4d225026c5db4bcbaed6597712c:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1874,7 +1886,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northwest.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-northwest.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:ed7742afb10d38fdfab1a2748211f43d2a150e90ec9d2609e65dd672a7caecbd:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
+        "colliderCacheKey": "mesh-collision-manager-v2:754a1c5de3096bf10604849f31aaedad98ae48033ddb0c093114cf87bc18e21e:a088bdaa0e2bb1f834dd3c906500600f53ee9169f5aa78e75455f186d9ac921a:32b93b51535488a80f97b27a31238e6fb9c9eacbfabfc92fbb69cd07e092e273",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -2015,7 +2027,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southeast.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southeast.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:310bb538f8139d222639e197e95b63800b888f01903d8430ca051a28515143f8:7183112371b1695c1928be1bd88c2a370f483850286719ae3869fe22656b6aa9:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "colliderCacheKey": "mesh-collision-manager-v2:9e835f916456578e72c79a840db8ec35f2270bb23bbd09a2601381a6fb67aa9e:7183112371b1695c1928be1bd88c2a370f483850286719ae3869fe22656b6aa9:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -2156,7 +2168,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southwest.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-root-southwest.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:46f128a488443b499281227b98420150918b789d69946ec5e7287d80b39ccae0:0d39c8e3f3908f581952214715b936eba47076669a6ce3df36de1878918c0914:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
+        "colliderCacheKey": "mesh-collision-manager-v2:ee12c9a536322e500006b1e06df24a9288234f76c8dc30d43f7217d06df6a6bf:0d39c8e3f3908f581952214715b936eba47076669a6ce3df36de1878918c0914:9aec20a37903261e62b0dece7b4cafe865bbdfbb51eb556a9382ff25ffa5f8a0",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -2445,10 +2457,6 @@
           "color": "#d8e8ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.7,
-          "spriteIntensity": 1.1,
-          "lightIntensity": 3.8,
-          "lightDistance": 8,
-          "lightDecay": 1.4,
           "twinkleSpeed": 1.1,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -2621,10 +2629,6 @@
           "color": "#d6ffd8",
           "secondaryColor": "#f5f1a8",
           "size": 0.7,
-          "spriteIntensity": 1.1,
-          "lightIntensity": 3.8,
-          "lightDistance": 8,
-          "lightDecay": 1.4,
           "twinkleSpeed": 1.1,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -2805,10 +2809,6 @@
           "color": "#d8d8ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.7,
-          "spriteIntensity": 1.1,
-          "lightIntensity": 3.8,
-          "lightDistance": 8,
-          "lightDecay": 1.4,
           "twinkleSpeed": 1.1,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -3228,10 +3228,6 @@
           "color": "#fff1a6",
           "secondaryColor": "#f5f1a8",
           "size": 0.72,
-          "spriteIntensity": 1.2,
-          "lightIntensity": 4.4,
-          "lightDistance": 9,
-          "lightDecay": 1.3,
           "twinkleSpeed": 1,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -3301,7 +3297,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-arch.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-arch.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -3778,7 +3774,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-portal-return.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-portal-return.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:8ecbfe6d38d78dd14f49d7b2bdc6a61099090219a0080498b92095f25e5550e6:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
+        "colliderCacheKey": "mesh-collision-manager-v2:e799d14d7de809642a4d25a229416b67824706fda39c6c5e7c2e7cde2595b23b:8ecbfe6d38d78dd14f49d7b2bdc6a61099090219a0080498b92095f25e5550e6:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -5305,54 +5301,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:8ecf3dc56a7eb91e34522008e34d0585fd1ace0d8226af7322d7b3fe438335a1:36cd5b4419bbae4b2b51484ad67a3fe63efa7fdb7c0407858b5193620b918771:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:58bba865cdcd9db2be4eb74ea2272dcd6c12d75498ca4b2bb9072a7fb5b9ea1a:36cd5b4419bbae4b2b51484ad67a3fe63efa7fdb7c0407858b5193620b918771:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-51-24-217Z.glb",
           "sourceNodeName": "Urd Root Shrine",
           "visualLocalBounds": {
             "min": [
-              -0.5899999737739563,
-              -0.5899999737739563,
-              -0.5
+              -0.8150172829627991,
+              -1.0005742311477661,
+              -0.8391017913818359
             ],
             "max": [
-              0.5899999737739563,
-              2.950000047683716,
-              0.5
+              0.8005654811859131,
+              0.9717459082603455,
+              0.7541739344596863
             ],
             "size": [
-              1.1799999475479126,
-              3.540000021457672,
-              1
+              1.6155827641487122,
+              1.9723201394081116,
+              1.5932757258415222
             ],
             "center": [
-              0,
-              1.1800000369548798,
-              0
+              -0.007225900888442993,
+              -0.014414161443710327,
+              -0.04246392846107483
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.5899999737739563,
-              -0.5899999737739563,
-              -0.5
+              -0.8150172829627991,
+              -1.0005742311477661,
+              -0.8391017913818359
             ],
             "max": [
-              0.5899999737739563,
-              2.950000047683716,
-              0.5
+              0.8005654811859131,
+              0.9717459082603455,
+              0.7541739344596863
             ],
             "size": [
-              1.1799999475479126,
-              3.540000021457672,
-              1
+              1.6155827641487122,
+              1.9723201394081116,
+              1.5932757258415222
             ],
             "center": [
-              0,
-              1.1800000369548798,
-              0
+              -0.007225900888442993,
+              -0.014414161443710327,
+              -0.04246392846107483
             ]
           },
           "visualToPhysicsMatrix": [
@@ -5392,9 +5388,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
-        "triangleCount": 434
+        "sourceAssetUrl": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-51-24-217Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-51-24-217Z.low.glb",
+        "triangleCount": 8982
       },
       "asset": {
         "url": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-51-24-217Z.glb"
@@ -5446,54 +5442,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-growth.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-growth.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:89abc48ab1c6f671dcd6297a67fa513ea522e5031653950a2d821a8781e6e5d7:609f17aff95064e692ec56cb51eab703919cf6fbdb29791f005e09542a39a0d6:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb",
           "sourceNodeName": "Mimir Root Shrine",
           "visualLocalBounds": {
             "min": [
-              -0.5899999737739563,
-              -0.5899999737739563,
-              -0.5
+              -0.9385361075401306,
+              -0.9913320541381836,
+              -0.8355563879013062
             ],
             "max": [
-              0.5899999737739563,
-              2.950000047683716,
-              0.5
+              0.919564425945282,
+              0.9745348691940308,
+              0.8024851679801941
             ],
             "size": [
-              1.1799999475479126,
-              3.540000021457672,
-              1
+              1.8581005334854126,
+              1.9658669233322144,
+              1.6380415558815002
             ],
             "center": [
-              0,
-              1.1800000369548798,
-              0
+              -0.009485840797424316,
+              -0.008398592472076416,
+              -0.01653560996055603
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.5899999737739563,
-              -0.5899999737739563,
-              -0.5
+              -0.9385361075401306,
+              -0.9913320541381836,
+              -0.8355563879013062
             ],
             "max": [
-              0.5899999737739563,
-              2.950000047683716,
-              0.5
+              0.919564425945282,
+              0.9745348691940308,
+              0.8024851679801941
             ],
             "size": [
-              1.1799999475479126,
-              3.540000021457672,
-              1
+              1.8581005334854126,
+              1.9658669233322144,
+              1.6380415558815002
             ],
             "center": [
-              0,
-              1.1800000369548798,
-              0
+              -0.009485840797424316,
+              -0.008398592472076416,
+              -0.01653560996055603
             ]
           },
           "visualToPhysicsMatrix": [
@@ -5533,9 +5529,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
-        "triangleCount": 434
+        "sourceAssetUrl": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.low.glb",
+        "triangleCount": 5220
       },
       "asset": {
         "url": "/generated/hunyuan3d/growth-planter/growth-planter-generated-2026-05-17T18-55-06-889Z.glb"
@@ -5587,54 +5583,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-bench.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-bench.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb:8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:4955018e48930adfebbc11459c54bc5d8b920c77b0c0d515b8f9316044275fb0:999f31c5c61fd52fd6f02b73d72b63b88fb9960bdcd5ab5e2be762451a526877:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/bench-growth/bench-growth-generated-2026-05-17T18-58-08-187Z.glb",
           "sourceNodeName": "Hvergelmir Bench",
           "visualLocalBounds": {
             "min": [
-              -1.3949999809265137,
-              -1.3949999809265137,
-              -0.675000011920929
+              -0.9996921420097351,
+              -0.9994962811470032,
+              -0.9862470030784607
             ],
             "max": [
-              1.3949999809265137,
-              1.600000023841858,
-              0.30000001192092896
+              0.971639096736908,
+              0.9755133390426636,
+              0.92755526304245
             ],
             "size": [
-              2.7899999618530273,
-              2.9950000047683716,
-              0.9750000238418579
+              1.971331238746643,
+              1.9750096201896667,
+              1.9138022661209106
             ],
             "center": [
-              0,
-              0.10250002145767212,
-              -0.1875
+              -0.014026522636413574,
+              -0.0119914710521698,
+              -0.02934587001800537
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -1.3949999809265137,
-              -1.3949999809265137,
-              -0.675000011920929
+              -0.9996921420097351,
+              -0.9994962811470032,
+              -0.9862470030784607
             ],
             "max": [
-              1.3949999809265137,
-              1.600000023841858,
-              0.30000001192092896
+              0.971639096736908,
+              0.9755133390426636,
+              0.92755526304245
             ],
             "size": [
-              2.7899999618530273,
-              2.9950000047683716,
-              0.9750000238418579
+              1.971331238746643,
+              1.9750096201896667,
+              1.9138022661209106
             ],
             "center": [
-              0,
-              0.10250002145767212,
-              -0.1875
+              -0.014026522636413574,
+              -0.0119914710521698,
+              -0.02934587001800537
             ]
           },
           "visualToPhysicsMatrix": [
@@ -5674,9 +5670,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.low.glb",
-        "triangleCount": 319
+        "sourceAssetUrl": "/generated/hunyuan3d/bench-growth/bench-growth-generated-2026-05-17T18-58-08-187Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/bench-growth/bench-growth-generated-2026-05-17T18-58-08-187Z.low.glb",
+        "triangleCount": 7100
       },
       "asset": {
         "url": "/generated/hunyuan3d/bench-growth/bench-growth-generated-2026-05-17T18-58-08-187Z.glb"
@@ -6595,10 +6591,6 @@
           "color": "#fff1a6",
           "secondaryColor": "#f5f1a8",
           "size": 0.92,
-          "spriteIntensity": 1.4,
-          "lightIntensity": 5.8,
-          "lightDistance": 12,
-          "lightDecay": 1.15,
           "twinkleSpeed": 0.82,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -6654,10 +6646,6 @@
           "color": "#b6ecff",
           "secondaryColor": "#f5f1a8",
           "size": 0.44,
-          "spriteIntensity": 0.95,
-          "lightIntensity": 2.4,
-          "lightDistance": 5.2,
-          "lightDecay": 1.35,
           "twinkleSpeed": 1.85,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -6713,10 +6701,6 @@
           "color": "#d9d0ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.5,
-          "spriteIntensity": 1,
-          "lightIntensity": 2.9,
-          "lightDistance": 6.3,
-          "lightDecay": 1.35,
           "twinkleSpeed": 0.75,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -6772,10 +6756,6 @@
           "color": "#dfff9a",
           "secondaryColor": "#f5f1a8",
           "size": 0.4,
-          "spriteIntensity": 0.86,
-          "lightIntensity": 2,
-          "lightDistance": 4.8,
-          "lightDecay": 1.35,
           "twinkleSpeed": 1.35,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -6831,10 +6811,6 @@
           "color": "#ffd89a",
           "secondaryColor": "#f5f1a8",
           "size": 0.42,
-          "spriteIntensity": 0.88,
-          "lightIntensity": 2.1,
-          "lightDistance": 5,
-          "lightDecay": 1.35,
           "twinkleSpeed": 1.1,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -6890,10 +6866,6 @@
           "color": "#a9b8ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.38,
-          "spriteIntensity": 0.78,
-          "lightIntensity": 1.7,
-          "lightDistance": 4.2,
-          "lightDecay": 1.35,
           "twinkleSpeed": 0.55,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -6949,10 +6921,6 @@
           "color": "#ffcf7f",
           "secondaryColor": "#f5f1a8",
           "size": 0.46,
-          "spriteIntensity": 1,
-          "lightIntensity": 2.2,
-          "lightDistance": 5,
-          "lightDecay": 1.4,
           "twinkleSpeed": 1.8,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -7008,10 +6976,6 @@
           "color": "#89d3ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.46,
-          "spriteIntensity": 1,
-          "lightIntensity": 2.2,
-          "lightDistance": 5,
-          "lightDecay": 1.4,
           "twinkleSpeed": 1.8,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -7067,10 +7031,6 @@
           "color": "#d8a4ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.46,
-          "spriteIntensity": 1,
-          "lightIntensity": 2.2,
-          "lightDistance": 5,
-          "lightDecay": 1.4,
           "twinkleSpeed": 1.8,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -7323,54 +7283,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-perch-spire.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-perch-spire.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:c0b11dee150e6c870c6eba518cdb4b8445dba6e36dc295f4317c187e5b6fed2f:5eff2841b842f4ae94f0ea3b347a18a75e0c9018b268acc523f442913303cbe0:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c231d5075430495f4e849ec2228e0d3b187eb8f4629e2d7b15883a60a73a0b9e:f65c82097a40cda655ea76ac9923303da547707432c4ac70a346e02e6b0b3981:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb",
           "sourceNodeName": "Crown Spire",
           "visualLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.8806772232055664,
+              -1.0005301237106323,
+              -0.8487055897712708
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.8592628240585327,
+              0.9742498397827148,
+              0.8207847476005554
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.7399400472640991,
+              1.9747799634933472,
+              1.6694903373718262
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.010707199573516846,
+              -0.01314014196395874,
+              -0.013960421085357666
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.7400000095367432,
-              -3.7200000286102295,
-              -0.7400000095367432
+              -0.8806772232055664,
+              -1.0005301237106323,
+              -0.8487055897712708
             ],
             "max": [
-              0.7400000095367432,
-              4.199999809265137,
-              0.7400000095367432
+              0.8592628240585327,
+              0.9742498397827148,
+              0.8207847476005554
             ],
             "size": [
-              1.4800000190734863,
-              7.919999837875366,
-              1.4800000190734863
+              1.7399400472640991,
+              1.9747799634933472,
+              1.6694903373718262
             ],
             "center": [
-              0,
-              0.2399998903274536,
-              0
+              -0.010707199573516846,
+              -0.01314014196395874,
+              -0.013960421085357666
             ]
           },
           "visualToPhysicsMatrix": [
@@ -7410,9 +7370,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.low.glb",
-        "triangleCount": 624
+        "sourceAssetUrl": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.low.glb",
+        "triangleCount": 6830
       },
       "asset": {
         "url": "/generated/hunyuan3d/support-column/support-column-generated-2026-05-17T19-04-08-179Z.glb"
@@ -7611,10 +7571,6 @@
           "color": "#fff1bf",
           "secondaryColor": "#f5f1a8",
           "size": 0.86,
-          "spriteIntensity": 1.3,
-          "lightIntensity": 4.9,
-          "lightDistance": 10.5,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.7,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -7670,10 +7626,6 @@
           "color": "#d8f5ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.42,
-          "spriteIntensity": 0.92,
-          "lightIntensity": 2.1,
-          "lightDistance": 4.6,
-          "lightDecay": 1.6,
           "twinkleSpeed": 1.7,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -7783,54 +7735,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:1613bf23599bf10a7a77548a853c54dea310b54eb31319ecd715ebcc832e31e9:daacafb3200cd3f7eeede636a1e27ad20747a408c56658f805e8a7a5f6fbc4c9:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/wasteland-archway/wasteland-archway-generated-2026-05-17T19-07-26-612Z.glb",
           "sourceNodeName": "Lower Root Arch 2",
           "visualLocalBounds": {
             "min": [
-              -1.649999976158142,
-              -0.1599999964237213,
-              -0.3100000023841858
+              -1.0027403831481934,
+              -0.9454917311668396,
+              -0.9976478219032288
             ],
             "max": [
-              1.649999976158142,
-              8.100000381469727,
-              0.3100000023841858
+              0.9617102146148682,
+              0.9213534593582153,
+              0.973932683467865
             ],
             "size": [
-              3.299999952316284,
-              8.260000377893448,
-              0.6200000047683716
+              1.9644505977630615,
+              1.866845190525055,
+              1.9715805053710938
             ],
             "center": [
-              0,
-              3.9700001925230026,
-              0
+              -0.020515084266662598,
+              -0.012069135904312134,
+              -0.011857569217681885
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -1.649999976158142,
-              -0.1599999964237213,
-              -0.3100000023841858
+              -1.0027403831481934,
+              -0.9454917311668396,
+              -0.9976478219032288
             ],
             "max": [
-              1.649999976158142,
-              8.100000381469727,
-              0.3100000023841858
+              0.9617102146148682,
+              0.9213534593582153,
+              0.973932683467865
             ],
             "size": [
-              3.299999952316284,
-              8.260000377893448,
-              0.6200000047683716
+              1.9644505977630615,
+              1.866845190525055,
+              1.9715805053710938
             ],
             "center": [
-              0,
-              3.9700001925230026,
-              0
+              -0.020515084266662598,
+              -0.012069135904312134,
+              -0.011857569217681885
             ]
           },
           "visualToPhysicsMatrix": [
@@ -7870,9 +7822,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.low.glb",
-        "triangleCount": 96
+        "sourceAssetUrl": "/generated/hunyuan3d/wasteland-archway/wasteland-archway-generated-2026-05-17T19-07-26-612Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/wasteland-archway/wasteland-archway-generated-2026-05-17T19-07-26-612Z.low.glb",
+        "triangleCount": 4750
       },
       "asset": {
         "url": "/generated/hunyuan3d/wasteland-archway/wasteland-archway-generated-2026-05-17T19-07-26-612Z.glb"
@@ -7924,54 +7876,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-ring.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-ring.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:b0da44e171867f94431164f05f33f772b4110f46e8ac6864aba885348bf1edfe:d2c42371dc319e62c758b8d2c391aa4cc75b727c756ab0358ddb2426ca18a5e1:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:e1bb387e41dcf96cd5a14e209100051cb4020c9fe53475a677ddf251c237fffa:da4a4322e4dbdb3c3f0c0e2f5a6f4c5f417c378d5c1fa258272f4730f0296cb5:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T19-10-33-073Z.glb",
           "sourceNodeName": "Broken Root Ring",
           "visualLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -0.9986728429794312,
+              -0.996286928653717,
+              -0.915399432182312
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.9700645804405212,
+              0.9714493751525879,
+              0.9017684459686279
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.9687374234199524,
+              1.967736303806305,
+              1.81716787815094
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              -0.014304131269454956,
+              -0.012418776750564575,
+              -0.006815493106842041
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -0.9986728429794312,
+              -0.996286928653717,
+              -0.915399432182312
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.9700645804405212,
+              0.9714493751525879,
+              0.9017684459686279
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.9687374234199524,
+              1.967736303806305,
+              1.81716787815094
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              -0.014304131269454956,
+              -0.012418776750564575,
+              -0.006815493106842041
             ]
           },
           "visualToPhysicsMatrix": [
@@ -8011,9 +7963,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
-        "triangleCount": 218
+        "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T19-10-33-073Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T19-10-33-073Z.low.glb",
+        "triangleCount": 4748
       },
       "asset": {
         "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T19-10-33-073Z.glb"
@@ -8449,10 +8401,6 @@
           "color": "#b3c2ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.58,
-          "spriteIntensity": 0.88,
-          "lightIntensity": 2.6,
-          "lightDistance": 5.6,
-          "lightDecay": 1.7,
           "twinkleSpeed": 0.65,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -8536,10 +8484,6 @@
           "color": "#ffd7a1",
           "secondaryColor": "#f5f1a8",
           "size": 0.44,
-          "spriteIntensity": 0.95,
-          "lightIntensity": 2.1,
-          "lightDistance": 4.8,
-          "lightDecay": 1.45,
           "twinkleSpeed": 1.6,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -8595,10 +8539,6 @@
           "color": "#b7e3ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.44,
-          "spriteIntensity": 0.95,
-          "lightIntensity": 2.1,
-          "lightDistance": 4.8,
-          "lightDecay": 1.45,
           "twinkleSpeed": 1.6,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -9000,10 +8940,6 @@
           "color": "#ffd58f",
           "secondaryColor": "#f5f1a8",
           "size": 0.5,
-          "spriteIntensity": 1,
-          "lightIntensity": 2.4,
-          "lightDistance": 5.6,
-          "lightDecay": 1.5,
           "twinkleSpeed": 1.2,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -9059,10 +8995,6 @@
           "color": "#b8eaff",
           "secondaryColor": "#f5f1a8",
           "size": 0.5,
-          "spriteIntensity": 1,
-          "lightIntensity": 2.4,
-          "lightDistance": 5.6,
-          "lightDecay": 1.5,
           "twinkleSpeed": 1.2,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -9118,10 +9050,6 @@
           "color": "#f6efb3",
           "secondaryColor": "#f5f1a8",
           "size": 0.58,
-          "spriteIntensity": 1,
-          "lightIntensity": 3.1,
-          "lightDistance": 5.6,
-          "lightDecay": 1.5,
           "twinkleSpeed": 1.2,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -9226,10 +9154,6 @@
           "color": "#dff8ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 0.95,
-          "lightIntensity": 2.5,
-          "lightDistance": 7.5,
-          "lightDecay": 1.5,
           "twinkleSpeed": 0.9,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -9285,10 +9209,6 @@
           "color": "#f1e7a9",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 0.95,
-          "lightIntensity": 2.5,
-          "lightDistance": 7.5,
-          "lightDecay": 1.5,
           "twinkleSpeed": 0.9,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -9344,10 +9264,6 @@
           "color": "#dff8ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 0.95,
-          "lightIntensity": 2.5,
-          "lightDistance": 7.5,
-          "lightDecay": 1.5,
           "twinkleSpeed": 0.9,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -9403,10 +9319,6 @@
           "color": "#f1e7a9",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 0.95,
-          "lightIntensity": 2.5,
-          "lightDistance": 7.5,
-          "lightDecay": 1.5,
           "twinkleSpeed": 0.9,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -9462,10 +9374,6 @@
           "color": "#dff8ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 0.95,
-          "lightIntensity": 2.5,
-          "lightDistance": 7.5,
-          "lightDecay": 1.5,
           "twinkleSpeed": 0.9,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -9521,10 +9429,6 @@
           "color": "#f1e7a9",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 0.95,
-          "lightIntensity": 2.5,
-          "lightDistance": 7.5,
-          "lightDecay": 1.5,
           "twinkleSpeed": 0.9,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -11060,54 +10964,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-north.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-north.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:b0da44e171867f94431164f05f33f772b4110f46e8ac6864aba885348bf1edfe:c1bfc7b0d1a0ce5ee7ad640c7fe76b39a4a1bfb8e337ff220552ab39125b23d7:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:f95cc95cc1e911a719e83f657362fefe722c399eb66883d32518a29d37805a3f:966d2c33e8834da88ceaf5396bd2c92d84872ee414211362c8f6775baee610f7:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T20-56-18-499Z.glb",
           "sourceNodeName": "Drowned Ring north",
           "visualLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -0.9707764387130737,
+              -0.8095299005508423,
+              -0.9887505769729614
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.9713103771209717,
+              0.7801277041435242,
+              0.9732679128646851
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.9420868158340454,
+              1.5896576046943665,
+              1.9620184898376465
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              0.0002669692039489746,
+              -0.014701098203659058,
+              -0.007741332054138184
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -0.9707764387130737,
+              -0.8095299005508423,
+              -0.9887505769729614
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.9713103771209717,
+              0.7801277041435242,
+              0.9732679128646851
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.9420868158340454,
+              1.5896576046943665,
+              1.9620184898376465
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              0.0002669692039489746,
+              -0.014701098203659058,
+              -0.007741332054138184
             ]
           },
           "visualToPhysicsMatrix": [
@@ -11147,9 +11051,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
-        "triangleCount": 218
+        "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T20-56-18-499Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T20-56-18-499Z.low.glb",
+        "triangleCount": 4750
       },
       "asset": {
         "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T20-56-18-499Z.glb"
@@ -11204,10 +11108,6 @@
           "color": "#d9f2ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.5,
-          "spriteIntensity": 0.92,
-          "lightIntensity": 2.3,
-          "lightDistance": 6.5,
-          "lightDecay": 1.5,
           "twinkleSpeed": 0.85,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -11305,54 +11205,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-south.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-south.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:b0da44e171867f94431164f05f33f772b4110f46e8ac6864aba885348bf1edfe:9428c2a26d49c904081db684e470175d4010d6dccd2a3cfe4515f5fe25ffdc43:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:7417db6f3cfd5d582f17d3b9bc16febf29e4cbeb352986a749f3e41d0e923877:7e8509cb2bd69954ced7bd9f2e0f99978849dde51d6e7791f5229dbd42e538e9:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb",
           "sourceNodeName": "Drowned Ring south",
           "visualLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -0.9902454018592834,
+              -0.9355183839797974,
+              -0.7484915852546692
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.9675481915473938,
+              0.8933879137039185,
+              0.7029206156730652
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.9577935934066772,
+              1.8289062976837158,
+              1.4514122009277344
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              -0.011348605155944824,
+              -0.021065235137939453,
+              -0.022785484790802002
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -0.9902454018592834,
+              -0.9355183839797974,
+              -0.7484915852546692
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.9675481915473938,
+              0.8933879137039185,
+              0.7029206156730652
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.9577935934066772,
+              1.8289062976837158,
+              1.4514122009277344
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              -0.011348605155944824,
+              -0.021065235137939453,
+              -0.022785484790802002
             ]
           },
           "visualToPhysicsMatrix": [
@@ -11392,9 +11292,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
-        "triangleCount": 218
+        "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.low.glb",
+        "triangleCount": 4748
       },
       "asset": {
         "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-02-15-898Z.glb"
@@ -11449,10 +11349,6 @@
           "color": "#f4e4a2",
           "secondaryColor": "#f5f1a8",
           "size": 0.5,
-          "spriteIntensity": 0.92,
-          "lightIntensity": 2.3,
-          "lightDistance": 6.5,
-          "lightDecay": 1.5,
           "twinkleSpeed": 0.85,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -11550,54 +11446,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-east.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-east.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:b0da44e171867f94431164f05f33f772b4110f46e8ac6864aba885348bf1edfe:c1bfc7b0d1a0ce5ee7ad640c7fe76b39a4a1bfb8e337ff220552ab39125b23d7:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:c5e4dd975833d1c6d0e5ddcf80882f435346fdb69baad70ad98594f166494e7d:b9b690969ced280319ca8fcbdf4496471c8fb1a47494e9e00e655560ffccb19e:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-08-20-319Z.glb",
           "sourceNodeName": "Drowned Ring east",
           "visualLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -0.9995900988578796,
+              -0.9805195331573486,
+              -0.6656725406646729
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.9724929928779602,
+              0.9569568037986755,
+              0.6921600103378296
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.9720830917358398,
+              1.9374763369560242,
+              1.3578325510025024
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              -0.013548552989959717,
+              -0.011781364679336548,
+              0.01324373483657837
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -0.9995900988578796,
+              -0.9805195331573486,
+              -0.6656725406646729
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.9724929928779602,
+              0.9569568037986755,
+              0.6921600103378296
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.9720830917358398,
+              1.9374763369560242,
+              1.3578325510025024
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              -0.013548552989959717,
+              -0.011781364679336548,
+              0.01324373483657837
             ]
           },
           "visualToPhysicsMatrix": [
@@ -11637,9 +11533,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
-        "triangleCount": 218
+        "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-08-20-319Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-08-20-319Z.low.glb",
+        "triangleCount": 4750
       },
       "asset": {
         "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-08-20-319Z.glb"
@@ -11694,10 +11590,6 @@
           "color": "#d9f2ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.5,
-          "spriteIntensity": 0.92,
-          "lightIntensity": 2.3,
-          "lightDistance": 6.5,
-          "lightDecay": 1.5,
           "twinkleSpeed": 0.85,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -11823,54 +11715,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-west.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-west.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:b0da44e171867f94431164f05f33f772b4110f46e8ac6864aba885348bf1edfe:c1bfc7b0d1a0ce5ee7ad640c7fe76b39a4a1bfb8e337ff220552ab39125b23d7:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:15d899e10a11a26ffd4835d1b91836ca4efac0e45c1c92ac0f30e5dd29816331:f8c42fa6e4597b33a52bbbcea3e9956a40c9b60a71b7fe7d2665203ca2a84d1b:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-14-13-866Z.glb",
           "sourceNodeName": "Drowned Ring west",
           "visualLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -1.001085638999939,
+              -0.9183956384658813,
+              -0.993125855922699
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.974134087562561,
+              0.8938437700271606,
+              0.9605826735496521
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.9752197265625,
+              1.812239408493042,
+              1.953708529472351
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              -0.013475775718688965,
+              -0.012275934219360352,
+              -0.016271591186523438
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -1.001085638999939,
+              -0.9183956384658813,
+              -0.993125855922699
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.974134087562561,
+              0.8938437700271606,
+              0.9605826735496521
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.9752197265625,
+              1.812239408493042,
+              1.953708529472351
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              -0.013475775718688965,
+              -0.012275934219360352,
+              -0.016271591186523438
             ]
           },
           "visualToPhysicsMatrix": [
@@ -11910,9 +11802,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
-        "triangleCount": 218
+        "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-14-13-866Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-14-13-866Z.low.glb",
+        "triangleCount": 4750
       },
       "asset": {
         "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-14-13-866Z.glb"
@@ -11967,10 +11859,6 @@
           "color": "#f4e4a2",
           "secondaryColor": "#f5f1a8",
           "size": 0.5,
-          "spriteIntensity": 0.92,
-          "lightIntensity": 2.3,
-          "lightDistance": 6.5,
-          "lightDecay": 1.5,
           "twinkleSpeed": 0.85,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -12096,54 +11984,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-nw.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-ring-nw.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:b0da44e171867f94431164f05f33f772b4110f46e8ac6864aba885348bf1edfe:c1bfc7b0d1a0ce5ee7ad640c7fe76b39a4a1bfb8e337ff220552ab39125b23d7:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+        "colliderCacheKey": "mesh-collision-manager-v2:fcb5a74278c410d05a3f1ca7c7b699df4e603f6eba0d64192047806beae5d87b:e254c6592cb1adf980564ec7e515ec965aa83e9763283bb30ac4395c3b0654ec:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-20-11-613Z.glb",
           "sourceNodeName": "Drowned Ring nw",
           "visualLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -0.9737582802772522,
+              -0.6844570636749268,
+              -0.999579131603241
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.9540501236915588,
+              0.7897860407829285,
+              0.9302744269371033
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.927808403968811,
+              1.4742431044578552,
+              1.9298535585403442
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              -0.00985407829284668,
+              0.052664488554000854,
+              -0.03465235233306885
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -2.8499999046325684,
-              0,
-              -0.24373197555541992
+              -0.9737582802772522,
+              -0.6844570636749268,
+              -0.999579131603241
             ],
             "max": [
-              2.8499999046325684,
-              2.8499999046325684,
-              0.24373197555541992
+              0.9540501236915588,
+              0.7897860407829285,
+              0.9302744269371033
             ],
             "size": [
-              5.699999809265137,
-              2.8499999046325684,
-              0.48746395111083984
+              1.927808403968811,
+              1.4742431044578552,
+              1.9298535585403442
             ],
             "center": [
-              0,
-              1.4249999523162842,
-              0
+              -0.00985407829284668,
+              0.052664488554000854,
+              -0.03465235233306885
             ]
           },
           "visualToPhysicsMatrix": [
@@ -12183,9 +12071,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.low.glb",
-        "triangleCount": 218
+        "sourceAssetUrl": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-20-11-613Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-20-11-613Z.low.glb",
+        "triangleCount": 4750
       },
       "asset": {
         "url": "/generated/hunyuan3d/broken-ring/broken-ring-generated-2026-05-17T21-20-11-613Z.glb"
@@ -12240,10 +12128,6 @@
           "color": "#d9f2ff",
           "secondaryColor": "#f5f1a8",
           "size": 0.5,
-          "spriteIntensity": 0.92,
-          "lightIntensity": 2.3,
-          "lightDistance": 6.5,
-          "lightDecay": 1.5,
           "twinkleSpeed": 0.85,
           "selectionLightBoost": 0.65,
           "lightBurstSpriteBoost": 0.18
@@ -12286,7 +12170,7 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+        "colliderCacheKey": "mesh-collision-manager-v2:faaa88d2df1a2c820395a9e71160890a571fdc88fdefdd4076f232605ad4404f:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -12441,54 +12325,54 @@
         "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.meta.json",
-        "colliderCacheKey": "mesh-collision-manager-v2:4fdf765845405bf900fdb5987c4b885be1bee8c875e2c3984ff3519e82cac0b2:e37bc69a079b08177269f1d571be2fca7bad9203a8d09e75b47e8e5fcf7e30d1:c99d3fbf9e4068877391e488774737d5ac08477ae3c0ca2359ff1634b3be3cc0",
+        "colliderCacheKey": "mesh-collision-manager-v2:b6950148c1c9065b4b92a7814244e057ba3a3ed06c245cd3ae22161378a7450c:def0bc1e2a17da77d07d854451a02d71531f0cbf13956f980df4633cd476addb:c99d3fbf9e4068877391e488774737d5ac08477ae3c0ca2359ff1634b3be3cc0",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
-          "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+          "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.glb",
           "sourceNodeName": "Yggdrasil Crown Ascent Merged",
           "visualLocalBounds": {
             "min": [
-              -6.372000217437744,
-              -0.550000011920929,
-              -10.043999671936035
+              -0.9878063201904297,
+              -0.9677425026893616,
+              -1.0001391172409058
             ],
             "max": [
-              6.372000217437744,
-              0.550000011920929,
-              10.043999671936035
+              0.9676888585090637,
+              0.9341762661933899,
+              0.973598062992096
             ],
             "size": [
-              12.744000434875488,
-              1.100000023841858,
-              20.08799934387207
+              1.9554951786994934,
+              1.9019187688827515,
+              1.9737371802330017
             ],
             "center": [
-              0,
-              0,
-              0
+              -0.010058730840682983,
+              -0.01678311824798584,
+              -0.013270527124404907
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -6.372000217437744,
-              -0.550000011920929,
-              -10.043999671936035
+              -0.9878063201904297,
+              -0.9677425026893616,
+              -1.0001391172409058
             ],
             "max": [
-              6.372000217437744,
-              0.550000011920929,
-              10.043999671936035
+              0.9676888585090637,
+              0.9341762661933899,
+              0.973598062992096
             ],
             "size": [
-              12.744000434875488,
-              1.100000023841858,
-              20.08799934387207
+              1.9554951786994934,
+              1.9019187688827515,
+              1.9737371802330017
             ],
             "center": [
-              0,
-              0,
-              0
+              -0.010058730840682983,
+              -0.01678311824798584,
+              -0.013270527124404907
             ]
           },
           "visualToPhysicsMatrix": [
@@ -12528,9 +12412,9 @@
             1
           ]
         },
-        "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
-        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
-        "triangleCount": 396
+        "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.glb",
+        "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-generated-2026-05-17T21-23-28-068Z.low.glb",
+        "triangleCount": 4810
       },
       "generation": {
         "family": "yggdrasil-crown-ascent-merged",

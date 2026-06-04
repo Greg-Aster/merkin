@@ -97,6 +97,18 @@
         "styles": true,
         "ambientParticles": true
       },
+      "fireflies": {
+        "enabled": false,
+        "allowWithAuthored": false,
+        "lighting": {
+          "spriteIntensity": 1.15,
+          "lightIntensity": 1.15,
+          "lightDistance": 4.6,
+          "lightDecay": 1.25,
+          "minimumLightIntensityScale": 0.16,
+          "lightBudgeted": true
+        }
+      },
       "style": {
         "preset": "surreal-site",
         "enabled": true,
@@ -1759,10 +1771,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -1806,10 +1814,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -1853,10 +1857,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -1900,10 +1900,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -1947,10 +1943,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -1994,10 +1986,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -2041,10 +2029,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -2088,10 +2072,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -2135,10 +2115,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -2182,10 +2158,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -2229,10 +2201,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -2276,10 +2244,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.52,
-          "spriteIntensity": 1.15,
-          "lightIntensity": 1.15,
-          "lightDistance": 4.6,
-          "lightDecay": 1.25,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 1.4,
           "shockwaveEnabled": true
@@ -2532,10 +2496,6 @@
           "color": "#ff4658",
           "secondaryColor": "#f5f1a8",
           "size": 0.62,
-          "spriteIntensity": 1.2,
-          "lightIntensity": 15,
-          "lightDistance": 30,
-          "lightDecay": 1,
           "twinkleSpeed": 0.9,
           "lightBurstBoost": 2
         }
