@@ -40,6 +40,7 @@ function updateList(path: Array<string | number>, value: string) {
 }
 
 $: fireflies = levelSettings.fireflies ?? {}
+$: fireflyLighting = fireflies.lighting ?? {}
 $: interactive = fireflies.interactive ?? {}
 $: fieldEnabled =
   fireflies.enabled ?? levelSettings.features?.fireflies ?? false
@@ -62,8 +63,8 @@ $: fieldCenter = fireflies.center ?? [0, 0, 0]
       <span class:ready={interactive.enabled} class:warn={!interactive.enabled} class="editor-chip">
         interaction {interactive.enabled ? 'on' : 'off'}
       </span>
-      <span class:ready={fireflies.lightBudgeted ?? true} class:warn={fireflies.lightBudgeted === false} class="editor-chip">
-        lights {(fireflies.lightBudgeted ?? true) ? 'budgeted' : 'unbudgeted'}
+      <span class:ready={fireflyLighting.lightBudgeted ?? true} class:warn={fireflyLighting.lightBudgeted === false} class="editor-chip">
+        lights {(fireflyLighting.lightBudgeted ?? true) ? 'budgeted' : 'unbudgeted'}
       </span>
     </div>
   </div>
@@ -106,10 +107,10 @@ $: fieldCenter = fireflies.center ?? [0, 0, 0]
     <label class="checkbox">
       <input
         type="checkbox"
-        checked={fireflies.lightBudgeted ?? true}
+        checked={fireflyLighting.lightBudgeted ?? true}
         on:change={(event) =>
           updateLevelSetting(
-            ['fireflies', 'lightBudgeted'],
+            ['fireflies', 'lighting', 'lightBudgeted'],
             (event.currentTarget as HTMLInputElement).checked,
           )}
       />
@@ -139,10 +140,11 @@ $: fieldCenter = fireflies.center ?? [0, 0, 0]
       <label class="editor-field"><span class="editor-field-label">Primary Color</span><input class="text-input" type="color" value={fireflies.color ?? '#f4ffb8'} on:input={(event) => updateLevelSetting(['fireflies', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Accent Color</span><input class="text-input" type="color" value={fireflies.secondaryColor ?? '#8defff'} on:input={(event) => updateLevelSetting(['fireflies', 'secondaryColor'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Sprite Size</span><input class="tuple-input" type="number" step="0.05" value={fireflies.size ?? 0.58} on:change={(event) => updateLevelNumericSetting(['fireflies', 'size'], (event.currentTarget as HTMLInputElement).value)} /></label>
-      <label class="editor-field"><span class="editor-field-label">Sprite Intensity</span><input class="tuple-input" type="number" step="0.05" value={fireflies.spriteIntensity ?? 1.45} on:change={(event) => updateLevelNumericSetting(['fireflies', 'spriteIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
-      <label class="editor-field"><span class="editor-field-label">Light Intensity</span><input class="tuple-input" type="number" step="1" value={fireflies.lightIntensity ?? 44} on:change={(event) => updateLevelNumericSetting(['fireflies', 'lightIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
-      <label class="editor-field"><span class="editor-field-label">Light Distance</span><input class="tuple-input" type="number" step="1" value={fireflies.lightDistance ?? 28} on:change={(event) => updateLevelNumericSetting(['fireflies', 'lightDistance'], (event.currentTarget as HTMLInputElement).value)} /></label>
-      <label class="editor-field"><span class="editor-field-label">Light Decay</span><input class="tuple-input" type="number" step="0.05" value={fireflies.lightDecay ?? 1.35} on:change={(event) => updateLevelNumericSetting(['fireflies', 'lightDecay'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Sprite Intensity</span><input class="tuple-input" type="number" step="0.05" value={fireflyLighting.spriteIntensity ?? 1.45} on:change={(event) => updateLevelNumericSetting(['fireflies', 'lighting', 'spriteIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Light Intensity</span><input class="tuple-input" type="number" step="1" value={fireflyLighting.lightIntensity ?? 44} on:change={(event) => updateLevelNumericSetting(['fireflies', 'lighting', 'lightIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Light Distance</span><input class="tuple-input" type="number" step="1" value={fireflyLighting.lightDistance ?? 28} on:change={(event) => updateLevelNumericSetting(['fireflies', 'lighting', 'lightDistance'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Light Decay</span><input class="tuple-input" type="number" step="0.05" value={fireflyLighting.lightDecay ?? 1.35} on:change={(event) => updateLevelNumericSetting(['fireflies', 'lighting', 'lightDecay'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Minimum Glow</span><input class="tuple-input" type="number" min="0" max="1" step="0.01" value={fireflyLighting.minimumLightIntensityScale ?? 0.16} on:change={(event) => updateLevelNumericSetting(['fireflies', 'lighting', 'minimumLightIntensityScale'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Twinkle Speed</span><input class="tuple-input" type="number" step="0.01" value={fireflies.twinkleSpeed ?? 0.82} on:change={(event) => updateLevelNumericSetting(['fireflies', 'twinkleSpeed'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Drift Speed</span><input class="tuple-input" type="number" step="0.01" value={fireflies.driftSpeed ?? 0.28} on:change={(event) => updateLevelNumericSetting(['fireflies', 'driftSpeed'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Sway</span><input class="tuple-input" type="number" step="0.1" value={fireflies.sway ?? 1.5} on:change={(event) => updateLevelNumericSetting(['fireflies', 'sway'], (event.currentTarget as HTMLInputElement).value)} /></label>
@@ -190,7 +192,23 @@ $: fieldCenter = fireflies.center ?? [0, 0, 0]
         <label class="editor-field"><span class="editor-field-label">{tier.label} Count</span><input class="tuple-input" type="number" step="1" value={fireflies.qualityTiers?.[tier.id]?.count ?? ''} on:change={(event) => updateLevelNumericSetting(['fireflies', 'qualityTiers', tier.id, 'count'], (event.currentTarget as HTMLInputElement).value)} /></label>
         <label class="editor-field"><span class="editor-field-label">{tier.label} Lights</span><input class="tuple-input" type="number" step="1" value={fireflies.qualityTiers?.[tier.id]?.lightCount ?? ''} on:change={(event) => updateLevelNumericSetting(['fireflies', 'qualityTiers', tier.id, 'lightCount'], (event.currentTarget as HTMLInputElement).value)} /></label>
         <label class="editor-field"><span class="editor-field-label">{tier.label} Size</span><input class="tuple-input" type="number" step="0.05" value={fireflies.qualityTiers?.[tier.id]?.size ?? ''} on:change={(event) => updateLevelNumericSetting(['fireflies', 'qualityTiers', tier.id, 'size'], (event.currentTarget as HTMLInputElement).value)} /></label>
-        <label class="editor-field"><span class="editor-field-label">{tier.label} Intensity</span><input class="tuple-input" type="number" step="0.05" value={fireflies.qualityTiers?.[tier.id]?.spriteIntensity ?? ''} on:change={(event) => updateLevelNumericSetting(['fireflies', 'qualityTiers', tier.id, 'spriteIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+        <label class="editor-field"><span class="editor-field-label">{tier.label} Sprite</span><input class="tuple-input" type="number" step="0.05" value={fireflies.qualityTiers?.[tier.id]?.lighting?.spriteIntensity ?? ''} on:change={(event) => updateLevelNumericSetting(['fireflies', 'qualityTiers', tier.id, 'lighting', 'spriteIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+        <label class="editor-field"><span class="editor-field-label">{tier.label} Light</span><input class="tuple-input" type="number" step="1" value={fireflies.qualityTiers?.[tier.id]?.lighting?.lightIntensity ?? ''} on:change={(event) => updateLevelNumericSetting(['fireflies', 'qualityTiers', tier.id, 'lighting', 'lightIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+        <label class="editor-field"><span class="editor-field-label">{tier.label} Range</span><input class="tuple-input" type="number" step="1" value={fireflies.qualityTiers?.[tier.id]?.lighting?.lightDistance ?? ''} on:change={(event) => updateLevelNumericSetting(['fireflies', 'qualityTiers', tier.id, 'lighting', 'lightDistance'], (event.currentTarget as HTMLInputElement).value)} /></label>
+        <label class="editor-field"><span class="editor-field-label">{tier.label} Decay</span><input class="tuple-input" type="number" step="0.05" value={fireflies.qualityTiers?.[tier.id]?.lighting?.lightDecay ?? ''} on:change={(event) => updateLevelNumericSetting(['fireflies', 'qualityTiers', tier.id, 'lighting', 'lightDecay'], (event.currentTarget as HTMLInputElement).value)} /></label>
+        <label class="editor-field"><span class="editor-field-label">{tier.label} Glow</span><input class="tuple-input" type="number" min="0" max="1" step="0.01" value={fireflies.qualityTiers?.[tier.id]?.lighting?.minimumLightIntensityScale ?? ''} on:change={(event) => updateLevelNumericSetting(['fireflies', 'qualityTiers', tier.id, 'lighting', 'minimumLightIntensityScale'], (event.currentTarget as HTMLInputElement).value)} /></label>
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            checked={fireflies.qualityTiers?.[tier.id]?.lighting?.lightBudgeted ?? true}
+            on:change={(event) =>
+              updateLevelSetting(
+                ['fireflies', 'qualityTiers', tier.id, 'lighting', 'lightBudgeted'],
+                (event.currentTarget as HTMLInputElement).checked,
+              )}
+          />
+          {tier.label} Budgeted
+        </label>
       </div>
     {/each}
   </div>

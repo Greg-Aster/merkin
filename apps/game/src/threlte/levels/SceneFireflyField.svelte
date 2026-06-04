@@ -1,9 +1,13 @@
 <script lang="ts">
-import { T, useTask } from '@threlte/core'
+import { T, useTask, useThrelte } from '@threlte/core'
 import { onDestroy } from 'svelte'
 import * as THREE from 'three'
 import StarSprite from '../components/StarSprite.svelte'
 import type { NpcConversationConfig } from '../engine/npcTypes'
+import {
+  DEFAULT_SCENE_FIREFLY_LIGHTING,
+  type ResolvedSceneFireflyLighting,
+} from '../engine/sceneFireflyField'
 import ManagedLight from '../features/lighting/ManagedLight.svelte'
 import { startNpcConversation } from '../features/npc'
 
@@ -57,11 +61,8 @@ export let interactive: SceneFireflyInteractiveSettings | undefined = undefined
 export let color = '#f4ffb8'
 export let secondaryColor = '#8defff'
 export let size = 0.58
-export let spriteIntensity = 1.45
-export let lightIntensity = 44
-export let lightDistance = 28
-export let lightDecay = 1.35
-export let lightBudgeted = true
+export let lighting: ResolvedSceneFireflyLighting =
+  DEFAULT_SCENE_FIREFLY_LIGHTING
 export let twinkleSpeed = 0.82
 export let driftSpeed = 0.28
 export let sway = 1.5
@@ -69,7 +70,16 @@ export let sway = 1.5
 let elapsed = 0
 let fireflies: SceneFirefly[] = []
 let hoveredFireflyId = ''
+let selectedLightFireflyIds = new Set<string>()
+let selectedLightFireflyKey = ''
+let lightSelectionAccumulator = 0
 const registeredInteractionIds = new Set<string>()
+const { camera } = useThrelte()
+const fireflyWorldPosition = new THREE.Vector3()
+const fireflyCameraWorldPosition = new THREE.Vector3()
+const fireflyViewFrustum = new THREE.Frustum()
+const fireflyViewProjectionMatrix = new THREE.Matrix4()
+const fireflyLightInfluenceSphere = new THREE.Sphere()
 
 const defaultProfileIds = [
   'elara-voss',
@@ -264,11 +274,107 @@ function getPulse(firefly: SceneFirefly, elapsedTime: number) {
 }
 
 function getSpriteIntensity(pulse: number) {
-  return spriteIntensity * (0.55 + pulse * 0.85)
+  return lighting.spriteIntensity * (0.55 + pulse * 0.85)
 }
 
 function getLightIntensity(pulse: number) {
-  return lightIntensity * pulse * pulse
+  const baseGlow = lighting.minimumLightIntensityScale
+  return lighting.lightIntensity * (baseGlow + (1 - baseGlow) * pulse * pulse)
+}
+
+function getActiveCamera(): THREE.Camera | null {
+  const candidate = camera as THREE.Camera & { current?: THREE.Camera | null }
+  const resolved = candidate?.current ?? candidate
+  return resolved && resolved.position instanceof THREE.Vector3
+    ? resolved
+    : null
+}
+
+function getWorldPositionFromLocal(position: [number, number, number]) {
+  return [
+    center[0] + position[0],
+    center[1] + position[1],
+    center[2] + position[2],
+  ] as [number, number, number]
+}
+
+function prepareFireflyLightViewFrustum(activeCamera: THREE.Camera) {
+  activeCamera.updateMatrixWorld()
+  const cameraWithProjectionUpdate = activeCamera as THREE.Camera & {
+    updateProjectionMatrix?: () => void
+  }
+  cameraWithProjectionUpdate.updateProjectionMatrix?.()
+  fireflyViewProjectionMatrix.multiplyMatrices(
+    activeCamera.projectionMatrix,
+    activeCamera.matrixWorldInverse,
+  )
+  fireflyViewFrustum.setFromProjectionMatrix(fireflyViewProjectionMatrix)
+}
+
+function isLightInfluenceInCameraView(position: [number, number, number]) {
+  fireflyWorldPosition.set(position[0], position[1], position[2])
+  fireflyLightInfluenceSphere.set(
+    fireflyWorldPosition,
+    Math.max(0.1, lighting.lightDistance),
+  )
+  return fireflyViewFrustum.intersectsSphere(fireflyLightInfluenceSphere)
+}
+
+function resolveSelectedLightFireflyIds() {
+  const activeCamera = getActiveCamera()
+  const selectedCount = Math.min(clampCount(lightCount, 0), fireflies.length)
+  if (selectedCount <= 0) return new Set<string>()
+
+  if (!activeCamera) {
+    return new Set(
+      fireflies.slice(0, selectedCount).map(firefly => firefly.id),
+    )
+  }
+
+  prepareFireflyLightViewFrustum(activeCamera)
+  activeCamera.getWorldPosition(fireflyCameraWorldPosition)
+
+  const candidates = fireflies
+    .map(firefly => {
+      const localPosition = getPosition(firefly, elapsed)
+      const worldPosition = getWorldPositionFromLocal(localPosition)
+      const distanceToCamera = fireflyCameraWorldPosition.distanceTo(
+        fireflyWorldPosition.set(
+          worldPosition[0],
+          worldPosition[1],
+          worldPosition[2],
+        ),
+      )
+      return {
+        firefly,
+        distanceToCamera,
+        pulse: getPulse(firefly, elapsed),
+        inCameraView: isLightInfluenceInCameraView(worldPosition),
+      }
+    })
+    .filter(candidate => candidate.inCameraView)
+
+  candidates.sort(
+    (a, b) =>
+      b.pulse - a.pulse ||
+      a.distanceToCamera - b.distanceToCamera ||
+      a.firefly.id.localeCompare(b.firefly.id),
+  )
+
+  return new Set(
+    candidates
+      .slice(0, selectedCount)
+      .map(candidate => candidate.firefly.id),
+  )
+}
+
+function refreshSelectedLightFireflies() {
+  const nextIds = resolveSelectedLightFireflyIds()
+  const nextKey = Array.from(nextIds).sort().join('|')
+  if (nextKey === selectedLightFireflyKey) return
+
+  selectedLightFireflyIds = nextIds
+  selectedLightFireflyKey = nextKey
 }
 
 function getInteractiveObjectId(firefly: SceneFirefly) {
@@ -384,6 +490,7 @@ async function startFireflyConversation(firefly: SceneFirefly) {
 $: buildSignature = JSON.stringify({
   fieldId,
   count,
+  lightCount,
   radius,
   minHeight,
   maxHeight,
@@ -398,17 +505,23 @@ $: buildSignature = JSON.stringify({
   color,
   secondaryColor,
   size,
+  lighting,
   twinkleSpeed,
   driftSpeed,
 })
 $: if (buildSignature) {
   buildFireflies()
+  refreshSelectedLightFireflies()
 }
-$: resolvedLightCount = Math.min(clampCount(lightCount, 0), fireflies.length)
 
 useTask(delta => {
   if (!enabled) return
   elapsed += delta
+  lightSelectionAccumulator += delta
+  if (lightSelectionAccumulator >= 0.12) {
+    lightSelectionAccumulator = 0
+    refreshSelectedLightFireflies()
+  }
 })
 
 onDestroy(() => {
@@ -418,7 +531,7 @@ onDestroy(() => {
 
 {#if enabled && fireflies.length > 0}
   <T.Group name={fieldId} position={center}>
-    {#each fireflies as firefly, index (firefly.id)}
+    {#each fireflies as firefly (firefly.id)}
       {@const fireflyPosition = getPosition(firefly, elapsed)}
       {@const pulse = getPulse(firefly, elapsed)}
       <StarSprite
@@ -438,16 +551,16 @@ onDestroy(() => {
         isHovered={hoveredFireflyId === firefly.id}
         onSpriteReady={(sprite) => registerFireflyInteraction(firefly, sprite)}
       />
-      {#if index < resolvedLightCount}
+      {#if selectedLightFireflyIds.has(firefly.id)}
         <ManagedLight
           id={`scene-firefly-light-${firefly.id}`}
           ownerId={firefly.id}
           position={fireflyPosition}
           color={firefly.color}
           intensity={getLightIntensity(pulse)}
-          distance={lightDistance * (0.78 + pulse * 0.22)}
-          decay={lightDecay}
-          runtimeBudgeted={lightBudgeted}
+          distance={lighting.lightDistance * (0.78 + pulse * 0.22)}
+          decay={lighting.lightDecay}
+          runtimeBudgeted={lighting.lightBudgeted}
         />
       {/if}
     {/each}

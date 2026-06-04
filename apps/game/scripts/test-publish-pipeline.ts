@@ -171,10 +171,6 @@ function createFireflyNpc(overrides: Partial<NpcComponent> = {}): NpcComponent {
       type: 'firefly',
       color: '#f4ffb8',
       size: 0.5,
-      spriteIntensity: 1,
-      lightIntensity: 2,
-      lightDistance: 7,
-      lightDecay: 1.4,
       twinkleSpeed: 0.8,
       lightBurstBoost: 1.25,
       selectionLightBoost: 3,
@@ -1359,10 +1355,28 @@ test('ambient firefly fields resolve quality-tier counts without authoring NPC a
       lightCount: 25,
       distribution: 'center-falloff',
       densityExponent: 2,
+      lighting: {
+        spriteIntensity: 1.4,
+        lightIntensity: 40,
+        lightDistance: 24,
+        lightDecay: 1.4,
+        minimumLightIntensityScale: 0.14,
+      },
       qualityTiers: {
         ultra_low: { count: 12, lightCount: 2 },
         medium: { count: 80, lightCount: 8 },
-        high: { count: 200, lightCount: 25, size: 1.1 },
+        high: {
+          count: 200,
+          lightCount: 25,
+          size: 1.1,
+          lighting: {
+            spriteIntensity: 1.8,
+            lightIntensity: 60,
+            lightDistance: 30,
+            minimumLightIntensityScale: 0.22,
+            lightBudgeted: false,
+          },
+        },
       },
     },
   })
@@ -1371,6 +1385,12 @@ test('ambient firefly fields resolve quality-tier counts without authoring NPC a
   assert.equal(quality.count, 200)
   assert.equal(quality.lightCount, 25)
   assert.equal(quality.size, 1.1)
+  assert.equal(quality.lighting.spriteIntensity, 1.8)
+  assert.equal(quality.lighting.lightIntensity, 60)
+  assert.equal(quality.lighting.lightDistance, 30)
+  assert.equal(quality.lighting.lightDecay, 1.4)
+  assert.equal(quality.lighting.minimumLightIntensityScale, 0.22)
+  assert.equal(quality.lighting.lightBudgeted, false)
 })
 
 test('Observatory source scene preserves ambient field lighting and authored firefly NPCs', () => {
@@ -1392,12 +1412,27 @@ test('Observatory source scene preserves ambient field lighting and authored fir
   assert.equal(fireflies?.allowWithAuthored, true)
   assert.equal(fireflies?.count, 72)
   assert.equal(fireflies?.lightCount, 10)
-  assert.equal(fireflies?.lightIntensity, 34)
-  assert.equal(fireflies?.lightDistance, 22)
+  assert.equal(fireflies?.lightIntensity, undefined)
+  assert.equal(fireflies?.lightDistance, undefined)
+  assert.equal(fireflies?.lighting?.lightIntensity, 68)
+  assert.equal(fireflies?.lighting?.lightDistance, 22)
+  assert.equal(fireflies?.lighting?.lightDecay, 1.45)
+  assert.equal(fireflies?.lighting?.minimumLightIntensityScale, 0.16)
   assert.deepEqual(fireflies?.center, [-137.2, 1.8, -49.5])
+  for (const node of scene.nodes ?? []) {
+    if (
+      node.npc?.archetype === 'firefly' ||
+      node.npc?.presentation?.type === 'firefly'
+    ) {
+      assert.equal(node.npc.presentation.spriteIntensity, undefined)
+      assert.equal(node.npc.presentation.lightIntensity, undefined)
+      assert.equal(node.npc.presentation.lightDistance, undefined)
+      assert.equal(node.npc.presentation.lightDecay, undefined)
+    }
+  }
 })
 
-test('runtime point-light budgets clamp visible count and source range', () => {
+test('runtime point-light budgets cap visible count and source range without player-distance culling', () => {
   const policy = resolveRuntimeVisibilityPolicy('high', {
     enableDynamicLighting: true,
     enableShadows: true,
@@ -1405,30 +1440,40 @@ test('runtime point-light budgets clamp visible count and source range', () => {
   })
   const visible = resolveRuntimePointLightVisibility({
     policy,
-    distanceToCamera: 6,
     sourceIntensity: 10,
     sourceDistance: 500,
   })
-  const culled = resolveRuntimePointLightVisibility({
-    policy,
-    distanceToCamera: 29,
+  const dynamicLightingDisabled = resolveRuntimePointLightVisibility({
+    policy: resolveRuntimeVisibilityPolicy('high', {
+      enableDynamicLighting: false,
+      enableShadows: true,
+      shadowMapSize: 1024,
+    }),
     sourceIntensity: 10,
     sourceDistance: 500,
+  })
+  const longRange = resolveRuntimePointLightVisibility({
+    policy,
+    sourceIntensity: 10,
+    sourceDistance: 14,
   })
   const unlit = resolveRuntimePointLightVisibility({
     policy,
-    distanceToCamera: 6,
     sourceIntensity: 0,
     sourceDistance: 500,
   })
 
   assert.equal(policy.pointLightBudget.maxVisibleCount, 8)
+  assert.equal(Object.hasOwn(policy.pointLightBudget, 'cullDistance'), false)
   assert.equal(visible.visible, true)
   assert.equal(visible.intensity, 8.8)
   assert.equal(visible.distance, 16)
-  assert.equal(culled.visible, false)
-  assert.equal(culled.intensity, 0)
-  assert.equal(culled.distance, 0)
+  assert.equal(longRange.visible, true)
+  assert.equal(longRange.intensity, 8.8)
+  assert.equal(longRange.distance, 12.6)
+  assert.equal(dynamicLightingDisabled.visible, false)
+  assert.equal(dynamicLightingDisabled.intensity, 0)
+  assert.equal(dynamicLightingDisabled.distance, 0)
   assert.equal(unlit.visible, false)
   assert.equal(unlit.intensity, 0)
   assert.equal(unlit.distance, 0)
@@ -1527,7 +1572,7 @@ test('NPC publish validation reports exact actor fields for invalid firefly data
             body: '',
           },
           presentation: {
-            lightDistance: -1,
+            size: -1,
             shockwaveEnabled: 'yes',
           } as any,
         }),
@@ -1565,7 +1610,7 @@ test('NPC publish validation reports exact actor fields for invalid firefly data
   )
   assert.match(
     errorText,
-    /NPC actor "invalid-firefly" field "npc\.presentation\.lightDistance"/,
+    /NPC actor "invalid-firefly" field "npc\.presentation\.size"/,
   )
   assert.match(
     errorText,

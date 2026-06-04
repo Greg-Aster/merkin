@@ -166,6 +166,55 @@ function normalizeSciFiPlanterB(
   }
 }
 
+function migrateFireflyNpcLightingContract(
+  scene: EditorSceneDocument,
+): EditorSceneDocument {
+  let changed = false
+  const nodes = scene.nodes.map(node => {
+    const npc = node.npc
+    if (!npc || npc.archetype !== 'firefly' || npc.presentation.type !== 'firefly') {
+      return node
+    }
+
+    const presentation = npc.presentation as typeof npc.presentation & {
+      spriteIntensity?: number
+      lightIntensity?: number
+      lightDistance?: number
+      lightDecay?: number
+      lightBudgeted?: boolean
+    }
+    if (
+      presentation.spriteIntensity === undefined &&
+      presentation.lightIntensity === undefined &&
+      presentation.lightDistance === undefined &&
+      presentation.lightDecay === undefined &&
+      presentation.lightBudgeted === undefined
+    ) {
+      return node
+    }
+
+    changed = true
+    const {
+      spriteIntensity: _spriteIntensity,
+      lightIntensity: _lightIntensity,
+      lightDistance: _lightDistance,
+      lightDecay: _lightDecay,
+      lightBudgeted: _lightBudgeted,
+      ...nextPresentation
+    } = presentation
+
+    return {
+      ...node,
+      npc: {
+        ...npc,
+        presentation: nextPresentation,
+      },
+    }
+  })
+
+  return changed ? { ...scene, nodes } : scene
+}
+
 export function upgradeLegacySceneDocument(
   scene: EditorSceneDocument,
 ): EditorSceneDocument {
@@ -177,21 +226,27 @@ export function upgradeLegacySceneDocument(
     sceneWithPackagedSettings.levelId === 'sci-fi-room'
       ? normalizeSciFiPlanterB(sceneWithPackagedSettings)
       : sceneWithPackagedSettings
+  const sceneWithUnifiedFireflyLighting =
+    migrateFireflyNpcLightingContract(normalizedScene)
 
-  const defaultScene = createDefaultSceneForLevel(normalizedScene.levelId)
+  const defaultScene = createDefaultSceneForLevel(
+    sceneWithUnifiedFireflyLighting.levelId,
+  )
   const nextVersion =
-    normalizedScene.levelId === 'sci-fi-room'
-      ? Math.max(normalizedScene.version, SCI_FI_ROOM_SCENE_VERSION)
-      : normalizedScene.version
+    sceneWithUnifiedFireflyLighting.levelId === 'sci-fi-room'
+      ? Math.max(sceneWithUnifiedFireflyLighting.version, SCI_FI_ROOM_SCENE_VERSION)
+      : sceneWithUnifiedFireflyLighting.version
 
   if (!defaultScene.nodes.length) {
     return {
-      ...normalizedScene,
+      ...sceneWithUnifiedFireflyLighting,
       version: nextVersion,
     }
   }
 
-  const existingIds = new Set(normalizedScene.nodes.map(node => node.id))
+  const existingIds = new Set(
+    sceneWithUnifiedFireflyLighting.nodes.map(node => node.id),
+  )
   const missingDefaultNodes = defaultScene.nodes.filter(
     node => !existingIds.has(node.id),
   )
@@ -204,7 +259,7 @@ export function upgradeLegacySceneDocument(
   }
 
   const defaultNodeCount = defaultScene.nodes.length
-  const currentNodeCount = normalizedScene.nodes.length
+  const currentNodeCount = sceneWithUnifiedFireflyLighting.nodes.length
   const missingRatio =
     missingDefaultNodes.length / Math.max(defaultNodeCount, 1)
   const shouldRepairFromDefaults =
@@ -214,15 +269,15 @@ export function upgradeLegacySceneDocument(
 
   if (!shouldRepairFromDefaults) {
     return {
-      ...normalizedScene,
+      ...sceneWithUnifiedFireflyLighting,
       version: nextVersion,
     }
   }
 
   return {
-    ...normalizedScene,
+    ...sceneWithUnifiedFireflyLighting,
     version: nextVersion,
-    nodes: [...normalizedScene.nodes, ...missingDefaultNodes],
+    nodes: [...sceneWithUnifiedFireflyLighting.nodes, ...missingDefaultNodes],
   }
 }
 

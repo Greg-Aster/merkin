@@ -17,7 +17,6 @@ export interface RuntimePropBudget {
 
 export interface RuntimePointLightBudget {
   enabled: boolean
-  cullDistance: number
   maxVisibleCount: number
   maxDistance: number
   intensityScale: number
@@ -77,7 +76,6 @@ const POINT_LIGHT_BUDGETS: Record<RuntimeQualityTier, RuntimePointLightBudget> =
   {
     ultra_low: {
       enabled: false,
-      cullDistance: 0,
       maxVisibleCount: 0,
       maxDistance: 0,
       intensityScale: 0,
@@ -85,7 +83,6 @@ const POINT_LIGHT_BUDGETS: Record<RuntimeQualityTier, RuntimePointLightBudget> =
     },
     low: {
       enabled: false,
-      cullDistance: 0,
       maxVisibleCount: 0,
       maxDistance: 0,
       intensityScale: 0,
@@ -93,7 +90,6 @@ const POINT_LIGHT_BUDGETS: Record<RuntimeQualityTier, RuntimePointLightBudget> =
     },
     medium: {
       enabled: true,
-      cullDistance: 18,
       maxVisibleCount: 4,
       maxDistance: 10,
       intensityScale: 0.72,
@@ -101,7 +97,6 @@ const POINT_LIGHT_BUDGETS: Record<RuntimeQualityTier, RuntimePointLightBudget> =
     },
     high: {
       enabled: true,
-      cullDistance: 28,
       maxVisibleCount: 8,
       maxDistance: 16,
       intensityScale: 0.88,
@@ -109,7 +104,6 @@ const POINT_LIGHT_BUDGETS: Record<RuntimeQualityTier, RuntimePointLightBudget> =
     },
     ultra: {
       enabled: true,
-      cullDistance: 40,
       maxVisibleCount: 12,
       maxDistance: 24,
       intensityScale: 1,
@@ -134,7 +128,6 @@ export function getRuntimePointLightBudget(
       enabled: false,
       intensityScale: 0,
       rangeScale: 0,
-      cullDistance: 0,
       maxVisibleCount: 0,
       maxDistance: 0,
     }
@@ -210,19 +203,16 @@ export function resolveRuntimePropVisibility({
 
 export function resolveRuntimePointLightVisibility({
   policy,
-  distanceToCamera,
   sourceIntensity,
   sourceDistance,
 }: {
   policy: RuntimeVisibilityPolicy
-  distanceToCamera: number
   sourceIntensity: number
   sourceDistance: number
 }): RuntimePointLightVisibility {
   const budget = policy.pointLightBudget
   const sourceEnabled = sourceIntensity > 0
-  const visible =
-    sourceEnabled && budget.enabled && distanceToCamera <= budget.cullDistance
+  const visible = sourceEnabled && budget.enabled
   const sourceRange = sourceDistance > 0 ? sourceDistance : budget.maxDistance
   const resolvedDistance = Math.min(
     sourceRange * budget.rangeScale,

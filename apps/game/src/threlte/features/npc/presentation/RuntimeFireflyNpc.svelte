@@ -4,6 +4,10 @@ import { createEventDispatcher, onDestroy } from 'svelte'
 import * as THREE from 'three'
 import StarSprite from '../../../components/StarSprite.svelte'
 import type { NpcComponent } from '../../../engine/npcTypes'
+import {
+  DEFAULT_SCENE_FIREFLY_LIGHTING,
+  type ResolvedSceneFireflyLighting,
+} from '../../../engine/sceneFireflyField'
 import { activeConversationSession } from '../../conversation/runtime'
 import ManagedLight from '../../lighting/ManagedLight.svelte'
 import RuntimeNpcInteractionTarget from '../RuntimeNpcInteractionTarget.svelte'
@@ -27,6 +31,8 @@ export let actorId = ''
 export let actor: RuntimeNpcActor | null = null
 export let levelId = ''
 export let npc: NpcComponent
+export let fireflyLighting: ResolvedSceneFireflyLighting =
+  DEFAULT_SCENE_FIREFLY_LIGHTING
 export let selected = false
 export let interactionSystem: any = null
 export let interactiveEnabled = false
@@ -39,7 +45,6 @@ let interactionSelectedUntil = 0
 let lightBurstGlow = 0
 let shockwaveIgnited = false
 let shockwaveIgnition = 0
-const npcFireflyPointLightScale = 0.16
 
 function getMotionOffset(
   presentation: ResolvedFireflyNpcPresentation,
@@ -137,8 +142,7 @@ function getLightIntensity(presentation: ResolvedFireflyNpcPresentation) {
   return (
     hoverBoost *
     selectedBoost *
-    getShockwaveIntensityMultiplier(presentation) *
-    npcFireflyPointLightScale
+    getShockwaveIntensityMultiplier(presentation)
   )
 }
 
@@ -198,7 +202,7 @@ useTask(delta => {
   )
 })
 
-$: presentation = resolveFireflyNpcPresentation(npc)
+$: presentation = resolveFireflyNpcPresentation(npc, fireflyLighting)
 
 onDestroy(() => {
   interactionHovered = false

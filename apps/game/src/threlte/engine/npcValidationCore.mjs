@@ -311,10 +311,6 @@ function validateFireflyPresentation({ actorId, presentation, errors }) {
 
   for (const [field, rule] of [
     ['npc.presentation.size', 'positive'],
-    ['npc.presentation.spriteIntensity', 'positive'],
-    ['npc.presentation.lightIntensity', 'non-negative'],
-    ['npc.presentation.lightDistance', 'positive'],
-    ['npc.presentation.lightDecay', 'positive'],
   ]) {
     const value = presentation[field.replace('npc.presentation.', '')]
     if (rule === 'positive' && !isPositiveFinite(value)) {

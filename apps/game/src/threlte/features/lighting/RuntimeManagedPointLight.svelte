@@ -1,5 +1,5 @@
 <script lang="ts">
-import { T, useTask, useThrelte } from '@threlte/core'
+import { T, useTask } from '@threlte/core'
 import * as THREE from 'three'
 import type { QualitySettings } from '../performance/OptimizationManager'
 import {
@@ -14,24 +14,12 @@ import type { RuntimeLightEmitter } from './RuntimeLightingController'
 
 export let emitter: RuntimeLightEmitter
 
-const { camera } = useThrelte()
-const worldPosition = new THREE.Vector3()
 const lightVisibilityThreshold = 0.001
 
-let currentDistanceToCamera = 0
-let distanceAccumulator = 0
 let renderedIntensity = 0
 let renderedDistance = 0
 let renderedVisible = false
 let renderedLightInitialized = false
-
-function getActiveCamera(): THREE.Camera | null {
-  const candidate = camera as THREE.Camera & { current?: THREE.Camera | null }
-  const resolved = candidate?.current ?? candidate
-  return resolved && resolved.position instanceof THREE.Vector3
-    ? resolved
-    : null
-}
 
 function getPointPosition(
   pointEmitter: RuntimeLightEmitter,
@@ -39,18 +27,8 @@ function getPointPosition(
   return pointEmitter.position ?? [0, 0, 0]
 }
 
-function updateCameraDistance() {
-  const activeCamera = getActiveCamera()
-  if (!activeCamera) return
-
-  const position = getPointPosition(emitter)
-  worldPosition.set(position[0], position[1], position[2])
-  currentDistanceToCamera = activeCamera.position.distanceTo(worldPosition)
-}
-
 function resolveLightBudget(
   pointEmitter: RuntimeLightEmitter,
-  distanceToCamera: number,
   qualityLevel: string,
   qualitySettings: QualitySettings,
 ) {
@@ -72,7 +50,6 @@ function resolveLightBudget(
 
   return resolveRuntimePointLightVisibility({
     policy,
-    distanceToCamera,
     sourceIntensity: pointEmitter.intensity,
     sourceDistance: pointEmitter.distance ?? 0,
   })
@@ -81,7 +58,6 @@ function resolveLightBudget(
 $: pointPosition = getPointPosition(emitter)
 $: budgetedLight = resolveLightBudget(
   emitter,
-  currentDistanceToCamera,
   $qualityLevelStore,
   $qualitySettingsStore,
 )
@@ -91,13 +67,6 @@ $: if (!renderedLightInitialized && budgetedLight) {
   renderedVisible = budgetedLight.visible
   renderedLightInitialized = true
 }
-
-useTask(delta => {
-  distanceAccumulator += delta
-  if (distanceAccumulator < 0.25) return
-  distanceAccumulator = 0
-  updateCameraDistance()
-})
 
 useTask(delta => {
   const targetIntensity = budgetedLight.visible ? budgetedLight.intensity : 0

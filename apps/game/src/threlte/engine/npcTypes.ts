@@ -48,15 +48,10 @@ export interface NpcFireflyPresentationConfig {
   color: string
   secondaryColor?: string
   size: number
-  spriteIntensity: number
-  lightIntensity: number
-  lightDistance: number
-  lightDecay: number
   twinkleSpeed?: number
   lightBurstBoost?: number
   selectionLightBoost?: number
   lightBurstSpriteBoost?: number
-  lightBudgeted?: boolean
   shockwaveEnabled?: boolean
 }
 

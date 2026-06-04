@@ -1,7 +1,8 @@
 <script lang="ts">
 import { T, useTask, useThrelte } from '@threlte/core'
-import { onDestroy } from 'svelte'
+import { onDestroy, onMount } from 'svelte'
 import type { Camera, DirectionalLight } from 'three'
+import * as THREE from 'three'
 import {
   qualityLevelStore,
   qualitySettingsStore,
@@ -21,8 +22,14 @@ const { camera } = useThrelte()
 let snapshot: RuntimeLightingSnapshot
 let keyLightRef: DirectionalLight | null = null
 let activeCameraPosition: [number, number, number] | null = null
+let activeCameraRef: Camera | null = null
 let pointLightDistanceAccumulator = 0
 let pointLightBudgetRefreshToken = 0
+const pointLightViewPosition = new THREE.Vector3()
+const pointLightCameraWorldPosition = new THREE.Vector3()
+const pointLightInfluenceFrustum = new THREE.Frustum()
+const pointLightInfluenceMatrix = new THREE.Matrix4()
+const pointLightInfluenceSphere = new THREE.Sphere()
 
 const unsubscribe = controller.subscribe(value => {
   snapshot = value
@@ -59,10 +66,17 @@ function updatePointLightBudgetCamera() {
   const activeCamera = getActiveCamera()
   if (!activeCamera) return
 
+  activeCamera.updateMatrixWorld()
+  const cameraWithProjectionUpdate = activeCamera as Camera & {
+    updateProjectionMatrix?: () => void
+  }
+  cameraWithProjectionUpdate.updateProjectionMatrix?.()
+  activeCameraRef = activeCamera
+  activeCamera.getWorldPosition(pointLightCameraWorldPosition)
   activeCameraPosition = [
-    activeCamera.position.x,
-    activeCamera.position.y,
-    activeCamera.position.z,
+    pointLightCameraWorldPosition.x,
+    pointLightCameraWorldPosition.y,
+    pointLightCameraWorldPosition.z,
   ]
   pointLightBudgetRefreshToken += 1
 }
@@ -79,9 +93,60 @@ function getPointEmitterDistanceToCamera(
   return Math.hypot(dx, dy, dz)
 }
 
+function preparePointLightInfluenceFrustum(activeCamera: Camera | null) {
+  if (!activeCamera) return null
+
+  activeCamera.updateMatrixWorld()
+  const cameraWithProjectionUpdate = activeCamera as Camera & {
+    updateProjectionMatrix?: () => void
+  }
+  cameraWithProjectionUpdate.updateProjectionMatrix?.()
+  pointLightInfluenceMatrix.multiplyMatrices(
+    activeCamera.projectionMatrix,
+    activeCamera.matrixWorldInverse,
+  )
+  pointLightInfluenceFrustum.setFromProjectionMatrix(pointLightInfluenceMatrix)
+  return pointLightInfluenceFrustum
+}
+
+function getPointEmitterInfluenceRadius(
+  emitter: RuntimeLightEmitter,
+  policy: ReturnType<typeof resolveRuntimeVisibilityPolicy>,
+) {
+  const sourceRange =
+    typeof emitter.distance === 'number' && Number.isFinite(emitter.distance)
+      ? emitter.distance
+      : policy.pointLightBudget.maxDistance
+  const visibleRange = Math.min(
+    Math.max(0, sourceRange),
+    Math.max(0, policy.pointLightBudget.maxDistance),
+  )
+  return Math.max(0.1, visibleRange)
+}
+
+function isPointEmitterInfluenceInCameraView(
+  emitter: RuntimeLightEmitter,
+  activeFrustum: THREE.Frustum | null,
+  distanceToCamera: number,
+  policy: ReturnType<typeof resolveRuntimeVisibilityPolicy>,
+) {
+  if (!activeFrustum || !emitter.position) return true
+  if (distanceToCamera <= 0.75) return true
+
+  pointLightViewPosition.set(
+    emitter.position[0],
+    emitter.position[1],
+    emitter.position[2],
+  )
+  pointLightInfluenceSphere.set(
+    pointLightViewPosition,
+    getPointEmitterInfluenceRadius(emitter, policy),
+  )
+  return activeFrustum.intersectsSphere(pointLightInfluenceSphere)
+}
+
 function getPointEmitterScore(
   emitter: RuntimeLightEmitter,
-  distanceToCamera: number,
   policy: ReturnType<typeof resolveRuntimeVisibilityPolicy>,
 ) {
   const budget = policy.pointLightBudget
@@ -90,16 +155,14 @@ function getPointEmitterScore(
     Math.max(1, sourceRange),
     Math.max(1, budget.maxDistance),
   )
-  return (
-    (Math.max(0, emitter.intensity) * rangeScore) /
-    Math.max(1, distanceToCamera)
-  )
+  return Math.max(0, emitter.intensity) * rangeScore
 }
 
 function resolveBudgetedPointEmitters(
   emitters: RuntimeLightEmitter[],
   policy: ReturnType<typeof resolveRuntimeVisibilityPolicy>,
   cameraPosition: [number, number, number] | null,
+  activeCamera: Camera | null,
   _refreshToken: number,
 ) {
   const budget = policy.pointLightBudget
@@ -107,6 +170,7 @@ function resolveBudgetedPointEmitters(
   const unbudgetedEmitters = enabledEmitters.filter(
     emitter => emitter.runtimeBudgeted === false,
   )
+  const activeFrustum = preparePointLightInfluenceFrustum(activeCamera)
   const budgetedCandidates = enabledEmitters
     .filter(emitter => emitter.runtimeBudgeted !== false && emitter.position)
     .map((emitter, index) => {
@@ -118,10 +182,16 @@ function resolveBudgetedPointEmitters(
         emitter,
         index,
         distanceToCamera,
-        score: getPointEmitterScore(emitter, distanceToCamera, policy),
+        inCameraView: isPointEmitterInfluenceInCameraView(
+          emitter,
+          activeFrustum,
+          distanceToCamera,
+          policy,
+        ),
+        score: getPointEmitterScore(emitter, policy),
       }
     })
-    .filter(candidate => candidate.distanceToCamera <= budget.cullDistance)
+    .filter(candidate => candidate.inCameraView)
 
   if (!budget.enabled || budget.maxVisibleCount <= 0) {
     return unbudgetedEmitters
@@ -167,6 +237,7 @@ $: budgetedPointEmitters = resolveBudgetedPointEmitters(
   pointEmitters,
   visibilityPolicy,
   activeCameraPosition,
+  activeCameraRef,
   pointLightBudgetRefreshToken,
 )
 $: applyKeyLightShadowBudget()
@@ -175,6 +246,10 @@ useTask(delta => {
   pointLightDistanceAccumulator += delta
   if (pointLightDistanceAccumulator < 0.25) return
   pointLightDistanceAccumulator = 0
+  updatePointLightBudgetCamera()
+})
+
+onMount(() => {
   updatePointLightBudgetCamera()
 })
 

@@ -1500,6 +1500,7 @@ $: sceneFireflyFieldQuality = resolveSceneFireflyFieldQuality({
   defaultSize: 0.58,
   defaultSpriteIntensity: 1.45,
 })
+$: sceneFireflyLighting = sceneFireflyFieldQuality.lighting
 $: sceneStarMapEnabled = sharedLevelSettings.features?.starMap ?? false
 $: waterLevel = waterSettings?.level ?? waterSettings?.initialLevel ?? -0.16
 $: waterColor = parseSceneColor(waterSettings?.color, 0x050b14)
@@ -1814,11 +1815,7 @@ onDestroy(() => {
         color={sharedLevelSettings.fireflies?.color ?? '#f4ffb8'}
         secondaryColor={sharedLevelSettings.fireflies?.secondaryColor ?? '#8defff'}
         size={sceneFireflyFieldQuality.size}
-        spriteIntensity={sceneFireflyFieldQuality.spriteIntensity}
-        lightIntensity={sharedLevelSettings.fireflies?.lightIntensity ?? 44}
-        lightDistance={sharedLevelSettings.fireflies?.lightDistance ?? 28}
-        lightDecay={sharedLevelSettings.fireflies?.lightDecay ?? 1.35}
-        lightBudgeted={sharedLevelSettings.fireflies?.lightBudgeted ?? true}
+        lighting={sceneFireflyLighting}
         twinkleSpeed={sharedLevelSettings.fireflies?.twinkleSpeed ?? 0.82}
         driftSpeed={sharedLevelSettings.fireflies?.driftSpeed ?? 0.28}
         sway={sharedLevelSettings.fireflies?.sway ?? 1.5}
@@ -1861,6 +1858,7 @@ onDestroy(() => {
           {interactionSystem}
           interactiveEnabled={true}
           visibleActorIds={visibleActorIdsForRender}
+          fireflyLighting={sceneFireflyLighting}
           on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
           on:noteRead={(event) => dispatch('noteRead', event.detail)}
           on:npcInteraction={(event) => dispatch('npcInteraction', event.detail)}

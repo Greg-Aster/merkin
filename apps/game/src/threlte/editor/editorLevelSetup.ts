@@ -10,6 +10,7 @@ const SHARED_LEVEL_SETTING_KEYS = [
   'spawn',
   'player',
   'features',
+  'fireflies',
   'style',
   'lighting',
   'renderProfile',
@@ -107,6 +108,12 @@ function hasSettingsEntries(
   return !!source && Object.keys(source).length > 0
 }
 
+function definedSettingsEntries<T extends Record<string, unknown>>(source: T) {
+  return Object.fromEntries(
+    Object.entries(source).filter(([, value]) => value !== undefined),
+  ) as Partial<T>
+}
+
 function collectLegacySharedLevelSettings(
   settings: EditorSceneSettings,
 ): SharedLevelEditorSettings {
@@ -196,6 +203,75 @@ function migrateRetiredLightingFields(settings: SharedLevelEditorSettings) {
   >
 }
 
+function migrateFireflyLightingContract(settings: SharedLevelEditorSettings) {
+  type LegacyFireflyQualityTierSettings = {
+    spriteIntensity?: number
+    lightIntensity?: number
+    lightDistance?: number
+    lightDecay?: number
+    minimumLightIntensityScale?: number
+    lightBudgeted?: boolean
+    lighting?: Record<string, unknown>
+  }
+
+  const fireflies = settings.fireflies as
+    | (NonNullable<SharedLevelEditorSettings['fireflies']> & {
+        spriteIntensity?: number
+        lightIntensity?: number
+        lightDistance?: number
+        lightDecay?: number
+        lightBudgeted?: boolean
+      })
+    | undefined
+  if (!fireflies) return
+
+  const legacyLighting = definedSettingsEntries({
+    spriteIntensity: fireflies.spriteIntensity,
+    lightIntensity: fireflies.lightIntensity,
+    lightDistance: fireflies.lightDistance,
+    lightDecay: fireflies.lightDecay,
+    lightBudgeted: fireflies.lightBudgeted,
+  })
+  if (hasSettingsEntries(legacyLighting)) {
+    fireflies.lighting = mergeLevelSettings(
+      legacyLighting,
+      fireflies.lighting ?? {},
+    )
+  }
+  delete fireflies.spriteIntensity
+  delete fireflies.lightIntensity
+  delete fireflies.lightDistance
+  delete fireflies.lightDecay
+  delete fireflies.lightBudgeted
+
+  const qualityTiers = fireflies.qualityTiers as
+    | Record<string, LegacyFireflyQualityTierSettings>
+    | undefined
+
+  for (const tierSettings of Object.values(qualityTiers ?? {})) {
+    const tierLegacyLighting = definedSettingsEntries({
+      spriteIntensity: tierSettings.spriteIntensity,
+      lightIntensity: tierSettings.lightIntensity,
+      lightDistance: tierSettings.lightDistance,
+      lightDecay: tierSettings.lightDecay,
+      minimumLightIntensityScale: tierSettings.minimumLightIntensityScale,
+      lightBudgeted: tierSettings.lightBudgeted,
+    })
+    if (hasSettingsEntries(tierLegacyLighting)) {
+      tierSettings.lighting = mergeLevelSettings(
+        tierLegacyLighting,
+        tierSettings.lighting ?? {},
+      )
+    }
+    delete tierSettings.spriteIntensity
+    delete tierSettings.lightIntensity
+    delete tierSettings.lightDistance
+    delete tierSettings.lightDecay
+    delete tierSettings.minimumLightIntensityScale
+    delete tierSettings.lightBudgeted
+  }
+}
+
 function migrateLegacyObservatorySettings(settings: EditorSceneSettings): void {
   const observatory = settings.observatory as
     | (ObservatoryEditorSettings & {
@@ -229,6 +305,7 @@ export function normalizeLevelSceneSettings(
   migrateLegacyFeatureAliases(normalized.level)
   migrateLegacyGroundVisualSource(normalized.level)
   migrateRetiredLightingFields(normalized.level)
+  migrateFireflyLightingContract(normalized.level)
 
   const workflow = getLevelCollisionWorkflow(levelId, normalized)
 

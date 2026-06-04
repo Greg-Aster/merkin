@@ -5,6 +5,8 @@ import { createEditorRuntimePreviewPlan } from '../engine/editorRuntimePreviewPl
 import { resolveRuntimePlayerSettings } from '../engine/runtimePlayerSettings'
 import { loadRuntimeSceneDocument } from '../engine/runtimeSceneDocumentLoader'
 import { adaptSceneDocumentToLevelDefinition } from '../engine/sceneAdapter'
+import { resolveSceneFireflyLighting } from '../engine/sceneFireflyField'
+import { qualityLevelStore } from '../features/performance/stores/performanceStore'
 import type {
   ActorDefinition,
   GeneratedCollisionProduct,
@@ -440,6 +442,11 @@ $: runtimePreviewPlan = createEditorRuntimePreviewPlan({
 $: runtimeActorsCanRender =
   runtimePreviewSceneReady && Boolean(RuntimeActorBranchComponent)
 
+$: playtestFireflyLighting = resolveSceneFireflyLighting({
+  settings: editorScene?.settings?.level?.fireflies,
+  qualityTier: $qualityLevelStore,
+})
+
 $: runtimePreviewOwnsAuthoring =
   runtimePreviewPlan.mode === 'runtime-preview' &&
   (runtimePreviewPlan.levelRuntime.ownsRuntimeActors
@@ -555,6 +562,7 @@ onDestroy(() => {
           {interactionSystem}
           interactiveEnabled={runtimePreviewPlan.runtimeActors.interactive}
           collisionOnly={runtimePreviewPlan.runtimeActors.collisionOnly}
+          fireflyLighting={playtestFireflyLighting}
           on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
           on:noteRead={(event) => dispatch('noteRead', event.detail)}
         />
@@ -573,6 +581,7 @@ onDestroy(() => {
           interactionSystem={null}
           interactiveEnabled={false}
           collisionOnly={true}
+          fireflyLighting={playtestFireflyLighting}
         />
       {/each}
     {/if}

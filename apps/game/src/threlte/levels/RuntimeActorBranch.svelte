@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { ActorDefinition } from '../engine/types'
+import type { ResolvedSceneFireflyLighting } from '../engine/sceneFireflyField'
 import RuntimeActorNode from './RuntimeActorNode.svelte'
 
 export let actor: ActorDefinition
@@ -9,6 +10,7 @@ export let interactionSystem: any = null
 export let interactiveEnabled = false
 export let visibleActorIds: Set<string> | null = null
 export let collisionOnly = false
+export let fireflyLighting: ResolvedSceneFireflyLighting
 
 $: childActors = actors.filter(child => {
   if (child.parentId !== actor.id) return false
@@ -23,6 +25,7 @@ $: childActors = actors.filter(child => {
   {interactionSystem}
   {interactiveEnabled}
   {collisionOnly}
+  {fireflyLighting}
   on:portalTransition
   on:noteRead
   on:npcInteraction
@@ -36,6 +39,7 @@ $: childActors = actors.filter(child => {
       {interactiveEnabled}
       {visibleActorIds}
       {collisionOnly}
+      {fireflyLighting}
       on:portalTransition
       on:noteRead
       on:npcInteraction

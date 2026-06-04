@@ -3,6 +3,10 @@ import type {
   NpcComponent,
   NpcFireflyPresentationConfig,
 } from '../../../engine/npcTypes'
+import {
+  DEFAULT_SCENE_FIREFLY_LIGHTING,
+  type ResolvedSceneFireflyLighting,
+} from '../../../engine/sceneFireflyField'
 
 export interface ResolvedFireflyNpcPresentation {
   color: string
@@ -58,6 +62,7 @@ export function getNpcPresentationAnimationPhase(id: string) {
 
 export function resolveFireflyNpcPresentation(
   npc: NpcComponent,
+  fireflyLighting: ResolvedSceneFireflyLighting = DEFAULT_SCENE_FIREFLY_LIGHTING,
 ): ResolvedFireflyNpcPresentation | null {
   if (!isFireflyNpcPresentation(npc.presentation)) return null
 
@@ -69,14 +74,10 @@ export function resolveFireflyNpcPresentation(
     color: presentation.color,
     secondaryColor: presentation.secondaryColor ?? presentation.color,
     size: finiteNumberOrDefault(presentation.size, 0.58, 0),
-    spriteIntensity: finiteNumberOrDefault(
-      presentation.spriteIntensity,
-      1.15,
-      0,
-    ),
-    lightIntensity: finiteNumberOrDefault(presentation.lightIntensity, 1.15, 0),
-    lightDistance: finiteNumberOrDefault(presentation.lightDistance, 4.6, 0),
-    lightDecay: finiteNumberOrDefault(presentation.lightDecay, 1.25, 0),
+    spriteIntensity: fireflyLighting.spriteIntensity,
+    lightIntensity: fireflyLighting.lightIntensity,
+    lightDistance: fireflyLighting.lightDistance,
+    lightDecay: fireflyLighting.lightDecay,
     twinkleSpeed: finiteNumberOrDefault(presentation.twinkleSpeed, 0.9, 0),
     lightBurstBoost: finiteNumberOrDefault(presentation.lightBurstBoost, 1, 0),
     selectionLightBoost: finiteNumberOrDefault(
@@ -89,7 +90,7 @@ export function resolveFireflyNpcPresentation(
       0.55,
       0,
     ),
-    lightBudgeted: presentation.lightBudgeted ?? true,
+    lightBudgeted: fireflyLighting.lightBudgeted,
     shockwaveEnabled: presentation.shockwaveEnabled ?? false,
     hoverHeight: finiteNumberOrDefault(hoverWander?.hoverHeight, 0.28),
     bobAmplitude: finiteNumberOrDefault(hoverWander?.bobAmplitude, 0.08, 0),

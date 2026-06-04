@@ -6,13 +6,20 @@ import * as THREE from 'three'
 import HeroProp from '../components/HeroProp.svelte'
 import ProceduralMesh from '../components/ProceduralMesh.svelte'
 import { getSceneNodeMeshRenderSource } from '../engine/actorRenderSource'
+import { resolveSceneFireflyLighting } from '../engine/sceneFireflyField'
 import ManagedLight from '../features/lighting/ManagedLight.svelte'
+import { qualityLevelStore } from '../features/performance/stores/performanceStore'
 import RuntimePrefabNode from '../levels/RuntimePrefabNode.svelte'
 import { EDITOR_MATERIAL_OVERRIDE_CONTEXT } from '../utils/materialOverrideContext'
-import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
+import type {
+  EditorMaterialData,
+  EditorSceneNode,
+  EditorSceneSettings,
+} from './editorTypes'
 
 export let node: EditorSceneNode
 export let editorEnabled = false
+export let sceneSettings: EditorSceneSettings | null = null
 
 $: meshSource = getSceneNodeMeshRenderSource(node)
 $: assetNode = meshSource.kind === 'asset' ? meshSource.asset : null
@@ -23,6 +30,10 @@ $: fireflyNpcPresentation =
   node.npc?.archetype === 'firefly' && node.npc.presentation.type === 'firefly'
     ? node.npc.presentation
     : null
+$: fireflyLighting = resolveSceneFireflyLighting({
+  settings: sceneSettings?.level?.fireflies,
+  qualityTier: $qualityLevelStore,
+})
 $: renderKey = `${node.id}:${node.kind}:${assetNode?.url ?? prefabNode?.type ?? primitiveNode?.geometry ?? lightNode?.color ?? fireflyNpcPresentation?.color ?? 'group'}`
 
 const materialOverrideStore = writable<EditorMaterialData | null>(null)
@@ -130,9 +141,9 @@ $: materialOverrideStore.set(
       ownerId={node.id}
       position={[0, 0, 0]}
       color={fireflyNpcPresentation.color}
-      intensity={fireflyNpcPresentation.lightIntensity}
-      distance={fireflyNpcPresentation.lightDistance}
-      decay={fireflyNpcPresentation.lightDecay ?? 1.25}
+      intensity={fireflyLighting.lightIntensity}
+      distance={fireflyLighting.lightDistance}
+      decay={fireflyLighting.lightDecay}
       runtimeBudgeted={!editorEnabled}
     />
     <ProceduralMesh
@@ -143,7 +154,7 @@ $: materialOverrideStore.set(
       scale={[1, 1, 1]}
       color={fireflyNpcPresentation.color}
       emissive={fireflyNpcPresentation.color}
-      emissiveIntensity={fireflyNpcPresentation.spriteIntensity}
+      emissiveIntensity={fireflyLighting.spriteIntensity}
       metalness={1}
       roughness={0.05}
       transparent={true}
@@ -157,7 +168,7 @@ $: materialOverrideStore.set(
       scale={[1, 1, 1]}
       color={fireflyNpcPresentation.secondaryColor ?? fireflyNpcPresentation.color}
       emissive={fireflyNpcPresentation.secondaryColor ?? fireflyNpcPresentation.color}
-      emissiveIntensity={fireflyNpcPresentation.spriteIntensity * 0.35}
+      emissiveIntensity={fireflyLighting.spriteIntensity * 0.35}
       metalness={1}
       roughness={0.04}
       transparent={true}

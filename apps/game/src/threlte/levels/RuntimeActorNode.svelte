@@ -12,6 +12,7 @@ import type {
   RuntimeGameplayData,
   RuntimeGameplayRenderNode,
 } from '../engine/runtimeGameplayTypes'
+import type { ResolvedSceneFireflyLighting } from '../engine/sceneFireflyField'
 import type { ActorDefinition } from '../engine/types'
 import RuntimeNpcSystem from '../features/npc/RuntimeNpcSystem.svelte'
 import RuntimeFireflyNpc from '../features/npc/presentation/RuntimeFireflyNpc.svelte'
@@ -27,6 +28,7 @@ export let levelId = ''
 export let interactionSystem: any = null
 export let interactiveEnabled = false
 export let collisionOnly = false
+export let fireflyLighting: ResolvedSceneFireflyLighting
 
 $: collision = actor.physics?.collision ?? null
 $: bodyType = actor.physics?.bodyType ?? 'fixed'
@@ -138,6 +140,7 @@ onDestroy(() => {
         actorId={actor.id}
         {levelId}
         npc={actor.npc}
+        {fireflyLighting}
         selected={false}
         {interactionSystem}
         {interactiveEnabled}

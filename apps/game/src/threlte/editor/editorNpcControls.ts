@@ -68,10 +68,6 @@ export type EditorNpcPatch =
       scope: 'presentationNumber'
       field:
         | 'size'
-        | 'spriteIntensity'
-        | 'lightIntensity'
-        | 'lightDistance'
-        | 'lightDecay'
         | 'twinkleSpeed'
         | 'lightBurstBoost'
         | 'selectionLightBoost'
@@ -124,10 +120,6 @@ export function createDefaultFireflyNpc(options: {
       color: '#ff4658',
       secondaryColor: '#f5f1a8',
       size: 0.58,
-      spriteIntensity: 1.15,
-      lightIntensity: 1.15,
-      lightDistance: 4.6,
-      lightDecay: 1.25,
       twinkleSpeed: 0.9,
       lightBurstBoost: 1.25,
       selectionLightBoost: 3,

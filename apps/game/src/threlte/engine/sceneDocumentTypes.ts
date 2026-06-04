@@ -509,6 +509,15 @@ export interface SharedLevelAmbientParticleSettings {
   }
 }
 
+export interface SharedLevelFireflyLightingSettings {
+  spriteIntensity?: number
+  lightIntensity?: number
+  lightDistance?: number
+  lightDecay?: number
+  minimumLightIntensityScale?: number
+  lightBudgeted?: boolean
+}
+
 export interface SharedLevelFireflySettings {
   fireflies?: {
     enabled?: boolean
@@ -522,10 +531,11 @@ export interface SharedLevelFireflySettings {
           count?: number
           lightCount?: number
           size?: number
-          spriteIntensity?: number
+          lighting?: SharedLevelFireflyLightingSettings
         }
       >
     >
+    lighting?: SharedLevelFireflyLightingSettings
     radius?: number
     minHeight?: number
     maxHeight?: number
@@ -544,11 +554,6 @@ export interface SharedLevelFireflySettings {
     color?: string
     secondaryColor?: string
     size?: number
-    spriteIntensity?: number
-    lightIntensity?: number
-    lightDistance?: number
-    lightDecay?: number
-    lightBudgeted?: boolean
     twinkleSpeed?: number
     driftSpeed?: number
     sway?: number

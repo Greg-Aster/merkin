@@ -127,12 +127,12 @@ onDestroy(() => {
       {sceneSettings}
     >
       {#if effectiveVisible && renderAuthoringVisuals}
-        <EditorNodeRenderContent {node} {editorEnabled} />
+        <EditorNodeRenderContent {node} {editorEnabled} {sceneSettings} />
       {/if}
     </EditorNodePhysicsBody>
   {:else}
     {#if effectiveVisible}
-      <EditorNodeRenderContent {node} {editorEnabled} />
+      <EditorNodeRenderContent {node} {editorEnabled} {sceneSettings} />
     {/if}
   {/if}
 
