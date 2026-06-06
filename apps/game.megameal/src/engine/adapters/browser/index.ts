@@ -274,15 +274,6 @@ export class BrowserInputAdapter
 		this.#listen(window, "pointercancel", (event) => {
 			this.#handlePointerCancel(event as PointerEvent);
 		});
-		this.#listen(this.#target, "touchstart", (event) => {
-			this.#setTouches(event as TouchEvent, true);
-		});
-		this.#listen(this.#target, "touchend", (event) => {
-			this.#setTouches(event as TouchEvent, false);
-		});
-		this.#listen(this.#target, "touchcancel", (event) => {
-			this.#setTouches(event as TouchEvent, false);
-		});
 		this.#listen(window, "blur", () => {
 			this.#endPointerLook({ emitClick: false });
 			this.input.setFocusState({ focused: false });
@@ -317,12 +308,6 @@ export class BrowserInputAdapter
 		this.#cleanups.push(() => {
 			target.removeEventListener(type, handler, options);
 		});
-	}
-
-	#setTouches(event: TouchEvent, active: boolean): void {
-		for (const touch of event.changedTouches) {
-			this.input.setTouch(String(touch.identifier), active);
-		}
 	}
 
 	#handlePointerDown(event: PointerEvent): void {

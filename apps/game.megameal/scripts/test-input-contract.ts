@@ -1,10 +1,17 @@
+import { CommandBus, World } from "../src/engine/core/index.js";
 import {
 	InputManager,
 	createActionMap,
 } from "../src/engine/modules/input/index.js";
 import {
+	INPUT_SNAPSHOT_RESOURCE,
+	PLAYER_ENTITY_RESOURCE,
+	PLAYER_INPUT_COMPONENT,
+} from "../src/game/systems/components.js";
+import {
 	MOBILE_TOUCH_ACTION_IDS,
 	createGameplayActionMap,
+	createPlayerInputSystem,
 } from "../src/game/systems/input.js";
 
 const emptyInput = () => new InputManager(createActionMap("test", []));
@@ -269,6 +276,52 @@ function assertDeepEqual(actual: unknown, expected: unknown, message?: string) {
 	input.setKey("KeyF", false);
 	const released = input.snapshot(3);
 	assertEqual(released.actions.get("charge.light")?.phase, "released");
+}
+
+{
+	const input = new InputManager(createGameplayActionMap());
+	const world = new World();
+	const player = world.createEntity();
+	const commands = new CommandBus();
+	const playerInput = createPlayerInputSystem({ input });
+
+	world.setResource(PLAYER_ENTITY_RESOURCE, player);
+	input.setKey("Space", true);
+	input.setTouch(MOBILE_TOUCH_ACTION_IDS.interactPrimary, true);
+	input.addPointerClick({
+		pointerId: 12,
+		button: 0,
+		position: [42, 64],
+	});
+
+	playerInput.update({
+		tick: 11,
+		world,
+		commands,
+	});
+
+	const dispatched = commands.peek();
+	const screenPointInteraction = dispatched.find(
+		(command) => command.type === "InteractAtScreenPoint",
+	);
+
+	assertEqual(world.hasResource(INPUT_SNAPSHOT_RESOURCE), true);
+	assertEqual(world.hasComponent(player, PLAYER_INPUT_COMPONENT), true);
+	assertEqual(
+		dispatched.some((command) => command.type === "MoveEntity"),
+		true,
+	);
+	assertEqual(
+		dispatched.some((command) => command.type === "JumpEntity"),
+		true,
+	);
+	assertEqual(
+		dispatched.some((command) => command.type === "InteractWithActiveTarget"),
+		true,
+	);
+	assertEqual(screenPointInteraction?.pointerId, 12);
+	assertEqual(screenPointInteraction?.button, 0);
+	assertDeepEqual(screenPointInteraction?.position, [42, 64]);
 }
 
 console.log("Input contract validation passed.");

@@ -15,6 +15,7 @@ import {
 	prototypeRuntimeSceneManifest,
 } from "../levels/index.js";
 import {
+	ACTIVE_INTERACTION_TARGET_RESOURCE,
 	ACTIVE_PORTAL_RESOURCE,
 	ACTIVE_STORY_NOTE_RESOURCE,
 	COLLECTED_COUNT_RESOURCE,
@@ -87,6 +88,7 @@ export function createGameScene(options: GameSceneOptions): Scene {
 			world.setResource(PLAYER_ENTITY_RESOURCE, player.entity);
 			scope.registerCleanup(() => {
 				world.removeResource(PLAYER_ENTITY_RESOURCE);
+				world.removeResource(ACTIVE_INTERACTION_TARGET_RESOURCE);
 				world.removeResource(ACTIVE_PORTAL_RESOURCE);
 				world.removeResource(ACTIVE_STORY_NOTE_RESOURCE);
 				world.removeResource(OPEN_STORY_NOTE_RESOURCE);

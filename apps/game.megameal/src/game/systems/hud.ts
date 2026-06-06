@@ -6,11 +6,7 @@ import {
 } from "../../engine/modules/rendering/index.js";
 import {
 	ACTIVE_INTERACTION_TARGET_RESOURCE,
-	ACTIVE_PORTAL_RESOURCE,
-	ACTIVE_STORY_NOTE_RESOURCE,
 	type ActiveInteractionTargetState,
-	type ActivePortalState,
-	type ActiveStoryNoteState,
 	CHARGED_ACTION_COMPONENT,
 	COLLECTED_COUNT_RESOURCE,
 	COLLECTIBLE_COMPONENT,
@@ -36,12 +32,6 @@ export function selectGameHudState(world: World): GameHudState {
 			? undefined
 			: world.getComponent<HealthComponent>(player, HEALTH_COMPONENT);
 	const input = world.getResource<InputSnapshot>(INPUT_SNAPSHOT_RESOURCE);
-	const activePortal = world.getResource<ActivePortalState>(
-		ACTIVE_PORTAL_RESOURCE,
-	);
-	const activeStoryNote = world.getResource<ActiveStoryNoteState>(
-		ACTIVE_STORY_NOTE_RESOURCE,
-	);
 	const activeInteractionTarget =
 		world.getResource<ActiveInteractionTargetState>(
 			ACTIVE_INTERACTION_TARGET_RESOURCE,
@@ -73,23 +63,23 @@ export function selectGameHudState(world: World): GameHudState {
 		inputEnabled: input?.focus.gameplayInputEnabled ?? false,
 		charging: chargedAction?.active ?? false,
 		chargeAmount: chargedAction?.normalizedCharge ?? 0,
-		...(activeInteractionTarget?.kind === "portal" && activePortal
+		...(activeInteractionTarget?.kind === "portal"
 			? {
 					activePortal: {
-						label: activePortal.label,
-						prompt: activePortal.prompt,
-						canTravel: activePortal.canTravel,
+						label: activeInteractionTarget.label,
+						prompt: activeInteractionTarget.prompt,
+						canTravel: activeInteractionTarget.canTravel,
 					},
 				}
 			: {}),
-		...(activeInteractionTarget?.kind === "story-note" && activeStoryNote
+		...(activeInteractionTarget?.kind === "story-note"
 			? {
 					activeStoryNote: {
-						title: activeStoryNote.title,
-						author: activeStoryNote.author,
-						location: activeStoryNote.location,
-						excerpt: activeStoryNote.excerpt,
-						prompt: activeStoryNote.prompt,
+						title: activeInteractionTarget.title,
+						author: activeInteractionTarget.author,
+						location: activeInteractionTarget.location,
+						excerpt: activeInteractionTarget.excerpt,
+						prompt: activeInteractionTarget.prompt,
 					},
 				}
 			: {}),

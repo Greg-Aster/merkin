@@ -50,7 +50,8 @@ export type MusicState = {
 };
 
 export type AudioSceneMusicData = {
-	readonly trackId: string;
+	readonly trackId?: string;
+	readonly trackIds?: readonly string[];
 	readonly volume?: number;
 	readonly autoplay?: boolean;
 };
@@ -170,12 +171,13 @@ export class AudioEventSystem {
 			const activeSceneId = this.activeSceneId?.();
 			const mappingSceneContext = eventSceneId ?? activeSceneId;
 
-			if (
-				mapping.sceneId !== undefined &&
-				mappingSceneContext !== undefined &&
-				mapping.sceneId !== mappingSceneContext
-			) {
-				continue;
+			if (mapping.sceneId !== undefined) {
+				if (
+					mappingSceneContext === undefined ||
+					mapping.sceneId !== mappingSceneContext
+				) {
+					continue;
+				}
 			}
 
 			const sceneId = eventSceneId ?? mapping.sceneId;
@@ -286,16 +288,42 @@ export function audioEventMappingsFromManifest(
 
 export function musicStateFromAudioContentManifest(
 	manifest: AudioContentManifest,
+	options: {
+		readonly selectionIndex?: number;
+	} = {},
 ): MusicState | undefined {
 	if (!manifest.sceneMusic) {
 		return undefined;
 	}
 
+	const trackIds = sceneMusicTrackIds(manifest.sceneMusic);
+
+	if (trackIds.length === 0) {
+		return undefined;
+	}
+
+	const selectionIndex = options.selectionIndex ?? 0;
+	const trackId = trackIds[selectionIndex % trackIds.length];
+
 	return {
-		trackId: manifest.sceneMusic.trackId,
+		trackId,
 		playing: manifest.sceneMusic.autoplay ?? true,
 		volume: manifest.sceneMusic.volume ?? 1,
 	};
+}
+
+export function sceneMusicTrackIds(
+	sceneMusic: AudioSceneMusicData | undefined,
+): readonly string[] {
+	if (!sceneMusic) {
+		return [];
+	}
+
+	if (sceneMusic.trackIds) {
+		return sceneMusic.trackIds;
+	}
+
+	return sceneMusic.trackId ? [sceneMusic.trackId] : [];
 }
 
 function isAudioEvent(event: EngineEvent): event is AudioEvent {
@@ -371,14 +399,58 @@ function validateAudioSceneMusicData(
 		return;
 	}
 
-	validateAllowedKeys(data, path, ["trackId", "volume", "autoplay"], errors);
-	requireString(data, "trackId", `${path}.trackId`, errors);
+	validateAllowedKeys(
+		data,
+		path,
+		["trackId", "trackIds", "volume", "autoplay"],
+		errors,
+	);
 
-	if (typeof data.trackId === "string" && data.trackId.length > 0) {
-		if (!audioAssetIds.has(data.trackId)) {
-			errors.push(
-				`${path}.trackId references unknown audio asset "${data.trackId}".`,
-			);
+	const hasTrackId = data.trackId !== undefined;
+	const hasTrackIds = data.trackIds !== undefined;
+
+	if (hasTrackId === hasTrackIds) {
+		errors.push(`${path} must provide exactly one of trackId or trackIds.`);
+	}
+
+	if (hasTrackId) {
+		requireString(data, "trackId", `${path}.trackId`, errors);
+
+		if (typeof data.trackId === "string" && data.trackId.length > 0) {
+			if (!audioAssetIds.has(data.trackId)) {
+				errors.push(
+					`${path}.trackId references unknown audio asset "${data.trackId}".`,
+				);
+			}
+		}
+	}
+
+	if (hasTrackIds) {
+		if (!Array.isArray(data.trackIds) || data.trackIds.length === 0) {
+			errors.push(`${path}.trackIds must be a non-empty array when provided.`);
+		} else {
+			const seenTrackIds = new Set<string>();
+
+			for (const [index, trackId] of data.trackIds.entries()) {
+				if (typeof trackId !== "string" || trackId.length === 0) {
+					errors.push(`${path}.trackIds.${index} must be a non-empty string.`);
+					continue;
+				}
+
+				if (seenTrackIds.has(trackId)) {
+					errors.push(
+						`${path}.trackIds contains duplicate track "${trackId}".`,
+					);
+				}
+
+				seenTrackIds.add(trackId);
+
+				if (!audioAssetIds.has(trackId)) {
+					errors.push(
+						`${path}.trackIds.${index} references unknown audio asset "${trackId}".`,
+					);
+				}
+			}
 		}
 	}
 

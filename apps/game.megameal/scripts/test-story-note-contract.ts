@@ -13,11 +13,15 @@ import {
 	type ActiveStoryNoteState,
 	OPEN_STORY_NOTE_RESOURCE,
 	type OpenStoryNoteState,
+	PLAYER_ENTITY_RESOURCE,
+	RUNTIME_SCENE_TRANSITION_RESOURCE,
 } from "../src/game/systems/components.js";
 import {
 	createInteractionCommandSystem,
 	createInteractionTargetSelectionSystem,
+	createPortalActivationSystem,
 	createStoryNoteActivationSystem,
+	selectGameHudState,
 } from "../src/game/systems/index.js";
 
 type TestEvent = EngineEvent & {
@@ -53,6 +57,7 @@ function createHarness() {
 		events: new EventBus<TestEvent>(),
 		interactionCommands: createInteractionCommandSystem(),
 		interactionTargets: createInteractionTargetSelectionSystem(),
+		portalActivation: createPortalActivationSystem(),
 		storyNotes: createStoryNoteActivationSystem(),
 		world: new World(),
 	};
@@ -101,6 +106,13 @@ function runInteractionTargetSelection(
 
 function runStoryNotes(harness: ReturnType<typeof createHarness>) {
 	harness.storyNotes.update({
+		events: harness.events,
+		world: harness.world,
+	});
+}
+
+function runPortalActivation(harness: ReturnType<typeof createHarness>) {
+	harness.portalActivation.update({
 		events: harness.events,
 		world: harness.world,
 	});
@@ -191,6 +203,81 @@ function runStoryNotes(harness: ReturnType<typeof createHarness>) {
 	runStoryNotes(harness);
 
 	assertEqual(harness.world.hasResource(OPEN_STORY_NOTE_RESOURCE), false);
+}
+
+{
+	const harness = createHarness();
+	const player = harness.world.createEntity();
+	const portal = activePortal();
+	const requestedRuntimeSceneIds: string[] = [];
+
+	harness.world.setResource(PLAYER_ENTITY_RESOURCE, player);
+	harness.world.setResource(ACTIVE_PORTAL_RESOURCE, portal);
+	harness.world.setResource(RUNTIME_SCENE_TRANSITION_RESOURCE, {
+		currentRuntimeSceneId() {
+			return "portal_arena_runtime";
+		},
+		canLoadRuntimeScene(runtimeSceneId: string) {
+			return runtimeSceneId === "miranda_deck_runtime";
+		},
+		requestRuntimeScene(runtimeSceneId: string) {
+			requestedRuntimeSceneIds.push(runtimeSceneId);
+		},
+	});
+
+	harness.events.emit({ type: "ActiveInteractionRequested" });
+	runInteractionTargetSelection(harness);
+	runPortalActivation(harness);
+
+	assertDeepEqual(requestedRuntimeSceneIds, ["miranda_deck_runtime"]);
+	assertEqual(
+		harness.events.peek().some((event) => event.type === "PortalActivated"),
+		true,
+	);
+}
+
+{
+	const harness = createHarness();
+	const selectedPortal = activePortal();
+	const stalePortal = {
+		...activePortal(0.5),
+		entity: 100,
+		label: "Stale Portal",
+		prompt: "Wrong prompt",
+	};
+
+	harness.world.setResource(ACTIVE_INTERACTION_TARGET_RESOURCE, {
+		kind: "portal",
+		...selectedPortal,
+	});
+	harness.world.setResource(ACTIVE_PORTAL_RESOURCE, stalePortal);
+
+	const hud = selectGameHudState(harness.world);
+
+	assertEqual(hud.activePortal?.label, "Portal");
+	assertEqual(hud.activePortal?.prompt, "Enter portal");
+}
+
+{
+	const harness = createHarness();
+	const selectedNote = activeStoryNote();
+	const staleNote = {
+		...activeStoryNote(0.5),
+		entity: 8,
+		title: "Stale Note",
+		prompt: "Wrong note prompt",
+	};
+
+	harness.world.setResource(ACTIVE_INTERACTION_TARGET_RESOURCE, {
+		kind: "story-note",
+		...selectedNote,
+	});
+	harness.world.setResource(ACTIVE_STORY_NOTE_RESOURCE, staleNote);
+
+	const hud = selectGameHudState(harness.world);
+
+	assertEqual(hud.activeStoryNote?.title, "Test Note");
+	assertEqual(hud.activeStoryNote?.prompt, "Read Test Note");
 }
 
 console.log("Story note contract validation passed.");

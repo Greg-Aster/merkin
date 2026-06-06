@@ -1,5 +1,9 @@
 import type { AssetManifest } from "../../engine/modules/assets/index.js";
 import type { AudioContentManifest } from "../../engine/modules/audio/index.js";
+import {
+	audioAmbientDarkShadowsOfDelight,
+	audioAmbientShadowWaltz,
+} from "./ambientAudioAssets.js";
 import { observatoryAudioContentManifest } from "./observatoryAssets.js";
 import { portalArenaAudioContentManifest } from "./portalArenaAssets.js";
 import {
@@ -331,12 +335,14 @@ const materialMirandaStoryMarkerMagenta = {
 const audioUiCollect = {
 	id: "audio_ui_collect",
 	kind: "audio",
-	url: "builtin://tone?frequencyHz=880&durationSeconds=0.12&volume=0.4",
+	url: "/audio/sfx/interface-click-tone.mp3",
+	tags: ["ui", "collect", "sfx"],
 } as const;
 const audioPlayerJump = {
 	id: "audio_player_jump",
 	kind: "audio",
-	url: "builtin://tone?frequencyHz=440&durationSeconds=0.09&volume=0.3",
+	url: "/audio/sfx/interface-sweep.mp3",
+	tags: ["player", "jump", "sfx"],
 } as const;
 const audioPlayerChargeRelease = {
 	id: "audio_player_charge_release",
@@ -418,6 +424,8 @@ export const mirandaDeckAssetManifest = {
 		audioPlayerJump,
 		audioPlayerChargeRelease,
 		audioMirandaAmbientWickedShadows,
+		audioAmbientDarkShadowsOfDelight,
+		audioAmbientShadowWaltz,
 	],
 	preloadGroups: {
 		miranda_deck: [
@@ -455,6 +463,8 @@ export const mirandaDeckAssetManifest = {
 			"audio_player_jump",
 			"audio_player_charge_release",
 			"audio_ambient_wicked_shadows_whisper",
+			"audio_ambient_dark_shadows_of_delight",
+			"audio_ambient_shadow_waltz",
 		],
 	},
 } satisfies AssetManifest;
@@ -487,7 +497,11 @@ export const prototypeAudioContentManifest = {
 
 export const mirandaDeckAudioContentManifest = {
 	sceneMusic: {
-		trackId: "audio_ambient_wicked_shadows_whisper",
+		trackIds: [
+			"audio_ambient_wicked_shadows_whisper",
+			"audio_ambient_dark_shadows_of_delight",
+			"audio_ambient_shadow_waltz",
+		],
 		volume: 0.16,
 		autoplay: true,
 	},

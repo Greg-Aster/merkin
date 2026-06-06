@@ -1,3 +1,4 @@
+export * from "./ambientAudioAssets.js";
 export * from "./defaultAssets.js";
 export * from "./observatoryAssets.js";
 export * from "./portalArenaAssets.js";

@@ -30,13 +30,6 @@ export type BrowserGainNodeLike = BrowserAudioNodeLike & {
 	readonly gain: BrowserAudioParamLike;
 };
 
-export type BrowserOscillatorNodeLike = BrowserAudioNodeLike & {
-	readonly frequency: BrowserAudioParamLike;
-	type: OscillatorType | string;
-	start(when?: number): void;
-	stop(when?: number): void;
-};
-
 export type BrowserAudioBufferSourceNodeLike = BrowserAudioNodeLike & {
 	buffer: BrowserAudioBufferLike | null;
 	loop: boolean;
@@ -49,19 +42,9 @@ export type BrowserAudioBufferSourceNodeLike = BrowserAudioNodeLike & {
 export type BrowserAudioContextLike = {
 	readonly destination: BrowserAudioNodeLike;
 	readonly currentTime: number;
-	readonly sampleRate?: number;
 	readonly state: AudioContextState | "closed" | "running" | "suspended";
 	createGain(): BrowserGainNodeLike;
 	createBufferSource(): BrowserAudioBufferSourceNodeLike;
-	createOscillator?(): BrowserOscillatorNodeLike;
-	createBuffer?(
-		channels: number,
-		length: number,
-		sampleRate: number,
-	): {
-		duration?: number;
-		getChannelData(channel: number): Float32Array;
-	};
 	decodeAudioData(data: ArrayBuffer): Promise<BrowserAudioBufferLike>;
 	resume(): Promise<void>;
 	close(): Promise<void>;
@@ -76,24 +59,11 @@ export type BrowserAudioManagerOptions = {
 	readonly masterVolume?: number;
 };
 
-export type ToneSoundOptions = {
-	readonly frequencyHz: number;
-	readonly durationSeconds: number;
-	readonly volume?: number;
-	readonly type?: OscillatorType | string;
+export type BrowserAudioAsset = {
+	readonly kind: "browser:audio-buffer";
+	readonly entry: AssetManifestEntry;
+	readonly buffer: BrowserAudioBufferLike;
 };
-
-export type BrowserAudioAsset =
-	| {
-			readonly kind: "browser:audio-buffer";
-			readonly entry: AssetManifestEntry;
-			readonly buffer: BrowserAudioBufferLike;
-	  }
-	| {
-			readonly kind: "browser:tone-sound";
-			readonly entry: AssetManifestEntry;
-			readonly options: ToneSoundOptions;
-	  };
 
 type PlaybackRecord = {
 	readonly id: string;
@@ -110,7 +80,6 @@ export class BrowserAudioManager implements AudioManagerPort {
 	readonly #context: BrowserAudioContextLike;
 	readonly #fetch: typeof fetch;
 	readonly #sounds = new Map<string, BrowserAudioBufferLike>();
-	readonly #toneSounds = new Map<string, ToneSoundOptions>();
 	readonly #playbacks = new Map<string, PlaybackRecord>();
 	readonly #gestureCleanups: Array<() => void> = [];
 	readonly #masterGain: BrowserGainNodeLike;
@@ -183,26 +152,15 @@ export class BrowserAudioManager implements AudioManagerPort {
 		}
 
 		this.#sounds.set(soundId, audioAsset);
-		this.#toneSounds.delete(soundId);
-	}
-
-	registerToneSound(soundId: string, options: ToneSoundOptions): void {
-		if (options.durationSeconds <= 0) {
-			throw new Error(`Tone sound "${soundId}" must have a positive duration.`);
-		}
-
-		this.#toneSounds.set(soundId, options);
-		this.#sounds.delete(soundId);
 	}
 
 	unregisterSound(soundId: string): void {
 		this.#sounds.delete(soundId);
-		this.#toneSounds.delete(soundId);
 		this.stop({ soundId });
 	}
 
 	hasSound(soundId: string): boolean {
-		return this.#sounds.has(soundId) || this.#toneSounds.has(soundId);
+		return this.#sounds.has(soundId);
 	}
 
 	async loadBuffer(
@@ -223,16 +181,6 @@ export class BrowserAudioManager implements AudioManagerPort {
 
 	createAssetLoader(): AssetLoader {
 		return async (entry: AssetManifestEntry) => {
-			if (isBuiltinToneUrl(entry.url)) {
-				const options = toneSoundOptionsFromUrl(entry.url);
-				this.registerToneSound(entry.id, options);
-				return {
-					kind: "browser:tone-sound",
-					entry,
-					options,
-				} satisfies BrowserAudioAsset;
-			}
-
 			const buffer = await this.loadBuffer(entry.id, entry.url);
 			return {
 				kind: "browser:audio-buffer",
@@ -359,7 +307,7 @@ export class BrowserAudioManager implements AudioManagerPort {
 	stats(): AudioManagerStats {
 		return {
 			unlocked: isAudioContextRunning(this.#context.state),
-			loadedSounds: this.#sounds.size + this.#toneSounds.size,
+			loadedSounds: this.#sounds.size,
 			activeSounds: this.#playbacks.size,
 			...(this.#music.trackId === undefined
 				? {}
@@ -378,7 +326,6 @@ export class BrowserAudioManager implements AudioManagerPort {
 		}
 		this.stopAll();
 		this.#sounds.clear();
-		this.#toneSounds.clear();
 		this.#masterGain.disconnect();
 		void this.#context.close();
 	}
@@ -386,45 +333,10 @@ export class BrowserAudioManager implements AudioManagerPort {
 	#createSource(soundId: string): BrowserAudioBufferSourceNodeLike | undefined {
 		const buffer = this.#sounds.get(soundId);
 
-		if (buffer) {
-			const source = this.#context.createBufferSource();
-			source.buffer = buffer;
-			return source;
-		}
-
-		const tone = this.#toneSounds.get(soundId);
-
-		if (!tone) {
+		if (!buffer) {
 			return undefined;
 		}
 
-		return this.#createToneSource(soundId, tone);
-	}
-
-	#createToneSource(
-		soundId: string,
-		tone: ToneSoundOptions,
-	): BrowserAudioBufferSourceNodeLike | undefined {
-		if (!this.#context.createBuffer) {
-			return undefined;
-		}
-
-		const sampleRate = this.#context.sampleRate ?? 44_100;
-		const length = Math.max(1, Math.round(tone.durationSeconds * sampleRate));
-		const buffer = this.#context.createBuffer(1, length, sampleRate);
-		const samples = buffer.getChannelData(0);
-		const amplitude = tone.volume ?? 0.4;
-
-		for (let index = 0; index < samples.length; index += 1) {
-			const progress = index / Math.max(1, samples.length - 1);
-			const envelope = Math.sin(Math.PI * progress);
-			samples[index] =
-				Math.sin((index / sampleRate) * tone.frequencyHz * Math.PI * 2) *
-				amplitude *
-				envelope;
-		}
-
-		this.registerSound(soundId, buffer);
 		const source = this.#context.createBufferSource();
 		source.buffer = buffer;
 		return source;
@@ -529,49 +441,4 @@ function isAudioBufferLike(value: unknown): value is BrowserAudioBufferLike {
 
 function isAudioContextRunning(state: unknown): boolean {
 	return state === "running";
-}
-
-function isBuiltinToneUrl(url: string): boolean {
-	return url.startsWith("builtin://tone");
-}
-
-function toneSoundOptionsFromUrl(url: string): ToneSoundOptions {
-	const parsed = new URL(url);
-	const frequencyHz = numberQueryParam(parsed, "frequencyHz");
-	const durationSeconds = numberQueryParam(parsed, "durationSeconds");
-	const volume = optionalNumberQueryParam(parsed, "volume");
-	const type = parsed.searchParams.get("type") ?? undefined;
-
-	return {
-		frequencyHz,
-		durationSeconds,
-		...(volume === undefined ? {} : { volume }),
-		...(type === undefined ? {} : { type }),
-	};
-}
-
-function numberQueryParam(url: URL, name: string): number {
-	const value = optionalNumberQueryParam(url, name);
-
-	if (value === undefined) {
-		throw new Error(`Missing numeric audio tone parameter "${name}".`);
-	}
-
-	return value;
-}
-
-function optionalNumberQueryParam(url: URL, name: string): number | undefined {
-	const value = url.searchParams.get(name);
-
-	if (value === null) {
-		return undefined;
-	}
-
-	const parsed = Number(value);
-
-	if (!Number.isFinite(parsed) || parsed <= 0) {
-		throw new Error(`Invalid audio tone parameter "${name}": ${value}.`);
-	}
-
-	return parsed;
 }

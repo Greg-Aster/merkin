@@ -40,7 +40,8 @@ const materialObservatoryFirefly = {
 const audioPlayerJump = {
 	id: "audio_player_jump",
 	kind: "audio",
-	url: "builtin://tone?frequencyHz=440&durationSeconds=0.09&volume=0.3",
+	url: "/audio/sfx/interface-sweep.mp3",
+	tags: ["player", "jump", "sfx"],
 } as const;
 const audioPlayerChargeRelease = {
 	id: "audio_player_charge_release",

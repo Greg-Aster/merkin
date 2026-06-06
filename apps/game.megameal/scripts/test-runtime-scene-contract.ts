@@ -16,7 +16,9 @@ import {
 	createAudioEventSystem,
 	evaluateRuntimeSceneReadiness,
 	loadRuntimeSceneManifest,
+	musicStateFromAudioContentManifest,
 	parseAudioContentManifest,
+	sceneMusicTrackIds,
 } from "../src/engine/index.js";
 import { audioContentManifestForRuntimeScene } from "../src/game/assets/index.js";
 import {
@@ -29,7 +31,10 @@ import {
 } from "../src/game/levels/index.js";
 import { PrefabRegistry } from "../src/game/prefabs/index.js";
 import { createGameScene } from "../src/game/scenes/index.js";
-import { PLAYER_ENTITY_RESOURCE } from "../src/game/systems/index.js";
+import {
+	ACTIVE_INTERACTION_TARGET_RESOURCE,
+	PLAYER_ENTITY_RESOURCE,
+} from "../src/game/systems/index.js";
 
 function assertEqual<TValue>(
 	actual: TValue,
@@ -108,7 +113,6 @@ function createFakeAudioContext(): {
 	const context: BrowserAudioContextLike = {
 		destination,
 		currentTime: 0,
-		sampleRate: 44_100,
 		state: "running",
 		createGain() {
 			return {
@@ -504,7 +508,7 @@ function allAssetStrings(
 	assertEqual(terrainRenderable.meshId, "mesh_observatory_environment");
 	assertDeepEqual(
 		transformPropertyForStableId(manifest, "observatory:terrain", "scale"),
-		[0.1808657926171221, 0.1808657926171221, 0.1808657926171221],
+		[1, 1, 1],
 	);
 	assertEqual(walkableCollider.intent, "solid");
 	assertEqual(walkableCollider.channel, "world");
@@ -1029,7 +1033,7 @@ for (const manifest of defaultRuntimeSceneManifests) {
 	const requiredAssetIds = new Set(manifest.readiness.requiredAssetIds ?? []);
 	const audioAssetIds = [
 		...audioContent.eventMappings.map((mapping) => mapping.soundId),
-		...(audioContent.sceneMusic ? [audioContent.sceneMusic.trackId] : []),
+		...sceneMusicTrackIds(audioContent.sceneMusic),
 	];
 
 	for (const audioAssetId of audioAssetIds) {
@@ -1140,6 +1144,32 @@ for (const manifest of defaultRuntimeSceneManifests) {
 		);
 	}
 
+	assertDeepEqual(sceneMusicTrackIds(audioContent.sceneMusic), [
+		"audio_ambient_portal_deck",
+		"audio_ambient_shadow_waltz",
+		"audio_ambient_whistling_dreams",
+	]);
+	assertEqual(
+		musicStateFromAudioContentManifest(audioContent, { selectionIndex: 0 })
+			?.trackId,
+		"audio_ambient_portal_deck",
+	);
+	assertEqual(
+		musicStateFromAudioContentManifest(audioContent, { selectionIndex: 1 })
+			?.trackId,
+		"audio_ambient_shadow_waltz",
+	);
+	assertEqual(
+		musicStateFromAudioContentManifest(audioContent, { selectionIndex: 2 })
+			?.trackId,
+		"audio_ambient_whistling_dreams",
+	);
+	assertEqual(
+		musicStateFromAudioContentManifest(audioContent, { selectionIndex: 3 })
+			?.trackId,
+		"audio_ambient_portal_deck",
+	);
+
 	assertErrorIncludes(
 		() =>
 			parseAudioContentManifest(
@@ -1147,7 +1177,7 @@ for (const manifest of defaultRuntimeSceneManifests) {
 					...audioContent,
 					sceneMusic: {
 						...audioContent.sceneMusic,
-						trackId: "missing_music_asset",
+						trackIds: ["missing_music_asset"],
 					},
 				},
 				{
@@ -1244,6 +1274,54 @@ for (const manifest of defaultRuntimeSceneManifests) {
 }
 
 {
+	const playedSounds: string[] = [];
+	const audioEvents = createAudioEventSystem({
+		audio: {
+			async unlock() {
+				return "unlocked";
+			},
+			registerSound() {},
+			unregisterSound() {},
+			hasSound() {
+				return true;
+			},
+			play(event) {
+				playedSounds.push(`${event.soundId}:${event.sceneId ?? "global"}`);
+				return undefined;
+			},
+			stop() {},
+			stopScene() {},
+			stopAll() {},
+			setMusic() {},
+			stats() {
+				return {
+					unlocked: true,
+					loadedSounds: 0,
+					activeSounds: 0,
+				};
+			},
+			dispose() {},
+		},
+		mappings: [
+			{
+				eventType: "EntityJumpRequested",
+				soundId: "jump-a",
+				sceneId: "scene:a",
+			},
+		],
+	});
+
+	audioEvents.handle({ type: "EntityJumpRequested", entity: 1 });
+	audioEvents.handle({
+		type: "EntityJumpRequested",
+		entity: 1,
+		sceneId: "scene:a",
+	});
+
+	assertDeepEqual(playedSounds, ["jump-a:scene:a"]);
+}
+
+{
 	const runtime = new EngineRuntime();
 	const sceneManager = new SceneManager();
 	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
@@ -1288,6 +1366,16 @@ for (const manifest of defaultRuntimeSceneManifests) {
 	assertEqual(sceneManager.status, "active");
 	assertEqual(runtime.world.entities().length, manifest.level.instances.length);
 	assertEqual(runtime.world.hasResource(PLAYER_ENTITY_RESOURCE), true);
+	runtime.world.setResource(ACTIVE_INTERACTION_TARGET_RESOURCE, {
+		kind: "portal",
+		entity: -1,
+		id: "stale-portal",
+		label: "Stale Portal",
+		prompt: "This target should be removed on unload",
+		targetRuntimeSceneId: "prototype_arena_runtime",
+		canTravel: true,
+		distanceSquared: 0,
+	});
 
 	const expectedPreloadedAssets = [...(manifest.level.preload ?? [])].sort();
 
@@ -1303,6 +1391,10 @@ for (const manifest of defaultRuntimeSceneManifests) {
 	assertEqual(sceneManager.activeScene, undefined);
 	assertEqual(runtime.world.entities().length, 0);
 	assertEqual(runtime.world.hasResource(PLAYER_ENTITY_RESOURCE), false);
+	assertEqual(
+		runtime.world.hasResource(ACTIVE_INTERACTION_TARGET_RESOURCE),
+		false,
+	);
 	assertEqual(assets.listLoaded().length, 0);
 	assertIncludes(stoppedSceneAudioIds, "portal_arena_game");
 

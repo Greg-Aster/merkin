@@ -45,6 +45,8 @@ export const portalArenaRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"audio_player_charge_release",
 			"audio_portal_activate",
 			"audio_ambient_portal_deck",
+			"audio_ambient_shadow_waltz",
+			"audio_ambient_whistling_dreams",
 		],
 		requiredCollisionPrefabIds: ["portal_arena_floor", "portal_gate", "player"],
 		requiredCollisionStableIds: [
@@ -137,6 +139,8 @@ export const mirandaDeckRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"audio_player_jump",
 			"audio_player_charge_release",
 			"audio_ambient_wicked_shadows_whisper",
+			"audio_ambient_dark_shadows_of_delight",
+			"audio_ambient_shadow_waltz",
 		],
 		requiredCollisionPrefabIds: [
 			"miranda_floor_main",

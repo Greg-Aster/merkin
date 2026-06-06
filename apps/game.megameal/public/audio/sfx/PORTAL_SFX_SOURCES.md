@@ -1,4 +1,4 @@
-# Portal SFX Sources
+# Production SFX Sources
 
 The `portal-*.mp3` files are edited from downloaded CC0 sound packs:
 
@@ -24,3 +24,18 @@ The `portal-*.mp3` files are edited from downloaded CC0 sound packs:
   - URL: https://opengameart.org/content/50-cc0-sci-fi-sfx
 
 Downloaded source files were trimmed or transcoded for short site UI effects.
+
+## Interface / Gameplay SFX
+
+- `interface-click-tone.mp3`
+  - Runtime ID: `audio_ui_collect`
+  - Source: checked-in project UI SFX.
+- `interface-sweep.mp3`
+  - Runtime ID: `audio_player_jump`
+  - Source: checked-in project UI SFX reused as the current file-backed jump
+    placeholder until a dedicated jump sound is selected.
+- `22-kenney-forceField_001.mp3`
+  - Runtime ID: `audio_player_charge_release`
+  - Source: `forceField_001.ogg` from Kenney "Sci-fi Sounds".
+  - License: CC0.
+  - URL: https://kenney.nl/assets/sci-fi-sounds

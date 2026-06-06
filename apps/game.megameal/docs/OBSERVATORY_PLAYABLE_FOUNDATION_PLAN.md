@@ -1,6 +1,6 @@
 # Observatory Playable Foundation Plan
 
-Status: implementation wired on 2026-06-06; final validation in progress.
+Status: implemented and validated on 2026-06-06.
 
 ## Summary
 
@@ -47,8 +47,7 @@ collision binary is ported.
 - Add player spawn at `[-137.2, 1.8, -49.5]` with
   `CharacterController.groundY: 1.8`.
 - Add player-carried point light on stable ID `player`.
-- Add GLB visual entity `observatory:terrain` with scale
-  `[0.1808657926171221, 0.1808657926171221, 0.1808657926171221]`.
+- Add GLB visual entity `observatory:terrain` with unit scale `[1, 1, 1]`.
 - Add flat explicit collision proxy `observatory:walkable-proxy` at top height
   `1.8`, half extents `[320, 0.05, 320]`.
 - Add character bounds `x/z = -300..300`.
@@ -136,7 +135,25 @@ Run:
   - shared assets `mesh_water_plane` and `material_water_dark_still`
   - shared prefab `water_surface_plane`
   - level-owned instance `observatory:water`
-- Final focused validation is in progress.
+- Focused validation passed:
+  - `audit:engine-boundaries`
+  - `type-check`
+  - `lint`
+  - `test:input-contract`
+  - `test:charged-action-contract`
+  - `test:story-note-contract`
+  - `test:scene-environment-contract`
+  - `test:runtime-scene-contract`
+  - `build`
+  - `git diff --check -- apps/game.megameal pnpm-lock.yaml`
+- Follow-up scale adjustment: `observatory:terrain` now renders the source GLB
+  at unit scale `[1, 1, 1]`; collision findings and the recommended next packet
+  are recorded in `docs/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md`.
+  Follow-up validation passed for `audit:engine-boundaries`, `type-check`,
+  `test:runtime-scene-contract`, scoped Biome checks on the touched source/test
+  files, and `git diff --check` on the touched files. Full package `lint` is
+  currently blocked by unrelated import-order drift in
+  `scripts/test-input-contract.ts` and `scripts/test-story-note-contract.ts`.
 
 ## Assumptions
 

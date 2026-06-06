@@ -253,11 +253,13 @@ Last verified: 2026-06-06.
 - Desktop/runtime foundation is implemented for held-look input, explicit
   action IDs, click interaction commands, nearest active target arbitration,
   portal click activation, story-note reader activation, light charge
-  state/events, held-charge player-light feedback, HUD projection, and stale
-  input clearing when gameplay input is disabled.
+  state/events, held-charge player-light feedback, selected-target HUD
+  projection, scene-unload selected-target cleanup, and stale input clearing
+  when gameplay input is disabled.
 - Mobile runtime foundation is implemented for `MobileInputControlsPort`, touch
   action IDs, touch movement, touch look, jump, sprint, active-target use, light
-  charge, and touch-state cleanup.
+  charge, and touch-state cleanup. Raw browser touch identifiers are not used as
+  a parallel gameplay input path.
 - Packet 1 held-look foundation is implemented.
 - Packet 2 action-map cleanup is implemented.
 - Packet 3 click interaction command foundation is implemented.
@@ -267,18 +269,23 @@ Last verified: 2026-06-06.
 - Packet 6 cleanup is partially complete for pointer-lock default ownership and
   stale docs; keep applying it after each new controls packet.
 - Focused validation: `test:input-contract` covers held-look gating, release
-  clearing, UI/focus disabled input clearing, click packets, required gameplay
-  action IDs, mouse action split, mobile touch action mappings, analog touch
-  movement, touch look, touch/gamepad active interaction, and light charge
-  action phases.
+  clearing, UI/focus disabled input clearing, click packets, real
+  `PlayerInputSystem` command dispatch, required gameplay action IDs, mouse
+  action split, mobile touch action mappings, analog touch movement, touch look,
+  touch/gamepad active interaction, and light charge action phases.
 - Focused validation: `test:story-note-contract` covers story-note activation,
-  nearest portal/story-note target arbitration, and story-note close behavior.
+  nearest portal/story-note target arbitration, portal activation transition
+  requests, selected-target HUD projection, and story-note close behavior.
+- Focused validation: `test:runtime-scene-contract` covers scene unload cleanup
+  for the selected `ActiveInteractionTarget` alongside player, entity, asset,
+  and audio cleanup.
 - Focused validation: `test:charged-action-contract` covers charge start, hold,
   release, full-charge burst, cancel events, held-charge player-light boost,
   and player-light reset when charge ends.
 - Full validation for this packet passed:
   `audit:engine-boundaries`, `type-check`, `lint`, `test:input-contract`,
-  `test:charged-action-contract`, `build`, and
+  `test:story-note-contract`, `test:charged-action-contract`,
+  `test:runtime-scene-contract`, `build`, and
   `git diff --check -- apps/game.megameal pnpm-lock.yaml`.
 - Known remaining work: screen-space/raycast inspect selection, release
   shockwave/avatar glow, held-charge procedural audio, expanded gamepad/input

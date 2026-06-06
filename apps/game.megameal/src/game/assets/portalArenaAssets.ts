@@ -1,5 +1,9 @@
 import type { AssetManifest } from "../../engine/modules/assets/index.js";
 import type { AudioContentManifest } from "../../engine/modules/audio/index.js";
+import {
+	audioAmbientShadowWaltz,
+	audioAmbientWhistlingDreams,
+} from "./ambientAudioAssets.js";
 import { cubemapClassicSky } from "./skyboxAssets.js";
 
 const meshPlayer = {
@@ -27,7 +31,8 @@ const materialPlayer = {
 const audioPlayerJump = {
 	id: "audio_player_jump",
 	kind: "audio",
-	url: "builtin://tone?frequencyHz=440&durationSeconds=0.09&volume=0.3",
+	url: "/audio/sfx/interface-sweep.mp3",
+	tags: ["player", "jump", "sfx"],
 } as const;
 const audioPlayerChargeRelease = {
 	id: "audio_player_charge_release",
@@ -59,6 +64,8 @@ export const portalArenaAssetManifest = {
 		audioPlayerChargeRelease,
 		audioPortalActivate,
 		audioPortalDeck,
+		audioAmbientShadowWaltz,
+		audioAmbientWhistlingDreams,
 	],
 	preloadGroups: {
 		portal_arena: [
@@ -71,13 +78,19 @@ export const portalArenaAssetManifest = {
 			"audio_player_charge_release",
 			"audio_portal_activate",
 			"audio_ambient_portal_deck",
+			"audio_ambient_shadow_waltz",
+			"audio_ambient_whistling_dreams",
 		],
 	},
 } satisfies AssetManifest;
 
 export const portalArenaAudioContentManifest = {
 	sceneMusic: {
-		trackId: "audio_ambient_portal_deck",
+		trackIds: [
+			"audio_ambient_portal_deck",
+			"audio_ambient_shadow_waltz",
+			"audio_ambient_whistling_dreams",
+		],
 		volume: 0.18,
 		autoplay: true,
 	},

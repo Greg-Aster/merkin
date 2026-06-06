@@ -809,6 +809,8 @@ Rules:
 - Pointer lock failures and exits are explicit events when that mode is used.
 - Disabled gameplay input clears stale keyboard, mouse, touch, gamepad, pointer
   delta, and click state instead of replaying it when input is re-enabled.
+- Mobile touch gameplay uses semantic `MobileInputControlsPort` action IDs;
+  raw browser touch identifiers are not a second gameplay input path.
 - Gamepad polling must account for connection, disconnection, and missing devices.
 
 Implemented first-person input flow:
@@ -821,6 +823,7 @@ BrowserInputAdapter
   -> PlayerInput component
   -> MoveEntity / JumpEntity / InteractAtScreenPoint / InteractWithActiveTarget commands
   -> ActiveInteractionTarget selected from proximity candidates
+  -> HUD projection from the selected ActiveInteractionTarget
   -> MovementIntent
   -> FirstPersonController yaw/pitch
   -> CharacterMotor
@@ -836,6 +839,10 @@ instead of being silently swallowed when pointer lock is enabled as an explicit
 mode. Mobile controls are an engine-facing input surface; they feed action and
 look intent through `MobileInputControlsPort` so gameplay systems can emit
 commands/events instead of UI mutating runtime state directly.
+`ActiveInteractionTarget` is the display and activation authority after
+proximity arbitration. HUD projection does not re-read raw portal or story-note
+proximity resources for selected-target details, and scene unload removes the
+selected target alongside portal/story-note reader state.
 
 ## 14.1 First-Person Player Architecture
 
@@ -927,14 +934,25 @@ Rules:
   from gameplay, UI, or runtime systems.
 - Event-mapped sounds and scene music must be present in the owning runtime
   scene asset manifest, preload list, and readiness requirements.
+- Scene music may declare either one `trackId` or an ordered `trackIds`
+  playlist. Playlist tracks are selected by the game runtime on scene load from
+  validated manifest-owned audio assets; the runtime must not scan folders.
 - `public/audio/sfx/audition/` is source/audition material only; production
   runtime manifests must not reference it directly.
+- `public/audio/ambient/AMBIENT_AUDIO_SOURCES.md` records production ambient
+  tracks and candidate tracks. Candidate tracks in `public/audio/ambient/` are
+  not runtime content until promoted to stable manifest IDs with provenance.
 
 Current production audio IDs:
 
 ```text
 audio_ambient_portal_deck -> public/audio/ambient/portal-deck.mp3
 audio_ambient_wicked_shadows_whisper -> public/audio/ambient/Wicked Shadows Whisper.mp3
+audio_ambient_dark_shadows_of_delight -> public/audio/ambient/Dark Shadows of Delight.mp3
+audio_ambient_shadow_waltz -> public/audio/ambient/Shadow Waltz.mp3
+audio_ambient_whistling_dreams -> public/audio/ambient/Whistling Dreams.mp3
+audio_ui_collect -> public/audio/sfx/interface-click-tone.mp3
+audio_player_jump -> public/audio/sfx/interface-sweep.mp3
 audio_player_charge_release -> public/audio/sfx/22-kenney-forceField_001.mp3
 audio_portal_activate -> public/audio/sfx/portal-activate.mp3
 ```

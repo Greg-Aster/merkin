@@ -155,6 +155,8 @@ export const mirandaDeckLevel = {
 		"audio_player_jump",
 		"audio_player_charge_release",
 		"audio_ambient_wicked_shadows_whisper",
+		"audio_ambient_dark_shadows_of_delight",
+		"audio_ambient_shadow_waltz",
 	],
 	instances: [
 		{

@@ -10,7 +10,7 @@ export const observatoryEnvironmentPrefab = {
 		Transform: {
 			position: [0, 0, 0],
 			rotation: [0, 0, 0, 1],
-			scale: [0.1808657926171221, 0.1808657926171221, 0.1808657926171221],
+			scale: [1, 1, 1],
 		},
 		Renderable: {
 			meshId: "mesh_observatory_environment",

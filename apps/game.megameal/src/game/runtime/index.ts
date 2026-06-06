@@ -92,6 +92,7 @@ export async function createMegamealGameRuntime(
 		options.runtimeManifest ?? defaultRuntimeSceneManifest;
 	const runtimeSceneCatalog = createRuntimeSceneCatalog(initialRuntimeManifest);
 	const runtimeSceneManifests = [...runtimeSceneCatalog.values()];
+	const musicSelectionCounts = new Map<string, number>();
 	const physicsSync = new PhysicsSyncSystem({
 		adapter: options.physics,
 	});
@@ -354,7 +355,14 @@ export async function createMegamealGameRuntime(
 				nextRuntimeSceneManifest.renderProfile.environment,
 				options.assets,
 			);
-			applyRuntimeSceneMusic(options.audio, nextRuntimeSceneManifest);
+			applyRuntimeSceneMusic(
+				options.audio,
+				nextRuntimeSceneManifest,
+				nextMusicSelectionIndex(
+					musicSelectionCounts,
+					nextRuntimeSceneManifest.id,
+				),
+			);
 			activeRuntimeSceneManifest = nextRuntimeSceneManifest;
 			loaded = true;
 		} catch (error) {
@@ -378,6 +386,7 @@ export async function createMegamealGameRuntime(
 function applyRuntimeSceneMusic(
 	audio: AudioManagerPort | undefined,
 	manifest: RuntimeSceneManifestData,
+	selectionIndex: number,
 ): void {
 	if (!audio) {
 		return;
@@ -389,7 +398,9 @@ function applyRuntimeSceneMusic(
 			assetManifest: manifest.assets,
 		},
 	);
-	const musicState = musicStateFromAudioContentManifest(audioContent);
+	const musicState = musicStateFromAudioContentManifest(audioContent, {
+		selectionIndex,
+	});
 
 	if (!musicState) {
 		return;
@@ -399,6 +410,15 @@ function applyRuntimeSceneMusic(
 		...musicState,
 		sceneId: manifest.level.sceneId ?? manifest.id,
 	});
+}
+
+function nextMusicSelectionIndex(
+	counts: Map<string, number>,
+	runtimeSceneId: string,
+): number {
+	const nextIndex = counts.get(runtimeSceneId) ?? 0;
+	counts.set(runtimeSceneId, nextIndex + 1);
+	return nextIndex;
 }
 
 function createRuntimeSceneCatalog(

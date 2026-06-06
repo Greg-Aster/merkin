@@ -143,6 +143,7 @@ BrowserInputAdapter
 	  -> PlayerInput component
 	  -> MoveEntity / JumpEntity / InteractAtScreenPoint / InteractWithActiveTarget commands
 	  -> ActiveInteractionTarget selected from proximity candidates
+	  -> HUD projects only the selected ActiveInteractionTarget
 	  -> MovementIntent component
 	  -> FirstPersonController yaw/pitch
 	  -> CharacterMotor component
@@ -167,8 +168,13 @@ visibility, UI capture, or scene readiness disables gameplay input, the input
 module clears stale keyboard, mouse, touch, gamepad, pointer delta, and click
 state instead of replaying it after input is re-enabled.
 Mobile controls are a UI input surface only; they call the engine-facing mobile
-input port, and gameplay systems turn those actions into commands/events. They
-do not own player transform, camera, charge, portal, or physics state.
+input port with semantic action IDs, and gameplay systems turn those actions
+into commands/events. Raw browser touch identifiers are not a parallel gameplay
+input surface. Mobile controls do not own player transform, camera, charge,
+portal, or physics state.
+Scene unload cleanup removes player, portal, story-note, open reader, and
+selected `ActiveInteractionTarget` resources so HUD and activation state cannot
+point at unloaded entities.
 
 The portal player light follows the same ownership rule. It is an authored
 `Light` component on the stable `player` entity and is required through

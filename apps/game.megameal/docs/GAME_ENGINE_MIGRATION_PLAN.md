@@ -3,7 +3,7 @@
 Source engine: `/home/greggles/Merkin/apps/game`
 Target engine: `/home/greggles/Merkin/apps/game.megameal`
 
-Current status: initial framework packet complete, normal root game scripts cut over to `@merkin/game-megameal`, portal arena navigation room implemented as the default runtime scene with manifest-owned portal-deck scene music, portal activation SFX, charge-release SFX, generated GLB field terrain, and a required player-carried point light with held-charge feedback, manifest-backed cubemap sky environments implemented for the current runtime scenes, scene-environment foundation implemented in `docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` for equirectangular textures, muted video skies, procedural atmosphere, bounded dynamic capture, and authored reflection probes, Miranda deck/cockpit/crew-quarters/Captain's Office/Engine Room/Medbay/Mess Hall/Chapel altar/Brig/Cargo Hold/Archive primitive foundation plus three authored Miranda point lights, checked-in Miranda primitive material parameters, Miranda scene music, shared charge-release SFX, nine Miranda story notes, and the StoryNote reader foundation migrated, Observatory playable foundation migrated as `observatory_runtime` with target-owned GLB art, explicit walkable collision, shared static visual water through `WaterSurfaceContract`, player/firefly lights, and portal transition by manifest ID, and runtime scene negative-case validation added in `apps/game.megameal`. The old `@merkin/game` app remains reference-only behind explicit `:legacy` root aliases. Player controls have a verified desktop/mobile runtime foundation with remaining consumer polish tracked in `docs/PLAYER_CONTROLS_MIGRATION_PLAN.md`. Future skybox and scene-environment packets are tracked in `docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`; future shared water behavior packets are tracked in `docs/WATER_SURFACE_SYSTEM_PLAN.md`. Authored Miranda point-light migration is implemented through `AuthoredLightContract`; portal player lighting is implemented through `PlayerCarriedLightContract`; Miranda primitive material parameter migration is implemented through `MaterialParameterContract`; curated scene music and SFX are implemented through `AudioManifestAndEvents`; Observatory playable foundation is implemented through `ObservatoryLevelContract` with static water owned by `WaterSurfaceContract`. The current implementation register and verification gate are in `ENGINE_CONTRACT_REGISTER.md`.
+Current status: initial framework packet complete, normal root game scripts cut over to `@merkin/game-megameal`, portal arena navigation room implemented as the default runtime scene with manifest-owned ambient playlist music, portal activation SFX, charge-release SFX, generated GLB field terrain, and a required player-carried point light with held-charge feedback, manifest-backed cubemap sky environments implemented for the current runtime scenes, scene-environment foundation implemented in `docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` for equirectangular textures, muted video skies, procedural atmosphere, bounded dynamic capture, and authored reflection probes, Miranda deck/cockpit/crew-quarters/Captain's Office/Engine Room/Medbay/Mess Hall/Chapel altar/Brig/Cargo Hold/Archive primitive foundation plus three authored Miranda point lights, checked-in Miranda primitive material parameters, Miranda ambient playlist music, shared charge-release SFX, nine Miranda story notes, and the StoryNote reader foundation migrated, Observatory playable foundation migrated as `observatory_runtime` with target-owned GLB art, explicit walkable collision, shared static visual water through `WaterSurfaceContract`, player/firefly lights, and portal transition by manifest ID, and runtime scene negative-case validation added in `apps/game.megameal`. The old `@merkin/game` app remains reference-only behind explicit `:legacy` root aliases. Player controls have a verified desktop/mobile runtime foundation with selected-target HUD projection, scene-unload selected-target cleanup, semantic mobile touch input, and remaining consumer polish tracked in `docs/PLAYER_CONTROLS_MIGRATION_PLAN.md`. Future skybox and scene-environment packets are tracked in `docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`; future shared water behavior packets are tracked in `docs/WATER_SURFACE_SYSTEM_PLAN.md`. Authored Miranda point-light migration is implemented through `AuthoredLightContract`; portal player lighting is implemented through `PlayerCarriedLightContract`; Miranda primitive material parameter migration is implemented through `MaterialParameterContract`; curated scene music playlists and SFX are implemented through `AudioManifestAndEvents`; Observatory playable foundation is implemented through `ObservatoryLevelContract` with static water owned by `WaterSurfaceContract`. The current implementation register and verification gate are in `ENGINE_CONTRACT_REGISTER.md`.
 
 ## Purpose
 
@@ -281,7 +281,7 @@ Current durable content slice:
 - The story-note migration preserves old note title, author, location, excerpt, body, marker color, and marker size as authored `StoryNote` component data. Reusable target-engine marker prefabs own the trigger collider and marker material, gameplay systems own open/close reader state, and the HUD observes selected/open interaction world state instead of hardcoding story text or choosing targets in UI.
 - Authored point-light migration is implemented for the old Miranda Command Gallery Beacon, Observation Light, and Archive Light. Light data lives in `Light` components on checked-in level/prefab data, syncs through `LightSyncSystem` and the renderer adapter, and is required by Miranda runtime-scene readiness through stable light IDs. Portal player-carried lighting is implemented through `PlayerCarriedLightContract` as a steady `Light` on the moving stable `player` entity, with portal readiness requiring that stable light ID. Held charge now boosts and restores that player light through game-owned `ChargedAction` and `PlayerLightFeedback` state, while `LightSyncSystem` and the Three adapter project mutable light updates in place. The old Svelte runtime lighting controller, point-light budget system, hidden player-radius culling, shockwave arrays, and renderer-local light mutation remain excluded.
 - Material parameter migration preserves old primitive base color, emissive color/intensity, metalness, roughness, and Medbay transparent opacity through schema-owned material asset data. The cockpit center panel and wide Archive server bank use split material IDs because their old authored values differ from their sibling prefabs.
-- Audio migration preserves the old/shared portal-deck ambience path from `packages/shared-audio/src/game-audio-profile.ts` lines 22-31 and `apps/game/public/audio/ambient/portal-deck.mp3` as a checked-in target audio asset at `public/audio/ambient/portal-deck.mp3`. Current target-only curated additions include `audio_ambient_wicked_shadows_whisper` at `public/audio/ambient/Wicked Shadows Whisper.mp3`, `audio_player_charge_release` at `public/audio/sfx/22-kenney-forceField_001.mp3`, and `audio_portal_activate` at `public/audio/sfx/portal-activate.mp3`. Runtime scene transitions stop previous scene music, apply the selected scene's manifest music after readiness succeeds, and scene cleanup stops scene-scoped music through `SceneScope`.
+- Audio migration preserves the old/shared portal-deck ambience path from `packages/shared-audio/src/game-audio-profile.ts` lines 22-31 and `apps/game/public/audio/ambient/portal-deck.mp3` as a checked-in target audio asset at `public/audio/ambient/portal-deck.mp3`. Current target-only curated additions include `audio_ambient_wicked_shadows_whisper`, `audio_ambient_dark_shadows_of_delight`, `audio_ambient_shadow_waltz`, `audio_ambient_whistling_dreams`, `audio_ui_collect`, `audio_player_jump`, `audio_player_charge_release`, and `audio_portal_activate`. Runtime scene transitions stop previous scene music, apply the selected scene's manifest music or manifest playlist entry after readiness succeeds, and scene cleanup stops scene-scoped music through `SceneScope`.
 - `public/audio/sfx/audition/` is source/audition material only. Runtime manifests must reference only curated production audio assets through stable manifest IDs.
 - The slice deliberately does not import old runtime JSON, generated collision products, generated story-marker GLBs, generated GLB actors, old Svelte-owned note state, old Three raycast interaction architecture, the old Svelte runtime lighting controller, point-light budget system, old Svelte/Howler audio systems, old held-charge oscillator code, post-processing, reflections, old runtime material mutation/repair, or editor behavior.
 - The source Cargo Hold includes Cargo Stack C beyond the current floor/bounds extent. The target preserves the authored primitive as data, but full playable Cargo Hold readiness remains future terrain/floor/bounds work.
@@ -435,6 +435,9 @@ Implemented behavior:
 - Scene music and one-shot SFX are declared in an `AudioContentManifest`,
   reference explicit manifest-owned audio assets, and validate before runtime
   use.
+- Scene music supports either a single `trackId` or an ordered `trackIds`
+  playlist. The runtime rotates through playlist entries on repeated scene
+  loads without scanning ambient folders.
 - Scene-scoped event-to-sound mappings are filtered by the active runtime scene
   so shared semantic events do not trigger inactive scene mappings.
 - The browser audio adapter actually starts/stops looped music from the
@@ -442,18 +445,22 @@ Implemented behavior:
 - Runtime scene transitions stop previous scene music and apply the selected
   scene music after the new scene and its preload assets are ready.
 - Implemented content includes the old/shared `portal-deck.mp3` ambient track
-  for `portal_arena_runtime`, the target Miranda ambient track
-  `Wicked Shadows Whisper.mp3`, charge-release SFX, and portal activation SFX.
+  for `portal_arena_runtime`, target Miranda ambient track
+  `Wicked Shadows Whisper.mp3`, promoted ambient playlist tracks
+  `Dark Shadows of Delight.mp3`, `Shadow Waltz.mp3`, and
+  `Whistling Dreams.mp3`, file-backed collect/jump SFX, charge-release SFX, and
+  portal activation SFX.
 
 Definition of done:
 
-- `portal_arena_runtime` owns and preloads the portal-deck, portal activation,
-  and charge-release audio assets.
-- `miranda_deck_runtime` owns and preloads the Wicked Shadows ambient track and
-  charge-release audio asset.
+- `portal_arena_runtime` owns and preloads its ambient playlist, portal
+  activation, jump, and charge-release audio assets.
+- `miranda_deck_runtime` owns and preloads its ambient playlist, jump, and
+  charge-release audio assets.
 - The audio content manifest validates scene music and event-mapping references
   against the owning asset manifest.
-- Runtime-scene validation covers missing scene-music asset references.
+- Runtime-scene validation covers missing scene-music and playlist asset
+  references.
 - Runtime-scene validation covers active-scene filtering for scene-scoped audio
   event mappings.
 - Runtime-scene validation covers mapped audio assets being preload-listed and
