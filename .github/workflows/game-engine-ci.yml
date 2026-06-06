@@ -3,13 +3,14 @@ name: Game Engine CI
 on:
   pull_request:
     paths:
-      - "apps/game/**"
-      - "apps/megameal/public/generated/hunyuan3d/**"
-      - "apps/megameal/public/generated/runtime-game-assets/**"
-      - "apps/megameal/public/generated/style-lab/**"
-      - "apps/megameal/public/terrain/**"
+      - "apps/game.megameal/**"
+      - "apps/megameal/public/audio/**"
       - "packages/shared-audio/**"
       - "packages/shared-data/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "scripts/audit-legacy-game-references.mjs"
       - ".github/workflows/game-engine-ci.yml"
   workflow_dispatch:
 
@@ -17,12 +18,12 @@ permissions:
   contents: read
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "22"
   PNPM_VERSION: "9.14.4"
 
 jobs:
-  release-gate:
-    name: Fast Release Gate
+  engine-contract-gate:
+    name: Engine Contract Gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -42,97 +43,50 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run game release gate
-        run: pnpm --dir apps/game release:gate:ci
+      - name: Legacy game reference audit
+        run: pnpm audit:legacy-game-references
 
-      - name: Upload release reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: game-release-reports
-          path: apps/game/reports/
-          if-no-files-found: ignore
+      - name: Engine boundary audit
+        run: pnpm --dir apps/game.megameal audit:engine-boundaries
 
-  browser-smoke:
-    name: Browser Smoke Reports
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Type check
+        run: pnpm --dir apps/game.megameal type-check
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+      - name: Lint
+        run: pnpm --dir apps/game.megameal lint
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
+      - name: Input contract
+        run: pnpm --dir apps/game.megameal test:input-contract
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Charged action contract
+        run: pnpm --dir apps/game.megameal test:charged-action-contract
 
-      - name: Install Playwright Chromium
-        run: pnpm --dir apps/game exec playwright install --with-deps chromium
+      - name: Story note contract
+        run: pnpm --dir apps/game.megameal test:story-note-contract
 
-      - name: Run browser release gate
-        run: pnpm --dir apps/game release:gate:browser
+      - name: Scene environment contract
+        run: pnpm --dir apps/game.megameal test:scene-environment-contract
 
-      - name: Upload visual smoke artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: game-visual-smoke
-          path: apps/game/.visual-smoke/
-          if-no-files-found: ignore
+      - name: Runtime scene contract
+        run: pnpm --dir apps/game.megameal test:runtime-scene-contract
 
-      - name: Upload browser release reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: game-browser-release-reports
-          path: apps/game/reports/
-          if-no-files-found: ignore
+      - name: Audio contract
+        run: pnpm --dir apps/game.megameal test:audio-contract
 
-  performance-certification:
-    name: Performance Telemetry Report
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Level authoring contract
+        run: pnpm --dir apps/game.megameal test:level-authoring-contract
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+      - name: Generated GLB import contract
+        run: pnpm --dir apps/game.megameal test:generated-glb-import-contract
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
+      - name: Kinematic character contract
+        run: pnpm --dir apps/game.megameal test:kinematic-character-contract
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Collision cook contract
+        run: pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract
 
-      - name: Install Playwright Chromium
-        run: pnpm --dir apps/game exec playwright install --with-deps chromium
+      - name: Observatory collision drift check
+        run: pnpm --dir apps/game.megameal ci:observatory-collision-drift
 
-      - name: Run reporting-only performance telemetry
-        run: pnpm --dir apps/game certify:performance -- --level=miranda --profile=desktop-high-chromium-1080p
-
-      - name: Run resource profile report
-        if: always()
-        run: pnpm --dir apps/game profile:resources -- --levels=miranda --write-json=reports/resource-profile-miranda.json
-
-      - name: Upload performance reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: game-performance-reports
-          path: apps/game/reports/
-          if-no-files-found: ignore
+      - name: Build
+        run: pnpm --dir apps/game.megameal build

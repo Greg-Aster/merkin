@@ -398,7 +398,9 @@ portal_arena_runtime
   -> required player-carried point light with held-charge feedback
   -> one real portal-deck scene music asset referenced through audio_ambient_portal_deck
   -> portal activation SFX referenced through audio_portal_activate
+  -> spatial portal loop SFX referenced through audio_portal_cycle on portal_gate emitters
   -> player charge-release SFX referenced through audio_player_charge_release
+  -> manifest-owned music/sfx/spatial mixer buses projected only by the audio adapter
   -> Portal components contribute proximity candidates for active target selection
   -> active portals target prototype_arena_runtime, miranda_deck_runtime, and
      observatory_runtime
@@ -407,22 +409,29 @@ portal_arena_runtime
 	  -> old Miranda spawn as authored player transform
 	  -> miranda_floor_main, miranda_floor_upper, and
 	     miranda_floor_cargo_hold static walkable render/physics prefabs
-  -> miranda cockpit glow panels as static render/physics prefabs
+  -> miranda cockpit glow panels and command console as static render/physics prefabs
   -> miranda crew bunks and locker bank as static render/physics prefabs
   -> miranda Captain's Office desk, chair, and safe as static render/physics prefabs
   -> miranda Engine Room core and columns as static render/physics prefabs
-  -> miranda Medbay pods, Mess Hall blockers, Chapel altar, Brig blockers,
-     Cargo Hold stacks, and Archive server banks as static render/physics prefabs
+  -> miranda Medbay pods, Mess Hall blockers, Chapel altar, Chapel monoliths,
+     Brig blockers, Cargo Hold stacks, and Archive server banks as static
+     render/physics prefabs
   -> Miranda primitive material assets preserve authored base color, emissive,
      metalness, roughness, and Medbay opacity parameters through manifest data
   -> Miranda scene music referenced through audio_ambient_wicked_shadows_whisper
   -> old Miranda airlock return portal as a Portal entity targeting
      observatory_runtime through the shared portal_gate prefab
   -> portal activation SFX referenced through audio_portal_activate
+  -> spatial portal loop SFX referenced through audio_portal_cycle on the
+     shared portal_gate emitter
   -> player charge-release SFX referenced through audio_player_charge_release
   -> nine Miranda StoryNote markers with trigger colliders, authored note data,
      nearest-target HUD prompts, and gameplay-owned reader open/close state
   -> three authored Miranda point lights as Transform + Light entities
+  -> AuthoredLightContract supports point, spot, and rectangle area-light
+     projection through LightSyncSystem and the renderer adapter
+  -> explicit render-profile light budget plus editor-only light draft
+     validation for authored lights
   -> readiness requires player, material/audio/environment assets, collision
      prefabs, exact collision stable IDs, exact walkable floor stable IDs, and
      exact authored light stable IDs
@@ -432,29 +441,140 @@ observatory_runtime
      evidence only
   -> implemented foundation packet in docs/OBSERVATORY_PLAYABLE_FOUNDATION_PLAN.md
   -> source GLB visual owned as mesh_observatory_environment
+  -> generated field visual owned as
+     mesh_observatory_field_micro_displacement under
+     public/assets/generated/game/observatory/terrain
   -> consumes engine-wide CollisionPolicy, WalkableCollisionContract, and
      LevelReadinessContract for collision
   -> mesh_observatory_environment stays visual-only
-  -> required observatory:walkable-proxy walkable/worldStatic floor collision
+  -> mesh_observatory_field_micro_displacement stays visual-only with
+     generated provenance/alignment metadata
+  -> required observatory:walkable-mesh walkable/worldStatic mesh collision
+  -> player opts into engine-owned kinematic character collision through
+     CharacterController.kinematicCollision
   -> four required observatory_boundary_blocker perimeter colliders; no render
      mesh collision inference
-  -> static observatory:water visual through WaterSurfaceContract with no
-     collider
+  -> observatory:water visual through WaterSurfaceContract with authored
+     animation/reflection parameters, renderer-safe projection data, and no
+     collider/gameplay volume
   -> cubemap_observatory_sky through the selected render profile
+  -> scene music uses shared audio_ambient_portal_deck from the old
+     courtyard-breeze preset evidence
   -> required player-carried Transform + Light entity
-  -> three required authored firefly Transform + Renderable + Light entities
+  -> three required firefly Transform + Renderable + Light entities authored
+     from deterministic population data
+  -> firefly flicker preview/cook samples are derived from authored
+     seed/phase/frequency/amplitude data, while live renderer animation remains
+     future work
   -> portal transition from portal_arena_runtime by runtime manifest ID
   -> readiness requires player, exact collision stable IDs, exact walkable
      stable IDs, exact light stable IDs, required assets, and physics/player
      readiness
   -> no old runtime JSON, terrain chunk runtime, generated collision binary,
      Svelte/Threlte light owner, hidden renderer default, or point-light
-     budget/controller path
+     budget/controller path; light budgets are authored profile validation,
+     not runtime controller clipping
 ```
 
 Full Miranda is not treated as ready until remaining terrain, cooked collision,
 generated GLB content, and importer/editor coverage beyond the current
-checked-in walkable floor footprint are authored in the new architecture.
+cook-drafted walkable floor footprint are authored in the new architecture.
+
+AAA-scale content must flow through an import/validation graph before runtime
+playback. Authored assets, prefabs, levels, render profiles, audio manifests,
+and transitions are source data. A content graph validator/importer derives or
+drift-checks the runtime manifest and readiness requirements from that source
+data before the scene is considered playable.
+
+```text
+Authored Content
+  -> assets, prefabs, levels, render profiles, audio, transitions
+  -> content graph import/validation
+  -> checked-in RuntimeSceneManifest and readiness data
+  -> runtime load gate
+  -> engine world projection into render, physics, audio, and UI adapters
+```
+
+The runtime scene manifest remains the runtime contract, but long
+hand-maintained readiness arrays must not become the level authoring system.
+Current readiness arrays are transitional checked-in data; the content graph
+validation gate derives or compares required assets, prefab IDs, collision
+stable IDs, walkable IDs, light IDs, and portal target manifest IDs from
+authored content. Missing source data fails the validator, not the renderer,
+physics adapter, UI, or app shell.
+
+Generated GLB parity also belongs to the content graph layer. Legacy generated
+GLB candidates must be represented by checked-in import parity manifests that
+either resolve to target asset, prefab, and stable level IDs or remain planned
+with owner metadata and removal conditions. Runtime scenes must not load old
+generated GLBs until an explicit import/generation owner has produced target
+manifest data. Imported target-generated GLBs must also declare the generator
+script, checked-in provenance metadata path, and generated GLB SHA-256 in the
+import parity manifest so drift fails in contract validation instead of at
+runtime.
+
+Editor and cook tooling must stay outside normal game runtime ownership. The
+planned level editor is a separate dev-only window/tooling surface, not an
+in-game HUD mode. It may author collision drafts, send temporary preview
+patches to a running game window, and run explicit bake commands, but shipped
+runtime behavior must still load validated `RuntimeSceneManifest`,
+`LevelDefinition`, and `PrefabDefinition` data. Normal builds validate cooked
+outputs and drift; they must not silently rebake or rewrite level files.
+
+```text
+Level Editor Window
+  -> authors collision/source level data
+  -> sends dev-only preview patches
+  -> runs explicit cook/bake commands
+  -> writes durable checked-in runtime data
+
+Game Window
+  -> loads validated runtime scene manifests
+  -> previews temporary editor patches only in dev mode
+  -> reloads baked scene data on request
+```
+
+The first data/check foundation is implemented for Observatory collision:
+`src/engine/data/collisionCook/index.ts` validates draft data, the checked-in
+draft lives under `src/game/editor/collisionDrafts`, and
+`cook:observatory-collision` drift-checks it against the current runtime
+manifest without writing files by default. The cook contract can serialize a
+temporary dev-only preview patch and can write the deterministic editor-owned
+generated bake artifact with `--write-generated-bake`; normal runtime data does
+not import that artifact. The explicit runtime collision bake writes only the
+generated checked-in runtime module at
+`src/game/generated/observatoryCollisionRuntime.ts` with
+`--write-runtime-collision`; Observatory prefab, level, and manifest owners
+import that module instead of duplicating cooked collision values. The dev-only
+game-window preview/reload protocol is implemented as an app-layer
+`BroadcastChannel` transport plus callback port; it validates collision preview
+patches before send/application and applies temporary transform/collider
+updates only in dev mode for the active runtime scene. Basic preview clearing
+is explicit and reversible through the same dev-only protocol; richer reload
+lifecycle diagnostics remain planned. The `/editor/` route exposes editable
+collision controls and a top-down collision gizmo surface for current
+Observatory draft entries; persisted spatial drag handles and generalized
+multi-level editing remain planned. Visual terrain
+displacement/import foundation is implemented through the generated Observatory
+field GLB plus provenance; the full generalized terrain import pipeline remains
+planned. These future packets remain tracked in
+`docs/LEVEL_EDITOR_COLLISION_COOK_PLAN.md`. The normal runtime must not import
+editor modules or rely on editor state.
+The first dev-only boundary shell exists at `/editor/`, backed by
+`src/app/editor/levelEditorSession.ts`; it lists the current Observatory
+editor session, preview metadata, and generated bake artifact hash without
+mounting through the normal game HUD.
+
+Runtime character traversal must use engine physics abstractions, not renderer
+geometry or raw adapter objects. `CharacterController.kinematicCollision`
+declares gameplay movement settings; `PhysicsAdapterPort` exposes the
+framework-neutral movement query; adapters such as Rapier implement the actual
+sliding, slope, snap-to-ground, and autostep behavior behind that port.
+Controller obstacle filtering is authored through collider policy/channel data,
+not renderer object membership or level-specific adapter branches. Collision
+shape dimensions and mesh vertices are final physics data; import/cook tools
+must bake source-art scale into collider data instead of relying on runtime
+`Transform.scale` as a hidden physics multiplier.
 
 The app layer may select a checked-in runtime manifest and pass it into the
 client mount. If it does not, the game layer's `defaultRuntimeSceneManifest`
@@ -628,8 +748,10 @@ Current website cutover rule:
 
 ```text
 Normal root game scripts target @merkin/game-megameal.
-The old @merkin/game app is reference-only and can run only through explicit
-:legacy root aliases.
+Legacy @merkin/game root aliases are retired; any remaining local old app
+folder is historical/reference material only, not a normal script target.
+Blender scene bridge packaging belongs to apps/blender.
+Active old-app package/workspace/source references fail audit:legacy-game-references.
 ```
 
 The normal game website must mount `apps/game.megameal/src/app/GameClient.svelte`

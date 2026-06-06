@@ -7,8 +7,9 @@ Status: implemented and validated on 2026-06-06.
 Recreate the old Observatory level in `apps/game.megameal` as a clean
 target-engine scene. The old `apps/game` scene is source evidence only. This
 packet creates a playable foundation: connected portal, owned source GLB visual
-terrain, explicit collision proxy, spawn, sky, shared static water surface,
-player-carried light, and three authored firefly light markers.
+terrain, generated field visual terrain, explicit collision, spawn, sky, shared
+water surface data, player-carried light, and deterministic three-firefly
+population data.
 
 No old `apps/game` runtime code, generated runtime scene JSON, Threlte/Svelte
 lighting, terrain chunk runtime, point-light budget controller, or generated
@@ -31,7 +32,11 @@ collision binary is ported.
   into
   `apps/game.megameal/public/assets/game/observatory/observatory-environment.glb`.
 - Add manifest asset `mesh_observatory_environment` at
-  `/assets/game/observatory/observatory-environment.glb`.
+	  `/assets/game/observatory/observatory-environment.glb`.
+- Add generated visual terrain asset `mesh_observatory_field_micro_displacement`
+  at `/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.glb`
+  with checked-in provenance metadata; this remains visual-only and aligned to
+  the authored collision sample grid.
 - Reuse `cubemap_observatory_sky`, `mesh_player`, `material_player`,
   `audio_player_jump`, and `audio_player_charge_release`.
 - Add shared manifest-owned water assets through `WaterSurfaceContract`:
@@ -45,14 +50,19 @@ collision binary is ported.
     `emissive: "#f4ffb8"`, `emissiveIntensity: 1.8`, `metalness: 0`,
     and `roughness: 0.18`
 - Add player spawn at `[-137.2, 1.8, -49.5]` with
-  `CharacterController.groundY: 1.8`.
+  `CharacterController.groundY: 1.8` as the spawn/fallback scalar and
+  `CharacterController.kinematicCollision` opt-in.
 - Add player-carried point light on stable ID `player`.
 - Add GLB visual entity `observatory:terrain` with unit scale `[1, 1, 1]`.
-- Add Observatory V1 authored proxy collision as a level consumer of
-  `CollisionPolicy`, `WalkableCollisionContract`, and `LevelReadinessContract`:
-  - required `observatory:walkable-proxy` floor collision with
-    `Collider.intent: "walkable"`, `channel: "worldStatic"`, top height `1.8`,
-    and half extents `[320, 0.05, 320]`
+- Add Observatory V1 authored collision as a level consumer of
+	  `CollisionPolicy`, `WalkableCollisionContract`, and `LevelReadinessContract`:
+	  - required `observatory:walkable-mesh` mesh collision with
+	    `Collider.intent: "walkable"`, `channel: "worldStatic"`, a deterministic
+	    17x17 grid, 289 explicit vertices, and 512 triangles covering
+	    `x/z = -320..320`
+  - engine-owned kinematic character collision routed through the physics
+    adapter, with slide, slope-limit, snap-to-ground, autostep settings, and
+    `obstacleChannels: ["worldStatic"]`
   - required `observatory_boundary_blocker` perimeter collision instances at
     `observatory:collision:boundary:north`,
     `observatory:collision:boundary:south`,
@@ -60,16 +70,17 @@ collision binary is ported.
     `observatory:collision:boundary:west`
   - no collision inferred from `mesh_observatory_environment`
 - Add character bounds `x/z = -300..300`.
-- Add static visual water surface instance `observatory:water` at `y = -2`,
-  scale `[4000, 0.02, 4000]`, renderable
-  `mesh_water_plane + material_water_dark_still`, no collider.
-  This packet only places the first visual instance; shared ownership and
-  richer future water behavior are tracked in
+- Add shared water instance `observatory:water` at `y = -2`, scale
+  `[4000, 0.02, 4000]`, renderable
+  `mesh_water_plane + material_water_dark_still`, and authored `WaterSurface`
+  animation/reflection/refraction data. The instance has no collider and no
+  gameplay volume. Richer future water behavior is tracked in
   `docs/WATER_SURFACE_SYSTEM_PLAN.md`.
 - Add render profile `observatory_moon_archive` using
   `cubemap_observatory_sky`, low ambient light, and no directional key/fill
   lights.
-- Add three stable `Transform + Renderable + Light` firefly markers:
+- Add deterministic `FireflyPopulationContract` data that generates three stable
+  `Transform + Renderable + Light + FireflyPopulationMember` firefly instances:
   - `observatory:firefly:archive` at `[-108.5, 4.4, 68]`, scale
     `[1.25, 1.25, 1.25]`
   - `observatory:firefly:lantern` at `[72, 5.2, -92]`, scale
@@ -79,8 +90,11 @@ collision binary is ported.
     `mesh_observatory_firefly_marker + material_observatory_firefly`
   - each firefly `Light` uses `kind: "point"`, `color: "#f4ffb8"`,
     `intensity: 8`, `distance: 34`, `decay: 1.6`, and `visible: true`
-- Keep Observatory scene music out of v1 until a target-owned audio asset is
-  selected.
+- Add Observatory scene music from the old `courtyard-breeze` preset evidence.
+  The old preset used `/audio/ambient/portal-deck.mp3` at volume `0.16`; the
+  target engine references that through shared `audio_ambient_portal_deck`
+  manifest data with `fadeSeconds: 1.5` instead of copying the old audio
+  runtime.
 - Keep jump and charge-release event mappings for `observatory_game`.
 
 ## Test Plan
@@ -92,17 +106,19 @@ Extend `test:runtime-scene-contract` with explicit assertions for:
 - `defaultRuntimeSceneManifests` includes `observatoryRuntimeSceneManifest`, and
   `getRuntimeSceneManifest("observatory_runtime")` resolves.
 - Required/preloaded assets include `mesh_observatory_environment`,
-  `mesh_water_plane`, `mesh_observatory_firefly_marker`,
-  `cubemap_observatory_sky`, `material_water_dark_still`,
-  `material_observatory_firefly`, `audio_player_jump`, and
-  `audio_player_charge_release`.
+  `mesh_observatory_field_micro_displacement`, `mesh_water_plane`,
+  `mesh_observatory_firefly_marker`, `cubemap_observatory_sky`,
+  `material_water_dark_still`, `material_observatory_firefly`,
+  `audio_player_jump`, `audio_player_charge_release`, and
+  `audio_ambient_portal_deck`.
 - The manifest does not reference old generated runtime JSON, old terrain
   chunks, old terrain manifests, or old generated collider binaries.
-- Player spawn, `CharacterController.groundY`, and player-carried `Light`
-  values match this plan.
-- Terrain visual entity, terrain scale, authored walkable floor collision,
-  boundary blocker collision, water transform, shared water renderable, and
-  shared water material parameters match this plan.
+- Player spawn, `CharacterController.groundY` fallback, kinematic collision
+  settings, and player-carried `Light` values match this plan.
+- Source terrain visual entity, generated visual terrain entity, terrain scale,
+  authored walkable floor collision, boundary blocker collision, water transform,
+  shared water renderable, and shared water material/component parameters match
+  this plan.
 - Required light stable IDs include `player`, `observatory:firefly:archive`,
   `observatory:firefly:lantern`, and `observatory:firefly:tide`.
 - Each firefly marker has the expected stable ID, position, renderable
@@ -110,8 +126,9 @@ Extend `test:runtime-scene-contract` with explicit assertions for:
 - Removing any required player/firefly light, boundary collision, or walkable
   floor collision from the spawned report fails readiness.
 - The portal arena Observatory portal targets `observatory_runtime`.
-- Observatory audio content has no scene music in v1 and includes jump and
-  charge-release event mappings for `observatory_game`.
+- Observatory audio content declares `audio_ambient_portal_deck` scene music at
+  volume `0.16`, fade time `1.5`, and includes jump and charge-release event
+  mappings for `observatory_game`.
 
 Run:
 
@@ -120,6 +137,17 @@ Run:
 - `pnpm --dir apps/game.megameal lint`
 - `pnpm --dir apps/game.megameal test:runtime-scene-contract`
 - `pnpm --dir apps/game.megameal test:scene-environment-contract`
+- `pnpm --dir apps/game.megameal test:water-firefly-contract`
+- `pnpm --dir apps/game.megameal test:audio-contract`
+- `pnpm --dir apps/game.megameal test:audio-spatial-contract`
+- `pnpm --dir apps/game.megameal test:light-contract`
+- `pnpm --dir apps/game.megameal test:kinematic-character-contract`
+- `pnpm --dir apps/game.megameal test:level-authoring-contract`
+- `pnpm --dir apps/game.megameal test:generated-glb-import-contract`
+- `pnpm --dir apps/game.megameal test:observatory-visual-terrain-contract`
+- `pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract`
+- `pnpm --dir apps/game.megameal ci:observatory-collision-drift`
+- `pnpm --dir apps/game.megameal cook:observatory-collision`
 - `git diff --check -- apps/game.megameal pnpm-lock.yaml`
 
 ## Current Progress
@@ -159,26 +187,38 @@ Run:
   at unit scale `[1, 1, 1]`; collision findings and the recommended next packet
   are recorded in `docs/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md`.
   Follow-up validation passed for `audit:engine-boundaries`, `type-check`,
-  `test:runtime-scene-contract`, scoped Biome checks on the touched source/test
-  files, and `git diff --check` on the touched files. Full package `lint` is
-  currently blocked by unrelated import-order drift in
-  `scripts/test-input-contract.ts` and `scripts/test-story-note-contract.ts`.
+  `lint`, `test:runtime-scene-contract`, and `git diff --check`.
 - Observatory V1 collision content implemented over the engine-wide collision
-  contracts:
-  - `observatory:walkable-proxy` is now required `walkable/worldStatic` floor
-    collision.
-  - four `observatory_boundary_blocker` perimeter colliders are required by
-    stable ID.
-  - `test:runtime-scene-contract` covers positive layout assertions and
-    negative readiness failures for missing boundary/walkable collision.
+	  contracts:
+	  - `observatory:walkable-mesh` is now required `walkable/worldStatic` floor
+	    collision with a deterministic 17x17 grid, 289 vertices, and 512
+	    triangles.
+	  - four `observatory_boundary_blocker` perimeter colliders are required by
+	    stable ID.
+	  - `test:runtime-scene-contract` covers positive layout assertions and
+	    negative readiness failures for missing boundary/walkable collision.
+- Generated Observatory visual terrain was added through
+  `ObservatoryVisualTerrainContract`:
+  - `mesh_observatory_field_micro_displacement`
+  - `observatory_field_visual_terrain`
+  - `observatory:terrain:visual-field`
+  - generated provenance and GLB hash validation
+- Observatory scene music was promoted from the old `courtyard-breeze` preset
+  evidence through the target audio manifest contract:
+  - shared production audio asset `audio_ambient_portal_deck`
+  - Observatory preload/readiness requirement for that asset
+  - `AudioContentManifest.sceneMusic` with volume `0.16` and
+    `fadeSeconds: 1.5`
+  - runtime-scene assertions proving the track is manifest-owned and selected
 
 ## Assumptions
 
 - Reusing old source art assets is allowed; porting old runtime/editor code is
   not.
 - This is a playable foundation, not full Observatory parity.
-- Terrain chunks, baked mesh collision import, procedural 200-firefly
-  population, rising water, water volumes, reflections, post-processing, and
-  ambient music require later contracts.
+- Full terrain chunks, terrain material/shader import, procedural 200-firefly
+  population tooling, live firefly flicker animation, rising water, water
+  volumes, visual reflections/refraction rendering, and post-processing require
+  later contracts.
 - No dev server or browser smoke check is part of this packet unless explicitly
   requested.

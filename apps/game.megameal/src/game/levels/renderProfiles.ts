@@ -23,6 +23,14 @@ export const prototypeRenderProfile = {
 				position: [3, 6, 4],
 			},
 		],
+		budget: {
+			maxTotal: 4,
+			maxAmbient: 1,
+			maxDirectional: 2,
+			maxPoint: 1,
+			maxSpot: 0,
+			maxShadowCasting: 0,
+		},
 	},
 	environment: {
 		kind: "cubemap-skybox",
@@ -63,6 +71,14 @@ export const mirandaDeckRenderProfile = {
 				position: [-16, 8, 14],
 			},
 		],
+		budget: {
+			maxTotal: 8,
+			maxAmbient: 1,
+			maxDirectional: 2,
+			maxPoint: 4,
+			maxSpot: 2,
+			maxShadowCasting: 1,
+		},
 	},
 	environment: {
 		kind: "cubemap-skybox",
@@ -103,6 +119,14 @@ export const portalArenaRenderProfile = {
 				position: [8, 4, -7],
 			},
 		],
+		budget: {
+			maxTotal: 6,
+			maxAmbient: 1,
+			maxDirectional: 2,
+			maxPoint: 2,
+			maxSpot: 2,
+			maxShadowCasting: 1,
+		},
 	},
 	environment: {
 		kind: "cubemap-skybox",
@@ -131,6 +155,14 @@ export const observatoryRenderProfile = {
 				intensity: 0.08,
 			},
 		],
+		budget: {
+			maxTotal: 8,
+			maxAmbient: 1,
+			maxDirectional: 0,
+			maxPoint: 6,
+			maxSpot: 1,
+			maxShadowCasting: 1,
+		},
 	},
 	environment: {
 		kind: "cubemap-skybox",
@@ -139,5 +171,10 @@ export const observatoryRenderProfile = {
 		backgroundBlurriness: 0.12,
 		environmentIntensity: 1.1,
 		requiredForReadiness: true,
+	},
+	postProcessing: {
+		enabled: false,
+		quality: "off",
+		effects: [],
 	},
 } satisfies RenderProfileData;

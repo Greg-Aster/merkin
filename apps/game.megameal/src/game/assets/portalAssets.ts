@@ -12,4 +12,11 @@ const audioPortalActivate = {
 	tags: ["portal", "transition", "sfx"],
 } as const;
 
-export { audioPortalActivate, meshPortalGate };
+const audioPortalCycle = {
+	id: "audio_portal_cycle",
+	kind: "audio",
+	url: "/audio/sfx/portal-cycle.mp3",
+	tags: ["portal", "loop", "spatial", "sfx"],
+} as const;
+
+export { audioPortalActivate, audioPortalCycle, meshPortalGate };

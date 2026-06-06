@@ -10,6 +10,8 @@ import {
 	AssetManager,
 	EngineRuntime,
 	LightSyncSystem,
+	type PhysicsAdapterPort,
+	PhysicsSyncSystem,
 	type RuntimeSceneLoadReport,
 	type RuntimeSceneManifestData,
 	SceneManager,
@@ -61,6 +63,45 @@ function assertDeepEqual<TValue>(
 			message ?? `Expected ${expectedJson}, received ${actualJson}.`,
 		);
 	}
+}
+
+function assertMeshVertexHeight(
+	vertices: readonly unknown[],
+	x: number,
+	z: number,
+	expectedHeight: number,
+	label: string,
+): void {
+	assertEqual(
+		meshVertexHeight(vertices, x, z, label),
+		expectedHeight,
+		`${label} height at ${x},${z}`,
+	);
+}
+
+function meshVertexHeight(
+	vertices: readonly unknown[],
+	x: number,
+	z: number,
+	label: string,
+): number {
+	for (const vertex of vertices) {
+		if (!Array.isArray(vertex) || vertex.length !== 3) {
+			continue;
+		}
+
+		const [vertexX, vertexY, vertexZ] = vertex;
+
+		if (vertexX === x && vertexZ === z) {
+			if (typeof vertexY !== "number") {
+				throw new Error(`${label} vertex ${x},${z} has no numeric height.`);
+			}
+
+			return vertexY;
+		}
+	}
+
+	throw new Error(`${label} has no vertex at ${x},${z}.`);
 }
 
 function assertIncludes(
@@ -381,6 +422,89 @@ function allAssetStrings(
 }
 
 {
+	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
+	const runtime = new EngineRuntime();
+	const levelLoader = new LevelLoader({
+		prefabs: new PrefabRegistry(manifest.prefabs),
+	});
+	const loadResult = await levelLoader.loadDefinition(
+		runtime.world,
+		manifest.level,
+	);
+	const player = loadResult.spawned.find(
+		(spawned) => spawned.stableId === "player",
+	);
+
+	if (!player) {
+		throw new Error("Expected portal arena player to spawn.");
+	}
+
+	const playerColliderBeforeSync = runtime.world.requireComponent<
+		Record<string, unknown>
+	>(player.entity, "Collider");
+	const normalizedOffset = assertRecord(
+		playerColliderBeforeSync.offset,
+		"Portal arena runtime player Collider.offset",
+	);
+	let createdColliderOffset: unknown;
+	const fakePhysics: PhysicsAdapterPort = {
+		createRigidBody() {
+			return 1;
+		},
+		createCollider(entity, _bodyHandle, collider) {
+			if (entity === player.entity) {
+				createdColliderOffset = collider.offset;
+			}
+			return 2;
+		},
+		destroyCollider() {},
+		destroyRigidBody() {},
+		syncBodyFromTransform() {},
+		syncTransformFromBody() {
+			return {
+				position: { x: 0, y: 0.65, z: 0 },
+				rotation: { x: 0, y: 0, z: 0, w: 1 },
+			};
+		},
+		applyImpulse() {},
+		step() {},
+		drainEvents() {
+			return [];
+		},
+		dispose() {},
+	};
+	const physicsSync = new PhysicsSyncSystem({ adapter: fakePhysics });
+
+	assertEqual(normalizedOffset.x, 0);
+	assertEqual(normalizedOffset.y, 0.9);
+	assertEqual(normalizedOffset.z, 0);
+
+	physicsSync.preSync(runtime.services);
+
+	const createdOffset = assertRecord(
+		createdColliderOffset,
+		"Portal arena physics adapter Collider.offset",
+	);
+	const playerColliderAfterSync = runtime.world.requireComponent<
+		Record<string, unknown>
+	>(player.entity, "Collider");
+	const preservedOffset = assertRecord(
+		playerColliderAfterSync.offset,
+		"Portal arena synced player Collider.offset",
+	);
+
+	assertEqual(createdOffset.x, 0);
+	assertEqual(createdOffset.y, 0.9);
+	assertEqual(createdOffset.z, 0);
+	assertEqual(playerColliderAfterSync.colliderHandle, 2);
+	assertEqual(preservedOffset.x, 0);
+	assertEqual(preservedOffset.y, 0.9);
+	assertEqual(preservedOffset.z, 0);
+
+	runtime.dispose();
+}
+
+{
 	const manifest = loadRuntimeSceneManifest(observatoryRuntimeSceneManifest);
 	const readiness = evaluateRuntimeSceneReadiness(
 		manifest,
@@ -451,12 +575,12 @@ function allAssetStrings(
 	);
 	const walkableCollider = componentForStableId(
 		manifest,
-		"observatory:walkable-proxy",
+		"observatory:walkable-mesh",
 		"Collider",
 	);
 	const walkableShape = assertRecord(
 		walkableCollider.shape,
-		"Observatory walkable proxy collider shape",
+		"Observatory walkable mesh collider shape",
 	);
 	const waterRenderable = componentForStableId(
 		manifest,
@@ -475,10 +599,15 @@ function allAssetStrings(
 		"Observatory character bounds",
 	);
 	const playerLight = componentForStableId(manifest, "player", "Light");
+	const playerCollider = componentForStableId(manifest, "player", "Collider");
 	const playerCharacterController = componentForStableId(
 		manifest,
 		"player",
 		"CharacterController",
+	);
+	const playerKinematicCollision = assertRecord(
+		playerCharacterController.kinematicCollision,
+		"Observatory player kinematic collision settings",
 	);
 
 	assertIncludes(
@@ -520,6 +649,7 @@ function allAssetStrings(
 		[-137.2, 1.8, -49.5],
 	);
 	assertEqual(playerCharacterController.groundY, 1.8);
+	assertDeepEqual(playerCollider.offset, [0, 0.9, 0]);
 	assertEqual(playerLight.kind, "point");
 	assertEqual(playerLight.color, "#ffd6a3");
 	assertEqual(playerLight.intensity, 5.5);
@@ -539,7 +669,7 @@ function allAssetStrings(
 	);
 	assertIncludes(
 		manifest.readiness.requiredCollisionPrefabIds ?? [],
-		"observatory_walkable_proxy",
+		"observatory_walkable_mesh",
 	);
 	assertIncludes(
 		manifest.readiness.requiredCollisionPrefabIds ?? [],
@@ -547,23 +677,70 @@ function allAssetStrings(
 	);
 	assertIncludes(
 		manifest.readiness.requiredWalkableStableIds ?? [],
-		"observatory:walkable-proxy",
+		"observatory:walkable-mesh",
 	);
 	assertIncludes(
 		manifest.readiness.requiredCollisionStableIds ?? [],
-		"observatory:walkable-proxy",
+		"observatory:walkable-mesh",
 	);
 	assertEqual(walkableCollider.intent, "walkable");
 	assertEqual(walkableCollider.channel, "worldStatic");
-	assertEqual(walkableShape.type, "box");
-	assertDeepEqual(walkableShape.halfExtents, [320, 0.05, 320]);
+	assertEqual(walkableShape.type, "mesh");
+	if (
+		!Array.isArray(walkableShape.vertices) ||
+		!Array.isArray(walkableShape.indices)
+	) {
+		throw new Error(
+			"Observatory walkable mesh must use mesh vertices/indices.",
+		);
+	}
+	assertEqual(walkableShape.vertices.length, 289);
+	assertEqual(walkableShape.indices.length, 1536);
+	assertEqual(walkableShape.indices.length / 3, 512);
+	assertDeepEqual(walkableShape.vertices[0], [-320, 1.43, -320]);
+	assertDeepEqual(walkableShape.vertices[144], [0, 2.25, 0]);
+	assertDeepEqual(walkableShape.vertices[288], [320, 2, 320]);
+	assertDeepEqual(walkableShape.indices.slice(0, 6), [0, 17, 1, 1, 17, 18]);
+	assertMeshVertexHeight(
+		walkableShape.vertices,
+		-120,
+		-40,
+		1.88,
+		"Observatory walkable mesh",
+	);
+	assertMeshVertexHeight(
+		walkableShape.vertices,
+		120,
+		120,
+		2.24,
+		"Observatory walkable mesh",
+	);
+	assertMeshVertexHeight(
+		walkableShape.vertices,
+		-320,
+		320,
+		1.59,
+		"Observatory walkable mesh",
+	);
+	assertEqual(playerKinematicCollision.enabled, true);
+	assertEqual(playerKinematicCollision.offset, 0.04);
+	assertEqual(playerKinematicCollision.slide, true);
+	assertDeepEqual(playerKinematicCollision.obstacleChannels, ["worldStatic"]);
+	assertEqual(playerKinematicCollision.snapToGroundDistance, 0.7);
+	assertEqual(playerKinematicCollision.maxSlopeClimbAngle, 0.7853981633974483);
+	assertEqual(playerKinematicCollision.minSlopeSlideAngle, 0.8726646259971648);
+	assertDeepEqual(playerKinematicCollision.autostep, {
+		maxHeight: 0.45,
+		minWidth: 0.35,
+		includeDynamicBodies: false,
+	});
 	assertDeepEqual(
 		transformPropertyForStableId(
 			manifest,
-			"observatory:walkable-proxy",
+			"observatory:walkable-mesh",
 			"position",
 		),
-		[0, 1.75, 0],
+		[0, 0, 0],
 	);
 	for (const expectation of boundaryCollisionExpectations) {
 		const boundaryCollider = componentForStableId(
@@ -1139,7 +1316,7 @@ function allAssetStrings(
 
 {
 	const manifest = loadRuntimeSceneManifest(observatoryRuntimeSceneManifest);
-	const missingStableId = "observatory:walkable-proxy";
+	const missingStableId = "observatory:walkable-mesh";
 	const readiness = evaluateRuntimeSceneReadiness(manifest, {
 		...validLoadReport(manifest),
 		spawned: manifest.level.instances
@@ -1312,10 +1489,17 @@ for (const manifest of defaultRuntimeSceneManifests) {
 		},
 	);
 
+	assertDeepEqual(sceneMusicTrackIds(audioContent.sceneMusic), [
+		"audio_ambient_portal_deck",
+	]);
 	assertEqual(
-		audioContent.sceneMusic,
-		undefined,
-		"Observatory foundation should not add scene music before a target asset is verified.",
+		musicStateFromAudioContentManifest(audioContent)?.trackId,
+		"audio_ambient_portal_deck",
+	);
+	assertEqual(musicStateFromAudioContentManifest(audioContent)?.volume, 0.16);
+	assertEqual(
+		musicStateFromAudioContentManifest(audioContent)?.fadeSeconds,
+		1.5,
 	);
 	assertEqual(
 		audioContent.eventMappings.some(

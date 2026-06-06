@@ -10,7 +10,7 @@ validation. It is a coordination document, not a replacement for:
 - `GAME_ENGINE_DESIGN_DOCUMENT.md`
 - `ENGINE_CONTRACT_REGISTER.md`
 - `docs/GAME_ENGINE_MIGRATION_PLAN.md`
-- `docs/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md`
+- `docs/Done/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md`
 - `docs/MIGRATION_HANDOFF_2026-06-06.md`
 - `docs/CLEANUP_REMINDER.md`
 
@@ -111,15 +111,30 @@ When both streams are active:
 Run this only after both active streams have stopped changing files:
 
 ```bash
-pnpm --dir apps/game.megameal audit:engine-boundaries
-pnpm --dir apps/game.megameal type-check
 pnpm --dir apps/game.megameal lint
 pnpm --dir apps/game.megameal test:input-contract
 pnpm --dir apps/game.megameal test:charged-action-contract
 pnpm --dir apps/game.megameal test:story-note-contract
 pnpm --dir apps/game.megameal test:scene-environment-contract
 pnpm --dir apps/game.megameal test:runtime-scene-contract
+pnpm --dir apps/game.megameal test:audio-contract
+pnpm --dir apps/game.megameal test:audio-spatial-contract
+pnpm --dir apps/game.megameal test:light-contract
+pnpm --dir apps/game.megameal test:water-firefly-contract
+pnpm --dir apps/game.megameal test:level-authoring-contract
+pnpm --dir apps/game.megameal test:generated-glb-import-contract
+pnpm --dir apps/game.megameal test:observatory-visual-terrain-contract
+pnpm --dir apps/game.megameal test:kinematic-character-contract
+pnpm --dir apps/game.megameal test:collision-overlay-view-model
+pnpm --dir apps/game.megameal test:level-editor-aaa-plan-contract
+pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract
+pnpm --dir apps/game.megameal test:live-preview-protocol-contract
+pnpm --dir apps/game.megameal ci:observatory-collision-drift
+pnpm --dir apps/game.megameal cook:observatory-collision
+pnpm --dir apps/game.megameal audit:engine-boundaries
+pnpm --dir apps/game.megameal type-check
 pnpm --dir apps/game.megameal build
+pnpm audit:legacy-game-references
 git diff --check -- apps/game.megameal pnpm-lock.yaml
 ```
 
@@ -148,7 +163,7 @@ Before either agent expands scope:
 - [x] Confirm the Miranda handoff lists only Miranda-owned files, or update it
       to say the branch also contains Observatory work.
 - [x] Confirm Observatory docs and runtime-scene tests agree on whether
-      `observatory:walkable-proxy` is `walkable/worldStatic` and whether
+      `observatory:walkable-mesh` is `walkable/worldStatic` and whether
       boundary blockers are required readiness data.
 - [x] Fix formatting and contract-test failures before adding new content.
 - [x] Confirm every untracked file is intentional and referenced by source,

@@ -61,6 +61,17 @@ Required cleanup and verification:
    - pnpm --dir apps/game.megameal test:story-note-contract
    - pnpm --dir apps/game.megameal test:scene-environment-contract
    - pnpm --dir apps/game.megameal test:runtime-scene-contract
+   - pnpm --dir apps/game.megameal test:audio-contract
+   - pnpm --dir apps/game.megameal test:audio-spatial-contract
+   - pnpm --dir apps/game.megameal test:light-contract
+   - pnpm --dir apps/game.megameal test:water-firefly-contract
+   - pnpm --dir apps/game.megameal test:level-authoring-contract
+   - pnpm --dir apps/game.megameal test:generated-glb-import-contract
+   - pnpm --dir apps/game.megameal test:observatory-visual-terrain-contract
+   - pnpm --dir apps/game.megameal test:kinematic-character-contract
+   - pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract
+   - pnpm --dir apps/game.megameal ci:observatory-collision-drift
+   - pnpm --dir apps/game.megameal cook:observatory-collision
    - pnpm --dir apps/game.megameal build
    - git diff --check -- apps/game.megameal pnpm-lock.yaml
 
@@ -88,7 +99,7 @@ Use this checklist before handing work back:
 - [ ] No package scripts point at deleted files.
 - [ ] No dead exports, unused helpers, temporary scripts, debug logs, placeholder TODOs, or commented-out code.
 - [ ] Docs reflect the current code and current validation commands.
-- [ ] `audit:engine-boundaries`, `type-check`, `lint`, `test:input-contract`, `test:charged-action-contract`, `test:story-note-contract`, `test:scene-environment-contract`, `test:runtime-scene-contract`, `build`, and `git diff --check` pass.
+- [ ] `audit:engine-boundaries`, `type-check`, `lint`, `test:input-contract`, `test:charged-action-contract`, `test:story-note-contract`, `test:scene-environment-contract`, `test:runtime-scene-contract`, `test:audio-contract`, `test:audio-spatial-contract`, `test:light-contract`, `test:water-firefly-contract`, `test:level-authoring-contract`, `test:generated-glb-import-contract`, `test:observatory-visual-terrain-contract`, `test:kinematic-character-contract`, `test:level-editor-collision-cook-contract`, `ci:observatory-collision-drift`, `cook:observatory-collision`, `build`, and `git diff --check` pass.
 
 ## Architecture Red Flags
 
@@ -115,6 +126,17 @@ pnpm --dir apps/game.megameal test:charged-action-contract
 pnpm --dir apps/game.megameal test:story-note-contract
 pnpm --dir apps/game.megameal test:scene-environment-contract
 pnpm --dir apps/game.megameal test:runtime-scene-contract
+pnpm --dir apps/game.megameal test:audio-contract
+pnpm --dir apps/game.megameal test:audio-spatial-contract
+pnpm --dir apps/game.megameal test:light-contract
+pnpm --dir apps/game.megameal test:water-firefly-contract
+pnpm --dir apps/game.megameal test:level-authoring-contract
+pnpm --dir apps/game.megameal test:generated-glb-import-contract
+pnpm --dir apps/game.megameal test:observatory-visual-terrain-contract
+pnpm --dir apps/game.megameal test:kinematic-character-contract
+pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract
+pnpm --dir apps/game.megameal ci:observatory-collision-drift
+pnpm --dir apps/game.megameal cook:observatory-collision
 pnpm --dir apps/game.megameal build
 git diff --check -- apps/game.megameal pnpm-lock.yaml
 ```

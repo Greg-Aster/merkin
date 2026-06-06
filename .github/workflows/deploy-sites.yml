@@ -78,7 +78,7 @@ jobs:
               - "scripts/deploy-pages-with-retry.sh"
               - "scripts/generate-post-pdfs.mjs"
             game:
-              - "apps/game/**"
+              - "apps/game.megameal/**"
               - "apps/megameal/public/**"
               - "packages/shared-audio/**"
               - "packages/shared-content/**"

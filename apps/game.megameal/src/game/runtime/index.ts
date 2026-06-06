@@ -1,7 +1,10 @@
 import {
+	ACTIVE_CAMERA_POSE_RESOURCE,
 	AUDIO_MANAGER_RESOURCE,
 	type AssetManagerPort,
 	type AudioManagerPort,
+	type AudioMixerPort,
+	type AudioSpatialPort,
 	type CameraPosePort,
 	EngineRuntime,
 	type Entity,
@@ -20,6 +23,7 @@ import {
 	SceneManager,
 	audioEventMappingsFromManifest,
 	createAudioEventSystem,
+	createAudioSpatialSyncSystem,
 	createCameraPoseApplySystem,
 	createPhysicsPostSyncSystem,
 	createPhysicsPreSyncSystem,
@@ -101,6 +105,16 @@ export async function createMegamealGameRuntime(
 	const reflectionProbeSync = new ReflectionProbeSyncSystem({
 		renderer: options.renderer,
 	});
+	const spatialAudio = audioSpatialPortFromOptions(options.audio);
+	const audioSpatialSync = spatialAudio
+		? createAudioSpatialSyncSystem({
+				audio: spatialAudio,
+				listenerResource: ACTIVE_CAMERA_POSE_RESOURCE,
+				activeSceneId: () =>
+					activeRuntimeSceneManifest?.level.sceneId ??
+					activeRuntimeSceneManifest?.id,
+			})
+		: undefined;
 	const audioEvents = options.audio
 		? createAudioEventSystem({
 				audio: options.audio,
@@ -138,6 +152,28 @@ export async function createMegamealGameRuntime(
 				});
 			});
 		},
+		reloadRuntimeScene(runtimeSceneId) {
+			const targetRuntimeSceneId =
+				runtimeSceneId ?? activeRuntimeSceneManifest?.id;
+
+			if (
+				loadingRuntimeSceneId !== undefined ||
+				targetRuntimeSceneId === undefined
+			) {
+				return;
+			}
+
+			void loadRuntimeScene(targetRuntimeSceneId).catch((error) => {
+				runtime.events.emit({
+					type: "RuntimeSceneTransitionFailed",
+					runtimeSceneId: targetRuntimeSceneId,
+					message:
+						error instanceof Error
+							? error.message
+							: "Runtime scene reload failed.",
+				});
+			});
+		},
 	};
 
 	options.input.setBindings(createGameplayActionMap().bindings);
@@ -168,7 +204,7 @@ export async function createMegamealGameRuntime(
 	runtime.scheduler.registerSystem("character", createCharacterMotorSystem());
 	runtime.scheduler.registerSystem(
 		"character",
-		createCharacterMovementSystem(),
+		createCharacterMovementSystem({ physics: options.physics }),
 		{
 			order: 10,
 		},
@@ -224,6 +260,11 @@ export async function createMegamealGameRuntime(
 		createCameraPoseApplySystem({ camera: options.renderer }),
 		{ order: -100 },
 	);
+	if (audioSpatialSync) {
+		runtime.scheduler.registerSystem("render-sync", audioSpatialSync, {
+			order: -90,
+		});
+	}
 	runtime.scheduler.registerSystem("render-sync", {
 		id: "render-sync",
 		update({ interpolation, world }) {
@@ -286,6 +327,7 @@ export async function createMegamealGameRuntime(
 			renderSync.detachAll();
 			lightSync.detachAll();
 			reflectionProbeSync.detachAll();
+			audioSpatialSync?.detachAll();
 			options.renderer.clearSceneEnvironment();
 			await sceneManager.unload(runtime.services);
 			physicsSync.dispose();
@@ -320,8 +362,14 @@ export async function createMegamealGameRuntime(
 		renderSync.detachAll();
 		lightSync.detachAll();
 		reflectionProbeSync.detachAll();
+		audioSpatialSync?.detachAll();
 		physicsSync.dispose();
-		options.audio?.setMusic({ trackId: undefined, playing: false, volume: 0 });
+		options.audio?.setMusic({
+			trackId: undefined,
+			playing: false,
+			volume: 0,
+			fadeSeconds: runtimeSceneMusicFadeSeconds(nextRuntimeSceneManifest),
+		});
 		options.renderer.clearSceneEnvironment();
 		options.renderer.applyRenderProfile?.(
 			nextRuntimeSceneManifest.renderProfile,
@@ -402,6 +450,10 @@ function applyRuntimeSceneMusic(
 		selectionIndex,
 	});
 
+	if (isAudioMixerPort(audio)) {
+		audio.configureMixerBuses(audioContent.mixerBuses ?? []);
+	}
+
 	if (!musicState) {
 		return;
 	}
@@ -410,6 +462,19 @@ function applyRuntimeSceneMusic(
 		...musicState,
 		sceneId: manifest.level.sceneId ?? manifest.id,
 	});
+}
+
+function runtimeSceneMusicFadeSeconds(
+	manifest: RuntimeSceneManifestData,
+): number {
+	const audioContent = parseAudioContentManifest(
+		audioContentManifestForRuntimeScene(manifest.id),
+		{
+			assetManifest: manifest.assets,
+		},
+	);
+
+	return audioContent.sceneMusic?.fadeSeconds ?? 0.75;
 }
 
 function nextMusicSelectionIndex(
@@ -446,6 +511,41 @@ function audioMappingsForRuntimeScenes(
 				},
 			),
 		),
+	);
+}
+
+function audioSpatialPortFromOptions(
+	audio: AudioManagerPort | undefined,
+): AudioSpatialPort | undefined {
+	if (!audio || !isAudioSpatialPort(audio)) {
+		return undefined;
+	}
+
+	return audio;
+}
+
+function isAudioMixerPort(
+	audio: AudioManagerPort,
+): audio is AudioManagerPort & AudioMixerPort {
+	return (
+		"configureMixerBuses" in audio &&
+		typeof audio.configureMixerBuses === "function" &&
+		"setMixerBusVolume" in audio &&
+		typeof audio.setMixerBusVolume === "function"
+	);
+}
+
+function isAudioSpatialPort(
+	audio: AudioManagerPort,
+): audio is AudioManagerPort & AudioSpatialPort {
+	const candidate = audio as Partial<AudioSpatialPort>;
+
+	return (
+		typeof candidate.setListener === "function" &&
+		typeof candidate.attachEmitter === "function" &&
+		typeof candidate.updateEmitter === "function" &&
+		typeof candidate.detachEmitter === "function" &&
+		typeof candidate.detachAllEmitters === "function"
 	);
 }
 

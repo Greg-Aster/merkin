@@ -1,5 +1,7 @@
 import type { AssetManifest } from "../../engine/modules/assets/index.js";
 import type { AudioContentManifest } from "../../engine/modules/audio/index.js";
+import { audioAmbientPortalDeck } from "./ambientAudioAssets.js";
+import { defaultAudioMixerBuses } from "./audioMixerBuses.js";
 import { cubemapObservatorySky } from "./skyboxAssets.js";
 import { materialWaterDarkStill, meshWaterPlane } from "./waterAssets.js";
 
@@ -13,6 +15,18 @@ const meshObservatoryEnvironment = {
 	kind: "mesh",
 	url: "/assets/game/observatory/observatory-environment.glb",
 	tags: ["terrain", "observatory", "source-glb"],
+} as const;
+const meshObservatoryFieldMicroDisplacement = {
+	id: "mesh_observatory_field_micro_displacement",
+	kind: "mesh",
+	url: "/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.glb",
+	tags: [
+		"terrain",
+		"observatory",
+		"generated",
+		"visual-displacement",
+		"collision-aligned",
+	],
 } as const;
 const meshObservatoryFireflyMarker = {
 	id: "mesh_observatory_firefly_marker",
@@ -54,6 +68,7 @@ export const observatoryAssetManifest = {
 	assets: [
 		meshPlayer,
 		meshObservatoryEnvironment,
+		meshObservatoryFieldMicroDisplacement,
 		meshWaterPlane,
 		meshObservatoryFireflyMarker,
 		cubemapObservatorySky,
@@ -62,11 +77,13 @@ export const observatoryAssetManifest = {
 		materialObservatoryFirefly,
 		audioPlayerJump,
 		audioPlayerChargeRelease,
+		audioAmbientPortalDeck,
 	],
 	preloadGroups: {
 		observatory: [
 			"mesh_player",
 			"mesh_observatory_environment",
+			"mesh_observatory_field_micro_displacement",
 			"mesh_water_plane",
 			"mesh_observatory_firefly_marker",
 			"cubemap_observatory_sky",
@@ -75,17 +92,27 @@ export const observatoryAssetManifest = {
 			"material_observatory_firefly",
 			"audio_player_jump",
 			"audio_player_charge_release",
+			"audio_ambient_portal_deck",
 		],
 	},
 } satisfies AssetManifest;
 
 export const observatoryAudioContentManifest = {
+	mixerBuses: defaultAudioMixerBuses,
+	sceneMusic: {
+		trackId: "audio_ambient_portal_deck",
+		volume: 0.16,
+		busId: "music",
+		autoplay: true,
+		fadeSeconds: 1.5,
+	},
 	eventMappings: [
 		{
 			id: "observatory.player.jump",
 			eventType: "EntityJumpRequested",
 			soundId: "audio_player_jump",
 			volume: 0.2,
+			busId: "sfx",
 			sceneId: "observatory_game",
 		},
 		{
@@ -93,6 +120,7 @@ export const observatoryAudioContentManifest = {
 			eventType: "ChargeActionReleased",
 			soundId: "audio_player_charge_release",
 			volume: 0.28,
+			busId: "sfx",
 			sceneId: "observatory_game",
 		},
 	],

@@ -1,10 +1,16 @@
 import type { AssetManifest } from "../../engine/modules/assets/index.js";
 import type { AudioContentManifest } from "../../engine/modules/audio/index.js";
 import {
+	audioAmbientPortalDeck,
 	audioAmbientShadowWaltz,
 	audioAmbientWhistlingDreams,
 } from "./ambientAudioAssets.js";
-import { audioPortalActivate, meshPortalGate } from "./portalAssets.js";
+import { defaultAudioMixerBuses } from "./audioMixerBuses.js";
+import {
+	audioPortalActivate,
+	audioPortalCycle,
+	meshPortalGate,
+} from "./portalAssets.js";
 import { cubemapClassicSky } from "./skyboxAssets.js";
 
 const meshPlayer = {
@@ -35,13 +41,6 @@ const audioPlayerChargeRelease = {
 	url: "/audio/sfx/22-kenney-forceField_001.mp3",
 	tags: ["player", "charge", "sfx"],
 } as const;
-const audioPortalDeck = {
-	id: "audio_ambient_portal_deck",
-	kind: "audio",
-	url: "/audio/ambient/portal-deck.mp3",
-	tags: ["music", "ambient", "portal-arena"],
-} as const;
-
 export const portalArenaAssetManifest = {
 	assets: [
 		meshPlayer,
@@ -52,7 +51,8 @@ export const portalArenaAssetManifest = {
 		audioPlayerJump,
 		audioPlayerChargeRelease,
 		audioPortalActivate,
-		audioPortalDeck,
+		audioPortalCycle,
+		audioAmbientPortalDeck,
 		audioAmbientShadowWaltz,
 		audioAmbientWhistlingDreams,
 	],
@@ -66,6 +66,7 @@ export const portalArenaAssetManifest = {
 			"audio_player_jump",
 			"audio_player_charge_release",
 			"audio_portal_activate",
+			"audio_portal_cycle",
 			"audio_ambient_portal_deck",
 			"audio_ambient_shadow_waltz",
 			"audio_ambient_whistling_dreams",
@@ -74,6 +75,7 @@ export const portalArenaAssetManifest = {
 } satisfies AssetManifest;
 
 export const portalArenaAudioContentManifest = {
+	mixerBuses: defaultAudioMixerBuses,
 	sceneMusic: {
 		trackIds: [
 			"audio_ambient_portal_deck",
@@ -81,7 +83,9 @@ export const portalArenaAudioContentManifest = {
 			"audio_ambient_whistling_dreams",
 		],
 		volume: 0.18,
+		busId: "music",
 		autoplay: true,
+		fadeSeconds: 1.5,
 	},
 	eventMappings: [
 		{
@@ -89,6 +93,7 @@ export const portalArenaAudioContentManifest = {
 			eventType: "EntityJumpRequested",
 			soundId: "audio_player_jump",
 			volume: 0.2,
+			busId: "sfx",
 			sceneId: "portal_arena_game",
 		},
 		{
@@ -96,6 +101,7 @@ export const portalArenaAudioContentManifest = {
 			eventType: "ChargeActionReleased",
 			soundId: "audio_player_charge_release",
 			volume: 0.28,
+			busId: "sfx",
 			sceneId: "portal_arena_game",
 		},
 		{
@@ -103,6 +109,7 @@ export const portalArenaAudioContentManifest = {
 			eventType: "PortalActivated",
 			soundId: "audio_portal_activate",
 			volume: 0.32,
+			busId: "sfx",
 			sceneId: "portal_arena_game",
 		},
 	],

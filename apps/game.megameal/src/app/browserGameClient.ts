@@ -4,6 +4,15 @@ import {
 	createEngineClientApi,
 } from "../engine/client-api/index.js";
 import type { RuntimeSceneManifestData } from "../engine/index.js";
+import {
+	RUNTIME_SCENE_TRANSITION_RESOURCE,
+	type RuntimeSceneTransitionPort,
+} from "../game/index.js";
+import {
+	applyCollisionPreviewPatchToRuntime,
+	clearCollisionPreviewPatchFromRuntime,
+	connectGameWindowDevPreviewChannel,
+} from "./devPreview/index.js";
 import { type GameClientMount, mountGameClient } from "./mountGameClient";
 
 export type BrowserGameClientOptions = {
@@ -21,6 +30,9 @@ export async function createBrowserGameClient(
 	options: BrowserGameClientOptions,
 ): Promise<BrowserGameClient> {
 	const platform = new BrowserPlatform();
+	const isDevelopment =
+		(import.meta as ImportMeta & { readonly env?: { readonly DEV?: boolean } })
+			.env?.DEV === true;
 	let client: GameClientMount;
 
 	try {
@@ -39,6 +51,51 @@ export async function createBrowserGameClient(
 	let frame: number | undefined;
 	let lastTimeMilliseconds = platform.now();
 	let disposed = false;
+	const devPreviewConnection = isDevelopment
+		? connectGameWindowDevPreviewChannel({
+				applyPreview(patch) {
+					const transition =
+						client.runtime.world.getResource<RuntimeSceneTransitionPort>(
+							RUNTIME_SCENE_TRANSITION_RESOURCE,
+						);
+
+					if (transition?.currentRuntimeSceneId() !== patch.runtimeSceneId) {
+						return;
+					}
+
+					applyCollisionPreviewPatchToRuntime(client.runtime, patch);
+				},
+				clearPreview(request) {
+					const transition =
+						client.runtime.world.getResource<RuntimeSceneTransitionPort>(
+							RUNTIME_SCENE_TRANSITION_RESOURCE,
+						);
+
+					if (transition?.currentRuntimeSceneId() !== request.runtimeSceneId) {
+						return;
+					}
+
+					clearCollisionPreviewPatchFromRuntime(client.runtime, request);
+				},
+				reload(request) {
+					const transition =
+						client.runtime.world.getResource<RuntimeSceneTransitionPort>(
+							RUNTIME_SCENE_TRANSITION_RESOURCE,
+						);
+
+					if (transition?.currentRuntimeSceneId() === request.runtimeSceneId) {
+						clearCollisionPreviewPatchFromRuntime(client.runtime, {
+							runtimeSceneId: request.runtimeSceneId,
+							...(request.sourcePlanHash === undefined
+								? {}
+								: { sourcePlanHash: request.sourcePlanHash }),
+						});
+					}
+
+					transition?.reloadRuntimeScene(request.runtimeSceneId);
+				},
+			})
+		: undefined;
 
 	const schedule = () => {
 		if (disposed) {
@@ -82,6 +139,7 @@ export async function createBrowserGameClient(
 
 		disposed = true;
 		stopLoop();
+		devPreviewConnection?.dispose();
 		client.dispose();
 		platform.dispose();
 	};

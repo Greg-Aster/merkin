@@ -1,3 +1,5 @@
+import { collisionLevelInstances as observatoryCollisionLevelInstances } from "../generated/observatoryCollisionRuntime.js";
+import { observatoryFireflyInstances } from "../populations/index.js";
 import type { LevelDefinition } from "./index.js";
 
 export const observatoryLevel = {
@@ -17,6 +19,7 @@ export const observatoryLevel = {
 	preload: [
 		"mesh_player",
 		"mesh_observatory_environment",
+		"mesh_observatory_field_micro_displacement",
 		"mesh_water_plane",
 		"mesh_observatory_firefly_marker",
 		"cubemap_observatory_sky",
@@ -25,6 +28,7 @@ export const observatoryLevel = {
 		"material_observatory_firefly",
 		"audio_player_jump",
 		"audio_player_charge_release",
+		"audio_ambient_portal_deck",
 	],
 	instances: [
 		{
@@ -33,82 +37,11 @@ export const observatoryLevel = {
 			stableId: "observatory:terrain",
 		},
 		{
-			id: "observatory-walkable-proxy",
-			prefabId: "observatory_walkable_proxy",
-			stableId: "observatory:walkable-proxy",
+			id: "observatory-field-visual-terrain",
+			prefabId: "observatory_field_visual_terrain",
+			stableId: "observatory:terrain:visual-field",
 		},
-		{
-			id: "observatory-boundary-north",
-			prefabId: "observatory_boundary_blocker",
-			stableId: "observatory:collision:boundary:north",
-			transform: {
-				position: [0, 5.8, -304],
-			},
-			components: {
-				Collider: {
-					intent: "solid",
-					channel: "worldStatic",
-					shape: {
-						type: "box",
-						halfExtents: [320, 4, 4],
-					},
-				},
-			},
-		},
-		{
-			id: "observatory-boundary-south",
-			prefabId: "observatory_boundary_blocker",
-			stableId: "observatory:collision:boundary:south",
-			transform: {
-				position: [0, 5.8, 304],
-			},
-			components: {
-				Collider: {
-					intent: "solid",
-					channel: "worldStatic",
-					shape: {
-						type: "box",
-						halfExtents: [320, 4, 4],
-					},
-				},
-			},
-		},
-		{
-			id: "observatory-boundary-east",
-			prefabId: "observatory_boundary_blocker",
-			stableId: "observatory:collision:boundary:east",
-			transform: {
-				position: [304, 5.8, 0],
-			},
-			components: {
-				Collider: {
-					intent: "solid",
-					channel: "worldStatic",
-					shape: {
-						type: "box",
-						halfExtents: [4, 4, 320],
-					},
-				},
-			},
-		},
-		{
-			id: "observatory-boundary-west",
-			prefabId: "observatory_boundary_blocker",
-			stableId: "observatory:collision:boundary:west",
-			transform: {
-				position: [-304, 5.8, 0],
-			},
-			components: {
-				Collider: {
-					intent: "solid",
-					channel: "worldStatic",
-					shape: {
-						type: "box",
-						halfExtents: [4, 4, 320],
-					},
-				},
-			},
-		},
+		...observatoryCollisionLevelInstances,
 		{
 			id: "observatory-water",
 			prefabId: "water_surface_plane",
@@ -117,33 +50,33 @@ export const observatoryLevel = {
 				position: [0, -2, 0],
 				scale: [4000, 0.02, 4000],
 			},
-		},
-		{
-			id: "observatory-archive-firefly",
-			prefabId: "observatory_firefly_marker",
-			stableId: "observatory:firefly:archive",
-			transform: {
-				position: [-108.5, 4.4, 68],
-				scale: [1.25, 1.25, 1.25],
+			components: {
+				WaterSurface: {
+					surfaceType: "plane",
+					animation: {
+						mode: "scrolling",
+						speed: 0.035,
+						direction: [0.62, 0.78],
+						waveAmplitude: 0.08,
+						waveLength: 48,
+					},
+					reflection: {
+						mode: "environment",
+						intensity: 0.32,
+					},
+					refraction: {
+						enabled: false,
+						intensity: 0,
+					},
+					gameplayVolume: {
+						enabled: false,
+					},
+					renderOrder: 5,
+					visible: true,
+				},
 			},
 		},
-		{
-			id: "observatory-lantern-firefly",
-			prefabId: "observatory_firefly_marker",
-			stableId: "observatory:firefly:lantern",
-			transform: {
-				position: [72, 5.2, -92],
-				scale: [1.1, 1.1, 1.1],
-			},
-		},
-		{
-			id: "observatory-tide-firefly",
-			prefabId: "observatory_firefly_marker",
-			stableId: "observatory:firefly:tide",
-			transform: {
-				position: [132, 3.6, 104],
-			},
-		},
+		...observatoryFireflyInstances,
 		{
 			id: "player",
 			prefabId: "player",
@@ -154,6 +87,20 @@ export const observatoryLevel = {
 			components: {
 				CharacterController: {
 					groundY: 1.8,
+					kinematicCollision: {
+						enabled: true,
+						offset: 0.04,
+						slide: true,
+						obstacleChannels: ["worldStatic"],
+						snapToGroundDistance: 0.7,
+						maxSlopeClimbAngle: 0.7853981633974483,
+						minSlopeSlideAngle: 0.8726646259971648,
+						autostep: {
+							maxHeight: 0.45,
+							minWidth: 0.35,
+							includeDynamicBodies: false,
+						},
+					},
 				},
 				Light: {
 					kind: "point",

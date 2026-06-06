@@ -93,7 +93,18 @@ pnpm --dir apps/game.megameal test:charged-action-contract
 pnpm --dir apps/game.megameal test:story-note-contract
 pnpm --dir apps/game.megameal test:scene-environment-contract
 pnpm --dir apps/game.megameal test:runtime-scene-contract
+pnpm --dir apps/game.megameal test:audio-contract
+pnpm --dir apps/game.megameal test:audio-spatial-contract
+pnpm --dir apps/game.megameal test:light-contract
+pnpm --dir apps/game.megameal test:water-firefly-contract
+pnpm --dir apps/game.megameal test:level-authoring-contract
+pnpm --dir apps/game.megameal test:generated-glb-import-contract
+pnpm --dir apps/game.megameal test:kinematic-character-contract
+pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract
+pnpm --dir apps/game.megameal ci:observatory-collision-drift
+pnpm --dir apps/game.megameal cook:observatory-collision
 pnpm --dir apps/game.megameal build
+pnpm audit:legacy-game-references
 git diff --check -- apps/game.megameal pnpm-lock.yaml
 ```
 
@@ -106,6 +117,16 @@ pnpm --dir apps/game.megameal exec tsx ./scripts/test-charged-action-contract.ts
 pnpm --dir apps/game.megameal exec tsx ./scripts/test-story-note-contract.ts
 pnpm --dir apps/game.megameal exec tsx ./scripts/test-scene-environment-contract.ts
 pnpm --dir apps/game.megameal exec tsx ./scripts/test-runtime-scene-contract.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/test-audio-contract.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/test-audio-spatial-contract.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/test-light-contract.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/test-water-firefly-contract.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/test-level-authoring-contract.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/test-generated-glb-import-contract.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/test-kinematic-character-contract.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/test-level-editor-collision-cook-contract.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/check-observatory-collision-drift.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/cook-observatory-collision.ts
 ```
 
 Do not run a dev server, browser smoke check, or full app smoke harness unless

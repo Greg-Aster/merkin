@@ -12,6 +12,7 @@ Miranda advanced in three packets:
 1. Miranda airlock return portal migration.
 2. Miranda walkable floor/readiness contract migration.
 3. Miranda Cargo Hold floor/bounds extension.
+4. Miranda cockpit command console and Chapel monolith content parity slice.
 
 Observatory advanced in one collision packet:
 
@@ -46,7 +47,12 @@ The full migration plan is not complete. Do not mark the migration complete.
   collision/walkable readiness.
 - Extended Miranda character bounds to `x = -20..20`, `z = -50..48` only after
   the Cargo Hold walkable floor extension was authored.
-- Updated Observatory collision so `observatory:walkable-proxy` is required
+- Added old Miranda cockpit command console and Chapel monolith A/B as
+  checked-in target-engine prefabs and instances with explicit render/collision
+  data.
+- Added readiness coverage for `miranda:cockpit:console`,
+  `miranda:chapel:monolith:a`, and `miranda:chapel:monolith:b`.
+- Updated Observatory collision so `observatory:walkable-mesh` is required
   `walkable/worldStatic` floor collision.
 - Added four required Observatory boundary blockers through checked-in level and
   prefab data.
@@ -109,8 +115,9 @@ Remaining known migration gaps:
 
 - Broader Miranda terrain/cooked collision/import coverage beyond the current
   checked-in walkable floor footprint.
-- Terrain-following or multi-height movement. Current player movement still
-  uses fixed `groundY`.
+- Broader terrain-following or multi-height movement. Observatory now opts
+  into engine-owned kinematic collision; levels that have not opted in still
+  use scalar `groundY` fallback behavior.
 - Expanded/spatial audio, crossfades, and durable audio import/generation.
 - Editor/import controls and generated/cooked content pipelines.
 - Starmap/timeline behavior as new manifest-owned data.
@@ -157,6 +164,8 @@ Expected new files:
 - The walkable collision changes are engine contracts, not scene-specific
   runtime repairs.
 - The current implementation intentionally keeps old generated portal apparatus
-  GLBs, generated story-marker GLBs, old runtime JSON, and generated collision
-  products excluded.
+  GLB files, old runtime JSON, and generated collision products excluded from
+  runtime loading. Generated story-marker parity is now tracked through
+  `GeneratedGlbImportParityContract`: used marker candidates are validated as
+  target-engine substitutions, while the old green marker remains planned.
 - `docs/CLEANUP_REMINDER.md` was read and must not be deleted.

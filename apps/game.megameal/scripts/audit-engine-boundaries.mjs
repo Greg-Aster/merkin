@@ -76,6 +76,17 @@ for (const file of files) {
 		}
 	}
 
+	if (isNormalRuntimeOwner(rel)) {
+		for (const match of imports.filter(
+			(entry) =>
+				entry.kind === "relative" && isEditorModulePath(entry.resolved),
+		)) {
+			violations.push(
+				`${rel}: normal runtime code must not import editor modules (${match.specifier})`,
+			);
+		}
+	}
+
 	if (!isBrowserGlobalAllowed(rel)) {
 		const globals = browserGlobalMatches(source);
 
@@ -158,6 +169,24 @@ function stripSourceSuffix(path) {
 
 function pathStartsWith(path, prefix) {
 	return path === prefix || path.startsWith(`${prefix}/`);
+}
+
+function isNormalRuntimeOwner(rel) {
+	return (
+		pathStartsWith(rel, "src/engine") ||
+		(pathStartsWith(rel, "src/game") &&
+			!pathStartsWith(rel, "src/game/editor")) ||
+		(pathStartsWith(rel, "src/app") &&
+			!pathStartsWith(rel, "src/app/editor")) ||
+		rel === "src/pages/index.astro"
+	);
+}
+
+function isEditorModulePath(path) {
+	return (
+		pathStartsWith(path, "src/app/editor") ||
+		pathStartsWith(path, "src/game/editor")
+	);
 }
 
 function importsPath(imports, pathPrefix) {

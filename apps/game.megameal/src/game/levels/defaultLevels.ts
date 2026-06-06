@@ -156,6 +156,7 @@ export const mirandaDeckLevel = {
 		"audio_player_jump",
 		"audio_player_charge_release",
 		"audio_portal_activate",
+		"audio_portal_cycle",
 		"audio_ambient_wicked_shadows_whisper",
 		"audio_ambient_dark_shadows_of_delight",
 		"audio_ambient_shadow_waltz",
@@ -224,6 +225,15 @@ export const mirandaDeckLevel = {
 					0.08842644374541003, -0.1783049929434211, -0.01609091832305187,
 					0.9798618146889424,
 				],
+			},
+		},
+		{
+			id: "miranda-cockpit-console",
+			prefabId: "miranda_cockpit_console",
+			stableId: "miranda:cockpit:console",
+			transform: {
+				position: [0, 2.57, -17.5],
+				rotation: [0, 1, 0, 0],
 			},
 		},
 		{
@@ -547,6 +557,24 @@ export const mirandaDeckLevel = {
 			stableId: "miranda:chapel:altar",
 			transform: {
 				position: [10.8, 0.92, 18.4],
+			},
+		},
+		{
+			id: "miranda-chapel-monolith-a",
+			prefabId: "miranda_chapel_monolith",
+			stableId: "miranda:chapel:monolith:a",
+			transform: {
+				position: [9.2, 2.28, 12.8],
+				rotation: [0, 0.059964006479444595, 0, 0.9982005399352042],
+			},
+		},
+		{
+			id: "miranda-chapel-monolith-b",
+			prefabId: "miranda_chapel_monolith",
+			stableId: "miranda:chapel:monolith:b",
+			transform: {
+				position: [12.4, 2.51, 12.4],
+				rotation: [0, -0.06994284733753277, 0, 0.9975510002532796],
 			},
 		},
 		{

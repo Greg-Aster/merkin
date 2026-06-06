@@ -119,6 +119,7 @@ export type RuntimeSceneTransitionPort = {
 	currentRuntimeSceneId(): string | undefined;
 	canLoadRuntimeScene(runtimeSceneId: string): boolean;
 	requestRuntimeScene(runtimeSceneId: string): void;
+	reloadRuntimeScene(runtimeSceneId?: string): void;
 };
 
 export type CharacterMovementBounds = {

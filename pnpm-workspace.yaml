@@ -1,5 +1,8 @@
 packages:
-  - 'apps/*'
+  - 'apps/blog-pusher'
+  - 'apps/game.megameal'
+  - 'apps/megameal'
+  - 'apps/travel'
   # Sites - blog-only sites in workspace
   - 'Temporal-Flow'
   - 'DNDIY.github.io'

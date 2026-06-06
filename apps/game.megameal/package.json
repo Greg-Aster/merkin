@@ -13,7 +13,7 @@
 	},
 	"scripts": {
 		"dev": "astro dev",
-		"build": "pnpm type-check && astro build",
+		"build": "pnpm type-check && pnpm ci:observatory-collision-drift && astro build",
 		"preview": "astro preview",
 		"type-check": "astro check && tsc --noEmit",
 		"audit:engine-boundaries": "node ./scripts/audit-engine-boundaries.mjs",
@@ -22,6 +22,22 @@
 		"test:story-note-contract": "tsx ./scripts/test-story-note-contract.ts",
 		"test:scene-environment-contract": "tsx ./scripts/test-scene-environment-contract.ts",
 		"test:runtime-scene-contract": "tsx ./scripts/test-runtime-scene-contract.ts",
+		"test:audio-contract": "tsx ./scripts/test-audio-contract.ts",
+		"test:audio-spatial-contract": "tsx ./scripts/test-audio-spatial-contract.ts",
+		"test:light-contract": "tsx ./scripts/test-light-contract.ts",
+		"test:water-firefly-contract": "tsx ./scripts/test-water-firefly-contract.ts",
+		"test:level-authoring-contract": "tsx ./scripts/test-level-authoring-contract.ts",
+		"test:generated-glb-import-contract": "tsx ./scripts/test-generated-glb-import-contract.ts",
+		"test:miranda-collision-draft-contract": "tsx ./scripts/test-miranda-collision-draft-contract.ts",
+		"test:observatory-visual-terrain-contract": "tsx ./scripts/test-observatory-visual-terrain-contract.ts",
+		"test:kinematic-character-contract": "tsx ./scripts/test-kinematic-character-contract.ts",
+		"test:collision-overlay-view-model": "tsx ./scripts/test-collision-overlay-view-model.ts",
+		"test:level-editor-aaa-plan-contract": "tsx ./scripts/test-level-editor-aaa-plan-contract.ts",
+		"test:level-editor-collision-cook-contract": "tsx ./scripts/test-level-editor-collision-cook-contract.ts",
+		"test:live-preview-protocol-contract": "tsx ./scripts/test-live-preview-protocol-contract.ts",
+		"ci:observatory-collision-drift": "tsx ./scripts/check-observatory-collision-drift.ts",
+		"cook:observatory-collision": "tsx ./scripts/cook-observatory-collision.ts",
+		"generate:observatory-field-terrain": "tsx ./scripts/generate-observatory-field-terrain.ts",
 		"generate:portal-field-glb": "node ./scripts/generate-portal-field-glb.mjs",
 		"lint": "biome check ./src ./scripts",
 		"format": "biome format --write ./src ./scripts"
@@ -29,7 +45,9 @@
 	"devDependencies": {
 		"@astrojs/check": "^0.9.4",
 		"@biomejs/biome": "1.8.3",
+		"@types/node": "25.3.0",
 		"@types/three": "0.176.0",
+		"tsx": "4.21.0",
 		"typescript": "^5.7.3"
 	}
 }

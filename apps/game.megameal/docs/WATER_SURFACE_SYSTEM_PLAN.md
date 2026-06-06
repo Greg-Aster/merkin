@@ -1,6 +1,6 @@
 # Water Surface System Plan
 
-Status: V1 shared static visual water surface implemented; future water behavior remains planned.
+Status: shared visual water surface plus contract-owned animation/reflection data implemented; firefly flicker preview/cook sampling is contract-owned; shader animation, reflections/refraction rendering, water volumes, live firefly animation, and gameplay behavior remain planned.
 
 This plan defines water as a reusable environmental surface system for `apps/game.megameal`, not as an Observatory-only mesh or material. The first implementation slice is intentionally simple: a static visual water plane that can be instanced and customized per level. Later packets can add animation, reflections, refraction, rising water, gameplay volumes, buoyancy, and authored water-body types without changing ownership.
 
@@ -21,15 +21,26 @@ and level identity. Treating it as a local Observatory mesh would make later
 levels duplicate asset IDs, material policy, renderer behavior, and validation.
 ```
 
-## Current V1 Implementation
+## Current Implementation
 
-The V1 contract implements a static visual water surface:
+The current contract implements a visual water surface with authored renderer
+parameters:
 
 - Rendered as scene content through ordinary engine data.
+- A `WaterSurface` component declares surface type, scrolling/static animation
+  parameters, reflection mode/intensity, refraction settings, render order, and
+  an explicitly disabled gameplay-volume slot.
+- `src/engine/modules/rendering` exposes a renderer-safe projection helper so a
+  future adapter can consume water appearance data without inheriting gameplay
+  volume policy.
 - No collider.
 - No gameplay trigger volume.
-- No shader animation, wave simulation, reflections, refraction, or rising-water behavior.
+- No shader animation, wave simulation, visual reflections, refraction, or
+  rising-water behavior has been implemented in the Three adapter yet.
 - No old `apps/game` water runtime code, editor code, generated products, or renderer repair path.
+- Firefly population data now derives bounded deterministic flicker preview/cook
+  samples from authored seed, phase, frequency, and amplitude values. The Three
+  adapter does not yet animate firefly light intensity from those samples.
 
 This keeps the first slice small while giving future water work a stable owner.
 
@@ -41,7 +52,8 @@ src/game/assets/waterAssets.ts
      material_water_dark_still
 
 src/game/prefabs/waterPrefabs.ts
-  -> shared water prefab archetypes such as water_surface_plane
+  -> shared water prefab archetypes such as water_surface_plane and default
+     WaterSurface component data
 
 src/game/levels/<level>.ts
   -> per-level water instances and customization, such as observatory:water
@@ -51,9 +63,9 @@ RuntimeSceneManifest / AssetManifest
      surface is required for first playable render
 
 Rendering module / ThreeRendererAdapter
-  -> framework-neutral render data in the engine; Three-specific material,
-     transparency, render order, future waves, reflections, and refraction
-     remain adapter concerns
+  -> framework-neutral WaterSurface data and renderer-safe projection in the
+     engine; Three-specific material, transparency, render order, future shader
+     waves, reflections, and refraction remain adapter concerns
 ```
 
 ## V1 Implementation Rules
@@ -62,6 +74,10 @@ Rendering module / ThreeRendererAdapter
 - A level may own a stable instance ID such as `observatory:water`.
 - The render mesh must not imply collision; collision or gameplay water volumes require a future explicit component/contract.
 - Material tuning must flow through manifest-owned material parameters or per-level prefab overrides, not renderer defaults.
+- Water animation/reflection/refraction settings must flow through
+  `WaterSurface`, not hidden renderer defaults.
+- `WaterSurface.gameplayVolume.enabled` must stay `false` until an explicit
+  gameplay water-volume contract is implemented.
 - A scene-specific water material can exist when the art direction requires it, but the shared water mesh/prefab owner remains the reusable water system.
 - Runtime scenes must include water assets in preload/readiness when the water surface is required for the scene's first playable presentation.
 - Svelte, Threlte, browser code, and old `apps/game` systems must not own water state.
@@ -76,7 +92,12 @@ Observatory consumes the shared contract as the first concrete level instance:
 - Level instance ID: `observatory:water`.
 - Position: `[0, -2, 0]`.
 - Visual size: `4000 x 4000`.
-- No collider and no water gameplay volume.
+- Authored `WaterSurface.animation.mode: "scrolling"` with bounded speed,
+  direction, wave amplitude, and wave length.
+- Authored `WaterSurface.reflection.mode: "environment"` with bounded
+  intensity.
+- Refraction disabled and gameplay volume disabled.
+- No collider and no active water gameplay volume.
 
 The Observatory packet must not make `mesh_observatory_water_plane`, `material_observatory_water`, or `observatory_water` the sole reusable owner. Those migration-scaffolding IDs are not part of the V1 implementation; the reusable owners are `mesh_water_plane`, `material_water_dark_still`, and `water_surface_plane`.
 
@@ -85,8 +106,8 @@ The Observatory packet must not make `mesh_observatory_water_plane`, `material_o
 Future water packets should extend `WaterSurfaceContract` rather than adding level-local policies:
 
 - Water quality tiers and renderer diagnostics.
-- Animated normal maps and simple wave parameter sets.
-- Reflections, refraction, depth fade, foam, and shoreline blending.
+- Animated normal maps and shader wave projection from the existing data.
+- Visual reflections, refraction, depth fade, foam, and shoreline blending.
 - Rising water and authored water-state timelines.
 - Explicit water volumes, underwater state, audio filters, and traversal effects.
 - Buoyancy and gameplay interactions.
@@ -102,6 +123,8 @@ The first implementation has focused validation that proves:
 - `observatory:water` is a level instance of the shared water prefab.
 - Required water render assets are in preload/readiness when the scene declares them required.
 - The water render mesh has no collider unless a later water-volume contract adds one explicitly.
+- The authored water component accepts valid bounded animation/reflection data
+  and rejects invalid wave/reflection/refraction/gameplay-volume data.
 - Old `apps/game` water runtime/editor/generated code is not imported.
 
 Expected docs-only validation for this plan:
@@ -117,5 +140,6 @@ Expected code-packet validation when implemented:
 pnpm --dir apps/game.megameal audit:engine-boundaries
 pnpm --dir apps/game.megameal type-check
 pnpm --dir apps/game.megameal lint
+pnpm --dir apps/game.megameal test:water-firefly-contract
 pnpm --dir apps/game.megameal test:runtime-scene-contract
 ```

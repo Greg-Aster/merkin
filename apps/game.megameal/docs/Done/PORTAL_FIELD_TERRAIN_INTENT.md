@@ -113,5 +113,5 @@ pipeline.
   now has a warm point `Light`, and portal scene readiness requires that stable
   light ID.
 - Focused terrain validation passes through `test:runtime-scene-contract`.
-- Full `type-check`, `lint`, and `build` are currently blocked by unrelated
-  current-tree environment/video asset work outside this terrain packet.
+- Current app validation passes for `type-check`, `lint`, and build in later
+  cleanup gates; historical unrelated blockers are no longer active.

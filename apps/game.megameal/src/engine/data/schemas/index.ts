@@ -120,6 +120,70 @@ export type RenderProfileLightData =
 			readonly position: readonly [number, number, number];
 	  };
 
+export type LightBudgetProfileData = {
+	readonly maxTotal?: number;
+	readonly maxAmbient?: number;
+	readonly maxDirectional?: number;
+	readonly maxPoint?: number;
+	readonly maxSpot?: number;
+	readonly maxArea?: number;
+	readonly maxShadowCasting?: number;
+};
+
+export type LightShadowData = {
+	readonly enabled: boolean;
+	readonly mapSize?: 256 | 512 | 1024 | 2048;
+	readonly bias?: number;
+	readonly normalBias?: number;
+	readonly radius?: number;
+	readonly cameraNear?: number;
+	readonly cameraFar?: number;
+};
+
+export type LightComponentData =
+	| {
+			readonly kind: "ambient";
+			readonly color: string;
+			readonly intensity: number;
+			readonly visible?: boolean;
+	  }
+	| {
+			readonly kind: "directional";
+			readonly color: string;
+			readonly intensity: number;
+			readonly visible?: boolean;
+			readonly shadow?: LightShadowData;
+	  }
+	| {
+			readonly kind: "point";
+			readonly color: string;
+			readonly intensity: number;
+			readonly distance: number;
+			readonly decay: number;
+			readonly visible?: boolean;
+			readonly shadow?: LightShadowData;
+	  }
+	| {
+			readonly kind: "spot";
+			readonly color: string;
+			readonly intensity: number;
+			readonly distance: number;
+			readonly decay: number;
+			readonly angle: number;
+			readonly penumbra: number;
+			readonly visible?: boolean;
+			readonly shadow?: LightShadowData;
+	  }
+	| {
+			readonly kind: "area";
+			readonly shape: "rectangle";
+			readonly color: string;
+			readonly intensity: number;
+			readonly width: number;
+			readonly height: number;
+			readonly visible?: boolean;
+	  };
+
 export type DynamicEnvironmentCaptureData = {
 	readonly mode: "on-load" | "interval" | "manual";
 	readonly resolution: 64 | 128 | 256;
@@ -191,6 +255,31 @@ export type RenderProfileEnvironmentData =
 	| VideoSkyboxEnvironmentData
 	| ProceduralAtmosphereEnvironmentData;
 
+export type RenderProfilePostProcessingEffectData =
+	| {
+			readonly kind: "bloom";
+			readonly threshold: number;
+			readonly intensity: number;
+			readonly radius: number;
+	  }
+	| {
+			readonly kind: "color-grading";
+			readonly exposure: number;
+			readonly contrast: number;
+			readonly saturation: number;
+	  }
+	| {
+			readonly kind: "vignette";
+			readonly offset: number;
+			readonly darkness: number;
+	  };
+
+export type RenderProfilePostProcessingData = {
+	readonly enabled: boolean;
+	readonly quality: "off" | "low" | "medium" | "high";
+	readonly effects: readonly RenderProfilePostProcessingEffectData[];
+};
+
 export type RenderProfileData = {
 	readonly id: string;
 	readonly renderer: {
@@ -202,8 +291,10 @@ export type RenderProfileData = {
 	};
 	readonly lighting: {
 		readonly lights: readonly RenderProfileLightData[];
+		readonly budget?: LightBudgetProfileData;
 	};
 	readonly environment: RenderProfileEnvironmentData;
+	readonly postProcessing?: RenderProfilePostProcessingData;
 };
 
 export type RuntimeSceneManifestData = {
@@ -504,11 +595,22 @@ export function validateRenderProfile(data: unknown): readonly string[] {
 				errors,
 			);
 		}
+
+		validateLightBudgetProfile(
+			data.lighting.budget,
+			"renderProfile.lighting.budget",
+			errors,
+		);
 	}
 
 	validateRenderProfileEnvironment(
 		data.environment,
 		"renderProfile.environment",
+		errors,
+	);
+	validateRenderProfilePostProcessing(
+		data.postProcessing,
+		"renderProfile.postProcessing",
 		errors,
 	);
 
@@ -655,6 +757,33 @@ function validateRenderProfileLight(
 
 	if (data.kind === "directional") {
 		validateRequiredNumberTuple(data.position, 3, `${path}.position`, errors);
+	}
+}
+
+function validateLightBudgetProfile(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (data === undefined) {
+		return;
+	}
+
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object when provided.`);
+		return;
+	}
+
+	for (const key of [
+		"maxTotal",
+		"maxAmbient",
+		"maxDirectional",
+		"maxPoint",
+		"maxSpot",
+		"maxArea",
+		"maxShadowCasting",
+	] as const) {
+		validateOptionalNonNegativeInteger(data[key], `${path}.${key}`, errors);
 	}
 }
 
@@ -882,6 +1011,99 @@ function validateOptionalDynamicEnvironmentCapture(
 				`${path}.intervalSeconds is only supported when mode is interval.`,
 			);
 		}
+	}
+}
+
+function validateRenderProfilePostProcessing(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (data === undefined) {
+		return;
+	}
+
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object when provided.`);
+		return;
+	}
+
+	if (typeof data.enabled !== "boolean") {
+		errors.push(`${path}.enabled must be a boolean.`);
+	}
+
+	if (
+		data.quality !== "off" &&
+		data.quality !== "low" &&
+		data.quality !== "medium" &&
+		data.quality !== "high"
+	) {
+		errors.push(`${path}.quality must be off, low, medium, or high.`);
+	}
+
+	if (data.enabled === false && data.quality !== "off") {
+		errors.push(
+			`${path}.quality must be off when post-processing is disabled.`,
+		);
+	}
+
+	if (data.enabled === true && data.quality === "off") {
+		errors.push(
+			`${path}.quality cannot be off when post-processing is enabled.`,
+		);
+	}
+
+	if (!Array.isArray(data.effects)) {
+		errors.push(`${path}.effects must be an array.`);
+		return;
+	}
+
+	if (data.enabled === false && data.effects.length > 0) {
+		errors.push(
+			`${path}.effects must be empty when post-processing is disabled.`,
+		);
+	}
+
+	for (const [index, effect] of data.effects.entries()) {
+		validateRenderProfilePostProcessingEffect(
+			effect,
+			`${path}.effects.${index}`,
+			errors,
+		);
+	}
+}
+
+function validateRenderProfilePostProcessingEffect(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	switch (data.kind) {
+		case "bloom":
+			validateRequiredAlpha(data.threshold, `${path}.threshold`, errors);
+			validateRequiredNonNegativeNumber(
+				data.intensity,
+				`${path}.intensity`,
+				errors,
+			);
+			validateRequiredAlpha(data.radius, `${path}.radius`, errors);
+			return;
+		case "color-grading":
+			validateRequiredNumber(data.exposure, `${path}.exposure`, errors);
+			validateRequiredNumber(data.contrast, `${path}.contrast`, errors);
+			validateRequiredNumber(data.saturation, `${path}.saturation`, errors);
+			return;
+		case "vignette":
+			validateRequiredAlpha(data.offset, `${path}.offset`, errors);
+			validateRequiredAlpha(data.darkness, `${path}.darkness`, errors);
+			return;
+		default:
+			errors.push(`${path}.kind must be bloom, color-grading, or vignette.`);
 	}
 }
 
@@ -1565,6 +1787,7 @@ function validateLevelInstance(
 
 			validateKnownComponents(data.components, `${path}.components`, errors, {
 				hasTransformOverride: isRecord(data.transform),
+				allowPartialCharacterController: true,
 			});
 		}
 	}
@@ -1580,6 +1803,7 @@ function validateKnownComponents(
 	errors: string[],
 	options: {
 		readonly hasTransformOverride?: boolean;
+		readonly allowPartialCharacterController?: boolean;
 	} = {},
 ): void {
 	const transform = components.Transform;
@@ -1646,6 +1870,48 @@ function validateKnownComponents(
 		errors.push(`${path}.ReflectionProbe requires a Transform component.`);
 	}
 
+	validateWaterSurfaceComponent(
+		components.WaterSurface,
+		`${path}.WaterSurface`,
+		errors,
+	);
+
+	if (components.WaterSurface !== undefined && !hasTransform) {
+		errors.push(`${path}.WaterSurface requires a Transform component.`);
+	}
+
+	validateFireflyPopulationMemberComponent(
+		components.FireflyPopulationMember,
+		`${path}.FireflyPopulationMember`,
+		errors,
+	);
+
+	if (components.FireflyPopulationMember !== undefined && !hasTransform) {
+		errors.push(
+			`${path}.FireflyPopulationMember requires a Transform component.`,
+		);
+	}
+
+	validateAudioListenerComponent(
+		components.AudioListener,
+		`${path}.AudioListener`,
+		errors,
+	);
+
+	if (components.AudioListener !== undefined && !hasTransform) {
+		errors.push(`${path}.AudioListener requires a Transform component.`);
+	}
+
+	validateSoundEmitterComponent(
+		components.SoundEmitter,
+		`${path}.SoundEmitter`,
+		errors,
+	);
+
+	if (components.SoundEmitter !== undefined && !hasTransform) {
+		errors.push(`${path}.SoundEmitter requires a Transform component.`);
+	}
+
 	const rigidBody = components.RigidBody;
 
 	if (rigidBody !== undefined) {
@@ -1675,6 +1941,471 @@ function validateKnownComponents(
 	}
 
 	validateColliderComponent(components.Collider, `${path}.Collider`, errors);
+	validateCharacterControllerComponent(
+		components.CharacterController,
+		`${path}.CharacterController`,
+		errors,
+		{
+			allowPartial: options.allowPartialCharacterController === true,
+		},
+	);
+}
+
+function validateWaterSurfaceComponent(
+	water: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (water === undefined) {
+		return;
+	}
+
+	if (!isRecord(water)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	if (water.surfaceType !== "plane") {
+		errors.push(`${path}.surfaceType must be plane.`);
+	}
+
+	validateOptionalStringArray(
+		water.normalMapAssetIds,
+		`${path}.normalMapAssetIds`,
+		errors,
+	);
+	validateWaterSurfaceAnimation(water.animation, `${path}.animation`, errors);
+	validateWaterSurfaceReflection(
+		water.reflection,
+		`${path}.reflection`,
+		errors,
+	);
+	validateWaterSurfaceRefraction(
+		water.refraction,
+		`${path}.refraction`,
+		errors,
+	);
+	validateWaterSurfaceGameplayVolume(
+		water.gameplayVolume,
+		`${path}.gameplayVolume`,
+		errors,
+	);
+	validateOptionalNumber(water.renderOrder, `${path}.renderOrder`, errors);
+
+	if (water.visible !== undefined && typeof water.visible !== "boolean") {
+		errors.push(`${path}.visible must be a boolean when provided.`);
+	}
+}
+
+function validateAudioListenerComponent(
+	listener: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (listener === undefined) {
+		return;
+	}
+
+	if (!isRecord(listener)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	if (typeof listener.active !== "boolean") {
+		errors.push(`${path}.active must be a boolean.`);
+	}
+
+	if (listener.gain !== undefined) {
+		validateRequiredAlpha(listener.gain, `${path}.gain`, errors);
+	}
+}
+
+function validateSoundEmitterComponent(
+	emitter: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (emitter === undefined) {
+		return;
+	}
+
+	if (!isRecord(emitter)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	requireString(emitter, "soundId", `${path}.soundId`, errors);
+
+	if (emitter.active !== undefined && typeof emitter.active !== "boolean") {
+		errors.push(`${path}.active must be a boolean when provided.`);
+	}
+
+	if (emitter.loop !== undefined && typeof emitter.loop !== "boolean") {
+		errors.push(`${path}.loop must be a boolean when provided.`);
+	}
+
+	if (emitter.autoplay !== undefined && typeof emitter.autoplay !== "boolean") {
+		errors.push(`${path}.autoplay must be a boolean when provided.`);
+	}
+
+	if (emitter.sceneId !== undefined) {
+		requireString(emitter, "sceneId", `${path}.sceneId`, errors);
+	}
+
+	if (emitter.volume !== undefined) {
+		validateRequiredAlpha(emitter.volume, `${path}.volume`, errors);
+	}
+
+	if (emitter.busId !== undefined) {
+		requireString(emitter, "busId", `${path}.busId`, errors);
+	}
+
+	validateOptionalPositiveNumber(
+		emitter.refDistance,
+		`${path}.refDistance`,
+		errors,
+	);
+	validateOptionalPositiveNumber(
+		emitter.maxDistance,
+		`${path}.maxDistance`,
+		errors,
+	);
+	validateOptionalNonNegativeNumber(
+		emitter.rolloffFactor,
+		`${path}.rolloffFactor`,
+		errors,
+	);
+
+	if (
+		emitter.distanceModel !== undefined &&
+		emitter.distanceModel !== "inverse" &&
+		emitter.distanceModel !== "linear" &&
+		emitter.distanceModel !== "exponential"
+	) {
+		errors.push(
+			`${path}.distanceModel must be inverse, linear, or exponential when provided.`,
+		);
+	}
+
+	validateOptionalNonNegativeNumber(
+		emitter.coneInnerAngle,
+		`${path}.coneInnerAngle`,
+		errors,
+	);
+	validateOptionalNonNegativeNumber(
+		emitter.coneOuterAngle,
+		`${path}.coneOuterAngle`,
+		errors,
+	);
+
+	if (emitter.coneOuterGain !== undefined) {
+		validateRequiredAlpha(
+			emitter.coneOuterGain,
+			`${path}.coneOuterGain`,
+			errors,
+		);
+	}
+}
+
+function validateWaterSurfaceAnimation(
+	animation: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(animation)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	if (animation.mode !== "static" && animation.mode !== "scrolling") {
+		errors.push(`${path}.mode must be static or scrolling.`);
+	}
+
+	validateRequiredNonNegativeNumber(animation.speed, `${path}.speed`, errors);
+	validateRequiredNumberTuple(
+		animation.direction,
+		2,
+		`${path}.direction`,
+		errors,
+	);
+	validateRequiredNonNegativeNumber(
+		animation.waveAmplitude,
+		`${path}.waveAmplitude`,
+		errors,
+	);
+	validateRequiredPositiveNumber(
+		animation.waveLength,
+		`${path}.waveLength`,
+		errors,
+	);
+}
+
+function validateWaterSurfaceReflection(
+	reflection: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(reflection)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	if (
+		reflection.mode !== "none" &&
+		reflection.mode !== "environment" &&
+		reflection.mode !== "reflection-probe"
+	) {
+		errors.push(`${path}.mode must be none, environment, or reflection-probe.`);
+	}
+
+	validateRequiredAlpha(reflection.intensity, `${path}.intensity`, errors);
+
+	if (reflection.mode === "reflection-probe") {
+		requireString(reflection, "probeStableId", `${path}.probeStableId`, errors);
+	} else if (reflection.probeStableId !== undefined) {
+		errors.push(
+			`${path}.probeStableId is only supported when mode is reflection-probe.`,
+		);
+	}
+}
+
+function validateWaterSurfaceRefraction(
+	refraction: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (refraction === undefined) {
+		return;
+	}
+
+	if (!isRecord(refraction)) {
+		errors.push(`${path} must be an object when provided.`);
+		return;
+	}
+
+	if (typeof refraction.enabled !== "boolean") {
+		errors.push(`${path}.enabled must be a boolean.`);
+	}
+
+	validateRequiredAlpha(refraction.intensity, `${path}.intensity`, errors);
+
+	if (refraction.enabled === false && refraction.intensity !== 0) {
+		errors.push(`${path}.intensity must be 0 when refraction is disabled.`);
+	}
+}
+
+function validateWaterSurfaceGameplayVolume(
+	volume: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (volume === undefined) {
+		return;
+	}
+
+	if (!isRecord(volume)) {
+		errors.push(`${path} must be an object when provided.`);
+		return;
+	}
+
+	if (volume.enabled !== false) {
+		errors.push(
+			`${path}.enabled must be false until the water gameplay volume contract is implemented.`,
+		);
+	}
+}
+
+function validateFireflyPopulationMemberComponent(
+	member: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (member === undefined) {
+		return;
+	}
+
+	if (!isRecord(member)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	requireString(member, "populationId", `${path}.populationId`, errors);
+	requireString(member, "memberId", `${path}.memberId`, errors);
+	validateRequiredNonNegativeInteger(member.seed, `${path}.seed`, errors);
+
+	if (member.phase !== undefined) {
+		validateRequiredAlpha(member.phase, `${path}.phase`, errors);
+	}
+
+	if (member.flicker !== undefined) {
+		if (!isRecord(member.flicker)) {
+			errors.push(`${path}.flicker must be an object when provided.`);
+		} else {
+			validateRequiredPositiveNumber(
+				member.flicker.frequencyHz,
+				`${path}.flicker.frequencyHz`,
+				errors,
+			);
+			validateRequiredAlpha(
+				member.flicker.amplitude,
+				`${path}.flicker.amplitude`,
+				errors,
+			);
+		}
+	}
+}
+
+function validateCharacterControllerComponent(
+	controller: unknown,
+	path: string,
+	errors: string[],
+	options: {
+		readonly allowPartial?: boolean;
+	} = {},
+): void {
+	if (controller === undefined) {
+		return;
+	}
+
+	if (!isRecord(controller)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	if (options.allowPartial === true) {
+		validateOptionalPositiveNumber(controller.speed, `${path}.speed`, errors);
+		validateOptionalNonNegativeNumber(
+			controller.jumpForce,
+			`${path}.jumpForce`,
+			errors,
+		);
+
+		if (
+			controller.grounded !== undefined &&
+			typeof controller.grounded !== "boolean"
+		) {
+			errors.push(`${path}.grounded must be a boolean when provided.`);
+		}
+	} else {
+		validateRequiredPositiveNumber(controller.speed, `${path}.speed`, errors);
+		validateRequiredNonNegativeNumber(
+			controller.jumpForce,
+			`${path}.jumpForce`,
+			errors,
+		);
+
+		if (typeof controller.grounded !== "boolean") {
+			errors.push(`${path}.grounded must be a boolean.`);
+		}
+	}
+
+	validateOptionalPositiveNumber(
+		controller.sprintMultiplier,
+		`${path}.sprintMultiplier`,
+		errors,
+	);
+	validateOptionalNumber(controller.gravity, `${path}.gravity`, errors);
+	validateOptionalNumber(
+		controller.verticalVelocity,
+		`${path}.verticalVelocity`,
+		errors,
+	);
+	validateOptionalNumber(controller.groundY, `${path}.groundY`, errors);
+
+	validateKinematicCollisionSettings(
+		controller.kinematicCollision,
+		`${path}.kinematicCollision`,
+		errors,
+	);
+}
+
+function validateKinematicCollisionSettings(
+	settings: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (settings === undefined) {
+		return;
+	}
+
+	if (!isRecord(settings)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	if (settings.enabled !== undefined && typeof settings.enabled !== "boolean") {
+		errors.push(`${path}.enabled must be a boolean when provided.`);
+	}
+
+	validateOptionalNonNegativeNumber(settings.offset, `${path}.offset`, errors);
+	if (settings.slide !== undefined && typeof settings.slide !== "boolean") {
+		errors.push(`${path}.slide must be a boolean when provided.`);
+	}
+	validateOptionalStringArray(
+		settings.obstacleChannels,
+		`${path}.obstacleChannels`,
+		errors,
+	);
+	if (
+		Array.isArray(settings.obstacleChannels) &&
+		settings.obstacleChannels.length === 0
+	) {
+		errors.push(`${path}.obstacleChannels must not be empty when provided.`);
+	}
+	validateOptionalPositiveNumber(
+		settings.snapToGroundDistance,
+		`${path}.snapToGroundDistance`,
+		errors,
+	);
+	validateOptionalNumber(
+		settings.maxSlopeClimbAngle,
+		`${path}.maxSlopeClimbAngle`,
+		errors,
+	);
+	validateOptionalNumber(
+		settings.minSlopeSlideAngle,
+		`${path}.minSlopeSlideAngle`,
+		errors,
+	);
+
+	if (settings.up !== undefined) {
+		validateRequiredVec3Like(settings.up, `${path}.up`, errors);
+	}
+
+	if (settings.autostep !== undefined) {
+		if (!isRecord(settings.autostep)) {
+			errors.push(`${path}.autostep must be an object when provided.`);
+		} else {
+			validateRequiredPositiveNumber(
+				settings.autostep.maxHeight,
+				`${path}.autostep.maxHeight`,
+				errors,
+			);
+			validateRequiredPositiveNumber(
+				settings.autostep.minWidth,
+				`${path}.autostep.minWidth`,
+				errors,
+			);
+			if (
+				settings.autostep.includeDynamicBodies !== undefined &&
+				typeof settings.autostep.includeDynamicBodies !== "boolean"
+			) {
+				errors.push(
+					`${path}.autostep.includeDynamicBodies must be a boolean when provided.`,
+				);
+			}
+		}
+	}
+
+	for (const angleProperty of [
+		"maxSlopeClimbAngle",
+		"minSlopeSlideAngle",
+	] as const) {
+		const value = settings[angleProperty];
+		if (typeof value === "number" && (value < 0 || value > Math.PI / 2)) {
+			errors.push(`${path}.${angleProperty} must be between 0 and PI / 2.`);
+		}
+	}
 }
 
 function validateLightComponent(
@@ -1695,9 +2426,12 @@ function validateLightComponent(
 		light.kind !== "ambient" &&
 		light.kind !== "directional" &&
 		light.kind !== "point" &&
-		light.kind !== "spot"
+		light.kind !== "spot" &&
+		light.kind !== "area"
 	) {
-		errors.push(`${path}.kind must be ambient, directional, point, or spot.`);
+		errors.push(
+			`${path}.kind must be ambient, directional, point, spot, or area.`,
+		);
 		return;
 	}
 
@@ -1724,6 +2458,75 @@ function validateLightComponent(
 	if (light.kind === "spot") {
 		validateRequiredPositiveNumber(light.angle, `${path}.angle`, errors);
 		validateRequiredAlpha(light.penumbra, `${path}.penumbra`, errors);
+	}
+
+	if (light.kind === "area") {
+		if (light.shape !== "rectangle") {
+			errors.push(`${path}.shape must be rectangle for area lights.`);
+		}
+
+		validateRequiredPositiveNumber(light.width, `${path}.width`, errors);
+		validateRequiredPositiveNumber(light.height, `${path}.height`, errors);
+	}
+
+	if (light.shadow !== undefined) {
+		if (light.kind === "ambient" || light.kind === "area") {
+			errors.push(`${path}.shadow is not supported for ${light.kind} lights.`);
+		}
+
+		validateLightShadowData(light.shadow, `${path}.shadow`, errors);
+	}
+}
+
+export function validateLightComponentData(
+	light: unknown,
+	path = "Light",
+): readonly string[] {
+	const errors: string[] = [];
+
+	validateLightComponent(light, path, errors);
+
+	return errors;
+}
+
+function validateLightShadowData(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object when provided.`);
+		return;
+	}
+
+	if (typeof data.enabled !== "boolean") {
+		errors.push(`${path}.enabled must be a boolean.`);
+	}
+
+	if (
+		data.mapSize !== undefined &&
+		data.mapSize !== 256 &&
+		data.mapSize !== 512 &&
+		data.mapSize !== 1024 &&
+		data.mapSize !== 2048
+	) {
+		errors.push(`${path}.mapSize must be 256, 512, 1024, or 2048.`);
+	}
+
+	validateOptionalNumber(data.bias, `${path}.bias`, errors);
+	validateOptionalNumber(data.normalBias, `${path}.normalBias`, errors);
+	validateOptionalNonNegativeNumber(data.radius, `${path}.radius`, errors);
+	validateOptionalPositiveNumber(data.cameraNear, `${path}.cameraNear`, errors);
+	validateOptionalPositiveNumber(data.cameraFar, `${path}.cameraFar`, errors);
+
+	if (
+		typeof data.cameraNear === "number" &&
+		Number.isFinite(data.cameraNear) &&
+		typeof data.cameraFar === "number" &&
+		Number.isFinite(data.cameraFar) &&
+		data.cameraFar <= data.cameraNear
+	) {
+		errors.push(`${path}.cameraFar must be greater than cameraNear.`);
 	}
 }
 
@@ -1835,6 +2638,7 @@ function validateColliderComponent(
 	validateCollisionIntent(collider.intent, `${path}.intent`, errors);
 	validateCollisionChannel(collider.channel, `${path}.channel`, errors);
 	validateCollisionIntentSensorPolicy(collider, path, errors);
+	validateOptionalNumberTuple(collider.offset, 3, `${path}.offset`, errors);
 
 	if (!isRecord(collider.shape)) {
 		errors.push(`${path}.shape must be an object.`);
@@ -2097,6 +2901,55 @@ function validateRequiredPositiveNumber(
 	}
 }
 
+function validateOptionalPositiveNumber(
+	value: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (value !== undefined) {
+		validateRequiredPositiveNumber(value, path, errors);
+	}
+}
+
+function validateOptionalNumber(
+	value: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (value !== undefined) {
+		validateRequiredNumber(value, path, errors);
+	}
+}
+
+function validateOptionalNonNegativeNumber(
+	value: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (value !== undefined) {
+		validateRequiredNonNegativeNumber(value, path, errors);
+	}
+}
+
+function validateOptionalNonNegativeInteger(
+	value: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (value === undefined) {
+		return;
+	}
+
+	if (
+		typeof value !== "number" ||
+		!Number.isFinite(value) ||
+		!Number.isInteger(value) ||
+		value < 0
+	) {
+		errors.push(`${path} must be a non-negative finite integer.`);
+	}
+}
+
 function validateRequiredNumber(
 	value: unknown,
 	path: string,
@@ -2114,6 +2967,16 @@ function validateRequiredNonNegativeNumber(
 ): void {
 	if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
 		errors.push(`${path} must be a non-negative finite number.`);
+	}
+}
+
+function validateRequiredNonNegativeInteger(
+	value: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
+		errors.push(`${path} must be a non-negative integer.`);
 	}
 }
 

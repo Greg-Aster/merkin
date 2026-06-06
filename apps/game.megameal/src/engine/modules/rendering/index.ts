@@ -6,6 +6,17 @@ export const PREVIOUS_TRANSFORM_COMPONENT = "PreviousTransform";
 export const RENDERABLE_COMPONENT = "Renderable";
 export const LIGHT_COMPONENT = "Light";
 export const REFLECTION_PROBE_COMPONENT = "ReflectionProbe";
+export const WATER_SURFACE_COMPONENT = "WaterSurface";
+
+export type LightShadowSettings = {
+	readonly enabled: boolean;
+	readonly mapSize?: 256 | 512 | 1024 | 2048;
+	readonly bias?: number;
+	readonly normalBias?: number;
+	readonly radius?: number;
+	readonly cameraNear?: number;
+	readonly cameraFar?: number;
+};
 
 export type RenderableComponent = {
 	readonly meshId: string;
@@ -25,6 +36,7 @@ export type DirectionalLightComponent = {
 	readonly color: string;
 	readonly intensity: number;
 	readonly visible?: boolean;
+	readonly shadow?: LightShadowSettings;
 };
 
 export type PointLightComponent = {
@@ -34,6 +46,7 @@ export type PointLightComponent = {
 	readonly distance: number;
 	readonly decay: number;
 	readonly visible?: boolean;
+	readonly shadow?: LightShadowSettings;
 };
 
 export type SpotLightComponent = {
@@ -45,13 +58,25 @@ export type SpotLightComponent = {
 	readonly angle: number;
 	readonly penumbra: number;
 	readonly visible?: boolean;
+	readonly shadow?: LightShadowSettings;
+};
+
+export type AreaLightComponent = {
+	readonly kind: "area";
+	readonly shape: "rectangle";
+	readonly color: string;
+	readonly intensity: number;
+	readonly width: number;
+	readonly height: number;
+	readonly visible?: boolean;
 };
 
 export type LightComponent =
 	| AmbientLightComponent
 	| DirectionalLightComponent
 	| PointLightComponent
-	| SpotLightComponent;
+	| SpotLightComponent
+	| AreaLightComponent;
 
 export type VisibilityComponent = {
 	readonly visible: boolean;
@@ -220,6 +245,72 @@ export type ReflectionProbeRendererPort = {
 	): void;
 	detachReflectionProbe(entity: Entity): void;
 };
+
+export type WaterSurfaceAnimationMode = "static" | "scrolling";
+export type WaterSurfaceReflectionMode =
+	| "none"
+	| "environment"
+	| "reflection-probe";
+
+export type WaterSurfaceAnimation = {
+	readonly mode: WaterSurfaceAnimationMode;
+	readonly speed: number;
+	readonly direction: readonly [number, number];
+	readonly waveAmplitude: number;
+	readonly waveLength: number;
+};
+
+export type WaterSurfaceReflection = {
+	readonly mode: WaterSurfaceReflectionMode;
+	readonly intensity: number;
+	readonly probeStableId?: string;
+};
+
+export type WaterSurfaceRefraction = {
+	readonly enabled: boolean;
+	readonly intensity: number;
+};
+
+export type WaterSurfaceGameplayVolume = {
+	readonly enabled: false;
+};
+
+export type WaterSurfaceComponent = {
+	readonly surfaceType: "plane";
+	readonly normalMapAssetIds?: readonly string[];
+	readonly animation: WaterSurfaceAnimation;
+	readonly reflection: WaterSurfaceReflection;
+	readonly refraction?: WaterSurfaceRefraction;
+	readonly gameplayVolume?: WaterSurfaceGameplayVolume;
+	readonly renderOrder?: number;
+	readonly visible?: boolean;
+};
+
+export type WaterSurfaceRendererState = {
+	readonly normalMapAssetIds?: readonly string[];
+	readonly animation: WaterSurfaceAnimation;
+	readonly reflection: WaterSurfaceReflection;
+	readonly refraction?: WaterSurfaceRefraction;
+	readonly renderOrder?: number;
+	readonly visible: boolean;
+};
+
+export function waterSurfaceRendererStateFromComponent(
+	water: WaterSurfaceComponent,
+): WaterSurfaceRendererState {
+	return {
+		...(water.normalMapAssetIds
+			? { normalMapAssetIds: [...water.normalMapAssetIds] }
+			: {}),
+		animation: { ...water.animation },
+		reflection: { ...water.reflection },
+		...(water.refraction ? { refraction: { ...water.refraction } } : {}),
+		...(water.renderOrder !== undefined
+			? { renderOrder: water.renderOrder }
+			: {}),
+		visible: water.visible !== false,
+	};
+}
 
 export type RenderQueueItem = {
 	readonly entity: Entity;

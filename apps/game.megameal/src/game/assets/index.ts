@@ -1,5 +1,7 @@
 export * from "./ambientAudioAssets.js";
+export * from "./audioMixerBuses.js";
 export * from "./defaultAssets.js";
+export * from "./generatedGlbImportParity.js";
 export * from "./observatoryAssets.js";
 export * from "./portalAssets.js";
 export * from "./portalArenaAssets.js";

@@ -30,6 +30,7 @@ export const playerPrefab = {
 		Collider: {
 			intent: "solid",
 			channel: "player",
+			offset: [0, 0.9, 0],
 			shape: {
 				type: "capsule",
 				halfHeight: 0.55,
@@ -285,6 +286,13 @@ export const mirandaCockpitPanelCenterPrefab = {
 	},
 } satisfies PrefabDefinition;
 
+export const mirandaCockpitConsolePrefab = createMirandaBoxBlockerPrefab({
+	id: "miranda_cockpit_console",
+	materialId: "material_miranda_cockpit_console",
+	tags: ["cockpit"],
+	scale: [3.1, 3.08, 2.93],
+});
+
 export const mirandaCrewBunkPrefab = {
 	id: "miranda_crew_bunk",
 	assetIds: ["mesh_box", "material_miranda_crew_bunk"],
@@ -529,6 +537,13 @@ export const mirandaChapelAltarPrefab = createMirandaBoxBlockerPrefab({
 	scale: [3.4, 1.84, 1.3],
 });
 
+export const mirandaChapelMonolithPrefab = createMirandaBoxBlockerPrefab({
+	id: "miranda_chapel_monolith",
+	materialId: "material_miranda_chapel_monolith",
+	tags: ["chapel"],
+	scale: [1.56, 4.56, 1.14],
+});
+
 export const mirandaBrigCellPrefab = createMirandaBoxBlockerPrefab({
 	id: "miranda_brig_cell",
 	materialId: "material_miranda_brig_cell",
@@ -646,6 +661,7 @@ export const mirandaDeckPrefabs = [
 	mirandaCargoHoldFloorPrefab,
 	mirandaCockpitPanelSidePrefab,
 	mirandaCockpitPanelCenterPrefab,
+	mirandaCockpitConsolePrefab,
 	mirandaCrewBunkPrefab,
 	mirandaLockerBankPrefab,
 	mirandaCaptainsDeskPrefab,
@@ -658,6 +674,7 @@ export const mirandaDeckPrefabs = [
 	mirandaMessTableSmallPrefab,
 	mirandaMessCounterPrefab,
 	mirandaChapelAltarPrefab,
+	mirandaChapelMonolithPrefab,
 	mirandaBrigCellPrefab,
 	mirandaBrigDeskPrefab,
 	mirandaCargoStackAPrefab,

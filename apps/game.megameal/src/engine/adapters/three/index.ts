@@ -15,6 +15,7 @@ import type { CameraPose, CameraPosePort } from "../../modules/camera/index.js";
 import type {
 	LightComponent,
 	LightRendererPort,
+	LightShadowSettings,
 	ReflectionProbeComponent,
 	ReflectionProbeRendererPort,
 	RenderTransform,
@@ -136,11 +137,29 @@ type ThreeLightObjectLike = ThreeObject3DLike & {
 	color?: {
 		set(color: string | number): void;
 	};
+	castShadow?: boolean;
 	intensity?: number;
 	distance?: number;
 	decay?: number;
 	angle?: number;
 	penumbra?: number;
+	width?: number;
+	height?: number;
+	shadow?: {
+		mapSize?: {
+			set?(width: number, height: number): void;
+			width?: number;
+			height?: number;
+		};
+		bias?: number;
+		normalBias?: number;
+		radius?: number;
+		camera?: {
+			near?: number;
+			far?: number;
+			updateProjectionMatrix?(): void;
+		};
+	};
 };
 
 export type ThreeSceneLike = ThreeObject3DLike & {
@@ -167,6 +186,10 @@ export type ThreeRendererLike = ThreeDisposableLike & {
 	setClearColor?(color: string | number, alpha?: number): void;
 	setPixelRatio?(pixelRatio: number): void;
 	setSize?(width: number, height: number, updateStyle?: boolean): void;
+	shadowMap?: {
+		enabled?: boolean;
+		type?: unknown;
+	};
 	toneMappingExposure?: number;
 };
 
@@ -228,6 +251,12 @@ export type ThreeRuntime = {
 		angle?: number,
 		penumbra?: number,
 		decay?: number,
+	) => ThreeObject3DLike;
+	readonly RectAreaLight?: new (
+		color: string | number,
+		intensity: number,
+		width?: number,
+		height?: number,
 	) => ThreeObject3DLike;
 	readonly CubeTextureLoader?: new () => ThreeCubeTextureLoaderLike;
 	readonly TextureLoader?: new () => ThreeTextureLoaderLike;
@@ -936,7 +965,7 @@ export class ThreeRendererAdapter
 
 		sanitizeUserData(object, entity);
 		applyTransform(object, transform);
-		applyLightProperties(object, light);
+		applyLightProperties(this.renderer, object, light);
 
 		this.scene.add(object);
 		this.#lights.set(entity, object);
@@ -954,7 +983,7 @@ export class ThreeRendererAdapter
 		}
 
 		applyTransform(object, transform);
-		applyLightProperties(object, light);
+		applyLightProperties(this.renderer, object, light);
 	}
 
 	detachLight(entity: Entity): void {
@@ -1577,10 +1606,25 @@ function createLightObject(
 				light.decay,
 			);
 		}
+		case "area": {
+			if (!three.RectAreaLight) {
+				throw new Error(
+					"Authored area Light component requires Three.RectAreaLight.",
+				);
+			}
+
+			return new three.RectAreaLight(
+				light.color,
+				light.intensity,
+				light.width,
+				light.height,
+			);
+		}
 	}
 }
 
 function applyLightProperties(
+	renderer: ThreeRendererLike,
 	object: ThreeObject3DLike,
 	light: LightComponent,
 ): void {
@@ -1598,6 +1642,70 @@ function applyLightProperties(
 	if (light.kind === "spot") {
 		target.angle = light.angle;
 		target.penumbra = light.penumbra;
+	}
+
+	if (light.kind === "area") {
+		target.width = light.width;
+		target.height = light.height;
+	}
+
+	if (light.kind === "ambient" || light.kind === "area") {
+		return;
+	}
+
+	applyLightShadowProperties(renderer, target, light.shadow);
+}
+
+function applyLightShadowProperties(
+	renderer: ThreeRendererLike,
+	target: ThreeLightObjectLike,
+	shadow: LightShadowSettings | undefined,
+): void {
+	target.castShadow = shadow?.enabled === true;
+
+	if (shadow?.enabled !== true) {
+		return;
+	}
+
+	if (renderer.shadowMap) {
+		renderer.shadowMap.enabled = true;
+	}
+
+	if (!target.shadow) {
+		return;
+	}
+
+	if (shadow.mapSize !== undefined) {
+		if (target.shadow.mapSize?.set) {
+			target.shadow.mapSize.set(shadow.mapSize, shadow.mapSize);
+		} else if (target.shadow.mapSize) {
+			target.shadow.mapSize.width = shadow.mapSize;
+			target.shadow.mapSize.height = shadow.mapSize;
+		}
+	}
+
+	if (shadow.bias !== undefined) {
+		target.shadow.bias = shadow.bias;
+	}
+
+	if (shadow.normalBias !== undefined) {
+		target.shadow.normalBias = shadow.normalBias;
+	}
+
+	if (shadow.radius !== undefined) {
+		target.shadow.radius = shadow.radius;
+	}
+
+	if (target.shadow.camera) {
+		if (shadow.cameraNear !== undefined) {
+			target.shadow.camera.near = shadow.cameraNear;
+		}
+
+		if (shadow.cameraFar !== undefined) {
+			target.shadow.camera.far = shadow.cameraFar;
+		}
+
+		target.shadow.camera.updateProjectionMatrix?.();
 	}
 }
 

@@ -1,0 +1,100 @@
+{
+	"schemaVersion": 1,
+	"id": "observatory_visual_terrain_generated_v1",
+	"generatedAt": "2026-06-06T00:00:00.000Z",
+	"owner": "Observatory visual terrain generation",
+	"source": {
+		"runtimeSceneId": "observatory_runtime",
+		"collisionDraftId": "observatory_collision_draft_v1",
+		"collisionStableId": "observatory:walkable-mesh",
+		"collisionPrefabId": "observatory_walkable_mesh",
+		"sourceVisualAssetId": "mesh_observatory_environment",
+		"sourceVisualAssetUrl": "/assets/game/observatory/observatory-environment.glb",
+		"sourceVisualStableId": "observatory:terrain",
+		"sourceVisualScale": [
+			1,
+			1,
+			1
+		]
+	},
+	"output": {
+		"meshAssetId": "mesh_observatory_field_micro_displacement",
+		"prefabId": "observatory_field_visual_terrain",
+		"stableId": "observatory:terrain:visual-field",
+		"glbUrl": "/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.glb",
+		"glbPath": "public/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.glb",
+		"metadataPath": "public/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.json",
+		"glbSha256": "326df726413d05e1139efe355d3e65bb0b78d120ecd05e615cc5ed1e37dd0d92",
+		"scale": [
+			1,
+			1,
+			1
+		]
+	},
+	"alignment": {
+		"renderUsesCollisionAsImplicitCollision": false,
+		"sourceGlbScale": [
+			1,
+			1,
+			1
+		],
+		"visualTerrainScale": [
+			1,
+			1,
+			1
+		],
+		"collisionGridSize": 17,
+		"collisionHalfExtent": 320,
+		"collisionCellSize": 40,
+		"collisionVertexCount": 289,
+		"collisionTriangleCount": 512,
+		"visualGridSize": 65,
+		"visualHalfExtent": 320,
+		"visualCellSize": 10,
+		"visualVertexCount": 4225,
+		"visualTriangleCount": 8192,
+		"microDisplacementAmplitude": 0.055,
+		"maxCollisionSampleError": 0,
+		"collisionAnchorSamples": [
+			{
+				"x": -320,
+				"z": -320,
+				"collisionHeight": 1.43,
+				"visualHeight": 1.43,
+				"error": 0
+			},
+			{
+				"x": -120,
+				"z": -40,
+				"collisionHeight": 1.88,
+				"visualHeight": 1.88,
+				"error": 0
+			},
+			{
+				"x": 0,
+				"z": 0,
+				"collisionHeight": 2.25,
+				"visualHeight": 2.25,
+				"error": 0
+			},
+			{
+				"x": 120,
+				"z": 120,
+				"collisionHeight": 2.24,
+				"visualHeight": 2.24,
+				"error": 0
+			},
+			{
+				"x": 320,
+				"z": 320,
+				"collisionHeight": 2,
+				"visualHeight": 2,
+				"error": 0
+			}
+		],
+		"heightRange": {
+			"min": 1.385225,
+			"max": 2.453625
+		}
+	}
+}

@@ -1,3 +1,10 @@
+export const audioAmbientPortalDeck = {
+	id: "audio_ambient_portal_deck",
+	kind: "audio",
+	url: "/audio/ambient/portal-deck.mp3",
+	tags: ["music", "ambient", "portal-deck"],
+} as const;
+
 export const audioAmbientDarkShadowsOfDelight = {
 	id: "audio_ambient_dark_shadows_of_delight",
 	kind: "audio",

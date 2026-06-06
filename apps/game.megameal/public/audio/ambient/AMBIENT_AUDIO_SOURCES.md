@@ -16,7 +16,7 @@ rights before promotion.
 
 | Stable ID | File | Owner | Provenance / Usage |
 | --- | --- | --- | --- |
-| `audio_ambient_portal_deck` | `portal-deck.mp3` | `src/game/assets/portalArenaAssets.ts` | Original project track; cleared for runtime scene music. |
+| `audio_ambient_portal_deck` | `portal-deck.mp3` | `src/game/assets/ambientAudioAssets.ts` | Original project track; cleared for portal arena playlist music and Observatory `courtyard-breeze` scene music. |
 | `audio_ambient_wicked_shadows_whisper` | `Wicked Shadows Whisper.mp3` | `src/game/assets/defaultAssets.ts` | Original project track; cleared for runtime scene music. |
 | `audio_ambient_dark_shadows_of_delight` | `Dark Shadows of Delight.mp3` | `src/game/assets/ambientAudioAssets.ts` | Original project track; cleared for runtime scene music. |
 | `audio_ambient_shadow_waltz` | `Shadow Waltz.mp3` | `src/game/assets/ambientAudioAssets.ts` | Original project track; cleared for runtime scene music. |

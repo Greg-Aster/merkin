@@ -4,9 +4,14 @@ import {
 	audioAmbientDarkShadowsOfDelight,
 	audioAmbientShadowWaltz,
 } from "./ambientAudioAssets.js";
+import { defaultAudioMixerBuses } from "./audioMixerBuses.js";
 import { observatoryAudioContentManifest } from "./observatoryAssets.js";
 import { portalArenaAudioContentManifest } from "./portalArenaAssets.js";
-import { audioPortalActivate, meshPortalGate } from "./portalAssets.js";
+import {
+	audioPortalActivate,
+	audioPortalCycle,
+	meshPortalGate,
+} from "./portalAssets.js";
 import {
 	cubemapClassicSky,
 	cubemapObservatorySky,
@@ -105,6 +110,18 @@ const materialMirandaCockpitPanelCenter = {
 		emissiveIntensity: 1,
 		metalness: 0.9,
 		roughness: 0.16,
+	},
+} as const;
+const materialMirandaCockpitConsole = {
+	id: "material_miranda_cockpit_console",
+	kind: "material",
+	url: "builtin://miranda-cockpit-console",
+	material: {
+		color: "#243344",
+		emissive: "#69cfff",
+		emissiveIntensity: 0.72,
+		metalness: 0.84,
+		roughness: 0.2,
 	},
 } as const;
 const materialMirandaCrewBunk = {
@@ -239,6 +256,18 @@ const materialMirandaChapelAltar = {
 		emissiveIntensity: 0.22,
 		metalness: 0.36,
 		roughness: 0.58,
+	},
+} as const;
+const materialMirandaChapelMonolith = {
+	id: "material_miranda_chapel_monolith",
+	kind: "material",
+	url: "builtin://miranda-chapel-monolith",
+	material: {
+		color: "#2f2b39",
+		emissive: "#8058b8",
+		emissiveIntensity: 0.16,
+		metalness: 0.24,
+		roughness: 0.74,
 	},
 } as const;
 const materialMirandaBrigCell = {
@@ -402,6 +431,7 @@ export const mirandaDeckAssetManifest = {
 		materialMirandaFloorUpper,
 		materialMirandaCockpitPanel,
 		materialMirandaCockpitPanelCenter,
+		materialMirandaCockpitConsole,
 		materialMirandaCrewBunk,
 		materialMirandaLockerBank,
 		materialMirandaCaptainsDesk,
@@ -413,6 +443,7 @@ export const mirandaDeckAssetManifest = {
 		materialMirandaMessTable,
 		materialMirandaMessCounter,
 		materialMirandaChapelAltar,
+		materialMirandaChapelMonolith,
 		materialMirandaBrigCell,
 		materialMirandaBrigDesk,
 		materialMirandaCargoStackA,
@@ -426,6 +457,7 @@ export const mirandaDeckAssetManifest = {
 		audioPlayerJump,
 		audioPlayerChargeRelease,
 		audioPortalActivate,
+		audioPortalCycle,
 		audioMirandaAmbientWickedShadows,
 		audioAmbientDarkShadowsOfDelight,
 		audioAmbientShadowWaltz,
@@ -443,6 +475,7 @@ export const mirandaDeckAssetManifest = {
 			"material_miranda_floor_upper",
 			"material_miranda_cockpit_panel",
 			"material_miranda_cockpit_panel_center",
+			"material_miranda_cockpit_console",
 			"material_miranda_crew_bunk",
 			"material_miranda_locker_bank",
 			"material_miranda_captains_desk",
@@ -454,6 +487,7 @@ export const mirandaDeckAssetManifest = {
 			"material_miranda_mess_table",
 			"material_miranda_mess_counter",
 			"material_miranda_chapel_altar",
+			"material_miranda_chapel_monolith",
 			"material_miranda_brig_cell",
 			"material_miranda_brig_desk",
 			"material_miranda_cargo_stack_a",
@@ -467,6 +501,7 @@ export const mirandaDeckAssetManifest = {
 			"audio_player_jump",
 			"audio_player_charge_release",
 			"audio_portal_activate",
+			"audio_portal_cycle",
 			"audio_ambient_wicked_shadows_whisper",
 			"audio_ambient_dark_shadows_of_delight",
 			"audio_ambient_shadow_waltz",
@@ -475,12 +510,14 @@ export const mirandaDeckAssetManifest = {
 } satisfies AssetManifest;
 
 export const prototypeAudioContentManifest = {
+	mixerBuses: defaultAudioMixerBuses,
 	eventMappings: [
 		{
 			id: "prototype.collect.ingredient",
 			eventType: "ItemCollected",
 			soundId: "audio_ui_collect",
 			volume: 0.35,
+			busId: "sfx",
 			sceneId: "prototype_game",
 		},
 		{
@@ -488,6 +525,7 @@ export const prototypeAudioContentManifest = {
 			eventType: "EntityJumpRequested",
 			soundId: "audio_player_jump",
 			volume: 0.2,
+			busId: "sfx",
 			sceneId: "prototype_game",
 		},
 		{
@@ -495,12 +533,14 @@ export const prototypeAudioContentManifest = {
 			eventType: "ChargeActionReleased",
 			soundId: "audio_player_charge_release",
 			volume: 0.28,
+			busId: "sfx",
 			sceneId: "prototype_game",
 		},
 	],
 } satisfies AudioContentManifest;
 
 export const mirandaDeckAudioContentManifest = {
+	mixerBuses: defaultAudioMixerBuses,
 	sceneMusic: {
 		trackIds: [
 			"audio_ambient_wicked_shadows_whisper",
@@ -508,7 +548,9 @@ export const mirandaDeckAudioContentManifest = {
 			"audio_ambient_shadow_waltz",
 		],
 		volume: 0.16,
+		busId: "music",
 		autoplay: true,
+		fadeSeconds: 1.5,
 	},
 	eventMappings: [
 		{
@@ -516,6 +558,7 @@ export const mirandaDeckAudioContentManifest = {
 			eventType: "EntityJumpRequested",
 			soundId: "audio_player_jump",
 			volume: 0.2,
+			busId: "sfx",
 			sceneId: "miranda_deck_game",
 		},
 		{
@@ -523,6 +566,7 @@ export const mirandaDeckAudioContentManifest = {
 			eventType: "ChargeActionReleased",
 			soundId: "audio_player_charge_release",
 			volume: 0.28,
+			busId: "sfx",
 			sceneId: "miranda_deck_game",
 		},
 		{
@@ -530,6 +574,7 @@ export const mirandaDeckAudioContentManifest = {
 			eventType: "PortalActivated",
 			soundId: "audio_portal_activate",
 			volume: 0.32,
+			busId: "sfx",
 			sceneId: "miranda_deck_game",
 		},
 	],

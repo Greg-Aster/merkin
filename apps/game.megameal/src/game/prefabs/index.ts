@@ -17,6 +17,8 @@ export {
 	mirandaCargoStackCPrefab,
 	mirandaCargoStackDPrefab,
 	mirandaChapelAltarPrefab,
+	mirandaChapelMonolithPrefab,
+	mirandaCockpitConsolePrefab,
 	mirandaCockpitPanelCenterPrefab,
 	mirandaCockpitPanelSidePrefab,
 	mirandaCommandGalleryBeaconLightPrefab,
@@ -46,8 +48,8 @@ export {
 	observatoryBoundaryBlockerPrefab,
 	observatoryEnvironmentPrefab,
 	observatoryFireflyMarkerPrefab,
+	observatoryWalkableMeshPrefab,
 	observatoryPrefabs,
-	observatoryWalkableProxyPrefab,
 } from "./observatoryPrefabs.js";
 export { portalGatePrefab } from "./navigationPrefabs.js";
 export {
@@ -268,9 +270,16 @@ function normalizeColliderComponent(components: Record<string, unknown>): void {
 		return;
 	}
 
+	const normalizedCollider: Record<string, unknown> = {
+		...collider,
+		...(collider.offset !== undefined
+			? { offset: tupleToVec3(collider.offset, vec3()) }
+			: {}),
+	};
+
 	if (collider.shape.type === "box") {
 		components.Collider = {
-			...collider,
+			...normalizedCollider,
 			shape: {
 				...collider.shape,
 				halfExtents: tupleToVec3(
@@ -287,7 +296,7 @@ function normalizeColliderComponent(components: Record<string, unknown>): void {
 		Array.isArray(collider.shape.vertices)
 	) {
 		components.Collider = {
-			...collider,
+			...normalizedCollider,
 			shape: {
 				...collider.shape,
 				vertices: collider.shape.vertices.map((vertex) =>
@@ -295,7 +304,10 @@ function normalizeColliderComponent(components: Record<string, unknown>): void {
 				),
 			},
 		};
+		return;
 	}
+
+	components.Collider = normalizedCollider;
 }
 
 function tupleToVec3(value: unknown, fallback: ReturnType<typeof vec3>) {

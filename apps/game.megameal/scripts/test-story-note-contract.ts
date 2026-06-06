@@ -223,6 +223,7 @@ function runPortalActivation(harness: ReturnType<typeof createHarness>) {
 		requestRuntimeScene(runtimeSceneId: string) {
 			requestedRuntimeSceneIds.push(runtimeSceneId);
 		},
+		reloadRuntimeScene() {},
 	});
 
 	harness.events.emit({ type: "ActiveInteractionRequested" });

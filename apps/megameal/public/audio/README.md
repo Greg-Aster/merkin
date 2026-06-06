@@ -20,9 +20,12 @@ Keep ambient tracks trimmed, seamless, and modest in file size so the site stays
 
 
 
-Implementation Plan
+Historical Monorepo Plan
 
-This is the concrete repo plan I’d use for this monorepo.
+This section is a legacy planning note from the older `apps/game` runtime era.
+The normal game app is now `apps/game.megameal`; treat `apps/game` paths below
+as historical/reference-only evidence unless a dedicated cleanup packet
+explicitly migrates or removes them.
 
 Phase 1: Shared Data Layer
 
@@ -56,9 +59,11 @@ Purpose:
 
 stop the game from reading MEGAMEAL content directly at runtime/build time
 generate canonical static JSON once, then let both apps consume it
-Phase 2: Replace Cross-App Content Loading in Game
+Phase 2: Replace Cross-App Content Loading in Legacy Game
 
-The current fragile file is apps/game/src/content/config.ts. It reaches directly into apps/megameal/src/content/posts, which is exactly the coupling that needs to go.
+The fragile file in the legacy app was apps/game/src/content/config.ts. It
+reached directly into apps/megameal/src/content/posts, which was the coupling
+this plan intended to remove.
 
 Change these files:
 
@@ -100,7 +105,9 @@ Purpose:
 keep the site and game reading the same normalized story graph
 Phase 4: Shared Audio Conventions
 
-Create one shared audio/config package.
+This remains a future idea, not an implemented package. If revived, design it
+against the current `apps/game.megameal` audio engine instead of the retired
+`apps/game` Threlte runtime.
 
 New files:
 
@@ -109,11 +116,12 @@ packages/shared-audio/tsconfig.json
 packages/shared-audio/src/audio-ids.ts
 packages/shared-audio/src/site-audio-profile.ts
 packages/shared-audio/src/game-audio-profile.ts
-Then migrate:
+Potential future integration points to evaluate:
 
 apps/megameal/src/config/audio.ts
 apps/megameal/src/utils/site-sfx.ts
-apps/game/src/threlte/systems/Audio.svelte
+apps/game.megameal/src/engine/modules/audio/index.ts
+apps/game.megameal/src/engine/adapters/browser/audio.ts
 Purpose:
 
 same audio vocabulary across both apps
@@ -132,14 +140,14 @@ deploy:all should include shared-data generation plus separate Megameal and game
 Recommended Order of Work
 
 Build packages/shared-content and packages/shared-data.
-Refactor apps/game/src/content/config.ts out of the game.
-Switch apps/game/src/services/TimelineService.ts to generated manifests.
-Move audio config into packages/shared-audio.
+For historical `apps/game` reference only: refactor apps/game/src/content/config.ts out of the game.
+For historical `apps/game` reference only: switch apps/game/src/services/TimelineService.ts to generated manifests.
+If the shared-audio idea is revived, target `apps/game.megameal` audio owners rather than `apps/game`.
 Tighten deploy scripts.
 Key Architectural Rule
 
-After this pass:
+Historical rule from this plan:
 
-apps/game should never reach into apps/megameal/src/content/*
+legacy apps/game should never reach into apps/megameal/src/content/*
 both apps should depend on packages/shared-data/generated/*
 megameal.org/game should redirect to game.megameal.org, not proxy the game

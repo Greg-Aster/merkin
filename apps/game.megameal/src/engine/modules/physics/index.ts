@@ -72,6 +72,7 @@ export type ColliderComponent = {
 	readonly shape: PhysicsColliderShape;
 	readonly intent: CollisionIntent;
 	readonly channel: CollisionChannel;
+	readonly offset?: Vec3;
 	readonly colliderHandle?: ColliderHandle;
 	readonly sensor?: boolean;
 };
@@ -89,6 +90,25 @@ export type CharacterControllerComponent = {
 	readonly gravity?: number;
 	readonly verticalVelocity?: number;
 	readonly groundY?: number;
+	readonly kinematicCollision?: KinematicCharacterCollisionSettings;
+};
+
+export type KinematicCharacterCollisionSettings = {
+	readonly enabled?: boolean;
+	readonly offset?: number;
+	readonly slide?: boolean;
+	readonly obstacleChannels?: readonly CollisionChannel[];
+	readonly snapToGroundDistance?: number;
+	readonly maxSlopeClimbAngle?: number;
+	readonly minSlopeSlideAngle?: number;
+	readonly autostep?: KinematicCharacterAutostepSettings;
+	readonly up?: Vec3;
+};
+
+export type KinematicCharacterAutostepSettings = {
+	readonly maxHeight: number;
+	readonly minWidth: number;
+	readonly includeDynamicBodies?: boolean;
 };
 
 export type CharacterBounds = {
@@ -147,6 +167,9 @@ export type PhysicsAdapterPort = {
 	step(deltaSeconds: number): void;
 	drainEvents(): readonly PhysicsCollisionEvent[];
 	castRay?(query: PhysicsRaycastQuery): PhysicsRaycastHit | undefined;
+	computeKinematicCharacterMovement?(
+		query: KinematicCharacterMovementQuery,
+	): KinematicCharacterMovementResult | undefined;
 	bodyCount?(): number;
 	colliderCount?(): number;
 	dispose(): void;
@@ -156,6 +179,7 @@ export type PhysicsRaycastQuery = {
 	readonly origin: Vec3;
 	readonly direction: Vec3;
 	readonly maxDistance: number;
+	readonly excludeEntities?: readonly Entity[];
 };
 
 export type PhysicsRaycastHit = {
@@ -164,6 +188,31 @@ export type PhysicsRaycastHit = {
 	readonly normal: Vec3;
 	readonly distance: number;
 };
+
+export type KinematicCharacterMovementQuery = {
+	readonly entity: Entity;
+	readonly colliderHandle: ColliderHandle;
+	readonly desiredTranslation: Vec3;
+	readonly settings: KinematicCharacterCollisionSettings;
+	readonly excludeEntities?: readonly Entity[];
+};
+
+export type KinematicCharacterMovementResult = {
+	readonly translation: Vec3;
+	readonly grounded: boolean;
+	readonly collisionCount: number;
+};
+
+export type KinematicCharacterCollisionUnavailableReason =
+	| "missing-collider-handle"
+	| "missing-physics-adapter"
+	| "movement-query-failed";
+
+export type KinematicCharacterCollisionUnavailableEvent =
+	EngineEvent<"KinematicCharacterCollisionUnavailable"> & {
+		readonly entity: Entity;
+		readonly reason: KinematicCharacterCollisionUnavailableReason;
+	};
 
 export function emitPhysicsEvents(
 	adapter: Pick<PhysicsAdapterPort, "drainEvents">,
@@ -498,6 +547,11 @@ export type KinematicCharacterControllerSystemOptions = {
 	readonly transformComponent?: string;
 	readonly characterControllerComponent?: string;
 	readonly characterMotorComponent?: string;
+	readonly colliderComponent?: string;
+	readonly physics?: Pick<
+		PhysicsAdapterPort,
+		"computeKinematicCharacterMovement"
+	>;
 };
 
 export function createKinematicCharacterControllerSystem<
@@ -509,6 +563,8 @@ export function createKinematicCharacterControllerSystem<
 		options.characterControllerComponent ?? CHARACTER_CONTROLLER_COMPONENT;
 	const characterMotorComponent =
 		options.characterMotorComponent ?? CHARACTER_MOTOR_COMPONENT;
+	const colliderComponent = options.colliderComponent ?? COLLIDER_COMPONENT;
+	const physics = options.physics;
 
 	return {
 		id: "kinematic-character-controller",
@@ -516,6 +572,7 @@ export function createKinematicCharacterControllerSystem<
 			transformComponent,
 			characterControllerComponent,
 			characterMotorComponent,
+			colliderComponent,
 		],
 		writes: [transformComponent, characterControllerComponent],
 		update(context) {
@@ -545,9 +602,10 @@ export function createKinematicCharacterControllerSystem<
 					speed * context.deltaSeconds,
 				);
 				const gravity = controller.gravity ?? -18;
-				const groundY = controller.groundY ?? transform.position.y;
+				const fallbackGroundY = controller.groundY ?? transform.position.y;
 				const wasGrounded =
-					controller.grounded || transform.position.y <= groundY + 0.001;
+					controller.grounded ||
+					transform.position.y <= fallbackGroundY + 0.001;
 				let verticalVelocity = controller.verticalVelocity ?? 0;
 
 				if (motor.jumpRequested && wasGrounded) {
@@ -559,15 +617,68 @@ export function createKinematicCharacterControllerSystem<
 				verticalVelocity += gravity * context.deltaSeconds;
 
 				const verticalDelta = verticalVelocity * context.deltaSeconds;
+				const desiredTranslation = addVec3(
+					horizontalDelta,
+					vec3(0, verticalDelta, 0),
+				);
+				const collider = context.world.getComponent<ColliderComponent>(
+					entity,
+					colliderComponent,
+				);
+				const kinematicCollision = controller.kinematicCollision;
+				const physicsAdapter = physics;
+				const kinematicCollisionRequested =
+					kinematicCollision !== undefined &&
+					kinematicCollision.enabled !== false;
+				const kinematicUnavailableReason =
+					kinematicCollisionRequested && collider?.colliderHandle === undefined
+						? "missing-collider-handle"
+						: kinematicCollisionRequested &&
+								physicsAdapter?.computeKinematicCharacterMovement === undefined
+							? "missing-physics-adapter"
+							: undefined;
+				const kinematicMovement =
+					kinematicCollisionRequested &&
+					kinematicUnavailableReason === undefined &&
+					collider?.colliderHandle !== undefined &&
+					kinematicCollision !== undefined &&
+					physicsAdapter?.computeKinematicCharacterMovement !== undefined
+						? physicsAdapter.computeKinematicCharacterMovement({
+								entity,
+								colliderHandle: collider.colliderHandle,
+								desiredTranslation,
+								settings: kinematicCollision,
+								excludeEntities: [entity],
+							})
+						: undefined;
+
+				if (
+					kinematicCollisionRequested &&
+					(kinematicUnavailableReason !== undefined ||
+						kinematicMovement === undefined)
+				) {
+					context.events.emit({
+						type: "KinematicCharacterCollisionUnavailable",
+						entity,
+						reason: kinematicUnavailableReason ?? "movement-query-failed",
+					});
+				}
+
 				const unclampedPosition = addVec3(
 					transform.position,
-					addVec3(horizontalDelta, vec3(0, verticalDelta, 0)),
+					kinematicMovement?.translation ?? desiredTranslation,
 				);
-				const grounded = unclampedPosition.y <= groundY;
+				const adapterGrounded = kinematicMovement?.grounded === true;
+				const fallbackGrounded =
+					!adapterGrounded && unclampedPosition.y <= fallbackGroundY;
+				const grounded = adapterGrounded || fallbackGrounded;
 				const nextPosition = clampPosition(
 					{
 						...unclampedPosition,
-						y: grounded ? groundY : unclampedPosition.y,
+						y:
+							(kinematicMovement === undefined || fallbackGrounded) && grounded
+								? fallbackGroundY
+								: unclampedPosition.y,
 					},
 					motor.bounds,
 				);
@@ -743,6 +854,7 @@ function withoutColliderHandle(collider: ColliderComponent): ColliderComponent {
 		shape: collider.shape,
 		intent: collider.intent,
 		channel: collider.channel,
+		...(collider.offset !== undefined ? { offset: collider.offset } : {}),
 		...(collider.sensor !== undefined ? { sensor: collider.sensor } : {}),
 	};
 }

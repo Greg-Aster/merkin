@@ -1,3 +1,4 @@
+import { getCollisionPrefabCollider } from "../generated/observatoryCollisionRuntime.js";
 import { playerPrefab } from "./defaultPrefabs.js";
 import type { PrefabDefinition } from "./index.js";
 import { waterSurfacePlanePrefab } from "./waterPrefabs.js";
@@ -19,12 +20,29 @@ export const observatoryEnvironmentPrefab = {
 	},
 } satisfies PrefabDefinition;
 
-export const observatoryWalkableProxyPrefab = {
-	id: "observatory_walkable_proxy",
-	tags: ["world", "collision", "walkable", "observatory"],
+export const observatoryFieldVisualTerrainPrefab = {
+	id: "observatory_field_visual_terrain",
+	assetIds: ["mesh_observatory_field_micro_displacement"],
+	tags: ["world", "terrain", "observatory", "generated", "visual-displacement"],
 	components: {
 		Transform: {
-			position: [0, 1.75, 0],
+			position: [0, 0, 0],
+			rotation: [0, 0, 0, 1],
+			scale: [1, 1, 1],
+		},
+		Renderable: {
+			meshId: "mesh_observatory_field_micro_displacement",
+			visible: true,
+		},
+	},
+} satisfies PrefabDefinition;
+
+export const observatoryWalkableMeshPrefab = {
+	id: "observatory_walkable_mesh",
+	tags: ["world", "collision", "walkable", "mesh", "observatory"],
+	components: {
+		Transform: {
+			position: [0, 0, 0],
 			rotation: [0, 0, 0, 1],
 			scale: [1, 1, 1],
 		},
@@ -32,14 +50,7 @@ export const observatoryWalkableProxyPrefab = {
 			type: "fixed",
 			mass: 0,
 		},
-		Collider: {
-			intent: "walkable",
-			channel: "worldStatic",
-			shape: {
-				type: "box",
-				halfExtents: [320, 0.05, 320],
-			},
-		},
+		Collider: getCollisionPrefabCollider("observatory_walkable_mesh"),
 	},
 } satisfies PrefabDefinition;
 
@@ -97,7 +108,8 @@ export const observatoryPrefabs = [
 	playerPrefab,
 	observatoryBoundaryBlockerPrefab,
 	observatoryEnvironmentPrefab,
-	observatoryWalkableProxyPrefab,
+	observatoryFieldVisualTerrainPrefab,
+	observatoryWalkableMeshPrefab,
 	waterSurfacePlanePrefab,
 	observatoryFireflyMarkerPrefab,
 ] as const;

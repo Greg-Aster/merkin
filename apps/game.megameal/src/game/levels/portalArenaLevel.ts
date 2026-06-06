@@ -70,6 +70,7 @@ export const portalArenaLevel = {
 		"audio_player_jump",
 		"audio_player_charge_release",
 		"audio_portal_activate",
+		"audio_portal_cycle",
 		"audio_ambient_portal_deck",
 		"audio_ambient_shadow_waltz",
 		"audio_ambient_whistling_dreams",
