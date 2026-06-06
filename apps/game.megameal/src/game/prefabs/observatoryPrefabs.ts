@@ -21,7 +21,7 @@ export const observatoryEnvironmentPrefab = {
 
 export const observatoryWalkableProxyPrefab = {
 	id: "observatory_walkable_proxy",
-	tags: ["world", "collision", "observatory"],
+	tags: ["world", "collision", "walkable", "observatory"],
 	components: {
 		Transform: {
 			position: [0, 1.75, 0],
@@ -33,11 +33,35 @@ export const observatoryWalkableProxyPrefab = {
 			mass: 0,
 		},
 		Collider: {
-			intent: "solid",
-			channel: "world",
+			intent: "walkable",
+			channel: "worldStatic",
 			shape: {
 				type: "box",
 				halfExtents: [320, 0.05, 320],
+			},
+		},
+	},
+} satisfies PrefabDefinition;
+
+export const observatoryBoundaryBlockerPrefab = {
+	id: "observatory_boundary_blocker",
+	tags: ["world", "collision", "blocker", "observatory"],
+	components: {
+		Transform: {
+			position: [0, 0, 0],
+			rotation: [0, 0, 0, 1],
+			scale: [1, 1, 1],
+		},
+		RigidBody: {
+			type: "fixed",
+			mass: 0,
+		},
+		Collider: {
+			intent: "solid",
+			channel: "worldStatic",
+			shape: {
+				type: "box",
+				halfExtents: [1, 1, 1],
 			},
 		},
 	},
@@ -71,6 +95,7 @@ export const observatoryFireflyMarkerPrefab = {
 
 export const observatoryPrefabs = [
 	playerPrefab,
+	observatoryBoundaryBlockerPrefab,
 	observatoryEnvironmentPrefab,
 	observatoryWalkableProxyPrefab,
 	waterSurfacePlanePrefab,

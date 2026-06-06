@@ -117,7 +117,7 @@ export const mirandaDeckLevel = {
 			minX: -20,
 			maxX: 20,
 			minZ: -50,
-			maxZ: 42,
+			maxZ: 48,
 		},
 	},
 	preload: [
@@ -125,6 +125,7 @@ export const mirandaDeckLevel = {
 		"mesh_box",
 		"mesh_cylinder",
 		"mesh_miranda_engine_core",
+		"mesh_portal_gate",
 		"cubemap_observatory_sky",
 		"material_player",
 		"material_miranda_floor_main",
@@ -154,6 +155,7 @@ export const mirandaDeckLevel = {
 		"material_miranda_story_marker_magenta",
 		"audio_player_jump",
 		"audio_player_charge_release",
+		"audio_portal_activate",
 		"audio_ambient_wicked_shadows_whisper",
 		"audio_ambient_dark_shadows_of_delight",
 		"audio_ambient_shadow_waltz",
@@ -173,6 +175,14 @@ export const mirandaDeckLevel = {
 			stableId: "miranda:floor:upper",
 			transform: {
 				position: [0, 4.7, -27.5],
+			},
+		},
+		{
+			id: "miranda-floor-cargo-hold",
+			prefabId: "miranda_floor_cargo_hold",
+			stableId: "miranda:floor:cargo-hold",
+			transform: {
+				position: [0, 3.35, 45],
 			},
 		},
 		{
@@ -416,6 +426,24 @@ export const mirandaDeckLevel = {
 				markerColor: "#ffb36d",
 				markerSize: 0.62,
 			}),
+		},
+		{
+			id: "miranda-return-portal",
+			prefabId: "portal_gate",
+			stableId: "miranda:airlock:return-portal",
+			transform: {
+				position: [0, 1, 6.6],
+				scale: [0.95, 0.95, 0.95],
+			},
+			components: {
+				Portal: {
+					id: "miranda.return.observatory",
+					label: "Return to Observatory",
+					prompt: "Click to return to Observatory",
+					targetRuntimeSceneId: "observatory_runtime",
+					activationRadius: 2.35,
+				},
+			},
 		},
 		{
 			id: "miranda-med-pod-a",

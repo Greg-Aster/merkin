@@ -48,8 +48,17 @@ collision binary is ported.
   `CharacterController.groundY: 1.8`.
 - Add player-carried point light on stable ID `player`.
 - Add GLB visual entity `observatory:terrain` with unit scale `[1, 1, 1]`.
-- Add flat explicit collision proxy `observatory:walkable-proxy` at top height
-  `1.8`, half extents `[320, 0.05, 320]`.
+- Add Observatory V1 authored proxy collision as a level consumer of
+  `CollisionPolicy`, `WalkableCollisionContract`, and `LevelReadinessContract`:
+  - required `observatory:walkable-proxy` floor collision with
+    `Collider.intent: "walkable"`, `channel: "worldStatic"`, top height `1.8`,
+    and half extents `[320, 0.05, 320]`
+  - required `observatory_boundary_blocker` perimeter collision instances at
+    `observatory:collision:boundary:north`,
+    `observatory:collision:boundary:south`,
+    `observatory:collision:boundary:east`, and
+    `observatory:collision:boundary:west`
+  - no collision inferred from `mesh_observatory_environment`
 - Add character bounds `x/z = -300..300`.
 - Add static visual water surface instance `observatory:water` at `y = -2`,
   scale `[4000, 0.02, 4000]`, renderable
@@ -91,15 +100,15 @@ Extend `test:runtime-scene-contract` with explicit assertions for:
   chunks, old terrain manifests, or old generated collider binaries.
 - Player spawn, `CharacterController.groundY`, and player-carried `Light`
   values match this plan.
-- Terrain visual entity, terrain scale, walkable collision proxy, water
-  transform, shared water renderable, and shared water material parameters
-  match this plan.
+- Terrain visual entity, terrain scale, authored walkable floor collision,
+  boundary blocker collision, water transform, shared water renderable, and
+  shared water material parameters match this plan.
 - Required light stable IDs include `player`, `observatory:firefly:archive`,
   `observatory:firefly:lantern`, and `observatory:firefly:tide`.
 - Each firefly marker has the expected stable ID, position, renderable
   mesh/material IDs, and point-light values.
-- Removing any required player/firefly light from the spawned report fails
-  readiness.
+- Removing any required player/firefly light, boundary collision, or walkable
+  floor collision from the spawned report fails readiness.
 - The portal arena Observatory portal targets `observatory_runtime`.
 - Observatory audio content has no scene music in v1 and includes jump and
   charge-release event mappings for `observatory_game`.
@@ -154,6 +163,14 @@ Run:
   files, and `git diff --check` on the touched files. Full package `lint` is
   currently blocked by unrelated import-order drift in
   `scripts/test-input-contract.ts` and `scripts/test-story-note-contract.ts`.
+- Observatory V1 collision content implemented over the engine-wide collision
+  contracts:
+  - `observatory:walkable-proxy` is now required `walkable/worldStatic` floor
+    collision.
+  - four `observatory_boundary_blocker` perimeter colliders are required by
+    stable ID.
+  - `test:runtime-scene-contract` covers positive layout assertions and
+    negative readiness failures for missing boundary/walkable collision.
 
 ## Assumptions
 

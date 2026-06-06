@@ -415,6 +415,28 @@ function allAssetStrings(
 		"observatory:firefly:lantern",
 		"observatory:firefly:tide",
 	] as const;
+	const boundaryCollisionExpectations = [
+		{
+			stableId: "observatory:collision:boundary:north",
+			position: [0, 5.8, -304],
+			halfExtents: [320, 4, 4],
+		},
+		{
+			stableId: "observatory:collision:boundary:south",
+			position: [0, 5.8, 304],
+			halfExtents: [320, 4, 4],
+		},
+		{
+			stableId: "observatory:collision:boundary:east",
+			position: [304, 5.8, 0],
+			halfExtents: [4, 4, 320],
+		},
+		{
+			stableId: "observatory:collision:boundary:west",
+			position: [-304, 5.8, 0],
+			halfExtents: [4, 4, 320],
+		},
+	] as const;
 	const environmentAssetId = assetBackedEnvironmentAssetId(manifest);
 	const environment = manifest.renderProfile.environment;
 	const environmentAsset = manifest.assets.assets.find(
@@ -506,12 +528,33 @@ function allAssetStrings(
 	assertEqual(playerLight.visible, true);
 
 	assertEqual(terrainRenderable.meshId, "mesh_observatory_environment");
+	assertEqual(
+		componentsForStableId(manifest, "observatory:terrain").Collider,
+		undefined,
+		"Observatory render GLB should not be treated as implicit collision.",
+	);
 	assertDeepEqual(
 		transformPropertyForStableId(manifest, "observatory:terrain", "scale"),
 		[1, 1, 1],
 	);
-	assertEqual(walkableCollider.intent, "solid");
-	assertEqual(walkableCollider.channel, "world");
+	assertIncludes(
+		manifest.readiness.requiredCollisionPrefabIds ?? [],
+		"observatory_walkable_proxy",
+	);
+	assertIncludes(
+		manifest.readiness.requiredCollisionPrefabIds ?? [],
+		"observatory_boundary_blocker",
+	);
+	assertIncludes(
+		manifest.readiness.requiredWalkableStableIds ?? [],
+		"observatory:walkable-proxy",
+	);
+	assertIncludes(
+		manifest.readiness.requiredCollisionStableIds ?? [],
+		"observatory:walkable-proxy",
+	);
+	assertEqual(walkableCollider.intent, "walkable");
+	assertEqual(walkableCollider.channel, "worldStatic");
 	assertEqual(walkableShape.type, "box");
 	assertDeepEqual(walkableShape.halfExtents, [320, 0.05, 320]);
 	assertDeepEqual(
@@ -522,6 +565,30 @@ function allAssetStrings(
 		),
 		[0, 1.75, 0],
 	);
+	for (const expectation of boundaryCollisionExpectations) {
+		const boundaryCollider = componentForStableId(
+			manifest,
+			expectation.stableId,
+			"Collider",
+		);
+		const boundaryShape = assertRecord(
+			boundaryCollider.shape,
+			`${expectation.stableId} collider shape`,
+		);
+
+		assertIncludes(
+			manifest.readiness.requiredCollisionStableIds ?? [],
+			expectation.stableId,
+		);
+		assertEqual(boundaryCollider.intent, "solid");
+		assertEqual(boundaryCollider.channel, "worldStatic");
+		assertEqual(boundaryShape.type, "box");
+		assertDeepEqual(boundaryShape.halfExtents, expectation.halfExtents);
+		assertDeepEqual(
+			transformPropertyForStableId(manifest, expectation.stableId, "position"),
+			expectation.position,
+		);
+	}
 	assertEqual(bounds.minX, -300);
 	assertEqual(bounds.maxX, 300);
 	assertEqual(bounds.minZ, -300);
@@ -659,6 +726,132 @@ function allAssetStrings(
 	);
 
 	assertEqual(observatoryPortal.targetRuntimeSceneId, "observatory_runtime");
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(mirandaDeckRuntimeSceneManifest);
+	const mainFloorCollider = componentForStableId(
+		manifest,
+		"miranda:floor:main",
+		"Collider",
+	);
+	const upperFloorCollider = componentForStableId(
+		manifest,
+		"miranda:floor:upper",
+		"Collider",
+	);
+	const cargoFloorCollider = componentForStableId(
+		manifest,
+		"miranda:floor:cargo-hold",
+		"Collider",
+	);
+	const mainFloorShape = assertRecord(
+		mainFloorCollider.shape,
+		"Miranda main floor collider shape",
+	);
+	const upperFloorShape = assertRecord(
+		upperFloorCollider.shape,
+		"Miranda upper floor collider shape",
+	);
+	const cargoFloorShape = assertRecord(
+		cargoFloorCollider.shape,
+		"Miranda cargo-hold floor collider shape",
+	);
+	const bounds = assertRecord(
+		manifest.level.resources?.["game:characterBounds"],
+		"Miranda character bounds",
+	);
+	const playerController = componentForStableId(
+		manifest,
+		"player",
+		"CharacterController",
+	);
+
+	assertIncludes(
+		manifest.readiness.requiredWalkableStableIds ?? [],
+		"miranda:floor:main",
+	);
+	assertIncludes(
+		manifest.readiness.requiredWalkableStableIds ?? [],
+		"miranda:floor:upper",
+	);
+	assertIncludes(
+		manifest.readiness.requiredWalkableStableIds ?? [],
+		"miranda:floor:cargo-hold",
+	);
+	assertEqual(mainFloorCollider.intent, "walkable");
+	assertEqual(mainFloorCollider.channel, "worldStatic");
+	assertEqual(upperFloorCollider.intent, "walkable");
+	assertEqual(upperFloorCollider.channel, "worldStatic");
+	assertEqual(cargoFloorCollider.intent, "walkable");
+	assertEqual(cargoFloorCollider.channel, "worldStatic");
+	assertEqual(mainFloorShape.type, "box");
+	assertDeepEqual(mainFloorShape.halfExtents, [20, 0.6, 46]);
+	assertEqual(upperFloorShape.type, "box");
+	assertDeepEqual(upperFloorShape.halfExtents, [9, 0.45, 9]);
+	assertEqual(cargoFloorShape.type, "box");
+	assertDeepEqual(cargoFloorShape.halfExtents, [20, 0.6, 3]);
+	assertEqual(bounds.minX, -20);
+	assertEqual(bounds.maxX, 20);
+	assertEqual(bounds.minZ, -50);
+	assertEqual(bounds.maxZ, 48);
+	assertEqual(playerController.groundY, 4.25);
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(mirandaDeckRuntimeSceneManifest);
+	const returnPortal = componentForStableId(
+		manifest,
+		"miranda:airlock:return-portal",
+		"Portal",
+	);
+	const returnPortalRenderable = componentForStableId(
+		manifest,
+		"miranda:airlock:return-portal",
+		"Renderable",
+	);
+	const returnPortalCollider = componentForStableId(
+		manifest,
+		"miranda:airlock:return-portal",
+		"Collider",
+	);
+
+	assertIncludes(manifest.readiness.requiredAssetIds ?? [], "mesh_portal_gate");
+	assertIncludes(
+		manifest.readiness.requiredAssetIds ?? [],
+		"audio_portal_activate",
+	);
+	assertIncludes(
+		manifest.readiness.requiredCollisionPrefabIds ?? [],
+		"portal_gate",
+	);
+	assertIncludes(
+		manifest.readiness.requiredCollisionStableIds ?? [],
+		"miranda:airlock:return-portal",
+	);
+	assertDeepEqual(
+		transformPropertyForStableId(
+			manifest,
+			"miranda:airlock:return-portal",
+			"position",
+		),
+		[0, 1, 6.6],
+	);
+	assertDeepEqual(
+		transformPropertyForStableId(
+			manifest,
+			"miranda:airlock:return-portal",
+			"scale",
+		),
+		[0.95, 0.95, 0.95],
+	);
+	assertEqual(returnPortal.id, "miranda.return.observatory");
+	assertEqual(returnPortal.label, "Return to Observatory");
+	assertEqual(returnPortal.targetRuntimeSceneId, "observatory_runtime");
+	assertEqual(returnPortalRenderable.meshId, "mesh_portal_gate");
+	assertEqual(returnPortalCollider.intent, "trigger");
+	assertEqual(returnPortalCollider.channel, "interaction");
+	assertEqual(returnPortalCollider.sensor, true);
 }
 
 {
@@ -921,6 +1114,66 @@ function allAssetStrings(
 	assertIncludes(
 		readiness.ok ? [] : readiness.errors,
 		`Required collision instance "${missingStableId}" was not spawned.`,
+	);
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(observatoryRuntimeSceneManifest);
+	const missingStableId = "observatory:collision:boundary:north";
+	const readiness = evaluateRuntimeSceneReadiness(manifest, {
+		...validLoadReport(manifest),
+		spawned: manifest.level.instances
+			.filter((instance) => instance.stableId !== missingStableId)
+			.map((instance) => ({
+				prefabId: instance.prefabId,
+				stableId: instance.stableId,
+			})),
+	});
+
+	assertEqual(readiness.ok, false);
+	assertIncludes(
+		readiness.ok ? [] : readiness.errors,
+		`Required collision instance "${missingStableId}" was not spawned.`,
+	);
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(observatoryRuntimeSceneManifest);
+	const missingStableId = "observatory:walkable-proxy";
+	const readiness = evaluateRuntimeSceneReadiness(manifest, {
+		...validLoadReport(manifest),
+		spawned: manifest.level.instances
+			.filter((instance) => instance.stableId !== missingStableId)
+			.map((instance) => ({
+				prefabId: instance.prefabId,
+				stableId: instance.stableId,
+			})),
+	});
+
+	assertEqual(readiness.ok, false);
+	assertIncludes(
+		readiness.ok ? [] : readiness.errors,
+		`Required walkable collision instance "${missingStableId}" was not spawned.`,
+	);
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(mirandaDeckRuntimeSceneManifest);
+	const missingStableId = "miranda:floor:main";
+	const readiness = evaluateRuntimeSceneReadiness(manifest, {
+		...validLoadReport(manifest),
+		spawned: manifest.level.instances
+			.filter((instance) => instance.stableId !== missingStableId)
+			.map((instance) => ({
+				prefabId: instance.prefabId,
+				stableId: instance.stableId,
+			})),
+	});
+
+	assertEqual(readiness.ok, false);
+	assertIncludes(
+		readiness.ok ? [] : readiness.errors,
+		`Required walkable collision instance "${missingStableId}" was not spawned.`,
 	);
 }
 

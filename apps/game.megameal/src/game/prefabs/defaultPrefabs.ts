@@ -1,4 +1,5 @@
 import type { PrefabDefinition } from "./index.js";
+import { portalGatePrefab } from "./navigationPrefabs.js";
 
 const mirandaEngineCoreColliderShape = createFrustumMeshColliderShape({
 	radiusTop: 1.1,
@@ -154,8 +155,8 @@ export const mirandaFloorMainPrefab = {
 			mass: 0,
 		},
 		Collider: {
-			intent: "solid",
-			channel: "world",
+			intent: "walkable",
+			channel: "worldStatic",
 			shape: {
 				type: "box",
 				halfExtents: [20, 0.6, 46],
@@ -184,11 +185,41 @@ export const mirandaFloorUpperPrefab = {
 			mass: 0,
 		},
 		Collider: {
-			intent: "solid",
-			channel: "world",
+			intent: "walkable",
+			channel: "worldStatic",
 			shape: {
 				type: "box",
 				halfExtents: [9, 0.45, 9],
+			},
+		},
+	},
+} satisfies PrefabDefinition;
+
+export const mirandaCargoHoldFloorPrefab = {
+	id: "miranda_floor_cargo_hold",
+	assetIds: ["mesh_box", "material_miranda_floor_main"],
+	tags: ["world", "collision", "miranda", "cargo-hold"],
+	components: {
+		Transform: {
+			position: [0, 0, 0],
+			rotation: [0, 0, 0, 1],
+			scale: [40, 1.2, 6],
+		},
+		Renderable: {
+			meshId: "mesh_box",
+			materialId: "material_miranda_floor_main",
+			visible: true,
+		},
+		RigidBody: {
+			type: "fixed",
+			mass: 0,
+		},
+		Collider: {
+			intent: "walkable",
+			channel: "worldStatic",
+			shape: {
+				type: "box",
+				halfExtents: [20, 0.6, 3],
 			},
 		},
 	},
@@ -612,6 +643,7 @@ export const mirandaDeckPrefabs = [
 	playerPrefab,
 	mirandaFloorMainPrefab,
 	mirandaFloorUpperPrefab,
+	mirandaCargoHoldFloorPrefab,
 	mirandaCockpitPanelSidePrefab,
 	mirandaCockpitPanelCenterPrefab,
 	mirandaCrewBunkPrefab,
@@ -638,6 +670,7 @@ export const mirandaDeckPrefabs = [
 	mirandaStoryMarkerAmberPrefab,
 	mirandaStoryMarkerRedPrefab,
 	mirandaStoryMarkerMagentaPrefab,
+	portalGatePrefab,
 	mirandaCommandGalleryBeaconLightPrefab,
 	mirandaObservationLightPrefab,
 	mirandaArchiveLightPrefab,

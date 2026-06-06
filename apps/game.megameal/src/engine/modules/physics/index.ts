@@ -65,7 +65,7 @@ export type PhysicsColliderShape =
 	| CylinderColliderShape
 	| MeshColliderShape;
 
-export type CollisionIntent = "solid" | "trigger";
+export type CollisionIntent = "solid" | "trigger" | "walkable";
 export type CollisionChannel = string;
 
 export type ColliderComponent = {

@@ -454,7 +454,10 @@ function requiredCollisionStableIdsReady(
 	physicsSync: PhysicsSyncSystem,
 	manifest: RuntimeSceneManifestData,
 ): boolean {
-	const requiredStableIds = manifest.readiness.requiredCollisionStableIds ?? [];
+	const requiredStableIds = [
+		...(manifest.readiness.requiredCollisionStableIds ?? []),
+		...(manifest.readiness.requiredWalkableStableIds ?? []),
+	];
 
 	if (requiredStableIds.length === 0) {
 		return true;

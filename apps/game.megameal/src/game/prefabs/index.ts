@@ -11,6 +11,7 @@ export {
 	mirandaBrigDeskPrefab,
 	mirandaCaptainsChairPrefab,
 	mirandaCaptainsDeskPrefab,
+	mirandaCargoHoldFloorPrefab,
 	mirandaCargoStackAPrefab,
 	mirandaCargoStackBPrefab,
 	mirandaCargoStackCPrefab,
@@ -42,15 +43,16 @@ export {
 	prototypePrefabs,
 } from "./defaultPrefabs.js";
 export {
+	observatoryBoundaryBlockerPrefab,
 	observatoryEnvironmentPrefab,
 	observatoryFireflyMarkerPrefab,
 	observatoryPrefabs,
 	observatoryWalkableProxyPrefab,
 } from "./observatoryPrefabs.js";
+export { portalGatePrefab } from "./navigationPrefabs.js";
 export {
 	portalArenaFloorPrefab,
 	portalArenaPrefabs,
-	portalGatePrefab,
 } from "./portalPrefabs.js";
 export { waterSurfacePlanePrefab } from "./waterPrefabs.js";
 

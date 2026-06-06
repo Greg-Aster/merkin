@@ -1,6 +1,7 @@
 # Observatory Collision System Findings
 
-Status: findings recorded on 2026-06-06.
+Status: Observatory V1 authored proxy collision layer implemented on
+2026-06-06 as a level consumer of the engine-wide collision contracts.
 
 ## Current Observatory State
 
@@ -11,11 +12,17 @@ Status: findings recorded on 2026-06-06.
   `/assets/game/observatory/observatory-environment.glb`.
 - The GLB visual instance `observatory:terrain` now uses unit scale
   `[1, 1, 1]`.
-- Walkability currently comes from one explicit flat collision proxy:
-  `observatory:walkable-proxy`, a fixed solid box at `[0, 1.75, 0]` with half
-  extents `[320, 0.05, 320]`.
+- Walkability comes from one explicit flat collision proxy:
+  `observatory:walkable-proxy`, a fixed `walkable/worldStatic` box at
+  `[0, 1.75, 0]` with half extents `[320, 0.05, 320]`.
+- Current movement bounds are backed by four required
+  `observatory_boundary_blocker` instances:
+  - `observatory:collision:boundary:north`
+  - `observatory:collision:boundary:south`
+  - `observatory:collision:boundary:east`
+  - `observatory:collision:boundary:west`
 - The water instance `observatory:water` is visual-only and has no collider.
-- The current playable foundation is therefore a flat traversal plane with a
+- The current playable foundation is therefore an authored proxy layer with a
   separate visual GLB. It is not full Observatory geometry collision.
 
 ## Current Engine Rules
@@ -29,9 +36,12 @@ The existing engine documents already define the correct boundary:
 - Runtime readiness must fail when required collision prefabs or stable
   collision instances are missing.
 
-This keeps the renderer, physics adapter, and gameplay state separated. It also
-prevents the old engine problem where generated products and renderer-side
-fallback behavior became implicit gameplay rules.
+This keeps the renderer, physics adapter, and gameplay state separated. The
+engine-wide contracts remain `CollisionPolicy`, `WalkableCollisionContract`,
+and `LevelReadinessContract`; Observatory only authors level content that
+consumes those contracts. This also prevents the old engine problem where
+generated products and renderer-side fallback behavior became implicit gameplay
+rules.
 
 ## AAA Engine Findings
 
@@ -60,27 +70,32 @@ AAA engines use layered collision, not a single render-mesh-as-physics policy.
 
 ## Target Observatory Collision Strategy
 
-The next Observatory packet should add an authored collision layer instead of
-turning the GLB render mesh into physics by default.
+The implemented V1 packet adds an authored collision layer instead of turning
+the GLB render mesh into physics by default.
 
-Recommended order:
+Implemented:
 
-1. Measure the Observatory GLB bounds and visual origin after the unit-scale
-   change.
+1. Keep the visual GLB at unit scale and visual-only.
+2. Recast `observatory:walkable-proxy` as required `walkable/worldStatic` floor
+   collision.
+3. Add four named boundary collision instances around the current movement
+   bounds.
+4. Keep V1 collision as simple authored box proxies.
+5. Require the critical floor and boundary stable IDs in runtime scene
+   readiness.
+6. Add negative tests that prove removing the floor proxy or a required blocker
+   fails readiness.
+
+Still future:
+
+1. Measure the Observatory GLB bounds and visual origin with an asset-analysis
+   tool.
 2. Re-author the player spawn against the visible level entrance or courtyard
-   once the GLB placement is confirmed.
-3. Replace the single flat proxy with named collision instances:
-   - floor or ground traversal proxy
-   - blocking volumes for walls, cliffs, or railings
-   - steps or ramps where traversal needs elevation
-   - portal approach and landmark blockers where needed
-4. Keep these first collision instances as simple box, capsule, cylinder, or
-   convex-style mesh data where possible.
-5. Add a cooked static mesh collision path only for surfaces that actually need
+   after visual placement is confirmed.
+3. Add interior blockers, steps, ramps, railings, and portal approach volumes
+   where they correspond to visible geometry.
+4. Add a cooked static mesh collision path only for surfaces that actually need
    triangle precision, such as irregular walkable terrain.
-6. Require every critical collision stable ID in runtime scene readiness.
-7. Add negative tests that prove removing the floor proxy or any required
-   blocking collision fails readiness.
 
 ## Non-Goals
 
@@ -93,7 +108,8 @@ Recommended order:
 
 ## Proposed Follow-Up Contract
 
-Add `ObservatoryCollisionContract` as a focused content packet:
+`ObservatoryCollisionContract` is implemented only as a focused level content
+packet over the engine-wide collision contracts:
 
 - Owner files:
   - `src/game/prefabs/observatoryPrefabs.ts`
@@ -101,7 +117,8 @@ Add `ObservatoryCollisionContract` as a focused content packet:
   - `src/game/levels/runtimeSceneManifests.ts`
   - `scripts/test-runtime-scene-contract.ts`
 - Runtime data:
-  - named collision prefabs for common Observatory blocker types
+  - required `observatory_walkable_proxy` floor collision prefab
+  - reusable `observatory_boundary_blocker` collision prefab
   - stable level instances for required collision surfaces
   - readiness entries for required collision prefab IDs and stable IDs
 - Validation:

@@ -57,6 +57,7 @@ export type LevelReadinessChecks = {
 	readonly assetsLoaded: boolean;
 	readonly spawnResolved: boolean;
 	readonly collisionReady: boolean;
+	readonly walkableReady: boolean;
 	readonly lightsReady: boolean;
 	readonly physicsReady: boolean;
 	readonly playerReady: boolean;
@@ -71,6 +72,7 @@ export type RuntimeSceneReadinessResult =
 			readonly requiredAssetIds: readonly string[];
 			readonly requiredCollisionPrefabIds: readonly string[];
 			readonly requiredCollisionStableIds: readonly string[];
+			readonly requiredWalkableStableIds: readonly string[];
 			readonly requiredLightStableIds: readonly string[];
 			readonly checks: LevelReadinessChecks;
 	  }
@@ -98,6 +100,8 @@ export function evaluateRuntimeSceneReadiness(
 		manifest.readiness.requiredCollisionPrefabIds ?? [];
 	const requiredCollisionStableIds =
 		manifest.readiness.requiredCollisionStableIds ?? [];
+	const requiredWalkableStableIds =
+		manifest.readiness.requiredWalkableStableIds ?? [];
 	const requiredLightStableIds =
 		manifest.readiness.requiredLightStableIds ?? [];
 	const preloadedAssetIds = new Set(report.preloadedAssetIds);
@@ -116,6 +120,9 @@ export function evaluateRuntimeSceneReadiness(
 	const missingCollisionStableIds = requiredCollisionStableIds.filter(
 		(stableId) => !spawnedStableIds.has(stableId),
 	);
+	const missingWalkableStableIds = requiredWalkableStableIds.filter(
+		(stableId) => !spawnedStableIds.has(stableId),
+	);
 	const missingLightStableIds = requiredLightStableIds.filter(
 		(stableId) => !spawnedStableIds.has(stableId),
 	);
@@ -126,6 +133,7 @@ export function evaluateRuntimeSceneReadiness(
 		collisionReady:
 			missingCollisionPrefabIds.length === 0 &&
 			missingCollisionStableIds.length === 0,
+		walkableReady: missingWalkableStableIds.length === 0,
 		lightsReady: missingLightStableIds.length === 0,
 		physicsReady: report.physicsReady,
 		playerReady: report.playerReady,
@@ -164,6 +172,12 @@ export function evaluateRuntimeSceneReadiness(
 		errors.push(`Required collision instance "${stableId}" was not spawned.`);
 	}
 
+	for (const stableId of missingWalkableStableIds) {
+		errors.push(
+			`Required walkable collision instance "${stableId}" was not spawned.`,
+		);
+	}
+
 	for (const stableId of missingLightStableIds) {
 		errors.push(`Required light instance "${stableId}" was not spawned.`);
 	}
@@ -193,6 +207,7 @@ export function evaluateRuntimeSceneReadiness(
 		requiredAssetIds,
 		requiredCollisionPrefabIds,
 		requiredCollisionStableIds,
+		requiredWalkableStableIds,
 		requiredLightStableIds,
 		checks,
 	};

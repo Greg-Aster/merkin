@@ -4,6 +4,7 @@ import {
 	audioAmbientShadowWaltz,
 	audioAmbientWhistlingDreams,
 } from "./ambientAudioAssets.js";
+import { audioPortalActivate, meshPortalGate } from "./portalAssets.js";
 import { cubemapClassicSky } from "./skyboxAssets.js";
 
 const meshPlayer = {
@@ -16,12 +17,6 @@ const meshPortalField = {
 	kind: "mesh",
 	url: "/assets/game/terrain/portal_field_moor.glb",
 	tags: ["terrain", "field", "portal-arena"],
-} as const;
-const meshPortalGate = {
-	id: "mesh_portal_gate",
-	kind: "mesh",
-	url: "/assets/game/portals/portal_gate.glb",
-	tags: ["portal", "navigation"],
 } as const;
 const materialPlayer = {
 	id: "material_player",
@@ -39,12 +34,6 @@ const audioPlayerChargeRelease = {
 	kind: "audio",
 	url: "/audio/sfx/22-kenney-forceField_001.mp3",
 	tags: ["player", "charge", "sfx"],
-} as const;
-const audioPortalActivate = {
-	id: "audio_portal_activate",
-	kind: "audio",
-	url: "/audio/sfx/portal-activate.mp3",
-	tags: ["portal", "transition", "sfx"],
 } as const;
 const audioPortalDeck = {
 	id: "audio_ambient_portal_deck",

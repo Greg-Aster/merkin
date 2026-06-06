@@ -223,11 +223,12 @@ export type RuntimeSceneManifestData = {
 		readonly requiredAssetIds?: readonly string[];
 		readonly requiredCollisionPrefabIds?: readonly string[];
 		readonly requiredCollisionStableIds?: readonly string[];
+		readonly requiredWalkableStableIds?: readonly string[];
 		readonly requiredLightStableIds?: readonly string[];
 	};
 };
 
-export type CollisionIntentData = "solid" | "trigger";
+export type CollisionIntentData = "solid" | "trigger" | "walkable";
 export type CollisionChannelData = string;
 
 export function createSchemaValidator<TData>(
@@ -598,6 +599,11 @@ export function validateRuntimeSceneManifest(data: unknown): readonly string[] {
 		validateOptionalStringArray(
 			data.readiness.requiredCollisionStableIds,
 			"runtimeSceneManifest.readiness.requiredCollisionStableIds",
+			errors,
+		);
+		validateOptionalStringArray(
+			data.readiness.requiredWalkableStableIds,
+			"runtimeSceneManifest.readiness.requiredWalkableStableIds",
 			errors,
 		);
 		validateOptionalStringArray(
@@ -1298,6 +1304,40 @@ function validateRuntimeSceneReferences(
 		}
 	}
 
+	for (const stableId of manifest.readiness.requiredWalkableStableIds ?? []) {
+		const instance = instances.get(stableId);
+
+		if (!instance) {
+			errors.push(
+				`runtimeSceneManifest.readiness.requiredWalkableStableIds references unknown level instance stable ID "${stableId}".`,
+			);
+			continue;
+		}
+
+		const prefab = prefabs.get(instance.prefabId);
+
+		if (!prefab) {
+			continue;
+		}
+
+		const collider = isRecord(instance.components?.Collider)
+			? instance.components.Collider
+			: prefab.components.Collider;
+
+		if (!isRecord(collider)) {
+			errors.push(
+				`runtimeSceneManifest.readiness.requiredWalkableStableIds "${stableId}" resolves to prefab "${instance.prefabId}" with no Collider component.`,
+			);
+			continue;
+		}
+
+		if (collider.intent !== "walkable") {
+			errors.push(
+				`runtimeSceneManifest.readiness.requiredWalkableStableIds "${stableId}" resolves to Collider.intent "${String(collider.intent)}" instead of walkable.`,
+			);
+		}
+	}
+
 	for (const stableId of manifest.readiness.requiredLightStableIds ?? []) {
 		const instance = instances.get(stableId);
 
@@ -1899,8 +1939,8 @@ function validateCollisionIntent(
 	path: string,
 	errors: string[],
 ): void {
-	if (value !== "solid" && value !== "trigger") {
-		errors.push(`${path} must be solid or trigger.`);
+	if (value !== "solid" && value !== "trigger" && value !== "walkable") {
+		errors.push(`${path} must be solid, trigger, or walkable.`);
 	}
 }
 
@@ -1923,8 +1963,13 @@ function validateCollisionIntentSensorPolicy(
 		errors.push(`${path}.sensor must be true when intent is trigger.`);
 	}
 
-	if (collider.intent === "solid" && collider.sensor === true) {
-		errors.push(`${path}.sensor cannot be true when intent is solid.`);
+	if (
+		(collider.intent === "solid" || collider.intent === "walkable") &&
+		collider.sensor === true
+	) {
+		errors.push(
+			`${path}.sensor cannot be true when intent is solid or walkable.`,
+		);
 	}
 }
 

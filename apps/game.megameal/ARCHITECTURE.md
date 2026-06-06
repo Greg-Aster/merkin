@@ -400,12 +400,13 @@ portal_arena_runtime
   -> portal activation SFX referenced through audio_portal_activate
   -> player charge-release SFX referenced through audio_player_charge_release
   -> Portal components contribute proximity candidates for active target selection
-  -> active portals currently target prototype_arena_runtime and miranda_deck_runtime
+  -> active portals target prototype_arena_runtime, miranda_deck_runtime, and
+     observatory_runtime
 
-miranda_deck_runtime
-  -> old Miranda spawn as authored player transform
-  -> miranda_floor_main static render/physics prefab
-  -> miranda_floor_upper static render/physics prefab
+	miranda_deck_runtime
+	  -> old Miranda spawn as authored player transform
+	  -> miranda_floor_main, miranda_floor_upper, and
+	     miranda_floor_cargo_hold static walkable render/physics prefabs
   -> miranda cockpit glow panels as static render/physics prefabs
   -> miranda crew bunks and locker bank as static render/physics prefabs
   -> miranda Captain's Office desk, chair, and safe as static render/physics prefabs
@@ -415,35 +416,45 @@ miranda_deck_runtime
   -> Miranda primitive material assets preserve authored base color, emissive,
      metalness, roughness, and Medbay opacity parameters through manifest data
   -> Miranda scene music referenced through audio_ambient_wicked_shadows_whisper
+  -> old Miranda airlock return portal as a Portal entity targeting
+     observatory_runtime through the shared portal_gate prefab
+  -> portal activation SFX referenced through audio_portal_activate
   -> player charge-release SFX referenced through audio_player_charge_release
   -> nine Miranda StoryNote markers with trigger colliders, authored note data,
      nearest-target HUD prompts, and gameplay-owned reader open/close state
   -> three authored Miranda point lights as Transform + Light entities
   -> readiness requires player, material/audio/environment assets, collision
-     prefabs, exact collision stable IDs, and exact authored light stable IDs
+     prefabs, exact collision stable IDs, exact walkable floor stable IDs, and
+     exact authored light stable IDs
 
 observatory_runtime
   -> target-engine recreation from old Observatory source art and scene
      evidence only
   -> implemented foundation packet in docs/OBSERVATORY_PLAYABLE_FOUNDATION_PLAN.md
   -> source GLB visual owned as mesh_observatory_environment
-  -> explicit flat observatory:walkable-proxy collision; no render mesh
-     collision inference
+  -> consumes engine-wide CollisionPolicy, WalkableCollisionContract, and
+     LevelReadinessContract for collision
+  -> mesh_observatory_environment stays visual-only
+  -> required observatory:walkable-proxy walkable/worldStatic floor collision
+  -> four required observatory_boundary_blocker perimeter colliders; no render
+     mesh collision inference
   -> static observatory:water visual through WaterSurfaceContract with no
      collider
   -> cubemap_observatory_sky through the selected render profile
   -> required player-carried Transform + Light entity
   -> three required authored firefly Transform + Renderable + Light entities
   -> portal transition from portal_arena_runtime by runtime manifest ID
-  -> readiness requires player, exact collision stable IDs, exact light stable
-     IDs, required assets, and physics/player readiness
+  -> readiness requires player, exact collision stable IDs, exact walkable
+     stable IDs, exact light stable IDs, required assets, and physics/player
+     readiness
   -> no old runtime JSON, terrain chunk runtime, generated collision binary,
      Svelte/Threlte light owner, hidden renderer default, or point-light
      budget/controller path
 ```
 
-Full Miranda is not treated as ready until the terrain collision manifest gap
-from the old runtime contract is solved in the new architecture.
+Full Miranda is not treated as ready until remaining terrain, cooked collision,
+generated GLB content, and importer/editor coverage beyond the current
+checked-in walkable floor footprint are authored in the new architecture.
 
 The app layer may select a checked-in runtime manifest and pass it into the
 client mount. If it does not, the game layer's `defaultRuntimeSceneManifest`

@@ -1056,7 +1056,8 @@ Current playable/runtime scenes:
 ```text
 portal_arena_runtime
   -> default navigation room with eight portal slots
-  -> active targets: prototype_arena_runtime and miranda_deck_runtime
+  -> active targets: prototype_arena_runtime, miranda_deck_runtime, and
+     observatory_runtime
 
 prototype_arena_runtime
   -> first playable prototype slice
@@ -1160,29 +1161,37 @@ Rules:
 - Runtime state should be serializable where practical.
 - Data schemas should validate content before runtime.
 - Runtime scene manifests own their asset, prefab, level, render profile, and readiness data for a playable scene.
-- Readiness must fail before play when required assets, player spawn, collision prefabs, exact collision stable IDs, or exact authored light stable IDs are missing.
+- Readiness must fail before play when required assets, player spawn, collision prefabs, exact collision stable IDs, exact walkable stable IDs, or exact authored light stable IDs are missing.
 - Content migration from the old game must rewrite source evidence into new contracts; it must not import old runtime code or copy old editor repair paths.
 - When old authored parent transforms are simple enough, migration may flatten them into level instance transforms while keeping prefab geometry/collider/material as reusable archetype data.
 
 Current migrated Miranda foundation:
 
 - `miranda_deck_runtime` is checked-in target-engine data, not old runtime JSON.
-- Migrated primitive content includes Miranda spawn, deck floors, cockpit glow panels, crew bunks, locker bank, Captain's Office desk/chair/safe, Engine Core, Engine Room columns, Medbay pods, Mess Hall blockers, Chapel Altar, Brig cells/desk, Cargo Hold stacks, and Archive server banks.
+- Migrated primitive content includes Miranda spawn, two deck floors plus a Cargo Hold floor/bounds extension as explicit `walkable` collision surfaces, cockpit glow panels, crew bunks, locker bank, Captain's Office desk/chair/safe, Engine Core, Engine Room columns, Medbay pods, Mess Hall blockers, Chapel Altar, Brig cells/desk, Cargo Hold stacks, and Archive server banks.
 - Migrated interaction content includes nine Miranda story notes as authored `StoryNote` component data with reusable marker prefabs, trigger colliders, nearest active target selection, reader open/close state, and HUD prompts/reader projection. The UI observes selected/open interaction state and dispatches close intent; it does not own story text or decide gameplay targets.
+- Migrated portal content includes the old Miranda airlock return portal as a
+  checked-in `Portal` entity at `miranda:airlock:return-portal`, using the
+  shared `portal_gate` prefab, `mesh_portal_gate`, and
+  `audio_portal_activate`. It targets `observatory_runtime` by manifest ID; no
+  old generated portal apparatus GLB, collider product, or editor/runtime code
+  is loaded.
 - Migrated authored lighting includes Miranda Command Gallery Beacon, Observation Light, and Archive Light as stable `Transform + Light` point-light entities. `LightSyncSystem` projects them through the renderer adapter; Svelte/Threlte lighting controllers, generated light IDs, and old point-light budgets were not copied.
 - The tapered Engine Core preserves old authored visual shape with a parameterized built-in cylinder/frustum render mesh and explicit mesh collider data.
 - Current primitive material migration preserves stable material IDs plus authored base color, emissive color/intensity, metalness, roughness, and Medbay opacity through schema-owned material asset data. The cockpit center panel and wide Archive server bank use split material IDs because their old authored material values differ from sibling prefabs.
-- Generated story-marker GLBs, old Three/Svelte raycast interaction, area/spot lights, light budgets/shadows, generated GLB actors, generated collider products, terrain/floor/bounds coverage, post-processing, reflections, material texture/shader import/generation, old held-charge oscillator audio, old shockwave VFX arrays, and old editor behavior remain future work until they have explicit contracts and owners.
+- Generated story-marker GLBs, old Three/Svelte raycast interaction, area/spot lights, light budgets/shadows, generated GLB actors, generated collider products, broader terrain/cooked-collision coverage beyond the current checked-in Miranda floor footprint, post-processing, reflections, material texture/shader import/generation, old held-charge oscillator audio, old shockwave VFX arrays, and old editor behavior remain future work until they have explicit contracts and owners.
 
 Current portal arena foundation:
 
 - `portal_arena_runtime` is the default runtime scene.
-- Portal assets are content-owned through `src/game/assets/portalArenaAssets.ts` and `public/assets/game/portals/portal_gate.glb`.
+- Shared portal assets are content-owned through
+  `src/game/assets/portalAssets.ts` and
+  `public/assets/game/portals/portal_gate.glb`.
 - Portal field terrain is content-owned through `mesh_portal_field` and
   `public/assets/game/terrain/portal_field_moor.glb`; `portal_arena_floor`
   keeps explicit solid/world collision as authored data instead of deriving
   collision from GLB render geometry.
-- Portal scene music and SFX are content-owned through `src/game/assets/portalArenaAssets.ts`, `AudioContentManifest.sceneMusic`, and event mappings. Production paths are `public/audio/ambient/portal-deck.mp3` for `audio_ambient_portal_deck`, `public/audio/sfx/portal-activate.mp3` for `audio_portal_activate`, and `public/audio/sfx/22-kenney-forceField_001.mp3` for `audio_player_charge_release`. Runtime transitions stop previous scene music and apply selected scene music only after the scene preload/readiness path succeeds.
+- Portal arena scene music and scene-scoped audio mappings are content-owned through `src/game/assets/portalArenaAssets.ts`, `AudioContentManifest.sceneMusic`, and event mappings. Shared portal gate/activation content is owned through `src/game/assets/portalAssets.ts`. Production paths are `public/audio/ambient/portal-deck.mp3` for `audio_ambient_portal_deck`, `public/audio/sfx/portal-activate.mp3` for `audio_portal_activate`, and `public/audio/sfx/22-kenney-forceField_001.mp3` for `audio_player_charge_release`. Runtime transitions stop previous scene music and apply selected scene music only after the scene preload/readiness path succeeds.
 - Portal slots are authored data in `src/game/levels/portalArenaLevel.ts`.
 - Portal interaction is handled by game systems that read world components/resources and request runtime scene transitions by manifest ID.
 - `PlayerCarriedLightContract` restores the useful legacy behavior where the
@@ -1216,8 +1225,12 @@ Current portal arena foundation:
   - The visual ground is the owned target asset
     `mesh_observatory_environment` at
     `/assets/game/observatory/observatory-environment.glb`, transformed as
-    authored scene data. Walkability is an explicit flat
-    `observatory:walkable-proxy` collision entity; render mesh geometry is not
+    authored scene data. The engine-wide `CollisionPolicy`,
+    `WalkableCollisionContract`, and `LevelReadinessContract` keep that GLB
+    visual-only: the Observatory packet consumes them through an explicit
+    `observatory:walkable-proxy` `walkable/worldStatic` collider, and the
+    current movement bounds are constrained by four required
+    `observatory_boundary_blocker` instances. Render mesh geometry is not
     implicit collision.
   - The player spawn is authored as the stable `player` instance at
     `[-137.2, 1.8, -49.5]`, with `CharacterController.groundY` set to `1.8`
@@ -1232,7 +1245,8 @@ Current portal arena foundation:
     `observatory:water` is a static visual instance at `y = -2` with no
     collider, while reusable mesh/material/prefab ownership belongs to the
     shared water system. Rising water, water volumes, reflections,
-    post-processing, cooked terrain collision, 200-firefly procedural
+    post-processing, cooked terrain collision beyond the current authored proxy
+    layer, 200-firefly procedural
     populations, scene music, and richer light/shadow behavior remain future
     contracts.
 - Miranda scene music is content-owned through `src/game/assets/defaultAssets.ts`, `AudioContentManifest.sceneMusic`, and `public/audio/ambient/Wicked Shadows Whisper.mp3` as `audio_ambient_wicked_shadows_whisper`.

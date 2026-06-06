@@ -7,6 +7,7 @@ The `portal-*.mp3` files are edited from downloaded CC0 sound packs:
   - License: CC0.
   - URL: https://opengameart.org/content/4-space-portal-sounds
 - `portal-activate.mp3`
+  - Runtime ID: `audio_portal_activate`
   - Source: `teleport_02.ogg` from "50 CC0 Sci-Fi SFX" by rubberduck on OpenGameArt.
   - License: CC0.
   - URL: https://opengameart.org/content/50-cc0-sci-fi-sfx

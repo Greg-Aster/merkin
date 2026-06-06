@@ -6,6 +6,7 @@ import {
 } from "./ambientAudioAssets.js";
 import { observatoryAudioContentManifest } from "./observatoryAssets.js";
 import { portalArenaAudioContentManifest } from "./portalArenaAssets.js";
+import { audioPortalActivate, meshPortalGate } from "./portalAssets.js";
 import {
 	cubemapClassicSky,
 	cubemapObservatorySky,
@@ -394,6 +395,7 @@ export const mirandaDeckAssetManifest = {
 		meshBox,
 		meshCylinder,
 		meshMirandaEngineCore,
+		meshPortalGate,
 		cubemapObservatorySky,
 		materialPlayer,
 		materialMirandaFloorMain,
@@ -423,6 +425,7 @@ export const mirandaDeckAssetManifest = {
 		materialMirandaStoryMarkerMagenta,
 		audioPlayerJump,
 		audioPlayerChargeRelease,
+		audioPortalActivate,
 		audioMirandaAmbientWickedShadows,
 		audioAmbientDarkShadowsOfDelight,
 		audioAmbientShadowWaltz,
@@ -433,6 +436,7 @@ export const mirandaDeckAssetManifest = {
 			"mesh_box",
 			"mesh_cylinder",
 			"mesh_miranda_engine_core",
+			"mesh_portal_gate",
 			"cubemap_observatory_sky",
 			"material_player",
 			"material_miranda_floor_main",
@@ -462,6 +466,7 @@ export const mirandaDeckAssetManifest = {
 			"material_miranda_story_marker_magenta",
 			"audio_player_jump",
 			"audio_player_charge_release",
+			"audio_portal_activate",
 			"audio_ambient_wicked_shadows_whisper",
 			"audio_ambient_dark_shadows_of_delight",
 			"audio_ambient_shadow_waltz",
@@ -518,6 +523,13 @@ export const mirandaDeckAudioContentManifest = {
 			eventType: "ChargeActionReleased",
 			soundId: "audio_player_charge_release",
 			volume: 0.28,
+			sceneId: "miranda_deck_game",
+		},
+		{
+			id: "miranda.portal.activate",
+			eventType: "PortalActivated",
+			soundId: "audio_portal_activate",
+			volume: 0.32,
 			sceneId: "miranda_deck_game",
 		},
 	],

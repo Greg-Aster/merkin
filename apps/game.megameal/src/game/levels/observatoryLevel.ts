@@ -38,6 +38,78 @@ export const observatoryLevel = {
 			stableId: "observatory:walkable-proxy",
 		},
 		{
+			id: "observatory-boundary-north",
+			prefabId: "observatory_boundary_blocker",
+			stableId: "observatory:collision:boundary:north",
+			transform: {
+				position: [0, 5.8, -304],
+			},
+			components: {
+				Collider: {
+					intent: "solid",
+					channel: "worldStatic",
+					shape: {
+						type: "box",
+						halfExtents: [320, 4, 4],
+					},
+				},
+			},
+		},
+		{
+			id: "observatory-boundary-south",
+			prefabId: "observatory_boundary_blocker",
+			stableId: "observatory:collision:boundary:south",
+			transform: {
+				position: [0, 5.8, 304],
+			},
+			components: {
+				Collider: {
+					intent: "solid",
+					channel: "worldStatic",
+					shape: {
+						type: "box",
+						halfExtents: [320, 4, 4],
+					},
+				},
+			},
+		},
+		{
+			id: "observatory-boundary-east",
+			prefabId: "observatory_boundary_blocker",
+			stableId: "observatory:collision:boundary:east",
+			transform: {
+				position: [304, 5.8, 0],
+			},
+			components: {
+				Collider: {
+					intent: "solid",
+					channel: "worldStatic",
+					shape: {
+						type: "box",
+						halfExtents: [4, 4, 320],
+					},
+				},
+			},
+		},
+		{
+			id: "observatory-boundary-west",
+			prefabId: "observatory_boundary_blocker",
+			stableId: "observatory:collision:boundary:west",
+			transform: {
+				position: [-304, 5.8, 0],
+			},
+			components: {
+				Collider: {
+					intent: "solid",
+					channel: "worldStatic",
+					shape: {
+						type: "box",
+						halfExtents: [4, 4, 320],
+					},
+				},
+			},
+		},
+		{
 			id: "observatory-water",
 			prefabId: "water_surface_plane",
 			stableId: "observatory:water",
