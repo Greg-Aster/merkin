@@ -178,3 +178,117 @@ export const observatoryRenderProfile = {
 		effects: [],
 	},
 } satisfies RenderProfileData;
+
+export const sciFiRoomRenderProfile = {
+	id: "sci_fi_room_interior_courtyard",
+	renderer: {
+		clearColor: "#061018",
+		clearAlpha: 1,
+		antialias: true,
+		maxPixelRatio: 2,
+		fallbackMaterialColor: "#7ecfff",
+	},
+	lighting: {
+		lights: [
+			{
+				kind: "ambient",
+				color: "#bfe8ff",
+				intensity: 0.42,
+			},
+			{
+				kind: "directional",
+				color: "#e8f7ff",
+				intensity: 1.1,
+				position: [10, 16, -8],
+			},
+			{
+				kind: "directional",
+				color: "#79d2ff",
+				intensity: 0.36,
+				position: [-12, 8, 14],
+			},
+		],
+		budget: {
+			maxTotal: 6,
+			maxAmbient: 1,
+			maxDirectional: 2,
+			maxPoint: 2,
+			maxSpot: 1,
+			maxArea: 0,
+			maxShadowCasting: 0,
+		},
+	},
+	environment: {
+		kind: "cubemap-skybox",
+		assetId: "cubemap_observatory_sky",
+		backgroundIntensity: 0.92,
+		backgroundBlurriness: 0.08,
+		environmentIntensity: 0.85,
+		requiredForReadiness: true,
+	},
+	postProcessing: {
+		enabled: false,
+		quality: "off",
+		effects: [],
+	},
+} satisfies RenderProfileData;
+
+export const solitudeRenderProfile = {
+	id: "solitude_abyssal_neon_ground",
+	renderer: {
+		clearColor: "#05020d",
+		clearAlpha: 1,
+		antialias: true,
+		maxPixelRatio: 2,
+		fallbackMaterialColor: "#58e6ff",
+	},
+	lighting: {
+		lights: [
+			{
+				kind: "ambient",
+				color: "#7e7bff",
+				intensity: 0.46,
+			},
+			{
+				kind: "directional",
+				color: "#ff58d2",
+				intensity: 0.96,
+				position: [12, 18, -18],
+				shadow: {
+					enabled: true,
+					mapSize: 1024,
+					bias: -0.0001,
+					normalBias: 0.02,
+				},
+			},
+			{
+				kind: "directional",
+				color: "#4ce6ff",
+				intensity: 0.34,
+				position: [-18, 9, 14],
+			},
+		],
+		budget: {
+			maxTotal: 6,
+			maxAmbient: 1,
+			maxDirectional: 2,
+			maxPoint: 1,
+			maxSpot: 1,
+			maxArea: 0,
+			maxShadowCasting: 1,
+		},
+	},
+	environment: {
+		kind: "cubemap-skybox",
+		assetId: "cubemap_observatory_sky",
+		backgroundIntensity: 0.9,
+		backgroundBlurriness: 0.18,
+		environmentIntensity: 0.85,
+		requiredForReadiness: true,
+	},
+	postProcessing: {
+		enabled: false,
+		quality: "off",
+		effects: [],
+	},
+} satisfies RenderProfileData;

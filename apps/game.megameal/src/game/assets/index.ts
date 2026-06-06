@@ -5,5 +5,7 @@ export * from "./generatedGlbImportParity.js";
 export * from "./observatoryAssets.js";
 export * from "./portalAssets.js";
 export * from "./portalArenaAssets.js";
+export * from "./sciFiRoomAssets.js";
 export * from "./skyboxAssets.js";
+export * from "./solitudeAssets.js";
 export * from "./waterAssets.js";

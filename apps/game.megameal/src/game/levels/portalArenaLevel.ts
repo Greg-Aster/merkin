@@ -30,8 +30,9 @@ const portalSlots: readonly PortalSlot[] = [
 		label: "Solitude",
 	},
 	{
-		id: "forge",
-		label: "Forge",
+		id: "sci-fi-room",
+		label: "Sci Fi Room",
+		targetRuntimeSceneId: "sci_fi_room_runtime",
 	},
 	{
 		id: "archive",

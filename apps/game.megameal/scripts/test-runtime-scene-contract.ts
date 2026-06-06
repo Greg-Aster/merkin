@@ -30,6 +30,7 @@ import {
 	mirandaDeckRuntimeSceneManifest,
 	observatoryRuntimeSceneManifest,
 	portalArenaRuntimeSceneManifest,
+	sciFiRoomRuntimeSceneManifest,
 } from "../src/game/levels/index.js";
 import { PrefabRegistry } from "../src/game/prefabs/index.js";
 import { createGameScene } from "../src/game/scenes/index.js";
@@ -37,6 +38,16 @@ import {
 	ACTIVE_INTERACTION_TARGET_RESOURCE,
 	PLAYER_ENTITY_RESOURCE,
 } from "../src/game/systems/index.js";
+
+const observatoryWalkableChunkStableIds = [0, 1, 2, 3].flatMap((xChunk) =>
+	[0, 1, 2, 3].map(
+		(zChunk) => `observatory:walkable-mesh:chunk:x${xChunk}-z${zChunk}`,
+	),
+);
+const firstObservatoryWalkableChunkStableId =
+	"observatory:walkable-mesh:chunk:x0-z0";
+const centerObservatoryWalkableChunkStableId =
+	"observatory:walkable-mesh:chunk:x2-z2";
 
 function assertEqual<TValue>(
 	actual: TValue,
@@ -348,6 +359,12 @@ function allAssetStrings(
 	return strings;
 }
 
+function optionalRuntimeSceneManifest(
+	id: string,
+): RuntimeSceneManifestData | undefined {
+	return defaultRuntimeSceneManifests.find((manifest) => manifest.id === id);
+}
+
 {
 	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
 	const readiness = evaluateRuntimeSceneReadiness(
@@ -532,6 +549,191 @@ function allAssetStrings(
 }
 
 {
+	const manifest = loadRuntimeSceneManifest(sciFiRoomRuntimeSceneManifest);
+	const readiness = evaluateRuntimeSceneReadiness(
+		manifest,
+		validLoadReport(manifest),
+	);
+
+	if (!readiness.ok) {
+		throw new Error(
+			`Expected Sci Fi Room manifest to be ready, received ${readiness.errors.join("; ")}.`,
+		);
+	}
+
+	assertEqual(readiness.manifestId, "sci_fi_room_runtime");
+	assertEqual(manifest.level.id, "sci_fi_room");
+	assertEqual(manifest.level.sceneId, "sci_fi_room_game");
+	assertEqual(
+		defaultRuntimeSceneManifests.includes(sciFiRoomRuntimeSceneManifest),
+		true,
+		"Sci Fi Room runtime scene must be registered in the default catalog.",
+	);
+	assertEqual(
+		getRuntimeSceneManifest("sci_fi_room_runtime")?.id,
+		"sci_fi_room_runtime",
+	);
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(sciFiRoomRuntimeSceneManifest);
+	const floorExpectations = [
+		{
+			stableId: "sci-fi-room:floor:interior",
+			position: [0, -0.56, 0],
+			materialId: "material_sci_fi_room_interior_floor",
+			halfExtents: [10.78, 0.24, 9.26],
+		},
+		{
+			stableId: "sci-fi-room:floor:courtyard",
+			position: [0, -0.56, 21.52],
+			materialId: "material_sci_fi_room_courtyard_floor",
+			halfExtents: [12.936, 0.24, 12.936],
+		},
+		{
+			stableId: "sci-fi-room:floor:wasteland",
+			position: [0.063, -0.806, 1.736],
+			materialId: "material_sci_fi_room_wasteland_floor",
+			halfExtents: [100.9975, 0.192, 102.2675],
+		},
+	] as const;
+	const environment = manifest.renderProfile.environment;
+	const environmentAssetId = assetBackedEnvironmentAssetId(manifest);
+	const portal = componentForStableId(
+		manifest,
+		"sci-fi-room:portal:observatory",
+		"Portal",
+	);
+	const portalCollider = componentForStableId(
+		manifest,
+		"sci-fi-room:portal:observatory",
+		"Collider",
+	);
+	const portalSoundEmitter = componentForStableId(
+		manifest,
+		"sci-fi-room:portal:observatory",
+		"SoundEmitter",
+	);
+	const playerLight = componentForStableId(manifest, "player", "Light");
+	const playerController = componentForStableId(
+		manifest,
+		"player",
+		"CharacterController",
+	);
+	const playerKinematicCollision = assertRecord(
+		playerController.kinematicCollision,
+		"Sci Fi Room player kinematic collision settings",
+	);
+	const bounds = assertRecord(
+		manifest.level.resources?.["game:characterBounds"],
+		"Sci Fi Room character bounds",
+	);
+
+	assertEqual(manifest.renderProfile.id, "sci_fi_room_interior_courtyard");
+	assertEqual(environmentAssetId, "cubemap_observatory_sky");
+	assertEqual(environment.kind, "cubemap-skybox");
+	assertIncludes(
+		manifest.readiness.requiredAssetIds ?? [],
+		"cubemap_observatory_sky",
+	);
+	assertIncludes(
+		manifest.readiness.requiredAssetIds ?? [],
+		"audio_portal_activate",
+	);
+	assertIncludes(
+		manifest.readiness.requiredAssetIds ?? [],
+		"audio_portal_cycle",
+	);
+	assertEqual(bounds.minX, -48);
+	assertEqual(bounds.maxX, 48);
+	assertEqual(bounds.minZ, -18);
+	assertEqual(bounds.maxZ, 64);
+	assertDeepEqual(
+		transformPropertyForStableId(manifest, "player", "position"),
+		[0, 1.5, 0],
+	);
+	assertEqual(playerController.groundY, 1.5);
+	assertDeepEqual(playerKinematicCollision.obstacleChannels, ["worldStatic"]);
+	assertEqual(playerLight.kind, "point");
+	assertEqual(playerLight.color, "#ffd6a3");
+	assertEqual(playerLight.intensity, 5.5);
+	assertEqual(playerLight.distance, 16);
+	assertEqual(portal.id, "sci-fi-room.observatory");
+	assertEqual(portal.label, "Observatory");
+	assertEqual(portal.targetRuntimeSceneId, "observatory_runtime");
+	assertEqual(portalCollider.intent, "trigger");
+	assertEqual(portalCollider.channel, "interaction");
+	assertEqual(portalCollider.sensor, true);
+	assertEqual(portalSoundEmitter.soundId, "audio_portal_cycle");
+
+	for (const expectation of floorExpectations) {
+		const renderable = componentForStableId(
+			manifest,
+			expectation.stableId,
+			"Renderable",
+		);
+		const collider = componentForStableId(
+			manifest,
+			expectation.stableId,
+			"Collider",
+		);
+		const shape = assertRecord(
+			collider.shape,
+			`${expectation.stableId} collider shape`,
+		);
+
+		assertIncludes(
+			manifest.readiness.requiredCollisionStableIds ?? [],
+			expectation.stableId,
+		);
+		assertIncludes(
+			manifest.readiness.requiredWalkableStableIds ?? [],
+			expectation.stableId,
+		);
+		assertEqual(renderable.meshId, "mesh_sci_fi_room_floor_slab");
+		assertEqual(renderable.materialId, expectation.materialId);
+		assertEqual(collider.intent, "walkable");
+		assertEqual(collider.channel, "worldStatic");
+		assertEqual(shape.type, "box");
+		assertDeepEqual(shape.halfExtents, expectation.halfExtents);
+		assertDeepEqual(
+			transformPropertyForStableId(manifest, expectation.stableId, "position"),
+			expectation.position,
+		);
+	}
+
+	for (const [stableId, title] of [
+		["sci-fi-room:story:pillar", "Pillar Whisper"],
+		["sci-fi-room:story:bench", "Bench Note"],
+		["sci-fi-room:story:fountain", "Fountain Inscription"],
+		["sci-fi-room:story:plant", "Plant Spiral"],
+		["sci-fi-room:story:junk", "Junk Memory"],
+	] as const) {
+		const storyNote = componentForStableId(manifest, stableId, "StoryNote");
+		const collider = componentForStableId(manifest, stableId, "Collider");
+
+		assertEqual(storyNote.title, title);
+		assertEqual(storyNote.activationRadius, 2.35);
+		assertEqual(collider.intent, "trigger");
+		assertEqual(collider.channel, "interaction");
+		assertEqual(collider.sensor, true);
+	}
+
+	for (const assetString of allAssetStrings(manifest)) {
+		assertEqual(
+			assetString.includes("/generated/runtime-game-assets/"),
+			false,
+			`Sci Fi Room target manifest must not reference old generated runtime asset paths: ${assetString}`,
+		);
+		assertEqual(
+			assetString.includes(".collider."),
+			false,
+			`Sci Fi Room target manifest must not reference old generated collider binaries: ${assetString}`,
+		);
+	}
+}
+
+{
 	const manifest = loadRuntimeSceneManifest(observatoryRuntimeSceneManifest);
 	const requiredLightStableIds = [
 		"player",
@@ -575,12 +777,21 @@ function allAssetStrings(
 	);
 	const walkableCollider = componentForStableId(
 		manifest,
-		"observatory:walkable-mesh",
+		firstObservatoryWalkableChunkStableId,
+		"Collider",
+	);
+	const centerWalkableCollider = componentForStableId(
+		manifest,
+		centerObservatoryWalkableChunkStableId,
 		"Collider",
 	);
 	const walkableShape = assertRecord(
 		walkableCollider.shape,
-		"Observatory walkable mesh collider shape",
+		"Observatory walkable mesh chunk collider shape",
+	);
+	const centerWalkableShape = assertRecord(
+		centerWalkableCollider.shape,
+		"Observatory center walkable mesh chunk collider shape",
 	);
 	const waterRenderable = componentForStableId(
 		manifest,
@@ -675,52 +886,57 @@ function allAssetStrings(
 		manifest.readiness.requiredCollisionPrefabIds ?? [],
 		"observatory_boundary_blocker",
 	);
-	assertIncludes(
-		manifest.readiness.requiredWalkableStableIds ?? [],
-		"observatory:walkable-mesh",
-	);
-	assertIncludes(
-		manifest.readiness.requiredCollisionStableIds ?? [],
-		"observatory:walkable-mesh",
-	);
+	for (const stableId of observatoryWalkableChunkStableIds) {
+		assertIncludes(
+			manifest.readiness.requiredWalkableStableIds ?? [],
+			stableId,
+		);
+		assertIncludes(
+			manifest.readiness.requiredCollisionStableIds ?? [],
+			stableId,
+		);
+	}
 	assertEqual(walkableCollider.intent, "walkable");
 	assertEqual(walkableCollider.channel, "worldStatic");
 	assertEqual(walkableShape.type, "mesh");
+	assertEqual(centerWalkableCollider.intent, "walkable");
+	assertEqual(centerWalkableCollider.channel, "worldStatic");
+	assertEqual(centerWalkableShape.type, "mesh");
 	if (
 		!Array.isArray(walkableShape.vertices) ||
-		!Array.isArray(walkableShape.indices)
+		!Array.isArray(walkableShape.indices) ||
+		!Array.isArray(centerWalkableShape.vertices) ||
+		!Array.isArray(centerWalkableShape.indices)
 	) {
 		throw new Error(
-			"Observatory walkable mesh must use mesh vertices/indices.",
+			"Observatory walkable mesh chunks must use mesh vertices/indices.",
 		);
 	}
-	assertEqual(walkableShape.vertices.length, 289);
-	assertEqual(walkableShape.indices.length, 1536);
-	assertEqual(walkableShape.indices.length / 3, 512);
+	assertEqual(walkableShape.vertices.length, 25);
+	assertEqual(walkableShape.indices.length, 96);
+	assertEqual(walkableShape.indices.length / 3, 32);
+	assertEqual(centerWalkableShape.vertices.length, 25);
+	assertEqual(centerWalkableShape.indices.length, 96);
+	assertEqual(centerWalkableShape.indices.length / 3, 32);
 	assertDeepEqual(walkableShape.vertices[0], [-320, 1.43, -320]);
-	assertDeepEqual(walkableShape.vertices[144], [0, 2.25, 0]);
-	assertDeepEqual(walkableShape.vertices[288], [320, 2, 320]);
-	assertDeepEqual(walkableShape.indices.slice(0, 6), [0, 17, 1, 1, 17, 18]);
+	assertDeepEqual(walkableShape.vertices[24], [-160, 1.67, -160]);
+	assertDeepEqual(walkableShape.indices.slice(0, 6), [0, 5, 1, 1, 5, 6]);
+	assertDeepEqual(centerWalkableShape.vertices[0], [0, 2.25, 0]);
+	assertDeepEqual(centerWalkableShape.vertices[24], [160, 2.09, 160]);
+	assertDeepEqual(centerWalkableShape.indices.slice(0, 6), [0, 5, 1, 1, 5, 6]);
 	assertMeshVertexHeight(
 		walkableShape.vertices,
-		-120,
-		-40,
-		1.88,
-		"Observatory walkable mesh",
+		-160,
+		-160,
+		1.67,
+		"Observatory first walkable mesh chunk",
 	);
 	assertMeshVertexHeight(
-		walkableShape.vertices,
+		centerWalkableShape.vertices,
 		120,
 		120,
 		2.24,
-		"Observatory walkable mesh",
-	);
-	assertMeshVertexHeight(
-		walkableShape.vertices,
-		-320,
-		320,
-		1.59,
-		"Observatory walkable mesh",
+		"Observatory center walkable mesh chunk",
 	);
 	assertEqual(playerKinematicCollision.enabled, true);
 	assertEqual(playerKinematicCollision.offset, 0.04);
@@ -737,7 +953,7 @@ function allAssetStrings(
 	assertDeepEqual(
 		transformPropertyForStableId(
 			manifest,
-			"observatory:walkable-mesh",
+			firstObservatoryWalkableChunkStableId,
 			"position",
 		),
 		[0, 0, 0],
@@ -903,6 +1119,114 @@ function allAssetStrings(
 	);
 
 	assertEqual(observatoryPortal.targetRuntimeSceneId, "observatory_runtime");
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
+	const sciFiRoomPortal = componentForStableId(
+		manifest,
+		"portal-arena:portal:sci-fi-room",
+		"Portal",
+	);
+
+	assertIncludes(
+		manifest.readiness.requiredCollisionStableIds ?? [],
+		"portal-arena:portal:sci-fi-room",
+	);
+	assertEqual(sciFiRoomPortal.label, "Sci Fi Room");
+	assertEqual(sciFiRoomPortal.targetRuntimeSceneId, "sci_fi_room_runtime");
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
+	const solitudePortal = componentForStableId(
+		manifest,
+		"portal-arena:portal:solitude",
+		"Portal",
+	);
+	const solitudeManifest = optionalRuntimeSceneManifest("solitude_runtime");
+
+	assertEqual(solitudePortal.label, "Solitude");
+
+	if (solitudeManifest) {
+		assertIncludes(
+			manifest.readiness.requiredCollisionStableIds ?? [],
+			"portal-arena:portal:solitude",
+		);
+		assertEqual(solitudePortal.targetRuntimeSceneId, "solitude_runtime");
+	} else {
+		assertEqual(
+			Object.prototype.hasOwnProperty.call(
+				solitudePortal,
+				"targetRuntimeSceneId",
+			),
+			false,
+			"Solitude portal must remain unconnected until solitude_runtime exists and validates.",
+		);
+	}
+}
+
+{
+	const solitudeManifest = optionalRuntimeSceneManifest("solitude_runtime");
+
+	if (solitudeManifest) {
+		const manifest = loadRuntimeSceneManifest(solitudeManifest);
+		const readiness = evaluateRuntimeSceneReadiness(
+			manifest,
+			validLoadReport(manifest),
+		);
+		const requiredWalkableStableIds =
+			manifest.readiness.requiredWalkableStableIds ?? [];
+
+		if (!readiness.ok) {
+			throw new Error(
+				`Expected Solitude manifest to be ready, received ${readiness.errors.join("; ")}.`,
+			);
+		}
+
+		assertEqual(readiness.manifestId, "solitude_runtime");
+		assertEqual(manifest.level.id, "solitude");
+		assertEqual(manifest.level.sceneId, "solitude_game");
+		assertEqual(
+			getRuntimeSceneManifest("solitude_runtime")?.id,
+			"solitude_runtime",
+		);
+
+		if (requiredWalkableStableIds.length < 2) {
+			throw new Error(
+				"Solitude runtime scene must declare its two authored walkable surfaces in readiness.requiredWalkableStableIds.",
+			);
+		}
+
+		for (const stableId of requiredWalkableStableIds) {
+			const collider = componentForStableId(manifest, stableId, "Collider");
+
+			assertIncludes(
+				manifest.readiness.requiredCollisionStableIds ?? [],
+				stableId,
+			);
+			assertEqual(collider.intent, "walkable");
+			assertEqual(collider.channel, "worldStatic");
+		}
+
+		for (const assetString of allAssetStrings(manifest)) {
+			assertEqual(
+				assetString.includes("/generated/runtime-game-assets/"),
+				false,
+				`Solitude target manifest must not reference old generated runtime asset paths: ${assetString}`,
+			);
+			assertEqual(
+				assetString.includes("/runtime-world-partitions/"),
+				false,
+				`Solitude target manifest must not reference old runtime partition paths: ${assetString}`,
+			);
+			assertEqual(
+				assetString.includes(".collider."),
+				false,
+				`Solitude target manifest must not reference old generated collider binaries: ${assetString}`,
+			);
+		}
+	}
 }
 
 {
@@ -1316,7 +1640,7 @@ function allAssetStrings(
 
 {
 	const manifest = loadRuntimeSceneManifest(observatoryRuntimeSceneManifest);
-	const missingStableId = "observatory:walkable-mesh";
+	const missingStableId = firstObservatoryWalkableChunkStableId;
 	const readiness = evaluateRuntimeSceneReadiness(manifest, {
 		...validLoadReport(manifest),
 		spawned: manifest.level.instances
@@ -1352,6 +1676,53 @@ function allAssetStrings(
 		readiness.ok ? [] : readiness.errors,
 		`Required walkable collision instance "${missingStableId}" was not spawned.`,
 	);
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(sciFiRoomRuntimeSceneManifest);
+	const missingStableId = "sci-fi-room:floor:interior";
+	const readiness = evaluateRuntimeSceneReadiness(manifest, {
+		...validLoadReport(manifest),
+		spawned: manifest.level.instances
+			.filter((instance) => instance.stableId !== missingStableId)
+			.map((instance) => ({
+				prefabId: instance.prefabId,
+				stableId: instance.stableId,
+			})),
+	});
+
+	assertEqual(readiness.ok, false);
+	assertIncludes(
+		readiness.ok ? [] : readiness.errors,
+		`Required walkable collision instance "${missingStableId}" was not spawned.`,
+	);
+}
+
+{
+	const solitudeManifest = optionalRuntimeSceneManifest("solitude_runtime");
+
+	if (solitudeManifest) {
+		const manifest = loadRuntimeSceneManifest(solitudeManifest);
+		const missingStableId = firstRequired(
+			manifest.readiness.requiredWalkableStableIds,
+			"Solitude required walkable stable IDs",
+		);
+		const readiness = evaluateRuntimeSceneReadiness(manifest, {
+			...validLoadReport(manifest),
+			spawned: manifest.level.instances
+				.filter((instance) => instance.stableId !== missingStableId)
+				.map((instance) => ({
+					prefabId: instance.prefabId,
+					stableId: instance.stableId,
+				})),
+		});
+
+		assertEqual(readiness.ok, false);
+		assertIncludes(
+			readiness.ok ? [] : readiness.errors,
+			`Required walkable collision instance "${missingStableId}" was not spawned.`,
+		);
+	}
 }
 
 {

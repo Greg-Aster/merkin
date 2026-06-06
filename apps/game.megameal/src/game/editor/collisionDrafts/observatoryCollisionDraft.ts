@@ -1,7 +1,11 @@
-import type { CollisionCookDraftData } from "../../../engine/data/index.js";
+import type {
+	CollisionCookDraftData,
+	CollisionCookDraftEntryData,
+} from "../../../engine/data/index.js";
 
 const observatoryWalkableMeshGridSize = 17;
 const observatoryWalkableMeshHalfExtent = 320;
+const observatoryWalkableMeshChunkCellSpan = 4;
 const observatoryWalkableMeshCellSize =
 	(observatoryWalkableMeshHalfExtent * 2) /
 	(observatoryWalkableMeshGridSize - 1);
@@ -77,35 +81,107 @@ const observatoryWalkableMeshHeightRows = [
 	],
 ] as const;
 
-const observatoryWalkableMeshVertices = createObservatoryWalkableMeshVertices();
-const observatoryWalkableMeshIndices = createObservatoryWalkableMeshIndices();
+const observatoryWalkableMeshChunkEntries =
+	createObservatoryWalkableMeshChunkEntries();
 
-function createObservatoryWalkableMeshVertices(): readonly [
-	number,
-	number,
-	number,
-][] {
-	const vertices: Array<[number, number, number]> = [];
+function createObservatoryWalkableMeshChunkEntries(): readonly CollisionCookDraftEntryData[] {
+	const chunksPerAxis =
+		(observatoryWalkableMeshGridSize - 1) /
+		observatoryWalkableMeshChunkCellSpan;
 
-	observatoryWalkableMeshHeightRows.forEach((row, zIndex) => {
-		const z = observatoryWalkableMeshCoordinate(zIndex);
+	if (!Number.isInteger(chunksPerAxis)) {
+		throw new Error(
+			"Observatory walkable mesh chunk size must evenly divide the authored height grid.",
+		);
+	}
 
-		row.forEach((height, xIndex) => {
-			vertices.push([observatoryWalkableMeshCoordinate(xIndex), height, z]);
-		});
-	});
+	const entries: CollisionCookDraftEntryData[] = [];
 
-	return vertices;
+	for (let zChunk = 0; zChunk < chunksPerAxis; zChunk += 1) {
+		for (let xChunk = 0; xChunk < chunksPerAxis; xChunk += 1) {
+			const chunkId = `x${xChunk}-z${zChunk}`;
+
+			entries.push({
+				id: `observatory-walkable-mesh-chunk-${chunkId}`,
+				stableId: `observatory:walkable-mesh:chunk:${chunkId}`,
+				prefabId: "observatory_walkable_mesh",
+				colliderTarget:
+					xChunk === 0 && zChunk === 0 ? "prefab" : "level-instance",
+				collider: {
+					intent: "walkable",
+					channel: "worldStatic",
+					shape: createObservatoryWalkableMeshChunkShape({
+						startXIndex: xChunk * observatoryWalkableMeshChunkCellSpan,
+						startZIndex: zChunk * observatoryWalkableMeshChunkCellSpan,
+					}),
+				},
+				readiness: {
+					requiredCollision: true,
+					requiredWalkable: true,
+				},
+				notes:
+					"Deterministic rolling-field walkable mesh chunk derived from the authored Observatory height grid.",
+			});
+		}
+	}
+
+	return entries;
 }
 
-function createObservatoryWalkableMeshIndices(): readonly number[] {
-	const indices: number[] = [];
-	const gridSize = observatoryWalkableMeshGridSize;
+function createObservatoryWalkableMeshChunkShape(options: {
+	readonly startXIndex: number;
+	readonly startZIndex: number;
+}): CollisionCookDraftEntryData["collider"]["shape"] {
+	const vertices: Array<[number, number, number]> = [];
+	const localGridSize = observatoryWalkableMeshChunkCellSpan + 1;
 
-	for (let zIndex = 0; zIndex < gridSize - 1; zIndex += 1) {
-		for (let xIndex = 0; xIndex < gridSize - 1; xIndex += 1) {
-			const topLeft = zIndex * gridSize + xIndex;
-			const bottomLeft = topLeft + gridSize;
+	for (
+		let zIndex = options.startZIndex;
+		zIndex <= options.startZIndex + observatoryWalkableMeshChunkCellSpan;
+		zIndex += 1
+	) {
+		const z = observatoryWalkableMeshCoordinate(zIndex);
+		const row = observatoryWalkableMeshHeightRows[zIndex];
+
+		if (!row) {
+			throw new Error(
+				`Observatory walkable mesh chunk references missing height row ${zIndex}.`,
+			);
+		}
+
+		for (
+			let xIndex = options.startXIndex;
+			xIndex <= options.startXIndex + observatoryWalkableMeshChunkCellSpan;
+			xIndex += 1
+		) {
+			const height = row[xIndex];
+
+			if (height === undefined) {
+				throw new Error(
+					`Observatory walkable mesh chunk references missing height sample ${xIndex}, ${zIndex}.`,
+				);
+			}
+
+			vertices.push([observatoryWalkableMeshCoordinate(xIndex), height, z]);
+		}
+	}
+
+	return {
+		type: "mesh",
+		vertices,
+		indices: createObservatoryWalkableMeshChunkIndices(localGridSize),
+	};
+}
+
+function createObservatoryWalkableMeshChunkIndices(
+	localGridSize: number,
+): readonly number[] {
+	const indices: number[] = [];
+
+	for (let zIndex = 0; zIndex < localGridSize - 1; zIndex += 1) {
+		for (let xIndex = 0; xIndex < localGridSize - 1; xIndex += 1) {
+			const topLeft = zIndex * localGridSize + xIndex;
+			const bottomLeft = topLeft + localGridSize;
 
 			indices.push(
 				topLeft,
@@ -140,27 +216,7 @@ export const observatoryCollisionCookDraft = {
 			"src/game/generated/observatoryCollisionRuntime.ts",
 	},
 	entries: [
-		{
-			id: "observatory-walkable-mesh",
-			stableId: "observatory:walkable-mesh",
-			prefabId: "observatory_walkable_mesh",
-			colliderTarget: "prefab",
-			collider: {
-				intent: "walkable",
-				channel: "worldStatic",
-				shape: {
-					type: "mesh",
-					vertices: observatoryWalkableMeshVertices,
-					indices: observatoryWalkableMeshIndices,
-				},
-			},
-			readiness: {
-				requiredCollision: true,
-				requiredWalkable: true,
-			},
-			notes:
-				"Deterministic V1 rolling-field walkable mesh until the full editor bake writer exists.",
-		},
+		...observatoryWalkableMeshChunkEntries,
 		{
 			id: "observatory-boundary-north",
 			stableId: "observatory:collision:boundary:north",

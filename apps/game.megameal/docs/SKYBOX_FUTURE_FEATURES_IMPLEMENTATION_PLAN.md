@@ -1,187 +1,247 @@
-# Skybox Future Features Implementation Plan
+# Skybox Active Implementation Plan
 
-Status: future implementation plan; not required for the current implemented
-scene-environment foundation
+Status: active implementation packet for 2026-06-06
 
-This plan records the future skybox and scene-environment work that remains
-after `docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` reached
-implemented-foundation status. The word "skybox" is used here as the familiar
-content feature name, but the engine owner remains the manifest-backed
-`SkyboxEnvironmentContract` and the broader scene-environment pipeline.
+This plan converts the saved skybox backlog into a same-day implementation
+slice. The filename is retained for existing doc links, but the work below is
+the active packet for the next sky/environment agent.
 
-## Current Baseline
+The goal is not to ship a full weather, cloud, and environment-editor stack in
+one pass. The goal is to prove the production scene-environment pipeline beyond
+cubemaps by moving one real runtime scene to a non-cubemap environment through
+the existing `SkyboxEnvironmentContract`, with validation and cleanup strong
+enough that later AAA-tier sky work has a durable foundation.
 
-- Runtime scene manifests and render profiles own scene environment selection.
-- Asset manifests own cubemap, equirectangular texture, and muted video sky
-  media references.
-- The data/schema layer validates environment asset references, readiness,
-  projection metadata, dynamic capture settings, and reflection probe data.
-- The rendering module owns framework-neutral scene-environment and reflection
-  probe contracts.
-- The Three adapter owns `Scene.background`, `Scene.environment`, PMREM/runtime
-  capture projection, video texture setup, procedural atmosphere projection,
-  and reflection probe cleanup.
-- Current production runtime scenes still use required `cubemap-skybox`
-  environments.
+## Today Goal
+
+Ship one production-authored non-cubemap scene environment through the current
+manifest-backed architecture.
+
+Target scene: `portal_arena_runtime`
+
+Target environment mode: `equirectangular-environment`
+
+Reason:
+
+```text
+portal_arena_runtime is the default scene and the navigation hub. Moving it
+first proves the authored environment path where users land, without coupling
+the work to Observatory, Miranda, Sci Fi Room, or old-engine migration churn.
+```
+
+Done today means:
+
+- `portal_arena_runtime` no longer uses `cubemap_classic_sky` as its production
+  render-profile environment.
+- A content-owned equirectangular environment asset is registered through the
+  game asset manifest path, preloaded by the selected runtime scene, and listed
+  in readiness when required.
+- The environment is projected only by the Three adapter through
+  `Scene.background` and `Scene.environment`.
+- The runtime-scene and scene-environment contract tests cover the new
+  production opt-in and at least one negative readiness/projection failure.
+- Docs and the contract register state that one production scene now uses a
+  non-cubemap environment, while other advanced sky/weather features remain
+  planned.
 
 ## Architecture Rules
 
-- Future sky, atmosphere, weather, and reflection features must extend
-  `RenderProfileData.environment`, asset manifests, rendering module contracts,
-  and renderer adapters.
-- Runtime scenes must reference stable environment IDs and declared assets; no
-  Svelte, gameplay system, page shell, or renderer fallback may choose hidden
-  sky media.
-- Visible background, environment lighting, fog/aerial perspective, reflection
-  probes, and weather settings must remain explicit authored data instead of
-  hidden adapter defaults.
-- Required sky/environment media must participate in preload and readiness when
-  a scene depends on them for first playable render.
-- Video sky audio remains outside this contract and must stay owned by audio
+- Extend `RenderProfileData.environment`, asset manifests, rendering module
+  contracts, and renderer adapters only where the current contract requires it.
+- Runtime scenes must reference stable environment asset IDs. No Svelte,
+  gameplay system, page shell, or renderer fallback may choose hidden sky media.
+- Visible background and environment lighting remain explicit authored data.
+- Required environment media must participate in preload and readiness when a
+  scene depends on it for first playable render.
+- Video sky audio remains outside this packet and must stay owned by audio
   manifests and audio events.
 - Renderer-side resource mutation must be tracked and restored on scene unload
   or adapter disposal.
+- Do not import old `apps/game` skybox, Threlte, editor, or generated runtime
+  code.
 
-## Future Feature Packets
+## Packet 0: Verify Baseline
 
-### 1. Environment Authoring And Import
+Owner files to inspect before editing:
 
-Goal: add durable authoring/import controls for sky, atmosphere, and reflection
-probe assets without bypassing manifest ownership.
+- `src/game/assets/skyboxAssets.ts`
+- `src/game/assets/portalArenaAssets.ts`
+- `src/game/levels/renderProfiles.ts`
+- `src/game/levels/runtimeSceneManifests.ts`
+- `src/engine/data/schemas/index.ts`
+- `src/engine/modules/rendering/index.ts`
+- `src/engine/adapters/three/index.ts`
+- `scripts/test-scene-environment-contract.ts`
+- `scripts/test-runtime-scene-contract.ts`
 
-Expected work:
+Expected baseline:
 
-- Add an import path for cubemap, equirectangular, HDRI-style, and video sky
-  assets that emits checked-in or cooked asset manifest entries.
-- Store source metadata such as source path, content hash, projection, color
-  space, intended quality tier, and generated-product references.
-- Validate cubemap face orientation, projection type, video muting policy, and
-  readiness intent before runtime use.
-- Add editor-facing controls only after the underlying data contract and
-  validation path are durable.
+- Current runtime scenes use `cubemap-skybox`.
+- The schema already accepts `equirectangular-environment`.
+- Texture assets can declare `projection: "equirectangular"`.
+- The Three adapter already projects equirectangular textures and PMREM
+  environment lighting.
+- `test:scene-environment-contract` already has positive and negative coverage
+  for equirectangular projection validation.
 
-Completion criteria:
+Stop condition:
 
-- Imported environment assets are manifest-owned and schema-validated.
-- Invalid projection, missing readiness, missing generated products, or hidden
-  renderer fallbacks fail focused tests.
+- If any baseline point is false, repair the contract foundation first and do
+  not continue into production scene opt-in.
 
-### 2. Cooked Environment Products And Quality Tiers
-
-Goal: move expensive sky and image-based-lighting products into generated or
-cooked environment artifacts that scenes can select by quality tier.
-
-Expected work:
-
-- Define cooked products for prefiltered reflection data, lower-resolution sky
-  variants, optional higher-quality source products, and browser-friendly media
-  formats.
-- Add explicit quality tiers for desktop, mobile, and low-memory runtime modes.
-- Keep dynamic capture bounded; never introduce unrestricted per-frame capture
-  as a default.
-- Make generated product metadata reproducible and auditable.
-
-Completion criteria:
-
-- Runtime scene manifests can select an authored environment quality policy.
-- Asset readiness can require the correct cooked product for the selected tier.
-- Validation rejects scenes that reference missing or mismatched generated
-  environment products.
-
-### 3. Reflection Probe Quality Upgrade
-
-Goal: evolve the current nearest/highest-priority reflection probe foundation
-into a production-ready local reflection system.
+## Packet 1: Add Production Environment Asset
 
 Expected work:
 
-- Add probe influence volumes, blending weights, priority rules, and debug
-  visualization.
-- Define capture/update budgets for static, on-load, interval, and manually
-  triggered probes.
-- Add diagnostics for probe assignment, material mutation/restoration, and
-  expensive capture schedules.
-- Keep probe behavior authored in components and synced through the rendering
-  module rather than inferred by the renderer.
+- Add a production-owned portal arena environment texture under a content-owned
+  path such as:
+
+```text
+public/assets/environment/portal-arena/portal-arena-sky-equirectangular.png
+```
+
+- Register it in `src/game/assets/skyboxAssets.ts` with:
+
+```ts
+id: "texture_portal_arena_equirectangular_sky"
+kind: "texture"
+projection: "equirectangular"
+colorSpace: "srgb"
+tags: ["skybox", "environment", "portal-arena"]
+```
+
+- Add the asset to `portalArenaAssetManifest`.
+- Keep the existing sample equirectangular and sample video assets as contract
+  test fixtures only. Do not use sample assets as the production scene sky.
+- If the selected image is generated or converted, document the source path,
+  generation/conversion command, and intended ownership in a short adjacent
+  asset note or in this plan before handoff.
 
 Completion criteria:
 
-- Multiple local probes can blend predictably without stale material state.
-- Debug views can identify active probes, influence volumes, and capture cost.
-- Tests cover invalid volumes, invalid capture policies, and cleanup behavior.
+- The asset is owned by game content, not by the renderer or app shell.
+- The asset path exists under `public/assets`.
+- The asset manifest validates without registering the full runtime catalog as
+  a substitute for selected-scene ownership.
 
-### 4. Physical Atmosphere, Fog, Clouds, And Weather
-
-Goal: extend the procedural atmosphere foundation into explicit authored
-atmosphere and weather contracts.
+## Packet 2: Opt Portal Arena Into Equirectangular Environment
 
 Expected work:
 
-- Add richer physical sky settings for sun/moon direction, exposure,
-  scattering-style parameters, and time-of-day profiles.
-- Add fog and aerial perspective settings under the scene-environment contract.
-- Add cloud and weather profiles only after they have clear data ownership,
-  runtime budgets, and renderer adapter projection rules.
-- Keep atmosphere lighting influence separate from visible background settings.
+- Update `portalArenaRenderProfile.environment` to:
+
+```ts
+{
+  kind: "equirectangular-environment",
+  assetId: "texture_portal_arena_equirectangular_sky",
+  backgroundIntensity: 1,
+  backgroundBlurriness: 0,
+  environmentIntensity: 0.8,
+  requiredForReadiness: true,
+}
+```
+
+- Tune only the environment values needed for a stable first-pass visual
+  result. Do not retune unrelated portal, terrain, lighting, audio, collision,
+  or controls behavior in this packet.
+- Replace `cubemap_classic_sky` with
+  `texture_portal_arena_equirectangular_sky` in
+  `portalArenaRuntimeSceneManifest.readiness.requiredAssetIds`.
+- Keep other runtime scenes on their current cubemap environments unless this
+  packet explicitly validates them.
 
 Completion criteria:
 
-- Atmosphere, fog, clouds, and weather are authored in render profiles or
-  environment assets, not hidden renderer defaults.
-- Current scenes can opt into the features without changing gameplay systems or
-  UI ownership.
-- Validation rejects partial atmosphere/weather data that would require runtime
-  repair.
+- The default runtime scene is the first production non-cubemap consumer.
+- Portal arena preload/readiness fails if the new environment asset is missing.
+- No hidden renderer fallback chooses a cubemap when the authored environment is
+  absent or invalid.
 
-### 5. Expanded Video Sky Support
-
-Goal: support more panoramic video formats while keeping browser performance and
-audio ownership explicit.
+## Packet 3: Strengthen Focused Validation
 
 Expected work:
 
-- Add validated mappings beyond `equirectangular-360`, such as 180-degree or
-  strip layouts, when content needs them.
-- Add video readiness diagnostics for muted autoplay, decode readiness, and
-  missing preload metadata.
-- Add quality-tiered video sky assets for mobile and desktop.
-- Keep video audio as a separate audio-manifest event path.
+- Keep `scripts/test-scene-environment-contract.ts` as the owner for accepted
+  environment variants and invalid environment data.
+- Keep `scripts/test-runtime-scene-contract.ts` as the owner for runtime scene
+  preload/readiness failures.
+- Add narrow coverage for the production portal arena opt-in:
+  - portal arena render profile uses `equirectangular-environment`,
+  - the referenced asset has `projection: "equirectangular"`,
+  - the asset is in the selected scene asset manifest,
+  - the required environment asset is in selected-scene readiness,
+  - a missing or wrong-projection portal arena environment fails validation.
+- Do not add broad catch-all tests or duplicate scene validation helpers if an
+  existing focused owner can be extended cleanly.
 
 Completion criteria:
 
-- Unsupported or mismatched video mappings fail schema validation.
-- Runtime can report video-sky readiness failures without falling back to a
-  hidden static sky.
+- Positive and negative validation proves the production scene opt-in.
+- Test failure messages identify the broken contract directly.
 
-### 6. Production Scene Opt-In
-
-Goal: migrate selected production scenes from cubemap-only environments to the
-newer modes only when their assets and readiness data are authored.
+## Packet 4: Update Documentation And Register State
 
 Expected work:
 
-- Choose the first scene that benefits from equirectangular, video, procedural,
-  or probe-enhanced environment behavior.
-- Add the required media assets, preload groups, readiness entries, render
-  profile data, and focused validation for that scene.
-- Preserve the current cubemap paths until each replacement mode is authored and
-  validated.
+- Update `ENGINE_CONTRACT_REGISTER.md` so `SkyboxEnvironmentContract` and the
+  active migration status say the default portal arena scene uses a manifest
+  owned equirectangular environment.
+- Update `GAME_ENGINE_DESIGN_DOCUMENT.md` current implementation status so it
+  no longer says all production scenes are cubemap-only.
+- Update `ARCHITECTURE.md` scene environment notes with the same current-state
+  truth.
+- Keep `docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` and
+  `docs/Done/SKYBOX_CUBEMAP_SYSTEM_REVIEW.md` as completed foundation records.
+- Do not move this file to `docs/Done` until Packet 1 through Packet 4 are
+  implemented and validated.
 
 Completion criteria:
 
-- The selected scene uses a non-cubemap environment mode through manifest-owned
-  data.
-- No app shell, UI component, gameplay system, or renderer fallback owns the
-  selected sky.
+- Docs distinguish three states clearly:
+  - completed cubemap/foundation work,
+  - active portal arena equirectangular production opt-in,
+  - deferred weather, clouds, import UI, cooked products, and richer probes.
 
-## Validation Expectations
+## Packet 5: Cleanup And Handoff
 
-Future packets should add or update focused validation rather than expanding
-catch-all tests. Depending on the packet, expected checks include:
+Expected work:
+
+- Remove unused imports, dead exports, scratch files, temporary probes, and
+  generated artifacts that are not intentionally owned.
+- Confirm no audio files were touched by this skybox packet.
+- Confirm no old `apps/game` code was imported or copied.
+- Record validation results in the final handoff.
+
+Completion criteria:
+
+- The changed-file list is scoped to sky/environment assets, manifests, render
+  profile, focused tests, and docs.
+- Any unrelated dirty files from other agents are left untouched and called out
+  separately.
+
+## Explicit Deferrals
+
+These remain out of today's packet unless the user explicitly expands scope:
+
+- Environment editor/import UI.
+- Generated or cooked environment product pipeline.
+- Desktop/mobile/low-memory environment quality tiers.
+- Reflection probe blending, influence-volume debug visualization, and capture
+  cost dashboards.
+- Fog, aerial perspective, physical atmosphere, volumetric clouds, weather, and
+  time-of-day authoring.
+- Expanded video sky mappings beyond `equirectangular-360`.
+- Moving Observatory, Miranda, Sci Fi Room, or future migrated levels to
+  non-cubemap environments.
+
+## Validation Gate
+
+Required before handoff:
 
 ```bash
 pnpm --dir apps/game.megameal test:scene-environment-contract
 pnpm --dir apps/game.megameal test:runtime-scene-contract
+pnpm --dir apps/game.megameal test:level-authoring-contract
 pnpm --dir apps/game.megameal audit:engine-boundaries
 pnpm --dir apps/game.megameal type-check
 pnpm --dir apps/game.megameal lint
@@ -194,7 +254,7 @@ of the default validation path unless explicitly requested.
 
 ## Handoff Rule
 
-Do not mark any future skybox packet complete until docs, schema, source
-ownership, renderer adapter behavior, cleanup, and focused validation all agree.
-If a feature is only planned, mark it as planned. If it is runtime-supported but
-not used by production scenes, say that directly.
+Do not call this active packet complete until source, assets, docs, contract
+register, cleanup, and focused validation all agree. If only the plan is saved,
+say that it is planned. If runtime support exists but the production opt-in was
+not completed, say that directly.

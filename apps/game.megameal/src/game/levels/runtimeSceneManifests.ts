@@ -4,6 +4,7 @@ import {
 	observatoryAssetManifest,
 	portalArenaAssetManifest,
 	prototypeAssetManifest,
+	sciFiRoomAssetManifest,
 } from "../assets/index.js";
 import { collisionReadiness as observatoryCollisionReadiness } from "../generated/observatoryCollisionRuntime.js";
 import {
@@ -11,6 +12,7 @@ import {
 	observatoryPrefabs,
 	portalArenaPrefabs,
 	prototypePrefabs,
+	sciFiRoomPrefabs,
 } from "../prefabs/index.js";
 import { mirandaDeckLevel, prototypeLevel } from "./defaultLevels.js";
 import { observatoryLevel } from "./observatoryLevel.js";
@@ -20,7 +22,9 @@ import {
 	observatoryRenderProfile,
 	portalArenaRenderProfile,
 	prototypeRenderProfile,
+	sciFiRoomRenderProfile,
 } from "./renderProfiles.js";
+import { sciFiRoomLevel } from "./sciFiRoomLevel.js";
 
 export const portalArenaRuntimeSceneManifest = loadRuntimeSceneManifest({
 	schemaVersion: 1,
@@ -56,6 +60,7 @@ export const portalArenaRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"portal-arena:portal:prototype-arena",
 			"portal-arena:portal:miranda-deck",
 			"portal-arena:portal:observatory",
+			"portal-arena:portal:sci-fi-room",
 			"player",
 		],
 		requiredLightStableIds: ["player"],
@@ -301,11 +306,71 @@ export const observatoryRuntimeSceneManifest = loadRuntimeSceneManifest({
 	},
 });
 
+export const sciFiRoomRuntimeSceneManifest = loadRuntimeSceneManifest({
+	schemaVersion: 1,
+	id: "sci_fi_room_runtime",
+	generatedAt: "2026-06-06T00:00:00.000Z",
+	source: {
+		kind: "authored",
+		id: "sci-fi-room.scene#playable-foundation",
+	},
+	level: sciFiRoomLevel,
+	prefabs: sciFiRoomPrefabs,
+	assets: sciFiRoomAssetManifest,
+	renderProfile: sciFiRoomRenderProfile,
+	readiness: {
+		playerStableId: "player",
+		requiredAssetIds: [
+			"mesh_player",
+			"mesh_portal_gate",
+			"mesh_sci_fi_room_floor_slab",
+			"mesh_sci_fi_room_column",
+			"mesh_sci_fi_room_console",
+			"mesh_sci_fi_room_anomaly_marker",
+			"mesh_sci_fi_room_story_marker",
+			"cubemap_observatory_sky",
+			"material_player",
+			"material_sci_fi_room_interior_floor",
+			"material_sci_fi_room_courtyard_floor",
+			"material_sci_fi_room_wasteland_floor",
+			"material_sci_fi_room_wall_panel",
+			"material_sci_fi_room_console",
+			"material_sci_fi_room_anomaly",
+			"material_sci_fi_room_story_marker",
+			"audio_player_jump",
+			"audio_player_charge_release",
+			"audio_portal_activate",
+			"audio_portal_cycle",
+		],
+		requiredCollisionPrefabIds: [
+			"sci_fi_room_floor_interior",
+			"sci_fi_room_floor_courtyard",
+			"sci_fi_room_floor_wasteland",
+			"portal_gate",
+			"player",
+		],
+		requiredCollisionStableIds: [
+			"sci-fi-room:floor:interior",
+			"sci-fi-room:floor:courtyard",
+			"sci-fi-room:floor:wasteland",
+			"sci-fi-room:portal:observatory",
+			"player",
+		],
+		requiredWalkableStableIds: [
+			"sci-fi-room:floor:interior",
+			"sci-fi-room:floor:courtyard",
+			"sci-fi-room:floor:wasteland",
+		],
+		requiredLightStableIds: ["player"],
+	},
+});
+
 export const defaultRuntimeSceneManifests = [
 	portalArenaRuntimeSceneManifest,
 	prototypeRuntimeSceneManifest,
 	mirandaDeckRuntimeSceneManifest,
 	observatoryRuntimeSceneManifest,
+	sciFiRoomRuntimeSceneManifest,
 ] as const;
 
 export const defaultRuntimeSceneManifest = portalArenaRuntimeSceneManifest;

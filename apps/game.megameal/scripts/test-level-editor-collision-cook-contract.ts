@@ -32,6 +32,13 @@ const generatedRuntimeModuleFileUrl = new URL(
 	"../src/game/generated/observatoryCollisionRuntime.ts",
 	import.meta.url,
 );
+const observatoryWalkableChunkStableIds = [0, 1, 2, 3].flatMap((xChunk) =>
+	[0, 1, 2, 3].map(
+		(zChunk) => `observatory:walkable-mesh:chunk:x${xChunk}-z${zChunk}`,
+	),
+);
+const firstObservatoryWalkableChunkStableId =
+	"observatory:walkable-mesh:chunk:x0-z0";
 const plan = buildCollisionCookPlan(observatoryCollisionCookDraft);
 const result = validateCollisionCookPlanAgainstRuntimeScene({
 	plan,
@@ -114,10 +121,12 @@ function assertWritePlan(cookPlan: CollisionCookPlan): void {
 	}
 
 	if (
-		!readinessArtifact.serializedPayload.includes('"observatory:walkable-mesh"')
+		!readinessArtifact.serializedPayload.includes(
+			`"${firstObservatoryWalkableChunkStableId}"`,
+		)
 	) {
 		throw new Error(
-			"Expected runtime-readiness write artifact to include Observatory walkable mesh readiness.",
+			"Expected runtime-readiness write artifact to include Observatory walkable chunk readiness.",
 		);
 	}
 
@@ -271,7 +280,7 @@ async function assertPreviewAndBake(
 				},
 			],
 		},
-		'stableId contains duplicate value "observatory:walkable-mesh"',
+		`stableId contains duplicate value "${firstPreviewEntry.stableId}"`,
 	);
 
 	if (bakeFile.writesRuntimeData !== false) {
@@ -329,20 +338,52 @@ function assertOverlay(): void {
 
 	assertEqual(
 		overlay.entries.length,
-		5,
-		"Expected Observatory collision overlay to expose 5 draft entries.",
+		20,
+		"Expected Observatory collision overlay to expose 20 draft entries.",
 	);
 
-	assertOverlayEntry(overlay, "observatory:walkable-mesh", {
+	assertEqual(
+		overlay.entries.filter((entry) =>
+			entry.stableId.startsWith("observatory:walkable-mesh:chunk:"),
+		).length,
+		16,
+		"Expected Observatory collision overlay to expose 16 walkable mesh chunks.",
+	);
+
+	assertOverlayEntry(overlay, firstObservatoryWalkableChunkStableId, {
 		shapeType: "mesh",
 		intent: "walkable",
 		channel: "worldStatic",
 		requiredCollision: true,
 		requiredWalkable: true,
 		min: [-320, 1.4, -320],
-		max: [320, 2.44, 320],
-		center: [0, 1.92, 0],
-		size: [640, 1.04, 640],
+		max: [-160, 1.67, -160],
+		center: [-240, 1.535, -240],
+		size: [160, 0.27, 160],
+	});
+
+	assertOverlayEntry(overlay, "observatory:walkable-mesh:chunk:x2-z2", {
+		shapeType: "mesh",
+		intent: "walkable",
+		channel: "worldStatic",
+		requiredCollision: true,
+		requiredWalkable: true,
+		min: [0, 2.01, 0],
+		max: [160, 2.44, 160],
+		center: [80, 2.225, 80],
+		size: [160, 0.43000000000000016, 160],
+	});
+
+	assertOverlayEntry(overlay, "observatory:walkable-mesh:chunk:x3-z3", {
+		shapeType: "mesh",
+		intent: "walkable",
+		channel: "worldStatic",
+		requiredCollision: true,
+		requiredWalkable: true,
+		min: [160, 1.73, 160],
+		max: [320, 2.09, 320],
+		center: [240, 1.91, 240],
+		size: [160, 0.3599999999999999, 160],
 	});
 
 	assertOverlayEntry(overlay, "observatory:collision:boundary:north", {
@@ -411,13 +452,13 @@ function assertEditorSessionDefaults(): void {
 	);
 	assertEqual(
 		editorSession.collisionDraftEntryCount,
-		5,
+		20,
 		"Expected the editor boundary shell to list the Observatory collision draft entry count.",
 	);
 	assertEqual(
 		editorSession.selectedLevelInstanceStableId,
-		"observatory:walkable-mesh",
-		"Expected the editor boundary shell to select the Observatory walkable mesh by default.",
+		firstObservatoryWalkableChunkStableId,
+		"Expected the editor boundary shell to select the first Observatory walkable mesh chunk by default.",
 	);
 	assertEqual(
 		editorSession.preview.channel,
@@ -454,7 +495,7 @@ function assertInvalidDraftCases(): void {
 				},
 			],
 		},
-		'stableId contains duplicate value "observatory:walkable-mesh"',
+		`stableId contains duplicate value "${firstDraftEntry.stableId}"`,
 	);
 
 	expectInvalidDraft(
@@ -569,55 +610,117 @@ function assertWritePlanHashChanges(): void {
 }
 
 function assertObservatoryWalkableMesh(cookPlan: CollisionCookPlan): void {
-	const walkablePlanEntry = cookPlan.entries.find(
-		(entry) => entry.stableId === "observatory:walkable-mesh",
+	const walkablePlanEntries = cookPlan.entries.filter((entry) =>
+		entry.stableId.startsWith("observatory:walkable-mesh:chunk:"),
 	);
 
-	if (!walkablePlanEntry) {
+	if (walkablePlanEntries.length !== 16) {
 		throw new Error(
-			"Expected Observatory collision cook plan to include walkable mesh.",
-		);
-	}
-
-	const walkableShape = walkablePlanEntry.colliderComponent.shape;
-
-	if (walkableShape.type !== "mesh") {
-		throw new Error(
-			"Expected Observatory walkable collision draft to use a mesh.",
+			`Expected Observatory collision cook plan to include 16 walkable mesh chunks, received ${walkablePlanEntries.length}.`,
 		);
 	}
 
 	assertEqual(
-		walkableShape.vertices.length,
+		JSON.stringify(cookPlan.requiredWalkableStableIds),
+		JSON.stringify(observatoryWalkableChunkStableIds),
+		"Expected Observatory required walkable readiness to list each mesh chunk.",
+	);
+
+	assertEqual(
+		walkablePlanEntries.filter((entry) => entry.colliderTarget === "prefab")
+			.length,
+		1,
+		"Expected exactly one walkable chunk to own the prefab default collider.",
+	);
+
+	assertEqual(
+		walkablePlanEntries.filter(
+			(entry) => entry.colliderTarget === "level-instance",
+		).length,
+		15,
+		"Expected remaining walkable chunks to own level-instance collider overrides.",
+	);
+
+	const uniqueVertices = new Map<string, CollisionCookVector3Data>();
+
+	for (const entry of walkablePlanEntries) {
+		const walkableShape = entry.colliderComponent.shape;
+
+		if (walkableShape.type !== "mesh") {
+			throw new Error(
+				`Expected Observatory walkable collision chunk ${entry.stableId} to use a mesh.`,
+			);
+		}
+
+		assertEqual(
+			walkableShape.vertices.length,
+			25,
+			`Unexpected Observatory walkable chunk vertex count for ${entry.stableId}.`,
+		);
+		assertEqual(
+			walkableShape.indices.length,
+			96,
+			`Unexpected Observatory walkable chunk index count for ${entry.stableId}.`,
+		);
+		assertEqual(
+			walkableShape.indices.length / 3,
+			32,
+			`Unexpected Observatory walkable chunk triangle count for ${entry.stableId}.`,
+		);
+
+		for (const vertex of walkableShape.vertices) {
+			uniqueVertices.set(`${vertex[0]}:${vertex[2]}`, vertex);
+		}
+	}
+
+	assertEqual(
+		uniqueVertices.size,
 		289,
 		"Unexpected Observatory walkable mesh vertex count.",
 	);
 	assertEqual(
-		walkableShape.indices.length,
+		walkablePlanEntries.reduce(
+			(total, entry) =>
+				total +
+				(entry.colliderComponent.shape.type === "mesh"
+					? entry.colliderComponent.shape.indices.length
+					: 0),
+			0,
+		),
 		1536,
 		"Unexpected Observatory walkable mesh index count.",
 	);
 	assertEqual(
-		walkableShape.indices.length / 3,
+		walkablePlanEntries.reduce(
+			(total, entry) =>
+				total +
+				(entry.colliderComponent.shape.type === "mesh"
+					? entry.colliderComponent.shape.indices.length / 3
+					: 0),
+			0,
+		),
 		512,
 		"Unexpected Observatory walkable mesh triangle count.",
 	);
+
+	const vertices = [...uniqueVertices.values()];
+
 	assertMeshVertexHeight(
-		walkableShape.vertices,
+		vertices,
 		-120,
 		-40,
 		1.88,
 		"Observatory collision draft walkable mesh",
 	);
 	assertMeshVertexHeight(
-		walkableShape.vertices,
+		vertices,
 		0,
 		0,
 		2.25,
 		"Observatory collision draft walkable mesh",
 	);
 	assertMeshVertexHeight(
-		walkableShape.vertices,
+		vertices,
 		320,
 		320,
 		2,

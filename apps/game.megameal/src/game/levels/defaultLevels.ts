@@ -1,6 +1,7 @@
 import type { LevelDefinition } from "./index.js";
 import { observatoryLevel } from "./observatoryLevel.js";
 import { portalArenaLevel } from "./portalArenaLevel.js";
+import { sciFiRoomLevel } from "./sciFiRoomLevel.js";
 
 export const prototypeLevel = {
 	id: "prototype_arena",
@@ -768,6 +769,7 @@ export const defaultLevels = [
 	prototypeLevel,
 	mirandaDeckLevel,
 	observatoryLevel,
+	sciFiRoomLevel,
 ] as const;
 
 function storyNote(options: {

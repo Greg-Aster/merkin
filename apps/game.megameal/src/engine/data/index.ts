@@ -6,3 +6,4 @@ export * from "./manifests/index.js";
 export * from "./replay/index.js";
 export * from "./schemas/index.js";
 export * from "./serializers/index.js";
+export * from "./terrainCook/index.js";

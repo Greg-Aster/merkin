@@ -118,6 +118,7 @@ export type RenderProfileLightData =
 			readonly color: string;
 			readonly intensity: number;
 			readonly position: readonly [number, number, number];
+			readonly shadow?: LightShadowData;
 	  };
 
 export type LightBudgetProfileData = {
@@ -757,6 +758,14 @@ function validateRenderProfileLight(
 
 	if (data.kind === "directional") {
 		validateRequiredNumberTuple(data.position, 3, `${path}.position`, errors);
+	}
+
+	if (data.shadow !== undefined) {
+		if (data.kind === "ambient") {
+			errors.push(`${path}.shadow is not supported for ambient lights.`);
+		}
+
+		validateLightShadowData(data.shadow, `${path}.shadow`, errors);
 	}
 }
 

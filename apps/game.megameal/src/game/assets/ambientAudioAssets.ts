@@ -19,6 +19,13 @@ export const audioAmbientShadowWaltz = {
 	tags: ["music", "ambient", "waltz"],
 } as const;
 
+export const audioAmbientWickedShadowsWhisper = {
+	id: "audio_ambient_wicked_shadows_whisper",
+	kind: "audio",
+	url: "/audio/ambient/Wicked%20Shadows%20Whisper.mp3",
+	tags: ["music", "ambient", "miranda", "solitude"],
+} as const;
+
 export const audioAmbientWhistlingDreams = {
 	id: "audio_ambient_whistling_dreams",
 	kind: "audio",

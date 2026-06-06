@@ -12,6 +12,10 @@ shadow/area-light tuning remain future packets.
 
 Current status: initial framework packet complete, normal root game scripts cut over to `@merkin/game-megameal`, portal arena navigation room implemented as the default runtime scene with manifest-owned ambient playlist music, portal activation SFX, charge-release SFX, shared spatial portal loop SFX, generated GLB field terrain, and a required player-carried point light with held-charge feedback, manifest-backed cubemap sky environments implemented for the current runtime scenes, scene-environment foundation implemented in `docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` for equirectangular textures, muted video skies, procedural atmosphere, bounded dynamic capture, and authored reflection probes, Miranda deck/cockpit/crew-quarters/Captain's Office/Engine Room/airlock return portal/Medbay/Mess Hall/Chapel/Brig/Cargo Hold/Archive primitive foundation plus two readiness-required walkable deck floors, a Cargo Hold walkable floor/bounds extension, old cockpit command console and Chapel monolith parity as checked-in target-engine prefabs, and three authored Miranda point lights, checked-in Miranda primitive material parameters, Miranda ambient playlist music, shared portal activation SFX, shared spatial portal loop SFX, scene-manifest charge-release SFX, nine Miranda story notes, and the StoryNote reader foundation migrated, Observatory playable foundation migrated as `observatory_runtime` with target-owned GLB art, explicit walkable mesh collision, boundary collision proxies, `worldStatic` kinematic obstacle filtering, shared water surface data through `WaterSurfaceContract`, deterministic three-firefly population data through `FireflyPopulationContract`, disabled/off post-processing profile data, player/firefly lights, manifest-owned scene music, and portal transition by manifest ID, and runtime scene negative-case validation added in `apps/game.megameal`. Legacy `@merkin/game` root aliases are retired, `start-game-manual-refresh.sh` now launches `@merkin/game-megameal`, `pnpm-workspace.yaml` excludes the ignored old `apps/game` folder, and the old `apps/game` lockfile importer is removed. Player controls have a verified desktop/mobile runtime foundation with selected-target HUD projection, scene-unload selected-target cleanup, semantic mobile touch input, and remaining consumer polish tracked in `docs/PLAYER_CONTROLS_MIGRATION_PLAN.md`. Future skybox and scene-environment packets are tracked in `docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`; future shared water behavior packets are tracked in `docs/WATER_SURFACE_SYSTEM_PLAN.md`. Authored Miranda point-light migration is implemented through `AuthoredLightContract`; portal player lighting is implemented through `PlayerCarriedLightContract`; Miranda primitive material parameter migration is implemented through `MaterialParameterContract`; curated scene music playlists, SFX, crossfades, and spatial listener/emitter foundation are implemented through `AudioManifestAndEvents`; Miranda walkable floor readiness is implemented through `WalkableCollisionContract`; engine-owned kinematic player traversal is implemented through `KinematicCharacterCollisionContract`; Observatory collision content consumes `CollisionPolicy`, `WalkableCollisionContract`, `KinematicCharacterCollisionContract`, and `LevelReadinessContract`; Observatory playable foundation is implemented through `ObservatoryLevelContract` with water owned by `WaterSurfaceContract` and current fireflies owned by `FireflyPopulationContract`. `LevelAuthoringImportValidationContract` now has an implemented foundation through `src/engine/data/contentGraph/index.ts` and `test:level-authoring-contract`, deriving or drift-checking runtime readiness from authored assets, prefabs, levels, lights, collision, audio, and transitions before broad level scaling. The current implementation register and verification gate are in `ENGINE_CONTRACT_REGISTER.md`.
 
+Sci Fi Room status update: `sci_fi_room_runtime` is now a playable foundation
+through `SciFiRoomLevelContract`, with a portal-arena transition added only
+after runtime-scene and content-graph validation passed.
+
 ## Migration Completion Checkpoint
 
 Status as of 2026-06-06: the migration is not finished. The current target
@@ -23,8 +27,9 @@ Implemented foundation:
 - Normal root game scripts and runtime mounting now target
   `@merkin/game-megameal`.
 - `portal_arena_runtime` is the default navigation room.
-- `prototype_arena_runtime`, `miranda_deck_runtime`, and
-  `observatory_runtime` load through runtime scene manifests.
+- `prototype_arena_runtime`, `miranda_deck_runtime`,
+  `observatory_runtime`, and `sci_fi_room_runtime` load through runtime scene
+  manifests.
 - Player controls, portal interaction, story-note interaction, scene unload
   cleanup, readiness gates, audio events, authored lights, scene environments,
   water/firefly data, and content-graph validation have focused contract
@@ -355,7 +360,111 @@ Current durable content slice:
 
 - `portal_arena_runtime` is the default navigation room. It has eight authored portal slots on a generated GLB moor field, a centered player spawn, a required player-carried point light on the stable `player` entity, a content-owned GLB portal gate asset, explicit solid/world terrain collision data, a manifest-owned portal-deck scene music asset, portal activation SFX, charge-release SFX, nearest active target HUD prompt selection through world state, and manifest-ID transitions to connected runtime scenes.
 - `observatory_runtime` implements the playable foundation from `docs/OBSERVATORY_PLAYABLE_FOUNDATION_PLAN.md`. It recreates the old Observatory from source art and scene evidence only, with target-owned runtime scene data, `mesh_observatory_environment`, generated `mesh_observatory_field_micro_displacement` visual terrain under `public/assets/generated/game/observatory/terrain`, `observatory:walkable-mesh` as required `walkable/worldStatic` mesh collision, four required `observatory_boundary_blocker` perimeter colliders, `CharacterController.kinematicCollision` on the player for adapter-owned slide/slope/snap/autostep traversal over `worldStatic` obstacles, visual `observatory:water` through the shared `water_surface_plane` prefab plus authored `WaterSurface` animation/reflection/refraction data, `cubemap_observatory_sky`, a disabled/off post-processing profile, a player-carried light, three firefly lights generated from deterministic `FireflyPopulationContract` data, manifest-owned `audio_ambient_portal_deck` scene music from the old `courtyard-breeze` preset evidence, and portal transition by manifest ID. The generated visual terrain has provenance/GLB hash/scale/alignment metadata and remains visual-only; collision still comes from `observatory:walkable-mesh`. The current Observatory water has no collider and no gameplay volume, and uses shared `WaterSurfaceContract` assets/prefabs/components (`mesh_water_plane`, `material_water_dark_still`, `water_surface_plane`, and `WaterSurface`). The aligned packet does not import old runtime code, load old generated runtime scene JSON, restore the old terrain chunk runtime, use generated collision binaries, copy old lighting budget/controller systems, old Svelte/Howler audio systems, or make Observatory-specific water/firefly IDs the reusable owner. Explicit editable collision gizmos, shader water animation, visual reflections/refraction, water volumes, post-processing adapter implementation, full terrain import UI/pipeline, and large procedural firefly population tooling remain future contracts.
+- `sci_fi_room_runtime` implements a playable foundation for the old Sci Fi Room packet. It uses old scene JSON as provenance only and owns new target-engine assets, prefabs, level data, render profile, runtime manifest, three readiness-required `walkable/worldStatic` floor colliders, old-source player spawn, player light, kinematic collision settings, an Observatory portal by manifest ID, five target-owned `StoryNote` markers, cubemap environment data, disabled/off post-processing profile data, and scene-scoped player/portal SFX mappings. The portal arena now includes a `Sci Fi Room` slot targeting `sci_fi_room_runtime` after runtime-scene and content-graph validation pass. Full old-scene generated GLB art/collision parity, cooked collision products, post-processing/reflection rendering, richer set dressing, and durable import/cook tooling remain future contracts.
 - `miranda_deck_runtime` migrates the old Miranda spawn, the two authored deck floor actors plus a target-engine Cargo Hold floor/bounds extension as explicit `walkable` collision surfaces, the three cockpit glow panel actors, the old cockpit command console, the four crew bunks, the locker bank, Captain's Desk, Captain's Chair, Recipe Safe, Engine Core, four engine columns, the airlock return portal, four Medbay pods, three Mess Hall blockers, Chapel Altar, two Chapel monoliths, four Brig cells, Brig Desk, four Cargo Hold stacks, five Archive server banks, three authored point lights, and nine story notes as checked-in target-engine data.
+
+Legacy level inventory from `apps/game`:
+
+The old active/deployed level registry at
+`apps/game/src/threlte/levels/level-registry.json` names five legacy levels.
+Only Miranda and Observatory have target-engine runtime foundations so far.
+The remaining legacy levels must be migrated as new target-engine contracts,
+not by importing the old Threlte/Svelte runtime, generated runtime scene JSON,
+or old component ownership.
+
+| Legacy level | Old registry source | Current target-engine status | Migration packet to add |
+| --- | --- | --- | --- |
+| `miranda` / Miranda Wreck | `apps/game/src/threlte/editor/scenes/miranda.scene.json`; old generated runtime scene under `apps/megameal/public/generated/runtime-game-assets/scenes/miranda.runtime-scene.json` | Partial target-engine foundation exists as `miranda_deck_runtime`; full Miranda is not ready | Continue Miranda terrain, cooked collision, generated/content parity, remaining rooms/interactions, and import/cook ownership before marking complete |
+| `observatory` / Observatory | `apps/game/src/threlte/editor/scenes/observatory.scene.json`; old generated runtime scene under `apps/megameal/public/generated/runtime-game-assets/scenes/observatory.runtime-scene.json` | Playable target-engine foundation exists as `observatory_runtime`; full old-scene parity is not complete | Continue terrain chunks, shader water, reflections/refraction, post-processing adapter work, water gameplay volumes, and large firefly population tooling |
+| `sci-fi-room` / Sci Fi Room | `apps/game/src/threlte/editor/scenes/sci-fi-room.scene.json`; old generated runtime scene under `apps/megameal/public/generated/runtime-game-assets/scenes/sci-fi-room.runtime-scene.json` | Playable target-engine foundation exists as `sci_fi_room_runtime`; full old-scene parity is not complete | Continue generated GLB art/collision parity, cooked collision/import ownership, post-processing/reflection rendering, richer set dressing, and durable authoring/import tooling before marking complete |
+| `solitude` / Solitude | `apps/game/src/threlte/editor/scenes/solitude.scene.json`; old generated runtime scene under `apps/megameal/public/generated/runtime-game-assets/scenes/solitude.runtime-scene.json`; old partition at `apps/megameal/public/runtime-world-partitions/solitude.partition.json`; provenance summary in `docs/SOLITUDE_MIGRATION_PROVENANCE.md` | Not migrated to `apps/game.megameal`; provenance captured only | Add a future `solitude_runtime` packet with generated asset provenance, two authored walkable surfaces, collision manifest/cook resolution, ambient particle/firefly policy, world-partition or no-streaming decision, render profile, audio preset migration, and portal-arena transition entry only after validation passes |
+| `yggdrasil` / Yggdrasil | `apps/game/src/threlte/editor/scenes/yggdrasil.scene.json`; old generated runtime scene under `apps/megameal/public/generated/runtime-game-assets/scenes/yggdrasil.runtime-scene.json`; old partition at `apps/megameal/public/runtime-world-partitions/yggdrasil.partition.json` | Not migrated to `apps/game.megameal` | Add a future `yggdrasil_runtime` packet with streaming/chunk ownership, generated GLB provenance, water surface/gameplay-volume decisions, ambient particle/firefly population policy, five authored walkable surfaces, required render/collision assets, asset-budget reduction, render-profile/post-processing decisions, story/portal interactions, and portal-arena transition entry only after validation passes |
+
+Old generated readiness evidence for migrated and not-yet-migrated levels:
+
+- `sci-fi-room` old build report had 45 actors, 29 runtime assets, three
+  required walkable/collision actors, and was not publish-ready because
+  `sci-fi-floor-interior-slab` had no runtime collision manifest.
+  `SciFiRoomLevelContract` is the migration owner for this packet; source
+  evidence from old scene JSON and old generated runtime JSON is provenance
+  only, and target-engine content must be rewritten into checked-in manifests,
+  prefabs, level data, render profile, collision ownership, and validation.
+  Provenance to preserve before implementation:
+  - Registry metadata: `apps/game/src/threlte/levels/level-registry.json`
+    lines 41-55 mark the old level as active/deployed, alias
+    `sci-fi-room-level`, scene source `sci-fi-room`, star-map year 2500,
+    and description `Enter the Sci Fi Room`.
+  - Scene settings: `apps/game/src/threlte/editor/scenes/sci-fi-room.scene.json`
+    lines 7-23 define `skyboxPreset: observatory`, player spawn
+    `[0, 1.5, 0]`, scene-authored ground/collision, disabled fallback
+    surfaces, and the three required ground actors. Lines 25-40 state no
+    render chunks and scene-authored terrain/collision as the migration mode.
+  - Render profile: the old profile
+    `sci-fi-room-interior-courtyard` at scene lines 111-235 uses desktop
+    default quality, one shadow-casting light budget, static-environment
+    reflections, and post-processing passes for tone mapping, ambient
+    occlusion, color grading, bloom, and vignette. The target packet must
+    translate this into the current render-profile/post-processing contracts
+    honestly; unsupported effects remain explicit future work rather than
+    hidden renderer defaults.
+  - Walkable floors: scene lines 278-389 define
+    `sci-fi-floor-interior-slab`, `sci-fi-floor-courtyard-slab`, and
+    `sci-fi-floor-wasteland-tile-4-4` as primitive `walkable/worldStatic`
+    surfaces. Their old sizes/positions are provenance for target-owned
+    collider data; runtime traversal must not depend on old scene JSON.
+  - Actor/collision summary: the old scene has 45 nodes: 3 primitive floors,
+    30 prefab actors, 8 asset actors, and 4 groups. Collision intent splits
+    into 3 walkable, 32 blocker, 6 trigger, and 4 non-collision group nodes.
+    The generated runtime report at
+    `apps/megameal/public/generated/runtime-game-assets/scenes/sci-fi-room.runtime-scene.json`
+    lines 7918-7933 records 45 actors, 8 asset actors, 3 primitive actors,
+    41 physics actors, and 38 trimesh actors; the runtime data also includes
+    29 runtime asset URLs and 41 generated collision products. These are
+    migration-sizing evidence only, not a license to load old generated JSON.
+  - Readiness blocker: old runtime report lines 7998-8045 show the three
+    required walkable/collision actors were present, but
+    `terrain-runtime-collision-declared` failed because
+    `sci-fi-floor-interior-slab` had no runtime collision manifest. The new
+    packet must own explicit readiness-required collision/walkable IDs and
+    focused negative-case validation before becoming playable.
+  - Story/interactions: scene lines 697-727 define one Observatory portal
+    trigger targeting legacy `observatory`; the target runtime should map this
+    to manifest ID `observatory_runtime`. Lines 765-1168 define five note
+    triggers worth migrating as target-owned `StoryNote` data:
+    `sci-fi-story-pillar`, `sci-fi-story-bench`,
+    `sci-fi-story-fountain`, `sci-fi-story-plant`, and
+    `sci-fi-story-junk`.
+  - Admission gate result: the portal-arena transition to
+    `sci_fi_room_runtime` was added only after the contract row,
+    target-owned assets, prefabs, level data, render profile, explicit
+    collision/walkable data, readiness checks, content-graph validation, and
+    runtime-scene negative tests existed and passed. Full GLB/cooked-collision
+    parity remains future work.
+- `solitude` old build report had 33 actors, 16 runtime assets, two required
+  walkable/collision actors, and was not publish-ready because
+  `solitude-ground-plateau` had no runtime collision manifest.
+  `docs/SOLITUDE_MIGRATION_PROVENANCE.md` captures exact old registry, scene,
+  generated runtime scene, and partition line evidence. The old files remain
+  read-only provenance and must not become runtime inputs for
+  `apps/game.megameal`.
+- `yggdrasil` old build report had 173 actors, 100 runtime assets, 13 required
+  render actors, five required collision actors, a 33-cell world partition, and
+  no publish blockers, but it exceeded the old 60-runtime-asset budget. The new
+  engine must treat this as a streaming/chunking and budget packet, not as a
+  simple manifest copy.
+
+Legacy-level admission rule:
+
+- A legacy level may appear in the portal arena only after it has a checked-in
+  target runtime scene manifest, manifest-owned assets, prefabs, level data,
+  render profile, explicit collision/walkable IDs, player spawn, readiness data,
+  content-graph validation, runtime-scene negative-case validation, and
+  contract-register row.
+- Old `apps/game` scene JSON and generated runtime scene JSON are provenance
+  only. They must not become runtime inputs for `apps/game.megameal`.
+- Generated assets from the old runtime asset folders must go through
+  `GeneratedGlbImportParityContract` or a future durable generated-asset import
+  contract before runtime use.
 - Historical source evidence captured before archival: old Miranda scene player
   spawn and ground contract in
   `apps/game/src/threlte/editor/scenes/miranda.scene.json` lines 7-18, deck
@@ -493,8 +602,8 @@ Definition of done:
 
 - `test:level-authoring-contract` is the focused test owner for the content
   graph contract.
-- Current portal arena, prototype arena, Miranda deck, and Observatory runtime
-  scenes pass content graph validation.
+- Current portal arena, prototype arena, Miranda deck, Observatory, and Sci Fi
+  Room runtime scenes pass content graph validation.
 - Negative cases prove missing assets, missing readiness assets, unknown
   prefabs, duplicate stable IDs, missing walkable readiness, missing light
   readiness, stale collision IDs, and missing portal targets fail before

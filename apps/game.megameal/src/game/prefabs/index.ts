@@ -56,6 +56,25 @@ export {
 	portalArenaFloorPrefab,
 	portalArenaPrefabs,
 } from "./portalPrefabs.js";
+export {
+	sciFiRoomAnomalyMarkerPrefab,
+	sciFiRoomColumnPrefab,
+	sciFiRoomConsolePrefab,
+	sciFiRoomCourtyardFloorPrefab,
+	sciFiRoomInteriorFloorPrefab,
+	sciFiRoomPrefabs,
+	sciFiRoomStoryMarkerPrefab,
+	sciFiRoomWastelandFloorPrefab,
+} from "./sciFiRoomPrefabs.js";
+export {
+	solitudeDaisPrefab,
+	solitudeFireflyMarkerPrefab,
+	solitudePillarPrefab,
+	solitudePlateauPrefab,
+	solitudePrefabs,
+	solitudeRingFragmentPrefab,
+	solitudeWindEmitterPrefab,
+} from "./solitudePrefabs.js";
 export { waterSurfacePlanePrefab } from "./waterPrefabs.js";
 
 export type PrefabId = string;

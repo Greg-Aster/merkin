@@ -15,6 +15,7 @@ export {
 } from "./defaultLevels.js";
 export { observatoryLevel } from "./observatoryLevel.js";
 export { portalArenaLevel } from "./portalArenaLevel.js";
+export { sciFiRoomLevel } from "./sciFiRoomLevel.js";
 export {
 	defaultRuntimeSceneManifest,
 	defaultRuntimeSceneManifests,
@@ -23,12 +24,14 @@ export {
 	observatoryRuntimeSceneManifest,
 	portalArenaRuntimeSceneManifest,
 	prototypeRuntimeSceneManifest,
+	sciFiRoomRuntimeSceneManifest,
 } from "./runtimeSceneManifests.js";
 export {
 	mirandaDeckRenderProfile,
 	observatoryRenderProfile,
 	portalArenaRenderProfile,
 	prototypeRenderProfile,
+	sciFiRoomRenderProfile,
 } from "./renderProfiles.js";
 
 export type LevelDefinition = {

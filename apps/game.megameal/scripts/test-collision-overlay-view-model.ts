@@ -9,23 +9,45 @@ import { observatoryCollisionCookDraft } from "../src/game/editor/collisionDraft
 
 const overlay = buildCollisionOverlayViewModel(observatoryCollisionCookDraft);
 const editorSession = getDefaultLevelEditorSessionSummary();
+const firstObservatoryWalkableChunkStableId =
+	"observatory:walkable-mesh:chunk:x0-z0";
 
 assertEqual(
 	overlay.entries.length,
-	5,
-	"Expected Observatory collision overlay to expose 5 draft entries.",
+	20,
+	"Expected Observatory collision overlay to expose 20 draft entries.",
 );
 
-assertOverlayEntry("observatory:walkable-mesh", {
+assertEqual(
+	overlay.entries.filter((entry) =>
+		entry.stableId.startsWith("observatory:walkable-mesh:chunk:"),
+	).length,
+	16,
+	"Expected Observatory collision overlay to expose 16 walkable mesh chunks.",
+);
+
+assertOverlayEntry(firstObservatoryWalkableChunkStableId, {
 	shapeType: "mesh",
 	intent: "walkable",
 	channel: "worldStatic",
 	requiredCollision: true,
 	requiredWalkable: true,
 	min: [-320, 1.4, -320],
-	max: [320, 2.44, 320],
-	center: [0, 1.92, 0],
-	size: [640, 1.04, 640],
+	max: [-160, 1.67, -160],
+	center: [-240, 1.535, -240],
+	size: [160, 0.27, 160],
+});
+
+assertOverlayEntry("observatory:walkable-mesh:chunk:x2-z2", {
+	shapeType: "mesh",
+	intent: "walkable",
+	channel: "worldStatic",
+	requiredCollision: true,
+	requiredWalkable: true,
+	min: [0, 2.01, 0],
+	max: [160, 2.44, 160],
+	center: [80, 2.225, 80],
+	size: [160, 0.43000000000000016, 160],
 });
 
 assertOverlayEntry("observatory:collision:boundary:north", {
@@ -77,6 +99,7 @@ assertOverlayEntry("observatory:collision:boundary:west", {
 });
 
 assertEditorSessionControls();
+assertEditorTerrainStatus();
 
 console.log(
 	`Collision overlay view model contract passed for ${overlay.entries.length} Observatory entries.`,
@@ -94,12 +117,12 @@ function assertEditorSessionControls(): void {
 		"Expected editor session controls to preserve overlay stable ID order.",
 	);
 
-	const walkableMesh = editorEntry("observatory:walkable-mesh");
+	const walkableMesh = editorEntry(firstObservatoryWalkableChunkStableId);
 
 	assertEqual(
 		walkableMesh.selected,
 		true,
-		"Expected the walkable mesh to remain the default selected stable ID.",
+		"Expected the first walkable chunk to remain the default selected stable ID.",
 	);
 	assertEqual(
 		walkableMesh.canEditTransform,
@@ -133,18 +156,18 @@ function assertEditorSessionControls(): void {
 
 	assertEqual(
 		walkableMesh.meshMetadata.vertexCount,
-		289,
-		"Unexpected walkable mesh vertex count in editor session.",
+		25,
+		"Unexpected walkable mesh chunk vertex count in editor session.",
 	);
 	assertEqual(
 		walkableMesh.meshMetadata.indexCount,
-		1536,
-		"Unexpected walkable mesh index count in editor session.",
+		96,
+		"Unexpected walkable mesh chunk index count in editor session.",
 	);
 	assertEqual(
 		walkableMesh.meshMetadata.triangleCount,
-		512,
-		"Unexpected walkable mesh triangle count in editor session.",
+		32,
+		"Unexpected walkable mesh chunk triangle count in editor session.",
 	);
 
 	const northBoundary = editorEntry("observatory:collision:boundary:north");
@@ -203,6 +226,267 @@ function assertEditorSessionControls(): void {
 		northBoundary.bounds.center,
 		[0, 5.8, -304],
 		"Unexpected north boundary derived bounds center in editor session.",
+	);
+}
+
+function assertEditorTerrainStatus(): void {
+	assertEqual(
+		editorSession.terrain.importCount,
+		1,
+		"Expected editor terrain status to expose one current terrain import.",
+	);
+	assertEqual(
+		editorSession.terrain.importedCount,
+		1,
+		"Expected current terrain import to be marked imported.",
+	);
+	assertEqual(
+		editorSession.terrain.collisionChunkCount,
+		20,
+		"Expected editor terrain status to expose all cooked collision chunks.",
+	);
+	assertEqual(
+		editorSession.terrain.meshChunkCount,
+		16,
+		"Expected editor terrain status to count walkable mesh chunks.",
+	);
+	assertEqual(
+		editorSession.terrain.boxChunkCount,
+		4,
+		"Expected editor terrain status to count boundary box chunks.",
+	);
+	assertEqual(
+		editorSession.terrain.walkableChunkCount,
+		16,
+		"Expected editor terrain status to count required walkable chunks.",
+	);
+	assertEqual(
+		editorSession.terrain.collisionTriangleCount,
+		512,
+		"Expected terrain collision triangle count to come from cooked mesh chunks.",
+	);
+	assertEqual(
+		editorSession.terrain.visualTriangleCount,
+		8192,
+		"Expected terrain visual triangle count to come from generated import metadata.",
+	);
+	assertEqual(
+		editorSession.terrain.sourcePlanHash,
+		"fnv1a32:6c07d491",
+		"Expected terrain status to expose the collision source plan hash.",
+	);
+
+	const terrainImport = editorSession.terrain.imports[0];
+
+	if (!terrainImport) {
+		throw new Error("Expected editor terrain import status to exist.");
+	}
+
+	assertEqual(
+		terrainImport.id,
+		"observatory-field-micro-displacement-glb",
+		"Unexpected editor terrain import ID.",
+	);
+	assertEqual(
+		terrainImport.status,
+		"imported",
+		"Expected editor terrain import to preserve import manifest status.",
+	);
+	assertEqual(
+		terrainImport.generatorScript,
+		"scripts/generate-observatory-field-terrain.ts",
+		"Expected editor terrain import to expose generator script provenance.",
+	);
+	assertEqual(
+		terrainImport.metadataPath,
+		"public/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.json",
+		"Expected editor terrain import to expose generated metadata path.",
+	);
+	assertEqual(
+		terrainImport.glbSha256,
+		"326df726413d05e1139efe355d3e65bb0b78d120ecd05e615cc5ed1e37dd0d92",
+		"Expected editor terrain import to expose the generated GLB hash.",
+	);
+	assertEqual(
+		terrainImport.source.collisionDraftId,
+		"observatory_collision_draft_v1",
+		"Expected editor terrain import to expose collision draft linkage.",
+	);
+	assertEqual(
+		terrainImport.source.primaryCollisionStableId,
+		firstObservatoryWalkableChunkStableId,
+		"Expected editor terrain import to expose primary collision stable ID linkage.",
+	);
+	assertEqual(
+		terrainImport.source.collisionStableIds.length,
+		16,
+		"Expected editor terrain import to normalize all collision chunk stable IDs.",
+	);
+	assertIncludes(
+		terrainImport.source.collisionStableIds,
+		firstObservatoryWalkableChunkStableId,
+		"Expected editor terrain import to expose collision stable ID chunk linkage.",
+	);
+	assertEqual(
+		terrainImport.output.meshAssetId,
+		"mesh_observatory_field_micro_displacement",
+		"Expected editor terrain import to expose runtime mesh asset target.",
+	);
+	assertEqual(
+		terrainImport.output.prefabId,
+		"observatory_field_visual_terrain",
+		"Expected editor terrain import to expose runtime prefab target.",
+	);
+	assertEqual(
+		terrainImport.output.stableId,
+		"observatory:terrain:visual-field",
+		"Expected editor terrain import to expose runtime stable ID target.",
+	);
+	assertEqual(
+		terrainImport.alignment.renderUsesCollisionAsImplicitCollision,
+		false,
+		"Editor terrain status must not claim render geometry owns collision.",
+	);
+	assertEqual(
+		terrainImport.alignment.collisionGridSize,
+		17,
+		"Expected editor terrain status to expose collision grid size.",
+	);
+	assertEqual(
+		terrainImport.alignment.visualGridSize,
+		65,
+		"Expected editor terrain status to expose visual grid size.",
+	);
+	assertEqual(
+		terrainImport.alignment.collisionTriangleCount,
+		512,
+		"Expected editor terrain status to expose collision triangle count.",
+	);
+	assertEqual(
+		terrainImport.alignment.visualTriangleCount,
+		8192,
+		"Expected editor terrain status to expose visual triangle count.",
+	);
+	assertEqual(
+		terrainImport.alignment.microDisplacementAmplitude,
+		0.055,
+		"Expected editor terrain status to expose micro displacement amplitude.",
+	);
+	assertEqual(
+		terrainImport.alignment.maxCollisionSampleError,
+		0,
+		"Expected editor terrain status to expose zero collision sample drift.",
+	);
+	assertEqual(
+		terrainImport.alignment.anchorSampleCount,
+		5,
+		"Expected editor terrain status to expose sampled collision anchors.",
+	);
+	assertEqual(
+		terrainImport.readiness.imported,
+		true,
+		"Expected editor terrain readiness to mark import as ready.",
+	);
+	assertEqual(
+		terrainImport.readiness.hasArtifactProvenance,
+		true,
+		"Expected editor terrain readiness to mark provenance as ready.",
+	);
+	assertEqual(
+		terrainImport.readiness.hasTargetRuntimeIds,
+		true,
+		"Expected editor terrain readiness to mark target runtime IDs as ready.",
+	);
+	assertEqual(
+		terrainImport.readiness.collisionLinked,
+		true,
+		"Expected editor terrain readiness to mark collision linkage as ready.",
+	);
+	assertEqual(
+		terrainImport.readiness.visualOnly,
+		true,
+		"Expected editor terrain readiness to mark visual terrain as visual-only.",
+	);
+
+	const terrainChunk = terrainStatusChunk(
+		firstObservatoryWalkableChunkStableId,
+	);
+
+	assertEqual(
+		terrainChunk.geometry.vertexCount,
+		25,
+		"Expected walkable terrain chunk vertex count to be exposed.",
+	);
+	assertEqual(
+		terrainChunk.geometry.indexCount,
+		96,
+		"Expected walkable terrain chunk index count to be exposed.",
+	);
+	assertEqual(
+		terrainChunk.geometry.triangleCount,
+		32,
+		"Expected walkable terrain chunk triangle count to be exposed.",
+	);
+	assertEqual(
+		terrainChunk.geometry.gridSize,
+		5,
+		"Expected walkable terrain chunk grid size to be derived.",
+	);
+	assertEqual(
+		terrainChunk.geometry.cellSize,
+		40,
+		"Expected walkable terrain chunk cell size to be derived.",
+	);
+	assertEqual(
+		terrainChunk.geometry.halfExtent,
+		80,
+		"Expected walkable terrain chunk half extent to be derived.",
+	);
+
+	if (!terrainChunk.geometry.heightRange) {
+		throw new Error("Expected walkable terrain chunk height range.");
+	}
+
+	assertEqual(
+		terrainChunk.geometry.heightRange.min,
+		1.4,
+		"Unexpected walkable terrain chunk minimum height.",
+	);
+	assertEqual(
+		terrainChunk.geometry.heightRange.max,
+		1.67,
+		"Unexpected walkable terrain chunk maximum height.",
+	);
+
+	const boundaryChunk = terrainStatusChunk(
+		"observatory:collision:boundary:north",
+	);
+
+	assertVector(
+		boundaryChunk.geometry.halfExtents ?? [0, 0, 0],
+		[320, 4, 4],
+		"Expected boundary terrain chunk half extents to be exposed.",
+	);
+
+	const runtimeModuleArtifact = editorSession.terrain.cookArtifacts.find(
+		(artifact) => artifact.purpose === "runtime-collision-module",
+	);
+
+	if (!runtimeModuleArtifact) {
+		throw new Error(
+			"Expected terrain cook status to expose runtime collision module artifact.",
+		);
+	}
+
+	assertEqual(
+		runtimeModuleArtifact.targetFile,
+		"src/game/generated/observatoryCollisionRuntime.ts",
+		"Expected terrain cook status to expose generated runtime module target.",
+	);
+	assertEqual(
+		runtimeModuleArtifact.writesRuntimeData,
+		true,
+		"Expected terrain cook status to flag runtime module as runtime data.",
 	);
 }
 
@@ -282,6 +566,20 @@ function editorEntry(stableId: string): LevelEditorCollisionEntryEditor {
 
 	if (!entry) {
 		throw new Error(`Expected editor session entry ${stableId} to exist.`);
+	}
+
+	return entry;
+}
+
+function terrainStatusChunk(
+	stableId: string,
+): (typeof editorSession.terrain.chunks)[number] {
+	const entry = editorSession.terrain.chunks.find(
+		(item) => item.stableId === stableId,
+	);
+
+	if (!entry) {
+		throw new Error(`Expected editor terrain chunk ${stableId} to exist.`);
 	}
 
 	return entry;

@@ -20,6 +20,20 @@ const formatNumber = (value: number) =>
 const formatVector = (value: readonly [number, number, number]) =>
 	value.map(formatNumber).join(", ");
 
+const formatBoolean = (value: boolean) => (value ? "yes" : "no");
+
+const formatOptionalNumber = (value: number | null) =>
+	value === null ? "n/a" : formatNumber(value);
+
+const formatOptionalVector = (
+	value: readonly [number, number, number] | null,
+) => (value === null ? "n/a" : formatVector(value));
+
+const terrainStatusClass = (status: string) => [
+	"editor-status-pill",
+	`editor-status-pill-${status}`,
+];
+
 const gizmoWorldHalfExtent = 320;
 const gizmoWorldSize = gizmoWorldHalfExtent * 2;
 
@@ -141,6 +155,309 @@ function clampPercent(value: number): string {
 									<dd>{String(editorSummary.bake.writesRuntimeData)}</dd>
 								</div>
 							</dl>
+						</section>
+
+						<section
+							class="editor-panel editor-panel-wide"
+							aria-label="Terrain import and cook status"
+						>
+							<header class="editor-section-header">
+								<h2>Terrain Import / Cook</h2>
+							</header>
+
+							<dl class="editor-facts">
+								<div>
+									<dt>Imports</dt>
+									<dd>
+										{editorSummary.terrain.importedCount} /{" "}
+										{editorSummary.terrain.importCount}
+									</dd>
+								</div>
+								<div>
+									<dt>Collision Chunks</dt>
+									<dd>{editorSummary.terrain.collisionChunkCount}</dd>
+								</div>
+								<div>
+									<dt>Walkable Chunks</dt>
+									<dd>{editorSummary.terrain.walkableChunkCount}</dd>
+								</div>
+								<div>
+									<dt>Mesh / Box Chunks</dt>
+									<dd>
+										{editorSummary.terrain.meshChunkCount} /{" "}
+										{editorSummary.terrain.boxChunkCount}
+									</dd>
+								</div>
+								<div>
+									<dt>Collision Triangles</dt>
+									<dd>{editorSummary.terrain.collisionTriangleCount}</dd>
+								</div>
+								<div>
+									<dt>Visual Triangles</dt>
+									<dd>{editorSummary.terrain.visualTriangleCount}</dd>
+								</div>
+								<div>
+									<dt>Source Plan Hash</dt>
+									<dd>{editorSummary.terrain.sourcePlanHash}</dd>
+								</div>
+							</dl>
+
+							{editorSummary.terrain.imports.map((terrainImport) => (
+								<section
+									class="editor-terrain-group"
+									aria-label={`Terrain import ${terrainImport.id}`}
+								>
+									<header class="editor-subsection-header">
+										<div>
+											<h3>{terrainImport.id}</h3>
+											<p>{terrainImport.owner}</p>
+										</div>
+										<span class:list={terrainStatusClass(terrainImport.status)}>
+											{terrainImport.status}
+										</span>
+									</header>
+
+									<dl class="editor-facts editor-facts-compact">
+										<div>
+											<dt>Runtime Scene</dt>
+											<dd>{terrainImport.runtimeSceneId}</dd>
+										</div>
+										<div>
+											<dt>Generated At</dt>
+											<dd>{terrainImport.generatedAt}</dd>
+										</div>
+										<div>
+											<dt>Generator</dt>
+											<dd>{terrainImport.generatorScript ?? "n/a"}</dd>
+										</div>
+										<div>
+											<dt>Metadata</dt>
+											<dd>{terrainImport.metadataPath ?? "n/a"}</dd>
+										</div>
+										<div>
+											<dt>GLB</dt>
+											<dd>{terrainImport.output.glbUrl}</dd>
+										</div>
+										<div>
+											<dt>SHA-256</dt>
+											<dd>{terrainImport.glbSha256 ?? "n/a"}</dd>
+										</div>
+										<div>
+											<dt>Source Visual</dt>
+											<dd>
+												{terrainImport.source.sourceVisualAssetId} /{" "}
+												{terrainImport.source.sourceVisualStableId}
+											</dd>
+										</div>
+										<div>
+											<dt>Collision Source</dt>
+											<dd>
+												{terrainImport.source.collisionDraftId} /{" "}
+												{terrainImport.source.collisionStableIds.join(", ")}
+											</dd>
+										</div>
+										<div>
+											<dt>Runtime Target</dt>
+											<dd>
+												{terrainImport.output.meshAssetId} /{" "}
+												{terrainImport.output.prefabId} /{" "}
+												{terrainImport.output.stableId}
+											</dd>
+										</div>
+										<div>
+											<dt>Source / Visual Scale</dt>
+											<dd>
+												{formatVector(terrainImport.alignment.sourceGlbScale)}
+												{" / "}
+												{formatVector(terrainImport.alignment.visualTerrainScale)}
+											</dd>
+										</div>
+									</dl>
+
+									<dl class="editor-metadata-grid">
+										<div>
+											<dt>Collision Grid</dt>
+											<dd>
+												{terrainImport.alignment.collisionGridSize} x{" "}
+												{terrainImport.alignment.collisionGridSize}
+											</dd>
+										</div>
+										<div>
+											<dt>Collision Cell</dt>
+											<dd>{formatNumber(terrainImport.alignment.collisionCellSize)}</dd>
+										</div>
+										<div>
+											<dt>Collision Vertices</dt>
+											<dd>{terrainImport.alignment.collisionVertexCount}</dd>
+										</div>
+										<div>
+											<dt>Collision Triangles</dt>
+											<dd>{terrainImport.alignment.collisionTriangleCount}</dd>
+										</div>
+										<div>
+											<dt>Visual Grid</dt>
+											<dd>
+												{terrainImport.alignment.visualGridSize} x{" "}
+												{terrainImport.alignment.visualGridSize}
+											</dd>
+										</div>
+										<div>
+											<dt>Visual Cell</dt>
+											<dd>{formatNumber(terrainImport.alignment.visualCellSize)}</dd>
+										</div>
+										<div>
+											<dt>Visual Vertices</dt>
+											<dd>{terrainImport.alignment.visualVertexCount}</dd>
+										</div>
+										<div>
+											<dt>Visual Triangles</dt>
+											<dd>{terrainImport.alignment.visualTriangleCount}</dd>
+										</div>
+										<div>
+											<dt>Micro Displacement</dt>
+											<dd>
+												{formatNumber(
+													terrainImport.alignment.microDisplacementAmplitude,
+												)}
+											</dd>
+										</div>
+										<div>
+											<dt>Height Range</dt>
+											<dd>
+												{formatNumber(terrainImport.alignment.heightRange.min)}
+												{" - "}
+												{formatNumber(terrainImport.alignment.heightRange.max)}
+											</dd>
+										</div>
+										<div>
+											<dt>Anchor Samples</dt>
+											<dd>{terrainImport.alignment.anchorSampleCount}</dd>
+										</div>
+										<div>
+											<dt>Max Sample Error</dt>
+											<dd>
+												{formatNumber(
+													terrainImport.alignment.maxCollisionSampleError,
+												)}
+											</dd>
+										</div>
+									</dl>
+
+									<div class="editor-status-list" aria-label="Terrain readiness">
+										<span>
+											imported {formatBoolean(terrainImport.readiness.imported)}
+										</span>
+										<span>
+											provenance{" "}
+											{formatBoolean(
+												terrainImport.readiness.hasArtifactProvenance,
+											)}
+										</span>
+										<span>
+											runtime IDs{" "}
+											{formatBoolean(terrainImport.readiness.hasTargetRuntimeIds)}
+										</span>
+										<span>
+											collision link{" "}
+											{formatBoolean(terrainImport.readiness.collisionLinked)}
+										</span>
+										<span>
+											visual only {formatBoolean(terrainImport.readiness.visualOnly)}
+										</span>
+									</div>
+								</section>
+							))}
+
+							<section class="editor-terrain-group" aria-label="Cook artifacts">
+								<header class="editor-subsection-header">
+									<div>
+										<h3>Cook Artifacts</h3>
+									</div>
+								</header>
+								<div class="editor-table-wrap">
+									<table class="editor-status-table">
+										<thead>
+											<tr>
+												<th scope="col">Purpose</th>
+												<th scope="col">Format</th>
+												<th scope="col">Target</th>
+												<th scope="col">Hash</th>
+												<th scope="col">Runtime</th>
+											</tr>
+										</thead>
+										<tbody>
+											{editorSummary.terrain.cookArtifacts.map((artifact) => (
+												<tr>
+													<td>{artifact.purpose}</td>
+													<td>{artifact.format}</td>
+													<td>{artifact.targetFile}</td>
+													<td>{artifact.contentHash}</td>
+													<td>{formatBoolean(artifact.writesRuntimeData)}</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</div>
+							</section>
+
+							<section class="editor-terrain-group" aria-label="Collision chunk status">
+								<header class="editor-subsection-header">
+									<div>
+										<h3>Collision Chunks</h3>
+									</div>
+								</header>
+								<div class="editor-table-wrap">
+									<table class="editor-status-table">
+										<thead>
+											<tr>
+												<th scope="col">Stable ID</th>
+												<th scope="col">Shape</th>
+												<th scope="col">Intent</th>
+												<th scope="col">Channel</th>
+												<th scope="col">Target</th>
+												<th scope="col">Required</th>
+												<th scope="col">Grid</th>
+												<th scope="col">Cell</th>
+												<th scope="col">Triangles</th>
+												<th scope="col">Height</th>
+												<th scope="col">Bounds</th>
+											</tr>
+										</thead>
+										<tbody>
+											{editorSummary.terrain.chunks.map((chunk) => (
+												<tr>
+													<td>{chunk.stableId}</td>
+													<td>{chunk.shapeType}</td>
+													<td>{chunk.intent}</td>
+													<td>{chunk.channel}</td>
+													<td>{chunk.colliderTarget}</td>
+													<td>
+														{chunk.requiredCollision ? "collision" : "optional"}
+														{chunk.requiredWalkable ? " / walkable" : ""}
+													</td>
+													<td>{formatOptionalNumber(chunk.geometry.gridSize)}</td>
+													<td>{formatOptionalNumber(chunk.geometry.cellSize)}</td>
+													<td>{formatOptionalNumber(chunk.geometry.triangleCount)}</td>
+													<td>
+														{chunk.geometry.heightRange
+															? `${formatNumber(
+																	chunk.geometry.heightRange.min,
+																)} - ${formatNumber(
+																	chunk.geometry.heightRange.max,
+																)}`
+															: "n/a"}
+													</td>
+													<td>
+														{formatVector(chunk.bounds.size)}
+														{" / half "}
+														{formatOptionalVector(chunk.geometry.halfExtents)}
+													</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</div>
+							</section>
 						</section>
 
 						<section class="editor-authoring" aria-label="Collision authoring">

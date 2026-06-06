@@ -636,7 +636,7 @@ Current implementation status:
 - `src/engine/adapters/three` loads cubemap, texture, and muted video assets through `AssetManager`, projects scene environments into `Scene.background` and `Scene.environment`, supports PMREM/cube capture where required, and clears/restores scene references and probe material mutations during unload.
 - `portal_arena_runtime`, `prototype_arena_runtime`, and `miranda_deck_runtime` still declare required cubemap environments. The new equirectangular, video, procedural, and reflection-probe modes are contract-ready for future authored scenes but are not used by the default scene yet.
 - Focused validation now includes `test:scene-environment-contract` for accepted environment variants, invalid projection/video/dynamic-capture data, and reflection-probe shape/resolution failures. `test:runtime-scene-contract` continues to cover current cubemap preload/readiness failures.
-- Remaining future work: editor/import controls, richer probe blending/debugging, 180/strip video sky mappings, fog/cloud/weather integration, generated/cooked environment pipelines, and production content authoring for the new modes. Future skybox and scene-environment packets are tracked in `docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`.
+- Active sky/environment work: `docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md` now tracks the same-day portal arena equirectangular production opt-in. Remaining deferred work includes editor/import controls, richer probe blending/debugging, 180/strip video sky mappings, fog/cloud/weather integration, generated/cooked environment pipelines, and broader production content authoring for the new modes.
 
 ### Water Surface Environmental Assets
 
@@ -865,8 +865,9 @@ owns the current Observatory V1 draft, and `cook:observatory-collision` checks
 the draft against runtime manifest data without writing files by default. The
 first dev-only editor boundary shell now exists at `/editor/`, with
 `src/app/editor/levelEditorSession.ts` projecting the current
-`observatory_runtime` collision draft, preview patch metadata, and generated
-bake artifact hash outside the normal game HUD. `--print-preview-patch`
+`observatory_runtime` collision draft, terrain import/cook status, preview
+patch metadata, and generated bake artifact hash outside the normal game HUD.
+`--print-preview-patch`
 exposes the temporary dev-only preview payload, and `--write-generated-bake`
 writes the deterministic editor-owned generated artifact at
 `src/game/editor/collisionDrafts/generated/observatoryCollisionBake.json`.
@@ -884,10 +885,17 @@ and component restoration are explicit through the same dev-only protocol;
 richer reload lifecycle diagnostics remain planned. The `/editor/` route
 exposes editable collision controls and a top-down collision gizmo surface for
 current Observatory draft entries; persisted spatial drag handles and
-generalized multi-level editing remain planned. Visual terrain
-displacement/import foundation is implemented through the generated Observatory
-field GLB plus provenance; the full generalized terrain import pipeline remains
-planned. Those future packets are tracked in
+generalized multi-level editing remain planned. The generalized terrain
+import/cook contract is implemented through engine data terrain cook
+validation, generated Observatory field GLB provenance, reusable write-plan
+serialization, and runtime-drift checks. Cooked terrain chunks are implemented
+as a foundation through 16 deterministic Observatory walkable terrain chunks
+derived from the authored 17x17 height grid, plus four boundary blockers.
+Render terrain and collision terrain are separate products: generated visual
+terrain stays visual-only, and runtime traversal stays on explicit collider
+data. Production editor import UI, material/shader import, terrain
+LOD/streaming, and multi-level terrain packages remain future packets tracked
+in
 `docs/LEVEL_EDITOR_COLLISION_COOK_PLAN.md`.
 
 Cooked collision shape dimensions and mesh vertices are final physics data.
@@ -1201,13 +1209,22 @@ Current playable/runtime scenes:
 portal_arena_runtime
   -> default navigation room with eight portal slots
   -> active targets: prototype_arena_runtime, miranda_deck_runtime, and
-     observatory_runtime
+     observatory_runtime, and sci_fi_room_runtime
 
 prototype_arena_runtime
   -> first playable prototype slice
 
 miranda_deck_runtime
   -> primitive foundation slice for migrated Miranda content
+
+observatory_runtime
+  -> playable foundation slice for migrated Observatory content
+
+sci_fi_room_runtime
+  -> playable foundation slice for migrated Sci Fi Room content
+  -> owns three readiness-required walkable floor colliders, five StoryNote
+     markers, a manifest-ID Observatory portal, and disabled/off
+     post-processing profile data
 ```
 
 ## 18. Browser Platform Layer
@@ -1350,6 +1367,10 @@ Current portal arena foundation:
 - Portal arena scene music and scene-scoped audio mappings are content-owned through `src/game/assets/portalArenaAssets.ts`, shared ambient tracks in `src/game/assets/ambientAudioAssets.ts`, `AudioContentManifest.sceneMusic`, and event mappings. Shared portal gate/activation content is owned through `src/game/assets/portalAssets.ts`. Production paths are `public/audio/ambient/portal-deck.mp3` for `audio_ambient_portal_deck`, `public/audio/sfx/portal-activate.mp3` for `audio_portal_activate`, and `public/audio/sfx/22-kenney-forceField_001.mp3` for `audio_player_charge_release`. Runtime transitions stop previous scene music and apply selected scene music only after the scene preload/readiness path succeeds.
 - Portal slots are authored data in `src/game/levels/portalArenaLevel.ts`.
 - Portal interaction is handled by game systems that read world components/resources and request runtime scene transitions by manifest ID.
+- The current connected portal slots target `prototype_arena_runtime`,
+  `miranda_deck_runtime`, `observatory_runtime`, and
+  `sci_fi_room_runtime`; each target exists in the checked-in runtime scene
+  catalog and passes readiness/content-graph validation before admission.
 - `PlayerCarriedLightContract` restores the useful legacy behavior where the
   player can read nearby dark ground. The current foundation uses the stable
   `player` entity itself as the light carrier: it has gameplay-owned
@@ -1390,9 +1411,10 @@ Current portal arena foundation:
     the collision draft sample heights. The engine-wide `CollisionPolicy`,
     `WalkableCollisionContract`, and `LevelReadinessContract` keep that GLB
     and generated visual terrain visual-only: the Observatory packet consumes
-    them through an explicit `observatory:walkable-mesh`
-    `walkable/worldStatic` mesh collider, and the current movement bounds are
-    constrained by four required `observatory_boundary_blocker` instances.
+    them through 16 deterministic `observatory:walkable-mesh:chunk:x*-z*`
+    `walkable/worldStatic` mesh collider chunks, and the current movement
+    bounds are constrained by four required `observatory_boundary_blocker`
+    instances.
     Render mesh geometry is not implicit collision.
   - The player spawn is authored as the stable `player` instance at
     `[-137.2, 1.8, -49.5]`, with `CharacterController.groundY` kept as the
@@ -1415,11 +1437,12 @@ Current portal arena foundation:
     gameplay volume disabled while reusable mesh/material/prefab/component
     ownership belongs to the shared water system. Shader animation,
     reflections/refraction rendering, water volumes, rising water,
-    post-processing adapter implementation, cooked terrain collision beyond
-    the current deterministic 17x17 collision layer, full terrain import UI
-    and material/shader pipeline, large firefly populations, live runtime
-    flicker animation, and richer light/shadow behavior remain future
-    contracts.
+    post-processing adapter implementation, terrain LOD/streaming, production
+    editor import UI and material/shader pipeline, large firefly populations,
+    live runtime flicker animation, and richer light/shadow behavior remain
+    future contracts. The generated visual terrain is not collision, and the
+    current collision product is a chunked terrain foundation, not a complete
+    multi-level terrain package.
   - Observatory scene music is content-owned through
     `src/game/assets/observatoryAssets.ts`, `AudioContentManifest.sceneMusic`,
     and the shared production `audio_ambient_portal_deck` asset. The old

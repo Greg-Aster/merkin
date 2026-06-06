@@ -12,7 +12,7 @@ const docs = {
 	contractRegister: await readProjectFile("ENGINE_CONTRACT_REGISTER.md"),
 	designDocument: await readProjectFile("GAME_ENGINE_DESIGN_DOCUMENT.md"),
 	observatoryFindings: await readProjectFile(
-		"docs/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md",
+		"docs/Done/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md",
 	),
 	plan: await readProjectFile("docs/LEVEL_EDITOR_COLLISION_COOK_PLAN.md"),
 };
@@ -26,9 +26,10 @@ await assertNoOrphanTestScripts();
 assertPlanValidationMatrix();
 assertArchitectureDocsStayHonest();
 assertObservatoryCollisionFindingsAreCurrent();
+assertGeneralizedTerrainContractsAreHonest();
 
 console.log(
-	"Level editor AAA plan contract passed: remaining items are documented as planned, validation commands are registered, and test scripts are owned.",
+	"Level editor AAA plan contract passed: implemented terrain/chunk contracts and remaining editor gaps are documented, validation commands are registered, and test scripts are owned.",
 );
 
 async function readProjectFile(path: string): Promise<string> {
@@ -43,6 +44,13 @@ function assertRequiredPackageScripts(): void {
 			"tsx ./scripts/test-generated-glb-import-contract.ts",
 		"test:observatory-visual-terrain-contract":
 			"tsx ./scripts/test-observatory-visual-terrain-contract.ts",
+		"test:terrain-import-pipeline-contract":
+			"tsx ./scripts/test-terrain-import-pipeline-contract.ts",
+		"test:terrain-visual-import-pipeline-contract":
+			"tsx ./scripts/test-terrain-import-pipeline-contract.ts",
+		"test:terrain-cook-contract": "tsx ./scripts/test-terrain-cook-contract.ts",
+		"test:cooked-terrain-chunk-contract":
+			"tsx ./scripts/test-terrain-cook-contract.ts",
 		"test:level-editor-aaa-plan-contract":
 			"tsx ./scripts/test-level-editor-aaa-plan-contract.ts",
 		"test:level-editor-collision-cook-contract":
@@ -133,11 +141,26 @@ function assertPlanValidationMatrix(): void {
 		{
 			item: "True terrain visual displacement/import pipeline",
 			requiredSnippets: [
-				"implemented foundation",
+				"implemented generalized terrain import/cook contract",
+				"render terrain and collision terrain are separate products",
 				"test:observatory-visual-terrain-contract",
+				"test:terrain-import-pipeline-contract",
+				"test:terrain-visual-import-pipeline-contract",
 				"generate:observatory-field-terrain",
 				"test:generated-glb-import-contract",
-				"future `test:terrain-visual-import-pipeline-contract`",
+				"production editor import UI",
+			],
+		},
+		{
+			item: "Richer cooked terrain chunks",
+			requiredSnippets: [
+				"implemented foundation",
+				"16 deterministic Observatory walkable terrain chunks",
+				"test:terrain-cook-contract",
+				"test:cooked-terrain-chunk-contract",
+				"test:level-editor-collision-cook-contract",
+				"ci:observatory-collision-drift",
+				"LOD/streaming",
 			],
 		},
 	];
@@ -180,14 +203,17 @@ function assertArchitectureDocsStayHonest(): void {
 		"editable collision controls",
 		"game-window preview/reload",
 		"generated runtime collision module",
-		"visual terrain displacement/import foundation is implemented",
-		"full visual terrain import pipeline remains planned",
+		"generalized terrain import/cook contract is implemented",
+		"16 deterministic observatory walkable terrain chunks",
+		"cooked terrain chunks are implemented as a foundation",
+		"render terrain and collision terrain are separate products",
 	];
 	const forbiddenOverclaims = [
 		"arbitrary typescript owner objects are rewritten",
 		"hand-authored typescript owner objects are rewritten",
-		"full visual terrain import pipeline is implemented",
 		"true terrain visual displacement/import pipeline is complete",
+		"production terrain editor ui is complete",
+		"terrain lod streaming is complete",
 	];
 
 	for (const snippet of requiredHonestStatusSnippets) {
@@ -208,26 +234,108 @@ function assertArchitectureDocsStayHonest(): void {
 }
 
 function assertObservatoryCollisionFindingsAreCurrent(): void {
+	const normalizedFindings = docs.observatoryFindings.replace(/\s+/g, " ");
+
 	assertIncludes(
-		docs.observatoryFindings,
+		normalizedFindings,
 		"17x17",
 		"Expected Observatory collision findings to document the current mesh resolution.",
 	);
 	assertIncludes(
-		docs.observatoryFindings,
+		normalizedFindings,
 		"289 vertices and 512 triangles",
 		"Expected Observatory collision findings to document the current vertex/triangle counts.",
 	);
 	assertIncludes(
-		docs.observatoryFindings,
+		normalizedFindings,
 		"does not change the rendered GLB surface",
 		"Expected Observatory collision findings to separate collision from visual terrain displacement.",
 	);
 	assertNotIncludes(
-		docs.observatoryFindings,
+		normalizedFindings,
 		"25 vertices and 32 triangles",
 		"Expected Observatory collision findings not to cite stale V1 mesh counts.",
 	);
+}
+
+function assertGeneralizedTerrainContractsAreHonest(): void {
+	const combinedDocs = [
+		docs.architecture,
+		docs.contractRegister,
+		docs.designDocument,
+		docs.plan,
+	]
+		.join("\n")
+		.toLowerCase()
+		.replace(/\s+/g, " ");
+	const hasGeneralizedTerrainPipelineContract =
+		packageScripts["test:terrain-visual-import-pipeline-contract"] !==
+		undefined;
+	const hasCookedTerrainChunkContract =
+		packageScripts["test:cooked-terrain-chunk-contract"] !== undefined;
+
+	assertIncludes(
+		combinedDocs,
+		"terrainvisualimportpipelinecontract",
+		"Expected docs/register to name the generalized terrain visual import contract.",
+	);
+	assertIncludes(
+		combinedDocs,
+		"cookedterrainchunkcontract",
+		"Expected docs/register to name the cooked terrain chunk contract.",
+	);
+	assertIncludes(
+		combinedDocs,
+		"render terrain and collision terrain are separate products",
+		"Expected docs to keep render terrain separate from collision terrain.",
+	);
+	assertIncludes(
+		combinedDocs,
+		"generated visual terrain must not be used as collision",
+		"Expected docs to forbid using generated visual terrain as collision.",
+	);
+
+	assertEqual(
+		hasGeneralizedTerrainPipelineContract,
+		true,
+		"Expected package script test:terrain-visual-import-pipeline-contract to guard implemented terrain import/cook docs.",
+	);
+	assertEqual(
+		hasCookedTerrainChunkContract,
+		true,
+		"Expected package script test:cooked-terrain-chunk-contract to guard implemented cooked terrain chunk docs.",
+	);
+	assertIncludes(
+		combinedDocs,
+		"generalized terrain import/cook contract is implemented",
+		"Expected docs to state the implemented terrain import/cook contract foundation.",
+	);
+	assertIncludes(
+		combinedDocs,
+		"16 deterministic observatory walkable terrain chunks",
+		"Expected docs to state the implemented Observatory cooked chunk foundation.",
+	);
+	assertIncludes(
+		combinedDocs,
+		"production editor import ui",
+		"Expected docs to keep production terrain editor UI as future work.",
+	);
+
+	const forbiddenRenderCollisionClaims = [
+		"generated visual terrain is collision",
+		"render terrain is the collision source",
+		"render glb is the collision source",
+		"mesh_observatory_field_micro_displacement owns collider",
+		"terrain collision chunks are complete",
+	];
+
+	for (const forbidden of forbiddenRenderCollisionClaims) {
+		assertNotIncludes(
+			combinedDocs,
+			forbidden,
+			`Docs must not overclaim render terrain as collision with ${JSON.stringify(forbidden)}.`,
+		);
+	}
 }
 
 function lineContaining(text: string, snippet: string): string | undefined {

@@ -8,6 +8,7 @@ import {
 	defaultRuntimeSceneManifests,
 	observatoryRuntimeSceneManifest,
 	portalArenaRuntimeSceneManifest,
+	sciFiRoomRuntimeSceneManifest,
 } from "../src/game/levels/index.js";
 
 type MutableRuntimeSceneManifestData = {
@@ -16,6 +17,9 @@ type MutableRuntimeSceneManifestData = {
 
 const runtimeSceneIds = defaultRuntimeSceneManifests.map(
 	(manifest) => manifest.id,
+);
+const solitudeRuntimeSceneManifest = defaultRuntimeSceneManifests.find(
+	(manifest) => manifest.id === "solitude_runtime",
 );
 
 for (const manifest of defaultRuntimeSceneManifests) {
@@ -102,8 +106,46 @@ expectInvalid(
 			requiredWalkableStableIds: [],
 		},
 	},
-	'authored walkable stable ID "observatory:walkable-mesh" is missing from readiness.requiredWalkableStableIds',
+	'authored walkable stable ID "observatory:walkable-mesh:chunk:x0-z0" is missing from readiness.requiredWalkableStableIds',
 );
+
+expectInvalid(
+	{
+		...cloneManifest(sciFiRoomRuntimeSceneManifest),
+		readiness: {
+			...sciFiRoomRuntimeSceneManifest.readiness,
+			requiredWalkableStableIds: (
+				sciFiRoomRuntimeSceneManifest.readiness.requiredWalkableStableIds ?? []
+			).filter((stableId) => stableId !== "sci-fi-room:floor:interior"),
+		},
+	},
+	'authored walkable stable ID "sci-fi-room:floor:interior" is missing from readiness.requiredWalkableStableIds',
+);
+
+if (solitudeRuntimeSceneManifest) {
+	const requiredWalkableStableIds =
+		solitudeRuntimeSceneManifest.readiness.requiredWalkableStableIds ?? [];
+	const firstWalkableStableId = requiredWalkableStableIds[0];
+
+	if (requiredWalkableStableIds.length < 2 || !firstWalkableStableId) {
+		throw new Error(
+			"Solitude runtime scene must declare its two authored walkable surfaces in readiness.requiredWalkableStableIds.",
+		);
+	}
+
+	expectInvalid(
+		{
+			...cloneManifest(solitudeRuntimeSceneManifest),
+			readiness: {
+				...solitudeRuntimeSceneManifest.readiness,
+				requiredWalkableStableIds: requiredWalkableStableIds.filter(
+					(stableId) => stableId !== firstWalkableStableId,
+				),
+			},
+		},
+		`authored walkable stable ID "${firstWalkableStableId}" is missing from readiness.requiredWalkableStableIds`,
+	);
+}
 
 expectInvalid(
 	{
@@ -133,6 +175,19 @@ expectInvalid(
 
 expectInvalid(
 	{
+		...cloneManifest(sciFiRoomRuntimeSceneManifest),
+		readiness: {
+			...sciFiRoomRuntimeSceneManifest.readiness,
+			requiredAssetIds: (
+				sciFiRoomRuntimeSceneManifest.readiness.requiredAssetIds ?? []
+			).filter((assetId) => assetId !== "audio_portal_activate"),
+		},
+	},
+	'authored asset "audio_portal_activate" is missing from readiness.requiredAssetIds',
+);
+
+expectInvalid(
+	{
 		...cloneManifest(portalArenaRuntimeSceneManifest),
 		level: {
 			...portalArenaRuntimeSceneManifest.level,
@@ -155,6 +210,42 @@ expectInvalid(
 	},
 	'portal targetRuntimeSceneId "missing_runtime" is not in the runtime scene catalog',
 );
+
+{
+	const solitudePortalTargetRuntimeSceneId = portalTargetRuntimeSceneId(
+		portalArenaRuntimeSceneManifest,
+		"portal-arena:portal:solitude",
+	);
+
+	if (solitudePortalTargetRuntimeSceneId) {
+		const audioContent = parseAudioContentManifest(
+			audioContentManifestForRuntimeScene(portalArenaRuntimeSceneManifest.id),
+			{ assetManifest: portalArenaRuntimeSceneManifest.assets },
+		);
+		const result = validateRuntimeSceneContentGraph({
+			manifest: portalArenaRuntimeSceneManifest,
+			runtimeSceneIds: runtimeSceneIds.filter(
+				(runtimeSceneId) =>
+					runtimeSceneId !== solitudePortalTargetRuntimeSceneId,
+			),
+			audioContent,
+		});
+
+		if (result.ok) {
+			throw new Error(
+				"Expected portal arena content graph to fail when the Solitude portal target is missing from the runtime scene catalog.",
+			);
+		}
+
+		const expectedError = `portal targetRuntimeSceneId "${solitudePortalTargetRuntimeSceneId}" is not in the runtime scene catalog`;
+
+		if (!result.errors.some((error) => error.includes(expectedError))) {
+			throw new Error(
+				`Expected portal arena content graph errors to include ${JSON.stringify(expectedError)}, received:\n${result.errors.join("\n")}`,
+			);
+		}
+	}
+}
 
 console.log(
 	`Level authoring contract passed for ${defaultRuntimeSceneManifests.length} runtime scene manifests.`,
@@ -199,4 +290,25 @@ function asRecord(value: unknown): Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value)
 		? (value as Record<string, unknown>)
 		: {};
+}
+
+function portalTargetRuntimeSceneId(
+	manifest: RuntimeSceneManifestData,
+	stableId: string,
+): string | undefined {
+	const instance = manifest.level.instances.find(
+		(candidate) => candidate.stableId === stableId,
+	);
+	const prefab = manifest.prefabs.find(
+		(candidate) => candidate.id === instance?.prefabId,
+	);
+	const portal = asRecord({
+		...asRecord(prefab?.components?.Portal),
+		...asRecord(instance?.components?.Portal),
+	});
+	const targetRuntimeSceneId = portal.targetRuntimeSceneId;
+
+	return typeof targetRuntimeSceneId === "string"
+		? targetRuntimeSceneId
+		: undefined;
 }

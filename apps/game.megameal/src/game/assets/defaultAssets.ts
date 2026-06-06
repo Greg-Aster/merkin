@@ -3,6 +3,7 @@ import type { AudioContentManifest } from "../../engine/modules/audio/index.js";
 import {
 	audioAmbientDarkShadowsOfDelight,
 	audioAmbientShadowWaltz,
+	audioAmbientWickedShadowsWhisper,
 } from "./ambientAudioAssets.js";
 import { defaultAudioMixerBuses } from "./audioMixerBuses.js";
 import { observatoryAudioContentManifest } from "./observatoryAssets.js";
@@ -12,6 +13,7 @@ import {
 	audioPortalCycle,
 	meshPortalGate,
 } from "./portalAssets.js";
+import { sciFiRoomAudioContentManifest } from "./sciFiRoomAssets.js";
 import {
 	cubemapClassicSky,
 	cubemapObservatorySky,
@@ -380,13 +382,6 @@ const audioPlayerChargeRelease = {
 	url: "/audio/sfx/22-kenney-forceField_001.mp3",
 	tags: ["player", "charge", "sfx"],
 } as const;
-const audioMirandaAmbientWickedShadows = {
-	id: "audio_ambient_wicked_shadows_whisper",
-	kind: "audio",
-	url: "/audio/ambient/Wicked%20Shadows%20Whisper.mp3",
-	tags: ["music", "ambient", "miranda"],
-} as const;
-
 export const prototypeAssetManifest = {
 	assets: [
 		meshPlayer,
@@ -458,7 +453,7 @@ export const mirandaDeckAssetManifest = {
 		audioPlayerChargeRelease,
 		audioPortalActivate,
 		audioPortalCycle,
-		audioMirandaAmbientWickedShadows,
+		audioAmbientWickedShadowsWhisper,
 		audioAmbientDarkShadowsOfDelight,
 		audioAmbientShadowWaltz,
 	],
@@ -593,6 +588,10 @@ export function audioContentManifestForRuntimeScene(
 
 	if (runtimeSceneManifestId === "observatory_runtime") {
 		return observatoryAudioContentManifest;
+	}
+
+	if (runtimeSceneManifestId === "sci_fi_room_runtime") {
+		return sciFiRoomAudioContentManifest;
 	}
 
 	if (runtimeSceneManifestId === "prototype_arena_runtime") {

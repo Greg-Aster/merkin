@@ -107,21 +107,79 @@ function installNodeFileReader(): void {
 function readWalkableMeshFromCollisionDraft(): {
 	readonly vertices: readonly Vec3[];
 	readonly indices: readonly number[];
+	readonly stableIds: readonly string[];
 } {
-	const entry = observatoryCollisionCookDraft.entries.find(
-		(candidate) => candidate.stableId === "observatory:walkable-mesh",
+	const entries = observatoryCollisionCookDraft.entries.filter(
+		(candidate) =>
+			candidate.stableId.startsWith("observatory:walkable-mesh:chunk:") &&
+			candidate.collider.shape.type === "mesh",
 	);
 
-	if (!entry || entry.collider.shape.type !== "mesh") {
+	if (entries.length === 0) {
 		throw new Error(
-			'Expected Observatory collision draft to include mesh collider "observatory:walkable-mesh".',
+			'Expected Observatory collision draft to include chunked mesh colliders under "observatory:walkable-mesh:chunk:*".',
+		);
+	}
+
+	const verticesByCoordinate = new Map<string, Vec3>();
+
+	for (const entry of entries) {
+		if (entry.collider.shape.type !== "mesh") {
+			continue;
+		}
+
+		for (const vertex of entry.collider.shape.vertices) {
+			const key = `${vertex[0]}:${vertex[2]}`;
+			const existingVertex = verticesByCoordinate.get(key);
+
+			if (existingVertex && existingVertex[1] !== vertex[1]) {
+				throw new Error(
+					`Chunked Observatory collision draft has conflicting heights at ${key}.`,
+				);
+			}
+
+			verticesByCoordinate.set(key, vertex);
+		}
+	}
+
+	const vertices = [...verticesByCoordinate.values()].sort(
+		(left, right) => left[2] - right[2] || left[0] - right[0],
+	);
+	const gridSize = Math.sqrt(vertices.length);
+
+	if (!Number.isInteger(gridSize)) {
+		throw new Error(
+			`Chunked Observatory collision draft resolves to ${vertices.length} unique vertices, not a square grid.`,
 		);
 	}
 
 	return {
-		vertices: entry.collider.shape.vertices,
-		indices: entry.collider.shape.indices,
+		vertices,
+		indices: createSourceGridIndices(gridSize),
+		stableIds: entries.map((entry) => entry.stableId).sort(),
 	};
+}
+
+function createSourceGridIndices(gridSize: number): readonly number[] {
+	const indices: number[] = [];
+
+	for (let zIndex = 0; zIndex < gridSize - 1; zIndex += 1) {
+		for (let xIndex = 0; xIndex < gridSize - 1; xIndex += 1) {
+			const topLeft = zIndex * gridSize + xIndex;
+			const bottomLeft = topLeft + gridSize;
+
+			indices.push(
+				topLeft,
+				bottomLeft,
+				topLeft + 1,
+				topLeft + 1,
+				bottomLeft,
+				bottomLeft + 1,
+			);
+		}
+	}
+
+	return indices;
 }
 
 function createVisualTerrainGeometryData(): {
@@ -282,7 +340,7 @@ function buildMetadata(
 		source: {
 			runtimeSceneId: "observatory_runtime",
 			collisionDraftId: observatoryCollisionCookDraft.id,
-			collisionStableId: "observatory:walkable-mesh",
+			collisionStableIds: sourceMesh.stableIds,
 			collisionPrefabId: "observatory_walkable_mesh",
 			sourceVisualAssetId: "mesh_observatory_environment",
 			sourceVisualAssetUrl:

@@ -354,6 +354,9 @@ LevelLoader, and readiness evaluation before player-controlled gameplay is
 exposed.
 Runtime scene transitions resolve target scenes by manifest ID from the game
 runtime catalog, not by level-specific branches in the app shell or engine core.
+The current checked-in catalog contains `portal_arena_runtime`,
+`prototype_arena_runtime`, `miranda_deck_runtime`, `observatory_runtime`, and
+`sci_fi_room_runtime`; `portal_arena_runtime` remains the default.
 Render profiles also declare the scene environment. Required environment
 assets are manifest-owned, preloaded with the selected scene, included in
 readiness when required, and projected by the renderer adapter only after the
@@ -361,10 +364,11 @@ scene preload succeeds.
 The current default runtime scenes use `cubemap-skybox`. The scene environment
 contract also accepts equirectangular texture skies, muted video skies,
 procedural atmosphere, bounded dynamic capture, and authored reflection probes
-for future scenes. Completed sky/environment packets live in
+for authored scenes. Completed sky/environment packets live in
 `docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` and
-`docs/Done/SKYBOX_CUBEMAP_SYSTEM_REVIEW.md`; future skybox and scene-environment
-packets are tracked in `docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`.
+`docs/Done/SKYBOX_CUBEMAP_SYSTEM_REVIEW.md`; the active portal arena
+equirectangular opt-in packet is tracked in
+`docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`.
 Readiness also checks exact required collision stable IDs and exact required
 light stable IDs, so authored scene-critical collision and lighting cannot be
 accidentally skipped by spawning only a matching prefab family.
@@ -402,8 +406,8 @@ portal_arena_runtime
   -> player charge-release SFX referenced through audio_player_charge_release
   -> manifest-owned music/sfx/spatial mixer buses projected only by the audio adapter
   -> Portal components contribute proximity candidates for active target selection
-  -> active portals target prototype_arena_runtime, miranda_deck_runtime, and
-     observatory_runtime
+  -> active portals target prototype_arena_runtime, miranda_deck_runtime,
+     observatory_runtime, and sci_fi_room_runtime
 
 	miranda_deck_runtime
 	  -> old Miranda spawn as authored player transform
@@ -449,7 +453,8 @@ observatory_runtime
   -> mesh_observatory_environment stays visual-only
   -> mesh_observatory_field_micro_displacement stays visual-only with
      generated provenance/alignment metadata
-  -> required observatory:walkable-mesh walkable/worldStatic mesh collision
+  -> required observatory:walkable-mesh:chunk:x*-z* walkable/worldStatic
+     mesh collision chunks
   -> player opts into engine-owned kinematic character collision through
      CharacterController.kinematicCollision
   -> four required observatory_boundary_blocker perimeter colliders; no render
@@ -474,6 +479,23 @@ observatory_runtime
      Svelte/Threlte light owner, hidden renderer default, or point-light
      budget/controller path; light budgets are authored profile validation,
      not runtime controller clipping
+
+sci_fi_room_runtime
+  -> target-engine playable foundation from old Sci Fi Room scene evidence only
+  -> primitive target-owned assets/materials in sciFiRoomAssets
+  -> three required walkable/worldStatic floor colliders with stable IDs:
+     sci-fi-room:floor:interior, sci-fi-room:floor:courtyard, and
+     sci-fi-room:floor:wasteland
+  -> old source spawn as the stable player instance with player-carried Light
+     and CharacterController.kinematicCollision settings
+  -> five StoryNote markers with trigger colliders and authored note data
+  -> shared portal_gate prefab targets observatory_runtime by manifest ID
+  -> player and portal SFX are scene-scoped through sciFiRoomAudioContentManifest
+  -> cubemap_observatory_sky through the selected render profile
+  -> disabled/off post-processing profile data until renderer adapter support exists
+  -> portal transition from portal_arena_runtime by runtime manifest ID
+  -> no old generated runtime scene JSON, generated collider binaries, app-shell
+     branches, or render-floor collision inference
 ```
 
 Full Miranda is not treated as ready until remaining terrain, cooked collision,
@@ -554,10 +576,16 @@ is explicit and reversible through the same dev-only protocol; richer reload
 lifecycle diagnostics remain planned. The `/editor/` route exposes editable
 collision controls and a top-down collision gizmo surface for current
 Observatory draft entries; persisted spatial drag handles and generalized
-multi-level editing remain planned. Visual terrain
-displacement/import foundation is implemented through the generated Observatory
-field GLB plus provenance; the full generalized terrain import pipeline remains
-planned. These future packets remain tracked in
+multi-level editing remain planned. The generalized terrain import/cook
+contract is implemented through engine data terrain cook validation, generated
+Observatory field GLB provenance, and explicit runtime-drift checks. Cooked
+terrain chunks are implemented as a foundation through 16 deterministic
+Observatory walkable terrain chunks derived from the authored 17x17 height
+grid, plus four boundary blockers. Render terrain and collision terrain are
+separate products: generated visual terrain stays visual-only, and runtime
+traversal stays on explicit collider data. Production editor import UI,
+material/shader import, terrain LOD/streaming, and multi-level terrain packages
+remain future packets tracked in
 `docs/LEVEL_EDITOR_COLLISION_COOK_PLAN.md`. The normal runtime must not import
 editor modules or rely on editor state.
 The first dev-only boundary shell exists at `/editor/`, backed by
