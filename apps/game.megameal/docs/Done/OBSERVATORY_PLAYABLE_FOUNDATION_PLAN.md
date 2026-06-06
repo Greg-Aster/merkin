@@ -32,7 +32,7 @@ collision binary is ported.
   into
   `apps/game.megameal/public/assets/game/observatory/observatory-environment.glb`.
 - Add manifest asset `mesh_observatory_environment` at
-	  `/assets/game/observatory/observatory-environment.glb`.
+  `/assets/game/observatory/observatory-environment.glb`.
 - Add generated visual terrain asset `mesh_observatory_field_micro_displacement`
   at `/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.glb`
   with checked-in provenance metadata; this remains visual-only and aligned to
@@ -55,11 +55,11 @@ collision binary is ported.
 - Add player-carried point light on stable ID `player`.
 - Add GLB visual entity `observatory:terrain` with unit scale `[1, 1, 1]`.
 - Add Observatory V1 authored collision as a level consumer of
-	  `CollisionPolicy`, `WalkableCollisionContract`, and `LevelReadinessContract`:
-	  - required `observatory:walkable-mesh` mesh collision with
-	    `Collider.intent: "walkable"`, `channel: "worldStatic"`, a deterministic
-	    17x17 grid, 289 explicit vertices, and 512 triangles covering
-	    `x/z = -320..320`
+  `CollisionPolicy`, `WalkableCollisionContract`, and `LevelReadinessContract`:
+  - required `observatory:walkable-mesh` mesh collision with
+    `Collider.intent: "walkable"`, `channel: "worldStatic"`, a deterministic
+    17x17 grid, 289 explicit vertices, and 512 triangles covering
+    `x/z = -320..320`
   - engine-owned kinematic character collision routed through the physics
     adapter, with slide, slope-limit, snap-to-ground, autostep settings, and
     `obstacleChannels: ["worldStatic"]`
@@ -189,14 +189,13 @@ Run:
   Follow-up validation passed for `audit:engine-boundaries`, `type-check`,
   `lint`, `test:runtime-scene-contract`, and `git diff --check`.
 - Observatory V1 collision content implemented over the engine-wide collision
-	  contracts:
-	  - `observatory:walkable-mesh` is now required `walkable/worldStatic` floor
-	    collision with a deterministic 17x17 grid, 289 vertices, and 512
-	    triangles.
-	  - four `observatory_boundary_blocker` perimeter colliders are required by
-	    stable ID.
-	  - `test:runtime-scene-contract` covers positive layout assertions and
-	    negative readiness failures for missing boundary/walkable collision.
+  contracts:
+  - `observatory:walkable-mesh` is now required `walkable/worldStatic` floor
+    collision with a deterministic 17x17 grid, 289 vertices, and 512 triangles.
+  - four `observatory_boundary_blocker` perimeter colliders are required by
+    stable ID.
+  - `test:runtime-scene-contract` covers positive layout assertions and
+    negative readiness failures for missing boundary/walkable collision.
 - Generated Observatory visual terrain was added through
   `ObservatoryVisualTerrainContract`:
   - `mesh_observatory_field_micro_displacement`

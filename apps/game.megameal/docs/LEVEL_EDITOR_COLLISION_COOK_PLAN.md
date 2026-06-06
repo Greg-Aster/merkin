@@ -3,9 +3,10 @@
 Status: runtime kinematic character collision consumption, data/check collision
 cook foundation, the dev-only editor shell, editable collision controls, a
 top-down collision gizmo surface, temporary preview-patch serialization,
-game-window preview/reload, the deterministic generated bake artifact, the
-generated runtime collision module writer, and the Observatory visual terrain
-displacement/import foundation are implemented on 2026-06-06.
+game-window preview/reload/clear, the deterministic generated bake artifact,
+the generated runtime collision module writer, Miranda current-floor collision
+draft drift validation, and the Observatory visual terrain displacement/import
+foundation are implemented on 2026-06-06.
 
 The explicit runtime collision bake writes
 `src/game/generated/observatoryCollisionRuntime.ts` with
@@ -16,6 +17,43 @@ a generalized direct runtime owner-file rewrite writer remains planned for
 future bake work and must avoid mutating unrelated hand-authored TypeScript
 source. A generalized multi-level visual terrain import/editor pipeline remains
 planned.
+
+## Current Progress Snapshot
+
+This plan is not fully complete as a AAA-style level editor, but the current
+foundation packet is implemented and validated.
+
+Implemented:
+
+- Engine-wide kinematic character collision consumption through the physics
+  adapter contract.
+- Observatory explicit walkable mesh collision and boundary blockers consumed
+  through generated runtime collision data.
+- A dev-only `/editor/` route separate from the normal game HUD.
+- Editable Observatory collision controls for stable ID selection,
+  intent/channel, box transforms, box half-extents, mesh metadata, derived
+  bounds, and a top-down collision gizmo surface.
+- Validated dev-only preview, reload, and clear/restoration messages between
+  the editor window and game window.
+- Deterministic generated bake artifact and explicit generated runtime
+  collision module writer for Observatory.
+- Miranda current walkable-floor draft validation for main, upper, and Cargo
+  Hold floor coverage, without generating a Miranda runtime collision module.
+- Observatory generated visual field terrain GLB plus provenance and manifest
+  integration.
+
+Still planned:
+
+- Persisting edits from the editor controls back into authored/cook source
+  data.
+- Spatial drag handles and a true 3D editor viewport that renders the level
+  scene while editing.
+- Generalized multi-level collision authoring and bake tooling.
+- A generalized direct runtime owner-file rewrite writer. The current completed
+  runtime bake path is the owned generated runtime collision module, not
+  arbitrary hand-authored TypeScript mutation.
+- Richer reload lifecycle diagnostics and multi-window preview diagnostics.
+- The full generalized visual terrain import/editor pipeline.
 
 ## Purpose
 
@@ -81,17 +119,28 @@ commands, not old `apps/game` editor code copied into the new runtime.
 
 ## Initial Scope
 
-The first editor packet should focus on Observatory collision only:
+The first editor packet focused on Observatory collision. Current progress is:
 
-1. Open a separate editor route or app window for `observatory_runtime`.
-2. Display the Observatory visual GLB and authored collision overlays.
-3. Select, create, move, rotate, scale, duplicate, and delete collision volumes.
-4. Author `Collider.intent` values: `walkable`, `solid`, and `trigger`.
-5. Author `Collider.channel` values such as `worldStatic` and `interaction`.
-6. Preserve stable IDs for required surfaces.
-7. Preview changes in a running game window through a dev-only channel.
-8. Bake changes to durable target-engine data.
-9. Run focused validation before marking the bake complete.
+1. Done: open a separate editor route/window for `observatory_runtime`.
+2. Partial: display authored collision overlays and a top-down gizmo surface;
+   the true 3D Observatory GLB editor viewport remains future.
+3. Partial: select current entries and edit box position, scale, and
+   half-extents; create, duplicate, delete, rotation handles, and persisted
+   spatial drag handles remain future.
+4. Done for current entries: author `Collider.intent` values through editor
+   controls.
+5. Done for current entries: author `Collider.channel` values through editor
+   controls.
+6. Done: preserve stable IDs for required surfaces in the editor view model and
+   cook validation.
+7. Done: preview changes in a running game window through a dev-only channel,
+   including explicit preview clear/restoration.
+8. Done for Observatory generated runtime collision module: bake changes to
+   durable target-engine data through `--write-runtime-collision`; generalized
+   direct owner-file rewrite tooling remains future.
+9. Done for current packets: focused validation exists for the editor view
+   model, collision cook contract, preview protocol, drift gate, generated GLB
+   import, visual terrain, and runtime scene data.
 
 ## Implemented Runtime Slice
 
@@ -252,7 +301,8 @@ Live preview should be dev-only and reversible:
 
 ### Packet 1: Editor Boundary
 
-Status: implemented boundary skeleton; full authoring UI remains future.
+Status: implemented boundary and first authoring-control shell; full spatial
+authoring UI remains future.
 
 - Add a dev-only editor route/window entry point.
 - Keep it separate from the normal game HUD.
@@ -269,7 +319,8 @@ Acceptance:
 
 ### Packet 2: Collision Authoring Model
 
-Status: implemented data/check foundation for Observatory V1 collision draft.
+Status: implemented data/check foundation for Observatory V1 collision draft
+and Miranda current walkable-floor draft coverage.
 
 - Define a narrow collision authoring draft format.
 - Map draft entries to existing `Collider` and `Transform` data.
@@ -278,6 +329,8 @@ Status: implemented data/check foundation for Observatory V1 collision draft.
 - Target cooked walkable meshes at the implemented
   `CharacterController.kinematicCollision` runtime consumption path when
   terrain needs non-flat traversal.
+- Keep Miranda in a draft/check-only mode until it has an explicit generated
+  runtime output owner.
 
 Acceptance:
 
@@ -330,14 +383,16 @@ Acceptance:
 
 ### Packet 5: Dev Preview And Reload
 
-Status: implemented first dev-only game-window preview and reload slice.
+Status: implemented first dev-only game-window preview, reload, and clear slice.
 Preview patches are validated, sent over the app-layer browser channel, applied
 as temporary runtime `Transform`/`Collider` component updates for matching
-stable IDs, and same-scene reload requests route through
-`RuntimeSceneTransitionPort.reloadRuntimeScene`.
+stable IDs, can be explicitly cleared/restored, and same-scene reload requests
+route through `RuntimeSceneTransitionPort.reloadRuntimeScene`.
 
 - Add a dev-only preview channel between editor and game windows.
 - Allow temporary preview patches and explicit scene reload after bake.
+- Allow explicit preview clear/restoration without making preview state source
+  data.
 - Keep the runtime scene manifest as the shipped source of truth.
 - Validate preview-patch messages through the collision cook preview patch
   validator before editor send and game-window application.
@@ -352,6 +407,8 @@ Acceptance:
 - Invalid preview patches are rejected before application callbacks run.
 - Valid preview patches can temporarily update matching runtime `Transform`
   and `Collider` components in the dev game window.
+- Preview clear restores original component data for previously patched
+  entities.
 - Preview-only data is never included in production runtime manifests.
 
 ### Packet 6: Visual Terrain Displacement/Import Pipeline
@@ -398,6 +455,7 @@ Implemented Observatory foundation artifacts:
 | Editable collision gizmo UI | first control slice implemented; `/editor` exposes selectable stable IDs, intent/channel controls, editable box position/scale fields, read-only walkable mesh metadata, derived bounds, and a top-down collision gizmo surface; persistence and spatial drag handles remain future | Current: `pnpm --dir apps/game.megameal test:collision-overlay-view-model` and `pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract`; future completion must add persisted edit and spatial gizmo validation |
 | Live game-window preview application/reload | implemented protocol/callback slice with temporary runtime component application and reload request path; preview reversal and richer reload lifecycle remain future | Current: `pnpm --dir apps/game.megameal test:live-preview-protocol-contract` and `pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract`; future `test:level-editor-preview-reload-contract` must validate reversal, reload lifecycle, and multi-window diagnostics |
 | Generated runtime collision bake | implemented as an explicit generated runtime module; arbitrary TS owner-object rewrite is intentionally avoided | Current: `pnpm --dir apps/game.megameal cook:observatory-collision`, `pnpm --dir apps/game.megameal cook:observatory-collision -- --write-runtime-collision`, `pnpm --dir apps/game.megameal cook:observatory-collision -- --write-generated-bake`, `pnpm --dir apps/game.megameal ci:observatory-collision-drift`, and `pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract`; future broader bake tooling must generalize beyond Observatory and must not rewrite unrelated owner files |
+| Miranda collision cook migration | implemented draft/check-only coverage for current main, upper, and Cargo Hold walkable floors; no Miranda generated runtime module exists yet | Current: `pnpm --dir apps/game.megameal test:miranda-collision-draft-contract`; future Miranda bake tooling must add an explicit generated output owner before any write path exists |
 | Direct runtime owner-file rewrite bake | planned; current implementation deliberately stops at the owned generated runtime collision module and does not rewrite arbitrary TypeScript owner files | Current: `pnpm --dir apps/game.megameal cook:observatory-collision`, `pnpm --dir apps/game.megameal cook:observatory-collision -- --write-runtime-collision`, `pnpm --dir apps/game.megameal ci:observatory-collision-drift`, and `pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract`; future `test:level-editor-runtime-bake-writer-contract` must validate exact target files, no unrelated rewrites, generated artifact validation, and post-bake runtime validation |
 | True terrain visual displacement/import pipeline | implemented foundation for Observatory generated visual terrain; full visual terrain import pipeline remains planned | Current: `pnpm --dir apps/game.megameal generate:observatory-field-terrain`, `pnpm --dir apps/game.megameal test:observatory-visual-terrain-contract`, `pnpm --dir apps/game.megameal test:generated-glb-import-contract`, and `pnpm --dir apps/game.megameal test:runtime-scene-contract`; future `test:terrain-visual-import-pipeline-contract` must validate generalized visual asset provenance, generated/imported asset readiness, and collision linkage |
 
@@ -416,6 +474,7 @@ pnpm --dir apps/game.megameal test:observatory-visual-terrain-contract
 pnpm --dir apps/game.megameal test:level-editor-aaa-plan-contract
 pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract
 pnpm --dir apps/game.megameal test:live-preview-protocol-contract
+pnpm --dir apps/game.megameal test:miranda-collision-draft-contract
 pnpm --dir apps/game.megameal ci:observatory-collision-drift
 pnpm --dir apps/game.megameal cook:observatory-collision
 pnpm --dir apps/game.megameal generate:observatory-field-terrain
@@ -540,11 +599,12 @@ Implemented as a dev-only editor/cook foundation:
 
 ### 2026-06-06 Packet 5 Protocol Progress
 
-Implemented the live preview/reload protocol slice without moving editor state
-into normal runtime systems:
+Implemented the live preview/reload/clear protocol slice without moving editor
+state into normal runtime systems:
 
 - Added protocol message validation to `src/engine/data/collisionCook/index.ts`
-  for `collision-preview-patch` and `reload-runtime-scene` messages.
+  for `collision-preview-patch`, `clear-collision-preview`, and
+  `reload-runtime-scene` messages.
 - Added `src/app/devPreview` as the app-layer game-window preview port and
   browser `BroadcastChannel` transport owner.
 - Added `src/app/editor/levelEditorPreviewSender.ts` and
@@ -553,13 +613,28 @@ into normal runtime systems:
   patches from current form values before sending.
 - Added game-window application in `src/app/browserGameClient.ts` through the
   `src/app/devPreview` port. It applies temporary preview patches to runtime
-  entities by stable ID and reloads through `RuntimeSceneTransitionPort`.
+  entities by stable ID, restores original component data on explicit clear,
+  and reloads through `RuntimeSceneTransitionPort`.
 - Added `RuntimeSceneTransitionPort.reloadRuntimeScene` as the explicit
   same-scene reload path without changing normal portal travel behavior.
 - Added `test:live-preview-protocol-contract` for valid protocol messages,
-  invalid patch rejection, reload request shape, callback routing, runtime
-  component application, missing-stable-ID reporting, and editor-module leak
-  prevention.
+  invalid patch rejection, clear request shape, reload request shape, callback
+  routing, runtime component application/restoration, missing-stable-ID
+  reporting, and editor-module leak prevention.
+
+### 2026-06-06 Miranda Collision Draft Coverage
+
+Implemented a draft/check-only migration slice for Miranda's current walkable
+floor footprint:
+
+- Added `src/game/editor/collisionDrafts/mirandaCollisionDraft.ts` for the
+  current readiness-required Miranda main, upper, and Cargo Hold walkable floor
+  coverage.
+- Added `test:miranda-collision-draft-contract` to validate the draft against
+  `miranda_deck_runtime`, required walkable stable IDs, authored character
+  bounds, runtime transforms, and dry-run write-plan targets.
+- Kept Miranda without a generated runtime collision module until a future
+  Miranda-specific output owner exists.
 
 ### 2026-06-06 Collision Cook Data/Check Foundation
 
@@ -631,16 +706,33 @@ Returned findings were folded into this plan and implementation:
 
 ## Completion Criteria
 
-The first complete editor/cook slice is acceptable when:
+Current judgment: the foundation slice is complete; the full AAA-style level
+editor/collision cook plan is not complete yet.
+
+Foundation criteria currently met:
 
 - The editor opens separately from the game window.
-- Observatory collision can be authored and baked as explicit primitives,
-  compound primitives, and walkable mesh/trimesh chunks when irregular ground
-  needs terrain fidelity.
-- Cooked collider dimensions and mesh vertices already include source-art
-  scale; runtime `Transform.scale` is not treated as hidden physics scale.
-- Baked output is durable, checked-in, and reproducible.
+- Current Observatory collision entries can be inspected and edited through
+  dev-only controls, then previewed in the game window.
+- The game window can reload the current runtime scene and clear preview state
+  through explicit dev-only messages.
+- Observatory baked output is durable, checked-in, reproducible, and drift
+  checked through the generated runtime collision module.
 - Runtime scene readiness requires the baked critical collision.
-- The game can reload the baked scene for testing.
 - The normal game runtime does not depend on editor state.
-- Build validation detects stale cooked output without silently rewriting it.
+- Build validation detects stale Observatory cooked output without silently
+  rewriting it.
+
+Full-plan criteria still open:
+
+- The editor must persist edits back into source/cook data instead of only
+  producing preview patches.
+- The editor must support spatial drag handles and a true 3D level viewport.
+- Collision authoring must generalize beyond Observatory.
+- Broader runtime bake tooling must support explicit generated output owners
+  for additional levels such as Miranda before write paths are added.
+- Cooked collider dimensions and mesh vertices must continue to include
+  source-art scale; runtime `Transform.scale` must not become hidden physics
+  scale.
+- The generalized visual terrain import/editor pipeline must be implemented
+  and validated.

@@ -12,6 +12,56 @@ shadow/area-light tuning remain future packets.
 
 Current status: initial framework packet complete, normal root game scripts cut over to `@merkin/game-megameal`, portal arena navigation room implemented as the default runtime scene with manifest-owned ambient playlist music, portal activation SFX, charge-release SFX, shared spatial portal loop SFX, generated GLB field terrain, and a required player-carried point light with held-charge feedback, manifest-backed cubemap sky environments implemented for the current runtime scenes, scene-environment foundation implemented in `docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` for equirectangular textures, muted video skies, procedural atmosphere, bounded dynamic capture, and authored reflection probes, Miranda deck/cockpit/crew-quarters/Captain's Office/Engine Room/airlock return portal/Medbay/Mess Hall/Chapel/Brig/Cargo Hold/Archive primitive foundation plus two readiness-required walkable deck floors, a Cargo Hold walkable floor/bounds extension, old cockpit command console and Chapel monolith parity as checked-in target-engine prefabs, and three authored Miranda point lights, checked-in Miranda primitive material parameters, Miranda ambient playlist music, shared portal activation SFX, shared spatial portal loop SFX, scene-manifest charge-release SFX, nine Miranda story notes, and the StoryNote reader foundation migrated, Observatory playable foundation migrated as `observatory_runtime` with target-owned GLB art, explicit walkable mesh collision, boundary collision proxies, `worldStatic` kinematic obstacle filtering, shared water surface data through `WaterSurfaceContract`, deterministic three-firefly population data through `FireflyPopulationContract`, disabled/off post-processing profile data, player/firefly lights, manifest-owned scene music, and portal transition by manifest ID, and runtime scene negative-case validation added in `apps/game.megameal`. Legacy `@merkin/game` root aliases are retired, `start-game-manual-refresh.sh` now launches `@merkin/game-megameal`, `pnpm-workspace.yaml` excludes the ignored old `apps/game` folder, and the old `apps/game` lockfile importer is removed. Player controls have a verified desktop/mobile runtime foundation with selected-target HUD projection, scene-unload selected-target cleanup, semantic mobile touch input, and remaining consumer polish tracked in `docs/PLAYER_CONTROLS_MIGRATION_PLAN.md`. Future skybox and scene-environment packets are tracked in `docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`; future shared water behavior packets are tracked in `docs/WATER_SURFACE_SYSTEM_PLAN.md`. Authored Miranda point-light migration is implemented through `AuthoredLightContract`; portal player lighting is implemented through `PlayerCarriedLightContract`; Miranda primitive material parameter migration is implemented through `MaterialParameterContract`; curated scene music playlists, SFX, crossfades, and spatial listener/emitter foundation are implemented through `AudioManifestAndEvents`; Miranda walkable floor readiness is implemented through `WalkableCollisionContract`; engine-owned kinematic player traversal is implemented through `KinematicCharacterCollisionContract`; Observatory collision content consumes `CollisionPolicy`, `WalkableCollisionContract`, `KinematicCharacterCollisionContract`, and `LevelReadinessContract`; Observatory playable foundation is implemented through `ObservatoryLevelContract` with water owned by `WaterSurfaceContract` and current fireflies owned by `FireflyPopulationContract`. `LevelAuthoringImportValidationContract` now has an implemented foundation through `src/engine/data/contentGraph/index.ts` and `test:level-authoring-contract`, deriving or drift-checking runtime readiness from authored assets, prefabs, levels, lights, collision, audio, and transitions before broad level scaling. The current implementation register and verification gate are in `ENGINE_CONTRACT_REGISTER.md`.
 
+## Migration Completion Checkpoint
+
+Status as of 2026-06-06: the migration is not finished. The current target
+engine is a contract-aligned playable foundation with several migrated content
+packets, not full parity with the old `apps/game` project.
+
+Implemented foundation:
+
+- Normal root game scripts and runtime mounting now target
+  `@merkin/game-megameal`.
+- `portal_arena_runtime` is the default navigation room.
+- `prototype_arena_runtime`, `miranda_deck_runtime`, and
+  `observatory_runtime` load through runtime scene manifests.
+- Player controls, portal interaction, story-note interaction, scene unload
+  cleanup, readiness gates, audio events, authored lights, scene environments,
+  water/firefly data, and content-graph validation have focused contract
+  coverage.
+- Old `apps/game` references in this plan are provenance citations only, not
+  active runtime dependencies.
+
+Not complete:
+
+- Full Miranda parity is not done. Broader terrain, cooked collision, import
+  coverage, and remaining generated/content parity still need owned contracts or
+  cook/import pipeline work before Miranda can be marked fully ready.
+- Full generated GLB import/cook parity is not done. Current validation tracks
+  selected target-engine substitutions and provenance, but it is not a complete
+  generated asset pipeline.
+- Level editor/cook tooling is not complete. Current dev-only preview and cook
+  foundations do not replace a durable multi-level authoring, bake, preview, and
+  manifest-writing pipeline.
+- Audio is foundation-level. Spatial emitters and mixer buses exist, but
+  occlusion/obstruction, procedural held-charge audio, expanded library
+  migration, authoring UI, and durable audio import/generation remain future
+  work.
+- Lighting is foundation-level. Authored point, spot, rectangle area, shadows,
+  and budget validation exist, but production shadow tuning, area-light material
+  policy, and richer editor controls remain future work.
+- Observatory is a playable foundation, not a complete old-scene recreation.
+  Dynamic water rendering, reflections/refraction, post-processing adapter
+  behavior, water gameplay volumes, large firefly tooling, and live firefly
+  animation remain future work.
+- The ignored local `apps/game` folder is still archival/reference material
+  until explicit user approval is given for deletion or final archival.
+
+Completion rule: do not mark the migration complete until the contract register
+has no active "foundation only" migration blockers for old-content parity,
+durable generated/import pipelines, authoring/cook ownership, audio expansion,
+lighting production tooling, Observatory parity, and old-app retirement.
+
 ## Purpose
 
 `apps/game.megameal` is the new engine foundation. Historical `apps/game`
