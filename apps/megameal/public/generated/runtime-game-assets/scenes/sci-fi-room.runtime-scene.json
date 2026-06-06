@@ -38,11 +38,6 @@
             "visualSource": "scene-actors",
             "fallbackSurfacePolicy": "disabled"
           },
-          "defaults": {
-            "primitiveCollisionByDefault": true,
-            "defaultFriction": 0.7,
-            "defaultRestitution": 0
-          },
           "roles": {
             "visualOnlyActorIds": [],
             "groundActorIds": [
@@ -50,12 +45,18 @@
               "sci-fi-floor-courtyard-slab",
               "sci-fi-floor-wasteland-tile-4-4"
             ]
+          },
+          "defaults": {
+            "primitiveCollisionByDefault": true,
+            "defaultFriction": 0.7,
+            "defaultRestitution": 0
           }
         },
         "terrainSculpt": {
           "enabled": false,
           "autoBakeCollision": false
         },
+        "skyboxPreset": "observatory",
         "spawn": {
           "position": [
             0,
@@ -300,9 +301,6 @@
               "settleMs": 2000
             }
           ]
-        },
-        "editorPanels": {
-          "environment": "sci-fi-room"
         }
       }
     },
@@ -7930,14 +7928,25 @@
     "detailMeshActorCount": 0,
     "defaultCollisionActorCount": 0,
     "visualOnlyActorCount": 0,
-    "requiredActorCount": 4,
+    "requiredActorCount": 0,
     "missingRequiredActorIds": [],
     "runtimeReadinessContract": {
       "schemaVersion": 2,
       "levelId": "sci-fi-room",
       "publish": {
-        "ready": true,
+        "ready": false,
         "gates": [
+          {
+            "id": "runtime-contract-metadata-authored",
+            "label": "Runtime Contract Metadata Authored",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "errors": [],
+              "warnings": []
+            },
+            "blockers": []
+          },
           {
             "id": "legacy-required-asset-actor-ids-absent",
             "label": "Legacy Required Asset Actor Ids Absent",
@@ -7954,7 +7963,7 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "runtimeActorId": "sci-fi-room-player-spawn",
+              "runtimeActorId": "",
               "player": [
                 0,
                 1.5,
@@ -7969,12 +7978,7 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "actorIds": [
-                "sci-fi-floor-interior-slab",
-                "sci-fi-floor-courtyard-slab",
-                "sci-fi-floor-wasteland-tile-4-4",
-                "sci-fi-room-player-spawn"
-              ],
+              "actorIds": [],
               "missingActorIds": []
             },
             "blockers": []
@@ -8025,16 +8029,20 @@
           {
             "id": "terrain-runtime-collision-declared",
             "label": "Terrain Runtime Collision Declared",
-            "required": false,
-            "satisfied": true,
+            "required": true,
+            "satisfied": false,
             "evidence": {
-              "runtimeActorId": "sci-fi-room-terrain",
+              "runtimeActorId": "sci-fi-floor-interior-slab",
               "manifestUrl": ""
             },
-            "blockers": []
+            "blockers": [
+              "Required terrain actor \"sci-fi-floor-interior-slab\" has no runtime collision manifest."
+            ]
           }
         ],
-        "blockers": []
+        "blockers": [
+          "Required terrain actor \"sci-fi-floor-interior-slab\" has no runtime collision manifest."
+        ]
       },
       "runtime": {
         "activationRequired": true,
@@ -8049,8 +8057,7 @@
           "required-initial-world-partition-cells-ready",
           "spawn-resolved",
           "physics-world-ready",
-          "player-body-ready",
-          "gameplay-enabled"
+          "player-body-ready"
         ],
         "requiredRenderActorIds": [],
         "requiredCollisionActorIds": [
@@ -8061,7 +8068,7 @@
         "requiredAssetUrls": [],
         "requiredColliderUrls": [],
         "requiredInitialCellKeys": [],
-        "requiredTerrain": false,
+        "requiredTerrain": true,
         "terrainManifestUrl": ""
       },
       "spawn": {
@@ -8071,20 +8078,15 @@
           0
         ],
         "valid": true,
-        "runtimeActorId": "sci-fi-room-player-spawn",
-        "satisfiedByRuntimeSystem": true
+        "runtimeActorId": "",
+        "satisfiedByRuntimeSystem": false
       },
       "terrain": {
-        "runtimeActorId": "sci-fi-room-terrain",
+        "runtimeActorId": "sci-fi-floor-interior-slab",
         "runtimeCollision": false,
         "satisfiedByRuntimeSystem": false
       },
-      "requiredActorIds": [
-        "sci-fi-floor-interior-slab",
-        "sci-fi-floor-courtyard-slab",
-        "sci-fi-floor-wasteland-tile-4-4",
-        "sci-fi-room-player-spawn"
-      ],
+      "requiredActorIds": [],
       "requiredWalkableActorIds": [
         "sci-fi-floor-interior-slab",
         "sci-fi-floor-courtyard-slab",
@@ -8184,8 +8186,19 @@
       "schemaVersion": 2,
       "levelId": "sci-fi-room",
       "publish": {
-        "ready": true,
+        "ready": false,
         "gates": [
+          {
+            "id": "runtime-contract-metadata-authored",
+            "label": "Runtime Contract Metadata Authored",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "errors": [],
+              "warnings": []
+            },
+            "blockers": []
+          },
           {
             "id": "legacy-required-asset-actor-ids-absent",
             "label": "Legacy Required Asset Actor Ids Absent",
@@ -8202,7 +8215,7 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "runtimeActorId": "sci-fi-room-player-spawn",
+              "runtimeActorId": "",
               "player": [
                 0,
                 1.5,
@@ -8217,12 +8230,7 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "actorIds": [
-                "sci-fi-floor-interior-slab",
-                "sci-fi-floor-courtyard-slab",
-                "sci-fi-floor-wasteland-tile-4-4",
-                "sci-fi-room-player-spawn"
-              ],
+              "actorIds": [],
               "missingActorIds": []
             },
             "blockers": []
@@ -8273,16 +8281,20 @@
           {
             "id": "terrain-runtime-collision-declared",
             "label": "Terrain Runtime Collision Declared",
-            "required": false,
-            "satisfied": true,
+            "required": true,
+            "satisfied": false,
             "evidence": {
-              "runtimeActorId": "sci-fi-room-terrain",
+              "runtimeActorId": "sci-fi-floor-interior-slab",
               "manifestUrl": ""
             },
-            "blockers": []
+            "blockers": [
+              "Required terrain actor \"sci-fi-floor-interior-slab\" has no runtime collision manifest."
+            ]
           }
         ],
-        "blockers": []
+        "blockers": [
+          "Required terrain actor \"sci-fi-floor-interior-slab\" has no runtime collision manifest."
+        ]
       },
       "runtime": {
         "activationRequired": true,
@@ -8297,8 +8309,7 @@
           "required-initial-world-partition-cells-ready",
           "spawn-resolved",
           "physics-world-ready",
-          "player-body-ready",
-          "gameplay-enabled"
+          "player-body-ready"
         ],
         "requiredRenderActorIds": [],
         "requiredCollisionActorIds": [
@@ -8309,7 +8320,7 @@
         "requiredAssetUrls": [],
         "requiredColliderUrls": [],
         "requiredInitialCellKeys": [],
-        "requiredTerrain": false,
+        "requiredTerrain": true,
         "terrainManifestUrl": ""
       },
       "spawn": {
@@ -8319,20 +8330,15 @@
           0
         ],
         "valid": true,
-        "runtimeActorId": "sci-fi-room-player-spawn",
-        "satisfiedByRuntimeSystem": true
+        "runtimeActorId": "",
+        "satisfiedByRuntimeSystem": false
       },
       "terrain": {
-        "runtimeActorId": "sci-fi-room-terrain",
+        "runtimeActorId": "sci-fi-floor-interior-slab",
         "runtimeCollision": false,
         "satisfiedByRuntimeSystem": false
       },
-      "requiredActorIds": [
-        "sci-fi-floor-interior-slab",
-        "sci-fi-floor-courtyard-slab",
-        "sci-fi-floor-wasteland-tile-4-4",
-        "sci-fi-room-player-spawn"
-      ],
+      "requiredActorIds": [],
       "requiredWalkableActorIds": [
         "sci-fi-floor-interior-slab",
         "sci-fi-floor-courtyard-slab",

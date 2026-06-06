@@ -50,6 +50,13 @@ temporal-flow-export/
 # BlogPusher app — separate git repo (github.com/Greg-Aster/blog-pusher.git)
 blog-pusher-sync/
 
+# Legacy game app — local reference only; new game runtime lives in apps/game.megameal
+apps/game/
+
+# OS and shortcut metadata
+desktop.ini
+*.url
+
 # Git worktrees (local-only, not committed)
 .linked-worktrees/
 .dev-runtime/

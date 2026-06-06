@@ -16,7 +16,7 @@
     "spawn": {
       "player": [
         0,
-        3.7,
+        5,
         -118
       ],
       "rotation": [
@@ -77,7 +77,7 @@
         "spawn": {
           "position": [
             0,
-            3.7,
+            5,
             -118
           ],
           "rotation": [
@@ -376,7 +376,7 @@
               "label": "Yggdrasil crown",
               "playerPosition": [
                 0,
-                3.7,
+                5,
                 -118
               ],
               "cameraPosition": [
@@ -12238,56 +12238,6 @@
         }
       },
       {
-        "id": "yggdrasil-audio-arrival",
-        "name": "Rainbow Threshold Ambience",
-        "kind": "volume",
-        "parentId": "yggdrasil-atmosphere-group",
-        "transform": {
-          "position": [
-            2.220446049250313e-16,
-            7.908721527290043,
-            -78
-          ],
-          "rotation": [
-            0,
-            0,
-            0
-          ],
-          "scale": [
-            84.00000000000001,
-            19.8,
-            84.00000000000001
-          ]
-        },
-        "gameplay": {
-          "type": "audio-region",
-          "data": {
-            "type": "audio-region",
-            "markerColor": "#dcb3ff",
-            "title": "Rainbow Threshold",
-            "audioTrack": "/audio/ambient/portal-deck.mp3",
-            "audioVolume": 0.18,
-            "regionFalloff": 18
-          }
-        },
-        "interaction": {
-          "kind": "custom",
-          "data": {
-            "type": "audio-region",
-            "markerColor": "#dcb3ff",
-            "title": "Rainbow Threshold",
-            "audioTrack": "/audio/ambient/portal-deck.mp3",
-            "audioVolume": 0.18,
-            "regionFalloff": 18
-          }
-        },
-        "audioRegion": {
-          "track": "/audio/ambient/portal-deck.mp3",
-          "volume": 0.18,
-          "falloff": 18
-        }
-      },
-      {
         "id": "yggdrasil-audio-urd",
         "name": "Urdarbrunnr Ambience",
         "kind": "volume",
@@ -18782,7 +18732,7 @@
     "detailMeshActorCount": 0,
     "defaultCollisionActorCount": 0,
     "visualOnlyActorCount": 14,
-    "requiredActorCount": 3,
+    "requiredActorCount": 0,
     "missingRequiredActorIds": [],
     "runtimeReadinessContract": {
       "schemaVersion": 2,
@@ -18790,6 +18740,17 @@
       "publish": {
         "ready": true,
         "gates": [
+          {
+            "id": "runtime-contract-metadata-authored",
+            "label": "Runtime Contract Metadata Authored",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "errors": [],
+              "warnings": []
+            },
+            "blockers": []
+          },
           {
             "id": "legacy-required-asset-actor-ids-absent",
             "label": "Legacy Required Asset Actor Ids Absent",
@@ -18806,10 +18767,10 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "runtimeActorId": "yggdrasil-player-spawn",
+              "runtimeActorId": "",
               "player": [
                 0,
-                3.7,
+                5,
                 -118
               ]
             },
@@ -18821,11 +18782,7 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "actorIds": [
-                "yggdrasil-ground",
-                "yggdrasil-spawn-pad",
-                "yggdrasil-tree-merged"
-              ],
+              "actorIds": [],
               "missingActorIds": []
             },
             "blockers": []
@@ -18837,7 +18794,6 @@
             "satisfied": true,
             "evidence": {
               "actorIds": [
-                "yggdrasil-tree-merged",
                 "yggdrasil-mound",
                 "yggdrasil-planter-urd",
                 "yggdrasil-planter-mimir",
@@ -18848,6 +18804,7 @@
                 "yggdrasil-hvergelmir-depth-arch-1",
                 "yggdrasil-hvergelmir-depth-monolith-left",
                 "yggdrasil-hvergelmir-depth-monolith-right",
+                "yggdrasil-tree-merged",
                 "yggdrasil-crown-ascent-merged",
                 "yggdrasil-bifrost-ribbon-merged"
               ],
@@ -18897,13 +18854,11 @@
                 "yggdrasil-island-shelf",
                 "yggdrasil-dais",
                 "yggdrasil-bifrost-path",
-                "yggdrasil-spawn-pad",
-                "yggdrasil-tree-merged"
+                "yggdrasil-spawn-pad"
               ],
               "colliderUrls": [
                 "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb",
-                "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.glb",
-                "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb"
+                "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.glb"
               ],
               "missingActorIds": []
             },
@@ -18915,7 +18870,7 @@
             "required": false,
             "satisfied": true,
             "evidence": {
-              "runtimeActorId": "yggdrasil-terrain",
+              "runtimeActorId": "yggdrasil-bifrost-path",
               "manifestUrl": ""
             },
             "blockers": []
@@ -18936,11 +18891,9 @@
           "required-initial-world-partition-cells-ready",
           "spawn-resolved",
           "physics-world-ready",
-          "player-body-ready",
-          "gameplay-enabled"
+          "player-body-ready"
         ],
         "requiredRenderActorIds": [
-          "yggdrasil-tree-merged",
           "yggdrasil-mound",
           "yggdrasil-planter-urd",
           "yggdrasil-planter-mimir",
@@ -18951,6 +18904,7 @@
           "yggdrasil-hvergelmir-depth-arch-1",
           "yggdrasil-hvergelmir-depth-monolith-left",
           "yggdrasil-hvergelmir-depth-monolith-right",
+          "yggdrasil-tree-merged",
           "yggdrasil-crown-ascent-merged",
           "yggdrasil-bifrost-ribbon-merged"
         ],
@@ -18959,8 +18913,7 @@
           "yggdrasil-island-shelf",
           "yggdrasil-dais",
           "yggdrasil-bifrost-path",
-          "yggdrasil-spawn-pad",
-          "yggdrasil-tree-merged"
+          "yggdrasil-spawn-pad"
         ],
         "requiredAssetUrls": [
           "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
@@ -18978,8 +18931,7 @@
         ],
         "requiredColliderUrls": [
           "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb",
-          "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.glb",
-          "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb"
+          "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.glb"
         ],
         "requiredInitialCellKeys": [],
         "requiredTerrain": false,
@@ -18988,23 +18940,19 @@
       "spawn": {
         "player": [
           0,
-          3.7,
+          5,
           -118
         ],
         "valid": true,
-        "runtimeActorId": "yggdrasil-player-spawn",
-        "satisfiedByRuntimeSystem": true
+        "runtimeActorId": "",
+        "satisfiedByRuntimeSystem": false
       },
       "terrain": {
-        "runtimeActorId": "yggdrasil-terrain",
+        "runtimeActorId": "yggdrasil-bifrost-path",
         "runtimeCollision": false,
         "satisfiedByRuntimeSystem": false
       },
-      "requiredActorIds": [
-        "yggdrasil-ground",
-        "yggdrasil-spawn-pad",
-        "yggdrasil-tree-merged"
-      ],
+      "requiredActorIds": [],
       "requiredWalkableActorIds": [
         "yggdrasil-ground",
         "yggdrasil-island-shelf",
@@ -19246,7 +19194,7 @@
     },
     "errors": [],
     "warnings": [
-      "100 runtime assets exceed contract budget of 48."
+      "100 runtime assets exceed contract budget of 60."
     ]
   },
   "runtime": {
@@ -19256,6 +19204,17 @@
       "publish": {
         "ready": true,
         "gates": [
+          {
+            "id": "runtime-contract-metadata-authored",
+            "label": "Runtime Contract Metadata Authored",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "errors": [],
+              "warnings": []
+            },
+            "blockers": []
+          },
           {
             "id": "legacy-required-asset-actor-ids-absent",
             "label": "Legacy Required Asset Actor Ids Absent",
@@ -19272,10 +19231,10 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "runtimeActorId": "yggdrasil-player-spawn",
+              "runtimeActorId": "",
               "player": [
                 0,
-                3.7,
+                5,
                 -118
               ]
             },
@@ -19287,11 +19246,7 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "actorIds": [
-                "yggdrasil-ground",
-                "yggdrasil-spawn-pad",
-                "yggdrasil-tree-merged"
-              ],
+              "actorIds": [],
               "missingActorIds": []
             },
             "blockers": []
@@ -19303,7 +19258,6 @@
             "satisfied": true,
             "evidence": {
               "actorIds": [
-                "yggdrasil-tree-merged",
                 "yggdrasil-mound",
                 "yggdrasil-planter-urd",
                 "yggdrasil-planter-mimir",
@@ -19314,6 +19268,7 @@
                 "yggdrasil-hvergelmir-depth-arch-1",
                 "yggdrasil-hvergelmir-depth-monolith-left",
                 "yggdrasil-hvergelmir-depth-monolith-right",
+                "yggdrasil-tree-merged",
                 "yggdrasil-crown-ascent-merged",
                 "yggdrasil-bifrost-ribbon-merged"
               ],
@@ -19363,13 +19318,11 @@
                 "yggdrasil-island-shelf",
                 "yggdrasil-dais",
                 "yggdrasil-bifrost-path",
-                "yggdrasil-spawn-pad",
-                "yggdrasil-tree-merged"
+                "yggdrasil-spawn-pad"
               ],
               "colliderUrls": [
                 "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb",
-                "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.glb",
-                "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb"
+                "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.glb"
               ],
               "missingActorIds": []
             },
@@ -19381,7 +19334,7 @@
             "required": false,
             "satisfied": true,
             "evidence": {
-              "runtimeActorId": "yggdrasil-terrain",
+              "runtimeActorId": "yggdrasil-bifrost-path",
               "manifestUrl": ""
             },
             "blockers": []
@@ -19402,11 +19355,9 @@
           "required-initial-world-partition-cells-ready",
           "spawn-resolved",
           "physics-world-ready",
-          "player-body-ready",
-          "gameplay-enabled"
+          "player-body-ready"
         ],
         "requiredRenderActorIds": [
-          "yggdrasil-tree-merged",
           "yggdrasil-mound",
           "yggdrasil-planter-urd",
           "yggdrasil-planter-mimir",
@@ -19417,6 +19368,7 @@
           "yggdrasil-hvergelmir-depth-arch-1",
           "yggdrasil-hvergelmir-depth-monolith-left",
           "yggdrasil-hvergelmir-depth-monolith-right",
+          "yggdrasil-tree-merged",
           "yggdrasil-crown-ascent-merged",
           "yggdrasil-bifrost-ribbon-merged"
         ],
@@ -19425,8 +19377,7 @@
           "yggdrasil-island-shelf",
           "yggdrasil-dais",
           "yggdrasil-bifrost-path",
-          "yggdrasil-spawn-pad",
-          "yggdrasil-tree-merged"
+          "yggdrasil-spawn-pad"
         ],
         "requiredAssetUrls": [
           "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
@@ -19444,8 +19395,7 @@
         ],
         "requiredColliderUrls": [
           "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb",
-          "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.glb",
-          "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb"
+          "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-ground.collider.glb"
         ],
         "requiredInitialCellKeys": [],
         "requiredTerrain": false,
@@ -19454,23 +19404,19 @@
       "spawn": {
         "player": [
           0,
-          3.7,
+          5,
           -118
         ],
         "valid": true,
-        "runtimeActorId": "yggdrasil-player-spawn",
-        "satisfiedByRuntimeSystem": true
+        "runtimeActorId": "",
+        "satisfiedByRuntimeSystem": false
       },
       "terrain": {
-        "runtimeActorId": "yggdrasil-terrain",
+        "runtimeActorId": "yggdrasil-bifrost-path",
         "runtimeCollision": false,
         "satisfiedByRuntimeSystem": false
       },
-      "requiredActorIds": [
-        "yggdrasil-ground",
-        "yggdrasil-spawn-pad",
-        "yggdrasil-tree-merged"
-      ],
+      "requiredActorIds": [],
       "requiredWalkableActorIds": [
         "yggdrasil-ground",
         "yggdrasil-island-shelf",
@@ -19586,7 +19532,6 @@
       "missingRequiredWalkableActorIds": []
     },
     "requiredRenderActorIds": [
-      "yggdrasil-tree-merged",
       "yggdrasil-mound",
       "yggdrasil-planter-urd",
       "yggdrasil-planter-mimir",
@@ -19597,6 +19542,7 @@
       "yggdrasil-hvergelmir-depth-arch-1",
       "yggdrasil-hvergelmir-depth-monolith-left",
       "yggdrasil-hvergelmir-depth-monolith-right",
+      "yggdrasil-tree-merged",
       "yggdrasil-crown-ascent-merged",
       "yggdrasil-bifrost-ribbon-merged"
     ],
@@ -24703,7 +24649,7 @@
           "label": "Yggdrasil crown",
           "playerPosition": [
             0,
-            3.7,
+            5,
             -118
           ],
           "cameraPosition": [

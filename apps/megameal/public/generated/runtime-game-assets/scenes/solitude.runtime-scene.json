@@ -38,11 +38,6 @@
             "visualSource": "scene-actors",
             "fallbackSurfacePolicy": "disabled"
           },
-          "defaults": {
-            "primitiveCollisionByDefault": true,
-            "defaultFriction": 0.7,
-            "defaultRestitution": 0
-          },
           "roles": {
             "visualOnlyActorIds": [
               "solitude-pillar-7"
@@ -54,6 +49,11 @@
           },
           "walkability": {
             "supportMaxDrop": 3
+          },
+          "defaults": {
+            "primitiveCollisionByDefault": true,
+            "defaultFriction": 0.7,
+            "defaultRestitution": 0
           }
         },
         "terrainSculpt": {
@@ -358,9 +358,6 @@
         },
         "player": {
           "lightIntensityScale": 3
-        },
-        "editorPanels": {
-          "environment": "solitude"
         }
       }
     },
@@ -4767,14 +4764,25 @@
     "detailMeshActorCount": 0,
     "defaultCollisionActorCount": 0,
     "visualOnlyActorCount": 1,
-    "requiredActorCount": 3,
+    "requiredActorCount": 0,
     "missingRequiredActorIds": [],
     "runtimeReadinessContract": {
       "schemaVersion": 2,
       "levelId": "solitude",
       "publish": {
-        "ready": true,
+        "ready": false,
         "gates": [
+          {
+            "id": "runtime-contract-metadata-authored",
+            "label": "Runtime Contract Metadata Authored",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "errors": [],
+              "warnings": []
+            },
+            "blockers": []
+          },
           {
             "id": "legacy-required-asset-actor-ids-absent",
             "label": "Legacy Required Asset Actor Ids Absent",
@@ -4791,7 +4799,7 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "runtimeActorId": "solitude-player-spawn",
+              "runtimeActorId": "",
               "player": [
                 0,
                 0.8,
@@ -4806,11 +4814,7 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "actorIds": [
-                "solitude-ground-plateau",
-                "solitude-ground-dais",
-                "solitude-player-spawn"
-              ],
+              "actorIds": [],
               "missingActorIds": []
             },
             "blockers": []
@@ -4862,16 +4866,20 @@
           {
             "id": "terrain-runtime-collision-declared",
             "label": "Terrain Runtime Collision Declared",
-            "required": false,
-            "satisfied": true,
+            "required": true,
+            "satisfied": false,
             "evidence": {
-              "runtimeActorId": "solitude-terrain",
+              "runtimeActorId": "solitude-ground-plateau",
               "manifestUrl": ""
             },
-            "blockers": []
+            "blockers": [
+              "Required terrain actor \"solitude-ground-plateau\" has no runtime collision manifest."
+            ]
           }
         ],
-        "blockers": []
+        "blockers": [
+          "Required terrain actor \"solitude-ground-plateau\" has no runtime collision manifest."
+        ]
       },
       "runtime": {
         "activationRequired": true,
@@ -4886,8 +4894,7 @@
           "required-initial-world-partition-cells-ready",
           "spawn-resolved",
           "physics-world-ready",
-          "player-body-ready",
-          "gameplay-enabled"
+          "player-body-ready"
         ],
         "requiredRenderActorIds": [],
         "requiredCollisionActorIds": [
@@ -4900,7 +4907,7 @@
           "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb"
         ],
         "requiredInitialCellKeys": [],
-        "requiredTerrain": false,
+        "requiredTerrain": true,
         "terrainManifestUrl": ""
       },
       "spawn": {
@@ -4910,19 +4917,15 @@
           -24
         ],
         "valid": true,
-        "runtimeActorId": "solitude-player-spawn",
-        "satisfiedByRuntimeSystem": true
+        "runtimeActorId": "",
+        "satisfiedByRuntimeSystem": false
       },
       "terrain": {
-        "runtimeActorId": "solitude-terrain",
+        "runtimeActorId": "solitude-ground-plateau",
         "runtimeCollision": false,
         "satisfiedByRuntimeSystem": false
       },
-      "requiredActorIds": [
-        "solitude-ground-plateau",
-        "solitude-ground-dais",
-        "solitude-player-spawn"
-      ],
+      "requiredActorIds": [],
       "requiredWalkableActorIds": [
         "solitude-ground-plateau",
         "solitude-ground-dais"
@@ -4984,8 +4987,19 @@
       "schemaVersion": 2,
       "levelId": "solitude",
       "publish": {
-        "ready": true,
+        "ready": false,
         "gates": [
+          {
+            "id": "runtime-contract-metadata-authored",
+            "label": "Runtime Contract Metadata Authored",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "errors": [],
+              "warnings": []
+            },
+            "blockers": []
+          },
           {
             "id": "legacy-required-asset-actor-ids-absent",
             "label": "Legacy Required Asset Actor Ids Absent",
@@ -5002,7 +5016,7 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "runtimeActorId": "solitude-player-spawn",
+              "runtimeActorId": "",
               "player": [
                 0,
                 0.8,
@@ -5017,11 +5031,7 @@
             "required": true,
             "satisfied": true,
             "evidence": {
-              "actorIds": [
-                "solitude-ground-plateau",
-                "solitude-ground-dais",
-                "solitude-player-spawn"
-              ],
+              "actorIds": [],
               "missingActorIds": []
             },
             "blockers": []
@@ -5073,16 +5083,20 @@
           {
             "id": "terrain-runtime-collision-declared",
             "label": "Terrain Runtime Collision Declared",
-            "required": false,
-            "satisfied": true,
+            "required": true,
+            "satisfied": false,
             "evidence": {
-              "runtimeActorId": "solitude-terrain",
+              "runtimeActorId": "solitude-ground-plateau",
               "manifestUrl": ""
             },
-            "blockers": []
+            "blockers": [
+              "Required terrain actor \"solitude-ground-plateau\" has no runtime collision manifest."
+            ]
           }
         ],
-        "blockers": []
+        "blockers": [
+          "Required terrain actor \"solitude-ground-plateau\" has no runtime collision manifest."
+        ]
       },
       "runtime": {
         "activationRequired": true,
@@ -5097,8 +5111,7 @@
           "required-initial-world-partition-cells-ready",
           "spawn-resolved",
           "physics-world-ready",
-          "player-body-ready",
-          "gameplay-enabled"
+          "player-body-ready"
         ],
         "requiredRenderActorIds": [],
         "requiredCollisionActorIds": [
@@ -5111,7 +5124,7 @@
           "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb"
         ],
         "requiredInitialCellKeys": [],
-        "requiredTerrain": false,
+        "requiredTerrain": true,
         "terrainManifestUrl": ""
       },
       "spawn": {
@@ -5121,19 +5134,15 @@
           -24
         ],
         "valid": true,
-        "runtimeActorId": "solitude-player-spawn",
-        "satisfiedByRuntimeSystem": true
+        "runtimeActorId": "",
+        "satisfiedByRuntimeSystem": false
       },
       "terrain": {
-        "runtimeActorId": "solitude-terrain",
+        "runtimeActorId": "solitude-ground-plateau",
         "runtimeCollision": false,
         "satisfiedByRuntimeSystem": false
       },
-      "requiredActorIds": [
-        "solitude-ground-plateau",
-        "solitude-ground-dais",
-        "solitude-player-spawn"
-      ],
+      "requiredActorIds": [],
       "requiredWalkableActorIds": [
         "solitude-ground-plateau",
         "solitude-ground-dais"

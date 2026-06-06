@@ -11,7 +11,7 @@
     },
     "git": {
       "branch": "main",
-      "commit": "a5c067aa5f8dc3cd3551824e4afd7e3cb811ef8f",
+      "commit": "2514cbae4442428fde4a25f49487a345609510ff",
       "dirty": true
     },
     "fingerprint": "0d3c5208c473289215f8c72103ae956c7d0f53430a6ed317f4a69d22eb4473e6",
@@ -6757,6 +6757,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -6919,6 +6921,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -7118,6 +7122,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -7317,6 +7323,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -7720,6 +7728,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -7882,6 +7892,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -8081,6 +8093,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -8280,6 +8294,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -8683,6 +8699,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -8845,6 +8863,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -9044,6 +9064,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -9243,6 +9265,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -9646,6 +9670,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -9808,6 +9834,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -10007,6 +10035,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -10206,6 +10236,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -10609,6 +10641,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -10771,6 +10805,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -10970,6 +11006,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -11169,6 +11207,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -11572,6 +11612,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -11734,6 +11776,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -11933,6 +11977,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -12132,6 +12178,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -12535,6 +12583,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -12697,6 +12747,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -12896,6 +12948,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -13095,6 +13149,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -13498,6 +13554,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -13660,6 +13718,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -13859,6 +13919,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -14058,6 +14120,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -14461,6 +14525,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -14623,6 +14689,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -14822,6 +14890,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -15021,6 +15091,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -15424,6 +15496,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -15586,6 +15660,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -15785,6 +15861,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -15984,6 +16062,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -16394,6 +16474,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -16556,6 +16638,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -16755,6 +16839,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -16954,6 +17040,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -17357,6 +17445,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -17519,6 +17609,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -17718,6 +17810,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -17917,6 +18011,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -18320,6 +18416,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -18482,6 +18580,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -18681,6 +18781,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -18880,6 +18982,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -19283,6 +19387,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -19445,6 +19551,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -19644,6 +19752,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -19843,6 +19953,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -20246,6 +20358,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -20408,6 +20522,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -20607,6 +20723,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -20806,6 +20924,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -21209,6 +21329,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -21371,6 +21493,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -21570,6 +21694,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -21769,6 +21895,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -22172,6 +22300,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -22334,6 +22464,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -22533,6 +22665,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -22732,6 +22866,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -23135,6 +23271,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -23297,6 +23435,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -23496,6 +23636,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -23695,6 +23837,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -24098,6 +24242,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -24260,6 +24406,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -24459,6 +24607,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -24658,6 +24808,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -25061,6 +25213,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -25223,6 +25377,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -25422,6 +25578,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -25621,6 +25779,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -26024,6 +26184,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -26186,6 +26348,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -26385,6 +26549,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -26584,6 +26750,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -26987,6 +27155,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -27149,6 +27319,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -27348,6 +27520,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -27547,6 +27721,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -27950,6 +28126,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -28112,6 +28290,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -28311,6 +28491,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -28510,6 +28692,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -28913,6 +29097,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -29075,6 +29261,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -29274,6 +29462,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -29473,6 +29663,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -29876,6 +30068,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -30038,6 +30232,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -30237,6 +30433,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -30436,6 +30634,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -30839,6 +31039,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -31001,6 +31203,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -31200,6 +31404,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -31399,6 +31605,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -31802,6 +32010,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -31964,6 +32174,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -32163,6 +32375,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -32362,6 +32576,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -32765,6 +32981,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -32927,6 +33145,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -33126,6 +33346,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -33325,6 +33547,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -33728,6 +33952,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -33890,6 +34116,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -34089,6 +34317,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -34288,6 +34518,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -34691,6 +34923,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -34853,6 +35087,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -35052,6 +35288,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -35251,6 +35489,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -35654,6 +35894,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -35816,6 +36058,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -36015,6 +36259,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -36214,6 +36460,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -36617,6 +36865,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -36779,6 +37029,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -36978,6 +37230,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -37177,6 +37431,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -37580,6 +37836,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -37742,6 +38000,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -37941,6 +38201,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -38140,6 +38402,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -38543,6 +38807,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -38705,6 +38971,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -38904,6 +39172,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -39103,6 +39373,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -39506,6 +39778,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -39668,6 +39942,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -39867,6 +40143,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -40066,6 +40344,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -40469,6 +40749,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -40631,6 +40913,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -40830,6 +41114,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -41029,6 +41315,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -41432,6 +41720,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -41594,6 +41884,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -41793,6 +42085,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -41992,6 +42286,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -42395,6 +42691,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -42557,6 +42855,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -42756,6 +43056,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -42955,6 +43257,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -43358,6 +43662,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -43520,6 +43826,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -43719,6 +44027,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -43918,6 +44228,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -44321,6 +44633,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -44483,6 +44797,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -44682,6 +44998,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -44881,6 +45199,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -45284,6 +45604,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -45446,6 +45768,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -45645,6 +45969,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -45844,6 +46170,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -46247,6 +46575,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -46409,6 +46739,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -46608,6 +46940,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -46807,6 +47141,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -47210,6 +47546,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -47372,6 +47710,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -47571,6 +47911,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -47770,6 +48112,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -48173,6 +48517,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -48335,6 +48681,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -48534,6 +48882,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -48733,6 +49083,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -49136,6 +49488,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -49298,6 +49652,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -49497,6 +49853,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -49696,6 +50054,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -50099,6 +50459,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -50261,6 +50623,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -50460,6 +50824,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -50659,6 +51025,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -51062,6 +51430,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -51224,6 +51594,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -51423,6 +51795,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -51622,6 +51996,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -52025,6 +52401,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -52187,6 +52565,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -52386,6 +52766,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -52585,6 +52967,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -52988,6 +53372,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -53150,6 +53536,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -53349,6 +53737,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -53548,6 +53938,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -53951,6 +54343,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -54113,6 +54507,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -54312,6 +54708,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -54511,6 +54909,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -54914,6 +55314,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -55076,6 +55478,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -55275,6 +55679,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -55474,6 +55880,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -55877,6 +56285,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -56039,6 +56449,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -56238,6 +56650,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -56437,6 +56851,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -56840,6 +57256,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -57002,6 +57420,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -57201,6 +57621,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -57400,6 +57822,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -57803,6 +58227,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -57965,6 +58391,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -58164,6 +58592,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -58363,6 +58793,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -58766,6 +59198,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -58928,6 +59362,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -59127,6 +59563,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -59326,6 +59764,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -59729,6 +60169,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -59891,6 +60333,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -60090,6 +60534,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -60289,6 +60735,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -60692,6 +61140,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -60854,6 +61304,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -61053,6 +61505,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -61252,6 +61706,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -61655,6 +62111,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -61817,6 +62275,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -62016,6 +62476,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -62215,6 +62677,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -62618,6 +63082,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -62780,6 +63246,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -62979,6 +63447,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -63178,6 +63648,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -63581,6 +64053,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -63743,6 +64217,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -63942,6 +64418,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -64141,6 +64619,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -64544,6 +65024,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -64706,6 +65188,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -64905,6 +65389,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -65104,6 +65590,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -65507,6 +65995,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -65669,6 +66159,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -65868,6 +66360,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -66067,6 +66561,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -66470,6 +66966,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -66632,6 +67130,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -66831,6 +67331,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -67030,6 +67532,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -67433,6 +67937,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -67595,6 +68101,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -67794,6 +68302,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -67993,6 +68503,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -68396,6 +68908,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -68558,6 +69072,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -68757,6 +69273,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -68956,6 +69474,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -69359,6 +69879,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -69521,6 +70043,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -69720,6 +70244,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -69919,6 +70445,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -70322,6 +70850,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -70484,6 +71014,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -70683,6 +71215,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -70882,6 +71416,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -71285,6 +71821,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -71447,6 +71985,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -71646,6 +72186,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -71845,6 +72387,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -72248,6 +72792,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -72410,6 +72956,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -72609,6 +73157,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -72808,6 +73358,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -73211,6 +73763,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -73373,6 +73927,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -73572,6 +74128,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -73771,6 +74329,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -74174,6 +74734,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -74336,6 +74898,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -74535,6 +75099,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -74734,6 +75300,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -75137,6 +75705,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -75299,6 +75869,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -75498,6 +76070,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -75697,6 +76271,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -76100,6 +76676,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -76262,6 +76840,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -76461,6 +77041,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -76660,6 +77242,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -77063,6 +77647,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -77225,6 +77811,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -77424,6 +78012,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -77623,6 +78213,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -78026,6 +78618,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -78188,6 +78782,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -78387,6 +78983,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -78586,6 +79184,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -78989,6 +79589,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -79151,6 +79753,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -79350,6 +79954,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -79549,6 +80155,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -79952,6 +80560,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -80114,6 +80724,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -80313,6 +80925,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -80512,6 +81126,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -80915,6 +81531,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -81077,6 +81695,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -81276,6 +81896,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -81475,6 +82097,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -81878,6 +82502,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -82040,6 +82666,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -82239,6 +82867,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -82438,6 +83068,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -82841,6 +83473,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -83003,6 +83637,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -83202,6 +83838,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -83401,6 +84039,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -83804,6 +84444,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -83966,6 +84608,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -84165,6 +84809,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -84364,6 +85010,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -84767,6 +85415,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -84929,6 +85579,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -85128,6 +85780,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -85327,6 +85981,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -85730,6 +86386,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -85892,6 +86550,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -86091,6 +86751,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -86290,6 +86952,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -86693,6 +87357,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -86855,6 +87521,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -87054,6 +87722,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -87253,6 +87923,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -87656,6 +88328,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -87818,6 +88492,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -88017,6 +88693,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -88216,6 +88894,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -88619,6 +89299,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -88781,6 +89463,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -88980,6 +89664,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -89179,6 +89865,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -89582,6 +90270,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -89744,6 +90434,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -89943,6 +90635,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -90142,6 +90836,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -90545,6 +91241,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -90707,6 +91405,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -90906,6 +91606,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -91105,6 +91807,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -91508,6 +92212,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -91670,6 +92376,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -91869,6 +92577,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -92068,6 +92778,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -92471,6 +93183,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -92633,6 +93347,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -92832,6 +93548,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -93031,6 +93749,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -93434,6 +94154,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -93596,6 +94318,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -93795,6 +94519,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -93994,6 +94720,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -94399,6 +95127,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -94561,6 +95291,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -94760,6 +95492,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -94959,6 +95693,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -95324,6 +96060,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 1,
@@ -95530,6 +96268,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -95762,6 +96502,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -95994,6 +96736,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -96387,6 +97131,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 1,
@@ -96593,6 +97339,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -96825,6 +97573,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -97057,6 +97807,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -97450,6 +98202,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 1,
@@ -97656,6 +98410,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -97888,6 +98644,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -98120,6 +98878,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -98513,6 +99273,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 1,
@@ -98719,6 +99481,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -98951,6 +99715,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -99183,6 +99949,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -99576,6 +100344,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 1,
@@ -99782,6 +100552,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -100014,6 +100786,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -100246,6 +101020,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -100639,6 +101415,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 1,
@@ -100845,6 +101623,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -101077,6 +101857,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -101309,6 +102091,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -101702,6 +102486,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 1,
@@ -101908,6 +102694,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -102140,6 +102928,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -102372,6 +103162,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -102765,6 +103557,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 1,
@@ -102971,6 +103765,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -103203,6 +103999,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -103435,6 +104233,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -103828,6 +104628,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 1,
@@ -104034,6 +104836,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -104266,6 +105070,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -104498,6 +105304,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -104891,6 +105699,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 1,
@@ -105097,6 +105907,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -105329,6 +106141,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -105561,6 +106375,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -105954,6 +106770,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 1,
@@ -106160,6 +106978,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -106392,6 +107212,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -106624,6 +107446,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -107056,6 +107880,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -107218,6 +108044,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -107417,6 +108245,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -107616,6 +108446,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -108019,6 +108851,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -108181,6 +109015,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -108380,6 +109216,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -108579,6 +109417,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -108982,6 +109822,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -109144,6 +109986,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -109343,6 +110187,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -109542,6 +110388,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -109945,6 +110793,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -110107,6 +110957,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -110306,6 +111158,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -110505,6 +111359,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -110908,6 +111764,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -111070,6 +111928,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -111269,6 +112129,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -111468,6 +112330,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -111871,6 +112735,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -112033,6 +112899,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -112232,6 +113100,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -112431,6 +113301,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -112834,6 +113706,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -112996,6 +113870,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -113195,6 +114071,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -113394,6 +114272,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -113797,6 +114677,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -113959,6 +114841,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -114158,6 +115042,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -114357,6 +115243,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -114760,6 +115648,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -114922,6 +115812,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -115121,6 +116013,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -115320,6 +116214,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -115723,6 +116619,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -115885,6 +116783,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -116084,6 +116984,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -116283,6 +117185,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -116704,6 +117608,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 1,
         "imageCount": 1,
         "unusedTextureCount": 0,
@@ -116866,6 +117772,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -117065,6 +117973,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -117264,6 +118174,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 1,
             "imageCount": 1,
             "unusedTextureCount": 0,
@@ -117783,6 +118695,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 12,
         "imageCount": 12,
         "unusedTextureCount": 0,
@@ -118243,6 +119157,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -118739,6 +119655,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -119235,6 +120153,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -119907,6 +120827,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 12,
         "imageCount": 12,
         "unusedTextureCount": 0,
@@ -120367,6 +121289,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -120863,6 +121787,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -121359,6 +122285,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -122031,6 +122959,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 12,
         "imageCount": 12,
         "unusedTextureCount": 0,
@@ -122491,6 +123421,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -122987,6 +123919,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -123483,6 +124417,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -124155,6 +125091,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 12,
         "imageCount": 12,
         "unusedTextureCount": 0,
@@ -124615,6 +125553,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -125111,6 +126051,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -125607,6 +126549,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -126739,6 +127683,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 0,
         "imageCount": 0,
         "unusedTextureCount": 0,
@@ -127132,6 +128078,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -127560,6 +128508,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -127988,6 +128938,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -128426,6 +129378,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 0,
         "imageCount": 0,
         "unusedTextureCount": 0,
@@ -128585,6 +129539,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -128779,6 +129735,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -128973,6 +129931,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -130114,6 +131074,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 0,
         "imageCount": 0,
         "unusedTextureCount": 0,
@@ -130585,6 +131547,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -131091,6 +132055,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -131597,6 +132563,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -131948,6 +132916,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 3,
         "imageCount": 3,
         "unusedTextureCount": 0,
@@ -132147,6 +133117,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -132382,6 +133354,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -132617,6 +133591,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -133807,6 +134783,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 0,
         "imageCount": 0,
         "unusedTextureCount": 0,
@@ -134348,6 +135326,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -134970,6 +135950,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -135592,6 +136574,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -136251,6 +137235,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 0,
         "imageCount": 0,
         "unusedTextureCount": 0,
@@ -136488,6 +137474,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -136760,6 +137748,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -137032,6 +138022,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -137644,6 +138636,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 0,
         "imageCount": 0,
         "unusedTextureCount": 0,
@@ -137881,6 +138875,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -138153,6 +139149,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -138425,6 +139423,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -138873,6 +139873,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 0,
         "imageCount": 0,
         "unusedTextureCount": 0,
@@ -139032,6 +140034,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -139226,6 +140230,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -139420,6 +140426,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -140395,6 +141403,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 0,
         "imageCount": 0,
         "unusedTextureCount": 0,
@@ -140788,6 +141798,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -141216,6 +142228,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -141644,6 +142658,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -142082,6 +143098,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 6,
         "imageCount": 6,
         "unusedTextureCount": 0,
@@ -142389,6 +143407,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -142732,6 +143752,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -143075,6 +144097,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -143607,6 +144631,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 6,
         "imageCount": 6,
         "unusedTextureCount": 0,
@@ -143914,6 +144940,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -144257,6 +145285,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -144600,6 +145630,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -145110,6 +146142,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 6,
         "imageCount": 6,
         "unusedTextureCount": 0,
@@ -145417,6 +146451,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -145760,6 +146796,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -146103,6 +147141,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -146627,6 +147667,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 6,
         "imageCount": 6,
         "unusedTextureCount": 0,
@@ -146934,6 +147976,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -147277,6 +148321,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -147620,6 +148666,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -148139,6 +149187,8 @@
             }
           ]
         },
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 6,
         "imageCount": 6,
         "unusedTextureCount": 0,
@@ -148446,6 +149496,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -148789,6 +149841,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -149132,6 +150186,8 @@
                 }
               ]
             },
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 6,
             "imageCount": 6,
             "unusedTextureCount": 0,
@@ -149835,6 +150891,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 0,
         "imageCount": 0,
         "unusedTextureCount": 0,
@@ -150072,6 +151130,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -150344,6 +151404,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -150616,6 +151678,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -151228,6 +152292,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 0,
         "imageCount": 0,
         "unusedTextureCount": 0,
@@ -151465,6 +152531,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -151737,6 +152805,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -152009,6 +153079,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -152631,6 +153703,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 0,
         "imageCount": 0,
         "unusedTextureCount": 0,
@@ -152868,6 +153942,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -153140,6 +154216,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -153412,6 +154490,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 0,
             "imageCount": 0,
             "unusedTextureCount": 0,
@@ -153730,6 +154810,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 3,
         "imageCount": 3,
         "unusedTextureCount": 0,
@@ -153911,6 +154993,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -154129,6 +155213,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -154347,6 +155433,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -154711,6 +155799,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 4,
         "imageCount": 4,
         "unusedTextureCount": 0,
@@ -154906,6 +155996,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 4,
             "imageCount": 4,
             "unusedTextureCount": 0,
@@ -155138,6 +156230,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 4,
             "imageCount": 4,
             "unusedTextureCount": 0,
@@ -155370,6 +156464,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 4,
             "imageCount": 4,
             "unusedTextureCount": 0,
@@ -155747,6 +156843,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 3,
         "imageCount": 3,
         "unusedTextureCount": 0,
@@ -155928,6 +157026,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -156146,6 +157246,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -156364,6 +157466,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 3,
             "imageCount": 3,
             "unusedTextureCount": 0,
@@ -156902,6 +158006,8 @@
           "unsupportedExtensions": []
         },
         "materialAuthoring": null,
+        "lightCount": 0,
+        "lights": [],
         "textureCount": 12,
         "imageCount": 12,
         "unusedTextureCount": 0,
@@ -157383,6 +158489,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -157901,6 +159009,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -158419,6 +159529,8 @@
               "unsupportedExtensions": []
             },
             "materialAuthoring": null,
+            "lightCount": 0,
+            "lights": [],
             "textureCount": 12,
             "imageCount": 12,
             "unusedTextureCount": 0,
@@ -158705,7 +159817,7 @@
       "runtimeAssetCount": 100,
       "buildErrors": [],
       "buildWarnings": [
-        "100 runtime assets exceed contract budget of 48."
+        "100 runtime assets exceed contract budget of 60."
       ]
     }
   }

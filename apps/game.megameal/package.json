@@ -1,0 +1,35 @@
+{
+	"name": "@merkin/game-megameal",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"packageManager": "pnpm@9.14.4",
+	"dependencies": {
+		"@astrojs/svelte": "7.2.5",
+		"@dimforge/rapier3d-compat": "0.17.3",
+		"astro": "5.18.0",
+		"svelte": "5.26.2",
+		"three": "0.178.0"
+	},
+	"scripts": {
+		"dev": "astro dev",
+		"build": "pnpm type-check && astro build",
+		"preview": "astro preview",
+		"type-check": "astro check && tsc --noEmit",
+		"audit:engine-boundaries": "node ./scripts/audit-engine-boundaries.mjs",
+		"test:input-contract": "tsx ./scripts/test-input-contract.ts",
+		"test:charged-action-contract": "tsx ./scripts/test-charged-action-contract.ts",
+		"test:story-note-contract": "tsx ./scripts/test-story-note-contract.ts",
+		"test:scene-environment-contract": "tsx ./scripts/test-scene-environment-contract.ts",
+		"test:runtime-scene-contract": "tsx ./scripts/test-runtime-scene-contract.ts",
+		"generate:portal-field-glb": "node ./scripts/generate-portal-field-glb.mjs",
+		"lint": "biome check ./src ./scripts",
+		"format": "biome format --write ./src ./scripts"
+	},
+	"devDependencies": {
+		"@astrojs/check": "^0.9.4",
+		"@biomejs/biome": "1.8.3",
+		"@types/three": "0.176.0",
+		"typescript": "^5.7.3"
+	}
+}
