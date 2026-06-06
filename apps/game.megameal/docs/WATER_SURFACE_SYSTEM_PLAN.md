@@ -21,9 +21,9 @@ and level identity. Treating it as a local Observatory mesh would make later
 levels duplicate asset IDs, material policy, renderer behavior, and validation.
 ```
 
-## Current V1 Target
+## Current V1 Implementation
 
-The V1 contract is a static visual water surface:
+The V1 contract implements a static visual water surface:
 
 - Rendered as scene content through ordinary engine data.
 - No collider.
@@ -95,7 +95,7 @@ Future water packets should extend `WaterSurfaceContract` rather than adding lev
 
 ## Validation Expectations
 
-The first implementation should add focused validation that proves:
+The first implementation has focused validation that proves:
 
 - Shared water asset IDs exist in the selected manifest.
 - Shared water prefab IDs exist and are used by Observatory.

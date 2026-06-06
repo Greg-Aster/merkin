@@ -668,7 +668,7 @@ Rules:
 - Runtime scenes include water assets in preload/readiness when the water surface is required for first playable presentation.
 - Svelte, Threlte, browser code, and old `apps/game` water/editor/runtime systems do not own target-engine water state.
 
-Observatory is the first planned consumer: it should place `observatory:water` as a shared static water prefab instance at `y = -2`, size `4000 x 4000`, with no collider. `docs/WATER_SURFACE_SYSTEM_PLAN.md` tracks the implementation plan and future water packets for animation, reflections/refraction, rising water, underwater state, buoyancy, and water-body authoring.
+Observatory is the first implemented consumer: it places `observatory:water` as a shared static water prefab instance at `y = -2`, size `4000 x 4000`, with no collider. `docs/WATER_SURFACE_SYSTEM_PLAN.md` tracks the V1 implementation plan and future water packets for animation, reflections/refraction, rising water, underwater state, buoyancy, and water-body authoring.
 
 Do not store gameplay state in `mesh.userData`.
 
@@ -1210,7 +1210,7 @@ Current portal arena foundation:
     `Transform + Renderable + Light` marker entities through
     `AuthoredLightContract`. Fireflies and the player light are required
     readiness stable IDs, not renderer defaults.
-  - The v1 water plane should be a shared `WaterSurfaceContract` consumer:
+  - The v1 water plane is a shared `WaterSurfaceContract` consumer:
     `observatory:water` is a static visual instance at `y = -2` with no
     collider, while reusable mesh/material/prefab ownership belongs to the
     shared water system. Rising water, water volumes, reflections,
