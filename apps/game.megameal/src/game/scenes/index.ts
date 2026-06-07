@@ -21,14 +21,19 @@ import {
 	COLLECTED_COUNT_RESOURCE,
 	OPEN_STORY_NOTE_RESOURCE,
 	PLAYER_ENTITY_RESOURCE,
+	TERRAIN_CHUNK_PACKAGES_RESOURCE,
+	TERRAIN_STREAMING_STATUS_RESOURCE,
 	TOTAL_COLLECTIBLES_RESOURCE,
+	activateTerrainChunkPackages,
 } from "../systems/index.js";
 
 export type GameSceneOptions = {
 	readonly id?: string;
 	readonly levelLoader: LevelLoader;
 	readonly runtimeManifest?: RuntimeSceneManifestData;
-	readonly physicsReady: () => boolean;
+	readonly physicsReady: (options?: {
+		readonly terrainPackageStartupStableIds?: readonly string[];
+	}) => boolean;
 };
 
 export function createGameScene(options: GameSceneOptions): Scene {
@@ -57,6 +62,25 @@ export function createGameScene(options: GameSceneOptions): Scene {
 			const playerSpawned = result.spawned.some(
 				(spawned) => spawned.stableId === manifest.readiness.playerStableId,
 			);
+			world.setResource(
+				TERRAIN_CHUNK_PACKAGES_RESOURCE,
+				manifest.terrainPackages ?? [],
+			);
+			const terrainActivation = activateTerrainChunkPackages({
+				world,
+				terrainPackages: manifest.terrainPackages ?? [],
+				spawned: result.spawned,
+			});
+
+			if (terrainActivation.errors.length > 0) {
+				throw new Error(
+					`Runtime scene manifest "${manifest.id}" terrain package activation failed: ${terrainActivation.errors.join("; ")}`,
+				);
+			}
+
+			const physicsReady = options.physicsReady({
+				terrainPackageStartupStableIds: terrainActivation.startupChunkStableIds,
+			});
 			const readiness = evaluateRuntimeSceneReadiness(manifest, {
 				levelId: result.levelId,
 				...(result.sceneId ? { sceneId: result.sceneId } : {}),
@@ -65,7 +89,8 @@ export function createGameScene(options: GameSceneOptions): Scene {
 					prefabId: spawned.prefabId,
 					stableId: spawned.stableId,
 				})),
-				physicsReady: options.physicsReady(),
+				activatedTerrainPackageIds: terrainActivation.activatedPackageIds,
+				physicsReady,
 				playerReady: playerSpawned,
 			});
 
@@ -94,6 +119,8 @@ export function createGameScene(options: GameSceneOptions): Scene {
 				world.removeResource(OPEN_STORY_NOTE_RESOURCE);
 				world.removeResource(COLLECTED_COUNT_RESOURCE);
 				world.removeResource(TOTAL_COLLECTIBLES_RESOURCE);
+				world.removeResource(TERRAIN_CHUNK_PACKAGES_RESOURCE);
+				world.removeResource(TERRAIN_STREAMING_STATUS_RESOURCE);
 			});
 		},
 		activate() {},

@@ -3,7 +3,7 @@ import type { AudioContentManifest } from "../../engine/modules/audio/index.js";
 import { audioAmbientPortalDeck } from "./ambientAudioAssets.js";
 import { defaultAudioMixerBuses } from "./audioMixerBuses.js";
 import { cubemapObservatorySky } from "./skyboxAssets.js";
-import { materialWaterDarkStill, meshWaterPlane } from "./waterAssets.js";
+import { materialWaterSurface, meshWaterPlane } from "./waterAssets.js";
 
 const meshPlayer = {
 	id: "mesh_player",
@@ -15,18 +15,6 @@ const meshObservatoryEnvironment = {
 	kind: "mesh",
 	url: "/assets/game/observatory/observatory-environment.glb",
 	tags: ["terrain", "observatory", "source-glb"],
-} as const;
-const meshObservatoryFieldMicroDisplacement = {
-	id: "mesh_observatory_field_micro_displacement",
-	kind: "mesh",
-	url: "/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.glb",
-	tags: [
-		"terrain",
-		"observatory",
-		"generated",
-		"visual-displacement",
-		"collision-aligned",
-	],
 } as const;
 const meshObservatoryFireflyMarker = {
 	id: "mesh_observatory_firefly_marker",
@@ -68,12 +56,11 @@ export const observatoryAssetManifest = {
 	assets: [
 		meshPlayer,
 		meshObservatoryEnvironment,
-		meshObservatoryFieldMicroDisplacement,
 		meshWaterPlane,
 		meshObservatoryFireflyMarker,
 		cubemapObservatorySky,
 		materialPlayer,
-		materialWaterDarkStill,
+		materialWaterSurface,
 		materialObservatoryFirefly,
 		audioPlayerJump,
 		audioPlayerChargeRelease,
@@ -83,12 +70,11 @@ export const observatoryAssetManifest = {
 		observatory: [
 			"mesh_player",
 			"mesh_observatory_environment",
-			"mesh_observatory_field_micro_displacement",
 			"mesh_water_plane",
 			"mesh_observatory_firefly_marker",
 			"cubemap_observatory_sky",
 			"material_player",
-			"material_water_dark_still",
+			"material_water_surface",
 			"material_observatory_firefly",
 			"audio_player_jump",
 			"audio_player_charge_release",

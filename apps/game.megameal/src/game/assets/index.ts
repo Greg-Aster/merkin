@@ -9,3 +9,4 @@ export * from "./sciFiRoomAssets.js";
 export * from "./skyboxAssets.js";
 export * from "./solitudeAssets.js";
 export * from "./waterAssets.js";
+export * from "./yggdrasilAssets.js";

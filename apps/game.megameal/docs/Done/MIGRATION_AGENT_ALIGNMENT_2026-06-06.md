@@ -123,14 +123,13 @@ pnpm --dir apps/game.megameal test:light-contract
 pnpm --dir apps/game.megameal test:water-firefly-contract
 pnpm --dir apps/game.megameal test:level-authoring-contract
 pnpm --dir apps/game.megameal test:generated-glb-import-contract
-pnpm --dir apps/game.megameal test:observatory-visual-terrain-contract
+pnpm --dir apps/game.megameal test:terrain-import-pipeline-contract
+pnpm --dir apps/game.megameal test:terrain-cook-contract
 pnpm --dir apps/game.megameal test:kinematic-character-contract
 pnpm --dir apps/game.megameal test:collision-overlay-view-model
 pnpm --dir apps/game.megameal test:level-editor-aaa-plan-contract
 pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract
 pnpm --dir apps/game.megameal test:live-preview-protocol-contract
-pnpm --dir apps/game.megameal ci:observatory-collision-drift
-pnpm --dir apps/game.megameal cook:observatory-collision
 pnpm --dir apps/game.megameal audit:engine-boundaries
 pnpm --dir apps/game.megameal type-check
 pnpm --dir apps/game.megameal build

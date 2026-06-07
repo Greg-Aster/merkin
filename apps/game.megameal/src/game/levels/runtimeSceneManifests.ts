@@ -5,7 +5,9 @@ import {
 	portalArenaAssetManifest,
 	prototypeAssetManifest,
 	sciFiRoomAssetManifest,
+	solitudeAssetManifest,
 } from "../assets/index.js";
+import { yggdrasilAssetManifest } from "../assets/yggdrasilAssets.js";
 import { collisionReadiness as observatoryCollisionReadiness } from "../generated/observatoryCollisionRuntime.js";
 import {
 	mirandaDeckPrefabs,
@@ -13,7 +15,9 @@ import {
 	portalArenaPrefabs,
 	prototypePrefabs,
 	sciFiRoomPrefabs,
+	solitudePrefabs,
 } from "../prefabs/index.js";
+import { yggdrasilPrefabs } from "../prefabs/yggdrasilPrefabs.js";
 import { mirandaDeckLevel, prototypeLevel } from "./defaultLevels.js";
 import { observatoryLevel } from "./observatoryLevel.js";
 import { portalArenaLevel } from "./portalArenaLevel.js";
@@ -23,8 +27,18 @@ import {
 	portalArenaRenderProfile,
 	prototypeRenderProfile,
 	sciFiRoomRenderProfile,
+	solitudeRenderProfile,
+	yggdrasilRenderProfile,
 } from "./renderProfiles.js";
 import { sciFiRoomLevel } from "./sciFiRoomLevel.js";
+import {
+	solitudeExpectedRuntimeImports,
+	solitudeLevel,
+} from "./solitudeLevel.js";
+import {
+	yggdrasilExpectedRuntimeImports,
+	yggdrasilLevel,
+} from "./yggdrasilLevel.js";
 
 export const portalArenaRuntimeSceneManifest = loadRuntimeSceneManifest({
 	schemaVersion: 1,
@@ -44,7 +58,7 @@ export const portalArenaRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"mesh_player",
 			"mesh_portal_field",
 			"mesh_portal_gate",
-			"cubemap_classic_sky",
+			"texture_portal_arena_equirectangular_sky",
 			"material_player",
 			"audio_player_jump",
 			"audio_player_charge_release",
@@ -60,7 +74,9 @@ export const portalArenaRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"portal-arena:portal:prototype-arena",
 			"portal-arena:portal:miranda-deck",
 			"portal-arena:portal:observatory",
+			"portal-arena:portal:solitude",
 			"portal-arena:portal:sci-fi-room",
+			"portal-arena:portal:yggdrasil",
 			"player",
 		],
 		requiredLightStableIds: ["player"],
@@ -276,12 +292,11 @@ export const observatoryRuntimeSceneManifest = loadRuntimeSceneManifest({
 		requiredAssetIds: [
 			"mesh_player",
 			"mesh_observatory_environment",
-			"mesh_observatory_field_micro_displacement",
 			"mesh_water_plane",
 			"mesh_observatory_firefly_marker",
 			"cubemap_observatory_sky",
 			"material_player",
-			"material_water_dark_still",
+			"material_water_surface",
 			"material_observatory_firefly",
 			"audio_player_jump",
 			"audio_player_charge_release",
@@ -365,12 +380,66 @@ export const sciFiRoomRuntimeSceneManifest = loadRuntimeSceneManifest({
 	},
 });
 
+export const solitudeRuntimeSceneManifest = loadRuntimeSceneManifest({
+	schemaVersion: 1,
+	id: "solitude_runtime",
+	generatedAt: "2026-06-06T00:00:00.000Z",
+	source: {
+		kind: "authored",
+		id: "solitude.scene#playable-foundation",
+	},
+	level: solitudeLevel,
+	prefabs: solitudePrefabs,
+	assets: solitudeAssetManifest,
+	renderProfile: solitudeRenderProfile,
+	readiness: {
+		playerStableId: solitudeExpectedRuntimeImports.readiness.playerStableId,
+		requiredAssetIds: solitudeExpectedRuntimeImports.assetIds,
+		requiredCollisionPrefabIds:
+			solitudeExpectedRuntimeImports.readiness.requiredCollisionPrefabIds,
+		requiredCollisionStableIds:
+			solitudeExpectedRuntimeImports.readiness.requiredCollisionStableIds,
+		requiredWalkableStableIds:
+			solitudeExpectedRuntimeImports.readiness.requiredWalkableStableIds,
+		requiredLightStableIds:
+			solitudeExpectedRuntimeImports.readiness.requiredLightStableIds,
+	},
+});
+
+export const yggdrasilRuntimeSceneManifest = loadRuntimeSceneManifest({
+	schemaVersion: 1,
+	id: "yggdrasil_runtime",
+	generatedAt: "2026-06-06T00:00:00.000Z",
+	source: {
+		kind: "authored",
+		id: "yggdrasil.scene#primitive-parity-foundation",
+	},
+	level: yggdrasilLevel,
+	prefabs: yggdrasilPrefabs,
+	assets: yggdrasilAssetManifest,
+	renderProfile: yggdrasilRenderProfile,
+	readiness: {
+		playerStableId: yggdrasilExpectedRuntimeImports.readiness.playerStableId,
+		requiredAssetIds: yggdrasilExpectedRuntimeImports.assetIds,
+		requiredCollisionPrefabIds:
+			yggdrasilExpectedRuntimeImports.readiness.requiredCollisionPrefabIds,
+		requiredCollisionStableIds:
+			yggdrasilExpectedRuntimeImports.readiness.requiredCollisionStableIds,
+		requiredWalkableStableIds:
+			yggdrasilExpectedRuntimeImports.readiness.requiredWalkableStableIds,
+		requiredLightStableIds:
+			yggdrasilExpectedRuntimeImports.readiness.requiredLightStableIds,
+	},
+});
+
 export const defaultRuntimeSceneManifests = [
 	portalArenaRuntimeSceneManifest,
 	prototypeRuntimeSceneManifest,
 	mirandaDeckRuntimeSceneManifest,
 	observatoryRuntimeSceneManifest,
 	sciFiRoomRuntimeSceneManifest,
+	solitudeRuntimeSceneManifest,
+	yggdrasilRuntimeSceneManifest,
 ] as const;
 
 export const defaultRuntimeSceneManifest = portalArenaRuntimeSceneManifest;

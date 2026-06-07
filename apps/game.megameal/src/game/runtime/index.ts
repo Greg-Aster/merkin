@@ -21,6 +21,8 @@ import {
 	type RuntimeSceneManifestData,
 	type SceneEnvironmentRendererPort,
 	SceneManager,
+	type WaterSurfaceRendererPort,
+	WaterSurfaceSyncSystem,
 	audioEventMappingsFromManifest,
 	createAudioEventSystem,
 	createAudioSpatialSyncSystem,
@@ -60,12 +62,14 @@ import {
 	createPortalProximitySystem,
 	createStoryNoteActivationSystem,
 	createStoryNoteProximitySystem,
+	createTerrainStreamingSystem,
 	selectGameHudState,
 } from "../systems/index.js";
 
 export type GameRendererPort = RendererPort &
 	LightRendererPort &
 	ReflectionProbeRendererPort &
+	WaterSurfaceRendererPort &
 	SceneEnvironmentRendererPort &
 	CameraPosePort & {
 		applyRenderProfile?(profile: RenderProfileData): void;
@@ -103,6 +107,9 @@ export async function createMegamealGameRuntime(
 	const renderSync = new RenderSyncSystem({ renderer: options.renderer });
 	const lightSync = new LightSyncSystem({ renderer: options.renderer });
 	const reflectionProbeSync = new ReflectionProbeSyncSystem({
+		renderer: options.renderer,
+	});
+	const waterSurfaceSync = new WaterSurfaceSyncSystem({
 		renderer: options.renderer,
 	});
 	const spatialAudio = audioSpatialPortFromOptions(options.audio);
@@ -240,6 +247,11 @@ export async function createMegamealGameRuntime(
 	});
 	runtime.scheduler.registerSystem(
 		"physics-pre-sync",
+		createTerrainStreamingSystem(),
+		{ order: -20 },
+	);
+	runtime.scheduler.registerSystem(
+		"physics-pre-sync",
 		createPhysicsPreSyncSystem(physicsSync),
 	);
 	runtime.scheduler.registerSystem(
@@ -297,6 +309,21 @@ export async function createMegamealGameRuntime(
 		},
 		{ order: 20 },
 	);
+	runtime.scheduler.registerSystem(
+		"render-sync",
+		{
+			id: "water-surface-sync",
+			update({ interpolation, world, deltaSeconds, tick }) {
+				waterSurfaceSync.update({
+					...(interpolation === undefined ? {} : { interpolation }),
+					...(deltaSeconds === undefined ? {} : { deltaSeconds }),
+					...(tick === undefined ? {} : { tick }),
+					world,
+				});
+			},
+		},
+		{ order: 30 },
+	);
 	runtime.scheduler.registerSystem("render", {
 		id: "render",
 		update({ interpolation }) {
@@ -327,6 +354,7 @@ export async function createMegamealGameRuntime(
 			renderSync.detachAll();
 			lightSync.detachAll();
 			reflectionProbeSync.detachAll();
+			waterSurfaceSync.detachAll();
 			audioSpatialSync?.detachAll();
 			options.renderer.clearSceneEnvironment();
 			await sceneManager.unload(runtime.services);
@@ -388,12 +416,13 @@ export async function createMegamealGameRuntime(
 				createGameScene({
 					levelLoader,
 					runtimeManifest: nextRuntimeSceneManifest,
-					physicsReady: () => {
+					physicsReady: ({ terrainPackageStartupStableIds = [] } = {}) => {
 						physicsSync.preSync(runtime.services);
 						return requiredCollisionStableIdsReady(
 							runtime.world,
 							physicsSync,
 							nextRuntimeSceneManifest,
+							terrainPackageStartupStableIds,
 						);
 					},
 				}),
@@ -553,10 +582,12 @@ function requiredCollisionStableIdsReady(
 	world: EngineRuntime["world"],
 	physicsSync: PhysicsSyncSystem,
 	manifest: RuntimeSceneManifestData,
+	additionalStableIds: readonly string[] = [],
 ): boolean {
 	const requiredStableIds = [
 		...(manifest.readiness.requiredCollisionStableIds ?? []),
 		...(manifest.readiness.requiredWalkableStableIds ?? []),
+		...additionalStableIds,
 	];
 
 	if (requiredStableIds.length === 0) {

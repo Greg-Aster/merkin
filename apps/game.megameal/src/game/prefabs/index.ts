@@ -48,8 +48,8 @@ export {
 	observatoryBoundaryBlockerPrefab,
 	observatoryEnvironmentPrefab,
 	observatoryFireflyMarkerPrefab,
-	observatoryWalkableMeshPrefab,
 	observatoryPrefabs,
+	observatoryWalkableMeshPrefab,
 } from "./observatoryPrefabs.js";
 export { portalGatePrefab } from "./navigationPrefabs.js";
 export {
@@ -75,7 +75,16 @@ export {
 	solitudeRingFragmentPrefab,
 	solitudeWindEmitterPrefab,
 } from "./solitudePrefabs.js";
-export { waterSurfacePlanePrefab } from "./waterPrefabs.js";
+export {
+	lakeWaterSurfacePrefab,
+	oceanWaterSurfacePrefab,
+	waterSurfacePlanePrefab,
+} from "./waterPrefabs.js";
+export {
+	yggdrasilAmbientEmitterPrefab,
+	yggdrasilPrefabs,
+	yggdrasilPrimitivePrefabs,
+} from "./yggdrasilPrefabs.js";
 
 export type PrefabId = string;
 export type StableEntityId = string;

@@ -55,8 +55,12 @@ export class EventBus<TEvent extends EngineEvent = EngineEvent> {
 		};
 	}
 
-	drain(): TEvent[] {
-		const events = this.queue.splice(0);
+	drain(maxEvents = this.queue.length): TEvent[] {
+		const count = Math.max(
+			0,
+			Math.min(this.queue.length, Math.floor(maxEvents)),
+		);
+		const events = this.queue.splice(0, count);
 
 		for (const event of events) {
 			this.notify(event);

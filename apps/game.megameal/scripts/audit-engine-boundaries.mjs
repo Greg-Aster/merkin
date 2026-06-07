@@ -16,6 +16,8 @@ const browserGlobalPattern =
 const oldEnginePathPattern = /(^|[^A-Za-z0-9_.-])\/?apps\/game(?:\/|$)/;
 const oldEnginePathGlobalPattern = /(^|[^A-Za-z0-9_.-])\/?apps\/game(?:\/|$)/g;
 const literalPattern = /["'`]([^"'`\n]+)["'`]/g;
+const engineContentTokenPattern =
+	/(^|[^a-z0-9])(?:miranda|observatory|sci[-_]?fi|yggdrasil|solitude|portal[-_]arena)(?:[^a-z0-9]|$)/i;
 
 const files = await collectFiles(join(rootPath, "src"));
 const violations = [];
@@ -26,6 +28,12 @@ for (const file of files) {
 	const imports = extractImportSpecifiers(source).map((specifier) =>
 		resolveSpecifier(rel, specifier),
 	);
+
+	if (isOversizedPrimitiveParitySource(rel, source)) {
+		violations.push(
+			`${rel}: primitive parity owner files must stay small; move bulk imported scene data to generated JSON plus validation`,
+		);
+	}
 
 	for (const match of oldEngineReferenceMatches(rel, source, imports)) {
 		violations.push(
@@ -40,6 +48,12 @@ for (const file of files) {
 					`${rel}: engine code must not import ${forbiddenPath} (${match.specifier})`,
 				);
 			}
+		}
+
+		for (const match of engineContentLiteralMatches(source)) {
+			violations.push(
+				`${rel}: engine implementation must not embed level/content-specific IDs (${match})`,
+			);
 		}
 	}
 
@@ -270,4 +284,26 @@ function oldEngineReferenceMatches(rel, source, imports) {
 	}
 
 	return [...matches].sort();
+}
+
+function engineContentLiteralMatches(source) {
+	const matches = new Set();
+
+	for (const match of source.matchAll(literalPattern)) {
+		const literal = match[1].replaceAll("\\", "/");
+
+		if (engineContentTokenPattern.test(literal)) {
+			matches.add(match[1]);
+		}
+	}
+
+	return [...matches].sort();
+}
+
+function isOversizedPrimitiveParitySource(rel, source) {
+	return (
+		pathStartsWith(rel, "src/game/content") &&
+		rel.endsWith("PrimitiveParity.ts") &&
+		source.split("\n").length > 250
+	);
 }

@@ -33,10 +33,6 @@ collision binary is ported.
   `apps/game.megameal/public/assets/game/observatory/observatory-environment.glb`.
 - Add manifest asset `mesh_observatory_environment` at
   `/assets/game/observatory/observatory-environment.glb`.
-- Add generated visual terrain asset `mesh_observatory_field_micro_displacement`
-  at `/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.glb`
-  with checked-in provenance metadata; this remains visual-only and aligned to
-  the authored collision sample grid.
 - Reuse `cubemap_observatory_sky`, `mesh_player`, `material_player`,
   `audio_player_jump`, and `audio_player_charge_release`.
 - Add shared manifest-owned water assets through `WaterSurfaceContract`:
@@ -75,7 +71,7 @@ collision binary is ported.
   `mesh_water_plane + material_water_dark_still`, and authored `WaterSurface`
   animation/reflection/refraction data. The instance has no collider and no
   gameplay volume. Richer future water behavior is tracked in
-  `docs/WATER_SURFACE_SYSTEM_PLAN.md`.
+  `docs/Done/WATER_SURFACE_SYSTEM_PLAN.md`.
 - Add render profile `observatory_moon_archive` using
   `cubemap_observatory_sky`, low ambient light, and no directional key/fill
   lights.
@@ -106,8 +102,7 @@ Extend `test:runtime-scene-contract` with explicit assertions for:
 - `defaultRuntimeSceneManifests` includes `observatoryRuntimeSceneManifest`, and
   `getRuntimeSceneManifest("observatory_runtime")` resolves.
 - Required/preloaded assets include `mesh_observatory_environment`,
-  `mesh_observatory_field_micro_displacement`, `mesh_water_plane`,
-  `mesh_observatory_firefly_marker`, `cubemap_observatory_sky`,
+  `mesh_water_plane`, `mesh_observatory_firefly_marker`, `cubemap_observatory_sky`,
   `material_water_dark_still`, `material_observatory_firefly`,
   `audio_player_jump`, `audio_player_charge_release`, and
   `audio_ambient_portal_deck`.
@@ -115,10 +110,9 @@ Extend `test:runtime-scene-contract` with explicit assertions for:
   chunks, old terrain manifests, or old generated collider binaries.
 - Player spawn, `CharacterController.groundY` fallback, kinematic collision
   settings, and player-carried `Light` values match this plan.
-- Source terrain visual entity, generated visual terrain entity, terrain scale,
-  authored walkable floor collision, boundary blocker collision, water transform,
-  shared water renderable, and shared water material/component parameters match
-  this plan.
+- Source terrain visual entity, terrain scale, authored walkable floor
+  collision, boundary blocker collision, water transform, shared water
+  renderable, and shared water material/component parameters match this plan.
 - Required light stable IDs include `player`, `observatory:firefly:archive`,
   `observatory:firefly:lantern`, and `observatory:firefly:tide`.
 - Each firefly marker has the expected stable ID, position, renderable
@@ -144,10 +138,9 @@ Run:
 - `pnpm --dir apps/game.megameal test:kinematic-character-contract`
 - `pnpm --dir apps/game.megameal test:level-authoring-contract`
 - `pnpm --dir apps/game.megameal test:generated-glb-import-contract`
-- `pnpm --dir apps/game.megameal test:observatory-visual-terrain-contract`
+- `pnpm --dir apps/game.megameal test:terrain-import-pipeline-contract`
+- `pnpm --dir apps/game.megameal test:terrain-cook-contract`
 - `pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract`
-- `pnpm --dir apps/game.megameal ci:observatory-collision-drift`
-- `pnpm --dir apps/game.megameal cook:observatory-collision`
 - `git diff --check -- apps/game.megameal pnpm-lock.yaml`
 
 ## Current Progress
@@ -168,7 +161,7 @@ Run:
   including catalog resolution, shared water ownership, firefly light readiness,
   and old-runtime negative checks.
 - Observatory-only water scaffolding was replaced with the shared
-  `docs/WATER_SURFACE_SYSTEM_PLAN.md` contract:
+  `docs/Done/WATER_SURFACE_SYSTEM_PLAN.md` contract:
   - shared assets `mesh_water_plane` and `material_water_dark_still`
   - shared prefab `water_surface_plane`
   - level-owned instance `observatory:water`
@@ -185,7 +178,7 @@ Run:
   - `git diff --check -- apps/game.megameal pnpm-lock.yaml`
 - Follow-up scale adjustment: `observatory:terrain` now renders the source GLB
   at unit scale `[1, 1, 1]`; collision findings and the recommended next packet
-  are recorded in `docs/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md`.
+  are recorded in `docs/Done/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md`.
   Follow-up validation passed for `audit:engine-boundaries`, `type-check`,
   `lint`, `test:runtime-scene-contract`, and `git diff --check`.
 - Observatory V1 collision content implemented over the engine-wide collision
@@ -196,12 +189,6 @@ Run:
     stable ID.
   - `test:runtime-scene-contract` covers positive layout assertions and
     negative readiness failures for missing boundary/walkable collision.
-- Generated Observatory visual terrain was added through
-  `ObservatoryVisualTerrainContract`:
-  - `mesh_observatory_field_micro_displacement`
-  - `observatory_field_visual_terrain`
-  - `observatory:terrain:visual-field`
-  - generated provenance and GLB hash validation
 - Observatory scene music was promoted from the old `courtyard-breeze` preset
   evidence through the target audio manifest contract:
   - shared production audio asset `audio_ambient_portal_deck`

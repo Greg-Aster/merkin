@@ -1,13 +1,16 @@
 ---
-import LevelEditorPreviewControls from "../app/editor/LevelEditorPreviewControls.svelte";
+import { readFile } from "node:fs/promises";
 import type { LevelEditorSessionSummary } from "../app/editor/levelEditorSession.js";
-import "../styles/editor.css";
 
 const title = "Megameal Level Editor";
 const isDevEditor = import.meta.env.DEV;
+let editorCss: string | undefined;
 let editorSummary: LevelEditorSessionSummary | undefined;
 
 if (isDevEditor) {
+	editorCss = await readFile(new URL("../styles/editor.css", import.meta.url), {
+		encoding: "utf8",
+	});
 	const editorModule = await import("../app/editor/levelEditorSession.js");
 	editorSummary = editorModule.getDefaultLevelEditorSessionSummary();
 }
@@ -70,6 +73,7 @@ function clampPercent(value: number): string {
 			content="Megameal game engine level editor development shell."
 		/>
 		<title>{title}</title>
+		{isDevEditor && editorCss ? <style set:html={editorCss} /> : null}
 	</head>
 	<body>
 		<main class="editor-shell">
@@ -130,21 +134,60 @@ function clampPercent(value: number): string {
 									<dd>{editorSummary.preview.sourcePlanHash}</dd>
 								</div>
 							</dl>
-							<LevelEditorPreviewControls
-								client:only="svelte"
-								serializedPreviewPatch={editorSummary.preview.serializedPatch}
+							<div
+								data-level-editor-preview-controls
+								data-preview-patch={editorSummary.preview.serializedPatch}
 							/>
+							<script>
+								if (import.meta.env.DEV) {
+									void (async () => {
+										const target = document.querySelector(
+											"[data-level-editor-preview-controls]",
+										);
+
+										if (!(target instanceof HTMLElement)) {
+											return;
+										}
+
+										const serializedPreviewPatch =
+											target.getAttribute("data-preview-patch");
+
+										if (serializedPreviewPatch === null) {
+											return;
+										}
+
+										const [{ mount }, editorControlsModule] =
+											await Promise.all([
+												import("svelte"),
+												import(
+													"../app/editor/LevelEditorPreviewControls.svelte"
+												),
+											]);
+										const LevelEditorPreviewControls =
+											editorControlsModule.default as unknown as import("svelte").Component<{
+												serializedPreviewPatch: string;
+											}>;
+
+										mount(LevelEditorPreviewControls, {
+											target,
+											props: {
+												serializedPreviewPatch,
+											},
+										});
+									})();
+								}
+							</script>
 						</section>
 
 						<section class="editor-panel" aria-label="Collision bake">
 							<dl class="editor-facts">
 								<div>
-									<dt>Bake Artifact</dt>
-									<dd>{editorSummary.bake.generatedArtifactPath}</dd>
+									<dt>Bake Mode</dt>
+									<dd>{editorSummary.bake.mode}</dd>
 								</div>
 								<div>
 									<dt>Bake Hash</dt>
-									<dd>{editorSummary.bake.generatedArtifactHash}</dd>
+									<dd>{editorSummary.bake.derivedBakeHash}</dd>
 								</div>
 								<div>
 									<dt>Write Plan Hash</dt>
@@ -228,7 +271,7 @@ function clampPercent(value: number): string {
 										</div>
 										<div>
 											<dt>Generator</dt>
-											<dd>{terrainImport.generatorScript ?? "n/a"}</dd>
+											<dd>{terrainImport.generatorId ?? "n/a"}</dd>
 										</div>
 										<div>
 											<dt>Metadata</dt>

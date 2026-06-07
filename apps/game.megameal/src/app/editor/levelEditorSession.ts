@@ -1,4 +1,3 @@
-import observatoryVisualTerrainMetadata from "../../../public/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.json";
 import {
 	buildCollisionCookBakeFile,
 	buildCollisionCookPlan,
@@ -10,10 +9,8 @@ import {
 import type {
 	CollisionCookShapeData,
 	CollisionCookVector3Data,
-	GeneratedGlbImportEntry,
 } from "../../engine/data/index.js";
 import type { CollisionIntentData } from "../../engine/data/schemas/index.js";
-import { generatedGlbImportParityManifests } from "../../game/assets/generatedGlbImportParity.js";
 import { buildCollisionOverlayViewModel } from "../../game/editor/collisionDrafts/collisionOverlayViewModel.js";
 import { observatoryCollisionCookDraft } from "../../game/editor/collisionDrafts/observatoryCollisionDraft.js";
 import { mirandaLightAuthoringDraft } from "../../game/editor/lightDrafts/mirandaLightDraft.js";
@@ -90,10 +87,10 @@ export type LevelEditorTerrainImportStatus = {
 	readonly id: string;
 	readonly runtimeSceneId: string;
 	readonly generatedAt: string;
-	readonly status: GeneratedGlbImportEntry["status"];
+	readonly status: "imported" | "planned" | "replaced";
 	readonly owner: string;
 	readonly sourceUrl: string;
-	readonly generatorScript: string | null;
+	readonly generatorId: string | null;
 	readonly metadataPath: string | null;
 	readonly glbSha256: string | null;
 	readonly source: {
@@ -189,8 +186,8 @@ export type LevelEditorSessionSummary = {
 		readonly serializedPatch: string;
 	};
 	readonly bake: {
-		readonly generatedArtifactPath: string;
-		readonly generatedArtifactHash: string;
+		readonly mode: "derived-in-memory";
+		readonly derivedBakeHash: string;
 		readonly writePlanHash: string;
 		readonly writeArtifactCount: number;
 		readonly writesRuntimeData: false;
@@ -333,9 +330,8 @@ export function getDefaultLevelEditorSessionSummary(): LevelEditorSessionSummary
 			serializedPatch: serializeCollisionCookPreviewPatch(previewPatch),
 		},
 		bake: {
-			generatedArtifactPath:
-				"src/game/editor/collisionDrafts/generated/observatoryCollisionBake.json",
-			generatedArtifactHash: bakeFile.contentHash,
+			mode: "derived-in-memory",
+			derivedBakeHash: bakeFile.contentHash,
 			writePlanHash: writePlan.contentHash,
 			writeArtifactCount: writePlan.artifacts.length,
 			writesRuntimeData: bakeFile.writesRuntimeData,
@@ -419,148 +415,7 @@ function boxMetadata(shape: CollisionCookShapeData): LevelEditorBoxMetadata {
 }
 
 function buildTerrainImportStatuses(): readonly LevelEditorTerrainImportStatus[] {
-	const metadataByPath = new Map([
-		[
-			observatoryVisualTerrainMetadata.output.metadataPath,
-			observatoryVisualTerrainMetadata,
-		],
-	]);
-
-	return generatedGlbImportParityManifests.flatMap((manifest) =>
-		manifest.entries.flatMap((entry) => {
-			const importEntry = entry as GeneratedGlbImportEntry;
-
-			if (!importEntry.artifact) {
-				return [];
-			}
-
-			const metadata = metadataByPath.get(importEntry.artifact.metadataPath);
-
-			if (!metadata) {
-				return [];
-			}
-
-			const collisionStableIds = collisionStableIdsFromMetadataSource(
-				metadata.source,
-			);
-
-			return [
-				{
-					id: importEntry.id,
-					runtimeSceneId: importEntry.runtimeSceneId,
-					generatedAt: manifest.generatedAt,
-					status: importEntry.status,
-					owner: importEntry.owner,
-					sourceUrl: importEntry.sourceUrl,
-					generatorScript: importEntry.artifact.generatorScript,
-					metadataPath: importEntry.artifact.metadataPath,
-					glbSha256: importEntry.artifact.glbSha256,
-					source: {
-						collisionDraftId: metadata.source.collisionDraftId,
-						primaryCollisionStableId: collisionStableIds[0] ?? "none",
-						collisionStableIds,
-						sourceVisualAssetId: metadata.source.sourceVisualAssetId,
-						sourceVisualStableId: metadata.source.sourceVisualStableId,
-						sourceVisualScale: vector3FromArray(
-							metadata.source.sourceVisualScale,
-							`${importEntry.id}.source.sourceVisualScale`,
-						),
-					},
-					output: {
-						meshAssetId: metadata.output.meshAssetId,
-						prefabId: metadata.output.prefabId,
-						stableId: metadata.output.stableId,
-						glbUrl: metadata.output.glbUrl,
-						scale: vector3FromArray(
-							metadata.output.scale,
-							`${importEntry.id}.output.scale`,
-						),
-					},
-					alignment: {
-						renderUsesCollisionAsImplicitCollision:
-							metadata.alignment.renderUsesCollisionAsImplicitCollision,
-						sourceGlbScale: vector3FromArray(
-							metadata.alignment.sourceGlbScale,
-							`${importEntry.id}.alignment.sourceGlbScale`,
-						),
-						visualTerrainScale: vector3FromArray(
-							metadata.alignment.visualTerrainScale,
-							`${importEntry.id}.alignment.visualTerrainScale`,
-						),
-						collisionGridSize: metadata.alignment.collisionGridSize,
-						collisionCellSize: metadata.alignment.collisionCellSize,
-						collisionVertexCount: metadata.alignment.collisionVertexCount,
-						collisionTriangleCount: metadata.alignment.collisionTriangleCount,
-						visualGridSize: metadata.alignment.visualGridSize,
-						visualCellSize: metadata.alignment.visualCellSize,
-						visualVertexCount: metadata.alignment.visualVertexCount,
-						visualTriangleCount: metadata.alignment.visualTriangleCount,
-						microDisplacementAmplitude:
-							metadata.alignment.microDisplacementAmplitude,
-						maxCollisionSampleError: metadata.alignment.maxCollisionSampleError,
-						heightRange: {
-							min: metadata.alignment.heightRange.min,
-							max: metadata.alignment.heightRange.max,
-						},
-						anchorSampleCount: metadata.alignment.collisionAnchorSamples.length,
-					},
-					readiness: {
-						imported: importEntry.status === "imported",
-						hasArtifactProvenance: importEntry.artifact !== undefined,
-						hasTargetRuntimeIds:
-							(importEntry.target?.assetIds?.length ?? 0) > 0 &&
-							(importEntry.target?.prefabIds?.length ?? 0) > 0 &&
-							(importEntry.target?.stableIds?.length ?? 0) > 0,
-						collisionLinked:
-							metadata.source.collisionDraftId ===
-								observatoryCollisionCookDraft.id &&
-							collisionStableIdsMatchCurrentWalkableTerrain(collisionStableIds),
-						visualOnly:
-							metadata.alignment.renderUsesCollisionAsImplicitCollision ===
-							false,
-					},
-				},
-			];
-		}),
-	);
-}
-
-function collisionStableIdsFromMetadataSource(
-	source: typeof observatoryVisualTerrainMetadata.source & {
-		readonly collisionStableIds?: readonly string[];
-		readonly collisionStableId?: string;
-	},
-): readonly string[] {
-	if (Array.isArray(source.collisionStableIds)) {
-		return [...source.collisionStableIds];
-	}
-
-	if (typeof source.collisionStableId === "string") {
-		return [source.collisionStableId];
-	}
-
 	return [];
-}
-
-function collisionStableIdsMatchCurrentWalkableTerrain(
-	stableIds: readonly string[],
-): boolean {
-	const baseStableId = "observatory:walkable-mesh";
-
-	if (stableIds.includes(baseStableId)) {
-		return true;
-	}
-
-	const currentWalkableChunkStableIds = observatoryCollisionCookDraft.entries
-		.map((entry) => entry.stableId)
-		.filter((stableId) => stableId.startsWith(`${baseStableId}:chunk:`));
-
-	return (
-		currentWalkableChunkStableIds.length > 0 &&
-		currentWalkableChunkStableIds.every((stableId) =>
-			stableIds.includes(stableId),
-		)
-	);
 }
 
 function chunkGeometrySummary(
@@ -619,21 +474,4 @@ function squareGridSize(vertexCount: number): number | null {
 
 function roundMetric(value: number): number {
 	return Number(value.toFixed(6));
-}
-
-function vector3FromArray(
-	value: readonly number[],
-	label: string,
-): CollisionCookVector3Data {
-	if (value.length !== 3) {
-		throw new Error(`Expected ${label} to have exactly three numbers.`);
-	}
-
-	const [x, y, z] = value;
-
-	if (typeof x !== "number" || typeof y !== "number" || typeof z !== "number") {
-		throw new Error(`Expected ${label} to have exactly three numbers.`);
-	}
-
-	return [x, y, z];
 }

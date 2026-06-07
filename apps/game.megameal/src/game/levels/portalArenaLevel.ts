@@ -28,6 +28,7 @@ const portalSlots: readonly PortalSlot[] = [
 	{
 		id: "solitude",
 		label: "Solitude",
+		targetRuntimeSceneId: "solitude_runtime",
 	},
 	{
 		id: "sci-fi-room",
@@ -35,8 +36,9 @@ const portalSlots: readonly PortalSlot[] = [
 		targetRuntimeSceneId: "sci_fi_room_runtime",
 	},
 	{
-		id: "archive",
-		label: "Archive",
+		id: "yggdrasil",
+		label: "Yggdrasil",
+		targetRuntimeSceneId: "yggdrasil_runtime",
 	},
 	{
 		id: "garden",
@@ -66,7 +68,7 @@ export const portalArenaLevel = {
 		"mesh_player",
 		"mesh_portal_field",
 		"mesh_portal_gate",
-		"cubemap_classic_sky",
+		"texture_portal_arena_equirectangular_sky",
 		"material_player",
 		"audio_player_jump",
 		"audio_player_charge_release",

@@ -1,10 +1,12 @@
-# Skybox Active Implementation Plan
+# Skybox Portal Arena Equirectangular Implementation Record
 
-Status: active implementation packet for 2026-06-06
+Status: portal arena equirectangular production opt-in implemented on
+2026-06-06; weather, clouds, import UI, cooked environment products, richer
+probe enhancements, and quality tiers remain future work
 
-This plan converts the saved skybox backlog into a same-day implementation
-slice. The filename is retained for existing doc links, but the work below is
-the active packet for the next sky/environment agent.
+This file records the saved skybox backlog as the portal arena implementation
+slice plus remaining future work. The filename is retained for existing doc
+links.
 
 The goal is not to ship a full weather, cloud, and environment-editor stack in
 one pass. The goal is to prove the production scene-environment pipeline beyond
@@ -12,7 +14,7 @@ cubemaps by moving one real runtime scene to a non-cubemap environment through
 the existing `SkyboxEnvironmentContract`, with validation and cleanup strong
 enough that later AAA-tier sky work has a durable foundation.
 
-## Today Goal
+## Implemented Goal
 
 Ship one production-authored non-cubemap scene environment through the current
 manifest-backed architecture.
@@ -29,13 +31,14 @@ first proves the authored environment path where users land, without coupling
 the work to Observatory, Miranda, Sci Fi Room, or old-engine migration churn.
 ```
 
-Done today means:
+Implemented state:
 
 - `portal_arena_runtime` no longer uses `cubemap_classic_sky` as its production
   render-profile environment.
 - A content-owned equirectangular environment asset is registered through the
   game asset manifest path, preloaded by the selected runtime scene, and listed
   in readiness when required.
+- The asset ID is `texture_portal_arena_equirectangular_sky`.
 - The environment is projected only by the Three adapter through
   `Scene.background` and `Scene.environment`.
 - The runtime-scene and scene-environment contract tests cover the new
@@ -74,9 +77,12 @@ Owner files to inspect before editing:
 - `scripts/test-scene-environment-contract.ts`
 - `scripts/test-runtime-scene-contract.ts`
 
-Expected baseline:
+Baseline before the production opt-in:
 
-- Current runtime scenes use `cubemap-skybox`.
+- Runtime scenes used `cubemap-skybox` before this packet. After completion,
+  `portal_arena_runtime` uses `equirectangular-environment`, while other
+  current production scenes remain on their authored cubemap environments unless
+  explicitly changed.
 - The schema already accepts `equirectangular-environment`.
 - Texture assets can declare `projection: "equirectangular"`.
 - The Three adapter already projects equirectangular textures and PMREM
@@ -91,10 +97,10 @@ Stop condition:
 
 ## Packet 1: Add Production Environment Asset
 
-Expected work:
+Implemented work:
 
 - Add a production-owned portal arena environment texture under a content-owned
-  path such as:
+  path:
 
 ```text
 public/assets/environment/portal-arena/portal-arena-sky-equirectangular.png
@@ -113,9 +119,11 @@ tags: ["skybox", "environment", "portal-arena"]
 - Add the asset to `portalArenaAssetManifest`.
 - Keep the existing sample equirectangular and sample video assets as contract
   test fixtures only. Do not use sample assets as the production scene sky.
-- If the selected image is generated or converted, document the source path,
-  generation/conversion command, and intended ownership in a short adjacent
-  asset note or in this plan before handoff.
+- Asset provenance: copied from the existing checked-in 2:1 panorama
+  `public/assets/skyboxes/170645ae-3f1f-47db-b920-226e61838ab7.png` into
+  `public/assets/environment/portal-arena/portal-arena-sky-equirectangular.png`.
+  No generated runtime artifact, cook output, or conversion command owns this
+  asset.
 
 Completion criteria:
 
@@ -126,7 +134,7 @@ Completion criteria:
 
 ## Packet 2: Opt Portal Arena Into Equirectangular Environment
 
-Expected work:
+Implemented work:
 
 - Update `portalArenaRenderProfile.environment` to:
 
@@ -181,25 +189,26 @@ Completion criteria:
 
 ## Packet 4: Update Documentation And Register State
 
-Expected work:
+Implemented work:
 
 - Update `ENGINE_CONTRACT_REGISTER.md` so `SkyboxEnvironmentContract` and the
   active migration status say the default portal arena scene uses a manifest
   owned equirectangular environment.
 - Update `GAME_ENGINE_DESIGN_DOCUMENT.md` current implementation status so it
-  no longer says all production scenes are cubemap-only.
+  says portal arena uses the equirectangular asset while non-portal production
+  scenes remain on their authored cubemaps.
 - Update `ARCHITECTURE.md` scene environment notes with the same current-state
   truth.
 - Keep `docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` and
   `docs/Done/SKYBOX_CUBEMAP_SYSTEM_REVIEW.md` as completed foundation records.
-- Do not move this file to `docs/Done` until Packet 1 through Packet 4 are
-  implemented and validated.
+- Keep this file under `docs/Done/` as the completed portal opt-in record and
+  future feature tracker unless a later cleanup intentionally moves it.
 
 Completion criteria:
 
 - Docs distinguish three states clearly:
   - completed cubemap/foundation work,
-  - active portal arena equirectangular production opt-in,
+  - implemented portal arena equirectangular production opt-in,
   - deferred weather, clouds, import UI, cooked products, and richer probes.
 
 ## Packet 5: Cleanup And Handoff
@@ -221,7 +230,7 @@ Completion criteria:
 
 ## Explicit Deferrals
 
-These remain out of today's packet unless the user explicitly expands scope:
+These remain future unless the user explicitly expands scope:
 
 - Environment editor/import UI.
 - Generated or cooked environment product pipeline.
@@ -254,7 +263,7 @@ of the default validation path unless explicitly requested.
 
 ## Handoff Rule
 
-Do not call this active packet complete until source, assets, docs, contract
-register, cleanup, and focused validation all agree. If only the plan is saved,
-say that it is planned. If runtime support exists but the production opt-in was
-not completed, say that directly.
+Do not call the portal arena opt-in complete unless source, assets, docs,
+contract register, cleanup, and focused validation all agree. If only docs are
+being reconciled, report that validation scope separately. If future
+weather/cloud/import/cooked/probe work has not landed, keep it marked future.

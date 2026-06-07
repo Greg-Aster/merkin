@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
 import { getDefaultLevelEditorSessionSummary } from "../src/app/editor/levelEditorSession.js";
 import {
 	type CollisionCookPlan,
@@ -11,7 +9,6 @@ import {
 	loadRuntimeSceneManifest,
 	validateCollisionCookPlanAgainstRuntimeScene,
 } from "../src/engine/index.js";
-import { generatedGlbImportParityManifests } from "../src/game/assets/index.js";
 import { observatoryCollisionCookDraft } from "../src/game/editor/collisionDrafts/observatoryCollisionDraft.js";
 import { collisionRuntimeModule } from "../src/game/generated/observatoryCollisionRuntime.js";
 import {
@@ -19,17 +16,7 @@ import {
 	getRuntimeSceneManifest,
 } from "../src/game/levels/index.js";
 
-const metadataPath =
-	"public/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.json";
-const glbPath =
-	"public/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.glb";
 const runtimeSceneId = "observatory_runtime";
-const visualStableId = "observatory:terrain:visual-field";
-const sourceTerrainStableId = "observatory:terrain";
-const visualAssetId = "mesh_observatory_field_micro_displacement";
-const visualPrefabId = "observatory_field_visual_terrain";
-const visualGlbUrl =
-	"/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.glb";
 const chunkStableIdPrefix = "observatory:walkable-mesh:chunk:";
 const expectedChunkStableIds = createExpectedChunkStableIds();
 const expectedReadinessChunkStableIds = [...expectedChunkStableIds].sort();
@@ -49,118 +36,20 @@ assertIncludes(
 );
 
 const manifest = loadRuntimeSceneManifest(catalogManifest);
-const metadata = assertRecord(
-	JSON.parse(
-		await readFile(new URL(`../${metadataPath}`, import.meta.url), "utf8"),
-	),
-	"Observatory terrain import metadata",
-);
-const glb = await readFile(new URL(`../${glbPath}`, import.meta.url));
 const plan = buildCollisionCookPlan(observatoryCollisionCookDraft);
 const writePlan = buildCollisionCookWritePlan(plan);
 const previewPatch = buildCollisionCookPreviewPatch(plan);
 const editorSummary = getDefaultLevelEditorSessionSummary();
 
 assertRuntimeValidation(plan, manifest);
-assertGeneratedTerrainImport(metadata, glb, manifest);
 assertCookedChunkPlan(plan);
 assertRuntimeReadinessLinkage(plan, manifest);
 assertEditorTerrainStatus(plan);
 assertDeterministicCookProducts(plan);
-assertNoRenderGlbCollisionInference(metadata, manifest);
 
 console.log(
 	`Terrain import pipeline contract passed for ${expectedChunkStableIds.length} Observatory cooked terrain chunks.`,
 );
-
-function assertGeneratedTerrainImport(
-	metadataInput: Record<string, unknown>,
-	glbBuffer: Buffer,
-	runtimeManifest: RuntimeSceneManifestData,
-): void {
-	const source = assertRecord(metadataInput.source, "metadata.source");
-	const output = assertRecord(metadataInput.output, "metadata.output");
-	const alignment = assertRecord(metadataInput.alignment, "metadata.alignment");
-	const importManifest = generatedGlbImportParityManifests.find(
-		(candidate) =>
-			candidate.id === "observatory-generated-visual-terrain-import",
-	);
-	const importEntry = importManifest?.entries.find(
-		(candidate) => candidate.id === "observatory-field-micro-displacement-glb",
-	);
-
-	if (!importEntry || !hasGeneratedArtifact(importEntry)) {
-		throw new Error(
-			"Expected Observatory visual terrain import entry to include artifact provenance.",
-		);
-	}
-
-	const artifact = importEntry.artifact;
-
-	assertEqual(metadataInput.schemaVersion, 1);
-	assertEqual(metadataInput.id, "observatory_visual_terrain_generated_v1");
-	assertEqual(metadataInput.owner, "Observatory visual terrain generation");
-	assertEqual(importEntry.status, "imported");
-	assertEqual(importEntry.runtimeSceneId, runtimeSceneId);
-	assertEqual(importEntry.sourceUrl, visualGlbUrl);
-	assertEqual(
-		artifact.generatorScript,
-		"scripts/generate-observatory-field-terrain.ts",
-	);
-	assertEqual(artifact.metadataPath, metadataPath);
-	assertEqual(artifact.glbSha256, output.glbSha256);
-	assertIncludes(importEntry.target?.assetIds ?? [], visualAssetId);
-	assertIncludes(importEntry.target?.prefabIds ?? [], visualPrefabId);
-	assertIncludes(importEntry.target?.stableIds ?? [], visualStableId);
-
-	assertEqual(source.runtimeSceneId, runtimeSceneId);
-	assertEqual(source.collisionDraftId, observatoryCollisionCookDraft.id);
-	assertEqual(source.sourceVisualAssetId, "mesh_observatory_environment");
-	assertEqual(
-		source.sourceVisualAssetUrl,
-		"/assets/game/observatory/observatory-environment.glb",
-	);
-	assertEqual(source.sourceVisualStableId, sourceTerrainStableId);
-	assertDeepEqual(source.sourceVisualScale, [1, 1, 1]);
-
-	assertEqual(output.meshAssetId, visualAssetId);
-	assertEqual(output.prefabId, visualPrefabId);
-	assertEqual(output.stableId, visualStableId);
-	assertEqual(output.glbUrl, visualGlbUrl);
-	assertEqual(output.glbPath, glbPath);
-	assertEqual(output.metadataPath, metadataPath);
-	assertDeepEqual(output.scale, [1, 1, 1]);
-
-	assertEqual(
-		assertString(output.glbSha256, "metadata.output.glbSha256"),
-		createSha256(glbBuffer),
-	);
-	assertEqual(glbBuffer.subarray(0, 4).toString("utf8"), "glTF");
-	assertEqual(glbBuffer.readUInt32LE(4), 2);
-	assertEqual(glbBuffer.readUInt32LE(8), glbBuffer.length);
-
-	assertDeepEqual(alignment.sourceGlbScale, [1, 1, 1]);
-	assertDeepEqual(alignment.visualTerrainScale, [1, 1, 1]);
-	assertEqual(alignment.collisionGridSize, 17);
-	assertEqual(alignment.collisionCellSize, 40);
-	assertEqual(alignment.collisionVertexCount, 289);
-	assertEqual(alignment.collisionTriangleCount, 512);
-	assertEqual(alignment.visualGridSize, 65);
-	assertEqual(alignment.visualCellSize, 10);
-	assertEqual(alignment.visualVertexCount, 4225);
-	assertEqual(alignment.visualTriangleCount, 8192);
-	assertEqual(alignment.maxCollisionSampleError, 0);
-
-	const fieldAsset = runtimeManifest.assets.assets.find(
-		(asset) => asset.id === visualAssetId,
-	);
-	assertEqual(fieldAsset?.url, visualGlbUrl);
-	assertIncludes(runtimeManifest.level.preload ?? [], visualAssetId);
-	assertIncludes(
-		runtimeManifest.readiness.requiredAssetIds ?? [],
-		visualAssetId,
-	);
-}
 
 function assertCookedChunkPlan(cookPlan: CollisionCookPlan): void {
 	const chunks = terrainChunkEntries(cookPlan);
@@ -324,14 +213,14 @@ function assertEditorTerrainStatus(cookPlan: CollisionCookPlan): void {
 		(chunk) => chunk.shapeType === "mesh",
 	);
 
-	assertEqual(terrain.importCount, 1);
-	assertEqual(terrain.importedCount, 1);
+	assertEqual(terrain.importCount, 0);
+	assertEqual(terrain.importedCount, 0);
 	assertEqual(terrain.collisionChunkCount, 20);
 	assertEqual(terrain.meshChunkCount, 16);
 	assertEqual(terrain.boxChunkCount, 4);
 	assertEqual(terrain.walkableChunkCount, 16);
 	assertEqual(terrain.collisionTriangleCount, 512);
-	assertEqual(terrain.visualTriangleCount, 8192);
+	assertEqual(terrain.visualTriangleCount, 0);
 	assertEqual(terrain.sourcePlanHash, writePlan.provenance.sourcePlanHash);
 	assertDeepEqual(
 		editorMeshChunks.map((chunk) => chunk.stableId),
@@ -352,22 +241,7 @@ function assertEditorTerrainStatus(cookPlan: CollisionCookPlan): void {
 		assertEqual(chunk.geometry.halfExtent, 80);
 	}
 
-	const terrainImport = terrain.imports.find(
-		(entry) => entry.id === "observatory-field-micro-displacement-glb",
-	);
-
-	if (!terrainImport) {
-		throw new Error(
-			"Expected editor terrain status to expose the Observatory visual terrain import.",
-		);
-	}
-
-	assertEqual(terrainImport.readiness.imported, true);
-	assertEqual(terrainImport.readiness.hasArtifactProvenance, true);
-	assertEqual(terrainImport.readiness.hasTargetRuntimeIds, true);
-	assertEqual(terrainImport.readiness.visualOnly, true);
-	assertDeepEqual(terrainImport.source.sourceVisualScale, [1, 1, 1]);
-	assertDeepEqual(terrainImport.output.scale, [1, 1, 1]);
+	assertDeepEqual(terrain.imports, []);
 }
 
 function assertDeterministicCookProducts(cookPlan: CollisionCookPlan): void {
@@ -399,51 +273,6 @@ function assertDeterministicCookProducts(cookPlan: CollisionCookPlan): void {
 		collisionRuntimeModule.sourcePlanHash,
 		writePlan.provenance.sourcePlanHash,
 	);
-}
-
-function assertNoRenderGlbCollisionInference(
-	metadataInput: Record<string, unknown>,
-	runtimeManifest: RuntimeSceneManifestData,
-): void {
-	const alignment = assertRecord(metadataInput.alignment, "metadata.alignment");
-
-	assertEqual(alignment.renderUsesCollisionAsImplicitCollision, false);
-	assertExcludes(
-		runtimeManifest.readiness.requiredCollisionStableIds ?? [],
-		visualStableId,
-		"Generated visual terrain stable ID must not be required collision.",
-	);
-	assertExcludes(
-		runtimeManifest.readiness.requiredWalkableStableIds ?? [],
-		visualStableId,
-		"Generated visual terrain stable ID must not be required walkable collision.",
-	);
-	assertEqual(
-		componentsForStableId(runtimeManifest, visualStableId).Collider,
-		undefined,
-	);
-	assertEqual(
-		componentsForStableId(runtimeManifest, visualStableId).RigidBody,
-		undefined,
-	);
-	assertEqual(
-		componentsForStableId(runtimeManifest, sourceTerrainStableId).Collider,
-		undefined,
-	);
-	assertEqual(
-		componentsForStableId(runtimeManifest, sourceTerrainStableId).RigidBody,
-		undefined,
-	);
-
-	for (const stableId of expectedChunkStableIds) {
-		const collider = componentsForStableId(runtimeManifest, stableId).Collider;
-
-		if (!isRecord(collider)) {
-			throw new Error(
-				`Expected terrain collision stable ID "${stableId}" to resolve through explicit collider data.`,
-			);
-		}
-	}
 }
 
 function assertRuntimeValidation(
@@ -591,10 +420,6 @@ function boundsFromVertices(
 	);
 }
 
-function createSha256(buffer: Buffer): string {
-	return createHash("sha256").update(buffer).digest("hex");
-}
-
 function assertIncludes<TValue>(
 	values: readonly TValue[],
 	expected: TValue,
@@ -604,19 +429,6 @@ function assertIncludes<TValue>(
 		throw new Error(
 			message ??
 				`Expected ${JSON.stringify(values)} to include ${JSON.stringify(expected)}.`,
-		);
-	}
-}
-
-function assertExcludes<TValue>(
-	values: readonly TValue[],
-	expected: TValue,
-	message?: string,
-): void {
-	if (values.includes(expected)) {
-		throw new Error(
-			message ??
-				`Expected ${JSON.stringify(values)} to exclude ${JSON.stringify(expected)}.`,
 		);
 	}
 }
@@ -646,38 +458,6 @@ function assertDeepEqual<TValue>(
 			message ?? `Expected ${expectedJson}, received ${actualJson}.`,
 		);
 	}
-}
-
-function assertRecord(value: unknown, label: string): Record<string, unknown> {
-	if (!isRecord(value)) {
-		throw new Error(`Expected ${label} to be an object.`);
-	}
-
-	return value;
-}
-
-function assertString(value: unknown, label: string): string {
-	if (typeof value !== "string") {
-		throw new Error(`Expected ${label} to be a string.`);
-	}
-
-	return value;
-}
-
-function hasGeneratedArtifact(value: unknown): value is {
-	readonly artifact: {
-		readonly generatorScript: string;
-		readonly metadataPath: string;
-		readonly glbSha256: string;
-	};
-} {
-	return (
-		isRecord(value) &&
-		isRecord(value.artifact) &&
-		typeof value.artifact.generatorScript === "string" &&
-		typeof value.artifact.metadataPath === "string" &&
-		typeof value.artifact.glbSha256 === "string"
-	);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

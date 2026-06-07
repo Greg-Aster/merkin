@@ -121,7 +121,6 @@ export type SceneEnvironmentLighting = {
 };
 
 export type BaseSceneEnvironment = {
-	readonly [property: string]: unknown;
 	readonly backgroundIntensity: number;
 	readonly backgroundBlurriness?: number;
 	readonly environmentIntensity?: number;
@@ -277,6 +276,7 @@ export type WaterSurfaceGameplayVolume = {
 
 export type WaterSurfaceComponent = {
 	readonly surfaceType: "plane";
+	readonly bodyType?: "ocean" | "lake" | "river" | "custom";
 	readonly normalMapAssetIds?: readonly string[];
 	readonly animation: WaterSurfaceAnimation;
 	readonly reflection: WaterSurfaceReflection;
@@ -287,6 +287,7 @@ export type WaterSurfaceComponent = {
 };
 
 export type WaterSurfaceRendererState = {
+	readonly bodyType?: "ocean" | "lake" | "river" | "custom";
 	readonly normalMapAssetIds?: readonly string[];
 	readonly animation: WaterSurfaceAnimation;
 	readonly reflection: WaterSurfaceReflection;
@@ -295,10 +296,21 @@ export type WaterSurfaceRendererState = {
 	readonly visible: boolean;
 };
 
+export type WaterSurfaceRendererPort = {
+	updateWaterSurface(
+		entity: Entity,
+		water: WaterSurfaceRendererState,
+		transform: RenderTransform,
+		elapsedSeconds: number,
+	): void;
+	detachWaterSurface(entity: Entity): void;
+};
+
 export function waterSurfaceRendererStateFromComponent(
 	water: WaterSurfaceComponent,
 ): WaterSurfaceRendererState {
 	return {
+		...(water.bodyType ? { bodyType: water.bodyType } : {}),
 		...(water.normalMapAssetIds
 			? { normalMapAssetIds: [...water.normalMapAssetIds] }
 			: {}),
@@ -320,6 +332,8 @@ export type RenderQueueItem = {
 
 export type RenderSyncContext = {
 	readonly world: World;
+	readonly deltaSeconds?: number;
+	readonly tick?: number;
 	readonly interpolation?: number;
 };
 
@@ -342,6 +356,13 @@ export type ReflectionProbeSyncSystemOptions = {
 	readonly transformComponent?: string;
 	readonly previousTransformComponent?: string;
 	readonly reflectionProbeComponent?: string;
+};
+
+export type WaterSurfaceSyncSystemOptions = {
+	readonly renderer: WaterSurfaceRendererPort;
+	readonly transformComponent?: string;
+	readonly previousTransformComponent?: string;
+	readonly waterSurfaceComponent?: string;
 };
 
 export type TransformHistorySystemOptions = {
@@ -370,6 +391,13 @@ export type ReflectionProbeSyncSystemHandle<
 	detachAll(): void;
 	hasEntity(entity: Entity): boolean;
 };
+
+export type WaterSurfaceSyncSystemHandle<TContext extends RenderSyncContext> =
+	System<TContext> & {
+		detach(entity: Entity): void;
+		detachAll(): void;
+		hasEntity(entity: Entity): boolean;
+	};
 
 export class RenderSyncSystem {
 	readonly renderer: RendererPort;
@@ -664,6 +692,95 @@ export class ReflectionProbeSyncSystem {
 	}
 }
 
+export class WaterSurfaceSyncSystem {
+	readonly renderer: WaterSurfaceRendererPort;
+	readonly transformComponent: string;
+	readonly previousTransformComponent: string;
+	readonly waterSurfaceComponent: string;
+
+	readonly #attachedEntities = new Set<Entity>();
+
+	constructor(options: WaterSurfaceSyncSystemOptions) {
+		this.renderer = options.renderer;
+		this.transformComponent = options.transformComponent ?? TRANSFORM_COMPONENT;
+		this.previousTransformComponent =
+			options.previousTransformComponent ?? PREVIOUS_TRANSFORM_COMPONENT;
+		this.waterSurfaceComponent =
+			options.waterSurfaceComponent ?? WATER_SURFACE_COMPONENT;
+	}
+
+	update(context: RenderSyncContext): void {
+		const activeEntities = new Set(
+			context.world.query([
+				this.transformComponent,
+				this.waterSurfaceComponent,
+			]),
+		);
+
+		for (const entity of activeEntities) {
+			const water = context.world.requireComponent<WaterSurfaceComponent>(
+				entity,
+				this.waterSurfaceComponent,
+			);
+
+			if (water.visible === false) {
+				this.detach(entity);
+				continue;
+			}
+
+			const transform = context.world.requireComponent<RenderTransform>(
+				entity,
+				this.transformComponent,
+			);
+			const previousTransform = context.world.getComponent<RenderTransform>(
+				entity,
+				this.previousTransformComponent,
+			);
+			const renderedTransform =
+				previousTransform && context.interpolation !== undefined
+					? interpolateTransform(
+							previousTransform,
+							transform,
+							context.interpolation,
+						)
+					: transform;
+			const elapsedSeconds = renderElapsedSeconds(context);
+
+			this.renderer.updateWaterSurface(
+				entity,
+				waterSurfaceRendererStateFromComponent(water),
+				renderedTransform,
+				elapsedSeconds,
+			);
+			this.#attachedEntities.add(entity);
+		}
+
+		for (const entity of [...this.#attachedEntities]) {
+			if (!activeEntities.has(entity)) {
+				this.detach(entity);
+			}
+		}
+	}
+
+	detach(entity: Entity): void {
+		if (!this.#attachedEntities.delete(entity)) {
+			return;
+		}
+
+		this.renderer.detachWaterSurface(entity);
+	}
+
+	detachAll(): void {
+		for (const entity of [...this.#attachedEntities]) {
+			this.detach(entity);
+		}
+	}
+
+	hasEntity(entity: Entity): boolean {
+		return this.#attachedEntities.has(entity);
+	}
+}
+
 export function createRenderSyncSystem<TContext extends RenderSyncContext>(
 	options: RenderSyncSystemOptions,
 ): RenderSyncSystemHandle<TContext> {
@@ -735,6 +852,31 @@ export function createReflectionProbeSyncSystem<
 	};
 }
 
+export function createWaterSurfaceSyncSystem<
+	TContext extends RenderSyncContext,
+>(
+	options: WaterSurfaceSyncSystemOptions,
+): WaterSurfaceSyncSystemHandle<TContext> {
+	const sync = new WaterSurfaceSyncSystem(options);
+
+	return {
+		id: "water-surface-sync",
+		reads: [sync.transformComponent, sync.waterSurfaceComponent],
+		update(context) {
+			sync.update(context);
+		},
+		detach(entity) {
+			sync.detach(entity);
+		},
+		detachAll() {
+			sync.detachAll();
+		},
+		hasEntity(entity) {
+			return sync.hasEntity(entity);
+		},
+	};
+}
+
 export function createTransformHistorySystem<
 	TContext extends { readonly world: World },
 >(options: TransformHistorySystemOptions = {}): System<TContext> {
@@ -761,6 +903,14 @@ export function createTransformHistorySystem<
 			}
 		},
 	};
+}
+
+function renderElapsedSeconds(context: RenderSyncContext): number {
+	const tick = context.tick ?? 0;
+	const deltaSeconds = context.deltaSeconds ?? 0;
+	const interpolation = context.interpolation ?? 0;
+
+	return (tick + interpolation) * deltaSeconds;
 }
 
 function renderableKey(renderable: RenderableComponent): string {

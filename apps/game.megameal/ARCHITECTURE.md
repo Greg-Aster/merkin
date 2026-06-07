@@ -315,6 +315,8 @@ The key scene rule:
 
 ```text
 Anything created during load must be destroyed during unload.
+Scene cleanup must attempt every registered cleanup before reporting aggregate
+failure.
 ```
 
 ### Runtime Scene Catalog And Load Path
@@ -354,21 +356,34 @@ LevelLoader, and readiness evaluation before player-controlled gameplay is
 exposed.
 Runtime scene transitions resolve target scenes by manifest ID from the game
 runtime catalog, not by level-specific branches in the app shell or engine core.
-The current checked-in catalog contains `portal_arena_runtime`,
-`prototype_arena_runtime`, `miranda_deck_runtime`, `observatory_runtime`, and
-`sci_fi_room_runtime`; `portal_arena_runtime` remains the default.
+The current checked-in playable catalog contains `portal_arena_runtime`,
+`prototype_arena_runtime`, `miranda_deck_runtime`, `observatory_runtime`,
+`sci_fi_room_runtime`, `solitude_runtime`, and `yggdrasil_runtime`;
+`portal_arena_runtime` remains the default.
+`YggdrasilLevelContract` and `PrimitiveSceneContentContract` own the direct
+primitive-parity Yggdrasil playable foundation; old GLB asset parity, cooked
+collision products, water, particle/firefly, lighting, post-processing, and
+partition parity remain future contracts.
 Render profiles also declare the scene environment. Required environment
 assets are manifest-owned, preloaded with the selected scene, included in
 readiness when required, and projected by the renderer adapter only after the
 scene preload succeeds.
-The current default runtime scenes use `cubemap-skybox`. The scene environment
-contract also accepts equirectangular texture skies, muted video skies,
-procedural atmosphere, bounded dynamic capture, and authored reflection probes
-for authored scenes. Completed sky/environment packets live in
-`docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` and
-`docs/Done/SKYBOX_CUBEMAP_SYSTEM_REVIEW.md`; the active portal arena
-equirectangular opt-in packet is tracked in
-`docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`.
+The default `portal_arena_runtime` render profile now uses the manifest-owned
+`equirectangular-environment` asset
+`texture_portal_arena_equirectangular_sky`. That asset is preloaded by the
+selected portal arena manifest and required for readiness. It is a checked-in
+copy of the existing 2:1 panorama
+`public/assets/skyboxes/170645ae-3f1f-47db-b920-226e61838ab7.png`, copied to
+`public/assets/environment/portal-arena/portal-arena-sky-equirectangular.png`
+with no generated runtime artifact. Other current production scenes remain on
+their authored `cubemap-skybox` environments unless explicitly changed. The
+scene environment contract also accepts equirectangular texture skies, muted
+video skies, procedural atmosphere, bounded dynamic capture, and authored
+reflection probes for authored scenes. Completed sky/environment packets live
+in `docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` and
+`docs/Done/SKYBOX_CUBEMAP_SYSTEM_REVIEW.md`; portal arena opt-in history and
+remaining future sky/weather/import/probe work are tracked in
+`docs/Done/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`.
 Readiness also checks exact required collision stable IDs and exact required
 light stable IDs, so authored scene-critical collision and lighting cannot be
 accidentally skipped by spawning only a matching prefab family.
@@ -398,6 +413,7 @@ portal_arena_runtime
   -> eight authored portal slots on a large generated GLB moor field
   -> one real GLB portal gate asset referenced through mesh_portal_gate
   -> one real GLB field asset referenced through mesh_portal_field
+  -> equirectangular scene environment referenced through texture_portal_arena_equirectangular_sky
   -> explicit large flat collision proxy owned by portal_arena_floor
   -> required player-carried point light with held-charge feedback
   -> one real portal-deck scene music asset referenced through audio_ambient_portal_deck
@@ -407,7 +423,7 @@ portal_arena_runtime
   -> manifest-owned music/sfx/spatial mixer buses projected only by the audio adapter
   -> Portal components contribute proximity candidates for active target selection
   -> active portals target prototype_arena_runtime, miranda_deck_runtime,
-     observatory_runtime, and sci_fi_room_runtime
+     observatory_runtime, solitude_runtime, and sci_fi_room_runtime
 
 	miranda_deck_runtime
 	  -> old Miranda spawn as authored player transform
@@ -445,14 +461,9 @@ observatory_runtime
      evidence only
   -> implemented foundation packet in docs/OBSERVATORY_PLAYABLE_FOUNDATION_PLAN.md
   -> source GLB visual owned as mesh_observatory_environment
-  -> generated field visual owned as
-     mesh_observatory_field_micro_displacement under
-     public/assets/generated/game/observatory/terrain
   -> consumes engine-wide CollisionPolicy, WalkableCollisionContract, and
      LevelReadinessContract for collision
   -> mesh_observatory_environment stays visual-only
-  -> mesh_observatory_field_micro_displacement stays visual-only with
-     generated provenance/alignment metadata
   -> required observatory:walkable-mesh:chunk:x*-z* walkable/worldStatic
      mesh collision chunks
   -> player opts into engine-owned kinematic character collision through
@@ -496,6 +507,40 @@ sci_fi_room_runtime
   -> portal transition from portal_arena_runtime by runtime manifest ID
   -> no old generated runtime scene JSON, generated collider binaries, app-shell
      branches, or render-floor collision inference
+
+solitude_runtime
+  -> target-owned playable foundation under SolitudeLevelContract
+  -> old Solitude scene JSON, generated runtime scene JSON, and world partition
+     are provenance only
+  -> uses target-owned primitive/current assets, prefabs, level data, render
+     profile, manifest-owned audio/environment data, and a compact no-streaming
+     level representation
+  -> explicitly owns the old plateau and dais surfaces as
+     walkable/worldStatic collision with stable IDs and readiness requirements
+  -> closes the old missing solitude-ground-plateau collision-manifest
+     blocker through target-owned collider/readiness data and negative
+     validation
+  -> portal transition from portal_arena_runtime is admitted after
+     runtime-scene and content-graph validation
+  -> full old generated GLB/cooked collision parity, twelve pillar-firefly NPC
+     groups, large ambient particle field, post-processing/reflections,
+     production light tuning, and partition/streaming behavior remain future
+     contracts
+
+yggdrasil_runtime
+  -> target-owned primitive-parity playable foundation under
+     YggdrasilLevelContract and PrimitiveSceneContentContract
+  -> old Yggdrasil scene backups, generated runtime scene JSON, and world
+     partition are provenance only
+  -> uses checked-in content data for all old primitive nodes, reusable
+     primitive helpers for manifest assets/prefabs/level instances,
+     render profile, audio/environment manifest data, explicit primitive
+     collision/walkable readiness, story/portal identity markers, and focused
+     validation before any portal-arena transition is added
+  -> old GLB asset parity, cooked collision products, water
+     rendering/gameplay volumes, ambient particle/firefly parity, production
+     lighting, post-processing, reflections, editor import/cook/write tooling,
+     and partition/streaming behavior remain future contracts
 ```
 
 Full Miranda is not treated as ready until remaining terrain, cooked collision,
@@ -525,13 +570,35 @@ stable IDs, walkable IDs, light IDs, and portal target manifest IDs from
 authored content. Missing source data fails the validator, not the renderer,
 physics adapter, UI, or app shell.
 
+The engine data contract modules are split by responsibility. Public imports
+should use the package barrels, but ownership lives in focused files:
+
+```text
+src/engine/data/schemas/
+  -> explicit public barrel plus type, schema, component, render-profile,
+     runtime-scene, terrain-package, helper, and validation modules
+src/engine/data/contentGraph/
+  -> content graph types, runtime scene requirement derivation, and generated
+     GLB import parity validation
+src/engine/data/collisionCook/
+  -> collision draft/message validation, preview/bake plan creation, runtime
+     scene validation, and write-plan serialization
+src/engine/data/terrainCook/
+  -> terrain cook manifest validation, shape validation, plan creation,
+     runtime scene validation, stable hashing, and write-plan serialization
+```
+
+The `index.ts` files in those folders are API barrels only. They must preserve
+documented public exports and should not become the place where contract logic
+accumulates again.
+
 Generated GLB parity also belongs to the content graph layer. Legacy generated
 GLB candidates must be represented by checked-in import parity manifests that
 either resolve to target asset, prefab, and stable level IDs or remain planned
 with owner metadata and removal conditions. Runtime scenes must not load old
 generated GLBs until an explicit import/generation owner has produced target
 manifest data. Imported target-generated GLBs must also declare the generator
-script, checked-in provenance metadata path, and generated GLB SHA-256 in the
+ID, checked-in provenance metadata path, and generated GLB SHA-256 in the
 import parity manifest so drift fails in contract validation instead of at
 runtime.
 
@@ -557,17 +624,18 @@ Game Window
 ```
 
 The first data/check foundation is implemented for Observatory collision:
-`src/engine/data/collisionCook/index.ts` validates draft data, the checked-in
-draft lives under `src/game/editor/collisionDrafts`, and
-`cook:observatory-collision` drift-checks it against the current runtime
-manifest without writing files by default. The cook contract can serialize a
-temporary dev-only preview patch and can write the deterministic editor-owned
-generated bake artifact with `--write-generated-bake`; normal runtime data does
-not import that artifact. The explicit runtime collision bake writes only the
-generated checked-in runtime module at
-`src/game/generated/observatoryCollisionRuntime.ts` with
-`--write-runtime-collision`; Observatory prefab, level, and manifest owners
-import that module instead of duplicating cooked collision values. The dev-only
+`src/engine/data/collisionCook` owns reusable draft validation and the
+checked-in collision draft data lives under `src/game/editor/collisionDrafts`.
+The former Observatory-only cook/drift commands were retired because editor and
+cook tooling must be generic and manifest-driven, not one script per level.
+Editor bake data is derived in memory for diagnostics until a generic generated
+artifact owner exists. Normal runtime data does not import editor bake
+artifacts. The checked-in
+generated collision runtime module at
+`src/game/generated/observatoryCollisionRuntime.ts` is retained as current
+runtime data until a generic cook owner replaces it; Observatory prefab, level,
+and manifest owners import that module instead of duplicating cooked collision
+values. The dev-only
 game-window preview/reload protocol is implemented as an app-layer
 `BroadcastChannel` transport plus callback port; it validates collision preview
 patches before send/application and applies temporary transform/collider
@@ -577,12 +645,12 @@ lifecycle diagnostics remain planned. The `/editor/` route exposes editable
 collision controls and a top-down collision gizmo surface for current
 Observatory draft entries; persisted spatial drag handles and generalized
 multi-level editing remain planned. The generalized terrain import/cook
-contract is implemented through engine data terrain cook validation, generated
-Observatory field GLB provenance, and explicit runtime-drift checks. Cooked
-terrain chunks are implemented as a foundation through 16 deterministic
+contract is implemented through engine data terrain cook validation, checked-in
+generated terrain provenance, and focused contract tests. Cooked terrain chunks
+are implemented as a foundation through 16 deterministic
 Observatory walkable terrain chunks derived from the authored 17x17 height
 grid, plus four boundary blockers. Render terrain and collision terrain are
-separate products: generated visual terrain stays visual-only, and runtime
+separate products: the Observatory terrain GLB stays visual-only, and runtime
 traversal stays on explicit collider data. Production editor import UI,
 material/shader import, terrain LOD/streaming, and multi-level terrain packages
 remain future packets tracked in
@@ -590,7 +658,7 @@ remain future packets tracked in
 editor modules or rely on editor state.
 The first dev-only boundary shell exists at `/editor/`, backed by
 `src/app/editor/levelEditorSession.ts`; it lists the current Observatory
-editor session, preview metadata, and generated bake artifact hash without
+editor session, preview metadata, and derived dry-run bake hash without
 mounting through the normal game HUD.
 
 Runtime character traversal must use engine physics abstractions, not renderer

@@ -232,13 +232,13 @@ function assertEditorSessionControls(): void {
 function assertEditorTerrainStatus(): void {
 	assertEqual(
 		editorSession.terrain.importCount,
-		1,
-		"Expected editor terrain status to expose one current terrain import.",
+		0,
+		"Expected editor terrain status to expose no generated visual imports.",
 	);
 	assertEqual(
 		editorSession.terrain.importedCount,
-		1,
-		"Expected current terrain import to be marked imported.",
+		0,
+		"Expected no generated terrain imports to be marked imported.",
 	);
 	assertEqual(
 		editorSession.terrain.collisionChunkCount,
@@ -267,8 +267,8 @@ function assertEditorTerrainStatus(): void {
 	);
 	assertEqual(
 		editorSession.terrain.visualTriangleCount,
-		8192,
-		"Expected terrain visual triangle count to come from generated import metadata.",
+		0,
+		"Expected no imported terrain triangles after removing the generated Observatory field.",
 	);
 	assertEqual(
 		editorSession.terrain.sourcePlanHash,
@@ -276,136 +276,10 @@ function assertEditorTerrainStatus(): void {
 		"Expected terrain status to expose the collision source plan hash.",
 	);
 
-	const terrainImport = editorSession.terrain.imports[0];
-
-	if (!terrainImport) {
-		throw new Error("Expected editor terrain import status to exist.");
-	}
-
-	assertEqual(
-		terrainImport.id,
-		"observatory-field-micro-displacement-glb",
-		"Unexpected editor terrain import ID.",
-	);
-	assertEqual(
-		terrainImport.status,
-		"imported",
-		"Expected editor terrain import to preserve import manifest status.",
-	);
-	assertEqual(
-		terrainImport.generatorScript,
-		"scripts/generate-observatory-field-terrain.ts",
-		"Expected editor terrain import to expose generator script provenance.",
-	);
-	assertEqual(
-		terrainImport.metadataPath,
-		"public/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.json",
-		"Expected editor terrain import to expose generated metadata path.",
-	);
-	assertEqual(
-		terrainImport.glbSha256,
-		"326df726413d05e1139efe355d3e65bb0b78d120ecd05e615cc5ed1e37dd0d92",
-		"Expected editor terrain import to expose the generated GLB hash.",
-	);
-	assertEqual(
-		terrainImport.source.collisionDraftId,
-		"observatory_collision_draft_v1",
-		"Expected editor terrain import to expose collision draft linkage.",
-	);
-	assertEqual(
-		terrainImport.source.primaryCollisionStableId,
-		firstObservatoryWalkableChunkStableId,
-		"Expected editor terrain import to expose primary collision stable ID linkage.",
-	);
-	assertEqual(
-		terrainImport.source.collisionStableIds.length,
-		16,
-		"Expected editor terrain import to normalize all collision chunk stable IDs.",
-	);
-	assertIncludes(
-		terrainImport.source.collisionStableIds,
-		firstObservatoryWalkableChunkStableId,
-		"Expected editor terrain import to expose collision stable ID chunk linkage.",
-	);
-	assertEqual(
-		terrainImport.output.meshAssetId,
-		"mesh_observatory_field_micro_displacement",
-		"Expected editor terrain import to expose runtime mesh asset target.",
-	);
-	assertEqual(
-		terrainImport.output.prefabId,
-		"observatory_field_visual_terrain",
-		"Expected editor terrain import to expose runtime prefab target.",
-	);
-	assertEqual(
-		terrainImport.output.stableId,
-		"observatory:terrain:visual-field",
-		"Expected editor terrain import to expose runtime stable ID target.",
-	);
-	assertEqual(
-		terrainImport.alignment.renderUsesCollisionAsImplicitCollision,
-		false,
-		"Editor terrain status must not claim render geometry owns collision.",
-	);
-	assertEqual(
-		terrainImport.alignment.collisionGridSize,
-		17,
-		"Expected editor terrain status to expose collision grid size.",
-	);
-	assertEqual(
-		terrainImport.alignment.visualGridSize,
-		65,
-		"Expected editor terrain status to expose visual grid size.",
-	);
-	assertEqual(
-		terrainImport.alignment.collisionTriangleCount,
-		512,
-		"Expected editor terrain status to expose collision triangle count.",
-	);
-	assertEqual(
-		terrainImport.alignment.visualTriangleCount,
-		8192,
-		"Expected editor terrain status to expose visual triangle count.",
-	);
-	assertEqual(
-		terrainImport.alignment.microDisplacementAmplitude,
-		0.055,
-		"Expected editor terrain status to expose micro displacement amplitude.",
-	);
-	assertEqual(
-		terrainImport.alignment.maxCollisionSampleError,
-		0,
-		"Expected editor terrain status to expose zero collision sample drift.",
-	);
-	assertEqual(
-		terrainImport.alignment.anchorSampleCount,
-		5,
-		"Expected editor terrain status to expose sampled collision anchors.",
-	);
-	assertEqual(
-		terrainImport.readiness.imported,
-		true,
-		"Expected editor terrain readiness to mark import as ready.",
-	);
-	assertEqual(
-		terrainImport.readiness.hasArtifactProvenance,
-		true,
-		"Expected editor terrain readiness to mark provenance as ready.",
-	);
-	assertEqual(
-		terrainImport.readiness.hasTargetRuntimeIds,
-		true,
-		"Expected editor terrain readiness to mark target runtime IDs as ready.",
-	);
-	assertEqual(
-		terrainImport.readiness.collisionLinked,
-		true,
-		"Expected editor terrain readiness to mark collision linkage as ready.",
-	);
-	assertEqual(
-		terrainImport.readiness.visualOnly,
-		true,
-		"Expected editor terrain readiness to mark visual terrain as visual-only.",
+	assertArrayEqual(
+		editorSession.terrain.imports,
+		[],
+		"Expected editor terrain status to expose no generated visual import entries.",
 	);
 
 	const terrainChunk = terrainStatusChunk(

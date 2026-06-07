@@ -12,18 +12,7 @@ import {
 	type PhysicsTransformComponent,
 	createKinematicCharacterControllerSystem,
 } from "../src/engine/modules/physics/index.js";
-
-function assertEqual<TValue>(
-	actual: TValue,
-	expected: TValue,
-	message?: string,
-) {
-	if (actual !== expected) {
-		throw new Error(
-			message ?? `Expected ${String(expected)}, received ${String(actual)}.`,
-		);
-	}
-}
+import { assertEqual } from "./contractTestHelpers.js";
 
 function assertClose(actual: number, expected: number, message?: string) {
 	if (Math.abs(actual - expected) > 0.000001) {

@@ -10,7 +10,6 @@ import {
 	type Vec3,
 	addVec3,
 	lengthSquaredVec3,
-	quat,
 	scaleVec3,
 	vec3,
 } from "../../math/index.js";
@@ -283,8 +282,10 @@ export class PhysicsSyncSystem {
 		);
 
 		for (const entity of activeBodies) {
-			const transform = normalizeRuntimeTransform(
+			const transform = requireRuntimeTransform(
 				context.world.requireComponent(entity, this.transformComponent),
+				entity,
+				this.transformComponent,
 			);
 			const body = context.world.requireComponent<RigidBodyComponent>(
 				entity,
@@ -346,8 +347,10 @@ export class PhysicsSyncSystem {
 				continue;
 			}
 
-			const transform = normalizeRuntimeTransform(
+			const transform = requireRuntimeTransform(
 				context.world.requireComponent(entity, this.transformComponent),
+				entity,
+				this.transformComponent,
 			);
 			const nextTransform = this.adapter.syncTransformFromBody(bodyHandle);
 
@@ -584,8 +587,10 @@ export function createKinematicCharacterControllerSystem<
 					entity,
 					characterMotorComponent,
 				) ?? { direction: vec3(), sprinting: false, jumpRequested: false };
-				const transform = normalizeRuntimeTransform(
+				const transform = requireRuntimeTransform(
 					context.world.requireComponent(entity, transformComponent),
+					entity,
+					transformComponent,
 				);
 				const controller =
 					context.world.requireComponent<CharacterControllerComponent>(
@@ -768,21 +773,36 @@ function toPhysicsTransform(
 	};
 }
 
-function normalizeRuntimeTransform(value: unknown): PhysicsTransformComponent {
+function requireRuntimeTransform(
+	value: unknown,
+	entity: Entity,
+	componentName: string,
+): PhysicsTransformComponent {
 	if (!isRecord(value)) {
-		return {
-			position: vec3(),
-			rotation: quat(),
-			scale: vec3(1, 1, 1),
-		};
+		throw new Error(
+			`Invalid ${componentName} component on entity ${entity}: expected an object.`,
+		);
 	}
 
-	return {
-		...value,
-		position: vec3FromUnknown(value.position, vec3()),
-		rotation: quatFromUnknown(value.rotation, quat()),
-		scale: vec3FromUnknown(value.scale, vec3(1, 1, 1)),
-	};
+	if (!isFiniteVec3(value.position)) {
+		throw new Error(
+			`Invalid ${componentName} component on entity ${entity}: position must be a finite Vec3.`,
+		);
+	}
+
+	if (!isFiniteQuat(value.rotation)) {
+		throw new Error(
+			`Invalid ${componentName} component on entity ${entity}: rotation must be a finite Quat.`,
+		);
+	}
+
+	if (value.scale !== undefined && !isFiniteVec3(value.scale)) {
+		throw new Error(
+			`Invalid ${componentName} component on entity ${entity}: scale must be a finite Vec3 when provided.`,
+		);
+	}
+
+	return value as PhysicsTransformComponent;
 }
 
 function clampPosition(
@@ -800,46 +820,23 @@ function clampPosition(
 	);
 }
 
-function vec3FromUnknown(value: unknown, fallback: Vec3): Vec3 {
-	if (Array.isArray(value)) {
-		return vec3(
-			numberOrFallback(value[0], fallback.x),
-			numberOrFallback(value[1], fallback.y),
-			numberOrFallback(value[2], fallback.z),
-		);
-	}
-
-	if (isRecord(value)) {
-		return vec3(
-			numberOrFallback(value.x, fallback.x),
-			numberOrFallback(value.y, fallback.y),
-			numberOrFallback(value.z, fallback.z),
-		);
-	}
-
-	return fallback;
+function isFiniteVec3(value: unknown): value is Vec3 {
+	return (
+		isRecord(value) &&
+		isFiniteNumber(value.x) &&
+		isFiniteNumber(value.y) &&
+		isFiniteNumber(value.z)
+	);
 }
 
-function quatFromUnknown(value: unknown, fallback: Quat): Quat {
-	if (Array.isArray(value)) {
-		return quat(
-			numberOrFallback(value[0], fallback.x),
-			numberOrFallback(value[1], fallback.y),
-			numberOrFallback(value[2], fallback.z),
-			numberOrFallback(value[3], fallback.w),
-		);
-	}
-
-	if (isRecord(value)) {
-		return quat(
-			numberOrFallback(value.x, fallback.x),
-			numberOrFallback(value.y, fallback.y),
-			numberOrFallback(value.z, fallback.z),
-			numberOrFallback(value.w, fallback.w),
-		);
-	}
-
-	return fallback;
+function isFiniteQuat(value: unknown): value is Quat {
+	return (
+		isRecord(value) &&
+		isFiniteNumber(value.x) &&
+		isFiniteNumber(value.y) &&
+		isFiniteNumber(value.z) &&
+		isFiniteNumber(value.w)
+	);
 }
 
 function withoutBodyHandle(body: RigidBodyComponent): RigidBodyComponent {
@@ -879,8 +876,8 @@ function sortRecord(value: unknown): unknown {
 	return value;
 }
 
-function numberOrFallback(value: unknown, fallback: number): number {
-	return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+function isFiniteNumber(value: unknown): value is number {
+	return typeof value === "number" && Number.isFinite(value);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

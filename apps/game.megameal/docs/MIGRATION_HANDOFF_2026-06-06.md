@@ -3,8 +3,8 @@
 ## Current Packet State
 
 This handoff was continued by
-`docs/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md` and aligned by
-`docs/MIGRATION_AGENT_ALIGNMENT_2026-06-06.md`. Current work is one combined
+`docs/Done/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md` and aligned by
+`docs/Done/MIGRATION_AGENT_ALIGNMENT_2026-06-06.md`. Current work is one combined
 engine packet using shared contracts, not separate level architectures.
 
 Miranda advanced in three packets:
@@ -131,10 +131,10 @@ Expected modified files:
 - `ENGINE_CONTRACT_REGISTER.md`
 - `GAME_ENGINE_DESIGN_DOCUMENT.md`
 - `docs/GAME_ENGINE_MIGRATION_PLAN.md`
-- `docs/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md`
-- `docs/MIGRATION_AGENT_ALIGNMENT_2026-06-06.md`
+- `docs/Done/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md`
+- `docs/Done/MIGRATION_AGENT_ALIGNMENT_2026-06-06.md`
 - `docs/MIGRATION_HANDOFF_2026-06-06.md`
-- `docs/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md`
+- `docs/Done/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md`
 - `docs/OBSERVATORY_PLAYABLE_FOUNDATION_PLAN.md`
 - `public/audio/sfx/PORTAL_SFX_SOURCES.md`
 - `scripts/test-runtime-scene-contract.ts`

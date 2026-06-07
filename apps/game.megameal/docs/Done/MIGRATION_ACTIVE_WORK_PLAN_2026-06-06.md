@@ -101,8 +101,8 @@ pnpm --dir apps/game.megameal test:level-authoring-contract
 pnpm --dir apps/game.megameal test:generated-glb-import-contract
 pnpm --dir apps/game.megameal test:kinematic-character-contract
 pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract
-pnpm --dir apps/game.megameal ci:observatory-collision-drift
-pnpm --dir apps/game.megameal cook:observatory-collision
+pnpm --dir apps/game.megameal test:terrain-import-pipeline-contract
+pnpm --dir apps/game.megameal test:terrain-cook-contract
 pnpm --dir apps/game.megameal build
 pnpm audit:legacy-game-references
 git diff --check -- apps/game.megameal pnpm-lock.yaml
@@ -125,8 +125,8 @@ pnpm --dir apps/game.megameal exec tsx ./scripts/test-level-authoring-contract.t
 pnpm --dir apps/game.megameal exec tsx ./scripts/test-generated-glb-import-contract.ts
 pnpm --dir apps/game.megameal exec tsx ./scripts/test-kinematic-character-contract.ts
 pnpm --dir apps/game.megameal exec tsx ./scripts/test-level-editor-collision-cook-contract.ts
-pnpm --dir apps/game.megameal exec tsx ./scripts/check-observatory-collision-drift.ts
-pnpm --dir apps/game.megameal exec tsx ./scripts/cook-observatory-collision.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/test-terrain-import-pipeline-contract.ts
+pnpm --dir apps/game.megameal exec tsx ./scripts/test-terrain-cook-contract.ts
 ```
 
 Do not run a dev server, browser smoke check, or full app smoke harness unless

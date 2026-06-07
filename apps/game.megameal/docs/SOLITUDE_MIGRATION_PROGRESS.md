@@ -1,6 +1,7 @@
 # Solitude Migration Progress
 
-Status: planning/progress packet opened on 2026-06-06.
+Status: playable foundation admitted on 2026-06-06; full legacy parity remains
+future work.
 
 Scope: migrate the legacy `solitude` level into `apps/game.megameal` as a new
 target-engine runtime scene, without importing the old runtime, editor, generated
@@ -15,6 +16,7 @@ Current source-of-truth documents:
 - `ENGINE_CONTRACT_REGISTER.md`
 - `docs/GAME_ENGINE_MIGRATION_PLAN.md`
 - `docs/SOLITUDE_MIGRATION_PROGRESS.md`
+- `docs/SOLITUDE_MIGRATION_PROVENANCE.md`
 
 Legacy source evidence is provenance only:
 
@@ -22,13 +24,16 @@ Legacy source evidence is provenance only:
 - `apps/megameal/public/generated/runtime-game-assets/scenes/solitude.runtime-scene.json`
 - `apps/megameal/public/runtime-world-partitions/solitude.partition.json`
 
-Target runtime IDs reserved for the implementation packet:
+Target runtime IDs used by the admitted foundation packet:
 
 - Runtime scene: `solitude_runtime`
 - Level: `solitude`
 
-No `src/` runtime implementation has been added by this docs-only progress
-packet.
+The admitted implementation is a target-owned playable foundation, not full
+old-scene parity. Solitude uses checked-in target assets, prefabs, level data,
+render profile, audio/environment data, runtime scene manifest data, explicit
+readiness entries, and a portal-arena transition. The legacy files listed above
+remain provenance only.
 
 ## Current Evidence
 
@@ -51,42 +56,80 @@ engine.
 - Do not load old generated runtime scene JSON as runtime data.
 - Do not load the old Solitude world partition directly.
 - Do not infer walkable collision from render meshes.
-- Do not add a portal-arena transition to `solitude_runtime` until the target
-  runtime scene manifest, readiness checks, content-graph validation, and
-  runtime-scene negative tests pass.
-- Do not mark Solitude playable or complete until the target-owned packet has
-  checked-in assets, prefabs, level data, render profile, runtime manifest,
-  collision/walkable IDs, player spawn, audio/environment decisions, and focused
-  validation.
+- Portal-arena transition to `solitude_runtime` is allowed only while the
+  target runtime scene manifest, readiness checks, content-graph validation,
+  and runtime-scene negative tests remain green.
+- Do not mark Solitude full legacy parity until generated GLB/cooked collision,
+  particle/firefly population, post-processing/reflection, production lighting,
+  and partition/streaming work have their own target-owned contracts.
 
 ## Implementation Tasks
 
-- [ ] Capture source evidence from the legacy Solitude scene, old generated
+- [x] Capture source evidence from the legacy Solitude scene, old generated
       runtime scene, old partition, and old registry metadata as provenance
       notes only.
-- [ ] Create target-owned Solitude asset manifest data.
-- [ ] Create target-owned Solitude prefab definitions.
-- [ ] Create target-owned Solitude level data with a stable player spawn.
-- [ ] Define the Solitude render profile and environment/post-processing policy.
-- [ ] Resolve whether old world partition behavior becomes checked-in
-      no-streaming content, a future streaming contract, or a generated/cooked
-      import packet.
-- [ ] Implement explicit ownership for the two old required walkable/collision
+- [x] Create target-owned Solitude asset manifest data using primitive/current
+      target assets first. Old generated GLBs remain future import/cook
+      candidates until `GeneratedGlbImportParityContract` admits them.
+- [x] Create target-owned Solitude prefab definitions with manifest IDs that
+      exactly match the asset manifest.
+- [x] Create target-owned Solitude level data with the stable old-source player
+      spawn rewritten into the new level contract.
+- [x] Define the Solitude render profile and environment/post-processing policy.
+      Only schema-supported profile data may be authored now; old shadows,
+      static reflections, bloom, ambient occlusion, color grading, and vignette
+      requests remain future renderer/quality work unless the target contract
+      supports them.
+- [x] Use a no-streaming playable foundation for the first packet and keep the
+      old one-cell world partition as provenance only. Any future streaming or
+      partition product needs a target-owned cook/import contract.
+- [x] Implement explicit ownership for the two old required walkable/collision
       surfaces, including stable IDs and readiness requirements.
-- [ ] Resolve the old `solitude-ground-plateau` missing-collision blocker as
-      target-owned collider data or a documented future cooked-collision product.
-- [ ] Define ambient particle/firefly policy through existing particle/firefly
-      contracts or mark it explicitly future.
-- [ ] Migrate any old audio preset evidence through `AudioManifestAndEvents`.
-- [ ] Add runtime-scene manifest data for `solitude_runtime`.
-- [ ] Add content-graph and runtime-scene validation, including negative tests
+- [x] Resolve the old `solitude-ground-plateau` missing-collision blocker as
+      target-owned collider data in the foundation, with future cooked
+      collision parity tracked separately.
+- [x] Define ambient particle/firefly policy through existing particle/firefly
+      contracts or mark it explicitly future. A small authored firefly/story
+      marker may be part of the playable foundation, but the old twelve NPC
+      groups and large ambient particle field are not parity-complete.
+- [x] Migrate the old `lonely-wind`/`Wicked Shadows Whisper` evidence through
+      `AudioManifestAndEvents` as manifest-owned scene music or a spatial
+      emitter, not direct playback.
+- [x] Add runtime-scene manifest data for `solitude_runtime`.
+- [x] Add content-graph and runtime-scene validation, including negative tests
       for missing required walkable/collision data.
-- [ ] Add the portal-arena transition to `solitude_runtime` only after
+- [x] Add the portal-arena transition to `solitude_runtime` only after
       validation passes.
+- [x] Document remaining full-parity work: generated GLB art/collision import,
+      cooked collision products, old particle/firefly population parity,
+      post-processing/reflection rendering, production light tuning, and any
+      future partition/streaming ownership.
+
+## Implementation Evidence
+
+Source inspection on 2026-06-06 confirms:
+
+- `src/game/assets/solitudeAssets.ts` owns Solitude primitive/current mesh,
+  material, cubemap, SFX, and ambient music assets plus the Solitude audio
+  content manifest.
+- `src/game/prefabs/solitudePrefabs.ts` owns Solitude plateau, dais, pillar,
+  ring-fragment, firefly/story marker, and wind-emitter prefabs. The plateau
+  and dais declare explicit `walkable/worldStatic` collider data.
+- `src/game/levels/solitudeLevel.ts` owns the no-streaming `solitude` level,
+  player spawn, portal return, story marker, spatial wind emitter, pillar/ring
+  blockers, required collision stable IDs, and exactly two required walkable
+  stable IDs: `solitude:ground:plateau` and `solitude:ground:dais`.
+- `src/game/levels/runtimeSceneManifests.ts` admits
+  `solitudeRuntimeSceneManifest` as `solitude_runtime` in the checked-in runtime
+  scene catalog.
+- `src/game/levels/portalArenaLevel.ts` points the Solitude portal slot at
+  `solitude_runtime`.
+- `src/game/assets/defaultAssets.ts` routes `solitude_runtime` to the Solitude
+  audio content manifest.
 
 ## Validation Checklist
 
-Expected implementation validation:
+Expected implementation validation for future Solitude code changes:
 
 - `pnpm --dir apps/game.megameal test:runtime-scene-contract`
 - `pnpm --dir apps/game.megameal test:level-authoring-contract`
@@ -106,5 +149,19 @@ Docs-only validation for this progress packet:
 
 ## Current Stop State
 
-Agent 1 opened the Solitude documentation/progress packet and reserved the
-contract owner. Runtime implementation remains unstarted.
+The Solitude playable foundation is admitted as `solitude_runtime` and linked
+from the portal arena. It is a compact target-owned foundation with explicit
+plateau/dais walkable collision, a return portal, a story/firefly marker,
+manifest-owned audio, and checked-in runtime manifest data. Do not claim full
+legacy parity. Remaining Solitude work is generated GLB art/collision import,
+cooked collision products, old particle/firefly population parity,
+post-processing/reflection rendering, production light tuning, and any future
+partition/streaming ownership.
+
+Validation recorded during admission:
+
+- `pnpm --dir apps/game.megameal test:runtime-scene-contract` passed.
+- `pnpm --dir apps/game.megameal test:level-authoring-contract` passed for 6
+  runtime scene manifests.
+- `pnpm --dir apps/game.megameal test:audio-contract` passed.
+- `pnpm --dir apps/game.megameal test:scene-environment-contract` passed.

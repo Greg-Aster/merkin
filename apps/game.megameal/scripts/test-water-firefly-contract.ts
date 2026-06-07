@@ -16,64 +16,12 @@ import {
 	validateFireflyPopulationDefinition,
 } from "../src/game/populations/index.js";
 import { PrefabRegistry } from "../src/game/prefabs/index.js";
-
-function assertEqual<TValue>(
-	actual: TValue,
-	expected: TValue,
-	message?: string,
-): void {
-	if (actual !== expected) {
-		throw new Error(
-			message ?? `Expected ${String(expected)}, received ${String(actual)}.`,
-		);
-	}
-}
-
-function assertDeepEqual<TValue>(
-	actual: TValue,
-	expected: TValue,
-	message?: string,
-): void {
-	const actualJson = JSON.stringify(actual);
-	const expectedJson = JSON.stringify(expected);
-
-	if (actualJson !== expectedJson) {
-		throw new Error(
-			message ?? `Expected ${expectedJson}, received ${actualJson}.`,
-		);
-	}
-}
-
-function assertErrorIncludes(action: () => void, expected: string): void {
-	try {
-		action();
-	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : JSON.stringify(error);
-
-		if (!message.includes(expected)) {
-			throw new Error(
-				`Expected error to include ${JSON.stringify(expected)}, received ${JSON.stringify(message)}.`,
-			);
-		}
-
-		return;
-	}
-
-	throw new Error(`Expected error including ${JSON.stringify(expected)}.`);
-}
-
-function assertRecord(value: unknown, label: string): Record<string, unknown> {
-	if (!isRecord(value)) {
-		throw new Error(`Expected ${label} to be an object.`);
-	}
-
-	return value;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null && !Array.isArray(value);
-}
+import {
+	assertDeepEqual,
+	assertEqual,
+	assertErrorIncludes,
+	assertRecord,
+} from "./contractTestHelpers.js";
 
 function componentsForStableId(
 	manifest: RuntimeSceneManifestData,
@@ -120,6 +68,7 @@ const waterSurface = componentForStableId(
 );
 
 assertEqual(waterSurface.surfaceType, "plane");
+assertEqual(waterSurface.bodyType, "lake");
 assertDeepEqual(waterSurface.animation, {
 	mode: "scrolling",
 	speed: 0.035,
@@ -149,6 +98,7 @@ assertEqual(
 );
 assertEqual(rendererState.visible, true);
 assertEqual(rendererState.renderOrder, 5);
+assertEqual(rendererState.bodyType, "lake");
 assertDeepEqual(rendererState.reflection, {
 	mode: "environment",
 	intensity: 0.32,

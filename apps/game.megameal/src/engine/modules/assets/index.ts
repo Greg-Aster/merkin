@@ -66,6 +66,7 @@ type AssetRecord = {
 
 export class AssetManager implements AssetManagerPort {
 	#assets = new Map<AssetId, AssetRecord>();
+	#inFlightLoads = new Map<AssetId, Promise<unknown>>();
 	#loaders = new Map<AssetKind, AssetLoader>();
 	#disposers = new Map<AssetKind, AssetDisposer>();
 	#preloadGroups = new Map<string, readonly AssetId[]>();
@@ -141,6 +142,12 @@ export class AssetManager implements AssetManagerPort {
 			return record.asset;
 		}
 
+		const inFlightLoad = this.#inFlightLoads.get(id);
+
+		if (inFlightLoad) {
+			return inFlightLoad;
+		}
+
 		const loader = this.#loaders.get(record.entry.kind);
 
 		if (!loader) {
@@ -149,8 +156,21 @@ export class AssetManager implements AssetManagerPort {
 			);
 		}
 
-		record.asset = await loader(record.entry);
-		return record.asset;
+		const loadPromise = (async () => {
+			const asset = await loader(record.entry);
+			record.asset = asset;
+			return asset;
+		})();
+
+		this.#inFlightLoads.set(id, loadPromise);
+
+		try {
+			return await loadPromise;
+		} finally {
+			if (this.#inFlightLoads.get(id) === loadPromise) {
+				this.#inFlightLoads.delete(id);
+			}
+		}
 	}
 
 	async preload(ids: readonly AssetId[]): Promise<void> {

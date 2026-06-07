@@ -21,33 +21,11 @@ import {
 	PLAYER_LIGHT_FEEDBACK_COMPONENT,
 	type PlayerLightFeedbackComponent,
 } from "../src/game/systems/components.js";
+import { assertDeepEqual, assertEqual } from "./contractTestHelpers.js";
 
 type TestEvent = EngineEvent & {
 	readonly [key: string]: unknown;
 };
-
-function assertEqual<TValue>(
-	actual: TValue,
-	expected: TValue,
-	message?: string,
-) {
-	if (actual !== expected) {
-		throw new Error(
-			message ?? `Expected ${String(expected)}, received ${String(actual)}.`,
-		);
-	}
-}
-
-function assertDeepEqual(actual: unknown, expected: unknown, message?: string) {
-	const actualJson = JSON.stringify(actual);
-	const expectedJson = JSON.stringify(expected);
-
-	if (actualJson !== expectedJson) {
-		throw new Error(
-			message ?? `Expected ${expectedJson}, received ${actualJson}.`,
-		);
-	}
-}
 
 function assertClose(actual: number, expected: number, message?: string) {
 	if (Math.abs(actual - expected) > 0.000001) {

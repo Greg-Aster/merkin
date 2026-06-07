@@ -11,7 +11,7 @@ import {
 	audioPortalCycle,
 	meshPortalGate,
 } from "./portalAssets.js";
-import { cubemapClassicSky } from "./skyboxAssets.js";
+import { portalArenaEquirectangularSky } from "./skyboxAssets.js";
 
 const meshPlayer = {
 	id: "mesh_player",
@@ -46,7 +46,7 @@ export const portalArenaAssetManifest = {
 		meshPlayer,
 		meshPortalField,
 		meshPortalGate,
-		cubemapClassicSky,
+		portalArenaEquirectangularSky,
 		materialPlayer,
 		audioPlayerJump,
 		audioPlayerChargeRelease,
@@ -61,7 +61,7 @@ export const portalArenaAssetManifest = {
 			"mesh_player",
 			"mesh_portal_field",
 			"mesh_portal_gate",
-			"cubemap_classic_sky",
+			"texture_portal_arena_equirectangular_sky",
 			"material_player",
 			"audio_player_jump",
 			"audio_player_charge_release",

@@ -19,12 +19,11 @@ export const observatoryLevel = {
 	preload: [
 		"mesh_player",
 		"mesh_observatory_environment",
-		"mesh_observatory_field_micro_displacement",
 		"mesh_water_plane",
 		"mesh_observatory_firefly_marker",
 		"cubemap_observatory_sky",
 		"material_player",
-		"material_water_dark_still",
+		"material_water_surface",
 		"material_observatory_firefly",
 		"audio_player_jump",
 		"audio_player_charge_release",
@@ -36,44 +35,14 @@ export const observatoryLevel = {
 			prefabId: "observatory_environment",
 			stableId: "observatory:terrain",
 		},
-		{
-			id: "observatory-field-visual-terrain",
-			prefabId: "observatory_field_visual_terrain",
-			stableId: "observatory:terrain:visual-field",
-		},
 		...observatoryCollisionLevelInstances,
 		{
 			id: "observatory-water",
-			prefabId: "water_surface_plane",
+			prefabId: "lake_water_surface",
 			stableId: "observatory:water",
 			transform: {
 				position: [0, -2, 0],
 				scale: [4000, 0.02, 4000],
-			},
-			components: {
-				WaterSurface: {
-					surfaceType: "plane",
-					animation: {
-						mode: "scrolling",
-						speed: 0.035,
-						direction: [0.62, 0.78],
-						waveAmplitude: 0.08,
-						waveLength: 48,
-					},
-					reflection: {
-						mode: "environment",
-						intensity: 0.32,
-					},
-					refraction: {
-						enabled: false,
-						intensity: 0,
-					},
-					gameplayVolume: {
-						enabled: false,
-					},
-					renderOrder: 5,
-					visible: true,
-				},
 			},
 		},
 		...observatoryFireflyInstances,

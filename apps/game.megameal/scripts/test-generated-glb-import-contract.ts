@@ -9,7 +9,10 @@ import {
 import { generatedGlbImportParityManifests } from "../src/game/assets/index.js";
 import { defaultRuntimeSceneManifests } from "../src/game/levels/index.js";
 
-for (const importManifest of generatedGlbImportParityManifests) {
+const importManifests =
+	generatedGlbImportParityManifests as readonly GeneratedGlbImportManifest[];
+
+for (const importManifest of importManifests) {
 	const result = validateGeneratedGlbImportManifest({
 		importManifest,
 		runtimeSceneManifests: defaultRuntimeSceneManifests,
@@ -22,7 +25,12 @@ for (const importManifest of generatedGlbImportParityManifests) {
 	}
 }
 
-const mirandaImportManifest = generatedGlbImportParityManifests[0];
+const mirandaImportManifest = importManifests[0];
+
+if (!mirandaImportManifest) {
+	throw new Error("Expected at least one generated GLB import manifest.");
+}
+
 const commandConsoleEntry = requireEntry(
 	mirandaImportManifest,
 	"miranda-command-console-glb",
@@ -30,13 +38,6 @@ const commandConsoleEntry = requireEntry(
 const portalApparatusEntry = requireEntry(
 	mirandaImportManifest,
 	"miranda-portal-apparatus-glb",
-);
-const observatoryImportManifest = requireImportManifest(
-	"observatory-generated-visual-terrain-import",
-);
-const observatoryFieldEntry = requireEntry(
-	observatoryImportManifest,
-	"observatory-field-micro-displacement-glb",
 );
 
 expectInvalid(
@@ -122,8 +123,11 @@ expectInvalid(
 );
 
 const { planned: _planned, ...plannedWithoutMetadata } = portalApparatusEntry;
-const { artifact: _artifact, ...observatoryFieldWithoutArtifact } =
-	observatoryFieldEntry;
+const invalidArtifact = {
+	generatorId: "engine:data:generated-glb-import-pipeline",
+	metadataPath: "public/assets/generated/game/synthetic/terrain.json",
+	glbSha256: "0".repeat(64),
+};
 
 expectInvalid(
 	{
@@ -135,55 +139,18 @@ expectInvalid(
 
 expectInvalid(
 	{
-		...observatoryImportManifest,
-		entries: [observatoryFieldWithoutArtifact],
-	},
-	"must include artifact provenance metadata",
-);
-
-expectInvalid(
-	{
-		...observatoryImportManifest,
-		entries: [
-			{
-				...observatoryFieldEntry,
-				sourceUrl: "/generated/runtime-game-assets/prefabs/terrain/field.glb",
-			},
-		],
-	},
-	"must point at a target-engine /assets/generated/ artifact",
-);
-
-expectInvalid(
-	{
-		...observatoryImportManifest,
-		entries: [
-			{
-				...observatoryFieldEntry,
-				artifact: {
-					...requireArtifact(observatoryFieldEntry),
-					glbSha256: "not-a-sha",
-				},
-			},
-		],
-	},
-	"artifact.glbSha256 must be a 64-character lowercase hex SHA-256",
-);
-
-expectInvalid(
-	{
 		...mirandaImportManifest,
 		entries: [
 			{
 				...commandConsoleEntry,
-				artifact: requireArtifact(observatoryFieldEntry),
+				artifact: invalidArtifact,
 			},
 		],
 	},
 	"artifact metadata is only allowed for imported target-generated assets",
 );
 
-for (const importManifest of generatedGlbImportParityManifests) {
+for (const importManifest of importManifests) {
 	for (const entry of importManifest.entries) {
 		if (entry.status === "imported") {
 			await assertImportedArtifactProvenance(entry);
@@ -192,7 +159,7 @@ for (const importManifest of generatedGlbImportParityManifests) {
 }
 
 console.log(
-	`Generated GLB import contract passed for ${generatedGlbImportParityManifests.length} manifest(s).`,
+	`Generated GLB import contract passed for ${importManifests.length} manifest(s).`,
 );
 
 function expectInvalid(
@@ -215,22 +182,6 @@ function expectInvalid(
 			`Expected ${importManifest.id} generated GLB import errors to include ${JSON.stringify(expectedError)}, received:\n${result.errors.join("\n")}`,
 		);
 	}
-}
-
-function requireImportManifest(
-	importManifestId: string,
-): GeneratedGlbImportManifest {
-	const importManifest = generatedGlbImportParityManifests.find(
-		(candidate) => candidate.id === importManifestId,
-	);
-
-	if (!importManifest) {
-		throw new Error(
-			`Expected generated GLB import manifest "${importManifestId}" to exist.`,
-		);
-	}
-
-	return importManifest;
 }
 
 function requireEntry(
@@ -297,9 +248,8 @@ async function assertImportedArtifactProvenance(
 		assertString(metadata.owner, `${entry.id}.metadata.owner`),
 		entry.owner,
 	);
-	assertIncludes(entry.evidence, artifact.generatorScript);
+	assertIncludes(entry.evidence, artifact.generatorId);
 	assertIncludes(entry.evidence, artifact.metadataPath);
-	await readFile(gameAppFileUrl(artifact.generatorScript), "utf8");
 	assertEqual(
 		assertString(output.glbUrl, `${entry.id}.metadata.output.glbUrl`),
 		entry.sourceUrl,

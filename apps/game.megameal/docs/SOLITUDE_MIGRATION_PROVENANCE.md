@@ -1,14 +1,15 @@
 # Solitude Migration Provenance
 
-Status: provenance captured only
+Status: provenance captured; target-owned playable foundation admitted
 Last updated: 2026-06-06
-Target future runtime scene: `solitude_runtime`
+Target runtime scene: `solitude_runtime`
 
-This file records old Solitude source evidence for the future
-`SolitudeLevelContract` implementation packet. The old files listed here are
-read-only provenance. They must not become runtime inputs for
-`apps/game.megameal`, and old `apps/game` runtime, Svelte, Threlte, Three, or
-generated-scene ownership must not be imported or copied.
+This file records old Solitude source evidence for the `SolitudeLevelContract`
+implementation packet. The old files listed here are read-only provenance. They
+must not become runtime inputs for `apps/game.megameal`, and old `apps/game`
+runtime, Svelte, Threlte, Three, or generated-scene ownership must not be
+imported or copied. The target packet should produce a compact playable
+foundation first, then track full old-scene parity as future import/cook work.
 
 ## Source Evidence Consulted
 
@@ -110,8 +111,6 @@ generated-scene ownership must not be imported or copied.
 
 ## Migration Implications
 
-- The future packet needs a `SolitudeLevelContract` row before runtime/data
-  implementation begins.
 - The target engine must own new assets, prefabs, level data, render profile,
   runtime scene manifest, audio content manifest entries, collision/walkable
   IDs, and validation. The old scene JSON, generated runtime scene JSON, and
@@ -119,7 +118,7 @@ generated-scene ownership must not be imported or copied.
 - The old spawn to preserve as authored target data is `[0, 0.8, -24]`; the
   old visual bookmark uses `[0, 1.5, -24]` and should be treated as camera
   framing evidence, not a separate spawn owner.
-- The future level must explicitly own both walkable surfaces:
+- The level must explicitly own both walkable surfaces:
   `solitude-ground-plateau` and `solitude-ground-dais`. The old failure around
   missing `solitude-ground-plateau` runtime collision manifest means the new
   packet must include readiness and negative validation for required walkable
@@ -127,29 +126,35 @@ generated-scene ownership must not be imported or copied.
 - Old generated GLB candidates and collider products must go through the
   current generated-asset/import/cook contracts before runtime use. Do not load
   the old generated runtime scene or old generated collision URLs directly.
-- The old world partition had only one initial cell. The future packet still
-  needs an explicit decision: use no streaming for the target-engine foundation
-  or create a target-owned partition/cook product with validation. Do not
-  preserve the old partition as runtime data without a new owner.
-- Ambient particles and authored firefly NPCs are separate evidence streams.
-  The implementation packet should choose between target-owned deterministic
-  firefly population data, ambient particle field data, or a staged subset,
-  and document unsupported behavior as future work.
+- The old world partition had only one initial cell. The playable foundation
+  should use checked-in no-streaming level data unless a target-owned
+  partition/cook product is introduced with validation. Do not preserve the old
+  partition as runtime data without a new owner.
+- Ambient particles and authored firefly NPCs are separate evidence streams. A
+  playable foundation may use a small target-owned staged subset, but the old
+  twelve pillar-firefly groups, central firefly conversation behavior, and
+  220-particle ambient field remain future parity work unless admitted through
+  existing particle/firefly/story contracts.
 - The old `lonely-wind` preset and audio region point to a concrete ambient
   track. The target packet should migrate this through `AudioManifestAndEvents`
   and scene music or spatial emitter contracts, not through direct playback.
-- The old render profile requested shadows, static-environment reflections,
-  and post-processing. The target packet should translate only currently
-  supported render-profile data and mark unsupported effects as explicit future
-  work.
-- Portal-arena transition to `solitude_runtime` must not be added until the
-  target runtime scene manifest, content graph validation, runtime-scene
-  negative tests, and contract-register row exist and pass.
+- The old render profile requested shadows, static-environment reflections, and
+  post-processing. The target packet should translate only currently supported
+  render-profile data and mark unsupported effects as explicit future work.
+- Portal-arena transition to `solitude_runtime` is allowed only through the
+  checked-in target runtime scene manifest and catalog. It must not point at old
+  scene JSON, generated runtime JSON, or the old partition.
 
 ## Current Status
 
 - Provenance capture is complete for the old registry row, scene JSON,
   generated runtime scene JSON, and old world partition JSON.
-- No `src/` files were changed by this provenance task.
-- No runtime behavior is implemented by this file.
-- Solitude remains not migrated to `apps/game.megameal`.
+- This provenance file does not implement runtime behavior.
+- The target runtime packet is admitted as a compact playable foundation through
+  checked-in target-owned assets, prefabs, level data, render profile, runtime
+  manifest data, explicit walkable/collision readiness IDs, audio content data,
+  and the portal-arena transition.
+- Full old-scene parity remains future work: generated GLB art/collision import,
+  cooked collision products, twelve pillar-firefly NPC groups, large ambient
+  particle field, post-processing/reflection rendering, production light tuning,
+  and partition/streaming ownership.

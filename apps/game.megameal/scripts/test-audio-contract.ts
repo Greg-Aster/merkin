@@ -1,40 +1,24 @@
 import { BrowserAudioManager } from "../src/engine/adapters/browser/audio.js";
+import type { RuntimeSceneManifestData } from "../src/engine/index.js";
 import type { AssetManifest } from "../src/engine/modules/assets/index.js";
 import {
 	musicStateFromAudioContentManifest,
 	parseAudioContentManifest,
+	sceneMusicTrackIds,
 	validateAudioContentManifest,
 } from "../src/engine/modules/audio/index.js";
-
-function assertEqual<T>(actual: T, expected: T): void {
-	if (actual !== expected) {
-		throw new Error(
-			`Expected ${String(expected)}, received ${String(actual)}.`,
-		);
-	}
-}
-
-function assertDeepEqual(actual: unknown, expected: unknown): void {
-	const actualJson = JSON.stringify(actual);
-	const expectedJson = JSON.stringify(expected);
-
-	if (actualJson !== expectedJson) {
-		throw new Error(`Expected ${expectedJson}, received ${actualJson}.`);
-	}
-}
+import { audioContentManifestForRuntimeScene } from "../src/game/assets/index.js";
+import { defaultRuntimeSceneManifests } from "../src/game/levels/index.js";
+import {
+	assertDeepEqual,
+	assertDefined,
+	assertEqual,
+} from "./contractTestHelpers.js";
 
 function assertMatch(actual: string, expected: RegExp): void {
 	if (!expected.test(actual)) {
 		throw new Error(`Expected "${actual}" to match ${expected}.`);
 	}
-}
-
-function assertDefined<T>(actual: T | undefined): T {
-	if (actual === undefined) {
-		throw new Error("Expected value to be defined.");
-	}
-
-	return actual;
 }
 
 const assetManifest = {
@@ -59,6 +43,7 @@ const assetManifest = {
 		test: ["audio_music_a", "audio_music_b", "audio_sfx_a"],
 	},
 } satisfies AssetManifest;
+const yggdrasilRuntimeSceneId = "yggdrasil_runtime";
 
 class FakeAudioParam {
 	value: number;
@@ -367,14 +352,123 @@ function testBrowserAudioMixerBusRouting(): void {
 	assertEqual(musicBusGain.gain.value, 0.3);
 }
 
+function testYggdrasilAudioManifestContract(): void {
+	const manifest = defaultRuntimeSceneManifests.find(
+		(candidate) => candidate.id === yggdrasilRuntimeSceneId,
+	);
+
+	if (!manifest) {
+		throw new Error(
+			`Expected Yggdrasil runtime scene manifest "${yggdrasilRuntimeSceneId}" to be registered before audio validation.`,
+		);
+	}
+
+	assertYggdrasilAudioContract(manifest);
+
+	const requiredAudioAssetIds = yggdrasilAudioAssetIds(manifest);
+	const firstAudioAssetId = assertDefined(requiredAudioAssetIds[0]);
+
+	assertYggdrasilAudioContractError(
+		{
+			...manifest,
+			readiness: {
+				...manifest.readiness,
+				requiredAssetIds: (manifest.readiness.requiredAssetIds ?? []).filter(
+					(assetId) => assetId !== firstAudioAssetId,
+				),
+			},
+		},
+		`Yggdrasil audio asset "${firstAudioAssetId}" must be listed in readiness.requiredAssetIds.`,
+	);
+}
+
 function lastGain(context: FakeAudioContext): FakeGainNode {
 	const gain = context.gains.at(-1);
 	return assertDefined(gain);
+}
+
+function assertYggdrasilAudioContract(
+	manifest: RuntimeSceneManifestData,
+): void {
+	const audioContent = parseAudioContentManifest(
+		audioContentManifestForRuntimeScene(manifest.id),
+		{ assetManifest: manifest.assets },
+	);
+	const sceneMusicIds = sceneMusicTrackIds(audioContent.sceneMusic);
+	const eventSoundIds = audioContent.eventMappings.map(
+		(mapping) => mapping.soundId,
+	);
+	const requiredAssetIds = new Set(manifest.readiness.requiredAssetIds ?? []);
+
+	if (sceneMusicIds.length === 0) {
+		throw new Error(
+			"Yggdrasil audio content must include manifest-owned scene music.",
+		);
+	}
+
+	if (eventSoundIds.length === 0) {
+		throw new Error(
+			"Yggdrasil audio content must include manifest-owned event mappings.",
+		);
+	}
+
+	for (const assetId of [...sceneMusicIds, ...eventSoundIds]) {
+		if (!requiredAssetIds.has(assetId)) {
+			throw new Error(
+				`Yggdrasil audio asset "${assetId}" must be listed in readiness.requiredAssetIds.`,
+			);
+		}
+	}
+
+	const musicState = assertDefined(
+		musicStateFromAudioContentManifest(audioContent),
+	);
+
+	assertEqual(musicState.playing, true);
+	assertDefined(musicState.trackId);
+}
+
+function assertYggdrasilAudioContractError(
+	manifest: RuntimeSceneManifestData,
+	expectedError: string,
+): void {
+	try {
+		assertYggdrasilAudioContract(manifest);
+	} catch (error) {
+		const message =
+			error instanceof Error ? error.message : JSON.stringify(error);
+
+		assertMatch(message, new RegExp(escapeRegExp(expectedError)));
+		return;
+	}
+
+	throw new Error(
+		`Expected Yggdrasil audio contract error including "${expectedError}".`,
+	);
+}
+
+function yggdrasilAudioAssetIds(
+	manifest: RuntimeSceneManifestData,
+): readonly string[] {
+	const audioContent = parseAudioContentManifest(
+		audioContentManifestForRuntimeScene(manifest.id),
+		{ assetManifest: manifest.assets },
+	);
+
+	return [
+		...sceneMusicTrackIds(audioContent.sceneMusic),
+		...audioContent.eventMappings.map((mapping) => mapping.soundId),
+	];
+}
+
+function escapeRegExp(value: string): string {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 testSceneMusicFadeValidation();
 testBrowserAudioMusicCrossfade();
 testSameTrackVolumeFadeDoesNotRestartMusic();
 testBrowserAudioMixerBusRouting();
+testYggdrasilAudioManifestContract();
 
 console.log("Audio contract checks passed.");

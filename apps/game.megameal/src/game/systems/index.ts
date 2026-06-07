@@ -8,3 +8,4 @@ export * from "./interactions.js";
 export * from "./movement.js";
 export * from "./portals.js";
 export * from "./storyNotes.js";
+export * from "./terrainStreaming.js";

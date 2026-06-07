@@ -17,6 +17,14 @@ export { observatoryLevel } from "./observatoryLevel.js";
 export { portalArenaLevel } from "./portalArenaLevel.js";
 export { sciFiRoomLevel } from "./sciFiRoomLevel.js";
 export {
+	solitudeExpectedRuntimeImports,
+	solitudeLevel,
+} from "./solitudeLevel.js";
+export {
+	yggdrasilExpectedRuntimeImports,
+	yggdrasilLevel,
+} from "./yggdrasilLevel.js";
+export {
 	defaultRuntimeSceneManifest,
 	defaultRuntimeSceneManifests,
 	getRuntimeSceneManifest,
@@ -25,6 +33,8 @@ export {
 	portalArenaRuntimeSceneManifest,
 	prototypeRuntimeSceneManifest,
 	sciFiRoomRuntimeSceneManifest,
+	solitudeRuntimeSceneManifest,
+	yggdrasilRuntimeSceneManifest,
 } from "./runtimeSceneManifests.js";
 export {
 	mirandaDeckRenderProfile,
@@ -32,6 +42,8 @@ export {
 	portalArenaRenderProfile,
 	prototypeRenderProfile,
 	sciFiRoomRenderProfile,
+	solitudeRenderProfile,
+	yggdrasilRenderProfile,
 } from "./renderProfiles.js";
 
 export type LevelDefinition = {

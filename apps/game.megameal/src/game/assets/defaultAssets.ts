@@ -20,6 +20,8 @@ import {
 	sampleEquirectangularSky,
 	sampleVideoSky,
 } from "./skyboxAssets.js";
+import { solitudeAudioContentManifest } from "./solitudeAssets.js";
+import { yggdrasilAudioContentManifest } from "./yggdrasilAssets.js";
 
 const meshPlayer = {
 	id: "mesh_player",
@@ -348,21 +350,33 @@ const materialMirandaStoryMarkerCyan = {
 	id: "material_miranda_story_marker_cyan",
 	kind: "material",
 	url: "builtin://miranda-story-marker-cyan",
+	material: {
+		color: "#8de0ff",
+	},
 } as const;
 const materialMirandaStoryMarkerAmber = {
 	id: "material_miranda_story_marker_amber",
 	kind: "material",
 	url: "builtin://miranda-story-marker-amber",
+	material: {
+		color: "#ffc584",
+	},
 } as const;
 const materialMirandaStoryMarkerRed = {
 	id: "material_miranda_story_marker_red",
 	kind: "material",
 	url: "builtin://miranda-story-marker-red",
+	material: {
+		color: "#ff8ea6",
+	},
 } as const;
 const materialMirandaStoryMarkerMagenta = {
 	id: "material_miranda_story_marker_magenta",
 	kind: "material",
 	url: "builtin://miranda-story-marker-magenta",
+	material: {
+		color: "#cba7ff",
+	},
 } as const;
 const audioUiCollect = {
 	id: "audio_ui_collect",
@@ -592,6 +606,14 @@ export function audioContentManifestForRuntimeScene(
 
 	if (runtimeSceneManifestId === "sci_fi_room_runtime") {
 		return sciFiRoomAudioContentManifest;
+	}
+
+	if (runtimeSceneManifestId === "solitude_runtime") {
+		return solitudeAudioContentManifest;
+	}
+
+	if (runtimeSceneManifestId === "yggdrasil_runtime") {
+		return yggdrasilAudioContentManifest;
 	}
 
 	if (runtimeSceneManifestId === "prototype_arena_runtime") {

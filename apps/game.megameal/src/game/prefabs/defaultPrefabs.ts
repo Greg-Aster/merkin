@@ -41,7 +41,7 @@ export const playerPrefab = {
 			speed: 4.5,
 			sprintMultiplier: 1.65,
 			jumpForce: 6,
-			gravity: -18,
+			gravity: -9.6,
 			verticalVelocity: 0,
 			groundY: 0.65,
 			grounded: true,

@@ -4,7 +4,7 @@ import { portalGatePrefab } from "./navigationPrefabs.js";
 
 export const solitudePlateauPrefab = {
 	id: "solitude_ground_plateau",
-	assetIds: ["mesh_solitude_plateau", "material_solitude_stone"],
+	assetIds: ["mesh_solitude_ground_plateau", "material_solitude_plateau"],
 	tags: ["world", "collision", "walkable", "solitude", "plateau"],
 	components: {
 		Transform: {
@@ -13,8 +13,8 @@ export const solitudePlateauPrefab = {
 			scale: [240, 0.72, 240],
 		},
 		Renderable: {
-			meshId: "mesh_solitude_plateau",
-			materialId: "material_solitude_stone",
+			meshId: "mesh_solitude_ground_plateau",
+			materialId: "material_solitude_plateau",
 			visible: true,
 		},
 		RigidBody: {
@@ -34,7 +34,7 @@ export const solitudePlateauPrefab = {
 
 export const solitudeDaisPrefab = {
 	id: "solitude_ground_dais",
-	assetIds: ["mesh_solitude_dais", "material_solitude_dais"],
+	assetIds: ["mesh_solitude_ground_dais", "material_solitude_dais"],
 	tags: ["world", "collision", "walkable", "solitude", "dais"],
 	components: {
 		Transform: {
@@ -43,7 +43,7 @@ export const solitudeDaisPrefab = {
 			scale: [44, 0.8, 44],
 		},
 		Renderable: {
-			meshId: "mesh_solitude_dais",
+			meshId: "mesh_solitude_ground_dais",
 			materialId: "material_solitude_dais",
 			visible: true,
 		},
@@ -65,7 +65,7 @@ export const solitudeDaisPrefab = {
 
 export const solitudePillarPrefab = {
 	id: "solitude_pillar",
-	assetIds: ["mesh_solitude_pillar", "material_solitude_stone"],
+	assetIds: ["mesh_solitude_pillar", "material_solitude_pillar"],
 	tags: ["world", "collision", "solitude", "pillar"],
 	components: {
 		Transform: {
@@ -75,7 +75,7 @@ export const solitudePillarPrefab = {
 		},
 		Renderable: {
 			meshId: "mesh_solitude_pillar",
-			materialId: "material_solitude_stone",
+			materialId: "material_solitude_pillar",
 			visible: true,
 		},
 		RigidBody: {
@@ -96,7 +96,7 @@ export const solitudePillarPrefab = {
 
 export const solitudeRingFragmentPrefab = {
 	id: "solitude_ring_fragment",
-	assetIds: ["mesh_solitude_ring_fragment", "material_solitude_stone"],
+	assetIds: ["mesh_solitude_ring_fragment", "material_solitude_ring_fragment"],
 	tags: ["world", "collision", "solitude", "ring-fragment"],
 	components: {
 		Transform: {
@@ -106,7 +106,7 @@ export const solitudeRingFragmentPrefab = {
 		},
 		Renderable: {
 			meshId: "mesh_solitude_ring_fragment",
-			materialId: "material_solitude_stone",
+			materialId: "material_solitude_ring_fragment",
 			visible: true,
 		},
 		RigidBody: {
@@ -166,7 +166,7 @@ export const solitudeFireflyMarkerPrefab = {
 
 export const solitudeWindEmitterPrefab = {
 	id: "solitude_wind_emitter",
-	assetIds: ["audio_solitude_wind"],
+	assetIds: ["audio_ambient_wicked_shadows_whisper"],
 	tags: ["world", "audio", "solitude", "ambient"],
 	components: {
 		Transform: {
@@ -175,7 +175,7 @@ export const solitudeWindEmitterPrefab = {
 			scale: [1, 1, 1],
 		},
 		SoundEmitter: {
-			soundId: "audio_solitude_wind",
+			soundId: "audio_ambient_wicked_shadows_whisper",
 			volume: 0.28,
 			busId: "spatial",
 			loop: true,

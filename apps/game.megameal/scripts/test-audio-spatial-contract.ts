@@ -9,31 +9,11 @@ import {
 	createAudioSpatialSyncSystem,
 } from "../src/engine/modules/audio/index.js";
 import { TRANSFORM_COMPONENT } from "../src/engine/modules/rendering/index.js";
-
-function assertEqual<T>(actual: T, expected: T): void {
-	if (actual !== expected) {
-		throw new Error(
-			`Expected ${String(expected)}, received ${String(actual)}.`,
-		);
-	}
-}
-
-function assertDeepEqual(actual: unknown, expected: unknown): void {
-	const actualJson = JSON.stringify(actual);
-	const expectedJson = JSON.stringify(expected);
-
-	if (actualJson !== expectedJson) {
-		throw new Error(`Expected ${expectedJson}, received ${actualJson}.`);
-	}
-}
-
-function assertDefined<T>(actual: T | undefined): T {
-	if (actual === undefined) {
-		throw new Error("Expected value to be defined.");
-	}
-
-	return actual;
-}
+import {
+	assertDeepEqual,
+	assertDefined,
+	assertEqual,
+} from "./contractTestHelpers.js";
 
 class RecordingSpatialAudio implements AudioSpatialPort {
 	listener: AudioListenerState | undefined;

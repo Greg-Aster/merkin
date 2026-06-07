@@ -24,10 +24,6 @@ import { buildCollisionOverlayViewModel } from "../src/game/editor/collisionDraf
 import { observatoryCollisionCookDraft } from "../src/game/editor/collisionDrafts/observatoryCollisionDraft.js";
 import { observatoryRuntimeSceneManifest } from "../src/game/levels/index.js";
 
-const generatedBakeFileUrl = new URL(
-	"../src/game/editor/collisionDrafts/generated/observatoryCollisionBake.json",
-	import.meta.url,
-);
 const generatedRuntimeModuleFileUrl = new URL(
 	"../src/game/generated/observatoryCollisionRuntime.ts",
 	import.meta.url,
@@ -303,15 +299,6 @@ async function assertPreviewAndBake(
 		);
 	}
 
-	const fs = await importNodeFsPromises();
-	const generatedBakeFile = await fs.readFile(generatedBakeFileUrl, "utf8");
-
-	if (generatedBakeFile !== serializedBakeFile) {
-		throw new Error(
-			"Expected generated Observatory collision bake artifact to match current cook output.",
-		);
-	}
-
 	const runtimeModuleArtifact =
 		getCollisionCookRuntimeModuleArtifact(writePlan);
 
@@ -321,6 +308,7 @@ async function assertPreviewAndBake(
 		);
 	}
 
+	const fs = await importNodeFsPromises();
 	const generatedRuntimeModule = await fs.readFile(
 		generatedRuntimeModuleFileUrl,
 		"utf8",
@@ -471,9 +459,14 @@ function assertEditorSessionDefaults(): void {
 		"Expected the editor boundary shell to expose the preview source plan hash.",
 	);
 	assertEqual(
-		editorSession.bake.generatedArtifactHash,
+		editorSession.bake.mode,
+		"derived-in-memory",
+		"Expected the editor boundary shell to derive bake data without a checked-in bake artifact.",
+	);
+	assertEqual(
+		editorSession.bake.derivedBakeHash,
 		bakeFile.contentHash,
-		"Expected the editor boundary shell to expose the generated bake artifact hash.",
+		"Expected the editor boundary shell to expose the derived bake hash.",
 	);
 }
 

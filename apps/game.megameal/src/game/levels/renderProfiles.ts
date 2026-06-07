@@ -129,11 +129,11 @@ export const portalArenaRenderProfile = {
 		},
 	},
 	environment: {
-		kind: "cubemap-skybox",
-		assetId: "cubemap_classic_sky",
+		kind: "equirectangular-environment",
+		assetId: "texture_portal_arena_equirectangular_sky",
 		backgroundIntensity: 1,
 		backgroundBlurriness: 0,
-		environmentIntensity: 0.9,
+		environmentIntensity: 0.8,
 		requiredForReadiness: true,
 	},
 } satisfies RenderProfileData;
@@ -272,7 +272,7 @@ export const solitudeRenderProfile = {
 			maxTotal: 6,
 			maxAmbient: 1,
 			maxDirectional: 2,
-			maxPoint: 1,
+			maxPoint: 2,
 			maxSpot: 1,
 			maxArea: 0,
 			maxShadowCasting: 1,
@@ -284,6 +284,60 @@ export const solitudeRenderProfile = {
 		backgroundIntensity: 0.9,
 		backgroundBlurriness: 0.18,
 		environmentIntensity: 0.85,
+		requiredForReadiness: true,
+	},
+	postProcessing: {
+		enabled: false,
+		quality: "off",
+		effects: [],
+	},
+} satisfies RenderProfileData;
+
+export const yggdrasilRenderProfile = {
+	id: "yggdrasil_foundation_basin",
+	renderer: {
+		clearColor: "#07110c",
+		clearAlpha: 1,
+		antialias: true,
+		maxPixelRatio: 2,
+		fallbackMaterialColor: "#76d489",
+	},
+	lighting: {
+		lights: [
+			{
+				kind: "ambient",
+				color: "#b7f0c8",
+				intensity: 0.4,
+			},
+			{
+				kind: "directional",
+				color: "#e7ffd8",
+				intensity: 1.05,
+				position: [10, 18, -12],
+			},
+			{
+				kind: "directional",
+				color: "#7fd7ff",
+				intensity: 0.32,
+				position: [-12, 8, 10],
+			},
+		],
+		budget: {
+			maxTotal: 9,
+			maxAmbient: 1,
+			maxDirectional: 2,
+			maxPoint: 6,
+			maxSpot: 1,
+			maxArea: 0,
+			maxShadowCasting: 0,
+		},
+	},
+	environment: {
+		kind: "cubemap-skybox",
+		assetId: "cubemap_observatory_sky",
+		backgroundIntensity: 0.88,
+		backgroundBlurriness: 0.1,
+		environmentIntensity: 0.8,
 		requiredForReadiness: true,
 	},
 	postProcessing: {

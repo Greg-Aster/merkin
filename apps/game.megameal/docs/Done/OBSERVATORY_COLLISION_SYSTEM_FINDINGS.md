@@ -7,7 +7,7 @@ generated visual-terrain provenance, the generalized terrain import/cook
 contract foundation, and cooked terrain chunk foundation. Remaining production
 editor, terrain LOD/streaming, and diagnostics work is tracked in
 `docs/LEVEL_EDITOR_COLLISION_COOK_PLAN.md` and
-`docs/WATER_SURFACE_SYSTEM_PLAN.md`.
+`docs/Done/WATER_SURFACE_SYSTEM_PLAN.md`.
 
 ## Final Observatory State
 
@@ -18,9 +18,6 @@ editor, terrain LOD/streaming, and diagnostics work is tracked in
   `mesh_observatory_environment` renders
   `/assets/game/observatory/observatory-environment.glb`.
 - The GLB visual instance `observatory:terrain` uses unit scale `[1, 1, 1]`.
-- The generated visual field terrain
-  `mesh_observatory_field_micro_displacement` is also visual-only and has
-  checked-in provenance/hash metadata.
 - The collision layer affects traversal but does not change the rendered GLB surface.
 - Walkability comes from explicit authored collision, not render geometry:
   `src/game/editor/collisionDrafts/observatoryCollisionDraft.ts` owns a 17x17
@@ -91,15 +88,14 @@ Owner files:
 - `src/engine/data/collisionCook/index.ts`
 - `src/engine/data/terrainCook/index.ts`
 - `src/game/editor/collisionDrafts/observatoryCollisionDraft.ts`
-- `src/game/editor/collisionDrafts/generated/observatoryCollisionBake.json`
 - `src/game/generated/observatoryCollisionRuntime.ts`
 - `src/game/prefabs/observatoryPrefabs.ts`
 - `src/game/levels/observatoryLevel.ts`
 - `src/game/levels/runtimeSceneManifests.ts`
 - `src/app/editor/levelEditorSession.ts`
 - `src/app/devPreview/*`
-- `scripts/cook-observatory-collision.ts`
-- `scripts/check-observatory-collision-drift.ts`
+- retired Observatory-only cook/check scripts replaced by generic contract
+  validation expectations
 - `scripts/test-level-editor-collision-cook-contract.ts`
 - `scripts/test-terrain-cook-contract.ts`
 - `scripts/test-terrain-import-pipeline-contract.ts`
@@ -125,15 +121,12 @@ Validation surface:
 - `pnpm --dir apps/game.megameal test:terrain-cook-contract`
 - `pnpm --dir apps/game.megameal test:terrain-import-pipeline-contract`
 - `pnpm --dir apps/game.megameal test:live-preview-protocol-contract`
-- `pnpm --dir apps/game.megameal cook:observatory-collision`
-- `pnpm --dir apps/game.megameal ci:observatory-collision-drift`
 - `pnpm --dir apps/game.megameal audit:engine-boundaries`
 - `pnpm --dir apps/game.megameal type-check`
 
 ## Non-Goals Preserved
 
-- Do not use `mesh_observatory_environment` or
-  `mesh_observatory_field_micro_displacement` as implicit collision.
+- Do not use `mesh_observatory_environment` as implicit collision.
 - Do not import old `apps/game` runtime collision chunks or generated collision
   binaries.
 - Do not repair missing collision in the renderer or physics adapter.

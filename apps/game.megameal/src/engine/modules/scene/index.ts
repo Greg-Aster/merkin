@@ -78,9 +78,21 @@ export class BasicSceneScope implements SceneScope {
 
 	async cleanup(): Promise<void> {
 		const cleanups = this.#cleanups.splice(0).reverse();
+		const errors: unknown[] = [];
 
 		for (const cleanup of cleanups) {
-			await cleanup();
+			try {
+				await cleanup();
+			} catch (error) {
+				errors.push(error);
+			}
+		}
+
+		if (errors.length > 0) {
+			throw new AggregateError(
+				errors,
+				`Scene "${this.sceneId}" cleanup failed for ${errors.length} resource(s).`,
+			);
 		}
 	}
 }

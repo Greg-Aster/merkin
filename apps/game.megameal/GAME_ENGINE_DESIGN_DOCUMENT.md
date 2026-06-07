@@ -126,10 +126,20 @@ src/
 
     data/
       schemas/
+      contentGraph/
+      collisionCook/
+      terrainCook/
       loaders/
       serializers/
       manifests/
 ```
+
+Data contract packages should keep `index.ts` as public API barrels only.
+Schema types and validators, content graph derivation/import parity checks,
+collision-cook draft/preview/bake/write-plan logic, and terrain-cook
+manifest/shape/runtime/write-plan logic belong in focused owner modules under
+those folders. New contracts should extend the narrow owner module rather than
+recreating large catch-all data files.
 
 ## 5. Layer Responsibilities
 
@@ -419,6 +429,10 @@ Guidelines:
 - Audio, UI, particles, and objective systems can react to events.
 - Hot-path systems should avoid excessive event chatter when direct component reads are clearer.
 - Events must have explicit scheduler timing so ordering bugs do not hide in the event bus.
+- Fixed runtime ticks drain events that existed before the audio stage only
+  after the audio stage runs. Events emitted after audio remain queued for the
+  next fixed tick so audio mappings can observe them instead of being silently
+  dropped.
 - Navigation interactions should be world-owned game components. For example, a portal is an entity with `Transform`, `Renderable`, `Collider`, and `Portal`; UI only observes the selected prompt, and scene transitions go through a runtime scene transition port.
 
 ## 9. Runtime Loop
@@ -531,10 +545,18 @@ Transform + Renderable -> Three object
 Current primitive mesh contract:
 
 - Built-in primitive mesh assets are adapter-owned render resources referenced through stable asset IDs.
-- The Three adapter may support parameterized built-in mesh URLs for primitive shapes, such as a tapered cylinder/frustum render mesh.
+- The Three adapter may support parameterized built-in mesh URLs for reusable
+  primitive shapes, such as box, cylinder, torus, icosahedron, and
+  dodecahedron. This support must stay generic; it must not branch on level IDs
+  or game-specific source IDs.
 - Built-in mesh URL parameters are render implementation details, not gameplay state.
 - Gameplay meaning remains in prefabs, components, colliders, and stable level instance IDs.
 - A render mesh must not become the source of collision truth; colliders must be explicit component data.
+- Migrated primitive-heavy scenes should use `PrimitiveSceneContentContract`:
+  checked-in content records own source IDs, transforms, geometry arguments,
+  material parameters, collision intent, and stable ID mapping; reusable helpers
+  derive manifest assets, prefabs, and level instances. A level supplies data,
+  not special engine/runtime code.
 
 ### Scene Environment, Sky, And Atmosphere
 
@@ -631,47 +653,62 @@ Rules:
 Current implementation status:
 
 - `src/engine/data/schemas` requires `renderProfile.environment` and validates environment references against the selected runtime scene asset manifest, level preload set, readiness assets, asset kind, and projection metadata.
-- `src/game/assets/skyboxAssets.ts` declares manifest-owned cubemap assets plus small checked-in sample equirectangular and video environment assets.
+- `src/game/assets/skyboxAssets.ts` declares manifest-owned cubemap assets, the production portal arena equirectangular environment asset, and small checked-in sample equirectangular and video environment assets. The portal arena texture `texture_portal_arena_equirectangular_sky` is a checked-in copy of `public/assets/skyboxes/170645ae-3f1f-47db-b920-226e61838ab7.png` at `public/assets/environment/portal-arena/portal-arena-sky-equirectangular.png`; no generated runtime artifact owns it.
 - `src/engine/modules/rendering` defines framework-neutral scene-environment variants, bounded dynamic capture settings, and the authored `ReflectionProbe` sync contract.
 - `src/engine/adapters/three` loads cubemap, texture, and muted video assets through `AssetManager`, projects scene environments into `Scene.background` and `Scene.environment`, supports PMREM/cube capture where required, and clears/restores scene references and probe material mutations during unload.
-- `portal_arena_runtime`, `prototype_arena_runtime`, and `miranda_deck_runtime` still declare required cubemap environments. The new equirectangular, video, procedural, and reflection-probe modes are contract-ready for future authored scenes but are not used by the default scene yet.
+- `portal_arena_runtime` now declares the required `equirectangular-environment` asset `texture_portal_arena_equirectangular_sky` through its render profile, selected-scene preload manifest, and readiness data. `prototype_arena_runtime`, `miranda_deck_runtime`, `observatory_runtime`, `sci_fi_room_runtime`, and `solitude_runtime` remain on their authored cubemap environments unless explicitly changed.
 - Focused validation now includes `test:scene-environment-contract` for accepted environment variants, invalid projection/video/dynamic-capture data, and reflection-probe shape/resolution failures. `test:runtime-scene-contract` continues to cover current cubemap preload/readiness failures.
-- Active sky/environment work: `docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md` now tracks the same-day portal arena equirectangular production opt-in. Remaining deferred work includes editor/import controls, richer probe blending/debugging, 180/strip video sky mappings, fog/cloud/weather integration, generated/cooked environment pipelines, and broader production content authoring for the new modes.
+- Portal arena equirectangular production opt-in is recorded in `docs/Done/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`. Remaining deferred work includes editor/import controls, richer probe blending/debugging, 180/strip video sky mappings, fog/cloud/weather integration, generated/cooked environment pipelines, and broader production content authoring for the new modes.
 
-### Water Surface Environmental Assets
+### Water Body Environmental System
 
-Water is a reusable environment primitive, not a level-local Observatory mesh. Modern engines treat water as a shared rendering/environment system: Unreal has a Water System for oceans, lakes, rivers, islands, meshing, rendering, and editing, while Unity HDRP exposes water as render-pipeline-owned water surfaces with configurable body/rendering/simulation behavior. The target engine should follow the same ownership shape at a smaller scale.
+Water is a reusable environment system, not a level-local mesh or one-off shader. Modern engines treat water this way: Unreal exposes a Water System with water body actors for oceans, lakes, rivers, custom bodies, meshing, rendering, waves, materials, and underwater/gameplay extension points; Unity HDRP exposes water as render-pipeline-owned water surfaces with configurable body/rendering/simulation behavior. The target engine follows the same ownership shape at a smaller browser-engine scale.
 
 Initial ownership:
 
 ```text
 src/game/assets/waterAssets.ts
-  -> shared reusable water mesh/material assets
+  -> shared reusable water mesh/material/texture assets; current runtime uses
+     one water mesh and one water shader material
 
 src/game/prefabs/waterPrefabs.ts
-  -> shared reusable water surface prefabs and default WaterSurface data
+  -> shared reusable water body prefabs such as lake_water_surface
+     and ocean_water_surface, with default WaterSurface data over the same
+     shared mesh/material/shader path
 
 src/game/levels/<level>.ts
-  -> per-level water instances and customization
+  -> per-level water body placement, scale, and optional authored overrides
 
 RuntimeSceneManifest / AssetManifest
   -> selected water assets, preload groups, and readiness assets when required
 
+Engine rendering module
+  -> framework-neutral WaterSurface component, body type, renderer-safe
+     projection state, and WaterSurfaceSyncSystem
+
 ThreeRendererAdapter
-  -> renderer-specific material/transparency/render-order behavior and future
-     shader wave/reflection/refraction projections from renderer-safe water data
+  -> renderer-specific water mesh, shader material, time uniform,
+     transparency, render-order, environment-reflection, and refraction
+     projection from renderer-safe water data
 ```
 
 Rules:
 
-- The current slice is visual water plus contract-owned animation/reflection/refraction data only: no collider, no trigger volume, no buoyancy, no rising-water behavior, and no shader simulation implementation yet.
-- A level may own a stable instance ID such as `observatory:water`, but reusable mesh/prefab ownership belongs to `WaterSurfaceContract`.
+- Water body types are data: `WaterSurface.bodyType` may be `ocean`, `lake`, `river`, or `custom`. Level code must not branch the renderer or engine by level ID to get water behavior.
+- Lake/ocean/custom presets may differ in authored `WaterSurface` values, but they must not create separate water systems or duplicate shader/material ownership. Current lake and ocean prefabs both use `mesh_water_plane` and `material_water_surface`.
+- The current slice is visual water plus shader-driven wave/reflection/refraction projection from authored component data: no collider, no trigger volume, no buoyancy, no rising-water behavior, and no underwater gameplay state yet.
+- A level may own a stable instance ID such as `observatory:water` or `yggdrasil:water:ocean`, but reusable mesh/material/prefab/shader ownership belongs to `WaterSurfaceContract`.
 - Render water must never imply collision; water volumes or traversal effects require explicit components/contracts. The current `WaterSurface.gameplayVolume.enabled` value is explicitly `false` until that contract exists.
-- Material color, opacity, roughness, emissive, and future shader parameters must be authored through manifest-owned material data or explicit prefab/level overrides, not hidden renderer defaults.
+- Material color, opacity, roughness, emissive, body type, animation, reflection, refraction, and render order must be authored through manifest-owned material data, shared water body prefabs, or explicit level overrides, not hidden renderer defaults.
 - Runtime scenes include water assets in preload/readiness when the water surface is required for first playable presentation.
 - Svelte, Threlte, browser code, and old `apps/game` water/editor/runtime systems do not own target-engine water state.
 
-Observatory is the first implemented consumer: it places `observatory:water` as a shared water prefab instance at `y = -2`, size `4000 x 4000`, with authored scrolling-wave and environment-reflection parameters, disabled refraction, no collider, and no gameplay volume. `docs/WATER_SURFACE_SYSTEM_PLAN.md` tracks the implementation plan and future packets for shader animation, visual reflections/refraction, rising water, underwater state, buoyancy, and water-body authoring.
+Current implemented consumers:
+
+- Observatory places `observatory:water` as a shared `lake_water_surface` body at `y = -2`, size `4000 x 4000`, with scrolling waves, environment reflection, disabled refraction, no collider, and no gameplay volume.
+- Yggdrasil places `yggdrasil:water:ocean` as a shared `ocean_water_surface` body at `y = -3.35`, size `920 x 920`, with scrolling waves, environment reflection, enabled visual refraction, no collider, and no gameplay volume.
+
+`docs/Done/WATER_SURFACE_SYSTEM_PLAN.md` records the implemented foundation and deferred packets for water quality tiers, richer reflections/refraction, depth fade, foam, shoreline blending, rising water, underwater state, buoyancy, and water-body import/cook tooling.
 
 Do not store gameplay state in `mesh.userData`.
 
@@ -762,6 +799,8 @@ Rules:
 - Physics handles are adapter details.
 - Collision events are translated into engine events.
 - Physics queries go through engine physics APIs.
+- Physics sync must reject malformed runtime `Transform` data instead of
+  normalizing it with hidden fallback position, rotation, or scale values.
 - Fixed timestep defaults to Rapier's practical game-oriented 1/60 second step unless a specific scene requires otherwise.
 - Collider shapes are authored data. Current schema-owned shapes are box, sphere, capsule, cylinder, and mesh.
 - Mesh colliders must include explicit vertices and triangle indices, and schema validation must reject malformed indices before runtime.
@@ -811,8 +850,8 @@ The content graph validator should derive or verify:
 Runtime scenes still consume `RuntimeSceneManifest` data; the runtime must not
 scan visible meshes, repair missing readiness, or branch by level ID. Current
 manual readiness arrays are transitional checked-in data and must be
-drift-checked. The implemented foundation in
-`src/engine/data/contentGraph/index.ts` and
+drift-checked. The implemented foundation in the
+`src/engine/data/contentGraph` package and
 `scripts/test-level-authoring-contract.ts` compares derived requirements with
 the existing manifests before more playable levels are added.
 
@@ -824,7 +863,7 @@ IDs, or be marked as planned with owner, contract, reason, and
 removal-condition metadata. Target-engine generated GLBs may be loaded by
 runtime scenes only after a deterministic generator, manifest asset, prefab,
 stable level instance, and provenance validation exist. Imported target-engine
-generated GLB entries must declare the generator script, checked-in provenance
+generated GLB entries must declare the generator ID, checked-in provenance
 metadata path, and generated GLB SHA-256; the generated import contract test
 verifies those values against the checked-in artifact. The implemented
 foundation in `src/game/assets/generatedGlbImportParity.ts` and
@@ -859,24 +898,26 @@ and other simple shapes for most floors, blockers, walls, and trigger volumes;
 compound primitive sets for architecture and traversal details; cooked trimesh
 chunks only for static irregular geometry that needs precision; heightfields
 only for future true heightmap terrain. The first Observatory slice now has a
-non-UI data/check foundation: `src/engine/data/collisionCook/index.ts` validates
+non-UI data/check foundation: `src/engine/data/collisionCook` validates
 authored collision drafts, `src/game/editor/collisionDrafts/observatoryCollisionDraft.ts`
-owns the current Observatory V1 draft, and `cook:observatory-collision` checks
-the draft against runtime manifest data without writing files by default. The
-first dev-only editor boundary shell now exists at `/editor/`, with
+owns the current Observatory V1 draft, and focused contract tests check the
+draft/runtime relationship without making editor state runtime source of truth.
+The former Observatory-only cook/drift commands were retired; future write
+paths must be generic and manifest-driven. The first dev-only editor boundary
+shell now exists at `/editor/`, with
 `src/app/editor/levelEditorSession.ts` projecting the current
 `observatory_runtime` collision draft, terrain import/cook status, preview
-patch metadata, and generated bake artifact hash outside the normal game HUD.
-`--print-preview-patch`
-exposes the temporary dev-only preview payload, and `--write-generated-bake`
-writes the deterministic editor-owned generated artifact at
-`src/game/editor/collisionDrafts/generated/observatoryCollisionBake.json`.
-`--write-runtime-collision` explicitly writes the generated checked-in runtime
-collision module at `src/game/generated/observatoryCollisionRuntime.ts`, which
-Observatory prefab, level, and manifest owners import for shipped collision
-data. The bake does not mutate arbitrary TypeScript object literals; the
-generated module is the structured runtime owner because broad TS rewrites are
-riskier than an owned generated data module.
+patch metadata, and derived dry-run bake hash outside the normal game HUD.
+Checked-in editor bake JSON was retired with the Observatory-only cook command;
+future generated bake artifacts need a generic manifest-driven owner before
+they can be written. The
+checked-in generated runtime collision module at
+`src/game/generated/observatoryCollisionRuntime.ts` is retained as current data
+until a generic cook owner replaces it; Observatory prefab, level, and manifest
+owners import that module for shipped collision data. The bake does not mutate
+arbitrary TypeScript object literals; generated runtime data must have an owned
+output module because broad TS rewrites are riskier than a structured generated
+data module.
 The dev-only game-window preview/reload protocol is implemented as an
 app-layer browser channel and callback port that validates preview-patch
 messages before send/application and applies temporary transform/collider
@@ -1149,8 +1190,13 @@ Manifest example:
 - Use cacheable, versioned URLs.
 - Define preload groups per scene.
 - Track shared GPU resources.
+- Coalesce concurrent loads for the same asset ID and clear failed in-flight
+  loads so a later request can retry.
 - Dispose or release scene-owned assets on unload.
 - Keep checked-in authored primitive assets separate from future generated runtime assets.
+- Keep primitive-heavy scene imports under `PrimitiveSceneContentContract` so
+  authored primitives become stable manifest assets, prefabs, level instances,
+  and readiness data instead of per-level renderer or runtime branches.
 - Do not reference generated GLB or collider products from runtime scenes until
   an import/generation owner validates them and the runtime manifest owns the
   resulting target asset, prefab, level, and readiness data.
@@ -1197,6 +1243,8 @@ resource it created.
 Recommended implementation:
 
 - SceneScope tracks all scene-owned runtime objects.
+- SceneScope cleanup attempts every registered resource cleanup before reporting
+  aggregate failures.
 - SceneManager owns transitions.
 - AssetManager tracks retain/release.
 - The game runtime owns a checked-in runtime scene catalog, a declared default runtime scene, and a scene transition port.
@@ -1208,8 +1256,8 @@ Current playable/runtime scenes:
 ```text
 portal_arena_runtime
   -> default navigation room with eight portal slots
-  -> active targets: prototype_arena_runtime, miranda_deck_runtime, and
-     observatory_runtime, and sci_fi_room_runtime
+  -> active targets: prototype_arena_runtime, miranda_deck_runtime,
+     observatory_runtime, sci_fi_room_runtime, and solitude_runtime
 
 prototype_arena_runtime
   -> first playable prototype slice
@@ -1225,6 +1273,27 @@ sci_fi_room_runtime
   -> owns three readiness-required walkable floor colliders, five StoryNote
      markers, a manifest-ID Observatory portal, and disabled/off
      post-processing profile data
+
+solitude_runtime
+  -> active target-owned playable-foundation packet, not full legacy parity
+  -> must use target-owned primitive/current assets, prefabs, level data,
+     render profile, audio/environment manifest data, explicit plateau/dais
+     walkable collision, and portal admission after validation
+
+yggdrasil_runtime
+  -> active target-owned primitive-parity playable-foundation packet, not full
+     legacy parity
+  -> uses the older primitive-heavy Yggdrasil backup as provenance only
+  -> must not import old runtime/editor code, load old generated runtime scene
+     JSON, or load old partition JSON
+  -> represents all old primitive nodes as checked-in target content data and
+     derives primitive assets, prefabs, level instances, collision stable IDs,
+     and walkable stable IDs through PrimitiveSceneContentContract
+  -> keeps manifest-owned audio/environment data, story/portal identity
+     markers, and portal-arena admission after validation
+  -> old GLB asset parity, cooked collision products, water, ambient
+     particle/firefly, production lighting, post-processing/reflection, editor
+     import/cook/write, and partition/streaming parity remain future contracts
 ```
 
 ## 18. Browser Platform Layer
@@ -1330,7 +1399,12 @@ Current migrated Miranda foundation:
 
 - `miranda_deck_runtime` is checked-in target-engine data, not old runtime JSON.
 - Migrated primitive content includes Miranda spawn, two deck floors plus a Cargo Hold floor/bounds extension as explicit `walkable` collision surfaces, cockpit glow panels, cockpit command console, crew bunks, locker bank, Captain's Office desk/chair/safe, Engine Core, Engine Room columns, Medbay pods, Mess Hall blockers, Chapel Altar, Chapel monoliths, Brig cells/desk, Cargo Hold stacks, and Archive server banks.
-- The current Miranda walkable floor footprint is now represented by `src/game/editor/collisionDrafts/mirandaCollisionDraft.ts`; `test:miranda-collision-draft-contract` validates that the draft matches runtime readiness and covers the authored character bounds. This is a cook-draft foundation, not full Miranda terrain/cooked collision parity.
+- The current Miranda walkable floor footprint is now represented by checked-in
+  runtime level/prefab collision data plus draft source data under
+  `src/game/editor/collisionDrafts`. Generic runtime-scene, level-authoring,
+  and terrain/collision contract tests validate current readiness coverage.
+  This is a cook-draft foundation, not full Miranda terrain/cooked collision
+  parity.
 - Migrated interaction content includes nine Miranda story notes as authored `StoryNote` component data with reusable marker prefabs, trigger colliders, nearest active target selection, reader open/close state, and HUD prompts/reader projection. The UI observes selected/open interaction state and dispatches close intent; it does not own story text or decide gameplay targets.
 - Migrated portal content includes the old Miranda airlock return portal as a
   checked-in `Portal` entity at `miranda:airlock:return-portal`, using the
@@ -1357,6 +1431,13 @@ Current migrated Miranda foundation:
 Current portal arena foundation:
 
 - `portal_arena_runtime` is the default runtime scene.
+- Its render profile uses the manifest-owned
+  `texture_portal_arena_equirectangular_sky` environment asset. That asset is a
+  checked-in copy of
+  `public/assets/skyboxes/170645ae-3f1f-47db-b920-226e61838ab7.png` at
+  `public/assets/environment/portal-arena/portal-arena-sky-equirectangular.png`,
+  and is preloaded/readiness-required by `portal_arena_runtime` with no
+  generated runtime artifact.
 - Shared portal assets are content-owned through
   `src/game/assets/portalAssets.ts` and
   `public/assets/game/portals/portal_gate.glb`.
@@ -1368,9 +1449,12 @@ Current portal arena foundation:
 - Portal slots are authored data in `src/game/levels/portalArenaLevel.ts`.
 - Portal interaction is handled by game systems that read world components/resources and request runtime scene transitions by manifest ID.
 - The current connected portal slots target `prototype_arena_runtime`,
-  `miranda_deck_runtime`, `observatory_runtime`, and
+  `miranda_deck_runtime`, `observatory_runtime`, `solitude_runtime`, and
   `sci_fi_room_runtime`; each target exists in the checked-in runtime scene
   catalog and passes readiness/content-graph validation before admission.
+- The Solitude portal slot points at target-owned `solitude_runtime` data. It
+  must not point at old scene JSON, generated runtime JSON, or the old
+  partition.
 - `PlayerCarriedLightContract` restores the useful legacy behavior where the
   player can read nearby dark ground. The current foundation uses the stable
   `player` entity itself as the light carrier: it has gameplay-owned
@@ -1402,19 +1486,12 @@ Current portal arena foundation:
   - The source Observatory GLB remains the owned target asset
     `mesh_observatory_environment` at
     `/assets/game/observatory/observatory-environment.glb`, transformed as
-    authored scene data at scale 1. The generated visual field terrain is the
-    owned target asset `mesh_observatory_field_micro_displacement` at
-    `/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.glb`,
-    produced by `scripts/generate-observatory-field-terrain.ts` with matching
-    provenance JSON. It is rendered by `observatory_field_visual_terrain` /
-    `observatory:terrain:visual-field` at scale 1 and records alignment with
-    the collision draft sample heights. The engine-wide `CollisionPolicy`,
+    authored scene data at scale 1. The engine-wide `CollisionPolicy`,
     `WalkableCollisionContract`, and `LevelReadinessContract` keep that GLB
-    and generated visual terrain visual-only: the Observatory packet consumes
-    them through 16 deterministic `observatory:walkable-mesh:chunk:x*-z*`
-    `walkable/worldStatic` mesh collider chunks, and the current movement
-    bounds are constrained by four required `observatory_boundary_blocker`
-    instances.
+    visual-only: the Observatory packet consumes 16 deterministic
+    `observatory:walkable-mesh:chunk:x*-z*` `walkable/worldStatic` mesh collider
+    chunks, and the current movement bounds are constrained by four required
+    `observatory_boundary_blocker` instances.
     Render mesh geometry is not implicit collision.
   - The player spawn is authored as the stable `player` instance at
     `[-137.2, 1.8, -49.5]`, with `CharacterController.groundY` kept as the
@@ -1440,9 +1517,8 @@ Current portal arena foundation:
     post-processing adapter implementation, terrain LOD/streaming, production
     editor import UI and material/shader pipeline, large firefly populations,
     live runtime flicker animation, and richer light/shadow behavior remain
-    future contracts. The generated visual terrain is not collision, and the
-    current collision product is a chunked terrain foundation, not a complete
-    multi-level terrain package.
+    future contracts. The current collision product is a chunked terrain
+    foundation, not a complete multi-level terrain package.
   - Observatory scene music is content-owned through
     `src/game/assets/observatoryAssets.ts`, `AudioContentManifest.sceneMusic`,
     and the shared production `audio_ambient_portal_deck` asset. The old
@@ -1451,6 +1527,18 @@ Current portal arena foundation:
     that as manifest-owned scene music with `fadeSeconds: 1.5` without copying
     the old Svelte/Howler runtime.
 - Miranda scene music is content-owned through `src/game/assets/defaultAssets.ts`, `AudioContentManifest.sceneMusic`, and `public/audio/ambient/Wicked Shadows Whisper.mp3` as `audio_ambient_wicked_shadows_whisper`.
+- Solitude migration is owned by `SolitudeLevelContract`. The admitted first
+  packet is a compact playable foundation that rewrites old Solitude evidence
+  into target-owned primitive/current assets, prefabs, level data, render
+  profile, runtime scene manifest data, manifest-owned audio/environment data,
+  and explicit `walkable/worldStatic` collision/readiness IDs for
+  `solitude:ground:plateau` and `solitude:ground:dais`. The old
+  `solitude-ground-plateau` missing runtime collision-manifest blocker is
+  closed by target-owned collider/readiness data in the admitted foundation.
+  Full generated GLB/cooked collision parity, twelve pillar-firefly NPC groups,
+  large ambient particle field, old
+  post-processing/reflection behavior, production light tuning, and
+  partition/streaming behavior remain future contracts.
 
 ## 20. Save, Load, Replay
 

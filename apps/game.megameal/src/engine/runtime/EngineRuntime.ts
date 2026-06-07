@@ -143,12 +143,18 @@ export class EngineRuntime {
 				commands: this.commands,
 				events: this.events,
 			};
+			let drainableEventCount = 0;
 
 			for (const stage of FIXED_STAGES) {
+				if (stage === "audio") {
+					drainableEventCount = this.events.size;
+				}
+
 				this.scheduler.run(stage, context);
 			}
 
-			this.events.drain();
+			// Keep events emitted after the audio stage queued for the next fixed tick.
+			this.events.drain(drainableEventCount);
 			this.#tick += 1;
 		}
 

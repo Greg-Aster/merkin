@@ -24,6 +24,8 @@ import type {
 	SceneEnvironment,
 	SceneEnvironmentAssetResolver,
 	SceneEnvironmentRendererPort,
+	WaterSurfaceRendererPort,
+	WaterSurfaceRendererState,
 } from "../../modules/rendering/index.js";
 
 export type ThreeAdapterBoundary = {
@@ -96,6 +98,9 @@ export type ThreeCubeCameraLike = ThreeObject3DLike & {
 };
 
 export type ThreeGeometryLike = ThreeDisposableLike;
+type ThreePlaneGeometryLike = ThreeGeometryLike & {
+	rotateX?(radians: number): unknown;
+};
 
 export type ThreeMaterialLike = {
 	dispose?(): void;
@@ -116,6 +121,15 @@ export type ThreeMaterialLike = {
 	readonly specularMap?: ThreeTextureLike | null;
 };
 
+export type ThreeShaderMaterialParameters = {
+	readonly uniforms?: Record<string, { value: unknown }>;
+	readonly vertexShader?: string;
+	readonly fragmentShader?: string;
+	readonly transparent?: boolean;
+	readonly depthWrite?: boolean;
+	readonly side?: unknown;
+};
+
 export type ThreeObject3DLike = {
 	userData: Record<string, unknown>;
 	visible: boolean;
@@ -124,6 +138,7 @@ export type ThreeObject3DLike = {
 	scale: ThreeVectorLike;
 	parent?: { remove(object: ThreeObject3DLike): void } | null;
 	children?: readonly ThreeObject3DLike[];
+	renderOrder?: number;
 	add?(object: ThreeObject3DLike): void;
 	remove?(object: ThreeObject3DLike): void;
 	traverse?(callback: (object: ThreeObject3DLike) => void): void;
@@ -221,15 +236,40 @@ export type ThreeRuntime = {
 		height: number,
 		depth: number,
 	) => ThreeGeometryLike;
+	readonly PlaneGeometry?: new (
+		width: number,
+		height: number,
+		widthSegments?: number,
+		heightSegments?: number,
+	) => ThreePlaneGeometryLike;
 	readonly CylinderGeometry?: new (
 		radiusTop: number,
 		radiusBottom: number,
 		height: number,
 		radialSegments?: number,
 	) => ThreeGeometryLike;
+	readonly TorusGeometry?: new (
+		radius: number,
+		tube: number,
+		radialSegments?: number,
+		tubularSegments?: number,
+	) => ThreeGeometryLike;
+	readonly IcosahedronGeometry?: new (
+		radius: number,
+		detail?: number,
+	) => ThreeGeometryLike;
+	readonly DodecahedronGeometry?: new (
+		radius: number,
+		detail?: number,
+	) => ThreeGeometryLike;
 	readonly MeshStandardMaterial: new (
 		parameters?: ThreeMeshStandardMaterialParameters,
 	) => ThreeMaterialLike;
+	readonly ShaderMaterial?: new (
+		parameters?: ThreeShaderMaterialParameters,
+	) => ThreeMaterialLike;
+	readonly Color?: new (color: string | number) => unknown;
+	readonly Vector2?: new (x: number, y: number) => unknown;
 	readonly AmbientLight?: new (
 		color: string | number,
 		intensity: number,
@@ -273,6 +313,7 @@ export type ThreeRuntime = {
 		renderTarget: ThreeWebGLCubeRenderTargetLike,
 	) => ThreeCubeCameraLike;
 	readonly Sky?: new () => ThreeObject3DLike;
+	readonly DoubleSide?: unknown;
 	readonly EquirectangularReflectionMapping?: unknown;
 	readonly SRGBColorSpace?: unknown;
 	readonly LinearSRGBColorSpace?: unknown;
@@ -463,16 +504,6 @@ export type ThreeRendererAdapterOptions = {
 	readonly resolveObject?: ThreeObjectResolver;
 };
 
-export async function createDefaultThreeRendererAdapter(
-	options: Omit<ThreeRendererAdapterOptions, "three"> = {},
-): Promise<ThreeRendererAdapter> {
-	const three = await loadDefaultThreeRuntime();
-	return new ThreeRendererAdapter({
-		...options,
-		three,
-	});
-}
-
 export async function loadDefaultThreeRuntime(): Promise<ThreeRuntime> {
 	return (await import("three")) as unknown as ThreeRuntime;
 }
@@ -661,6 +692,7 @@ export class ThreeRendererAdapter
 		RendererPort,
 		LightRendererPort,
 		ReflectionProbeRendererPort,
+		WaterSurfaceRendererPort,
 		CameraPosePort,
 		SceneEnvironmentRendererPort
 {
@@ -679,6 +711,7 @@ export class ThreeRendererAdapter
 	#environmentCapture: ActiveCubeCapture | undefined;
 	readonly #environmentDisposables = new Set<ThreeDisposableLike>();
 	readonly #reflectionProbes = new Map<Entity, AttachedReflectionProbe>();
+	readonly #waterSurfaces = new Set<Entity>();
 	readonly #materialEnvMapOriginals = new WeakMap<
 		ThreeMaterialLike,
 		ThreeTextureLike | null | undefined
@@ -1028,6 +1061,34 @@ export class ThreeRendererAdapter
 		applyTransform(attached.object, transform);
 	}
 
+	updateWaterSurface(
+		entity: Entity,
+		water: WaterSurfaceRendererState,
+		transform: RenderTransform,
+		elapsedSeconds: number,
+	): void {
+		const attached = this.#objects.get(entity);
+
+		if (!attached) {
+			return;
+		}
+
+		applyTransform(attached.object, transform);
+		attached.object.visible = water.visible;
+		setObjectRenderOrder(attached.object, water.renderOrder);
+		updateWaterMaterialState(
+			attached.object,
+			water,
+			elapsedSeconds,
+			this.scene.environment,
+		);
+		this.#waterSurfaces.add(entity);
+	}
+
+	detachWaterSurface(entity: Entity): void {
+		this.#waterSurfaces.delete(entity);
+	}
+
 	detach(entity: Entity): void {
 		const attached = this.#objects.get(entity);
 
@@ -1044,6 +1105,7 @@ export class ThreeRendererAdapter
 		}
 
 		this.#objects.delete(entity);
+		this.#waterSurfaces.delete(entity);
 	}
 
 	render(interpolation: number): void {
@@ -1862,6 +1924,10 @@ function createThreeMaterialLoader(three: ThreeRuntime): AssetLoader {
 			kind: "three:material-factory",
 			entry,
 			createMaterial() {
+				if (isWaterMaterialEntry(entry)) {
+					return createWaterShaderMaterial(three, entry);
+				}
+
 				return new three.MeshStandardMaterial(
 					meshStandardMaterialParametersFrom(entry),
 				);
@@ -1903,6 +1969,197 @@ function meshStandardMaterialParametersFrom(
 	}
 
 	return parameters;
+}
+
+function isWaterMaterialEntry(entry: AssetManifestEntry): boolean {
+	return (
+		builtinIdFromUrl(entry.url).startsWith("water-") ||
+		(entry.tags ?? []).includes("water")
+	);
+}
+
+function createWaterShaderMaterial(
+	three: ThreeRuntime,
+	entry: AssetManifestEntry,
+): ThreeMaterialLike {
+	const fallbackParameters = meshStandardMaterialParametersFrom(entry);
+
+	if (!three.ShaderMaterial) {
+		return new three.MeshStandardMaterial(fallbackParameters);
+	}
+
+	const color = fallbackParameters.color ?? "#052033";
+	const emissive = fallbackParameters.emissive ?? "#01111c";
+	const opacity = fallbackParameters.opacity ?? 0.88;
+
+	return new three.ShaderMaterial({
+		uniforms: {
+			uTime: { value: 0 },
+			uBaseColor: { value: threeColorValue(three, color) },
+			uDeepColor: { value: threeColorValue(three, emissive) },
+			uWaveAmplitude: { value: 0 },
+			uWaveLength: { value: 1 },
+			uWaveSpeed: { value: 0 },
+			uWaveDirection: { value: threeVector2Value(three, 1, 0) },
+			uReflectionIntensity: { value: 0 },
+			uRefractionIntensity: { value: 0 },
+			uOpacity: { value: opacity },
+		},
+		vertexShader: WATER_VERTEX_SHADER,
+		fragmentShader: WATER_FRAGMENT_SHADER,
+		transparent: fallbackParameters.transparent ?? opacity < 1,
+		depthWrite: false,
+		side: three.DoubleSide,
+	});
+}
+
+function threeColorValue(three: ThreeRuntime, color: string | number): unknown {
+	return three.Color ? new three.Color(color) : color;
+}
+
+function threeVector2Value(three: ThreeRuntime, x: number, y: number): unknown {
+	return three.Vector2 ? new three.Vector2(x, y) : [x, y];
+}
+
+const WATER_VERTEX_SHADER = `
+uniform float uTime;
+uniform float uWaveAmplitude;
+uniform float uWaveLength;
+uniform float uWaveSpeed;
+uniform vec2 uWaveDirection;
+varying vec2 vUv;
+varying float vWave;
+
+void main() {
+	vec3 transformed = position;
+	vec2 waveDirection = normalize(uWaveDirection);
+	float wavelength = max(uWaveLength, 0.001);
+	float primary = sin(dot(transformed.xz, waveDirection) / wavelength + uTime * uWaveSpeed);
+	float secondary = sin((transformed.x - transformed.z) / (wavelength * 0.63) + uTime * uWaveSpeed * 0.73);
+	vWave = primary * 0.65 + secondary * 0.35;
+	transformed.y += vWave * uWaveAmplitude;
+	vUv = uv;
+	gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
+}
+`;
+
+const WATER_FRAGMENT_SHADER = `
+uniform vec3 uBaseColor;
+uniform vec3 uDeepColor;
+uniform float uReflectionIntensity;
+uniform float uRefractionIntensity;
+uniform float uOpacity;
+varying vec2 vUv;
+varying float vWave;
+
+void main() {
+	float shoreMix = smoothstep(0.0, 1.0, vUv.y);
+	float shimmer = 0.5 + 0.5 * vWave;
+	vec3 color = mix(uDeepColor, uBaseColor, 0.28 + shoreMix * 0.22);
+	color += vec3(0.16, 0.22, 0.26) * shimmer * uReflectionIntensity;
+	color += vec3(0.03, 0.08, 0.12) * uRefractionIntensity;
+	gl_FragColor = vec4(color, uOpacity);
+}
+`;
+
+function setObjectRenderOrder(
+	object: ThreeObject3DLike,
+	renderOrder: number | undefined,
+): void {
+	object.renderOrder = renderOrder ?? 0;
+	object.traverse?.((node) => {
+		node.renderOrder = renderOrder ?? 0;
+	});
+}
+
+function updateWaterMaterialState(
+	object: ThreeObject3DLike,
+	water: WaterSurfaceRendererState,
+	elapsedSeconds: number,
+	environmentTexture: ThreeTextureLike | null | undefined,
+): void {
+	object.traverse?.((node) => {
+		updateWaterMaterial(
+			node.material,
+			water,
+			elapsedSeconds,
+			environmentTexture,
+		);
+	});
+	updateWaterMaterial(
+		object.material,
+		water,
+		elapsedSeconds,
+		environmentTexture,
+	);
+}
+
+function updateWaterMaterial(
+	material: ThreeMaterialLike | readonly ThreeMaterialLike[] | null | undefined,
+	water: WaterSurfaceRendererState,
+	elapsedSeconds: number,
+	environmentTexture: ThreeTextureLike | null | undefined,
+): void {
+	forEachMaterial(material, (entry) => {
+		setWaterUniform(entry, "uTime", elapsedSeconds);
+		setWaterUniform(entry, "uWaveAmplitude", water.animation.waveAmplitude);
+		setWaterUniform(entry, "uWaveLength", water.animation.waveLength);
+		setWaterUniform(
+			entry,
+			"uWaveSpeed",
+			water.animation.mode === "scrolling" ? water.animation.speed : 0,
+		);
+		setWaterVector2Uniform(entry, "uWaveDirection", water.animation.direction);
+		setWaterUniform(entry, "uReflectionIntensity", water.reflection.intensity);
+		setWaterUniform(
+			entry,
+			"uRefractionIntensity",
+			water.refraction?.intensity ?? 0,
+		);
+
+		if (water.reflection.mode === "environment" && environmentTexture) {
+			entry.envMap = environmentTexture;
+		}
+
+		entry.needsUpdate = true;
+	});
+}
+
+function setWaterUniform(
+	material: ThreeMaterialLike,
+	name: string,
+	value: unknown,
+): void {
+	const uniform = isRecord(material.uniforms)
+		? material.uniforms[name]
+		: undefined;
+
+	if (isRecord(uniform)) {
+		uniform.value = value;
+	}
+}
+
+function setWaterVector2Uniform(
+	material: ThreeMaterialLike,
+	name: string,
+	value: readonly [number, number],
+): void {
+	const uniform = isRecord(material.uniforms)
+		? material.uniforms[name]
+		: undefined;
+
+	if (!isRecord(uniform)) {
+		return;
+	}
+
+	const current = uniform.value;
+
+	if (isRecord(current) && typeof current.set === "function") {
+		current.set(value[0], value[1]);
+		return;
+	}
+
+	uniform.value = [value[0], value[1]];
 }
 
 function createThreeCubemapLoader(
@@ -2076,6 +2333,22 @@ function createBuiltinMeshAsset(
 				case "box":
 				case "arena-floor":
 					return new three.BoxGeometry(1, 1, 1);
+				case "plane": {
+					if (!three.PlaneGeometry) {
+						throw new Error(
+							'Builtin mesh "plane" requires Three.PlaneGeometry.',
+						);
+					}
+
+					const geometry = new three.PlaneGeometry(
+						builtinNumberParam(entry.url, "width", 1),
+						builtinNumberParam(entry.url, "height", 1),
+						builtinIntegerParam(entry.url, "widthSegments", 1),
+						builtinIntegerParam(entry.url, "heightSegments", 1),
+					);
+					geometry.rotateX?.(-Math.PI / 2);
+					return geometry;
+				}
 				case "cylinder":
 					if (!three.CylinderGeometry) {
 						throw new Error(
@@ -2088,6 +2361,41 @@ function createBuiltinMeshAsset(
 						builtinNumberParam(entry.url, "radiusBottom", 0.5),
 						builtinNumberParam(entry.url, "height", 1),
 						builtinIntegerParam(entry.url, "radialSegments", 18),
+					);
+				case "torus":
+					if (!three.TorusGeometry) {
+						throw new Error(
+							'Builtin mesh "torus" requires Three.TorusGeometry.',
+						);
+					}
+
+					return new three.TorusGeometry(
+						builtinNumberParam(entry.url, "radius", 1),
+						builtinNumberParam(entry.url, "tube", 0.25),
+						builtinIntegerParam(entry.url, "radialSegments", 12),
+						builtinIntegerParam(entry.url, "tubularSegments", 24),
+					);
+				case "icosahedron":
+					if (!three.IcosahedronGeometry) {
+						throw new Error(
+							'Builtin mesh "icosahedron" requires Three.IcosahedronGeometry.',
+						);
+					}
+
+					return new three.IcosahedronGeometry(
+						builtinNumberParam(entry.url, "radius", 1),
+						builtinNonNegativeIntegerParam(entry.url, "detail", 0),
+					);
+				case "dodecahedron":
+					if (!three.DodecahedronGeometry) {
+						throw new Error(
+							'Builtin mesh "dodecahedron" requires Three.DodecahedronGeometry.',
+						);
+					}
+
+					return new three.DodecahedronGeometry(
+						builtinNumberParam(entry.url, "radius", 1),
+						builtinNonNegativeIntegerParam(entry.url, "detail", 0),
 					);
 				case "ingredient":
 					return new three.BoxGeometry(0.8, 0.8, 0.8);
@@ -2106,56 +2414,6 @@ function builtinMaterialColor(url: string): string | number {
 			return "#355e3b";
 		case "ingredient-gold":
 			return "#eab308";
-		case "miranda-floor-main":
-			return "#252d37";
-		case "miranda-floor-upper":
-			return "#2e3844";
-		case "miranda-cockpit-panel":
-			return "#1e2e3f";
-		case "miranda-cockpit-panel-center":
-			return "#1e2e3f";
-		case "miranda-crew-bunk":
-			return "#2b3341";
-		case "miranda-locker-bank":
-			return "#29323d";
-		case "miranda-captains-desk":
-			return "#5a3c2b";
-		case "miranda-captains-chair":
-			return "#3b2f36";
-		case "miranda-recipe-safe":
-			return "#2b3138";
-		case "miranda-engine-column":
-			return "#46313a";
-		case "miranda-engine-core":
-			return "#5a2d24";
-		case "miranda-med-pod":
-			return "#6da8bf";
-		case "miranda-mess-table":
-			return "#5d4638";
-		case "miranda-mess-counter":
-			return "#3f2d29";
-		case "miranda-chapel-altar":
-			return "#332934";
-		case "miranda-brig-cell":
-			return "#3f3034";
-		case "miranda-brig-desk":
-			return "#4a3732";
-		case "miranda-cargo-stack-a":
-			return "#564136";
-		case "miranda-cargo-stack":
-			return "#5a4334";
-		case "miranda-server-bank":
-			return "#202634";
-		case "miranda-server-bank-wide":
-			return "#202634";
-		case "miranda-story-marker-cyan":
-			return "#8de0ff";
-		case "miranda-story-marker-amber":
-			return "#ffc584";
-		case "miranda-story-marker-red":
-			return "#ff8ea6";
-		case "miranda-story-marker-magenta":
-			return "#cba7ff";
 		default:
 			return "#9ca3af";
 	}
@@ -2188,6 +2446,19 @@ function builtinIntegerParam(
 	fallback: number,
 ): number {
 	return Math.max(3, Math.round(builtinNumberParam(url, key, fallback)));
+}
+
+function builtinNonNegativeIntegerParam(
+	url: string,
+	key: string,
+	fallback: number,
+): number {
+	const params = builtinQueryParams(url);
+	const raw = params.get(key);
+	const value = raw === null ? Number.NaN : Number(raw);
+	return Number.isFinite(value) && value >= 0
+		? Math.round(value)
+		: Math.max(0, Math.round(fallback));
 }
 
 function builtinQueryParams(url: string): URLSearchParams {

@@ -44,12 +44,6 @@ const meshSolitudeFireflyMarker = {
 	url: "builtin://cylinder?radiusTop=0.22&radiusBottom=0.28&height=0.8&radialSegments=12",
 	tags: ["solitude", "firefly", "story-note", "primitive"],
 } as const;
-const meshSolitudeHazeMarker = {
-	id: "mesh_solitude_haze_marker",
-	kind: "mesh",
-	url: "builtin://box",
-	tags: ["solitude", "haze", "visual-marker", "primitive"],
-} as const;
 const materialPlayer = {
 	id: "material_player",
 	kind: "material",
@@ -115,20 +109,6 @@ const materialSolitudeFirefly = {
 		roughness: 0.22,
 	},
 } as const;
-const materialSolitudeHaze = {
-	id: "material_solitude_haze",
-	kind: "material",
-	url: "builtin://solitude-haze",
-	material: {
-		color: "#8f9daf",
-		emissive: "#4ce6ff",
-		emissiveIntensity: 0.18,
-		metalness: 0,
-		roughness: 0.72,
-		opacity: 0.18,
-		transparent: true,
-	},
-} as const;
 const audioPlayerJump = {
 	id: "audio_player_jump",
 	kind: "audio",
@@ -151,7 +131,6 @@ export const solitudeAssetManifest = {
 		meshSolitudePillar,
 		meshSolitudeRingFragment,
 		meshSolitudeFireflyMarker,
-		meshSolitudeHazeMarker,
 		cubemapObservatorySky,
 		materialPlayer,
 		materialSolitudePlateau,
@@ -159,7 +138,6 @@ export const solitudeAssetManifest = {
 		materialSolitudePillar,
 		materialSolitudeRingFragment,
 		materialSolitudeFirefly,
-		materialSolitudeHaze,
 		audioPlayerJump,
 		audioPlayerChargeRelease,
 		audioPortalActivate,
@@ -175,7 +153,6 @@ export const solitudeAssetManifest = {
 			"mesh_solitude_pillar",
 			"mesh_solitude_ring_fragment",
 			"mesh_solitude_firefly_marker",
-			"mesh_solitude_haze_marker",
 			"cubemap_observatory_sky",
 			"material_player",
 			"material_solitude_plateau",
@@ -183,7 +160,6 @@ export const solitudeAssetManifest = {
 			"material_solitude_pillar",
 			"material_solitude_ring_fragment",
 			"material_solitude_firefly",
-			"material_solitude_haze",
 			"audio_player_jump",
 			"audio_player_charge_release",
 			"audio_portal_activate",

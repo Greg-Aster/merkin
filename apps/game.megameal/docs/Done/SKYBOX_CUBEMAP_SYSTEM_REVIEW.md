@@ -347,7 +347,7 @@ Active follow-on packet:
 - `docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` records the completed expansion
   of this cubemap foundation into equirectangular, video, procedural atmosphere,
   bounded dynamic capture, and authored reflection probe support.
-- `docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md` tracks the remaining
+- `docs/Done/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md` tracks the remaining
   future skybox and scene-environment feature packets.
 - Runtime support can now be described as cubemap plus foundation support for
   equirectangular, muted `equirectangular-360` video, procedural atmosphere,

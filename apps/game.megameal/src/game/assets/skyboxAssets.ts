@@ -27,6 +27,15 @@ export const cubemapObservatorySky = {
 	tags: ["skybox", "environment"],
 } satisfies AssetManifestEntry;
 
+export const portalArenaEquirectangularSky = {
+	id: "texture_portal_arena_equirectangular_sky",
+	kind: "texture",
+	url: "/assets/environment/portal-arena/portal-arena-sky-equirectangular.png",
+	projection: "equirectangular",
+	colorSpace: "srgb",
+	tags: ["skybox", "environment", "portal-arena"],
+} satisfies AssetManifestEntry;
+
 export const sampleEquirectangularSky = {
 	id: "texture_sample_equirectangular_sky",
 	kind: "texture",

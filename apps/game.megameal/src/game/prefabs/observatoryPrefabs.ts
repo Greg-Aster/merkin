@@ -1,7 +1,7 @@
 import { getCollisionPrefabCollider } from "../generated/observatoryCollisionRuntime.js";
 import { playerPrefab } from "./defaultPrefabs.js";
 import type { PrefabDefinition } from "./index.js";
-import { waterSurfacePlanePrefab } from "./waterPrefabs.js";
+import { lakeWaterSurfacePrefab } from "./waterPrefabs.js";
 
 export const observatoryEnvironmentPrefab = {
 	id: "observatory_environment",
@@ -15,23 +15,6 @@ export const observatoryEnvironmentPrefab = {
 		},
 		Renderable: {
 			meshId: "mesh_observatory_environment",
-			visible: true,
-		},
-	},
-} satisfies PrefabDefinition;
-
-export const observatoryFieldVisualTerrainPrefab = {
-	id: "observatory_field_visual_terrain",
-	assetIds: ["mesh_observatory_field_micro_displacement"],
-	tags: ["world", "terrain", "observatory", "generated", "visual-displacement"],
-	components: {
-		Transform: {
-			position: [0, 0, 0],
-			rotation: [0, 0, 0, 1],
-			scale: [1, 1, 1],
-		},
-		Renderable: {
-			meshId: "mesh_observatory_field_micro_displacement",
 			visible: true,
 		},
 	},
@@ -108,8 +91,7 @@ export const observatoryPrefabs = [
 	playerPrefab,
 	observatoryBoundaryBlockerPrefab,
 	observatoryEnvironmentPrefab,
-	observatoryFieldVisualTerrainPrefab,
 	observatoryWalkableMeshPrefab,
-	waterSurfacePlanePrefab,
+	lakeWaterSurfacePrefab,
 	observatoryFireflyMarkerPrefab,
 ] as const;

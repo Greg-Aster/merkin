@@ -177,41 +177,6 @@ export const mirandaGeneratedGlbImportParityManifest = {
 	],
 } satisfies GeneratedGlbImportManifest;
 
-export const observatoryGeneratedVisualTerrainImportManifest = {
-	id: "observatory-generated-visual-terrain-import",
-	generatedAt: "2026-06-06T00:00:00.000Z",
-	entries: [
-		{
-			id: "observatory-field-micro-displacement-glb",
-			sourceUrl:
-				"/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.glb",
-			runtimeSceneId: "observatory_runtime",
-			status: "imported",
-			owner: "Observatory visual terrain generation",
-			evidence: [
-				"scripts/generate-observatory-field-terrain.ts",
-				"public/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.json",
-				"docs/LEVEL_EDITOR_COLLISION_COOK_PLAN.md",
-			],
-			artifact: {
-				generatorScript: "scripts/generate-observatory-field-terrain.ts",
-				metadataPath:
-					"public/assets/generated/game/observatory/terrain/observatory-field-micro-displacement.json",
-				glbSha256:
-					"326df726413d05e1139efe355d3e65bb0b78d120ecd05e615cc5ed1e37dd0d92",
-			},
-			target: {
-				assetIds: ["mesh_observatory_field_micro_displacement"],
-				prefabIds: ["observatory_field_visual_terrain"],
-				stableIds: ["observatory:terrain:visual-field"],
-				notes:
-					"Generated target-engine visual terrain aligns to observatory:walkable-mesh collision draft heights while collision stays explicit and non-render-derived.",
-			},
-		},
-	],
-} satisfies GeneratedGlbImportManifest;
-
 export const generatedGlbImportParityManifests = [
 	mirandaGeneratedGlbImportParityManifest,
-	observatoryGeneratedVisualTerrainImportManifest,
 ] as const;

@@ -38,7 +38,8 @@ floor.
 This packet will:
 
 - add an authored generated GLB asset under `public/assets/game/terrain/`,
-- keep a checked-in deterministic generator script so the asset is reproducible,
+- keep provenance so the asset can be reproduced later through generic terrain
+  import/generation tooling,
 - replace the portal arena floor renderable with the GLB mesh asset,
 - remove the portal arena floor's unused built-in material dependency,
 - expand the portal arena floor collision proxy and player movement bounds,
@@ -101,7 +102,8 @@ pipeline.
 
 - Intent documented.
 - `PortalFieldTerrainContract` added to the contract register.
-- Deterministic generator added at `scripts/generate-portal-field-glb.mjs`.
+- The former deterministic one-off generator was retired; future regeneration
+  must use generic terrain import/generation tooling.
 - Generated GLB added at `public/assets/game/terrain/portal_field_moor.glb`.
 - `portal_arena_floor` now renders the GLB field and keeps explicit box
   collision as the stable gameplay proxy.

@@ -5,10 +5,16 @@ import {
 	loadRuntimeSceneManifest,
 } from "../src/engine/index.js";
 import {
+	portalArenaEquirectangularSky,
 	sampleEquirectangularSky,
 	sampleVideoSky,
 } from "../src/game/assets/index.js";
-import { portalArenaRuntimeSceneManifest } from "../src/game/levels/index.js";
+import {
+	defaultRuntimeSceneManifests,
+	portalArenaRuntimeSceneManifest,
+} from "../src/game/levels/index.js";
+
+const yggdrasilRuntimeSceneId = "yggdrasil_runtime";
 
 function assertErrorIncludes(action: () => void, expected: string): void {
 	try {
@@ -79,6 +85,94 @@ const solidColorManifest = withEnvironment({
 	backgroundIntensity: 1,
 });
 loadRuntimeSceneManifest(solidColorManifest);
+
+const productionPortalArenaManifest = loadRuntimeSceneManifest(
+	portalArenaRuntimeSceneManifest,
+);
+const productionPortalArenaEnvironment =
+	productionPortalArenaManifest.renderProfile.environment;
+
+if (productionPortalArenaEnvironment.kind !== "equirectangular-environment") {
+	throw new Error(
+		"Portal arena render profile must use an equirectangular environment.",
+	);
+}
+
+if (
+	productionPortalArenaEnvironment.assetId !== portalArenaEquirectangularSky.id
+) {
+	throw new Error(
+		`Portal arena render profile must reference ${portalArenaEquirectangularSky.id}.`,
+	);
+}
+
+const productionPortalArenaEnvironmentAsset =
+	productionPortalArenaManifest.assets.assets.find(
+		(asset) => asset.id === productionPortalArenaEnvironment.assetId,
+	);
+
+if (productionPortalArenaEnvironmentAsset?.projection !== "equirectangular") {
+	throw new Error(
+		"Portal arena environment asset must declare equirectangular projection.",
+	);
+}
+
+const productionYggdrasilManifest = loadRuntimeSceneManifest(
+	requiredYggdrasilRuntimeSceneManifest(),
+);
+const productionYggdrasilEnvironment =
+	productionYggdrasilManifest.renderProfile.environment;
+
+if (productionYggdrasilEnvironment.kind !== "cubemap-skybox") {
+	throw new Error("Yggdrasil render profile must use the observatory cubemap.");
+}
+
+if (productionYggdrasilEnvironment.assetId !== "cubemap_observatory_sky") {
+	throw new Error(
+		'Yggdrasil render profile must reference "cubemap_observatory_sky".',
+	);
+}
+
+if (productionYggdrasilEnvironment.requiredForReadiness !== true) {
+	throw new Error(
+		"Yggdrasil environment must be required for runtime scene readiness.",
+	);
+}
+
+if (
+	!productionYggdrasilManifest.readiness.requiredAssetIds?.includes(
+		productionYggdrasilEnvironment.assetId,
+	)
+) {
+	throw new Error(
+		`Yggdrasil environment asset "${productionYggdrasilEnvironment.assetId}" must be listed in readiness.requiredAssetIds.`,
+	);
+}
+
+const productionYggdrasilEnvironmentAsset =
+	productionYggdrasilManifest.assets.assets.find(
+		(asset) => asset.id === productionYggdrasilEnvironment.assetId,
+	);
+
+if (productionYggdrasilEnvironmentAsset?.kind !== "cubemap") {
+	throw new Error("Yggdrasil environment asset must declare cubemap kind.");
+}
+
+assertErrorIncludes(
+	() =>
+		loadRuntimeSceneManifest({
+			...productionYggdrasilManifest,
+			readiness: {
+				...productionYggdrasilManifest.readiness,
+				requiredAssetIds: (
+					productionYggdrasilManifest.readiness.requiredAssetIds ?? []
+				).filter(
+					(assetId) => assetId !== productionYggdrasilEnvironment.assetId,
+				),
+			},
+		}),
+	`runtimeSceneManifest.renderProfile.environment.assetId "${productionYggdrasilEnvironment.assetId}" is required for readiness but is missing from runtimeSceneManifest.readiness.requiredAssetIds.`,
+);
 
 const equirectangularManifest = withEnvironment(
 	{
@@ -289,3 +383,17 @@ assertErrorIncludes(
 );
 
 console.log("Scene environment contract validation passed.");
+
+function requiredYggdrasilRuntimeSceneManifest(): RuntimeSceneManifestData {
+	const manifest = defaultRuntimeSceneManifests.find(
+		(candidate) => candidate.id === yggdrasilRuntimeSceneId,
+	);
+
+	if (!manifest) {
+		throw new Error(
+			`Expected Yggdrasil runtime scene manifest "${yggdrasilRuntimeSceneId}" to be registered before environment validation.`,
+		);
+	}
+
+	return manifest;
+}
