@@ -10,9 +10,6 @@ export const th: Translation = {
   [Key.projects]: 'โปรเจกต์',
   [Key.search]: 'ค้นหา',
 
-  [Key.configs]: 'การตั้งค่า',
-  [Key.friends]: 'เพื่อน',
-
   [Key.tags]: 'ป้ายกำกับ',
   [Key.categories]: 'หมวดหมู่',
   [Key.recentPosts]: 'โพสต์ล่าสุด',

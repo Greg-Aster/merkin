@@ -1,13 +1,7 @@
 ---
-import {
-  Content,
-  frontmatter,
-} from '../content/posts/store/store-placeholder.mdx'
-import StoreLayout from '../layouts/store/StoreLayout.astro'
+import { getRetiredPublicRouteTarget } from '../contracts/routes'
 
-const { title, description } = frontmatter
+const redirectTarget = getRetiredPublicRouteTarget('/store-placeholder/')
+
+return Astro.redirect(redirectTarget, 301)
 ---
-<StoreLayout title={title} description={description}>
-  <h1 class="sr-only">{title}</h1>
-  <Content />
-</StoreLayout>

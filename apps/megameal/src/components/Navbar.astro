@@ -8,7 +8,6 @@ import LightDarkSwitch from './LightDarkSwitch.svelte'
 import Search from './Search.svelte'
 import SiteAudioControl from './client/SiteAudioControl.svelte'
 import StoreCartButton from './store/StoreCartButton.svelte'
-import AdminNavbar from './svelte/admin/AdminNavbar.svelte'
 import DisplaySettings from './widget/DisplaySettings.svelte'
 import NavMenuPanel from './widget/NavMenuPanel.astro'
 
@@ -27,9 +26,6 @@ const homeLink =
   links.find(link => !link.external && link.url === '/') ??
   LinkPresets[LinkPreset.Home]
 const navigationLinks = links.filter(link => link !== homeLink)
-// Prerendered pages cannot read per-request auth state during static builds.
-// Admin auth is already derived from localStorage on the client.
-const isAuthenticated = false
 import '../styles/features/extracted/navbar.css'
 ---
 
@@ -40,9 +36,6 @@ import '../styles/features/extracted/navbar.css'
         "navbar-shell card-base !overflow-visible max-w-[var(--page-width)] min-h-[3.25rem] md:h-[4.5rem] md:min-h-0 !rounded-t-none mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-1.5 md:gap-3 px-2.5 py-1 md:px-4 md:py-0"]}>
         
         <div class="flex items-center justify-start min-w-0">
-            <div id="admin-navbar-shell" class="hidden">
-                <AdminNavbar client:only="svelte" siteTitle={siteConfig.title} />
-            </div>
             <a
               id="public-home-link"
               aria-label={`${siteConfig.title} home`}
@@ -64,7 +57,6 @@ import '../styles/features/extracted/navbar.css'
         </div>
         
         <div id="public-nav-shell" class="flex items-center justify-center gap-2 md:gap-4 min-w-0">
-            <!-- Regular Navigation Links (hidden when in admin mode) -->
             <div id="standard-nav" class="hidden md:flex items-center">
             {navigationLinks.map((l) => {
                 return l.dropdown ? (
@@ -137,13 +129,12 @@ import '../styles/features/extracted/navbar.css'
                 <Icon name="fa6-solid:compress" class="fullscreen-exit-icon text-[1.25rem] hidden"></Icon>
             </button> -->
                         
-            <!-- ⭐ RESTORED: Mobile Hamburger Menu Button -->
             <button aria-label="Menu" name="Nav Menu" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="mobile-header-button nav-action-button btn-plain scale-animation rounded-lg active:scale-90 md:!hidden" id="nav-menu-switch">
                 <Icon name="material-symbols:menu-rounded" class="nav-action-icon"></Icon>
             </button>
         </div>
         
-        <NavMenuPanel links={links} isAuthenticated={isAuthenticated}>
+        <NavMenuPanel links={links}>
             <div class="mobile-menu-tools md:hidden">
                 <button type="button" id="mobile-search-action" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="mobile-menu-tools__button">
                     <span>Search</span>
@@ -221,7 +212,6 @@ import '../styles/features/extracted/navbar.css'
             });
         }
     
-        // ⭐ RESTORED: Nav menu button functionality
         let menuBtn = document.getElementById("nav-menu-switch");
         if (menuBtn) {
             menuBtn.addEventListener("click", function () {
@@ -255,44 +245,12 @@ import '../styles/features/extracted/navbar.css'
             });
         }
 
-        const hasValidAuth = () => {
-            const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-            const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0');
-            if (!isAuthenticated || !expiresAt || Date.now() >= expiresAt) {
-                localStorage.removeItem('isAuthenticated');
-                localStorage.removeItem('authExpiresAt');
-                return false;
-            }
-            return true;
-        };
-
-        const isAuthenticated = hasValidAuth();
-        const publicHomeLink = document.getElementById('public-home-link');
-        const adminNavbarShell = document.getElementById('admin-navbar-shell');
-        const publicNavShell = document.getElementById('public-nav-shell');
-
-        if (publicHomeLink) {
-            publicHomeLink.style.display = isAuthenticated ? 'none' : '';
-        }
-
-        if (adminNavbarShell) {
-            adminNavbarShell.style.display = isAuthenticated ? 'flex' : 'none';
-        }
-
-        if (publicNavShell) {
-            publicNavShell.style.display = isAuthenticated ? 'none' : '';
-        }
-
         updateMobileThemeLabel();
         syncStoreControlsVisibility();
     
-        // UPDATED: Layout-based Fullscreen Mode Toggle Functionality
         initializeFullscreenMode();
     }
     
-    /**
-     * FIXED: Initialize layout-based fullscreen mode toggle
-     */
     function initializeFullscreenMode() {
         const toggleBtn = document.getElementById('fullscreen-btn');
         if (!toggleBtn) return; // Exit if button doesn't exist
@@ -300,17 +258,14 @@ import '../styles/features/extracted/navbar.css'
         const expandIcon = toggleBtn?.querySelector('.fullscreen-icon');
         const compressIcon = toggleBtn?.querySelector('.fullscreen-exit-icon');
         
-        // Check saved state and apply it immediately
         const isFullscreen = localStorage.getItem('fullscreenMode') === 'true';
         
-        // Apply initial state
         if (isFullscreen) {
             applyFullscreenState();
         } else {
             applyNormalState();
         }
         
-        // Toggle handler - immediate layout change
         toggleBtn?.addEventListener('click', () => {
             const currentState = localStorage.getItem('fullscreenMode') === 'true';
             
@@ -321,60 +276,30 @@ import '../styles/features/extracted/navbar.css'
             }
         });
         
-        /**
-         * Apply fullscreen visual state (layout-based fullscreen)
-         */
         function applyFullscreenState() {
-            // Add class to force mobile view layout
             document.body.classList.add('force-mobile-view');
             document.body.classList.add('fullscreen-mode');
             
-            // Update button icons
             expandIcon?.classList.add('hidden');
             compressIcon?.classList.remove('hidden');
-            
-            console.log('Layout fullscreen mode applied');
         }
         
-        /**
-         * Apply normal state
-         */
         function applyNormalState() {
-            // Remove fullscreen class
             document.body.classList.remove('force-mobile-view');
             document.body.classList.remove('fullscreen-mode');
             
-            // Update button icons
             expandIcon?.classList.remove('hidden');
             compressIcon?.classList.add('hidden');
-            
-            console.log('Normal layout mode applied');
         }
         
-        /**
-         * Enable fullscreen mode - immediate layout change
-         */
         function enableFullscreenMode() {
-            // Save state
             localStorage.setItem('fullscreenMode', 'true');
-            
-            // Apply layout changes immediately
             applyFullscreenState();
-            
-            console.log('Layout fullscreen mode enabled');
         }
         
-        /**
-         * Disable fullscreen mode - immediate layout change
-         */
         function disableFullscreenMode() {
-            // Save state
             localStorage.setItem('fullscreenMode', 'false');
-            
-            // Restore normal layout immediately
             applyNormalState();
-            
-            console.log('Layout fullscreen mode disabled');
         }
     }
     

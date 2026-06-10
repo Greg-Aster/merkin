@@ -5,30 +5,15 @@ import { url } from '../../utils/url-utils'
 
 interface Props {
   links: NavBarLink[]
-  isAuthenticated?: boolean
 }
 
 const links = Astro.props.links
-const isAuthenticated = Astro.props.isAuthenticated || false
-
-const adminLinks = [
-  {
-    name: 'Configs',
-    url: '/configs',
-    icon: 'material-symbols:settings-outline',
-  },
-  {
-    name: 'Friends',
-    url: '/friends',
-    icon: 'material-symbols:group',
-  },
-]
 ---
 
 <div id="nav-menu-panel" class:list={['float-panel float-panel-closed absolute transition-all fixed right-4 px-2 py-2']} hidden>
   <slot />
 
-  <div id="default-links" class:list={[{ hidden: isAuthenticated }]}>
+  <div id="default-links">
     {links.map((link) => (
       <>
         <a
@@ -89,62 +74,4 @@ const adminLinks = [
     ))}
   </div>
 
-  <div id="admin-links" class:list={[{ hidden: !isAuthenticated }]}>
-    {adminLinks.map((link) => (
-      <a
-        href={url(link.url)}
-        class="group flex justify-between items-center py-2 pl-3 pr-1 rounded-lg gap-8 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)] transition"
-      >
-        <div class="transition text-black/75 dark:text-white/75 font-bold group-hover:text-[var(--primary)] group-active:text-[var(--primary)]">
-          {link.name}
-        </div>
-        <Icon name={link.icon} class="transition text-[1.25rem] text-[var(--primary)]" />
-      </a>
-    ))}
-
-    <button
-      id="menu-logout-button"
-      class="group flex justify-between items-center py-2 pl-3 pr-1 rounded-lg gap-8 w-full hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)] transition"
-    >
-      <div class="transition text-black/75 dark:text-white/75 font-bold group-hover:text-[var(--primary)] group-active:text-[var(--primary)]">
-        Logout
-      </div>
-      <Icon name="material-symbols:logout" class="transition text-[1.25rem] text-[var(--primary)]" />
-    </button>
-  </div>
 </div>
-
-<script>
-  const hasValidAuth = () => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
-    const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0')
-    if (!isAuthenticated || !expiresAt || Date.now() >= expiresAt) {
-      localStorage.removeItem('isAuthenticated')
-      localStorage.removeItem('authExpiresAt')
-      return false
-    }
-    return true
-  }
-
-  const syncMenuAuthState = () => {
-    const isAuthenticated = hasValidAuth()
-    const defaultLinks = document.getElementById('default-links')
-    const adminLinks = document.getElementById('admin-links')
-
-    if (defaultLinks) {
-      defaultLinks.style.display = isAuthenticated ? 'none' : ''
-    }
-
-    if (adminLinks) {
-      adminLinks.style.display = isAuthenticated ? '' : 'none'
-    }
-  }
-
-  syncMenuAuthState()
-
-  document.getElementById('menu-logout-button')?.addEventListener('click', () => {
-    localStorage.removeItem('isAuthenticated')
-    localStorage.removeItem('authExpiresAt')
-    window.location.href = '/'
-  })
-</script>

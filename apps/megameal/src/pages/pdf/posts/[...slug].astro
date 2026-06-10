@@ -1,11 +1,12 @@
 ---
 import { getCollection } from 'astro:content'
+import { publicCollectionFilter } from '../../../contracts/content'
 
 export async function getStaticPaths() {
-  const posts = await getCollection('posts')
+  const posts = await getCollection('posts', publicCollectionFilter)
 
   return posts
-    .filter(post => post.data.downloadable === true && post.data.draft !== true)
+    .filter(post => post.data.downloadable === true)
     .map(post => ({
       params: { slug: post.slug },
       props: { post },

@@ -10,9 +10,6 @@ export const zh_TW: Translation = {
   [Key.projects]: '專案',
   [Key.search]: '搜尋',
 
-  [Key.configs]: '配置',
-  [Key.friends]: '友鏈',
-
   [Key.tags]: '標籤',
   [Key.categories]: '分類',
   [Key.recentPosts]: '最新文章',

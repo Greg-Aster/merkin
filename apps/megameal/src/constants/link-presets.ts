@@ -24,15 +24,15 @@ export const LinkPresets: { [key in LinkPreset]: NavBarLink } = {
     url: '/projects/',
   },
   [LinkPreset.Configs]: {
-    name: i18n(I18nKey.configs),
-    url: '/configs/',
+    name: i18n(I18nKey.home),
+    url: '/',
   },
   [LinkPreset.Friends]: {
-    name: i18n(I18nKey.friends),
-    url: '/friends/',
+    name: i18n(I18nKey.community),
+    url: '/community/',
   },
   [LinkPreset.NewPost]: {
-    name: i18n(I18nKey.configs),
-    url: '/configs/',
+    name: i18n(I18nKey.archive),
+    url: '/archive/',
   },
 }

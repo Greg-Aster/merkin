@@ -4,7 +4,6 @@ import { i18n } from '@i18n/translation'
 import Icon from '@iconify/svelte/dist/Icon.svelte'
 import { url } from '@utils/url-utils'
 import { onMount } from 'svelte'
-import { getFriendContent, isFriendContentEnabled } from '../stores/friendStore'
 
 type PagefindResult = {
   url: string
@@ -12,9 +11,6 @@ type PagefindResult = {
     title: string
   }
   excerpt: string
-  isFriendContent?: boolean
-  friendName?: string
-  friendUrl?: string
 }
 
 type PagefindApi = {
@@ -34,8 +30,6 @@ declare global {
 let keywordDesktop = ''
 let keywordMobile = ''
 let result: PagefindResult[] = []
-let isAuthenticated = false
-let friendContentEnabled = false
 export let hideMobileTrigger = false
 
 const fakeResult = [
@@ -77,21 +71,6 @@ function waitForPagefind(timeoutMs = 2500) {
 }
 
 onMount(() => {
-  function hasValidAuth() {
-    const authed = localStorage.getItem('isAuthenticated') === 'true'
-    const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0')
-    if (!authed || !expiresAt || Date.now() >= expiresAt) {
-      localStorage.removeItem('isAuthenticated')
-      localStorage.removeItem('authExpiresAt')
-      return false
-    }
-    return true
-  }
-
-  // Check authentication and friend content status
-  isAuthenticated = hasValidAuth()
-  friendContentEnabled = isFriendContentEnabled()
-
   search = async (keyword: string, isDesktop: boolean) => {
     const panel = document.getElementById('search-panel')
     if (!panel) return
@@ -101,10 +80,8 @@ onMount(() => {
       return
     }
 
-    // Initialize results array
     let arr = []
 
-    // Get standard search results
     if (import.meta.env.PROD) {
       const pagefind = await waitForPagefind()
       if (!pagefind) return
@@ -116,29 +93,7 @@ onMount(() => {
         arr.push(pagefindResult)
       }
     } else {
-      // Mock data for non-production environment
       arr = fakeResult
-    }
-
-    // Get and add friend content results if enabled
-    if (isAuthenticated && friendContentEnabled) {
-      const friendResults = searchFriendPosts(keyword)
-
-      // Convert friend results to the same format as pagefind results
-      const formattedFriendResults = friendResults.map(post => ({
-        url: post.sourceUrl || `/friend-${post.slug || post.id}`,
-        meta: {
-          title: `${post.title} (from ${post.friendName})`,
-        },
-        excerpt: stripHtml(post.description || ''),
-        // Add indicator this is friend content
-        isFriendContent: true,
-        friendName: post.friendName,
-        friendUrl: post.friendUrl,
-      }))
-
-      // Add friend results to the main results array
-      arr = [...arr, ...formattedFriendResults]
     }
 
     if (!arr.length && isDesktop) {
@@ -151,52 +106,10 @@ onMount(() => {
     }
     result = arr
   }
-
-  // Listen for friend content toggle events
-  window.addEventListener('friend-content-toggled', e => {
-    const event = e as CustomEvent
-    const enabled = event.detail?.enabled ?? false
-
-    if (friendContentEnabled !== enabled) {
-      friendContentEnabled = enabled
-      // Re-search with current keyword to update results
-      search(keywordDesktop || keywordMobile, true)
-    }
-  })
 })
 
-// Function to search through friend posts
-function searchFriendPosts(keyword) {
-  if (!keyword) return []
-
-  const friendPosts = getFriendContent()
-  const normalizedKeyword = keyword.toLowerCase()
-
-  return friendPosts.filter(post => {
-    // Search in title
-    if (post.title?.toLowerCase().includes(normalizedKeyword)) return true
-
-    // Search in description
-    if (post.description?.toLowerCase().includes(normalizedKeyword)) return true
-
-    // Search in content (if available)
-    if (post.content?.toLowerCase().includes(normalizedKeyword)) return true
-
-    // Search in tags
-    if (post.tags && Array.isArray(post.tags)) {
-      if (post.tags.some(tag => tag.toLowerCase().includes(normalizedKeyword)))
-        return true
-    }
-
-    // Search in category
-    if (post.category?.toLowerCase().includes(normalizedKeyword)) return true
-
-    return false
-  })
-}
-
 // Strip markup from excerpts before rendering.
-function stripHtml(text) {
+function stripHtml(text: string) {
   return String(text || '').replace(/<[^>]*>/g, '')
 }
 
@@ -260,18 +173,12 @@ $: search(keywordMobile, false)
       {#each result as item}
           <div
              class="transition first-of-type:mt-2 lg:first-of-type:mt-0 group block
-         rounded-xl text-lg px-3 py-2 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]
-         {item.isFriendContent ? 'border-l-4 border-l-[var(--primary)]' : ''}">
+         rounded-xl text-lg px-3 py-2 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]">
               <a href={item.url} class="block" data-sfx-hover="hover-soft" data-sfx-click="soft">
                 <div class="transition text-90 inline-flex font-bold group-hover:text-[var(--primary)]">
                     {item.meta.title}<Icon icon="fa6-solid:chevron-right" class="transition text-[0.75rem] translate-x-1 my-auto text-[var(--primary)]"></Icon>
                 </div>
               </a>
-              {#if item.isFriendContent}
-                  <div class="text-xs text-neutral-500 dark:text-neutral-400 mb-1">
-                      From <a href={item.friendUrl} target="_blank" rel="noopener noreferrer" data-sfx-hover="hover-soft" data-sfx-click="sweep" class="text-[var(--primary)] hover:underline">{item.friendName}</a>
-                  </div>
-              {/if}
               <div class="transition text-sm text-50">
                   {item.excerpt}
               </div>

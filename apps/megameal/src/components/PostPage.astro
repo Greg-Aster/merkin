@@ -3,11 +3,9 @@ import { getPostUrlBySlug } from '@utils/url-utils'
 import { postCardConfig } from '../config/postcard.config'
 import { formatDateToYYYYMMDD } from '../utils/date-utils'
 import PostCard from './PostCard.astro'
-import FriendContentIntegrator from './svelte/friends/FriendContentIntegrator.svelte'
 
 const { page } = Astro.props
 
-// Add data attributes to each post element for sorting by the FriendContentIntegrator
 let delay = 0
 const interval = 50
 
@@ -16,7 +14,7 @@ const animationEnabled = postCardConfig.localPosts.styling.animationEnabled
 ---
 
 <div id="posts-container" class="transition flex flex-col rounded-[var(--radius-large)] py-1 md:py-0 gap-3 sm:gap-4 md:gap-4 lg:gap-4 mb-4">
-    <!-- Regular local posts (server-rendered) with data attributes for friend content integration -->
+    <!-- Local posts are server-rendered; data attributes support archive sorting and filtering. -->
     {page.data.map((entry: any) => {
         const dateStr = formatDateToYYYYMMDD(entry.data.published);
         const timestamp = new Date(entry.data.published).getTime();
@@ -41,6 +39,4 @@ const animationEnabled = postCardConfig.localPosts.styling.animationEnabled
         );
     })}
     
-    <!-- Friend content integrator that will add friend posts client-side -->
-    <FriendContentIntegrator client:load />
 </div>

@@ -19,7 +19,7 @@ import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 import mdx from "@astrojs/mdx";
 
-// CORS middleware for friend content sharing
+// CORS middleware for public feed/API routes.
 const corsMiddleware = () => {
   return {
     name: 'cors-middleware',
@@ -31,8 +31,7 @@ const corsMiddleware = () => {
               req.url.includes('/feed') ||
               req.url.includes('/rss') ||
               req.url.includes('/atom.xml') ||
-              req.url.includes('/api/') ||
-              req.url.includes('/friend-content.json')) {
+              req.url.includes('/api/')) {
             res.setHeader('Access-Control-Allow-Origin', '*');
             res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
             res.setHeader('Access-Control-Allow-Headers', 'Content-Type');

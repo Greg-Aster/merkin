@@ -2,23 +2,20 @@ import { getCollection } from 'astro:content'
 import type { BlogPostData } from '@/types/config'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
+import {
+  comparePublishedDesc,
+  publicCollectionFilter,
+} from '../contracts/content'
 
 export async function getSortedPosts(
   includeDrafts = false,
 ): Promise<{ body: string; data: BlogPostData; slug: string }[]> {
-  const allBlogPosts = (await getCollection('posts', ({ data }) => {
-    // If includeDrafts is true, include all posts regardless of draft status
-    // Otherwise, only include non-draft posts
-    return includeDrafts ? true : data.draft !== true
-  })) as unknown as { body: string; data: BlogPostData; slug: string }[]
+  const allBlogPosts = (await getCollection(
+    'posts',
+    includeDrafts ? undefined : publicCollectionFilter,
+  )) as unknown as { body: string; data: BlogPostData; slug: string }[]
 
-  const sorted = allBlogPosts.sort(
-    (a: { data: BlogPostData }, b: { data: BlogPostData }) => {
-      const dateA = new Date(a.data.published)
-      const dateB = new Date(b.data.published)
-      return dateA > dateB ? -1 : 1
-    },
-  )
+  const sorted = allBlogPosts.sort(comparePublishedDesc)
 
   // Continue with setting up next/prev links
   for (let i = 1; i < sorted.length; i++) {
@@ -39,9 +36,10 @@ export type Tag = {
 }
 
 export async function getTagList(): Promise<Tag[]> {
-  const allBlogPosts = await getCollection<'posts'>('posts', ({ data }) => {
-    return import.meta.env.PROD ? data.draft !== true : true
-  })
+  const allBlogPosts = await getCollection<'posts'>(
+    'posts',
+    import.meta.env.PROD ? publicCollectionFilter : undefined,
+  )
 
   const countMap: { [key: string]: number } = {}
   allBlogPosts.map((post: { data: { tags: string[] } }) => {
@@ -70,9 +68,10 @@ export async function getPostsBySeries(
   seriesId: string,
   includeDrafts = false,
 ): Promise<{ body: string; data: BlogPostData; slug: string }[]> {
-  const allPosts = (await getCollection('posts', ({ data }) => {
-    return includeDrafts ? true : data.draft !== true
-  })) as unknown as { body: string; data: BlogPostData; slug: string }[]
+  const allPosts = (await getCollection(
+    'posts',
+    includeDrafts ? undefined : publicCollectionFilter,
+  )) as unknown as { body: string; data: BlogPostData; slug: string }[]
 
   return allPosts
     .filter(post => (post.data as any).series === seriesId)
@@ -88,9 +87,10 @@ export async function getAllSeries(
 ): Promise<
   Record<string, { body: string; data: BlogPostData; slug: string }[]>
 > {
-  const allPosts = (await getCollection('posts', ({ data }) => {
-    return includeDrafts ? true : data.draft !== true
-  })) as unknown as { body: string; data: BlogPostData; slug: string }[]
+  const allPosts = (await getCollection(
+    'posts',
+    includeDrafts ? undefined : publicCollectionFilter,
+  )) as unknown as { body: string; data: BlogPostData; slug: string }[]
 
   const grouped: Record<string, typeof allPosts> = {}
   for (const post of allPosts) {
@@ -117,9 +117,10 @@ export async function getPostsByEra(
   eraSlug: string,
   includeDrafts = false,
 ): Promise<{ body: string; data: BlogPostData; slug: string }[]> {
-  const allPosts = (await getCollection('posts', ({ data }) => {
-    return includeDrafts ? true : data.draft !== true
-  })) as unknown as { body: string; data: BlogPostData; slug: string }[]
+  const allPosts = (await getCollection(
+    'posts',
+    includeDrafts ? undefined : publicCollectionFilter,
+  )) as unknown as { body: string; data: BlogPostData; slug: string }[]
 
   return allPosts
     .filter(post => post.data.timelineEra === eraSlug)
@@ -133,9 +134,10 @@ export async function getPostsByEra(
 // --- End series / arc helpers ---
 
 export async function getCategoryList(): Promise<Category[]> {
-  const allBlogPosts = await getCollection<'posts'>('posts', ({ data }) => {
-    return import.meta.env.PROD ? data.draft !== true : true
-  })
+  const allBlogPosts = await getCollection<'posts'>(
+    'posts',
+    import.meta.env.PROD ? publicCollectionFilter : undefined,
+  )
   const count: { [key: string]: number } = {}
   allBlogPosts.map((post: { data: { category: string | number } }) => {
     if (!post.data.category) {

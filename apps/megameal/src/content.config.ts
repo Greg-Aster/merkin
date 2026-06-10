@@ -1,7 +1,6 @@
 import { defineCollection, z } from 'astro:content'
 import {
   aboutSchema,
-  friendsSchema,
   postsSchema,
   specSchema,
   teamSchema,
@@ -259,11 +258,6 @@ const teamCollection = defineCollection({
   schema: teamSchema,
 })
 
-// Define the friends collection
-const friendsCollection = defineCollection({
-  schema: friendsSchema,
-})
-
 // Define the 'about' collection for dynamic author pages
 const aboutCollection = defineCollection({
   schema: aboutSchema,
@@ -414,7 +408,6 @@ export const collections = {
   merkin: merkinCollection,
   spec: specCollection,
   team: teamCollection,
-  friends: friendsCollection,
   about: aboutCollection, // NEW: About collection for dynamic author pages
   products: productsCollection,
   snuggaloids: snuggaloidRegistryCollection,

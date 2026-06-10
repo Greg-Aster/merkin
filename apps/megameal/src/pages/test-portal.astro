@@ -1,25 +1,7 @@
 ---
-import FactsWidget from '../components/widget/FactsWidget.astro'
-import PortalHeroBackgroundSlide from '../components/home/PortalHeroBackgroundSlide.astro'
-import PortalHeroSlide from '../components/home/PortalHeroSlide.astro'
-import MainGridLayout from '../layouts/MainGridLayout.astro'
----
+import { getRetiredPublicRouteTarget } from '../contracts/routes'
 
-<MainGridLayout homeLayout="test-portal" title="Test Portal">
-  <Fragment slot="banner-overlay-content">
-    <PortalHeroSlide />
-  </Fragment>
-  <Fragment slot="banner-slide-content">
-    <PortalHeroBackgroundSlide />
-  </Fragment>
-  <FactsWidget
-    slot="overlay"
-    class="test-portal-sponsored-overlay"
-    variant="overlay"
-    dismissible={true}
-    storageKey="megameal-test-portal-sponsored-overlay-dismissed"
-    kicker="Sponsored"
-    title="Sponsored"
-    footerText="Floating promotions are a service, not an intrusion."
-  />
-</MainGridLayout>
+const redirectTarget = getRetiredPublicRouteTarget('/test-portal/')
+
+return Astro.redirect(redirectTarget, 301)
+---

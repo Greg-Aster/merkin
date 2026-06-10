@@ -11,6 +11,7 @@
 		"astro": "astro",
 		"type-check": "tsc --noEmit",
 		"audit:links": "node scripts/audit-links.mjs --dist dist",
+		"audit:contracts": "node scripts/audit-site-contracts.mjs",
 		"audit:css": "node scripts/audit-css-architecture.mjs --all",
 		"audit:css:changed": "node scripts/audit-css-architecture.mjs --changed",
 		"audit:css:strict": "node scripts/audit-css-architecture.mjs --changed --strict",

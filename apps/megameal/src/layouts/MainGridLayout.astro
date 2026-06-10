@@ -43,7 +43,7 @@ interface Props {
     authorBio?: string
     authorLink?: string
   }
-  homeLayout?: 'default' | 'portal' | 'test-portal'
+  homeLayout?: 'default' | 'portal'
   contentMode?: 'default' | 'banner-only'
   showMascot?: boolean
   showAssistantWidget?: boolean
@@ -54,12 +54,7 @@ interface Props {
   timelineConnectionPatterns?: Record<string, unknown>
 }
 
-const isTestPortalLayout = Astro.props.homeLayout === 'test-portal'
-const sharedHomeLayout: 'default' | 'portal' | undefined = isTestPortalLayout
-  ? 'portal'
-  : Astro.props.homeLayout === 'test-portal'
-    ? undefined
-    : Astro.props.homeLayout
+const sharedHomeLayout = Astro.props.homeLayout
 const hasCustomBannerSlideContent = Astro.slots.has('banner-slide-content')
 const hasCustomBannerOverlayContent = Astro.slots.has('banner-overlay-content')
 const normalizedPath = Astro.url.pathname.replace(/\/$/, '')
@@ -99,7 +94,7 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   post: layoutPost,
   homeLayout: sharedHomeLayout,
   oneColumn: resolvedOneColumn,
-  contentMode: isTestPortalLayout ? 'banner-only' : Astro.props.contentMode,
+  contentMode: Astro.props.contentMode,
 }
 ---
 

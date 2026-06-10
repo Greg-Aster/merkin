@@ -7,9 +7,6 @@ enum I18nKey {
   projects = 'projects',
   search = 'search',
 
-  configs = 'configs',
-  friends = 'friends',
-
   tags = 'tags',
   categories = 'categories',
   recentPosts = 'recentPosts',

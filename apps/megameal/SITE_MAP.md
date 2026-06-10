@@ -71,7 +71,6 @@ This is a working map of the Astro routes in `apps/megameal/src/pages`.
 | `/feed.xml` | Feed XML | `src/pages/feed.xml.ts` |
 | `/feed/` | Feed index route | `src/pages/feed/index.xml.ts` |
 | `/atom.xml` | Atom feed | `src/pages/atom.xml.ts` |
-| `/friend-content-json/` | Friend content JSON endpoint | `src/pages/friend-content-json.ts` |
 | `/pdf/posts/[slug]/` | Printable/PDF post route | `src/pages/pdf/posts/[...slug].astro` |
 
 ## Error Pages

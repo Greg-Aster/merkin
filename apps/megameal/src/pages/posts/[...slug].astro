@@ -10,21 +10,20 @@ import MainGridLayout from '@layouts/MainGridLayout.astro'
 import { url, getDir, getPostUrlBySlug } from '@utils/url-utils'
 import { Icon } from 'astro-icon/components'
 import PostMetadata from '../../components/PostMeta.astro'
-import Bleepy from '../../components/bleepy/Bleepy.astro'
 import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 import { licenseConfig } from '../../config/config'
 import { profileConfig, siteConfig } from '../../config/config'
+import { publicCollectionFilter } from '../../contracts/content'
 import { SERIES_CONFIG } from '../../config/seriesConfig'
 import { getPostsBySeries } from '../../utils/content-utils'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
 import { firstContactManualRedirects } from '../../utils/reader'
 import '../../styles/pages/post-detail.css'
 
-// ⭐ FIXED: Import the correct layout toggle component
 import LayoutToggle from '../../components/client/LayoutToggle.svelte'
 
 export async function getStaticPaths() {
-  const posts = await getCollection('posts') // Include all posts, including drafts
+  const posts = await getCollection('posts', publicCollectionFilter)
   const sortedPosts = [...posts].sort(
     (a, b) =>
       new Date(b.data.published).getTime() -
@@ -69,9 +68,6 @@ if (retiredPostRedirect) {
 }
 
 const mascotCtx = post.data.mascotContext
-const bannerTypeCtx = post.data.bannerType
-const shouldRenderAssistantBleepy = bannerTypeCtx === 'assistant'
-const hasMascotContext = !!mascotCtx
 
 // Extract backgroundImage from frontmatter for dynamic background support
 const backgroundImage = post.data.backgroundImage
@@ -208,9 +204,6 @@ const pdfButtonLabel = useDownloadFile
 
 <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
 
-<!-- =============================================================== -->
-<!-- ⭐ FIXED: BUILT-IN LAYOUT TOGGLE - USING CORRECT COMPONENT     -->
-<!-- =============================================================== -->
 <LayoutToggle 
   client:load 
   variant="minimal"
