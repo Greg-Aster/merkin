@@ -1,17 +1,16 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
-import type { RuntimeSnapshot } from "../engine/client-api/index.js";
 import type { Command, MobileInputControlsPort } from "../engine/index.js";
 import {
-	type GameHudState,
+	type GameRuntimeUiState,
 	MOBILE_TOUCH_ACTION_IDS,
 	getRuntimeSceneManifest,
 } from "../game/index.js";
 import MobileControls from "../ui/MobileControls.svelte";
-import RuntimeHud from "../ui/RuntimeHud.svelte";
+import RuntimeInteractionOverlay from "../ui/RuntimeInteractionOverlay.svelte";
 import { createBrowserGameClient } from "./browserGameClient";
 
-const defaultGameState: GameHudState = {
+const defaultRuntimeUiState: GameRuntimeUiState = {
 	playerAlive: false,
 	playerPosition: [0, 0, 0],
 	health: [0, 0],
@@ -26,14 +25,7 @@ const defaultGameState: GameHudState = {
 };
 
 let canvas: HTMLCanvasElement;
-let snapshot: RuntimeSnapshot = $state({
-	lifecycle: "created",
-	tick: 0,
-	interpolation: 0,
-});
-let gameState: GameHudState = $state(defaultGameState);
-let mounted = $state(false);
-let startupError: string | undefined = $state();
+let runtimeUiState: GameRuntimeUiState = $state(defaultRuntimeUiState);
 let mobileControls: MobileInputControlsPort | undefined = $state();
 let dispatchCommand: ((command: Command) => void) | undefined = $state();
 let disposeClient: (() => void) | undefined;
@@ -61,17 +53,17 @@ async function initializeClient(): Promise<void> {
 			return;
 		}
 
-		const unsubscribe = client.api.observeRuntime((value) => {
-			snapshot = value;
-			const nextGameState = client.gameState();
-			gameState = nextGameState;
-			client.setUiCapturingInput(nextGameState.openStoryNote !== undefined);
+		const unsubscribe = client.api.observeRuntime(() => {
+			const nextRuntimeUiState = client.runtimeUiState();
+			runtimeUiState = nextRuntimeUiState;
+			client.setUiCapturingInput(
+				nextRuntimeUiState.openStoryNote !== undefined,
+			);
 		});
 
 		client.startLoop();
 		mobileControls = client.mobileControls;
 		dispatchCommand = client.api.dispatch;
-		mounted = true;
 		disposeClient = () => {
 			unsubscribe();
 			client.setUiCapturingInput(false);
@@ -80,8 +72,7 @@ async function initializeClient(): Promise<void> {
 			dispatchCommand = undefined;
 		};
 	} catch (error) {
-		startupError =
-			error instanceof Error ? error.message : "Game runtime failed to start.";
+		console.error("Game runtime failed to start.", error);
 	}
 }
 
@@ -106,13 +97,7 @@ function selectedRuntimeSceneManifest() {
 
 <div class="game-client" data-game-client>
 	<canvas bind:this={canvas} class="game-canvas" data-game-canvas></canvas>
-	<RuntimeHud
-		{mounted}
-		{snapshot}
-		{gameState}
-		{startupError}
-		dispatch={dispatchCommand}
-	/>
+	<RuntimeInteractionOverlay {runtimeUiState} dispatch={dispatchCommand} />
 	{#if mobileControls}
 		<MobileControls
 			input={mobileControls}

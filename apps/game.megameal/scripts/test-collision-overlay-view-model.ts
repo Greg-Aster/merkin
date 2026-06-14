@@ -8,7 +8,9 @@ import { buildCollisionOverlayViewModel } from "../src/game/editor/collisionDraf
 import { observatoryCollisionCookDraft } from "../src/game/editor/collisionDrafts/observatoryCollisionDraft.js";
 
 const overlay = buildCollisionOverlayViewModel(observatoryCollisionCookDraft);
-const editorSession = getDefaultLevelEditorSessionSummary();
+const editorSession = getDefaultLevelEditorSessionSummary({
+	selectedRuntimeSceneId: "observatory_runtime",
+});
 const firstObservatoryWalkableChunkStableId =
 	"observatory:walkable-mesh:chunk:x0-z0";
 
@@ -32,10 +34,10 @@ assertOverlayEntry(firstObservatoryWalkableChunkStableId, {
 	channel: "worldStatic",
 	requiredCollision: true,
 	requiredWalkable: true,
-	min: [-320, 1.4, -320],
-	max: [-160, 1.67, -160],
-	center: [-240, 1.535, -240],
-	size: [160, 0.27, 160],
+	min: [-130.625, 0.48, -118.75],
+	max: [-95, 1.2, -95],
+	center: [-112.8125, 0.84, -106.875],
+	size: [35.625, 0.72, 23.75],
 });
 
 assertOverlayEntry("observatory:walkable-mesh:chunk:x2-z2", {
@@ -44,10 +46,10 @@ assertOverlayEntry("observatory:walkable-mesh:chunk:x2-z2", {
 	channel: "worldStatic",
 	requiredCollision: true,
 	requiredWalkable: true,
-	min: [0, 2.01, 0],
-	max: [160, 2.44, 160],
-	center: [80, 2.225, 80],
-	size: [160, 0.43000000000000016, 160],
+	min: [0, 1.4, 0],
+	max: [95, 52.24, 95],
+	center: [47.5, 26.82, 47.5],
+	size: [95, 50.84, 95],
 });
 
 assertOverlayEntry("observatory:collision:boundary:north", {
@@ -56,10 +58,10 @@ assertOverlayEntry("observatory:collision:boundary:north", {
 	channel: "worldStatic",
 	requiredCollision: true,
 	requiredWalkable: false,
-	min: [-320, 1.8, -308],
-	max: [320, 9.8, -300],
-	center: [0, 5.8, -304],
-	size: [640, 8, 8],
+	min: [-190, -4.2, -192],
+	max: [190, 11.8, -184],
+	center: [0, 3.8000000000000003, -188],
+	size: [380, 16, 8],
 });
 
 assertOverlayEntry("observatory:collision:boundary:south", {
@@ -68,10 +70,10 @@ assertOverlayEntry("observatory:collision:boundary:south", {
 	channel: "worldStatic",
 	requiredCollision: true,
 	requiredWalkable: false,
-	min: [-320, 1.8, 300],
-	max: [320, 9.8, 308],
-	center: [0, 5.8, 304],
-	size: [640, 8, 8],
+	min: [-190, -4.2, 184],
+	max: [190, 11.8, 192],
+	center: [0, 3.8000000000000003, 188],
+	size: [380, 16, 8],
 });
 
 assertOverlayEntry("observatory:collision:boundary:east", {
@@ -80,10 +82,10 @@ assertOverlayEntry("observatory:collision:boundary:east", {
 	channel: "worldStatic",
 	requiredCollision: true,
 	requiredWalkable: false,
-	min: [300, 1.8, -320],
-	max: [308, 9.8, 320],
-	center: [304, 5.8, 0],
-	size: [8, 8, 640],
+	min: [184, -4.2, -190],
+	max: [192, 11.8, 190],
+	center: [188, 3.8000000000000003, 0],
+	size: [8, 16, 380],
 });
 
 assertOverlayEntry("observatory:collision:boundary:west", {
@@ -92,10 +94,10 @@ assertOverlayEntry("observatory:collision:boundary:west", {
 	channel: "worldStatic",
 	requiredCollision: true,
 	requiredWalkable: false,
-	min: [-308, 1.8, -320],
-	max: [-300, 9.8, 320],
-	center: [-304, 5.8, 0],
-	size: [8, 8, 640],
+	min: [-192, -4.2, -190],
+	max: [-184, 11.8, 190],
+	center: [-188, 3.8000000000000003, 0],
+	size: [8, 16, 380],
 });
 
 assertEditorSessionControls();
@@ -156,17 +158,17 @@ function assertEditorSessionControls(): void {
 
 	assertEqual(
 		walkableMesh.meshMetadata.vertexCount,
-		25,
+		10,
 		"Unexpected walkable mesh chunk vertex count in editor session.",
 	);
 	assertEqual(
 		walkableMesh.meshMetadata.indexCount,
-		96,
+		24,
 		"Unexpected walkable mesh chunk index count in editor session.",
 	);
 	assertEqual(
 		walkableMesh.meshMetadata.triangleCount,
-		32,
+		8,
 		"Unexpected walkable mesh chunk triangle count in editor session.",
 	);
 
@@ -184,7 +186,7 @@ function assertEditorSessionControls(): void {
 
 	assertVector(
 		fieldsToVector(northBoundary.transformControls.position),
-		[0, 5.8, -304],
+		[0, 3.8, -188],
 		"Unexpected north boundary position editor values.",
 	);
 	assertVector(
@@ -219,26 +221,91 @@ function assertEditorSessionControls(): void {
 
 	assertVector(
 		northBoundary.boxMetadata.halfExtents,
-		[320, 4, 4],
+		[190, 8, 4],
 		"Unexpected north boundary half extents.",
 	);
 	assertVector(
 		northBoundary.bounds.center,
-		[0, 5.8, -304],
+		[0, 3.8000000000000003, -188],
 		"Unexpected north boundary derived bounds center in editor session.",
 	);
 }
 
 function assertEditorTerrainStatus(): void {
 	assertEqual(
-		editorSession.terrain.importCount,
-		0,
-		"Expected editor terrain status to expose no generated visual imports.",
+		editorSession.terrain.selectedRuntimeSceneId,
+		"observatory_runtime",
+		"Expected editor terrain status to use the selected runtime scene.",
 	);
 	assertEqual(
-		editorSession.terrain.importedCount,
+		editorSession.terrain.packageCount,
+		1,
+		"Expected editor terrain status to expose runtime terrain packages.",
+	);
+	assertEqual(
+		editorSession.terrain.requiredPackageCount,
+		1,
+		"Expected editor terrain status to expose required terrain package count.",
+	);
+	assertArrayEqual(
+		editorSession.terrain.packageIds,
+		["observatory_runtime:terrain-package"],
+		"Expected editor terrain status to expose package IDs from the runtime manifest.",
+	);
+	assertArrayEqual(
+		editorSession.terrain.requiredPackageIds,
+		["observatory_runtime:terrain-package"],
+		"Expected editor terrain status to expose readiness terrain package IDs.",
+	);
+	assertEqual(
+		editorSession.terrain.startupChunkCount,
+		1,
+		"Expected editor terrain status to expose terrain package startup chunks.",
+	);
+	assertEqual(
+		editorSession.terrain.activeCollisionChunkCount,
+		null,
+		"Expected editor terrain status to leave active collision count unset without runtime state.",
+	);
+	assertEqual(
+		editorSession.terrain.visualBindingCount,
+		1,
+		"Expected editor terrain status to expose terrain package visual bindings.",
+	);
+	assertEqual(
+		editorSession.terrain.lodBindingCounts.near,
 		0,
-		"Expected no generated terrain imports to be marked imported.",
+		"Expected Observatory terrain package to expose near LOD binding count.",
+	);
+	assertEqual(
+		editorSession.terrain.lodBindingCounts.far,
+		0,
+		"Expected Observatory terrain package to expose far LOD binding count.",
+	);
+	assertEqual(
+		editorSession.terrain.lodBindingCounts.mergedFloor,
+		1,
+		"Expected Observatory terrain package to expose merged-floor LOD binding count.",
+	);
+	assertEqual(
+		editorSession.terrain.chunkLodReferenceCounts.near,
+		16,
+		"Expected Observatory terrain package to expose near chunk LOD references.",
+	);
+	assertEqual(
+		editorSession.terrain.chunkLodReferenceCounts.far,
+		0,
+		"Expected Observatory terrain package to expose far chunk LOD references.",
+	);
+	assertEqual(
+		editorSession.terrain.materialAssetCount,
+		1,
+		"Expected editor terrain status to expose unique package material assets.",
+	);
+	assertArrayEqual(
+		editorSession.terrain.packageErrors,
+		[],
+		"Expected editor terrain package status to report no missing or stale package errors.",
 	);
 	assertEqual(
 		editorSession.terrain.collisionChunkCount,
@@ -262,24 +329,92 @@ function assertEditorTerrainStatus(): void {
 	);
 	assertEqual(
 		editorSession.terrain.collisionTriangleCount,
-		512,
+		1182,
 		"Expected terrain collision triangle count to come from cooked mesh chunks.",
 	);
 	assertEqual(
-		editorSession.terrain.visualTriangleCount,
-		0,
-		"Expected no imported terrain triangles after removing the generated Observatory field.",
-	);
-	assertEqual(
 		editorSession.terrain.sourcePlanHash,
-		"fnv1a32:6c07d491",
+		"fnv1a32:2834b03a",
 		"Expected terrain status to expose the collision source plan hash.",
 	);
 
+	const terrainPackage = terrainStatusPackage(
+		"observatory_runtime:terrain-package",
+	);
+
+	assertEqual(
+		terrainPackage.status,
+		"ready",
+		"Expected Observatory terrain package status to be ready.",
+	);
+	assertEqual(
+		terrainPackage.required,
+		true,
+		"Expected Observatory terrain package to be required by readiness.",
+	);
+	assertEqual(
+		terrainPackage.chunkCount,
+		16,
+		"Expected Observatory terrain package chunk count to come from the runtime manifest.",
+	);
+	assertEqual(
+		terrainPackage.startupChunkCount,
+		1,
+		"Expected Observatory terrain package startup chunk count to come from the runtime manifest.",
+	);
+	assertEqual(
+		terrainPackage.activeCollisionChunkCount,
+		null,
+		"Expected package active collision count to stay unset without runtime state.",
+	);
+	assertEqual(
+		terrainPackage.visualBindingCount,
+		1,
+		"Expected Observatory terrain package visual binding count to come from the runtime manifest.",
+	);
+	assertEqual(
+		terrainPackage.materialSetCount,
+		1,
+		"Expected Observatory terrain package material set count to be exposed.",
+	);
+	assertEqual(
+		terrainPackage.materialLayerCount,
+		1,
+		"Expected Observatory terrain package material layer count to be exposed.",
+	);
+	assertEqual(
+		terrainPackage.materialAssetCount,
+		1,
+		"Expected Observatory terrain package material asset count to be exposed.",
+	);
+	assertEqual(
+		terrainPackage.driftHash,
+		"fnv1a32:551029f5",
+		"Expected Observatory terrain package drift hash to be exposed.",
+	);
 	assertArrayEqual(
-		editorSession.terrain.imports,
+		terrainPackage.errors,
 		[],
-		"Expected editor terrain status to expose no generated visual import entries.",
+		"Expected Observatory terrain package to expose no stale package errors.",
+	);
+
+	const statefulEditorSession = getDefaultLevelEditorSessionSummary({
+		selectedRuntimeSceneId: "observatory_runtime",
+		terrainStreamingStatus: {
+			packageIds: ["observatory_runtime:terrain-package"],
+			activeCollisionChunkStableIds: [firstObservatoryWalkableChunkStableId],
+			errors: [],
+		},
+	});
+	assertEqual(
+		statefulEditorSession.terrain.activeCollisionChunkCount,
+		1,
+		"Expected editor terrain status to expose active collision count when runtime state is provided.",
+	);
+	assertEqual(
+		statefulEditorSession.terrain.packages[0]?.activeCollisionChunkCount,
+		1,
+		"Expected terrain package status to expose package active collision count when runtime state is provided.",
 	);
 
 	const terrainChunk = terrainStatusChunk(
@@ -288,33 +423,33 @@ function assertEditorTerrainStatus(): void {
 
 	assertEqual(
 		terrainChunk.geometry.vertexCount,
-		25,
+		10,
 		"Expected walkable terrain chunk vertex count to be exposed.",
 	);
 	assertEqual(
 		terrainChunk.geometry.indexCount,
-		96,
+		24,
 		"Expected walkable terrain chunk index count to be exposed.",
 	);
 	assertEqual(
 		terrainChunk.geometry.triangleCount,
-		32,
+		8,
 		"Expected walkable terrain chunk triangle count to be exposed.",
 	);
 	assertEqual(
 		terrainChunk.geometry.gridSize,
-		5,
-		"Expected walkable terrain chunk grid size to be derived.",
+		null,
+		"Expected sparse walkable terrain chunk grid size to stay unset.",
 	);
 	assertEqual(
 		terrainChunk.geometry.cellSize,
-		40,
-		"Expected walkable terrain chunk cell size to be derived.",
+		null,
+		"Expected sparse walkable terrain chunk cell size to stay unset.",
 	);
 	assertEqual(
 		terrainChunk.geometry.halfExtent,
-		80,
-		"Expected walkable terrain chunk half extent to be derived.",
+		17.8125,
+		"Expected sparse walkable terrain chunk half extent to be derived.",
 	);
 
 	if (!terrainChunk.geometry.heightRange) {
@@ -323,12 +458,12 @@ function assertEditorTerrainStatus(): void {
 
 	assertEqual(
 		terrainChunk.geometry.heightRange.min,
-		1.4,
+		0.48,
 		"Unexpected walkable terrain chunk minimum height.",
 	);
 	assertEqual(
 		terrainChunk.geometry.heightRange.max,
-		1.67,
+		1.2,
 		"Unexpected walkable terrain chunk maximum height.",
 	);
 
@@ -338,7 +473,7 @@ function assertEditorTerrainStatus(): void {
 
 	assertVector(
 		boundaryChunk.geometry.halfExtents ?? [0, 0, 0],
-		[320, 4, 4],
+		[190, 8, 4],
 		"Expected boundary terrain chunk half extents to be exposed.",
 	);
 
@@ -454,6 +589,20 @@ function terrainStatusChunk(
 
 	if (!entry) {
 		throw new Error(`Expected editor terrain chunk ${stableId} to exist.`);
+	}
+
+	return entry;
+}
+
+function terrainStatusPackage(
+	packageId: string,
+): (typeof editorSession.terrain.packages)[number] {
+	const entry = editorSession.terrain.packages.find(
+		(item) => item.id === packageId,
+	);
+
+	if (!entry) {
+		throw new Error(`Expected editor terrain package ${packageId} to exist.`);
 	}
 
 	return entry;

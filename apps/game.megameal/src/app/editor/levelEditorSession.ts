@@ -7,13 +7,30 @@ import {
 	serializeCollisionCookPreviewPatch,
 } from "../../engine/data/index.js";
 import type {
+	CollisionCookDraftData,
 	CollisionCookShapeData,
 	CollisionCookVector3Data,
+	LevelPrefabInstanceData,
+	PrefabData,
+	RuntimeSceneManifestData,
+	TerrainChunkPackageData,
+	TerrainVisualBindingData,
 } from "../../engine/data/index.js";
 import type { CollisionIntentData } from "../../engine/data/schemas/index.js";
+import {
+	getCollisionCookDraftForRuntimeScene,
+	listCollisionCookDraftRuntimeSceneIds,
+} from "../../game/editor/collisionDrafts/collisionDraftRegistry.js";
 import { buildCollisionOverlayViewModel } from "../../game/editor/collisionDrafts/collisionOverlayViewModel.js";
-import { observatoryCollisionCookDraft } from "../../game/editor/collisionDrafts/observatoryCollisionDraft.js";
-import { mirandaLightAuthoringDraft } from "../../game/editor/lightDrafts/mirandaLightDraft.js";
+import { getLightAuthoringDraftForRuntimeScene } from "../../game/editor/lightDrafts/lightDraftRegistry.js";
+import {
+	defaultRuntimeSceneManifest,
+	getRuntimeSceneManifest,
+} from "../../game/levels/index.js";
+import {
+	type LevelEditorWorkspaceModel,
+	buildLevelEditorWorkspaceModel,
+} from "./levelEditorWorkspaceModel.js";
 
 const collisionIntentOptions = ["solid", "trigger", "walkable"] as const;
 const collisionChannelOptions = ["worldStatic", "trigger"] as const;
@@ -83,60 +100,6 @@ export type LevelEditorCollisionEntryEditor = {
 	readonly boxMetadata?: LevelEditorBoxMetadata;
 };
 
-export type LevelEditorTerrainImportStatus = {
-	readonly id: string;
-	readonly runtimeSceneId: string;
-	readonly generatedAt: string;
-	readonly status: "imported" | "planned" | "replaced";
-	readonly owner: string;
-	readonly sourceUrl: string;
-	readonly generatorId: string | null;
-	readonly metadataPath: string | null;
-	readonly glbSha256: string | null;
-	readonly source: {
-		readonly collisionDraftId: string;
-		readonly primaryCollisionStableId: string;
-		readonly collisionStableIds: readonly string[];
-		readonly sourceVisualAssetId: string;
-		readonly sourceVisualStableId: string;
-		readonly sourceVisualScale: CollisionCookVector3Data;
-	};
-	readonly output: {
-		readonly meshAssetId: string;
-		readonly prefabId: string;
-		readonly stableId: string;
-		readonly glbUrl: string;
-		readonly scale: CollisionCookVector3Data;
-	};
-	readonly alignment: {
-		readonly renderUsesCollisionAsImplicitCollision: boolean;
-		readonly sourceGlbScale: CollisionCookVector3Data;
-		readonly visualTerrainScale: CollisionCookVector3Data;
-		readonly collisionGridSize: number;
-		readonly collisionCellSize: number;
-		readonly collisionVertexCount: number;
-		readonly collisionTriangleCount: number;
-		readonly visualGridSize: number;
-		readonly visualCellSize: number;
-		readonly visualVertexCount: number;
-		readonly visualTriangleCount: number;
-		readonly microDisplacementAmplitude: number;
-		readonly maxCollisionSampleError: number;
-		readonly heightRange: {
-			readonly min: number;
-			readonly max: number;
-		};
-		readonly anchorSampleCount: number;
-	};
-	readonly readiness: {
-		readonly imported: boolean;
-		readonly hasArtifactProvenance: boolean;
-		readonly hasTargetRuntimeIds: boolean;
-		readonly collisionLinked: boolean;
-		readonly visualOnly: boolean;
-	};
-};
-
 export type LevelEditorTerrainChunkStatus = {
 	readonly stableId: string;
 	readonly prefabId: string;
@@ -168,12 +131,75 @@ export type LevelEditorTerrainCookArtifactStatus = {
 	readonly writesRuntimeData: boolean;
 };
 
+export type LevelEditorTerrainLodCounts = {
+	readonly near: number;
+	readonly far: number;
+	readonly mergedFloor: number;
+};
+
+export type LevelEditorTerrainChunkLodReferenceCounts = {
+	readonly near: number;
+	readonly far: number;
+};
+
+export type LevelEditorTerrainPackageStatus = {
+	readonly id: string;
+	readonly runtimeSceneId: string;
+	readonly sourceManifestId: string;
+	readonly status: "ready" | "stale";
+	readonly required: boolean;
+	readonly chunkCount: number;
+	readonly startupChunkCount: number;
+	readonly streamableChunkCount: number;
+	readonly activeCollisionChunkCount: number | null;
+	readonly visualBindingCount: number;
+	readonly lodBindingCounts: LevelEditorTerrainLodCounts;
+	readonly chunkLodReferenceCounts: LevelEditorTerrainChunkLodReferenceCounts;
+	readonly materialSetCount: number;
+	readonly materialLayerCount: number;
+	readonly materialAssetCount: number;
+	readonly driftHash: string;
+	readonly errors: readonly string[];
+};
+
+export type LevelEditorTerrainStreamingState = {
+	readonly packageIds?: readonly string[];
+	readonly activeCollisionChunkStableIds?: readonly string[];
+	readonly errors?: readonly string[];
+};
+
+export type LevelEditorSessionOptions = {
+	readonly selectedRuntimeSceneId?: string;
+	readonly terrainStreamingStatus?: LevelEditorTerrainStreamingState;
+};
+
+export type LevelEditorCollisionDraftState =
+	| {
+			readonly status: "registered";
+			readonly id: string;
+			readonly runtimeSceneId: string;
+			readonly levelId: string;
+			readonly entryCount: number;
+			readonly missingReason: null;
+			readonly registeredRuntimeSceneIds: readonly string[];
+	  }
+	| {
+			readonly status: "missing";
+			readonly id: null;
+			readonly runtimeSceneId: string;
+			readonly levelId: string;
+			readonly entryCount: 0;
+			readonly missingReason: string;
+			readonly registeredRuntimeSceneIds: readonly string[];
+	  };
+
 export type LevelEditorSessionSummary = {
 	readonly selectedRuntimeSceneId: string;
 	readonly selectedLevelInstanceStableId: string | null;
-	readonly collisionDraftId: string;
+	readonly collisionDraft: LevelEditorCollisionDraftState;
+	readonly collisionDraftId: string | null;
 	readonly collisionDraftEntryCount: number;
-	readonly lightDraftId: string;
+	readonly lightDraftId: string | null;
 	readonly lightDraftEntryCount: number;
 	readonly collisionOverlayEntries: readonly LevelEditorCollisionOverlaySummary[];
 	readonly collisionEntryEditors: readonly LevelEditorCollisionEntryEditor[];
@@ -181,42 +207,154 @@ export type LevelEditorSessionSummary = {
 		readonly protocolChannel: "megameal-level-editor-preview-v1";
 		readonly channel: "level-editor-collision-preview";
 		readonly mode: "temporary-preview";
+		readonly status: "ready" | "missing-draft";
+		readonly missingReason: string | null;
 		readonly entryCount: number;
-		readonly sourcePlanHash: string;
-		readonly serializedPatch: string;
+		readonly sourcePlanHash: string | null;
+		readonly serializedPatch: string | null;
 	};
 	readonly bake: {
 		readonly mode: "derived-in-memory";
-		readonly derivedBakeHash: string;
-		readonly writePlanHash: string;
+		readonly derivedBakeHash: string | null;
+		readonly writePlanHash: string | null;
 		readonly writeArtifactCount: number;
 		readonly writesRuntimeData: false;
 	};
 	readonly terrain: {
-		readonly importCount: number;
-		readonly importedCount: number;
+		readonly selectedRuntimeSceneId: string;
+		readonly packageCount: number;
+		readonly requiredPackageCount: number;
+		readonly packageIds: readonly string[];
+		readonly requiredPackageIds: readonly string[];
+		readonly startupChunkCount: number;
+		readonly activeCollisionChunkCount: number | null;
+		readonly visualBindingCount: number;
+		readonly lodBindingCounts: LevelEditorTerrainLodCounts;
+		readonly chunkLodReferenceCounts: LevelEditorTerrainChunkLodReferenceCounts;
+		readonly materialAssetCount: number;
+		readonly packageErrors: readonly string[];
+		readonly packages: readonly LevelEditorTerrainPackageStatus[];
 		readonly collisionChunkCount: number;
 		readonly meshChunkCount: number;
 		readonly boxChunkCount: number;
 		readonly walkableChunkCount: number;
 		readonly collisionTriangleCount: number;
-		readonly visualTriangleCount: number;
-		readonly sourcePlanHash: string;
-		readonly imports: readonly LevelEditorTerrainImportStatus[];
+		readonly sourcePlanHash: string | null;
 		readonly chunks: readonly LevelEditorTerrainChunkStatus[];
 		readonly cookArtifacts: readonly LevelEditorTerrainCookArtifactStatus[];
 	};
+	readonly workspace: LevelEditorWorkspaceModel;
 };
 
-export function getDefaultLevelEditorSessionSummary(): LevelEditorSessionSummary {
-	const plan = buildCollisionCookPlan(observatoryCollisionCookDraft);
-	const overlay = buildCollisionOverlayViewModel(observatoryCollisionCookDraft);
+type LevelEditorCollisionSessionState = {
+	readonly selectedStableId: string | null;
+	readonly collisionDraft: LevelEditorCollisionDraftState;
+	readonly collisionOverlayEntries: readonly LevelEditorCollisionOverlaySummary[];
+	readonly collisionEntryEditors: readonly LevelEditorCollisionEntryEditor[];
+	readonly terrainChunks: readonly LevelEditorTerrainChunkStatus[];
+	readonly collisionTriangleCount: number;
+	readonly terrainSourcePlanHash: string | null;
+	readonly preview: LevelEditorSessionSummary["preview"];
+	readonly bake: LevelEditorSessionSummary["bake"];
+	readonly cookArtifacts: readonly LevelEditorTerrainCookArtifactStatus[];
+};
+
+export function getDefaultLevelEditorSessionSummary(
+	options: LevelEditorSessionOptions = {},
+): LevelEditorSessionSummary {
+	const selectedRuntimeSceneManifest = resolveLevelEditorRuntimeSceneManifest(
+		options.selectedRuntimeSceneId,
+	);
+	const selectedRuntimeSceneId = selectedRuntimeSceneManifest.id;
+	const collisionDraft = getCollisionCookDraftForRuntimeScene(
+		selectedRuntimeSceneId,
+	);
+	const collisionSession =
+		collisionDraft === undefined
+			? buildMissingCollisionDraftSession(selectedRuntimeSceneManifest)
+			: buildRegisteredCollisionDraftSession(collisionDraft);
+	const lightDraft = getLightAuthoringDraftForRuntimeScene(
+		selectedRuntimeSceneId,
+	);
+	const lightPlan =
+		lightDraft === undefined ? null : buildLightAuthoringPlan(lightDraft);
+	const terrainPackageSummary = buildTerrainPackageSummary(
+		selectedRuntimeSceneId,
+		selectedRuntimeSceneManifest,
+		options.terrainStreamingStatus,
+	);
+	const workspace = buildLevelEditorWorkspaceModel({
+		selectedRuntimeSceneId,
+		...(collisionSession.selectedStableId === null
+			? {}
+			: { selectedStableId: collisionSession.selectedStableId }),
+	});
+
+	return {
+		selectedRuntimeSceneId,
+		selectedLevelInstanceStableId: collisionSession.selectedStableId,
+		collisionDraft: collisionSession.collisionDraft,
+		collisionDraftId: collisionSession.collisionDraft.id,
+		collisionDraftEntryCount: collisionSession.collisionDraft.entryCount,
+		lightDraftId: lightPlan?.draftId ?? null,
+		lightDraftEntryCount: lightPlan?.entries.length ?? 0,
+		collisionOverlayEntries: collisionSession.collisionOverlayEntries,
+		collisionEntryEditors: collisionSession.collisionEntryEditors,
+		preview: collisionSession.preview,
+		bake: collisionSession.bake,
+		terrain: {
+			selectedRuntimeSceneId,
+			packageCount: terrainPackageSummary.packageCount,
+			requiredPackageCount: terrainPackageSummary.requiredPackageCount,
+			packageIds: terrainPackageSummary.packageIds,
+			requiredPackageIds: terrainPackageSummary.requiredPackageIds,
+			startupChunkCount: terrainPackageSummary.startupChunkCount,
+			activeCollisionChunkCount:
+				terrainPackageSummary.activeCollisionChunkCount,
+			visualBindingCount: terrainPackageSummary.visualBindingCount,
+			lodBindingCounts: terrainPackageSummary.lodBindingCounts,
+			chunkLodReferenceCounts: terrainPackageSummary.chunkLodReferenceCounts,
+			materialAssetCount: terrainPackageSummary.materialAssetCount,
+			packageErrors: terrainPackageSummary.packageErrors,
+			packages: terrainPackageSummary.packages,
+			collisionChunkCount: collisionSession.terrainChunks.length,
+			meshChunkCount: collisionSession.terrainChunks.filter(
+				(entry) => entry.shapeType === "mesh",
+			).length,
+			boxChunkCount: collisionSession.terrainChunks.filter(
+				(entry) => entry.shapeType === "box",
+			).length,
+			walkableChunkCount: collisionSession.terrainChunks.filter(
+				(entry) => entry.requiredWalkable,
+			).length,
+			collisionTriangleCount: collisionSession.collisionTriangleCount,
+			sourcePlanHash: collisionSession.terrainSourcePlanHash,
+			chunks: collisionSession.terrainChunks,
+			cookArtifacts: collisionSession.cookArtifacts,
+		},
+		workspace,
+	};
+}
+
+function resolveLevelEditorRuntimeSceneManifest(
+	selectedRuntimeSceneId: string | undefined,
+): RuntimeSceneManifestData {
+	return (
+		getRuntimeSceneManifest(
+			selectedRuntimeSceneId ?? defaultRuntimeSceneManifest.id,
+		) ?? defaultRuntimeSceneManifest
+	);
+}
+
+function buildRegisteredCollisionDraftSession(
+	collisionDraft: CollisionCookDraftData,
+): LevelEditorCollisionSessionState {
+	const plan = buildCollisionCookPlan(collisionDraft);
+	const overlay = buildCollisionOverlayViewModel(collisionDraft);
 	const previewPatch = buildCollisionCookPreviewPatch(plan);
 	const writePlan = buildCollisionCookWritePlan(plan);
 	const bakeFile = buildCollisionCookBakeFile(plan);
-	const lightPlan = buildLightAuthoringPlan(mirandaLightAuthoringDraft);
-	const selectedStableId =
-		observatoryCollisionCookDraft.entries[0]?.stableId ?? null;
+	const selectedStableId = collisionDraft.entries[0]?.stableId ?? null;
 	const planEntriesByStableId = new Map(
 		plan.entries.map((entry) => [entry.stableId, entry]),
 	);
@@ -294,23 +432,22 @@ export function getDefaultLevelEditorSessionSummary(): LevelEditorSessionSummary
 			),
 		};
 	});
-	const terrainImports = buildTerrainImportStatuses();
-	const visualTriangleCount = terrainImports.reduce(
-		(total, entry) => total + entry.alignment.visualTriangleCount,
-		0,
-	);
 	const collisionTriangleCount = terrainChunks.reduce(
 		(total, entry) => total + (entry.geometry.triangleCount ?? 0),
 		0,
 	);
 
 	return {
-		selectedRuntimeSceneId: observatoryCollisionCookDraft.runtimeSceneId,
-		selectedLevelInstanceStableId: selectedStableId,
-		collisionDraftId: observatoryCollisionCookDraft.id,
-		collisionDraftEntryCount: observatoryCollisionCookDraft.entries.length,
-		lightDraftId: lightPlan.draftId,
-		lightDraftEntryCount: lightPlan.entries.length,
+		selectedStableId,
+		collisionDraft: {
+			status: "registered",
+			id: collisionDraft.id,
+			runtimeSceneId: collisionDraft.runtimeSceneId,
+			levelId: collisionDraft.levelId,
+			entryCount: collisionDraft.entries.length,
+			missingReason: null,
+			registeredRuntimeSceneIds: listCollisionCookDraftRuntimeSceneIds(),
+		},
 		collisionOverlayEntries: overlay.entries.map((entry) => ({
 			stableId: entry.stableId,
 			prefabId: entry.prefabId,
@@ -325,6 +462,8 @@ export function getDefaultLevelEditorSessionSummary(): LevelEditorSessionSummary
 			protocolChannel: "megameal-level-editor-preview-v1",
 			channel: previewPatch.channel,
 			mode: previewPatch.mode,
+			status: "ready",
+			missingReason: null,
 			entryCount: previewPatch.entries.length,
 			sourcePlanHash: previewPatch.sourcePlanHash,
 			serializedPatch: serializeCollisionCookPreviewPatch(previewPatch),
@@ -336,34 +475,63 @@ export function getDefaultLevelEditorSessionSummary(): LevelEditorSessionSummary
 			writeArtifactCount: writePlan.artifacts.length,
 			writesRuntimeData: bakeFile.writesRuntimeData,
 		},
-		terrain: {
-			importCount: terrainImports.length,
-			importedCount: terrainImports.filter(
-				(entry) => entry.status === "imported",
-			).length,
-			collisionChunkCount: terrainChunks.length,
-			meshChunkCount: terrainChunks.filter(
-				(entry) => entry.shapeType === "mesh",
-			).length,
-			boxChunkCount: terrainChunks.filter((entry) => entry.shapeType === "box")
-				.length,
-			walkableChunkCount: terrainChunks.filter(
-				(entry) => entry.requiredWalkable,
-			).length,
-			collisionTriangleCount,
-			visualTriangleCount,
-			sourcePlanHash: writePlan.provenance.sourcePlanHash,
-			imports: terrainImports,
-			chunks: terrainChunks,
-			cookArtifacts: writePlan.artifacts.map((artifact) => ({
-				id: artifact.id,
-				purpose: artifact.purpose,
-				format: artifact.format,
-				targetFile: artifact.targetFile,
-				contentHash: artifact.contentHash,
-				writesRuntimeData: artifact.purpose === "runtime-collision-module",
-			})),
+		terrainChunks,
+		collisionTriangleCount,
+		terrainSourcePlanHash: writePlan.provenance.sourcePlanHash,
+		cookArtifacts: writePlan.artifacts.map((artifact) => ({
+			id: artifact.id,
+			purpose: artifact.purpose,
+			format: artifact.format,
+			targetFile: artifact.targetFile,
+			contentHash: artifact.contentHash,
+			writesRuntimeData: artifact.purpose === "runtime-collision-module",
+		})),
+	};
+}
+
+function buildMissingCollisionDraftSession(
+	manifest: RuntimeSceneManifestData,
+): LevelEditorCollisionSessionState {
+	const registeredRuntimeSceneIds = listCollisionCookDraftRuntimeSceneIds();
+	const missingReason =
+		registeredRuntimeSceneIds.length === 0
+			? `Runtime scene "${manifest.id}" has no registered collision cook draft.`
+			: `Runtime scene "${manifest.id}" has no registered collision cook draft. Registered collision draft runtime scenes: ${registeredRuntimeSceneIds.join(", ")}.`;
+
+	return {
+		selectedStableId: manifest.readiness.playerStableId ?? null,
+		collisionDraft: {
+			status: "missing",
+			id: null,
+			runtimeSceneId: manifest.id,
+			levelId: manifest.level.id,
+			entryCount: 0,
+			missingReason,
+			registeredRuntimeSceneIds,
 		},
+		collisionOverlayEntries: [],
+		collisionEntryEditors: [],
+		terrainChunks: [],
+		collisionTriangleCount: 0,
+		terrainSourcePlanHash: null,
+		preview: {
+			protocolChannel: "megameal-level-editor-preview-v1",
+			channel: "level-editor-collision-preview",
+			mode: "temporary-preview",
+			status: "missing-draft",
+			missingReason,
+			entryCount: 0,
+			sourcePlanHash: null,
+			serializedPatch: null,
+		},
+		bake: {
+			mode: "derived-in-memory",
+			derivedBakeHash: null,
+			writePlanHash: null,
+			writeArtifactCount: 0,
+			writesRuntimeData: false,
+		},
+		cookArtifacts: [],
 	};
 }
 
@@ -414,8 +582,417 @@ function boxMetadata(shape: CollisionCookShapeData): LevelEditorBoxMetadata {
 	};
 }
 
-function buildTerrainImportStatuses(): readonly LevelEditorTerrainImportStatus[] {
-	return [];
+type LevelEditorTerrainPackageSummary = {
+	readonly packageCount: number;
+	readonly requiredPackageCount: number;
+	readonly packageIds: readonly string[];
+	readonly requiredPackageIds: readonly string[];
+	readonly startupChunkCount: number;
+	readonly activeCollisionChunkCount: number | null;
+	readonly visualBindingCount: number;
+	readonly lodBindingCounts: LevelEditorTerrainLodCounts;
+	readonly chunkLodReferenceCounts: LevelEditorTerrainChunkLodReferenceCounts;
+	readonly materialAssetCount: number;
+	readonly packageErrors: readonly string[];
+	readonly packages: readonly LevelEditorTerrainPackageStatus[];
+};
+
+function buildTerrainPackageSummary(
+	selectedRuntimeSceneId: string,
+	manifest: RuntimeSceneManifestData | undefined,
+	terrainStreamingStatus: LevelEditorTerrainStreamingState | undefined,
+): LevelEditorTerrainPackageSummary {
+	const activeCollisionChunkStableIds =
+		terrainStreamingStatus?.activeCollisionChunkStableIds === undefined
+			? null
+			: new Set(terrainStreamingStatus.activeCollisionChunkStableIds);
+	const packageErrors: string[] = [];
+
+	if (!manifest) {
+		return {
+			packageCount: 0,
+			requiredPackageCount: 0,
+			packageIds: [],
+			requiredPackageIds: [],
+			startupChunkCount: 0,
+			activeCollisionChunkCount:
+				activeCollisionChunkStableIds === null
+					? null
+					: activeCollisionChunkStableIds.size,
+			visualBindingCount: 0,
+			lodBindingCounts: emptyLodCounts(),
+			chunkLodReferenceCounts: emptyChunkLodReferenceCounts(),
+			materialAssetCount: 0,
+			packageErrors: [
+				`Selected runtime scene "${selectedRuntimeSceneId}" has no registered runtime scene manifest.`,
+			],
+			packages: [],
+		};
+	}
+
+	const terrainPackages = manifest.terrainPackages ?? [];
+	const packageIds = terrainPackages.map((terrainPackage) => terrainPackage.id);
+	const packageIdsSet = new Set(packageIds);
+	const requiredPackageIds = manifest.readiness.requiredTerrainPackageIds ?? [];
+	const requiredPackageIdsSet = new Set(requiredPackageIds);
+	const allChunkStableIds = new Set(
+		terrainPackages.flatMap((terrainPackage) =>
+			terrainPackage.chunks.map((chunk) => chunk.stableId),
+		),
+	);
+	const instancesByStableId = new Map(
+		manifest.level.instances.map((instance) => [instance.stableId, instance]),
+	);
+	const prefabsById = new Map(
+		manifest.prefabs.map((prefab) => [prefab.id, prefab]),
+	);
+
+	for (const packageId of requiredPackageIds) {
+		if (!packageIdsSet.has(packageId)) {
+			packageErrors.push(
+				`readiness.requiredTerrainPackageIds references missing terrain package "${packageId}".`,
+			);
+		}
+	}
+
+	for (const packageId of terrainStreamingStatus?.packageIds ?? []) {
+		if (!packageIdsSet.has(packageId)) {
+			packageErrors.push(
+				`terrain streaming state references package "${packageId}" outside selected runtime scene "${manifest.id}".`,
+			);
+		}
+	}
+
+	if (activeCollisionChunkStableIds !== null) {
+		for (const stableId of activeCollisionChunkStableIds) {
+			if (!allChunkStableIds.has(stableId)) {
+				packageErrors.push(
+					`terrain streaming state active collision chunk "${stableId}" is not in selected runtime scene terrain packages.`,
+				);
+			}
+		}
+	}
+
+	for (const error of terrainStreamingStatus?.errors ?? []) {
+		packageErrors.push(`terrain streaming state reports: ${error}`);
+	}
+
+	const packages = terrainPackages.map((terrainPackage) =>
+		buildTerrainPackageStatus(terrainPackage, {
+			manifest,
+			requiredPackageIds: requiredPackageIdsSet,
+			instancesByStableId,
+			prefabsById,
+			activeCollisionChunkStableIds,
+		}),
+	);
+
+	for (const terrainPackage of packages) {
+		packageErrors.push(...terrainPackage.errors);
+	}
+
+	return {
+		packageCount: terrainPackages.length,
+		requiredPackageCount: requiredPackageIds.length,
+		packageIds,
+		requiredPackageIds,
+		startupChunkCount: terrainPackages.reduce(
+			(total, terrainPackage) =>
+				total + terrainPackage.startupChunkStableIds.length,
+			0,
+		),
+		activeCollisionChunkCount:
+			activeCollisionChunkStableIds === null
+				? null
+				: packages.reduce(
+						(total, terrainPackage) =>
+							total + (terrainPackage.activeCollisionChunkCount ?? 0),
+						0,
+					),
+		visualBindingCount: terrainPackages.reduce(
+			(total, terrainPackage) => total + terrainPackage.visualBindings.length,
+			0,
+		),
+		lodBindingCounts: sumLodCounts(
+			terrainPackages.map((terrainPackage) =>
+				lodBindingCounts(terrainPackage.visualBindings),
+			),
+		),
+		chunkLodReferenceCounts: sumChunkLodReferenceCounts(
+			terrainPackages.map(chunkLodReferenceCounts),
+		),
+		materialAssetCount: new Set(
+			terrainPackages.flatMap(terrainPackageMaterialAssetIds),
+		).size,
+		packageErrors: uniqueStrings(packageErrors),
+		packages,
+	};
+}
+
+function buildTerrainPackageStatus(
+	terrainPackage: TerrainChunkPackageData,
+	options: {
+		readonly manifest: RuntimeSceneManifestData;
+		readonly requiredPackageIds: ReadonlySet<string>;
+		readonly instancesByStableId: ReadonlyMap<string, LevelPrefabInstanceData>;
+		readonly prefabsById: ReadonlyMap<string, PrefabData>;
+		readonly activeCollisionChunkStableIds: ReadonlySet<string> | null;
+	},
+): LevelEditorTerrainPackageStatus {
+	const errors: string[] = [];
+	const required = options.requiredPackageIds.has(terrainPackage.id);
+	const chunkStableIds = new Set(
+		terrainPackage.chunks.map((chunk) => chunk.stableId),
+	);
+	const materialLayersBySetId = new Map(
+		terrainPackage.materialSets.map((materialSet) => [
+			materialSet.id,
+			new Set(materialSet.layers.map((layer) => layer.id)),
+		]),
+	);
+
+	if (!required) {
+		errors.push(
+			`terrain package "${terrainPackage.id}" is present but missing from readiness.requiredTerrainPackageIds.`,
+		);
+	}
+
+	if (terrainPackage.runtimeSceneId !== options.manifest.id) {
+		errors.push(
+			`terrain package "${terrainPackage.id}" runtimeSceneId "${terrainPackage.runtimeSceneId}" does not match selected runtime scene "${options.manifest.id}".`,
+		);
+	}
+
+	for (const chunk of terrainPackage.chunks) {
+		const instance = options.instancesByStableId.get(chunk.stableId);
+
+		if (!instance) {
+			errors.push(
+				`terrain package "${terrainPackage.id}" chunk "${chunk.stableId}" references missing level instance.`,
+			);
+		} else {
+			const cellPackageId = terrainChunkCellPackageId(
+				instance,
+				options.prefabsById,
+			);
+
+			if (cellPackageId !== terrainPackage.id) {
+				errors.push(
+					`terrain package "${terrainPackage.id}" chunk "${chunk.stableId}" has TerrainChunkCell package "${cellPackageId ?? "missing"}".`,
+				);
+			}
+		}
+
+		const materialBinding = chunk.materialBinding;
+		if (materialBinding) {
+			const materialLayerIds = materialLayersBySetId.get(
+				materialBinding.materialSetId,
+			);
+
+			if (!materialLayerIds) {
+				errors.push(
+					`terrain package "${terrainPackage.id}" chunk "${chunk.stableId}" references missing material set "${materialBinding.materialSetId}".`,
+				);
+			} else {
+				for (const layerId of materialBinding.layerIds) {
+					if (!materialLayerIds.has(layerId)) {
+						errors.push(
+							`terrain package "${terrainPackage.id}" chunk "${chunk.stableId}" references missing material layer "${layerId}".`,
+						);
+					}
+				}
+			}
+		}
+	}
+
+	for (const stableId of terrainPackage.startupChunkStableIds) {
+		if (!chunkStableIds.has(stableId)) {
+			errors.push(
+				`terrain package "${terrainPackage.id}" startupChunkStableIds references missing chunk "${stableId}".`,
+			);
+		}
+	}
+
+	for (const stableId of terrainPackage.streamableChunkStableIds) {
+		if (!chunkStableIds.has(stableId)) {
+			errors.push(
+				`terrain package "${terrainPackage.id}" streamableChunkStableIds references missing chunk "${stableId}".`,
+			);
+		}
+	}
+
+	for (const binding of terrainPackage.visualBindings) {
+		const instance = options.instancesByStableId.get(binding.stableId);
+
+		if (!instance) {
+			errors.push(
+				`terrain package "${terrainPackage.id}" visual binding "${binding.stableId}" references missing level instance.`,
+			);
+			continue;
+		}
+
+		if (instance.prefabId !== binding.prefabId) {
+			errors.push(
+				`terrain package "${terrainPackage.id}" visual binding "${binding.stableId}" expects prefab "${binding.prefabId}", but level instance uses "${instance.prefabId}".`,
+			);
+		}
+
+		for (const sourceStableId of binding.sourceChunkStableIds) {
+			if (!chunkStableIds.has(sourceStableId)) {
+				errors.push(
+					`terrain package "${terrainPackage.id}" visual binding "${binding.stableId}" references missing source chunk "${sourceStableId}".`,
+				);
+			}
+		}
+	}
+
+	const activeCollisionChunkStableIds = options.activeCollisionChunkStableIds;
+	const activeCollisionChunkCount =
+		activeCollisionChunkStableIds === null
+			? null
+			: terrainPackage.chunks.filter((chunk) =>
+					activeCollisionChunkStableIds.has(chunk.stableId),
+				).length;
+
+	return {
+		id: terrainPackage.id,
+		runtimeSceneId: terrainPackage.runtimeSceneId,
+		sourceManifestId: terrainPackage.sourceManifestId,
+		status: errors.length === 0 ? "ready" : "stale",
+		required,
+		chunkCount: terrainPackage.chunks.length,
+		startupChunkCount: terrainPackage.startupChunkStableIds.length,
+		streamableChunkCount: terrainPackage.streamableChunkStableIds.length,
+		activeCollisionChunkCount,
+		visualBindingCount: terrainPackage.visualBindings.length,
+		lodBindingCounts: lodBindingCounts(terrainPackage.visualBindings),
+		chunkLodReferenceCounts: chunkLodReferenceCounts(terrainPackage),
+		materialSetCount: terrainPackage.materialSets.length,
+		materialLayerCount: terrainPackage.materialSets.reduce(
+			(total, materialSet) => total + materialSet.layers.length,
+			0,
+		),
+		materialAssetCount: terrainPackageMaterialAssetIds(terrainPackage).length,
+		driftHash: terrainPackage.driftHash,
+		errors: uniqueStrings(errors),
+	};
+}
+
+function terrainChunkCellPackageId(
+	instance: LevelPrefabInstanceData,
+	prefabsById: ReadonlyMap<string, PrefabData>,
+): string | null {
+	return (
+		componentPackageId(instance.components?.TerrainChunkCell) ??
+		componentPackageId(
+			prefabsById.get(instance.prefabId)?.components?.TerrainChunkCell,
+		)
+	);
+}
+
+function componentPackageId(component: unknown): string | null {
+	if (!isRecord(component)) {
+		return null;
+	}
+
+	return typeof component.packageId === "string" ? component.packageId : null;
+}
+
+function terrainPackageMaterialAssetIds(
+	terrainPackage: TerrainChunkPackageData,
+): readonly string[] {
+	return uniqueStrings(
+		terrainPackage.materialSets.flatMap((materialSet) => [
+			materialSet.fallbackMaterialAssetId,
+			...materialSet.layers.map((layer) => layer.materialAssetId),
+		]),
+	);
+}
+
+function lodBindingCounts(
+	bindings: readonly TerrainVisualBindingData[],
+): LevelEditorTerrainLodCounts {
+	const counts = {
+		near: 0,
+		far: 0,
+		mergedFloor: 0,
+	};
+
+	for (const binding of bindings) {
+		counts[lodCountKey(binding.lod)] += 1;
+	}
+
+	return counts;
+}
+
+function chunkLodReferenceCounts(
+	terrainPackage: TerrainChunkPackageData,
+): LevelEditorTerrainChunkLodReferenceCounts {
+	const counts = {
+		near: 0,
+		far: 0,
+	};
+
+	for (const chunk of terrainPackage.chunks) {
+		counts.near += chunk.lod.nearVisualStableIds.length;
+		counts.far += chunk.lod.farVisualStableIds.length;
+	}
+
+	return counts;
+}
+
+function sumLodCounts(
+	values: readonly LevelEditorTerrainLodCounts[],
+): LevelEditorTerrainLodCounts {
+	return values.reduce(
+		(total, item) => ({
+			near: total.near + item.near,
+			far: total.far + item.far,
+			mergedFloor: total.mergedFloor + item.mergedFloor,
+		}),
+		emptyLodCounts(),
+	);
+}
+
+function sumChunkLodReferenceCounts(
+	values: readonly LevelEditorTerrainChunkLodReferenceCounts[],
+): LevelEditorTerrainChunkLodReferenceCounts {
+	return values.reduce(
+		(total, item) => ({
+			near: total.near + item.near,
+			far: total.far + item.far,
+		}),
+		emptyChunkLodReferenceCounts(),
+	);
+}
+
+function lodCountKey(
+	lod: TerrainVisualBindingData["lod"],
+): keyof LevelEditorTerrainLodCounts {
+	return lod === "merged-floor" ? "mergedFloor" : lod;
+}
+
+function emptyLodCounts(): LevelEditorTerrainLodCounts {
+	return {
+		near: 0,
+		far: 0,
+		mergedFloor: 0,
+	};
+}
+
+function emptyChunkLodReferenceCounts(): LevelEditorTerrainChunkLodReferenceCounts {
+	return {
+		near: 0,
+		far: 0,
+	};
+}
+
+function uniqueStrings(values: readonly string[]): readonly string[] {
+	return [...new Set(values)];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function chunkGeometrySummary(

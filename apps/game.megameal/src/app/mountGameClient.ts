@@ -21,7 +21,7 @@ import {
 	type RuntimeSceneManifestData,
 } from "../engine/index.js";
 import {
-	type GameHudState,
+	type GameRuntimeUiState,
 	createMegamealGameRuntime,
 	defaultRuntimeSceneManifest,
 } from "../game/index.js";
@@ -35,7 +35,7 @@ export type GameClientMountOptions = {
 export type GameClientMount = {
 	readonly runtime: EngineRuntime;
 	readonly mobileControls: MobileInputControlsPort;
-	gameState(): GameHudState;
+	runtimeUiState(): GameRuntimeUiState;
 	setUiCapturingInput(capturing: boolean): void;
 	dispose(): void;
 };
@@ -91,7 +91,7 @@ export async function mountGameClient(
 	return {
 		runtime: game.runtime,
 		mobileControls: input,
-		gameState: game.gameState,
+		runtimeUiState: game.runtimeUiState,
 		setUiCapturingInput(capturing) {
 			input.setFocusState({ uiCapturingInput: capturing });
 		},

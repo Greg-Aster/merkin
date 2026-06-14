@@ -162,6 +162,22 @@ function validateCookedRuntimeReadiness(
 		readonly errors: string[];
 	},
 ): void {
+	if (entry.readiness.terrainPackageOwned === true) {
+		if (state.requiredCollisionStableIds.has(entry.stableId)) {
+			state.errors.push(
+				`collision cook entry "${entry.id}" stableId "${entry.stableId}" is terrain-package owned and must not be listed in readiness.requiredCollisionStableIds.`,
+			);
+		}
+
+		if (state.requiredWalkableStableIds.has(entry.stableId)) {
+			state.errors.push(
+				`collision cook entry "${entry.id}" stableId "${entry.stableId}" is terrain-package owned and must not be listed in readiness.requiredWalkableStableIds.`,
+			);
+		}
+
+		return;
+	}
+
 	if (!entry.readiness.requiredCollision) {
 		return;
 	}

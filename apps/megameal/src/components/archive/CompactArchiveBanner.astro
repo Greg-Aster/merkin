@@ -2,6 +2,7 @@
 import { Icon } from 'astro-icon/components'
 import { formatTimelineYear } from '@merkin/shared-content'
 import archiveManifest from '../../../../../packages/shared-data/generated/archive.json'
+import { isPublicArchiveRecord } from '../../contracts/archive'
 
 type ArchivePost = (typeof archiveManifest.items)[number]
 
@@ -40,7 +41,8 @@ function byArchiveOrder(a: ArchivePost, b: ArchivePost) {
 }
 
 function getTimelineLabel(item: ArchivePost) {
-  if (typeof item.timelineYear === 'number') return formatTimelineYear(item.timelineYear)
+  if (typeof item.timelineYear === 'number')
+    return formatTimelineYear(item.timelineYear)
   if (!item.published) return 'undated'
   const year = new Date(item.published).getUTCFullYear()
   return Number.isFinite(year) ? String(year) : 'undated'
@@ -55,7 +57,7 @@ const relatedRecords = archiveManifest.items
   .sort(byArchiveOrder)
 
 const visibleRecords = relatedRecords.slice(0, 6)
-const openCount = relatedRecords.filter(item => !item.draft).length
+const openCount = relatedRecords.filter(isPublicArchiveRecord).length
 const restrictedCount = Math.max(relatedRecords.length - openCount, 0)
 const archiveTitle =
   currentData.seriesTitle || currentData.title || 'Archive Record'
@@ -180,22 +182,10 @@ const archiveDescription =
 </section>
 
 <script>
-  function setCompactArchiveBannerVideoRate() {
-    document
-      .querySelectorAll('[data-compact-archive-banner-video]')
-      .forEach(video => {
-        if (!(video instanceof HTMLVideoElement)) return
-        video.defaultPlaybackRate = 0.1
-        video.playbackRate = 0.1
-        if (video.dataset.playbackRateLocked === 'true') return
-        video.dataset.playbackRateLocked = 'true'
-        video.addEventListener('play', () => {
-          video.playbackRate = 0.1
-        })
-      })
-  }
+  import { attachArchiveBannerVideoPlayback } from '../../utils/archive-banner-video'
 
-  setCompactArchiveBannerVideoRate()
-  document.addEventListener('DOMContentLoaded', setCompactArchiveBannerVideoRate)
-  document.addEventListener('astro:page-load', setCompactArchiveBannerVideoRate)
+  attachArchiveBannerVideoPlayback({
+    selector: '[data-compact-archive-banner-video]',
+    playbackRate: 0.1,
+  })
 </script>

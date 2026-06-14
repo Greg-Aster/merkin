@@ -1,3 +1,4 @@
+import { terrainLevelInstancesForRuntimeScene } from "../generated/terrainRuntime.js";
 import type { LevelDefinition, LevelPrefabInstance } from "./index.js";
 
 const PORTAL_COUNT = 8;
@@ -84,6 +85,7 @@ export const portalArenaLevel = {
 			prefabId: "portal_arena_floor",
 			stableId: "portal-arena:floor",
 		},
+		...terrainLevelInstancesForRuntimeScene("portal_arena_runtime"),
 		{
 			id: "player",
 			prefabId: "player",

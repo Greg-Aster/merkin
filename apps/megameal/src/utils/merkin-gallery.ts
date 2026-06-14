@@ -1,4 +1,5 @@
 import type { CollectionEntry } from 'astro:content'
+import { isPublicContentData } from '../contracts/content'
 import { url } from './url-utils'
 
 export const MERKIN_GALLERY_TIME_ZONE = 'America/Los_Angeles'
@@ -52,7 +53,7 @@ export function getPublishableMerkinEntries(
   todayKey = getMerkinTodayKey(),
 ) {
   return entries
-    .filter(entry => entry.data.draft !== true && entry.data.date <= todayKey)
+    .filter(entry => isPublicContentData(entry.data) && entry.data.date <= todayKey)
     .sort(compareMerkinEntries)
 }
 

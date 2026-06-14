@@ -90,6 +90,11 @@
         text-decoration: underline;
       }
 
+      .pdf-article[data-recipe-mode='original'] [data-recipe-mode='terrestrial'],
+      .pdf-article[data-recipe-mode='terrestrial'] [data-recipe-mode='original'] {
+        display: none;
+      }
+
       .pdf-article hr {
         border: 0;
         border-top: 1px solid #ddd;

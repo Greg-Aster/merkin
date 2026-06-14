@@ -80,6 +80,7 @@ export {
 	oceanWaterSurfacePrefab,
 	waterSurfacePlanePrefab,
 } from "./waterPrefabs.js";
+export { terrainChunkCellPrefab } from "./terrainPrefabs.js";
 export {
 	yggdrasilAmbientEmitterPrefab,
 	yggdrasilPrefabs,
@@ -175,7 +176,7 @@ export class PrefabRegistry {
 			...(prefab.tags ? { tags: prefab.tags } : {}),
 			components,
 		});
-		normalizeKnownRuntimeComponents(components);
+		normalizeRuntimeComponentMap(components);
 
 		const entity = world.createEntity();
 		const stableId = options.stableId ?? createStableEntityId(prefabId, entity);
@@ -265,7 +266,7 @@ function applyTransformOverride(
 	components.Transform = nextTransform;
 }
 
-function normalizeKnownRuntimeComponents(
+export function normalizeRuntimeComponentMap(
 	components: Record<string, unknown>,
 ): void {
 	normalizeTransformComponent(components);

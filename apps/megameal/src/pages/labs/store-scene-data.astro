@@ -1,17 +1,14 @@
 ---
 import { getCollection } from 'astro:content'
 import Layout from '@layouts/Layout.astro'
+import { labPrototypeProductFilter } from '../../contracts/products'
 import {
   normalizeProductEntry,
   normalizeReviewEntry,
 } from '../../utils/store-scene-content'
 
 const prototypeProducts = (await getCollection('products'))
-  .filter(
-    product =>
-      product.data.draft === true &&
-      typeof product.data.sceneWeight === 'number',
-  )
+  .filter(labPrototypeProductFilter)
   .sort((a, b) => (b.data.sceneWeight ?? 0) - (a.data.sceneWeight ?? 0))
 
 const reviewEntries = await getCollection('reviews')

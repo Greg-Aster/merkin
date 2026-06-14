@@ -7,10 +7,13 @@ import MainGridLayout from '@layouts/MainGridLayout.astro'
 import archiveManifest from '../../../../../packages/shared-data/generated/archive.json'
 import gameStarsManifest from '../../../../../packages/shared-data/generated/game-stars.json'
 import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
+import { isPublicContentData } from '../../contracts/content'
 
 const allRecords = archiveManifest.items
-const publishedRecords = archiveManifest.items.filter(record => !record.draft)
-const restrictedRecords = archiveManifest.items.filter(record => record.draft)
+const publishedRecords = archiveManifest.items.filter(isPublicContentData)
+const restrictedRecords = archiveManifest.items.filter(
+  record => !isPublicContentData(record),
+)
 const allTimelineItems = timelineManifest.items
 const allGameStars = gameStarsManifest.items
 const activeArcCount = new Set(

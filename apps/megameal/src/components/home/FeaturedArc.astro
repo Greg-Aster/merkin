@@ -6,6 +6,7 @@
 import ImageWrapper from '@/components/misc/ImageWrapper.astro'
 import { FEATURED_SERIES_ORDER, SERIES_CONFIG } from '@/config/seriesConfig'
 import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
+import { isPublicContentData } from '../../contracts/content'
 
 type SharedFeaturedPost = (typeof postsManifest.items)[number]
 
@@ -13,7 +14,7 @@ function getPostsBySeriesFromSharedData(
   seriesId: string,
 ): SharedFeaturedPost[] {
   return postsManifest.items
-    .filter(post => !post.draft && post.series === seriesId)
+    .filter(post => isPublicContentData(post) && post.series === seriesId)
     .sort((left, right) => (left.seriesPart ?? 0) - (right.seriesPart ?? 0))
 }
 
@@ -102,4 +103,3 @@ import '../../styles/features/extracted/featured-arc.css'
     </div>
   </section>
 )}
-

@@ -1,13 +1,9 @@
 import type { CollectionEntry } from 'astro:content'
 import { buildYouTubeEmbedUrl } from '@merkin/blog-core/utils/youtube-embed'
-
-function toSlug(product: CollectionEntry<'products'>) {
-  return product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')
-}
-
-function toHref(product: CollectionEntry<'products'>) {
-  return `/store/${toSlug(product)}/`
-}
+import {
+  getProductHref as getContractProductHref,
+  getProductSlug as getContractProductSlug,
+} from '../contracts/products'
 
 function resolveMediaThumbnail(product: CollectionEntry<'products'>) {
   const firstMedia = product.data.media?.find(item => item.type === 'image')
@@ -30,7 +26,7 @@ export function buildFlagshipProductShowcase(
     .slice(0, 4)
     .map(entry => ({
       name: entry.data.name,
-      href: toHref(entry),
+      href: getContractProductHref(entry),
       image: resolveMediaThumbnail(entry),
       price: entry.data.price,
       availability: entry.data.availability,
@@ -168,7 +164,7 @@ export function buildFlagshipProductShowcase(
       rating: product.data.rating,
       sku: product.data.sku,
       stockRegistry: product.data.stockRegistry,
-      href: toHref(product),
+      href: getContractProductHref(product),
       media,
       specifications: product.data.specifications ?? [],
       ingredients: product.data.ingredients ?? [],
@@ -183,9 +179,9 @@ export function buildFlagshipProductShowcase(
 }
 
 export function getProductSlug(product: CollectionEntry<'products'>) {
-  return toSlug(product)
+  return getContractProductSlug(product)
 }
 
 export function getProductHref(product: CollectionEntry<'products'>) {
-  return toHref(product)
+  return getContractProductHref(product)
 }

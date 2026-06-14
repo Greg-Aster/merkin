@@ -4,12 +4,14 @@ import { Icon } from 'astro-icon/components'
 import SnuggaloidRegistryList from '../../components/snuggaloids/SnuggaloidRegistryList.svelte'
 import ProductCustomizer from '../../components/store/ProductCustomizer.svelte'
 import { buildSnuggaloidCustomizerConfig } from '../../config/snuggaloidCustomizer'
+import { publicCollectionFilter } from '../../contracts/content'
+import { publicProductCollectionFilter } from '../../contracts/products'
 import StoreLayout from '../../layouts/store/StoreLayout.astro'
 
 const units = (
-  await getCollection('snuggaloids', ({ data }) => data.draft !== true)
+  await getCollection('snuggaloids', publicCollectionFilter)
 ).sort((a, b) => a.data.unitId.localeCompare(b.data.unitId))
-const products = await getCollection('products', ({ data }) => data.draft !== true)
+const products = await getCollection('products', publicProductCollectionFilter)
 const snuggaloidsProduct = products.find(product => {
   const slug = product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')
   return slug === 'snuggaloids'

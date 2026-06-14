@@ -1,6 +1,7 @@
 import type {
 	AssetManifestEntryData,
 	TerrainChunkPackageData,
+	TerrainMaterialSetData,
 } from "../schemas/index.js";
 import { parseTerrainCookManifest } from "./manifestValidation.js";
 import {
@@ -21,6 +22,7 @@ import type {
 	TerrainCookPlan,
 	TerrainCookVector3Data,
 	TerrainCookVisualBindingData,
+	TerrainCookVisualOutputPlanData,
 } from "./types.js";
 
 export function buildTerrainCookPlan(manifestInput: unknown): TerrainCookPlan {
@@ -41,6 +43,13 @@ export function buildTerrainCookPlan(manifestInput: unknown): TerrainCookPlan {
 	const visualBindings = (manifest.visualBindings ?? []).map((binding) =>
 		cloneValue(binding),
 	);
+	const materialSets = (
+		manifest.materialSets ??
+		defaultTerrainMaterialSets({
+			visualOutputs,
+			collisionChunks,
+		})
+	).map((materialSet) => cloneValue(materialSet));
 	const startupChunkStableIds = sortedUnique(
 		manifest.startupChunkStableIds ?? [],
 	);
@@ -55,6 +64,7 @@ export function buildTerrainCookPlan(manifestInput: unknown): TerrainCookPlan {
 					manifest,
 					collisionChunks,
 					visualBindings,
+					materialSets,
 					startupChunkStableIds,
 					streamableChunkStableIds,
 				});
@@ -75,6 +85,7 @@ export function buildTerrainCookPlan(manifestInput: unknown): TerrainCookPlan {
 		provenance: cloneValue(manifest.provenance),
 		visualOutputs,
 		visualBindings,
+		materialSets,
 		collisionChunks,
 		...(manifest.streamingPolicy === undefined
 			? {}
@@ -106,6 +117,7 @@ function buildTerrainChunkPackage(options: {
 	readonly manifest: TerrainCookManifestData;
 	readonly collisionChunks: readonly TerrainCookCollisionChunkPlanData[];
 	readonly visualBindings: readonly TerrainCookVisualBindingData[];
+	readonly materialSets: readonly TerrainMaterialSetData[];
 	readonly startupChunkStableIds: readonly string[];
 	readonly streamableChunkStableIds: readonly string[];
 }): TerrainChunkPackageData {
@@ -155,6 +167,7 @@ function buildTerrainChunkPackage(options: {
 		runtimeSceneId: options.manifest.runtimeSceneId,
 		sourceManifestId: options.manifest.id,
 		policy: cloneValue(options.manifest.streamingPolicy),
+		materialSets: cloneValue(options.materialSets),
 		chunks,
 		visualBindings: options.visualBindings.map((binding) => ({
 			id: binding.id,
@@ -172,6 +185,32 @@ function buildTerrainChunkPackage(options: {
 		...packageWithoutHash,
 		driftHash: hashStableValue(packageWithoutHash),
 	};
+}
+
+function defaultTerrainMaterialSets(options: {
+	readonly visualOutputs: readonly TerrainCookVisualOutputPlanData[];
+	readonly collisionChunks: readonly TerrainCookCollisionChunkPlanData[];
+}): readonly TerrainMaterialSetData[] {
+	const fallbackMaterialAssetId =
+		options.visualOutputs.flatMap((output) => output.materialAssetIds)[0] ??
+		options.collisionChunks.find((chunk) => chunk.materialId !== undefined)
+			?.materialId ??
+		"terrain_default_material";
+
+	return [
+		{
+			id: "default-terrain-material-set",
+			blendMode: "single",
+			fallbackMaterialAssetId,
+			layers: [
+				{
+					id: "base",
+					materialAssetId: fallbackMaterialAssetId,
+					uvScale: [1, 1],
+				},
+			],
+		},
+	];
 }
 
 function terrainChunkGroupId(chunk: TerrainCookCollisionChunkPlanData): string {

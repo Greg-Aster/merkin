@@ -65,9 +65,10 @@ const featuredStats = stats.slice(0, 3)
 </section>
 
 <script>
-  const archiveBannerVideo = document.getElementById('archive-banner-video')
+  import { attachArchiveBannerVideoPlayback } from '../../utils/archive-banner-video'
 
-  if (archiveBannerVideo instanceof HTMLVideoElement) {
-    archiveBannerVideo.playbackRate = 0.25
-  }
+  attachArchiveBannerVideoPlayback({
+    selector: '#archive-banner-video',
+    playbackRate: 0.25,
+  })
 </script>

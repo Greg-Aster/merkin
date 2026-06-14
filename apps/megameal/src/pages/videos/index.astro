@@ -1,10 +1,13 @@
 ---
 import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
+import { publicCollectionFilter } from '../../contracts/content'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
+import '../../styles/pages/videos-index.css'
 
-const videos = (await getCollection('videos', ({ data }) => data.draft !== true))
-  .sort((a, b) => b.data.published.getTime() - a.data.published.getTime())
+const videos = (await getCollection('videos', publicCollectionFilter)).sort(
+  (a, b) => b.data.published.getTime() - a.data.published.getTime(),
+)
 
 function getVideoHref(video: (typeof videos)[number]) {
   return `/videos/${video.slug}/`
@@ -30,7 +33,10 @@ function uniqueBySlug(items: typeof videos) {
 }
 
 function slugify(value: string) {
-  return value.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  return value
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
 }
 
 const featuredVideo = videos[0]
@@ -41,7 +47,9 @@ const categories = Array.from(
 const categoryRows = categories
   .map(category => ({
     category,
-    videos: videos.filter(video => (video.data.category ?? 'Video') === category),
+    videos: videos.filter(
+      video => (video.data.category ?? 'Video') === category,
+    ),
   }))
   .filter(row => row.videos.length > 0)
 
@@ -314,128 +322,9 @@ const videoBannerPost = featuredVideo
   </section>
 
   <script>
-    const videoRailControls = Array.from(
-      document.querySelectorAll<HTMLButtonElement>('[data-video-rail-control]'),
-    )
-    const videoRails = Array.from(
-      document.querySelectorAll<HTMLElement>('[data-video-rail]'),
-    )
-    const videoRailAffordances = Array.from(
-      document.querySelectorAll<HTMLElement>('[data-video-rail-affordance]'),
-    )
-    const scrollEdgeTolerance = 6
+    import { initVideosArchiveRail } from '../../components/videos/videosArchiveRail'
 
-    function getRailControls(rail: HTMLElement) {
-      const target = rail.dataset.videoRail
-
-      return videoRailControls.filter(control => {
-        return control.dataset.videoRailTarget === target
-      })
-    }
-
-    function getRailAffordances(rail: HTMLElement) {
-      const target = rail.dataset.videoRail
-
-      return videoRailAffordances.filter(affordance => {
-        return affordance.dataset.videoRailAffordance === target
-      })
-    }
-
-    function updateRailControls(rail: HTMLElement) {
-      const maxScroll = rail.scrollWidth - rail.clientWidth
-      const hasOverflow = maxScroll > scrollEdgeTolerance
-      const railBounds = rail.getBoundingClientRect()
-      const firstItem = rail.firstElementChild
-      const lastItem = rail.lastElementChild
-      const firstItemBounds = firstItem?.getBoundingClientRect()
-      const lastItemBounds = lastItem?.getBoundingClientRect()
-      const firstItemVisible =
-        firstItemBounds &&
-        firstItemBounds.left >= railBounds.left - scrollEdgeTolerance
-      const lastItemVisible =
-        lastItemBounds &&
-        lastItemBounds.right <= railBounds.right + scrollEdgeTolerance
-      const atStart =
-        firstItemVisible || rail.scrollLeft <= scrollEdgeTolerance
-      const atEnd =
-        lastItemVisible || rail.scrollLeft >= maxScroll - scrollEdgeTolerance
-
-      getRailControls(rail).forEach(control => {
-        const direction = Number(control.dataset.videoRailDirection || '1')
-
-        const shouldHide =
-          !hasOverflow || (direction < 0 && atStart) || (direction > 0 && atEnd)
-        control.hidden = shouldHide
-        control.disabled = shouldHide
-      })
-
-      getRailAffordances(rail).forEach(affordance => {
-        affordance.hidden = !hasOverflow || atEnd
-      })
-    }
-
-    function watchRailAfterScroll(rail: HTMLElement) {
-      const startedAt = performance.now()
-
-      function tick() {
-        updateRailControls(rail)
-
-        if (performance.now() - startedAt < 900) {
-          requestAnimationFrame(tick)
-        }
-      }
-
-      requestAnimationFrame(tick)
-    }
-
-    function updateAllRailControls() {
-      videoRails.forEach(updateRailControls)
-    }
-
-    videoRailControls.forEach(control => {
-      control.addEventListener('click', () => {
-        const target = control.dataset.videoRailTarget
-        const direction = Number(control.dataset.videoRailDirection || '1')
-        if (!target) return
-
-        const rail = document.querySelector<HTMLElement>(
-          `[data-video-rail="${target}"]`,
-        )
-        if (!rail) return
-
-        rail.scrollBy({
-          left: direction * rail.clientWidth * 0.82,
-          behavior: 'smooth',
-        })
-        watchRailAfterScroll(rail)
-      })
-    })
-
-    videoRails.forEach(rail => {
-      rail.addEventListener('scroll', () => updateRailControls(rail), {
-        passive: true,
-      })
-      rail.addEventListener('scrollend', () => updateRailControls(rail))
-    })
-
-    window.addEventListener('resize', updateAllRailControls)
-    window.addEventListener('load', updateAllRailControls)
-    updateAllRailControls()
+    initVideosArchiveRail()
+    document.addEventListener('astro:page-load', initVideosArchiveRail)
   </script>
 </MainGridLayout>
-
-<style is:global>
-  body:has([data-videos-archive]) #banner-container {
-    margin-top: 0;
-  }
-
-  body:has([data-videos-archive]) #main-panel-wrapper {
-    top: 54px;
-  }
-
-  @media (min-width: 768px) {
-    body:has([data-videos-archive]) #main-panel-wrapper {
-      top: 4.5rem;
-    }
-  }
-</style>

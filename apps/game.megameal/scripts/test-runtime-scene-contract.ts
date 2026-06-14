@@ -35,10 +35,6 @@ const centerObservatoryWalkableChunkStableId =
 	"observatory:walkable-mesh:chunk:x2-z2";
 const solitudeRuntimeSceneId = "solitude_runtime";
 const solitudePortalStableId = "portal-arena:portal:solitude";
-const solitudeExpectedWalkableStableIds = [
-	"solitude:ground:plateau",
-	"solitude:ground:dais",
-] as const;
 const solitudeExpectedCollisionStableIds =
 	solitudeExpectedRuntimeImports.readiness.requiredCollisionStableIds;
 const solitudeOldPathMarkers = [
@@ -47,8 +43,8 @@ const solitudeOldPathMarkers = [
 	".collider.",
 ] as const;
 const yggdrasilRuntimeSceneId = "yggdrasil_runtime";
-const yggdrasilExpectedWalkableStableIds =
-	yggdrasilExpectedRuntimeImports.readiness.requiredWalkableStableIds;
+const yggdrasilExpectedTerrainWalkableStableIds =
+	yggdrasilExpectedRuntimeImports.terrain.terrainOwnedWalkableStableIds;
 
 function assertEqual<TValue>(
 	actual: TValue,
@@ -133,6 +129,19 @@ function assertIncludes(
 		throw new Error(
 			message ??
 				`Expected ${JSON.stringify(values)} to include ${JSON.stringify(expected)}.`,
+		);
+	}
+}
+
+function assertNotIncludes(
+	values: readonly string[],
+	unexpected: string,
+	message?: string,
+): void {
+	if (values.includes(unexpected)) {
+		throw new Error(
+			message ??
+				`Expected ${JSON.stringify(values)} not to include ${JSON.stringify(unexpected)}.`,
 		);
 	}
 }
@@ -338,6 +347,87 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 	}
 }
 
+function firstTerrainPackage(manifest: RuntimeSceneManifestData) {
+	const terrainPackage = manifest.terrainPackages?.[0];
+
+	if (terrainPackage === undefined) {
+		throw new Error(
+			`Expected runtime scene "${manifest.id}" to declare a terrain package.`,
+		);
+	}
+
+	assertIncludes(
+		manifest.readiness.requiredTerrainPackageIds ?? [],
+		terrainPackage.id,
+		`Runtime scene "${manifest.id}" must require its terrain package before play.`,
+	);
+	assertEqual(terrainPackage.runtimeSceneId, manifest.id);
+	assertNonEmpty(
+		terrainPackage.chunks,
+		`Runtime scene "${manifest.id}" terrain package must contain chunks.`,
+	);
+
+	for (const chunk of terrainPackage.chunks) {
+		const components = componentsForStableId(manifest, chunk.stableId);
+		const terrainChunkCell = assertRecord(
+			components.TerrainChunkCell,
+			`${manifest.id} ${chunk.stableId} TerrainChunkCell component`,
+		);
+
+		assertEqual(terrainChunkCell.packageId, terrainPackage.id);
+		assertEqual(
+			components.Collider,
+			undefined,
+			`Terrain package chunk "${chunk.stableId}" must not ship an active Collider component.`,
+		);
+		assertEqual(
+			components.RigidBody,
+			undefined,
+			`Terrain package chunk "${chunk.stableId}" must not ship an active RigidBody component.`,
+		);
+		assertNotIncludes(
+			manifest.readiness.requiredCollisionStableIds ?? [],
+			chunk.stableId,
+			`Terrain package chunk "${chunk.stableId}" must be owned by requiredTerrainPackageIds, not requiredCollisionStableIds.`,
+		);
+		assertNotIncludes(
+			manifest.readiness.requiredWalkableStableIds ?? [],
+			chunk.stableId,
+			`Terrain package chunk "${chunk.stableId}" must be owned by requiredTerrainPackageIds, not requiredWalkableStableIds.`,
+		);
+	}
+
+	return terrainPackage;
+}
+
+function terrainChunkForStableId(
+	manifest: RuntimeSceneManifestData,
+	stableId: string,
+) {
+	for (const terrainPackage of manifest.terrainPackages ?? []) {
+		const chunk = terrainPackage.chunks.find(
+			(candidate) => candidate.stableId === stableId,
+		);
+
+		if (chunk) {
+			return chunk;
+		}
+	}
+
+	throw new Error(
+		`Expected runtime scene "${manifest.id}" terrain packages to include chunk "${stableId}".`,
+	);
+}
+
+function terrainChunksForGroup(
+	manifest: RuntimeSceneManifestData,
+	groupId: string,
+) {
+	return (manifest.terrainPackages ?? []).flatMap((terrainPackage) =>
+		terrainPackage.chunks.filter((chunk) => chunk.groupId === groupId),
+	);
+}
+
 {
 	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
 	const readiness = evaluateRuntimeSceneReadiness(
@@ -387,7 +477,10 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 		| undefined;
 	const renderable = floorComponents?.Renderable;
 	const collider = floorComponents?.Collider;
-	const colliderShape = collider?.shape as Record<string, unknown> | undefined;
+	const terrainPackage = firstTerrainPackage(manifest);
+	const portalVisualBinding = terrainPackage.visualBindings.find(
+		(binding) => binding.stableId === "portal-arena:floor",
+	);
 	const bounds = manifest.level.resources?.["game:characterBounds"] as
 		| Record<string, unknown>
 		| undefined;
@@ -415,10 +508,14 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 		false,
 		"Portal field renderable should not reference a built-in material.",
 	);
-	assertEqual(collider?.intent, "solid");
-	assertEqual(collider?.channel, "world");
-	assertEqual(colliderShape?.type, "box");
-	assertDeepEqual(colliderShape?.halfExtents, [2600, 0.05, 2600]);
+	assertEqual(
+		collider,
+		undefined,
+		"Portal field visual prefab must not own terrain collision; collision belongs to the terrain package.",
+	);
+	assertEqual(terrainPackage.chunks.length, 36);
+	assertEqual(portalVisualBinding?.stableId, "portal-arena:floor");
+	assertEqual(portalVisualBinding?.lod, "merged-floor");
 	assertEqual(bounds?.minX, -360);
 	assertEqual(bounds?.maxX, 360);
 	assertEqual(bounds?.minZ, -360);
@@ -577,6 +674,7 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 		"yggdrasil:water:ocean",
 		"WaterSurface",
 	);
+	const terrainPackage = firstTerrainPackage(manifest);
 
 	if (!readiness.ok) {
 		throw new Error(
@@ -605,14 +703,19 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 		yggdrasilRuntimeSceneId,
 	);
 	assertSameStringSet(
-		manifest.readiness.requiredWalkableStableIds,
-		yggdrasilExpectedWalkableStableIds,
-		"Yggdrasil readiness.requiredWalkableStableIds must exactly match authored primitive walkables.",
+		manifest.readiness.requiredWalkableStableIds ?? [],
+		[],
+		"Yggdrasil readiness must not author legacy requiredWalkableStableIds for terrain-owned primitive walkables.",
 	);
 	assertSameStringSet(
 		manifest.readiness.requiredCollisionStableIds,
 		result.graph.collisionStableIds,
-		"Yggdrasil readiness.requiredCollisionStableIds must exactly match authored collision stable IDs.",
+		"Yggdrasil readiness.requiredCollisionStableIds must exactly match non-terrain authored collision stable IDs.",
+	);
+	assertSameStringSet(
+		terrainPackage.chunks.map((chunk) => chunk.stableId),
+		yggdrasilExpectedTerrainWalkableStableIds,
+		"Yggdrasil terrain package chunks must exactly match terrain-owned primitive walkables.",
 	);
 	assertSameStringSet(
 		manifest.readiness.requiredLightStableIds,
@@ -639,9 +742,9 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 	assertEqual(
 		(manifest.readiness.requiredCollisionStableIds ?? []).filter((stableId) =>
 			stableId.startsWith("yggdrasil:primitive:"),
-		).length,
+		).length + terrainPackage.chunks.length,
 		yggdrasilExpectedRuntimeImports.primitiveParity.collisionNodeCount,
-		"Yggdrasil runtime scene readiness must include every primitive collision node.",
+		"Yggdrasil terrain package plus non-terrain collision readiness must cover every primitive collision node.",
 	);
 	assertIncludes(
 		result.graph.portalTargetRuntimeSceneIds,
@@ -694,8 +797,12 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 		"Yggdrasil ocean must stay visual-only until WaterSurface gameplay volumes exist.",
 	);
 
-	for (const stableId of yggdrasilExpectedWalkableStableIds) {
-		const collider = componentForStableId(manifest, stableId, "Collider");
+	for (const stableId of yggdrasilExpectedTerrainWalkableStableIds) {
+		const terrainChunk = terrainChunkForStableId(manifest, stableId);
+		const collider = assertRecord(
+			terrainChunk.colliderComponent,
+			`${stableId} Yggdrasil terrain chunk collider`,
+		);
 		const shape = assertRecord(
 			collider.shape,
 			`${stableId} Yggdrasil primitive collider shape`,
@@ -708,10 +815,15 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 			"box",
 			"Yggdrasil primitive collision must honor explicit cuboid source data instead of deriving collider type from render geometry.",
 		);
-		assertIncludes(
+		assertNotIncludes(
 			manifest.readiness.requiredCollisionStableIds ?? [],
 			stableId,
-			`Yggdrasil walkable stable ID ${stableId} must also be collision-required.`,
+			`Yggdrasil terrain-owned walkable ${stableId} must not be collision-required outside terrain package readiness.`,
+		);
+		assertNotIncludes(
+			manifest.readiness.requiredWalkableStableIds ?? [],
+			stableId,
+			`Yggdrasil terrain-owned walkable ${stableId} must not be listed in requiredWalkableStableIds.`,
 		);
 	}
 }
@@ -747,24 +859,19 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 	const manifest = loadRuntimeSceneManifest(sciFiRoomRuntimeSceneManifest);
 	const floorExpectations = [
 		{
-			stableId: "sci-fi-room:floor:interior",
-			position: [0, -0.56, 0],
-			materialId: "material_sci_fi_room_interior_floor",
-			halfExtents: [10.78, 0.24, 9.26],
+			groupId: "interior",
+			materialSetId: "sci-fi-room-interior",
 		},
 		{
-			stableId: "sci-fi-room:floor:courtyard",
-			position: [0, -0.56, 21.52],
-			materialId: "material_sci_fi_room_courtyard_floor",
-			halfExtents: [12.936, 0.24, 12.936],
+			groupId: "courtyard",
+			materialSetId: "sci-fi-room-courtyard",
 		},
 		{
-			stableId: "sci-fi-room:floor:wasteland",
-			position: [0.063, -0.806, 1.736],
-			materialId: "material_sci_fi_room_wasteland_floor",
-			halfExtents: [100.9975, 0.192, 102.2675],
+			groupId: "wasteland",
+			materialSetId: "sci-fi-room-wasteland",
 		},
 	] as const;
+	firstTerrainPackage(manifest);
 	const environment = manifest.renderProfile.environment;
 	const environmentAssetId = assetBackedEnvironmentAssetId(manifest);
 	const portal = componentForStableId(
@@ -835,39 +942,31 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 	assertEqual(portalSoundEmitter.soundId, "audio_portal_cycle");
 
 	for (const expectation of floorExpectations) {
-		const renderable = componentForStableId(
-			manifest,
-			expectation.stableId,
-			"Renderable",
-		);
-		const collider = componentForStableId(
-			manifest,
-			expectation.stableId,
-			"Collider",
-		);
-		const shape = assertRecord(
-			collider.shape,
-			`${expectation.stableId} collider shape`,
-		);
+		const chunks = terrainChunksForGroup(manifest, expectation.groupId);
 
-		assertIncludes(
-			manifest.readiness.requiredCollisionStableIds ?? [],
-			expectation.stableId,
+		assertNonEmpty(
+			chunks,
+			`Sci Fi Room terrain package must include ${expectation.groupId} chunks.`,
 		);
-		assertIncludes(
-			manifest.readiness.requiredWalkableStableIds ?? [],
-			expectation.stableId,
-		);
-		assertEqual(renderable.meshId, "mesh_sci_fi_room_floor_slab");
-		assertEqual(renderable.materialId, expectation.materialId);
-		assertEqual(collider.intent, "walkable");
-		assertEqual(collider.channel, "worldStatic");
-		assertEqual(shape.type, "box");
-		assertDeepEqual(shape.halfExtents, expectation.halfExtents);
-		assertDeepEqual(
-			transformPropertyForStableId(manifest, expectation.stableId, "position"),
-			expectation.position,
-		);
+		for (const chunk of chunks) {
+			const collider = assertRecord(
+				chunk.colliderComponent,
+				`${chunk.stableId} terrain collider`,
+			);
+			const shape = assertRecord(
+				collider.shape,
+				`${chunk.stableId} terrain collider shape`,
+			);
+			const materialBinding = assertRecord(
+				chunk.materialBinding,
+				`${chunk.stableId} terrain material binding`,
+			);
+
+			assertEqual(collider.intent, "walkable");
+			assertEqual(collider.channel, "worldStatic");
+			assertEqual(shape.type, "box");
+			assertEqual(materialBinding.materialSetId, expectation.materialSetId);
+		}
 	}
 
 	for (const [stableId, title] of [
@@ -912,23 +1011,23 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 	const boundaryCollisionExpectations = [
 		{
 			stableId: "observatory:collision:boundary:north",
-			position: [0, 5.8, -304],
-			halfExtents: [320, 4, 4],
+			position: [0, 3.8, -188],
+			halfExtents: [190, 8, 4],
 		},
 		{
 			stableId: "observatory:collision:boundary:south",
-			position: [0, 5.8, 304],
-			halfExtents: [320, 4, 4],
+			position: [0, 3.8, 188],
+			halfExtents: [190, 8, 4],
 		},
 		{
 			stableId: "observatory:collision:boundary:east",
-			position: [304, 5.8, 0],
-			halfExtents: [4, 4, 320],
+			position: [188, 3.8, 0],
+			halfExtents: [4, 8, 190],
 		},
 		{
 			stableId: "observatory:collision:boundary:west",
-			position: [-304, 5.8, 0],
-			halfExtents: [4, 4, 320],
+			position: [-188, 3.8, 0],
+			halfExtents: [4, 8, 190],
 		},
 	] as const;
 	const environmentAssetId = assetBackedEnvironmentAssetId(manifest);
@@ -943,15 +1042,16 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 		"observatory:terrain",
 		"Renderable",
 	);
-	const walkableCollider = componentForStableId(
-		manifest,
-		firstObservatoryWalkableChunkStableId,
-		"Collider",
+	const terrainPackage = firstTerrainPackage(manifest);
+	const walkableCollider = assertRecord(
+		terrainChunkForStableId(manifest, firstObservatoryWalkableChunkStableId)
+			.colliderComponent,
+		"Observatory walkable mesh chunk collider",
 	);
-	const centerWalkableCollider = componentForStableId(
-		manifest,
-		centerObservatoryWalkableChunkStableId,
-		"Collider",
+	const centerWalkableCollider = assertRecord(
+		terrainChunkForStableId(manifest, centerObservatoryWalkableChunkStableId)
+			.colliderComponent,
+		"Observatory center walkable mesh chunk collider",
 	);
 	const walkableShape = assertRecord(
 		walkableCollider.shape,
@@ -1025,9 +1125,9 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 
 	assertDeepEqual(
 		transformPropertyForStableId(manifest, "player", "position"),
-		[-137.2, 1.8, -49.5],
+		[-137.2, 0.43, -49.5],
 	);
-	assertEqual(playerCharacterController.groundY, 1.8);
+	assertEqual(playerCharacterController.groundY, 0.43);
 	assertDeepEqual(playerCollider.offset, [0, 0.9, 0]);
 	assertEqual(playerLight.kind, "point");
 	assertEqual(playerLight.color, "#ffd6a3");
@@ -1048,20 +1148,28 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 	);
 	assertIncludes(
 		manifest.readiness.requiredCollisionPrefabIds ?? [],
-		"observatory_walkable_mesh",
-	);
-	assertIncludes(
-		manifest.readiness.requiredCollisionPrefabIds ?? [],
 		"observatory_boundary_blocker",
+	);
+	assertNotIncludes(
+		manifest.readiness.requiredCollisionPrefabIds ?? [],
+		"observatory_walkable_mesh",
+		"Observatory walkable terrain chunks must be terrain-package owned, not required as ordinary collision prefabs.",
 	);
 	for (const stableId of observatoryWalkableChunkStableIds) {
 		assertIncludes(
+			terrainPackage.chunks.map((chunk) => chunk.stableId),
+			stableId,
+			"Observatory walkable chunks must be listed in the terrain package.",
+		);
+		assertNotIncludes(
 			manifest.readiness.requiredWalkableStableIds ?? [],
 			stableId,
+			"Observatory walkable chunks must not use legacy walkable readiness.",
 		);
-		assertIncludes(
+		assertNotIncludes(
 			manifest.readiness.requiredCollisionStableIds ?? [],
 			stableId,
+			"Observatory walkable chunks must not use legacy collision readiness.",
 		);
 	}
 	assertEqual(walkableCollider.intent, "walkable");
@@ -1080,30 +1188,30 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 			"Observatory walkable mesh chunks must use mesh vertices/indices.",
 		);
 	}
-	assertEqual(walkableShape.vertices.length, 25);
-	assertEqual(walkableShape.indices.length, 96);
-	assertEqual(walkableShape.indices.length / 3, 32);
-	assertEqual(centerWalkableShape.vertices.length, 25);
-	assertEqual(centerWalkableShape.indices.length, 96);
-	assertEqual(centerWalkableShape.indices.length / 3, 32);
-	assertDeepEqual(walkableShape.vertices[0], [-320, 1.43, -320]);
-	assertDeepEqual(walkableShape.vertices[24], [-160, 1.67, -160]);
-	assertDeepEqual(walkableShape.indices.slice(0, 6), [0, 5, 1, 1, 5, 6]);
-	assertDeepEqual(centerWalkableShape.vertices[0], [0, 2.25, 0]);
-	assertDeepEqual(centerWalkableShape.vertices[24], [160, 2.09, 160]);
-	assertDeepEqual(centerWalkableShape.indices.slice(0, 6), [0, 5, 1, 1, 5, 6]);
+	assertEqual(walkableShape.vertices.length, 10);
+	assertEqual(walkableShape.indices.length, 24);
+	assertEqual(walkableShape.indices.length / 3, 8);
+	assertEqual(centerWalkableShape.vertices.length, 80);
+	assertEqual(centerWalkableShape.indices.length, 372);
+	assertEqual(centerWalkableShape.indices.length / 3, 124);
+	assertDeepEqual(walkableShape.vertices[0], [-106.875, 1.06, -118.75]);
+	assertDeepEqual(walkableShape.vertices[9], [-95, 0.68, -95]);
+	assertDeepEqual(walkableShape.indices.slice(0, 6), [0, 2, 1, 1, 2, 3]);
+	assertDeepEqual(centerWalkableShape.vertices[0], [0, 52.24, 0]);
+	assertDeepEqual(centerWalkableShape.vertices[79], [95, 2.84, 95]);
+	assertDeepEqual(centerWalkableShape.indices.slice(0, 6), [0, 2, 1, 1, 2, 3]);
 	assertMeshVertexHeight(
 		walkableShape.vertices,
-		-160,
-		-160,
-		1.67,
+		-106.875,
+		-118.75,
+		1.06,
 		"Observatory first walkable mesh chunk",
 	);
 	assertMeshVertexHeight(
 		centerWalkableShape.vertices,
-		120,
-		120,
-		2.24,
+		47.5,
+		47.5,
+		11.83,
 		"Observatory center walkable mesh chunk",
 	);
 	assertEqual(playerKinematicCollision.enabled, true);
@@ -1150,10 +1258,10 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 			expectation.position,
 		);
 	}
-	assertEqual(bounds.minX, -300);
-	assertEqual(bounds.maxX, 300);
-	assertEqual(bounds.minZ, -300);
-	assertEqual(bounds.maxZ, 300);
+	assertEqual(bounds.minX, -185);
+	assertEqual(bounds.maxX, 185);
+	assertEqual(bounds.minZ, -185);
+	assertEqual(bounds.maxZ, 185);
 	assertDeepEqual(
 		transformPropertyForStableId(manifest, "observatory:water", "position"),
 		[0, -2, 0],
@@ -1342,6 +1450,7 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 		),
 		audioContent,
 	});
+	const terrainPackage = firstTerrainPackage(manifest);
 	const requiredWalkableStableIds =
 		manifest.readiness.requiredWalkableStableIds ?? [];
 
@@ -1371,13 +1480,13 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 	);
 	assertSameStringSet(
 		contentGraph.graph.walkableStableIds,
-		solitudeExpectedWalkableStableIds,
-		"Solitude content graph must expose exactly the two authored walkable surfaces.",
+		[],
+		"Solitude terrain package chunks must not appear as active walkable Collider components before streaming activation.",
 	);
 	assertSameStringSet(
 		requiredWalkableStableIds,
-		solitudeExpectedWalkableStableIds,
-		"Solitude readiness.requiredWalkableStableIds must exactly match the two authored walkable surfaces.",
+		[],
+		"Solitude terrain-owned chunks must not use legacy requiredWalkableStableIds readiness.",
 	);
 	assertSameStringSet(
 		manifest.readiness.requiredCollisionStableIds,
@@ -1400,12 +1509,30 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 		"Solitude readiness.requiredAssetIds must exactly match authored content assets.",
 	);
 
-	for (const stableId of requiredWalkableStableIds) {
-		const collider = componentForStableId(manifest, stableId, "Collider");
+	assertNonEmpty(
+		terrainChunksForGroup(manifest, "plateau"),
+		"Solitude plateau terrain must be represented by package chunks.",
+	);
+	assertNonEmpty(
+		terrainChunksForGroup(manifest, "dais"),
+		"Solitude dais terrain must be represented by package chunks.",
+	);
 
-		assertIncludes(
+	for (const chunk of terrainPackage.chunks) {
+		const collider = assertRecord(
+			chunk.colliderComponent,
+			`${chunk.stableId} Solitude terrain chunk collider`,
+		);
+
+		assertNotIncludes(
 			manifest.readiness.requiredCollisionStableIds ?? [],
-			stableId,
+			chunk.stableId,
+			"Solitude terrain-owned chunks must not use legacy collision readiness.",
+		);
+		assertNotIncludes(
+			manifest.readiness.requiredWalkableStableIds ?? [],
+			chunk.stableId,
+			"Solitude terrain-owned chunks must not use legacy walkable readiness.",
 		);
 		assertEqual(collider.intent, "walkable");
 		assertEqual(collider.channel, "worldStatic");
@@ -1424,32 +1551,33 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 
 {
 	const manifest = loadRuntimeSceneManifest(mirandaDeckRuntimeSceneManifest);
-	const mainFloorCollider = componentForStableId(
-		manifest,
-		"miranda:floor:main",
-		"Collider",
+	const terrainPackage = firstTerrainPackage(manifest);
+	const mainFloorChunks = terrainChunksForGroup(manifest, "main");
+	const upperFloorChunks = terrainChunksForGroup(manifest, "upper");
+	const cargoFloorChunks = terrainChunksForGroup(manifest, "cargo-hold");
+	const firstMainFloorCollider = assertRecord(
+		mainFloorChunks[0]?.colliderComponent,
+		"Miranda main terrain chunk collider",
 	);
-	const upperFloorCollider = componentForStableId(
-		manifest,
-		"miranda:floor:upper",
-		"Collider",
+	const firstUpperFloorCollider = assertRecord(
+		upperFloorChunks[0]?.colliderComponent,
+		"Miranda upper terrain chunk collider",
 	);
-	const cargoFloorCollider = componentForStableId(
-		manifest,
-		"miranda:floor:cargo-hold",
-		"Collider",
+	const firstCargoFloorCollider = assertRecord(
+		cargoFloorChunks[0]?.colliderComponent,
+		"Miranda cargo-hold terrain chunk collider",
 	);
 	const mainFloorShape = assertRecord(
-		mainFloorCollider.shape,
-		"Miranda main floor collider shape",
+		firstMainFloorCollider.shape,
+		"Miranda main terrain chunk collider shape",
 	);
 	const upperFloorShape = assertRecord(
-		upperFloorCollider.shape,
-		"Miranda upper floor collider shape",
+		firstUpperFloorCollider.shape,
+		"Miranda upper terrain chunk collider shape",
 	);
 	const cargoFloorShape = assertRecord(
-		cargoFloorCollider.shape,
-		"Miranda cargo-hold floor collider shape",
+		firstCargoFloorCollider.shape,
+		"Miranda cargo-hold terrain chunk collider shape",
 	);
 	const bounds = assertRecord(
 		manifest.level.resources?.["game:characterBounds"],
@@ -1461,30 +1589,34 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 		"CharacterController",
 	);
 
-	assertIncludes(
+	assertEqual(terrainPackage.chunks.length, 40);
+	assertEqual(mainFloorChunks.length, 32);
+	assertEqual(upperFloorChunks.length, 4);
+	assertEqual(cargoFloorChunks.length, 4);
+	assertNotIncludes(
 		manifest.readiness.requiredWalkableStableIds ?? [],
 		"miranda:floor:main",
 	);
-	assertIncludes(
+	assertNotIncludes(
 		manifest.readiness.requiredWalkableStableIds ?? [],
 		"miranda:floor:upper",
 	);
-	assertIncludes(
+	assertNotIncludes(
 		manifest.readiness.requiredWalkableStableIds ?? [],
 		"miranda:floor:cargo-hold",
 	);
-	assertEqual(mainFloorCollider.intent, "walkable");
-	assertEqual(mainFloorCollider.channel, "worldStatic");
-	assertEqual(upperFloorCollider.intent, "walkable");
-	assertEqual(upperFloorCollider.channel, "worldStatic");
-	assertEqual(cargoFloorCollider.intent, "walkable");
-	assertEqual(cargoFloorCollider.channel, "worldStatic");
+	assertEqual(firstMainFloorCollider.intent, "walkable");
+	assertEqual(firstMainFloorCollider.channel, "worldStatic");
+	assertEqual(firstUpperFloorCollider.intent, "walkable");
+	assertEqual(firstUpperFloorCollider.channel, "worldStatic");
+	assertEqual(firstCargoFloorCollider.intent, "walkable");
+	assertEqual(firstCargoFloorCollider.channel, "worldStatic");
 	assertEqual(mainFloorShape.type, "box");
-	assertDeepEqual(mainFloorShape.halfExtents, [20, 0.6, 46]);
+	assertDeepEqual(mainFloorShape.halfExtents, [6, 0.6, 6]);
 	assertEqual(upperFloorShape.type, "box");
-	assertDeepEqual(upperFloorShape.halfExtents, [9, 0.45, 9]);
+	assertDeepEqual(upperFloorShape.halfExtents, [6, 0.45, 6]);
 	assertEqual(cargoFloorShape.type, "box");
-	assertDeepEqual(cargoFloorShape.halfExtents, [20, 0.6, 3]);
+	assertDeepEqual(cargoFloorShape.halfExtents, [6, 0.6, 3]);
 	assertEqual(bounds.minX, -20);
 	assertEqual(bounds.maxX, 20);
 	assertEqual(bounds.minZ, -50);
@@ -1841,84 +1973,73 @@ function assertNonEmpty(values: readonly unknown[], message: string): void {
 
 {
 	const manifest = loadRuntimeSceneManifest(observatoryRuntimeSceneManifest);
-	const missingStableId = firstObservatoryWalkableChunkStableId;
+	const missingPackageId = firstRequired(
+		manifest.readiness.requiredTerrainPackageIds,
+		"Observatory terrain package readiness",
+	);
 	const readiness = evaluateRuntimeSceneReadiness(manifest, {
 		...validLoadReport(manifest),
-		spawned: manifest.level.instances
-			.filter((instance) => instance.stableId !== missingStableId)
-			.map((instance) => ({
-				prefabId: instance.prefabId,
-				stableId: instance.stableId,
-			})),
+		activatedTerrainPackageIds: [],
 	});
 
 	assertEqual(readiness.ok, false);
 	assertIncludes(
 		readiness.ok ? [] : readiness.errors,
-		`Required walkable collision instance "${missingStableId}" was not spawned.`,
+		`Required terrain package "${missingPackageId}" was not activated.`,
 	);
 }
 
 {
 	const manifest = loadRuntimeSceneManifest(mirandaDeckRuntimeSceneManifest);
-	const missingStableId = "miranda:floor:main";
+	const missingPackageId = firstRequired(
+		manifest.readiness.requiredTerrainPackageIds,
+		"Miranda terrain package readiness",
+	);
 	const readiness = evaluateRuntimeSceneReadiness(manifest, {
 		...validLoadReport(manifest),
-		spawned: manifest.level.instances
-			.filter((instance) => instance.stableId !== missingStableId)
-			.map((instance) => ({
-				prefabId: instance.prefabId,
-				stableId: instance.stableId,
-			})),
+		activatedTerrainPackageIds: [],
 	});
 
 	assertEqual(readiness.ok, false);
 	assertIncludes(
 		readiness.ok ? [] : readiness.errors,
-		`Required walkable collision instance "${missingStableId}" was not spawned.`,
+		`Required terrain package "${missingPackageId}" was not activated.`,
 	);
 }
 
 {
 	const manifest = loadRuntimeSceneManifest(sciFiRoomRuntimeSceneManifest);
-	const missingStableId = "sci-fi-room:floor:interior";
+	const missingPackageId = firstRequired(
+		manifest.readiness.requiredTerrainPackageIds,
+		"Sci-Fi Room terrain package readiness",
+	);
 	const readiness = evaluateRuntimeSceneReadiness(manifest, {
 		...validLoadReport(manifest),
-		spawned: manifest.level.instances
-			.filter((instance) => instance.stableId !== missingStableId)
-			.map((instance) => ({
-				prefabId: instance.prefabId,
-				stableId: instance.stableId,
-			})),
+		activatedTerrainPackageIds: [],
 	});
 
 	assertEqual(readiness.ok, false);
 	assertIncludes(
 		readiness.ok ? [] : readiness.errors,
-		`Required walkable collision instance "${missingStableId}" was not spawned.`,
+		`Required terrain package "${missingPackageId}" was not activated.`,
 	);
 }
 
 {
 	const manifest = loadRuntimeSceneManifest(solitudeRuntimeSceneManifest);
-	const missingStableId = firstRequired(
-		manifest.readiness.requiredWalkableStableIds,
-		"Solitude required walkable stable IDs",
+	const missingPackageId = firstRequired(
+		manifest.readiness.requiredTerrainPackageIds,
+		"Solitude terrain package readiness",
 	);
 	const readiness = evaluateRuntimeSceneReadiness(manifest, {
 		...validLoadReport(manifest),
-		spawned: manifest.level.instances
-			.filter((instance) => instance.stableId !== missingStableId)
-			.map((instance) => ({
-				prefabId: instance.prefabId,
-				stableId: instance.stableId,
-			})),
+		activatedTerrainPackageIds: [],
 	});
 
 	assertEqual(readiness.ok, false);
 	assertIncludes(
 		readiness.ok ? [] : readiness.errors,
-		`Required walkable collision instance "${missingStableId}" was not spawned.`,
+		`Required terrain package "${missingPackageId}" was not activated.`,
 	);
 }
 

@@ -14,7 +14,10 @@ import {
 	RIGID_BODY_COMPONENT,
 	TRANSFORM_COMPONENT,
 } from "../../engine/index.js";
-import { STABLE_ID_COMPONENT } from "../prefabs/index.js";
+import {
+	STABLE_ID_COMPONENT,
+	normalizeRuntimeComponentMap,
+} from "../prefabs/index.js";
 import { PLAYER_ENTITY_RESOURCE } from "./components.js";
 
 export const TERRAIN_CHUNK_PACKAGES_RESOURCE = "game:terrainChunkPackages";
@@ -360,6 +363,11 @@ function activateTerrainChunk(
 	entity: Entity,
 	chunk: TerrainChunkPackageChunkData,
 ): void {
+	const components: Record<string, unknown> = {
+		[COLLIDER_COMPONENT]: cloneValue(chunk.colliderComponent),
+	};
+
+	normalizeRuntimeComponentMap(components);
 	world.addComponent<RigidBodyComponent>(
 		entity,
 		RIGID_BODY_COMPONENT,
@@ -368,7 +376,7 @@ function activateTerrainChunk(
 	world.addComponent<ColliderComponent>(
 		entity,
 		COLLIDER_COMPONENT,
-		cloneValue(chunk.colliderComponent) as ColliderComponent,
+		components[COLLIDER_COMPONENT] as ColliderComponent,
 	);
 }
 

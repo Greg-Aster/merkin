@@ -1,6 +1,7 @@
 import { playerPrefab } from "./defaultPrefabs.js";
 import type { PrefabDefinition } from "./index.js";
 import { portalGatePrefab } from "./navigationPrefabs.js";
+import { terrainChunkCellPrefab } from "./terrainPrefabs.js";
 
 export const solitudePlateauPrefab = {
 	id: "solitude_ground_plateau",
@@ -191,6 +192,7 @@ export const solitudeWindEmitterPrefab = {
 export const solitudePrefabs = [
 	playerPrefab,
 	portalGatePrefab,
+	terrainChunkCellPrefab,
 	solitudePlateauPrefab,
 	solitudeDaisPrefab,
 	solitudePillarPrefab,

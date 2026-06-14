@@ -10,6 +10,10 @@ import {
 import { yggdrasilAssetManifest } from "../assets/yggdrasilAssets.js";
 import { collisionReadiness as observatoryCollisionReadiness } from "../generated/observatoryCollisionRuntime.js";
 import {
+	terrainPackagesForRuntimeScene,
+	terrainReadinessForRuntimeScene,
+} from "../generated/terrainRuntime.js";
+import {
 	mirandaDeckPrefabs,
 	observatoryPrefabs,
 	portalArenaPrefabs,
@@ -52,8 +56,10 @@ export const portalArenaRuntimeSceneManifest = loadRuntimeSceneManifest({
 	prefabs: portalArenaPrefabs,
 	assets: portalArenaAssetManifest,
 	renderProfile: portalArenaRenderProfile,
+	terrainPackages: terrainPackagesForRuntimeScene("portal_arena_runtime"),
 	readiness: {
 		playerStableId: "player",
+		...terrainReadinessForRuntimeScene("portal_arena_runtime"),
 		requiredAssetIds: [
 			"mesh_player",
 			"mesh_portal_field",
@@ -68,9 +74,8 @@ export const portalArenaRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"audio_ambient_shadow_waltz",
 			"audio_ambient_whistling_dreams",
 		],
-		requiredCollisionPrefabIds: ["portal_arena_floor", "portal_gate", "player"],
+		requiredCollisionPrefabIds: ["portal_gate", "player"],
 		requiredCollisionStableIds: [
-			"portal-arena:floor",
 			"portal-arena:portal:prototype-arena",
 			"portal-arena:portal:miranda-deck",
 			"portal-arena:portal:observatory",
@@ -95,8 +100,10 @@ export const prototypeRuntimeSceneManifest = loadRuntimeSceneManifest({
 	prefabs: prototypePrefabs,
 	assets: prototypeAssetManifest,
 	renderProfile: prototypeRenderProfile,
+	terrainPackages: terrainPackagesForRuntimeScene("prototype_arena_runtime"),
 	readiness: {
 		playerStableId: "player",
+		...terrainReadinessForRuntimeScene("prototype_arena_runtime"),
 		requiredAssetIds: [
 			"mesh_player",
 			"mesh_arena_floor",
@@ -109,7 +116,7 @@ export const prototypeRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"audio_player_jump",
 			"audio_player_charge_release",
 		],
-		requiredCollisionPrefabIds: ["arena_floor", "player"],
+		requiredCollisionPrefabIds: ["player"],
 	},
 });
 
@@ -125,8 +132,10 @@ export const mirandaDeckRuntimeSceneManifest = loadRuntimeSceneManifest({
 	prefabs: mirandaDeckPrefabs,
 	assets: mirandaDeckAssetManifest,
 	renderProfile: mirandaDeckRenderProfile,
+	terrainPackages: terrainPackagesForRuntimeScene("miranda_deck_runtime"),
 	readiness: {
 		playerStableId: "player",
+		...terrainReadinessForRuntimeScene("miranda_deck_runtime"),
 		requiredAssetIds: [
 			"mesh_player",
 			"mesh_box",
@@ -171,9 +180,6 @@ export const mirandaDeckRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"audio_ambient_shadow_waltz",
 		],
 		requiredCollisionPrefabIds: [
-			"miranda_floor_main",
-			"miranda_floor_upper",
-			"miranda_floor_cargo_hold",
 			"miranda_cockpit_panel_side",
 			"miranda_cockpit_panel_center",
 			"miranda_crew_bunk",
@@ -206,9 +212,6 @@ export const mirandaDeckRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"player",
 		],
 		requiredCollisionStableIds: [
-			"miranda:floor:main",
-			"miranda:floor:upper",
-			"miranda:floor:cargo-hold",
 			"miranda:cockpit:panel:left",
 			"miranda:cockpit:panel:center",
 			"miranda:cockpit:panel:right",
@@ -262,11 +265,6 @@ export const mirandaDeckRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"miranda:archive:story-note:index",
 			"player",
 		],
-		requiredWalkableStableIds: [
-			"miranda:floor:main",
-			"miranda:floor:upper",
-			"miranda:floor:cargo-hold",
-		],
 		requiredLightStableIds: [
 			"miranda:command-gallery:beacon-light",
 			"miranda:observation-gallery:light",
@@ -287,8 +285,10 @@ export const observatoryRuntimeSceneManifest = loadRuntimeSceneManifest({
 	prefabs: observatoryPrefabs,
 	assets: observatoryAssetManifest,
 	renderProfile: observatoryRenderProfile,
+	terrainPackages: terrainPackagesForRuntimeScene("observatory_runtime"),
 	readiness: {
 		playerStableId: "player",
+		...terrainReadinessForRuntimeScene("observatory_runtime"),
 		requiredAssetIds: [
 			"mesh_player",
 			"mesh_observatory_environment",
@@ -303,15 +303,17 @@ export const observatoryRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"audio_ambient_portal_deck",
 		],
 		requiredCollisionPrefabIds: [
-			...observatoryCollisionReadiness.requiredCollisionPrefabIds,
+			...observatoryCollisionReadiness.requiredCollisionPrefabIds.filter(
+				(prefabId) => prefabId !== "observatory_walkable_mesh",
+			),
 			"player",
 		],
 		requiredCollisionStableIds: [
-			...observatoryCollisionReadiness.requiredCollisionStableIds,
+			...observatoryCollisionReadiness.requiredCollisionStableIds.filter(
+				(stableId) => !stableId.startsWith("observatory:walkable-mesh:chunk:"),
+			),
 			"player",
 		],
-		requiredWalkableStableIds:
-			observatoryCollisionReadiness.requiredWalkableStableIds,
 		requiredLightStableIds: [
 			"player",
 			"observatory:firefly:archive",
@@ -333,8 +335,10 @@ export const sciFiRoomRuntimeSceneManifest = loadRuntimeSceneManifest({
 	prefabs: sciFiRoomPrefabs,
 	assets: sciFiRoomAssetManifest,
 	renderProfile: sciFiRoomRenderProfile,
+	terrainPackages: terrainPackagesForRuntimeScene("sci_fi_room_runtime"),
 	readiness: {
 		playerStableId: "player",
+		...terrainReadinessForRuntimeScene("sci_fi_room_runtime"),
 		requiredAssetIds: [
 			"mesh_player",
 			"mesh_portal_gate",
@@ -357,25 +361,8 @@ export const sciFiRoomRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"audio_portal_activate",
 			"audio_portal_cycle",
 		],
-		requiredCollisionPrefabIds: [
-			"sci_fi_room_floor_interior",
-			"sci_fi_room_floor_courtyard",
-			"sci_fi_room_floor_wasteland",
-			"portal_gate",
-			"player",
-		],
-		requiredCollisionStableIds: [
-			"sci-fi-room:floor:interior",
-			"sci-fi-room:floor:courtyard",
-			"sci-fi-room:floor:wasteland",
-			"sci-fi-room:portal:observatory",
-			"player",
-		],
-		requiredWalkableStableIds: [
-			"sci-fi-room:floor:interior",
-			"sci-fi-room:floor:courtyard",
-			"sci-fi-room:floor:wasteland",
-		],
+		requiredCollisionPrefabIds: ["portal_gate", "player"],
+		requiredCollisionStableIds: ["sci-fi-room:portal:observatory", "player"],
 		requiredLightStableIds: ["player"],
 	},
 });
@@ -392,15 +379,15 @@ export const solitudeRuntimeSceneManifest = loadRuntimeSceneManifest({
 	prefabs: solitudePrefabs,
 	assets: solitudeAssetManifest,
 	renderProfile: solitudeRenderProfile,
+	terrainPackages: terrainPackagesForRuntimeScene("solitude_runtime"),
 	readiness: {
 		playerStableId: solitudeExpectedRuntimeImports.readiness.playerStableId,
+		...terrainReadinessForRuntimeScene("solitude_runtime"),
 		requiredAssetIds: solitudeExpectedRuntimeImports.assetIds,
 		requiredCollisionPrefabIds:
 			solitudeExpectedRuntimeImports.readiness.requiredCollisionPrefabIds,
 		requiredCollisionStableIds:
 			solitudeExpectedRuntimeImports.readiness.requiredCollisionStableIds,
-		requiredWalkableStableIds:
-			solitudeExpectedRuntimeImports.readiness.requiredWalkableStableIds,
 		requiredLightStableIds:
 			solitudeExpectedRuntimeImports.readiness.requiredLightStableIds,
 	},
@@ -418,15 +405,15 @@ export const yggdrasilRuntimeSceneManifest = loadRuntimeSceneManifest({
 	prefabs: yggdrasilPrefabs,
 	assets: yggdrasilAssetManifest,
 	renderProfile: yggdrasilRenderProfile,
+	terrainPackages: terrainPackagesForRuntimeScene("yggdrasil_runtime"),
 	readiness: {
 		playerStableId: yggdrasilExpectedRuntimeImports.readiness.playerStableId,
+		...terrainReadinessForRuntimeScene("yggdrasil_runtime"),
 		requiredAssetIds: yggdrasilExpectedRuntimeImports.assetIds,
 		requiredCollisionPrefabIds:
 			yggdrasilExpectedRuntimeImports.readiness.requiredCollisionPrefabIds,
 		requiredCollisionStableIds:
 			yggdrasilExpectedRuntimeImports.readiness.requiredCollisionStableIds,
-		requiredWalkableStableIds:
-			yggdrasilExpectedRuntimeImports.readiness.requiredWalkableStableIds,
 		requiredLightStableIds:
 			yggdrasilExpectedRuntimeImports.readiness.requiredLightStableIds,
 	},

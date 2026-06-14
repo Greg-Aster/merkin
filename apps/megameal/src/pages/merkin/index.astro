@@ -5,6 +5,7 @@ import Markdown from '@components/misc/Markdown.astro'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
 import MerkinMedia from '../../components/merkin/MerkinMedia.astro'
 import MerkinShareActions from '../../components/merkin/MerkinShareActions.svelte'
+import { publicCollectionFilter } from '../../contracts/content'
 import {
   formatMerkinDate,
   getMerkinHref,
@@ -13,10 +14,7 @@ import {
   getPublishableMerkinEntries,
 } from '../../utils/merkin-gallery'
 
-const allMerkinEntries = await getCollection(
-  'merkin',
-  ({ data }) => data.draft !== true,
-)
+const allMerkinEntries = await getCollection('merkin', publicCollectionFilter)
 const merkinEntries = getPublishableMerkinEntries(allMerkinEntries)
 const featuredEntry = merkinEntries[0]
 

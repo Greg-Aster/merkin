@@ -6,9 +6,10 @@
 import { getCollection } from 'astro:content'
 import { formatTimelineYearRange } from '@merkin/shared-content'
 import { defaultEraConfig, eraColorMap } from '@/config/timelineconfig'
+import { publicCollectionFilter } from '../../contracts/content'
 
 // Get all non-draft posts
-const allPosts = await getCollection('posts', ({ data }) => data.draft !== true)
+const allPosts = await getCollection('posts', publicCollectionFilter)
 
 // Count posts per era
 const postCountByEra: Record<string, number> = {}

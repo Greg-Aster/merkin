@@ -15,7 +15,13 @@ const docs = {
 		"docs/Done/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md",
 	),
 	plan: await readProjectFile("docs/LEVEL_EDITOR_COLLISION_COOK_PLAN.md"),
+	workspaceAlignment: await readProjectFile(
+		"docs/LEVEL_EDITOR_WORKSPACE_ALIGNMENT.md",
+	),
 };
+const auditScript = await readProjectFile(
+	"scripts/audit-engine-boundaries.mjs",
+);
 const packageJson = JSON.parse(
 	await readProjectFile("package.json"),
 ) as PackageJson;
@@ -25,6 +31,8 @@ assertRequiredPackageScripts();
 await assertNoOrphanTestScripts();
 assertPlanValidationMatrix();
 assertArchitectureDocsStayHonest();
+assertWorkspaceAlignmentHasExternalProof();
+assertGenericEditorCatalogGuardrails();
 assertObservatoryCollisionFindingsAreCurrent();
 assertGeneralizedTerrainContractsAreHonest();
 
@@ -47,6 +55,8 @@ function assertRequiredPackageScripts(): void {
 		"test:terrain-cook-contract": "tsx ./scripts/test-terrain-cook-contract.ts",
 		"test:level-editor-aaa-plan-contract":
 			"tsx ./scripts/test-level-editor-aaa-plan-contract.ts",
+		"test:level-editor-workspace-model-contract":
+			"tsx ./scripts/test-level-editor-workspace-model-contract.ts",
 		"test:level-editor-collision-cook-contract":
 			"tsx ./scripts/test-level-editor-collision-cook-contract.ts",
 		"test:live-preview-protocol-contract":
@@ -139,10 +149,10 @@ function assertPlanValidationMatrix(): void {
 			item: "Richer cooked terrain chunks",
 			requiredSnippets: [
 				"implemented foundation",
-				"16 deterministic Observatory walkable terrain chunks",
+				"16 deterministic Observatory GLB-footprint walkable terrain chunks",
 				"test:terrain-cook-contract",
 				"test:level-editor-collision-cook-contract",
-				"LOD/streaming",
+				"generic terrain package/readiness/streaming ownership",
 			],
 		},
 	];
@@ -186,7 +196,7 @@ function assertArchitectureDocsStayHonest(): void {
 		"game-window preview/reload",
 		"generated runtime collision module",
 		"generalized terrain import/cook contract is implemented",
-		"16 deterministic observatory walkable terrain chunks",
+		"16 deterministic observatory glb-footprint walkable terrain chunks",
 		"cooked terrain chunks are implemented as a foundation",
 		"render terrain and collision terrain are separate products",
 	];
@@ -215,17 +225,93 @@ function assertArchitectureDocsStayHonest(): void {
 	}
 }
 
+function assertWorkspaceAlignmentHasExternalProof(): void {
+	const requiredSnippets = [
+		"RuntimeSceneManifestData",
+		"level browser source",
+		"of truth",
+		"Spawn, Terrain, Collision, Lights, Portals, Audio Emitters, Story, and Props",
+		"runtime catalog default",
+		"not a generic editor default or fallback",
+		"collisionDraftRegistry.ts",
+		"preview-only",
+		"LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL",
+		"per-level collision",
+		"hardcode `*_runtime`",
+		"Do not import or copy old `apps/game/src/threlte/editor/**` code",
+		"https://dev.epicgames.com/documentation/en-us/unreal-engine/levels-in-unreal-engine",
+		"https://dev.epicgames.com/documentation/en-us/unreal-engine/actors-in-unreal-engine",
+		"https://docs.unity3d.com/Manual/CreatingScenes.html",
+		"https://docs.unity3d.com/Manual/GameObjects.html",
+		"https://docs.godotengine.org/en/stable/getting_started/step_by_step/nodes_and_scenes.html",
+		"test:level-editor-workspace-model-contract",
+		"test:production-editor-bundle-contract",
+	];
+
+	for (const snippet of requiredSnippets) {
+		assertIncludes(
+			docs.workspaceAlignment,
+			snippet,
+			`Expected workspace alignment doc to include ${JSON.stringify(snippet)}.`,
+		);
+	}
+}
+
+function assertGenericEditorCatalogGuardrails(): void {
+	const combinedDocs = [
+		docs.architecture,
+		docs.contractRegister,
+		docs.designDocument,
+		docs.plan,
+		docs.workspaceAlignment,
+	]
+		.join("\n")
+		.toLowerCase()
+		.replace(/\s+/g, " ");
+	const requiredDocSnippets = [
+		"runtime scene catalog default",
+		"draft registry",
+		"missing-draft",
+		"not as app/editor fallback/default behavior",
+		"must not directly import per-level collision draft modules",
+		"hardcode `*_runtime`",
+	];
+	const requiredAuditSnippets = [
+		"isGenericAppEditorModule",
+		"levelSpecificEditorDefaultMatches",
+		"perLevelCollisionDraftImportPattern",
+		"runtimeSceneIdLiteralPattern",
+		"manifest/draft catalog",
+	];
+
+	for (const snippet of requiredDocSnippets) {
+		assertIncludes(
+			combinedDocs,
+			snippet.toLowerCase(),
+			`Expected docs to enforce generic editor catalog guardrail ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredAuditSnippets) {
+		assertIncludes(
+			auditScript,
+			snippet,
+			`Expected audit script to include guardrail snippet ${JSON.stringify(snippet)}.`,
+		);
+	}
+}
+
 function assertObservatoryCollisionFindingsAreCurrent(): void {
 	const normalizedFindings = docs.observatoryFindings.replace(/\s+/g, " ");
 
 	assertIncludes(
 		normalizedFindings,
-		"17x17",
+		"33x33",
 		"Expected Observatory collision findings to document the current mesh resolution.",
 	);
 	assertIncludes(
 		normalizedFindings,
-		"289 vertices and 512 triangles",
+		"665 unique emitted vertices and 1182 triangles",
 		"Expected Observatory collision findings to document the current vertex/triangle counts.",
 	);
 	assertIncludes(
@@ -235,7 +321,7 @@ function assertObservatoryCollisionFindingsAreCurrent(): void {
 	);
 	assertNotIncludes(
 		normalizedFindings,
-		"25 vertices and 32 triangles",
+		"17x17",
 		"Expected Observatory collision findings not to cite stale V1 mesh counts.",
 	);
 }
@@ -293,7 +379,7 @@ function assertGeneralizedTerrainContractsAreHonest(): void {
 	);
 	assertIncludes(
 		combinedDocs,
-		"16 deterministic observatory walkable terrain chunks",
+		"16 deterministic observatory glb-footprint walkable terrain chunks",
 		"Expected docs to state the implemented Observatory cooked chunk foundation.",
 	);
 	assertIncludes(

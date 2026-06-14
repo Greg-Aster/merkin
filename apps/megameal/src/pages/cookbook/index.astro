@@ -1,8 +1,9 @@
 ---
 import { getCollection } from 'astro:content'
 import CookbookReaderPage from '../../components/cookbook/CookbookReaderPage.astro'
+import { publicCollectionFilter } from '../../contracts/content'
 
-const entries = await getCollection('cookbook', ({ data }) => data.draft !== true)
+const entries = await getCollection('cookbook', publicCollectionFilter)
 const indexEntry =
   entries.find(entry => entry.slug === 'cookbook-index') ?? entries[0]
 

@@ -7,9 +7,8 @@ Status: implemented and validated on 2026-06-06.
 Recreate the old Observatory level in `apps/game.megameal` as a clean
 target-engine scene. The old `apps/game` scene is source evidence only. This
 packet creates a playable foundation: connected portal, owned source GLB visual
-terrain, generated field visual terrain, explicit collision, spawn, sky, shared
-water surface data, player-carried light, and deterministic three-firefly
-population data.
+terrain, explicit GLB-footprint collision, spawn, sky, shared water surface
+data, player-carried light, and deterministic three-firefly population data.
 
 No old `apps/game` runtime code, generated runtime scene JSON, Threlte/Svelte
 lighting, terrain chunk runtime, point-light budget controller, or generated
@@ -45,17 +44,18 @@ collision binary is ported.
   - `material_observatory_firefly` with `color: "#f4ffb8"`,
     `emissive: "#f4ffb8"`, `emissiveIntensity: 1.8`, `metalness: 0`,
     and `roughness: 0.18`
-- Add player spawn at `[-137.2, 1.8, -49.5]` with
-  `CharacterController.groundY: 1.8` as the spawn/fallback scalar and
+- Add player spawn at `[-137.2, 0.43, -49.5]` with
+  `CharacterController.groundY: 0.43` as the spawn/fallback scalar and
   `CharacterController.kinematicCollision` opt-in.
 - Add player-carried point light on stable ID `player`.
 - Add GLB visual entity `observatory:terrain` with unit scale `[1, 1, 1]`.
 - Add Observatory V1 authored collision as a level consumer of
   `CollisionPolicy`, `WalkableCollisionContract`, and `LevelReadinessContract`:
   - required `observatory:walkable-mesh` mesh collision with
-    `Collider.intent: "walkable"`, `channel: "worldStatic"`, a deterministic
-    17x17 grid, 289 explicit vertices, and 512 triangles covering
-    `x/z = -320..320`
+    `Collider.intent: "walkable"`, `channel: "worldStatic"`, deterministic
+    sparse chunks from a 33x33 GLB-footprint sampled collision source,
+    preserving 665 unique emitted vertices and 1182 triangles inside the
+    `x/z = -190..190` collision source extent
   - engine-owned kinematic character collision routed through the physics
     adapter, with slide, slope-limit, snap-to-ground, autostep settings, and
     `obstacleChannels: ["worldStatic"]`
@@ -65,7 +65,7 @@ collision binary is ported.
     `observatory:collision:boundary:east`, and
     `observatory:collision:boundary:west`
   - no collision inferred from `mesh_observatory_environment`
-- Add character bounds `x/z = -300..300`.
+- Add character bounds `x/z = -185..185`.
 - Add shared water instance `observatory:water` at `y = -2`, scale
   `[4000, 0.02, 4000]`, renderable
   `mesh_water_plane + material_water_dark_still`, and authored `WaterSurface`
@@ -184,7 +184,8 @@ Run:
 - Observatory V1 collision content implemented over the engine-wide collision
   contracts:
   - `observatory:walkable-mesh` is now required `walkable/worldStatic` floor
-    collision with a deterministic 17x17 grid, 289 vertices, and 512 triangles.
+    collision with deterministic 33x33 GLB-footprint sparse chunks, 665 unique
+    emitted vertices, and 1182 triangles.
   - four `observatory_boundary_blocker` perimeter colliders are required by
     stable ID.
   - `test:runtime-scene-contract` covers positive layout assertions and

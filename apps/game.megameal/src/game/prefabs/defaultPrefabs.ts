@@ -1,5 +1,6 @@
 import type { PrefabDefinition } from "./index.js";
 import { portalGatePrefab } from "./navigationPrefabs.js";
+import { terrainChunkCellPrefab } from "./terrainPrefabs.js";
 
 const mirandaEngineCoreColliderShape = createFrustumMeshColliderShape({
 	radiusTop: 1.1,
@@ -52,7 +53,7 @@ export const playerPrefab = {
 			mouseSensitivity: 0.0025,
 			minPitchRadians: -1.3962634015954636,
 			maxPitchRadians: 1.3962634015954636,
-			eyeHeight: 0.55,
+			eyeHeight: 1.0,
 			fovDegrees: 70,
 			near: 0.05,
 			far: 2000,
@@ -650,12 +651,14 @@ export const mirandaArchiveLightPrefab = createMirandaPointLightPrefab({
 
 export const prototypePrefabs = [
 	playerPrefab,
+	terrainChunkCellPrefab,
 	arenaFloorPrefab,
 	ingredientPrefab,
 ] as const;
 
 export const mirandaDeckPrefabs = [
 	playerPrefab,
+	terrainChunkCellPrefab,
 	mirandaFloorMainPrefab,
 	mirandaFloorUpperPrefab,
 	mirandaCargoHoldFloorPrefab,

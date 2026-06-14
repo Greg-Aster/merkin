@@ -55,6 +55,7 @@ let starColumn: THREE.Group | null = null
 let screenRail: THREE.Group | null = null
 const screenNodes: THREE.Group[] = []
 let portraitMobile = false
+let compactViewport = false
 let particleLimit = 1250
 let introParticleLimit = 560
 let particleExpansionElapsed = 0
@@ -163,6 +164,7 @@ $: introParticleLimit =
 
 function syncViewportMode() {
   if (typeof window === 'undefined') return
+  compactViewport = window.innerWidth <= 760 || window.innerHeight <= 640
   portraitMobile =
     window.innerWidth <= 760 && window.innerHeight > window.innerWidth
 }
@@ -793,7 +795,8 @@ useTask(delta => {
 							hovered={index === hoveredScreenIndex}
 							primary={screen.primary}
 							active={index === activeScreenIndex}
-							shouldLoadMedia={screenMediaLoadStates[index]}
+							shouldLoadMedia={compactViewport || screenMediaLoadStates[index]}
+							videoPlaybackEnabled={!compactViewport}
 							{motionEnabled}
 							{sceneQuality}
 						/>

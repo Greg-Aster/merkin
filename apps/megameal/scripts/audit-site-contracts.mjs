@@ -127,6 +127,53 @@ assert(
   'pdf/posts/[...slug].astro must generate public PDF routes with publicCollectionFilter',
 )
 
+const routeFilterExpectations = [
+  [
+    'src/pages/store.astro',
+    "getCollection('products', publicProductCollectionFilter)",
+  ],
+  [
+    'src/pages/store/[slug].astro',
+    "getCollection('products', publicProductCollectionFilter)",
+  ],
+  [
+    'src/pages/store/page/[page].astro',
+    "getCollection('products', publicProductCollectionFilter)",
+  ],
+  [
+    'src/pages/videos/index.astro',
+    "getCollection('videos', publicCollectionFilter)",
+  ],
+  [
+    'src/pages/videos/[...slug].astro',
+    "getCollection('videos', publicCollectionFilter)",
+  ],
+  [
+    'src/pages/cookbook/index.astro',
+    "getCollection('cookbook', publicCollectionFilter)",
+  ],
+  [
+    'src/pages/cookbook/[...slug].astro',
+    "getCollection('cookbook', publicCollectionFilter)",
+  ],
+  [
+    'src/pages/snuggaloids/index.astro',
+    "getCollection('snuggaloids', publicCollectionFilter)",
+  ],
+  [
+    'src/pages/pdf/cookbook/[...slug].astro',
+    "getCollection(\n    'cookbook',\n    publicDownloadableCollectionFilter,\n  )",
+  ],
+]
+
+for (const [routeFile, expectedFilter] of routeFilterExpectations) {
+  const routeText = readFileSync(path.join(appRoot, routeFile), 'utf8')
+  assert(
+    routeText.includes(expectedFilter),
+    `${routeFile} must generate public routes with the centralized content/product filter`,
+  )
+}
+
 if (failures.length > 0) {
   console.error('[site-contracts] Contract audit failed:')
   failures.forEach(failure => console.error(`- ${failure}`))

@@ -6,8 +6,9 @@ top-down collision gizmo surface, temporary preview-patch serialization,
 game-window preview/reload/clear, derived in-memory bake diagnostics, Miranda
 current-floor collision draft validation, and the Observatory visual terrain
 displacement/import foundation are implemented on 2026-06-06. The generalized
-terrain import/cook contract and cooked terrain chunk foundation are also
-implemented on 2026-06-06.
+terrain import/cook contract, cooked terrain chunk foundation, terrain package
+readiness, and generic terrain streaming foundation are also implemented on
+2026-06-06.
 
 The former explicit Observatory runtime collision bake command was retired.
 `src/game/generated/observatoryCollisionRuntime.ts` remains checked-in runtime
@@ -18,12 +19,21 @@ current runtime bake is implemented through this owned generated runtime module;
 a generalized direct runtime owner-file rewrite writer remains planned for
 future bake work and must avoid mutating unrelated hand-authored TypeScript
 source. The generalized terrain import/cook contract is implemented in
-`src/engine/data/terrainCook`, with focused synthetic contract validation and
-Observatory visual terrain/import integration. Cooked terrain chunks are
-implemented as a foundation through 16 deterministic Observatory
+`src/engine/data/terrainCook`, with focused synthetic contract validation,
+Observatory environment GLB provenance, production terrain package/readiness
+data, and generic streaming ownership. Cooked terrain chunks are implemented as
+a foundation through 16 deterministic Observatory GLB-footprint
 `observatory:walkable-mesh:chunk:x*-z*` collision chunks plus boundary
-blockers. Production editor import UI, material/shader import, terrain
-LOD/streaming, and multi-level terrain packages remain planned.
+blockers. The only terrain cook/drift entrypoints are generic `cook:terrain`
+and `ci:terrain-drift`; level-specific terrain scripts remain retired.
+`docs/TERRAIN_PACKAGE_COMPLETION_CLEANUP.md` is the focused cleanup checklist
+for the unified terrain package/cook/streaming surface. Generic editor
+tooling now resolves the selected runtime scene through the checked-in runtime
+scene catalog and resolves collision drafts through the draft registry; it must
+not hardcode `observatory_runtime` or import the Observatory draft as an app
+fallback/default.
+Production editor import UI, material/shader authoring UI, and broader
+multi-scene terrain rollout remain planned.
 
 ## Current Progress Snapshot
 
@@ -37,6 +47,8 @@ Implemented:
 - Observatory explicit walkable mesh collision and boundary blockers consumed
   through generated runtime collision data.
 - A dev-only `/editor/` route separate from the normal game HUD.
+- A catalog-driven editor workspace that opens on the runtime scene catalog
+  default and treats Observatory collision as a selectable content draft.
 - Editable Observatory collision controls for stable ID selection,
   intent/channel, box transforms, box half-extents, mesh metadata, derived
   bounds, and a top-down collision gizmo surface.
@@ -48,8 +60,11 @@ Implemented:
   Hold floor coverage, without generating a Miranda runtime collision module.
 - Generalized engine-data terrain import/cook validation through
   `src/engine/data/terrainCook`.
-- 16 deterministic Observatory walkable terrain chunks with required
+- 16 deterministic Observatory GLB-footprint walkable terrain chunks with required
   collision/walkable stable IDs and drift validation.
+- Generic `terrainPackages` runtime manifest data, terrain package readiness,
+  startup chunk activation, per-tick streaming planning, and active-entity
+  renderer/physics projection through `TerrainChunkStreamingContract`.
 
 Still planned:
 
@@ -64,8 +79,8 @@ Still planned:
 - Richer reload lifecycle diagnostics and multi-window preview diagnostics.
 - Production terrain editor import UI, material/shader import, and multi-level
   terrain import reports.
-- Terrain LOD/streaming and multi-level cooked terrain packages beyond the
-  Observatory chunk foundation.
+- Broader multi-scene terrain package rollout and production terrain authoring
+  UX beyond the current generic package/cook/streaming foundation.
 
 ## Purpose
 
@@ -131,9 +146,11 @@ commands, not old `apps/game` editor code copied into the new runtime.
 
 ## Initial Scope
 
-The first editor packet focused on Observatory collision. Current progress is:
+The first editor packet focused on Observatory collision as content, while the
+generic workspace stays catalog-driven. Current progress is:
 
-1. Done: open a separate editor route/window for `observatory_runtime`.
+1. Done: open a separate editor route/window on the runtime scene catalog
+   default, with `observatory_runtime` loadable through the level browser.
 2. Partial: display authored collision overlays and a top-down gizmo surface;
    the true 3D Observatory GLB editor viewport remains future.
 3. Partial: select current entries and edit box position, scale, and
@@ -194,16 +211,17 @@ gameplay ownership:
 - `src/game/editor/collisionDrafts/observatoryCollisionDraft.ts` is the
   checked-in Observatory collision draft source for the current walkable mesh
   and four boundary blockers.
-- The former Observatory-only cook/drift command has been retired. Future cook
-  and write paths must be generic, manifest-driven, and reusable across levels.
+- The former Observatory-only cook/drift command has been retired. Future
+  collision cook/write paths must be generic, manifest-driven, and reusable
+  across levels; terrain package writes use `cook:terrain`.
 - Deterministic bake data is derived in memory for editor diagnostics. Future
   generated bake artifacts need a generic manifest-driven owner before they can
   be written.
 - The deterministic checked-in runtime collision module remains at
-  `src/game/generated/observatoryCollisionRuntime.ts` as current runtime data
-  until a generic cook owner replaces it. Observatory prefab, level, and
-  runtime-manifest owners import this generated module for shipped collision
-  data.
+`src/game/generated/observatoryCollisionRuntime.ts` as current runtime data
+  until the generic terrain runtime module fully replaces the legacy collision
+  data. Observatory prefab, level, and runtime-manifest owners import this
+  generated module for shipped collision data.
 - `scripts/test-level-editor-collision-cook-contract.ts` proves invalid draft
   data, invalid preview patches, deterministic in-memory bake output, stale
   generated runtime module output, unsafe write requests, and stale cooked runtime data
@@ -222,20 +240,27 @@ ownership:
 - `src/pages/editor.astro` is the separate `/editor/` route/window surface.
 - The route loads `src/app/editor/levelEditorSession.ts` only when
   `import.meta.env.DEV` is true.
-- The editor shell lists the current `observatory_runtime` session,
-  `observatory_collision_draft_v1`, Observatory collision draft entry count,
-  preview patch metadata, and derived bake hash.
+- The editor shell resolves the selected runtime scene from the checked-in
+  runtime scene catalog. With no `?scene=` parameter it opens on
+  `defaultRuntimeSceneManifest.id`, matching the runtime catalog default.
+- Collision authoring resolves through
+  `src/game/editor/collisionDrafts/collisionDraftRegistry.ts`. Scenes without
+  a registered collision draft report a missing-draft state; selecting a scene
+  with a registered draft loads that scene's preview patch metadata and derived
+  bake hash.
 - The normal game route and runtime systems do not import `src/app/editor` or
   `src/game/editor`.
 - `test:level-editor-collision-cook-contract` validates the editor session
-  summary, preview patch metadata, and derived bake hash against the Observatory
-  collision draft.
+  summary, the catalog default missing-draft state, and selected registered
+  collision draft preview metadata/derived bake hash against content-owned
+  draft data.
 - `audit:engine-boundaries` validates that normal runtime owner paths do not
-  import editor modules.
+  import editor modules, and that generic app/editor modules do not directly
+  import per-level collision draft modules or hardcode `*_runtime` scene IDs.
 
-This boundary now hosts the first editable Observatory collision-control
-surface. It still does not implement an interactive visual GLB viewport or a
-generalized visual terrain import pipeline.
+This boundary now hosts editable collision-control surfaces for registered
+collision drafts when their scene is selected. It still does not implement an
+interactive visual GLB viewport or production multi-scene authoring UI.
 
 ## Non-Goals For The First Packet
 
@@ -294,11 +319,11 @@ Every cooked collision output must include:
 - readiness requirement when it is critical to playability
 
 The current Observatory collision product is 16 deterministic walkable mesh
-chunks derived from the authored 17x17 height grid, plus four primitive
-blockers. Chunk stable IDs use
+chunks derived from a 33x33 GLB-footprint sampled collision source, plus four
+primitive blockers. Chunk stable IDs use
 `observatory:walkable-mesh:chunk:x*-z*`; source-art scale is baked into
 collider vertices, chunk ordering is deterministic, and readiness links the
-required collision/walkable stable IDs through runtime manifest validation.
+terrain package ID and startup chunk IDs through runtime manifest validation.
 `test:terrain-cook-contract` and `test:terrain-import-pipeline-contract` guard
 the generalized terrain import/cook and chunk foundation.
 
@@ -385,11 +410,15 @@ Acceptance:
 Status: implemented derived bake-data foundation and retained checked-in
 generated runtime collision module. Arbitrary TypeScript owner-object rewrite is
 intentionally not used; the generated runtime module is the safer structured
-runtime owner until a generic cook owner replaces it.
+runtime owner until the generic terrain runtime module fully replaces the
+legacy collision data.
 
-- Future generated write paths must use a generic manifest-driven cook command.
-- Generate or update durable editor-owned bake artifacts only after that generic
-  owner exists.
+- Future collision-generated write paths must use a generic manifest-driven cook
+  command.
+- Terrain package writes use `cook:terrain` and drift checks use
+  `ci:terrain-drift`.
+- Generate or update durable editor-owned bake artifacts only after their
+  generic owner exists.
 - Avoid silent generation during build.
 - Add a drift check that fails when cooked data is stale.
 - Keep generated walkable collision as explicit `Collider.shape.type: "mesh"`
@@ -452,8 +481,9 @@ material/shader import, and multi-level terrain import reports remain future.
 
 Acceptance:
 
-- Visual terrain import/generation must be owned by a future generic command
-  before any generated/imported runtime asset is checked in.
+- Visual terrain import/generation writes must be owned by the generic
+  `cook:terrain` command before any generated/imported runtime asset is
+  checked in.
 - The runtime manifest references the resolved visual asset through normal
   asset/prefab data.
 - Collision still comes from explicit collider data and readiness checks.
@@ -472,38 +502,43 @@ Implemented foundation artifacts:
 
 Status: implemented foundation. Cooked terrain chunks are implemented as a
 reusable engine-data contract plus the current Observatory chunked terrain
-collision product. The runtime collision bake writes 16 deterministic
-Observatory walkable mesh chunks and four boundary blockers into the generated
-runtime collision module. Chunk LODs, streaming partitions, and multi-level
-cooked terrain packages remain future.
+collision product. The unified terrain package/readiness/streaming foundation
+is production data through `RuntimeSceneManifest.terrainPackages` and
+`TerrainChunkStreamingContract`; production editor import UI,
+material/shader authoring UI, and terrain package integration for newly added
+runtime scenes remain future.
 
 - `src/engine/data/terrainCook` defines the cooked terrain chunk schema,
   source-art scale bake policy, readiness derivation, runtime drift validation,
   and deterministic write-plan serialization.
 - `src/game/editor/collisionDrafts/observatoryCollisionDraft.ts` derives 16
-  `observatory:walkable-mesh:chunk:x*-z*` chunks from the authored 17x17
-  height grid.
-- Keep chunks static-collision products, not renderer GLB products.
+  `observatory:walkable-mesh:chunk:x*-z*` chunks from a 33x33 GLB-footprint
+  sampled collision source.
+- Keep visual chunks, collision chunks, material bindings, and package manifests
+  as engine/game data products, not renderer-owned GLB discovery.
 - Record chunk stable ID namespace, source level ID, source-art scale, spatial
   bounds, vertex/index or heightfield data, channel/intent policy, readiness
   linkage, chunk hash, and deterministic ordering.
-- Keep chunk generation explicit and non-writing by default; write paths need
-  named generated output owners and drift checks.
+- Keep chunk generation explicit and non-writing by default; writes go through
+  `cook:terrain`, and drift checks go through `ci:terrain-drift`.
 - Validate chunks through the same `CollisionPolicy`,
   `WalkableCollisionContract`, `KinematicCharacterCollisionContract`, and
-  `LevelReadinessContract` path.
+  `LevelReadinessContract` path after terrain package activation.
 
 Acceptance:
 
 - `test:terrain-cook-contract` fails on missing chunk provenance,
   non-deterministic ordering, stale runtime readiness, render-GLB collision
   inference, or hidden runtime scale multiplication.
-- A future generic cook/drift gate must prove runtime chunk data matches
-  authored terrain source before any write path is reintroduced.
+- `ci:terrain-drift` must prove runtime chunk/package data matches authored
+  terrain source before generated output is accepted.
 - Runtime consumers load chunk data through explicit collider data and never
   through render mesh inspection.
-- Future LOD/streaming and multi-level chunk packages must add focused
-  validation before they can be marked complete.
+- Runtime streaming activates/deactivates package chunks through
+  `TerrainChunkStreamingContract`; renderer and physics adapters project active
+  ECS entities only.
+- Broader multi-scene terrain packages must add focused validation before each
+  new content rollout is marked complete.
 
 ## Remaining AAA-Plan Validation Matrix
 
@@ -515,7 +550,7 @@ Acceptance:
 | Miranda collision cook migration | implemented draft/check-only coverage for current main, upper, and Cargo Hold walkable floors; no Miranda generated runtime module exists yet | Current: generic runtime-scene, level-authoring, and terrain/collision contract tests; future generic bake tooling must add an explicit generated output owner before any write path exists |
 | Direct runtime owner-file rewrite bake | planned; current implementation deliberately stops at the owned generated runtime collision module and does not rewrite arbitrary TypeScript owner files | Current: `pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract`; future `test:level-editor-runtime-bake-writer-contract` must validate exact target files, no unrelated rewrites, generated artifact validation, and post-bake runtime validation |
 | True terrain visual displacement/import pipeline | implemented generalized terrain import/cook contract; render terrain and collision terrain are separate products; production editor import UI, material/shader import, and multi-level import reports remain future | Current: `pnpm --dir apps/game.megameal test:generated-glb-import-contract`, `pnpm --dir apps/game.megameal test:terrain-import-pipeline-contract`, and `pnpm --dir apps/game.megameal test:runtime-scene-contract`; future production editor import UI validation must cover persisted import controls, material/shader import, multi-level import reports, and explicit collision linkage without treating render GLBs as collision |
-| Richer cooked terrain chunks | implemented foundation with 16 deterministic Observatory walkable terrain chunks; LOD/streaming and multi-level terrain packages remain future | Current: `pnpm --dir apps/game.megameal test:terrain-cook-contract`, `pnpm --dir apps/game.megameal test:terrain-import-pipeline-contract`, `pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract`, and `pnpm --dir apps/game.megameal test:kinematic-character-contract`; future LOD/streaming validation must cover chunk LODs, streaming partitions, multi-level packages, and no render-terrain collision inference |
+| Richer cooked terrain chunks | implemented foundation with 16 deterministic Observatory GLB-footprint walkable terrain chunks plus generic terrain package/readiness/streaming ownership | Current: `pnpm --dir apps/game.megameal test:terrain-cook-contract`, `pnpm --dir apps/game.megameal test:terrain-import-pipeline-contract`, `pnpm --dir apps/game.megameal test:terrain-streaming-contract`, `pnpm --dir apps/game.megameal test:terrain-package-readiness-contract`, `pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract`, `pnpm --dir apps/game.megameal test:kinematic-character-contract`, and `pnpm --dir apps/game.megameal ci:terrain-drift`; future rollout validation must cover additional scene packages, material/shader authoring, and no render-terrain collision inference |
 
 ## Validation Gate
 
@@ -567,14 +602,14 @@ foundation:
   no render-terrain collision inference.
 - Updated Observatory collision cook data to generate 16 deterministic
   `observatory:walkable-mesh:chunk:x*-z*` walkable/worldStatic mesh chunks from
-  the authored 17x17 height grid, with four boundary blockers still owning
-  movement bounds.
+  a 33x33 GLB-footprint sampled collision source, with four boundary blockers
+  still owning movement bounds.
 - Updated the generated Observatory collision bake and generated runtime
   collision module so runtime traversal consumes the chunked collision product.
 
 Remaining production terrain work is editor import persistence, material/shader
-import, multi-level import reports, terrain LOD/streaming, and multi-level
-cooked terrain packages.
+import, multi-level import reports, and broader scene rollout on top of the
+generic terrain package/readiness/streaming foundation.
 
 ### 2026-06-06 Dev-Only Editor Boundary Skeleton
 
@@ -582,30 +617,33 @@ Implemented Packet 1 as a narrow editor route/window boundary:
 
 - Added `/editor/` through `src/pages/editor.astro`.
 - Added `src/app/editor/levelEditorSession.ts` as the dev editor session
-  summary owner for `observatory_runtime`.
-- Kept the route separate from the normal game HUD and default runtime scene.
+  summary owner for catalog-selected runtime scenes, collision-draft registry
+  lookup, and missing-draft reporting.
+- Kept the route separate from the normal game HUD and default runtime scene;
+  with no `?scene=` parameter the editor opens on the runtime catalog default.
 - Extended `test:level-editor-collision-cook-contract` with editor session
-  summary assertions.
+  summary assertions for the catalog default and selected registered draft.
 - Extended `audit:engine-boundaries` with a normal-runtime import leak check
-  for `src/app/editor` and `src/game/editor`.
+  for `src/app/editor` and `src/game/editor`, plus a generic app/editor
+  guardrail against direct per-level draft imports or hardcoded `*_runtime`
+  scene IDs.
 
-Remaining generalized editor work is the 3D Observatory GLB viewport,
-multi-level collision authoring, multi-level runtime bake support, production
-terrain editor import UI, material/shader import, and multi-level import
-reports.
+Remaining generalized editor work is the 3D visual viewport, multi-level
+collision authoring, multi-level runtime bake support, production terrain
+editor import UI, material/shader import, and multi-level import reports.
 
 ### 2026-06-06 Editable Collision Controls
 
 Implemented the first editable collision-control slice inside the dev-only
 `/editor` route:
 
-- `src/app/editor/levelEditorSession.ts` now projects Observatory collision
-  entries into editor controls while preserving stable IDs from
-  `collisionOverlayViewModel`.
+- `src/app/editor/levelEditorSession.ts` now projects registered collision
+  draft entries into editor controls only when their runtime scene is selected,
+  while preserving stable IDs from `collisionOverlayViewModel`.
 - `src/pages/editor.astro` exposes selectable stable IDs, intent/channel
   controls, a top-down collision gizmo board, editable position/scale fields for
-  box colliders, editable box half-extents, read-only mesh metadata for
-  `observatory:walkable-mesh`, and derived bounds.
+  box colliders, editable box half-extents, read-only mesh metadata for mesh
+  collision entries, and derived bounds.
 - `test:collision-overlay-view-model` validates the session/view-model editor
   fields and stable-ID preservation.
 
@@ -644,8 +682,8 @@ instead of arbitrary TypeScript object rewrites:
   `src/game/levels/runtimeSceneManifests.ts` import the generated module for
   Observatory collider, collision instance, and collision-readiness data.
 - There is currently no package-exposed runtime collision write path. Future
-  writes must go through a generic manifest-driven cook owner, not a
-  level-specific command.
+  collision writes must go through a generic manifest-driven cook owner; terrain
+  package writes use `cook:terrain`, never a level-specific command.
 - The cook write plan includes the generated TypeScript module as an explicit
   `runtime-collision-module` artifact, while retaining JSON dry-run payloads for
   prefab colliders, level instances, and readiness.
@@ -738,8 +776,8 @@ Implemented as an engine-wide prerequisite for the editor/cook pipeline:
   obstacle filtering.
 - Replaced Observatory's old flat walkable collision box with explicit
   `observatory:walkable-mesh:chunk:x*-z*` deterministic mesh collision chunks
-  derived from the authored 17x17 height grid and kept readiness tied to those
-  authored chunk stable IDs.
+  derived from a 33x33 GLB-footprint sampled collision source and kept readiness
+  tied to those authored chunk stable IDs.
 - Added/used focused validation through `test:kinematic-character-contract`
   and updated runtime-scene assertions for Observatory mesh collision.
 
@@ -814,4 +852,6 @@ Full-plan criteria still open:
   scale.
 - Production terrain editor import UI, material/shader import, and multi-level
   import reports remain open.
-- Terrain LOD/streaming and multi-level cooked terrain packages remain open.
+- Broader scene terrain package adoption, production terrain editor import UI,
+  and material/shader authoring UI remain open; generic package readiness and
+  chunk streaming are active foundation behavior.

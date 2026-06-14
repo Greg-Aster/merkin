@@ -289,6 +289,7 @@ function buildTerrainCookRuntimeModuleData(options: {
 		targetFiles: cloneValue(options.plan.targetFiles),
 		visualOutputs: cloneValue(options.plan.visualOutputs),
 		visualBindings: cloneValue(options.plan.visualBindings),
+		materialSets: cloneValue(options.plan.materialSets),
 		collisionChunks: cloneValue(options.plan.collisionChunks),
 		levelInstances: cloneValue(buildTerrainLevelInstanceEntries(options.plan)),
 		...(options.plan.terrainPackage === undefined

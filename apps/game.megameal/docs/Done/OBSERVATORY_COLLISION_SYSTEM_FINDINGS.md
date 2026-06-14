@@ -3,8 +3,8 @@
 Status: completed on 2026-06-06 and moved to `docs/Done`. Observatory has an
 explicit, generated runtime collision owner, engine-wide kinematic character
 collision consumption, editor/cook validation, dev-only preview/reload protocol,
-generated visual-terrain provenance, the generalized terrain import/cook
-contract foundation, and cooked terrain chunk foundation. Remaining production
+source GLB provenance, the generalized terrain import/cook contract foundation,
+and cooked terrain chunk foundation. Remaining production
 editor, terrain LOD/streaming, and diagnostics work is tracked in
 `docs/LEVEL_EDITOR_COLLISION_COOK_PLAN.md` and
 `docs/Done/WATER_SURFACE_SYSTEM_PLAN.md`.
@@ -12,20 +12,21 @@ editor, terrain LOD/streaming, and diagnostics work is tracked in
 ## Final Observatory State
 
 - The player does not spawn at the scene origin. The authored stable `player`
-  instance is at `[-137.2, 1.8, -49.5]` with `CharacterController.groundY:
-  1.8` retained as a spawn/fallback scalar.
+  instance is at `[-137.2, 0.43, -49.5]` with `CharacterController.groundY:
+  0.43` retained as a spawn/fallback scalar.
 - The Observatory environment GLB is visual-only:
   `mesh_observatory_environment` renders
   `/assets/game/observatory/observatory-environment.glb`.
 - The GLB visual instance `observatory:terrain` uses unit scale `[1, 1, 1]`.
 - The collision layer affects traversal but does not change the rendered GLB surface.
-- Walkability comes from explicit authored collision, not render geometry:
-  `src/game/editor/collisionDrafts/observatoryCollisionDraft.ts` owns a 17x17
-  height grid that cooks into 16 deterministic walkable mesh chunks.
-- The 16 walkable chunks cover `x/z = -320..320`, use stable IDs in the
-  `observatory:walkable-mesh:chunk:x*-z*` namespace, and preserve 289 vertices
-  and 512 triangles of the authored surface while splitting
-  runtime colliders into deterministic 5x5-vertex chunks.
+- Walkability comes from explicit authored/cooked collision, not runtime render
+  geometry: `src/game/editor/collisionDrafts/observatoryCollisionDraft.ts`
+  owns a 33x33 GLB-footprint sampled collision source that cooks into 16
+  deterministic sparse walkable mesh chunks.
+- The 16 walkable chunks use stable IDs in the
+  `observatory:walkable-mesh:chunk:x*-z*` namespace and preserve 665 unique
+  emitted vertices and 1182 triangles of the explicit collision surface inside
+  the `x/z = -190..190` collision source extent.
 - Four required `observatory_boundary_blocker` instances constrain current
   movement bounds:
   - `observatory:collision:boundary:north`
@@ -88,11 +89,14 @@ Owner files:
 - `src/engine/data/collisionCook/index.ts`
 - `src/engine/data/terrainCook/index.ts`
 - `src/game/editor/collisionDrafts/observatoryCollisionDraft.ts`
+- `src/game/editor/collisionDrafts/collisionDraftRegistry.ts`
 - `src/game/generated/observatoryCollisionRuntime.ts`
 - `src/game/prefabs/observatoryPrefabs.ts`
 - `src/game/levels/observatoryLevel.ts`
 - `src/game/levels/runtimeSceneManifests.ts`
-- `src/app/editor/levelEditorSession.ts`
+- `src/app/editor/levelEditorSession.ts` selects Observatory through the generic
+  runtime scene catalog and collision draft registry; it is not an
+  Observatory-specific default owner.
 - `src/app/devPreview/*`
 - retired Observatory-only cook/check scripts replaced by generic contract
   validation expectations

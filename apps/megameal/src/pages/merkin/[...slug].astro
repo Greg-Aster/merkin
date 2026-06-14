@@ -5,6 +5,7 @@ import Markdown from '@components/misc/Markdown.astro'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
 import MerkinMedia from '../../components/merkin/MerkinMedia.astro'
 import MerkinShareActions from '../../components/merkin/MerkinShareActions.svelte'
+import { publicCollectionFilter } from '../../contracts/content'
 import {
   formatMerkinDate,
   getMerkinHref,
@@ -15,7 +16,7 @@ import {
 
 export async function getStaticPaths() {
   const entries = getPublishableMerkinEntries(
-    await getCollection('merkin', ({ data }) => data.draft !== true),
+    await getCollection('merkin', publicCollectionFilter),
   )
 
   return entries.map(entry => ({

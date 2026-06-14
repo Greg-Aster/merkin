@@ -10,7 +10,9 @@ import { buildCollisionCookWritePlan } from "./writePlan.js";
 export function buildCollisionCookPlan(draftInput: unknown): CollisionCookPlan {
 	const draft = parseCollisionCookDraft(draftInput);
 	const requiredEntries = draft.entries.filter(
-		(entry) => entry.readiness.requiredCollision,
+		(entry) =>
+			entry.readiness.requiredCollision &&
+			entry.readiness.terrainPackageOwned !== true,
 	);
 
 	return {
@@ -31,6 +33,7 @@ export function buildCollisionCookPlan(draftInput: unknown): CollisionCookPlan {
 		requiredWalkableStableIds: sortedUnique(
 			draft.entries
 				.filter((entry) => entry.readiness.requiredWalkable === true)
+				.filter((entry) => entry.readiness.terrainPackageOwned !== true)
 				.map((entry) => entry.stableId),
 		),
 	};

@@ -1,3 +1,4 @@
+import { terrainLevelInstancesForRuntimeScene } from "../generated/terrainRuntime.js";
 import type { LevelDefinition } from "./index.js";
 import { observatoryLevel } from "./observatoryLevel.js";
 import { portalArenaLevel } from "./portalArenaLevel.js";
@@ -32,11 +33,7 @@ export const prototypeLevel = {
 		"audio_player_charge_release",
 	],
 	instances: [
-		{
-			id: "floor",
-			prefabId: "arena_floor",
-			stableId: "arena:floor",
-		},
+		...terrainLevelInstancesForRuntimeScene("prototype_arena_runtime"),
 		{
 			id: "player",
 			prefabId: "player",
@@ -165,30 +162,7 @@ export const mirandaDeckLevel = {
 		"audio_ambient_shadow_waltz",
 	],
 	instances: [
-		{
-			id: "miranda-floor-main",
-			prefabId: "miranda_floor_main",
-			stableId: "miranda:floor:main",
-			transform: {
-				position: [0, 3.35, -4],
-			},
-		},
-		{
-			id: "miranda-floor-upper",
-			prefabId: "miranda_floor_upper",
-			stableId: "miranda:floor:upper",
-			transform: {
-				position: [0, 4.7, -27.5],
-			},
-		},
-		{
-			id: "miranda-floor-cargo-hold",
-			prefabId: "miranda_floor_cargo_hold",
-			stableId: "miranda:floor:cargo-hold",
-			transform: {
-				position: [0, 3.35, 45],
-			},
-		},
+		...terrainLevelInstancesForRuntimeScene("miranda_deck_runtime"),
 		{
 			id: "miranda-command-gallery-beacon-light",
 			prefabId: "miranda_command_gallery_beacon_light",

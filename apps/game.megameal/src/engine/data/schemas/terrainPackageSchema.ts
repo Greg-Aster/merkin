@@ -3,6 +3,7 @@ import {
 	isRecord,
 	requireString,
 	requireUniqueString,
+	validateOptionalNumberTuple,
 	validateRequiredNumberTuple,
 	validateRequiredPositiveInteger,
 	validateRequiredPositiveNumber,
@@ -49,6 +50,23 @@ export function validateTerrainPackage(
 
 	const chunkStableIds = new Set<string>();
 	const visualStableIds = new Set<string>();
+	const materialSetLayerIds = new Map<string, Set<string>>();
+
+	if (!Array.isArray(data.materialSets) || data.materialSets.length === 0) {
+		errors.push(`${path}.materialSets must contain at least one material set.`);
+	} else {
+		const materialSetIds = new Set<string>();
+
+		for (const [index, materialSet] of data.materialSets.entries()) {
+			validateTerrainMaterialSet(
+				materialSet,
+				`${path}.materialSets.${index}`,
+				materialSetIds,
+				materialSetLayerIds,
+				errors,
+			);
+		}
+	}
 
 	if (!Array.isArray(data.chunks) || data.chunks.length === 0) {
 		errors.push(`${path}.chunks must contain at least one chunk.`);
@@ -58,6 +76,7 @@ export function validateTerrainPackage(
 				chunk,
 				`${path}.chunks.${index}`,
 				chunkStableIds,
+				materialSetLayerIds,
 				errors,
 			);
 		}
@@ -137,6 +156,80 @@ export function validateTerrainPackage(
 			}
 		}
 	}
+}
+
+function validateTerrainMaterialSet(
+	data: unknown,
+	path: string,
+	materialSetIds: Set<string>,
+	materialSetLayerIds: Map<string, Set<string>>,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	requireUniqueString(data.id, `${path}.id`, materialSetIds, errors);
+	requireString(
+		data,
+		"fallbackMaterialAssetId",
+		`${path}.fallbackMaterialAssetId`,
+		errors,
+	);
+
+	if (
+		data.blendMode !== "single" &&
+		data.blendMode !== "weighted" &&
+		data.blendMode !== "splat-map"
+	) {
+		errors.push(`${path}.blendMode must be single, weighted, or splat-map.`);
+	}
+
+	if (!Array.isArray(data.layers) || data.layers.length === 0) {
+		errors.push(`${path}.layers must contain at least one layer.`);
+		return;
+	}
+
+	const layerIds = new Set<string>();
+
+	for (const [index, layer] of data.layers.entries()) {
+		validateTerrainMaterialLayer(
+			layer,
+			`${path}.layers.${index}`,
+			layerIds,
+			errors,
+		);
+	}
+
+	if (typeof data.id === "string") {
+		materialSetLayerIds.set(data.id, layerIds);
+	}
+}
+
+function validateTerrainMaterialLayer(
+	data: unknown,
+	path: string,
+	layerIds: Set<string>,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	requireUniqueString(data.id, `${path}.id`, layerIds, errors);
+	requireString(data, "materialAssetId", `${path}.materialAssetId`, errors);
+
+	if (data.textureAssetIds !== undefined) {
+		validateRequiredStringArray(
+			data.textureAssetIds,
+			`${path}.textureAssetIds`,
+			errors,
+		);
+	}
+
+	validateOptionalNumberTuple(data.uvScale, 2, `${path}.uvScale`, errors);
 }
 
 function validateTerrainStreamingPolicy(
@@ -230,6 +323,7 @@ function validateTerrainPackageChunk(
 	data: unknown,
 	path: string,
 	chunkStableIds: Set<string>,
+	materialSetLayerIds: ReadonlyMap<string, ReadonlySet<string>>,
 	errors: string[],
 ): void {
 	if (!isRecord(data)) {
@@ -248,6 +342,12 @@ function validateTerrainPackageChunk(
 	validateTerrainBounds(data.bounds, `${path}.bounds`, errors);
 	validateRequiredNumberTuple(data.center, 3, `${path}.center`, errors);
 	validateTerrainChunkLod(data.lod, `${path}.lod`, errors);
+	validateTerrainChunkMaterialBinding(
+		data.materialBinding,
+		`${path}.materialBinding`,
+		materialSetLayerIds,
+		errors,
+	);
 	validateTerrainChunkRigidBody(
 		data.rigidBodyComponent,
 		`${path}.rigidBodyComponent`,
@@ -258,6 +358,49 @@ function validateTerrainPackageChunk(
 		`${path}.colliderComponent`,
 		errors,
 	);
+}
+
+function validateTerrainChunkMaterialBinding(
+	data: unknown,
+	path: string,
+	materialSetLayerIds: ReadonlyMap<string, ReadonlySet<string>>,
+	errors: string[],
+): void {
+	if (data === undefined) {
+		return;
+	}
+
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	requireString(data, "materialSetId", `${path}.materialSetId`, errors);
+	validateRequiredStringArray(data.layerIds, `${path}.layerIds`, errors);
+	validateOptionalNumberTuple(data.uvScale, 2, `${path}.uvScale`, errors);
+
+	const materialSetId =
+		typeof data.materialSetId === "string" ? data.materialSetId : undefined;
+	const layerIds =
+		materialSetId === undefined
+			? undefined
+			: materialSetLayerIds.get(materialSetId);
+
+	if (materialSetId !== undefined && layerIds === undefined) {
+		errors.push(
+			`${path}.materialSetId references unknown material set "${materialSetId}".`,
+		);
+	}
+
+	if (Array.isArray(data.layerIds) && layerIds !== undefined) {
+		for (const layerId of data.layerIds) {
+			if (typeof layerId === "string" && !layerIds.has(layerId)) {
+				errors.push(
+					`${path}.layerIds references unknown material layer "${layerId}".`,
+				);
+			}
+		}
+	}
 }
 
 function validateTerrainVisualBinding(

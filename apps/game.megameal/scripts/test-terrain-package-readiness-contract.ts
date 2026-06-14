@@ -1,5 +1,6 @@
 import {
 	COLLIDER_COMPONENT,
+	type ColliderComponent,
 	EngineRuntime,
 	RIGID_BODY_COMPONENT,
 	type RuntimeSceneManifestData,
@@ -15,6 +16,7 @@ import { activateTerrainChunkPackages } from "../src/game/systems/index.js";
 
 const terrainPackageId = "synthetic:terrain-package";
 const terrainChunkStableId = "synthetic:terrain:chunk:0:0";
+const meshTerrainChunkStableId = "synthetic:terrain:chunk:mesh:0:0";
 
 const manifest = loadRuntimeSceneManifest({
 	schemaVersion: 1,
@@ -37,6 +39,11 @@ const manifest = loadRuntimeSceneManifest({
 				id: "synthetic-terrain-chunk",
 				prefabId: "synthetic_terrain_chunk_cell",
 				stableId: terrainChunkStableId,
+			},
+			{
+				id: "synthetic-mesh-terrain-chunk",
+				prefabId: "synthetic_terrain_chunk_cell",
+				stableId: meshTerrainChunkStableId,
 			},
 		],
 	},
@@ -97,6 +104,20 @@ const manifest = loadRuntimeSceneManifest({
 				hysteresisMeters: 4,
 				maxChunkOperationsPerTick: 8,
 			},
+			materialSets: [
+				{
+					id: "synthetic-terrain-material-set",
+					blendMode: "single",
+					fallbackMaterialAssetId: "material_synthetic_terrain",
+					layers: [
+						{
+							id: "base",
+							materialAssetId: "material_synthetic_terrain",
+							uvScale: [1, 1],
+						},
+					],
+				},
+			],
 			chunks: [
 				{
 					stableId: terrainChunkStableId,
@@ -124,10 +145,44 @@ const manifest = loadRuntimeSceneManifest({
 						},
 					},
 				},
+				{
+					stableId: meshTerrainChunkStableId,
+					groupId: "chunk",
+					chunkKey: [1, 0],
+					bounds: {
+						min: [16, -1, -8],
+						max: [24, 1, 8],
+					},
+					center: [20, 0, 0],
+					lod: {
+						nearVisualStableIds: [],
+						farVisualStableIds: [],
+					},
+					rigidBodyComponent: {
+						type: "fixed",
+						mass: 0,
+					},
+					colliderComponent: {
+						intent: "walkable",
+						channel: "worldStatic",
+						shape: {
+							type: "mesh",
+							vertices: [
+								[16, 0, -8],
+								[24, 0, -8],
+								[16, 0, 8],
+							],
+							indices: [0, 1, 2],
+						},
+					},
+				},
 			],
 			visualBindings: [],
-			startupChunkStableIds: [terrainChunkStableId],
-			streamableChunkStableIds: [terrainChunkStableId],
+			startupChunkStableIds: [terrainChunkStableId, meshTerrainChunkStableId],
+			streamableChunkStableIds: [
+				terrainChunkStableId,
+				meshTerrainChunkStableId,
+			],
 			driftHash: "fnv1a32:synthetic",
 		},
 	],
@@ -186,9 +241,16 @@ async function assertTerrainActivationReport(): Promise<void> {
 	const chunkEntity = loadResult.spawned.find(
 		(spawned) => spawned.stableId === terrainChunkStableId,
 	)?.entity;
+	const meshChunkEntity = loadResult.spawned.find(
+		(spawned) => spawned.stableId === meshTerrainChunkStableId,
+	)?.entity;
 
 	if (chunkEntity === undefined) {
 		throw new Error("Expected terrain chunk entity to be spawned.");
+	}
+
+	if (meshChunkEntity === undefined) {
+		throw new Error("Expected mesh terrain chunk entity to be spawned.");
 	}
 
 	assertEqual(
@@ -197,9 +259,45 @@ async function assertTerrainActivationReport(): Promise<void> {
 		"Expected terrain package activation to succeed.",
 	);
 	assertDeepEqual(activation.activatedPackageIds, [terrainPackageId]);
-	assertDeepEqual(activation.startupChunkStableIds, [terrainChunkStableId]);
+	assertDeepEqual(activation.startupChunkStableIds, [
+		terrainChunkStableId,
+		meshTerrainChunkStableId,
+	]);
 	assertEqual(world.hasComponent(chunkEntity, RIGID_BODY_COMPONENT), true);
 	assertEqual(world.hasComponent(chunkEntity, COLLIDER_COMPONENT), true);
+	assertEqual(world.hasComponent(meshChunkEntity, RIGID_BODY_COMPONENT), true);
+	assertEqual(world.hasComponent(meshChunkEntity, COLLIDER_COMPONENT), true);
+	const collider = world.requireComponent<ColliderComponent>(
+		chunkEntity,
+		COLLIDER_COMPONENT,
+	);
+
+	if (collider.shape.type !== "box") {
+		throw new Error("Expected synthetic terrain collider to be a box.");
+	}
+
+	assertEqual(collider.shape.halfExtents.x, 8);
+	assertEqual(collider.shape.halfExtents.y, 1);
+	assertEqual(collider.shape.halfExtents.z, 8);
+	const meshCollider = world.requireComponent<ColliderComponent>(
+		meshChunkEntity,
+		COLLIDER_COMPONENT,
+	);
+
+	if (meshCollider.shape.type !== "mesh") {
+		throw new Error("Expected synthetic terrain mesh collider to be a mesh.");
+	}
+
+	assertEqual(
+		typeof meshCollider.shape.vertices[0]?.x,
+		"number",
+		"Expected synthetic mesh terrain vertices to be runtime Vec3 values.",
+	);
+	assertEqual(
+		Number.isFinite(meshCollider.shape.vertices[0]?.x),
+		true,
+		"Expected synthetic mesh terrain vertices to be finite before physics sync.",
+	);
 
 	const readiness = evaluateRuntimeSceneReadiness(manifest, {
 		levelId: loadResult.levelId,
@@ -254,7 +352,10 @@ async function assertSceneLoadReportsActivatedTerrainPackages(): Promise<void> {
 	);
 
 	assertEqual(sceneManager.status, "active");
-	assertDeepEqual(physicsReadyStartupIds, [terrainChunkStableId]);
+	assertDeepEqual(physicsReadyStartupIds, [
+		terrainChunkStableId,
+		meshTerrainChunkStableId,
+	]);
 
 	await sceneManager.unload(runtime.services);
 	runtime.dispose();

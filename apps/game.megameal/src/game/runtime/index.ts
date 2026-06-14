@@ -43,7 +43,7 @@ import {
 import { PrefabRegistry, STABLE_ID_COMPONENT } from "../prefabs/index.js";
 import { createGameScene } from "../scenes/index.js";
 import {
-	type GameHudState,
+	type GameRuntimeUiState,
 	RUNTIME_SCENE_TRANSITION_RESOURCE,
 	type RuntimeSceneTransitionPort,
 	createCharacterMotorSystem,
@@ -63,7 +63,7 @@ import {
 	createStoryNoteActivationSystem,
 	createStoryNoteProximitySystem,
 	createTerrainStreamingSystem,
-	selectGameHudState,
+	selectGameRuntimeUiState,
 } from "../systems/index.js";
 
 export type GameRendererPort = RendererPort &
@@ -87,7 +87,7 @@ export type MegamealGameRuntimeOptions = {
 export type MegamealGameRuntime = {
 	readonly runtime: EngineRuntime;
 	readonly sceneManager: SceneManager;
-	gameState(): GameHudState;
+	runtimeUiState(): GameRuntimeUiState;
 	dispose(): Promise<void>;
 };
 
@@ -341,8 +341,8 @@ export async function createMegamealGameRuntime(
 	return {
 		runtime,
 		sceneManager,
-		gameState() {
-			return selectGameHudState(runtime.world);
+		runtimeUiState() {
+			return selectGameRuntimeUiState(runtime.world);
 		},
 		async dispose() {
 			if (disposed) {

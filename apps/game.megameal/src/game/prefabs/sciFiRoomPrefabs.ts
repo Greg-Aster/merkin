@@ -1,6 +1,7 @@
 import { playerPrefab } from "./defaultPrefabs.js";
 import type { PrefabDefinition } from "./index.js";
 import { portalGatePrefab } from "./navigationPrefabs.js";
+import { terrainChunkCellPrefab } from "./terrainPrefabs.js";
 
 export const sciFiRoomInteriorFloorPrefab = {
 	id: "sci_fi_room_floor_interior",
@@ -216,6 +217,7 @@ export const sciFiRoomStoryMarkerPrefab = {
 export const sciFiRoomPrefabs = [
 	playerPrefab,
 	portalGatePrefab,
+	terrainChunkCellPrefab,
 	sciFiRoomInteriorFloorPrefab,
 	sciFiRoomCourtyardFloorPrefab,
 	sciFiRoomWastelandFloorPrefab,

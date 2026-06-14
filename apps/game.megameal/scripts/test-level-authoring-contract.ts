@@ -17,16 +17,16 @@ import {
 type MutableRuntimeSceneManifestData = {
 	-readonly [Key in keyof RuntimeSceneManifestData]: RuntimeSceneManifestData[Key];
 };
+type RuntimeTerrainPackage = NonNullable<
+	RuntimeSceneManifestData["terrainPackages"]
+>[number];
 
 const runtimeSceneIds = defaultRuntimeSceneManifests.map(
 	(manifest) => manifest.id,
 );
 const solitudeRuntimeSceneId = "solitude_runtime";
 const solitudePortalStableId = "portal-arena:portal:solitude";
-const solitudeExpectedWalkableStableIds = [
-	"solitude:ground:plateau",
-	"solitude:ground:dais",
-] as const;
+const solitudeExpectedTerrainGroupIds = ["dais", "plateau"] as const;
 const solitudeExpectedCollisionStableIds =
 	solitudeExpectedRuntimeImports.readiness.requiredCollisionStableIds;
 const solitudeOldPathMarkers = [
@@ -36,7 +36,7 @@ const solitudeOldPathMarkers = [
 ] as const;
 const yggdrasilRuntimeSceneId = "yggdrasil_runtime";
 const yggdrasilExpectedWalkableStableIds =
-	yggdrasilExpectedRuntimeImports.readiness.requiredWalkableStableIds;
+	yggdrasilExpectedRuntimeImports.terrain.terrainOwnedWalkableStableIds;
 const yggdrasilOldPathMarkers = [
 	"/generated/runtime-game-assets/",
 	"/runtime-world-partitions/",
@@ -44,10 +44,6 @@ const yggdrasilOldPathMarkers = [
 ] as const;
 
 for (const manifest of defaultRuntimeSceneManifests) {
-	if (manifest.id === yggdrasilRuntimeSceneId) {
-		continue;
-	}
-
 	const audioContent = parseAudioContentManifest(
 		audioContentManifestForRuntimeScene(manifest.id),
 		{ assetManifest: manifest.assets },
@@ -63,6 +59,8 @@ for (const manifest of defaultRuntimeSceneManifests) {
 			`Expected ${manifest.id} content graph to validate:\n${result.errors.join("\n")}`,
 		);
 	}
+
+	assertTerrainPackageReadiness(manifest);
 }
 
 expectInvalid(
@@ -128,10 +126,10 @@ expectInvalid(
 		...cloneManifest(observatoryRuntimeSceneManifest),
 		readiness: {
 			...observatoryRuntimeSceneManifest.readiness,
-			requiredWalkableStableIds: [],
+			requiredTerrainPackageIds: [],
 		},
 	},
-	'authored walkable stable ID "observatory:walkable-mesh:chunk:x0-z0" is missing from readiness.requiredWalkableStableIds',
+	'terrain package "observatory_runtime:terrain-package" is missing from readiness.requiredTerrainPackageIds',
 );
 
 expectInvalid(
@@ -139,18 +137,20 @@ expectInvalid(
 		...cloneManifest(sciFiRoomRuntimeSceneManifest),
 		readiness: {
 			...sciFiRoomRuntimeSceneManifest.readiness,
-			requiredWalkableStableIds: (
-				sciFiRoomRuntimeSceneManifest.readiness.requiredWalkableStableIds ?? []
-			).filter((stableId) => stableId !== "sci-fi-room:floor:interior"),
+			requiredTerrainPackageIds: [],
 		},
 	},
-	'authored walkable stable ID "sci-fi-room:floor:interior" is missing from readiness.requiredWalkableStableIds',
+	'terrain package "sci_fi_room_runtime:terrain-package" is missing from readiness.requiredTerrainPackageIds',
 );
 
 {
 	const requiredWalkableStableIds =
 		solitudeRuntimeSceneManifest.readiness.requiredWalkableStableIds ?? [];
-	const firstWalkableStableId = solitudeExpectedWalkableStableIds[0];
+	const terrainPackage = firstTerrainPackage(solitudeRuntimeSceneManifest);
+	const firstTerrainChunkStableId = firstRequired(
+		terrainPackage.chunks.map((chunk) => chunk.stableId),
+		"Solitude terrain package chunks",
+	);
 	const audioContent = parseAudioContentManifest(
 		audioContentManifestForRuntimeScene(solitudeRuntimeSceneManifest.id),
 		{ assetManifest: solitudeRuntimeSceneManifest.assets },
@@ -173,13 +173,18 @@ expectInvalid(
 
 	assertSameStringSet(
 		result.graph.walkableStableIds,
-		solitudeExpectedWalkableStableIds,
-		"Solitude content graph must expose exactly the two authored walkable surfaces.",
+		[],
+		"Solitude content graph must keep terrain package chunks out of authored walkable stable IDs.",
 	);
 	assertSameStringSet(
 		requiredWalkableStableIds,
-		solitudeExpectedWalkableStableIds,
-		"Solitude readiness.requiredWalkableStableIds must exactly match the two authored walkable surfaces.",
+		[],
+		"Solitude readiness must not author legacy requiredWalkableStableIds because terrain package readiness owns streamed walkables.",
+	);
+	assertSameStringSet(
+		[...new Set(terrainPackage.chunks.map((chunk) => chunk.groupId))],
+		solitudeExpectedTerrainGroupIds,
+		"Solitude terrain package must preserve the authored plateau and dais groups.",
 	);
 	assertSameStringSet(
 		solitudeRuntimeSceneManifest.readiness.requiredCollisionStableIds,
@@ -217,12 +222,12 @@ expectInvalid(
 			...cloneManifest(solitudeRuntimeSceneManifest),
 			readiness: {
 				...solitudeRuntimeSceneManifest.readiness,
-				requiredWalkableStableIds: requiredWalkableStableIds.filter(
-					(stableId) => stableId !== firstWalkableStableId,
-				),
+				requiredTerrainPackageIds: (
+					solitudeRuntimeSceneManifest.readiness.requiredTerrainPackageIds ?? []
+				).filter((terrainPackageId) => terrainPackageId !== terrainPackage.id),
 			},
 		},
-		`authored walkable stable ID "${firstWalkableStableId}" is missing from readiness.requiredWalkableStableIds`,
+		`terrain package "${terrainPackage.id}" is missing from readiness.requiredTerrainPackageIds`,
 	);
 
 	expectInvalid(
@@ -233,10 +238,25 @@ expectInvalid(
 				requiredCollisionStableIds: (
 					solitudeRuntimeSceneManifest.readiness.requiredCollisionStableIds ??
 					[]
-				).filter((stableId) => stableId !== firstWalkableStableId),
+				).concat(firstTerrainChunkStableId),
 			},
 		},
-		`readiness.requiredWalkableStableIds "${firstWalkableStableId}" is missing from readiness.requiredCollisionStableIds`,
+		`terrain package chunk "${firstTerrainChunkStableId}" must not be listed in readiness.requiredCollisionStableIds; terrain package readiness owns streamed chunks.`,
+	);
+
+	expectInvalid(
+		{
+			...cloneManifest(solitudeRuntimeSceneManifest),
+			readiness: {
+				...solitudeRuntimeSceneManifest.readiness,
+				requiredWalkableStableIds: [
+					...(solitudeRuntimeSceneManifest.readiness
+						.requiredWalkableStableIds ?? []),
+					firstTerrainChunkStableId,
+				],
+			},
+		},
+		`terrain package chunk "${firstTerrainChunkStableId}" must not be listed in readiness.requiredWalkableStableIds; terrain package readiness owns streamed chunks.`,
 	);
 }
 
@@ -263,7 +283,11 @@ expectInvalid(
 		),
 		"Yggdrasil non-walkable required collision stable IDs",
 	);
-	const firstWalkableStableId = yggdrasilExpectedWalkableStableIds[0];
+	const terrainPackage = firstTerrainPackage(manifest);
+	const firstTerrainChunkStableId = firstRequired(
+		terrainPackage.chunks.map((chunk) => chunk.stableId),
+		"Yggdrasil terrain package chunks",
+	);
 	const firstLightStableId = firstRequired(
 		manifest.readiness.requiredLightStableIds,
 		"Yggdrasil readiness.requiredLightStableIds",
@@ -324,12 +348,26 @@ expectInvalid(
 			...cloneManifest(manifest),
 			readiness: {
 				...manifest.readiness,
-				requiredWalkableStableIds: (
-					manifest.readiness.requiredWalkableStableIds ?? []
-				).filter((stableId) => stableId !== firstWalkableStableId),
+				requiredTerrainPackageIds: (
+					manifest.readiness.requiredTerrainPackageIds ?? []
+				).filter((terrainPackageId) => terrainPackageId !== terrainPackage.id),
 			},
 		},
-		`authored walkable stable ID "${firstWalkableStableId}" is missing from readiness.requiredWalkableStableIds`,
+		`terrain package "${terrainPackage.id}" is missing from readiness.requiredTerrainPackageIds`,
+	);
+
+	expectYggdrasilContractInvalid(
+		{
+			...cloneManifest(manifest),
+			readiness: {
+				...manifest.readiness,
+				requiredWalkableStableIds: [
+					...(manifest.readiness.requiredWalkableStableIds ?? []),
+					firstTerrainChunkStableId,
+				],
+			},
+		},
+		`terrain package chunk "${firstTerrainChunkStableId}" must not be listed in readiness.requiredWalkableStableIds; terrain package readiness owns streamed chunks.`,
 	);
 
 	expectYggdrasilContractInvalid(
@@ -576,9 +614,15 @@ function assertYggdrasilLevelAuthoringContract(
 	}
 
 	assertSameStringSet(
-		manifest.readiness.requiredWalkableStableIds,
+		manifest.readiness.requiredWalkableStableIds ?? [],
+		[],
+		"Yggdrasil readiness must not author legacy requiredWalkableStableIds because terrain package readiness owns primitive walkables.",
+	);
+	const terrainPackage = firstTerrainPackage(manifest);
+	assertSameStringSet(
+		terrainPackage.chunks.map((chunk) => chunk.stableId),
 		yggdrasilExpectedWalkableStableIds,
-		"Yggdrasil readiness.requiredWalkableStableIds must exactly match authored primitive walkables.",
+		"Yggdrasil terrain package chunks must exactly match terrain-owned primitive walkables.",
 	);
 	assertSameStringSet(
 		manifest.readiness.requiredAssetIds,
@@ -632,9 +676,9 @@ function assertYggdrasilLevelAuthoringContract(
 	assertEqual(
 		(manifest.readiness.requiredCollisionStableIds ?? []).filter((stableId) =>
 			stableId.startsWith("yggdrasil:primitive:"),
-		).length,
+		).length + terrainPackage.chunks.length,
 		yggdrasilExpectedRuntimeImports.primitiveParity.collisionNodeCount,
-		"Yggdrasil readiness must include every primitive collision node.",
+		"Yggdrasil collision coverage must include non-terrain primitive readiness plus terrain package chunks.",
 	);
 
 	for (const assetString of allAssetStrings(manifest)) {
@@ -662,6 +706,81 @@ function assertYggdrasilLevelAuthoringContract(
 			);
 		}
 	}
+}
+
+function assertTerrainPackageReadiness(
+	manifest: RuntimeSceneManifestData,
+): RuntimeTerrainPackage {
+	const terrainPackage = firstTerrainPackage(manifest);
+
+	if (terrainPackage.runtimeSceneId !== manifest.id) {
+		throw new Error(
+			`Terrain package "${terrainPackage.id}" targets runtime scene "${terrainPackage.runtimeSceneId}", expected "${manifest.id}".`,
+		);
+	}
+
+	assertIncludes(
+		manifest.readiness.requiredTerrainPackageIds ?? [],
+		terrainPackage.id,
+		`Manifest "${manifest.id}" must require terrain package "${terrainPackage.id}".`,
+	);
+
+	if (terrainPackage.chunks.length === 0) {
+		throw new Error(
+			`Terrain package "${terrainPackage.id}" must include at least one streamable chunk.`,
+		);
+	}
+
+	for (const chunk of terrainPackage.chunks) {
+		assertNotIncludes(
+			manifest.readiness.requiredCollisionStableIds ?? [],
+			chunk.stableId,
+			`Terrain package chunk "${chunk.stableId}" must not be listed in legacy requiredCollisionStableIds.`,
+		);
+		assertNotIncludes(
+			manifest.readiness.requiredWalkableStableIds ?? [],
+			chunk.stableId,
+			`Terrain package chunk "${chunk.stableId}" must not be listed in legacy requiredWalkableStableIds.`,
+		);
+
+		const terrainCell = asRecord(
+			componentFromInstance(manifest, chunk.stableId, "TerrainChunkCell"),
+		);
+
+		if (terrainCell.packageId !== terrainPackage.id) {
+			throw new Error(
+				`Terrain package chunk "${chunk.stableId}" must resolve to TerrainChunkCell.packageId "${terrainPackage.id}".`,
+			);
+		}
+
+		if (componentFromInstance(manifest, chunk.stableId, "Collider")) {
+			throw new Error(
+				`Terrain package chunk "${chunk.stableId}" must not ship an active Collider component.`,
+			);
+		}
+
+		if (componentFromInstance(manifest, chunk.stableId, "RigidBody")) {
+			throw new Error(
+				`Terrain package chunk "${chunk.stableId}" must not ship an active RigidBody component.`,
+			);
+		}
+	}
+
+	return terrainPackage;
+}
+
+function firstTerrainPackage(
+	manifest: RuntimeSceneManifestData,
+): RuntimeTerrainPackage {
+	const terrainPackage = manifest.terrainPackages?.[0];
+
+	if (!terrainPackage) {
+		throw new Error(
+			`Manifest "${manifest.id}" must include a terrain package.`,
+		);
+	}
+
+	return terrainPackage;
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -704,6 +823,19 @@ function assertIncludes(
 		throw new Error(
 			message ??
 				`Expected ${JSON.stringify(values)} to include ${JSON.stringify(expected)}.`,
+		);
+	}
+}
+
+function assertNotIncludes(
+	values: readonly string[],
+	unexpected: string,
+	message?: string,
+): void {
+	if (values.includes(unexpected)) {
+		throw new Error(
+			message ??
+				`Expected ${JSON.stringify(values)} not to include ${JSON.stringify(unexpected)}.`,
 		);
 	}
 }

@@ -26,7 +26,7 @@ import {
 	createInteractionTargetSelectionSystem,
 	createPortalActivationSystem,
 	createStoryNoteActivationSystem,
-	selectGameHudState,
+	selectGameRuntimeUiState,
 } from "../src/game/systems/index.js";
 import { assertDeepEqual, assertEqual } from "./contractTestHelpers.js";
 
@@ -237,10 +237,10 @@ function runPortalActivation(harness: ReturnType<typeof createHarness>) {
 	});
 	harness.world.setResource(ACTIVE_PORTAL_RESOURCE, stalePortal);
 
-	const hud = selectGameHudState(harness.world);
+	const runtimeUi = selectGameRuntimeUiState(harness.world);
 
-	assertEqual(hud.activePortal?.label, "Portal");
-	assertEqual(hud.activePortal?.prompt, "Enter portal");
+	assertEqual(runtimeUi.activePortal?.label, "Portal");
+	assertEqual(runtimeUi.activePortal?.prompt, "Enter portal");
 }
 
 {
@@ -259,10 +259,10 @@ function runPortalActivation(harness: ReturnType<typeof createHarness>) {
 	});
 	harness.world.setResource(ACTIVE_STORY_NOTE_RESOURCE, staleNote);
 
-	const hud = selectGameHudState(harness.world);
+	const runtimeUi = selectGameRuntimeUiState(harness.world);
 
-	assertEqual(hud.activeStoryNote?.title, "Test Note");
-	assertEqual(hud.activeStoryNote?.prompt, "Read Test Note");
+	assertEqual(runtimeUi.activeStoryNote?.title, "Test Note");
+	assertEqual(runtimeUi.activeStoryNote?.prompt, "Read Test Note");
 }
 
 {

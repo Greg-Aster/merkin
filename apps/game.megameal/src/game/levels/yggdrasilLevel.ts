@@ -6,6 +6,7 @@ import {
 	yggdrasilPrimitiveParitySource,
 	yggdrasilPrimitiveWalkableSourceIds,
 } from "../content/yggdrasilPrimitiveParity.js";
+import { yggdrasilTerrainPackageId } from "../generated/terrainRuntime.js";
 import type { LevelDefinition, LevelPrefabInstance } from "./index.js";
 
 const primitiveIds = yggdrasilPrimitiveContentOptions.ids;
@@ -18,13 +19,22 @@ const primitiveMaterialAssetIds = yggdrasilPrimitiveNodes.map((node) =>
 const primitivePrefabIds = yggdrasilPrimitiveNodes.map((node) =>
 	primitiveIds.prefabId(node.sourceId),
 );
-const primitiveCollisionPrefabIds = yggdrasilPrimitiveCollisionSourceIds.map(
-	(sourceId) => primitiveIds.prefabId(sourceId),
+const terrainOwnedPrimitiveSourceIds = new Set(
+	yggdrasilPrimitiveWalkableSourceIds,
 );
-const primitiveCollisionStableIds = yggdrasilPrimitiveCollisionSourceIds.map(
-	(sourceId) => primitiveIds.stableId(sourceId),
-);
-const requiredWalkableStableIds = yggdrasilPrimitiveWalkableSourceIds.map(
+const requiredPrimitiveCollisionSourceIds =
+	yggdrasilPrimitiveCollisionSourceIds.filter(
+		(sourceId) => !terrainOwnedPrimitiveSourceIds.has(sourceId),
+	);
+const requiredPrimitiveCollisionPrefabIds =
+	requiredPrimitiveCollisionSourceIds.map((sourceId) =>
+		primitiveIds.prefabId(sourceId),
+	);
+const requiredPrimitiveCollisionStableIds =
+	requiredPrimitiveCollisionSourceIds.map((sourceId) =>
+		primitiveIds.stableId(sourceId),
+	);
+const terrainOwnedWalkableStableIds = yggdrasilPrimitiveWalkableSourceIds.map(
 	(sourceId) => primitiveIds.stableId(sourceId),
 );
 
@@ -79,16 +89,18 @@ export const yggdrasilExpectedRuntimeImports = {
 		playerStableId: "player",
 		requiredCollisionPrefabIds: [
 			"portal_gate",
-			...primitiveCollisionPrefabIds,
+			...requiredPrimitiveCollisionPrefabIds,
 			"player",
 		],
 		requiredCollisionStableIds: [
 			"player",
 			"yggdrasil:portal:portal-arena",
-			...primitiveCollisionStableIds,
+			...requiredPrimitiveCollisionStableIds,
 		],
-		requiredWalkableStableIds,
 		requiredLightStableIds: ["player"],
+	},
+	terrain: {
+		terrainOwnedWalkableStableIds,
 	},
 } as const;
 
@@ -203,14 +215,24 @@ function applyYggdrasilInstanceComponentOverlay(
 	instance: LevelPrefabInstance,
 ): LevelPrefabInstance {
 	const components = yggdrasilInstanceComponentOverlays[instance.id];
+	const terrainCell = yggdrasilPrimitiveWalkableSourceIds.includes(instance.id)
+		? {
+				TerrainChunkCell: {
+					packageId: yggdrasilTerrainPackageId,
+				},
+			}
+		: {};
 
-	if (!components) {
+	if (!components && Object.keys(terrainCell).length === 0) {
 		return instance;
 	}
 
 	return {
 		...instance,
-		components,
+		components: {
+			...terrainCell,
+			...(components ?? {}),
+		},
 	};
 }
 

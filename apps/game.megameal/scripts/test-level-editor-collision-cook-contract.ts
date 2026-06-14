@@ -28,16 +28,12 @@ const generatedRuntimeModuleFileUrl = new URL(
 	"../src/game/generated/observatoryCollisionRuntime.ts",
 	import.meta.url,
 );
-const observatoryWalkableChunkStableIds = [0, 1, 2, 3].flatMap((xChunk) =>
-	[0, 1, 2, 3].map(
-		(zChunk) => `observatory:walkable-mesh:chunk:x${xChunk}-z${zChunk}`,
-	),
-);
 const firstObservatoryWalkableChunkStableId =
 	"observatory:walkable-mesh:chunk:x0-z0";
 const plan = buildCollisionCookPlan(observatoryCollisionCookDraft);
+const runtimeCollisionPlan = collisionPlanWithoutTerrainChunks(plan);
 const result = validateCollisionCookPlanAgainstRuntimeScene({
-	plan,
+	plan: runtimeCollisionPlan,
 	manifest: observatoryRuntimeSceneManifest,
 });
 
@@ -47,6 +43,7 @@ if (!result.ok) {
 	);
 }
 
+assertRuntimeTerrainPackage(plan, observatoryRuntimeSceneManifest);
 assertObservatoryWalkableMesh(plan);
 assertWritePlan(plan);
 await assertPreviewAndBake(plan);
@@ -117,12 +114,27 @@ function assertWritePlan(cookPlan: CollisionCookPlan): void {
 	}
 
 	if (
-		!readinessArtifact.serializedPayload.includes(
+		readinessArtifact.serializedPayload.includes(
 			`"${firstObservatoryWalkableChunkStableId}"`,
 		)
 	) {
 		throw new Error(
-			"Expected runtime-readiness write artifact to include Observatory walkable chunk readiness.",
+			"Runtime-readiness write artifacts must not write Observatory terrain chunks into legacy stable-id readiness arrays.",
+		);
+	}
+
+	const requiredWalkableStableIds = (
+		readinessArtifact.payload as {
+			readonly requiredWalkableStableIds?: unknown;
+		}
+	).requiredWalkableStableIds;
+
+	if (
+		Array.isArray(requiredWalkableStableIds) &&
+		requiredWalkableStableIds.length > 0
+	) {
+		throw new Error(
+			"Runtime-readiness write artifacts must keep requiredWalkableStableIds empty because terrain package readiness owns streamed chunks.",
 		);
 	}
 
@@ -344,10 +356,10 @@ function assertOverlay(): void {
 		channel: "worldStatic",
 		requiredCollision: true,
 		requiredWalkable: true,
-		min: [-320, 1.4, -320],
-		max: [-160, 1.67, -160],
-		center: [-240, 1.535, -240],
-		size: [160, 0.27, 160],
+		min: [-130.625, 0.48, -118.75],
+		max: [-95, 1.2, -95],
+		center: [-112.8125, 0.84, -106.875],
+		size: [35.625, 0.72, 23.75],
 	});
 
 	assertOverlayEntry(overlay, "observatory:walkable-mesh:chunk:x2-z2", {
@@ -356,10 +368,10 @@ function assertOverlay(): void {
 		channel: "worldStatic",
 		requiredCollision: true,
 		requiredWalkable: true,
-		min: [0, 2.01, 0],
-		max: [160, 2.44, 160],
-		center: [80, 2.225, 80],
-		size: [160, 0.43000000000000016, 160],
+		min: [0, 1.4, 0],
+		max: [95, 52.24, 95],
+		center: [47.5, 26.82, 47.5],
+		size: [95, 50.84, 95],
 	});
 
 	assertOverlayEntry(overlay, "observatory:walkable-mesh:chunk:x3-z3", {
@@ -368,10 +380,10 @@ function assertOverlay(): void {
 		channel: "worldStatic",
 		requiredCollision: true,
 		requiredWalkable: true,
-		min: [160, 1.73, 160],
-		max: [320, 2.09, 320],
-		center: [240, 1.91, 240],
-		size: [160, 0.3599999999999999, 160],
+		min: [95, 1.64, 95],
+		max: [106.875, 3.76, 106.875],
+		center: [100.9375, 2.6999999999999997, 100.9375],
+		size: [11.875, 2.12, 11.875],
 	});
 
 	assertOverlayEntry(overlay, "observatory:collision:boundary:north", {
@@ -380,10 +392,10 @@ function assertOverlay(): void {
 		channel: "worldStatic",
 		requiredCollision: true,
 		requiredWalkable: false,
-		min: [-320, 1.8, -308],
-		max: [320, 9.8, -300],
-		center: [0, 5.8, -304],
-		size: [640, 8, 8],
+		min: [-190, -4.2, -192],
+		max: [190, 11.8, -184],
+		center: [0, 3.8000000000000003, -188],
+		size: [380, 16, 8],
 	});
 
 	assertOverlayEntry(overlay, "observatory:collision:boundary:south", {
@@ -392,10 +404,10 @@ function assertOverlay(): void {
 		channel: "worldStatic",
 		requiredCollision: true,
 		requiredWalkable: false,
-		min: [-320, 1.8, 300],
-		max: [320, 9.8, 308],
-		center: [0, 5.8, 304],
-		size: [640, 8, 8],
+		min: [-190, -4.2, 184],
+		max: [190, 11.8, 192],
+		center: [0, 3.8000000000000003, 188],
+		size: [380, 16, 8],
 	});
 
 	assertOverlayEntry(overlay, "observatory:collision:boundary:east", {
@@ -404,10 +416,10 @@ function assertOverlay(): void {
 		channel: "worldStatic",
 		requiredCollision: true,
 		requiredWalkable: false,
-		min: [300, 1.8, -320],
-		max: [308, 9.8, 320],
-		center: [304, 5.8, 0],
-		size: [8, 8, 640],
+		min: [184, -4.2, -190],
+		max: [192, 11.8, 190],
+		center: [188, 3.8000000000000003, 0],
+		size: [8, 16, 380],
 	});
 
 	assertOverlayEntry(overlay, "observatory:collision:boundary:west", {
@@ -416,27 +428,50 @@ function assertOverlay(): void {
 		channel: "worldStatic",
 		requiredCollision: true,
 		requiredWalkable: false,
-		min: [-308, 1.8, -320],
-		max: [-300, 9.8, 320],
-		center: [-304, 5.8, 0],
-		size: [8, 8, 640],
+		min: [-192, -4.2, -190],
+		max: [-184, 11.8, 190],
+		center: [-188, 3.8000000000000003, 0],
+		size: [8, 16, 380],
 	});
 }
 
 function assertEditorSessionDefaults(): void {
-	const editorSession = getDefaultLevelEditorSessionSummary();
+	const defaultEditorSession = getDefaultLevelEditorSessionSummary();
+	const editorSession = getDefaultLevelEditorSessionSummary({
+		selectedRuntimeSceneId: "observatory_runtime",
+	});
 	const previewPatch = buildCollisionCookPreviewPatch(plan);
 	const bakeFile = buildCollisionCookBakeFile(plan);
 
 	assertEqual(
+		defaultEditorSession.selectedRuntimeSceneId,
+		"portal_arena_runtime",
+		"Expected the generic editor boundary shell to open on the runtime scene catalog default.",
+	);
+	assertEqual(
+		defaultEditorSession.collisionDraft.status,
+		"missing",
+		"Expected the catalog-default editor session not to fall back to Observatory collision data.",
+	);
+	assertIncludes(
+		defaultEditorSession.collisionDraft.registeredRuntimeSceneIds,
+		"observatory_runtime",
+		"Expected Observatory to remain a registered content-specific collision draft.",
+	);
+	assertEqual(
 		editorSession.selectedRuntimeSceneId,
 		"observatory_runtime",
-		"Expected the editor boundary shell to open on Observatory runtime.",
+		"Expected selecting Observatory in the editor boundary shell to use Observatory runtime.",
+	);
+	assertEqual(
+		editorSession.collisionDraft.status,
+		"registered",
+		"Expected selecting Observatory to load its collision draft from the registry.",
 	);
 	assertEqual(
 		editorSession.collisionDraftId,
 		"observatory_collision_draft_v1",
-		"Expected the editor boundary shell to use the Observatory collision draft.",
+		"Expected the selected Observatory editor session to use the Observatory collision draft.",
 	);
 	assertEqual(
 		editorSession.collisionDraftEntryCount,
@@ -452,6 +487,11 @@ function assertEditorSessionDefaults(): void {
 		editorSession.preview.channel,
 		previewPatch.channel,
 		"Expected the editor boundary shell to expose the preview channel.",
+	);
+	assertEqual(
+		editorSession.preview.status,
+		"ready",
+		"Expected selected Observatory preview data to be ready.",
 	);
 	assertEqual(
 		editorSession.preview.sourcePlanHash,
@@ -576,6 +616,113 @@ function assertRuntimeMismatchCases(): void {
 	);
 }
 
+function assertRuntimeTerrainPackage(
+	cookPlan: CollisionCookPlan,
+	manifest: RuntimeSceneManifestData,
+): void {
+	const terrainPackage = firstTerrainPackage(manifest);
+	const packageChunkIds = terrainPackage.chunks
+		.map((chunk) => chunk.stableId)
+		.sort();
+	const cookChunkEntries = cookPlan.entries.filter((entry) =>
+		isTerrainChunkStableId(entry.stableId),
+	);
+	const cookChunkIds = cookChunkEntries.map((entry) => entry.stableId).sort();
+	const cookChunksByStableId = new Map(
+		cookChunkEntries.map((entry) => [entry.stableId, entry] as const),
+	);
+
+	assertIncludes(
+		manifest.readiness.requiredTerrainPackageIds ?? [],
+		terrainPackage.id,
+		"Expected Observatory runtime manifest to require its terrain package.",
+	);
+	assertDeepEqual(
+		packageChunkIds,
+		cookChunkIds,
+		"Expected Observatory runtime terrain package chunks to match the collision cook terrain chunks.",
+	);
+
+	for (const chunk of terrainPackage.chunks) {
+		assertNotIncludes(
+			manifest.readiness.requiredCollisionStableIds ?? [],
+			chunk.stableId,
+			`Observatory terrain package chunk "${chunk.stableId}" must not be listed in legacy requiredCollisionStableIds.`,
+		);
+		assertNotIncludes(
+			manifest.readiness.requiredWalkableStableIds ?? [],
+			chunk.stableId,
+			`Observatory terrain package chunk "${chunk.stableId}" must not be listed in legacy requiredWalkableStableIds.`,
+		);
+
+		const components = componentsForStableId(manifest, chunk.stableId);
+		const terrainCell = components.TerrainChunkCell;
+
+		if (!isRecord(terrainCell) || terrainCell.packageId !== terrainPackage.id) {
+			throw new Error(
+				`Observatory terrain package chunk "${chunk.stableId}" must resolve to TerrainChunkCell.packageId "${terrainPackage.id}".`,
+			);
+		}
+
+		if (isRecord(components.Collider)) {
+			throw new Error(
+				`Observatory terrain package chunk "${chunk.stableId}" must not ship an active Collider component.`,
+			);
+		}
+
+		if (isRecord(components.RigidBody)) {
+			throw new Error(
+				`Observatory terrain package chunk "${chunk.stableId}" must not ship an active RigidBody component.`,
+			);
+		}
+
+		const cookChunk = cookChunksByStableId.get(chunk.stableId);
+
+		if (!cookChunk) {
+			throw new Error(
+				`Expected Observatory collision cook chunk "${chunk.stableId}" to exist.`,
+			);
+		}
+
+		assertDeepEqual(
+			chunk.colliderComponent,
+			cookChunk.colliderComponent,
+			`Expected Observatory terrain package chunk "${chunk.stableId}" collider data to match the collision cook draft.`,
+		);
+	}
+}
+
+function collisionPlanWithoutTerrainChunks(
+	cookPlan: CollisionCookPlan,
+): CollisionCookPlan {
+	const entries = cookPlan.entries.filter(
+		(entry) => !isTerrainChunkStableId(entry.stableId),
+	);
+	const requiredEntries = entries.filter(
+		(entry) => entry.readiness.requiredCollision,
+	);
+
+	return {
+		...cookPlan,
+		entries,
+		requiredCollisionPrefabIds: sortedUnique(
+			requiredEntries.map((entry) => entry.prefabId),
+		),
+		requiredCollisionStableIds: sortedUnique(
+			requiredEntries.map((entry) => entry.stableId),
+		),
+		requiredWalkableStableIds: sortedUnique(
+			entries
+				.filter((entry) => entry.readiness.requiredWalkable === true)
+				.map((entry) => entry.stableId),
+		),
+	};
+}
+
+function isTerrainChunkStableId(stableId: string): boolean {
+	return stableId.startsWith("observatory:walkable-mesh:chunk:");
+}
+
 function assertWritePlanHashChanges(): void {
 	const writePlan = buildCollisionCookWritePlan(plan);
 	const shiftedDraft: CollisionCookDraftData = {
@@ -615,8 +762,13 @@ function assertObservatoryWalkableMesh(cookPlan: CollisionCookPlan): void {
 
 	assertEqual(
 		JSON.stringify(cookPlan.requiredWalkableStableIds),
-		JSON.stringify(observatoryWalkableChunkStableIds),
-		"Expected Observatory required walkable readiness to list each mesh chunk.",
+		JSON.stringify([]),
+		"Expected Observatory terrain-package owned chunks to stay out of legacy walkable readiness.",
+	);
+	assertNotIncludes(
+		cookPlan.requiredCollisionPrefabIds,
+		"observatory_walkable_mesh",
+		"Expected Observatory terrain-package owned chunks to stay out of legacy collision prefab readiness.",
 	);
 
 	assertEqual(
@@ -637,6 +789,11 @@ function assertObservatoryWalkableMesh(cookPlan: CollisionCookPlan): void {
 	const uniqueVertices = new Map<string, CollisionCookVector3Data>();
 
 	for (const entry of walkablePlanEntries) {
+		assertEqual(
+			entry.readiness.terrainPackageOwned,
+			true,
+			`Expected Observatory walkable collision chunk ${entry.stableId} to be terrain-package owned.`,
+		);
 		const walkableShape = entry.colliderComponent.shape;
 
 		if (walkableShape.type !== "mesh") {
@@ -645,21 +802,16 @@ function assertObservatoryWalkableMesh(cookPlan: CollisionCookPlan): void {
 			);
 		}
 
-		assertEqual(
-			walkableShape.vertices.length,
-			25,
-			`Unexpected Observatory walkable chunk vertex count for ${entry.stableId}.`,
-		);
-		assertEqual(
-			walkableShape.indices.length,
-			96,
-			`Unexpected Observatory walkable chunk index count for ${entry.stableId}.`,
-		);
-		assertEqual(
-			walkableShape.indices.length / 3,
-			32,
-			`Unexpected Observatory walkable chunk triangle count for ${entry.stableId}.`,
-		);
+		if (walkableShape.vertices.length < 4) {
+			throw new Error(
+				`Expected Observatory walkable collision chunk ${entry.stableId} to include emitted GLB-footprint vertices.`,
+			);
+		}
+		if (walkableShape.indices.length < 6) {
+			throw new Error(
+				`Expected Observatory walkable collision chunk ${entry.stableId} to include emitted GLB-footprint triangles.`,
+			);
+		}
 
 		for (const vertex of walkableShape.vertices) {
 			uniqueVertices.set(`${vertex[0]}:${vertex[2]}`, vertex);
@@ -668,7 +820,7 @@ function assertObservatoryWalkableMesh(cookPlan: CollisionCookPlan): void {
 
 	assertEqual(
 		uniqueVertices.size,
-		289,
+		665,
 		"Unexpected Observatory walkable mesh vertex count.",
 	);
 	assertEqual(
@@ -680,7 +832,7 @@ function assertObservatoryWalkableMesh(cookPlan: CollisionCookPlan): void {
 					: 0),
 			0,
 		),
-		1536,
+		3546,
 		"Unexpected Observatory walkable mesh index count.",
 	);
 	assertEqual(
@@ -692,7 +844,7 @@ function assertObservatoryWalkableMesh(cookPlan: CollisionCookPlan): void {
 					: 0),
 			0,
 		),
-		512,
+		1182,
 		"Unexpected Observatory walkable mesh triangle count.",
 	);
 
@@ -700,23 +852,23 @@ function assertObservatoryWalkableMesh(cookPlan: CollisionCookPlan): void {
 
 	assertMeshVertexHeight(
 		vertices,
-		-120,
-		-40,
-		1.88,
+		-142.5,
+		-47.5,
+		0.58,
 		"Observatory collision draft walkable mesh",
 	);
 	assertMeshVertexHeight(
 		vertices,
 		0,
 		0,
-		2.25,
+		52.24,
 		"Observatory collision draft walkable mesh",
 	);
 	assertMeshVertexHeight(
 		vertices,
-		320,
-		320,
-		2,
+		47.5,
+		47.5,
+		11.83,
 		"Observatory collision draft walkable mesh",
 	);
 }
@@ -848,7 +1000,7 @@ function expectRuntimeMismatch(
 	expectedError: string,
 ): void {
 	const runtimeResult = validateCollisionCookPlanAgainstRuntimeScene({
-		plan,
+		plan: runtimeCollisionPlan,
 		manifest,
 	});
 
@@ -1091,6 +1243,108 @@ async function importNodeFsPromises(): Promise<NodeFsPromises> {
 	const specifier = "node:fs/promises";
 
 	return (await import(specifier)) as NodeFsPromises;
+}
+
+function firstTerrainPackage(manifest: RuntimeSceneManifestData) {
+	const terrainPackage = manifest.terrainPackages?.[0];
+
+	if (!terrainPackage) {
+		throw new Error(
+			`Expected runtime manifest "${manifest.id}" to include a terrain package.`,
+		);
+	}
+
+	return terrainPackage;
+}
+
+function componentsForStableId(
+	manifest: RuntimeSceneManifestData,
+	stableId: string,
+): Record<string, unknown> {
+	const instance = manifest.level.instances.find(
+		(candidate) => candidate.stableId === stableId,
+	);
+
+	if (!instance) {
+		throw new Error(`Expected runtime level instance "${stableId}" to exist.`);
+	}
+
+	const prefab = manifest.prefabs.find(
+		(candidate) => candidate.id === instance.prefabId,
+	);
+
+	if (!prefab) {
+		throw new Error(
+			`Expected runtime level instance "${stableId}" to reference prefab "${instance.prefabId}".`,
+		);
+	}
+
+	return {
+		...prefab.components,
+		...(instance.components ?? {}),
+	};
+}
+
+function sortedUnique(values: readonly string[]): readonly string[] {
+	return [...new Set(values)].sort();
+}
+
+function assertDeepEqual<TValue>(
+	actual: TValue,
+	expected: TValue,
+	message: string,
+): void {
+	const actualJson = stableStringify(actual);
+	const expectedJson = stableStringify(expected);
+
+	if (actualJson !== expectedJson) {
+		throw new Error(
+			`${message} Expected ${expectedJson}, received ${actualJson}.`,
+		);
+	}
+}
+
+function stableStringify(value: unknown): string {
+	if (Array.isArray(value)) {
+		return `[${value.map((item) => stableStringify(item)).join(",")}]`;
+	}
+
+	if (isRecord(value)) {
+		return `{${Object.keys(value)
+			.sort()
+			.map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+			.join(",")}}`;
+	}
+
+	return JSON.stringify(value);
+}
+
+function assertIncludes<TValue>(
+	values: readonly TValue[],
+	expected: TValue,
+	message: string,
+): void {
+	if (!values.includes(expected)) {
+		throw new Error(
+			`${message} Expected ${JSON.stringify(values)} to include ${JSON.stringify(expected)}.`,
+		);
+	}
+}
+
+function assertNotIncludes<TValue>(
+	values: readonly TValue[],
+	unexpected: TValue,
+	message: string,
+): void {
+	if (values.includes(unexpected)) {
+		throw new Error(
+			`${message} Expected ${JSON.stringify(values)} not to include ${JSON.stringify(unexpected)}.`,
+		);
+	}
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function assertEqual<TValue>(

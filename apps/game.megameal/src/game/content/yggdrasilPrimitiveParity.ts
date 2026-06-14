@@ -33,4 +33,5 @@ export const yggdrasilPrimitiveContentOptions = {
 	tag: "yggdrasil",
 	ids: yggdrasilPrimitiveContentIds,
 	walkableSourceIds: yggdrasilPrimitiveWalkableSourceIds,
+	terrainOwnedSourceIds: yggdrasilPrimitiveWalkableSourceIds,
 } as const satisfies PrimitiveSceneContentOptions;

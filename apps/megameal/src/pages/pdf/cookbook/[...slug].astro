@@ -1,13 +1,14 @@
 ---
 import { getCollection } from 'astro:content'
+import { publicDownloadableCollectionFilter } from '../../../contracts/content'
 
 export async function getStaticPaths() {
-  const entries = await getCollection('cookbook')
+  const entries = await getCollection(
+    'cookbook',
+    publicDownloadableCollectionFilter,
+  )
 
   return entries
-    .filter(
-      entry => entry.data.downloadable === true && entry.data.draft !== true,
-    )
     .flatMap(entry => [
       {
         params: { slug: entry.slug },
@@ -53,10 +54,3 @@ import '../../../styles/pages/pdf-post.css'
     </article>
   </body>
 </html>
-
-<style is:global>
-  .pdf-article[data-recipe-mode='original'] [data-recipe-mode='terrestrial'],
-  .pdf-article[data-recipe-mode='terrestrial'] [data-recipe-mode='original'] {
-    display: none;
-  }
-</style>

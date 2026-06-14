@@ -3,32 +3,29 @@ import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import FeaturedProductBanner from '../../components/home/FeaturedProductBanner.svelte'
 import MediaGallery from '../../components/store/MediaGallery.svelte'
-import StoreLayout from '../../layouts/store/StoreLayout.astro'
 import {
-  buildFlagshipProductShowcase,
+  getAvailabilityBadge,
   getProductHref,
+  getProductMediaItems,
   getProductSlug,
-} from '../../utils/flagship-product-showcase'
-import { url } from '../../utils/url-utils'
+  productCategoryLabels,
+  publicProductCollectionFilter,
+} from '../../contracts/products'
+import StoreLayout from '../../layouts/store/StoreLayout.astro'
+import { buildFlagshipProductShowcase } from '../../utils/flagship-product-showcase'
 
 export async function getStaticPaths() {
-  const products = await getCollection(
-    'products',
-    ({ data }) => data.draft !== true,
-  )
+  const products = await getCollection('products', publicProductCollectionFilter)
   return products.map(product => ({
     params: {
-      slug: product.data.slug ?? product.id.replace(/\.(md|mdx)$/, ''),
+      slug: getProductSlug(product),
     },
     props: { product },
   }))
 }
 
 const { product } = Astro.props
-const allProducts = await getCollection(
-  'products',
-  ({ data }) => data.draft !== true,
-)
+const allProducts = await getCollection('products', publicProductCollectionFilter)
 const { Content: ProductContent } = await product.render()
 const {
   name,
@@ -36,9 +33,6 @@ const {
   description,
   realDescription,
   price,
-  image,
-  additionalImages,
-  media,
   sku,
   rating,
   specifications,
@@ -62,49 +56,7 @@ const hasQandA = Array.isArray(qanda) && qanda.length > 0
 const hasPreWrittenReviews =
   Array.isArray(preWrittenReviews) && preWrittenReviews.length > 0
 
-const resolveAsset = (path: string | undefined) => {
-  if (!path) return undefined
-  return path.startsWith('/') ? url(path) : path
-}
-
-type MediaGalleryItem = {
-  type: 'image' | 'video' | 'youtube'
-  src?: string
-  videoId?: string
-  poster?: string
-  alt?: string
-  caption?: string
-}
-
-const isGalleryMediaType = (type: string): type is MediaGalleryItem['type'] =>
-  type === 'image' || type === 'video' || type === 'youtube'
-
-// Unified media items
-const mediaItems: MediaGalleryItem[] =
-  Array.isArray(media) && media.length > 0
-    ? media.flatMap(item => {
-        if (!isGalleryMediaType(item.type)) return []
-        return [
-          {
-            type: item.type,
-            src: item.src ? resolveAsset(item.src) : undefined,
-            videoId: item.videoId,
-            poster: item.poster ? resolveAsset(item.poster) : undefined,
-            alt: item.alt,
-            caption: item.caption,
-          },
-        ]
-      })
-    : [
-        ...(image
-          ? [{ type: 'image' as const, src: resolveAsset(image), alt: name }]
-          : []),
-        ...(additionalImages ?? []).map((src: string) => ({
-          type: 'image' as const,
-          src: resolveAsset(src),
-          alt: name,
-        })),
-      ]
+const mediaItems = getProductMediaItems(product)
 
 let fullStars = 0
 let halfStar = false
@@ -117,59 +69,14 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
   emptyStars = 5 - fullStars - (halfStar ? 1 : 0)
 }
 
-const availabilityMap: Record<
-  string,
-  { label: string; classes: string; ctaMessage: string }
-> = {
-  available: {
-    label: badge || 'Available Now',
-    classes: 'bg-emerald-500/90 text-white',
-    ctaMessage: '',
-  },
-  coming_soon: {
-    label: badge || 'Coming Soon',
-    classes: 'bg-blue-500/80 text-white',
-    ctaMessage: 'Transmission pending. Stand by.',
-  },
-  out_of_stock: {
-    label: badge || 'Out of Stock',
-    classes: 'bg-slate-500/80 text-white',
-    ctaMessage: 'The shelves are bare. Demand has been noted. Probably.',
-  },
-  not_in_your_area: {
-    label: badge || 'Not in Your Area',
-    classes: 'bg-amber-500/80 text-black',
-    ctaMessage: 'Your coordinates are outside our current distribution matrix.',
-  },
-  not_in_your_timeline: {
-    label: badge || 'Not Available in Your Timeline',
-    classes: 'bg-purple-500/80 text-white',
-    ctaMessage:
-      'This product exists. Procurement from your timeline is not currently supported.',
-  },
-  artifact_only: {
-    label: badge || 'Artifact Record',
-    classes: 'bg-rose-900/80 text-rose-200',
-    ctaMessage:
-      'This item is catalogued for archival purposes. Acquiring it would be inadvisable.',
-  },
-}
 const currentAvailability = availability ?? 'coming_soon'
-const avail =
-  availabilityMap[currentAvailability] ?? availabilityMap.coming_soon
+const avail = getAvailabilityBadge(currentAvailability, badge)
 const canAddToCart = ctaMode === 'cart' && currentAvailability === 'available'
 const canBuyExternal =
   ctaMode === 'external' &&
   !!stripePaymentLink &&
   currentAvailability === 'available'
 
-const categoryLabels: Record<string, string> = {
-  equipment: 'Equipment',
-  consumables: 'Consumables',
-  publications: 'Publications',
-  companions: 'Companions',
-  relics: 'Relics',
-}
 const productSlug = getProductSlug(product)
 const productHref = getProductHref(product)
 // Compatibility fallback for running dev servers during content-schema migration.
@@ -210,7 +117,7 @@ const flagshipShowcase = isShowcaseProduct
         <>
           <Icon name="mdi:chevron-right" class="h-4 w-4" />
           <a href={`/store/?category=${category}`} data-sfx-hover="hover-soft" data-sfx-click="soft" class="hover:text-[var(--primary)] transition capitalize">
-            {categoryLabels[category] ?? category}
+            {productCategoryLabels[category] ?? category}
           </a>
         </>
       )}
@@ -300,7 +207,7 @@ const flagshipShowcase = isShowcaseProduct
             </span>
             {category && (
               <span class="px-2 py-0.5 rounded text-xs font-medium bg-slate-700/60 text-slate-300 capitalize">
-                {categoryLabels[category] ?? category}
+                {productCategoryLabels[category] ?? category}
               </span>
             )}
           </div>
@@ -502,22 +409,7 @@ const flagshipShowcase = isShowcaseProduct
 </StoreLayout>
 
 <script>
-  // Tab switching
-  const tabs = document.querySelectorAll<HTMLButtonElement>('.detail-tab')
-  const panels = document.querySelectorAll<HTMLElement>('.detail-panel')
+  import { initProductDetailTabs } from '../../components/store/storefrontController'
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const target = tab.dataset.tab
-      tabs.forEach(t => {
-        const active = t.dataset.tab === target
-        t.classList.toggle('border-[var(--primary)]', active)
-        t.classList.toggle('text-[var(--primary)]', active)
-        t.classList.toggle('border-transparent', !active)
-        t.classList.toggle('text-slate-400', !active)
-        t.setAttribute('aria-selected', active ? 'true' : 'false')
-      })
-      panels.forEach(p => p.classList.toggle('hidden', p.id !== `panel-${target}`))
-    })
-  })
+  initProductDetailTabs()
 </script>

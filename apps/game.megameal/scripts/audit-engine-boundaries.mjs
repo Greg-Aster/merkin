@@ -16,6 +16,9 @@ const browserGlobalPattern =
 const oldEnginePathPattern = /(^|[^A-Za-z0-9_.-])\/?apps\/game(?:\/|$)/;
 const oldEnginePathGlobalPattern = /(^|[^A-Za-z0-9_.-])\/?apps\/game(?:\/|$)/g;
 const literalPattern = /["'`]([^"'`\n]+)["'`]/g;
+const perLevelCollisionDraftImportPattern =
+	/src\/game\/editor\/collisionDrafts\/[^/]+CollisionDraft$/;
+const runtimeSceneIdLiteralPattern = /^[a-z][a-z0-9_]*_runtime$/;
 const engineContentTokenPattern =
 	/(^|[^a-z0-9])(?:miranda|observatory|sci[-_]?fi|yggdrasil|solitude|portal[-_]arena)(?:[^a-z0-9]|$)/i;
 
@@ -38,6 +41,15 @@ for (const file of files) {
 	for (const match of oldEngineReferenceMatches(rel, source, imports)) {
 		violations.push(
 			`${rel}: sibling apps/game is read-only reference material (${match})`,
+		);
+	}
+
+	for (const match of browserGameClientDevPreviewStaticImportMatches(
+		rel,
+		source,
+	)) {
+		violations.push(
+			`${rel}: browser game client must lazy-load dev-preview code through the dev-only dynamic bridge (${match})`,
 		);
 	}
 
@@ -97,6 +109,30 @@ for (const file of files) {
 		)) {
 			violations.push(
 				`${rel}: normal runtime code must not import editor modules (${match.specifier})`,
+			);
+		}
+	}
+
+	if (isGenericAppEditorModule(rel)) {
+		for (const match of levelSpecificEditorDefaultMatches(
+			rel,
+			source,
+			imports,
+		)) {
+			violations.push(
+				`${rel}: generic app/editor tooling must resolve editor content through the manifest/draft catalog (${match})`,
+			);
+		}
+	}
+
+	if (pathStartsWith(rel, "src/app/editor")) {
+		for (const match of imports.filter(
+			(entry) =>
+				entry.kind === "relative" &&
+				entry.resolved === "src/game/editor/authoring/index",
+		)) {
+			violations.push(
+				`${rel}: browser editor modules must import browser-safe authoring submodules instead of the server persistence barrel (${match.specifier})`,
 			);
 		}
 	}
@@ -163,6 +199,22 @@ function extractImportSpecifiers(source) {
 	return [...specifiers];
 }
 
+function extractStaticImportSpecifiers(source) {
+	const specifiers = new Set();
+	const patterns = [
+		/\b(?:import|export)\s+(?:type\s+)?[\s\S]*?\bfrom\s*["']([^"']+)["']/g,
+		/^\s*import\s*["']([^"']+)["']/gm,
+	];
+
+	for (const pattern of patterns) {
+		for (const match of source.matchAll(pattern)) {
+			specifiers.add(match[1]);
+		}
+	}
+
+	return [...specifiers];
+}
+
 function resolveSpecifier(relFile, specifier) {
 	if (!specifier.startsWith(".")) {
 		return { kind: "package", specifier };
@@ -201,6 +253,10 @@ function isEditorModulePath(path) {
 		pathStartsWith(path, "src/app/editor") ||
 		pathStartsWith(path, "src/game/editor")
 	);
+}
+
+function isGenericAppEditorModule(rel) {
+	return pathStartsWith(rel, "src/app") || rel === "src/pages/editor.astro";
 }
 
 function importsPath(imports, pathPrefix) {
@@ -286,6 +342,22 @@ function oldEngineReferenceMatches(rel, source, imports) {
 	return [...matches].sort();
 }
 
+function browserGameClientDevPreviewStaticImportMatches(rel, source) {
+	if (rel !== "src/app/browserGameClient.ts") {
+		return [];
+	}
+
+	return extractStaticImportSpecifiers(source)
+		.map((specifier) => resolveSpecifier(rel, specifier))
+		.filter(
+			(entry) =>
+				entry.kind === "relative" &&
+				pathStartsWith(entry.resolved, "src/app/devPreview"),
+		)
+		.map((entry) => `static import ${entry.specifier}`)
+		.sort();
+}
+
 function engineContentLiteralMatches(source) {
 	const matches = new Set();
 
@@ -294,6 +366,27 @@ function engineContentLiteralMatches(source) {
 
 		if (engineContentTokenPattern.test(literal)) {
 			matches.add(match[1]);
+		}
+	}
+
+	return [...matches].sort();
+}
+
+function levelSpecificEditorDefaultMatches(rel, source, imports) {
+	const matches = new Set();
+
+	for (const entry of imports) {
+		if (
+			entry.kind === "relative" &&
+			perLevelCollisionDraftImportPattern.test(entry.resolved)
+		) {
+			matches.add(`direct per-level collision draft import ${entry.specifier}`);
+		}
+	}
+
+	for (const match of source.matchAll(literalPattern)) {
+		if (runtimeSceneIdLiteralPattern.test(match[1])) {
+			matches.add(`runtime scene literal "${match[1]}"`);
 		}
 	}
 

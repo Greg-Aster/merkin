@@ -13,7 +13,6 @@ import {
   SRGBColorSpace,
   type Texture,
   TextureLoader,
-  VideoTexture,
   type WebGLRenderer,
 } from 'three'
 import type * as THREE from 'three'
@@ -32,6 +31,7 @@ import {
   createScreenInfoTickerTextureController,
   createScreenTextTexture,
 } from './homeIntroScreenTextTextures'
+import { createHomeIntroScreenVideoPlayback } from './homeIntroScreenVideoPlayback'
 
 type SceneQuality = 'high' | 'balanced' | 'lean'
 
@@ -50,6 +50,7 @@ export let description = ''
 export let stat = ''
 export let ctaLabel = ''
 export let hovered = false
+export let videoPlaybackEnabled = true
 export let motionEnabled = true
 
 const threlte = useThrelte()
@@ -59,7 +60,7 @@ let stillTexture: Texture | null = null
 let screenTextTexture: CanvasTexture | null = null
 let screenInfoTexture: CanvasTexture | null = null
 let screenContentTexture: Texture | null = null
-let videoTexture: VideoTexture | null = null
+let videoTexture: Texture | null = null
 let panelRoot: Group | null = null
 let screenModel: THREE.Object3D | null = null
 let screenContentMesh: Mesh | null = null
@@ -73,8 +74,8 @@ let screenModelRequested = false
 let stillTextureRequested = false
 let ktx2TextureRequested = false
 let titleTextureRequested = false
-let videoRequested = false
 let videoReady = false
+let hasVideoElement = false
 let mounted = false
 let disposed = false
 let hoverBlend = 0
@@ -85,8 +86,8 @@ let textOpacity = primary ? 0.72 : 0.58
 let infoTextOpacity = 0
 let mediaTint = '#ffffff'
 let titleMediaTint = '#ffffff'
-let videoElement: HTMLVideoElement | null = null
 const screenInfoTicker = createScreenInfoTickerTextureController()
+const videoPlayback = createHomeIntroScreenVideoPlayback()
 
 const additiveBlending = AdditiveBlending
 const normalBlending = NormalBlending
@@ -95,8 +96,9 @@ const frontSide = FrontSide
 const frameWidth = 3.18
 const frameHeight = 1.78
 const screenModelZ = -0.07
-const mediaWidth = frameWidth * 1.1
-const mediaHeight = frameHeight * 1.1
+const screenContentInset = 0.9
+const mediaWidth = frameWidth * screenContentInset
+const mediaHeight = mediaWidth * (9 / 16)
 const titleWidth = mediaWidth
 const titleHeight = mediaHeight
 const fallbackWidth = 2.76
@@ -129,18 +131,30 @@ function disposeTitleTexture() {
   titleTexture = null
 }
 
-function disposeVideoTexture() {
-  videoTexture?.dispose()
-  videoTexture = null
+function applyVideoPlaybackState(state = videoPlayback.state) {
+  videoTexture = state.texture
+  videoReady = state.ready
+  hasVideoElement = state.hasElement
 }
 
-function disposeVideoElement() {
-  if (!videoElement) return
+function releaseVideoPlayback() {
+  applyVideoPlaybackState(videoPlayback.release())
+}
 
-  videoElement.pause()
-  videoElement.removeAttribute('src')
-  videoElement.load()
-  videoElement = null
+function syncVideoPlayback() {
+  applyVideoPlaybackState(
+    videoPlayback.sync({
+      enabled: videoPlaybackEnabled,
+      src: videoSrc,
+      playbackRate: screenVideoPlaybackRate,
+      shouldLoadMedia,
+      active,
+      hovered,
+      motionEnabled,
+      isMounted: () => mounted,
+      onReady: applyVideoPlaybackState,
+    }),
+  )
 }
 
 function disposeScreenTextTexture() {
@@ -183,64 +197,6 @@ function configureMediaTexture(texture: Texture, invertY = false) {
   }
 
   texture.needsUpdate = true
-}
-
-function ensureVideoLoaded() {
-  if (
-    videoRequested ||
-    typeof document === 'undefined' ||
-    !shouldLoadMedia ||
-    !videoSrc
-  ) {
-    return
-  }
-
-  videoRequested = true
-  videoReady = false
-  const video = document.createElement('video')
-  video.muted = true
-  video.loop = true
-  video.playsInline = true
-  video.preload = 'metadata'
-  video.crossOrigin = 'anonymous'
-  video.playbackRate = screenVideoPlaybackRate
-  video.src = videoSrc
-
-  video.addEventListener(
-    'canplay',
-    () => {
-      if (!mounted || videoElement !== video) return
-      videoReady = true
-    },
-    { once: true },
-  )
-
-  videoElement = video
-  videoTexture = new VideoTexture(video)
-  configureMediaTexture(videoTexture)
-  video.load()
-}
-
-function syncVideoPlayback() {
-  if (!videoSrc) return
-
-  if (!motionEnabled) return videoElement?.pause()
-
-  if (shouldLoadMedia && (active || hovered)) {
-    ensureVideoLoaded()
-  }
-
-  const shouldPlay = shouldLoadMedia && hovered
-
-  if (shouldPlay) {
-    if (videoElement) videoElement.playbackRate = screenVideoPlaybackRate
-    videoElement?.play().catch(() => {
-      // The still image remains visible if autoplay is blocked.
-    })
-    return
-  }
-
-  videoElement?.pause()
 }
 
 function syncScreenTextTexture() {
@@ -295,8 +251,7 @@ function cleanupPanel() {
   disposeScreenModel()
   disposeStillTexture()
   disposeTitleTexture()
-  disposeVideoTexture()
-  disposeVideoElement()
+  releaseVideoPlayback()
   disposeScreenTextTexture()
   disposeScreenInfoTexture()
   disposeScreenContentRenderer()
@@ -416,7 +371,7 @@ function renderScreenContent() {
   ].join(':')
   const hasLiveVideo =
     Boolean(videoTexture && videoReady && videoMediaOpacity > 0.001) &&
-    videoElement?.paused === false
+    videoPlayback.isPlaying
 
   if (
     screenContentRendered &&
@@ -439,8 +394,8 @@ $: if (loader && shouldLoadMedia) {
 
 $: if (
   mounted &&
-  videoSrc &&
-  (active || hovered || videoElement || !motionEnabled)
+  (videoSrc || hasVideoElement) &&
+  (active || hovered || hasVideoElement || !motionEnabled || !videoPlaybackEnabled)
 ) {
   syncVideoPlayback()
 }
@@ -452,27 +407,23 @@ $: if (mounted && (kicker || title || stat || ctaLabel)) {
 $: mediaTint = getTextureTint(mediaOpacity)
 $: titleMediaTint = getTextureTint(titleMediaOpacity)
 $: if (screenContentMesh && screenContentMaterial) {
-  const reflectionOnly = Boolean(screenModel)
-  const canWriteMainPass = !reflectionOnly
-
   screenContentMesh.userData[homeIntroReflectionOnlyUserDataKey] =
-    reflectionOnly
+    Boolean(screenModel)
   screenContentMesh.visible = true
-  screenContentMaterial.colorWrite = canWriteMainPass
-  screenContentMaterial.depthWrite = canWriteMainPass
+  screenContentMaterial.colorWrite = true
+  screenContentMaterial.depthWrite = false
   screenContentMesh.onBeforeRender = renderer => {
     const renderTarget = renderer.getRenderTarget()
     const renderTargetName = renderTarget?.texture?.name ?? ''
-    const canWriteGlassPass =
-      Boolean(renderTarget) && renderTargetName !== 'HomeIntroLogoGlitch.logo'
-    const canWriteCurrentPass = !reflectionOnly || canWriteGlassPass
+    const isLogoGlitchPass =
+      Boolean(renderTarget) && renderTargetName === 'HomeIntroLogoGlitch.logo'
 
-    screenContentMaterial!.colorWrite = canWriteCurrentPass
-    screenContentMaterial!.depthWrite = canWriteCurrentPass
+    screenContentMaterial!.colorWrite = !isLogoGlitchPass
+    screenContentMaterial!.depthWrite = false
   }
   screenContentMesh.onAfterRender = () => {
-    screenContentMaterial!.colorWrite = canWriteMainPass
-    screenContentMaterial!.depthWrite = canWriteMainPass
+    screenContentMaterial!.colorWrite = true
+    screenContentMaterial!.depthWrite = false
   }
 }
 

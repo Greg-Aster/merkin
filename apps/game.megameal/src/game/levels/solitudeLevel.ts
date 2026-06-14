@@ -1,3 +1,4 @@
+import { terrainLevelInstancesForRuntimeScene } from "../generated/terrainRuntime.js";
 import type { LevelDefinition, LevelPrefabInstance } from "./index.js";
 
 const YAW_QUARTER_TURN = [0, Math.SQRT1_2, 0, Math.SQRT1_2] as const;
@@ -71,8 +72,6 @@ export const solitudeExpectedRuntimeImports = {
 		playerStableId: "player",
 		requiredCollisionPrefabIds: [
 			"portal_gate",
-			"solitude_ground_plateau",
-			"solitude_ground_dais",
 			"solitude_pillar",
 			"solitude_ring_fragment",
 			"solitude_firefly_marker",
@@ -81,17 +80,11 @@ export const solitudeExpectedRuntimeImports = {
 		requiredCollisionStableIds: [
 			"player",
 			"solitude:portal:portal-arena",
-			"solitude:ground:plateau",
-			"solitude:ground:dais",
 			"solitude:story:central-firefly",
 			...pillarRing.map((pillar) => `solitude:pillar:${pillar.id}`),
 			...ringFragments.map(
 				(fragment) => `solitude:ring-fragment:${fragment.id}`,
 			),
-		],
-		requiredWalkableStableIds: [
-			"solitude:ground:plateau",
-			"solitude:ground:dais",
 		],
 		requiredLightStableIds: ["player", "solitude:story:central-firefly"],
 	},
@@ -113,52 +106,7 @@ export const solitudeLevel = {
 	},
 	preload: solitudeExpectedRuntimeImports.assetIds,
 	instances: [
-		{
-			id: "solitude-ground-plateau",
-			prefabId: "solitude_ground_plateau",
-			stableId: "solitude:ground:plateau",
-			transform: {
-				position: [0, -0.36, 0],
-				scale: [128.45490162495452, 0.72, 132.4415601615787],
-			},
-			components: {
-				RigidBody: {
-					type: "fixed",
-					mass: 0,
-				},
-				Collider: {
-					intent: "walkable",
-					channel: "worldStatic",
-					shape: {
-						type: "box",
-						halfExtents: [64.22745081247726, 0.36, 66.22078008078935],
-					},
-				},
-			},
-		},
-		{
-			id: "solitude-ground-dais",
-			prefabId: "solitude_ground_dais",
-			stableId: "solitude:ground:dais",
-			transform: {
-				position: [0, 0.16, 0.2305610401047442],
-				scale: [23.249915454852893, 0.32, 22.39938096256249],
-			},
-			components: {
-				RigidBody: {
-					type: "fixed",
-					mass: 0,
-				},
-				Collider: {
-					intent: "walkable",
-					channel: "worldStatic",
-					shape: {
-						type: "box",
-						halfExtents: [11.624957727426446, 0.16, 11.199690481281245],
-					},
-				},
-			},
-		},
+		...terrainLevelInstancesForRuntimeScene("solitude_runtime"),
 		...pillarRing.map(createPillarInstance),
 		...ringFragments.map(createRingFragmentInstance),
 		{

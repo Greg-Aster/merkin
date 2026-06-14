@@ -157,7 +157,7 @@ export type GameplayCommand =
 	| InteractWithActiveTargetCommand
 	| CloseStoryNoteCommand;
 
-export type GameHudState = {
+export type GameRuntimeUiState = {
 	readonly playerAlive: boolean;
 	readonly playerPosition: readonly [number, number, number];
 	readonly health: readonly [number, number];

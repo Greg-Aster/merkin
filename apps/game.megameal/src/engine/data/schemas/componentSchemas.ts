@@ -15,6 +15,7 @@ import {
 	validateRequiredNumberTuple,
 	validateRequiredPositiveNumber,
 	validateRequiredPositiveNumberTuple,
+	validateRequiredStringArray,
 	validateRequiredVec3Like,
 	validateSerializableValue,
 } from "./helpers.js";
@@ -124,6 +125,16 @@ export function validateKnownComponents(
 
 	if (components.TerrainChunkCell !== undefined && !hasTransform) {
 		errors.push(`${path}.TerrainChunkCell requires a Transform component.`);
+	}
+
+	validateTerrainSurfaceComponent(
+		components.TerrainSurface,
+		`${path}.TerrainSurface`,
+		errors,
+	);
+
+	if (components.TerrainSurface !== undefined && !hasTransform) {
+		errors.push(`${path}.TerrainSurface requires a Transform component.`);
 	}
 
 	validateLightComponent(components.Light, `${path}.Light`, errors);
@@ -238,6 +249,33 @@ function validateTerrainChunkCellComponent(
 	}
 
 	requireString(cell, "packageId", `${path}.packageId`, errors);
+}
+
+function validateTerrainSurfaceComponent(
+	surface: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (surface === undefined) {
+		return;
+	}
+
+	if (!isRecord(surface)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	requireString(surface, "materialSetId", `${path}.materialSetId`, errors);
+	validateRequiredStringArray(surface.layerIds, `${path}.layerIds`, errors);
+	validateOptionalNumberTuple(surface.uvScale, 2, `${path}.uvScale`, errors);
+
+	if (
+		surface.blendMode !== "single" &&
+		surface.blendMode !== "weighted" &&
+		surface.blendMode !== "splat-map"
+	) {
+		errors.push(`${path}.blendMode must be single, weighted, or splat-map.`);
+	}
 }
 
 function validateWaterSurfaceComponent(

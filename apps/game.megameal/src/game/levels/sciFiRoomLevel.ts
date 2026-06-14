@@ -1,3 +1,4 @@
+import { terrainLevelInstancesForRuntimeScene } from "../generated/terrainRuntime.js";
 import type { LevelDefinition } from "./index.js";
 
 const columnInstances = [
@@ -47,30 +48,7 @@ export const sciFiRoomLevel = {
 		"audio_portal_cycle",
 	],
 	instances: [
-		{
-			id: "sci-fi-room-floor-interior",
-			prefabId: "sci_fi_room_floor_interior",
-			stableId: "sci-fi-room:floor:interior",
-			transform: {
-				position: [0, -0.56, 0],
-			},
-		},
-		{
-			id: "sci-fi-room-floor-courtyard",
-			prefabId: "sci_fi_room_floor_courtyard",
-			stableId: "sci-fi-room:floor:courtyard",
-			transform: {
-				position: [0, -0.56, 21.52],
-			},
-		},
-		{
-			id: "sci-fi-room-floor-wasteland",
-			prefabId: "sci_fi_room_floor_wasteland",
-			stableId: "sci-fi-room:floor:wasteland",
-			transform: {
-				position: [0.063, -0.806, 1.736],
-			},
-		},
+		...terrainLevelInstancesForRuntimeScene("sci_fi_room_runtime"),
 		{
 			id: "sci-fi-room-console",
 			prefabId: "sci_fi_room_console",

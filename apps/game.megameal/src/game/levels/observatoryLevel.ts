@@ -1,6 +1,13 @@
 import { collisionLevelInstances as observatoryCollisionLevelInstances } from "../generated/observatoryCollisionRuntime.js";
+import { terrainLevelInstancesForRuntimeScene } from "../generated/terrainRuntime.js";
 import { observatoryFireflyInstances } from "../populations/index.js";
 import type { LevelDefinition } from "./index.js";
+
+const observatoryBoundaryCollisionLevelInstances =
+	observatoryCollisionLevelInstances.filter(
+		(instance) =>
+			!instance.stableId.startsWith("observatory:walkable-mesh:chunk:"),
+	);
 
 export const observatoryLevel = {
 	id: "observatory",
@@ -10,10 +17,10 @@ export const observatoryLevel = {
 		"game:collectedCount": 0,
 		"game:totalCollectibles": 0,
 		"game:characterBounds": {
-			minX: -300,
-			maxX: 300,
-			minZ: -300,
-			maxZ: 300,
+			minX: -185,
+			maxX: 185,
+			minZ: -185,
+			maxZ: 185,
 		},
 	},
 	preload: [
@@ -35,7 +42,8 @@ export const observatoryLevel = {
 			prefabId: "observatory_environment",
 			stableId: "observatory:terrain",
 		},
-		...observatoryCollisionLevelInstances,
+		...terrainLevelInstancesForRuntimeScene("observatory_runtime"),
+		...observatoryBoundaryCollisionLevelInstances,
 		{
 			id: "observatory-water",
 			prefabId: "lake_water_surface",
@@ -51,11 +59,11 @@ export const observatoryLevel = {
 			prefabId: "player",
 			stableId: "player",
 			transform: {
-				position: [-137.2, 1.8, -49.5],
+				position: [-137.2, 0.43, -49.5],
 			},
 			components: {
 				CharacterController: {
-					groundY: 1.8,
+					groundY: 0.43,
 					kinematicCollision: {
 						enabled: true,
 						offset: 0.04,

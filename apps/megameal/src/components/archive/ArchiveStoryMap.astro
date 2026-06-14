@@ -1,232 +1,11 @@
 ---
 import { Icon } from 'astro-icon/components'
-import { formatTimelineYear } from '@merkin/shared-content'
-import archiveManifest from '../../../../../packages/shared-data/generated/archive.json'
+import {
+  getArchiveStoryMapModel,
+  getCollectionLabel,
+} from './archiveStoryMapModel'
 
-type ArchivePost = (typeof archiveManifest.items)[number]
-
-interface ArchiveGroup {
-  id: string
-  title: string
-  description: string
-  tone: string
-  previewImages: string[]
-  posts: ArchivePost[]
-}
-
-function normalizeId(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
-function getArchiveGroupTitle(post: ArchivePost) {
-  if (post.seriesTitle) return post.seriesTitle
-  if (post.series === 'first-contact-manual')
-    return "The Interstellar Traveler's First Contact Manual"
-  if (post.series) return post.series
-  if (post.collection === 'videos') return 'Video Archive'
-  if (post.collection === 'reader') return 'Reader Files'
-  if (post.collection === 'products') return 'Commercial Records'
-  if (post.collection === 'about') return 'Personnel Files'
-  if (post.collection === 'cookbook') return 'Galactic Cookbook'
-  if (post.sourcePath?.includes('miranda-bloody-mary'))
-    return 'The Miranda Incident'
-  if (post.tags?.some(tag => /cookbook|recipe/i.test(tag)))
-    return 'Galactic Cookbook'
-  if (post.category === 'Site Updates') return 'Site Transmissions'
-  if (
-    post.category === 'Store Announcement' ||
-    post.sourcePath?.includes('/store/')
-  )
-    return 'Commercial Records'
-  if (post.sourcePath?.startsWith('timelines/')) return 'Chronology Fragments'
-  return 'Core Entry Points'
-}
-
-function getGroupDescription(title: string) {
-  const descriptions: Record<string, string> = {
-    'Core Entry Points':
-      'Primary gateways into the MEGAMEAL universe and its competing transmission modes.',
-    'Site Transmissions':
-      'Development notes, assistant dispatches, and project-facing updates from the active surface.',
-    'Galactic Cookbook':
-      'Culinary records, recipe fragments, and edible historical artifacts from the archive.',
-    'Chronology Fragments':
-      'Loose timeline records that define eras, disasters, ascensions, and lost civilizations.',
-    "The Interstellar Traveler's First Contact Manual":
-      'A survival manual for contact with beings that do not care if you remain intact.',
-    'Commercial Records':
-      'Storefront debris, product records, and corporate commerce fragments.',
-    'Video Archive':
-      'Screening rooms, transmissions, commercials, and recovered moving-image evidence.',
-    'Reader Files':
-      'Long-form manuals, chapters, and serialized documents from the broader archive.',
-    'Personnel Files':
-      'Profiles, witnesses, departments, and known entities connected to the record.',
-    'The Miranda Incident':
-      'Recovered testimony, recipes, access denials, and contradictory evidence from a temporal catastrophe.',
-    'The Snuggloid Emergence':
-      'Companion-product records documenting the rise of a suspiciously affectionate species.',
-  }
-
-  return (
-    descriptions[title] ??
-    'Related records in the broader MEGAMEAL story graph.'
-  )
-}
-
-function getGroupTone(index: number) {
-  const tones = [
-    'core',
-    'signal',
-    'cookbook',
-    'chronology',
-    'manual',
-    'commercial',
-    'miranda',
-    'snuggloid',
-  ]
-  return tones[index % tones.length]
-}
-
-function formatYear(value: string | null | undefined) {
-  if (!value) return 'undated'
-  const year = new Date(value).getUTCFullYear()
-  return Number.isFinite(year) ? String(year) : 'undated'
-}
-
-function getTimelineLabel(post: ArchivePost) {
-  if (typeof post.timelineYear === 'number') {
-    return formatTimelineYear(post.timelineYear)
-  }
-  return formatYear(post.published)
-}
-
-function getCollectionLabel(value: string | null | undefined) {
-  if (!value) return 'Record'
-  return value
-    .replace(/[-_]+/g, ' ')
-    .replace(/\b\w/g, character => character.toUpperCase())
-}
-
-function getNodeStyle(index: number, total: number) {
-  const safeTotal = Math.max(total, 1)
-  const angle = (index / safeTotal) * Math.PI * 2 - Math.PI / 2
-  const ring = index % 3
-  const radius = ring === 0 ? 32 : ring === 1 ? 40 : 24
-  const x = 50 + Math.cos(angle) * radius
-  const y = 50 + Math.sin(angle) * radius * 0.72
-  const delay = index * 0.12
-  return `--node-x: ${x.toFixed(2)}%; --node-y: ${y.toFixed(2)}%; --node-delay: ${delay.toFixed(2)}s;`
-}
-
-function getPreviewImages(posts: ArchivePost[], tone: string) {
-  const fallbackByTone: Record<string, string[]> = {
-    core: [
-      '/posts/timeline/universe.png',
-      '/posts/timeline/universe-avatar.png',
-    ],
-    signal: ['/assets/banner/golden-era.jpg', '/posts/horror.png'],
-    cookbook: [
-      '/posts/cookbook/cookbook.png',
-      '/posts/timeline/zelephant-roast.png',
-    ],
-    chronology: [
-      '/posts/timeline/archive.png',
-      '/posts/timeline/corporate.png',
-    ],
-    manual: [
-      '/posts/timeline/chronos.png',
-      '/posts/timeline/awakening-era.png',
-    ],
-    commercial: [
-      '/posts/Mega-Meal-Explained/ultra-sign.png',
-      '/posts/Mega-Meal-Explained/burger-hole.png',
-    ],
-    miranda: [
-      '/posts/timeline/redacted.png',
-      '/posts/timeline/vault-keypad.png',
-    ],
-    snuggloid: [
-      '/posts/timeline/snuggloid-entity.png',
-      '/posts/timeline/snuggloid1.png',
-    ],
-  }
-
-  const seen = new Set<string>()
-  const discovered = posts
-    .flatMap(post => [post.image, post.bannerData?.background])
-    .filter((value): value is string => Boolean(value))
-    .filter(value => {
-      if (seen.has(value)) return false
-      seen.add(value)
-      return true
-    })
-
-  return [
-    ...discovered,
-    ...(fallbackByTone[tone] ?? fallbackByTone.core),
-  ].slice(0, 3)
-}
-
-const grouped = new Map<string, ArchivePost[]>()
-
-for (const post of archiveManifest.items) {
-  const groupTitle = getArchiveGroupTitle(post)
-  if (!grouped.has(groupTitle)) grouped.set(groupTitle, [])
-  grouped.get(groupTitle)?.push(post)
-}
-
-const preferredOrder = [
-  'Core Entry Points',
-  'The Miranda Incident',
-  'Video Archive',
-  "The Interstellar Traveler's First Contact Manual",
-  'Reader Files',
-  'Chronology Fragments',
-  'Galactic Cookbook',
-  'Commercial Records',
-  'Personnel Files',
-  'The Snuggloid Emergence',
-  'Site Transmissions',
-]
-
-const archiveGroups: ArchiveGroup[] = Array.from(grouped.entries())
-  .sort(([a], [b]) => {
-    const aIndex = preferredOrder.indexOf(a)
-    const bIndex = preferredOrder.indexOf(b)
-    if (aIndex !== -1 || bIndex !== -1) {
-      return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex)
-    }
-    return a.localeCompare(b)
-  })
-  .map(([title, posts], index) => ({
-    id: normalizeId(title),
-    title,
-    description: getGroupDescription(title),
-    tone: getGroupTone(index),
-    previewImages: getPreviewImages(posts, getGroupTone(index)),
-    posts: posts.sort((a, b) => {
-      const partA = a.seriesPart ?? Number.POSITIVE_INFINITY
-      const partB = b.seriesPart ?? Number.POSITIVE_INFINITY
-      if (partA !== partB) return partA - partB
-
-      const timelineA = a.timelineYear ?? Number.POSITIVE_INFINITY
-      const timelineB = b.timelineYear ?? Number.POSITIVE_INFINITY
-      if (timelineA !== timelineB) return timelineA - timelineB
-
-      return (
-        new Date(b.published ?? 0).getTime() -
-        new Date(a.published ?? 0).getTime()
-      )
-    }),
-  }))
-
-const collectionFilters = Array.from(
-  new Set(archiveManifest.items.map(post => post.collection).filter(Boolean)),
-).sort((a, b) => getCollectionLabel(a).localeCompare(getCollectionLabel(b)))
+const { archiveGroups, collectionFilters } = getArchiveStoryMapModel()
 
 import '../../styles/features/archive/story-map-shell.css'
 import '../../styles/features/archive/story-map-nodes.css'
@@ -298,12 +77,6 @@ import '../../styles/features/archive/story-map-responsive.css'
 
   <div class="archive-map-grid">
     {archiveGroups.map((group) => {
-      const openCount = group.posts.filter(post => !post.draft).length
-      const restrictedGroupCount = group.posts.length - openCount
-      const groupCollections = Array.from(
-        new Set(group.posts.map(post => post.collection).filter(Boolean)),
-      )
-
       return (
         <details
           class="archive-arc-card"
@@ -311,7 +84,7 @@ import '../../styles/features/archive/story-map-responsive.css'
           data-archive-group
           data-group-title={group.title}
           data-group-description={group.description}
-          data-group-collections={groupCollections.join(' ')}
+          data-group-collections={group.collectionValues.join(' ')}
           style={`--archive-bg-1: url('${group.previewImages[0]}'); --archive-bg-2: url('${group.previewImages[1] ?? group.previewImages[0]}'); --archive-bg-3: url('${group.previewImages[2] ?? group.previewImages[0]}');`}
         >
           <summary class="archive-arc-summary">
@@ -327,9 +100,9 @@ import '../../styles/features/archive/story-map-responsive.css'
             </div>
             <p class="archive-arc-description">{group.description}</p>
             <div class="archive-access-line archive-access-line--summary">
-              <span>{openCount} open</span>
-              <span>{restrictedGroupCount} restricted</span>
-              <span>{groupCollections.map(getCollectionLabel).join(' / ')}</span>
+              <span>{group.openCount} open</span>
+              <span>{group.restrictedCount} restricted</span>
+              <span>{group.collectionSummary}</span>
             </div>
             <div class="archive-arc-open-indicator" aria-hidden="true">
               <Icon name="mdi:chevron-down" />
@@ -347,42 +120,37 @@ import '../../styles/features/archive/story-map-responsive.css'
             <div class="archive-node-map__core">
               <Icon name="mdi:archive-eye-outline" />
             </div>
-            {group.posts.map((post, index) => (
+            {group.posts.map(record => (
               <div
                 class:list={[
                   'archive-map-node',
-                  post.draft ? 'archive-map-node--locked' : 'archive-map-node--open',
+                  record.isLocked ? 'archive-map-node--locked' : 'archive-map-node--open',
                 ]}
-                style={getNodeStyle(index, group.posts.length)}
-                title={`${post.title} - ${post.draft ? 'Restricted' : 'Open'}`}
+                style={record.nodeStyle}
+                title={`${record.post.title} - ${record.isLocked ? 'Restricted' : 'Open'}`}
               >
-                <Icon name={post.draft ? 'mdi:lock-outline' : 'mdi:file-eye-outline'} />
+                <Icon name={record.isLocked ? 'mdi:lock-outline' : 'mdi:file-eye-outline'} />
               </div>
             ))}
           </div>
 
           <div class="archive-access-line">
-            <span>{openCount} open</span>
-            <span>{restrictedGroupCount} restricted</span>
+            <span>{group.openCount} open</span>
+            <span>{group.restrictedCount} restricted</span>
           </div>
 
           <ol class="archive-record-list" data-archive-record-list>
-            {group.posts.map((post, index) => {
-              const isLocked = post.draft === true
-              const access = isLocked ? 'restricted' : 'open'
-              const collection = post.collection ?? ''
-              const collectionLabel = getCollectionLabel(collection)
-              const timelineLabel = getTimelineLabel(post)
+            {group.posts.map(record => {
               const content = (
                 <>
-                  <span class="archive-record-index">{String(index + 1).padStart(2, '0')}</span>
+                  <span class="archive-record-index">{record.indexLabel}</span>
                   <span class="archive-record-main">
-                    <strong>{post.title}</strong>
-                    <small>{timelineLabel} &middot; {isLocked ? 'Restricted record' : `${collectionLabel} entry point`}</small>
+                    <strong>{record.post.title}</strong>
+                    <small>{record.timelineLabel} &middot; {record.isLocked ? 'Restricted record' : `${record.collectionLabel} entry point`}</small>
                   </span>
                   <span class="archive-record-status">
-                    <Icon name={isLocked ? 'mdi:lock-outline' : 'mdi:arrow-right'} />
-                    <span>{isLocked ? 'Locked' : 'Open'}</span>
+                    <Icon name={record.isLocked ? 'mdi:lock-outline' : 'mdi:arrow-right'} />
+                    <span>{record.isLocked ? 'Locked' : 'Open'}</span>
                   </span>
                 </>
               )
@@ -390,18 +158,18 @@ import '../../styles/features/archive/story-map-responsive.css'
               return (
                 <li
                   data-archive-record
-                  data-record-title={post.title}
-                  data-record-access={access}
-                  data-record-type={collection}
-                  data-record-year={timelineLabel}
-                  data-record-search={`${post.title} ${group.title} ${group.description} ${collectionLabel} ${timelineLabel} ${isLocked ? 'restricted locked' : 'open'}`.toLowerCase()}
+                  data-record-title={record.post.title}
+                  data-record-access={record.access}
+                  data-record-type={record.collection}
+                  data-record-year={record.timelineLabel}
+                  data-record-search={record.searchText}
                 >
-                  {isLocked ? (
-                    <div class="archive-record archive-record--locked" aria-label={`${post.title}, restricted record`}>
+                  {record.isLocked ? (
+                    <div class="archive-record archive-record--locked" aria-label={`${record.post.title}, restricted record`}>
                       {content}
                     </div>
                   ) : (
-                    <a class="archive-record archive-record--open" href={post.url} data-sfx-click="sweep">
+                    <a class="archive-record archive-record--open" href={record.post.url} data-sfx-click="sweep">
                       {content}
                     </a>
                   )}

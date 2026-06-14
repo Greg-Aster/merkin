@@ -6,6 +6,7 @@ import {
 import { playerPrefab } from "./defaultPrefabs.js";
 import type { PrefabDefinition } from "./index.js";
 import { portalGatePrefab } from "./navigationPrefabs.js";
+import { terrainChunkCellPrefab } from "./terrainPrefabs.js";
 import { oceanWaterSurfacePrefab } from "./waterPrefabs.js";
 
 export const yggdrasilPrimitivePrefabs = createPrimitivePrefabs(
@@ -40,6 +41,7 @@ export const yggdrasilAmbientEmitterPrefab = {
 export const yggdrasilPrefabs = [
 	playerPrefab,
 	portalGatePrefab,
+	terrainChunkCellPrefab,
 	oceanWaterSurfacePrefab,
 	...yggdrasilPrimitivePrefabs,
 	yggdrasilAmbientEmitterPrefab,

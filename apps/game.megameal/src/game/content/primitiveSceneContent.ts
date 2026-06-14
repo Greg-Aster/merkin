@@ -74,6 +74,7 @@ export type PrimitiveSceneContentOptions = {
 	readonly tag: string;
 	readonly ids: PrimitiveSceneContentIds;
 	readonly walkableSourceIds?: readonly string[];
+	readonly terrainOwnedSourceIds?: readonly string[];
 };
 
 export function createPrimitiveSceneContentIds(options: {
@@ -275,7 +276,9 @@ export function createPrimitivePrefabs(
 			},
 		};
 
-		if (node.collision) {
+		const terrainOwned = isPrimitiveTerrainOwned(node.sourceId, options);
+
+		if (node.collision && !terrainOwned) {
 			components.RigidBody = {
 				type: "fixed",
 				mass: 0,
@@ -302,6 +305,7 @@ export function createPrimitivePrefabs(
 				node.geometry,
 				...(node.collision ? ["collision"] : []),
 				...(isPrimitiveWalkable(node.sourceId, options) ? ["walkable"] : []),
+				...(terrainOwned ? ["terrain"] : []),
 			],
 			components,
 		};
@@ -437,6 +441,13 @@ function isPrimitiveWalkable(
 	options: PrimitiveSceneContentOptions,
 ): boolean {
 	return (options.walkableSourceIds ?? []).includes(sourceId);
+}
+
+function isPrimitiveTerrainOwned(
+	sourceId: string,
+	options: PrimitiveSceneContentOptions,
+): boolean {
+	return (options.terrainOwnedSourceIds ?? []).includes(sourceId);
 }
 
 function positiveArg(value: number | undefined): number {

@@ -5,27 +5,52 @@ import {
 	type LevelEditorPreviewChannelMessageHandler,
 	type LevelEditorPreviewChannelPort,
 	applyCollisionPreviewPatchToRuntime,
+	applyCoreObjectPreviewPatchToRuntime,
 	clearCollisionPreviewPatchFromRuntime,
+	clearCoreObjectPreviewPatchFromRuntime,
 	connectGameWindowDevPreviewChannel,
 	handleGameWindowDevPreviewMessage,
 	postLevelEditorDevPreviewMessage,
 } from "../src/app/devPreview/index.js";
 import {
+	buildCameraLiveEditModeMessage as buildEditorCameraLiveEditModeMessage,
+	buildObjectEditPreviewClearRequestMessage as buildEditorObjectEditPreviewClearRequestMessage,
+	buildObjectEditPreviewPatchMessage as buildEditorObjectEditPreviewPatchMessage,
+	buildRuntimeReloadRequestMessage as buildEditorRuntimeReloadRequestMessage,
+	sendCameraLiveEditModeRequest,
+	sendObjectEditPreviewClearRequest,
+	sendObjectEditPreviewPatch,
+} from "../src/app/editor/levelEditorPreviewSender.js";
+import {
 	type CollisionCookPreviewPatch,
 	LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL,
+	type LevelEditorCameraLiveEditModeRequest,
 	type LevelEditorCollisionPreviewClearRequest,
+	type LevelEditorCoreObjectPreviewPatch,
+	type LevelEditorObjectEditPreviewPatch,
+	type LevelEditorRuntimeReloadAckPayload,
 	type LevelEditorRuntimeReloadRequest,
+	type LevelEditorRuntimeTelemetryPayload,
+	createCameraLiveEditModeMessage,
 	createCollisionPreviewClearRequestMessage,
 	createCollisionPreviewPatchMessage,
+	createCoreObjectPreviewClearRequestMessage,
+	createCoreObjectPreviewPatchMessage,
+	createObjectEditPreviewPatchMessage,
+	createRuntimeReloadAckMessage,
 	createRuntimeSceneReloadRequestMessage,
+	createRuntimeTelemetryMessage,
 	parseLevelEditorDevPreviewMessage,
 } from "../src/engine/data/index.js";
 import {
 	COLLIDER_COMPONENT,
 	EngineRuntime,
+	LIGHT_COMPONENT,
 	PHYSICS_TRANSFORM_COMPONENT,
+	SOUND_EMITTER_COMPONENT,
 } from "../src/engine/index.js";
 import { STABLE_ID_COMPONENT } from "../src/game/prefabs/index.js";
+import { PORTAL_COMPONENT } from "../src/game/systems/index.js";
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const appRoot = normalize(join(scriptDirectory, ".."));
@@ -33,6 +58,31 @@ const validPreviewPatch = createValidPreviewPatch();
 const validPreviewMessage = createCollisionPreviewPatchMessage({
 	requestId: "test-preview:valid",
 	patch: validPreviewPatch,
+});
+const validCoreObjectPreviewPatch = createValidCoreObjectPreviewPatch();
+const validCoreObjectPreviewMessage = createCoreObjectPreviewPatchMessage({
+	requestId: "test-core-preview:valid",
+	patch: validCoreObjectPreviewPatch,
+});
+const validObjectEditPreviewPatch = createValidObjectEditPreviewPatch();
+const validObjectEditPreviewMessage = createObjectEditPreviewPatchMessage({
+	requestId: "test-object-edit-preview:valid",
+	patch: validObjectEditPreviewPatch,
+});
+const validCameraLiveEditRequest = createValidCameraLiveEditRequest();
+const validCameraLiveEditMessage = createCameraLiveEditModeMessage({
+	requestId: "test-camera-live-edit:valid",
+	request: validCameraLiveEditRequest,
+});
+const validRuntimeReloadAck = createValidRuntimeReloadAck();
+const validRuntimeReloadAckMessage = createRuntimeReloadAckMessage({
+	requestId: "test-runtime-reload-ack:valid",
+	ack: validRuntimeReloadAck,
+});
+const validRuntimeTelemetry = createValidRuntimeTelemetry();
+const validRuntimeTelemetryMessage = createRuntimeTelemetryMessage({
+	requestId: "test-runtime-telemetry:valid",
+	telemetry: validRuntimeTelemetry,
 });
 
 function createValidPreviewPatch(): CollisionCookPreviewPatch {
@@ -71,6 +121,164 @@ function createValidPreviewPatch(): CollisionCookPreviewPatch {
 	};
 }
 
+function createValidCoreObjectPreviewPatch(): LevelEditorCoreObjectPreviewPatch {
+	return {
+		schemaVersion: 1,
+		channel: "level-editor-core-object-preview",
+		mode: "temporary-preview",
+		runtimeSceneId: "portal_arena_runtime",
+		levelId: "portal_arena",
+		sourcePlanHash: "workspace:portal:test0001",
+		entries: [
+			{
+				stableId: "player",
+				targetKind: "spawn",
+				transform: {
+					position: [1, 2, 3],
+				},
+			},
+			{
+				stableId: "portal-arena:light:test",
+				targetKind: "light",
+				transform: {
+					position: [4, 5, 6],
+				},
+				light: {
+					kind: "point",
+					color: "#8adff5",
+					intensity: 3.4,
+					distance: 18,
+					decay: 2,
+					visible: true,
+				},
+			},
+			{
+				stableId: "portal-arena:portal:test",
+				targetKind: "portal",
+				portal: {
+					id: "portal",
+					label: "Preview Portal",
+					prompt: "Preview",
+					targetRuntimeSceneId: "observatory_runtime",
+					activationRadius: 3,
+				},
+			},
+			{
+				stableId: "portal-arena:audio:test",
+				targetKind: "audio-emitter",
+				soundEmitter: {
+					soundId: "audio_portal_cycle",
+					volume: 0.42,
+					loop: true,
+					active: true,
+					refDistance: 2,
+					maxDistance: 16,
+					rolloffFactor: 1.2,
+					distanceModel: "inverse",
+				},
+			},
+		],
+	};
+}
+
+function createValidObjectEditPreviewPatch(): LevelEditorObjectEditPreviewPatch {
+	return {
+		schemaVersion: 1,
+		channel: "level-editor-object-edit-preview",
+		mode: "temporary-preview",
+		runtimeSceneId: "portal_arena_runtime",
+		levelId: "portal_arena",
+		sourcePlanHash: "workspace:object-edit:test0001",
+		entries: [
+			{
+				stableId: "object-edit:transform",
+				operation: "transform",
+				transform: {
+					position: [10, 2, -3],
+					scale: [2, 2, 2],
+				},
+			},
+			{
+				stableId: "object-edit:component",
+				operation: "component-patch",
+				components: {
+					Renderable: {
+						meshId: "mesh_portal_gate",
+						materialId: "material_portal_gate",
+					},
+				},
+				removeComponents: ["SoundEmitter"],
+			},
+			{
+				stableId: "object-edit:inserted",
+				operation: "insert",
+				prefabId: "preview_insert_prefab",
+				transform: {
+					position: [4, 5, 6],
+				},
+				components: {
+					Transform: {
+						scale: [1, 1, 1],
+					},
+					Renderable: {
+						meshId: "mesh_portal_gate",
+					},
+				},
+			},
+			{
+				stableId: "object-edit:removed",
+				operation: "remove",
+				componentNames: ["Renderable", "Collider"],
+			},
+		],
+	};
+}
+
+function createValidCameraLiveEditRequest(): LevelEditorCameraLiveEditModeRequest {
+	return {
+		runtimeSceneId: "portal_arena_runtime",
+		mode: "edit",
+		sourcePlanHash: "workspace:camera:test0001",
+		pose: {
+			position: [7, 8, 9],
+			rotation: [0, 0, 0, 1],
+			fovDegrees: 55,
+			near: 0.1,
+			far: 250,
+		},
+	};
+}
+
+function createValidRuntimeReloadAck(): LevelEditorRuntimeReloadAckPayload {
+	return {
+		runtimeSceneId: "portal_arena_runtime",
+		activeRuntimeSceneId: "portal_arena_runtime",
+		status: "accepted",
+		reason: "reload-requested",
+		sourcePlanHash: "workspace:reload:test0001",
+	};
+}
+
+function createValidRuntimeTelemetry(): LevelEditorRuntimeTelemetryPayload {
+	return {
+		runtimeSceneId: "portal_arena_runtime",
+		lifecycle: "started",
+		tick: 128,
+		playerAlive: true,
+		playerPosition: [0, 0.6, 0],
+		health: [100, 100],
+		remainingCollectibles: 0,
+		collectedCount: 0,
+		moving: false,
+		pointerLocked: false,
+		lookActive: false,
+		inputEnabled: true,
+		charging: false,
+		chargeAmount: 0,
+		updatedAtMs: 1234,
+	};
+}
+
 function assertProtocolMessageValidation(): void {
 	const parsed = parseLevelEditorDevPreviewMessage(validPreviewMessage);
 
@@ -104,6 +312,267 @@ function assertProtocolMessageValidation(): void {
 		requestId: "test-preview:explicit-create",
 		patch: parsed.payload,
 	});
+
+	const coreParsed = parseLevelEditorDevPreviewMessage(
+		validCoreObjectPreviewMessage,
+	);
+
+	assertEqual(
+		coreParsed.type,
+		"core-object-preview-patch",
+		"Expected core object preview message type.",
+	);
+
+	if (coreParsed.type !== "core-object-preview-patch") {
+		throw new Error("Expected parsed core preview message to be a core patch.");
+	}
+
+	assertEqual(
+		coreParsed.payload.channel,
+		"level-editor-core-object-preview",
+		"Expected core preview message to carry the core object preview channel.",
+	);
+	assertEqual(
+		coreParsed.payload.entries.length,
+		4,
+		"Expected core preview fixture to include core editable object classes.",
+	);
+
+	createCoreObjectPreviewPatchMessage({
+		requestId: "test-core-preview:explicit-create",
+		patch: coreParsed.payload,
+	});
+
+	const objectEditParsed = parseLevelEditorDevPreviewMessage(
+		validObjectEditPreviewMessage,
+	);
+
+	assertEqual(
+		objectEditParsed.type,
+		"object-edit-preview-patch",
+		"Expected object edit preview message type.",
+	);
+
+	if (objectEditParsed.type !== "object-edit-preview-patch") {
+		throw new Error(
+			"Expected parsed object edit preview message to be an object edit patch.",
+		);
+	}
+
+	assertEqual(
+		objectEditParsed.payload.entries.length,
+		4,
+		"Expected object edit fixture to cover transform, component, insert, and remove.",
+	);
+
+	createObjectEditPreviewPatchMessage({
+		requestId: "test-object-edit-preview:explicit-create",
+		patch: objectEditParsed.payload,
+	});
+
+	const cameraParsed = parseLevelEditorDevPreviewMessage(
+		validCameraLiveEditMessage,
+	);
+
+	assertEqual(
+		cameraParsed.type,
+		"camera-live-edit-mode",
+		"Expected camera live edit message type.",
+	);
+
+	if (cameraParsed.type !== "camera-live-edit-mode") {
+		throw new Error(
+			"Expected parsed camera message to be a live edit mode request.",
+		);
+	}
+
+	assertEqual(
+		cameraParsed.request.mode,
+		"edit",
+		"Expected camera message to enter edit mode.",
+	);
+
+	createCameraLiveEditModeMessage({
+		requestId: "test-camera-live-edit:explicit-create",
+		request: cameraParsed.request,
+	});
+
+	const reloadAckParsed = parseLevelEditorDevPreviewMessage(
+		validRuntimeReloadAckMessage,
+	);
+
+	assertEqual(
+		reloadAckParsed.type,
+		"runtime-reload-ack",
+		"Expected runtime reload ack message type.",
+	);
+
+	if (reloadAckParsed.type !== "runtime-reload-ack") {
+		throw new Error("Expected parsed reload ack message to be a reload ack.");
+	}
+
+	assertEqual(
+		reloadAckParsed.payload.status,
+		"accepted",
+		"Expected reload ack fixture to be accepted.",
+	);
+
+	createRuntimeReloadAckMessage({
+		requestId: "test-runtime-reload-ack:explicit-create",
+		ack: reloadAckParsed.payload,
+	});
+
+	const telemetryParsed = parseLevelEditorDevPreviewMessage(
+		validRuntimeTelemetryMessage,
+	);
+
+	assertEqual(
+		telemetryParsed.type,
+		"runtime-telemetry",
+		"Expected runtime telemetry message type.",
+	);
+
+	if (telemetryParsed.type !== "runtime-telemetry") {
+		throw new Error(
+			"Expected parsed telemetry message to be runtime telemetry.",
+		);
+	}
+
+	assertEqual(
+		telemetryParsed.payload.lifecycle,
+		"started",
+		"Expected runtime telemetry to carry the game lifecycle.",
+	);
+
+	createRuntimeTelemetryMessage({
+		requestId: "test-runtime-telemetry:explicit-create",
+		telemetry: telemetryParsed.payload,
+	});
+}
+
+function assertEditorPreviewSenderHelpers(): void {
+	const objectEditMessage = buildEditorObjectEditPreviewPatchMessage(
+		"test-editor-sender:object-edit",
+		validObjectEditPreviewPatch,
+	);
+
+	assertEqual(
+		objectEditMessage.type,
+		"object-edit-preview-patch",
+		"Expected editor sender to build object-edit preview messages.",
+	);
+	assertEqual(
+		objectEditMessage.payload.entries.length,
+		4,
+		"Expected editor sender to preserve transform/component/insert/remove entries.",
+	);
+
+	const objectEditClearMessage =
+		buildEditorObjectEditPreviewClearRequestMessage({
+			requestId: "test-editor-sender:object-edit-clear",
+			runtimeSceneId: validObjectEditPreviewPatch.runtimeSceneId,
+			sourcePlanHash: validObjectEditPreviewPatch.sourcePlanHash,
+			stableIds: validObjectEditPreviewPatch.entries.map(
+				(entry) => entry.stableId,
+			),
+			operations: ["transform", "component-patch", "insert", "remove"],
+		});
+
+	assertEqual(
+		objectEditClearMessage.request.runtimeSceneId,
+		validObjectEditPreviewPatch.runtimeSceneId,
+		"Expected object-edit clear request to use the selected runtime scene.",
+	);
+	assertEqual(
+		objectEditClearMessage.request.operations?.length,
+		4,
+		"Expected object-edit clear request to carry operation filters.",
+	);
+
+	const editPose = validCameraLiveEditRequest.pose;
+
+	if (editPose === undefined) {
+		throw new Error("Expected camera edit fixture to include a pose.");
+	}
+
+	const cameraEditMessage = buildEditorCameraLiveEditModeMessage({
+		requestId: "test-editor-sender:camera-edit",
+		runtimeSceneId: validCameraLiveEditRequest.runtimeSceneId,
+		mode: "edit",
+		...(validCameraLiveEditRequest.sourcePlanHash === undefined
+			? {}
+			: { sourcePlanHash: validCameraLiveEditRequest.sourcePlanHash }),
+		pose: editPose,
+	});
+
+	assertEqual(
+		cameraEditMessage.request.mode,
+		"edit",
+		"Expected editor sender to build camera edit-mode requests.",
+	);
+	assertEqual(
+		cameraEditMessage.request.runtimeSceneId,
+		"portal_arena_runtime",
+		"Expected camera edit request to preserve catalog runtimeSceneId.",
+	);
+
+	const cameraGameplayMessage = buildEditorCameraLiveEditModeMessage({
+		requestId: "test-editor-sender:camera-gameplay",
+		runtimeSceneId: "sci_fi_room_runtime",
+		mode: "gameplay",
+		sourcePlanHash: "workspace:camera:gameplay",
+	});
+
+	assertEqual(
+		cameraGameplayMessage.request.mode,
+		"gameplay",
+		"Expected editor sender to build gameplay camera requests.",
+	);
+	assertEqual(
+		cameraGameplayMessage.request.runtimeSceneId,
+		"sci_fi_room_runtime",
+		"Expected gameplay camera request to avoid scene fallbacks.",
+	);
+
+	const manualReloadMessage = buildEditorRuntimeReloadRequestMessage({
+		requestId: "test-editor-sender:reload",
+		runtimeSceneId: "sci_fi_room_runtime",
+	});
+
+	assertEqual(
+		manualReloadMessage.request.runtimeSceneId,
+		"sci_fi_room_runtime",
+		"Expected editor reload helper to use its supplied runtimeSceneId.",
+	);
+	assertEqual(
+		manualReloadMessage.request.reason,
+		"manual",
+		"Expected editor reload helper without a source hash to stay manual.",
+	);
+
+	const channel = new InMemoryPreviewChannel();
+	sendObjectEditPreviewPatch(
+		channel,
+		"test-editor-sender:send-object-edit",
+		validObjectEditPreviewPatch,
+	);
+	sendObjectEditPreviewClearRequest(channel, {
+		requestId: "test-editor-sender:send-object-edit-clear",
+		runtimeSceneId: validObjectEditPreviewPatch.runtimeSceneId,
+		sourcePlanHash: validObjectEditPreviewPatch.sourcePlanHash,
+		operations: ["transform"],
+	});
+	sendCameraLiveEditModeRequest(channel, {
+		requestId: "test-editor-sender:send-camera-gameplay",
+		runtimeSceneId: "sci_fi_room_runtime",
+		mode: "gameplay",
+	});
+
+	assertEqual(
+		channel.messages.length,
+		3,
+		"Expected editor sender helpers to post three validated messages.",
+	);
 }
 
 function assertInvalidPreviewPatchRejection(): void {
@@ -155,6 +624,29 @@ function assertInvalidPreviewPatchRejection(): void {
 	if (appliedPreview !== undefined || reloaded !== undefined) {
 		throw new Error("Expected invalid preview message to avoid callbacks.");
 	}
+}
+
+function assertRuntimeTelemetryValidation(): void {
+	expectInvalidMessage(
+		{
+			...validRuntimeTelemetryMessage,
+			payload: {
+				...validRuntimeTelemetryMessage.payload,
+				tick: -1,
+			},
+		},
+		"payload.tick must be a non-negative safe integer",
+	);
+	expectInvalidMessage(
+		{
+			...validRuntimeTelemetryMessage,
+			payload: {
+				...validRuntimeTelemetryMessage.payload,
+				lifecycle: "booting",
+			},
+		},
+		"payload.lifecycle must be created, started, paused, stopped, or disposed",
+	);
 }
 
 function assertReloadRequestShape(): void {
@@ -243,21 +735,73 @@ function assertClearPreviewRequestShape(): void {
 		},
 		"stableIds.1 must be a non-empty string",
 	);
+
+	const clearCoreMessage = createCoreObjectPreviewClearRequestMessage({
+		requestId: "test-core-clear:valid",
+		runtimeSceneId: "portal_arena_runtime",
+		sourcePlanHash: validCoreObjectPreviewPatch.sourcePlanHash,
+		stableIds: validCoreObjectPreviewPatch.entries.map(
+			(entry) => entry.stableId,
+		),
+		targetKinds: ["spawn", "light", "portal", "audio-emitter"],
+	});
+	const parsedCore = parseLevelEditorDevPreviewMessage(clearCoreMessage);
+
+	assertEqual(
+		parsedCore.type,
+		"clear-core-object-preview",
+		"Expected clear-core-object-preview message type.",
+	);
+
+	if (parsedCore.type !== "clear-core-object-preview") {
+		throw new Error("Expected parsed core clear message to be a core clear.");
+	}
+
+	assertEqual(
+		parsedCore.request.targetKinds?.length,
+		4,
+		"Expected core clear request to carry target kind filters.",
+	);
+
+	expectInvalidMessage(
+		{
+			...clearCoreMessage,
+			request: {
+				...clearCoreMessage.request,
+				targetKinds: ["spawn", "bad-kind"],
+			},
+		},
+		"targetKinds.1 must be light, spawn, portal, or audio-emitter",
+	);
 }
 
 function assertChannelSenderReceiverFlow(): void {
 	const channel = new InMemoryPreviewChannel();
 	let appliedPreview: CollisionCookPreviewPatch | undefined;
+	let appliedCorePreview: LevelEditorCoreObjectPreviewPatch | undefined;
 	let reloadRequest: LevelEditorRuntimeReloadRequest | undefined;
 	let clearRequest: LevelEditorCollisionPreviewClearRequest | undefined;
+	let clearCoreRequest:
+		| ReturnType<typeof createCoreObjectPreviewClearRequestMessage>["request"]
+		| undefined;
+	let runtimeTelemetry: LevelEditorRuntimeTelemetryPayload | undefined;
 	let rejectedCount = 0;
 	const connection = connectGameWindowDevPreviewChannel({
 		channel,
 		applyPreview(patch) {
 			appliedPreview = patch;
 		},
+		applyCoreObjectPreview(patch) {
+			appliedCorePreview = patch;
+		},
 		clearPreview(request) {
 			clearRequest = request;
+		},
+		clearCoreObjectPreview(request) {
+			clearCoreRequest = request;
+		},
+		receiveRuntimeTelemetry(payload) {
+			runtimeTelemetry = payload;
 		},
 		reload(request) {
 			reloadRequest = request;
@@ -287,6 +831,26 @@ function assertChannelSenderReceiverFlow(): void {
 		appliedPreview.sourcePlanHash,
 		validPreviewMessage.payload.sourcePlanHash,
 		"Expected receiver to apply the validated preview patch.",
+	);
+
+	postLevelEditorDevPreviewMessage(
+		channel,
+		createCoreObjectPreviewPatchMessage({
+			requestId: "test-core-preview:through-channel",
+			patch: validCoreObjectPreviewPatch,
+		}),
+	);
+
+	if (!appliedCorePreview) {
+		throw new Error(
+			"Expected channel receiver to apply core preview callback.",
+		);
+	}
+
+	assertEqual(
+		appliedCorePreview.entries.length,
+		4,
+		"Expected core preview callback to receive validated patch entries.",
 	);
 
 	postLevelEditorDevPreviewMessage(
@@ -329,6 +893,47 @@ function assertChannelSenderReceiverFlow(): void {
 		clearRequest.runtimeSceneId,
 		"observatory_runtime",
 		"Expected clear-preview callback to receive Observatory runtime scene ID.",
+	);
+
+	postLevelEditorDevPreviewMessage(
+		channel,
+		createCoreObjectPreviewClearRequestMessage({
+			requestId: "test-core-clear:through-channel",
+			runtimeSceneId: validCoreObjectPreviewPatch.runtimeSceneId,
+			sourcePlanHash: validCoreObjectPreviewPatch.sourcePlanHash,
+			stableIds: [validCoreObjectPreviewPatch.entries[0]?.stableId ?? "player"],
+			targetKinds: ["spawn"],
+		}),
+	);
+
+	if (!clearCoreRequest) {
+		throw new Error(
+			"Expected channel receiver to clear core preview callback.",
+		);
+	}
+
+	assertEqual(
+		clearCoreRequest.targetKinds?.[0],
+		"spawn",
+		"Expected core clear callback to receive target kind filter.",
+	);
+
+	postLevelEditorDevPreviewMessage(
+		channel,
+		createRuntimeTelemetryMessage({
+			requestId: "test-runtime-telemetry:through-channel",
+			telemetry: validRuntimeTelemetry,
+		}),
+	);
+
+	if (!runtimeTelemetry) {
+		throw new Error("Expected channel receiver to accept runtime telemetry.");
+	}
+
+	assertEqual(
+		runtimeTelemetry.lifecycle,
+		"started",
+		"Expected runtime telemetry callback to receive lifecycle.",
 	);
 
 	channel.post({ type: "invalid" });
@@ -501,6 +1106,158 @@ function assertRuntimePreviewPatchApplication(): void {
 		missingResult.missingStableIds.length,
 		1,
 		"Expected missing runtime preview application to report missing stable ID.",
+	);
+}
+
+function assertCoreObjectRuntimePreviewApplication(): void {
+	const runtime = new EngineRuntime();
+	const player = createStableEntity(runtime, "player");
+	const light = createStableEntity(runtime, "portal-arena:light:test");
+	const portal = createStableEntity(runtime, "portal-arena:portal:test");
+	const audio = createStableEntity(runtime, "portal-arena:audio:test");
+
+	runtime.world.addComponent(player, PHYSICS_TRANSFORM_COMPONENT, {
+		position: { x: 0, y: 0, z: 0 },
+		rotation: { x: 0, y: 0, z: 0, w: 1 },
+		scale: { x: 1, y: 1, z: 1 },
+	});
+	runtime.world.addComponent(light, LIGHT_COMPONENT, {
+		kind: "point",
+		color: "#ffffff",
+		intensity: 1,
+		distance: 4,
+		decay: 2,
+	});
+	runtime.world.addComponent(portal, PORTAL_COMPONENT, {
+		id: "portal",
+		label: "Original Portal",
+		targetRuntimeSceneId: "miranda_deck_runtime",
+		activationRadius: 2,
+	});
+	runtime.world.addComponent(audio, SOUND_EMITTER_COMPONENT, {
+		soundId: "audio_portal_cycle",
+		volume: 0.1,
+		loop: true,
+	});
+
+	const result = applyCoreObjectPreviewPatchToRuntime(
+		runtime,
+		validCoreObjectPreviewPatch,
+	);
+
+	if (!result.ok) {
+		throw new Error(
+			`Expected core preview application to succeed, missing ${result.missingStableIds.join(", ")}.`,
+		);
+	}
+
+	assertEqual(
+		result.appliedStableIds.length,
+		4,
+		"Expected core preview application to update four entries.",
+	);
+	assertDeepEqual(
+		runtime.world.requireComponent<{
+			readonly position: {
+				readonly x: number;
+				readonly y: number;
+				readonly z: number;
+			};
+		}>(player, PHYSICS_TRANSFORM_COMPONENT).position,
+		{ x: 1, y: 2, z: 3 },
+		"Expected spawn preview to update player transform.",
+	);
+	assertEqual(
+		runtime.world.requireComponent<{ readonly intensity: number }>(
+			light,
+			LIGHT_COMPONENT,
+		).intensity,
+		3.4,
+		"Expected light preview to update light intensity.",
+	);
+	assertEqual(
+		runtime.world.requireComponent<{ readonly targetRuntimeSceneId?: string }>(
+			portal,
+			PORTAL_COMPONENT,
+		).targetRuntimeSceneId,
+		"observatory_runtime",
+		"Expected portal preview to update portal target.",
+	);
+	assertEqual(
+		runtime.world.requireComponent<{ readonly volume?: number }>(
+			audio,
+			SOUND_EMITTER_COMPONENT,
+		).volume,
+		0.42,
+		"Expected audio preview to update emitter volume.",
+	);
+
+	const clearResult = clearCoreObjectPreviewPatchFromRuntime(runtime, {
+		runtimeSceneId: validCoreObjectPreviewPatch.runtimeSceneId,
+		sourcePlanHash: validCoreObjectPreviewPatch.sourcePlanHash,
+		stableIds: validCoreObjectPreviewPatch.entries.map(
+			(entry) => entry.stableId,
+		),
+		targetKinds: ["spawn", "light", "portal", "audio-emitter"],
+	});
+
+	assertEqual(
+		clearResult.clearedStableIds.length,
+		4,
+		"Expected core clear request to restore four snapshots.",
+	);
+	assertDeepEqual(
+		runtime.world.requireComponent<{
+			readonly position: {
+				readonly x: number;
+				readonly y: number;
+				readonly z: number;
+			};
+		}>(player, PHYSICS_TRANSFORM_COMPONENT).position,
+		{ x: 0, y: 0, z: 0 },
+		"Expected core clear to restore player transform.",
+	);
+	assertEqual(
+		runtime.world.requireComponent<{ readonly intensity: number }>(
+			light,
+			LIGHT_COMPONENT,
+		).intensity,
+		1,
+		"Expected core clear to restore original light.",
+	);
+	assertEqual(
+		runtime.world.requireComponent<{ readonly targetRuntimeSceneId?: string }>(
+			portal,
+			PORTAL_COMPONENT,
+		).targetRuntimeSceneId,
+		"miranda_deck_runtime",
+		"Expected core clear to restore original portal target.",
+	);
+	assertEqual(
+		runtime.world.requireComponent<{ readonly volume?: number }>(
+			audio,
+			SOUND_EMITTER_COMPONENT,
+		).volume,
+		0.1,
+		"Expected core clear to restore original audio emitter.",
+	);
+
+	const missingRuntime = new EngineRuntime();
+	const missingResult = applyCoreObjectPreviewPatchToRuntime(
+		missingRuntime,
+		validCoreObjectPreviewPatch,
+	);
+
+	if (missingResult.ok) {
+		throw new Error(
+			"Expected core preview application to report missing entities.",
+		);
+	}
+
+	assertEqual(
+		missingResult.missingStableIds.length,
+		validCoreObjectPreviewPatch.entries.length,
+		"Expected missing core preview application to report all missing stable IDs.",
 	);
 }
 
@@ -707,6 +1464,12 @@ function extractSchemaErrors(error: unknown): readonly string[] {
 	return [error instanceof Error ? error.message : "Invalid preview message."];
 }
 
+function createStableEntity(runtime: EngineRuntime, stableId: string) {
+	const entity = runtime.world.createEntity();
+	runtime.world.addComponent(entity, STABLE_ID_COMPONENT, { id: stableId });
+	return entity;
+}
+
 function assertEqual<T>(actual: T, expected: T, message: string): void {
 	if (actual !== expected) {
 		throw new Error(`${message} Expected ${expected}, received ${actual}.`);
@@ -758,11 +1521,14 @@ class InMemoryPreviewChannel implements LevelEditorPreviewChannelPort {
 }
 
 assertProtocolMessageValidation();
+assertEditorPreviewSenderHelpers();
 assertInvalidPreviewPatchRejection();
+assertRuntimeTelemetryValidation();
 assertReloadRequestShape();
 assertClearPreviewRequestShape();
 assertChannelSenderReceiverFlow();
 assertRuntimePreviewPatchApplication();
+assertCoreObjectRuntimePreviewApplication();
 await assertNoEditorModuleLeak();
 
 console.log("Live preview protocol contract passed.");

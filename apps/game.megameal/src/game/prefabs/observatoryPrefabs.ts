@@ -1,6 +1,7 @@
 import { getCollisionPrefabCollider } from "../generated/observatoryCollisionRuntime.js";
 import { playerPrefab } from "./defaultPrefabs.js";
 import type { PrefabDefinition } from "./index.js";
+import { terrainChunkCellPrefab } from "./terrainPrefabs.js";
 import { lakeWaterSurfacePrefab } from "./waterPrefabs.js";
 
 export const observatoryEnvironmentPrefab = {
@@ -89,6 +90,7 @@ export const observatoryFireflyMarkerPrefab = {
 
 export const observatoryPrefabs = [
 	playerPrefab,
+	terrainChunkCellPrefab,
 	observatoryBoundaryBlockerPrefab,
 	observatoryEnvironmentPrefab,
 	observatoryWalkableMeshPrefab,

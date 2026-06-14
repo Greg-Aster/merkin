@@ -48,6 +48,8 @@ import { SERIES_CONFIG } from '@/config/seriesConfig'
 import gameStarsManifest from '../../../../../packages/shared-data/generated/game-stars.json'
 import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
 import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
+import { isPublicContentData } from '../../contracts/content'
+import { isPublishedManifestRecord } from '../../contracts/manifests'
 // Import type guards
 import { isImageBannerItem, isVideoBannerItem } from './types'
 
@@ -81,12 +83,12 @@ type BannerMotionConfig = {
   easing?: string
 }
 
-const publishedPosts = postsManifest.items.filter(post => !post.draft)
+const publishedPosts = postsManifest.items.filter(isPublicContentData)
 const publishedTimelineItems = timelineManifest.items.filter(
-  event => !event.isDraft,
+  isPublishedManifestRecord,
 )
 const publishedGameStars = gameStarsManifest.items.filter(
-  event => !event.isDraft,
+  isPublishedManifestRecord,
 )
 const activeArcIds = new Set(
   publishedPosts

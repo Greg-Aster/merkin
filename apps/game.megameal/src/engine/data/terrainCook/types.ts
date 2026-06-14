@@ -5,6 +5,7 @@ import type {
 	LevelPrefabInstanceData,
 	TerrainChunkPackageData,
 	TerrainChunkStreamingPolicyData,
+	TerrainMaterialSetData,
 } from "../schemas/index.js";
 
 export type TerrainCookVector3Data = readonly [number, number, number];
@@ -161,6 +162,7 @@ export type TerrainCookManifestData = {
 	readonly provenance: TerrainCookProvenanceData;
 	readonly visualOutputs: readonly TerrainCookVisualOutputData[];
 	readonly visualBindings?: readonly TerrainCookVisualBindingData[];
+	readonly materialSets?: readonly TerrainMaterialSetData[];
 	readonly streamingPolicy?: TerrainChunkStreamingPolicyData;
 	readonly startupChunkStableIds?: readonly string[];
 	readonly streamableChunkStableIds?: readonly string[];
@@ -193,6 +195,7 @@ export type TerrainCookPlan = {
 	readonly provenance: TerrainCookProvenanceData;
 	readonly visualOutputs: readonly TerrainCookVisualOutputPlanData[];
 	readonly visualBindings: readonly TerrainCookVisualBindingData[];
+	readonly materialSets: readonly TerrainMaterialSetData[];
 	readonly collisionChunks: readonly TerrainCookCollisionChunkPlanData[];
 	readonly streamingPolicy?: TerrainChunkStreamingPolicyData;
 	readonly startupChunkStableIds: readonly string[];
@@ -269,6 +272,7 @@ export type TerrainCookRuntimeModuleData = {
 	readonly targetFiles: TerrainCookTargetFilesData;
 	readonly visualOutputs: readonly TerrainCookVisualOutputPlanData[];
 	readonly visualBindings: readonly TerrainCookVisualBindingData[];
+	readonly materialSets: readonly TerrainMaterialSetData[];
 	readonly collisionChunks: readonly TerrainCookCollisionChunkPlanData[];
 	readonly levelInstances: TerrainCookLevelInstanceArtifactData["entries"];
 	readonly terrainPackage?: TerrainChunkPackageData;

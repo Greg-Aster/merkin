@@ -50,6 +50,10 @@ type TerrainChunkFixture = {
 		readonly nearVisualStableIds: readonly string[];
 		readonly farVisualStableIds: readonly string[];
 	};
+	readonly materialBinding?: {
+		readonly materialSetId: string;
+		readonly layerIds: readonly string[];
+	};
 	readonly rigidBodyComponent: {
 		readonly type: "fixed";
 		readonly mass: 0;
@@ -63,6 +67,16 @@ type TerrainPackageFixture = {
 	readonly runtimeSceneId: string;
 	readonly sourceManifestId: string;
 	readonly policy: TerrainStreamingPolicyFixture;
+	readonly materialSets: readonly {
+		readonly id: string;
+		readonly blendMode: "single" | "weighted" | "splat-map";
+		readonly fallbackMaterialAssetId: string;
+		readonly layers: readonly {
+			readonly id: string;
+			readonly materialAssetId: string;
+			readonly uvScale: readonly [number, number];
+		}[];
+	}[];
 	readonly chunks: readonly TerrainChunkFixture[];
 	readonly visualBindings: readonly {
 		readonly id: string;
@@ -288,6 +302,10 @@ function createRuntimeManifestWithPolicy(
 			nearVisualStableIds: ["test:floor:main"],
 			farVisualStableIds: ["test:floor:main"],
 		},
+		materialBinding: {
+			materialSetId: "test-terrain-materials",
+			layerIds: ["base"],
+		},
 		rigidBodyComponent: {
 			type: "fixed",
 			mass: 0,
@@ -394,6 +412,20 @@ function createRuntimeManifestWithPolicy(
 				runtimeSceneId: "terrain_streaming_schema_fixture",
 				sourceManifestId: "terrain_streaming_manifest",
 				policy,
+				materialSets: [
+					{
+						id: "test-terrain-materials",
+						blendMode: "single",
+						fallbackMaterialAssetId: "material_test_terrain",
+						layers: [
+							{
+								id: "base",
+								materialAssetId: "material_test_terrain",
+								uvScale: [1, 1],
+							},
+						],
+					},
+				],
 				chunks: [chunk],
 				visualBindings: [
 					{
@@ -438,6 +470,20 @@ function streamingFixturePackage(): TerrainPackageFixture {
 		runtimeSceneId: "test_level_runtime",
 		sourceManifestId: "test_terrain_v1",
 		policy: defaultPolicy(),
+		materialSets: [
+			{
+				id: "test-terrain-materials",
+				blendMode: "single",
+				fallbackMaterialAssetId: "material_test_terrain",
+				layers: [
+					{
+						id: "base",
+						materialAssetId: "material_test_terrain",
+						uvScale: [1, 1],
+					},
+				],
+			},
+		],
 		chunks,
 		visualBindings: [
 			{
@@ -474,6 +520,10 @@ function streamingFixtureChunks(): readonly TerrainChunkFixture[] {
 			lod: {
 				nearVisualStableIds: ["main-test:floor:main"],
 				farVisualStableIds: ["main-test:floor:main"],
+			},
+			materialBinding: {
+				materialSetId: "test-terrain-materials",
+				layerIds: ["base"],
 			},
 			rigidBodyComponent: {
 				type: "fixed",

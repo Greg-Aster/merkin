@@ -1,7 +1,12 @@
 ---
 import type { CollectionEntry } from 'astro:content'
+import {
+  getAvailabilityBadge,
+  getProductCardThumbnail,
+  getProductHref,
+  getProductMediaItems,
+} from '../../contracts/products'
 import { communityConfig } from '../../config/community.config'
-import { url } from '../../utils/url-utils'
 import ProductCardClient from './ProductCardClient.astro'
 import ProductCardDetails from './ProductCardDetails.astro'
 import ProductCardSummary from './ProductCardSummary.astro'
@@ -20,11 +25,8 @@ const {
   tagline,
   description,
   price,
-  image,
   sku,
   rating,
-  additionalImages,
-  media,
   specifications,
   qanda,
   preWrittenReviews,
@@ -34,26 +36,6 @@ const {
   shippingNote,
   badge,
 } = product.data
-
-type MediaGalleryItem = {
-  type: 'image' | 'video' | 'youtube'
-  src?: string
-  videoId?: string
-  poster?: string
-  alt?: string
-  caption?: string
-}
-
-type CardThumbnail = {
-  kind: 'image' | 'youtube'
-  src?: string
-  videoId?: string
-}
-
-const resolveAsset = (path: string | undefined) => {
-  if (!path) return undefined
-  return path.startsWith('/') ? url(path) : path
-}
 const formActionUrl = communityConfig.contact.formActionUrl
 
 const hasSpecifications =
@@ -62,48 +44,8 @@ const hasQandA = Array.isArray(qanda) && qanda.length > 0
 const hasPreWrittenReviews =
   Array.isArray(preWrittenReviews) && preWrittenReviews.length > 0
 
-// Build unified media items: prefer media[] field, fall back to legacy image/additionalImages
-const isGalleryMediaType = (type: string): type is MediaGalleryItem['type'] =>
-  type === 'image' || type === 'video' || type === 'youtube'
-
-const mediaItems: MediaGalleryItem[] =
-  Array.isArray(media) && media.length > 0
-    ? media.flatMap(item => {
-        if (!isGalleryMediaType(item.type)) return []
-        return [
-          {
-            type: item.type,
-            src: item.src ? resolveAsset(item.src) : undefined,
-            videoId: item.videoId,
-            poster: item.poster ? resolveAsset(item.poster) : undefined,
-            alt: item.alt,
-            caption: item.caption,
-          },
-        ]
-      })
-    : [
-        ...(image
-          ? [{ type: 'image' as const, src: resolveAsset(image), alt: name }]
-          : []),
-        ...(additionalImages ?? []).map((src: string) => ({
-          type: 'image' as const,
-          src: resolveAsset(src),
-          alt: name,
-        })),
-      ]
-
-// For the card thumbnail: first image or YouTube thumbnail
-const cardThumbnail: CardThumbnail | null = (() => {
-  for (const m of mediaItems) {
-    if (m.type === 'image' && m.src)
-      return { kind: 'image' as const, src: resolveAsset(m.src) }
-    if (m.type === 'video' && m.poster)
-      return { kind: 'image' as const, src: resolveAsset(m.poster) }
-    if (m.type === 'youtube' && m.videoId)
-      return { kind: 'youtube' as const, videoId: m.videoId }
-  }
-  return null
-})()
+const mediaItems = getProductMediaItems(product)
+const cardThumbnail = getProductCardThumbnail(mediaItems)
 
 // Star rating calculation
 let calculatedFullStars = 0
@@ -118,54 +60,14 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
   calculatedEmptyStars = 5 - calculatedFullStars - (calculatedHalfStar ? 1 : 0)
 }
 
-// Availability badge config — each status gets a label, color, and satirical CTA message
-const availabilityMap: Record<
-  string,
-  { label: string; classes: string; ctaMessage: string }
-> = {
-  available: {
-    label: badge || 'Available Now',
-    classes: 'bg-emerald-500/90 text-white',
-    ctaMessage: '',
-  },
-  coming_soon: {
-    label: badge || 'Coming Soon',
-    classes: 'bg-blue-500/80 text-white',
-    ctaMessage: 'Transmission pending. Stand by.',
-  },
-  out_of_stock: {
-    label: badge || 'Out of Stock',
-    classes: 'bg-slate-500/80 text-white',
-    ctaMessage: 'The shelves are bare. Demand has been noted. Probably.',
-  },
-  not_in_your_area: {
-    label: badge || 'Not in Your Area',
-    classes: 'bg-amber-500/80 text-black',
-    ctaMessage: 'Your coordinates are outside our current distribution matrix.',
-  },
-  not_in_your_timeline: {
-    label: badge || 'Not Available in Your Timeline',
-    classes: 'bg-purple-500/80 text-white',
-    ctaMessage:
-      'This product exists. Procurement from your timeline is not currently supported.',
-  },
-  artifact_only: {
-    label: badge || 'Artifact Record',
-    classes: 'bg-rose-900/80 text-rose-200',
-    ctaMessage:
-      'This item is catalogued for archival purposes. Acquiring it would be inadvisable.',
-  },
-}
 const currentAvailability = availability ?? 'coming_soon'
-const availBadge =
-  availabilityMap[currentAvailability] ?? availabilityMap.coming_soon
+const availBadge = getAvailabilityBadge(currentAvailability, badge)
 const canAddToCart = ctaMode === 'cart' && currentAvailability === 'available'
 const canBuyExternal =
   ctaMode === 'external' &&
   !!stripePaymentLink &&
   currentAvailability === 'available'
-const productSlug = product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')
-const productHref = `/store/${productSlug}/`
+const productHref = getProductHref(product)
 const ratingLabel =
   typeof rating === 'number'
     ? `Rating: ${rating.toFixed(1)} out of 5 stars`

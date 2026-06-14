@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
+import { publicProductCollectionFilter } from '../../contracts/products'
 import {
   buildFlagshipProductShowcase,
   getProductSlug,
@@ -7,10 +8,7 @@ import {
 import FeaturedProductBanner from './FeaturedProductBanner.svelte'
 import '../../styles/features/home/featured-product-hero-slide.css'
 
-const products = await getCollection(
-  'products',
-  ({ data }) => data.draft !== true,
-)
+const products = await getCollection('products', publicProductCollectionFilter)
 const product =
   products.find(entry => getProductSlug(entry) === 'snuggaloids') ??
   products.find(entry => entry.data.featured) ??

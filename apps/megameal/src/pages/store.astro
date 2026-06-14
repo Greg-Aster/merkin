@@ -2,87 +2,34 @@
 import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import MarketplaceListingCard from '../components/store/MarketplaceListingCard.astro'
+import {
+  getAvailabilityCounts,
+  getCategoryCounts,
+  getPrimaryProductVisual,
+  getProductHref,
+  getProductSearchText,
+  productAvailabilityDisplay,
+  publicProductCollectionFilter,
+  sortFeaturedProductsFirst,
+  storeCategories,
+} from '../contracts/products'
 import StoreLayout from '../layouts/store/StoreLayout.astro'
-import { url } from '../utils/url-utils'
 
-const allProducts = await getCollection(
-  'products',
-  ({ data }) => data.draft !== true,
+const allProducts = sortFeaturedProductsFirst(
+  await getCollection('products', publicProductCollectionFilter),
 )
-
-function resolveAsset(path: string | undefined) {
-  if (!path) return undefined
-  return path.startsWith('/') ? url(path) : path
-}
-
-function getProductHref(product: (typeof allProducts)[number]) {
-  return `/store/${product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')}/`
-}
-
-function getPrimaryVisual(product: (typeof allProducts)[number]) {
-  const media = product.data.media ?? []
-  for (const item of media) {
-    if (item.type === 'image' && item.src) return resolveAsset(item.src)
-    if (item.thumbnail) return resolveAsset(item.thumbnail)
-    if (item.poster) return resolveAsset(item.poster)
-    if (item.type === 'youtube' && item.videoId) {
-      return `https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg`
-    }
-  }
-  return resolveAsset(product.data.image)
-}
-
-allProducts.sort((a, b) => {
-  if (a.data.featured && !b.data.featured) return -1
-  if (!a.data.featured && b.data.featured) return 1
-  return (b.data.rating ?? 0) - (a.data.rating ?? 0)
-})
 
 const featuredProduct = allProducts.find(p => p.data.featured)
 const featuredPrimaryVisual = featuredProduct
-  ? getPrimaryVisual(featuredProduct)
+  ? getPrimaryProductVisual(featuredProduct)
   : undefined
 const spotlightProducts = allProducts
   .filter(product => product.id !== featuredProduct?.id)
   .slice(0, 3)
 
-const categories = [
-  { id: 'all', label: 'All Products' },
-  { id: 'equipment', label: 'Equipment' },
-  { id: 'consumables', label: 'Consumables' },
-  { id: 'publications', label: 'Publications' },
-  { id: 'companions', label: 'Companions' },
-  { id: 'relics', label: 'Relics' },
-]
-
-const categoryCounts = Object.fromEntries(
-  categories.map(category => [
-    category.id,
-    category.id === 'all'
-      ? allProducts.length
-      : allProducts.filter(product => product.data.category === category.id)
-          .length,
-  ]),
-)
-
-const availabilityDisplay: Record<string, string> = {
-  available: 'Available Now',
-  coming_soon: 'Coming Soon',
-  out_of_stock: 'Out of Stock',
-  not_in_your_area: 'Not in Your Area',
-  not_in_your_timeline: 'Not in Your Timeline',
-  artifact_only: 'Artifact Only',
-}
-
-const availabilityCounts = Object.entries(availabilityDisplay).map(
-  ([availability, label]) => ({
-    availability,
-    label,
-    count: allProducts.filter(
-      product => (product.data.availability ?? 'coming_soon') === availability,
-    ).length,
-  }),
-)
+const categories = storeCategories
+const categoryCounts = getCategoryCounts(allProducts)
+const availabilityCounts = getAvailabilityCounts(allProducts)
 
 const availableNowCount =
   availabilityCounts.find(item => item.availability === 'available')?.count ?? 0
@@ -310,11 +257,11 @@ const companionCount = allProducts.filter(
 						</div>
 						<div class="storefront-spotlight__grid">
 								{spotlightProducts.map((product) => (
-									<a href={getProductHref(product)} data-sfx-hover="hover-soft" data-sfx-click="soft" class="storefront-spotlight__card">
+								<a href={getProductHref(product)} data-sfx-hover="hover-soft" data-sfx-click="soft" class="storefront-spotlight__card">
 									<div class="storefront-spotlight__media">
-										{getPrimaryVisual(product) ? (
+										{getPrimaryProductVisual(product) ? (
 											<img
-												src={getPrimaryVisual(product)}
+												src={getPrimaryProductVisual(product)}
 												alt={product.data.name}
 												loading="lazy"
 											/>
@@ -333,7 +280,7 @@ const companionCount = allProducts.filter(
 										<strong>
 											{typeof product.data.price === "number"
 												? `$${product.data.price.toFixed(2)}`
-												: availabilityDisplay[product.data.availability ?? "coming_soon"]}
+												: productAvailabilityDisplay[product.data.availability ?? "coming_soon"]}
 										</strong>
 									</div>
 								</a>
@@ -357,7 +304,7 @@ const companionCount = allProducts.filter(
 								data-price={product.data.price ?? 0}
 								data-rating={product.data.rating ?? 0}
 								data-featured={product.data.featured ? "1" : "0"}
-								data-search={`${product.data.name} ${product.data.category ?? ""} ${product.data.tagline ?? ""} ${product.data.description ?? ""}`.toLowerCase()}
+								data-search={getProductSearchText(product)}
 							>
 								<MarketplaceListingCard product={product} />
 							</div>
@@ -384,127 +331,7 @@ const companionCount = allProducts.filter(
 </StoreLayout>
 
 <script>
-	document.addEventListener("DOMContentLoaded", () => {
-		const items = Array.from(
-			document.querySelectorAll<HTMLElement>(".product-grid-item"),
-		);
-		const grid = document.getElementById("product-grid");
-		const noResults = document.getElementById("no-results");
-		const countEls = Array.from(document.querySelectorAll<HTMLElement>(".product-count"));
-		const sortSelects = Array.from(
-			document.querySelectorAll<HTMLSelectElement>(".sort-select-control"),
-		);
-		const categorySelects = Array.from(
-			document.querySelectorAll<HTMLSelectElement>(".category-select-control"),
-		);
-		const searchInputs = Array.from(
-			document.querySelectorAll<HTMLInputElement>(".product-search-control"),
-		);
+	import { initStorefrontMarketplace } from '../components/store/storefrontController'
 
-		let activeCategory = "all";
-		let activeSearch = "";
-
-		function syncCategoryControls() {
-			document
-				.querySelectorAll<HTMLButtonElement>(".category-filter")
-				.forEach((candidate) => {
-					candidate.dataset.active =
-						candidate.dataset.category === activeCategory ? "true" : "false";
-				});
-
-			categorySelects.forEach((select) => {
-				select.value = activeCategory;
-			});
-		}
-
-		function applyFilter() {
-			let visible = 0;
-			for (const item of items) {
-				const category = item.dataset.category ?? "";
-				const search = item.dataset.search ?? "";
-				const matchesCategory = activeCategory === "all" || category === activeCategory;
-				const matchesSearch = !activeSearch || search.includes(activeSearch);
-				const show = matchesCategory && matchesSearch;
-				item.classList.toggle("hidden", !show);
-				if (show) visible += 1;
-			}
-
-			for (const countEl of countEls) {
-				countEl.textContent = `${visible} product${visible !== 1 ? "s" : ""}`;
-			}
-			noResults?.classList.toggle("hidden", visible > 0);
-			grid?.classList.toggle("hidden", visible === 0);
-		}
-
-		function applySort(value: string) {
-			if (!grid) return;
-
-			const sorted = [...items].sort((a, b) => {
-				switch (value) {
-					case "rating":
-						return (
-							parseFloat(b.dataset.rating ?? "0") -
-							parseFloat(a.dataset.rating ?? "0")
-						);
-					case "price-asc":
-						return (
-							parseFloat(a.dataset.price ?? "0") -
-							parseFloat(b.dataset.price ?? "0")
-						);
-					case "price-desc":
-						return (
-							parseFloat(b.dataset.price ?? "0") -
-							parseFloat(a.dataset.price ?? "0")
-						);
-					case "available":
-						return (
-							(a.dataset.availability === "available" ? 0 : 1) -
-							(b.dataset.availability === "available" ? 0 : 1)
-						);
-					default:
-						return (
-							parseInt(b.dataset.featured ?? "0") -
-							parseInt(a.dataset.featured ?? "0")
-						);
-				}
-			});
-
-			for (const item of sorted) grid.appendChild(item);
-		}
-
-		document.querySelectorAll<HTMLButtonElement>(".category-filter").forEach((button) => {
-			button.addEventListener("click", () => {
-				activeCategory = button.dataset.category ?? "all";
-				syncCategoryControls();
-				applyFilter();
-			});
-		});
-
-		categorySelects.forEach((select) => {
-			select.addEventListener("change", () => {
-				activeCategory = select.value;
-				syncCategoryControls();
-				applyFilter();
-			});
-		});
-
-		searchInputs.forEach((input) => {
-			input.addEventListener("input", () => {
-				activeSearch = input.value.trim().toLowerCase();
-				searchInputs.forEach((candidate) => {
-					if (candidate !== input) candidate.value = input.value;
-				});
-				applyFilter();
-			});
-		});
-
-		sortSelects.forEach((sortSelect) => {
-			sortSelect.addEventListener("change", () => {
-				sortSelects.forEach((candidate) => {
-					if (candidate !== sortSelect) candidate.value = sortSelect.value;
-				});
-				applySort(sortSelect.value);
-			});
-		});
-	});
+	document.addEventListener('DOMContentLoaded', initStorefrontMarketplace)
 </script>

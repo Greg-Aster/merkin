@@ -1,15 +1,13 @@
 ---
 import { getCollection } from 'astro:content'
 import ProductCard from '../../../components/store/ProductCard.astro'
+import { publicProductCollectionFilter } from '../../../contracts/products'
 import StorePagination from '../../../components/store/StorePagination.astro'
 import StoreLayout from '../../../layouts/store/StoreLayout.astro'
 
 export async function getStaticPaths() {
   // Removed { paginate } as it's not used
-  const products = await getCollection(
-    'products',
-    ({ data }) => data.draft !== true,
-  )
+  const products = await getCollection('products', publicProductCollectionFilter)
   // Using a fixed PRODUCTS_PER_PAGE here. Ideally, this would be a shared constant.
   const PRODUCTS_PER_PAGE = 5
 
@@ -34,9 +32,7 @@ export async function getStaticPaths() {
 }
 
 const PRODUCTS_PER_PAGE = 5
-const allProducts = await getCollection('products', ({ data }) => {
-  return data.draft !== true
-})
+const allProducts = await getCollection('products', publicProductCollectionFilter)
 
 const { page } = Astro.params
 const currentPage = Number.parseInt(page as string, 10)
@@ -104,34 +100,7 @@ if (currentPage === 1) {
 </StoreLayout>
 
 <script>
-  // Script for product card interaction (same as in store.astro)
-  document.addEventListener('DOMContentLoaded', () => {
-    const productCards = document.querySelectorAll('.product-card-wrapper');
-    let currentlySelectedCard: HTMLElement | null = null;
+  import { initProductCardExpansion } from '../../../components/store/storefrontController'
 
-    productCards.forEach(cardElement => {
-      const card = cardElement as HTMLElement;
-      const clickableAreas = card.querySelectorAll('.product-clickable-area');
-
-      clickableAreas.forEach(area => {
-        area.addEventListener('click', (event) => {
-          if ((event.target as HTMLElement).closest('.product-cart-button')) {
-            return;
-          }
-          const clickedCard = card;
-          if (currentlySelectedCard && currentlySelectedCard !== clickedCard) {
-            currentlySelectedCard.classList.remove('selected', 'expanded');
-          }
-          if (clickedCard.classList.contains('selected')) {
-            clickedCard.classList.remove('selected', 'expanded');
-            currentlySelectedCard = null;
-          } else {
-            clickedCard.classList.add('selected', 'expanded');
-            currentlySelectedCard = clickedCard;
-          }
-        });
-      });
-    });
-  });
+  document.addEventListener('DOMContentLoaded', initProductCardExpansion)
 </script>
-

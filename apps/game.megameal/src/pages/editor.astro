@@ -4,6 +4,7 @@ import type { LevelEditorSessionSummary } from "../app/editor/levelEditorSession
 
 const title = "Megameal Level Editor";
 const isDevEditor = import.meta.env.DEV;
+const selectedRuntimeSceneId = Astro.url.searchParams.get("scene") ?? undefined;
 let editorCss: string | undefined;
 let editorSummary: LevelEditorSessionSummary | undefined;
 
@@ -12,54 +13,9 @@ if (isDevEditor) {
 		encoding: "utf8",
 	});
 	const editorModule = await import("../app/editor/levelEditorSession.js");
-	editorSummary = editorModule.getDefaultLevelEditorSessionSummary();
-}
-
-const formatNumber = (value: number) =>
-	Number.isInteger(value)
-		? String(value)
-		: value.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
-
-const formatVector = (value: readonly [number, number, number]) =>
-	value.map(formatNumber).join(", ");
-
-const formatBoolean = (value: boolean) => (value ? "yes" : "no");
-
-const formatOptionalNumber = (value: number | null) =>
-	value === null ? "n/a" : formatNumber(value);
-
-const formatOptionalVector = (
-	value: readonly [number, number, number] | null,
-) => (value === null ? "n/a" : formatVector(value));
-
-const terrainStatusClass = (status: string) => [
-	"editor-status-pill",
-	`editor-status-pill-${status}`,
-];
-
-const gizmoWorldHalfExtent = 320;
-const gizmoWorldSize = gizmoWorldHalfExtent * 2;
-
-function gizmoStyle(
-	entry: LevelEditorSessionSummary["collisionEntryEditors"][number],
-): string {
-	const left =
-		((entry.bounds.min[0] + gizmoWorldHalfExtent) / gizmoWorldSize) * 100;
-	const top =
-		((entry.bounds.min[2] + gizmoWorldHalfExtent) / gizmoWorldSize) * 100;
-	const width = (entry.bounds.size[0] / gizmoWorldSize) * 100;
-	const height = (entry.bounds.size[2] / gizmoWorldSize) * 100;
-
-	return [
-		`left: ${clampPercent(left)}%`,
-		`top: ${clampPercent(top)}%`,
-		`width: ${clampPercent(width)}%`,
-		`height: ${clampPercent(height)}%`,
-	].join("; ");
-}
-
-function clampPercent(value: number): string {
-	return Math.max(0, Math.min(100, value)).toFixed(4);
+	editorSummary = editorModule.getDefaultLevelEditorSessionSummary(
+		selectedRuntimeSceneId === undefined ? {} : { selectedRuntimeSceneId },
+	);
 }
 ---
 
@@ -77,647 +33,12 @@ function clampPercent(value: number): string {
 	</head>
 	<body>
 		<main class="editor-shell">
-			<section class="editor-header">
-				<h1>{title}</h1>
-			</section>
-
 			{
 				isDevEditor && editorSummary ? (
-					<>
-						<section class="editor-panel" aria-label="Level editor session">
-							<dl class="editor-facts">
-								<div>
-									<dt>Runtime Scene</dt>
-									<dd>{editorSummary.selectedRuntimeSceneId}</dd>
-								</div>
-								<div>
-									<dt>Collision Draft</dt>
-									<dd>{editorSummary.collisionDraftId}</dd>
-								</div>
-								<div>
-									<dt>Draft Entries</dt>
-									<dd>{editorSummary.collisionDraftEntryCount}</dd>
-								</div>
-								<div>
-									<dt>Light Draft</dt>
-									<dd>{editorSummary.lightDraftId}</dd>
-								</div>
-								<div>
-									<dt>Light Entries</dt>
-									<dd>{editorSummary.lightDraftEntryCount}</dd>
-								</div>
-								<div>
-									<dt>Selected Stable ID</dt>
-									<dd>
-										{editorSummary.selectedLevelInstanceStableId ?? "none"}
-									</dd>
-								</div>
-							</dl>
-						</section>
-
-						<section class="editor-panel" aria-label="Preview channel">
-							<dl class="editor-facts">
-								<div>
-									<dt>Preview Channel</dt>
-									<dd>{editorSummary.preview.channel}</dd>
-								</div>
-								<div>
-									<dt>Preview Mode</dt>
-									<dd>{editorSummary.preview.mode}</dd>
-								</div>
-								<div>
-									<dt>Preview Entries</dt>
-									<dd>{editorSummary.preview.entryCount}</dd>
-								</div>
-								<div>
-									<dt>Source Plan Hash</dt>
-									<dd>{editorSummary.preview.sourcePlanHash}</dd>
-								</div>
-							</dl>
-							<div
-								data-level-editor-preview-controls
-								data-preview-patch={editorSummary.preview.serializedPatch}
-							/>
-							<script>
-								if (import.meta.env.DEV) {
-									void (async () => {
-										const target = document.querySelector(
-											"[data-level-editor-preview-controls]",
-										);
-
-										if (!(target instanceof HTMLElement)) {
-											return;
-										}
-
-										const serializedPreviewPatch =
-											target.getAttribute("data-preview-patch");
-
-										if (serializedPreviewPatch === null) {
-											return;
-										}
-
-										const [{ mount }, editorControlsModule] =
-											await Promise.all([
-												import("svelte"),
-												import(
-													"../app/editor/LevelEditorPreviewControls.svelte"
-												),
-											]);
-										const LevelEditorPreviewControls =
-											editorControlsModule.default as unknown as import("svelte").Component<{
-												serializedPreviewPatch: string;
-											}>;
-
-										mount(LevelEditorPreviewControls, {
-											target,
-											props: {
-												serializedPreviewPatch,
-											},
-										});
-									})();
-								}
-							</script>
-						</section>
-
-						<section class="editor-panel" aria-label="Collision bake">
-							<dl class="editor-facts">
-								<div>
-									<dt>Bake Mode</dt>
-									<dd>{editorSummary.bake.mode}</dd>
-								</div>
-								<div>
-									<dt>Bake Hash</dt>
-									<dd>{editorSummary.bake.derivedBakeHash}</dd>
-								</div>
-								<div>
-									<dt>Write Plan Hash</dt>
-									<dd>{editorSummary.bake.writePlanHash}</dd>
-								</div>
-								<div>
-									<dt>Runtime Writes</dt>
-									<dd>{String(editorSummary.bake.writesRuntimeData)}</dd>
-								</div>
-							</dl>
-						</section>
-
-						<section
-							class="editor-panel editor-panel-wide"
-							aria-label="Terrain import and cook status"
-						>
-							<header class="editor-section-header">
-								<h2>Terrain Import / Cook</h2>
-							</header>
-
-							<dl class="editor-facts">
-								<div>
-									<dt>Imports</dt>
-									<dd>
-										{editorSummary.terrain.importedCount} /{" "}
-										{editorSummary.terrain.importCount}
-									</dd>
-								</div>
-								<div>
-									<dt>Collision Chunks</dt>
-									<dd>{editorSummary.terrain.collisionChunkCount}</dd>
-								</div>
-								<div>
-									<dt>Walkable Chunks</dt>
-									<dd>{editorSummary.terrain.walkableChunkCount}</dd>
-								</div>
-								<div>
-									<dt>Mesh / Box Chunks</dt>
-									<dd>
-										{editorSummary.terrain.meshChunkCount} /{" "}
-										{editorSummary.terrain.boxChunkCount}
-									</dd>
-								</div>
-								<div>
-									<dt>Collision Triangles</dt>
-									<dd>{editorSummary.terrain.collisionTriangleCount}</dd>
-								</div>
-								<div>
-									<dt>Visual Triangles</dt>
-									<dd>{editorSummary.terrain.visualTriangleCount}</dd>
-								</div>
-								<div>
-									<dt>Source Plan Hash</dt>
-									<dd>{editorSummary.terrain.sourcePlanHash}</dd>
-								</div>
-							</dl>
-
-							{editorSummary.terrain.imports.map((terrainImport) => (
-								<section
-									class="editor-terrain-group"
-									aria-label={`Terrain import ${terrainImport.id}`}
-								>
-									<header class="editor-subsection-header">
-										<div>
-											<h3>{terrainImport.id}</h3>
-											<p>{terrainImport.owner}</p>
-										</div>
-										<span class:list={terrainStatusClass(terrainImport.status)}>
-											{terrainImport.status}
-										</span>
-									</header>
-
-									<dl class="editor-facts editor-facts-compact">
-										<div>
-											<dt>Runtime Scene</dt>
-											<dd>{terrainImport.runtimeSceneId}</dd>
-										</div>
-										<div>
-											<dt>Generated At</dt>
-											<dd>{terrainImport.generatedAt}</dd>
-										</div>
-										<div>
-											<dt>Generator</dt>
-											<dd>{terrainImport.generatorId ?? "n/a"}</dd>
-										</div>
-										<div>
-											<dt>Metadata</dt>
-											<dd>{terrainImport.metadataPath ?? "n/a"}</dd>
-										</div>
-										<div>
-											<dt>GLB</dt>
-											<dd>{terrainImport.output.glbUrl}</dd>
-										</div>
-										<div>
-											<dt>SHA-256</dt>
-											<dd>{terrainImport.glbSha256 ?? "n/a"}</dd>
-										</div>
-										<div>
-											<dt>Source Visual</dt>
-											<dd>
-												{terrainImport.source.sourceVisualAssetId} /{" "}
-												{terrainImport.source.sourceVisualStableId}
-											</dd>
-										</div>
-										<div>
-											<dt>Collision Source</dt>
-											<dd>
-												{terrainImport.source.collisionDraftId} /{" "}
-												{terrainImport.source.collisionStableIds.join(", ")}
-											</dd>
-										</div>
-										<div>
-											<dt>Runtime Target</dt>
-											<dd>
-												{terrainImport.output.meshAssetId} /{" "}
-												{terrainImport.output.prefabId} /{" "}
-												{terrainImport.output.stableId}
-											</dd>
-										</div>
-										<div>
-											<dt>Source / Visual Scale</dt>
-											<dd>
-												{formatVector(terrainImport.alignment.sourceGlbScale)}
-												{" / "}
-												{formatVector(terrainImport.alignment.visualTerrainScale)}
-											</dd>
-										</div>
-									</dl>
-
-									<dl class="editor-metadata-grid">
-										<div>
-											<dt>Collision Grid</dt>
-											<dd>
-												{terrainImport.alignment.collisionGridSize} x{" "}
-												{terrainImport.alignment.collisionGridSize}
-											</dd>
-										</div>
-										<div>
-											<dt>Collision Cell</dt>
-											<dd>{formatNumber(terrainImport.alignment.collisionCellSize)}</dd>
-										</div>
-										<div>
-											<dt>Collision Vertices</dt>
-											<dd>{terrainImport.alignment.collisionVertexCount}</dd>
-										</div>
-										<div>
-											<dt>Collision Triangles</dt>
-											<dd>{terrainImport.alignment.collisionTriangleCount}</dd>
-										</div>
-										<div>
-											<dt>Visual Grid</dt>
-											<dd>
-												{terrainImport.alignment.visualGridSize} x{" "}
-												{terrainImport.alignment.visualGridSize}
-											</dd>
-										</div>
-										<div>
-											<dt>Visual Cell</dt>
-											<dd>{formatNumber(terrainImport.alignment.visualCellSize)}</dd>
-										</div>
-										<div>
-											<dt>Visual Vertices</dt>
-											<dd>{terrainImport.alignment.visualVertexCount}</dd>
-										</div>
-										<div>
-											<dt>Visual Triangles</dt>
-											<dd>{terrainImport.alignment.visualTriangleCount}</dd>
-										</div>
-										<div>
-											<dt>Micro Displacement</dt>
-											<dd>
-												{formatNumber(
-													terrainImport.alignment.microDisplacementAmplitude,
-												)}
-											</dd>
-										</div>
-										<div>
-											<dt>Height Range</dt>
-											<dd>
-												{formatNumber(terrainImport.alignment.heightRange.min)}
-												{" - "}
-												{formatNumber(terrainImport.alignment.heightRange.max)}
-											</dd>
-										</div>
-										<div>
-											<dt>Anchor Samples</dt>
-											<dd>{terrainImport.alignment.anchorSampleCount}</dd>
-										</div>
-										<div>
-											<dt>Max Sample Error</dt>
-											<dd>
-												{formatNumber(
-													terrainImport.alignment.maxCollisionSampleError,
-												)}
-											</dd>
-										</div>
-									</dl>
-
-									<div class="editor-status-list" aria-label="Terrain readiness">
-										<span>
-											imported {formatBoolean(terrainImport.readiness.imported)}
-										</span>
-										<span>
-											provenance{" "}
-											{formatBoolean(
-												terrainImport.readiness.hasArtifactProvenance,
-											)}
-										</span>
-										<span>
-											runtime IDs{" "}
-											{formatBoolean(terrainImport.readiness.hasTargetRuntimeIds)}
-										</span>
-										<span>
-											collision link{" "}
-											{formatBoolean(terrainImport.readiness.collisionLinked)}
-										</span>
-										<span>
-											visual only {formatBoolean(terrainImport.readiness.visualOnly)}
-										</span>
-									</div>
-								</section>
-							))}
-
-							<section class="editor-terrain-group" aria-label="Cook artifacts">
-								<header class="editor-subsection-header">
-									<div>
-										<h3>Cook Artifacts</h3>
-									</div>
-								</header>
-								<div class="editor-table-wrap">
-									<table class="editor-status-table">
-										<thead>
-											<tr>
-												<th scope="col">Purpose</th>
-												<th scope="col">Format</th>
-												<th scope="col">Target</th>
-												<th scope="col">Hash</th>
-												<th scope="col">Runtime</th>
-											</tr>
-										</thead>
-										<tbody>
-											{editorSummary.terrain.cookArtifacts.map((artifact) => (
-												<tr>
-													<td>{artifact.purpose}</td>
-													<td>{artifact.format}</td>
-													<td>{artifact.targetFile}</td>
-													<td>{artifact.contentHash}</td>
-													<td>{formatBoolean(artifact.writesRuntimeData)}</td>
-												</tr>
-											))}
-										</tbody>
-									</table>
-								</div>
-							</section>
-
-							<section class="editor-terrain-group" aria-label="Collision chunk status">
-								<header class="editor-subsection-header">
-									<div>
-										<h3>Collision Chunks</h3>
-									</div>
-								</header>
-								<div class="editor-table-wrap">
-									<table class="editor-status-table">
-										<thead>
-											<tr>
-												<th scope="col">Stable ID</th>
-												<th scope="col">Shape</th>
-												<th scope="col">Intent</th>
-												<th scope="col">Channel</th>
-												<th scope="col">Target</th>
-												<th scope="col">Required</th>
-												<th scope="col">Grid</th>
-												<th scope="col">Cell</th>
-												<th scope="col">Triangles</th>
-												<th scope="col">Height</th>
-												<th scope="col">Bounds</th>
-											</tr>
-										</thead>
-										<tbody>
-											{editorSummary.terrain.chunks.map((chunk) => (
-												<tr>
-													<td>{chunk.stableId}</td>
-													<td>{chunk.shapeType}</td>
-													<td>{chunk.intent}</td>
-													<td>{chunk.channel}</td>
-													<td>{chunk.colliderTarget}</td>
-													<td>
-														{chunk.requiredCollision ? "collision" : "optional"}
-														{chunk.requiredWalkable ? " / walkable" : ""}
-													</td>
-													<td>{formatOptionalNumber(chunk.geometry.gridSize)}</td>
-													<td>{formatOptionalNumber(chunk.geometry.cellSize)}</td>
-													<td>{formatOptionalNumber(chunk.geometry.triangleCount)}</td>
-													<td>
-														{chunk.geometry.heightRange
-															? `${formatNumber(
-																	chunk.geometry.heightRange.min,
-																)} - ${formatNumber(
-																	chunk.geometry.heightRange.max,
-																)}`
-															: "n/a"}
-													</td>
-													<td>
-														{formatVector(chunk.bounds.size)}
-														{" / half "}
-														{formatOptionalVector(chunk.geometry.halfExtents)}
-													</td>
-												</tr>
-											))}
-										</tbody>
-									</table>
-								</div>
-							</section>
-						</section>
-
-						<section class="editor-authoring" aria-label="Collision authoring">
-							<form class="editor-authoring-grid">
-								<aside class="editor-selector" aria-label="Collision stable IDs">
-									<h2>Collision IDs</h2>
-									<div class="editor-gizmo-board" data-collision-gizmo-board>
-										{editorSummary.collisionEntryEditors.map((entry) => (
-											<button
-												type="button"
-												class:list={[
-													"editor-gizmo",
-													`editor-gizmo-${entry.shapeType}`,
-													entry.selected && "editor-gizmo-selected",
-												]}
-												style={gizmoStyle(entry)}
-												data-gizmo-stable-id={entry.stableId}
-												aria-label={entry.stableId}
-											>
-												<span>{entry.shapeType}</span>
-											</button>
-										))}
-									</div>
-									<div class="editor-radio-list">
-										{editorSummary.collisionEntryEditors.map((entry) => (
-											<label
-												class:list={[
-													"editor-radio-option",
-													entry.selected && "editor-radio-option-selected",
-												]}
-											>
-												<input
-													type="radio"
-													name="selectedCollisionStableId"
-													value={entry.stableId}
-													checked={entry.selected}
-												/>
-												<span>{entry.stableId}</span>
-											</label>
-										))}
-									</div>
-								</aside>
-
-								<div class="editor-entry-stack">
-									{editorSummary.collisionEntryEditors.map((entry) => (
-										<section
-											class:list={[
-												"editor-collision-entry",
-												entry.selected && "editor-collision-entry-selected",
-											]}
-											aria-label={`Collision entry ${entry.stableId}`}
-										>
-											<header class="editor-entry-header">
-												<div>
-													<h2>{entry.stableId}</h2>
-													<p>{entry.prefabId}</p>
-												</div>
-												<span>{entry.shapeType}</span>
-											</header>
-
-											<div class="editor-control-grid">
-												<label class="editor-field">
-													<span>Intent</span>
-													<select
-														name={entry.intentControl.name}
-														aria-label={`${entry.stableId} intent`}
-														data-collision-field="intent"
-														data-stable-id={entry.stableId}
-													>
-														{entry.intentControl.options.map((option) => (
-															<option
-																value={option}
-																selected={option === entry.intentControl.value}
-															>
-																{option}
-															</option>
-														))}
-													</select>
-												</label>
-
-												<label class="editor-field">
-													<span>Channel</span>
-													<select
-														name={entry.channelControl.name}
-														aria-label={`${entry.stableId} channel`}
-														data-collision-field="channel"
-														data-stable-id={entry.stableId}
-													>
-														{entry.channelControl.options.map((option) => (
-															<option
-																value={option}
-																selected={option === entry.channelControl.value}
-															>
-																{option}
-															</option>
-														))}
-													</select>
-												</label>
-											</div>
-
-											{
-												entry.transformControls ? (
-													<div class="editor-transform-grid">
-														<fieldset class="editor-fieldset">
-															<legend>{entry.transformControls.position.label}</legend>
-															<div class="editor-axis-grid">
-																{entry.transformControls.position.fields.map(
-																	(field) => (
-																		<label class="editor-field">
-																			<span>{field.label}</span>
-																			<input
-																				type="number"
-																				name={field.name}
-																				value={formatNumber(field.value)}
-																				step="0.01"
-																				data-collision-field="position"
-																				data-stable-id={entry.stableId}
-																				data-axis={field.axis}
-																			/>
-																		</label>
-																	),
-																)}
-															</div>
-														</fieldset>
-
-														<fieldset class="editor-fieldset">
-															<legend>{entry.transformControls.scale.label}</legend>
-															<div class="editor-axis-grid">
-																{entry.transformControls.scale.fields.map((field) => (
-																	<label class="editor-field">
-																		<span>{field.label}</span>
-																			<input
-																				type="number"
-																				name={field.name}
-																				value={formatNumber(field.value)}
-																				step="0.01"
-																				min="0.01"
-																				data-collision-field="scale"
-																				data-stable-id={entry.stableId}
-																				data-axis={field.axis}
-																			/>
-																	</label>
-																))}
-															</div>
-														</fieldset>
-													</div>
-												) : null
-											}
-
-											{
-												entry.meshMetadata ? (
-													<dl class="editor-metadata-grid">
-														<div>
-															<dt>Vertices</dt>
-															<dd>{entry.meshMetadata.vertexCount}</dd>
-														</div>
-														<div>
-															<dt>Indices</dt>
-															<dd>{entry.meshMetadata.indexCount}</dd>
-														</div>
-														<div>
-															<dt>Triangles</dt>
-															<dd>{entry.meshMetadata.triangleCount}</dd>
-														</div>
-													</dl>
-												) : null
-											}
-
-											{
-												entry.boxMetadata ? (
-													<fieldset class="editor-fieldset">
-														<legend>Half Extents</legend>
-														<div class="editor-axis-grid">
-															{entry.boxMetadata.halfExtents.map((value, index) => (
-																<label class="editor-field">
-																	<span>{["X", "Y", "Z"][index]}</span>
-																	<input
-																		type="number"
-																		name={`collision.${entry.stableId}.halfExtents.${index}`}
-																		value={formatNumber(value)}
-																		step="0.01"
-																		min="0.01"
-																		data-collision-field="halfExtents"
-																		data-stable-id={entry.stableId}
-																		data-axis-index={index}
-																	/>
-																</label>
-															))}
-														</div>
-													</fieldset>
-												) : null
-											}
-
-											<dl class="editor-bounds-grid">
-												<div>
-													<dt>Min</dt>
-													<dd>{formatVector(entry.bounds.min)}</dd>
-												</div>
-												<div>
-													<dt>Max</dt>
-													<dd>{formatVector(entry.bounds.max)}</dd>
-												</div>
-												<div>
-													<dt>Center</dt>
-													<dd>{formatVector(entry.bounds.center)}</dd>
-												</div>
-												<div>
-													<dt>Size</dt>
-													<dd>{formatVector(entry.bounds.size)}</dd>
-												</div>
-											</dl>
-										</section>
-									))}
-								</div>
-							</form>
-						</section>
-					</>
+					<div
+						data-level-editor-workspace
+						data-editor-session={JSON.stringify(editorSummary)}
+					/>
 				) : (
 					<section class="editor-panel" aria-label="Level editor unavailable">
 						<p>Level editor disabled outside development mode.</p>
@@ -725,5 +46,70 @@ function clampPercent(value: number): string {
 				)
 			}
 		</main>
+		{
+			isDevEditor && editorSummary ? (
+				<script>
+					if (import.meta.env.DEV) {
+						void (async () => {
+							const target = document.querySelector(
+								"[data-level-editor-workspace]",
+							);
+
+							if (!(target instanceof HTMLElement)) {
+								return;
+							}
+
+							let serializedEditorSession =
+								target.getAttribute("data-editor-session");
+
+							if (serializedEditorSession === null) {
+								return;
+							}
+
+							const requestedRuntimeSceneId = new URL(
+								globalThis.location.href,
+							).searchParams.get("scene");
+							const serverEditorSession = JSON.parse(serializedEditorSession) as {
+								readonly selectedRuntimeSceneId?: string;
+							};
+
+							const [{ mount }, workspaceModule, sessionModule] = await Promise.all([
+								import("svelte"),
+								import("../app/editor/LevelEditorWorkspace.svelte"),
+								import("../app/editor/levelEditorSession.js"),
+							]);
+
+							if (
+								requestedRuntimeSceneId &&
+								requestedRuntimeSceneId !==
+									serverEditorSession.selectedRuntimeSceneId
+							) {
+								serializedEditorSession = JSON.stringify(
+									sessionModule.getDefaultLevelEditorSessionSummary({
+										selectedRuntimeSceneId: requestedRuntimeSceneId,
+									}),
+								);
+								target.setAttribute(
+									"data-editor-session",
+									serializedEditorSession,
+								);
+							}
+
+							const LevelEditorWorkspace =
+								workspaceModule.default as unknown as import("svelte").Component<{
+									serializedEditorSession: string;
+								}>;
+
+							mount(LevelEditorWorkspace, {
+								target,
+								props: {
+									serializedEditorSession,
+								},
+							});
+						})();
+					}
+				</script>
+			) : null
+		}
 	</body>
 </html>

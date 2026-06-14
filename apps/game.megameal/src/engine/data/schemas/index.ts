@@ -32,6 +32,8 @@ export type {
 	TerrainChunkPackageChunkData,
 	TerrainChunkPackageData,
 	TerrainChunkStreamingPolicyData,
+	TerrainMaterialLayerData,
+	TerrainMaterialSetData,
 	TerrainVisualBindingData,
 	TextureProjectionData,
 	Vec3Data,

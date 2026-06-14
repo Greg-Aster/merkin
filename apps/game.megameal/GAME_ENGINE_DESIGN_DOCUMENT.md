@@ -137,9 +137,9 @@ src/
 Data contract packages should keep `index.ts` as public API barrels only.
 Schema types and validators, content graph derivation/import parity checks,
 collision-cook draft/preview/bake/write-plan logic, and terrain-cook
-manifest/shape/runtime/write-plan logic belong in focused owner modules under
-those folders. New contracts should extend the narrow owner module rather than
-recreating large catch-all data files.
+manifest/shape/package/runtime/write-plan logic belong in focused owner modules
+under those folders. New contracts should extend the narrow owner module rather
+than recreating large catch-all data files.
 
 ## 5. Layer Responsibilities
 
@@ -647,7 +647,7 @@ Rules:
 - Required environment assets participate in runtime-scene readiness validation.
 - The asset manager owns loaded cubemap assets and disposal; the renderer adapter owns `Scene.background`, `Scene.environment`, fog/atmosphere projection, and clearing stale scene references before scene unload.
 - Svelte, Threlte, and gameplay systems do not mutate Three scene background/environment directly.
-- Missing authored environment data must fail validation for production runtime scenes; the runtime must not silently choose an Observatory/default fallback.
+- Missing authored environment data must fail validation for production runtime scenes; the runtime must not silently choose a level-specific/default fallback.
 - Future volumetric clouds, sky atmosphere, weather, reflection probes, and image-based-lighting preprocessing should extend this contract instead of creating unrelated atmosphere policies.
 
 Current implementation status:
@@ -838,8 +838,9 @@ The content graph validator should derive or verify:
   authoring products, and shared gameplay/environment prefabs.
 - Required collision stable IDs from instances whose prefab or instance
   override declares required solid, trigger, or interaction collision.
-- Required walkable stable IDs from authored `Collider.intent: "walkable"`
-  data.
+- Required walkable stable IDs from non-streamed authored
+  `Collider.intent: "walkable"` data, and required terrain package IDs for
+  streamable terrain walkables.
 - Required light stable IDs from authored first-playable `Light` components.
 - Runtime scene transitions from `Portal.targetRuntimeSceneId` values and the
   checked-in runtime scene catalog.
@@ -869,7 +870,7 @@ verifies those values against the checked-in artifact. The implemented
 foundation in `src/game/assets/generatedGlbImportParity.ts` and
 `scripts/test-generated-glb-import-contract.ts` currently tracks Miranda
 command-console, Chapel monolith, story-marker, and portal-apparatus generated
-GLB candidates plus the imported Observatory field visual terrain GLB.
+GLB candidates plus the target-owned Observatory environment GLB provenance.
 
 ### Level Editor And Collision Cook Pipeline
 
@@ -897,24 +898,31 @@ Collision cooking should prefer cheap authored primitive data first: cuboids
 and other simple shapes for most floors, blockers, walls, and trigger volumes;
 compound primitive sets for architecture and traversal details; cooked trimesh
 chunks only for static irregular geometry that needs precision; heightfields
-only for future true heightmap terrain. The first Observatory slice now has a
-non-UI data/check foundation: `src/engine/data/collisionCook` validates
-authored collision drafts, `src/game/editor/collisionDrafts/observatoryCollisionDraft.ts`
-owns the current Observatory V1 draft, and focused contract tests check the
-draft/runtime relationship without making editor state runtime source of truth.
-The former Observatory-only cook/drift commands were retired; future write
-paths must be generic and manifest-driven. The first dev-only editor boundary
-shell now exists at `/editor/`, with
-`src/app/editor/levelEditorSession.ts` projecting the current
-`observatory_runtime` collision draft, terrain import/cook status, preview
-patch metadata, and derived dry-run bake hash outside the normal game HUD.
+only for future true heightmap terrain. The first collision data/check
+foundation now uses a registry model: `src/engine/data/collisionCook`
+validates authored collision drafts,
+`src/game/editor/collisionDrafts/collisionDraftRegistry.ts` exposes the
+checked-in draft catalog, and focused contract tests check draft/runtime
+relationships without making editor state runtime source of truth. The current
+Observatory V1 draft remains valid Observatory content data at
+`src/game/editor/collisionDrafts/observatoryCollisionDraft.ts`; it is not a
+generic app/editor fallback. The former Observatory-only cook/drift commands
+were retired; future collision write paths must be generic and
+manifest/catalog-driven, while terrain package writes use `cook:terrain` and
+drift checks use `ci:terrain-drift`. The first dev-only editor boundary shell
+now exists at `/editor/`, with `src/app/editor/levelEditorSession.ts` resolving
+the selected runtime scene from the checked-in runtime scene catalog, resolving
+collision drafts from the draft registry, reporting a missing-draft state for
+scenes without a registered collision draft, and keeping preview metadata plus
+derived dry-run bake hashes outside the normal game HUD.
 Checked-in editor bake JSON was retired with the Observatory-only cook command;
 future generated bake artifacts need a generic manifest-driven owner before
 they can be written. The
 checked-in generated runtime collision module at
 `src/game/generated/observatoryCollisionRuntime.ts` is retained as current data
-until a generic cook owner replaces it; Observatory prefab, level, and manifest
-owners import that module for shipped collision data. The bake does not mutate
+until the generic terrain runtime module fully replaces the legacy collision
+module; Observatory prefab, level, and manifest owners import that module for
+shipped collision data. The bake does not mutate
 arbitrary TypeScript object literals; generated runtime data must have an owned
 output module because broad TS rewrites are riskier than a structured generated
 data module.
@@ -924,19 +932,26 @@ messages before send/application and applies temporary transform/collider
 updates only in dev mode for the active runtime scene. Basic preview clearing
 and component restoration are explicit through the same dev-only protocol;
 richer reload lifecycle diagnostics remain planned. The `/editor/` route
-exposes editable collision controls and a top-down collision gizmo surface for
-current Observatory draft entries; persisted spatial drag handles and
-generalized multi-level editing remain planned. The generalized terrain
-import/cook contract is implemented through engine data terrain cook
-validation, generated Observatory field GLB provenance, reusable write-plan
-serialization, and runtime-drift checks. Cooked terrain chunks are implemented
-as a foundation through 16 deterministic Observatory walkable terrain chunks
-derived from the authored 17x17 height grid, plus four boundary blockers.
-Render terrain and collision terrain are separate products: generated visual
-terrain stays visual-only, and runtime traversal stays on explicit collider
-data. Production editor import UI, material/shader import, terrain
-LOD/streaming, and multi-level terrain packages remain future packets tracked
-in
+exposes catalog-driven workspace browsing and collision controls for the
+selected scene when that scene has a registered draft; per-level collision
+entries are shown only after selecting their registered runtime scene.
+Persisted spatial drag handles and generalized multi-level editing remain
+planned. The generalized
+terrain import/cook contract is implemented through engine data terrain cook validation,
+Observatory environment GLB provenance, reusable write-plan serialization,
+runtime-drift checks, and production `RuntimeSceneManifest.terrainPackages`
+readiness data. Cooked terrain chunks are implemented as a foundation through
+16 deterministic Observatory GLB-footprint walkable terrain chunks derived into
+explicit checked-in collision source data, plus four boundary blockers. Render
+terrain, collision terrain, material bindings, and terrain packages are
+engine/game data products; renderer and physics adapters only project currently
+active entities. `TerrainChunkStreamingContract` owns startup package
+activation, per-tick collision activation/deactivation, visual visibility
+projection, and package readiness. The only terrain cook/drift entrypoints are
+the generic `cook:terrain` and `ci:terrain-drift`; level-specific terrain
+cook/drift scripts remain retired. Production editor import UI,
+material/shader authoring UI, and terrain package integration for newly added
+runtime scenes remain future packets tracked in
 `docs/LEVEL_EDITOR_COLLISION_COOK_PLAN.md`.
 
 Cooked collision shape dimensions and mesh vertices are final physics data.
@@ -1270,15 +1285,15 @@ observatory_runtime
 
 sci_fi_room_runtime
   -> playable foundation slice for migrated Sci Fi Room content
-  -> owns three readiness-required walkable floor colliders, five StoryNote
-     markers, a manifest-ID Observatory portal, and disabled/off
+  -> owns three floor surfaces through generic terrain package chunks, five
+     StoryNote markers, a manifest-ID Observatory portal, and disabled/off
      post-processing profile data
 
 solitude_runtime
   -> active target-owned playable-foundation packet, not full legacy parity
   -> must use target-owned primitive/current assets, prefabs, level data,
-     render profile, audio/environment manifest data, explicit plateau/dais
-     walkable collision, and portal admission after validation
+     render profile, audio/environment manifest data, terrain-package-owned
+     plateau/dais walkable collision, and portal admission after validation
 
 yggdrasil_runtime
   -> active target-owned primitive-parity playable-foundation packet, not full
@@ -1288,7 +1303,7 @@ yggdrasil_runtime
      JSON, or load old partition JSON
   -> represents all old primitive nodes as checked-in target content data and
      derives primitive assets, prefabs, level instances, collision stable IDs,
-     and walkable stable IDs through PrimitiveSceneContentContract
+     and terrain package walkable chunk data through PrimitiveSceneContentContract
   -> keeps manifest-owned audio/environment data, story/portal identity
      markers, and portal-arena admission after validation
   -> old GLB asset parity, cooked collision products, water, ambient
@@ -1391,7 +1406,7 @@ Rules:
 - Runtime state should be serializable where practical.
 - Data schemas should validate content before runtime.
 - Runtime scene manifests own their asset, prefab, level, render profile, and readiness data for a playable scene.
-- Readiness must fail before play when required assets, player spawn, collision prefabs, exact collision stable IDs, exact walkable stable IDs, or exact authored light stable IDs are missing.
+- Readiness must fail before play when required assets, player spawn, collision prefabs, exact collision stable IDs, exact non-streamed walkable stable IDs, required terrain package IDs/startup chunks, or exact authored light stable IDs are missing.
 - Content migration from the old game must rewrite source evidence into new contracts; it must not import old runtime code or copy old editor repair paths.
 - When old authored parent transforms are simple enough, migration may flatten them into level instance transforms while keeping prefab geometry/collider/material as reusable archetype data.
 
@@ -1494,11 +1509,11 @@ Current portal arena foundation:
     `observatory_boundary_blocker` instances.
     Render mesh geometry is not implicit collision.
   - The player spawn is authored as the stable `player` instance at
-    `[-137.2, 1.8, -49.5]`, with `CharacterController.groundY` kept as the
+    `[-137.2, 0.43, -49.5]`, with `CharacterController.groundY` kept as the
     spawn/fallback scalar and `CharacterController.kinematicCollision`
     enabling adapter-owned slide, slope, snap-to-ground, autostep behavior,
     and `worldStatic` obstacle filtering over the explicit collision data.
-    Movement bounds remain clamped to `x/z = -300..300`.
+    Movement bounds remain clamped to `x/z = -185..185`.
   - Lighting uses the existing contracts: a low ambient render profile with
     `cubemap_observatory_sky`, a player-carried `Transform + Light` through
     `PlayerCarriedLightContract`, and three firefly
@@ -1514,11 +1529,12 @@ Current portal arena foundation:
     gameplay volume disabled while reusable mesh/material/prefab/component
     ownership belongs to the shared water system. Shader animation,
     reflections/refraction rendering, water volumes, rising water,
-    post-processing adapter implementation, terrain LOD/streaming, production
-    editor import UI and material/shader pipeline, large firefly populations,
-    live runtime flicker animation, and richer light/shadow behavior remain
-    future contracts. The current collision product is a chunked terrain
-    foundation, not a complete multi-level terrain package.
+    post-processing adapter implementation, production editor import UI,
+    material/shader authoring UI, future-scene terrain package integration,
+    large firefly populations, live runtime flicker animation, and richer
+    light/shadow behavior remain future contracts. The current collision
+    product is a chunked terrain foundation that feeds the generic terrain
+    package/cook/streaming contract, not an Observatory-specific runtime.
   - Observatory scene music is content-owned through
     `src/game/assets/observatoryAssets.ts`, `AudioContentManifest.sceneMusic`,
     and the shared production `audio_ambient_portal_deck` asset. The old

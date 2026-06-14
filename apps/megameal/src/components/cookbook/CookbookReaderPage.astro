@@ -5,8 +5,10 @@ import type { CollectionEntry } from 'astro:content'
 import Markdown from '@components/misc/Markdown.astro'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
 import { Icon } from 'astro-icon/components'
+import { publicCollectionFilter } from '../../contracts/content'
 import { url } from '../../utils/url-utils'
 import CookbookBanner from './CookbookBanner.astro'
+import '../../styles/pages/cookbook-reader.css'
 
 interface Props {
   entry: CollectionEntry<'cookbook'>
@@ -15,7 +17,7 @@ interface Props {
 
 const { entry, entries } = Astro.props
 const visibleEntries = entries
-  .filter(item => item.data.draft !== true)
+  .filter(publicCollectionFilter)
   .sort((a, b) => (a.data.page ?? 999) - (b.data.page ?? 999))
 const { Content, headings } = await entry.render()
 const contentOwnsPageHeading = headings.some(heading => heading.depth === 1)
@@ -326,63 +328,9 @@ function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
 </MainGridLayout>
 
 <script>
-  function initCookbookRecipeMode() {
-    const reader = document.querySelector('#cookbook-reader')
-    if (!(reader instanceof HTMLElement)) return
-
-    const controls = Array.from(
-      reader.querySelectorAll('[data-recipe-mode-control]'),
-    )
-    const downloads = Array.from(
-      document.querySelectorAll('[data-recipe-download-mode]'),
-    )
-    const storageKey = 'megameal-cookbook-recipe-mode-v2'
-
-    const setMode = (mode: string | null) => {
-      const nextMode = mode === 'terrestrial' ? 'terrestrial' : 'original'
-      reader.dataset.recipeMode = nextMode
-      window.localStorage?.setItem(storageKey, nextMode)
-
-      controls.forEach((control) => {
-        const isActive = control.getAttribute('data-recipe-mode-control') === nextMode
-        control.setAttribute('aria-pressed', String(isActive))
-        control.classList.toggle('bg-white', isActive)
-        control.classList.toggle('text-black', isActive)
-        control.classList.toggle('shadow-sm', isActive)
-        control.classList.toggle('dark:bg-black/50', isActive)
-        control.classList.toggle('dark:text-white', isActive)
-      })
-
-      downloads.forEach((download) => {
-        const isActive =
-          download.getAttribute('data-recipe-download-mode') === nextMode
-        download.setAttribute('aria-current', isActive ? 'true' : 'false')
-      })
-    }
-
-    controls.forEach((control) => {
-      control.addEventListener('click', () => {
-        setMode(control.getAttribute('data-recipe-mode-control'))
-      })
-    })
-
-    setMode(window.localStorage?.getItem(storageKey))
-  }
+  import { initCookbookRecipeMode } from './cookbookRecipeMode'
 
   document.addEventListener('DOMContentLoaded', initCookbookRecipeMode)
   document.addEventListener('astro:page-load', initCookbookRecipeMode)
   initCookbookRecipeMode()
 </script>
-
-<style is:global>
-  #cookbook-reader[data-recipe-mode='original'] [data-recipe-mode='terrestrial'],
-  #cookbook-reader[data-recipe-mode='terrestrial'] [data-recipe-mode='original'] {
-    display: none;
-  }
-
-  [data-recipe-download-mode][aria-current='true'] .card-base {
-    box-shadow:
-      inset 0 0 0 2px color-mix(in srgb, var(--primary) 58%, transparent),
-      inset 0 0 10px color-mix(in srgb, var(--primary) 28%, transparent);
-  }
-</style>

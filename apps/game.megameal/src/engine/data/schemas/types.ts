@@ -107,6 +107,26 @@ export type TerrainChunkLodData = {
 	readonly farVisualStableIds: readonly string[];
 };
 
+export type TerrainMaterialLayerData = {
+	readonly id: string;
+	readonly materialAssetId: string;
+	readonly textureAssetIds?: readonly string[];
+	readonly uvScale?: readonly [number, number];
+};
+
+export type TerrainMaterialSetData = {
+	readonly id: string;
+	readonly blendMode: "single" | "weighted" | "splat-map";
+	readonly fallbackMaterialAssetId: string;
+	readonly layers: readonly TerrainMaterialLayerData[];
+};
+
+export type TerrainChunkMaterialBindingData = {
+	readonly materialSetId: string;
+	readonly layerIds: readonly string[];
+	readonly uvScale?: readonly [number, number];
+};
+
 export type TerrainChunkStreamingPolicyData = {
 	readonly startupRadiusMeters: number;
 	readonly activeCollisionRadiusMeters: number;
@@ -124,6 +144,7 @@ export type TerrainChunkPackageChunkData = {
 	readonly bounds: TerrainBoundsData;
 	readonly center: readonly [number, number, number];
 	readonly lod: TerrainChunkLodData;
+	readonly materialBinding?: TerrainChunkMaterialBindingData;
 	readonly rigidBodyComponent: {
 		readonly type: "fixed";
 		readonly mass: 0;
@@ -146,6 +167,7 @@ export type TerrainChunkPackageData = {
 	readonly runtimeSceneId: string;
 	readonly sourceManifestId: string;
 	readonly policy: TerrainChunkStreamingPolicyData;
+	readonly materialSets: readonly TerrainMaterialSetData[];
 	readonly chunks: readonly TerrainChunkPackageChunkData[];
 	readonly visualBindings: readonly TerrainVisualBindingData[];
 	readonly startupChunkStableIds: readonly string[];

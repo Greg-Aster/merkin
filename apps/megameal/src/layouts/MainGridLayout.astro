@@ -1,6 +1,4 @@
 ---
-import fs from 'node:fs'
-import path from 'node:path'
 import '@fontsource/creepster'
 import '@fontsource/metal-mania'
 import {
@@ -17,6 +15,13 @@ import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
 import TimelinePortalCarousel from '@components/timeline/TimelinePortalCarousel.svelte'
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
 import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
+import {
+  isContentPostPage,
+  isTimeline2DPath,
+  isTimelinePath,
+  postUsesArchiveBanner,
+  resolvePostOneColumn,
+} from '../utils/mainGridLayout.server'
 import '@/styles/features/banner/banner-base.css'
 import '@/styles/features/banner/banner-billboards.css'
 import '@/styles/features/banner/banner-title-display.css'
@@ -57,35 +62,18 @@ interface Props {
 const sharedHomeLayout = Astro.props.homeLayout
 const hasCustomBannerSlideContent = Astro.slots.has('banner-slide-content')
 const hasCustomBannerOverlayContent = Astro.slots.has('banner-overlay-content')
-const normalizedPath = Astro.url.pathname.replace(/\/$/, '')
-const isTimelineRoute = normalizedPath === '/timeline'
-const isTimeline2DRoute = normalizedPath === '/timeline/2d'
+const isTimelineRoute = isTimelinePath(Astro.url.pathname)
+const isTimeline2DRoute = isTimeline2DPath(Astro.url.pathname)
 const originalPost = Astro.props.post as
   | ({ data?: { bannerType?: string } } & Record<string, unknown>)
   | undefined
-const isContentPost = Astro.props.isPostPage === true && Boolean(originalPost)
+const isContentPost = isContentPostPage(Astro.props.isPostPage, originalPost)
 const layoutPost = originalPost
-const postSourcePath =
-  isContentPost && typeof (originalPost as any)?.id === 'string'
-    ? path.join(
-        process.cwd(),
-        'src',
-        'content',
-        'posts',
-        (originalPost as any).id,
-      )
-    : ''
-const rawPostFrontmatter =
-  postSourcePath && fs.existsSync(postSourcePath)
-    ? (fs.readFileSync(postSourcePath, 'utf8').split('---')[1] ?? '')
-    : ''
-const postRequestsVisibleSidebar =
-  /^\s*oneColumn:\s*false\s*(?:#.*)?$/m.test(rawPostFrontmatter)
 const resolvedOneColumn = isContentPost
-  ? !postRequestsVisibleSidebar
+  ? resolvePostOneColumn(originalPost)
   : Astro.props.oneColumn
 const usesArchiveBanner =
-  !isContentPost && layoutPost?.data?.bannerType === 'archive'
+  !isContentPost && postUsesArchiveBanner(layoutPost)
 const hasPortalDemoContent = Astro.slots.has('portal-demo-content')
 const sharedProps: Omit<Props, 'homeLayout'> & {
   homeLayout?: 'default' | 'portal'
