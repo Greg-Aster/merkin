@@ -65,14 +65,14 @@ export const navBarConfig: NavBarConfig = {
       name: 'More',
       url: '/about/',
       dropdown: [
-        {
+/*         {
           name: 'Cookbook',
           url: '/cookbook/',
-        },
-        {
+        }, */
+/*         {
           name: 'First Contact Manual',
           url: '/reader/first-contact-manual/',
-        },
+        }, */
         {
           name: 'Quizzes',
           url: '/quiz/',

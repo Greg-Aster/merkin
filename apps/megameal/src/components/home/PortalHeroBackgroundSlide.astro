@@ -17,6 +17,8 @@ const portalIntroBackgroundPlaybackRate = 0.25
 </div>
 
 <script>
+  import { homePortalEvents } from '../../contracts/homePortal'
+
   const slide = document.querySelector<HTMLElement>('.megameal-portal-background-slide')
   const video = slide?.querySelector<HTMLVideoElement>('.megameal-portal-background-slide__video')
 
@@ -123,7 +125,7 @@ const portalIntroBackgroundPlaybackRate = 0.25
       loadBackgroundVideo()
     }
 
-    window.addEventListener('merkin:portal-advance', loadBackgroundVideo, {
+    window.addEventListener(homePortalEvents.portalAdvance, loadBackgroundVideo, {
       once: true,
     })
     window.addEventListener('pointerdown', loadFromPointerIntent, { once: true })

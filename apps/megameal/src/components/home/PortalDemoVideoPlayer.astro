@@ -67,6 +67,14 @@ const demoVideos = [
 </section>
 
 <script>
+  import {
+    homePortalEvents,
+    homePortalWindowKeys,
+    portalDemoState,
+    portalDemoStorageKeys,
+    type PortalAudioSuspensionDetail,
+    type PortalBannerSelectSceneDetail,
+  } from '../../contracts/homePortal'
   import { readSiteAudioVolume, siteAudioConfig } from '../../config/audio'
   import {
     addSiteAudioActivationListeners,
@@ -80,12 +88,12 @@ const demoVideos = [
     poster: string
   }
 
-  const cleanupKey = '__megamealPortalDemoPlayerCleanup'
-  const boundKey = '__megamealPortalDemoPlayerBound'
-  const lastIndexStorageKey = 'megameal-portal-demo-last-index'
-  const demoActiveClass = 'megameal-portal-demo-active'
-  const demoAudioSuspensionReason = 'portal-demo'
-  const audioConfigChangeEvent = 'megameal:audio-config-change'
+  const cleanupKey = homePortalWindowKeys.portalDemoPlayerCleanup
+  const boundKey = homePortalWindowKeys.portalDemoPlayerBound
+  const lastIndexStorageKey = portalDemoStorageKeys.lastIndex
+  const demoActiveClass = portalDemoState.activeClass
+  const demoAudioSuspensionReason = portalDemoState.audioSuspensionReason
+  const audioConfigChangeEvent = homePortalEvents.audioConfigChange
   const channelGlitchClass = 'is-channel-glitching'
   const handoffGlitchStartProgress = 0.78
   const handoffGlitchResetProgress = 0.38
@@ -226,8 +234,10 @@ const demoVideos = [
       if (hasSuspendedSiteAudio === isSuspended) return
       hasSuspendedSiteAudio = isSuspended
       window.dispatchEvent(
-        new CustomEvent(
-          isSuspended ? 'megameal:audio-suspend' : 'megameal:audio-resume',
+        new CustomEvent<PortalAudioSuspensionDetail>(
+          isSuspended
+            ? homePortalEvents.audioSuspend
+            : homePortalEvents.audioResume,
           {
             detail: {
               reason: demoAudioSuspensionReason,
@@ -437,9 +447,10 @@ const demoVideos = [
     })
 
     window.addEventListener(
-      'merkin:banner-select-scene',
+      homePortalEvents.bannerSelectScene,
       event => {
-        const detail = (event as CustomEvent).detail
+        const detail = (event as CustomEvent<PortalBannerSelectSceneDetail>)
+          .detail
         if (detail?.phase !== 'standard-banner') return
         const progress = Number(detail.progress) || 0
 

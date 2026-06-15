@@ -1,6 +1,7 @@
 <script lang="ts">
 import { siteSfxManager } from '@/utils/site-sfx'
 import { onDestroy, onMount } from 'svelte'
+import { homePortalEvents } from '../../contracts/homePortal'
 import '../../styles/features/extracted/home-intro-environment.css'
 
 type HomeIntroEnvironmentComponent =
@@ -68,7 +69,7 @@ function waitForIntent() {
     void loadEnvironment({ unlockFromGesture: isDirectAudioIntent(event) })
   }
 
-  window.addEventListener('merkin:portal-advance', start, { signal })
+  window.addEventListener(homePortalEvents.portalAdvance, start, { signal })
   window.addEventListener('click', start, { signal })
   window.addEventListener('pointerdown', start, {
     signal,

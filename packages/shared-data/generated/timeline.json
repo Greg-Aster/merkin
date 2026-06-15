@@ -16,7 +16,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Historical Archives",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Lore",
@@ -279,7 +279,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Prime, Northern Hemisphere",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Digital Legacy",
@@ -312,7 +312,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Prime, Global Information Network",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Digital Consciousness",
@@ -345,7 +345,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Prime, Multiple Locations",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Singularity",
@@ -709,7 +709,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Solar System",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Singularity",
@@ -765,7 +765,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "The Orion Spur and Beyond",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Diaspora",
@@ -852,7 +852,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Planet Qarnivor, Pre-Extinction Media Networks",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Commercial",
         "Pre-Extinction",
@@ -883,7 +883,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Planet Quarnivor, Orion Spur",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Corporate Empire",
@@ -1230,7 +1230,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Planet Quarnivor, Irradiated Wasteland",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Snuggloid",
         "Extinction Aftermath",
@@ -1256,7 +1256,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Multiple Temporal Coordinates",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Singularity Wars",
@@ -1342,7 +1342,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "The Orion Spur",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Corporate History",
@@ -1563,7 +1563,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Abandoned Data Repository, Sol System Ruins",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Digital Consciousness",
@@ -1596,7 +1596,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Beyond Conventional Spacetime",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Temporal Physics",
@@ -1652,7 +1652,7 @@
       "isLevel": false,
       "levelId": null,
       "location": "Terminal Universe",
-      "isDraft": true,
+      "isDraft": false,
       "tags": [
         "Timeline",
         "Lore",

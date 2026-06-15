@@ -6,6 +6,7 @@ import {
   readSiteAudioVolume,
   siteAudioConfig,
 } from '../config/audio'
+import { homePortalEvents } from '../contracts/homePortal'
 import { markSiteAudioUnlocked } from './site-audio-activation'
 
 declare global {
@@ -760,7 +761,7 @@ class SiteAudioManager {
   }
 
   private bindSuspensionEvents(): void {
-    window.addEventListener('megameal:audio-suspend', event => {
+    window.addEventListener(homePortalEvents.audioSuspend, event => {
       const detail =
         event instanceof CustomEvent
           ? (event.detail as { reason?: string } | undefined)
@@ -768,7 +769,7 @@ class SiteAudioManager {
       this.suspendAmbience(detail?.reason ?? 'external-request')
     })
 
-    window.addEventListener('megameal:audio-resume', event => {
+    window.addEventListener(homePortalEvents.audioResume, event => {
       const detail =
         event instanceof CustomEvent
           ? (event.detail as { reason?: string } | undefined)
@@ -1113,7 +1114,7 @@ class SiteAudioManager {
     if (typeof window === 'undefined') return
 
     window.dispatchEvent(
-      new CustomEvent('megameal:audio-config-change', {
+      new CustomEvent(homePortalEvents.audioConfigChange, {
         detail: this.getState(),
       }),
     )

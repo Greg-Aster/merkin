@@ -1,7 +1,9 @@
-const portalScrollCleanupKey = '__megamealPortalScrollCleanup'
-const portalScrollInitKey = '__megamealPortalScrollInit'
-const portalScrollResetKey = '__megamealPortalScrollReset'
-const portalScrollBoundKey = '__megamealPortalScrollBound'
+import { homePortalWindowKeys } from '../../contracts/homePortal'
+
+const portalScrollCleanupKey = homePortalWindowKeys.portalScrollCleanup
+const portalScrollInitKey = homePortalWindowKeys.portalScrollInit
+const portalScrollResetKey = homePortalWindowKeys.portalScrollReset
+const portalScrollBoundKey = homePortalWindowKeys.portalScrollBound
 
 type PortalScrollWindow = Window &
   typeof globalThis & {
@@ -101,10 +103,7 @@ function initPortalScrollStages() {
         rect.bottom > window.innerHeight * 0.16 &&
         rect.top < window.innerHeight * 0.84
 
-      stage.classList.toggle(
-        'is-current',
-        anyVisible && stage === currentStage,
-      )
+      stage.classList.toggle('is-current', anyVisible && stage === currentStage)
       stage.classList.toggle(
         'is-approaching',
         anyVisible && stage !== currentStage && isApproaching,
