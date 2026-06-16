@@ -31,27 +31,41 @@ contentFormat: "manual"
 lang: ""
 mascotContext: "The universe isn't waiting with open arms, traveler. It's waiting with open... well, let's just say you don't want to find out. This is your 'don't-become-space-jello' starter pack, courtesy of someone who's seen too much and Bi-Smart's surprisingly resilient emergency broadcast system."
 ---
-import ManualChapterHero from '../../../components/reader/ManualChapterHero.astro'
-import ManualChapterIndex from '../../../components/reader/ManualChapterIndex.astro'
-import ManualChapterLink from '../../../components/reader/ManualChapterLink.astro'
 import ManualSurvivalImperative from '../../../components/reader/ManualSurvivalImperative.astro'
 import '../../../styles/reader/first-contact-manual.css'
 
-<ManualChapterHero
-  chapter="Foreword"
-  icon="⚠️"
-  title="The Interstellar Traveler's Admonition"
-  quote="The universe isn't a welcoming committee—it's an unmoderated existential horror convention, and your best bet is to avoid the registration desk entirely."
-  cite="An Anonymous Interstellar Veteran (Redacted)"
-/>
+<section className="not-prose fcmi-hero fcmi-window fcmi-tone-purple" aria-labelledby="manual-foreword-heading">
+  <div className="fcmi-shell">
+    <div className="fcmi-frame fcmi-hero-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <div className="fcmi-hero-header">
+        <div className="fcmi-icon-tile fcmi-hero-icon" aria-hidden="true">⚠️</div>
+        <div className="fcmi-hero-heading">
+          <p className="fcmi-kicker">Foreword</p>
+          <h1 id="manual-foreword-heading" className="fcmi-hero-title">The Interstellar Traveler's Admonition</h1>
+        </div>
+      </div>
+
+      <blockquote className="fcmi-hero-quote">
+        “The universe isn't a welcoming committee—it's an unmoderated existential horror convention, and your best bet is to avoid the registration desk entirely.”
+      </blockquote>
+
+      <p className="fcmi-hero-cite">— <cite>An Anonymous Interstellar Veteran (Redacted)</cite></p>
+    </div>
+  </div>
+</section>
 
 ---
 
 ## Document Overview
 
-<p> This foreword is the manual's polite cough before the decompression alarm: a short case for why first contact should begin with leaving.</p>
+<p> This the Forward. The purpose of the Forward is a short case for why first contact should begin with avoiding first contact.</p>
 
- It checks the friendly-alien myth against the fatality data, names the major threat categories, explains why older intelligences are rarely legible, reduces official protocol to usable panic, and ends with the emergency hierarchy for anyone already becoming paperwork.
+ The manual itself checks the friendly-alien myth against the fatality data, names the major threat categories, explains why older intelligences are rarely legible, reduces official protocol to usable panic, and ends with the emergency hierarchy for anyone already becoming paperwork.
 
 ## How to Use This Book
 
@@ -528,10 +542,21 @@ When in doubt, remember the cardinal rule: <span className="fcmi-emphasis fcmi-t
 
 And when even that fails, shop smart - shop Bi-Smart. You got that?
 
-<ManualChapterLink
-  href="/reader/first-contact-manual/chapter-1/"
-  number="1"
-  title="Chapter 1: The Indifferent Cosmos and Its Insidious Inhabitants"
-  subtitle="AVOID. DETECT. RETREAT. SURVIVE."
-  tone="blue"
-/>
+<a className="not-prose fcmi-next-link fcmi-window fcmi-tone-blue" href="/reader/first-contact-manual/chapter-1/" aria-label="Continue to Chapter 1: The Indifferent Cosmos and Its Insidious Inhabitants">
+  <div className="fcmi-shell">
+    <div className="fcmi-frame fcmi-next-link-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <span className="fcmi-next-link-number" aria-hidden="true">01</span>
+      <span className="fcmi-next-link-body">
+        <span className="fcmi-kicker">Next Chapter</span>
+        <strong className="fcmi-next-link-title">Chapter 1: The Indifferent Cosmos and Its Insidious Inhabitants</strong>
+        <span className="fcmi-next-link-subtitle">AVOID. DETECT. RETREAT. SURVIVE.</span>
+      </span>
+      <span className="fcmi-next-link-arrow" aria-hidden="true">→</span>
+    </div>
+  </div>
+</a>
