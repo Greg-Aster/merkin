@@ -3,7 +3,7 @@ title: "About Linda Sue"
 description: "Independent researcher who theorized about the Snuggloid phenomenon before disappearing on an unauthorized expedition to Qarnivor."
 name: "Dr Linda Sue"
 role: "Independent Xenobiologist (Missing)"
-avatar: "/about/video/sue.webm"
+avatar: "/about/linda-sue.webp"
 bio: "Last known location: En route to Qarnivor system. Status: Missing, presumed dead."
 published: 2024-12-20
 updated: 2024-12-20

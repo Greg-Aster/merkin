@@ -15,7 +15,7 @@ export type ContentEntryWithData<TData> = {
 }
 
 export function isPublicContentData(data: DraftableData) {
-  return data.draft !== true
+  return import.meta.env.PROD ? data.draft !== true : true
 }
 
 export function publicCollectionFilter<TData extends DraftableData>({

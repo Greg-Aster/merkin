@@ -1,0 +1,49 @@
+---
+import fs from 'node:fs'
+import path from 'node:path'
+import { getCollection } from 'astro:content'
+import { publicCollectionFilter } from '../../../contracts/content'
+import {
+  firstContactManualRouteParam,
+  sortFirstContactManualEntries,
+} from '../../../utils/reader'
+import '../../../styles/pages/pdf-post.css'
+
+export async function getStaticPaths() {
+  const readerEntries = await getCollection('reader', publicCollectionFilter)
+  const downloadable = sortFirstContactManualEntries(readerEntries).filter(
+    entry => entry.data.downloadable === true,
+  )
+
+  return downloadable.map(entry => ({
+    params: { slug: firstContactManualRouteParam(entry) },
+    props: { entry },
+  }))
+}
+
+const { entry } = Astro.props
+const { Content } = await entry.render()
+
+const publishedDate =
+  entry.data.published instanceof Date
+    ? entry.data.published.toISOString().slice(0, 10)
+    : String(entry.data.published)
+---
+<html lang={entry.data.lang || 'en'} class="pdf-export-page">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{entry.data.title} - PDF</title>
+  </head>
+  <body class="pdf-export-body">
+    <article class="pdf-article">
+      <h1>{entry.data.title}</h1>
+      <p class="meta">Published: {publishedDate}</p>
+      {entry.data.description && <p class="description">{entry.data.description}</p>}
+      {entry.data.image && entry.data.showImageOnPost !== false && (
+        <img src={entry.data.image} alt={entry.data.title} loading="eager" />
+      )}
+      <Content />
+    </article>
+  </body>
+</html>

@@ -12,6 +12,8 @@ async function walkDirectory(directory: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true })
   const files = await Promise.all(
     entries.map(async entry => {
+      if (entry.name.startsWith('_') || entry.name.startsWith('.')) return []
+
       const absolutePath = path.join(directory, entry.name)
 
       if (entry.isDirectory()) {

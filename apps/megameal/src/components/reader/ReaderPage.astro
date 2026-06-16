@@ -1,11 +1,15 @@
 ---
+import fs from 'node:fs'
+import path from 'node:path'
 import type { CollectionEntry } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
 import Markdown from '@components/misc/Markdown.astro'
+import { url } from '@utils/url-utils'
 import {
   FIRST_CONTACT_MANUAL_TITLE,
   firstContactManualHref,
+  firstContactManualRouteParam,
 } from '../../utils/reader'
 import ReaderBanner from './ReaderBanner.astro'
 
@@ -17,6 +21,19 @@ interface Props {
 const { entry, entries } = Astro.props
 const { Content } = await entry.render()
 const currentIndex = entries.findIndex(item => item.slug === entry.slug)
+
+const isDownloadable = entry.data.downloadable === true
+const routeParam = firstContactManualRouteParam(entry)
+const isDev = import.meta.env.DEV
+const localPdfPath = path.join(process.cwd(), 'public', 'downloads', 'reader', `${routeParam}.pdf`)
+const hasDevPdfFile = isDev && fs.existsSync(localPdfPath)
+const useDownloadFile = !isDev || hasDevPdfFile
+const pdfDownloadUrl = useDownloadFile
+  ? url(`/downloads/reader/${routeParam}.pdf`)
+  : url(`/pdf/reader/${routeParam}/`)
+const pdfButtonLabel = useDownloadFile
+  ? 'Download Chapter (PDF)'
+  : 'Open Printable View'
 const previousEntry = currentIndex > 0 ? entries[currentIndex - 1] : null
 const nextEntry =
   currentIndex >= 0 && currentIndex < entries.length - 1
@@ -132,6 +149,23 @@ const readerArticleClass = [
         <Markdown class="markdown-content prose-invert">
           <Content />
         </Markdown>
+
+        {isDownloadable && (
+          <div class="mt-6 border-t border-dashed border-white/10 pt-5">
+            <a
+              href={pdfDownloadUrl}
+              download={useDownloadFile ? `${routeParam.split('/').pop()}.pdf` : undefined}
+              data-sfx-hover="hover-emphasis"
+              data-sfx-click="confirm"
+              class="download-pdf-btn w-full font-bold overflow-hidden active:scale-95"
+            >
+              <div class="btn-card rounded-xl w-full min-h-[3.5rem] px-4 py-3 flex items-center justify-center gap-3 border border-cyan-500/30 bg-cyan-900/20 hover:bg-cyan-900/35 transition">
+                <Icon name="material-symbols:download-rounded" class="text-[1.5rem] text-cyan-400 shrink-0" />
+                <span class="text-cyan-200">{pdfButtonLabel}</span>
+              </div>
+            </a>
+          </div>
+        )}
 
         <nav class="mt-8 flex items-center justify-between gap-3 border-t border-dashed border-white/10 pt-5" aria-label="Reader controls">
           <a

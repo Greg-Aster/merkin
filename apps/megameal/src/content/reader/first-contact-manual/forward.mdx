@@ -6,7 +6,7 @@ image: "/first-contact/forward-wide.webp"
 backgroundImage: ""
 # Custom author profile fields
 avatarImage: "/posts/timeline/chronos.png"
-authorName: "An Anonymous Interstellar Veteran [Redacted]"
+authorName: "An Anonymous Interstellar Veteran (Redacted)"
 authorBio: "Survivor of multiple unscheduled reality adjustments and involuntary jello-fication attempts. Currently enjoys competitive macramé and not being eaten."
 # Use the timeline as a banner
 bannerType: "image"
@@ -25,23 +25,39 @@ showImageOnPost: false
 tags: [First Contact, Xenobiology, Interstellar Travel, Existential Threats, Cosmic Horror]
 category: "MEGA MEAL"
 draft: true
+downloadable: true
 series: "first-contact-manual"
 seriesTitle: "The Interstellar Traveler's First Contact Manual"
 contentFormat: "manual"
 lang: ""
 mascotContext: "The universe isn't waiting with open arms, traveler. It's waiting with open... well, let's just say you don't want to find out. This is your 'don't-become-space-jello' starter pack, courtesy of someone who's seen too much and Bi-Smart's surprisingly resilient emergency broadcast system."
 ---
+import ManualChapterHero from '../../../components/reader/ManualChapterHero.astro'
 import ManualChapterIndex from '../../../components/reader/ManualChapterIndex.astro'
 import ManualChapterLink from '../../../components/reader/ManualChapterLink.astro'
+import ManualPanel from '../../../components/reader/ManualPanel.astro'
 import ManualSurvivalImperative from '../../../components/reader/ManualSurvivalImperative.astro'
+
+<ManualChapterHero
+  chapter="Foreword"
+  icon="⚠️"
+  title="The Interstellar Traveler's Admonition"
+  quote="The universe isn't a welcoming committee—it's an unmoderated existential horror convention, and your best bet is to avoid the registration desk entirely."
+  cite="An Anonymous Interstellar Veteran (Redacted)"
+/>
+
+---
 
 ## Document Overview
 
-This foreword is the manual's polite cough before the decompression alarm: a short case for why first contact should begin with leaving. It checks the friendly-alien myth against the fatality data, names the major threat categories, explains why older intelligences are rarely legible, reduces official protocol to usable panic, and ends with the emergency hierarchy for anyone already becoming paperwork.
+<p> This foreword is the manual's polite cough before the decompression alarm: a short case for why first contact should begin with leaving.</p>
+
+ It checks the friendly-alien myth against the fatality data, names the major threat categories, explains why older intelligences are rarely legible, reduces official protocol to usable panic, and ends with the emergency hierarchy for anyone already becoming paperwork.
 
 ## How to Use This Book
 
-This book may be read in order if you are safely indoors, far from unusual lights, and not currently trying to understand why that rock is making a sci-fi chittering noise. If contact is imminent or already underway, use the routing notes below before the situation develops opinions.
+<p> You are likely reading this book because you are either considering initiating first contact, or ar currently in the midst of one.</p> 
+<p> Luckily for you, we have considered both of these scenarios and constructed the chapters accordingly. This book may be read in order if you are safely indoors, far from unusual lights, and not currently trying to understand why that rock is making a sci-fi chittering noise. <span className="text-red-800">If contact is imminent or already underway, use the routing notes below before the situation develops further.</span></p>
 
 <div className="not-prose my-5 divide-y divide-yellow-500/20 border-y border-yellow-500/25 text-sm">
   <a href="/reader/first-contact-manual/chapter-1/" className="group grid gap-1 py-3 no-underline transition hover:bg-yellow-500/5 hover:no-underline md:grid-cols-[5.5rem_minmax(0,0.9fr)_minmax(0,1.2fr)] md:gap-4">
@@ -193,14 +209,11 @@ This book may be read in order if you are safely indoors, far from unusual light
 
     <p>First contact situations represent one of the highest-risk scenarios any interstellar traveler can encounter.</p>
 
-    <p>They out rank other threats you may encounter by wide margins -- micrometeroid impacts, solar flares, explosive decompression, murder suicide, cannabalism and angry robot butlers others </p>
+    <p>They out rank other threats you may encounter by wide margins -- micrometeoroid impacts, solar flares, explosive decompression, murder suicide, cannibalism and angry robot butlers others </p>
 
   </div>
 
-  <aside className="not-prose self-start rounded-md border border-gray-500/40 bg-gray-900/45 p-3 lg:sticky lg:top-4">
-    <div className="mb-2 flex items-center gap-2 text-sm font-bold text-gray-300">
-      🎨 Threat Codes
-    </div>
+  <ManualPanel tone="gray" title="🎨 Threat Codes" class="not-prose self-start lg:sticky lg:top-4">
     <div className="space-y-1.5 text-xs">
       <div className="flex items-center gap-2">
         <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-red-500"></span>
@@ -233,27 +246,24 @@ This book may be read in order if you are safely indoors, far from unusual light
         <span className="ml-auto text-[11px] text-gray-400">Rare success</span>
       </div>
     </div>
-    <div
-      className="mt-2 whitespace-normal break-words rounded border border-gray-600/30 bg-gray-800/50 p-2 text-[10px] leading-snug text-gray-400"
-      title="Color codes used throughout this manual for quick threat assessment. We are inevitably going to forget this halfway through the manual. Thoughtful layout will decay. We consider it an example of how messy things can get in real life."
-    >
-     <p>  Color codes used throughout this manual for quick threat assessment. </p>
+    <div className="mt-2 whitespace-normal break-words rounded border border-gray-600/30 bg-gray-800/50 p-2 text-[10px] leading-snug text-gray-400">
+      <p>Color codes used throughout this manual for quick threat assessment.</p>
       <p>We are inevitably going to forget this halfway through the manual. Thoughtful layout will decay. We consider it an example of how messy things can get in real life.</p>
     </div>
-  </aside>
+  </ManualPanel>
 </div>
 
 ### The Cardinal Rule
     
-<div className="bg-black/30 p-8 mb-0 mt-0 rounded-lg border border-red-500/30">
-      <p className="text-red-200 text-lg leading-relaxed mb-0">
-        If you see something foreign—biological, "intelligent" (we'll dissect that term later), or defying all sensible categorization—the rule is simple: <span class="text-red-400 text-xl font-bold">DON’T</span>. Don't approach, signal, investigate, or even think too hard about it.
-      </p>
-      
-      <p className="text-yellow-200 text-sm leading-relaxed mb-4">
-        This isn't hyperbole. This conclusion is etched in the irradiated wreckage of countless exploratory vessels, the liquefied remains of over-eager xenolinguists, and the silent, screaming data streams from probes that saw too much. The universe isn't a welcoming committee—it's an unmoderated existential horror convention, and your best bet is to avoid the registration desk entirely.
-      </p>
-</div>
+<ManualPanel tone="red" emphasis="strong" title="The Cardinal Rule">
+  <p className="text-red-200 text-lg leading-relaxed mb-0">
+    If you see something foreign—biological, "intelligent" (we’ll dissect that term later), or defying all sensible categorization—the rule is simple: <span class="text-red-400 text-xl font-bold">DON’T</span>. Don’t approach, signal, investigate, or even think too hard about it.
+  </p>
+
+  <p className="text-yellow-200 text-sm leading-relaxed mb-4">
+    This isn’t hyperbole. This conclusion is etched in the irradiated wreckage of countless exploratory vessels, the liquefied remains of over-eager xenolinguists, and the silent, screaming data streams from probes that saw too much. The universe isn’t a welcoming committee—it’s an unmoderated existential horror convention, and your best bet is to avoid the registration desk entirely.
+  </p>
+</ManualPanel>
 
 ### The Scope of the Problem
 
@@ -264,11 +274,7 @@ The universe operates as a vast ecosystem where introducing new species—partic
 Understanding what you're likely to encounter helps explain why our survival recommendations are so universally negative. The cosmos has produced a remarkable variety of ways to end your existence, often simultaneously creative and efficient.
 
 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-  <div className="card-base2 p-6">
-    <div className="text-lg font-bold text-orange-400 mb-4 flex items-center gap-2">
-      <span className="w-60 h-6 bg-orange-400 rounded text-white text-xs flex items-center justify-center">📊 Galactic Contact Fatality Index (GCFI)</span>
-    </div>
-    
+  <ManualPanel tone="orange" title="📊 Galactic Contact Fatality Index (GCFI)">
     <div className="bg-green-900/20 p-3 rounded border border-green-500/30 mb-4">
       <div className="flex items-center justify-between mb-2">
         <span className="text-green-300 font-semibold">Successful Contact:</span>
@@ -320,12 +326,9 @@ Understanding what you're likely to encounter helps explain why our survival rec
         *Compiled from 47,829 documented first-contact events across 12 galactic sectors. "Artistic Repurposing" includes conversion to living sculptures, decorative wall arrangements, and one notable case where an entire expedition became a particularly avant-garde wind chime.
       </p>
     </div>
-  </div>
+  </ManualPanel>
   
-  <div className="card-base2 p-6">
-    <div className="text-lg font-bold text-purple-400 mb-4 flex items-center gap-2">
-      <span className="w-60 h-6 bg-purple-400 rounded text-white text-xs flex items-center justify-center">🧬 Known Threat Categories</span>
-    </div>
+  <ManualPanel tone="purple" title="🧬 Known Threat Categories">
     <div className="space-y-3 text-xs">
       <div className="bg-red-900/20 p-3 rounded border border-red-500/30">
         <div className="flex items-center gap-3 mb-1">
@@ -369,7 +372,7 @@ Understanding what you're likely to encounter helps explain why our survival rec
         <span className="font-bold">Note:</span> These categories often overlap. The Vel'Tar Consortium, for instance, are hostile biologics with incompatible physics <em>and</em> pure malevolence. Lucky us.
       </p>
     </div>
-  </div>
+  </ManualPanel>
 </div>
 
 ## The Evolutionary Disparity Problem
@@ -378,11 +381,7 @@ Beyond the immediate threats lies a more fundamental issue: the sheer evolutiona
 
 Life across the galaxy has had billions of years to devise creative, insidious, and terrifyingly effective solutions to extreme environments and competitive pressures. Human civilization, in our cosmic blink of existence, has developed impressive technology but lacks the adaptive resilience that comes from eons of evolutionary pressure.
 
-<div className="bg-blue-900/15 border border-blue-500/30 rounded-lg p-5 mb-4">
-  <h3 className="text-blue-400 font-bold text-lg mb-3 flex items-center gap-2">
-    <span className="w-60 h-6 bg-blue-400 rounded text-white text-xs flex items-center justify-center">📋 Evolutionary Disparity Analysis</span>
-
-  </h3>
+<ManualPanel tone="blue" title="📋 Evolutionary Disparity Analysis">
   <p className="text-blue-200 leading-relaxed mb-4">
     The disparity isn't just about technological capability—it's about fundamental differences in adaptive capacity, resilience, and often ruthlessness. When your opponent has been perfecting survival strategies for geological ages while you've been working on them for a few millennia, the odds are not in your favor.
   </p>
@@ -394,7 +393,7 @@ Life across the galaxy has had billions of years to devise creative, insidious, 
       <cite className="text-blue-300 text-xs">- Dr. Yuki Tanaka, Xenobiological Threat Assessment Division</cite>
     </div>
   </div>
-</div>
+</ManualPanel>
 
 This gap manifests in ways beyond raw technological superiority. Advanced civilizations may operate on principles utterly alien to human understanding, making their intentions, methods, and even their definition of "existence" incomprehensible to us. What appears benign might be preparation for harvest. What seems hostile might be their equivalent of a polite greeting.
 
@@ -402,12 +401,7 @@ This gap manifests in ways beyond raw technological superiority. Advanced civili
 
 The proper first contact protocols are meticulously outlined in the official Interstellar Compact Mandates, specifically "Section 34 Paragraph C Part B Footnote Amanda and the CF." For those brave enough to attempt accessing this document via standard intergalactic networks, expect signal quality issues and data bills capable of bankrupting minor star nations.
 
-<div className="bg-gray-900/50 border border-gray-500/50 rounded-lg p-5 mb-4">
-  <h3 className="text-gray-300 font-bold text-lg mb-4 flex items-center gap-2">
-    <span className="w-6 h-6 bg-gray-500 rounded text-white text-xs flex items-center justify-center">📄</span>
-    Official Protocol Excerpt: Section 34.C.B.FA.CF
-  </h3>
-  
+<ManualPanel tone="gray" icon="📄" title="Official Protocol Excerpt: Section 34.C.B.FA.CF">
   <div className="bg-black/50 border border-gray-600/50 rounded p-4 mb-4">
     <p className="text-gray-400 text-xs mb-2 italic">Excerpt: Interstellar Compact Mandates</p>
     <blockquote className="text-gray-200 text-sm leading-relaxed border-l-2 border-gray-500 pl-4">
@@ -421,7 +415,7 @@ The proper first contact protocols are meticulously outlined in the official Int
       The only truly survivable part of this labyrinthine directive is its often-ignored summary: <span className="font-bold">monitor emissions from light-years away, with contingency plans and multiple backup protocols</span>. When seconds count and the nearest enforcement agent is three millennia away (probably on a coffee break), convoluted directives become death sentences wrapped in red tape.
     </p>
   </div>
-</div>
+</ManualPanel>
 
 The Byzantine nature of official protocols serves multiple purposes, none of them beneficial to field operatives. These documents function as institutional smokescreens, allowing galactic bureaucracies to appear prepared while effectively abandoning responsibility when crises unfold. They're worse than useless—they're designed to shift liability from organizations to individuals who find themselves facing cosmic-scale threats with inadequate guidance.
 
@@ -429,12 +423,7 @@ The Byzantine nature of official protocols serves multiple purposes, none of the
 
 When all else fails—and statistically speaking, it will—emergency protocols become your last line of defense. These aren't optimistic guidelines for successful contact; they're damage limitation strategies for when everything has already gone horribly wrong.
 
-<div className="bg-red-900/15 border-2 border-red-500/50 rounded-lg p-5 mb-4">
-  <h3 className="text-red-400 font-bold text-xl mb-4 flex items-center gap-2">
-    <span className="w-8 h-8 bg-red-500 rounded text-white text-sm flex items-center justify-center">⚠</span>
-    Emergency Protocol Hierarchy
-  </h3>
-  
+<ManualPanel tone="red" emphasis="strong" icon="⚠" title="Emergency Protocol Hierarchy">
   <div className="space-y-3">
     <div className="bg-red-900/30 p-3 rounded border border-red-500/30">
       <div className="flex items-center gap-3 mb-1">
@@ -443,7 +432,7 @@ When all else fails—and statistically speaking, it will—emergency protocols 
       </div>
       <p className="text-gray-300 text-sm ml-11">The primary protocol. Avoid contact entirely. Turn around. Go home. Take up pottery or stained glass.</p>
     </div>
-    
+
     <div className="bg-orange-900/30 p-3 rounded border border-orange-500/30">
       <div className="flex items-center gap-3 mb-1">
         <span className="w-8 h-8 bg-orange-500 rounded text-white text-xs flex items-center justify-center font-bold">2</span>
@@ -451,7 +440,7 @@ When all else fails—and statistically speaking, it will—emergency protocols 
       </div>
       <p className="text-gray-300 text-sm ml-11">If somehow the first protocol failed to register, this is your reminder that discretion is the better part of continued existence.</p>
     </div>
-    
+
     <div className="bg-yellow-900/30 p-3 rounded border border-yellow-500/30">
       <div className="flex items-center gap-3 mb-1">
         <span className="w-8 h-8 bg-yellow-500 rounded text-white text-xs flex items-center justify-center font-bold">3</span>
@@ -460,7 +449,7 @@ When all else fails—and statistically speaking, it will—emergency protocols 
       <p className="text-gray-300 text-sm ml-11">When all else fails, remember: The Bi-Smart Survival Emporium can give you 5% off you're next purchase if you use this coupon code [redacted]. Bi-Smart Corporation emergency broadcast systems have a remarkable survival rate. Sometimes the best technology is the one that gets you home in one piece.</p>
     </div>
   </div>
-</div>
+</ManualPanel>
 
 ---
 

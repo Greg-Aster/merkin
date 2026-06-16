@@ -14,9 +14,9 @@ function getArgValue(flag) {
 const appArg = getArgValue('--app')
 const appRoot = path.resolve(appArg || process.cwd())
 const distDir = path.join(appRoot, 'dist')
-const pdfHtmlRoot = path.join(distDir, 'pdf', 'posts')
-const downloadsRoot = path.join(distDir, 'downloads', 'posts')
-const publicDownloadsRoot = path.join(appRoot, 'public', 'downloads', 'posts')
+const pdfHtmlRoot = path.join(distDir, 'pdf')
+const downloadsRoot = path.join(distDir, 'downloads')
+const publicDownloadsRoot = path.join(appRoot, 'public', 'downloads')
 
 async function collectPdfPages(dir) {
   const entries = await fsp.readdir(dir, { withFileTypes: true })
@@ -94,7 +94,7 @@ async function main() {
   }
 
   if (!fs.existsSync(pdfHtmlRoot)) {
-    console.log('[pdf] No /pdf/posts routes found in dist. Skipping PDF generation.')
+    console.log('[pdf] No /pdf routes found in dist. Skipping PDF generation.')
     return
   }
 
@@ -102,7 +102,7 @@ async function main() {
   const slugs = pdfPages.map(deriveSlugFromPdfIndex)
 
   if (slugs.length === 0) {
-    console.log('[pdf] No downloadable post PDF pages found. Skipping.')
+    console.log('[pdf] No downloadable PDF pages found. Skipping.')
     return
   }
 
@@ -152,7 +152,7 @@ async function main() {
   try {
     for (const slug of slugs) {
       const encodedSlug = encodeSlugForUrl(slug)
-      const pdfUrl = `http://127.0.0.1:${port}/pdf/posts/${encodedSlug}/`
+      const pdfUrl = `http://127.0.0.1:${port}/pdf/${encodedSlug}/`
       const outputPath = path.join(downloadsRoot, `${slug}.pdf`)
       const publicOutputPath = path.join(publicDownloadsRoot, `${slug}.pdf`)
 
