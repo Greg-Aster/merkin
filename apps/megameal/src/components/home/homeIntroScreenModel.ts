@@ -13,7 +13,10 @@ function loadSharedScreenModel() {
   sharedScreenModelPromise ??= screenGltfLoader
     .loadAsync(screenModelSrc)
     .then(gltf => gltf.scene ?? gltf.scenes?.[0] ?? null)
-    .catch(() => null)
+    .catch(error => {
+      console.warn('Failed to load home intro screen model:', error)
+      return null
+    })
 
   return sharedScreenModelPromise
 }
@@ -58,14 +61,8 @@ function tuneScreenModel(model: THREE.Object3D) {
 
     mesh.castShadow = false
     mesh.receiveShadow = false
-    mesh.frustumCulled = false
     mesh.renderOrder = 12
   })
-}
-
-export function disposeHomeIntroScreenModel(_model: THREE.Object3D | null) {
-  // Geometry and materials are shared by all screen clones through loadSharedScreenModel().
-  // Individual panel teardown must not dispose the shared GLB assets.
 }
 
 export async function loadHomeIntroScreenModelInstance(

@@ -1,18 +1,8 @@
 ---
-// UniverseHeroSlide.astro
-// Universe intro as a banner slide (rendered via banner-slide-content slot).
-// This fills the banner-slide shell created by blog-core for html-type items.
-// The banner videos cycle after this slide.
-
-interface Props {
-  transparentMode?: boolean
-}
-
-const { transparentMode = false } = Astro.props
 import '../../styles/features/home/universe-hero-slide.css'
 ---
 
-<div class:list={['hero-slide-inner', transparentMode && 'hero-slide-inner--transparent']}>
+<div class="hero-slide-inner">
   <div class="hero-bg-layer" aria-hidden="true">
     <div class="hero-stars"></div>
     <div class="hero-stars-twinkle"></div>
@@ -20,7 +10,7 @@ import '../../styles/features/home/universe-hero-slide.css'
     <div class="hero-vignette"></div>
   </div>
 
-  <div class="hero-content-inner" data-tilt-panel>
+  <div class="hero-content-inner">
     <div class="hero-eyebrow">Year 3042 — The Multiverse is Open</div>
 
     <p class="hero-title">
@@ -56,26 +46,3 @@ import '../../styles/features/home/universe-hero-slide.css'
     <span>&#8595;</span>
   </div>
 </div>
-
-<script>
-  // 3D mousemove tilt on the hero content
-  const content = document.querySelector('[data-tilt-panel]') as HTMLElement | null
-  if (content) {
-    let rafId = 0
-    document.addEventListener('mousemove', (e) => {
-      cancelAnimationFrame(rafId)
-      rafId = requestAnimationFrame(() => {
-        const x = (e.clientX / window.innerWidth - 0.5) * 8
-        const y = (e.clientY / window.innerHeight - 0.5) * 8
-        content.style.transform = `perspective(1000px) rotateX(${-y}deg) rotateY(${x}deg) translateZ(0)`
-      })
-    })
-    // Reset on mouse leave banner area
-    const bannerContainer = document.getElementById('banner-container')
-    if (bannerContainer) {
-      bannerContainer.addEventListener('mouseleave', () => {
-        content.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)'
-      })
-    }
-  }
-</script>

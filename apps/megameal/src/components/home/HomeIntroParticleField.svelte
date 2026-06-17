@@ -71,7 +71,6 @@ import {
   Color,
   ShaderMaterial,
 } from 'three'
-import type { Points } from 'three'
 
 type IntroInputState = {
   x: number
@@ -105,14 +104,10 @@ export let wheel = 0
 export let scrollStep = 1
 export let scrollSpan = 10
 export let atmosphereReveal = 1
-export let axialSpinSpeed = 0
-export let axialSpinInputScale = 0
 export let pointSizeScale = 1
 export let opacityScale = 1
 export let motionEnabled = true
 export let densityMultiplier = 1
-
-let points: Points | null = null
 
 const starTexture = getStarTexture()
 const coreGeometry = new BufferGeometry()
@@ -125,6 +120,7 @@ let haloSizes = new Float32Array(0)
 let coreAlphas = new Float32Array(0)
 let haloAlphas = new Float32Array(0)
 let particleCapacity = 0
+let lastStaticUpdateSignature = ''
 const color = new Color()
 const haloColor = new Color()
 const particleCapacityStep = 128
@@ -231,17 +227,35 @@ useTask(() => {
   const renderParticleCount = getRenderParticleCount()
   if (renderParticleCount <= 0) return
 
+  const pixelRatio =
+    typeof window === 'undefined' ? 1 : Math.min(1.6, window.devicePixelRatio || 1)
+  if (!motionEnabled) {
+    const staticUpdateSignature = [
+      renderParticleCount,
+      particles.length,
+      wheel,
+      scrollStep,
+      scrollSpan,
+      atmosphereReveal,
+      pointSizeScale,
+      opacityScale,
+      densityMultiplier,
+      pixelRatio,
+    ].join('|')
+
+    if (staticUpdateSignature === lastStaticUpdateSignature) return
+    lastStaticUpdateSignature = staticUpdateSignature
+  } else {
+    lastStaticUpdateSignature = ''
+  }
+
   const time = motionEnabled ? performance.now() * 0.001 : 0
   const motionTime = time * particleMotionScale
   const pointerX = motionEnabled && Number.isFinite(input.x) ? input.x : 0
   const inputDragX = motionEnabled && Number.isFinite(input.dragX) ? input.dragX : 0
+  const inputActive = motionEnabled && input.active
   const verticalScroll = wheel * scrollStep
-  const axialRotation = time * axialSpinSpeed + inputDragX * axialSpinInputScale
-  const axialCos = Math.cos(axialRotation)
-  const axialSin = Math.sin(axialRotation)
 
-  const pixelRatio =
-    typeof window === 'undefined' ? 1 : Math.min(1.6, window.devicePixelRatio || 1)
   coreMaterial.uniforms.pixelRatio.value = pixelRatio
   haloMaterial.uniforms.pixelRatio.value = pixelRatio
 
@@ -258,7 +272,6 @@ useTask(() => {
       ? 0
       : (0.24 + variantB * 1.28) * (0.72 + particle.radialT * 0.54)
     const variantScale = variantIndex === 0 ? 1 : 0.82 + variantC * 0.32
-    const variantOpacity = 1
     const sizeVariance = variantIndex === 0
       ? 0.7 + variantD * 0.62
       : 0.46 + variantD * 1.18
@@ -276,7 +289,7 @@ useTask(() => {
     const reactiveRadius =
       particle.radius * (1 + clusterPulse * particle.clusterStrength * 0.06) +
       clusterOrbit +
-      (input.active ? 0.07 : 0.028) * Math.sin(motionTime * 2.2 + index)
+      (inputActive ? 0.07 : 0.028) * Math.sin(motionTime * 2.2 + index)
     const groupedSpin =
       spin +
       Math.sin(motionTime * 0.42 + particle.phase) *
@@ -308,7 +321,7 @@ useTask(() => {
       Math.sin(variantAngle) * variantDistance * 0.82 +
       Math.sin(groupedSpin) * reactiveRadius * 0.72
 
-    positions[index * 3] = baseX * axialCos - baseZ * axialSin
+    positions[index * 3] = baseX
     positions[index * 3 + 1] =
       wrapCentered(
         particle.anchorY +
@@ -319,7 +332,7 @@ useTask(() => {
       ) +
       Math.sin(motionTime * 1.1 + particle.phase) *
         (0.05 + particle.clusterStrength * 0.11)
-    positions[index * 3 + 2] = baseX * axialSin + baseZ * axialCos
+    positions[index * 3 + 2] = baseZ
 
     color.setHSL(hue, 0.78, 0.46 + centerWeight * 0.16)
     coreColors[index * 3] = color.r
@@ -339,8 +352,8 @@ useTask(() => {
       sizeVariance
     coreSizes[index] = spriteScale * particlePointSizeScale * pointSizeScale
     haloSizes[index] = coreSizes[index] * haloPointSizeScale
-    coreAlphas[index] = coreAlpha * opacityScale * variantOpacity
-    haloAlphas[index] = haloAlpha * opacityScale * variantOpacity
+    coreAlphas[index] = coreAlpha * opacityScale
+    haloAlphas[index] = haloAlpha * opacityScale
   }
 
   const positionAttribute = coreGeometry.getAttribute('position')
@@ -368,4 +381,4 @@ onDestroy(() => {
 </script>
 
 <T.Points args={[haloGeometry, haloMaterial]} />
-<T.Points bind:ref={points} args={[coreGeometry, coreMaterial]} />
+<T.Points args={[coreGeometry, coreMaterial]} />

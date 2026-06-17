@@ -73,10 +73,10 @@ const retroComputerGlyphs: Record<string, readonly string[]> = {
   Z: ['11111', '00001', '00010', '00100', '01000', '10000', '11111'],
 }
 
-function wrapCanvasText(
-  context: CanvasRenderingContext2D,
+function wrapMeasuredText(
   value: string,
   maxWidth: number,
+  measureText: (line: string) => number,
 ) {
   const words = value.split(/\s+/).filter(Boolean)
   const lines: string[] = []
@@ -84,7 +84,7 @@ function wrapCanvasText(
 
   words.forEach(word => {
     const nextLine = line ? `${line} ${word}` : word
-    if (context.measureText(nextLine).width <= maxWidth || !line) {
+    if (measureText(nextLine) <= maxWidth || !line) {
       line = nextLine
       return
     }
@@ -95,6 +95,18 @@ function wrapCanvasText(
 
   if (line) lines.push(line)
   return lines
+}
+
+function wrapCanvasText(
+  context: CanvasRenderingContext2D,
+  value: string,
+  maxWidth: number,
+) {
+  return wrapMeasuredText(
+    value,
+    maxWidth,
+    line => context.measureText(line).width,
+  )
 }
 
 function measureRetroComputerText(
@@ -115,23 +127,11 @@ function wrapRetroComputerText(
   maxWidth: number,
   scale = retroComputerTextScale,
 ) {
-  const words = value.split(/\s+/).filter(Boolean)
-  const lines: string[] = []
-  let line = ''
-
-  words.forEach(word => {
-    const nextLine = line ? `${line} ${word}` : word
-    if (measureRetroComputerText(nextLine, scale) <= maxWidth || !line) {
-      line = nextLine
-      return
-    }
-
-    lines.push(line)
-    line = word
-  })
-
-  if (line) lines.push(line)
-  return lines
+  return wrapMeasuredText(
+    value,
+    maxWidth,
+    line => measureRetroComputerText(line, scale),
+  )
 }
 
 function drawRetroComputerText(
@@ -375,99 +375,6 @@ export function createScreenInfoTickerTextureController(
       })
     }
     ctx.restore()
-
-    texture.needsUpdate = true
-    lastUpdateAt = time
-    return texture
-  }
-
-  function dispose() {
-    texture?.dispose()
-    texture = null
-    canvas = null
-    context = null
-    lastUpdateAt = 0
-  }
-
-  return {
-    dispose,
-    update,
-  }
-}
-
-export function createTextMediaBlurTextureController(frameInterval = 1 / 24) {
-  let canvas: HTMLCanvasElement | null = null
-  let context: CanvasRenderingContext2D | null = null
-  let texture: CanvasTexture | null = null
-  let lastUpdateAt = 0
-
-  function ensureTexture() {
-    if (texture || typeof document === 'undefined') return
-
-    canvas = document.createElement('canvas')
-    canvas.width = 512
-    canvas.height = 288
-    context = canvas.getContext('2d', {
-      alpha: true,
-      willReadFrequently: false,
-    })
-
-    if (!context) {
-      canvas = null
-      return
-    }
-
-    texture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
-  }
-
-  function update(
-    time: number,
-    video: HTMLVideoElement | null,
-    opacity: number,
-    enabled: boolean,
-  ) {
-    if (
-      !enabled ||
-      opacity <= 0.01 ||
-      !video ||
-      video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA
-    ) {
-      return texture
-    }
-
-    if (time - lastUpdateAt < frameInterval) return texture
-    ensureTexture()
-    if (!canvas || !context || !texture) return texture
-
-    const { width, height } = canvas
-    const blurOverscanX = 34
-    const blurOverscanY = 22
-
-    context.clearRect(0, 0, width, height)
-    context.save()
-    context.filter = 'blur(12px) saturate(0.9) brightness(0.74) contrast(1.04)'
-
-    try {
-      context.drawImage(
-        video,
-        -blurOverscanX,
-        -blurOverscanY,
-        width + blurOverscanX * 2,
-        height + blurOverscanY * 2,
-      )
-    } catch {
-      context.restore()
-      return texture
-    }
-
-    context.restore()
-
-    const shadowGradient = context.createLinearGradient(0, 0, width, 0)
-    shadowGradient.addColorStop(0, 'rgb(2 6 23 / 0.62)')
-    shadowGradient.addColorStop(0.64, 'rgb(2 6 23 / 0.42)')
-    shadowGradient.addColorStop(1, 'rgb(2 6 23 / 0.16)')
-    context.fillStyle = shadowGradient
-    context.fillRect(0, 0, width, height)
 
     texture.needsUpdate = true
     lastUpdateAt = time

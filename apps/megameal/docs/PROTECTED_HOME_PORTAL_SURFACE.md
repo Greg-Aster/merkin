@@ -24,9 +24,8 @@ The first paginated home page is the protected portal composition. It sets:
 - `banner-slide-content` slot with `PortalHeroBackgroundSlide`
 - `portal-demo-content` slot with `PortalDemoVideoPlayer`
 - `overlay` slot with `PortalSponsoredBloom`
-- `initPortalScrollController()` from `src/components/home/portalScrollStages`
 
-Do not remove the first-page portal branch, slot names, slot contents, or scroll controller initialization.
+Do not remove the first-page portal branch, slot names, or slot contents.
 
 ### PortalHeroSlide
 
@@ -37,7 +36,7 @@ Protected responsibilities:
 - Foreground home portal copy and accessibility text.
 - Portal destination advancement.
 - Dispatch of the `merkin:portal-advance` custom event.
-- Integration with `HomeIntroEnvironmentLoader`.
+- Direct integration with `HomeIntroEnvironment`.
 - Scroll cue and related portal hero CSS imports.
 
 Do not remove visible copy, screen-reader copy, controls, destination rotation, or event dispatch behavior.
@@ -94,19 +93,6 @@ Protected responsibilities:
 - Any fields consumed by hero, environment, or screen-panel components.
 
 Do not delete screens, rename fields, or change destination ordering unless the visual and interaction behavior is intentionally updated.
-
-### portalScrollStages
-
-Owner: `src/components/home/portalScrollStages.ts`
-
-Protected responsibilities:
-
-- Home portal scroll-stage behavior.
-- Lifecycle wiring for Astro page loads and page-show style restores.
-- Window cleanup/init/reset/bound keys used to keep the controller idempotent.
-- Reduced-motion and mobile-sensitive scroll handling.
-
-Do not remove scroll stages, lifecycle events, global window keys, or cleanup behavior without an equivalent controller and manual scroll verification.
 
 ### MainGridLayout Handoff
 

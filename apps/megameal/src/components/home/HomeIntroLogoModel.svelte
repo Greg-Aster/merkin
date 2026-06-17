@@ -1,6 +1,6 @@
 <script lang="ts">
 import { T, useTask } from '@threlte/core'
-import { onDestroy, onMount } from 'svelte'
+import { onMount } from 'svelte'
 import {
   Box3,
   BufferAttribute,
@@ -15,10 +15,8 @@ import {
 import type * as THREE from 'three'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { getHomeIntroLogoModelSrc } from './homeIntroLogoAssets'
 
 type SceneQuality = 'high' | 'balanced' | 'lean'
-type AnimatedAtlasBlendMode = 'emissive' | 'multiply'
 type AnimatedAtlasUniforms = {
   animatedAtlasStrength: { value: number }
 }
@@ -29,15 +27,10 @@ export let animatedAtlasColumns = 6
 export let animatedAtlasRows = 4
 export let animatedAtlasFrames = 23
 export let animatedAtlasFps = 3
-export let animatedAtlasBlendMode: AnimatedAtlasBlendMode = 'emissive'
 export let animatedAtlasIntensity = 0.5
 export let animatedAtlasBaseIntensity = 1
-export let animatedAtlasUvOffsetX = 0
-export let animatedAtlasUvOffsetY = 0
 export let animatedAtlasUvScaleX = 1
 export let animatedAtlasUvScaleY = 1
-export let animatedAtlasUvFlipX = false
-export let animatedAtlasUvFlipY = false
 export let onReady: (() => void) | undefined
 
 let logoModel: THREE.Object3D | null = null
@@ -59,10 +52,6 @@ const originalMaterialColors = new WeakMap<
   THREE.MeshStandardMaterial,
   THREE.Color
 >()
-const originalMaterialMaps = new WeakMap<
-  THREE.MeshStandardMaterial,
-  Texture | null
->()
 const animatedAtlasUniforms = new WeakMap<
   THREE.MeshStandardMaterial,
   AnimatedAtlasUniforms
@@ -73,8 +62,7 @@ const logoCenter = new Vector3()
 const logoSize = new Vector3()
 const logoTargetSize = new Vector3(4.68, 2.24, 1.44)
 const uvBounds = new Box3()
-
-$: logoModelSrc = getHomeIntroLogoModelSrc(sceneQuality)
+const logoModelSrc = '/assets/3D/Hy3D_textured_00005_optimized.glb'
 
 function disposeObjectResources(object: THREE.Object3D) {
   object.traverse(child => {
@@ -167,13 +155,11 @@ function ensurePlanarUvAttribute(mesh: THREE.Mesh) {
   for (let index = 0; index < position.count; index += 1) {
     const baseU = (position.getX(index) - uvBounds.min.x) / sizeX
     const baseV = (position.getY(index) - uvBounds.min.y) / sizeY
-    const projectedU = animatedAtlasUvFlipX ? 1 - baseU : baseU
-    const projectedV = animatedAtlasUvFlipY ? 1 - baseV : baseV
 
     uvs[index * 2] =
-      (projectedU - 0.5) * animatedAtlasUvScaleX + 0.5 + animatedAtlasUvOffsetX
+      (baseU - 0.5) * animatedAtlasUvScaleX + 0.5
     uvs[index * 2 + 1] =
-      (projectedV - 0.5) * animatedAtlasUvScaleY + 0.5 + animatedAtlasUvOffsetY
+      (baseV - 0.5) * animatedAtlasUvScaleY + 0.5
   }
 
   geometry.setAttribute('uv', new BufferAttribute(uvs, 2))
@@ -259,9 +245,6 @@ function tuneLogoModel(model: THREE.Object3D) {
       if (!originalMaterialColors.has(material)) {
         originalMaterialColors.set(material, material.color.clone())
       }
-      if (!originalMaterialMaps.has(material)) {
-        originalMaterialMaps.set(material, material.map)
-      }
 
       material.emissive.set(0, 0, 0)
       material.emissiveIntensity = 0
@@ -323,15 +306,10 @@ function applyAnimatedAtlasToModel() {
   if (!logoModel || !atlasTexture) return
 
   uvRevisionKey = [
-    animatedAtlasBlendMode,
     animatedAtlasIntensity,
     animatedAtlasBaseIntensity,
-    animatedAtlasUvOffsetX,
-    animatedAtlasUvOffsetY,
     animatedAtlasUvScaleX,
     animatedAtlasUvScaleY,
-    animatedAtlasUvFlipX,
-    animatedAtlasUvFlipY,
   ].join(':')
 
   logoModel.traverse(child => {
@@ -356,24 +334,17 @@ function applyAnimatedAtlasToModel() {
       const uniforms = getAnimatedAtlasUniforms(material)
       uniforms.animatedAtlasStrength.value = animatedAtlasIntensity
 
-      if (animatedAtlasBlendMode === 'multiply') {
-        installAnimatedAtlasShader(material)
-        material.map = atlasTexture
-        material.emissiveMap = null
-        material.emissive.set(0, 0, 0)
-        material.emissiveIntensity = 0
-      } else {
-        material.map = originalMaterialMaps.get(material) ?? null
-        material.emissiveMap = atlasTexture
-        material.emissive.set(1, 1, 1)
-        material.emissiveIntensity = animatedAtlasIntensity
-      }
+      installAnimatedAtlasShader(material)
+      material.map = atlasTexture
+      material.emissiveMap = null
+      material.emissive.set(0, 0, 0)
+      material.emissiveIntensity = 0
       material.needsUpdate = true
     })
   })
 }
 
-async function loadAnimatedAtlas(sourceUrl: string) {
+function loadAnimatedAtlas(sourceUrl: string) {
   pendingAtlasSrc = sourceUrl
 
   textureLoader.load(
@@ -440,12 +411,6 @@ onMount(() => {
   }
 })
 
-onDestroy(() => {
-  mounted = false
-  disposeLogoModel()
-  disposeAtlasTexture()
-})
-
 $: if (
   mounted &&
   logoModelSrc !== activeLogoModelSrc &&
@@ -465,15 +430,10 @@ $: if (
 
 $: if (mounted && logoModel && atlasTexture) {
   const nextUvRevisionKey = [
-    animatedAtlasBlendMode,
     animatedAtlasIntensity,
     animatedAtlasBaseIntensity,
-    animatedAtlasUvOffsetX,
-    animatedAtlasUvOffsetY,
     animatedAtlasUvScaleX,
     animatedAtlasUvScaleY,
-    animatedAtlasUvFlipX,
-    animatedAtlasUvFlipY,
   ].join(':')
 
   if (nextUvRevisionKey !== uvRevisionKey) {

@@ -1,28 +1,28 @@
 <script lang="ts">
 import { extractYouTubeVideoId } from '@merkin/blog-core/utils/youtube-embed'
 import { onMount } from 'svelte'
-import { cart } from '../../stores/cartStore'
+import { cart } from '../../../stores/cartStore'
 import {
   getAddToCartRefusalQuirk,
   getPriceDriftQuirk,
-} from '../../utils/product-banner-quirks'
+} from '../../../utils/product-banner-quirks'
 import FeaturedProductZoomModal from './FeaturedProductZoomModal.svelte'
-import FeaturedProductDetailPanel from './featured-product/FeaturedProductDetailPanel.svelte'
-import FeaturedProductMediaStage from './featured-product/FeaturedProductMediaStage.svelte'
-import FeaturedProductPurchaseSheet from './featured-product/FeaturedProductPurchaseSheet.svelte'
-import FeaturedProductRelatedRail from './featured-product/FeaturedProductRelatedRail.svelte'
-import FeaturedProductTopBar from './featured-product/FeaturedProductTopBar.svelte'
+import FeaturedProductDetailPanel from './FeaturedProductDetailPanel.svelte'
+import FeaturedProductMediaStage from './FeaturedProductMediaStage.svelte'
+import FeaturedProductPurchaseSheet from './FeaturedProductPurchaseSheet.svelte'
+import FeaturedProductRelatedRail from './FeaturedProductRelatedRail.svelte'
+import FeaturedProductTopBar from './FeaturedProductTopBar.svelte'
 import type {
   AvailabilityTone,
   FeaturedProduct,
   FeaturedProductPanel,
   ProductMedia,
   RelatedProduct,
-} from './featured-product/types'
-import '../../styles/features/home/featured-product-shell.css'
-import '../../styles/features/home/featured-product-commerce.css'
-import '../../styles/features/home/featured-product-panels.css'
-import '../../styles/features/home/featured-product-related-modal.css'
+} from './types'
+import '../../../styles/features/store/featured-product/featured-product-shell.css'
+import '../../../styles/features/store/featured-product/featured-product-commerce.css'
+import '../../../styles/features/store/featured-product/featured-product-panels.css'
+import '../../../styles/features/store/featured-product/featured-product-related-modal.css'
 
 export let product: FeaturedProduct
 export let showBannerControls = true

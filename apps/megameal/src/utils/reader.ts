@@ -8,6 +8,7 @@ export const FIRST_CONTACT_MANUAL_TITLE =
 export const FIRST_CONTACT_MANUAL_DESCRIPTION =
   'An unvarnished survival manual for first contact, cosmic indifference, hostile civilizations, and other reasons to stay quiet.'
 const FIRST_CONTACT_MANUAL_SLUG_PREFIX = `${FIRST_CONTACT_MANUAL_BOOK_SLUG}/`
+const FIRST_CONTACT_MANUAL_PRIVATE_SLUGS = new Set(['working-copy'])
 
 const firstContactLegacyPostSlugs: Record<string, string> = {
   'timelines/first-contact-index': 'first-contact-manual/index',
@@ -18,7 +19,6 @@ const firstContactLegacyPostSlugs: Record<string, string> = {
   'timelines/first-contact-4': 'first-contact-manual/chapter-4',
   'timelines/first-contact-5': 'first-contact-manual/chapter-5',
   'timelines/first-contact-afterword': 'first-contact-manual/afterword',
-  'timelines/first-contact-working-copy': 'first-contact-manual/working-copy',
 }
 
 function firstContactManualLocalSlug(slug: string) {
@@ -40,7 +40,13 @@ function firstContactManualSortKey(slug: string) {
 }
 
 export function isFirstContactManualEntry(entry: ReaderEntry) {
-  return entry.slug.startsWith(FIRST_CONTACT_MANUAL_SLUG_PREFIX)
+  const localSlug = firstContactManualLocalSlug(entry.slug)
+
+  return (
+    entry.slug.startsWith(FIRST_CONTACT_MANUAL_SLUG_PREFIX) &&
+    !localSlug.startsWith('_') &&
+    !FIRST_CONTACT_MANUAL_PRIVATE_SLUGS.has(localSlug)
+  )
 }
 
 export function sortFirstContactManualEntries(

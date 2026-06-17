@@ -1,12 +1,12 @@
 ---
 import { getCollection } from 'astro:content'
-import { publicProductCollectionFilter } from '../../contracts/products'
+import { publicProductCollectionFilter } from '../../../contracts/products'
 import {
   buildFlagshipProductShowcase,
   getProductSlug,
-} from '../../utils/flagship-product-showcase'
+} from '../../../utils/flagship-product-showcase'
 import FeaturedProductBanner from './FeaturedProductBanner.svelte'
-import '../../styles/features/home/featured-product-hero-slide.css'
+import '../../../styles/features/store/featured-product/featured-product-hero-slide.css'
 
 const products = await getCollection('products', publicProductCollectionFilter)
 const product =

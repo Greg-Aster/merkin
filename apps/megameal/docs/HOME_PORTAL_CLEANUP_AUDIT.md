@@ -24,7 +24,6 @@ This is a read-only production-behavior audit. No production code changes are pr
 | `apps/megameal/src/components/home/PortalDemoVideoPlayer.astro` | Demo video player, clips, preview overlay, autoplay/audio coordination. | Do not touch | Protected demo video and audio behavior. Some manifest extraction is possible but needs manual verification. |
 | `apps/megameal/src/components/home/PortalSponsoredBloom.astro` | Sponsored bloom overlay and interactive cards. | Do not touch | `audit:css:changed` marks it as new oversized debt, but behavior is protected. |
 | `apps/megameal/src/components/home/homeIntroScreens.ts` | Portal destination/screen data. | Do not touch | Destination rotation is protected behavior. |
-| `apps/megameal/src/components/home/portalScrollStages.ts` | Home portal scroll stage controller and global lifecycle hooks. | Do not touch | Scroll behavior is protected. It also owns several global window keys. |
 | `apps/megameal/src/layouts/MainGridLayout.astro` | Megameal wrapper around blog-core layout and portal slots. | Do not touch | Slot bridge for `portal-demo-content`, `banner-slide-content`, and `banner-overlay-content`. |
 | `packages/blog-core/src/layouts/MainGridLayout.astro` | Shared layout used by Megameal and other sites. | Do not touch | Cross-site shared layout. Any cleanup needs broader verification. |
 
@@ -92,7 +91,6 @@ These are not deletion candidates. They are cleanup candidates only after manual
 | `apps/megameal/src/components/home/HomeIntroEnvironmentScene.svelte` | Oversized baseline component. | Needs manual verification | Extract narrow helpers for scene setup and readiness dispatches. Keep rendering equivalent. |
 | `apps/megameal/src/components/home/PortalDemoVideoPlayer.astro` | Large protected component with inline clip manifest, player lifecycle, and audio coordination. | Needs manual verification | Extract clip manifest and event constants first. Do not change autoplay, audio, or player controls without manual testing. |
 | `apps/megameal/src/components/home/PortalSponsoredBloom.astro` | New oversized CSS audit debt. | Needs manual verification | Split data selection, card creation, and dismissal/motion controller into local helpers. |
-| `apps/megameal/src/components/home/portalScrollStages.ts` | Multiple global window keys and lifecycle hooks. | Needs manual verification | Centralize window key strings and event names. Do not change scroll stages without home portal visual/scroll checks. |
 | `apps/megameal/src/utils/site-audio.ts` | Large audio utility with scattered custom events across the site. | Needs manual verification | Centralize event names with `site-audio-activation.ts` and add targeted unit coverage. Audio behavior is protected. |
 | `apps/megameal/src/components/timeline/TimelinePortalCarousel.svelte` | Oversized and expanded beyond CSS audit baseline. | Needs manual verification | Treat as a separate timeline cleanup, not home portal cleanup. |
 | `apps/megameal/src/components/timeline/TimelinePortalCarouselScene.svelte` | Oversized and expanded beyond CSS audit baseline. | Needs manual verification | Treat as a separate timeline cleanup. |
@@ -105,7 +103,6 @@ Scoped search found several global window keys and custom event strings. These a
 
 | Surface | Examples | Classification | Recommendation |
 | --- | --- | --- | --- |
-| Home portal globals | `__megamealPortalScrollCleanup`, `__megamealPortalScrollInit`, `__megamealPortalScrollReset`, `__megamealPortalScrollBound` | Needs manual verification | Centralize constants in the scroll controller module. |
 | Demo player globals | `__megamealPortalDemoPlayerCleanup`, `__megamealPortalDemoPlayerBound` | Needs manual verification | Centralize near demo player manifest/lifecycle helpers. |
 | Route/store globals | `__megamealRouteTransitionsInitialized`, `__megamealStoreLayoutParallaxCleanup` | Safe cleanup only with focused tests | Centralize constants in owning modules. |
 | Portal and audio events | `merkin:portal-advance`, `merkin:banner-select-scene`, `merkin:banner-control`, `merkin:banner-state`, `megameal:portal-intro-ready`, `megameal:audio-config-change`, `megameal:audio-suspend`, `megameal:audio-resume`, `megameal:audio-unlocked`, `megameal:sfx` | Needs manual verification | Create typed or named constants in owner modules. Do not rename event strings in place. |
@@ -116,7 +113,6 @@ The following selector families are broad enough to warrant caution. They are no
 
 | File | Selector risk | Classification | Recommendation |
 | --- | --- | --- | --- |
-| `apps/megameal/src/styles/pages/dynamic-page.css` | Global `html.megameal-home-stage-ready` and `#banner-container.portal-snap-stage` selectors drive protected portal behavior. | Do not touch | Leave unchanged unless visual portal regression coverage exists. |
 | `apps/megameal/src/styles/features/home/portal-hero-slide.css` | Global portal phase classes and banner-container selectors. | Do not touch | Protected visual behavior. |
 | `apps/megameal/src/styles/pages/videos-index.css` | Page-scoped `body:has([data-videos-archive]) #banner-container` and `#main-panel-wrapper`. | Needs manual verification | Candidate for route-local tightening, but verify route visuals. |
 | `apps/megameal/src/styles/pages/mobile-content-frame.css` | `body:has(.mobile-content-frame) main#main`. | Needs manual verification | Candidate for route-local tightening. |

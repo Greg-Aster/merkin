@@ -520,10 +520,6 @@ function primeScreenLayoutForCurrentWheel() {
 function updateScreenOrbit(wheel: number, ease: number) {
   const selectedIndex = getSelectedScreenIndex(wheel)
   const visualSelectedIndex = getHomeIntroRestedScreenIndex(selectedIndex)
-  activeScreenIndex = clampScreenIndex(Math.round(selectedIndex))
-  syncBannerToFrontScreen(getBannerSelectedScreenIndex(selectedIndex))
-  syncScreenMediaLoadStates(selectedIndex)
-  syncScreenPanelMountStates(selectedIndex)
   const snapToTarget = !screenOrbitInitialized
   let positionedAnyScreen = false
 
@@ -752,7 +748,6 @@ useTask(delta => {
 
 <T.PerspectiveCamera bind:ref={camera} makeDefault position={cameraPosition} fov={cameraFov} />
 
-<T.AmbientLight intensity={0.0} color="#dbeafe" />
 <T.Group bind:ref={logoSearchTargetA} />
 <T.SpotLight
 	bind:ref={logoSearchLightA}
@@ -768,6 +763,8 @@ useTask(delta => {
 		src={sceneBackdropSrc}
 		position={sceneBackdropPosition}
 		size={sceneBackdropSize}
+		{portalVisible}
+		{motionEnabled}
 	/>
 
 	{#if carouselComponentReady && ScreenPanel}
@@ -795,7 +792,7 @@ useTask(delta => {
 							hovered={index === hoveredScreenIndex}
 							primary={screen.primary}
 							active={index === activeScreenIndex}
-							shouldLoadMedia={compactViewport || screenMediaLoadStates[index]}
+							shouldLoadMedia={screenMediaLoadStates[index]}
 							videoPlaybackEnabled={!compactViewport}
 							{motionEnabled}
 							{sceneQuality}
@@ -823,14 +820,10 @@ useTask(delta => {
 		<T.Group bind:ref={ringGlowA} rotation={[Math.PI / 2, 0, 0]}>
 			<HomeIntroRingGlow
 				radius={0.86}
-				count={0}
 				color="#67e8f9"
 				hueCycleBase={0.52}
 				hueCycleSpeed={0.01}
-				opacity={0.5}
-				size={0.3}
 				haloOpacity={1}
-				emitter={true}
 				emitterAngle={0.18}
 				emitterSize={1.16}
 				emitterOpacity={1}
@@ -844,14 +837,10 @@ useTask(delta => {
 		<T.Group bind:ref={ringGlowB} rotation={[0.32, Math.PI / 2, 0.26]}>
 			<HomeIntroRingGlow
 				radius={0.88}
-				count={0}
 				color="#8b5cf6"
 				hueCycleBase={0.72}
 				hueCycleSpeed={0.009}
-				opacity={0.9}
-				size={0.27}
 				haloOpacity={1}
-				emitter={true}
 				emitterAngle={2.24}
 				emitterSize={1.04}
 				emitterOpacity={1}
@@ -865,14 +854,10 @@ useTask(delta => {
 		<T.Group bind:ref={ringGlowC} rotation={[0.76, 0.28, Math.PI / 2]}>
 			<HomeIntroRingGlow
 				radius={0.82}
-				count={0}
 				color="#a78bfa"
 				hueCycleBase={0.78}
 				hueCycleSpeed={0.008}
-				opacity={0.9}
-				size={0.24}
 				haloOpacity={1}
-				emitter={true}
 				emitterAngle={4.18}
 				emitterSize={0.94}
 				emitterOpacity={1}
@@ -895,15 +880,10 @@ useTask(delta => {
 			animatedAtlasRows={4}
 			animatedAtlasFrames={23}
 			animatedAtlasFps={6}
-			animatedAtlasBlendMode="multiply"
 			animatedAtlasIntensity={.7}
 			animatedAtlasBaseIntensity={.7}
-			animatedAtlasUvOffsetX={0}
-			animatedAtlasUvOffsetY={0}
 			animatedAtlasUvScaleX={.92}
 			animatedAtlasUvScaleY={0.8}
-			animatedAtlasUvFlipX={false}
-			animatedAtlasUvFlipY={false}
 			onReady={handleLogoReady}
 		/>
 	</T.Group>

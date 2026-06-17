@@ -2,6 +2,8 @@
 
 Date: 2026-06-14
 
+Superseded note, 2026-06-17: `apps/megameal/src/components/home/portalScrollStages.ts` and its scroll-stage window keys were removed after source review found no live `.portal-snap-section` producer.
+
 Scope: preservation-focused cleanup for the MEGA MEAL home portal. This pass does not redesign the page, remove portal systems, rename DOM classes, rename data attributes, remove routes, remove assets, or change CTA hrefs/media paths.
 
 ## Files Inspected
@@ -20,7 +22,7 @@ Scope: preservation-focused cleanup for the MEGA MEAL home portal. This pass doe
 - `apps/megameal/src/components/home/HomeIntroEnvironmentLoader.svelte`
 - `apps/megameal/src/components/home/HomeIntroEnvironmentScene.svelte`
 - `apps/megameal/src/components/home/homeIntroScreens.ts`
-- `apps/megameal/src/components/home/portalScrollStages.ts`
+- `apps/megameal/src/components/home/portalScrollStages.ts` (removed 2026-06-17)
 - `apps/megameal/src/layouts/MainGridLayout.astro`
 - `packages/blog-core/src/layouts/MainGridLayout.astro`
 - `apps/megameal/src/styles/features/home/`
@@ -34,14 +36,14 @@ Scope: preservation-focused cleanup for the MEGA MEAL home portal. This pass doe
 - Joystick/scroll cue markup, data attributes, pointer handlers, click handler, and keyboard handlers remain in `PortalHeroSlide`.
 - Screen-reader copy remains in `PortalHeroSlide`.
 - Home portal custom event strings are preserved in `src/contracts/homePortal.ts`.
-- Astro lifecycle cleanup remains present for portal scroll stages, demo player, and sponsored bloom.
+- Astro lifecycle cleanup remains present for demo player and sponsored bloom. The older portal scroll-stage controller was removed on 2026-06-17.
 - Nav/search ownership in `packages/blog-core/src/layouts/MainGridLayout.astro` was inspected and not changed.
 - CTA hrefs and media paths in `homeIntroScreens.ts`, demo player clips, background video, and CSS were not changed.
 
 ## Cleanup Opportunities Found
 
 1. Custom event names were duplicated across portal dispatchers/listeners.
-2. Portal scroll window keys were local magic strings in `portalScrollStages.ts`.
+2. Portal scroll window keys were local magic strings in `portalScrollStages.ts`; this was superseded by the 2026-06-17 removal of the unused scroll-stage controller.
 3. Portal demo window keys were local magic strings in `PortalDemoVideoPlayer.astro`.
 4. Portal sponsored bloom cleanup key was a local magic string in inline script.
 5. Portal demo localStorage key was a local magic string.
@@ -57,7 +59,7 @@ Scope: preservation-focused cleanup for the MEGA MEAL home portal. This pass doe
 
 1. Added `src/contracts/homePortal.ts` as the centralized owner for protected home portal custom events, portal window keys, portal demo storage keys, demo active class, demo audio suspension reason, and narrow `CustomEvent` detail types.
 2. Replaced duplicated portal custom event strings in the home portal dispatchers/listeners with `homePortalEvents`.
-3. Replaced portal scroll, portal demo, and sponsored bloom window-key magic strings with `homePortalWindowKeys`.
+3. Replaced portal demo and sponsored bloom window-key magic strings with `homePortalWindowKeys`. The portal scroll keys were removed with the unused controller on 2026-06-17.
 4. Replaced the portal demo last-index localStorage magic string with `portalDemoStorageKeys.lastIndex`.
 5. Added narrow event detail types for portal advance, banner scene selection, intro-ready, and portal demo audio suspension events.
 6. Added `scripts/audit-home-portal-contracts.mjs` and wired it into `audit:contracts` so the requested contract validation also checks protected home portal strings and source surfaces.

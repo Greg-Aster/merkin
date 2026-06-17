@@ -20,6 +20,8 @@ export let src = ''
 export let position: [number, number, number] = [0, 0, -4.2]
 export let size: [number, number] = [16, 9]
 export let probePosition: [number, number, number] = [0, 0, -0.1]
+export let portalVisible = true
+export let motionEnabled = true
 
 const threlte = useThrelte()
 const loader = new TextureLoader()
@@ -30,7 +32,6 @@ const reflectionTarget = new WebGLCubeRenderTarget(256, {
   magFilter: LinearFilter,
 })
 const reflectionProbe = new CubeCamera(0.1, 90, reflectionTarget)
-const reflectionProbeUpdateInterval = 1 / 12
 
 reflectionTarget.texture.name = 'home-intro-scene-reflection'
 
@@ -42,7 +43,6 @@ let activeSrc = ''
 let loadToken = 0
 let mounted = false
 let probeNeedsUpdate = false
-let probeUpdateElapsed = 0
 
 function configureTexture(item: Texture) {
   item.colorSpace = SRGBColorSpace
@@ -123,7 +123,6 @@ function updateReflectionProbe() {
   }
   scene.environment = reflectionTarget.texture
 
-  probeUpdateElapsed = 0
   probeNeedsUpdate = false
 }
 
@@ -186,14 +185,12 @@ onMount(() => {
   }
 })
 
-useTask(delta => {
-  if (!mounted || !texture) return
-
-  probeUpdateElapsed += delta
-
-  if (probeNeedsUpdate || probeUpdateElapsed >= reflectionProbeUpdateInterval) {
-    updateReflectionProbe()
+useTask(() => {
+  if (!mounted || !texture || !probeNeedsUpdate || !portalVisible || !motionEnabled) {
+    return
   }
+
+  updateReflectionProbe()
 })
 
 $: if (mounted && src) {

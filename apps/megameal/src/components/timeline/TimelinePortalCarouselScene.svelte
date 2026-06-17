@@ -844,10 +844,7 @@ useTask(delta => {
       scrollStep={effectScrollStepY}
       scrollSpan={particleScrollSpan}
       atmosphereReveal={1}
-      axialSpinSpeed={0}
-      axialSpinInputScale={0}
       pointSizeScale={0.3}
-      opacityScale={1}
       motionEnabled={false}
     />
   </T.Group>

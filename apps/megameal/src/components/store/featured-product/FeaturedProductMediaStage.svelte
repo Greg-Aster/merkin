@@ -6,7 +6,7 @@ import {
   youtubeEmbedReferrerPolicy,
 } from '@merkin/blog-core/utils/youtube-embed'
 import { onMount, tick } from 'svelte'
-import ProceduralModelViewer from '../ProceduralModelViewer.svelte'
+import ProceduralModelViewer from './ProceduralModelViewer.svelte'
 import type { FeaturedProduct, ProductMedia } from './types'
 
 export let product: FeaturedProduct

@@ -8,10 +8,6 @@ export const homePortalEvents = {
 } as const
 
 export const homePortalWindowKeys = {
-  portalScrollCleanup: '__megamealPortalScrollCleanup',
-  portalScrollInit: '__megamealPortalScrollInit',
-  portalScrollReset: '__megamealPortalScrollReset',
-  portalScrollBound: '__megamealPortalScrollBound',
   portalDemoPlayerCleanup: '__megamealPortalDemoPlayerCleanup',
   portalDemoPlayerBound: '__megamealPortalDemoPlayerBound',
   portalSponsoredBloomCleanup: '__megamealPortalSponsoredBloomCleanup',

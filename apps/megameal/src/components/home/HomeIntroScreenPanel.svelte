@@ -23,10 +23,7 @@ import {
 } from './homeIntroKtx2Loader'
 import { homeIntroReflectionOnlyUserDataKey } from './homeIntroReflectionOnly'
 import { HomeIntroScreenContentRenderer } from './homeIntroScreenContentRenderer'
-import {
-  disposeHomeIntroScreenModel,
-  loadHomeIntroScreenModelInstance,
-} from './homeIntroScreenModel'
+import { loadHomeIntroScreenModelInstance } from './homeIntroScreenModel'
 import {
   createScreenInfoTickerTextureController,
   createScreenTextTexture,
@@ -181,7 +178,6 @@ function disposeStillTexture() {
 }
 
 function disposeScreenModel() {
-  disposeHomeIntroScreenModel(screenModel)
   screenModel = null
 }
 
@@ -225,7 +221,6 @@ async function loadScreenModel() {
     )
 
     if (!mounted || controller.signal.aborted || !model) {
-      disposeHomeIntroScreenModel(model)
       return
     }
 

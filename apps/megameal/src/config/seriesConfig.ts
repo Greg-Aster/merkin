@@ -7,7 +7,6 @@ export interface SeriesConfig {
   color: string // Hex color for visual accent
   startSlug: string // Slug of the first post (used for "Begin Reading" CTA)
   featuredImage?: string
-  featured?: boolean // Whether to show in FeaturedArc on homepage
 }
 
 export const SERIES_CONFIG: Record<string, SeriesConfig> = {
@@ -18,7 +17,6 @@ export const SERIES_CONFIG: Record<string, SeriesConfig> = {
     color: '#8b5cf6',
     startSlug: 'timelines/first-contact-index',
     featuredImage: '/posts/timeline/chronos.png',
-    featured: true,
   },
   'miranda-incident': {
     title: 'The Miranda Incident',
@@ -37,10 +35,3 @@ export const SERIES_CONFIG: Record<string, SeriesConfig> = {
     featuredImage: '/posts/timeline/conflict-era.png',
   },
 }
-
-// Ordered list of series IDs to display on homepage (in order)
-export const FEATURED_SERIES_ORDER: string[] = [
-  'first-contact-manual',
-  'miranda-incident',
-  'snuggloid-emergence',
-]

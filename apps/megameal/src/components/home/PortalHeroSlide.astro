@@ -1,12 +1,12 @@
 ---
-import HomeIntroEnvironmentLoader from './HomeIntroEnvironmentLoader.svelte'
+import HomeIntroEnvironment from './HomeIntroEnvironment.svelte'
 import '../../styles/features/home/portal-hero-slide.css'
 import '../../styles/features/home/portal-hero-scroll-cue.css'
 ---
 
 <section class="megameal-home-intro" aria-label="MEGAMEAL portal introduction">
   <div class="megameal-home-intro__environment" aria-hidden="true">
-    <HomeIntroEnvironmentLoader client:load />
+    <HomeIntroEnvironment client:load />
   </div>
 
   <div class="megameal-home-intro__screen-reader-copy">
@@ -105,7 +105,7 @@ import '../../styles/features/home/portal-hero-scroll-cue.css'
 
       const hero = document.getElementById('banner-container')
       const candidates = Array.from(
-        document.querySelectorAll<HTMLElement>('.portal-snap-section, .portal-showcase, main#main'),
+        document.querySelectorAll<HTMLElement>('main#main'),
       )
       const target = candidates.find((element) => {
         const rect = element.getBoundingClientRect()

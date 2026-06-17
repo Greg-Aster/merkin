@@ -1,5 +1,5 @@
 {
-  "count": 83,
+  "count": 79,
   "items": [
     {
       "id": "explainer",
@@ -42,7 +42,7 @@
       "collection": "posts",
       "url": "/posts/first-contact-manual-style-guide/",
       "title": "Dev Notes: First Contact Manual — Style & Layout Contract",
-      "description": "Internal style contract for the First Contact Manual reader series: shared components, tone palette, chapter skeleton, and frontmatter checklist.",
+      "description": "Internal style contract for the First Contact Manual reader series: imported CSS classes, tone palette, chapter skeleton, and frontmatter checklist.",
       "published": "2026-06-15T00:00:00.000Z",
       "updated": null,
       "draft": false,
@@ -63,8 +63,8 @@
       "sourcePath": "posts/first-contact-manual-world-bible.mdx",
       "collection": "posts",
       "url": "/posts/first-contact-manual-world-bible/",
-      "title": "Dev Notes: First Contact Manual — World Bible & Voice Guide",
-      "description": "Internal world bible for the First Contact Manual reader series: narrator voices, recurring statistics, named entities, and running gags to reuse instead of reinventing.",
+      "title": "Dev Notes: First Contact Manual -- World Bible & Data Contract",
+      "description": "Internal world bible and data contract for the First Contact Manual reader series: source priority, statistics, chapter datasets, named entities, and consistency rules.",
       "published": "2026-06-15T00:00:00.000Z",
       "updated": null,
       "draft": false,
@@ -310,7 +310,7 @@
         "Cosmic Economics"
       ],
       "category": "MEGA MEAL",
-      "image": "/posts/timeline/chronos.png",
+      "image": "/first-contact/afterword.webp",
       "bannerType": "image",
       "bannerData": {
         "category": "MEGA MEAL",
@@ -384,7 +384,7 @@
         "Cosmic Horror"
       ],
       "category": "MEGA MEAL",
-      "image": "/posts/timeline/chronos.png",
+      "image": "/first-contact/chapter2.webp",
       "bannerType": "image",
       "bannerData": {
         "category": "MEGA MEAL",
@@ -423,7 +423,7 @@
         "Disaster Mechanisms"
       ],
       "category": "MEGA MEAL",
-      "image": "/posts/timeline/chronos.png",
+      "image": "/first-contact/chapter3.webp",
       "bannerType": "image",
       "bannerData": {
         "category": "MEGA MEAL",
@@ -462,7 +462,7 @@
         "Dark Forest Theory"
       ],
       "category": "MEGA MEAL",
-      "image": "/posts/timeline/chronos.png",
+      "image": "/first-contact/chapter4.webp",
       "bannerType": "image",
       "bannerData": {
         "category": "MEGA MEAL",
@@ -500,7 +500,7 @@
         "Existential Crisis Management"
       ],
       "category": "MEGA MEAL",
-      "image": "/posts/timeline/chronos.png",
+      "image": "/first-contact/chapter5.webp",
       "bannerType": "image",
       "bannerData": {
         "category": "MEGA MEAL",
@@ -555,151 +555,6 @@
       "series": "first-contact-manual",
       "seriesTitle": "The Interstellar Traveler's First Contact Manual",
       "contentFormat": "manual"
-    },
-    {
-      "id": "first-contact-manual/forward (another copy)",
-      "slug": "first-contact-manual/forward (another copy)",
-      "sourcePath": "reader/first-contact-manual/forward (another copy).mdx",
-      "collection": "reader",
-      "url": "/reader/first-contact-manual/forward (another copy)/",
-      "title": "The Interstellar Traveler's Admonition:",
-      "description": "An unvarnished, statistically-validated guide to the horrifying realities of alien life and why your first, last, and only instinct upon encountering the unknown should be to run. Fast. (Excerpt from the Hand Guide for Interstellar Travel and Objects of Unknown Origin, p. 37)",
-      "published": "2025-05-29T00:00:00.000Z",
-      "updated": null,
-      "draft": true,
-      "tags": [
-        "First Contact",
-        "Xenobiology",
-        "Interstellar Travel",
-        "Existential Threats",
-        "Cosmic Horror"
-      ],
-      "category": "MEGA MEAL",
-      "image": "/first-contact/forward-wide.webp",
-      "bannerType": "image",
-      "bannerData": {
-        "category": "MEGA MEAL",
-        "startYear": 1,
-        "endYear": 1e+100,
-        "background": "/posts/timeline/chronos.png"
-      },
-      "timelineYear": 7652,
-      "timelineEra": "awakening-era",
-      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
-      "isKeyEvent": true,
-      "isLevel": false,
-      "levelId": null,
-      "series": "first-contact-manual",
-      "seriesTitle": "The Interstellar Traveler's First Contact Manual",
-      "contentFormat": "manual"
-    },
-    {
-      "id": "first-contact-manual/forward (copy)",
-      "slug": "first-contact-manual/forward (copy)",
-      "sourcePath": "reader/first-contact-manual/forward (copy).mdx",
-      "collection": "reader",
-      "url": "/reader/first-contact-manual/forward (copy)/",
-      "title": "The Interstellar Traveler's Admonition:",
-      "description": "An unvarnished, statistically-validated guide to the horrifying realities of alien life and why your first, last, and only instinct upon encountering the unknown should be to run. Fast. (Excerpt from the Hand Guide for Interstellar Travel and Objects of Unknown Origin, p. 37)",
-      "published": "2025-05-29T00:00:00.000Z",
-      "updated": null,
-      "draft": true,
-      "tags": [
-        "First Contact",
-        "Xenobiology",
-        "Interstellar Travel",
-        "Existential Threats",
-        "Cosmic Horror"
-      ],
-      "category": "MEGA MEAL",
-      "image": "/first-contact/forward-wide.webp",
-      "bannerType": "image",
-      "bannerData": {
-        "category": "MEGA MEAL",
-        "startYear": 1,
-        "endYear": 1e+100,
-        "background": "/posts/timeline/chronos.png"
-      },
-      "timelineYear": 7652,
-      "timelineEra": "awakening-era",
-      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
-      "isKeyEvent": true,
-      "isLevel": false,
-      "levelId": null,
-      "series": "first-contact-manual",
-      "seriesTitle": "The Interstellar Traveler's First Contact Manual",
-      "contentFormat": "manual"
-    },
-    {
-      "id": "first-contact-manual/forwardwcss",
-      "slug": "first-contact-manual/forwardwcss",
-      "sourcePath": "reader/first-contact-manual/forwardwcss.mdx",
-      "collection": "reader",
-      "url": "/reader/first-contact-manual/forwardwcss/",
-      "title": "The Interstellar Traveler's Admonition:",
-      "description": "An unvarnished, statistically-validated guide to the horrifying realities of alien life and why your first, last, and only instinct upon encountering the unknown should be to run. Fast. (Excerpt from the Hand Guide for Interstellar Travel and Objects of Unknown Origin, p. 37)",
-      "published": "2025-05-29T00:00:00.000Z",
-      "updated": null,
-      "draft": true,
-      "tags": [
-        "First Contact",
-        "Xenobiology",
-        "Interstellar Travel",
-        "Existential Threats",
-        "Cosmic Horror"
-      ],
-      "category": "MEGA MEAL",
-      "image": "/first-contact/forward-wide.webp",
-      "bannerType": "image",
-      "bannerData": {
-        "category": "MEGA MEAL",
-        "startYear": 1,
-        "endYear": 1e+100,
-        "background": "/posts/timeline/chronos.png"
-      },
-      "timelineYear": 7652,
-      "timelineEra": "awakening-era",
-      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
-      "isKeyEvent": true,
-      "isLevel": false,
-      "levelId": null,
-      "series": "first-contact-manual",
-      "seriesTitle": "The Interstellar Traveler's First Contact Manual",
-      "contentFormat": "manual"
-    },
-    {
-      "id": "first-contact-manual/working-copy",
-      "slug": "first-contact-manual/working-copy",
-      "sourcePath": "reader/first-contact-manual/working-copy.mdx",
-      "collection": "reader",
-      "url": "/reader/first-contact-manual/working-copy/",
-      "title": "The Interstellar Traveler's Admonition: A Comprehensive Xenobiological and First Contact Threat Analysis",
-      "description": "An unvarnished, statistically-validated guide to the horrifying realities of alien life and why your first, last, and only instinct upon encountering the unknown should be to run. Fast. (Excerpt from the Hand Guide for Interstellar Travel and Objects of Unknown Origin, p. 37)",
-      "published": "2025-05-29T00:00:00.000Z",
-      "updated": null,
-      "draft": true,
-      "tags": [
-        "First Contact",
-        "Xenobiology",
-        "Interstellar Travel",
-        "Existential Threats",
-        "Cosmic Horror"
-      ],
-      "category": "MEGA MEAL",
-      "image": "/posts/timeline/chronos.png",
-      "bannerType": "timeline",
-      "bannerData": {
-        "category": "MEGA MEAL",
-        "startYear": 1,
-        "endYear": 1e+100,
-        "background": "/posts/timeline/chronos.png"
-      },
-      "timelineYear": 7652,
-      "timelineEra": "wip",
-      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
-      "isKeyEvent": true,
-      "isLevel": false,
-      "levelId": null
     },
     {
       "id": "meat-cake",

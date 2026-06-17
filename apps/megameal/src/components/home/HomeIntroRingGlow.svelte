@@ -81,18 +81,11 @@ import { AdditiveBlending, DoubleSide, Vector3 } from 'three'
 import type { Group } from 'three'
 
 export let radius = 1
-export let count = 36
 export let color = '#67e8f9'
 export let hueCycleBase: number | null = null
 export let hueCycleSpeed = 0.01
-export let opacity = 0.18
-export let size = 0.16
-export let rotation: [number, number, number] = [0, 0, 0]
-export let spinAxis: 'x' | 'y' | 'z' = 'z'
-export let spinSpeed = 0
 export let atmosphereReveal = 1
 export let haloOpacity = 0.26
-export let emitter = false
 export let emitterAngle = 0
 export let emitterSize = 0.72
 export let emitterOpacity = 0.86
@@ -112,25 +105,42 @@ const emitterLocalPosition = new Vector3()
 const emitterWorldPosition = new Vector3()
 const groupWorldPosition = new Vector3()
 
-$: sparks = Array.from({ length: count }, (_, index) => {
-  const progress = index / Math.max(count, 1)
-  const angle = progress * Math.PI * 2
-  return {
-    x: Math.cos(angle) * radius,
-    y: Math.sin(angle) * radius,
-    phase: angle + index * 0.37,
-    size: size * (0.72 + ((index * 17) % 9) / 20),
-  }
-})
 $: emitterPosition = [
   Math.cos(emitterAngle) * radius,
   Math.sin(emitterAngle) * radius,
   0,
 ] as [number, number, number]
 
-useTask(() => {
-  if (!motionEnabled) return
+function syncEmitterPosition() {
   if (!group) return
+
+  emitterLocalPosition.set(
+    emitterPosition[0],
+    emitterPosition[1],
+    emitterPosition[2],
+  )
+
+  if (!emitterFrontFacing) {
+    emitterGroup?.position.copy(emitterLocalPosition)
+    return
+  }
+
+  emitterWorldPosition.copy(emitterLocalPosition)
+  group.localToWorld(emitterWorldPosition)
+  group.getWorldPosition(groupWorldPosition)
+  emitterWorldPosition.z = groupWorldPosition.z + emitterFrontOffset
+  group.worldToLocal(emitterWorldPosition)
+  emitterGroup?.position.copy(emitterWorldPosition)
+}
+
+useTask(() => {
+  if (!group) return
+
+  if (!motionEnabled) {
+    animatedColor = color
+    syncEmitterPosition()
+    return
+  }
 
   const time = performance.now() * 0.001
   if (hueCycleBase !== null) {
@@ -140,29 +150,7 @@ useTask(() => {
     animatedColor = color
   }
 
-  group.rotation.set(rotation[0], rotation[1], rotation[2])
-  group.rotation[spinAxis] += time * spinSpeed
-
-  if (emitterGroup) {
-    emitterLocalPosition.set(
-      emitterPosition[0],
-      emitterPosition[1],
-      emitterPosition[2],
-    )
-
-    if (emitterFrontFacing) {
-      emitterWorldPosition.copy(emitterLocalPosition)
-      group.localToWorld(emitterWorldPosition)
-      group.getWorldPosition(groupWorldPosition)
-      emitterWorldPosition.z =
-        groupWorldPosition.z + emitterFrontOffset
-      group.worldToLocal(emitterWorldPosition)
-      emitterGroup.position.copy(emitterWorldPosition)
-    } else {
-      emitterGroup.position.copy(emitterLocalPosition)
-    }
-  }
-
+  syncEmitterPosition()
 })
 </script>
 
@@ -180,31 +168,17 @@ useTask(() => {
       depthTest={true}
     />
   </T.Mesh>
-  {#each sparks as spark}
-    <T.Sprite position={[spark.x, spark.y, 0]} scale={[spark.size, spark.size, spark.size]}>
+  <T.Group bind:ref={emitterGroup}>
+    <T.Sprite scale={[emitterSize, emitterSize, emitterSize]}>
       <T.SpriteMaterial
         map={glowTexture}
         color={animatedColor}
         transparent={true}
-        opacity={atmosphereReveal * opacity * (0.74 + Math.sin(spark.phase) * 0.08)}
+        opacity={atmosphereReveal * emitterOpacity}
         blending={additiveBlending}
         depthWrite={false}
+        depthTest={false}
       />
     </T.Sprite>
-  {/each}
-  {#if emitter}
-    <T.Group bind:ref={emitterGroup}>
-      <T.Sprite scale={[emitterSize, emitterSize, emitterSize]}>
-        <T.SpriteMaterial
-          map={glowTexture}
-          color={animatedColor}
-          transparent={true}
-          opacity={atmosphereReveal * emitterOpacity}
-          blending={additiveBlending}
-          depthWrite={false}
-          depthTest={false}
-        />
-      </T.Sprite>
-    </T.Group>
-  {/if}
+  </T.Group>
 </T.Group>

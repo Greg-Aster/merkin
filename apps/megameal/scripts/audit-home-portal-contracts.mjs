@@ -35,10 +35,6 @@ const protectedContracts = [
       ['megameal:audio-suspend', 'audio suspend event string'],
       ['megameal:audio-resume', 'audio resume event string'],
       ['megameal:audio-config-change', 'audio config-change event string'],
-      ['__megamealPortalScrollCleanup', 'portal scroll cleanup window key'],
-      ['__megamealPortalScrollInit', 'portal scroll init window key'],
-      ['__megamealPortalScrollReset', 'portal scroll reset window key'],
-      ['__megamealPortalScrollBound', 'portal scroll bound window key'],
       [
         '__megamealPortalDemoPlayerCleanup',
         'portal demo cleanup window key',
@@ -63,7 +59,6 @@ const protectedContracts = [
       ['slot="banner-overlay-content"', 'banner overlay slot'],
       ['slot="banner-slide-content"', 'banner slide slot'],
       ['slot="portal-demo-content"', 'portal demo slot'],
-      ['initPortalScrollController', 'portal scroll controller initialization'],
     ],
   ],
   [
@@ -105,11 +100,11 @@ const protectedContracts = [
     'apps/megameal/src/components/home/PortalSponsoredBloom.astro',
     [
       ['data-portal-sponsored-bloom', 'sponsored bloom root data attribute'],
-      ['merkin:portal-advance', 'portal advance listener'],
-      ['megameal:portal-intro-ready', 'portal intro ready listener'],
+      ['homePortalEvents.portalAdvance', 'centralized portal advance listener'],
+      ['homePortalEvents.portalIntroReady', 'centralized portal intro listener'],
       [
-        '__megamealPortalSponsoredBloomCleanup',
-        'sponsored bloom cleanup key',
+        'homePortalWindowKeys.portalSponsoredBloomCleanup',
+        'centralized sponsored bloom cleanup key',
       ],
       ['astro:before-preparation', 'Astro cleanup lifecycle binding'],
       ['pagehide', 'pagehide cleanup binding'],
@@ -131,19 +126,6 @@ const protectedContracts = [
         'home intro still path',
       ],
       ['/assets/banner/universbg0001-0121.webm', 'universe video path'],
-    ],
-  ],
-  [
-    'apps/megameal/src/components/home/portalScrollStages.ts',
-    [
-      ['homePortalWindowKeys.portalScrollCleanup', 'centralized cleanup key'],
-      ['homePortalWindowKeys.portalScrollInit', 'centralized init key'],
-      ['homePortalWindowKeys.portalScrollReset', 'centralized reset key'],
-      ['homePortalWindowKeys.portalScrollBound', 'centralized bound key'],
-      ['astro:page-load', 'Astro page-load lifecycle binding'],
-      ['astro:before-preparation', 'Astro cleanup lifecycle binding'],
-      ['pageshow', 'page-show restore lifecycle binding'],
-      ['visibilitychange', 'visibility restore lifecycle binding'],
     ],
   ],
   [

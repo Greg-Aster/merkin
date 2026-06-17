@@ -52,6 +52,7 @@ let pointerDownStartedOnScreen = false
 let pointerDragDistance = 0
 let activePointerId: number | null = null
 let activeTouchId: number | null = null
+let activeTouchListenersBound = false
 let virtualWheel = 0
 let wheelVelocity = 0
 let scrollFrame = 0
@@ -78,7 +79,6 @@ const portalDemoActiveClass = 'megameal-portal-demo-active'
 const standardBannerPhaseClass = 'megameal-home-standard-banner-phase'
 const logoEffectsRevealCutoff = 0.68
 const wheelMomentumDecay = 2.4
-const wheelMomentumImpulse = 5.2
 const wheelMomentumMaxVelocity = 4.8
 const mouseWheelSensitivity = 1.15
 const mouseWheelMomentumImpulse = 3.6
@@ -625,6 +625,24 @@ function getChangedTouch(event: TouchEvent) {
       )
 }
 
+function bindActiveTouchListeners() {
+  if (activeTouchListenersBound) return
+
+  activeTouchListenersBound = true
+  window.addEventListener('touchmove', handleTouchMove, { passive: false })
+  window.addEventListener('touchend', handleTouchEnd, { passive: false })
+  window.addEventListener('touchcancel', handleTouchEnd)
+}
+
+function unbindActiveTouchListeners() {
+  if (!activeTouchListenersBound) return
+
+  activeTouchListenersBound = false
+  window.removeEventListener('touchmove', handleTouchMove)
+  window.removeEventListener('touchend', handleTouchEnd)
+  window.removeEventListener('touchcancel', handleTouchEnd)
+}
+
 function handleTouchStart(event: TouchEvent) {
   const isDemoOrStandardPhase =
     isPortalDemoActive() || isStandardBannerPhaseActive()
@@ -646,6 +664,7 @@ function handleTouchStart(event: TouchEvent) {
   pointerDownStartedOnScreen = isPointerOverActiveScreen(touch.clientX, touch.clientY)
   updatePointer(touch.clientX, touch.clientY)
   playPortalDragSfx({ unlockFromGesture: true })
+  bindActiveTouchListeners()
 }
 
 function handleTouchMove(event: TouchEvent) {
@@ -660,11 +679,12 @@ function handleTouchMove(event: TouchEvent) {
       touch.clientY - pointerDownClientY,
     ),
   )
-  const touchWheelDistance = Math.max(
-    220,
-    Math.min(window.innerHeight * 0.46, 360),
+  applyDragDelta(
+    touch.clientX,
+    touch.clientY,
+    1.075,
+    Math.max(220, Math.min(window.innerHeight * 0.46, 360)),
   )
-  applyDragDelta(touch.clientX, touch.clientY, 2.15, touchWheelDistance)
 }
 
 function handleTouchEnd(event: TouchEvent) {
@@ -683,6 +703,7 @@ function handleTouchEnd(event: TouchEvent) {
   activeTouchId = null
   pointerDownStartedOnScreen = false
   pointerDragDistance = 0
+  unbindActiveTouchListeners()
 
   if (shouldNavigate) {
     event.preventDefault()
@@ -831,10 +852,7 @@ onMount(() => {
   window.addEventListener('pointermove', handlePointerMove)
   window.addEventListener('pointerup', handlePointerUp)
   window.addEventListener('pointercancel', handlePointerUp)
-  window.addEventListener('touchstart', handleTouchStart, { passive: false })
-  window.addEventListener('touchmove', handleTouchMove, { passive: false })
-  window.addEventListener('touchend', handleTouchEnd)
-  window.addEventListener('touchcancel', handleTouchEnd)
+  window.addEventListener('touchstart', handleTouchStart, { passive: true })
   window.addEventListener('wheel', handleWheel, { passive: false })
   window.addEventListener('keydown', handleKeyboardScroll)
   window.addEventListener('merkin:portal-advance', handlePortalAdvance)
@@ -848,9 +866,7 @@ onMount(() => {
     window.removeEventListener('pointerup', handlePointerUp)
     window.removeEventListener('pointercancel', handlePointerUp)
     window.removeEventListener('touchstart', handleTouchStart)
-    window.removeEventListener('touchmove', handleTouchMove)
-    window.removeEventListener('touchend', handleTouchEnd)
-    window.removeEventListener('touchcancel', handleTouchEnd)
+    unbindActiveTouchListeners()
     window.removeEventListener('wheel', handleWheel)
     window.removeEventListener('keydown', handleKeyboardScroll)
     window.removeEventListener('merkin:portal-advance', handlePortalAdvance)
@@ -871,6 +887,7 @@ onMount(() => {
 onDestroy(() => {
   input.active = false
   activeTouchId = null
+  unbindActiveTouchListeners()
   if (scrollFrame) {
     window.cancelAnimationFrame(scrollFrame)
     scrollFrame = 0
