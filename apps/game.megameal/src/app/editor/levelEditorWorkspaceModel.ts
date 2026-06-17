@@ -5,10 +5,16 @@ import type {
 	RuntimeSceneManifestData,
 } from "../../engine/data/index.js";
 import {
+	validateRuntimeSceneContentGraph,
+	validateRuntimeSceneManifest,
+} from "../../engine/data/index.js";
+import {
 	type LevelEditorAuthoringDocumentProvenance,
 	projectRuntimeSceneManifestToAuthoringDocument,
 	validateLevelEditorAuthoringDocument,
 } from "../../engine/data/levelAuthoring/index.js";
+import { parseAudioContentManifest } from "../../engine/modules/audio/index.js";
+import { audioContentManifestForRuntimeScene } from "../../game/assets/index.js";
 import {
 	type LevelEditorOwnerRegistry,
 	type LevelEditorOwnerTarget,
@@ -153,6 +159,7 @@ export type LevelEditorWorkspaceLibraryGroup = {
 
 export type LevelEditorWorkspaceCommandId =
 	| "save"
+	| "save-level"
 	| "discard"
 	| "build"
 	| "publish";
@@ -165,6 +172,8 @@ export type LevelEditorWorkspaceCommand = {
 	readonly blocksDirty: boolean;
 	readonly operation:
 		| "authoring-transaction"
+		| "owner-write"
+		| "publish-owner-write"
 		| "clear-staged-preview"
 		| "build-plan"
 		| "publish-plan";
@@ -176,6 +185,41 @@ export type LevelEditorWorkspaceOutputLogEntry = {
 	readonly level: "info" | "success" | "warning" | "error";
 	readonly source: string;
 	readonly message: string;
+};
+
+export type LevelEditorValidationReportCategory =
+	| "stable-id"
+	| "owner-provenance"
+	| "reference-integrity"
+	| "readiness"
+	| "render-budget"
+	| "terrain"
+	| "audio-content"
+	| "unsupported-field"
+	| "runtime-scene-schema"
+	| "content-graph";
+
+export type LevelEditorValidationReportItem = {
+	readonly id: string;
+	readonly severity: "error" | "warning";
+	readonly category: LevelEditorValidationReportCategory;
+	readonly source:
+		| "runtime-scene-manifest"
+		| "content-graph"
+		| "authoring-provenance"
+		| "workspace-model";
+	readonly message: string;
+	readonly blocksPublish: boolean;
+};
+
+export type LevelEditorValidationReport = {
+	readonly schemaVersion: 1;
+	readonly runtimeSceneId: string;
+	readonly generatedFrom: readonly string[];
+	readonly items: readonly LevelEditorValidationReportItem[];
+	readonly errorCount: number;
+	readonly warningCount: number;
+	readonly blocksPublish: boolean;
 };
 
 export type LevelEditorWorkspaceAuthoringSaveTarget = {
@@ -235,6 +279,7 @@ export type LevelEditorWorkspaceModel = {
 		readonly errors: readonly string[];
 		readonly warnings: readonly string[];
 	};
+	readonly validationReport: LevelEditorValidationReport;
 	readonly routes: {
 		readonly editor: "/editor/";
 		readonly liveGame: "/";
@@ -281,9 +326,14 @@ export function buildLevelEditorWorkspaceModel(
 		selectedManifest.readiness.playerStableId ??
 		objects[0]?.stableId ??
 		null;
-	const validation = buildWorkspaceValidation(selectedManifest, objects);
 	const authoring = buildWorkspaceAuthoringState(selectedManifest);
 	const commandPlans = buildWorkspaceCommandPlans(selectedManifest);
+	const validationReport = buildLevelEditorValidationReport({
+		manifest: selectedManifest,
+		objects,
+		authoring,
+	});
+	const validation = summarizeValidationReport(validationReport);
 
 	return {
 		schemaVersion: 1,
@@ -296,6 +346,7 @@ export function buildLevelEditorWorkspaceModel(
 		objectLibrary: buildObjectLibrary(selectedManifest, objects),
 		graph: buildEngineGraph(selectedManifest, objects, selectedStableId),
 		validation,
+		validationReport,
 		routes: {
 			editor: "/editor/",
 			liveGame: "/",
@@ -305,7 +356,7 @@ export function buildLevelEditorWorkspaceModel(
 		commandPlans,
 		outputLog: buildInitialOutputLog({
 			manifest: selectedManifest,
-			validation,
+			validationReport,
 			authoring,
 			commandPlans,
 		}),
@@ -574,43 +625,237 @@ function graphCategoryNode(
 	};
 }
 
-function buildWorkspaceValidation(
-	manifest: RuntimeSceneManifestData,
-	objects: readonly LevelEditorWorkspaceObject[],
+export function buildLevelEditorValidationReport(options: {
+	readonly manifest: RuntimeSceneManifestData;
+	readonly objects?: readonly LevelEditorWorkspaceObject[];
+	readonly authoring?: LevelEditorWorkspaceAuthoringState;
+}): LevelEditorValidationReport {
+	const items: LevelEditorValidationReportItem[] = [];
+	const seenIds = new Set<string>();
+	const runtimeSceneIds = defaultRuntimeSceneManifests.map(
+		(manifest) => manifest.id,
+	);
+
+	for (const message of validateRuntimeSceneManifest(options.manifest)) {
+		addValidationReportItem(items, seenIds, {
+			severity: "error",
+			source: "runtime-scene-manifest",
+			category: categoryForValidationMessage("runtime-scene-manifest", message),
+			message,
+		});
+	}
+
+	try {
+		const audioContent = parseAudioContentManifest(
+			audioContentManifestForRuntimeScene(options.manifest.id),
+			{ assetManifest: options.manifest.assets },
+		);
+		const contentGraphValidation = validateRuntimeSceneContentGraph({
+			manifest: options.manifest,
+			runtimeSceneIds,
+			audioContent,
+		});
+
+		if (!contentGraphValidation.ok) {
+			for (const message of contentGraphValidation.errors) {
+				addValidationReportItem(items, seenIds, {
+					severity: "error",
+					source: "content-graph",
+					category: categoryForValidationMessage("content-graph", message),
+					message,
+				});
+			}
+		}
+	} catch (error) {
+		addValidationReportItem(items, seenIds, {
+			severity: "error",
+			source: "content-graph",
+			category: "audio-content",
+			message: error instanceof Error ? error.message : String(error),
+		});
+	}
+
+	for (const message of options.authoring?.errors ?? []) {
+		addValidationReportItem(items, seenIds, {
+			severity: "error",
+			source: "authoring-provenance",
+			category: categoryForValidationMessage("authoring-provenance", message),
+			message,
+		});
+	}
+
+	for (const message of workspaceValidationWarnings(options.objects ?? [])) {
+		addValidationReportItem(items, seenIds, {
+			severity: "warning",
+			source: "workspace-model",
+			category: categoryForValidationMessage("workspace-model", message),
+			message,
+		});
+	}
+
+	const errorCount = items.filter((item) => item.severity === "error").length;
+	const warningCount = items.filter(
+		(item) => item.severity === "warning",
+	).length;
+
+	return {
+		schemaVersion: 1,
+		runtimeSceneId: options.manifest.id,
+		generatedFrom: [
+			"validateRuntimeSceneManifest",
+			"validateRuntimeSceneContentGraph",
+			"validateLevelEditorAuthoringDocument",
+			"levelEditorWorkspaceModel",
+		],
+		items,
+		errorCount,
+		warningCount,
+		blocksPublish: errorCount > 0,
+	};
+}
+
+function summarizeValidationReport(
+	report: LevelEditorValidationReport,
 ): LevelEditorWorkspaceModel["validation"] {
-	const stableIds = new Set(objects.map((object) => object.stableId));
-	const errors: string[] = [];
+	return {
+		errors: report.items
+			.filter((item) => item.severity === "error")
+			.map((item) => item.message),
+		warnings: report.items
+			.filter((item) => item.severity === "warning")
+			.map((item) => item.message),
+	};
+}
+
+function addValidationReportItem(
+	items: LevelEditorValidationReportItem[],
+	seenIds: Set<string>,
+	item: Omit<LevelEditorValidationReportItem, "id" | "blocksPublish">,
+): void {
+	const baseId = [
+		item.source,
+		item.category,
+		slugifyValidationId(item.message),
+	].join(":");
+	let id = baseId;
+	let suffix = 2;
+
+	while (seenIds.has(id)) {
+		id = `${baseId}:${suffix}`;
+		suffix += 1;
+	}
+
+	seenIds.add(id);
+	items.push({
+		id,
+		...item,
+		blocksPublish: item.severity === "error",
+	});
+}
+
+function categoryForValidationMessage(
+	source: LevelEditorValidationReportItem["source"],
+	message: string,
+): LevelEditorValidationReportCategory {
+	const normalized = message.toLowerCase();
+
+	if (normalized.includes("owner") || normalized.includes("provenance")) {
+		return "owner-provenance";
+	}
+
+	if (normalized.includes("duplicate stable id")) {
+		return "stable-id";
+	}
+
+	if (normalized.includes("readiness")) {
+		return "readiness";
+	}
+
+	if (
+		normalized.includes("terrain package") ||
+		normalized.includes("terrain")
+	) {
+		return "terrain";
+	}
+
+	if (normalized.includes("lighting.budget")) {
+		return "render-budget";
+	}
+
+	if (
+		normalized.includes("unknown asset") ||
+		normalized.includes("unknown prefab") ||
+		normalized.includes("targetruntimesceneid") ||
+		normalized.includes("not in the runtime scene catalog") ||
+		normalized.includes("dangling")
+	) {
+		return "reference-integrity";
+	}
+
+	if (
+		normalized.includes("audio") ||
+		normalized.includes("sound") ||
+		normalized.includes("music")
+	) {
+		return "audio-content";
+	}
+
+	if (
+		normalized.includes("unsupported") ||
+		normalized.includes("read-only") ||
+		normalized.includes("bake-only")
+	) {
+		return "unsupported-field";
+	}
+
+	return source === "runtime-scene-manifest"
+		? "runtime-scene-schema"
+		: "content-graph";
+}
+
+function workspaceValidationWarnings(
+	objects: readonly LevelEditorWorkspaceObject[],
+): readonly string[] {
 	const warnings: string[] = [];
+	const terrainCount = objects.filter(
+		(object) => object.category === "terrain",
+	).length;
+	const bakeOnlyCount = objects.filter((object) =>
+		object.capabilities.includes("bake-only"),
+	).length;
+	const readOnlyCount = objects.filter(
+		(object) =>
+			object.capabilities.includes("read-only") &&
+			!object.capabilities.includes("editable"),
+	).length;
 
-	if (!stableIds.has(manifest.readiness.playerStableId)) {
-		errors.push(
-			`readiness.playerStableId "${manifest.readiness.playerStableId}" is not present in level instances.`,
-		);
-	}
-
-	for (const stableId of manifest.readiness.requiredCollisionStableIds ?? []) {
-		if (!stableIds.has(stableId)) {
-			errors.push(
-				`readiness.requiredCollisionStableIds references missing "${stableId}".`,
-			);
-		}
-	}
-
-	for (const stableId of manifest.readiness.requiredLightStableIds ?? []) {
-		if (!stableIds.has(stableId)) {
-			errors.push(
-				`readiness.requiredLightStableIds references missing "${stableId}".`,
-			);
-		}
-	}
-
-	if (objects.filter((object) => object.category === "terrain").length > 0) {
+	if (terrainCount > 0) {
 		warnings.push(
-			"Terrain package editing is bake-only in this preview packet.",
+			`${terrainCount} terrain workspace objects are bake-only and must publish through their cook/drift contract.`,
+		);
+	} else if (bakeOnlyCount > 0) {
+		warnings.push(
+			`${bakeOnlyCount} workspace objects are bake-only and must publish through their owner contract.`,
 		);
 	}
 
-	return { errors, warnings };
+	if (readOnlyCount > 0) {
+		warnings.push(
+			`${readOnlyCount} workspace objects expose read-only fields; unsupported staged fields are refused before publish.`,
+		);
+	}
+
+	return warnings;
+}
+
+function slugifyValidationId(message: string): string {
+	const slug = message
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "")
+		.slice(0, 96);
+
+	return slug.length === 0 ? "item" : slug;
 }
 
 function objectCategory(options: {
@@ -736,7 +981,8 @@ function inspectorFieldsForObject(
 		category === "spawn" ||
 		category === "lights" ||
 		category === "portals" ||
-		category === "audio"
+		category === "audio" ||
+		category === "collision"
 	) {
 		addVectorFields(
 			fields,
@@ -1109,14 +1355,25 @@ function workspaceCommands(options: {
 	return [
 		{
 			id: "save",
-			label: "Save",
+			label: "Save Draft",
 			enabled: saveReady,
 			requiresDirty: true,
 			blocksDirty: false,
 			operation: "authoring-transaction",
 			reason: saveReady
-				? `staged edits create a LevelEditorAuthoringTransaction for ${options.authoring.saveTarget?.targetFile}`
-				: `authoring save is blocked: ${firstError(options.authoring.errors)}`,
+				? `writes a generated authoring draft transaction to ${options.authoring.saveTarget?.targetFile}; staged edits remain dirty until a bounded level owner write succeeds`
+				: `draft save is blocked: ${firstError(options.authoring.errors)}`,
+		},
+		{
+			id: "save-level",
+			label: "Save Level",
+			enabled: saveReady,
+			requiresDirty: true,
+			blocksDirty: false,
+			operation: "owner-write",
+			reason: saveReady
+				? "writes the first supported bounded runtime owner data path for level-owned set-transform operations"
+				: `level save is blocked: ${firstError(options.authoring.errors)}`,
 		},
 		{
 			id: "discard",
@@ -1143,17 +1400,18 @@ function workspaceCommands(options: {
 		},
 		{
 			id: "publish",
-			label: "Publish",
-			enabled: publishReady,
-			requiresDirty: false,
-			blocksDirty: true,
-			operation: "publish-plan",
-			reason: publishReady
-				? `available as a local-only publish gate with ${options.commandPlans.publish.stepCount} explicit steps`
-				: `publish is blocked: ${firstError([
-						...options.validation.errors,
-						...options.commandPlans.publish.errors,
-					])}`,
+			label: "Publish Level",
+			enabled: saveReady && publishReady,
+			requiresDirty: true,
+			blocksDirty: false,
+			operation: "publish-owner-write",
+			reason:
+				saveReady && publishReady
+					? `publishes supported staged level owner writes and runs ${options.commandPlans.publish.stepCount} local validation/build gates`
+					: `publish is blocked: ${firstError([
+							...options.validation.errors,
+							...options.commandPlans.publish.errors,
+						])}`,
 		},
 	];
 }
@@ -1382,7 +1640,7 @@ function summarizeCommandPlan(
 
 function buildInitialOutputLog(options: {
 	readonly manifest: RuntimeSceneManifestData;
-	readonly validation: LevelEditorWorkspaceModel["validation"];
+	readonly validationReport: LevelEditorValidationReport;
 	readonly authoring: LevelEditorWorkspaceAuthoringState;
 	readonly commandPlans: LevelEditorWorkspaceModel["commandPlans"];
 }): readonly LevelEditorWorkspaceOutputLogEntry[] {
@@ -1400,7 +1658,7 @@ function buildInitialOutputLog(options: {
 			message:
 				options.authoring.saveTarget === null
 					? "No writable generated authoring-save target is registered for this runtime scene."
-					: `Authoring save target ${options.authoring.saveTarget.targetFile} is registered for explicit save transactions.`,
+					: `Save Draft writes generated authoring transactions to ${options.authoring.saveTarget.targetFile}; it does not mark staged edits clean as a permanent level save.`,
 		},
 		{
 			id: "commands:build-publish",
@@ -1410,25 +1668,13 @@ function buildInitialOutputLog(options: {
 					? "info"
 					: "warning",
 			source: "commands",
-			message: `Build and local publish plans expose ${options.commandPlans.build.stepCount}/${options.commandPlans.publish.stepCount} explicit steps with hidden production cook disabled.`,
+			message: `Build and local publish command surfaces expose ${options.commandPlans.build.stepCount}/${options.commandPlans.publish.stepCount} explicit steps with hidden production cook disabled; publish errors are reported through the validation report and output log.`,
 		},
-		...options.validation.errors.map((message, index) => ({
-			id: `validation:error:${index}`,
-			level: "error" as const,
-			source: "validation",
-			message,
-		})),
-		...options.validation.warnings.map((message, index) => ({
-			id: `validation:warning:${index}`,
-			level: "warning" as const,
-			source: "validation",
-			message,
-		})),
-		...options.authoring.errors.map((message, index) => ({
-			id: `authoring:error:${index}`,
-			level: "error" as const,
-			source: "authoring",
-			message,
+		...options.validationReport.items.map((item) => ({
+			id: item.id,
+			level: item.severity,
+			source: item.category,
+			message: item.message,
 		})),
 	];
 }

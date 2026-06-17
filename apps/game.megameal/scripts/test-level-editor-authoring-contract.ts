@@ -2,8 +2,10 @@ import {
 	type LevelEditorAuthoringDocument,
 	type LevelEditorAuthoringDocumentProvenance,
 	type LevelEditorAuthoringTransaction,
+	buildLevelEditorAuthoringOwnerWritePlan,
 	buildLevelEditorAuthoringWritePlan,
 	projectRuntimeSceneManifestToAuthoringDocument,
+	serializeLevelEditorAuthoringOwnerWritePlan,
 	serializeLevelEditorAuthoringWritePlan,
 	validateLevelEditorAuthoringDocument,
 	validateLevelEditorAuthoringTransaction,
@@ -130,6 +132,207 @@ expectWriteArtifact(
 	writePlan,
 	"prefab-components",
 	document.provenance.prefabs.targetFile,
+);
+
+const transformOnlyTransaction = {
+	...validTransaction,
+	id: "test-authoring-owner-write-transaction",
+	operations: [
+		{
+			id: "move-player-spawn",
+			kind: "set-transform",
+			stableId: "player",
+			persistence: "saved",
+			transform: {
+				position: [1, 2, 3],
+			},
+		},
+	],
+} satisfies LevelEditorAuthoringTransaction;
+const ownerWritePlan = buildLevelEditorAuthoringOwnerWritePlan(
+	document,
+	transformOnlyTransaction,
+	{
+		sourceSnapshot: createSourceSnapshot(portalArenaRuntimeSceneManifest),
+		currentOwnerContentHashes: {
+			[document.provenance.level.ownerId]:
+				document.provenance.level.contentHash,
+		},
+	},
+);
+const repeatedOwnerWritePlan = buildLevelEditorAuthoringOwnerWritePlan(
+	document,
+	transformOnlyTransaction,
+	{
+		sourceSnapshot: createSourceSnapshot(portalArenaRuntimeSceneManifest),
+		currentOwnerContentHashes: {
+			[document.provenance.level.ownerId]:
+				document.provenance.level.contentHash,
+		},
+	},
+);
+
+assertEqual(
+	ownerWritePlan.writeMode,
+	"bounded-owner-write-plan",
+	"Expected owner write plan to use the bounded owner-write mode.",
+);
+assertEqual(
+	ownerWritePlan.writesRuntimeData,
+	true,
+	"Expected owner write plan to describe runtime owner data writes.",
+);
+assertEqual(
+	ownerWritePlan.writesFiles,
+	false,
+	"Expected owner write plan to avoid writing files directly.",
+);
+assertEqual(
+	serializeLevelEditorAuthoringOwnerWritePlan(ownerWritePlan),
+	serializeLevelEditorAuthoringOwnerWritePlan(repeatedOwnerWritePlan),
+	"Expected owner write plan serialization to be deterministic.",
+);
+assertIncludes(
+	ownerWritePlan.report.changedStableIds,
+	"player",
+	"Expected owner write report to include the player stable ID.",
+);
+assertIncludes(
+	ownerWritePlan.report.changedFiles,
+	document.provenance.level.targetFile,
+	"Expected owner write report to include the level owner file.",
+);
+
+const ownerWriteTarget = ownerWritePlan.ownerTargets[0];
+
+if (!ownerWriteTarget) {
+	throw new Error("Expected owner write plan to include a level owner target.");
+}
+
+assertEqual(
+	ownerWriteTarget.expectedBaseHash,
+	document.provenance.level.contentHash,
+	"Expected owner write target to keep the level owner base hash.",
+);
+assertEqual(
+	ownerWritePlan.artifacts[0]?.purpose,
+	"level-instances",
+	"Expected owner write artifact to target level instances.",
+);
+
+const publishedPlayer =
+	ownerWritePlan.artifacts[0]?.payload.level.instances.find(
+		(instance) => instance.stableId === "player",
+	);
+
+if (!publishedPlayer) {
+	throw new Error(
+		"Expected owner write artifact to include the player instance.",
+	);
+}
+
+assertEqual(
+	JSON.stringify(publishedPlayer.transform?.position),
+	JSON.stringify([1, 2, 3]),
+	"Expected owner write artifact to contain the moved player transform.",
+);
+
+const nonPlayerTransformTransaction = {
+	...validTransaction,
+	id: "test-authoring-non-player-owner-write-transaction",
+	operations: [
+		{
+			id: "move-observatory-portal",
+			kind: "set-transform",
+			stableId: "portal-arena:portal:observatory",
+			persistence: "saved",
+			transform: {
+				position: [2, 0, -6],
+				scale: [1.1, 1.1, 1.1],
+			},
+		},
+	],
+} satisfies LevelEditorAuthoringTransaction;
+const nonPlayerOwnerWritePlan = buildLevelEditorAuthoringOwnerWritePlan(
+	document,
+	nonPlayerTransformTransaction,
+	{
+		sourceSnapshot: createSourceSnapshot(portalArenaRuntimeSceneManifest),
+		currentOwnerContentHashes: {
+			[document.provenance.level.ownerId]:
+				document.provenance.level.contentHash,
+		},
+	},
+);
+const publishedNonPlayer =
+	nonPlayerOwnerWritePlan.artifacts[0]?.payload.level.instances.find(
+		(instance) => instance.stableId === "portal-arena:portal:observatory",
+	);
+
+if (!publishedNonPlayer) {
+	throw new Error(
+		"Expected owner write artifact to include the non-player portal instance.",
+	);
+}
+
+assertIncludes(
+	nonPlayerOwnerWritePlan.report.changedStableIds,
+	"portal-arena:portal:observatory",
+	"Expected owner write report to include the non-player stable ID.",
+);
+assertEqual(
+	JSON.stringify(publishedNonPlayer.transform?.position),
+	JSON.stringify([2, 0, -6]),
+	"Expected owner write artifact to contain the moved non-player transform.",
+);
+assertEqual(
+	JSON.stringify(publishedNonPlayer.transform?.scale),
+	JSON.stringify([1.1, 1.1, 1.1]),
+	"Expected owner write artifact to contain the non-player scale transform.",
+);
+
+expectOwnerWriteFailure(
+	document,
+	transformOnlyTransaction,
+	{
+		sourceSnapshot: createSourceSnapshot(portalArenaRuntimeSceneManifest),
+		currentOwnerContentHashes: {
+			[document.provenance.level.ownerId]: "fnv1a32:ffffffff",
+		},
+	},
+	"base hash mismatch",
+);
+
+expectOwnerWriteFailure(
+	document,
+	validTransaction,
+	{
+		sourceSnapshot: createSourceSnapshot(portalArenaRuntimeSceneManifest),
+	},
+	"Initial owner writes support set-transform only",
+);
+
+expectOwnerWriteFailure(
+	document,
+	{
+		...transformOnlyTransaction,
+		id: "unknown-stable-id-owner-write",
+		operations: [
+			{
+				id: "move-missing-instance",
+				kind: "set-transform",
+				stableId: "missing-stable-id",
+				persistence: "saved",
+				transform: {
+					position: [1, 2, 3],
+				},
+			},
+		],
+	},
+	{
+		sourceSnapshot: createSourceSnapshot(portalArenaRuntimeSceneManifest),
+	},
+	"is not present in the authoringDoc",
 );
 
 expectInvalidDocument(
@@ -310,6 +513,17 @@ function createProvenance(
 	};
 }
 
+function createSourceSnapshot(manifest: RuntimeSceneManifestData) {
+	return {
+		manifest,
+		level: manifest.level,
+		prefabs: manifest.prefabs,
+		assets: manifest.assets,
+		renderProfile: manifest.renderProfile,
+		terrainPackages: manifest.terrainPackages ?? [],
+	};
+}
+
 function owner(
 	kind: LevelEditorAuthoringDocumentProvenance[keyof Omit<
 		LevelEditorAuthoringDocumentProvenance,
@@ -388,6 +602,22 @@ function expectInvalidTransaction(
 	}
 
 	assertIncludes(result.errors, expectedError, "Expected transaction error.");
+}
+
+function expectOwnerWriteFailure(
+	document: LevelEditorAuthoringDocument,
+	transaction: LevelEditorAuthoringTransaction,
+	options: Parameters<typeof buildLevelEditorAuthoringOwnerWritePlan>[2],
+	expectedError: string,
+): void {
+	try {
+		buildLevelEditorAuthoringOwnerWritePlan(document, transaction, options);
+		throw new Error("Expected owner write plan to fail.");
+	} catch (error) {
+		if (!(error instanceof Error) || !error.message.includes(expectedError)) {
+			throw error;
+		}
+	}
 }
 
 function expectWriteArtifact(

@@ -11,6 +11,7 @@ export type LevelEditorOwnerKind =
 export type LevelEditorGeneratedOwnerKind =
 	| "authoring-save"
 	| "collision-runtime"
+	| "published-transforms"
 	| "terrain-runtime";
 
 export type LevelEditorOwnerWriteStrategy =
@@ -42,6 +43,55 @@ export type LevelEditorOwnerRegistry = {
 	readonly generator: "levelEditor.ownerRegistry.v1";
 	readonly runtimeSceneIds: readonly string[];
 	readonly targets: readonly LevelEditorOwnerTarget[];
+	readonly contentHash: string;
+};
+
+export type LevelEditorFeatureFamilyPublishStatus =
+	| "bounded-owner-write"
+	| "registered-owner-draft-only"
+	| "cook-contract"
+	| "preview-only"
+	| "read-only"
+	| "unsupported-for-publish";
+
+export type LevelEditorFeatureFamilyStoragePolicy =
+	| "runtime-owner-publish"
+	| "save-draft-only-non-runtime"
+	| "cook-generated-owner"
+	| "live-preview-only"
+	| "read-only-no-save"
+	| "blocked-no-save";
+
+export type LevelEditorFeatureFamilySource =
+	| "workspace"
+	| "object-library"
+	| "npc-authoring"
+	| "environment-authoring"
+	| "ai-asset-lab"
+	| "collision-authoring"
+	| "camera-authoring"
+	| "build-publish";
+
+export type LevelEditorFeatureFamilyCoverage = {
+	readonly schemaVersion: 1;
+	readonly id: string;
+	readonly label: string;
+	readonly source: LevelEditorFeatureFamilySource;
+	readonly publishStatus: LevelEditorFeatureFamilyPublishStatus;
+	readonly storagePolicy: LevelEditorFeatureFamilyStoragePolicy;
+	readonly requiredOwnerKinds: readonly LevelEditorOwnerKind[];
+	readonly optionalGeneratedOwnerKinds: readonly LevelEditorGeneratedOwnerKind[];
+	readonly operationKinds: readonly string[];
+	readonly fieldPaths: readonly string[];
+	readonly ownerTargetIds: readonly string[];
+	readonly unsupportedReason?: string;
+};
+
+export type LevelEditorFeatureCoverageRegistry = {
+	readonly schemaVersion: 1;
+	readonly generator: "levelEditor.featureCoverage.v1";
+	readonly runtimeSceneIds: readonly string[];
+	readonly families: readonly LevelEditorFeatureFamilyCoverage[];
 	readonly contentHash: string;
 };
 
@@ -77,6 +127,236 @@ type RuntimeSceneOwnerModules = {
 	}[];
 };
 
+type LevelEditorFeatureFamilyDefinition = Omit<
+	LevelEditorFeatureFamilyCoverage,
+	"schemaVersion" | "ownerTargetIds"
+>;
+
+const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
+	[
+		{
+			id: "runtime-scene-selection",
+			label: "Runtime Scene Selection And Manifest Inspection",
+			source: "workspace",
+			publishStatus: "read-only",
+			storagePolicy: "read-only-no-save",
+			requiredOwnerKinds: [],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: [],
+			fieldPaths: ["runtimeSceneManifest", "levelBrowser"],
+			unsupportedReason:
+				"scene registration and manifest-reference editing are inspect-only until a manifest owner writer exists",
+		},
+		{
+			id: "level-instance-transform",
+			label: "Level Instance Transform",
+			source: "workspace",
+			publishStatus: "bounded-owner-write",
+			storagePolicy: "runtime-owner-publish",
+			requiredOwnerKinds: ["level"],
+			optionalGeneratedOwnerKinds: ["published-transforms"],
+			operationKinds: ["set-transform"],
+			fieldPaths: [
+				"Transform.position",
+				"Transform.rotation",
+				"Transform.scale",
+			],
+		},
+		{
+			id: "level-instance-structure",
+			label: "Level Instance Structure",
+			source: "workspace",
+			publishStatus: "registered-owner-draft-only",
+			storagePolicy: "save-draft-only-non-runtime",
+			requiredOwnerKinds: ["level", "prefab"],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: [
+				"insert-instance",
+				"remove-instance",
+				"replace-prefab",
+				"stable-id-management",
+				"grouping",
+			],
+			fieldPaths: ["level.instances", "level.instances.*.prefabId"],
+		},
+		{
+			id: "component-editing",
+			label: "Schema-Backed Component Editing",
+			source: "workspace",
+			publishStatus: "registered-owner-draft-only",
+			storagePolicy: "save-draft-only-non-runtime",
+			requiredOwnerKinds: ["level", "prefab"],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: ["set-component", "remove-component"],
+			fieldPaths: ["components.*"],
+		},
+		{
+			id: "object-library-placement",
+			label: "Object Library Prefab Placement",
+			source: "object-library",
+			publishStatus: "registered-owner-draft-only",
+			storagePolicy: "save-draft-only-non-runtime",
+			requiredOwnerKinds: ["level", "prefab"],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: ["insert-level-instance"],
+			fieldPaths: ["level.instances.*", "prefabs.*"],
+		},
+		{
+			id: "object-library-replacement",
+			label: "Object Library Replacement",
+			source: "object-library",
+			publishStatus: "registered-owner-draft-only",
+			storagePolicy: "save-draft-only-non-runtime",
+			requiredOwnerKinds: ["level", "prefab", "asset"],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: [
+				"replace-level-instance",
+				"replace-component-asset-reference",
+			],
+			fieldPaths: [
+				"level.instances.*.prefabId",
+				"Renderable.meshId",
+				"Renderable.materialId",
+				"SoundEmitter.soundId",
+			],
+		},
+		{
+			id: "portal-interaction-targets",
+			label: "Portal Targets And Interaction Triggers",
+			source: "workspace",
+			publishStatus: "registered-owner-draft-only",
+			storagePolicy: "save-draft-only-non-runtime",
+			requiredOwnerKinds: ["level"],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: ["set-portal-target", "set-component"],
+			fieldPaths: [
+				"Portal.targetRuntimeSceneId",
+				"Portal.activationRadius",
+				"Portal.prompt",
+			],
+		},
+		{
+			id: "story-notes-and-gameplay-markers",
+			label: "Story Notes And Gameplay Markers",
+			source: "workspace",
+			publishStatus: "read-only",
+			storagePolicy: "read-only-no-save",
+			requiredOwnerKinds: [],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: [],
+			fieldPaths: ["StoryNote", "gameplayMarkers", "questHooks"],
+			unsupportedReason:
+				"current story/gameplay marker surfaces are inspect-only until typed owner writers exist",
+		},
+		{
+			id: "environment-render-profile",
+			label: "Environment And Render Profile",
+			source: "environment-authoring",
+			publishStatus: "registered-owner-draft-only",
+			storagePolicy: "save-draft-only-non-runtime",
+			requiredOwnerKinds: ["render-profile", "asset"],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: ["set-render-profile-environment"],
+			fieldPaths: ["renderProfile.environment.*"],
+		},
+		{
+			id: "authored-lighting",
+			label: "Authored Lighting",
+			source: "environment-authoring",
+			publishStatus: "registered-owner-draft-only",
+			storagePolicy: "save-draft-only-non-runtime",
+			requiredOwnerKinds: ["level", "prefab", "render-profile"],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: ["set-authored-light-field", "set-component"],
+			fieldPaths: ["Light.*", "renderProfile.lighting.*"],
+		},
+		{
+			id: "audio-authoring",
+			label: "Audio Emitters And Scene Music",
+			source: "environment-authoring",
+			publishStatus: "registered-owner-draft-only",
+			storagePolicy: "save-draft-only-non-runtime",
+			requiredOwnerKinds: ["level", "asset"],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: ["set-audio-track-id", "set-component"],
+			fieldPaths: ["SoundEmitter.*", "audioContentManifest.sceneMusic"],
+		},
+		{
+			id: "terrain-packages",
+			label: "Terrain Packages",
+			source: "workspace",
+			publishStatus: "cook-contract",
+			storagePolicy: "cook-generated-owner",
+			requiredOwnerKinds: ["generated-module"],
+			optionalGeneratedOwnerKinds: ["terrain-runtime"],
+			operationKinds: ["cook-terrain"],
+			fieldPaths: ["terrainPackages.*", "TerrainChunkCell", "TerrainSurface"],
+		},
+		{
+			id: "collision-authoring",
+			label: "Collision Authoring",
+			source: "collision-authoring",
+			publishStatus: "cook-contract",
+			storagePolicy: "cook-generated-owner",
+			requiredOwnerKinds: ["level", "prefab"],
+			optionalGeneratedOwnerKinds: ["collision-runtime"],
+			operationKinds: ["stage-collision-preview-entry", "cook-collision"],
+			fieldPaths: ["Collider.*", "RigidBody.*"],
+		},
+		{
+			id: "npc-firefly-authoring",
+			label: "NPC And Firefly Authoring",
+			source: "npc-authoring",
+			publishStatus: "registered-owner-draft-only",
+			storagePolicy: "save-draft-only-non-runtime",
+			requiredOwnerKinds: ["level", "prefab"],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: ["insert-firefly-npc", "remove-npc", "duplicate-npc"],
+			fieldPaths: ["FireflyPopulationMember.*", "Light.*"],
+		},
+		{
+			id: "ai-generated-assets",
+			label: "AI Generated Assets",
+			source: "ai-asset-lab",
+			publishStatus: "registered-owner-draft-only",
+			storagePolicy: "save-draft-only-non-runtime",
+			requiredOwnerKinds: ["level", "asset"],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: [
+				"insert-generated-asset",
+				"replace-selection-renderable",
+				"assign-generated-material",
+			],
+			fieldPaths: ["assetManifest.generated.*", "Renderable.*"],
+		},
+		{
+			id: "camera-live-preview",
+			label: "Camera Live Preview",
+			source: "camera-authoring",
+			publishStatus: "preview-only",
+			storagePolicy: "live-preview-only",
+			requiredOwnerKinds: [],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: ["camera-live-edit-mode"],
+			fieldPaths: ["camera.previewPose"],
+			unsupportedReason:
+				"camera live/edit mode is a dev-preview command and has no runtime owner file",
+		},
+		{
+			id: "build-publish-plan",
+			label: "Build And Publish Plan",
+			source: "build-publish",
+			publishStatus: "read-only",
+			storagePolicy: "read-only-no-save",
+			requiredOwnerKinds: [],
+			optionalGeneratedOwnerKinds: [],
+			operationKinds: ["build-plan", "publish-plan"],
+			fieldPaths: ["editor.buildPublish.steps"],
+			unsupportedReason:
+				"the current publish panel displays local gates and does not mutate checked-in owner data",
+		},
+	];
+
 const runtimeSceneOwnerModules: Record<string, RuntimeSceneOwnerModules> = {
 	portal_arena_runtime: {
 		level: ownerModule(
@@ -99,7 +379,7 @@ const runtimeSceneOwnerModules: Record<string, RuntimeSceneOwnerModules> = {
 			"portalArenaRenderProfile",
 			"src/game/levels/renderProfiles.ts",
 		),
-		generatedModules: [terrainRuntimeModule()],
+		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
 	},
 	prototype_arena_runtime: {
 		level: ownerModule(
@@ -122,7 +402,7 @@ const runtimeSceneOwnerModules: Record<string, RuntimeSceneOwnerModules> = {
 			"prototypeRenderProfile",
 			"src/game/levels/renderProfiles.ts",
 		),
-		generatedModules: [terrainRuntimeModule()],
+		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
 	},
 	miranda_deck_runtime: {
 		level: ownerModule(
@@ -145,7 +425,7 @@ const runtimeSceneOwnerModules: Record<string, RuntimeSceneOwnerModules> = {
 			"mirandaDeckRenderProfile",
 			"src/game/levels/renderProfiles.ts",
 		),
-		generatedModules: [terrainRuntimeModule()],
+		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
 	},
 	observatory_runtime: {
 		level: ownerModule(
@@ -170,6 +450,7 @@ const runtimeSceneOwnerModules: Record<string, RuntimeSceneOwnerModules> = {
 		),
 		generatedModules: [
 			terrainRuntimeModule(),
+			publishedTransformsModule(),
 			{
 				ownerName: "Observatory generated collision runtime",
 				ownerExport: "observatoryCollisionRuntime",
@@ -199,7 +480,7 @@ const runtimeSceneOwnerModules: Record<string, RuntimeSceneOwnerModules> = {
 			"sciFiRoomRenderProfile",
 			"src/game/levels/renderProfiles.ts",
 		),
-		generatedModules: [terrainRuntimeModule()],
+		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
 	},
 	solitude_runtime: {
 		level: ownerModule(
@@ -222,7 +503,7 @@ const runtimeSceneOwnerModules: Record<string, RuntimeSceneOwnerModules> = {
 			"solitudeRenderProfile",
 			"src/game/levels/renderProfiles.ts",
 		),
-		generatedModules: [terrainRuntimeModule()],
+		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
 	},
 	yggdrasil_runtime: {
 		level: ownerModule(
@@ -245,7 +526,7 @@ const runtimeSceneOwnerModules: Record<string, RuntimeSceneOwnerModules> = {
 			"yggdrasilRenderProfile",
 			"src/game/levels/renderProfiles.ts",
 		),
-		generatedModules: [terrainRuntimeModule()],
+		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
 	},
 };
 
@@ -352,6 +633,129 @@ export function getLevelEditorOwnerTarget(
 	return listLevelEditorOwnerTargets().find((target) => target.id === targetId);
 }
 
+function featureFamilyCoverage(
+	definition: LevelEditorFeatureFamilyDefinition,
+	ownerRegistry: LevelEditorOwnerRegistry,
+): LevelEditorFeatureFamilyCoverage {
+	return cloneValue({
+		schemaVersion: 1,
+		...definition,
+		ownerTargetIds: ownerTargetsForFeatureFamily(definition, ownerRegistry),
+	});
+}
+
+export function buildLevelEditorFeatureCoverageRegistry(
+	ownerRegistry: LevelEditorOwnerRegistry = buildLevelEditorOwnerRegistry(),
+): LevelEditorFeatureCoverageRegistry {
+	const families = featureFamilyDefinitions.map((definition) =>
+		featureFamilyCoverage(definition, ownerRegistry),
+	);
+	const registryBase = {
+		schemaVersion: 1,
+		generator: "levelEditor.featureCoverage.v1",
+		runtimeSceneIds: ownerRegistry.runtimeSceneIds,
+		families,
+	} satisfies Omit<LevelEditorFeatureCoverageRegistry, "contentHash">;
+
+	return {
+		...registryBase,
+		contentHash: hashStableValue(registryBase),
+	};
+}
+
+export function validateLevelEditorFeatureCoverageRegistry(
+	registry: LevelEditorFeatureCoverageRegistry,
+	ownerRegistry: LevelEditorOwnerRegistry = buildLevelEditorOwnerRegistry(),
+): readonly string[] {
+	const errors: string[] = [];
+	const familyIds = new Set<string>();
+	const ownerTargetIds = new Set(
+		ownerRegistry.targets.map((target) => target.id),
+	);
+
+	if (registry.schemaVersion !== 1) {
+		errors.push("featureCoverage.schemaVersion must be 1.");
+	}
+
+	if (registry.generator !== "levelEditor.featureCoverage.v1") {
+		errors.push(
+			"featureCoverage.generator must be levelEditor.featureCoverage.v1.",
+		);
+	}
+
+	for (const runtimeSceneId of ownerRegistry.runtimeSceneIds) {
+		if (!registry.runtimeSceneIds.includes(runtimeSceneId)) {
+			errors.push(
+				`featureCoverage is missing runtime scene "${runtimeSceneId}" from the owner registry.`,
+			);
+		}
+	}
+
+	for (const family of registry.families) {
+		if (familyIds.has(family.id)) {
+			errors.push(`feature family "${family.id}" is duplicated.`);
+		}
+		familyIds.add(family.id);
+
+		for (const ownerTargetId of family.ownerTargetIds) {
+			if (!ownerTargetIds.has(ownerTargetId)) {
+				errors.push(
+					`feature family "${family.id}" references unknown owner target "${ownerTargetId}".`,
+				);
+			}
+		}
+
+		if (
+			family.storagePolicy === "save-draft-only-non-runtime" ||
+			family.storagePolicy === "runtime-owner-publish" ||
+			family.storagePolicy === "cook-generated-owner"
+		) {
+			if (family.ownerTargetIds.length === 0) {
+				errors.push(
+					`feature family "${family.id}" requires owner targets for storage policy "${family.storagePolicy}".`,
+				);
+			}
+		}
+
+		if (
+			family.publishStatus === "read-only" ||
+			family.publishStatus === "preview-only" ||
+			family.publishStatus === "unsupported-for-publish"
+		) {
+			if (family.storagePolicy === "save-draft-only-non-runtime") {
+				errors.push(
+					`feature family "${family.id}" cannot save editor drafts while publish status is "${family.publishStatus}".`,
+				);
+			}
+			if (!family.unsupportedReason) {
+				errors.push(
+					`feature family "${family.id}" must explain why it is not publishable.`,
+				);
+			}
+		}
+
+		if (
+			family.publishStatus === "bounded-owner-write" &&
+			family.storagePolicy !== "runtime-owner-publish"
+		) {
+			errors.push(
+				`feature family "${family.id}" has bounded owner writes but storage policy "${family.storagePolicy}".`,
+			);
+		}
+
+		if (
+			family.publishStatus === "registered-owner-draft-only" &&
+			family.storagePolicy !== "save-draft-only-non-runtime"
+		) {
+			errors.push(
+				`feature family "${family.id}" must be explicit save-draft-only storage until a publish writer exists.`,
+			);
+		}
+	}
+
+	return errors;
+}
+
 function ownerModule(
 	ownerName: string,
 	ownerExport: string,
@@ -372,6 +776,17 @@ function terrainRuntimeModule(): NonNullable<
 		ownerExport: "terrainRuntimeModule",
 		targetFile: "src/game/generated/terrainRuntime.ts",
 		generatedOwnerKind: "terrain-runtime",
+	};
+}
+
+function publishedTransformsModule(): NonNullable<
+	RuntimeSceneOwnerModules["generatedModules"]
+>[number] {
+	return {
+		ownerName: "Generated published level transform overrides",
+		ownerExport: "publishedLevelInstanceTransformOverrides",
+		targetFile: "src/game/generated/publishedLevelTransforms.ts",
+		generatedOwnerKind: "published-transforms",
 	};
 }
 
@@ -423,4 +838,38 @@ function ownerTarget(options: {
 			: {}),
 		runtimeCatalogEvidence: options.evidence,
 	});
+}
+
+function ownerTargetsForFeatureFamily(
+	definition: LevelEditorFeatureFamilyDefinition,
+	ownerRegistry: LevelEditorOwnerRegistry,
+): readonly string[] {
+	const requiredOwnerKinds = new Set(definition.requiredOwnerKinds);
+	const optionalGeneratedOwnerKinds = new Set(
+		definition.optionalGeneratedOwnerKinds,
+	);
+
+	return ownerRegistry.targets
+		.filter((target) => {
+			if (requiredOwnerKinds.has(target.ownerKind)) {
+				if (
+					target.ownerKind === "generated-module" &&
+					optionalGeneratedOwnerKinds.size > 0
+				) {
+					return (
+						target.generatedOwnerKind !== undefined &&
+						optionalGeneratedOwnerKinds.has(target.generatedOwnerKind)
+					);
+				}
+
+				return true;
+			}
+
+			return (
+				target.generatedOwnerKind !== undefined &&
+				optionalGeneratedOwnerKinds.has(target.generatedOwnerKind)
+			);
+		})
+		.map((target) => target.id)
+		.sort();
 }

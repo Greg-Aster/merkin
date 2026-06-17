@@ -214,6 +214,75 @@ export type LevelEditorAuthoringWritePlan = {
 	readonly contentHash: string;
 };
 
+export type LevelEditorAuthoringOwnerWriteTarget = {
+	readonly schemaVersion: 1;
+	readonly ownerId: string;
+	readonly kind: "level";
+	readonly targetFile: string;
+	readonly exportName: string;
+	readonly expectedBaseHash: string;
+	readonly currentBaseHash: string;
+};
+
+export type LevelEditorAuthoringLevelTransformWrite = {
+	readonly id: string;
+	readonly kind: "set-level-instance-transform";
+	readonly ownerId: string;
+	readonly stableId: string;
+	readonly instanceId: string;
+	readonly beforeTransform?: LevelPrefabInstanceData["transform"];
+	readonly afterTransform: LevelPrefabInstanceData["transform"];
+	readonly contentHash: string;
+};
+
+export type LevelEditorAuthoringOwnerWriteArtifactPayload = {
+	readonly schemaVersion: 1;
+	readonly transactionId: string;
+	readonly runtimeSceneId: string;
+	readonly levelId: string;
+	readonly ownerTarget: LevelEditorAuthoringOwnerWriteTarget;
+	readonly level: LevelData;
+	readonly writes: readonly LevelEditorAuthoringLevelTransformWrite[];
+};
+
+export type LevelEditorAuthoringOwnerWriteArtifact = {
+	readonly id: string;
+	readonly targetFile: string;
+	readonly exportName: string;
+	readonly ownerId: string;
+	readonly purpose: "level-instances";
+	readonly format: "json";
+	readonly payload: LevelEditorAuthoringOwnerWriteArtifactPayload;
+	readonly serializedPayload: string;
+	readonly contentHash: string;
+};
+
+export type LevelEditorAuthoringOwnerWritePlan = {
+	readonly schemaVersion: 1;
+	readonly generator: "levelAuthoring.ownerWritePlan.v1";
+	readonly contract: typeof LEVEL_EDITOR_AUTHORING_CONTRACT;
+	readonly writeMode: "bounded-owner-write-plan";
+	readonly writesRuntimeData: true;
+	readonly writesFiles: false;
+	readonly supportedOperationKinds: readonly ["set-transform"];
+	readonly transactionId: string;
+	readonly runtimeSceneId: string;
+	readonly levelId: string;
+	readonly baseDocumentHash: string;
+	readonly provenance: {
+		readonly sourceDocumentHash: string;
+		readonly sourceTransactionHash: string;
+		readonly hashAlgorithm: "fnv1a32";
+	};
+	readonly ownerTargets: readonly LevelEditorAuthoringOwnerWriteTarget[];
+	readonly artifacts: readonly LevelEditorAuthoringOwnerWriteArtifact[];
+	readonly report: {
+		readonly changedFiles: readonly string[];
+		readonly changedStableIds: readonly string[];
+	};
+	readonly contentHash: string;
+};
+
 export type LevelEditorAuthoringSourceSnapshot = {
 	readonly manifest: RuntimeSceneManifestData;
 	readonly level: LevelData;

@@ -9,7 +9,10 @@ import {
 	queuedLevelEditorAuthoringSaveOperations,
 } from "./levelEditorAuthoringStore.js";
 import type { LevelEditorWorkspaceModel } from "./levelEditorWorkspaceModel.js";
-import type { LevelEditorStagedFieldEdit } from "./levelEditorWorkspaceUi.js";
+import {
+	type LevelEditorStagedFieldEdit,
+	buildWorkspaceAuthoringTransaction,
+} from "./levelEditorWorkspaceUi.js";
 
 const LEVEL_EDITOR_MISSING_FILE_HASH = "missing";
 
@@ -34,18 +37,29 @@ export type LevelEditorAuthoringCommandResult = {
 		readonly currentHash: string;
 		readonly contentHash: string;
 		readonly wroteFile: boolean;
+		readonly changedStableIds?: readonly string[];
+	}[];
+	readonly validationGates?: readonly {
+		readonly scriptName: string;
+		readonly ok: boolean;
+		readonly output: string;
 	}[];
 	readonly errors?: readonly string[];
 };
 
 export async function fetchLevelEditorAuthoringStatus(
 	runtimeSceneId: string,
+	target:
+		| "authoring-save"
+		| "level"
+		| "published-transforms" = "authoring-save",
 ): Promise<LevelEditorAuthoringStatus> {
 	const url = new URL(
 		"/api/editor/authoring/status.json",
 		globalThis.location.href,
 	);
 	url.searchParams.set("runtimeSceneId", runtimeSceneId);
+	url.searchParams.set("target", target);
 	const response = await fetch(url);
 	const payload = (await response.json()) as
 		| LevelEditorAuthoringStatus
@@ -68,6 +82,7 @@ export async function runLevelEditorAuthoringCommand(options: {
 	readonly edits: readonly LevelEditorStagedFieldEdit[];
 	readonly queuedOperations?: readonly LevelEditorQueuedAuthoringOperation[];
 	readonly baseHash?: string;
+	readonly target?: "draft" | "level" | "publish";
 }): Promise<LevelEditorAuthoringCommandResult> {
 	const transaction = buildAuthoringSaveTransaction({
 		workspace: options.workspace,
@@ -75,20 +90,38 @@ export async function runLevelEditorAuthoringCommand(options: {
 		queuedOperations: options.queuedOperations ?? [],
 		baseHash: options.baseHash ?? LEVEL_EDITOR_MISSING_FILE_HASH,
 	});
-	const response = await fetch("/api/editor/authoring/save.json", {
-		method: "POST",
-		headers: {
-			"content-type": "application/json",
-		},
-		body: JSON.stringify(
-			{
-				mode: options.mode,
-				transaction,
+	const target = options.target ?? "draft";
+	const response = await fetch(
+		target === "publish"
+			? "/api/editor/authoring/publish-local.json"
+			: target === "level"
+				? "/api/editor/authoring/save-level.json"
+				: "/api/editor/authoring/save.json",
+		{
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
 			},
-			null,
-			2,
-		),
-	});
+			body: JSON.stringify(
+				{
+					mode:
+						target === "level" && options.mode === "save"
+							? "save-level"
+							: target === "publish" && options.mode === "save"
+								? "publish-local"
+								: options.mode,
+					transaction,
+					...(target === "level" || target === "publish"
+						? {
+								baseHash: options.baseHash ?? LEVEL_EDITOR_MISSING_FILE_HASH,
+							}
+						: {}),
+				},
+				null,
+				2,
+			),
+		},
+	);
 	const payload = (await response.json()) as LevelEditorAuthoringCommandResult;
 
 	if (!response.ok) {
@@ -111,8 +144,15 @@ export function buildAuthoringSaveTransaction(options: {
 	readonly queuedOperations?: readonly LevelEditorQueuedAuthoringOperation[];
 	readonly baseHash?: string;
 }): LevelEditorAuthoringSaveTransactionData {
+	const transactionId = createTransactionId(
+		options.workspace.selectedRuntimeSceneId,
+	);
 	const operations = [
-		...buildAuthoringOperations(options.workspace, options.edits),
+		...stagedFieldEditSaveOperations({
+			workspace: options.workspace,
+			edits: options.edits,
+			transactionId,
+		}),
 		...queuedAuthoringSaveOperations(
 			options.workspace,
 			options.queuedOperations ?? [],
@@ -127,9 +167,7 @@ export function buildAuthoringSaveTransaction(options: {
 
 	return {
 		schemaVersion: 1,
-		transactionId: createTransactionId(
-			options.workspace.selectedRuntimeSceneId,
-		),
+		transactionId,
 		runtimeSceneId: options.workspace.selectedRuntimeSceneId,
 		authoringValidation: {
 			status: "valid",
@@ -142,6 +180,25 @@ export function buildAuthoringSaveTransaction(options: {
 		},
 		targets: [target],
 	};
+}
+
+function stagedFieldEditSaveOperations(options: {
+	readonly workspace: LevelEditorWorkspaceModel;
+	readonly edits: readonly LevelEditorStagedFieldEdit[];
+	readonly transactionId: string;
+}): readonly LevelEditorAuthoringOperationData[] {
+	if (options.edits.length === 0) {
+		return [];
+	}
+
+	return buildWorkspaceAuthoringTransaction({
+		workspace: options.workspace,
+		edits: options.edits,
+		transactionId: options.transactionId,
+		createdAt: new Date().toISOString(),
+	}).operations.map((operation) =>
+		saveOperationForAuthoringOperation(options.workspace, operation),
+	);
 }
 
 function queuedAuthoringSaveOperations(
@@ -218,43 +275,6 @@ function saveOperationForAuthoringOperation(
 			};
 		}
 	}
-}
-
-function buildAuthoringOperations(
-	workspace: LevelEditorWorkspaceModel,
-	edits: readonly LevelEditorStagedFieldEdit[],
-): readonly LevelEditorAuthoringOperationData[] {
-	const editsByStableId = new Map<string, LevelEditorStagedFieldEdit[]>();
-
-	for (const edit of edits) {
-		const item = editsByStableId.get(edit.stableId) ?? [];
-		item.push(edit);
-		editsByStableId.set(edit.stableId, item);
-	}
-
-	return [...editsByStableId.entries()].map(([stableId, stableEdits]) => {
-		const object = workspace.objects.find(
-			(candidate) => candidate.stableId === stableId,
-		);
-		const payload = {
-			stableId,
-			prefabId: object?.prefabId ?? null,
-			category: object?.category ?? null,
-			fieldEdits: stableEdits.map((edit) => ({
-				path: edit.path,
-				before: edit.before,
-				after: edit.after,
-			})),
-		};
-
-		return {
-			kind: "replace-level-instance",
-			ownerKind: "level",
-			ownerTargetId: `${workspace.selectedRuntimeSceneId}:level`,
-			subjectId: stableId,
-			payload,
-		} satisfies LevelEditorAuthoringOperationData;
-	});
 }
 
 function createTransactionId(runtimeSceneId: string): string {

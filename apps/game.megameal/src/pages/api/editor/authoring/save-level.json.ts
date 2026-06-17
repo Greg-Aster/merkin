@@ -1,10 +1,9 @@
 import type { APIRoute } from "astro";
-import { handleLevelEditorAuthoringPersistenceRequest } from "./_shared.js";
+import { handleLevelEditorLevelOwnerWriteRequest } from "./_shared.js";
 
 export const prerender = process.env.NODE_ENV === "production";
 
 export const POST: APIRoute = ({ request }) =>
-	handleLevelEditorAuthoringPersistenceRequest({
+	handleLevelEditorLevelOwnerWriteRequest({
 		request,
-		mode: "save",
 	});

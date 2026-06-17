@@ -1,6 +1,13 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import {
+	mkdir,
+	mkdtemp,
+	readFile,
+	readdir,
+	rm,
+	writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { buildLevelEditorAiApplyPlanQueueEntry } from "../src/app/editor/levelEditorAiAssetLabModel.js";
 import { buildAuthoringSaveTransaction } from "../src/app/editor/levelEditorAuthoringClient.js";
 import { buildLevelEditorWorkspaceModel } from "../src/app/editor/levelEditorWorkspaceModel.js";
@@ -10,19 +17,48 @@ import {
 	type LevelEditorAuthoringOperationData,
 	type LevelEditorAuthoringSaveTargetData,
 	type LevelEditorAuthoringSaveTransactionData,
+	PUBLISHED_LEVEL_TRANSFORMS_TARGET_FILE,
 	buildLevelEditorAuthoringSaveWritePlan,
 	buildLevelEditorOwnerRegistry,
 	hashLevelEditorAuthoringFileContent,
+	mergePublishedTransformOverrides,
+	parsePublishedLevelTransformOverrides,
+	publishLevelEditorTransformTransaction,
+	rollbackLevelEditorPublishChangeset,
+	serializePublishedLevelTransformOverridesSource,
 } from "../src/game/editor/authoring/index.js";
 import { saveLevelEditorAuthoringTransaction } from "../src/game/editor/authoring/persistence.js";
 import { defaultRuntimeSceneManifests } from "../src/game/levels/index.js";
 import {
 	authoringTargetStatus,
 	handleLevelEditorAuthoringPersistenceRequest,
+	handleLevelEditorLevelOwnerWriteRequest,
+	handleLevelEditorLocalPublishRequest,
 } from "../src/pages/api/editor/authoring/_shared.js";
+import { prerender as dryRunRoutePrerender } from "../src/pages/api/editor/authoring/dry-run.json.js";
+import { prerender as publishLocalRoutePrerender } from "../src/pages/api/editor/authoring/publish-local.json.js";
+import { prerender as saveLevelRoutePrerender } from "../src/pages/api/editor/authoring/save-level.json.js";
+import { prerender as saveRoutePrerender } from "../src/pages/api/editor/authoring/save.json.js";
+import {
+	GET as getLevelEditorAuthoringStatusRoute,
+	POST as postLevelEditorAuthoringStatusRoute,
+	prerender as statusRoutePrerender,
+} from "../src/pages/api/editor/authoring/status.json.js";
 
 const registry = buildLevelEditorOwnerRegistry();
-
+for (const [routeName, prerender] of [
+	["status", statusRoutePrerender],
+	["dry-run", dryRunRoutePrerender],
+	["save", saveRoutePrerender],
+	["save-level", saveLevelRoutePrerender],
+	["publish-local", publishLocalRoutePrerender],
+] as const) {
+	assertEqual(
+		prerender,
+		false,
+		`Expected authoring ${routeName} API route to opt out of static prerendering.`,
+	);
+}
 assertEqual(
 	registry.runtimeSceneIds.length,
 	defaultRuntimeSceneManifests.length,
@@ -54,6 +90,15 @@ for (const manifest of defaultRuntimeSceneManifests) {
 				target.writableByAuthoringSave,
 		),
 		`Expected ${manifest.id} to have a writable generated authoring-save target.`,
+	);
+	assert(
+		targets.some(
+			(target) =>
+				target.generatedOwnerKind === "published-transforms" &&
+				target.targetFile === PUBLISHED_LEVEL_TRANSFORMS_TARGET_FILE &&
+				target.writableByAuthoringSave === false,
+		),
+		`Expected ${manifest.id} to register the generated published-transform runtime owner.`,
 	);
 }
 
@@ -271,6 +316,64 @@ assertValidationFailure(
 	"does not match owner target",
 );
 
+const publishedTransformTransaction = createTransaction({
+	runtimeSceneId: "portal_arena_runtime",
+	saveTargetId: "portal_arena_runtime:generated:authoring-save",
+	baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+	ownerTargetId: "portal_arena_runtime:level",
+	transactionId: "publish-contract-player-transform",
+});
+const mergedPublishedOverrides = mergePublishedTransformOverrides({
+	existingOverrides: [],
+	transaction: publishedTransformTransaction,
+});
+const nonPlayerPublishedTransformTransaction = createTransaction({
+	runtimeSceneId: "portal_arena_runtime",
+	saveTargetId: "portal_arena_runtime:generated:authoring-save",
+	baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+	ownerTargetId: "portal_arena_runtime:level",
+	transactionId: "publish-contract-non-player-transform",
+	subjectId: "portal-arena:portal:observatory",
+	position: [2, 0, -6],
+});
+const mergedNonPlayerPublishedOverrides = mergePublishedTransformOverrides({
+	existingOverrides: mergedPublishedOverrides,
+	transaction: nonPlayerPublishedTransformTransaction,
+});
+
+assertEqual(
+	mergedPublishedOverrides[0]?.stableId,
+	"player",
+	"Expected publish proof to create a player transform override.",
+);
+assertEqual(
+	mergedPublishedOverrides[0]?.transform.position?.join(","),
+	"0,1.5,0",
+	"Expected publish proof to preserve the typed set-transform position.",
+);
+assertEqual(
+	mergedNonPlayerPublishedOverrides
+		.find((override) => override.stableId === "portal-arena:portal:observatory")
+		?.transform.position?.join(","),
+	"2,0,-6",
+	"Expected publish proof to accept a non-player stable level instance.",
+);
+
+assertPublishFailure(
+	() =>
+		mergePublishedTransformOverrides({
+			existingOverrides: [],
+			transaction: createTransaction({
+				runtimeSceneId: "portal_arena_runtime",
+				saveTargetId: "portal_arena_runtime:generated:authoring-save",
+				baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+				ownerTargetId: "portal_arena_runtime:level",
+				subjectId: "missing-stable-id",
+			}),
+		}),
+	'does not contain stable ID "missing-stable-id"',
+);
+
 const tempRoot = await mkdtemp(join(tmpdir(), "level-editor-save-contract-"));
 
 try {
@@ -375,16 +478,189 @@ try {
 	await rm(tempRoot, { recursive: true, force: true });
 }
 
+const publishedTransformTempRoot = await mkdtemp(
+	join(tmpdir(), "level-editor-published-transform-contract-"),
+);
+
+try {
+	const publishedTransformPath = resolve(
+		publishedTransformTempRoot,
+		PUBLISHED_LEVEL_TRANSFORMS_TARGET_FILE,
+	);
+	const initialPublishedTransformSource =
+		serializePublishedLevelTransformOverridesSource([]);
+	const initialPublishedTransformHash = hashLevelEditorAuthoringFileContent(
+		initialPublishedTransformSource,
+	);
+	await mkdir(dirname(publishedTransformPath), { recursive: true });
+	await writeFile(
+		publishedTransformPath,
+		initialPublishedTransformSource,
+		"utf8",
+	);
+
+	const publishDryRun = await publishLevelEditorTransformTransaction({
+		appRoot: publishedTransformTempRoot,
+		transaction: publishedTransformTransaction,
+		baseHash: initialPublishedTransformHash,
+		dryRun: true,
+	});
+
+	assertEqual(
+		publishDryRun.wroteFile,
+		false,
+		"Expected publish dry run to avoid generated runtime owner writes.",
+	);
+	assertIncludes(
+		publishDryRun.publishedStableIds,
+		"player",
+		"Expected publish dry run to report the changed stable player instance.",
+	);
+	assertEqual(
+		await readFile(publishedTransformPath, "utf8"),
+		initialPublishedTransformSource,
+		"Expected publish dry run to leave the generated runtime owner unchanged.",
+	);
+
+	const publishSave = await publishLevelEditorTransformTransaction({
+		appRoot: publishedTransformTempRoot,
+		transaction: publishedTransformTransaction,
+		baseHash: initialPublishedTransformHash,
+	});
+	const updatedPublishedTransformSource = await readFile(
+		publishedTransformPath,
+		"utf8",
+	);
+	const updatedPublishedTransformOverrides =
+		parsePublishedLevelTransformOverrides(updatedPublishedTransformSource);
+
+	assertEqual(
+		publishSave.wroteFile,
+		true,
+		"Expected publish to write the generated runtime owner file.",
+	);
+	assertEqual(
+		publishSave.changeset.entries[0]?.priorContent,
+		initialPublishedTransformSource,
+		"Expected publish changeset to retain the full prior generated owner contents.",
+	);
+	assertEqual(
+		publishSave.changeset.entries[0]?.priorHash,
+		initialPublishedTransformHash,
+		"Expected publish changeset to record the prior generated owner hash.",
+	);
+	assertEqual(
+		publishSave.changeset.entries[0]?.currentContent,
+		updatedPublishedTransformSource,
+		"Expected publish changeset to stage the full generated owner contents before writing.",
+	);
+	assertEqual(
+		publishSave.changeset.entries[0]?.currentHash,
+		hashLevelEditorAuthoringFileContent(updatedPublishedTransformSource),
+		"Expected publish changeset to record the staged generated owner content hash.",
+	);
+	assertEqual(
+		updatedPublishedTransformOverrides[0]?.stableId,
+		"player",
+		"Expected publish to persist the player transform in generated runtime owner data.",
+	);
+
+	const noOpPublish = await publishLevelEditorTransformTransaction({
+		appRoot: publishedTransformTempRoot,
+		transaction: publishedTransformTransaction,
+		baseHash: hashLevelEditorAuthoringFileContent(
+			updatedPublishedTransformSource,
+		),
+	});
+
+	assertEqual(
+		noOpPublish.wroteFile,
+		false,
+		"Expected publishing identical generated runtime owner bytes to report a no-op write.",
+	);
+	assertEqual(
+		noOpPublish.changeset.entries[0]?.noOp,
+		true,
+		"Expected publish changeset to identify byte-identical generated owner output.",
+	);
+	assertEqual(
+		await readFile(publishedTransformPath, "utf8"),
+		updatedPublishedTransformSource,
+		"Expected no-op publish to leave generated runtime owner bytes unchanged.",
+	);
+
+	const nonPlayerPublishSave = await publishLevelEditorTransformTransaction({
+		appRoot: publishedTransformTempRoot,
+		transaction: nonPlayerPublishedTransformTransaction,
+		baseHash: hashLevelEditorAuthoringFileContent(
+			updatedPublishedTransformSource,
+		),
+	});
+	const updatedNonPlayerPublishedTransformSource = await readFile(
+		publishedTransformPath,
+		"utf8",
+	);
+	const updatedNonPlayerPublishedTransformOverrides =
+		parsePublishedLevelTransformOverrides(
+			updatedNonPlayerPublishedTransformSource,
+		);
+
+	assertEqual(
+		nonPlayerPublishSave.wroteFile,
+		true,
+		"Expected non-player publish to write the generated runtime owner file.",
+	);
+	assertIncludes(
+		nonPlayerPublishSave.publishedStableIds,
+		"portal-arena:portal:observatory",
+		"Expected non-player publish to report the portal stable ID.",
+	);
+	assertEqual(
+		updatedNonPlayerPublishedTransformOverrides
+			.find(
+				(override) => override.stableId === "portal-arena:portal:observatory",
+			)
+			?.transform.position?.join(","),
+		"2,0,-6",
+		"Expected publish to persist the non-player portal transform in generated runtime owner data.",
+	);
+
+	await assertPersistenceFailure(
+		publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: publishedTransformTransaction,
+			baseHash: initialPublishedTransformHash,
+		}),
+		"base hash mismatch",
+	);
+
+	await rollbackLevelEditorPublishChangeset(publishSave.changeset);
+	assertEqual(
+		await readFile(publishedTransformPath, "utf8"),
+		initialPublishedTransformSource,
+		"Expected publish rollback to restore the prior generated runtime owner contents.",
+	);
+} finally {
+	await rm(publishedTransformTempRoot, { recursive: true, force: true });
+}
+
 const routeTempRoot = await mkdtemp(
 	join(tmpdir(), "level-editor-save-route-contract-"),
 );
 const originalNodeEnv = process.env.NODE_ENV;
+const levelOwnerSource = await readFile(
+	"src/game/levels/portalArenaLevel.ts",
+	"utf8",
+);
+const levelOwnerBaseHash =
+	hashLevelEditorAuthoringFileContent(levelOwnerSource);
 
 try {
 	process.env.NODE_ENV = "development";
 
 	const initialRouteStatus = await authoringTargetStatus(
 		"portal_arena_runtime",
+		"authoring-save",
 		routeTempRoot,
 	);
 
@@ -392,6 +668,25 @@ try {
 		initialRouteStatus.baseHash,
 		LEVEL_EDITOR_MISSING_FILE_HASH,
 		"Expected authoring status to report missing generated save modules.",
+	);
+
+	const routeLevelOwnerPath = resolve(
+		routeTempRoot,
+		"src/game/levels/portalArenaLevel.ts",
+	);
+	await mkdir(dirname(routeLevelOwnerPath), { recursive: true });
+	await writeFile(routeLevelOwnerPath, levelOwnerSource, "utf8");
+
+	const initialLevelRouteStatus = await authoringTargetStatus(
+		"portal_arena_runtime",
+		"level",
+		routeTempRoot,
+	);
+
+	assertEqual(
+		initialLevelRouteStatus.baseHash,
+		levelOwnerBaseHash,
+		"Expected level authoring status to report the checked-in level owner hash.",
 	);
 
 	const routeDryRunResponse =
@@ -477,6 +772,143 @@ try {
 		"Expected stale save API response to explain the base hash mismatch.",
 	);
 
+	const initialPublishedTransformRouteStatus = await authoringTargetStatus(
+		"portal_arena_runtime",
+		"published-transforms",
+		routeTempRoot,
+	);
+
+	assertEqual(
+		initialPublishedTransformRouteStatus.baseHash,
+		LEVEL_EDITOR_MISSING_FILE_HASH,
+		"Expected published transform status to report a missing generated runtime owner before Save Level.",
+	);
+	assertEqual(
+		initialPublishedTransformRouteStatus.targetId,
+		"portal_arena_runtime:generated:published-transforms",
+		"Expected published transform status to resolve through the owner registry.",
+	);
+
+	const statusRouteResponse = await getLevelEditorAuthoringStatusRoute({
+		request: new Request(
+			"http://127.0.0.1:4322/api/editor/authoring/status.json?runtimeSceneId=portal_arena_runtime&target=published-transforms",
+		),
+		url: new URL("http://127.0.0.1:4322/api/editor/authoring/status.json"),
+	} as Parameters<typeof getLevelEditorAuthoringStatusRoute>[0]);
+
+	assertEqual(
+		statusRouteResponse.status,
+		200,
+		"Expected status route to read query params from request.url for the Astro dev server.",
+	);
+	const statusRoute = (await statusRouteResponse.json()) as ApiResultBody & {
+		readonly targetId?: string;
+	};
+	assertEqual(
+		statusRoute.targetId,
+		"portal_arena_runtime:generated:published-transforms",
+		"Expected status route to return the published transform owner target.",
+	);
+
+	const postStatusRouteResponse = await postLevelEditorAuthoringStatusRoute({
+		request: new Request(
+			"http://127.0.0.1:4322/api/editor/authoring/status.json",
+			{
+				method: "POST",
+				headers: {
+					"x-megameal-runtime-scene-id": "portal_arena_runtime",
+					"x-megameal-authoring-target": "published-transforms",
+				},
+			},
+		),
+		url: new URL("http://127.0.0.1:4322/api/editor/authoring/status.json"),
+	} as Parameters<typeof postLevelEditorAuthoringStatusRoute>[0]);
+
+	assertEqual(
+		postStatusRouteResponse.status,
+		200,
+		"Expected status POST route to accept runtime scene and target from the request body.",
+	);
+	const postStatusRoute =
+		(await postStatusRouteResponse.json()) as ApiResultBody & {
+			readonly targetId?: string;
+		};
+	assertEqual(
+		postStatusRoute.targetId,
+		"portal_arena_runtime:generated:published-transforms",
+		"Expected status POST route to return the published transform owner target.",
+	);
+
+	const routeLevelDryRunResponse =
+		await handleLevelEditorLevelOwnerWriteRequest({
+			appRoot: routeTempRoot,
+			request: jsonRequest({
+				mode: "dry-run",
+				transaction: publishedTransformTransaction,
+				baseHash: initialPublishedTransformRouteStatus.baseHash,
+			}),
+		});
+
+	assertEqual(
+		routeLevelDryRunResponse.status,
+		200,
+		"Expected Save Level dry-run API request to return HTTP 200.",
+	);
+	const routeLevelDryRun =
+		(await routeLevelDryRunResponse.json()) as ApiResultBody;
+	assertEqual(
+		routeLevelDryRun.artifacts?.[0]?.wroteFile,
+		false,
+		"Expected Save Level API dry run to avoid writes.",
+	);
+	assertIncludes(
+		routeLevelDryRun.artifacts?.[0]?.changedStableIds ?? [],
+		"player",
+		"Expected Save Level API dry run to report the changed player stable ID.",
+	);
+
+	const routeLevelSaveResponse = await handleLevelEditorLevelOwnerWriteRequest({
+		appRoot: routeTempRoot,
+		request: jsonRequest({
+			mode: "save-level",
+			transaction: publishedTransformTransaction,
+			baseHash: initialPublishedTransformRouteStatus.baseHash,
+		}),
+	});
+
+	assertEqual(
+		routeLevelSaveResponse.status,
+		201,
+		"Expected Save Level API request to return HTTP 201.",
+	);
+	const routeLevelSave = (await routeLevelSaveResponse.json()) as ApiResultBody;
+	assertEqual(
+		routeLevelSave.artifacts?.[0]?.wroteFile,
+		true,
+		"Expected Save Level API request to write the generated runtime owner.",
+	);
+	assertIncludes(
+		routeLevelSave.artifacts?.[0]?.changedStableIds ?? [],
+		"player",
+		"Expected Save Level API save to report the changed player stable ID.",
+	);
+
+	const routeLevelConflictResponse =
+		await handleLevelEditorLevelOwnerWriteRequest({
+			appRoot: routeTempRoot,
+			request: jsonRequest({
+				mode: "save-level",
+				transaction: publishedTransformTransaction,
+				baseHash: initialPublishedTransformRouteStatus.baseHash,
+			}),
+		});
+
+	assertEqual(
+		routeLevelConflictResponse.status,
+		409,
+		"Expected stale Save Level API request to return HTTP 409.",
+	);
+
 	const routeValidationResponse =
 		await handleLevelEditorAuthoringPersistenceRequest({
 			appRoot: routeTempRoot,
@@ -525,6 +957,141 @@ try {
 	await rm(routeTempRoot, { recursive: true, force: true });
 }
 
+const publishRouteTempRoot = await mkdtemp(
+	join(tmpdir(), "level-editor-publish-route-contract-"),
+);
+
+try {
+	process.env.NODE_ENV = "development";
+
+	const initialPublishRouteStatus = await authoringTargetStatus(
+		"portal_arena_runtime",
+		"published-transforms",
+		publishRouteTempRoot,
+	);
+	const publishDryRunResponse = await handleLevelEditorLocalPublishRequest({
+		appRoot: publishRouteTempRoot,
+		request: jsonRequest({
+			mode: "dry-run",
+			transaction: publishedTransformTransaction,
+			baseHash: initialPublishRouteStatus.baseHash,
+		}),
+		runValidationGate: async (scriptName) => ({
+			scriptName,
+			ok: true,
+			output: "dry-run gate should not execute",
+		}),
+	});
+
+	assertEqual(
+		publishDryRunResponse.status,
+		200,
+		"Expected Publish dry-run API request to return HTTP 200.",
+	);
+	const publishDryRun = (await publishDryRunResponse.json()) as ApiResultBody;
+	assertEqual(
+		publishDryRun.artifacts?.[0]?.wroteFile,
+		false,
+		"Expected Publish dry run to avoid writes.",
+	);
+	assertEqual(
+		publishDryRun.validationGates?.length ?? 0,
+		0,
+		"Expected Publish dry run not to execute validation gates.",
+	);
+
+	const executedGates: string[] = [];
+	const publishResponse = await handleLevelEditorLocalPublishRequest({
+		appRoot: publishRouteTempRoot,
+		request: jsonRequest({
+			mode: "publish-local",
+			transaction: publishedTransformTransaction,
+			baseHash: initialPublishRouteStatus.baseHash,
+		}),
+		runValidationGate: async (scriptName) => {
+			executedGates.push(scriptName);
+			return {
+				scriptName,
+				ok: true,
+				output: `passed ${scriptName}`,
+			};
+		},
+	});
+
+	assertEqual(
+		publishResponse.status,
+		201,
+		"Expected Publish API request to return HTTP 201 after validation gates pass.",
+	);
+	const publishResult = (await publishResponse.json()) as ApiResultBody;
+	assertEqual(
+		publishResult.artifacts?.[0]?.wroteFile,
+		true,
+		"Expected Publish API request to write the generated runtime owner.",
+	);
+	assertIncludes(
+		executedGates,
+		"build",
+		"Expected Publish API request to run the production build gate.",
+	);
+	assertEqual(
+		publishResult.validationGates?.every((gate) => gate.ok),
+		true,
+		"Expected Publish API response to report passing validation gates.",
+	);
+} finally {
+	restoreNodeEnv(originalNodeEnv);
+	await rm(publishRouteTempRoot, { recursive: true, force: true });
+}
+
+const failingPublishRouteTempRoot = await mkdtemp(
+	join(tmpdir(), "level-editor-publish-rollback-contract-"),
+);
+
+try {
+	process.env.NODE_ENV = "development";
+	const initialFailingPublishStatus = await authoringTargetStatus(
+		"portal_arena_runtime",
+		"published-transforms",
+		failingPublishRouteTempRoot,
+	);
+	const failingPublishPath = resolve(
+		failingPublishRouteTempRoot,
+		PUBLISHED_LEVEL_TRANSFORMS_TARGET_FILE,
+	);
+	const failingPublishResponse = await handleLevelEditorLocalPublishRequest({
+		appRoot: failingPublishRouteTempRoot,
+		request: jsonRequest({
+			mode: "publish-local",
+			transaction: publishedTransformTransaction,
+			baseHash: initialFailingPublishStatus.baseHash,
+		}),
+		runValidationGate: async (scriptName) => ({
+			scriptName,
+			ok: scriptName !== "type-check",
+			output:
+				scriptName === "type-check"
+					? "simulated type-check failure"
+					: `passed ${scriptName}`,
+		}),
+	});
+
+	assertEqual(
+		failingPublishResponse.status,
+		400,
+		"Expected Publish API request to fail when a validation gate fails.",
+	);
+	await assertFileMissing(
+		failingPublishPath,
+		"Expected failing Publish API request to roll back the generated runtime owner.",
+	);
+} finally {
+	restoreNodeEnv(originalNodeEnv);
+	await rm(failingPublishRouteTempRoot, { recursive: true, force: true });
+}
+
+await assertRuntimeDoesNotImportEditorDrafts();
+
 console.log(
 	`Level editor save contract passed for ${registry.runtimeSceneIds.length} runtime scene owner sets.`,
 );
@@ -535,12 +1102,111 @@ type ApiResultBody = {
 	readonly artifacts?: readonly {
 		readonly targetFile?: string;
 		readonly wroteFile?: boolean;
+		readonly changedStableIds?: readonly string[];
+	}[];
+	readonly validationGates?: readonly {
+		readonly scriptName?: string;
+		readonly ok?: boolean;
+		readonly output?: string;
 	}[];
 	readonly error?: {
 		readonly code?: string;
 		readonly message?: string;
 	};
 };
+
+async function assertRuntimeDoesNotImportEditorDrafts(): Promise<void> {
+	const appRoot = resolve(".");
+	const sourceRoots = [
+		resolve(appRoot, "src/game"),
+		resolve(appRoot, "src/engine"),
+	];
+	const sourceFiles = (
+		await Promise.all(sourceRoots.map((root) => collectSourceFiles(root)))
+	).flat();
+	const offenders: string[] = [];
+
+	for (const file of sourceFiles) {
+		if (isInsidePath(file, resolve(appRoot, "src/game/editor"))) {
+			continue;
+		}
+
+		const source = await readFile(file, "utf8");
+
+		for (const [index, line] of source.split("\n").entries()) {
+			const specifier = importSpecifier(line);
+
+			if (specifier === undefined || !specifier.startsWith(".")) {
+				continue;
+			}
+
+			const absoluteImportPath = resolve(dirname(file), specifier);
+			const relativeImportPath = normalizePath(
+				relative(appRoot, absoluteImportPath),
+			);
+
+			if (
+				relativeImportPath.startsWith("src/game/editor/") ||
+				relativeImportPath.includes("/editor/authoring/generated")
+			) {
+				offenders.push(
+					`${normalizePath(relative(appRoot, file))}:${index + 1} imports ${specifier}`,
+				);
+			}
+		}
+	}
+
+	if (offenders.length > 0) {
+		throw new Error(
+			`Runtime source must not import editor drafts or generated authoring saves:\n${offenders.join(
+				"\n",
+			)}`,
+		);
+	}
+}
+
+async function collectSourceFiles(root: string): Promise<readonly string[]> {
+	const entries = await readdir(root, { withFileTypes: true });
+	const files: string[] = [];
+
+	for (const entry of entries) {
+		const path = resolve(root, entry.name);
+
+		if (entry.isDirectory()) {
+			files.push(...(await collectSourceFiles(path)));
+			continue;
+		}
+
+		if (entry.isFile() && /\.(?:astro|svelte|ts)$/.test(entry.name)) {
+			files.push(path);
+		}
+	}
+
+	return files;
+}
+
+function importSpecifier(line: string): string | undefined {
+	const match =
+		/^\s*(?:import|export)\s+(?:type\s+)?(?:[^"']*?\s+from\s+)?["']([^"']+)["']/.exec(
+			line,
+		);
+
+	return match?.[1];
+}
+
+function isInsidePath(path: string, parent: string): boolean {
+	const relativePath = relative(parent, path);
+
+	return (
+		relativePath !== "" &&
+		!relativePath.startsWith("..") &&
+		!relativePath.split(sep).includes("..")
+	);
+}
+
+function normalizePath(path: string): string {
+	return path.split(sep).join("/");
+}
 
 function createTransaction(options: {
 	readonly runtimeSceneId: string;
@@ -549,6 +1215,7 @@ function createTransaction(options: {
 	readonly ownerTargetId: string;
 	readonly transactionId?: string;
 	readonly subjectId?: string;
+	readonly position?: readonly [number, number, number];
 }): LevelEditorAuthoringSaveTransactionData {
 	return {
 		schemaVersion: 1,
@@ -570,9 +1237,15 @@ function createTransaction(options: {
 						ownerTargetId: options.ownerTargetId,
 						subjectId: options.subjectId ?? "player",
 						payload: {
-							components: {
-								Transform: {
-									position: [0, 1.5, 0],
+							operation: {
+								id: `${options.transactionId ?? "save-contract-insert"}:${
+									options.subjectId ?? "player"
+								}:transform`,
+								kind: "set-transform",
+								stableId: options.subjectId ?? "player",
+								persistence: "saved",
+								transform: {
+									position: options.position ?? [0, 1.5, 0],
 								},
 							},
 						},
@@ -620,6 +1293,43 @@ async function assertPersistenceFailure(
 	}
 
 	throw new Error(`Expected persistence failure for ${expectedMessage}.`);
+}
+
+async function assertFileMissing(path: string, message: string): Promise<void> {
+	try {
+		await readFile(path, "utf8");
+	} catch (error) {
+		if (
+			typeof error === "object" &&
+			error !== null &&
+			"code" in error &&
+			error.code === "ENOENT"
+		) {
+			return;
+		}
+
+		throw error;
+	}
+
+	throw new Error(message);
+}
+
+function assertPublishFailure(
+	callback: () => unknown,
+	expectedMessage: string,
+): void {
+	try {
+		callback();
+	} catch (error) {
+		assertIncludes(
+			String(error instanceof Error ? error.message : error),
+			expectedMessage,
+			`Expected publish failure to mention "${expectedMessage}".`,
+		);
+		return;
+	}
+
+	throw new Error(`Expected publish failure for ${expectedMessage}.`);
 }
 
 function requireSaveTarget(

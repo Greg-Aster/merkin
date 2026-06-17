@@ -327,6 +327,12 @@ async function runWorkspaceCommand(
 			case "authoring-transaction":
 				await saveStagedAuthoringTransaction();
 				return;
+			case "owner-write":
+				await saveStagedLevelOwnerData();
+				return;
+			case "publish-owner-write":
+				await publishStagedLevelOwnerData();
+				return;
 			case "clear-staged-preview":
 				discardStagedEdits();
 				return;
@@ -340,6 +346,220 @@ async function runWorkspaceCommand(
 	} finally {
 		activeCommandId = null;
 	}
+}
+
+async function publishStagedLevelOwnerData(): Promise<void> {
+	try {
+		const saveOperationCount = authoringQueue.operationCount;
+		const previewTargets = previewTargetsForStagedEdits({
+			workspace,
+			edits: stagedFieldEdits,
+		});
+		const saveTarget = await fetchLevelEditorAuthoringStatus(
+			workspace.selectedRuntimeSceneId,
+			"published-transforms",
+		);
+		const dryRun = await runLevelEditorAuthoringCommand({
+			mode: "dry-run",
+			target: "publish",
+			workspace,
+			edits: stagedFieldEdits,
+			queuedOperations: queuedAuthoringOperationEntries,
+			baseHash: saveTarget.baseHash,
+		});
+
+		if (!dryRun.ok) {
+			throw new Error(
+				dryRun.errors?.join(" ") ?? dryRun.message ?? "Publish dry run failed.",
+			);
+		}
+
+		const publishResult = await runLevelEditorAuthoringCommand({
+			mode: "save",
+			target: "publish",
+			workspace,
+			edits: stagedFieldEdits,
+			queuedOperations: queuedAuthoringOperationEntries,
+			baseHash: saveTarget.baseHash,
+		});
+
+		if (!publishResult.ok) {
+			throw new Error(
+				publishResult.errors?.join(" ") ??
+					publishResult.message ??
+					"Publish failed.",
+			);
+		}
+
+		authoringQueue = createLevelEditorAuthoringQueue();
+		latestTransaction = undefined;
+		status = {
+			kind: "sent",
+			label: `Published level data with ${saveOperationCount} operations to ${saveTarget.targetFile}`,
+		};
+		appendOutputLog({
+			level: "success",
+			source: "publish",
+			message: `${publishResult.message} ${formatAuthoringArtifacts(publishResult)}${formatValidationGates(publishResult)}.`,
+		});
+
+		if (channel) {
+			if (previewTargets.stableIds.length > 0) {
+				sendLevelEditorDevPreviewMessage(
+					channel,
+					createCoreObjectPreviewClearRequestMessage({
+						requestId: createRequestId("publish-clear-preview"),
+						runtimeSceneId: workspace.selectedRuntimeSceneId,
+						stableIds: previewTargets.stableIds,
+						targetKinds: previewTargets.targetKinds,
+					}),
+				);
+			}
+
+			sendLevelEditorDevPreviewMessage(
+				channel,
+				createRuntimeSceneReloadRequestMessage({
+					requestId: createRequestId("publish-reload"),
+					runtimeSceneId: workspace.selectedRuntimeSceneId,
+				}),
+			);
+		}
+	} catch (error) {
+		status = {
+			kind: "error",
+			label: "Unable to publish level data",
+		};
+		appendOutputLog({
+			level: "error",
+			source: "publish",
+			message: error instanceof Error ? error.message : String(error),
+		});
+	}
+}
+
+function formatValidationGates(
+	result: Awaited<ReturnType<typeof runLevelEditorAuthoringCommand>>,
+): string {
+	const gates = result.validationGates ?? [];
+
+	if (gates.length === 0) {
+		return "";
+	}
+
+	const passed = gates.filter((gate) => gate.ok).length;
+	return `; ${passed}/${gates.length} validation gates passed`;
+}
+
+async function saveStagedLevelOwnerData(): Promise<void> {
+	try {
+		const saveOperationCount = authoringQueue.operationCount;
+		const previewTargets = previewTargetsForStagedEdits({
+			workspace,
+			edits: stagedFieldEdits,
+		});
+		const saveTarget = await fetchLevelEditorAuthoringStatus(
+			workspace.selectedRuntimeSceneId,
+			"published-transforms",
+		);
+		const dryRun = await runLevelEditorAuthoringCommand({
+			mode: "dry-run",
+			target: "level",
+			workspace,
+			edits: stagedFieldEdits,
+			queuedOperations: queuedAuthoringOperationEntries,
+			baseHash: saveTarget.baseHash,
+		});
+
+		if (!dryRun.ok) {
+			throw new Error(
+				dryRun.errors?.join(" ") ??
+					dryRun.message ??
+					"Save Level dry run failed.",
+			);
+		}
+
+		const saveResult = await runLevelEditorAuthoringCommand({
+			mode: "save",
+			target: "level",
+			workspace,
+			edits: stagedFieldEdits,
+			queuedOperations: queuedAuthoringOperationEntries,
+			baseHash: saveTarget.baseHash,
+		});
+
+		if (!saveResult.ok) {
+			throw new Error(
+				saveResult.errors?.join(" ") ??
+					saveResult.message ??
+					"Save Level failed.",
+			);
+		}
+
+		authoringQueue = createLevelEditorAuthoringQueue();
+		latestTransaction = undefined;
+		status = {
+			kind: "sent",
+			label: `Saved level data with ${saveOperationCount} operations to ${saveTarget.targetFile}`,
+		};
+		appendOutputLog({
+			level: "success",
+			source: "save-level",
+			message: `${saveResult.message} ${formatAuthoringArtifacts(saveResult)}.`,
+		});
+
+		if (channel) {
+			if (previewTargets.stableIds.length > 0) {
+				sendLevelEditorDevPreviewMessage(
+					channel,
+					createCoreObjectPreviewClearRequestMessage({
+						requestId: createRequestId("save-level-clear-preview"),
+						runtimeSceneId: workspace.selectedRuntimeSceneId,
+						stableIds: previewTargets.stableIds,
+						targetKinds: previewTargets.targetKinds,
+					}),
+				);
+			}
+
+			sendLevelEditorDevPreviewMessage(
+				channel,
+				createRuntimeSceneReloadRequestMessage({
+					requestId: createRequestId("save-level-reload"),
+					runtimeSceneId: workspace.selectedRuntimeSceneId,
+				}),
+			);
+		}
+	} catch (error) {
+		status = {
+			kind: "error",
+			label: "Unable to save level data",
+		};
+		appendOutputLog({
+			level: "error",
+			source: "save-level",
+			message: error instanceof Error ? error.message : String(error),
+		});
+	}
+}
+
+function formatAuthoringArtifacts(
+	result: Awaited<ReturnType<typeof runLevelEditorAuthoringCommand>>,
+): string {
+	const artifacts = result.artifacts ?? [];
+
+	if (artifacts.length === 0) {
+		return "No runtime owner artifacts were written";
+	}
+
+	return artifacts
+		.map((artifact) => {
+			const stableIds =
+				artifact.changedStableIds === undefined ||
+				artifact.changedStableIds.length === 0
+					? ""
+					: ` for ${artifact.changedStableIds.join(", ")}`;
+			return `${artifact.wroteFile ? "wrote" : "checked"} ${artifact.targetFile}${stableIds}`;
+		})
+		.join("; ");
 }
 
 async function saveStagedAuthoringTransaction(): Promise<void> {
@@ -399,15 +619,14 @@ async function saveStagedAuthoringTransaction(): Promise<void> {
 			);
 		}
 
-		authoringQueue = createLevelEditorAuthoringQueue();
 		status = {
 			kind: "sent",
-			label: `Saved ${saveOperationCount} operations to ${saveTarget.targetFile}`,
+			label: `Saved draft with ${saveOperationCount} operations to ${saveTarget.targetFile}`,
 		};
 		appendOutputLog({
-			level: "success",
+			level: "warning",
 			source: "save",
-			message: `${saveResult.message} ${saveResult.artifacts?.length ?? 0} artifacts checked.`,
+			message: `${saveResult.message} ${saveResult.artifacts?.length ?? 0} draft artifacts checked. Staged edits remain dirty because no bounded level owner write succeeded.`,
 		});
 	} catch (error) {
 		status = {
@@ -481,7 +700,7 @@ function workspaceCommandBlockReason(
 	}
 
 	if (command.blocksDirty && hasDirtyState) {
-		return "Save or discard staged edits before using this command";
+		return "Staged edits are dirty; Save Draft preserves a transaction but does not make them permanent. Discard the staged edits before using this plan view.";
 	}
 
 	return null;
@@ -1290,20 +1509,21 @@ function runtimeLifecycleLabel(): string {
 	</section>
 	<section class="editor-panel">
 		<header class="editor-panel-header">
-			<h2>Validation</h2>
-			<span>{workspace.validation.errors.length} errors</span>
+			<h2>Validation Report</h2>
+			<span>
+				{workspace.validationReport.errorCount} errors / {workspace.validationReport.warningCount} warnings
+			</span>
 		</header>
 		<div class="editor-status-list">
-			{#if workspace.validation.errors.length === 0}
-				<span>no workspace errors</span>
+			{#if workspace.validationReport.items.length === 0}
+				<span>no workspace validation findings</span>
 			{:else}
-				{#each workspace.validation.errors as error}
-					<span>{error}</span>
+				{#each workspace.validationReport.items as item}
+					<span title={item.id}>
+						{item.severity}: {item.category} / {item.message}
+					</span>
 				{/each}
 			{/if}
-			{#each workspace.validation.warnings as warning}
-				<span>{warning}</span>
-			{/each}
 		</div>
 		<p class="editor-status" data-state={status.kind}>{status.label}</p>
 	</section>
@@ -1314,7 +1534,7 @@ function runtimeLifecycleLabel(): string {
 		</header>
 		<dl class="editor-facts editor-facts-compact">
 			<div>
-				<dt>Save Target</dt>
+				<dt>Draft Target</dt>
 				<dd>{workspace.authoring.saveTarget?.targetFile ?? "not registered"}</dd>
 			</div>
 			<div>
@@ -1345,7 +1565,7 @@ function runtimeLifecycleLabel(): string {
 				class:selected-plan={selectedCommandPlanId === "publish"}
 				onclick={() => (selectedCommandPlanId = "publish")}
 			>
-				Publish
+				Publish Gates
 			</button>
 		</div>
 		<ol class="editor-plan-list">

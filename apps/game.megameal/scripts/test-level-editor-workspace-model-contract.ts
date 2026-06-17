@@ -6,12 +6,17 @@ import {
 	stageLevelEditorAuthoringOperations,
 } from "../src/app/editor/levelEditorAuthoringStore.js";
 import { getDefaultLevelEditorSessionSummary } from "../src/app/editor/levelEditorSession.js";
-import { buildLevelEditorWorkspaceModel } from "../src/app/editor/levelEditorWorkspaceModel.js";
+import {
+	type LevelEditorWorkspaceAuthoringState,
+	buildLevelEditorValidationReport,
+	buildLevelEditorWorkspaceModel,
+} from "../src/app/editor/levelEditorWorkspaceModel.js";
 import {
 	type LevelEditorStagedFieldEdit,
 	buildWorkspaceAuthoringTransaction,
 	previewTargetsForStagedEdits,
 } from "../src/app/editor/levelEditorWorkspaceUi.js";
+import type { RuntimeSceneManifestData } from "../src/engine/data/index.js";
 import {
 	type LevelEditorAuthoringOperationData,
 	buildLevelEditorAuthoringSaveWritePlan,
@@ -66,6 +71,36 @@ assertEqual(
 	workspace.authoring.status,
 	"ready",
 	"Expected workspace authoring document state to be ready.",
+);
+assertEqual(
+	workspace.validationReport.schemaVersion,
+	1,
+	"Expected workspace validation report schema version to be explicit.",
+);
+assertEqual(
+	workspace.validationReport.runtimeSceneId,
+	workspace.selectedRuntimeSceneId,
+	"Expected validation report to target the selected runtime scene.",
+);
+assertIncludes(
+	workspace.validationReport.generatedFrom,
+	"validateRuntimeSceneContentGraph",
+	"Expected workspace validation report to use the same content graph validator as contract tests.",
+);
+assertEqual(
+	workspace.validationReport.errorCount,
+	workspace.validation.errors.length,
+	"Expected legacy validation errors to mirror report errors.",
+);
+assertEqual(
+	workspace.validationReport.warningCount,
+	workspace.validation.warnings.length,
+	"Expected legacy validation warnings to mirror report warnings.",
+);
+assertEqual(
+	workspace.validationReport.blocksPublish,
+	false,
+	"Expected valid catalog workspace report not to block publish.",
 );
 if (workspace.authoring.saveTarget === null) {
 	throw new Error(
@@ -179,15 +214,60 @@ const commandById = new Map(
 	workspace.commands.map((command) => [command.id, command] as const),
 );
 const saveCommand = requiredMapValue(commandById, "save");
+const saveLevelCommand = requiredMapValue(commandById, "save-level");
 const discardCommand = requiredMapValue(commandById, "discard");
 const buildCommand = requiredMapValue(commandById, "build");
 const publishCommand = requiredMapValue(commandById, "publish");
 
-assertEqual(saveCommand.enabled, true, "Expected Save to be commandable.");
+assertEqual(
+	saveCommand.enabled,
+	true,
+	"Expected Save Draft to be commandable.",
+);
+assertEqual(
+	saveCommand.label,
+	"Save Draft",
+	"Expected generated authoring transaction persistence to be labeled Save Draft.",
+);
+assertEqual(
+	saveCommand.operation,
+	"authoring-transaction",
+	"Expected Save Draft to write only the authoring transaction path.",
+);
 assertEqual(
 	saveCommand.requiresDirty,
 	true,
-	"Expected Save to require staged edits.",
+	"Expected Save Draft to require staged edits.",
+);
+assertContains(
+	saveCommand.reason,
+	"staged edits remain dirty until a bounded level owner write succeeds",
+	"Expected Save Draft command copy to avoid implying runtime permanence.",
+);
+assertEqual(
+	saveLevelCommand.enabled,
+	true,
+	"Expected Save Level to be commandable when authoring is ready.",
+);
+assertEqual(
+	saveLevelCommand.operation,
+	"owner-write",
+	"Expected Save Level to target the bounded owner-write command path.",
+);
+assertEqual(
+	saveLevelCommand.requiresDirty,
+	true,
+	"Expected Save Level to require staged edits before writing owner data.",
+);
+assertEqual(
+	saveLevelCommand.blocksDirty,
+	false,
+	"Expected Save Level to accept dirty staged edits because it is the durable write path.",
+);
+assertContains(
+	saveLevelCommand.reason,
+	"bounded runtime owner data path",
+	"Expected Save Level command copy to describe bounded runtime owner writes.",
 );
 assertEqual(
 	discardCommand.operation,
@@ -201,8 +281,33 @@ assertEqual(
 );
 assertEqual(
 	publishCommand.blocksDirty,
+	false,
+	"Expected Publish Level to accept dirty staged edits because it is the durable publish path.",
+);
+assertEqual(
+	publishCommand.label,
+	"Publish Level",
+	"Expected Publish to be labeled as the durable level publish path.",
+);
+assertEqual(
+	publishCommand.operation,
+	"publish-owner-write",
+	"Expected Publish to target the owner-write publish command path.",
+);
+assertEqual(
+	publishCommand.requiresDirty,
 	true,
-	"Expected Publish to be blocked by unsaved staged edits.",
+	"Expected Publish Level to require staged edits before writing owner data.",
+);
+assertEqual(
+	publishCommand.enabled,
+	!workspace.validationReport.blocksPublish,
+	"Expected Publish command availability to follow validation report errors.",
+);
+assertContains(
+	publishCommand.reason,
+	"local validation/build gates",
+	"Expected Publish copy to describe validation/build gating.",
 );
 assertEqual(
 	workspace.commandPlans.build.errors.length,
@@ -213,6 +318,11 @@ assertEqual(
 	workspace.commandPlans.publish.errors.length,
 	0,
 	"Expected publish command plan to validate.",
+);
+assertAnyContains(
+	workspace.outputLog.map((entry) => entry.message),
+	"hidden production cook disabled",
+	"Expected initial output log to describe explicit build/publish command gates.",
 );
 
 const buildScripts = workspace.commandPlans.build.steps
@@ -268,6 +378,64 @@ assertEqual(
 	transaction.operations[0]?.kind,
 	"set-transform",
 	"Expected staged transform edits to produce a set-transform operation.",
+);
+
+const portalObject = workspace.objects.find(
+	(object) => object.stableId === "portal-arena:portal:observatory",
+);
+
+if (!portalObject) {
+	throw new Error(
+		"Expected portal arena workspace to expose the Observatory portal.",
+	);
+}
+
+const portalPositionXField = portalObject.fields.find(
+	(field) => field.path === "Transform.position.x",
+);
+
+if (!portalPositionXField || typeof portalPositionXField.value !== "number") {
+	throw new Error("Expected non-player portal position X field to be numeric.");
+}
+
+const stagedPortalEdit = {
+	stableId: portalObject.stableId,
+	path: portalPositionXField.path,
+	label: portalPositionXField.label,
+	before: portalPositionXField.value,
+	after: portalPositionXField.value + 0.5,
+} satisfies LevelEditorStagedFieldEdit;
+const portalTransaction = buildWorkspaceAuthoringTransaction({
+	workspace,
+	edits: [stagedPortalEdit],
+	transactionId: "workspace-contract-non-player-transaction",
+	createdAt: "2026-06-17T00:00:00.000Z",
+});
+const portalOperation = portalTransaction.operations[0];
+
+assertEqual(
+	portalOperation?.kind,
+	"set-transform",
+	"Expected non-player staged transform edits to produce a set-transform operation.",
+);
+if (portalOperation?.kind !== "set-transform") {
+	throw new Error("Expected non-player operation to be set-transform.");
+}
+assertEqual(
+	portalOperation.stableId,
+	portalObject.stableId,
+	"Expected non-player staged transform edits to preserve the selected stable ID.",
+);
+const portalSaveTransaction = buildAuthoringSaveTransaction({
+	workspace,
+	edits: [stagedPortalEdit],
+	baseHash: "missing",
+});
+
+assertEqual(
+	portalSaveTransaction.targets[0]?.operations[0]?.subjectId,
+	portalObject.stableId,
+	"Expected non-player staged transform edits to reach the save transaction subject ID.",
 );
 
 const panelQueuedGeneratedSaveOperation = {
@@ -393,6 +561,92 @@ for (const terrainObject of terrainObjects) {
 	);
 }
 
+assertIncludes(
+	workspace.validationReport.items
+		.filter((item) => item.severity === "warning")
+		.map((item) => item.category),
+	"terrain",
+	"Expected validation report to surface bake-only terrain as a warning category.",
+);
+
+const duplicateStableIdInstance =
+	defaultRuntimeSceneManifest.level.instances[0];
+if (duplicateStableIdInstance === undefined) {
+	throw new Error("Expected default runtime scene to include level instances.");
+}
+
+const duplicateStableIdReport = buildLevelEditorValidationReport({
+	manifest: {
+		...defaultRuntimeSceneManifest,
+		level: {
+			...defaultRuntimeSceneManifest.level,
+			instances: [
+				...defaultRuntimeSceneManifest.level.instances,
+				{
+					...duplicateStableIdInstance,
+					id: "workspace-contract-duplicate-stable-id",
+				},
+			],
+		},
+	} satisfies RuntimeSceneManifestData,
+});
+
+assertEqual(
+	duplicateStableIdReport.blocksPublish,
+	true,
+	"Expected validation report errors to block publish.",
+);
+assertIncludes(
+	duplicateStableIdReport.items.map((item) => item.category),
+	"stable-id",
+	"Expected duplicate stable IDs to use a stable-id report category.",
+);
+assertAtLeast(
+	duplicateStableIdReport.items.filter(
+		(item) => item.id.includes("stable-id") && item.blocksPublish,
+	).length,
+	1,
+	"Expected blocking validation report items to have stable IDs.",
+);
+
+const missingAssetReport = buildLevelEditorValidationReport({
+	manifest: {
+		...defaultRuntimeSceneManifest,
+		assets: {
+			...defaultRuntimeSceneManifest.assets,
+			assets: defaultRuntimeSceneManifest.assets.assets.filter(
+				(asset) => asset.id !== "mesh_player",
+			),
+		},
+	} satisfies RuntimeSceneManifestData,
+});
+
+assertIncludes(
+	missingAssetReport.items.map((item) => item.category),
+	"reference-integrity",
+	"Expected unresolved asset references to use the reference-integrity report category.",
+);
+assertAnyContains(
+	missingAssetReport.items.map((item) => item.id),
+	"reference-integrity",
+	"Expected unresolved asset report IDs to include their category.",
+);
+
+const missingOwnerProvenanceReport = buildLevelEditorValidationReport({
+	manifest: defaultRuntimeSceneManifest,
+	authoring: {
+		...workspace.authoring,
+		status: "blocked",
+		errors: ["records.0.owner must declare owner provenance."],
+	} satisfies LevelEditorWorkspaceAuthoringState,
+});
+
+assertIncludes(
+	missingOwnerProvenanceReport.items.map((item) => item.category),
+	"owner-provenance",
+	"Expected missing owner provenance to use an owner-provenance report category.",
+);
+
 console.log(
 	`Level editor workspace model contract passed for ${workspace.levelBrowser.length} loadable levels and ${workspace.objects.length} selected-scene objects.`,
 );
@@ -410,6 +664,26 @@ function assertIncludes<T>(
 ): void {
 	if (!items.includes(item)) {
 		throw new Error(`${message} Missing ${String(item)}.`);
+	}
+}
+
+function assertContains(
+	actual: string,
+	expected: string,
+	message: string,
+): void {
+	if (!actual.includes(expected)) {
+		throw new Error(`${message} Missing ${expected}.`);
+	}
+}
+
+function assertAnyContains(
+	items: readonly string[],
+	expected: string,
+	message: string,
+): void {
+	if (!items.some((item) => item.includes(expected))) {
+		throw new Error(`${message} Missing ${expected}.`);
 	}
 }
 

@@ -25,6 +25,7 @@ import { yggdrasilPrefabs } from "../prefabs/yggdrasilPrefabs.js";
 import { mirandaDeckLevel, prototypeLevel } from "./defaultLevels.js";
 import { observatoryLevel } from "./observatoryLevel.js";
 import { portalArenaLevel } from "./portalArenaLevel.js";
+import { applyPublishedLevelInstanceTransformOverrides } from "./publishedLevelOverrides.js";
 import {
 	mirandaDeckRenderProfile,
 	observatoryRenderProfile,
@@ -52,7 +53,10 @@ export const portalArenaRuntimeSceneManifest = loadRuntimeSceneManifest({
 		kind: "authored",
 		id: "portal_arena",
 	},
-	level: portalArenaLevel,
+	level: applyPublishedLevelInstanceTransformOverrides({
+		runtimeSceneId: "portal_arena_runtime",
+		level: portalArenaLevel,
+	}),
 	prefabs: portalArenaPrefabs,
 	assets: portalArenaAssetManifest,
 	renderProfile: portalArenaRenderProfile,
@@ -96,7 +100,10 @@ export const prototypeRuntimeSceneManifest = loadRuntimeSceneManifest({
 		kind: "prototype",
 		id: "prototype_arena",
 	},
-	level: prototypeLevel,
+	level: applyPublishedLevelInstanceTransformOverrides({
+		runtimeSceneId: "prototype_arena_runtime",
+		level: prototypeLevel,
+	}),
 	prefabs: prototypePrefabs,
 	assets: prototypeAssetManifest,
 	renderProfile: prototypeRenderProfile,
@@ -128,7 +135,10 @@ export const mirandaDeckRuntimeSceneManifest = loadRuntimeSceneManifest({
 		kind: "authored",
 		id: "miranda.scene#deck",
 	},
-	level: mirandaDeckLevel,
+	level: applyPublishedLevelInstanceTransformOverrides({
+		runtimeSceneId: "miranda_deck_runtime",
+		level: mirandaDeckLevel,
+	}),
 	prefabs: mirandaDeckPrefabs,
 	assets: mirandaDeckAssetManifest,
 	renderProfile: mirandaDeckRenderProfile,
@@ -281,7 +291,10 @@ export const observatoryRuntimeSceneManifest = loadRuntimeSceneManifest({
 		kind: "authored",
 		id: "observatory.scene#playable-foundation",
 	},
-	level: observatoryLevel,
+	level: applyPublishedLevelInstanceTransformOverrides({
+		runtimeSceneId: "observatory_runtime",
+		level: observatoryLevel,
+	}),
 	prefabs: observatoryPrefabs,
 	assets: observatoryAssetManifest,
 	renderProfile: observatoryRenderProfile,
@@ -331,7 +344,10 @@ export const sciFiRoomRuntimeSceneManifest = loadRuntimeSceneManifest({
 		kind: "authored",
 		id: "sci-fi-room.scene#playable-foundation",
 	},
-	level: sciFiRoomLevel,
+	level: applyPublishedLevelInstanceTransformOverrides({
+		runtimeSceneId: "sci_fi_room_runtime",
+		level: sciFiRoomLevel,
+	}),
 	prefabs: sciFiRoomPrefabs,
 	assets: sciFiRoomAssetManifest,
 	renderProfile: sciFiRoomRenderProfile,
@@ -375,7 +391,10 @@ export const solitudeRuntimeSceneManifest = loadRuntimeSceneManifest({
 		kind: "authored",
 		id: "solitude.scene#playable-foundation",
 	},
-	level: solitudeLevel,
+	level: applyPublishedLevelInstanceTransformOverrides({
+		runtimeSceneId: "solitude_runtime",
+		level: solitudeLevel,
+	}),
 	prefabs: solitudePrefabs,
 	assets: solitudeAssetManifest,
 	renderProfile: solitudeRenderProfile,
@@ -401,7 +420,10 @@ export const yggdrasilRuntimeSceneManifest = loadRuntimeSceneManifest({
 		kind: "authored",
 		id: "yggdrasil.scene#primitive-parity-foundation",
 	},
-	level: yggdrasilLevel,
+	level: applyPublishedLevelInstanceTransformOverrides({
+		runtimeSceneId: "yggdrasil_runtime",
+		level: yggdrasilLevel,
+	}),
 	prefabs: yggdrasilPrefabs,
 	assets: yggdrasilAssetManifest,
 	renderProfile: yggdrasilRenderProfile,

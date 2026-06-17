@@ -274,6 +274,7 @@ export function serializeLevelEditorSavedAuthoringModuleSource(
 		"// Source: LevelEditorAuthoringPersistenceContract. Do not edit by hand.",
 		'import type { LevelEditorSavedAuthoringModuleData } from "../saveTransaction.js";',
 		"",
+		"// biome-ignore format: preserve stable generated authoring payload formatting.",
 		`export const levelEditorAuthoringSaveModule = ${serializedModule} satisfies LevelEditorSavedAuthoringModuleData;`,
 		"",
 	].join("\n");

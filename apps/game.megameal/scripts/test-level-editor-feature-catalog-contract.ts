@@ -4,6 +4,13 @@ import {
 	createObjectLibraryReplacementPreviewMessage,
 	objectLibrarySubjectFromSelection,
 } from "../src/app/editor/levelEditorObjectLibrary.js";
+import { buildLevelEditorWorkspaceModel } from "../src/app/editor/levelEditorWorkspaceModel.js";
+import {
+	type LevelEditorFeatureFamilyCoverage,
+	buildLevelEditorFeatureCoverageRegistry,
+	buildLevelEditorOwnerRegistry,
+	validateLevelEditorFeatureCoverageRegistry,
+} from "../src/game/editor/authoring/ownerRegistry.js";
 import {
 	buildEditorBuildPublishPlan,
 	validateEditorBuildPublishPlan,
@@ -34,6 +41,73 @@ import {
 	assertDefined,
 	assertEqual,
 } from "./contractTestHelpers.js";
+
+const ownerRegistry = buildLevelEditorOwnerRegistry();
+const featureCoverage = buildLevelEditorFeatureCoverageRegistry(ownerRegistry);
+assertDeepEqual(
+	validateLevelEditorFeatureCoverageRegistry(featureCoverage, ownerRegistry),
+	[],
+	"Expected level editor feature-family publish coverage to validate.",
+);
+
+const featureFamiliesById = new Map(
+	featureCoverage.families.map((family) => [family.id, family] as const),
+);
+for (const familyId of [
+	"runtime-scene-selection",
+	"level-instance-transform",
+	"level-instance-structure",
+	"component-editing",
+	"object-library-placement",
+	"object-library-replacement",
+	"portal-interaction-targets",
+	"story-notes-and-gameplay-markers",
+	"environment-render-profile",
+	"authored-lighting",
+	"audio-authoring",
+	"terrain-packages",
+	"collision-authoring",
+	"npc-firefly-authoring",
+	"ai-generated-assets",
+	"camera-live-preview",
+	"build-publish-plan",
+]) {
+	assertDefined(
+		featureFamiliesById.get(familyId),
+		`Expected feature coverage for ${familyId}.`,
+	);
+}
+
+for (const family of featureCoverage.families) {
+	assertFeatureFamilyDoesNotPersistUnsupportedFields(family);
+}
+
+const workspaceModel = buildLevelEditorWorkspaceModel({
+	selectedRuntimeSceneId: portalArenaRuntimeSceneManifest.id,
+});
+const workspaceEditableFamilyIds = new Set(
+	workspaceModel.objects.flatMap((object) =>
+		object.fields.some((field) => !field.readOnly)
+			? workspaceFeatureFamilyIdsForCategory(object.category)
+			: [],
+	),
+);
+for (const familyId of workspaceEditableFamilyIds) {
+	const family = assertDefined(
+		featureFamiliesById.get(familyId),
+		`Expected editable workspace category to have feature coverage ${familyId}.`,
+	);
+	assertNotEqual(
+		family.publishStatus,
+		"unsupported-for-publish",
+		`Expected editable workspace family ${familyId} to have owner coverage or be read-only.`,
+	);
+	assertAtLeast(
+		family.ownerTargetIds.length,
+		1,
+		`Expected editable workspace family ${familyId} to resolve owner targets.`,
+	);
+}
 
 const objectLibrary = buildManifestBackedObjectLibrary();
 
@@ -78,6 +152,12 @@ assertEqual(
 	fireflyEntry.placement?.writesFiles,
 	false,
 	"Expected object library insertion drafts not to write files directly.",
+);
+assertFeatureFamilyDraftOnlyWithOwners(
+	assertDefined(
+		featureFamiliesById.get("object-library-placement"),
+		"Expected object library placement feature coverage.",
+	),
 );
 assertIncludes(
 	fireflyEntry.runtimeSceneIds,
@@ -132,6 +212,12 @@ assertEqual(
 	portalReplacementDraft.writesFiles,
 	false,
 	"Expected object-library replacements not to write files directly.",
+);
+assertFeatureFamilyDraftOnlyWithOwners(
+	assertDefined(
+		featureFamiliesById.get("object-library-replacement"),
+		"Expected object library replacement feature coverage.",
+	),
 );
 assertEqual(
 	portalReplacementDraft.mutatesRuntimeDirectly,
@@ -244,6 +330,12 @@ assertEqual(
 	false,
 	"Expected firefly insert operation to require an authoring transaction.",
 );
+assertFeatureFamilyDraftOnlyWithOwners(
+	assertDefined(
+		featureFamiliesById.get("npc-firefly-authoring"),
+		"Expected NPC/firefly feature coverage.",
+	),
+);
 assertEqual(
 	insertFirefly.instance.prefabId,
 	defaultFireflyNpcAuthoringTemplate.prefabId,
@@ -331,6 +423,12 @@ assertIncludes(
 	"renderProfile.environment.environmentIntensity",
 	"Expected portal arena environment intensity control.",
 );
+assertFeatureFamilyDraftOnlyWithOwners(
+	assertDefined(
+		featureFamiliesById.get("environment-render-profile"),
+		"Expected environment render-profile feature coverage.",
+	),
+);
 assertIncludes(
 	portalEnvironment.audio.sceneMusicTrackIds,
 	"audio_ambient_portal_deck",
@@ -345,6 +443,12 @@ assertEqual(
 	portalEnvironment.audio.trackControls[0]?.operationDraft.writesFiles,
 	false,
 	"Expected audio track operation drafts not to write files directly.",
+);
+assertFeatureFamilyDraftOnlyWithOwners(
+	assertDefined(
+		featureFamiliesById.get("audio-authoring"),
+		"Expected audio authoring feature coverage.",
+	),
 );
 
 const mirandaEnvironment = buildEnvironmentAuthoringModel(
@@ -376,6 +480,12 @@ assertEqual(
 	false,
 	"Expected light operation drafts not to write files directly.",
 );
+assertFeatureFamilyDraftOnlyWithOwners(
+	assertDefined(
+		featureFamiliesById.get("authored-lighting"),
+		"Expected authored lighting feature coverage.",
+	),
+);
 assertDeepEqual(
 	mirandaEnvironment.validation.errors,
 	[],
@@ -402,6 +512,14 @@ assertEqual(
 	cameraEditDraft.writesFiles,
 	false,
 	"Expected camera live/edit operation drafts not to write files.",
+);
+assertEqual(
+	assertDefined(
+		featureFamiliesById.get("camera-live-preview"),
+		"Expected camera live preview feature coverage.",
+	).storagePolicy,
+	"live-preview-only",
+	"Expected camera live/edit mode to stay preview-only with no save-draft storage.",
 );
 assertEqual(
 	cameraEditDraft.request.mode,
@@ -439,6 +557,14 @@ assertEqual(
 	true,
 	"Expected editor publish plan to stay local-only.",
 );
+assertEqual(
+	assertDefined(
+		featureFamiliesById.get("build-publish-plan"),
+		"Expected build/publish plan feature coverage.",
+	).storagePolicy,
+	"read-only-no-save",
+	"Expected current build/publish plan to remain read-only and not editor-draft persisted.",
+);
 
 const scripts = buildPlan.steps
 	.filter((step) => step.commandKind === "package-script")
@@ -474,7 +600,7 @@ assertEqual(
 );
 
 console.log(
-	`Level editor feature catalog contract passed for ${objectLibrary.groups.length} groups, ${npcCatalog.templates.length} NPC templates, and ${buildPlan.steps.length} build/publish steps.`,
+	`Level editor feature catalog contract passed for ${objectLibrary.groups.length} groups, ${npcCatalog.templates.length} NPC templates, ${featureCoverage.families.length} feature families, and ${buildPlan.steps.length} build/publish steps.`,
 );
 
 function assertIncludes<T>(
@@ -492,6 +618,70 @@ function assertAtLeast(actual: number, minimum: number, message: string): void {
 		throw new Error(
 			`${message} Expected at least ${minimum}, received ${actual}.`,
 		);
+	}
+}
+
+function assertNotEqual<T>(actual: T, expected: T, message: string): void {
+	if (actual === expected) {
+		throw new Error(`${message} Received ${String(actual)}.`);
+	}
+}
+
+function assertFeatureFamilyDraftOnlyWithOwners(
+	family: LevelEditorFeatureFamilyCoverage,
+): void {
+	assertEqual(
+		family.publishStatus,
+		"registered-owner-draft-only",
+		`Expected feature family ${family.id} to declare draft-only owner coverage until a publish writer exists.`,
+	);
+	assertEqual(
+		family.storagePolicy,
+		"save-draft-only-non-runtime",
+		`Expected feature family ${family.id} to avoid permanent editor-only runtime storage.`,
+	);
+	assertAtLeast(
+		family.ownerTargetIds.length,
+		1,
+		`Expected feature family ${family.id} to resolve owner targets.`,
+	);
+}
+
+function assertFeatureFamilyDoesNotPersistUnsupportedFields(
+	family: LevelEditorFeatureFamilyCoverage,
+): void {
+	if (family.publishStatus !== "unsupported-for-publish") {
+		return;
+	}
+
+	assertEqual(
+		family.storagePolicy,
+		"blocked-no-save",
+		`Expected unsupported feature family ${family.id} to block save-draft storage.`,
+	);
+	assertEqual(
+		family.ownerTargetIds.length,
+		0,
+		`Expected unsupported feature family ${family.id} to avoid owner targets.`,
+	);
+}
+
+function workspaceFeatureFamilyIdsForCategory(
+	category: string,
+): readonly string[] {
+	switch (category) {
+		case "spawn":
+			return ["level-instance-transform"];
+		case "lights":
+			return ["level-instance-transform", "authored-lighting"];
+		case "portals":
+			return ["level-instance-transform", "portal-interaction-targets"];
+		case "audio":
+			return ["level-instance-transform", "audio-authoring"];
+		case "collision":
+			return ["collision-authoring"];
+		default:
+			return [];
 	}
 }
 

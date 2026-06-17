@@ -4,6 +4,11 @@ export {
 	serializeLevelEditorAuthoringWritePlan,
 } from "./writePlan.js";
 export {
+	buildLevelEditorAuthoringOwnerWritePlan,
+	serializeLevelEditorAuthoringOwnerWritePlan,
+	type BuildLevelEditorAuthoringOwnerWritePlanOptions,
+} from "./ownerWritePlan.js";
+export {
 	validateLevelEditorAuthoringDocument,
 	validateLevelEditorAuthoringTransaction,
 } from "./validation.js";
@@ -15,8 +20,13 @@ export type {
 	LevelEditorAuthoringInsertInstanceOperation,
 	LevelEditorAuthoringOperationPersistence,
 	LevelEditorAuthoringOperationTarget,
+	LevelEditorAuthoringLevelTransformWrite,
 	LevelEditorAuthoringOwnerKind,
 	LevelEditorAuthoringOwnerProvenance,
+	LevelEditorAuthoringOwnerWriteArtifact,
+	LevelEditorAuthoringOwnerWriteArtifactPayload,
+	LevelEditorAuthoringOwnerWritePlan,
+	LevelEditorAuthoringOwnerWriteTarget,
 	LevelEditorAuthoringProjectionOptions,
 	LevelEditorAuthoringRecord,
 	LevelEditorAuthoringRemoveComponentOperation,
