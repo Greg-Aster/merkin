@@ -28,19 +28,31 @@ contentFormat: "manual"
 lang: ""
 mascotContext: "Now that you know what's out there and how they organize, let's discuss the accidental ways they'll eliminate you. This comprehensive analysis focuses on helpful aliens and cosmic indifference—because the universe's most dangerous entities are often the ones trying to help."
 ---
-import ManualChapterHero from '../../../components/reader/ManualChapterHero.astro'
-import ManualChapterIndex from '../../../components/reader/ManualChapterIndex.astro'
-import ManualChapterLink from '../../../components/reader/ManualChapterLink.astro'
-import ManualComparisonPanel from '../../../components/reader/ManualComparisonPanel.astro'
-import ManualNotice from '../../../components/reader/ManualNotice.astro'
+import '../../../styles/reader/first-contact-manual.css'
+import '../../../styles/reader/first-contact-manual-flow.css'
 
-<ManualChapterHero
-  chapter="Chapter 3"
-  title="The Complete Guide to First Contact Catastrophes"
-  icon="🤝"
-  quote={`Welcome to the comprehensive analysis of why first contact scenarios consistently transform from "exciting scientific opportunity" to "existential catastrophe requiring extensive therapy and potentially new bodies"—not through malicious intent, but through helpful assistance and cosmic indifference. This chapter explains why human survival strategies are mathematically inadequate against entities trying to help you, and how these inadequacies manifest as creative extinction events through customer service excellence.`}
-  quoteMarks={false}
-/>
+<section className="not-prose fcmi-hero fcmi-window fcmi-tone-purple" aria-labelledby="chapter-3-heading">
+  <div className="fcmi-shell">
+    <div className="fcmi-frame fcmi-hero-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <div className="fcmi-hero-header">
+        <div className="fcmi-icon-tile fcmi-hero-icon" aria-hidden="true">🤝</div>
+        <div className="fcmi-hero-heading">
+          <p className="fcmi-kicker">Chapter 3</p>
+          <h1 id="chapter-3-heading" className="fcmi-hero-title">The Complete Guide to First Contact Catastrophes</h1>
+        </div>
+      </div>
+
+      <blockquote className="fcmi-hero-quote">
+        Welcome to the comprehensive analysis of why first contact scenarios consistently transform from "exciting scientific opportunity" to "existential catastrophe requiring extensive therapy and potentially new bodies"—not through malicious intent, but through helpful assistance and cosmic indifference. This chapter explains why human survival strategies are mathematically inadequate against entities trying to help you, and how these inadequacies manifest as creative extinction events through customer service excellence.
+      </blockquote>
+    </div>
+  </div>
+</section>
 
 ## Chapter Overview
 
@@ -52,43 +64,68 @@ This chapter examines the fundamental impossibility of defending against cosmic-
 
 ## Chapter Index
 
-<ManualChapterIndex
-  items={[
-    { number: '3.1', title: 'Why Your Survival Strategy Is Adorably Inadequate' },
-    { number: '3.2', title: "The Universe's Accidental Elimination Catalog" },
-    { number: '3.3', title: 'Six Primary Helpful Disaster Mechanisms' },
-    { number: '3.4', title: 'The Evasion Doctrine: Statistical Survival Principles' },
-  ]}
-  sidebarPanels={[
-    {
-      title: '🤝 Disaster Categories',
-      items: [
-        { tone: 'blue', label: 'Helpful Accidents', detail: "they're trying to help" },
-        { tone: 'purple', label: 'Scale Mismatches', detail: "you're too small to notice" },
-        { tone: 'cyan', label: 'Communication Errors', detail: 'lost in translation' },
-        { tone: 'green', label: 'Contamination Events', detail: "they're infectious" },
-        { tone: 'yellow', label: 'Technical Failures', detail: 'physics stops working' },
-        { tone: 'red', label: 'Psychological Overwhelm', detail: 'enlightenment as trauma' },
-      ],
-    },
-    {
-      title: '💀 Statistical Reality',
-      lines: [
-        '• Successful peaceful contact: 0.003%',
-        '• Helpful alien survival rate: 23%',
-        '• Hostile alien survival rate: 46%',
-        '• Customer service disasters: 89%',
-        '• Accidental elimination: 77%',
-        '• Therapy required afterward: 94%',
-        '• Career change to safer profession: 78%',
-      ],
-    },
-  ]}
-/>
+<section className="not-prose fcmi-index fcmi-chapter-index fcmi-tone-blue" aria-labelledby="chapter-3-index-heading">
+  <div className="fcmi-index-shell">
+    <div className="fcmi-index-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
 
-<ManualNotice tone="blue" title="Critical Warning" icon="⚠️" class="mt-6">
-  This chapter documents both the theoretical inevitability and practical implementation of first contact catastrophes through helpful assistance rather than hostile intent. Understanding these frameworks may itself represent a vulnerability—some disaster mechanisms are activated by comprehension itself, mathematical proofs contained herein have been known to cause existential despair, and exposure to detailed elimination catalogs has resulted in persistent cosmic perspective disorder in 23% of readers.
-</ManualNotice>
+      <header className="fcmi-index-header">
+        <div>
+          <p className="fcmi-index-kicker">Chapter Reference</p>
+          <h2 id="chapter-3-index-heading" className="fcmi-index-title">Chapter Index</h2>
+        </div>
+        <p className="fcmi-index-meta">Sections 3.1–3.4</p>
+      </header>
+
+      <div className="fcmi-chapter-index-grid">
+        <div className="fcmi-section-list fcmi-chapter-section-list">
+          <a className="fcmi-section-row fcmi-tone-blue" href="#31-why-your-survival-strategy-is-adorably-inadequate">
+            <span className="fcmi-section-code">3.1</span>
+            <span className="fcmi-section-title">Why Your Survival Strategy Is Adorably Inadequate</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-purple" href="#32-the-universes-accidental-elimination-catalog">
+            <span className="fcmi-section-code">3.2</span>
+            <span className="fcmi-section-title">The Universe's Accidental Elimination Catalog</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-orange" href="#33-six-primary-helpful-disaster-mechanisms">
+            <span className="fcmi-section-code">3.3</span>
+            <span className="fcmi-section-title">Six Primary Helpful Disaster Mechanisms</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-green" href="#34-the-evasion-doctrine-statistical-survival-principles">
+            <span className="fcmi-section-code">3.4</span>
+            <span className="fcmi-section-title">The Evasion Doctrine: Statistical Survival Principles</span>
+          </a>
+        </div>
+
+        <aside className="fcmi-legend-window fcmi-tone-gray" aria-label="Disaster categories">
+          <div className="fcmi-legend-header">
+            <span className="fcmi-legend-kicker">Disaster Categories</span>
+            <strong>Helpful Failure Modes</strong>
+          </div>
+          <div className="fcmi-legend-list">
+            <div className="fcmi-legend-row fcmi-tone-blue"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Helpful Accidents</span><span className="fcmi-legend-meta">they're trying to help</span></div>
+            <div className="fcmi-legend-row fcmi-tone-purple"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Scale Mismatches</span><span className="fcmi-legend-meta">you're too small to notice</span></div>
+            <div className="fcmi-legend-row fcmi-tone-cyan"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Communication Errors</span><span className="fcmi-legend-meta">lost in translation</span></div>
+            <div className="fcmi-legend-row fcmi-tone-green"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Contamination Events</span><span className="fcmi-legend-meta">they're infectious</span></div>
+            <div className="fcmi-legend-row fcmi-tone-yellow"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Technical Failures</span><span className="fcmi-legend-meta">physics stops working</span></div>
+            <div className="fcmi-legend-row fcmi-tone-red"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Psychological Overwhelm</span><span className="fcmi-legend-meta">enlightenment as trauma</span></div>
+          </div>
+          <div className="fcmi-legend-note">
+            <p><strong>Statistical Reality:</strong></p>
+            <p>• Successful peaceful contact: 0.003%<br />• Helpful alien survival rate: 23%<br />• Hostile alien survival rate: 46%<br />• Customer service disasters: 89%<br />• Accidental elimination: 77%<br />• Therapy required afterward: 94%<br />• Career change to safer profession: 78%</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p className="not-prose fcmi-notice fcmi-notice--blue">
+  <strong>Critical Warning:</strong> This chapter documents both the theoretical inevitability and practical implementation of first contact catastrophes through helpful assistance rather than hostile intent. Understanding these frameworks may itself represent a vulnerability—some disaster mechanisms are activated by comprehension itself, mathematical proofs contained herein have been known to cause existential despair, and exposure to detailed elimination catalogs has resulted in persistent cosmic perspective disorder in 23% of readers.
+</p>
 
 ---
 
@@ -98,30 +135,36 @@ Human survival strategies evolved for terrestrial threats—predators with simil
 
 ### The Great Cognitive Mismatch
 
-<ManualComparisonPanel
-  tone="blue"
-  icon="⚠️"
-  title="The Assistance Mismatch"
-  subtitle="Why evolution prepared us for the wrong type of help entirely"
-  leftTitle="What We're Optimized For"
-  leftItems={[
-    'Help from similar biological entities (fellow humans)',
-    'Assistance using familiar technology (tools we understand)',
-    'Aid that respects human biological limitations (survivable improvements)',
-    'Help that operates on human timescales (minutes, not millennia)',
-    'Assistance following comprehensible physics (laws that make sense)',
-    'Single-category help with predictable consequences (one improvement at a time)',
-  ]}
-  rightTitle="What We Actually Receive Out There"
-  rightItems={[
-    'Assistance from reality-manipulating entities (cosmic customer service)',
-    'Help using incomprehensible technology (magic-level improvements)',
-    'Aid that ignores biological constraints (death-level enhancements)',
-    'Assistance on geological timescales (patience of mountains)',
-    'Help that treats physics as suggestions (universe warranty void)',
-    'Multi-vector assistance creating impossible contradictions (help overload)',
-  ]}
-/>
+<section className="not-prose fcmi-section-panel fcmi-tone-blue" aria-labelledby="assistance-mismatch-heading">
+  <div className="fcmi-section-panel-inner">
+    <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+    <header className="fcmi-panel-header">
+      <div className="fcmi-panel-heading-group">
+        <p className="fcmi-kicker">Assistance Analysis</p>
+        <h3 id="assistance-mismatch-heading" className="fcmi-title">The Assistance Mismatch</h3>
+      </div>
+      <span className="fcmi-icon-tile" aria-hidden="true">⚠️</span>
+    </header>
+
+    <div className="fcmi-panel-body">
+      <p className="fcmi-panel-copy">Why evolution prepared us for the wrong type of help entirely</p>
+      <div className="fcmi-list-grid">
+        <section className="fcmi-mini-card fcmi-tone-green">
+          <div className="fcmi-mini-head"><strong>What We're Optimized For</strong></div>
+          <p>• Help from similar biological entities (fellow humans)<br />• Assistance using familiar technology (tools we understand)<br />• Aid that respects human biological limitations (survivable improvements)<br />• Help that operates on human timescales (minutes, not millennia)<br />• Assistance following comprehensible physics (laws that make sense)<br />• Single-category help with predictable consequences (one improvement at a time)</p>
+        </section>
+        <section className="fcmi-mini-card fcmi-tone-red">
+          <div className="fcmi-mini-head"><strong>What We Actually Receive Out There</strong></div>
+          <p>• Assistance from reality-manipulating entities (cosmic customer service)<br />• Help using incomprehensible technology (magic-level improvements)<br />• Aid that ignores biological constraints (death-level enhancements)<br />• Assistance on geological timescales (patience of mountains)<br />• Help that treats physics as suggestions (universe warranty void)<br />• Multi-vector assistance creating impossible contradictions (help overload)</p>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
 
 ### Scale Blindness: The Helpful Limitation
 
@@ -171,9 +214,9 @@ Human psychology is wired for gratitude and reciprocity when offered assistance.
 
 ### The Mathematics of Assistance Impossibility
 
-The universe operates under no obligation to provide you with help you can understand, survive, or benefit from. The math is depressingly simple: if cosmic assistance operates across multiple improvement vectors simultaneously (quantum, dimensional, biological, temporal), then every acceptance creates exploitable vulnerabilities in alternative survival vectors.
+The universe operates under no obligation to provide you with help you can understand, survive, or benefit from. The math is depressingly simple: if cosmic assistance operates across multiple improvement vectors simultaneously (biological, technological, reality, temporal, dimensional), then every acceptance creates exploitable vulnerabilities in alternative survival vectors.
 
-**The Multi-Vector Assistance Problem:** Try to solve this equation—accept quantum enhancement while maintaining biological integrity while stabilizing temporal fields while preserving dimensional coordinates. It's like trying to be simultaneously optimized and unoptimized, by the same helper, at the same time, while also being improved in two places at once and existing in multiple timelines. The universe literally won't let you survive the help.
+**The Multi-Vector Assistance Problem:** Try to solve this equation—accept biological enhancement while integrating technological upgrades while stabilizing reality and temporal fields while preserving dimensional coordinates. It's like trying to be simultaneously optimized and unoptimized, by the same helper, at the same time, while also being improved in two places at once and existing in multiple timelines. The universe literally won't let you survive the help.
 
 <div className="bg-gray-900/30 border border-gray-500/50 rounded-lg p-6 mb-6">
   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -628,7 +671,7 @@ Analysis of 23,847 documented helpful contact scenarios reveals six primary assi
 
 <div className="bg-cyan-900/15 border-2 border-cyan-500/50 rounded-lg p-6 mb-6">
   <div className="flex items-center gap-4 mb-4">
-    <div className="w-16 h-16 bg-cyan-500/20 rounded-lg flex items-center joy-center">
+    <div className="w-16 h-16 bg-cyan-500/20 rounded-lg flex items-center justify-center">
       <span className="text-cyan-400 text-2xl">🧠</span>
     </div>
     <div className="flex-1">
@@ -776,7 +819,7 @@ The mathematical certainty of assistance failure creates a universe where surviv
 
 ### Mathematical Foundation: Universal Survival Equations
 
-The math is depressingly simple but unforgiving: helpful contact equals catastrophic optimization with statistical certainty approaching 1.0. In a universe containing multiple routes to beneficial intelligence, infinite spatial/temporal scales, and no physical limitations on assistance optimization, contact with multi-vector helpful intelligence approaches mathematical enhancement certainly over cosmic timescales.
+The math is depressingly simple but unforgiving: helpful contact equals catastrophic optimization with statistical certainty approaching 1.0. In a universe containing multiple routes to beneficial intelligence, infinite spatial/temporal scales, and no physical limitations on assistance optimization, contact with multi-vector helpful intelligence approaches mathematical certainty of enhancement over cosmic timescales.
 
 <div className="bg-gradient-to-r from-black/60 to-blue-900/40 border-2 border-blue-500/50 rounded-xl p-6 my-6">
   <div className="flex items-center gap-4 mb-4">
@@ -853,37 +896,68 @@ The evidence demands complete revision of human first contact doctrine when faci
 
 **Final Truth:** The universe is not only stranger than you imagine—it's more helpful than you can survive. Your best strategy is not preparation for beneficial contact, but prevention of helpful contact through comprehensive assistance avoidance protocols and strategic cultivation of cosmic unimportance.
 
-<ManualChapterLink
-  href="/reader/first-contact-manual/chapter-4/"
-  number="4"
-  title="When They Actually Want You Dead"
-  subtitle="Hostile elimination through superior military doctrine"
-  tone="red"
-  description="A comprehensive analysis of hostile first contact scenarios where alien civilizations actively hunt, eliminate, or conquer human civilization through deliberate military action, resource competition, and predatory behavior. Covers why hostile aliens are statistically less dangerous than helpful ones."
-  tags={[
-    { tone: 'yellow', label: 'Dark Forest Theory' },
-    { tone: 'red', label: 'Military Doctrine' },
-    { tone: 'purple', label: 'Resource Competition' },
-  ]}
-/>
+<a className="not-prose fcmi-next-link fcmi-window fcmi-tone-red"
+   href="/reader/first-contact-manual/chapter-4/"
+   aria-label="Continue to Chapter 4: When They Actually Want You Dead">
+  <div className="fcmi-shell">
+    <div className="fcmi-frame fcmi-next-link-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <span className="fcmi-next-link-number" aria-hidden="true">04</span>
+      <span className="fcmi-next-link-body">
+        <span className="fcmi-kicker">Next Chapter</span>
+        <strong className="fcmi-next-link-title">When They Actually Want You Dead</strong>
+        <span className="fcmi-next-link-subtitle">Hostile elimination through superior military doctrine</span>
+        <span className="fcmi-next-link-description">A comprehensive analysis of hostile first contact scenarios where alien civilizations actively hunt, eliminate, or conquer human civilization through deliberate military action, resource competition, and predatory behavior. Covers why hostile aliens are statistically less dangerous than helpful ones.</span>
+        <span className="fcmi-next-link-tags" aria-label="Chapter topics">
+          <span className="fcmi-badge fcmi-tone-yellow">Dark Forest Theory</span>
+          <span className="fcmi-badge fcmi-tone-red">Military Doctrine</span>
+          <span className="fcmi-badge fcmi-tone-purple">Resource Competition</span>
+        </span>
+      </span>
+      <span className="fcmi-next-link-arrow" aria-hidden="true">→</span>
+    </div>
+  </div>
+</a>
 
 ---
 
-<div className="bg-gray-900/50 border border-gray-500/50 rounded-lg p-4 mt-6">
-  <h5 className="text-gray-300 font-bold text-sm mb-3">COMPREHENSIVE CHAPTER REFERENCES</h5>
-  <p className="text-gray-400 text-xs mb-3">*Compiled during extended exposure to helpful alien customer service across multiple star systems, with special thanks to our insurance company's "Cosmic Assistance Exposure" policy and Bi-Smart's excellent optimization specialists.*</p>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-400 leading-relaxed font-jetbrains-mono">
-    <div>
-      <span className="font-bold text-gray-300">Assistance Impossibility Analysis:</span><br />
-      [1-23] Multi-vector enhancement mathematics, scale blindness documentation, helpful contradiction matrices, assistance entity multiplication factors, optimization asymmetry calculations (why every improvement becomes a cosmic "help me" sign)
-    </div>
-    <div>
-      <span className="font-bold text-gray-300">Beneficial Elimination Method Cataloging:</span><br />
-      [24-47] Biological assistance studies, reality enhancement techniques, scale-based optimization protocols, customer service mechanisms, consciousness improvement operations (the universe's comprehensive toolkit for helpful enhancement)
+<section className="not-prose fcmi-section-panel fcmi-tone-gray" aria-labelledby="chapter-3-references-heading">
+  <div className="fcmi-section-panel-inner">
+    <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+    <header className="fcmi-panel-header">
+      <div className="fcmi-panel-heading-group">
+        <p className="fcmi-kicker">Reference Appendix</p>
+        <h3 id="chapter-3-references-heading" className="fcmi-title">COMPREHENSIVE CHAPTER REFERENCES</h3>
+      </div>
+      <span className="fcmi-icon-tile" aria-hidden="true">📚</span>
+    </header>
+
+    <div className="fcmi-panel-body">
+      <p className="fcmi-caption">*Compiled during extended exposure to helpful alien customer service across multiple star systems, with special thanks to our insurance company's "Cosmic Assistance Exposure" policy and Bi-Smart's excellent optimization specialists.*</p>
+
+      <div className="fcmi-list-grid">
+        <section className="fcmi-mini-card fcmi-tone-gray">
+          <div className="fcmi-mini-head"><strong>Assistance Impossibility Analysis:</strong></div>
+          <p>[1-23] Multi-vector enhancement mathematics, scale blindness documentation, helpful contradiction matrices, assistance entity multiplication factors, optimization asymmetry calculations (why every improvement becomes a cosmic "help me" sign)</p>
+        </section>
+        <section className="fcmi-mini-card fcmi-tone-gray">
+          <div className="fcmi-mini-head"><strong>Beneficial Elimination Method Cataloging:</strong></div>
+          <p>[24-47] Biological assistance studies, reality enhancement techniques, scale-based optimization protocols, customer service mechanisms, consciousness improvement operations (the universe's comprehensive toolkit for helpful enhancement)</p>
+        </section>
+      </div>
+
+      <section className="fcmi-document-excerpt fcmi-tone-gray">
+        <p className="fcmi-excerpt-label">Bi-Smart Corporation Disclaimer</p>
+        <blockquote><strong>Bi-Smart Corporation Disclaimer:</strong> This field guide is provided for educational and survival purposes only. Side effects may include: questioning the nature of assistance, spontaneous understanding of cosmic helpfulness, persistent nightmares involving excellent customer service representatives, and the uncomfortable realization that gratitude operates below the help threshold of most cosmic entities. This guide does not constitute a guarantee of survival, though it may improve your odds of recognizing when to politely decline cosmic assistance. For best results, combine with Bi-Smart's "Advanced Assistance Avoidance" training course and a healthy respect for the statistical improbability of surviving cosmic helpfulness. Shop smart—shop Bi-Smart. You got that?</blockquote>
+      </section>
     </div>
   </div>
-  
-  <div className="mt-4 p-3 bg-black/40 border border-gray-600/30 rounded">
-    <p className="text-xs text-gray-400 italic">**Bi-Smart Corporation Disclaimer:** This field guide is provided for educational and survival purposes only. Side effects may include: questioning the nature of assistance, spontaneous understanding of cosmic helpfulness, persistent nightmares involving excellent customer service representatives, and the uncomfortable realization that gratitude operates below the help threshold of most cosmic entities. This guide does not constitute a guarantee of survival, though it may improve your odds of recognizing when to politely decline cosmic assistance. For best results, combine with Bi-Smart's "Advanced Assistance Avoidance" training course and a healthy respect for the statistical improbability of surviving cosmic helpfulness. Shop smart—shop Bi-Smart. You got that?</p>
-  </div>
-</div>
+</section>

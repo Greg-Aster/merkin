@@ -1,422 +1,589 @@
 # First Contact Manual — Style & Layout Contract
 
-Applies to `src/content/reader/first-contact-manual/*.mdx`. The `forward.mdx` chapter
-is the layout reference — when in doubt, match its newest structural patterns: the rounded
-technical-window Chapter Index and the full-width survival imperative image.
+Applies to `src/content/reader/first-contact-manual/*.mdx`.
+`forward.mdx` is the visual reference implementation. Match its styling language, class
+naming, tone usage, rounded-window structure, and component-free CSS approach. Do not
+copy forward-only content blocks into normal chapters — those are clearly marked in
+the block inventory below.
 
-Goal: every chapter should look like it was assembled from the same component kit.
-Drift happens when new sections are built with hand-rolled `<div className="...">`
-blocks instead of the shared components in `src/components/reader/`. **Prefer a
-component over a raw div every time one fits.**
+**Goal:** every chapter reads as a single designed book. All visual structure comes from
+shared imported CSS classes. No Astro components for styling. No per-chapter
+`<style>` blocks. No Tailwind class piles in MDX.
 
-Primary visual direction: a professional textbook/reference manual with subtle
-emergency-interface DNA. The book should feel polished, readable, and official,
-not like a generic neon sci-fi HUD. Visual richness should come from reusable
-layout, spacing, frames, type hierarchy, and controlled texture — not from extra
-jokes, filler copy, or one-off CSS flourishes.
+---
 
-## Component kit (use these, not raw divs)
+## CSS system
 
-All live in `src/components/reader/`. Import only what a chapter actually uses.
+**Base file:** `src/styles/reader/first-contact-manual.css`
 
-- **`ManualChapterHero`** — the title block at the top of every chapter (`chapter`,
-  `title`, `icon`, `quote`, optional `cite`). Always purple. One per chapter.
-- **`ManualChapterIndex`** — the "Chapter Index" section. This is now one of the
-  visual anchors of the manual. It should support the rounded technical-window
-treatment used by the forward's top-of-book index: rounded glass container,
-inset border, corner brackets, subtle scanlines/noise, large faded chapter
-numerals, compact ruled section rows, and section-appropriate accent colors.
-It also supports the detailed numbered-section layout
-  (with `items[].sections`) used by chapters 1–5, and the sidebar "tone legend"
-  (`sidebarTitle`/`sidebarItems`/`sidebarNote` or `sidebarPanels`). The forward's
-  top-of-book index and per-chapter indexes should both go through this component.
-  Sidebar prop guide:
-  - `variant="reference"` or equivalent — the preferred textbook/technical-window
-    style for the forward index and any polished contents spread
-  - `sidebarItems` — flat tone-labeled list (simple one-panel legend)
-  - `sidebarPanels` — grouped panels each with their own `items`, `lines`, and
-    `note` (richer sidebar; prefer this for the threat-codes legend)
-  - `sidebarNote` — footer note appended beneath a `sidebarItems` list
-- **`ManualPanel`** — the general-purpose colored card/section container. Use for
-  any "boxed callout with a title and body" instead of a hand-written
-  `<div className="bg-X-900/15 border border-X-500/30 rounded-lg p-5">...`. Props:
-  `tone`, `emphasis` (`subtle`|`strong`), `icon`, `iconStyle` (`soft`|`solid`),
-  `title`, `subtitle`. Use `emphasis="strong"` for critical warnings/imperatives
-  (thick border); omit it (default `subtle`) for informational panels. Body content
-  goes in `<slot />`.
-- **`ManualNotice`** — short inline warnings/asides. `variant="bar"` for the
-  left-border-strip style, `variant="panel"` (default) for a boxed note.
-- **`ManualListGrid`** — the 2-or-3-column "cards with bullet lists" grid (e.g.
-  threat category breakdowns, comparison lists). Props: `cards[]`, `columns`.
-  Each card: `{ tone?, title, body?, items? }`. Use for simple title + body text or
-  title + bullet items. For cards that need custom inner layouts (progress bars,
-  stat rows, nested divs), use `ManualPanel` with slot content instead.
-- **`ManualComparisonPanel`** — a `ManualPanel` wrapping a 2-column
-  `ManualListGrid`, for "X vs Y" sections (e.g. helpful vs hostile, left/right
-  doctrine comparisons).
-- **`ManualChapterLink`** — the "next chapter" call-to-action card at the end of a
-  chapter. One per chapter (except the afterword, which is the end of the book).
-- **`ManualTechFrame`** — a restrained technical-window frame for reference sections,
-  indexes, official excerpts, tables, and polished textbook-style blocks. Use the
-  shared technical-window structure by default: rounded window, layered dark/glass
-  background, inset border, subtle scanlines/noise, corner brackets, and small
-  monospaced labels. Its color should inherit from the section/tone, not from a
-  hard-coded theme.
-  This is the preferred wrapper for the refined Chapter Index look.
-- **`ManualDangerFrame`** — high-emphasis survival warning frame. Use only for true
-  emergency panels or visual moments equivalent to the survival imperative image.
-  It may use red as the dominant accent; do not use this for ordinary index entries,
-  chapter overviews, or neutral reference content.
-- **`ManualSectionRows`** — compact textbook-style section rows. Use for subsection
-  lists inside `ManualChapterIndex` and other reference layouts. Section numbers
-  should use monospaced type; rows should be ruled or leader-lined, not chip-heavy.
-- **`ManualSurvivalImperative`** — the full-width "DON'T" image figure. Forward only
-  unless a chapter has an equivalent key image.
+**Threat-flow extension:** `src/styles/reader/first-contact-manual-flow.css`
 
-If a layout need doesn't fit any of these, extend the component (add a prop/variant)
-rather than writing a one-off styled div in the MDX. That keeps the drift contained
-to one file instead of N chapters.
+The base file owns the technical-window system and reusable `fcmi-*` primitives.
+The flow extension owns the tone-legend visual pass: stronger legend swatches,
+chapter index rails, section-row dots, panel tone rails, and destination-colored
+next links. Keep the flow extension small; do not move base layout ownership into it.
 
-## Tone palette (consistent meaning across the book)
-
-Pick the `tone` prop to match meaning, not just to vary color:
-
-| Tone     | Meaning in this manual                                  |
-|----------|----------------------------------------------------------|
-| `red`    | CRITICAL / hostile / reality-ending                       |
-| `orange` | HIGH / species-level threat / elimination methodology    |
-| `yellow` | ELEVATED / caution / "helpful but dangerous"              |
-| `blue`   | INFO / procedures / official protocol / neutral data      |
-| `purple` | SPECIAL / chapter hero / unique cosmic-scale cases        |
-| `green`  | POSITIVE / rare survival success                          |
-| `gray`   | Corporate / bureaucratic / Bi-Smart material              |
-| `cyan`/`teal` | Secondary accents inside index/sidebar lists only — don't introduce as a primary section tone |
-
-The "🎨 Threat Codes" legend in `forward.mdx` is the canonical definition of this
-palette — new chapters should reuse it via `ManualChapterIndex`'s `sidebarPanels`,
-not redefine it.
-
-## First Contact visual system
-
-The newer forward index and the "First, Last, and Only Truly Reliable Rule" image
-are the strongest visual references. Future styling should borrow their shared
-structure and polish while allowing each section of the site to keep its own color
-palette.
-
-This section is a **shape, typography, gradient, and component behavior contract**.
-It is not a fixed color palette. Agents should preserve the existing tone colors of
-each section unless the user explicitly asks for a color change.
-
-### Base visual principle
-
-The manual should read as a professional textbook/reference document that has been
-subtly shaped by emergency-interface and technical-window design.
-
-Default behavior:
-
-- keep prose areas readable, calm, and book-like
-- use rounded windows and layered panels for high-value reference sections
-- use color semantically through existing `tone` props and site tokens
-- use gradients, inset borders, corner brackets, and microtype for polish
-- avoid adding decorative copy merely to make a section feel alive
-
-Do not make the whole manual look like a generic neon HUD, trading-card grid, or
-video-game menu. The design should feel official and tactile, not gimmicky.
-
-### Color discipline
-
-Color is controlled by the existing site/theme/tone system. Do not hard-code a new
-universal color family into future MDX documents.
-
-Rules:
-
-- Preserve the existing tone palette unless the user asks otherwise.
-- `red` remains reserved for critical warnings, hostile states, survival imperatives,
-  or true danger moments.
-- `orange`, `yellow`, `blue`, `purple`, `green`, `gray`, `cyan`, and `teal` retain
-  their semantic meanings from the tone palette.
-- A component may use the local tone color for borders, glows, labels, section rules,
-  and corner brackets.
-- Neutral surfaces should usually remain dark, translucent, or glass-like, but the
-  accent color should come from the component tone or parent section.
-- Do not convert unrelated sections to blue, red, amber, or any other global color
-  merely because one reference page used that color successfully.
-
-The important part is consistency of **form**: rounded windows, layered depth,
-clean type, technical framing, and restrained gradients.
-
-### Shape language
-
-Use the survival imperative image and the refined Chapter Index as shape references:
-
-- large rounded outer windows
-- smaller rounded inner panels
-- inset border lines
-- corner bracket marks
-- thin technical rules
-- small decorative ticks/dots used sparingly
-- strong negative space
-- compact technical labels
-- panel depth through soft inner glow, not heavy shadows
-- grid alignment that feels like a textbook spread, not a random card wall
-
-Recommended radii:
-
-```css
---manual-radius-window: 1.5rem;
---manual-radius-panel: 1rem;
---manual-radius-small: 0.625rem;
+**Import at the top of every MDX chapter:**
+```js
+import '../../../styles/reader/first-contact-manual.css'
+import '../../../styles/reader/first-contact-manual-flow.css'
 ```
 
-Use these values as proportions, not as mandatory exact values. If the global site
-already has radius tokens, map this system onto those tokens instead of creating
-redundant ones.
+The paths resolve from `src/content/reader/first-contact-manual/` up to
+`src/styles/reader/`.
 
-### Gradient and surface language
+### Design tokens
 
-Panels should feel layered, polished, and lightly dimensional.
+All layout, color, and spacing derive from `--fcmi-*` CSS custom properties set on
+`:root` and inherited by `:where([class*="fcmi-"])`. The ones to know:
 
-Preferred surface recipes:
-
-- dark translucent base surface
-- subtle top-to-bottom linear gradient
-- faint radial glow from one corner or edge
-- inset highlight line at the top
-- soft inner glow using the local tone color
-- low-opacity border using the local tone color
-- optional second inset border for important reference windows
-
-Avoid:
-
-- flat single-color boxes when a section is meant to feel designed
-- harsh neon floods
-- thick glowing borders on ordinary content
-- heavy drop shadows that make panels look like floating app cards
-- random gradients that do not use the current tone or site palette
-
-Example pattern, using semantic variables rather than fixed colors:
-
-```css
-.manual-window {
-  border-radius: var(--manual-radius-window, 1.5rem);
-  border: 1px solid color-mix(in srgb, var(--manual-accent) 34%, transparent);
-  background:
-    radial-gradient(circle at 85% 12%, color-mix(in srgb, var(--manual-accent) 16%, transparent), transparent 36%),
-    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018)),
-    var(--manual-surface, rgba(8, 10, 16, 0.88));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    inset 0 0 32px color-mix(in srgb, var(--manual-accent) 10%, transparent),
-    0 24px 70px rgba(0,0,0,0.28);
-}
+```
+--fcmi-text-rgb / --fcmi-muted-rgb / --fcmi-dim-rgb    text hierarchy (RGB triples)
+--fcmi-surface-rgb / --fcmi-surface-2-rgb              background surfaces
+--fcmi-accent-rgb / --fcmi-accent-2-rgb / --fcmi-glow-rgb  tone color — changed by fcmi-tone-* classes
+--fcmi-radius-xl / -lg / -md / -sm                     border radii
+--fcmi-mono / --fcmi-sans                              fonts
 ```
 
-If `color-mix()` support is a concern, use existing project tokens or static RGBA
-values inside the component CSS, not inside MDX.
+Do not override token vars inline in MDX. Use `fcmi-tone-*` to change color.
 
-### Texture language
+---
 
-Allowed texture motifs:
+## Tone palette
 
-- very subtle scanlines
-- low-opacity paper/noise grain
-- faint radial glow
-- soft vignette
-- barely visible technical linework
-- inset frame borders
+Add `fcmi-tone-{color}` to the outermost element of a section. The class sets the
+three accent vars; all children that reference `var(--fcmi-accent-rgb)` update
+automatically. Set tone once on the parent — never on children.
 
-Keep these effects quiet. They should be felt before they are noticed. Never reduce
-readability for texture.
+| Class | Semantic meaning in this manual |
+|---|---|
+| `fcmi-tone-red` | CRITICAL / hostile / survival imperative |
+| `fcmi-tone-orange` | HIGH / species-level threat / elimination methods |
+| `fcmi-tone-yellow` | ELEVATED / caution / helpful-but-dangerous |
+| `fcmi-tone-blue` | INFO / procedures / official protocol / neutral data |
+| `fcmi-tone-cyan` | Ch. 1 accent (identification) |
+| `fcmi-tone-purple` | SPECIAL / chapter hero / cosmic-scale / afterword |
+| `fcmi-tone-green` | POSITIVE / rare survival success |
+| `fcmi-tone-gray` | Corporate / bureaucratic / Bi-Smart material |
 
-Use `prefers-reduced-motion` and avoid animated scanlines unless the user explicitly
-requests motion.
+Red is reserved for genuine danger — The Cardinal Rule, Emergency Protocol Hierarchy,
+and CRITICAL threat indicators. Do not use it decoratively.
 
-### Typography
+---
 
-Use typography to create polish before adding decoration:
+## Structural primitives
 
-- large faded chapter numerals as anchors
-- clean linked chapter titles
-- descriptions in quieter text
-- monospaced section numbers
-- compact ruled section rows
-- small uppercase eyebrow labels only where they clarify section function
-- consistent letter spacing for labels and metadata
-- strong line-height and spacing for textbook readability
-- no extra lore copy just to make a section look designed
+### Window / shell / frame (three-layer depth)
 
-The Chapter Index should remain fast to scan. Do not add "use when," "primary
-action," joke warnings, or fictional routing instructions unless the user explicitly
-requests a more narrative index.
+High-prominence blocks (hero, chapter index, next-link) use a three-layer container system:
 
-### Index style contract
-
-The polished Chapter Index is now the main reference model for future MDX styling.
-Its success comes from structure, not color.
-
-Index entries should use:
-
-- a rounded outer reference window
-- an inner frame or inset border
-- corner brackets or technical ticks
-- a concise header area
-- large faded chapter numbers
-- clear linked titles
-- short existing descriptions
-- compact section rows
-- monospaced section codes
-- subtle section dividers or leader lines
-- tone-aware accent colors inherited from data/props
-
-Index entries should not use:
-
-- large warning styling unless the entry itself is a warning
-- extra explanatory paragraphs
-- fictional routing lines
-- oversized decorative icons
-- new one-off color systems
-- repeated Tailwind class piles inside MDX
-
-### Component implementation rule
-
-If a visual motif appears more than once, it belongs in a component, variant, or
-utility class. Do not rebuild the rounded technical-window style with new Tailwind
-piles inside each MDX file.
-
-Future agents should update or extend:
-
-- `ManualChapterIndex`
-- `ManualTechFrame`
-- `ManualDangerFrame`
-- `ManualSectionRows`
-- `ManualPanel`
-- shared CSS/design tokens
-
-rather than inserting raw layout/styling directly into chapter MDX.
-
-### Token guidance
-
-Use existing project variables where possible. If new tokens are needed, define
-semantic tokens for shape, surface, text, and accent behavior instead of fixed
-section colors.
-
-Preferred semantic set:
-
-```css
---manual-surface: rgba(8, 10, 16, 0.88);
---manual-surface-soft: rgba(255, 255, 255, 0.045);
---manual-surface-strong: rgba(255, 255, 255, 0.075);
---manual-text: rgba(255, 255, 255, 0.94);
---manual-text-muted: rgba(225, 232, 242, 0.68);
---manual-accent: currentColor;
---manual-accent-soft: color-mix(in srgb, var(--manual-accent) 48%, transparent);
---manual-accent-faint: color-mix(in srgb, var(--manual-accent) 16%, transparent);
---manual-border: color-mix(in srgb, var(--manual-accent) 28%, transparent);
---manual-glow: color-mix(in srgb, var(--manual-accent) 18%, transparent);
---manual-radius-window: 1.5rem;
---manual-radius-panel: 1rem;
---manual-radius-small: 0.625rem;
---manual-mono: "IBM Plex Mono", "Courier New", monospace;
---manual-sans: inherit;
+```html
+<section class="not-prose fcmi-window fcmi-tone-purple">
+  <!-- outer: gradient border + scanlines + dot-noise texture -->
+  <div class="fcmi-shell">
+    <!-- middle: dark glass surface -->
+    <div class="fcmi-frame">
+      <!-- inner: inset border + radial gradient -->
+      [content]
+    </div>
+  </div>
+</section>
 ```
 
-Do not duplicate these if equivalent tokens already exist. Component CSS should map
-existing tone colors to `--manual-accent`, then reuse the same structural styling
-across sections.
+Simpler blocks (section panels, routing table) use their own shell/frame aliases
+(`fcmi-routing-shell` / `fcmi-routing-frame`, `fcmi-section-panel-inner`) that follow
+the same depth principle without requiring all three generic classes.
 
+### Corner brackets
+
+Place all four inside any `fcmi-frame`, `fcmi-routing-frame`, or `fcmi-section-panel-inner`:
+
+```html
+<span class="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+<span class="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+<span class="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+<span class="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+```
+
+Color comes from `--fcmi-accent-rgb` on the nearest parent with a tone class.
+
+### Typography utilities
+
+| Class | Use |
+|---|---|
+| `.fcmi-kicker` | Small all-caps monospaced label above a heading |
+| `.fcmi-title` | Section heading — cream color, slight text-shadow |
+| `.fcmi-emphasis` | Inline accent emphasis (e.g., `<span class="fcmi-emphasis fcmi-tone-red">DON'T</span>`) |
+| `.fcmi-caption` | Dim small footnote / source citation |
+| `.fcmi-panel-lede` | Large leading paragraph inside a panel body (cream) |
+| `.fcmi-panel-copy` | Supporting paragraph inside a panel body (muted) |
+
+---
+
+## Block inventory
+
+Blocks marked **"Forward-only"** appear exclusively in `forward.mdx`. Do not reproduce
+them in chapters 1–5 or the afterword.
+
+**Reusable (all chapters):** Hero · Notice · Content panel · Metric grid · Quote card ·
+Document excerpt · Callout card · Protocol list · Next chapter link
+
+**Forward-only:** Routing table · Chapter Index · Reference spread + threat legend ·
+Survival imperative image
+
+---
+
+### Hero (chapter title block)
+
+One per chapter, immediately after the import line. Always `fcmi-tone-purple`.
+
+```html
+<section class="not-prose fcmi-hero fcmi-window fcmi-tone-purple" aria-labelledby="heading-id">
+  <div class="fcmi-shell">
+    <div class="fcmi-frame fcmi-hero-frame">
+      <span class="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <div class="fcmi-hero-header">
+        <div class="fcmi-icon-tile fcmi-hero-icon" aria-hidden="true">⚠️</div>
+        <div class="fcmi-hero-heading">
+          <p class="fcmi-kicker">Foreword</p>
+          <h1 id="heading-id" class="fcmi-hero-title">Chapter Title</h1>
+        </div>
+      </div>
+
+      <blockquote class="fcmi-hero-quote">"Opening quote."</blockquote>
+      <p class="fcmi-hero-cite">— <cite>Author Name</cite></p>
+    </div>
+  </div>
+</section>
+```
+
+Match the heading level used in the existing `forward.mdx` hero. Do not change heading
+levels for visual reasons — if unsure, preserve the existing file's level and flag it.
+
+---
+
+### Routing table (forward only)
+
+The emergency chapter-routing block in "How to Use This Book". Forward-only.
+One `fcmi-routing-row` per chapter + afterword.
+
+```html
+<section class="not-prose fcmi-routing-window" aria-label="Emergency chapter routing">
+  <div class="fcmi-routing-shell">
+    <div class="fcmi-routing-frame">
+      <span class="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <div class="fcmi-routing-list">
+        <a href="/reader/first-contact-manual/chapter-1/" class="fcmi-routing-row fcmi-tone-cyan">
+          <span class="fcmi-routing-code">Ch. 1</span>
+          <span class="fcmi-routing-title">What is that thing?</span>
+          <span class="fcmi-routing-desc">Short triage description.</span>
+        </a>
+        <!-- Ch.2 yellow / Ch.3 blue / Ch.4 red / Ch.5 orange / Afterword purple -->
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+---
+
+### Notice (field note / inline alert)
+
+Short standalone notice. Not inside a panel. Use sparingly — one per section max.
+
+```html
+<p class="not-prose fcmi-notice fcmi-notice--red">
+  <strong>Field note:</strong> Message text.
+</p>
+```
+
+`fcmi-notice--red` for warnings, `fcmi-notice--blue` for informational notes.
+
+---
+
+### Chapter Index (forward only)
+
+The large reference spread listing all chapters with their sections. Forward-only.
+
+```html
+<section class="not-prose fcmi-index" aria-labelledby="chapter-index-heading">
+  <div class="fcmi-index-shell">
+    <div class="fcmi-index-frame">
+      <span class="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <header class="fcmi-index-header">
+        <div>
+          <p class="fcmi-index-kicker">Reference Contents</p>
+          <h2 id="chapter-index-heading" class="fcmi-index-title">Chapter Index</h2>
+        </div>
+        <p class="fcmi-index-meta">Entries 01–05 / Afterword</p>
+      </header>
+
+      <div class="fcmi-index-entries">
+        <article class="fcmi-entry fcmi-entry--cyan">
+          <div class="fcmi-number">01</div>
+          <div class="fcmi-entry-body">
+            <a href="/reader/first-contact-manual/chapter-1/" class="fcmi-entry-title">Chapter Title</a>
+            <p class="fcmi-entry-desc">One-sentence description.</p>
+            <div class="fcmi-section-list">
+              <div class="fcmi-section-row">
+                <span class="fcmi-section-code">1.1</span>
+                <span class="fcmi-section-title">Section Title</span>
+              </div>
+              <!-- more fcmi-section-row divs -->
+            </div>
+          </div>
+        </article>
+        <!-- Ch.2 --yellow / Ch.3 --blue / Ch.4 --orange / Ch.5 --orange -->
+        <!-- Afterword: fcmi-entry--purple + <div class="fcmi-number fcmi-number--after">AFTER</div> -->
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+---
+
+### Reference spread (prose + legend sidebar)
+
+Used for "The Universal Truth About First Contact" — a prose column beside the threat-codes
+legend. The legend is defined once here in the forward; later chapters reference the tone
+table above instead of recreating it.
+
+```html
+<div class="not-prose fcmi-reference-spread">
+  <div class="fcmi-prose-stack">
+    <p>Prose paragraph.</p>
+    <!-- prose paragraphs only — no headings inside fcmi-prose-stack -->
+  </div>
+
+  <aside class="fcmi-legend-window fcmi-tone-gray" aria-label="Threat codes">
+    <div class="fcmi-legend-header">
+      <span class="fcmi-legend-kicker">Tone Legend</span>
+      <strong>Threat Codes</strong>
+    </div>
+    <div class="fcmi-legend-list">
+      <div class="fcmi-legend-row fcmi-tone-red">
+        <span class="fcmi-dot"></span>
+        <span class="fcmi-legend-name">CRITICAL</span>
+        <span class="fcmi-legend-meta">Reality-ending</span>
+      </div>
+      <!-- fcmi-tone-orange HIGH / fcmi-tone-yellow ELEVATED / fcmi-tone-blue INFO -->
+      <!-- fcmi-tone-purple SPECIAL / fcmi-tone-green POSITIVE -->
+    </div>
+    <div class="fcmi-legend-note">
+      <p>Note text.</p>
+    </div>
+  </aside>
+</div>
+```
+
+---
+
+### Content panel (general-purpose section block)
+
+The workhorse block. Use for analysis, protocols, official excerpts, and any colored
+reference section.
+
+```html
+<section class="not-prose fcmi-section-panel fcmi-tone-blue" aria-labelledby="heading-id">
+  <div class="fcmi-section-panel-inner">
+    <span class="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+    <span class="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+    <span class="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+    <span class="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+    <header class="fcmi-panel-header">
+      <div class="fcmi-panel-heading-group">
+        <p class="fcmi-kicker">Analysis</p>
+        <h3 id="heading-id" class="fcmi-title">Panel Title</h3>
+      </div>
+      <span class="fcmi-icon-tile" aria-hidden="true">📄</span>  <!-- optional icon -->
+    </header>
+
+    <div class="fcmi-panel-body">
+      <!-- fcmi-panel-lede, fcmi-panel-copy, fcmi-quote-card, etc. -->
+    </div>
+  </div>
+</section>
+```
+
+Add `fcmi-panel--strong` alongside `fcmi-section-panel` for critical-warning panels
+(thicker border, stronger glow). Use only for The Cardinal Rule and Emergency Protocol
+Hierarchy — not for ordinary information panels.
+
+---
+
+### Metric grid (two-panel statistics layout)
+
+Used for GCFI + Threat Categories. Two `fcmi-section-panel` elements in a responsive grid.
+
+```html
+<div class="not-prose fcmi-metric-grid">
+  <section class="not-prose fcmi-section-panel fcmi-tone-orange" aria-labelledby="gcfi-heading">
+    <!-- panel header (see above) -->
+    <div class="fcmi-panel-body">
+      <div class="fcmi-stat-stack">
+
+        <section class="fcmi-stat-card fcmi-tone-green">
+          <div class="fcmi-stat-head">
+            <span>Successful Contact:</span>
+            <strong>0.003%</strong>
+          </div>
+          <div class="fcmi-progress" aria-hidden="true">
+            <span class="fcmi-progress-fill" style={{width: '0.3%'}}></span>
+          </div>
+          <p>Description.</p>
+        </section>
+
+        <div class="fcmi-stat-breakdown">
+          <div class="fcmi-data-row fcmi-tone-red"><span>Label</span><strong>34.2%</strong></div>
+          <!-- more data rows with tone classes -->
+        </div>
+
+        <p class="fcmi-caption">*Source footnote.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="not-prose fcmi-section-panel fcmi-tone-purple" aria-labelledby="threats-heading">
+    <!-- panel header -->
+    <div class="fcmi-panel-body">
+      <div class="fcmi-card-stack">
+        <section class="fcmi-mini-card fcmi-tone-red">
+          <div class="fcmi-mini-head">
+            <span class="fcmi-dot"></span>
+            <strong>Category Name</strong>
+            <span>47.3%</span>
+          </div>
+          <p>Description.</p>
+        </section>
+        <!-- more fcmi-mini-card sections -->
+      </div>
+      <p class="fcmi-caption fcmi-notice--blue"><strong>Note:</strong> ...</p>
+    </div>
+  </section>
+</div>
+```
+
+---
+
+### Quote card
+
+Pull-quote / expert citation. Nested inside a panel body.
+
+```html
+<figure class="fcmi-quote-card fcmi-tone-blue">
+  <blockquote>"Quote text."</blockquote>
+  <figcaption>— Attribution, Title</figcaption>
+</figure>
+```
+
+---
+
+### Document excerpt
+
+Bureaucratic / official document quoted text.
+
+```html
+<section class="fcmi-document-excerpt fcmi-tone-gray">
+  <p class="fcmi-excerpt-label">Excerpt: Source Document Title</p>
+  <blockquote>"...long official text..."</blockquote>
+</section>
+```
+
+---
+
+### Callout card
+
+Secondary annotation box inside a panel (e.g., "Bureaucratic Reality Check").
+
+```html
+<section class="fcmi-callout-card fcmi-tone-blue">
+  <h4>Callout Title</h4>
+  <p>Content.</p>
+</section>
+```
+
+---
+
+### Protocol list
+
+Numbered step sequences. Nested inside a `fcmi-panel--strong` panel body.
+
+```html
+<div class="fcmi-protocol-stack">
+  <section class="fcmi-protocol-row fcmi-tone-red">
+    <span class="fcmi-protocol-num">1</span>
+    <div>
+      <h4>DEFCON ∞: DON'T</h4>
+      <p>Description.</p>
+    </div>
+  </section>
+  <!-- more rows: fcmi-tone-orange, fcmi-tone-yellow -->
+</div>
+```
+
+---
+
+### Survival imperative image
+
+The full-width "DON'T" figure. Forward only, unless a chapter has an equivalent full-bleed image.
+
+```html
+<figure class="not-prose fcmi-imperative">
+  <img
+    src="/first-contact/dont.webp"
+    alt="Critical survival imperative: don't approach, don't signal, don't investigate, don't even think."
+    width="2048"
+    height="650"
+    loading="eager"
+    decoding="async"
+  />
+</figure>
+```
+
+No Astro component needed — `.fcmi-imperative` handles the rounding and overflow.
+
+---
+
+### Next chapter link
+
+End of every chapter except the afterword.
+
+```html
+<a class="not-prose fcmi-next-link fcmi-window fcmi-tone-blue"
+   href="/reader/first-contact-manual/chapter-1/"
+   aria-label="Continue to Chapter 1: Title">
+  <div class="fcmi-shell">
+    <div class="fcmi-frame fcmi-next-link-frame">
+      <span class="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span class="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <span class="fcmi-next-link-number" aria-hidden="true">01</span>
+      <span class="fcmi-next-link-body">
+        <span class="fcmi-kicker">Next Chapter</span>
+        <strong class="fcmi-next-link-title">Chapter 1: Full Title</strong>
+        <span class="fcmi-next-link-subtitle">TAGLINE SUBTITLE</span>
+      </span>
+      <span class="fcmi-next-link-arrow" aria-hidden="true">→</span>
+    </div>
+  </div>
+</a>
+```
+
+Tone matches the target chapter. Afterword link uses `fcmi-tone-purple`.
+
+---
 
 ## Standard chapter skeleton
 
+```
 1. Frontmatter (see checklist below)
-2. Imports (only components used in this file)
-3. `<ManualChapterHero ... />`
-4. `---`
-5. `## Chapter Overview` — 2–3 paragraphs, no components
-6. `---`
-7. `## Chapter Index` — `<ManualChapterIndex variant="reference" items={[...]} sidebarPanels={...} />` when the polished rounded reference treatment is appropriate
-8. Numbered `## N.M Section Title` sections, each built from `ManualPanel` /
-   `ManualListGrid` / `ManualComparisonPanel` / `ManualNotice`
-9. `---`
-10. `## Conclusion` (or chapter-specific closing heading)
-11. `<ManualChapterLink href="/reader/first-contact-manual/chapter-N+1/" ... />`
+2. import '../../../styles/reader/first-contact-manual.css'
+3. Hero block
+      <section class="fcmi-hero fcmi-window fcmi-tone-purple">
+4. ---
+5. ## Document Overview / ## Chapter Overview
+      2–3 plain prose paragraphs. No blocks, no sub-headings.
+6. [Forward only] ## How to Use This Book
+      Prose + routing table + notice
+7. ---
+8. [Forward only] Chapter Index
+      <section class="fcmi-index">
+9. ---
+10. ## Section Heading — prose paragraph(s)
+      [fcmi-section-panel / fcmi-metric-grid / fcmi-reference-spread / etc.]
+      [repeat for each section]
+11. ---
+12. ## Conclusion — plain prose
+13. Next chapter link
+      <a class="fcmi-next-link fcmi-window">
+```
+
+All custom HTML blocks must have `not-prose` on the outermost element.
+Plain `## Markdown headings` and prose paragraphs go between blocks without wrappers.
+
+---
 
 ## Frontmatter checklist
 
-Copy `forward.mdx`'s frontmatter block and adjust per-chapter. Keep these consistent
-across all files:
+Copy from `forward.mdx` and adjust per-chapter:
 
-- `authorName`: `"An Anonymous Interstellar Veteran (Redacted)"` — use parentheses,
-  not `[Redacted]` (forward currently has the bracket variant; fix when touched).
-- `authorBio`: exact shared sentence — see world bible.
-- `image`: a real chapter-specific image under `/first-contact/` when one exists;
-  fall back to `/posts/timeline/chronos.png` only if no custom art exists yet.
+- `authorName`: `"An Anonymous Interstellar Veteran (Redacted)"` — parentheses, not brackets
+- `authorBio`: exact bio sentence — see world bible
+- `image`: `/first-contact/chapter-N.webp` or fall back to `/posts/timeline/chronos.png`
 - `timelineYear: 7.652e3`, `timelineEra: "awakening-era"`,
-  `timelineLocation: "The Fringes of Known (and Mostly Hostile) Space"`,
-  `isKeyEvent: true`, `showImageOnPost: false`, `bannerType: "image"`,
-  `category: "MEGA MEAL"`, `draft: true`, `series: "first-contact-manual"`,
-  `seriesTitle: "The Interstellar Traveler's First Contact Manual"`,
-  `contentFormat: "manual"`.
-- `seriesPart`: chapter number (1–5). Omit for forward/afterword.
-- `tags`: always include `First Contact`; add 2–4 chapter-specific tags, no more.
+  `timelineLocation: "The Fringes of Known (and Mostly Hostile) Space"`
+- `isKeyEvent: true`, `showImageOnPost: false`, `bannerType: "image"`, `category: "MEGA MEAL"`
+- `draft: true`, `series: "first-contact-manual"`,
+  `seriesTitle: "The Interstellar Traveler's First Contact Manual"`, `contentFormat: "manual"`
+- `seriesPart`: chapter number (1–5). **Omit** for the forward and afterword.
+- `tags`: always include `First Contact`; add 2–4 chapter-specific tags, no more than 5 total.
 
-## Do not modify human-authored prose
+**Afterword only:** override `authorName` and `authorBio` with the Bi-Smart Corporation
+executive committee — see world bible for exact text.
 
-The narrative text in every chapter is written by a human. Do not change word
-choice, sentence structure, punctuation style, frontmatter metadata (tags, titles,
-descriptions), or anything else in the authored content without an explicit user
-request. Do not upgrade ASCII punctuation (`--`, `...`) to Unicode equivalents.
-Spelling corrections (wrong letters in a word) are the only exception — everything
-else is off-limits unless asked. See `_AGENTS.md` for the full rule.
-
-## Things to avoid
-
-- Don't hand-write `bg-{color}-900/NN border border-{color}-500/30 rounded-lg p-N`
-  combinations — that's a `ManualPanel`.
-- Don't recreate the rounded technical-window index styling with one-off
-  MDX divs — that belongs in `ManualChapterIndex`, `ManualTechFrame`, or shared CSS.
-- Don't invent new gradient/border color combos for hero-style blocks — that's
-  `ManualChapterHero` (purple) or `ManualChapterLink` (tone-based).
-- Don't nest raw `<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">` card
-  grids — that's `ManualListGrid`.
-- Don't use red as a general aesthetic accent. Red is reserved for critical warnings
-  and survival imperative moments.
-- Keep inline `<span className="...">` styling only for small one-off emphasis
-  (e.g. the red `DON'T`), not for structural layout.
+---
 
 ## Prose style
 
-- `## Chapter Overview` (or `## Document Overview` for the forward) should be 2–3
-  paragraphs of plain prose — no components, no sub-headers.
-- Statistical callouts must use one of the two canonical named datasets (47,829
-  documented first-contact events; 23,847 documented helpful/hostile scenarios). If
-  neither fits, introduce a new dataset with an explicit source label rather than
-  implying a third unnamed survey.
-- Never end a list with a dangling placeholder fragment like "...and angry robot
-  butlers others" — complete every sentence. No "others" orphans without a closing
-  thought ("...and countless others." is fine).
+- `## Chapter Overview` (or `## Document Overview` in the forward) should be 2–3 plain prose
+  paragraphs — no components, no sub-headers.
+- Statistical callouts must use one of the two canonical named datasets (47,829 documented
+  first-contact events; 23,847 documented helpful/hostile scenarios). If neither fits, introduce
+  a new dataset with an explicit source label rather than implying a third unnamed survey.
+- Never end a list with a dangling placeholder fragment like "...and angry robot butlers others"
+  — complete every sentence.
 
-## Forward and afterword skeleton deviations
+---
 
-These two files are exceptions to the standard chapter skeleton and should not be
-forced into the numbered-section pattern:
+## Do not modify human-authored prose
 
-- **Forward** — uses a "How to Use This Book" emergency routing table (raw `<div>`
-  anchor grid, lines 47–83 of `forward.mdx`). This pattern is intentional and
-  approved: no component handles tone-coded triage links at this size. Do not
-  componentize it. The forward's Chapter Index is the canonical example of the
-  polished rounded technical-window index style. Preserve its clean
-  textbook function: do not add filler, jokes, or fictional routing copy to the
-  index. Omit `seriesPart` from frontmatter.
-- **Afterword** — uses the Bi-Smart Corporation narrator (different `authorName` and
-  `authorBio`; see world bible). Has heavier raw-div styling reflecting its corporate
-  memo aesthetic; it is exempt from the standard skeleton until a dedicated refactor.
-  Omit `seriesPart` from frontmatter.
+See `_AGENTS.md` for the complete rule. Summary: spelling corrections only. Do not change
+word choice, sentence structure, frontmatter metadata, ASCII punctuation (`--`, `...`),
+or intentional in-world comedy errors.
 
-## Frontmatter: afterword narrator
+---
 
-For the afterword only, override the standard author fields:
+## Forward and afterword deviations
 
+- **Forward** includes the Routing Table and Chapter Index — both are forward-only blocks.
+- **Afterword** uses the Bi-Smart Corporation narrator (different frontmatter), heavier corporate
+  tone, and is exempt from the standard numbered-section skeleton until a dedicated refactor.
+- Neither file uses `seriesPart` in frontmatter.
+
+**Afterword narrator (frontmatter only):**
 ```yaml
 authorName: "Bi-Smart Corporation Executive Research Committee (Names Redacted for Cosmic Security)"
 authorBio: "Corporate entity specializing in existential liability documentation, survival equipment durability testing, and maintaining profitable business models during species extinction events."
 ```
+
+---
+
+## Things to avoid
+
+- **No `<style>` blocks in MDX** — all CSS lives in `first-contact-manual.css`
+- **No Tailwind class piles in MDX** — use `fcmi-*` classes
+- **No hardcoded hex/rgba values** — use `fcmi-tone-*` to change accent color
+- **No Astro component imports for styling** — use `fcmi-*` HTML patterns instead. Functional
+  components providing behavior, data handling, or image optimization are allowed when plain
+  MDX cannot reasonably substitute.
+- **No inline `style="..."` attributes** except `style={{width: 'X%'}}` on `.fcmi-progress-fill`
+- **Nested tones only for semantic sub-items** — legend rows, stat cards, data rows,
+  protocol rows, and mini-cards may carry their own `fcmi-tone-*`. Do not add tone
+  classes to structural containers or decorative spans merely to vary color.
+- **No red for decoration** — `fcmi-tone-red` is for genuine danger only

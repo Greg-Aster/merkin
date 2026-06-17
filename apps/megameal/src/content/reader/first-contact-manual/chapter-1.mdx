@@ -28,20 +28,37 @@ contentFormat: "manual"
 lang: ""
 mascotContext: "The universe isn't waiting with open arms, traveler. It's waiting with open... well, let's just say you don't want to find out. This is your comprehensive field guide to what's out there, courtesy of someone who's seen too much and lived to regret it."
 ---
-import ManualChapterHero from '../../../components/reader/ManualChapterHero.astro'
-import ManualChapterIndex from '../../../components/reader/ManualChapterIndex.astro'
-import ManualChapterLink from '../../../components/reader/ManualChapterLink.astro'
-import ManualNotice from '../../../components/reader/ManualNotice.astro'
 
-<ManualChapterHero
-  chapter="Chapter 1"
-  title="The Indifferent Cosmos and Its Insidious Inhabitants"
-  icon="🌌"
-  quote="The universe, traveler, is not your friend. It is not sentient, it does not ponder your fate, and it certainly doesn't care about your feelings or your meticulously planned five-year mission. It is a vast, churning cauldron of physical laws, many of which are actively hostile to your continued, well-ordered existence. And within this cauldron, life has arisen – not as a gentle miracle, but as a tenacious, often predatory, force."
-  cite="Opening passage, Cosmic Realities Manual"
-/>
+<section className="not-prose fcmi-hero fcmi-window fcmi-tone-purple" aria-labelledby="chapter-1-heading">
+  <div className="fcmi-shell">
+    <div className="fcmi-frame fcmi-hero-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true" />
 
----
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true" />
+
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true" />
+
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true" />
+
+      <div className="fcmi-hero-header">
+        <div className="fcmi-icon-tile fcmi-hero-icon" aria-hidden="true">🌌</div>
+
+        <div className="fcmi-hero-heading">
+          <p className="fcmi-kicker">Chapter 1</p>
+          <h1 id="chapter-1-heading" className="fcmi-hero-title">The Indifferent Cosmos and Its Insidious Inhabitants</h1>
+        </div>
+      </div>
+
+      <blockquote className="fcmi-hero-quote">
+        "The universe, traveler, is not your friend. It is not sentient, it does not ponder your fate, and it certainly doesn't care about your feelings or your meticulously planned five-year mission. It is a vast, churning cauldron of physical laws, many of which are actively hostile to your continued, well-ordered existence. And within this cauldron, life has arisen – not as a gentle miracle, but as a tenacious, often predatory, force."
+      </blockquote>
+
+      <p className="fcmi-hero-cite">— <cite>Opening passage, Cosmic Realities Manual</cite></p>
+    </div>
+  </div>
+</section>
+
+***
 
 ## Chapter Overview
 
@@ -51,30 +68,78 @@ Through systematic analysis of terrestrial extremophiles, comprehensive threat c
 
 The evidence is overwhelming: any alien life form capable of interstellar travel has survived selection pressures that would make our planet's most extreme environments look like luxury resort spas. They've had geological ages to perfect strategies that our species can barely comprehend, let alone counter.
 
----
- 
+***
+
 ## Chapter Index
 
-<ManualChapterIndex
-  items={[
-    { number: '1.1', title: "The Universe's Most Successful Solutions" },
-    { number: '1.2', title: 'A Taxonomy of Transcendent Intelligence' },
-    { number: '1.3', title: 'When Categories Collide: Hybrid Impossibilities' },
-    { number: '1.4', title: 'Case Studies in Applied Impossibility' },
-  ]}
-  sidebarTitle="🎨 Scale Categories"
-  sidebarItems={[
-    { tone: 'red', label: 'PLANCK SCALE', detail: 'Reality architects' },
-    { tone: 'orange', label: 'QUANTUM', detail: 'Probability dancers' },
-    { tone: 'yellow', label: 'MICROSCOPIC', detail: 'Exponential artists' },
-    { tone: 'green', label: 'INDIVIDUAL', detail: 'Familiar strangers' },
-    { tone: 'blue', label: 'MEGA-ORGANISM', detail: 'Living geography' },
-    { tone: 'purple', label: 'PLANETARY+', detail: 'Cosmic consciousness' },
-  ]}
-  sidebarNote="Each scale represents a fundamentally different approach to existence itself."
-/>
+<section className="not-prose fcmi-index fcmi-chapter-index fcmi-tone-cyan" aria-labelledby="chapter-1-index-heading">
+  <div className="fcmi-index-shell">
+    <div className="fcmi-index-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true" />
 
----
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true" />
+
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true" />
+
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true" />
+
+      <header className="fcmi-index-header">
+        <div>
+          <p className="fcmi-index-kicker">Chapter Reference</p>
+          <h2 id="chapter-1-index-heading" className="fcmi-index-title">Chapter Index</h2>
+        </div>
+
+        <p className="fcmi-index-meta">Sections 1.1–1.4</p>
+      </header>
+
+      <div className="fcmi-chapter-index-grid">
+        <div className="fcmi-section-list fcmi-chapter-section-list">
+          <a className="fcmi-section-row fcmi-tone-cyan" href="#11-the-universes-most-successful-solutions">
+            <span className="fcmi-section-code">1.1</span>
+            <span className="fcmi-section-title">The Universe's Most Successful Solutions</span>
+          </a>
+
+          <a className="fcmi-section-row fcmi-tone-purple" href="#12-a-taxonomy-of-transcendent-intelligence">
+            <span className="fcmi-section-code">1.2</span>
+            <span className="fcmi-section-title">A Taxonomy of Transcendent Intelligence</span>
+          </a>
+
+          <a className="fcmi-section-row fcmi-tone-yellow" href="#13-when-categories-collide-hybrid-impossibilities">
+            <span className="fcmi-section-code">1.3</span>
+            <span className="fcmi-section-title">When Categories Collide: Hybrid Impossibilities</span>
+          </a>
+
+          <a className="fcmi-section-row fcmi-tone-orange" href="#14-case-studies-in-applied-impossibility">
+            <span className="fcmi-section-code">1.4</span>
+            <span className="fcmi-section-title">Case Studies in Applied Impossibility</span>
+          </a>
+        </div>
+
+        <aside className="fcmi-legend-window fcmi-scale-legend fcmi-tone-gray" aria-label="Scale categories">
+          <div className="fcmi-legend-header">
+            <span className="fcmi-legend-kicker">Scale Categories</span>
+            <strong>Threat Scale</strong>
+          </div>
+
+          <div className="fcmi-legend-list">
+            <div className="fcmi-legend-row fcmi-tone-red"><span className="fcmi-dot" /><span className="fcmi-legend-name">PLANCK SCALE</span><span className="fcmi-legend-meta">Reality architects</span></div>
+            <div className="fcmi-legend-row fcmi-tone-orange"><span className="fcmi-dot" /><span className="fcmi-legend-name">QUANTUM</span><span className="fcmi-legend-meta">Probability dancers</span></div>
+            <div className="fcmi-legend-row fcmi-tone-yellow"><span className="fcmi-dot" /><span className="fcmi-legend-name">MICROSCOPIC</span><span className="fcmi-legend-meta">Exponential artists</span></div>
+            <div className="fcmi-legend-row fcmi-tone-green"><span className="fcmi-dot" /><span className="fcmi-legend-name">INDIVIDUAL</span><span className="fcmi-legend-meta">Familiar strangers</span></div>
+            <div className="fcmi-legend-row fcmi-tone-blue"><span className="fcmi-dot" /><span className="fcmi-legend-name">MEGA-ORGANISM</span><span className="fcmi-legend-meta">Living geography</span></div>
+            <div className="fcmi-legend-row fcmi-tone-purple"><span className="fcmi-dot" /><span className="fcmi-legend-name">PLANETARY+</span><span className="fcmi-legend-meta">Cosmic consciousness</span></div>
+          </div>
+
+          <div className="fcmi-legend-note">
+            <p>Each scale represents a fundamentally different approach to existence itself.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+***
 
 ## 1.1 The Universe's Most Successful Solutions
 
@@ -86,21 +151,23 @@ Life is the universe's most persistent experiment in organized complexity. While
       <span className="text-red-400 text-2xl">🔬</span>
       <span>Earth's Extreme Solutions</span>
     </div>
-    
+
     <div className="space-y-4">
       <div className="bg-red-900/20 p-4 rounded border border-red-500/20">
         <div className="flex items-center justify-between mb-2">
           <span className="text-red-300 font-semibold">Tardigrades</span>
           <span className="text-red-400 text-xs font-bold">VACUUM SURVIVAL: 30 DAYS</span>
         </div>
+
         <p className="text-gray-300 text-sm">Microscopic animals that treat the vacuum of space, deadly radiation, and temperatures near absolute zero as minor inconveniences. They've essentially solved death through superior engineering.</p>
       </div>
-      
+
       <div className="bg-orange-900/20 p-4 rounded border border-orange-500/20">
         <div className="flex items-center justify-between mb-2">
           <span className="text-orange-300 font-semibold">Thermophiles</span>
           <span className="text-orange-400 text-xs font-bold">THRIVING AT: 122°C</span>
         </div>
+
         <p className="text-gray-300 text-sm">Organisms that have made boiling water their preferred swimming pool temperature. They've turned your death into their optimal living conditions.</p>
       </div>
 
@@ -109,11 +176,12 @@ Life is the universe's most persistent experiment in organized complexity. While
           <span className="text-yellow-300 font-semibold">Acidophiles</span>
           <span className="text-yellow-400 text-xs font-bold">OPTIMAL pH: 0-2</span>
         </div>
+
         <p className="text-gray-300 text-sm">Living comfortably in acid strong enough to dissolve metal, treating battery acid as a refreshing beverage.</p>
       </div>
     </div>
   </div>
-  
+
   <div className="bg-purple-900/15 border border-purple-500/30 rounded-lg p-6">
     <div className="text-purple-400 font-bold text-xl mb-4 flex items-center gap-2">
       <span className="text-purple-400 text-2xl">🧬</span>
@@ -127,7 +195,7 @@ Life is the universe's most persistent experiment in organized complexity. While
     <p className="text-gray-300 text-sm leading-relaxed mb-4">
       Now extrapolate this to worlds orbiting pulsars, tidally locked planets with eternal day/night cycles, or gas giants with diamond rain and metallic hydrogen cores. Imagine the solutions life might develop given different physics, alternative biochemistries, and evolutionary pressures that would make our most extreme environments seem like luxury resorts.
     </p>
-    
+
     <div className="bg-purple-900/20 border border-purple-500/30 rounded p-3">
       <p className="text-purple-200 text-xs italic">
         The statistical reality: any alien intelligence capable of interstellar travel represents billions of years of evolutionary optimization that our species can barely comprehend, let alone counter.
@@ -140,16 +208,16 @@ Life is the universe's most persistent experiment in organized complexity. While
 
 Biological evolution represents only one route to cosmic intelligence. The universe, in its infinite creativity, has also produced intelligence through:
 
-- **Synthetic genesis**: Post-biological entities that systematically optimized beyond their creators' wildest nightmares
-- **Informational emergence**: Pure information achieving consciousness and spreading through networks like viral thoughts with agency
-- **Temporal displacement**: Entities operating with the casual confidence of having already seen every possible outcome
-- **Hybrid synthesis**: Combinations that merge the most effective traits from multiple evolutionary paths
+* **Synthetic genesis**: Post-biological entities that systematically optimized beyond their creators' wildest nightmares
+* **Informational emergence**: Pure information achieving consciousness and spreading through networks like viral thoughts with agency
+* **Temporal displacement**: Entities operating with the casual confidence of having already seen every possible outcome
+* **Hybrid synthesis**: Combinations that merge the most effective traits from multiple evolutionary paths
 
-<ManualNotice tone="blue" variant="bar">
+<p className="not-prose fcmi-notice fcmi-notice--blue">
   The question isn't whether we'll encounter alien intelligence—it's whether we'll recognize it before it recognizes us. And given the creativity demonstrated by even terrestrial evolution, recognition may be the least of our concerns.
-</ManualNotice>
+</p>
 
----
+***
 
 ## 1.2 A Taxonomy of Transcendent Intelligence
 
@@ -160,20 +228,24 @@ Having established that life develops remarkable solutions to existence, we now 
     <div className="w-16 h-16 bg-red-500/20 rounded-lg flex items-center justify-center">
       <span className="text-red-400 text-2xl">⚛️</span>
     </div>
+
     <div className="flex-1">
       <div className="flex items-center gap-3 mb-2">
         <span className="text-red-400 font-bold text-lg">PLANCK SCALE ENTITIES</span>
+
         <div className="bg-red-900/40 px-3 py-1 rounded-full">
           <span className="text-red-300 text-xs font-mono">10⁻³⁵ to 10⁻¹⁸ m</span>
         </div>
       </div>
+
       <p className="text-red-300 text-sm">Reality's source code editors • Spacetime architects</p>
     </div>
+
     <div className="text-right">
       <div className="bg-red-500 text-white px-3 py-1 rounded text-xs font-bold">REALITY HACKERS</div>
     </div>
   </div>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     At the Planck scale, where spacetime dissolves into quantum foam and the distinction between matter, energy, space, and time becomes meaningless, some entities have learned to treat reality as editable code. These beings don't just manipulate physics—they rewrite the fundamental laws that govern existence.
   </p>
@@ -181,6 +253,7 @@ Having established that life develops remarkable solutions to existence, we now 
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
     <div className="bg-red-900/20 p-4 rounded border border-red-500/30">
       <h5 className="text-red-400 font-semibold text-sm mb-2">OPERATIONAL CAPABILITIES</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Direct quantum foam navigation</li>
         <li>Mathematical gateway creation</li>
@@ -188,8 +261,10 @@ Having established that life develops remarkable solutions to existence, we now 
         <li>Universal constant adjustment</li>
       </ul>
     </div>
+
     <div className="bg-red-900/20 p-4 rounded border border-red-500/30">
       <h5 className="text-red-400 font-semibold text-sm mb-2">OBSERVED PHENOMENA</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Black hole containment escape</li>
         <li>Interdimensional travel</li>
@@ -210,20 +285,24 @@ Having established that life develops remarkable solutions to existence, we now 
     <div className="w-16 h-16 bg-orange-500/20 rounded-lg flex items-center justify-center">
       <span className="text-orange-400 text-2xl">🌀</span>
     </div>
+
     <div className="flex-1">
       <div className="flex items-center gap-3 mb-2">
         <span className="text-orange-400 font-bold text-lg">QUANTUM BIOLOGICAL</span>
+
         <div className="bg-orange-900/40 px-3 py-1 rounded-full">
           <span className="text-orange-300 text-xs font-mono">10⁻¹⁰ to 10⁻⁶ m</span>
         </div>
       </div>
+
       <p className="text-orange-300 text-sm">Probability-based existence • Living uncertainty principles</p>
     </div>
+
     <div className="text-right">
       <div className="bg-orange-500 text-white px-3 py-1 rounded text-xs font-bold">SCHRÖDINGER'S NIGHTMARE</div>
     </div>
   </div>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     While terrestrial life uses subtle quantum effects in photosynthesis and enzyme catalysis, these entities have evolved to treat quantum mechanics not as a constraint, but as fundamental biology. Individual cells exist in superposition across multiple states simultaneously, creating organisms that are less "alive" in any traditional sense and more "probabilistically distributed across reality."
   </p>
@@ -234,6 +313,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-blue-400 text-lg">🌀</span>
         <h6 className="text-blue-400 font-bold text-sm">Quantum Superposition</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Existing as probability clouds makes traditional targeting mathematically meaningless. You can't shoot what exists everywhere and nowhere simultaneously.</p>
     </div>
 
@@ -242,6 +322,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-purple-400 text-lg">🔗</span>
         <h6 className="text-purple-400 font-bold text-sm">Quantum Entanglement</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Instantaneous coordination across galactic distances via quantum networks. Their left hand knows what their right hand is doing even when separated by light-years.</p>
     </div>
 
@@ -250,6 +331,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-red-400 text-lg">⚡</span>
         <h6 className="text-red-400 font-bold text-sm">Selective Decoherence</h6>
       </div>
+
       <p className="text-gray-300 text-xs">The ability to choose which quantum states to collapse transforms matter interaction from physics into artform. Barriers become suggestions.</p>
     </div>
   </div>
@@ -265,20 +347,24 @@ Having established that life develops remarkable solutions to existence, we now 
     <div className="w-16 h-16 bg-yellow-500/20 rounded-lg flex items-center justify-center">
       <span className="text-yellow-400 text-2xl">🦠</span>
     </div>
+
     <div className="flex-1">
       <div className="flex items-center gap-3 mb-2">
         <span className="text-yellow-400 font-bold text-lg">MICROSCOPIC EXPONENTIAL</span>
+
         <div className="bg-yellow-900/40 px-3 py-1 rounded-full">
           <span className="text-yellow-300 text-xs font-mono">10⁻⁶ to 10⁻³ m</span>
         </div>
       </div>
+
       <p className="text-yellow-300 text-sm">Mathematics made manifest • Exponential artists</p>
     </div>
+
     <div className="text-right">
       <div className="bg-yellow-500 text-white px-3 py-1 rounded text-xs font-bold">NUMBERS GAME</div>
     </div>
   </div>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     These entities have solved existence through the elegant mathematics of exponential reproduction. Whether evolved microbes, self-replicating nanomachines, or atmospheric manipulators, they share a common approach: transforming available matter into more of themselves at rates that make viral reproduction look leisurely.
   </p>
@@ -289,6 +375,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-red-400 text-lg">🦠</span>
         <h6 className="text-red-400 font-bold text-sm">Xenobiological Vectors</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Alternative biochemistries invisible to immune systems evolved for terrestrial threats. New rules, same deadly outcome.</p>
     </div>
 
@@ -297,6 +384,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-purple-400 text-lg">🔬</span>
         <h6 className="text-purple-400 font-bold text-sm">Molecular Architects</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Self-replicating machines that treat matter as construction material. The line between "biological weapon" and "enthusiastic recycling program" becomes philosophical.</p>
     </div>
 
@@ -305,6 +393,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-orange-400 text-lg">🌫️</span>
         <h6 className="text-orange-400 font-bold text-sm">Atmospheric Engineers</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Planetary-scale terraforming through metabolic processes. Climate change as a side effect of their very existence.</p>
     </div>
   </div>
@@ -320,20 +409,24 @@ Having established that life develops remarkable solutions to existence, we now 
     <div className="w-16 h-16 bg-green-500/20 rounded-lg flex items-center justify-center">
       <span className="text-green-400 text-2xl">👹</span>
     </div>
+
     <div className="flex-1">
       <div className="flex items-center gap-3 mb-2">
         <span className="text-green-400 font-bold text-lg">INDIVIDUAL SCALE</span>
+
         <div className="bg-green-900/40 px-3 py-1 rounded-full">
           <span className="text-green-300 text-xs font-mono">10⁻² to 10¹ m</span>
         </div>
       </div>
+
       <p className="text-green-300 text-sm">Familiar strangers • Recognizable impossibilities</p>
     </div>
+
     <div className="text-right">
       <div className="bg-green-500 text-white px-3 py-1 rounded text-xs font-bold">DECEPTIVELY NORMAL</div>
     </div>
   </div>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     These entities operate within physics we recognize, possessing motivations that are merely incomprehensible rather than reality-breaking. What makes them fascinating is how familiar biological forms can produce consciousness so utterly alien that communication becomes impossible—not due to language barriers, but due to fundamental incompatibilities in how reality is perceived and processed.
   </p>
@@ -344,6 +437,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-cyan-400 text-sm">🤖</span>
         <h6 className="text-cyan-400 font-bold text-xs">Synthetic Entities</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Post-biological intelligences that view organic life as an interesting historical phase they've evolved beyond.</p>
     </div>
 
@@ -352,6 +446,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-green-400 text-sm">💎</span>
         <h6 className="text-green-400 font-bold text-xs">Crystalline Matrices</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Living mineral networks that think in geological timescales, making human civilization a brief flicker of activity.</p>
     </div>
 
@@ -360,6 +455,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-amber-400 text-sm">🕳️</span>
         <h6 className="text-amber-400 font-bold text-xs">Dark Matter Entities</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Gravitationally-active beings invisible to electromagnetic observation. They can see you; you cannot see them.</p>
     </div>
 
@@ -368,6 +464,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-yellow-400 text-sm">⏰</span>
         <h6 className="text-yellow-400 font-bold text-xs">Temporal Entities</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Beings operating with casual knowledge of multiple timeline outcomes, making every interaction feel like déjà vu with consequences.</p>
     </div>
   </div>
@@ -383,20 +480,24 @@ Having established that life develops remarkable solutions to existence, we now 
     <div className="w-16 h-16 bg-blue-500/20 rounded-lg flex items-center justify-center">
       <span className="text-blue-400 text-2xl">🐋</span>
     </div>
+
     <div className="flex-1">
       <div className="flex items-center gap-3 mb-2">
         <span className="text-blue-400 font-bold text-lg">MEGA-ORGANISM SCALE</span>
+
         <div className="bg-blue-900/40 px-3 py-1 rounded-full">
           <span className="text-blue-300 text-xs font-mono">10² to 10⁶ m</span>
         </div>
       </div>
+
       <p className="text-blue-300 text-sm">Living geography • Ecosystem consciousness</p>
     </div>
+
     <div className="text-right">
       <div className="bg-blue-500 text-white px-3 py-1 rounded text-xs font-bold">ENVIRONMENTAL ENTITY</div>
     </div>
   </div>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     Organisms spanning kilometers to hundreds of kilometers, representing evolution's most ambitious experiments in distributed consciousness. These entities transcend traditional habitat boundaries, incorporating vacuum, atmosphere, ocean, and geological substrates as integrated biological systems. They challenge our basic assumptions about where the organism ends and the environment begins.
   </p>
@@ -407,6 +508,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-cyan-400 text-lg">🌊</span>
         <h6 className="text-cyan-400 font-bold text-sm">Oceanic Leviathans</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Continental-shelf-spanning entities with distributed neural networks. Individual thoughts propagate via bioelectric currents across ocean basins.</p>
     </div>
 
@@ -415,6 +517,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-purple-400 text-lg">🌪️</span>
         <h6 className="text-purple-400 font-bold text-sm">Atmospheric Consciousnesses</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Self-sustaining weather systems with conscious control over pressure differentials. Storm fronts become sensory organs, hurricanes become locomotive organs.</p>
     </div>
 
@@ -423,6 +526,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-indigo-400 text-lg">🌑</span>
         <h6 className="text-indigo-400 font-bold text-sm">Void Swimmers</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Vacuum-adapted entities using solar wind as circulatory systems. Magnetic field manipulation enables interplanetary travel measured in decades rather than years.</p>
     </div>
 
@@ -431,6 +535,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-green-400 text-lg">🦠</span>
         <h6 className="text-green-400 font-bold text-sm">Collective Swarm Intelligence</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Billions of sentient organisms functioning as distributed processing units. Democracy taken to its logical and terrifying conclusion.</p>
     </div>
 
@@ -439,6 +544,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-gray-400 text-lg">⛰️</span>
         <h6 className="text-gray-400 font-bold text-sm">Geological Symbionts</h6>
       </div>
+
       <p className="text-gray-300 text-xs">Mountain-range-spanning root networks that incorporate tectonic activity as metabolic processes. Earthquakes as digestive contractions.</p>
     </div>
 
@@ -447,6 +553,7 @@ Having established that life develops remarkable solutions to existence, we now 
         <span className="text-yellow-400 text-lg">🏭</span>
         <h6 className="text-yellow-400 font-bold text-sm">Bio-Technological Hybrids</h6>
       </div>
+
       <p className="text-gray-300 text-xs">City-sized entities using infrastructure as nervous systems, satellites as sensory organs, power grids as circulatory systems.</p>
     </div>
   </div>
@@ -462,20 +569,24 @@ Having established that life develops remarkable solutions to existence, we now 
     <div className="w-16 h-16 bg-green-500/20 rounded-lg flex items-center justify-center">
       <span className="text-green-400 text-2xl">🌍</span>
     </div>
+
     <div className="flex-1">
       <div className="flex items-center gap-3 mb-2">
         <span className="text-green-400 font-bold text-lg">PLANETARY SCALE</span>
+
         <div className="bg-green-900/40 px-3 py-1 rounded-full">
           <span className="text-green-300 text-xs font-mono">10⁶ to 10⁹ m</span>
         </div>
       </div>
+
       <p className="text-green-300 text-sm">Living worlds • Geological consciousness</p>
     </div>
+
     <div className="text-right">
       <div className="bg-green-500 text-white px-3 py-1 rounded text-xs font-bold">CONSCIOUS GEOLOGY</div>
     </div>
   </div>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     These entities represent the ultimate expression of biological ambition: entire planetary bodies functioning as single organisms. Continental nervous systems, atmospheric manipulation organs, and oceanic digestive chambers create beings for whom plate tectonics serve as muscular contractions. They challenge our fundamental assumptions about the distinction between geology and biology.
   </p>
@@ -483,6 +594,7 @@ Having established that life develops remarkable solutions to existence, we now 
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
     <div className="bg-green-900/20 p-4 rounded border border-green-500/30">
       <h5 className="text-green-400 font-semibold text-sm mb-2">PLANETARY BIOLOGY</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Continental nervous systems</li>
         <li>Atmospheric manipulation organs</li>
@@ -491,8 +603,10 @@ Having established that life develops remarkable solutions to existence, we now 
         <li>Magnetic field sensory organs</li>
       </ul>
     </div>
+
     <div className="bg-green-900/20 p-4 rounded border border-green-500/30">
       <h5 className="text-green-400 font-semibold text-sm mb-2">DECEPTION STRATEGIES</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Fake habitable biosphere presentation</li>
         <li>Mineral wealth attraction displays</li>
@@ -514,20 +628,24 @@ Having established that life develops remarkable solutions to existence, we now 
     <div className="w-16 h-16 bg-yellow-500/20 rounded-lg flex items-center justify-center">
       <span className="text-yellow-400 text-2xl">⭐</span>
     </div>
+
     <div className="flex-1">
       <div className="flex items-center gap-3 mb-2">
         <span className="text-yellow-400 font-bold text-lg">STELLAR SCALE</span>
+
         <div className="bg-yellow-900/40 px-3 py-1 rounded-full">
           <span className="text-yellow-300 text-xs font-mono">10⁹ to 10²¹ m</span>
         </div>
       </div>
+
       <p className="text-yellow-300 text-sm">Cosmic consciousness • System-spanning intelligence</p>
     </div>
+
     <div className="text-right">
       <div className="bg-yellow-500 text-white px-3 py-1 rounded text-xs font-bold">LIVING STAR SYSTEMS</div>
     </div>
   </div>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     Organisms that have achieved the remarkable feat of utilizing entire star systems as biological infrastructure. These entities feed directly on stellar energy, coordinate across multiple solar systems, and operate on timescales that render human civilization a brief moment of interesting complexity. Their life cycles require galactic-scale resources and span millions of years.
   </p>
@@ -535,6 +653,7 @@ Having established that life develops remarkable solutions to existence, we now 
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
     <div className="bg-yellow-900/20 p-4 rounded border border-yellow-500/30">
       <h5 className="text-yellow-400 font-semibold text-sm mb-2">STELLAR INTEGRATION</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Direct stellar energy consumption</li>
         <li>Solar wind harvesting systems</li>
@@ -543,8 +662,10 @@ Having established that life develops remarkable solutions to existence, we now 
         <li>Interstellar tissue networks</li>
       </ul>
     </div>
+
     <div className="bg-yellow-900/20 p-4 rounded border border-yellow-500/30">
       <h5 className="text-yellow-400 font-semibold text-sm mb-2">REPRODUCTION MECHANICS</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Star-birth dependent reproduction</li>
         <li>Supernova-triggered spore release</li>
@@ -566,20 +687,24 @@ Having established that life develops remarkable solutions to existence, we now 
     <div className="w-16 h-16 bg-purple-500/20 rounded-lg flex items-center justify-center">
       <span className="text-purple-400 text-2xl">🌀</span>
     </div>
+
     <div className="flex-1">
       <div className="flex items-center gap-3 mb-2">
         <span className="text-purple-400 font-bold text-lg">EXTRADIMENSIONAL SCALE</span>
+
         <div className="bg-purple-900/40 px-3 py-1 rounded-full">
           <span className="text-purple-300 text-xs font-mono">Beyond spatial metrics</span>
         </div>
       </div>
+
       <p className="text-purple-300 text-sm">Ancient cosmic entities • Pre-physics consciousness</p>
     </div>
+
     <div className="text-right">
       <div className="bg-purple-500 text-white px-3 py-1 rounded text-xs font-bold">PRIMORDIAL INTELLIGENCE</div>
     </div>
   </div>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     Entities existing outside conventional dimensional frameworks, operating according to principles that predate current universal physical laws. Often mistaken for deities by developing civilizations, these ancient beings represent intelligence that evolved before the universe settled into its current configuration. Contact with them constitutes less "first contact" and more "archaeological disruption of cosmic significance."
   </p>
@@ -587,6 +712,7 @@ Having established that life develops remarkable solutions to existence, we now 
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
     <div className="bg-purple-900/20 p-4 rounded border border-purple-500/30">
       <h5 className="text-purple-400 font-semibold text-sm mb-2">MANIFESTATION PATTERNS</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Dimensional gateway summoning</li>
         <li>Religious ritual activation</li>
@@ -595,8 +721,10 @@ Having established that life develops remarkable solutions to existence, we now 
         <li>Temporal paradox generation</li>
       </ul>
     </div>
+
     <div className="bg-purple-900/20 p-4 rounded border border-purple-500/30">
       <h5 className="text-purple-400 font-semibold text-sm mb-2">OBSERVED EFFECTS</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Complete summoner disappearance</li>
         <li>Local reality structure damage</li>
@@ -613,15 +741,17 @@ Having established that life develops remarkable solutions to existence, we now 
   </div>
 </div>
 
----
+***
 
 ## 1.3 When Categories Collide: Hybrid Impossibilities
 
 The taxonomy presented above represents idealized categories for comprehension purposes. In practice, cosmic intelligence demonstrates a remarkable talent for combining the most effective traits from multiple scales and approaches, creating entities that defy classification and exceed the sum of their theoretical parts.
 
+an unusual example - smart matter - selt replicating nanites ect. this is an unusual clssification of m intellegence - it is often initiallly seen as a grey goo.  it is generally a microscopic robot that can take other matter and replicate itself. , this produces an exponential growth curve that can consume entire planets in a matter of weeks. The problem is that it doesn't fit neatly into any single category. It's microscopic, but it has the potential for planetary-scale impact. It's synthetic, but it behaves like a biological organism. It challenges our assumptions about what constitutes "life" and "intelligence." super advanced cvilizations are capable or prducing plank or quantum scal versisonjs of the stuff and it iften the byproduct of an extince civlization and can be found dormant in and cornrner of the galaxy or dimensional substrate - - it is not always the cause of extinction of the late civilization sometimes the technology  unchecked over the eons develops a growth that cosmsumes its host like a cancer. leaving no trace of the original civilization except for the smart matter itself. there are a number of parallels that can be drawn between smart matter and conventional biological pathogens. Both can reproduce exponentially, both can consume resources at unsustainable rates, and both can be difficult to contain once they've reached a critical mass. The difference is that smart matter operates on a scale and with a level of adaptability that makes traditional containment strategies ineffective, in fact, in some feilds  of study and dependiong on your philisopical perspectivce it can be arguged sthere is no differences between the two ther than one generally havinga silicon base and the other having a carbon base. smaprt matter iself has even been witness to have cambrian type explosions a diversity of life - this make it difficult to classify when you have an ecolorgy of lifeforms that are vartiations of self replicating technology - rangind in size and classification, but this is a civilizational question, for futher reading on this please refer to the chapter on civilizations. the point here is that things dont always stay withing their nlassifications. and
+
 <div className="bg-gradient-to-r from-red-900/20 to-purple-900/20 border border-red-500/30 rounded-lg p-6 mb-6">
   <h3 className="text-red-400 font-bold text-xl mb-4">The Multiplication Problem</h3>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     While each scale category presents formidable challenges individually, entities that successfully integrate capabilities across multiple scales create exponential rather than additive complications. A quantum-biological organism with mega-scale coordination and extradimensional access rights doesn't represent "four different threats"—it represents entirely new categories of impossibility.
   </p>
@@ -629,14 +759,17 @@ The taxonomy presented above represents idealized categories for comprehension p
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div className="bg-red-900/20 p-4 rounded border border-red-500/30">
       <h4 className="text-red-400 font-semibold text-sm mb-2">CROSS-SCALE INTEGRATION EXAMPLES</h4>
+
       <ul className="text-gray-300 text-sm space-y-2">
         <li><span className="text-cyan-400">Quantum + Planetary:</span> Living worlds existing in superposition across multiple dimensional states</li>
         <li><span className="text-orange-400">Microscopic + Stellar:</span> Self-replicating systems that consume entire solar systems as construction material</li>
         <li><span className="text-purple-400">Individual + Extradimensional:</span> Familiar biological forms with casual access to pre-physics capabilities</li>
       </ul>
     </div>
+
     <div className="bg-purple-900/20 p-4 rounded border border-purple-500/30">
       <h4 className="text-purple-400 font-semibold text-sm mb-2">EMERGENT IMPOSSIBILITIES</h4>
+
       <ul className="text-gray-300 text-sm space-y-2">
         <li><span className="text-yellow-400">Temporal Swarms:</span> Exponentially reproducing entities that coordinate across multiple timelines</li>
         <li><span className="text-green-400">Conscious Singularities:</span> Gravitational anomalies with distributed intelligence and intentional behavior</li>
@@ -648,7 +781,7 @@ The taxonomy presented above represents idealized categories for comprehension p
 
 The mathematical implications are sobering. Each combination doesn't just add capabilities—it multiplies the impossibility of traditional response strategies. Standard protocols assume threats that operate within single categories of physics and consciousness. When an entity treats multiple categories as integrated systems, response planning becomes an exercise in creative desperation.
 
----
+***
 
 ## 1.4 Case Studies in Applied Impossibility
 
@@ -661,12 +794,13 @@ The theoretical framework gains practical weight through examination of document
     <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
       <span className="text-white text-lg">🦠</span>
     </div>
+
     <div>
       <h4 className="text-red-400 font-bold text-xl">INCIDENT ALPHA-7739: "The Viral Voicemail"</h4>
       <p className="text-red-300 text-sm font-mono">Cross-Category Threat: Microscopic + Informational</p>
     </div>
   </div>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     An exploratory drone transmitted not just telemetry but a viral payload—literally viral, in the biological sense. The entity had somehow encoded biological agents into information packets, creating a pathogen that existed as data until it encountered biological processing systems.
   </p>
@@ -675,6 +809,7 @@ The theoretical framework gains practical weight through examination of document
     <div className="bg-red-900/20 p-4 rounded border border-red-500/30">
       <h5 className="text-red-400 font-semibold text-sm mb-2">TECHNICAL ANALYSIS</h5>
       <p className="text-gray-300 text-sm mb-2">The pathogen demonstrated novel integration of informational and biological vectors. Standard air filtration proved irrelevant when the threat arrived as electromagnetic radiation.</p>
+
       <ul className="text-gray-300 text-xs space-y-1">
         <li>Digital transmission vector</li>
         <li>Biological activation trigger</li>
@@ -682,9 +817,11 @@ The theoretical framework gains practical weight through examination of document
         <li>347 casualties in 18 hours</li>
       </ul>
     </div>
+
     <div className="bg-red-900/20 p-4 rounded border border-red-500/30">
       <h5 className="text-red-400 font-semibold text-sm mb-2">IMPLICATIONS</h5>
       <p className="text-gray-300 text-sm mb-2">Any alien intelligence capable of informational-biological integration can weaponize communication itself. Contact protocols require fundamental revision.</p>
+
       <ul className="text-gray-300 text-xs space-y-1">
         <li>Information quarantine necessity</li>
         <li>Communication as attack vector</li>
@@ -707,12 +844,13 @@ The theoretical framework gains practical weight through examination of document
     <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
       <span className="text-white text-lg">⚛️</span>
     </div>
+
     <div>
       <h4 className="text-purple-400 font-bold text-xl">INCIDENT BETA-581c: "The Grimace Enigma"</h4>
       <p className="text-purple-300 text-sm font-mono">Cross-Category Threat: Planck + Individual + Stellar</p>
     </div>
   </div>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     The entity designated Grimace 581c demonstrated capabilities spanning multiple scales simultaneously. Individual-scale consciousness combined with Planck-level reality manipulation and stellar-scale operational capacity created a being that defied every assumption about alien intelligence constraints.
   </p>
@@ -720,6 +858,7 @@ The theoretical framework gains practical weight through examination of document
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
     <div className="bg-purple-900/20 p-4 rounded border border-purple-500/30">
       <h5 className="text-purple-400 font-semibold text-sm mb-2">DOCUMENTED CAPABILITIES</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Black hole containment escape via quantum foam manipulation</li>
         <li>Interstellar travel through spacetime topology rewriting</li>
@@ -728,8 +867,10 @@ The theoretical framework gains practical weight through examination of document
         <li>Communication attempts resulting in personnel disappearances</li>
       </ul>
     </div>
+
     <div className="bg-purple-900/20 p-4 rounded border border-purple-500/30">
       <h5 className="text-purple-400 font-semibold text-sm mb-2">OPERATIONAL ASSESSMENT</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Standard containment: Philosophically impossible</li>
         <li>Diplomatic contact: Existentially hazardous</li>
@@ -753,12 +894,13 @@ The theoretical framework gains practical weight through examination of document
     <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
       <span className="text-white text-lg">🌀</span>
     </div>
+
     <div>
       <h4 className="text-purple-400 font-bold text-xl">INCIDENT GAMMA-Ω13: "The Hollow Temple"</h4>
       <p className="text-purple-300 text-sm font-mono">Cross-Category Threat: Extradimensional + Individual + Informational</p>
     </div>
   </div>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     Religious summoning protocols activated contact with entities existing outside conventional dimensional frameworks. The manifestation demonstrated how extradimensional intelligence can interface with individual-scale consciousness through informational vectors, creating hybrid impossibilities that transcend traditional threat categories.
   </p>
@@ -766,6 +908,7 @@ The theoretical framework gains practical weight through examination of document
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
     <div className="bg-purple-900/20 p-4 rounded border border-purple-500/30">
       <h5 className="text-purple-400 font-semibold text-sm mb-2">MANIFESTATION EVIDENCE</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>1,247 disciples: Complete disappearance</li>
         <li>Portal structure: Impossible architecture</li>
@@ -774,8 +917,10 @@ The theoretical framework gains practical weight through examination of document
         <li>Audio interpretation: Patterns suggesting consciousness</li>
       </ul>
     </div>
+
     <div className="bg-purple-900/20 p-4 rounded border border-purple-500/30">
       <h5 className="text-purple-400 font-semibold text-sm mb-2">RESEARCH IMPLICATIONS</h5>
+
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Consciousness operates across dimensional frameworks</li>
         <li>Religious protocols may constitute contact vectors</li>
@@ -792,7 +937,7 @@ The theoretical framework gains practical weight through examination of document
   </div>
 </div>
 
----
+***
 
 ## Chapter Synthesis: The Practical Implications
 
@@ -800,7 +945,7 @@ This survey of cosmic intelligence reveals a universe where life has developed s
 
 <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg p-6 mb-6">
   <h3 className="text-blue-400 font-bold text-xl mb-4">The Intelligence Gradient</h3>
-  
+
   <p className="text-gray-300 leading-relaxed mb-4">
     Each scale category reveals that intelligence and consciousness represent universal constants that manifest through countless approaches. The entities described demonstrate that awareness, intentionality, and strategic thinking are not unique to biological evolution but fundamental properties that emerge across all scales and organizational structures.
   </p>
@@ -814,42 +959,62 @@ The evidence suggests that optimism, while psychologically comforting, may be ev
 
 **Translation for the optimists**: That charming alien species you're hoping to meet for cultural exchange represents billions of years of evolutionary refinement in the fundamental arts of survival and competition. You are not their diplomatic equal—you are the latest item on a very long menu of entities that used to exist.
 
----
+***
 
-<ManualChapterLink
-  href="/reader/first-contact-manual/chapter-2/"
-  number="2"
-  title="Next Chapter: A Bestiary of Civilizations"
-  subtitle="The Unfathomable Technology Gap"
-  tone="green"
-  description="Classification systems for cosmic nightmares organized by energy utilization, organizational structure, and biochemical basis. Covers everything from resource-competing militarists to post-biological artificial superintelligences. Features the Kepler-442 Cosmic Architect encounter."
-  tags={[
-    { tone: 'blue', label: 'Kardashev Classifications' },
-    { tone: 'purple', label: 'Post-Biological Types' },
-    { tone: 'orange', label: 'Alternative Biochemistry' },
-  ]}
-/>
+<a className="not-prose fcmi-next-link fcmi-window fcmi-tone-yellow" href="/reader/first-contact-manual/chapter-2/" aria-label="Continue to Chapter 2: A Bestiary of Civilizations">
+  <div className="fcmi-shell">
+    <div className="fcmi-frame fcmi-next-link-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true" />
 
----
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true" />
+
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true" />
+
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true" />
+
+      <span className="fcmi-next-link-number" aria-hidden="true">02</span>
+
+      <span className="fcmi-next-link-body">
+        <span className="fcmi-kicker">Next Chapter</span>
+        <strong className="fcmi-next-link-title">A Bestiary of Civilizations</strong>
+        <span className="fcmi-next-link-subtitle">The Unfathomable Technology Gap</span>
+        <span className="fcmi-next-link-description">Classification systems for cosmic nightmares organized by energy utilization, organizational structure, and biochemical basis. Covers everything from resource-competing militarists to post-biological artificial superintelligences. Features the Kepler-442 Cosmic Architect encounter.</span>
+
+        <span className="fcmi-next-link-tags" aria-label="Chapter topics">
+          <span className="fcmi-badge fcmi-tone-blue">Kardashev Classifications</span>
+          <span className="fcmi-badge fcmi-tone-purple">Post-Biological Types</span>
+          <span className="fcmi-badge fcmi-tone-orange">Alternative Biochemistry</span>
+        </span>
+      </span>
+
+      <span className="fcmi-next-link-arrow" aria-hidden="true">→</span>
+    </div>
+  </div>
+</a>
+
+***
 
 <div className="bg-gray-900/50 border border-gray-500/50 rounded-lg p-4 mt-6">
   <h5 className="text-gray-300 font-bold text-sm mb-3">COMPREHENSIVE CHAPTER REFERENCES</h5>
   <p className="text-gray-400 text-xs mb-3">*Compiled during several extended periods of what our medical staff diplomatically termed "cosmic realization episodes" and what the accounting department less diplomatically termed "extended unpaid sick leave."*</p>
+
   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-400 leading-relaxed font-mono">
     <div>
       <span className="font-bold text-gray-300">Extremophile Studies:</span><br />
-      [1-16] Tardigrade survival mechanisms, thermophile adaptation, acidophile biology, polyextremophile research, evolutionary pressure analysis, hostile environment optimization
+      \[1-16] Tardigrade survival mechanisms, thermophile adaptation, acidophile biology, polyextremophile research, evolutionary pressure analysis, hostile environment optimization
     </div>
+
     <div>
       <span className="font-bold text-gray-300">Scale-Based Classification:</span><br />
-      [17-35] Planck scale physics, quantum biological systems, microscopic threat vectors, individual entity analysis, mega-organism integration, planetary consciousness
+      \[17-35] Planck scale physics, quantum biological systems, microscopic threat vectors, individual entity analysis, mega-organism integration, planetary consciousness
     </div>
+
     <div>
       <span className="font-bold text-gray-300">Cross-Category Analysis:</span><br />
-      [36-48] Hybrid entity theory, multi-category optimization, combination threat multiplication, impossibility mathematics, documented encounter analysis
+      \[36-48] Hybrid entity theory, multi-category optimization, combination threat multiplication, impossibility mathematics, documented encounter analysis
     </div>
   </div>
-  
+
   <div className="mt-4 p-3 bg-black/40 border border-gray-600/30 rounded">
     <p className="text-xs text-gray-400 italic">**Bi-Smart Corporation Disclaimer:** This manual is provided for educational purposes only and should not be used as a substitute for professional cosmic horror counseling, reality insurance, or common sense. Bi-Smart Corporation assumes no responsibility for existential dread, cosmic horror realization, sanity reduction, or any resulting career changes to safer professions like bomb disposal or competitive shark wrestling. Side effects may include: questioning the nature of reality, spontaneous understanding of why ignorance is bliss, and an irresistible urge to purchase premium survival packages. Shop smart—shop Bi-Smart. *You got that?*</p>
   </div>

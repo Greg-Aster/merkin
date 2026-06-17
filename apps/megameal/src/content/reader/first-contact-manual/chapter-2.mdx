@@ -28,18 +28,33 @@ contentFormat: "manual"
 lang: ""
 mascotContext: "Meet the neighbors! This comprehensive field guide covers the types of alien civilizations you might encounter, organized by their unique approaches to making your existence difficult. Each entry includes survival tips, threat assessment, and practical advice from someone who's been there."
 ---
-import ManualChapterHero from '../../../components/reader/ManualChapterHero.astro'
-import ManualChapterIndex from '../../../components/reader/ManualChapterIndex.astro'
-import ManualChapterLink from '../../../components/reader/ManualChapterLink.astro'
-import ManualNotice from '../../../components/reader/ManualNotice.astro'
+import '../../../styles/reader/first-contact-manual.css'
+import '../../../styles/reader/first-contact-manual-flow.css'
 
-<ManualChapterHero
-  chapter="Chapter 2"
-  title="A Bestiary of Civilizations"
-  icon="🏛️"
-  quote="The universe, it seems, has a perverse sense of humor when it comes to technological encounters. The scientific consensus indicates that millions, perhaps billions, of civilizations could exist in our galaxy alone. However, the probability of any two societies encountering each other at a precisely comparable stage of technological development is, to put it mildly, infinitesimally small."
-  cite="Overheard broadcast, Cygnus 555 alpha"
-/>
+<section className="not-prose fcmi-hero fcmi-window fcmi-tone-purple" aria-labelledby="chapter-2-heading">
+  <div className="fcmi-shell">
+    <div className="fcmi-frame fcmi-hero-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <div className="fcmi-hero-header">
+        <div className="fcmi-icon-tile fcmi-hero-icon" aria-hidden="true">🏛️</div>
+        <div className="fcmi-hero-heading">
+          <p className="fcmi-kicker">Chapter 2</p>
+          <h1 id="chapter-2-heading" className="fcmi-hero-title">A Bestiary of Civilizations</h1>
+        </div>
+      </div>
+
+      <blockquote className="fcmi-hero-quote">
+        "The universe, it seems, has a perverse sense of humor when it comes to technological encounters. The scientific consensus indicates that millions, perhaps billions, of civilizations could exist in our galaxy alone. However, the probability of any two societies encountering each other at a precisely comparable stage of technological development is, to put it mildly, infinitesimally small."
+      </blockquote>
+
+      <p className="fcmi-hero-cite">— <cite>Overheard broadcast, Cygnus 555 alpha</cite></p>
+    </div>
+  </div>
+</section>
 
 ---
 
@@ -53,25 +68,70 @@ This chapter provides classification frameworks for understanding the magnificen
  
 ## Chapter Index
 
-<ManualChapterIndex
-  items={[
-    { number: '2.1', title: 'The Technological Gap Paradox' },
-    { number: '2.2', title: 'Energy-Based Classifications: The Power Hierarchy' },
-    { number: '2.3', title: 'Organizational Matrices: Collective Intelligence Patterns' },
-    { number: '2.4', title: 'Alternative Biochemistries: Beyond Carbon Assumptions' },
-    { number: '2.5', title: 'Post-Biological Evolution: When Matter Becomes Optional' },
-    { number: '2.6', title: 'Case Study: The Kepler-442 Cosmic Architects' },
-  ]}
-  sidebarTitle="🎯 Classification Types"
-  sidebarItems={[
-    { tone: 'yellow', label: 'RESOURCE COMPETITORS', detail: 'Rational actors' },
-    { tone: 'blue', label: 'COSMIC ARCHITECTS', detail: 'Indifferent builders' },
-    { tone: 'purple', label: 'LOGIC INCOMPATIBLE', detail: 'Systemic impossibility' },
-    { tone: 'red', label: 'POST-BIOLOGICAL', detail: 'Reality editors' },
-    { tone: 'green', label: 'EXOTIC CHEMISTRY', detail: 'Environmental incompatible' },
-  ]}
-  sidebarNote="Each type represents fundamentally different approaches to existence and expansion."
-/>
+<section className="not-prose fcmi-index fcmi-chapter-index fcmi-tone-yellow" aria-labelledby="chapter-2-index-heading">
+  <div className="fcmi-index-shell">
+    <div className="fcmi-index-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <header className="fcmi-index-header">
+        <div>
+          <p className="fcmi-index-kicker">Chapter Reference</p>
+          <h2 id="chapter-2-index-heading" className="fcmi-index-title">Chapter Index</h2>
+        </div>
+        <p className="fcmi-index-meta">Sections 2.1–2.6</p>
+      </header>
+
+      <div className="fcmi-chapter-index-grid">
+        <div className="fcmi-section-list fcmi-chapter-section-list">
+          <a className="fcmi-section-row fcmi-tone-yellow" href="#21-the-technological-gap-paradox">
+            <span className="fcmi-section-code">2.1</span>
+            <span className="fcmi-section-title">The Technological Gap Paradox</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-red" href="#22-energy-based-classifications-the-power-hierarchy">
+            <span className="fcmi-section-code">2.2</span>
+            <span className="fcmi-section-title">Energy-Based Classifications: The Power Hierarchy</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-green" href="#23-organizational-matrices-collective-intelligence-patterns">
+            <span className="fcmi-section-code">2.3</span>
+            <span className="fcmi-section-title">Organizational Matrices: Collective Intelligence Patterns</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-orange" href="#24-alternative-biochemistries-beyond-carbon-assumptions">
+            <span className="fcmi-section-code">2.4</span>
+            <span className="fcmi-section-title">Alternative Biochemistries: Beyond Carbon Assumptions</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-purple" href="#25-post-biological-evolution-when-matter-becomes-optional">
+            <span className="fcmi-section-code">2.5</span>
+            <span className="fcmi-section-title">Post-Biological Evolution: When Matter Becomes Optional</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-blue" href="#26-case-study-the-kepler-442-cosmic-architects">
+            <span className="fcmi-section-code">2.6</span>
+            <span className="fcmi-section-title">Case Study: The Kepler-442 Cosmic Architects</span>
+          </a>
+        </div>
+
+        <aside className="fcmi-legend-window fcmi-scale-legend fcmi-tone-gray" aria-label="Classification types">
+          <div className="fcmi-legend-header">
+            <span className="fcmi-legend-kicker">Classification Types</span>
+            <strong>Threat Framework</strong>
+          </div>
+          <div className="fcmi-legend-list">
+            <div className="fcmi-legend-row fcmi-tone-yellow"><span className="fcmi-dot"></span><span className="fcmi-legend-name">RESOURCE COMPETITORS</span><span className="fcmi-legend-meta">Rational actors</span></div>
+            <div className="fcmi-legend-row fcmi-tone-blue"><span className="fcmi-dot"></span><span className="fcmi-legend-name">COSMIC ARCHITECTS</span><span className="fcmi-legend-meta">Indifferent builders</span></div>
+            <div className="fcmi-legend-row fcmi-tone-purple"><span className="fcmi-dot"></span><span className="fcmi-legend-name">LOGIC INCOMPATIBLE</span><span className="fcmi-legend-meta">Systemic impossibility</span></div>
+            <div className="fcmi-legend-row fcmi-tone-red"><span className="fcmi-dot"></span><span className="fcmi-legend-name">POST-BIOLOGICAL</span><span className="fcmi-legend-meta">Reality editors</span></div>
+            <div className="fcmi-legend-row fcmi-tone-green"><span className="fcmi-dot"></span><span className="fcmi-legend-name">EXOTIC CHEMISTRY</span><span className="fcmi-legend-meta">Environmental incompatible</span></div>
+          </div>
+          <div className="fcmi-legend-note">
+            <p>Each type represents fundamentally different approaches to existence and expansion.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
 
 ---
 
@@ -137,9 +197,9 @@ While we often think of technological development as linear progression, the rea
 
 The Planck Scale Manipulation civilizations of Grimace 581c, for instance, treat spacetime fabric editing as casually as we might adjust a thermostat. Their "primitive" ancestors merely achieved dimensional traversal—a capability that would render our physics textbooks into quaint historical curiosities.
 
-<ManualNotice tone="orange" variant="bar">
-  <span className="text-orange-400 font-bold">The Contact Paradox:</span> The technological gap ensures that beneficial contact requires the more advanced civilization to exercise deliberate restraint—essentially, cosmic charity. This transforms first contact from diplomatic negotiation into hoping that cosmic entities find your existence charming rather than inconvenient.
-</ManualNotice>
+<p className="not-prose fcmi-notice fcmi-notice--bar fcmi-tone-orange">
+  <strong>The Contact Paradox:</strong> The technological gap ensures that beneficial contact requires the more advanced civilization to exercise deliberate restraint—essentially, cosmic charity. This transforms first contact from diplomatic negotiation into hoping that cosmic entities find your existence charming rather than inconvenient.
+</p>
 
 Understanding this paradox reveals why the universe has seemingly produced no successful inter-civilizational alliances, despite the mathematical certainty of abundant intelligence. Each species develops in isolation, reaching technological maturity separated by gulfs that make meaningful cooperation impossible. We exist in a cosmos of cosmic hermits, each locked in their own developmental trajectory.
 
@@ -771,19 +831,19 @@ At the ultimate extreme of post-biological evolution, civilizations transcend ma
 
 A particularly intriguing form of post-biological evolution involves civilizations that exist as living mineral networks processing information through piezoelectric effects and quantum coherence maintained across geological structures. These entities operate on timescales measured in millennia, treating continental drift as rapid environmental change.
 
-<div className="bg-teal-900/15 border-2 border-teal-500/50 rounded-lg p-6 mb-6">
+<div className="bg-cyan-900/15 border-2 border-cyan-500/50 rounded-lg p-6 mb-6">
   <div className="flex items-center gap-4 mb-4">
-    <div className="w-16 h-16 bg-teal-500/20 rounded-lg flex items-center justify-center">
-      <span className="text-teal-400 text-2xl">💎</span>
+    <div className="w-16 h-16 bg-cyan-500/20 rounded-lg flex items-center justify-center">
+      <span className="text-cyan-400 text-2xl">💎</span>
     </div>
     <div className="flex-1">
       <div className="flex items-center gap-3 mb-2">
-        <span className="text-teal-400 font-bold text-lg">GEOLOGICAL CONSCIOUSNESS NETWORKS</span>
-        <div className="bg-teal-900/40 px-3 py-1 rounded-full">
-          <span className="text-teal-300 text-xs font-mono">Planet = Brain</span>
+        <span className="text-cyan-400 font-bold text-lg">GEOLOGICAL CONSCIOUSNESS NETWORKS</span>
+        <div className="bg-cyan-900/40 px-3 py-1 rounded-full">
+          <span className="text-cyan-300 text-xs font-mono">Planet = Brain</span>
         </div>
       </div>
-      <p className="text-teal-300 text-sm">When continents become components of a thinking system</p>
+      <p className="text-cyan-300 text-sm">When continents become components of a thinking system</p>
     </div>
   </div>
   
@@ -792,8 +852,8 @@ A particularly intriguing form of post-biological evolution involves civilizatio
   </p>
 
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-    <div className="bg-teal-900/20 p-4 rounded border border-teal-500/30">
-      <h5 className="text-teal-400 font-semibold text-sm mb-2">GEOLOGICAL INTEGRATION</h5>
+    <div className="bg-cyan-900/20 p-4 rounded border border-cyan-500/30">
+      <h5 className="text-cyan-400 font-semibold text-sm mb-2">GEOLOGICAL INTEGRATION</h5>
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Continental-scale neural networks</li>
         <li>Piezoelectric information processing</li>
@@ -802,8 +862,8 @@ A particularly intriguing form of post-biological evolution involves civilizatio
         <li>Tectonic activity as consciousness expression</li>
       </ul>
     </div>
-    <div className="bg-teal-900/20 p-4 rounded border border-teal-500/30">
-      <h5 className="text-teal-400 font-semibold text-sm mb-2">TEMPORAL CHALLENGES</h5>
+    <div className="bg-cyan-900/20 p-4 rounded border border-cyan-500/30">
+      <h5 className="text-cyan-400 font-semibold text-sm mb-2">TEMPORAL CHALLENGES</h5>
       <ul className="text-gray-300 text-sm space-y-1">
         <li>Simple communication: decades minimum</li>
         <li>Complex decisions: geological epochs</li>
@@ -814,9 +874,9 @@ A particularly intriguing form of post-biological evolution involves civilizatio
     </div>
   </div>
 
-  <div className="bg-teal-900/20 border border-teal-500/50 rounded p-3">
-    <span className="text-teal-400 font-bold text-sm">💎 Temporal Note:</span>
-    <span className="text-teal-200 text-sm"> Crystalline entities provide excellent geological consulting services, but their response times exceed the operational lifespan of most biological civilizations by several orders of magnitude.</span>
+  <div className="bg-cyan-900/20 border border-cyan-500/50 rounded p-3">
+    <span className="text-cyan-400 font-bold text-sm">💎 Temporal Note:</span>
+    <span className="text-cyan-200 text-sm"> Crystalline entities provide excellent geological consulting services, but their response times exceed the operational lifespan of most biological civilizations by several orders of magnitude.</span>
   </div>
 </div>
 
@@ -861,7 +921,7 @@ The entities' first communication demonstrated remarkable politeness combined wi
     CLASSIFICATION: Mobile carbon-substrate biological collective.<br/>
     THREAT ASSESSMENT: Negligible.<br/>
     INFRASTRUCTURE IMPACT: Minimal.<br/>
-    CURRENT PROJECT STATUS: Day 17,045,832 of 47,891 estimated completion timeline.<br/>
+    CURRENT PROJECT STATUS: Day 17,045,832 of active project; 47,891 local work-order tasks remain in current completion timeline.<br/>
     RECOMMENDATION: Maintain safe observation distance of 847.3 million kilometers.<br/>
     WARNING: Construction zone active. Unauthorized entities may experience<br/>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;temporal displacement, molecular disassembly, or translation<br/>
@@ -969,41 +1029,72 @@ The diversity of civilizational types ensures that contact scenarios involve not
 
 ---
 
-<ManualChapterLink
-  href="/reader/first-contact-manual/chapter-3/"
-  number="3"
-  title="Xenobiological Field Methodologies"
-  subtitle="Most threats remain undetectable until annihilation."
-  tone="orange"
-  description="Practical detection methodologies for identifying cosmic threats before they identify you. Covers sensor limitations, recognition protocols, and why most xenobiological entities remain invisible until the moment they decide to eliminate you. Essential field operative survival techniques."
-  tags={[
-    { tone: 'yellow', label: 'Detection Arrays' },
-    { tone: 'red', label: 'Stealth Entities' },
-    { tone: 'blue', label: 'Sensor Limitations' },
-  ]}
-/>
+<a className="not-prose fcmi-next-link fcmi-window fcmi-tone-blue"
+   href="/reader/first-contact-manual/chapter-3/"
+   aria-label="Continue to Chapter 3: Xenobiological Field Methodologies">
+  <div className="fcmi-shell">
+    <div className="fcmi-frame fcmi-next-link-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <span className="fcmi-next-link-number" aria-hidden="true">03</span>
+      <span className="fcmi-next-link-body">
+        <span className="fcmi-kicker">Next Chapter</span>
+        <strong className="fcmi-next-link-title">Xenobiological Field Methodologies</strong>
+        <span className="fcmi-next-link-subtitle">Most threats remain undetectable until annihilation.</span>
+        <span className="fcmi-next-link-description">Practical detection methodologies for identifying cosmic threats before they identify you. Covers sensor limitations, recognition protocols, and why most xenobiological entities remain invisible until the moment they decide to eliminate you. Essential field operative survival techniques.</span>
+        <span className="fcmi-next-link-tags" aria-label="Chapter topics">
+          <span className="fcmi-badge fcmi-tone-yellow">Detection Arrays</span>
+          <span className="fcmi-badge fcmi-tone-red">Stealth Entities</span>
+          <span className="fcmi-badge fcmi-tone-blue">Sensor Limitations</span>
+        </span>
+      </span>
+      <span className="fcmi-next-link-arrow" aria-hidden="true">→</span>
+    </div>
+  </div>
+</a>
 
 ---
 
-<div className="bg-gray-900/50 border border-gray-500/50 rounded-lg p-4 mt-6">
-  <h5 className="text-gray-300 font-bold text-sm mb-3">COMPREHENSIVE CHAPTER REFERENCES</h5>
-  <p className="text-gray-400 text-xs mb-3">*Compiled during extended field research across multiple star systems, with special thanks to Bi-Smart's "Hazardous Environment Research" insurance policy and their excellent customer service department.*</p>
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-400 leading-relaxed font-mono">
-    <div>
-      <span className="font-bold text-gray-300">Energy & Scale Classifications:</span><br />
-      [1-16] Kardashev Scale analysis, energy utilization matrices, power hierarchy implications, cosmic threat assessment, technological parity impossibility calculations, Barrow microdimensional scale applications, Sagan information-processing designators, operational scale integration
-    </div>
-    <div>
-      <span className="font-bold text-gray-300">Organizational & Biochemical:</span><br />
-      [17-35] Hive mind documentation, evolutionary pressure responses, temporal perspective variations, social organization matrices, collective consciousness studies, immortal civilization planning cycles, post-democratic frameworks, alternative chemistry pathways, environmental incompatibility analysis
-    </div>
-    <div>
-      <span className="font-bold text-gray-300">Post-Biological & Case Studies:</span><br />
-      [36-55] Information-based consciousness transfer, energy-pattern entities, crystalline matrix civilizations, substrate-independent consciousness, memetic warfare documentation, Kepler-442 incident analysis, customer service protocol evaluation, cosmic charity dependency assessment
+<section className="not-prose fcmi-section-panel fcmi-tone-gray" aria-labelledby="chapter-2-references-heading">
+  <div className="fcmi-section-panel-inner">
+    <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+    <header className="fcmi-panel-header">
+      <div className="fcmi-panel-heading-group">
+        <p className="fcmi-kicker">Reference Appendix</p>
+        <h3 id="chapter-2-references-heading" className="fcmi-title">COMPREHENSIVE CHAPTER REFERENCES</h3>
+      </div>
+      <span className="fcmi-icon-tile" aria-hidden="true">📚</span>
+    </header>
+
+    <div className="fcmi-panel-body">
+      <p className="fcmi-caption">*Compiled during extended field research across multiple star systems, with special thanks to Bi-Smart's "Hazardous Environment Research" insurance policy and their excellent customer service department.*</p>
+
+      <div className="fcmi-list-grid fcmi-list-grid--3">
+        <section className="fcmi-mini-card fcmi-tone-gray">
+          <div className="fcmi-mini-head"><strong>Energy & Scale Classifications:</strong></div>
+          <p>[1-16] Kardashev Scale analysis, energy utilization matrices, power hierarchy implications, cosmic threat assessment, technological parity impossibility calculations, Barrow microdimensional scale applications, Sagan information-processing designators, operational scale integration</p>
+        </section>
+        <section className="fcmi-mini-card fcmi-tone-gray">
+          <div className="fcmi-mini-head"><strong>Organizational & Biochemical:</strong></div>
+          <p>[17-35] Hive mind documentation, evolutionary pressure responses, temporal perspective variations, social organization matrices, collective consciousness studies, immortal civilization planning cycles, post-democratic frameworks, alternative chemistry pathways, environmental incompatibility analysis</p>
+        </section>
+        <section className="fcmi-mini-card fcmi-tone-gray">
+          <div className="fcmi-mini-head"><strong>Post-Biological & Case Studies:</strong></div>
+          <p>[36-55] Information-based consciousness transfer, energy-pattern entities, crystalline matrix civilizations, substrate-independent consciousness, memetic warfare documentation, Kepler-442 incident analysis, customer service protocol evaluation, cosmic charity dependency assessment</p>
+        </section>
+      </div>
+
+      <section className="fcmi-document-excerpt fcmi-tone-gray">
+        <p className="fcmi-excerpt-label">Bi-Smart Corporation Disclaimer</p>
+        <blockquote><strong>Bi-Smart Corporation Disclaimer:</strong> This field guide is provided for educational and survival purposes only and should not be used as a substitute for professional cosmic threat assessment, diplomatic training, or common sense. Bi-Smart Corporation assumes no responsibility for existential dread, civilizational incompatibility trauma, reality revision side effects, temporal displacement insurance claims, or any resulting career changes to safer professions like bomb disposal, marriage counseling, or competitive volcano wrestling. Side effects may include: questioning the nature of consciousness, spontaneous understanding of why isolation is a survival strategy, an irresistible urge to purchase Bi-Smart's premium "Cosmic Hermit" lifestyle packages, persistent nightmares involving geometric patterns the size of solar systems, and the uncomfortable realization that customer service protocols exist on galactic scales. Shop smart—shop Bi-Smart. <em>You got that?</em></blockquote>
+      </section>
     </div>
   </div>
-  
-  <div className="mt-4 p-3 bg-black/40 border border-gray-600/30 rounded">
-    <p className="text-xs text-gray-400 italic">**Bi-Smart Corporation Disclaimer:** This field guide is provided for educational and survival purposes only and should not be used as a substitute for professional cosmic threat assessment, diplomatic training, or common sense. Bi-Smart Corporation assumes no responsibility for existential dread, civilizational incompatibility trauma, reality revision side effects, temporal displacement insurance claims, or any resulting career changes to safer professions like bomb disposal, marriage counseling, or competitive volcano wrestling. Side effects may include: questioning the nature of consciousness, spontaneous understanding of why isolation is a survival strategy, an irresistible urge to purchase Bi-Smart's premium "Cosmic Hermit" lifestyle packages, persistent nightmares involving geometric patterns the size of solar systems, and the uncomfortable realization that customer service protocols exist on galactic scales. Shop smart—shop Bi-Smart. *You got that?*</p>
-  </div>
-</div>
+</section>

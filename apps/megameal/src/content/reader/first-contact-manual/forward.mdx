@@ -31,8 +31,8 @@ contentFormat: "manual"
 lang: ""
 mascotContext: "The universe isn't waiting with open arms, traveler. It's waiting with open... well, let's just say you don't want to find out. This is your 'don't-become-space-jello' starter pack, courtesy of someone who's seen too much and Bi-Smart's surprisingly resilient emergency broadcast system."
 ---
-import ManualSurvivalImperative from '../../../components/reader/ManualSurvivalImperative.astro'
 import '../../../styles/reader/first-contact-manual.css'
+import '../../../styles/reader/first-contact-manual-flow.css'
 
 <section className="not-prose fcmi-hero fcmi-window fcmi-tone-purple" aria-labelledby="manual-foreword-heading">
   <div className="fcmi-shell">
@@ -70,7 +70,7 @@ import '../../../styles/reader/first-contact-manual.css'
 ## How to Use This Book
 
 <p> You are likely reading this book because you are either considering initiating first contact, or ar currently in the midst of one.</p> 
-<p> Luckily for you, we have considered both of these scenarios and constructed the chapters accordingly. This book may be read in order if you are safely indoors, far from unusual lights, and not currently trying to understand why that rock is making a sci-fi chittering noise. <span className="text-red-800">If contact is imminent or already underway, use the routing notes below before the situation develops further.</span></p>
+<p> Luckily for you, we have considered both of these scenarios and constructed the chapters accordingly. This book may be read in order if you are safely indoors, far from unusual lights, and not currently trying to understand why that rock is making a sci-fi chittering noise. <span className="text-red-800">If first contact is imminent or already underway, use the routing notes below before the situation develops further.</span></p>
 
 <section className="not-prose fcmi-routing-window" aria-label="Emergency chapter routing">
   <div className="fcmi-routing-shell">
@@ -83,7 +83,7 @@ import '../../../styles/reader/first-contact-manual.css'
       <div className="fcmi-routing-list">
         <a href="/reader/first-contact-manual/chapter-1/" className="fcmi-routing-row fcmi-tone-cyan">
           <span className="fcmi-routing-code">Ch. 1</span>
-          <span className="fcmi-routing-title">Identify the thing</span>
+          <span className="fcmi-routing-title">What is that thing?</span>
           <span className="fcmi-routing-desc">Life-form, artifact, signal, impossible animal, thinking weather, or judgmental geology. </span>
         </a>
 
@@ -95,7 +95,7 @@ import '../../../styles/reader/first-contact-manual.css'
 
         <a href="/reader/first-contact-manual/chapter-3/" className="fcmi-routing-row fcmi-tone-blue">
           <span className="fcmi-routing-code">Ch. 3</span>
-          <span className="fcmi-routing-title">Helpful aliens</span>
+          <span className="fcmi-routing-title">Contacting helpful aliens</span>
           <span className="fcmi-routing-desc">Helpful, patient, educational, customer-service-adjacent, or eager to improve your body, ship, species, or soul.</span>
         </a>
 
@@ -113,7 +113,7 @@ import '../../../styles/reader/first-contact-manual.css'
 
         <a href="/reader/first-contact-manual/afterword/" className="fcmi-routing-row fcmi-tone-purple">
           <span className="fcmi-routing-code">After</span>
-          <span className="fcmi-routing-title">Why so quiet?</span>
+          <span className="fcmi-routing-title">Why is it so quiet?</span>
           <span className="fcmi-routing-desc">You survived, saw nothing, or are wondering why the galaxy seems quiet.</span>
         </a>
       </div>
@@ -122,13 +122,9 @@ import '../../../styles/reader/first-contact-manual.css'
 </section>
 
 <p className="not-prose fcmi-notice fcmi-notice--red">
-  <strong>Field note:</strong> If you are unsure which scenario applies, assume Chapter 5 applies. The universe is under no obligation to wait while you locate the correct subsection, and several known entities interpret hesitation as consent, prey behavior, or a charming local greeting.
+  <strong>Field note:</strong> If you are unsure which scenario applies, assume Chapter 5 applies. The universe is under no obligation to wait while you locate the correct subsection, and several known entities interpret hesitation as consent, or prey behavior.
 </p>
 
-<ManualSurvivalImperative
-  imageSrc="/first-contact/dont.webp"
-  imageAlt="Critical survival imperative: don't approach, don't signal, don't investigate, don't even think."
-/>
 
 ---
 
@@ -156,11 +152,11 @@ import '../../../styles/reader/first-contact-manual.css'
             <a href="/reader/first-contact-manual/chapter-1/" className="fcmi-entry-title">The Indifferent Cosmos and Its Insidious Inhabitants</a>
             <p className="fcmi-entry-desc">Field identification for alien life and intelligence by scale, from microscopic inconveniences to cosmic entities with architecture where mercy should be.</p>
             <div className="fcmi-section-list">
-              <div className="fcmi-section-row"><span className="fcmi-section-code">1.1</span><span className="fcmi-section-title">The Universe's Most Successful Solutions</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">1.2</span><span className="fcmi-section-title">A Taxonomy of Transcendent Intelligence</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">1.3</span><span className="fcmi-section-title">When Categories Collide: Hybrid Impossibilities</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">1.4</span><span className="fcmi-section-title">Case Studies in Applied Impossibility</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">SYN</span><span className="fcmi-section-title">Practical implications for remaining solid</span></div>
+              <a href="/reader/first-contact-manual/chapter-1/#11-the-universes-most-successful-solutions" className="fcmi-section-row"><span className="fcmi-section-code">1.1</span><span className="fcmi-section-title">The Universe's Most Successful Solutions</span></a>
+              <a href="/reader/first-contact-manual/chapter-1/#12-a-taxonomy-of-transcendent-intelligence" className="fcmi-section-row"><span className="fcmi-section-code">1.2</span><span className="fcmi-section-title">A Taxonomy of Transcendent Intelligence</span></a>
+              <a href="/reader/first-contact-manual/chapter-1/#13-when-categories-collide-hybrid-impossibilities" className="fcmi-section-row"><span className="fcmi-section-code">1.3</span><span className="fcmi-section-title">When Categories Collide: Hybrid Impossibilities</span></a>
+              <a href="/reader/first-contact-manual/chapter-1/#14-case-studies-in-applied-impossibility" className="fcmi-section-row"><span className="fcmi-section-code">1.4</span><span className="fcmi-section-title">Case Studies in Applied Impossibility</span></a>
+              <a href="/reader/first-contact-manual/chapter-1/#chapter-synthesis-the-practical-implications" className="fcmi-section-row"><span className="fcmi-section-code">SYN</span><span className="fcmi-section-title">Practical implications for remaining solid</span></a>
             </div>
           </div>
         </article>
@@ -171,12 +167,12 @@ import '../../../styles/reader/first-contact-manual.css'
             <a href="/reader/first-contact-manual/chapter-2/" className="fcmi-entry-title">A Bestiary of Civilizations</a>
             <p className="fcmi-entry-desc">Classification systems for civilizations: technology gaps, energy use, organizational patterns, alien chemistry, post-biological life, and regrettably polite contractors.</p>
             <div className="fcmi-section-list">
-              <div className="fcmi-section-row"><span className="fcmi-section-code">2.1</span><span className="fcmi-section-title">The Technological Gap Paradox</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">2.2</span><span className="fcmi-section-title">Energy-Based Classifications</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">2.3</span><span className="fcmi-section-title">Collective Intelligence Patterns</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">2.4</span><span className="fcmi-section-title">Alternative Biochemistries</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">2.5</span><span className="fcmi-section-title">Post-Biological Evolution</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">2.6</span><span className="fcmi-section-title">The Kepler-442 Cosmic Architects</span></div>
+              <a href="/reader/first-contact-manual/chapter-2/#21-the-technological-gap-paradox" className="fcmi-section-row"><span className="fcmi-section-code">2.1</span><span className="fcmi-section-title">The Technological Gap Paradox</span></a>
+              <a href="/reader/first-contact-manual/chapter-2/#22-energy-based-classifications-the-power-hierarchy" className="fcmi-section-row"><span className="fcmi-section-code">2.2</span><span className="fcmi-section-title">Energy-Based Classifications</span></a>
+              <a href="/reader/first-contact-manual/chapter-2/#23-organizational-matrices-collective-intelligence-patterns" className="fcmi-section-row"><span className="fcmi-section-code">2.3</span><span className="fcmi-section-title">Collective Intelligence Patterns</span></a>
+              <a href="/reader/first-contact-manual/chapter-2/#24-alternative-biochemistries-beyond-carbon-assumptions" className="fcmi-section-row"><span className="fcmi-section-code">2.4</span><span className="fcmi-section-title">Alternative Biochemistries</span></a>
+              <a href="/reader/first-contact-manual/chapter-2/#25-post-biological-evolution-when-matter-becomes-optional" className="fcmi-section-row"><span className="fcmi-section-code">2.5</span><span className="fcmi-section-title">Post-Biological Evolution</span></a>
+              <a href="/reader/first-contact-manual/chapter-2/#26-case-study-the-kepler-442-cosmic-architects" className="fcmi-section-row"><span className="fcmi-section-code">2.6</span><span className="fcmi-section-title">The Kepler-442 Cosmic Architects</span></a>
             </div>
           </div>
         </article>
@@ -187,27 +183,27 @@ import '../../../styles/reader/first-contact-manual.css'
             <a href="/reader/first-contact-manual/chapter-3/" className="fcmi-entry-title">The Complete Guide to First Contact Catastrophes</a>
             <p className="fcmi-entry-desc">Why helpful aliens may be worse than hostile ones, including accidental elimination, assistance cascades, scale mismatch, and the customer-service face of doom.</p>
             <div className="fcmi-section-list">
-              <div className="fcmi-section-row"><span className="fcmi-section-code">3.1</span><span className="fcmi-section-title">Why Your Survival Strategy Is Adorably Inadequate</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">3.2</span><span className="fcmi-section-title">The Universe's Accidental Elimination Catalog</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">3.3</span><span className="fcmi-section-title">Six Primary Helpful Disaster Mechanisms</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">3.4</span><span className="fcmi-section-title">The Evasion Doctrine</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">END</span><span className="fcmi-section-title">The helpful contact reality</span></div>
+              <a href="/reader/first-contact-manual/chapter-3/#31-why-your-survival-strategy-is-adorably-inadequate" className="fcmi-section-row"><span className="fcmi-section-code">3.1</span><span className="fcmi-section-title">Why Your Survival Strategy Is Adorably Inadequate</span></a>
+              <a href="/reader/first-contact-manual/chapter-3/#32-the-universes-accidental-elimination-catalog" className="fcmi-section-row"><span className="fcmi-section-code">3.2</span><span className="fcmi-section-title">The Universe's Accidental Elimination Catalog</span></a>
+              <a href="/reader/first-contact-manual/chapter-3/#33-six-primary-helpful-disaster-mechanisms" className="fcmi-section-row"><span className="fcmi-section-code">3.3</span><span className="fcmi-section-title">Six Primary Helpful Disaster Mechanisms</span></a>
+              <a href="/reader/first-contact-manual/chapter-3/#34-the-evasion-doctrine-statistical-survival-principles" className="fcmi-section-row"><span className="fcmi-section-code">3.4</span><span className="fcmi-section-title">The Evasion Doctrine</span></a>
+              <a href="/reader/first-contact-manual/chapter-3/#chapter-conclusion-the-helpful-contact-reality" className="fcmi-section-row"><span className="fcmi-section-code">END</span><span className="fcmi-section-title">The helpful contact reality</span></a>
             </div>
           </div>
         </article>
 
-        <article className="fcmi-entry fcmi-entry--orange">
+        <article className="fcmi-entry fcmi-entry--red">
           <div className="fcmi-number">04</div>
           <div className="fcmi-entry-body">
             <a href="/reader/first-contact-manual/chapter-4/" className="fcmi-entry-title">When They Actually Want You Dead</a>
             <p className="fcmi-entry-desc">Hostile first contact without comforting ambiguity: military mismatch, elimination methods, engagement patterns, case files, and combat avoidance doctrine.</p>
             <div className="fcmi-section-list">
-              <div className="fcmi-section-row"><span className="fcmi-section-code">4.1</span><span className="fcmi-section-title">Why Military Strategy Is Laughably Inadequate</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">4.2</span><span className="fcmi-section-title">Hostile Elimination Methodologies</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">4.3</span><span className="fcmi-section-title">Primary Hostile Engagement Patterns</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">4.4</span><span className="fcmi-section-title">Hostile Encounter Case Files</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">4.5</span><span className="fcmi-section-title">Military Evasion Doctrine</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">REF</span><span className="fcmi-section-title">References and equipment guide</span></div>
+              <a href="/reader/first-contact-manual/chapter-4/#41-why-military-strategy-is-laughably-inadequate" className="fcmi-section-row"><span className="fcmi-section-code">4.1</span><span className="fcmi-section-title">Why Military Strategy Is Laughably Inadequate</span></a>
+              <a href="/reader/first-contact-manual/chapter-4/#42-hostile-elimination-methodologies" className="fcmi-section-row"><span className="fcmi-section-code">4.2</span><span className="fcmi-section-title">Hostile Elimination Methodologies</span></a>
+              <a href="/reader/first-contact-manual/chapter-4/#43-primary-hostile-engagement-patterns" className="fcmi-section-row"><span className="fcmi-section-code">4.3</span><span className="fcmi-section-title">Primary Hostile Engagement Patterns</span></a>
+              <a href="/reader/first-contact-manual/chapter-4/#44-case-file-analysis-hostile-encounter-documentation" className="fcmi-section-row"><span className="fcmi-section-code">4.4</span><span className="fcmi-section-title">Hostile Encounter Case Files</span></a>
+              <a href="/reader/first-contact-manual/chapter-4/#45-military-evasion-doctrine-strategic-survival-principles" className="fcmi-section-row"><span className="fcmi-section-code">4.5</span><span className="fcmi-section-title">Military Evasion Doctrine</span></a>
+              <a href="/reader/first-contact-manual/chapter-4/#chapter-references-and-equipment-guide" className="fcmi-section-row"><span className="fcmi-section-code">REF</span><span className="fcmi-section-title">References and equipment guide</span></a>
             </div>
           </div>
         </article>
@@ -218,11 +214,11 @@ import '../../../styles/reader/first-contact-manual.css'
             <a href="/reader/first-contact-manual/chapter-5/" className="fcmi-entry-title">The All Hope is Lost, You Fool Protocol</a>
             <p className="fcmi-entry-desc">Emergency response for readers who have already ignored the earlier chapters and now require matrices, equipment catalogs, and a final broadcast template.</p>
             <div className="fcmi-section-list">
-              <div className="fcmi-section-row"><span className="fcmi-section-code">5.1</span><span className="fcmi-section-title">Emergency Threat Classification Matrix</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">5.2</span><span className="fcmi-section-title">Corporate Emergency Response Infrastructure</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">5.3</span><span className="fcmi-section-title">Bi-Smart Emergency Equipment Catalog</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">5.4</span><span className="fcmi-section-title">Threat-Specific Emergency Protocols</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">5.5</span><span className="fcmi-section-title">The Final Broadcast</span></div>
+              <a href="/reader/first-contact-manual/chapter-5/#51-emergency-threat-classification-and-response-matrix" className="fcmi-section-row"><span className="fcmi-section-code">5.1</span><span className="fcmi-section-title">Emergency Threat Classification Matrix</span></a>
+              <a href="/reader/first-contact-manual/chapter-5/#52-corporate-emergency-response-infrastructure" className="fcmi-section-row"><span className="fcmi-section-code">5.2</span><span className="fcmi-section-title">Corporate Emergency Response Infrastructure</span></a>
+              <a href="/reader/first-contact-manual/chapter-5/#53-bi-smart-emergency-equipment-catalog" className="fcmi-section-row"><span className="fcmi-section-code">5.3</span><span className="fcmi-section-title">Bi-Smart Emergency Equipment Catalog</span></a>
+              <a href="/reader/first-contact-manual/chapter-5/#54-threat-specific-emergency-protocols" className="fcmi-section-row"><span className="fcmi-section-code">5.4</span><span className="fcmi-section-title">Threat-Specific Emergency Protocols</span></a>
+              <a href="/reader/first-contact-manual/chapter-5/#55-the-final-broadcast-when-all-systems-fail" className="fcmi-section-row"><span className="fcmi-section-code">5.5</span><span className="fcmi-section-title">The Final Broadcast</span></a>
             </div>
           </div>
         </article>
@@ -233,10 +229,10 @@ import '../../../styles/reader/first-contact-manual.css'
             <a href="/reader/first-contact-manual/afterword/" className="fcmi-entry-title">The Dark Universe Hypothesis</a>
             <p className="fcmi-entry-desc">The corporate epilogue: why the quiet galaxy is not reassuring, why detection is expensive in the terminal sense, and why staying irrelevant remains the premium survival plan.</p>
             <div className="fcmi-section-list">
-              <div className="fcmi-section-row"><span className="fcmi-section-code">A.1</span><span className="fcmi-section-title">The Business Case for Cosmic Horror</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">A.2</span><span className="fcmi-section-title">The Cosmic Business Model Reality</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">A.3</span><span className="fcmi-section-title">Final Corporate Assessment</span></div>
-              <div className="fcmi-section-row"><span className="fcmi-section-code">A.4</span><span className="fcmi-section-title">Management Disclaimer</span></div>
+              <a href="/reader/first-contact-manual/afterword/#the-business-case-for-cosmic-horror" className="fcmi-section-row"><span className="fcmi-section-code">A.1</span><span className="fcmi-section-title">The Business Case for Cosmic Horror</span></a>
+              <a href="/reader/first-contact-manual/afterword/#the-cosmic-business-model-reality" className="fcmi-section-row"><span className="fcmi-section-code">A.2</span><span className="fcmi-section-title">The Cosmic Business Model Reality</span></a>
+              <a href="/reader/first-contact-manual/afterword/#final-corporate-assessment-and-customer-advisory" className="fcmi-section-row"><span className="fcmi-section-code">A.3</span><span className="fcmi-section-title">Final Corporate Assessment</span></a>
+              <a href="/reader/first-contact-manual/afterword/#management-disclaimer-and-commercial-conclusion" className="fcmi-section-row"><span className="fcmi-section-code">A.4</span><span className="fcmi-section-title">Management Disclaimer</span></a>
             </div>
           </div>
         </article>
@@ -248,6 +244,8 @@ import '../../../styles/reader/first-contact-manual.css'
 ---
 
 ## The Universal Truth About First Contact
+
+It is bad. Avoid at all costs. This is a confusing contradiction coming from a first contact manual, I know. But the data is clear, and the universe is not a safe place for the curious. The best way to survive an encounter with the unknown is to never have one in the first place. We expect you to disregard this advice, but we are contractually obligated to include it anyway, we have also included the rest of the book in case you do ignore it, and we wish you the best of luck if you do.
 
 <div className="not-prose fcmi-reference-spread">
   <div className="fcmi-prose-stack">
@@ -308,9 +306,20 @@ import '../../../styles/reader/first-contact-manual.css'
   </div>
 </section>
 
+<figure className="not-prose fcmi-imperative">
+  <img
+    src="/first-contact/dont.webp"
+    alt="Critical survival imperative: don't approach, don't signal, don't investigate, don't even think."
+    width="2048"
+    height="650"
+    loading="eager"
+    decoding="async"
+  />
+</figure>
+
 ### The Scope of the Problem
 
-The universe operates as a vast ecosystem where introducing new species—particularly one as presumptuous as humanity—often mirrors the introduction of invasive species on terrestrial planets, but amplified to cosmic scale. Instead of English Ivy overrunning your backyard, you're looking at self-replicating nanites converting star systems into grey goo, or alien microorganisms deciding your entire species would make an attractive jello sculpture.
+The universe operates as a vast ecosystem where introducing new species--particularly one as presumptuous as whatever species you are--often mirrors the introduction of invasive species on terrestrial planets, but amplified to cosmic scale. But instead of that pesky weed or vine overrunning your backyard, you're looking at self-replicating nanites converting star systems into grey goo, or alien microorganisms deciding your entire species would make an attractive jello sculpture.
 
 ## Statistical Reality: Why "DON'T" Is Sound Advice
 
@@ -361,7 +370,7 @@ Understanding what you're likely to encounter helps explain why our survival rec
         </div>
       </section>
 
-      <p className="fcmi-caption">*Compiled from 47,829 documented first-contact events across 12 galactic sectors. "Artistic Repurposing" includes conversion to living sculptures, decorative wall arrangements, and one notable case where an entire expedition became a particularly avant-garde wind chime.</p>
+      <p className="fcmi-caption">*Above information is broad stroaks for emphasis only. The actual failure points for first contact are much more broad than this list implies. As an example--"Biological Conversion" can include digestion or Parasitic assimilation. "Artistic Repurposing" includes conversion to living sculptures, decorative wall arrangements, or a notable case where an entire expedition was forced to do an acient dance called macharena to demonstrate a missunderstanding on the assumed trancendant abilities of humanoids gleaned form the expanding radio and light cone of media expanding slowly from their home star system.</p>
     </div>
       </div>
     </div>
@@ -403,7 +412,8 @@ Understanding what you're likely to encounter helps explain why our survival rec
       </section>
     </div>
 
-    <p className="fcmi-notice fcmi-notice--blue"><strong>Note:</strong> These categories often overlap. The Vel'Tar Consortium, for instance, are hostile biologics with incompatible physics <em>and</em> pure malevolence. Lucky us.</p>
+<br />
+    <p className="fcmi-caption fcmi-notice--blue"><strong>Note:</strong> These categories often overlap. The Vel'Tar Consortium, for instance, are hostile biologics with incompatible physics <em>and</em> pure malevolence.</p>
       </div>
     </div>
   </section>
@@ -446,7 +456,9 @@ This gap manifests in ways beyond raw technological superiority. Advanced civili
 
 ## Official Protocols and Bureaucratic Reality
 
-The proper first contact protocols are meticulously outlined in the official Interstellar Compact Mandates, specifically "Section 34 Paragraph C Part B Footnote Amanda and the CF." For those brave enough to attempt accessing this document via standard intergalactic networks, expect signal quality issues and data bills capable of bankrupting minor star nations.
+Please Note: This guide is an unoffical document, and should not be considered a substitute for official first contact protocols. If you have access to official interstellar communication channels, we recommend consulting the Interstellar Compact Mandates for comprehensive guidelines. However, be prepared for the reality that these documents are often written with bureaucratic obfuscation in mind, and may not provide practical guidance in real-world scenarios.
+
+The some of the more notable examples of proper first contact protocols are meticulously outlined in the official Interstellar Compact Mandates, specifically "Section 34 Paragraph C Part B Footnote Amanda and the CF." For those brave enough to attempt accessing this document via standard intergalactic networks, expect signal quality issues and data bills capable of bankrupting minor star nations.
 
 <section className="not-prose fcmi-section-panel fcmi-tone-gray" aria-labelledby="official-protocol-excerpt-section-34cbfacf-heading">
   <div className="fcmi-section-panel-inner">
@@ -519,8 +531,8 @@ When all else fails—and statistically speaking, it will—emergency protocols 
     <section className="fcmi-protocol-row fcmi-tone-yellow">
       <span className="fcmi-protocol-num">3</span>
       <div>
-        <h4>FINAL PROTOCOL: Shop Smart - Shop Bi-Smart</h4>
-        <p>When all else fails, remember: The Bi-Smart Survival Emporium can give you 5% off you're next purchase if you use this coupon code [redacted]. Bi-Smart Corporation emergency broadcast systems have a remarkable survival rate. Sometimes the best technology is the one that gets you home in one piece.</p>
+        <h4>FINAL PROTOCOL: Consider Bi-Smarts expanding catalog of essential survival tools</h4>
+        <p>When all else fails, remember: The Bi-Smart Survival Emporium can give you 5% off you're next purchase if you use this coupon code [redacted]. Bi-Smart Corporation emergency broadcast systems have a remarkable survival rate. Sometimes the best technology is the one that gets you home in one piece. Shop Smart - Shop Bi-Smart.</p>
       </div>
     </section>
   </div>

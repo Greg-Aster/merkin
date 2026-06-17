@@ -26,21 +26,33 @@ seriesPart: 4
 seriesTitle: "The Interstellar Traveler's First Contact Manual"
 contentFormat: "manual"
 lang: ""
-mascotContext: "Chapter 3 covered helpful aliens who accidentally eliminate you through customer service. This chapter covers the ones who eliminate you on purpose through superior military doctrine, predatory instincts, and competitive resource economics. Spoiler alert: intentional elimination proves significantly more efficient than accidental elimination."
+mascotContext: "Chapter 3 covered helpful aliens who accidentally eliminate you through customer service. This chapter covers the ones who eliminate you on purpose through superior military doctrine, predatory instincts, and competitive resource economics. Spoiler alert: intentional elimination proves more direct and easier to recognize than accidental elimination."
 ---
-import ManualChapterHero from '../../../components/reader/ManualChapterHero.astro'
-import ManualChapterIndex from '../../../components/reader/ManualChapterIndex.astro'
-import ManualChapterLink from '../../../components/reader/ManualChapterLink.astro'
-import ManualComparisonPanel from '../../../components/reader/ManualComparisonPanel.astro'
-import ManualNotice from '../../../components/reader/ManualNotice.astro'
+import '../../../styles/reader/first-contact-manual.css'
+import '../../../styles/reader/first-contact-manual-flow.css'
 
-<ManualChapterHero
-  chapter="Chapter 4"
-  title="When They Actually Want You Dead"
-  icon="⚔️"
-  quote="While Chapter 3 examined the existential horror of helpful aliens who eliminate you through customer service excellence, this chapter addresses a more straightforward category of cosmic nightmare: civilizations that want you dead and possess the military sophistication to make it happen efficiently. These entities don't accidentally eliminate you while trying to help—they deliberately eliminate you because your continued existence interferes with their strategic objectives, resource requirements, or entertainment preferences."
-  quoteMarks={false}
-/>
+<section className="not-prose fcmi-hero fcmi-window fcmi-tone-purple" aria-labelledby="chapter-4-heading">
+  <div className="fcmi-shell">
+    <div className="fcmi-frame fcmi-hero-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <div className="fcmi-hero-header">
+        <div className="fcmi-icon-tile fcmi-hero-icon" aria-hidden="true">⚔️</div>
+        <div className="fcmi-hero-heading">
+          <p className="fcmi-kicker">Chapter 4</p>
+          <h1 id="chapter-4-heading" className="fcmi-hero-title">When They Actually Want You Dead</h1>
+        </div>
+      </div>
+
+      <blockquote className="fcmi-hero-quote">
+        While Chapter 3 examined the existential horror of helpful aliens who eliminate you through customer service excellence, this chapter addresses a more straightforward category of cosmic nightmare: civilizations that want you dead and possess the military sophistication to make it happen efficiently. These entities don't accidentally eliminate you while trying to help—they deliberately eliminate you because your continued existence interferes with their strategic objectives, resource requirements, or entertainment preferences.
+      </blockquote>
+    </div>
+  </div>
+</section>
 
 ## Chapter Overview
 
@@ -52,55 +64,72 @@ This chapter examines why human military strategy proves laughably inadequate ag
 
 ## Chapter Index
 
-<ManualChapterIndex
-  items={[
-    { number: '4.1', title: 'Why Military Strategy Is Laughably Inadequate' },
-    { number: '4.2', title: 'Hostile Elimination Methodologies' },
-    { number: '4.3', title: 'Primary Hostile Engagement Patterns' },
-    { number: '4.4', title: 'Case File Analysis: Hostile Encounter Documentation' },
-    { number: '4.5', title: 'Military Evasion Doctrine' },
-  ]}
-  sidebarPanels={[
-    {
-      title: '⚔️ Hostile Categories',
-      items: [
-        { tone: 'red', label: 'Resource Competitors', detail: 'Dark Forest theory' },
-        { tone: 'orange', label: 'Predatory Hunters', detail: 'sport and sustenance' },
-        { tone: 'yellow', label: 'Military Conquest', detail: 'territorial expansion' },
-        { tone: 'green', label: 'Economic Exploitation', detail: 'resource harvesting' },
-        { tone: 'blue', label: 'Environmental Warfare', detail: 'planetary modification' },
-        { tone: 'purple', label: 'Entertainment Industry', detail: 'cosmic gladiator games' },
-      ],
-    },
-    {
-      title: '💀 Military Statistics',
-      lines: [
-        '• Hostile alien survival rate: 46%',
-        '• Helpful alien survival rate: 23%',
-        '• Reason: Hostile intent enables rapid threat recognition',
-        '• Average engagement duration: 12 minutes',
-        '• Military response effectiveness: 0.2%',
-        '• Successful evacuation rate: 45.8%',
-        '• Career change to civilian life: 89%',
-      ],
-    },
-    {
-      title: '📊 Engagement Types',
-      lines: [
-        '• Preemptive Strike Operations (most common)',
-        '• Resource Acquisition Raids (pragmatic)',
-        '• Territorial Expansion Campaigns (systematic)',
-        '• Environmental Warfare (planetary scale)',
-        '• Economic Exploitation (species commoditization)',
-        '• Entertainment Harvesting (cosmic TV)',
-      ],
-    },
-  ]}
-/>
+<section className="not-prose fcmi-index fcmi-chapter-index fcmi-tone-red" aria-labelledby="chapter-4-index-heading">
+  <div className="fcmi-index-shell">
+    <div className="fcmi-index-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
 
-<ManualNotice tone="red" title="Critical Distinction" icon="⚠️" class="mt-6">
-  Hostile first contact scenarios differ fundamentally from helpful-accident scenarios in one crucial respect: threat recognition occurs immediately rather than gradually. When entities announce their intention to eliminate you, human psychology triggers appropriate fear responses enabling rapid evacuation. Paradoxically, this makes deliberately hostile aliens statistically less dangerous than helpful ones, though individual encounters remain spectacularly lethal.
-</ManualNotice>
+      <header className="fcmi-index-header">
+        <div>
+          <p className="fcmi-index-kicker">Chapter Reference</p>
+          <h2 id="chapter-4-index-heading" className="fcmi-index-title">Chapter Index</h2>
+        </div>
+        <p className="fcmi-index-meta">Sections 4.1–4.5</p>
+      </header>
+
+      <div className="fcmi-chapter-index-grid">
+        <div className="fcmi-section-list fcmi-chapter-section-list">
+          <a className="fcmi-section-row fcmi-tone-red" href="#41-why-military-strategy-is-laughably-inadequate">
+            <span className="fcmi-section-code">4.1</span>
+            <span className="fcmi-section-title">Why Military Strategy Is Laughably Inadequate</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-orange" href="#42-hostile-elimination-methodologies">
+            <span className="fcmi-section-code">4.2</span>
+            <span className="fcmi-section-title">Hostile Elimination Methodologies</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-yellow" href="#43-primary-hostile-engagement-patterns">
+            <span className="fcmi-section-code">4.3</span>
+            <span className="fcmi-section-title">Primary Hostile Engagement Patterns</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-purple" href="#44-case-file-analysis-hostile-encounter-documentation">
+            <span className="fcmi-section-code">4.4</span>
+            <span className="fcmi-section-title">Case File Analysis: Hostile Encounter Documentation</span>
+          </a>
+          <a className="fcmi-section-row fcmi-tone-blue" href="#45-military-evasion-doctrine">
+            <span className="fcmi-section-code">4.5</span>
+            <span className="fcmi-section-title">Military Evasion Doctrine</span>
+          </a>
+        </div>
+
+        <aside className="fcmi-legend-window fcmi-tone-gray" aria-label="Hostile categories">
+          <div className="fcmi-legend-header">
+            <span className="fcmi-legend-kicker">Hostile Categories</span>
+            <strong>Threat Patterns</strong>
+          </div>
+          <div className="fcmi-legend-list">
+            <div className="fcmi-legend-row fcmi-tone-red"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Resource Competitors</span><span className="fcmi-legend-meta">Dark Forest theory</span></div>
+            <div className="fcmi-legend-row fcmi-tone-orange"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Predatory Hunters</span><span className="fcmi-legend-meta">sport and sustenance</span></div>
+            <div className="fcmi-legend-row fcmi-tone-yellow"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Military Conquest</span><span className="fcmi-legend-meta">territorial expansion</span></div>
+            <div className="fcmi-legend-row fcmi-tone-green"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Economic Exploitation</span><span className="fcmi-legend-meta">resource harvesting</span></div>
+            <div className="fcmi-legend-row fcmi-tone-blue"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Environmental Warfare</span><span className="fcmi-legend-meta">planetary modification</span></div>
+            <div className="fcmi-legend-row fcmi-tone-purple"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Entertainment Industry</span><span className="fcmi-legend-meta">cosmic gladiator games</span></div>
+          </div>
+          <div className="fcmi-legend-note">
+            <p><strong>Military Statistics:</strong></p>
+            <p>• Survival rate in hostile encounters: 46%<br />• Survival rate in helpful encounters: 23%<br />• Reason: Hostile intent enables rapid threat recognition<br />• Average engagement duration: 12 minutes<br />• Military response effectiveness: 0.2%<br />• Successful evacuation rate: 45.8%<br />• Career change to civilian life: 89%</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p className="not-prose fcmi-notice fcmi-notice--red">
+  <strong>Critical Distinction:</strong> Hostile first contact scenarios differ fundamentally from helpful-accident scenarios in one crucial respect: threat recognition occurs immediately rather than gradually. When entities announce their intention to eliminate you, human psychology triggers appropriate fear responses enabling rapid evacuation. Paradoxically, this makes deliberately hostile aliens statistically less dangerous than helpful ones, though individual encounters remain spectacularly lethal.
+</p>
 
 ---
 
@@ -110,30 +139,36 @@ Human military doctrine evolved to address terrestrial conflicts between approxi
 
 ### The Fundamental Military Mismatch
 
-<ManualComparisonPanel
-  tone="red"
-  icon="⚔️"
-  title="The Strategic Impossibility"
-  subtitle="Why military evolution prepared us for the wrong type of war entirely"
-  leftTitle="What Our Military Is Designed For"
-  leftItems={[
-    'Roughly equivalent technological opponents (peer adversaries)',
-    'Conflicts over terrestrial resources within Earth parameters',
-    'Combat operations on human timescales (hours to months)',
-    'Enemies detectable by conventional sensors (visible targets)',
-    "Adversaries operating under familiar physics (Newton's laws)",
-    'Strategic objectives comprehensible to human psychology',
-  ]}
-  rightTitle="What We Actually Face In Cosmic Warfare"
-  rightItems={[
-    'Technology gaps spanning geological eras (godlike capabilities)',
-    'Resource conflicts over galactic territories and stellar energy',
-    'Military campaigns planned across millennia (geological patience)',
-    'Enemies operating invisibly across multiple dimensions',
-    'Adversaries that edit physics to tactical advantage',
-    'Strategic objectives based on incomprehensible philosophies',
-  ]}
-/>
+<section className="not-prose fcmi-section-panel fcmi-panel--strong fcmi-tone-red" aria-labelledby="strategic-impossibility-heading">
+  <div className="fcmi-section-panel-inner">
+    <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+    <header className="fcmi-panel-header">
+      <div className="fcmi-panel-heading-group">
+        <p className="fcmi-kicker">Strategic Impossibility</p>
+        <h3 id="strategic-impossibility-heading" className="fcmi-title">The Strategic Impossibility</h3>
+      </div>
+      <span className="fcmi-icon-tile" aria-hidden="true">⚔️</span>
+    </header>
+
+    <div className="fcmi-panel-body">
+      <p className="fcmi-panel-copy">Why military evolution prepared us for the wrong type of war entirely</p>
+      <div className="fcmi-list-grid">
+        <section className="fcmi-mini-card fcmi-tone-yellow">
+          <div className="fcmi-mini-head"><strong>What Our Military Is Designed For</strong></div>
+          <p>• Roughly equivalent technological opponents (peer adversaries)<br />• Conflicts over terrestrial resources within Earth parameters<br />• Combat operations on human timescales (hours to months)<br />• Enemies detectable by conventional sensors (visible targets)<br />• Adversaries operating under familiar physics (Newton's laws)<br />• Strategic objectives comprehensible to human psychology</p>
+        </section>
+        <section className="fcmi-mini-card fcmi-tone-red">
+          <div className="fcmi-mini-head"><strong>What We Actually Face In Cosmic Warfare</strong></div>
+          <p>• Technology gaps spanning geological eras (godlike capabilities)<br />• Resource conflicts over galactic territories and stellar energy<br />• Military campaigns planned across millennia (geological patience)<br />• Enemies operating invisibly across multiple dimensions<br />• Adversaries that edit physics to tactical advantage<br />• Strategic objectives based on incomprehensible philosophies</p>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
 
 ### Strategic Doctrine Failures: Why Everything We Know Is Wrong
 
@@ -1668,42 +1703,63 @@ When facing entities that can manipulate reality, time, and space as military as
 
 ## Chapter References and Equipment Guide
 
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-  <ManualChapterLink
-    href="/reader/first-contact-manual/chapter-5/"
-    number="5"
-    title="Advanced Threat Recognition"
-    subtitle="Detection methodologies for cosmic nightmare identification"
-    tone="purple"
-    description="Practical detection methodologies for identifying cosmic threats before they identify you. Covers sensor limitations, recognition protocols, stealth entities, and why most xenobiological threats remain invisible until the moment they decide to eliminate you. Essential field operative survival techniques and equipment recommendations."
-    tags={[
-      { tone: 'yellow', label: 'Detection Arrays' },
-      { tone: 'red', label: 'Stealth Entities' },
-      { tone: 'blue', label: 'Sensor Limitations' },
-      { tone: 'green', label: 'Field Equipment' },
-    ]}
-  />
+<div className="not-prose fcmi-list-grid">
+  <a className="fcmi-next-link fcmi-window fcmi-tone-orange" href="/reader/first-contact-manual/chapter-5/" aria-label="Continue to Chapter 5: Advanced Threat Recognition">
+    <div className="fcmi-shell">
+      <div className="fcmi-frame fcmi-next-link-frame">
+        <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+        <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+        <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+        <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+        <span className="fcmi-next-link-number" aria-hidden="true">05</span>
+        <span className="fcmi-next-link-body">
+          <span className="fcmi-kicker">Next Chapter</span>
+          <strong className="fcmi-next-link-title">Chapter 5: Advanced Threat Recognition</strong>
+          <span className="fcmi-next-link-subtitle">DETECTION METHODOLOGIES FOR COSMIC NIGHTMARE IDENTIFICATION</span>
+          <span className="fcmi-next-link-description">Practical detection methodologies for identifying cosmic threats before they identify you. Covers sensor limitations, recognition protocols, stealth entities, and why most xenobiological threats remain invisible until the moment they decide to eliminate you. Essential field operative survival techniques and equipment recommendations.</span>
+          <span className="fcmi-next-link-tags"><span className="fcmi-badge fcmi-tone-yellow">Detection Arrays</span><span className="fcmi-badge fcmi-tone-red">Stealth Entities</span><span className="fcmi-badge fcmi-tone-blue">Sensor Limitations</span><span className="fcmi-badge fcmi-tone-green">Field Equipment</span></span>
+        </span>
+        <span className="fcmi-next-link-arrow" aria-hidden="true">→</span>
+      </div>
+    </div>
+  </a>
 
-  <ManualChapterLink
-    href="/reader/first-contact-manual/chapter-3/"
-    number="3"
-    title="Helpful Alien Disasters"
-    subtitle="When customer service becomes extinction"
-    tone="blue"
-    description="Complete analysis of why helpful aliens achieve 77% elimination rates through customer service excellence. Covers the politeness problem, scale mismatches, communication catastrophes, and why entities trying to help you represent humanity's most dangerous threat category."
-    tags={[
-      { tone: 'green', label: 'Customer Service' },
-      { tone: 'orange', label: 'Scale Mismatches' },
-      { tone: 'purple', label: 'Communication Hazards' },
-      { tone: 'red', label: 'Jello Apocalypse' },
-    ]}
-  />
+  <a className="fcmi-next-link fcmi-window fcmi-tone-blue" href="/reader/first-contact-manual/chapter-3/" aria-label="Back reference to Chapter 3: Helpful Alien Disasters">
+    <div className="fcmi-shell">
+      <div className="fcmi-frame fcmi-next-link-frame">
+        <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+        <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+        <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+        <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+        <span className="fcmi-next-link-number" aria-hidden="true">03</span>
+        <span className="fcmi-next-link-body">
+          <span className="fcmi-kicker">Previous Reference</span>
+          <strong className="fcmi-next-link-title">Chapter 3: Helpful Alien Disasters</strong>
+          <span className="fcmi-next-link-subtitle">WHEN CUSTOMER SERVICE BECOMES EXTINCTION</span>
+          <span className="fcmi-next-link-description">Complete analysis of why helpful aliens achieve 77% elimination rates through customer service excellence. Covers the politeness problem, scale mismatches, communication catastrophes, and why entities trying to help you represent humanity's most dangerous threat category.</span>
+          <span className="fcmi-next-link-tags"><span className="fcmi-badge fcmi-tone-green">Customer Service</span><span className="fcmi-badge fcmi-tone-orange">Scale Mismatches</span><span className="fcmi-badge fcmi-tone-purple">Communication Hazards</span><span className="fcmi-badge fcmi-tone-red">Jello Apocalypse</span></span>
+        </span>
+        <span className="fcmi-next-link-arrow" aria-hidden="true">↩</span>
+      </div>
+    </div>
+  </a>
 </div>
 
 ---
 
-<div className="bg-gray-900/50 border border-gray-500/50 rounded-lg p-4 mt-6">
-  <h5 className="text-gray-300 font-bold text-sm mb-3">COMPREHENSIVE CHAPTER REFERENCES</h5>
+<section className="not-prose fcmi-section-panel fcmi-tone-gray" aria-labelledby="chapter-4-references-heading">
+  <div className="fcmi-section-panel-inner">
+    <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+    <header className="fcmi-panel-header">
+      <div className="fcmi-panel-heading-group">
+        <p className="fcmi-kicker">Appendix</p>
+        <h3 id="chapter-4-references-heading" className="fcmi-title">COMPREHENSIVE CHAPTER REFERENCES</h3>
+      </div>
+      <span className="fcmi-icon-tile" aria-hidden="true">📚</span>
+    </header>
   <p className="text-gray-400 text-xs mb-3">*Compiled during extended hostile contact scenarios across multiple theaters of cosmic warfare, with special thanks to the survivors who provided tactical intelligence and our insurance company's "Hostile Alien Engagement" policy.*</p>
   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-400 leading-relaxed font-jetbrains-mono">
     <div>
@@ -1720,10 +1776,11 @@ When facing entities that can manipulate reality, time, and space as military as
     </div>
   </div>
   
-  <div className="mt-4 p-3 bg-black/40 border border-gray-600/30 rounded">
+  <section className="fcmi-document-excerpt fcmi-tone-gray">
     <p className="text-xs text-gray-400 italic">**Bi-Smart Corporation Disclaimer:** This military survival guide is provided for educational and tactical purposes only and should not be used as a substitute for professional military training, common sense, or a healthy respect for the statistical impossibility of victory against cosmic-scale adversaries. Bi-Smart Corporation assumes no responsibility for military pride, tactical overconfidence, heroic last stand syndrome, or any resulting career changes to safer professions like bomb disposal, marriage counseling, or competitive volcano wrestling. Side effects may include: questioning the nature of military honor, spontaneous understanding of why retreat is a tactical victory, persistent nightmares involving helpful customer service representatives with overwhelming military capability, and the uncomfortable realization that running away really fast is the most advanced military strategy available to human civilization. This guide does not constitute a guarantee of survival in hostile contact scenarios, though it may improve your odds of recognizing when to abandon everything and evacuate immediately. For best results, combine with Bi-Smart's "Advanced Strategic Retreat" training course, comprehensive life insurance that covers cosmic warfare casualties, and acceptance that military victory against cosmic-scale threats represents mathematical impossibility rather than strategic challenge. Remember: when facing entities that treat reality as a configuration file, the most advanced military response is professional, efficient, and extremely rapid strategic retreat. Shop smart—shop Bi-Smart. You got that? (Please, for the love of causality and the preservation of human military personnel, tell me you got that. The universe is vast, mostly hostile, and full of entities whose routine military exercises exceed our total war-fighting capability. Your survival depends on acknowledging this reality and evacuating accordingly.)</p>
+    </section>
   </div>
-</div>
+</section>
 
 ---
 

@@ -28,19 +28,31 @@ contentFormat: "manual"
 lang: ""
 mascotContext: "You've ignored every warning, dismissed every statistic, and somehow found yourself in an active first contact scenario. This chapter contains the emergency protocols that probably won't save you, but will at least ensure your final moments are properly documented for insurance purposes."
 ---
-import ManualChapterHero from '../../../components/reader/ManualChapterHero.astro'
-import ManualChapterIndex from '../../../components/reader/ManualChapterIndex.astro'
-import ManualListGrid from '../../../components/reader/ManualListGrid.astro'
-import ManualNotice from '../../../components/reader/ManualNotice.astro'
-import ManualPanel from '../../../components/reader/ManualPanel.astro'
+import '../../../styles/reader/first-contact-manual.css'
+import '../../../styles/reader/first-contact-manual-flow.css'
 
-<ManualChapterHero
-  chapter="Chapter 5"
-  title={`The "All Hope is Lost, You Fool" Protocol`}
-  icon="🆘"
-  quote="So, you've ignored every meticulously researched warning in this Admonition. You've blundered into a first contact situation despite clear evidence that helpful aliens achieve 77% elimination rates through customer service excellence and hostile aliens maintain 54% elimination rates through military superiority. The multi-colored jello is forming at your feet, or perhaps that nice entity is offering to upgrade your biology beyond survival compatibility. What now, traveler?"
-  quoteMarks={false}
-/>
+<section className="not-prose fcmi-hero fcmi-window fcmi-tone-purple" aria-labelledby="chapter-5-heading">
+  <div className="fcmi-shell">
+    <div className="fcmi-frame fcmi-hero-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+
+      <div className="fcmi-hero-header">
+        <div className="fcmi-icon-tile fcmi-hero-icon" aria-hidden="true">🆘</div>
+        <div className="fcmi-hero-heading">
+          <p className="fcmi-kicker">Chapter 5</p>
+          <h1 id="chapter-5-heading" className="fcmi-hero-title">The "All Hope is Lost, You Fool" Protocol</h1>
+        </div>
+      </div>
+
+      <blockquote className="fcmi-hero-quote">
+        So, you've ignored every meticulously researched warning in this Admonition. You've blundered into a first contact situation despite clear evidence that helpful aliens achieve 77% elimination rates through customer service excellence and hostile aliens maintain 54% elimination rates through military superiority. The multi-colored jello is forming at your feet, or perhaps that nice entity is offering to upgrade your biology beyond survival compatibility. What now, traveler?
+      </blockquote>
+    </div>
+  </div>
+</section>
 
 ## Chapter Overview
 
@@ -52,43 +64,56 @@ The protocols contained herein represent the distilled wisdom of 23,847 emergenc
 
 ## Chapter Index
 
-<ManualChapterIndex
-  items={[
-    { number: '5.1', title: 'Emergency Threat Classification and Response Matrix' },
-    { number: '5.2', title: 'Corporate Emergency Response Infrastructure' },
-    { number: '5.3', title: 'Bi-Smart Emergency Equipment Catalog' },
-    { number: '5.4', title: 'Threat-Specific Emergency Protocols' },
-    { number: '5.5', title: 'The Final Broadcast: When All Systems Fail' },
-  ]}
-  sidebarPanels={[
-    {
-      title: '🆘 Emergency Priorities',
-      items: [
-        { tone: 'red', label: 'Immediate threat classification', detail: 'helpful vs hostile' },
-        { tone: 'orange', label: 'Corporate emergency response activation' },
-        { tone: 'yellow', label: 'Equipment deployment and survival probability assessment' },
-        { tone: 'green', label: 'Threat-specific protocol implementation' },
-        { tone: 'blue', label: 'Final documentation and epitaph broadcasting' },
-      ],
-    },
-    {
-      title: '📊 Emergency Statistics',
-      lines: [
-        '• Emergency protocol success rate: 0.003%',
-        '• ITE response time: 6-8 geological epochs',
-        '• Corporate liability transfer: 99.97% efficiency',
-        '• Hail Mary device durability: Survives users',
-        '• Final broadcast accuracy: Depressingly precise',
-        '• Bi-Smart bankruptcy prevention: 847 occasions',
-        '• Smooth jazz survival rate: 100% (device only)',
-      ],
-    },
-  ]}
-/>
+<section className="not-prose fcmi-index fcmi-chapter-index fcmi-tone-orange" aria-labelledby="chapter-5-index-heading">
+  <div className="fcmi-index-shell">
+    <div className="fcmi-index-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
 
-<ManualNotice tone="red" title="Protocol Activation Warning" icon="⚠️" class="mt-6">
-  This chapter represents the final stage of first contact crisis management. If you are consulting these protocols, you have already ignored Chapters 3 and 4's comprehensive threat analysis and prevention strategies. The procedures documented herein are designed for immediate implementation during active contact scenarios, though success rates remain statistically negligible due to the mathematical impossibility of surviving cosmic-scale entities through emergency protocols alone.
-</ManualNotice>
+      <header className="fcmi-index-header">
+        <div>
+          <p className="fcmi-index-kicker">Chapter Reference</p>
+          <h2 id="chapter-5-index-heading" className="fcmi-index-title">Chapter Index</h2>
+        </div>
+        <p className="fcmi-index-meta">Sections 5.1–5.5</p>
+      </header>
+
+      <div className="fcmi-chapter-index-grid">
+        <div className="fcmi-section-list fcmi-chapter-section-list">
+          <a className="fcmi-section-row fcmi-tone-blue" href="#51-emergency-threat-classification-and-response-matrix"><span className="fcmi-section-code">5.1</span><span className="fcmi-section-title">Emergency Threat Classification and Response Matrix</span></a>
+          <a className="fcmi-section-row fcmi-tone-orange" href="#52-corporate-emergency-response-infrastructure"><span className="fcmi-section-code">5.2</span><span className="fcmi-section-title">Corporate Emergency Response Infrastructure</span></a>
+          <a className="fcmi-section-row fcmi-tone-yellow" href="#53-bi-smart-emergency-equipment-catalog"><span className="fcmi-section-code">5.3</span><span className="fcmi-section-title">Bi-Smart Emergency Equipment Catalog</span></a>
+          <a className="fcmi-section-row fcmi-tone-green" href="#54-threat-specific-emergency-protocols"><span className="fcmi-section-code">5.4</span><span className="fcmi-section-title">Threat-Specific Emergency Protocols</span></a>
+          <a className="fcmi-section-row fcmi-tone-purple" href="#55-the-final-broadcast-when-all-systems-fail"><span className="fcmi-section-code">5.5</span><span className="fcmi-section-title">The Final Broadcast: When All Systems Fail</span></a>
+        </div>
+
+        <aside className="fcmi-legend-window fcmi-tone-gray" aria-label="Emergency chapter reference">
+          <div className="fcmi-legend-header">
+            <span className="fcmi-legend-kicker">Emergency Priorities</span>
+            <strong>Crisis Stack</strong>
+          </div>
+          <div className="fcmi-legend-list">
+            <div className="fcmi-legend-row fcmi-tone-red"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Immediate threat classification</span><span className="fcmi-legend-meta">helpful vs hostile</span></div>
+            <div className="fcmi-legend-row fcmi-tone-orange"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Corporate response activation</span><span className="fcmi-legend-meta">liability transfer</span></div>
+            <div className="fcmi-legend-row fcmi-tone-yellow"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Equipment deployment</span><span className="fcmi-legend-meta">survival assessment</span></div>
+            <div className="fcmi-legend-row fcmi-tone-green"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Threat protocol implementation</span><span className="fcmi-legend-meta">field response</span></div>
+            <div className="fcmi-legend-row fcmi-tone-blue"><span className="fcmi-dot"></span><span className="fcmi-legend-name">Final documentation</span><span className="fcmi-legend-meta">broadcast accuracy</span></div>
+          </div>
+          <div className="fcmi-legend-note">
+            <p><strong>Emergency Statistics:</strong></p>
+            <p>• Emergency protocol success rate: 0.003%<br />• ITE response time: 6-8 geological epochs<br />• Corporate liability transfer: 99.97% efficiency<br />• Hail Mary device durability: Survives users<br />• Final broadcast accuracy: Depressingly precise<br />• Bi-Smart bankruptcy prevention: 847 occasions<br />• Smooth jazz survival rate: 100% (device only)</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p className="not-prose fcmi-notice fcmi-notice--red">
+  <strong>Protocol Activation Warning:</strong> This chapter represents the final stage of first contact crisis management. If you are consulting these protocols, you have already ignored Chapters 3 and 4's comprehensive threat analysis and prevention strategies. The procedures documented herein are designed for immediate implementation during active contact scenarios, though success rates remain statistically negligible due to the mathematical impossibility of surviving cosmic-scale entities through emergency protocols alone.
+</p>
 
 ---
 
@@ -98,58 +123,62 @@ When faced with an active first contact scenario, the first critical step involv
 
 ### Rapid Threat Assessment Protocol
 
-<ManualPanel
-  tone="blue"
-  emphasis="strong"
-  icon="🎯"
-  title="EMERGENCY CLASSIFICATION FRAMEWORK"
-  subtitle="Rapid identification of threat type and appropriate response protocols"
-  class="mb-6"
->
-  <p>
-    <strong>Primary Classification Question:</strong> Is the entity offering assistance, announcing elimination intent, or simply existing in your vicinity without apparent awareness of your presence?
-  </p>
+<section className="not-prose fcmi-section-panel fcmi-tone-blue fcmi-panel--strong" aria-labelledby="emergency-classification-framework-heading">
+  <div className="fcmi-section-panel-inner">
+    <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+    <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
 
-  <ManualListGrid
-    columns={3}
-    class="mt-4"
-    cards={[
-      {
-        tone: 'blue',
-        title: 'Helpful Entity Indicators',
-        items: [
-          'Offers to "improve" your biology or technology',
-          'Expresses concern for your "optimization potential"',
-          'Mentions "customer service" or "assistance protocols"',
-          'Demonstrates patience with your reluctance to accept help',
-          'Maintains polite conversation during enhancement procedures',
-        ],
-      },
-      {
-        tone: 'red',
-        title: 'Hostile Entity Indicators',
-        items: [
-          'Announces elimination intent without customer service',
-          'Deploys military forces without negotiation offers',
-          'Treats your species as resource inventory',
-          'References territorial acquisition or expansion',
-          'Demonstrates immediate threat recognition capability',
-        ],
-      },
-      {
-        tone: 'purple',
-        title: 'Indifferent Entity Indicators',
-        items: [
-          "Massive scale operations you're too small to register",
-          'Infrastructure projects spanning geological time',
-          'No direct communication or awareness',
-          'Casual reality modification during routine maintenance',
-          'Environmental changes that accidentally eliminate biospheres',
-        ],
-      },
-    ]}
-  />
-</ManualPanel>
+    <header className="fcmi-panel-header">
+      <div className="fcmi-panel-heading-group">
+        <p className="fcmi-kicker">Emergency Classification</p>
+        <h3 id="emergency-classification-framework-heading" className="fcmi-title">EMERGENCY CLASSIFICATION FRAMEWORK</h3>
+        <p className="fcmi-panel-subtitle">Rapid identification of threat type and appropriate response protocols</p>
+      </div>
+      <span className="fcmi-icon-tile" aria-hidden="true">🎯</span>
+    </header>
+
+    <div className="fcmi-panel-body">
+      <p className="fcmi-panel-copy">
+        <strong>Primary Classification Question:</strong> Is the entity offering assistance, announcing elimination intent, or simply existing in your vicinity without apparent awareness of your presence?
+      </p>
+
+      <div className="fcmi-list-grid fcmi-list-grid--3">
+        <section className="fcmi-mini-card fcmi-tone-blue">
+          <div className="fcmi-mini-head"><span className="fcmi-dot"></span><strong>Helpful Entity Indicators</strong></div>
+          <ul>
+            <li>Offers to "improve" your biology or technology</li>
+            <li>Expresses concern for your "optimization potential"</li>
+            <li>Mentions "customer service" or "assistance protocols"</li>
+            <li>Demonstrates patience with your reluctance to accept help</li>
+            <li>Maintains polite conversation during enhancement procedures</li>
+          </ul>
+        </section>
+        <section className="fcmi-mini-card fcmi-tone-red">
+          <div className="fcmi-mini-head"><span className="fcmi-dot"></span><strong>Hostile Entity Indicators</strong></div>
+          <ul>
+            <li>Announces elimination intent without customer service</li>
+            <li>Deploys military forces without negotiation offers</li>
+            <li>Treats your species as resource inventory</li>
+            <li>References territorial acquisition or expansion</li>
+            <li>Demonstrates immediate threat recognition capability</li>
+          </ul>
+        </section>
+        <section className="fcmi-mini-card fcmi-tone-purple">
+          <div className="fcmi-mini-head"><span className="fcmi-dot"></span><strong>Indifferent Entity Indicators</strong></div>
+          <ul>
+            <li>Massive scale operations you're too small to register</li>
+            <li>Infrastructure projects spanning geological time</li>
+            <li>No direct communication or awareness</li>
+            <li>Casual reality modification during routine maintenance</li>
+            <li>Environmental changes that accidentally eliminate biospheres</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
 
 ### Emergency Response Time Matrix
 
@@ -523,7 +552,7 @@ When institutional support fails and corporate panic buttons prove counterproduc
     </div>
   </div>
 
-  **User Testimonials:** "The kit didn't prevent my conversion to jello, but I became a lovely shade of blue-green with hints of strawberry. My enemies were so impressed they preserved me as a decorative centerpiece." - Anonymous Survivor, Kepler-442 Incident
+  **User Testimonials:** "The kit didn't prevent my conversion to jello, but I became a lovely shade of blue-green with hints of strawberry. My enemies were so impressed they preserved me as a decorative centerpiece." - Anonymous Survivor, Epsilon Eridani Enhancement Treatment
 </div>
 
 ### The Bi-Smart Hostile Alien Deterrent System™
@@ -539,7 +568,7 @@ When institutional support fails and corporate panic buttons prove counterproduc
     </div>
   </div>
 
-  **Strategic Framework:** As documented in Chapter 4's analysis of hostile engagement patterns, hostile aliens prove paradoxically less dangerous than helpful ones (46% vs 77% elimination rates) due to immediate threat recognition enabling appropriate fear responses. This system optimizes that advantage.
+  **Strategic Framework:** As documented in Chapter 4's analysis of hostile engagement patterns, hostile aliens prove paradoxically less dangerous than helpful ones (54% vs 77% elimination rates) due to immediate threat recognition enabling appropriate fear responses. This system optimizes that advantage.
 
   #### System Components and Capabilities
 
@@ -987,8 +1016,8 @@ When all conventional emergency systems have failed and survival probability app
     <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
       <h6 className="text-blue-400 font-bold text-sm mb-3">Mathematical Entertainment Suite</h6>
       <div className="space-y-2 text-xs text-blue-200">
-        <div>• <strong>The number e:</strong> Calculated to 2.7 million digits</div>
-        <div>• <strong>Pi sequences:</strong> For patient artificial intelligences</div>
+        <div>• <strong>Pi sequences:</strong> Calculated to 2.7 million digits for patient artificial intelligences</div>
+        <div>• <strong>The number e:</strong> Included for entities who find circles emotionally manipulative</div>
         <div>• <strong>Fibonacci patterns:</strong> Visual, audio, and gravitational wave formats</div>
         <div>• <strong>Fractals:</strong> Proven pleasing to 73% of robot species</div>
         <div>• <strong>Prime number cascades:</strong> Universal mathematical beauty</div>
@@ -1111,7 +1140,7 @@ When all hope is statistically eliminated and the Hail Mary device represents th
     <div className="bg-blue-900/20 border border-blue-500/30 rounded p-4">
       <div className="text-blue-400 font-bold text-sm mb-3">Technical Capabilities</div>
       <div className="space-y-2 text-xs text-blue-200">
-        <div>• <strong>Mathematical Entertainment:</strong> e to 2.7M digits</div>
+        <div>• <strong>Mathematical Entertainment:</strong> pi to 2.7M digits</div>
         <div>• <strong>Smooth Jazz Duration:</strong> 2,847 hours minimum</div>
         <div>• <strong>Linguistic Database:</strong> 15,847 peace declarations</div>
         <div>• <strong>Pheromone Range:</strong> Atmospheric optimization</div>
@@ -1134,3 +1163,30 @@ When faced with cosmic-scale threats that exceed all conventional response capab
 In a universe where customer survival rates approach statistical zero, Bi-Smart has created the perfect business model: products that achieve maximum brand visibility through spectacular failure, generating permanent cultural impact that ensures corporate memory persistence beyond species survival.
 
 Shop Smart. Shop Bi-Smart. You got that?
+
+
+---
+
+<a className="not-prose fcmi-next-link fcmi-window fcmi-tone-purple"
+   href="/reader/first-contact-manual/afterword/"
+   aria-label="Continue to Afterword">
+  <div className="fcmi-shell">
+    <div className="fcmi-frame fcmi-next-link-frame">
+      <span className="fcmi-corner fcmi-corner--tl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--tr" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--bl" aria-hidden="true"></span>
+      <span className="fcmi-corner fcmi-corner--br" aria-hidden="true"></span>
+      <span className="fcmi-next-link-number fcmi-number--after" aria-hidden="true">AFTER</span>
+      <span className="fcmi-next-link-body">
+        <span className="fcmi-kicker">Next Section</span>
+        <strong className="fcmi-next-link-title">Afterword</strong>
+        <span className="fcmi-next-link-subtitle">CORPORATE CLOSING STATEMENT</span>
+      </span>
+      <span className="fcmi-next-link-arrow" aria-hidden="true">→</span>
+    </div>
+  </div>
+</a>
+
+---
+
+*End of Chapter 5*

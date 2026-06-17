@@ -9,9 +9,9 @@
 
    Usage:
    1. Import once in the MDX chapter, layout, or reader shell:
-      import "../../../styles/first-contact-manual.css";
+      import "../../../styles/reader/first-contact-manual.css";
    2. Wrap custom MDX layouts in the classes below instead of long Tailwind class piles.
-   3. Override tone variables locally when a section needs a different color family.
+   3. Use fcmi-tone-* on semantic section wrappers when a block needs a different color family.
 */
 
 /* --------------------------------------------------------------------------
@@ -983,7 +983,7 @@
   line-height: 1.45;
 }
 
-/* Reusable transformed panel: replaces old ManualPanel surface when used in MDX. */
+/* Reusable transformed panel surface for MDX. */
 .fcmi-section-panel {
   position: relative;
   margin: clamp(1.4rem, 4vw, 2.5rem) 0;
@@ -1637,4 +1637,569 @@
   .fcmi-next-link-arrow {
     justify-self: start;
   }
+}
+
+/* ─── Survival imperative figure ───────────────────────────────────────── */
+
+.fcmi-imperative {
+  margin-bottom: 2rem;
+  overflow: hidden;
+  border-radius: var(--fcmi-radius-lg, 0.75rem);
+}
+
+.fcmi-imperative img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+
+/* --------------------------------------------------------------------------
+   Chapter 1 legacy-layout compatibility layer
+   --------------------------------------------------------------------------
+   Chapter 1 still contains human-authored MDX blocks with older Tailwind-style
+   className strings. These rules visually pull those existing containers into
+   the same rounded technical-window system used by the forward without changing
+   the prose or requiring every inner card to be hand-rewritten.
+   -------------------------------------------------------------------------- */
+
+/* Tone inheritance for old utility-class blocks. */
+:where([class*="red-900"], [class*="red-500"], [class*="text-red-"]) { --fcmi-accent-rgb: 248 95 95; --fcmi-accent-2-rgb: 136 30 45; --fcmi-glow-rgb: 255 45 45; }
+:where([class*="orange-900"], [class*="orange-500"], [class*="text-orange-"]) { --fcmi-accent-rgb: 245 151 88; --fcmi-accent-2-rgb: 139 72 28; --fcmi-glow-rgb: 245 115 55; }
+:where([class*="yellow-900"], [class*="yellow-500"], [class*="text-yellow-"]) { --fcmi-accent-rgb: 226 207 102; --fcmi-accent-2-rgb: 130 105 35; --fcmi-glow-rgb: 240 210 70; }
+:where([class*="amber-900"], [class*="amber-500"], [class*="text-amber-"]) { --fcmi-accent-rgb: 226 175 90; --fcmi-accent-2-rgb: 130 88 35; --fcmi-glow-rgb: 240 170 70; }
+:where([class*="blue-900"], [class*="blue-500"], [class*="text-blue-"]) { --fcmi-accent-rgb: 118 170 255; --fcmi-accent-2-rgb: 58 86 168; --fcmi-glow-rgb: 69 143 220; }
+:where([class*="cyan-900"], [class*="cyan-500"], [class*="text-cyan-"]) { --fcmi-accent-rgb: 105 218 232; --fcmi-accent-2-rgb: 42 130 150; --fcmi-glow-rgb: 65 210 230; }
+:where([class*="indigo-900"], [class*="indigo-500"], [class*="text-indigo-"]) { --fcmi-accent-rgb: 145 150 255; --fcmi-accent-2-rgb: 74 78 170; --fcmi-glow-rgb: 110 120 255; }
+:where([class*="purple-900"], [class*="purple-500"], [class*="text-purple-"]) { --fcmi-accent-rgb: 174 145 255; --fcmi-accent-2-rgb: 92 60 170; --fcmi-glow-rgb: 150 105 255; }
+:where([class*="green-900"], [class*="green-500"], [class*="text-green-"]) { --fcmi-accent-rgb: 115 218 160; --fcmi-accent-2-rgb: 44 130 76; --fcmi-glow-rgb: 80 220 135; }
+:where([class*="gray-900"], [class*="gray-500"], [class*="text-gray-"]) { --fcmi-accent-rgb: 170 184 200; --fcmi-accent-2-rgb: 76 86 100; --fcmi-glow-rgb: 145 165 185; }
+
+/* Major old chapter panels: rounded technical windows, not flat Tailwind boxes. */
+:where(
+  [class*="bg-red-900/15"],
+  [class*="bg-orange-900/15"],
+  [class*="bg-yellow-900/15"],
+  [class*="bg-green-900/15"],
+  [class*="bg-blue-900/15"],
+  [class*="bg-purple-900/15"],
+  [class*="bg-gradient-to-r"],
+  [class*="bg-gradient-to-br"]
+):where([class*="rounded-lg"]):where([class*="p-6"]) {
+  position: relative !important;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.34) !important;
+  border-radius: var(--fcmi-radius-xl) !important;
+  background:
+    radial-gradient(circle at 8% 0%, rgb(var(--fcmi-accent-rgb) / 0.20), transparent 32%),
+    radial-gradient(circle at 96% 8%, rgb(var(--fcmi-accent-2-rgb) / 0.14), transparent 38%),
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.045), rgb(var(--fcmi-text-rgb) / 0.012)),
+    linear-gradient(135deg, rgb(var(--fcmi-surface-2-rgb) / 0.86), rgb(var(--fcmi-surface-rgb) / 0.96) 62%, rgb(var(--fcmi-surface-3-rgb) / 0.96)) !important;
+  box-shadow:
+    0 24px 68px rgb(0 0 0 / 0.34),
+    0 0 32px rgb(var(--fcmi-glow-rgb) / 0.10),
+    inset 0 0 42px rgb(var(--fcmi-glow-rgb) / 0.075),
+    inset 0 1px 0 rgb(var(--fcmi-text-rgb) / 0.07) !important;
+  overflow: hidden !important;
+}
+
+:where(
+  [class*="bg-red-900/15"],
+  [class*="bg-orange-900/15"],
+  [class*="bg-yellow-900/15"],
+  [class*="bg-green-900/15"],
+  [class*="bg-blue-900/15"],
+  [class*="bg-purple-900/15"],
+  [class*="bg-gradient-to-r"],
+  [class*="bg-gradient-to-br"]
+):where([class*="rounded-lg"]):where([class*="p-6"])::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.105;
+  background: repeating-linear-gradient(to bottom, rgb(var(--fcmi-accent-rgb) / 0.14) 0, rgb(var(--fcmi-accent-rgb) / 0.14) 1px, transparent 1px, transparent 6px);
+  mix-blend-mode: screen;
+}
+
+:where(
+  [class*="bg-red-900/15"],
+  [class*="bg-orange-900/15"],
+  [class*="bg-yellow-900/15"],
+  [class*="bg-green-900/15"],
+  [class*="bg-blue-900/15"],
+  [class*="bg-purple-900/15"],
+  [class*="bg-gradient-to-r"],
+  [class*="bg-gradient-to-br"]
+):where([class*="rounded-lg"]):where([class*="p-6"])::after {
+  content: "";
+  position: absolute;
+  inset: 0.68rem;
+  pointer-events: none;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.075);
+  border-radius: calc(var(--fcmi-radius-xl) - 0.45rem);
+}
+
+/* Keep children above generated scanline/inset layers. */
+:where([class*="bg-"][class*="900/15"], [class*="bg-gradient-to"]):where([class*="rounded-lg"]):where([class*="p-6"]) > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Old inner cards become mini technical cards. */
+:where(
+  [class*="bg-red-900/20"],
+  [class*="bg-orange-900/20"],
+  [class*="bg-yellow-900/20"],
+  [class*="bg-green-900/20"],
+  [class*="bg-blue-900/20"],
+  [class*="bg-cyan-900/20"],
+  [class*="bg-indigo-900/20"],
+  [class*="bg-purple-900/20"],
+  [class*="bg-gray-900/20"],
+  [class*="bg-gray-900/50"],
+  [class*="bg-black/40"]
+):where([class*="rounded"], [class*="rounded-lg"]):where([class*="p-"]) {
+  position: relative !important;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.22) !important;
+  border-radius: var(--fcmi-radius-md) !important;
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.04), rgb(var(--fcmi-text-rgb) / 0.008)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.075), transparent 62%),
+    rgb(var(--fcmi-surface-rgb) / 0.42) !important;
+  box-shadow:
+    inset 0 0 24px rgb(var(--fcmi-glow-rgb) / 0.055),
+    0 14px 34px rgb(0 0 0 / 0.20) !important;
+  overflow: hidden !important;
+}
+
+:where(
+  [class*="bg-red-900/20"],
+  [class*="bg-orange-900/20"],
+  [class*="bg-yellow-900/20"],
+  [class*="bg-green-900/20"],
+  [class*="bg-blue-900/20"],
+  [class*="bg-cyan-900/20"],
+  [class*="bg-indigo-900/20"],
+  [class*="bg-purple-900/20"],
+  [class*="bg-gray-900/20"],
+  [class*="bg-gray-900/50"],
+  [class*="bg-black/40"]
+):where([class*="rounded"], [class*="rounded-lg"]):where([class*="p-"]) > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Icon tiles and pill labels inside legacy panels. */
+:where([class*="w-16"][class*="h-16"], [class*="w-12"][class*="h-12"]):where([class*="rounded"]) {
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.32) !important;
+  border-radius: var(--fcmi-radius-md) !important;
+  background:
+    radial-gradient(circle at 50% 30%, rgb(var(--fcmi-accent-rgb) / 0.12), transparent 62%),
+    rgb(var(--fcmi-surface-rgb) / 0.45) !important;
+  color: rgb(var(--fcmi-accent-rgb) / 0.82) !important;
+  box-shadow: inset 0 0 18px rgb(var(--fcmi-glow-rgb) / 0.08), 0 0 18px rgb(var(--fcmi-glow-rgb) / 0.08) !important;
+}
+
+:where([class*="rounded-full"], [class*="px-3"][class*="py-1"]) {
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.24) !important;
+  border-radius: 999px !important;
+  background: rgb(var(--fcmi-accent-rgb) / 0.065) !important;
+  color: rgb(var(--fcmi-accent-rgb) / 0.78) !important;
+  font-family: var(--fcmi-mono) !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Legacy typography alignment with forward. */
+:where([class*="text-gray-300"], [class*="text-gray-400"]) { color: var(--fcmi-muted) !important; }
+:where([class*="text-red-"], [class*="text-orange-"], [class*="text-yellow-"], [class*="text-amber-"], [class*="text-green-"], [class*="text-blue-"], [class*="text-cyan-"], [class*="text-indigo-"], [class*="text-purple-"]) {
+  color: rgb(var(--fcmi-accent-rgb) / 0.86) !important;
+}
+:where(h3[class*="font-bold"], h4[class*="font-bold"], h5[class*="font"], h6[class*="font"]) {
+  color: rgb(var(--fcmi-accent-rgb) / 0.88) !important;
+  letter-spacing: 0.01em;
+}
+:where([class*="font-mono"]) { font-family: var(--fcmi-mono) !important; }
+
+/* Chapter-specific index and next-link extensions. */
+.fcmi-chapter-index-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.78fr);
+  gap: clamp(1rem, 3vw, 1.35rem);
+  align-items: start;
+}
+
+.fcmi-chapter-section-list {
+  position: relative;
+  z-index: 1;
+  border: 1px solid var(--fcmi-line);
+  border-radius: var(--fcmi-radius-lg);
+  background: rgb(var(--fcmi-surface-rgb) / 0.28);
+  overflow: hidden;
+}
+
+.fcmi-chapter-section-list .fcmi-section-row {
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  padding: 0.72rem 0.85rem;
+  text-decoration: none;
+}
+
+.fcmi-chapter-section-list .fcmi-section-row:hover {
+  background: linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.08), transparent 72%);
+  text-decoration: none;
+}
+
+.fcmi-next-link-description {
+  color: var(--fcmi-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.fcmi-next-link-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 900px) {
+  .fcmi-chapter-index-grid { grid-template-columns: 1fr; }
+}
+
+/* --------------------------------------------------------------------------
+   Chapter 4 legacy-layout compatibility extension
+   --------------------------------------------------------------------------
+   Chapter 4 contains a larger number of human-authored legacy utility panels
+   than the earlier chapters. These rules broaden the existing compatibility
+   layer so p-4/p-8, rounded-xl, border-2, and bg-* /30 emphasis cards inherit
+   the same fcmi technical-window language without rewriting prose blocks.
+   -------------------------------------------------------------------------- */
+
+:where(
+  [class*="bg-red-900/15"],
+  [class*="bg-orange-900/15"],
+  [class*="bg-yellow-900/15"],
+  [class*="bg-amber-900/15"],
+  [class*="bg-green-900/15"],
+  [class*="bg-blue-900/15"],
+  [class*="bg-cyan-900/15"],
+  [class*="bg-purple-900/15"],
+  [class*="bg-gray-900/15"],
+  [class*="bg-gradient-to-r"],
+  [class*="bg-gradient-to-br"]
+):where([class*="rounded"]):where([class*="p-6"], [class*="p-8"]) {
+  position: relative !important;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.34) !important;
+  border-radius: var(--fcmi-radius-xl) !important;
+  background:
+    radial-gradient(circle at 8% 0%, rgb(var(--fcmi-accent-rgb) / 0.20), transparent 32%),
+    radial-gradient(circle at 96% 8%, rgb(var(--fcmi-accent-2-rgb) / 0.14), transparent 38%),
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.045), rgb(var(--fcmi-text-rgb) / 0.012)),
+    linear-gradient(135deg, rgb(var(--fcmi-surface-2-rgb) / 0.86), rgb(var(--fcmi-surface-rgb) / 0.96) 62%, rgb(var(--fcmi-surface-3-rgb) / 0.96)) !important;
+  box-shadow:
+    0 24px 68px rgb(0 0 0 / 0.34),
+    0 0 32px rgb(var(--fcmi-glow-rgb) / 0.10),
+    inset 0 0 42px rgb(var(--fcmi-glow-rgb) / 0.075),
+    inset 0 1px 0 rgb(var(--fcmi-text-rgb) / 0.07) !important;
+  overflow: hidden !important;
+}
+
+:where(
+  [class*="bg-red-900/15"],
+  [class*="bg-orange-900/15"],
+  [class*="bg-yellow-900/15"],
+  [class*="bg-amber-900/15"],
+  [class*="bg-green-900/15"],
+  [class*="bg-blue-900/15"],
+  [class*="bg-cyan-900/15"],
+  [class*="bg-purple-900/15"],
+  [class*="bg-gray-900/15"],
+  [class*="bg-gradient-to-r"],
+  [class*="bg-gradient-to-br"]
+):where([class*="rounded"]):where([class*="p-6"], [class*="p-8"])::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.105;
+  background: repeating-linear-gradient(to bottom, rgb(var(--fcmi-accent-rgb) / 0.14) 0, rgb(var(--fcmi-accent-rgb) / 0.14) 1px, transparent 1px, transparent 6px);
+  mix-blend-mode: screen;
+}
+
+:where(
+  [class*="bg-red-900/15"],
+  [class*="bg-orange-900/15"],
+  [class*="bg-yellow-900/15"],
+  [class*="bg-amber-900/15"],
+  [class*="bg-green-900/15"],
+  [class*="bg-blue-900/15"],
+  [class*="bg-cyan-900/15"],
+  [class*="bg-purple-900/15"],
+  [class*="bg-gray-900/15"],
+  [class*="bg-gradient-to-r"],
+  [class*="bg-gradient-to-br"]
+):where([class*="rounded"]):where([class*="p-6"], [class*="p-8"])::after {
+  content: "";
+  position: absolute;
+  inset: 0.68rem;
+  pointer-events: none;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.075);
+  border-radius: calc(var(--fcmi-radius-xl) - 0.45rem);
+}
+
+:where([class*="bg-900/15"], [class*="bg-gradient-to"]):where([class*="rounded"]):where([class*="p-6"], [class*="p-8"]) > *,
+:where([class*="bg-red-900/15"], [class*="bg-orange-900/15"], [class*="bg-yellow-900/15"], [class*="bg-amber-900/15"], [class*="bg-green-900/15"], [class*="bg-blue-900/15"], [class*="bg-cyan-900/15"], [class*="bg-purple-900/15"], [class*="bg-gray-900/15"]):where([class*="rounded"]):where([class*="p-6"], [class*="p-8"]) > * {
+  position: relative;
+  z-index: 1;
+}
+
+:where(
+  [class*="bg-red-900/30"],
+  [class*="bg-orange-900/30"],
+  [class*="bg-yellow-900/30"],
+  [class*="bg-green-900/30"],
+  [class*="bg-blue-900/30"],
+  [class*="bg-cyan-900/30"],
+  [class*="bg-purple-900/30"],
+  [class*="bg-gray-900/30"]
+):where([class*="rounded"]):where([class*="p-"]) {
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.20) !important;
+  border-radius: var(--fcmi-radius-md) !important;
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.04), rgb(var(--fcmi-text-rgb) / 0.008)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.08), transparent 70%),
+    rgb(var(--fcmi-surface-rgb) / 0.46) !important;
+  box-shadow: inset 0 0 22px rgb(var(--fcmi-glow-rgb) / 0.055) !important;
+}
+
+:where([class*="border-l-4"]):where([class*="p-4"]) {
+  border-radius: var(--fcmi-radius-md) !important;
+  border-top: 1px solid rgb(var(--fcmi-accent-rgb) / 0.18) !important;
+  border-right: 1px solid rgb(var(--fcmi-accent-rgb) / 0.18) !important;
+  border-bottom: 1px solid rgb(var(--fcmi-accent-rgb) / 0.18) !important;
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.11), rgb(var(--fcmi-surface-rgb) / 0.35) 42%, transparent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Chapter 5 legacy-layout compatibility extension
+   --------------------------------------------------------------------------
+   Chapter 5 keeps several human-authored emergency tables, terminal readouts,
+   specification cards, and black-box transmission panels in legacy utility
+   markup. These rules let those blocks inherit the shared fcmi technical-window
+   language without rewriting the prose or lists inside them.
+   -------------------------------------------------------------------------- */
+
+:where(
+  [class*="bg-red-900/20"],
+  [class*="bg-orange-900/20"],
+  [class*="bg-yellow-900/20"],
+  [class*="bg-green-900/20"],
+  [class*="bg-blue-900/20"],
+  [class*="bg-cyan-900/20"],
+  [class*="bg-purple-900/20"],
+  [class*="bg-gray-900/20"],
+  [class*="bg-gray-900/30"],
+  [class*="bg-black/80"],
+  [class*="bg-black/50"]
+):where([class*="rounded"], [class*="rounded-lg"], [class*="rounded-xl"]):where([class*="p-4"], [class*="p-6"], [class*="p-8"]) {
+  border-color: rgb(var(--fcmi-accent-rgb) / 0.26) !important;
+  border-radius: var(--fcmi-radius-lg) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgb(var(--fcmi-accent-rgb) / 0.10), transparent 32%),
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.04), rgb(var(--fcmi-text-rgb) / 0.008)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.075), transparent 68%),
+    rgb(var(--fcmi-surface-rgb) / 0.48) !important;
+  box-shadow:
+    inset 0 0 28px rgb(var(--fcmi-glow-rgb) / 0.06),
+    0 16px 42px rgb(0 0 0 / 0.24) !important;
+}
+
+:where([class*="border-4"]):where([class*="rounded-xl"], [class*="rounded-lg"]):where([class*="p-6"], [class*="p-8"]) {
+  border-width: 1px !important;
+  border-color: rgb(var(--fcmi-accent-rgb) / 0.46) !important;
+  box-shadow:
+    0 0 34px rgb(var(--fcmi-glow-rgb) / 0.18),
+    inset 0 0 34px rgb(var(--fcmi-glow-rgb) / 0.10),
+    0 22px 70px rgb(0 0 0 / 0.34) !important;
+}
+
+:where(.fcmi-mini-card, .fcmi-card, .fcmi-panel-body) ul {
+  margin: 0.75rem 0 0;
+  padding-left: 1.15rem;
+  color: var(--fcmi-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+:where(.fcmi-mini-card, .fcmi-card, .fcmi-panel-body) li + li {
+  margin-top: 0.32rem;
+}
+
+:where(.overflow-x-auto) {
+  position: relative;
+  z-index: 1;
+  overflow-x: auto;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.14);
+  border-radius: var(--fcmi-radius-md);
+  background: rgb(var(--fcmi-surface-rgb) / 0.30);
+}
+
+:where(.overflow-x-auto) table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--fcmi-muted);
+  font-family: var(--fcmi-mono);
+}
+
+:where(.overflow-x-auto) th,
+:where(.overflow-x-auto) td {
+  border-bottom: 1px solid var(--fcmi-line-soft) !important;
+  padding: 0.62rem 0.7rem !important;
+}
+
+:where(.overflow-x-auto) th {
+  color: var(--fcmi-cream) !important;
+  background: rgb(var(--fcmi-accent-rgb) / 0.065);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+:where(.overflow-x-auto) tr:last-child td {
+  border-bottom: 0 !important;
+}
+
+:where([class*="font-mono"][class*="bg-black"]):where([class*="p-4"], [class*="p-6"]) {
+  font-family: var(--fcmi-mono) !important;
+  color: var(--fcmi-muted) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Afterword legacy-layout compatibility extension
+   --------------------------------------------------------------------------
+   The afterword uses the Bi-Smart corporate narrator and keeps several
+   human-authored utility-styled panels. These rules let the converted
+   fcmi-section-panel shells present those panels as part of the same technical
+   window system without rewriting the prose inside them.
+   -------------------------------------------------------------------------- */
+
+.fcmi-afterword-panel {
+  margin: clamp(1.35rem, 4vw, 2.45rem) 0;
+}
+
+.fcmi-afterword-panel-inner {
+  color: var(--fcmi-muted);
+}
+
+.fcmi-afterword-panel-inner > .flex:first-of-type,
+.fcmi-afterword-panel-inner > [class*="font-bold"][class*="text-2xl"]:first-child,
+.fcmi-afterword-panel-inner > [class*="font-bold"][class*="text-lg"]:first-child {
+  position: relative;
+  z-index: 1;
+  padding: 0.1rem 0 clamp(0.85rem, 2vw, 1.05rem);
+  margin-bottom: clamp(0.9rem, 2vw, 1.2rem) !important;
+  border-bottom: 1px solid var(--fcmi-line);
+}
+
+.fcmi-afterword-panel-inner > .flex:first-of-type h3,
+.fcmi-afterword-panel-inner > .flex:first-of-type h4,
+.fcmi-afterword-panel-inner > .flex:first-of-type p,
+.fcmi-afterword-panel-inner > [class*="font-bold"][class*="text-2xl"]:first-child {
+  position: relative;
+  z-index: 1;
+}
+
+.fcmi-afterword-panel-inner > .flex:first-of-type h3,
+.fcmi-afterword-panel-inner > .flex:first-of-type h4,
+.fcmi-afterword-panel-inner > [class*="font-bold"][class*="text-2xl"]:first-child,
+.fcmi-afterword-panel-inner > [class*="font-bold"][class*="text-lg"]:first-child {
+  color: var(--fcmi-cream) !important;
+  font-size: clamp(1rem, 2vw, 1.22rem) !important;
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 18px rgb(var(--fcmi-glow-rgb) / 0.12);
+}
+
+.fcmi-afterword-panel-inner > .flex:first-of-type p,
+.fcmi-afterword-panel-inner [class*="text-sm"] {
+  color: rgb(var(--fcmi-accent-rgb) / 0.72) !important;
+  font-family: var(--fcmi-mono);
+  letter-spacing: 0.05em;
+}
+
+.fcmi-afterword-panel-inner p,
+.fcmi-afterword-panel-inner li,
+.fcmi-afterword-panel-inner div:not([class*="fcmi-corner"]),
+.fcmi-afterword-panel-inner blockquote {
+  position: relative;
+  z-index: 1;
+}
+
+.fcmi-afterword-panel-inner > p,
+.fcmi-afterword-panel-inner p[class*="leading-relaxed"] {
+  color: var(--fcmi-muted) !important;
+  line-height: 1.65;
+}
+
+.fcmi-afterword-panel-inner strong {
+  color: rgb(var(--fcmi-accent-rgb) / 0.88);
+}
+
+.fcmi-afterword-panel-inner ul,
+.fcmi-afterword-panel-inner ol {
+  position: relative;
+  z-index: 1;
+  margin: 0.85rem 0 1rem;
+  padding-left: 1.2rem;
+  color: var(--fcmi-muted);
+  line-height: 1.58;
+}
+
+.fcmi-afterword-panel-inner li + li {
+  margin-top: 0.32rem;
+}
+
+.fcmi-afterword-panel-inner [class*="grid-cols"] {
+  position: relative;
+  z-index: 1;
+}
+
+.fcmi-afterword-panel-inner [class*="bg-black/40"],
+.fcmi-afterword-panel-inner [class*="bg-red-900/20"],
+.fcmi-afterword-panel-inner [class*="bg-yellow-900/20"],
+.fcmi-afterword-panel-inner [class*="bg-orange-900/20"],
+.fcmi-afterword-panel-inner [class*="bg-gray-900/50"] {
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.20) !important;
+  border-radius: var(--fcmi-radius-md) !important;
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.085), rgb(var(--fcmi-surface-rgb) / 0.36) 44%, transparent),
+    rgb(var(--fcmi-surface-rgb) / 0.34) !important;
+  box-shadow: inset 0 0 22px rgb(var(--fcmi-glow-rgb) / 0.055) !important;
+}
+
+.fcmi-afterword-panel-inner [class*="border-t"] {
+  border-color: var(--fcmi-line) !important;
+}
+
+.fcmi-afterword-panel-inner [class*="text-red-"],
+.fcmi-afterword-panel-inner [class*="text-orange-"],
+.fcmi-afterword-panel-inner [class*="text-yellow-"],
+.fcmi-afterword-panel-inner [class*="text-green-"],
+.fcmi-afterword-panel-inner [class*="text-blue-"],
+.fcmi-afterword-panel-inner [class*="text-cyan-"],
+.fcmi-afterword-panel-inner [class*="text-purple-"],
+.fcmi-afterword-panel-inner [class*="text-gray-"] {
+  color: rgb(var(--fcmi-accent-rgb) / 0.84) !important;
+}
+
+.fcmi-afterword-panel-inner p[class*="text-red-"],
+.fcmi-afterword-panel-inner p[class*="text-orange-"],
+.fcmi-afterword-panel-inner p[class*="text-yellow-"],
+.fcmi-afterword-panel-inner p[class*="text-green-"],
+.fcmi-afterword-panel-inner p[class*="text-blue-"],
+.fcmi-afterword-panel-inner p[class*="text-cyan-"],
+.fcmi-afterword-panel-inner p[class*="text-purple-"],
+.fcmi-afterword-panel-inner p[class*="text-gray-"] {
+  color: var(--fcmi-muted) !important;
 }

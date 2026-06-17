@@ -1,0 +1,100 @@
+/* Threat-code flow accents for First Contact Manual chapters.
+   Keep this layer small: it extends existing fcmi tone classes without owning
+   the base manual layout system. */
+
+.fcmi-legend-row {
+  position: relative;
+  box-shadow:
+    inset 3px 0 0 rgb(var(--fcmi-accent-rgb) / 0.36),
+    inset 0 0 16px rgb(var(--fcmi-glow-rgb) / 0.035);
+  overflow: hidden;
+}
+
+.fcmi-legend-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.12), transparent 38%),
+    radial-gradient(circle at 100% 50%, rgb(var(--fcmi-accent-rgb) / 0.09), transparent 32%);
+  opacity: 0.7;
+}
+
+.fcmi-legend-row .fcmi-dot,
+.fcmi-legend-name,
+.fcmi-legend-meta {
+  position: relative;
+  z-index: 1;
+}
+
+.fcmi-section-panel-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--fcmi-accent-rgb) / 0.54) 18%,
+      rgb(var(--fcmi-accent-rgb) / 0.28) 68%,
+      transparent
+    );
+  box-shadow: 0 0 18px rgb(var(--fcmi-glow-rgb) / 0.24);
+}
+
+.fcmi-next-link-frame {
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.085), transparent 62%),
+    radial-gradient(circle at 100% 50%, rgb(var(--fcmi-accent-2-rgb) / 0.10), transparent 36%),
+    rgb(var(--fcmi-surface-3-rgb) / 0.28);
+}
+
+.fcmi-chapter-section-list {
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-accent-rgb) / 0.055), transparent 52%),
+    rgb(var(--fcmi-surface-rgb) / 0.28);
+}
+
+.fcmi-chapter-section-list .fcmi-section-row {
+  position: relative;
+  padding-left: 1.05rem;
+  border-left: 3px solid rgb(var(--fcmi-accent-rgb) / 0.34);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.075), transparent 64%);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.fcmi-chapter-section-list .fcmi-section-row::before {
+  content: "";
+  position: absolute;
+  left: 0.42rem;
+  top: 50%;
+  width: 0.34rem;
+  height: 0.34rem;
+  border-radius: 999px;
+  background: rgb(var(--fcmi-accent-rgb) / 0.78);
+  box-shadow: 0 0 12px rgb(var(--fcmi-glow-rgb) / 0.36);
+  transform: translateY(-50%);
+}
+
+.fcmi-chapter-section-list .fcmi-section-row:hover {
+  border-left-color: rgb(var(--fcmi-accent-rgb) / 0.72);
+  background: linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.14), transparent 72%);
+  transform: translateX(2px);
+}
+
+.fcmi-chapter-section-list .fcmi-section-row:hover .fcmi-section-title {
+  color: var(--fcmi-cream);
+}
+
+.fcmi-chapter-section-list .fcmi-section-code {
+  color: rgb(var(--fcmi-accent-rgb) / 0.88);
+  opacity: 1;
+}
