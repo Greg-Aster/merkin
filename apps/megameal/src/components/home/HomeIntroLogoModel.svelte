@@ -19,6 +19,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 type SceneQuality = 'high' | 'balanced' | 'lean'
 type AnimatedAtlasUniforms = {
   animatedAtlasStrength: { value: number }
+  animatedAtlasBaseIntensity: { value: number }
 }
 
 export let sceneQuality: SceneQuality = 'high'
@@ -48,10 +49,6 @@ let uvRevisionKey = ''
 const gltfLoader = new GLTFLoader()
 gltfLoader.setMeshoptDecoder(MeshoptDecoder)
 const textureLoader = new TextureLoader()
-const originalMaterialColors = new WeakMap<
-  THREE.MeshStandardMaterial,
-  THREE.Color
->()
 const animatedAtlasUniforms = new WeakMap<
   THREE.MeshStandardMaterial,
   AnimatedAtlasUniforms
@@ -63,6 +60,20 @@ const logoSize = new Vector3()
 const logoTargetSize = new Vector3(4.68, 2.24, 1.44)
 const uvBounds = new Box3()
 const logoModelSrc = '/assets/3D/Hy3D_textured_00005_optimized.glb'
+const importedLogoTextureChannels = [
+  'map',
+  'alphaMap',
+  'aoMap',
+  'bumpMap',
+  'displacementMap',
+  'emissiveMap',
+  'envMap',
+  'lightMap',
+  'metalnessMap',
+  'normalMap',
+  'roughnessMap',
+] as const
+type LogoMaterialTextureChannel = (typeof importedLogoTextureChannels)[number]
 
 function disposeObjectResources(object: THREE.Object3D) {
   object.traverse(child => {
@@ -173,6 +184,7 @@ function getAnimatedAtlasUniforms(
   if (!uniforms) {
     uniforms = {
       animatedAtlasStrength: { value: animatedAtlasIntensity },
+      animatedAtlasBaseIntensity: { value: animatedAtlasBaseIntensity },
     }
     animatedAtlasUniforms.set(material, uniforms)
   }
@@ -191,10 +203,12 @@ function installAnimatedAtlasShader(material: THREE.MeshStandardMaterial) {
   material.onBeforeCompile = (shader, renderer) => {
     previousOnBeforeCompile(shader, renderer)
     shader.uniforms.animatedAtlasStrength = uniforms.animatedAtlasStrength
+    shader.uniforms.animatedAtlasBaseIntensity =
+      uniforms.animatedAtlasBaseIntensity
     shader.fragmentShader = shader.fragmentShader
       .replace(
         '#include <common>',
-        '#include <common>\nuniform float animatedAtlasStrength;',
+        '#include <common>\nuniform float animatedAtlasStrength;\nuniform float animatedAtlasBaseIntensity;',
       )
       .replace(
         '#include <map_fragment>',
@@ -209,12 +223,32 @@ function installAnimatedAtlasShader(material: THREE.MeshStandardMaterial) {
     0.0,
     1.0
   );
-  vec3 animatedAtlasMultipliedColor =
-    diffuseColor.rgb * sampledDiffuseColor.rgb;
   diffuseColor.rgb = mix(
     diffuseColor.rgb,
-    animatedAtlasMultipliedColor,
+    sampledDiffuseColor.rgb,
     animatedAtlasMix
+  );
+#endif
+`,
+      )
+      .replace(
+        '#include <emissivemap_fragment>',
+        `
+#include <emissivemap_fragment>
+#ifdef USE_MAP
+  vec4 sampledEmissiveColor = texture2D( map, vMapUv );
+  #ifdef DECODE_VIDEO_TEXTURE
+    sampledEmissiveColor = sRGBTransferEOTF( sampledEmissiveColor );
+  #endif
+  float animatedAtlasEmissiveMix = clamp(
+    sampledEmissiveColor.a * animatedAtlasStrength,
+    0.0,
+    1.0
+  );
+  totalEmissiveRadiance = mix(
+    totalEmissiveRadiance,
+    sampledEmissiveColor.rgb * animatedAtlasBaseIntensity,
+    animatedAtlasEmissiveMix
   );
 #endif
 `,
@@ -222,8 +256,38 @@ function installAnimatedAtlasShader(material: THREE.MeshStandardMaterial) {
   }
 
   material.customProgramCacheKey = () =>
-    `${previousCustomProgramCacheKey()}:home-intro-animated-atlas-multiply`
+    `${previousCustomProgramCacheKey()}:home-intro-animated-atlas-projection`
   material.userData.homeIntroAnimatedAtlasShader = true
+}
+
+function stripImportedLogoMaterial(material: THREE.MeshStandardMaterial) {
+  const materialTextures = material as unknown as Record<
+    LogoMaterialTextureChannel,
+    Texture | null
+  >
+
+  importedLogoTextureChannels.forEach(channel => {
+    const texture = materialTextures[channel]
+    if (texture && texture !== atlasTexture) {
+      texture.dispose()
+    }
+    materialTextures[channel] = null
+  })
+
+  material.color.setScalar(0)
+  material.emissive.set(0, 0, 0)
+  material.emissiveIntensity = 0
+  material.metalness = 0
+  material.roughness = sceneQuality === 'lean' ? 0.86 : 0.78
+  material.envMapIntensity = 0
+  material.toneMapped = false
+  material.side = FrontSide
+  material.transparent = false
+  material.opacity = 1
+  material.alphaTest = 0
+  material.depthWrite = true
+  material.depthTest = true
+  material.needsUpdate = true
 }
 
 function tuneLogoModel(model: THREE.Object3D) {
@@ -242,36 +306,7 @@ function tuneLogoModel(model: THREE.Object3D) {
     materials.forEach(item => {
       const material = item as THREE.MeshStandardMaterial | undefined
       if (!material?.isMeshStandardMaterial) return
-      if (!originalMaterialColors.has(material)) {
-        originalMaterialColors.set(material, material.color.clone())
-      }
-
-      material.emissive.set(0, 0, 0)
-      material.emissiveIntensity = 0
-      material.metalness = Math.max(
-        material.metalness,
-        sceneQuality === 'lean' ? 0.18 : 0.34,
-      )
-      material.roughness = Math.min(
-        material.roughness,
-        sceneQuality === 'lean' ? 0.48 : 0.32,
-      )
-      material.envMapIntensity = 0.45
-      material.side = FrontSide
-      material.transparent = false
-      material.depthWrite = true
-      material.depthTest = true
-
-      if (material.map) {
-        material.map.colorSpace = SRGBColorSpace
-        material.map.anisotropy = sceneQuality === 'high' ? 4 : 2
-        material.map.generateMipmaps = false
-        material.map.minFilter = LinearFilter
-        material.map.magFilter = LinearFilter
-        material.map.needsUpdate = true
-      }
-
-      material.needsUpdate = true
+      stripImportedLogoMaterial(material)
     })
   })
 }
@@ -325,20 +360,21 @@ function applyAnimatedAtlasToModel() {
       const material = item as THREE.MeshStandardMaterial | undefined
       if (!material?.isMeshStandardMaterial) return
 
-      const originalColor = originalMaterialColors.get(material)
-      if (originalColor) {
-        material.color
-          .copy(originalColor)
-          .multiplyScalar(animatedAtlasBaseIntensity)
-      }
+      stripImportedLogoMaterial(material)
       const uniforms = getAnimatedAtlasUniforms(material)
       uniforms.animatedAtlasStrength.value = animatedAtlasIntensity
+      uniforms.animatedAtlasBaseIntensity.value = animatedAtlasBaseIntensity
 
       installAnimatedAtlasShader(material)
       material.map = atlasTexture
       material.emissiveMap = null
       material.emissive.set(0, 0, 0)
-      material.emissiveIntensity = 0
+      material.emissiveIntensity = 1
+      material.map.colorSpace = SRGBColorSpace
+      material.map.anisotropy = sceneQuality === 'high' ? 4 : 2
+      material.map.generateMipmaps = false
+      material.map.minFilter = LinearFilter
+      material.map.magFilter = LinearFilter
       material.needsUpdate = true
     })
   })

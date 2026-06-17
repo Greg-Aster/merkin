@@ -7,7 +7,10 @@ import {
   siteAudioConfig,
 } from '../config/audio'
 import { homePortalEvents } from '../contracts/homePortal'
-import { markSiteAudioUnlocked } from './site-audio-activation'
+import {
+  isSiteAudioActivationGesture,
+  markSiteAudioUnlocked,
+} from './site-audio-activation'
 
 declare global {
   interface Window {
@@ -468,7 +471,7 @@ class SiteAudioManager {
     }
   }
 
-  async unlockFromGesture(): Promise<boolean> {
+  async unlockFromGesture(event?: Event): Promise<boolean> {
     if (typeof window === 'undefined') return false
 
     if (this.hasUnlockedAudio()) {
@@ -485,7 +488,9 @@ class SiteAudioManager {
     try {
       const userActivation = (navigator as NavigatorWithUserActivation)
         .userActivation
-      if (userActivation?.isActive === false) {
+      const hasTrustedGesture =
+        event?.isTrusted === true && isSiteAudioActivationGesture(event)
+      if (userActivation?.isActive === false && !hasTrustedGesture) {
         return false
       }
 

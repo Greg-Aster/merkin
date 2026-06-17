@@ -25,8 +25,8 @@ onMount(() => {
   }
 
   const stopListeningForAudioActivation = addSiteAudioActivationListeners(
-    () => {
-      void siteAudioManager.unlockFromGesture()
+    event => {
+      void siteAudioManager.unlockFromGesture(event)
     },
   )
 

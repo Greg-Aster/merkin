@@ -17,9 +17,6 @@ const documentActivationEvents = [
 
 const wheelActivationThreshold = 4
 
-// Wheel can wake ambience only after the browser has recorded a real user
-// activation. Calling WebAudio resume from wheel alone creates autoplay warnings.
-
 export const siteAudioUnlockedEvent = 'megameal:audio-unlocked'
 
 let siteAudioUnlocked = false
@@ -69,7 +66,7 @@ export function isSiteAudioActivationGesture(event: Event): boolean {
         Math.abs(event.deltaX),
         Math.abs(event.deltaY),
         Math.abs(event.deltaZ),
-      ) >= wheelActivationThreshold && hasSiteAudioUserActivation()
+      ) >= wheelActivationThreshold && event.isTrusted
     )
   }
 

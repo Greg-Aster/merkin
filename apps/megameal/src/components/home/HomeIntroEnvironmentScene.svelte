@@ -49,8 +49,6 @@ let ringGlowA: THREE.Group | null = null
 let ringGlowB: THREE.Group | null = null
 let ringGlowC: THREE.Group | null = null
 let logoMeshRoot: THREE.Group | null = null
-let logoSearchLightA: THREE.SpotLight | null = null
-let logoSearchTargetA: THREE.Group | null = null
 let starColumn: THREE.Group | null = null
 let screenRail: THREE.Group | null = null
 const screenNodes: THREE.Group[] = []
@@ -88,12 +86,9 @@ const screenPanelMountOverscan = 2.25
 const targetScreenEuler = new Euler(0, 0, 0, 'YXZ')
 const targetScreenQuaternion = new Quaternion()
 const targetScreenScale = new Vector3()
-const logoLightTarget = new Vector3(0, 0, -1.05)
-const logoSearchLightPosition = new Vector3()
 const logoIntroDuration = 2.05
 const logoImpactDuration = 0.42
 const logoRotationOffset = Math.PI
-const portalLightTransmissionScale = 0.48
 const logoFloatPitchAmplitude = 0.038
 const logoFloatYawAmplitude = 0.064
 const logoFloatRollAmplitude = 0.026
@@ -371,37 +366,6 @@ function clamp01(value: number) {
 function smoothstep(value: number) {
   const normalized = clamp01(value)
   return normalized * normalized * (3 - normalized * 2)
-}
-
-function updateLogoSearchLight(
-  light: THREE.SpotLight | null,
-  target: THREE.Group | null,
-  time: number,
-  phase: number,
-  intensity: number,
-  radiusX: number,
-  radiusY: number,
-  frontOffset: number,
-) {
-  if (!light || !target) return
-
-  const drift = time * 0.24 + phase
-  const sweep = time * 0.11 + phase * 0.7
-  const targetX = logoLightTarget.x + Math.cos(sweep) * 0.18
-  const targetY = logoLightTarget.y + Math.sin(sweep) * 0.14
-
-  target.position.set(targetX, targetY, logoLightTarget.z)
-  logoSearchLightPosition.set(
-    logoLightTarget.x + Math.cos(drift) * radiusX,
-    logoLightTarget.y + 0.42 + Math.sin(drift) * radiusY,
-    logoLightTarget.z + frontOffset,
-  )
-  light.position.copy(logoSearchLightPosition)
-  light.intensity = atmosphereReveal * intensity * portalLightTransmissionScale
-
-  if (light.target !== target) {
-    light.target = target
-  }
 }
 
 function getIntroOffsetScreens() {
@@ -686,25 +650,11 @@ useTask(delta => {
       logoFloatYaw +
       input.dragX * 0.035
     logoMeshRoot.rotation.z = 0.045 - logoCarouselPhase * 0.05 + logoFloatRoll
-    logoMeshRoot.getWorldPosition(logoLightTarget)
-  } else {
-    logoLightTarget.set(0, 0, -1.05)
   }
 
   if (ringGlowA) ringGlowA.rotation.z += delta * 0.34
   if (ringGlowB) ringGlowB.rotation.x -= delta * 0.2
   if (ringGlowC) ringGlowC.rotation.y += delta * 0.26
-
-  updateLogoSearchLight(
-    logoSearchLightA,
-    logoSearchTargetA,
-    time,
-    0,
-    320,
-    2.85,
-    1.36,
-    6.25,
-  )
 
   if (starColumn) {
     const emitterTargetX =
@@ -747,16 +697,6 @@ useTask(delta => {
 </script>
 
 <T.PerspectiveCamera bind:ref={camera} makeDefault position={cameraPosition} fov={cameraFov} />
-
-<T.Group bind:ref={logoSearchTargetA} />
-<T.SpotLight
-	bind:ref={logoSearchLightA}
-	color="#dff7ff"
-	distance={16.5}
-	decay={1.02}
-	angle={0.9}
-	penumbra={0.98}
-/>
 
 <T.Group bind:ref={world} position={[0, 0, 0]} scale={[sceneScale, sceneScale, sceneScale]}>
 	<HomeIntroSceneBackdrop
@@ -817,57 +757,48 @@ useTask(delta => {
 		/>
 	</T.Group>
 
-	<T.Group bind:ref={emblem} position={[0, emblemBaseY, -2.28]} scale={emblemScale}>
-		<T.Group bind:ref={ringGlowA} rotation={[Math.PI / 2, 0, 0]}>
-			<HomeIntroRingGlow
-				radius={0.86}
-				color="#67e8f9"
-				hueCycleBase={0.52}
-				hueCycleSpeed={0.01}
-				haloOpacity={1}
-				emitterAngle={0.18}
-				emitterSize={1.16}
-				emitterOpacity={1}
-				emitterFrontFacing={true}
-				emitterFrontOffset={1.65}
-				{atmosphereReveal}
-				{motionEnabled}
-			/>
-		</T.Group>
+		<T.Group bind:ref={emblem} position={[0, emblemBaseY, -2.28]} scale={emblemScale}>
+			<T.Group bind:ref={ringGlowA} rotation={[Math.PI / 2, 0, 0]}>
+				<HomeIntroRingGlow
+					radius={0.86}
+					color="#67e8f9"
+					hueCycleBase={0.52}
+					hueCycleSpeed={0.01}
+					ringOpacity={1}
+					dotSize={1.45}
+					dotCount={72}
+					{atmosphereReveal}
+					{motionEnabled}
+				/>
+			</T.Group>
 
-		<T.Group bind:ref={ringGlowB} rotation={[0.32, Math.PI / 2, 0.26]}>
-			<HomeIntroRingGlow
-				radius={0.88}
-				color="#8b5cf6"
-				hueCycleBase={0.72}
-				hueCycleSpeed={0.009}
-				haloOpacity={1}
-				emitterAngle={2.24}
-				emitterSize={1.04}
-				emitterOpacity={1}
-				emitterFrontFacing={true}
-				emitterFrontOffset={1.55}
-				{atmosphereReveal}
-				{motionEnabled}
-			/>
-		</T.Group>
+			<T.Group bind:ref={ringGlowB} rotation={[0.32, Math.PI / 2, 0.26]}>
+				<HomeIntroRingGlow
+					radius={0.88}
+					color="#8b5cf6"
+					hueCycleBase={0.72}
+					hueCycleSpeed={0.009}
+					ringOpacity={0.92}
+					dotSize={1.28}
+					dotCount={68}
+					{atmosphereReveal}
+					{motionEnabled}
+				/>
+			</T.Group>
 
-		<T.Group bind:ref={ringGlowC} rotation={[0.76, 0.28, Math.PI / 2]}>
-			<HomeIntroRingGlow
-				radius={0.82}
-				color="#a78bfa"
-				hueCycleBase={0.78}
-				hueCycleSpeed={0.008}
-				haloOpacity={1}
-				emitterAngle={4.18}
-				emitterSize={0.94}
-				emitterOpacity={1}
-				emitterFrontFacing={true}
-				emitterFrontOffset={1.45}
-				{atmosphereReveal}
-				{motionEnabled}
-			/>
-		</T.Group>
+			<T.Group bind:ref={ringGlowC} rotation={[0.76, 0.28, Math.PI / 2]}>
+				<HomeIntroRingGlow
+					radius={0.82}
+					color="#a78bfa"
+					hueCycleBase={0.78}
+					hueCycleSpeed={0.008}
+					ringOpacity={0.86}
+					dotSize={1.16}
+					dotCount={64}
+					{atmosphereReveal}
+					{motionEnabled}
+				/>
+			</T.Group>
 
 	</T.Group>
 </T.Group>
@@ -880,9 +811,9 @@ useTask(delta => {
 			animatedAtlasColumns={6}
 			animatedAtlasRows={4}
 			animatedAtlasFrames={23}
-			animatedAtlasFps={6}
-			animatedAtlasIntensity={.7}
-			animatedAtlasBaseIntensity={.7}
+			animatedAtlasFps={3}
+			animatedAtlasIntensity={1}
+			animatedAtlasBaseIntensity={1}
 			animatedAtlasUvScaleX={.92}
 			animatedAtlasUvScaleY={0.8}
 			onReady={handleLogoReady}
