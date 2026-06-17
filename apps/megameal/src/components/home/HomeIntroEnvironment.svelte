@@ -15,6 +15,7 @@ import HomeIntroEnvironmentScene from './HomeIntroEnvironmentScene.svelte'
 import HomeIntroPostProcessing from './HomeIntroPostProcessing.svelte'
 import {
   homeIntroIntroOffsetScreens,
+  homeIntroFinalScreenGraceScreens,
   homeIntroMaxWheelForOffset,
   homeIntroMobileIntroOffsetScreens,
   homeIntroScreens,
@@ -395,7 +396,8 @@ function syncStandardBannerPhaseClass() {
   const selectedIndex =
     input.wheel * homeIntroWheelToScreenRatio - introOffsetScreens
   const phaseProgress =
-    (selectedIndex - (homeIntroScreens.length - 1)) /
+    (selectedIndex -
+      (homeIntroScreens.length - 1 + homeIntroFinalScreenGraceScreens)) /
     homeIntroStandardBannerPhaseScreens
 
   document.documentElement.classList.toggle(

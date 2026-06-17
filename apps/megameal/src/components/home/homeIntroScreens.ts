@@ -115,9 +115,15 @@ export const homeIntroIntroOffsetScreens = 2.85
 export const homeIntroMobileIntroOffsetScreens = 3.75
 export const homeIntroBannerSceneHoldRadius = 0.3
 export const homeIntroScreenCount = homeIntroScreens.length
+export const homeIntroFinalScreenGraceScreens = 0.85
 export const homeIntroStandardBannerPhaseScreens = 1.1
 export function homeIntroMaxWheelForOffset(offsetScreens = homeIntroIntroOffsetScreens) {
-  return (homeIntroScreenCount - 1 + offsetScreens) / homeIntroWheelToScreenRatio
+  return (
+    homeIntroScreenCount -
+    1 +
+    offsetScreens +
+    homeIntroFinalScreenGraceScreens
+  ) / homeIntroWheelToScreenRatio
 }
 
 export function clampHomeIntroScreenIndex(value: number) {
@@ -172,7 +178,8 @@ export function getHomeIntroBannerSyncState(selectedIndex: number) {
 }
 
 export function getHomeIntroBannerSyncEvent(selectedIndex: number) {
-  const standardBannerPhaseStart = homeIntroScreenCount - 1
+  const standardBannerPhaseStart =
+    homeIntroScreenCount - 1 + homeIntroFinalScreenGraceScreens
   const standardBannerProgress =
     (selectedIndex - standardBannerPhaseStart) /
     homeIntroStandardBannerPhaseScreens
