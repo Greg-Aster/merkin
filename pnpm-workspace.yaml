@@ -1,5 +1,4 @@
 packages:
-  - 'apps/blog-pusher'
   - 'apps/game.megameal'
   - 'apps/megameal'
   - 'apps/travel'
