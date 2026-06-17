@@ -193,17 +193,19 @@
       top: max(5.8rem, calc(env(safe-area-inset-top) + 4.9rem));
       right: 0.75rem;
       min-width: 0;
-      width: min(15.75rem, calc(100% - 1.5rem));
-      padding: 0.52rem 0.64rem;
+      width: min(13.5rem, calc(100% - 1.5rem));
+      padding: 0.44rem 0.58rem;
     }
 
     .home-intro-copy--feature {
       left: 0.75rem;
       right: auto;
       bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1.5rem));
-      width: min(18rem, calc(100% - 1.5rem));
-      padding: 0.58rem;
-      gap: 0.34rem;
+      width: min(14.25rem, calc(100% - 1.5rem));
+      max-height: 21svh;
+      padding: 0.5rem;
+      gap: 0.28rem;
+      overflow: hidden;
     }
 
     :root[data-megameal-mobile-ad-visible='true'] .home-intro-copy--feature {
@@ -212,7 +214,7 @@
 
     .home-intro-copy h2 {
       max-width: 18ch;
-      font-size: clamp(1.08rem, 6vw, 1.62rem);
+      font-size: clamp(1rem, 5vw, 1.42rem);
       line-height: 1;
     }
 
@@ -222,7 +224,7 @@
       font-size: 0.76rem;
       line-height: 1.34;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 2;
     }
 
     .home-intro-copy__label,
@@ -233,8 +235,8 @@
     }
 
     .home-intro-copy__button {
-      min-height: 2.1rem;
-      padding: 0.56rem 0.72rem;
+      min-height: 1.92rem;
+      padding: 0.48rem 0.64rem;
     }
 
     .timeline-mobile-readout {
@@ -294,15 +296,14 @@
   @media (max-width: 430px) and (orientation: portrait) {
     .home-intro-copy--status {
       top: max(5.35rem, calc(env(safe-area-inset-top) + 4.55rem));
-      width: min(13rem, calc(100% - 1.5rem));
+      width: min(12.25rem, calc(100% - 1.5rem));
       text-align: right;
     }
 
     .home-intro-copy--feature {
       bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1.5rem));
-      width: min(15.25rem, calc(100% - 1.5rem));
-      max-height: 25svh;
-      overflow: hidden;
+      width: min(13.25rem, calc(100% - 1.5rem));
+      max-height: 18svh;
     }
 
     :root[data-megameal-mobile-ad-visible='true'] .home-intro-copy--feature {
@@ -310,7 +311,7 @@
     }
 
     .home-intro-copy p {
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 1;
     }
   }
 

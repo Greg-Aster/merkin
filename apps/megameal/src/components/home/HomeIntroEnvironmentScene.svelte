@@ -87,6 +87,7 @@ const logoEmitterParticleScrollRatio = 0.16
 const screenPanelMountOverscan = 2.25
 const targetScreenEuler = new Euler(0, 0, 0, 'YXZ')
 const targetScreenQuaternion = new Quaternion()
+const targetScreenScale = new Vector3()
 const logoLightTarget = new Vector3(0, 0, -1.05)
 const logoSearchLightPosition = new Vector3()
 const logoIntroDuration = 2.05
@@ -113,13 +114,13 @@ let screenPanelMountStates = Array.from(
   (_, index) => index === primaryScreenIndex,
 )
 
-$: sceneScale = portraitMobile ? 0.78 : 1
+$: sceneScale = portraitMobile ? 0.92 : 1
 $: cameraPosition = portraitMobile
-  ? ([0, 0.2, 8.85] as [number, number, number])
+  ? ([0, 0.12, 7.35] as [number, number, number])
   : ([0, 0.08, 6.8] as [number, number, number])
-$: cameraFov = portraitMobile ? 48 : 44
+$: cameraFov = portraitMobile ? 44 : 44
 $: railPosition = portraitMobile
-  ? ([0, 0.46, -0.68] as [number, number, number])
+  ? ([-0.36, 0.24, -0.46] as [number, number, number])
   : ([0, 0, -0.34] as [number, number, number])
 $: starColumnPosition = portraitMobile
   ? ([0, 0.08, -2.02] as [number, number, number])
@@ -304,7 +305,7 @@ const screens = Array.from({ length: screenCount }, (_, index) => {
   return {
     position: [0, 0, 0] as [number, number, number],
     rotation: [0, 0, 0] as [number, number, number],
-    scale: 1,
+    scale: [1, 1, 1] as [number, number, number],
     sceneId: portalScreens[index].sceneId,
     kicker: portalScreens[index].kicker,
     title: portalScreens[index].title,
@@ -484,9 +485,9 @@ function getScreenOrbitTarget(index: number, visualSelectedIndex: number) {
   const offset = index - visualSelectedIndex
   const depth = Math.abs(offset)
   const spiral = offset * screenAngleStep
-  const orbitRadiusX = screenOrbitRadiusX * (portraitMobile ? 0.52 : 1)
-  const orbitRadiusZ = screenOrbitRadiusZ * (portraitMobile ? 0.76 : 1)
-  const stepY = screenStepY * (portraitMobile ? 0.9 : 1)
+  const orbitRadiusX = screenOrbitRadiusX * (portraitMobile ? 0.68 : 1)
+  const orbitRadiusZ = screenOrbitRadiusZ * (portraitMobile ? 0.72 : 1)
+  const stepY = screenStepY * (portraitMobile ? 0.88 : 1)
   const x = Math.sin(spiral) * orbitRadiusX
   const y = -offset * stepY
   const z = screenOrbitCenterZ + Math.cos(spiral) * orbitRadiusZ - depth * 0.08
@@ -496,7 +497,7 @@ function getScreenOrbitTarget(index: number, visualSelectedIndex: number) {
   )
   const pitch = Math.sin(spiral) * -0.025
   const roll = Math.sin(spiral) * 0.018
-  const scale = portraitMobile ? 0.88 : 1.12
+  const scale = (portraitMobile ? [1.18, 1.18, 1.18] : [1.12, 1.12, 1.12]) as [number, number, number]
 
   return { x, y, z, pitch, yaw: outwardYaw, roll, scale }
 }
@@ -535,15 +536,14 @@ function updateScreenOrbit(wheel: number, ease: number) {
     if (snapToTarget) {
       screen.position.set(target.x, target.y, target.z)
       screen.quaternion.copy(targetScreenQuaternion)
-      screen.scale.setScalar(target.scale)
+      screen.scale.fromArray(target.scale)
     } else {
       screen.position.x += (target.x - screen.position.x) * ease
       screen.position.y += (target.y - screen.position.y) * ease
       screen.position.z += (target.z - screen.position.z) * ease
       screen.quaternion.slerp(targetScreenQuaternion, ease)
 
-      const scale = screen.scale.x + (target.scale - screen.scale.x) * ease
-      screen.scale.setScalar(scale)
+      screen.scale.lerp(targetScreenScale.fromArray(target.scale), ease)
     }
   }
 
@@ -774,7 +774,7 @@ useTask(delta => {
 					bind:ref={screenNodes[index]}
 					position={screen.position}
 					rotation={screen.rotation}
-					scale={[screen.scale, screen.scale, screen.scale]}
+					scale={screen.scale}
 				>
 					{#if screenPanelMountStates[index]}
 						<svelte:component
@@ -791,6 +791,7 @@ useTask(delta => {
 							ctaLabel={screen.ctaLabel}
 							hovered={index === hoveredScreenIndex}
 							primary={screen.primary}
+							portraitLayout={portraitMobile}
 							active={index === activeScreenIndex}
 							shouldLoadMedia={screenMediaLoadStates[index]}
 							videoPlaybackEnabled={!compactViewport}

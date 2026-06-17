@@ -33,6 +33,8 @@ export class HomeIntroScreenContentRenderer {
   private readonly target: WebGLRenderTarget
   private readonly scene = new Scene()
   private readonly camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
+  private readonly mediaMesh: Mesh
+  private readonly videoMesh: Mesh
   private readonly mediaMaterial = new MeshBasicMaterial({
     color: '#ffffff',
     depthTest: false,
@@ -63,14 +65,20 @@ export class HomeIntroScreenContentRenderer {
     this.texture = this.target.texture
 
     const fullSurfaceGeometry = new PlaneGeometry(2, 2)
+    const targetAspect = renderWidth / renderHeight
+    const mediaAspect = 16 / 9
+    const coverScaleX = mediaAspect > targetAspect ? mediaAspect / targetAspect : 1
+    const coverScaleY = mediaAspect > targetAspect ? 1 : targetAspect / mediaAspect
 
-    const mediaMesh = new Mesh(fullSurfaceGeometry, this.mediaMaterial)
-    mediaMesh.position.z = -0.04
-    this.scene.add(mediaMesh)
+    this.mediaMesh = new Mesh(fullSurfaceGeometry, this.mediaMaterial)
+    this.mediaMesh.scale.set(coverScaleX, coverScaleY, 1)
+    this.mediaMesh.position.z = -0.04
+    this.scene.add(this.mediaMesh)
 
-    const videoMesh = new Mesh(fullSurfaceGeometry.clone(), this.videoMaterial)
-    videoMesh.position.z = -0.03
-    this.scene.add(videoMesh)
+    this.videoMesh = new Mesh(fullSurfaceGeometry.clone(), this.videoMaterial)
+    this.videoMesh.scale.set(coverScaleX, coverScaleY, 1)
+    this.videoMesh.position.z = -0.03
+    this.scene.add(this.videoMesh)
   }
 
   render(renderer: WebGLRenderer, state: HomeIntroScreenContentRendererState) {

@@ -49,6 +49,7 @@ export let ctaLabel = ''
 export let hovered = false
 export let videoPlaybackEnabled = true
 export let motionEnabled = true
+export let portraitLayout = false
 
 const threlte = useThrelte()
 
@@ -63,6 +64,7 @@ let screenModel: THREE.Object3D | null = null
 let screenContentMesh: Mesh | null = null
 let screenContentMaterial: THREE.MeshBasicMaterial | null = null
 let screenContentRenderer: HomeIntroScreenContentRenderer | null = null
+let screenContentRendererLayout: 'landscape' | 'portrait' | null = null
 let screenContentRendered = false
 let screenContentRenderKey = ''
 let loader: TextureLoader | null = null
@@ -92,6 +94,7 @@ const doubleSide = DoubleSide
 const frontSide = FrontSide
 const frameWidth = 3.18
 const frameHeight = 1.78
+const portraitFrameRotationZ = Math.PI / 2
 const screenModelZ = -0.07
 const screenContentInset = 0.9
 const mediaWidth = frameWidth * screenContentInset
@@ -100,11 +103,18 @@ const titleWidth = mediaWidth
 const titleHeight = mediaHeight
 const fallbackWidth = 2.76
 const fallbackHeight = 0.44
-const mediaSurfaceZ = -0.16
+const mediaSurfaceZ = screenModelZ + 0.012
 const textWidth = 2.54
 const textHeight = 1.24
-const textSurfaceZ = -0.018
+const textSurfaceZ = screenModelZ + 0.028
 const screenVideoPlaybackRate = 0.33
+$: screenLayout = portraitLayout ? 'portrait' : 'landscape'
+$: framePlaneWidth = portraitLayout ? frameHeight : frameWidth
+$: framePlaneHeight = portraitLayout ? frameWidth : frameHeight
+$: mediaPlaneWidth = portraitLayout ? mediaHeight : mediaWidth
+$: mediaPlaneHeight = portraitLayout ? mediaWidth : mediaHeight
+$: textPlaneWidth = portraitLayout ? mediaPlaneWidth : textWidth
+$: textPlaneHeight = portraitLayout ? mediaPlaneHeight : textHeight
 
 function getTextureTint(opacity: number) {
   const channel = Math.round(Math.min(1, Math.max(0, opacity)) * 255)
@@ -167,6 +177,7 @@ function disposeScreenInfoTexture() {
 function disposeScreenContentRenderer() {
   screenContentRenderer?.dispose()
   screenContentRenderer = null
+  screenContentRendererLayout = null
   screenContentTexture = null
   screenContentRendered = false
   screenContentRenderKey = ''
@@ -202,6 +213,7 @@ function syncScreenTextTexture() {
   screenTextTexture = createScreenTextTexture({
     ctaLabel,
     kicker,
+    layout: screenLayout,
     stat,
     title,
   })
@@ -330,9 +342,15 @@ function loadStillTexture() {
 }
 
 function ensureScreenContentRenderer() {
-  if (screenContentRenderer) return screenContentRenderer
+  if (screenContentRenderer && screenContentRendererLayout === screenLayout) {
+    return screenContentRenderer
+  }
 
-  screenContentRenderer = new HomeIntroScreenContentRenderer()
+  disposeScreenContentRenderer()
+  screenContentRendererLayout = screenLayout
+  screenContentRenderer = new HomeIntroScreenContentRenderer(
+    portraitLayout ? { renderWidth: 720, renderHeight: 1024 } : {},
+  )
   screenContentTexture = screenContentRenderer.texture
 
   return screenContentRenderer
@@ -395,7 +413,7 @@ $: if (
   syncVideoPlayback()
 }
 
-$: if (mounted && (kicker || title || stat || ctaLabel)) {
+$: if (mounted && (kicker || title || stat || ctaLabel || portraitLayout)) {
   syncScreenTextTexture()
 }
 
@@ -406,6 +424,7 @@ $: if (screenContentMesh && screenContentMaterial) {
     Boolean(screenModel)
   screenContentMesh.visible = true
   screenContentMaterial.colorWrite = true
+  screenContentMaterial.depthTest = false
   screenContentMaterial.depthWrite = false
   screenContentMesh.onBeforeRender = renderer => {
     const renderTarget = renderer.getRenderTarget()
@@ -414,10 +433,12 @@ $: if (screenContentMesh && screenContentMaterial) {
       Boolean(renderTarget) && renderTargetName === 'HomeIntroLogoGlitch.logo'
 
     screenContentMaterial!.colorWrite = !isLogoGlitchPass
+    screenContentMaterial!.depthTest = false
     screenContentMaterial!.depthWrite = false
   }
   screenContentMesh.onAfterRender = () => {
     screenContentMaterial!.colorWrite = true
+    screenContentMaterial!.depthTest = false
     screenContentMaterial!.depthWrite = false
   }
 }
@@ -427,7 +448,7 @@ useTask(delta => {
   const ease = 1 - Math.exp(-delta * 8)
 
   if (motionEnabled) {
-    hoverBlend += ((hovered ? 1 : 0) - hoverBlend) * ease
+    hoverBlend += (((hovered && !portraitLayout) ? 1 : 0) - hoverBlend) * ease
     const baseTitleOpacity = 0.94
     const baseMediaOpacity = primary ? 0.92 : 0.86
     videoMediaOpacity = videoReady ? hoverBlend : 0
@@ -466,12 +487,12 @@ useTask(delta => {
 
 <T.Group bind:ref={panelRoot}>
 	{#if screenModel}
-		<T.Group position={[0, 0, screenModelZ]}>
+		<T.Group position={[0, 0, screenModelZ]} rotation={[0, 0, portraitLayout ? portraitFrameRotationZ : 0]}>
 			<T is={screenModel} />
 		</T.Group>
 	{:else}
 		<T.Mesh position={[0, 0, screenModelZ]} renderOrder={12}>
-			<T.PlaneGeometry args={[frameWidth, frameHeight]} />
+			<T.PlaneGeometry args={[framePlaneWidth, framePlaneHeight]} />
 			<T.MeshPhysicalMaterial
 				color="#f8fafc"
 				side={doubleSide}
@@ -498,58 +519,44 @@ useTask(delta => {
 	{/if}
 
 	{#if screenContentTexture}
-		<T.Mesh
-			bind:ref={screenContentMesh}
-			position={[0, primary ? 0.02 : 0, mediaSurfaceZ]}
-		>
-			<T.PlaneGeometry args={[primary ? titleWidth : mediaWidth, primary ? titleHeight : mediaHeight]} />
+		<T.Mesh bind:ref={screenContentMesh} position={[0, primary ? 0.02 : 0, mediaSurfaceZ]} renderOrder={80}>
+			<T.PlaneGeometry args={[primary && !portraitLayout ? titleWidth : mediaPlaneWidth, primary && !portraitLayout ? titleHeight : mediaPlaneHeight]} />
 			<T.MeshBasicMaterial
 				bind:ref={screenContentMaterial}
 				map={screenContentTexture}
 				side={frontSide}
 				blending={normalBlending}
-				depthWrite={true}
+				transparent={true}
+				depthTest={false}
+				depthWrite={false}
 			/>
 		</T.Mesh>
 	{:else}
-		<T.Mesh position={[0, 0.02, mediaSurfaceZ]}>
-			<T.PlaneGeometry args={[fallbackWidth, fallbackHeight]} />
+		<T.Mesh position={[0, 0.02, mediaSurfaceZ]} renderOrder={80}>
+			<T.PlaneGeometry args={[portraitLayout ? fallbackHeight : fallbackWidth, portraitLayout ? fallbackWidth : fallbackHeight]} />
 			<T.MeshBasicMaterial
 				color={primary ? "#67e8f9" : "#8b5cf6"}
 				side={doubleSide}
 				transparent={true}
 				opacity={primary ? 0.32 : 0.16}
 				blending={additiveBlending}
+				depthTest={false}
 				depthWrite={false}
 			/>
 		</T.Mesh>
 	{/if}
 
 	{#if screenTextTexture}
-		<T.Mesh position={[0, 0.01, textSurfaceZ]} renderOrder={21}>
-			<T.PlaneGeometry args={[textWidth, textHeight]} />
-			<T.MeshBasicMaterial
-				map={screenTextTexture}
-				side={frontSide}
-				transparent={true}
-				opacity={textOpacity}
-				blending={normalBlending}
-				depthWrite={false}
-			/>
+		<T.Mesh position={[0, 0.01, textSurfaceZ]} renderOrder={90}>
+			<T.PlaneGeometry args={[textPlaneWidth, textPlaneHeight]} />
+			<T.MeshBasicMaterial map={screenTextTexture} side={frontSide} transparent={true} opacity={textOpacity} blending={normalBlending} depthTest={false} depthWrite={false} />
 		</T.Mesh>
 	{/if}
 
 	{#if screenInfoTexture}
-		<T.Mesh position={[0, 0.018, textSurfaceZ + 0.006]} renderOrder={22}>
-			<T.PlaneGeometry args={[textWidth, textHeight]} />
-			<T.MeshBasicMaterial
-				map={screenInfoTexture}
-				side={frontSide}
-				transparent={true}
-				opacity={infoTextOpacity}
-				blending={normalBlending}
-				depthWrite={false}
-			/>
+		<T.Mesh position={[0, 0.018, textSurfaceZ + 0.006]} renderOrder={91}>
+			<T.PlaneGeometry args={[textPlaneWidth, textPlaneHeight]} />
+			<T.MeshBasicMaterial map={screenInfoTexture} side={frontSide} transparent={true} opacity={infoTextOpacity} blending={normalBlending} depthTest={false} depthWrite={false} />
 		</T.Mesh>
 	{/if}
 

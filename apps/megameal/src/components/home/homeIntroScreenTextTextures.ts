@@ -3,6 +3,7 @@ import { CanvasTexture } from 'three'
 
 type ScreenTextTextureOptions = {
   kicker?: string
+  layout?: 'landscape' | 'portrait'
   title?: string
   stat?: string
   ctaLabel?: string
@@ -166,6 +167,7 @@ function drawRetroComputerText(
 
 export function createScreenTextTexture({
   kicker = '',
+  layout = 'landscape',
   title = '',
   stat = '',
   ctaLabel = '',
@@ -173,12 +175,89 @@ export function createScreenTextTexture({
   if (typeof document === 'undefined') return null
 
   const canvas = document.createElement('canvas')
-  canvas.width = 1024
-  canvas.height = 512
+  canvas.width = layout === 'portrait' ? 576 : 1024
+  canvas.height = layout === 'portrait' ? 1024 : 512
   const context = canvas.getContext('2d')
   if (!context) return null
 
   context.clearRect(0, 0, canvas.width, canvas.height)
+
+  if (layout === 'portrait') {
+    const maxWidth = 448
+    const x = 58
+    let y = 118
+
+    const textPlateGradient = context.createLinearGradient(0, 72, 0, 860)
+    textPlateGradient.addColorStop(0, 'rgba(2, 6, 23, 0.88)')
+    textPlateGradient.addColorStop(0.64, 'rgba(2, 6, 23, 0.72)')
+    textPlateGradient.addColorStop(1, 'rgba(2, 6, 23, 0)')
+    context.fillStyle = textPlateGradient
+    context.fillRect(32, 72, 512, 820)
+    context.fillStyle = 'rgba(8, 47, 73, 0.34)'
+    context.fillRect(46, 230, 484, 210)
+
+    context.textBaseline = 'top'
+    context.lineJoin = 'round'
+    context.fillStyle = 'rgb(103 232 249 / 0.88)'
+    context.strokeStyle = 'rgb(2 6 23 / 0.92)'
+    context.lineWidth = 5
+    context.font = '800 24px "JetBrains Mono", ui-monospace, monospace'
+    const kickerText = (kicker || stat || 'PORTAL').toUpperCase()
+    wrapCanvasText(context, kickerText, maxWidth).slice(0, 2).forEach(line => {
+      context.strokeText(line, x, y)
+      context.fillText(line, x, y)
+      y += 38
+    })
+
+    y += 44
+    context.fillStyle = 'rgb(248 250 252 / 0.96)'
+    context.strokeStyle = 'rgb(2 6 23 / 0.96)'
+    context.lineWidth = 9
+    context.shadowColor = 'rgb(2 6 23 / 0.82)'
+    context.shadowBlur = 24
+    context.font = '850 66px Inter, ui-sans-serif, system-ui, sans-serif'
+
+    wrapCanvasText(context, title || 'MEGA MEAL SAGA', maxWidth)
+      .slice(0, 3)
+      .forEach(line => {
+        context.strokeText(line, x, y)
+        context.fillText(line, x, y)
+        y += 78
+      })
+
+    context.shadowBlur = 0
+    context.fillStyle = 'rgb(226 232 240 / 0.8)'
+    context.strokeStyle = 'rgb(2 6 23 / 0.92)'
+    context.lineWidth = 5
+    context.font = '700 23px "JetBrains Mono", ui-monospace, monospace'
+    const detail = stat || ctaLabel
+    if (detail) {
+      wrapCanvasText(context, detail.toUpperCase(), maxWidth)
+        .slice(0, 2)
+        .forEach((line, lineIndex) => {
+          context.strokeText(line, x, 650 + lineIndex * 36)
+          context.fillText(line, x, 650 + lineIndex * 36)
+        })
+    }
+
+    if (ctaLabel) {
+      const label = ctaLabel.toUpperCase()
+      const buttonWidth = Math.min(420, context.measureText(label).width + 74)
+      context.fillStyle = 'rgb(15 23 42 / 0.82)'
+      context.fillRect(x, 776, buttonWidth, 62)
+      context.strokeStyle = 'rgb(103 232 249 / 0.74)'
+      context.lineWidth = 2
+      context.strokeRect(x, 776, buttonWidth, 62)
+      context.fillStyle = 'rgb(224 242 254 / 0.94)'
+      context.strokeStyle = 'rgb(2 6 23 / 0.86)'
+      context.lineWidth = 4
+      context.font = '850 23px "JetBrains Mono", ui-monospace, monospace'
+      context.strokeText(label, x + 32, 793)
+      context.fillText(label, x + 32, 793)
+    }
+
+    return configureGeneratedCanvasTexture(new CanvasTexture(canvas))
+  }
 
   const maxWidth = 820
   const x = 92
