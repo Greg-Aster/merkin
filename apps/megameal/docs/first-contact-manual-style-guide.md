@@ -512,6 +512,8 @@ Tone matches the target chapter. Afterword link uses `fcmi-tone-purple`.
 12. ## Conclusion — plain prose
 13. Next chapter link
       <a class="fcmi-next-link fcmi-window">
+14. ## Chapter References when the chapter uses research-backed scientific,
+      theoretical, or historical material
 ```
 
 All custom HTML blocks must have `not-prose` on the outermost element.
@@ -546,6 +548,10 @@ executive committee — see world bible for exact text.
 - Statistical callouts must use one of the two canonical named datasets (47,829 documented
   first-contact events; 23,847 documented helpful/hostile scenarios). If neither fits, introduce
   a new dataset with an explicit source label rather than implying a third unnamed survey.
+- Research-backed additions must be reflected in `## Chapter References`. Group references
+  by the section or concept they support, preserve existing source links, and prefer primary
+  papers, review papers, DOI pages, standards bodies, or official scientific references over
+  secondary summaries.
 - Never end a list with a dangling placeholder fragment like "...and angry robot butlers others"
   — complete every sentence.
 

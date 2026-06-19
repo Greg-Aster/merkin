@@ -94,21 +94,26 @@ const pageAmbientTrackJson = pageAmbientTracks.length
       </div>
     )}
   </div>
-  {/* Cart Drawer — mounted once at layout level, controlled via custom events */}
-  <CartDrawer client:load />
-  <StoreCartRuntime client:load />
+  <div id="page-content-surface">
+    {/* Cart Drawer — mounted once at layout level, controlled via custom events */}
+    <CartDrawer client:load />
+    <StoreCartRuntime client:load />
 
-  <div id="main-grid" class="relative z-10">
-    <main id="store-content" class="relative z-10 py-8 mt-6">
-      <slot />
-    </main>
-    <Footer />
-    <BackToTop />
+    <div id="main-grid" class="relative z-10">
+      <main id="store-content" class="relative z-10 py-8 mt-6">
+        <slot />
+      </main>
+      <Footer />
+      <BackToTop />
+    </div>
+    <script>
+      import {
+        bindStoreLayoutChromePageLoad,
+        initStoreLayoutChrome,
+      } from './storeLayoutChrome'
+
+      initStoreLayoutChrome();
+      bindStoreLayoutChromePageLoad();
+    </script>
   </div>
-  <script>
-    import { initStoreLayoutChrome } from './storeLayoutChrome'
-
-    initStoreLayoutChrome();
-    document.addEventListener('astro:page-load', initStoreLayoutChrome);
-  </script>
 </Layout>

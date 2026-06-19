@@ -3,6 +3,7 @@ type StoreLayoutCleanup = () => void
 type StoreLayoutWindow = Window &
   typeof globalThis & {
     __megamealStoreLayoutParallaxCleanup?: StoreLayoutCleanup
+    __megamealStoreLayoutPageLoadListenerBound?: boolean
   }
 
 export function initStoreLayoutChrome() {
@@ -56,4 +57,16 @@ export function initStoreLayoutChrome() {
   storeWindow.__megamealStoreLayoutParallaxCleanup = () => {
     window.removeEventListener('scroll', handleScroll)
   }
+}
+
+export function bindStoreLayoutChromePageLoad() {
+  if (typeof window === 'undefined') return
+  const storeWindow = window as StoreLayoutWindow
+
+  window.setTimeout(() => {
+    if (storeWindow.__megamealStoreLayoutPageLoadListenerBound) return
+
+    document.addEventListener('astro:page-load', initStoreLayoutChrome)
+    storeWindow.__megamealStoreLayoutPageLoadListenerBound = true
+  }, 0)
 }

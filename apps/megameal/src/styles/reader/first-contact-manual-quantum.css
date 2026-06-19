@@ -1,0 +1,155 @@
+/* Quantum-biological entity layout for First Contact Manual chapter 1. */
+
+.fcmi-quantum-brief {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(min(100%, 15rem), 0.42fr);
+  gap: clamp(0.7rem, 2vw, 1rem);
+  align-items: stretch;
+  margin: 0 0 clamp(0.9rem, 2.4vw, 1.2rem);
+}
+
+.fcmi-quantum-brief-copy {
+  display: grid;
+  gap: 0.7rem;
+  padding: clamp(0.78rem, 2vw, 1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.075), transparent 74%),
+    rgb(var(--fcmi-surface-rgb) / 0.3);
+}
+
+.fcmi-quantum-brief-copy p {
+  margin: 0;
+  color: var(--fcmi-muted);
+  font-size: 0.95rem;
+  line-height: 1.62;
+}
+
+.fcmi-quantum-boundary {
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+  padding: clamp(0.78rem, 2vw, 1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.22);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-accent-rgb) / 0.11), rgb(var(--fcmi-accent-rgb) / 0.035)),
+    rgb(var(--fcmi-surface-rgb) / 0.34);
+}
+
+.fcmi-quantum-boundary strong {
+  color: rgb(var(--fcmi-accent-rgb) / 0.9);
+  font-family: var(--fcmi-mono);
+  font-size: 0.78rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.fcmi-quantum-boundary p {
+  margin: 0;
+  color: var(--fcmi-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.fcmi-quantum-encounter {
+  display: grid;
+  gap: 0.34rem;
+  margin-top: 0.1rem;
+  padding-top: 0.62rem;
+  border-top: 1px solid rgb(var(--fcmi-accent-rgb) / 0.18);
+}
+
+.fcmi-quantum-encounter span {
+  color: rgb(var(--fcmi-accent-rgb) / 0.84);
+  font-family: var(--fcmi-mono);
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.fcmi-quantum-substrate-band {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin: clamp(0.78rem, 2vw, 1rem) 0;
+}
+
+.fcmi-quantum-substrate-band span {
+  min-width: 0;
+  padding: 0.42rem 0.48rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.2);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.12), transparent 74%),
+    rgb(var(--fcmi-surface-rgb) / 0.32);
+  color: rgb(var(--fcmi-accent-rgb) / 0.9);
+  font-family: var(--fcmi-mono);
+  font-size: 0.66rem;
+  font-weight: 850;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.fcmi-quantum-section {
+  display: grid;
+  gap: 0.58rem;
+  margin: clamp(0.82rem, 2.2vw, 1.08rem) 0;
+}
+
+.fcmi-quantum-section-header {
+  display: grid;
+  gap: 0.24rem;
+  padding: 0 0 0.55rem;
+  border-bottom: 1px solid rgb(var(--fcmi-accent-rgb) / 0.14);
+}
+
+.fcmi-quantum-section-header .fcmi-kicker {
+  margin: 0;
+  color: rgb(var(--fcmi-accent-rgb) / 0.72);
+}
+
+.fcmi-quantum-section-header h4 {
+  margin: 0;
+  color: var(--fcmi-cream);
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.fcmi-quantum-section-header p {
+  margin: 0;
+  color: var(--fcmi-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.fcmi-quantum-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.56rem, 1.8vw, 0.78rem);
+}
+
+.fcmi-quantum-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.56rem, 1.8vw, 0.78rem);
+}
+
+@media (max-width: 680px) {
+  .fcmi-quantum-brief,
+  .fcmi-quantum-substrate-band,
+  .fcmi-quantum-form-grid,
+  .fcmi-quantum-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 1040px) {
+  .fcmi-quantum-substrate-band,
+  .fcmi-quantum-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

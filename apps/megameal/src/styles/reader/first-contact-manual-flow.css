@@ -2,6 +2,10 @@
    Keep this layer small: it extends existing fcmi tone classes without owning
    the base manual layout system. */
 
+@import "./first-contact-manual-planck.css";
+@import "./first-contact-manual-quantum.css";
+@import "./first-contact-manual-exotic-ledger.css";
+
 .fcmi-legend-row {
   position: relative;
   box-shadow:
@@ -43,6 +47,423 @@
       transparent
     );
   box-shadow: 0 0 18px rgb(var(--fcmi-glow-rgb) / 0.24);
+}
+
+.fcmi-support-note {
+  max-width: min(100%, 58rem);
+  margin: clamp(0.9rem, 2.5vw, 1.25rem) auto clamp(1.1rem, 3vw, 1.65rem);
+  box-shadow:
+    0 16px 44px rgb(0 0 0 / 0.24),
+    0 0 22px rgb(var(--fcmi-glow-rgb) / 0.08);
+}
+
+.fcmi-support-note .fcmi-section-panel-inner {
+  padding: clamp(0.78rem, 2vw, 1.05rem);
+}
+
+.fcmi-support-note .fcmi-panel-header {
+  margin-bottom: clamp(0.55rem, 1.8vw, 0.8rem);
+}
+
+.fcmi-support-note .fcmi-title {
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.fcmi-support-note .fcmi-kicker {
+  font-size: 0.56rem;
+}
+
+.fcmi-support-note .fcmi-icon-tile {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: var(--fcmi-radius-sm);
+  font-size: 1.1rem;
+}
+
+.fcmi-support-note .fcmi-card-stack,
+.fcmi-support-note .fcmi-list-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: clamp(0.5rem, 1.6vw, 0.7rem);
+}
+
+.fcmi-support-note .fcmi-mini-card,
+.fcmi-support-note .fcmi-quote-card {
+  padding: clamp(0.68rem, 1.7vw, 0.86rem);
+}
+
+.fcmi-support-note .fcmi-mini-head {
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.fcmi-support-note .fcmi-mini-head span:last-child {
+  letter-spacing: 0;
+}
+
+.fcmi-support-note .fcmi-mini-card p,
+.fcmi-support-note .fcmi-panel-copy,
+.fcmi-support-note .fcmi-panel-lede,
+.fcmi-support-note .fcmi-prose-stack p,
+.fcmi-support-note .fcmi-quote-card blockquote,
+.fcmi-support-note .fcmi-notice {
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.fcmi-support-note .fcmi-panel-lede {
+  margin-bottom: 0.7rem;
+}
+
+.fcmi-support-note .fcmi-prose-stack {
+  padding: clamp(0.62rem, 1.8vw, 0.82rem);
+  gap: 0.58rem;
+}
+
+.fcmi-support-note .fcmi-quote-card {
+  margin-top: 0.7rem;
+}
+
+.fcmi-support-note .fcmi-notice {
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.85rem;
+}
+
+.fcmi-taxonomy-ladder {
+  margin: clamp(1rem, 3vw, 1.6rem) 0 clamp(1.4rem, 4vw, 2.2rem);
+  padding: clamp(0.72rem, 2vw, 0.9rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.26);
+  border-radius: var(--fcmi-radius-lg);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.08), transparent 58%),
+    rgb(var(--fcmi-surface-rgb) / 0.36);
+  box-shadow:
+    inset 0 0 24px rgb(var(--fcmi-glow-rgb) / 0.055),
+    0 12px 34px rgb(0 0 0 / 0.18);
+}
+
+.fcmi-taxonomy-ladder-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.1rem 0.15rem 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
+}
+
+.fcmi-taxonomy-ladder-header .fcmi-kicker {
+  margin: 0 0 0.22rem;
+}
+
+.fcmi-taxonomy-title-lockup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.55rem 0.75rem;
+}
+
+.fcmi-taxonomy-ladder-title {
+  margin: 0;
+  color: var(--fcmi-cream);
+  font-size: 1.18rem;
+  line-height: 1.15;
+}
+
+.fcmi-threat-swatch-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.22rem;
+  padding: 0.2rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.14);
+  border-radius: var(--fcmi-radius-sm);
+  background: rgb(var(--fcmi-surface-rgb) / 0.34);
+}
+
+.fcmi-threat-swatch {
+  display: block;
+  width: 0.92rem;
+  aspect-ratio: 1;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.48);
+  border-radius: 0.2rem;
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.16), transparent 55%),
+    rgb(var(--fcmi-accent-rgb) / 0.86);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.24),
+    0 0 10px rgb(var(--fcmi-glow-rgb) / 0.34);
+}
+
+.fcmi-taxonomy-ladder-note {
+  max-width: 24rem;
+  margin: 0;
+  color: var(--fcmi-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.fcmi-taxonomy-ladder-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
+  gap: 0.44rem;
+}
+
+.fcmi-taxonomy-step {
+  display: grid;
+  gap: 0.24rem;
+  min-height: 100%;
+  padding: 0.62rem 0.68rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.15);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.04), rgb(var(--fcmi-text-rgb) / 0.01)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.08), transparent 70%);
+  color: inherit;
+  text-decoration: none;
+}
+
+.fcmi-taxonomy-step strong {
+  color: rgb(var(--fcmi-accent-rgb) / 0.9);
+  font-family: var(--fcmi-mono);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.fcmi-taxonomy-step span {
+  color: var(--fcmi-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.fcmi-taxonomy-step .fcmi-taxonomy-step-meta {
+  color: rgb(var(--fcmi-accent-rgb) / 0.78);
+  font-size: 0.72rem;
+}
+
+.fcmi-scale-entry {
+  position: relative;
+  margin: clamp(1rem, 3vw, 1.45rem) 0;
+  padding: clamp(0.9rem, 2.5vw, 1.18rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.24);
+  border-left-width: 4px;
+  border-radius: var(--fcmi-radius-lg);
+  background:
+    radial-gradient(circle at 0 0, rgb(var(--fcmi-accent-rgb) / 0.12), transparent 28%),
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.035), rgb(var(--fcmi-text-rgb) / 0.008)),
+    rgb(var(--fcmi-surface-rgb) / 0.36);
+  box-shadow:
+    inset 0 0 30px rgb(var(--fcmi-glow-rgb) / 0.045),
+    0 18px 44px rgb(0 0 0 / 0.2);
+}
+
+.fcmi-scale-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(0.7rem, 2vw, 1rem);
+  align-items: center;
+  margin-bottom: clamp(0.7rem, 2vw, 0.95rem);
+}
+
+.fcmi-scale-icon {
+  display: grid;
+  place-items: center;
+  width: clamp(2.55rem, 6vw, 3.25rem);
+  aspect-ratio: 1;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.24);
+  border-radius: var(--fcmi-radius-md);
+  background: rgb(var(--fcmi-accent-rgb) / 0.12);
+  color: rgb(var(--fcmi-accent-rgb) / 0.9);
+  font-size: 1.45rem;
+  box-shadow: inset 0 0 18px rgb(var(--fcmi-glow-rgb) / 0.08);
+}
+
+.fcmi-scale-title-group {
+  min-width: 0;
+}
+
+.fcmi-scale-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.65rem;
+  align-items: center;
+  margin-bottom: 0.28rem;
+}
+
+.fcmi-scale-title {
+  color: rgb(var(--fcmi-accent-rgb) / 0.92);
+  font-family: var(--fcmi-mono);
+  font-size: 1.02rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.fcmi-scale-range {
+  padding: 0.24rem 0.5rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.2);
+  border-radius: 999px;
+  background: rgb(var(--fcmi-accent-rgb) / 0.09);
+  color: rgb(var(--fcmi-accent-rgb) / 0.84);
+  font-family: var(--fcmi-mono);
+  font-size: 0.7rem;
+}
+
+.fcmi-scale-subtitle {
+  margin: 0;
+  color: var(--fcmi-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.fcmi-scale-label {
+  justify-self: end;
+  padding: 0.32rem 0.56rem;
+  border-radius: var(--fcmi-radius-sm);
+  background: rgb(var(--fcmi-accent-rgb) / 0.82);
+  color: rgb(var(--fcmi-surface-3-rgb));
+  font-size: 0.64rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.fcmi-scale-copy {
+  margin: 0 0 clamp(0.72rem, 2vw, 0.95rem);
+  color: var(--fcmi-muted);
+  font-size: 0.95rem;
+  line-height: 1.62;
+}
+
+.fcmi-scale-section {
+  display: grid;
+  gap: 0.58rem;
+  margin: clamp(0.82rem, 2.2vw, 1.08rem) 0;
+}
+
+.fcmi-scale-section-header {
+  display: grid;
+  gap: 0.24rem;
+  padding: 0 0 0.55rem;
+  border-bottom: 1px solid rgb(var(--fcmi-accent-rgb) / 0.14);
+}
+
+.fcmi-scale-section-header .fcmi-kicker {
+  margin: 0;
+  color: rgb(var(--fcmi-accent-rgb) / 0.72);
+}
+
+.fcmi-scale-section-header h4 {
+  margin: 0;
+  color: var(--fcmi-cream);
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.fcmi-scale-section-header p {
+  margin: 0;
+  color: var(--fcmi-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.fcmi-scale-type-band {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 6.2rem), 1fr));
+  gap: 0.35rem;
+}
+
+.fcmi-scale-type-band span {
+  min-width: 0;
+  padding: 0.42rem 0.48rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.2);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.12), transparent 74%),
+    rgb(var(--fcmi-surface-rgb) / 0.32);
+  color: rgb(var(--fcmi-accent-rgb) / 0.9);
+  font-family: var(--fcmi-mono);
+  font-size: 0.66rem;
+  font-weight: 850;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.fcmi-scale-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: clamp(0.56rem, 1.8vw, 0.78rem);
+  margin: clamp(0.72rem, 2vw, 0.95rem) 0;
+}
+
+.fcmi-scale-detail-card {
+  padding: clamp(0.72rem, 1.8vw, 0.9rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.065), transparent 78%),
+    rgb(var(--fcmi-surface-rgb) / 0.34);
+}
+
+.fcmi-scale-detail-card h4,
+.fcmi-scale-detail-card h5,
+.fcmi-scale-detail-card h6 {
+  margin: 0 0 0.45rem;
+  color: rgb(var(--fcmi-accent-rgb) / 0.88);
+  font-size: 0.76rem;
+  font-weight: 850;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.fcmi-scale-detail-card p,
+.fcmi-scale-detail-card li {
+  color: var(--fcmi-muted);
+  font-size: 0.82rem;
+  line-height: 1.48;
+}
+
+.fcmi-scale-detail-card p,
+.fcmi-scale-detail-card ul {
+  margin: 0;
+}
+
+.fcmi-scale-detail-card ul {
+  padding-left: 1rem;
+}
+
+.fcmi-scale-note {
+  margin-top: clamp(0.72rem, 2vw, 0.95rem);
+  padding: 0.7rem 0.78rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.22);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.095), transparent 76%),
+    rgb(var(--fcmi-surface-rgb) / 0.34);
+  color: var(--fcmi-muted);
+  font-size: 0.83rem;
+  line-height: 1.5;
+}
+
+.fcmi-scale-note strong {
+  color: rgb(var(--fcmi-accent-rgb) / 0.9);
+}
+
+@media (max-width: 680px) {
+  .fcmi-scale-header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .fcmi-scale-label {
+    grid-column: 1 / -1;
+    justify-self: start;
+    text-align: left;
+  }
 }
 
 .fcmi-next-link-frame {

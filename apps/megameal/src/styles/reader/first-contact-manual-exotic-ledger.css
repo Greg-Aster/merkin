@@ -1,0 +1,94 @@
+/* Deferred exotic classification ledger for First Contact Manual chapter 1. */
+
+.fcmi-exotic-ledger {
+  margin: clamp(1rem, 3vw, 1.45rem) 0 clamp(1.4rem, 4vw, 2rem);
+  padding: clamp(0.78rem, 2.2vw, 1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.22);
+  border-radius: var(--fcmi-radius-lg);
+  background:
+    radial-gradient(circle at 100% 0, rgb(var(--fcmi-accent-rgb) / 0.1), transparent 28%),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.07), transparent 58%),
+    rgb(var(--fcmi-surface-rgb) / 0.34);
+  box-shadow:
+    inset 0 0 28px rgb(var(--fcmi-glow-rgb) / 0.045),
+    0 16px 38px rgb(0 0 0 / 0.18);
+}
+
+.fcmi-exotic-ledger-header {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0 0 0.72rem;
+  margin-bottom: 0.72rem;
+  border-bottom: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
+}
+
+.fcmi-exotic-ledger-header .fcmi-kicker {
+  margin: 0;
+  color: rgb(var(--fcmi-accent-rgb) / 0.74);
+}
+
+.fcmi-exotic-ledger-header h3 {
+  margin: 0;
+  color: var(--fcmi-cream);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.fcmi-exotic-ledger-header p {
+  margin: 0;
+  color: var(--fcmi-muted);
+  font-size: 0.84rem;
+  line-height: 1.48;
+}
+
+.fcmi-exotic-ledger-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.55rem, 1.6vw, 0.72rem);
+}
+
+.fcmi-exotic-ledger-item {
+  display: grid;
+  gap: 0.34rem;
+  padding: 0.68rem 0.72rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
+  border-left-width: 3px;
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.075), transparent 78%),
+    rgb(var(--fcmi-surface-rgb) / 0.3);
+}
+
+.fcmi-exotic-ledger-item strong {
+  color: rgb(var(--fcmi-accent-rgb) / 0.9);
+  font-family: var(--fcmi-mono);
+  font-size: 0.72rem;
+  font-weight: 850;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.fcmi-exotic-ledger-item span {
+  color: var(--fcmi-cream);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.fcmi-exotic-ledger-item p {
+  margin: 0;
+  color: var(--fcmi-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 680px) {
+  .fcmi-exotic-ledger-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 1040px) {
+  .fcmi-exotic-ledger-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

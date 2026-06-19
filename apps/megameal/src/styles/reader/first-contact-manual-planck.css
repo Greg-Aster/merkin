@@ -1,0 +1,130 @@
+/* Planck-scale entity layout for First Contact Manual chapter 1. */
+
+.fcmi-scale-education {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(min(100%, 14rem), 0.8fr);
+  gap: clamp(0.7rem, 2vw, 1rem);
+  align-items: stretch;
+  margin: 0 0 clamp(0.9rem, 2.4vw, 1.2rem);
+}
+
+.fcmi-scale-education-main {
+  display: grid;
+  gap: 0.7rem;
+  padding: clamp(0.78rem, 2vw, 1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.075), transparent 72%),
+    rgb(var(--fcmi-surface-rgb) / 0.3);
+}
+
+.fcmi-scale-education-main p {
+  margin: 0;
+  color: var(--fcmi-muted);
+  font-size: 0.95rem;
+  line-height: 1.62;
+}
+
+.fcmi-scale-unknowns {
+  display: grid;
+  align-content: start;
+  gap: 0.58rem;
+  padding: clamp(0.78rem, 2vw, 1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.22);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-accent-rgb) / 0.11), rgb(var(--fcmi-accent-rgb) / 0.035)),
+    rgb(var(--fcmi-surface-rgb) / 0.34);
+  box-shadow: inset 0 0 24px rgb(var(--fcmi-glow-rgb) / 0.06);
+}
+
+.fcmi-scale-unknowns strong {
+  color: rgb(var(--fcmi-accent-rgb) / 0.9);
+  font-family: var(--fcmi-mono);
+  font-size: 0.78rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.fcmi-scale-unknowns p {
+  margin: 0;
+  color: var(--fcmi-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.fcmi-scale-incident {
+  display: grid;
+  gap: 0.34rem;
+  margin-top: 0.1rem;
+  padding-top: 0.62rem;
+  border-top: 1px solid rgb(var(--fcmi-accent-rgb) / 0.18);
+}
+
+.fcmi-scale-incident span {
+  color: rgb(var(--fcmi-accent-rgb) / 0.84);
+  font-family: var(--fcmi-mono);
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.fcmi-scale-group {
+  display: grid;
+  gap: 0.58rem;
+  margin: clamp(0.82rem, 2.2vw, 1.08rem) 0;
+}
+
+.fcmi-scale-group-header {
+  display: grid;
+  gap: 0.24rem;
+  padding: 0 0 0.55rem;
+  border-bottom: 1px solid rgb(var(--fcmi-accent-rgb) / 0.14);
+}
+
+.fcmi-scale-group-header .fcmi-kicker {
+  margin: 0;
+  color: rgb(var(--fcmi-accent-rgb) / 0.72);
+}
+
+.fcmi-scale-group-header h4 {
+  margin: 0;
+  color: var(--fcmi-cream);
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.fcmi-scale-group-header p {
+  margin: 0;
+  color: var(--fcmi-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.fcmi-planck-origin-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.56rem, 1.8vw, 0.78rem);
+}
+
+.fcmi-scale-field-guide {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.56rem, 1.8vw, 0.78rem);
+}
+
+@media (max-width: 680px) {
+  .fcmi-scale-education,
+  .fcmi-planck-origin-grid,
+  .fcmi-scale-field-guide {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 1040px) {
+  .fcmi-planck-origin-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -6,7 +6,9 @@ type NavigationOptions = {
 	restoreHash?: boolean;
 };
 
-const containerSelectors = ["#banner-container", "#main-grid"];
+const bannerContainerSelector = "#banner-container";
+const contentSurfaceSelector = "#page-content-surface";
+const legacyContentSelector = "#main-grid";
 const htmlCache = new Map<string, string>();
 const routeManagedBodyClasses = ["is-home", "lg:is-home"];
 const managedHeadSelector = [
@@ -265,6 +267,13 @@ function executeInsertedScripts(root: ParentNode) {
 	}
 }
 
+function getContentSurface(root: ParentNode) {
+	return (
+		root.querySelector(contentSurfaceSelector) ??
+		root.querySelector(legacyContentSelector)
+	);
+}
+
 function focusMainContent() {
 	const target =
 		document.getElementById("main-content-wrapper") ??
@@ -304,18 +313,34 @@ function swapContainers(nextDocument: Document) {
 	const replacements: Array<{
 		currentElement: Element;
 		nextElement: Element;
+		selector: string;
 	}> = [];
 
-	for (const selector of containerSelectors) {
-		const currentElement = document.querySelector(selector);
-		const nextElement = nextDocument.querySelector(selector);
-		if (!currentElement || !nextElement) return false;
-		replacements.push({ currentElement, nextElement });
+	const currentBanner = document.querySelector(bannerContainerSelector);
+	const nextBanner = nextDocument.querySelector(bannerContainerSelector);
+	const currentContent = getContentSurface(document);
+	const nextContent = getContentSurface(nextDocument);
+
+	if (!currentBanner || !nextBanner || !currentContent || !nextContent) {
+		return false;
 	}
+
+	replacements.push({
+		currentElement: currentBanner,
+		nextElement: nextBanner,
+		selector: bannerContainerSelector,
+	});
+	replacements.push({
+		currentElement: currentContent,
+		nextElement: nextContent,
+		selector: nextContent.matches(contentSurfaceSelector)
+			? contentSurfaceSelector
+			: legacyContentSelector,
+	});
 
 	dispatchPageEvent("astro:before-swap", {
 		newDocument: nextDocument,
-		selectors: containerSelectors,
+		selectors: replacements.map(({ selector }) => selector),
 	});
 
 	for (const { currentElement, nextElement } of replacements) {

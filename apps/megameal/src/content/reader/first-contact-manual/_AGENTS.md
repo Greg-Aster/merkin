@@ -62,3 +62,18 @@ editing these files, agents must not change the substance of what was written:
 (wrong letters in a word, e.g. "cannabalism" → "cannibalism") but do not touch
 anything else. When in doubt whether something is a typo or intentional style,
 leave it as written and flag it to the user.
+
+## Research references are part of the chapter contract
+
+When adding or materially expanding science-backed speculative content, do not
+leave the research basis only in chat notes. Add or update a chapter-level
+`## Chapter References` section with the primary papers, review papers, DOI pages,
+or authoritative references that informed the addition.
+
+- Keep references grouped by the chapter topic they support.
+- Prefer primary literature, review papers, standards bodies, or official
+  scientific references over secondary summaries.
+- If a source only supports a boundary note or deferred classification ledger,
+  still cite it in the references section.
+- Do not rewrite existing author prose to force citations inline; use the chapter
+  reference block unless the user explicitly asks for inline citation prose.
