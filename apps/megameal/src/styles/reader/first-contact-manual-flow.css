@@ -401,6 +401,14 @@
   margin: clamp(0.72rem, 2vw, 0.95rem) 0;
 }
 
+.fcmi-scale-detail-grid--paired {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fcmi-scale-detail-grid--paired .fcmi-scale-detail-card {
+  padding: clamp(0.82rem, 2vw, 1.02rem);
+}
+
 .fcmi-scale-detail-card {
   padding: clamp(0.72rem, 1.8vw, 0.9rem);
   border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
@@ -457,6 +465,10 @@
 @media (max-width: 680px) {
   .fcmi-scale-header {
     grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .fcmi-scale-detail-grid--paired {
+    grid-template-columns: 1fr;
   }
 
   .fcmi-scale-label {

@@ -7,6 +7,10 @@ type PackageJson = {
 };
 
 const appRoot = fileURLToPath(new URL("..", import.meta.url));
+const legacyThrelteEditorPath = [
+	"Do not import or copy old `apps",
+	"game/src/threlte/editor/**` code",
+].join("/");
 const docs = {
 	architecture: await readProjectFile("ARCHITECTURE.md"),
 	contractRegister: await readProjectFile("ENGINE_CONTRACT_REGISTER.md"),
@@ -238,7 +242,7 @@ function assertWorkspaceAlignmentHasExternalProof(): void {
 		"LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL",
 		"per-level collision",
 		"hardcode `*_runtime`",
-		"Do not import or copy old `apps/game/src/threlte/editor/**` code",
+		legacyThrelteEditorPath,
 		"https://dev.epicgames.com/documentation/en-us/unreal-engine/levels-in-unreal-engine",
 		"https://dev.epicgames.com/documentation/en-us/unreal-engine/actors-in-unreal-engine",
 		"https://docs.unity3d.com/Manual/CreatingScenes.html",

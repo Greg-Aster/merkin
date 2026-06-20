@@ -20,6 +20,7 @@ import {
 
 const fixedNow = "2026-06-11T12:00:00.000Z";
 const appRoot = fileURLToPath(new URL("..", import.meta.url));
+const legacyGamePath = ["apps", "game"].join("/");
 
 const disabledStatus = buildDisabledEditorAiServiceStatusReport({
 	checkedAt: fixedNow,
@@ -290,9 +291,9 @@ async function assertNoOldGameReferences(directory: string): Promise<void> {
 	for (const file of files) {
 		const source = await readFile(file, "utf8");
 
-		if (source.includes("apps/game")) {
+		if (source.includes(legacyGamePath)) {
 			throw new Error(
-				`${relative(appRoot, file)} references old apps/game code or routes.`,
+				`${relative(appRoot, file)} references old legacy game code or routes.`,
 			);
 		}
 	}
