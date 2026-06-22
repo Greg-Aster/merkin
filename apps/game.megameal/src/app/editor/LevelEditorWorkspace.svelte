@@ -3,12 +3,16 @@ import { onDestroy, onMount } from "svelte";
 import {
 	type LevelEditorCoreObjectPreviewPatchEntry,
 	type LevelEditorRuntimeTelemetryPayload,
+	type LevelPrefabInstanceData,
 	createCoreObjectPreviewClearRequestMessage,
 	createCoreObjectPreviewPatchMessage,
 	createRuntimeSceneReloadRequestMessage,
 	parseLevelEditorDevPreviewMessage,
 } from "../../engine/data/index.js";
-import type { LevelEditorAuthoringTransaction } from "../../engine/data/levelAuthoring/index.js";
+import type {
+	LevelEditorAuthoringEditOperation,
+	LevelEditorAuthoringTransaction,
+} from "../../engine/data/levelAuthoring/index.js";
 import { buildEnvironmentAuthoringModel } from "../../game/editor/environmentAuthoring/index.js";
 import { buildNpcAuthoringCatalog } from "../../game/editor/npcAuthoring/index.js";
 import type { EditorObjectLibraryReplacementDraft } from "../../game/editor/objectLibrary/index.js";
@@ -23,6 +27,7 @@ import LevelEditorEnvironmentPanel from "./LevelEditorEnvironmentPanel.svelte";
 import LevelEditorNpcPanel from "./LevelEditorNpcPanel.svelte";
 import LevelEditorObjectLibraryPanel from "./LevelEditorObjectLibraryPanel.svelte";
 import LevelEditorPreviewControls from "./LevelEditorPreviewControls.svelte";
+import LevelEditorViewportBridgePanel from "./LevelEditorViewportBridgePanel.svelte";
 import {
 	fetchLevelEditorAuthoringStatus,
 	runLevelEditorAuthoringCommand,
@@ -32,6 +37,8 @@ import {
 	buildLevelEditorAuthoringTransactionFromQueue,
 	createLevelEditorAuthoringQueue,
 	redoLevelEditorAuthoringQueue,
+	removeLevelEditorAuthoringOperationEntry,
+	removeLevelEditorStagedFieldEdit,
 	stageLevelEditorAuthoringOperations,
 	stageLevelEditorFieldEdit,
 	undoLevelEditorAuthoringQueue,
@@ -41,17 +48,30 @@ import {
 	serializeNpcAuthoringCatalog,
 } from "./levelEditorEnvironmentPanels.js";
 import {
+	type LevelEditorObjectLibraryPanelEntry,
 	buildLevelEditorObjectLibraryPanelModel,
 	createObjectLibraryReplacementPreviewMessage,
+	createObjectLibraryStagedPlacement,
 	objectLibrarySubjectFromSelection,
 } from "./levelEditorObjectLibrary.js";
 import { sendLevelEditorDevPreviewMessage } from "./levelEditorPreviewSender.js";
 import type { LevelEditorSessionSummary } from "./levelEditorSession.js";
+import {
+	type LevelEditorViewportBridgeConnectionStatus,
+	type LevelEditorViewportBridgeViewMode,
+	type LevelEditorViewportGizmoMode,
+	type LevelEditorViewportNormalizedPoint,
+	type LevelEditorViewportOverlayId,
+	buildLevelEditorViewportBridgeModel,
+	viewportPlacementPositionFromNormalizedPoint,
+} from "./levelEditorViewportBridgeModel.js";
 import type {
+	LevelEditorWorkspaceCategory,
 	LevelEditorWorkspaceCommand,
 	LevelEditorWorkspaceCommandPlan,
 	LevelEditorWorkspaceField,
 	LevelEditorWorkspaceObject,
+	LevelEditorWorkspaceTreeGroup,
 } from "./levelEditorWorkspaceModel.js";
 import {
 	type LevelEditorStagedFieldEdit,
@@ -73,6 +93,31 @@ type PreviewStatus = {
 
 type RuntimeTelemetryState = "waiting" | "live" | "stale";
 
+type StagedPublishReadiness = {
+	readonly status: "clean" | "publish-ready" | "draft-only" | "mixed";
+	readonly label: string;
+	readonly canRunOwnerWrite: boolean;
+	readonly supportedOperationCount: number;
+	readonly unsupportedOperationCount: number;
+	readonly reasons: readonly string[];
+};
+
+type SelectedInstanceRemovalReadiness = {
+	readonly canStage: boolean;
+	readonly requiredForReadiness: boolean;
+	readonly alreadyStaged: boolean;
+	readonly queueEntryId: string | null;
+	readonly reason: string;
+};
+
+type SelectedInstanceDuplicationReadiness = {
+	readonly canStage: boolean;
+	readonly sourceStableId: string | null;
+	readonly duplicateStableId: string | null;
+	readonly queueEntryId: string | null;
+	readonly reason: string;
+};
+
 const { serializedEditorSession }: Props = $props();
 const editorSession = JSON.parse(
 	serializedEditorSession,
@@ -82,8 +127,17 @@ let selectedStableId: string = $state(
 	workspace.selectedStableId ?? workspace.objects[0]?.stableId ?? "",
 );
 let selectedGraphNode: string = $state("authored-level");
+let selectedObjectLibraryEntryId: string | null = $state(null);
 const selectedWorkspaceObject = $derived(
 	workspace.objects.find((object) => object.stableId === selectedStableId),
+);
+const objectFocusGroups = $derived(
+	workspace.sceneTree.filter((group) => group.objects.length > 0),
+);
+const selectedObjectFocusGroup = $derived(
+	objectFocusGroups.find(
+		(group) => group.category === selectedWorkspaceObject?.category,
+	) ?? objectFocusGroups[0],
 );
 const selectedRuntimeSceneManifest = $derived(
 	getRuntimeSceneManifest(workspace.selectedRuntimeSceneId),
@@ -106,8 +160,10 @@ const objectLibraryPanelModel = $derived(
 		runtimeSceneId: workspace.selectedRuntimeSceneId,
 		levelId: workspace.selectedLevelId,
 		selectedObject: selectedObjectLibrarySubject,
+		selectedEntryId: selectedObjectLibraryEntryId,
 	}),
 );
+const viewportPlacementTarget = $derived(buildViewportPlacementTarget());
 const serializedEnvironmentModel = $derived(
 	serializeEnvironmentAuthoringModel(
 		buildEnvironmentAuthoringModel(selectedRuntimeSceneManifest),
@@ -121,10 +177,23 @@ let status: PreviewStatus = $state({
 	kind: "idle",
 	label: "Preview channel initializing",
 });
+let liveCoreObjectPreviewStableIds: readonly string[] = $state([]);
 let authoringQueue = $state(createLevelEditorAuthoringQueue());
 const stagedFieldEdits = $derived(authoringQueue.stagedFieldEdits);
 const queuedAuthoringOperationEntries = $derived(
 	authoringQueue.queuedOperations,
+);
+const stagedPublishReadiness = $derived(
+	buildStagedPublishReadiness({
+		stagedFieldEdits,
+		queuedOperations: queuedAuthoringOperationEntries,
+	}),
+);
+const selectedInstanceRemovalReadiness = $derived(
+	buildSelectedInstanceRemovalReadiness(),
+);
+const selectedInstanceDuplicationReadiness = $derived(
+	buildSelectedInstanceDuplicationReadiness(),
 );
 let latestTransaction: LevelEditorAuthoringTransaction | undefined = $state();
 let selectedCommandPlanId: "build" | "publish" = $state("build");
@@ -140,8 +209,44 @@ let runtimeTelemetry: LevelEditorRuntimeTelemetryPayload | undefined = $state();
 let runtimeTelemetryState: RuntimeTelemetryState = $state("waiting");
 let lastRuntimeTelemetryReceivedAt: number | undefined = $state();
 let activeCommandId: LevelEditorWorkspaceCommand["id"] | null = $state(null);
+let viewportBridgeViewMode: LevelEditorViewportBridgeViewMode =
+	$state("live-game");
+let viewportTransformMode: LevelEditorViewportGizmoMode = $state("translate");
+let viewportTranslateSnapStep = $state(0.1);
+let viewportRotateSnapStep = $state(15);
+let viewportScaleSnapStep = $state(0.05);
+let enabledViewportOverlayIds: readonly LevelEditorViewportOverlayId[] = $state(
+	["selection-outline", "object-labels", "transform-origin"],
+);
 let unsubscribeRuntimeTelemetry: (() => void) | undefined;
 let telemetryFreshnessTimer: number | undefined;
+const viewportBridgeConnectionStatus: LevelEditorViewportBridgeConnectionStatus =
+	$derived(
+		runtimeTelemetryState === "live"
+			? "live"
+			: runtimeTelemetryState === "stale"
+				? "unavailable"
+				: channel
+					? "ready"
+					: "inactive",
+	);
+const viewportBridgeModel = $derived(
+	buildLevelEditorViewportBridgeModel({
+		workspace,
+		selectedStableId: selectedStableId === "" ? null : selectedStableId,
+		viewMode: viewportBridgeViewMode,
+		enabledOverlayIds: enabledViewportOverlayIds,
+		connectionStatus: viewportBridgeConnectionStatus,
+		liveRuntimeSceneId: runtimeTelemetry?.runtimeSceneId ?? null,
+		fieldValueOverrides: stagedFieldEdits,
+		transformMode: viewportTransformMode,
+		transformSnapSteps: {
+			translate: viewportTranslateSnapStep,
+			rotate: viewportRotateSnapStep,
+			scale: viewportScaleSnapStep,
+		},
+	}),
+);
 
 onMount(() => {
 	channel = createBrowserLevelEditorPreviewChannel();
@@ -183,6 +288,670 @@ function selectObject(stableId: string): void {
 	selectedGraphNode = object ? `category:${object.category}` : "authored-level";
 }
 
+function selectObjectGroup(category: LevelEditorWorkspaceCategory): void {
+	const group = objectFocusGroups.find((item) => item.category === category);
+	const firstObject = group?.objects[0];
+
+	if (firstObject) {
+		selectObject(firstObject.stableId);
+	}
+}
+
+function selectViewportBridgeViewMode(
+	mode: LevelEditorViewportBridgeViewMode,
+): void {
+	viewportBridgeViewMode = mode;
+}
+
+function selectViewportTransformMode(mode: LevelEditorViewportGizmoMode): void {
+	viewportTransformMode = mode;
+}
+
+function selectViewportTransformSnapStep(
+	mode: LevelEditorViewportGizmoMode,
+	step: number,
+): void {
+	if (!Number.isFinite(step) || step <= 0) {
+		return;
+	}
+
+	switch (mode) {
+		case "translate":
+			viewportTranslateSnapStep = step;
+			return;
+		case "rotate":
+			viewportRotateSnapStep = step;
+			return;
+		case "scale":
+			viewportScaleSnapStep = step;
+			return;
+	}
+}
+
+function toggleViewportBridgeOverlay(id: LevelEditorViewportOverlayId): void {
+	const activeIds = new Set(enabledViewportOverlayIds);
+
+	if (activeIds.has(id)) {
+		activeIds.delete(id);
+	} else {
+		activeIds.add(id);
+	}
+
+	enabledViewportOverlayIds = [...activeIds];
+}
+
+function selectObjectLibraryEntry(entryId: string): void {
+	selectedObjectLibraryEntryId = entryId;
+}
+
+function selectedInstanceRemovalQueueEntryId(stableId: string): string {
+	return `selected-instance-removal:${workspace.selectedRuntimeSceneId}:${stableId}`;
+}
+
+function selectedInstanceDuplicateQueueEntryId(stableId: string): string {
+	return `selected-instance-duplicate:${workspace.selectedRuntimeSceneId}:${stableId}`;
+}
+
+function buildSelectedInstanceDuplicationReadiness(): SelectedInstanceDuplicationReadiness {
+	const object = selectedWorkspaceObject;
+
+	if (!object) {
+		return {
+			canStage: false,
+			sourceStableId: null,
+			duplicateStableId: null,
+			queueEntryId: null,
+			reason: "Select a level instance before staging duplication.",
+		};
+	}
+
+	if (!sourceInstanceForSelectedObject(object.stableId)) {
+		return {
+			canStage: false,
+			sourceStableId: object.stableId,
+			duplicateStableId: null,
+			queueEntryId: null,
+			reason:
+				"Selected object is not backed by a manifest level instance that can be duplicated.",
+		};
+	}
+
+	const duplicateStableId = nextDuplicateStableId(object.stableId);
+
+	return {
+		canStage: true,
+		sourceStableId: object.stableId,
+		duplicateStableId,
+		queueEntryId: selectedInstanceDuplicateQueueEntryId(duplicateStableId),
+		reason:
+			"Stages a duplicate as a generated level-instance insertion with a small position offset.",
+	};
+}
+
+function buildSelectedInstanceRemovalReadiness(): SelectedInstanceRemovalReadiness {
+	const object = selectedWorkspaceObject;
+
+	if (!object) {
+		return {
+			canStage: false,
+			requiredForReadiness: false,
+			alreadyStaged: false,
+			queueEntryId: null,
+			reason: "Select a level instance before staging removal.",
+		};
+	}
+
+	const queueEntryId = selectedInstanceRemovalQueueEntryId(object.stableId);
+	const alreadyStaged = authoringQueue.queuedOperations.some(
+		(entry) => entry.id === queueEntryId,
+	);
+	const readinessReason = readinessRequiredStableIdReason(object.stableId);
+
+	if (readinessReason !== null) {
+		return {
+			canStage: false,
+			requiredForReadiness: true,
+			alreadyStaged,
+			queueEntryId,
+			reason: readinessReason,
+		};
+	}
+
+	if (alreadyStaged) {
+		return {
+			canStage: false,
+			requiredForReadiness: false,
+			alreadyStaged,
+			queueEntryId,
+			reason: "Removal is already staged for this selected instance.",
+		};
+	}
+
+	return {
+		canStage: true,
+		requiredForReadiness: false,
+		alreadyStaged,
+		queueEntryId,
+		reason:
+			"Stages a bounded level-instance removal through the generated level owner path.",
+	};
+}
+
+function readinessRequiredStableIdReason(stableId: string): string | null {
+	const readiness = selectedRuntimeSceneManifest.readiness;
+
+	if (stableId === readiness.playerStableId) {
+		return `Cannot remove "${stableId}" because it is the runtime scene player readiness stable ID.`;
+	}
+
+	if ((readiness.requiredCollisionStableIds ?? []).includes(stableId)) {
+		return `Cannot remove "${stableId}" because runtime readiness requires it as collision.`;
+	}
+
+	if ((readiness.requiredWalkableStableIds ?? []).includes(stableId)) {
+		return `Cannot remove "${stableId}" because runtime readiness requires it as walkable ground.`;
+	}
+
+	if ((readiness.requiredLightStableIds ?? []).includes(stableId)) {
+		return `Cannot remove "${stableId}" because runtime readiness requires it as an authored light.`;
+	}
+
+	return null;
+}
+
+function sourceInstanceForSelectedObject(
+	stableId: string,
+): LevelPrefabInstanceData | null {
+	return (
+		selectedRuntimeSceneManifest.level.instances.find(
+			(instance) => instance.stableId === stableId,
+		) ?? null
+	);
+}
+
+function nextDuplicateStableId(sourceStableId: string): string {
+	const existingStableIds = new Set([
+		...workspace.objects.map((object) => object.stableId),
+		...authoringQueue.queuedOperations.flatMap((entry) =>
+			(entry.operations ?? []).flatMap((operation) =>
+				operation.kind === "insert-instance"
+					? [operation.instance.stableId]
+					: [],
+			),
+		),
+		...authoringQueue.queuedOperations.flatMap((entry) =>
+			(entry.saveOperations ?? []).map((operation) => operation.subjectId),
+		),
+	]);
+	const baseId = `${sourceStableId}:duplicate`;
+	let index = 1;
+	let candidate = `${baseId}-${index}`;
+
+	while (existingStableIds.has(candidate)) {
+		index += 1;
+		candidate = `${baseId}-${index}`;
+	}
+
+	return candidate;
+}
+
+function stageSelectedInstanceRemoval(): void {
+	const object = selectedWorkspaceObject;
+	const readiness = selectedInstanceRemovalReadiness;
+
+	if (!object || !readiness.canStage || readiness.queueEntryId === null) {
+		appendOutputLog({
+			level: "warning",
+			source: "remove-instance",
+			message: readiness.reason,
+		});
+		return;
+	}
+
+	const operation = {
+		id: `remove-instance:${workspace.selectedRuntimeSceneId}:${object.stableId}`,
+		kind: "remove-instance",
+		persistence: "saved",
+		stableId: object.stableId,
+		note: "Selected level instance removal staged from the workbench.",
+	} satisfies LevelEditorAuthoringEditOperation;
+
+	stageAuthoringOperationEntry({
+		id: readiness.queueEntryId,
+		label: `Remove ${object.label}`,
+		operations: [operation],
+	});
+	status = {
+		kind: "ready",
+		label: `Staged removal for ${object.stableId}`,
+	};
+}
+
+function stageSelectedInstanceDuplicate(): void {
+	const object = selectedWorkspaceObject;
+	const readiness = selectedInstanceDuplicationReadiness;
+	const sourceInstance =
+		readiness.sourceStableId === null
+			? null
+			: sourceInstanceForSelectedObject(readiness.sourceStableId);
+
+	if (
+		!object ||
+		!sourceInstance ||
+		!readiness.canStage ||
+		readiness.duplicateStableId === null ||
+		readiness.queueEntryId === null
+	) {
+		appendOutputLog({
+			level: "warning",
+			source: "duplicate-instance",
+			message: readiness.reason,
+		});
+		return;
+	}
+
+	const duplicateInstance = duplicateLevelInstance({
+		sourceInstance,
+		stableId: readiness.duplicateStableId,
+		position: selectedViewportPlacementPosition(),
+	});
+	const operation = {
+		id: `duplicate-instance:${workspace.selectedRuntimeSceneId}:${duplicateInstance.stableId}`,
+		kind: "insert-instance",
+		persistence: "saved",
+		instance: duplicateInstance,
+		note: "Selected level instance duplicate staged from the workbench.",
+	} satisfies LevelEditorAuthoringEditOperation;
+
+	stageAuthoringOperationEntry({
+		id: readiness.queueEntryId,
+		label: `Duplicate ${object.label}`,
+		operations: [operation],
+	});
+	status = {
+		kind: "ready",
+		label: `Staged duplicate ${duplicateInstance.stableId}`,
+	};
+}
+
+function duplicateLevelInstance(options: {
+	readonly sourceInstance: LevelPrefabInstanceData;
+	readonly stableId: string;
+	readonly position: readonly [number, number, number] | null;
+}): LevelPrefabInstanceData {
+	const sourceTransform = options.sourceInstance.transform;
+	const sourcePosition = options.position ?? sourceTransform?.position ?? null;
+	const transform =
+		sourceTransform === undefined && sourcePosition === null
+			? undefined
+			: {
+					...(sourceTransform === undefined
+						? {}
+						: cloneEditorValue(sourceTransform)),
+					...(sourcePosition === null
+						? {}
+						: {
+								position: [
+									roundEditorNumber(sourcePosition[0] + 1),
+									roundEditorNumber(sourcePosition[1]),
+									roundEditorNumber(sourcePosition[2] + 1),
+								] satisfies readonly [number, number, number],
+							}),
+				};
+
+	return {
+		id: options.stableId,
+		stableId: options.stableId,
+		prefabId: options.sourceInstance.prefabId,
+		...(options.sourceInstance.components === undefined
+			? {}
+			: { components: cloneEditorValue(options.sourceInstance.components) }),
+		...(transform === undefined ? {} : { transform }),
+	};
+}
+
+function cloneEditorValue<T>(value: T): T {
+	return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function roundEditorNumber(value: number): number {
+	return Math.round(value * 1000) / 1000;
+}
+
+function objectLibraryEntryById(
+	entryId: string,
+): LevelEditorObjectLibraryPanelEntry | null {
+	return (
+		objectLibraryPanelModel.groups
+			.flatMap((group) => group.entries)
+			.find((entry) => entry.id === entryId) ?? null
+	);
+}
+
+function buildViewportPlacementTarget(): {
+	readonly label: string;
+	readonly status: string;
+	readonly targetLabel: string;
+	readonly canStage: boolean;
+	readonly writesFiles: boolean;
+	readonly reason: string;
+} | null {
+	const entry = objectLibraryPanelModel.selectedEntry;
+	const draft = entry?.placementReadiness.placementDraft;
+	const position = viewportPlacementPosition();
+	const selectedPosition = selectedViewportPlacementPosition();
+
+	if (!entry || !draft) {
+		return null;
+	}
+
+	return {
+		label: entry.label,
+		status: entry.placementReadiness.status,
+		targetLabel: position
+			? `x ${position[0].toFixed(2)} / y ${position[1].toFixed(2)} / z ${position[2].toFixed(2)}`
+			: "viewport placement surface unavailable",
+		canStage: entry.canStagePlacementDraft && position !== null,
+		writesFiles: entry.placementReadiness.writesFiles,
+		reason:
+			position === null
+				? "The viewport does not expose transform-positioned bounds for placement."
+				: selectedPosition === null
+					? "Stages a draft placement at the center of the viewport placement surface. Drop onto the viewport to choose a specific X/Z point."
+					: "Stages a draft placement at the selected viewport object position. Drop onto the viewport to choose a specific X/Z point.",
+	};
+}
+
+function viewportPlacementPosition(
+	point?: LevelEditorViewportNormalizedPoint,
+): readonly [number, number, number] | null {
+	if (point) {
+		return viewportPlacementPositionFromNormalizedPoint({
+			surface: viewportBridgeModel.projection.placementSurface,
+			point,
+			y: selectedViewportPlacementY(),
+		});
+	}
+
+	const selectedPosition = selectedViewportPlacementPosition();
+
+	if (selectedPosition !== null) {
+		return selectedPosition;
+	}
+
+	return viewportPlacementPositionFromNormalizedPoint({
+		surface: viewportBridgeModel.projection.placementSurface,
+		point: { xPercent: 50, zPercent: 50 },
+		y: selectedViewportPlacementY(),
+	});
+}
+
+function selectedViewportPlacementPosition():
+	| readonly [number, number, number]
+	| null {
+	const object = selectedWorkspaceObject;
+
+	if (!object) {
+		return null;
+	}
+
+	const x = numberFieldDisplayValue(object, "Transform.position.x");
+	const y = numberFieldDisplayValue(object, "Transform.position.y");
+	const z = numberFieldDisplayValue(object, "Transform.position.z");
+
+	if (x === null || y === null || z === null) {
+		return null;
+	}
+
+	return [x, y, z];
+}
+
+function selectedViewportPlacementY(): number {
+	const object = selectedWorkspaceObject;
+
+	if (!object) {
+		return 0;
+	}
+
+	return numberFieldDisplayValue(object, "Transform.position.y") ?? 0;
+}
+
+function numberFieldDisplayValue(
+	object: LevelEditorWorkspaceObject,
+	path: string,
+): number | null {
+	const field = object.fields.find((item) => item.path === path);
+
+	if (!field) {
+		return null;
+	}
+
+	const value = Number(fieldDisplayValue(object, field));
+
+	return Number.isFinite(value) ? value : null;
+}
+
+function stageDroppedObjectLibraryPlacement(
+	entryId: string,
+	point: LevelEditorViewportNormalizedPoint,
+): void {
+	selectObjectLibraryEntry(entryId);
+	stageViewportPlacementAtTarget(entryId, point);
+}
+
+function stageViewportPlacementAtTarget(
+	entryId?: string,
+	point?: LevelEditorViewportNormalizedPoint,
+): void {
+	const entry =
+		entryId === undefined
+			? objectLibraryPanelModel.selectedEntry
+			: objectLibraryEntryById(entryId);
+	const draft = entry?.placementReadiness.placementDraft;
+	const position = viewportPlacementPosition(point);
+
+	if (!entry || !draft || position === null || !entry.canStagePlacementDraft) {
+		return;
+	}
+
+	const queuedEntryId = `object-library-viewport-placements:${workspace.selectedRuntimeSceneId}`;
+	const existingEntry = authoringQueue.queuedOperations.find(
+		(item) => item.id === queuedEntryId,
+	);
+	const stagedPlacement = createObjectLibraryStagedPlacement({
+		runtimeSceneId: workspace.selectedRuntimeSceneId,
+		entry,
+		draft,
+		index: (existingEntry?.saveOperations?.length ?? 0) + 1,
+		source: point === undefined ? "viewport-placement-target" : "viewport-drop",
+		transform: {
+			...draft.transform,
+			position,
+		},
+	});
+
+	stageAuthoringOperationEntry({
+		id: queuedEntryId,
+		label: "Object library viewport placements",
+		operations: [
+			...(existingEntry?.operations ?? []),
+			stagedPlacement.operation,
+		].slice(-8),
+		saveOperations: [
+			...(existingEntry?.saveOperations ?? []),
+			stagedPlacement.saveOperation,
+		].slice(-8),
+	});
+	appendOutputLog({
+		level: "success",
+		source: point === undefined ? "viewport-placement" : "viewport-drop",
+		message:
+			point === undefined
+				? `Staged ${entry.label} placement at ${stagedPlacement.stableId}.`
+				: `Dropped ${entry.label} placement at ${stagedPlacement.stableId}.`,
+	});
+}
+
+function nudgeViewportTransformField(path: string, delta: number): void {
+	const object = selectedWorkspaceObject;
+	const field = object?.fields.find((item) => item.path === path);
+
+	if (
+		!object ||
+		!field ||
+		field.input !== "number" ||
+		field.readOnly ||
+		field.workflow.editability !== "editable"
+	) {
+		return;
+	}
+
+	const currentValue = Number(fieldDisplayValue(object, field));
+	const baselineValue = Number(field.value);
+	const after = Number(
+		(
+			(Number.isFinite(currentValue) ? currentValue : baselineValue || 0) +
+			delta
+		).toFixed(4),
+	);
+	const nextQueue = stageLevelEditorFieldEdit(authoringQueue, {
+		stableId: object.stableId,
+		path: field.path,
+		label: field.label,
+		before: field.value,
+		after,
+	});
+
+	if (nextQueue === authoringQueue) {
+		return;
+	}
+
+	authoringQueue = nextQueue;
+	latestTransaction = undefined;
+}
+
+function objectFieldValue(
+	object: LevelEditorWorkspaceObject,
+	path: string,
+): string | number | boolean | undefined {
+	return object.fields.find((field) => field.path === path)?.value;
+}
+
+function objectFieldText(
+	object: LevelEditorWorkspaceObject,
+	path: string,
+): string {
+	const value = objectFieldValue(object, path);
+
+	return typeof value === "string" ? value : "";
+}
+
+function portalTargetLabel(object: LevelEditorWorkspaceObject): string {
+	const targetSceneId = objectFieldText(object, "Portal.targetRuntimeSceneId");
+
+	if (!targetSceneId) {
+		return "Unconnected";
+	}
+
+	return targetSceneId.replace(/_runtime$/, "").replace(/_/g, " ");
+}
+
+function portalPromptLabel(object: LevelEditorWorkspaceObject): string {
+	return objectFieldText(object, "Portal.prompt") || "No prompt configured";
+}
+
+function objectPosition(
+	object: LevelEditorWorkspaceObject,
+): { readonly x: number; readonly z: number } | null {
+	const x = objectFieldValue(object, "Transform.position.x");
+	const z = objectFieldValue(object, "Transform.position.z");
+
+	if (typeof x !== "number" || typeof z !== "number") {
+		return null;
+	}
+
+	return { x, z };
+}
+
+function objectPositionLabel(object: LevelEditorWorkspaceObject): string {
+	const position = objectPosition(object);
+
+	if (!position) {
+		return "position unavailable";
+	}
+
+	return `x ${position.x.toFixed(1)} / z ${position.z.toFixed(1)}`;
+}
+
+function objectTargetLabel(object: LevelEditorWorkspaceObject): string {
+	if (object.category === "portals") {
+		return portalTargetLabel(object);
+	}
+
+	const primaryAsset = object.preview.primaryAsset;
+
+	if (primaryAsset) {
+		return primaryAsset.assetId;
+	}
+
+	return object.prefabId;
+}
+
+function objectDescriptor(object: LevelEditorWorkspaceObject): string {
+	if (object.category === "portals") {
+		return portalPromptLabel(object);
+	}
+
+	return object.componentNames.join(", ");
+}
+
+function formatWorkflowValue(value: string): string {
+	return value
+		.split("-")
+		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+		.join(" ");
+}
+
+function objectFocusPinStyle(
+	group: LevelEditorWorkspaceTreeGroup,
+	object: LevelEditorWorkspaceObject,
+): string {
+	const position = objectPosition(object);
+
+	if (!position) {
+		return "";
+	}
+
+	const positionedObjects = group.objects
+		.map((item) => objectPosition(item))
+		.filter(
+			(item): item is { readonly x: number; readonly z: number } =>
+				item !== null,
+		);
+	const xs = positionedObjects.map((item) => item.x);
+	const zs = positionedObjects.map((item) => item.z);
+	const minX = Math.min(...xs);
+	const maxX = Math.max(...xs);
+	const minZ = Math.min(...zs);
+	const maxZ = Math.max(...zs);
+	const normalizedX = normalizeEditorMapAxis(position.x, minX, maxX);
+	const normalizedZ = normalizeEditorMapAxis(position.z, minZ, maxZ);
+
+	return `--object-map-x: ${normalizedX}%; --object-map-z: ${normalizedZ}%`;
+}
+
+function normalizeEditorMapAxis(
+	value: number,
+	min: number,
+	max: number,
+): number {
+	if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
+		return 50;
+	}
+
+	return Math.round(10 + ((value - min) / (max - min)) * 80);
+}
+
 function handleInspectorFieldInput(
 	event: Event,
 	object: LevelEditorWorkspaceObject,
@@ -212,8 +981,16 @@ function fieldDisplayValue(
 	object: LevelEditorWorkspaceObject,
 	field: LevelEditorWorkspaceField,
 ): string | number | boolean {
+	return fieldDisplayValueFromEdits(stagedFieldEdits, object, field);
+}
+
+function fieldDisplayValueFromEdits(
+	edits: readonly LevelEditorStagedFieldEdit[],
+	object: LevelEditorWorkspaceObject,
+	field: LevelEditorWorkspaceField,
+): string | number | boolean {
 	return (
-		findStagedFieldEdit(stagedFieldEdits, object.stableId, field.path)?.after ??
+		findStagedFieldEdit(edits, object.stableId, field.path)?.after ??
 		field.value
 	);
 }
@@ -279,6 +1056,7 @@ function discardStagedEdits(): void {
 		});
 
 		sendLevelEditorDevPreviewMessage(channel, message);
+		untrackCoreObjectPreviews(previewTargets.stableIds);
 		status = {
 			kind: "sent",
 			label: `Cleared previews for ${previewTargets.stableIds.length} staged objects`,
@@ -414,6 +1192,7 @@ async function publishStagedLevelOwnerData(): Promise<void> {
 						targetKinds: previewTargets.targetKinds,
 					}),
 				);
+				untrackCoreObjectPreviews(previewTargets.stableIds);
 			}
 
 			sendLevelEditorDevPreviewMessage(
@@ -518,6 +1297,7 @@ async function saveStagedLevelOwnerData(): Promise<void> {
 						targetKinds: previewTargets.targetKinds,
 					}),
 				);
+				untrackCoreObjectPreviews(previewTargets.stableIds);
 			}
 
 			sendLevelEditorDevPreviewMessage(
@@ -703,6 +1483,14 @@ function workspaceCommandBlockReason(
 		return "Staged edits are dirty; Save Draft preserves a transaction but does not make them permanent. Discard the staged edits before using this plan view.";
 	}
 
+	if (
+		(command.operation === "owner-write" ||
+			command.operation === "publish-owner-write") &&
+		!stagedPublishReadiness.canRunOwnerWrite
+	) {
+		return stagedPublishReadiness.reasons[0] ?? stagedPublishReadiness.label;
+	}
+
 	return null;
 }
 
@@ -726,6 +1514,290 @@ function appendOutputLog(entry: {
 	outputLog = [createWorkspaceOutputLogEntry(entry), ...outputLog].slice(0, 48);
 }
 
+function buildStagedPublishReadiness(options: {
+	readonly stagedFieldEdits: readonly LevelEditorStagedFieldEdit[];
+	readonly queuedOperations: readonly LevelEditorQueuedAuthoringOperation[];
+}): StagedPublishReadiness {
+	const unsupportedReasons: string[] = [];
+	let supportedOperationCount = 0;
+
+	for (const edit of options.stagedFieldEdits) {
+		if (isPublishableTransformFieldPath(edit.path)) {
+			supportedOperationCount += 1;
+			continue;
+		}
+
+		unsupportedReasons.push(
+			`${edit.label} (${edit.path}) is not publishable by the current generated level owner writer.`,
+		);
+	}
+
+	for (const entry of options.queuedOperations) {
+		const entryPublishability = queuedEntryPublishability(entry);
+		supportedOperationCount += entryPublishability.supportedOperationCount;
+		unsupportedReasons.push(...entryPublishability.unsupportedReasons);
+	}
+
+	const unsupportedOperationCount = unsupportedReasons.length;
+	const status =
+		supportedOperationCount === 0 && unsupportedOperationCount === 0
+			? "clean"
+			: unsupportedOperationCount === 0
+				? "publish-ready"
+				: supportedOperationCount === 0
+					? "draft-only"
+					: "mixed";
+
+	return {
+		status,
+		label: stagedPublishReadinessLabel(status),
+		canRunOwnerWrite: status === "publish-ready",
+		supportedOperationCount,
+		unsupportedOperationCount,
+		reasons: unsupportedReasons.slice(0, 4),
+	};
+}
+
+function queuedEntryPublishability(
+	entry: LevelEditorQueuedAuthoringOperation,
+): {
+	readonly supportedOperationCount: number;
+	readonly unsupportedReasons: readonly string[];
+} {
+	const operationLabel = entry.label ?? entry.id;
+
+	if ((entry.saveOperations?.length ?? 0) > 0) {
+		return classifyQueuedSaveOperations(entry, operationLabel);
+	}
+
+	return classifyQueuedEditOperations(entry, operationLabel);
+}
+
+function classifyQueuedSaveOperations(
+	entry: LevelEditorQueuedAuthoringOperation,
+	operationLabel: string,
+): {
+	readonly supportedOperationCount: number;
+	readonly unsupportedReasons: readonly string[];
+} {
+	let supportedOperationCount = 0;
+	const unsupportedReasons: string[] = [];
+
+	for (const operation of entry.saveOperations ?? []) {
+		if (
+			isPublishableLevelTransformSaveOperation(operation) ||
+			isPublishableLevelInsertionSaveOperation(operation) ||
+			isPublishableLevelPrefabReplacementSaveOperation(operation) ||
+			isPublishableLevelRemovalSaveOperation(operation) ||
+			isPublishableLevelComponentSaveOperation(operation) ||
+			isPublishableLevelComponentRemovalSaveOperation(operation)
+		) {
+			supportedOperationCount += 1;
+			continue;
+		}
+
+		unsupportedReasons.push(
+			`${operationLabel} stages ${operation.kind}; Save Level/Publish currently accepts only level-owned set-transform, insert-level-instance, replace-prefab, remove-level-instance, set-component, and remove-component operations.`,
+		);
+	}
+
+	return { supportedOperationCount, unsupportedReasons };
+}
+
+function classifyQueuedEditOperations(
+	entry: LevelEditorQueuedAuthoringOperation,
+	operationLabel: string,
+): {
+	readonly supportedOperationCount: number;
+	readonly unsupportedReasons: readonly string[];
+} {
+	let supportedOperationCount = 0;
+	const unsupportedReasons: string[] = [];
+
+	for (const operation of entry.operations ?? []) {
+		if (
+			(operation.kind === "set-transform" && !("target" in operation)) ||
+			(operation.kind === "set-transform" && operation.target !== "prefab") ||
+			operation.kind === "insert-instance" ||
+			operation.kind === "replace-prefab" ||
+			operation.kind === "remove-instance" ||
+			(operation.kind === "set-component" &&
+				operation.target === "level-instance") ||
+			(operation.kind === "remove-component" &&
+				operation.target === "level-instance")
+		) {
+			supportedOperationCount += 1;
+			continue;
+		}
+
+		unsupportedReasons.push(
+			`${operationLabel} stages ${operation.kind}; Save Level/Publish currently accepts only level-owned set-transform, insert-level-instance, replace-prefab, remove-level-instance, set-component, and remove-component operations.`,
+		);
+	}
+
+	return { supportedOperationCount, unsupportedReasons };
+}
+
+function isPublishableTransformFieldPath(path: string): boolean {
+	return (
+		path.startsWith("Transform.position.") ||
+		path.startsWith("Transform.scale.") ||
+		path.startsWith("Light.") ||
+		path.startsWith("Portal.") ||
+		path.startsWith("SoundEmitter.")
+	);
+}
+
+function isPublishableLevelTransformSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	const payloadOperation =
+		operation.payload &&
+		typeof operation.payload === "object" &&
+		"operation" in operation.payload &&
+		operation.payload.operation &&
+		typeof operation.payload.operation === "object" &&
+		"kind" in operation.payload.operation
+			? operation.payload.operation
+			: null;
+
+	return (
+		operation.kind === "replace-level-instance" &&
+		operation.ownerKind === "level" &&
+		payloadOperation !== null &&
+		payloadOperation.kind === "set-transform"
+	);
+}
+
+function isPublishableLevelInsertionSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	return (
+		operation.kind === "insert-level-instance" &&
+		operation.ownerKind === "level" &&
+		operation.payload !== null &&
+		typeof operation.payload === "object" &&
+		"instance" in operation.payload
+	);
+}
+
+function isPublishableLevelRemovalSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	const payloadOperation =
+		operation.payload &&
+		typeof operation.payload === "object" &&
+		"operation" in operation.payload &&
+		operation.payload.operation &&
+		typeof operation.payload.operation === "object" &&
+		"kind" in operation.payload.operation
+			? operation.payload.operation
+			: null;
+
+	return (
+		operation.kind === "remove-level-instance" &&
+		operation.ownerKind === "level" &&
+		payloadOperation !== null &&
+		payloadOperation.kind === "remove-instance"
+	);
+}
+
+function isPublishableLevelPrefabReplacementSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	const payloadOperation =
+		operation.payload &&
+		typeof operation.payload === "object" &&
+		"operation" in operation.payload &&
+		operation.payload.operation &&
+		typeof operation.payload.operation === "object" &&
+		"kind" in operation.payload.operation
+			? operation.payload.operation
+			: null;
+
+	return (
+		operation.kind === "replace-level-instance" &&
+		operation.ownerKind === "level" &&
+		payloadOperation !== null &&
+		payloadOperation.kind === "replace-prefab" &&
+		"prefabId" in payloadOperation &&
+		typeof payloadOperation.prefabId === "string"
+	);
+}
+
+function isPublishableLevelComponentSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	const payloadOperation =
+		operation.payload &&
+		typeof operation.payload === "object" &&
+		"operation" in operation.payload &&
+		operation.payload.operation &&
+		typeof operation.payload.operation === "object" &&
+		"kind" in operation.payload.operation
+			? operation.payload.operation
+			: null;
+
+	return (
+		operation.kind === "replace-level-instance" &&
+		operation.ownerKind === "level" &&
+		payloadOperation !== null &&
+		payloadOperation.kind === "set-component" &&
+		"target" in payloadOperation &&
+		payloadOperation.target === "level-instance"
+	);
+}
+
+function isPublishableLevelComponentRemovalSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	const payloadOperation =
+		operation.payload &&
+		typeof operation.payload === "object" &&
+		"operation" in operation.payload &&
+		operation.payload.operation &&
+		typeof operation.payload.operation === "object" &&
+		"kind" in operation.payload.operation
+			? operation.payload.operation
+			: null;
+
+	return (
+		operation.kind === "replace-level-instance" &&
+		operation.ownerKind === "level" &&
+		payloadOperation !== null &&
+		payloadOperation.kind === "remove-component" &&
+		"target" in payloadOperation &&
+		payloadOperation.target === "level-instance"
+	);
+}
+
+function stagedPublishReadinessLabel(
+	status: StagedPublishReadiness["status"],
+): string {
+	switch (status) {
+		case "clean":
+			return "No staged owner writes";
+		case "publish-ready":
+			return "Save Level/Publish ready";
+		case "draft-only":
+			return "Draft-only staged work";
+		case "mixed":
+			return "Mixed publish readiness";
+	}
+}
+
 function stageAuthoringOperationEntry(
 	entry: LevelEditorQueuedAuthoringOperation,
 ): void {
@@ -744,6 +1816,70 @@ function stageAuthoringOperationEntry(
 			(entry.operations?.length ?? 0) + (entry.saveOperations?.length ?? 0)
 		} operations.`,
 	});
+}
+
+function removeQueuedAuthoringOperationEntry(entryId: string): void {
+	const entry = authoringQueue.queuedOperations.find(
+		(candidate) => candidate.id === entryId,
+	);
+	const nextQueue = removeLevelEditorAuthoringOperationEntry(
+		authoringQueue,
+		entryId,
+	);
+
+	if (nextQueue === authoringQueue) {
+		return;
+	}
+
+	authoringQueue = nextQueue;
+	latestTransaction = undefined;
+	appendOutputLog({
+		level: "info",
+		source: "staged-operations",
+		message: `Removed ${entry?.label ?? entryId} from staged operations.`,
+	});
+}
+
+function removeStagedFieldEdit(stableId: string, path: string): void {
+	const edit = stagedFieldEdits.find(
+		(candidate) => candidate.stableId === stableId && candidate.path === path,
+	);
+	const object = workspace.objects.find(
+		(candidate) => candidate.stableId === stableId,
+	);
+	const shouldReconcilePreview =
+		object?.previewTargetKind !== undefined &&
+		liveCoreObjectPreviewStableIds.includes(stableId);
+	const nextQueue = removeLevelEditorStagedFieldEdit(
+		authoringQueue,
+		stableId,
+		path,
+	);
+
+	if (nextQueue === authoringQueue) {
+		return;
+	}
+
+	authoringQueue = nextQueue;
+	latestTransaction = undefined;
+	if (shouldReconcilePreview && object) {
+		reconcileCoreObjectPreviewAfterStagedFieldRemoval(
+			object,
+			nextQueue.stagedFieldEdits,
+		);
+	}
+	appendOutputLog({
+		level: "info",
+		source: "staged-fields",
+		message: `Reverted ${edit?.label ?? path} on ${stableId}.`,
+	});
+}
+
+function stagedFieldObjectLabel(stableId: string): string {
+	return (
+		workspace.objects.find((object) => object.stableId === stableId)?.label ??
+		stableId
+	);
 }
 
 function sendCoreObjectPreview(): void {
@@ -774,6 +1910,7 @@ function sendCoreObjectPreview(): void {
 	});
 
 	sendLevelEditorDevPreviewMessage(channel, message);
+	trackCoreObjectPreview(object.stableId);
 	status = {
 		kind: "sent",
 		label: `Previewed ${object.previewTargetKind} ${object.stableId}`,
@@ -802,9 +1939,95 @@ function clearCoreObjectPreview(): void {
 	});
 
 	sendLevelEditorDevPreviewMessage(channel, message);
+	untrackCoreObjectPreviews([object.stableId]);
 	status = {
 		kind: "sent",
 		label: `Cleared preview for ${object.stableId}`,
+	};
+}
+
+function trackCoreObjectPreview(stableId: string): void {
+	if (liveCoreObjectPreviewStableIds.includes(stableId)) {
+		return;
+	}
+
+	liveCoreObjectPreviewStableIds = [
+		...liveCoreObjectPreviewStableIds,
+		stableId,
+	].sort();
+}
+
+function untrackCoreObjectPreviews(stableIds: readonly string[]): void {
+	if (stableIds.length === 0) {
+		return;
+	}
+
+	const removedIds = new Set(stableIds);
+	liveCoreObjectPreviewStableIds = liveCoreObjectPreviewStableIds.filter(
+		(stableId) => !removedIds.has(stableId),
+	);
+}
+
+function reconcileCoreObjectPreviewAfterStagedFieldRemoval(
+	object: LevelEditorWorkspaceObject,
+	nextStagedFieldEdits: readonly LevelEditorStagedFieldEdit[],
+): void {
+	if (!object.previewTargetKind) {
+		return;
+	}
+
+	if (!channel) {
+		status = {
+			kind: "error",
+			label: "Preview channel unavailable while reconciling reverted edit",
+		};
+		return;
+	}
+
+	const remainingObjectEdits = nextStagedFieldEdits.filter(
+		(edit) => edit.stableId === object.stableId,
+	);
+
+	if (remainingObjectEdits.length === 0) {
+		sendLevelEditorDevPreviewMessage(
+			channel,
+			createCoreObjectPreviewClearRequestMessage({
+				requestId: createRequestId("revert-clear-preview"),
+				runtimeSceneId: workspace.selectedRuntimeSceneId,
+				sourcePlanHash: previewSourceHash(object),
+				stableIds: [object.stableId],
+				targetKinds: [object.previewTargetKind],
+			}),
+		);
+		untrackCoreObjectPreviews([object.stableId]);
+		status = {
+			kind: "sent",
+			label: `Cleared preview after reverting ${object.stableId}`,
+		};
+		return;
+	}
+
+	const patch = {
+		schemaVersion: 1,
+		channel: "level-editor-core-object-preview",
+		mode: "temporary-preview",
+		runtimeSceneId: workspace.selectedRuntimeSceneId,
+		levelId: workspace.selectedLevelId,
+		sourcePlanHash: previewSourceHash(object),
+		entries: [buildCoreObjectPreviewEntry(object, nextStagedFieldEdits)],
+	} as const;
+
+	sendLevelEditorDevPreviewMessage(
+		channel,
+		createCoreObjectPreviewPatchMessage({
+			requestId: createRequestId("revert-refresh-preview"),
+			patch,
+		}),
+	);
+	trackCoreObjectPreview(object.stableId);
+	status = {
+		kind: "sent",
+		label: `Refreshed preview after reverting ${object.stableId}`,
 	};
 }
 
@@ -862,8 +2085,9 @@ function reloadLiveRuntime(): void {
 
 function buildCoreObjectPreviewEntry(
 	object: LevelEditorWorkspaceObject,
+	edits: readonly LevelEditorStagedFieldEdit[] = stagedFieldEdits,
 ): LevelEditorCoreObjectPreviewPatchEntry {
-	const transform = readTransformPatch(object);
+	const transform = readTransformPatch(object, edits);
 
 	switch (object.previewTargetKind) {
 		case "light":
@@ -871,7 +2095,7 @@ function buildCoreObjectPreviewEntry(
 				stableId: object.stableId,
 				targetKind: "light",
 				...(transform === undefined ? {} : { transform }),
-				light: readComponentPatch(object, "Light"),
+				light: readComponentPatch(object, "Light", edits),
 			} as LevelEditorCoreObjectPreviewPatchEntry;
 		case "spawn":
 			return {
@@ -884,28 +2108,31 @@ function buildCoreObjectPreviewEntry(
 				stableId: object.stableId,
 				targetKind: "portal",
 				...(transform === undefined ? {} : { transform }),
-				portal: readComponentPatch(object, "Portal"),
+				portal: readComponentPatch(object, "Portal", edits),
 			} as LevelEditorCoreObjectPreviewPatchEntry;
 		case "audio-emitter":
 			return {
 				stableId: object.stableId,
 				targetKind: "audio-emitter",
 				...(transform === undefined ? {} : { transform }),
-				soundEmitter: readComponentPatch(object, "SoundEmitter"),
+				soundEmitter: readComponentPatch(object, "SoundEmitter", edits),
 			} as LevelEditorCoreObjectPreviewPatchEntry;
 		default:
 			throw new Error("Selected object is not previewable.");
 	}
 }
 
-function readTransformPatch(object: LevelEditorWorkspaceObject):
+function readTransformPatch(
+	object: LevelEditorWorkspaceObject,
+	edits: readonly LevelEditorStagedFieldEdit[] = stagedFieldEdits,
+):
 	| {
 			readonly position?: readonly [number, number, number];
 			readonly scale?: readonly [number, number, number];
 	  }
 	| undefined {
-	const position = readVectorField(object, "Transform.position");
-	const scale = readVectorField(object, "Transform.scale");
+	const position = readVectorField(object, "Transform.position", edits);
+	const scale = readVectorField(object, "Transform.scale", edits);
 	const transform = {
 		...(position === undefined ? {} : { position }),
 		...(scale === undefined ? {} : { scale }),
@@ -917,6 +2144,7 @@ function readTransformPatch(object: LevelEditorWorkspaceObject):
 function readComponentPatch(
 	object: LevelEditorWorkspaceObject,
 	componentName: "Light" | "Portal" | "SoundEmitter",
+	edits: readonly LevelEditorStagedFieldEdit[] = stagedFieldEdits,
 ): Record<string, unknown> {
 	const seedKey =
 		componentName === "SoundEmitter"
@@ -932,7 +2160,7 @@ function readComponentPatch(
 		}
 
 		const property = field.path.slice(componentName.length + 1);
-		component[property] = readFieldValue(object, field);
+		component[property] = readFieldValue(object, field, edits);
 	}
 
 	return component;
@@ -941,6 +2169,7 @@ function readComponentPatch(
 function readVectorField(
 	object: LevelEditorWorkspaceObject,
 	path: "Transform.position" | "Transform.scale",
+	edits: readonly LevelEditorStagedFieldEdit[] = stagedFieldEdits,
 ): readonly [number, number, number] | undefined {
 	const fields = ["x", "y", "z"].map((axis) =>
 		object.fields.find((field) => field.path === `${path}.${axis}`),
@@ -955,32 +2184,16 @@ function readVectorField(
 	);
 
 	return resolvedFields.map((field) =>
-		Number(readFieldValue(object, field)),
+		Number(readFieldValue(object, field, edits)),
 	) as [number, number, number];
 }
 
 function readFieldValue(
 	object: LevelEditorWorkspaceObject,
 	field: LevelEditorWorkspaceField,
+	edits: readonly LevelEditorStagedFieldEdit[] = stagedFieldEdits,
 ): string | number | boolean {
-	const input = document.querySelector<HTMLInputElement>(
-		`[data-editor-inspector-field="${cssEscape(field.path)}"][data-stable-id="${cssEscape(object.stableId)}"]`,
-	);
-
-	if (!input) {
-		return fieldDisplayValue(object, field);
-	}
-
-	if (input.type === "checkbox") {
-		return input.checked;
-	}
-
-	if (field.input === "number") {
-		const value = Number(input.value);
-		return Number.isFinite(value) ? value : Number(field.value) || 0;
-	}
-
-	return input.value;
+	return fieldDisplayValueFromEdits(edits, object, field);
 }
 
 function previewSourceHash(object: LevelEditorWorkspaceObject): string {
@@ -989,10 +2202,6 @@ function previewSourceHash(object: LevelEditorWorkspaceObject): string {
 
 function createRequestId(prefix: string): string {
 	return `${prefix}:${globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36)}`;
-}
-
-function cssEscape(value: string): string {
-	return globalThis.CSS?.escape?.(value) ?? value.replace(/["\\]/g, "\\$&");
 }
 
 function cloneRecord(value: unknown): Record<string, unknown> {
@@ -1170,7 +2379,10 @@ function runtimeLifecycleLabel(): string {
 <section class="editor-command-bar" aria-label="Workspace commands">
 	<div class="editor-dirty-state" data-dirty={hasDirtyState}>
 		<strong>{hasDirtyState ? "Dirty" : "Clean"}</strong>
-		<span>{dirtyCount} staged items / {authoringQueue.operationCount} operations</span>
+		<span>
+			{dirtyCount} staged items / {authoringQueue.operationCount} operations /
+			{stagedPublishReadiness.label}
+		</span>
 	</div>
 	<div class="editor-command-actions">
 		<button type="button" disabled={!authoringQueue.canUndo} onclick={undoStagedEdit}>
@@ -1178,6 +2390,9 @@ function runtimeLifecycleLabel(): string {
 		</button>
 		<button type="button" disabled={!authoringQueue.canRedo} onclick={redoStagedEdit}>
 			Redo
+		</button>
+		<button type="button" disabled={!hasDirtyState} onclick={discardStagedEdits}>
+			Discard Staged
 		</button>
 		{#each workspace.commands as command}
 			<button
@@ -1194,7 +2409,7 @@ function runtimeLifecycleLabel(): string {
 	</div>
 </section>
 
-<section class="editor-workspace-grid" aria-label="Level editor workspace">
+<section class="editor-workbench-main" aria-label="Level editor workbench">
 	<aside class="editor-panel editor-outliner" aria-label="Scene outliner">
 		<header class="editor-panel-header">
 			<h2>Outliner</h2>
@@ -1219,32 +2434,246 @@ function runtimeLifecycleLabel(): string {
 		</div>
 	</aside>
 
-	<section class="editor-panel editor-graph-panel" aria-label="Engine graph">
-		<header class="editor-panel-header">
-			<h2>Engine Map</h2>
-			<span>{workspace.persistence.mode}</span>
-		</header>
-		<div class="editor-engine-graph">
-			{#each workspace.graph.nodes as node}
+	<main class="editor-workbench-center" aria-label="Viewport and selection">
+		<LevelEditorViewportBridgePanel
+			model={viewportBridgeModel}
+			onViewModeChange={selectViewportBridgeViewMode}
+			onOverlayToggle={toggleViewportBridgeOverlay}
+			onSelectObject={selectObject}
+			onTransformNudge={nudgeViewportTransformField}
+			onTransformModeChange={selectViewportTransformMode}
+			onTransformSnapStepChange={selectViewportTransformSnapStep}
+			placementTarget={viewportPlacementTarget}
+			onStagePlacementAtTarget={stageViewportPlacementAtTarget}
+			onDropPlacementEntry={stageDroppedObjectLibraryPlacement}
+		/>
+		<section class="editor-panel editor-live-viewport-actions" aria-label="Live viewport actions">
+			<header class="editor-panel-header">
+				<div>
+					<h2>Live Runtime</h2>
+					<p>{workspace.selectedLevelId} / {workspace.selectedRuntimeSceneId}</p>
+				</div>
+				<span data-telemetry-state={runtimeTelemetryState}>
+					{runtimeTelemetryState}
+				</span>
+			</header>
+			<div class="editor-viewport-status-strip">
+				<span>Runtime {runtimeLifecycleLabel()}</span>
+				<span>Player {formatRuntimePosition()}</span>
+				<span>Input {formatRuntimeInput()}</span>
+			</div>
+			<div class="editor-actions">
 				<button
 					type="button"
-					class:selected-graph-node={node.id === selectedGraphNode || node.selected}
-					class={`editor-graph-node editor-graph-${node.kind} editor-graph-${node.status}`}
-					onclick={() => (selectedGraphNode = node.id)}
+					disabled={!channel || !selectedWorkspaceObject?.previewTargetKind}
+					onclick={sendCoreObjectPreview}
 				>
-					<span>{node.label}</span>
-					{#if node.count !== undefined}
-						<small>{node.count}</small>
-					{/if}
+					Preview Selected
 				</button>
-			{/each}
-		</div>
-		<div class="editor-graph-edges">
-			{#each workspace.graph.edges as edge}
-				<span>{edge.from} -> {edge.to}: {edge.label}</span>
-			{/each}
-		</div>
-	</section>
+				<button
+					type="button"
+					disabled={!channel || !selectedWorkspaceObject?.previewTargetKind}
+					onclick={clearCoreObjectPreview}
+				>
+					Clear Preview
+				</button>
+				<button type="button" disabled={!channel} onclick={reloadLiveRuntime}>
+					Reload Runtime
+				</button>
+			</div>
+		</section>
+
+		{#if selectedObjectFocusGroup}
+			<section
+				class="editor-panel editor-object-focus"
+				aria-label="Selection summary"
+			>
+				<header class="editor-panel-header">
+					<div>
+						<h2>Selection Summary</h2>
+						<p>{workspace.selectedLevelId} / {workspace.selectedRuntimeSceneId}</p>
+					</div>
+					<span>{workspace.objects.length} objects</span>
+				</header>
+				<div
+					class="editor-object-category-rail"
+					role="tablist"
+					aria-label="Object categories"
+				>
+					{#each objectFocusGroups as group}
+						<button
+							type="button"
+							role="tab"
+							aria-selected={group.category === selectedObjectFocusGroup.category}
+							class:selected-category={group.category ===
+								selectedObjectFocusGroup.category}
+							onclick={() => selectObjectGroup(group.category)}
+						>
+							<span>{group.label}</span>
+							<small>{group.objects.length}</small>
+						</button>
+					{/each}
+				</div>
+				<div class="editor-object-focus-grid">
+					<div
+						class="editor-object-map"
+						aria-label={`${selectedObjectFocusGroup.label} spatial layout`}
+						data-object-category={selectedObjectFocusGroup.category}
+					>
+						<div class="editor-object-map-core">
+							<strong>{selectedObjectFocusGroup.label}</strong>
+							<span>{selectedObjectFocusGroup.objects.length} objects</span>
+						</div>
+						{#each selectedObjectFocusGroup.objects as object, index}
+							<button
+								type="button"
+								class:selected-map-object={object.stableId === selectedStableId}
+								style={objectFocusPinStyle(selectedObjectFocusGroup, object)}
+								aria-pressed={object.stableId === selectedStableId}
+								title={`${object.label}: ${objectTargetLabel(object)}`}
+								onclick={() => selectObject(object.stableId)}
+							>
+								<span>{index + 1}</span>
+							</button>
+						{/each}
+					</div>
+					<div class="editor-object-focus-list">
+						{#each selectedObjectFocusGroup.objects as object, index}
+							<button
+								type="button"
+								class:selected-object-row={object.stableId === selectedStableId}
+								aria-pressed={object.stableId === selectedStableId}
+								onclick={() => selectObject(object.stableId)}
+							>
+								<span>{index + 1}. {object.label}</span>
+								<small>
+									{objectTargetLabel(object)} / {objectPositionLabel(object)}
+								</small>
+							</button>
+						{/each}
+					</div>
+					<div class="editor-object-focus-detail">
+						{#if selectedWorkspaceObject}
+							<strong>{selectedWorkspaceObject.label}</strong>
+							<div
+								class="editor-workflow-badges"
+								aria-label="Selected object workflow"
+							>
+								{#each selectedWorkspaceObject.workflow.labels as label}
+									<span>{label}</span>
+								{/each}
+							</div>
+							<dl class="editor-facts editor-facts-compact">
+								<div>
+									<dt>Stable ID</dt>
+									<dd>{selectedWorkspaceObject.stableId}</dd>
+								</div>
+								<div>
+									<dt>Category</dt>
+									<dd>{selectedWorkspaceObject.category}</dd>
+								</div>
+								<div>
+									<dt>Position</dt>
+									<dd>{objectPositionLabel(selectedWorkspaceObject)}</dd>
+								</div>
+								<div>
+									<dt>Reference</dt>
+									<dd>{objectTargetLabel(selectedWorkspaceObject)}</dd>
+								</div>
+								<div>
+									<dt>Save</dt>
+									<dd>
+										{formatWorkflowValue(
+											selectedWorkspaceObject.workflow.publishability,
+										)}
+									</dd>
+								</div>
+							</dl>
+							<p class="editor-note">
+								{objectDescriptor(selectedWorkspaceObject)}
+							</p>
+							<p class="editor-workflow-reason">
+								{selectedWorkspaceObject.workflow.reason}
+							</p>
+							<div class="editor-actions">
+								<button
+									type="button"
+									disabled={!channel || !selectedWorkspaceObject.previewTargetKind}
+									onclick={sendCoreObjectPreview}
+								>
+									Preview Object
+								</button>
+								<button
+									type="button"
+									disabled={!channel || !selectedWorkspaceObject.previewTargetKind}
+									onclick={clearCoreObjectPreview}
+								>
+									Clear Preview
+								</button>
+								<button
+									type="button"
+									disabled={!selectedInstanceDuplicationReadiness.canStage}
+									title={selectedInstanceDuplicationReadiness.reason}
+									data-selected-instance-duplicate-ready={selectedInstanceDuplicationReadiness.canStage}
+									onclick={stageSelectedInstanceDuplicate}
+								>
+									Duplicate
+								</button>
+								<button
+									type="button"
+									disabled={!selectedInstanceRemovalReadiness.canStage}
+									title={selectedInstanceRemovalReadiness.reason}
+									data-selected-instance-removal-ready={selectedInstanceRemovalReadiness.canStage}
+									onclick={stageSelectedInstanceRemoval}
+								>
+									Stage Removal
+								</button>
+							</div>
+							<p class="editor-workflow-reason">
+								{selectedInstanceDuplicationReadiness.reason}
+							</p>
+							<p class="editor-workflow-reason">
+								{selectedInstanceRemovalReadiness.reason}
+							</p>
+						{:else}
+							<strong>Select an object</strong>
+							<p class="editor-note">
+								Choose an object to load its inspector fields and preview controls.
+							</p>
+						{/if}
+					</div>
+				</div>
+			</section>
+		{/if}
+
+		<section class="editor-panel editor-graph-panel" aria-label="Engine graph">
+			<header class="editor-panel-header">
+				<h2>Engine Map</h2>
+				<span>{workspace.persistence.mode}</span>
+			</header>
+			<div class="editor-engine-graph">
+				{#each workspace.graph.nodes as node}
+					<button
+						type="button"
+						class:selected-graph-node={node.id === selectedGraphNode ||
+							node.selected}
+						class={`editor-graph-node editor-graph-${node.kind} editor-graph-${node.status}`}
+						onclick={() => (selectedGraphNode = node.id)}
+					>
+						<span>{node.label}</span>
+						{#if node.count !== undefined}
+							<small>{node.count}</small>
+						{/if}
+					</button>
+				{/each}
+			</div>
+			<div class="editor-graph-edges">
+				{#each workspace.graph.edges as edge}
+					<span>{edge.from} -> {edge.to}: {edge.label}</span>
+				{/each}
+			</div>
+		</section>
+	</main>
 
 	<section class="editor-panel editor-inspector" aria-label="Inspector">
 		{#if selectedWorkspaceObject}
@@ -1273,6 +2702,43 @@ function runtimeLifecycleLabel(): string {
 					<dd>{selectedWorkspaceObject.capabilities.join(", ")}</dd>
 				</div>
 			</dl>
+			<div
+				class="editor-workflow-summary"
+				data-workflow-publishability={selectedWorkspaceObject.workflow.publishability}
+			>
+				<div class="editor-workflow-badges" aria-label="Inspector workflow">
+					{#each selectedWorkspaceObject.workflow.labels as label}
+						<span>{label}</span>
+					{/each}
+				</div>
+				<dl class="editor-facts editor-facts-compact">
+					<div>
+						<dt>Preview</dt>
+						<dd>{formatWorkflowValue(selectedWorkspaceObject.workflow.preview)}</dd>
+					</div>
+					<div>
+						<dt>Storage</dt>
+						<dd>{formatWorkflowValue(selectedWorkspaceObject.workflow.storage)}</dd>
+					</div>
+					<div>
+						<dt>Publish</dt>
+						<dd>
+							{formatWorkflowValue(
+								selectedWorkspaceObject.workflow.publishability,
+							)}
+						</dd>
+					</div>
+					<div>
+						<dt>Owners</dt>
+						<dd>
+							{selectedWorkspaceObject.workflow.featureFamilyIds.join(", ")}
+						</dd>
+					</div>
+				</dl>
+				<p class="editor-workflow-reason">
+					{selectedWorkspaceObject.workflow.reason}
+				</p>
+			</div>
 			<div class="editor-selected-preview">
 				<div
 					class="editor-preview-media"
@@ -1322,8 +2788,9 @@ function runtimeLifecycleLabel(): string {
 					<label
 						class="editor-field"
 						class:dirty-field={isFieldDirty(selectedWorkspaceObject, field)}
+						data-workflow-publishability={field.workflow.publishability}
 					>
-						<span>{field.label}</span>
+						<span class="editor-field-title">{field.label}</span>
 						{#if field.input === "checkbox"}
 							<input
 								type="checkbox"
@@ -1359,6 +2826,16 @@ function runtimeLifecycleLabel(): string {
 								data-stable-id={selectedWorkspaceObject.stableId}
 							/>
 						{/if}
+						<small class="editor-field-meta">
+							{formatWorkflowValue(field.workflow.publishability)} /
+							{formatWorkflowValue(field.workflow.storage)}
+						</small>
+						<div class="editor-workflow-badges" aria-label={`${field.label} workflow`}>
+							{#each field.workflow.labels as label}
+								<span>{label}</span>
+							{/each}
+						</div>
+						<small class="editor-field-reason">{field.workflow.reason}</small>
 					</label>
 				{/each}
 			</div>
@@ -1380,7 +2857,31 @@ function runtimeLifecycleLabel(): string {
 				<button type="button" disabled={!channel} onclick={reloadLiveRuntime}>
 					Reload Runtime
 				</button>
+				<button
+					type="button"
+					disabled={!selectedInstanceDuplicationReadiness.canStage}
+					title={selectedInstanceDuplicationReadiness.reason}
+					data-selected-instance-duplicate-ready={selectedInstanceDuplicationReadiness.canStage}
+					onclick={stageSelectedInstanceDuplicate}
+				>
+					Duplicate
+				</button>
+				<button
+					type="button"
+					disabled={!selectedInstanceRemovalReadiness.canStage}
+					title={selectedInstanceRemovalReadiness.reason}
+					data-selected-instance-removal-ready={selectedInstanceRemovalReadiness.canStage}
+					onclick={stageSelectedInstanceRemoval}
+				>
+				Stage Removal
+				</button>
 			</div>
+			<p class="editor-workflow-reason">
+				{selectedInstanceDuplicationReadiness.reason}
+			</p>
+			<p class="editor-workflow-reason">
+				{selectedInstanceRemovalReadiness.reason}
+			</p>
 			<p class="editor-note">{selectedWorkspaceObject.capabilityReason}</p>
 		{/if}
 	</section>
@@ -1445,8 +2946,10 @@ function runtimeLifecycleLabel(): string {
 	<LevelEditorObjectLibraryPanel
 		model={objectLibraryPanelModel}
 		selectedEntryId={objectLibraryPanelModel.selectedEntryId}
+		onSelectEntry={selectObjectLibraryEntry}
 		onStageReplacement={stageObjectLibraryReplacement}
 		onStageAuthoringOperations={stageAuthoringOperationEntry}
+		onRemoveAuthoringOperations={removeQueuedAuthoringOperationEntry}
 	/>
 	<LevelEditorEnvironmentPanel
 		serializedEnvironmentModel={serializedEnvironmentModel}
@@ -1594,6 +3097,95 @@ function runtimeLifecycleLabel(): string {
 					<span>{error}</span>
 				{/each}
 			</div>
+		{/if}
+	</section>
+	<section
+		class="editor-panel editor-staged-operations"
+		aria-label="Staged operations"
+	>
+		<header class="editor-panel-header">
+			<h2>Staged Operations</h2>
+			<span>{authoringQueue.operationCount}</span>
+		</header>
+		<dl class="editor-facts editor-facts-compact">
+			<div>
+				<dt>Field Edits</dt>
+				<dd>{authoringQueue.stagedFieldEditCount}</dd>
+			</div>
+			<div>
+				<dt>Queued Entries</dt>
+				<dd>{authoringQueue.queuedOperationEntryCount}</dd>
+			</div>
+			<div>
+				<dt>Total Operations</dt>
+				<dd>{authoringQueue.operationCount}</dd>
+			</div>
+			<div>
+				<dt>Owner Write</dt>
+				<dd>{stagedPublishReadiness.label}</dd>
+			</div>
+			<div>
+				<dt>Undo / Redo</dt>
+				<dd>
+					{authoringQueue.canUndo ? "undo" : "locked"} /
+					{authoringQueue.canRedo ? "redo" : "locked"}
+				</dd>
+			</div>
+		</dl>
+		{#if stagedPublishReadiness.reasons.length > 0}
+			<div class="editor-status-list" aria-label="Staged publish readiness">
+				{#each stagedPublishReadiness.reasons as reason}
+					<span>{reason}</span>
+				{/each}
+			</div>
+		{/if}
+		{#if stagedFieldEdits.length > 0}
+			<ol class="editor-staged-operation-list" aria-label="Staged field edits">
+				{#each stagedFieldEdits as edit}
+					<li>
+						<div>
+							<strong>{stagedFieldObjectLabel(edit.stableId)}</strong>
+							<span>{edit.label} / {edit.path}</span>
+						</div>
+						<small>
+							{String(edit.before)} -> {String(edit.after)}
+						</small>
+						<button
+							type="button"
+							onclick={() => removeStagedFieldEdit(edit.stableId, edit.path)}
+						>
+							Revert
+						</button>
+					</li>
+				{/each}
+			</ol>
+		{/if}
+		{#if queuedAuthoringOperationEntries.length > 0}
+			<ol class="editor-staged-operation-list">
+				{#each queuedAuthoringOperationEntries as entry}
+					<li>
+						<div>
+							<strong>{entry.label ?? entry.id}</strong>
+							<span>{entry.id}</span>
+						</div>
+						<small>
+							{entry.operations?.length ?? 0} edit operations /
+							{entry.saveOperations?.length ?? 0} save operations
+						</small>
+						<button
+							type="button"
+							onclick={() => removeQueuedAuthoringOperationEntry(entry.id)}
+						>
+							Remove
+						</button>
+					</li>
+				{/each}
+			</ol>
+		{:else if stagedFieldEdits.length === 0}
+			<p class="editor-status" data-state="ready">
+				No queued object-library, viewport, AI, NPC, environment, or camera
+				operations.
+			</p>
 		{/if}
 	</section>
 	<section class="editor-panel editor-output-log" aria-label="Output log">

@@ -20,6 +20,8 @@ import type { RuntimeSceneManifestData } from "../src/engine/data/index.js";
 import {
 	type LevelEditorAuthoringOperationData,
 	buildLevelEditorAuthoringSaveWritePlan,
+	buildLevelEditorFeatureCoverageRegistry,
+	validateLevelEditorFeatureCoverageRegistry,
 } from "../src/game/editor/authoring/index.js";
 import { defaultRuntimeSceneManifest } from "../src/game/levels/index.js";
 
@@ -102,6 +104,21 @@ assertEqual(
 	false,
 	"Expected valid catalog workspace report not to block publish.",
 );
+assertEqual(
+	workspace.selection.state,
+	"selected-object",
+	"Expected workspace selection summary to resolve the selected stable ID.",
+);
+assertEqual(
+	workspace.selection.selectedStableId,
+	workspace.selectedStableId,
+	"Expected selection summary to mirror the workspace selected stable ID.",
+);
+assertIncludes(
+	workspace.selection.labels,
+	"Selected",
+	"Expected selection summary labels to expose selected state.",
+);
 if (workspace.authoring.saveTarget === null) {
 	throw new Error(
 		"Expected workspace to expose a generated authoring-save target.",
@@ -156,6 +173,11 @@ assertIncludes(
 	"Expected selected workspace to expose the player spawn category.",
 );
 assertIncludes(
+	[...defaultCategories],
+	"portals",
+	"Expected selected workspace to expose portal objects as an outliner category.",
+);
+assertIncludes(
 	registeredDraftWorkspace.sceneTree.map((group) => group.category),
 	"collision",
 	"Expected explicitly selected registered-draft workspace to expose collision objects.",
@@ -164,6 +186,79 @@ assertAtLeast(
 	defaultCategories.size,
 	3,
 	"Expected workspace outliner to be broader than terrain diagnostics.",
+);
+
+const portalGroup = workspace.sceneTree.find(
+	(group) => group.category === "portals",
+);
+
+if (!portalGroup) {
+	throw new Error("Expected default workspace to include a Portals group.");
+}
+
+assertAtLeast(
+	portalGroup.objects.length,
+	1,
+	"Expected default workspace portal group to contain selectable objects.",
+);
+
+const firstPortalObject = portalGroup.objects[0];
+
+if (!firstPortalObject) {
+	throw new Error("Expected a first portal object in the default workspace.");
+}
+
+assertIncludes(
+	firstPortalObject.componentNames,
+	"Portal",
+	"Expected portal category objects to carry the Portal component.",
+);
+assertIncludes(
+	firstPortalObject.fields.map((field) => field.path),
+	"Portal.targetRuntimeSceneId",
+	"Expected portal inspector fields to expose the target runtime scene.",
+);
+assertIncludes(
+	firstPortalObject.capabilities,
+	"editable",
+	"Expected portal category objects to remain editable through the object workflow.",
+);
+assertEqual(
+	firstPortalObject.workflow.publishability,
+	"publishable",
+	"Expected portal objects to expose publishability for transform and level-instance component fields.",
+);
+assertIncludes(
+	firstPortalObject.workflow.labels,
+	"Publishable",
+	"Expected portal workflow labels to expose publishable transform fields.",
+);
+assertIncludes(
+	firstPortalObject.workflow.labels,
+	"Publishable",
+	"Expected portal workflow labels to expose bounded owner-write publishability.",
+);
+
+const firstPortalTransformField = firstPortalObject.fields.find(
+	(field) => field.path === "Transform.position.x",
+);
+const firstPortalTargetField = firstPortalObject.fields.find(
+	(field) => field.path === "Portal.targetRuntimeSceneId",
+);
+
+if (!firstPortalTransformField || !firstPortalTargetField) {
+	throw new Error("Expected portal workflow test fields to be present.");
+}
+
+assertEqual(
+	firstPortalTransformField.workflow.publishability,
+	"publishable",
+	"Expected portal transform fields to be publishable through bounded owner writes.",
+);
+assertEqual(
+	firstPortalTargetField.workflow.publishability,
+	"publishable",
+	"Expected portal target fields to be publishable through bounded level-instance component overrides.",
 );
 
 const allPreviewTargets = new Set(
@@ -208,6 +303,35 @@ assertIncludes(
 	playerObject.fields.map((field) => field.path),
 	"Transform.position.x",
 	"Expected inspector fields to expose transform position editing.",
+);
+assertEqual(
+	playerObject.workflow.selectionState,
+	"selected",
+	"Expected selected object workflow to expose selected state.",
+);
+assertEqual(
+	playerObject.workflow.publishability,
+	"publishable",
+	"Expected selected player transform workflow to be publishable.",
+);
+assertIncludes(
+	playerObject.workflow.labels,
+	"Temporary preview",
+	"Expected selected player workflow to expose temporary preview state.",
+);
+
+const playerPositionWorkflow = playerObject.fields.find(
+	(field) => field.path === "Transform.position.x",
+)?.workflow;
+
+if (!playerPositionWorkflow) {
+	throw new Error("Expected player position workflow metadata.");
+}
+
+assertIncludes(
+	playerPositionWorkflow.labels,
+	"Publishable",
+	"Expected player position field labels to expose publishability.",
 );
 
 const commandById = new Map(
@@ -308,6 +432,21 @@ assertContains(
 	publishCommand.reason,
 	"local validation/build gates",
 	"Expected Publish copy to describe validation/build gating.",
+);
+assertNotContains(
+	publishCommand.reason,
+	"component",
+	"Expected Publish copy not to overclaim broad component owner-write support.",
+);
+assertNotContains(
+	publishCommand.reason,
+	"prefab",
+	"Expected Publish copy not to overclaim prefab owner-write support.",
+);
+assertNotContains(
+	publishCommand.reason,
+	"asset",
+	"Expected Publish copy not to overclaim asset owner-write support.",
 );
 assertEqual(
 	workspace.commandPlans.build.errors.length,
@@ -549,6 +688,239 @@ for (const nodeId of [
 	);
 }
 
+const featureCoverage = buildLevelEditorFeatureCoverageRegistry();
+const featureCoverageErrors =
+	validateLevelEditorFeatureCoverageRegistry(featureCoverage);
+
+assertEqual(
+	featureCoverageErrors.length,
+	0,
+	"Expected level editor feature-family publish coverage to validate.",
+);
+
+const boundedOwnerWriteFamilies = featureCoverage.families.filter(
+	(family) => family.publishStatus === "bounded-owner-write",
+);
+
+assertEqual(
+	boundedOwnerWriteFamilies.length,
+	6,
+	"Expected transform overrides, level-instance duplication/removal/prefab replacement, component edits, and object-library placements to be publishable.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.map((family) => family.id),
+	"level-instance-transform",
+	"Expected level-instance transforms to remain a bounded owner-write family.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-transform",
+	)?.operationKinds ?? [],
+	"set-transform",
+	"Expected the transform family to support set-transform owner writes.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.map((family) => family.id),
+	"level-instance-removal",
+	"Expected level-instance removals to be a bounded owner-write family.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-removal",
+	)?.operationKinds ?? [],
+	"remove-instance",
+	"Expected the level-instance removal family to support remove-instance owner writes.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-removal",
+	)?.operationKinds ?? [],
+	"remove-level-instance",
+	"Expected the level-instance removal family to support persisted remove-level-instance owner writes.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-removal",
+	)?.optionalGeneratedOwnerKinds ?? [],
+	"published-transforms",
+	"Expected level-instance removal publish support to route through the generated level-instance owner.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-removal",
+	)?.ownerTargetIds ?? [],
+	`${workspace.selectedRuntimeSceneId}:level`,
+	"Expected level-instance removal publish support to be backed by the selected level owner target.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.map((family) => family.id),
+	"level-instance-duplication",
+	"Expected level-instance duplication to be a bounded owner-write family.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-duplication",
+	)?.operationKinds ?? [],
+	"insert-instance",
+	"Expected the level-instance duplication family to support insert-instance owner writes.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-duplication",
+	)?.operationKinds ?? [],
+	"insert-level-instance",
+	"Expected the level-instance duplication family to support persisted insert-level-instance owner writes.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-duplication",
+	)?.optionalGeneratedOwnerKinds ?? [],
+	"published-transforms",
+	"Expected duplication publish support to route through the generated level-instance owner.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-duplication",
+	)?.ownerTargetIds ?? [],
+	`${workspace.selectedRuntimeSceneId}:level`,
+	"Expected duplication publish support to be backed by the selected level owner target.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.map((family) => family.id),
+	"level-instance-prefab-replacement",
+	"Expected level-instance prefab replacement to be a bounded owner-write family.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-prefab-replacement",
+	)?.operationKinds ?? [],
+	"replace-prefab",
+	"Expected the level-instance prefab replacement family to support replace-prefab owner writes.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-prefab-replacement",
+	)?.operationKinds ?? [],
+	"replace-level-instance",
+	"Expected the level-instance prefab replacement family to support persisted replace-level-instance owner writes.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-prefab-replacement",
+	)?.optionalGeneratedOwnerKinds ?? [],
+	"published-transforms",
+	"Expected prefab replacement publish support to route through the generated level-instance owner.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-prefab-replacement",
+	)?.ownerTargetIds ?? [],
+	`${workspace.selectedRuntimeSceneId}:level`,
+	"Expected prefab replacement publish support to be backed by the selected level owner target.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.map((family) => family.id),
+	"component-editing",
+	"Expected component editing to be a bounded owner-write family.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find((family) => family.id === "component-editing")
+		?.operationKinds ?? [],
+	"set-component",
+	"Expected the component-editing family to support set-component owner writes.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find((family) => family.id === "component-editing")
+		?.operationKinds ?? [],
+	"remove-component",
+	"Expected the component-editing family to support remove-component owner writes.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find((family) => family.id === "component-editing")
+		?.optionalGeneratedOwnerKinds ?? [],
+	"published-transforms",
+	"Expected component publish support to route through the generated level-instance owner.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find((family) => family.id === "component-editing")
+		?.ownerTargetIds ?? [],
+	`${workspace.selectedRuntimeSceneId}:level`,
+	"Expected component publish support to be backed by the selected level owner target.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.map((family) => family.id),
+	"object-library-placement",
+	"Expected object-library placement to be a bounded owner-write family.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "object-library-placement",
+	)?.operationKinds ?? [],
+	"insert-level-instance",
+	"Expected the placement family to support insert-level-instance owner writes.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies[0]?.optionalGeneratedOwnerKinds ?? [],
+	"published-transforms",
+	"Expected transform publish support to route through the published transform owner.",
+);
+assertIncludes(
+	boundedOwnerWriteFamilies.find(
+		(family) => family.id === "level-instance-transform",
+	)?.ownerTargetIds ?? [],
+	`${workspace.selectedRuntimeSceneId}:level`,
+	"Expected transform publish support to be backed by the selected level owner target.",
+);
+
+for (const familyId of [
+	"object-library-replacement",
+	"portal-interaction-targets",
+	"environment-render-profile",
+	"authored-lighting",
+	"audio-authoring",
+	"npc-firefly-authoring",
+	"ai-generated-assets",
+] as const) {
+	const family = featureCoverage.families.find((item) => item.id === familyId);
+
+	if (!family) {
+		throw new Error(`Expected feature-family coverage for ${familyId}.`);
+	}
+	assertEqual(
+		family.publishStatus,
+		"registered-owner-draft-only",
+		`Expected ${familyId} to remain draft-only until a runtime owner writer exists.`,
+	);
+	assertEqual(
+		family.storagePolicy,
+		"save-draft-only-non-runtime",
+		`Expected ${familyId} not to persist editor-only data as runtime support.`,
+	);
+	assertAtLeast(
+		family.ownerTargetIds.length,
+		1,
+		`Expected ${familyId} to name future owner targets without claiming publish support.`,
+	);
+}
+
+for (const familyId of ["terrain-packages", "collision-authoring"] as const) {
+	const family = featureCoverage.families.find((item) => item.id === familyId);
+
+	if (!family) {
+		throw new Error(`Expected feature-family coverage for ${familyId}.`);
+	}
+	assertEqual(
+		family.publishStatus,
+		"cook-contract",
+		`Expected ${familyId} to remain behind cook-contract publish semantics.`,
+	);
+	assertEqual(
+		family.storagePolicy,
+		"cook-generated-owner",
+		`Expected ${familyId} to publish through generated cook owners, not generic Publish Level.`,
+	);
+}
+
 const terrainObjects = registeredDraftWorkspace.objects.filter(
 	(object) => object.category === "terrain",
 );
@@ -559,7 +931,39 @@ for (const terrainObject of terrainObjects) {
 		"bake-only",
 		"Expected terrain objects to remain bake-only in the workspace model.",
 	);
+	assertEqual(
+		terrainObject.workflow.publishability,
+		"cook-contract",
+		"Expected terrain workflow to expose cook/bake publishability.",
+	);
+	assertIncludes(
+		terrainObject.workflow.labels,
+		"Cook/bake publish",
+		"Expected terrain workflow labels to expose cook/bake publish.",
+	);
 }
+
+const missingSelectionWorkspace = buildLevelEditorWorkspaceModel({
+	selectedStableId: "workspace-contract:missing-selection",
+});
+
+assertEqual(
+	missingSelectionWorkspace.selection.state,
+	"missing-selection",
+	"Expected missing selected stable IDs to be explicit in the workspace model.",
+);
+assertIncludes(
+	missingSelectionWorkspace.selection.labels,
+	"Missing selection",
+	"Expected missing selection labels to be user-facing.",
+);
+assertEqual(
+	missingSelectionWorkspace.objects.some(
+		(object) => object.workflow.selectionState === "selected",
+	),
+	false,
+	"Expected missing selection state not to mark an unrelated object selected.",
+);
 
 assertIncludes(
 	workspace.validationReport.items
@@ -674,6 +1078,16 @@ function assertContains(
 ): void {
 	if (!actual.includes(expected)) {
 		throw new Error(`${message} Missing ${expected}.`);
+	}
+}
+
+function assertNotContains(
+	actual: string,
+	forbidden: string,
+	message: string,
+): void {
+	if (actual.toLowerCase().includes(forbidden.toLowerCase())) {
+		throw new Error(`${message} Forbidden ${forbidden}.`);
 	}
 }
 

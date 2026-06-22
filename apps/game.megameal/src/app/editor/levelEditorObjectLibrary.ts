@@ -1,12 +1,17 @@
 import {
 	type LevelEditorObjectEditPreviewPatchMessage,
+	type LevelPrefabInstanceData,
 	createObjectEditPreviewPatchMessage,
 } from "../../engine/data/index.js";
 import type { AssetManifestEntryData } from "../../engine/data/index.js";
+import type { LevelEditorAuthoringEditOperation } from "../../engine/data/levelAuthoring/index.js";
+import type { LevelEditorAuthoringOperationData } from "../../game/editor/authoring/saveTransaction.js";
 import {
 	type EditorObjectLibraryCatalog,
 	type EditorObjectLibraryEntry,
 	type EditorObjectLibraryGroup,
+	type EditorObjectLibraryPlacementDraft,
+	type EditorObjectLibraryPlacementReadiness,
 	type EditorObjectLibraryPreviewKind,
 	type EditorObjectLibraryReplacementDraft,
 	type EditorObjectLibraryReplacementSubject,
@@ -40,6 +45,11 @@ export type LevelEditorObjectLibraryPreviewModel = {
 		| "no-preview";
 };
 
+export type LevelEditorObjectLibraryPlacementReadinessModel =
+	EditorObjectLibraryPlacementReadiness & {
+		readonly placementDraft: EditorObjectLibraryPlacementDraft | null;
+	};
+
 export type LevelEditorObjectLibraryPanelEntry = {
 	readonly entry: EditorObjectLibraryEntry;
 	readonly id: string;
@@ -49,9 +59,21 @@ export type LevelEditorObjectLibraryPanelEntry = {
 	readonly tags: readonly string[];
 	readonly runtimeSceneIds: readonly string[];
 	readonly preview: LevelEditorObjectLibraryPreviewModel;
+	readonly placementReadiness: LevelEditorObjectLibraryPlacementReadinessModel;
+	readonly canStagePlacementDraft: boolean;
+	readonly canPublishPlacement: boolean;
 	readonly replacementDraft: EditorObjectLibraryReplacementDraft | null;
 	readonly unavailableReason: string | null;
 	readonly canReplaceSelectedObject: boolean;
+};
+
+export type LevelEditorObjectLibraryStagedPlacement = {
+	readonly id: string;
+	readonly stableId: string;
+	readonly label: string;
+	readonly draft: EditorObjectLibraryPlacementDraft;
+	readonly operation: LevelEditorAuthoringEditOperation;
+	readonly saveOperation: LevelEditorAuthoringOperationData;
 };
 
 export type LevelEditorObjectLibraryPanelGroup = Omit<
@@ -73,11 +95,18 @@ export type LevelEditorObjectLibraryPanelModel = {
 	readonly replacementDraft: EditorObjectLibraryReplacementDraft | null;
 	readonly summary: {
 		readonly entryCount: number;
+		readonly placeableDraftEntryCount: number;
+		readonly publishablePlacementEntryCount: number;
 		readonly replaceableEntryCount: number;
 		readonly stagedWritesFiles: false;
 		readonly replacementMode: "preview-only";
 	};
 };
+
+export type LevelEditorObjectLibraryPlacementSource =
+	| "object-library-panel"
+	| "viewport-placement-target"
+	| "viewport-drop";
 
 export function buildLevelEditorObjectLibraryPanelModel(options: {
 	readonly runtimeSceneId: string;
@@ -133,12 +162,73 @@ export function buildLevelEditorObjectLibraryPanelModel(options: {
 		replacementDraft: selectedEntry?.replacementDraft ?? null,
 		summary: {
 			entryCount: entries.length,
+			placeableDraftEntryCount: entries.filter(
+				(entry) => entry.canStagePlacementDraft,
+			).length,
+			publishablePlacementEntryCount: entries.filter(
+				(entry) => entry.canPublishPlacement,
+			).length,
 			replaceableEntryCount: entries.filter(
 				(entry) => entry.canReplaceSelectedObject,
 			).length,
 			stagedWritesFiles: false,
 			replacementMode: "preview-only",
 		},
+	};
+}
+
+export function createObjectLibraryStagedPlacement(options: {
+	readonly runtimeSceneId: string;
+	readonly entry: LevelEditorObjectLibraryPanelEntry;
+	readonly draft: EditorObjectLibraryPlacementDraft;
+	readonly index: number;
+	readonly source: LevelEditorObjectLibraryPlacementSource;
+	readonly transform?: EditorObjectLibraryPlacementDraft["transform"];
+}): LevelEditorObjectLibraryStagedPlacement {
+	const stableId = stableIdForPlacementDraft(options.draft, options.index);
+	const transform = options.transform ?? options.draft.transform;
+	const instance = {
+		id: stableId,
+		stableId,
+		prefabId: options.draft.prefabId,
+		components: options.draft.componentOverrides,
+		transform,
+	} satisfies LevelPrefabInstanceData;
+	const note =
+		options.source === "viewport-placement-target"
+			? "Object library placement draft staged from the viewport placement target."
+			: options.source === "viewport-drop"
+				? "Object library placement draft staged from a viewport drop point."
+				: "Object library placement draft staged from the editor panel.";
+	const operation = {
+		id: `object-library-placement:${options.runtimeSceneId}:${stableId}`,
+		kind: "insert-instance",
+		persistence: "saved",
+		instance,
+		note,
+	} satisfies LevelEditorAuthoringEditOperation;
+	const saveOperation = {
+		kind: "insert-level-instance",
+		ownerKind: "level",
+		ownerTargetId: `${options.runtimeSceneId}:level`,
+		subjectId: stableId,
+		payload: {
+			sourceOperationKind: options.draft.operation,
+			entryId: options.entry.id,
+			sourceOwner: options.entry.sourceOwner,
+			placementDraft: options.draft,
+			placementSource: options.source,
+			instance,
+		},
+	} satisfies LevelEditorAuthoringOperationData;
+
+	return {
+		id: `${options.entry.id}:${stableId}`,
+		stableId,
+		label: options.entry.label,
+		draft: options.draft,
+		operation,
+		saveOperation,
 	};
 }
 
@@ -178,6 +268,19 @@ export function objectLibrarySubjectFromSelection(options: {
 	};
 }
 
+function stableIdForPlacementDraft(
+	draft: EditorObjectLibraryPlacementDraft,
+	index: number,
+): string {
+	const slug = `draft-${index}`;
+
+	return draft.stableIdPattern
+		.replace("{prefabId}", draft.prefabId)
+		.replace("{slug}", slug)
+		.replace(/[^a-zA-Z0-9:_-]+/g, "-")
+		.replace(/-+/g, "-");
+}
+
 function panelEntryForObjectLibraryEntry(options: {
 	readonly entry: EditorObjectLibraryEntry;
 	readonly runtimeSceneId: string;
@@ -212,6 +315,13 @@ function panelEntryForObjectLibraryEntry(options: {
 		tags: options.entry.tags,
 		runtimeSceneIds: options.entry.runtimeSceneIds,
 		preview: previewModelForEntry(options.entry, options.assetsById),
+		placementReadiness: {
+			...options.entry.placementReadiness,
+			placementDraft: options.entry.placement ?? null,
+		},
+		canStagePlacementDraft:
+			options.entry.placementReadiness.canStagePlacementDraft,
+		canPublishPlacement: options.entry.placementReadiness.canPublishPlacement,
 		replacementDraft,
 		unavailableReason,
 		canReplaceSelectedObject: replacementDraft !== null,

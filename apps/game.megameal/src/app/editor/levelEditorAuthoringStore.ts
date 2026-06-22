@@ -81,6 +81,21 @@ export function stageLevelEditorFieldEdit(
 	});
 }
 
+export function removeLevelEditorStagedFieldEdit(
+	state: LevelEditorAuthoringQueueState,
+	stableId: string,
+	path: string,
+): LevelEditorAuthoringQueueState {
+	const key = fieldEditKey(stableId, path);
+
+	return commitQueueSnapshot(state, {
+		stagedFieldEdits: state.stagedFieldEdits.filter(
+			(edit) => fieldEditKey(edit.stableId, edit.path) !== key,
+		),
+		queuedOperations: state.queuedOperations,
+	});
+}
+
 export function stageLevelEditorAuthoringOperations(
 	state: LevelEditorAuthoringQueueState,
 	input: LevelEditorAuthoringOperationInput,

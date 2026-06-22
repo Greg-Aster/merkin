@@ -35,6 +35,24 @@ export type EditorObjectLibraryPlacementDraft = {
 	readonly requiresAuthoringTransaction: true;
 };
 
+export type EditorObjectLibraryPlacementReadinessStatus =
+	| "draft-ready"
+	| "publish-ready"
+	| "replacement-only"
+	| "blocked";
+
+export type EditorObjectLibraryPlacementReadiness = {
+	readonly schemaVersion: 1;
+	readonly contract: "ManifestBackedObjectPlacementReadiness";
+	readonly status: EditorObjectLibraryPlacementReadinessStatus;
+	readonly canStagePlacementDraft: boolean;
+	readonly canPublishPlacement: boolean;
+	readonly writesFiles: boolean;
+	readonly requiresAuthoringTransaction: boolean;
+	readonly requiredOwnerKinds: readonly ("level" | "prefab")[];
+	readonly reasons: readonly string[];
+};
+
 export type EditorObjectLibraryReplacementSubject = {
 	readonly stableId: string;
 	readonly label: string;
@@ -126,6 +144,7 @@ export type EditorObjectLibraryEntry = {
 	readonly assetIds?: readonly string[];
 	readonly componentNames?: readonly string[];
 	readonly placement?: EditorObjectLibraryPlacementDraft;
+	readonly placementReadiness: EditorObjectLibraryPlacementReadiness;
 };
 
 export type EditorObjectLibraryGroup = {
@@ -171,6 +190,13 @@ const groupLabels: Record<string, string> = {
 	"prefabs:spawn": "Spawn And Player",
 	"prefabs:terrain": "Terrain",
 };
+const placementReadinessStatuses =
+	new Set<EditorObjectLibraryPlacementReadinessStatus>([
+		"draft-ready",
+		"publish-ready",
+		"replacement-only",
+		"blocked",
+	]);
 
 export function buildManifestBackedObjectLibrary(
 	manifests: readonly RuntimeSceneManifestData[] = defaultRuntimeSceneManifests,
@@ -275,6 +301,8 @@ export function validateObjectLibraryCatalog(
 					`objectLibrary prefab entry "${entry.id}" must expose an editor placement draft.`,
 				);
 			}
+
+			validatePlacementReadiness(entry, errors);
 		}
 	}
 
@@ -696,6 +724,7 @@ function prefabLibraryEntry(
 			writesFiles: false,
 			requiresAuthoringTransaction: true,
 		},
+		placementReadiness: prefabPlacementReadiness(),
 	};
 }
 
@@ -718,7 +747,98 @@ function assetLibraryEntry(
 		},
 		assetKind: asset.kind,
 		assetId: asset.id,
+		placementReadiness: assetPlacementReadiness(),
 	};
+}
+
+function prefabPlacementReadiness(): EditorObjectLibraryPlacementReadiness {
+	return {
+		schemaVersion: 1,
+		contract: "ManifestBackedObjectPlacementReadiness",
+		status: "publish-ready",
+		canStagePlacementDraft: true,
+		canPublishPlacement: true,
+		writesFiles: true,
+		requiresAuthoringTransaction: true,
+		requiredOwnerKinds: ["level", "prefab"],
+		reasons: [
+			"Prefab is declared by the selected runtime scene manifest and can be staged through a generated level insertion owner.",
+			"Save Level/Publish writes bounded generated runtime placement data after validation.",
+		],
+	};
+}
+
+function assetPlacementReadiness(): EditorObjectLibraryPlacementReadiness {
+	return {
+		schemaVersion: 1,
+		contract: "ManifestBackedObjectPlacementReadiness",
+		status: "replacement-only",
+		canStagePlacementDraft: false,
+		canPublishPlacement: false,
+		writesFiles: false,
+		requiresAuthoringTransaction: false,
+		requiredOwnerKinds: [],
+		reasons: [
+			"Asset entries are manifest-backed replacement sources; placement requires a prefab entry.",
+		],
+	};
+}
+
+function validatePlacementReadiness(
+	entry: EditorObjectLibraryEntry,
+	errors: string[],
+): void {
+	const readiness = entry.placementReadiness;
+
+	if (readiness.schemaVersion !== 1) {
+		errors.push(
+			`objectLibrary entry "${entry.id}" placementReadiness.schemaVersion must be 1.`,
+		);
+	}
+
+	if (readiness.contract !== "ManifestBackedObjectPlacementReadiness") {
+		errors.push(
+			`objectLibrary entry "${entry.id}" placementReadiness.contract must be ManifestBackedObjectPlacementReadiness.`,
+		);
+	}
+
+	if (!placementReadinessStatuses.has(readiness.status)) {
+		errors.push(
+			`objectLibrary entry "${entry.id}" placementReadiness.status is invalid.`,
+		);
+	}
+
+	if (readiness.reasons.length === 0) {
+		errors.push(
+			`objectLibrary entry "${entry.id}" placementReadiness.reasons must describe the placement state.`,
+		);
+	}
+
+	if (
+		entry.kind === "prefab" &&
+		(readiness.status !== "publish-ready" ||
+			readiness.canStagePlacementDraft !== true ||
+			readiness.canPublishPlacement !== true ||
+			readiness.writesFiles !== true ||
+			readiness.requiresAuthoringTransaction !== true)
+	) {
+		errors.push(
+			`objectLibrary prefab entry "${entry.id}" placement readiness must be publish-ready through an authoring transaction.`,
+		);
+	}
+
+	if (
+		entry.kind === "asset" &&
+		(readiness.status !== "replacement-only" ||
+			readiness.canStagePlacementDraft !== false ||
+			readiness.canPublishPlacement !== false ||
+			readiness.writesFiles !== false ||
+			readiness.requiresAuthoringTransaction !== false)
+	) {
+		errors.push(
+			`objectLibrary asset entry "${entry.id}" placement readiness must be replacement-only.`,
+		);
+	}
 }
 
 function prefabGroupId(prefab: PrefabData): string {

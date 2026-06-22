@@ -16,8 +16,12 @@ import {
 import { parseAudioContentManifest } from "../../engine/modules/audio/index.js";
 import { audioContentManifestForRuntimeScene } from "../../game/assets/index.js";
 import {
+	type LevelEditorFeatureFamilyCoverage,
+	type LevelEditorFeatureFamilyPublishStatus,
+	type LevelEditorFeatureFamilyStoragePolicy,
 	type LevelEditorOwnerRegistry,
 	type LevelEditorOwnerTarget,
+	buildLevelEditorFeatureCoverageRegistry,
 	buildLevelEditorOwnerRegistry,
 } from "../../game/editor/authoring/ownerRegistry.js";
 import {
@@ -53,6 +57,34 @@ export type LevelEditorWorkspacePreviewTargetKind =
 	| "portal"
 	| "audio-emitter";
 
+export type LevelEditorWorkspaceWorkflowPreview =
+	| "temporary-preview"
+	| "cook-preview"
+	| "none";
+
+export type LevelEditorWorkspaceWorkflowPublishability =
+	| "publishable"
+	| "draft-only"
+	| "cook-contract"
+	| "preview-only"
+	| "read-only"
+	| "unsupported"
+	| "mixed";
+
+export type LevelEditorWorkspaceWorkflowStorage =
+	| LevelEditorFeatureFamilyStoragePolicy
+	| "mixed";
+
+export type LevelEditorWorkspaceFieldWorkflow = {
+	readonly editability: "editable" | "read-only";
+	readonly preview: LevelEditorWorkspaceWorkflowPreview;
+	readonly storage: LevelEditorWorkspaceWorkflowStorage;
+	readonly publishability: LevelEditorWorkspaceWorkflowPublishability;
+	readonly labels: readonly string[];
+	readonly reason: string;
+	readonly featureFamilyIds: readonly string[];
+};
+
 export type LevelEditorWorkspaceField = {
 	readonly path: string;
 	readonly label: string;
@@ -61,6 +93,18 @@ export type LevelEditorWorkspaceField = {
 	readonly step?: string;
 	readonly min?: string;
 	readonly readOnly: boolean;
+	readonly workflow: LevelEditorWorkspaceFieldWorkflow;
+};
+
+export type LevelEditorWorkspaceObjectWorkflow = {
+	readonly selectionState: "selected" | "available";
+	readonly editability: "editable" | "read-only";
+	readonly preview: LevelEditorWorkspaceWorkflowPreview;
+	readonly storage: LevelEditorWorkspaceWorkflowStorage;
+	readonly publishability: LevelEditorWorkspaceWorkflowPublishability;
+	readonly labels: readonly string[];
+	readonly reason: string;
+	readonly featureFamilyIds: readonly string[];
 };
 
 export type LevelEditorWorkspaceObject = {
@@ -75,6 +119,7 @@ export type LevelEditorWorkspaceObject = {
 	readonly capabilities: readonly LevelEditorWorkspaceCapability[];
 	readonly capabilityReason: string;
 	readonly fields: readonly LevelEditorWorkspaceField[];
+	readonly workflow: LevelEditorWorkspaceObjectWorkflow;
 	readonly preview: LevelEditorWorkspaceSelectedObjectPreview;
 	readonly previewTargetKind?: LevelEditorWorkspacePreviewTargetKind;
 	readonly previewSeed?: Record<string, unknown>;
@@ -262,11 +307,23 @@ export type LevelEditorWorkspaceCommandPlan = {
 	readonly errors: readonly string[];
 };
 
+export type LevelEditorWorkspaceSelectionSummary = {
+	readonly selectedStableId: string | null;
+	readonly selectedObjectId: string | null;
+	readonly selectedLabel: string | null;
+	readonly selectedCategory: LevelEditorWorkspaceCategory | null;
+	readonly state: "selected-object" | "missing-selection" | "empty-scene";
+	readonly labels: readonly string[];
+	readonly inspectorTitle: string;
+	readonly inspectorSubtitle: string;
+};
+
 export type LevelEditorWorkspaceModel = {
 	readonly schemaVersion: 1;
 	readonly selectedRuntimeSceneId: string;
 	readonly selectedLevelId: string;
 	readonly selectedStableId: string | null;
+	readonly selection: LevelEditorWorkspaceSelectionSummary;
 	readonly levelBrowser: readonly LevelEditorWorkspaceLevelItem[];
 	readonly sceneTree: readonly LevelEditorWorkspaceTreeGroup[];
 	readonly objects: readonly LevelEditorWorkspaceObject[];
@@ -310,6 +367,15 @@ const categoryLabels: Record<LevelEditorWorkspaceCategory, string> = {
 	props: "Props",
 };
 
+type LevelEditorWorkspaceObjectWithoutWorkflow = Omit<
+	LevelEditorWorkspaceObject,
+	"workflow"
+>;
+type LevelEditorWorkspaceFieldWithoutWorkflow = Omit<
+	LevelEditorWorkspaceField,
+	"workflow"
+>;
+
 export function buildLevelEditorWorkspaceModel(
 	options: {
 		readonly selectedRuntimeSceneId?: string;
@@ -320,12 +386,17 @@ export function buildLevelEditorWorkspaceModel(
 		getRuntimeSceneManifest(
 			options.selectedRuntimeSceneId ?? defaultRuntimeSceneManifest.id,
 		) ?? defaultRuntimeSceneManifest;
-	const objects = buildWorkspaceObjects(selectedManifest);
+	const featureFamiliesById = buildFeatureFamiliesById();
+	const objectBases = buildWorkspaceObjects(
+		selectedManifest,
+		featureFamiliesById,
+	);
 	const selectedStableId =
 		options.selectedStableId ??
 		selectedManifest.readiness.playerStableId ??
-		objects[0]?.stableId ??
+		objectBases[0]?.stableId ??
 		null;
+	const objects = applyObjectWorkflowSelection(objectBases, selectedStableId);
 	const authoring = buildWorkspaceAuthoringState(selectedManifest);
 	const commandPlans = buildWorkspaceCommandPlans(selectedManifest);
 	const validationReport = buildLevelEditorValidationReport({
@@ -340,6 +411,7 @@ export function buildLevelEditorWorkspaceModel(
 		selectedRuntimeSceneId: selectedManifest.id,
 		selectedLevelId: selectedManifest.level.id,
 		selectedStableId,
+		selection: buildSelectionSummary(objects, selectedStableId),
 		levelBrowser: defaultRuntimeSceneManifests.map(levelBrowserItem),
 		sceneTree: buildSceneTree(objects),
 		objects,
@@ -386,7 +458,8 @@ function levelBrowserItem(
 
 function buildWorkspaceObjects(
 	manifest: RuntimeSceneManifestData,
-): readonly LevelEditorWorkspaceObject[] {
+	featureFamiliesById: ReadonlyMap<string, LevelEditorFeatureFamilyCoverage>,
+): readonly LevelEditorWorkspaceObjectWithoutWorkflow[] {
 	const assetsById = new Map(
 		manifest.assets.assets.map((asset) => [asset.id, asset]),
 	);
@@ -426,7 +499,11 @@ function buildWorkspaceObjects(
 			componentNames,
 			capabilities,
 			capabilityReason: capabilityReason(category),
-			fields: inspectorFieldsForObject(category, components),
+			fields: inspectorFieldsForObject(
+				category,
+				components,
+				featureFamiliesById,
+			),
 			preview: selectedObjectPreview({
 				label,
 				stableId: instance.stableId,
@@ -443,6 +520,81 @@ function buildWorkspaceObjects(
 					}),
 		};
 	});
+}
+
+function buildFeatureFamiliesById(): ReadonlyMap<
+	string,
+	LevelEditorFeatureFamilyCoverage
+> {
+	const ownerRegistry = buildLevelEditorOwnerRegistry();
+	const featureCoverage =
+		buildLevelEditorFeatureCoverageRegistry(ownerRegistry);
+
+	return new Map(featureCoverage.families.map((family) => [family.id, family]));
+}
+
+function applyObjectWorkflowSelection(
+	objects: readonly LevelEditorWorkspaceObjectWithoutWorkflow[],
+	selectedStableId: string | null,
+): readonly LevelEditorWorkspaceObject[] {
+	return objects.map((object) => ({
+		...object,
+		workflow: objectWorkflowForFields({
+			category: object.category,
+			fields: object.fields,
+			selected: object.stableId === selectedStableId,
+		}),
+	}));
+}
+
+function buildSelectionSummary(
+	objects: readonly LevelEditorWorkspaceObject[],
+	selectedStableId: string | null,
+): LevelEditorWorkspaceSelectionSummary {
+	const selectedObject =
+		selectedStableId === null
+			? undefined
+			: objects.find((object) => object.stableId === selectedStableId);
+
+	if (selectedObject) {
+		return {
+			selectedStableId,
+			selectedObjectId: selectedObject.id,
+			selectedLabel: selectedObject.label,
+			selectedCategory: selectedObject.category,
+			state: "selected-object",
+			labels: selectedObject.workflow.labels,
+			inspectorTitle: selectedObject.label,
+			inspectorSubtitle: `${categoryLabels[selectedObject.category]} / ${selectedObject.stableId}`,
+		};
+	}
+
+	if (objects.length === 0) {
+		return {
+			selectedStableId: null,
+			selectedObjectId: null,
+			selectedLabel: null,
+			selectedCategory: null,
+			state: "empty-scene",
+			labels: ["No selection"],
+			inspectorTitle: "No selectable objects",
+			inspectorSubtitle: "The selected runtime scene has no level instances.",
+		};
+	}
+
+	return {
+		selectedStableId,
+		selectedObjectId: null,
+		selectedLabel: null,
+		selectedCategory: null,
+		state: "missing-selection",
+		labels: ["Missing selection"],
+		inspectorTitle: "Selection unavailable",
+		inspectorSubtitle:
+			selectedStableId === null
+				? "Select a manifest-owned object to inspect it."
+				: `Stable ID ${selectedStableId} is not present in this runtime scene.`,
+	};
 }
 
 function buildSceneTree(
@@ -956,6 +1108,86 @@ function capabilityReason(category: LevelEditorWorkspaceCategory): string {
 	}
 }
 
+function objectWorkflowForFields(options: {
+	readonly category: LevelEditorWorkspaceCategory;
+	readonly fields: readonly LevelEditorWorkspaceField[];
+	readonly selected: boolean;
+}): LevelEditorWorkspaceObjectWorkflow {
+	const fieldWorkflows = options.fields.map((field) => field.workflow);
+	const editability = fieldWorkflows.some(
+		(workflow) => workflow.editability === "editable",
+	)
+		? "editable"
+		: "read-only";
+	const preview = collapsePreviewModes(
+		fieldWorkflows.map((workflow) => workflow.preview),
+	);
+	const storage = collapseStoragePolicies(
+		fieldWorkflows.map((workflow) => workflow.storage),
+	);
+	const publishability = collapsePublishabilities(
+		fieldWorkflows.map((workflow) => workflow.publishability),
+	);
+	const labels = uniqueStrings([
+		options.selected ? "Selected" : "Available",
+		...workflowLabels({
+			editability,
+			preview,
+			publishability,
+		}),
+		...fieldWorkflows.flatMap((workflow) =>
+			workflow.labels.filter(
+				(label) =>
+					label === "Publishable" ||
+					label === "Draft-only" ||
+					label === "Cook/bake publish",
+			),
+		),
+	]);
+
+	return {
+		selectionState: options.selected ? "selected" : "available",
+		editability,
+		preview,
+		storage,
+		publishability,
+		labels,
+		reason: objectWorkflowReason({
+			category: options.category,
+			publishability,
+			storage,
+		}),
+		featureFamilyIds: uniqueStrings(
+			fieldWorkflows.flatMap((workflow) => workflow.featureFamilyIds),
+		),
+	};
+}
+
+function objectWorkflowReason(options: {
+	readonly category: LevelEditorWorkspaceCategory;
+	readonly publishability: LevelEditorWorkspaceWorkflowPublishability;
+	readonly storage: LevelEditorWorkspaceWorkflowStorage;
+}): string {
+	switch (options.publishability) {
+		case "publishable":
+			return "selected inspector fields can publish through bounded runtime owner writes";
+		case "draft-only":
+			return "selected inspector fields save to editor authoring drafts until a runtime owner writer exists";
+		case "cook-contract":
+			return `${categoryLabels[options.category]} changes publish through explicit cook/bake contract tooling`;
+		case "mixed":
+			return "selected object has both publishable owner-write fields and draft-only component fields";
+		case "preview-only":
+			return "selected object can be previewed in dev mode but has no durable save owner";
+		case "unsupported":
+			return "selected object is blocked from publish until an owner contract exists";
+		case "read-only":
+			return options.storage === "read-only-no-save"
+				? "selected object is inspect-only in the current workspace model"
+				: "selected object is not publishable in the current workspace model";
+	}
+}
+
 function objectLabel(
 	instance: LevelPrefabInstanceData,
 	components: Record<string, unknown>,
@@ -973,8 +1205,9 @@ function objectLabel(
 function inspectorFieldsForObject(
 	category: LevelEditorWorkspaceCategory,
 	components: Record<string, unknown>,
+	featureFamiliesById: ReadonlyMap<string, LevelEditorFeatureFamilyCoverage>,
 ): readonly LevelEditorWorkspaceField[] {
-	const fields: LevelEditorWorkspaceField[] = [];
+	const fields: LevelEditorWorkspaceFieldWithoutWorkflow[] = [];
 	const transform = asRecord(components.Transform);
 
 	if (
@@ -1093,7 +1326,9 @@ function inspectorFieldsForObject(
 	}
 
 	if (fields.length > 0) {
-		return fields;
+		return fields.map((field) =>
+			fieldWithWorkflow({ category, field, featureFamiliesById }),
+		);
 	}
 
 	return Object.keys(components)
@@ -1102,9 +1337,251 @@ function inspectorFieldsForObject(
 			path: componentName,
 			label: componentName,
 			value: "read-only component",
-			input: "text",
+			input: "text" as const,
 			readOnly: true,
-		}));
+		}))
+		.map((field) =>
+			fieldWithWorkflow({ category, field, featureFamiliesById }),
+		);
+}
+
+function fieldWithWorkflow(options: {
+	readonly category: LevelEditorWorkspaceCategory;
+	readonly field: LevelEditorWorkspaceFieldWithoutWorkflow;
+	readonly featureFamiliesById: ReadonlyMap<
+		string,
+		LevelEditorFeatureFamilyCoverage
+	>;
+}): LevelEditorWorkspaceField {
+	return {
+		...options.field,
+		workflow: fieldWorkflowForField(options),
+	};
+}
+
+function fieldWorkflowForField(options: {
+	readonly category: LevelEditorWorkspaceCategory;
+	readonly field: LevelEditorWorkspaceFieldWithoutWorkflow;
+	readonly featureFamiliesById: ReadonlyMap<
+		string,
+		LevelEditorFeatureFamilyCoverage
+	>;
+}): LevelEditorWorkspaceFieldWorkflow {
+	const featureFamilyIds = featureFamilyIdsForField(
+		options.category,
+		options.field.path,
+	);
+	const featureFamilies = featureFamilyIds
+		.map((id) => options.featureFamiliesById.get(id))
+		.filter(
+			(family): family is LevelEditorFeatureFamilyCoverage =>
+				family !== undefined,
+		);
+	const editability = options.field.readOnly ? "read-only" : "editable";
+	const preview = options.field.readOnly
+		? "none"
+		: previewWorkflowForCategory(options.category);
+	const storage = options.field.readOnly
+		? options.category === "terrain"
+			? "cook-generated-owner"
+			: "read-only-no-save"
+		: collapseStoragePolicies(
+				featureFamilies.map((family) => family.storagePolicy),
+			);
+	const publishability = options.field.readOnly
+		? options.category === "terrain"
+			? "cook-contract"
+			: "read-only"
+		: collapsePublishStatuses(
+				featureFamilies.map((family) => family.publishStatus),
+			);
+
+	return {
+		editability,
+		preview,
+		storage,
+		publishability,
+		labels: workflowLabels({ editability, preview, publishability }),
+		reason: fieldWorkflowReason({
+			field: options.field,
+			featureFamilies,
+			publishability,
+		}),
+		featureFamilyIds,
+	};
+}
+
+function featureFamilyIdsForField(
+	category: LevelEditorWorkspaceCategory,
+	path: string,
+): readonly string[] {
+	if (category === "terrain") {
+		return ["terrain-packages"];
+	}
+
+	if (category === "collision") {
+		return ["collision-authoring"];
+	}
+
+	if (path.startsWith("Transform.")) {
+		return ["level-instance-transform"];
+	}
+
+	if (
+		path.startsWith("Portal.") ||
+		path.startsWith("Light.") ||
+		path.startsWith("SoundEmitter.")
+	) {
+		return ["component-editing"];
+	}
+
+	if (path.startsWith("StoryNote") || category === "story") {
+		return ["story-notes-and-gameplay-markers"];
+	}
+
+	return ["component-editing"];
+}
+
+function previewWorkflowForCategory(
+	category: LevelEditorWorkspaceCategory,
+): LevelEditorWorkspaceWorkflowPreview {
+	if (category === "collision") {
+		return "cook-preview";
+	}
+
+	return previewTargetKindForCategory(category) === undefined
+		? "none"
+		: "temporary-preview";
+}
+
+function collapsePreviewModes(
+	previews: readonly LevelEditorWorkspaceWorkflowPreview[],
+): LevelEditorWorkspaceWorkflowPreview {
+	if (previews.includes("cook-preview")) {
+		return "cook-preview";
+	}
+
+	if (previews.includes("temporary-preview")) {
+		return "temporary-preview";
+	}
+
+	return "none";
+}
+
+function collapseStoragePolicies(
+	storagePolicies: readonly LevelEditorWorkspaceWorkflowStorage[],
+): LevelEditorWorkspaceWorkflowStorage {
+	const uniquePolicies = uniqueStrings(storagePolicies);
+
+	if (uniquePolicies.length === 0) {
+		return "read-only-no-save";
+	}
+
+	return uniquePolicies.length === 1 ? uniquePolicies[0] ?? "mixed" : "mixed";
+}
+
+function collapsePublishStatuses(
+	statuses: readonly LevelEditorFeatureFamilyPublishStatus[],
+): LevelEditorWorkspaceWorkflowPublishability {
+	return collapsePublishabilities(statuses.map(publishabilityForStatus));
+}
+
+function collapsePublishabilities(
+	publishabilities: readonly LevelEditorWorkspaceWorkflowPublishability[],
+): LevelEditorWorkspaceWorkflowPublishability {
+	const uniquePublishabilities = uniqueStrings(
+		publishabilities.filter((publishability) => publishability !== "mixed"),
+	);
+
+	if (uniquePublishabilities.length === 0) {
+		return "read-only";
+	}
+
+	return uniquePublishabilities.length === 1
+		? uniquePublishabilities[0] ?? "mixed"
+		: "mixed";
+}
+
+function publishabilityForStatus(
+	status: LevelEditorFeatureFamilyPublishStatus,
+): LevelEditorWorkspaceWorkflowPublishability {
+	switch (status) {
+		case "bounded-owner-write":
+			return "publishable";
+		case "registered-owner-draft-only":
+			return "draft-only";
+		case "cook-contract":
+			return "cook-contract";
+		case "preview-only":
+			return "preview-only";
+		case "read-only":
+			return "read-only";
+		case "unsupported-for-publish":
+			return "unsupported";
+	}
+}
+
+function workflowLabels(options: {
+	readonly editability: "editable" | "read-only";
+	readonly preview: LevelEditorWorkspaceWorkflowPreview;
+	readonly publishability: LevelEditorWorkspaceWorkflowPublishability;
+}): readonly string[] {
+	return uniqueStrings([
+		options.editability === "editable" ? "Editable" : "Read-only",
+		...(options.preview === "temporary-preview" ? ["Temporary preview"] : []),
+		...(options.preview === "cook-preview" ? ["Cook preview"] : []),
+		workflowPublishabilityLabel(options.publishability),
+	]);
+}
+
+function workflowPublishabilityLabel(
+	publishability: LevelEditorWorkspaceWorkflowPublishability,
+): string {
+	switch (publishability) {
+		case "publishable":
+			return "Publishable";
+		case "draft-only":
+			return "Draft-only";
+		case "cook-contract":
+			return "Cook/bake publish";
+		case "preview-only":
+			return "Preview-only";
+		case "read-only":
+			return "Read-only";
+		case "unsupported":
+			return "Blocked from publish";
+		case "mixed":
+			return "Mixed publishability";
+	}
+}
+
+function fieldWorkflowReason(options: {
+	readonly field: LevelEditorWorkspaceFieldWithoutWorkflow;
+	readonly featureFamilies: readonly LevelEditorFeatureFamilyCoverage[];
+	readonly publishability: LevelEditorWorkspaceWorkflowPublishability;
+}): string {
+	const familyLabels = options.featureFamilies
+		.map((family) => family.label)
+		.join(", ");
+	const source =
+		familyLabels.length === 0 ? "the current workspace contract" : familyLabels;
+
+	switch (options.publishability) {
+		case "publishable":
+			return `${options.field.label} can publish through ${source}.`;
+		case "draft-only":
+			return `${options.field.label} can save as an editor draft through ${source}, but it has no runtime owner publish writer yet.`;
+		case "cook-contract":
+			return `${options.field.label} publishes through explicit cook/bake contract tooling.`;
+		case "preview-only":
+			return `${options.field.label} can preview in dev mode, but it has no durable save owner.`;
+		case "unsupported":
+			return `${options.field.label} is blocked from publish until an owner contract exists.`;
+		case "mixed":
+			return `${options.field.label} spans multiple workflow contracts.`;
+		case "read-only":
+			return `${options.field.label} is inspect-only in this workspace model.`;
+	}
 }
 
 function previewSeedForObject(
@@ -1291,7 +1768,7 @@ function mergeInstanceComponents(
 }
 
 function addVectorFields(
-	fields: LevelEditorWorkspaceField[],
+	fields: LevelEditorWorkspaceFieldWithoutWorkflow[],
 	path: string,
 	label: string,
 	value: unknown,
@@ -1311,7 +1788,7 @@ function addVectorFields(
 }
 
 function addField(
-	fields: LevelEditorWorkspaceField[],
+	fields: LevelEditorWorkspaceFieldWithoutWorkflow[],
 	path: string,
 	label: string,
 	value: unknown,
@@ -1701,6 +2178,12 @@ function countBy(values: readonly string[]): ReadonlyMap<string, number> {
 	}
 
 	return counts;
+}
+
+function uniqueStrings<TValue extends string>(
+	values: readonly TValue[],
+): readonly TValue[] {
+	return [...new Set(values)].sort();
 }
 
 function compareLibraryItems(

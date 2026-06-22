@@ -170,34 +170,71 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 			storagePolicy: "save-draft-only-non-runtime",
 			requiredOwnerKinds: ["level", "prefab"],
 			optionalGeneratedOwnerKinds: [],
-			operationKinds: [
-				"insert-instance",
-				"remove-instance",
-				"replace-prefab",
-				"stable-id-management",
-				"grouping",
-			],
+			operationKinds: ["insert-instance", "stable-id-management", "grouping"],
 			fieldPaths: ["level.instances", "level.instances.*.prefabId"],
+			unsupportedReason:
+				"drafts can record broader level instance structure edits, but no bounded level/prefab owner writer exists for raw insert, grouping, or stable-ID changes",
+		},
+		{
+			id: "level-instance-removal",
+			label: "Level Instance Removal",
+			source: "workspace",
+			publishStatus: "bounded-owner-write",
+			storagePolicy: "runtime-owner-publish",
+			requiredOwnerKinds: ["level"],
+			optionalGeneratedOwnerKinds: ["published-transforms"],
+			operationKinds: ["remove-instance", "remove-level-instance"],
+			fieldPaths: ["level.instances.*"],
+			unsupportedReason:
+				"readiness-required instance removal remains blocked until a matching manifest/readiness owner writer exists",
+		},
+		{
+			id: "level-instance-duplication",
+			label: "Level Instance Duplication",
+			source: "workspace",
+			publishStatus: "bounded-owner-write",
+			storagePolicy: "runtime-owner-publish",
+			requiredOwnerKinds: ["level", "prefab"],
+			optionalGeneratedOwnerKinds: ["published-transforms"],
+			operationKinds: ["insert-instance", "insert-level-instance"],
+			fieldPaths: ["level.instances.*", "prefabs.*"],
+			unsupportedReason:
+				"duplication is bounded to generated level-instance insertions; broader stable-ID management, grouping, replacement, and readiness owner updates remain draft-only",
+		},
+		{
+			id: "level-instance-prefab-replacement",
+			label: "Level Instance Prefab Replacement",
+			source: "object-library",
+			publishStatus: "bounded-owner-write",
+			storagePolicy: "runtime-owner-publish",
+			requiredOwnerKinds: ["level", "prefab"],
+			optionalGeneratedOwnerKinds: ["published-transforms"],
+			operationKinds: ["replace-prefab", "replace-level-instance"],
+			fieldPaths: ["level.instances.*.prefabId", "prefabs.*"],
+			unsupportedReason:
+				"replacement is bounded to level-instance prefab ID overrides; readiness-required stable IDs and broader asset/component replacement remain draft-only until matching owner writers exist",
 		},
 		{
 			id: "component-editing",
 			label: "Schema-Backed Component Editing",
 			source: "workspace",
-			publishStatus: "registered-owner-draft-only",
-			storagePolicy: "save-draft-only-non-runtime",
-			requiredOwnerKinds: ["level", "prefab"],
-			optionalGeneratedOwnerKinds: [],
+			publishStatus: "bounded-owner-write",
+			storagePolicy: "runtime-owner-publish",
+			requiredOwnerKinds: ["level"],
+			optionalGeneratedOwnerKinds: ["published-transforms"],
 			operationKinds: ["set-component", "remove-component"],
 			fieldPaths: ["components.*"],
+			unsupportedReason:
+				"prefab-owned component edits remain draft-only until a prefab owner writer exists",
 		},
 		{
 			id: "object-library-placement",
 			label: "Object Library Prefab Placement",
 			source: "object-library",
-			publishStatus: "registered-owner-draft-only",
-			storagePolicy: "save-draft-only-non-runtime",
+			publishStatus: "bounded-owner-write",
+			storagePolicy: "runtime-owner-publish",
 			requiredOwnerKinds: ["level", "prefab"],
-			optionalGeneratedOwnerKinds: [],
+			optionalGeneratedOwnerKinds: ["published-transforms"],
 			operationKinds: ["insert-level-instance"],
 			fieldPaths: ["level.instances.*", "prefabs.*"],
 		},
@@ -219,6 +256,8 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 				"Renderable.materialId",
 				"SoundEmitter.soundId",
 			],
+			unsupportedReason:
+				"object replacement is draft-only until bounded level, prefab, and asset reference writers exist",
 		},
 		{
 			id: "portal-interaction-targets",
@@ -234,6 +273,8 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 				"Portal.activationRadius",
 				"Portal.prompt",
 			],
+			unsupportedReason:
+				"portal component edits are draft-only until a bounded level component owner writer exists",
 		},
 		{
 			id: "story-notes-and-gameplay-markers",
@@ -258,6 +299,8 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 			optionalGeneratedOwnerKinds: [],
 			operationKinds: ["set-render-profile-environment"],
 			fieldPaths: ["renderProfile.environment.*"],
+			unsupportedReason:
+				"environment edits are draft-only until bounded render-profile and asset owner writers exist",
 		},
 		{
 			id: "authored-lighting",
@@ -269,6 +312,8 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 			optionalGeneratedOwnerKinds: [],
 			operationKinds: ["set-authored-light-field", "set-component"],
 			fieldPaths: ["Light.*", "renderProfile.lighting.*"],
+			unsupportedReason:
+				"lighting edits are draft-only until bounded light component and render-profile owner writers exist",
 		},
 		{
 			id: "audio-authoring",
@@ -280,6 +325,8 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 			optionalGeneratedOwnerKinds: [],
 			operationKinds: ["set-audio-track-id", "set-component"],
 			fieldPaths: ["SoundEmitter.*", "audioContentManifest.sceneMusic"],
+			unsupportedReason:
+				"audio edits are draft-only until bounded audio manifest and level component owner writers exist",
 		},
 		{
 			id: "terrain-packages",
@@ -291,6 +338,8 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 			optionalGeneratedOwnerKinds: ["terrain-runtime"],
 			operationKinds: ["cook-terrain"],
 			fieldPaths: ["terrainPackages.*", "TerrainChunkCell", "TerrainSurface"],
+			unsupportedReason:
+				"terrain changes must publish through the terrain cook/drift contract, not the current Save Level/Publish Level transform slice",
 		},
 		{
 			id: "collision-authoring",
@@ -302,6 +351,8 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 			optionalGeneratedOwnerKinds: ["collision-runtime"],
 			operationKinds: ["stage-collision-preview-entry", "cook-collision"],
 			fieldPaths: ["Collider.*", "RigidBody.*"],
+			unsupportedReason:
+				"collision changes must publish through the collision cook contract, not the current Save Level/Publish Level transform slice",
 		},
 		{
 			id: "npc-firefly-authoring",
@@ -313,6 +364,8 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 			optionalGeneratedOwnerKinds: [],
 			operationKinds: ["insert-firefly-npc", "remove-npc", "duplicate-npc"],
 			fieldPaths: ["FireflyPopulationMember.*", "Light.*"],
+			unsupportedReason:
+				"NPC/firefly edits are draft-only until bounded level/prefab owner writers and runtime AI support exist",
 		},
 		{
 			id: "ai-generated-assets",
@@ -328,6 +381,8 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 				"assign-generated-material",
 			],
 			fieldPaths: ["assetManifest.generated.*", "Renderable.*"],
+			unsupportedReason:
+				"AI asset edits are draft-only until bounded asset manifest and renderable reference owner writers exist",
 		},
 		{
 			id: "camera-live-preview",
@@ -717,19 +772,17 @@ export function validateLevelEditorFeatureCoverageRegistry(
 			}
 		}
 
-		if (
-			family.publishStatus === "read-only" ||
-			family.publishStatus === "preview-only" ||
-			family.publishStatus === "unsupported-for-publish"
-		) {
+		if (family.publishStatus !== "bounded-owner-write") {
 			if (family.storagePolicy === "save-draft-only-non-runtime") {
-				errors.push(
-					`feature family "${family.id}" cannot save editor drafts while publish status is "${family.publishStatus}".`,
-				);
+				if (family.publishStatus !== "registered-owner-draft-only") {
+					errors.push(
+						`feature family "${family.id}" cannot save editor drafts while publish status is "${family.publishStatus}".`,
+					);
+				}
 			}
 			if (!family.unsupportedReason) {
 				errors.push(
-					`feature family "${family.id}" must explain why it is not publishable.`,
+					`feature family "${family.id}" must explain why Publish Level does not support it.`,
 				);
 			}
 		}
@@ -754,6 +807,15 @@ export function validateLevelEditorFeatureCoverageRegistry(
 	}
 
 	return errors;
+}
+
+export function getLevelEditorFeatureFamilyForOperationKind(
+	operationKind: string,
+	registry: LevelEditorFeatureCoverageRegistry = buildLevelEditorFeatureCoverageRegistry(),
+): LevelEditorFeatureFamilyCoverage | undefined {
+	return registry.families.find((family) =>
+		family.operationKinds.includes(operationKind),
+	);
 }
 
 function ownerModule(

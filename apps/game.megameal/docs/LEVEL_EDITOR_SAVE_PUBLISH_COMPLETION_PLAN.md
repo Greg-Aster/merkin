@@ -57,14 +57,24 @@ full save/publish path is incomplete:
 
 - Save Draft writes a generated authoring transaction module with
   `writesRuntimeData: false` and does not mark runtime data permanent.
-- Save Level writes the owned generated runtime transform override module for
-  validated level-owned `set-transform` operations only.
+- Save Level writes the owned generated runtime override module for validated
+  level-owned `set-transform` operations, generated object-library
+  `insert-level-instance` placement operations, bounded level-instance
+  `replace-prefab` operations, and level-instance `set-component`/
+  `remove-component` operations through the `component-editing` family.
 - The owner registry still has broader level, prefab, asset, render-profile,
   terrain/collision, audio, and readiness owner targets that are not writable by
   the current Save Level slice.
-- Publish Level is implemented for the current generated transform owner slice:
-  it stages the generated owner write, runs configured local validation/build
-  gates, rolls back on gate failure, and does not deploy.
+- Publish Level is implemented for the current generated level override owner
+  slice: it stages transform overrides, object-library placement insertions,
+  prefab ID overrides, component set/removal records, and bounded instance
+  removal records, runs configured local validation/build gates, rolls back on
+  gate failure, and does not deploy.
+- The current configured Publish Level gates are the first-slice gates:
+  `test:level-editor-save-contract`, `test:runtime-scene-contract`,
+  `test:production-editor-bundle-contract`, `type-check`, and `build`. Broader
+  cook/drift, terrain, collision, audio, prefab, render-profile, asset, NPC, and
+  environment gates must be added with the owner-write paths they validate.
 - The UI must keep Save Draft, Save Level, and Publish Level separate so users
   do not infer a generated draft changed runtime owner data.
 
@@ -83,16 +93,20 @@ contract test proves the runtime loads it. (Last audited: 2026-06-17.)
 | --- | --- | --- | --- |
 | Preview | `src/app/devPreview/**`, live-preview protocol | Implemented | Dev-only, temporary, schema-validated, scene-scoped, clearable. |
 | Save Draft | `handleLevelEditorAuthoringPersistenceRequest`, `save.json`/`dry-run.json`, `authoring-save` generated modules | Implemented | Writes generated authoring modules with `writesRuntimeData: false`. Runtime must not import them. |
-| Runtime published-override plumbing | `src/game/generated/publishedLevelTransforms.ts`, `src/game/levels/publishedLevelOverrides.ts`, `runtimeSceneManifests.ts` applier | Implemented for level-instance transforms | The generated override module and the `applyPublishedLevelInstanceTransformOverrides` consumer are wired into every runtime scene. The checked-in override array may be empty, but `save-level` can write deterministic transform overrides for selected-scene stable level instances. |
-| Save Level / bounded owner write | `handleLevelEditorLevelOwnerWriteRequest` (`save-level.json`) | Implemented for `set-transform` level-instance edits | The endpoint writes the owned generated published-transform module for validated level-owned `set-transform` operations after base-hash validation. It reports hashes and changed stable IDs, detects byte-identical no-op writes, records a reversible changeset, and supports valid stable level instances in the selected runtime scene while refusing unknown stable IDs. Broader insert/delete/component owner writes remain Milestone 2+ work. |
-| Publish | `handleLevelEditorLocalPublishRequest` (`publish-local.json`), `src/game/editor/buildPublish/**` | Implemented for generated transform owner slice | Applies validated `set-transform` operations to the generated published-transform runtime owner, runs configured local validation/build gates, reports changed artifacts, and rolls back the generated owner write when a gate fails. It does not deploy and does not yet cover broader Milestone 2 feature families. |
+| Runtime published-override plumbing | `src/game/generated/publishedLevelTransforms.ts`, `src/game/levels/publishedLevelOverrides.ts`, `runtimeSceneManifests.ts` applier | Implemented for level-instance transforms, generated level-instance insertions, level-instance prefab ID overrides, level-instance component overrides/removals, and bounded level-instance removals | The generated override module and the `applyPublishedLevelInstanceTransformOverrides` consumer are wired into every runtime scene. The checked-in override, insertion, prefab override, component override, component removal, and instance removal arrays may be empty, but `save-level` can write deterministic transform overrides for selected-scene stable level instances, generated object-library placement insertions for known scene prefabs, level-instance `replace-prefab` records, level-instance `set-component` overrides, level-instance `remove-component` records, and bounded `remove-level-instance` records for publishable instance deletion. |
+| Save Level / bounded owner write | `handleLevelEditorLevelOwnerWriteRequest` (`save-level.json`) | Implemented for `set-transform` level-instance edits, object-library `insert-level-instance` placements, bounded `replace-prefab` operations, component-editing `set-component`/`remove-component` operations, and bounded `remove-level-instance` operations | The endpoint writes the owned generated published-transform/placement/prefab-override/component set/removal/instance removal module for validated level-owned operations after base-hash validation. It reports hashes and changed stable IDs, detects byte-identical no-op writes, records a reversible changeset, supports valid stable level instances in the selected runtime scene, refuses generated placement insertions that duplicate existing stable IDs or reference unknown prefabs, refuses prefab replacement records that target unknown replacement prefabs or readiness-required checked-in stable IDs, records component overrides by runtime scene, stable ID, and component name, records component removals that clear stale generated component overrides for the same key, writes checked-in instance removal records for non-readiness-critical stable IDs, and cancels generated insertions without leaving generated-only tombstones. Readiness-required deletes/replacements, broad asset/component replacement, grouping, stable-ID management, and non-level-owner component families remain Milestone 2+ work. |
+| Publish | `handleLevelEditorLocalPublishRequest` (`publish-local.json`), `src/game/editor/buildPublish/**` | Implemented for generated transform, object-library placement, prefab ID override, component override/removal, and bounded instance-removal owner slice | Applies validated `set-transform`, generated placement insertion, `replace-prefab`, component override, component removal, and bounded `remove-level-instance` operations to the generated runtime owner, runs configured local validation/build gates, reports changed artifacts, and rolls back the generated owner write when a gate fails. It does not deploy and does not yet cover broader Milestone 2 feature families. |
 | In-editor validation report | `src/app/editor/levelEditorWorkspaceModel.ts`, `LevelEditorWorkspace.svelte` | Implemented | `LevelEditorValidationReport` derives from runtime-scene schema validation, content-graph validation, audio content validation, authoring owner provenance, and workspace capability warnings. Errors block Publish Level; warnings are shown in the report/output log without blocking. |
 
 The runtime-read half (override module + applier), the write half
 (`save-level` endpoint + deterministic owner writer), and the local Publish
-route now meet for the first player/level-instance `set-transform` proof slice.
-Publish Level remains scoped to this generated transform owner until broader
-Milestone 2 feature families have the same bounded owner-write coverage.
+route now meet for the first level-instance `set-transform` slice, the
+object-library placement insertion slice, and the component-editing
+`replace-prefab` slice, `set-component`/`remove-component` slice, plus the bounded
+`remove-level-instance` slice for non-readiness-critical checked-in instances
+and generated insertion cancellation. Publish Level remains scoped to this
+generated level override owner until broader Milestone 2 feature families have
+the same bounded owner-write coverage.
 
 ## Permanent Terms
 
@@ -109,15 +123,22 @@ These terms are binding for docs, UI labels, tests, and implementation:
   owner-registry evidence for later publish, but runtime must not import or fall
   back to these modules.
 - Save Level: bounded owner persistence for supported edit types. The current
-  implementation supports level-owned `set-transform` operations through the
-  generated published-transform owner module. Save Level may clear dirty state
-  only after approved owner targets pass base-hash validation and the write
-  succeeds.
+  implementation supports level-owned `set-transform` operations and generated
+  object-library `insert-level-instance` placement operations, bounded
+  level-instance `replace-prefab` operations from the
+  `level-instance-prefab-replacement` family, level-instance
+  `set-component`/`remove-component` operations from the `component-editing`
+  family, and bounded `remove-level-instance` operations from the
+  `level-instance-removal` family, through the generated published level
+  override owner module. Save Level may clear dirty state only after approved
+  owner targets pass base-hash validation and the write succeeds.
 - Publish: an explicit local repo mutation action that applies validated staged
   operations to checked-in runtime owner data, runs required validation/build
   gates, reports changed owner/generated files, and then permits a reload. The
-  current implementation supports the first generated transform-owner proof
-  slice. Publish is not deployment, not normal-build rewriting, and not runtime
+  current implementation supports generated transform overrides, generated
+  object-library placement insertions, generated component overrides,
+  generated component removals, and generated instance removals.
+  Publish is not deployment, not normal-build rewriting, and not runtime
   mutation.
 
 Permanent runtime data means checked-in owner data loaded through normal
@@ -159,8 +180,9 @@ Any implementation must preserve these rules:
 - [x] Define permanent Preview, Save Draft, Save Level, and Publish terms.
 - [x] Record current implementation honestly: Preview is temporary/dev-only,
   Save Draft writes generated authoring transaction modules with
-  `writesRuntimeData: false`, Save Level writes the first generated runtime
-  transform owner slice, and Publish Level runs the first local gated owner-write
+  `writesRuntimeData: false`, Save Level writes the generated runtime level
+  override owner slice for transforms, placements, component overrides, and
+  component removals, and Publish Level runs the first local gated owner-write
   publish slice.
 - [x] Record owner, validation, forbidden shortcuts, and removal conditions for
   the permanent save/publish path.
@@ -193,10 +215,11 @@ Any implementation must preserve these rules:
 - Preview, Save Draft, Save Level, and Publish are defined in this plan's
   permanent terms.
 - Save Level and Publish Level now perform real bounded owner writes for the
-  level-instance `set-transform` slice (generated published-transform owner
-  module, base-hash gated, atomic changeset with rollback). Generated authoring
-  Save Draft modules remain explicitly non-runtime (`writesRuntimeData: false`)
-  and must not be consumed at runtime.
+  level-instance `set-transform` slice, generated object-library placement
+  insertions, and component-editing `set-component`/`remove-component`
+  operations (generated published level override owner module, base-hash gated,
+  atomic changeset with rollback). Generated authoring Save Draft modules remain explicitly
+  non-runtime (`writesRuntimeData: false`) and must not be consumed at runtime.
   Removal condition: as each later feature family gains the same bounded
   owner-write coverage, any compatibility Save Draft staging for that family must
   become explicit draft history or be removed from the Save Level path.
@@ -269,10 +292,23 @@ Implement a reusable owner writer with these properties:
   missing owner targets, and unsupported operation kinds.
 - It emits a deterministic write report for UI and validation.
 
-First proof-milestone supported writes:
+Current generated-owner supported writes:
 
 - `set-transform` for level instances.
 - Player spawn transform, represented as the `player` stable level instance.
+- `insert-level-instance` for generated object-library placements that target
+  known scene prefabs and deterministic generated stable IDs.
+- `replace-prefab` for bounded level-instance prefab ID replacement through the
+  `level-instance-prefab-replacement` feature family. Checked-in
+  readiness-required instance replacement is blocked until a matching
+  manifest/readiness owner writer exists.
+- `set-component` and `remove-component` for level-instance component
+  set/removal records through the `component-editing` feature family.
+- `remove-level-instance` for bounded level-instance removal through the
+  `level-instance-removal` feature family. Checked-in readiness-required
+  instance removal is blocked until a matching manifest/readiness owner writer
+  exists; generated insertion removal cancels the generated insertion without
+  leaving a generated-only tombstone.
 
 Required editor feature families:
 
@@ -305,9 +341,11 @@ and reviewed like other generated runtime data.
 
 ### 5. Real Publish Command
 
-Publish Level is now an action for the generated transform-owner slice, not only
-a plan display. Additional feature families must meet the same rules before
-their Publish support is enabled.
+Publish Level is now an action for the generated level override owner slice, not
+only a plan display. The implemented slice covers level-instance transforms,
+generated object-library placements, and component-editing overrides. Additional
+feature families must meet the same rules before their Publish support is
+enabled.
 
 Publish should:
 
@@ -316,10 +354,16 @@ Publish should:
 - either apply current staged edits or require an explicit saved authoring
   state, depending on the final Save/Save Draft decision.
 - apply validated operations to checked-in owner data.
-- run source validation and content graph validation.
-- run relevant cook/drift checks.
-- run editor authoring contract tests.
-- run the production editor exclusion test.
+- run the configured first-slice gates for the supported operation set:
+  `test:level-editor-save-contract`, `test:runtime-scene-contract`,
+  `test:production-editor-bundle-contract`, `type-check`, and `build`.
+- add source validation, content graph validation, cook/drift checks, editor
+  authoring contract tests, and production exclusion checks as each later owner
+  family becomes publishable.
+
+Publish must not imply full-feature save/publish coverage until the matching
+checked-in owner write, rollback behavior, and focused contract test exist for
+that feature family.
 - run type-check and build.
 - request live reload only after successful writes and required validation.
 - report changed owner files and generated files.
@@ -396,10 +440,18 @@ editing:
 
 Current implemented slice: `set-transform` is no longer only a player proof.
 The authoring operation/model path and generated published-transform writer now
-accept valid non-player stable level instances in the selected runtime scene and
-refuse unknown stable IDs. Full Milestone 2 remains incomplete until create,
-duplicate, delete, component editing, grouping, multi-object operations, and
-undo/redo publish semantics have the same owner-write coverage.
+accept valid non-player stable level instances in the selected runtime scene,
+refuse unknown stable IDs, publish generated object-library insertions, and
+publish bounded `replace-prefab` operations as generated prefab ID override
+entries, and publish component-editing `set-component`/`remove-component`
+operations as generated component set/removal entries. It also publishes
+bounded `remove-level-instance` records for non-readiness-critical checked-in
+instances and cancels generated insertions while clearing stale generated child
+records.
+Full Milestone 2 remains incomplete until create, duplicate, readiness-aware
+delete/replacement with manifest/readiness updates, broad asset/component
+replacement, grouping, multi-object operations, and undo/redo publish semantics have the same
+owner-write coverage.
 
 - create, duplicate, delete, move, rotate, scale, and group level instances.
 - edit typed components through schema-backed panels.
@@ -489,7 +541,7 @@ below describe *how* permanence must behave so the editor reaches AAA-tier
 robustness (Unreal, Unity, Godot). These apply to every owner-write path, not to
 a single feature. They are binding once the corresponding write path is enabled.
 
-First-slice status (re-audited 2026-06-17, transform owner path only):
+First-slice status (re-audited 2026-06-17, generated level override owner path):
 
 - A. Atomicity/rollback — implemented and tested (changeset + rollback).
 - B. Concurrency/merge — partial: stale base hash refused with HTTP 409 and the
@@ -526,12 +578,13 @@ failure that can corrupt checked-in runtime data.
 - Publish must be idempotent: re-publishing identical staged operations produces
   no diff.
 
-Current generated-owner foundation: the published transform owner writer stages
+Current generated-owner foundation: the published level override writer stages
 the full generated module contents in a reversible changeset before writing,
-records the prior hash and the staged current hash, skips byte-identical writes,
-and exposes a rollback helper. The remaining real Publish command must reuse
-that changeset shape for all owner files and run post-write gates through the
-same rollback path.
+including transform overrides, placement insertions, component overrides, and
+component removals. It records the prior hash and the staged current hash,
+skips byte-identical writes, and exposes a rollback helper. Later owner files
+must reuse that changeset shape and run post-write gates through the same
+rollback path.
 
 ### B. Concurrency And Merge Model
 

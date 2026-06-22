@@ -19,10 +19,32 @@ const docs = {
 		"docs/Done/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md",
 	),
 	plan: await readProjectFile("docs/LEVEL_EDITOR_COLLISION_COOK_PLAN.md"),
+	researchGap: await readProjectFile(
+		"docs/LEVEL_EDITOR_AAA_RESEARCH_AND_GAP_ANALYSIS.md",
+	),
+	savePublishPlan: await readProjectFile(
+		"docs/LEVEL_EDITOR_SAVE_PUBLISH_COMPLETION_PLAN.md",
+	),
+	workbenchProgress: await readProjectFile(
+		"docs/LEVEL_EDITOR_WORKBENCH_IMPLEMENTATION_PROGRESS.md",
+	),
 	workspaceAlignment: await readProjectFile(
 		"docs/LEVEL_EDITOR_WORKSPACE_ALIGNMENT.md",
 	),
 };
+const workspaceComponent = await readProjectFile(
+	"src/app/editor/LevelEditorWorkspace.svelte",
+);
+const objectLibraryPanel = await readProjectFile(
+	"src/app/editor/LevelEditorObjectLibraryPanel.svelte",
+);
+const objectLibraryModel = await readProjectFile(
+	"src/app/editor/levelEditorObjectLibrary.ts",
+);
+const viewportBridgePanel = await readProjectFile(
+	"src/app/editor/LevelEditorViewportBridgePanel.svelte",
+);
+const editorStyles = await readProjectFile("src/styles/editor.css");
 const auditScript = await readProjectFile(
 	"scripts/audit-engine-boundaries.mjs",
 );
@@ -36,6 +58,10 @@ await assertNoOrphanTestScripts();
 assertPlanValidationMatrix();
 assertArchitectureDocsStayHonest();
 assertWorkspaceAlignmentHasExternalProof();
+assertResearchGapAnalysisIsActionable();
+assertWorkbenchContractIsRegistered();
+assertWorkbenchSourceUsesConnectedRegions();
+assertSavePublishPlanStaysFirstSliceHonest();
 assertGenericEditorCatalogGuardrails();
 assertObservatoryCollisionFindingsAreCurrent();
 assertGeneralizedTerrainContractsAreHonest();
@@ -61,6 +87,10 @@ function assertRequiredPackageScripts(): void {
 			"tsx ./scripts/test-level-editor-aaa-plan-contract.ts",
 		"test:level-editor-workspace-model-contract":
 			"tsx ./scripts/test-level-editor-workspace-model-contract.ts",
+		"test:level-editor-workbench-model-contract":
+			"tsx ./scripts/test-level-editor-workbench-model-contract.ts",
+		"test:level-editor-viewport-bridge-model-contract":
+			"tsx ./scripts/test-level-editor-viewport-bridge-model-contract.ts",
 		"test:level-editor-collision-cook-contract":
 			"tsx ./scripts/test-level-editor-collision-cook-contract.ts",
 		"test:live-preview-protocol-contract":
@@ -237,12 +267,21 @@ function assertWorkspaceAlignmentHasExternalProof(): void {
 		"Spawn, Terrain, Collision, Lights, Portals, Audio Emitters, Story, and Props",
 		"runtime catalog default",
 		"not a generic editor default or fallback",
+		"category-first and component-driven",
+		"docs/LEVEL_EDITOR_AAA_RESEARCH_AND_GAP_ANALYSIS.md",
+		"top toolbar, scene",
+		"central viewport or live-game viewport bridge",
+		"category rail, spatial pins, and",
+		"selected-object summaries",
+		"scene-specific portal lists",
 		"collisionDraftRegistry.ts",
-		"preview-only",
+		"Browser-side preview edits are preview-only",
+		"Explicit dev-only authoring API routes",
 		"LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL",
 		"per-level collision",
 		"hardcode `*_runtime`",
 		legacyThrelteEditorPath,
+		"https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-editor-interface",
 		"https://dev.epicgames.com/documentation/en-us/unreal-engine/levels-in-unreal-engine",
 		"https://dev.epicgames.com/documentation/en-us/unreal-engine/actors-in-unreal-engine",
 		"https://docs.unity3d.com/Manual/CreatingScenes.html",
@@ -259,6 +298,359 @@ function assertWorkspaceAlignmentHasExternalProof(): void {
 			`Expected workspace alignment doc to include ${JSON.stringify(snippet)}.`,
 		);
 	}
+}
+
+function assertResearchGapAnalysisIsActionable(): void {
+	const requiredSnippets = [
+		"Status: active research and contract gap report",
+		"External Editor Research",
+		"Current Megameal Contract Truth",
+		"UX Gap Matrix",
+		"Architecture Gap Matrix",
+		"Required Workbench Contract",
+		"No-Victory Criteria",
+		"First Implementation Gate",
+		"central scene viewport",
+		"scene hierarchy or outliner",
+		"details/inspector panel",
+		"asset/content browser",
+		"Save Draft writes generated authoring transaction modules",
+		"bounded generated-owner",
+		"Central 3D scene viewport",
+		"Missing as an editor-owned workbench surface",
+		"Transform gizmos",
+		"Missing",
+		"Publish gates reflect the exact current supported operation set",
+		"https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-editor-interface",
+		"https://docs.unity3d.com/Manual/editor-windows-views-reference.html",
+		"https://docs.godotengine.org/en/stable/getting_started/introduction/first_look_at_the_editor.html",
+		"https://www.docs.o3de.org/docs/user-guide/editor/",
+	];
+
+	for (const snippet of requiredSnippets) {
+		assertIncludes(
+			docs.researchGap,
+			snippet,
+			`Expected research/gap analysis to include ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	assertIncludesOneOf(
+		docs.researchGap,
+		[
+			"generated level-instance transform overrides",
+			"generated level-instance transform and component overrides",
+			"generated level-instance `set-transform` and `set-component` overrides",
+			"generated level-instance set-transform and set-component overrides",
+			"generated level-instance set-transform, set-component, and remove-component overrides",
+			"generated level-instance transform overrides, object-library generated placements, level-instance prefab ID replacements, level-instance component set/removal records, and bounded level-instance removals",
+			"slices for level-instance transform overrides, object-library generated",
+		],
+		"Expected research/gap analysis to describe the bounded generated-owner publish path for level-instance overrides.",
+	);
+}
+
+function assertWorkbenchContractIsRegistered(): void {
+	const row = lineContaining(
+		docs.contractRegister,
+		"| `LevelEditorWorkbenchContract` |",
+	);
+
+	if (!row) {
+		throw new Error("Expected LevelEditorWorkbenchContract to be registered.");
+	}
+
+	for (const snippet of [
+		"docs/LEVEL_EDITOR_AAA_RESEARCH_AND_GAP_ANALYSIS.md",
+		"top toolbar",
+		"scene hierarchy/outliner",
+		"future central viewport or live-game viewport bridge",
+		"content browser/object library",
+		"test:level-editor-aaa-plan-contract",
+		"treating a stack of diagnostic cards as the final level editor",
+		"Research and gap analysis implemented",
+		"A true AAA-tier workbench remains future",
+	]) {
+		assertIncludes(
+			row,
+			snippet,
+			`Expected workbench contract row to include ${JSON.stringify(snippet)}.`,
+		);
+	}
+}
+
+function assertWorkbenchSourceUsesConnectedRegions(): void {
+	const requiredProgressSnippets = [
+		"Level Editor Workbench Implementation Progress",
+		"The current editor is a foundation, not a finished AAA-tier editor.",
+		"that reads as a professional editor",
+		"instead of stacked diagnostic panels",
+		"Implementation Checkpoint",
+		"Viewport bridge",
+		"Content browser",
+		"normalized object-library drop placement exist",
+		"Needs real gizmos, arbitrary drag placement",
+		"draft-ready drag metadata exist",
+		"guarded selected-instance duplicate/removal action pair",
+		"Level Instance Duplicate Owner Writes",
+		"Stage Removal",
+		"Do Not Declare Done Until",
+		"Persistent owner writes exist for the feature families advertised as",
+	];
+	const requiredComponentSnippets = [
+		'<section class="editor-workbench-main" aria-label="Level editor workbench">',
+		'class="editor-panel editor-outliner" aria-label="Scene outliner"',
+		"<LevelEditorViewportBridgePanel",
+		"buildLevelEditorViewportBridgeModel",
+		"viewportBridgeViewMode",
+		"viewportTransformMode",
+		"viewportTranslateSnapStep",
+		"viewportScaleSnapStep",
+		"enabledViewportOverlayIds",
+		"toggleViewportBridgeOverlay",
+		"selectViewportTransformMode",
+		"selectViewportTransformSnapStep",
+		'class="editor-panel editor-graph-panel" aria-label="Engine graph"',
+		'class="editor-panel editor-inspector" aria-label="Inspector"',
+		'class="editor-panel editor-live-runtime"',
+		"<LevelEditorObjectLibraryPanel",
+		'class="editor-panel editor-command-plan" aria-label="Command plan"',
+		'class="editor-panel editor-staged-operations"',
+		"removeQueuedAuthoringOperationEntry",
+		"removeLevelEditorAuthoringOperationEntry",
+		"onRemoveAuthoringOperations={removeQueuedAuthoringOperationEntry}",
+		"removeStagedFieldEdit",
+		"removeLevelEditorStagedFieldEdit",
+		"queuedAuthoringOperationEntries",
+		"stagedFieldEdits",
+		"Staged Operations",
+		"Staged field edits",
+		"Revert",
+		'class="editor-panel editor-output-log" aria-label="Output log"',
+		'class="editor-panel editor-object-focus"',
+		'aria-label="Selection summary"',
+		'class="editor-workflow-summary"',
+		"data-workflow-publishability={selectedWorkspaceObject.workflow.publishability}",
+		"selectedWorkspaceObject.workflow.labels",
+		"field.workflow.reason",
+		"field.workflow.publishability",
+		"function readFieldValue(",
+		"return fieldDisplayValueFromEdits(edits, object, field);",
+		"stagedPublishReadiness",
+		"buildStagedPublishReadiness",
+		"queuedEntryPublishability",
+		"Save Level/Publish currently accepts only level-owned set-transform, insert-level-instance, replace-prefab, remove-level-instance, set-component, and remove-component operations.",
+		"Owner Write",
+		"liveCoreObjectPreviewStableIds",
+		"reconcileCoreObjectPreviewAfterStagedFieldRemoval",
+		"revert-refresh-preview",
+		"revert-clear-preview",
+		"discardStagedEdits",
+		"Discard Staged",
+		"buildSelectedInstanceRemovalReadiness",
+		"buildSelectedInstanceDuplicationReadiness",
+		"readinessRequiredStableIdReason",
+		"stageSelectedInstanceRemoval",
+		"stageSelectedInstanceDuplicate",
+		"nextDuplicateStableId",
+		"Selected level instance duplicate staged from the workbench.",
+		"data-selected-instance-duplicate-ready={selectedInstanceDuplicationReadiness.canStage}",
+		"Selected level instance removal staged from the workbench.",
+		"data-selected-instance-removal-ready={selectedInstanceRemovalReadiness.canStage}",
+		"placementTarget={viewportPlacementTarget}",
+		"onStagePlacementAtTarget={stageViewportPlacementAtTarget}",
+		"onDropPlacementEntry={stageDroppedObjectLibraryPlacement}",
+		"object-library-viewport-placements",
+	];
+	const requiredViewportBridgeSnippets = [
+		'class="editor-panel editor-viewport-bridge" aria-label="Viewport bridge"',
+		"data-viewport-mode={model.view.mode}",
+		"data-gizmo-status={model.gizmo.status}",
+		"onViewModeChange",
+		"onOverlayToggle",
+		"onSelectObject",
+		"onTransformNudge",
+		"onTransformModeChange",
+		"onTransformSnapStepChange",
+		"model.projection.objects",
+		'class="editor-viewport-pin"',
+		"placementProjectionTarget",
+		"stagePlacementFromGhost",
+		'class="editor-viewport-placement-ghost"',
+		"data-placement-ready={placementTarget.canStage}",
+		"application/x-megameal-object-library-entry",
+		"data-placement-drop-ready={placementTarget?.canStage ?? false}",
+		"ondrop={handlePlacementDrop}",
+		'class="editor-viewport-transform-controls"',
+		'class="editor-transform-mode-switcher"',
+		'class="editor-transform-snap-control"',
+		"model.transformControls.activeMode",
+		"model.transformControls.activeSnapStep",
+		'class="editor-viewport-placement-target"',
+		"model.transformControls.stagesAuthoringEdits",
+		"model.transformControls.writesRuntimeData",
+		"model.bridge.writesRuntimeData",
+		"model.gizmo.directManipulationEnabled",
+		"model.view.activeOverlayIds",
+	];
+	const requiredObjectLibrarySnippets = [
+		"objectLibrarySearchQuery",
+		"objectLibraryKindFilter",
+		"objectLibraryPlacementFilter",
+		"filteredObjectLibraryGroups",
+		"filteredObjectLibraryEntries",
+		"matchesObjectLibraryFilters",
+		"No library entries match",
+		"placementTransformEditor",
+		"function authoredPlacementTransform()",
+		"function resetPlacementTransformEditor()",
+		"function removeStagedPlacement(",
+		"function objectLibraryPlacementQueueEntryId()",
+		"onRemoveAuthoringOperations",
+		"Placement Transform",
+		"bind:value={placementTransformEditor.positionX}",
+		"bind:value={placementTransformEditor.yawDegrees}",
+		"formatPlacementTransform",
+		"activePlacementDraft",
+		"function stagePlacement()",
+		"function startPlacementDrag(",
+		"draggable={entry.placementReadiness.canStagePlacementDraft}",
+		"data-placement-drag-ready={entry.placementReadiness.canStagePlacementDraft}",
+		"object-library-placements",
+		"Stage Placement Draft",
+		"onSelectEntry",
+		"activeEntry.placementReadiness.status",
+		"activeEntry.placementReadiness.canStagePlacementDraft",
+		"model.summary.placeableDraftEntryCount",
+		"model.summary.publishablePlacementEntryCount",
+		"Publish-ready",
+		"Not publishable",
+		"No file writes",
+	];
+	const requiredObjectLibraryModelSnippets = [
+		"createObjectLibraryStagedPlacement",
+		"insert-level-instance",
+		"viewport-placement-target",
+		"placementSource",
+		"LevelEditorObjectLibraryStagedPlacement",
+	];
+	const requiredStyleSnippets = [
+		".editor-workbench-main",
+		".editor-workbench-center",
+		".editor-viewport-bridge",
+		".editor-viewport-placement-ghost",
+		'.editor-viewport-frame[data-placement-drop-ready="true"]',
+		".editor-viewport-frame.editor-viewport-placement-drop-active",
+		".editor-workflow-summary",
+		".editor-workflow-badges",
+		".editor-staged-operations",
+		".editor-staged-operation-list",
+		".editor-library-browser-controls",
+		".editor-library-empty-state",
+		".editor-placement-composer",
+		".editor-placement-transform-grid",
+		".editor-staged-placement-list",
+		".editor-transform-mode-switcher",
+		".editor-transform-snap-control",
+		'.editor-field[data-workflow-publishability="publishable"] input',
+		"grid-template-columns: minmax(15rem, 18rem) minmax(28rem, 1fr) minmax(",
+		".editor-bottom-grid",
+		".editor-object-focus-grid",
+	];
+
+	for (const snippet of requiredProgressSnippets) {
+		assertIncludes(
+			docs.workbenchProgress,
+			snippet,
+			`Expected workbench progress doc to include ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredComponentSnippets) {
+		assertIncludes(
+			workspaceComponent,
+			snippet,
+			`Expected LevelEditorWorkspace to keep the connected workbench region ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const forbiddenSnippet of [
+		"document.querySelector<HTMLInputElement>",
+		"cssEscape(field.path)",
+	]) {
+		assertNotIncludes(
+			workspaceComponent,
+			forbiddenSnippet,
+			`Expected preview construction to avoid DOM-scraped inspector state via ${JSON.stringify(forbiddenSnippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredViewportBridgeSnippets) {
+		assertIncludes(
+			viewportBridgePanel,
+			snippet,
+			`Expected viewport bridge panel to expose the contract surface ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredObjectLibrarySnippets) {
+		assertIncludes(
+			objectLibraryPanel,
+			snippet,
+			`Expected object library panel to expose placement workflow source ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredObjectLibraryModelSnippets) {
+		assertIncludes(
+			objectLibraryModel,
+			snippet,
+			`Expected object library model to own placement operation source ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredStyleSnippets) {
+		assertIncludes(
+			editorStyles,
+			snippet,
+			`Expected editor styles to keep the connected workbench layout rule ${JSON.stringify(snippet)}.`,
+		);
+	}
+}
+
+function assertSavePublishPlanStaysFirstSliceHonest(): void {
+	const normalizedSavePublishPlan = docs.savePublishPlan.replace(/\s+/g, " ");
+	const requiredSnippets = [
+		"current configured Publish Level gates are the first-slice gates",
+		"test:level-editor-save-contract",
+		"test:runtime-scene-contract",
+		"test:production-editor-bundle-contract",
+		"type-check",
+		"build",
+		"Broader cook/drift, terrain, collision, audio, prefab, render-profile, asset, NPC, and environment gates must be added",
+		"Publish must not imply full-feature save/publish coverage",
+	];
+
+	for (const snippet of requiredSnippets) {
+		assertIncludes(
+			normalizedSavePublishPlan,
+			snippet,
+			`Expected save/publish plan to include ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	assertIncludesOneOf(
+		normalizedSavePublishPlan,
+		[
+			"supports level-owned `set-transform` operations and generated object-library `insert-level-instance` placement operations",
+			"supports level-owned `set-transform` operations, generated object-library `insert-level-instance` placement operations, and bounded level-instance `set-component` overrides",
+			"supports level-owned set-transform operations, generated object-library insert-level-instance placement operations, and bounded level-instance set-component overrides",
+			"supports level-owned set-transform operations, generated object-library insert-level-instance placement operations, and bounded level-instance set-component and remove-component overrides",
+			"supports level-owned set-transform operations, generated object-library insert-level-instance placement operations, bounded level-instance set-component and remove-component overrides, and bounded remove-level-instance owner writes",
+			"supports level-owned set-transform operations, generated object-library insert-level-instance placement operations, bounded level-instance replace-prefab overrides, bounded level-instance set-component and remove-component overrides, and bounded remove-level-instance owner writes",
+		],
+		"Expected save/publish plan to describe the bounded first-slice generated-owner publish families.",
+	);
 }
 
 function assertGenericEditorCatalogGuardrails(): void {
@@ -415,6 +807,20 @@ function lineContaining(text: string, snippet: string): string | undefined {
 function assertIncludes(text: string, snippet: string, message: string): void {
 	if (!text.includes(snippet)) {
 		throw new Error(`${message} Missing snippet: ${JSON.stringify(snippet)}.`);
+	}
+}
+
+function assertIncludesOneOf(
+	text: string,
+	snippets: readonly string[],
+	message: string,
+): void {
+	if (!snippets.some((snippet) => text.includes(snippet))) {
+		throw new Error(
+			`${message} Missing one of: ${snippets
+				.map((snippet) => JSON.stringify(snippet))
+				.join(", ")}.`,
+		);
 	}
 }
 

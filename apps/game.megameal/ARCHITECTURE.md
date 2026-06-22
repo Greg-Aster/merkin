@@ -673,6 +673,21 @@ The first dev-only boundary shell exists at `/editor/`, backed by
 `RuntimeSceneManifest` from the checked-in catalog, resolves collision drafts
 through the draft registry, reports missing draft state without falling back to
 level-specific content, and stays outside the normal game HUD.
+The editor workspace may add professional selection aids such as category
+filters, spatial pins, selected-object summaries, and future editor-only
+viewport gizmos. Those aids are UI projections over manifest-owned level
+instances and component fields; they must select the same stable-ID object as
+the outliner and inspector, must not create scene-specific object lists such as
+a hardcoded portal arena portal set, and must not become runtime gameplay
+state.
+The target editor architecture is a workbench, not a stack of unrelated cards:
+top toolbar, scene hierarchy, central editor viewport or live-game viewport
+bridge, selected-object inspector, content browser, output log, and validation
+or publish gates. `docs/LEVEL_EDITOR_AAA_RESEARCH_AND_GAP_ANALYSIS.md` owns the
+research-backed gap matrix for that workbench. Until the central viewport,
+synchronized selection, direct manipulation, and broader owner-write publish
+paths exist, the editor must be described as a foundation rather than a
+AAA-tier-complete level editor.
 
 Runtime character traversal must use engine physics abstractions, not renderer
 geometry or raw adapter objects. `CharacterController.kinematicCollision`

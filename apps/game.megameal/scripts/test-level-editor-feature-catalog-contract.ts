@@ -57,6 +57,8 @@ for (const familyId of [
 	"runtime-scene-selection",
 	"level-instance-transform",
 	"level-instance-structure",
+	"level-instance-removal",
+	"level-instance-prefab-replacement",
 	"component-editing",
 	"object-library-placement",
 	"object-library-replacement",
@@ -81,6 +83,122 @@ for (const familyId of [
 for (const family of featureCoverage.families) {
 	assertFeatureFamilyDoesNotPersistUnsupportedFields(family);
 }
+
+const componentEditingFeatureFamily = assertDefined(
+	featureFamiliesById.get("component-editing"),
+	"Expected component editing feature coverage.",
+);
+assertFeatureFamilyPublishableWithOwners(componentEditingFeatureFamily);
+assertIncludes(
+	componentEditingFeatureFamily.optionalGeneratedOwnerKinds,
+	"published-transforms",
+	"Expected component editing to publish level-instance component set/removal operations through the generated level authoring owner.",
+);
+assertIncludes(
+	componentEditingFeatureFamily.operationKinds,
+	"set-component",
+	"Expected component editing to cover level-instance set-component overrides.",
+);
+assertIncludes(
+	componentEditingFeatureFamily.operationKinds,
+	"remove-component",
+	"Expected component editing to cover level-instance remove-component operations.",
+);
+assertIncludes(
+	componentEditingFeatureFamily.requiredOwnerKinds,
+	"level",
+	"Expected component editing to require the level owner for publishable component set/removal operations.",
+);
+
+const levelInstanceRemovalFeatureFamily = assertDefined(
+	featureFamiliesById.get("level-instance-removal"),
+	"Expected level-instance removal feature coverage.",
+);
+assertFeatureFamilyPublishableWithOwners(levelInstanceRemovalFeatureFamily);
+assertIncludes(
+	levelInstanceRemovalFeatureFamily.optionalGeneratedOwnerKinds,
+	"published-transforms",
+	"Expected level-instance removal to publish through the generated level authoring owner.",
+);
+assertIncludes(
+	levelInstanceRemovalFeatureFamily.operationKinds,
+	"remove-instance",
+	"Expected level-instance removal to cover authoring remove-instance operations.",
+);
+assertIncludes(
+	levelInstanceRemovalFeatureFamily.operationKinds,
+	"remove-level-instance",
+	"Expected level-instance removal to cover persisted remove-level-instance save operations.",
+);
+assertIncludes(
+	levelInstanceRemovalFeatureFamily.requiredOwnerKinds,
+	"level",
+	"Expected level-instance removal to require the level owner.",
+);
+
+const levelInstanceDuplicationFeatureFamily = assertDefined(
+	featureFamiliesById.get("level-instance-duplication"),
+	"Expected level-instance duplication feature coverage.",
+);
+assertFeatureFamilyPublishableWithOwners(levelInstanceDuplicationFeatureFamily);
+assertIncludes(
+	levelInstanceDuplicationFeatureFamily.optionalGeneratedOwnerKinds,
+	"published-transforms",
+	"Expected level-instance duplication to publish through the generated level authoring owner.",
+);
+assertIncludes(
+	levelInstanceDuplicationFeatureFamily.operationKinds,
+	"insert-instance",
+	"Expected level-instance duplication to cover authoring insert-instance operations.",
+);
+assertIncludes(
+	levelInstanceDuplicationFeatureFamily.operationKinds,
+	"insert-level-instance",
+	"Expected level-instance duplication to cover persisted insert-level-instance save operations.",
+);
+assertIncludes(
+	levelInstanceDuplicationFeatureFamily.requiredOwnerKinds,
+	"level",
+	"Expected level-instance duplication to require the level owner.",
+);
+assertIncludes(
+	levelInstanceDuplicationFeatureFamily.requiredOwnerKinds,
+	"prefab",
+	"Expected level-instance duplication to require the source prefab owner.",
+);
+
+const levelInstancePrefabReplacementFeatureFamily = assertDefined(
+	featureFamiliesById.get("level-instance-prefab-replacement"),
+	"Expected level-instance prefab replacement feature coverage.",
+);
+assertFeatureFamilyPublishableWithOwners(
+	levelInstancePrefabReplacementFeatureFamily,
+);
+assertIncludes(
+	levelInstancePrefabReplacementFeatureFamily.optionalGeneratedOwnerKinds,
+	"published-transforms",
+	"Expected level-instance prefab replacement to publish through the generated level authoring owner.",
+);
+assertIncludes(
+	levelInstancePrefabReplacementFeatureFamily.operationKinds,
+	"replace-prefab",
+	"Expected level-instance prefab replacement to cover replace-prefab operations.",
+);
+assertIncludes(
+	levelInstancePrefabReplacementFeatureFamily.operationKinds,
+	"replace-level-instance",
+	"Expected level-instance prefab replacement to cover persisted replace-level-instance save operations.",
+);
+assertIncludes(
+	levelInstancePrefabReplacementFeatureFamily.requiredOwnerKinds,
+	"level",
+	"Expected level-instance prefab replacement to require the level owner.",
+);
+assertIncludes(
+	levelInstancePrefabReplacementFeatureFamily.requiredOwnerKinds,
+	"prefab",
+	"Expected level-instance prefab replacement to require the replacement prefab owner.",
+);
 
 const workspaceModel = buildLevelEditorWorkspaceModel({
 	selectedRuntimeSceneId: portalArenaRuntimeSceneManifest.id,
@@ -153,7 +271,37 @@ assertEqual(
 	false,
 	"Expected object library insertion drafts not to write files directly.",
 );
-assertFeatureFamilyDraftOnlyWithOwners(
+assertEqual(
+	fireflyEntry.placementReadiness.contract,
+	"ManifestBackedObjectPlacementReadiness",
+	"Expected object library entries to expose manifest-backed placement readiness.",
+);
+assertEqual(
+	fireflyEntry.placementReadiness.status,
+	"publish-ready",
+	"Expected manifest-backed prefab entries to be publish-ready for placement.",
+);
+assertEqual(
+	fireflyEntry.placementReadiness.canStagePlacementDraft,
+	true,
+	"Expected prefab placement readiness to allow draft staging.",
+);
+assertEqual(
+	fireflyEntry.placementReadiness.canPublishPlacement,
+	true,
+	"Expected object library prefab placement to become publishable through the generated owner writer.",
+);
+assertEqual(
+	fireflyEntry.placementReadiness.writesFiles,
+	true,
+	"Expected object library placement readiness to report generated owner writes.",
+);
+assertIncludes(
+	fireflyEntry.placementReadiness.requiredOwnerKinds,
+	"level",
+	"Expected prefab placement readiness to require a level owner.",
+);
+assertFeatureFamilyPublishableWithOwners(
 	assertDefined(
 		featureFamiliesById.get("object-library-placement"),
 		"Expected object library placement feature coverage.",
@@ -241,6 +389,21 @@ const portalMeshEntry = assertDefined(
 		?.entries.find((entry) => entry.assetId === "mesh_portal_gate"),
 	"Expected portal gate mesh to appear in the manifest-backed asset library.",
 );
+assertEqual(
+	portalMeshEntry.placementReadiness.status,
+	"replacement-only",
+	"Expected asset library entries to be replacement-only for placement readiness.",
+);
+assertEqual(
+	portalMeshEntry.placementReadiness.canStagePlacementDraft,
+	false,
+	"Expected asset entries not to expose placement drafts.",
+);
+assertEqual(
+	portalMeshEntry.placementReadiness.canPublishPlacement,
+	false,
+	"Expected asset placement readiness not to become publishable.",
+);
 const meshReplacementDraft = createObjectLibraryReplacementDraft({
 	runtimeSceneId: defaultRuntimeSceneManifest.id,
 	levelId: defaultRuntimeSceneManifest.level.id,
@@ -288,6 +451,21 @@ assertEqual(
 	objectLibraryPanel.summary.stagedWritesFiles,
 	false,
 	"Expected staged replacement summary not to claim direct file writes.",
+);
+assertAtLeast(
+	objectLibraryPanel.summary.placeableDraftEntryCount,
+	1,
+	"Expected object-library panel summary to count draft-ready prefab placements.",
+);
+assertAtLeast(
+	objectLibraryPanel.summary.publishablePlacementEntryCount,
+	1,
+	"Expected object-library panel summary to expose publishable prefab placements.",
+);
+assertEqual(
+	objectLibraryPanel.selectedEntry?.canPublishPlacement,
+	false,
+	"Expected panel entries not to make object-library placement publishable.",
 );
 const replacementMessage = createObjectLibraryReplacementPreviewMessage({
 	requestId: "object-library-replacement-contract",
@@ -639,6 +817,26 @@ function assertFeatureFamilyDraftOnlyWithOwners(
 		family.storagePolicy,
 		"save-draft-only-non-runtime",
 		`Expected feature family ${family.id} to avoid permanent editor-only runtime storage.`,
+	);
+	assertAtLeast(
+		family.ownerTargetIds.length,
+		1,
+		`Expected feature family ${family.id} to resolve owner targets.`,
+	);
+}
+
+function assertFeatureFamilyPublishableWithOwners(
+	family: LevelEditorFeatureFamilyCoverage,
+): void {
+	assertEqual(
+		family.publishStatus,
+		"bounded-owner-write",
+		`Expected feature family ${family.id} to declare bounded owner-write coverage.`,
+	);
+	assertEqual(
+		family.storagePolicy,
+		"runtime-owner-publish",
+		`Expected feature family ${family.id} to publish through checked-in runtime owner data.`,
 	);
 	assertAtLeast(
 		family.ownerTargetIds.length,

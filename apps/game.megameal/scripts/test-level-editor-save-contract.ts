@@ -21,7 +21,17 @@ import {
 	buildLevelEditorAuthoringSaveWritePlan,
 	buildLevelEditorOwnerRegistry,
 	hashLevelEditorAuthoringFileContent,
+	mergePublishedLevelInstanceComponentOverrides,
+	mergePublishedLevelInstanceComponentRemovals,
+	mergePublishedLevelInstanceInsertions,
+	mergePublishedLevelInstancePrefabOverrides,
+	mergePublishedLevelInstanceRemovals,
 	mergePublishedTransformOverrides,
+	parsePublishedLevelInstanceComponentOverrides,
+	parsePublishedLevelInstanceComponentRemovals,
+	parsePublishedLevelInstanceInsertions,
+	parsePublishedLevelInstancePrefabOverrides,
+	parsePublishedLevelInstanceRemovals,
 	parsePublishedLevelTransformOverrides,
 	publishLevelEditorTransformTransaction,
 	rollbackLevelEditorPublishChangeset,
@@ -340,6 +350,212 @@ const mergedNonPlayerPublishedOverrides = mergePublishedTransformOverrides({
 	existingOverrides: mergedPublishedOverrides,
 	transaction: nonPlayerPublishedTransformTransaction,
 });
+const publishedPlacementTransaction = createPlacementTransaction({
+	runtimeSceneId: "portal_arena_runtime",
+	saveTargetId: "portal_arena_runtime:generated:authoring-save",
+	baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+	ownerTargetId: "portal_arena_runtime:level",
+	transactionId: "publish-contract-portal-placement",
+	stableId: "portal_arena:portal_gate:draft-save-contract",
+	prefabId: "portal_gate",
+	position: [4, 0, -8],
+});
+const mergedPublishedInsertions = mergePublishedLevelInstanceInsertions({
+	existingInsertions: [],
+	transaction: publishedPlacementTransaction,
+});
+assertEqual(
+	mergedPublishedInsertions[0]?.instance.stableId,
+	"portal_arena:portal_gate:draft-save-contract",
+	"Expected generated insertion merge to preserve the placed stable ID.",
+);
+const publishedPrefabReplacementTransaction =
+	createPrefabReplacementTransaction({
+		runtimeSceneId: "prototype_arena_runtime",
+		saveTargetId: "prototype_arena_runtime:generated:authoring-save",
+		baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+		ownerTargetId: "prototype_arena_runtime:level",
+		transactionId: "publish-contract-ingredient-prefab-replacement",
+		stableId: "ingredient:north",
+		prefabId: "arena_floor",
+	});
+const mergedPublishedPrefabOverrides =
+	mergePublishedLevelInstancePrefabOverrides({
+		existingPrefabOverrides: [],
+		transaction: publishedPrefabReplacementTransaction,
+	});
+assertEqual(
+	mergedPublishedPrefabOverrides[0]?.stableId,
+	"ingredient:north",
+	"Expected prefab replacement merge to preserve the target stable ID.",
+);
+assertEqual(
+	mergedPublishedPrefabOverrides[0]?.prefabId,
+	"arena_floor",
+	"Expected prefab replacement merge to preserve the replacement prefab ID.",
+);
+const generatedInsertionRemovalTransaction = createRemovalTransaction({
+	runtimeSceneId: "portal_arena_runtime",
+	saveTargetId: "portal_arena_runtime:generated:authoring-save",
+	baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+	ownerTargetId: "portal_arena_runtime:level",
+	transactionId: "publish-contract-generated-placement-removal",
+	stableId: "portal_arena:portal_gate:draft-save-contract",
+});
+const mergedInsertionsAfterGeneratedRemoval =
+	mergePublishedLevelInstanceInsertions({
+		existingInsertions: mergedPublishedInsertions,
+		transaction: generatedInsertionRemovalTransaction,
+	});
+const mergedRemovalsAfterGeneratedRemoval = mergePublishedLevelInstanceRemovals(
+	{
+		existingRemovals: [],
+		existingInsertions: mergedPublishedInsertions,
+		transaction: generatedInsertionRemovalTransaction,
+	},
+);
+assertEqual(
+	mergedInsertionsAfterGeneratedRemoval.some(
+		(insertion) =>
+			insertion.instance.stableId ===
+			"portal_arena:portal_gate:draft-save-contract",
+	),
+	false,
+	"Expected removing a generated insertion to clear the generated insertion record.",
+);
+assertEqual(
+	mergedRemovalsAfterGeneratedRemoval.length,
+	0,
+	"Expected removing a generated insertion to avoid a runtime tombstone for generated-only data.",
+);
+const publishedComponentTransaction = createComponentTransaction({
+	runtimeSceneId: "portal_arena_runtime",
+	saveTargetId: "portal_arena_runtime:generated:authoring-save",
+	baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+	ownerTargetId: "portal_arena_runtime:level",
+	transactionId: "publish-contract-portal-component",
+	stableId: "portal-arena:portal:observatory",
+	componentName: "Portal",
+	value: {
+		targetRuntimeSceneId: "observatory_runtime",
+		label: "Observatory Contract Portal",
+	},
+});
+const mergedPublishedComponentOverrides =
+	mergePublishedLevelInstanceComponentOverrides({
+		existingComponentOverrides: [],
+		transaction: publishedComponentTransaction,
+	});
+assertEqual(
+	mergedPublishedComponentOverrides[0]?.componentName,
+	"Portal",
+	"Expected generated component merge to preserve the component name.",
+);
+const publishedComponentRemovalTransaction = createComponentRemovalTransaction({
+	runtimeSceneId: "portal_arena_runtime",
+	saveTargetId: "portal_arena_runtime:generated:authoring-save",
+	baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+	ownerTargetId: "portal_arena_runtime:level",
+	transactionId: "publish-contract-portal-component-removal",
+	stableId: "portal-arena:portal:observatory",
+	componentName: "Portal",
+});
+const mergedPublishedComponentRemovals =
+	mergePublishedLevelInstanceComponentRemovals({
+		existingComponentRemovals: [],
+		transaction: publishedComponentRemovalTransaction,
+	});
+assertEqual(
+	mergedPublishedComponentRemovals[0]?.componentName,
+	"Portal",
+	"Expected generated component removal merge to preserve the component name.",
+);
+const publishedInstanceRemovalTransaction = createRemovalTransaction({
+	runtimeSceneId: "prototype_arena_runtime",
+	saveTargetId: "prototype_arena_runtime:generated:authoring-save",
+	baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+	ownerTargetId: "prototype_arena_runtime:level",
+	transactionId: "publish-contract-ingredient-removal",
+	stableId: "ingredient:north",
+});
+const mergedPublishedInstanceRemovals = mergePublishedLevelInstanceRemovals({
+	existingRemovals: [],
+	transaction: publishedInstanceRemovalTransaction,
+});
+assertEqual(
+	mergedPublishedInstanceRemovals[0]?.stableId,
+	"ingredient:north",
+	"Expected generated instance removal merge to preserve the removed stable ID.",
+);
+assertEqual(
+	mergedPublishedInstanceRemovals[0]?.runtimeSceneId,
+	"prototype_arena_runtime",
+	"Expected generated instance removal merge to preserve the runtime scene ID.",
+);
+const readinessRequiredRemovalTransaction = createRemovalTransaction({
+	runtimeSceneId: "portal_arena_runtime",
+	saveTargetId: "portal_arena_runtime:generated:authoring-save",
+	baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+	ownerTargetId: "portal_arena_runtime:level",
+	transactionId: "publish-contract-rejects-required-removal",
+	stableId: "portal-arena:portal:observatory",
+});
+assertThrows(
+	() =>
+		mergePublishedLevelInstanceRemovals({
+			existingRemovals: [],
+			transaction: readinessRequiredRemovalTransaction,
+		}),
+	"cannot remove readiness-required stable ID",
+	"Expected generated owner writes to reject removal of readiness-required level instances.",
+);
+const readinessRequiredPrefabReplacementTransaction =
+	createPrefabReplacementTransaction({
+		runtimeSceneId: "portal_arena_runtime",
+		saveTargetId: "portal_arena_runtime:generated:authoring-save",
+		baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+		ownerTargetId: "portal_arena_runtime:level",
+		transactionId: "publish-contract-rejects-required-prefab-replacement",
+		stableId: "portal-arena:portal:observatory",
+		prefabId: "portal_gate",
+	});
+assertThrows(
+	() =>
+		mergePublishedLevelInstancePrefabOverrides({
+			existingPrefabOverrides: [],
+			transaction: readinessRequiredPrefabReplacementTransaction,
+		}),
+	"cannot replace prefab for readiness-required stable ID",
+	"Expected generated owner writes to reject prefab replacement for readiness-required level instances.",
+);
+const mixedUnsupportedPublishTransaction: LevelEditorAuthoringSaveTransactionData =
+	{
+		...publishedTransformTransaction,
+		transactionId: "publish-contract-rejects-asset-operation",
+		targets: [
+			{
+				...requireSaveTarget(publishedTransformTransaction),
+				operations: [
+					requireSaveOperation(
+						requireSaveTarget(publishedTransformTransaction),
+					),
+					{
+						kind: "replace-asset",
+						ownerKind: "asset",
+						ownerTargetId: "portal_arena_runtime:assets",
+						subjectId: "asset:texture_portal_arena_equirectangular_sky",
+						payload: {
+							operation: {
+								kind: "replace-component-asset-reference",
+								stableId: "player",
+								fieldPath: "Renderable.materialId",
+							},
+						},
+					},
+				],
+			},
+		],
+	};
 
 assertEqual(
 	mergedPublishedOverrides[0]?.stableId,
@@ -372,6 +588,22 @@ assertPublishFailure(
 			}),
 		}),
 	'does not contain stable ID "missing-stable-id"',
+);
+assertPublishFailure(
+	() =>
+		mergePublishedTransformOverrides({
+			existingOverrides: [],
+			transaction: mixedUnsupportedPublishTransaction,
+		}),
+	"Object Library Replacement",
+);
+assertPublishFailure(
+	() =>
+		mergePublishedTransformOverrides({
+			existingOverrides: [],
+			transaction: mixedUnsupportedPublishTransaction,
+		}),
+	"draft-only",
 );
 
 const tempRoot = await mkdtemp(join(tmpdir(), "level-editor-save-contract-"));
@@ -623,6 +855,364 @@ try {
 			?.transform.position?.join(","),
 		"2,0,-6",
 		"Expected publish to persist the non-player portal transform in generated runtime owner data.",
+	);
+
+	const placementPublishSave = await publishLevelEditorTransformTransaction({
+		appRoot: publishedTransformTempRoot,
+		transaction: publishedPlacementTransaction,
+		baseHash: hashLevelEditorAuthoringFileContent(
+			updatedNonPlayerPublishedTransformSource,
+		),
+	});
+	const updatedPlacementPublishedSource = await readFile(
+		publishedTransformPath,
+		"utf8",
+	);
+	const updatedPlacementInsertions = parsePublishedLevelInstanceInsertions(
+		updatedPlacementPublishedSource,
+	);
+
+	assertEqual(
+		placementPublishSave.wroteFile,
+		true,
+		"Expected placement publish to write the generated runtime owner file.",
+	);
+	assertIncludes(
+		placementPublishSave.publishedStableIds,
+		"portal_arena:portal_gate:draft-save-contract",
+		"Expected placement publish to report the inserted stable ID.",
+	);
+	assertEqual(
+		placementPublishSave.insertions[0]?.instance.prefabId,
+		"portal_gate",
+		"Expected placement publish to return generated insertion data.",
+	);
+	assertEqual(
+		updatedPlacementInsertions[0]?.instance.stableId,
+		"portal_arena:portal_gate:draft-save-contract",
+		"Expected placement publish to persist the inserted level instance.",
+	);
+	assertEqual(
+		updatedPlacementInsertions[0]?.instance.transform?.position?.join(","),
+		"4,0,-8",
+		"Expected placement publish to persist the authored placement transform.",
+	);
+
+	const prefabReplacementPublishSave =
+		await publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: publishedPrefabReplacementTransaction,
+			baseHash: hashLevelEditorAuthoringFileContent(
+				updatedPlacementPublishedSource,
+			),
+		});
+	const updatedPrefabReplacementPublishedSource = await readFile(
+		publishedTransformPath,
+		"utf8",
+	);
+	const updatedPrefabOverrides = parsePublishedLevelInstancePrefabOverrides(
+		updatedPrefabReplacementPublishedSource,
+	);
+
+	assertEqual(
+		prefabReplacementPublishSave.wroteFile,
+		true,
+		"Expected prefab replacement publish to write the generated runtime owner file.",
+	);
+	assertIncludes(
+		prefabReplacementPublishSave.publishedStableIds,
+		"ingredient:north",
+		"Expected prefab replacement publish to report the replaced stable ID.",
+	);
+	assertEqual(
+		prefabReplacementPublishSave.prefabOverrides[0]?.prefabId,
+		"arena_floor",
+		"Expected prefab replacement publish to return generated prefab override data.",
+	);
+	assertEqual(
+		updatedPrefabOverrides[0]?.stableId,
+		"ingredient:north",
+		"Expected prefab replacement publish to persist the target stable ID.",
+	);
+	assertEqual(
+		updatedPrefabOverrides[0]?.prefabId,
+		"arena_floor",
+		"Expected prefab replacement publish to persist the replacement prefab ID.",
+	);
+
+	const generatedInsertionComponentPublishSave =
+		await publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: createComponentTransaction({
+				runtimeSceneId: "portal_arena_runtime",
+				saveTargetId: "portal_arena_runtime:generated:authoring-save",
+				baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+				ownerTargetId: "portal_arena_runtime:level",
+				transactionId: "publish-contract-generated-portal-component",
+				stableId: "portal_arena:portal_gate:draft-save-contract",
+				componentName: "Portal",
+				value: {
+					targetRuntimeSceneId: "prototype_arena_runtime",
+					label: "Generated Portal Override",
+				},
+			}),
+			baseHash: hashLevelEditorAuthoringFileContent(
+				updatedPrefabReplacementPublishedSource,
+			),
+		});
+	const updatedGeneratedInsertionComponentPublishedSource = await readFile(
+		publishedTransformPath,
+		"utf8",
+	);
+	const updatedGeneratedInsertionComponentOverrides =
+		parsePublishedLevelInstanceComponentOverrides(
+			updatedGeneratedInsertionComponentPublishedSource,
+		);
+
+	assertEqual(
+		generatedInsertionComponentPublishSave.wroteFile,
+		true,
+		"Expected generated insertion component publish to write the generated runtime owner file.",
+	);
+	assertIncludes(
+		generatedInsertionComponentPublishSave.publishedStableIds,
+		"portal_arena:portal_gate:draft-save-contract",
+		"Expected generated insertion component publish to report the inserted stable ID.",
+	);
+	assertEqual(
+		updatedGeneratedInsertionComponentOverrides[0]?.stableId,
+		"portal_arena:portal_gate:draft-save-contract",
+		"Expected component publish to accept an existing generated insertion stable ID.",
+	);
+	assertEqual(
+		updatedGeneratedInsertionComponentOverrides[0]?.value.label,
+		"Generated Portal Override",
+		"Expected component publish to persist an override for a generated insertion.",
+	);
+
+	const generatedInsertionRemovalPublishSave =
+		await publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: generatedInsertionRemovalTransaction,
+			baseHash: hashLevelEditorAuthoringFileContent(
+				updatedGeneratedInsertionComponentPublishedSource,
+			),
+		});
+	const updatedGeneratedInsertionRemovalPublishedSource = await readFile(
+		publishedTransformPath,
+		"utf8",
+	);
+	const updatedGeneratedInsertionRemovalInsertions =
+		parsePublishedLevelInstanceInsertions(
+			updatedGeneratedInsertionRemovalPublishedSource,
+		);
+	const updatedGeneratedInsertionRemovalComponentOverrides =
+		parsePublishedLevelInstanceComponentOverrides(
+			updatedGeneratedInsertionRemovalPublishedSource,
+		);
+	const updatedGeneratedInsertionRemovalInstanceRemovals =
+		parsePublishedLevelInstanceRemovals(
+			updatedGeneratedInsertionRemovalPublishedSource,
+		);
+
+	assertEqual(
+		generatedInsertionRemovalPublishSave.wroteFile,
+		true,
+		"Expected generated insertion removal publish to write the generated runtime owner file.",
+	);
+	assertIncludes(
+		generatedInsertionRemovalPublishSave.publishedStableIds,
+		"portal_arena:portal_gate:draft-save-contract",
+		"Expected generated insertion removal publish to report the removed stable ID.",
+	);
+	assertEqual(
+		updatedGeneratedInsertionRemovalInsertions.some(
+			(insertion) =>
+				insertion.instance.stableId ===
+				"portal_arena:portal_gate:draft-save-contract",
+		),
+		false,
+		"Expected generated insertion removal publish to clear the insertion record.",
+	);
+	assertEqual(
+		updatedGeneratedInsertionRemovalComponentOverrides.some(
+			(override) =>
+				override.stableId === "portal_arena:portal_gate:draft-save-contract",
+		),
+		false,
+		"Expected generated insertion removal publish to clear dependent component overrides.",
+	);
+	assertEqual(
+		updatedGeneratedInsertionRemovalInstanceRemovals.some(
+			(removal) =>
+				removal.stableId === "portal_arena:portal_gate:draft-save-contract",
+		),
+		false,
+		"Expected generated insertion removal publish to avoid a runtime tombstone for generated-only data.",
+	);
+
+	const componentPublishSave = await publishLevelEditorTransformTransaction({
+		appRoot: publishedTransformTempRoot,
+		transaction: publishedComponentTransaction,
+		baseHash: hashLevelEditorAuthoringFileContent(
+			updatedGeneratedInsertionRemovalPublishedSource,
+		),
+	});
+	const updatedComponentPublishedSource = await readFile(
+		publishedTransformPath,
+		"utf8",
+	);
+	const updatedComponentOverrides =
+		parsePublishedLevelInstanceComponentOverrides(
+			updatedComponentPublishedSource,
+		);
+	const updatedPortalComponentOverride = updatedComponentOverrides.find(
+		(override) => override.stableId === "portal-arena:portal:observatory",
+	);
+
+	assertEqual(
+		componentPublishSave.wroteFile,
+		true,
+		"Expected component publish to write the generated runtime owner file.",
+	);
+	assertIncludes(
+		componentPublishSave.publishedStableIds,
+		"portal-arena:portal:observatory",
+		"Expected component publish to report the component override stable ID.",
+	);
+	assertEqual(
+		componentPublishSave.componentOverrides[0]?.componentName,
+		"Portal",
+		"Expected component publish to return generated component override data.",
+	);
+	assertEqual(
+		updatedPortalComponentOverride?.stableId,
+		"portal-arena:portal:observatory",
+		"Expected component publish to persist the target stable ID.",
+	);
+	assertEqual(
+		updatedPortalComponentOverride?.value.label,
+		"Observatory Contract Portal",
+		"Expected component publish to persist the authored component value.",
+	);
+
+	const componentRemovalPublishSave =
+		await publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: publishedComponentRemovalTransaction,
+			baseHash: hashLevelEditorAuthoringFileContent(
+				updatedComponentPublishedSource,
+			),
+		});
+	const updatedComponentRemovalPublishedSource = await readFile(
+		publishedTransformPath,
+		"utf8",
+	);
+	const updatedComponentRemovalOverrides =
+		parsePublishedLevelInstanceComponentOverrides(
+			updatedComponentRemovalPublishedSource,
+		);
+	const updatedComponentRemovals = parsePublishedLevelInstanceComponentRemovals(
+		updatedComponentRemovalPublishedSource,
+	);
+
+	assertEqual(
+		componentRemovalPublishSave.wroteFile,
+		true,
+		"Expected component removal publish to write the generated runtime owner file.",
+	);
+	assertIncludes(
+		componentRemovalPublishSave.publishedStableIds,
+		"portal-arena:portal:observatory",
+		"Expected component removal publish to report the component removal stable ID.",
+	);
+	assertEqual(
+		componentRemovalPublishSave.componentRemovals[0]?.componentName,
+		"Portal",
+		"Expected component removal publish to return generated component removal data.",
+	);
+	assertEqual(
+		updatedComponentRemovals[0]?.stableId,
+		"portal-arena:portal:observatory",
+		"Expected component removal publish to persist the target stable ID.",
+	);
+	assertEqual(
+		updatedComponentRemovals[0]?.componentName,
+		"Portal",
+		"Expected component removal publish to persist the removed component name.",
+	);
+	assertEqual(
+		updatedComponentRemovalOverrides.some(
+			(override) =>
+				override.stableId === "portal-arena:portal:observatory" &&
+				override.componentName === "Portal",
+		),
+		false,
+		"Expected component removal publish to clear a stale generated component override for the same component.",
+	);
+
+	const instanceRemovalPublishSave =
+		await publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: publishedInstanceRemovalTransaction,
+			baseHash: hashLevelEditorAuthoringFileContent(
+				updatedComponentRemovalPublishedSource,
+			),
+		});
+	const updatedInstanceRemovalPublishedSource = await readFile(
+		publishedTransformPath,
+		"utf8",
+	);
+	const updatedInstanceRemovals = parsePublishedLevelInstanceRemovals(
+		updatedInstanceRemovalPublishedSource,
+	);
+
+	assertEqual(
+		instanceRemovalPublishSave.wroteFile,
+		true,
+		"Expected instance removal publish to write the generated runtime owner file.",
+	);
+	assertIncludes(
+		instanceRemovalPublishSave.publishedStableIds,
+		"ingredient:north",
+		"Expected instance removal publish to report the removed stable ID.",
+	);
+	assertEqual(
+		instanceRemovalPublishSave.removals[0]?.stableId,
+		"ingredient:north",
+		"Expected instance removal publish to return generated instance removal data.",
+	);
+	assertEqual(
+		updatedInstanceRemovals[0]?.stableId,
+		"ingredient:north",
+		"Expected instance removal publish to persist the checked-in target stable ID.",
+	);
+	assertEqual(
+		updatedInstanceRemovals[0]?.runtimeSceneId,
+		"prototype_arena_runtime",
+		"Expected instance removal publish to persist the owning runtime scene ID.",
+	);
+
+	await assertPersistenceFailure(
+		publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: readinessRequiredRemovalTransaction,
+			baseHash: hashLevelEditorAuthoringFileContent(
+				updatedInstanceRemovalPublishedSource,
+			),
+		}),
+		"cannot remove readiness-required stable ID",
+	);
+
+	await assertPersistenceFailure(
+		publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: readinessRequiredPrefabReplacementTransaction,
+			baseHash: hashLevelEditorAuthoringFileContent(
+				updatedInstanceRemovalPublishedSource,
+			),
+		}),
+		"cannot replace prefab for readiness-required stable ID",
 	);
 
 	await assertPersistenceFailure(
@@ -1256,6 +1846,237 @@ function createTransaction(options: {
 	};
 }
 
+function createPlacementTransaction(options: {
+	readonly runtimeSceneId: string;
+	readonly saveTargetId: string;
+	readonly baseHash: string;
+	readonly ownerTargetId: string;
+	readonly transactionId: string;
+	readonly stableId: string;
+	readonly prefabId: string;
+	readonly position: readonly [number, number, number];
+}): LevelEditorAuthoringSaveTransactionData {
+	return {
+		schemaVersion: 1,
+		transactionId: options.transactionId,
+		runtimeSceneId: options.runtimeSceneId,
+		authoringValidation: {
+			status: "valid",
+			contract: "LevelEditorAuthoringContract",
+			contentHash: "fnv1a32:cccccccc",
+		},
+		targets: [
+			{
+				targetId: options.saveTargetId,
+				baseHash: options.baseHash,
+				operations: [
+					{
+						kind: "insert-level-instance",
+						ownerKind: "level",
+						ownerTargetId: options.ownerTargetId,
+						subjectId: options.stableId,
+						payload: {
+							sourceOperationKind: "insert-level-instance",
+							entryId: `prefab:${options.prefabId}`,
+							sourceOwner: `runtime-scene-manifest-catalog:prefabs:${options.prefabId}`,
+							placementSource: "save-contract",
+							instance: {
+								id: options.stableId,
+								stableId: options.stableId,
+								prefabId: options.prefabId,
+								components: {},
+								transform: {
+									position: options.position,
+									rotation: [0, 0, 0, 1],
+									scale: [1, 1, 1],
+								},
+							},
+						},
+					},
+				],
+			},
+		],
+	};
+}
+
+function createPrefabReplacementTransaction(options: {
+	readonly runtimeSceneId: string;
+	readonly saveTargetId: string;
+	readonly baseHash: string;
+	readonly ownerTargetId: string;
+	readonly transactionId: string;
+	readonly stableId: string;
+	readonly prefabId: string;
+}): LevelEditorAuthoringSaveTransactionData {
+	return {
+		schemaVersion: 1,
+		transactionId: options.transactionId,
+		runtimeSceneId: options.runtimeSceneId,
+		authoringValidation: {
+			status: "valid",
+			contract: "LevelEditorAuthoringContract",
+			contentHash: "fnv1a32:abababab",
+		},
+		targets: [
+			{
+				targetId: options.saveTargetId,
+				baseHash: options.baseHash,
+				operations: [
+					{
+						kind: "replace-level-instance",
+						ownerKind: "level",
+						ownerTargetId: options.ownerTargetId,
+						subjectId: options.stableId,
+						payload: {
+							operation: {
+								id: `${options.transactionId}:${options.stableId}:prefab`,
+								kind: "replace-prefab",
+								stableId: options.stableId,
+								prefabId: options.prefabId,
+								persistence: "saved",
+							},
+						},
+					},
+				],
+			},
+		],
+	};
+}
+
+function createComponentTransaction(options: {
+	readonly runtimeSceneId: string;
+	readonly saveTargetId: string;
+	readonly baseHash: string;
+	readonly ownerTargetId: string;
+	readonly transactionId: string;
+	readonly stableId: string;
+	readonly componentName: string;
+	readonly value: Record<string, unknown>;
+}): LevelEditorAuthoringSaveTransactionData {
+	return {
+		schemaVersion: 1,
+		transactionId: options.transactionId,
+		runtimeSceneId: options.runtimeSceneId,
+		authoringValidation: {
+			status: "valid",
+			contract: "LevelEditorAuthoringContract",
+			contentHash: "fnv1a32:dddddddd",
+		},
+		targets: [
+			{
+				targetId: options.saveTargetId,
+				baseHash: options.baseHash,
+				operations: [
+					{
+						kind: "replace-level-instance",
+						ownerKind: "level",
+						ownerTargetId: options.ownerTargetId,
+						subjectId: options.stableId,
+						payload: {
+							operation: {
+								id: `${options.transactionId}:${options.stableId}:component`,
+								kind: "set-component",
+								stableId: options.stableId,
+								target: "level-instance",
+								componentName: options.componentName,
+								persistence: "saved",
+								value: options.value,
+							},
+						},
+					},
+				],
+			},
+		],
+	};
+}
+
+function createComponentRemovalTransaction(options: {
+	readonly runtimeSceneId: string;
+	readonly saveTargetId: string;
+	readonly baseHash: string;
+	readonly ownerTargetId: string;
+	readonly transactionId: string;
+	readonly stableId: string;
+	readonly componentName: string;
+}): LevelEditorAuthoringSaveTransactionData {
+	return {
+		schemaVersion: 1,
+		transactionId: options.transactionId,
+		runtimeSceneId: options.runtimeSceneId,
+		authoringValidation: {
+			status: "valid",
+			contract: "LevelEditorAuthoringContract",
+			contentHash: "fnv1a32:eeeeeeee",
+		},
+		targets: [
+			{
+				targetId: options.saveTargetId,
+				baseHash: options.baseHash,
+				operations: [
+					{
+						kind: "replace-level-instance",
+						ownerKind: "level",
+						ownerTargetId: options.ownerTargetId,
+						subjectId: options.stableId,
+						payload: {
+							operation: {
+								id: `${options.transactionId}:${options.stableId}:component-removal`,
+								kind: "remove-component",
+								stableId: options.stableId,
+								target: "level-instance",
+								componentName: options.componentName,
+								persistence: "saved",
+							},
+						},
+					},
+				],
+			},
+		],
+	};
+}
+
+function createRemovalTransaction(options: {
+	readonly runtimeSceneId: string;
+	readonly saveTargetId: string;
+	readonly baseHash: string;
+	readonly ownerTargetId: string;
+	readonly transactionId: string;
+	readonly stableId: string;
+}): LevelEditorAuthoringSaveTransactionData {
+	return {
+		schemaVersion: 1,
+		transactionId: options.transactionId,
+		runtimeSceneId: options.runtimeSceneId,
+		authoringValidation: {
+			status: "valid",
+			contract: "LevelEditorAuthoringContract",
+			contentHash: "fnv1a32:ffffffff",
+		},
+		targets: [
+			{
+				targetId: options.saveTargetId,
+				baseHash: options.baseHash,
+				operations: [
+					{
+						kind: "remove-level-instance",
+						ownerKind: "level",
+						ownerTargetId: options.ownerTargetId,
+						subjectId: options.stableId,
+						payload: {
+							operation: {
+								id: `${options.transactionId}:${options.stableId}:instance-removal`,
+								kind: "remove-instance",
+								stableId: options.stableId,
+								persistence: "saved",
+							},
+						},
+					},
+				],
+			},
+		],
+	};
+}
+
 function assertValidationFailure(
 	transaction: LevelEditorAuthoringSaveTransactionData,
 	expectedMessage: string,
@@ -1275,6 +2096,25 @@ function assertValidationFailure(
 	}
 
 	throw new Error(`Expected validation failure for ${expectedMessage}.`);
+}
+
+function assertThrows(
+	action: () => unknown,
+	expectedMessage: string,
+	message: string,
+): void {
+	try {
+		action();
+	} catch (error) {
+		assertIncludes(
+			String(error instanceof Error ? error.message : error),
+			expectedMessage,
+			message,
+		);
+		return;
+	}
+
+	throw new Error(message);
 }
 
 async function assertPersistenceFailure(

@@ -18,6 +18,10 @@ explicit contract tooling.
 - Unreal Engine cooking converts authored content into platform/runtime-ready
   data:
   https://dev.epicgames.com/documentation/en-us/unreal-engine/cooking-content-in-unreal-engine
+- Unreal's editor interface uses a workbench made of a viewport, outliner,
+  details panel, content browser/drawer, toolbar, output log, play controls, and
+  save/build status:
+  https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-editor-interface
 - Unity scenes are project assets that hold all or part of a game, commonly one
   scene per level:
   https://docs.unity3d.com/Manual/CreatingScenes.html
@@ -46,6 +50,19 @@ explicit contract tooling.
   readiness IDs.
 - The editor outliner groups manifest-owned objects by component role:
   Spawn, Terrain, Collision, Lights, Portals, Audio Emitters, Story, and Props.
+- The current UI is a foundation, not the finished workbench. The target
+  professional editor shape is tracked in
+  `docs/LEVEL_EDITOR_AAA_RESEARCH_AND_GAP_ANALYSIS.md`: top toolbar, scene
+  hierarchy, central viewport or live-game viewport bridge, inspector, content
+  browser, output log, and publish/validation gates.
+- The object-selection workflow is category-first and component-driven. The
+  editor may provide visual aids such as a category rail, spatial pins, and
+  selected-object summaries, but those controls must be derived from
+  `workspace.objects`, `sceneTree`, stable IDs, and component fields. A category
+  aid for portals, lights, audio emitters, or future object roles must select
+  the same manifest-owned object that the outliner and inspector use; it must
+  not introduce scene-specific portal lists, runtime repair data, or a parallel
+  inspector.
 - Direct manipulation is component-based. V1 previewable objects are player
   spawn transform, authored lights, portal components, and sound emitters.
 - Collision continues through `LevelEditorCollisionCookContract`; terrain
@@ -55,9 +72,16 @@ explicit contract tooling.
   `src/game/editor/collisionDrafts/collisionDraftRegistry.ts`. Per-level
   drafts are content packets and load only when their registered runtime scene
   is selected.
-- Browser edits are preview-only. Runtime changes are sent through
+- Browser-side preview edits are preview-only. Runtime changes are sent through
   `LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL` and restored through clear/reload
-  snapshots. The browser editor does not write source files.
+  snapshots. The Svelte workspace does not directly write source files.
+  Explicit dev-only authoring API routes may write bounded owner files only for
+  supported Save Draft, Save Level, and Publish operations, currently including
+  generated level-instance transforms, object-library placements,
+  level-instance prefab ID replacement records,
+  level-instance component set/removal records, and bounded
+  `remove-level-instance` records. Unsupported staged operations must remain
+  draft-only or blocked instead of leaking into runtime.
 - `/editor/` owns the dev control workspace. `/` owns the live game runtime.
   Production builds must continue to exclude editor tooling from normal game
   execution.
@@ -82,7 +106,7 @@ explicit contract tooling.
   proves that the editor model opens on the runtime catalog default, keeps
   registered collision-draft scenes loadable from the catalog, exposes
   non-terrain outliner groups, previewable core object classes, graph nodes,
-  and preview-only persistence.
+  category-first object selection data, and explicit dev authoring persistence.
 - `pnpm --dir apps/game.megameal test:live-preview-protocol-contract` proves
   preview messages are validated, scene mismatches remain runtime-gated, and
   temporary runtime mutations can be cleared.
