@@ -59,7 +59,12 @@ export type LevelEditorWorkbenchHierarchyRegion =
 			readonly stableIdPaths: readonly {
 				readonly stableId: string;
 				readonly label: string;
+				readonly categoryLabel: string;
+				readonly objectPath: readonly string[];
 				readonly sourceOwner: string;
+				readonly visibility: LevelEditorWorkspaceObject["outliner"]["visibility"];
+				readonly lock: LevelEditorWorkspaceObject["outliner"]["lock"];
+				readonly pickability: LevelEditorWorkspaceObject["outliner"]["pickability"];
 			}[];
 		}[];
 	};
@@ -290,7 +295,12 @@ function buildHierarchyRegion(
 				stableIdPaths: group.objects.map((object) => ({
 					stableId: object.stableId,
 					label: object.label,
+					categoryLabel: object.outliner.categoryLabel,
+					objectPath: object.outliner.objectPath,
 					sourceOwner: object.sourceOwner,
+					visibility: object.outliner.visibility,
+					lock: object.outliner.lock,
+					pickability: object.outliner.pickability,
 				})),
 			};
 		}),

@@ -1,6 +1,8 @@
 import {
 	buildLevelEditorViewportBridgeModel,
+	viewportPickProjectedObjectFromNormalizedPoint,
 	viewportPlacementPositionFromNormalizedPoint,
+	viewportProjectedTransformPositionFromNormalizedPoint,
 } from "../src/app/editor/levelEditorViewportBridgeModel.js";
 import type {
 	LevelEditorWorkspaceModel,
@@ -145,6 +147,153 @@ assertIncludes(
 	"Expected selected viewport bridge objects to expose future transform origin overlay readiness.",
 );
 assertEqual(
+	bridge.camera.activeMode,
+	"orbit",
+	"Expected viewport camera controls to default to orbit navigation.",
+);
+assertIncludes(
+	bridge.camera.availableModes,
+	"top",
+	"Expected viewport camera controls to expose top-down navigation.",
+);
+assertEqual(
+	bridge.camera.zoomPercent,
+	100,
+	"Expected viewport camera controls to default to 100 percent zoom.",
+);
+assertEqual(
+	bridge.camera.framingTarget,
+	"selected-object",
+	"Expected viewport camera controls to frame the selected object when one exists.",
+);
+assertEqual(
+	bridge.camera.stagesAuthoringEdits,
+	false,
+	"Expected viewport camera controls not to stage authoring edits.",
+);
+assertEqual(
+	bridge.camera.writesRuntimeData,
+	false,
+	"Expected viewport camera controls not to mutate runtime camera data.",
+);
+assertEqual(
+	bridge.interaction.activeTool,
+	"select",
+	"Expected viewport interaction to default to selection.",
+);
+assertIncludes(
+	bridge.interaction.tools.map((tool) => tool.id),
+	"place",
+	"Expected viewport interaction tools to include placement.",
+);
+assertIncludes(
+	bridge.interaction.tools.map((tool) => tool.id),
+	"transform",
+	"Expected viewport interaction tools to include transform.",
+);
+assertEqual(
+	bridge.interaction.renderedScenePickingEnabled,
+	false,
+	"Expected viewport interaction not to claim rendered-scene picking.",
+);
+assertEqual(
+	bridge.interaction.writesRuntimeData,
+	false,
+	"Expected viewport interaction tools not to mutate runtime data.",
+);
+assertEqual(
+	bridge.interaction.selectableSource,
+	"projected-transform-pins",
+	"Expected viewport selection to use projected transform pins until rendered picking exists.",
+);
+assertEqual(
+	bridge.interaction.projectedPickRadiusPercent,
+	6,
+	"Expected viewport projected picking to expose its pick radius.",
+);
+assertEqual(
+	bridge.interaction.projectedTransformDrag.status,
+	"ready",
+	"Expected projected transform drag to be ready for editable translate fields.",
+);
+assertEqual(
+	bridge.interaction.projectedTransformDrag.requiresActiveTool,
+	"transform",
+	"Expected projected transform drag to require Transform tool mode.",
+);
+assertEqual(
+	bridge.interaction.projectedTransformDrag.requiredMode,
+	"translate",
+	"Expected projected transform drag to require translate mode.",
+);
+assertIncludes(
+	bridge.interaction.projectedTransformDrag.requiredFieldPaths,
+	"Transform.position.x",
+	"Expected projected transform drag to name editable position X as a required field.",
+);
+assertIncludes(
+	bridge.interaction.projectedTransformDrag.requiredFieldPaths,
+	"Transform.position.z",
+	"Expected projected transform drag to name editable position Z as a required field.",
+);
+assertEqual(
+	bridge.interaction.projectedTransformDrag.preservesAxis,
+	"y",
+	"Expected projected transform drag metadata to preserve authored Y.",
+);
+assertEqual(
+	bridge.interaction.projectedTransformDrag.renderedSceneHitTesting,
+	false,
+	"Expected projected transform drag not to claim rendered-scene hit testing.",
+);
+assertEqual(
+	bridge.interaction.projectedTransformDrag.renderedSceneGizmo,
+	false,
+	"Expected projected transform drag not to claim rendered-scene gizmos.",
+);
+assertEqual(
+	bridge.interaction.projectedTransformDrag.stagesAuthoringEdits,
+	true,
+	"Expected projected transform drag to stage authoring edits.",
+);
+assertEqual(
+	bridge.interaction.projectedTransformDrag.writesRuntimeData,
+	false,
+	"Expected projected transform drag not to mutate runtime data directly.",
+);
+const projectedPlayerPick = viewportPickProjectedObjectFromNormalizedPoint({
+	projection: bridge.projection,
+	point: { xPercent: 13, zPercent: 13 },
+});
+
+if (projectedPlayerPick === null) {
+	throw new Error("Expected projected viewport click to pick the player pin.");
+}
+
+assertEqual(
+	projectedPlayerPick.stableId,
+	playerObject.stableId,
+	"Expected projected viewport picking to select the nearest stable-ID object.",
+);
+assertEqual(
+	projectedPlayerPick.source,
+	"projected-transform-pins",
+	"Expected projected viewport picking to report the projected-pin source.",
+);
+assertEqual(
+	projectedPlayerPick.renderedScenePicking,
+	false,
+	"Expected projected viewport picking not to claim rendered-scene raycasting.",
+);
+assertEqual(
+	viewportPickProjectedObjectFromNormalizedPoint({
+		projection: bridge.projection,
+		point: { xPercent: 50, zPercent: 50 },
+	}),
+	null,
+	"Expected projected viewport picking to return null when no projected pin is inside the pick radius.",
+);
+assertEqual(
 	bridge.selectedStableId,
 	workspace.selectedStableId,
 	"Expected viewport bridge selection to mirror the workspace selected stable ID.",
@@ -205,6 +354,16 @@ assertEqual(
 	bridge.projection.placementSurface.stagesAuthoringEdits,
 	true,
 	"Expected viewport placement surface to stage authoring edits.",
+);
+assertEqual(
+	bridge.projection.placementSurface.snapSource,
+	"translate-snap-step",
+	"Expected viewport placement surface to use the viewport translate snap contract.",
+);
+assertEqual(
+	bridge.projection.placementSurface.snapStep,
+	0.1,
+	"Expected viewport placement surface to default to translate snap.",
 );
 assertEqual(
 	bridge.projection.placementSurface.writesRuntimeData,
@@ -278,6 +437,53 @@ assertEqual(
 	"10,0,20",
 	"Expected viewport drop placement to map normalized viewport coordinates into authored X/Z bounds.",
 );
+
+const customSnapBridge = buildLevelEditorViewportBridgeModel({
+	workspace,
+	transformSnapSteps: {
+		translate: 2,
+	},
+});
+const snappedPlacementPosition = viewportPlacementPositionFromNormalizedPoint({
+	surface: customSnapBridge.projection.placementSurface,
+	point: { xPercent: 55, zPercent: 55 },
+	y: 0,
+});
+
+if (snappedPlacementPosition === null) {
+	throw new Error(
+		"Expected snap-aware viewport drop point to map into a placement position.",
+	);
+}
+
+assertEqual(
+	customSnapBridge.projection.placementSurface.snapStep,
+	2,
+	"Expected viewport placement surface to follow configured translate snap.",
+);
+assertEqual(
+	snappedPlacementPosition.join(","),
+	"2,0,12",
+	"Expected viewport drop placement to snap authored X/Z coordinates to the translate grid.",
+);
+const projectedTransformDragPosition =
+	viewportProjectedTransformPositionFromNormalizedPoint({
+		surface: customSnapBridge.projection.placementSurface,
+		point: { xPercent: 55, zPercent: 55 },
+		currentY: 3,
+	});
+
+if (projectedTransformDragPosition === null) {
+	throw new Error(
+		"Expected projected transform drag point to map into a transform position.",
+	);
+}
+
+assertEqual(
+	projectedTransformDragPosition.join(","),
+	"2,3,12",
+	"Expected projected transform drag to snap X/Z while preserving the selected object's Y.",
+);
 assertEqual(
 	bridge.transformControls.status,
 	"ready",
@@ -297,6 +503,11 @@ assertIncludes(
 	bridge.transformControls.availableModes,
 	"scale",
 	"Expected viewport transform controls to expose scale when scale fields exist.",
+);
+assertIncludes(
+	bridge.transformControls.availableModes,
+	"rotate",
+	"Expected viewport transform controls to expose rotate when rotation fields exist.",
 );
 assertEqual(
 	bridge.transformControls.activeSnapStep,
@@ -351,6 +562,9 @@ const scaledBridge = buildLevelEditorViewportBridgeModel({
 		translate: 0.5,
 		scale: 0.025,
 	},
+	cameraMode: "top",
+	cameraZoomPercent: 250,
+	interactionTool: "transform",
 });
 const scaleXField = scaledBridge.transformControls.fields.find(
 	(field) => field.path === "Transform.scale.x",
@@ -384,6 +598,92 @@ assertEqual(
 	scaledBridge.transformControls.activeHandles[0]?.step,
 	0.025,
 	"Expected scale transform handles to use the active scale snap step.",
+);
+assertEqual(
+	scaledBridge.camera.activeMode,
+	"top",
+	"Expected viewport camera controls to accept explicit camera mode.",
+);
+assertEqual(
+	scaledBridge.camera.zoomPercent,
+	250,
+	"Expected viewport camera controls to accept explicit zoom percentage.",
+);
+assertEqual(
+	scaledBridge.interaction.activeTool,
+	"transform",
+	"Expected viewport interaction tools to accept explicit transform mode when transform controls are ready.",
+);
+
+const rotatedBridge = buildLevelEditorViewportBridgeModel({
+	workspace,
+	transformMode: "rotate",
+	transformSnapSteps: {
+		rotate: 5,
+	},
+});
+const rotationYawControl = rotatedBridge.transformControls.rotationYawControl;
+
+assertEqual(
+	rotatedBridge.transformControls.activeMode,
+	"rotate",
+	"Expected viewport transform controls to accept explicit rotate mode.",
+);
+assertEqual(
+	rotatedBridge.interaction.projectedTransformDrag.status,
+	"blocked",
+	"Expected projected transform drag metadata to block outside translate mode.",
+);
+assertEqual(
+	rotatedBridge.transformControls.activeSnapStep,
+	5,
+	"Expected viewport transform controls to expose the active rotate snap step.",
+);
+if (!rotationYawControl) {
+	throw new Error("Expected rotate mode to expose a yaw-degree control.");
+}
+
+assertEqual(
+	rotationYawControl.stepDegrees,
+	5,
+	"Expected yaw rotation control to use the configured rotate snap step.",
+);
+assertEqual(
+	rotationYawControl.valueDegrees,
+	0,
+	"Expected identity quaternion rotation to resolve to zero yaw degrees.",
+);
+assertIncludes(
+	rotationYawControl.fieldPaths,
+	"Transform.rotation.y",
+	"Expected yaw rotation control to stage the quaternion Y field.",
+);
+assertEqual(
+	rotationYawControl.source,
+	"workspace-transform-field",
+	"Expected yaw rotation control to derive from workspace transform fields.",
+);
+assertNotIncludes(
+	rotatedBridge.transformControls.activeHandles.map((handle) => handle.path),
+	"Transform.rotation.y",
+	"Expected rotate mode not to expose raw quaternion component handles.",
+);
+
+const placementToolBridge = buildLevelEditorViewportBridgeModel({
+	workspace,
+	interactionTool: "place",
+});
+
+assertEqual(
+	placementToolBridge.interaction.activeTool,
+	"place",
+	"Expected viewport interaction tools to accept explicit placement mode when a placement surface is ready.",
+);
+assertEqual(
+	placementToolBridge.interaction.tools.find((tool) => tool.id === "place")
+		?.source,
+	"normalized-placement-surface",
+	"Expected placement tool readiness to use the normalized placement surface.",
 );
 
 const stagedBridge = buildLevelEditorViewportBridgeModel({
@@ -508,6 +808,22 @@ assertEqual(
 	"no-selection",
 	"Expected empty selection to block future gizmo readiness.",
 );
+assertEqual(
+	emptySelectionBridge.camera.framingTarget,
+	"scene-bounds",
+	"Expected empty selection viewport camera controls to frame scene bounds.",
+);
+assertEqual(
+	emptySelectionBridge.interaction.activeTool,
+	"select",
+	"Expected empty selection viewport interaction to fall back to selection instead of transform.",
+);
+assertEqual(
+	emptySelectionBridge.interaction.tools.find((tool) => tool.id === "transform")
+		?.enabled,
+	false,
+	"Expected transform interaction tool to be disabled without a selected editable object.",
+);
 assertNotIncludes(
 	emptySelectionBridge.view.activeOverlayIds,
 	"selection-outline",
@@ -532,12 +848,55 @@ function workspaceObject(options: {
 		LevelEditorWorkspaceObject["previewTargetKind"]
 	>;
 }): LevelEditorWorkspaceObject {
+	const fields = [
+		...transformNumberFields(
+			"Transform.position",
+			"Position",
+			options.position,
+			"0.1",
+		),
+		...transformNumberFields(
+			"Transform.rotation",
+			"Rotation",
+			{ x: 0, y: 0, z: 0, w: 1 },
+			"0.01",
+		),
+		...transformNumberFields(
+			"Transform.scale",
+			"Scale",
+			{ x: 1, y: 1, z: 1 },
+			"0.05",
+		),
+	] satisfies LevelEditorWorkspaceObject["fields"];
+
 	return {
 		id: options.id,
 		stableId: options.stableId,
 		prefabId: options.prefabId,
 		label: options.label,
 		category: options.category,
+		outliner: {
+			categoryLabel: options.category,
+			objectPath: [options.category, options.label],
+			visibility: {
+				state: "visible",
+				label: "Visible",
+				reason:
+					"Fixture object is visible for viewport bridge contract coverage.",
+			},
+			lock: {
+				state: "editable",
+				label: "Editable",
+				reason:
+					"Fixture object is editable for viewport bridge contract coverage.",
+			},
+			pickability: {
+				state: "projected-pickable",
+				label: "Projected pickable",
+				reason:
+					"Fixture object exposes transform fields for projected viewport picking.",
+			},
+		},
 		sourceOwner: `level:fixture prefab:${options.prefabId}`,
 		assetIds: [],
 		componentNames: options.componentNames,
@@ -555,19 +914,26 @@ function workspaceObject(options: {
 				"fixture object is editable for viewport bridge contract coverage.",
 			featureFamilyIds: ["level-instance-transform"],
 		},
-		fields: [
-			...transformNumberFields(
-				"Transform.position",
-				"Position",
-				options.position,
-				"0.1",
-			),
-			...transformNumberFields(
-				"Transform.scale",
-				"Scale",
-				{ x: 1, y: 1, z: 1 },
-				"0.05",
-			),
+		fields,
+		fieldGroups: [
+			{
+				id: "Transform",
+				componentName: "Transform",
+				label: "Transform",
+				fields,
+				editableFieldCount: fields.length,
+				readOnlyFieldCount: 0,
+				workflow: fields[0]?.workflow ?? {
+					editability: "editable",
+					preview: "temporary-preview",
+					storage: "runtime-owner-publish",
+					publishability: "publishable",
+					labels: ["Editable", "Temporary preview", "Publishable"],
+					reason:
+						"fixture field is editable for viewport bridge contract coverage.",
+					featureFamilyIds: ["level-instance-transform"],
+				},
+			},
 		],
 		preview: {
 			title: options.label,
@@ -583,15 +949,25 @@ function workspaceObject(options: {
 }
 
 function transformNumberFields(
-	prefix: "Transform.position" | "Transform.scale",
-	labelPrefix: "Position" | "Scale",
-	values: { readonly x: number; readonly y: number; readonly z: number },
+	prefix: "Transform.position" | "Transform.rotation" | "Transform.scale",
+	labelPrefix: "Position" | "Rotation" | "Scale",
+	values: {
+		readonly x: number;
+		readonly y: number;
+		readonly z: number;
+		readonly w?: number;
+	},
 	step: string,
 ): LevelEditorWorkspaceObject["fields"] {
-	return (["x", "y", "z"] as const).map((axis) => ({
+	const axes =
+		prefix === "Transform.rotation"
+			? (["x", "y", "z", "w"] as const)
+			: (["x", "y", "z"] as const);
+
+	return axes.map((axis) => ({
 		path: `${prefix}.${axis}`,
 		label: `${labelPrefix} ${axis.toUpperCase()}`,
-		value: values[axis],
+		value: values[axis] ?? 0,
 		input: "number",
 		step,
 		readOnly: false,

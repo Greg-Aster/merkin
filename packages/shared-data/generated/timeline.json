@@ -1,5 +1,5 @@
 {
-  "count": 54,
+  "count": 55,
   "items": [
     {
       "title": "The Beginning of Time",
@@ -481,6 +481,40 @@
       "timelineEra": "awakening-era",
       "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
       "uniqueId": "first-contact-manual/chapter-1",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 1e+100,
+        "background": "/posts/timeline/chronos.png"
+      }
+    },
+    {
+      "title": "Chapter 1: The Indifferent Cosmos and Its Insidious Inhabitants",
+      "description": "A comprehensive catalog of alien life forms that transcend human understanding - organized by scale from quantum manipulators to cosmic entities. Your field guide to what's waiting out there to turn you into space-jello.",
+      "slug": "first-contact-manual/chapter-1 (copy)",
+      "sourcePath": "reader/first-contact-manual/chapter-1 (copy).mdx",
+      "url": "/reader/first-contact-manual/chapter-1 (copy)/",
+      "contentType": "reader",
+      "sourceCollection": "reader",
+      "year": 7652,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Fringes of Known (and Mostly Hostile) Space",
+      "isDraft": true,
+      "tags": [
+        "First Contact",
+        "Xenobiology",
+        "Interstellar Travel",
+        "Existential Threats",
+        "Cosmic Horror"
+      ],
+      "timelineYear": 7652,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
+      "uniqueId": "first-contact-manual/chapter-1 (copy)",
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,

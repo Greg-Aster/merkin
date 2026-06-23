@@ -13,6 +13,7 @@ import {
 } from "../src/app/editor/levelEditorWorkspaceModel.js";
 import {
 	type LevelEditorStagedFieldEdit,
+	buildStagedPublishReadiness,
 	buildWorkspaceAuthoringTransaction,
 	previewTargetsForStagedEdits,
 } from "../src/app/editor/levelEditorWorkspaceUi.js";
@@ -229,6 +230,31 @@ assertEqual(
 	"Expected portal objects to expose publishability for transform and level-instance component fields.",
 );
 assertIncludes(
+	firstPortalObject.outliner.objectPath,
+	workspace.selectedRuntimeSceneId,
+	"Expected portal outliner path to include the runtime scene ID.",
+);
+assertIncludes(
+	firstPortalObject.outliner.objectPath,
+	firstPortalObject.stableId,
+	"Expected portal outliner path to include the selected stable ID.",
+);
+assertEqual(
+	firstPortalObject.outliner.visibility.state,
+	"visible",
+	"Expected portal outliner visibility metadata to be explicit.",
+);
+assertEqual(
+	firstPortalObject.outliner.lock.state,
+	"editable",
+	"Expected portal outliner lock metadata to describe editable objects.",
+);
+assertEqual(
+	firstPortalObject.outliner.pickability.state,
+	"projected-pickable",
+	"Expected portal outliner pickability metadata to reflect projected transform selection aids.",
+);
+assertIncludes(
 	firstPortalObject.workflow.labels,
 	"Publishable",
 	"Expected portal workflow labels to expose publishable transform fields.",
@@ -245,9 +271,20 @@ const firstPortalTransformField = firstPortalObject.fields.find(
 const firstPortalTargetField = firstPortalObject.fields.find(
 	(field) => field.path === "Portal.targetRuntimeSceneId",
 );
+const firstPortalTransformGroup = firstPortalObject.fieldGroups.find(
+	(group) => group.componentName === "Transform",
+);
+const firstPortalComponentGroup = firstPortalObject.fieldGroups.find(
+	(group) => group.componentName === "Portal",
+);
 
 if (!firstPortalTransformField || !firstPortalTargetField) {
 	throw new Error("Expected portal workflow test fields to be present.");
+}
+if (!firstPortalTransformGroup || !firstPortalComponentGroup) {
+	throw new Error(
+		"Expected portal inspector fields to be grouped by component.",
+	);
 }
 
 assertEqual(
@@ -259,6 +296,31 @@ assertEqual(
 	firstPortalTargetField.workflow.publishability,
 	"publishable",
 	"Expected portal target fields to be publishable through bounded level-instance component overrides.",
+);
+assertIncludes(
+	firstPortalTransformGroup.fields.map((field) => field.path),
+	"Transform.position.x",
+	"Expected inspector Transform group to retain transform fields.",
+);
+assertIncludes(
+	firstPortalComponentGroup.fields.map((field) => field.path),
+	"Portal.targetRuntimeSceneId",
+	"Expected inspector Portal group to retain component fields.",
+);
+assertEqual(
+	firstPortalTransformGroup.workflow.publishability,
+	"publishable",
+	"Expected inspector Transform group to summarize bounded owner-write publishability.",
+);
+assertEqual(
+	firstPortalComponentGroup.workflow.publishability,
+	"publishable",
+	"Expected inspector Portal group to summarize component edit publishability.",
+);
+assertAtLeast(
+	firstPortalTransformGroup.editableFieldCount,
+	1,
+	"Expected inspector Transform group to expose editable fields.",
 );
 
 const allPreviewTargets = new Set(
@@ -655,6 +717,137 @@ assertEqual(
 	queuedGeneratedSaveWritePlan.artifacts[0]?.payload.operations[0]?.subjectId,
 	playerObject.stableId,
 	"Expected generated-save write plan to accept panel queued save operations.",
+);
+
+const cleanPublishReadiness = buildStagedPublishReadiness({
+	stagedFieldEdits: [],
+	queuedOperations: [],
+});
+
+assertEqual(
+	cleanPublishReadiness.status,
+	"clean",
+	"Expected empty staged work to classify as clean for Save Level/Publish.",
+);
+assertEqual(
+	cleanPublishReadiness.canRunOwnerWrite,
+	false,
+	"Expected clean staged work not to run owner-write commands.",
+);
+
+const fieldPublishReadiness = buildStagedPublishReadiness({
+	stagedFieldEdits: [stagedEdit],
+	queuedOperations: [],
+});
+
+assertEqual(
+	fieldPublishReadiness.status,
+	"publish-ready",
+	"Expected staged transform fields to classify as publish-ready owner writes.",
+);
+assertEqual(
+	fieldPublishReadiness.canRunOwnerWrite,
+	true,
+	"Expected staged transform fields to enable owner-write commands.",
+);
+
+const publishableGeneratedSaveOperation = {
+	kind: "replace-level-instance",
+	ownerKind: "level",
+	ownerTargetId: `${workspace.selectedRuntimeSceneId}:level`,
+	subjectId: playerObject.stableId,
+	payload: {
+		operation: {
+			kind: "set-transform",
+			stableId: playerObject.stableId,
+			transform: {
+				position: {
+					x: positionXField.value + 1,
+				},
+			},
+		},
+	},
+} satisfies LevelEditorAuthoringOperationData;
+const publishableQueueReadiness = buildStagedPublishReadiness({
+	stagedFieldEdits: [],
+	queuedOperations: [
+		{
+			id: "publishable-generated-transform",
+			label: "Publishable generated transform",
+			saveOperations: [publishableGeneratedSaveOperation],
+		},
+	],
+});
+
+assertEqual(
+	publishableQueueReadiness.status,
+	"publish-ready",
+	"Expected generated level transform save operations to classify as publish-ready.",
+);
+
+const draftOnlySaveOperation = {
+	kind: "replace-asset",
+	ownerKind: "asset",
+	ownerTargetId: `${workspace.selectedRuntimeSceneId}:assets`,
+	subjectId: "draft-only-asset",
+	payload: {
+		operation: {
+			kind: "replace-asset",
+		},
+	},
+} satisfies LevelEditorAuthoringOperationData;
+const draftOnlyReadiness = buildStagedPublishReadiness({
+	stagedFieldEdits: [],
+	queuedOperations: [
+		{
+			id: "draft-only-asset-operation",
+			label: "Draft-only asset operation",
+			saveOperations: [draftOnlySaveOperation],
+		},
+	],
+});
+
+assertEqual(
+	draftOnlyReadiness.status,
+	"draft-only",
+	"Expected unsupported owner save operations to remain draft-only.",
+);
+assertEqual(
+	draftOnlyReadiness.canRunOwnerWrite,
+	false,
+	"Expected draft-only staged work to block Save Level/Publish owner writes.",
+);
+assertAnyContains(
+	draftOnlyReadiness.reasons,
+	"replace-asset",
+	"Expected draft-only publish readiness to name the unsupported operation.",
+);
+
+const mixedPublishReadiness = buildStagedPublishReadiness({
+	stagedFieldEdits: [stagedEdit],
+	queuedOperations: [
+		{
+			id: "mixed-draft-only-asset-operation",
+			label: "Mixed draft-only asset operation",
+			saveOperations: [draftOnlySaveOperation],
+		},
+	],
+});
+
+assertEqual(
+	mixedPublishReadiness.status,
+	"mixed",
+	"Expected supported plus unsupported staged work to classify as mixed.",
+);
+assertEqual(
+	mixedPublishReadiness.supportedOperationCount,
+	1,
+	"Expected mixed publish readiness to count supported staged owner writes.",
+);
+assertEqual(
+	mixedPublishReadiness.unsupportedOperationCount,
+	1,
+	"Expected mixed publish readiness to count unsupported staged owner writes.",
 );
 
 const previewTargets = previewTargetsForStagedEdits({

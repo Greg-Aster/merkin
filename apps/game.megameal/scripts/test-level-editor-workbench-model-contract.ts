@@ -100,6 +100,37 @@ assertIncludes(
 	selectedStableId,
 	"Expected hierarchy selected group to retain stable-ID object paths.",
 );
+const selectedHierarchyPath = assertDefined(
+	selectedHierarchyGroup.stableIdPaths.find(
+		(path) => path.stableId === selectedStableId,
+	),
+	"Expected selected hierarchy path metadata to exist.",
+);
+assertIncludes(
+	selectedHierarchyPath.objectPath,
+	workspace.selectedRuntimeSceneId,
+	"Expected hierarchy path metadata to include the runtime scene ID.",
+);
+assertIncludes(
+	selectedHierarchyPath.objectPath,
+	selectedStableId,
+	"Expected hierarchy path metadata to include the stable ID.",
+);
+assertEqual(
+	selectedHierarchyPath.visibility.state,
+	"visible",
+	"Expected hierarchy to expose visibility affordance metadata.",
+);
+assertIncludes(
+	["editable", "cook-guarded", "read-only"],
+	selectedHierarchyPath.lock.state,
+	"Expected hierarchy to expose lock affordance metadata.",
+);
+assertIncludes(
+	["projected-pickable", "outliner-only"],
+	selectedHierarchyPath.pickability.state,
+	"Expected hierarchy to expose pickability affordance metadata.",
+);
 
 const viewport = workbench.regions.viewport;
 assertEqual(

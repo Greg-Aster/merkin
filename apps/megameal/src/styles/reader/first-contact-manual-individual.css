@@ -1,0 +1,35 @@
+/* Individual-scale entity layout for First Contact Manual chapter 1. */
+
+.fcmi-scale-entry--individual-bg {
+  background:
+    radial-gradient(circle at 9% 6%, rgb(var(--fcmi-accent-rgb) / 0.19), transparent 31%),
+    radial-gradient(circle at 79% 12%, rgb(124 194 104 / 0.14), transparent 37%),
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.8), rgb(var(--fcmi-surface-rgb) / 0.59)),
+    url("/first-contact/individual.webp") center / cover no-repeat,
+    rgb(var(--fcmi-surface-rgb) / 0.74);
+  box-shadow:
+    inset 0 0 54px rgb(var(--fcmi-glow-rgb) / 0.11),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03),
+    0 20px 56px rgb(0 0 0 / 0.32);
+}
+
+.fcmi-scale-entry--individual-bg .fcmi-scale-copy,
+.fcmi-scale-entry--individual-bg .fcmi-scale-type-band span,
+.fcmi-scale-entry--individual-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--individual-bg .fcmi-scale-note {
+  backdrop-filter: blur(5px);
+}
+
+.fcmi-scale-entry--individual-bg .fcmi-scale-copy {
+  padding: clamp(0.72rem, 1.8vw, 0.92rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.14);
+  border-radius: var(--fcmi-radius-sm);
+}
+
+.fcmi-scale-entry--individual-bg .fcmi-scale-copy,
+.fcmi-scale-entry--individual-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--individual-bg .fcmi-scale-type-band span {
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.6), rgb(var(--fcmi-surface-rgb) / 0.4)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.08), transparent 74%);
+}

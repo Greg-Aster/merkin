@@ -59,11 +59,14 @@ import type { LevelEditorSessionSummary } from "./levelEditorSession.js";
 import {
 	type LevelEditorViewportBridgeConnectionStatus,
 	type LevelEditorViewportBridgeViewMode,
+	type LevelEditorViewportCameraMode,
 	type LevelEditorViewportGizmoMode,
+	type LevelEditorViewportInteractionTool,
 	type LevelEditorViewportNormalizedPoint,
 	type LevelEditorViewportOverlayId,
 	buildLevelEditorViewportBridgeModel,
 	viewportPlacementPositionFromNormalizedPoint,
+	viewportProjectedTransformPositionFromNormalizedPoint,
 } from "./levelEditorViewportBridgeModel.js";
 import type {
 	LevelEditorWorkspaceCategory,
@@ -75,6 +78,8 @@ import type {
 } from "./levelEditorWorkspaceModel.js";
 import {
 	type LevelEditorStagedFieldEdit,
+	type LevelEditorStagedPublishReadiness,
+	buildStagedPublishReadiness,
 	commandPlanOutputMessage,
 	createWorkspaceOutputLogEntry,
 	findStagedFieldEdit,
@@ -92,15 +97,6 @@ type PreviewStatus = {
 };
 
 type RuntimeTelemetryState = "waiting" | "live" | "stale";
-
-type StagedPublishReadiness = {
-	readonly status: "clean" | "publish-ready" | "draft-only" | "mixed";
-	readonly label: string;
-	readonly canRunOwnerWrite: boolean;
-	readonly supportedOperationCount: number;
-	readonly unsupportedOperationCount: number;
-	readonly reasons: readonly string[];
-};
 
 type SelectedInstanceRemovalReadiness = {
 	readonly canStage: boolean;
@@ -128,8 +124,22 @@ let selectedStableId: string = $state(
 );
 let selectedGraphNode: string = $state("authored-level");
 let selectedObjectLibraryEntryId: string | null = $state(null);
+const outlinerSearchQuery = $state("");
 const selectedWorkspaceObject = $derived(
 	workspace.objects.find((object) => object.stableId === selectedStableId),
+);
+const filteredSceneTree = $derived(
+	workspace.sceneTree
+		.map((group) => ({
+			...group,
+			objects: group.objects.filter((object) =>
+				matchesOutlinerSearch(group, object),
+			),
+		}))
+		.filter((group) => group.objects.length > 0),
+);
+const filteredOutlinerObjectCount = $derived(
+	filteredSceneTree.reduce((count, group) => count + group.objects.length, 0),
 );
 const objectFocusGroups = $derived(
 	workspace.sceneTree.filter((group) => group.objects.length > 0),
@@ -161,6 +171,7 @@ const objectLibraryPanelModel = $derived(
 		levelId: workspace.selectedLevelId,
 		selectedObject: selectedObjectLibrarySubject,
 		selectedEntryId: selectedObjectLibraryEntryId,
+		sceneObjects: workspace.objects,
 	}),
 );
 const viewportPlacementTarget = $derived(buildViewportPlacementTarget());
@@ -211,6 +222,10 @@ let lastRuntimeTelemetryReceivedAt: number | undefined = $state();
 let activeCommandId: LevelEditorWorkspaceCommand["id"] | null = $state(null);
 let viewportBridgeViewMode: LevelEditorViewportBridgeViewMode =
 	$state("live-game");
+let viewportCameraMode: LevelEditorViewportCameraMode = $state("orbit");
+let viewportCameraZoomPercent = $state(100);
+let viewportInteractionTool: LevelEditorViewportInteractionTool =
+	$state("select");
 let viewportTransformMode: LevelEditorViewportGizmoMode = $state("translate");
 let viewportTranslateSnapStep = $state(0.1);
 let viewportRotateSnapStep = $state(15);
@@ -245,6 +260,9 @@ const viewportBridgeModel = $derived(
 			rotate: viewportRotateSnapStep,
 			scale: viewportScaleSnapStep,
 		},
+		cameraMode: viewportCameraMode,
+		cameraZoomPercent: viewportCameraZoomPercent,
+		interactionTool: viewportInteractionTool,
 	}),
 );
 
@@ -297,10 +315,65 @@ function selectObjectGroup(category: LevelEditorWorkspaceCategory): void {
 	}
 }
 
+function matchesOutlinerSearch(
+	group: LevelEditorWorkspaceTreeGroup,
+	object: LevelEditorWorkspaceObject,
+): boolean {
+	const query = outlinerSearchQuery.trim().toLowerCase();
+
+	if (query.length === 0) {
+		return true;
+	}
+
+	return [
+		group.label,
+		object.id,
+		object.stableId,
+		object.label,
+		object.category,
+		object.prefabId,
+		object.sourceOwner,
+		object.outliner.categoryLabel,
+		object.outliner.visibility.label,
+		object.outliner.lock.label,
+		object.outliner.pickability.label,
+		...object.outliner.objectPath,
+		object.workflow.publishability,
+		object.workflow.storage,
+		...object.assetIds,
+		...object.componentNames,
+		...object.workflow.labels,
+	]
+		.filter((value): value is string => typeof value === "string")
+		.some((value) => value.toLowerCase().includes(query));
+}
+
 function selectViewportBridgeViewMode(
 	mode: LevelEditorViewportBridgeViewMode,
 ): void {
 	viewportBridgeViewMode = mode;
+}
+
+function selectViewportCameraMode(mode: LevelEditorViewportCameraMode): void {
+	viewportCameraMode = mode;
+}
+
+function selectViewportCameraZoomPercent(zoomPercent: number): void {
+	if (!Number.isFinite(zoomPercent)) {
+		return;
+	}
+
+	viewportCameraZoomPercent = Math.max(25, Math.min(400, zoomPercent));
+}
+
+function selectViewportInteractionTool(
+	tool: LevelEditorViewportInteractionTool,
+): void {
+	if (tool === "place" && !viewportPlacementTarget?.canStage) {
+		return;
+	}
+
+	viewportInteractionTool = tool;
 }
 
 function selectViewportTransformMode(mode: LevelEditorViewportGizmoMode): void {
@@ -629,6 +702,7 @@ function objectLibraryEntryById(
 }
 
 function buildViewportPlacementTarget(): {
+	readonly entryId: string;
 	readonly label: string;
 	readonly status: string;
 	readonly targetLabel: string;
@@ -646,6 +720,7 @@ function buildViewportPlacementTarget(): {
 	}
 
 	return {
+		entryId: entry.id,
 		label: entry.label,
 		status: entry.placementReadiness.status,
 		targetLabel: position
@@ -734,14 +809,16 @@ function numberFieldDisplayValue(
 function stageDroppedObjectLibraryPlacement(
 	entryId: string,
 	point: LevelEditorViewportNormalizedPoint,
+	source: "viewport-click" | "viewport-drop" = "viewport-drop",
 ): void {
 	selectObjectLibraryEntry(entryId);
-	stageViewportPlacementAtTarget(entryId, point);
+	stageViewportPlacementAtTarget(entryId, point, source);
 }
 
 function stageViewportPlacementAtTarget(
 	entryId?: string,
 	point?: LevelEditorViewportNormalizedPoint,
+	source?: "viewport-click" | "viewport-drop",
 ): void {
 	const entry =
 		entryId === undefined
@@ -763,7 +840,10 @@ function stageViewportPlacementAtTarget(
 		entry,
 		draft,
 		index: (existingEntry?.saveOperations?.length ?? 0) + 1,
-		source: point === undefined ? "viewport-placement-target" : "viewport-drop",
+		source:
+			point === undefined
+				? "viewport-placement-target"
+				: source ?? "viewport-drop",
 		transform: {
 			...draft.transform,
 			position,
@@ -784,11 +864,18 @@ function stageViewportPlacementAtTarget(
 	});
 	appendOutputLog({
 		level: "success",
-		source: point === undefined ? "viewport-placement" : "viewport-drop",
+		source:
+			point === undefined
+				? "viewport-placement"
+				: source === "viewport-click"
+					? "viewport-click"
+					: "viewport-drop",
 		message:
 			point === undefined
 				? `Staged ${entry.label} placement at ${stagedPlacement.stableId}.`
-				: `Dropped ${entry.label} placement at ${stagedPlacement.stableId}.`,
+				: source === "viewport-click"
+					? `Placed ${entry.label} from viewport click at ${stagedPlacement.stableId}.`
+					: `Dropped ${entry.label} placement at ${stagedPlacement.stableId}.`,
 	});
 }
 
@@ -828,6 +915,152 @@ function nudgeViewportTransformField(path: string, delta: number): void {
 
 	authoringQueue = nextQueue;
 	latestTransaction = undefined;
+}
+
+function stageViewportProjectedTransformDrag(
+	point: LevelEditorViewportNormalizedPoint,
+): void {
+	const object = selectedWorkspaceObject;
+
+	if (!object || viewportInteractionTool !== "transform") {
+		return;
+	}
+
+	const position = viewportProjectedTransformPositionFromNormalizedPoint({
+		surface: viewportBridgeModel.projection.placementSurface,
+		point,
+		currentY: selectedViewportPlacementY(),
+	});
+
+	if (position === null) {
+		return;
+	}
+
+	const fields = [
+		object.fields.find((field) => field.path === "Transform.position.x"),
+		object.fields.find((field) => field.path === "Transform.position.z"),
+	];
+
+	if (
+		fields.some(
+			(field) =>
+				!field ||
+				field.input !== "number" ||
+				field.readOnly ||
+				field.workflow.editability !== "editable",
+		)
+	) {
+		return;
+	}
+
+	const resolvedFields = fields.filter(
+		(field): field is LevelEditorWorkspaceField => field !== undefined,
+	);
+	const values = [position[0], position[2]] as const;
+	let nextQueue = authoringQueue;
+
+	for (const [index, field] of resolvedFields.entries()) {
+		nextQueue = stageLevelEditorFieldEdit(nextQueue, {
+			stableId: object.stableId,
+			path: field.path,
+			label: field.label,
+			before: field.value,
+			after: values[index],
+		});
+	}
+
+	if (nextQueue === authoringQueue) {
+		return;
+	}
+
+	authoringQueue = nextQueue;
+	latestTransaction = undefined;
+}
+
+function nudgeViewportRotationYaw(deltaDegrees: number): void {
+	const object = selectedWorkspaceObject;
+
+	if (!object || !Number.isFinite(deltaDegrees)) {
+		return;
+	}
+
+	const fieldPaths = [
+		"Transform.rotation.x",
+		"Transform.rotation.y",
+		"Transform.rotation.z",
+		"Transform.rotation.w",
+	] as const;
+	const fields = fieldPaths.map((path) =>
+		object.fields.find((field) => field.path === path),
+	);
+
+	if (
+		fields.some(
+			(field) =>
+				!field ||
+				field.input !== "number" ||
+				field.readOnly ||
+				field.workflow.editability !== "editable",
+		)
+	) {
+		return;
+	}
+
+	const resolvedFields = fields.filter(
+		(field): field is LevelEditorWorkspaceField => field !== undefined,
+	);
+	const currentRotation = resolvedFields.map((field, index) => {
+		const stagedOrStoredValue = Number(fieldDisplayValue(object, field));
+
+		if (Number.isFinite(stagedOrStoredValue)) {
+			return stagedOrStoredValue;
+		}
+
+		return index === 3 ? 1 : 0;
+	}) as [number, number, number, number];
+	const nextRotation = quaternionFromYawDegrees(
+		yawDegreesFromQuaternion(currentRotation) + deltaDegrees,
+	);
+	let nextQueue = authoringQueue;
+
+	for (const [index, field] of resolvedFields.entries()) {
+		nextQueue = stageLevelEditorFieldEdit(nextQueue, {
+			stableId: object.stableId,
+			path: field.path,
+			label: field.label,
+			before: field.value,
+			after: nextRotation[index],
+		});
+	}
+
+	if (nextQueue === authoringQueue) {
+		return;
+	}
+
+	authoringQueue = nextQueue;
+	latestTransaction = undefined;
+}
+
+function yawDegreesFromQuaternion(
+	rotation: readonly [number, number, number, number],
+): number {
+	const [x, y, z, w] = rotation;
+	const yawRadians = Math.atan2(2 * (w * y + x * z), 1 - 2 * (y * y + z * z));
+
+	return (yawRadians * 180) / Math.PI;
+}
+
+function quaternionFromYawDegrees(
+	degrees: number,
+): readonly [number, number, number, number] {
+	const halfRadians = (degrees * Math.PI) / 360;
+
+	return [
+		0,
+		Number(Math.sin(halfRadians).toFixed(6)),
+		0,
+		Number(Math.cos(halfRadians).toFixed(6)),
+	];
 }
 
 function objectFieldValue(
@@ -1514,290 +1747,6 @@ function appendOutputLog(entry: {
 	outputLog = [createWorkspaceOutputLogEntry(entry), ...outputLog].slice(0, 48);
 }
 
-function buildStagedPublishReadiness(options: {
-	readonly stagedFieldEdits: readonly LevelEditorStagedFieldEdit[];
-	readonly queuedOperations: readonly LevelEditorQueuedAuthoringOperation[];
-}): StagedPublishReadiness {
-	const unsupportedReasons: string[] = [];
-	let supportedOperationCount = 0;
-
-	for (const edit of options.stagedFieldEdits) {
-		if (isPublishableTransformFieldPath(edit.path)) {
-			supportedOperationCount += 1;
-			continue;
-		}
-
-		unsupportedReasons.push(
-			`${edit.label} (${edit.path}) is not publishable by the current generated level owner writer.`,
-		);
-	}
-
-	for (const entry of options.queuedOperations) {
-		const entryPublishability = queuedEntryPublishability(entry);
-		supportedOperationCount += entryPublishability.supportedOperationCount;
-		unsupportedReasons.push(...entryPublishability.unsupportedReasons);
-	}
-
-	const unsupportedOperationCount = unsupportedReasons.length;
-	const status =
-		supportedOperationCount === 0 && unsupportedOperationCount === 0
-			? "clean"
-			: unsupportedOperationCount === 0
-				? "publish-ready"
-				: supportedOperationCount === 0
-					? "draft-only"
-					: "mixed";
-
-	return {
-		status,
-		label: stagedPublishReadinessLabel(status),
-		canRunOwnerWrite: status === "publish-ready",
-		supportedOperationCount,
-		unsupportedOperationCount,
-		reasons: unsupportedReasons.slice(0, 4),
-	};
-}
-
-function queuedEntryPublishability(
-	entry: LevelEditorQueuedAuthoringOperation,
-): {
-	readonly supportedOperationCount: number;
-	readonly unsupportedReasons: readonly string[];
-} {
-	const operationLabel = entry.label ?? entry.id;
-
-	if ((entry.saveOperations?.length ?? 0) > 0) {
-		return classifyQueuedSaveOperations(entry, operationLabel);
-	}
-
-	return classifyQueuedEditOperations(entry, operationLabel);
-}
-
-function classifyQueuedSaveOperations(
-	entry: LevelEditorQueuedAuthoringOperation,
-	operationLabel: string,
-): {
-	readonly supportedOperationCount: number;
-	readonly unsupportedReasons: readonly string[];
-} {
-	let supportedOperationCount = 0;
-	const unsupportedReasons: string[] = [];
-
-	for (const operation of entry.saveOperations ?? []) {
-		if (
-			isPublishableLevelTransformSaveOperation(operation) ||
-			isPublishableLevelInsertionSaveOperation(operation) ||
-			isPublishableLevelPrefabReplacementSaveOperation(operation) ||
-			isPublishableLevelRemovalSaveOperation(operation) ||
-			isPublishableLevelComponentSaveOperation(operation) ||
-			isPublishableLevelComponentRemovalSaveOperation(operation)
-		) {
-			supportedOperationCount += 1;
-			continue;
-		}
-
-		unsupportedReasons.push(
-			`${operationLabel} stages ${operation.kind}; Save Level/Publish currently accepts only level-owned set-transform, insert-level-instance, replace-prefab, remove-level-instance, set-component, and remove-component operations.`,
-		);
-	}
-
-	return { supportedOperationCount, unsupportedReasons };
-}
-
-function classifyQueuedEditOperations(
-	entry: LevelEditorQueuedAuthoringOperation,
-	operationLabel: string,
-): {
-	readonly supportedOperationCount: number;
-	readonly unsupportedReasons: readonly string[];
-} {
-	let supportedOperationCount = 0;
-	const unsupportedReasons: string[] = [];
-
-	for (const operation of entry.operations ?? []) {
-		if (
-			(operation.kind === "set-transform" && !("target" in operation)) ||
-			(operation.kind === "set-transform" && operation.target !== "prefab") ||
-			operation.kind === "insert-instance" ||
-			operation.kind === "replace-prefab" ||
-			operation.kind === "remove-instance" ||
-			(operation.kind === "set-component" &&
-				operation.target === "level-instance") ||
-			(operation.kind === "remove-component" &&
-				operation.target === "level-instance")
-		) {
-			supportedOperationCount += 1;
-			continue;
-		}
-
-		unsupportedReasons.push(
-			`${operationLabel} stages ${operation.kind}; Save Level/Publish currently accepts only level-owned set-transform, insert-level-instance, replace-prefab, remove-level-instance, set-component, and remove-component operations.`,
-		);
-	}
-
-	return { supportedOperationCount, unsupportedReasons };
-}
-
-function isPublishableTransformFieldPath(path: string): boolean {
-	return (
-		path.startsWith("Transform.position.") ||
-		path.startsWith("Transform.scale.") ||
-		path.startsWith("Light.") ||
-		path.startsWith("Portal.") ||
-		path.startsWith("SoundEmitter.")
-	);
-}
-
-function isPublishableLevelTransformSaveOperation(operation: {
-	readonly kind: string;
-	readonly ownerKind: string;
-	readonly payload?: unknown;
-}): boolean {
-	const payloadOperation =
-		operation.payload &&
-		typeof operation.payload === "object" &&
-		"operation" in operation.payload &&
-		operation.payload.operation &&
-		typeof operation.payload.operation === "object" &&
-		"kind" in operation.payload.operation
-			? operation.payload.operation
-			: null;
-
-	return (
-		operation.kind === "replace-level-instance" &&
-		operation.ownerKind === "level" &&
-		payloadOperation !== null &&
-		payloadOperation.kind === "set-transform"
-	);
-}
-
-function isPublishableLevelInsertionSaveOperation(operation: {
-	readonly kind: string;
-	readonly ownerKind: string;
-	readonly payload?: unknown;
-}): boolean {
-	return (
-		operation.kind === "insert-level-instance" &&
-		operation.ownerKind === "level" &&
-		operation.payload !== null &&
-		typeof operation.payload === "object" &&
-		"instance" in operation.payload
-	);
-}
-
-function isPublishableLevelRemovalSaveOperation(operation: {
-	readonly kind: string;
-	readonly ownerKind: string;
-	readonly payload?: unknown;
-}): boolean {
-	const payloadOperation =
-		operation.payload &&
-		typeof operation.payload === "object" &&
-		"operation" in operation.payload &&
-		operation.payload.operation &&
-		typeof operation.payload.operation === "object" &&
-		"kind" in operation.payload.operation
-			? operation.payload.operation
-			: null;
-
-	return (
-		operation.kind === "remove-level-instance" &&
-		operation.ownerKind === "level" &&
-		payloadOperation !== null &&
-		payloadOperation.kind === "remove-instance"
-	);
-}
-
-function isPublishableLevelPrefabReplacementSaveOperation(operation: {
-	readonly kind: string;
-	readonly ownerKind: string;
-	readonly payload?: unknown;
-}): boolean {
-	const payloadOperation =
-		operation.payload &&
-		typeof operation.payload === "object" &&
-		"operation" in operation.payload &&
-		operation.payload.operation &&
-		typeof operation.payload.operation === "object" &&
-		"kind" in operation.payload.operation
-			? operation.payload.operation
-			: null;
-
-	return (
-		operation.kind === "replace-level-instance" &&
-		operation.ownerKind === "level" &&
-		payloadOperation !== null &&
-		payloadOperation.kind === "replace-prefab" &&
-		"prefabId" in payloadOperation &&
-		typeof payloadOperation.prefabId === "string"
-	);
-}
-
-function isPublishableLevelComponentSaveOperation(operation: {
-	readonly kind: string;
-	readonly ownerKind: string;
-	readonly payload?: unknown;
-}): boolean {
-	const payloadOperation =
-		operation.payload &&
-		typeof operation.payload === "object" &&
-		"operation" in operation.payload &&
-		operation.payload.operation &&
-		typeof operation.payload.operation === "object" &&
-		"kind" in operation.payload.operation
-			? operation.payload.operation
-			: null;
-
-	return (
-		operation.kind === "replace-level-instance" &&
-		operation.ownerKind === "level" &&
-		payloadOperation !== null &&
-		payloadOperation.kind === "set-component" &&
-		"target" in payloadOperation &&
-		payloadOperation.target === "level-instance"
-	);
-}
-
-function isPublishableLevelComponentRemovalSaveOperation(operation: {
-	readonly kind: string;
-	readonly ownerKind: string;
-	readonly payload?: unknown;
-}): boolean {
-	const payloadOperation =
-		operation.payload &&
-		typeof operation.payload === "object" &&
-		"operation" in operation.payload &&
-		operation.payload.operation &&
-		typeof operation.payload.operation === "object" &&
-		"kind" in operation.payload.operation
-			? operation.payload.operation
-			: null;
-
-	return (
-		operation.kind === "replace-level-instance" &&
-		operation.ownerKind === "level" &&
-		payloadOperation !== null &&
-		payloadOperation.kind === "remove-component" &&
-		"target" in payloadOperation &&
-		payloadOperation.target === "level-instance"
-	);
-}
-
-function stagedPublishReadinessLabel(
-	status: StagedPublishReadiness["status"],
-): string {
-	switch (status) {
-		case "clean":
-			return "No staged owner writes";
-		case "publish-ready":
-			return "Save Level/Publish ready";
-		case "draft-only":
-			return "Draft-only staged work";
-		case "mixed":
-			return "Mixed publish readiness";
-	}
-}
-
 function stageAuthoringOperationEntry(
 	entry: LevelEditorQueuedAuthoringOperation,
 ): void {
@@ -2128,13 +2077,16 @@ function readTransformPatch(
 ):
 	| {
 			readonly position?: readonly [number, number, number];
+			readonly rotation?: readonly [number, number, number, number];
 			readonly scale?: readonly [number, number, number];
 	  }
 	| undefined {
 	const position = readVectorField(object, "Transform.position", edits);
+	const rotation = readQuaternionField(object, "Transform.rotation", edits);
 	const scale = readVectorField(object, "Transform.scale", edits);
 	const transform = {
 		...(position === undefined ? {} : { position }),
+		...(rotation === undefined ? {} : { rotation }),
 		...(scale === undefined ? {} : { scale }),
 	};
 
@@ -2186,6 +2138,28 @@ function readVectorField(
 	return resolvedFields.map((field) =>
 		Number(readFieldValue(object, field, edits)),
 	) as [number, number, number];
+}
+
+function readQuaternionField(
+	object: LevelEditorWorkspaceObject,
+	path: "Transform.rotation",
+	edits: readonly LevelEditorStagedFieldEdit[] = stagedFieldEdits,
+): readonly [number, number, number, number] | undefined {
+	const fields = ["x", "y", "z", "w"].map((axis) =>
+		object.fields.find((field) => field.path === `${path}.${axis}`),
+	);
+
+	if (fields.some((field) => field === undefined)) {
+		return undefined;
+	}
+
+	const resolvedFields = fields.filter(
+		(field): field is LevelEditorWorkspaceField => field !== undefined,
+	);
+
+	return resolvedFields.map((field) =>
+		Number(readFieldValue(object, field, edits)),
+	) as [number, number, number, number];
 }
 
 function readFieldValue(
@@ -2386,10 +2360,10 @@ function runtimeLifecycleLabel(): string {
 	</div>
 	<div class="editor-command-actions">
 		<button type="button" disabled={!authoringQueue.canUndo} onclick={undoStagedEdit}>
-			Undo
+			Undo {authoringQueue.undoDepth}
 		</button>
 		<button type="button" disabled={!authoringQueue.canRedo} onclick={redoStagedEdit}>
-			Redo
+			Redo {authoringQueue.redoDepth}
 		</button>
 		<button type="button" disabled={!hasDirtyState} onclick={discardStagedEdits}>
 			Discard Staged
@@ -2413,10 +2387,19 @@ function runtimeLifecycleLabel(): string {
 	<aside class="editor-panel editor-outliner" aria-label="Scene outliner">
 		<header class="editor-panel-header">
 			<h2>Outliner</h2>
-			<span>{workspace.objects.length}</span>
+			<span>{filteredOutlinerObjectCount} / {workspace.objects.length}</span>
 		</header>
+		<div class="editor-inspector-fields" aria-label="Outliner filters">
+			<label class="editor-field">
+				<span>Search</span>
+				<input
+					bind:value={outlinerSearchQuery}
+					placeholder="Stable ID, prefab, component, owner"
+				/>
+			</label>
+		</div>
 		<div class="editor-outliner-list">
-			{#each workspace.sceneTree as group}
+			{#each filteredSceneTree as group}
 				<section class="editor-outliner-group">
 					<h3>{group.label}</h3>
 					{#each group.objects as object}
@@ -2425,12 +2408,47 @@ function runtimeLifecycleLabel(): string {
 							class:selected-object={object.stableId === selectedStableId}
 							onclick={() => selectObject(object.stableId)}
 						>
-							<span>{object.label}</span>
+							<span class="editor-outliner-row-title">
+								<span>{object.label}</span>
+								<small>{object.outliner.categoryLabel}</small>
+							</span>
+							<small class="editor-outliner-path">
+								{object.outliner.objectPath.join(" / ")}
+							</small>
+							<span
+								class="editor-outliner-affordances"
+								aria-label="Outliner affordances"
+							>
+								<span
+									data-affordance-state={object.outliner.visibility.state}
+									title={object.outliner.visibility.reason}
+								>
+									{object.outliner.visibility.label}
+								</span>
+								<span
+									data-affordance-state={object.outliner.lock.state}
+									title={object.outliner.lock.reason}
+								>
+									{object.outliner.lock.label}
+								</span>
+								<span
+									data-affordance-state={object.outliner.pickability.state}
+									title={object.outliner.pickability.reason}
+								>
+									{object.outliner.pickability.label}
+								</span>
+							</span>
 							<small>{object.prefabId}</small>
 						</button>
 					{/each}
 				</section>
 			{/each}
+			{#if filteredSceneTree.length === 0}
+				<div class="editor-library-empty-state">
+					<strong>No scene objects match</strong>
+					<span>{outlinerSearchQuery}</span>
+				</div>
+			{/if}
 		</div>
 	</aside>
 
@@ -2438,9 +2456,14 @@ function runtimeLifecycleLabel(): string {
 		<LevelEditorViewportBridgePanel
 			model={viewportBridgeModel}
 			onViewModeChange={selectViewportBridgeViewMode}
+			onCameraModeChange={selectViewportCameraMode}
+			onCameraZoomPercentChange={selectViewportCameraZoomPercent}
+			onInteractionToolChange={selectViewportInteractionTool}
 			onOverlayToggle={toggleViewportBridgeOverlay}
 			onSelectObject={selectObject}
 			onTransformNudge={nudgeViewportTransformField}
+			onTransformProjectedDrag={stageViewportProjectedTransformDrag}
+			onRotationYawNudge={nudgeViewportRotationYaw}
 			onTransformModeChange={selectViewportTransformMode}
 			onTransformSnapStepChange={selectViewportTransformSnapStep}
 			placementTarget={viewportPlacementTarget}
@@ -2783,60 +2806,92 @@ function runtimeLifecycleLabel(): string {
 					{/if}
 				</div>
 			</div>
-			<div class="editor-inspector-fields">
-				{#each selectedWorkspaceObject.fields as field}
-					<label
-						class="editor-field"
-						class:dirty-field={isFieldDirty(selectedWorkspaceObject, field)}
-						data-workflow-publishability={field.workflow.publishability}
+			<div class="editor-inspector-component-groups">
+				{#each selectedWorkspaceObject.fieldGroups as fieldGroup}
+					<section
+						class="editor-inspector-component-group"
+						data-workflow-publishability={fieldGroup.workflow.publishability}
+						aria-label={`${fieldGroup.label} inspector fields`}
 					>
-						<span class="editor-field-title">{field.label}</span>
-						{#if field.input === "checkbox"}
-							<input
-								type="checkbox"
-								checked={Boolean(
-									fieldDisplayValue(selectedWorkspaceObject, field),
-								)}
-								disabled={field.readOnly}
-								onchange={(event) =>
-									handleInspectorFieldInput(
-										event,
-										selectedWorkspaceObject,
-										field,
-									)}
-								data-editor-inspector-field={field.path}
-								data-stable-id={selectedWorkspaceObject.stableId}
-							/>
-						{:else}
-							<input
-								type={field.input}
-								value={String(
-									fieldDisplayValue(selectedWorkspaceObject, field),
-								)}
-								step={field.step}
-								min={field.min}
-								readonly={field.readOnly}
-								oninput={(event) =>
-									handleInspectorFieldInput(
-										event,
-										selectedWorkspaceObject,
-										field,
-									)}
-								data-editor-inspector-field={field.path}
-								data-stable-id={selectedWorkspaceObject.stableId}
-							/>
-						{/if}
-						<small class="editor-field-meta">
-							{formatWorkflowValue(field.workflow.publishability)} /
-							{formatWorkflowValue(field.workflow.storage)}
-						</small>
-						<div class="editor-workflow-badges" aria-label={`${field.label} workflow`}>
-							{#each field.workflow.labels as label}
+						<header class="editor-inspector-component-header">
+							<div>
+								<h3>{fieldGroup.label}</h3>
+								<p>
+									{fieldGroup.editableFieldCount} editable /
+									{fieldGroup.readOnlyFieldCount} read-only
+								</p>
+							</div>
+							<span>{formatWorkflowValue(fieldGroup.workflow.publishability)}</span>
+						</header>
+						<div
+							class="editor-workflow-badges"
+							aria-label={`${fieldGroup.label} workflow`}
+						>
+							{#each fieldGroup.workflow.labels as label}
 								<span>{label}</span>
 							{/each}
 						</div>
-						<small class="editor-field-reason">{field.workflow.reason}</small>
-					</label>
+						<p class="editor-workflow-reason">{fieldGroup.workflow.reason}</p>
+						<div class="editor-inspector-fields">
+							{#each fieldGroup.fields as field}
+								<label
+									class="editor-field"
+									class:dirty-field={isFieldDirty(selectedWorkspaceObject, field)}
+									data-workflow-publishability={field.workflow.publishability}
+								>
+									<span class="editor-field-title">{field.label}</span>
+									{#if field.input === "checkbox"}
+										<input
+											type="checkbox"
+											checked={Boolean(
+												fieldDisplayValue(selectedWorkspaceObject, field),
+											)}
+											disabled={field.readOnly}
+											onchange={(event) =>
+												handleInspectorFieldInput(
+													event,
+													selectedWorkspaceObject,
+													field,
+												)}
+											data-editor-inspector-field={field.path}
+											data-stable-id={selectedWorkspaceObject.stableId}
+										/>
+									{:else}
+										<input
+											type={field.input}
+											value={String(
+												fieldDisplayValue(selectedWorkspaceObject, field),
+											)}
+											step={field.step}
+											min={field.min}
+											readonly={field.readOnly}
+											oninput={(event) =>
+												handleInspectorFieldInput(
+													event,
+													selectedWorkspaceObject,
+													field,
+												)}
+											data-editor-inspector-field={field.path}
+											data-stable-id={selectedWorkspaceObject.stableId}
+										/>
+									{/if}
+									<small class="editor-field-meta">
+										{formatWorkflowValue(field.workflow.publishability)} /
+										{formatWorkflowValue(field.workflow.storage)}
+									</small>
+									<div
+										class="editor-workflow-badges"
+										aria-label={`${field.label} workflow`}
+									>
+										{#each field.workflow.labels as label}
+											<span>{label}</span>
+										{/each}
+									</div>
+									<small class="editor-field-reason">{field.workflow.reason}</small>
+								</label>
+							{/each}
+						</div>
+					</section>
 				{/each}
 			</div>
 			<div class="editor-actions">
@@ -2887,7 +2942,7 @@ function runtimeLifecycleLabel(): string {
 	</section>
 </section>
 
-<section class="editor-bottom-grid" aria-label="Editor diagnostics">
+<section class="editor-bottom-dock" aria-label="Editor bottom dock">
 	<section
 		class="editor-panel editor-live-runtime"
 		aria-label="Live runtime status"
@@ -2969,7 +3024,7 @@ function runtimeLifecycleLabel(): string {
 		selectedStableIds={selectedStableId === "" ? [] : [selectedStableId]}
 		onStageAuthoringOperations={stageAuthoringOperationEntry}
 	/>
-	<section class="editor-panel">
+	<section class="editor-panel editor-collision-preview" aria-label="Collision preview">
 		<header class="editor-panel-header">
 			<h2>Collision Preview</h2>
 			<span>
@@ -2986,7 +3041,7 @@ function runtimeLifecycleLabel(): string {
 			onStageAuthoringOperations={stageAuthoringOperationEntry}
 		/>
 	</section>
-	<section class="editor-panel">
+	<section class="editor-panel editor-terrain-bake" aria-label="Terrain bake">
 		<header class="editor-panel-header">
 			<h2>Terrain / Bake</h2>
 			<span>{editorSession.terrain.packageCount} packages</span>
@@ -3010,7 +3065,10 @@ function runtimeLifecycleLabel(): string {
 			</div>
 		</dl>
 	</section>
-	<section class="editor-panel">
+	<section
+		class="editor-panel editor-validation-report"
+		aria-label="Validation report"
+	>
 		<header class="editor-panel-header">
 			<h2>Validation Report</h2>
 			<span>
@@ -3127,9 +3185,12 @@ function runtimeLifecycleLabel(): string {
 			<div>
 				<dt>Undo / Redo</dt>
 				<dd>
-					{authoringQueue.canUndo ? "undo" : "locked"} /
-					{authoringQueue.canRedo ? "redo" : "locked"}
+					{authoringQueue.undoDepth} / {authoringQueue.redoDepth}
 				</dd>
+			</div>
+			<div>
+				<dt>History Limit</dt>
+				<dd>{authoringQueue.historyLimit}</dd>
 			</div>
 		</dl>
 		{#if stagedPublishReadiness.reasons.length > 0}

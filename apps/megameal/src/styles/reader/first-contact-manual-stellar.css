@@ -1,0 +1,36 @@
+/* Stellar-scale entity layout for First Contact Manual chapter 1. */
+
+.fcmi-scale-entry--stellar-bg {
+  background:
+    radial-gradient(circle at 12% 6%, rgb(var(--fcmi-accent-rgb) / 0.2), transparent 32%),
+    radial-gradient(circle at 74% 15%, rgb(94 231 212 / 0.16), transparent 35%),
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.82), rgb(var(--fcmi-surface-rgb) / 0.61)),
+    url("/first-contact/stellar-bg.webp") center 38% / cover no-repeat,
+    rgb(var(--fcmi-surface-rgb) / 0.76);
+  box-shadow:
+    inset 0 0 64px rgb(var(--fcmi-glow-rgb) / 0.13),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03),
+    0 20px 58px rgb(0 0 0 / 0.34);
+}
+
+.fcmi-scale-entry--stellar-bg .fcmi-scale-copy,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-type-band span,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-note,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-alert {
+  backdrop-filter: blur(5px);
+}
+
+.fcmi-scale-entry--stellar-bg .fcmi-scale-copy {
+  padding: clamp(0.72rem, 1.8vw, 0.92rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.15);
+  border-radius: var(--fcmi-radius-sm);
+}
+
+.fcmi-scale-entry--stellar-bg .fcmi-scale-copy,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-type-band span {
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.62), rgb(var(--fcmi-surface-rgb) / 0.42)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.1), transparent 74%);
+}

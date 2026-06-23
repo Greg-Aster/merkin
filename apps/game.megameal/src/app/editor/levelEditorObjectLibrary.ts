@@ -50,6 +50,13 @@ export type LevelEditorObjectLibraryPlacementReadinessModel =
 		readonly placementDraft: EditorObjectLibraryPlacementDraft | null;
 	};
 
+export type LevelEditorObjectLibraryUsageState = "used" | "unused";
+
+export type LevelEditorObjectLibraryUsageObject = {
+	readonly prefabId: string;
+	readonly assetIds: readonly string[];
+};
+
 export type LevelEditorObjectLibraryPanelEntry = {
 	readonly entry: EditorObjectLibraryEntry;
 	readonly id: string;
@@ -65,6 +72,8 @@ export type LevelEditorObjectLibraryPanelEntry = {
 	readonly replacementDraft: EditorObjectLibraryReplacementDraft | null;
 	readonly unavailableReason: string | null;
 	readonly canReplaceSelectedObject: boolean;
+	readonly usageCount: number;
+	readonly usageState: LevelEditorObjectLibraryUsageState;
 };
 
 export type LevelEditorObjectLibraryStagedPlacement = {
@@ -98,6 +107,8 @@ export type LevelEditorObjectLibraryPanelModel = {
 		readonly placeableDraftEntryCount: number;
 		readonly publishablePlacementEntryCount: number;
 		readonly replaceableEntryCount: number;
+		readonly usedEntryCount: number;
+		readonly unusedEntryCount: number;
 		readonly stagedWritesFiles: false;
 		readonly replacementMode: "preview-only";
 	};
@@ -106,6 +117,7 @@ export type LevelEditorObjectLibraryPanelModel = {
 export type LevelEditorObjectLibraryPlacementSource =
 	| "object-library-panel"
 	| "viewport-placement-target"
+	| "viewport-click"
 	| "viewport-drop";
 
 export function buildLevelEditorObjectLibraryPanelModel(options: {
@@ -113,12 +125,14 @@ export function buildLevelEditorObjectLibraryPanelModel(options: {
 	readonly levelId?: string;
 	readonly selectedObject?: EditorObjectLibraryReplacementSubject | null;
 	readonly selectedEntryId?: string | null;
+	readonly sceneObjects?: readonly LevelEditorObjectLibraryUsageObject[];
 	readonly catalog?: EditorObjectLibraryCatalog;
 }): LevelEditorObjectLibraryPanelModel {
 	const runtimeManifest = getRuntimeSceneManifest(options.runtimeSceneId);
 	const levelId = options.levelId ?? runtimeManifest?.level.id ?? "unknown";
 	const catalog = options.catalog ?? buildManifestBackedObjectLibrary();
 	const selectedObject = options.selectedObject ?? null;
+	const usageCounts = objectLibraryUsageCounts(options.sceneObjects ?? []);
 	const assetsById = new Map(
 		(runtimeManifest?.assets.assets ?? []).map((asset) => [asset.id, asset]),
 	);
@@ -135,6 +149,7 @@ export function buildLevelEditorObjectLibraryPanelModel(options: {
 						levelId,
 						selectedObject,
 						assetsById,
+						usageCounts,
 					}),
 				);
 
@@ -171,6 +186,10 @@ export function buildLevelEditorObjectLibraryPanelModel(options: {
 			replaceableEntryCount: entries.filter(
 				(entry) => entry.canReplaceSelectedObject,
 			).length,
+			usedEntryCount: entries.filter((entry) => entry.usageState === "used")
+				.length,
+			unusedEntryCount: entries.filter((entry) => entry.usageState === "unused")
+				.length,
 			stagedWritesFiles: false,
 			replacementMode: "preview-only",
 		},
@@ -197,9 +216,11 @@ export function createObjectLibraryStagedPlacement(options: {
 	const note =
 		options.source === "viewport-placement-target"
 			? "Object library placement draft staged from the viewport placement target."
-			: options.source === "viewport-drop"
-				? "Object library placement draft staged from a viewport drop point."
-				: "Object library placement draft staged from the editor panel.";
+			: options.source === "viewport-click"
+				? "Object library placement draft staged from a viewport click point."
+				: options.source === "viewport-drop"
+					? "Object library placement draft staged from a viewport drop point."
+					: "Object library placement draft staged from the editor panel.";
 	const operation = {
 		id: `object-library-placement:${options.runtimeSceneId}:${stableId}`,
 		kind: "insert-instance",
@@ -287,6 +308,10 @@ function panelEntryForObjectLibraryEntry(options: {
 	readonly levelId: string;
 	readonly selectedObject: EditorObjectLibraryReplacementSubject | null;
 	readonly assetsById: ReadonlyMap<string, AssetManifestEntryData>;
+	readonly usageCounts: {
+		readonly prefabs: ReadonlyMap<string, number>;
+		readonly assets: ReadonlyMap<string, number>;
+	};
 }): LevelEditorObjectLibraryPanelEntry {
 	const replacementResult = options.selectedObject
 		? tryCreateObjectLibraryReplacementDraft({
@@ -305,6 +330,10 @@ function panelEntryForObjectLibraryEntry(options: {
 			: replacementResult?.ok === false
 				? replacementResult.errors.join(" ")
 				: null;
+	const usageCount = usageCountForObjectLibraryEntry(
+		options.entry,
+		options.usageCounts,
+	);
 
 	return {
 		entry: options.entry,
@@ -317,7 +346,10 @@ function panelEntryForObjectLibraryEntry(options: {
 		preview: previewModelForEntry(options.entry, options.assetsById),
 		placementReadiness: {
 			...options.entry.placementReadiness,
-			placementDraft: options.entry.placement ?? null,
+			placementDraft: placementDraftForCurrentLevel(
+				options.entry.placement ?? null,
+				options.levelId,
+			),
 		},
 		canStagePlacementDraft:
 			options.entry.placementReadiness.canStagePlacementDraft,
@@ -325,7 +357,66 @@ function panelEntryForObjectLibraryEntry(options: {
 		replacementDraft,
 		unavailableReason,
 		canReplaceSelectedObject: replacementDraft !== null,
+		usageCount,
+		usageState: usageCount > 0 ? "used" : "unused",
 	};
+}
+
+function placementDraftForCurrentLevel(
+	draft: EditorObjectLibraryPlacementDraft | null,
+	levelId: string,
+): EditorObjectLibraryPlacementDraft | null {
+	if (draft === null) {
+		return null;
+	}
+
+	return {
+		...draft,
+		stableIdPattern: `${levelId}:{prefabId}:{slug}`,
+	};
+}
+
+function objectLibraryUsageCounts(
+	objects: readonly LevelEditorObjectLibraryUsageObject[],
+): {
+	readonly prefabs: ReadonlyMap<string, number>;
+	readonly assets: ReadonlyMap<string, number>;
+} {
+	return {
+		prefabs: countBy(objects.map((object) => object.prefabId)),
+		assets: countBy(objects.flatMap((object) => object.assetIds)),
+	};
+}
+
+function usageCountForObjectLibraryEntry(
+	entry: EditorObjectLibraryEntry,
+	usageCounts: {
+		readonly prefabs: ReadonlyMap<string, number>;
+		readonly assets: ReadonlyMap<string, number>;
+	},
+): number {
+	if (entry.prefabId) {
+		return usageCounts.prefabs.get(entry.prefabId) ?? 0;
+	}
+
+	if (entry.assetId) {
+		return usageCounts.assets.get(entry.assetId) ?? 0;
+	}
+
+	return (entry.assetIds ?? []).reduce(
+		(count, assetId) => count + (usageCounts.assets.get(assetId) ?? 0),
+		0,
+	);
+}
+
+function countBy(values: readonly string[]): ReadonlyMap<string, number> {
+	const counts = new Map<string, number>();
+
+	for (const value of values) {
+		counts.set(value, (counts.get(value) ?? 0) + 1);
+	}
+
+	return counts;
 }
 
 function previewModelForEntry(

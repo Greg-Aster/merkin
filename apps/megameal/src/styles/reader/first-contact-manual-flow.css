@@ -4,6 +4,13 @@
 
 @import "./first-contact-manual-planck.css";
 @import "./first-contact-manual-quantum.css";
+@import "./first-contact-manual-microscopic.css";
+@import "./first-contact-manual-individual.css";
+@import "./first-contact-manual-mega-organism.css";
+@import "./first-contact-manual-planetary.css";
+@import "./first-contact-manual-stellar.css";
+@import "./first-contact-manual-scale-exceptions.css";
+@import "./first-contact-manual-hybrids.css";
 @import "./first-contact-manual-exotic-ledger.css";
 
 .fcmi-legend-row {

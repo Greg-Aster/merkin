@@ -2,6 +2,7 @@ import { createLevelEditorCameraModeOperationDraft } from "../src/app/editor/lev
 import {
 	buildLevelEditorObjectLibraryPanelModel,
 	createObjectLibraryReplacementPreviewMessage,
+	createObjectLibraryStagedPlacement,
 	objectLibrarySubjectFromSelection,
 } from "../src/app/editor/levelEditorObjectLibrary.js";
 import { buildLevelEditorWorkspaceModel } from "../src/app/editor/levelEditorWorkspaceModel.js";
@@ -324,6 +325,35 @@ assertIncludes(
 	defaultRuntimeSceneManifest.id,
 	"Expected portal library entry to include the default runtime scene manifest.",
 );
+const mirandaPortalLibraryPanel = buildLevelEditorObjectLibraryPanelModel({
+	runtimeSceneId: mirandaDeckRuntimeSceneManifest.id,
+	selectedEntryId: portalEntry.id,
+});
+const mirandaPortalPlacementEntry = assertDefined(
+	mirandaPortalLibraryPanel.selectedEntry,
+	"Expected shared portal prefab to be selectable in the Miranda object library panel.",
+);
+const mirandaPortalPlacementDraft = assertDefined(
+	mirandaPortalPlacementEntry.placementReadiness.placementDraft,
+	"Expected shared prefab entries to expose a scene-scoped placement draft.",
+);
+assertEqual(
+	mirandaPortalPlacementDraft.stableIdPattern,
+	`${mirandaDeckRuntimeSceneManifest.level.id}:{prefabId}:{slug}`,
+	"Expected shared prefab placement drafts to use the selected runtime scene level ID.",
+);
+const mirandaPortalPlacement = createObjectLibraryStagedPlacement({
+	runtimeSceneId: mirandaDeckRuntimeSceneManifest.id,
+	entry: mirandaPortalPlacementEntry,
+	draft: mirandaPortalPlacementDraft,
+	index: 1,
+	source: "object-library-panel",
+});
+assertEqual(
+	mirandaPortalPlacement.stableId,
+	`${mirandaDeckRuntimeSceneManifest.level.id}:portal_gate:draft-1`,
+	"Expected shared prefab placement staging to preserve current-scene generated-owner stable IDs.",
+);
 
 const selectedPortalObject = objectLibrarySubjectFromSelection({
 	stableId: "portal-arena:portal:observatory",
@@ -431,6 +461,7 @@ const objectLibraryPanel = buildLevelEditorObjectLibraryPanelModel({
 	runtimeSceneId: defaultRuntimeSceneManifest.id,
 	selectedObject: selectedPortalObject,
 	selectedEntryId: portalMeshEntry.id,
+	sceneObjects: workspaceModel.objects,
 });
 assertEqual(
 	objectLibraryPanel.selectedObject?.stableId,
@@ -462,10 +493,30 @@ assertAtLeast(
 	1,
 	"Expected object-library panel summary to expose publishable prefab placements.",
 );
+assertAtLeast(
+	objectLibraryPanel.summary.usedEntryCount,
+	1,
+	"Expected object-library panel summary to count entries used by the current scene.",
+);
+assertAtLeast(
+	objectLibraryPanel.summary.unusedEntryCount,
+	1,
+	"Expected object-library panel summary to count entries unused by the current scene.",
+);
 assertEqual(
 	objectLibraryPanel.selectedEntry?.canPublishPlacement,
 	false,
 	"Expected panel entries not to make object-library placement publishable.",
+);
+assertEqual(
+	objectLibraryPanel.selectedEntry?.usageState,
+	"used",
+	"Expected the selected portal mesh entry to be marked used by the current scene.",
+);
+assertAtLeast(
+	objectLibraryPanel.selectedEntry?.usageCount ?? 0,
+	1,
+	"Expected the selected portal mesh entry to report scene usage count.",
 );
 const replacementMessage = createObjectLibraryReplacementPreviewMessage({
 	requestId: "object-library-replacement-contract",

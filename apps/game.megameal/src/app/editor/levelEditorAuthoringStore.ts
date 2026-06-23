@@ -36,6 +36,9 @@ export type LevelEditorAuthoringQueueState =
 		readonly operationCount: number;
 		readonly canUndo: boolean;
 		readonly canRedo: boolean;
+		readonly undoDepth: number;
+		readonly redoDepth: number;
+		readonly historyLimit: number;
 		readonly undoSnapshots: readonly LevelEditorAuthoringQueueSnapshot[];
 		readonly redoSnapshots: readonly LevelEditorAuthoringQueueSnapshot[];
 	};
@@ -44,6 +47,8 @@ export type LevelEditorAuthoringQueueSeed =
 	Partial<LevelEditorAuthoringQueueSnapshot> & {
 		readonly operationInputs?: readonly LevelEditorAuthoringOperationInput[];
 	};
+
+export const levelEditorAuthoringQueueHistoryLimit = 64;
 
 export function createLevelEditorAuthoringQueue(
 	seed: LevelEditorAuthoringQueueSeed = {},
@@ -146,7 +151,7 @@ export function undoLevelEditorAuthoringQueue(
 		redoSnapshots: [
 			snapshotLevelEditorAuthoringQueue(state),
 			...state.redoSnapshots,
-		],
+		].slice(0, state.historyLimit),
 	});
 }
 
@@ -163,7 +168,7 @@ export function redoLevelEditorAuthoringQueue(
 		undoSnapshots: [
 			...state.undoSnapshots,
 			snapshotLevelEditorAuthoringQueue(state),
-		],
+		].slice(-state.historyLimit),
 		redoSnapshots: state.redoSnapshots.slice(1),
 	});
 }
@@ -239,7 +244,7 @@ function commitQueueSnapshot(
 	}
 
 	return createQueueState(normalizedNext, {
-		undoSnapshots: [...state.undoSnapshots, current],
+		undoSnapshots: [...state.undoSnapshots, current].slice(-state.historyLimit),
 		redoSnapshots: [],
 	});
 }
@@ -271,6 +276,9 @@ function createQueueState(
 		operationCount,
 		canUndo: undoSnapshots.length > 0,
 		canRedo: redoSnapshots.length > 0,
+		undoDepth: undoSnapshots.length,
+		redoDepth: redoSnapshots.length,
+		historyLimit: levelEditorAuthoringQueueHistoryLimit,
 		undoSnapshots,
 		redoSnapshots,
 	};

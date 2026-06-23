@@ -1,5 +1,32 @@
 /* Planck-scale entity layout for First Contact Manual chapter 1. */
 
+.fcmi-scale-entry--planck-bg {
+  background:
+    radial-gradient(circle at 0 0, rgb(var(--fcmi-accent-rgb) / 0.22), transparent 30%),
+    radial-gradient(circle at 88% 10%, rgb(var(--fcmi-glow-rgb) / 0.16), transparent 34%),
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.78), rgb(var(--fcmi-surface-rgb) / 0.58)),
+    url("/first-contact/plank-bg.webp") center / cover no-repeat,
+    rgb(var(--fcmi-surface-rgb) / 0.72);
+  box-shadow:
+    inset 0 0 52px rgb(var(--fcmi-glow-rgb) / 0.12),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03),
+    0 20px 56px rgb(0 0 0 / 0.32);
+}
+
+.fcmi-scale-entry--planck-bg .fcmi-scale-education-main,
+.fcmi-scale-entry--planck-bg .fcmi-scale-unknowns,
+.fcmi-scale-entry--planck-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--planck-bg .fcmi-scale-note {
+  backdrop-filter: blur(5px);
+}
+
+.fcmi-scale-entry--planck-bg .fcmi-scale-education-main,
+.fcmi-scale-entry--planck-bg .fcmi-scale-detail-card {
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.58), rgb(var(--fcmi-surface-rgb) / 0.38)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.08), transparent 72%);
+}
+
 .fcmi-scale-education {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(min(100%, 14rem), 0.8fr);

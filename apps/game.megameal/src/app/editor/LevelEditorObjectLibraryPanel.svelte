@@ -25,6 +25,8 @@ type ObjectLibraryPlacementFilter =
 	| "publish-ready"
 	| "replacement-ready"
 	| "blocked";
+type ObjectLibraryUsageFilter = "all" | "used" | "unused";
+type ObjectLibrarySortMode = "name" | "most-used" | "unused-first";
 
 type PlacementTransformEditorState = {
 	entryId: string;
@@ -70,6 +72,8 @@ const objectLibrarySearchQuery = $state("");
 const objectLibraryKindFilter: ObjectLibraryKindFilter = $state("all");
 const objectLibraryPlacementFilter: ObjectLibraryPlacementFilter =
 	$state("all");
+const objectLibraryUsageFilter: ObjectLibraryUsageFilter = $state("all");
+const objectLibrarySortMode: ObjectLibrarySortMode = $state("name");
 const placementTransformEditor: PlacementTransformEditorState = $state({
 	entryId: "",
 	positionX: 0,
@@ -85,8 +89,8 @@ const filteredObjectLibraryGroups = $derived(
 	model.groups
 		.map((group) => ({
 			...group,
-			entries: group.entries.filter((entry) =>
-				matchesObjectLibraryFilters(entry),
+			entries: sortObjectLibraryEntries(
+				group.entries.filter((entry) => matchesObjectLibraryFilters(entry)),
 			),
 		}))
 		.filter((group) => group.entries.length > 0),
@@ -336,6 +340,13 @@ function matchesObjectLibraryFilters(
 		return false;
 	}
 
+	if (
+		objectLibraryUsageFilter !== "all" &&
+		entry.usageState !== objectLibraryUsageFilter
+	) {
+		return false;
+	}
+
 	const query = objectLibrarySearchQuery.trim().toLowerCase();
 
 	if (query.length === 0) {
@@ -350,6 +361,7 @@ function matchesObjectLibraryFilters(
 		entry.preview.label,
 		entry.preview.assetId,
 		entry.placementReadiness.status,
+		entry.usageState,
 		...entry.tags,
 		...entry.runtimeSceneIds,
 	]
@@ -375,6 +387,28 @@ function matchesObjectLibraryPlacementFilter(
 		case "all":
 			return true;
 	}
+}
+
+function sortObjectLibraryEntries(
+	entries: readonly LevelEditorObjectLibraryPanelEntry[],
+): readonly LevelEditorObjectLibraryPanelEntry[] {
+	return [...entries].sort((left, right) => {
+		switch (objectLibrarySortMode) {
+			case "most-used":
+				return (
+					right.usageCount - left.usageCount ||
+					left.label.localeCompare(right.label)
+				);
+			case "unused-first":
+				return (
+					Number(left.usageState === "used") -
+						Number(right.usageState === "used") ||
+					left.label.localeCompare(right.label)
+				);
+			case "name":
+				return left.label.localeCompare(right.label);
+		}
+	});
 }
 
 function editOperationForReplacementDraft(
@@ -497,6 +531,22 @@ function formatWorkflowValue(value: string): string {
 				<option value="blocked">Blocked</option>
 			</select>
 		</label>
+		<label>
+			<span>Usage</span>
+			<select bind:value={objectLibraryUsageFilter} aria-label="Filter library usage">
+				<option value="all">All usage</option>
+				<option value="used">Used in scene</option>
+				<option value="unused">Unused in scene</option>
+			</select>
+		</label>
+		<label>
+			<span>Sort</span>
+			<select bind:value={objectLibrarySortMode} aria-label="Sort object library">
+				<option value="name">Name</option>
+				<option value="most-used">Most used</option>
+				<option value="unused-first">Unused first</option>
+			</select>
+		</label>
 	</div>
 	<div class="editor-library-grid">
 		<div class="editor-library-list">
@@ -516,7 +566,7 @@ function formatWorkflowValue(value: string): string {
 						>
 							<span>{entry.label}</span>
 							<small>
-								{entry.kind} / {entry.canReplaceSelectedObject
+								{entry.kind} / {entry.usageCount} used / {entry.canReplaceSelectedObject
 									? "replaceable"
 									: "inspect"}
 							</small>
@@ -567,6 +617,14 @@ function formatWorkflowValue(value: string): string {
 						</dd>
 					</div>
 					<div>
+						<dt>Usage</dt>
+						<dd>
+							{activeEntry.usageState === "used"
+								? `${activeEntry.usageCount} scene use${activeEntry.usageCount === 1 ? "" : "s"}`
+								: "Unused in scene"}
+						</dd>
+					</div>
+					<div>
 						<dt>Placement Save</dt>
 						<dd>
 							{activeEntry.placementReadiness.canStagePlacementDraft
@@ -601,6 +659,9 @@ function formatWorkflowValue(value: string): string {
 						{activeEntry.canPublishPlacement
 							? "Publish-ready"
 							: "Not publishable"}
+					</span>
+					<span>
+						{activeEntry.usageState === "used" ? "Used in scene" : "Unused"}
 					</span>
 					<span>{activeEntry.placementReadiness.writesFiles ? "Writes files" : "No file writes"}</span>
 				</div>
@@ -728,6 +789,14 @@ function formatWorkflowValue(value: string): string {
 		<div>
 			<dt>Publish Placement</dt>
 			<dd>{model.summary.publishablePlacementEntryCount}</dd>
+		</div>
+		<div>
+			<dt>Used</dt>
+			<dd>{model.summary.usedEntryCount}</dd>
+		</div>
+		<div>
+			<dt>Unused</dt>
+			<dd>{model.summary.unusedEntryCount}</dd>
 		</div>
 		<div>
 			<dt>Staged</dt>

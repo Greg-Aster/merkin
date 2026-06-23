@@ -62,6 +62,7 @@ desktop.ini
 .dev-runtime/
 
 # Local editor recovery snapshots
+apps/megameal/.local-notes/
 apps/game/src/threlte/editor/scenes/*.backup.json
 apps/game/src/threlte/editor/scenes/*.pre-restore.json
 apps/game/.visual-smoke/

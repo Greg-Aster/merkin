@@ -3,6 +3,7 @@ import type {
 	LevelEditorAuthoringSetTransformOperation,
 	LevelEditorAuthoringTransaction,
 } from "../../engine/data/levelAuthoring/index.js";
+import type { LevelEditorAuthoringOperationData } from "../../game/editor/authoring/saveTransaction.js";
 import type {
 	LevelEditorWorkspaceCommandPlan,
 	LevelEditorWorkspaceField,
@@ -24,6 +25,22 @@ export type LevelEditorStagedFieldEdit = {
 	readonly label: string;
 	readonly before: LevelEditorFieldValue;
 	readonly after: LevelEditorFieldValue;
+};
+
+export type LevelEditorStagedPublishReadinessQueuedOperation = {
+	readonly id: string;
+	readonly label?: string;
+	readonly operations?: readonly LevelEditorAuthoringEditOperation[];
+	readonly saveOperations?: readonly LevelEditorAuthoringOperationData[];
+};
+
+export type LevelEditorStagedPublishReadiness = {
+	readonly status: "clean" | "publish-ready" | "draft-only" | "mixed";
+	readonly label: string;
+	readonly canRunOwnerWrite: boolean;
+	readonly supportedOperationCount: number;
+	readonly unsupportedOperationCount: number;
+	readonly reasons: readonly string[];
 };
 
 export function fieldEditKey(stableId: string, path: string): string {
@@ -177,6 +194,269 @@ export function commandPlanOutputMessage(
 	}.`;
 }
 
+export function buildStagedPublishReadiness(options: {
+	readonly stagedFieldEdits: readonly LevelEditorStagedFieldEdit[];
+	readonly queuedOperations: readonly LevelEditorStagedPublishReadinessQueuedOperation[];
+}): LevelEditorStagedPublishReadiness {
+	const unsupportedReasons: string[] = [];
+	let supportedOperationCount = 0;
+
+	for (const edit of options.stagedFieldEdits) {
+		if (isPublishableTransformFieldPath(edit.path)) {
+			supportedOperationCount += 1;
+			continue;
+		}
+
+		unsupportedReasons.push(
+			`${edit.label} (${edit.path}) is not publishable by the current generated level owner writer.`,
+		);
+	}
+
+	for (const entry of options.queuedOperations) {
+		const entryPublishability = queuedEntryPublishability(entry);
+		supportedOperationCount += entryPublishability.supportedOperationCount;
+		unsupportedReasons.push(...entryPublishability.unsupportedReasons);
+	}
+
+	const unsupportedOperationCount = unsupportedReasons.length;
+	const status =
+		supportedOperationCount === 0 && unsupportedOperationCount === 0
+			? "clean"
+			: unsupportedOperationCount === 0
+				? "publish-ready"
+				: supportedOperationCount === 0
+					? "draft-only"
+					: "mixed";
+
+	return {
+		status,
+		label: stagedPublishReadinessLabel(status),
+		canRunOwnerWrite: status === "publish-ready",
+		supportedOperationCount,
+		unsupportedOperationCount,
+		reasons: unsupportedReasons.slice(0, 4),
+	};
+}
+
+function queuedEntryPublishability(
+	entry: LevelEditorStagedPublishReadinessQueuedOperation,
+): {
+	readonly supportedOperationCount: number;
+	readonly unsupportedReasons: readonly string[];
+} {
+	const operationLabel = entry.label ?? entry.id;
+
+	if ((entry.saveOperations?.length ?? 0) > 0) {
+		return classifyQueuedSaveOperations(entry, operationLabel);
+	}
+
+	return classifyQueuedEditOperations(entry, operationLabel);
+}
+
+function classifyQueuedSaveOperations(
+	entry: LevelEditorStagedPublishReadinessQueuedOperation,
+	operationLabel: string,
+): {
+	readonly supportedOperationCount: number;
+	readonly unsupportedReasons: readonly string[];
+} {
+	let supportedOperationCount = 0;
+	const unsupportedReasons: string[] = [];
+
+	for (const operation of entry.saveOperations ?? []) {
+		if (
+			isPublishableLevelTransformSaveOperation(operation) ||
+			isPublishableLevelInsertionSaveOperation(operation) ||
+			isPublishableLevelPrefabReplacementSaveOperation(operation) ||
+			isPublishableLevelRemovalSaveOperation(operation) ||
+			isPublishableLevelComponentSaveOperation(operation) ||
+			isPublishableLevelComponentRemovalSaveOperation(operation)
+		) {
+			supportedOperationCount += 1;
+			continue;
+		}
+
+		unsupportedReasons.push(
+			`${operationLabel} stages ${operation.kind}; Save Level/Publish currently accepts only level-owned set-transform, insert-level-instance, replace-prefab, remove-level-instance, set-component, and remove-component operations.`,
+		);
+	}
+
+	return { supportedOperationCount, unsupportedReasons };
+}
+
+function classifyQueuedEditOperations(
+	entry: LevelEditorStagedPublishReadinessQueuedOperation,
+	operationLabel: string,
+): {
+	readonly supportedOperationCount: number;
+	readonly unsupportedReasons: readonly string[];
+} {
+	let supportedOperationCount = 0;
+	const unsupportedReasons: string[] = [];
+
+	for (const operation of entry.operations ?? []) {
+		if (
+			(operation.kind === "set-transform" && !("target" in operation)) ||
+			(operation.kind === "set-transform" && operation.target !== "prefab") ||
+			operation.kind === "insert-instance" ||
+			operation.kind === "replace-prefab" ||
+			operation.kind === "remove-instance" ||
+			(operation.kind === "set-component" &&
+				operation.target === "level-instance") ||
+			(operation.kind === "remove-component" &&
+				operation.target === "level-instance")
+		) {
+			supportedOperationCount += 1;
+			continue;
+		}
+
+		unsupportedReasons.push(
+			`${operationLabel} stages ${operation.kind}; Save Level/Publish currently accepts only level-owned set-transform, insert-level-instance, replace-prefab, remove-level-instance, set-component, and remove-component operations.`,
+		);
+	}
+
+	return { supportedOperationCount, unsupportedReasons };
+}
+
+function isPublishableTransformFieldPath(path: string): boolean {
+	return (
+		path.startsWith("Transform.position.") ||
+		path.startsWith("Transform.rotation.") ||
+		path.startsWith("Transform.scale.") ||
+		path.startsWith("Light.") ||
+		path.startsWith("Portal.") ||
+		path.startsWith("SoundEmitter.")
+	);
+}
+
+function isPublishableLevelTransformSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	const payloadOperation = payloadOperationRecord(operation.payload);
+
+	return (
+		operation.kind === "replace-level-instance" &&
+		operation.ownerKind === "level" &&
+		payloadOperation !== null &&
+		payloadOperation.kind === "set-transform"
+	);
+}
+
+function isPublishableLevelInsertionSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	return (
+		operation.kind === "insert-level-instance" &&
+		operation.ownerKind === "level" &&
+		operation.payload !== null &&
+		typeof operation.payload === "object" &&
+		"instance" in operation.payload
+	);
+}
+
+function isPublishableLevelRemovalSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	const payloadOperation = payloadOperationRecord(operation.payload);
+
+	return (
+		operation.kind === "remove-level-instance" &&
+		operation.ownerKind === "level" &&
+		payloadOperation !== null &&
+		payloadOperation.kind === "remove-instance"
+	);
+}
+
+function isPublishableLevelPrefabReplacementSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	const payloadOperation = payloadOperationRecord(operation.payload);
+
+	return (
+		operation.kind === "replace-level-instance" &&
+		operation.ownerKind === "level" &&
+		payloadOperation !== null &&
+		payloadOperation.kind === "replace-prefab" &&
+		"prefabId" in payloadOperation &&
+		typeof payloadOperation.prefabId === "string"
+	);
+}
+
+function isPublishableLevelComponentSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	const payloadOperation = payloadOperationRecord(operation.payload);
+
+	return (
+		operation.kind === "replace-level-instance" &&
+		operation.ownerKind === "level" &&
+		payloadOperation !== null &&
+		payloadOperation.kind === "set-component" &&
+		"target" in payloadOperation &&
+		payloadOperation.target === "level-instance"
+	);
+}
+
+function isPublishableLevelComponentRemovalSaveOperation(operation: {
+	readonly kind: string;
+	readonly ownerKind: string;
+	readonly payload?: unknown;
+}): boolean {
+	const payloadOperation = payloadOperationRecord(operation.payload);
+
+	return (
+		operation.kind === "replace-level-instance" &&
+		operation.ownerKind === "level" &&
+		payloadOperation !== null &&
+		payloadOperation.kind === "remove-component" &&
+		"target" in payloadOperation &&
+		payloadOperation.target === "level-instance"
+	);
+}
+
+function payloadOperationRecord(
+	payload: unknown,
+): Record<string, unknown> | null {
+	if (
+		payload === null ||
+		typeof payload !== "object" ||
+		!("operation" in payload)
+	) {
+		return null;
+	}
+
+	const operation = payload.operation;
+
+	return operation !== null && typeof operation === "object"
+		? (operation as Record<string, unknown>)
+		: null;
+}
+
+function stagedPublishReadinessLabel(
+	status: LevelEditorStagedPublishReadiness["status"],
+): string {
+	switch (status) {
+		case "clean":
+			return "No staged owner writes";
+		case "publish-ready":
+			return "Save Level/Publish ready";
+		case "draft-only":
+			return "Draft-only staged work";
+		case "mixed":
+			return "Mixed publish readiness";
+	}
+}
+
 function buildAuthoringOperations(options: {
 	readonly workspace: LevelEditorWorkspaceModel;
 	readonly edits: readonly LevelEditorStagedFieldEdit[];
@@ -255,10 +535,16 @@ function transformOperationValue(
 	const hasScale = edits.some((edit) =>
 		edit.path.startsWith("Transform.scale."),
 	);
+	const hasRotation = edits.some((edit) =>
+		edit.path.startsWith("Transform.rotation."),
+	);
 
 	return {
 		...(hasPosition
 			? { position: vectorValue(object, edits, "Transform.position") }
+			: {}),
+		...(hasRotation
+			? { rotation: quaternionValue(object, edits, "Transform.rotation") }
 			: {}),
 		...(hasScale
 			? { scale: vectorValue(object, edits, "Transform.scale") }
@@ -278,6 +564,20 @@ function vectorValue(
 
 		return Number(edit?.after ?? field?.value ?? 0);
 	}) as [number, number, number];
+}
+
+function quaternionValue(
+	object: LevelEditorWorkspaceObject,
+	edits: readonly LevelEditorStagedFieldEdit[],
+	path: "Transform.rotation",
+): readonly [number, number, number, number] {
+	return ["x", "y", "z", "w"].map((axis) => {
+		const fieldPath = `${path}.${axis}`;
+		const edit = edits.find((item) => item.path === fieldPath);
+		const field = object.fields.find((item) => item.path === fieldPath);
+
+		return Number(edit?.after ?? field?.value ?? (axis === "w" ? 1 : 0));
+	}) as [number, number, number, number];
 }
 
 function componentOperationValue(

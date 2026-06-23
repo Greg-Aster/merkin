@@ -96,6 +96,16 @@ export type LevelEditorWorkspaceField = {
 	readonly workflow: LevelEditorWorkspaceFieldWorkflow;
 };
 
+export type LevelEditorWorkspaceInspectorFieldGroup = {
+	readonly id: string;
+	readonly componentName: string;
+	readonly label: string;
+	readonly fields: readonly LevelEditorWorkspaceField[];
+	readonly editableFieldCount: number;
+	readonly readOnlyFieldCount: number;
+	readonly workflow: LevelEditorWorkspaceFieldWorkflow;
+};
+
 export type LevelEditorWorkspaceObjectWorkflow = {
 	readonly selectionState: "selected" | "available";
 	readonly editability: "editable" | "read-only";
@@ -107,18 +117,40 @@ export type LevelEditorWorkspaceObjectWorkflow = {
 	readonly featureFamilyIds: readonly string[];
 };
 
+export type LevelEditorWorkspaceOutlinerAffordance = {
+	readonly categoryLabel: string;
+	readonly objectPath: readonly string[];
+	readonly visibility: {
+		readonly state: "visible";
+		readonly label: string;
+		readonly reason: string;
+	};
+	readonly lock: {
+		readonly state: "editable" | "cook-guarded" | "read-only";
+		readonly label: string;
+		readonly reason: string;
+	};
+	readonly pickability: {
+		readonly state: "projected-pickable" | "outliner-only";
+		readonly label: string;
+		readonly reason: string;
+	};
+};
+
 export type LevelEditorWorkspaceObject = {
 	readonly id: string;
 	readonly stableId: string;
 	readonly prefabId: string;
 	readonly label: string;
 	readonly category: LevelEditorWorkspaceCategory;
+	readonly outliner: LevelEditorWorkspaceOutlinerAffordance;
 	readonly sourceOwner: string;
 	readonly assetIds: readonly string[];
 	readonly componentNames: readonly string[];
 	readonly capabilities: readonly LevelEditorWorkspaceCapability[];
 	readonly capabilityReason: string;
 	readonly fields: readonly LevelEditorWorkspaceField[];
+	readonly fieldGroups: readonly LevelEditorWorkspaceInspectorFieldGroup[];
 	readonly workflow: LevelEditorWorkspaceObjectWorkflow;
 	readonly preview: LevelEditorWorkspaceSelectedObjectPreview;
 	readonly previewTargetKind?: LevelEditorWorkspacePreviewTargetKind;
@@ -487,6 +519,11 @@ function buildWorkspaceObjects(
 		const assetIds = objectAssetIds(prefab, components, assetsById);
 		const sourceOwner = `level:${manifest.level.id} prefab:${instance.prefabId}`;
 		const label = objectLabel(instance, components);
+		const fields = inspectorFieldsForObject(
+			category,
+			components,
+			featureFamiliesById,
+		);
 
 		return {
 			id: instance.id,
@@ -494,16 +531,21 @@ function buildWorkspaceObjects(
 			prefabId: instance.prefabId,
 			label,
 			category,
+			outliner: objectOutlinerAffordance({
+				manifest,
+				instance,
+				category,
+				capabilities,
+				fields,
+				components,
+			}),
 			sourceOwner,
 			assetIds,
 			componentNames,
 			capabilities,
 			capabilityReason: capabilityReason(category),
-			fields: inspectorFieldsForObject(
-				category,
-				components,
-				featureFamiliesById,
-			),
+			fields,
+			fieldGroups: inspectorFieldGroupsForFields(fields),
 			preview: selectedObjectPreview({
 				label,
 				stableId: instance.stableId,
@@ -1188,6 +1230,107 @@ function objectWorkflowReason(options: {
 	}
 }
 
+function objectOutlinerAffordance(options: {
+	readonly manifest: RuntimeSceneManifestData;
+	readonly instance: LevelPrefabInstanceData;
+	readonly category: LevelEditorWorkspaceCategory;
+	readonly capabilities: readonly LevelEditorWorkspaceCapability[];
+	readonly fields: readonly LevelEditorWorkspaceFieldWithoutWorkflow[];
+	readonly components: Record<string, unknown>;
+}): LevelEditorWorkspaceOutlinerAffordance {
+	const categoryLabel = categoryLabels[options.category];
+	const lock = objectOutlinerLock(options.category, options.capabilities);
+	const pickability = objectOutlinerPickability(
+		options.components,
+		options.fields,
+	);
+
+	return {
+		categoryLabel,
+		objectPath: [
+			options.manifest.id,
+			options.manifest.level.id,
+			categoryLabel,
+			options.instance.stableId,
+		],
+		visibility: {
+			state: "visible",
+			label: "Visible",
+			reason:
+				"Manifest-owned level instances are visible in the editor outliner; hidden/isolation state is a future authoring contract.",
+		},
+		lock,
+		pickability,
+	};
+}
+
+function objectOutlinerLock(
+	category: LevelEditorWorkspaceCategory,
+	capabilities: readonly LevelEditorWorkspaceCapability[],
+): LevelEditorWorkspaceOutlinerAffordance["lock"] {
+	if (category === "terrain" || category === "collision") {
+		return {
+			state: "cook-guarded",
+			label: "Cook guarded",
+			reason:
+				"Collision and terrain changes must flow through explicit cook/bake contracts before they become runtime owner data.",
+		};
+	}
+
+	if (capabilities.includes("editable")) {
+		return {
+			state: "editable",
+			label: "Editable",
+			reason:
+				"Supported component fields can stage editor operations through the authoring queue.",
+		};
+	}
+
+	return {
+		state: "read-only",
+		label: "Read-only",
+		reason:
+			"This object is inspect-only until a matching owner-write contract exists.",
+	};
+}
+
+function objectOutlinerPickability(
+	components: Record<string, unknown>,
+	fields: readonly LevelEditorWorkspaceFieldWithoutWorkflow[],
+): LevelEditorWorkspaceOutlinerAffordance["pickability"] {
+	const transform = asRecord(components.Transform);
+	const position = Array.isArray(transform?.position)
+		? transform.position
+		: undefined;
+	const hasProjectedPosition =
+		typeof position?.[0] === "number" && typeof position[2] === "number";
+	const hasEditableProjectedFields =
+		fields.some(
+			(field) =>
+				field.path === "Transform.position.x" && field.readOnly === false,
+		) &&
+		fields.some(
+			(field) =>
+				field.path === "Transform.position.z" && field.readOnly === false,
+		);
+
+	if (hasProjectedPosition && hasEditableProjectedFields) {
+		return {
+			state: "projected-pickable",
+			label: "Projected pick",
+			reason:
+				"Object has authored X/Z transform fields that can participate in editor projected selection and placement aids.",
+		};
+	}
+
+	return {
+		state: "outliner-only",
+		label: "Outliner only",
+		reason:
+			"Object lacks editable projected transform fields for current viewport picking aids.",
+	};
+}
+
 function objectLabel(
 	instance: LevelPrefabInstanceData,
 	components: Record<string, unknown>,
@@ -1222,6 +1365,12 @@ function inspectorFieldsForObject(
 			"Transform.position",
 			"Position",
 			transform?.position,
+		);
+		addQuaternionFields(
+			fields,
+			"Transform.rotation",
+			"Rotation",
+			transform?.rotation,
 		);
 		addVectorFields(fields, "Transform.scale", "Scale", transform?.scale);
 	}
@@ -1343,6 +1492,112 @@ function inspectorFieldsForObject(
 		.map((field) =>
 			fieldWithWorkflow({ category, field, featureFamiliesById }),
 		);
+}
+
+function inspectorFieldGroupsForFields(
+	fields: readonly LevelEditorWorkspaceField[],
+): readonly LevelEditorWorkspaceInspectorFieldGroup[] {
+	const groups = new Map<string, LevelEditorWorkspaceField[]>();
+
+	for (const field of fields) {
+		const componentName = componentNameForInspectorFieldPath(field.path);
+		const componentFields = groups.get(componentName) ?? [];
+		componentFields.push(field);
+		groups.set(componentName, componentFields);
+	}
+
+	return [...groups.entries()].map(([componentName, componentFields]) =>
+		inspectorFieldGroupForFields(componentName, componentFields),
+	);
+}
+
+function inspectorFieldGroupForFields(
+	componentName: string,
+	fields: readonly LevelEditorWorkspaceField[],
+): LevelEditorWorkspaceInspectorFieldGroup {
+	const workflows = fields.map((field) => field.workflow);
+	const editability = workflows.some(
+		(workflow) => workflow.editability === "editable",
+	)
+		? "editable"
+		: "read-only";
+	const preview = collapsePreviewModes(
+		workflows.map((workflow) => workflow.preview),
+	);
+	const storage = collapseStoragePolicies(
+		workflows.map((workflow) => workflow.storage),
+	);
+	const publishability = collapsePublishabilities(
+		workflows.map((workflow) => workflow.publishability),
+	);
+	const featureFamilyIds = uniqueStrings(
+		workflows.flatMap((workflow) => workflow.featureFamilyIds),
+	);
+	const editableFieldCount = fields.filter(
+		(field) => field.workflow.editability === "editable",
+	).length;
+	const readOnlyFieldCount = fields.length - editableFieldCount;
+	const label = inspectorFieldGroupLabel(componentName);
+
+	return {
+		id: componentName,
+		componentName,
+		label,
+		fields,
+		editableFieldCount,
+		readOnlyFieldCount,
+		workflow: {
+			editability,
+			preview,
+			storage,
+			publishability,
+			labels: workflowLabels({ editability, preview, publishability }),
+			reason: inspectorFieldGroupReason({
+				label,
+				editableFieldCount,
+				readOnlyFieldCount,
+				publishability,
+			}),
+			featureFamilyIds,
+		},
+	};
+}
+
+function componentNameForInspectorFieldPath(path: string): string {
+	return path.split(".")[0] || path;
+}
+
+function inspectorFieldGroupLabel(componentName: string): string {
+	return `${componentName} Component`;
+}
+
+function inspectorFieldGroupReason(options: {
+	readonly label: string;
+	readonly editableFieldCount: number;
+	readonly readOnlyFieldCount: number;
+	readonly publishability: LevelEditorWorkspaceWorkflowPublishability;
+}): string {
+	const fieldSummary =
+		options.readOnlyFieldCount > 0
+			? `${options.editableFieldCount} editable and ${options.readOnlyFieldCount} read-only fields`
+			: `${options.editableFieldCount} editable fields`;
+
+	switch (options.publishability) {
+		case "publishable":
+			return `${options.label} has ${fieldSummary} that stage through the authoring queue and publish through bounded owner writes.`;
+		case "draft-only":
+			return `${options.label} has ${fieldSummary} that can save to editor drafts until a runtime owner writer exists.`;
+		case "cook-contract":
+			return `${options.label} publishes through explicit cook/bake contract tooling.`;
+		case "preview-only":
+			return `${options.label} can preview in dev mode, but it has no durable save owner.`;
+		case "unsupported":
+			return `${options.label} is blocked from publish until an owner contract exists.`;
+		case "mixed":
+			return `${options.label} spans multiple publishability contracts.`;
+		case "read-only":
+			return `${options.label} is inspect-only in this workspace model.`;
+	}
 }
 
 function fieldWithWorkflow(options: {
@@ -1781,6 +2036,26 @@ function addVectorFields(
 			`${path}.${axis}`,
 			`${label} ${axis.toUpperCase()}`,
 			typeof tuple?.[index] === "number" ? tuple[index] : index === 2 ? 0 : 0,
+			"number",
+			{ step: "0.01" },
+		);
+	}
+}
+
+function addQuaternionFields(
+	fields: LevelEditorWorkspaceFieldWithoutWorkflow[],
+	path: string,
+	label: string,
+	value: unknown,
+): void {
+	const tuple = Array.isArray(value) ? value : undefined;
+
+	for (const [index, axis] of ["x", "y", "z", "w"].entries()) {
+		addField(
+			fields,
+			`${path}.${axis}`,
+			`${label} ${axis.toUpperCase()}`,
+			typeof tuple?.[index] === "number" ? tuple[index] : axis === "w" ? 1 : 0,
 			"number",
 			{ step: "0.01" },
 		);

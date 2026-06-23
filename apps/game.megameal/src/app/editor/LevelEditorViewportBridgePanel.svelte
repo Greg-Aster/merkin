@@ -1,8 +1,12 @@
 <script lang="ts">
+import { viewportPickProjectedObjectFromNormalizedPoint } from "./levelEditorViewportBridgeModel.js";
 import type {
 	LevelEditorViewportBridgeModel,
 	LevelEditorViewportBridgeViewMode,
+	LevelEditorViewportCameraMode,
 	LevelEditorViewportGizmoMode,
+	LevelEditorViewportInteractionTool,
+	LevelEditorViewportInteractionToolModel,
 	LevelEditorViewportNormalizedPoint,
 	LevelEditorViewportOverlayId,
 	LevelEditorViewportTransformControlField,
@@ -12,15 +16,25 @@ import type {
 type Props = {
 	readonly model: LevelEditorViewportBridgeModel;
 	readonly onViewModeChange?: (mode: LevelEditorViewportBridgeViewMode) => void;
+	readonly onCameraModeChange?: (mode: LevelEditorViewportCameraMode) => void;
+	readonly onCameraZoomPercentChange?: (zoomPercent: number) => void;
+	readonly onInteractionToolChange?: (
+		tool: LevelEditorViewportInteractionTool,
+	) => void;
 	readonly onOverlayToggle?: (id: LevelEditorViewportOverlayId) => void;
 	readonly onSelectObject?: (stableId: string) => void;
 	readonly onTransformNudge?: (path: string, delta: number) => void;
+	readonly onTransformProjectedDrag?: (
+		point: LevelEditorViewportNormalizedPoint,
+	) => void;
+	readonly onRotationYawNudge?: (deltaDegrees: number) => void;
 	readonly onTransformModeChange?: (mode: LevelEditorViewportGizmoMode) => void;
 	readonly onTransformSnapStepChange?: (
 		mode: LevelEditorViewportGizmoMode,
 		step: number,
 	) => void;
 	readonly placementTarget?: {
+		readonly entryId: string;
 		readonly label: string;
 		readonly status: string;
 		readonly targetLabel: string;
@@ -32,15 +46,21 @@ type Props = {
 	readonly onDropPlacementEntry?: (
 		entryId: string,
 		point: LevelEditorViewportNormalizedPoint,
+		source?: "viewport-click" | "viewport-drop",
 	) => void;
 };
 
 const {
 	model,
 	onViewModeChange,
+	onCameraModeChange,
+	onCameraZoomPercentChange,
+	onInteractionToolChange,
 	onOverlayToggle,
 	onSelectObject,
 	onTransformNudge,
+	onTransformProjectedDrag,
+	onRotationYawNudge,
 	onTransformModeChange,
 	onTransformSnapStepChange,
 	placementTarget = null,
@@ -50,6 +70,9 @@ const {
 const objectLibraryPlacementDragMimeType =
 	"application/x-megameal-object-library-entry";
 let placementDropActive = $state(false);
+let placementHoverPoint: LevelEditorViewportNormalizedPoint | null =
+	$state(null);
+let transformDragActive = $state(false);
 const selectedObject = $derived(model.selectedObject);
 const projectedObjects = $derived(
 	model.projection.objects.filter((object) => object.hasTransformPosition),
@@ -58,6 +81,15 @@ const placementProjectionTarget = $derived(
 	placementTarget
 		? projectedObjects.find((object) => object.selected) ?? null
 		: null,
+);
+const placementGhostPoint = $derived(
+	placementHoverPoint ??
+		(placementProjectionTarget
+			? {
+					xPercent: placementProjectionTarget.xPercent,
+					zPercent: placementProjectionTarget.zPercent,
+				}
+			: null),
 );
 const selectedComponents = $derived(
 	selectedObject?.componentNames.length
@@ -77,12 +109,33 @@ const activeTransformFields = $derived(
 const selectedProjection = $derived(
 	projectedObjects.find((object) => object.selected) ?? null,
 );
+const selectToolActive = $derived(model.interaction.activeTool === "select");
+const placeToolActive = $derived(model.interaction.activeTool === "place");
+const transformToolActive = $derived(
+	model.interaction.activeTool === "transform",
+);
+const projectedTransformDragReady = $derived(
+	model.transformControls.activeMode === "translate" &&
+		model.transformControls.activeHandles.some(
+			(handle) => handle.path === "Transform.position.x" && handle.canStage,
+		) &&
+		model.transformControls.activeHandles.some(
+			(handle) => handle.path === "Transform.position.z" && handle.canStage,
+		),
+);
 const viewModeLabels: Record<LevelEditorViewportBridgeViewMode, string> = {
 	"live-game": "Live Game",
 	lit: "Lit",
 	unlit: "Unlit",
 	collision: "Collision",
 	wireframe: "Wireframe",
+};
+const cameraModeLabels: Record<LevelEditorViewportCameraMode, string> = {
+	orbit: "Orbit",
+	top: "Top",
+	front: "Front",
+	side: "Side",
+	iso: "Iso",
 };
 const transformModeLabels: Record<LevelEditorViewportGizmoMode, string> = {
 	translate: "Translate",
@@ -99,12 +152,99 @@ function selectViewMode(event: Event): void {
 	onViewModeChange?.(select.value as LevelEditorViewportBridgeViewMode);
 }
 
+function selectCameraMode(event: Event): void {
+	const select = event.currentTarget as HTMLSelectElement;
+	onCameraModeChange?.(select.value as LevelEditorViewportCameraMode);
+}
+
+function selectCameraZoomPercent(event: Event): void {
+	const input = event.currentTarget as HTMLInputElement;
+	const zoomPercent = Number(input.value);
+
+	if (!Number.isFinite(zoomPercent)) {
+		return;
+	}
+
+	onCameraZoomPercentChange?.(zoomPercent);
+}
+
+function selectInteractionTool(tool: LevelEditorViewportInteractionTool): void {
+	if (tool === "place" && !placementTarget?.canStage) {
+		return;
+	}
+
+	onInteractionToolChange?.(tool);
+}
+
 function toggleOverlay(id: LevelEditorViewportOverlayId): void {
 	onOverlayToggle?.(id);
 }
 
 function selectProjectedObject(stableId: string): void {
 	onSelectObject?.(stableId);
+}
+
+function interactionToolEnabled(
+	tool: LevelEditorViewportInteractionToolModel,
+): boolean {
+	return (
+		tool.enabled &&
+		(tool.id !== "place" || (placementTarget?.canStage ?? false))
+	);
+}
+
+function interactionToolReason(
+	tool: LevelEditorViewportInteractionToolModel,
+): string {
+	if (tool.id === "place" && !placementTarget?.canStage) {
+		return (
+			placementTarget?.reason ??
+			"Select a draft-ready object-library entry before using Place."
+		);
+	}
+
+	return tool.reason;
+}
+
+function handleViewportClick(event: MouseEvent): void {
+	if (viewportEventHitInteractiveElement(event)) {
+		return;
+	}
+
+	const point = viewportNormalizedPointFromPointerEvent(event);
+
+	if (point === null) {
+		return;
+	}
+
+	if (placeToolActive && placementTarget?.canStage && onDropPlacementEntry) {
+		onDropPlacementEntry(placementTarget.entryId, point, "viewport-click");
+		return;
+	}
+
+	if (!selectToolActive || !onSelectObject) {
+		return;
+	}
+
+	const pick = viewportPickProjectedObjectFromNormalizedPoint({
+		projection: model.projection,
+		point,
+		radiusPercent: model.interaction.projectedPickRadiusPercent,
+	});
+
+	if (pick) {
+		onSelectObject(pick.stableId);
+	}
+}
+
+function viewportEventHitInteractiveElement(event: Event): boolean {
+	const target = event.target as HTMLElement | null;
+
+	return Boolean(
+		target?.closest(
+			"button, input, select, textarea, a, [data-ignore-viewport-pick]",
+		),
+	);
 }
 
 function nudgeTransform(
@@ -119,6 +259,61 @@ function nudgeTransformHandle(
 	direction: -1 | 1,
 ): void {
 	onTransformNudge?.(handle.path, handle.step * direction);
+}
+
+function beginProjectedTransformDrag(event: PointerEvent): void {
+	if (
+		!transformToolActive ||
+		!projectedTransformDragReady ||
+		!onTransformProjectedDrag
+	) {
+		return;
+	}
+
+	event.preventDefault();
+	event.stopPropagation();
+	transformDragActive = true;
+	const frame = (event.currentTarget as HTMLElement | null)?.closest(
+		".editor-viewport-frame",
+	) as HTMLElement | null;
+	frame?.setPointerCapture(event.pointerId);
+}
+
+function stageProjectedTransformDrag(event: PointerEvent): void {
+	if (!transformDragActive || !onTransformProjectedDrag) {
+		return;
+	}
+
+	const point = viewportNormalizedPointFromPointerEvent(event);
+
+	if (point === null) {
+		return;
+	}
+
+	onTransformProjectedDrag(point);
+}
+
+function endProjectedTransformDrag(event: PointerEvent): void {
+	if (!transformDragActive) {
+		return;
+	}
+
+	transformDragActive = false;
+	const frame = event.currentTarget as HTMLElement | null;
+
+	if (frame?.hasPointerCapture(event.pointerId)) {
+		frame.releasePointerCapture(event.pointerId);
+	}
+}
+
+function nudgeRotationYaw(direction: -1 | 1): void {
+	const control = model.transformControls.rotationYawControl;
+
+	if (!control) {
+		return;
+	}
+
+	onRotationYawNudge?.(control.stepDegrees * direction);
 }
 
 function selectTransformMode(mode: LevelEditorViewportGizmoMode): void {
@@ -137,11 +332,41 @@ function selectTransformSnapStep(event: Event): void {
 }
 
 function stagePlacementFromGhost(): void {
-	if (!placementTarget?.canStage) {
+	if (!placeToolActive || !placementTarget?.canStage) {
+		return;
+	}
+
+	if (placementHoverPoint && onDropPlacementEntry) {
+		onDropPlacementEntry(
+			placementTarget.entryId,
+			placementHoverPoint,
+			"viewport-click",
+		);
 		return;
 	}
 
 	onStagePlacementAtTarget?.();
+}
+
+function handleViewportPointerMove(event: PointerEvent): void {
+	stageProjectedTransformDrag(event);
+
+	if (transformDragActive) {
+		placementHoverPoint = null;
+		return;
+	}
+
+	if (!placeToolActive || !placementTarget?.canStage) {
+		placementHoverPoint = null;
+		return;
+	}
+
+	placementHoverPoint = viewportNormalizedPointFromPointerEvent(event);
+}
+
+function handleViewportPointerLeave(): void {
+	placementHoverPoint = null;
+	transformDragActive = false;
 }
 
 function dragHasObjectLibraryPlacement(event: DragEvent): boolean {
@@ -152,7 +377,7 @@ function dragHasObjectLibraryPlacement(event: DragEvent): boolean {
 }
 
 function handlePlacementDragOver(event: DragEvent): void {
-	if (!placementTarget?.canStage || !onDropPlacementEntry) {
+	if (!placeToolActive || !placementTarget?.canStage || !onDropPlacementEntry) {
 		return;
 	}
 
@@ -174,7 +399,7 @@ function handlePlacementDragLeave(event: DragEvent): void {
 }
 
 function handlePlacementDrop(event: DragEvent): void {
-	if (!placementTarget?.canStage || !onDropPlacementEntry) {
+	if (!placeToolActive || !placementTarget?.canStage || !onDropPlacementEntry) {
 		placementDropActive = false;
 		return;
 	}
@@ -196,11 +421,18 @@ function handlePlacementDrop(event: DragEvent): void {
 
 	event.preventDefault();
 	placementDropActive = false;
-	onDropPlacementEntry(entryId, point);
+	placementHoverPoint = null;
+	onDropPlacementEntry(entryId, point, "viewport-drop");
 }
 
 function viewportNormalizedPointFromDragEvent(
 	event: DragEvent,
+): LevelEditorViewportNormalizedPoint | null {
+	return viewportNormalizedPointFromPointerEvent(event);
+}
+
+function viewportNormalizedPointFromPointerEvent(
+	event: DragEvent | MouseEvent,
 ): LevelEditorViewportNormalizedPoint | null {
 	const frame = event.currentTarget as HTMLElement | null;
 	const rect = frame?.getBoundingClientRect();
@@ -228,10 +460,17 @@ function viewportNormalizedPointFromDragEvent(
 	<div
 		class="editor-viewport-frame"
 		class:editor-viewport-placement-drop-active={placementDropActive}
-		data-viewport-mode={model.view.mode}
-		data-gizmo-status={model.gizmo.status}
-		data-placement-drop-ready={placementTarget?.canStage ?? false}
-		ondragover={handlePlacementDragOver}
+	data-viewport-mode={model.view.mode}
+	data-viewport-interaction-tool={model.interaction.activeTool}
+	data-gizmo-status={model.gizmo.status}
+	data-transform-drag-active={transformDragActive}
+	data-placement-drop-ready={placeToolActive && (placementTarget?.canStage ?? false)}
+	onclick={handleViewportClick}
+	onpointermove={handleViewportPointerMove}
+	onpointerup={endProjectedTransformDrag}
+	onpointercancel={endProjectedTransformDrag}
+	onmouseleave={handleViewportPointerLeave}
+	ondragover={handlePlacementDragOver}
 		ondragleave={handlePlacementDragLeave}
 		ondrop={handlePlacementDrop}
 	>
@@ -245,21 +484,22 @@ function viewportNormalizedPointFromDragEvent(
 					style={`--viewport-object-x: ${object.xPercent}%; --viewport-object-z: ${object.zPercent}%`}
 					aria-pressed={object.selected}
 					title={`${object.label} / ${object.category}`}
-					disabled={!onSelectObject}
+					disabled={!selectToolActive || !onSelectObject}
 					onclick={() => selectProjectedObject(object.stableId)}
 				>
 					<span>{object.label.slice(0, 1)}</span>
 				</button>
 			{/each}
 		</div>
-		{#if placementTarget && placementProjectionTarget}
+		{#if placementTarget && placementGhostPoint}
 			<button
 				type="button"
 				class="editor-viewport-placement-ghost"
-				data-placement-ready={placementTarget.canStage}
-				style={`--viewport-placement-x: ${placementProjectionTarget.xPercent}%; --viewport-placement-z: ${placementProjectionTarget.zPercent}%`}
+				data-placement-ready={placeToolActive && placementTarget.canStage}
+				data-placement-preview-source={placementHoverPoint ? "hover" : "selected-object"}
+				style={`--viewport-placement-x: ${placementGhostPoint.xPercent}%; --viewport-placement-z: ${placementGhostPoint.zPercent}%`}
 				title={`${placementTarget.label} at ${placementTarget.targetLabel}`}
-				disabled={!placementTarget.canStage || !onStagePlacementAtTarget}
+				disabled={!placeToolActive || !placementTarget.canStage || !onStagePlacementAtTarget}
 				onclick={stagePlacementFromGhost}
 			>
 				<span>+</span>
@@ -273,6 +513,17 @@ function viewportNormalizedPointFromDragEvent(
 				data-gizmo-mode={model.transformControls.activeMode}
 				aria-label="Selected object transform handles"
 			>
+				{#if model.transformControls.activeMode === "translate"}
+					<button
+						type="button"
+						class="editor-viewport-transform-drag-handle"
+						disabled={!transformToolActive || !projectedTransformDragReady || !onTransformProjectedDrag}
+						title="Drag selected object on the projected X/Z placement surface"
+						onpointerdown={beginProjectedTransformDrag}
+					>
+						XZ
+					</button>
+				{/if}
 				{#each model.transformControls.activeHandles as handle}
 					<div
 						class="editor-viewport-transform-handle"
@@ -282,7 +533,7 @@ function viewportNormalizedPointFromDragEvent(
 						<button
 							type="button"
 							aria-label={`Decrease ${handle.label}`}
-							disabled={!handle.canStage || !onTransformNudge}
+							disabled={!transformToolActive || !handle.canStage || !onTransformNudge}
 							title={handle.reason}
 							onclick={() => nudgeTransformHandle(handle, -1)}
 						>
@@ -292,7 +543,7 @@ function viewportNormalizedPointFromDragEvent(
 						<button
 							type="button"
 							aria-label={`Increase ${handle.label}`}
-							disabled={!handle.canStage || !onTransformNudge}
+							disabled={!transformToolActive || !handle.canStage || !onTransformNudge}
 							title={handle.reason}
 							onclick={() => nudgeTransformHandle(handle, 1)}
 						>
@@ -333,6 +584,20 @@ function viewportNormalizedPointFromDragEvent(
 	</div>
 
 	<div class="editor-inspector-fields">
+		<div class="editor-transform-mode-switcher" aria-label="Viewport interaction tool">
+			{#each model.interaction.tools as tool}
+				<button
+					type="button"
+					class:active-transform-mode={tool.id === model.interaction.activeTool}
+					aria-pressed={tool.id === model.interaction.activeTool}
+					disabled={!interactionToolEnabled(tool) || !onInteractionToolChange}
+					title={interactionToolReason(tool)}
+					onclick={() => selectInteractionTool(tool.id)}
+				>
+					{tool.label}
+				</button>
+			{/each}
+		</div>
 		<label class="editor-field">
 			<span>Mode</span>
 			<select
@@ -348,6 +613,30 @@ function viewportNormalizedPointFromDragEvent(
 		<label class="editor-field">
 			<span>Live Scene</span>
 			<input value={model.bridge.liveRuntimeSceneId ?? "not connected"} readonly />
+		</label>
+		<label class="editor-field">
+			<span>Camera</span>
+			<select
+				value={model.camera.activeMode}
+				disabled={!onCameraModeChange}
+				onchange={selectCameraMode}
+			>
+				{#each model.camera.availableModes as mode}
+					<option value={mode}>{cameraModeLabels[mode]}</option>
+				{/each}
+			</select>
+		</label>
+		<label class="editor-field">
+			<span>Zoom</span>
+			<input
+				type="range"
+				min="25"
+				max="400"
+				step="25"
+				value={String(model.camera.zoomPercent)}
+				disabled={!onCameraZoomPercentChange}
+				oninput={selectCameraZoomPercent}
+			/>
 		</label>
 		<label class="editor-field">
 			<span>Selection</span>
@@ -375,6 +664,22 @@ function viewportNormalizedPointFromDragEvent(
 		<div>
 			<dt>Writes Runtime</dt>
 			<dd>{String(model.bridge.writesRuntimeData)}</dd>
+		</div>
+		<div>
+			<dt>Pick Runtime</dt>
+			<dd>{String(model.interaction.renderedScenePickingEnabled)}</dd>
+		</div>
+		<div>
+			<dt>Tool</dt>
+			<dd>{model.interaction.activeTool}</dd>
+		</div>
+		<div>
+			<dt>Camera Writes</dt>
+			<dd>{String(model.camera.writesRuntimeData)}</dd>
+		</div>
+		<div>
+			<dt>Framing</dt>
+			<dd>{model.camera.framingTarget}</dd>
 		</div>
 	</dl>
 
@@ -428,7 +733,7 @@ function viewportNormalizedPointFromDragEvent(
 				/ writes runtime {String(model.transformControls.writesRuntimeData)}
 			</small>
 		</header>
-		{#if model.transformControls.fields.length > 0}
+		{#if model.transformControls.fields.length > 0 || model.transformControls.rotationYawControl}
 			<div class="editor-transform-toolbar">
 				<div class="editor-transform-mode-switcher" aria-label="Transform mode">
 					{#each model.transformControls.availableModes as mode}
@@ -457,6 +762,35 @@ function viewportNormalizedPointFromDragEvent(
 				</label>
 			</div>
 			<div class="editor-transform-nudge-grid">
+				{#if model.transformControls.activeMode === "rotate" && model.transformControls.rotationYawControl}
+					{@const yawControl = model.transformControls.rotationYawControl}
+					<div
+						class="editor-transform-nudge"
+						data-transform-mode="rotate"
+						data-transform-axis="y"
+					>
+						<span>{yawControl.label}</span>
+						<button
+							type="button"
+							aria-label={`Decrease ${yawControl.label}`}
+							disabled={!transformToolActive || !yawControl.canStage || !onRotationYawNudge}
+							title={yawControl.reason}
+							onclick={() => nudgeRotationYaw(-1)}
+						>
+							-
+						</button>
+						<output>{yawControl.valueDegrees.toFixed(1)} deg</output>
+						<button
+							type="button"
+							aria-label={`Increase ${yawControl.label}`}
+							disabled={!transformToolActive || !yawControl.canStage || !onRotationYawNudge}
+							title={yawControl.reason}
+							onclick={() => nudgeRotationYaw(1)}
+						>
+							+
+						</button>
+					</div>
+				{/if}
 				{#each activeTransformFields as field}
 					<div
 						class="editor-transform-nudge"
@@ -467,7 +801,7 @@ function viewportNormalizedPointFromDragEvent(
 						<button
 							type="button"
 							aria-label={`Decrease ${field.label}`}
-							disabled={!field.canStage || !onTransformNudge}
+							disabled={!transformToolActive || !field.canStage || !onTransformNudge}
 							onclick={() => nudgeTransform(field, -1)}
 						>
 							-
@@ -476,7 +810,7 @@ function viewportNormalizedPointFromDragEvent(
 						<button
 							type="button"
 							aria-label={`Increase ${field.label}`}
-							disabled={!field.canStage || !onTransformNudge}
+							disabled={!transformToolActive || !field.canStage || !onTransformNudge}
 							onclick={() => nudgeTransform(field, 1)}
 						>
 							+
@@ -512,11 +846,17 @@ function viewportNormalizedPointFromDragEvent(
 					<dt>Target</dt>
 					<dd>{placementTarget.targetLabel}</dd>
 				</div>
+				<div>
+					<dt>Snap</dt>
+					<dd>
+						{model.projection.placementSurface.snapStep}
+					</dd>
+				</div>
 			</dl>
 			<p>{placementTarget.reason}</p>
 			<button
 				type="button"
-				disabled={!placementTarget.canStage || !onStagePlacementAtTarget}
+				disabled={!placeToolActive || !placementTarget.canStage || !onStagePlacementAtTarget}
 				onclick={onStagePlacementAtTarget}
 			>
 				Stage Placement At Target
@@ -542,6 +882,10 @@ function viewportNormalizedPointFromDragEvent(
 		<div>
 			<dt>Drop Surface</dt>
 			<dd>{model.projection.placementSurface.status}</dd>
+		</div>
+		<div>
+			<dt>Drop Snap</dt>
+			<dd>{model.projection.placementSurface.snapStep}</dd>
 		</div>
 		<div>
 			<dt>Transform Edits</dt>

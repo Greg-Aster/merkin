@@ -33,6 +33,18 @@ export type LevelEditorViewportOverlayId =
 
 export type LevelEditorViewportGizmoMode = "translate" | "rotate" | "scale";
 
+export type LevelEditorViewportInteractionTool =
+	| "select"
+	| "place"
+	| "transform";
+
+export type LevelEditorViewportCameraMode =
+	| "orbit"
+	| "top"
+	| "front"
+	| "side"
+	| "iso";
+
 export type LevelEditorViewportProjectedObject = {
 	readonly stableId: string;
 	readonly label: string;
@@ -49,6 +61,8 @@ export type LevelEditorViewportPlacementSurface = {
 	readonly status: "ready" | "empty";
 	readonly coordinateSpace: "normalized-transform-xz";
 	readonly source: "workspace-transform-bounds";
+	readonly snapSource: "translate-snap-step";
+	readonly snapStep: number;
 	readonly worldBounds: {
 		readonly minX: number;
 		readonly maxX: number;
@@ -64,6 +78,15 @@ export type LevelEditorViewportPlacementSurface = {
 export type LevelEditorViewportNormalizedPoint = {
 	readonly xPercent: number;
 	readonly zPercent: number;
+};
+
+export type LevelEditorViewportProjectedPickResult = {
+	readonly stableId: string;
+	readonly label: string;
+	readonly distancePercent: number;
+	readonly source: "projected-transform-pins";
+	readonly renderedScenePicking: false;
+	readonly reason: string;
 };
 
 export type LevelEditorViewportFieldValueOverride = {
@@ -98,6 +121,23 @@ export type LevelEditorViewportTransformGizmoHandle = {
 	readonly reason: string;
 };
 
+export type LevelEditorViewportRotationYawControl = {
+	readonly label: "Yaw";
+	readonly valueDegrees: number;
+	readonly stepDegrees: number;
+	readonly canStage: boolean;
+	readonly fieldPaths: readonly [
+		"Transform.rotation.x",
+		"Transform.rotation.y",
+		"Transform.rotation.z",
+		"Transform.rotation.w",
+	];
+	readonly stagesAuthoringEdits: true;
+	readonly writesRuntimeData: false;
+	readonly source: "workspace-transform-field";
+	readonly reason: string;
+};
+
 export type LevelEditorViewportTransformSnapSteps = Readonly<
 	Record<LevelEditorViewportGizmoMode, number>
 >;
@@ -118,7 +158,64 @@ export type LevelEditorViewportTransformControls = {
 	readonly writesRuntimeData: false;
 	readonly fields: readonly LevelEditorViewportTransformControlField[];
 	readonly activeHandles: readonly LevelEditorViewportTransformGizmoHandle[];
+	readonly rotationYawControl: LevelEditorViewportRotationYawControl | null;
 	readonly blockedReasons: readonly string[];
+};
+
+export type LevelEditorViewportCameraControls = {
+	readonly activeMode: LevelEditorViewportCameraMode;
+	readonly availableModes: readonly LevelEditorViewportCameraMode[];
+	readonly zoomPercent: number;
+	readonly framingTarget: "selected-object" | "scene-bounds";
+	readonly targetStableId: string | null;
+	readonly stagesAuthoringEdits: false;
+	readonly writesRuntimeData: false;
+	readonly source: "editor-viewport-navigation";
+	readonly reason: string;
+};
+
+export type LevelEditorViewportInteractionToolModel = {
+	readonly id: LevelEditorViewportInteractionTool;
+	readonly label: string;
+	readonly enabled: boolean;
+	readonly source:
+		| "projected-transform-pins"
+		| "normalized-placement-surface"
+		| "workspace-transform-fields";
+	readonly reason: string;
+};
+
+export type LevelEditorViewportProjectedTransformDragAffordance = {
+	readonly status: "ready" | "blocked";
+	readonly requiresActiveTool: "transform";
+	readonly requiredMode: "translate";
+	readonly requiredFieldPaths: readonly [
+		"Transform.position.x",
+		"Transform.position.z",
+	];
+	readonly coordinateSpace: "normalized-transform-xz";
+	readonly surfaceSource: "normalized-transform-xz-surface";
+	readonly transformSource: "workspace-transform-fields";
+	readonly preservesAxis: "y";
+	readonly renderedSceneHitTesting: false;
+	readonly renderedSceneGizmo: false;
+	readonly stagesAuthoringEdits: true;
+	readonly writesRuntimeData: false;
+	readonly reason: string;
+};
+
+export type LevelEditorViewportInteractionModel = {
+	readonly activeTool: LevelEditorViewportInteractionTool;
+	readonly tools: readonly LevelEditorViewportInteractionToolModel[];
+	readonly renderedScenePickingEnabled: false;
+	readonly selectableSource: "projected-transform-pins";
+	readonly projectedPickRadiusPercent: number;
+	readonly placementSource: "normalized-transform-xz-surface";
+	readonly transformSource: "workspace-transform-fields";
+	readonly projectedTransformDrag: LevelEditorViewportProjectedTransformDragAffordance;
+	readonly writesRuntimeData: false;
+	readonly blockedReasons: readonly string[];
+	readonly reason: string;
 };
 
 export type LevelEditorViewportBridgeSelectedObject = {
@@ -181,7 +278,9 @@ export type LevelEditorViewportBridgeModel = {
 		readonly selectableCount: number;
 		readonly selectedObjectCount: number;
 	};
+	readonly interaction: LevelEditorViewportInteractionModel;
 	readonly transformControls: LevelEditorViewportTransformControls;
+	readonly camera: LevelEditorViewportCameraControls;
 	readonly gizmo: LevelEditorViewportGizmoReadiness;
 };
 
@@ -195,6 +294,9 @@ export function buildLevelEditorViewportBridgeModel(options: {
 	readonly fieldValueOverrides?: readonly LevelEditorViewportFieldValueOverride[];
 	readonly transformMode?: LevelEditorViewportGizmoMode;
 	readonly transformSnapSteps?: Partial<LevelEditorViewportTransformSnapSteps>;
+	readonly cameraMode?: LevelEditorViewportCameraMode;
+	readonly cameraZoomPercent?: number;
+	readonly interactionTool?: LevelEditorViewportInteractionTool;
 }): LevelEditorViewportBridgeModel {
 	const selectedStableId =
 		options.selectedStableId === undefined
@@ -221,6 +323,21 @@ export function buildLevelEditorViewportBridgeModel(options: {
 		selectedObject,
 		enabledOverlayIds: options.enabledOverlayIds ?? defaultOverlayIds,
 	});
+	const transformSnapSteps = normalizeTransformSnapSteps(
+		options.transformSnapSteps,
+	);
+	const projection = buildViewportProjection({
+		objects: options.workspace.objects,
+		selectedStableId: bridgeSelectedObject?.stableId ?? null,
+		fieldValueOverrides: options.fieldValueOverrides ?? [],
+		placementSnapStep: transformSnapSteps.translate,
+	});
+	const transformControls = buildTransformControls({
+		selectedObject,
+		fieldValueOverrides: options.fieldValueOverrides ?? [],
+		requestedMode: options.transformMode ?? "translate",
+		snapSteps: transformSnapSteps,
+	});
 
 	return {
 		schemaVersion: 1,
@@ -244,16 +361,17 @@ export function buildLevelEditorViewportBridgeModel(options: {
 				.filter((overlay) => overlay.enabled)
 				.map((overlay) => overlay.id),
 		},
-		projection: buildViewportProjection({
-			objects: options.workspace.objects,
-			selectedStableId: bridgeSelectedObject?.stableId ?? null,
-			fieldValueOverrides: options.fieldValueOverrides ?? [],
+		projection,
+		interaction: buildViewportInteractionModel({
+			requestedTool: options.interactionTool ?? "select",
+			projection,
+			transformControls,
 		}),
-		transformControls: buildTransformControls({
+		transformControls,
+		camera: buildViewportCameraControls({
 			selectedObject,
-			fieldValueOverrides: options.fieldValueOverrides ?? [],
-			requestedMode: options.transformMode ?? "translate",
-			snapSteps: normalizeTransformSnapSteps(options.transformSnapSteps),
+			requestedMode: options.cameraMode ?? "orbit",
+			zoomPercent: options.cameraZoomPercent ?? 100,
 		}),
 		gizmo: buildGizmoReadiness(selectedObject),
 	};
@@ -266,6 +384,26 @@ const viewportBridgeViewModes = [
 	"collision",
 	"wireframe",
 ] as const satisfies readonly LevelEditorViewportBridgeViewMode[];
+
+const viewportCameraModes = [
+	"orbit",
+	"top",
+	"front",
+	"side",
+	"iso",
+] as const satisfies readonly LevelEditorViewportCameraMode[];
+
+const viewportInteractionTools = [
+	"select",
+	"place",
+	"transform",
+] as const satisfies readonly LevelEditorViewportInteractionTool[];
+
+const viewportInteractionToolLabels = {
+	select: "Select",
+	place: "Place",
+	transform: "Transform",
+} as const satisfies Record<LevelEditorViewportInteractionTool, string>;
 
 const defaultOverlayIds = [
 	"selection-outline",
@@ -325,6 +463,7 @@ function buildViewportProjection(options: {
 	readonly objects: readonly LevelEditorWorkspaceObject[];
 	readonly selectedStableId: string | null;
 	readonly fieldValueOverrides: readonly LevelEditorViewportFieldValueOverride[];
+	readonly placementSnapStep: number;
 }): LevelEditorViewportBridgeModel["projection"] {
 	const positionedObjects = options.objects
 		.map((object) => ({
@@ -357,6 +496,8 @@ function buildViewportProjection(options: {
 			status: positionedObjects.length === 0 ? "empty" : "ready",
 			coordinateSpace: "normalized-transform-xz",
 			source: "workspace-transform-bounds",
+			snapSource: "translate-snap-step",
+			snapStep: options.placementSnapStep,
 			worldBounds: bounds,
 			marginPercent: viewportProjectionMarginPercent,
 			stagesAuthoringEdits: true,
@@ -392,6 +533,7 @@ function buildTransformControls(options: {
 			writesRuntimeData: false,
 			fields: [],
 			activeHandles: [],
+			rotationYawControl: null,
 			blockedReasons: ["Select a manifest-owned object first."],
 		};
 	}
@@ -401,26 +543,34 @@ function buildTransformControls(options: {
 		fieldValueOverrides: options.fieldValueOverrides,
 		snapSteps: options.snapSteps,
 	});
-	const availableModes = transformModesWithFields(fields);
+	const rotationYawControl = rotationYawControlForObject({
+		object: options.selectedObject,
+		fieldValueOverrides: options.fieldValueOverrides,
+		stepDegrees: options.snapSteps.rotate,
+	});
+	const availableModes = transformModesWithFields(fields, rotationYawControl);
 	const activeMode = availableModes.includes(options.requestedMode)
 		? options.requestedMode
 		: availableModes[0] ?? options.requestedMode;
 	const blockedReasons =
-		fields.length === 0
+		fields.length === 0 && rotationYawControl === null
 			? ["Selected object does not expose numeric Transform fields."]
 			: [
-					...new Set(
-						fields
+					...new Set([
+						...fields
 							.filter((field) => !field.canStage)
 							.map((field) => field.reason),
-					),
+						...(rotationYawControl && !rotationYawControl.canStage
+							? [rotationYawControl.reason]
+							: []),
+					]),
 				];
 
 	return {
 		status:
-			fields.length === 0
+			fields.length === 0 && rotationYawControl === null
 				? "blocked"
-				: fields.some((field) => field.canStage)
+				: fields.some((field) => field.canStage) || rotationYawControl?.canStage
 					? "ready"
 					: "blocked",
 		activeMode,
@@ -433,7 +583,156 @@ function buildTransformControls(options: {
 		writesRuntimeData: false,
 		fields,
 		activeHandles: transformGizmoHandlesForFields(fields, activeMode),
+		rotationYawControl,
 		blockedReasons,
+	};
+}
+
+function buildViewportInteractionModel(options: {
+	readonly requestedTool: LevelEditorViewportInteractionTool;
+	readonly projection: LevelEditorViewportBridgeModel["projection"];
+	readonly transformControls: LevelEditorViewportTransformControls;
+}): LevelEditorViewportInteractionModel {
+	const tools = viewportInteractionTools.map((tool) =>
+		buildViewportInteractionToolModel({
+			tool,
+			projection: options.projection,
+			transformControls: options.transformControls,
+		}),
+	);
+	const activeTool = tools.some(
+		(tool) => tool.id === options.requestedTool && tool.enabled,
+	)
+		? options.requestedTool
+		: tools.find((tool) => tool.enabled)?.id ?? "select";
+	const blockedReasons = tools
+		.filter((tool) => !tool.enabled)
+		.map((tool) => tool.reason);
+
+	return {
+		activeTool,
+		tools,
+		renderedScenePickingEnabled: false,
+		selectableSource: "projected-transform-pins",
+		projectedPickRadiusPercent: defaultProjectedPickRadiusPercent,
+		placementSource: "normalized-transform-xz-surface",
+		transformSource: "workspace-transform-fields",
+		projectedTransformDrag: buildProjectedTransformDragAffordance({
+			projection: options.projection,
+			transformControls: options.transformControls,
+		}),
+		writesRuntimeData: false,
+		blockedReasons,
+		reason:
+			"Viewport tools operate on editor projections today; rendered-scene picking remains disabled until a runtime-backed hit-test contract exists.",
+	};
+}
+
+function buildViewportInteractionToolModel(options: {
+	readonly tool: LevelEditorViewportInteractionTool;
+	readonly projection: LevelEditorViewportBridgeModel["projection"];
+	readonly transformControls: LevelEditorViewportTransformControls;
+}): LevelEditorViewportInteractionToolModel {
+	switch (options.tool) {
+		case "select":
+			return {
+				id: "select",
+				label: viewportInteractionToolLabels.select,
+				enabled: options.projection.selectableCount > 0,
+				source: "projected-transform-pins",
+				reason:
+					options.projection.selectableCount > 0
+						? "Selects stable-ID objects through projected transform pins."
+						: "No transform-positioned objects are available for projected selection.",
+			};
+		case "place":
+			return {
+				id: "place",
+				label: viewportInteractionToolLabels.place,
+				enabled: options.projection.placementSurface.status === "ready",
+				source: "normalized-placement-surface",
+				reason:
+					options.projection.placementSurface.status === "ready"
+						? "Stages object-library placements on the normalized placement surface."
+						: options.projection.placementSurface.reason,
+			};
+		case "transform":
+			return {
+				id: "transform",
+				label: viewportInteractionToolLabels.transform,
+				enabled: options.transformControls.status === "ready",
+				source: "workspace-transform-fields",
+				reason:
+					options.transformControls.status === "ready"
+						? "Stages transform edits through workspace transform fields."
+						: options.transformControls.blockedReasons.join("; "),
+			};
+	}
+}
+
+function buildProjectedTransformDragAffordance(options: {
+	readonly projection: LevelEditorViewportBridgeModel["projection"];
+	readonly transformControls: LevelEditorViewportTransformControls;
+}): LevelEditorViewportProjectedTransformDragAffordance {
+	const activeTranslateHandles = options.transformControls.activeHandles.filter(
+		(handle) => handle.mode === "translate" && handle.canStage,
+	);
+	const hasPositionX = activeTranslateHandles.some(
+		(handle) => handle.path === "Transform.position.x",
+	);
+	const hasPositionZ = activeTranslateHandles.some(
+		(handle) => handle.path === "Transform.position.z",
+	);
+	const ready =
+		options.projection.placementSurface.status === "ready" &&
+		options.transformControls.status === "ready" &&
+		options.transformControls.activeMode === "translate" &&
+		hasPositionX &&
+		hasPositionZ;
+
+	return {
+		status: ready ? "ready" : "blocked",
+		requiresActiveTool: "transform",
+		requiredMode: "translate",
+		requiredFieldPaths: ["Transform.position.x", "Transform.position.z"],
+		coordinateSpace: "normalized-transform-xz",
+		surfaceSource: "normalized-transform-xz-surface",
+		transformSource: "workspace-transform-fields",
+		preservesAxis: "y",
+		renderedSceneHitTesting: false,
+		renderedSceneGizmo: false,
+		stagesAuthoringEdits: true,
+		writesRuntimeData: false,
+		reason: ready
+			? "Projected X/Z transform dragging is available through editable Transform.position.x/z fields and the normalized placement surface."
+			: "Projected X/Z transform dragging requires translate mode, editable Transform.position.x/z fields, and a ready normalized placement surface.",
+	};
+}
+
+function buildViewportCameraControls(options: {
+	readonly selectedObject: LevelEditorWorkspaceObject | null;
+	readonly requestedMode: LevelEditorViewportCameraMode;
+	readonly zoomPercent: number;
+}): LevelEditorViewportCameraControls {
+	const activeMode = viewportCameraModes.includes(options.requestedMode)
+		? options.requestedMode
+		: "orbit";
+	const zoomPercent = Math.max(25, Math.min(400, options.zoomPercent));
+	const targetStableId = options.selectedObject?.stableId ?? null;
+
+	return {
+		activeMode,
+		availableModes: viewportCameraModes,
+		zoomPercent,
+		framingTarget: targetStableId === null ? "scene-bounds" : "selected-object",
+		targetStableId,
+		stagesAuthoringEdits: false,
+		writesRuntimeData: false,
+		source: "editor-viewport-navigation",
+		reason:
+			targetStableId === null
+				? "Editor viewport navigation frames manifest-derived scene bounds without mutating runtime camera data."
+				: "Editor viewport navigation frames the selected stable-ID object without mutating runtime camera data.",
 	};
 }
 
@@ -485,6 +784,68 @@ function transformControlFieldsForObject(options: {
 		);
 }
 
+function rotationYawControlForObject(options: {
+	readonly object: LevelEditorWorkspaceObject;
+	readonly fieldValueOverrides: readonly LevelEditorViewportFieldValueOverride[];
+	readonly stepDegrees: number;
+}): LevelEditorViewportRotationYawControl | null {
+	const fieldPaths = [
+		"Transform.rotation.x",
+		"Transform.rotation.y",
+		"Transform.rotation.z",
+		"Transform.rotation.w",
+	] as const;
+	const fields = fieldPaths.map((path) =>
+		options.object.fields.find((field) => field.path === path),
+	);
+
+	if (fields.some((field) => field === undefined || field.input !== "number")) {
+		return null;
+	}
+
+	const resolvedFields = fields.filter(
+		(field): field is LevelEditorWorkspaceObject["fields"][number] =>
+			field !== undefined && field.input === "number",
+	);
+	const values = fieldPaths.map((path, index) => {
+		const field = resolvedFields[index];
+		const override = options.fieldValueOverrides.find(
+			(item) => item.stableId === options.object.stableId && item.path === path,
+		);
+
+		return (
+			numberFromValue(override?.after ?? field?.value) ??
+			(path.endsWith(".w") ? 1 : 0)
+		);
+	}) as [number, number, number, number];
+	const canStage = resolvedFields.every(
+		(field) => !field.readOnly && field.workflow.editability === "editable",
+	);
+
+	return {
+		label: "Yaw",
+		valueDegrees: roundPlacementCoordinate(yawDegreesFromQuaternion(values)),
+		stepDegrees: options.stepDegrees,
+		canStage,
+		fieldPaths,
+		stagesAuthoringEdits: true,
+		writesRuntimeData: false,
+		source: "workspace-transform-field",
+		reason: canStage
+			? "Stages quaternion rotation fields from a yaw-degree viewport control."
+			: "Selected object rotation fields are not all editable.",
+	};
+}
+
+function yawDegreesFromQuaternion(
+	rotation: readonly [number, number, number, number],
+): number {
+	const [x, y, z, w] = rotation;
+	const yawRadians = Math.atan2(2 * (w * y + x * z), 1 - 2 * (y * y + z * z));
+
+	return (yawRadians * 180) / Math.PI;
+}
+
 function transformFieldCandidates(
 	prefix: "Transform.position" | "Transform.scale",
 	mode: LevelEditorViewportGizmoMode,
@@ -502,9 +863,12 @@ function transformFieldCandidates(
 
 function transformModesWithFields(
 	fields: readonly LevelEditorViewportTransformControlField[],
+	rotationYawControl: LevelEditorViewportRotationYawControl | null,
 ): readonly LevelEditorViewportGizmoMode[] {
 	return (["translate", "rotate", "scale"] as const).filter((mode) =>
-		fields.some((field) => field.mode === mode),
+		mode === "rotate"
+			? rotationYawControl !== null
+			: fields.some((field) => field.mode === mode),
 	);
 }
 
@@ -635,8 +999,79 @@ export function viewportPlacementPositionFromNormalizedPoint(options: {
 		options.surface.worldBounds.maxZ,
 		options.surface.marginPercent,
 	);
+	const snappedX = snapPlacementCoordinate(
+		x,
+		options.surface.snapStep,
+		options.surface.worldBounds.minX,
+		options.surface.worldBounds.maxX,
+	);
+	const snappedZ = snapPlacementCoordinate(
+		z,
+		options.surface.snapStep,
+		options.surface.worldBounds.minZ,
+		options.surface.worldBounds.maxZ,
+	);
 
-	return [roundPlacementCoordinate(x), options.y, roundPlacementCoordinate(z)];
+	return [snappedX, options.y, snappedZ];
+}
+
+export function viewportProjectedTransformPositionFromNormalizedPoint(options: {
+	readonly surface: LevelEditorViewportPlacementSurface;
+	readonly point: LevelEditorViewportNormalizedPoint;
+	readonly currentY: number;
+}): readonly [number, number, number] | null {
+	return viewportPlacementPositionFromNormalizedPoint({
+		surface: options.surface,
+		point: options.point,
+		y: options.currentY,
+	});
+}
+
+export function viewportPickProjectedObjectFromNormalizedPoint(options: {
+	readonly projection: LevelEditorViewportBridgeModel["projection"];
+	readonly point: LevelEditorViewportNormalizedPoint;
+	readonly radiusPercent?: number;
+}): LevelEditorViewportProjectedPickResult | null {
+	const radiusPercent = positiveNumberOrDefault(
+		options.radiusPercent,
+		defaultProjectedPickRadiusPercent,
+	);
+	const candidates = options.projection.objects
+		.filter((object) => object.hasTransformPosition)
+		.map((object) => ({
+			object,
+			distancePercent: viewportPointDistancePercent(options.point, {
+				xPercent: object.xPercent,
+				zPercent: object.zPercent,
+			}),
+		}))
+		.filter((candidate) => candidate.distancePercent <= radiusPercent)
+		.sort((left, right) => left.distancePercent - right.distancePercent);
+	const nearest = candidates[0];
+
+	if (!nearest) {
+		return null;
+	}
+
+	return {
+		stableId: nearest.object.stableId,
+		label: nearest.object.label,
+		distancePercent: roundPlacementCoordinate(nearest.distancePercent),
+		source: "projected-transform-pins",
+		renderedScenePicking: false,
+		reason:
+			"Selected the nearest projected stable-ID transform pin; rendered-scene raycast picking is not enabled.",
+	};
+}
+
+function viewportPointDistancePercent(
+	left: LevelEditorViewportNormalizedPoint,
+	right: LevelEditorViewportNormalizedPoint,
+): number {
+	return Math.hypot(
+		left.xPercent - right.xPercent,
+		left.zPercent - right.zPercent,
+	);
 }
 
 function placementBoundsForPositions(
@@ -743,6 +1178,7 @@ function normalizeViewportAxis(
 }
 
 const viewportProjectionMarginPercent = 12;
+const defaultProjectedPickRadiusPercent = 6;
 
 function denormalizeViewportAxis(
 	percent: number,
@@ -761,6 +1197,22 @@ function denormalizeViewportAxis(
 
 function roundPlacementCoordinate(value: number): number {
 	return Number(value.toFixed(4));
+}
+
+function snapPlacementCoordinate(
+	value: number,
+	step: number,
+	min: number,
+	max: number,
+): number {
+	const snapStep = positiveNumberOrDefault(
+		step,
+		defaultTransformSnapSteps.translate,
+	);
+	const snapped = Math.round(value / snapStep) * snapStep;
+	const clamped = Math.max(min, Math.min(max, snapped));
+
+	return roundPlacementCoordinate(clamped);
 }
 
 function buildGizmoReadiness(
