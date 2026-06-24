@@ -391,6 +391,93 @@ export type LevelEditorCameraLiveEditModeRequest = {
 	readonly pose?: LevelEditorCameraLiveEditPoseData;
 };
 
+export type LevelEditorRenderedSceneHitTestViewport = {
+	readonly width: number;
+	readonly height: number;
+	readonly devicePixelRatio?: number;
+};
+
+export type LevelEditorRenderedSceneHitTestScreenPoint = {
+	readonly x: number;
+	readonly y: number;
+};
+
+export type LevelEditorRenderedSceneBoxSelectRect = {
+	readonly x: number;
+	readonly y: number;
+	readonly width: number;
+	readonly height: number;
+};
+
+export type LevelEditorRenderedSceneHitTestRequest = {
+	readonly runtimeSceneId: string;
+	readonly coordinateSpace: "viewport-css-pixels";
+	readonly viewport: LevelEditorRenderedSceneHitTestViewport;
+	readonly screenPoint: LevelEditorRenderedSceneHitTestScreenPoint;
+	readonly pickableStableIds?: readonly string[];
+	readonly objectViewStateGate: "visible-and-pickable-only";
+	readonly writesRuntimeData: false;
+	readonly sourcePlanHash?: string;
+};
+
+export type LevelEditorRenderedSceneBoxSelectRequest = {
+	readonly runtimeSceneId: string;
+	readonly coordinateSpace: "viewport-css-pixels";
+	readonly viewport: LevelEditorRenderedSceneHitTestViewport;
+	readonly rect: LevelEditorRenderedSceneBoxSelectRect;
+	readonly pickableStableIds?: readonly string[];
+	readonly objectViewStateGate: "visible-and-pickable-only";
+	readonly writesRuntimeData: false;
+	readonly sourcePlanHash?: string;
+};
+
+export type LevelEditorRenderedSceneHitTestObjectKind =
+	| "level-instance"
+	| "collision-preview"
+	| "object-edit-preview"
+	| LevelEditorCoreObjectPreviewTargetKind;
+
+export type LevelEditorRenderedSceneHitTestHit = {
+	readonly stableId: string;
+	readonly objectKind: LevelEditorRenderedSceneHitTestObjectKind;
+	readonly distance: number;
+	readonly worldPosition: CollisionCookVector3Data;
+	readonly worldNormal?: CollisionCookVector3Data;
+	readonly renderableId?: string;
+	readonly label?: string;
+};
+
+export type LevelEditorRenderedSceneHitTestResultStatus =
+	| "hit"
+	| "miss"
+	| "ignored";
+
+export type LevelEditorRenderedSceneHitTestResultReason =
+	| "rendered-hit-test-unavailable"
+	| "runtime-scene-not-active"
+	| "stale-request"
+	| "no-rendered-hit";
+
+export type LevelEditorRenderedSceneHitTestResultPayload = {
+	readonly runtimeSceneId: string;
+	readonly activeRuntimeSceneId?: string;
+	readonly status: LevelEditorRenderedSceneHitTestResultStatus;
+	readonly source: "runtime-rendered-scene-hit-test";
+	readonly writesRuntimeData: false;
+	readonly hit?: LevelEditorRenderedSceneHitTestHit;
+	readonly reason?: LevelEditorRenderedSceneHitTestResultReason;
+};
+
+export type LevelEditorRenderedSceneBoxSelectResultPayload = {
+	readonly runtimeSceneId: string;
+	readonly activeRuntimeSceneId?: string;
+	readonly status: LevelEditorRenderedSceneHitTestResultStatus;
+	readonly source: "runtime-rendered-scene-box-select";
+	readonly writesRuntimeData: false;
+	readonly hits?: readonly LevelEditorRenderedSceneHitTestHit[];
+	readonly reason?: LevelEditorRenderedSceneHitTestResultReason;
+};
+
 export type LevelEditorRuntimeReloadAckStatus = "accepted" | "ignored";
 
 export type LevelEditorRuntimeReloadAckReason =
@@ -480,6 +567,38 @@ export type LevelEditorCameraLiveEditModeMessage = {
 	readonly request: LevelEditorCameraLiveEditModeRequest;
 };
 
+export type LevelEditorRenderedSceneHitTestRequestMessage = {
+	readonly schemaVersion: 1;
+	readonly protocol: typeof LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL;
+	readonly type: "rendered-scene-hit-test-request";
+	readonly requestId: string;
+	readonly request: LevelEditorRenderedSceneHitTestRequest;
+};
+
+export type LevelEditorRenderedSceneHitTestResultMessage = {
+	readonly schemaVersion: 1;
+	readonly protocol: typeof LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL;
+	readonly type: "rendered-scene-hit-test-result";
+	readonly requestId: string;
+	readonly payload: LevelEditorRenderedSceneHitTestResultPayload;
+};
+
+export type LevelEditorRenderedSceneBoxSelectRequestMessage = {
+	readonly schemaVersion: 1;
+	readonly protocol: typeof LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL;
+	readonly type: "rendered-scene-box-select-request";
+	readonly requestId: string;
+	readonly request: LevelEditorRenderedSceneBoxSelectRequest;
+};
+
+export type LevelEditorRenderedSceneBoxSelectResultMessage = {
+	readonly schemaVersion: 1;
+	readonly protocol: typeof LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL;
+	readonly type: "rendered-scene-box-select-result";
+	readonly requestId: string;
+	readonly payload: LevelEditorRenderedSceneBoxSelectResultPayload;
+};
+
 export type LevelEditorRuntimeReloadAckMessage = {
 	readonly schemaVersion: 1;
 	readonly protocol: typeof LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL;
@@ -505,6 +624,10 @@ export type LevelEditorDevPreviewMessage =
 	| LevelEditorObjectEditPreviewPatchMessage
 	| LevelEditorObjectEditPreviewClearRequestMessage
 	| LevelEditorCameraLiveEditModeMessage
+	| LevelEditorRenderedSceneHitTestRequestMessage
+	| LevelEditorRenderedSceneHitTestResultMessage
+	| LevelEditorRenderedSceneBoxSelectRequestMessage
+	| LevelEditorRenderedSceneBoxSelectResultMessage
 	| LevelEditorRuntimeReloadAckMessage
 	| LevelEditorRuntimeTelemetryMessage;
 

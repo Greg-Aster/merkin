@@ -1,5 +1,47 @@
 import type { RenderProfileData } from "../../engine/index.js";
 
+export const starterRenderProfile = {
+	id: "starter_minimal_daylight",
+	renderer: {
+		clearColor: "#121917",
+		clearAlpha: 1,
+		antialias: true,
+		maxPixelRatio: 2,
+		fallbackMaterialColor: "#50a8ff",
+	},
+	lighting: {
+		lights: [
+			{
+				kind: "ambient",
+				color: "#d8f5e4",
+				intensity: 0.85,
+			},
+			{
+				kind: "directional",
+				color: "#fff2d5",
+				intensity: 2.1,
+				position: [3, 6, 4],
+			},
+		],
+		budget: {
+			maxTotal: 4,
+			maxAmbient: 1,
+			maxDirectional: 2,
+			maxPoint: 1,
+			maxSpot: 0,
+			maxShadowCasting: 0,
+		},
+	},
+	environment: {
+		kind: "cubemap-skybox",
+		assetId: "cubemap_classic_sky",
+		backgroundIntensity: 1,
+		backgroundBlurriness: 0,
+		environmentIntensity: 0.85,
+		requiredForReadiness: true,
+	},
+} satisfies RenderProfileData;
+
 export const prototypeRenderProfile = {
 	id: "prototype_minimal_daylight",
 	renderer: {

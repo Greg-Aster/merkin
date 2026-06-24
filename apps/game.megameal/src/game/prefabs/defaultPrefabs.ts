@@ -656,6 +656,30 @@ export const prototypePrefabs = [
 	ingredientPrefab,
 ] as const;
 
+export const starterPropPrefab = {
+	id: "starter_prop",
+	assetIds: ["mesh_box", "material_arena_floor"],
+	tags: ["prop", "starter"],
+	components: {
+		Transform: {
+			position: [0, 0.55, -2],
+			rotation: [0, 0, 0, 1],
+			scale: [0.8, 0.8, 0.8],
+		},
+		Renderable: {
+			meshId: "mesh_box",
+			materialId: "material_arena_floor",
+			visible: true,
+		},
+	},
+} satisfies PrefabDefinition;
+
+export const starterPrefabs = [
+	playerPrefab,
+	arenaFloorPrefab,
+	starterPropPrefab,
+] as const;
+
 export const mirandaDeckPrefabs = [
 	playerPrefab,
 	terrainChunkCellPrefab,

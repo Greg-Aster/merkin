@@ -6,6 +6,47 @@ import { sciFiRoomLevel } from "./sciFiRoomLevel.js";
 import { solitudeLevel } from "./solitudeLevel.js";
 import { yggdrasilLevel } from "./yggdrasilLevel.js";
 
+export const starterLevel = {
+	id: "starter_level",
+	sceneId: "starter_game",
+	preloadGroups: ["starter"],
+	resources: {
+		"game:collectedCount": 0,
+		"game:totalCollectibles": 0,
+		"game:characterBounds": {
+			minX: -6,
+			maxX: 6,
+			minZ: -4,
+			maxZ: 4,
+		},
+	},
+	preload: [
+		"mesh_player",
+		"mesh_arena_floor",
+		"mesh_box",
+		"cubemap_classic_sky",
+		"material_player",
+		"material_arena_floor",
+	],
+	instances: [
+		{
+			id: "floor",
+			prefabId: "arena_floor",
+			stableId: "starter:floor",
+		},
+		{
+			id: "player",
+			prefabId: "player",
+			stableId: "player",
+		},
+		{
+			id: "starter-prop",
+			prefabId: "starter_prop",
+			stableId: "starter:prop",
+		},
+	],
+} satisfies LevelDefinition;
+
 export const prototypeLevel = {
 	id: "prototype_arena",
 	sceneId: "prototype_game",
@@ -741,6 +782,7 @@ export const mirandaDeckLevel = {
 } satisfies LevelDefinition;
 
 export const defaultLevels = [
+	starterLevel,
 	portalArenaLevel,
 	prototypeLevel,
 	mirandaDeckLevel,

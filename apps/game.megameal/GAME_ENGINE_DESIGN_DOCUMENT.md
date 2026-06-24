@@ -1269,8 +1269,12 @@ Recommended implementation:
 Current playable/runtime scenes:
 
 ```text
+starter_runtime
+  -> generic clean-install starter scene with a player, floor, neutral prop,
+     built-in assets, and no Portal Arena dependency
+
 portal_arena_runtime
-  -> default navigation room with eight portal slots
+  -> optional Merkin navigation room with eight portal slots
   -> active targets: prototype_arena_runtime, miranda_deck_runtime,
      observatory_runtime, sci_fi_room_runtime, and solitude_runtime
 
@@ -1445,7 +1449,8 @@ Current migrated Miranda foundation:
 
 Current portal arena foundation:
 
-- `portal_arena_runtime` is the default runtime scene.
+- `portal_arena_runtime` is optional Merkin game content, not the generic
+  engine default. `starter_runtime` is the clean-install default runtime scene.
 - Its render profile uses the manifest-owned
   `texture_portal_arena_equirectangular_sky` environment asset. That asset is a
   checked-in copy of

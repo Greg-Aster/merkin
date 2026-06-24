@@ -1,7 +1,8 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 import {
-	type LevelEditorCoreObjectPreviewPatchEntry,
+	type LevelEditorRenderedSceneBoxSelectResultPayload,
+	type LevelEditorRenderedSceneHitTestResultPayload,
 	type LevelEditorRuntimeTelemetryPayload,
 	type LevelPrefabInstanceData,
 	createCoreObjectPreviewClearRequestMessage,
@@ -44,6 +45,10 @@ import {
 	undoLevelEditorAuthoringQueue,
 } from "./levelEditorAuthoringStore.js";
 import {
+	buildCoreObjectPreviewEntry,
+	objectLibraryComponentSnapshots,
+} from "./levelEditorCoreObjectPreviewPatch.js";
+import {
 	serializeEnvironmentAuthoringModel,
 	serializeNpcAuthoringCatalog,
 } from "./levelEditorEnvironmentPanels.js";
@@ -54,7 +59,42 @@ import {
 	createObjectLibraryStagedPlacement,
 	objectLibrarySubjectFromSelection,
 } from "./levelEditorObjectLibrary.js";
+import {
+	type LevelEditorObjectViewStatePatch,
+	buildLevelEditorObjectViewStateModel,
+	buildLevelEditorObjectViewStateStorageKey,
+	clearLevelEditorObjectIsolation,
+	clearLevelEditorObjectViewStateForStableId,
+	levelEditorObjectViewStateForStableId,
+	parseLevelEditorObjectViewStatePersistence,
+	resetLevelEditorObjectViewState,
+	serializeLevelEditorObjectViewStatePersistence,
+	setLevelEditorObjectIsolated,
+	setLevelEditorObjectLocked,
+	setLevelEditorObjectVisible,
+} from "./levelEditorObjectViewStateModel.js";
+import {
+	type LevelEditorOutlinerCategoryFilter,
+	type LevelEditorOutlinerLockFilter,
+	type LevelEditorOutlinerPickabilityFilter,
+	type LevelEditorOutlinerVisibilityFilter,
+	matchesLevelEditorOutlinerFilters,
+} from "./levelEditorOutlinerFilters.js";
 import { sendLevelEditorDevPreviewMessage } from "./levelEditorPreviewSender.js";
+import {
+	type LevelEditorRenderedBoxSelectViewportRequestOptions,
+	type LevelEditorRenderedHitTestViewportRequestOptions,
+	type LevelEditorRenderedSelectionPendingRequest,
+	consumeLevelEditorRenderedBoxSelectSelectionResult,
+	consumeLevelEditorRenderedHitTestSelectionResult,
+	requestLevelEditorRenderedBoxSelectSelection,
+	requestLevelEditorRenderedHitTestSelection,
+} from "./levelEditorRenderedHitTestSelection.js";
+import {
+	createLevelEditorSelectionState,
+	selectLevelEditorObject,
+	selectLevelEditorObjects,
+} from "./levelEditorSelectionModel.js";
 import type { LevelEditorSessionSummary } from "./levelEditorSession.js";
 import {
 	type LevelEditorViewportBridgeConnectionStatus,
@@ -74,7 +114,6 @@ import type {
 	LevelEditorWorkspaceCommandPlan,
 	LevelEditorWorkspaceField,
 	LevelEditorWorkspaceObject,
-	LevelEditorWorkspaceTreeGroup,
 } from "./levelEditorWorkspaceModel.js";
 import {
 	type LevelEditorStagedFieldEdit,
@@ -119,27 +158,77 @@ const editorSession = JSON.parse(
 	serializedEditorSession,
 ) as LevelEditorSessionSummary;
 const workspace = editorSession.workspace;
-let selectedStableId: string = $state(
-	workspace.selectedStableId ?? workspace.objects[0]?.stableId ?? "",
+const objectViewStateStorageKey = buildLevelEditorObjectViewStateStorageKey(
+	workspace.selectedRuntimeSceneId,
 );
+let selectedStableIds: readonly string[] = $state(initialSelectedStableIds());
 let selectedGraphNode: string = $state("authored-level");
 let selectedObjectLibraryEntryId: string | null = $state(null);
-const outlinerSearchQuery = $state("");
+let objectViewStateByStableId: Readonly<
+	Record<string, LevelEditorObjectViewStatePatch>
+> = $state(resetLevelEditorObjectViewState());
+let objectViewStateSource:
+	| "editor-memory"
+	| "browser-local-editor-workspace" = $state("editor-memory");
+let outlinerSearchQuery = $state("");
+let outlinerCategoryFilter: LevelEditorOutlinerCategoryFilter = $state("all");
+let outlinerVisibilityFilter: LevelEditorOutlinerVisibilityFilter =
+	$state("all");
+let outlinerLockFilter: LevelEditorOutlinerLockFilter = $state("all");
+let outlinerPickabilityFilter: LevelEditorOutlinerPickabilityFilter =
+	$state("all");
+const editorSelectionState = $derived(
+	createLevelEditorSelectionState({
+		objects: workspace.objects,
+		selectedStableIds,
+	}),
+);
+const selectedStableId = $derived(editorSelectionState.primaryStableId ?? "");
 const selectedWorkspaceObject = $derived(
 	workspace.objects.find((object) => object.stableId === selectedStableId),
+);
+const objectViewStateModel = $derived(
+	buildLevelEditorObjectViewStateModel({
+		objects: workspace.objects,
+		stateByStableId: objectViewStateByStableId,
+		stateSource: objectViewStateSource,
+	}),
+);
+const outlinerFiltersActive = $derived(
+	outlinerSearchQuery.trim().length > 0 ||
+		outlinerCategoryFilter !== "all" ||
+		outlinerVisibilityFilter !== "all" ||
+		outlinerLockFilter !== "all" ||
+		outlinerPickabilityFilter !== "all",
 );
 const filteredSceneTree = $derived(
 	workspace.sceneTree
 		.map((group) => ({
 			...group,
 			objects: group.objects.filter((object) =>
-				matchesOutlinerSearch(group, object),
+				matchesLevelEditorOutlinerFilters({
+					group,
+					object,
+					viewState: objectViewStateForStableId(object.stableId),
+					filters: {
+						query: outlinerSearchQuery,
+						category: outlinerCategoryFilter,
+						visibility: outlinerVisibilityFilter,
+						lock: outlinerLockFilter,
+						pickability: outlinerPickabilityFilter,
+					},
+				}),
 			),
 		}))
 		.filter((group) => group.objects.length > 0),
 );
 const filteredOutlinerObjectCount = $derived(
 	filteredSceneTree.reduce((count, group) => count + group.objects.length, 0),
+);
+const filteredOutlinerStableIds = $derived(
+	filteredSceneTree.flatMap((group) =>
+		group.objects.map((object) => object.stableId),
+	),
 );
 const objectFocusGroups = $derived(
 	workspace.sceneTree.filter((group) => group.objects.length > 0),
@@ -219,6 +308,10 @@ let outputLog = $state([...workspace.outputLog]);
 let runtimeTelemetry: LevelEditorRuntimeTelemetryPayload | undefined = $state();
 let runtimeTelemetryState: RuntimeTelemetryState = $state("waiting");
 let lastRuntimeTelemetryReceivedAt: number | undefined = $state();
+let pendingRenderedSceneHitTest: LevelEditorRenderedSelectionPendingRequest | null =
+	$state(null);
+let pendingRenderedSceneBoxSelect: LevelEditorRenderedSelectionPendingRequest | null =
+	$state(null);
 let activeCommandId: LevelEditorWorkspaceCommand["id"] | null = $state(null);
 let viewportBridgeViewMode: LevelEditorViewportBridgeViewMode =
 	$state("live-game");
@@ -245,10 +338,20 @@ const viewportBridgeConnectionStatus: LevelEditorViewportBridgeConnectionStatus 
 					? "ready"
 					: "inactive",
 	);
+const renderedSceneSelectionRequestReady = $derived(
+	runtimeTelemetryState === "live" &&
+		runtimeTelemetry?.runtimeSceneId === workspace.selectedRuntimeSceneId,
+);
 const viewportBridgeModel = $derived(
 	buildLevelEditorViewportBridgeModel({
 		workspace,
 		selectedStableId: selectedStableId === "" ? null : selectedStableId,
+		selectedStableIds: editorSelectionState.selectedStableIds,
+		objectViewState: {
+			visibleStableIds: objectViewStateModel.visibleStableIds,
+			pickableStableIds: objectViewStateModel.pickableStableIds,
+			lockedStableIds: objectViewStateModel.lockedStableIds,
+		},
 		viewMode: viewportBridgeViewMode,
 		enabledOverlayIds: enabledViewportOverlayIds,
 		connectionStatus: viewportBridgeConnectionStatus,
@@ -263,17 +366,24 @@ const viewportBridgeModel = $derived(
 		cameraMode: viewportCameraMode,
 		cameraZoomPercent: viewportCameraZoomPercent,
 		interactionTool: viewportInteractionTool,
+		renderedHitTestRequestReadiness:
+			channel &&
+			runtimeTelemetryState === "live" &&
+			runtimeTelemetry?.runtimeSceneId === workspace.selectedRuntimeSceneId
+				? "available"
+				: "unavailable",
 	}),
 );
 
 onMount(() => {
+	restoreObjectViewStateFromBrowserStorage();
 	channel = createBrowserLevelEditorPreviewChannel();
 	status = channel
 		? { kind: "ready", label: "Preview channel ready" }
 		: { kind: "error", label: "Preview channel unavailable" };
 
 	if (channel) {
-		unsubscribeRuntimeTelemetry = channel.subscribe(handleRuntimeTelemetry);
+		unsubscribeRuntimeTelemetry = channel.subscribe(handleDevPreviewMessage);
 		telemetryFreshnessTimer = globalThis.setInterval(
 			updateRuntimeTelemetryState,
 			500,
@@ -293,6 +403,12 @@ function selectedObject(): LevelEditorWorkspaceObject | undefined {
 	return selectedWorkspaceObject;
 }
 
+function initialSelectedStableIds(): readonly string[] {
+	const stableId = workspace.selectedStableId ?? workspace.objects[0]?.stableId;
+
+	return stableId ? [stableId] : [];
+}
+
 function openRuntimeScene(event: Event): void {
 	const select = event.currentTarget as HTMLSelectElement;
 	const url = new URL(globalThis.location.href);
@@ -300,10 +416,61 @@ function openRuntimeScene(event: Event): void {
 	globalThis.location.assign(url.toString());
 }
 
-function selectObject(stableId: string): void {
-	selectedStableId = stableId;
-	const object = workspace.objects.find((item) => item.stableId === stableId);
+function selectObject(
+	stableId: string,
+	options: { readonly additive?: boolean } = {},
+): void {
+	const nextSelectionState = selectLevelEditorObject({
+		state: editorSelectionState,
+		stableId,
+		additive: options.additive,
+	});
+	selectedStableIds = nextSelectionState.selectedStableIds;
+	const object = nextSelectionState.primaryObject;
 	selectedGraphNode = object ? `category:${object.category}` : "authored-level";
+}
+
+function selectObjectFromPointer(event: MouseEvent, stableId: string): void {
+	selectObject(stableId, { additive: event.ctrlKey || event.metaKey });
+}
+
+function selectObjects(
+	stableIds: readonly string[],
+	options: { readonly additive?: boolean } = {},
+): void {
+	const nextSelectionState = selectLevelEditorObjects({
+		state: editorSelectionState,
+		stableIds,
+		additive: options.additive,
+	});
+	selectedStableIds = nextSelectionState.selectedStableIds;
+	const object = nextSelectionState.primaryObject;
+	selectedGraphNode = object ? `category:${object.category}` : "authored-level";
+}
+
+function makePrimarySelection(stableId: string): void {
+	selectObjects([
+		stableId,
+		...editorSelectionState.selectedStableIds.filter(
+			(selectedStableId) => selectedStableId !== stableId,
+		),
+	]);
+}
+
+function removeObjectFromSelection(stableId: string): void {
+	selectObjects(
+		editorSelectionState.selectedStableIds.filter(
+			(selectedStableId) => selectedStableId !== stableId,
+		),
+	);
+}
+
+function objectIsSelected(stableId: string): boolean {
+	return editorSelectionState.selectedStableIds.includes(stableId);
+}
+
+function objectIsPrimarySelection(stableId: string): boolean {
+	return editorSelectionState.primaryStableId === stableId;
 }
 
 function selectObjectGroup(category: LevelEditorWorkspaceCategory): void {
@@ -315,37 +482,157 @@ function selectObjectGroup(category: LevelEditorWorkspaceCategory): void {
 	}
 }
 
-function matchesOutlinerSearch(
-	group: LevelEditorWorkspaceTreeGroup,
-	object: LevelEditorWorkspaceObject,
-): boolean {
-	const query = outlinerSearchQuery.trim().toLowerCase();
+function resetOutlinerFilters(): void {
+	outlinerSearchQuery = "";
+	outlinerCategoryFilter = "all";
+	outlinerVisibilityFilter = "all";
+	outlinerLockFilter = "all";
+	outlinerPickabilityFilter = "all";
+}
 
-	if (query.length === 0) {
-		return true;
+function selectFilteredOutlinerObjects(): void {
+	selectObjects(filteredOutlinerStableIds);
+}
+
+function addFilteredOutlinerObjectsToSelection(): void {
+	selectObjects(filteredOutlinerStableIds, { additive: true });
+}
+
+function clearObjectSelection(): void {
+	selectObjects([]);
+}
+
+function restoreObjectViewStateFromBrowserStorage(): void {
+	const storage = browserLocalStorage();
+	const serialized = storage?.getItem(objectViewStateStorageKey);
+
+	if (!storage || !serialized) {
+		return;
 	}
 
-	return [
-		group.label,
-		object.id,
-		object.stableId,
-		object.label,
-		object.category,
-		object.prefabId,
-		object.sourceOwner,
-		object.outliner.categoryLabel,
-		object.outliner.visibility.label,
-		object.outliner.lock.label,
-		object.outliner.pickability.label,
-		...object.outliner.objectPath,
-		object.workflow.publishability,
-		object.workflow.storage,
-		...object.assetIds,
-		...object.componentNames,
-		...object.workflow.labels,
-	]
-		.filter((value): value is string => typeof value === "string")
-		.some((value) => value.toLowerCase().includes(query));
+	const result = parseLevelEditorObjectViewStatePersistence({
+		serialized,
+		expectedRuntimeSceneId: workspace.selectedRuntimeSceneId,
+	});
+
+	if (!result.ok) {
+		storage.removeItem(objectViewStateStorageKey);
+		appendOutputLog({
+			level: "warning",
+			source: "object-view-state",
+			message: `Discarded saved editor object view state: ${result.reason}`,
+		});
+		return;
+	}
+
+	objectViewStateByStableId = result.envelope.stateByStableId;
+	objectViewStateSource = "browser-local-editor-workspace";
+	appendOutputLog({
+		level: "info",
+		source: "object-view-state",
+		message: `Restored browser-local object view state for ${workspace.selectedRuntimeSceneId}.`,
+	});
+}
+
+function setObjectViewStateByStableId(
+	nextState: Readonly<Record<string, LevelEditorObjectViewStatePatch>>,
+): void {
+	objectViewStateByStableId = nextState;
+	const storage = browserLocalStorage();
+
+	if (!storage) {
+		objectViewStateSource = "editor-memory";
+		return;
+	}
+
+	if (Object.keys(nextState).length === 0) {
+		storage.removeItem(objectViewStateStorageKey);
+		objectViewStateSource = "editor-memory";
+		return;
+	}
+
+	try {
+		storage.setItem(
+			objectViewStateStorageKey,
+			serializeLevelEditorObjectViewStatePersistence({
+				runtimeSceneId: workspace.selectedRuntimeSceneId,
+				stateByStableId: nextState,
+			}),
+		);
+		objectViewStateSource = "browser-local-editor-workspace";
+	} catch {
+		objectViewStateSource = "editor-memory";
+		appendOutputLog({
+			level: "warning",
+			source: "object-view-state",
+			message:
+				"Object view state stayed in editor memory because browser-local storage was unavailable.",
+		});
+	}
+}
+
+function browserLocalStorage(): Storage | null {
+	try {
+		return globalThis.localStorage ?? null;
+	} catch {
+		return null;
+	}
+}
+
+function toggleObjectVisible(stableId: string): void {
+	const viewState = objectViewStateForStableId(stableId);
+	setObjectViewStateByStableId(
+		setLevelEditorObjectVisible(
+			objectViewStateByStableId,
+			stableId,
+			!viewState.visible,
+		),
+	);
+}
+
+function toggleObjectLocked(stableId: string): void {
+	const viewState = objectViewStateForStableId(stableId);
+	setObjectViewStateByStableId(
+		setLevelEditorObjectLocked(
+			objectViewStateByStableId,
+			stableId,
+			!viewState.locked,
+		),
+	);
+}
+
+function toggleObjectIsolated(stableId: string): void {
+	const viewState = objectViewStateForStableId(stableId);
+	setObjectViewStateByStableId(
+		setLevelEditorObjectIsolated(
+			objectViewStateByStableId,
+			stableId,
+			!viewState.isolated,
+		),
+	);
+}
+
+function clearObjectViewState(stableId: string): void {
+	setObjectViewStateByStableId(
+		clearLevelEditorObjectViewStateForStableId(
+			objectViewStateByStableId,
+			stableId,
+		),
+	);
+}
+
+function clearAllObjectIsolation(): void {
+	setObjectViewStateByStableId(
+		clearLevelEditorObjectIsolation(objectViewStateByStableId),
+	);
+}
+
+function resetObjectViewState(): void {
+	setObjectViewStateByStableId(resetLevelEditorObjectViewState());
+}
+
+function objectViewStateForStableId(stableId: string) {
+	return levelEditorObjectViewStateForStableId(objectViewStateModel, stableId);
 }
 
 function selectViewportBridgeViewMode(
@@ -1851,7 +2138,12 @@ function sendCoreObjectPreview(): void {
 		runtimeSceneId: workspace.selectedRuntimeSceneId,
 		levelId: workspace.selectedLevelId,
 		sourcePlanHash: previewSourceHash(object),
-		entries: [buildCoreObjectPreviewEntry(object)],
+		entries: [
+			buildCoreObjectPreviewEntry({
+				object,
+				edits: stagedFieldEdits,
+			}),
+		],
 	} as const;
 	const message = createCoreObjectPreviewPatchMessage({
 		requestId: createRequestId("core-preview"),
@@ -1963,7 +2255,12 @@ function reconcileCoreObjectPreviewAfterStagedFieldRemoval(
 		runtimeSceneId: workspace.selectedRuntimeSceneId,
 		levelId: workspace.selectedLevelId,
 		sourcePlanHash: previewSourceHash(object),
-		entries: [buildCoreObjectPreviewEntry(object, nextStagedFieldEdits)],
+		entries: [
+			buildCoreObjectPreviewEntry({
+				object,
+				edits: nextStagedFieldEdits,
+			}),
+		],
 	} as const;
 
 	sendLevelEditorDevPreviewMessage(
@@ -2032,136 +2329,6 @@ function reloadLiveRuntime(): void {
 	};
 }
 
-function buildCoreObjectPreviewEntry(
-	object: LevelEditorWorkspaceObject,
-	edits: readonly LevelEditorStagedFieldEdit[] = stagedFieldEdits,
-): LevelEditorCoreObjectPreviewPatchEntry {
-	const transform = readTransformPatch(object, edits);
-
-	switch (object.previewTargetKind) {
-		case "light":
-			return {
-				stableId: object.stableId,
-				targetKind: "light",
-				...(transform === undefined ? {} : { transform }),
-				light: readComponentPatch(object, "Light", edits),
-			} as LevelEditorCoreObjectPreviewPatchEntry;
-		case "spawn":
-			return {
-				stableId: object.stableId,
-				targetKind: "spawn",
-				transform: transform ?? {},
-			};
-		case "portal":
-			return {
-				stableId: object.stableId,
-				targetKind: "portal",
-				...(transform === undefined ? {} : { transform }),
-				portal: readComponentPatch(object, "Portal", edits),
-			} as LevelEditorCoreObjectPreviewPatchEntry;
-		case "audio-emitter":
-			return {
-				stableId: object.stableId,
-				targetKind: "audio-emitter",
-				...(transform === undefined ? {} : { transform }),
-				soundEmitter: readComponentPatch(object, "SoundEmitter", edits),
-			} as LevelEditorCoreObjectPreviewPatchEntry;
-		default:
-			throw new Error("Selected object is not previewable.");
-	}
-}
-
-function readTransformPatch(
-	object: LevelEditorWorkspaceObject,
-	edits: readonly LevelEditorStagedFieldEdit[] = stagedFieldEdits,
-):
-	| {
-			readonly position?: readonly [number, number, number];
-			readonly rotation?: readonly [number, number, number, number];
-			readonly scale?: readonly [number, number, number];
-	  }
-	| undefined {
-	const position = readVectorField(object, "Transform.position", edits);
-	const rotation = readQuaternionField(object, "Transform.rotation", edits);
-	const scale = readVectorField(object, "Transform.scale", edits);
-	const transform = {
-		...(position === undefined ? {} : { position }),
-		...(rotation === undefined ? {} : { rotation }),
-		...(scale === undefined ? {} : { scale }),
-	};
-
-	return Object.keys(transform).length === 0 ? undefined : transform;
-}
-
-function readComponentPatch(
-	object: LevelEditorWorkspaceObject,
-	componentName: "Light" | "Portal" | "SoundEmitter",
-	edits: readonly LevelEditorStagedFieldEdit[] = stagedFieldEdits,
-): Record<string, unknown> {
-	const seedKey =
-		componentName === "SoundEmitter"
-			? "soundEmitter"
-			: componentName === "Portal"
-				? "portal"
-				: "light";
-	const component = cloneRecord(object.previewSeed?.[seedKey]);
-
-	for (const field of object.fields) {
-		if (!field.path.startsWith(`${componentName}.`)) {
-			continue;
-		}
-
-		const property = field.path.slice(componentName.length + 1);
-		component[property] = readFieldValue(object, field, edits);
-	}
-
-	return component;
-}
-
-function readVectorField(
-	object: LevelEditorWorkspaceObject,
-	path: "Transform.position" | "Transform.scale",
-	edits: readonly LevelEditorStagedFieldEdit[] = stagedFieldEdits,
-): readonly [number, number, number] | undefined {
-	const fields = ["x", "y", "z"].map((axis) =>
-		object.fields.find((field) => field.path === `${path}.${axis}`),
-	);
-
-	if (fields.some((field) => field === undefined)) {
-		return undefined;
-	}
-
-	const resolvedFields = fields.filter(
-		(field): field is LevelEditorWorkspaceField => field !== undefined,
-	);
-
-	return resolvedFields.map((field) =>
-		Number(readFieldValue(object, field, edits)),
-	) as [number, number, number];
-}
-
-function readQuaternionField(
-	object: LevelEditorWorkspaceObject,
-	path: "Transform.rotation",
-	edits: readonly LevelEditorStagedFieldEdit[] = stagedFieldEdits,
-): readonly [number, number, number, number] | undefined {
-	const fields = ["x", "y", "z", "w"].map((axis) =>
-		object.fields.find((field) => field.path === `${path}.${axis}`),
-	);
-
-	if (fields.some((field) => field === undefined)) {
-		return undefined;
-	}
-
-	const resolvedFields = fields.filter(
-		(field): field is LevelEditorWorkspaceField => field !== undefined,
-	);
-
-	return resolvedFields.map((field) =>
-		Number(readFieldValue(object, field, edits)),
-	) as [number, number, number, number];
-}
-
 function readFieldValue(
 	object: LevelEditorWorkspaceObject,
 	field: LevelEditorWorkspaceField,
@@ -2178,56 +2345,74 @@ function createRequestId(prefix: string): string {
 	return `${prefix}:${globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36)}`;
 }
 
-function cloneRecord(value: unknown): Record<string, unknown> {
-	return JSON.parse(JSON.stringify(value ?? {})) as Record<string, unknown>;
+function requestRenderedScenePick(
+	options: LevelEditorRenderedHitTestViewportRequestOptions,
+): boolean {
+	if (!channel || !renderedSceneSelectionRequestReady) {
+		return false;
+	}
+	const result = requestLevelEditorRenderedHitTestSelection({
+		channel,
+		requestId: createRequestId("rendered-hit-test"),
+		request: {
+			runtimeSceneId: workspace.selectedRuntimeSceneId,
+			viewport: options.viewport,
+			screenPoint: options.screenPoint,
+			pickableStableIds: objectViewStateModel.pickableStableIds,
+			sourcePlanHash: `workspace:rendered-hit-test:${workspace.selectedRuntimeSceneId}`,
+		},
+		additive: options.additive,
+	});
+
+	if (result.status === "sent") {
+		pendingRenderedSceneHitTest = result.pendingRequest;
+		status = { kind: "sent", label: result.label };
+		return true;
+	}
+
+	status = { kind: "error", label: result.label };
+	appendOutputLog({
+		level: "error",
+		source: "rendered-hit-test",
+		message: result.message,
+	});
+	return false;
 }
 
-function objectLibraryComponentSnapshots(
-	object: LevelEditorWorkspaceObject,
-): Pick<
-	Parameters<typeof objectLibrarySubjectFromSelection>[0],
-	"currentRenderable" | "currentSoundEmitter"
-> {
-	const renderable =
-		object.previewSeed?.renderable &&
-		typeof object.previewSeed.renderable === "object"
-			? (object.previewSeed.renderable as Record<string, unknown>)
-			: undefined;
-	const soundEmitter =
-		object.previewSeed?.soundEmitter &&
-		typeof object.previewSeed.soundEmitter === "object"
-			? (object.previewSeed.soundEmitter as Record<string, unknown>)
-			: undefined;
+function requestRenderedSceneBoxSelect(
+	options: LevelEditorRenderedBoxSelectViewportRequestOptions,
+): boolean {
+	if (!channel || !renderedSceneSelectionRequestReady) {
+		return false;
+	}
+	const result = requestLevelEditorRenderedBoxSelectSelection({
+		channel,
+		requestId: createRequestId("rendered-box-select"),
+		request: {
+			runtimeSceneId: workspace.selectedRuntimeSceneId,
+			viewport: options.viewport,
+			rect: options.rect,
+			pickableStableIds: objectViewStateModel.pickableStableIds,
+			sourcePlanHash: `workspace:rendered-box-select:${workspace.selectedRuntimeSceneId}`,
+		},
+		additive: options.additive,
+	});
 
-	return {
-		...(renderable === undefined
-			? {}
-			: {
-					currentRenderable: {
-						...(typeof renderable.meshId === "string"
-							? { meshId: renderable.meshId }
-							: {}),
-						...(typeof renderable.materialId === "string"
-							? { materialId: renderable.materialId }
-							: {}),
-					},
-				}),
-		...(soundEmitter === undefined
-			? {}
-			: {
-					currentSoundEmitter: {
-						...(typeof soundEmitter.soundId === "string"
-							? { soundId: soundEmitter.soundId }
-							: {}),
-						...(typeof soundEmitter.volume === "number"
-							? { volume: soundEmitter.volume }
-							: {}),
-					},
-				}),
-	};
+	if (result.status === "sent") {
+		pendingRenderedSceneBoxSelect = result.pendingRequest;
+		status = { kind: "sent", label: result.label };
+		return true;
+	}
+
+	status = { kind: "error", label: result.label };
+	appendOutputLog({
+		level: "error",
+		source: "rendered-box-select",
+		message: result.message,
+	});
+	return false;
 }
-
-function handleRuntimeTelemetry(messageData: unknown): void {
+function handleDevPreviewMessage(messageData: unknown): void {
 	let message: ReturnType<typeof parseLevelEditorDevPreviewMessage>;
 
 	try {
@@ -2236,16 +2421,122 @@ function handleRuntimeTelemetry(messageData: unknown): void {
 		return;
 	}
 
-	if (
-		message.type !== "runtime-telemetry" ||
-		message.payload.runtimeSceneId !== workspace.selectedRuntimeSceneId
-	) {
+	if (message.type === "runtime-telemetry") {
+		if (message.payload.runtimeSceneId !== workspace.selectedRuntimeSceneId) {
+			return;
+		}
+
+		runtimeTelemetry = message.payload;
+		lastRuntimeTelemetryReceivedAt = Date.now();
+		runtimeTelemetryState = "live";
 		return;
 	}
 
-	runtimeTelemetry = message.payload;
-	lastRuntimeTelemetryReceivedAt = Date.now();
-	runtimeTelemetryState = "live";
+	if (message.type === "rendered-scene-hit-test-result") {
+		handleRenderedSceneHitTestResult(message.requestId, message.payload);
+	}
+
+	if (message.type === "rendered-scene-box-select-result") {
+		handleRenderedSceneBoxSelectResult(message.requestId, message.payload);
+	}
+}
+
+function handleRenderedSceneHitTestResult(
+	requestId: string,
+	payload: LevelEditorRenderedSceneHitTestResultPayload,
+): void {
+	const pendingRequest = pendingRenderedSceneHitTest;
+	const result = consumeLevelEditorRenderedHitTestSelectionResult({
+		requestId,
+		pendingRequestId: pendingRequest?.requestId ?? null,
+		expectedRuntimeSceneId: workspace.selectedRuntimeSceneId,
+		payload,
+		objects: workspace.objects,
+		pickableStableIds: objectViewStateModel.pickableStableIds,
+		additive: pendingRequest?.additive,
+	});
+
+	if (pendingRequest?.requestId === requestId) {
+		pendingRenderedSceneHitTest = null;
+	}
+
+	if (result.status === "selected") {
+		selectObject(result.stableId, { additive: result.additive });
+		status = {
+			kind: "ready",
+			label: `Rendered selection: ${result.stableId}`,
+		};
+		appendOutputLog({
+			level: "success",
+			source: "rendered-hit-test",
+			message: result.message,
+		});
+		return;
+	}
+
+	if (result.status === "stale" && result.reason === "request-id-mismatch") {
+		return;
+	}
+
+	status = {
+		kind: result.status === "miss" ? "ready" : "error",
+		label: result.message,
+	};
+	appendOutputLog({
+		level: result.status === "miss" ? "info" : "warning",
+		source: "rendered-hit-test",
+		message: result.message,
+	});
+}
+
+function handleRenderedSceneBoxSelectResult(
+	requestId: string,
+	payload: LevelEditorRenderedSceneBoxSelectResultPayload,
+): void {
+	const pendingRequest = pendingRenderedSceneBoxSelect;
+	const result = consumeLevelEditorRenderedBoxSelectSelectionResult({
+		requestId,
+		pendingRequestId: pendingRequest?.requestId ?? null,
+		expectedRuntimeSceneId: workspace.selectedRuntimeSceneId,
+		payload,
+		objects: workspace.objects,
+		pickableStableIds: objectViewStateModel.pickableStableIds,
+		additive: pendingRequest?.additive,
+	});
+
+	if (pendingRequest?.requestId === requestId) {
+		pendingRenderedSceneBoxSelect = null;
+	}
+
+	if (result.status === "selected") {
+		selectObjects(result.stableIds, { additive: result.additive });
+		status = {
+			kind: "ready",
+			label: `Rendered box selection: ${result.stableIds.length} object${
+				result.stableIds.length === 1 ? "" : "s"
+			}`,
+		};
+		appendOutputLog({
+			level: "success",
+			source: "rendered-box-select",
+			message: result.message,
+		});
+		return;
+	}
+
+	if (result.status === "stale" && result.reason === "request-id-mismatch") {
+		return;
+	}
+
+	status = {
+		kind: result.status === "miss" ? "ready" : "error",
+		label: result.message,
+	};
+	appendOutputLog({
+		level: result.status === "miss" ? "info" : "warning",
+		source: "rendered-box-select",
+		message: result.message,
+	});
 }
 
 function updateRuntimeTelemetryState(): void {
@@ -2387,7 +2678,9 @@ function runtimeLifecycleLabel(): string {
 	<aside class="editor-panel editor-outliner" aria-label="Scene outliner">
 		<header class="editor-panel-header">
 			<h2>Outliner</h2>
-			<span>{filteredOutlinerObjectCount} / {workspace.objects.length}</span>
+			<span>
+				{editorSelectionState.selectedCount} selected / {filteredOutlinerObjectCount} shown
+			</span>
 		</header>
 		<div class="editor-inspector-fields" aria-label="Outliner filters">
 			<label class="editor-field">
@@ -2397,16 +2690,112 @@ function runtimeLifecycleLabel(): string {
 					placeholder="Stable ID, prefab, component, owner"
 				/>
 			</label>
+			<label class="editor-field">
+				<span>Category</span>
+				<select bind:value={outlinerCategoryFilter}>
+					<option value="all">All categories</option>
+					{#each workspace.sceneTree as group}
+						<option value={group.category}>{group.label}</option>
+					{/each}
+				</select>
+			</label>
+			<label class="editor-field">
+				<span>Lock</span>
+				<select bind:value={outlinerLockFilter}>
+					<option value="all">All lock states</option>
+					<option value="editable">Editable</option>
+					<option value="cook-guarded">Cook guarded</option>
+					<option value="read-only">Read only</option>
+					<option value="editor-locked">Editor locked</option>
+					<option value="editor-unlocked">Editor unlocked</option>
+				</select>
+			</label>
+			<label class="editor-field">
+				<span>Pickability</span>
+				<select bind:value={outlinerPickabilityFilter}>
+					<option value="all">All pickability</option>
+					<option value="projected-pickable">Projected pickable</option>
+					<option value="outliner-only">Outliner only</option>
+					<option value="editor-pickable">Editor pickable</option>
+				</select>
+			</label>
+			<label class="editor-field">
+				<span>Visibility</span>
+				<select bind:value={outlinerVisibilityFilter}>
+					<option value="all">All visibility</option>
+					<option value="source-visible">Source visible</option>
+					<option value="editor-visible">Editor visible</option>
+					<option value="editor-hidden">Editor hidden</option>
+				</select>
+			</label>
+			<div class="editor-outliner-filter-actions">
+				<span>
+					{filteredOutlinerObjectCount} shown of {workspace.objects.length}
+				</span>
+				<button
+					type="button"
+					disabled={filteredOutlinerObjectCount === 0}
+					onclick={selectFilteredOutlinerObjects}
+				>
+					Select Shown
+				</button>
+				<button
+					type="button"
+					disabled={filteredOutlinerObjectCount === 0}
+					onclick={addFilteredOutlinerObjectsToSelection}
+				>
+					Add Shown
+				</button>
+				<button
+					type="button"
+					disabled={editorSelectionState.selectedCount === 0}
+					onclick={clearObjectSelection}
+				>
+					Clear Selection
+				</button>
+				<button
+					type="button"
+					disabled={!objectViewStateModel.hasIsolation}
+					title="Clears editor-only isolation state without writing owner files."
+					onclick={clearAllObjectIsolation}
+				>
+					Clear Isolation
+				</button>
+				<button
+					type="button"
+					disabled={Object.keys(objectViewStateByStableId).length === 0}
+					title="Resets editor-only visibility, lock, and isolation state."
+					onclick={resetObjectViewState}
+				>
+					Reset View
+				</button>
+				<button
+					type="button"
+					disabled={!outlinerFiltersActive}
+					onclick={resetOutlinerFilters}
+				>
+					Reset
+				</button>
+			</div>
 		</div>
 		<div class="editor-outliner-list">
 			{#each filteredSceneTree as group}
 				<section class="editor-outliner-group">
 					<h3>{group.label}</h3>
 					{#each group.objects as object}
+						{@const objectViewState = objectViewStateForStableId(
+							object.stableId,
+						)}
 						<button
 							type="button"
-							class:selected-object={object.stableId === selectedStableId}
-							onclick={() => selectObject(object.stableId)}
+							class:selected-object={objectIsSelected(object.stableId)}
+							class:primary-selected-object={objectIsPrimarySelection(
+								object.stableId,
+							)}
+							aria-pressed={objectIsSelected(object.stableId)}
+							data-selected-primary={objectIsPrimarySelection(object.stableId)}
+							onclick={(event) =>
+								selectObjectFromPointer(event, object.stableId)}
 						>
 							<span class="editor-outliner-row-title">
 								<span>{object.label}</span>
@@ -2440,13 +2829,61 @@ function runtimeLifecycleLabel(): string {
 							</span>
 							<small>{object.prefabId}</small>
 						</button>
+						<div
+							class="editor-outliner-row-tools"
+							aria-label={`Editor-only view actions for ${object.label}`}
+						>
+							<button
+								type="button"
+								class:active-view-state={!objectViewState.visible}
+								aria-pressed={!objectViewState.visible}
+								title="Hide or show this object in editor-only outliner and projected viewport state. Does not write runtime or owner files."
+								onclick={() => toggleObjectVisible(object.stableId)}
+							>
+								{objectViewState.visible ? "Hide" : "Show"}
+							</button>
+							<button
+								type="button"
+								class:active-view-state={objectViewState.locked}
+								aria-pressed={objectViewState.locked}
+								title="Lock or unlock editor-only projected picking for this object. Does not write runtime or owner files."
+								onclick={() => toggleObjectLocked(object.stableId)}
+							>
+								{objectViewState.locked ? "Unlock" : "Lock"}
+							</button>
+							<button
+								type="button"
+								class:active-view-state={objectViewState.isolated}
+								aria-pressed={objectViewState.isolated}
+								title="Toggle editor-only isolation. Does not write runtime or owner files."
+								onclick={() => toggleObjectIsolated(object.stableId)}
+							>
+								{objectViewState.isolated ? "Unisolate" : "Isolate"}
+							</button>
+							<button
+								type="button"
+								disabled={
+									objectViewState.visible &&
+									!objectViewState.locked &&
+									!objectViewState.isolated
+								}
+								title="Clear editor-only view state for this object."
+								onclick={() => clearObjectViewState(object.stableId)}
+							>
+								Reset
+							</button>
+						</div>
 					{/each}
 				</section>
 			{/each}
 			{#if filteredSceneTree.length === 0}
 				<div class="editor-library-empty-state">
 					<strong>No scene objects match</strong>
-					<span>{outlinerSearchQuery}</span>
+					<span>
+						{outlinerFiltersActive
+							? "Adjust the outliner filters."
+							: outlinerSearchQuery}
+					</span>
 				</div>
 			{/if}
 		</div>
@@ -2461,6 +2898,9 @@ function runtimeLifecycleLabel(): string {
 			onInteractionToolChange={selectViewportInteractionTool}
 			onOverlayToggle={toggleViewportBridgeOverlay}
 			onSelectObject={selectObject}
+			onSelectObjects={selectObjects}
+			onRenderedScenePick={requestRenderedScenePick}
+			onRenderedSceneBoxSelect={requestRenderedSceneBoxSelect}
 			onTransformNudge={nudgeViewportTransformField}
 			onTransformProjectedDrag={stageViewportProjectedTransformDrag}
 			onRotationYawNudge={nudgeViewportRotationYaw}
@@ -2518,6 +2958,67 @@ function runtimeLifecycleLabel(): string {
 					</div>
 					<span>{workspace.objects.length} objects</span>
 				</header>
+				<div class="editor-selection-context" aria-live="polite">
+					<strong>{editorSelectionState.selectedCount} selected</strong>
+					<span>
+						{editorSelectionState.mode === "multi"
+							? `Primary inspector: ${selectedWorkspaceObject?.label ?? "none"}`
+							: "Inspector follows the selected stable-ID object."}
+					</span>
+					{#if editorSelectionState.mode === "multi"}
+						<small>{editorSelectionState.bulkStageReason}</small>
+					{/if}
+				</div>
+				{#if editorSelectionState.selectedCount > 1}
+					<div class="editor-selection-set" aria-label="Selection set">
+						<div class="editor-selection-set-summary">
+							<div>
+								<strong>Categories</strong>
+								<span>
+									{editorSelectionState.categorySummaries
+										.map((summary) => `${summary.category}: ${summary.count}`)
+										.join(" / ")}
+								</span>
+							</div>
+							<div>
+								<strong>Common Components</strong>
+								<span>
+									{editorSelectionState.commonComponentNames.length > 0
+										? editorSelectionState.commonComponentNames.join(", ")
+										: "none"}
+								</span>
+							</div>
+						</div>
+						<div class="editor-selection-set-list">
+							{#each editorSelectionState.selectedObjects as object}
+								<div
+									class="editor-selection-set-row"
+									data-selected-primary={objectIsPrimarySelection(object.stableId)}
+								>
+									<div>
+										<strong>{object.label}</strong>
+										<span>{object.category} / {object.stableId}</span>
+									</div>
+									<div class="editor-selection-set-actions">
+										<button
+											type="button"
+											disabled={objectIsPrimarySelection(object.stableId)}
+											onclick={() => makePrimarySelection(object.stableId)}
+										>
+											Primary
+										</button>
+										<button
+											type="button"
+											onclick={() => removeObjectFromSelection(object.stableId)}
+										>
+											Remove
+										</button>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
 				<div
 					class="editor-object-category-rail"
 					role="tablist"
@@ -2550,11 +3051,16 @@ function runtimeLifecycleLabel(): string {
 						{#each selectedObjectFocusGroup.objects as object, index}
 							<button
 								type="button"
-								class:selected-map-object={object.stableId === selectedStableId}
+								class:selected-map-object={objectIsSelected(object.stableId)}
+								class:primary-selected-map-object={objectIsPrimarySelection(
+									object.stableId,
+								)}
 								style={objectFocusPinStyle(selectedObjectFocusGroup, object)}
-								aria-pressed={object.stableId === selectedStableId}
+								aria-pressed={objectIsSelected(object.stableId)}
+								data-selected-primary={objectIsPrimarySelection(object.stableId)}
 								title={`${object.label}: ${objectTargetLabel(object)}`}
-								onclick={() => selectObject(object.stableId)}
+								onclick={(event) =>
+									selectObjectFromPointer(event, object.stableId)}
 							>
 								<span>{index + 1}</span>
 							</button>
@@ -2564,9 +3070,14 @@ function runtimeLifecycleLabel(): string {
 						{#each selectedObjectFocusGroup.objects as object, index}
 							<button
 								type="button"
-								class:selected-object-row={object.stableId === selectedStableId}
-								aria-pressed={object.stableId === selectedStableId}
-								onclick={() => selectObject(object.stableId)}
+								class:selected-object-row={objectIsSelected(object.stableId)}
+								class:primary-selected-object-row={objectIsPrimarySelection(
+									object.stableId,
+								)}
+								aria-pressed={objectIsSelected(object.stableId)}
+								data-selected-primary={objectIsPrimarySelection(object.stableId)}
+								onclick={(event) =>
+									selectObjectFromPointer(event, object.stableId)}
 							>
 								<span>{index + 1}. {object.label}</span>
 								<small>
@@ -2669,11 +3180,11 @@ function runtimeLifecycleLabel(): string {
 			</section>
 		{/if}
 
-		<section class="editor-panel editor-graph-panel" aria-label="Engine graph">
-			<header class="editor-panel-header">
-				<h2>Engine Map</h2>
-				<span>{workspace.persistence.mode}</span>
-			</header>
+			<details class="editor-panel editor-graph-panel" aria-label="Engine graph">
+				<summary class="editor-panel-header">
+					<h2>Engine Map</h2>
+					<span>{workspace.persistence.mode}</span>
+				</summary>
 			<div class="editor-engine-graph">
 				{#each workspace.graph.nodes as node}
 					<button
@@ -2695,7 +3206,7 @@ function runtimeLifecycleLabel(): string {
 					<span>{edge.from} -> {edge.to}: {edge.label}</span>
 				{/each}
 			</div>
-		</section>
+			</details>
 	</main>
 
 	<section class="editor-panel editor-inspector" aria-label="Inspector">
@@ -2943,16 +3454,16 @@ function runtimeLifecycleLabel(): string {
 </section>
 
 <section class="editor-bottom-dock" aria-label="Editor bottom dock">
-	<section
-		class="editor-panel editor-live-runtime"
-		aria-label="Live runtime status"
-	>
-		<header class="editor-panel-header">
-			<h2>Live Runtime</h2>
-			<span data-telemetry-state={runtimeTelemetryState}>
-				{runtimeTelemetryState}
-			</span>
-		</header>
+		<details
+			class="editor-panel editor-live-runtime"
+			aria-label="Live runtime status"
+		>
+			<summary class="editor-panel-header">
+				<h2>Live Runtime</h2>
+				<span data-telemetry-state={runtimeTelemetryState}>
+					{runtimeTelemetryState}
+				</span>
+			</summary>
 		<div class="editor-runtime-topline">
 			<strong>Megameal</strong>
 			<span>{runtimeLifecycleLabel()}</span>
@@ -2997,7 +3508,7 @@ function runtimeLifecycleLabel(): string {
 				<dd>{formatRuntimeCharge()}</dd>
 			</div>
 		</dl>
-	</section>
+		</details>
 	<LevelEditorObjectLibraryPanel
 		model={objectLibraryPanelModel}
 		selectedEntryId={objectLibraryPanelModel.selectedEntryId}
@@ -3021,18 +3532,18 @@ function runtimeLifecycleLabel(): string {
 	/>
 	<LevelEditorAiAssetLab
 		runtimeSceneId={workspace.selectedRuntimeSceneId}
-		selectedStableIds={selectedStableId === "" ? [] : [selectedStableId]}
+		selectedStableIds={editorSelectionState.selectedStableIds}
 		onStageAuthoringOperations={stageAuthoringOperationEntry}
 	/>
-	<section class="editor-panel editor-collision-preview" aria-label="Collision preview">
-		<header class="editor-panel-header">
-			<h2>Collision Preview</h2>
-			<span>
-				{editorSession.preview.status === "ready"
-					? editorSession.preview.entryCount
-					: "no draft"}
-			</span>
-		</header>
+		<details class="editor-panel editor-collision-preview" aria-label="Collision preview">
+			<summary class="editor-panel-header">
+				<h2>Collision Preview</h2>
+				<span>
+					{editorSession.preview.status === "ready"
+						? editorSession.preview.entryCount
+						: "no draft"}
+				</span>
+			</summary>
 		<LevelEditorPreviewControls
 			selectedRuntimeSceneId={workspace.selectedRuntimeSceneId}
 			serializedPreviewPatch={editorSession.preview.serializedPatch}
@@ -3040,12 +3551,12 @@ function runtimeLifecycleLabel(): string {
 			missingReason={editorSession.preview.missingReason}
 			onStageAuthoringOperations={stageAuthoringOperationEntry}
 		/>
-	</section>
-	<section class="editor-panel editor-terrain-bake" aria-label="Terrain bake">
-		<header class="editor-panel-header">
-			<h2>Terrain / Bake</h2>
-			<span>{editorSession.terrain.packageCount} packages</span>
-		</header>
+		</details>
+		<details class="editor-panel editor-terrain-bake" aria-label="Terrain bake">
+			<summary class="editor-panel-header">
+				<h2>Terrain / Bake</h2>
+				<span>{editorSession.terrain.packageCount} packages</span>
+			</summary>
 		<dl class="editor-facts editor-facts-compact">
 			<div>
 				<dt>Scene</dt>
@@ -3064,17 +3575,17 @@ function runtimeLifecycleLabel(): string {
 				<dd>{editorSession.bake.derivedBakeHash ?? "not available"}</dd>
 			</div>
 		</dl>
-	</section>
-	<section
-		class="editor-panel editor-validation-report"
-		aria-label="Validation report"
-	>
-		<header class="editor-panel-header">
-			<h2>Validation Report</h2>
-			<span>
-				{workspace.validationReport.errorCount} errors / {workspace.validationReport.warningCount} warnings
-			</span>
-		</header>
+		</details>
+		<details
+			class="editor-panel editor-validation-report"
+			aria-label="Validation report"
+		>
+			<summary class="editor-panel-header">
+				<h2>Validation Report</h2>
+				<span>
+					{workspace.validationReport.errorCount} errors / {workspace.validationReport.warningCount} warnings
+				</span>
+			</summary>
 		<div class="editor-status-list">
 			{#if workspace.validationReport.items.length === 0}
 				<span>no workspace validation findings</span>
@@ -3087,12 +3598,12 @@ function runtimeLifecycleLabel(): string {
 			{/if}
 		</div>
 		<p class="editor-status" data-state={status.kind}>{status.label}</p>
-	</section>
-	<section class="editor-panel editor-command-plan" aria-label="Command plan">
-		<header class="editor-panel-header">
-			<h2>Commands</h2>
-			<span>{workspace.authoring.status}</span>
-		</header>
+		</details>
+		<details class="editor-panel editor-command-plan" aria-label="Command plan">
+			<summary class="editor-panel-header">
+				<h2>Commands</h2>
+				<span>{workspace.authoring.status}</span>
+			</summary>
 		<dl class="editor-facts editor-facts-compact">
 			<div>
 				<dt>Draft Target</dt>
@@ -3156,15 +3667,16 @@ function runtimeLifecycleLabel(): string {
 				{/each}
 			</div>
 		{/if}
-	</section>
-	<section
-		class="editor-panel editor-staged-operations"
-		aria-label="Staged operations"
-	>
-		<header class="editor-panel-header">
-			<h2>Staged Operations</h2>
-			<span>{authoringQueue.operationCount}</span>
-		</header>
+		</details>
+		<details
+			class="editor-panel editor-staged-operations"
+			aria-label="Staged operations"
+			open={hasDirtyState}
+		>
+			<summary class="editor-panel-header">
+				<h2>Staged Operations</h2>
+				<span>{authoringQueue.operationCount}</span>
+			</summary>
 		<dl class="editor-facts editor-facts-compact">
 			<div>
 				<dt>Field Edits</dt>
@@ -3248,12 +3760,12 @@ function runtimeLifecycleLabel(): string {
 				operations.
 			</p>
 		{/if}
-	</section>
-	<section class="editor-panel editor-output-log" aria-label="Output log">
-		<header class="editor-panel-header">
-			<h2>Output Log</h2>
-			<span>{outputLog.length}</span>
-		</header>
+		</details>
+		<details class="editor-panel editor-output-log" aria-label="Output log">
+			<summary class="editor-panel-header">
+				<h2>Output Log</h2>
+				<span>{outputLog.length}</span>
+			</summary>
 		<ol>
 			{#each outputLog as entry}
 				<li data-log-level={entry.level}>
@@ -3262,5 +3774,5 @@ function runtimeLifecycleLabel(): string {
 				</li>
 			{/each}
 		</ol>
-	</section>
+		</details>
 </section>

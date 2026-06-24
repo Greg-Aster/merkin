@@ -20,6 +20,10 @@ import {
 	type LevelEditorObjectEditPreviewOperation,
 	type LevelEditorObjectEditPreviewPatch,
 	type LevelEditorObjectEditPreviewPatchEntry,
+	type LevelEditorRenderedSceneBoxSelectRequest,
+	type LevelEditorRenderedSceneBoxSelectResultPayload,
+	type LevelEditorRenderedSceneHitTestRequest,
+	type LevelEditorRenderedSceneHitTestResultPayload,
 	type LevelEditorRuntimeReloadAckPayload,
 	type LevelEditorRuntimeReloadRequest,
 	type LevelEditorRuntimeTelemetryPayload,
@@ -62,6 +66,22 @@ export type GameWindowPreviewPort = {
 		request: LevelEditorObjectEditPreviewClearRequest,
 	): void;
 	applyCameraLiveEditMode?(request: LevelEditorCameraLiveEditModeRequest): void;
+	requestRenderedSceneHitTest?(
+		request: LevelEditorRenderedSceneHitTestRequest,
+		requestId: string,
+	): void;
+	receiveRenderedSceneHitTestResult?(
+		payload: LevelEditorRenderedSceneHitTestResultPayload,
+		requestId: string,
+	): void;
+	requestRenderedSceneBoxSelect?(
+		request: LevelEditorRenderedSceneBoxSelectRequest,
+		requestId: string,
+	): void;
+	receiveRenderedSceneBoxSelectResult?(
+		payload: LevelEditorRenderedSceneBoxSelectResultPayload,
+		requestId: string,
+	): void;
 	receiveRuntimeTelemetry?(payload: LevelEditorRuntimeTelemetryPayload): void;
 	receiveRuntimeReloadAck?(payload: LevelEditorRuntimeReloadAckPayload): void;
 	reload(request: LevelEditorRuntimeReloadRequest): void;
@@ -212,6 +232,46 @@ export function handleGameWindowDevPreviewMessage(
 			};
 		case "camera-live-edit-mode":
 			port.applyCameraLiveEditMode?.(parsed.message.request);
+			return {
+				ok: true,
+				requestId: parsed.message.requestId,
+				messageType: parsed.message.type,
+			};
+		case "rendered-scene-hit-test-request":
+			port.requestRenderedSceneHitTest?.(
+				parsed.message.request,
+				parsed.message.requestId,
+			);
+			return {
+				ok: true,
+				requestId: parsed.message.requestId,
+				messageType: parsed.message.type,
+			};
+		case "rendered-scene-hit-test-result":
+			port.receiveRenderedSceneHitTestResult?.(
+				parsed.message.payload,
+				parsed.message.requestId,
+			);
+			return {
+				ok: true,
+				requestId: parsed.message.requestId,
+				messageType: parsed.message.type,
+			};
+		case "rendered-scene-box-select-request":
+			port.requestRenderedSceneBoxSelect?.(
+				parsed.message.request,
+				parsed.message.requestId,
+			);
+			return {
+				ok: true,
+				requestId: parsed.message.requestId,
+				messageType: parsed.message.type,
+			};
+		case "rendered-scene-box-select-result":
+			port.receiveRenderedSceneBoxSelectResult?.(
+				parsed.message.payload,
+				parsed.message.requestId,
+			);
 			return {
 				ok: true,
 				requestId: parsed.message.requestId,

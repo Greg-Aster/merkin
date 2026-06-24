@@ -14,6 +14,10 @@ import {
 	type LevelEditorObjectEditPreviewOperation,
 	type LevelEditorObjectEditPreviewPatch,
 	type LevelEditorObjectEditPreviewPatchMessage,
+	type LevelEditorRenderedSceneBoxSelectRequest,
+	type LevelEditorRenderedSceneBoxSelectRequestMessage,
+	type LevelEditorRenderedSceneHitTestRequest,
+	type LevelEditorRenderedSceneHitTestRequestMessage,
 	type LevelEditorRuntimeReloadRequestMessage,
 	buildCollisionCookPlan,
 	buildCollisionCookPreviewPatch,
@@ -24,6 +28,8 @@ import {
 	createCoreObjectPreviewPatchMessage,
 	createObjectEditPreviewClearRequestMessage,
 	createObjectEditPreviewPatchMessage,
+	createRenderedSceneBoxSelectRequestMessage,
+	createRenderedSceneHitTestRequestMessage,
 	createRuntimeSceneReloadRequestMessage,
 } from "../../engine/data/index.js";
 import {
@@ -93,6 +99,26 @@ export function buildCameraLiveEditModeMessage(options: {
 				: { sourcePlanHash: options.sourcePlanHash }),
 			...(options.pose === undefined ? {} : { pose: options.pose }),
 		},
+	});
+}
+
+export function buildRenderedSceneHitTestRequestMessage(options: {
+	readonly requestId: string;
+	readonly request: LevelEditorRenderedSceneHitTestRequest;
+}): LevelEditorRenderedSceneHitTestRequestMessage {
+	return createRenderedSceneHitTestRequestMessage({
+		requestId: options.requestId,
+		request: options.request,
+	});
+}
+
+export function buildRenderedSceneBoxSelectRequestMessage(options: {
+	readonly requestId: string;
+	readonly request: LevelEditorRenderedSceneBoxSelectRequest;
+}): LevelEditorRenderedSceneBoxSelectRequestMessage {
+	return createRenderedSceneBoxSelectRequestMessage({
+		requestId: options.requestId,
+		request: options.request,
 	});
 }
 
@@ -213,6 +239,30 @@ export function sendCameraLiveEditModeRequest(
 	},
 ): LevelEditorCameraLiveEditModeMessage {
 	const message = buildCameraLiveEditModeMessage(options);
+	sendLevelEditorDevPreviewMessage(channel, message);
+	return message;
+}
+
+export function sendRenderedSceneHitTestRequest(
+	channel: LevelEditorPreviewChannelPort,
+	options: {
+		readonly requestId: string;
+		readonly request: LevelEditorRenderedSceneHitTestRequest;
+	},
+): LevelEditorRenderedSceneHitTestRequestMessage {
+	const message = buildRenderedSceneHitTestRequestMessage(options);
+	sendLevelEditorDevPreviewMessage(channel, message);
+	return message;
+}
+
+export function sendRenderedSceneBoxSelectRequest(
+	channel: LevelEditorPreviewChannelPort,
+	options: {
+		readonly requestId: string;
+		readonly request: LevelEditorRenderedSceneBoxSelectRequest;
+	},
+): LevelEditorRenderedSceneBoxSelectRequestMessage {
+	const message = buildRenderedSceneBoxSelectRequestMessage(options);
 	sendLevelEditorDevPreviewMessage(channel, message);
 	return message;
 }

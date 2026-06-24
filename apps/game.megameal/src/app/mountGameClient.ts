@@ -7,6 +7,10 @@ import {
 } from "../engine/adapters/browser/index.js";
 import { createRapierPhysicsAdapter } from "../engine/adapters/rapier/index.js";
 import {
+	type ThreeRenderedSceneBoxSelectRequest,
+	type ThreeRenderedSceneBoxSelectResult,
+	type ThreeRenderedSceneHitTestRequest,
+	type ThreeRenderedSceneHitTestResult,
 	ThreeRendererAdapter,
 	createThreeAssetObjectResolver,
 	loadDefaultThreeRuntime,
@@ -35,6 +39,12 @@ export type GameClientMountOptions = {
 export type GameClientMount = {
 	readonly runtime: EngineRuntime;
 	readonly mobileControls: MobileInputControlsPort;
+	hitTestRenderedScene(
+		request: ThreeRenderedSceneHitTestRequest,
+	): ThreeRenderedSceneHitTestResult;
+	boxSelectRenderedScene(
+		request: ThreeRenderedSceneBoxSelectRequest,
+	): ThreeRenderedSceneBoxSelectResult;
 	runtimeUiState(): GameRuntimeUiState;
 	setUiCapturingInput(capturing: boolean): void;
 	dispose(): void;
@@ -91,6 +101,12 @@ export async function mountGameClient(
 	return {
 		runtime: game.runtime,
 		mobileControls: input,
+		hitTestRenderedScene(request) {
+			return renderer.hitTestRenderedScene(request);
+		},
+		boxSelectRenderedScene(request) {
+			return renderer.boxSelectRenderedScene(request);
+		},
 		runtimeUiState: game.runtimeUiState,
 		setUiCapturingInput(capturing) {
 			input.setFocusState({ uiCapturingInput: capturing });

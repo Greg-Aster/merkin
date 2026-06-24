@@ -34,6 +34,28 @@ export type ThreeAdapterBoundary = {
 
 export type ThreeVectorLike = {
 	set(x: number, y: number, z: number): void;
+	readonly x?: number;
+	readonly y?: number;
+	readonly z?: number;
+};
+
+export type ThreeVector2Like = {
+	x: number;
+	y: number;
+	set?(x: number, y: number): void;
+};
+
+export type ThreeVector3Like = {
+	x: number;
+	y: number;
+	z: number;
+	project?(camera: ThreeCameraLike): ThreeVector3Like;
+};
+
+export type ThreeBox3Like = {
+	readonly min: ThreeVector3Like;
+	readonly max: ThreeVector3Like;
+	setFromObject?(object: ThreeObject3DLike): ThreeBox3Like;
 };
 
 export type ThreeQuaternionLike = {
@@ -142,6 +164,8 @@ export type ThreeObject3DLike = {
 	add?(object: ThreeObject3DLike): void;
 	remove?(object: ThreeObject3DLike): void;
 	traverse?(callback: (object: ThreeObject3DLike) => void): void;
+	updateMatrixWorld?(force?: boolean): void;
+	updateWorldMatrix?(updateParents?: boolean, updateChildren?: boolean): void;
 	clone?(recursive?: boolean): ThreeObject3DLike;
 	geometry?: ThreeGeometryLike | null;
 	material?: ThreeMaterialLike | readonly ThreeMaterialLike[] | null;
@@ -208,6 +232,31 @@ export type ThreeRendererLike = ThreeDisposableLike & {
 	toneMappingExposure?: number;
 };
 
+export type ThreeRaycasterIntersectionLike = {
+	readonly distance?: number;
+	readonly object?: ThreeObject3DLike;
+	readonly point?: {
+		readonly x: number;
+		readonly y: number;
+		readonly z: number;
+	};
+	readonly face?: {
+		readonly normal?: {
+			readonly x: number;
+			readonly y: number;
+			readonly z: number;
+		};
+	};
+};
+
+export type ThreeRaycasterLike = {
+	setFromCamera(point: ThreeVector2Like, camera: ThreeCameraLike): void;
+	intersectObjects(
+		objects: readonly ThreeObject3DLike[],
+		recursive?: boolean,
+	): ThreeRaycasterIntersectionLike[];
+};
+
 export type ThreeMeshStandardMaterialParameters = {
 	color?: string | number;
 	emissive?: string | number;
@@ -269,7 +318,10 @@ export type ThreeRuntime = {
 		parameters?: ThreeShaderMaterialParameters,
 	) => ThreeMaterialLike;
 	readonly Color?: new (color: string | number) => unknown;
-	readonly Vector2?: new (x: number, y: number) => unknown;
+	readonly Vector2?: new (x: number, y: number) => ThreeVector2Like;
+	readonly Vector3?: new (x: number, y: number, z: number) => ThreeVector3Like;
+	readonly Box3?: new () => ThreeBox3Like;
+	readonly Raycaster?: new () => ThreeRaycasterLike;
 	readonly AmbientLight?: new (
 		color: string | number,
 		intensity: number,
@@ -484,6 +536,65 @@ export type ThreeResolvedObject =
 export type ThreeObjectResolver = (
 	renderable: RenderableComponent,
 ) => ThreeResolvedObject | undefined;
+
+export type ThreeRenderedSceneHitTestRequest = {
+	readonly viewport: {
+		readonly width: number;
+		readonly height: number;
+	};
+	readonly screenPoint: {
+		readonly x: number;
+		readonly y: number;
+	};
+	readonly entityFilter?: ReadonlySet<Entity>;
+};
+
+export type ThreeRenderedSceneBoxSelectRequest = {
+	readonly viewport: {
+		readonly width: number;
+		readonly height: number;
+	};
+	readonly rect: {
+		readonly x: number;
+		readonly y: number;
+		readonly width: number;
+		readonly height: number;
+	};
+	readonly entityFilter?: ReadonlySet<Entity>;
+};
+
+export type ThreeRenderedSceneHitTestResult =
+	| {
+			readonly status: "hit";
+			readonly entity: Entity;
+			readonly distance: number;
+			readonly worldPosition: readonly [number, number, number];
+			readonly worldNormal?: readonly [number, number, number];
+	  }
+	| {
+			readonly status: "miss";
+	  }
+	| {
+			readonly status: "unavailable";
+			readonly reason: "rendered-hit-test-unavailable";
+	  };
+
+export type ThreeRenderedSceneBoxSelectResult =
+	| {
+			readonly status: "hit";
+			readonly hits: readonly {
+				readonly entity: Entity;
+				readonly distance: number;
+				readonly worldPosition: readonly [number, number, number];
+			}[];
+	  }
+	| {
+			readonly status: "miss";
+	  }
+	| {
+			readonly status: "unavailable";
+			readonly reason: "rendered-hit-test-unavailable";
+	  };
 
 export type ThreeRendererAdapterOptions = {
 	readonly three: ThreeRuntime;
@@ -1168,6 +1279,186 @@ export class ThreeRendererAdapter
 
 	hasObject(entity: Entity): boolean {
 		return this.#objects.has(entity);
+	}
+
+	hitTestRenderedScene(
+		request: ThreeRenderedSceneHitTestRequest,
+	): ThreeRenderedSceneHitTestResult {
+		if (
+			this.#three.Raycaster === undefined ||
+			this.#three.Vector2 === undefined ||
+			request.viewport.width <= 0 ||
+			request.viewport.height <= 0
+		) {
+			return {
+				status: "unavailable",
+				reason: "rendered-hit-test-unavailable",
+			};
+		}
+
+		const candidates: ThreeObject3DLike[] = [];
+
+		for (const [entity, attached] of this.#objects) {
+			if (
+				request.entityFilter !== undefined &&
+				!request.entityFilter.has(entity)
+			) {
+				continue;
+			}
+
+			if (attached.object.visible === false) {
+				continue;
+			}
+
+			candidates.push(attached.object);
+		}
+
+		if (candidates.length === 0) {
+			return { status: "miss" };
+		}
+
+		const raycaster = new this.#three.Raycaster();
+		const normalizedPoint = new this.#three.Vector2(
+			(request.screenPoint.x / request.viewport.width) * 2 - 1,
+			-(request.screenPoint.y / request.viewport.height) * 2 + 1,
+		);
+
+		raycaster.setFromCamera(normalizedPoint, this.camera);
+
+		for (const intersection of raycaster.intersectObjects(candidates, true)) {
+			const hitObject = intersection.object;
+
+			if (!hitObject) {
+				continue;
+			}
+
+			const entity = entityFromObjectUserData(hitObject);
+
+			if (entity === undefined) {
+				continue;
+			}
+
+			if (
+				request.entityFilter !== undefined &&
+				!request.entityFilter.has(entity)
+			) {
+				continue;
+			}
+
+			const point = intersection.point;
+
+			if (!isFiniteVector3Like(point)) {
+				continue;
+			}
+
+			const normal = intersection.face?.normal;
+
+			return {
+				status: "hit",
+				entity,
+				distance:
+					typeof intersection.distance === "number" &&
+					Number.isFinite(intersection.distance)
+						? intersection.distance
+						: 0,
+				worldPosition: [point.x, point.y, point.z],
+				...(isFiniteVector3Like(normal)
+					? { worldNormal: [normal.x, normal.y, normal.z] as const }
+					: {}),
+			};
+		}
+
+		return { status: "miss" };
+	}
+
+	boxSelectRenderedScene(
+		request: ThreeRenderedSceneBoxSelectRequest,
+	): ThreeRenderedSceneBoxSelectResult {
+		if (
+			this.#three.Vector3 === undefined ||
+			this.#three.Box3 === undefined ||
+			request.viewport.width <= 0 ||
+			request.viewport.height <= 0 ||
+			request.rect.width <= 0 ||
+			request.rect.height <= 0
+		) {
+			return {
+				status: "unavailable",
+				reason: "rendered-hit-test-unavailable",
+			};
+		}
+
+		const minX = request.rect.x;
+		const minY = request.rect.y;
+		const maxX = request.rect.x + request.rect.width;
+		const maxY = request.rect.y + request.rect.height;
+		const Vector3 = this.#three.Vector3;
+		const Box3 = this.#three.Box3;
+		const hits: {
+			readonly entity: Entity;
+			readonly distance: number;
+			readonly worldPosition: readonly [number, number, number];
+		}[] = [];
+
+		for (const [entity, attached] of this.#objects) {
+			if (
+				request.entityFilter !== undefined &&
+				!request.entityFilter.has(entity)
+			) {
+				continue;
+			}
+
+			if (attached.object.visible === false) {
+				continue;
+			}
+
+			attached.object.updateWorldMatrix?.(true, true);
+			attached.object.updateMatrixWorld?.(true);
+
+			const bounds = new Box3();
+			bounds.setFromObject?.(attached.object);
+
+			if (!isFiniteBox3Like(bounds)) {
+				continue;
+			}
+
+			const projectedBounds = projectWorldBoundsToViewport(
+				Vector3,
+				this.camera,
+				request.viewport,
+				bounds,
+			);
+
+			if (
+				projectedBounds === undefined ||
+				projectedBounds.maxX < minX ||
+				projectedBounds.minX > maxX ||
+				projectedBounds.maxY < minY ||
+				projectedBounds.minY > maxY
+			) {
+				continue;
+			}
+
+			const center = centerOfBox(bounds);
+
+			hits.push({
+				entity,
+				distance: distanceBetweenVectors(center, this.camera.position),
+				worldPosition: [center.x, center.y, center.z],
+			});
+		}
+
+		if (hits.length === 0) {
+			return { status: "miss" };
+		}
+
+		return {
+			status: "hit",
+			hits: hits.sort(
+				(left, right) =>
+					left.distance - right.distance || left.entity - right.entity,
+			),
+		};
 	}
 
 	setSize(width: number, height: number, pixelRatio?: number): void {
@@ -3002,6 +3293,113 @@ function isThreeObject3DLike(value: unknown): value is ThreeObject3DLike {
 		isRecord(value.scale) &&
 		typeof value.scale.set === "function"
 	);
+}
+
+function entityFromObjectUserData(
+	object: ThreeObject3DLike,
+): Entity | undefined {
+	const entityId = object.userData.entityId;
+
+	return typeof entityId === "number" && Number.isSafeInteger(entityId)
+		? entityId
+		: undefined;
+}
+
+function isFiniteVector3Like(
+	value: unknown,
+): value is { readonly x: number; readonly y: number; readonly z: number } {
+	return (
+		isRecord(value) &&
+		typeof value.x === "number" &&
+		Number.isFinite(value.x) &&
+		typeof value.y === "number" &&
+		Number.isFinite(value.y) &&
+		typeof value.z === "number" &&
+		Number.isFinite(value.z)
+	);
+}
+
+function isFiniteBox3Like(value: unknown): value is ThreeBox3Like {
+	return (
+		isRecord(value) &&
+		isFiniteVector3Like(value.min) &&
+		isFiniteVector3Like(value.max) &&
+		value.min.x <= value.max.x &&
+		value.min.y <= value.max.y &&
+		value.min.z <= value.max.z
+	);
+}
+
+function centerOfBox(box: ThreeBox3Like): ThreeVector3Like {
+	return {
+		x: (box.min.x + box.max.x) / 2,
+		y: (box.min.y + box.max.y) / 2,
+		z: (box.min.z + box.max.z) / 2,
+	};
+}
+
+function projectWorldBoundsToViewport(
+	Vector3: new (x: number, y: number, z: number) => ThreeVector3Like,
+	camera: ThreeCameraLike,
+	viewport: { readonly width: number; readonly height: number },
+	box: ThreeBox3Like,
+):
+	| {
+			readonly minX: number;
+			readonly minY: number;
+			readonly maxX: number;
+			readonly maxY: number;
+	  }
+	| undefined {
+	const boundsCorners: readonly (readonly [number, number, number])[] = [
+		[box.min.x, box.min.y, box.min.z],
+		[box.min.x, box.min.y, box.max.z],
+		[box.min.x, box.max.y, box.min.z],
+		[box.min.x, box.max.y, box.max.z],
+		[box.max.x, box.min.y, box.min.z],
+		[box.max.x, box.min.y, box.max.z],
+		[box.max.x, box.max.y, box.min.z],
+		[box.max.x, box.max.y, box.max.z],
+	];
+	const projectedPoints = boundsCorners
+		.map(([x, y, z]) => {
+			const projected = new Vector3(x, y, z);
+			projected.project?.(camera);
+			return projected;
+		})
+		.filter(
+			(point) => isFiniteVector3Like(point) && point.z >= -1 && point.z <= 1,
+		)
+		.map((point) => ({
+			x: ((point.x + 1) / 2) * viewport.width,
+			y: ((1 - point.y) / 2) * viewport.height,
+		}));
+
+	if (projectedPoints.length === 0) {
+		return undefined;
+	}
+
+	return {
+		minX: Math.min(...projectedPoints.map((point) => point.x)),
+		minY: Math.min(...projectedPoints.map((point) => point.y)),
+		maxX: Math.max(...projectedPoints.map((point) => point.x)),
+		maxY: Math.max(...projectedPoints.map((point) => point.y)),
+	};
+}
+
+function distanceBetweenVectors(
+	left: { readonly x: number; readonly y: number; readonly z: number },
+	right: unknown,
+): number {
+	if (!isFiniteVector3Like(right)) {
+		return 0;
+	}
+
+	const dx = left.x - right.x;
+	const dy = left.y - right.y;
+	const dz = left.z - right.z;
+
+	return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

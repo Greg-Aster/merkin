@@ -3,6 +3,7 @@ import {
 	viewportPickProjectedObjectFromNormalizedPoint,
 	viewportPlacementPositionFromNormalizedPoint,
 	viewportProjectedTransformPositionFromNormalizedPoint,
+	viewportSelectProjectedObjectsInRect,
 } from "../src/app/editor/levelEditorViewportBridgeModel.js";
 import type {
 	LevelEditorWorkspaceModel,
@@ -197,6 +198,41 @@ assertEqual(
 	"Expected viewport interaction not to claim rendered-scene picking.",
 );
 assertEqual(
+	bridge.interaction.renderedHitTest.requestReadiness,
+	"unavailable",
+	"Expected rendered hit-test requests to default to unavailable until an adapter-owned requester is supplied.",
+);
+assertEqual(
+	bridge.interaction.renderedHitTest.requestAvailable,
+	false,
+	"Expected unavailable rendered hit-test readiness not to expose request availability.",
+);
+assertEqual(
+	bridge.interaction.renderedHitTest.selectionBehavior,
+	"unchanged-projected-selection",
+	"Expected rendered hit-test readiness not to replace projected selection behavior.",
+);
+assertEqual(
+	bridge.interaction.renderedHitTest.usesBrowserApis,
+	false,
+	"Expected rendered hit-test readiness to avoid browser APIs in the pure bridge model.",
+);
+assertEqual(
+	bridge.interaction.renderedHitTest.usesThreeApis,
+	false,
+	"Expected rendered hit-test readiness to avoid Three APIs in the pure bridge model.",
+);
+assertEqual(
+	bridge.interaction.renderedHitTest.changesSelection,
+	false,
+	"Expected rendered hit-test readiness not to mutate selection behavior.",
+);
+assertEqual(
+	bridge.interaction.renderedHitTest.unavailableReasons.length,
+	1,
+	"Expected unavailable rendered hit-test readiness to explain why requests are unavailable.",
+);
+assertEqual(
 	bridge.interaction.writesRuntimeData,
 	false,
 	"Expected viewport interaction tools not to mutate runtime data.",
@@ -293,10 +329,50 @@ assertEqual(
 	null,
 	"Expected projected viewport picking to return null when no projected pin is inside the pick radius.",
 );
+const projectedMarqueeSelection = viewportSelectProjectedObjectsInRect({
+	projection: bridge.projection,
+	start: { xPercent: 0, zPercent: 0 },
+	end: { xPercent: 100, zPercent: 100 },
+});
+
+assertIncludes(
+	projectedMarqueeSelection.selectedStableIds,
+	playerObject.stableId,
+	"Expected projected viewport marquee selection to include player transform pins inside the rectangle.",
+);
+assertIncludes(
+	projectedMarqueeSelection.selectedStableIds,
+	portalObject.stableId,
+	"Expected projected viewport marquee selection to include portal transform pins inside the rectangle.",
+);
+assertEqual(
+	projectedMarqueeSelection.source,
+	"projected-transform-marquee",
+	"Expected projected viewport marquee selection to report the projected marquee source.",
+);
+assertEqual(
+	projectedMarqueeSelection.renderedScenePicking,
+	false,
+	"Expected projected viewport marquee selection not to claim rendered-scene hit testing.",
+);
+assertEqual(
+	viewportSelectProjectedObjectsInRect({
+		projection: bridge.projection,
+		start: { xPercent: 45, zPercent: 45 },
+		end: { xPercent: 55, zPercent: 55 },
+	}).selectedStableIds.length,
+	0,
+	"Expected projected viewport marquee selection to return an empty selection when no projected pins are inside the rectangle.",
+);
 assertEqual(
 	bridge.selectedStableId,
 	workspace.selectedStableId,
 	"Expected viewport bridge selection to mirror the workspace selected stable ID.",
+);
+assertIncludes(
+	bridge.selectedStableIds,
+	workspace.selectedStableId,
+	"Expected viewport bridge selection list to include the primary selected stable ID.",
 );
 
 if (bridge.selectedObject === null) {
@@ -387,6 +463,26 @@ assertEqual(
 );
 assertIncludes(
 	bridge.projection.objects.map((object) => object.stableId),
+	playerObject.stableId,
+	"Expected default viewport bridge projection to include visible player objects.",
+);
+assertEqual(
+	bridge.projection.objects.every((object) => object.visible),
+	true,
+	"Expected default viewport bridge projection objects to be visible.",
+);
+assertEqual(
+	bridge.projection.objects.every((object) => object.pickable),
+	true,
+	"Expected default viewport bridge projection objects to be pickable.",
+);
+assertEqual(
+	bridge.projection.selectedObjectCount,
+	1,
+	"Expected viewport bridge projection to count selected transform pins.",
+);
+assertIncludes(
+	bridge.projection.objects.map((object) => object.stableId),
 	portalObject.stableId,
 	"Expected viewport bridge projection to include portal objects generically.",
 );
@@ -405,6 +501,11 @@ assertEqual(
 	"Expected viewport projection to mark the selected object.",
 );
 assertEqual(
+	selectedProjection.primarySelected,
+	true,
+	"Expected viewport projection to mark the primary selected object.",
+);
+assertEqual(
 	selectedProjection.hasTransformPosition,
 	true,
 	"Expected selected viewport projection to come from transform fields.",
@@ -418,6 +519,53 @@ assertAtLeast(
 	selectedProjection.zPercent,
 	8,
 	"Expected viewport projection z percent to stay inside the viewport frame.",
+);
+
+const viewStateBridge = buildLevelEditorViewportBridgeModel({
+	workspace,
+	objectViewState: {
+		visibleStableIds: [playerObject.stableId],
+		pickableStableIds: [],
+		lockedStableIds: [playerObject.stableId],
+	},
+});
+
+assertEqual(
+	viewStateBridge.projection.objects.length,
+	1,
+	"Expected editor-hidden objects to be omitted from projected viewport pins.",
+);
+assertEqual(
+	viewStateBridge.projection.selectableCount,
+	0,
+	"Expected editor-locked projected objects not to count as selectable pins.",
+);
+assertEqual(
+	viewStateBridge.projection.objects[0]?.locked,
+	true,
+	"Expected editor object view-state locks to project into viewport pins.",
+);
+assertEqual(
+	viewStateBridge.projection.objects[0]?.pickable,
+	false,
+	"Expected editor object view-state locks to disable projected pin picking.",
+);
+assertEqual(
+	viewportPickProjectedObjectFromNormalizedPoint({
+		projection: viewStateBridge.projection,
+		point: { xPercent: 13, zPercent: 13 },
+	}),
+	null,
+	"Expected projected viewport picking to ignore editor-locked pins.",
+);
+assertEqual(
+	viewportSelectProjectedObjectsInRect({
+		projection: viewStateBridge.projection,
+		start: { xPercent: 0, zPercent: 0 },
+		end: { xPercent: 100, zPercent: 100 },
+	}).selectedStableIds.length,
+	0,
+	"Expected projected viewport marquee selection to ignore editor-locked pins.",
 );
 
 const droppedPlacementPosition = viewportPlacementPositionFromNormalizedPoint({
@@ -686,6 +834,53 @@ assertEqual(
 	"Expected placement tool readiness to use the normalized placement surface.",
 );
 
+const renderedHitTestReadyBridge = buildLevelEditorViewportBridgeModel({
+	workspace,
+	renderedHitTestRequestReadiness: "available",
+});
+
+assertEqual(
+	renderedHitTestReadyBridge.interaction.renderedHitTest.requestReadiness,
+	"available",
+	"Expected rendered hit-test request readiness to expose adapter-owned availability when supplied.",
+);
+assertEqual(
+	renderedHitTestReadyBridge.interaction.renderedHitTest.requestAvailable,
+	true,
+	"Expected available rendered hit-test readiness to mark request availability.",
+);
+assertEqual(
+	renderedHitTestReadyBridge.interaction.renderedHitTest.unavailableReasons
+		.length,
+	0,
+	"Expected available rendered hit-test readiness not to report unavailable reasons.",
+);
+assertEqual(
+	renderedHitTestReadyBridge.interaction.renderedScenePickingEnabled,
+	true,
+	"Expected rendered hit-test request readiness to enable rendered-scene selection requests.",
+);
+assertEqual(
+	renderedHitTestReadyBridge.interaction.selectableSource,
+	"runtime-rendered-scene-hit-test",
+	"Expected rendered hit-test request readiness to expose runtime-rendered selection as the active selection source.",
+);
+assertEqual(
+	renderedHitTestReadyBridge.interaction.renderedHitTest.changesSelection,
+	true,
+	"Expected available rendered hit-test readiness to represent result-backed editor selection.",
+);
+assertEqual(
+	renderedHitTestReadyBridge.interaction.renderedHitTest.selectionBehavior,
+	"rendered-hit-test-result-selection",
+	"Expected available rendered hit-test readiness to describe result-backed stable-ID selection.",
+);
+assertEqual(
+	renderedHitTestReadyBridge.interaction.renderedHitTest.writesRuntimeData,
+	false,
+	"Expected rendered hit-test readiness not to write runtime data.",
+);
+
 const stagedBridge = buildLevelEditorViewportBridgeModel({
 	workspace,
 	fieldValueOverrides: [
@@ -774,6 +969,57 @@ assertIncludes(
 	portalBridge.view.activeOverlayIds,
 	"portal-links",
 	"Expected portal objects to expose portal link overlay readiness.",
+);
+
+const multiSelectionBridge = buildLevelEditorViewportBridgeModel({
+	workspace,
+	selectedStableId: playerObject.stableId,
+	selectedStableIds: [playerObject.stableId, portalObject.stableId],
+});
+const multiSelectedPlayerProjection =
+	multiSelectionBridge.projection.objects.find(
+		(object) => object.stableId === playerObject.stableId,
+	);
+const multiSelectedPortalProjection =
+	multiSelectionBridge.projection.objects.find(
+		(object) => object.stableId === portalObject.stableId,
+	);
+
+if (!multiSelectedPlayerProjection || !multiSelectedPortalProjection) {
+	throw new Error(
+		"Expected multi-selected viewport projections for player and portal.",
+	);
+}
+
+assertEqual(
+	multiSelectionBridge.selectedStableId,
+	playerObject.stableId,
+	"Expected viewport bridge multi-select to preserve the primary selected stable ID.",
+);
+assertEqual(
+	multiSelectionBridge.projection.selectedObjectCount,
+	2,
+	"Expected viewport bridge projection to count every selected projected object.",
+);
+assertEqual(
+	multiSelectedPlayerProjection.primarySelected,
+	true,
+	"Expected viewport bridge multi-select to keep one primary transform target.",
+);
+assertEqual(
+	multiSelectedPortalProjection.selected,
+	true,
+	"Expected viewport bridge multi-select to mark secondary selected projected objects.",
+);
+assertEqual(
+	multiSelectedPortalProjection.primarySelected,
+	false,
+	"Expected secondary projected selection not to become the transform target.",
+);
+assertEqual(
+	multiSelectionBridge.transformControls.status,
+	"ready",
+	"Expected viewport transform controls to stay bound to the primary selected object.",
 );
 
 const mismatchedBridge = buildLevelEditorViewportBridgeModel({

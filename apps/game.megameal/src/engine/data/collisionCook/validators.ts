@@ -376,6 +376,34 @@ export function validateLevelEditorDevPreviewMessage(
 				errors,
 			);
 			return errors;
+		case "rendered-scene-hit-test-request":
+			validateRenderedSceneHitTestRequest(
+				data.request,
+				"levelEditorDevPreviewMessage.request",
+				errors,
+			);
+			return errors;
+		case "rendered-scene-hit-test-result":
+			validateRenderedSceneHitTestResultPayload(
+				data.payload,
+				"levelEditorDevPreviewMessage.payload",
+				errors,
+			);
+			return errors;
+		case "rendered-scene-box-select-request":
+			validateRenderedSceneBoxSelectRequest(
+				data.request,
+				"levelEditorDevPreviewMessage.request",
+				errors,
+			);
+			return errors;
+		case "rendered-scene-box-select-result":
+			validateRenderedSceneBoxSelectResultPayload(
+				data.payload,
+				"levelEditorDevPreviewMessage.payload",
+				errors,
+			);
+			return errors;
 		case "runtime-reload-ack":
 			validateRuntimeReloadAckPayload(
 				data.payload,
@@ -392,7 +420,7 @@ export function validateLevelEditorDevPreviewMessage(
 			return errors;
 		default:
 			errors.push(
-				"levelEditorDevPreviewMessage.type must be collision-preview-patch, core-object-preview-patch, object-edit-preview-patch, reload-runtime-scene, clear-collision-preview, clear-core-object-preview, clear-object-edit-preview, camera-live-edit-mode, runtime-reload-ack, or runtime-telemetry.",
+				"levelEditorDevPreviewMessage.type must be collision-preview-patch, core-object-preview-patch, object-edit-preview-patch, reload-runtime-scene, clear-collision-preview, clear-core-object-preview, clear-object-edit-preview, camera-live-edit-mode, rendered-scene-hit-test-request, rendered-scene-hit-test-result, rendered-scene-box-select-request, rendered-scene-box-select-result, runtime-reload-ack, or runtime-telemetry.",
 			);
 			return errors;
 	}
@@ -538,6 +566,236 @@ function validateCameraLiveEditModeRequest(
 	}
 }
 
+function validateRenderedSceneHitTestRequest(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	requireString(data.runtimeSceneId, `${path}.runtimeSceneId`, errors);
+
+	if (data.coordinateSpace !== "viewport-css-pixels") {
+		errors.push(`${path}.coordinateSpace must be viewport-css-pixels.`);
+	}
+
+	validateRenderedSceneHitTestViewport(
+		data.viewport,
+		`${path}.viewport`,
+		errors,
+	);
+	validateRenderedSceneHitTestScreenPoint(
+		data.screenPoint,
+		data.viewport,
+		`${path}.screenPoint`,
+		errors,
+	);
+
+	if (data.pickableStableIds !== undefined) {
+		validateStringArray(
+			data.pickableStableIds,
+			`${path}.pickableStableIds`,
+			errors,
+		);
+	}
+
+	if (data.objectViewStateGate !== "visible-and-pickable-only") {
+		errors.push(
+			`${path}.objectViewStateGate must be visible-and-pickable-only.`,
+		);
+	}
+
+	if (data.writesRuntimeData !== false) {
+		errors.push(`${path}.writesRuntimeData must be false.`);
+	}
+
+	if (
+		data.sourcePlanHash !== undefined &&
+		typeof data.sourcePlanHash !== "string"
+	) {
+		errors.push(`${path}.sourcePlanHash must be a string when provided.`);
+	}
+}
+
+function validateRenderedSceneHitTestResultPayload(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	requireString(data.runtimeSceneId, `${path}.runtimeSceneId`, errors);
+
+	if (
+		data.activeRuntimeSceneId !== undefined &&
+		typeof data.activeRuntimeSceneId !== "string"
+	) {
+		errors.push(`${path}.activeRuntimeSceneId must be a string when provided.`);
+	}
+
+	if (
+		data.status !== "hit" &&
+		data.status !== "miss" &&
+		data.status !== "ignored"
+	) {
+		errors.push(`${path}.status must be hit, miss, or ignored.`);
+	}
+
+	if (data.source !== "runtime-rendered-scene-hit-test") {
+		errors.push(`${path}.source must be runtime-rendered-scene-hit-test.`);
+	}
+
+	if (data.writesRuntimeData !== false) {
+		errors.push(`${path}.writesRuntimeData must be false.`);
+	}
+
+	if (data.status === "hit") {
+		validateRenderedSceneHitTestHit(data.hit, `${path}.hit`, errors);
+	} else if (data.hit !== undefined) {
+		errors.push(`${path}.hit must be omitted unless status is hit.`);
+	}
+
+	if (data.status === "miss" && data.reason === undefined) {
+		errors.push(`${path}.reason is required when status is miss.`);
+	}
+
+	if (data.status === "ignored" && data.reason === undefined) {
+		errors.push(`${path}.reason is required when status is ignored.`);
+	}
+
+	if (data.reason !== undefined) {
+		validateRenderedSceneHitTestResultReason(
+			data.reason,
+			`${path}.reason`,
+			errors,
+		);
+	}
+}
+
+function validateRenderedSceneBoxSelectRequest(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	requireString(data.runtimeSceneId, `${path}.runtimeSceneId`, errors);
+
+	if (data.coordinateSpace !== "viewport-css-pixels") {
+		errors.push(`${path}.coordinateSpace must be viewport-css-pixels.`);
+	}
+
+	validateRenderedSceneHitTestViewport(
+		data.viewport,
+		`${path}.viewport`,
+		errors,
+	);
+	validateRenderedSceneBoxSelectRect(
+		data.rect,
+		data.viewport,
+		`${path}.rect`,
+		errors,
+	);
+
+	if (data.pickableStableIds !== undefined) {
+		validateStringArray(
+			data.pickableStableIds,
+			`${path}.pickableStableIds`,
+			errors,
+		);
+	}
+
+	if (data.objectViewStateGate !== "visible-and-pickable-only") {
+		errors.push(
+			`${path}.objectViewStateGate must be visible-and-pickable-only.`,
+		);
+	}
+
+	if (data.writesRuntimeData !== false) {
+		errors.push(`${path}.writesRuntimeData must be false.`);
+	}
+
+	if (
+		data.sourcePlanHash !== undefined &&
+		typeof data.sourcePlanHash !== "string"
+	) {
+		errors.push(`${path}.sourcePlanHash must be a string when provided.`);
+	}
+}
+
+function validateRenderedSceneBoxSelectResultPayload(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	requireString(data.runtimeSceneId, `${path}.runtimeSceneId`, errors);
+
+	if (
+		data.activeRuntimeSceneId !== undefined &&
+		typeof data.activeRuntimeSceneId !== "string"
+	) {
+		errors.push(`${path}.activeRuntimeSceneId must be a string when provided.`);
+	}
+
+	if (
+		data.status !== "hit" &&
+		data.status !== "miss" &&
+		data.status !== "ignored"
+	) {
+		errors.push(`${path}.status must be hit, miss, or ignored.`);
+	}
+
+	if (data.source !== "runtime-rendered-scene-box-select") {
+		errors.push(`${path}.source must be runtime-rendered-scene-box-select.`);
+	}
+
+	if (data.writesRuntimeData !== false) {
+		errors.push(`${path}.writesRuntimeData must be false.`);
+	}
+
+	if (data.status === "hit") {
+		if (!Array.isArray(data.hits) || data.hits.length === 0) {
+			errors.push(`${path}.hits must be a non-empty array when status is hit.`);
+		} else {
+			data.hits.forEach((hit, index) =>
+				validateRenderedSceneHitTestHit(hit, `${path}.hits[${index}]`, errors),
+			);
+		}
+	} else if (data.hits !== undefined) {
+		errors.push(`${path}.hits must be omitted unless status is hit.`);
+	}
+
+	if (data.status === "miss" && data.reason === undefined) {
+		errors.push(`${path}.reason is required when status is miss.`);
+	}
+
+	if (data.status === "ignored" && data.reason === undefined) {
+		errors.push(`${path}.reason is required when status is ignored.`);
+	}
+
+	if (data.reason !== undefined) {
+		validateRenderedSceneHitTestResultReason(
+			data.reason,
+			`${path}.reason`,
+			errors,
+		);
+	}
+}
+
 function validateRuntimeReloadAckPayload(
 	data: unknown,
 	path: string,
@@ -617,6 +875,221 @@ function validateRuntimeTelemetryPayload(
 	validateBoolean(data.charging, `${path}.charging`, errors);
 	validateAlpha(data.chargeAmount, `${path}.chargeAmount`, errors);
 	validateFiniteNumber(data.updatedAtMs, `${path}.updatedAtMs`, errors);
+}
+
+function validateRenderedSceneHitTestViewport(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	validateRequiredPositiveNumber(data.width, `${path}.width`, errors);
+	validateRequiredPositiveNumber(data.height, `${path}.height`, errors);
+
+	if (data.devicePixelRatio !== undefined) {
+		validateRequiredPositiveNumber(
+			data.devicePixelRatio,
+			`${path}.devicePixelRatio`,
+			errors,
+		);
+	}
+}
+
+function validateRenderedSceneHitTestScreenPoint(
+	data: unknown,
+	viewport: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	validateFiniteNumber(data.x, `${path}.x`, errors);
+	validateFiniteNumber(data.y, `${path}.y`, errors);
+
+	if (
+		typeof data.x === "number" &&
+		Number.isFinite(data.x) &&
+		isRecord(viewport) &&
+		typeof viewport.width === "number" &&
+		Number.isFinite(viewport.width) &&
+		(data.x < 0 || data.x > viewport.width)
+	) {
+		errors.push(`${path}.x must be inside the viewport width.`);
+	}
+
+	if (
+		typeof data.y === "number" &&
+		Number.isFinite(data.y) &&
+		isRecord(viewport) &&
+		typeof viewport.height === "number" &&
+		Number.isFinite(viewport.height) &&
+		(data.y < 0 || data.y > viewport.height)
+	) {
+		errors.push(`${path}.y must be inside the viewport height.`);
+	}
+}
+
+function validateRenderedSceneBoxSelectRect(
+	data: unknown,
+	viewport: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	validateFiniteNumber(data.x, `${path}.x`, errors);
+	validateFiniteNumber(data.y, `${path}.y`, errors);
+	validateRequiredPositiveNumber(data.width, `${path}.width`, errors);
+	validateRequiredPositiveNumber(data.height, `${path}.height`, errors);
+
+	if (!isRecord(viewport)) {
+		return;
+	}
+
+	if (
+		typeof data.x === "number" &&
+		Number.isFinite(data.x) &&
+		typeof viewport.width === "number" &&
+		Number.isFinite(viewport.width) &&
+		(data.x < 0 || data.x > viewport.width)
+	) {
+		errors.push(`${path}.x must be inside the viewport width.`);
+	}
+
+	if (
+		typeof data.y === "number" &&
+		Number.isFinite(data.y) &&
+		typeof viewport.height === "number" &&
+		Number.isFinite(viewport.height) &&
+		(data.y < 0 || data.y > viewport.height)
+	) {
+		errors.push(`${path}.y must be inside the viewport height.`);
+	}
+
+	if (
+		typeof data.x === "number" &&
+		Number.isFinite(data.x) &&
+		typeof data.width === "number" &&
+		Number.isFinite(data.width) &&
+		typeof viewport.width === "number" &&
+		Number.isFinite(viewport.width) &&
+		data.x + data.width > viewport.width
+	) {
+		errors.push(`${path} must fit inside the viewport width.`);
+	}
+
+	if (
+		typeof data.y === "number" &&
+		Number.isFinite(data.y) &&
+		typeof data.height === "number" &&
+		Number.isFinite(data.height) &&
+		typeof viewport.height === "number" &&
+		Number.isFinite(viewport.height) &&
+		data.y + data.height > viewport.height
+	) {
+		errors.push(`${path} must fit inside the viewport height.`);
+	}
+}
+
+function validateRenderedSceneHitTestHit(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object when status is hit.`);
+		return;
+	}
+
+	requireString(data.stableId, `${path}.stableId`, errors);
+	validateRenderedSceneHitTestObjectKind(
+		data.objectKind,
+		`${path}.objectKind`,
+		errors,
+	);
+	validateFiniteNumber(data.distance, `${path}.distance`, errors);
+
+	if (
+		typeof data.distance === "number" &&
+		Number.isFinite(data.distance) &&
+		data.distance < 0
+	) {
+		errors.push(`${path}.distance must be non-negative.`);
+	}
+
+	validateRequiredNumberTuple(
+		data.worldPosition,
+		3,
+		`${path}.worldPosition`,
+		errors,
+	);
+
+	if (data.worldNormal !== undefined) {
+		validateRequiredNumberTuple(
+			data.worldNormal,
+			3,
+			`${path}.worldNormal`,
+			errors,
+		);
+	}
+
+	if (
+		data.renderableId !== undefined &&
+		typeof data.renderableId !== "string"
+	) {
+		errors.push(`${path}.renderableId must be a string when provided.`);
+	}
+
+	if (data.label !== undefined && typeof data.label !== "string") {
+		errors.push(`${path}.label must be a string when provided.`);
+	}
+}
+
+function validateRenderedSceneHitTestObjectKind(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (
+		data !== "level-instance" &&
+		data !== "collision-preview" &&
+		data !== "object-edit-preview" &&
+		data !== "light" &&
+		data !== "spawn" &&
+		data !== "portal" &&
+		data !== "audio-emitter"
+	) {
+		errors.push(
+			`${path} must be level-instance, collision-preview, object-edit-preview, light, spawn, portal, or audio-emitter.`,
+		);
+	}
+}
+
+function validateRenderedSceneHitTestResultReason(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (
+		data !== "rendered-hit-test-unavailable" &&
+		data !== "runtime-scene-not-active" &&
+		data !== "stale-request" &&
+		data !== "no-rendered-hit"
+	) {
+		errors.push(
+			`${path} must be rendered-hit-test-unavailable, runtime-scene-not-active, stale-request, or no-rendered-hit.`,
+		);
+	}
 }
 
 function validateCoreObjectPreviewEntry(

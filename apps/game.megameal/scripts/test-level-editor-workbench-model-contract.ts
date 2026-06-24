@@ -1,5 +1,6 @@
 import { buildLevelEditorWorkbenchModel } from "../src/app/editor/levelEditorWorkbenchModel.js";
 import { buildLevelEditorWorkspaceModel } from "../src/app/editor/levelEditorWorkspaceModel.js";
+import { portalArenaRuntimeSceneManifest } from "../src/game/levels/index.js";
 import {
 	assertDeepEqual,
 	assertDefined,
@@ -8,6 +9,12 @@ import {
 
 const workspace = buildLevelEditorWorkspaceModel();
 const workbench = buildLevelEditorWorkbenchModel({ workspace });
+const portalArenaWorkspace = buildLevelEditorWorkspaceModel({
+	selectedRuntimeSceneId: portalArenaRuntimeSceneManifest.id,
+});
+const portalArenaWorkbench = buildLevelEditorWorkbenchModel({
+	workspace: portalArenaWorkspace,
+});
 
 assertEqual(
 	workbench.schemaVersion,
@@ -158,13 +165,16 @@ assertEqual(
 	false,
 	"Expected workbench shell not to overclaim implemented transform gizmos.",
 );
-for (const targetKind of ["spawn", "portal"] as const) {
-	assertIncludes(
-		viewport.supportedPreviewTargetKinds,
-		targetKind,
-		`Expected viewport preview target kinds to include ${targetKind}.`,
-	);
-}
+assertIncludes(
+	viewport.supportedPreviewTargetKinds,
+	"spawn",
+	"Expected default viewport preview target kinds to include spawn.",
+);
+assertIncludes(
+	portalArenaWorkbench.regions.viewport.supportedPreviewTargetKinds,
+	"portal",
+	"Expected Portal Arena viewport preview target kinds to include portal.",
+);
 
 const selectedObject = assertDefined(
 	workspace.objects.find((object) => object.stableId === selectedStableId),

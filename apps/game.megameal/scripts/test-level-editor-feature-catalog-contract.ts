@@ -33,7 +33,6 @@ import {
 	validateObjectLibraryReplacementDraft,
 } from "../src/game/editor/objectLibrary/index.js";
 import {
-	defaultRuntimeSceneManifest,
 	mirandaDeckRuntimeSceneManifest,
 	portalArenaRuntimeSceneManifest,
 } from "../src/game/levels/index.js";
@@ -322,8 +321,8 @@ const portalEntry = assertDefined(
 );
 assertIncludes(
 	portalEntry.runtimeSceneIds,
-	defaultRuntimeSceneManifest.id,
-	"Expected portal library entry to include the default runtime scene manifest.",
+	portalArenaRuntimeSceneManifest.id,
+	"Expected portal library entry to include the Portal Arena runtime scene manifest.",
 );
 const mirandaPortalLibraryPanel = buildLevelEditorObjectLibraryPanelModel({
 	runtimeSceneId: mirandaDeckRuntimeSceneManifest.id,
@@ -371,8 +370,8 @@ const selectedPortalObject = objectLibrarySubjectFromSelection({
 	},
 });
 const portalReplacementDraft = createObjectLibraryReplacementDraft({
-	runtimeSceneId: defaultRuntimeSceneManifest.id,
-	levelId: defaultRuntimeSceneManifest.level.id,
+	runtimeSceneId: portalArenaRuntimeSceneManifest.id,
+	levelId: portalArenaRuntimeSceneManifest.level.id,
 	selectedObject: selectedPortalObject,
 	replacementEntry: portalEntry,
 });
@@ -435,8 +434,8 @@ assertEqual(
 	"Expected asset placement readiness not to become publishable.",
 );
 const meshReplacementDraft = createObjectLibraryReplacementDraft({
-	runtimeSceneId: defaultRuntimeSceneManifest.id,
-	levelId: defaultRuntimeSceneManifest.level.id,
+	runtimeSceneId: portalArenaRuntimeSceneManifest.id,
+	levelId: portalArenaRuntimeSceneManifest.level.id,
 	selectedObject: selectedPortalObject,
 	replacementEntry: portalMeshEntry,
 });
@@ -458,7 +457,7 @@ assertEqual(
 );
 
 const objectLibraryPanel = buildLevelEditorObjectLibraryPanelModel({
-	runtimeSceneId: defaultRuntimeSceneManifest.id,
+	runtimeSceneId: portalArenaRuntimeSceneManifest.id,
 	selectedObject: selectedPortalObject,
 	selectedEntryId: portalMeshEntry.id,
 	sceneObjects: workspaceModel.objects,

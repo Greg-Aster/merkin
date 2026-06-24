@@ -12,6 +12,7 @@ import {
 import { audioContentManifestForRuntimeScene } from "../src/game/assets/index.js";
 import {
 	LevelLoader,
+	defaultRuntimeSceneManifest,
 	defaultRuntimeSceneManifests,
 	getRuntimeSceneManifest,
 	mirandaDeckRuntimeSceneManifest,
@@ -20,6 +21,7 @@ import {
 	sciFiRoomRuntimeSceneManifest,
 	solitudeExpectedRuntimeImports,
 	solitudeRuntimeSceneManifest,
+	starterRuntimeSceneManifest,
 	yggdrasilExpectedRuntimeImports,
 } from "../src/game/levels/index.js";
 import { PrefabRegistry } from "../src/game/prefabs/index.js";
@@ -425,6 +427,29 @@ function terrainChunksForGroup(
 ) {
 	return (manifest.terrainPackages ?? []).flatMap((terrainPackage) =>
 		terrainPackage.chunks.filter((chunk) => chunk.groupId === groupId),
+	);
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(starterRuntimeSceneManifest);
+	const readiness = evaluateRuntimeSceneReadiness(
+		manifest,
+		validLoadReport(manifest),
+	);
+
+	if (!readiness.ok) {
+		throw new Error(
+			`Expected starter runtime manifest to be ready, received ${readiness.errors.join("; ")}.`,
+		);
+	}
+
+	assertEqual(defaultRuntimeSceneManifest.id, "starter_runtime");
+	assertEqual(readiness.manifestId, "starter_runtime");
+	assertEqual(manifest.level.id, "starter_level");
+	assertIncludes(
+		defaultRuntimeSceneManifests.map((runtimeManifest) => runtimeManifest.id),
+		"portal_arena_runtime",
+		"Expected Portal Arena to remain registered as optional game content.",
 	);
 }
 

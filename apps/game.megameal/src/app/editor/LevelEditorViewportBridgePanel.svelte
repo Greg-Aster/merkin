@@ -1,5 +1,13 @@
 <script lang="ts">
-import { viewportPickProjectedObjectFromNormalizedPoint } from "./levelEditorViewportBridgeModel.js";
+import type {
+	LevelEditorRenderedSceneBoxSelectRect,
+	LevelEditorRenderedSceneHitTestScreenPoint,
+	LevelEditorRenderedSceneHitTestViewport,
+} from "../../engine/data/index.js";
+import {
+	viewportPickProjectedObjectFromNormalizedPoint,
+	viewportSelectProjectedObjectsInRect,
+} from "./levelEditorViewportBridgeModel.js";
 import type {
 	LevelEditorViewportBridgeModel,
 	LevelEditorViewportBridgeViewMode,
@@ -22,7 +30,24 @@ type Props = {
 		tool: LevelEditorViewportInteractionTool,
 	) => void;
 	readonly onOverlayToggle?: (id: LevelEditorViewportOverlayId) => void;
-	readonly onSelectObject?: (stableId: string) => void;
+	readonly onSelectObject?: (
+		stableId: string,
+		options?: { readonly additive?: boolean },
+	) => void;
+	readonly onSelectObjects?: (
+		stableIds: readonly string[],
+		options?: { readonly additive?: boolean },
+	) => void;
+	readonly onRenderedScenePick?: (request: {
+		readonly screenPoint: LevelEditorRenderedSceneHitTestScreenPoint;
+		readonly viewport: LevelEditorRenderedSceneHitTestViewport;
+		readonly additive?: boolean;
+	}) => boolean;
+	readonly onRenderedSceneBoxSelect?: (request: {
+		readonly rect: LevelEditorRenderedSceneBoxSelectRect;
+		readonly viewport: LevelEditorRenderedSceneHitTestViewport;
+		readonly additive?: boolean;
+	}) => boolean;
 	readonly onTransformNudge?: (path: string, delta: number) => void;
 	readonly onTransformProjectedDrag?: (
 		point: LevelEditorViewportNormalizedPoint,
@@ -58,6 +83,9 @@ const {
 	onInteractionToolChange,
 	onOverlayToggle,
 	onSelectObject,
+	onSelectObjects,
+	onRenderedScenePick,
+	onRenderedSceneBoxSelect,
 	onTransformNudge,
 	onTransformProjectedDrag,
 	onRotationYawNudge,
@@ -73,13 +101,20 @@ let placementDropActive = $state(false);
 let placementHoverPoint: LevelEditorViewportNormalizedPoint | null =
 	$state(null);
 let transformDragActive = $state(false);
+let selectionMarqueeStart: LevelEditorViewportNormalizedPoint | null =
+	$state(null);
+let selectionMarqueeCurrent: LevelEditorViewportNormalizedPoint | null =
+	$state(null);
+let suppressNextViewportClick = $state(false);
 const selectedObject = $derived(model.selectedObject);
 const projectedObjects = $derived(
-	model.projection.objects.filter((object) => object.hasTransformPosition),
+	model.projection.objects.filter(
+		(object) => object.hasTransformPosition && object.visible,
+	),
 );
 const placementProjectionTarget = $derived(
 	placementTarget
-		? projectedObjects.find((object) => object.selected) ?? null
+		? projectedObjects.find((object) => object.primarySelected) ?? null
 		: null,
 );
 const placementGhostPoint = $derived(
@@ -107,7 +142,12 @@ const activeTransformFields = $derived(
 	),
 );
 const selectedProjection = $derived(
-	projectedObjects.find((object) => object.selected) ?? null,
+	projectedObjects.find((object) => object.primarySelected) ?? null,
+);
+const selectionMarqueeStyle = $derived(
+	selectionMarqueeStart && selectionMarqueeCurrent
+		? marqueeStyle(selectionMarqueeStart, selectionMarqueeCurrent)
+		: "",
 );
 const selectToolActive = $derived(model.interaction.activeTool === "select");
 const placeToolActive = $derived(model.interaction.activeTool === "place");
@@ -180,8 +220,8 @@ function toggleOverlay(id: LevelEditorViewportOverlayId): void {
 	onOverlayToggle?.(id);
 }
 
-function selectProjectedObject(stableId: string): void {
-	onSelectObject?.(stableId);
+function selectProjectedObject(event: MouseEvent, stableId: string): void {
+	onSelectObject?.(stableId, { additive: event.ctrlKey || event.metaKey });
 }
 
 function interactionToolEnabled(
@@ -207,6 +247,11 @@ function interactionToolReason(
 }
 
 function handleViewportClick(event: MouseEvent): void {
+	if (suppressNextViewportClick) {
+		suppressNextViewportClick = false;
+		return;
+	}
+
 	if (viewportEventHitInteractiveElement(event)) {
 		return;
 	}
@@ -226,6 +271,23 @@ function handleViewportClick(event: MouseEvent): void {
 		return;
 	}
 
+	if (
+		model.interaction.renderedHitTest.requestAvailable &&
+		onRenderedScenePick
+	) {
+		const request = renderedScenePickRequestFromPointerEvent(event);
+
+		if (
+			request !== null &&
+			onRenderedScenePick({
+				...request,
+				additive: event.ctrlKey || event.metaKey,
+			})
+		) {
+			return;
+		}
+	}
+
 	const pick = viewportPickProjectedObjectFromNormalizedPoint({
 		projection: model.projection,
 		point,
@@ -233,8 +295,60 @@ function handleViewportClick(event: MouseEvent): void {
 	});
 
 	if (pick) {
-		onSelectObject(pick.stableId);
+		onSelectObject(pick.stableId, {
+			additive: event.ctrlKey || event.metaKey,
+		});
 	}
+}
+
+function renderedScenePickRequestFromPointerEvent(event: MouseEvent): {
+	readonly screenPoint: LevelEditorRenderedSceneHitTestScreenPoint;
+	readonly viewport: LevelEditorRenderedSceneHitTestViewport;
+} | null {
+	const frame = event.currentTarget as HTMLElement | null;
+	const rect = frame?.getBoundingClientRect();
+
+	if (!rect || rect.width <= 0 || rect.height <= 0) {
+		return null;
+	}
+
+	const devicePixelRatio = globalThis.devicePixelRatio;
+
+	return {
+		screenPoint: {
+			x: event.clientX - rect.left,
+			y: event.clientY - rect.top,
+		},
+		viewport: {
+			width: rect.width,
+			height: rect.height,
+			...(Number.isFinite(devicePixelRatio) && devicePixelRatio > 0
+				? { devicePixelRatio }
+				: {}),
+		},
+	};
+}
+
+function beginSelectionMarquee(event: PointerEvent): void {
+	if (
+		event.button !== 0 ||
+		!selectToolActive ||
+		!onSelectObjects ||
+		viewportEventHitInteractiveElement(event)
+	) {
+		return;
+	}
+
+	const point = viewportNormalizedPointFromPointerEvent(event);
+
+	if (point === null) {
+		return;
+	}
+
+	selectionMarqueeStart = point;
+	selectionMarqueeCurrent = point;
+	const frame = event.currentTarget as HTMLElement | null;
+	frame?.setPointerCapture(event.pointerId);
 }
 
 function viewportEventHitInteractiveElement(event: Event): boolean {
@@ -306,6 +420,107 @@ function endProjectedTransformDrag(event: PointerEvent): void {
 	}
 }
 
+function updateSelectionMarquee(event: PointerEvent): void {
+	if (!selectionMarqueeStart) {
+		return;
+	}
+
+	const point = viewportNormalizedPointFromPointerEvent(event);
+
+	if (point === null) {
+		return;
+	}
+
+	selectionMarqueeCurrent = point;
+}
+
+function completeSelectionMarquee(event: PointerEvent): void {
+	if (!selectionMarqueeStart || !selectionMarqueeCurrent || !onSelectObjects) {
+		return;
+	}
+
+	const start = selectionMarqueeStart;
+	const end = selectionMarqueeCurrent;
+	selectionMarqueeStart = null;
+	selectionMarqueeCurrent = null;
+
+	const frame = event.currentTarget as HTMLElement | null;
+
+	if (frame?.hasPointerCapture(event.pointerId)) {
+		frame.releasePointerCapture(event.pointerId);
+	}
+
+	if (!marqueeHasSelectionDistance(start, end)) {
+		return;
+	}
+
+	if (
+		model.interaction.renderedHitTest.requestAvailable &&
+		onRenderedSceneBoxSelect
+	) {
+		const request = renderedSceneBoxSelectRequestFromMarquee(event, start, end);
+
+		if (
+			request !== null &&
+			onRenderedSceneBoxSelect({
+				...request,
+				additive: event.ctrlKey || event.metaKey,
+			})
+		) {
+			suppressNextViewportClick = true;
+			return;
+		}
+	}
+
+	const selection = viewportSelectProjectedObjectsInRect({
+		projection: model.projection,
+		start,
+		end,
+	});
+	suppressNextViewportClick = true;
+	onSelectObjects(selection.selectedStableIds, {
+		additive: event.ctrlKey || event.metaKey,
+	});
+}
+
+function renderedSceneBoxSelectRequestFromMarquee(
+	event: PointerEvent,
+	start: LevelEditorViewportNormalizedPoint,
+	end: LevelEditorViewportNormalizedPoint,
+): {
+	readonly rect: LevelEditorRenderedSceneBoxSelectRect;
+	readonly viewport: LevelEditorRenderedSceneHitTestViewport;
+} | null {
+	const frame = event.currentTarget as HTMLElement | null;
+	const bounds = frame?.getBoundingClientRect();
+
+	if (!bounds || bounds.width <= 0 || bounds.height <= 0) {
+		return null;
+	}
+
+	const leftPercent = Math.min(start.xPercent, end.xPercent);
+	const topPercent = Math.min(start.zPercent, end.zPercent);
+	const widthPercent = Math.abs(start.xPercent - end.xPercent);
+	const heightPercent = Math.abs(start.zPercent - end.zPercent);
+	const devicePixelRatio = globalThis.devicePixelRatio;
+
+	return {
+		rect: {
+			x: (leftPercent / 100) * bounds.width,
+			y: (topPercent / 100) * bounds.height,
+			width: (widthPercent / 100) * bounds.width,
+			height: (heightPercent / 100) * bounds.height,
+		},
+		viewport: {
+			width: bounds.width,
+			height: bounds.height,
+			...(Number.isFinite(devicePixelRatio) && devicePixelRatio > 0
+				? { devicePixelRatio }
+				: {}),
+		},
+	};
+}
+
 function nudgeRotationYaw(direction: -1 | 1): void {
 	const control = model.transformControls.rotationYawControl;
 
@@ -349,6 +564,13 @@ function stagePlacementFromGhost(): void {
 }
 
 function handleViewportPointerMove(event: PointerEvent): void {
+	updateSelectionMarquee(event);
+
+	if (selectionMarqueeStart) {
+		placementHoverPoint = null;
+		return;
+	}
+
 	stageProjectedTransformDrag(event);
 
 	if (transformDragActive) {
@@ -367,6 +589,8 @@ function handleViewportPointerMove(event: PointerEvent): void {
 function handleViewportPointerLeave(): void {
 	placementHoverPoint = null;
 	transformDragActive = false;
+	selectionMarqueeStart = null;
+	selectionMarqueeCurrent = null;
 }
 
 function dragHasObjectLibraryPlacement(event: DragEvent): boolean {
@@ -432,7 +656,7 @@ function viewportNormalizedPointFromDragEvent(
 }
 
 function viewportNormalizedPointFromPointerEvent(
-	event: DragEvent | MouseEvent,
+	event: DragEvent | MouseEvent | PointerEvent,
 ): LevelEditorViewportNormalizedPoint | null {
 	const frame = event.currentTarget as HTMLElement | null;
 	const rect = frame?.getBoundingClientRect();
@@ -445,6 +669,28 @@ function viewportNormalizedPointFromPointerEvent(
 		xPercent: ((event.clientX - rect.left) / rect.width) * 100,
 		zPercent: ((event.clientY - rect.top) / rect.height) * 100,
 	};
+}
+
+function marqueeHasSelectionDistance(
+	start: LevelEditorViewportNormalizedPoint,
+	end: LevelEditorViewportNormalizedPoint,
+): boolean {
+	return (
+		Math.abs(start.xPercent - end.xPercent) >= 1.5 ||
+		Math.abs(start.zPercent - end.zPercent) >= 1.5
+	);
+}
+
+function marqueeStyle(
+	start: LevelEditorViewportNormalizedPoint,
+	end: LevelEditorViewportNormalizedPoint,
+): string {
+	const left = Math.min(start.xPercent, end.xPercent);
+	const top = Math.min(start.zPercent, end.zPercent);
+	const width = Math.abs(start.xPercent - end.xPercent);
+	const height = Math.abs(start.zPercent - end.zPercent);
+
+	return `--viewport-marquee-left: ${left}%; --viewport-marquee-top: ${top}%; --viewport-marquee-width: ${width}%; --viewport-marquee-height: ${height}%`;
 }
 </script>
 
@@ -464,28 +710,46 @@ function viewportNormalizedPointFromPointerEvent(
 	data-viewport-interaction-tool={model.interaction.activeTool}
 	data-gizmo-status={model.gizmo.status}
 	data-transform-drag-active={transformDragActive}
+	data-selection-marquee-active={selectionMarqueeStart !== null}
 	data-placement-drop-ready={placeToolActive && (placementTarget?.canStage ?? false)}
 	onclick={handleViewportClick}
+	onpointerdown={beginSelectionMarquee}
 	onpointermove={handleViewportPointerMove}
-	onpointerup={endProjectedTransformDrag}
-	onpointercancel={endProjectedTransformDrag}
+	onpointerup={(event) => {
+		completeSelectionMarquee(event);
+		endProjectedTransformDrag(event);
+	}}
+	onpointercancel={(event) => {
+		selectionMarqueeStart = null;
+		selectionMarqueeCurrent = null;
+		endProjectedTransformDrag(event);
+	}}
 	onmouseleave={handleViewportPointerLeave}
 	ondragover={handlePlacementDragOver}
 		ondragleave={handlePlacementDragLeave}
 		ondrop={handlePlacementDrop}
 	>
 		<div class="editor-viewport-crosshair" aria-hidden="true"></div>
+		{#if selectionMarqueeStart && selectionMarqueeCurrent}
+			<div
+				class="editor-viewport-selection-marquee"
+				style={selectionMarqueeStyle}
+				aria-hidden="true"
+			></div>
+		{/if}
 		<div class="editor-viewport-pins" aria-label="Projected workspace objects">
 			{#each projectedObjects as object}
 				<button
 					type="button"
 					class="editor-viewport-pin"
 					class:selected-viewport-object={object.selected}
+					class:primary-selected-viewport-object={object.primarySelected}
 					style={`--viewport-object-x: ${object.xPercent}%; --viewport-object-z: ${object.zPercent}%`}
 					aria-pressed={object.selected}
-					title={`${object.label} / ${object.category}`}
-					disabled={!selectToolActive || !onSelectObject}
-					onclick={() => selectProjectedObject(object.stableId)}
+					data-selected-primary={object.primarySelected}
+					title={`${object.label} / ${object.category} / ${object.reason}`}
+					disabled={!selectToolActive || !object.pickable || !onSelectObject}
+					onclick={(event) => selectProjectedObject(event, object.stableId)}
 				>
 					<span>{object.label.slice(0, 1)}</span>
 				</button>

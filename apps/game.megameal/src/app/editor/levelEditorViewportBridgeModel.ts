@@ -50,6 +50,10 @@ export type LevelEditorViewportProjectedObject = {
 	readonly label: string;
 	readonly category: LevelEditorWorkspaceObject["category"];
 	readonly selected: boolean;
+	readonly primarySelected: boolean;
+	readonly visible: boolean;
+	readonly locked: boolean;
+	readonly pickable: boolean;
 	readonly hasTransformPosition: boolean;
 	readonly xPercent: number;
 	readonly zPercent: number;
@@ -85,6 +89,13 @@ export type LevelEditorViewportProjectedPickResult = {
 	readonly label: string;
 	readonly distancePercent: number;
 	readonly source: "projected-transform-pins";
+	readonly renderedScenePicking: false;
+	readonly reason: string;
+};
+
+export type LevelEditorViewportProjectedMarqueeSelectionResult = {
+	readonly selectedStableIds: readonly string[];
+	readonly source: "projected-transform-marquee";
 	readonly renderedScenePicking: false;
 	readonly reason: string;
 };
@@ -204,11 +215,34 @@ export type LevelEditorViewportProjectedTransformDragAffordance = {
 	readonly reason: string;
 };
 
+export type LevelEditorViewportRenderedHitTestRequestReadiness =
+	| "unavailable"
+	| "available";
+
+export type LevelEditorViewportRenderedHitTestReadiness = {
+	readonly requestReadiness: LevelEditorViewportRenderedHitTestRequestReadiness;
+	readonly requestAvailable: boolean;
+	readonly requestSource: "runtime-rendered-scene-hit-test";
+	readonly resultIdentity: "stable-id";
+	readonly selectionBehavior:
+		| "rendered-hit-test-result-selection"
+		| "unchanged-projected-selection";
+	readonly usesBrowserApis: false;
+	readonly usesThreeApis: false;
+	readonly changesSelection: boolean;
+	readonly writesRuntimeData: false;
+	readonly unavailableReasons: readonly string[];
+	readonly reason: string;
+};
+
 export type LevelEditorViewportInteractionModel = {
 	readonly activeTool: LevelEditorViewportInteractionTool;
 	readonly tools: readonly LevelEditorViewportInteractionToolModel[];
-	readonly renderedScenePickingEnabled: false;
-	readonly selectableSource: "projected-transform-pins";
+	readonly renderedScenePickingEnabled: boolean;
+	readonly renderedHitTest: LevelEditorViewportRenderedHitTestReadiness;
+	readonly selectableSource:
+		| "runtime-rendered-scene-hit-test"
+		| "projected-transform-pins";
 	readonly projectedPickRadiusPercent: number;
 	readonly placementSource: "normalized-transform-xz-surface";
 	readonly transformSource: "workspace-transform-fields";
@@ -256,6 +290,7 @@ export type LevelEditorViewportBridgeModel = {
 	readonly contract: typeof LEVEL_EDITOR_VIEWPORT_BRIDGE_CONTRACT;
 	readonly runtimeSceneId: string;
 	readonly selectedStableId: string | null;
+	readonly selectedStableIds: readonly string[];
 	readonly selectedObject: LevelEditorViewportBridgeSelectedObject | null;
 	readonly bridge: {
 		readonly targetRoute: "/";
@@ -284,9 +319,17 @@ export type LevelEditorViewportBridgeModel = {
 	readonly gizmo: LevelEditorViewportGizmoReadiness;
 };
 
+export type LevelEditorViewportObjectViewStateProjection = {
+	readonly visibleStableIds?: readonly string[];
+	readonly pickableStableIds?: readonly string[];
+	readonly lockedStableIds?: readonly string[];
+};
+
 export function buildLevelEditorViewportBridgeModel(options: {
 	readonly workspace: LevelEditorWorkspaceModel;
 	readonly selectedStableId?: string | null;
+	readonly selectedStableIds?: readonly string[];
+	readonly objectViewState?: LevelEditorViewportObjectViewStateProjection;
 	readonly viewMode?: LevelEditorViewportBridgeViewMode;
 	readonly enabledOverlayIds?: readonly LevelEditorViewportOverlayId[];
 	readonly connectionStatus?: LevelEditorViewportBridgeConnectionStatus;
@@ -297,11 +340,24 @@ export function buildLevelEditorViewportBridgeModel(options: {
 	readonly cameraMode?: LevelEditorViewportCameraMode;
 	readonly cameraZoomPercent?: number;
 	readonly interactionTool?: LevelEditorViewportInteractionTool;
+	readonly renderedHitTestRequestReadiness?: LevelEditorViewportRenderedHitTestRequestReadiness;
 }): LevelEditorViewportBridgeModel {
-	const selectedStableId =
+	const requestedPrimaryStableId =
 		options.selectedStableId === undefined
 			? options.workspace.selectedStableId
 			: options.selectedStableId;
+	const selectedStableIds = normalizeViewportSelectedStableIds({
+		objects: options.workspace.objects,
+		selectedStableIds:
+			options.selectedStableIds ??
+			(requestedPrimaryStableId === null ? [] : [requestedPrimaryStableId]),
+	});
+	const selectedStableId =
+		requestedPrimaryStableId === null
+			? null
+			: selectedStableIds.includes(requestedPrimaryStableId)
+				? requestedPrimaryStableId
+				: selectedStableIds[0] ?? null;
 	const selectedObject =
 		selectedStableId === null
 			? null
@@ -328,7 +384,9 @@ export function buildLevelEditorViewportBridgeModel(options: {
 	);
 	const projection = buildViewportProjection({
 		objects: options.workspace.objects,
-		selectedStableId: bridgeSelectedObject?.stableId ?? null,
+		selectedStableIds,
+		primarySelectedStableId: bridgeSelectedObject?.stableId ?? null,
+		objectViewState: options.objectViewState,
 		fieldValueOverrides: options.fieldValueOverrides ?? [],
 		placementSnapStep: transformSnapSteps.translate,
 	});
@@ -344,6 +402,7 @@ export function buildLevelEditorViewportBridgeModel(options: {
 		contract: LEVEL_EDITOR_VIEWPORT_BRIDGE_CONTRACT,
 		runtimeSceneId: options.workspace.selectedRuntimeSceneId,
 		selectedStableId: bridgeSelectedObject?.stableId ?? null,
+		selectedStableIds,
 		selectedObject: bridgeSelectedObject,
 		bridge: {
 			targetRoute: options.workspace.routes.liveGame,
@@ -366,6 +425,8 @@ export function buildLevelEditorViewportBridgeModel(options: {
 			requestedTool: options.interactionTool ?? "select",
 			projection,
 			transformControls,
+			renderedHitTestRequestReadiness:
+				options.renderedHitTestRequestReadiness ?? "unavailable",
 		}),
 		transformControls,
 		camera: buildViewportCameraControls({
@@ -461,11 +522,20 @@ function buildViewportOverlays(options: {
 
 function buildViewportProjection(options: {
 	readonly objects: readonly LevelEditorWorkspaceObject[];
-	readonly selectedStableId: string | null;
+	readonly selectedStableIds: readonly string[];
+	readonly primarySelectedStableId: string | null;
+	readonly objectViewState:
+		| LevelEditorViewportObjectViewStateProjection
+		| undefined;
 	readonly fieldValueOverrides: readonly LevelEditorViewportFieldValueOverride[];
 	readonly placementSnapStep: number;
 }): LevelEditorViewportBridgeModel["projection"] {
+	const viewState = normalizeViewportObjectViewState({
+		objects: options.objects,
+		objectViewState: options.objectViewState,
+	});
 	const positionedObjects = options.objects
+		.filter((object) => viewState.visibleStableIds.has(object.stableId))
 		.map((object) => ({
 			object,
 			position: objectTransformPosition(object, options.fieldValueOverrides),
@@ -481,14 +551,20 @@ function buildViewportProjection(options: {
 	const bounds = placementBoundsForPositions(
 		positionedObjects.map((entry) => entry.position),
 	);
-	const objects = options.objects.map((object) =>
-		projectViewportObject({
-			object,
-			selectedStableId: options.selectedStableId,
-			bounds,
-			fieldValueOverrides: options.fieldValueOverrides,
-		}),
-	);
+	const objects = options.objects
+		.filter((object) => viewState.visibleStableIds.has(object.stableId))
+		.map((object) =>
+			projectViewportObject({
+				object,
+				selectedStableIds: options.selectedStableIds,
+				primarySelectedStableId: options.primarySelectedStableId,
+				visible: viewState.visibleStableIds.has(object.stableId),
+				locked: viewState.lockedStableIds.has(object.stableId),
+				pickable: viewState.pickableStableIds.has(object.stableId),
+				bounds,
+				fieldValueOverrides: options.fieldValueOverrides,
+			}),
+		);
 
 	return {
 		coordinateSpace: "normalized-transform-xz",
@@ -508,9 +584,46 @@ function buildViewportProjection(options: {
 					: "Drops are mapped into manifest-owned Transform.position X/Z bounds and staged as authoring edits.",
 		},
 		objects,
-		selectableCount: objects.filter((object) => object.hasTransformPosition)
-			.length,
+		selectableCount: objects.filter(
+			(object) => object.hasTransformPosition && object.pickable,
+		).length,
 		selectedObjectCount: objects.filter((object) => object.selected).length,
+	};
+}
+
+function normalizeViewportObjectViewState(options: {
+	readonly objects: readonly LevelEditorWorkspaceObject[];
+	readonly objectViewState:
+		| LevelEditorViewportObjectViewStateProjection
+		| undefined;
+}): {
+	readonly visibleStableIds: ReadonlySet<string>;
+	readonly pickableStableIds: ReadonlySet<string>;
+	readonly lockedStableIds: ReadonlySet<string>;
+} {
+	const allStableIds = options.objects.map((object) => object.stableId);
+	const visibleStableIds = new Set(
+		options.objectViewState?.visibleStableIds ?? allStableIds,
+	);
+	const lockedStableIds = new Set(
+		options.objectViewState?.lockedStableIds ?? [],
+	);
+	const pickableStableIds = new Set(
+		options.objectViewState?.pickableStableIds ??
+			options.objects
+				.filter(
+					(object) =>
+						object.outliner.pickability.state === "projected-pickable" &&
+						!lockedStableIds.has(object.stableId) &&
+						visibleStableIds.has(object.stableId),
+				)
+				.map((object) => object.stableId),
+	);
+
+	return {
+		visibleStableIds,
+		pickableStableIds,
+		lockedStableIds,
 	};
 }
 
@@ -592,6 +705,7 @@ function buildViewportInteractionModel(options: {
 	readonly requestedTool: LevelEditorViewportInteractionTool;
 	readonly projection: LevelEditorViewportBridgeModel["projection"];
 	readonly transformControls: LevelEditorViewportTransformControls;
+	readonly renderedHitTestRequestReadiness: LevelEditorViewportRenderedHitTestRequestReadiness;
 }): LevelEditorViewportInteractionModel {
 	const tools = viewportInteractionTools.map((tool) =>
 		buildViewportInteractionToolModel({
@@ -608,12 +722,18 @@ function buildViewportInteractionModel(options: {
 	const blockedReasons = tools
 		.filter((tool) => !tool.enabled)
 		.map((tool) => tool.reason);
+	const renderedHitTest = buildRenderedHitTestReadiness(
+		options.renderedHitTestRequestReadiness,
+	);
 
 	return {
 		activeTool,
 		tools,
-		renderedScenePickingEnabled: false,
-		selectableSource: "projected-transform-pins",
+		renderedScenePickingEnabled: renderedHitTest.requestAvailable,
+		renderedHitTest,
+		selectableSource: renderedHitTest.requestAvailable
+			? "runtime-rendered-scene-hit-test"
+			: "projected-transform-pins",
 		projectedPickRadiusPercent: defaultProjectedPickRadiusPercent,
 		placementSource: "normalized-transform-xz-surface",
 		transformSource: "workspace-transform-fields",
@@ -623,8 +743,37 @@ function buildViewportInteractionModel(options: {
 		}),
 		writesRuntimeData: false,
 		blockedReasons,
-		reason:
-			"Viewport tools operate on editor projections today; rendered-scene picking remains disabled until a runtime-backed hit-test contract exists.",
+		reason: renderedHitTest.requestAvailable
+			? "Viewport selection can request runtime-rendered hit-test results by stable ID while keeping projected pins as editor fallback."
+			: "Viewport selection uses editor projections until a runtime-rendered hit-test requester is available.",
+	};
+}
+
+function buildRenderedHitTestReadiness(
+	requestReadiness: LevelEditorViewportRenderedHitTestRequestReadiness,
+): LevelEditorViewportRenderedHitTestReadiness {
+	const requestAvailable = requestReadiness === "available";
+
+	return {
+		requestReadiness,
+		requestAvailable,
+		requestSource: "runtime-rendered-scene-hit-test",
+		resultIdentity: "stable-id",
+		selectionBehavior: requestAvailable
+			? "rendered-hit-test-result-selection"
+			: "unchanged-projected-selection",
+		usesBrowserApis: false,
+		usesThreeApis: false,
+		changesSelection: requestAvailable,
+		writesRuntimeData: false,
+		unavailableReasons: requestAvailable
+			? []
+			: [
+					"No rendered-scene hit-test requester has been attached to the viewport bridge model.",
+				],
+		reason: requestAvailable
+			? "Rendered hit-test requests can be issued by a caller-owned adapter and consumed as stable-ID editor selection results without writing runtime data."
+			: "Rendered hit-test requests are unavailable in the pure viewport bridge model; projected-pin selection remains the active editor selection behavior.",
 	};
 }
 
@@ -933,7 +1082,11 @@ const transformSnapOptions = {
 
 function projectViewportObject(options: {
 	readonly object: LevelEditorWorkspaceObject;
-	readonly selectedStableId: string | null;
+	readonly selectedStableIds: readonly string[];
+	readonly primarySelectedStableId: string | null;
+	readonly visible: boolean;
+	readonly locked: boolean;
+	readonly pickable: boolean;
 	readonly bounds: LevelEditorViewportPlacementSurface["worldBounds"];
 	readonly fieldValueOverrides: readonly LevelEditorViewportFieldValueOverride[];
 }): LevelEditorViewportProjectedObject {
@@ -941,7 +1094,9 @@ function projectViewportObject(options: {
 		options.object,
 		options.fieldValueOverrides,
 	);
-	const selected = options.object.stableId === options.selectedStableId;
+	const selected = options.selectedStableIds.includes(options.object.stableId);
+	const primarySelected =
+		options.object.stableId === options.primarySelectedStableId;
 
 	if (position === null) {
 		return {
@@ -949,11 +1104,20 @@ function projectViewportObject(options: {
 			label: options.object.label,
 			category: options.object.category,
 			selected,
+			primarySelected,
+			visible: options.visible,
+			locked: options.locked,
+			pickable: options.pickable,
 			hasTransformPosition: false,
 			xPercent: 50,
 			zPercent: 50,
 			source: "workspace-transform",
-			reason: "Object does not expose Transform.position.x/z fields.",
+			reason: viewportProjectionReason({
+				baseReason: "Object does not expose Transform.position.x/z fields.",
+				visible: options.visible,
+				locked: options.locked,
+				pickable: options.pickable,
+			}),
 		};
 	}
 
@@ -962,6 +1126,10 @@ function projectViewportObject(options: {
 		label: options.object.label,
 		category: options.object.category,
 		selected,
+		primarySelected,
+		visible: options.visible,
+		locked: options.locked,
+		pickable: options.pickable,
 		hasTransformPosition: true,
 		xPercent: normalizeViewportAxis(
 			position.x,
@@ -974,8 +1142,46 @@ function projectViewportObject(options: {
 			options.bounds.maxZ,
 		),
 		source: "workspace-transform",
-		reason: "Projected from manifest-owned Transform.position.x/z fields.",
+		reason: viewportProjectionReason({
+			baseReason:
+				"Projected from manifest-owned Transform.position.x/z fields.",
+			visible: options.visible,
+			locked: options.locked,
+			pickable: options.pickable,
+		}),
 	};
+}
+
+function viewportProjectionReason(options: {
+	readonly baseReason: string;
+	readonly visible: boolean;
+	readonly locked: boolean;
+	readonly pickable: boolean;
+}): string {
+	if (!options.visible) {
+		return `${options.baseReason} Hidden by editor-only object view state.`;
+	}
+
+	if (options.locked) {
+		return `${options.baseReason} Locked by editor-only object view state; viewport picking is disabled.`;
+	}
+
+	if (!options.pickable) {
+		return `${options.baseReason} Current editor projection is visible but not pickable.`;
+	}
+
+	return options.baseReason;
+}
+
+function normalizeViewportSelectedStableIds(options: {
+	readonly objects: readonly LevelEditorWorkspaceObject[];
+	readonly selectedStableIds: readonly string[];
+}): readonly string[] {
+	const stableIds = new Set(options.objects.map((object) => object.stableId));
+
+	return [...new Set(options.selectedStableIds)].filter((stableId) =>
+		stableIds.has(stableId),
+	);
 }
 
 export function viewportPlacementPositionFromNormalizedPoint(options: {
@@ -1037,7 +1243,7 @@ export function viewportPickProjectedObjectFromNormalizedPoint(options: {
 		defaultProjectedPickRadiusPercent,
 	);
 	const candidates = options.projection.objects
-		.filter((object) => object.hasTransformPosition)
+		.filter((object) => object.hasTransformPosition && object.pickable)
 		.map((object) => ({
 			object,
 			distancePercent: viewportPointDistancePercent(options.point, {
@@ -1061,6 +1267,36 @@ export function viewportPickProjectedObjectFromNormalizedPoint(options: {
 		renderedScenePicking: false,
 		reason:
 			"Selected the nearest projected stable-ID transform pin; rendered-scene raycast picking is not enabled.",
+	};
+}
+
+export function viewportSelectProjectedObjectsInRect(options: {
+	readonly projection: LevelEditorViewportBridgeModel["projection"];
+	readonly start: LevelEditorViewportNormalizedPoint;
+	readonly end: LevelEditorViewportNormalizedPoint;
+}): LevelEditorViewportProjectedMarqueeSelectionResult {
+	const minX = Math.min(options.start.xPercent, options.end.xPercent);
+	const maxX = Math.max(options.start.xPercent, options.end.xPercent);
+	const minZ = Math.min(options.start.zPercent, options.end.zPercent);
+	const maxZ = Math.max(options.start.zPercent, options.end.zPercent);
+	const selectedStableIds = options.projection.objects
+		.filter(
+			(object) =>
+				object.hasTransformPosition &&
+				object.pickable &&
+				object.xPercent >= minX &&
+				object.xPercent <= maxX &&
+				object.zPercent >= minZ &&
+				object.zPercent <= maxZ,
+		)
+		.map((object) => object.stableId);
+
+	return {
+		selectedStableIds,
+		source: "projected-transform-marquee",
+		renderedScenePicking: false,
+		reason:
+			"Selected stable-ID transform pins inside the projected marquee rectangle; rendered-scene selection is not enabled.",
 	};
 }
 

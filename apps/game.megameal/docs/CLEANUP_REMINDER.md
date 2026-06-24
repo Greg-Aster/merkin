@@ -41,6 +41,10 @@ Required cleanup and verification:
    - No orphan files that are not referenced by package scripts, source imports, docs, or a clear future contract.
    - No duplicate docs or stale status claims.
    - No broad catch-all test/source files when a focused owner file is more maintainable.
+   - Level-editor maintainability: central file budgets are extraction triggers,
+     not feature ceilings. If an AAA editor feature needs more surface area,
+     keep the new logic in a focused owner component/model/test or record an
+     explicit temporary central-budget decision in the maintainability contract.
    - No generated artifacts unless they are intentionally owned, reproducible, and documented.
    - No stale package scripts referencing deleted files.
    - No unused dependencies added to package.json.
@@ -81,6 +85,9 @@ Use this checklist before handing work back:
 - [ ] No browser globals outside `src/app`, `src/ui`, `.astro`/`.svelte`, or `src/engine/adapters/browser`.
 - [ ] No direct imports from sibling `apps/game`.
 - [ ] No new broad catch-all files without a clear owner.
+- [ ] Level-editor changes either stay under a focused owner component/model/test
+      or pass the central file budgets in
+      `test:level-editor-maintainability-contract`.
 - [ ] No package scripts point at deleted files.
 - [ ] No dead exports, unused helpers, temporary scripts, debug logs, placeholder TODOs, or commented-out code.
 - [ ] Docs reflect the current code and current validation commands.

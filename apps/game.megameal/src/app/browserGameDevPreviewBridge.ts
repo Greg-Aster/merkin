@@ -1,5 +1,7 @@
 import type { RuntimeSnapshot } from "../engine/client-api/index.js";
 import {
+	createRenderedSceneBoxSelectResultMessage,
+	createRenderedSceneHitTestResultMessage,
 	createRuntimeReloadAckMessage,
 	createRuntimeTelemetryMessage,
 } from "../engine/index.js";
@@ -13,6 +15,8 @@ import {
 	applyCollisionPreviewPatchToRuntime,
 	applyCoreObjectPreviewPatchToRuntime,
 	applyObjectEditPreviewPatchToRuntime,
+	buildRenderedSceneBoxSelectResultPayload,
+	buildRenderedSceneHitTestResultPayload,
 	clearCollisionPreviewPatchFromRuntime,
 	clearCoreObjectPreviewPatchFromRuntime,
 	clearObjectEditPreviewPatchFromRuntime,
@@ -122,6 +126,42 @@ export function connectBrowserGameDevPreviewBridge(
 					}
 
 					applyCameraLiveEditModeToRuntime(client.runtime, request);
+				},
+				requestRenderedSceneHitTest(request, requestId) {
+					const activeRuntimeSceneId = currentRuntimeSceneId();
+
+					postLevelEditorDevPreviewMessage(
+						devPreviewChannel,
+						createRenderedSceneHitTestResultMessage({
+							requestId,
+							result: buildRenderedSceneHitTestResultPayload({
+								runtime: client.runtime,
+								hitTestPort: client,
+								request,
+								...(activeRuntimeSceneId === undefined
+									? {}
+									: { activeRuntimeSceneId }),
+							}),
+						}),
+					);
+				},
+				requestRenderedSceneBoxSelect(request, requestId) {
+					const activeRuntimeSceneId = currentRuntimeSceneId();
+
+					postLevelEditorDevPreviewMessage(
+						devPreviewChannel,
+						createRenderedSceneBoxSelectResultMessage({
+							requestId,
+							result: buildRenderedSceneBoxSelectResultPayload({
+								runtime: client.runtime,
+								boxSelectPort: client,
+								request,
+								...(activeRuntimeSceneId === undefined
+									? {}
+									: { activeRuntimeSceneId }),
+							}),
+						}),
+					);
 				},
 				reload(request) {
 					const transition =

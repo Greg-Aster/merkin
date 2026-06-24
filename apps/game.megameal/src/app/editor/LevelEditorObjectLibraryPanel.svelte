@@ -68,12 +68,16 @@ let stagedReplacementDrafts: readonly EditorObjectLibraryReplacementDraft[] =
 	$state([]);
 let stagedPlacements: readonly LevelEditorObjectLibraryStagedPlacement[] =
 	$state([]);
-const objectLibrarySearchQuery = $state("");
-const objectLibraryKindFilter: ObjectLibraryKindFilter = $state("all");
-const objectLibraryPlacementFilter: ObjectLibraryPlacementFilter =
-	$state("all");
-const objectLibraryUsageFilter: ObjectLibraryUsageFilter = $state("all");
-const objectLibrarySortMode: ObjectLibrarySortMode = $state("name");
+// biome-ignore lint/style/useConst: Svelte bind:value mutates this state from markup.
+let objectLibrarySearchQuery = $state("");
+// biome-ignore lint/style/useConst: Svelte bind:value mutates this state from markup.
+let objectLibraryKindFilter: ObjectLibraryKindFilter = $state("all");
+// biome-ignore lint/style/useConst: Svelte bind:value mutates this state from markup.
+let objectLibraryPlacementFilter: ObjectLibraryPlacementFilter = $state("all");
+// biome-ignore lint/style/useConst: Svelte bind:value mutates this state from markup.
+let objectLibraryUsageFilter: ObjectLibraryUsageFilter = $state("all");
+// biome-ignore lint/style/useConst: Svelte bind:value mutates this state from markup.
+let objectLibrarySortMode: ObjectLibrarySortMode = $state("name");
 const placementTransformEditor: PlacementTransformEditorState = $state({
 	entryId: "",
 	positionX: 0,

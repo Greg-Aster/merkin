@@ -10,6 +10,14 @@ import {
 	type LevelEditorObjectEditPreviewClearRequestMessage,
 	type LevelEditorObjectEditPreviewOperation,
 	type LevelEditorObjectEditPreviewPatchMessage,
+	type LevelEditorRenderedSceneBoxSelectRequest,
+	type LevelEditorRenderedSceneBoxSelectRequestMessage,
+	type LevelEditorRenderedSceneBoxSelectResultMessage,
+	type LevelEditorRenderedSceneBoxSelectResultPayload,
+	type LevelEditorRenderedSceneHitTestRequest,
+	type LevelEditorRenderedSceneHitTestRequestMessage,
+	type LevelEditorRenderedSceneHitTestResultMessage,
+	type LevelEditorRenderedSceneHitTestResultPayload,
 	type LevelEditorRuntimeReloadAckMessage,
 	type LevelEditorRuntimeReloadAckPayload,
 	type LevelEditorRuntimeReloadReason,
@@ -172,6 +180,58 @@ export function createCameraLiveEditModeMessage(options: {
 		requestId: options.requestId,
 		request: options.request,
 	}) as LevelEditorCameraLiveEditModeMessage;
+}
+
+export function createRenderedSceneHitTestRequestMessage(options: {
+	readonly requestId: string;
+	readonly request: LevelEditorRenderedSceneHitTestRequest;
+}): LevelEditorRenderedSceneHitTestRequestMessage {
+	return levelEditorDevPreviewMessageValidator.parse({
+		schemaVersion: 1,
+		protocol: LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL,
+		type: "rendered-scene-hit-test-request",
+		requestId: options.requestId,
+		request: options.request,
+	}) as LevelEditorRenderedSceneHitTestRequestMessage;
+}
+
+export function createRenderedSceneHitTestResultMessage(options: {
+	readonly requestId: string;
+	readonly result: LevelEditorRenderedSceneHitTestResultPayload;
+}): LevelEditorRenderedSceneHitTestResultMessage {
+	return levelEditorDevPreviewMessageValidator.parse({
+		schemaVersion: 1,
+		protocol: LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL,
+		type: "rendered-scene-hit-test-result",
+		requestId: options.requestId,
+		payload: options.result,
+	}) as LevelEditorRenderedSceneHitTestResultMessage;
+}
+
+export function createRenderedSceneBoxSelectRequestMessage(options: {
+	readonly requestId: string;
+	readonly request: LevelEditorRenderedSceneBoxSelectRequest;
+}): LevelEditorRenderedSceneBoxSelectRequestMessage {
+	return levelEditorDevPreviewMessageValidator.parse({
+		schemaVersion: 1,
+		protocol: LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL,
+		type: "rendered-scene-box-select-request",
+		requestId: options.requestId,
+		request: options.request,
+	}) as LevelEditorRenderedSceneBoxSelectRequestMessage;
+}
+
+export function createRenderedSceneBoxSelectResultMessage(options: {
+	readonly requestId: string;
+	readonly result: LevelEditorRenderedSceneBoxSelectResultPayload;
+}): LevelEditorRenderedSceneBoxSelectResultMessage {
+	return levelEditorDevPreviewMessageValidator.parse({
+		schemaVersion: 1,
+		protocol: LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL,
+		type: "rendered-scene-box-select-result",
+		requestId: options.requestId,
+		payload: options.result,
+	}) as LevelEditorRenderedSceneBoxSelectResultMessage;
 }
 
 export function createRuntimeReloadAckMessage(options: {

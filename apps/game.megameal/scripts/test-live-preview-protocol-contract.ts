@@ -16,10 +16,14 @@ import {
 	buildCameraLiveEditModeMessage as buildEditorCameraLiveEditModeMessage,
 	buildObjectEditPreviewClearRequestMessage as buildEditorObjectEditPreviewClearRequestMessage,
 	buildObjectEditPreviewPatchMessage as buildEditorObjectEditPreviewPatchMessage,
+	buildRenderedSceneBoxSelectRequestMessage as buildEditorRenderedSceneBoxSelectRequestMessage,
+	buildRenderedSceneHitTestRequestMessage as buildEditorRenderedSceneHitTestRequestMessage,
 	buildRuntimeReloadRequestMessage as buildEditorRuntimeReloadRequestMessage,
 	sendCameraLiveEditModeRequest,
 	sendObjectEditPreviewClearRequest,
 	sendObjectEditPreviewPatch,
+	sendRenderedSceneBoxSelectRequest,
+	sendRenderedSceneHitTestRequest,
 } from "../src/app/editor/levelEditorPreviewSender.js";
 import {
 	type CollisionCookPreviewPatch,
@@ -28,6 +32,10 @@ import {
 	type LevelEditorCollisionPreviewClearRequest,
 	type LevelEditorCoreObjectPreviewPatch,
 	type LevelEditorObjectEditPreviewPatch,
+	type LevelEditorRenderedSceneBoxSelectRequest,
+	type LevelEditorRenderedSceneBoxSelectResultPayload,
+	type LevelEditorRenderedSceneHitTestRequest,
+	type LevelEditorRenderedSceneHitTestResultPayload,
 	type LevelEditorRuntimeReloadAckPayload,
 	type LevelEditorRuntimeReloadRequest,
 	type LevelEditorRuntimeTelemetryPayload,
@@ -37,6 +45,10 @@ import {
 	createCoreObjectPreviewClearRequestMessage,
 	createCoreObjectPreviewPatchMessage,
 	createObjectEditPreviewPatchMessage,
+	createRenderedSceneBoxSelectRequestMessage,
+	createRenderedSceneBoxSelectResultMessage,
+	createRenderedSceneHitTestRequestMessage,
+	createRenderedSceneHitTestResultMessage,
 	createRuntimeReloadAckMessage,
 	createRuntimeSceneReloadRequestMessage,
 	createRuntimeTelemetryMessage,
@@ -74,6 +86,33 @@ const validCameraLiveEditMessage = createCameraLiveEditModeMessage({
 	requestId: "test-camera-live-edit:valid",
 	request: validCameraLiveEditRequest,
 });
+const validRenderedSceneHitTestRequest =
+	createValidRenderedSceneHitTestRequest();
+const validRenderedSceneHitTestRequestMessage =
+	createRenderedSceneHitTestRequestMessage({
+		requestId: "test-rendered-hit-test-request:valid",
+		request: validRenderedSceneHitTestRequest,
+	});
+const validRenderedSceneHitTestResult = createValidRenderedSceneHitTestResult();
+const validRenderedSceneHitTestResultMessage =
+	createRenderedSceneHitTestResultMessage({
+		requestId: "test-rendered-hit-test-result:valid",
+		result: validRenderedSceneHitTestResult,
+	});
+const validRenderedSceneBoxSelectRequest =
+	createValidRenderedSceneBoxSelectRequest();
+const validRenderedSceneBoxSelectRequestMessage =
+	createRenderedSceneBoxSelectRequestMessage({
+		requestId: "test-rendered-box-select-request:valid",
+		request: validRenderedSceneBoxSelectRequest,
+	});
+const validRenderedSceneBoxSelectResult =
+	createValidRenderedSceneBoxSelectResult();
+const validRenderedSceneBoxSelectResultMessage =
+	createRenderedSceneBoxSelectResultMessage({
+		requestId: "test-rendered-box-select-result:valid",
+		result: validRenderedSceneBoxSelectResult,
+	});
 const validRuntimeReloadAck = createValidRuntimeReloadAck();
 const validRuntimeReloadAckMessage = createRuntimeReloadAckMessage({
 	requestId: "test-runtime-reload-ack:valid",
@@ -249,6 +288,87 @@ function createValidCameraLiveEditRequest(): LevelEditorCameraLiveEditModeReques
 	};
 }
 
+function createValidRenderedSceneHitTestRequest(): LevelEditorRenderedSceneHitTestRequest {
+	return {
+		runtimeSceneId: "portal_arena_runtime",
+		coordinateSpace: "viewport-css-pixels",
+		viewport: {
+			width: 1280,
+			height: 720,
+			devicePixelRatio: 2,
+		},
+		screenPoint: {
+			x: 640,
+			y: 360,
+		},
+		pickableStableIds: ["portal-arena:portal:test"],
+		objectViewStateGate: "visible-and-pickable-only",
+		writesRuntimeData: false,
+		sourcePlanHash: "workspace:rendered-hit-test:test0001",
+	};
+}
+
+function createValidRenderedSceneHitTestResult(): LevelEditorRenderedSceneHitTestResultPayload {
+	return {
+		runtimeSceneId: "portal_arena_runtime",
+		activeRuntimeSceneId: "portal_arena_runtime",
+		status: "hit",
+		source: "runtime-rendered-scene-hit-test",
+		writesRuntimeData: false,
+		hit: {
+			stableId: "portal-arena:portal:test",
+			objectKind: "portal",
+			distance: 12.5,
+			worldPosition: [1, 2, 3],
+			worldNormal: [0, 1, 0],
+			renderableId: "mesh_portal_gate",
+			label: "Preview Portal",
+		},
+	};
+}
+
+function createValidRenderedSceneBoxSelectRequest(): LevelEditorRenderedSceneBoxSelectRequest {
+	return {
+		runtimeSceneId: "portal_arena_runtime",
+		coordinateSpace: "viewport-css-pixels",
+		viewport: {
+			width: 1280,
+			height: 720,
+			devicePixelRatio: 2,
+		},
+		rect: {
+			x: 320,
+			y: 180,
+			width: 640,
+			height: 360,
+		},
+		pickableStableIds: ["portal-arena:portal:test"],
+		objectViewStateGate: "visible-and-pickable-only",
+		writesRuntimeData: false,
+		sourcePlanHash: "workspace:rendered-box-select:test0001",
+	};
+}
+
+function createValidRenderedSceneBoxSelectResult(): LevelEditorRenderedSceneBoxSelectResultPayload {
+	return {
+		runtimeSceneId: "portal_arena_runtime",
+		activeRuntimeSceneId: "portal_arena_runtime",
+		status: "hit",
+		source: "runtime-rendered-scene-box-select",
+		writesRuntimeData: false,
+		hits: [
+			{
+				stableId: "portal-arena:portal:test",
+				objectKind: "portal",
+				distance: 12.5,
+				worldPosition: [1, 2, 3],
+				renderableId: "mesh_portal_gate",
+				label: "Preview Portal",
+			},
+		],
+	};
+}
+
 function createValidRuntimeReloadAck(): LevelEditorRuntimeReloadAckPayload {
 	return {
 		runtimeSceneId: "portal_arena_runtime",
@@ -397,6 +517,113 @@ function assertProtocolMessageValidation(): void {
 		request: cameraParsed.request,
 	});
 
+	const renderedHitTestRequestParsed = parseLevelEditorDevPreviewMessage(
+		validRenderedSceneHitTestRequestMessage,
+	);
+
+	assertEqual(
+		renderedHitTestRequestParsed.type,
+		"rendered-scene-hit-test-request",
+		"Expected rendered-scene hit-test request message type.",
+	);
+
+	if (renderedHitTestRequestParsed.type !== "rendered-scene-hit-test-request") {
+		throw new Error(
+			"Expected parsed rendered-scene hit-test message to be a request.",
+		);
+	}
+
+	assertEqual(
+		renderedHitTestRequestParsed.request.coordinateSpace,
+		"viewport-css-pixels",
+		"Expected rendered hit-test request to use viewport CSS-pixel coordinates.",
+	);
+
+	const renderedHitTestResultParsed = parseLevelEditorDevPreviewMessage(
+		validRenderedSceneHitTestResultMessage,
+	);
+
+	assertEqual(
+		renderedHitTestResultParsed.type,
+		"rendered-scene-hit-test-result",
+		"Expected rendered-scene hit-test result message type.",
+	);
+
+	if (renderedHitTestResultParsed.type !== "rendered-scene-hit-test-result") {
+		throw new Error(
+			"Expected parsed rendered-scene hit-test message to be a result.",
+		);
+	}
+
+	assertEqual(
+		renderedHitTestResultParsed.payload.hit?.stableId,
+		"portal-arena:portal:test",
+		"Expected rendered hit-test result to carry the hit stable ID.",
+	);
+
+	const renderedBoxSelectRequestParsed = parseLevelEditorDevPreviewMessage(
+		validRenderedSceneBoxSelectRequestMessage,
+	);
+
+	assertEqual(
+		renderedBoxSelectRequestParsed.type,
+		"rendered-scene-box-select-request",
+		"Expected rendered-scene box-select request message type.",
+	);
+
+	if (
+		renderedBoxSelectRequestParsed.type !== "rendered-scene-box-select-request"
+	) {
+		throw new Error(
+			"Expected parsed rendered-scene box-select message to be a request.",
+		);
+	}
+
+	assertEqual(
+		renderedBoxSelectRequestParsed.request.coordinateSpace,
+		"viewport-css-pixels",
+		"Expected rendered box-select request to use viewport CSS-pixel coordinates.",
+	);
+	assertEqual(
+		renderedBoxSelectRequestParsed.request.rect.width,
+		640,
+		"Expected rendered box-select request to carry a CSS-pixel rectangle.",
+	);
+
+	createRenderedSceneBoxSelectRequestMessage({
+		requestId: "test-rendered-box-select-request:explicit-create",
+		request: renderedBoxSelectRequestParsed.request,
+	});
+
+	const renderedBoxSelectResultParsed = parseLevelEditorDevPreviewMessage(
+		validRenderedSceneBoxSelectResultMessage,
+	);
+
+	assertEqual(
+		renderedBoxSelectResultParsed.type,
+		"rendered-scene-box-select-result",
+		"Expected rendered-scene box-select result message type.",
+	);
+
+	if (
+		renderedBoxSelectResultParsed.type !== "rendered-scene-box-select-result"
+	) {
+		throw new Error(
+			"Expected parsed rendered-scene box-select message to be a result.",
+		);
+	}
+
+	assertEqual(
+		renderedBoxSelectResultParsed.payload.hits?.[0]?.stableId,
+		"portal-arena:portal:test",
+		"Expected rendered box-select result to carry stable-ID hits.",
+	);
+
+	createRenderedSceneBoxSelectResultMessage({
+		requestId: "test-rendered-box-select-result:explicit-create",
+		result: renderedBoxSelectResultParsed.payload,
+	});
+
 	const reloadAckParsed = parseLevelEditorDevPreviewMessage(
 		validRuntimeReloadAckMessage,
 	);
@@ -534,6 +761,39 @@ function assertEditorPreviewSenderHelpers(): void {
 		"Expected gameplay camera request to avoid scene fallbacks.",
 	);
 
+	const renderedHitTestMessage = buildEditorRenderedSceneHitTestRequestMessage({
+		requestId: "test-editor-sender:rendered-hit-test",
+		request: validRenderedSceneHitTestRequest,
+	});
+
+	assertEqual(
+		renderedHitTestMessage.request.objectViewStateGate,
+		"visible-and-pickable-only",
+		"Expected editor rendered hit-test helper to preserve object view-state gating.",
+	);
+	assertEqual(
+		renderedHitTestMessage.request.writesRuntimeData,
+		false,
+		"Expected editor rendered hit-test helper not to request runtime writes.",
+	);
+
+	const renderedBoxSelectMessage =
+		buildEditorRenderedSceneBoxSelectRequestMessage({
+			requestId: "test-editor-sender:rendered-box-select",
+			request: validRenderedSceneBoxSelectRequest,
+		});
+
+	assertEqual(
+		renderedBoxSelectMessage.request.objectViewStateGate,
+		"visible-and-pickable-only",
+		"Expected editor rendered box-select helper to preserve object view-state gating.",
+	);
+	assertEqual(
+		renderedBoxSelectMessage.request.writesRuntimeData,
+		false,
+		"Expected editor rendered box-select helper not to request runtime writes.",
+	);
+
 	const manualReloadMessage = buildEditorRuntimeReloadRequestMessage({
 		requestId: "test-editor-sender:reload",
 		runtimeSceneId: "sci_fi_room_runtime",
@@ -567,11 +827,19 @@ function assertEditorPreviewSenderHelpers(): void {
 		runtimeSceneId: "sci_fi_room_runtime",
 		mode: "gameplay",
 	});
+	sendRenderedSceneHitTestRequest(channel, {
+		requestId: "test-editor-sender:send-rendered-hit-test",
+		request: validRenderedSceneHitTestRequest,
+	});
+	sendRenderedSceneBoxSelectRequest(channel, {
+		requestId: "test-editor-sender:send-rendered-box-select",
+		request: validRenderedSceneBoxSelectRequest,
+	});
 
 	assertEqual(
 		channel.messages.length,
-		3,
-		"Expected editor sender helpers to post three validated messages.",
+		5,
+		"Expected editor sender helpers to post five validated messages.",
 	);
 }
 
@@ -646,6 +914,158 @@ function assertRuntimeTelemetryValidation(): void {
 			},
 		},
 		"payload.lifecycle must be created, started, paused, stopped, or disposed",
+	);
+}
+
+function assertRenderedSceneHitTestValidation(): void {
+	expectInvalidMessage(
+		{
+			...validRenderedSceneHitTestRequestMessage,
+			request: {
+				...validRenderedSceneHitTestRequest,
+				screenPoint: {
+					x: 1281,
+					y: 360,
+				},
+			},
+		},
+		"screenPoint.x must be inside the viewport width",
+	);
+	expectInvalidMessage(
+		{
+			...validRenderedSceneHitTestRequestMessage,
+			request: {
+				...validRenderedSceneHitTestRequest,
+				coordinateSpace: "normalized-viewport",
+			},
+		},
+		"coordinateSpace must be viewport-css-pixels",
+	);
+	expectInvalidMessage(
+		{
+			...validRenderedSceneHitTestResultMessage,
+			payload: {
+				...validRenderedSceneHitTestResult,
+				status: "hit",
+				hit: undefined,
+			},
+		},
+		"payload.hit must be an object when status is hit",
+	);
+	expectInvalidMessage(
+		{
+			...validRenderedSceneHitTestResultMessage,
+			payload: {
+				runtimeSceneId: "portal_arena_runtime",
+				status: "miss",
+				source: "runtime-rendered-scene-hit-test",
+				writesRuntimeData: false,
+			},
+		},
+		"payload.reason is required when status is miss",
+	);
+	expectInvalidMessage(
+		{
+			...validRenderedSceneHitTestRequestMessage,
+			request: {
+				...validRenderedSceneHitTestRequest,
+				writesRuntimeData: true,
+			},
+		},
+		"request.writesRuntimeData must be false",
+	);
+	expectInvalidMessage(
+		{
+			...validRenderedSceneHitTestRequestMessage,
+			request: {
+				...validRenderedSceneHitTestRequest,
+				objectViewStateGate: "all-rendered-objects",
+			},
+		},
+		"request.objectViewStateGate must be visible-and-pickable-only",
+	);
+	expectInvalidMessage(
+		{
+			...validRenderedSceneHitTestResultMessage,
+			payload: {
+				...validRenderedSceneHitTestResult,
+				writesRuntimeData: true,
+			},
+		},
+		"payload.writesRuntimeData must be false",
+	);
+
+	parseLevelEditorDevPreviewMessage({
+		...validRenderedSceneHitTestResultMessage,
+		payload: {
+			runtimeSceneId: "portal_arena_runtime",
+			status: "ignored",
+			source: "runtime-rendered-scene-hit-test",
+			writesRuntimeData: false,
+			reason: "rendered-hit-test-unavailable",
+		},
+	});
+
+	expectInvalidMessage(
+		{
+			...validRenderedSceneBoxSelectRequestMessage,
+			request: {
+				...validRenderedSceneBoxSelectRequest,
+				rect: {
+					...validRenderedSceneBoxSelectRequest.rect,
+					width: 0,
+				},
+			},
+		},
+		"request.rect.width must be a finite positive number",
+	);
+	expectInvalidMessage(
+		{
+			...validRenderedSceneBoxSelectRequestMessage,
+			request: {
+				...validRenderedSceneBoxSelectRequest,
+				rect: {
+					x: 1200,
+					y: 180,
+					width: 640,
+					height: 360,
+				},
+			},
+		},
+		"request.rect must fit inside the viewport width",
+	);
+	expectInvalidMessage(
+		{
+			...validRenderedSceneBoxSelectRequestMessage,
+			request: {
+				...validRenderedSceneBoxSelectRequest,
+				writesRuntimeData: true,
+			},
+		},
+		"request.writesRuntimeData must be false",
+	);
+	expectInvalidMessage(
+		{
+			...validRenderedSceneBoxSelectResultMessage,
+			payload: {
+				...validRenderedSceneBoxSelectResult,
+				status: "hit",
+				hits: [],
+			},
+		},
+		"payload.hits must be a non-empty array when status is hit",
+	);
+	expectInvalidMessage(
+		{
+			...validRenderedSceneBoxSelectResultMessage,
+			payload: {
+				runtimeSceneId: "portal_arena_runtime",
+				status: "miss",
+				source: "runtime-rendered-scene-box-select",
+				writesRuntimeData: false,
+			},
+		},
+		"payload.reason is required when status is miss",
 	);
 }
 
@@ -784,6 +1204,30 @@ function assertChannelSenderReceiverFlow(): void {
 	let clearCoreRequest:
 		| ReturnType<typeof createCoreObjectPreviewClearRequestMessage>["request"]
 		| undefined;
+	let renderedHitTestRequest:
+		| {
+				readonly request: LevelEditorRenderedSceneHitTestRequest;
+				readonly requestId: string;
+		  }
+		| undefined;
+	let renderedHitTestResult:
+		| {
+				readonly payload: LevelEditorRenderedSceneHitTestResultPayload;
+				readonly requestId: string;
+		  }
+		| undefined;
+	let renderedBoxSelectRequest:
+		| {
+				readonly request: LevelEditorRenderedSceneBoxSelectRequest;
+				readonly requestId: string;
+		  }
+		| undefined;
+	let renderedBoxSelectResult:
+		| {
+				readonly payload: LevelEditorRenderedSceneBoxSelectResultPayload;
+				readonly requestId: string;
+		  }
+		| undefined;
 	let runtimeTelemetry: LevelEditorRuntimeTelemetryPayload | undefined;
 	let rejectedCount = 0;
 	const connection = connectGameWindowDevPreviewChannel({
@@ -802,6 +1246,18 @@ function assertChannelSenderReceiverFlow(): void {
 		},
 		receiveRuntimeTelemetry(payload) {
 			runtimeTelemetry = payload;
+		},
+		requestRenderedSceneHitTest(request, requestId) {
+			renderedHitTestRequest = { request, requestId };
+		},
+		receiveRenderedSceneHitTestResult(payload, requestId) {
+			renderedHitTestResult = { payload, requestId };
+		},
+		requestRenderedSceneBoxSelect(request, requestId) {
+			renderedBoxSelectRequest = { request, requestId };
+		},
+		receiveRenderedSceneBoxSelectResult(payload, requestId) {
+			renderedBoxSelectResult = { payload, requestId };
 		},
 		reload(request) {
 			reloadRequest = request;
@@ -916,6 +1372,106 @@ function assertChannelSenderReceiverFlow(): void {
 		clearCoreRequest.targetKinds?.[0],
 		"spawn",
 		"Expected core clear callback to receive target kind filter.",
+	);
+
+	postLevelEditorDevPreviewMessage(
+		channel,
+		createRenderedSceneHitTestRequestMessage({
+			requestId: "test-rendered-hit-test:through-channel",
+			request: validRenderedSceneHitTestRequest,
+		}),
+	);
+
+	if (!renderedHitTestRequest) {
+		throw new Error(
+			"Expected channel receiver to dispatch rendered-scene hit-test request callback.",
+		);
+	}
+
+	assertEqual(
+		renderedHitTestRequest.request.objectViewStateGate,
+		"visible-and-pickable-only",
+		"Expected rendered hit-test request callback to preserve editor object view-state gating.",
+	);
+	assertEqual(
+		renderedHitTestRequest.requestId,
+		"test-rendered-hit-test:through-channel",
+		"Expected rendered hit-test request callback to preserve requestId.",
+	);
+
+	postLevelEditorDevPreviewMessage(
+		channel,
+		createRenderedSceneHitTestResultMessage({
+			requestId: "test-rendered-hit-test:through-channel",
+			result: validRenderedSceneHitTestResult,
+		}),
+	);
+
+	if (!renderedHitTestResult) {
+		throw new Error(
+			"Expected channel receiver to dispatch rendered-scene hit-test result callback.",
+		);
+	}
+
+	assertEqual(
+		renderedHitTestResult.payload.hit?.stableId,
+		"portal-arena:portal:test",
+		"Expected rendered hit-test result callback to preserve stable ID.",
+	);
+	assertEqual(
+		renderedHitTestResult.payload.writesRuntimeData,
+		false,
+		"Expected rendered hit-test result callback not to write runtime data.",
+	);
+
+	postLevelEditorDevPreviewMessage(
+		channel,
+		createRenderedSceneBoxSelectRequestMessage({
+			requestId: "test-rendered-box-select:through-channel",
+			request: validRenderedSceneBoxSelectRequest,
+		}),
+	);
+
+	if (!renderedBoxSelectRequest) {
+		throw new Error(
+			"Expected channel receiver to dispatch rendered-scene box-select request callback.",
+		);
+	}
+
+	assertEqual(
+		renderedBoxSelectRequest.request.objectViewStateGate,
+		"visible-and-pickable-only",
+		"Expected rendered box-select request callback to preserve editor object view-state gating.",
+	);
+	assertEqual(
+		renderedBoxSelectRequest.requestId,
+		"test-rendered-box-select:through-channel",
+		"Expected rendered box-select request callback to preserve requestId.",
+	);
+
+	postLevelEditorDevPreviewMessage(
+		channel,
+		createRenderedSceneBoxSelectResultMessage({
+			requestId: "test-rendered-box-select:through-channel",
+			result: validRenderedSceneBoxSelectResult,
+		}),
+	);
+
+	if (!renderedBoxSelectResult) {
+		throw new Error(
+			"Expected channel receiver to dispatch rendered-scene box-select result callback.",
+		);
+	}
+
+	assertEqual(
+		renderedBoxSelectResult.payload.hits?.[0]?.stableId,
+		"portal-arena:portal:test",
+		"Expected rendered box-select result callback to preserve stable IDs.",
+	);
+	assertEqual(
+		renderedBoxSelectResult.payload.writesRuntimeData,
+		false,
+		"Expected rendered box-select result callback not to write runtime data.",
 	);
 
 	postLevelEditorDevPreviewMessage(
@@ -1524,6 +2080,7 @@ assertProtocolMessageValidation();
 assertEditorPreviewSenderHelpers();
 assertInvalidPreviewPatchRejection();
 assertRuntimeTelemetryValidation();
+assertRenderedSceneHitTestValidation();
 assertReloadRequestShape();
 assertClearPreviewRequestShape();
 assertChannelSenderReceiverFlow();

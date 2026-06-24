@@ -22,7 +22,10 @@ import {
 import type { RuntimeSceneManifestData } from "../src/engine/data/schemas/index.js";
 import { buildCollisionOverlayViewModel } from "../src/game/editor/collisionDrafts/collisionOverlayViewModel.js";
 import { observatoryCollisionCookDraft } from "../src/game/editor/collisionDrafts/observatoryCollisionDraft.js";
-import { observatoryRuntimeSceneManifest } from "../src/game/levels/index.js";
+import {
+	defaultRuntimeSceneManifest,
+	observatoryRuntimeSceneManifest,
+} from "../src/game/levels/index.js";
 
 const generatedRuntimeModuleFileUrl = new URL(
 	"../src/game/generated/observatoryCollisionRuntime.ts",
@@ -445,7 +448,7 @@ function assertEditorSessionDefaults(): void {
 
 	assertEqual(
 		defaultEditorSession.selectedRuntimeSceneId,
-		"portal_arena_runtime",
+		defaultRuntimeSceneManifest.id,
 		"Expected the generic editor boundary shell to open on the runtime scene catalog default.",
 	);
 	assertEqual(

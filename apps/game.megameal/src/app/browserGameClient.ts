@@ -11,7 +11,10 @@ export type BrowserGameClientOptions = {
 	readonly runtimeManifest?: RuntimeSceneManifestData;
 };
 
-export type BrowserGameClient = Omit<GameClientMount, "runtime"> & {
+export type BrowserGameClient = Omit<
+	GameClientMount,
+	"runtime" | "hitTestRenderedScene" | "boxSelectRenderedScene"
+> & {
 	readonly api: EngineClientApi;
 	startLoop(): void;
 	stopLoop(): void;

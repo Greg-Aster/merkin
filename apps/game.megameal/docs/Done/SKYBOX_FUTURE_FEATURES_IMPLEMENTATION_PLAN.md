@@ -26,9 +26,11 @@ Target environment mode: `equirectangular-environment`
 Reason:
 
 ```text
-portal_arena_runtime is the default scene and the navigation hub. Moving it
-first proves the authored environment path where users land, without coupling
-the work to Observatory, Miranda, Sci Fi Room, or old-engine migration churn.
+portal_arena_runtime was the default scene and navigation hub when this packet
+landed. It now remains optional Merkin game content while `starter_runtime`
+owns the clean-install default. Moving Portal Arena first proved the authored
+environment path without coupling the work to Observatory, Miranda, Sci Fi Room,
+or old-engine migration churn.
 ```
 
 Implemented state:
@@ -192,8 +194,8 @@ Completion criteria:
 Implemented work:
 
 - Update `ENGINE_CONTRACT_REGISTER.md` so `SkyboxEnvironmentContract` and the
-  active migration status say the default portal arena scene uses a manifest
-  owned equirectangular environment.
+  active migration status say Portal Arena uses a manifest-owned
+  equirectangular environment.
 - Update `GAME_ENGINE_DESIGN_DOCUMENT.md` current implementation status so it
   says portal arena uses the equirectangular asset while non-portal production
   scenes remain on their authored cubemaps.

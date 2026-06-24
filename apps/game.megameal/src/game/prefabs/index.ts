@@ -43,6 +43,8 @@ export {
 	mirandaStoryMarkerRedPrefab,
 	playerPrefab,
 	prototypePrefabs,
+	starterPropPrefab,
+	starterPrefabs,
 } from "./defaultPrefabs.js";
 export {
 	observatoryBoundaryBlockerPrefab,

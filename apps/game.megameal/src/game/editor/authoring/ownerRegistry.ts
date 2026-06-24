@@ -413,6 +413,29 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 	];
 
 const runtimeSceneOwnerModules: Record<string, RuntimeSceneOwnerModules> = {
+	starter_runtime: {
+		level: ownerModule(
+			"Starter level",
+			"starterLevel",
+			"src/game/levels/defaultLevels.ts",
+		),
+		prefabs: ownerModule(
+			"Starter prefab catalog",
+			"starterPrefabs",
+			"src/game/prefabs/defaultPrefabs.ts",
+		),
+		assets: ownerModule(
+			"Starter asset manifest",
+			"starterAssetManifest",
+			"src/game/assets/defaultAssets.ts",
+		),
+		renderProfile: ownerModule(
+			"Starter render profile",
+			"starterRenderProfile",
+			"src/game/levels/renderProfiles.ts",
+		),
+		generatedModules: [publishedTransformsModule()],
+	},
 	portal_arena_runtime: {
 		level: ownerModule(
 			"Portal arena level",

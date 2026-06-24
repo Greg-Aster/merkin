@@ -24,7 +24,10 @@ import {
 	buildLevelEditorFeatureCoverageRegistry,
 	validateLevelEditorFeatureCoverageRegistry,
 } from "../src/game/editor/authoring/index.js";
-import { defaultRuntimeSceneManifest } from "../src/game/levels/index.js";
+import {
+	defaultRuntimeSceneManifest,
+	portalArenaRuntimeSceneManifest,
+} from "../src/game/levels/index.js";
 
 const session = getDefaultLevelEditorSessionSummary();
 const workspace = session.workspace;
@@ -168,15 +171,18 @@ if (registeredDraftSession.collisionDraftId === null) {
 const defaultCategories = new Set(
 	workspace.sceneTree.map((group) => group.category),
 );
+const portalArenaWorkspace = buildLevelEditorWorkspaceModel({
+	selectedRuntimeSceneId: portalArenaRuntimeSceneManifest.id,
+});
 assertIncludes(
 	[...defaultCategories],
 	"spawn",
 	"Expected selected workspace to expose the player spawn category.",
 );
 assertIncludes(
-	[...defaultCategories],
+	portalArenaWorkspace.sceneTree.map((group) => group.category),
 	"portals",
-	"Expected selected workspace to expose portal objects as an outliner category.",
+	"Expected Portal Arena workspace to expose portal objects as an outliner category.",
 );
 assertIncludes(
 	registeredDraftWorkspace.sceneTree.map((group) => group.category),
@@ -189,24 +195,28 @@ assertAtLeast(
 	"Expected workspace outliner to be broader than terrain diagnostics.",
 );
 
-const portalGroup = workspace.sceneTree.find(
+const portalGroup = portalArenaWorkspace.sceneTree.find(
 	(group) => group.category === "portals",
 );
 
 if (!portalGroup) {
-	throw new Error("Expected default workspace to include a Portals group.");
+	throw new Error(
+		"Expected Portal Arena workspace to include a Portals group.",
+	);
 }
 
 assertAtLeast(
 	portalGroup.objects.length,
 	1,
-	"Expected default workspace portal group to contain selectable objects.",
+	"Expected Portal Arena workspace portal group to contain selectable objects.",
 );
 
 const firstPortalObject = portalGroup.objects[0];
 
 if (!firstPortalObject) {
-	throw new Error("Expected a first portal object in the default workspace.");
+	throw new Error(
+		"Expected a first portal object in the Portal Arena workspace.",
+	);
 }
 
 assertIncludes(
@@ -231,7 +241,7 @@ assertEqual(
 );
 assertIncludes(
 	firstPortalObject.outliner.objectPath,
-	workspace.selectedRuntimeSceneId,
+	portalArenaWorkspace.selectedRuntimeSceneId,
 	"Expected portal outliner path to include the runtime scene ID.",
 );
 assertIncludes(
@@ -452,8 +462,13 @@ assertEqual(
 );
 assertContains(
 	saveLevelCommand.reason,
-	"bounded runtime owner data path",
+	"bounded generated runtime owner data",
 	"Expected Save Level command copy to describe bounded runtime owner writes.",
+);
+assertContains(
+	saveLevelCommand.reason,
+	"object-library placements",
+	"Expected Save Level command copy to describe the current generated-owner support beyond transforms.",
 );
 assertEqual(
 	discardCommand.operation,
@@ -581,7 +596,7 @@ assertEqual(
 	"Expected staged transform edits to produce a set-transform operation.",
 );
 
-const portalObject = workspace.objects.find(
+const portalObject = portalArenaWorkspace.objects.find(
 	(object) => object.stableId === "portal-arena:portal:observatory",
 );
 
@@ -607,7 +622,7 @@ const stagedPortalEdit = {
 	after: portalPositionXField.value + 0.5,
 } satisfies LevelEditorStagedFieldEdit;
 const portalTransaction = buildWorkspaceAuthoringTransaction({
-	workspace,
+	workspace: portalArenaWorkspace,
 	edits: [stagedPortalEdit],
 	transactionId: "workspace-contract-non-player-transaction",
 	createdAt: "2026-06-17T00:00:00.000Z",
@@ -628,7 +643,7 @@ assertEqual(
 	"Expected non-player staged transform edits to preserve the selected stable ID.",
 );
 const portalSaveTransaction = buildAuthoringSaveTransaction({
-	workspace,
+	workspace: portalArenaWorkspace,
 	edits: [stagedPortalEdit],
 	baseHash: "missing",
 });
@@ -1159,11 +1174,11 @@ assertEqual(
 );
 
 assertIncludes(
-	workspace.validationReport.items
+	registeredDraftWorkspace.validationReport.items
 		.filter((item) => item.severity === "warning")
 		.map((item) => item.category),
 	"terrain",
-	"Expected validation report to surface bake-only terrain as a warning category.",
+	"Expected terrain-backed validation reports to surface bake-only terrain as a warning category.",
 );
 
 const duplicateStableIdInstance =

@@ -12,6 +12,7 @@ export {
 	defaultLevels,
 	mirandaDeckLevel,
 	prototypeLevel,
+	starterLevel,
 } from "./defaultLevels.js";
 export { observatoryLevel } from "./observatoryLevel.js";
 export { portalArenaLevel } from "./portalArenaLevel.js";
@@ -34,6 +35,7 @@ export {
 	prototypeRuntimeSceneManifest,
 	sciFiRoomRuntimeSceneManifest,
 	solitudeRuntimeSceneManifest,
+	starterRuntimeSceneManifest,
 	yggdrasilRuntimeSceneManifest,
 } from "./runtimeSceneManifests.js";
 export {
@@ -43,6 +45,7 @@ export {
 	prototypeRenderProfile,
 	sciFiRoomRenderProfile,
 	solitudeRenderProfile,
+	starterRenderProfile,
 	yggdrasilRenderProfile,
 } from "./renderProfiles.js";
 

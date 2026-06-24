@@ -2124,7 +2124,7 @@ function workspaceCommands(options: {
 			blocksDirty: false,
 			operation: "owner-write",
 			reason: saveReady
-				? "writes the first supported bounded runtime owner data path for level-owned set-transform operations"
+				? "writes bounded generated runtime owner data for supported level-instance transforms, object-library placements, prefab replacements, component set/removal records, duplicate insertions, and instance removals"
 				: `level save is blocked: ${firstError(options.authoring.errors)}`,
 		},
 		{
@@ -2436,6 +2436,7 @@ function firstError(errors: readonly string[]): string {
 }
 
 const runtimeSceneManifestExportNames: Record<string, string> = {
+	starter_runtime: "starterRuntimeSceneManifest",
 	portal_arena_runtime: "portalArenaRuntimeSceneManifest",
 	prototype_arena_runtime: "prototypeRuntimeSceneManifest",
 	miranda_deck_runtime: "mirandaDeckRuntimeSceneManifest",

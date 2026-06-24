@@ -35,17 +35,41 @@ const docs = {
 const workspaceComponent = await readProjectFile(
 	"src/app/editor/LevelEditorWorkspace.svelte",
 );
+const coreObjectPreviewPatch = await readProjectFile(
+	"src/app/editor/levelEditorCoreObjectPreviewPatch.ts",
+);
 const objectLibraryPanel = await readProjectFile(
 	"src/app/editor/LevelEditorObjectLibraryPanel.svelte",
 );
 const objectLibraryModel = await readProjectFile(
 	"src/app/editor/levelEditorObjectLibrary.ts",
 );
+const outlinerFiltersModel = await readProjectFile(
+	"src/app/editor/levelEditorOutlinerFilters.ts",
+);
 const workspaceUi = await readProjectFile(
 	"src/app/editor/levelEditorWorkspaceUi.ts",
 );
 const viewportBridgePanel = await readProjectFile(
 	"src/app/editor/LevelEditorViewportBridgePanel.svelte",
+);
+const devPreviewProtocol = await readProjectFile(
+	"src/app/devPreview/gameWindowPreviewProtocol.ts",
+);
+const renderedSceneHitTestResult = await readProjectFile(
+	"src/app/devPreview/renderedSceneHitTestResult.ts",
+);
+const previewSender = await readProjectFile(
+	"src/app/editor/levelEditorPreviewSender.ts",
+);
+const renderedHitTestSelection = await readProjectFile(
+	"src/app/editor/levelEditorRenderedHitTestSelection.ts",
+);
+const protocolTypes = await readProjectFile(
+	"src/engine/data/collisionCook/types.ts",
+);
+const threeAdapter = await readProjectFile(
+	"src/engine/adapters/three/index.ts",
 );
 const editorStyles = await readProjectFile("src/styles/editor.css");
 const auditScript = await readProjectFile(
@@ -64,6 +88,8 @@ assertWorkspaceAlignmentHasExternalProof();
 assertResearchGapAnalysisIsActionable();
 assertWorkbenchContractIsRegistered();
 assertWorkbenchSourceUsesConnectedRegions();
+await assertEditorObjectViewStateCoverageStaysEditorOnly();
+assertRenderedSceneHitTestProtocolSeamIsHonest();
 assertSavePublishPlanStaysFirstSliceHonest();
 assertGenericEditorCatalogGuardrails();
 assertObservatoryCollisionFindingsAreCurrent();
@@ -90,16 +116,26 @@ function assertRequiredPackageScripts(): void {
 			"tsx ./scripts/test-level-editor-aaa-plan-contract.ts",
 		"test:level-editor-authoring-queue-contract":
 			"tsx ./scripts/test-level-editor-authoring-queue-contract.ts",
+		"test:level-editor-selection-model-contract":
+			"tsx ./scripts/test-level-editor-selection-model-contract.ts",
+		"test:level-editor-object-view-state-model-contract":
+			"tsx ./scripts/test-level-editor-object-view-state-model-contract.ts",
+		"test:level-editor-rendered-hit-test-selection-contract":
+			"tsx ./scripts/test-level-editor-rendered-hit-test-selection-contract.ts",
 		"test:level-editor-workspace-model-contract":
 			"tsx ./scripts/test-level-editor-workspace-model-contract.ts",
 		"test:level-editor-workbench-model-contract":
 			"tsx ./scripts/test-level-editor-workbench-model-contract.ts",
 		"test:level-editor-viewport-bridge-model-contract":
 			"tsx ./scripts/test-level-editor-viewport-bridge-model-contract.ts",
+		"test:level-editor-maintainability-contract":
+			"tsx ./scripts/test-level-editor-maintainability-contract.ts",
 		"test:level-editor-collision-cook-contract":
 			"tsx ./scripts/test-level-editor-collision-cook-contract.ts",
 		"test:live-preview-protocol-contract":
 			"tsx ./scripts/test-live-preview-protocol-contract.ts",
+		"test:rendered-scene-hit-test-contract":
+			"tsx ./scripts/test-rendered-scene-hit-test-contract.ts",
 	};
 
 	for (const [scriptName, expectedCommand] of Object.entries(requiredScripts)) {
@@ -315,6 +351,17 @@ function assertResearchGapAnalysisIsActionable(): void {
 		"Required Workbench Contract",
 		"No-Victory Criteria",
 		"First Implementation Gate",
+		"Blockout-To-Reimagined Asset Workflow",
+		"`Renderable.meshId`",
+		"manifest-backed mesh picker",
+		"Hunyuan/ComfyUI",
+		"Generated output enters the editor as a generated asset/library record",
+		"AI never mutates runtime entities directly",
+		"A visual reimagining must not silently create collision",
+		"Inspector renderable mesh picker",
+		"AI visual reimagining",
+		"AI-generated visual assets",
+		"The blockout-to-reimagined workflow is complete",
 		"central scene viewport",
 		"scene hierarchy or outliner",
 		"details/inspector panel",
@@ -374,6 +421,11 @@ function assertWorkbenchContractIsRegistered(): void {
 		"test:level-editor-aaa-plan-contract",
 		"treating a stack of diagnostic cards as the final level editor",
 		"Research and gap analysis implemented",
+		"blockout-to-reimagined workflow is planned but not complete",
+		"manifest-backed mesh picking",
+		"Hunyuan/ComfyUI generation",
+		"generated asset provenance",
+		"preserving stable IDs and gameplay components",
 		"A true AAA-tier workbench remains future",
 	]) {
 		assertIncludes(
@@ -397,17 +449,31 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		"editor-side camera/framing controls",
 		"explicit Select/Place/Transform tool modes",
 		"projected X/Z translate dragging",
+		"synchronized projected viewport pin selection",
+		"projected viewport marquee selection",
 		"This is editor-projected direct manipulation, not a rendered-scene raycast",
 		"Needs rendered-scene gizmos, arbitrary drag placement",
 		"draft-ready drag metadata exist",
 		"guarded selected-instance duplicate/removal action pair",
 		"bounded staged authoring undo/redo",
+		"editor-owned outliner multi-select foundation",
+		"primary inspector object",
+		"selection-set inspector",
+		"bulk owner-write operations remain future",
+		"Planned blockout-to-reimagined asset workflow",
+		"designers block out levels with simple primitives/prefabs",
+		"`Renderable.meshId` must be a first-class inspector field",
+		"generated asset import into a manifest-backed library",
+		"Generated visual replacement must preserve stable IDs and gameplay components",
 		"post-publish undo/redo semantics",
 		"pre-save authoring history only",
 		"tightening projected X/Z translate drag contract/progress hygiene",
 		"Rendered-scene direct manipulation remains disabled",
 		"Level Instance Duplicate Owner Writes",
 		"Stage Removal",
+		"UX consolidation lane active",
+		"secondary dock/drawer surfaces",
+		"Active pass demotes status/debug windows into secondary dock affordances",
 		"Do Not Declare Done Until",
 		"Persistent owner writes exist for the feature families advertised as",
 	];
@@ -415,9 +481,60 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		'<section class="editor-workbench-main" aria-label="Level editor workbench">',
 		'class="editor-panel editor-outliner" aria-label="Scene outliner"',
 		"outlinerSearchQuery",
+		"outlinerCategoryFilter",
+		"outlinerVisibilityFilter",
+		"outlinerLockFilter",
+		"outlinerPickabilityFilter",
+		"outlinerFiltersActive",
+		"filteredOutlinerStableIds",
+		"resetOutlinerFilters",
+		"selectFilteredOutlinerObjects",
+		"addFilteredOutlinerObjectsToSelection",
+		"clearObjectSelection",
+		"objectViewStateModel",
+		"buildLevelEditorObjectViewStateModel",
+		"toggleObjectVisible",
+		"toggleObjectLocked",
+		"toggleObjectIsolated",
+		"resetObjectViewState",
+		"matchesLevelEditorOutlinerFilters",
+		'from "./levelEditorOutlinerFilters.js"',
+		"selectedStableIds",
+		"createLevelEditorSelectionState",
+		"selectLevelEditorObject",
+		"editorSelectionState.primaryStableId",
+		"editorSelectionState.selectedStableIds",
+		"objectIsSelected",
+		"objectIsPrimarySelection",
+		"selectObjectFromPointer",
+		"event.ctrlKey || event.metaKey",
+		"Primary inspector",
+		"bulkStageReason",
+		"categorySummaries",
+		"commonComponentNames",
+		"makePrimarySelection",
+		"removeObjectFromSelection",
+		'class="editor-selection-set"',
+		'class="editor-selection-set-row"',
 		"filteredSceneTree",
-		"matchesOutlinerSearch",
 		"Stable ID, prefab, component, owner",
+		"All categories",
+		"All lock states",
+		"All pickability",
+		"All visibility",
+		"Editor locked",
+		"Editor unlocked",
+		"Editor pickable",
+		"Editor visible",
+		"Editor hidden",
+		"Select Shown",
+		"Add Shown",
+		"Clear Selection",
+		"Clear Isolation",
+		"Reset View",
+		'class="editor-outliner-filter-actions"',
+		'class="editor-outliner-row-tools"',
+		"class:active-view-state",
 		"object.outliner.objectPath.join",
 		'class="editor-outliner-affordances"',
 		"object.outliner.visibility.label",
@@ -449,9 +566,15 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		'class="editor-inspector-component-group"',
 		'class="editor-panel editor-live-runtime"',
 		"<LevelEditorObjectLibraryPanel",
+		'<details class="editor-panel editor-graph-panel"',
+		'class="editor-panel editor-live-runtime"',
+		'<details class="editor-panel editor-collision-preview"',
+		'<details class="editor-panel editor-terrain-bake"',
+		'class="editor-panel editor-validation-report"',
 		'class="editor-panel editor-command-plan" aria-label="Command plan"',
 		'class="editor-panel editor-staged-operations"',
 		'class="editor-panel editor-validation-report"',
+		"open={hasDirtyState}",
 		"removeQueuedAuthoringOperationEntry",
 		"removeLevelEditorAuthoringOperationEntry",
 		"onRemoveAuthoringOperations={removeQueuedAuthoringOperationEntry}",
@@ -473,7 +596,6 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		"function readFieldValue(",
 		"return fieldDisplayValueFromEdits(edits, object, field);",
 		"Transform.rotation.",
-		"readQuaternionField",
 		"nudgeViewportRotationYaw",
 		"quaternionFromYawDegrees",
 		"onRotationYawNudge={nudgeViewportRotationYaw}",
@@ -510,6 +632,14 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		'source === "viewport-click"',
 		"object-library-viewport-placements",
 	];
+	const requiredCoreObjectPreviewPatchSnippets = [
+		"buildCoreObjectPreviewEntry",
+		"readTransformPatch",
+		"readVectorField",
+		"readQuaternionField",
+		"objectLibraryComponentSnapshots",
+		"Transform.rotation",
+	];
 	const requiredViewportBridgeSnippets = [
 		'class="editor-panel editor-viewport-bridge" aria-label="Viewport bridge"',
 		"data-viewport-mode={model.view.mode}",
@@ -536,7 +666,8 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		"data-viewport-interaction-tool={model.interaction.activeTool}",
 		"onclick={handleViewportClick}",
 		"onpointermove={handleViewportPointerMove}",
-		"onpointerup={endProjectedTransformDrag}",
+		"completeSelectionMarquee(event)",
+		"endProjectedTransformDrag(event)",
 		"onmouseleave={handleViewportPointerLeave}",
 		'onDropPlacementEntry(placementTarget.entryId, point, "viewport-click")',
 		"placementHoverPoint",
@@ -545,6 +676,15 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		"model.camera.activeMode",
 		"model.camera.writesRuntimeData",
 		"model.projection.objects",
+		"object.primarySelected",
+		"viewportSelectProjectedObjectsInRect",
+		"selectionMarqueeStart",
+		"onSelectObjects",
+		"data-selection-marquee-active",
+		'class="editor-viewport-selection-marquee"',
+		"class:primary-selected-viewport-object",
+		"data-selected-primary={object.primarySelected}",
+		"additive: event.ctrlKey || event.metaKey",
 		'class="editor-viewport-pin"',
 		"placementProjectionTarget",
 		"stagePlacementFromGhost",
@@ -617,6 +757,17 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		"placementSource",
 		"LevelEditorObjectLibraryStagedPlacement",
 	];
+	const requiredOutlinerFilterModelSnippets = [
+		"export type LevelEditorOutlinerFilters",
+		"export function matchesLevelEditorOutlinerFilters",
+		"matchesVisibilityFilter",
+		"matchesLockFilter",
+		"matchesPickabilityFilter",
+		"matchesSearch",
+		"editor-pickable",
+		"editor-hidden",
+		"editor-locked",
+	];
 	const requiredWorkspaceUiSnippets = [
 		"export function buildStagedPublishReadiness",
 		"function queuedEntryPublishability",
@@ -632,6 +783,8 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		".editor-workbench-main",
 		".editor-workbench-center",
 		".editor-viewport-bridge",
+		".editor-viewport-pin.primary-selected-viewport-object",
+		".editor-viewport-selection-marquee",
 		".editor-viewport-placement-ghost",
 		".editor-viewport-transform-drag-handle",
 		'[data-transform-drag-active="true"]',
@@ -639,6 +792,17 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		".editor-viewport-frame.editor-viewport-placement-drop-active",
 		".editor-workflow-summary",
 		".editor-workflow-badges",
+		".editor-outliner-filter-actions",
+		".editor-outliner-row-tools",
+		".editor-outliner-row-tools button.active-view-state",
+		".editor-selection-context",
+		".editor-selection-set",
+		".editor-selection-set-summary",
+		".editor-selection-set-row",
+		".editor-selection-set-actions",
+		".editor-outliner-group button.primary-selected-object",
+		".editor-object-map button.primary-selected-map-object",
+		".editor-object-focus-list button.primary-selected-object-row",
 		".editor-staged-operations",
 		".editor-staged-operation-list",
 		".editor-library-browser-controls",
@@ -649,11 +813,19 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		".editor-transform-mode-switcher",
 		".editor-transform-snap-control",
 		'.editor-field[data-workflow-publishability="publishable"] input',
-		"grid-template-columns: minmax(15rem, 18rem) minmax(28rem, 1fr) minmax(",
+		"grid-template-columns: minmax(15rem, 18rem) minmax(34rem, 1.35fr) minmax(",
 		".editor-bottom-dock",
 		"grid-template-areas:",
-		"library staged validation",
+		"library library library",
+		"staged validation commands",
+		"live collision terrain",
+		"output output output",
 		".editor-bottom-dock .editor-object-library",
+		".editor-bottom-dock .editor-live-runtime",
+		".editor-bottom-dock .editor-collision-preview",
+		".editor-bottom-dock .editor-terrain-bake",
+		"details.editor-panel:not([open])",
+		"details.editor-panel > summary.editor-panel-header",
 		".editor-object-focus-grid",
 	];
 
@@ -670,6 +842,14 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 			workspaceComponent,
 			snippet,
 			`Expected LevelEditorWorkspace to keep the connected workbench region ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredCoreObjectPreviewPatchSnippets) {
+		assertIncludes(
+			coreObjectPreviewPatch,
+			snippet,
+			`Expected core object preview patch helper to keep ${JSON.stringify(snippet)} after extraction from the workspace component.`,
 		);
 	}
 
@@ -708,6 +888,14 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		);
 	}
 
+	for (const snippet of requiredOutlinerFilterModelSnippets) {
+		assertIncludes(
+			outlinerFiltersModel,
+			snippet,
+			`Expected outliner filter model to own filter logic ${JSON.stringify(snippet)}.`,
+		);
+	}
+
 	for (const snippet of requiredWorkspaceUiSnippets) {
 		assertIncludes(
 			workspaceUi,
@@ -721,6 +909,244 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 			editorStyles,
 			snippet,
 			`Expected editor styles to keep the connected workbench layout rule ${JSON.stringify(snippet)}.`,
+		);
+	}
+}
+
+async function assertEditorObjectViewStateCoverageStaysEditorOnly(): Promise<void> {
+	const normalizedWorkspaceAlignment = docs.workspaceAlignment.replace(
+		/\s+/g,
+		" ",
+	);
+	const normalizedResearchGap = docs.researchGap.replace(/\s+/g, " ");
+	const normalizedWorkbenchProgress = docs.workbenchProgress.replace(
+		/\s+/g,
+		" ",
+	);
+	const normalizedSavePublishPlan = docs.savePublishPlan.replace(/\s+/g, " ");
+	const combinedDocs = [
+		normalizedWorkspaceAlignment,
+		normalizedResearchGap,
+		normalizedWorkbenchProgress,
+		normalizedSavePublishPlan,
+	].join(" ");
+	const requiredEditorOnlySnippets = [
+		"filters are editor view state only",
+		"Browser-local editor workspace persistence may remember them as per-scene workbench state, but that is still not runtime scene data",
+		"must not be implemented as shipped object visibility, lock, isolation, or pickability toggles, or as owner-file writes, without a matching owner-write contract",
+		"may come from editor memory or browser-local editor workspace persistence",
+		"It is not runtime scene data",
+		"must not mutate `RuntimeSceneManifest`, level instance components",
+		"selection-state operations only",
+		"must not stage transforms, duplicate/remove operations, component edits, or owner writes without explicit bulk-operation contracts",
+	];
+	const requiredBrowserLocalSnippets = [
+		"browser-local runtime-scene-scoped object view-state restore",
+		"browser-local editor-only object view state that restores per runtime scene without runtime data or owner-file writes",
+	];
+	const requiredFuturePersistenceSnippets = [
+		"shared or checked-in visibility/isolation/lock metadata",
+		"Durable shipped scene/editor metadata remains future work",
+		"only as editor-owned state with schema versioning",
+		"It must stay separate from shipped runtime manifests and owner files",
+		"Future checked-in/shared scene/editor metadata must get an explicit non-runtime owner",
+		"non-runtime owner before saved view presets, team-visible visibility sets",
+		"bulk owner-write operations for multi-selected objects",
+		"bulk operation contracts",
+	];
+	const forbiddenViewStateOverclaims = [
+		"persisted visibility/isolation/lock state is implemented",
+		"visibility/isolation/lock owner writes are implemented",
+		"outliner filters write owner data",
+		"outliner filters persist owner writes",
+		"lock/pickability toggles are persisted",
+		"view-state filters are runtime owner data",
+		"browser-local object view-state writes runtime data",
+		"browser-local object view-state writes owner files",
+		"browser-local object view-state persists owner writes",
+		"browser-local view state is runtime owner data",
+		"browser-local persistence is a runtime owner write",
+	];
+
+	for (const snippet of requiredEditorOnlySnippets) {
+		assertIncludes(
+			normalizedWorkspaceAlignment,
+			snippet,
+			`Expected workspace alignment to distinguish editor-only object view state with ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredBrowserLocalSnippets) {
+		assertIncludes(
+			normalizedResearchGap,
+			snippet,
+			`Expected research/gap docs to distinguish browser-local object view-state persistence with ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredFuturePersistenceSnippets) {
+		assertIncludes(
+			combinedDocs,
+			snippet,
+			`Expected docs to keep persisted object view-state owner writes future with ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const forbidden of forbiddenViewStateOverclaims) {
+		assertNotIncludes(
+			combinedDocs.toLowerCase(),
+			forbidden,
+			`Expected docs not to overclaim object view-state persistence with ${JSON.stringify(forbidden)}.`,
+		);
+	}
+
+	const scriptFileNames = await readdir(join(appRoot, "scripts"));
+	const optionalViewStateContractNames = [
+		"test-level-editor-object-view-state-contract.ts",
+		"test-level-editor-view-state-contract.ts",
+		"test-level-editor-object-visibility-contract.ts",
+	];
+	const existingViewStateContractTests = optionalViewStateContractNames.filter(
+		(fileName) => scriptFileNames.includes(fileName),
+	);
+	const optionalViewStateScriptNames = [
+		"test:level-editor-object-view-state-contract",
+		"test:level-editor-view-state-contract",
+		"test:level-editor-object-visibility-contract",
+	];
+	const existingViewStatePackageScripts = optionalViewStateScriptNames.filter(
+		(scriptName) => packageScripts[scriptName] !== undefined,
+	);
+	const optionalViewStateModelNames = [
+		"levelEditorObjectViewStateModel",
+		"levelEditorViewStateModel",
+		"LevelEditorObjectViewStateContract",
+	];
+	const modelMentionsOptionalViewState = optionalViewStateModelNames.some(
+		(snippet) => workspaceComponent.includes(snippet),
+	);
+
+	if (
+		existingViewStateContractTests.length > 0 ||
+		existingViewStatePackageScripts.length > 0 ||
+		modelMentionsOptionalViewState
+	) {
+		assertIncludesOneOf(
+			combinedDocs,
+			[
+				"object view-state",
+				"object view state",
+				"editor view state",
+				"visibility/isolation/lock state",
+			],
+			"Expected docs to recognize the object view-state contract surface when a model or focused test exists.",
+		);
+	}
+}
+
+function assertRenderedSceneHitTestProtocolSeamIsHonest(): void {
+	const combinedDocs = [
+		docs.contractRegister,
+		docs.researchGap,
+		docs.workspaceAlignment,
+		docs.workbenchProgress,
+	]
+		.join("\n")
+		.replace(/\s+/g, " ");
+	const combinedSources = [
+		protocolTypes,
+		devPreviewProtocol,
+		renderedSceneHitTestResult,
+		renderedHitTestSelection,
+		previewSender,
+		threeAdapter,
+	]
+		.join("\n")
+		.replace(/\s+/g, " ");
+	const requiredDocSnippets = [
+		"rendered-scene hit-test and box-select request/result protocols",
+		"dev-runtime adapter-backed result path",
+		"LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL",
+		"rendered-scene-hit-test-request",
+		"rendered-scene-hit-test-result",
+		"rendered-scene-box-select-request",
+		"rendered-scene-box-select-result",
+		"ThreeRendererAdapter.hitTestRenderedScene",
+		"ThreeRendererAdapter.boxSelectRenderedScene",
+		"stableId",
+		"runtimeSceneId",
+		"requestId",
+		"writesRuntimeData: false",
+		"runtime-rendered-scene-box-select",
+		"Editor object view-state still gates rendered selection",
+		"Projected transform pins remain the editor fallback when the runtime rendered hit-test requester is unavailable",
+		"projected-bounds box/marquee selection",
+		"This is a renderer-backed stable-ID selection path, not proof of a complete direct-manipulation system",
+	];
+	const requiredSourceSnippets = [
+		"rendered-scene-hit-test-request",
+		"rendered-scene-hit-test-result",
+		"rendered-scene-box-select-request",
+		"rendered-scene-box-select-result",
+		"LevelEditorRenderedSceneBoxSelectRequest",
+		"pickableStableIds",
+		"objectViewStateGate",
+		"visible-and-pickable-only",
+		"writesRuntimeData",
+		"requestRenderedSceneHitTest",
+		"receiveRenderedSceneHitTestResult",
+		"requestRenderedSceneBoxSelect",
+		"receiveRenderedSceneBoxSelectResult",
+		"buildRenderedSceneHitTestRequestMessage",
+		"buildRenderedSceneBoxSelectRequestMessage",
+		"sendRenderedSceneHitTestRequest",
+		"sendRenderedSceneBoxSelectRequest",
+		"hitTestRenderedScene",
+		"boxSelectRenderedScene",
+		"Box3",
+		"buildRenderedSceneHitTestResultPayload",
+		"buildRenderedSceneBoxSelectResultPayload",
+		"LEVEL_EDITOR_RENDERED_HIT_TEST_SELECTION_CONTRACT",
+		"buildLevelEditorRenderedHitTestSelectionRequest",
+		"consumeLevelEditorRenderedHitTestSelectionResult",
+		"buildLevelEditorRenderedBoxSelectSelectionRequest",
+		"consumeLevelEditorRenderedBoxSelectSelectionResult",
+		"StableId",
+		"runtime-rendered-scene-hit-test",
+		"runtime-rendered-scene-box-select",
+	];
+	const forbiddenOverclaims = [
+		"real raycast is complete",
+		"rendered-scene raycast is complete",
+		"full rendered-scene picking is implemented",
+		"full mesh-bounds box selection is complete",
+		"aaa viewport picking is complete",
+		"direct manipulation is complete",
+		"rendered-scene direct manipulation is complete",
+		"runtime raycast selection is production-ready",
+	];
+
+	for (const snippet of requiredDocSnippets) {
+		assertIncludes(
+			combinedDocs,
+			snippet,
+			`Expected rendered-scene hit-test seam docs to include ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredSourceSnippets) {
+		assertIncludes(
+			combinedSources,
+			snippet,
+			`Expected rendered-scene hit-test seam source to include ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const forbidden of forbiddenOverclaims) {
+		assertNotIncludes(
+			combinedDocs.toLowerCase(),
+			forbidden,
+			`Docs must not overclaim rendered-scene hit-test progress with ${JSON.stringify(forbidden)}.`,
 		);
 	}
 }

@@ -356,10 +356,12 @@ LevelLoader, and readiness evaluation before player-controlled gameplay is
 exposed.
 Runtime scene transitions resolve target scenes by manifest ID from the game
 runtime catalog, not by level-specific branches in the app shell or engine core.
-The current checked-in playable catalog contains `portal_arena_runtime`,
-`prototype_arena_runtime`, `miranda_deck_runtime`, `observatory_runtime`,
-`sci_fi_room_runtime`, `solitude_runtime`, and `yggdrasil_runtime`;
-`portal_arena_runtime` remains the default.
+The current checked-in runtime scene catalog contains `starter_runtime`,
+`portal_arena_runtime`, `prototype_arena_runtime`, `miranda_deck_runtime`,
+`observatory_runtime`, `sci_fi_room_runtime`, `solitude_runtime`, and
+`yggdrasil_runtime`. `starter_runtime` is the generic clean-install default.
+`portal_arena_runtime` remains optional Merkin game content and the navigation
+hub for the migrated Merkin scenes.
 `YggdrasilLevelContract` and `PrimitiveSceneContentContract` own the direct
 primitive-parity Yggdrasil playable foundation; old GLB asset parity, cooked
 collision products, water, particle/firefly, lighting, post-processing, and
@@ -368,7 +370,7 @@ Render profiles also declare the scene environment. Required environment
 assets are manifest-owned, preloaded with the selected scene, included in
 readiness when required, and projected by the renderer adapter only after the
 scene preload succeeds.
-The default `portal_arena_runtime` render profile now uses the manifest-owned
+The optional `portal_arena_runtime` render profile uses the manifest-owned
 `equirectangular-environment` asset
 `texture_portal_arena_equirectangular_sky`. That asset is preloaded by the
 selected portal arena manifest and required for readiness. It is a checked-in
@@ -644,11 +646,11 @@ patches before send/application and applies temporary transform/collider
 updates only in dev mode for the active runtime scene. Basic preview clearing
 is explicit and reversible through the same dev-only protocol; richer reload
 lifecycle diagnostics remain planned. The `/editor/` route opens on the
-runtime scene catalog default, exposes a level browser from
-`defaultRuntimeSceneManifests`, and loads collision controls only when the
-selected runtime scene has a registered collision draft. Per-level collision
-drafts are content packets, not the editor foundation, fallback, or app
-default.
+runtime scene catalog default, which is the starter scene rather than Portal
+Arena, exposes a level browser from `defaultRuntimeSceneManifests`, and loads
+collision controls only when the selected runtime scene has a registered
+collision draft. Per-level collision drafts are content packets, not the editor
+foundation, fallback, or app default.
 Persisted spatial drag handles and generalized multi-level editing remain
 planned. The generalized terrain import/cook contract is implemented through
 engine data terrain cook validation, checked-in
@@ -702,8 +704,10 @@ must bake source-art scale into collider data instead of relying on runtime
 
 The app layer may select a checked-in runtime manifest and pass it into the
 client mount. If it does not, the game layer's `defaultRuntimeSceneManifest`
-selects `portal_arena_runtime`. Selection and runtime scene transition rules
-must stay outside generic engine code; the engine still consumes only validated
+selects `starter_runtime`. Product-specific game content such as
+`portal_arena_runtime` must remain an explicit catalog selection, not the
+engine starter identity. Selection and runtime scene transition rules must stay
+outside generic engine code; the engine still consumes only validated
 `RuntimeSceneManifest` data.
 
 ---

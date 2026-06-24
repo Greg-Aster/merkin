@@ -6,6 +6,7 @@ import {
 	prototypeAssetManifest,
 	sciFiRoomAssetManifest,
 	solitudeAssetManifest,
+	starterAssetManifest,
 } from "../assets/index.js";
 import { yggdrasilAssetManifest } from "../assets/yggdrasilAssets.js";
 import { collisionReadiness as observatoryCollisionReadiness } from "../generated/observatoryCollisionRuntime.js";
@@ -20,9 +21,14 @@ import {
 	prototypePrefabs,
 	sciFiRoomPrefabs,
 	solitudePrefabs,
+	starterPrefabs,
 } from "../prefabs/index.js";
 import { yggdrasilPrefabs } from "../prefabs/yggdrasilPrefabs.js";
-import { mirandaDeckLevel, prototypeLevel } from "./defaultLevels.js";
+import {
+	mirandaDeckLevel,
+	prototypeLevel,
+	starterLevel,
+} from "./defaultLevels.js";
 import { observatoryLevel } from "./observatoryLevel.js";
 import { portalArenaLevel } from "./portalArenaLevel.js";
 import { applyPublishedLevelInstanceTransformOverrides } from "./publishedLevelOverrides.js";
@@ -33,6 +39,7 @@ import {
 	prototypeRenderProfile,
 	sciFiRoomRenderProfile,
 	solitudeRenderProfile,
+	starterRenderProfile,
 	yggdrasilRenderProfile,
 } from "./renderProfiles.js";
 import { sciFiRoomLevel } from "./sciFiRoomLevel.js";
@@ -89,6 +96,36 @@ export const portalArenaRuntimeSceneManifest = loadRuntimeSceneManifest({
 			"player",
 		],
 		requiredLightStableIds: ["player"],
+	},
+});
+
+export const starterRuntimeSceneManifest = loadRuntimeSceneManifest({
+	schemaVersion: 1,
+	id: "starter_runtime",
+	generatedAt: "2026-06-24T00:00:00.000Z",
+	source: {
+		kind: "prototype",
+		id: "starter_level",
+	},
+	level: applyPublishedLevelInstanceTransformOverrides({
+		runtimeSceneId: "starter_runtime",
+		level: starterLevel,
+	}),
+	prefabs: starterPrefabs,
+	assets: starterAssetManifest,
+	renderProfile: starterRenderProfile,
+	readiness: {
+		playerStableId: "player",
+		requiredAssetIds: [
+			"mesh_player",
+			"mesh_arena_floor",
+			"mesh_box",
+			"cubemap_classic_sky",
+			"material_player",
+			"material_arena_floor",
+		],
+		requiredCollisionPrefabIds: ["arena_floor", "player"],
+		requiredCollisionStableIds: ["starter:floor", "player"],
 	},
 });
 
@@ -442,6 +479,7 @@ export const yggdrasilRuntimeSceneManifest = loadRuntimeSceneManifest({
 });
 
 export const defaultRuntimeSceneManifests = [
+	starterRuntimeSceneManifest,
 	portalArenaRuntimeSceneManifest,
 	prototypeRuntimeSceneManifest,
 	mirandaDeckRuntimeSceneManifest,
@@ -451,7 +489,7 @@ export const defaultRuntimeSceneManifests = [
 	yggdrasilRuntimeSceneManifest,
 ] as const;
 
-export const defaultRuntimeSceneManifest = portalArenaRuntimeSceneManifest;
+export const defaultRuntimeSceneManifest = starterRuntimeSceneManifest;
 
 export function getRuntimeSceneManifest(
 	id: string,

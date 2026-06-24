@@ -60,7 +60,9 @@ for (const manifest of defaultRuntimeSceneManifests) {
 		);
 	}
 
-	assertTerrainPackageReadiness(manifest);
+	if ((manifest.terrainPackages ?? []).length > 0) {
+		assertTerrainPackageReadiness(manifest);
+	}
 }
 
 expectInvalid(

@@ -18,12 +18,23 @@ criteria are all met.
 - `docs/LEVEL_EDITOR_LEGACY_FEATURE_RECREATION_PLAN.md`
 - `ARCHITECTURE.md`
 - `GAME_ENGINE_DESIGN_DOCUMENT.md`
+- `LevelEditorMaintainabilityContract` in `ENGINE_CONTRACT_REGISTER.md`
 
 ## Current Truth
 
 - The current editor is a foundation, not a finished AAA-tier editor.
+- The generic runtime/editor default is `starter_runtime`, a neutral starter
+  scene for clean installs. `portal_arena_runtime` remains selectable Merkin
+  game content and must not become the implicit editor fallback or engine
+  starter identity.
 - Current strengths: dev-only boundary, runtime catalog selection, stable-ID
   objects, grouped outliner data with manifest path and affordance metadata,
+  outliner search/category/lock/pickability/visibility filters,
+  browser-local editor workspace persistence for per-object hide/show,
+  lock/unlock, isolate, and reset view state,
+  editor-owned outliner multi-select foundation with a primary inspector object,
+  synchronized projected viewport pin selection, projected viewport marquee
+  selection, and a selection-set inspector,
   inspector transform/component fields, dev-preview bridge,
   workflow/publishability labels, object-library placement readiness, Save
   Draft, and bounded generated-owner Save Level/Publish for transforms and
@@ -31,21 +42,65 @@ criteria are all met.
   level-instance component overrides, and level-instance component removals,
   plus bounded level-instance removals and a guarded selected-instance duplicate/removal action pair
   in the workbench.
-- Current major gaps: central viewport/direct picking, rendered-scene transform gizmos,
-  synchronized selection with a real viewport, rendered-scene hit testing beyond
-  snap-aware normalized viewport drop placement, owner writes for component
-  families that need non-level owners, and full
+- Current major gaps: rendered-scene transform gizmos/direct manipulation,
+  rendered-scene camera framing/navigation, checked-in/shared editor metadata
+  owner for saved workbench view state, bulk owner-write operations for
+  multi-selected objects, owner writes for component families that need
+  non-level owners, and full
   professional editor ergonomics beyond the first workbench shell.
+- Rendered-scene hit-test result foundation exists in this fork. The dev-preview
+  protocol now validates and dispatches `rendered-scene-hit-test-request` and
+  `rendered-scene-hit-test-result` messages with `LEVEL_EDITOR_DEV_PREVIEW_PROTOCOL`,
+  `requestId`, `runtimeSceneId`, optional pickable `stableId` filters,
+  stable-ID hit results, editor object view-state gating, and
+  `writesRuntimeData: false`. The dev runtime now wires
+  `ThreeRendererAdapter.hitTestRenderedScene` into the preview bridge, maps
+  adapter-local entity hits back to runtime `StableId` components, and posts
+  hit/miss/ignored result payloads without Svelte-side Three/canvas scraping.
+  The workbench can now send those requests from Select-mode viewport clicks and
+  consume runtime hit-test responses through
+  `LEVEL_EDITOR_RENDERED_HIT_TEST_SELECTION_CONTRACT` as stable-ID editor
+  selection when the hit object is still known and editor-pickable. Projected
+  transform pins remain the editor fallback when the runtime rendered hit-test
+  requester is unavailable. This is a renderer-backed stable-ID selection path,
+  not proof of a complete direct-manipulation system.
+- Rendered-scene box/marquee selection now uses the same dev-preview boundary.
+  Select-mode marquee gestures can send `rendered-scene-box-select-request`
+  messages with a CSS-pixel screen rectangle and pickable stable-ID filters;
+  the dev runtime projects adapter-attached object root positions through
+  `ThreeRendererAdapter.boxSelectRenderedScene`, maps entity hits back to
+  stable IDs, and returns `rendered-scene-box-select-result` payloads with
+  `runtime-rendered-scene-box-select` provenance and `writesRuntimeData:
+  false`. The Three adapter uses projected render-object bounds from adapter
+  `Box3` data rather than only the object root origin. The workbench consumes
+  those results as editor selection state only. The existing projected marquee
+  remains the fallback when the rendered requester is unavailable. This is
+  bounds-aware stable-ID box selection, not occlusion-aware lasso selection and
+  not transform manipulation.
 - Known validation status: the latest recorded focused editor gate set,
   aggregate contract suite, type-check, lint, boundary audit, production bundle
   guard, build, and diff check passed after reconciling the current workbench
   model/test integration state, including component-grouped inspector sections,
   staged owner-write readiness helper coverage, viewport projected X/Z dragging,
   shared object-library scene-scoped placement drafts, and bounded staged
-  authoring undo/redo history. Build still reports the existing Astro/Vite
+  authoring undo/redo history, plus editor-owned outliner multi-select
+  foundation coverage. Build still reports the existing Astro/Vite
   warnings for an empty editor chunk, large client chunks, and GET generation
   for POST-only editor authoring API routes.
 - The editor must keep moving toward a workbench that reads as a professional editor instead of stacked diagnostic panels.
+- UX consolidation lane active: the immediate failing point is not missing
+  planned systems, but the current presentation of every status/debug/tooling
+  surface as an equally important window. The consolidation pass must keep the
+  same editor capabilities while prioritizing the central viewport/workbench,
+  left outliner, right inspector, and bottom content drawer; validation,
+  command plans, telemetry, terrain/collision status, and logs should become
+  secondary dock/drawer surfaces unless the user is actively working in them.
+- Maintainability ratchet: the editor is still intended to become a complete
+  AAA-quality game and level editor, but new capability must not disappear into
+  unbounded central files. `test:level-editor-maintainability-contract`
+  enforces central file budgets as extraction triggers, not feature ceilings.
+  Large systems are valid when they have focused owners, clear runtime/editor
+  boundaries, durable validation, and documented contract ownership.
 - Old `apps/game` editor code remains reference/provenance only. Do not import
   it, copy its runtime architecture, or load old scene JSON as target data.
 
@@ -65,13 +120,15 @@ criteria are all met.
 
 | Area | Current status | Remaining end-state gap |
 | --- | --- | --- |
-| Workbench shell | First professional shell integrated with a prioritized bottom dock for content, staged operations, validation, commands, and output | Needs runtime-backed viewport depth and final layout polish |
-| Selection | Stable-ID selection drives searchable outliner filtering, manifest path/category affordances, inspector, viewport pins, projected viewport click picking, and object-library context | Needs true live viewport picking against rendered scene objects, multi-select, and real persisted visibility/isolation/lock state |
+| Workbench shell | First professional shell integrated with a prioritized bottom dock for content, staged operations, validation, commands, output, and filterable outliner hierarchy | Needs runtime-backed viewport depth and final layout polish |
+| Selection | Stable-ID selection drives searchable outliner filtering, manifest path/category affordances, inspector, projected viewport pins, projected viewport click picking, runtime-backed rendered viewport click picking when the preview bridge is live, projected viewport marquee selection, runtime-backed rendered bounds-aware box/marquee stable-ID selection when the preview bridge is live, object-library context, a selection-set inspector, browser-local editor workspace persistence for per-object hide/show, lock/unlock, isolate/reset state, and an editor-owned outliner/category-aid multi-select foundation. Multi-select keeps a primary inspector object, synchronizes selected projected viewport pins, and deliberately disables bulk owner-write operations. | Needs bulk operation contracts, occlusion-aware advanced rendered selection modes, and a checked-in/shared editor metadata owner for durable team-visible view state |
 | Inspector | Editable fields stage authoring edits with workflow labels, component-grouped inspector sections, including level-instance transform position/rotation/scale fields and `set-component` save operations for supported component fields | Needs broader component editors and owner-write families beyond level-instance component set/removal records |
 | Save/Publish | Save Draft plus bounded generated-owner Save Level/Publish for transforms, object-library placements, level-instance prefab ID replacements, level-instance component overrides/removals, bounded level-instance duplicate insertions, bounded level-instance removals, and bounded staged authoring undo/redo are guarded | Needs publishable coverage for collision, terrain, audio manifest, NPCs, environment/render-profile edits, asset-manifest edits, prefab-owned component edits, readiness-owner deletes/replacements, broad asset/component replacement, grouping, stable-ID management, and post-publish undo/redo semantics |
-| Viewport bridge | Projected pins, projected frame-click picking, explicit Select/Place/Transform tool modes, transform position/rotation/scale nudges, snap controls, screen-space transform handles, projected X/Z translate dragging, editor-side camera/framing controls, placement target, hover-aware placement ghost, Place-mode click placement, and snap-aware normalized object-library drop placement exist | Needs rendered-scene gizmos, arbitrary drag placement with rendered-scene hit testing, rendered-scene camera framing/navigation, and rendered-scene hit testing |
+| Viewport bridge | Projected pins, projected frame-click picking, explicit Select/Place/Transform tool modes, transform position/rotation/scale nudges, snap controls, screen-space transform handles, projected X/Z translate dragging, editor-side camera/framing controls, placement target, hover-aware placement ghost, Place-mode click placement, and snap-aware normalized object-library drop placement exist; runtime-backed rendered-scene click selection and rendered-scene bounds-aware box/marquee stable-ID selection through the dev-preview request/result path also exist | Needs rendered-scene gizmos, arbitrary drag placement with editor-consumed hit-test results, rendered-scene camera framing/navigation, and advanced rendered selection modes beyond rectangular bounds overlap |
 | Content browser | Search/filter, current-scene usage filtering/sorting, previews, publish-ready placement readiness, transform composer, staged review/removal, hover-aware viewport ghost handoff, Place-mode click placement, and draft-ready drag metadata exist | Needs asset import workflows, richer placement ergonomics, and full rendered viewport placement |
 | Validation/contracts | Focused contract guards and central progress log are active | Needs final focused validation, build evidence, and legacy-reference audit before declaring the whole editor complete |
+| Maintainability | Central workspace/model/viewport/object-library/CSS budgets are now guarded by `test:level-editor-maintainability-contract`; the budgets are extraction triggers, not feature ceilings | Needs continued extraction of outliner, selection-set, viewport, object-library, authoring queue, and CSS ownership as new AAA editor systems land |
+| UX consolidation | Active pass demotes status/debug windows into secondary dock affordances while preserving current editor behavior | Needs follow-up with a true rendered-scene viewport and task-mode specific layouts once runtime-backed picking/direct manipulation land |
 
 ## Implementation Packets
 
@@ -110,10 +167,30 @@ Progress:
   and workflow labels. Filtering changes the hierarchy view only; selection
   remains the same stable-ID workspace state shared by the inspector, viewport,
   preview, and object library.
+- The outliner now also filters by manifest object category, authoring lock
+  state, projected pickability, and visibility metadata. These are hierarchy
+  filters over current editor metadata, not persisted visibility/lock toggles.
+- Filtered outliner results can now drive selection-set actions: select shown,
+  add shown, and clear selection. These actions reuse the editor stable-ID
+  selection model and do not stage bulk owner writes.
 - Outliner rows now expose manifest-derived object paths and read-only
   visibility, authoring lock, and pickability affordance labels. These labels
   clarify what the current editor can do without adding fake toggles or a new
   persistence contract for visibility/isolation/lock state.
+- `EditorObjectViewState` is now implemented as a browser-local editor
+  workspace persistence model and workbench control slice for per-object
+  hide/show, lock/unlock, isolate, reset, filtered outliner membership, and
+  projected viewport pickability. It is keyed by stable ID, scoped by runtime
+  scene, reports unknown state for cleanup, and explicitly does not write
+  runtime data, owner files, or checked-in/shared editor metadata.
+- The projected viewport bridge now receives the editor view-state projection:
+  hidden objects are omitted from projected pins, editor-locked objects remain
+  visible but non-pickable, and marquee/click selection only returns pickable
+  projected transform pins.
+- Future checked-in/shared scene/editor metadata must get an explicit
+  non-runtime owner before saved view presets, team-visible visibility sets,
+  isolation sets, lock overrides, panel layout, editor notes, or per-scene
+  workbench preferences are treated as durable shared data.
 - Replaced the lower equal-weight diagnostics grid with a prioritized bottom
   dock. The content browser now owns the primary dock lane, while staged
   operations, validation, command gates, and output log have named dock areas;
@@ -140,6 +217,66 @@ Progress:
 - The viewport overlay, selection summary, inspector summary, and inspector
   fields now show selected-object and field workflow labels/reasons from the
   workspace model.
+- The workbench now has an editor-owned multi-select foundation for the
+  outliner and category-aid surfaces. Ctrl/Cmd selection toggles stable-ID
+  objects, visual selection state is shared by the outliner, spatial map, and
+  focus list, and the selected ID list is passed to the AI asset lab context.
+- Multi-select keeps the first selected stable ID as the primary inspector,
+  viewport transform, preview, duplicate/remove, and object-library replacement
+  subject. The contract is explicit that bulk owner-write operations remain future:
+  bulk transform, duplicate, removal, and Save Level/Publish mutation for
+  multi-selected objects require explicit owner-write contracts and validation
+  paths.
+- The viewport bridge now consumes the same selected stable-ID list as the
+  outliner/category aids. Projected pins show secondary selections while
+  transform controls, placement target anchoring, camera framing, and preview
+  behavior remain bound to the primary selected stable ID.
+- The viewport bridge now supports projected marquee selection in Select mode.
+  Dragging across the projected viewport selects transform-positioned stable IDs
+  inside the rectangle, replacing selection by default or extending it with
+  Ctrl/Cmd. This is still editor-projected selection, not rendered-scene
+  hit testing, and it does not enable bulk owner-write operations.
+- Multi-selection now exposes a selection-set inspector inside the selection
+  summary. It shows selected category counts, common component names, and
+  selected object rows with primary-selection and remove-from-selection
+  controls. These controls reorder or trim the editor selection only; they do
+  not stage bulk runtime owner writes.
+- Added focused contract coverage in
+  `test:level-editor-selection-model-contract` for selection normalization,
+  additive toggling, primary-object behavior, and the disabled bulk-operation
+  contract.
+
+### Planned blockout-to-reimagined asset workflow
+
+Target: designers block out levels with simple primitives/prefabs, then select
+objects in the level editor and replace their visual mesh/material with either
+an existing manifest-backed asset or a new Hunyuan/ComfyUI generated asset.
+
+Current foundation:
+
+- Stable-ID selection, outliner selection, viewport selection aids, and primary
+  inspector selection already provide the selected-object context.
+- The inspector shows the selected object's prefab/source owner, components,
+  preview data, workflow labels, and supported editable fields.
+- Object Library builds a manifest-backed asset/prefab catalog and can stage
+  selected-object replacement drafts for renderable mesh/material references,
+  audio references, and prefab replacement.
+- AI Asset Lab receives the selected stable-ID list and has Hunyuan/ComfyUI
+  backend contracts, generated asset records, and apply-to-selection edit plans.
+
+Missing before the workflow can be called complete:
+
+- `Renderable.meshId` must be a first-class inspector field with a mesh picker,
+  current mesh preview, scene-scoped asset filtering, dirty state, and
+  instance-versus-prefab scope language.
+- AI Asset Lab still needs real generation dispatch/result harvesting and
+  generated asset import into a manifest-backed library.
+- Save/Publish still needs durable generated asset manifest writers and
+  renderable asset-reference owner writes for this operation family.
+- Generated visual replacement must preserve stable IDs and gameplay components
+  by default; collision, portal behavior, audio, scripts, and physics are not
+  inferred from the generated mesh unless the user explicitly edits those
+  owners.
 
 ### Packet 3: Save/Preview/Publish Clarity
 
@@ -251,6 +388,24 @@ Progress:
   `Transform.position.x/z` field edits through the existing authoring queue.
   This is editor-projected direct manipulation, not a rendered-scene raycast
   gizmo.
+- The viewport bridge projection now carries all editor-selected stable IDs and
+  marks one primary selected object. Projected viewport pin clicks support the
+  same Ctrl/Cmd additive selection flow as the outliner, but transform handles
+  still target only the primary selected object until explicit bulk transform
+  contracts exist.
+- Select mode now supports a projected viewport marquee rectangle. The marquee
+  calls the same workspace stable-ID selection path as pins and the outliner,
+  using `viewportSelectProjectedObjectsInRect` over normalized transform X/Z
+  pins. It remains a projected editor affordance and does not claim rendered
+  scene raycast or surface selection.
+- Rendered-scene picking must be a future dev-preview request/response
+  protocol slice, not Svelte or Three scraping. The editor-side request should
+  carry pointer coordinates, requested pick mode, active `runtimeSceneId`, and a
+  `requestId`; the runtime/adapter response should carry a matching request ID,
+  scene ID, stable ID or explicit no-hit/rejection reason, optional world-space
+  hit data, and stale-response semantics. Until those message types, runtime
+  handlers, adapter queries, and focused protocol/model tests exist in code,
+  this tracker must continue to call rendered-scene picking future work.
 - The viewport frame now accepts draft-ready object-library drag payloads as a
   bounded placement surface. Dropping a prefab maps the normalized viewport
   pointer point into manifest-derived X/Z transform bounds, then stages the same
@@ -871,6 +1026,170 @@ Progress:
   updating the Save/Publish contract register. Build still reports the existing
   Astro/Vite warnings for an empty editor chunk, large client chunks, and GET
   generation for POST-only editor authoring API routes.
+- `pnpm --dir apps/game.megameal test:level-editor-selection-model-contract`,
+  `test:level-editor-workspace-model-contract`,
+  `test:level-editor-aaa-plan-contract`,
+  `test:level-editor-workbench-model-contract`,
+  `test:level-editor-viewport-bridge-model-contract`,
+  `test:level-editor-feature-catalog-contract`, `type-check`, `lint`,
+  `audit:engine-boundaries`, `test:contracts`, `build`, and
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml` passed after adding
+  the editor-owned outliner/category-aid multi-select foundation, primary
+  inspector-object contract, disabled bulk-owner-write selection model, focused
+  selection-model contract test, Save Level command copy update, and contract
+  docs. Build still reports the existing Astro/Vite warnings for an empty
+  editor chunk, large client chunks, and GET generation for POST-only editor
+  authoring API routes.
+- `pnpm --dir apps/game.megameal test:level-editor-viewport-bridge-model-contract`,
+  `test:level-editor-selection-model-contract`,
+  `test:level-editor-workspace-model-contract`,
+  `test:level-editor-aaa-plan-contract`, `type-check`, `lint`,
+  `audit:engine-boundaries`, `test:contracts`, `build`, and
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml` passed after
+  synchronizing editor multi-select with projected viewport pins while keeping
+  viewport transform controls, placement anchor, camera framing, and preview
+  behavior bound to the primary selected object. Build still reports the
+  existing Astro/Vite warnings for an empty editor chunk, large client chunks,
+  and GET generation for POST-only editor authoring API routes.
+- `pnpm --dir apps/game.megameal test:level-editor-selection-model-contract`,
+  `test:level-editor-viewport-bridge-model-contract`,
+  `test:level-editor-aaa-plan-contract`, `type-check`, `lint`, and
+  `audit:engine-boundaries`, `test:contracts`, `build`, and
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml` passed after adding
+  projected viewport marquee selection. The marquee selects stable-ID transform
+  pins from the editor projection only, supports Ctrl/Cmd additive selection,
+  and keeps bulk owner writes disabled. Build still reports the existing
+  Astro/Vite warnings for an empty editor chunk, large client chunks, and GET
+  generation for POST-only editor authoring API routes.
+- `pnpm --dir apps/game.megameal test:level-editor-selection-model-contract`,
+  `test:level-editor-aaa-plan-contract`, `type-check`, `lint`,
+  `audit:engine-boundaries`, `test:contracts`, `build`, and
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml` passed after adding
+  the selection-set inspector. The inspector summarizes selected
+  categories/common components and lets the user choose the primary selected
+  object or remove selected IDs without staging runtime owner writes. Build
+  still reports the existing Astro/Vite warnings for an empty editor chunk,
+  large client chunks, and GET generation for POST-only editor authoring API
+  routes.
+- `pnpm --dir apps/game.megameal test:level-editor-aaa-plan-contract`,
+  `type-check`, `lint`, `audit:engine-boundaries`, `test:contracts`,
+  `build`, and `git diff --check -- apps/game.megameal pnpm-lock.yaml` passed
+  after adding category, authoring-lock, projected-pickability, and visibility
+  filters to the scene outliner. The filters narrow editor hierarchy view state
+  only and do not persist visibility, lock, isolation, or pickability changes.
+  Filtered outliner results can now replace the current selection, add to the
+  current selection, or clear the selection set; these are editor selection
+  operations only.
+  Build still reports the existing Astro/Vite warnings for an empty editor
+  chunk, large client chunks, and GET generation for POST-only editor authoring
+  API routes.
+- `pnpm --dir apps/game.megameal test:level-editor-selection-model-contract`,
+  `test:level-editor-aaa-plan-contract`, `type-check`, `lint`,
+  `audit:engine-boundaries`, `test:contracts`, `build`, and
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml` passed after adding
+  outliner `Select Shown`, `Add Shown`, and `Clear Selection` actions. These
+  actions operate on filtered stable-ID editor selection state only and do not
+  stage bulk edits or owner writes. Build still reports the existing Astro/Vite
+  warnings for an empty editor chunk, large client chunks, and GET generation
+  for POST-only editor authoring API routes.
+- `pnpm --dir apps/game.megameal test:level-editor-object-view-state-model-contract`,
+  `test:level-editor-viewport-bridge-model-contract`,
+  `test:level-editor-aaa-plan-contract`, `type-check`, `lint`,
+  `test:contracts`, `audit:engine-boundaries`,
+  `test:production-editor-bundle-contract`, `build`,
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml`, and
+  `pnpm audit:legacy-game-references` passed after implementing editor-only
+  object view state. The workbench can now hide/show, lock/unlock, isolate,
+  clear, and reset stable-ID objects through browser-local editor workspace
+  persistence; projected viewport picking and marquee selection now ignore
+  hidden or editor-locked pins without staging owner writes. Build still reports
+  the existing Astro/Vite warnings for an empty editor chunk, large client
+  chunks, and GET generation for POST-only editor authoring API routes.
+- `pnpm --dir apps/game.megameal test:live-preview-protocol-contract`,
+  `test:level-editor-viewport-bridge-model-contract`,
+  `test:level-editor-aaa-plan-contract`, `type-check`, `lint`,
+  `audit:engine-boundaries`, `test:production-editor-bundle-contract`,
+  `test:contracts`, `build`,
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml`, and
+  `pnpm audit:legacy-game-references` passed after adding the rendered-scene
+  hit-test protocol seam. The seam validates and dispatches request/result
+  messages only; renderer-backed raycast selection, rendered-scene direct
+  manipulation, and runtime-backed marquee selection remain future work. Build
+  still reports the existing Astro/Vite warnings for an empty editor chunk,
+  large client chunks, and GET generation for POST-only editor authoring API
+  routes.
+- `pnpm --dir apps/game.megameal test:rendered-scene-hit-test-contract`,
+  `test:live-preview-protocol-contract`, `test:level-editor-aaa-plan-contract`,
+  `type-check`, `lint`, `audit:engine-boundaries`,
+  `test:production-editor-bundle-contract`, `test:contracts`, `build`,
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml`, and
+  `pnpm audit:legacy-game-references` passed after adding the adapter-backed
+  rendered-scene hit-test result path. The dev runtime can now resolve
+  adapter-local rendered object hits to stable-ID protocol results; the
+  following slice wires editor-side request/result consumption for single-click
+  selection while leaving rendered-scene marquee selection and direct
+  manipulation future. Build still reports the
+  existing Astro/Vite warnings for an empty editor chunk, large client chunks,
+  and GET generation for POST-only editor authoring API routes.
+- `pnpm --dir apps/game.megameal test:level-editor-rendered-hit-test-selection-contract`
+  and `test:level-editor-viewport-bridge-model-contract` passed after adding
+  editor-side runtime hit-test request construction and result consumption for
+  single-click stable-ID selection. `test:live-preview-protocol-contract`,
+  `test:rendered-scene-hit-test-contract`,
+  `test:level-editor-aaa-plan-contract`, `type-check`, `lint`,
+  `audit:engine-boundaries`, `test:level-editor-maintainability-contract`,
+  `test:contracts`, `test:production-editor-bundle-contract`, `build`,
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml`, and
+  `pnpm audit:legacy-game-references` also passed for this slice. Rendered-scene
+  direct manipulation, gizmos, and rendered-scene marquee selection remain
+  future work. Build still reports the existing Astro/Vite warnings for an empty
+  editor chunk, large client chunks, and GET generation for POST-only editor
+  authoring API routes.
+- `pnpm --dir apps/game.megameal test:rendered-scene-hit-test-contract`,
+  `test:level-editor-rendered-hit-test-selection-contract`,
+  `test:live-preview-protocol-contract`,
+  `test:level-editor-viewport-bridge-model-contract`,
+  `test:level-editor-aaa-plan-contract`,
+  `test:level-editor-maintainability-contract`,
+  `test:level-editor-collision-cook-contract`, `type-check`, `lint`,
+  `audit:engine-boundaries`, `test:production-editor-bundle-contract`,
+  `test:contracts`, `build`,
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml`, and
+  `pnpm audit:legacy-game-references` passed after adding rendered-scene
+  box/marquee stable-ID selection through the dev-preview protocol. The
+  workbench now sends rendered box-select requests from Select-mode marquee
+  gestures, consumes stable-ID result sets as editor selection state only, and
+  keeps the existing projected marquee as fallback. This first implementation
+  used root-origin rendered selection; the following bounds-aware slice
+  supersedes that limitation. Rendered-scene direct manipulation and gizmos
+  remain future work. Build still reports the existing
+  Astro/Vite warnings for an empty editor chunk, large client chunks, and GET
+  generation for POST-only editor authoring API routes. The collision cook
+  contract now follows `defaultRuntimeSceneManifest.id` for the generic editor
+  catalog default instead of hardcoding Portal Arena.
+- `pnpm --dir apps/game.megameal test:rendered-scene-hit-test-contract`,
+  `test:level-editor-aaa-plan-contract`, `type-check`, `lint`,
+  `audit:engine-boundaries`, `test:production-editor-bundle-contract`,
+  `test:contracts`, `build`,
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml`, and
+  `pnpm audit:legacy-game-references` passed after upgrading rendered
+  box/marquee selection from root-origin projection to adapter-owned projected
+  render-object bounds. `ThreeRendererAdapter.boxSelectRenderedScene` now uses
+  adapter-local `Box3` data and camera projection to detect rectangle overlap
+  while the editor and dev-preview protocol still exchange stable-ID selection
+  payloads only. Rendered-scene direct manipulation, transform gizmos,
+  occlusion-aware lasso selection, checked-in/shared visibility/lock/isolation
+  metadata ownership, and bulk owner-write operations remain future work. Build
+  still reports the existing Astro/Vite warnings for an empty editor chunk,
+  large client chunks, and GET generation for POST-only editor authoring API
+  routes.
+- `git diff --check -- apps/game.megameal/docs/LEVEL_EDITOR_WORKBENCH_IMPLEMENTATION_PROGRESS.md`
+  passed and
+  `rg -n "[ \t]+$" apps/game.megameal/docs/LEVEL_EDITOR_WORKBENCH_IMPLEMENTATION_PROGRESS.md`
+  returned no matches after updating this tracker to record browser-local
+  editor workspace persistence for hide/show, lock/unlock, isolate/reset object
+  view state while keeping checked-in/shared editor metadata ownership and bulk
+  operations future.
 
 ## Do Not Declare Done Until
 

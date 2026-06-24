@@ -427,6 +427,27 @@ export const prototypeAssetManifest = {
 	},
 } satisfies AssetManifest;
 
+export const starterAssetManifest = {
+	assets: [
+		meshPlayer,
+		meshArenaFloor,
+		meshBox,
+		cubemapClassicSky,
+		materialPlayer,
+		materialArenaFloor,
+	],
+	preloadGroups: {
+		starter: [
+			"mesh_player",
+			"mesh_arena_floor",
+			"mesh_box",
+			"cubemap_classic_sky",
+			"material_player",
+			"material_arena_floor",
+		],
+	},
+} satisfies AssetManifest;
+
 export const mirandaDeckAssetManifest = {
 	assets: [
 		meshPlayer,
