@@ -167,9 +167,8 @@ let selectedObjectLibraryEntryId: string | null = $state(null);
 let objectViewStateByStableId: Readonly<
 	Record<string, LevelEditorObjectViewStatePatch>
 > = $state(resetLevelEditorObjectViewState());
-let objectViewStateSource:
-	| "editor-memory"
-	| "browser-local-editor-workspace" = $state("editor-memory");
+let objectViewStateSource: "editor-memory" | "browser-local-editor-workspace" =
+	$state("editor-memory");
 let outlinerSearchQuery = $state("");
 let outlinerCategoryFilter: LevelEditorOutlinerCategoryFilter = $state("all");
 let outlinerVisibilityFilter: LevelEditorOutlinerVisibilityFilter =
