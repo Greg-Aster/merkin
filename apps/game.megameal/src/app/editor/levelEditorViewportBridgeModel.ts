@@ -1,8 +1,23 @@
+import { buildLevelEditorViewportCameraControls } from "./levelEditorViewportCameraModel.js";
+import type {
+	LevelEditorViewportCameraControls,
+	LevelEditorViewportCameraMode,
+	LevelEditorViewportNormalizedPoint,
+} from "./levelEditorViewportCameraModel.js";
 import type {
 	LevelEditorWorkspaceModel,
 	LevelEditorWorkspaceObject,
 	LevelEditorWorkspacePreviewTargetKind,
 } from "./levelEditorWorkspaceModel.js";
+
+export type {
+	LevelEditorViewportCameraControls,
+	LevelEditorViewportCameraFrameCommand,
+	LevelEditorViewportCameraFrameCommandId,
+	LevelEditorViewportCameraFramingTarget,
+	LevelEditorViewportCameraMode,
+	LevelEditorViewportNormalizedPoint,
+} from "./levelEditorViewportCameraModel.js";
 
 export const LEVEL_EDITOR_VIEWPORT_BRIDGE_CONTRACT =
 	"LevelEditorViewportBridgeContract" as const;
@@ -38,13 +53,6 @@ export type LevelEditorViewportInteractionTool =
 	| "place"
 	| "transform";
 
-export type LevelEditorViewportCameraMode =
-	| "orbit"
-	| "top"
-	| "front"
-	| "side"
-	| "iso";
-
 export type LevelEditorViewportProjectedObject = {
 	readonly stableId: string;
 	readonly label: string;
@@ -77,11 +85,6 @@ export type LevelEditorViewportPlacementSurface = {
 	readonly stagesAuthoringEdits: true;
 	readonly writesRuntimeData: false;
 	readonly reason: string;
-};
-
-export type LevelEditorViewportNormalizedPoint = {
-	readonly xPercent: number;
-	readonly zPercent: number;
 };
 
 export type LevelEditorViewportProjectedPickResult = {
@@ -171,18 +174,6 @@ export type LevelEditorViewportTransformControls = {
 	readonly activeHandles: readonly LevelEditorViewportTransformGizmoHandle[];
 	readonly rotationYawControl: LevelEditorViewportRotationYawControl | null;
 	readonly blockedReasons: readonly string[];
-};
-
-export type LevelEditorViewportCameraControls = {
-	readonly activeMode: LevelEditorViewportCameraMode;
-	readonly availableModes: readonly LevelEditorViewportCameraMode[];
-	readonly zoomPercent: number;
-	readonly framingTarget: "selected-object" | "scene-bounds";
-	readonly targetStableId: string | null;
-	readonly stagesAuthoringEdits: false;
-	readonly writesRuntimeData: false;
-	readonly source: "editor-viewport-navigation";
-	readonly reason: string;
 };
 
 export type LevelEditorViewportInteractionToolModel = {
@@ -429,8 +420,9 @@ export function buildLevelEditorViewportBridgeModel(options: {
 				options.renderedHitTestRequestReadiness ?? "unavailable",
 		}),
 		transformControls,
-		camera: buildViewportCameraControls({
+		camera: buildLevelEditorViewportCameraControls({
 			selectedObject,
+			projectedObjects: projection.objects,
 			requestedMode: options.cameraMode ?? "orbit",
 			zoomPercent: options.cameraZoomPercent ?? 100,
 		}),
@@ -445,14 +437,6 @@ const viewportBridgeViewModes = [
 	"collision",
 	"wireframe",
 ] as const satisfies readonly LevelEditorViewportBridgeViewMode[];
-
-const viewportCameraModes = [
-	"orbit",
-	"top",
-	"front",
-	"side",
-	"iso",
-] as const satisfies readonly LevelEditorViewportCameraMode[];
 
 const viewportInteractionTools = [
 	"select",
@@ -855,33 +839,6 @@ function buildProjectedTransformDragAffordance(options: {
 		reason: ready
 			? "Projected X/Z transform dragging is available through editable Transform.position.x/z fields and the normalized placement surface."
 			: "Projected X/Z transform dragging requires translate mode, editable Transform.position.x/z fields, and a ready normalized placement surface.",
-	};
-}
-
-function buildViewportCameraControls(options: {
-	readonly selectedObject: LevelEditorWorkspaceObject | null;
-	readonly requestedMode: LevelEditorViewportCameraMode;
-	readonly zoomPercent: number;
-}): LevelEditorViewportCameraControls {
-	const activeMode = viewportCameraModes.includes(options.requestedMode)
-		? options.requestedMode
-		: "orbit";
-	const zoomPercent = Math.max(25, Math.min(400, options.zoomPercent));
-	const targetStableId = options.selectedObject?.stableId ?? null;
-
-	return {
-		activeMode,
-		availableModes: viewportCameraModes,
-		zoomPercent,
-		framingTarget: targetStableId === null ? "scene-bounds" : "selected-object",
-		targetStableId,
-		stagesAuthoringEdits: false,
-		writesRuntimeData: false,
-		source: "editor-viewport-navigation",
-		reason:
-			targetStableId === null
-				? "Editor viewport navigation frames manifest-derived scene bounds without mutating runtime camera data."
-				: "Editor viewport navigation frames the selected stable-ID object without mutating runtime camera data.",
 	};
 }
 

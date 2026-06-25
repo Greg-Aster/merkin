@@ -61,7 +61,8 @@ full save/publish path is incomplete:
   level-owned `set-transform` operations, generated object-library
   `insert-level-instance` placement operations, bounded level-instance
   `replace-prefab` operations, and level-instance `set-component`/
-  `remove-component` operations through the `component-editing` family.
+  `remove-component` operations through the `component-editing` family, plus
+  bounded `remove-level-instance` operations.
 - The owner registry still has broader level, prefab, asset, render-profile,
   terrain/collision, audio, and readiness owner targets that are not writable by
   the current Save Level slice.
@@ -77,6 +78,10 @@ full save/publish path is incomplete:
   environment gates must be added with the owner-write paths they validate.
 - The UI must keep Save Draft, Save Level, and Publish Level separate so users
   do not infer a generated draft changed runtime owner data.
+- The `Staged Operations` dock now classifies queued entries as Preview only,
+  Save Draft only, mixed persistence, or Save Level/Publish ready. Those
+  summaries are display-only; the authoring queue remains the execution input
+  for Preview, Save Draft, Save Level, Publish, Reload, and Discard Staged.
 
 The fix is not to let runtime consume editor state. The fix is to expand the
 bounded owner-write path and complete the local publish action promised by the
@@ -92,6 +97,7 @@ contract test proves the runtime loads it. (Last audited: 2026-06-17.)
 | Path | Owner | Status | Notes |
 | --- | --- | --- | --- |
 | Preview | `src/app/devPreview/**`, live-preview protocol | Implemented | Dev-only, temporary, schema-validated, scene-scoped, clearable. |
+| Staged operations clarity | `LevelEditorWorkspace.svelte`, `levelEditorWorkspaceUi.ts`, authoring queue | First clarity slice implemented | The dock distinguishes Preview only, Save Draft only, mixed persistence, and Save Level/Publish ready queued entries, with targeted staged-field revert, targeted queued-entry removal, `Discard Staged`, and staged owner-write readiness. It does not change save/publish execution semantics. |
 | Save Draft | `handleLevelEditorAuthoringPersistenceRequest`, `save.json`/`dry-run.json`, `authoring-save` generated modules | Implemented | Writes generated authoring modules with `writesRuntimeData: false`. Runtime must not import them. |
 | Runtime published-override plumbing | `src/game/generated/publishedLevelTransforms.ts`, `src/game/levels/publishedLevelOverrides.ts`, `runtimeSceneManifests.ts` applier | Implemented for level-instance transforms, generated level-instance insertions, level-instance prefab ID overrides, level-instance component overrides/removals, and bounded level-instance removals | The generated override module and the `applyPublishedLevelInstanceTransformOverrides` consumer are wired into every runtime scene. The checked-in override, insertion, prefab override, component override, component removal, and instance removal arrays may be empty, but `save-level` can write deterministic transform overrides for selected-scene stable level instances, generated object-library placement insertions for known scene prefabs, level-instance `replace-prefab` records, level-instance `set-component` overrides, level-instance `remove-component` records, and bounded `remove-level-instance` records for publishable instance deletion. |
 | Save Level / bounded owner write | `handleLevelEditorLevelOwnerWriteRequest` (`save-level.json`) | Implemented for `set-transform` level-instance edits, object-library `insert-level-instance` placements, bounded `replace-prefab` operations, component-editing `set-component`/`remove-component` operations, and bounded `remove-level-instance` operations | The endpoint writes the owned generated published-transform/placement/prefab-override/component set/removal/instance removal module for validated level-owned operations after base-hash validation. It reports hashes and changed stable IDs, detects byte-identical no-op writes, records a reversible changeset, supports valid stable level instances in the selected runtime scene, refuses generated placement insertions that duplicate existing stable IDs or reference unknown prefabs, refuses prefab replacement records that target unknown replacement prefabs or readiness-required checked-in stable IDs, records component overrides by runtime scene, stable ID, and component name, records component removals that clear stale generated component overrides for the same key, writes checked-in instance removal records for non-readiness-critical stable IDs, and cancels generated insertions without leaving generated-only tombstones. Readiness-required deletes/replacements, broad asset/component replacement, grouping, stable-ID management, and non-level-owner component families remain Milestone 2+ work. |

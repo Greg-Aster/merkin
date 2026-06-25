@@ -167,6 +167,71 @@ assertEqual(
 	"selected-object",
 	"Expected viewport camera controls to frame the selected object when one exists.",
 );
+assertIncludes(
+	bridge.camera.framedStableIds,
+	playerObject.stableId,
+	"Expected viewport camera framing to target the primary selected stable ID.",
+);
+assertEqual(
+	bridge.camera.focusPoint.xPercent,
+	12,
+	"Expected selected-object camera framing to use the selected projected X coordinate.",
+);
+assertEqual(
+	bridge.camera.focusPoint.zPercent,
+	12,
+	"Expected selected-object camera framing to use the selected projected Z coordinate.",
+);
+const frameSelectedCommand = bridge.camera.framingCommands.find(
+	(command) => command.id === "frame-selected",
+);
+
+if (!frameSelectedCommand) {
+	throw new Error(
+		"Expected viewport camera controls to expose frame selected.",
+	);
+}
+
+assertEqual(
+	frameSelectedCommand.enabled,
+	true,
+	"Expected frame selected to be enabled for a transform-positioned selection.",
+);
+assertIncludes(
+	frameSelectedCommand.targetStableIds,
+	playerObject.stableId,
+	"Expected frame selected to target the primary selected stable ID.",
+);
+assertEqual(
+	frameSelectedCommand.stagesAuthoringEdits,
+	false,
+	"Expected frame selected not to stage authoring edits.",
+);
+assertEqual(
+	frameSelectedCommand.writesRuntimeData,
+	false,
+	"Expected frame selected not to mutate runtime camera data.",
+);
+assertEqual(
+	frameSelectedCommand.zoomPercent,
+	225,
+	"Expected frame selected to provide a professional close framing zoom.",
+);
+const frameSelectionCommand = bridge.camera.framingCommands.find(
+	(command) => command.id === "frame-selection",
+);
+
+if (!frameSelectionCommand) {
+	throw new Error(
+		"Expected viewport camera controls to expose frame selection.",
+	);
+}
+
+assertEqual(
+	frameSelectionCommand.enabled,
+	false,
+	"Expected frame selection to stay disabled for a single selected object.",
+);
 assertEqual(
 	bridge.camera.stagesAuthoringEdits,
 	false,
@@ -176,6 +241,86 @@ assertEqual(
 	bridge.camera.writesRuntimeData,
 	false,
 	"Expected viewport camera controls not to mutate runtime camera data.",
+);
+const cameraMultiSelectionBridge = buildLevelEditorViewportBridgeModel({
+	workspace,
+	selectedStableId: playerObject.stableId,
+	selectedStableIds: [playerObject.stableId, portalObject.stableId],
+});
+
+assertEqual(
+	cameraMultiSelectionBridge.camera.framingTarget,
+	"selected-set",
+	"Expected viewport camera controls to frame multi-selection sets.",
+);
+assertIncludes(
+	cameraMultiSelectionBridge.camera.framedStableIds,
+	playerObject.stableId,
+	"Expected multi-selection framing to include the player stable ID.",
+);
+assertIncludes(
+	cameraMultiSelectionBridge.camera.framedStableIds,
+	portalObject.stableId,
+	"Expected multi-selection framing to include the portal stable ID.",
+);
+assertEqual(
+	cameraMultiSelectionBridge.camera.focusPoint.xPercent,
+	50,
+	"Expected multi-selection framing to center the projected selected X bounds.",
+);
+assertEqual(
+	cameraMultiSelectionBridge.camera.focusPoint.zPercent,
+	50,
+	"Expected multi-selection framing to center the projected selected Z bounds.",
+);
+const multiFrameSelectionCommand =
+	cameraMultiSelectionBridge.camera.framingCommands.find(
+		(command) => command.id === "frame-selection",
+	);
+
+if (!multiFrameSelectionCommand) {
+	throw new Error(
+		"Expected multi-selection camera controls to expose frame selection.",
+	);
+}
+
+assertEqual(
+	multiFrameSelectionCommand.enabled,
+	true,
+	"Expected frame selection to be enabled for multiple projected selected objects.",
+);
+assertEqual(
+	multiFrameSelectionCommand.target,
+	"selected-set",
+	"Expected frame selection to target the selected stable-ID set.",
+);
+assertEqual(
+	multiFrameSelectionCommand.writesRuntimeData,
+	false,
+	"Expected frame selection not to mutate runtime camera data.",
+);
+const frameAllCommand = cameraMultiSelectionBridge.camera.framingCommands.find(
+	(command) => command.id === "frame-all",
+);
+
+if (!frameAllCommand) {
+	throw new Error("Expected viewport camera controls to expose frame all.");
+}
+
+assertEqual(
+	frameAllCommand.enabled,
+	true,
+	"Expected frame all to be enabled when projected transform objects exist.",
+);
+assertEqual(
+	frameAllCommand.target,
+	"scene-bounds",
+	"Expected frame all to target manifest-derived projected scene bounds.",
+);
+assertEqual(
+	frameAllCommand.writesRuntimeData,
+	false,
+	"Expected frame all not to mutate runtime camera data.",
 );
 assertEqual(
 	bridge.interaction.activeTool,

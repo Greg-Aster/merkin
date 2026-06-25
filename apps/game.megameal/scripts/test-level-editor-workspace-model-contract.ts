@@ -13,6 +13,7 @@ import {
 } from "../src/app/editor/levelEditorWorkspaceModel.js";
 import {
 	type LevelEditorStagedFieldEdit,
+	buildQueuedOperationSummaries,
 	buildStagedPublishReadiness,
 	buildWorkspaceAuthoringTransaction,
 	previewTargetsForStagedEdits,
@@ -783,21 +784,44 @@ const publishableGeneratedSaveOperation = {
 		},
 	},
 } satisfies LevelEditorAuthoringOperationData;
+const publishableQueueEntry = {
+	id: "publishable-generated-transform",
+	label: "Publishable generated transform",
+	saveOperations: [publishableGeneratedSaveOperation],
+} satisfies LevelEditorQueuedAuthoringOperation;
 const publishableQueueReadiness = buildStagedPublishReadiness({
 	stagedFieldEdits: [],
-	queuedOperations: [
-		{
-			id: "publishable-generated-transform",
-			label: "Publishable generated transform",
-			saveOperations: [publishableGeneratedSaveOperation],
-		},
-	],
+	queuedOperations: [publishableQueueEntry],
 });
 
 assertEqual(
 	publishableQueueReadiness.status,
 	"publish-ready",
 	"Expected generated level transform save operations to classify as publish-ready.",
+);
+const publishableQueueSummaries = buildQueuedOperationSummaries([
+	publishableQueueEntry,
+]);
+
+assertEqual(
+	publishableQueueSummaries[0]?.status,
+	"publish-ready",
+	"Expected queued operation summary to expose publish-ready status.",
+);
+assertEqual(
+	publishableQueueSummaries[0]?.statusLabel,
+	"Save Level/Publish ready",
+	"Expected queued operation summary to use Save Level/Publish language.",
+);
+assertEqual(
+	publishableQueueSummaries[0]?.persistenceLabel,
+	"Bounded owner write",
+	"Expected publishable queue summary to name the bounded owner-write path.",
+);
+assertContains(
+	publishableQueueSummaries[0]?.detail ?? "",
+	"generated level owner-write",
+	"Expected publishable queue summary to explain the generated level owner.",
 );
 
 const draftOnlySaveOperation = {
@@ -811,15 +835,14 @@ const draftOnlySaveOperation = {
 		},
 	},
 } satisfies LevelEditorAuthoringOperationData;
+const draftOnlyQueueEntry = {
+	id: "draft-only-asset-operation",
+	label: "Draft-only asset operation",
+	saveOperations: [draftOnlySaveOperation],
+} satisfies LevelEditorQueuedAuthoringOperation;
 const draftOnlyReadiness = buildStagedPublishReadiness({
 	stagedFieldEdits: [],
-	queuedOperations: [
-		{
-			id: "draft-only-asset-operation",
-			label: "Draft-only asset operation",
-			saveOperations: [draftOnlySaveOperation],
-		},
-	],
+	queuedOperations: [draftOnlyQueueEntry],
 });
 
 assertEqual(
@@ -837,16 +860,29 @@ assertAnyContains(
 	"replace-asset",
 	"Expected draft-only publish readiness to name the unsupported operation.",
 );
+const draftOnlyQueueSummaries = buildQueuedOperationSummaries([
+	draftOnlyQueueEntry,
+]);
+
+assertEqual(
+	draftOnlyQueueSummaries[0]?.status,
+	"draft-only",
+	"Expected queued operation summary to expose draft-only status.",
+);
+assertEqual(
+	draftOnlyQueueSummaries[0]?.persistenceLabel,
+	"Generated draft persistence",
+	"Expected draft-only queue summary to name generated draft persistence.",
+);
+assertAnyContains(
+	draftOnlyQueueSummaries[0]?.reasons ?? [],
+	"replace-asset",
+	"Expected draft-only queue summary to include the unsupported operation reason.",
+);
 
 const mixedPublishReadiness = buildStagedPublishReadiness({
 	stagedFieldEdits: [stagedEdit],
-	queuedOperations: [
-		{
-			id: "mixed-draft-only-asset-operation",
-			label: "Mixed draft-only asset operation",
-			saveOperations: [draftOnlySaveOperation],
-		},
-	],
+	queuedOperations: [draftOnlyQueueEntry],
 });
 
 assertEqual(
@@ -863,6 +899,41 @@ assertEqual(
 	mixedPublishReadiness.unsupportedOperationCount,
 	1,
 	"Expected mixed publish readiness to count unsupported staged owner writes.",
+);
+const mixedQueueSummaries = buildQueuedOperationSummaries([
+	{
+		id: "mixed-generated-operation",
+		label: "Mixed generated operation",
+		saveOperations: [publishableGeneratedSaveOperation, draftOnlySaveOperation],
+	},
+]);
+
+assertEqual(
+	mixedQueueSummaries[0]?.status,
+	"mixed",
+	"Expected queued operation summary to expose mixed persistence status.",
+);
+assertEqual(
+	mixedQueueSummaries[0]?.persistenceLabel,
+	"Split before publishing",
+	"Expected mixed queue summary to tell designers to split before publishing.",
+);
+const previewOnlyQueueSummaries = buildQueuedOperationSummaries([
+	{
+		id: "preview-only-operation",
+		label: "Preview-only operation",
+	},
+]);
+
+assertEqual(
+	previewOnlyQueueSummaries[0]?.status,
+	"preview-only",
+	"Expected empty queued entries to be labeled preview-only.",
+);
+assertEqual(
+	previewOnlyQueueSummaries[0]?.persistenceLabel,
+	"No durable operation",
+	"Expected preview-only entries to say no durable operation exists.",
 );
 
 const previewTargets = previewTargetsForStagedEdits({

@@ -10,7 +10,10 @@ import type {
 	LevelEditorObjectLibraryPanelModel,
 	LevelEditorObjectLibraryStagedPlacement,
 } from "./levelEditorObjectLibrary.js";
-import { createObjectLibraryStagedPlacement } from "./levelEditorObjectLibrary.js";
+import {
+	createObjectLibraryReplacementQueueEntry,
+	createObjectLibraryStagedPlacement,
+} from "./levelEditorObjectLibrary.js";
 
 type StageAuthoringOperationsCallback = (
 	entry: LevelEditorQueuedAuthoringOperation,
@@ -165,18 +168,14 @@ function stageReplacement(): void {
 function emitStagedReplacementOperations(
 	drafts: readonly EditorObjectLibraryReplacementDraft[],
 ): void {
-	const operations = drafts.flatMap((draft) => {
-		const operation = editOperationForReplacementDraft(draft);
-		return operation === null ? [] : [operation];
+	const entry = createObjectLibraryReplacementQueueEntry({
+		runtimeSceneId: model.runtimeSceneId,
+		drafts,
 	});
-	const saveOperations = drafts.map(saveOperationForReplacementDraft);
 
-	onStageAuthoringOperations?.({
-		id: `object-library-replacements:${model.runtimeSceneId}`,
-		label: "Object library replacements",
-		...(operations.length === 0 ? {} : { operations }),
-		saveOperations,
-	});
+	if (entry) {
+		onStageAuthoringOperations?.(entry);
+	}
 }
 
 function stagePlacement(): void {
@@ -413,79 +412,6 @@ function sortObjectLibraryEntries(
 				return left.label.localeCompare(right.label);
 		}
 	});
-}
-
-function editOperationForReplacementDraft(
-	draft: EditorObjectLibraryReplacementDraft,
-): LevelEditorAuthoringEditOperation | null {
-	if (draft.replacementKind === "replace-level-instance-prefab") {
-		if (draft.replacement.prefabId === undefined) {
-			return null;
-		}
-
-		return {
-			id: `object-library:${draft.sourcePlanHash}:replace-prefab`,
-			kind: "replace-prefab",
-			persistence: "saved",
-			stableId: draft.selectedObject.stableId,
-			prefabId: draft.replacement.prefabId,
-			note: "Object library replacement staged from the editor panel.",
-		} satisfies LevelEditorAuthoringEditOperation;
-	}
-
-	const componentName = stringValue(
-		draft.authoringOperation.payload.componentName,
-	);
-	const patch = recordValue(draft.authoringOperation.payload.patch);
-
-	if (componentName === null || patch === null) {
-		return null;
-	}
-
-	return {
-		id: `object-library:${draft.sourcePlanHash}:${componentName}`,
-		kind: "set-component",
-		persistence: "saved",
-		stableId: draft.selectedObject.stableId,
-		target: "level-instance",
-		componentName,
-		value: patch,
-		note: "Object library asset replacement staged from the editor panel.",
-	} satisfies LevelEditorAuthoringEditOperation;
-}
-
-function saveOperationForReplacementDraft(
-	draft: EditorObjectLibraryReplacementDraft,
-): LevelEditorAuthoringOperationData {
-	const operation = draft.authoringOperation;
-	const kind =
-		operation.kind === "replace-component-asset-reference"
-			? "replace-level-instance"
-			: operation.kind;
-
-	return {
-		kind,
-		ownerKind: operation.ownerKind,
-		ownerTargetId: operation.ownerTargetId,
-		subjectId: operation.subjectStableId,
-		payload: {
-			...operation.payload,
-			sourceOperationKind: operation.kind,
-			replacementKind: draft.replacementKind,
-			replacement: draft.replacement,
-			sourcePlanHash: draft.sourcePlanHash,
-		},
-	} satisfies LevelEditorAuthoringOperationData;
-}
-
-function stringValue(value: unknown): string | null {
-	return typeof value === "string" && value.length > 0 ? value : null;
-}
-
-function recordValue(value: unknown): Record<string, unknown> | null {
-	return typeof value === "object" && value !== null && !Array.isArray(value)
-		? (value as Record<string, unknown>)
-		: null;
 }
 
 function formatWorkflowValue(value: string): string {

@@ -11,6 +11,7 @@ import {
 import type {
 	LevelEditorViewportBridgeModel,
 	LevelEditorViewportBridgeViewMode,
+	LevelEditorViewportCameraFrameCommand,
 	LevelEditorViewportCameraMode,
 	LevelEditorViewportGizmoMode,
 	LevelEditorViewportInteractionTool,
@@ -26,6 +27,9 @@ type Props = {
 	readonly onViewModeChange?: (mode: LevelEditorViewportBridgeViewMode) => void;
 	readonly onCameraModeChange?: (mode: LevelEditorViewportCameraMode) => void;
 	readonly onCameraZoomPercentChange?: (zoomPercent: number) => void;
+	readonly onCameraFrameCommand?: (
+		command: LevelEditorViewportCameraFrameCommand,
+	) => void;
 	readonly onInteractionToolChange?: (
 		tool: LevelEditorViewportInteractionTool,
 	) => void;
@@ -80,6 +84,7 @@ const {
 	onViewModeChange,
 	onCameraModeChange,
 	onCameraZoomPercentChange,
+	onCameraFrameCommand,
 	onInteractionToolChange,
 	onOverlayToggle,
 	onSelectObject,
@@ -206,6 +211,16 @@ function selectCameraZoomPercent(event: Event): void {
 	}
 
 	onCameraZoomPercentChange?.(zoomPercent);
+}
+
+function runCameraFrameCommand(
+	command: LevelEditorViewportCameraFrameCommand,
+): void {
+	if (!command.enabled) {
+		return;
+	}
+
+	onCameraFrameCommand?.(command);
 }
 
 function selectInteractionTool(tool: LevelEditorViewportInteractionTool): void {
@@ -703,32 +718,32 @@ function marqueeStyle(
 		<span>{model.bridge.connectionStatus}</span>
 	</header>
 
-	<div
-		class="editor-viewport-frame"
-		class:editor-viewport-placement-drop-active={placementDropActive}
-	data-viewport-mode={model.view.mode}
-	data-viewport-interaction-tool={model.interaction.activeTool}
-	data-gizmo-status={model.gizmo.status}
-	data-transform-drag-active={transformDragActive}
-	data-selection-marquee-active={selectionMarqueeStart !== null}
-	data-placement-drop-ready={placeToolActive && (placementTarget?.canStage ?? false)}
-	onclick={handleViewportClick}
-	onpointerdown={beginSelectionMarquee}
-	onpointermove={handleViewportPointerMove}
-	onpointerup={(event) => {
-		completeSelectionMarquee(event);
-		endProjectedTransformDrag(event);
-	}}
-	onpointercancel={(event) => {
-		selectionMarqueeStart = null;
-		selectionMarqueeCurrent = null;
-		endProjectedTransformDrag(event);
-	}}
-	onmouseleave={handleViewportPointerLeave}
-	ondragover={handlePlacementDragOver}
-		ondragleave={handlePlacementDragLeave}
-		ondrop={handlePlacementDrop}
-	>
+		<div
+			class="editor-viewport-frame"
+			class:editor-viewport-placement-drop-active={placementDropActive}
+			data-viewport-mode={model.view.mode}
+			data-viewport-interaction-tool={model.interaction.activeTool}
+			data-gizmo-status={model.gizmo.status}
+			data-transform-drag-active={transformDragActive}
+			data-selection-marquee-active={selectionMarqueeStart !== null}
+			data-placement-drop-ready={placeToolActive && (placementTarget?.canStage ?? false)}
+			onclick={handleViewportClick}
+			onpointerdown={beginSelectionMarquee}
+			onpointermove={handleViewportPointerMove}
+			onpointerup={(event) => {
+				completeSelectionMarquee(event);
+				endProjectedTransformDrag(event);
+			}}
+			onpointercancel={(event) => {
+				selectionMarqueeStart = null;
+				selectionMarqueeCurrent = null;
+				endProjectedTransformDrag(event);
+			}}
+			onmouseleave={handleViewportPointerLeave}
+			ondragover={handlePlacementDragOver}
+			ondragleave={handlePlacementDragLeave}
+			ondrop={handlePlacementDrop}
+		>
 		<div class="editor-viewport-crosshair" aria-hidden="true"></div>
 		{#if selectionMarqueeStart && selectionMarqueeCurrent}
 			<div
@@ -902,6 +917,21 @@ function marqueeStyle(
 				oninput={selectCameraZoomPercent}
 			/>
 		</label>
+		<div
+			class="editor-transform-mode-switcher"
+			aria-label="Viewport camera framing"
+		>
+			{#each model.camera.framingCommands as command}
+				<button
+					type="button"
+					disabled={!command.enabled || !onCameraFrameCommand}
+					title={command.reason}
+					onclick={() => runCameraFrameCommand(command)}
+				>
+					{command.label}
+				</button>
+			{/each}
+		</div>
 		<label class="editor-field">
 			<span>Selection</span>
 			<input value={selectedObject?.stableId ?? "none"} readonly />
@@ -944,6 +974,13 @@ function marqueeStyle(
 		<div>
 			<dt>Framing</dt>
 			<dd>{model.camera.framingTarget}</dd>
+		</div>
+		<div>
+			<dt>Focus</dt>
+			<dd>
+				{model.camera.focusPoint.xPercent.toFixed(1)} /
+				{model.camera.focusPoint.zPercent.toFixed(1)}
+			</dd>
 		</div>
 	</dl>
 

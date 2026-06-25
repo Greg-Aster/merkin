@@ -27,7 +27,9 @@ import LevelEditorCameraPanel from "./LevelEditorCameraPanel.svelte";
 import LevelEditorEnvironmentPanel from "./LevelEditorEnvironmentPanel.svelte";
 import LevelEditorNpcPanel from "./LevelEditorNpcPanel.svelte";
 import LevelEditorObjectLibraryPanel from "./LevelEditorObjectLibraryPanel.svelte";
+import LevelEditorObjectPreviewPanel from "./LevelEditorObjectPreviewPanel.svelte";
 import LevelEditorPreviewControls from "./LevelEditorPreviewControls.svelte";
+import LevelEditorRenderableAssetPicker from "./LevelEditorRenderableAssetPicker.svelte";
 import LevelEditorViewportBridgePanel from "./LevelEditorViewportBridgePanel.svelte";
 import {
 	fetchLevelEditorAuthoringStatus,
@@ -99,6 +101,7 @@ import type { LevelEditorSessionSummary } from "./levelEditorSession.js";
 import {
 	type LevelEditorViewportBridgeConnectionStatus,
 	type LevelEditorViewportBridgeViewMode,
+	type LevelEditorViewportCameraFrameCommand,
 	type LevelEditorViewportCameraMode,
 	type LevelEditorViewportGizmoMode,
 	type LevelEditorViewportInteractionTool,
@@ -118,6 +121,7 @@ import type {
 import {
 	type LevelEditorStagedFieldEdit,
 	type LevelEditorStagedPublishReadiness,
+	buildQueuedOperationSummaries,
 	buildStagedPublishReadiness,
 	commandPlanOutputMessage,
 	createWorkspaceOutputLogEntry,
@@ -281,6 +285,9 @@ let authoringQueue = $state(createLevelEditorAuthoringQueue());
 const stagedFieldEdits = $derived(authoringQueue.stagedFieldEdits);
 const queuedAuthoringOperationEntries = $derived(
 	authoringQueue.queuedOperations,
+);
+const queuedOperationSummaries = $derived(
+	buildQueuedOperationSummaries(queuedAuthoringOperationEntries),
 );
 const stagedPublishReadiness = $derived(
 	buildStagedPublishReadiness({
@@ -650,6 +657,24 @@ function selectViewportCameraZoomPercent(zoomPercent: number): void {
 	}
 
 	viewportCameraZoomPercent = Math.max(25, Math.min(400, zoomPercent));
+}
+
+function runViewportCameraFrameCommand(
+	command: LevelEditorViewportCameraFrameCommand,
+): void {
+	if (!command.enabled) {
+		return;
+	}
+
+	viewportCameraMode = command.cameraMode;
+	viewportCameraZoomPercent = command.zoomPercent;
+	appendOutputLog({
+		level: "info",
+		source: "viewport-camera",
+		message: `${command.label} targeted ${command.targetStableIds.length} stable-ID object${
+			command.targetStableIds.length === 1 ? "" : "s"
+		} without runtime camera writes.`,
+	});
 }
 
 function selectViewportInteractionTool(
@@ -2894,6 +2919,7 @@ function runtimeLifecycleLabel(): string {
 			onViewModeChange={selectViewportBridgeViewMode}
 			onCameraModeChange={selectViewportCameraMode}
 			onCameraZoomPercentChange={selectViewportCameraZoomPercent}
+			onCameraFrameCommand={runViewportCameraFrameCommand}
 			onInteractionToolChange={selectViewportInteractionTool}
 			onOverlayToggle={toggleViewportBridgeOverlay}
 			onSelectObject={selectObject}
@@ -3272,50 +3298,18 @@ function runtimeLifecycleLabel(): string {
 					{selectedWorkspaceObject.workflow.reason}
 				</p>
 			</div>
-			<div class="editor-selected-preview">
-				<div
-					class="editor-preview-media"
-					data-preview-mode={selectedWorkspaceObject.preview.primaryAsset?.mode ??
-						"none"}
-				>
-					{#if selectedWorkspaceObject.preview.primaryAsset?.mode === "image"}
-						<img
-							src={selectedWorkspaceObject.preview.primaryAsset.url}
-							alt=""
-							loading="lazy"
-						/>
-					{:else if selectedWorkspaceObject.preview.primaryAsset?.mode === "audio"}
-						<audio
-							controls
-							src={selectedWorkspaceObject.preview.primaryAsset.url}
-						></audio>
-					{:else if selectedWorkspaceObject.preview.primaryAsset?.mode === "material"}
-						<span
-							class="editor-material-swatch"
-							style:background-color={selectedWorkspaceObject.preview
-								.primaryAsset.swatchColor ?? "#39b7a3"}
-						></span>
-					{:else}
-						<span>
-							{selectedWorkspaceObject.preview.primaryAsset?.kind ?? "no asset"}
-						</span>
-					{/if}
-				</div>
-				<div class="editor-preview-copy">
-					<strong>{selectedWorkspaceObject.preview.title}</strong>
-					<span>{selectedWorkspaceObject.preview.subtitle}</span>
-					{#if selectedWorkspaceObject.preview.primaryAsset}
-						<a
-							href={selectedWorkspaceObject.preview.primaryAsset.url}
-							target="_blank"
-						>
-							{selectedWorkspaceObject.preview.primaryAsset.assetId}
-						</a>
-					{:else}
-						<span>{selectedWorkspaceObject.preview.sourceOwner}</span>
-					{/if}
-				</div>
-			</div>
+			<LevelEditorObjectPreviewPanel
+				selectedObject={selectedObjectLibrarySubject}
+				preview={objectLibraryPanelModel.selectedObjectPreview}
+			/>
+			<LevelEditorRenderableAssetPicker
+				objectLibraryModel={objectLibraryPanelModel}
+				selectedEntryId={objectLibraryPanelModel.selectedEntryId}
+				authoringQueue={authoringQueue}
+				onSelectEntry={selectObjectLibraryEntry}
+				onStageReplacement={stageObjectLibraryReplacement}
+				onStageAuthoringOperations={stageAuthoringOperationEntry}
+			/>
 			<div class="editor-inspector-component-groups">
 				{#each selectedWorkspaceObject.fieldGroups as fieldGroup}
 					<section
@@ -3733,20 +3727,26 @@ function runtimeLifecycleLabel(): string {
 			</ol>
 		{/if}
 		{#if queuedAuthoringOperationEntries.length > 0}
-			<ol class="editor-staged-operation-list">
-				{#each queuedAuthoringOperationEntries as entry}
+			<ol class="editor-staged-operation-list" aria-label="Queued authoring operations">
+				{#each queuedOperationSummaries as summary}
 					<li>
 						<div>
-							<strong>{entry.label ?? entry.id}</strong>
-							<span>{entry.id}</span>
+							<strong>{summary.label}</strong>
+							<span>{summary.id} / {summary.statusLabel}</span>
 						</div>
 						<small>
-							{entry.operations?.length ?? 0} edit operations /
-							{entry.saveOperations?.length ?? 0} save operations
+							{summary.persistenceLabel}: {summary.detail}
+							{#if summary.reasons.length > 0}
+								{" "}
+								{summary.reasons.join(" ")}
+							{/if}
+							{" "}
+							({summary.editOperationCount} edit operations /
+							{summary.saveOperationCount} save operations)
 						</small>
 						<button
 							type="button"
-							onclick={() => removeQueuedAuthoringOperationEntry(entry.id)}
+							onclick={() => removeQueuedAuthoringOperationEntry(summary.id)}
 						>
 							Remove
 						</button>

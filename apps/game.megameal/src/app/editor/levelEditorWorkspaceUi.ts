@@ -43,6 +43,24 @@ export type LevelEditorStagedPublishReadiness = {
 	readonly reasons: readonly string[];
 };
 
+export type LevelEditorQueuedOperationSummaryStatus =
+	| "publish-ready"
+	| "draft-only"
+	| "mixed"
+	| "preview-only";
+
+export type LevelEditorQueuedOperationSummary = {
+	readonly id: string;
+	readonly label: string;
+	readonly editOperationCount: number;
+	readonly saveOperationCount: number;
+	readonly status: LevelEditorQueuedOperationSummaryStatus;
+	readonly statusLabel: string;
+	readonly persistenceLabel: string;
+	readonly detail: string;
+	readonly reasons: readonly string[];
+};
+
 export function fieldEditKey(stableId: string, path: string): string {
 	return `${stableId}\u0000${path}`;
 }
@@ -238,6 +256,36 @@ export function buildStagedPublishReadiness(options: {
 	};
 }
 
+export function buildQueuedOperationSummaries(
+	entries: readonly LevelEditorStagedPublishReadinessQueuedOperation[],
+): readonly LevelEditorQueuedOperationSummary[] {
+	return entries.map((entry) => {
+		const publishability = queuedEntryPublishability(entry);
+		const editOperationCount = entry.operations?.length ?? 0;
+		const saveOperationCount = entry.saveOperations?.length ?? 0;
+		const status = queuedOperationSummaryStatus({
+			totalOperationCount: editOperationCount + saveOperationCount,
+			supportedOperationCount: publishability.supportedOperationCount,
+			unsupportedOperationCount: publishability.unsupportedReasons.length,
+		});
+
+		return {
+			id: entry.id,
+			label: entry.label ?? entry.id,
+			editOperationCount,
+			saveOperationCount,
+			status,
+			statusLabel: queuedOperationStatusLabel(status),
+			persistenceLabel: queuedOperationPersistenceLabel(status),
+			detail: queuedOperationDetail(status),
+			reasons:
+				status === "preview-only"
+					? ["No durable authoring operations are queued."]
+					: publishability.unsupportedReasons.slice(0, 4),
+		};
+	});
+}
+
 function queuedEntryPublishability(
 	entry: LevelEditorStagedPublishReadinessQueuedOperation,
 ): {
@@ -251,6 +299,22 @@ function queuedEntryPublishability(
 	}
 
 	return classifyQueuedEditOperations(entry, operationLabel);
+}
+
+function queuedOperationSummaryStatus(options: {
+	readonly totalOperationCount: number;
+	readonly supportedOperationCount: number;
+	readonly unsupportedOperationCount: number;
+}): LevelEditorQueuedOperationSummaryStatus {
+	if (options.totalOperationCount === 0) {
+		return "preview-only";
+	}
+
+	if (options.unsupportedOperationCount === 0) {
+		return "publish-ready";
+	}
+
+	return options.supportedOperationCount === 0 ? "draft-only" : "mixed";
 }
 
 function classifyQueuedSaveOperations(
@@ -454,6 +518,51 @@ function stagedPublishReadinessLabel(
 			return "Draft-only staged work";
 		case "mixed":
 			return "Mixed publish readiness";
+	}
+}
+
+function queuedOperationStatusLabel(
+	status: LevelEditorQueuedOperationSummaryStatus,
+): string {
+	switch (status) {
+		case "publish-ready":
+			return "Save Level/Publish ready";
+		case "draft-only":
+			return "Save Draft only";
+		case "mixed":
+			return "Mixed persistence";
+		case "preview-only":
+			return "Preview only";
+	}
+}
+
+function queuedOperationPersistenceLabel(
+	status: LevelEditorQueuedOperationSummaryStatus,
+): string {
+	switch (status) {
+		case "publish-ready":
+			return "Bounded owner write";
+		case "draft-only":
+			return "Generated draft persistence";
+		case "mixed":
+			return "Split before publishing";
+		case "preview-only":
+			return "No durable operation";
+	}
+}
+
+function queuedOperationDetail(
+	status: LevelEditorQueuedOperationSummaryStatus,
+): string {
+	switch (status) {
+		case "publish-ready":
+			return "All queued operations fit current generated level owner-write families.";
+		case "draft-only":
+			return "Save Draft can preserve this entry; Save Level/Publish will block until an owner-write contract exists.";
+		case "mixed":
+			return "Contains publishable and unsupported operations; split or remove unsupported work before Save Level/Publish.";
+		case "preview-only":
+			return "This entry can affect editor review, but it has no durable authoring operation to save or publish.";
 	}
 }
 

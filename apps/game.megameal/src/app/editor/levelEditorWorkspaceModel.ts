@@ -525,6 +525,8 @@ function buildWorkspaceObjects(
 			featureFamiliesById,
 		);
 
+		const previewSeed = previewSeedForObject(previewTargetKind, components);
+
 		return {
 			id: instance.id,
 			stableId: instance.stableId,
@@ -554,12 +556,8 @@ function buildWorkspaceObjects(
 				assetIds,
 				assetsById,
 			}),
-			...(previewTargetKind === undefined
-				? {}
-				: {
-						previewTargetKind,
-						previewSeed: previewSeedForObject(previewTargetKind, components),
-					}),
+			...(previewTargetKind === undefined ? {} : { previewTargetKind }),
+			...(Object.keys(previewSeed).length === 0 ? {} : { previewSeed }),
 		};
 	});
 }
@@ -1840,14 +1838,19 @@ function fieldWorkflowReason(options: {
 }
 
 function previewSeedForObject(
-	targetKind: LevelEditorWorkspacePreviewTargetKind,
+	targetKind: LevelEditorWorkspacePreviewTargetKind | undefined,
 	components: Record<string, unknown>,
 ): Record<string, unknown> {
 	const seed: Record<string, unknown> = {};
 	const transform = asRecord(components.Transform);
+	const renderable = asRecord(components.Renderable);
 
 	if (transform) {
 		seed.transform = cloneRecord(transform);
+	}
+
+	if (renderable) {
+		seed.renderable = cloneRecord(renderable);
 	}
 
 	switch (targetKind) {

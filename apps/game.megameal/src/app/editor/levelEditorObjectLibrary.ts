@@ -22,6 +22,7 @@ import {
 	defaultRuntimeSceneManifests,
 	getRuntimeSceneManifest,
 } from "../../game/levels/index.js";
+import type { LevelEditorQueuedAuthoringOperation } from "./levelEditorAuthoringStore.js";
 
 export type LevelEditorObjectLibraryPreviewMode =
 	| "model"
@@ -253,6 +254,93 @@ export function createObjectLibraryStagedPlacement(options: {
 	};
 }
 
+export function editOperationForReplacementDraft(
+	draft: EditorObjectLibraryReplacementDraft,
+): LevelEditorAuthoringEditOperation | null {
+	if (draft.replacementKind === "replace-level-instance-prefab") {
+		if (draft.replacement.prefabId === undefined) {
+			return null;
+		}
+
+		return {
+			id: `object-library:${draft.sourcePlanHash}:replace-prefab`,
+			kind: "replace-prefab",
+			persistence: "saved",
+			stableId: draft.selectedObject.stableId,
+			prefabId: draft.replacement.prefabId,
+			note: "Object library replacement staged from the editor panel.",
+		} satisfies LevelEditorAuthoringEditOperation;
+	}
+
+	const componentName = stringValue(
+		draft.authoringOperation.payload.componentName,
+	);
+	const patch = recordValue(draft.authoringOperation.payload.patch);
+
+	if (componentName === null || patch === null) {
+		return null;
+	}
+
+	return {
+		id: `object-library:${draft.sourcePlanHash}:${componentName}`,
+		kind: "set-component",
+		persistence: "saved",
+		stableId: draft.selectedObject.stableId,
+		target: "level-instance",
+		componentName,
+		value: patch,
+		note: "Object library asset replacement staged from the editor panel.",
+	} satisfies LevelEditorAuthoringEditOperation;
+}
+
+export function saveOperationForReplacementDraft(
+	draft: EditorObjectLibraryReplacementDraft,
+): LevelEditorAuthoringOperationData {
+	const operation = draft.authoringOperation;
+	const kind =
+		operation.kind === "replace-component-asset-reference"
+			? "replace-level-instance"
+			: operation.kind;
+
+	return {
+		kind,
+		ownerKind: operation.ownerKind,
+		ownerTargetId: operation.ownerTargetId,
+		subjectId: operation.subjectStableId,
+		payload: {
+			...operation.payload,
+			sourceOperationKind: operation.kind,
+			replacementKind: draft.replacementKind,
+			replacement: draft.replacement,
+			sourcePlanHash: draft.sourcePlanHash,
+		},
+	} satisfies LevelEditorAuthoringOperationData;
+}
+
+export function createObjectLibraryReplacementQueueEntry(options: {
+	readonly runtimeSceneId: string;
+	readonly drafts: readonly EditorObjectLibraryReplacementDraft[];
+	readonly id?: string;
+	readonly label?: string;
+}): LevelEditorQueuedAuthoringOperation | null {
+	if (options.drafts.length === 0) {
+		return null;
+	}
+
+	const operations = options.drafts.flatMap((draft) => {
+		const operation = editOperationForReplacementDraft(draft);
+		return operation === null ? [] : [operation];
+	});
+	const saveOperations = options.drafts.map(saveOperationForReplacementDraft);
+
+	return {
+		id: options.id ?? `object-library-replacements:${options.runtimeSceneId}`,
+		label: options.label ?? "Object library replacements",
+		...(operations.length === 0 ? {} : { operations }),
+		saveOperations,
+	};
+}
+
 export function createObjectLibraryReplacementPreviewMessage(options: {
 	readonly requestId: string;
 	readonly draft: EditorObjectLibraryReplacementDraft;
@@ -417,6 +505,16 @@ function countBy(values: readonly string[]): ReadonlyMap<string, number> {
 	}
 
 	return counts;
+}
+
+function stringValue(value: unknown): string | null {
+	return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+function recordValue(value: unknown): Record<string, unknown> | null {
+	return typeof value === "object" && value !== null && !Array.isArray(value)
+		? (value as Record<string, unknown>)
+		: null;
 }
 
 function previewModelForEntry(
