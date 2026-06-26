@@ -80,7 +80,15 @@ The current Megameal editor has useful foundations:
   The selected-object inspector now has a first Renderable picker slice for
   current mesh/material IDs, scene-scoped manifest-backed choices, active
   level-instance scope, future-disabled prefab/asset-manifest scopes, and
-  current/dirty/staged state through the same replacement draft queue.
+  current/dirty/staged state through the same replacement draft queue. The
+  picker now includes selectable candidate cards with display-only source
+  owner, preview contract, usage, and type metadata. Mesh and material
+  selections compose against the effective queued `Renderable` state so a later
+  staged material change preserves an already staged mesh change. Those selected
+  level-instance Renderable edits now emit normal `set-component` operations,
+  making the first bounded mesh/material reference override path Save
+  Level/Publish-ready through the existing generated component override owner
+  after asset-kind and selected-scene preload validation.
   AI Asset Lab can model Hunyuan/ComfyUI service status, queue/generated asset
   records, and apply-to-selection edit plans, but durable generated asset
   manifest writes, generated result import, and the full visual replacement
@@ -124,11 +132,12 @@ The final editor must support a blockout-first level-building workflow:
 
 This workflow is planned, but not complete. The current editor has the stable
 selection model, inspector foundation, object-library replacement foundation,
-and AI Asset Lab contract foundation. Missing work is the first-class inspector
-mesh picker, real generation dispatch/result harvesting, durable generated
-asset manifest writers, publish gates for renderable asset-reference updates,
-and clear UI that distinguishes replacing one selected instance from changing a
-reusable prefab definition.
+first bounded level-instance Renderable mesh/material reference Save
+Level/Publish path with asset-kind and selected-scene preload validation, and AI
+Asset Lab contract foundation. Missing work is real generation dispatch/result
+harvesting, durable generated asset manifest writers, generated asset import,
+enabled prefab/asset owner scopes, and clear UI that distinguishes replacing one
+selected instance from changing a reusable prefab definition.
 
 ## UX Gap Matrix
 
@@ -139,7 +148,7 @@ reusable prefab definition.
 | Transform gizmos | Missing | Add move/rotate/scale handles, local/world space, axis constraints, pivot, grid/snap, and numeric transform sync. |
 | Hierarchy/outliner | Partial | Current outliner lists grouped objects with search, category/lock/pickability/visibility filters, category/path affordances, filtered-result selection actions, editor-only hide/show, lock/unlock, isolate/reset controls, browser-local runtime-scene-scoped object view-state restore, and an editor-owned Ctrl/Cmd multi-select foundation shared with projected viewport pins/marquee selection plus runtime-backed rendered box/marquee stable-ID selection. Shared or checked-in visibility/lock/isolation metadata, group/reparent, and deeper hierarchy path tooling remain future. |
 | Inspector | Partial | Inspector can stage supported fields and multi-selection now has a selection-set summary, but mixed-object editing and bulk operation contracts remain future work. |
-| Inspector renderable mesh picker | Partial | First selected-object Renderable picker slice exposes current `Renderable.meshId`/`Renderable.materialId`, scene-scoped manifest-backed mesh/material choices, active level-instance scope, future-disabled prefab/asset-manifest scopes, current/dirty/staged labels, preview staging, and queued authoring operations. Rich rendered thumbnails, generated asset import, durable manifest writers, enabled prefab/asset scopes, and final publish semantics remain future. |
+| Inspector renderable mesh picker | Partial | First selected-object Renderable picker slice exposes current `Renderable.meshId`/`Renderable.materialId`, scene-scoped manifest-backed mesh/material choices, active level-instance scope, future-disabled prefab/asset-manifest scopes, current/dirty/staged labels, selectable candidate cards with display-only source owner/preview contract/usage/type metadata, preview staging, queued authoring operations, composed mesh/material staging from the effective queued `Renderable` state, and Save Level/Publish-ready level-instance Renderable `set-component` overrides after asset-kind and selected-scene preload validation. Rich rendered thumbnails, generated asset import, durable manifest writers, and enabled prefab/asset scopes remain future. |
 | Asset/content browser | Partial | Object Library exists and can stage mesh/material/audio/prefab replacement drafts, but placement/replacement is not a complete persistent asset/prefab workflow. |
 | AI visual reimagining | Partial foundation | AI Asset Lab has service/job/generated-record/apply-plan contracts for Hunyuan/ComfyUI, but final generation dispatch, result import, generated asset manifest persistence, and inspector/object-library integration remain future work. |
 | Dirty/save state | First clarity slice implemented; still partial | Save Draft, Save Level, Publish, Discard Staged, and Preview are separated in code and the staged operations dock now classifies queued entries as preview-only, draft-only, mixed, or Save Level/Publish ready. Broader operation coverage, post-publish rollback, and full professional save/publish semantics remain future. |
@@ -156,7 +165,7 @@ reusable prefab definition.
 | Selection model | Stable object IDs, category groups, editor-owned multi-select context with one primary inspector object, synchronized projected viewport pins, projected marquee selection, runtime-backed rendered click and bounds-aware box/marquee stable-ID selection, browser-local editor-only object view state that restores per runtime scene without runtime data or owner-file writes, and a selection-set inspector | Bulk mutations, occlusion-aware advanced rendered selection modes, mixed-object editing, and shared or checked-in visibility/isolation/lock metadata remain future | One workbench selection model with viewport/outliner/inspector synchronization |
 | Authoring queue | Staged field edits and queued operations | Some preview paths still read current DOM inputs | Typed staged state as the only preview/save input |
 | Preview | Dev-only runtime patch protocol | Clear/reload lifecycle diagnostics remain limited | Editor-mode/live-mode visual contract and richer preview diagnostics |
-| Persistence | Generated authoring drafts plus bounded generated owner writes for level-instance transform overrides, object-library insertions, prefab replacement records, component set/removal records, and bounded level-instance removals | Renderable mesh/material reference updates can stage through replacement drafts but are not yet publishable; broader readiness-owner mutations remain blocked | Generated owner writes for renderable mesh/material reference updates, generated asset manifest records, and later asset/render/audio owners |
+| Persistence | Generated authoring drafts plus bounded generated owner writes for level-instance transform overrides, object-library insertions, prefab replacement records, component set/removal records including level-instance Renderable mesh/material reference overrides, and bounded level-instance removals | Broader readiness-owner mutations, prefab-owned edits, asset-manifest edits, and generated asset records remain blocked | Generated asset manifest records, enabled prefab/asset scopes, and later asset/render/audio owners |
 | AI-generated visual assets | AI Asset Lab contract models and generated asset records | Service probing and apply-plan staging exist without full generation/import/publish path | Dev-only Hunyuan/ComfyUI dispatch, generated output harvesting, provenance/hash validation, manifest-backed asset records, object-library availability, and renderable-reference publish gates |
 | Contracts | Existing workspace/save/collision plans and register rows | Some docs are scattered or stale in wording | Dedicated workbench contract, gap analysis, and milestone gates |
 
@@ -174,8 +183,10 @@ target regions are:
 - Right dock: selected-object inspector with source owner, component groups,
   editable fields, current renderable mesh/material references, manifest-backed
   asset pickers, publishability labels, and operation previews.
-- Bottom dock: content browser/object library, AI Asset Lab/generated asset
-  library, output log, validation report, command plan, and publish gates.
+- Bottom dock: tabbed content browser/object library, AI Asset Lab/generated
+  asset library, staged operations, output log, validation report, command
+  plan, publish gates, and secondary live-runtime/collision/terrain
+  diagnostics.
 
 Existing panels may survive as task panels, but they should not remain as a
 flat stack of equal boxes. A user should be able to answer the core editor

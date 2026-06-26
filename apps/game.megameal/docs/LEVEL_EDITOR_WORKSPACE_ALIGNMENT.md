@@ -88,12 +88,19 @@ explicit contract tooling.
   hierarchy, central viewport or live-game viewport bridge, inspector, content
   browser, output log, and publish/validation gates.
 - Workbench usability has a priority order. The central viewport or live-game
-  viewport bridge, left scene hierarchy, right inspector, and bottom content
-  browser are primary authoring surfaces. Validation reports, command plans,
-  runtime telemetry, terrain/collision diagnostics, and output logs are
-  secondary dock/drawer surfaces unless a task mode explicitly promotes one of
-  them. Do not present every internal contract/status surface as an equally
-  important window in the default editor layout.
+  viewport bridge, left scene hierarchy, right inspector, and tabbed bottom
+  content browser are primary authoring surfaces. Staged operations, validation
+  reports, command plans, publish gates, runtime telemetry, terrain/collision
+  diagnostics, and output logs are secondary dock/drawer surfaces unless a task
+  mode explicitly promotes one of them. Do not present every internal
+  contract/status surface as an equally important window in the default editor
+  layout.
+- The bottom dock must behave as an accessible tabbed authoring surface, not a
+  loose list of hidden cards. Staged Operations reflects the live authoring
+  queue count, Publish Gates promotes the publish command plan, Commands
+  promotes the build command plan, and live-runtime/collision/terrain tools
+  remain secondary diagnostics unless a future task mode explicitly promotes
+  them.
 - The object-selection workflow is category-first and component-driven. The
   editor may provide visual aids such as a category rail, spatial pins, and
   selected-object summaries, but those controls must be derived from
@@ -163,9 +170,11 @@ explicit contract tooling.
   supported Save Draft, Save Level, and Publish operations, currently including
   generated level-instance transforms, object-library placements,
   level-instance prefab ID replacement records,
-  level-instance component set/removal records, and bounded
-  `remove-level-instance` records. Unsupported staged operations must remain
-  draft-only or blocked instead of leaking into runtime.
+  level-instance component set/removal records including selected-object
+  Renderable mesh/material reference overrides after asset-kind and
+  selected-scene preload validation, and bounded `remove-level-instance`
+  records. Unsupported staged operations must remain draft-only or blocked
+  instead of leaking into runtime.
 - `/editor/` owns the dev control workspace. `/` owns the live game runtime.
   Production builds must continue to exclude editor tooling from normal game
   execution.

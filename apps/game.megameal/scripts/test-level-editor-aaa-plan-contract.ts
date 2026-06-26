@@ -35,6 +35,10 @@ const docs = {
 const workspaceComponent = await readProjectFile(
 	"src/app/editor/LevelEditorWorkspace.svelte",
 );
+const bottomDockComponent = await readProjectFile(
+	"src/app/editor/LevelEditorBottomDock.svelte",
+);
+const workbenchComponentSurface = `${workspaceComponent}\n${bottomDockComponent}`;
 const coreObjectPreviewPatch = await readProjectFile(
 	"src/app/editor/levelEditorCoreObjectPreviewPatch.ts",
 );
@@ -43,6 +47,15 @@ const objectLibraryPanel = await readProjectFile(
 );
 const objectLibraryModel = await readProjectFile(
 	"src/app/editor/levelEditorObjectLibrary.ts",
+);
+const renderableAssetPickerModel = await readProjectFile(
+	"src/app/editor/levelEditorRenderableAssetPickerModel.ts",
+);
+const renderableAssetPickerComponent = await readProjectFile(
+	"src/app/editor/LevelEditorRenderableAssetPicker.svelte",
+);
+const publishedLevelTransforms = await readProjectFile(
+	"src/game/editor/authoring/publishedLevelTransforms.ts",
 );
 const outlinerFiltersModel = await readProjectFile(
 	"src/app/editor/levelEditorOutlinerFilters.ts",
@@ -370,6 +383,7 @@ function assertResearchGapAnalysisIsActionable(): void {
 		"asset/content browser",
 		"Save Draft writes generated authoring transaction modules",
 		"bounded generated-owner",
+		"asset-kind and selected-scene preload validation",
 		"Central 3D scene viewport",
 		"Missing as an editor-owned workbench surface",
 		"Transform gizmos",
@@ -427,6 +441,7 @@ function assertWorkbenchContractIsRegistered(): void {
 		"existing manifest-backed mesh/material choices",
 		"active level-instance scope",
 		"current/dirty/staged labels",
+		"composed mesh/material staging",
 		"Hunyuan/ComfyUI generation",
 		"generated asset provenance",
 		"preserving stable IDs and gameplay components",
@@ -471,6 +486,9 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		"current `Renderable.meshId` and `Renderable.materialId`",
 		"future-disabled prefab/asset-manifest scopes",
 		"current/dirty/staged state",
+		"effective queued `Renderable` state",
+		"Save Level/Publish-ready level-instance Renderable overrides",
+		"asset-kind and selected-scene preload validation",
 		"generated asset import into a manifest-backed library",
 		"Generated visual replacement must preserve stable IDs and gameplay components",
 		"post-publish undo/redo semantics",
@@ -482,6 +500,7 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		"UX consolidation lane active",
 		"secondary dock/drawer surfaces",
 		"Active pass demotes status/debug windows into secondary dock affordances",
+		"tabbed bottom dock",
 		"Do Not Declare Done Until",
 		"Persistent owner writes exist for the feature families advertised as",
 	];
@@ -573,19 +592,42 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		'class="editor-inspector-component-groups"',
 		'class="editor-inspector-component-group"',
 		'class="editor-panel editor-live-runtime"',
+		"<LevelEditorBottomDock",
 		"<LevelEditorObjectLibraryPanel",
 		'<details class="editor-panel editor-graph-panel"',
 		'class="editor-panel editor-live-runtime"',
 		'<details class="editor-panel editor-collision-preview"',
 		'<details class="editor-panel editor-terrain-bake"',
+		"selectedBottomDockTabId",
+		"bottomDockTabs",
+		'tab.id === "staged-operations"',
+		"authoringQueue.operationCount",
+		": tab.itemCount",
+		"selectBottomDockTab",
+		'if (tabId === "publish-gates")',
+		'selectedCommandPlanId = "publish";',
+		'if (tabId === "command-plan")',
+		'selectedCommandPlanId = "build";',
+		'class="editor-bottom-dock-tabs"',
+		'role="tablist"',
+		'role="tab"',
+		'aria-controls="editor-bottom-dock-panel"',
+		"aria-selected={selectedTabId === tab.id}",
+		"data-bottom-dock-tab={tab.id}",
+		'id="editor-bottom-dock-panel"',
+		'class="editor-bottom-dock-primary"',
+		'role="tabpanel"',
+		"aria-labelledby={`editor-bottom-dock-tab-${selectedTabId}`}",
+		"data-active-bottom-dock-tab={selectedTabId}",
+		'class="editor-bottom-dock-content-grid"',
+		'class="editor-bottom-dock-secondary"',
 		'class="editor-panel editor-validation-report"',
 		'class="editor-panel editor-command-plan" aria-label="Command plan"',
 		'class="editor-panel editor-staged-operations"',
 		'class="editor-panel editor-validation-report"',
-		"open={hasDirtyState}",
 		"removeQueuedAuthoringOperationEntry",
 		"removeLevelEditorAuthoringOperationEntry",
-		"onRemoveAuthoringOperations={removeQueuedAuthoringOperationEntry}",
+		"onRemoveAuthoringOperations={onRemoveQueuedAuthoringOperationEntry}",
 		"removeStagedFieldEdit",
 		"removeLevelEditorStagedFieldEdit",
 		"queuedAuthoringOperationEntries",
@@ -770,6 +812,43 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		"placementSource",
 		"LevelEditorObjectLibraryStagedPlacement",
 	];
+	const requiredRenderableAssetPickerModelSnippets = [
+		"editOperationForReplacementDraft",
+		"effectiveRenderableFromQueue",
+		"mergeRenderableDraft",
+		"mergeRenderableReference",
+		"inspector-renderable-replacement:${options.runtimeSceneId}:${options.draft.selectedObject.stableId}",
+		"operations: [operation]",
+		"previewContract",
+		"usageState",
+		"runtimeSceneIds",
+		"canStageSelectedMesh",
+		"canStageSelectedMaterial",
+		"selected candidate matches checked-in data but differs from the staged renderable reference",
+	];
+	const requiredRenderableAssetPickerComponentSnippets = [
+		'data-workflow-publishability="publishable"',
+		"Save Level / Publish",
+		"editor-renderable-candidate-board",
+		"editor-renderable-candidate-card",
+		"formatCandidateUsage",
+		"candidate.previewContract",
+		"pickerModel.canStageSelectedMesh",
+		"pickerModel.canStageSelectedMaterial",
+		'.editor-renderable-candidate-card[aria-pressed="true"]',
+	];
+	const requiredPublishedLevelTransformSnippets = [
+		"assertPublishableComponentOverrideValue",
+		"assertRenderableAssetReference",
+		"runtimeScenePreloadAssetIds",
+		"options.value.meshId",
+		"options.value.materialId",
+		".Renderable.meshId",
+		".Renderable.materialId",
+		"references unknown asset",
+		"expected ${options.expectedKind}",
+		"not declared in the level preload set",
+	];
 	const requiredOutlinerFilterModelSnippets = [
 		"export type LevelEditorOutlinerFilters",
 		"export function matchesLevelEditorOutlinerFilters",
@@ -834,15 +913,11 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 		'.editor-field[data-workflow-publishability="publishable"] input',
 		"grid-template-columns: minmax(15rem, 18rem) minmax(34rem, 1.35fr) minmax(",
 		".editor-bottom-dock",
-		"grid-template-areas:",
-		"library library library",
-		"staged validation commands",
-		"live collision terrain",
-		"output output output",
-		".editor-bottom-dock .editor-object-library",
-		".editor-bottom-dock .editor-live-runtime",
-		".editor-bottom-dock .editor-collision-preview",
-		".editor-bottom-dock .editor-terrain-bake",
+		".editor-bottom-dock-tabs",
+		".editor-bottom-dock-tabs button.active-bottom-dock-tab",
+		".editor-bottom-dock-primary",
+		".editor-bottom-dock-content-grid",
+		".editor-bottom-dock-secondary",
 		"details.editor-panel:not([open])",
 		"details.editor-panel > summary.editor-panel-header",
 		".editor-object-focus-grid",
@@ -858,9 +933,9 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 
 	for (const snippet of requiredComponentSnippets) {
 		assertIncludes(
-			workspaceComponent,
+			workbenchComponentSurface,
 			snippet,
-			`Expected LevelEditorWorkspace to keep the connected workbench region ${JSON.stringify(snippet)}.`,
+			`Expected the level editor workbench surface to keep the connected workbench region ${JSON.stringify(snippet)}.`,
 		);
 	}
 
@@ -904,6 +979,30 @@ function assertWorkbenchSourceUsesConnectedRegions(): void {
 			objectLibraryModel,
 			snippet,
 			`Expected object library model to own placement operation source ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredRenderableAssetPickerModelSnippets) {
+		assertIncludes(
+			renderableAssetPickerModel,
+			snippet,
+			`Expected renderable asset picker model to preserve composed mesh/material staging ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredRenderableAssetPickerComponentSnippets) {
+		assertIncludes(
+			renderableAssetPickerComponent,
+			snippet,
+			`Expected renderable asset picker component to expose publishable level-instance Renderable edits ${JSON.stringify(snippet)}.`,
+		);
+	}
+
+	for (const snippet of requiredPublishedLevelTransformSnippets) {
+		assertIncludes(
+			publishedLevelTransforms,
+			snippet,
+			`Expected published level transform writer to validate Renderable asset references ${JSON.stringify(snippet)}.`,
 		);
 	}
 

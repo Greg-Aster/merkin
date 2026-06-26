@@ -966,62 +966,65 @@ a:focus-visible {
 
 .editor-bottom-dock {
 	display: grid;
-	grid-template-areas:
-		"library library library"
-		"staged validation commands"
-		"live collision terrain"
-		"output output output";
-	grid-template-columns: minmax(24rem, 1fr) minmax(18rem, 0.8fr) minmax(
-			18rem,
-			0.8fr
-		);
+	gap: 0.85rem;
+	align-items: start;
+}
+
+.editor-bottom-dock-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.editor-bottom-dock-tabs button {
+	display: flex;
+	align-items: center;
+	gap: 0.45rem;
+	min-height: 2.35rem;
+	padding-inline: 0.85rem;
+	border: 1px solid var(--editor-border);
+	border-radius: 7px;
+	background: var(--editor-panel-muted);
+	color: var(--editor-text);
+}
+
+.editor-bottom-dock-tabs button.active-bottom-dock-tab {
+	border-color: rgb(57 183 163 / 80%);
+	background: rgb(57 183 163 / 16%);
+	color: var(--editor-text-strong);
+}
+
+.editor-bottom-dock-tabs small {
+	min-width: 1.45rem;
+	padding: 0.12rem 0.35rem;
+	border-radius: 999px;
+	background: rgb(0 0 0 / 22%);
+	color: var(--editor-muted);
+	font-size: 0.72rem;
+	text-align: center;
+}
+
+.editor-bottom-dock-primary {
+	display: grid;
+	min-width: 0;
+}
+
+.editor-bottom-dock-content-grid {
+	display: grid;
+	grid-template-columns: minmax(24rem, 1.25fr) minmax(18rem, 0.8fr);
 	gap: 1rem;
 	align-items: start;
 }
 
-.editor-bottom-dock .editor-object-library {
-	grid-area: library;
+.editor-bottom-dock-content-grid .editor-object-library {
+	grid-row: span 3;
 }
 
-.editor-bottom-dock .editor-staged-operations {
-	grid-area: staged;
-}
-
-.editor-bottom-dock .editor-live-runtime {
-	grid-area: live;
-}
-
-.editor-bottom-dock .editor-collision-preview {
-	grid-area: collision;
-}
-
-.editor-bottom-dock .editor-terrain-bake {
-	grid-area: terrain;
-}
-
-.editor-bottom-dock .editor-validation-report {
-	grid-area: validation;
-}
-
-.editor-bottom-dock .editor-command-plan {
-	grid-area: commands;
-}
-
-.editor-bottom-dock .editor-output-log {
-	grid-area: output;
-}
-
-.editor-bottom-dock > :not(
-		.editor-object-library,
-		.editor-staged-operations,
-		.editor-live-runtime,
-		.editor-collision-preview,
-		.editor-terrain-bake,
-		.editor-validation-report,
-		.editor-command-plan,
-		.editor-output-log
-	) {
-	align-self: stretch;
+.editor-bottom-dock-secondary {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1rem;
+	align-items: start;
 }
 
 .editor-panel {
@@ -1975,17 +1978,9 @@ details.editor-panel > summary.editor-panel-header::-webkit-details-marker {
 
 @media (max-width: 1180px) {
 	.editor-workbench-main,
-	.editor-bottom-dock {
+	.editor-bottom-dock-content-grid,
+	.editor-bottom-dock-secondary {
 		grid-template-columns: 1fr;
-	}
-
-	.editor-bottom-dock {
-		grid-template-areas:
-			"library"
-			"staged"
-			"validation"
-			"commands"
-			"output";
 	}
 
 	.editor-outliner-list {

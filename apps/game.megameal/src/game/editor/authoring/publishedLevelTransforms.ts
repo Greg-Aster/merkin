@@ -1262,6 +1262,14 @@ function publishedLevelInstanceComponentOverrideForOperation(
 		"operation.componentName",
 	);
 	const value = parseRecord(payloadOperation.value, "operation.value");
+
+	assertPublishableComponentOverrideValue({
+		manifest,
+		componentName,
+		value,
+		path: "operation.value",
+	});
+
 	const overrideBase = {
 		schemaVersion: 1 as const,
 		runtimeSceneId: transaction.runtimeSceneId,
@@ -1276,6 +1284,82 @@ function publishedLevelInstanceComponentOverrideForOperation(
 		...overrideBase,
 		contentHash: hashStableValue(overrideBase),
 	};
+}
+
+function assertPublishableComponentOverrideValue(options: {
+	readonly manifest: (typeof defaultRuntimeSceneManifests)[number];
+	readonly componentName: string;
+	readonly value: Record<string, unknown>;
+	readonly path: string;
+}): void {
+	if (options.componentName !== "Renderable") {
+		return;
+	}
+
+	assertRenderableAssetReference({
+		manifest: options.manifest,
+		assetId: parseString(
+			options.value.meshId,
+			`${options.path}.Renderable.meshId`,
+		),
+		expectedKind: "mesh",
+		path: `${options.path}.Renderable.meshId`,
+	});
+
+	if (options.value.materialId !== undefined) {
+		assertRenderableAssetReference({
+			manifest: options.manifest,
+			assetId: parseString(
+				options.value.materialId,
+				`${options.path}.Renderable.materialId`,
+			),
+			expectedKind: "material",
+			path: `${options.path}.Renderable.materialId`,
+		});
+	}
+}
+
+function assertRenderableAssetReference(options: {
+	readonly manifest: (typeof defaultRuntimeSceneManifests)[number];
+	readonly assetId: string;
+	readonly expectedKind: "mesh" | "material";
+	readonly path: string;
+}): void {
+	const asset = options.manifest.assets.assets.find(
+		(candidate) => candidate.id === options.assetId,
+	);
+
+	if (!asset) {
+		throw new Error(
+			`${options.path} references unknown asset "${options.assetId}".`,
+		);
+	}
+
+	if (asset.kind !== options.expectedKind) {
+		throw new Error(
+			`${options.path} references ${asset.kind} asset "${options.assetId}", expected ${options.expectedKind}.`,
+		);
+	}
+
+	if (!runtimeScenePreloadAssetIds(options.manifest).has(options.assetId)) {
+		throw new Error(
+			`${options.path} references asset "${options.assetId}" that is not declared in the level preload set.`,
+		);
+	}
+}
+
+function runtimeScenePreloadAssetIds(
+	manifest: (typeof defaultRuntimeSceneManifests)[number],
+): ReadonlySet<string> {
+	const assetIds = new Set<string>();
+
+	for (const groupId of manifest.level.preloadGroups ?? []) {
+		for (const assetId of manifest.assets.preloadGroups?.[groupId] ?? []) {
+			assetIds.add(assetId);
+		}
+	}
+
+	return assetIds;
 }
 
 function publishedLevelInstanceComponentRemovalForOperation(

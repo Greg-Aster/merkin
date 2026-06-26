@@ -54,11 +54,11 @@ export const navBarConfig: NavBarConfig = {
       name: 'Videos',
       url: '/videos/',
     },
-    {
+/*     {
       name: 'Game',
       url: 'https://game.megameal.org/',
       external: true,
-    },
+    }, */
     3,
     1,
     {

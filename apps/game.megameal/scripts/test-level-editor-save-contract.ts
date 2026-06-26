@@ -451,6 +451,40 @@ assertEqual(
 	"Portal",
 	"Expected generated component merge to preserve the component name.",
 );
+const publishedRenderableComponentTransaction = createComponentTransaction({
+	runtimeSceneId: "portal_arena_runtime",
+	saveTargetId: "portal_arena_runtime:generated:authoring-save",
+	baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+	ownerTargetId: "portal_arena_runtime:level",
+	transactionId: "publish-contract-renderable-component",
+	stableId: "player",
+	componentName: "Renderable",
+	value: {
+		meshId: "mesh_portal_gate",
+		materialId: "material_player",
+	},
+});
+const mergedPublishedRenderableComponentOverrides =
+	mergePublishedLevelInstanceComponentOverrides({
+		existingComponentOverrides: mergedPublishedComponentOverrides,
+		transaction: publishedRenderableComponentTransaction,
+	});
+const mergedRenderableComponentOverride =
+	mergedPublishedRenderableComponentOverrides.find(
+		(override) =>
+			override.stableId === "player" && override.componentName === "Renderable",
+	);
+
+assertEqual(
+	mergedRenderableComponentOverride?.value.meshId,
+	"mesh_portal_gate",
+	"Expected generated Renderable component merge to preserve the mesh reference.",
+);
+assertEqual(
+	mergedRenderableComponentOverride?.value.materialId,
+	"material_player",
+	"Expected generated Renderable component merge to preserve the material reference.",
+);
 const publishedComponentRemovalTransaction = createComponentRemovalTransaction({
 	runtimeSceneId: "portal_arena_runtime",
 	saveTargetId: "portal_arena_runtime:generated:authoring-save",
@@ -1096,12 +1130,132 @@ try {
 		"Expected component publish to persist the authored component value.",
 	);
 
+	const renderableComponentPublishSave =
+		await publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: publishedRenderableComponentTransaction,
+			baseHash: hashLevelEditorAuthoringFileContent(
+				updatedComponentPublishedSource,
+			),
+		});
+	const updatedRenderableComponentPublishedSource = await readFile(
+		publishedTransformPath,
+		"utf8",
+	);
+	const updatedRenderableComponentOverrides =
+		parsePublishedLevelInstanceComponentOverrides(
+			updatedRenderableComponentPublishedSource,
+		);
+	const updatedRenderableComponentOverride =
+		updatedRenderableComponentOverrides.find(
+			(override) =>
+				override.stableId === "player" &&
+				override.componentName === "Renderable",
+		);
+
+	assertEqual(
+		renderableComponentPublishSave.wroteFile,
+		true,
+		"Expected Renderable component publish to write the generated runtime owner file.",
+	);
+	assertIncludes(
+		renderableComponentPublishSave.publishedStableIds,
+		"player",
+		"Expected Renderable component publish to report the selected stable ID.",
+	);
+	assertEqual(
+		renderableComponentPublishSave.componentOverrides.find(
+			(override) =>
+				override.stableId === "player" &&
+				override.componentName === "Renderable",
+		)?.componentName,
+		"Renderable",
+		"Expected Renderable component publish to return generated component override data.",
+	);
+	assertEqual(
+		updatedRenderableComponentOverride?.value.meshId,
+		"mesh_portal_gate",
+		"Expected Renderable component publish to persist the mesh reference.",
+	);
+	assertEqual(
+		updatedRenderableComponentOverride?.value.materialId,
+		"material_player",
+		"Expected Renderable component publish to persist the material reference.",
+	);
+
+	await assertPersistenceFailure(
+		publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: createComponentTransaction({
+				runtimeSceneId: "portal_arena_runtime",
+				saveTargetId: "portal_arena_runtime:generated:authoring-save",
+				baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+				ownerTargetId: "portal_arena_runtime:level",
+				transactionId: "publish-contract-renderable-unknown-mesh",
+				stableId: "player",
+				componentName: "Renderable",
+				value: {
+					meshId: "mesh_missing_contract",
+					materialId: "material_player",
+				},
+			}),
+			baseHash: hashLevelEditorAuthoringFileContent(
+				updatedRenderableComponentPublishedSource,
+			),
+		}),
+		'operation.value.Renderable.meshId references unknown asset "mesh_missing_contract".',
+	);
+	await assertPersistenceFailure(
+		publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: createComponentTransaction({
+				runtimeSceneId: "portal_arena_runtime",
+				saveTargetId: "portal_arena_runtime:generated:authoring-save",
+				baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+				ownerTargetId: "portal_arena_runtime:level",
+				transactionId: "publish-contract-renderable-wrong-mesh-kind",
+				stableId: "player",
+				componentName: "Renderable",
+				value: {
+					meshId: "material_player",
+					materialId: "material_player",
+				},
+			}),
+			baseHash: hashLevelEditorAuthoringFileContent(
+				updatedRenderableComponentPublishedSource,
+			),
+		}),
+		'operation.value.Renderable.meshId references material asset "material_player", expected mesh.',
+	);
+	await assertPersistenceFailure(
+		publishLevelEditorTransformTransaction({
+			appRoot: publishedTransformTempRoot,
+			transaction: createComponentTransaction({
+				runtimeSceneId: "portal_arena_runtime",
+				saveTargetId: "portal_arena_runtime:generated:authoring-save",
+				baseHash: LEVEL_EDITOR_MISSING_FILE_HASH,
+				ownerTargetId: "portal_arena_runtime:level",
+				transactionId: "publish-contract-renderable-wrong-material-kind",
+				stableId: "player",
+				componentName: "Renderable",
+				value: {
+					meshId: "mesh_portal_gate",
+					materialId: "mesh_portal_gate",
+				},
+			}),
+			baseHash: hashLevelEditorAuthoringFileContent(
+				updatedRenderableComponentPublishedSource,
+			),
+		}),
+		'operation.value.Renderable.materialId references mesh asset "mesh_portal_gate", expected material.',
+	);
+
 	const componentRemovalPublishSave =
 		await publishLevelEditorTransformTransaction({
 			appRoot: publishedTransformTempRoot,
 			transaction: publishedComponentRemovalTransaction,
 			baseHash: hashLevelEditorAuthoringFileContent(
-				updatedComponentPublishedSource,
+				updatedRenderableComponentPublishedSource,
 			),
 		});
 	const updatedComponentRemovalPublishedSource = await readFile(

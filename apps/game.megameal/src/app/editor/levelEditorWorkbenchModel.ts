@@ -109,6 +109,7 @@ export type LevelEditorWorkbenchBottomDockRegion =
 		readonly tabs: readonly {
 			readonly id:
 				| "content-browser"
+				| "staged-operations"
 				| "output-log"
 				| "validation-report"
 				| "command-plan"
@@ -379,13 +380,18 @@ function buildBottomDockRegion(
 		id: "bottom-dock",
 		label: "Bottom Dock",
 		contractRole:
-			"content browser, output log, validation report, command plan, and publish gates",
+			"content browser, staged operations, output log, validation report, command plan, and publish gates",
 		ownsRuntimeState: false,
 		tabs: [
 			{
 				id: "content-browser",
 				label: "Content Browser",
 				itemCount: contentItemCount,
+			},
+			{
+				id: "staged-operations",
+				label: "Staged Operations",
+				itemCount: workspace.authoring.recordCount,
 			},
 			{
 				id: "output-log",

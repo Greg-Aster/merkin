@@ -61,8 +61,10 @@ full save/publish path is incomplete:
   level-owned `set-transform` operations, generated object-library
   `insert-level-instance` placement operations, bounded level-instance
   `replace-prefab` operations, and level-instance `set-component`/
-  `remove-component` operations through the `component-editing` family, plus
-  bounded `remove-level-instance` operations.
+  `remove-component` operations through the `component-editing` family,
+  including selected-object Renderable mesh/material reference overrides for
+  existing manifest-backed assets, plus bounded `remove-level-instance`
+  operations.
 - The owner registry still has broader level, prefab, asset, render-profile,
   terrain/collision, audio, and readiness owner targets that are not writable by
   the current Save Level slice.
@@ -99,9 +101,9 @@ contract test proves the runtime loads it. (Last audited: 2026-06-17.)
 | Preview | `src/app/devPreview/**`, live-preview protocol | Implemented | Dev-only, temporary, schema-validated, scene-scoped, clearable. |
 | Staged operations clarity | `LevelEditorWorkspace.svelte`, `levelEditorWorkspaceUi.ts`, authoring queue | First clarity slice implemented | The dock distinguishes Preview only, Save Draft only, mixed persistence, and Save Level/Publish ready queued entries, with targeted staged-field revert, targeted queued-entry removal, `Discard Staged`, and staged owner-write readiness. It does not change save/publish execution semantics. |
 | Save Draft | `handleLevelEditorAuthoringPersistenceRequest`, `save.json`/`dry-run.json`, `authoring-save` generated modules | Implemented | Writes generated authoring modules with `writesRuntimeData: false`. Runtime must not import them. |
-| Runtime published-override plumbing | `src/game/generated/publishedLevelTransforms.ts`, `src/game/levels/publishedLevelOverrides.ts`, `runtimeSceneManifests.ts` applier | Implemented for level-instance transforms, generated level-instance insertions, level-instance prefab ID overrides, level-instance component overrides/removals, and bounded level-instance removals | The generated override module and the `applyPublishedLevelInstanceTransformOverrides` consumer are wired into every runtime scene. The checked-in override, insertion, prefab override, component override, component removal, and instance removal arrays may be empty, but `save-level` can write deterministic transform overrides for selected-scene stable level instances, generated object-library placement insertions for known scene prefabs, level-instance `replace-prefab` records, level-instance `set-component` overrides, level-instance `remove-component` records, and bounded `remove-level-instance` records for publishable instance deletion. |
-| Save Level / bounded owner write | `handleLevelEditorLevelOwnerWriteRequest` (`save-level.json`) | Implemented for `set-transform` level-instance edits, object-library `insert-level-instance` placements, bounded `replace-prefab` operations, component-editing `set-component`/`remove-component` operations, and bounded `remove-level-instance` operations | The endpoint writes the owned generated published-transform/placement/prefab-override/component set/removal/instance removal module for validated level-owned operations after base-hash validation. It reports hashes and changed stable IDs, detects byte-identical no-op writes, records a reversible changeset, supports valid stable level instances in the selected runtime scene, refuses generated placement insertions that duplicate existing stable IDs or reference unknown prefabs, refuses prefab replacement records that target unknown replacement prefabs or readiness-required checked-in stable IDs, records component overrides by runtime scene, stable ID, and component name, records component removals that clear stale generated component overrides for the same key, writes checked-in instance removal records for non-readiness-critical stable IDs, and cancels generated insertions without leaving generated-only tombstones. Readiness-required deletes/replacements, broad asset/component replacement, grouping, stable-ID management, and non-level-owner component families remain Milestone 2+ work. |
-| Publish | `handleLevelEditorLocalPublishRequest` (`publish-local.json`), `src/game/editor/buildPublish/**` | Implemented for generated transform, object-library placement, prefab ID override, component override/removal, and bounded instance-removal owner slice | Applies validated `set-transform`, generated placement insertion, `replace-prefab`, component override, component removal, and bounded `remove-level-instance` operations to the generated runtime owner, runs configured local validation/build gates, reports changed artifacts, and rolls back the generated owner write when a gate fails. It does not deploy and does not yet cover broader Milestone 2 feature families. |
+| Runtime published-override plumbing | `src/game/generated/publishedLevelTransforms.ts`, `src/game/levels/publishedLevelOverrides.ts`, `runtimeSceneManifests.ts` applier | Implemented for level-instance transforms, generated level-instance insertions, level-instance prefab ID overrides, level-instance component overrides/removals including Renderable mesh/material overrides, and bounded level-instance removals | The generated override module and the `applyPublishedLevelInstanceTransformOverrides` consumer are wired into every runtime scene. The checked-in override, insertion, prefab override, component override, component removal, and instance removal arrays may be empty, but `save-level` can write deterministic transform overrides for selected-scene stable level instances, generated object-library placement insertions for known scene prefabs, level-instance `replace-prefab` records, level-instance `set-component` overrides including selected-object Renderable mesh/material reference overrides, level-instance `remove-component` records, and bounded `remove-level-instance` records for publishable instance deletion. |
+| Save Level / bounded owner write | `handleLevelEditorLevelOwnerWriteRequest` (`save-level.json`) | Implemented for `set-transform` level-instance edits, object-library `insert-level-instance` placements, bounded `replace-prefab` operations, component-editing `set-component`/`remove-component` operations including Renderable mesh/material overrides, and bounded `remove-level-instance` operations | The endpoint writes the owned generated published-transform/placement/prefab-override/component set/removal/instance removal module for validated level-owned operations after base-hash validation. It reports hashes and changed stable IDs, detects byte-identical no-op writes, records a reversible changeset, supports valid stable level instances in the selected runtime scene, refuses generated placement insertions that duplicate existing stable IDs or reference unknown prefabs, refuses prefab replacement records that target unknown replacement prefabs or readiness-required checked-in stable IDs, records component overrides by runtime scene, stable ID, and component name including selected-object Renderable mesh/material reference overrides for existing manifest-backed assets after validating asset kind and selected-scene preload membership, records component removals that clear stale generated component overrides for the same key, writes checked-in instance removal records for non-readiness-critical stable IDs, and cancels generated insertions without leaving generated-only tombstones. Readiness-required deletes/replacements, generated asset manifest writes, prefab-owned edits, asset-manifest edits, grouping, stable-ID management, and non-level-owner component families remain Milestone 2+ work. |
+| Publish | `handleLevelEditorLocalPublishRequest` (`publish-local.json`), `src/game/editor/buildPublish/**` | Implemented for generated transform, object-library placement, prefab ID override, component override/removal including Renderable mesh/material overrides, and bounded instance-removal owner slice | Applies validated `set-transform`, generated placement insertion, `replace-prefab`, component override including selected-object Renderable mesh/material reference overrides, component removal, and bounded `remove-level-instance` operations to the generated runtime owner, runs configured local validation/build gates, reports changed artifacts, and rolls back the generated owner write when a gate fails. It does not deploy and does not yet cover broader Milestone 2 feature families. |
 | In-editor validation report | `src/app/editor/levelEditorWorkspaceModel.ts`, `LevelEditorWorkspace.svelte` | Implemented | `LevelEditorValidationReport` derives from runtime-scene schema validation, content-graph validation, audio content validation, authoring owner provenance, and workspace capability warnings. Errors block Publish Level; warnings are shown in the report/output log without blocking. |
 
 The runtime-read half (override module + applier), the write half
@@ -134,16 +136,21 @@ These terms are binding for docs, UI labels, tests, and implementation:
   level-instance `replace-prefab` operations from the
   `level-instance-prefab-replacement` family, level-instance
   `set-component`/`remove-component` operations from the `component-editing`
-  family, and bounded `remove-level-instance` operations from the
-  `level-instance-removal` family, through the generated published level
-  override owner module. Save Level may clear dirty state only after approved
-  owner targets pass base-hash validation and the write succeeds.
+  family including selected-object Renderable mesh/material reference overrides
+  for existing manifest-backed assets, and bounded `remove-level-instance`
+  operations from the `level-instance-removal` family, through the generated
+  published level override owner module. Renderable overrides must resolve to
+  the selected runtime scene manifest and level preload set before the generated
+  owner write is serialized. Save Level may clear dirty state only after
+  approved owner targets pass base-hash validation and the write succeeds.
 - Publish: an explicit local repo mutation action that applies validated staged
   operations to checked-in runtime owner data, runs required validation/build
   gates, reports changed owner/generated files, and then permits a reload. The
   current implementation supports generated transform overrides, generated
-  object-library placement insertions, generated component overrides,
-  generated component removals, and generated instance removals.
+  object-library placement insertions, generated prefab ID overrides, generated
+  component overrides including selected-object Renderable mesh/material
+  reference overrides, generated component removals, and generated instance
+  removals.
   Publish is not deployment, not normal-build rewriting, and not runtime
   mutation.
 
@@ -309,7 +316,10 @@ Current generated-owner supported writes:
   readiness-required instance replacement is blocked until a matching
   manifest/readiness owner writer exists.
 - `set-component` and `remove-component` for level-instance component
-  set/removal records through the `component-editing` feature family.
+  set/removal records through the `component-editing` feature family, including
+  selected-object Renderable mesh/material reference overrides for existing
+  manifest-backed assets that resolve to the selected runtime scene manifest and
+  level preload set.
 - `remove-level-instance` for bounded level-instance removal through the
   `level-instance-removal` feature family. Checked-in readiness-required
   instance removal is blocked until a matching manifest/readiness owner writer
@@ -327,9 +337,11 @@ Required editor feature families:
   interaction triggers, story notes, quest/event hooks, portal targets, and
   authored navigation/camera markers.
 - Prefab placement, prefab variant editing, object-library replacement,
-  reusable authored kits, and asset reference validation.
-- Renderable, material, light, reflection, water, sky, environment, and render
-  profile authoring through the existing rendering contracts.
+  reusable authored kits, selected level-instance Renderable reference editing,
+  and asset reference validation.
+- Material asset authoring, generated asset manifests, reusable prefab/asset
+  scope editing, light, reflection, water, sky, environment, and render profile
+  authoring through the existing rendering contracts.
 - Collider, rigid body, character controller, terrain collision, streamed
   terrain package, and cook/drift products through their existing terrain and
   collision contracts.
@@ -349,9 +361,10 @@ and reviewed like other generated runtime data.
 
 Publish Level is now an action for the generated level override owner slice, not
 only a plan display. The implemented slice covers level-instance transforms,
-generated object-library placements, and component-editing overrides. Additional
-feature families must meet the same rules before their Publish support is
-enabled.
+generated object-library placements, prefab ID overrides, component-editing
+overrides including selected-object Renderable mesh/material reference
+overrides, component removals, and bounded instance removals. Additional feature
+families must meet the same rules before their Publish support is enabled.
 
 Publish should:
 
@@ -450,7 +463,9 @@ accept valid non-player stable level instances in the selected runtime scene,
 refuse unknown stable IDs, publish generated object-library insertions, and
 publish bounded `replace-prefab` operations as generated prefab ID override
 entries, and publish component-editing `set-component`/`remove-component`
-operations as generated component set/removal entries. It also publishes
+operations as generated component set/removal entries, including selected-object
+Renderable mesh/material reference overrides for existing manifest-backed
+assets after asset-kind and selected-scene preload validation. It also publishes
 bounded `remove-level-instance` records for non-readiness-critical checked-in
 instances and cancels generated insertions while clearing stale generated child
 records.

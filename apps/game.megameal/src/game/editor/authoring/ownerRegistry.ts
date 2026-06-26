@@ -1,4 +1,11 @@
-import { defaultRuntimeSceneManifests } from "../../levels/index.js";
+import {
+	defaultRuntimeSceneManifests,
+	getLevelContentPackage,
+	listLevelContentPackages,
+	type LevelContentPackage,
+	type LevelContentPackageGeneratedOwnerModule,
+	type LevelContentPackageOwnerModule,
+} from "../../levels/index.js";
 import { cloneValue, hashStableValue } from "./stableValue.js";
 
 export type LevelEditorOwnerKind =
@@ -96,35 +103,11 @@ export type LevelEditorFeatureCoverageRegistry = {
 };
 
 type RuntimeSceneOwnerModules = {
-	readonly level: {
-		readonly ownerName: string;
-		readonly ownerExport: string;
-		readonly targetFile: string;
-	};
-	readonly prefabs: {
-		readonly ownerName: string;
-		readonly ownerExport: string;
-		readonly targetFile: string;
-	};
-	readonly assets: {
-		readonly ownerName: string;
-		readonly ownerExport: string;
-		readonly targetFile: string;
-	};
-	readonly renderProfile: {
-		readonly ownerName: string;
-		readonly ownerExport: string;
-		readonly targetFile: string;
-	};
-	readonly generatedModules?: readonly {
-		readonly ownerName: string;
-		readonly ownerExport: string;
-		readonly targetFile: string;
-		readonly generatedOwnerKind: Exclude<
-			LevelEditorGeneratedOwnerKind,
-			"authoring-save"
-		>;
-	}[];
+	readonly level: LevelContentPackageOwnerModule;
+	readonly prefabs: LevelContentPackageOwnerModule;
+	readonly assets: LevelContentPackageOwnerModule;
+	readonly renderProfile: LevelContentPackageOwnerModule;
+	readonly generatedModules?: readonly LevelContentPackageGeneratedOwnerModule[];
 };
 
 type LevelEditorFeatureFamilyDefinition = Omit<
@@ -412,215 +395,20 @@ const featureFamilyDefinitions: readonly LevelEditorFeatureFamilyDefinition[] =
 		},
 	];
 
-const runtimeSceneOwnerModules: Record<string, RuntimeSceneOwnerModules> = {
-	starter_runtime: {
-		level: ownerModule(
-			"Starter level",
-			"starterLevel",
-			"src/game/levels/defaultLevels.ts",
-		),
-		prefabs: ownerModule(
-			"Starter prefab catalog",
-			"starterPrefabs",
-			"src/game/prefabs/defaultPrefabs.ts",
-		),
-		assets: ownerModule(
-			"Starter asset manifest",
-			"starterAssetManifest",
-			"src/game/assets/defaultAssets.ts",
-		),
-		renderProfile: ownerModule(
-			"Starter render profile",
-			"starterRenderProfile",
-			"src/game/levels/renderProfiles.ts",
-		),
-		generatedModules: [publishedTransformsModule()],
-	},
-	portal_arena_runtime: {
-		level: ownerModule(
-			"Portal arena level",
-			"portalArenaLevel",
-			"src/game/levels/portalArenaLevel.ts",
-		),
-		prefabs: ownerModule(
-			"Portal arena prefab catalog",
-			"portalArenaPrefabs",
-			"src/game/prefabs/portalPrefabs.ts",
-		),
-		assets: ownerModule(
-			"Portal arena asset manifest",
-			"portalArenaAssetManifest",
-			"src/game/assets/portalArenaAssets.ts",
-		),
-		renderProfile: ownerModule(
-			"Portal arena render profile",
-			"portalArenaRenderProfile",
-			"src/game/levels/renderProfiles.ts",
-		),
-		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
-	},
-	prototype_arena_runtime: {
-		level: ownerModule(
-			"Prototype arena level",
-			"prototypeLevel",
-			"src/game/levels/defaultLevels.ts",
-		),
-		prefabs: ownerModule(
-			"Prototype prefab catalog",
-			"prototypePrefabs",
-			"src/game/prefabs/defaultPrefabs.ts",
-		),
-		assets: ownerModule(
-			"Prototype asset manifest",
-			"prototypeAssetManifest",
-			"src/game/assets/defaultAssets.ts",
-		),
-		renderProfile: ownerModule(
-			"Prototype render profile",
-			"prototypeRenderProfile",
-			"src/game/levels/renderProfiles.ts",
-		),
-		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
-	},
-	miranda_deck_runtime: {
-		level: ownerModule(
-			"Miranda deck level",
-			"mirandaDeckLevel",
-			"src/game/levels/defaultLevels.ts",
-		),
-		prefabs: ownerModule(
-			"Miranda deck prefab catalog",
-			"mirandaDeckPrefabs",
-			"src/game/prefabs/defaultPrefabs.ts",
-		),
-		assets: ownerModule(
-			"Miranda deck asset manifest",
-			"mirandaDeckAssetManifest",
-			"src/game/assets/defaultAssets.ts",
-		),
-		renderProfile: ownerModule(
-			"Miranda deck render profile",
-			"mirandaDeckRenderProfile",
-			"src/game/levels/renderProfiles.ts",
-		),
-		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
-	},
-	observatory_runtime: {
-		level: ownerModule(
-			"Observatory level",
-			"observatoryLevel",
-			"src/game/levels/observatoryLevel.ts",
-		),
-		prefabs: ownerModule(
-			"Observatory prefab catalog",
-			"observatoryPrefabs",
-			"src/game/prefabs/observatoryPrefabs.ts",
-		),
-		assets: ownerModule(
-			"Observatory asset manifest",
-			"observatoryAssetManifest",
-			"src/game/assets/observatoryAssets.ts",
-		),
-		renderProfile: ownerModule(
-			"Observatory render profile",
-			"observatoryRenderProfile",
-			"src/game/levels/renderProfiles.ts",
-		),
-		generatedModules: [
-			terrainRuntimeModule(),
-			publishedTransformsModule(),
-			{
-				ownerName: "Observatory generated collision runtime",
-				ownerExport: "observatoryCollisionRuntime",
-				targetFile: "src/game/generated/observatoryCollisionRuntime.ts",
-				generatedOwnerKind: "collision-runtime",
-			},
-		],
-	},
-	sci_fi_room_runtime: {
-		level: ownerModule(
-			"Sci Fi Room level",
-			"sciFiRoomLevel",
-			"src/game/levels/sciFiRoomLevel.ts",
-		),
-		prefabs: ownerModule(
-			"Sci Fi Room prefab catalog",
-			"sciFiRoomPrefabs",
-			"src/game/prefabs/sciFiRoomPrefabs.ts",
-		),
-		assets: ownerModule(
-			"Sci Fi Room asset manifest",
-			"sciFiRoomAssetManifest",
-			"src/game/assets/sciFiRoomAssets.ts",
-		),
-		renderProfile: ownerModule(
-			"Sci Fi Room render profile",
-			"sciFiRoomRenderProfile",
-			"src/game/levels/renderProfiles.ts",
-		),
-		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
-	},
-	solitude_runtime: {
-		level: ownerModule(
-			"Solitude level",
-			"solitudeLevel",
-			"src/game/levels/solitudeLevel.ts",
-		),
-		prefabs: ownerModule(
-			"Solitude prefab catalog",
-			"solitudePrefabs",
-			"src/game/prefabs/solitudePrefabs.ts",
-		),
-		assets: ownerModule(
-			"Solitude asset manifest",
-			"solitudeAssetManifest",
-			"src/game/assets/solitudeAssets.ts",
-		),
-		renderProfile: ownerModule(
-			"Solitude render profile",
-			"solitudeRenderProfile",
-			"src/game/levels/renderProfiles.ts",
-		),
-		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
-	},
-	yggdrasil_runtime: {
-		level: ownerModule(
-			"Yggdrasil level",
-			"yggdrasilLevel",
-			"src/game/levels/yggdrasilLevel.ts",
-		),
-		prefabs: ownerModule(
-			"Yggdrasil prefab catalog",
-			"yggdrasilPrefabs",
-			"src/game/prefabs/yggdrasilPrefabs.ts",
-		),
-		assets: ownerModule(
-			"Yggdrasil asset manifest",
-			"yggdrasilAssetManifest",
-			"src/game/assets/yggdrasilAssets.ts",
-		),
-		renderProfile: ownerModule(
-			"Yggdrasil render profile",
-			"yggdrasilRenderProfile",
-			"src/game/levels/renderProfiles.ts",
-		),
-		generatedModules: [terrainRuntimeModule(), publishedTransformsModule()],
-	},
-};
-
 export function buildLevelEditorOwnerRegistry(): LevelEditorOwnerRegistry {
 	const runtimeSceneIds = defaultRuntimeSceneManifests.map(
 		(manifest) => manifest.id,
 	);
 	const targets = defaultRuntimeSceneManifests.flatMap((manifest) => {
-		const ownerModules = runtimeSceneOwnerModules[manifest.id];
+		const contentPackage = getLevelContentPackage(manifest.id);
 
-		if (!ownerModules) {
+		if (!contentPackage) {
 			throw new Error(
-				`Runtime scene "${manifest.id}" is missing level editor owner metadata.`,
+				`Runtime scene "${manifest.id}" is missing level content package owner metadata.`,
 			);
 		}
 
+		const ownerModules = ownerModulesFromContentPackage(contentPackage);
 		const evidence = {
 			sourceKind: manifest.source.kind,
 			sourceId: manifest.source.id,

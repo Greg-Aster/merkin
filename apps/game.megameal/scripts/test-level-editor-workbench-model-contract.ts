@@ -207,12 +207,27 @@ assertDeepEqual(
 	bottomDock.tabs.map((tab) => tab.id),
 	[
 		"content-browser",
+		"staged-operations",
 		"output-log",
 		"validation-report",
 		"command-plan",
 		"publish-gates",
 	],
-	"Expected bottom dock to expose content/output/validation/command/publish tabs.",
+	"Expected bottom dock to expose content/staged/output/validation/command/publish tabs.",
+);
+const stagedOperationsTab = assertDefined(
+	bottomDock.tabs.find((tab) => tab.id === "staged-operations"),
+	"Expected bottom dock to include a staged operations tab.",
+);
+assertEqual(
+	stagedOperationsTab.label,
+	"Staged Operations",
+	"Expected staged operations tab to use editor-facing language.",
+);
+assertEqual(
+	stagedOperationsTab.itemCount,
+	workspace.authoring.recordCount,
+	"Expected staged operations tab to reflect authoring record count.",
 );
 assertEqual(
 	bottomDock.contentBrowser.groupCount,

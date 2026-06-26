@@ -20,6 +20,62 @@ criteria are all met.
 - `GAME_ENGINE_DESIGN_DOCUMENT.md`
 - `LevelEditorMaintainabilityContract` in `ENGINE_CONTRACT_REGISTER.md`
 
+## Latest Verified Gate
+
+Latest fully recorded gate: the accessible tabbed bottom-dock slice passed its
+focused workbench/AAA/maintainability contracts, aggregate contract suite,
+type-check, lint, boundary audit, production editor bundle guard, build,
+legacy-reference audit, and diff check. The goal remains active; this verifies
+only the current bottom-dock implementation packet, not the full AAA-tier level
+editor.
+
+Known non-blocking warnings: the build continues to report the existing
+Astro/Vite warnings for an empty editor chunk, large client chunks, and GET
+generation for POST-only editor authoring API routes.
+
+## Current Active Packet
+
+Owner: Codex main thread with six read-only support agents auditing adjacent
+lanes.
+
+Goal: replace the equal-weight bottom diagnostic wall with an accessible tabbed
+bottom dock that keeps the content browser primary and exposes Staged
+Operations, Validation Report, Commands, Publish Gates, and Output Log as
+intentional dock tabs. Live Runtime, Collision Preview, and Terrain/Bake remain
+accessible through secondary dock/drawer surfaces rather than primary task
+panels.
+
+Files in scope: `LevelEditorWorkspace.svelte`,
+`levelEditorWorkbenchModel.ts`, `src/styles/editor.css`, focused level-editor
+contract tests, `ENGINE_CONTRACT_REGISTER.md`, and this progress log.
+
+Out of scope: runtime ownership changes, dev-preview protocol changes, new
+owner writers, generated asset import, rendered-scene gizmos, and browser smoke
+checks.
+
+Next validation gate: focused workbench/AAA/maintainability contracts, then
+type-check, lint, boundary audit, aggregate contracts, production editor bundle
+guard, diff check, legacy-reference audit, and build.
+
+## Support Agent Findings Queue
+
+- Scene hierarchy/outliner is contract-aligned but still embedded in
+  `LevelEditorWorkspace.svelte`; the next maintainability slice should extract
+  `LevelEditorSceneHierarchyPanel.svelte` before adding hierarchy behavior.
+- Inspector is functional for staged fields and Renderable replacement, but the
+  next quality slice should move toward typed property descriptors,
+  component-specific controls, and property-level preflight validation.
+- Content browser and Renderable picker are aligned for existing manifest
+  assets. AI/generated replacement remains blocked until the AI apply path uses
+  the current `Renderable.meshId`/`Renderable.materialId` contract and a real
+  generated asset manifest owner exists.
+- Save/publish readiness has a contract-risk queue item: generic
+  `component-editing` publishability must be reconciled with feature-family
+  registry truth for Portal, Light, and SoundEmitter before broadening owner
+  writes.
+- Progress tracking should keep a current active packet, latest verified gate,
+  and explicit dirty-tree status for every multi-week editor slice.
+
 ## Current Truth
 
 - The current editor is a foundation, not a finished AAA-tier editor.
@@ -40,8 +96,9 @@ criteria are all met.
   workflow/publishability labels, object-library placement readiness, Save
   Draft, and bounded generated-owner Save Level/Publish for transforms and
   object-library placements, level-instance prefab ID replacements,
-  level-instance component overrides, and level-instance component removals,
-  plus bounded level-instance removals and a guarded selected-instance duplicate/removal action pair
+  level-instance component overrides including selected-object Renderable
+  mesh/material reference overrides, level-instance component removals, plus
+  bounded level-instance removals and a guarded selected-instance duplicate/removal action pair
   in the workbench.
 - Current major gaps: rendered-scene transform gizmos/direct manipulation,
   rendered-scene camera navigation/depth, checked-in/shared editor metadata
@@ -91,9 +148,14 @@ criteria are all met.
   planned systems, but the current presentation of every status/debug/tooling
   surface as an equally important window. The consolidation pass must keep the
   same editor capabilities while prioritizing the central viewport/workbench,
-  left outliner, right inspector, and bottom content drawer; validation,
-  command plans, telemetry, terrain/collision status, and logs should become
-  secondary dock/drawer surfaces unless the user is actively working in them.
+  left outliner, right inspector, and tabbed bottom dock; validation, command
+  plans, telemetry, terrain/collision status, and logs should become secondary
+  dock/drawer surfaces unless the user is actively working in them.
+- Bottom-dock contract invariant: primary lower-workbench panels are selected
+  through accessible tabs, staged operation counts reflect the live authoring
+  queue in the UI, Publish Gates opens the publish command plan, Commands opens
+  the build command plan, and live-runtime/collision/terrain tools stay as
+  secondary diagnostics.
 - Maintainability ratchet: the editor is still intended to become a complete
   AAA-quality game and level editor, but new capability must not disappear into
   unbounded central files. `test:level-editor-maintainability-contract`
@@ -119,9 +181,9 @@ criteria are all met.
 
 | Area | Current status | Remaining end-state gap |
 | --- | --- | --- |
-| Workbench shell | First professional shell integrated with a prioritized bottom dock for content, staged operations, validation, commands, output, and filterable outliner hierarchy | Needs runtime-backed viewport depth and final layout polish |
+| Workbench shell | First professional shell integrated with a tabbed bottom dock for content browser, staged operations, validation, commands, publish gates, output, secondary diagnostics, and filterable outliner hierarchy | Needs runtime-backed viewport depth and final layout polish |
 | Selection | Stable-ID selection drives searchable outliner filtering, manifest path/category affordances, inspector, projected viewport pins, projected viewport click picking, runtime-backed rendered viewport click picking when the preview bridge is live, projected viewport marquee selection, runtime-backed rendered bounds-aware box/marquee stable-ID selection when the preview bridge is live, object-library context, a selection-set inspector, browser-local editor workspace persistence for per-object hide/show, lock/unlock, isolate/reset state, and an editor-owned outliner/category-aid multi-select foundation. Multi-select keeps a primary inspector object, synchronizes selected projected viewport pins, and deliberately disables bulk owner-write operations. | Needs bulk operation contracts, occlusion-aware advanced rendered selection modes, and a checked-in/shared editor metadata owner for durable team-visible view state |
-| Inspector | Editable fields stage authoring edits with workflow labels, component-grouped inspector sections, including level-instance transform position/rotation/scale fields, `set-component` save operations for supported component fields, and a first selected-object Renderable mesh/material picker slice backed by scene-scoped manifest assets with active level-instance scope, future-disabled prefab/asset scopes, and current/dirty/staged state | Needs broader component editors, richer rendered mesh thumbnails, enabled prefab/asset scopes after owner-write contracts exist, and owner-write families beyond bounded level-instance component records |
+| Inspector | Editable fields stage authoring edits with workflow labels, component-grouped inspector sections, including level-instance transform position/rotation/scale fields, `set-component` save operations for supported component fields, and a first selected-object Renderable mesh/material picker slice backed by scene-scoped manifest assets with active level-instance scope, future-disabled prefab/asset scopes, current/dirty/staged state, selectable candidate cards with display-only source owner/preview contract/usage/type metadata, and Save Level/Publish-ready level-instance Renderable overrides after asset-kind and selected-scene preload validation | Needs broader component editors, richer rendered mesh thumbnails, enabled prefab/asset scopes after owner-write contracts exist, and owner-write families beyond bounded level-instance component records |
 | Save/Publish | Save Draft plus bounded generated-owner Save Level/Publish for transforms, object-library placements, level-instance prefab ID replacements, level-instance component overrides/removals, bounded level-instance duplicate insertions, bounded level-instance removals, and bounded staged authoring undo/redo are guarded | Needs publishable coverage for collision, terrain, audio manifest, NPCs, environment/render-profile edits, asset-manifest edits, prefab-owned component edits, readiness-owner deletes/replacements, broad asset/component replacement, grouping, stable-ID management, and post-publish undo/redo semantics |
 | Viewport bridge | Projected pins, projected frame-click picking, explicit Select/Place/Transform tool modes, transform position/rotation/scale nudges, snap controls, screen-space transform handles, projected X/Z translate dragging, editor-side camera/framing controls with frame selected/selection/all commands, placement target, hover-aware placement ghost, Place-mode click placement, and snap-aware normalized object-library drop placement exist; runtime-backed rendered-scene click selection and rendered-scene bounds-aware box/marquee stable-ID selection through the dev-preview request/result path also exist | Needs rendered-scene gizmos, arbitrary drag placement with editor-consumed hit-test results, rendered-scene camera navigation/depth, and advanced rendered selection modes beyond rectangular bounds overlap |
 | Content browser | Search/filter, current-scene usage filtering/sorting, previews, publish-ready placement readiness, transform composer, staged review/removal, hover-aware viewport ghost handoff, Place-mode click placement, and draft-ready drag metadata exist | Needs asset import workflows, richer placement ergonomics, and full rendered viewport placement |
@@ -144,8 +206,8 @@ Required outcomes:
 - Center work area reserves the future viewport/live-game bridge as a first-
   class region.
 - Right inspector owns selected-object details and editable fields.
-- Bottom dock owns content library, validation, output log, command plan, and
-  specialist panels.
+- Bottom dock owns a tabbed content library, staged operations, validation,
+  output log, command plan, publish gates, and secondary specialist panels.
 - Current Object Selection is either folded into selection summary or clearly
   labeled as a helper, not the final editor architecture.
 
@@ -190,11 +252,12 @@ Progress:
   non-runtime owner before saved view presets, team-visible visibility sets,
   isolation sets, lock overrides, panel layout, editor notes, or per-scene
   workbench preferences are treated as durable shared data.
-- Replaced the lower equal-weight diagnostics grid with a prioritized bottom
-  dock. The content browser now owns the primary dock lane, while staged
-  operations, validation, command gates, and output log have named dock areas;
-  runtime telemetry and specialist tools remain available as secondary dock
-  panels instead of competing with publish-readiness surfaces.
+- Replaced the lower equal-weight diagnostics grid with a prioritized tabbed
+  bottom dock. The content browser now owns the default dock tab, while staged
+  operations, validation, command gates, publish gates, and output log are
+  explicit task tabs; runtime telemetry and specialist tools remain available
+  as secondary diagnostic panels instead of competing with primary
+  publish-readiness surfaces.
 
 ### Packet 2: Selection And Inspector Coherence
 
@@ -267,9 +330,12 @@ Current foundation:
   current `Renderable.meshId` and `Renderable.materialId`, scene-scoped
   manifest-backed mesh/material choices, explicit level-instance scope,
   future-disabled prefab/asset-manifest scopes, current/dirty/staged state
-  labels, and preview/stage actions. These picker edits preserve stable IDs and
-  existing renderable state by default, and they reuse the Object Library
-  replacement draft/queue path instead of adding a separate persistence model.
+  labels, selectable candidate cards with display-only source owner, preview
+  contract, usage, and type metadata, and preview/stage actions. These picker
+  edits preserve stable IDs and existing renderable state by default, merge
+  against the effective queued `Renderable` state so staged mesh and material
+  changes survive together, and reuse the Object Library replacement draft/queue
+  path instead of adding a separate persistence model.
 - AI Asset Lab receives the selected stable-ID list and has Hunyuan/ComfyUI
   backend contracts, generated asset records, and apply-to-selection edit plans.
 
@@ -277,14 +343,17 @@ Missing before the workflow can be called complete:
 
 - The inspector Renderable picker still needs richer rendered mesh thumbnails
   and eventually enabled prefab-definition and asset-manifest scopes after their
-  owner-write contracts exist. Save Level/Publish coverage is unchanged in this
-  slice; picker-staged renderable asset-reference edits remain on the existing
-  generated authoring transaction path until a bounded owner-write path for this
-  operation family is implemented and validated.
+  owner-write contracts exist. Level-instance Renderable mesh/material reference
+  edits now stage as normal `set-component` operations, so Save Level/Publish can
+  persist them through the existing generated component override owner.
+  Candidate source owner, preview contract, usage, and type labels remain
+  display-only metadata; they must not imply generated asset import,
+  prefab-definition edits, or asset-manifest writes.
 - AI Asset Lab still needs real generation dispatch/result harvesting and
   generated asset import into a manifest-backed library.
-- Save/Publish still needs durable generated asset manifest writers and
-  renderable asset-reference owner writes for this operation family.
+- Save/Publish still needs durable generated asset manifest writers, generated
+  asset import records, and prefab/asset-manifest owner writes before generated
+  visual replacement or reusable prefab/asset edits can be complete.
 - Generated visual replacement must preserve stable IDs and gameplay components
   by default; collision, portal behavior, audio, scripts, and physics are not
   inferred from the generated mesh unless the user explicitly edits those
@@ -361,11 +430,17 @@ Progress:
   undo/redo, divergent edit redo clearing, and bounded retained history. This
   is pre-save authoring history only; post-publish rollback and cross-session
   undo remain future owner-write work.
-- Next-slice safeguard: renderable mesh/material replacement drafts currently
-  stage full `Renderable` component updates. Before enabling final saved
-  renderable-reference publish semantics, the picker must preserve staged mesh
-  and material changes together rather than allowing later full-component
-  drafts to overwrite earlier staged `Renderable` fields.
+- The inspector Renderable picker now composes mesh/material replacement drafts
+  from the effective queued `Renderable` state and uses one queue entry per
+  selected stable-ID object. Staging a mesh and then a material replaces the
+  previous full-component draft with a combined `Renderable` patch, so later
+  staged fields no longer overwrite earlier staged mesh/material choices.
+- The inspector Renderable picker now emits those combined Renderable patches as
+  normal level-instance `set-component` queued operations, without custom
+  picker-only save payloads. Save Draft converts them into generated authoring
+  transactions, and Save Level/Publish can classify and persist them through the
+  bounded generated component override owner after asset-kind and
+  selected-scene preload validation.
 
 ### Packet 4: Viewport Bridge And Direct Manipulation
 
@@ -567,6 +642,9 @@ Progress:
   as generated `PublishedLevelInstanceComponentOverride` or
   `PublishedLevelInstanceComponentRemoval` entries in
   `src/game/generated/publishedLevelTransforms.ts`.
+- The selected-object inspector Renderable picker now uses this same
+  component-editing family for existing manifest-backed mesh/material reference
+  updates on the selected level instance.
 - Runtime level override composition applies generated component overrides and
   removals alongside generated insertions and transform overrides before normal
   scene loading consumes the level data.
@@ -670,12 +748,67 @@ Progress:
   replacement prefab IDs, stale base hashes, and generated insertion targets.
 - Readiness-required checked-in stable IDs remain blocked for prefab
   replacement until a matching manifest/readiness owner writer exists.
-- Broader object-library replacement for mesh/material/audio asset references,
-  prefab-owned component schemas, grouping, stable-ID management, and readiness
-  owner updates remains draft-only.
+- Broader object-library replacement remains draft-only for audio asset
+  references, prefab-owned component schemas, generated asset records,
+  asset-manifest edits, grouping, stable-ID management, and readiness owner
+  updates. The selected-object inspector Renderable picker is the narrow
+  exception for existing manifest-backed mesh/material references on a selected
+  level instance through the bounded component-editing owner.
 
 ## Validation Log
 
+- `pnpm --dir apps/game.megameal test:level-editor-workbench-model-contract`,
+  `test:level-editor-aaa-plan-contract`,
+  `test:level-editor-maintainability-contract`, `type-check`, `lint`,
+  `audit:engine-boundaries`, `test:contracts`,
+  `test:production-editor-bundle-contract`,
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml`,
+  `pnpm audit:legacy-game-references`, and `build` passed after replacing the
+  lower equal-weight diagnostic wall with an accessible tabbed bottom dock,
+  extracting `LevelEditorBottomDock.svelte`, preserving the existing authoring
+  queue/runtime ownership boundaries, and recording the support-agent follow-up
+  queue. Build still reports the existing Astro/Vite warnings for an empty
+  editor chunk, large client chunks, and GET generation for POST-only editor
+  authoring API routes.
+- `pnpm --dir apps/game.megameal test:level-editor-selected-object-renderable-picker-contract`,
+  `test:level-editor-aaa-plan-contract`,
+  `test:level-editor-maintainability-contract`,
+  `type-check`, `lint`, `audit:engine-boundaries`, `test:contracts`,
+  `test:production-editor-bundle-contract`,
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml`,
+  `pnpm audit:legacy-game-references`, and `build` passed after adding
+  selectable Renderable mesh/material candidate cards with display-only source
+  owner, preview contract, usage, and type metadata. Build still reports the
+  existing Astro/Vite warnings for an empty editor chunk, large client chunks,
+  and GET generation for POST-only editor authoring API routes.
+- `pnpm --dir apps/game.megameal test:level-editor-save-contract`,
+  `test:level-editor-aaa-plan-contract`,
+  `test:level-editor-selected-object-renderable-picker-contract`,
+  `test:level-editor-workspace-model-contract`,
+  `test:level-editor-feature-catalog-contract`,
+  `test:level-editor-maintainability-contract`,
+  `test:production-editor-bundle-contract`, `audit:engine-boundaries`,
+  `type-check`, `lint`, `test:contracts`, `build`,
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml`, and
+  `pnpm audit:legacy-game-references` passed after hardening the bounded
+  selected-object Renderable Save Level/Publish path with asset-kind and
+  selected-scene preload validation in the generated level component override
+  writer. Build still reports the existing Astro/Vite warnings for an empty
+  editor chunk, large client chunks, and GET generation for POST-only editor
+  authoring API routes.
+- `pnpm --dir apps/game.megameal test:level-editor-selected-object-renderable-picker-contract`,
+  `test:level-editor-save-contract`, `test:level-editor-aaa-plan-contract`,
+  `test:level-editor-workspace-model-contract`,
+  `test:level-editor-feature-catalog-contract`,
+  `test:level-editor-maintainability-contract`,
+  `test:production-editor-bundle-contract`, `audit:engine-boundaries`,
+  `type-check`, `lint`, `test:contracts`, `build`,
+  `git diff --check -- apps/game.megameal pnpm-lock.yaml`, and
+  `pnpm audit:legacy-game-references` passed after making the selected-object
+  Renderable picker Save Level/Publish-ready through the bounded
+  level-instance `set-component` generated owner path. Build still reports the
+  existing Astro/Vite warnings for an empty editor chunk, large client chunks,
+  and GET generation for POST-only editor authoring API routes.
 - `pnpm --dir apps/game.megameal test:level-editor-viewport-bridge-model-contract`
   passed after the viewport bridge workspace integration.
 - `pnpm --dir apps/game.megameal test:level-editor-aaa-plan-contract` passed

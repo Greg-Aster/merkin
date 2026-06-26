@@ -9,6 +9,18 @@ import type {
 } from "../prefabs/index.js";
 
 export {
+	getLevelContentPackage,
+	levelContentPackages,
+	listLevelContentPackages,
+	listLevelContentPackagesForPack,
+	type LevelContentPackId,
+	type LevelContentPackage,
+	type LevelContentPackageGeneratedOwnerKind,
+	type LevelContentPackageGeneratedOwnerModule,
+	type LevelContentPackageMigrationStatus,
+	type LevelContentPackageOwnerModule,
+} from "./contentPackages.js";
+export {
 	defaultLevels,
 	mirandaDeckLevel,
 	prototypeLevel,
