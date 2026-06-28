@@ -13,7 +13,7 @@
 	},
 	"scripts": {
 		"dev": "astro dev",
-		"build": "pnpm type-check && astro build",
+		"build": "pnpm check:static-environment-collision && pnpm type-check && astro build",
 		"preview": "astro preview",
 		"type-check": "astro check && tsc --noEmit",
 		"audit:protected-docs": "node ./scripts/audit-protected-doc-edits.mjs",
@@ -27,6 +27,9 @@
 		"test:npc-contract": "tsx ./scripts/test-npc-contract.ts",
 		"test:level-editor-workspace-contract": "tsx ./scripts/test-level-editor-workspace-contract.ts",
 		"test:collision-overlay-contract": "tsx ./scripts/test-collision-overlay-contract.ts",
+		"test:static-environment-collision-contract": "tsx ./scripts/test-static-environment-collision-contract.ts",
+		"cook:static-environment-collision": "tsx ./scripts/cook-static-environment-collision.ts",
+		"check:static-environment-collision": "tsx ./scripts/cook-static-environment-collision.ts --level=observatory --check",
 		"generate:portal-field-glb": "node ./scripts/generate-portal-field-glb.mjs",
 		"lint": "biome check ./src ./scripts",
 		"format": "biome format --write ./src ./scripts"

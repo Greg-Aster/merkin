@@ -111,6 +111,9 @@ export type LightModulationComponent = {
 	readonly blinkFadeSeconds: number;
 	readonly phase?: number;
 	readonly maxActiveLights?: number;
+	readonly nearDistance?: number;
+	readonly farDistance?: number;
+	readonly midIntensityScale?: number;
 };
 
 export type InteractionTargetComponent = {

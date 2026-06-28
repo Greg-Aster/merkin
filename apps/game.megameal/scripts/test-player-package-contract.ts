@@ -45,6 +45,10 @@ type RawLevelPackageData = {
 		}[];
 	};
 	readonly player?: {
+		readonly firstPersonController?: {
+			readonly yawRadians?: number;
+			readonly pitchRadians?: number;
+		};
 		readonly light?: unknown;
 	};
 };
@@ -236,6 +240,22 @@ for (const entry of packages) {
 		`Resolved level package "${entry.raw.id}" must contain exactly one composed player instance.`,
 	);
 	assertEqual(playerInstances[0]?.prefabId, PLAYER_PREFAB_ID);
+	if (entry.raw.player?.firstPersonController) {
+		const firstPersonController = playerInstances[0]?.components
+			?.FirstPersonController as
+			| { readonly yawRadians?: number; readonly pitchRadians?: number }
+			| undefined;
+		assertEqual(
+			firstPersonController?.yawRadians,
+			entry.raw.player.firstPersonController.yawRadians,
+			`Resolved level package "${entry.raw.id}" must compose level-owned player yaw into FirstPersonController.`,
+		);
+		assertEqual(
+			firstPersonController?.pitchRadians,
+			entry.raw.player.firstPersonController.pitchRadians,
+			`Resolved level package "${entry.raw.id}" must compose level-owned player pitch into FirstPersonController.`,
+		);
+	}
 
 	const playerPrefabs = entry.resolved.prefabs.filter(
 		(prefab) => prefab.id === PLAYER_PREFAB_ID,

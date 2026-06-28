@@ -1,5 +1,4 @@
 import type { Entity, World } from "../../engine/core/index.js";
-import type { Vec3 } from "../../engine/math/index.js";
 import {
 	COLLIDER_COMPONENT,
 	type ColliderComponent,
@@ -125,52 +124,9 @@ function overlayShapeFromCollider(
 			};
 		case "mesh":
 			return {
-				type: "mesh-bounds",
-				...boundsFromVertices(shape.vertices),
+				type: "mesh",
+				vertices: shape.vertices,
+				indices: shape.indices,
 			};
 	}
-}
-
-function boundsFromVertices(vertices: readonly Vec3[]): {
-	readonly halfExtents: Vec3;
-	readonly center: Vec3;
-} {
-	if (vertices.length === 0) {
-		return {
-			halfExtents: { x: 0.5, y: 0.5, z: 0.5 },
-			center: { x: 0, y: 0, z: 0 },
-		};
-	}
-
-	const bounds = vertices.reduce(
-		(accumulator, vertex) => ({
-			minX: Math.min(accumulator.minX, vertex.x),
-			minY: Math.min(accumulator.minY, vertex.y),
-			minZ: Math.min(accumulator.minZ, vertex.z),
-			maxX: Math.max(accumulator.maxX, vertex.x),
-			maxY: Math.max(accumulator.maxY, vertex.y),
-			maxZ: Math.max(accumulator.maxZ, vertex.z),
-		}),
-		{
-			minX: Number.POSITIVE_INFINITY,
-			minY: Number.POSITIVE_INFINITY,
-			minZ: Number.POSITIVE_INFINITY,
-			maxX: Number.NEGATIVE_INFINITY,
-			maxY: Number.NEGATIVE_INFINITY,
-			maxZ: Number.NEGATIVE_INFINITY,
-		},
-	);
-
-	return {
-		halfExtents: {
-			x: Math.max((bounds.maxX - bounds.minX) / 2, 0.05),
-			y: Math.max((bounds.maxY - bounds.minY) / 2, 0.05),
-			z: Math.max((bounds.maxZ - bounds.minZ) / 2, 0.05),
-		},
-		center: {
-			x: (bounds.minX + bounds.maxX) / 2,
-			y: (bounds.minY + bounds.maxY) / 2,
-			z: (bounds.minZ + bounds.maxZ) / 2,
-		},
-	};
 }

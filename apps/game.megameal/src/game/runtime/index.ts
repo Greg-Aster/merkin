@@ -65,6 +65,7 @@ import {
 	createPortalProximitySystem,
 	createStoryNoteActivationSystem,
 	createStoryNoteProximitySystem,
+	createWalkableGroundingSystem,
 	selectGameHudState,
 } from "../systems/index.js";
 
@@ -203,6 +204,13 @@ export async function createMegamealGameRuntime(
 		order: -10,
 	});
 	runtime.scheduler.registerSystem("character", createCharacterMotorSystem());
+	runtime.scheduler.registerSystem(
+		"character",
+		createWalkableGroundingSystem(),
+		{
+			order: 5,
+		},
+	);
 	runtime.scheduler.registerSystem(
 		"character",
 		createCharacterMovementSystem(),

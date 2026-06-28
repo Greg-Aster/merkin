@@ -109,9 +109,13 @@ const mesh = items[2];
 assert.ok(mesh, "mesh diagnostic item exists.");
 assert.equal(mesh.intent, "solid");
 assert.equal(mesh.synced, true);
-assert.equal(mesh.shape.type, "mesh-bounds");
-assert.deepEqual(mesh.shape.halfExtents, { x: 2, y: 2, z: 2 });
-assert.deepEqual(mesh.shape.center, { x: 1, y: 2, z: 0 });
+assert.equal(mesh.shape.type, "mesh");
+assert.deepEqual(mesh.shape.vertices, [
+	{ x: -1, y: 0, z: -2 },
+	{ x: 3, y: 4, z: 2 },
+	{ x: 1, y: 1, z: 0 },
+]);
+assert.deepEqual(mesh.shape.indices, [0, 1, 2]);
 
 assert.deepEqual(summarizeCollisionOverlay(true, items), {
 	enabled: true,

@@ -36,6 +36,7 @@ import {
 
 const NEAR_DISTANCE = 48;
 const FAR_DISTANCE = 140;
+const DEFAULT_NPC_LIGHT_MID_INTENSITY_SCALE = 0.55;
 const DEFAULT_NPC_ACTIVATION_RADIUS = 2.4;
 const DEFAULT_ACTIVE_NPC_LIGHT_BUDGET = 8;
 
@@ -284,12 +285,10 @@ export function createLightModulationSystem<
 				const time = context.tick * context.deltaSeconds;
 				const blinkScale = getBlinkScale(candidate.modulation, time, phase);
 				const pulse = getPulse(candidate.modulation, time, phase);
-				const significanceScale =
-					candidate.significance?.tier === "far"
-						? 0
-						: candidate.significance?.tier === "mid"
-							? 0.55
-							: 1;
+				const significanceScale = lightDistanceScale(
+					candidate.significance,
+					candidate.modulation,
+				);
 				const activeScale =
 					index < Math.max(0, Math.floor(budget)) ? significanceScale : 0;
 				const minimumScale = clamp01(
@@ -553,6 +552,37 @@ function getPulse(
 	return wave * softness + (1 - softness);
 }
 
+function lightDistanceScale(
+	significance: NpcSignificanceComponent | undefined,
+	modulation: LightModulationComponent,
+): number {
+	if (!significance) {
+		return 1;
+	}
+
+	const nearDistance = positiveFinite(modulation.nearDistance, NEAR_DISTANCE);
+	const farDistance = Math.max(
+		nearDistance,
+		positiveFinite(modulation.farDistance, FAR_DISTANCE),
+	);
+	const distance = Math.sqrt(significance.distanceSquared);
+
+	if (distance > farDistance) {
+		return 0;
+	}
+
+	if (distance > nearDistance) {
+		return clamp01(
+			finite(
+				modulation.midIntensityScale,
+				DEFAULT_NPC_LIGHT_MID_INTENSITY_SCALE,
+			),
+		);
+	}
+
+	return 1;
+}
+
 function getBlinkScale(
 	modulation: LightModulationComponent,
 	time: number,
@@ -750,6 +780,18 @@ function normalizeLightModulation(
 		...(typeof value.maxActiveLights === "number" &&
 		Number.isFinite(value.maxActiveLights)
 			? { maxActiveLights: Math.max(0, Math.floor(value.maxActiveLights)) }
+			: {}),
+		...(typeof value.nearDistance === "number" &&
+		Number.isFinite(value.nearDistance)
+			? { nearDistance: Math.max(0, value.nearDistance) }
+			: {}),
+		...(typeof value.farDistance === "number" &&
+		Number.isFinite(value.farDistance)
+			? { farDistance: Math.max(0, value.farDistance) }
+			: {}),
+		...(typeof value.midIntensityScale === "number" &&
+		Number.isFinite(value.midIntensityScale)
+			? { midIntensityScale: clamp01(value.midIntensityScale) }
 			: {}),
 	};
 }

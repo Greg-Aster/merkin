@@ -1,0 +1,17 @@
+{
+	"schemaVersion": 1,
+	"id": "observatory_environment_collision",
+	"levelId": "observatory",
+	"runtimeSceneId": "observatory_runtime",
+	"visualAssetId": "mesh_observatory_environment",
+	"visualAssetUrl": "/assets/game/observatory/observatory-environment.glb",
+	"mode": "automatic-glb",
+	"settings": {
+		"profile": "mobile-dense",
+		"chunkSizeMeters": 64,
+		"sampleSpacingMeters": 2,
+		"walkableSlopeDegrees": 52,
+		"maxTrianglesPerChunk": 4096,
+		"maxTotalTriangles": 16384
+	}
+}

@@ -1,3 +1,6 @@
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { basename, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -5,6 +8,8 @@ import { fileURLToPath } from "node:url";
 const GLOBAL_SETTINGS_API_PATH = "/__megameal-editor-api/global-settings";
 const LEVELS_API_PATH = "/__megameal-editor-api/levels";
 const PLAYER_PACKAGE_API_PATH = "/__megameal-editor-api/player-package";
+const APP_ROOT_PATH = fileURLToPath(new URL("..", import.meta.url));
+const PUBLIC_DIR_PATH = fileURLToPath(new URL("../public", import.meta.url));
 const GLOBAL_SETTINGS_FILE_PATH = fileURLToPath(
 	new URL("../src/levels/global/settings.ts", import.meta.url),
 );
@@ -31,6 +36,8 @@ const LEVEL_FILE_NAMES = [
 	"index.ts",
 ];
 const LEVEL_NPC_DIR_NAME = "npcs";
+const LEVEL_COLLISION_DIR_NAME = "collision";
+const LEVEL_COLLISION_FILE_NAMES = ["source.json", "generated.json"];
 const SHARED_ASSET_IDS = new Set([
 	"mesh_player",
 	"material_player",
@@ -223,6 +230,41 @@ async function handleLevelsRequest(req, res) {
 		return;
 	}
 
+	if (
+		req.method === "POST" &&
+		runtimeSceneId &&
+		(action === "collision/check" || action === "collision/cook")
+	) {
+		const workspace = await readLevelWorkspace(runtimeSceneId);
+		const result = runStaticEnvironmentCollisionCook({
+			level: workspace.folderName,
+			check: action === "collision/check",
+		});
+
+		if (action === "collision/check") {
+			sendJson(res, 200, {
+				status: result.ok ? "current" : "stale",
+				output: result.output,
+				error: result.error,
+				workspace: await readLevelWorkspace(runtimeSceneId),
+			});
+			return;
+		}
+
+		if (!result.ok) {
+			throw new Error(
+				result.error || "Static environment collision cook failed.",
+			);
+		}
+
+		sendJson(res, 200, {
+			status: "cooked",
+			output: result.output,
+			workspace: await readLevelWorkspace(runtimeSceneId),
+		});
+		return;
+	}
+
 	if (req.method === "POST" && runtimeSceneId) {
 		const workspace = await readLevelWorkspace(runtimeSceneId);
 		const body = await readJsonBody(req);
@@ -290,12 +332,14 @@ async function readLevelWorkspace(runtimeSceneId) {
 	const files = await readLevelSourceFiles(
 		summary.absoluteFolderPath,
 		summary.npcPackage,
+		summary.collisionPackage,
 	);
 
 	return {
 		...summary,
 		files,
 		npcPackage: summary.npcPackage,
+		collisionPackage: summary.collisionPackage,
 		document: summary.document,
 		editable: editableOverview(summary.document),
 		diagnostics: validateLevelPackageDocument(
@@ -313,6 +357,7 @@ async function readLevelSummary(folderPath) {
 		await readFile(join(folderPath, "skybox.json"), "utf8"),
 	);
 	const npcPackage = await readLevelNpcPackage(folderPath);
+	const collisionPackage = await readLevelCollisionPackage(folderPath);
 	const document = validateLevelPackageData(
 		{ ...levelData, skybox },
 		npcPackage,
@@ -329,11 +374,12 @@ async function readLevelSummary(folderPath) {
 		skyboxAssetId: environmentAssetId(document.skybox.environment) ?? "",
 		skyboxBlur: document.skybox.environment.backgroundBlurriness ?? 0,
 		npcPackage,
+		collisionPackage,
 		document,
 	};
 }
 
-async function readLevelSourceFiles(folderPath, npcPackage) {
+async function readLevelSourceFiles(folderPath, npcPackage, collisionPackage) {
 	const files = [];
 
 	for (const name of LEVEL_FILE_NAMES) {
@@ -361,7 +407,134 @@ async function readLevelSourceFiles(folderPath, npcPackage) {
 		});
 	}
 
+	for (const collisionFile of collisionPackage.files) {
+		files.push({
+			name: collisionFile.name,
+			path: collisionFile.path,
+			source: await readFile(collisionFile.absolutePath, "utf8"),
+		});
+	}
+
 	return files;
+}
+
+async function readLevelCollisionPackage(folderPath) {
+	const collisionDir = join(folderPath, LEVEL_COLLISION_DIR_NAME);
+	const files = [];
+
+	for (const fileName of LEVEL_COLLISION_FILE_NAMES) {
+		const absolutePath = join(collisionDir, fileName);
+
+		if (!existsSync(absolutePath)) {
+			continue;
+		}
+
+		files.push({
+			name: `${LEVEL_COLLISION_DIR_NAME}/${fileName}`,
+			path: relative(process.cwd(), absolutePath),
+			absolutePath,
+			data: JSON.parse(await readFile(absolutePath, "utf8")),
+		});
+	}
+
+	return {
+		files,
+		diagnostics: await readStaticEnvironmentCollisionDiagnostics(files),
+	};
+}
+
+async function readStaticEnvironmentCollisionDiagnostics(files) {
+	const sourceFile = files.find((file) => file.name.endsWith("source.json"));
+	const generatedFile = files.find((file) =>
+		file.name.endsWith("generated.json"),
+	);
+
+	if (!sourceFile) {
+		return {
+			status: "missing-source",
+			message: "No collision/source.json file exists for this level.",
+		};
+	}
+
+	if (!generatedFile) {
+		return {
+			status: "missing-generated",
+			message: "No collision/generated.json file exists for this level.",
+		};
+	}
+
+	try {
+		const source = sourceFile.data;
+		const generated = generatedFile.data;
+		const sourceAssetUrl =
+			source.mode === "manual-collision-glb" && source.collisionAssetUrl
+				? source.collisionAssetUrl
+				: source.visualAssetUrl;
+
+		if (typeof sourceAssetUrl !== "string" || !sourceAssetUrl.startsWith("/")) {
+			throw new Error("collision source asset URL must be root-relative.");
+		}
+
+		const sourceAssetPath = join(PUBLIC_DIR_PATH, sourceAssetUrl.slice(1));
+		if (!existsSync(sourceAssetPath)) {
+			return {
+				status: "missing-source-asset",
+				message: `Collision source asset does not exist: ${sourceAssetUrl}`,
+				sourceAssetUrl,
+				generatedSourceHash: generated.source?.sourceHash,
+			};
+		}
+
+		const currentSourceHash = `sha256:${sha256(await readFile(sourceAssetPath))}`;
+		const generatedSourceHash = generated.source?.sourceHash;
+
+		return {
+			status: currentSourceHash === generatedSourceHash ? "current" : "stale",
+			message:
+				currentSourceHash === generatedSourceHash
+					? "Generated collision matches the current source asset hash."
+					: "Generated collision is stale for the current source asset hash.",
+			sourceAssetUrl,
+			currentSourceHash,
+			generatedSourceHash,
+			generatedAt: generated.generatedAt,
+			chunkCount: generated.summary?.chunkCount,
+			triangleCount: generated.summary?.triangleCount,
+		};
+	} catch (error) {
+		return {
+			status: "invalid",
+			message: errorMessage(error),
+		};
+	}
+}
+
+function runStaticEnvironmentCollisionCook({ level, check }) {
+	const args = [
+		"--dir",
+		APP_ROOT_PATH,
+		"cook:static-environment-collision",
+		"--",
+		`--level=${level}`,
+		...(check ? ["--check"] : []),
+	];
+
+	try {
+		const output = execFileSync("pnpm", args, {
+			cwd: APP_ROOT_PATH,
+			encoding: "utf8",
+			stdio: ["ignore", "pipe", "pipe"],
+		});
+		return { ok: true, output };
+	} catch (error) {
+		const stdout = typeof error.stdout === "string" ? error.stdout : "";
+		const stderr = typeof error.stderr === "string" ? error.stderr : "";
+		return {
+			ok: false,
+			output: `${stdout}${stderr}`.trim(),
+			error: errorMessage(error),
+		};
+	}
 }
 
 async function readLevelNpcPackage(folderPath) {
@@ -869,12 +1042,44 @@ function validateLevelPlayer(value, errors) {
 		errors.push("player must be an object.");
 		return;
 	}
-	if (value.light === undefined || value.light === false) {
+
+	if (value.transform !== undefined) {
+		validateTransform(value.transform, "player.transform", errors);
+	}
+
+	if (value.groundY !== undefined) {
+		validateFiniteNumber(value.groundY, "player.groundY", errors);
+	}
+
+	if (value.firstPersonController !== undefined) {
+		validateLevelPlayerFirstPersonController(
+			value.firstPersonController,
+			errors,
+		);
+	}
+
+	if (value.light !== undefined && value.light !== false) {
+		validateLightComponent(value.light, "player.light", errors, {
+			allowedKinds: ["point"],
+		});
+	}
+}
+
+function validateLevelPlayerFirstPersonController(value, errors) {
+	if (!isObject(value)) {
+		errors.push("player.firstPersonController must be an object.");
 		return;
 	}
-	validateLightComponent(value.light, "player.light", errors, {
-		allowedKinds: ["point"],
-	});
+
+	for (const key of ["yawRadians", "pitchRadians"]) {
+		if (value[key] !== undefined) {
+			validateFiniteNumber(
+				value[key],
+				`player.firstPersonController.${key}`,
+				errors,
+			);
+		}
+	}
 }
 
 function validateLightComponent(value, path, errors, options = {}) {
@@ -1119,6 +1324,7 @@ function validateNpcGroup(value, path, errors) {
 		errors.push(`${path}.instances must be an array.`);
 		return;
 	}
+	validateNpcGroupDefaults(value.defaults, `${path}.defaults`, errors);
 	validateUniqueIds(
 		value.instances.map((instance) => instance?.id),
 		`${path}.instances.id`,
@@ -1132,6 +1338,28 @@ function validateNpcGroup(value, path, errors) {
 	for (const [index, instance] of value.instances.entries()) {
 		validateNpcInstance(instance, `${path}.instances.${index}`, errors);
 	}
+}
+
+function validateNpcGroupDefaults(value, path, errors) {
+	if (value === undefined) {
+		return;
+	}
+	if (!isObject(value)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+	validateNpcMovementOverride(value.movement, `${path}.movement`, errors);
+	validateNpcLightOverride(value.light, `${path}.light`, errors);
+	validateNpcLightModulationOverride(
+		value.lightModulation,
+		`${path}.lightModulation`,
+		errors,
+	);
+	validateNpcInteractionOverride(
+		value.interaction,
+		`${path}.interaction`,
+		errors,
+	);
 }
 
 function validateNpcInstance(value, path, errors) {
@@ -1221,16 +1449,42 @@ function validateNpcLightModulationOverride(value, path, errors) {
 	for (const key of [
 		"phase",
 		"pulseSpeed",
-		"pulseSoftness",
-		"blinkSpeed",
-		"blinkDutyCycle",
-		"minimumIntensityScale",
 		"baseIntensity",
 		"baseDistance",
 		"maxActiveLights",
+		"blinkFadeSeconds",
+		"nearDistance",
+		"farDistance",
 	]) {
 		if (value[key] !== undefined) {
 			validateNonNegativeNumber(value[key], `${path}.${key}`, errors);
+		}
+	}
+	for (const key of [
+		"pulseSoftness",
+		"activeLightPercent",
+		"minimumIntensityScale",
+		"midIntensityScale",
+	]) {
+		if (value[key] !== undefined) {
+			validateAlpha(value[key], `${path}.${key}`, errors);
+		}
+	}
+	if (value.blinkPeriodSeconds !== undefined) {
+		validateNumberTuple(
+			value.blinkPeriodSeconds,
+			2,
+			`${path}.blinkPeriodSeconds`,
+			errors,
+		);
+		if (Array.isArray(value.blinkPeriodSeconds)) {
+			for (const [index, entry] of value.blinkPeriodSeconds.entries()) {
+				validateNonNegativeNumber(
+					entry,
+					`${path}.blinkPeriodSeconds.${index}`,
+					errors,
+				);
+			}
 		}
 	}
 }

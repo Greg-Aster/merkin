@@ -121,8 +121,39 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 		prefabRecord.components,
 		"npc_firefly.components",
 	);
+	const archetypeDefaults = assertRecord(
+		fireflyArchetype.defaults,
+		"firefly archetype defaults",
+	);
+	const groupDefaults = assertRecord(
+		fireflies.defaults,
+		"firefly group defaults",
+	);
+	const groupLightModulation = assertRecord(
+		groupDefaults.lightModulation,
+		"firefly group lightModulation defaults",
+	);
 
 	assertEqual(prefabComponents.Renderable, undefined);
+	assertEqual(
+		archetypeDefaults.lightModulation,
+		undefined,
+		"Firefly blink/budget defaults must be owned by the level NPC group, not the global archetype.",
+	);
+	for (const field of [
+		"maxActiveLights",
+		"activeLightPercent",
+		"nearDistance",
+		"farDistance",
+		"midIntensityScale",
+	]) {
+		const value = groupLightModulation[field];
+		if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+			throw new Error(
+				`firefly group lightModulation.${field} must be non-negative.`,
+			);
+		}
+	}
 }
 
 for (const stableId of fireflyStableIds) {
@@ -139,7 +170,27 @@ for (const stableId of fireflyStableIds) {
 	assertRecord(components.Npc, `${stableId}.Npc`);
 	assertRecord(components.MovementBehavior, `${stableId}.MovementBehavior`);
 	assertRecord(components.Light, `${stableId}.Light`);
-	assertRecord(components.LightModulation, `${stableId}.LightModulation`);
+	const lightModulation = assertRecord(
+		components.LightModulation,
+		`${stableId}.LightModulation`,
+	);
+	const groupLightModulation = assertRecord(
+		assertRecord(fireflies.defaults, "firefly group defaults").lightModulation,
+		"firefly group lightModulation defaults",
+	);
+	for (const field of [
+		"maxActiveLights",
+		"activeLightPercent",
+		"nearDistance",
+		"farDistance",
+		"midIntensityScale",
+	]) {
+		assertEqual(
+			lightModulation[field],
+			groupLightModulation[field],
+			`${stableId}.LightModulation.${field} must inherit the level-owned firefly group default.`,
+		);
+	}
 	assertRecord(components.InteractionTarget, `${stableId}.InteractionTarget`);
 	assertRecord(components.Conversation, `${stableId}.Conversation`);
 }
@@ -272,6 +323,9 @@ for (const stableId of fireflyStableIds) {
 		blinkPeriodSeconds: [2, 3],
 		blinkFadeSeconds: 0.1,
 		maxActiveLights: 1,
+		nearDistance: 12,
+		farDistance: 24,
+		midIntensityScale: 0.5,
 	});
 	world.addComponent(visual, "StableId", { id: "test:npc:visual" });
 	world.addComponent<RenderTransform>(visual, TRANSFORM_COMPONENT, {

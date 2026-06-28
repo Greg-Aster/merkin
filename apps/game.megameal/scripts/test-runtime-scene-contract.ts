@@ -36,6 +36,7 @@ import {
 	observatoryRuntimeSceneManifest,
 	portalArenaRuntimeSceneManifest,
 } from "../src/levels/index.js";
+import observatoryStaticEnvironmentCollision from "../src/levels/observatory/collision/generated.json";
 import observatoryFireflies from "../src/levels/observatory/npcs/fireflies.json";
 
 const fireflyPreloadAssetIds = fireflyArchetype.assets?.preload ?? [];
@@ -422,15 +423,8 @@ function allAssetStrings(
 		"observatory:terrain",
 		"Renderable",
 	);
-	const walkableCollider = componentForStableId(
-		manifest,
-		"observatory:walkable-proxy",
-		"Collider",
-	);
-	const walkableShape = assertRecord(
-		walkableCollider.shape,
-		"Observatory walkable proxy collider shape",
-	);
+	const staticEnvironmentCollisionChunks =
+		observatoryStaticEnvironmentCollision.chunks;
 	const bounds = assertRecord(
 		manifest.level.resources?.["game:characterBounds"],
 		"Observatory character bounds",
@@ -454,32 +448,47 @@ function allAssetStrings(
 	);
 	assertIncludes(
 		manifest.readiness.requiredCollisionPrefabIds ?? [],
-		"observatory_walkable_proxy",
-	);
-	assertIncludes(
-		manifest.readiness.requiredCollisionPrefabIds ?? [],
 		"observatory_boundary_blocker",
 	);
-	assertIncludes(
-		manifest.readiness.requiredWalkableStableIds ?? [],
-		"observatory:walkable-proxy",
-	);
-	assertIncludes(
-		manifest.readiness.requiredCollisionStableIds ?? [],
-		"observatory:walkable-proxy",
-	);
-	assertEqual(walkableCollider.intent, "walkable");
-	assertEqual(walkableCollider.channel, "worldStatic");
-	assertEqual(walkableShape.type, "box");
-	assertDeepEqual(walkableShape.halfExtents, [320, 0.05, 320]);
-	assertDeepEqual(
-		transformPropertyForStableId(
-			manifest,
-			"observatory:walkable-proxy",
-			"position",
+
+	assertEqual(
+		manifest.level.instances.some(
+			(instance) => instance.stableId === "observatory:walkable-proxy",
 		),
-		[0, 1.75, 0],
+		false,
+		"Observatory flat walkable proxy must not remain after static environment collision cook.",
 	);
+
+	for (const chunk of staticEnvironmentCollisionChunks) {
+		const collider = componentForStableId(manifest, chunk.stableId, "Collider");
+		const shape = assertRecord(
+			collider.shape,
+			`${chunk.stableId} static environment collider shape`,
+		);
+
+		assertIncludes(
+			manifest.readiness.requiredCollisionStableIds ?? [],
+			chunk.stableId,
+		);
+		assertIncludes(
+			manifest.readiness.requiredWalkableStableIds ?? [],
+			chunk.stableId,
+		);
+		assertEqual(collider.intent, "walkable");
+		assertEqual(collider.channel, "worldStatic");
+		assertEqual(shape.type, "mesh");
+		assertEqual(
+			Array.isArray(shape.vertices),
+			true,
+			`${chunk.stableId} must expose generated mesh collider vertices.`,
+		);
+		assertEqual(
+			Array.isArray(shape.indices),
+			true,
+			`${chunk.stableId} must expose generated mesh collider indices.`,
+		);
+	}
+
 	for (const expectation of boundaryCollisionExpectations) {
 		const boundaryCollider = componentForStableId(
 			manifest,
@@ -1004,7 +1013,10 @@ function allAssetStrings(
 
 {
 	const manifest = loadRuntimeSceneManifest(observatoryRuntimeSceneManifest);
-	const missingStableId = "observatory:walkable-proxy";
+	const missingStableId = assertRecord(
+		observatoryStaticEnvironmentCollision.chunks[0],
+		"first Observatory static environment collision chunk",
+	).stableId;
 	const readiness = evaluateRuntimeSceneReadiness(manifest, {
 		...validLoadReport(manifest),
 		spawned: manifest.level.instances

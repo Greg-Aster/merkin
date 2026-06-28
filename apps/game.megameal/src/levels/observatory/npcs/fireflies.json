@@ -1,14 +1,39 @@
 {
 	"schemaVersion": 1,
 	"archetype": "firefly",
+	"defaults": {
+		"lightModulation": {
+			"minimumIntensityScale": 0.12,
+			"pulseSpeed": 0.85,
+			"pulseSoftness": 0.82,
+			"activeLightPercent": 0.68,
+			"blinkPeriodSeconds": [
+				8,
+				15
+			],
+			"blinkFadeSeconds": 1.6,
+			"maxActiveLights": 24,
+			"nearDistance": 20,
+			"farDistance": 300,
+			"midIntensityScale": 0.7
+		}
+	},
 	"instances": [
 		{
 			"id": "observatory-archive-firefly",
 			"stableId": "observatory:firefly:archive",
 			"displayName": "Archive Firefly",
 			"transform": {
-				"position": [-137.2, 2.35, -62],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					76,
+					1.125,
+					-52
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.4,
@@ -18,7 +43,7 @@
 				"bobSpeed": 0.72
 			},
 			"light": {
-				"intensity": 5.8,
+				"intensity": 11.6,
 				"distance": 20,
 				"decay": 1.35
 			},
@@ -42,8 +67,16 @@
 			"stableId": "observatory:firefly:lantern",
 			"displayName": "Lantern Firefly",
 			"transform": {
-				"position": [-146, 3.15, -57],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					82,
+					1.198,
+					-46
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.6,
@@ -54,7 +87,7 @@
 			},
 			"light": {
 				"color": "#8defff",
-				"intensity": 5.4,
+				"intensity": 10.8,
 				"distance": 19,
 				"decay": 1.35
 			},
@@ -78,8 +111,16 @@
 			"stableId": "observatory:firefly:tide",
 			"displayName": "Tide Firefly",
 			"transform": {
-				"position": [-128.5, 1.95, -54],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					70,
+					2.146,
+					-40
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.8,
@@ -90,7 +131,7 @@
 			},
 			"light": {
 				"color": "#dff8ff",
-				"intensity": 5,
+				"intensity": 10,
 				"distance": 18,
 				"decay": 1.35
 			},
@@ -114,8 +155,16 @@
 			"stableId": "observatory:firefly:violet-ridge",
 			"displayName": "Violet Ridge Firefly",
 			"transform": {
-				"position": [-188, 5.1, -118],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					64,
+					1.399,
+					-58
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.7,
@@ -126,7 +175,7 @@
 			},
 			"light": {
 				"color": "#9a5cff",
-				"intensity": 5.1,
+				"intensity": 10.2,
 				"distance": 18,
 				"decay": 1.35
 			},
@@ -150,8 +199,16 @@
 			"stableId": "observatory:firefly:blue-basin",
 			"displayName": "Blue Basin Firefly",
 			"transform": {
-				"position": [-84, 2.8, -172],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					58,
+					2.225,
+					-52
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.45,
@@ -162,7 +219,7 @@
 			},
 			"light": {
 				"color": "#4aa8ff",
-				"intensity": 5.3,
+				"intensity": 10.6,
 				"distance": 18.5,
 				"decay": 1.35
 			},
@@ -186,8 +243,16 @@
 			"stableId": "observatory:firefly:red-arch",
 			"displayName": "Red Arch Firefly",
 			"transform": {
-				"position": [-210, 6.4, -26],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					52,
+					3.96,
+					-40
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.9,
@@ -198,7 +263,7 @@
 			},
 			"light": {
 				"color": "#ff4f5f",
-				"intensity": 5.6,
+				"intensity": 11.2,
 				"distance": 19,
 				"decay": 1.35
 			},
@@ -222,8 +287,16 @@
 			"stableId": "observatory:firefly:purple-drift",
 			"displayName": "Purple Drift Firefly",
 			"transform": {
-				"position": [-56, 4.25, -94],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					46,
+					5.795,
+					-28
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.6,
@@ -234,7 +307,7 @@
 			},
 			"light": {
 				"color": "#c46cff",
-				"intensity": 5.2,
+				"intensity": 10.4,
 				"distance": 18,
 				"decay": 1.35
 			},
@@ -258,8 +331,16 @@
 			"stableId": "observatory:firefly:crimson-pool",
 			"displayName": "Crimson Pool Firefly",
 			"transform": {
-				"position": [-16, 1.75, -212],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					40,
+					1.689,
+					-64
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.35,
@@ -270,7 +351,7 @@
 			},
 			"light": {
 				"color": "#d62745",
-				"intensity": 4.9,
+				"intensity": 9.8,
 				"distance": 17,
 				"decay": 1.35
 			},
@@ -294,8 +375,16 @@
 			"stableId": "observatory:firefly:cobalt-step",
 			"displayName": "Cobalt Step Firefly",
 			"transform": {
-				"position": [42, 7.2, -146],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					36,
+					10.766,
+					-14
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.75,
@@ -306,7 +395,7 @@
 			},
 			"light": {
 				"color": "#276bff",
-				"intensity": 5.4,
+				"intensity": 10.8,
 				"distance": 19,
 				"decay": 1.35
 			},
@@ -330,8 +419,16 @@
 			"stableId": "observatory:firefly:rose-spire",
 			"displayName": "Rose Spire Firefly",
 			"transform": {
-				"position": [94, 3.65, -72],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					24,
+					5.873,
+					-44
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.55,
@@ -342,7 +439,7 @@
 			},
 			"light": {
 				"color": "#ff6bb5",
-				"intensity": 5.2,
+				"intensity": 10.4,
 				"distance": 18,
 				"decay": 1.35
 			},
@@ -366,8 +463,16 @@
 			"stableId": "observatory:firefly:indigo-waterline",
 			"displayName": "Indigo Waterline Firefly",
 			"transform": {
-				"position": [152, 5.75, -18],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					4,
+					4.155,
+					-56
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.8,
@@ -378,7 +483,7 @@
 			},
 			"light": {
 				"color": "#5357ff",
-				"intensity": 5.1,
+				"intensity": 10.2,
 				"distance": 18,
 				"decay": 1.35
 			},
@@ -402,8 +507,16 @@
 			"stableId": "observatory:firefly:ruby-gallery",
 			"displayName": "Ruby Gallery Firefly",
 			"transform": {
-				"position": [218, 2.45, 46],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					-18,
+					4.701,
+					-42
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.65,
@@ -414,7 +527,7 @@
 			},
 			"light": {
 				"color": "#ff2f6d",
-				"intensity": 5.5,
+				"intensity": 11,
 				"distance": 19,
 				"decay": 1.35
 			},
@@ -438,8 +551,16 @@
 			"stableId": "observatory:firefly:azure-lantern",
 			"displayName": "Azure Lantern Firefly",
 			"transform": {
-				"position": [176, 8.1, 132],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					-34,
+					2.588,
+					-52
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.5,
@@ -450,7 +571,7 @@
 			},
 			"light": {
 				"color": "#39c8ff",
-				"intensity": 5.3,
+				"intensity": 10.6,
 				"distance": 18.5,
 				"decay": 1.35
 			},
@@ -474,8 +595,16 @@
 			"stableId": "observatory:firefly:magenta-orbit",
 			"displayName": "Magenta Orbit Firefly",
 			"transform": {
-				"position": [88, 4.6, 204],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					-48,
+					3.458,
+					-32
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 2,
@@ -486,7 +615,7 @@
 			},
 			"light": {
 				"color": "#ff42e6",
-				"intensity": 5.2,
+				"intensity": 10.4,
 				"distance": 18.5,
 				"decay": 1.35
 			},
@@ -510,8 +639,16 @@
 			"stableId": "observatory:firefly:lavender-ring",
 			"displayName": "Lavender Ring Firefly",
 			"transform": {
-				"position": [-24, 2.1, 178],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					-42,
+					8.462,
+					0
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.7,
@@ -522,7 +659,7 @@
 			},
 			"light": {
 				"color": "#b7a1ff",
-				"intensity": 5,
+				"intensity": 10,
 				"distance": 17.5,
 				"decay": 1.35
 			},
@@ -546,8 +683,16 @@
 			"stableId": "observatory:firefly:ember-crossing",
 			"displayName": "Ember Crossing Firefly",
 			"transform": {
-				"position": [-118, 6.85, 134],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					-34,
+					15.371,
+					24
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.4,
@@ -558,7 +703,7 @@
 			},
 			"light": {
 				"color": "#ff3750",
-				"intensity": 5.4,
+				"intensity": 10.8,
 				"distance": 18.5,
 				"decay": 1.35
 			},
@@ -582,8 +727,16 @@
 			"stableId": "observatory:firefly:sapphire-pillar",
 			"displayName": "Sapphire Pillar Firefly",
 			"transform": {
-				"position": [-202, 3.05, 82],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					-17,
+					10.523,
+					39
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.8,
@@ -594,7 +747,7 @@
 			},
 			"light": {
 				"color": "#2f7dff",
-				"intensity": 5.5,
+				"intensity": 11,
 				"distance": 19,
 				"decay": 1.35
 			},
@@ -618,8 +771,16 @@
 			"stableId": "observatory:firefly:plum-garden",
 			"displayName": "Plum Garden Firefly",
 			"transform": {
-				"position": [-246, 5.3, 188],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					7,
+					7.518,
+					47
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.55,
@@ -630,7 +791,7 @@
 			},
 			"light": {
 				"color": "#8e3cff",
-				"intensity": 5,
+				"intensity": 10,
 				"distance": 17.5,
 				"decay": 1.35
 			},
@@ -654,8 +815,16 @@
 			"stableId": "observatory:firefly:scarlet-bridge",
 			"displayName": "Scarlet Bridge Firefly",
 			"transform": {
-				"position": [248, 8.8, -208],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					28,
+					6.417,
+					40
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.7,
@@ -666,7 +835,7 @@
 			},
 			"light": {
 				"color": "#ff1f3f",
-				"intensity": 5.6,
+				"intensity": 11.2,
 				"distance": 19,
 				"decay": 1.35
 			},
@@ -690,8 +859,16 @@
 			"stableId": "observatory:firefly:aurora-blue",
 			"displayName": "Aurora Blue Firefly",
 			"transform": {
-				"position": [12, 2.7, 264],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					46,
+					2.558,
+					18
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 2.1,
@@ -702,7 +879,7 @@
 			},
 			"light": {
 				"color": "#61e4ff",
-				"intensity": 5.4,
+				"intensity": 10.8,
 				"distance": 19.5,
 				"decay": 1.35
 			},
@@ -726,8 +903,16 @@
 			"stableId": "observatory:firefly:wine-shadow",
 			"displayName": "Wine Shadow Firefly",
 			"transform": {
-				"position": [-286, 7.65, -214],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					58,
+					2.948,
+					-8
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.45,
@@ -738,7 +923,7 @@
 			},
 			"light": {
 				"color": "#b21a56",
-				"intensity": 4.8,
+				"intensity": 9.6,
 				"distance": 17,
 				"decay": 1.35
 			},
@@ -762,8 +947,16 @@
 			"stableId": "observatory:firefly:electric-violet",
 			"displayName": "Electric Violet Firefly",
 			"transform": {
-				"position": [284, 3.9, 218],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					44,
+					6.168,
+					-30
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.9,
@@ -774,7 +967,7 @@
 			},
 			"light": {
 				"color": "#cf35ff",
-				"intensity": 5.7,
+				"intensity": 11.4,
 				"distance": 19.5,
 				"decay": 1.35
 			},
@@ -798,8 +991,16 @@
 			"stableId": "observatory:firefly:pale-blue",
 			"displayName": "Pale Blue Firefly",
 			"transform": {
-				"position": [230, 6.15, -112],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					18,
+					17.165,
+					8
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.6,
@@ -810,7 +1011,7 @@
 			},
 			"light": {
 				"color": "#a9d8ff",
-				"intensity": 4.9,
+				"intensity": 9.8,
 				"distance": 17.5,
 				"decay": 1.35
 			},
@@ -834,8 +1035,16 @@
 			"stableId": "observatory:firefly:deep-red",
 			"displayName": "Deep Red Firefly",
 			"transform": {
-				"position": [-72, 9.4, 282],
-				"scale": [0.2, 0.2, 0.2]
+				"position": [
+					-8,
+					24.547,
+					14
+				],
+				"scale": [
+					0.2,
+					0.2,
+					0.2
+				]
 			},
 			"movement": {
 				"radius": 1.85,
@@ -846,7 +1055,7 @@
 			},
 			"light": {
 				"color": "#b80028",
-				"intensity": 5.2,
+				"intensity": 10.4,
 				"distance": 18.5,
 				"decay": 1.35
 			},

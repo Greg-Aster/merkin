@@ -79,6 +79,7 @@ export async function mountGameClient(
 			assets,
 			three,
 			fallbackColor: renderProfile.renderer.fallbackMaterialColor,
+			createCanvas: createSpriteCanvas,
 		}),
 	});
 	const resize = createRendererResizeHandler(
@@ -163,6 +164,13 @@ function createAssetManager(
 	}
 
 	return assets;
+}
+
+function createSpriteCanvas(size: number): HTMLCanvasElement {
+	const canvas = document.createElement("canvas");
+	canvas.width = size;
+	canvas.height = size;
+	return canvas;
 }
 
 const unavailableAudioAssetLoader: AssetLoader = async (entry) => ({

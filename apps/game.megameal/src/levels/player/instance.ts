@@ -17,6 +17,10 @@ export type LevelPlayerConfig = {
 		readonly rotation?: readonly [number, number, number, number];
 		readonly scale?: readonly [number, number, number];
 	};
+	readonly firstPersonController?: {
+		readonly yawRadians?: number;
+		readonly pitchRadians?: number;
+	};
 	readonly groundY?: number;
 	readonly light?: false | PlayerLightConfig;
 	readonly audio?: {
@@ -46,6 +50,10 @@ export function createPlayerInstance(
 			...defaultPlayerLight,
 			...config.light,
 		};
+	}
+
+	if (config.firstPersonController) {
+		components.FirstPersonController = config.firstPersonController;
 	}
 
 	return {

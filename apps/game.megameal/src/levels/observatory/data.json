@@ -16,19 +16,15 @@
 				"material_water_dark_still"
 			],
 			"requiredCollisionPrefabIds": [
-				"observatory_walkable_proxy",
 				"observatory_boundary_blocker"
 			],
 			"requiredCollisionStableIds": [
-				"observatory:walkable-proxy",
 				"observatory:collision:boundary:north",
 				"observatory:collision:boundary:south",
 				"observatory:collision:boundary:east",
 				"observatory:collision:boundary:west"
 			],
-			"requiredWalkableStableIds": [
-				"observatory:walkable-proxy"
-			],
+			"requiredWalkableStableIds": [],
 			"requiredLightStableIds": [
 				"observatory:firefly:archive",
 				"observatory:firefly:lantern",
@@ -62,11 +58,6 @@
 				"id": "observatory-terrain",
 				"prefabId": "observatory_environment",
 				"stableId": "observatory:terrain"
-			},
-			{
-				"id": "observatory-walkable-proxy",
-				"prefabId": "observatory_walkable_proxy",
-				"stableId": "observatory:walkable-proxy"
 			},
 			{
 				"id": "observatory-boundary-north",
@@ -300,51 +291,6 @@
 						"visible": true
 					}
 				}
-			},
-			{
-				"id": "observatory_walkable_proxy",
-				"tags": [
-					"world",
-					"collision",
-					"walkable",
-					"observatory"
-				],
-				"components": {
-					"Transform": {
-						"position": [
-							0,
-							1.75,
-							0
-						],
-						"rotation": [
-							0,
-							0,
-							0,
-							1
-						],
-						"scale": [
-							1,
-							1,
-							1
-						]
-					},
-					"RigidBody": {
-						"type": "fixed",
-						"mass": 0
-					},
-					"Collider": {
-						"intent": "walkable",
-						"channel": "worldStatic",
-						"shape": {
-							"type": "box",
-							"halfExtents": [
-								320,
-								0.05,
-								320
-							]
-						}
-					}
-				}
 			}
 		]
 	},
@@ -373,10 +319,14 @@
 	"player": {
 		"transform": {
 			"position": [
-				-137.2,
-				1.8,
-				-49.5
+				-20,
+				23,
+				10
 			]
+		},
+		"firstPersonController": {
+			"yawRadians": 1.5707963267948966,
+			"pitchRadians": 0
 		},
 		"groundY": 1.8,
 		"light": {

@@ -192,9 +192,9 @@ export type CollisionOverlayShape =
 			readonly radius: number;
 	  }
 	| {
-			readonly type: "mesh-bounds";
-			readonly halfExtents: Vec3;
-			readonly center: Vec3;
+			readonly type: "mesh";
+			readonly vertices: readonly Vec3[];
+			readonly indices: readonly number[];
 	  };
 
 export type CollisionOverlayItem = {

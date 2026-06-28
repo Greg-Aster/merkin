@@ -1932,6 +1932,30 @@ function validateLightModulationComponent(
 			errors,
 		);
 	}
+
+	if (modulation.nearDistance !== undefined) {
+		validateRequiredNonNegativeNumber(
+			modulation.nearDistance,
+			`${path}.nearDistance`,
+			errors,
+		);
+	}
+
+	if (modulation.farDistance !== undefined) {
+		validateRequiredNonNegativeNumber(
+			modulation.farDistance,
+			`${path}.farDistance`,
+			errors,
+		);
+	}
+
+	if (modulation.midIntensityScale !== undefined) {
+		validateRequiredAlpha(
+			modulation.midIntensityScale,
+			`${path}.midIntensityScale`,
+			errors,
+		);
+	}
 }
 
 function validateInteractionTargetComponent(

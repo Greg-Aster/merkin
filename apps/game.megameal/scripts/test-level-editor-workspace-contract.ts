@@ -238,11 +238,25 @@ for (const folder of folders) {
 			/\.\.\/global\/npcs\/firefly\/archetype\.json/,
 			"observatory/package.ts must compose the global firefly archetype into the level package",
 		);
+		assert.match(
+			packageSource,
+			/\.\/collision\/generated\.json/,
+			"observatory/package.ts must compose generated static environment collision data into the level package",
+		);
 		const npcLightStableIds = new Set(
 			runtimeSceneManifest.level.instances
 				.filter((instance) => Boolean(instance.components?.Npc))
 				.filter((instance) => Boolean(instance.components?.Light))
 				.map((instance) => instance.stableId),
+		);
+		assert.ok(
+			runtimeSceneManifest.level.instances.some(
+				(instance) =>
+					instance.stableId.startsWith(
+						"static-environment:observatory_environment_collision:chunk:",
+					) && Boolean(instance.components?.Collider),
+			),
+			"observatory generated static environment collision chunks must resolve as normal Collider instances",
 		);
 		for (const stableId of [
 			"observatory:firefly:archive",
@@ -264,8 +278,79 @@ assert.match(
 );
 assert.match(
 	levelEditorWorkspaceSource,
+	/"Collision"/,
+	"level editor must expose a Collision tab for static environment cook inspection",
+);
+assert.match(
+	levelEditorWorkspaceSource,
+	/collisionPackage\.files/,
+	"level editor must derive collision source and generated data from level-owned collision files",
+);
+assert.match(
+	levelEditorWorkspaceSource,
+	/checkCollisionCook/,
+	"level editor must expose a static environment collision drift check action",
+);
+assert.match(
+	levelEditorWorkspaceSource,
+	/cookCollision/,
+	"level editor must expose a static environment collision cook action",
+);
+assert.match(
+	levelEditorWorkspaceSource,
+	/collisionDiagnostics/,
+	"level editor must show static environment collision diagnostics from level-owned files",
+);
+for (const collisionDiagnosticHandle of [
+	"Walkable Triangles",
+	"Collision Ratio",
+	"Source Bounds",
+	"Walkable Bounds",
+	"Collision Bounds",
+	"Bounds Coverage",
+	"boundsCoverageLabel",
+	"boundsLabel",
+]) {
+	assert.match(
+		levelEditorWorkspaceSource,
+		new RegExp(
+			collisionDiagnosticHandle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+		),
+		`level editor Collision tab must expose ${collisionDiagnosticHandle}`,
+	);
+}
+assert.match(
+	levelEditorWorkspaceSource,
 	/npcPackage:\s*workspace\.npcPackage/,
 	"level editor saves must include edited NPC package data",
+);
+for (const playerHandle of [
+	"Save Player",
+	"Player Facing",
+	"Initial Camera Direction",
+	"Level-Owned Lighting",
+	"data.json -> player.light",
+	"updatePlayerFacingDegrees",
+	"updatePlayerLightField",
+	"firstPersonController",
+	"yawRadians",
+	"pitchRadians",
+]) {
+	assert.match(
+		levelEditorWorkspaceSource,
+		new RegExp(playerHandle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+		`level editor Player tab must expose ${playerHandle} as level-owned player direction data`,
+	);
+}
+assert.doesNotMatch(
+	levelEditorWorkspaceSource,
+	/saveLevel\("player spawn"\)|saveLevel\("player light"\)|aria-label="Player light"/,
+	"level editor Player tab must use one player save action and must not duplicate player light in the Lighting tab",
+);
+assert.doesNotMatch(
+	levelEditorWorkspaceSource,
+	/PLAYER_PACKAGE_API_PATH|playerPackage|src\/levels\/player\/data\.json/,
+	"level editor workspace must not read or present global player package data inside the level editor",
 );
 assert.match(
 	levelEditorWorkspaceSource,
@@ -286,8 +371,16 @@ for (const editorHandle of [
 	"updateNpcInstanceField",
 	"updateNpcInstanceRecordField",
 	"updateNpcInstanceTransformVector",
+	"updateNpcGroupDefaultRecordField",
+	"updateNpcGroupLightPeriodValue",
 	"Movement Radius",
 	"Light Phase",
+	"Max Real Lights",
+	"Active Fraction",
+	"Blink Min Seconds",
+	"Blink Max Seconds",
+	"Near Light Range",
+	"Far Light Range",
 	"Activation Radius",
 	"Conversation Body",
 ]) {
@@ -301,6 +394,36 @@ assert.match(
 	editorDevApiSource,
 	/validateWritableNpcPackage/,
 	"editor dev API must validate writable level-owned NPC group payloads",
+);
+assert.match(
+	editorDevApiSource,
+	/validateNpcGroupDefaults/,
+	"editor dev API must validate writable level-owned NPC group defaults",
+);
+assert.match(
+	editorDevApiSource,
+	/validateLevelPlayerFirstPersonController/,
+	"editor dev API must validate level-owned player first-person direction overrides",
+);
+assert.match(
+	editorDevApiSource,
+	/LEVEL_COLLISION_FILE_NAMES/,
+	"editor dev API must expose level-owned collision source files for read-only workspace inspection",
+);
+assert.match(
+	editorDevApiSource,
+	/collision\/check/,
+	"editor dev API must expose a DEV-only static environment collision drift check action",
+);
+assert.match(
+	editorDevApiSource,
+	/collision\/cook/,
+	"editor dev API must expose a DEV-only static environment collision cook action",
+);
+assert.match(
+	editorDevApiSource,
+	/readStaticEnvironmentCollisionDiagnostics/,
+	"editor dev API must report hash-based static environment collision diagnostics",
 );
 assert.match(
 	editorDevApiSource,

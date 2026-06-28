@@ -52,6 +52,12 @@ export type ThreeTextureLike = ThreeDisposableLike & {
 	needsUpdate?: boolean;
 };
 
+export type ThreeCanvasLike = {
+	width: number;
+	height: number;
+	getContext(contextId: "2d"): CanvasRenderingContext2D | null;
+};
+
 export type ThreeCubeTextureLoaderLike = {
 	load(
 		urls: readonly string[],
@@ -98,6 +104,12 @@ export type ThreeCubeCameraLike = ThreeObject3DLike & {
 };
 
 export type ThreeGeometryLike = ThreeDisposableLike;
+
+export type ThreeBufferGeometryLike = ThreeGeometryLike & {
+	setAttribute(name: string, attribute: unknown): void;
+	setIndex(index: readonly number[] | Uint32Array): void;
+	computeVertexNormals?(): void;
+};
 
 export type ThreeMaterialLike = {
 	dispose?(): void;
@@ -233,6 +245,11 @@ export type ThreeRuntime = {
 		capSegments?: number,
 		radialSegments?: number,
 	) => ThreeGeometryLike;
+	readonly BufferGeometry?: new () => ThreeBufferGeometryLike;
+	readonly Float32BufferAttribute?: new (
+		array: readonly number[] | Float32Array,
+		itemSize: number,
+	) => unknown;
 	readonly MeshStandardMaterial: new (
 		parameters?: ThreeMeshStandardMaterialParameters,
 	) => ThreeMaterialLike;
@@ -240,7 +257,7 @@ export type ThreeRuntime = {
 		parameters?: ThreeSpriteMaterialParameters,
 	) => ThreeMaterialLike;
 	readonly Sprite?: new (material: ThreeMaterialLike) => ThreeObject3DLike;
-	readonly CanvasTexture?: new (canvas: HTMLCanvasElement) => ThreeTextureLike;
+	readonly CanvasTexture?: new (canvas: ThreeCanvasLike) => ThreeTextureLike;
 	readonly AdditiveBlending?: unknown;
 	readonly AmbientLight?: new (
 		color: string | number,
@@ -359,7 +376,7 @@ export type ThreeSpriteAsset = {
 };
 
 type StarSpriteTexture = {
-	readonly canvas: HTMLCanvasElement;
+	readonly canvas: ThreeCanvasLike;
 	readonly scaleMultiplier: number;
 };
 
@@ -456,6 +473,7 @@ export type ThreeAssetResolverOptions = {
 	readonly assets: Pick<AssetManagerPort, "get" | "has">;
 	readonly three: ThreeRuntime;
 	readonly fallbackColor?: string | number;
+	readonly createCanvas: (size: number) => ThreeCanvasLike;
 };
 
 export type ThreeResolvedObject =
@@ -623,7 +641,10 @@ function createSpriteObject(
 		);
 	}
 
-	const spriteTexture = createStarSpriteTexture(spriteAsset);
+	const spriteTexture = createStarSpriteTexture(
+		spriteAsset,
+		options.createCanvas,
+	);
 	const texture = new options.three.CanvasTexture(spriteTexture.canvas);
 	setTextureColorSpace(texture, "srgb", options.three);
 	texture.needsUpdate = true;
@@ -658,7 +679,10 @@ function createSpriteObject(
 	};
 }
 
-function createStarSpriteTexture(asset: ThreeSpriteAsset): StarSpriteTexture {
+function createStarSpriteTexture(
+	asset: ThreeSpriteAsset,
+	createCanvas: (size: number) => ThreeCanvasLike,
+): StarSpriteTexture {
 	const size = 256;
 	const padding = 8;
 	const baseRadius = size * 0.03;
@@ -682,7 +706,7 @@ function createStarSpriteTexture(asset: ThreeSpriteAsset): StarSpriteTexture {
 	];
 	const radiusScale = Math.max(0.01, Math.min(1, ...scaleLimits));
 	const radius = baseRadius * radiusScale;
-	const canvas = createCanvasElement(size);
+	const canvas = createCanvas(size);
 	const context = canvas.getContext("2d");
 
 	if (!context) {
@@ -847,17 +871,6 @@ function clampUnit(value: number): number {
 	return Math.min(1, Math.max(0, value));
 }
 
-function createCanvasElement(size: number): HTMLCanvasElement {
-	if (typeof document === "undefined") {
-		throw new Error("Sprite texture generation requires a browser document.");
-	}
-
-	const canvas = document.createElement("canvas");
-	canvas.width = size;
-	canvas.height = size;
-	return canvas;
-}
-
 export function isThreeSpriteAsset(asset: unknown): asset is ThreeSpriteAsset {
 	return isRecord(asset) && asset.kind === "three:sprite";
 }
@@ -972,6 +985,50 @@ function collisionOverlayColor(item: CollisionOverlayItem): string {
 		case "solid":
 			return "#f59e0b";
 	}
+}
+
+function overlayMeshBounds(vertices: readonly Vec3[]): {
+	readonly halfExtents: Vec3;
+	readonly center: Vec3;
+} {
+	if (vertices.length === 0) {
+		return {
+			halfExtents: { x: 0.5, y: 0.5, z: 0.5 },
+			center: { x: 0, y: 0, z: 0 },
+		};
+	}
+
+	const bounds = vertices.reduce(
+		(accumulator, vertex) => ({
+			minX: Math.min(accumulator.minX, vertex.x),
+			minY: Math.min(accumulator.minY, vertex.y),
+			minZ: Math.min(accumulator.minZ, vertex.z),
+			maxX: Math.max(accumulator.maxX, vertex.x),
+			maxY: Math.max(accumulator.maxY, vertex.y),
+			maxZ: Math.max(accumulator.maxZ, vertex.z),
+		}),
+		{
+			minX: Number.POSITIVE_INFINITY,
+			minY: Number.POSITIVE_INFINITY,
+			minZ: Number.POSITIVE_INFINITY,
+			maxX: Number.NEGATIVE_INFINITY,
+			maxY: Number.NEGATIVE_INFINITY,
+			maxZ: Number.NEGATIVE_INFINITY,
+		},
+	);
+
+	return {
+		halfExtents: {
+			x: Math.max((bounds.maxX - bounds.minX) / 2, 0.05),
+			y: Math.max((bounds.maxY - bounds.minY) / 2, 0.05),
+			z: Math.max((bounds.maxZ - bounds.minZ) / 2, 0.05),
+		},
+		center: {
+			x: (bounds.minX + bounds.maxX) / 2,
+			y: (bounds.minY + bounds.maxY) / 2,
+			z: (bounds.minZ + bounds.maxZ) / 2,
+		},
+	};
 }
 
 export class ThreeRendererAdapter
@@ -1487,16 +1544,47 @@ export class ThreeRendererAdapter
 							),
 					center: zero,
 				};
-			case "mesh-bounds":
+			case "mesh": {
+				if (this.#three.BufferGeometry && this.#three.Float32BufferAttribute) {
+					return {
+						geometry: this.#createCollisionOverlayMeshGeometry(item.shape),
+						center: zero,
+					};
+				}
+
+				const bounds = overlayMeshBounds(item.shape.vertices);
 				return {
 					geometry: new this.#three.BoxGeometry(
-						item.shape.halfExtents.x * 2,
-						item.shape.halfExtents.y * 2,
-						item.shape.halfExtents.z * 2,
+						bounds.halfExtents.x * 2,
+						bounds.halfExtents.y * 2,
+						bounds.halfExtents.z * 2,
 					),
-					center: item.shape.center,
+					center: bounds.center,
 				};
+			}
 		}
+	}
+
+	#createCollisionOverlayMeshGeometry(
+		shape: Extract<CollisionOverlayItem["shape"], { readonly type: "mesh" }>,
+	): ThreeGeometryLike {
+		if (!this.#three.BufferGeometry || !this.#three.Float32BufferAttribute) {
+			throw new Error(
+				"Collision mesh overlay requires Three BufferGeometry support.",
+			);
+		}
+
+		const geometry = new this.#three.BufferGeometry();
+		geometry.setAttribute(
+			"position",
+			new this.#three.Float32BufferAttribute(
+				shape.vertices.flatMap((vertex) => [vertex.x, vertex.y, vertex.z]),
+				3,
+			),
+		);
+		geometry.setIndex(shape.indices);
+		geometry.computeVertexNormals?.();
+		return geometry;
 	}
 
 	setCameraPose(pose: CameraPose): void {

@@ -6,9 +6,22 @@
 		"chargeReleaseAudioUrl": "/audio/sfx/22-kenney-forceField_001.mp3"
 	},
 	"transform": {
-		"position": [0, 0.65, 1.5],
-		"rotation": [0, 0, 0, 1],
-		"scale": [0.75, 1.25, 0.75]
+		"position": [
+			0,
+			0.65,
+			1.5
+		],
+		"rotation": [
+			0,
+			0,
+			0,
+			1
+		],
+		"scale": [
+			0.75,
+			1.25,
+			0.75
+		]
 	},
 	"renderable": {
 		"visible": false
@@ -31,7 +44,7 @@
 		"mouseSensitivity": 0.0025,
 		"minPitchRadians": -1.3962634015954636,
 		"maxPitchRadians": 1.3962634015954636,
-		"eyeHeight": 0.55,
+		"eyeHeight": 1,
 		"fovDegrees": 70,
 		"near": 0.05,
 		"far": 2000

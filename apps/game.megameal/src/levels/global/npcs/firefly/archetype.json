@@ -218,15 +218,6 @@
 			"decay": 1.35,
 			"visible": true
 		},
-		"lightModulation": {
-			"minimumIntensityScale": 0.12,
-			"pulseSpeed": 0.85,
-			"pulseSoftness": 0.82,
-			"activeLightPercent": 0.42,
-			"blinkPeriodSeconds": [12, 22],
-			"blinkFadeSeconds": 2.2,
-			"maxActiveLights": 8
-		},
 		"interaction": {
 			"kind": "npc",
 			"prompt": "Listen",

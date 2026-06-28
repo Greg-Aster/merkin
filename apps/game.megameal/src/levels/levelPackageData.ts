@@ -42,6 +42,11 @@ import {
 	playerHasRequiredLight,
 	playerPrefab,
 } from "./player/index.js";
+import {
+	type ResolvedStaticEnvironmentCollisionPackage,
+	type StaticEnvironmentCollisionPackage,
+	resolveStaticEnvironmentCollisionPackage,
+} from "./staticEnvironmentCollision.js";
 
 export type LevelSkyboxData = {
 	readonly schemaVersion: 1;
@@ -123,6 +128,12 @@ export type LevelNpcVisualPartData = {
 export type LevelNpcGroupData = {
 	readonly schemaVersion: 1;
 	readonly archetype: string;
+	readonly defaults?: {
+		readonly movement?: Record<string, unknown>;
+		readonly light?: Record<string, unknown>;
+		readonly lightModulation?: Record<string, unknown>;
+		readonly interaction?: Record<string, unknown>;
+	};
 	readonly instances: readonly LevelNpcInstanceData[];
 };
 
@@ -194,12 +205,19 @@ export function defineLevelPackage(
 	data: unknown,
 	skybox: unknown,
 	npcs: LevelNpcPackageData = {},
+	collision: StaticEnvironmentCollisionPackage = {},
 ): ResolvedLevelPackage {
 	const packageData = parseLevelPackageData(data);
 	const skyboxData = parseLevelSkyboxData(skybox);
 	const npcData = parseLevelNpcPackageData(npcs);
-	const level = composeLevel(packageData, skyboxData, npcData);
-	const readiness = composeReadiness(packageData, skyboxData, npcData);
+	const collisionData = resolveStaticEnvironmentCollisionPackage(collision);
+	const level = composeLevel(packageData, skyboxData, npcData, collisionData);
+	const readiness = composeReadiness(
+		packageData,
+		skyboxData,
+		npcData,
+		collisionData,
+	);
 	const renderProfile = composeRenderProfile(packageData, skyboxData);
 	const assetManifest = {
 		assets: [
@@ -234,6 +252,7 @@ export function defineLevelPackage(
 		),
 		playerPrefab,
 		...packageData.prefabs.local,
+		...collisionData.prefabs,
 		...npcData.prefabs,
 	] satisfies readonly PrefabData[];
 	const audio = {
@@ -365,37 +384,50 @@ function parseLevelNpcPackageData(
 
 		for (const instance of group.instances) {
 			const position = instance.transform.position ?? [0, 0, 0];
+			const groupDefaults = group.defaults ?? {};
 			const light = {
 				...archetype.defaults.light,
+				...groupDefaults.light,
 				...instance.light,
 			};
 			const lightModulation = {
 				...archetype.defaults.lightModulation,
+				...groupDefaults.lightModulation,
 				...instance.lightModulation,
 				baseIntensity: numericValue(
 					instance.lightModulation?.baseIntensity,
 					numericValue(
 						instance.light?.intensity,
-						numericValue(light.intensity, 0),
+						numericValue(
+							groupDefaults.lightModulation?.baseIntensity,
+							numericValue(light.intensity, 0),
+						),
 					),
 				),
 				baseDistance: numericValue(
 					instance.lightModulation?.baseDistance,
 					numericValue(
 						instance.light?.distance,
-						numericValue(light.distance, 0),
+						numericValue(
+							groupDefaults.lightModulation?.baseDistance,
+							numericValue(light.distance, 0),
+						),
 					),
 				),
 			};
 			const movement = {
 				...archetype.defaults.movement,
+				...groupDefaults.movement,
 				...instance.movement,
-				...(isRecord(archetype.defaults.movement) || isRecord(instance.movement)
+				...(isRecord(archetype.defaults.movement) ||
+				isRecord(groupDefaults.movement) ||
+				isRecord(instance.movement)
 					? { basePosition: position }
 					: {}),
 			};
 			const interaction = {
 				...archetype.defaults.interaction,
+				...groupDefaults.interaction,
 				...instance.interaction,
 			};
 
@@ -544,6 +576,7 @@ function composeLevel(
 	packageData: LevelPackageData,
 	skyboxData: LevelSkyboxData,
 	npcData: ResolvedLevelNpcPackageData,
+	collisionData: ResolvedStaticEnvironmentCollisionPackage,
 ): LevelData {
 	return {
 		...packageData.level,
@@ -555,6 +588,7 @@ function composeLevel(
 		]),
 		instances: [
 			...packageData.level.instances,
+			...collisionData.instances,
 			...npcData.instances,
 			createPlayerInstance(packageData.player),
 		],
@@ -565,6 +599,7 @@ function composeReadiness(
 	packageData: LevelPackageData,
 	skyboxData: LevelSkyboxData,
 	npcData: ResolvedLevelNpcPackageData,
+	collisionData: ResolvedStaticEnvironmentCollisionPackage,
 ): RuntimeSceneManifestData["readiness"] {
 	const readiness = packageData.runtimeScene.readiness;
 
@@ -585,7 +620,24 @@ function composeReadiness(
 			? {
 					requiredCollisionStableIds: unique([
 						...readiness.requiredCollisionStableIds,
+						...collisionData.requiredCollisionStableIds,
 						PLAYER_STABLE_ID,
+					]),
+				}
+			: collisionData.requiredCollisionStableIds.length > 0
+				? {
+						requiredCollisionStableIds: unique([
+							...collisionData.requiredCollisionStableIds,
+							PLAYER_STABLE_ID,
+						]),
+					}
+				: {}),
+		...(readiness.requiredWalkableStableIds ||
+		collisionData.requiredWalkableStableIds.length > 0
+			? {
+					requiredWalkableStableIds: unique([
+						...(readiness.requiredWalkableStableIds ?? []),
+						...collisionData.requiredWalkableStableIds,
 					]),
 				}
 			: {}),

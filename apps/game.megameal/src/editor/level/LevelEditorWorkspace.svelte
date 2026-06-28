@@ -7,7 +7,6 @@ import type {
 import StructuredValueEditor from "./StructuredValueEditor.svelte";
 
 const LEVELS_API_PATH = "/__megameal-editor-api/levels";
-const PLAYER_PACKAGE_API_PATH = "/__megameal-editor-api/player-package";
 const tabs = [
 	"Overview",
 	"Manifest",
@@ -16,6 +15,7 @@ const tabs = [
 	"Instances",
 	"Prefabs",
 	"Assets",
+	"Collision",
 	"Audio",
 	"Skybox",
 	"NPCs",
@@ -66,6 +66,28 @@ type LevelNpcSourceFile = {
 type LevelNpcPackage = {
 	readonly groups: readonly LevelNpcSourceFile[];
 	readonly archetypes: readonly LevelNpcSourceFile[];
+};
+
+type LevelCollisionSourceFile = {
+	readonly name: string;
+	readonly path: string;
+	readonly data: Record<string, JsonValue>;
+};
+
+type LevelCollisionDiagnostics = {
+	readonly status: string;
+	readonly message?: string;
+	readonly sourceAssetUrl?: string;
+	readonly currentSourceHash?: string;
+	readonly generatedSourceHash?: string;
+	readonly generatedAt?: string;
+	readonly chunkCount?: number;
+	readonly triangleCount?: number;
+};
+
+type LevelCollisionPackage = {
+	readonly files: readonly LevelCollisionSourceFile[];
+	readonly diagnostics?: LevelCollisionDiagnostics;
 };
 
 type LevelPackageDocument = {
@@ -119,12 +141,9 @@ type LevelPackageDocument = {
 type LevelWorkspace = LevelSummary & {
 	readonly files: readonly LevelFile[];
 	readonly npcPackage: LevelNpcPackage;
+	readonly collisionPackage: LevelCollisionPackage;
 	readonly document: LevelPackageDocument;
 	readonly diagnostics: readonly string[];
-};
-
-type PlayerPackageDocument = {
-	readonly light?: Record<string, JsonValue>;
 };
 
 type EntityLightRow = {
@@ -202,6 +221,11 @@ const tabInfo = {
 				label: "transform",
 				description:
 					"Player spawn position, rotation, and scale for this level.",
+			},
+			{
+				label: "firstPersonController",
+				description:
+					"Initial camera yaw and pitch for the player when this level loads.",
 			},
 			{
 				label: "groundY",
@@ -294,6 +318,22 @@ const tabInfo = {
 				label: "preloadGroups",
 				description:
 					"Named groups of asset IDs loaded together before or during scene startup.",
+			},
+		],
+	},
+	Collision: {
+		summary:
+			"Static environment collision is cooked from level-owned source settings into generated collision products. The editor inspects this data while runtime consumes explicit Collider components.",
+		fields: [
+			{
+				label: "source",
+				description:
+					"Cook source config: visual GLB, optional manual collision GLB, mode, and performance settings.",
+			},
+			{
+				label: "generated",
+				description:
+					"Generated collision chunks, source hash, bounds, triangle counts, and readiness-owned stable IDs.",
 			},
 		],
 	},
@@ -428,6 +468,15 @@ const tabInfo = {
 	},
 } satisfies Record<Tab, TabInfo>;
 
+const DEFAULT_LEVEL_PLAYER_LIGHT = {
+	kind: "point",
+	color: "#ffffff",
+	intensity: 1,
+	distance: 10,
+	decay: 2,
+	visible: true,
+} satisfies Record<string, JsonValue>;
+
 let levels: readonly LevelSummary[] = $state([]);
 let workspace: LevelWorkspace | undefined = $state();
 let selectedRuntimeSceneId = $state("");
@@ -437,7 +486,6 @@ let selectedSourceFile = $state("data.json");
 let draft: LevelPackageDocument | undefined = $state();
 let savedDraft: LevelPackageDocument | undefined = $state();
 let savedNpcPackage: LevelNpcPackage | undefined = $state();
-let playerPackage: PlayerPackageDocument | undefined = $state();
 let liveSnapshot: GameDevBridgeSnapshot | undefined = $state();
 let bridgeEndpoint: GameDevBridgeEditorEndpoint | undefined = $state();
 let statusMessage = $state("Loading levels.");
@@ -449,6 +497,65 @@ const activeFile = $derived(
 );
 const sourceFileOptions = $derived(
 	workspace?.files.map((file) => file.name) ?? ["data.json"],
+);
+const collisionSource = $derived(
+	workspace?.collisionPackage.files.find((file) =>
+		file.name.endsWith("source.json"),
+	)?.data,
+);
+const collisionGenerated = $derived(
+	workspace?.collisionPackage.files.find((file) =>
+		file.name.endsWith("generated.json"),
+	)?.data,
+);
+const collisionSettings = $derived(
+	hasRecordValue(collisionSource?.settings) ? collisionSource.settings : {},
+);
+const collisionSummary = $derived(
+	hasRecordValue(collisionGenerated?.summary) ? collisionGenerated.summary : {},
+);
+const collisionGeneratedSource = $derived(
+	hasRecordValue(collisionGenerated?.source) ? collisionGenerated.source : {},
+);
+const collisionDiagnostics = $derived(workspace?.collisionPackage.diagnostics);
+const collisionIsStale = $derived(collisionDiagnostics?.status === "stale");
+const collisionQualityLabel = $derived(
+	Number(collisionSettings.sampleSpacingMeters ?? 0) <= 3
+		? "high"
+		: Number(collisionSettings.sampleSpacingMeters ?? 0) <= 5
+			? "medium"
+			: "coarse",
+);
+const collisionCompressionRatio = $derived(
+	Number(collisionSummary.sourceTriangleCount ?? 0) > 0
+		? `${
+				Math.round(
+					(Number(collisionSummary.triangleCount ?? 0) /
+						Number(collisionSummary.sourceTriangleCount ?? 1)) *
+						1000,
+				) / 10
+			}%`
+		: "none",
+);
+const collisionBoundsLabel = $derived(
+	boundsLabel(toRecord(collisionSummary.bounds)),
+);
+const sourceBoundsLabel = $derived(
+	boundsLabel(toRecord(collisionSummary.sourceBounds)),
+);
+const walkableBoundsLabel = $derived(
+	boundsLabel(toRecord(collisionSummary.walkableBounds)),
+);
+const collisionBoundsCoverageLabel = $derived(
+	boundsCoverageLabel(
+		toRecord(collisionSummary.walkableBounds),
+		toRecord(collisionSummary.bounds),
+		Number(
+			collisionSummary.metersPerSample ??
+				collisionSettings.sampleSpacingMeters ??
+				0,
+		),
+	),
 );
 const dirty = $derived(
 	(draft !== undefined &&
@@ -474,10 +581,21 @@ const npcInstanceCount = $derived(
 const activeTabInfo = $derived(tabInfo[activeTab]);
 const skyboxEnvironment = $derived(toRecord(draft?.skybox.environment));
 const playerConfig = $derived(toRecord(draft?.player));
-const hasPlayerLightOverride = $derived(hasRecordValue(playerConfig.light));
-const playerLight = $derived(
-	toRecord(playerConfig.light ?? playerPackage?.light),
+const playerTransform = $derived(toRecord(playerConfig.transform));
+const playerFirstPersonController = $derived(
+	toRecord(playerConfig.firstPersonController),
 );
+const playerSpawnPosition = $derived(
+	vector3Value(playerTransform.position, [0, 0, 0]),
+);
+const playerYawDegrees = $derived(
+	radiansToDegrees(numericField(playerFirstPersonController.yawRadians)),
+);
+const playerPitchDegrees = $derived(
+	radiansToDegrees(numericField(playerFirstPersonController.pitchRadians)),
+);
+const hasPlayerLightOverride = $derived(hasRecordValue(playerConfig.light));
+const playerLight = $derived(toRecord(playerConfig.light));
 const renderLightRows = $derived(renderProfileLightRows(draft));
 const prefabLightRows = $derived(
 	entityLightRows(draft?.prefabs.local ?? [], "prefab"),
@@ -507,7 +625,6 @@ const skyboxAssetOptions = $derived(
 
 onMount(() => {
 	void initializeWorkspace();
-	void loadPlayerPackage();
 
 	if (import.meta.env.DEV) {
 		void import("../../app/gameDevBridge.js").then(
@@ -536,17 +653,6 @@ async function initializeWorkspace(): Promise<void> {
 
 	if (runtimeSceneId) {
 		await loadLevel(runtimeSceneId);
-	}
-}
-
-async function loadPlayerPackage(): Promise<void> {
-	try {
-		const payload = await fetchJson<{
-			readonly playerPackage: PlayerPackageDocument;
-		}>(PLAYER_PACKAGE_API_PATH);
-		playerPackage = payload.playerPackage;
-	} catch {
-		playerPackage = undefined;
 	}
 }
 
@@ -686,6 +792,73 @@ async function uploadAsset(event: Event): Promise<void> {
 	} catch (error) {
 		uploadMessage =
 			error instanceof Error ? error.message : "Failed to upload asset.";
+	} finally {
+		busy = false;
+	}
+}
+
+async function checkCollisionCook(): Promise<void> {
+	if (!workspace) {
+		return;
+	}
+	busy = true;
+	statusMessage = "Checking static environment collision.";
+	try {
+		const payload = await fetchJson<{
+			readonly status: string;
+			readonly error?: string;
+			readonly workspace: LevelWorkspace;
+		}>(
+			`${LEVELS_API_PATH}/${encodeURIComponent(workspace.runtimeSceneId)}/collision/check`,
+			{
+				method: "POST",
+			},
+		);
+		workspace = payload.workspace;
+		draft = structuredClone(payload.workspace.document);
+		savedDraft = structuredClone(payload.workspace.document);
+		savedNpcPackage = structuredClone(payload.workspace.npcPackage);
+		statusMessage =
+			payload.status === "current"
+				? "Static environment collision is current."
+				: payload.error ?? "Static environment collision is stale.";
+	} catch (error) {
+		statusMessage =
+			error instanceof Error ? error.message : "Failed to check collision.";
+	} finally {
+		busy = false;
+	}
+}
+
+async function cookCollision(): Promise<void> {
+	if (!workspace) {
+		return;
+	}
+	busy = true;
+	statusMessage = "Cooking static environment collision.";
+	try {
+		const previousRuntimeSceneId = workspace.runtimeSceneId;
+		const payload = await fetchJson<{
+			readonly workspace: LevelWorkspace;
+		}>(
+			`${LEVELS_API_PATH}/${encodeURIComponent(workspace.runtimeSceneId)}/collision/cook`,
+			{
+				method: "POST",
+			},
+		);
+		workspace = payload.workspace;
+		selectedRuntimeSceneId = payload.workspace.runtimeSceneId;
+		draft = structuredClone(payload.workspace.document);
+		savedDraft = structuredClone(payload.workspace.document);
+		savedNpcPackage = structuredClone(payload.workspace.npcPackage);
+		statusMessage = "Cooked static environment collision.";
+		reloadGameIfActive(
+			previousRuntimeSceneId,
+			payload.workspace.runtimeSceneId,
+		);
+	} catch (error) {
+		statusMessage =
+			error instanceof Error ? error.message : "Failed to cook collision.";
 	} finally {
 		busy = false;
 	}
@@ -868,6 +1041,60 @@ function updateRenderLightPosition(
 	updateRenderLightField(index, "position", position);
 }
 
+function updatePlayerSpawnPosition(axisIndex: number, value: number): void {
+	if (!draft) {
+		return;
+	}
+	const player = toRecord(draft.player);
+	const transform = toRecord(player.transform);
+	const position = vector3Value(transform.position, [0, 0, 0]);
+	position[axisIndex] = value;
+	updateDocument({
+		...draft,
+		player: {
+			...player,
+			transform: {
+				...transform,
+				position,
+			},
+		},
+	});
+}
+
+function updatePlayerGroundY(value: number): void {
+	if (!draft) {
+		return;
+	}
+	updateDocument({
+		...draft,
+		player: {
+			...toRecord(draft.player),
+			groundY: value,
+		},
+	});
+}
+
+function updatePlayerFacingDegrees(
+	key: "yawRadians" | "pitchRadians",
+	value: number,
+): void {
+	if (!draft) {
+		return;
+	}
+	const player = toRecord(draft.player);
+	const firstPersonController = toRecord(player.firstPersonController);
+	updateDocument({
+		...draft,
+		player: {
+			...player,
+			firstPersonController: {
+				...firstPersonController,
+				[key]: degreesToRadians(value),
+			},
+		},
+	});
+}
+
 function updatePlayerLightField(key: string, value: JsonValue): void {
 	if (!draft) {
 		return;
@@ -887,15 +1114,14 @@ function updatePlayerLightField(key: string, value: JsonValue): void {
 }
 
 function createPlayerLightOverride(): void {
-	if (!draft || !playerPackage?.light) {
-		statusMessage = "Player package light defaults are unavailable.";
+	if (!draft) {
 		return;
 	}
 	updateDocument({
 		...draft,
 		player: {
 			...toRecord(draft.player),
-			light: structuredClone(playerPackage.light),
+			light: structuredClone(DEFAULT_LEVEL_PLAYER_LIGHT),
 		},
 	});
 	statusMessage = "Created level player light override.";
@@ -960,6 +1186,60 @@ function updateNpcInstanceLightField(
 	value: JsonValue,
 ): void {
 	updateNpcInstanceRecordField(groupIndex, instanceIndex, "light", key, value);
+}
+
+function updateNpcGroupDefaultRecordField(
+	groupIndex: number | undefined,
+	recordKey: string,
+	key: string,
+	value: JsonValue,
+): void {
+	if (!workspace || groupIndex === undefined) {
+		return;
+	}
+	const groups = workspace.npcPackage.groups.map((group, currentGroupIndex) => {
+		if (currentGroupIndex !== groupIndex) {
+			return group;
+		}
+		const defaults = toRecord(group.data.defaults);
+		const record = toRecord(defaults[recordKey]);
+		return {
+			...group,
+			data: {
+				...group.data,
+				defaults: {
+					...defaults,
+					[recordKey]: {
+						...record,
+						[key]: value,
+					},
+				},
+			},
+		};
+	});
+	workspace = {
+		...workspace,
+		npcPackage: {
+			...workspace.npcPackage,
+			groups,
+		},
+	};
+}
+
+function updateNpcGroupLightPeriodValue(
+	groupIndex: number | undefined,
+	periodIndex: number,
+	value: number,
+): void {
+	const modulation = npcGroupDefaultRecord(groupIndex, "lightModulation");
+	const period = numberTuple2(modulation.blinkPeriodSeconds, [8, 15]);
+	period[periodIndex] = value;
+	updateNpcGroupDefaultRecordField(
+		groupIndex,
+		"lightModulation",
+		"blinkPeriodSeconds",
+		period,
+	);
 }
 
 function updateNpcInstanceField(
@@ -1059,6 +1339,18 @@ function npcInstanceAt(
 	return hasRecordValue(instance) ? instance : undefined;
 }
 
+function npcGroupDefaultRecord(
+	groupIndex: number | undefined,
+	recordKey: string,
+): Record<string, JsonValue> {
+	if (!workspace || groupIndex === undefined) {
+		return {};
+	}
+	const group = workspace.npcPackage.groups[groupIndex];
+	const defaults = toRecord(group?.data.defaults);
+	return toRecord(defaults[recordKey]);
+}
+
 function updateSkybox<K extends keyof LevelPackageDocument["skybox"]>(
 	key: K,
 	value: LevelPackageDocument["skybox"][K],
@@ -1143,12 +1435,25 @@ function numericField(value: unknown, fallback = 0): number {
 	return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
+function radiansToDegrees(value: number): number {
+	return Math.round((value * 180_000) / Math.PI) / 1000;
+}
+
+function degreesToRadians(value: number): number {
+	return (value * Math.PI) / 180;
+}
+
 function readNonNegativeNumberInput(
 	input: HTMLInputElement,
 	fallback = 0,
 ): number {
 	const value = Number(input.value);
 	return Number.isFinite(value) ? Math.max(0, value) : fallback;
+}
+
+function readAlphaNumberInput(input: HTMLInputElement, fallback = 0): number {
+	const value = Number(input.value);
+	return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : fallback;
 }
 
 function readFiniteNumberInput(input: HTMLInputElement, fallback = 0): number {
@@ -1312,6 +1617,59 @@ function hasRecordValue(value: unknown): value is Record<string, JsonValue> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function boundsLabel(bounds: Record<string, JsonValue>): string {
+	const min = Array.isArray(bounds.min) ? bounds.min : [];
+	const max = Array.isArray(bounds.max) ? bounds.max : [];
+	if (min.length < 3 || max.length < 3) {
+		return "none";
+	}
+	return `x ${String(min[0])}..${String(max[0])}, y ${String(min[1])}..${String(max[1])}, z ${String(min[2])}..${String(max[2])}`;
+}
+
+function boundsCoverageLabel(
+	sourceBounds: Record<string, JsonValue>,
+	collisionBounds: Record<string, JsonValue>,
+	sampleSpacingMeters: number,
+): string {
+	const sourceMin = vector3(sourceBounds.min);
+	const sourceMax = vector3(sourceBounds.max);
+	const collisionMin = vector3(collisionBounds.min);
+	const collisionMax = vector3(collisionBounds.max);
+
+	if (!sourceMin || !sourceMax || !collisionMin || !collisionMax) {
+		return "none";
+	}
+
+	const gap = Math.max(
+		Math.max(0, collisionMin[0] - sourceMin[0]),
+		Math.max(0, sourceMax[0] - collisionMax[0]),
+		Math.max(0, collisionMin[2] - sourceMin[2]),
+		Math.max(0, sourceMax[2] - collisionMax[2]),
+	);
+	const tolerance = sampleSpacingMeters > 0 ? sampleSpacingMeters * 1.25 : 0;
+	const roundedGap = Math.round(gap * 100) / 100;
+	const roundedTolerance = Math.round(tolerance * 100) / 100;
+	const status =
+		tolerance > 0 && gap <= tolerance
+			? "within tolerance"
+			: "outside tolerance";
+	return `${roundedGap}m max X/Z gap (${status}, ${roundedTolerance}m)`;
+}
+
+function vector3(
+	value: JsonValue | undefined,
+): readonly [number, number, number] | undefined {
+	if (!Array.isArray(value)) {
+		return undefined;
+	}
+	const x = Number(value[0]);
+	const y = Number(value[1]);
+	const z = Number(value[2]);
+	return Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)
+		? [x, y, z]
+		: undefined;
+}
+
 function renderProfileLightRows(
 	document: LevelPackageDocument | undefined,
 ): readonly EntityLightRow[] {
@@ -1455,6 +1813,19 @@ function vector3Value(
 		numericField(value[0], fallback[0]),
 		numericField(value[1], fallback[1]),
 		numericField(value[2], fallback[2]),
+	];
+}
+
+function numberTuple2(
+	value: unknown,
+	fallback: readonly [number, number],
+): [number, number] {
+	if (!Array.isArray(value)) {
+		return [...fallback];
+	}
+	return [
+		numericField(value[0], fallback[0]),
+		numericField(value[1], fallback[1]),
 	];
 }
 </script>
@@ -1661,13 +2032,201 @@ function vector3Value(
 							onChange={(value) => updateSection("runtimeScene", value)}
 						/>
 					{:else if activeTab === "Player"}
-						<StructuredValueEditor
-							value={(draft.player ?? {}) as JsonValue}
-							label="Player Spawn / Configuration"
-							disabled={busy}
-							onChange={(value) =>
-								updateSection("player", value as Record<string, JsonValue>)}
-						/>
+						<div class="player-workbench">
+							<div class="section-actions">
+								<button
+									type="button"
+									disabled={!workspace || busy}
+									onclick={() => void saveLevel("player")}
+								>
+									Save Player
+								</button>
+							</div>
+
+							<section class="lighting-group" aria-label="Player spawn">
+								<div class="lighting-group-header">
+									<div>
+										<p>Player Spawn</p>
+										<h2>Position And Grounding</h2>
+									</div>
+								</div>
+								<div class="lighting-fields">
+									{#each playerSpawnPosition as positionValue, axisIndex}
+										<label>
+											<span>Position {["X", "Y", "Z"][axisIndex]}</span>
+											<input
+												type="number"
+												step="0.1"
+												value={positionValue}
+												disabled={busy}
+												oninput={(event) =>
+													updatePlayerSpawnPosition(
+														axisIndex,
+														readFiniteNumberInput(event.currentTarget),
+													)}
+											/>
+										</label>
+									{/each}
+									<label>
+										<span>Ground Y</span>
+										<input
+											type="number"
+											step="0.1"
+											value={numericField(playerConfig.groundY)}
+											disabled={busy}
+											oninput={(event) =>
+												updatePlayerGroundY(
+													readFiniteNumberInput(event.currentTarget),
+												)}
+										/>
+									</label>
+								</div>
+							</section>
+
+							<section class="lighting-group" aria-label="Player facing">
+								<div class="lighting-group-header">
+									<div>
+										<p>Player Facing</p>
+										<h2>Initial Camera Direction</h2>
+									</div>
+									<span class="lighting-badge">degrees</span>
+								</div>
+								<div class="lighting-fields">
+									<label>
+										<span>Yaw</span>
+										<input
+											type="number"
+											step="1"
+											value={playerYawDegrees}
+											disabled={busy}
+											oninput={(event) =>
+												updatePlayerFacingDegrees(
+													"yawRadians",
+													readFiniteNumberInput(event.currentTarget),
+												)}
+										/>
+									</label>
+									<label>
+										<span>Pitch</span>
+										<input
+											type="number"
+											step="1"
+											value={playerPitchDegrees}
+											disabled={busy}
+											oninput={(event) =>
+												updatePlayerFacingDegrees(
+													"pitchRadians",
+													readFiniteNumberInput(event.currentTarget),
+												)}
+										/>
+									</label>
+								</div>
+							</section>
+
+							<section class="lighting-group" aria-label="Player level light">
+								<div class="lighting-group-header">
+									<div>
+										<p>Player Light</p>
+										<h2>Level-Owned Lighting</h2>
+									</div>
+									{#if hasPlayerLightOverride}
+										<span class="lighting-badge">data.json</span>
+									{:else}
+										<button
+											type="button"
+											disabled={busy}
+											onclick={createPlayerLightOverride}
+										>
+											Create Level Light
+										</button>
+									{/if}
+								</div>
+								<article class="lighting-source" class:readonly-source={!hasPlayerLightOverride}>
+									<div class="lighting-source-header">
+										<div>
+											<h3>
+												{hasPlayerLightOverride ? "Level Player Light" : "No Level Player Light"}
+											</h3>
+											<p>
+												{hasPlayerLightOverride
+													? "data.json -> player.light"
+													: "Create a level-owned player.light entry to edit these values."}
+											</p>
+										</div>
+										<span class="lighting-badge">
+											{hasPlayerLightOverride ? "editable" : "not set"}
+										</span>
+									</div>
+									<div class="lighting-fields">
+										<label>
+											<span>Color</span>
+											<input
+												type="color"
+												value={String(playerLight.color ?? "#ffffff")}
+												disabled={busy || !hasPlayerLightOverride}
+												oninput={(event) =>
+													updatePlayerLightField("color", event.currentTarget.value)}
+											/>
+										</label>
+										<label>
+											<span>Intensity</span>
+											<input
+												type="number"
+												min="0"
+												step="0.01"
+												value={numericField(playerLight.intensity)}
+												disabled={busy || !hasPlayerLightOverride}
+												oninput={(event) =>
+													updatePlayerLightField(
+														"intensity",
+														readNonNegativeNumberInput(event.currentTarget),
+													)}
+											/>
+										</label>
+										<label>
+											<span>Distance</span>
+											<input
+												type="number"
+												min="0"
+												step="0.1"
+												value={numericField(playerLight.distance)}
+												disabled={busy || !hasPlayerLightOverride}
+												oninput={(event) =>
+													updatePlayerLightField(
+														"distance",
+														readNonNegativeNumberInput(event.currentTarget),
+													)}
+											/>
+										</label>
+										<label>
+											<span>Decay</span>
+											<input
+												type="number"
+												min="0"
+												step="0.1"
+												value={numericField(playerLight.decay)}
+												disabled={busy || !hasPlayerLightOverride}
+												oninput={(event) =>
+													updatePlayerLightField(
+														"decay",
+														readNonNegativeNumberInput(event.currentTarget),
+													)}
+											/>
+										</label>
+										<label class="checkbox-control">
+											<input
+												type="checkbox"
+												checked={playerLight.visible !== false}
+												disabled={busy || !hasPlayerLightOverride}
+												onchange={(event) =>
+													updatePlayerLightField("visible", event.currentTarget.checked)}
+											/>
+											<span>Visible</span>
+										</label>
+									</div>
+								</article>
+							</section>
+						</div>
 					{:else if activeTab === "Resources"}
 						<StructuredValueEditor
 							value={(draft.level.resources ?? {}) as JsonValue}
@@ -1715,6 +2274,124 @@ function vector3Value(
 							disabled={busy}
 							onChange={(value) => updateSection("assets", value)}
 						/>
+					{:else if activeTab === "Collision"}
+						<div class="collision-summary">
+							<div class="section-actions">
+								<button type="button" disabled={!workspace || busy} onclick={checkCollisionCook}>
+									Check Generated Collision
+								</button>
+								<button type="button" disabled={!workspace || busy} onclick={cookCollision}>
+									Cook Static Collision
+								</button>
+								<p>
+									{collisionDiagnostics?.message ??
+										"No static environment collision diagnostics are available."}
+								</p>
+							</div>
+							<section class="lighting-group" aria-label="Static environment collision source">
+								<div class="lighting-group-header">
+									<div>
+										<p>Static Environment Source</p>
+										<h2>{String(collisionSource?.mode ?? "none")}</h2>
+									</div>
+									<span class="lighting-badge">{collisionQualityLabel}</span>
+								</div>
+								<dl class="editor-facts">
+									<div>
+										<dt>Visual Asset</dt>
+										<dd>{String(collisionSource?.visualAssetId ?? "none")}</dd>
+									</div>
+									<div>
+										<dt>Visual URL</dt>
+										<dd>{String(collisionSource?.visualAssetUrl ?? "none")}</dd>
+									</div>
+									<div>
+										<dt>Profile</dt>
+										<dd>{String(collisionSettings.profile ?? "none")}</dd>
+									</div>
+									<div>
+										<dt>Chunk Size</dt>
+										<dd>{String(collisionSettings.chunkSizeMeters ?? "none")}</dd>
+									</div>
+									<div>
+										<dt>Sample Spacing</dt>
+										<dd>{String(collisionSettings.sampleSpacingMeters ?? "none")}</dd>
+									</div>
+									<div>
+										<dt>Max Chunk Triangles</dt>
+										<dd>{String(collisionSettings.maxTrianglesPerChunk ?? "none")}</dd>
+									</div>
+									<div>
+										<dt>Collision Asset</dt>
+										<dd>{String(collisionSource?.collisionAssetUrl ?? "automatic visual GLB")}</dd>
+									</div>
+								</dl>
+							</section>
+
+							<section class="lighting-group" aria-label="Static environment collision product">
+								<div class="lighting-group-header">
+									<div>
+										<p>Generated Collision Product</p>
+										<h2>{String(collisionSummary.chunkCount ?? 0)} Chunks</h2>
+									</div>
+									<span class="lighting-badge">{collisionIsStale ? "stale" : String(collisionDiagnostics?.status ?? "generated")}</span>
+								</div>
+								<dl class="editor-facts">
+									<div>
+										<dt>Collision Triangles</dt>
+										<dd>{String(collisionSummary.triangleCount ?? 0)}</dd>
+									</div>
+									<div>
+										<dt>Source Triangles</dt>
+										<dd>{String(collisionSummary.sourceTriangleCount ?? 0)}</dd>
+									</div>
+									<div>
+										<dt>Walkable Triangles</dt>
+										<dd>{String(collisionSummary.walkableTriangleCount ?? "none")}</dd>
+									</div>
+									<div>
+										<dt>Collision Ratio</dt>
+										<dd>{collisionCompressionRatio}</dd>
+									</div>
+									<div>
+										<dt>Sampled Points</dt>
+										<dd>{String(collisionSummary.sampledPointCount ?? 0)}</dd>
+									</div>
+									<div>
+										<dt>Meters / Sample</dt>
+										<dd>{String(collisionSummary.metersPerSample ?? "none")}</dd>
+									</div>
+									<div>
+										<dt>Source Bounds</dt>
+										<dd>{sourceBoundsLabel}</dd>
+									</div>
+									<div>
+										<dt>Walkable Bounds</dt>
+										<dd>{walkableBoundsLabel}</dd>
+									</div>
+									<div>
+										<dt>Collision Bounds</dt>
+										<dd>{collisionBoundsLabel}</dd>
+									</div>
+									<div>
+										<dt>Bounds Coverage</dt>
+										<dd>{collisionBoundsCoverageLabel}</dd>
+									</div>
+									<div>
+										<dt>Source Hash</dt>
+										<dd>{String(collisionGeneratedSource.sourceHash ?? "none")}</dd>
+									</div>
+									<div>
+										<dt>Current Hash</dt>
+										<dd>{String(collisionDiagnostics?.currentSourceHash ?? "none")}</dd>
+									</div>
+									<div>
+										<dt>Generated At</dt>
+										<dd>{String(collisionDiagnostics?.generatedAt ?? "none")}</dd>
+									</div>
+								</dl>
+							</section>
+						</div>
 					{:else if activeTab === "Audio"}
 						<div class="section-actions">
 							<button type="button" disabled={busy} onclick={addAudioMapping}>
@@ -1878,6 +2555,206 @@ function vector3Value(
 													>
 														Save
 													</button>
+												</div>
+												<div class="npc-instance-form">
+													<div class="lighting-source-header">
+														<div>
+															<h3>Population Light Defaults</h3>
+															<p>{group.name} -> defaults.lightModulation</p>
+														</div>
+														<span class="lighting-badge">group</span>
+													</div>
+													<div class="lighting-fields">
+														<label>
+															<span>Max Real Lights</span>
+															<input
+																type="number"
+																min="0"
+																step="1"
+																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").maxActiveLights, 8)}
+																disabled={busy}
+																oninput={(event) =>
+																	updateNpcGroupDefaultRecordField(
+																		groupIndex,
+																		"lightModulation",
+																		"maxActiveLights",
+																		Math.floor(readNonNegativeNumberInput(event.currentTarget)),
+																	)}
+															/>
+														</label>
+														<label>
+															<span>Active Fraction</span>
+															<input
+																type="number"
+																min="0"
+																max="1"
+																step="0.01"
+																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").activeLightPercent, 1)}
+																disabled={busy}
+																oninput={(event) =>
+																	updateNpcGroupDefaultRecordField(
+																		groupIndex,
+																		"lightModulation",
+																		"activeLightPercent",
+																		readAlphaNumberInput(event.currentTarget, 1),
+																	)}
+															/>
+														</label>
+														<label>
+															<span>Blink Min Seconds</span>
+															<input
+																type="number"
+																min="0.25"
+																step="0.1"
+																value={numberTuple2(npcGroupDefaultRecord(groupIndex, "lightModulation").blinkPeriodSeconds, [8, 15])[0]}
+																disabled={busy}
+																oninput={(event) =>
+																	updateNpcGroupLightPeriodValue(
+																		groupIndex,
+																		0,
+																		readNonNegativeNumberInput(event.currentTarget, 8),
+																	)}
+															/>
+														</label>
+														<label>
+															<span>Blink Max Seconds</span>
+															<input
+																type="number"
+																min="0.25"
+																step="0.1"
+																value={numberTuple2(npcGroupDefaultRecord(groupIndex, "lightModulation").blinkPeriodSeconds, [8, 15])[1]}
+																disabled={busy}
+																oninput={(event) =>
+																	updateNpcGroupLightPeriodValue(
+																		groupIndex,
+																		1,
+																		readNonNegativeNumberInput(event.currentTarget, 15),
+																	)}
+															/>
+														</label>
+														<label>
+															<span>Blink Fade Seconds</span>
+															<input
+																type="number"
+																min="0"
+																step="0.1"
+																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").blinkFadeSeconds, 0)}
+																disabled={busy}
+																oninput={(event) =>
+																	updateNpcGroupDefaultRecordField(
+																		groupIndex,
+																		"lightModulation",
+																		"blinkFadeSeconds",
+																		readNonNegativeNumberInput(event.currentTarget),
+																	)}
+															/>
+														</label>
+														<label>
+															<span>Minimum Intensity</span>
+															<input
+																type="number"
+																min="0"
+																max="1"
+																step="0.01"
+																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").minimumIntensityScale, 0)}
+																disabled={busy}
+																oninput={(event) =>
+																	updateNpcGroupDefaultRecordField(
+																		groupIndex,
+																		"lightModulation",
+																		"minimumIntensityScale",
+																		readAlphaNumberInput(event.currentTarget),
+																	)}
+															/>
+														</label>
+														<label>
+															<span>Pulse Speed</span>
+															<input
+																type="number"
+																min="0"
+																step="0.01"
+																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").pulseSpeed, 0)}
+																disabled={busy}
+																oninput={(event) =>
+																	updateNpcGroupDefaultRecordField(
+																		groupIndex,
+																		"lightModulation",
+																		"pulseSpeed",
+																		readNonNegativeNumberInput(event.currentTarget),
+																	)}
+															/>
+														</label>
+														<label>
+															<span>Pulse Softness</span>
+															<input
+																type="number"
+																min="0"
+																max="1"
+																step="0.01"
+																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").pulseSoftness, 1)}
+																disabled={busy}
+																oninput={(event) =>
+																	updateNpcGroupDefaultRecordField(
+																		groupIndex,
+																		"lightModulation",
+																		"pulseSoftness",
+																		readAlphaNumberInput(event.currentTarget, 1),
+																	)}
+															/>
+														</label>
+														<label>
+															<span>Near Light Range</span>
+															<input
+																type="number"
+																min="0"
+																step="1"
+																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").nearDistance, 48)}
+																disabled={busy}
+																oninput={(event) =>
+																	updateNpcGroupDefaultRecordField(
+																		groupIndex,
+																		"lightModulation",
+																		"nearDistance",
+																		readNonNegativeNumberInput(event.currentTarget),
+																	)}
+															/>
+														</label>
+														<label>
+															<span>Far Light Range</span>
+															<input
+																type="number"
+																min="0"
+																step="1"
+																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").farDistance, 140)}
+																disabled={busy}
+																oninput={(event) =>
+																	updateNpcGroupDefaultRecordField(
+																		groupIndex,
+																		"lightModulation",
+																		"farDistance",
+																		readNonNegativeNumberInput(event.currentTarget),
+																	)}
+															/>
+														</label>
+														<label>
+															<span>Mid Range Scale</span>
+															<input
+																type="number"
+																min="0"
+																max="1"
+																step="0.01"
+																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").midIntensityScale, 0.55)}
+																disabled={busy}
+																oninput={(event) =>
+																	updateNpcGroupDefaultRecordField(
+																		groupIndex,
+																		"lightModulation",
+																		"midIntensityScale",
+																		readAlphaNumberInput(event.currentTarget, 0.55),
+																	)}
+															/>
+														</label>
+													</div>
 												</div>
 												{#if npcGroupInstances(group).length}
 													{#each npcGroupInstances(group) as instance, instanceIndex (String(instance.stableId ?? instance.id ?? instanceIndex))}
@@ -2401,116 +3278,6 @@ function vector3Value(
 															readNonNegativeNumberInput(event.currentTarget),
 														)}
 												/>
-											</label>
-										</div>
-									</article>
-								</section>
-
-								<section class="lighting-group" aria-label="Player light">
-									<div class="lighting-group-header">
-										<div>
-											<p>Player Light</p>
-											<h2>Level Override</h2>
-										</div>
-										{#if hasPlayerLightOverride}
-												<button
-													type="button"
-													disabled={!workspace || busy}
-													onclick={() => void saveLevel("player light")}
-												>
-												Save
-											</button>
-										{:else}
-											<button
-												type="button"
-												disabled={busy || !playerPackage?.light}
-												onclick={createPlayerLightOverride}
-											>
-												Create Override
-											</button>
-										{/if}
-									</div>
-									<article class="lighting-source" class:readonly-source={!hasPlayerLightOverride}>
-										<div class="lighting-source-header">
-											<div>
-												<h3>
-													{hasPlayerLightOverride ? "Level Player Light" : "Inherited Player Light"}
-												</h3>
-												<p>
-													{hasPlayerLightOverride
-														? "data.json -> player.light"
-														: "src/levels/player/data.json -> light"}
-												</p>
-											</div>
-											<span class="lighting-badge">
-												{hasPlayerLightOverride ? "editable" : "inherited"}
-											</span>
-										</div>
-										<div class="lighting-fields">
-											<label>
-												<span>Color</span>
-												<input
-													type="color"
-													value={String(playerLight.color ?? "#ffd6a3")}
-													disabled={busy || !hasPlayerLightOverride}
-													oninput={(event) =>
-														updatePlayerLightField("color", event.currentTarget.value)}
-												/>
-											</label>
-											<label>
-												<span>Intensity</span>
-												<input
-													type="number"
-													min="0"
-													step="0.01"
-													value={numericField(playerLight.intensity)}
-													disabled={busy || !hasPlayerLightOverride}
-													oninput={(event) =>
-														updatePlayerLightField(
-															"intensity",
-															readNonNegativeNumberInput(event.currentTarget),
-														)}
-												/>
-											</label>
-											<label>
-												<span>Distance</span>
-												<input
-													type="number"
-													min="0"
-													step="0.1"
-													value={numericField(playerLight.distance)}
-													disabled={busy || !hasPlayerLightOverride}
-													oninput={(event) =>
-														updatePlayerLightField(
-															"distance",
-															readNonNegativeNumberInput(event.currentTarget),
-														)}
-												/>
-											</label>
-											<label>
-												<span>Decay</span>
-												<input
-													type="number"
-													min="0"
-													step="0.1"
-													value={numericField(playerLight.decay)}
-													disabled={busy || !hasPlayerLightOverride}
-													oninput={(event) =>
-														updatePlayerLightField(
-															"decay",
-															readNonNegativeNumberInput(event.currentTarget),
-														)}
-												/>
-											</label>
-											<label class="checkbox-control">
-												<input
-													type="checkbox"
-													checked={playerLight.visible !== false}
-													disabled={busy || !hasPlayerLightOverride}
-													onchange={(event) =>
-														updatePlayerLightField("visible", event.currentTarget.checked)}
-												/>
-												<span>Visible</span>
 											</label>
 										</div>
 									</article>
