@@ -11,10 +11,7 @@ export type BrowserGameClientOptions = {
 	readonly runtimeManifest?: RuntimeSceneManifestData;
 };
 
-export type BrowserGameClient = Omit<
-	GameClientMount,
-	"runtime" | "hitTestRenderedScene" | "boxSelectRenderedScene"
-> & {
+export type BrowserGameClient = Omit<GameClientMount, "runtime"> & {
 	readonly api: EngineClientApi;
 	startLoop(): void;
 	stopLoop(): void;
@@ -24,9 +21,6 @@ export async function createBrowserGameClient(
 	options: BrowserGameClientOptions,
 ): Promise<BrowserGameClient> {
 	const platform = new BrowserPlatform();
-	const isDevelopment =
-		(import.meta as ImportMeta & { readonly env: { readonly DEV: boolean } })
-			.env.DEV === true;
 	let client: GameClientMount;
 
 	try {
@@ -45,16 +39,6 @@ export async function createBrowserGameClient(
 	let frame: number | undefined;
 	let lastTimeMilliseconds = platform.now();
 	let disposed = false;
-	const devPreviewBridge = isDevelopment
-		? (
-				await import("./browserGameDevPreviewBridge.js")
-			).connectBrowserGameDevPreviewBridge({
-				client,
-				...(options.runtimeManifest?.id === undefined
-					? {}
-					: { fallbackRuntimeSceneId: options.runtimeManifest.id }),
-			})
-		: undefined;
 
 	const schedule = () => {
 		if (disposed) {
@@ -80,8 +64,7 @@ export async function createBrowserGameClient(
 			(timeMilliseconds - lastTimeMilliseconds) / 1000,
 		);
 		lastTimeMilliseconds = timeMilliseconds;
-		const snapshot = client.runtime.update(deltaSeconds);
-		devPreviewBridge?.publishRuntimeTelemetry(snapshot, timeMilliseconds);
+		client.runtime.update(deltaSeconds);
 		schedule();
 	};
 
@@ -99,7 +82,6 @@ export async function createBrowserGameClient(
 
 		disposed = true;
 		stopLoop();
-		devPreviewBridge?.dispose();
 		client.dispose();
 		platform.dispose();
 	};
@@ -108,7 +90,11 @@ export async function createBrowserGameClient(
 
 	return {
 		api: createEngineClientApi(client.runtime),
-		runtimeUiState: client.runtimeUiState,
+		gameState: client.gameState,
+		runtimeSceneState: client.runtimeSceneState,
+		requestRuntimeScene: client.requestRuntimeScene,
+		setCollisionOverlayEnabled: client.setCollisionOverlayEnabled,
+		runtimeDiagnostics: client.runtimeDiagnostics,
 		mobileControls: client.mobileControls,
 		setUiCapturingInput: client.setUiCapturingInput,
 		startLoop() {

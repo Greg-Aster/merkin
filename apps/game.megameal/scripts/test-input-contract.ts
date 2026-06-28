@@ -13,9 +13,31 @@ import {
 	createGameplayActionMap,
 	createPlayerInputSystem,
 } from "../src/game/systems/input.js";
-import { assertDeepEqual, assertEqual } from "./contractTestHelpers.js";
 
 const emptyInput = () => new InputManager(createActionMap("test", []));
+
+function assertEqual<TValue>(
+	actual: TValue,
+	expected: TValue,
+	message?: string,
+) {
+	if (actual !== expected) {
+		throw new Error(
+			message ?? `Expected ${String(expected)}, received ${String(actual)}.`,
+		);
+	}
+}
+
+function assertDeepEqual(actual: unknown, expected: unknown, message?: string) {
+	const actualJson = JSON.stringify(actual);
+	const expectedJson = JSON.stringify(expected);
+
+	if (actualJson !== expectedJson) {
+		throw new Error(
+			message ?? `Expected ${expectedJson}, received ${actualJson}.`,
+		);
+	}
+}
 
 {
 	const input = emptyInput();

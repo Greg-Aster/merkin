@@ -1,18 +1,12 @@
-import type { Vec3 } from "../../math/index.js";
 import type {
 	AssetDisposer,
 	AssetLoader,
 	AssetManifestEntry,
 } from "../../modules/assets/index.js";
 import type {
-	AudioListenerState,
 	AudioManagerPort,
 	AudioManagerStats,
-	AudioMixerBusData,
-	AudioMixerPort,
 	AudioPlaybackHandle,
-	AudioSpatialEmitterState,
-	AudioSpatialPort,
 	AudioUnlockState,
 	MusicState,
 } from "../../modules/audio/index.js";
@@ -36,25 +30,6 @@ export type BrowserGainNodeLike = BrowserAudioNodeLike & {
 	readonly gain: BrowserAudioParamLike;
 };
 
-export type BrowserPannerNodeLike = BrowserAudioNodeLike & {
-	distanceModel: DistanceModelType;
-	refDistance: number;
-	maxDistance: number;
-	rolloffFactor: number;
-	coneInnerAngle: number;
-	coneOuterAngle: number;
-	coneOuterGain: number;
-	panningModel?: PanningModelType;
-	readonly positionX?: BrowserAudioParamLike;
-	readonly positionY?: BrowserAudioParamLike;
-	readonly positionZ?: BrowserAudioParamLike;
-	readonly orientationX?: BrowserAudioParamLike;
-	readonly orientationY?: BrowserAudioParamLike;
-	readonly orientationZ?: BrowserAudioParamLike;
-	setPosition?(x: number, y: number, z: number): void;
-	setOrientation?(x: number, y: number, z: number): void;
-};
-
 export type BrowserAudioBufferSourceNodeLike = BrowserAudioNodeLike & {
 	buffer: BrowserAudioBufferLike | null;
 	loop: boolean;
@@ -68,34 +43,11 @@ export type BrowserAudioContextLike = {
 	readonly destination: BrowserAudioNodeLike;
 	readonly currentTime: number;
 	readonly state: AudioContextState | "closed" | "running" | "suspended";
-	readonly listener?: BrowserAudioListenerLike;
 	createGain(): BrowserGainNodeLike;
 	createBufferSource(): BrowserAudioBufferSourceNodeLike;
-	createPanner?(): BrowserPannerNodeLike;
 	decodeAudioData(data: ArrayBuffer): Promise<BrowserAudioBufferLike>;
 	resume(): Promise<void>;
 	close(): Promise<void>;
-};
-
-export type BrowserAudioListenerLike = {
-	readonly positionX?: BrowserAudioParamLike;
-	readonly positionY?: BrowserAudioParamLike;
-	readonly positionZ?: BrowserAudioParamLike;
-	readonly forwardX?: BrowserAudioParamLike;
-	readonly forwardY?: BrowserAudioParamLike;
-	readonly forwardZ?: BrowserAudioParamLike;
-	readonly upX?: BrowserAudioParamLike;
-	readonly upY?: BrowserAudioParamLike;
-	readonly upZ?: BrowserAudioParamLike;
-	setPosition?(x: number, y: number, z: number): void;
-	setOrientation?(
-		forwardX: number,
-		forwardY: number,
-		forwardZ: number,
-		upX: number,
-		upY: number,
-		upZ: number,
-	): void;
 };
 
 export type BrowserAudioContextFactory = () => BrowserAudioContextLike;
@@ -117,26 +69,18 @@ type PlaybackRecord = {
 	readonly id: string;
 	readonly soundId: string;
 	readonly sceneId?: string;
-	readonly busId?: string;
-	readonly emitterEntity?: number;
 	readonly source: BrowserAudioBufferSourceNodeLike;
 	readonly gain: BrowserGainNodeLike;
-	readonly panner?: BrowserPannerNodeLike;
 	disposed: boolean;
-	stopping: boolean;
 };
 
 let nextPlaybackId = 1;
 
-export class BrowserAudioManager
-	implements AudioManagerPort, AudioSpatialPort, AudioMixerPort
-{
+export class BrowserAudioManager implements AudioManagerPort {
 	readonly #context: BrowserAudioContextLike;
 	readonly #fetch: typeof fetch;
 	readonly #sounds = new Map<string, BrowserAudioBufferLike>();
 	readonly #playbacks = new Map<string, PlaybackRecord>();
-	readonly #emitterPlaybackIds = new Map<number, string>();
-	readonly #busGains = new Map<string, BrowserGainNodeLike>();
 	readonly #gestureCleanups: Array<() => void> = [];
 	readonly #masterGain: BrowserGainNodeLike;
 	#musicPlaybackId: string | undefined;
@@ -249,7 +193,6 @@ export class BrowserAudioManager
 	play(event: {
 		readonly soundId: string;
 		readonly volume?: number;
-		readonly busId?: string;
 		readonly loop?: boolean;
 		readonly sceneId?: string;
 	}): AudioPlaybackHandle | undefined {
@@ -269,7 +212,7 @@ export class BrowserAudioManager
 		setParam(gain.gain, event.volume ?? 1, this.#now());
 		source.loop = event.loop ?? false;
 		source.connect(gain);
-		gain.connect(this.#outputForBus(event.busId));
+		gain.connect(this.#masterGain);
 
 		const record: PlaybackRecord = {
 			id: playbackId,
@@ -277,8 +220,6 @@ export class BrowserAudioManager
 			source,
 			gain,
 			disposed: false,
-			stopping: false,
-			...(event.busId === undefined ? {} : { busId: event.busId }),
 			...(event.sceneId === undefined ? {} : { sceneId: event.sceneId }),
 		};
 
@@ -333,22 +274,17 @@ export class BrowserAudioManager
 		this.#assertActive();
 
 		const nextTrackId = state.playing ? state.trackId : undefined;
-		const fadeSeconds = state.fadeSeconds ?? 0;
 
 		if (this.#musicPlaybackId !== undefined) {
 			const playback = this.#playbacks.get(this.#musicPlaybackId);
 
-			if (
-				playback !== undefined &&
-				playback.soundId === nextTrackId &&
-				playback.busId === state.busId
-			) {
-				rampParam(playback.gain.gain, state.volume, this.#now(), fadeSeconds);
+			if (playback !== undefined && playback.soundId === nextTrackId) {
+				setParam(playback.gain.gain, state.volume, this.#now());
 				this.#music = state;
 				return;
 			}
 
-			this.#fadeOutPlayback(this.#musicPlaybackId, fadeSeconds);
+			this.#stopPlayback(this.#musicPlaybackId);
 		}
 
 		this.#musicPlaybackId = undefined;
@@ -360,101 +296,12 @@ export class BrowserAudioManager
 
 		const playback = this.play({
 			soundId: nextTrackId,
-			volume: fadeSeconds > 0 ? 0 : state.volume,
-			...(state.busId === undefined ? {} : { busId: state.busId }),
+			volume: state.volume,
 			loop: true,
 			...(state.sceneId === undefined ? {} : { sceneId: state.sceneId }),
 		});
 
 		this.#musicPlaybackId = playback?.id;
-
-		if (playback && fadeSeconds > 0) {
-			const record = this.#playbacks.get(playback.id);
-			if (record !== undefined) {
-				rampParam(record.gain.gain, state.volume, this.#now(), fadeSeconds);
-			}
-		}
-	}
-
-	configureMixerBuses(buses: readonly AudioMixerBusData[]): void {
-		this.#assertActive();
-
-		for (const bus of buses) {
-			this.setMixerBusVolume(bus.id, bus.volume);
-		}
-	}
-
-	setMixerBusVolume(busId: string, volume: number): void {
-		this.#assertActive();
-		setParam(this.#gainForBus(busId).gain, volume, this.#now());
-	}
-
-	setListener(state: AudioListenerState): void {
-		this.#assertActive();
-		const listener = this.#context.listener;
-
-		if (!listener) {
-			return;
-		}
-
-		setAudioParam3(listener, "position", state.position, this.#now());
-		setAudioListenerOrientation(listener, state, this.#now());
-	}
-
-	attachEmitter(
-		entity: number,
-		state: AudioSpatialEmitterState,
-	): AudioPlaybackHandle | undefined {
-		this.#assertActive();
-		this.detachEmitter(entity);
-		const playback = this.#playSpatialEmitter(state);
-
-		if (!playback) {
-			return undefined;
-		}
-
-		this.#emitterPlaybackIds.set(entity, playback.id);
-		return playback;
-	}
-
-	updateEmitter(entity: number, state: AudioSpatialEmitterState): void {
-		this.#assertActive();
-		const playbackId = this.#emitterPlaybackIds.get(entity);
-
-		if (!playbackId) {
-			this.attachEmitter(entity, state);
-			return;
-		}
-
-		const playback = this.#playbacks.get(playbackId);
-
-		if (!playback || playback.soundId !== state.soundId) {
-			this.attachEmitter(entity, state);
-			return;
-		}
-
-		setParam(playback.gain.gain, state.volume, this.#now());
-
-		if (playback.panner) {
-			applyEmitterStateToPanner(playback.panner, state, this.#now());
-		}
-	}
-
-	detachEmitter(entity: number): void {
-		const playbackId = this.#emitterPlaybackIds.get(entity);
-
-		if (!playbackId) {
-			return;
-		}
-
-		this.#emitterPlaybackIds.delete(entity);
-		this.#stopPlayback(playbackId);
-	}
-
-	detachAllEmitters(): void {
-		for (const entity of [...this.#emitterPlaybackIds.keys()]) {
-			this.detachEmitter(entity);
-		}
 	}
 
 	stats(): AudioManagerStats {
@@ -478,13 +325,8 @@ export class BrowserAudioManager
 			cleanup();
 		}
 		this.stopAll();
-		this.#emitterPlaybackIds.clear();
 		this.#sounds.clear();
 		this.#masterGain.disconnect();
-		for (const busGain of this.#busGains.values()) {
-			busGain.disconnect();
-		}
-		this.#busGains.clear();
 		void this.#context.close();
 	}
 
@@ -500,63 +342,6 @@ export class BrowserAudioManager
 		return source;
 	}
 
-	#playSpatialEmitter(
-		state: AudioSpatialEmitterState,
-	): AudioPlaybackHandle | undefined {
-		void this.unlock();
-
-		const source = this.#createSource(state.soundId);
-
-		if (!source) {
-			return undefined;
-		}
-
-		const gain = this.#context.createGain();
-		const panner = this.#context.createPanner?.();
-		const playbackId = `audio:${nextPlaybackId}`;
-		nextPlaybackId += 1;
-
-		setParam(gain.gain, state.volume, this.#now());
-		source.loop = state.loop;
-
-		if (panner) {
-			applyEmitterStateToPanner(panner, state, this.#now());
-			source.connect(gain);
-			gain.connect(panner);
-			panner.connect(this.#outputForBus(state.busId));
-		} else {
-			source.connect(gain);
-			gain.connect(this.#outputForBus(state.busId));
-		}
-
-		const record: PlaybackRecord = {
-			id: playbackId,
-			soundId: state.soundId,
-			emitterEntity: state.entity,
-			source,
-			gain,
-			disposed: false,
-			stopping: false,
-			...(state.busId === undefined ? {} : { busId: state.busId }),
-			...(panner === undefined ? {} : { panner }),
-			...(state.sceneId === undefined ? {} : { sceneId: state.sceneId }),
-		};
-
-		source.onended = () => {
-			this.#releasePlayback(playbackId);
-		};
-		this.#playbacks.set(playbackId, record);
-		source.start(this.#now());
-
-		return {
-			id: playbackId,
-			soundId: state.soundId,
-			...(state.sceneId === undefined ? {} : { sceneId: state.sceneId }),
-			stop: () => this.#stopPlayback(playbackId),
-			dispose: () => this.#stopPlayback(playbackId),
-		};
-	}
-
 	#stopPlayback(playbackId: string): void {
 		const playback = this.#playbacks.get(playbackId);
 
@@ -565,31 +350,11 @@ export class BrowserAudioManager
 		}
 
 		playback.disposed = true;
-		playback.stopping = true;
 		try {
 			playback.source.stop(this.#now());
 		} finally {
 			this.#releasePlayback(playbackId);
 		}
-	}
-
-	#fadeOutPlayback(playbackId: string, fadeSeconds: number): void {
-		const playback = this.#playbacks.get(playbackId);
-
-		if (!playback || playback.disposed || playback.stopping) {
-			return;
-		}
-
-		if (fadeSeconds <= 0) {
-			this.#stopPlayback(playbackId);
-			return;
-		}
-
-		const now = this.#now();
-		const stopAt = now + fadeSeconds;
-		playback.stopping = true;
-		rampParam(playback.gain.gain, 0, now, fadeSeconds);
-		playback.source.stop(stopAt);
 	}
 
 	#releasePlayback(playbackId: string): void {
@@ -605,17 +370,9 @@ export class BrowserAudioManager
 			this.#musicPlaybackId = undefined;
 		}
 
-		if (
-			playback.emitterEntity !== undefined &&
-			this.#emitterPlaybackIds.get(playback.emitterEntity) === playbackId
-		) {
-			this.#emitterPlaybackIds.delete(playback.emitterEntity);
-		}
-
 		playback.source.onended = null;
 		playback.source.disconnect();
 		playback.gain.disconnect();
-		playback.panner?.disconnect();
 	}
 
 	#assertActive(): void {
@@ -626,24 +383,6 @@ export class BrowserAudioManager
 
 	#now(): number {
 		return this.#context.currentTime;
-	}
-
-	#outputForBus(busId: string | undefined): BrowserAudioNodeLike {
-		return busId === undefined ? this.#masterGain : this.#gainForBus(busId);
-	}
-
-	#gainForBus(busId: string): BrowserGainNodeLike {
-		const existing = this.#busGains.get(busId);
-
-		if (existing) {
-			return existing;
-		}
-
-		const gain = this.#context.createGain();
-		setParam(gain.gain, 1, this.#now());
-		gain.connect(this.#masterGain);
-		this.#busGains.set(busId, gain);
-		return gain;
 	}
 }
 
@@ -659,105 +398,6 @@ export function createBrowserAudioAssetDisposer(
 	return (_asset, entry) => {
 		manager.unregisterSound(entry.id);
 	};
-}
-
-function applyEmitterStateToPanner(
-	panner: BrowserPannerNodeLike,
-	state: AudioSpatialEmitterState,
-	time: number,
-): void {
-	panner.distanceModel = state.distanceModel;
-	panner.refDistance = state.refDistance;
-	panner.maxDistance = state.maxDistance;
-	panner.rolloffFactor = state.rolloffFactor;
-	panner.coneInnerAngle = state.coneInnerAngle ?? 360;
-	panner.coneOuterAngle = state.coneOuterAngle ?? 360;
-	panner.coneOuterGain = state.coneOuterGain ?? 0;
-
-	if (panner.panningModel !== undefined) {
-		panner.panningModel = "HRTF";
-	}
-
-	setAudioParam3(panner, "position", state.position, time);
-	setAudioParam3(panner, "orientation", state.forward, time);
-}
-
-function setAudioParam3(
-	target: BrowserPannerNodeLike | BrowserAudioListenerLike,
-	kind: "position" | "orientation",
-	value: Vec3,
-	time: number,
-): void {
-	const paramX =
-		kind === "position"
-			? target.positionX
-			: "orientationX" in target
-				? target.orientationX
-				: undefined;
-	const paramY =
-		kind === "position"
-			? target.positionY
-			: "orientationY" in target
-				? target.orientationY
-				: undefined;
-	const paramZ =
-		kind === "position"
-			? target.positionZ
-			: "orientationZ" in target
-				? target.orientationZ
-				: undefined;
-
-	if (paramX && paramY && paramZ) {
-		setParam(paramX, value.x, time);
-		setParam(paramY, value.y, time);
-		setParam(paramZ, value.z, time);
-		return;
-	}
-
-	if (kind === "position") {
-		target.setPosition?.(value.x, value.y, value.z);
-		return;
-	}
-
-	if (kind === "orientation") {
-		(target as BrowserPannerNodeLike).setOrientation?.(
-			value.x,
-			value.y,
-			value.z,
-		);
-	}
-}
-
-function setAudioListenerOrientation(
-	listener: BrowserAudioListenerLike,
-	state: AudioListenerState,
-	time: number,
-): void {
-	if (
-		listener.forwardX &&
-		listener.forwardY &&
-		listener.forwardZ &&
-		listener.upX &&
-		listener.upY &&
-		listener.upZ
-	) {
-		setParam(listener.forwardX, state.forward.x, time);
-		setParam(listener.forwardY, state.forward.y, time);
-		setParam(listener.forwardZ, state.forward.z, time);
-		setParam(listener.upX, state.up.x, time);
-		setParam(listener.upY, state.up.y, time);
-		setParam(listener.upZ, state.up.z, time);
-		return;
-	}
-
-	listener.setOrientation?.(
-		state.forward.x,
-		state.forward.y,
-		state.forward.z,
-		state.up.x,
-		state.up.y,
-		state.up.z,
-	);
 }
 
 function createDefaultAudioContext(): BrowserAudioContextLike {
@@ -793,21 +433,6 @@ function setParam(
 	}
 
 	param.value = value;
-}
-
-function rampParam(
-	param: BrowserAudioParamLike,
-	value: number,
-	time: number,
-	durationSeconds: number,
-): void {
-	if (durationSeconds <= 0 || !param.linearRampToValueAtTime) {
-		setParam(param, value, time);
-		return;
-	}
-
-	setParam(param, param.value, time);
-	param.linearRampToValueAtTime(value, time + durationSeconds);
 }
 
 function isAudioBufferLike(value: unknown): value is BrowserAudioBufferLike {

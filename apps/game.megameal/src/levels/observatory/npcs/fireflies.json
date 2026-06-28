@@ -1,0 +1,869 @@
+{
+	"schemaVersion": 1,
+	"archetype": "firefly",
+	"instances": [
+		{
+			"id": "observatory-archive-firefly",
+			"stableId": "observatory:firefly:archive",
+			"displayName": "Archive Firefly",
+			"transform": {
+				"position": [-137.2, 2.35, -62],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.4,
+				"speed": 0.2,
+				"hoverHeight": 0.38,
+				"bobAmplitude": 0.22,
+				"bobSpeed": 0.72
+			},
+			"light": {
+				"intensity": 5.8,
+				"distance": 20,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.12
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Archive Firefly",
+				"excerpt": "A warm light circles the old landing stones.",
+				"body": "The observatory remembers by reflection. The water keeps the sky below you, and the sky keeps the way ahead.",
+				"durationMs": 7000
+			}
+		},
+		{
+			"id": "observatory-lantern-firefly",
+			"stableId": "observatory:firefly:lantern",
+			"displayName": "Lantern Firefly",
+			"transform": {
+				"position": [-146, 3.15, -57],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.6,
+				"speed": 0.17,
+				"hoverHeight": 0.9,
+				"bobAmplitude": 0.34,
+				"bobSpeed": 0.58
+			},
+			"light": {
+				"color": "#8defff",
+				"intensity": 5.4,
+				"distance": 19,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.46
+			},
+			"interaction": {
+				"prompt": "Ask",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Lantern Firefly",
+				"excerpt": "A cool lantern-light points toward the instruments.",
+				"body": "The lantern-light points toward the instruments. If the deeper voice is sleeping, this small glow can still answer with memory.",
+				"durationMs": 7000
+			}
+		},
+		{
+			"id": "observatory-tide-firefly",
+			"stableId": "observatory:firefly:tide",
+			"displayName": "Tide Firefly",
+			"transform": {
+				"position": [-128.5, 1.95, -54],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.8,
+				"speed": 0.14,
+				"hoverHeight": 0.55,
+				"bobAmplitude": 0.18,
+				"bobSpeed": 0.64
+			},
+			"light": {
+				"color": "#dff8ff",
+				"intensity": 5,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.73
+			},
+			"interaction": {
+				"prompt": "Watch",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Tide Firefly",
+				"excerpt": "A cool light keeps near the edge where the water rises.",
+				"body": "When the tide climbs, keep to stone and reflected stars. The dark water is beautiful, but it is not a path.",
+				"durationMs": 5500
+			}
+		},
+		{
+			"id": "observatory-violet-ridge-firefly",
+			"stableId": "observatory:firefly:violet-ridge",
+			"displayName": "Violet Ridge Firefly",
+			"transform": {
+				"position": [-188, 5.1, -118],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.7,
+				"speed": 0.16,
+				"hoverHeight": 1.2,
+				"bobAmplitude": 0.42,
+				"bobSpeed": 0.46
+			},
+			"light": {
+				"color": "#9a5cff",
+				"intensity": 5.1,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.04
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Violet Ridge Firefly",
+				"excerpt": "A violet light turns above the ridge stones.",
+				"body": "The violet glow keeps to the high stone and watches the water below.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-blue-basin-firefly",
+			"stableId": "observatory:firefly:blue-basin",
+			"displayName": "Blue Basin Firefly",
+			"transform": {
+				"position": [-84, 2.8, -172],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.45,
+				"speed": 0.18,
+				"hoverHeight": 0.7,
+				"bobAmplitude": 0.26,
+				"bobSpeed": 0.86
+			},
+			"light": {
+				"color": "#4aa8ff",
+				"intensity": 5.3,
+				"distance": 18.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.09
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.1
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Blue Basin Firefly",
+				"excerpt": "A blue point skims the basin air.",
+				"body": "The blue firefly drifts where reflected sky gathers in the low places.",
+				"durationMs": 5400
+			}
+		},
+		{
+			"id": "observatory-red-arch-firefly",
+			"stableId": "observatory:firefly:red-arch",
+			"displayName": "Red Arch Firefly",
+			"transform": {
+				"position": [-210, 6.4, -26],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.9,
+				"speed": 0.14,
+				"hoverHeight": 1.65,
+				"bobAmplitude": 0.55,
+				"bobSpeed": 0.52
+			},
+			"light": {
+				"color": "#ff4f5f",
+				"intensity": 5.6,
+				"distance": 19,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.15
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Red Arch Firefly",
+				"excerpt": "A red spark burns under the arch.",
+				"body": "The red firefly pulses like a warning held inside the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-purple-drift-firefly",
+			"stableId": "observatory:firefly:purple-drift",
+			"displayName": "Purple Drift Firefly",
+			"transform": {
+				"position": [-56, 4.25, -94],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.6,
+				"speed": 0.19,
+				"hoverHeight": 1.05,
+				"bobAmplitude": 0.36,
+				"bobSpeed": 0.74
+			},
+			"light": {
+				"color": "#c46cff",
+				"intensity": 5.2,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.2
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Purple Drift Firefly",
+				"excerpt": "A purple glow drifts through the open air.",
+				"body": "The purple light moves slowly, as if tracing an old orbit.",
+				"durationMs": 5400
+			}
+		},
+		{
+			"id": "observatory-crimson-pool-firefly",
+			"stableId": "observatory:firefly:crimson-pool",
+			"displayName": "Crimson Pool Firefly",
+			"transform": {
+				"position": [-16, 1.75, -212],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.35,
+				"speed": 0.15,
+				"hoverHeight": 0.42,
+				"bobAmplitude": 0.2,
+				"bobSpeed": 0.61
+			},
+			"light": {
+				"color": "#d62745",
+				"intensity": 4.9,
+				"distance": 17,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.26
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Crimson Pool Firefly",
+				"excerpt": "A crimson point hangs over dark water.",
+				"body": "The crimson light lingers at the edge, bright enough to mark where not to step.",
+				"durationMs": 5400
+			}
+		},
+		{
+			"id": "observatory-cobalt-step-firefly",
+			"stableId": "observatory:firefly:cobalt-step",
+			"displayName": "Cobalt Step Firefly",
+			"transform": {
+				"position": [42, 7.2, -146],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.75,
+				"speed": 0.17,
+				"hoverHeight": 1.8,
+				"bobAmplitude": 0.6,
+				"bobSpeed": 0.5
+			},
+			"light": {
+				"color": "#276bff",
+				"intensity": 5.4,
+				"distance": 19,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.31
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Cobalt Step Firefly",
+				"excerpt": "A cobalt light rises by the steps.",
+				"body": "The cobalt glow climbs and falls as if counting steps nobody can see.",
+				"durationMs": 5500
+			}
+		},
+		{
+			"id": "observatory-rose-spire-firefly",
+			"stableId": "observatory:firefly:rose-spire",
+			"displayName": "Rose Spire Firefly",
+			"transform": {
+				"position": [94, 3.65, -72],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.55,
+				"speed": 0.16,
+				"hoverHeight": 0.95,
+				"bobAmplitude": 0.3,
+				"bobSpeed": 0.68
+			},
+			"light": {
+				"color": "#ff6bb5",
+				"intensity": 5.2,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.36
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Rose Spire Firefly",
+				"excerpt": "A rose-colored light circles a high point.",
+				"body": "The rose firefly keeps its small orbit above the broken spire.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-indigo-waterline-firefly",
+			"stableId": "observatory:firefly:indigo-waterline",
+			"displayName": "Indigo Waterline Firefly",
+			"transform": {
+				"position": [152, 5.75, -18],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.8,
+				"speed": 0.13,
+				"hoverHeight": 1.4,
+				"bobAmplitude": 0.48,
+				"bobSpeed": 0.56
+			},
+			"light": {
+				"color": "#5357ff",
+				"intensity": 5.1,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.41
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.1
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Indigo Waterline Firefly",
+				"excerpt": "An indigo light traces the waterline.",
+				"body": "The indigo firefly follows the boundary between stone and reflection.",
+				"durationMs": 5400
+			}
+		},
+		{
+			"id": "observatory-ruby-gallery-firefly",
+			"stableId": "observatory:firefly:ruby-gallery",
+			"displayName": "Ruby Gallery Firefly",
+			"transform": {
+				"position": [218, 2.45, 46],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.65,
+				"speed": 0.18,
+				"hoverHeight": 0.62,
+				"bobAmplitude": 0.24,
+				"bobSpeed": 0.79
+			},
+			"light": {
+				"color": "#ff2f6d",
+				"intensity": 5.5,
+				"distance": 19,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.47
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Ruby Gallery Firefly",
+				"excerpt": "A ruby light flickers in the gallery air.",
+				"body": "The ruby firefly flashes once, then waits for the echo to catch up.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-azure-lantern-firefly",
+			"stableId": "observatory:firefly:azure-lantern",
+			"displayName": "Azure Lantern Firefly",
+			"transform": {
+				"position": [176, 8.1, 132],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.5,
+				"speed": 0.16,
+				"hoverHeight": 2.1,
+				"bobAmplitude": 0.72,
+				"bobSpeed": 0.44
+			},
+			"light": {
+				"color": "#39c8ff",
+				"intensity": 5.3,
+				"distance": 18.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.52
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Azure Lantern Firefly",
+				"excerpt": "An azure lantern-light hangs in the distance.",
+				"body": "The azure glow steadies itself where the path opens toward the far water.",
+				"durationMs": 5500
+			}
+		},
+		{
+			"id": "observatory-magenta-orbit-firefly",
+			"stableId": "observatory:firefly:magenta-orbit",
+			"displayName": "Magenta Orbit Firefly",
+			"transform": {
+				"position": [88, 4.6, 204],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 2,
+				"speed": 0.15,
+				"hoverHeight": 1.15,
+				"bobAmplitude": 0.4,
+				"bobSpeed": 0.7
+			},
+			"light": {
+				"color": "#ff42e6",
+				"intensity": 5.2,
+				"distance": 18.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.58
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Magenta Orbit Firefly",
+				"excerpt": "A magenta point loops through the open air.",
+				"body": "The magenta firefly repeats a small orbit as if tied to a missing instrument.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-lavender-ring-firefly",
+			"stableId": "observatory:firefly:lavender-ring",
+			"displayName": "Lavender Ring Firefly",
+			"transform": {
+				"position": [-24, 2.1, 178],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.7,
+				"speed": 0.17,
+				"hoverHeight": 0.5,
+				"bobAmplitude": 0.2,
+				"bobSpeed": 0.83
+			},
+			"light": {
+				"color": "#b7a1ff",
+				"intensity": 5,
+				"distance": 17.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.63
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.1
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Lavender Ring Firefly",
+				"excerpt": "A lavender light softens the ring of stones.",
+				"body": "The lavender firefly moves quietly, leaving the stones darker after it passes.",
+				"durationMs": 5500
+			}
+		},
+		{
+			"id": "observatory-ember-crossing-firefly",
+			"stableId": "observatory:firefly:ember-crossing",
+			"displayName": "Ember Crossing Firefly",
+			"transform": {
+				"position": [-118, 6.85, 134],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.4,
+				"speed": 0.19,
+				"hoverHeight": 1.75,
+				"bobAmplitude": 0.58,
+				"bobSpeed": 0.48
+			},
+			"light": {
+				"color": "#ff3750",
+				"intensity": 5.4,
+				"distance": 18.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.68
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Ember Crossing Firefly",
+				"excerpt": "A red ember-light crosses the path.",
+				"body": "The ember firefly darts across the crossing, then slows as if reconsidering.",
+				"durationMs": 5400
+			}
+		},
+		{
+			"id": "observatory-sapphire-pillar-firefly",
+			"stableId": "observatory:firefly:sapphire-pillar",
+			"displayName": "Sapphire Pillar Firefly",
+			"transform": {
+				"position": [-202, 3.05, 82],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.8,
+				"speed": 0.14,
+				"hoverHeight": 0.82,
+				"bobAmplitude": 0.28,
+				"bobSpeed": 0.66
+			},
+			"light": {
+				"color": "#2f7dff",
+				"intensity": 5.5,
+				"distance": 19,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.72
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Sapphire Pillar Firefly",
+				"excerpt": "A sapphire light hovers beside a pillar.",
+				"body": "The sapphire firefly keeps close to the stone, blue enough to sharpen its edge.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-plum-garden-firefly",
+			"stableId": "observatory:firefly:plum-garden",
+			"displayName": "Plum Garden Firefly",
+			"transform": {
+				"position": [-246, 5.3, 188],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.55,
+				"speed": 0.16,
+				"hoverHeight": 1.35,
+				"bobAmplitude": 0.46,
+				"bobSpeed": 0.6
+			},
+			"light": {
+				"color": "#8e3cff",
+				"intensity": 5,
+				"distance": 17.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.77
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.1
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Plum Garden Firefly",
+				"excerpt": "A plum-colored light waits beyond the path.",
+				"body": "The plum firefly keeps a low watch over the outer stones.",
+				"durationMs": 5500
+			}
+		},
+		{
+			"id": "observatory-scarlet-bridge-firefly",
+			"stableId": "observatory:firefly:scarlet-bridge",
+			"displayName": "Scarlet Bridge Firefly",
+			"transform": {
+				"position": [248, 8.8, -208],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.7,
+				"speed": 0.18,
+				"hoverHeight": 2.3,
+				"bobAmplitude": 0.78,
+				"bobSpeed": 0.42
+			},
+			"light": {
+				"color": "#ff1f3f",
+				"intensity": 5.6,
+				"distance": 19,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.82
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Scarlet Bridge Firefly",
+				"excerpt": "A scarlet light marks the far side.",
+				"body": "The scarlet firefly burns bright enough to draw the eye across the distance.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-aurora-blue-firefly",
+			"stableId": "observatory:firefly:aurora-blue",
+			"displayName": "Aurora Blue Firefly",
+			"transform": {
+				"position": [12, 2.7, 264],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 2.1,
+				"speed": 0.13,
+				"hoverHeight": 0.68,
+				"bobAmplitude": 0.24,
+				"bobSpeed": 0.76
+			},
+			"light": {
+				"color": "#61e4ff",
+				"intensity": 5.4,
+				"distance": 19.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.87
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Aurora Blue Firefly",
+				"excerpt": "A blue-white light hangs high and slow.",
+				"body": "The aurora firefly glows like a piece of sky that forgot to leave.",
+				"durationMs": 5700
+			}
+		},
+		{
+			"id": "observatory-wine-shadow-firefly",
+			"stableId": "observatory:firefly:wine-shadow",
+			"displayName": "Wine Shadow Firefly",
+			"transform": {
+				"position": [-286, 7.65, -214],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.45,
+				"speed": 0.15,
+				"hoverHeight": 1.95,
+				"bobAmplitude": 0.66,
+				"bobSpeed": 0.54
+			},
+			"light": {
+				"color": "#b21a56",
+				"intensity": 4.8,
+				"distance": 17,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.91
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Wine Shadow Firefly",
+				"excerpt": "A wine-red light moves near the outer dark.",
+				"body": "The wine firefly stays near the edge where the observatory stops pretending to be safe.",
+				"durationMs": 5500
+			}
+		},
+		{
+			"id": "observatory-electric-violet-firefly",
+			"stableId": "observatory:firefly:electric-violet",
+			"displayName": "Electric Violet Firefly",
+			"transform": {
+				"position": [284, 3.9, 218],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.9,
+				"speed": 0.2,
+				"hoverHeight": 1.05,
+				"bobAmplitude": 0.34,
+				"bobSpeed": 0.62
+			},
+			"light": {
+				"color": "#cf35ff",
+				"intensity": 5.7,
+				"distance": 19.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.95
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Electric Violet Firefly",
+				"excerpt": "An electric violet light trembles in the distance.",
+				"body": "The electric violet firefly jitters like a signal caught between instruments.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-pale-blue-firefly",
+			"stableId": "observatory:firefly:pale-blue",
+			"displayName": "Pale Blue Firefly",
+			"transform": {
+				"position": [230, 6.15, -112],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.6,
+				"speed": 0.14,
+				"hoverHeight": 1.55,
+				"bobAmplitude": 0.52,
+				"bobSpeed": 0.57
+			},
+			"light": {
+				"color": "#a9d8ff",
+				"intensity": 4.9,
+				"distance": 17.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.98
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.1
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Pale Blue Firefly",
+				"excerpt": "A pale blue light waits over cold stone.",
+				"body": "The pale blue firefly barely moves, bright and quiet above the observatory floor.",
+				"durationMs": 5400
+			}
+		},
+		{
+			"id": "observatory-deep-red-firefly",
+			"stableId": "observatory:firefly:deep-red",
+			"displayName": "Deep Red Firefly",
+			"transform": {
+				"position": [-72, 9.4, 282],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.85,
+				"speed": 0.16,
+				"hoverHeight": 2.45,
+				"bobAmplitude": 0.82,
+				"bobSpeed": 0.4
+			},
+			"light": {
+				"color": "#b80028",
+				"intensity": 5.2,
+				"distance": 18.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.55
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Deep Red Firefly",
+				"excerpt": "A deep red firefly hangs beyond the ring.",
+				"body": "The deep red light burns low and steady, as if keeping time for the water.",
+				"durationMs": 5600
+			}
+		}
+	]
+}

@@ -3,92 +3,6 @@ import { prefabDefinitionValidator } from "../../engine/data/index.js";
 import { quat, vec3 } from "../../engine/math/index.js";
 import type { SceneScope } from "../../engine/modules/scene/index.js";
 
-export {
-	arenaFloorPrefab,
-	ingredientPrefab,
-	mirandaArchiveLightPrefab,
-	mirandaBrigCellPrefab,
-	mirandaBrigDeskPrefab,
-	mirandaCaptainsChairPrefab,
-	mirandaCaptainsDeskPrefab,
-	mirandaCargoHoldFloorPrefab,
-	mirandaCargoStackAPrefab,
-	mirandaCargoStackBPrefab,
-	mirandaCargoStackCPrefab,
-	mirandaCargoStackDPrefab,
-	mirandaChapelAltarPrefab,
-	mirandaChapelMonolithPrefab,
-	mirandaCockpitConsolePrefab,
-	mirandaCockpitPanelCenterPrefab,
-	mirandaCockpitPanelSidePrefab,
-	mirandaCommandGalleryBeaconLightPrefab,
-	mirandaCrewBunkPrefab,
-	mirandaDeckPrefabs,
-	mirandaEngineColumnPrefab,
-	mirandaEngineCorePrefab,
-	mirandaFloorMainPrefab,
-	mirandaFloorUpperPrefab,
-	mirandaLockerBankPrefab,
-	mirandaMedPodPrefab,
-	mirandaMessCounterPrefab,
-	mirandaMessTableLargePrefab,
-	mirandaMessTableSmallPrefab,
-	mirandaObservationLightPrefab,
-	mirandaRecipeSafePrefab,
-	mirandaServerBankTallPrefab,
-	mirandaServerBankWidePrefab,
-	mirandaStoryMarkerAmberPrefab,
-	mirandaStoryMarkerCyanPrefab,
-	mirandaStoryMarkerMagentaPrefab,
-	mirandaStoryMarkerRedPrefab,
-	playerPrefab,
-	prototypePrefabs,
-	starterPropPrefab,
-	starterPrefabs,
-} from "./defaultPrefabs.js";
-export {
-	observatoryBoundaryBlockerPrefab,
-	observatoryEnvironmentPrefab,
-	observatoryFireflyMarkerPrefab,
-	observatoryPrefabs,
-	observatoryWalkableMeshPrefab,
-} from "./observatoryPrefabs.js";
-export { portalGatePrefab } from "./navigationPrefabs.js";
-export {
-	portalArenaFloorPrefab,
-	portalArenaPrefabs,
-} from "./portalPrefabs.js";
-export {
-	sciFiRoomAnomalyMarkerPrefab,
-	sciFiRoomColumnPrefab,
-	sciFiRoomConsolePrefab,
-	sciFiRoomCourtyardFloorPrefab,
-	sciFiRoomInteriorFloorPrefab,
-	sciFiRoomPrefabs,
-	sciFiRoomStoryMarkerPrefab,
-	sciFiRoomWastelandFloorPrefab,
-} from "./sciFiRoomPrefabs.js";
-export {
-	solitudeDaisPrefab,
-	solitudeFireflyMarkerPrefab,
-	solitudePillarPrefab,
-	solitudePlateauPrefab,
-	solitudePrefabs,
-	solitudeRingFragmentPrefab,
-	solitudeWindEmitterPrefab,
-} from "./solitudePrefabs.js";
-export {
-	lakeWaterSurfacePrefab,
-	oceanWaterSurfacePrefab,
-	waterSurfacePlanePrefab,
-} from "./waterPrefabs.js";
-export { terrainChunkCellPrefab } from "./terrainPrefabs.js";
-export {
-	yggdrasilAmbientEmitterPrefab,
-	yggdrasilPrefabs,
-	yggdrasilPrimitivePrefabs,
-} from "./yggdrasilPrefabs.js";
-
 export type PrefabId = string;
 export type StableEntityId = string;
 
@@ -178,7 +92,7 @@ export class PrefabRegistry {
 			...(prefab.tags ? { tags: prefab.tags } : {}),
 			components,
 		});
-		normalizeRuntimeComponentMap(components);
+		normalizeKnownRuntimeComponents(components);
 
 		const entity = world.createEntity();
 		const stableId = options.stableId ?? createStableEntityId(prefabId, entity);
@@ -268,7 +182,7 @@ function applyTransformOverride(
 	components.Transform = nextTransform;
 }
 
-export function normalizeRuntimeComponentMap(
+function normalizeKnownRuntimeComponents(
 	components: Record<string, unknown>,
 ): void {
 	normalizeTransformComponent(components);
@@ -301,16 +215,9 @@ function normalizeColliderComponent(components: Record<string, unknown>): void {
 		return;
 	}
 
-	const normalizedCollider: Record<string, unknown> = {
-		...collider,
-		...(collider.offset !== undefined
-			? { offset: tupleToVec3(collider.offset, vec3()) }
-			: {}),
-	};
-
 	if (collider.shape.type === "box") {
 		components.Collider = {
-			...normalizedCollider,
+			...collider,
 			shape: {
 				...collider.shape,
 				halfExtents: tupleToVec3(
@@ -327,7 +234,7 @@ function normalizeColliderComponent(components: Record<string, unknown>): void {
 		Array.isArray(collider.shape.vertices)
 	) {
 		components.Collider = {
-			...normalizedCollider,
+			...collider,
 			shape: {
 				...collider.shape,
 				vertices: collider.shape.vertices.map((vertex) =>
@@ -335,10 +242,7 @@ function normalizeColliderComponent(components: Record<string, unknown>): void {
 				),
 			},
 		};
-		return;
 	}
-
-	components.Collider = normalizedCollider;
 }
 
 function tupleToVec3(value: unknown, fallback: ReturnType<typeof vec3>) {

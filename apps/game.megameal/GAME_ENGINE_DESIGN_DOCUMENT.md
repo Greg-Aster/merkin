@@ -1,9 +1,14 @@
 # Browser Game Engine Design Document
 
-Status: Draft
+Status: Target design authority
 Scope: Browser-based 3D game engine for a website
 Target stack: Astro, Svelte, Three.js, Threlte, Rapier, browser platform APIs
 Target year: 2026
+
+This document defines intended product and engine design. It is not a migration
+log, implementation ledger, or agent status surface. Current ownership,
+verification state, partial implementation notes, and migration progress belong
+in `ENGINE_CONTRACT_REGISTER.md` or focused docs under `docs/`.
 
 ## 1. Purpose
 
@@ -83,10 +88,26 @@ src/
     astro pages, routing, layout, site shell
 
   ui/
-    svelte menus, HUD, editor panels, debug panels
+    svelte menus, HUD, debug panels
+
+  levels/
+    index.ts
+    global/
+      package settings, shared package assets and prefabs, runtime scene router
+    player/
+      configurable player prefab, player assets, player audio defaults,
+      readiness constants, and spawn helper data imported by level packages
+    <level>/
+      level data, local asset manifest, local prefab definitions, audio mappings,
+      render profile, runtime scene manifest, player spawn/override config, and
+      level bundle entrypoint
+
+  editor/
+    optional external tooling windows, master-control maps, diagnostics
 
   game/
-    game-specific rules, actors, levels, objectives, abilities, encounters
+    game-specific rules, actors, objectives, abilities, encounters,
+    generic prefab registry/spawn mechanics
 
   engine/
     core/
@@ -126,20 +147,10 @@ src/
 
     data/
       schemas/
-      contentGraph/
-      collisionCook/
-      terrainCook/
       loaders/
       serializers/
       manifests/
 ```
-
-Data contract packages should keep `index.ts` as public API barrels only.
-Schema types and validators, content graph derivation/import parity checks,
-collision-cook draft/preview/bake/write-plan logic, and terrain-cook
-manifest/shape/package/runtime/write-plan logic belong in focused owner modules
-under those folders. New contracts should extend the narrow owner module rather
-than recreating large catch-all data files.
 
 ## 5. Layer Responsibilities
 
@@ -164,17 +175,14 @@ Forbidden responsibilities:
 - Encoding gameplay rules.
 - Registering gameplay systems directly.
 
-Current cutover status:
+Target boundary:
 
-- The normal root game scripts target `@merkin/game-megameal`.
-- The deployed game static output comes from `apps/game.megameal/dist`.
-- Legacy `@merkin/game` root aliases are retired; any remaining local old app
-  folder is historical/reference material only, not a normal script target.
-- Blender scene bridge packaging is owned by `apps/blender`, not the old app.
-- `audit:legacy-game-references` fails active old-app references while allowing
-  checked-in historical docs and generated provenance metadata.
-- Old `apps/game` runtime code must not be imported, wrapped, or mounted as the
-  normal website runtime.
+- The app layer hosts the selected product runtime without importing legacy
+  runtime systems.
+- Legacy applications may be studied as reference evidence only when an
+  explicit migration task allows it.
+- Normal website routes should mount the product runtime through the app layer
+  and should not become a second engine owner.
 
 ### UI Layer
 
@@ -223,7 +231,7 @@ Allowed responsibilities:
 - Interactions.
 - Objectives.
 - Level-specific rules.
-- Entity and prefab definitions.
+- Gameplay component meanings and generic prefab/spawn mechanics.
 - Runtime composition through engine ports supplied by the app layer.
 
 Forbidden responsibilities:
@@ -390,6 +398,15 @@ RenderSyncSystem:
 
 Do not require every service to be a component. Asset registries, scheduler, event bus, profiler, scene manager, renderer, and physics world can be engine resources/services.
 
+Authored non-player world objects that move use the generic NPC moving-actor
+contract. This includes talking characters, fireflies, floating objects, drones,
+and future authored movers. Their species or object identity is level data, not
+a runtime system name. The runtime should process these objects through generic
+components such as `Npc`, `MovementBehavior`, `LightModulation`,
+`InteractionTarget`, and `Conversation`, with batched systems and
+distance/significance budgets. Particles, shader animation, sky/water motion,
+camera motion, physics debris, and the player are not NPC moving actors.
+
 ## 8. Commands And Events
 
 Use commands for intent. Use events for facts that already happened.
@@ -429,10 +446,6 @@ Guidelines:
 - Audio, UI, particles, and objective systems can react to events.
 - Hot-path systems should avoid excessive event chatter when direct component reads are clearer.
 - Events must have explicit scheduler timing so ordering bugs do not hide in the event bus.
-- Fixed runtime ticks drain events that existed before the audio stage only
-  after the audio stage runs. Events emitted after audio remain queued for the
-  next fixed tick so audio mappings can observe them instead of being silently
-  dropped.
 - Navigation interactions should be world-owned game components. For example, a portal is an entity with `Transform`, `Renderable`, `Collider`, and `Portal`; UI only observes the selected prompt, and scene transitions go through a runtime scene transition port.
 
 ## 9. Runtime Loop
@@ -542,21 +555,13 @@ Renderer sync:
 Transform + Renderable -> Three object
 ```
 
-Current primitive mesh contract:
+Primitive mesh contract:
 
 - Built-in primitive mesh assets are adapter-owned render resources referenced through stable asset IDs.
-- The Three adapter may support parameterized built-in mesh URLs for reusable
-  primitive shapes, such as box, cylinder, torus, icosahedron, and
-  dodecahedron. This support must stay generic; it must not branch on level IDs
-  or game-specific source IDs.
+- The Three adapter may support parameterized built-in mesh URLs for primitive shapes, such as a tapered cylinder/frustum render mesh.
 - Built-in mesh URL parameters are render implementation details, not gameplay state.
 - Gameplay meaning remains in prefabs, components, colliders, and stable level instance IDs.
 - A render mesh must not become the source of collision truth; colliders must be explicit component data.
-- Migrated primitive-heavy scenes should use `PrimitiveSceneContentContract`:
-  checked-in content records own source IDs, transforms, geometry arguments,
-  material parameters, collision intent, and stable ID mapping; reusable helpers
-  derive manifest assets, prefabs, and level instances. A level supplies data,
-  not special engine/runtime code.
 
 ### Scene Environment, Sky, And Atmosphere
 
@@ -580,8 +585,14 @@ Therefore the engine contract should be a scene environment contract with a cube
 Recommended target ownership:
 
 ```text
+src/levels/<level>/skybox.json
+  -> declares per-level scene environment mode, sky media asset ID, background
+     blur, background intensity, environment lighting intensity, readiness
+     intent, preload policy, and planned disabled sky feature metadata
+
 RuntimeSceneManifest / RenderProfile
-  -> declares scene environment asset ID, mode, readiness intent, and tuning
+  -> receives the composed scene environment asset ID, mode, readiness intent,
+     and tuning consumed by runtime scene loading and the renderer
 
 AssetManifest
   -> declares cubemap assets with six faces, equirectangular maps, LUTs,
@@ -641,74 +652,72 @@ type SceneEnvironment =
 
 Rules:
 
+- Per-level skybox/environment data belongs with the level package, not in
+  `src/game`, Svelte UI, renderer defaults, or a central scene switch.
+- The editor may expose DEV-only skybox controls that save the owning
+  `skybox.json` file, but normal runtime code must keep consuming validated
+  level package data after reload/rebuild.
 - Runtime scenes reference an environment by stable ID; they do not hardcode paths in gameplay systems.
 - A cubemap skybox asset must declare exactly six face URLs and their orientation.
 - Visible background and environment lighting are separate settings even when they use the same source texture.
 - Required environment assets participate in runtime-scene readiness validation.
 - The asset manager owns loaded cubemap assets and disposal; the renderer adapter owns `Scene.background`, `Scene.environment`, fog/atmosphere projection, and clearing stale scene references before scene unload.
 - Svelte, Threlte, and gameplay systems do not mutate Three scene background/environment directly.
-- Missing authored environment data must fail validation for production runtime scenes; the runtime must not silently choose a level-specific/default fallback.
+- Missing authored environment data must fail validation for production runtime scenes; the runtime must not silently choose an Observatory/default fallback.
+- Starmap, chunked-sky, and sky-motion data may exist as explicit disabled
+  planning metadata only. They must not be treated as runtime-supported until
+  schemas, assets, adapter projection, runtime behavior, and focused validation
+  exist for that packet.
 - Future volumetric clouds, sky atmosphere, weather, reflection probes, and image-based-lighting preprocessing should extend this contract instead of creating unrelated atmosphere policies.
 
-Current implementation status:
+Target validation:
 
-- `src/engine/data/schemas` requires `renderProfile.environment` and validates environment references against the selected runtime scene asset manifest, level preload set, readiness assets, asset kind, and projection metadata.
-- `src/game/assets/skyboxAssets.ts` declares manifest-owned cubemap assets, the production portal arena equirectangular environment asset, and small checked-in sample equirectangular and video environment assets. The portal arena texture `texture_portal_arena_equirectangular_sky` is a checked-in copy of `public/assets/skyboxes/170645ae-3f1f-47db-b920-226e61838ab7.png` at `public/assets/environment/portal-arena/portal-arena-sky-equirectangular.png`; no generated runtime artifact owns it.
-- `src/engine/modules/rendering` defines framework-neutral scene-environment variants, bounded dynamic capture settings, and the authored `ReflectionProbe` sync contract.
-- `src/engine/adapters/three` loads cubemap, texture, and muted video assets through `AssetManager`, projects scene environments into `Scene.background` and `Scene.environment`, supports PMREM/cube capture where required, and clears/restores scene references and probe material mutations during unload.
-- `portal_arena_runtime` now declares the required `equirectangular-environment` asset `texture_portal_arena_equirectangular_sky` through its render profile, selected-scene preload manifest, and readiness data. `prototype_arena_runtime`, `miranda_deck_runtime`, `observatory_runtime`, `sci_fi_room_runtime`, and `solitude_runtime` remain on their authored cubemap environments unless explicitly changed.
-- Focused validation now includes `test:scene-environment-contract` for accepted environment variants, invalid projection/video/dynamic-capture data, and reflection-probe shape/resolution failures. `test:runtime-scene-contract` continues to cover current cubemap preload/readiness failures.
-- Portal arena equirectangular production opt-in is recorded in `docs/Done/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`. Remaining deferred work includes editor/import controls, richer probe blending/debugging, 180/strip video sky mappings, fog/cloud/weather integration, generated/cooked environment pipelines, and broader production content authoring for the new modes.
+- Scene-environment schemas should reject missing environment ownership,
+  invalid asset references, invalid projection metadata, and readiness assets
+  that cannot be preloaded.
+- Renderer adapters should expose focused tests for loading, projection,
+  dynamic capture, probe cleanup, and stale-reference disposal.
+- Future sky, weather, fog, cloud, reflection, and generated environment
+  packets should extend the same manifest-owned contract instead of introducing
+  renderer-local fallback policies.
 
-### Water Body Environmental System
+### Water Surface Environmental Assets
 
-Water is a reusable environment system, not a level-local mesh or one-off shader. Modern engines treat water this way: Unreal exposes a Water System with water body actors for oceans, lakes, rivers, custom bodies, meshing, rendering, waves, materials, and underwater/gameplay extension points; Unity HDRP exposes water as render-pipeline-owned water surfaces with configurable body/rendering/simulation behavior. The target engine follows the same ownership shape at a smaller browser-engine scale.
+Water is a reusable environment primitive, not a level-local Observatory mesh. Modern engines treat water as a shared rendering/environment system: Unreal has a Water System for oceans, lakes, rivers, islands, meshing, rendering, and editing, while Unity HDRP exposes water as render-pipeline-owned water surfaces with configurable body/rendering/simulation behavior. The target engine should follow the same ownership shape at a smaller scale.
 
 Initial ownership:
 
 ```text
-src/game/assets/waterAssets.ts
-  -> shared reusable water mesh/material/texture assets; current runtime uses
-     one water mesh and one water shader material
+src/levels/global/waterAssets.ts
+  -> shipped product water mesh/material asset definitions
 
-src/game/prefabs/waterPrefabs.ts
-  -> shared reusable water body prefabs such as lake_water_surface
-     and ocean_water_surface, with default WaterSurface data over the same
-     shared mesh/material/shader path
+src/levels/global/prefabs.ts
+  -> shipped product water surface prefab definitions
 
-src/game/levels/<level>.ts
-  -> per-level water body placement, scale, and optional authored overrides
+src/levels/<level>/level.ts
+  -> per-level water instances and customization
 
 RuntimeSceneManifest / AssetManifest
   -> selected water assets, preload groups, and readiness assets when required
 
-Engine rendering module
-  -> framework-neutral WaterSurface component, body type, renderer-safe
-     projection state, and WaterSurfaceSyncSystem
-
 ThreeRendererAdapter
-  -> renderer-specific water mesh, shader material, time uniform,
-     transparency, render-order, environment-reflection, and refraction
-     projection from renderer-safe water data
+  -> renderer-specific material/transparency/render-order behavior and future
+     wave/reflection/refraction projections
 ```
 
 Rules:
 
-- Water body types are data: `WaterSurface.bodyType` may be `ocean`, `lake`, `river`, or `custom`. Level code must not branch the renderer or engine by level ID to get water behavior.
-- Lake/ocean/custom presets may differ in authored `WaterSurface` values, but they must not create separate water systems or duplicate shader/material ownership. Current lake and ocean prefabs both use `mesh_water_plane` and `material_water_surface`.
-- The current slice is visual water plus shader-driven wave/reflection/refraction projection from authored component data: no collider, no trigger volume, no buoyancy, no rising-water behavior, and no underwater gameplay state yet.
-- A level may own a stable instance ID such as `observatory:water` or `yggdrasil:water:ocean`, but reusable mesh/material/prefab/shader ownership belongs to `WaterSurfaceContract`.
-- Render water must never imply collision; water volumes or traversal effects require explicit components/contracts. The current `WaterSurface.gameplayVolume.enabled` value is explicitly `false` until that contract exists.
-- Material color, opacity, roughness, emissive, body type, animation, reflection, refraction, and render order must be authored through manifest-owned material data, shared water body prefabs, or explicit level overrides, not hidden renderer defaults.
+- The first slice is static visual water only: no collider, no trigger volume, no buoyancy, no rising-water behavior, and no shader simulation.
+- A level may own a stable instance ID such as `observatory:water`, but reusable mesh/prefab ownership belongs to `WaterSurfaceContract`.
+- Render water must never imply collision; water volumes or traversal effects require explicit future components/contracts.
+- Material color, opacity, roughness, emissive, and future shader parameters must be authored through manifest-owned material data or explicit prefab/level overrides, not hidden renderer defaults.
 - Runtime scenes include water assets in preload/readiness when the water surface is required for first playable presentation.
 - Svelte, Threlte, browser code, and old `apps/game` water/editor/runtime systems do not own target-engine water state.
 
-Current implemented consumers:
-
-- Observatory places `observatory:water` as a shared `lake_water_surface` body at `y = -2`, size `4000 x 4000`, with scrolling waves, environment reflection, disabled refraction, no collider, and no gameplay volume.
-- Yggdrasil places `yggdrasil:water:ocean` as a shared `ocean_water_surface` body at `y = -3.35`, size `920 x 920`, with scrolling waves, environment reflection, enabled visual refraction, no collider, and no gameplay volume.
-
-`docs/Done/WATER_SURFACE_SYSTEM_PLAN.md` records the implemented foundation and deferred packets for water quality tiers, richer reflections/refraction, depth fade, foam, shoreline blending, rising water, underwater state, buoyancy, and water-body import/cook tooling.
+Product levels may place water instances as static visual surfaces. Animation,
+reflections/refraction, rising water, underwater state, buoyancy, and
+water-body authoring require explicit future contracts before they become
+runtime behavior.
 
 Do not store gameplay state in `mesh.userData`.
 
@@ -799,165 +808,11 @@ Rules:
 - Physics handles are adapter details.
 - Collision events are translated into engine events.
 - Physics queries go through engine physics APIs.
-- Physics sync must reject malformed runtime `Transform` data instead of
-  normalizing it with hidden fallback position, rotation, or scale values.
 - Fixed timestep defaults to Rapier's practical game-oriented 1/60 second step unless a specific scene requires otherwise.
-- Collider shapes are authored data. Current schema-owned shapes are box, sphere, capsule, cylinder, and mesh.
+- Collider shapes are authored data. Schema-owned shapes include box, sphere, capsule, cylinder, and mesh.
 - Mesh colliders must include explicit vertices and triangle indices, and schema validation must reject malformed indices before runtime.
 - Render meshes are not collision sources unless a contract explicitly authors equivalent collider data.
 - Rapier mesh collider use belongs behind the Rapier adapter; game systems and prefabs never hold raw Rapier collider objects.
-- Kinematic player traversal uses `CharacterController.kinematicCollision` and
-  `PhysicsAdapterPort.computeKinematicCharacterMovement`; Rapier's kinematic
-  character controller stays behind the Rapier adapter. Movement obstacle
-  filtering is authored through collision channels on the controller settings
-  and collider policies, not adapter-local level branches.
-
-### Level Authoring And Import Validation
-
-AAA-tier engines do not scale level readiness through long hand-maintained
-arrays. They keep authored content, imported/cooked products, runtime catalogs,
-and validation as separate contracts. For this engine, that means a content
-graph layer must derive or drift-check runtime scene manifests from checked-in
-source content before more levels scale out.
-
-Target data flow:
-
-```text
-Authored level, prefab, asset, render, audio, and transition data
-  -> content graph import/validation
-  -> derived or drift-checked RuntimeSceneManifest readiness
-  -> runtime load gate
-```
-
-The content graph validator should derive or verify:
-
-- Required asset IDs from level preload data, prefab render/audio references,
-  render-profile environment assets, shared portal/water/sky assets, material
-  texture references, and scene music/SFX manifests.
-- Required prefab IDs from level instances, transition endpoints, collision
-  authoring products, and shared gameplay/environment prefabs.
-- Required collision stable IDs from instances whose prefab or instance
-  override declares required solid, trigger, or interaction collision.
-- Required walkable stable IDs from non-streamed authored
-  `Collider.intent: "walkable"` data, and required terrain package IDs for
-  streamable terrain walkables.
-- Required light stable IDs from authored first-playable `Light` components.
-- Runtime scene transitions from `Portal.targetRuntimeSceneId` values and the
-  checked-in runtime scene catalog.
-- Duplicate stable IDs, orphaned preload entries, missing asset definitions,
-  missing prefab definitions, missing portal targets, and readiness values that
-  drift from authored source.
-
-Runtime scenes still consume `RuntimeSceneManifest` data; the runtime must not
-scan visible meshes, repair missing readiness, or branch by level ID. Current
-manual readiness arrays are transitional checked-in data and must be
-drift-checked. The implemented foundation in the
-`src/engine/data/contentGraph` package and
-`scripts/test-level-authoring-contract.ts` compares derived requirements with
-the existing manifests before more playable levels are added.
-
-Generated GLB parity and explicit target-generated assets use the same
-ownership rule. Legacy generated GLB candidates are tracked in checked-in
-import manifests, not copied into runtime paths ad hoc. Each generated
-candidate must either resolve to current target asset, prefab, and level stable
-IDs, or be marked as planned with owner, contract, reason, and
-removal-condition metadata. Target-engine generated GLBs may be loaded by
-runtime scenes only after a deterministic generator, manifest asset, prefab,
-stable level instance, and provenance validation exist. Imported target-engine
-generated GLB entries must declare the generator ID, checked-in provenance
-metadata path, and generated GLB SHA-256; the generated import contract test
-verifies those values against the checked-in artifact. The implemented
-foundation in `src/game/assets/generatedGlbImportParity.ts` and
-`scripts/test-generated-glb-import-contract.ts` currently tracks Miranda
-command-console, Chapel monolith, story-marker, and portal-apparatus generated
-GLB candidates plus the target-owned Observatory environment GLB provenance.
-
-### Level Editor And Collision Cook Pipeline
-
-The level editor is planned as a separate dev-only window/tooling surface. It
-does not become the normal game HUD, and runtime game systems must not depend
-on editor state.
-
-Target data flow:
-
-```text
-Editor authoring data
-  -> collision draft/source data
-  -> explicit cook/bake command
-  -> checked-in PrefabDefinition / LevelDefinition / RuntimeSceneManifest data
-  -> runtime loading, readiness, physics sync, and Rapier adapter projection
-```
-
-The editor may run beside the game window, send temporary dev-only preview
-patches, and request a scene reload after a successful bake. Preview patches
-must stay separate from shipped data and must pass the same schema/contract
-validation path before runtime preview. Normal builds validate that cooked data
-is current; they do not silently bake or rewrite files.
-
-Collision cooking should prefer cheap authored primitive data first: cuboids
-and other simple shapes for most floors, blockers, walls, and trigger volumes;
-compound primitive sets for architecture and traversal details; cooked trimesh
-chunks only for static irregular geometry that needs precision; heightfields
-only for future true heightmap terrain. The first collision data/check
-foundation now uses a registry model: `src/engine/data/collisionCook`
-validates authored collision drafts,
-`src/game/editor/collisionDrafts/collisionDraftRegistry.ts` exposes the
-checked-in draft catalog, and focused contract tests check draft/runtime
-relationships without making editor state runtime source of truth. The current
-Observatory V1 draft remains valid Observatory content data at
-`src/game/editor/collisionDrafts/observatoryCollisionDraft.ts`; it is not a
-generic app/editor fallback. The former Observatory-only cook/drift commands
-were retired; future collision write paths must be generic and
-manifest/catalog-driven, while terrain package writes use `cook:terrain` and
-drift checks use `ci:terrain-drift`. The first dev-only editor boundary shell
-now exists at `/editor/`, with `src/app/editor/levelEditorSession.ts` resolving
-the selected runtime scene from the checked-in runtime scene catalog, resolving
-collision drafts from the draft registry, reporting a missing-draft state for
-scenes without a registered collision draft, and keeping preview metadata plus
-derived dry-run bake hashes outside the normal game HUD.
-Checked-in editor bake JSON was retired with the Observatory-only cook command;
-future generated bake artifacts need a generic manifest-driven owner before
-they can be written. The
-checked-in generated runtime collision module at
-`src/game/generated/observatoryCollisionRuntime.ts` is retained as current data
-until the generic terrain runtime module fully replaces the legacy collision
-module; Observatory prefab, level, and manifest owners import that module for
-shipped collision data. The bake does not mutate
-arbitrary TypeScript object literals; generated runtime data must have an owned
-output module because broad TS rewrites are riskier than a structured generated
-data module.
-The dev-only game-window preview/reload protocol is implemented as an
-app-layer browser channel and callback port that validates preview-patch
-messages before send/application and applies temporary transform/collider
-updates only in dev mode for the active runtime scene. Basic preview clearing
-and component restoration are explicit through the same dev-only protocol;
-richer reload lifecycle diagnostics remain planned. The `/editor/` route
-exposes catalog-driven workspace browsing and collision controls for the
-selected scene when that scene has a registered draft; per-level collision
-entries are shown only after selecting their registered runtime scene.
-Persisted spatial drag handles and generalized multi-level editing remain
-planned. The generalized
-terrain import/cook contract is implemented through engine data terrain cook validation,
-Observatory environment GLB provenance, reusable write-plan serialization,
-runtime-drift checks, and production `RuntimeSceneManifest.terrainPackages`
-readiness data. Cooked terrain chunks are implemented as a foundation through
-16 deterministic Observatory GLB-footprint walkable terrain chunks derived into
-explicit checked-in collision source data, plus four boundary blockers. Render
-terrain, collision terrain, material bindings, and terrain packages are
-engine/game data products; renderer and physics adapters only project currently
-active entities. `TerrainChunkStreamingContract` owns startup package
-activation, per-tick collision activation/deactivation, visual visibility
-projection, and package readiness. The only terrain cook/drift entrypoints are
-the generic `cook:terrain` and `ci:terrain-drift`; level-specific terrain
-cook/drift scripts remain retired. Production editor import UI,
-material/shader authoring UI, and terrain package integration for newly added
-runtime scenes remain future packets tracked in
-`docs/LEVEL_EDITOR_COLLISION_COOK_PLAN.md`.
-
-Cooked collision shape dimensions and mesh vertices are final physics data.
-Runtime `Transform.scale` is visual/spatial scene data and is not a hidden
-physics scale multiplier; import and cook tools must bake any source-art scale
-into collider dimensions or vertices before validation.
 
 Determinism rules:
 
@@ -1007,7 +862,7 @@ Rules:
   raw browser touch identifiers are not a second gameplay input path.
 - Gamepad polling must account for connection, disconnection, and missing devices.
 
-Implemented first-person input flow:
+Target first-person input flow:
 
 ```text
 BrowserInputAdapter
@@ -1041,8 +896,14 @@ selected target alongside portal/story-note reader state.
 ## 14.1 First-Person Player Architecture
 
 The first-person player is an entity composition, not a Svelte or Three object.
+Configurable player data belongs in `src/levels/player`, where the level package
+can replace the player prefab, player asset IDs, player audio defaults, and
+readiness constants without changing runtime systems. Individual level packages
+own only player spawn and override config such as start position, ground height,
+light enablement/tuning, and audio volume overrides. Runtime behavior remains in
+game systems.
 
-Current player components:
+Target player components:
 
 ```text
 Player entity
@@ -1131,24 +992,13 @@ Rules:
 - Scene music may declare either one `trackId` or an ordered `trackIds`
   playlist. Playlist tracks are selected by the game runtime on scene load from
   validated manifest-owned audio assets; the runtime must not scan folders.
-- Scene music may declare bounded `fadeSeconds`. The browser audio adapter owns
-  music fade-in, fade-out, and crossfade scheduling; gameplay and UI do not
-  create or ramp Web Audio nodes directly.
-- Audio content manifests may declare named mixer buses with bounded gain
-  values. Scene music, mapped events, and `SoundEmitter` components may
-  reference those buses by stable `busId`; the browser audio adapter owns the
-  Web Audio gain graph and bus volume updates.
-- Spatial audio uses engine-owned `SoundEmitter` components plus the active
-  camera pose/listener resource. The browser audio adapter owns Web Audio
-  listener, panner, gain, playback, and cleanup nodes; gameplay and UI never
-  hold Web Audio objects.
 - `public/audio/sfx/audition/` is source/audition material only; production
   runtime manifests must not reference it directly.
 - `public/audio/ambient/AMBIENT_AUDIO_SOURCES.md` records production ambient
   tracks and candidate tracks. Candidate tracks in `public/audio/ambient/` are
   not runtime content until promoted to stable manifest IDs with provenance.
 
-Current production audio IDs:
+Production audio ID examples:
 
 ```text
 audio_ambient_portal_deck -> public/audio/ambient/portal-deck.mp3
@@ -1160,8 +1010,12 @@ audio_ui_collect -> public/audio/sfx/interface-click-tone.mp3
 audio_player_jump -> public/audio/sfx/interface-sweep.mp3
 audio_player_charge_release -> public/audio/sfx/22-kenney-forceField_001.mp3
 audio_portal_activate -> public/audio/sfx/portal-activate.mp3
-audio_portal_cycle -> public/audio/sfx/portal-cycle.mp3
 ```
+
+Player audio asset IDs and default player event mappings are configurable
+player package data under `src/levels/player`, then composed into resolved level
+packages. Individual levels should not copy those player asset definitions or
+event mappings unless the player package contract is intentionally replaced.
 
 ## 16. Asset Architecture
 
@@ -1205,16 +1059,9 @@ Manifest example:
 - Use cacheable, versioned URLs.
 - Define preload groups per scene.
 - Track shared GPU resources.
-- Coalesce concurrent loads for the same asset ID and clear failed in-flight
-  loads so a later request can retry.
 - Dispose or release scene-owned assets on unload.
 - Keep checked-in authored primitive assets separate from future generated runtime assets.
-- Keep primitive-heavy scene imports under `PrimitiveSceneContentContract` so
-  authored primitives become stable manifest assets, prefabs, level instances,
-  and readiness data instead of per-level renderer or runtime branches.
-- Do not reference generated GLB or collider products from runtime scenes until
-  an import/generation owner validates them and the runtime manifest owns the
-  resulting target asset, prefab, level, and readiness data.
+- Do not reference generated GLB or collider products until an import/generation owner exists.
 - Scene manifests must declare the exact assets they need; runtime startup must not fall back to broad default registries or hidden boot preload groups.
 - Renderable mesh/material references in prefabs or level-instance overrides must resolve inside the owning runtime scene manifest and level preload set before runtime.
 - Browser-served authored game assets live under `public/assets/game/...` and are referenced through stable manifest IDs. The portal arena gate GLB is referenced as `mesh_portal_gate`; the level never imports the file directly.
@@ -1258,62 +1105,30 @@ resource it created.
 Recommended implementation:
 
 - SceneScope tracks all scene-owned runtime objects.
-- SceneScope cleanup attempts every registered resource cleanup before reporting
-  aggregate failures.
 - SceneManager owns transitions.
 - AssetManager tracks retain/release.
-- The game runtime owns a checked-in runtime scene catalog, a declared default runtime scene, and a scene transition port.
+- The external level package owns checked-in runtime scene manifests.
+- Global settings own default runtime-scene selection.
+- The game runtime consumes a selected manifest catalog and owns the scene transition port.
 - World supports entity groups or scene ownership tags.
 - Adapters expose explicit destruction APIs.
 
-Current playable/runtime scenes:
+Product runtime scene catalogs:
 
 ```text
-starter_runtime
-  -> generic clean-install starter scene with a player, floor, neutral prop,
-     built-in assets, and no Portal Arena dependency
-
-portal_arena_runtime
-  -> optional Merkin navigation room with eight portal slots
-  -> active targets: prototype_arena_runtime, miranda_deck_runtime,
-     observatory_runtime, sci_fi_room_runtime, and solitude_runtime
-
-prototype_arena_runtime
-  -> first playable prototype slice
-
-miranda_deck_runtime
-  -> primitive foundation slice for migrated Miranda content
-
-observatory_runtime
-  -> playable foundation slice for migrated Observatory content
-
-sci_fi_room_runtime
-  -> playable foundation slice for migrated Sci Fi Room content
-  -> owns three floor surfaces through generic terrain package chunks, five
-     StoryNote markers, a manifest-ID Observatory portal, and disabled/off
-     post-processing profile data
-
-solitude_runtime
-  -> active target-owned playable-foundation packet, not full legacy parity
-  -> must use target-owned primitive/current assets, prefabs, level data,
-     render profile, audio/environment manifest data, terrain-package-owned
-     plateau/dais walkable collision, and portal admission after validation
-
-yggdrasil_runtime
-  -> active target-owned primitive-parity playable-foundation packet, not full
-     legacy parity
-  -> uses the older primitive-heavy Yggdrasil backup as provenance only
-  -> must not import old runtime/editor code, load old generated runtime scene
-     JSON, or load old partition JSON
-  -> represents all old primitive nodes as checked-in target content data and
-     derives primitive assets, prefabs, level instances, collision stable IDs,
-     and terrain package walkable chunk data through PrimitiveSceneContentContract
-  -> keeps manifest-owned audio/environment data, story/portal identity
-     markers, and portal-arena admission after validation
-  -> old GLB asset parity, cooked collision products, water, ambient
-     particle/firefly, production lighting, post-processing/reflection, editor
-     import/cook/write, and partition/streaming parity remain future contracts
+runtime scene manifest
+  -> level data
+  -> asset manifest
+  -> prefab catalog
+  -> render profile
+  -> readiness contract
+  -> optional transition targets
 ```
+
+The engine should not require a Merkin-specific scene list to boot. The app or
+product package selects a manifest catalog and a default runtime scene through
+global configuration. Other products should be able to replace the level
+package without rewriting engine or editor code.
 
 ## 18. Browser Platform Layer
 
@@ -1405,161 +1220,50 @@ world.spawnPrefab('crate_breakable', {
 Rules:
 
 - Prefabs define reusable entity composition.
-- Levels define scene composition.
+- Root `src/levels` data defines product scene composition.
 - Assets are referenced by stable IDs.
 - Runtime state should be serializable where practical.
 - Data schemas should validate content before runtime.
 - Runtime scene manifests own their asset, prefab, level, render profile, and readiness data for a playable scene.
-- Readiness must fail before play when required assets, player spawn, collision prefabs, exact collision stable IDs, exact non-streamed walkable stable IDs, required terrain package IDs/startup chunks, or exact authored light stable IDs are missing.
+- Readiness must fail before play when required assets, player spawn, collision prefabs, exact collision stable IDs, exact walkable stable IDs, or exact authored light stable IDs are missing.
+- Level data must not be hidden inside `src/game`; a game can consume a level
+  package, but the level package should be replaceable or removable as a
+  product input.
+- Product asset manifests, product prefab definitions, runtime scene IDs,
+  runtime scene manifest lists, render profiles, skybox/environment files, and
+  per-scene audio mappings belong with the level package, not in `src/game`.
+- Optional editor tooling must not be a runtime dependency. Editor surfaces are
+  owned under `src/editor`; they may visualize architecture/flow and, during
+  local development only, edit approved checked-in level package data through
+  a DEV-only app API. Editor commands that affect a running game must route
+  through game/runtime contracts, not direct editor mutation of ECS storage,
+  renderer objects, or production runtime state.
 - Content migration from the old game must rewrite source evidence into new contracts; it must not import old runtime code or copy old editor repair paths.
 - When old authored parent transforms are simple enough, migration may flatten them into level instance transforms while keeping prefab geometry/collider/material as reusable archetype data.
 
-Current migrated Miranda foundation:
+Product content packages:
 
-- `miranda_deck_runtime` is checked-in target-engine data, not old runtime JSON.
-- Migrated primitive content includes Miranda spawn, two deck floors plus a Cargo Hold floor/bounds extension as explicit `walkable` collision surfaces, cockpit glow panels, cockpit command console, crew bunks, locker bank, Captain's Office desk/chair/safe, Engine Core, Engine Room columns, Medbay pods, Mess Hall blockers, Chapel Altar, Chapel monoliths, Brig cells/desk, Cargo Hold stacks, and Archive server banks.
-- The current Miranda walkable floor footprint is now represented by checked-in
-  runtime level/prefab collision data plus draft source data under
-  `src/game/editor/collisionDrafts`. Generic runtime-scene, level-authoring,
-  and terrain/collision contract tests validate current readiness coverage.
-  This is a cook-draft foundation, not full Miranda terrain/cooked collision
-  parity.
-- Migrated interaction content includes nine Miranda story notes as authored `StoryNote` component data with reusable marker prefabs, trigger colliders, nearest active target selection, reader open/close state, and HUD prompts/reader projection. The UI observes selected/open interaction state and dispatches close intent; it does not own story text or decide gameplay targets.
-- Migrated portal content includes the old Miranda airlock return portal as a
-  checked-in `Portal` entity at `miranda:airlock:return-portal`, using the
-  shared `portal_gate` prefab, `mesh_portal_gate`, and
-  `audio_portal_activate`. It targets `observatory_runtime` by manifest ID; no
-  old generated portal apparatus GLB, collider product, or editor/runtime code
-  is loaded.
-- Migrated authored lighting includes Miranda Command Gallery Beacon, Observation Light, and Archive Light as stable `Transform + Light` point-light entities. `LightSyncSystem` projects them through the renderer adapter; Svelte/Threlte lighting controllers and generated light IDs were not copied. `AuthoredLightContract` now includes spot-light schema/adapter support, rectangle area-light schema/adapter support, optional shadow settings for shadow-capable authored lights, explicit render-profile light budgets enforced by content-graph validation, and an editor-only Miranda light draft validator. The old point-light budget controller was not copied; budgets fail authoring validation instead of clipping runtime lights.
-- The tapered Engine Core preserves old authored visual shape with a parameterized built-in cylinder/frustum render mesh and explicit mesh collider data.
-- Current primitive material migration preserves stable material IDs plus authored base color, emissive color/intensity, metalness, roughness, and Medbay opacity through schema-owned material asset data. The cockpit center panel and wide Archive server bank use split material IDs because their old authored material values differ from sibling prefabs.
-- Generated GLB parity is now tracked through
-  `GeneratedGlbImportParityContract`: the old command-console, Chapel
-  monolith, and used story-marker GLBs are validated as checked-in target-engine
-  substitutions; the old green story marker and portal apparatus remain planned
-  entries with owner metadata and removal conditions.
-- Old Three/Svelte raycast interaction, production area-light tuning/editor controls,
-  generated collider products,
-  broader terrain/cooked-collision coverage beyond the current cook-drafted
-  Miranda floor footprint, post-processing, reflections, material
-  texture/shader import/generation, old held-charge oscillator audio, old
-  shockwave VFX arrays, and old editor behavior remain future work until they
-  have explicit contracts and owners.
-
-Current portal arena foundation:
-
-- `portal_arena_runtime` is optional Merkin game content, not the generic
-  engine default. `starter_runtime` is the clean-install default runtime scene.
-- Its render profile uses the manifest-owned
-  `texture_portal_arena_equirectangular_sky` environment asset. That asset is a
-  checked-in copy of
-  `public/assets/skyboxes/170645ae-3f1f-47db-b920-226e61838ab7.png` at
-  `public/assets/environment/portal-arena/portal-arena-sky-equirectangular.png`,
-  and is preloaded/readiness-required by `portal_arena_runtime` with no
-  generated runtime artifact.
-- Shared portal assets are content-owned through
-  `src/game/assets/portalAssets.ts` and
-  `public/assets/game/portals/portal_gate.glb`.
-- Portal field terrain is content-owned through `mesh_portal_field` and
-  `public/assets/game/terrain/portal_field_moor.glb`; `portal_arena_floor`
-  keeps explicit solid/world collision as authored data instead of deriving
-  collision from GLB render geometry.
-- Portal arena scene music and scene-scoped audio mappings are content-owned through `src/game/assets/portalArenaAssets.ts`, shared ambient tracks in `src/game/assets/ambientAudioAssets.ts`, `AudioContentManifest.sceneMusic`, and event mappings. Shared portal gate/activation content is owned through `src/game/assets/portalAssets.ts`. Production paths are `public/audio/ambient/portal-deck.mp3` for `audio_ambient_portal_deck`, `public/audio/sfx/portal-activate.mp3` for `audio_portal_activate`, and `public/audio/sfx/22-kenney-forceField_001.mp3` for `audio_player_charge_release`. Runtime transitions stop previous scene music and apply selected scene music only after the scene preload/readiness path succeeds.
-- Portal slots are authored data in `src/game/levels/portalArenaLevel.ts`.
-- Portal interaction is handled by game systems that read world components/resources and request runtime scene transitions by manifest ID.
-- The current connected portal slots target `prototype_arena_runtime`,
-  `miranda_deck_runtime`, `observatory_runtime`, `solitude_runtime`, and
-  `sci_fi_room_runtime`; each target exists in the checked-in runtime scene
-  catalog and passes readiness/content-graph validation before admission.
-- The Solitude portal slot points at target-owned `solitude_runtime` data. It
-  must not point at old scene JSON, generated runtime JSON, or the old
-  partition.
-- `PlayerCarriedLightContract` restores the useful legacy behavior where the
-  player can read nearby dark ground. The current foundation uses the stable
-  `player` entity itself as the light carrier: it has gameplay-owned
-  `Transform` data plus instance-level `Light` data in
-  `src/game/levels/portalArenaLevel.ts`, and `portal_arena_runtime` requires
-  that stable light ID before the scene can be considered ready.
-  `PlayerChargeLightFeedbackSystem` boosts the player `Light` intensity and
-  range while `ChargedAction` is held, stores the authored base values in
-  `PlayerLightFeedback`, and restores those values when charge ends.
-  `LightSyncSystem` projects the moving `Transform + Light` state through the
-  renderer adapter, and the Three adapter updates mutable light properties
-  in-place. No Svelte/Threlte/Three-owned player light, render-profile
-  stuffing, hidden renderer default, old point-light budget controller, or
-  renderer-local mutation path is allowed.
-- Future player-light work should stay inside the same contract. If the light
-  needs a camera/hand offset, add an explicit stable child/follower
-  relationship or a game-owned follow system. Release burst shockwaves, avatar
-  glow, shadows, and richer pulse tuning remain future consumers of semantic
-  gameplay events or ECS light state.
-- Implemented Observatory playable foundation:
-  - `ObservatoryLevelContract` recreates the old Observatory first slice as
-    checked-in target-engine scene content, using old source art and scene
-    evidence only. It does not load old generated runtime scene JSON, old
-    terrain chunk runtime, generated collision binaries, editor repair paths,
-    Svelte/Threlte lighting controllers, or point-light budget controllers.
-  - The implemented slice is `observatory_runtime` / `observatory` /
-    `observatory_game`, reached from the portal arena Observatory slot by
-    manifest ID. It is a playable foundation, not full old-level parity.
-  - The source Observatory GLB remains the owned target asset
-    `mesh_observatory_environment` at
-    `/assets/game/observatory/observatory-environment.glb`, transformed as
-    authored scene data at scale 1. The engine-wide `CollisionPolicy`,
-    `WalkableCollisionContract`, and `LevelReadinessContract` keep that GLB
-    visual-only: the Observatory packet consumes 16 deterministic
-    `observatory:walkable-mesh:chunk:x*-z*` `walkable/worldStatic` mesh collider
-    chunks, and the current movement bounds are constrained by four required
-    `observatory_boundary_blocker` instances.
-    Render mesh geometry is not implicit collision.
-  - The player spawn is authored as the stable `player` instance at
-    `[-137.2, 0.43, -49.5]`, with `CharacterController.groundY` kept as the
-    spawn/fallback scalar and `CharacterController.kinematicCollision`
-    enabling adapter-owned slide, slope, snap-to-ground, autostep behavior,
-    and `worldStatic` obstacle filtering over the explicit collision data.
-    Movement bounds remain clamped to `x/z = -185..185`.
-  - Lighting uses the existing contracts: a low ambient render profile with
-    `cubemap_observatory_sky`, a player-carried `Transform + Light` through
-    `PlayerCarriedLightContract`, and three firefly
-    `Transform + Renderable + Light` entities generated from deterministic
-    `FireflyPopulationContract` data. Fireflies and the player light are
-    required readiness stable IDs, not renderer defaults. The current firefly
-    contract also derives bounded deterministic flicker preview/cook samples
-    from authored seed/phase/frequency/amplitude data; live runtime light
-    animation remains a future renderer/system packet.
-  - The water plane is a shared `WaterSurfaceContract` consumer:
-    `observatory:water` carries authored scrolling-wave and
-    environment-reflection parameters at `y = -2`, has no collider, and keeps
-    gameplay volume disabled while reusable mesh/material/prefab/component
-    ownership belongs to the shared water system. Shader animation,
-    reflections/refraction rendering, water volumes, rising water,
-    post-processing adapter implementation, production editor import UI,
-    material/shader authoring UI, future-scene terrain package integration,
-    large firefly populations, live runtime flicker animation, and richer
-    light/shadow behavior remain future contracts. The current collision
-    product is a chunked terrain foundation that feeds the generic terrain
-    package/cook/streaming contract, not an Observatory-specific runtime.
-  - Observatory scene music is content-owned through
-    `src/game/assets/observatoryAssets.ts`, `AudioContentManifest.sceneMusic`,
-    and the shared production `audio_ambient_portal_deck` asset. The old
-    Observatory `courtyard-breeze` editor preset resolved to
-    `/audio/ambient/portal-deck.mp3` at volume `0.16`; the target engine keeps
-    that as manifest-owned scene music with `fadeSeconds: 1.5` without copying
-    the old Svelte/Howler runtime.
-- Miranda scene music is content-owned through `src/game/assets/defaultAssets.ts`, `AudioContentManifest.sceneMusic`, and `public/audio/ambient/Wicked Shadows Whisper.mp3` as `audio_ambient_wicked_shadows_whisper`.
-- Solitude migration is owned by `SolitudeLevelContract`. The admitted first
-  packet is a compact playable foundation that rewrites old Solitude evidence
-  into target-owned primitive/current assets, prefabs, level data, render
-  profile, runtime scene manifest data, manifest-owned audio/environment data,
-  and explicit `walkable/worldStatic` collision/readiness IDs for
-  `solitude:ground:plateau` and `solitude:ground:dais`. The old
-  `solitude-ground-plateau` missing runtime collision-manifest blocker is
-  closed by target-owned collider/readiness data in the admitted foundation.
-  Full generated GLB/cooked collision parity, twelve pillar-firefly NPC groups,
-  large ambient particle field, old
-  post-processing/reflection behavior, production light tuning, and
-  partition/streaming behavior remain future contracts.
+- Level packages should be checked-in source data or validated generated data
+  with a declared owner, not hidden runtime side effects.
+- If the product level package is absent, runtime startup should fail clearly
+  or accept an externally supplied package. The engine and game layers must not
+  retain hardcoded Megameal runtime scene IDs or product content tables outside
+  the level package.
+- Migrated content should become stable prefabs, assets, components, and level
+  instances. Old runtime JSON, generated repair products, and editor-side state
+  are evidence only unless an explicit contract promotes them.
+- Scene music, one-shot sounds, portals, interaction targets, authored lights,
+  collision surfaces, water surfaces, story notes, and player spawn data should
+  be owned by the product data package and referenced by stable IDs.
+- Renderer-derived geometry must not imply collision. Walkable surfaces,
+  blockers, triggers, water volumes, terrain collision, and generated collider
+  products require explicit collision ownership and readiness validation.
+- Player-carried lights and charge feedback should remain gameplay-owned ECS
+  state projected through renderer adapters. UI or Three-local mutation should
+  not become the source of truth for player illumination.
+- Product examples such as Miranda, Observatory, portal arenas, prototype
+  arenas, or future levels belong in `src/levels` and the contract register,
+  not as hardcoded engine assumptions.
 
 ## 20. Save, Load, Replay
 
@@ -1658,11 +1362,42 @@ engine/modules
 engine/adapters/three
 engine/adapters/rapier
 engine/adapters/browser
+global
+levels
+editor
 game
 ui
 ```
 
 Move code only when ownership is clear.
+
+The first separability target is:
+
+```text
+src/levels
+  -> product runtime scene package
+src/levels/global
+  -> package settings, shared package data, runtime scene router
+src/levels/player
+  -> configurable player prefab/assets/audio/readiness data imported by levels
+src/levels/<level>
+  -> level data, local assets/prefabs/audio, base render profile,
+     skybox/environment data, runtime manifest, player spawn/override config
+src/editor
+  -> optional external tooling window
+src/game
+  -> gameplay rules, generic prefab registry/spawn mechanics, runtime composition
+```
+
+The master-control map remains an interactive architecture graph and live
+diagnostic surface. Dedicated editor workspaces may exist beside it for
+DEV-only source authoring, such as level package and skybox/environment data
+editing. These workspaces must save through approved file-owner APIs, keep
+future unsupported controls disabled or clearly planned, and must not become
+normal game state or a runtime dependency. Local development live editing
+should use an app-owned bridge that streams serializable game snapshots into
+the editor and sends editor commands back through validated runtime control
+ports.
 
 ### Phase 2: Minimal Engine Runtime
 
@@ -1697,18 +1432,14 @@ Player entity
 
 This is usually the key turning point because it proves the renderer, physics, UI, and gameplay can coordinate through the world.
 
-Current implementation status:
+Completion criteria:
 
-- Player state lives in the world as a spawned `player` prefab.
-- Input is collected by the browser adapter and mirrored into `PlayerInput`.
-- Movement commands produce `MovementIntent`.
-- First-person yaw/pitch and camera ownership live in engine systems.
-- The local first-person body renderable is hidden while collision and gameplay state remain active.
-- Kinematic character collision foundation is implemented through an engine
-  physics-port query and the Rapier adapter's character controller. Remaining
-  traversal polish such as moving platforms, crouch, ledge rules, richer stair
-  tuning, and gameplay-specific collision masks should continue to talk to
-  engine physics abstractions, not Rapier directly.
+- Player state lives in the engine world as entity/component data.
+- Input is collected by platform adapters and converted into semantic engine
+  input state or commands.
+- Movement, first-person orientation, camera targets, collision, and gameplay
+  state are owned by engine/game systems rather than UI or renderer objects.
+- Gameplay systems talk to engine physics abstractions, not directly to Rapier.
 
 ### Phase 4: Render Sync
 
@@ -1749,16 +1480,15 @@ Move repeated objects and level composition into:
 - Asset manifests.
 - Schemas.
 
-Current implementation status:
+Completion criteria:
 
-- Prototype and Miranda runtime scene manifests load through manifest-owned assets and prefabs.
-- Miranda primitive content and story-note markers are migrated as explicit prefabs and level instances with stable IDs and readiness requirements.
-- Miranda generated GLB parity candidates are tracked by
-  `GeneratedGlbImportParityContract`; current substitutions validate against
-  target assets, prefabs, and stable level instances, while unresolved generated
-  candidates stay planned instead of entering runtime silently.
-- Built-in primitive mesh support includes parameterized cylinders for authored frustum visuals; collision remains explicit data.
-- Full Miranda is not complete until terrain/cooked collision, generated GLB content, render/VFX interaction polish, and editor tooling have durable owners.
+- Product runtime scene manifests load through manifest-owned assets, prefabs,
+  level data, render profiles, and readiness requirements.
+- Repeated object composition moves into reusable prefabs and explicit level
+  instances with stable IDs.
+- Collision remains explicit data even when render meshes are procedural,
+  imported, or generated.
+- Editor tooling remains optional and does not become a runtime dependency.
 
 ### Phase 8: Browser Performance Hardening
 

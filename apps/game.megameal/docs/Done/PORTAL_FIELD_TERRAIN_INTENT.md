@@ -38,8 +38,7 @@ floor.
 This packet will:
 
 - add an authored generated GLB asset under `public/assets/game/terrain/`,
-- keep provenance so the asset can be reproduced later through generic terrain
-  import/generation tooling,
+- keep a checked-in deterministic generator script so the asset is reproducible,
 - replace the portal arena floor renderable with the GLB mesh asset,
 - remove the portal arena floor's unused built-in material dependency,
 - expand the portal arena floor collision proxy and player movement bounds,
@@ -55,9 +54,9 @@ also carries a warm point `Light` so nearby dark ground remains readable.
 
 Current source ownership:
 
-- portal scene-profile lighting lives in `src/game/levels/renderProfiles.ts`,
+- portal scene-profile lighting lives in `src/levels/portal-arena/renderProfile.ts`,
 - the portal floor and gate prefabs have no `Light` components,
-- the portal player instance in `src/game/levels/portalArenaLevel.ts` adds the
+- the portal player instance in `src/levels/portal-arena/level.ts` adds the
   steady player-carried point light,
 - authored `Light` components already exist in the new engine for Miranda
   point lights and are projected through `LightSyncSystem`.
@@ -102,8 +101,7 @@ pipeline.
 
 - Intent documented.
 - `PortalFieldTerrainContract` added to the contract register.
-- The former deterministic one-off generator was retired; future regeneration
-  must use generic terrain import/generation tooling.
+- Deterministic generator added at `scripts/generate-portal-field-glb.mjs`.
 - Generated GLB added at `public/assets/game/terrain/portal_field_moor.glb`.
 - `portal_arena_floor` now renders the GLB field and keeps explicit box
   collision as the stable gameplay proxy.
@@ -115,5 +113,5 @@ pipeline.
   now has a warm point `Light`, and portal scene readiness requires that stable
   light ID.
 - Focused terrain validation passes through `test:runtime-scene-contract`.
-- Current app validation passes for `type-check`, `lint`, and build in later
-  cleanup gates; historical unrelated blockers are no longer active.
+- Full `type-check`, `lint`, and `build` are currently blocked by unrelated
+  current-tree environment/video asset work outside this terrain packet.

@@ -15,12 +15,8 @@ const browserGlobalPattern =
 	/\b(document|window|localStorage|sessionStorage|indexedDB|requestAnimationFrame|cancelAnimationFrame|navigator|HTMLElement|HTMLCanvasElement|Worker)\b/g;
 const oldEnginePathPattern = /(^|[^A-Za-z0-9_.-])\/?apps\/game(?:\/|$)/;
 const oldEnginePathGlobalPattern = /(^|[^A-Za-z0-9_.-])\/?apps\/game(?:\/|$)/g;
+const runtimeSceneIdPattern = /["'`]([a-z0-9]+(?:_[a-z0-9]+)*_runtime)["'`]/g;
 const literalPattern = /["'`]([^"'`\n]+)["'`]/g;
-const perLevelCollisionDraftImportPattern =
-	/src\/game\/editor\/collisionDrafts\/[^/]+CollisionDraft$/;
-const runtimeSceneIdLiteralPattern = /^[a-z][a-z0-9_]*_runtime$/;
-const engineContentTokenPattern =
-	/(^|[^a-z0-9])(?:miranda|observatory|sci[-_]?fi|yggdrasil|solitude|portal[-_]arena)(?:[^a-z0-9]|$)/i;
 
 const files = await collectFiles(join(rootPath, "src"));
 const violations = [];
@@ -32,39 +28,63 @@ for (const file of files) {
 		resolveSpecifier(rel, specifier),
 	);
 
-	if (isOversizedPrimitiveParitySource(rel, source)) {
-		violations.push(
-			`${rel}: primitive parity owner files must stay small; move bulk imported scene data to generated JSON plus validation`,
-		);
-	}
-
 	for (const match of oldEngineReferenceMatches(rel, source, imports)) {
 		violations.push(
 			`${rel}: sibling apps/game is read-only reference material (${match})`,
 		);
 	}
 
-	for (const match of browserGameClientDevPreviewStaticImportMatches(
-		rel,
-		source,
-	)) {
+	if (pathStartsWith(rel, "src/game/assets")) {
 		violations.push(
-			`${rel}: browser game client must lazy-load dev-preview code through the dev-only dynamic bridge (${match})`,
+			`${rel}: product asset manifests belong in a level folder under src/levels or in src/levels/global for shared package data`,
 		);
 	}
 
+	if (
+		pathStartsWith(rel, "src/game/prefabs") &&
+		rel !== "src/game/prefabs/index.ts"
+	) {
+		violations.push(
+			`${rel}: product prefab definitions belong in a level folder under src/levels or in src/levels/global for shared package data`,
+		);
+	}
+
+	if (!isLevelPackageFile(rel)) {
+		for (const runtimeSceneId of runtimeSceneIdMatches(source)) {
+			violations.push(
+				`${rel}: runtime scene ID "${runtimeSceneId}" belongs in src/levels`,
+			);
+		}
+	}
+
+	if (!isLevelPackageImportAllowed(rel)) {
+		for (const match of importsPath(imports, "src/levels")) {
+			violations.push(
+				`${rel}: only level-package code may statically import src/levels (${match.specifier})`,
+			);
+		}
+	}
+
 	if (pathStartsWith(rel, "src/engine")) {
-		for (const forbiddenPath of ["src/app", "src/ui", "src/game"]) {
+		for (const forbiddenPath of [
+			"src/app",
+			"src/ui",
+			"src/game",
+			"src/levels",
+			"src/editor",
+		]) {
 			for (const match of importsPath(imports, forbiddenPath)) {
 				violations.push(
 					`${rel}: engine code must not import ${forbiddenPath} (${match.specifier})`,
 				);
 			}
 		}
+	}
 
-		for (const match of engineContentLiteralMatches(source)) {
+	if (!isEditorImportAllowed(rel)) {
+		for (const match of importsPath(imports, "src/editor")) {
 			violations.push(
-				`${rel}: engine implementation must not embed level/content-specific IDs (${match})`,
+				`${rel}: only the editor route may import src/editor (${match.specifier})`,
 			);
 		}
 	}
@@ -98,41 +118,6 @@ for (const file of files) {
 		)) {
 			violations.push(
 				`${rel}: game code must not import framework package "${specifier}"`,
-			);
-		}
-	}
-
-	if (isNormalRuntimeOwner(rel)) {
-		for (const match of imports.filter(
-			(entry) =>
-				entry.kind === "relative" && isEditorModulePath(entry.resolved),
-		)) {
-			violations.push(
-				`${rel}: normal runtime code must not import editor modules (${match.specifier})`,
-			);
-		}
-	}
-
-	if (isGenericAppEditorModule(rel)) {
-		for (const match of levelSpecificEditorDefaultMatches(
-			rel,
-			source,
-			imports,
-		)) {
-			violations.push(
-				`${rel}: generic app/editor tooling must resolve editor content through the manifest/draft catalog (${match})`,
-			);
-		}
-	}
-
-	if (pathStartsWith(rel, "src/app/editor")) {
-		for (const match of imports.filter(
-			(entry) =>
-				entry.kind === "relative" &&
-				entry.resolved === "src/game/editor/authoring/index",
-		)) {
-			violations.push(
-				`${rel}: browser editor modules must import browser-safe authoring submodules instead of the server persistence barrel (${match.specifier})`,
 			);
 		}
 	}
@@ -199,22 +184,6 @@ function extractImportSpecifiers(source) {
 	return [...specifiers];
 }
 
-function extractStaticImportSpecifiers(source) {
-	const specifiers = new Set();
-	const patterns = [
-		/\b(?:import|export)\s+(?:type\s+)?[\s\S]*?\bfrom\s*["']([^"']+)["']/g,
-		/^\s*import\s*["']([^"']+)["']/gm,
-	];
-
-	for (const pattern of patterns) {
-		for (const match of source.matchAll(pattern)) {
-			specifiers.add(match[1]);
-		}
-	}
-
-	return [...specifiers];
-}
-
 function resolveSpecifier(relFile, specifier) {
 	if (!specifier.startsWith(".")) {
 		return { kind: "package", specifier };
@@ -235,28 +204,6 @@ function stripSourceSuffix(path) {
 
 function pathStartsWith(path, prefix) {
 	return path === prefix || path.startsWith(`${prefix}/`);
-}
-
-function isNormalRuntimeOwner(rel) {
-	return (
-		pathStartsWith(rel, "src/engine") ||
-		(pathStartsWith(rel, "src/game") &&
-			!pathStartsWith(rel, "src/game/editor")) ||
-		(pathStartsWith(rel, "src/app") &&
-			!pathStartsWith(rel, "src/app/editor")) ||
-		rel === "src/pages/index.astro"
-	);
-}
-
-function isEditorModulePath(path) {
-	return (
-		pathStartsWith(path, "src/app/editor") ||
-		pathStartsWith(path, "src/game/editor")
-	);
-}
-
-function isGenericAppEditorModule(rel) {
-	return pathStartsWith(rel, "src/app") || rel === "src/pages/editor.astro";
 }
 
 function importsPath(imports, pathPrefix) {
@@ -283,15 +230,38 @@ function isBrowserGlobalAllowed(rel) {
 	return (
 		pathStartsWith(rel, "src/app") ||
 		pathStartsWith(rel, "src/ui") ||
+		pathStartsWith(rel, "src/editor") ||
 		pathStartsWith(rel, "src/engine/adapters/browser") ||
 		rel.endsWith(".astro") ||
 		rel.endsWith(".svelte")
 	);
 }
 
+function isEditorImportAllowed(rel) {
+	return (
+		pathStartsWith(rel, "src/editor") ||
+		rel === "src/pages/editor.astro" ||
+		pathStartsWith(rel, "src/pages/editor")
+	);
+}
+
+function isLevelPackageFile(rel) {
+	return pathStartsWith(rel, "src/levels");
+}
+
+function isLevelPackageImportAllowed(rel) {
+	return pathStartsWith(rel, "src/levels");
+}
+
 function browserGlobalMatches(source) {
 	return [
 		...new Set([...source.matchAll(browserGlobalPattern)].map((m) => m[1])),
+	].sort();
+}
+
+function runtimeSceneIdMatches(source) {
+	return [
+		...new Set([...source.matchAll(runtimeSceneIdPattern)].map((m) => m[1])),
 	].sort();
 }
 
@@ -340,63 +310,4 @@ function oldEngineReferenceMatches(rel, source, imports) {
 	}
 
 	return [...matches].sort();
-}
-
-function browserGameClientDevPreviewStaticImportMatches(rel, source) {
-	if (rel !== "src/app/browserGameClient.ts") {
-		return [];
-	}
-
-	return extractStaticImportSpecifiers(source)
-		.map((specifier) => resolveSpecifier(rel, specifier))
-		.filter(
-			(entry) =>
-				entry.kind === "relative" &&
-				pathStartsWith(entry.resolved, "src/app/devPreview"),
-		)
-		.map((entry) => `static import ${entry.specifier}`)
-		.sort();
-}
-
-function engineContentLiteralMatches(source) {
-	const matches = new Set();
-
-	for (const match of source.matchAll(literalPattern)) {
-		const literal = match[1].replaceAll("\\", "/");
-
-		if (engineContentTokenPattern.test(literal)) {
-			matches.add(match[1]);
-		}
-	}
-
-	return [...matches].sort();
-}
-
-function levelSpecificEditorDefaultMatches(rel, source, imports) {
-	const matches = new Set();
-
-	for (const entry of imports) {
-		if (
-			entry.kind === "relative" &&
-			perLevelCollisionDraftImportPattern.test(entry.resolved)
-		) {
-			matches.add(`direct per-level collision draft import ${entry.specifier}`);
-		}
-	}
-
-	for (const match of source.matchAll(literalPattern)) {
-		if (runtimeSceneIdLiteralPattern.test(match[1])) {
-			matches.add(`runtime scene literal "${match[1]}"`);
-		}
-	}
-
-	return [...matches].sort();
-}
-
-function isOversizedPrimitiveParitySource(rel, source) {
-	return (
-		pathStartsWith(rel, "src/game/content") &&
-		rel.endsWith("PrimitiveParity.ts") &&
-		source.split("\n").length > 250
-	);
 }

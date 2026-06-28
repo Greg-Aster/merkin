@@ -1,0 +1,45 @@
+{
+	"name": "@merkin/megameal-engine",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts",
+		"./adapters": "./src/adapters/index.ts",
+		"./adapters/browser": "./src/adapters/browser/index.ts",
+		"./adapters/browser/audio": "./src/adapters/browser/audio.ts",
+		"./adapters/rapier": "./src/adapters/rapier/index.ts",
+		"./adapters/three": "./src/adapters/three/index.ts",
+		"./client-api": "./src/client-api/index.ts",
+		"./core": "./src/core/index.ts",
+		"./data": "./src/data/index.ts",
+		"./data/collisionCook": "./src/data/collisionCook/index.ts",
+		"./data/contentGraph": "./src/data/contentGraph/index.ts",
+		"./data/levelAuthoring": "./src/data/levelAuthoring/index.ts",
+		"./data/schemas": "./src/data/schemas/index.ts",
+		"./data/terrainCook": "./src/data/terrainCook/index.ts",
+		"./math": "./src/math/index.ts",
+		"./modules/assets": "./src/modules/assets/index.ts",
+		"./modules/audio": "./src/modules/audio/index.ts",
+		"./modules/camera": "./src/modules/camera/index.ts",
+		"./modules/input": "./src/modules/input/index.ts",
+		"./modules/physics": "./src/modules/physics/index.ts",
+		"./modules/rendering": "./src/modules/rendering/index.ts",
+		"./modules/scene": "./src/modules/scene/index.ts",
+		"./runtime": "./src/runtime/index.ts"
+	},
+	"scripts": {
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@dimforge/rapier3d-compat": "0.17.3",
+		"three": "0.178.0"
+	},
+	"devDependencies": {
+		"@types/node": "25.3.0",
+		"@types/three": "0.176.0",
+		"typescript": "^5.7.3"
+	}
+}

@@ -1,0 +1,44 @@
+{
+	"schemaVersion": 1,
+	"environment": {
+		"kind": "cubemap-skybox",
+		"assetId": "cubemap_observatory_sky",
+		"backgroundIntensity": 1,
+		"backgroundBlurriness": 0,
+		"environmentIntensity": 0.5,
+		"requiredForReadiness": false
+	},
+	"assets": {
+		"shared": [
+			"cubemap_observatory_sky"
+		],
+		"local": [],
+		"preload": [
+			"cubemap_observatory_sky"
+		],
+		"preloadGroups": {
+			"observatory": [
+				"cubemap_observatory_sky"
+			]
+		}
+	},
+	"planned": {
+		"starmap": {
+			"enabled": false,
+			"assetId": "",
+			"motion": "static"
+		},
+		"chunkedSky": {
+			"enabled": false,
+			"chunks": []
+		},
+		"motion": {
+			"enabled": false,
+			"angularVelocity": [
+				0,
+				0,
+				0
+			]
+		}
+	}
+}

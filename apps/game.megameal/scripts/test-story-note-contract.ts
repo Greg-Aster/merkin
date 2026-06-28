@@ -4,11 +4,6 @@ import {
 	EventBus,
 	World,
 } from "../src/engine/core/index.js";
-import type { RuntimeSceneManifestData } from "../src/engine/index.js";
-import {
-	defaultRuntimeSceneManifests,
-	portalArenaRuntimeSceneManifest,
-} from "../src/game/levels/index.js";
 import {
 	ACTIVE_INTERACTION_TARGET_RESOURCE,
 	ACTIVE_PORTAL_RESOURCE,
@@ -26,14 +21,35 @@ import {
 	createInteractionTargetSelectionSystem,
 	createPortalActivationSystem,
 	createStoryNoteActivationSystem,
-	selectGameRuntimeUiState,
+	selectGameHudState,
 } from "../src/game/systems/index.js";
-import { assertDeepEqual, assertEqual } from "./contractTestHelpers.js";
 
 type TestEvent = EngineEvent & {
 	readonly [key: string]: unknown;
 };
-const yggdrasilRuntimeSceneId = "yggdrasil_runtime";
+
+function assertEqual<TValue>(
+	actual: TValue,
+	expected: TValue,
+	message?: string,
+) {
+	if (actual !== expected) {
+		throw new Error(
+			message ?? `Expected ${String(expected)}, received ${String(actual)}.`,
+		);
+	}
+}
+
+function assertDeepEqual(actual: unknown, expected: unknown, message?: string) {
+	const actualJson = JSON.stringify(actual);
+	const expectedJson = JSON.stringify(expected);
+
+	if (actualJson !== expectedJson) {
+		throw new Error(
+			message ?? `Expected ${expectedJson}, received ${actualJson}.`,
+		);
+	}
+}
 
 function createHarness() {
 	return {
@@ -207,7 +223,6 @@ function runPortalActivation(harness: ReturnType<typeof createHarness>) {
 		requestRuntimeScene(runtimeSceneId: string) {
 			requestedRuntimeSceneIds.push(runtimeSceneId);
 		},
-		reloadRuntimeScene() {},
 	});
 
 	harness.events.emit({ type: "ActiveInteractionRequested" });
@@ -237,10 +252,10 @@ function runPortalActivation(harness: ReturnType<typeof createHarness>) {
 	});
 	harness.world.setResource(ACTIVE_PORTAL_RESOURCE, stalePortal);
 
-	const runtimeUi = selectGameRuntimeUiState(harness.world);
+	const hud = selectGameHudState(harness.world);
 
-	assertEqual(runtimeUi.activePortal?.label, "Portal");
-	assertEqual(runtimeUi.activePortal?.prompt, "Enter portal");
+	assertEqual(hud.activePortal?.label, "Portal");
+	assertEqual(hud.activePortal?.prompt, "Enter portal");
 }
 
 {
@@ -259,208 +274,10 @@ function runPortalActivation(harness: ReturnType<typeof createHarness>) {
 	});
 	harness.world.setResource(ACTIVE_STORY_NOTE_RESOURCE, staleNote);
 
-	const runtimeUi = selectGameRuntimeUiState(harness.world);
+	const hud = selectGameHudState(harness.world);
 
-	assertEqual(runtimeUi.activeStoryNote?.title, "Test Note");
-	assertEqual(runtimeUi.activeStoryNote?.prompt, "Read Test Note");
-}
-
-{
-	const manifest = requiredYggdrasilRuntimeSceneManifest();
-	const storyNoteStableIds = stableIdsWithComponent(manifest, "StoryNote");
-
-	firstRequired(storyNoteStableIds, "Yggdrasil authored story notes");
-
-	assertYggdrasilStoryNoteContract(manifest);
-	assertYggdrasilStoryNoteContractError(
-		{
-			...manifest,
-			level: {
-				...manifest.level,
-				instances: manifest.level.instances.filter(
-					(instance) => !storyNoteStableIds.includes(instance.stableId),
-				),
-			},
-		},
-		"Yggdrasil must include at least one authored story note.",
-	);
-}
-
-{
-	const portalArenaYggdrasilPortal = portalTarget(
-		portalArenaRuntimeSceneManifest,
-		yggdrasilRuntimeSceneId,
-	);
-
-	if (portalArenaYggdrasilPortal) {
-		const harness = createHarness();
-		const player = harness.world.createEntity();
-		const requestedRuntimeSceneIds: string[] = [];
-
-		harness.world.setResource(PLAYER_ENTITY_RESOURCE, player);
-		harness.world.setResource(ACTIVE_PORTAL_RESOURCE, {
-			entity: 101,
-			id: String(portalArenaYggdrasilPortal.id ?? "portal"),
-			label: String(portalArenaYggdrasilPortal.label ?? "Yggdrasil"),
-			prompt: String(portalArenaYggdrasilPortal.prompt ?? "Enter Yggdrasil"),
-			targetRuntimeSceneId: yggdrasilRuntimeSceneId,
-			canTravel: true,
-			distanceSquared: 1,
-		});
-		harness.world.setResource(RUNTIME_SCENE_TRANSITION_RESOURCE, {
-			currentRuntimeSceneId() {
-				return "portal_arena_runtime";
-			},
-			canLoadRuntimeScene(runtimeSceneId: string) {
-				return runtimeSceneId === yggdrasilRuntimeSceneId;
-			},
-			requestRuntimeScene(runtimeSceneId: string) {
-				requestedRuntimeSceneIds.push(runtimeSceneId);
-			},
-			reloadRuntimeScene() {},
-		});
-
-		harness.events.emit({ type: "ActiveInteractionRequested" });
-		runInteractionTargetSelection(harness);
-		runPortalActivation(harness);
-
-		assertDeepEqual(requestedRuntimeSceneIds, [yggdrasilRuntimeSceneId]);
-		assertEqual(
-			harness.events.peek().some((event) => event.type === "PortalActivated"),
-			true,
-		);
-	}
-}
-
-function requiredYggdrasilRuntimeSceneManifest(): RuntimeSceneManifestData {
-	const manifest = defaultRuntimeSceneManifests.find(
-		(candidate) => candidate.id === yggdrasilRuntimeSceneId,
-	);
-
-	if (!manifest) {
-		throw new Error(
-			`Expected Yggdrasil runtime scene manifest "${yggdrasilRuntimeSceneId}" to be registered before story-note validation.`,
-		);
-	}
-
-	return manifest;
-}
-
-function assertYggdrasilStoryNoteContract(
-	manifest: RuntimeSceneManifestData,
-): void {
-	const storyNotes = stableIdsWithComponent(manifest, "StoryNote").map(
-		(stableId) => componentFromInstance(manifest, stableId, "StoryNote"),
-	);
-
-	if (storyNotes.length === 0) {
-		throw new Error("Yggdrasil must include at least one authored story note.");
-	}
-
-	for (const note of storyNotes) {
-		for (const key of [
-			"id",
-			"title",
-			"author",
-			"location",
-			"excerpt",
-			"body",
-		] as const) {
-			if (typeof note[key] !== "string" || note[key].length === 0) {
-				throw new Error(`Yggdrasil story note must include ${key}.`);
-			}
-		}
-	}
-}
-
-function assertYggdrasilStoryNoteContractError(
-	manifest: RuntimeSceneManifestData,
-	expectedError: string,
-): void {
-	try {
-		assertYggdrasilStoryNoteContract(manifest);
-	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : JSON.stringify(error);
-
-		if (!message.includes(expectedError)) {
-			throw new Error(
-				`Expected Yggdrasil story-note error to include ${JSON.stringify(expectedError)}, received ${JSON.stringify(message)}.`,
-			);
-		}
-
-		return;
-	}
-
-	throw new Error(
-		`Expected Yggdrasil story-note error including ${JSON.stringify(expectedError)}.`,
-	);
-}
-
-function stableIdsWithComponent(
-	manifest: RuntimeSceneManifestData,
-	componentName: string,
-): readonly string[] {
-	return manifest.level.instances
-		.filter(
-			(instance) =>
-				Object.keys(
-					componentFromInstance(manifest, instance.stableId, componentName),
-				).length > 0,
-		)
-		.map((instance) => instance.stableId);
-}
-
-function componentFromInstance(
-	manifest: RuntimeSceneManifestData,
-	stableId: string,
-	componentName: string,
-): Record<string, unknown> {
-	const instance = manifest.level.instances.find(
-		(candidate) => candidate.stableId === stableId,
-	);
-	const prefab = manifest.prefabs.find(
-		(candidate) => candidate.id === instance?.prefabId,
-	);
-
-	return {
-		...asRecord(prefab?.components?.[componentName]),
-		...asRecord(instance?.components?.[componentName]),
-	};
-}
-
-function portalTarget(
-	manifest: RuntimeSceneManifestData,
-	targetRuntimeSceneId: string,
-): Record<string, unknown> | undefined {
-	for (const instance of manifest.level.instances) {
-		const portal = componentFromInstance(manifest, instance.stableId, "Portal");
-
-		if (portal.targetRuntimeSceneId === targetRuntimeSceneId) {
-			return portal;
-		}
-	}
-
-	return undefined;
-}
-
-function asRecord(value: unknown): Record<string, unknown> {
-	return typeof value === "object" && value !== null && !Array.isArray(value)
-		? (value as Record<string, unknown>)
-		: {};
-}
-
-function firstRequired<TValue>(
-	values: readonly TValue[] | undefined,
-	label: string,
-): TValue {
-	const value = values?.[0];
-
-	if (value === undefined) {
-		throw new Error(`Expected ${label} to contain at least one entry.`);
-	}
-
-	return value;
+	assertEqual(hud.activeStoryNote?.title, "Test Note");
+	assertEqual(hud.activeStoryNote?.prompt, "Read Test Note");
 }
 
 console.log("Story note contract validation passed.");

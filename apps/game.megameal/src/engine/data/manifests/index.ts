@@ -48,7 +48,6 @@ export type RuntimeSceneLoadReport = {
 	readonly sceneId?: string;
 	readonly preloadedAssetIds: readonly string[];
 	readonly spawned: readonly RuntimeSceneSpawnReport[];
-	readonly activatedTerrainPackageIds?: readonly string[];
 	readonly physicsReady: boolean;
 	readonly playerReady: boolean;
 };
@@ -60,7 +59,6 @@ export type LevelReadinessChecks = {
 	readonly collisionReady: boolean;
 	readonly walkableReady: boolean;
 	readonly lightsReady: boolean;
-	readonly terrainPackagesReady: boolean;
 	readonly physicsReady: boolean;
 	readonly playerReady: boolean;
 };
@@ -76,7 +74,6 @@ export type RuntimeSceneReadinessResult =
 			readonly requiredCollisionStableIds: readonly string[];
 			readonly requiredWalkableStableIds: readonly string[];
 			readonly requiredLightStableIds: readonly string[];
-			readonly requiredTerrainPackageIds: readonly string[];
 			readonly checks: LevelReadinessChecks;
 	  }
 	| {
@@ -107,11 +104,6 @@ export function evaluateRuntimeSceneReadiness(
 		manifest.readiness.requiredWalkableStableIds ?? [];
 	const requiredLightStableIds =
 		manifest.readiness.requiredLightStableIds ?? [];
-	const requiredTerrainPackageIds =
-		manifest.readiness.requiredTerrainPackageIds ?? [];
-	const activatedTerrainPackageIds = new Set(
-		report.activatedTerrainPackageIds ?? [],
-	);
 	const preloadedAssetIds = new Set(report.preloadedAssetIds);
 	const spawnedStableIds = new Set(
 		report.spawned.map((spawned) => spawned.stableId),
@@ -134,9 +126,6 @@ export function evaluateRuntimeSceneReadiness(
 	const missingLightStableIds = requiredLightStableIds.filter(
 		(stableId) => !spawnedStableIds.has(stableId),
 	);
-	const missingTerrainPackageIds = requiredTerrainPackageIds.filter(
-		(packageId) => !activatedTerrainPackageIds.has(packageId),
-	);
 	const checks: LevelReadinessChecks = {
 		manifestLoaded: true,
 		assetsLoaded: missingAssetIds.length === 0,
@@ -146,7 +135,6 @@ export function evaluateRuntimeSceneReadiness(
 			missingCollisionStableIds.length === 0,
 		walkableReady: missingWalkableStableIds.length === 0,
 		lightsReady: missingLightStableIds.length === 0,
-		terrainPackagesReady: missingTerrainPackageIds.length === 0,
 		physicsReady: report.physicsReady,
 		playerReady: report.playerReady,
 	};
@@ -194,10 +182,6 @@ export function evaluateRuntimeSceneReadiness(
 		errors.push(`Required light instance "${stableId}" was not spawned.`);
 	}
 
-	for (const packageId of missingTerrainPackageIds) {
-		errors.push(`Required terrain package "${packageId}" was not activated.`);
-	}
-
 	if (!checks.physicsReady) {
 		errors.push("Physics runtime was not ready for scene activation.");
 	}
@@ -225,7 +209,6 @@ export function evaluateRuntimeSceneReadiness(
 		requiredCollisionStableIds,
 		requiredWalkableStableIds,
 		requiredLightStableIds,
-		requiredTerrainPackageIds,
 		checks,
 	};
 }

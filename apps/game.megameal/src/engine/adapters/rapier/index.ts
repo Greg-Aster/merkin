@@ -3,9 +3,6 @@ import { type Quat, type Vec3, quat, vec3 } from "../../math/index.js";
 import type {
 	ColliderComponent,
 	ColliderHandle,
-	KinematicCharacterCollisionSettings,
-	KinematicCharacterMovementQuery,
-	KinematicCharacterMovementResult,
 	PhysicsAdapterPort,
 	PhysicsBodyHandle,
 	PhysicsCollisionEvent,
@@ -37,7 +34,6 @@ type RapierRigidBodyDesc = {
 type RapierColliderDesc = {
 	setSensor?(sensor: boolean): RapierColliderDesc;
 	setActiveEvents?(events: number): RapierColliderDesc;
-	setTranslation?(x: number, y: number, z: number): RapierColliderDesc;
 };
 
 type RapierRigidBody = {
@@ -46,8 +42,6 @@ type RapierRigidBody = {
 	rotation(): RapierRotation;
 	setTranslation(translation: Vec3, wakeUp: boolean): void;
 	setRotation(rotation: Quat, wakeUp: boolean): void;
-	setNextKinematicTranslation?(translation: Vec3): void;
-	setNextKinematicRotation?(rotation: Quat): void;
 	applyImpulse?(impulse: Vec3, wakeUp: boolean): void;
 };
 
@@ -63,21 +57,14 @@ type RapierRay = {
 type RapierRayHit = {
 	readonly collider?: RapierCollider;
 	readonly colliderHandle?: ColliderHandle;
-	readonly timeOfImpact?: number;
-	readonly toi?: number;
-	readonly normal?: RapierVector | (() => RapierVector);
+	readonly toi: number;
+	normal?(): RapierVector;
 };
 
 type RapierWorld = {
 	timestep?: number;
 	createRigidBody(desc: RapierRigidBodyDesc): RapierRigidBody;
 	removeRigidBody(body: RapierRigidBody): void;
-	createCharacterController?(
-		offset: number,
-	): RapierKinematicCharacterController;
-	removeCharacterController?(
-		controller: RapierKinematicCharacterController,
-	): void;
 	createCollider(
 		desc: RapierColliderDesc,
 		body?: RapierRigidBody,
@@ -88,49 +75,7 @@ type RapierWorld = {
 		ray: RapierRay,
 		maxDistance: number,
 		solid: boolean,
-		filterFlags?: unknown,
-		filterGroups?: unknown,
-		filterExcludeCollider?: RapierCollider,
-		filterExcludeRigidBody?: RapierRigidBody,
-		filterPredicate?: (collider: RapierCollider) => boolean,
 	): RapierRayHit | undefined;
-	castRayAndGetNormal?(
-		ray: RapierRay,
-		maxDistance: number,
-		solid: boolean,
-		filterFlags?: unknown,
-		filterGroups?: unknown,
-		filterExcludeCollider?: RapierCollider,
-		filterExcludeRigidBody?: RapierRigidBody,
-		filterPredicate?: (collider: RapierCollider) => boolean,
-	): RapierRayHit | undefined;
-};
-
-type RapierKinematicCharacterController = {
-	free?(): void;
-	setUp?(vector: Vec3): void;
-	setOffset?(value: number): void;
-	setSlideEnabled?(enabled: boolean): void;
-	enableAutostep?(
-		maxHeight: number,
-		minWidth: number,
-		includeDynamicBodies: boolean,
-	): void;
-	disableAutostep?(): void;
-	setMaxSlopeClimbAngle?(angle: number): void;
-	setMinSlopeSlideAngle?(angle: number): void;
-	enableSnapToGround?(distance: number): void;
-	disableSnapToGround?(): void;
-	computeColliderMovement(
-		collider: RapierCollider,
-		desiredTranslationDelta: Vec3,
-		filterFlags?: unknown,
-		filterGroups?: unknown,
-		filterPredicate?: (collider: RapierCollider) => boolean,
-	): void;
-	computedMovement(): RapierVector;
-	computedGrounded?(): boolean;
-	numComputedCollisions?(): number;
 };
 
 type RapierEventQueue = {
@@ -240,23 +185,6 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 	return value as Record<string, unknown>;
 }
 
-function rayHitTimeOfImpact(hit: RapierRayHit): number | undefined {
-	const timeOfImpact = hit.timeOfImpact ?? hit.toi;
-
-	if (typeof timeOfImpact !== "number" || !Number.isFinite(timeOfImpact)) {
-		return undefined;
-	}
-
-	return timeOfImpact;
-}
-
-function rayHitNormal(hit: RapierRayHit): RapierVector {
-	const normal =
-		typeof hit.normal === "function" ? hit.normal() : hit.normal ?? vec3();
-
-	return normal;
-}
-
 export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 	readonly kind = "rapier";
 
@@ -264,22 +192,9 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 	#eventQueue?: RapierEventQueue;
 	#bodies = new Map<PhysicsBodyHandle, RapierRigidBody>();
 	#colliders = new Map<ColliderHandle, RapierCollider>();
-	#characterControllers = new Map<
-		ColliderHandle,
-		RapierKinematicCharacterController
-	>();
 	#bodyEntities = new Map<PhysicsBodyHandle, Entity>();
-	#bodyTypes = new Map<PhysicsBodyHandle, RigidBodyComponent["type"]>();
 	#colliderEntities = new Map<ColliderHandle, Entity>();
 	#colliderBodies = new Map<ColliderHandle, PhysicsBodyHandle>();
-	#colliderPolicies = new Map<
-		ColliderHandle,
-		{
-			readonly intent: ColliderComponent["intent"];
-			readonly channel: ColliderComponent["channel"];
-			readonly sensor?: boolean;
-		}
-	>();
 	#collisionEvents: PhysicsCollisionEvent[] = [];
 
 	constructor(
@@ -313,7 +228,6 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 		const rawBody = this.#world.createRigidBody(desc);
 		this.#bodies.set(rawBody.handle, rawBody);
 		this.#bodyEntities.set(rawBody.handle, entity);
-		this.#bodyTypes.set(rawBody.handle, body.type);
 		return rawBody.handle;
 	}
 
@@ -324,14 +238,6 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 	): ColliderHandle {
 		const body = this.requireBody(bodyHandle);
 		const desc = this.createColliderDesc(collider);
-
-		if (collider.offset !== undefined) {
-			desc.setTranslation?.(
-				collider.offset.x,
-				collider.offset.y,
-				collider.offset.z,
-			);
-		}
 
 		if (collider.sensor !== undefined) {
 			desc.setSensor?.(collider.sensor);
@@ -347,11 +253,6 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 		this.#colliders.set(rawCollider.handle, rawCollider);
 		this.#colliderEntities.set(rawCollider.handle, entity);
 		this.#colliderBodies.set(rawCollider.handle, bodyHandle);
-		this.#colliderPolicies.set(rawCollider.handle, {
-			intent: collider.intent,
-			channel: collider.channel,
-			...(collider.sensor !== undefined ? { sensor: collider.sensor } : {}),
-		});
 		return rawCollider.handle;
 	}
 
@@ -362,12 +263,10 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 			return;
 		}
 
-		this.destroyCharacterController(handle);
 		this.#world.removeCollider(collider, true);
 		this.#colliders.delete(handle);
 		this.#colliderEntities.delete(handle);
 		this.#colliderBodies.delete(handle);
-		this.#colliderPolicies.delete(handle);
 	}
 
 	destroyRigidBody(handle: PhysicsBodyHandle): void {
@@ -379,18 +278,15 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 
 		for (const [colliderHandle, bodyHandle] of this.#colliderBodies) {
 			if (bodyHandle === handle) {
-				this.destroyCharacterController(colliderHandle);
 				this.#colliderEntities.delete(colliderHandle);
 				this.#colliders.delete(colliderHandle);
 				this.#colliderBodies.delete(colliderHandle);
-				this.#colliderPolicies.delete(colliderHandle);
 			}
 		}
 
 		this.#world.removeRigidBody(body);
 		this.#bodies.delete(handle);
 		this.#bodyEntities.delete(handle);
-		this.#bodyTypes.delete(handle);
 	}
 
 	syncBodyFromTransform(
@@ -398,21 +294,6 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 		transform: PhysicsTransform,
 	): void {
 		const body = this.requireBody(handle);
-		if (this.#bodyTypes.get(handle) === "kinematic") {
-			if (body.setNextKinematicTranslation) {
-				body.setNextKinematicTranslation(transform.position);
-			} else {
-				body.setTranslation(transform.position, true);
-			}
-
-			if (body.setNextKinematicRotation) {
-				body.setNextKinematicRotation(transform.rotation);
-			} else {
-				body.setRotation(transform.rotation, true);
-			}
-			return;
-		}
-
 		body.setTranslation(transform.position, true);
 		body.setRotation(transform.rotation, true);
 	}
@@ -454,44 +335,6 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 		return events;
 	}
 
-	computeKinematicCharacterMovement(
-		query: KinematicCharacterMovementQuery,
-	): KinematicCharacterMovementResult | undefined {
-		const collider = this.#colliders.get(query.colliderHandle);
-
-		if (!collider || !this.#world.createCharacterController) {
-			return undefined;
-		}
-
-		const controller = this.ensureCharacterController(
-			query.colliderHandle,
-			query.settings,
-		);
-		const excludedEntities = new Set(query.excludeEntities ?? []);
-		excludedEntities.add(query.entity);
-
-		controller.computeColliderMovement(
-			collider,
-			query.desiredTranslation,
-			undefined,
-			undefined,
-			(obstacle) =>
-				this.shouldIncludeCharacterObstacle(
-					obstacle,
-					excludedEntities,
-					query.settings.obstacleChannels,
-				),
-		);
-
-		const movement = controller.computedMovement();
-
-		return {
-			translation: vec3(movement.x, movement.y, movement.z),
-			grounded: controller.computedGrounded?.() ?? false,
-			collisionCount: controller.numComputedCollisions?.() ?? 0,
-		};
-	}
-
 	castRay(query: PhysicsRaycastQuery): PhysicsRaycastHit | undefined {
 		if (!this.#world.castRay) {
 			return undefined;
@@ -500,35 +343,7 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 		const ray = this.rapier.Ray
 			? new this.rapier.Ray(query.origin, query.direction)
 			: { origin: query.origin, dir: query.direction };
-		const excludedEntities = new Set(query.excludeEntities ?? []);
-		const filterPredicate =
-			excludedEntities.size > 0
-				? (collider: RapierCollider) => {
-						const entity = this.#colliderEntities.get(collider.handle);
-						return entity === undefined || !excludedEntities.has(entity);
-					}
-				: undefined;
-		const hit =
-			this.#world.castRayAndGetNormal?.(
-				ray,
-				query.maxDistance,
-				true,
-				undefined,
-				undefined,
-				undefined,
-				undefined,
-				filterPredicate,
-			) ??
-			this.#world.castRay(
-				ray,
-				query.maxDistance,
-				true,
-				undefined,
-				undefined,
-				undefined,
-				undefined,
-				filterPredicate,
-			);
+		const hit = this.#world.castRay(ray, query.maxDistance, true);
 
 		if (!hit) {
 			return undefined;
@@ -546,23 +361,17 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 			return undefined;
 		}
 
-		const timeOfImpact = rayHitTimeOfImpact(hit);
-
-		if (timeOfImpact === undefined) {
-			return undefined;
-		}
-
-		const normal = rayHitNormal(hit);
+		const normal = hit.normal?.() ?? vec3();
 
 		return {
 			entity,
 			point: vec3(
-				query.origin.x + query.direction.x * timeOfImpact,
-				query.origin.y + query.direction.y * timeOfImpact,
-				query.origin.z + query.direction.z * timeOfImpact,
+				query.origin.x + query.direction.x * hit.toi,
+				query.origin.y + query.direction.y * hit.toi,
+				query.origin.z + query.direction.z * hit.toi,
 			),
 			normal: vec3(normal.x, normal.y, normal.z),
-			distance: timeOfImpact,
+			distance: hit.toi,
 		};
 	}
 
@@ -651,73 +460,6 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 		);
 	}
 
-	private ensureCharacterController(
-		colliderHandle: ColliderHandle,
-		settings: KinematicCharacterMovementQuery["settings"],
-	): RapierKinematicCharacterController {
-		let controller = this.#characterControllers.get(colliderHandle);
-
-		if (!controller) {
-			if (!this.#world.createCharacterController) {
-				throw new Error(
-					"The loaded Rapier module does not support character controllers.",
-				);
-			}
-
-			controller = this.#world.createCharacterController(
-				settings.offset ?? 0.04,
-			);
-			this.#characterControllers.set(colliderHandle, controller);
-		}
-
-		applyCharacterControllerSettings(controller, settings);
-		return controller;
-	}
-
-	private destroyCharacterController(colliderHandle: ColliderHandle): void {
-		const controller = this.#characterControllers.get(colliderHandle);
-
-		if (!controller) {
-			return;
-		}
-
-		if (this.#world.removeCharacterController) {
-			this.#world.removeCharacterController(controller);
-		} else {
-			controller.free?.();
-		}
-
-		this.#characterControllers.delete(colliderHandle);
-	}
-
-	private shouldIncludeCharacterObstacle(
-		collider: RapierCollider,
-		excludedEntities: ReadonlySet<Entity>,
-		obstacleChannels: readonly string[] | undefined,
-	): boolean {
-		const entity = this.#colliderEntities.get(collider.handle);
-
-		if (entity !== undefined && excludedEntities.has(entity)) {
-			return false;
-		}
-
-		const policy = this.#colliderPolicies.get(collider.handle);
-
-		if (
-			policy === undefined ||
-			policy.intent === "trigger" ||
-			policy.sensor === true
-		) {
-			return false;
-		}
-
-		if (obstacleChannels !== undefined) {
-			return obstacleChannels.includes(policy.channel);
-		}
-
-		return true;
-	}
-
 	private requireBody(handle: PhysicsBodyHandle): RapierRigidBody {
 		const body = this.#bodies.get(handle);
 
@@ -745,38 +487,5 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 				colliderB,
 			});
 		});
-	}
-}
-
-function applyCharacterControllerSettings(
-	controller: RapierKinematicCharacterController,
-	settings: KinematicCharacterCollisionSettings,
-): void {
-	controller.setOffset?.(settings.offset ?? 0.04);
-	controller.setUp?.(settings.up ?? vec3(0, 1, 0));
-	controller.setSlideEnabled?.(settings.slide ?? true);
-
-	if (settings.autostep) {
-		controller.enableAutostep?.(
-			settings.autostep.maxHeight,
-			settings.autostep.minWidth,
-			settings.autostep.includeDynamicBodies ?? false,
-		);
-	} else {
-		controller.disableAutostep?.();
-	}
-
-	if (settings.snapToGroundDistance !== undefined) {
-		controller.enableSnapToGround?.(settings.snapToGroundDistance);
-	} else {
-		controller.disableSnapToGround?.();
-	}
-
-	if (settings.maxSlopeClimbAngle !== undefined) {
-		controller.setMaxSlopeClimbAngle?.(settings.maxSlopeClimbAngle);
-	}
-
-	if (settings.minSlopeSlideAngle !== undefined) {
-		controller.setMinSlopeSlideAngle?.(settings.minSlopeSlideAngle);
 	}
 }

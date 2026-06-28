@@ -3,8 +3,8 @@
 ## Current Packet State
 
 This handoff was continued by
-`docs/Done/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md` and aligned by
-`docs/Done/MIGRATION_AGENT_ALIGNMENT_2026-06-06.md`. Current work is one combined
+`docs/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md` and aligned by
+`docs/MIGRATION_AGENT_ALIGNMENT_2026-06-06.md`. Current work is one combined
 engine packet using shared contracts, not separate level architectures.
 
 Miranda advanced in three packets:
@@ -12,7 +12,6 @@ Miranda advanced in three packets:
 1. Miranda airlock return portal migration.
 2. Miranda walkable floor/readiness contract migration.
 3. Miranda Cargo Hold floor/bounds extension.
-4. Miranda cockpit command console and Chapel monolith content parity slice.
 
 Observatory advanced in one collision packet:
 
@@ -26,10 +25,10 @@ The full migration plan is not complete. Do not mark the migration complete.
 
 - Migrated the old Miranda airlock return portal into checked-in target-engine
   data as `miranda:airlock:return-portal`.
-- Added shared portal asset ownership in `src/game/assets/portalAssets.ts` for
+- Added shared portal asset ownership in `src/levels/global/portalAssets.ts` for
   `mesh_portal_gate` and `audio_portal_activate`.
 - Added shared portal prefab ownership in
-  `src/game/prefabs/navigationPrefabs.ts` for `portal_gate`.
+  `src/levels/global/prefabs.ts` for `portal_gate`.
 - Rewired portal arena and Miranda to reuse shared portal asset/prefab owners
   instead of duplicating scene-local definitions.
 - Added Miranda portal preload/readiness coverage for `mesh_portal_gate`,
@@ -47,12 +46,7 @@ The full migration plan is not complete. Do not mark the migration complete.
   collision/walkable readiness.
 - Extended Miranda character bounds to `x = -20..20`, `z = -50..48` only after
   the Cargo Hold walkable floor extension was authored.
-- Added old Miranda cockpit command console and Chapel monolith A/B as
-  checked-in target-engine prefabs and instances with explicit render/collision
-  data.
-- Added readiness coverage for `miranda:cockpit:console`,
-  `miranda:chapel:monolith:a`, and `miranda:chapel:monolith:b`.
-- Updated Observatory collision so `observatory:walkable-mesh` is required
+- Updated Observatory collision so `observatory:walkable-proxy` is required
   `walkable/worldStatic` floor collision.
 - Added four required Observatory boundary blockers through checked-in level and
   prefab data.
@@ -115,9 +109,8 @@ Remaining known migration gaps:
 
 - Broader Miranda terrain/cooked collision/import coverage beyond the current
   checked-in walkable floor footprint.
-- Broader terrain-following or multi-height movement. Observatory now opts
-  into engine-owned kinematic collision; levels that have not opted in still
-  use scalar `groundY` fallback behavior.
+- Terrain-following or multi-height movement. Current player movement still
+  uses fixed `groundY`.
 - Expanded/spatial audio, crossfades, and durable audio import/generation.
 - Editor/import controls and generated/cooked content pipelines.
 - Starmap/timeline behavior as new manifest-owned data.
@@ -131,32 +124,32 @@ Expected modified files:
 - `ENGINE_CONTRACT_REGISTER.md`
 - `GAME_ENGINE_DESIGN_DOCUMENT.md`
 - `docs/GAME_ENGINE_MIGRATION_PLAN.md`
-- `docs/Done/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md`
-- `docs/Done/MIGRATION_AGENT_ALIGNMENT_2026-06-06.md`
+- `docs/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md`
+- `docs/MIGRATION_AGENT_ALIGNMENT_2026-06-06.md`
 - `docs/MIGRATION_HANDOFF_2026-06-06.md`
-- `docs/Done/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md`
+- `docs/OBSERVATORY_COLLISION_SYSTEM_FINDINGS.md`
 - `docs/OBSERVATORY_PLAYABLE_FOUNDATION_PLAN.md`
 - `public/audio/sfx/PORTAL_SFX_SOURCES.md`
 - `scripts/test-runtime-scene-contract.ts`
 - `src/engine/data/manifests/index.ts`
 - `src/engine/data/schemas/index.ts`
 - `src/engine/modules/physics/index.ts`
-- `src/game/assets/defaultAssets.ts`
-- `src/game/assets/index.ts`
-- `src/game/assets/portalArenaAssets.ts`
-- `src/game/levels/defaultLevels.ts`
-- `src/game/levels/observatoryLevel.ts`
-- `src/game/levels/runtimeSceneManifests.ts`
-- `src/game/prefabs/defaultPrefabs.ts`
+- `src/levels/miranda-deck/assets.ts`
+- `src/levels/prototype-arena/assets.ts`
+- `src/levels/portal-arena/assets.ts`
+- `src/levels/miranda-deck/level.ts`
+- `src/levels/observatory/level.ts`
+- `src/levels/global/router.ts`
+- `src/levels/miranda-deck/prefabs.ts`
 - `src/game/prefabs/index.ts`
-- `src/game/prefabs/observatoryPrefabs.ts`
-- `src/game/prefabs/portalPrefabs.ts`
+- `src/levels/observatory/prefabs.ts`
+- `src/levels/portal-arena/prefabs.ts`
 - `src/game/runtime/index.ts`
 
 Expected new files:
 
-- `src/game/assets/portalAssets.ts`
-- `src/game/prefabs/navigationPrefabs.ts`
+- `src/levels/global/portalAssets.ts`
+- `src/levels/global/prefabs.ts`
 
 ## Architecture Notes
 
@@ -164,8 +157,6 @@ Expected new files:
 - The walkable collision changes are engine contracts, not scene-specific
   runtime repairs.
 - The current implementation intentionally keeps old generated portal apparatus
-  GLB files, old runtime JSON, and generated collision products excluded from
-  runtime loading. Generated story-marker parity is now tracked through
-  `GeneratedGlbImportParityContract`: used marker candidates are validated as
-  target-engine substitutions, while the old green marker remains planned.
+  GLBs, generated story-marker GLBs, old runtime JSON, and generated collision
+  products excluded.
 - `docs/CLEANUP_REMINDER.md` was read and must not be deleted.

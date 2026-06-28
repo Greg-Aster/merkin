@@ -1,9 +1,11 @@
 import type { System } from "../../engine/core/index.js";
 import {
 	ACTIVE_INTERACTION_TARGET_RESOURCE,
+	ACTIVE_NPC_RESOURCE,
 	ACTIVE_PORTAL_RESOURCE,
 	ACTIVE_STORY_NOTE_RESOURCE,
 	type ActiveInteractionTargetState,
+	type ActiveNpcState,
 	type ActivePortalState,
 	type ActiveStoryNoteState,
 } from "./components.js";
@@ -13,7 +15,11 @@ export function createInteractionTargetSelectionSystem<
 >(): System<TContext> {
 	return {
 		id: "interaction-target-selection",
-		reads: [ACTIVE_PORTAL_RESOURCE, ACTIVE_STORY_NOTE_RESOURCE],
+		reads: [
+			ACTIVE_PORTAL_RESOURCE,
+			ACTIVE_STORY_NOTE_RESOURCE,
+			ACTIVE_NPC_RESOURCE,
+		],
 		writes: [ACTIVE_INTERACTION_TARGET_RESOURCE],
 		update(context) {
 			const activePortal = context.world.getResource<ActivePortalState>(
@@ -22,9 +28,12 @@ export function createInteractionTargetSelectionSystem<
 			const activeStoryNote = context.world.getResource<ActiveStoryNoteState>(
 				ACTIVE_STORY_NOTE_RESOURCE,
 			);
+			const activeNpc =
+				context.world.getResource<ActiveNpcState>(ACTIVE_NPC_RESOURCE);
 			const selected = selectActiveInteractionTarget(
 				activePortal,
 				activeStoryNote,
+				activeNpc,
 			);
 
 			if (selected) {
@@ -52,38 +61,25 @@ type InteractionTargetSelectionContext = {
 function selectActiveInteractionTarget(
 	activePortal: ActivePortalState | undefined,
 	activeStoryNote: ActiveStoryNoteState | undefined,
+	activeNpc: ActiveNpcState | undefined,
 ): ActiveInteractionTargetState | undefined {
-	if (!activePortal && !activeStoryNote) {
+	if (!activePortal && !activeStoryNote && !activeNpc) {
 		return undefined;
 	}
 
-	if (activePortal && activeStoryNote) {
-		if (activePortal.distanceSquared <= activeStoryNote.distanceSquared) {
-			return {
-				kind: "portal",
-				...activePortal,
-			};
-		}
-
-		return {
-			kind: "story-note",
-			...activeStoryNote,
-		};
-	}
-
-	if (activePortal) {
-		return {
-			kind: "portal",
-			...activePortal,
-		};
-	}
-
-	if (activeStoryNote) {
-		return {
-			kind: "story-note",
-			...activeStoryNote,
-		};
-	}
-
-	return undefined;
+	return [
+		activePortal ? { kind: "portal" as const, ...activePortal } : undefined,
+		activeStoryNote
+			? { kind: "story-note" as const, ...activeStoryNote }
+			: undefined,
+		activeNpc ? { kind: "npc" as const, ...activeNpc } : undefined,
+	]
+		.filter(
+			(target): target is ActiveInteractionTargetState => target !== undefined,
+		)
+		.sort(
+			(left, right) =>
+				left.distanceSquared - right.distanceSquared ||
+				left.kind.localeCompare(right.kind),
+		)[0];
 }

@@ -1,0 +1,55 @@
+{
+	"assets": {
+		"meshUrl": "builtin://player",
+		"materialUrl": "builtin://player-blue",
+		"jumpAudioUrl": "/audio/sfx/interface-sweep.mp3",
+		"chargeReleaseAudioUrl": "/audio/sfx/22-kenney-forceField_001.mp3"
+	},
+	"transform": {
+		"position": [0, 0.65, 1.5],
+		"rotation": [0, 0, 0, 1],
+		"scale": [0.75, 1.25, 0.75]
+	},
+	"renderable": {
+		"visible": false
+	},
+	"rigidBody": {
+		"mass": 80
+	},
+	"collider": {
+		"halfHeight": 0.55,
+		"radius": 0.35
+	},
+	"characterController": {
+		"speed": 4.5,
+		"sprintMultiplier": 1.65,
+		"jumpForce": 6,
+		"gravity": -9.6,
+		"groundY": 0.65
+	},
+	"firstPersonController": {
+		"mouseSensitivity": 0.0025,
+		"minPitchRadians": -1.3962634015954636,
+		"maxPitchRadians": 1.3962634015954636,
+		"eyeHeight": 0.55,
+		"fovDegrees": 70,
+		"near": 0.05,
+		"far": 2000
+	},
+	"health": {
+		"current": 100,
+		"max": 100
+	},
+	"audio": {
+		"jumpVolume": 0.2,
+		"chargeReleaseVolume": 0.28
+	},
+	"light": {
+		"kind": "point",
+		"color": "#ffd6a3",
+		"intensity": 5.5,
+		"distance": 16,
+		"decay": 2,
+		"visible": true
+	}
+}

@@ -1,11 +1,5 @@
 import type { Entity } from "../../core/index.js";
-import type { EngineEvent, EventBus, System, World } from "../../core/index.js";
-import {
-	type Quat,
-	type Vec3,
-	rotateVec3ByQuat,
-	vec3,
-} from "../../math/index.js";
+import type { EngineEvent, EventBus, System } from "../../core/index.js";
 import type { AssetManifest } from "../assets/index.js";
 
 export const AUDIO_LISTENER_COMPONENT = "AudioListener";
@@ -19,48 +13,9 @@ export type AudioListenerComponent = {
 
 export type SoundEmitterComponent = {
 	readonly soundId: string;
-	readonly active?: boolean;
 	readonly loop?: boolean;
 	readonly volume?: number;
-	readonly busId?: string;
 	readonly autoplay?: boolean;
-	readonly sceneId?: string;
-	readonly refDistance?: number;
-	readonly maxDistance?: number;
-	readonly rolloffFactor?: number;
-	readonly distanceModel?: AudioDistanceModel;
-	readonly coneInnerAngle?: number;
-	readonly coneOuterAngle?: number;
-	readonly coneOuterGain?: number;
-};
-
-export type AudioDistanceModel = "inverse" | "linear" | "exponential";
-
-export type AudioSpatialOrientation = {
-	readonly forward: Vec3;
-	readonly up: Vec3;
-};
-
-export type AudioListenerState = AudioSpatialOrientation & {
-	readonly position: Vec3;
-	readonly gain?: number;
-};
-
-export type AudioSpatialEmitterState = AudioSpatialOrientation & {
-	readonly entity: Entity;
-	readonly soundId: string;
-	readonly position: Vec3;
-	readonly volume: number;
-	readonly busId?: string;
-	readonly loop: boolean;
-	readonly sceneId?: string;
-	readonly refDistance: number;
-	readonly maxDistance: number;
-	readonly rolloffFactor: number;
-	readonly distanceModel: AudioDistanceModel;
-	readonly coneInnerAngle?: number;
-	readonly coneOuterAngle?: number;
-	readonly coneOuterGain?: number;
 };
 
 export type AudioEvent =
@@ -69,7 +24,6 @@ export type AudioEvent =
 			readonly entity?: Entity;
 			readonly soundId: string;
 			readonly volume?: number;
-			readonly busId?: string;
 			readonly loop?: boolean;
 			readonly sceneId?: string;
 	  }
@@ -92,23 +46,14 @@ export type MusicState = {
 	readonly trackId: string | undefined;
 	readonly playing: boolean;
 	readonly volume: number;
-	readonly busId?: string;
 	readonly sceneId?: string;
-	readonly fadeSeconds?: number;
 };
 
 export type AudioSceneMusicData = {
 	readonly trackId?: string;
 	readonly trackIds?: readonly string[];
 	readonly volume?: number;
-	readonly busId?: string;
 	readonly autoplay?: boolean;
-	readonly fadeSeconds?: number;
-};
-
-export type AudioMixerBusData = {
-	readonly id: string;
-	readonly volume: number;
 };
 
 export type AudioUnlockState = "unlocked" | "blocked" | "unavailable";
@@ -144,56 +89,6 @@ export type AudioManagerPort = {
 	dispose(): void;
 };
 
-export type AudioMixerPort = {
-	configureMixerBuses(buses: readonly AudioMixerBusData[]): void;
-	setMixerBusVolume(busId: string, volume: number): void;
-};
-
-export type AudioSpatialPort = {
-	setListener(state: AudioListenerState): void;
-	attachEmitter(
-		entity: Entity,
-		state: AudioSpatialEmitterState,
-	): AudioPlaybackHandle | undefined;
-	updateEmitter(entity: Entity, state: AudioSpatialEmitterState): void;
-	detachEmitter(entity: Entity): void;
-	detachAllEmitters(): void;
-};
-
-export type AudioTransformComponent = {
-	readonly position: Vec3;
-	readonly rotation: Quat;
-	readonly scale?: Vec3;
-};
-
-export type AudioPoseResource = {
-	readonly position: Vec3;
-	readonly rotation: Quat;
-};
-
-export type AudioSpatialSyncContext = {
-	readonly world: World;
-	readonly interpolation?: number;
-};
-
-export type AudioSpatialSyncSystemOptions = {
-	readonly audio: AudioSpatialPort;
-	readonly listenerResource?: string;
-	readonly transformComponent?: string;
-	readonly previousTransformComponent?: string;
-	readonly listenerComponent?: string;
-	readonly emitterComponent?: string;
-	readonly activeSceneId?: () => string | undefined;
-};
-
-export type AudioSpatialSyncSystemHandle<
-	TContext extends AudioSpatialSyncContext,
-> = System<TContext> & {
-	detach(entity: Entity): void;
-	detachAll(): void;
-	hasEmitter(entity: Entity): boolean;
-};
-
 export type AudioSceneScope = {
 	readonly sceneId: string;
 	registerAudioNode(dispose: () => void): void;
@@ -211,14 +106,12 @@ export type AudioEventMapping = {
 	readonly eventType: string;
 	readonly soundId: string;
 	readonly volume?: number;
-	readonly busId?: string;
 	readonly loop?: boolean;
 	readonly sceneId?: string;
 	readonly when?: (event: EngineEvent) => boolean;
 };
 
 export type AudioContentManifest = {
-	readonly mixerBuses?: readonly AudioMixerBusData[];
 	readonly eventMappings: readonly AudioEventMappingData[];
 	readonly sceneMusic?: AudioSceneMusicData;
 };
@@ -228,7 +121,6 @@ export type AudioEventMappingData = {
 	readonly eventType: string;
 	readonly soundId: string;
 	readonly volume?: number;
-	readonly busId?: string;
 	readonly loop?: boolean;
 	readonly sceneId?: string;
 };
@@ -297,7 +189,6 @@ export class AudioEventSystem {
 				...(typeof mapping.volume === "number"
 					? { volume: mapping.volume }
 					: {}),
-				...(typeof mapping.busId === "string" ? { busId: mapping.busId } : {}),
 				...(typeof mapping.loop === "boolean" ? { loop: mapping.loop } : {}),
 				...(sceneId === undefined ? {} : { sceneId }),
 			});
@@ -349,132 +240,6 @@ export function createAudioEventSystem(
 	return new AudioEventSystem(options);
 }
 
-export function createAudioSpatialSyncSystem<
-	TContext extends AudioSpatialSyncContext,
->(
-	options: AudioSpatialSyncSystemOptions,
-): AudioSpatialSyncSystemHandle<TContext> {
-	const transformComponent = options.transformComponent ?? "Transform";
-	const previousTransformComponent =
-		options.previousTransformComponent ?? "PreviousTransform";
-	const listenerComponent =
-		options.listenerComponent ?? AUDIO_LISTENER_COMPONENT;
-	const emitterComponent = options.emitterComponent ?? SOUND_EMITTER_COMPONENT;
-	const attachedEmitters = new Set<Entity>();
-	const emitterKeys = new Map<Entity, string>();
-
-	const system = {
-		id: "audio-spatial-sync",
-		reads: [
-			transformComponent,
-			previousTransformComponent,
-			listenerComponent,
-			emitterComponent,
-			...(options.listenerResource ? [options.listenerResource] : []),
-		],
-		update(context) {
-			const listener = listenerStateFromWorld(context.world, {
-				transformComponent,
-				listenerComponent,
-				...(options.listenerResource !== undefined
-					? { listenerResource: options.listenerResource }
-					: {}),
-			});
-
-			if (listener) {
-				options.audio.setListener(listener);
-			}
-
-			const activeEmitters = new Set<Entity>();
-
-			for (const entity of context.world.query([
-				transformComponent,
-				emitterComponent,
-			])) {
-				const emitter = context.world.requireComponent<SoundEmitterComponent>(
-					entity,
-					emitterComponent,
-				);
-
-				if (emitter.active === false || emitter.autoplay === false) {
-					continue;
-				}
-
-				const transform =
-					context.world.requireComponent<AudioTransformComponent>(
-						entity,
-						transformComponent,
-					);
-				const previousTransform =
-					context.world.getComponent<AudioTransformComponent>(
-						entity,
-						previousTransformComponent,
-					);
-				const spatialTransform =
-					previousTransform && context.interpolation !== undefined
-						? interpolateAudioTransform(
-								previousTransform,
-								transform,
-								context.interpolation,
-							)
-						: transform;
-				const state = spatialEmitterStateFromComponent(
-					entity,
-					emitter,
-					spatialTransform,
-					options.activeSceneId?.(),
-				);
-				const key = spatialEmitterKey(state);
-
-				activeEmitters.add(entity);
-
-				if (!attachedEmitters.has(entity)) {
-					options.audio.attachEmitter(entity, state);
-					attachedEmitters.add(entity);
-					emitterKeys.set(entity, key);
-					continue;
-				}
-
-				if (emitterKeys.get(entity) !== key) {
-					options.audio.detachEmitter(entity);
-					options.audio.attachEmitter(entity, state);
-					emitterKeys.set(entity, key);
-					continue;
-				}
-
-				options.audio.updateEmitter(entity, state);
-			}
-
-			for (const entity of [...attachedEmitters]) {
-				if (!activeEmitters.has(entity)) {
-					detach(entity);
-				}
-			}
-		},
-		detach,
-		detachAll() {
-			for (const entity of [...attachedEmitters]) {
-				detach(entity);
-			}
-			options.audio.detachAllEmitters();
-		},
-		hasEmitter(entity) {
-			return attachedEmitters.has(entity);
-		},
-	} satisfies AudioSpatialSyncSystemHandle<TContext>;
-
-	return system;
-
-	function detach(entity: Entity): void {
-		if (!attachedEmitters.delete(entity)) {
-			return;
-		}
-
-		emitterKeys.delete(entity);
-		options.audio.detachEmitter(entity);
-	}
-}
-
 export function validateAudioContentManifest(
 	manifest: unknown,
 	options: {
@@ -516,7 +281,6 @@ export function audioEventMappingsFromManifest(
 		eventType: mapping.eventType,
 		soundId: mapping.soundId,
 		...(mapping.volume === undefined ? {} : { volume: mapping.volume }),
-		...(mapping.busId === undefined ? {} : { busId: mapping.busId }),
 		...(mapping.loop === undefined ? {} : { loop: mapping.loop }),
 		...(mapping.sceneId === undefined ? {} : { sceneId: mapping.sceneId }),
 	}));
@@ -545,12 +309,6 @@ export function musicStateFromAudioContentManifest(
 		trackId,
 		playing: manifest.sceneMusic.autoplay ?? true,
 		volume: manifest.sceneMusic.volume ?? 1,
-		...(manifest.sceneMusic.busId === undefined
-			? {}
-			: { busId: manifest.sceneMusic.busId }),
-		...(manifest.sceneMusic.fadeSeconds === undefined
-			? {}
-			: { fadeSeconds: manifest.sceneMusic.fadeSeconds }),
 	};
 }
 
@@ -566,132 +324,6 @@ export function sceneMusicTrackIds(
 	}
 
 	return sceneMusic.trackId ? [sceneMusic.trackId] : [];
-}
-
-function listenerStateFromWorld(
-	world: World,
-	options: {
-		readonly listenerResource?: string;
-		readonly transformComponent: string;
-		readonly listenerComponent: string;
-	},
-): AudioListenerState | undefined {
-	if (options.listenerResource) {
-		const pose = world.getResource<AudioPoseResource>(options.listenerResource);
-
-		if (pose) {
-			return audioListenerStateFromPose(pose);
-		}
-	}
-
-	for (const entity of world.query([
-		options.transformComponent,
-		options.listenerComponent,
-	])) {
-		const listener = world.requireComponent<AudioListenerComponent>(
-			entity,
-			options.listenerComponent,
-		);
-
-		if (listener.active === false) {
-			continue;
-		}
-
-		const transform = world.requireComponent<AudioTransformComponent>(
-			entity,
-			options.transformComponent,
-		);
-
-		return {
-			...audioListenerStateFromPose(transform),
-			...(listener.gain === undefined ? {} : { gain: listener.gain }),
-		};
-	}
-
-	return undefined;
-}
-
-function audioListenerStateFromPose(
-	pose: AudioPoseResource,
-): AudioListenerState {
-	return {
-		position: pose.position,
-		...orientationFromRotation(pose.rotation),
-	};
-}
-
-function spatialEmitterStateFromComponent(
-	entity: Entity,
-	emitter: SoundEmitterComponent,
-	transform: AudioTransformComponent,
-	activeSceneId: string | undefined,
-): AudioSpatialEmitterState {
-	const sceneId = emitter.sceneId ?? activeSceneId;
-
-	return {
-		entity,
-		soundId: emitter.soundId,
-		position: transform.position,
-		...orientationFromRotation(transform.rotation),
-		volume: emitter.volume ?? 1,
-		...(emitter.busId === undefined ? {} : { busId: emitter.busId }),
-		loop: emitter.loop ?? true,
-		...(sceneId === undefined ? {} : { sceneId }),
-		refDistance: emitter.refDistance ?? 1,
-		maxDistance: emitter.maxDistance ?? 24,
-		rolloffFactor: emitter.rolloffFactor ?? 1,
-		distanceModel: emitter.distanceModel ?? "inverse",
-		...(emitter.coneInnerAngle === undefined
-			? {}
-			: { coneInnerAngle: emitter.coneInnerAngle }),
-		...(emitter.coneOuterAngle === undefined
-			? {}
-			: { coneOuterAngle: emitter.coneOuterAngle }),
-		...(emitter.coneOuterGain === undefined
-			? {}
-			: { coneOuterGain: emitter.coneOuterGain }),
-	};
-}
-
-function orientationFromRotation(rotation: Quat): AudioSpatialOrientation {
-	return {
-		forward: rotateVec3ByQuat(vec3(0, 0, -1), rotation),
-		up: rotateVec3ByQuat(vec3(0, 1, 0), rotation),
-	};
-}
-
-function interpolateAudioTransform(
-	previous: AudioTransformComponent,
-	current: AudioTransformComponent,
-	interpolation: number,
-): AudioTransformComponent {
-	const t = Math.max(0, Math.min(1, interpolation));
-
-	return {
-		position: {
-			x: previous.position.x + (current.position.x - previous.position.x) * t,
-			y: previous.position.y + (current.position.y - previous.position.y) * t,
-			z: previous.position.z + (current.position.z - previous.position.z) * t,
-		},
-		rotation: current.rotation,
-		...(current.scale === undefined ? {} : { scale: current.scale }),
-	};
-}
-
-function spatialEmitterKey(state: AudioSpatialEmitterState): string {
-	return [
-		state.soundId,
-		state.loop ? "loop" : "oneshot",
-		state.busId ?? "",
-		state.sceneId ?? "",
-		state.distanceModel,
-		state.refDistance,
-		state.maxDistance,
-		state.rolloffFactor,
-		state.coneInnerAngle ?? "",
-		state.coneOuterAngle ?? "",
-		state.coneOuterGain ?? "",
-	].join("|");
 }
 
 function isAudioEvent(event: EngineEvent): event is AudioEvent {
@@ -716,7 +348,7 @@ function validateAudioContentManifestData(
 	validateAllowedKeys(
 		data,
 		"audioContentManifest",
-		["mixerBuses", "eventMappings", "sceneMusic"],
+		["eventMappings", "sceneMusic"],
 		errors,
 	);
 
@@ -730,11 +362,6 @@ function validateAudioContentManifestData(
 			.filter((asset) => asset.kind === "audio")
 			.map((asset) => asset.id),
 	);
-	const mixerBusIds = validateAudioMixerBusData(
-		data.mixerBuses,
-		"audioContentManifest.mixerBuses",
-		errors,
-	);
 	const mappingIds = new Set<string>();
 
 	for (const [index, mapping] of data.eventMappings.entries()) {
@@ -742,7 +369,6 @@ function validateAudioContentManifestData(
 			mapping,
 			`audioContentManifest.eventMappings.${index}`,
 			audioAssetIds,
-			mixerBusIds,
 			mappingIds,
 			errors,
 		);
@@ -752,7 +378,6 @@ function validateAudioContentManifestData(
 		data.sceneMusic,
 		"audioContentManifest.sceneMusic",
 		audioAssetIds,
-		mixerBusIds,
 		errors,
 	);
 
@@ -763,7 +388,6 @@ function validateAudioSceneMusicData(
 	data: unknown,
 	path: string,
 	audioAssetIds: ReadonlySet<string>,
-	mixerBusIds: ReadonlySet<string>,
 	errors: string[],
 ): void {
 	if (data === undefined) {
@@ -778,7 +402,7 @@ function validateAudioSceneMusicData(
 	validateAllowedKeys(
 		data,
 		path,
-		["trackId", "trackIds", "volume", "busId", "autoplay", "fadeSeconds"],
+		["trackId", "trackIds", "volume", "autoplay"],
 		errors,
 	);
 
@@ -834,18 +458,8 @@ function validateAudioSceneMusicData(
 		validateAudioUnitValue(data.volume, `${path}.volume`, errors);
 	}
 
-	validateOptionalAudioBusId(data.busId, `${path}.busId`, mixerBusIds, errors);
-
 	if (data.autoplay !== undefined && typeof data.autoplay !== "boolean") {
 		errors.push(`${path}.autoplay must be a boolean when provided.`);
-	}
-
-	if (data.fadeSeconds !== undefined) {
-		validateAudioDurationSeconds(
-			data.fadeSeconds,
-			`${path}.fadeSeconds`,
-			errors,
-		);
 	}
 }
 
@@ -853,7 +467,6 @@ function validateAudioEventMappingData(
 	data: unknown,
 	path: string,
 	audioAssetIds: ReadonlySet<string>,
-	mixerBusIds: ReadonlySet<string>,
 	mappingIds: Set<string>,
 	errors: string[],
 ): void {
@@ -865,7 +478,7 @@ function validateAudioEventMappingData(
 	validateAllowedKeys(
 		data,
 		path,
-		["id", "eventType", "soundId", "volume", "busId", "loop", "sceneId"],
+		["id", "eventType", "soundId", "volume", "loop", "sceneId"],
 		errors,
 	);
 	requireString(data, "id", `${path}.id`, errors);
@@ -894,75 +507,12 @@ function validateAudioEventMappingData(
 		validateAudioUnitValue(data.volume, `${path}.volume`, errors);
 	}
 
-	validateOptionalAudioBusId(data.busId, `${path}.busId`, mixerBusIds, errors);
-
 	if (data.loop !== undefined && typeof data.loop !== "boolean") {
 		errors.push(`${path}.loop must be a boolean when provided.`);
 	}
 
 	if (data.sceneId !== undefined) {
 		requireString(data, "sceneId", `${path}.sceneId`, errors);
-	}
-}
-
-function validateAudioMixerBusData(
-	data: unknown,
-	path: string,
-	errors: string[],
-): ReadonlySet<string> {
-	const busIds = new Set<string>();
-
-	if (data === undefined) {
-		return busIds;
-	}
-
-	if (!Array.isArray(data)) {
-		errors.push(`${path} must be an array when provided.`);
-		return busIds;
-	}
-
-	for (const [index, bus] of data.entries()) {
-		const busPath = `${path}.${index}`;
-
-		if (!isRecord(bus)) {
-			errors.push(`${busPath} must be an object.`);
-			continue;
-		}
-
-		validateAllowedKeys(bus, busPath, ["id", "volume"], errors);
-		requireString(bus, "id", `${busPath}.id`, errors);
-
-		if (typeof bus.id === "string" && bus.id.length > 0) {
-			if (busIds.has(bus.id)) {
-				errors.push(`${path} contains duplicate bus "${bus.id}".`);
-			}
-
-			busIds.add(bus.id);
-		}
-
-		validateAudioUnitValue(bus.volume, `${busPath}.volume`, errors);
-	}
-
-	return busIds;
-}
-
-function validateOptionalAudioBusId(
-	value: unknown,
-	path: string,
-	mixerBusIds: ReadonlySet<string>,
-	errors: string[],
-): void {
-	if (value === undefined) {
-		return;
-	}
-
-	if (typeof value !== "string" || value.length === 0) {
-		errors.push(`${path} must be a non-empty string when provided.`);
-		return;
-	}
-
-	if (!mixerBusIds.has(value)) {
-		errors.push(`${path} references unknown mixer bus "${value}".`);
 	}
 }
 
@@ -978,21 +528,6 @@ function validateAudioUnitValue(
 		value > 1
 	) {
 		errors.push(`${path} must be a finite number from 0 to 1.`);
-	}
-}
-
-function validateAudioDurationSeconds(
-	value: unknown,
-	path: string,
-	errors: string[],
-): void {
-	if (
-		typeof value !== "number" ||
-		!Number.isFinite(value) ||
-		value < 0 ||
-		value > 30
-	) {
-		errors.push(`${path} must be a finite number from 0 to 30.`);
 	}
 }
 

@@ -16,7 +16,7 @@ Required cleanup and verification:
    - GAME_ENGINE_DESIGN_DOCUMENT.md
    - ENGINE_CONTRACT_REGISTER.md
    - docs/GAME_ENGINE_MIGRATION_PLAN.md
-   - docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md and docs/Done/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md when touching scene environment, sky, atmosphere, video sky, or reflection probe work
+   - docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md and docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md when touching scene environment, sky, atmosphere, video sky, or reflection probe work
 
 2. Confirm the architecture boundaries still hold:
    - Astro/app code only hosts and mounts the browser client.
@@ -35,16 +35,14 @@ Required cleanup and verification:
    - Svelte stores and props mirror selected state only.
    - Player, camera, physics, input, and level state flow through components, resources, commands, events, systems, and adapters.
    - System registration belongs in the game/runtime composition layer, not scattered through UI or page shell code.
+   - Level data belongs in `src/levels`, not hidden inside `src/game`.
+   - Optional editor tooling belongs in `src/editor` and is not imported by the normal runtime.
 
 4. Remove cruft before handoff:
    - No temporary probes, one-off scripts, throwaway tests, scratch files, debug logs, commented-out code, placeholder TODOs, or unused exports.
    - No orphan files that are not referenced by package scripts, source imports, docs, or a clear future contract.
    - No duplicate docs or stale status claims.
    - No broad catch-all test/source files when a focused owner file is more maintainable.
-   - Level-editor maintainability: central file budgets are extraction triggers,
-     not feature ceilings. If an AAA editor feature needs more surface area,
-     keep the new logic in a focused owner component/model/test or record an
-     explicit temporary central-budget decision in the maintainability contract.
    - No generated artifacts unless they are intentionally owned, reproducible, and documented.
    - No stale package scripts referencing deleted files.
    - No unused dependencies added to package.json.
@@ -60,7 +58,11 @@ Required cleanup and verification:
    - pnpm --dir apps/game.megameal audit:engine-boundaries
    - pnpm --dir apps/game.megameal type-check
    - pnpm --dir apps/game.megameal lint
-   - pnpm --dir apps/game.megameal test:contracts
+   - pnpm --dir apps/game.megameal test:input-contract
+   - pnpm --dir apps/game.megameal test:charged-action-contract
+   - pnpm --dir apps/game.megameal test:story-note-contract
+   - pnpm --dir apps/game.megameal test:scene-environment-contract
+   - pnpm --dir apps/game.megameal test:runtime-scene-contract
    - pnpm --dir apps/game.megameal build
    - git diff --check -- apps/game.megameal pnpm-lock.yaml
 
@@ -84,14 +86,13 @@ Use this checklist before handing work back:
 - [ ] No framework imports leaked into `src/engine/core`, `src/engine/modules`, `src/engine/data`, or `src/game`.
 - [ ] No browser globals outside `src/app`, `src/ui`, `.astro`/`.svelte`, or `src/engine/adapters/browser`.
 - [ ] No direct imports from sibling `apps/game`.
+- [ ] No normal runtime imports from `src/editor`.
+- [ ] Level package data remains under `src/levels`; game systems do not hide level catalogs.
 - [ ] No new broad catch-all files without a clear owner.
-- [ ] Level-editor changes either stay under a focused owner component/model/test
-      or pass the central file budgets in
-      `test:level-editor-maintainability-contract`.
 - [ ] No package scripts point at deleted files.
 - [ ] No dead exports, unused helpers, temporary scripts, debug logs, placeholder TODOs, or commented-out code.
 - [ ] Docs reflect the current code and current validation commands.
-- [ ] `audit:engine-boundaries`, `type-check`, `lint`, `test:contracts`, `build`, and `git diff --check` pass.
+- [ ] `audit:engine-boundaries`, `type-check`, `lint`, `test:input-contract`, `test:charged-action-contract`, `test:story-note-contract`, `test:scene-environment-contract`, `test:runtime-scene-contract`, `build`, and `git diff --check` pass.
 
 ## Architecture Red Flags
 
@@ -113,7 +114,11 @@ Treat these as blockers unless there is an explicit architecture decision record
 pnpm --dir apps/game.megameal audit:engine-boundaries
 pnpm --dir apps/game.megameal type-check
 pnpm --dir apps/game.megameal lint
-pnpm --dir apps/game.megameal test:contracts
+pnpm --dir apps/game.megameal test:input-contract
+pnpm --dir apps/game.megameal test:charged-action-contract
+pnpm --dir apps/game.megameal test:story-note-contract
+pnpm --dir apps/game.megameal test:scene-environment-contract
+pnpm --dir apps/game.megameal test:runtime-scene-contract
 pnpm --dir apps/game.megameal build
 git diff --check -- apps/game.megameal pnpm-lock.yaml
 ```

@@ -1,6 +1,8 @@
 import type { Entity } from "../../core/index.js";
 import type { RuntimeServices } from "../../runtime/index.js";
 
+export * from "./levelLoading.js";
+
 export type SceneStatus =
 	| "created"
 	| "loading"
@@ -78,21 +80,9 @@ export class BasicSceneScope implements SceneScope {
 
 	async cleanup(): Promise<void> {
 		const cleanups = this.#cleanups.splice(0).reverse();
-		const errors: unknown[] = [];
 
 		for (const cleanup of cleanups) {
-			try {
-				await cleanup();
-			} catch (error) {
-				errors.push(error);
-			}
-		}
-
-		if (errors.length > 0) {
-			throw new AggregateError(
-				errors,
-				`Scene "${this.sceneId}" cleanup failed for ${errors.length} resource(s).`,
-			);
+			await cleanup();
 		}
 	}
 }

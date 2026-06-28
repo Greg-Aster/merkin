@@ -264,7 +264,7 @@ Current foundation status:
 - `RenderProfileData.environment` is required and currently supports the
   explicit `cubemap-skybox` mode.
 - Asset manifests support `kind: "cubemap"` entries with exactly six face URLs.
-- `src/game/assets/skyboxAssets.ts` owns `cubemap_classic_sky` and
+- `src/levels/global/skyboxAssets.ts` owns `cubemap_classic_sky` and
   `cubemap_observatory_sky` as checked-in target-engine cubemap assets.
 - Portal arena, prototype arena, and Miranda deck render profiles declare a
   required cubemap environment by stable asset ID.
@@ -347,7 +347,7 @@ Active follow-on packet:
 - `docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md` records the completed expansion
   of this cubemap foundation into equirectangular, video, procedural atmosphere,
   bounded dynamic capture, and authored reflection probe support.
-- `docs/Done/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md` tracks the remaining
+- `docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md` tracks the remaining
   future skybox and scene-environment feature packets.
 - Runtime support can now be described as cubemap plus foundation support for
   equirectangular, muted `equirectangular-360` video, procedural atmosphere,

@@ -1,0 +1,391 @@
+{
+	"id": "observatory",
+	"runtimeScene": {
+		"schemaVersion": 1,
+		"id": "observatory_runtime",
+		"generatedAt": "2026-06-06T00:00:00.000Z",
+		"source": {
+			"kind": "authored",
+			"id": "observatory.scene#playable-foundation"
+		},
+		"readiness": {
+			"playerStableId": "player",
+			"requiredAssetIds": [
+				"mesh_observatory_environment",
+				"mesh_water_plane",
+				"material_water_dark_still"
+			],
+			"requiredCollisionPrefabIds": [
+				"observatory_walkable_proxy",
+				"observatory_boundary_blocker"
+			],
+			"requiredCollisionStableIds": [
+				"observatory:walkable-proxy",
+				"observatory:collision:boundary:north",
+				"observatory:collision:boundary:south",
+				"observatory:collision:boundary:east",
+				"observatory:collision:boundary:west"
+			],
+			"requiredWalkableStableIds": [
+				"observatory:walkable-proxy"
+			],
+			"requiredLightStableIds": [
+				"observatory:firefly:archive",
+				"observatory:firefly:lantern",
+				"observatory:firefly:tide"
+			]
+		}
+	},
+	"level": {
+		"id": "observatory",
+		"sceneId": "observatory_game",
+		"preloadGroups": [
+			"observatory"
+		],
+		"resources": {
+			"game:collectedCount": 0,
+			"game:totalCollectibles": 0,
+			"game:characterBounds": {
+				"minX": -300,
+				"maxX": 300,
+				"minZ": -300,
+				"maxZ": 300
+			}
+		},
+		"preload": [
+			"mesh_observatory_environment",
+			"mesh_water_plane",
+			"material_water_dark_still"
+		],
+		"instances": [
+			{
+				"id": "observatory-terrain",
+				"prefabId": "observatory_environment",
+				"stableId": "observatory:terrain"
+			},
+			{
+				"id": "observatory-walkable-proxy",
+				"prefabId": "observatory_walkable_proxy",
+				"stableId": "observatory:walkable-proxy"
+			},
+			{
+				"id": "observatory-boundary-north",
+				"prefabId": "observatory_boundary_blocker",
+				"stableId": "observatory:collision:boundary:north",
+				"transform": {
+					"position": [
+						0,
+						5.8,
+						-304
+					]
+				},
+				"components": {
+					"Collider": {
+						"intent": "solid",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [
+								320,
+								4,
+								4
+							]
+						}
+					}
+				}
+			},
+			{
+				"id": "observatory-boundary-south",
+				"prefabId": "observatory_boundary_blocker",
+				"stableId": "observatory:collision:boundary:south",
+				"transform": {
+					"position": [
+						0,
+						5.8,
+						304
+					]
+				},
+				"components": {
+					"Collider": {
+						"intent": "solid",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [
+								320,
+								4,
+								4
+							]
+						}
+					}
+				}
+			},
+			{
+				"id": "observatory-boundary-east",
+				"prefabId": "observatory_boundary_blocker",
+				"stableId": "observatory:collision:boundary:east",
+				"transform": {
+					"position": [
+						304,
+						5.8,
+						0
+					]
+				},
+				"components": {
+					"Collider": {
+						"intent": "solid",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [
+								4,
+								4,
+								320
+							]
+						}
+					}
+				}
+			},
+			{
+				"id": "observatory-boundary-west",
+				"prefabId": "observatory_boundary_blocker",
+				"stableId": "observatory:collision:boundary:west",
+				"transform": {
+					"position": [
+						-304,
+						5.8,
+						0
+					]
+				},
+				"components": {
+					"Collider": {
+						"intent": "solid",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [
+								4,
+								4,
+								320
+							]
+						}
+					}
+				}
+			},
+			{
+				"id": "observatory-water",
+				"prefabId": "water_surface_plane",
+				"stableId": "observatory:water",
+				"transform": {
+					"position": [
+						0,
+						-2,
+						0
+					],
+					"scale": [
+						4000,
+						0.02,
+						4000
+					]
+				}
+			}
+		]
+	},
+	"assets": {
+		"shared": [
+			"mesh_water_plane",
+			"material_water_dark_still"
+		],
+		"local": [
+			{
+				"id": "mesh_observatory_environment",
+				"kind": "mesh",
+				"url": "/assets/game/observatory/observatory-environment.glb",
+				"tags": [
+					"terrain",
+					"observatory",
+					"source-glb"
+				]
+			}
+		],
+		"preloadGroups": {
+			"observatory": [
+				"mesh_observatory_environment",
+				"mesh_water_plane",
+				"material_water_dark_still"
+			]
+		}
+	},
+	"prefabs": {
+		"shared": [
+			"water_surface_plane"
+		],
+		"local": [
+			{
+				"id": "observatory_boundary_blocker",
+				"tags": [
+					"world",
+					"collision",
+					"blocker",
+					"observatory"
+				],
+				"components": {
+					"Transform": {
+						"position": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							0,
+							0,
+							0,
+							1
+						],
+						"scale": [
+							1,
+							1,
+							1
+						]
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [
+								1,
+								1,
+								1
+							]
+						}
+					}
+				}
+			},
+			{
+				"id": "observatory_environment",
+				"assetIds": [
+					"mesh_observatory_environment"
+				],
+				"tags": [
+					"world",
+					"terrain",
+					"observatory"
+				],
+				"components": {
+					"Transform": {
+						"position": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							0,
+							0,
+							0,
+							1
+						],
+						"scale": [
+							1,
+							1,
+							1
+						]
+					},
+					"Renderable": {
+						"meshId": "mesh_observatory_environment",
+						"visible": true
+					}
+				}
+			},
+			{
+				"id": "observatory_walkable_proxy",
+				"tags": [
+					"world",
+					"collision",
+					"walkable",
+					"observatory"
+				],
+				"components": {
+					"Transform": {
+						"position": [
+							0,
+							1.75,
+							0
+						],
+						"rotation": [
+							0,
+							0,
+							0,
+							1
+						],
+						"scale": [
+							1,
+							1,
+							1
+						]
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "walkable",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [
+								320,
+								0.05,
+								320
+							]
+						}
+					}
+				}
+			}
+		]
+	},
+	"audio": {
+		"eventMappings": []
+	},
+	"renderProfile": {
+		"id": "observatory_moon_archive",
+		"renderer": {
+			"clearColor": "#020711",
+			"clearAlpha": 1,
+			"antialias": true,
+			"maxPixelRatio": 2,
+			"fallbackMaterialColor": "#273043"
+		},
+		"lighting": {
+			"lights": [
+				{
+					"kind": "ambient",
+					"color": "#c9d8f2",
+					"intensity": 0
+				}
+			]
+		}
+	},
+	"player": {
+		"transform": {
+			"position": [
+				-137.2,
+				1.8,
+				-49.5
+			]
+		},
+		"groundY": 1.8,
+		"light": {
+			"kind": "point",
+			"color": "#c061cb",
+			"intensity": 10,
+			"distance": 16,
+			"decay": 2,
+			"visible": true
+		}
+	}
+}

@@ -336,6 +336,7 @@ export function inspectAssetRegistry(
 	const byKind = {
 		mesh: 0,
 		material: 0,
+		sprite: 0,
 		texture: 0,
 		cubemap: 0,
 		video: 0,

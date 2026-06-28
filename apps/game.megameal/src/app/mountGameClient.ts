@@ -7,10 +7,6 @@ import {
 } from "../engine/adapters/browser/index.js";
 import { createRapierPhysicsAdapter } from "../engine/adapters/rapier/index.js";
 import {
-	type ThreeRenderedSceneBoxSelectRequest,
-	type ThreeRenderedSceneBoxSelectResult,
-	type ThreeRenderedSceneHitTestRequest,
-	type ThreeRenderedSceneHitTestResult,
 	ThreeRendererAdapter,
 	createThreeAssetObjectResolver,
 	loadDefaultThreeRuntime,
@@ -24,11 +20,14 @@ import {
 	type RendererPort,
 	type RuntimeSceneManifestData,
 } from "../engine/index.js";
-import {
-	type GameRuntimeUiState,
-	createMegamealGameRuntime,
-	defaultRuntimeSceneManifest,
-} from "../game/index.js";
+import { type GameHudState, createMegamealGameRuntime } from "../game/index.js";
+import type {
+	RuntimeDiagnosticToggleResult,
+	RuntimeDiagnosticsState,
+	RuntimeSceneRequestResult,
+	RuntimeSceneState,
+} from "../game/runtime/index.js";
+import { runtimeSettings } from "./levelPackageDiscovery.js";
 
 export type GameClientMountOptions = {
 	readonly canvas: HTMLCanvasElement;
@@ -39,13 +38,11 @@ export type GameClientMountOptions = {
 export type GameClientMount = {
 	readonly runtime: EngineRuntime;
 	readonly mobileControls: MobileInputControlsPort;
-	hitTestRenderedScene(
-		request: ThreeRenderedSceneHitTestRequest,
-	): ThreeRenderedSceneHitTestResult;
-	boxSelectRenderedScene(
-		request: ThreeRenderedSceneBoxSelectRequest,
-	): ThreeRenderedSceneBoxSelectResult;
-	runtimeUiState(): GameRuntimeUiState;
+	runtimeSceneState(): RuntimeSceneState;
+	requestRuntimeScene(runtimeSceneId: string): RuntimeSceneRequestResult;
+	setCollisionOverlayEnabled(enabled: boolean): RuntimeDiagnosticToggleResult;
+	runtimeDiagnostics(): RuntimeDiagnosticsState;
+	gameState(): GameHudState;
 	setUiCapturingInput(capturing: boolean): void;
 	dispose(): void;
 };
@@ -62,7 +59,14 @@ export async function mountGameClient(
 	const assets = createAssetManager(three, audio);
 	const size = options.platform.displaySize(options.canvas);
 	const runtimeManifest =
-		options.runtimeManifest ?? defaultRuntimeSceneManifest;
+		options.runtimeManifest ?? runtimeSettings.defaultRuntimeSceneManifest;
+
+	if (!runtimeManifest) {
+		throw new Error(
+			"No level package is installed. Add src/levels or pass a runtime scene manifest to mount the game.",
+		);
+	}
+
 	const renderProfile = runtimeManifest.renderProfile;
 	const renderer = new ThreeRendererAdapter({
 		three,
@@ -92,6 +96,9 @@ export async function mountGameClient(
 		physics,
 		...(audio ? { audio } : {}),
 		runtimeManifest,
+		runtimeSceneManifests: runtimeSettings.runtimeSceneManifests,
+		audioContentManifestForRuntimeScene:
+			runtimeSettings.audioContentManifestForRuntimeScene,
 	});
 
 	resize();
@@ -101,13 +108,11 @@ export async function mountGameClient(
 	return {
 		runtime: game.runtime,
 		mobileControls: input,
-		hitTestRenderedScene(request) {
-			return renderer.hitTestRenderedScene(request);
-		},
-		boxSelectRenderedScene(request) {
-			return renderer.boxSelectRenderedScene(request);
-		},
-		runtimeUiState: game.runtimeUiState,
+		runtimeSceneState: game.runtimeSceneState,
+		requestRuntimeScene: game.requestRuntimeScene,
+		setCollisionOverlayEnabled: game.setCollisionOverlayEnabled,
+		runtimeDiagnostics: game.runtimeDiagnostics,
+		gameState: game.gameState,
 		setUiCapturingInput(capturing) {
 			input.setFocusState({ uiCapturingInput: capturing });
 		},

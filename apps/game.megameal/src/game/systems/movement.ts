@@ -10,7 +10,6 @@ import type { PlayerInputComponent } from "../../engine/modules/input/index.js";
 import {
 	CHARACTER_MOTOR_COMPONENT,
 	type CharacterMotorComponent,
-	type KinematicCharacterControllerSystemOptions,
 	createKinematicCharacterControllerSystem,
 } from "../../engine/modules/physics/index.js";
 import {
@@ -146,8 +145,8 @@ export function createCharacterMotorSystem<
 
 export function createCharacterMovementSystem<
 	TContext extends CharacterMovementContext,
->(options: KinematicCharacterControllerSystemOptions = {}): System<TContext> {
-	return createKinematicCharacterControllerSystem<TContext>(options);
+>(): System<TContext> {
+	return createKinematicCharacterControllerSystem<TContext>();
 }
 
 type FirstPersonLookContext = {

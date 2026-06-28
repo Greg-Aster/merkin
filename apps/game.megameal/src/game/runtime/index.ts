@@ -1,14 +1,15 @@
 import {
-	ACTIVE_CAMERA_POSE_RESOURCE,
 	AUDIO_MANAGER_RESOURCE,
 	type AssetManagerPort,
+	type AudioContentManifest,
 	type AudioManagerPort,
-	type AudioMixerPort,
-	type AudioSpatialPort,
 	type CameraPosePort,
+	type CollisionOverlayItem,
+	type CollisionOverlayRendererPort,
 	EngineRuntime,
 	type Entity,
 	type InputPlatformPort,
+	LevelLoader,
 	type LightRendererPort,
 	LightSyncSystem,
 	type PhysicsAdapterPort,
@@ -21,11 +22,8 @@ import {
 	type RuntimeSceneManifestData,
 	type SceneEnvironmentRendererPort,
 	SceneManager,
-	type WaterSurfaceRendererPort,
-	WaterSurfaceSyncSystem,
 	audioEventMappingsFromManifest,
 	createAudioEventSystem,
-	createAudioSpatialSyncSystem,
 	createCameraPoseApplySystem,
 	createPhysicsPostSyncSystem,
 	createPhysicsPreSyncSystem,
@@ -34,16 +32,15 @@ import {
 	musicStateFromAudioContentManifest,
 	parseAudioContentManifest,
 } from "../../engine/index.js";
-import { audioContentManifestForRuntimeScene } from "../assets/index.js";
 import {
-	LevelLoader,
-	defaultRuntimeSceneManifest,
-	defaultRuntimeSceneManifests,
-} from "../levels/index.js";
+	type CollisionOverlayDiagnosticsState,
+	collectCollisionOverlayItems,
+	summarizeCollisionOverlay,
+} from "../diagnostics/index.js";
 import { PrefabRegistry, STABLE_ID_COMPONENT } from "../prefabs/index.js";
 import { createGameScene } from "../scenes/index.js";
 import {
-	type GameRuntimeUiState,
+	type GameHudState,
 	RUNTIME_SCENE_TRANSITION_RESOURCE,
 	type RuntimeSceneTransitionPort,
 	createCharacterMotorSystem,
@@ -51,10 +48,16 @@ import {
 	createChargedActionSystem,
 	createCollectibleSystem,
 	createFirstPersonLookSystem,
+	createFollowTargetSystem,
 	createGameplayActionMap,
 	createInteractionCommandSystem,
 	createInteractionTargetSelectionSystem,
+	createLightModulationSystem,
+	createMovementBehaviorSystem,
 	createMovementCommandSystem,
+	createNpcDialogSystem,
+	createNpcProximitySystem,
+	createNpcSignificanceSystem,
 	createPlayerCameraSystem,
 	createPlayerChargeLightFeedbackSystem,
 	createPlayerInputSystem,
@@ -62,15 +65,14 @@ import {
 	createPortalProximitySystem,
 	createStoryNoteActivationSystem,
 	createStoryNoteProximitySystem,
-	createTerrainStreamingSystem,
-	selectGameRuntimeUiState,
+	selectGameHudState,
 } from "../systems/index.js";
 
 export type GameRendererPort = RendererPort &
 	LightRendererPort &
 	ReflectionProbeRendererPort &
-	WaterSurfaceRendererPort &
 	SceneEnvironmentRendererPort &
+	CollisionOverlayRendererPort &
 	CameraPosePort & {
 		applyRenderProfile?(profile: RenderProfileData): void;
 	};
@@ -82,13 +84,44 @@ export type MegamealGameRuntimeOptions = {
 	readonly physics: PhysicsAdapterPort;
 	readonly audio?: AudioManagerPort;
 	readonly runtimeManifest?: RuntimeSceneManifestData;
+	readonly runtimeSceneManifests?: readonly RuntimeSceneManifestData[];
+	readonly audioContentManifestForRuntimeScene?: (
+		runtimeSceneManifestId: string,
+	) => AudioContentManifest;
 };
 
 export type MegamealGameRuntime = {
 	readonly runtime: EngineRuntime;
 	readonly sceneManager: SceneManager;
-	runtimeUiState(): GameRuntimeUiState;
+	runtimeSceneState(): RuntimeSceneState;
+	requestRuntimeScene(runtimeSceneId: string): RuntimeSceneRequestResult;
+	setCollisionOverlayEnabled(enabled: boolean): RuntimeDiagnosticToggleResult;
+	runtimeDiagnostics(): RuntimeDiagnosticsState;
+	gameState(): GameHudState;
 	dispose(): Promise<void>;
+};
+
+export type RuntimeSceneState = {
+	readonly activeRuntimeSceneId?: string;
+	readonly loadingRuntimeSceneId?: string;
+	readonly availableRuntimeSceneIds: readonly string[];
+};
+
+export type RuntimeSceneRequestResult = {
+	readonly accepted: boolean;
+	readonly runtimeSceneId: string;
+	readonly message: string;
+};
+
+export type RuntimeDiagnosticToggleResult = {
+	readonly accepted: boolean;
+	readonly enabled: boolean;
+	readonly message: string;
+	readonly diagnostics: RuntimeDiagnosticsState;
+};
+
+export type RuntimeDiagnosticsState = {
+	readonly collisionOverlay: CollisionOverlayDiagnosticsState;
 };
 
 export async function createMegamealGameRuntime(
@@ -96,9 +129,15 @@ export async function createMegamealGameRuntime(
 ): Promise<MegamealGameRuntime> {
 	const runtime = new EngineRuntime();
 	const sceneManager = new SceneManager();
+	const runtimeSceneCatalog = createRuntimeSceneCatalog(options);
 	const initialRuntimeManifest =
-		options.runtimeManifest ?? defaultRuntimeSceneManifest;
-	const runtimeSceneCatalog = createRuntimeSceneCatalog(initialRuntimeManifest);
+		options.runtimeManifest ?? runtimeSceneCatalog.values().next().value;
+
+	if (!initialRuntimeManifest) {
+		throw new Error("No runtime scene manifests are registered.");
+	}
+
+	runtimeSceneCatalog.set(initialRuntimeManifest.id, initialRuntimeManifest);
 	const runtimeSceneManifests = [...runtimeSceneCatalog.values()];
 	const musicSelectionCounts = new Map<string, number>();
 	const physicsSync = new PhysicsSyncSystem({
@@ -109,23 +148,13 @@ export async function createMegamealGameRuntime(
 	const reflectionProbeSync = new ReflectionProbeSyncSystem({
 		renderer: options.renderer,
 	});
-	const waterSurfaceSync = new WaterSurfaceSyncSystem({
-		renderer: options.renderer,
-	});
-	const spatialAudio = audioSpatialPortFromOptions(options.audio);
-	const audioSpatialSync = spatialAudio
-		? createAudioSpatialSyncSystem({
-				audio: spatialAudio,
-				listenerResource: ACTIVE_CAMERA_POSE_RESOURCE,
-				activeSceneId: () =>
-					activeRuntimeSceneManifest?.level.sceneId ??
-					activeRuntimeSceneManifest?.id,
-			})
-		: undefined;
 	const audioEvents = options.audio
 		? createAudioEventSystem({
 				audio: options.audio,
-				mappings: audioMappingsForRuntimeScenes(runtimeSceneManifests),
+				mappings: audioMappingsForRuntimeScenes(
+					runtimeSceneManifests,
+					options.audioContentManifestForRuntimeScene,
+				),
 				activeSceneId: () =>
 					activeRuntimeSceneManifest?.level.sceneId ??
 					activeRuntimeSceneManifest?.id,
@@ -133,6 +162,9 @@ export async function createMegamealGameRuntime(
 		: undefined;
 	let activeRuntimeSceneManifest: RuntimeSceneManifestData | undefined;
 	let loadingRuntimeSceneId: string | undefined;
+	let collisionOverlayEnabled = false;
+	let collisionOverlayItems: readonly CollisionOverlayItem[] = [];
+	let collisionOverlayCleared = true;
 	const transitionPort: RuntimeSceneTransitionPort = {
 		currentRuntimeSceneId() {
 			return activeRuntimeSceneManifest?.id;
@@ -141,45 +173,7 @@ export async function createMegamealGameRuntime(
 			return runtimeSceneCatalog.has(runtimeSceneId);
 		},
 		requestRuntimeScene(runtimeSceneId) {
-			if (
-				loadingRuntimeSceneId !== undefined ||
-				activeRuntimeSceneManifest?.id === runtimeSceneId
-			) {
-				return;
-			}
-
-			void loadRuntimeScene(runtimeSceneId).catch((error) => {
-				runtime.events.emit({
-					type: "RuntimeSceneTransitionFailed",
-					runtimeSceneId,
-					message:
-						error instanceof Error
-							? error.message
-							: "Runtime scene transition failed.",
-				});
-			});
-		},
-		reloadRuntimeScene(runtimeSceneId) {
-			const targetRuntimeSceneId =
-				runtimeSceneId ?? activeRuntimeSceneManifest?.id;
-
-			if (
-				loadingRuntimeSceneId !== undefined ||
-				targetRuntimeSceneId === undefined
-			) {
-				return;
-			}
-
-			void loadRuntimeScene(targetRuntimeSceneId).catch((error) => {
-				runtime.events.emit({
-					type: "RuntimeSceneTransitionFailed",
-					runtimeSceneId: targetRuntimeSceneId,
-					message:
-						error instanceof Error
-							? error.message
-							: "Runtime scene reload failed.",
-				});
-			});
+			requestRuntimeScene(runtimeSceneId);
 		},
 	};
 
@@ -211,7 +205,7 @@ export async function createMegamealGameRuntime(
 	runtime.scheduler.registerSystem("character", createCharacterMotorSystem());
 	runtime.scheduler.registerSystem(
 		"character",
-		createCharacterMovementSystem({ physics: options.physics }),
+		createCharacterMovementSystem(),
 		{
 			order: 10,
 		},
@@ -226,6 +220,12 @@ export async function createMegamealGameRuntime(
 	runtime.scheduler.registerSystem("gameplay", createCollectibleSystem());
 	runtime.scheduler.registerSystem("gameplay", createPortalProximitySystem(), {
 		order: 10,
+	});
+	runtime.scheduler.registerSystem("gameplay", createNpcSignificanceSystem(), {
+		order: 12,
+	});
+	runtime.scheduler.registerSystem("gameplay", createNpcProximitySystem(), {
+		order: 14,
 	});
 	runtime.scheduler.registerSystem(
 		"gameplay",
@@ -242,14 +242,21 @@ export async function createMegamealGameRuntime(
 		createStoryNoteActivationSystem(),
 		{ order: 18 },
 	);
+	runtime.scheduler.registerSystem("gameplay", createNpcDialogSystem(), {
+		order: 19,
+	});
 	runtime.scheduler.registerSystem("gameplay", createPortalActivationSystem(), {
 		order: 20,
 	});
-	runtime.scheduler.registerSystem(
-		"physics-pre-sync",
-		createTerrainStreamingSystem(),
-		{ order: -20 },
-	);
+	runtime.scheduler.registerSystem("ai", createMovementBehaviorSystem(), {
+		order: 0,
+	});
+	runtime.scheduler.registerSystem("ai", createFollowTargetSystem(), {
+		order: 5,
+	});
+	runtime.scheduler.registerSystem("ai", createLightModulationSystem(), {
+		order: 10,
+	});
 	runtime.scheduler.registerSystem(
 		"physics-pre-sync",
 		createPhysicsPreSyncSystem(physicsSync),
@@ -272,11 +279,6 @@ export async function createMegamealGameRuntime(
 		createCameraPoseApplySystem({ camera: options.renderer }),
 		{ order: -100 },
 	);
-	if (audioSpatialSync) {
-		runtime.scheduler.registerSystem("render-sync", audioSpatialSync, {
-			order: -90,
-		});
-	}
 	runtime.scheduler.registerSystem("render-sync", {
 		id: "render-sync",
 		update({ interpolation, world }) {
@@ -312,17 +314,25 @@ export async function createMegamealGameRuntime(
 	runtime.scheduler.registerSystem(
 		"render-sync",
 		{
-			id: "water-surface-sync",
-			update({ interpolation, world, deltaSeconds, tick }) {
-				waterSurfaceSync.update({
-					...(interpolation === undefined ? {} : { interpolation }),
-					...(deltaSeconds === undefined ? {} : { deltaSeconds }),
-					...(tick === undefined ? {} : { tick }),
-					world,
-				});
+			id: "collision-overlay-sync",
+			update({ world }) {
+				if (!collisionOverlayEnabled) {
+					collisionOverlayItems = [];
+
+					if (!collisionOverlayCleared) {
+						options.renderer.clearCollisionOverlay();
+						collisionOverlayCleared = true;
+					}
+
+					return;
+				}
+
+				collisionOverlayItems = collectCollisionOverlayItems(world);
+				options.renderer.setCollisionOverlay(collisionOverlayItems);
+				collisionOverlayCleared = false;
 			},
 		},
-		{ order: 30 },
+		{ order: 90 },
 	);
 	runtime.scheduler.registerSystem("render", {
 		id: "render",
@@ -341,8 +351,22 @@ export async function createMegamealGameRuntime(
 	return {
 		runtime,
 		sceneManager,
-		runtimeUiState() {
-			return selectGameRuntimeUiState(runtime.world);
+		runtimeSceneState() {
+			return {
+				...(activeRuntimeSceneManifest
+					? { activeRuntimeSceneId: activeRuntimeSceneManifest.id }
+					: {}),
+				...(loadingRuntimeSceneId ? { loadingRuntimeSceneId } : {}),
+				availableRuntimeSceneIds: runtimeSceneManifests.map(
+					(manifest) => manifest.id,
+				),
+			};
+		},
+		requestRuntimeScene,
+		setCollisionOverlayEnabled,
+		runtimeDiagnostics,
+		gameState() {
+			return selectGameHudState(runtime.world);
 		},
 		async dispose() {
 			if (disposed) {
@@ -354,14 +378,92 @@ export async function createMegamealGameRuntime(
 			renderSync.detachAll();
 			lightSync.detachAll();
 			reflectionProbeSync.detachAll();
-			waterSurfaceSync.detachAll();
-			audioSpatialSync?.detachAll();
+			clearCollisionOverlayState();
 			options.renderer.clearSceneEnvironment();
 			await sceneManager.unload(runtime.services);
 			physicsSync.dispose();
 			runtime.dispose();
 		},
 	};
+
+	function requestRuntimeScene(
+		runtimeSceneId: string,
+	): RuntimeSceneRequestResult {
+		if (!runtimeSceneCatalog.has(runtimeSceneId)) {
+			return {
+				accepted: false,
+				runtimeSceneId,
+				message: `Runtime scene manifest "${runtimeSceneId}" is not registered.`,
+			};
+		}
+
+		if (loadingRuntimeSceneId !== undefined) {
+			return {
+				accepted: false,
+				runtimeSceneId,
+				message: `Runtime scene "${loadingRuntimeSceneId}" is already loading.`,
+			};
+		}
+
+		if (activeRuntimeSceneManifest?.id === runtimeSceneId) {
+			return {
+				accepted: true,
+				runtimeSceneId,
+				message: `Runtime scene "${runtimeSceneId}" is already active.`,
+			};
+		}
+
+		void loadRuntimeScene(runtimeSceneId).catch((error) => {
+			runtime.events.emit({
+				type: "RuntimeSceneTransitionFailed",
+				runtimeSceneId,
+				message:
+					error instanceof Error
+						? error.message
+						: "Runtime scene transition failed.",
+			});
+		});
+
+		return {
+			accepted: true,
+			runtimeSceneId,
+			message: `Runtime scene "${runtimeSceneId}" load requested.`,
+		};
+	}
+
+	function setCollisionOverlayEnabled(
+		enabled: boolean,
+	): RuntimeDiagnosticToggleResult {
+		collisionOverlayEnabled = enabled;
+
+		if (!enabled) {
+			clearCollisionOverlayState();
+		}
+
+		return {
+			accepted: true,
+			enabled,
+			message: enabled
+				? "Collision overlay enabled."
+				: "Collision overlay disabled.",
+			diagnostics: runtimeDiagnostics(),
+		};
+	}
+
+	function runtimeDiagnostics(): RuntimeDiagnosticsState {
+		return {
+			collisionOverlay: summarizeCollisionOverlay(
+				collisionOverlayEnabled,
+				collisionOverlayItems,
+			),
+		};
+	}
+
+	function clearCollisionOverlayState(): void {
+		collisionOverlayItems = [];
+		options.renderer.clearCollisionOverlay();
+		collisionOverlayCleared = true;
+	}
 
 	async function loadRuntimeScene(
 		runtimeSceneId: string,
@@ -390,14 +492,9 @@ export async function createMegamealGameRuntime(
 		renderSync.detachAll();
 		lightSync.detachAll();
 		reflectionProbeSync.detachAll();
-		audioSpatialSync?.detachAll();
+		clearCollisionOverlayState();
 		physicsSync.dispose();
-		options.audio?.setMusic({
-			trackId: undefined,
-			playing: false,
-			volume: 0,
-			fadeSeconds: runtimeSceneMusicFadeSeconds(nextRuntimeSceneManifest),
-		});
+		options.audio?.setMusic({ trackId: undefined, playing: false, volume: 0 });
 		options.renderer.clearSceneEnvironment();
 		options.renderer.applyRenderProfile?.(
 			nextRuntimeSceneManifest.renderProfile,
@@ -416,13 +513,12 @@ export async function createMegamealGameRuntime(
 				createGameScene({
 					levelLoader,
 					runtimeManifest: nextRuntimeSceneManifest,
-					physicsReady: ({ terrainPackageStartupStableIds = [] } = {}) => {
+					physicsReady: () => {
 						physicsSync.preSync(runtime.services);
 						return requiredCollisionStableIdsReady(
 							runtime.world,
 							physicsSync,
 							nextRuntimeSceneManifest,
-							terrainPackageStartupStableIds,
 						);
 					},
 				}),
@@ -439,6 +535,7 @@ export async function createMegamealGameRuntime(
 					musicSelectionCounts,
 					nextRuntimeSceneManifest.id,
 				),
+				options.audioContentManifestForRuntimeScene,
 			);
 			activeRuntimeSceneManifest = nextRuntimeSceneManifest;
 			loaded = true;
@@ -464,13 +561,16 @@ function applyRuntimeSceneMusic(
 	audio: AudioManagerPort | undefined,
 	manifest: RuntimeSceneManifestData,
 	selectionIndex: number,
+	audioContentManifestForRuntimeScene: AudioContentManifestLookup | undefined,
 ): void {
 	if (!audio) {
 		return;
 	}
 
 	const audioContent = parseAudioContentManifest(
-		audioContentManifestForRuntimeScene(manifest.id),
+		audioContentManifestForRuntimeScene?.(manifest.id) ?? {
+			eventMappings: [],
+		},
 		{
 			assetManifest: manifest.assets,
 		},
@@ -478,10 +578,6 @@ function applyRuntimeSceneMusic(
 	const musicState = musicStateFromAudioContentManifest(audioContent, {
 		selectionIndex,
 	});
-
-	if (isAudioMixerPort(audio)) {
-		audio.configureMixerBuses(audioContent.mixerBuses ?? []);
-	}
 
 	if (!musicState) {
 		return;
@@ -493,19 +589,6 @@ function applyRuntimeSceneMusic(
 	});
 }
 
-function runtimeSceneMusicFadeSeconds(
-	manifest: RuntimeSceneManifestData,
-): number {
-	const audioContent = parseAudioContentManifest(
-		audioContentManifestForRuntimeScene(manifest.id),
-		{
-			assetManifest: manifest.assets,
-		},
-	);
-
-	return audioContent.sceneMusic?.fadeSeconds ?? 0.75;
-}
-
 function nextMusicSelectionIndex(
 	counts: Map<string, number>,
 	runtimeSceneId: string,
@@ -515,26 +598,33 @@ function nextMusicSelectionIndex(
 	return nextIndex;
 }
 
-function createRuntimeSceneCatalog(
-	initialRuntimeSceneManifest: RuntimeSceneManifestData,
-): Map<string, RuntimeSceneManifestData> {
+function createRuntimeSceneCatalog(options: {
+	readonly runtimeManifest?: RuntimeSceneManifestData;
+	readonly runtimeSceneManifests?: readonly RuntimeSceneManifestData[];
+}): Map<string, RuntimeSceneManifestData> {
 	const catalog = new Map<string, RuntimeSceneManifestData>();
 
-	for (const manifest of defaultRuntimeSceneManifests) {
+	for (const manifest of options.runtimeSceneManifests ?? []) {
 		catalog.set(manifest.id, manifest);
 	}
 
-	catalog.set(initialRuntimeSceneManifest.id, initialRuntimeSceneManifest);
+	if (options.runtimeManifest) {
+		catalog.set(options.runtimeManifest.id, options.runtimeManifest);
+	}
+
 	return catalog;
 }
 
 function audioMappingsForRuntimeScenes(
 	manifests: readonly RuntimeSceneManifestData[],
+	audioContentManifestForRuntimeScene: AudioContentManifestLookup | undefined,
 ) {
 	return manifests.flatMap((manifest) =>
 		audioEventMappingsFromManifest(
 			parseAudioContentManifest(
-				audioContentManifestForRuntimeScene(manifest.id),
+				audioContentManifestForRuntimeScene?.(manifest.id) ?? {
+					eventMappings: [],
+				},
 				{
 					assetManifest: manifest.assets,
 				},
@@ -543,51 +633,18 @@ function audioMappingsForRuntimeScenes(
 	);
 }
 
-function audioSpatialPortFromOptions(
-	audio: AudioManagerPort | undefined,
-): AudioSpatialPort | undefined {
-	if (!audio || !isAudioSpatialPort(audio)) {
-		return undefined;
-	}
-
-	return audio;
-}
-
-function isAudioMixerPort(
-	audio: AudioManagerPort,
-): audio is AudioManagerPort & AudioMixerPort {
-	return (
-		"configureMixerBuses" in audio &&
-		typeof audio.configureMixerBuses === "function" &&
-		"setMixerBusVolume" in audio &&
-		typeof audio.setMixerBusVolume === "function"
-	);
-}
-
-function isAudioSpatialPort(
-	audio: AudioManagerPort,
-): audio is AudioManagerPort & AudioSpatialPort {
-	const candidate = audio as Partial<AudioSpatialPort>;
-
-	return (
-		typeof candidate.setListener === "function" &&
-		typeof candidate.attachEmitter === "function" &&
-		typeof candidate.updateEmitter === "function" &&
-		typeof candidate.detachEmitter === "function" &&
-		typeof candidate.detachAllEmitters === "function"
-	);
-}
+type AudioContentManifestLookup = (
+	runtimeSceneManifestId: string,
+) => AudioContentManifest;
 
 function requiredCollisionStableIdsReady(
 	world: EngineRuntime["world"],
 	physicsSync: PhysicsSyncSystem,
 	manifest: RuntimeSceneManifestData,
-	additionalStableIds: readonly string[] = [],
 ): boolean {
 	const requiredStableIds = [
 		...(manifest.readiness.requiredCollisionStableIds ?? []),
 		...(manifest.readiness.requiredWalkableStableIds ?? []),
-		...additionalStableIds,
 	];
 
 	if (requiredStableIds.length === 0) {

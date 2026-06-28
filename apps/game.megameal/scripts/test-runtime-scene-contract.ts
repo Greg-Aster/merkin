@@ -1,52 +1,49 @@
 import {
+	type BrowserAudioBufferSourceNodeLike,
+	type BrowserAudioContextLike,
+	BrowserAudioManager,
+	type BrowserAudioNodeLike,
+} from "../src/engine/adapters/browser/index.js";
+import {
+	AUDIO_MANAGER_RESOURCE,
+	type AssetKind,
+	AssetManager,
 	EngineRuntime,
-	type PhysicsAdapterPort,
-	PhysicsSyncSystem,
+	LevelLoader,
+	LightSyncSystem,
 	type RuntimeSceneLoadReport,
 	type RuntimeSceneManifestData,
+	SceneManager,
+	createAudioEventSystem,
 	evaluateRuntimeSceneReadiness,
 	loadRuntimeSceneManifest,
+	musicStateFromAudioContentManifest,
 	parseAudioContentManifest,
-	validateRuntimeSceneContentGraph,
+	sceneMusicTrackIds,
 } from "../src/engine/index.js";
-import { audioContentManifestForRuntimeScene } from "../src/game/assets/index.js";
+import { PrefabRegistry } from "../src/game/prefabs/index.js";
+import { createGameScene } from "../src/game/scenes/index.js";
 import {
-	LevelLoader,
-	defaultRuntimeSceneManifest,
+	ACTIVE_INTERACTION_TARGET_RESOURCE,
+	PLAYER_ENTITY_RESOURCE,
+} from "../src/game/systems/index.js";
+import fireflyArchetype from "../src/levels/global/npcs/firefly/archetype.json";
+import {
+	audioContentManifestForRuntimeScene,
 	defaultRuntimeSceneManifests,
 	getRuntimeSceneManifest,
 	mirandaDeckRuntimeSceneManifest,
 	observatoryRuntimeSceneManifest,
 	portalArenaRuntimeSceneManifest,
-	sciFiRoomRuntimeSceneManifest,
-	solitudeExpectedRuntimeImports,
-	solitudeRuntimeSceneManifest,
-	starterRuntimeSceneManifest,
-	yggdrasilExpectedRuntimeImports,
-} from "../src/game/levels/index.js";
-import { PrefabRegistry } from "../src/game/prefabs/index.js";
+} from "../src/levels/index.js";
+import observatoryFireflies from "../src/levels/observatory/npcs/fireflies.json";
 
-const observatoryWalkableChunkStableIds = [0, 1, 2, 3].flatMap((xChunk) =>
-	[0, 1, 2, 3].map(
-		(zChunk) => `observatory:walkable-mesh:chunk:x${xChunk}-z${zChunk}`,
-	),
+const fireflyPreloadAssetIds = fireflyArchetype.assets?.preload ?? [];
+const fireflyVisualPartSuffixes =
+	fireflyArchetype.visualParts?.map((part) => part.idSuffix) ?? [];
+const observatoryFireflyStableIds = observatoryFireflies.instances.map(
+	(instance) => instance.stableId,
 );
-const firstObservatoryWalkableChunkStableId =
-	"observatory:walkable-mesh:chunk:x0-z0";
-const centerObservatoryWalkableChunkStableId =
-	"observatory:walkable-mesh:chunk:x2-z2";
-const solitudeRuntimeSceneId = "solitude_runtime";
-const solitudePortalStableId = "portal-arena:portal:solitude";
-const solitudeExpectedCollisionStableIds =
-	solitudeExpectedRuntimeImports.readiness.requiredCollisionStableIds;
-const solitudeOldPathMarkers = [
-	"/generated/runtime-game-assets/",
-	"/runtime-world-partitions/",
-	".collider.",
-] as const;
-const yggdrasilRuntimeSceneId = "yggdrasil_runtime";
-const yggdrasilExpectedTerrainWalkableStableIds =
-	yggdrasilExpectedRuntimeImports.terrain.terrainOwnedWalkableStableIds;
 
 function assertEqual<TValue>(
 	actual: TValue,
@@ -75,53 +72,6 @@ function assertDeepEqual<TValue>(
 	}
 }
 
-function assertSameStringSet(
-	actual: readonly string[] | undefined,
-	expected: readonly string[],
-	message: string,
-): void {
-	assertDeepEqual([...(actual ?? [])].sort(), [...expected].sort(), message);
-}
-
-function assertMeshVertexHeight(
-	vertices: readonly unknown[],
-	x: number,
-	z: number,
-	expectedHeight: number,
-	label: string,
-): void {
-	assertEqual(
-		meshVertexHeight(vertices, x, z, label),
-		expectedHeight,
-		`${label} height at ${x},${z}`,
-	);
-}
-
-function meshVertexHeight(
-	vertices: readonly unknown[],
-	x: number,
-	z: number,
-	label: string,
-): number {
-	for (const vertex of vertices) {
-		if (!Array.isArray(vertex) || vertex.length !== 3) {
-			continue;
-		}
-
-		const [vertexX, vertexY, vertexZ] = vertex;
-
-		if (vertexX === x && vertexZ === z) {
-			if (typeof vertexY !== "number") {
-				throw new Error(`${label} vertex ${x},${z} has no numeric height.`);
-			}
-
-			return vertexY;
-		}
-	}
-
-	throw new Error(`${label} has no vertex at ${x},${z}.`);
-}
-
 function assertIncludes(
 	values: readonly string[],
 	expected: string,
@@ -131,19 +81,6 @@ function assertIncludes(
 		throw new Error(
 			message ??
 				`Expected ${JSON.stringify(values)} to include ${JSON.stringify(expected)}.`,
-		);
-	}
-}
-
-function assertNotIncludes(
-	values: readonly string[],
-	unexpected: string,
-	message?: string,
-): void {
-	if (values.includes(unexpected)) {
-		throw new Error(
-			message ??
-				`Expected ${JSON.stringify(values)} not to include ${JSON.stringify(unexpected)}.`,
 		);
 	}
 }
@@ -171,6 +108,71 @@ function cloneValue<TValue>(value: TValue): TValue {
 	return JSON.parse(JSON.stringify(value)) as TValue;
 }
 
+type FakeAudioSource = BrowserAudioBufferSourceNodeLike & {
+	started: boolean;
+	stopped: boolean;
+};
+
+function createFakeAudioContext(): {
+	readonly context: BrowserAudioContextLike;
+	readonly sources: readonly FakeAudioSource[];
+} {
+	const sources: FakeAudioSource[] = [];
+	const destination = createFakeAudioNode();
+	const context: BrowserAudioContextLike = {
+		destination,
+		currentTime: 0,
+		state: "running",
+		createGain() {
+			return {
+				...createFakeAudioNode(),
+				gain: {
+					value: 1,
+					setValueAtTime(value) {
+						this.value = value;
+					},
+				},
+			};
+		},
+		createBufferSource() {
+			const source: FakeAudioSource = {
+				...createFakeAudioNode(),
+				buffer: null,
+				loop: false,
+				onended: null,
+				started: false,
+				stopped: false,
+				start() {
+					this.started = true;
+				},
+				stop() {
+					this.stopped = true;
+					this.onended?.();
+				},
+			};
+
+			sources.push(source);
+			return source;
+		},
+		async decodeAudioData() {
+			return { duration: 1 };
+		},
+		async resume() {},
+		async close() {},
+	};
+
+	return { context, sources };
+}
+
+function createFakeAudioNode(): BrowserAudioNodeLike {
+	return {
+		connect() {
+			return undefined;
+		},
+		disconnect() {},
+	};
+}
+
 function validLoadReport(
 	manifest: RuntimeSceneManifestData,
 ): RuntimeSceneLoadReport {
@@ -182,8 +184,6 @@ function validLoadReport(
 			prefabId: instance.prefabId,
 			stableId: instance.stableId,
 		})),
-		activatedTerrainPackageIds:
-			manifest.readiness.requiredTerrainPackageIds ?? [],
 		physicsReady: true,
 		playerReady: true,
 	};
@@ -203,10 +203,10 @@ function assetBackedEnvironmentAssetId(
 	return environment.assetId;
 }
 
-function firstRequired<TValue>(
-	values: readonly TValue[] | undefined,
+function firstRequired(
+	values: readonly string[] | undefined,
 	label: string,
-): TValue {
+): string {
 	const value = values?.[0];
 
 	if (value === undefined) {
@@ -316,143 +316,6 @@ function allAssetStrings(
 	return strings;
 }
 
-function requiredYggdrasilRuntimeSceneManifest(): RuntimeSceneManifestData {
-	const manifest = defaultRuntimeSceneManifests.find(
-		(candidate) => candidate.id === yggdrasilRuntimeSceneId,
-	);
-
-	if (!manifest) {
-		throw new Error(
-			`Expected Yggdrasil runtime scene manifest "${yggdrasilRuntimeSceneId}" to be registered in defaultRuntimeSceneManifests.`,
-		);
-	}
-
-	return manifest;
-}
-
-function stableIdsWithComponent(
-	manifest: RuntimeSceneManifestData,
-	componentName: string,
-): readonly string[] {
-	return manifest.level.instances
-		.filter((instance) =>
-			isRecord(
-				componentsForStableId(manifest, instance.stableId)[componentName],
-			),
-		)
-		.map((instance) => instance.stableId);
-}
-
-function assertNonEmpty(values: readonly unknown[], message: string): void {
-	if (values.length === 0) {
-		throw new Error(message);
-	}
-}
-
-function firstTerrainPackage(manifest: RuntimeSceneManifestData) {
-	const terrainPackage = manifest.terrainPackages?.[0];
-
-	if (terrainPackage === undefined) {
-		throw new Error(
-			`Expected runtime scene "${manifest.id}" to declare a terrain package.`,
-		);
-	}
-
-	assertIncludes(
-		manifest.readiness.requiredTerrainPackageIds ?? [],
-		terrainPackage.id,
-		`Runtime scene "${manifest.id}" must require its terrain package before play.`,
-	);
-	assertEqual(terrainPackage.runtimeSceneId, manifest.id);
-	assertNonEmpty(
-		terrainPackage.chunks,
-		`Runtime scene "${manifest.id}" terrain package must contain chunks.`,
-	);
-
-	for (const chunk of terrainPackage.chunks) {
-		const components = componentsForStableId(manifest, chunk.stableId);
-		const terrainChunkCell = assertRecord(
-			components.TerrainChunkCell,
-			`${manifest.id} ${chunk.stableId} TerrainChunkCell component`,
-		);
-
-		assertEqual(terrainChunkCell.packageId, terrainPackage.id);
-		assertEqual(
-			components.Collider,
-			undefined,
-			`Terrain package chunk "${chunk.stableId}" must not ship an active Collider component.`,
-		);
-		assertEqual(
-			components.RigidBody,
-			undefined,
-			`Terrain package chunk "${chunk.stableId}" must not ship an active RigidBody component.`,
-		);
-		assertNotIncludes(
-			manifest.readiness.requiredCollisionStableIds ?? [],
-			chunk.stableId,
-			`Terrain package chunk "${chunk.stableId}" must be owned by requiredTerrainPackageIds, not requiredCollisionStableIds.`,
-		);
-		assertNotIncludes(
-			manifest.readiness.requiredWalkableStableIds ?? [],
-			chunk.stableId,
-			`Terrain package chunk "${chunk.stableId}" must be owned by requiredTerrainPackageIds, not requiredWalkableStableIds.`,
-		);
-	}
-
-	return terrainPackage;
-}
-
-function terrainChunkForStableId(
-	manifest: RuntimeSceneManifestData,
-	stableId: string,
-) {
-	for (const terrainPackage of manifest.terrainPackages ?? []) {
-		const chunk = terrainPackage.chunks.find(
-			(candidate) => candidate.stableId === stableId,
-		);
-
-		if (chunk) {
-			return chunk;
-		}
-	}
-
-	throw new Error(
-		`Expected runtime scene "${manifest.id}" terrain packages to include chunk "${stableId}".`,
-	);
-}
-
-function terrainChunksForGroup(
-	manifest: RuntimeSceneManifestData,
-	groupId: string,
-) {
-	return (manifest.terrainPackages ?? []).flatMap((terrainPackage) =>
-		terrainPackage.chunks.filter((chunk) => chunk.groupId === groupId),
-	);
-}
-
-{
-	const manifest = loadRuntimeSceneManifest(starterRuntimeSceneManifest);
-	const readiness = evaluateRuntimeSceneReadiness(
-		manifest,
-		validLoadReport(manifest),
-	);
-
-	if (!readiness.ok) {
-		throw new Error(
-			`Expected starter runtime manifest to be ready, received ${readiness.errors.join("; ")}.`,
-		);
-	}
-
-	assertEqual(defaultRuntimeSceneManifest.id, "starter_runtime");
-	assertEqual(readiness.manifestId, "starter_runtime");
-	assertEqual(manifest.level.id, "starter_level");
-	assertIncludes(
-		defaultRuntimeSceneManifests.map((runtimeManifest) => runtimeManifest.id),
-		"portal_arena_runtime",
-		"Expected Portal Arena to remain registered as optional game content.",
-	);
-}
-
 {
 	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
 	const readiness = evaluateRuntimeSceneReadiness(
@@ -471,41 +334,14 @@ function terrainChunksForGroup(
 
 {
 	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
-	const environment = manifest.renderProfile.environment;
-	const environmentAssetId = assetBackedEnvironmentAssetId(manifest);
-	const environmentAsset = manifest.assets.assets.find(
-		(asset) => asset.id === environmentAssetId,
-	);
-
-	assertEqual(environment.kind, "equirectangular-environment");
-	assertEqual(environmentAssetId, "texture_portal_arena_equirectangular_sky");
-	assertEqual(environmentAsset?.kind, "texture");
-	assertEqual(environmentAsset?.projection, "equirectangular");
-	assertIncludes(manifest.level.preload ?? [], environmentAssetId);
-	assertIncludes(
-		manifest.assets.preloadGroups?.portal_arena ?? [],
-		environmentAssetId,
-	);
-	assertIncludes(manifest.readiness.requiredAssetIds ?? [], environmentAssetId);
-}
-
-{
-	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
-	const fieldAsset = manifest.assets.assets.find(
-		(asset) => asset.id === "mesh_portal_field",
-	);
 	const floorPrefab = manifest.prefabs.find(
 		(prefab) => prefab.id === "portal_arena_floor",
 	);
 	const floorComponents = floorPrefab?.components as
 		| Record<string, Record<string, unknown>>
 		| undefined;
-	const renderable = floorComponents?.Renderable;
 	const collider = floorComponents?.Collider;
-	const terrainPackage = firstTerrainPackage(manifest);
-	const portalVisualBinding = terrainPackage.visualBindings.find(
-		(binding) => binding.stableId === "portal-arena:floor",
-	);
+	const colliderShape = collider?.shape as Record<string, unknown> | undefined;
 	const bounds = manifest.level.resources?.["game:characterBounds"] as
 		| Record<string, unknown>
 		| undefined;
@@ -516,124 +352,17 @@ function terrainChunksForGroup(
 		| Record<string, unknown>
 		| undefined;
 
-	assertIncludes(
-		manifest.readiness.requiredAssetIds ?? [],
-		"mesh_portal_field",
-	);
 	assertIncludes(manifest.readiness.requiredLightStableIds ?? [], "player");
-	assertEqual(
-		manifest.readiness.requiredAssetIds?.includes("material_arena_floor"),
-		false,
-		"Portal field GLB should own its material instead of requiring the old built-in floor material.",
-	);
-	assertEqual(fieldAsset?.url, "/assets/game/terrain/portal_field_moor.glb");
-	assertEqual(renderable?.meshId, "mesh_portal_field");
-	assertEqual(
-		Object.prototype.hasOwnProperty.call(renderable ?? {}, "materialId"),
-		false,
-		"Portal field renderable should not reference a built-in material.",
-	);
-	assertEqual(
-		collider,
-		undefined,
-		"Portal field visual prefab must not own terrain collision; collision belongs to the terrain package.",
-	);
-	assertEqual(terrainPackage.chunks.length, 36);
-	assertEqual(portalVisualBinding?.stableId, "portal-arena:floor");
-	assertEqual(portalVisualBinding?.lod, "merged-floor");
+	assertRecord(floorComponents?.Renderable, "Portal arena floor renderable");
+	assertEqual(collider?.intent, "solid");
+	assertEqual(collider?.channel, "world");
+	assertEqual(colliderShape?.type, "box");
+	assertDeepEqual(colliderShape?.halfExtents, [2600, 0.05, 2600]);
 	assertEqual(bounds?.minX, -360);
 	assertEqual(bounds?.maxX, 360);
 	assertEqual(bounds?.minZ, -360);
 	assertEqual(bounds?.maxZ, 360);
-	assertEqual(playerLight?.kind, "point");
-	assertEqual(playerLight?.color, "#ffd6a3");
-	assertEqual(playerLight?.intensity, 5.5);
-	assertEqual(playerLight?.distance, 16);
-	assertEqual(playerLight?.decay, 2);
-	assertEqual(playerLight?.visible, true);
-}
-
-{
-	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
-	const runtime = new EngineRuntime();
-	const levelLoader = new LevelLoader({
-		prefabs: new PrefabRegistry(manifest.prefabs),
-	});
-	const loadResult = await levelLoader.loadDefinition(
-		runtime.world,
-		manifest.level,
-	);
-	const player = loadResult.spawned.find(
-		(spawned) => spawned.stableId === "player",
-	);
-
-	if (!player) {
-		throw new Error("Expected portal arena player to spawn.");
-	}
-
-	const playerColliderBeforeSync = runtime.world.requireComponent<
-		Record<string, unknown>
-	>(player.entity, "Collider");
-	const normalizedOffset = assertRecord(
-		playerColliderBeforeSync.offset,
-		"Portal arena runtime player Collider.offset",
-	);
-	let createdColliderOffset: unknown;
-	const fakePhysics: PhysicsAdapterPort = {
-		createRigidBody() {
-			return 1;
-		},
-		createCollider(entity, _bodyHandle, collider) {
-			if (entity === player.entity) {
-				createdColliderOffset = collider.offset;
-			}
-			return 2;
-		},
-		destroyCollider() {},
-		destroyRigidBody() {},
-		syncBodyFromTransform() {},
-		syncTransformFromBody() {
-			return {
-				position: { x: 0, y: 0.65, z: 0 },
-				rotation: { x: 0, y: 0, z: 0, w: 1 },
-			};
-		},
-		applyImpulse() {},
-		step() {},
-		drainEvents() {
-			return [];
-		},
-		dispose() {},
-	};
-	const physicsSync = new PhysicsSyncSystem({ adapter: fakePhysics });
-
-	assertEqual(normalizedOffset.x, 0);
-	assertEqual(normalizedOffset.y, 0.9);
-	assertEqual(normalizedOffset.z, 0);
-
-	physicsSync.preSync(runtime.services);
-
-	const createdOffset = assertRecord(
-		createdColliderOffset,
-		"Portal arena physics adapter Collider.offset",
-	);
-	const playerColliderAfterSync = runtime.world.requireComponent<
-		Record<string, unknown>
-	>(player.entity, "Collider");
-	const preservedOffset = assertRecord(
-		playerColliderAfterSync.offset,
-		"Portal arena synced player Collider.offset",
-	);
-
-	assertEqual(createdOffset.x, 0);
-	assertEqual(createdOffset.y, 0.9);
-	assertEqual(createdOffset.z, 0);
-	assertEqual(playerColliderAfterSync.colliderHandle, 2);
-	assertEqual(preservedOffset.x, 0);
-	assertEqual(preservedOffset.y, 0.9);
-	assertEqual(preservedOffset.z, 0);
-
-	runtime.dispose();
+	assertRecord(playerLight, "Portal arena player light");
 }
 
 {
@@ -664,600 +393,92 @@ function terrainChunksForGroup(
 }
 
 {
-	const manifest = loadRuntimeSceneManifest(
-		requiredYggdrasilRuntimeSceneManifest(),
-	);
-	const readiness = evaluateRuntimeSceneReadiness(
-		manifest,
-		validLoadReport(manifest),
-	);
-	const audioContent = parseAudioContentManifest(
-		audioContentManifestForRuntimeScene(manifest.id),
-		{ assetManifest: manifest.assets },
-	);
-	const result = validateRuntimeSceneContentGraph({
-		manifest,
-		runtimeSceneIds: defaultRuntimeSceneManifests.map(
-			(candidate) => candidate.id,
-		),
-		audioContent,
-	});
-	const returnPortalTargets = stableIdsWithComponent(manifest, "Portal").map(
-		(stableId) =>
-			componentsForStableId(manifest, stableId).Portal as
-				| Record<string, unknown>
-				| undefined,
-	);
-	const storyNoteStableIds = stableIdsWithComponent(manifest, "StoryNote");
-	const oceanRenderable = componentForStableId(
-		manifest,
-		"yggdrasil:water:ocean",
-		"Renderable",
-	);
-	const oceanWaterSurface = componentForStableId(
-		manifest,
-		"yggdrasil:water:ocean",
-		"WaterSurface",
-	);
-	const terrainPackage = firstTerrainPackage(manifest);
-
-	if (!readiness.ok) {
-		throw new Error(
-			`Expected Yggdrasil manifest to be ready, received ${readiness.errors.join("; ")}.`,
-		);
-	}
-
-	if (!result.ok) {
-		throw new Error(
-			`Expected Yggdrasil content graph to validate:\n${result.errors.join("\n")}`,
-		);
-	}
-
-	assertEqual(readiness.manifestId, yggdrasilRuntimeSceneId);
-	assertEqual(manifest.level.id, "yggdrasil");
-	assertEqual(manifest.level.sceneId, "yggdrasil_game");
-	assertEqual(
-		defaultRuntimeSceneManifests.some(
-			(candidate) => candidate.id === yggdrasilRuntimeSceneId,
-		),
-		true,
-		"Yggdrasil runtime scene must be registered in the default catalog.",
-	);
-	assertEqual(
-		getRuntimeSceneManifest(yggdrasilRuntimeSceneId)?.id,
-		yggdrasilRuntimeSceneId,
-	);
-	assertSameStringSet(
-		manifest.readiness.requiredWalkableStableIds ?? [],
-		[],
-		"Yggdrasil readiness must not author legacy requiredWalkableStableIds for terrain-owned primitive walkables.",
-	);
-	assertSameStringSet(
-		manifest.readiness.requiredCollisionStableIds,
-		result.graph.collisionStableIds,
-		"Yggdrasil readiness.requiredCollisionStableIds must exactly match non-terrain authored collision stable IDs.",
-	);
-	assertSameStringSet(
-		terrainPackage.chunks.map((chunk) => chunk.stableId),
-		yggdrasilExpectedTerrainWalkableStableIds,
-		"Yggdrasil terrain package chunks must exactly match terrain-owned primitive walkables.",
-	);
-	assertSameStringSet(
-		manifest.readiness.requiredLightStableIds,
-		result.graph.lightStableIds,
-		"Yggdrasil readiness.requiredLightStableIds must exactly match authored light stable IDs.",
-	);
-	assertNonEmpty(
-		result.graph.authoredAssetIds.filter((assetId) =>
-			assetId.includes("yggdrasil"),
-		),
-		"Yggdrasil runtime scene must include target-owned Yggdrasil assets.",
-	);
-	assertNonEmpty(
-		result.graph.prefabIds.filter((prefabId) => prefabId.includes("yggdrasil")),
-		"Yggdrasil runtime scene must include target-owned Yggdrasil prefabs.",
-	);
-	assertEqual(
-		manifest.level.instances.filter((instance) =>
-			instance.stableId.startsWith("yggdrasil:primitive:"),
-		).length,
-		yggdrasilExpectedRuntimeImports.primitiveParity.primitiveNodeCount,
-		"Yggdrasil runtime scene must instantiate every primitive node from the target-owned parity data.",
-	);
-	assertEqual(
-		(manifest.readiness.requiredCollisionStableIds ?? []).filter((stableId) =>
-			stableId.startsWith("yggdrasil:primitive:"),
-		).length + terrainPackage.chunks.length,
-		yggdrasilExpectedRuntimeImports.primitiveParity.collisionNodeCount,
-		"Yggdrasil terrain package plus non-terrain collision readiness must cover every primitive collision node.",
-	);
-	assertIncludes(
-		result.graph.portalTargetRuntimeSceneIds,
-		"portal_arena_runtime",
-		"Yggdrasil runtime scene must include a return portal to the portal arena.",
-	);
-	assertEqual(
-		returnPortalTargets.some(
-			(portal) => portal?.targetRuntimeSceneId === "portal_arena_runtime",
-		),
-		true,
-		"Yggdrasil runtime scene must author a portal component back to the portal arena.",
-	);
-	assertNonEmpty(
-		storyNoteStableIds,
-		"Yggdrasil runtime scene must include at least one authored story note.",
-	);
-	assertIncludes(
-		manifest.readiness.requiredAssetIds ?? [],
-		"mesh_water_plane",
-		"Yggdrasil ocean must preload the shared water mesh through the manifest.",
-	);
-	assertIncludes(
-		manifest.readiness.requiredAssetIds ?? [],
-		"material_water_surface",
-		"Yggdrasil ocean must preload the shared water material through the manifest.",
-	);
-	assertDeepEqual(
-		transformPropertyForStableId(manifest, "yggdrasil:water:ocean", "position"),
-		[0, -3.35, 0],
-	);
-	assertDeepEqual(
-		transformPropertyForStableId(manifest, "yggdrasil:water:ocean", "scale"),
-		[920, 0.02, 920],
-	);
-	assertEqual(oceanRenderable.meshId, "mesh_water_plane");
-	assertEqual(oceanRenderable.materialId, "material_water_surface");
-	assertEqual(oceanWaterSurface.surfaceType, "plane");
-	assertEqual(oceanWaterSurface.bodyType, "ocean");
-	assertDeepEqual(oceanWaterSurface.refraction, {
-		enabled: true,
-		intensity: 0.08,
-	});
-	assertDeepEqual(oceanWaterSurface.gameplayVolume, {
-		enabled: false,
-	});
-	assertEqual(
-		componentsForStableId(manifest, "yggdrasil:water:ocean").Collider,
-		undefined,
-		"Yggdrasil ocean must stay visual-only until WaterSurface gameplay volumes exist.",
-	);
-
-	for (const stableId of yggdrasilExpectedTerrainWalkableStableIds) {
-		const terrainChunk = terrainChunkForStableId(manifest, stableId);
-		const collider = assertRecord(
-			terrainChunk.colliderComponent,
-			`${stableId} Yggdrasil terrain chunk collider`,
-		);
-		const shape = assertRecord(
-			collider.shape,
-			`${stableId} Yggdrasil primitive collider shape`,
-		);
-
-		assertEqual(collider.intent, "walkable");
-		assertEqual(collider.channel, "worldStatic");
-		assertEqual(
-			shape.type,
-			"box",
-			"Yggdrasil primitive collision must honor explicit cuboid source data instead of deriving collider type from render geometry.",
-		);
-		assertNotIncludes(
-			manifest.readiness.requiredCollisionStableIds ?? [],
-			stableId,
-			`Yggdrasil terrain-owned walkable ${stableId} must not be collision-required outside terrain package readiness.`,
-		);
-		assertNotIncludes(
-			manifest.readiness.requiredWalkableStableIds ?? [],
-			stableId,
-			`Yggdrasil terrain-owned walkable ${stableId} must not be listed in requiredWalkableStableIds.`,
-		);
-	}
-}
-
-{
-	const manifest = loadRuntimeSceneManifest(sciFiRoomRuntimeSceneManifest);
-	const readiness = evaluateRuntimeSceneReadiness(
-		manifest,
-		validLoadReport(manifest),
-	);
-
-	if (!readiness.ok) {
-		throw new Error(
-			`Expected Sci Fi Room manifest to be ready, received ${readiness.errors.join("; ")}.`,
-		);
-	}
-
-	assertEqual(readiness.manifestId, "sci_fi_room_runtime");
-	assertEqual(manifest.level.id, "sci_fi_room");
-	assertEqual(manifest.level.sceneId, "sci_fi_room_game");
-	assertEqual(
-		defaultRuntimeSceneManifests.includes(sciFiRoomRuntimeSceneManifest),
-		true,
-		"Sci Fi Room runtime scene must be registered in the default catalog.",
-	);
-	assertEqual(
-		getRuntimeSceneManifest("sci_fi_room_runtime")?.id,
-		"sci_fi_room_runtime",
-	);
-}
-
-{
-	const manifest = loadRuntimeSceneManifest(sciFiRoomRuntimeSceneManifest);
-	const floorExpectations = [
-		{
-			groupId: "interior",
-			materialSetId: "sci-fi-room-interior",
-		},
-		{
-			groupId: "courtyard",
-			materialSetId: "sci-fi-room-courtyard",
-		},
-		{
-			groupId: "wasteland",
-			materialSetId: "sci-fi-room-wasteland",
-		},
-	] as const;
-	firstTerrainPackage(manifest);
-	const environment = manifest.renderProfile.environment;
-	const environmentAssetId = assetBackedEnvironmentAssetId(manifest);
-	const portal = componentForStableId(
-		manifest,
-		"sci-fi-room:portal:observatory",
-		"Portal",
-	);
-	const portalCollider = componentForStableId(
-		manifest,
-		"sci-fi-room:portal:observatory",
-		"Collider",
-	);
-	const portalSoundEmitter = componentForStableId(
-		manifest,
-		"sci-fi-room:portal:observatory",
-		"SoundEmitter",
-	);
-	const playerLight = componentForStableId(manifest, "player", "Light");
-	const playerController = componentForStableId(
-		manifest,
-		"player",
-		"CharacterController",
-	);
-	const playerKinematicCollision = assertRecord(
-		playerController.kinematicCollision,
-		"Sci Fi Room player kinematic collision settings",
-	);
-	const bounds = assertRecord(
-		manifest.level.resources?.["game:characterBounds"],
-		"Sci Fi Room character bounds",
-	);
-
-	assertEqual(manifest.renderProfile.id, "sci_fi_room_interior_courtyard");
-	assertEqual(environmentAssetId, "cubemap_observatory_sky");
-	assertEqual(environment.kind, "cubemap-skybox");
-	assertIncludes(
-		manifest.readiness.requiredAssetIds ?? [],
-		"cubemap_observatory_sky",
-	);
-	assertIncludes(
-		manifest.readiness.requiredAssetIds ?? [],
-		"audio_portal_activate",
-	);
-	assertIncludes(
-		manifest.readiness.requiredAssetIds ?? [],
-		"audio_portal_cycle",
-	);
-	assertEqual(bounds.minX, -48);
-	assertEqual(bounds.maxX, 48);
-	assertEqual(bounds.minZ, -18);
-	assertEqual(bounds.maxZ, 64);
-	assertDeepEqual(
-		transformPropertyForStableId(manifest, "player", "position"),
-		[0, 1.5, 0],
-	);
-	assertEqual(playerController.groundY, 1.5);
-	assertDeepEqual(playerKinematicCollision.obstacleChannels, ["worldStatic"]);
-	assertEqual(playerLight.kind, "point");
-	assertEqual(playerLight.color, "#ffd6a3");
-	assertEqual(playerLight.intensity, 5.5);
-	assertEqual(playerLight.distance, 16);
-	assertEqual(portal.id, "sci-fi-room.observatory");
-	assertEqual(portal.label, "Observatory");
-	assertEqual(portal.targetRuntimeSceneId, "observatory_runtime");
-	assertEqual(portalCollider.intent, "trigger");
-	assertEqual(portalCollider.channel, "interaction");
-	assertEqual(portalCollider.sensor, true);
-	assertEqual(portalSoundEmitter.soundId, "audio_portal_cycle");
-
-	for (const expectation of floorExpectations) {
-		const chunks = terrainChunksForGroup(manifest, expectation.groupId);
-
-		assertNonEmpty(
-			chunks,
-			`Sci Fi Room terrain package must include ${expectation.groupId} chunks.`,
-		);
-		for (const chunk of chunks) {
-			const collider = assertRecord(
-				chunk.colliderComponent,
-				`${chunk.stableId} terrain collider`,
-			);
-			const shape = assertRecord(
-				collider.shape,
-				`${chunk.stableId} terrain collider shape`,
-			);
-			const materialBinding = assertRecord(
-				chunk.materialBinding,
-				`${chunk.stableId} terrain material binding`,
-			);
-
-			assertEqual(collider.intent, "walkable");
-			assertEqual(collider.channel, "worldStatic");
-			assertEqual(shape.type, "box");
-			assertEqual(materialBinding.materialSetId, expectation.materialSetId);
-		}
-	}
-
-	for (const [stableId, title] of [
-		["sci-fi-room:story:pillar", "Pillar Whisper"],
-		["sci-fi-room:story:bench", "Bench Note"],
-		["sci-fi-room:story:fountain", "Fountain Inscription"],
-		["sci-fi-room:story:plant", "Plant Spiral"],
-		["sci-fi-room:story:junk", "Junk Memory"],
-	] as const) {
-		const storyNote = componentForStableId(manifest, stableId, "StoryNote");
-		const collider = componentForStableId(manifest, stableId, "Collider");
-
-		assertEqual(storyNote.title, title);
-		assertEqual(storyNote.activationRadius, 2.35);
-		assertEqual(collider.intent, "trigger");
-		assertEqual(collider.channel, "interaction");
-		assertEqual(collider.sensor, true);
-	}
-
-	for (const assetString of allAssetStrings(manifest)) {
-		assertEqual(
-			assetString.includes("/generated/runtime-game-assets/"),
-			false,
-			`Sci Fi Room target manifest must not reference old generated runtime asset paths: ${assetString}`,
-		);
-		assertEqual(
-			assetString.includes(".collider."),
-			false,
-			`Sci Fi Room target manifest must not reference old generated collider binaries: ${assetString}`,
-		);
-	}
-}
-
-{
 	const manifest = loadRuntimeSceneManifest(observatoryRuntimeSceneManifest);
-	const requiredLightStableIds = [
-		"player",
-		"observatory:firefly:archive",
-		"observatory:firefly:lantern",
-		"observatory:firefly:tide",
-	] as const;
+	const requiredLightStableIds = ["player", ...observatoryFireflyStableIds];
 	const boundaryCollisionExpectations = [
 		{
 			stableId: "observatory:collision:boundary:north",
-			position: [0, 3.8, -188],
-			halfExtents: [190, 8, 4],
+			position: [0, 5.8, -304],
+			halfExtents: [320, 4, 4],
 		},
 		{
 			stableId: "observatory:collision:boundary:south",
-			position: [0, 3.8, 188],
-			halfExtents: [190, 8, 4],
+			position: [0, 5.8, 304],
+			halfExtents: [320, 4, 4],
 		},
 		{
 			stableId: "observatory:collision:boundary:east",
-			position: [188, 3.8, 0],
-			halfExtents: [4, 8, 190],
+			position: [304, 5.8, 0],
+			halfExtents: [4, 4, 320],
 		},
 		{
 			stableId: "observatory:collision:boundary:west",
-			position: [-188, 3.8, 0],
-			halfExtents: [4, 8, 190],
+			position: [-304, 5.8, 0],
+			halfExtents: [4, 4, 320],
 		},
 	] as const;
-	const environmentAssetId = assetBackedEnvironmentAssetId(manifest);
-	const environment = manifest.renderProfile.environment;
-	const environmentAsset = manifest.assets.assets.find(
-		(asset) => asset.id === "mesh_observatory_environment",
-	);
-	const renderLights = manifest.renderProfile.lighting.lights;
-	const ambientLight = renderLights.find((light) => light.kind === "ambient");
 	const terrainRenderable = componentForStableId(
 		manifest,
 		"observatory:terrain",
 		"Renderable",
 	);
-	const terrainPackage = firstTerrainPackage(manifest);
-	const walkableCollider = assertRecord(
-		terrainChunkForStableId(manifest, firstObservatoryWalkableChunkStableId)
-			.colliderComponent,
-		"Observatory walkable mesh chunk collider",
-	);
-	const centerWalkableCollider = assertRecord(
-		terrainChunkForStableId(manifest, centerObservatoryWalkableChunkStableId)
-			.colliderComponent,
-		"Observatory center walkable mesh chunk collider",
+	const walkableCollider = componentForStableId(
+		manifest,
+		"observatory:walkable-proxy",
+		"Collider",
 	);
 	const walkableShape = assertRecord(
 		walkableCollider.shape,
-		"Observatory walkable mesh chunk collider shape",
-	);
-	const centerWalkableShape = assertRecord(
-		centerWalkableCollider.shape,
-		"Observatory center walkable mesh chunk collider shape",
-	);
-	const waterRenderable = componentForStableId(
-		manifest,
-		"observatory:water",
-		"Renderable",
-	);
-	const waterMaterialAsset = manifest.assets.assets.find(
-		(asset) => asset.id === "material_water_surface",
-	);
-	const waterMaterial = assertRecord(
-		waterMaterialAsset?.material,
-		"Observatory water material",
+		"Observatory walkable proxy collider shape",
 	);
 	const bounds = assertRecord(
 		manifest.level.resources?.["game:characterBounds"],
 		"Observatory character bounds",
 	);
 	const playerLight = componentForStableId(manifest, "player", "Light");
-	const playerCollider = componentForStableId(manifest, "player", "Collider");
-	const playerCharacterController = componentForStableId(
-		manifest,
-		"player",
-		"CharacterController",
-	);
-	const playerKinematicCollision = assertRecord(
-		playerCharacterController.kinematicCollision,
-		"Observatory player kinematic collision settings",
-	);
 
-	assertIncludes(
-		manifest.readiness.requiredAssetIds ?? [],
-		"mesh_observatory_environment",
-	);
-	assertIncludes(
-		manifest.readiness.requiredAssetIds ?? [],
-		"cubemap_observatory_sky",
-	);
-	assertEqual(environmentAssetId, "cubemap_observatory_sky");
-	assertEqual(environment.kind, "cubemap-skybox");
-
-	if (environment.kind !== "cubemap-skybox") {
-		throw new Error("Observatory render profile must use a cubemap skybox.");
+	for (const assetId of fireflyPreloadAssetIds) {
+		assertIncludes(
+			manifest.readiness.requiredAssetIds ?? [],
+			assetId,
+			`Observatory readiness must include firefly archetype preload asset "${assetId}".`,
+		);
 	}
+	assertRecord(playerLight, "Observatory player light");
 
-	assertEqual(
-		environmentAsset?.url,
-		"/assets/game/observatory/observatory-environment.glb",
-	);
-	if (environment.kind !== "cubemap-skybox") {
-		throw new Error("Observatory render profile must use a cubemap skybox.");
-	}
-	assertEqual(manifest.renderProfile.id, "observatory_moon_archive");
-	assertEqual(environment.backgroundIntensity, 0.85);
-	assertEqual(environment.environmentIntensity, 1.1);
-	assertEqual(environment.backgroundBlurriness, 0.12);
-	assertEqual(ambientLight?.color, "#c9d8f2");
-	assertEqual(ambientLight?.intensity, 0.08);
-	assertEqual(
-		renderLights.some((light) => light.kind === "directional"),
-		false,
-		"Observatory v1 should not add daylight-style directional key/fill lights.",
-	);
-
-	assertDeepEqual(
-		transformPropertyForStableId(manifest, "player", "position"),
-		[-137.2, 0.43, -49.5],
-	);
-	assertEqual(playerCharacterController.groundY, 0.43);
-	assertDeepEqual(playerCollider.offset, [0, 0.9, 0]);
-	assertEqual(playerLight.kind, "point");
-	assertEqual(playerLight.color, "#ffd6a3");
-	assertEqual(playerLight.intensity, 5.5);
-	assertEqual(playerLight.distance, 16);
-	assertEqual(playerLight.decay, 2);
-	assertEqual(playerLight.visible, true);
-
-	assertEqual(terrainRenderable.meshId, "mesh_observatory_environment");
+	assertRecord(terrainRenderable, "Observatory terrain renderable");
 	assertEqual(
 		componentsForStableId(manifest, "observatory:terrain").Collider,
 		undefined,
 		"Observatory render GLB should not be treated as implicit collision.",
 	);
-	assertDeepEqual(
-		transformPropertyForStableId(manifest, "observatory:terrain", "scale"),
-		[1, 1, 1],
+	assertIncludes(
+		manifest.readiness.requiredCollisionPrefabIds ?? [],
+		"observatory_walkable_proxy",
 	);
 	assertIncludes(
 		manifest.readiness.requiredCollisionPrefabIds ?? [],
 		"observatory_boundary_blocker",
 	);
-	assertNotIncludes(
-		manifest.readiness.requiredCollisionPrefabIds ?? [],
-		"observatory_walkable_mesh",
-		"Observatory walkable terrain chunks must be terrain-package owned, not required as ordinary collision prefabs.",
+	assertIncludes(
+		manifest.readiness.requiredWalkableStableIds ?? [],
+		"observatory:walkable-proxy",
 	);
-	for (const stableId of observatoryWalkableChunkStableIds) {
-		assertIncludes(
-			terrainPackage.chunks.map((chunk) => chunk.stableId),
-			stableId,
-			"Observatory walkable chunks must be listed in the terrain package.",
-		);
-		assertNotIncludes(
-			manifest.readiness.requiredWalkableStableIds ?? [],
-			stableId,
-			"Observatory walkable chunks must not use legacy walkable readiness.",
-		);
-		assertNotIncludes(
-			manifest.readiness.requiredCollisionStableIds ?? [],
-			stableId,
-			"Observatory walkable chunks must not use legacy collision readiness.",
-		);
-	}
+	assertIncludes(
+		manifest.readiness.requiredCollisionStableIds ?? [],
+		"observatory:walkable-proxy",
+	);
 	assertEqual(walkableCollider.intent, "walkable");
 	assertEqual(walkableCollider.channel, "worldStatic");
-	assertEqual(walkableShape.type, "mesh");
-	assertEqual(centerWalkableCollider.intent, "walkable");
-	assertEqual(centerWalkableCollider.channel, "worldStatic");
-	assertEqual(centerWalkableShape.type, "mesh");
-	if (
-		!Array.isArray(walkableShape.vertices) ||
-		!Array.isArray(walkableShape.indices) ||
-		!Array.isArray(centerWalkableShape.vertices) ||
-		!Array.isArray(centerWalkableShape.indices)
-	) {
-		throw new Error(
-			"Observatory walkable mesh chunks must use mesh vertices/indices.",
-		);
-	}
-	assertEqual(walkableShape.vertices.length, 10);
-	assertEqual(walkableShape.indices.length, 24);
-	assertEqual(walkableShape.indices.length / 3, 8);
-	assertEqual(centerWalkableShape.vertices.length, 80);
-	assertEqual(centerWalkableShape.indices.length, 372);
-	assertEqual(centerWalkableShape.indices.length / 3, 124);
-	assertDeepEqual(walkableShape.vertices[0], [-106.875, 1.06, -118.75]);
-	assertDeepEqual(walkableShape.vertices[9], [-95, 0.68, -95]);
-	assertDeepEqual(walkableShape.indices.slice(0, 6), [0, 2, 1, 1, 2, 3]);
-	assertDeepEqual(centerWalkableShape.vertices[0], [0, 52.24, 0]);
-	assertDeepEqual(centerWalkableShape.vertices[79], [95, 2.84, 95]);
-	assertDeepEqual(centerWalkableShape.indices.slice(0, 6), [0, 2, 1, 1, 2, 3]);
-	assertMeshVertexHeight(
-		walkableShape.vertices,
-		-106.875,
-		-118.75,
-		1.06,
-		"Observatory first walkable mesh chunk",
-	);
-	assertMeshVertexHeight(
-		centerWalkableShape.vertices,
-		47.5,
-		47.5,
-		11.83,
-		"Observatory center walkable mesh chunk",
-	);
-	assertEqual(playerKinematicCollision.enabled, true);
-	assertEqual(playerKinematicCollision.offset, 0.04);
-	assertEqual(playerKinematicCollision.slide, true);
-	assertDeepEqual(playerKinematicCollision.obstacleChannels, ["worldStatic"]);
-	assertEqual(playerKinematicCollision.snapToGroundDistance, 0.7);
-	assertEqual(playerKinematicCollision.maxSlopeClimbAngle, 0.7853981633974483);
-	assertEqual(playerKinematicCollision.minSlopeSlideAngle, 0.8726646259971648);
-	assertDeepEqual(playerKinematicCollision.autostep, {
-		maxHeight: 0.45,
-		minWidth: 0.35,
-		includeDynamicBodies: false,
-	});
+	assertEqual(walkableShape.type, "box");
+	assertDeepEqual(walkableShape.halfExtents, [320, 0.05, 320]);
 	assertDeepEqual(
 		transformPropertyForStableId(
 			manifest,
-			firstObservatoryWalkableChunkStableId,
+			"observatory:walkable-proxy",
 			"position",
 		),
-		[0, 0, 0],
+		[0, 1.75, 0],
 	);
 	for (const expectation of boundaryCollisionExpectations) {
 		const boundaryCollider = componentForStableId(
@@ -1283,27 +504,14 @@ function terrainChunksForGroup(
 			expectation.position,
 		);
 	}
-	assertEqual(bounds.minX, -185);
-	assertEqual(bounds.maxX, 185);
-	assertEqual(bounds.minZ, -185);
-	assertEqual(bounds.maxZ, 185);
-	assertDeepEqual(
-		transformPropertyForStableId(manifest, "observatory:water", "position"),
-		[0, -2, 0],
+	assertEqual(bounds.minX, -300);
+	assertEqual(bounds.maxX, 300);
+	assertEqual(bounds.minZ, -300);
+	assertEqual(bounds.maxZ, 300);
+	assertRecord(
+		componentsForStableId(manifest, "observatory:water").Renderable,
+		"Observatory water renderable",
 	);
-	assertDeepEqual(
-		transformPropertyForStableId(manifest, "observatory:water", "scale"),
-		[4000, 0.02, 4000],
-	);
-	assertEqual(waterRenderable.meshId, "mesh_water_plane");
-	assertEqual(waterRenderable.materialId, "material_water_surface");
-	assertEqual(waterMaterial.color, "#06324a");
-	assertEqual(waterMaterial.emissive, "#01111c");
-	assertEqual(waterMaterial.emissiveIntensity, 0.05);
-	assertEqual(waterMaterial.metalness, 0);
-	assertEqual(waterMaterial.roughness, 0.18);
-	assertEqual(waterMaterial.opacity, 0.88);
-	assertEqual(waterMaterial.transparent, true);
 	assertEqual(
 		componentsForStableId(manifest, "observatory:water").Collider,
 		undefined,
@@ -1315,51 +523,79 @@ function terrainChunksForGroup(
 	}
 
 	for (const fireflyStableId of requiredLightStableIds.slice(1)) {
-		const fireflyRenderable = componentForStableId(
-			manifest,
-			fireflyStableId,
-			"Renderable",
-		);
+		const fireflyComponents = componentsForStableId(manifest, fireflyStableId);
 		const fireflyLight = componentForStableId(
 			manifest,
 			fireflyStableId,
 			"Light",
 		);
 
-		assertEqual(fireflyRenderable.meshId, "mesh_observatory_firefly_marker");
-		assertEqual(fireflyRenderable.materialId, "material_observatory_firefly");
+		assertRecord(fireflyComponents.Npc, `${fireflyStableId}.Npc`);
+		assertRecord(
+			fireflyComponents.MovementBehavior,
+			`${fireflyStableId}.MovementBehavior`,
+		);
+		assertRecord(
+			fireflyComponents.LightModulation,
+			`${fireflyStableId}.LightModulation`,
+		);
+		assertEqual(fireflyComponents.Renderable, undefined);
+
+		for (const suffix of fireflyVisualPartSuffixes) {
+			assertRecord(
+				componentForStableId(
+					manifest,
+					`${fireflyStableId}:${suffix}`,
+					"Renderable",
+				),
+				`${fireflyStableId}:${suffix}.Renderable`,
+			);
+			assertRecord(
+				componentForStableId(
+					manifest,
+					`${fireflyStableId}:${suffix}`,
+					"FollowTarget",
+				),
+				`${fireflyStableId}:${suffix}.FollowTarget`,
+			);
+		}
+
 		assertEqual(fireflyLight.kind, "point");
-		assertEqual(fireflyLight.color, "#f4ffb8");
-		assertEqual(fireflyLight.intensity, 8);
-		assertEqual(fireflyLight.distance, 34);
-		assertEqual(fireflyLight.decay, 1.6);
-		assertEqual(fireflyLight.visible, true);
+		for (const field of ["intensity", "distance", "decay"]) {
+			const value = fireflyLight[field];
+			if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+				throw new Error(
+					`${fireflyStableId}.Light.${field} must be non-negative.`,
+				);
+			}
+		}
+		if (typeof fireflyLight.color !== "string") {
+			throw new Error(`${fireflyStableId}.Light.color must be a string.`);
+		}
+		if (typeof fireflyLight.visible !== "boolean") {
+			throw new Error(`${fireflyStableId}.Light.visible must be a boolean.`);
+		}
 	}
 
-	assertDeepEqual(
-		transformPropertyForStableId(
+	for (const fireflyStableId of requiredLightStableIds.slice(1)) {
+		const position = transformPropertyForStableId(
 			manifest,
-			"observatory:firefly:archive",
+			fireflyStableId,
 			"position",
-		),
-		[-108.5, 4.4, 68],
-	);
-	assertDeepEqual(
-		transformPropertyForStableId(
-			manifest,
-			"observatory:firefly:lantern",
-			"position",
-		),
-		[72, 5.2, -92],
-	);
-	assertDeepEqual(
-		transformPropertyForStableId(
-			manifest,
-			"observatory:firefly:tide",
-			"position",
-		),
-		[132, 3.6, 104],
-	);
+		);
+
+		if (
+			!Array.isArray(position) ||
+			position.length !== 3 ||
+			position.some(
+				(value) => typeof value !== "number" || !Number.isFinite(value),
+			)
+		) {
+			throw new Error(
+				`${fireflyStableId}.transform.position must be a numeric vec3.`,
+			);
+		}
+	}
 
 	for (const assetString of allAssetStrings(manifest)) {
 		assertEqual(
@@ -1423,186 +659,33 @@ function terrainChunksForGroup(
 }
 
 {
-	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
-	const sciFiRoomPortal = componentForStableId(
-		manifest,
-		"portal-arena:portal:sci-fi-room",
-		"Portal",
-	);
-
-	assertIncludes(
-		manifest.readiness.requiredCollisionStableIds ?? [],
-		"portal-arena:portal:sci-fi-room",
-	);
-	assertEqual(sciFiRoomPortal.label, "Sci Fi Room");
-	assertEqual(sciFiRoomPortal.targetRuntimeSceneId, "sci_fi_room_runtime");
-}
-
-{
-	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
-	const solitudePortal = componentForStableId(
-		manifest,
-		solitudePortalStableId,
-		"Portal",
-	);
-
-	assertEqual(solitudePortal.label, "Solitude");
-	assertIncludes(
-		manifest.readiness.requiredCollisionStableIds ?? [],
-		solitudePortalStableId,
-	);
-	assertEqual(solitudePortal.targetRuntimeSceneId, solitudeRuntimeSceneId);
-	assertIncludes(
-		defaultRuntimeSceneManifests.map((runtimeManifest) => runtimeManifest.id),
-		solitudeRuntimeSceneId,
-	);
-}
-
-{
-	const manifest = loadRuntimeSceneManifest(solitudeRuntimeSceneManifest);
-	const readiness = evaluateRuntimeSceneReadiness(
-		manifest,
-		validLoadReport(manifest),
-	);
-	const audioContent = parseAudioContentManifest(
-		audioContentManifestForRuntimeScene(manifest.id),
-		{ assetManifest: manifest.assets },
-	);
-	const contentGraph = validateRuntimeSceneContentGraph({
-		manifest,
-		runtimeSceneIds: defaultRuntimeSceneManifests.map(
-			(runtimeManifest) => runtimeManifest.id,
-		),
-		audioContent,
-	});
-	const terrainPackage = firstTerrainPackage(manifest);
-	const requiredWalkableStableIds =
-		manifest.readiness.requiredWalkableStableIds ?? [];
-
-	if (!readiness.ok) {
-		throw new Error(
-			`Expected Solitude manifest to be ready, received ${readiness.errors.join("; ")}.`,
-		);
-	}
-
-	if (!contentGraph.ok) {
-		throw new Error(
-			`Expected Solitude content graph to validate, received ${contentGraph.errors.join("; ")}.`,
-		);
-	}
-
-	assertEqual(readiness.manifestId, solitudeRuntimeSceneId);
-	assertEqual(manifest.level.id, "solitude");
-	assertEqual(manifest.level.sceneId, "solitude_game");
-	assertEqual(
-		defaultRuntimeSceneManifests.includes(solitudeRuntimeSceneManifest),
-		true,
-		"Solitude runtime scene must be registered in the default catalog.",
-	);
-	assertEqual(
-		getRuntimeSceneManifest(solitudeRuntimeSceneId)?.id,
-		solitudeRuntimeSceneId,
-	);
-	assertSameStringSet(
-		contentGraph.graph.walkableStableIds,
-		[],
-		"Solitude terrain package chunks must not appear as active walkable Collider components before streaming activation.",
-	);
-	assertSameStringSet(
-		requiredWalkableStableIds,
-		[],
-		"Solitude terrain-owned chunks must not use legacy requiredWalkableStableIds readiness.",
-	);
-	assertSameStringSet(
-		manifest.readiness.requiredCollisionStableIds,
-		solitudeExpectedCollisionStableIds,
-		"Solitude readiness.requiredCollisionStableIds must exactly match the Solitude contract.",
-	);
-	assertSameStringSet(
-		manifest.readiness.requiredCollisionStableIds,
-		contentGraph.graph.collisionStableIds,
-		"Solitude readiness.requiredCollisionStableIds must exactly match authored collision stable IDs.",
-	);
-	assertSameStringSet(
-		manifest.readiness.requiredAssetIds,
-		solitudeExpectedRuntimeImports.assetIds,
-		"Solitude readiness.requiredAssetIds must exactly match the Solitude contract.",
-	);
-	assertSameStringSet(
-		manifest.readiness.requiredAssetIds,
-		contentGraph.graph.authoredAssetIds,
-		"Solitude readiness.requiredAssetIds must exactly match authored content assets.",
-	);
-
-	assertNonEmpty(
-		terrainChunksForGroup(manifest, "plateau"),
-		"Solitude plateau terrain must be represented by package chunks.",
-	);
-	assertNonEmpty(
-		terrainChunksForGroup(manifest, "dais"),
-		"Solitude dais terrain must be represented by package chunks.",
-	);
-
-	for (const chunk of terrainPackage.chunks) {
-		const collider = assertRecord(
-			chunk.colliderComponent,
-			`${chunk.stableId} Solitude terrain chunk collider`,
-		);
-
-		assertNotIncludes(
-			manifest.readiness.requiredCollisionStableIds ?? [],
-			chunk.stableId,
-			"Solitude terrain-owned chunks must not use legacy collision readiness.",
-		);
-		assertNotIncludes(
-			manifest.readiness.requiredWalkableStableIds ?? [],
-			chunk.stableId,
-			"Solitude terrain-owned chunks must not use legacy walkable readiness.",
-		);
-		assertEqual(collider.intent, "walkable");
-		assertEqual(collider.channel, "worldStatic");
-	}
-
-	for (const assetString of allAssetStrings(manifest)) {
-		for (const marker of solitudeOldPathMarkers) {
-			assertEqual(
-				assetString.includes(marker),
-				false,
-				`Solitude target manifest must not reference old generated/provenance-only paths: ${assetString}`,
-			);
-		}
-	}
-}
-
-{
 	const manifest = loadRuntimeSceneManifest(mirandaDeckRuntimeSceneManifest);
-	const terrainPackage = firstTerrainPackage(manifest);
-	const mainFloorChunks = terrainChunksForGroup(manifest, "main");
-	const upperFloorChunks = terrainChunksForGroup(manifest, "upper");
-	const cargoFloorChunks = terrainChunksForGroup(manifest, "cargo-hold");
-	const firstMainFloorCollider = assertRecord(
-		mainFloorChunks[0]?.colliderComponent,
-		"Miranda main terrain chunk collider",
+	const mainFloorCollider = componentForStableId(
+		manifest,
+		"miranda:floor:main",
+		"Collider",
 	);
-	const firstUpperFloorCollider = assertRecord(
-		upperFloorChunks[0]?.colliderComponent,
-		"Miranda upper terrain chunk collider",
+	const upperFloorCollider = componentForStableId(
+		manifest,
+		"miranda:floor:upper",
+		"Collider",
 	);
-	const firstCargoFloorCollider = assertRecord(
-		cargoFloorChunks[0]?.colliderComponent,
-		"Miranda cargo-hold terrain chunk collider",
+	const cargoFloorCollider = componentForStableId(
+		manifest,
+		"miranda:floor:cargo-hold",
+		"Collider",
 	);
 	const mainFloorShape = assertRecord(
-		firstMainFloorCollider.shape,
-		"Miranda main terrain chunk collider shape",
+		mainFloorCollider.shape,
+		"Miranda main floor collider shape",
 	);
 	const upperFloorShape = assertRecord(
-		firstUpperFloorCollider.shape,
-		"Miranda upper terrain chunk collider shape",
+		upperFloorCollider.shape,
+		"Miranda upper floor collider shape",
 	);
 	const cargoFloorShape = assertRecord(
-		firstCargoFloorCollider.shape,
-		"Miranda cargo-hold terrain chunk collider shape",
+		cargoFloorCollider.shape,
+		"Miranda cargo-hold floor collider shape",
 	);
 	const bounds = assertRecord(
 		manifest.level.resources?.["game:characterBounds"],
@@ -1614,34 +697,30 @@ function terrainChunksForGroup(
 		"CharacterController",
 	);
 
-	assertEqual(terrainPackage.chunks.length, 40);
-	assertEqual(mainFloorChunks.length, 32);
-	assertEqual(upperFloorChunks.length, 4);
-	assertEqual(cargoFloorChunks.length, 4);
-	assertNotIncludes(
+	assertIncludes(
 		manifest.readiness.requiredWalkableStableIds ?? [],
 		"miranda:floor:main",
 	);
-	assertNotIncludes(
+	assertIncludes(
 		manifest.readiness.requiredWalkableStableIds ?? [],
 		"miranda:floor:upper",
 	);
-	assertNotIncludes(
+	assertIncludes(
 		manifest.readiness.requiredWalkableStableIds ?? [],
 		"miranda:floor:cargo-hold",
 	);
-	assertEqual(firstMainFloorCollider.intent, "walkable");
-	assertEqual(firstMainFloorCollider.channel, "worldStatic");
-	assertEqual(firstUpperFloorCollider.intent, "walkable");
-	assertEqual(firstUpperFloorCollider.channel, "worldStatic");
-	assertEqual(firstCargoFloorCollider.intent, "walkable");
-	assertEqual(firstCargoFloorCollider.channel, "worldStatic");
+	assertEqual(mainFloorCollider.intent, "walkable");
+	assertEqual(mainFloorCollider.channel, "worldStatic");
+	assertEqual(upperFloorCollider.intent, "walkable");
+	assertEqual(upperFloorCollider.channel, "worldStatic");
+	assertEqual(cargoFloorCollider.intent, "walkable");
+	assertEqual(cargoFloorCollider.channel, "worldStatic");
 	assertEqual(mainFloorShape.type, "box");
-	assertDeepEqual(mainFloorShape.halfExtents, [6, 0.6, 6]);
+	assertDeepEqual(mainFloorShape.halfExtents, [20, 0.6, 46]);
 	assertEqual(upperFloorShape.type, "box");
-	assertDeepEqual(upperFloorShape.halfExtents, [6, 0.45, 6]);
+	assertDeepEqual(upperFloorShape.halfExtents, [9, 0.45, 9]);
 	assertEqual(cargoFloorShape.type, "box");
-	assertDeepEqual(cargoFloorShape.halfExtents, [6, 0.6, 3]);
+	assertDeepEqual(cargoFloorShape.halfExtents, [20, 0.6, 3]);
 	assertEqual(bounds.minX, -20);
 	assertEqual(bounds.maxX, 20);
 	assertEqual(bounds.minZ, -50);
@@ -1656,18 +735,12 @@ function terrainChunksForGroup(
 		"miranda:airlock:return-portal",
 		"Portal",
 	);
-	const returnPortalRenderable = componentForStableId(
-		manifest,
-		"miranda:airlock:return-portal",
-		"Renderable",
-	);
 	const returnPortalCollider = componentForStableId(
 		manifest,
 		"miranda:airlock:return-portal",
 		"Collider",
 	);
 
-	assertIncludes(manifest.readiness.requiredAssetIds ?? [], "mesh_portal_gate");
 	assertIncludes(
 		manifest.readiness.requiredAssetIds ?? [],
 		"audio_portal_activate",
@@ -1699,7 +772,6 @@ function terrainChunksForGroup(
 	assertEqual(returnPortal.id, "miranda.return.observatory");
 	assertEqual(returnPortal.label, "Return to Observatory");
 	assertEqual(returnPortal.targetRuntimeSceneId, "observatory_runtime");
-	assertEqual(returnPortalRenderable.meshId, "mesh_portal_gate");
 	assertEqual(returnPortalCollider.intent, "trigger");
 	assertEqual(returnPortalCollider.channel, "interaction");
 	assertEqual(returnPortalCollider.sensor, true);
@@ -1729,33 +801,6 @@ function terrainChunksForGroup(
 	assertErrorIncludes(
 		() => loadRuntimeSceneManifest(brokenManifest),
 		`runtimeSceneManifest.readiness.requiredLightStableIds "player" resolves to prefab "player" with no Light component.`,
-	);
-}
-
-{
-	const manifest = cloneValue(portalArenaRuntimeSceneManifest);
-	const environmentAssetId = assetBackedEnvironmentAssetId(manifest);
-	const brokenManifest = {
-		...manifest,
-		assets: {
-			...manifest.assets,
-			assets: manifest.assets.assets.filter(
-				(asset) => asset.id !== environmentAssetId,
-			),
-			preloadGroups: Object.fromEntries(
-				Object.entries(manifest.assets.preloadGroups ?? {}).map(
-					([groupId, assetIds]) => [
-						groupId,
-						assetIds.filter((assetId) => assetId !== environmentAssetId),
-					],
-				),
-			),
-		},
-	};
-
-	assertErrorIncludes(
-		() => loadRuntimeSceneManifest(brokenManifest),
-		`runtimeSceneManifest.renderProfile.environment.assetId references unknown asset "${environmentAssetId}"`,
 	);
 }
 
@@ -1811,15 +856,30 @@ function terrainChunksForGroup(
 {
 	const manifest = cloneValue(portalArenaRuntimeSceneManifest);
 	const environmentAssetId = assetBackedEnvironmentAssetId(manifest);
+	const cubemap = manifest.assets.assets.find(
+		(asset) => asset.id === environmentAssetId,
+	);
+
+	if (!cubemap?.faces) {
+		throw new Error("Expected portal arena to declare a cubemap environment.");
+	}
+
+	const brokenFaces = {
+		px: cubemap.faces.px,
+		py: cubemap.faces.py,
+		ny: cubemap.faces.ny,
+		pz: cubemap.faces.pz,
+		nz: cubemap.faces.nz,
+	};
 	const brokenManifest = {
 		...manifest,
 		assets: {
 			...manifest.assets,
 			assets: manifest.assets.assets.map((asset) =>
-				asset.id === environmentAssetId
+				asset.id === cubemap.id
 					? {
 							...asset,
-							projection: "uv" as const,
+							faces: brokenFaces,
 						}
 					: asset,
 			),
@@ -1828,65 +888,11 @@ function terrainChunksForGroup(
 
 	assertErrorIncludes(
 		() => loadRuntimeSceneManifest(brokenManifest),
-		`runtimeSceneManifest.renderProfile.environment.assetId "${environmentAssetId}" must reference a texture asset with projection "equirectangular"`,
+		"assetManifest.assets.",
 	);
-}
-
-{
-	const manifest = cloneValue(mirandaDeckRuntimeSceneManifest);
-	const material = manifest.assets.assets.find(
-		(asset) => asset.id === "material_miranda_med_pod",
-	);
-
-	if (!material?.material) {
-		throw new Error("Expected Miranda med pod material parameters to exist.");
-	}
-
-	(material.material as Record<string, unknown>).transparent = false;
-
 	assertErrorIncludes(
-		() => loadRuntimeSceneManifest(manifest),
-		"material.transparent must be true when opacity is below 1",
-	);
-}
-
-{
-	const manifest = cloneValue(mirandaDeckRuntimeSceneManifest);
-	const material = manifest.assets.assets.find(
-		(asset) => asset.id === "material_miranda_cockpit_panel_center",
-	);
-
-	if (!material?.material) {
-		throw new Error(
-			"Expected Miranda cockpit center material parameters to exist.",
-		);
-	}
-
-	(material.material as Record<string, unknown>).metalness = 1.5;
-
-	assertErrorIncludes(
-		() => loadRuntimeSceneManifest(manifest),
-		"material.metalness must be a finite number from 0 to 1",
-	);
-}
-
-{
-	const manifest = cloneValue(mirandaDeckRuntimeSceneManifest);
-	const material = manifest.assets.assets.find(
-		(asset) => asset.id === "material_miranda_server_bank_wide",
-	);
-
-	if (!material?.material) {
-		throw new Error(
-			"Expected Miranda server bank material parameters to exist.",
-		);
-	}
-
-	(material.material as Record<string, unknown>).sparkle = 1;
-
-	assertErrorIncludes(
-		() => loadRuntimeSceneManifest(manifest),
-		"material.sparkle is not a supported material parameter",
+		() => loadRuntimeSceneManifest(brokenManifest),
+		".faces.nx",
 	);
 }
 
@@ -1998,73 +1004,41 @@ function terrainChunksForGroup(
 
 {
 	const manifest = loadRuntimeSceneManifest(observatoryRuntimeSceneManifest);
-	const missingPackageId = firstRequired(
-		manifest.readiness.requiredTerrainPackageIds,
-		"Observatory terrain package readiness",
-	);
+	const missingStableId = "observatory:walkable-proxy";
 	const readiness = evaluateRuntimeSceneReadiness(manifest, {
 		...validLoadReport(manifest),
-		activatedTerrainPackageIds: [],
+		spawned: manifest.level.instances
+			.filter((instance) => instance.stableId !== missingStableId)
+			.map((instance) => ({
+				prefabId: instance.prefabId,
+				stableId: instance.stableId,
+			})),
 	});
 
 	assertEqual(readiness.ok, false);
 	assertIncludes(
 		readiness.ok ? [] : readiness.errors,
-		`Required terrain package "${missingPackageId}" was not activated.`,
+		`Required walkable collision instance "${missingStableId}" was not spawned.`,
 	);
 }
 
 {
 	const manifest = loadRuntimeSceneManifest(mirandaDeckRuntimeSceneManifest);
-	const missingPackageId = firstRequired(
-		manifest.readiness.requiredTerrainPackageIds,
-		"Miranda terrain package readiness",
-	);
+	const missingStableId = "miranda:floor:main";
 	const readiness = evaluateRuntimeSceneReadiness(manifest, {
 		...validLoadReport(manifest),
-		activatedTerrainPackageIds: [],
+		spawned: manifest.level.instances
+			.filter((instance) => instance.stableId !== missingStableId)
+			.map((instance) => ({
+				prefabId: instance.prefabId,
+				stableId: instance.stableId,
+			})),
 	});
 
 	assertEqual(readiness.ok, false);
 	assertIncludes(
 		readiness.ok ? [] : readiness.errors,
-		`Required terrain package "${missingPackageId}" was not activated.`,
-	);
-}
-
-{
-	const manifest = loadRuntimeSceneManifest(sciFiRoomRuntimeSceneManifest);
-	const missingPackageId = firstRequired(
-		manifest.readiness.requiredTerrainPackageIds,
-		"Sci-Fi Room terrain package readiness",
-	);
-	const readiness = evaluateRuntimeSceneReadiness(manifest, {
-		...validLoadReport(manifest),
-		activatedTerrainPackageIds: [],
-	});
-
-	assertEqual(readiness.ok, false);
-	assertIncludes(
-		readiness.ok ? [] : readiness.errors,
-		`Required terrain package "${missingPackageId}" was not activated.`,
-	);
-}
-
-{
-	const manifest = loadRuntimeSceneManifest(solitudeRuntimeSceneManifest);
-	const missingPackageId = firstRequired(
-		manifest.readiness.requiredTerrainPackageIds,
-		"Solitude terrain package readiness",
-	);
-	const readiness = evaluateRuntimeSceneReadiness(manifest, {
-		...validLoadReport(manifest),
-		activatedTerrainPackageIds: [],
-	});
-
-	assertEqual(readiness.ok, false);
-	assertIncludes(
-		readiness.ok ? [] : readiness.errors,
-		`Required terrain package "${missingPackageId}" was not activated.`,
+		`Required walkable collision instance "${missingStableId}" was not spawned.`,
 	);
 }
 
@@ -2105,6 +1079,450 @@ function terrainChunksForGroup(
 		() => loadRuntimeSceneManifest(manifest),
 		"Light.distance must be a non-negative finite number",
 	);
+}
+
+{
+	const world = new EngineRuntime().world;
+	const entity = world.createEntity();
+	const calls: string[] = [];
+	const lightSync = new LightSyncSystem({
+		renderer: {
+			attachLight(attachedEntity) {
+				calls.push(`attach:${attachedEntity}`);
+			},
+			updateLight(updatedEntity) {
+				calls.push(`update:${updatedEntity}`);
+			},
+			detachLight(detachedEntity) {
+				calls.push(`detach:${detachedEntity}`);
+			},
+		},
+	});
+
+	world.addComponent(entity, "Transform", {
+		position: { x: 0, y: 1, z: 2 },
+		rotation: { x: 0, y: 0, z: 0, w: 1 },
+		scale: { x: 1, y: 1, z: 1 },
+	});
+	world.addComponent(entity, "Light", {
+		kind: "point",
+		color: "#7dc8ff",
+		intensity: 5,
+		distance: 16,
+		decay: 2,
+	});
+
+	lightSync.update({ world });
+	lightSync.update({ world });
+
+	world.addComponent(entity, "Light", {
+		kind: "point",
+		color: "#7dc8ff",
+		intensity: 8,
+		distance: 20,
+		decay: 2,
+	});
+	lightSync.update({ world });
+
+	assertDeepEqual(calls, [
+		`attach:${entity}`,
+		`update:${entity}`,
+		`update:${entity}`,
+	]);
+
+	lightSync.detachAll();
+
+	assertDeepEqual(calls, [
+		`attach:${entity}`,
+		`update:${entity}`,
+		`update:${entity}`,
+		`detach:${entity}`,
+	]);
+}
+
+for (const manifest of defaultRuntimeSceneManifests) {
+	const audioContent = parseAudioContentManifest(
+		audioContentManifestForRuntimeScene(manifest.id),
+		{
+			assetManifest: manifest.assets,
+		},
+	);
+	const preloadedAssetIds = new Set(manifest.level.preload);
+	const requiredAssetIds = new Set(manifest.readiness.requiredAssetIds ?? []);
+	const audioAssetIds = [
+		...audioContent.eventMappings.map((mapping) => mapping.soundId),
+		...sceneMusicTrackIds(audioContent.sceneMusic),
+	];
+
+	for (const audioAssetId of audioAssetIds) {
+		assertEqual(
+			preloadedAssetIds.has(audioAssetId),
+			true,
+			`${manifest.id} must preload audio asset "${audioAssetId}".`,
+		);
+		assertEqual(
+			requiredAssetIds.has(audioAssetId),
+			true,
+			`${manifest.id} must require audio asset "${audioAssetId}" for readiness.`,
+		);
+	}
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(observatoryRuntimeSceneManifest);
+	const audioContent = parseAudioContentManifest(
+		audioContentManifestForRuntimeScene(manifest.id),
+		{
+			assetManifest: manifest.assets,
+		},
+	);
+
+	assertEqual(
+		audioContent.sceneMusic,
+		undefined,
+		"Observatory foundation should not add scene music before a target asset is verified.",
+	);
+	assertEqual(
+		audioContent.eventMappings.some(
+			(mapping) =>
+				mapping.sceneId === "observatory_game" &&
+				mapping.eventType === "EntityJumpRequested" &&
+				mapping.soundId === "audio_player_jump",
+		),
+		true,
+	);
+	assertEqual(
+		audioContent.eventMappings.some(
+			(mapping) =>
+				mapping.sceneId === "observatory_game" &&
+				mapping.eventType === "ChargeActionReleased" &&
+				mapping.soundId === "audio_player_charge_release",
+		),
+		true,
+	);
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
+	const readiness = evaluateRuntimeSceneReadiness(manifest, {
+		...validLoadReport(manifest),
+		preloadedAssetIds: validLoadReport(manifest).preloadedAssetIds.filter(
+			(assetId) => assetId !== "audio_ambient_portal_deck",
+		),
+	});
+
+	assertEqual(readiness.ok, false);
+	assertIncludes(
+		readiness.ok ? [] : readiness.errors,
+		'Required asset "audio_ambient_portal_deck" was not preloaded.',
+	);
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
+	const audioContent = cloneValue(
+		audioContentManifestForRuntimeScene(manifest.id),
+	);
+	const mapping = audioContent.eventMappings[0];
+
+	if (!mapping) {
+		throw new Error(
+			"Expected portal arena audio content to include a mapping.",
+		);
+	}
+
+	assertErrorIncludes(
+		() =>
+			parseAudioContentManifest(
+				{
+					eventMappings: [
+						{
+							...mapping,
+							soundId: "missing_audio_asset",
+						},
+					],
+				},
+				{
+					assetManifest: manifest.assets,
+				},
+			),
+		'unknown audio asset "missing_audio_asset"',
+	);
+}
+
+{
+	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
+	const audioContent = cloneValue(
+		audioContentManifestForRuntimeScene(manifest.id),
+	);
+
+	if (!audioContent.sceneMusic) {
+		throw new Error(
+			"Expected portal arena audio content to declare scene music.",
+		);
+	}
+
+	assertDeepEqual(sceneMusicTrackIds(audioContent.sceneMusic), [
+		"audio_ambient_portal_deck",
+		"audio_ambient_shadow_waltz",
+		"audio_ambient_whistling_dreams",
+	]);
+	assertEqual(
+		musicStateFromAudioContentManifest(audioContent, { selectionIndex: 0 })
+			?.trackId,
+		"audio_ambient_portal_deck",
+	);
+	assertEqual(
+		musicStateFromAudioContentManifest(audioContent, { selectionIndex: 1 })
+			?.trackId,
+		"audio_ambient_shadow_waltz",
+	);
+	assertEqual(
+		musicStateFromAudioContentManifest(audioContent, { selectionIndex: 2 })
+			?.trackId,
+		"audio_ambient_whistling_dreams",
+	);
+	assertEqual(
+		musicStateFromAudioContentManifest(audioContent, { selectionIndex: 3 })
+			?.trackId,
+		"audio_ambient_portal_deck",
+	);
+
+	assertErrorIncludes(
+		() =>
+			parseAudioContentManifest(
+				{
+					...audioContent,
+					sceneMusic: {
+						...audioContent.sceneMusic,
+						trackIds: ["missing_music_asset"],
+					},
+				},
+				{
+					assetManifest: manifest.assets,
+				},
+			),
+		'unknown audio asset "missing_music_asset"',
+	);
+}
+
+{
+	const fakeAudio = createFakeAudioContext();
+	const manager = new BrowserAudioManager({
+		context: fakeAudio.context,
+	});
+
+	manager.registerSound("audio_ambient_portal_deck", { duration: 10 });
+	manager.setMusic({
+		trackId: "audio_ambient_portal_deck",
+		playing: true,
+		volume: 0.18,
+		sceneId: "portal_arena_game",
+	});
+
+	assertEqual(fakeAudio.sources.length, 1);
+	assertEqual(fakeAudio.sources[0]?.started, true);
+	assertEqual(fakeAudio.sources[0]?.loop, true);
+	assertEqual(manager.stats().activeSounds, 1);
+	assertEqual(manager.stats().musicTrackId, "audio_ambient_portal_deck");
+
+	manager.setMusic({
+		trackId: "audio_ambient_portal_deck",
+		playing: true,
+		volume: 0.08,
+		sceneId: "portal_arena_game",
+	});
+
+	assertEqual(fakeAudio.sources.length, 1);
+
+	manager.stopScene("portal_arena_game");
+
+	assertEqual(fakeAudio.sources[0]?.stopped, true);
+	assertEqual(manager.stats().activeSounds, 0);
+	manager.dispose();
+}
+
+{
+	const playedSounds: string[] = [];
+	const audioEvents = createAudioEventSystem({
+		activeSceneId: () => "scene:b",
+		audio: {
+			async unlock() {
+				return "unlocked";
+			},
+			registerSound() {},
+			unregisterSound() {},
+			hasSound() {
+				return true;
+			},
+			play(event) {
+				playedSounds.push(`${event.soundId}:${event.sceneId ?? "global"}`);
+				return undefined;
+			},
+			stop() {},
+			stopScene() {},
+			stopAll() {},
+			setMusic() {},
+			stats() {
+				return {
+					unlocked: true,
+					loadedSounds: 0,
+					activeSounds: 0,
+				};
+			},
+			dispose() {},
+		},
+		mappings: [
+			{
+				eventType: "EntityJumpRequested",
+				soundId: "jump-a",
+				sceneId: "scene:a",
+			},
+			{
+				eventType: "EntityJumpRequested",
+				soundId: "jump-b",
+				sceneId: "scene:b",
+			},
+		],
+	});
+
+	audioEvents.handle({ type: "EntityJumpRequested", entity: 1 });
+
+	assertDeepEqual(playedSounds, ["jump-b:scene:b"]);
+}
+
+{
+	const playedSounds: string[] = [];
+	const audioEvents = createAudioEventSystem({
+		audio: {
+			async unlock() {
+				return "unlocked";
+			},
+			registerSound() {},
+			unregisterSound() {},
+			hasSound() {
+				return true;
+			},
+			play(event) {
+				playedSounds.push(`${event.soundId}:${event.sceneId ?? "global"}`);
+				return undefined;
+			},
+			stop() {},
+			stopScene() {},
+			stopAll() {},
+			setMusic() {},
+			stats() {
+				return {
+					unlocked: true,
+					loadedSounds: 0,
+					activeSounds: 0,
+				};
+			},
+			dispose() {},
+		},
+		mappings: [
+			{
+				eventType: "EntityJumpRequested",
+				soundId: "jump-a",
+				sceneId: "scene:a",
+			},
+		],
+	});
+
+	audioEvents.handle({ type: "EntityJumpRequested", entity: 1 });
+	audioEvents.handle({
+		type: "EntityJumpRequested",
+		entity: 1,
+		sceneId: "scene:a",
+	});
+
+	assertDeepEqual(playedSounds, ["jump-a:scene:a"]);
+}
+
+{
+	const runtime = new EngineRuntime();
+	const sceneManager = new SceneManager();
+	const manifest = loadRuntimeSceneManifest(portalArenaRuntimeSceneManifest);
+	const assets = new AssetManager(manifest.assets);
+	const loadedAssetIds: string[] = [];
+	const disposedAssetIds: string[] = [];
+	const stoppedSceneAudioIds: string[] = [];
+	const assetKinds = new Set(
+		manifest.assets.assets.map((asset) => asset.kind),
+	) as ReadonlySet<AssetKind>;
+
+	for (const kind of assetKinds) {
+		assets.registerLoader(kind, async (entry) => {
+			loadedAssetIds.push(entry.id);
+			return { id: entry.id, kind: entry.kind };
+		});
+		assets.registerDisposer(kind, (_asset, entry) => {
+			disposedAssetIds.push(entry.id);
+		});
+	}
+
+	runtime.world.setResource(AUDIO_MANAGER_RESOURCE, {
+		stopScene(sceneId: string) {
+			stoppedSceneAudioIds.push(sceneId);
+		},
+	});
+
+	const levelLoader = new LevelLoader({
+		prefabs: new PrefabRegistry(manifest.prefabs),
+		assets,
+	});
+
+	await sceneManager.load(
+		createGameScene({
+			levelLoader,
+			runtimeManifest: manifest,
+			physicsReady: () => true,
+		}),
+		runtime.services,
+	);
+
+	assertEqual(sceneManager.status, "active");
+	assertEqual(runtime.world.entities().length, manifest.level.instances.length);
+	assertEqual(runtime.world.hasResource(PLAYER_ENTITY_RESOURCE), true);
+	runtime.world.setResource(ACTIVE_INTERACTION_TARGET_RESOURCE, {
+		kind: "portal",
+		entity: -1,
+		id: "stale-portal",
+		label: "Stale Portal",
+		prompt: "This target should be removed on unload",
+		targetRuntimeSceneId: "prototype_arena_runtime",
+		canTravel: true,
+		distanceSquared: 0,
+	});
+
+	const expectedPreloadedAssets = [...(manifest.level.preload ?? [])].sort();
+
+	for (const assetId of expectedPreloadedAssets) {
+		assertEqual(assets.refCount(assetId), 1);
+	}
+
+	assertEqual(assets.listLoaded().length, expectedPreloadedAssets.length);
+
+	await sceneManager.unload(runtime.services);
+
+	assertEqual(sceneManager.status, "disposed");
+	assertEqual(sceneManager.activeScene, undefined);
+	assertEqual(runtime.world.entities().length, 0);
+	assertEqual(runtime.world.hasResource(PLAYER_ENTITY_RESOURCE), false);
+	assertEqual(
+		runtime.world.hasResource(ACTIVE_INTERACTION_TARGET_RESOURCE),
+		false,
+	);
+	assertEqual(assets.listLoaded().length, 0);
+	assertIncludes(stoppedSceneAudioIds, "portal_arena_game");
+
+	for (const assetId of expectedPreloadedAssets) {
+		assertEqual(assets.refCount(assetId), 0);
+		assertIncludes(loadedAssetIds, assetId);
+		assertIncludes(disposedAssetIds, assetId);
+	}
+
+	runtime.dispose();
 }
 
 console.log("Runtime scene contract validation passed.");

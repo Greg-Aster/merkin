@@ -118,4 +118,4 @@ backgrounds, environment maps, or probe resources.
 - Production content can opt into the new modes after assets are explicitly
   declared in the selected runtime scene manifest preload/readiness sets.
 - Future skybox and scene-environment feature packets are tracked in
-  `docs/Done/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`.
+  `docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md`.

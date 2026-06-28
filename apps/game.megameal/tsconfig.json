@@ -16,7 +16,10 @@
     "paths": {
       "@/*": ["src/*"],
       "@engine/*": ["src/engine/*"],
+      "@editor/*": ["src/editor/*"],
       "@game/*": ["src/game/*"],
+      "@global/*": ["src/global/*"],
+      "@levels/*": ["src/levels/*"],
       "@ui/*": ["src/ui/*"]
     }
   },

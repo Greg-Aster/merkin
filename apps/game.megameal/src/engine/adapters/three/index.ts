@@ -13,9 +13,10 @@ import type {
 } from "../../modules/assets/index.js";
 import type { CameraPose, CameraPosePort } from "../../modules/camera/index.js";
 import type {
+	CollisionOverlayItem,
+	CollisionOverlayRendererPort,
 	LightComponent,
 	LightRendererPort,
-	LightShadowSettings,
 	ReflectionProbeComponent,
 	ReflectionProbeRendererPort,
 	RenderTransform,
@@ -24,8 +25,7 @@ import type {
 	SceneEnvironment,
 	SceneEnvironmentAssetResolver,
 	SceneEnvironmentRendererPort,
-	WaterSurfaceRendererPort,
-	WaterSurfaceRendererState,
+	SpriteRenderableComponent,
 } from "../../modules/rendering/index.js";
 
 export type ThreeAdapterBoundary = {
@@ -34,28 +34,6 @@ export type ThreeAdapterBoundary = {
 
 export type ThreeVectorLike = {
 	set(x: number, y: number, z: number): void;
-	readonly x?: number;
-	readonly y?: number;
-	readonly z?: number;
-};
-
-export type ThreeVector2Like = {
-	x: number;
-	y: number;
-	set?(x: number, y: number): void;
-};
-
-export type ThreeVector3Like = {
-	x: number;
-	y: number;
-	z: number;
-	project?(camera: ThreeCameraLike): ThreeVector3Like;
-};
-
-export type ThreeBox3Like = {
-	readonly min: ThreeVector3Like;
-	readonly max: ThreeVector3Like;
-	setFromObject?(object: ThreeObject3DLike): ThreeBox3Like;
 };
 
 export type ThreeQuaternionLike = {
@@ -120,9 +98,6 @@ export type ThreeCubeCameraLike = ThreeObject3DLike & {
 };
 
 export type ThreeGeometryLike = ThreeDisposableLike;
-type ThreePlaneGeometryLike = ThreeGeometryLike & {
-	rotateX?(radians: number): unknown;
-};
 
 export type ThreeMaterialLike = {
 	dispose?(): void;
@@ -135,6 +110,7 @@ export type ThreeMaterialLike = {
 	readonly emissiveMap?: ThreeTextureLike | null;
 	envMap?: ThreeTextureLike | null | undefined;
 	needsUpdate?: boolean;
+	toneMapped?: boolean;
 	uniforms?: Record<string, unknown>;
 	readonly lightMap?: ThreeTextureLike | null;
 	readonly metalnessMap?: ThreeTextureLike | null;
@@ -143,13 +119,15 @@ export type ThreeMaterialLike = {
 	readonly specularMap?: ThreeTextureLike | null;
 };
 
-export type ThreeShaderMaterialParameters = {
-	readonly uniforms?: Record<string, { value: unknown }>;
-	readonly vertexShader?: string;
-	readonly fragmentShader?: string;
+export type ThreeSpriteMaterialParameters = {
+	readonly map?: ThreeTextureLike;
+	readonly color?: string | number;
 	readonly transparent?: boolean;
+	readonly opacity?: number;
+	readonly alphaTest?: number;
+	readonly blending?: unknown;
 	readonly depthWrite?: boolean;
-	readonly side?: unknown;
+	readonly depthTest?: boolean;
 };
 
 export type ThreeObject3DLike = {
@@ -158,14 +136,12 @@ export type ThreeObject3DLike = {
 	position: ThreeVectorLike;
 	quaternion: ThreeQuaternionLike;
 	scale: ThreeVectorLike;
+	renderOrder?: number;
 	parent?: { remove(object: ThreeObject3DLike): void } | null;
 	children?: readonly ThreeObject3DLike[];
-	renderOrder?: number;
 	add?(object: ThreeObject3DLike): void;
 	remove?(object: ThreeObject3DLike): void;
 	traverse?(callback: (object: ThreeObject3DLike) => void): void;
-	updateMatrixWorld?(force?: boolean): void;
-	updateWorldMatrix?(updateParents?: boolean, updateChildren?: boolean): void;
 	clone?(recursive?: boolean): ThreeObject3DLike;
 	geometry?: ThreeGeometryLike | null;
 	material?: ThreeMaterialLike | readonly ThreeMaterialLike[] | null;
@@ -176,29 +152,11 @@ type ThreeLightObjectLike = ThreeObject3DLike & {
 	color?: {
 		set(color: string | number): void;
 	};
-	castShadow?: boolean;
 	intensity?: number;
 	distance?: number;
 	decay?: number;
 	angle?: number;
 	penumbra?: number;
-	width?: number;
-	height?: number;
-	shadow?: {
-		mapSize?: {
-			set?(width: number, height: number): void;
-			width?: number;
-			height?: number;
-		};
-		bias?: number;
-		normalBias?: number;
-		radius?: number;
-		camera?: {
-			near?: number;
-			far?: number;
-			updateProjectionMatrix?(): void;
-		};
-	};
 };
 
 export type ThreeSceneLike = ThreeObject3DLike & {
@@ -225,36 +183,7 @@ export type ThreeRendererLike = ThreeDisposableLike & {
 	setClearColor?(color: string | number, alpha?: number): void;
 	setPixelRatio?(pixelRatio: number): void;
 	setSize?(width: number, height: number, updateStyle?: boolean): void;
-	shadowMap?: {
-		enabled?: boolean;
-		type?: unknown;
-	};
 	toneMappingExposure?: number;
-};
-
-export type ThreeRaycasterIntersectionLike = {
-	readonly distance?: number;
-	readonly object?: ThreeObject3DLike;
-	readonly point?: {
-		readonly x: number;
-		readonly y: number;
-		readonly z: number;
-	};
-	readonly face?: {
-		readonly normal?: {
-			readonly x: number;
-			readonly y: number;
-			readonly z: number;
-		};
-	};
-};
-
-export type ThreeRaycasterLike = {
-	setFromCamera(point: ThreeVector2Like, camera: ThreeCameraLike): void;
-	intersectObjects(
-		objects: readonly ThreeObject3DLike[],
-		recursive?: boolean,
-	): ThreeRaycasterIntersectionLike[];
 };
 
 export type ThreeMeshStandardMaterialParameters = {
@@ -265,6 +194,8 @@ export type ThreeMeshStandardMaterialParameters = {
 	roughness?: number;
 	opacity?: number;
 	transparent?: boolean;
+	wireframe?: boolean;
+	depthWrite?: boolean;
 };
 
 export type ThreeRuntime = {
@@ -285,43 +216,32 @@ export type ThreeRuntime = {
 		height: number,
 		depth: number,
 	) => ThreeGeometryLike;
-	readonly PlaneGeometry?: new (
-		width: number,
-		height: number,
-		widthSegments?: number,
-		heightSegments?: number,
-	) => ThreePlaneGeometryLike;
 	readonly CylinderGeometry?: new (
 		radiusTop: number,
 		radiusBottom: number,
 		height: number,
 		radialSegments?: number,
 	) => ThreeGeometryLike;
-	readonly TorusGeometry?: new (
+	readonly SphereGeometry?: new (
 		radius: number,
-		tube: number,
+		widthSegments?: number,
+		heightSegments?: number,
+	) => ThreeGeometryLike;
+	readonly CapsuleGeometry?: new (
+		radius: number,
+		length: number,
+		capSegments?: number,
 		radialSegments?: number,
-		tubularSegments?: number,
-	) => ThreeGeometryLike;
-	readonly IcosahedronGeometry?: new (
-		radius: number,
-		detail?: number,
-	) => ThreeGeometryLike;
-	readonly DodecahedronGeometry?: new (
-		radius: number,
-		detail?: number,
 	) => ThreeGeometryLike;
 	readonly MeshStandardMaterial: new (
 		parameters?: ThreeMeshStandardMaterialParameters,
 	) => ThreeMaterialLike;
-	readonly ShaderMaterial?: new (
-		parameters?: ThreeShaderMaterialParameters,
+	readonly SpriteMaterial?: new (
+		parameters?: ThreeSpriteMaterialParameters,
 	) => ThreeMaterialLike;
-	readonly Color?: new (color: string | number) => unknown;
-	readonly Vector2?: new (x: number, y: number) => ThreeVector2Like;
-	readonly Vector3?: new (x: number, y: number, z: number) => ThreeVector3Like;
-	readonly Box3?: new () => ThreeBox3Like;
-	readonly Raycaster?: new () => ThreeRaycasterLike;
+	readonly Sprite?: new (material: ThreeMaterialLike) => ThreeObject3DLike;
+	readonly CanvasTexture?: new (canvas: HTMLCanvasElement) => ThreeTextureLike;
+	readonly AdditiveBlending?: unknown;
 	readonly AmbientLight?: new (
 		color: string | number,
 		intensity: number,
@@ -344,12 +264,6 @@ export type ThreeRuntime = {
 		penumbra?: number,
 		decay?: number,
 	) => ThreeObject3DLike;
-	readonly RectAreaLight?: new (
-		color: string | number,
-		intensity: number,
-		width?: number,
-		height?: number,
-	) => ThreeObject3DLike;
 	readonly CubeTextureLoader?: new () => ThreeCubeTextureLoaderLike;
 	readonly TextureLoader?: new () => ThreeTextureLoaderLike;
 	readonly VideoTexture?: ThreeVideoTextureConstructor;
@@ -365,7 +279,6 @@ export type ThreeRuntime = {
 		renderTarget: ThreeWebGLCubeRenderTargetLike,
 	) => ThreeCubeCameraLike;
 	readonly Sky?: new () => ThreeObject3DLike;
-	readonly DoubleSide?: unknown;
 	readonly EquirectangularReflectionMapping?: unknown;
 	readonly SRGBColorSpace?: unknown;
 	readonly LinearSRGBColorSpace?: unknown;
@@ -432,13 +345,32 @@ export type ThreeVideoAsset = {
 	pause(): void;
 };
 
+export type ThreeSpriteAsset = {
+	readonly kind: "three:sprite";
+	readonly entry: AssetManifestEntry;
+	readonly color: string;
+	readonly size: number;
+	readonly opacity: number;
+	readonly intensity: number;
+	readonly glow: number;
+	readonly starType: "point" | "sparkle" | "halo" | "classic";
+	readonly depthTest: boolean;
+	readonly renderOrder: number;
+};
+
+type StarSpriteTexture = {
+	readonly canvas: HTMLCanvasElement;
+	readonly scaleMultiplier: number;
+};
+
 export type ThreeRenderableAsset =
 	| ThreeBuiltinMeshAsset
 	| ThreeMaterialFactoryAsset
 	| ThreeGltfAsset
 	| ThreeCubemapAsset
 	| ThreeTextureAsset
-	| ThreeVideoAsset;
+	| ThreeVideoAsset
+	| ThreeSpriteAsset;
 
 export type ThreeAssetLoaderRegistrationTarget = {
 	registerLoader(kind: AssetKind, loader: AssetLoader): void;
@@ -531,70 +463,12 @@ export type ThreeResolvedObject =
 	| {
 			readonly object: ThreeObject3DLike;
 			readonly disposeOnDetach?: boolean;
+			readonly scaleMultiplier?: Vec3;
 	  };
 
 export type ThreeObjectResolver = (
 	renderable: RenderableComponent,
 ) => ThreeResolvedObject | undefined;
-
-export type ThreeRenderedSceneHitTestRequest = {
-	readonly viewport: {
-		readonly width: number;
-		readonly height: number;
-	};
-	readonly screenPoint: {
-		readonly x: number;
-		readonly y: number;
-	};
-	readonly entityFilter?: ReadonlySet<Entity>;
-};
-
-export type ThreeRenderedSceneBoxSelectRequest = {
-	readonly viewport: {
-		readonly width: number;
-		readonly height: number;
-	};
-	readonly rect: {
-		readonly x: number;
-		readonly y: number;
-		readonly width: number;
-		readonly height: number;
-	};
-	readonly entityFilter?: ReadonlySet<Entity>;
-};
-
-export type ThreeRenderedSceneHitTestResult =
-	| {
-			readonly status: "hit";
-			readonly entity: Entity;
-			readonly distance: number;
-			readonly worldPosition: readonly [number, number, number];
-			readonly worldNormal?: readonly [number, number, number];
-	  }
-	| {
-			readonly status: "miss";
-	  }
-	| {
-			readonly status: "unavailable";
-			readonly reason: "rendered-hit-test-unavailable";
-	  };
-
-export type ThreeRenderedSceneBoxSelectResult =
-	| {
-			readonly status: "hit";
-			readonly hits: readonly {
-				readonly entity: Entity;
-				readonly distance: number;
-				readonly worldPosition: readonly [number, number, number];
-			}[];
-	  }
-	| {
-			readonly status: "miss";
-	  }
-	| {
-			readonly status: "unavailable";
-			readonly reason: "rendered-hit-test-unavailable";
-	  };
 
 export type ThreeRendererAdapterOptions = {
 	readonly three: ThreeRuntime;
@@ -615,6 +489,16 @@ export type ThreeRendererAdapterOptions = {
 	readonly resolveObject?: ThreeObjectResolver;
 };
 
+export async function createDefaultThreeRendererAdapter(
+	options: Omit<ThreeRendererAdapterOptions, "three"> = {},
+): Promise<ThreeRendererAdapter> {
+	const three = await loadDefaultThreeRuntime();
+	return new ThreeRendererAdapter({
+		...options,
+		three,
+	});
+}
+
 export async function loadDefaultThreeRuntime(): Promise<ThreeRuntime> {
 	return (await import("three")) as unknown as ThreeRuntime;
 }
@@ -628,15 +512,18 @@ export function registerThreeAssetLoaders(
 	const cubemapLoader = createThreeCubemapLoader(options);
 	const textureLoader = createThreeTextureLoader(options);
 	const videoLoader = createThreeVideoLoader(options);
+	const spriteLoader = createThreeSpriteLoader();
 	const disposer = createThreeAssetDisposer();
 
 	target.registerLoader("mesh", meshLoader);
 	target.registerLoader("material", materialLoader);
+	target.registerLoader("sprite", spriteLoader);
 	target.registerLoader("cubemap", cubemapLoader);
 	target.registerLoader("texture", textureLoader);
 	target.registerLoader("video", videoLoader);
 	target.registerDisposer("mesh", disposer);
 	target.registerDisposer("material", disposer);
+	target.registerDisposer("sprite", disposer);
 	target.registerDisposer("cubemap", disposer);
 	target.registerDisposer("texture", disposer);
 	target.registerDisposer("video", disposer);
@@ -646,6 +533,10 @@ export function createThreeAssetObjectResolver(
 	options: ThreeAssetResolverOptions,
 ): ThreeObjectResolver {
 	return (renderable) => {
+		if (renderable.kind === "sprite") {
+			return createSpriteObject(renderable, options);
+		}
+
 		if (!options.assets.has(renderable.meshId)) {
 			throw new Error(
 				`Renderable mesh asset "${renderable.meshId}" is not registered.`,
@@ -700,6 +591,275 @@ function createFallbackMaterial(
 	return new options.three.MeshStandardMaterial({
 		color: options.fallbackColor ?? "#9ca3af",
 	});
+}
+
+function createSpriteObject(
+	renderable: SpriteRenderableComponent,
+	options: ThreeAssetResolverOptions,
+): {
+	readonly object: ThreeObject3DLike;
+	readonly disposeOnDetach: boolean;
+	readonly scaleMultiplier: Vec3;
+} {
+	if (!options.three.Sprite || !options.three.SpriteMaterial) {
+		throw new Error("Three runtime does not provide sprite rendering support.");
+	}
+
+	if (!options.three.CanvasTexture) {
+		throw new Error("Three runtime does not provide canvas texture support.");
+	}
+
+	if (!options.assets.has(renderable.spriteId)) {
+		throw new Error(
+			`Renderable sprite asset "${renderable.spriteId}" is not registered.`,
+		);
+	}
+
+	const spriteAsset = options.assets.get(renderable.spriteId);
+
+	if (!isThreeSpriteAsset(spriteAsset)) {
+		throw new Error(
+			`Renderable sprite asset "${renderable.spriteId}" is not loaded as a Three sprite asset.`,
+		);
+	}
+
+	const spriteTexture = createStarSpriteTexture(spriteAsset);
+	const texture = new options.three.CanvasTexture(spriteTexture.canvas);
+	setTextureColorSpace(texture, "srgb", options.three);
+	texture.needsUpdate = true;
+
+	const material = new options.three.SpriteMaterial({
+		map: texture,
+		color: "#ffffff",
+		transparent: true,
+		alphaTest: 0.001,
+		opacity: clampUnit(
+			spriteAsset.opacity * spriteAsset.intensity * spriteAsset.glow,
+		),
+		...(options.three.AdditiveBlending
+			? { blending: options.three.AdditiveBlending }
+			: {}),
+		depthWrite: false,
+		depthTest: spriteAsset.depthTest,
+	});
+	material.toneMapped = false;
+
+	const sprite = new options.three.Sprite(material);
+	sprite.renderOrder = spriteAsset.renderOrder;
+
+	return {
+		object: sprite,
+		disposeOnDetach: true,
+		scaleMultiplier: {
+			x: spriteAsset.size * spriteTexture.scaleMultiplier,
+			y: spriteAsset.size * spriteTexture.scaleMultiplier,
+			z: 1,
+		},
+	};
+}
+
+function createStarSpriteTexture(asset: ThreeSpriteAsset): StarSpriteTexture {
+	const size = 256;
+	const padding = 8;
+	const baseRadius = size * 0.03;
+	const shapeExtentMultiplier = starShapeExtentMultiplier(asset.starType);
+	const glowLayers = [
+		{ radiusMultiplier: 15 * asset.glow, opacity: 0.04, blur: 25 },
+		{ radiusMultiplier: 10 * asset.glow, opacity: 0.08, blur: 20 },
+		{ radiusMultiplier: 6 * asset.glow, opacity: 0.15, blur: 15 },
+		{ radiusMultiplier: 3 * asset.glow, opacity: 0.25, blur: 8 },
+	] as const;
+	const drawableExtent = Math.max(1, size / 2 - padding);
+	const scaleLimits = [
+		drawableExtent / Math.max(1, baseRadius * shapeExtentMultiplier),
+		...glowLayers.map((layer) => {
+			const radiusBudget = drawableExtent - layer.blur;
+			if (radiusBudget <= 0) {
+				return 0;
+			}
+			return radiusBudget / Math.max(1, baseRadius * layer.radiusMultiplier);
+		}),
+	];
+	const radiusScale = Math.max(0.01, Math.min(1, ...scaleLimits));
+	const radius = baseRadius * radiusScale;
+	const canvas = createCanvasElement(size);
+	const context = canvas.getContext("2d");
+
+	if (!context) {
+		throw new Error("Sprite canvas did not provide a 2D rendering context.");
+	}
+
+	const center = size / 2;
+	context.clearRect(0, 0, size, size);
+
+	for (const layer of glowLayers) {
+		const layerRadius = radius * layer.radiusMultiplier;
+		context.save();
+		context.filter = `blur(${layer.blur}px)`;
+
+		const gradient = context.createRadialGradient(
+			center,
+			center,
+			0,
+			center,
+			center,
+			layerRadius,
+		);
+		gradient.addColorStop(0, colorWithAlpha(asset.color, layer.opacity));
+		gradient.addColorStop(
+			0.5,
+			colorWithAlpha(asset.color, layer.opacity * 0.59),
+		);
+		gradient.addColorStop(1, colorWithAlpha(asset.color, 0));
+
+		context.fillStyle = gradient;
+		context.beginPath();
+		context.arc(center, center, layerRadius, 0, Math.PI * 2);
+		context.fill();
+		context.restore();
+	}
+
+	drawStarSpriteShape(context, asset.starType, asset.color, center, radius);
+
+	return {
+		canvas,
+		scaleMultiplier: 1 / radiusScale,
+	};
+}
+
+function drawStarSpriteShape(
+	context: CanvasRenderingContext2D,
+	starType: ThreeSpriteAsset["starType"],
+	color: string,
+	center: number,
+	radius: number,
+): void {
+	context.save();
+	context.globalCompositeOperation = "source-over";
+
+	switch (starType) {
+		case "point":
+			context.fillStyle = color;
+			context.beginPath();
+			context.arc(center, center, radius * 1.2, 0, Math.PI * 2);
+			context.fill();
+			break;
+		case "classic":
+			drawStarPath(context, center, center, 5, radius * 2, radius, color);
+			break;
+		case "sparkle":
+			drawStarPath(
+				context,
+				center,
+				center,
+				4,
+				radius * 1.8,
+				radius * 0.8,
+				color,
+			);
+			context.strokeStyle = colorWithAlpha(color, 0.67);
+			context.lineWidth = 2;
+			context.beginPath();
+			context.moveTo(center - radius * 3, center);
+			context.lineTo(center + radius * 3, center);
+			context.moveTo(center, center - radius * 3);
+			context.lineTo(center, center + radius * 3);
+			context.stroke();
+			break;
+		case "halo":
+			for (const ring of [
+				{ radius: radius * 1.2, opacity: 1 },
+				{ radius: radius * 2, opacity: 0.6 },
+				{ radius: radius * 2.8, opacity: 0.3 },
+			]) {
+				context.fillStyle = colorWithAlpha(color, ring.opacity);
+				context.beginPath();
+				context.arc(center, center, ring.radius, 0, Math.PI * 2);
+				context.fill();
+			}
+			break;
+	}
+
+	context.restore();
+}
+
+function drawStarPath(
+	context: CanvasRenderingContext2D,
+	cx: number,
+	cy: number,
+	spikes: number,
+	outerRadius: number,
+	innerRadius: number,
+	color: string,
+): void {
+	let rotation = (Math.PI / 2) * 3;
+	const step = Math.PI / spikes;
+
+	context.beginPath();
+	context.moveTo(cx, cy - outerRadius);
+
+	for (let index = 0; index < spikes; index += 1) {
+		context.lineTo(
+			cx + Math.cos(rotation) * outerRadius,
+			cy + Math.sin(rotation) * outerRadius,
+		);
+		rotation += step;
+		context.lineTo(
+			cx + Math.cos(rotation) * innerRadius,
+			cy + Math.sin(rotation) * innerRadius,
+		);
+		rotation += step;
+	}
+
+	context.lineTo(cx, cy - outerRadius);
+	context.closePath();
+	context.fillStyle = color;
+	context.fill();
+}
+
+function starShapeExtentMultiplier(
+	starType: ThreeSpriteAsset["starType"],
+): number {
+	switch (starType) {
+		case "classic":
+			return 2;
+		case "sparkle":
+			return 3;
+		case "halo":
+			return 2.8;
+		case "point":
+			return 1.2;
+	}
+}
+
+function colorWithAlpha(color: string, alpha: number): string {
+	const alphaHex = Math.round(clampUnit(alpha) * 255)
+		.toString(16)
+		.padStart(2, "0");
+	return `${color}${alphaHex}`;
+}
+
+function clampUnit(value: number): number {
+	if (!Number.isFinite(value)) {
+		return 0;
+	}
+
+	return Math.min(1, Math.max(0, value));
+}
+
+function createCanvasElement(size: number): HTMLCanvasElement {
+	if (typeof document === "undefined") {
+		throw new Error("Sprite texture generation requires a browser document.");
+	}
+
+	const canvas = document.createElement("canvas");
+	canvas.width = size;
+	canvas.height = size;
+	return canvas;
+}
+
+export function isThreeSpriteAsset(asset: unknown): asset is ThreeSpriteAsset {
+	return isRecord(asset) && asset.kind === "three:sprite";
 }
 
 export function isThreeGltfAsset(asset: unknown): asset is ThreeGltfAsset {
@@ -775,6 +935,7 @@ function isVideoElementLike(value: unknown): value is HTMLVideoElement {
 type AttachedObject = {
 	readonly object: ThreeObject3DLike;
 	readonly disposeOnDetach: boolean;
+	readonly scaleMultiplier?: Vec3;
 };
 
 type NormalizedDynamicCapture = {
@@ -798,12 +959,27 @@ type AttachedReflectionProbe = {
 	readonly capture: ActiveCubeCapture;
 };
 
+function collisionOverlayColor(item: CollisionOverlayItem): string {
+	if (!item.synced) {
+		return "#94a3b8";
+	}
+
+	switch (item.intent) {
+		case "walkable":
+			return "#4ade80";
+		case "trigger":
+			return "#38bdf8";
+		case "solid":
+			return "#f59e0b";
+	}
+}
+
 export class ThreeRendererAdapter
 	implements
 		RendererPort,
 		LightRendererPort,
 		ReflectionProbeRendererPort,
-		WaterSurfaceRendererPort,
+		CollisionOverlayRendererPort,
 		CameraPosePort,
 		SceneEnvironmentRendererPort
 {
@@ -822,7 +998,7 @@ export class ThreeRendererAdapter
 	#environmentCapture: ActiveCubeCapture | undefined;
 	readonly #environmentDisposables = new Set<ThreeDisposableLike>();
 	readonly #reflectionProbes = new Map<Entity, AttachedReflectionProbe>();
-	readonly #waterSurfaces = new Set<Entity>();
+	readonly #collisionOverlayObjects = new Set<ThreeObject3DLike>();
 	readonly #materialEnvMapOriginals = new WeakMap<
 		ThreeMaterialLike,
 		ThreeTextureLike | null | undefined
@@ -1109,7 +1285,7 @@ export class ThreeRendererAdapter
 
 		sanitizeUserData(object, entity);
 		applyTransform(object, transform);
-		applyLightProperties(this.renderer, object, light);
+		applyLightProperties(object, light);
 
 		this.scene.add(object);
 		this.#lights.set(entity, object);
@@ -1127,7 +1303,7 @@ export class ThreeRendererAdapter
 		}
 
 		applyTransform(object, transform);
-		applyLightProperties(this.renderer, object, light);
+		applyLightProperties(object, light);
 	}
 
 	detachLight(entity: Entity): void {
@@ -1154,7 +1330,7 @@ export class ThreeRendererAdapter
 		const attached = this.#createObject(renderable);
 
 		sanitizeUserData(attached.object, entity);
-		applyTransform(attached.object, transform);
+		applyTransform(attached.object, transform, attached.scaleMultiplier);
 		attached.object.visible = renderable.visible !== false;
 
 		this.scene.add(attached.object);
@@ -1169,35 +1345,7 @@ export class ThreeRendererAdapter
 			return;
 		}
 
-		applyTransform(attached.object, transform);
-	}
-
-	updateWaterSurface(
-		entity: Entity,
-		water: WaterSurfaceRendererState,
-		transform: RenderTransform,
-		elapsedSeconds: number,
-	): void {
-		const attached = this.#objects.get(entity);
-
-		if (!attached) {
-			return;
-		}
-
-		applyTransform(attached.object, transform);
-		attached.object.visible = water.visible;
-		setObjectRenderOrder(attached.object, water.renderOrder);
-		updateWaterMaterialState(
-			attached.object,
-			water,
-			elapsedSeconds,
-			this.scene.environment,
-		);
-		this.#waterSurfaces.add(entity);
-	}
-
-	detachWaterSurface(entity: Entity): void {
-		this.#waterSurfaces.delete(entity);
+		applyTransform(attached.object, transform, attached.scaleMultiplier);
 	}
 
 	detach(entity: Entity): void {
@@ -1216,13 +1364,139 @@ export class ThreeRendererAdapter
 		}
 
 		this.#objects.delete(entity);
-		this.#waterSurfaces.delete(entity);
 	}
 
 	render(interpolation: number): void {
 		void interpolation;
 		this.#updateDynamicCaptures();
 		this.renderer.render(this.scene, this.camera);
+	}
+
+	setCollisionOverlay(items: readonly CollisionOverlayItem[]): void {
+		this.clearCollisionOverlay();
+
+		for (const item of items) {
+			const object = this.#createCollisionOverlayObject(item);
+			this.#collisionOverlayObjects.add(object);
+			this.scene.add(object);
+		}
+	}
+
+	clearCollisionOverlay(): void {
+		for (const object of this.#collisionOverlayObjects) {
+			this.scene.remove(object);
+			object.parent?.remove(object);
+			disposeObject3D(object);
+		}
+
+		this.#collisionOverlayObjects.clear();
+	}
+
+	#createCollisionOverlayObject(item: CollisionOverlayItem): ThreeObject3DLike {
+		const { geometry, center } = this.#createCollisionOverlayGeometry(item);
+		const material = new this.#three.MeshStandardMaterial({
+			color: collisionOverlayColor(item),
+			emissive: collisionOverlayColor(item),
+			emissiveIntensity: 0.32,
+			opacity: item.synced ? 0.42 : 0.24,
+			transparent: true,
+			wireframe: true,
+			depthWrite: false,
+		});
+		const object = new this.#three.Mesh(geometry, material);
+		const position = item.transform.position;
+		const rotation = item.transform.rotation;
+		const scale = item.transform.scale;
+
+		object.userData = {
+			...object.userData,
+			megamealCollisionOverlay: true,
+			entity: item.entity,
+			stableId: item.stableId,
+			intent: item.intent,
+			channel: item.channel,
+			synced: item.synced,
+		};
+		object.position.set(
+			position.x + center.x * scale.x,
+			position.y + center.y * scale.y,
+			position.z + center.z * scale.z,
+		);
+		object.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
+		object.scale.set(scale.x, scale.y, scale.z);
+
+		return object;
+	}
+
+	#createCollisionOverlayGeometry(item: CollisionOverlayItem): {
+		readonly geometry: ThreeGeometryLike;
+		readonly center: Vec3;
+	} {
+		const zero = { x: 0, y: 0, z: 0 };
+
+		switch (item.shape.type) {
+			case "box":
+				return {
+					geometry: new this.#three.BoxGeometry(
+						item.shape.halfExtents.x * 2,
+						item.shape.halfExtents.y * 2,
+						item.shape.halfExtents.z * 2,
+					),
+					center: zero,
+				};
+			case "sphere":
+				return {
+					geometry: this.#three.SphereGeometry
+						? new this.#three.SphereGeometry(item.shape.radius, 18, 10)
+						: new this.#three.BoxGeometry(
+								item.shape.radius * 2,
+								item.shape.radius * 2,
+								item.shape.radius * 2,
+							),
+					center: zero,
+				};
+			case "capsule":
+				return {
+					geometry: this.#three.CapsuleGeometry
+						? new this.#three.CapsuleGeometry(
+								item.shape.radius,
+								item.shape.halfHeight * 2,
+								6,
+								12,
+							)
+						: new this.#three.BoxGeometry(
+								item.shape.radius * 2,
+								item.shape.halfHeight * 2 + item.shape.radius * 2,
+								item.shape.radius * 2,
+							),
+					center: zero,
+				};
+			case "cylinder":
+				return {
+					geometry: this.#three.CylinderGeometry
+						? new this.#three.CylinderGeometry(
+								item.shape.radius,
+								item.shape.radius,
+								item.shape.halfHeight * 2,
+								18,
+							)
+						: new this.#three.BoxGeometry(
+								item.shape.radius * 2,
+								item.shape.halfHeight * 2,
+								item.shape.radius * 2,
+							),
+					center: zero,
+				};
+			case "mesh-bounds":
+				return {
+					geometry: new this.#three.BoxGeometry(
+						item.shape.halfExtents.x * 2,
+						item.shape.halfExtents.y * 2,
+						item.shape.halfExtents.z * 2,
+					),
+					center: item.shape.center,
+				};
+		}
 	}
 
 	setCameraPose(pose: CameraPose): void {
@@ -1269,6 +1543,7 @@ export class ThreeRendererAdapter
 			this.detachReflectionProbe(entity);
 		}
 
+		this.clearCollisionOverlay();
 		this.clearSceneEnvironment();
 		this.renderer.dispose();
 	}
@@ -1279,186 +1554,6 @@ export class ThreeRendererAdapter
 
 	hasObject(entity: Entity): boolean {
 		return this.#objects.has(entity);
-	}
-
-	hitTestRenderedScene(
-		request: ThreeRenderedSceneHitTestRequest,
-	): ThreeRenderedSceneHitTestResult {
-		if (
-			this.#three.Raycaster === undefined ||
-			this.#three.Vector2 === undefined ||
-			request.viewport.width <= 0 ||
-			request.viewport.height <= 0
-		) {
-			return {
-				status: "unavailable",
-				reason: "rendered-hit-test-unavailable",
-			};
-		}
-
-		const candidates: ThreeObject3DLike[] = [];
-
-		for (const [entity, attached] of this.#objects) {
-			if (
-				request.entityFilter !== undefined &&
-				!request.entityFilter.has(entity)
-			) {
-				continue;
-			}
-
-			if (attached.object.visible === false) {
-				continue;
-			}
-
-			candidates.push(attached.object);
-		}
-
-		if (candidates.length === 0) {
-			return { status: "miss" };
-		}
-
-		const raycaster = new this.#three.Raycaster();
-		const normalizedPoint = new this.#three.Vector2(
-			(request.screenPoint.x / request.viewport.width) * 2 - 1,
-			-(request.screenPoint.y / request.viewport.height) * 2 + 1,
-		);
-
-		raycaster.setFromCamera(normalizedPoint, this.camera);
-
-		for (const intersection of raycaster.intersectObjects(candidates, true)) {
-			const hitObject = intersection.object;
-
-			if (!hitObject) {
-				continue;
-			}
-
-			const entity = entityFromObjectUserData(hitObject);
-
-			if (entity === undefined) {
-				continue;
-			}
-
-			if (
-				request.entityFilter !== undefined &&
-				!request.entityFilter.has(entity)
-			) {
-				continue;
-			}
-
-			const point = intersection.point;
-
-			if (!isFiniteVector3Like(point)) {
-				continue;
-			}
-
-			const normal = intersection.face?.normal;
-
-			return {
-				status: "hit",
-				entity,
-				distance:
-					typeof intersection.distance === "number" &&
-					Number.isFinite(intersection.distance)
-						? intersection.distance
-						: 0,
-				worldPosition: [point.x, point.y, point.z],
-				...(isFiniteVector3Like(normal)
-					? { worldNormal: [normal.x, normal.y, normal.z] as const }
-					: {}),
-			};
-		}
-
-		return { status: "miss" };
-	}
-
-	boxSelectRenderedScene(
-		request: ThreeRenderedSceneBoxSelectRequest,
-	): ThreeRenderedSceneBoxSelectResult {
-		if (
-			this.#three.Vector3 === undefined ||
-			this.#three.Box3 === undefined ||
-			request.viewport.width <= 0 ||
-			request.viewport.height <= 0 ||
-			request.rect.width <= 0 ||
-			request.rect.height <= 0
-		) {
-			return {
-				status: "unavailable",
-				reason: "rendered-hit-test-unavailable",
-			};
-		}
-
-		const minX = request.rect.x;
-		const minY = request.rect.y;
-		const maxX = request.rect.x + request.rect.width;
-		const maxY = request.rect.y + request.rect.height;
-		const Vector3 = this.#three.Vector3;
-		const Box3 = this.#three.Box3;
-		const hits: {
-			readonly entity: Entity;
-			readonly distance: number;
-			readonly worldPosition: readonly [number, number, number];
-		}[] = [];
-
-		for (const [entity, attached] of this.#objects) {
-			if (
-				request.entityFilter !== undefined &&
-				!request.entityFilter.has(entity)
-			) {
-				continue;
-			}
-
-			if (attached.object.visible === false) {
-				continue;
-			}
-
-			attached.object.updateWorldMatrix?.(true, true);
-			attached.object.updateMatrixWorld?.(true);
-
-			const bounds = new Box3();
-			bounds.setFromObject?.(attached.object);
-
-			if (!isFiniteBox3Like(bounds)) {
-				continue;
-			}
-
-			const projectedBounds = projectWorldBoundsToViewport(
-				Vector3,
-				this.camera,
-				request.viewport,
-				bounds,
-			);
-
-			if (
-				projectedBounds === undefined ||
-				projectedBounds.maxX < minX ||
-				projectedBounds.minX > maxX ||
-				projectedBounds.maxY < minY ||
-				projectedBounds.minY > maxY
-			) {
-				continue;
-			}
-
-			const center = centerOfBox(bounds);
-
-			hits.push({
-				entity,
-				distance: distanceBetweenVectors(center, this.camera.position),
-				worldPosition: [center.x, center.y, center.z],
-			});
-		}
-
-		if (hits.length === 0) {
-			return { status: "miss" };
-		}
-
-		return {
-			status: "hit",
-			hits: hits.sort(
-				(left, right) =>
-					left.distance - right.distance || left.entity - right.entity,
-			),
-		};
 	}
 
 	setSize(width: number, height: number, pixelRatio?: number): void {
@@ -1959,25 +2054,10 @@ function createLightObject(
 				light.decay,
 			);
 		}
-		case "area": {
-			if (!three.RectAreaLight) {
-				throw new Error(
-					"Authored area Light component requires Three.RectAreaLight.",
-				);
-			}
-
-			return new three.RectAreaLight(
-				light.color,
-				light.intensity,
-				light.width,
-				light.height,
-			);
-		}
 	}
 }
 
 function applyLightProperties(
-	renderer: ThreeRendererLike,
 	object: ThreeObject3DLike,
 	light: LightComponent,
 ): void {
@@ -1995,70 +2075,6 @@ function applyLightProperties(
 	if (light.kind === "spot") {
 		target.angle = light.angle;
 		target.penumbra = light.penumbra;
-	}
-
-	if (light.kind === "area") {
-		target.width = light.width;
-		target.height = light.height;
-	}
-
-	if (light.kind === "ambient" || light.kind === "area") {
-		return;
-	}
-
-	applyLightShadowProperties(renderer, target, light.shadow);
-}
-
-function applyLightShadowProperties(
-	renderer: ThreeRendererLike,
-	target: ThreeLightObjectLike,
-	shadow: LightShadowSettings | undefined,
-): void {
-	target.castShadow = shadow?.enabled === true;
-
-	if (shadow?.enabled !== true) {
-		return;
-	}
-
-	if (renderer.shadowMap) {
-		renderer.shadowMap.enabled = true;
-	}
-
-	if (!target.shadow) {
-		return;
-	}
-
-	if (shadow.mapSize !== undefined) {
-		if (target.shadow.mapSize?.set) {
-			target.shadow.mapSize.set(shadow.mapSize, shadow.mapSize);
-		} else if (target.shadow.mapSize) {
-			target.shadow.mapSize.width = shadow.mapSize;
-			target.shadow.mapSize.height = shadow.mapSize;
-		}
-	}
-
-	if (shadow.bias !== undefined) {
-		target.shadow.bias = shadow.bias;
-	}
-
-	if (shadow.normalBias !== undefined) {
-		target.shadow.normalBias = shadow.normalBias;
-	}
-
-	if (shadow.radius !== undefined) {
-		target.shadow.radius = shadow.radius;
-	}
-
-	if (target.shadow.camera) {
-		if (shadow.cameraNear !== undefined) {
-			target.shadow.camera.near = shadow.cameraNear;
-		}
-
-		if (shadow.cameraFar !== undefined) {
-			target.shadow.camera.far = shadow.cameraFar;
-		}
-
-		target.shadow.camera.updateProjectionMatrix?.();
 	}
 }
 
@@ -2215,15 +2231,38 @@ function createThreeMaterialLoader(three: ThreeRuntime): AssetLoader {
 			kind: "three:material-factory",
 			entry,
 			createMaterial() {
-				if (isWaterMaterialEntry(entry)) {
-					return createWaterShaderMaterial(three, entry);
-				}
-
 				return new three.MeshStandardMaterial(
 					meshStandardMaterialParametersFrom(entry),
 				);
 			},
 		} satisfies ThreeMaterialFactoryAsset;
+	};
+}
+
+function createThreeSpriteLoader(): AssetLoader {
+	return async (entry) => {
+		if (!isBuiltinUrl(entry.url)) {
+			throw new Error(
+				`Sprite asset "${entry.id}" must use builtin:// until sprite texture loading is added.`,
+			);
+		}
+
+		if (!entry.sprite) {
+			throw new Error(`Sprite asset "${entry.id}" must declare sprite data.`);
+		}
+
+		return {
+			kind: "three:sprite",
+			entry,
+			color: entry.sprite.color,
+			size: Math.max(0.001, entry.sprite.size),
+			opacity: entry.sprite.opacity ?? 1,
+			intensity: entry.sprite.intensity ?? 1,
+			glow: entry.sprite.glow ?? 1,
+			starType: entry.sprite.starType ?? "sparkle",
+			depthTest: entry.sprite.depthTest ?? true,
+			renderOrder: entry.sprite.renderOrder ?? 1,
+		} satisfies ThreeSpriteAsset;
 	};
 }
 
@@ -2260,197 +2299,6 @@ function meshStandardMaterialParametersFrom(
 	}
 
 	return parameters;
-}
-
-function isWaterMaterialEntry(entry: AssetManifestEntry): boolean {
-	return (
-		builtinIdFromUrl(entry.url).startsWith("water-") ||
-		(entry.tags ?? []).includes("water")
-	);
-}
-
-function createWaterShaderMaterial(
-	three: ThreeRuntime,
-	entry: AssetManifestEntry,
-): ThreeMaterialLike {
-	const fallbackParameters = meshStandardMaterialParametersFrom(entry);
-
-	if (!three.ShaderMaterial) {
-		return new three.MeshStandardMaterial(fallbackParameters);
-	}
-
-	const color = fallbackParameters.color ?? "#052033";
-	const emissive = fallbackParameters.emissive ?? "#01111c";
-	const opacity = fallbackParameters.opacity ?? 0.88;
-
-	return new three.ShaderMaterial({
-		uniforms: {
-			uTime: { value: 0 },
-			uBaseColor: { value: threeColorValue(three, color) },
-			uDeepColor: { value: threeColorValue(three, emissive) },
-			uWaveAmplitude: { value: 0 },
-			uWaveLength: { value: 1 },
-			uWaveSpeed: { value: 0 },
-			uWaveDirection: { value: threeVector2Value(three, 1, 0) },
-			uReflectionIntensity: { value: 0 },
-			uRefractionIntensity: { value: 0 },
-			uOpacity: { value: opacity },
-		},
-		vertexShader: WATER_VERTEX_SHADER,
-		fragmentShader: WATER_FRAGMENT_SHADER,
-		transparent: fallbackParameters.transparent ?? opacity < 1,
-		depthWrite: false,
-		side: three.DoubleSide,
-	});
-}
-
-function threeColorValue(three: ThreeRuntime, color: string | number): unknown {
-	return three.Color ? new three.Color(color) : color;
-}
-
-function threeVector2Value(three: ThreeRuntime, x: number, y: number): unknown {
-	return three.Vector2 ? new three.Vector2(x, y) : [x, y];
-}
-
-const WATER_VERTEX_SHADER = `
-uniform float uTime;
-uniform float uWaveAmplitude;
-uniform float uWaveLength;
-uniform float uWaveSpeed;
-uniform vec2 uWaveDirection;
-varying vec2 vUv;
-varying float vWave;
-
-void main() {
-	vec3 transformed = position;
-	vec2 waveDirection = normalize(uWaveDirection);
-	float wavelength = max(uWaveLength, 0.001);
-	float primary = sin(dot(transformed.xz, waveDirection) / wavelength + uTime * uWaveSpeed);
-	float secondary = sin((transformed.x - transformed.z) / (wavelength * 0.63) + uTime * uWaveSpeed * 0.73);
-	vWave = primary * 0.65 + secondary * 0.35;
-	transformed.y += vWave * uWaveAmplitude;
-	vUv = uv;
-	gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
-}
-`;
-
-const WATER_FRAGMENT_SHADER = `
-uniform vec3 uBaseColor;
-uniform vec3 uDeepColor;
-uniform float uReflectionIntensity;
-uniform float uRefractionIntensity;
-uniform float uOpacity;
-varying vec2 vUv;
-varying float vWave;
-
-void main() {
-	float shoreMix = smoothstep(0.0, 1.0, vUv.y);
-	float shimmer = 0.5 + 0.5 * vWave;
-	vec3 color = mix(uDeepColor, uBaseColor, 0.28 + shoreMix * 0.22);
-	color += vec3(0.16, 0.22, 0.26) * shimmer * uReflectionIntensity;
-	color += vec3(0.03, 0.08, 0.12) * uRefractionIntensity;
-	gl_FragColor = vec4(color, uOpacity);
-}
-`;
-
-function setObjectRenderOrder(
-	object: ThreeObject3DLike,
-	renderOrder: number | undefined,
-): void {
-	object.renderOrder = renderOrder ?? 0;
-	object.traverse?.((node) => {
-		node.renderOrder = renderOrder ?? 0;
-	});
-}
-
-function updateWaterMaterialState(
-	object: ThreeObject3DLike,
-	water: WaterSurfaceRendererState,
-	elapsedSeconds: number,
-	environmentTexture: ThreeTextureLike | null | undefined,
-): void {
-	object.traverse?.((node) => {
-		updateWaterMaterial(
-			node.material,
-			water,
-			elapsedSeconds,
-			environmentTexture,
-		);
-	});
-	updateWaterMaterial(
-		object.material,
-		water,
-		elapsedSeconds,
-		environmentTexture,
-	);
-}
-
-function updateWaterMaterial(
-	material: ThreeMaterialLike | readonly ThreeMaterialLike[] | null | undefined,
-	water: WaterSurfaceRendererState,
-	elapsedSeconds: number,
-	environmentTexture: ThreeTextureLike | null | undefined,
-): void {
-	forEachMaterial(material, (entry) => {
-		setWaterUniform(entry, "uTime", elapsedSeconds);
-		setWaterUniform(entry, "uWaveAmplitude", water.animation.waveAmplitude);
-		setWaterUniform(entry, "uWaveLength", water.animation.waveLength);
-		setWaterUniform(
-			entry,
-			"uWaveSpeed",
-			water.animation.mode === "scrolling" ? water.animation.speed : 0,
-		);
-		setWaterVector2Uniform(entry, "uWaveDirection", water.animation.direction);
-		setWaterUniform(entry, "uReflectionIntensity", water.reflection.intensity);
-		setWaterUniform(
-			entry,
-			"uRefractionIntensity",
-			water.refraction?.intensity ?? 0,
-		);
-
-		if (water.reflection.mode === "environment" && environmentTexture) {
-			entry.envMap = environmentTexture;
-		}
-
-		entry.needsUpdate = true;
-	});
-}
-
-function setWaterUniform(
-	material: ThreeMaterialLike,
-	name: string,
-	value: unknown,
-): void {
-	const uniform = isRecord(material.uniforms)
-		? material.uniforms[name]
-		: undefined;
-
-	if (isRecord(uniform)) {
-		uniform.value = value;
-	}
-}
-
-function setWaterVector2Uniform(
-	material: ThreeMaterialLike,
-	name: string,
-	value: readonly [number, number],
-): void {
-	const uniform = isRecord(material.uniforms)
-		? material.uniforms[name]
-		: undefined;
-
-	if (!isRecord(uniform)) {
-		return;
-	}
-
-	const current = uniform.value;
-
-	if (isRecord(current) && typeof current.set === "function") {
-		current.set(value[0], value[1]);
-		return;
-	}
-
-	uniform.value = [value[0], value[1]];
 }
 
 function createThreeCubemapLoader(
@@ -2624,22 +2472,6 @@ function createBuiltinMeshAsset(
 				case "box":
 				case "arena-floor":
 					return new three.BoxGeometry(1, 1, 1);
-				case "plane": {
-					if (!three.PlaneGeometry) {
-						throw new Error(
-							'Builtin mesh "plane" requires Three.PlaneGeometry.',
-						);
-					}
-
-					const geometry = new three.PlaneGeometry(
-						builtinNumberParam(entry.url, "width", 1),
-						builtinNumberParam(entry.url, "height", 1),
-						builtinIntegerParam(entry.url, "widthSegments", 1),
-						builtinIntegerParam(entry.url, "heightSegments", 1),
-					);
-					geometry.rotateX?.(-Math.PI / 2);
-					return geometry;
-				}
 				case "cylinder":
 					if (!three.CylinderGeometry) {
 						throw new Error(
@@ -2653,40 +2485,19 @@ function createBuiltinMeshAsset(
 						builtinNumberParam(entry.url, "height", 1),
 						builtinIntegerParam(entry.url, "radialSegments", 18),
 					);
-				case "torus":
-					if (!three.TorusGeometry) {
-						throw new Error(
-							'Builtin mesh "torus" requires Three.TorusGeometry.',
+				case "sphere":
+					if (!three.SphereGeometry) {
+						return new three.BoxGeometry(
+							builtinNumberParam(entry.url, "radius", 0.5) * 2,
+							builtinNumberParam(entry.url, "radius", 0.5) * 2,
+							builtinNumberParam(entry.url, "radius", 0.5) * 2,
 						);
 					}
 
-					return new three.TorusGeometry(
-						builtinNumberParam(entry.url, "radius", 1),
-						builtinNumberParam(entry.url, "tube", 0.25),
-						builtinIntegerParam(entry.url, "radialSegments", 12),
-						builtinIntegerParam(entry.url, "tubularSegments", 24),
-					);
-				case "icosahedron":
-					if (!three.IcosahedronGeometry) {
-						throw new Error(
-							'Builtin mesh "icosahedron" requires Three.IcosahedronGeometry.',
-						);
-					}
-
-					return new three.IcosahedronGeometry(
-						builtinNumberParam(entry.url, "radius", 1),
-						builtinNonNegativeIntegerParam(entry.url, "detail", 0),
-					);
-				case "dodecahedron":
-					if (!three.DodecahedronGeometry) {
-						throw new Error(
-							'Builtin mesh "dodecahedron" requires Three.DodecahedronGeometry.',
-						);
-					}
-
-					return new three.DodecahedronGeometry(
-						builtinNumberParam(entry.url, "radius", 1),
-						builtinNonNegativeIntegerParam(entry.url, "detail", 0),
+					return new three.SphereGeometry(
+						builtinNumberParam(entry.url, "radius", 0.5),
+						builtinIntegerParam(entry.url, "widthSegments", 18),
+						builtinIntegerParam(entry.url, "heightSegments", 12),
 					);
 				case "ingredient":
 					return new three.BoxGeometry(0.8, 0.8, 0.8);
@@ -2705,6 +2516,56 @@ function builtinMaterialColor(url: string): string | number {
 			return "#355e3b";
 		case "ingredient-gold":
 			return "#eab308";
+		case "miranda-floor-main":
+			return "#252d37";
+		case "miranda-floor-upper":
+			return "#2e3844";
+		case "miranda-cockpit-panel":
+			return "#1e2e3f";
+		case "miranda-cockpit-panel-center":
+			return "#1e2e3f";
+		case "miranda-crew-bunk":
+			return "#2b3341";
+		case "miranda-locker-bank":
+			return "#29323d";
+		case "miranda-captains-desk":
+			return "#5a3c2b";
+		case "miranda-captains-chair":
+			return "#3b2f36";
+		case "miranda-recipe-safe":
+			return "#2b3138";
+		case "miranda-engine-column":
+			return "#46313a";
+		case "miranda-engine-core":
+			return "#5a2d24";
+		case "miranda-med-pod":
+			return "#6da8bf";
+		case "miranda-mess-table":
+			return "#5d4638";
+		case "miranda-mess-counter":
+			return "#3f2d29";
+		case "miranda-chapel-altar":
+			return "#332934";
+		case "miranda-brig-cell":
+			return "#3f3034";
+		case "miranda-brig-desk":
+			return "#4a3732";
+		case "miranda-cargo-stack-a":
+			return "#564136";
+		case "miranda-cargo-stack":
+			return "#5a4334";
+		case "miranda-server-bank":
+			return "#202634";
+		case "miranda-server-bank-wide":
+			return "#202634";
+		case "miranda-story-marker-cyan":
+			return "#8de0ff";
+		case "miranda-story-marker-amber":
+			return "#ffc584";
+		case "miranda-story-marker-red":
+			return "#ff8ea6";
+		case "miranda-story-marker-magenta":
+			return "#cba7ff";
 		default:
 			return "#9ca3af";
 	}
@@ -2737,19 +2598,6 @@ function builtinIntegerParam(
 	fallback: number,
 ): number {
 	return Math.max(3, Math.round(builtinNumberParam(url, key, fallback)));
-}
-
-function builtinNonNegativeIntegerParam(
-	url: string,
-	key: string,
-	fallback: number,
-): number {
-	const params = builtinQueryParams(url);
-	const raw = params.get(key);
-	const value = raw === null ? Number.NaN : Number(raw);
-	return Number.isFinite(value) && value >= 0
-		? Math.round(value)
-		: Math.max(0, Math.round(fallback));
 }
 
 function builtinQueryParams(url: string): URLSearchParams {
@@ -3085,6 +2933,7 @@ function errorMessage(error: unknown): string {
 export function applyTransform(
 	object: ThreeObject3DLike,
 	transform: RenderTransform,
+	scaleMultiplier?: Vec3,
 ): void {
 	object.position.set(
 		transform.position.x,
@@ -3097,7 +2946,11 @@ export function applyTransform(
 		transform.rotation.z,
 		transform.rotation.w,
 	);
-	object.scale.set(transform.scale.x, transform.scale.y, transform.scale.z);
+	object.scale.set(
+		transform.scale.x * (scaleMultiplier?.x ?? 1),
+		transform.scale.y * (scaleMultiplier?.y ?? 1),
+		transform.scale.z * (scaleMultiplier?.z ?? 1),
+	);
 }
 
 export function sanitizeUserData(
@@ -3105,7 +2958,7 @@ export function sanitizeUserData(
 	entity: Entity,
 ): void {
 	const visit = (node: ThreeObject3DLike) => {
-		node.userData = { entityId: entity };
+		node.userData = { ...node.userData, entityId: entity };
 	};
 
 	traverseObject(object, visit);
@@ -3213,10 +3066,19 @@ function normalizeResolvedObject(
 	resolved: ThreeResolvedObject,
 ): AttachedObject {
 	if ("object" in resolved) {
-		return {
+		const attached: AttachedObject = {
 			object: resolved.object,
 			disposeOnDetach: resolved.disposeOnDetach ?? false,
 		};
+
+		if (resolved.scaleMultiplier !== undefined) {
+			return {
+				...attached,
+				scaleMultiplier: resolved.scaleMultiplier,
+			};
+		}
+
+		return attached;
 	}
 
 	return {
@@ -3293,113 +3155,6 @@ function isThreeObject3DLike(value: unknown): value is ThreeObject3DLike {
 		isRecord(value.scale) &&
 		typeof value.scale.set === "function"
 	);
-}
-
-function entityFromObjectUserData(
-	object: ThreeObject3DLike,
-): Entity | undefined {
-	const entityId = object.userData.entityId;
-
-	return typeof entityId === "number" && Number.isSafeInteger(entityId)
-		? entityId
-		: undefined;
-}
-
-function isFiniteVector3Like(
-	value: unknown,
-): value is { readonly x: number; readonly y: number; readonly z: number } {
-	return (
-		isRecord(value) &&
-		typeof value.x === "number" &&
-		Number.isFinite(value.x) &&
-		typeof value.y === "number" &&
-		Number.isFinite(value.y) &&
-		typeof value.z === "number" &&
-		Number.isFinite(value.z)
-	);
-}
-
-function isFiniteBox3Like(value: unknown): value is ThreeBox3Like {
-	return (
-		isRecord(value) &&
-		isFiniteVector3Like(value.min) &&
-		isFiniteVector3Like(value.max) &&
-		value.min.x <= value.max.x &&
-		value.min.y <= value.max.y &&
-		value.min.z <= value.max.z
-	);
-}
-
-function centerOfBox(box: ThreeBox3Like): ThreeVector3Like {
-	return {
-		x: (box.min.x + box.max.x) / 2,
-		y: (box.min.y + box.max.y) / 2,
-		z: (box.min.z + box.max.z) / 2,
-	};
-}
-
-function projectWorldBoundsToViewport(
-	Vector3: new (x: number, y: number, z: number) => ThreeVector3Like,
-	camera: ThreeCameraLike,
-	viewport: { readonly width: number; readonly height: number },
-	box: ThreeBox3Like,
-):
-	| {
-			readonly minX: number;
-			readonly minY: number;
-			readonly maxX: number;
-			readonly maxY: number;
-	  }
-	| undefined {
-	const boundsCorners: readonly (readonly [number, number, number])[] = [
-		[box.min.x, box.min.y, box.min.z],
-		[box.min.x, box.min.y, box.max.z],
-		[box.min.x, box.max.y, box.min.z],
-		[box.min.x, box.max.y, box.max.z],
-		[box.max.x, box.min.y, box.min.z],
-		[box.max.x, box.min.y, box.max.z],
-		[box.max.x, box.max.y, box.min.z],
-		[box.max.x, box.max.y, box.max.z],
-	];
-	const projectedPoints = boundsCorners
-		.map(([x, y, z]) => {
-			const projected = new Vector3(x, y, z);
-			projected.project?.(camera);
-			return projected;
-		})
-		.filter(
-			(point) => isFiniteVector3Like(point) && point.z >= -1 && point.z <= 1,
-		)
-		.map((point) => ({
-			x: ((point.x + 1) / 2) * viewport.width,
-			y: ((1 - point.y) / 2) * viewport.height,
-		}));
-
-	if (projectedPoints.length === 0) {
-		return undefined;
-	}
-
-	return {
-		minX: Math.min(...projectedPoints.map((point) => point.x)),
-		minY: Math.min(...projectedPoints.map((point) => point.y)),
-		maxX: Math.max(...projectedPoints.map((point) => point.x)),
-		maxY: Math.max(...projectedPoints.map((point) => point.y)),
-	};
-}
-
-function distanceBetweenVectors(
-	left: { readonly x: number; readonly y: number; readonly z: number },
-	right: unknown,
-): number {
-	if (!isFiniteVector3Like(right)) {
-		return 0;
-	}
-
-	const dx = left.x - right.x;
-	const dy = left.y - right.y;
-	const dz = left.z - right.z;
-
-	return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
