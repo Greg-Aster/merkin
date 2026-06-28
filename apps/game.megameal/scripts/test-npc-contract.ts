@@ -36,6 +36,8 @@ const fireflyStableIds = fireflies.instances.map(
 	(instance) => instance.stableId,
 );
 const fireflyPreloadAssetIds = fireflyArchetype.assets?.preload ?? [];
+const fireflyVisualPartSuffixes =
+	fireflyArchetype.visualParts?.map((part) => part.idSuffix) ?? [];
 const observatoryManifest = observatoryLevelPackage.runtimeSceneManifest;
 
 function assertEqual<TValue>(
@@ -86,6 +88,14 @@ function assertNumberTuple3(
 	return [value[0], value[1], value[2]];
 }
 
+function assertFiniteNumber(value: unknown, label: string): number {
+	if (typeof value !== "number" || !Number.isFinite(value)) {
+		throw new Error(`Expected ${label} to be a finite number.`);
+	}
+
+	return value;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -133,8 +143,61 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 		groupDefaults.lightModulation,
 		"firefly group lightModulation defaults",
 	);
+	const assetsById = new Map(
+		(fireflyArchetype.assets?.local ?? []).map((asset) => [asset.id, asset]),
+	);
+	const coreSprite = assertRecord(
+		assertRecord(
+			assetsById.get("sprite_npc_firefly_core"),
+			"sprite_npc_firefly_core",
+		).sprite,
+		"sprite_npc_firefly_core.sprite",
+	);
+	const glintSprite = assertRecord(
+		assertRecord(
+			assetsById.get("sprite_npc_firefly_glint"),
+			"sprite_npc_firefly_glint",
+		).sprite,
+		"sprite_npc_firefly_glint.sprite",
+	);
+	const innerGlowSprite = assertRecord(
+		assertRecord(
+			assetsById.get("sprite_npc_firefly_inner_glow"),
+			"sprite_npc_firefly_inner_glow",
+		).sprite,
+		"sprite_npc_firefly_inner_glow.sprite",
+	);
+	const outerHaloSprite = assertRecord(
+		assertRecord(
+			assetsById.get("sprite_npc_firefly_outer_halo"),
+			"sprite_npc_firefly_outer_halo",
+		).sprite,
+		"sprite_npc_firefly_outer_halo.sprite",
+	);
+	const coreSize = assertFiniteNumber(
+		coreSprite.size,
+		"sprite_npc_firefly_core.sprite.size",
+	);
+	const glintSize = assertFiniteNumber(
+		glintSprite.size,
+		"sprite_npc_firefly_glint.sprite.size",
+	);
+	const innerGlowSize = assertFiniteNumber(
+		innerGlowSprite.size,
+		"sprite_npc_firefly_inner_glow.sprite.size",
+	);
+	const outerHaloSize = assertFiniteNumber(
+		outerHaloSprite.size,
+		"sprite_npc_firefly_outer_halo.sprite.size",
+	);
 
 	assertEqual(prefabComponents.Renderable, undefined);
+	if (coreSize >= innerGlowSize || glintSize >= innerGlowSize) {
+		throw new Error("Firefly central sprites must stay smaller than the glow.");
+	}
+	if (innerGlowSize >= outerHaloSize) {
+		throw new Error("Firefly outer halo must stay larger than the inner glow.");
+	}
 	assertEqual(
 		archetypeDefaults.lightModulation,
 		undefined,
@@ -212,6 +275,29 @@ for (const stableId of fireflyStableIds) {
 		if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
 			throw new Error(`${stableId}.Light.${field} must be non-negative.`);
 		}
+	}
+
+	if (typeof light.color !== "string") {
+		throw new Error(`${stableId}.Light.color must be a string.`);
+	}
+
+	for (const suffix of fireflyVisualPartSuffixes) {
+		const visualPart = observatoryManifest.level.instances.find(
+			(entry) => entry.stableId === `${stableId}:${suffix}`,
+		);
+		const visualPartComponents = assertRecord(
+			visualPart?.components,
+			`${stableId}:${suffix}.components`,
+		);
+		const visualPartRenderable = assertRecord(
+			visualPartComponents.Renderable,
+			`${stableId}:${suffix}.Renderable`,
+		);
+		assertEqual(
+			visualPartRenderable.color,
+			light.color,
+			`${stableId}:${suffix}.Renderable.color must inherit the root firefly light color.`,
+		);
 	}
 }
 

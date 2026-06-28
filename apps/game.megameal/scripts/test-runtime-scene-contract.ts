@@ -551,13 +551,18 @@ function allAssetStrings(
 		assertEqual(fireflyComponents.Renderable, undefined);
 
 		for (const suffix of fireflyVisualPartSuffixes) {
-			assertRecord(
+			const visualRenderable = assertRecord(
 				componentForStableId(
 					manifest,
 					`${fireflyStableId}:${suffix}`,
 					"Renderable",
 				),
 				`${fireflyStableId}:${suffix}.Renderable`,
+			);
+			assertEqual(
+				visualRenderable.color,
+				fireflyLight.color,
+				`${fireflyStableId}:${suffix}.Renderable.color must inherit the root firefly light color.`,
 			);
 			assertRecord(
 				componentForStableId(

@@ -2038,6 +2038,10 @@ function validateRenderableComponent(
 	}
 
 	requireString(renderable, "spriteId", `${path}.spriteId`, errors);
+
+	if (renderable.color !== undefined) {
+		validateRequiredHexColor(renderable.color, `${path}.color`, errors);
+	}
 }
 
 function validateFollowTargetComponent(

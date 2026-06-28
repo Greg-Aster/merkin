@@ -5,7 +5,7 @@
 		"assetId": "cubemap_observatory_sky",
 		"backgroundIntensity": 1,
 		"backgroundBlurriness": 0,
-		"environmentIntensity": 1,
+		"environmentIntensity": 0.5,
 		"requiredForReadiness": false
 	},
 	"assets": {

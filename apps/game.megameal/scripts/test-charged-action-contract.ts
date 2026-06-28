@@ -1,4 +1,5 @@
 import { type EngineEvent, EventBus, World } from "../src/engine/core/index.js";
+import { quat, vec3 } from "../src/engine/math/index.js";
 import type {
 	InputActionPhase,
 	InputActionState,
@@ -6,9 +7,15 @@ import type {
 } from "../src/engine/modules/input/index.js";
 import {
 	LIGHT_COMPONENT,
+	LIGHT_TRANSFORM_COMPONENT,
 	type LightComponent,
+	type LightRendererPort,
+	LightSyncSystem,
 	type PointLightComponent,
+	type RenderTransform,
+	TRANSFORM_COMPONENT,
 } from "../src/engine/modules/rendering/index.js";
+import { createPlayerLightCameraAnchorSystem } from "../src/game/systems/camera.js";
 import {
 	createChargedActionSystem,
 	createPlayerChargeLightFeedbackSystem,
@@ -16,6 +23,8 @@ import {
 import {
 	CHARGED_ACTION_COMPONENT,
 	type ChargedActionComponent,
+	FIRST_PERSON_CONTROLLER_COMPONENT,
+	type FirstPersonControllerComponent,
 	PLAYER_ENTITY_RESOURCE,
 	PLAYER_INPUT_COMPONENT,
 	PLAYER_LIGHT_FEEDBACK_COMPONENT,
@@ -121,6 +130,29 @@ function addPlayerPointLight(world: World, player: number) {
 		decay: 2,
 		visible: true,
 	});
+}
+
+function addPlayerCameraSource(world: World, player: number) {
+	world.addComponent<RenderTransform>(player, TRANSFORM_COMPONENT, {
+		position: vec3(2, 3, 4),
+		rotation: quat(),
+		scale: vec3(1, 1, 1),
+	});
+	world.addComponent<FirstPersonControllerComponent>(
+		player,
+		FIRST_PERSON_CONTROLLER_COMPONENT,
+		{
+			yawRadians: Math.PI / 2,
+			pitchRadians: 0.25,
+			mouseSensitivity: 0.002,
+			minPitchRadians: -1.4,
+			maxPitchRadians: 1.4,
+			eyeHeight: 1.25,
+			fovDegrees: 70,
+			near: 0.1,
+			far: 500,
+		},
+	);
 }
 
 function requirePlayerPointLight(
@@ -234,6 +266,45 @@ function requirePlayerPointLight(
 	runUpdate(harness, 0.016);
 
 	assertDeepEqual(eventTypes(harness.events), ["ChargeActionCanceled"]);
+}
+
+{
+	const harness = createHarness();
+	addPlayerPointLight(harness.world, harness.player);
+	addPlayerCameraSource(harness.world, harness.player);
+
+	createPlayerLightCameraAnchorSystem().update({
+		world: harness.world,
+	});
+
+	const playerTransform = harness.world.requireComponent<RenderTransform>(
+		harness.player,
+		TRANSFORM_COMPONENT,
+	);
+	const lightTransform = harness.world.requireComponent<RenderTransform>(
+		harness.player,
+		LIGHT_TRANSFORM_COMPONENT,
+	);
+	const renderedLightTransforms: RenderTransform[] = [];
+	const renderer: LightRendererPort = {
+		attachLight(_entity, _light, transform) {
+			renderedLightTransforms.push(transform);
+		},
+		updateLight(_entity, _light, transform) {
+			renderedLightTransforms.push(transform);
+		},
+		detachLight() {},
+	};
+
+	new LightSyncSystem({
+		renderer,
+		lightTransformComponent: LIGHT_TRANSFORM_COMPONENT,
+	}).update({ world: harness.world });
+
+	assertDeepEqual(playerTransform.position, vec3(2, 3, 4));
+	assertDeepEqual(lightTransform.position, vec3(2, 4.25, 4));
+	assertDeepEqual(lightTransform.scale, vec3(1, 1, 1));
+	assertDeepEqual(renderedLightTransforms[0]?.position, vec3(2, 4.25, 4));
 }
 
 {

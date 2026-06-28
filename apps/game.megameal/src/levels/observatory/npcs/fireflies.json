@@ -7,10 +7,7 @@
 			"pulseSpeed": 0.85,
 			"pulseSoftness": 0.82,
 			"activeLightPercent": 0.68,
-			"blinkPeriodSeconds": [
-				8,
-				15
-			],
+			"blinkPeriodSeconds": [8, 15],
 			"blinkFadeSeconds": 1.6,
 			"maxActiveLights": 24,
 			"nearDistance": 20,
@@ -24,16 +21,8 @@
 			"stableId": "observatory:firefly:archive",
 			"displayName": "Archive Firefly",
 			"transform": {
-				"position": [
-					76,
-					1.125,
-					-52
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [76, 1.125, -52],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.4,
@@ -67,16 +56,8 @@
 			"stableId": "observatory:firefly:lantern",
 			"displayName": "Lantern Firefly",
 			"transform": {
-				"position": [
-					82,
-					1.198,
-					-46
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [82, 1.198, -46],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.6,
@@ -111,16 +92,8 @@
 			"stableId": "observatory:firefly:tide",
 			"displayName": "Tide Firefly",
 			"transform": {
-				"position": [
-					70,
-					2.146,
-					-40
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [70, 2.146, -40],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.8,
@@ -155,16 +128,8 @@
 			"stableId": "observatory:firefly:violet-ridge",
 			"displayName": "Violet Ridge Firefly",
 			"transform": {
-				"position": [
-					64,
-					1.399,
-					-58
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [64, 1.399, -58],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.7,
@@ -199,16 +164,8 @@
 			"stableId": "observatory:firefly:blue-basin",
 			"displayName": "Blue Basin Firefly",
 			"transform": {
-				"position": [
-					58,
-					2.225,
-					-52
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [58, 2.225, -52],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.45,
@@ -243,16 +200,8 @@
 			"stableId": "observatory:firefly:red-arch",
 			"displayName": "Red Arch Firefly",
 			"transform": {
-				"position": [
-					52,
-					3.96,
-					-40
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [52, 3.96, -40],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.9,
@@ -287,16 +236,8 @@
 			"stableId": "observatory:firefly:purple-drift",
 			"displayName": "Purple Drift Firefly",
 			"transform": {
-				"position": [
-					46,
-					5.795,
-					-28
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [46, 5.795, -28],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.6,
@@ -331,16 +272,8 @@
 			"stableId": "observatory:firefly:crimson-pool",
 			"displayName": "Crimson Pool Firefly",
 			"transform": {
-				"position": [
-					40,
-					1.689,
-					-64
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [40, 1.689, -64],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.35,
@@ -375,16 +308,8 @@
 			"stableId": "observatory:firefly:cobalt-step",
 			"displayName": "Cobalt Step Firefly",
 			"transform": {
-				"position": [
-					36,
-					10.766,
-					-14
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [36, 10.766, -14],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.75,
@@ -419,16 +344,8 @@
 			"stableId": "observatory:firefly:rose-spire",
 			"displayName": "Rose Spire Firefly",
 			"transform": {
-				"position": [
-					24,
-					5.873,
-					-44
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [24, 5.873, -44],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.55,
@@ -463,16 +380,8 @@
 			"stableId": "observatory:firefly:indigo-waterline",
 			"displayName": "Indigo Waterline Firefly",
 			"transform": {
-				"position": [
-					4,
-					4.155,
-					-56
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [4, 4.155, -56],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.8,
@@ -507,16 +416,8 @@
 			"stableId": "observatory:firefly:ruby-gallery",
 			"displayName": "Ruby Gallery Firefly",
 			"transform": {
-				"position": [
-					-18,
-					4.701,
-					-42
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [-18, 4.701, -42],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.65,
@@ -551,16 +452,8 @@
 			"stableId": "observatory:firefly:azure-lantern",
 			"displayName": "Azure Lantern Firefly",
 			"transform": {
-				"position": [
-					-34,
-					2.588,
-					-52
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [-34, 2.588, -52],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.5,
@@ -595,16 +488,8 @@
 			"stableId": "observatory:firefly:magenta-orbit",
 			"displayName": "Magenta Orbit Firefly",
 			"transform": {
-				"position": [
-					-48,
-					3.458,
-					-32
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [-48, 3.458, -32],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 2,
@@ -639,16 +524,8 @@
 			"stableId": "observatory:firefly:lavender-ring",
 			"displayName": "Lavender Ring Firefly",
 			"transform": {
-				"position": [
-					-42,
-					8.462,
-					0
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [-42, 8.462, 0],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.7,
@@ -683,16 +560,8 @@
 			"stableId": "observatory:firefly:ember-crossing",
 			"displayName": "Ember Crossing Firefly",
 			"transform": {
-				"position": [
-					-34,
-					15.371,
-					24
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [-34, 15.371, 24],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.4,
@@ -727,16 +596,8 @@
 			"stableId": "observatory:firefly:sapphire-pillar",
 			"displayName": "Sapphire Pillar Firefly",
 			"transform": {
-				"position": [
-					-17,
-					10.523,
-					39
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [-17, 10.523, 39],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.8,
@@ -771,16 +632,8 @@
 			"stableId": "observatory:firefly:plum-garden",
 			"displayName": "Plum Garden Firefly",
 			"transform": {
-				"position": [
-					7,
-					7.518,
-					47
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [7, 7.518, 47],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.55,
@@ -815,16 +668,8 @@
 			"stableId": "observatory:firefly:scarlet-bridge",
 			"displayName": "Scarlet Bridge Firefly",
 			"transform": {
-				"position": [
-					28,
-					6.417,
-					40
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [28, 6.417, 40],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.7,
@@ -859,16 +704,8 @@
 			"stableId": "observatory:firefly:aurora-blue",
 			"displayName": "Aurora Blue Firefly",
 			"transform": {
-				"position": [
-					46,
-					2.558,
-					18
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [46, 2.558, 18],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 2.1,
@@ -903,16 +740,8 @@
 			"stableId": "observatory:firefly:wine-shadow",
 			"displayName": "Wine Shadow Firefly",
 			"transform": {
-				"position": [
-					58,
-					2.948,
-					-8
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [58, 2.948, -8],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.45,
@@ -947,16 +776,8 @@
 			"stableId": "observatory:firefly:electric-violet",
 			"displayName": "Electric Violet Firefly",
 			"transform": {
-				"position": [
-					44,
-					6.168,
-					-30
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [44, 6.168, -30],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.9,
@@ -991,16 +812,8 @@
 			"stableId": "observatory:firefly:pale-blue",
 			"displayName": "Pale Blue Firefly",
 			"transform": {
-				"position": [
-					18,
-					17.165,
-					8
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [18, 17.165, 8],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.6,
@@ -1035,16 +848,8 @@
 			"stableId": "observatory:firefly:deep-red",
 			"displayName": "Deep Red Firefly",
 			"transform": {
-				"position": [
-					-8,
-					24.547,
-					14
-				],
-				"scale": [
-					0.2,
-					0.2,
-					0.2
-				]
+				"position": [-8, 24.547, 14],
+				"scale": [0.2, 0.2, 0.2]
 			},
 			"movement": {
 				"radius": 1.85,
@@ -1071,6 +876,870 @@
 				"title": "Deep Red Firefly",
 				"excerpt": "A deep red firefly hangs beyond the ring.",
 				"body": "The deep red light burns low and steady, as if keeping time for the water.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-hilltop-corona-firefly",
+			"stableId": "observatory:firefly:hilltop-corona",
+			"displayName": "Hilltop Corona Firefly",
+			"transform": {
+				"position": [-8, 21.331, 4],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.18,
+				"speed": 0.14,
+				"hoverHeight": 2.25,
+				"bobAmplitude": 0.36,
+				"bobSpeed": 0.7
+			},
+			"light": {
+				"color": "#ffd66b",
+				"intensity": 11.4,
+				"distance": 19,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.03
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Hilltop Corona Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-summit-halo-firefly",
+			"stableId": "observatory:firefly:summit-halo",
+			"displayName": "Summit Halo Firefly",
+			"transform": {
+				"position": [-6, 21.393, 2],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.02,
+				"speed": 0.16,
+				"hoverHeight": 1.95,
+				"bobAmplitude": 0.28,
+				"bobSpeed": 0.62
+			},
+			"light": {
+				"color": "#dff8ff",
+				"intensity": 10.8,
+				"distance": 18.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.07
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Summit Halo Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-crest-spark-firefly",
+			"stableId": "observatory:firefly:crest-spark",
+			"displayName": "Crest Spark Firefly",
+			"transform": {
+				"position": [-4, 21.352, 4],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 0.92,
+				"speed": 0.18,
+				"hoverHeight": 1.7,
+				"bobAmplitude": 0.24,
+				"bobSpeed": 0.82
+			},
+			"light": {
+				"color": "#8defff",
+				"intensity": 10.6,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.11
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Crest Spark Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-white-peak-firefly",
+			"stableId": "observatory:firefly:white-peak",
+			"displayName": "White Peak Firefly",
+			"transform": {
+				"position": [-2, 21.341, 0],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.08,
+				"speed": 0.15,
+				"hoverHeight": 2.55,
+				"bobAmplitude": 0.42,
+				"bobSpeed": 0.48
+			},
+			"light": {
+				"color": "#f4fbff",
+				"intensity": 10.4,
+				"distance": 17.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.17
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "White Peak Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-blue-crown-firefly",
+			"stableId": "observatory:firefly:blue-crown",
+			"displayName": "Blue Crown Firefly",
+			"transform": {
+				"position": [0, 21.25, -2],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.22,
+				"speed": 0.13,
+				"hoverHeight": 1.45,
+				"bobAmplitude": 0.32,
+				"bobSpeed": 0.76
+			},
+			"light": {
+				"color": "#4aa8ff",
+				"intensity": 10.8,
+				"distance": 18.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.23
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Blue Crown Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-ruby-summit-firefly",
+			"stableId": "observatory:firefly:ruby-summit",
+			"displayName": "Ruby Summit Firefly",
+			"transform": {
+				"position": [-10, 21.179, 6],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.36,
+				"speed": 0.12,
+				"hoverHeight": 2.1,
+				"bobAmplitude": 0.38,
+				"bobSpeed": 0.54
+			},
+			"light": {
+				"color": "#ff2f6d",
+				"intensity": 11,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.29
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Ruby Summit Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-violet-cairn-firefly",
+			"stableId": "observatory:firefly:violet-cairn",
+			"displayName": "Violet Cairn Firefly",
+			"transform": {
+				"position": [-8, 21.206, 8],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.12,
+				"speed": 0.2,
+				"hoverHeight": 1.85,
+				"bobAmplitude": 0.3,
+				"bobSpeed": 0.9
+			},
+			"light": {
+				"color": "#9a5cff",
+				"intensity": 10.2,
+				"distance": 17.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.34
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Violet Cairn Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-aurora-crest-firefly",
+			"stableId": "observatory:firefly:aurora-crest",
+			"displayName": "Aurora Crest Firefly",
+			"transform": {
+				"position": [-4, 21.074, -4],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.48,
+				"speed": 0.1,
+				"hoverHeight": 2.35,
+				"bobAmplitude": 0.46,
+				"bobSpeed": 0.44
+			},
+			"light": {
+				"color": "#61e4ff",
+				"intensity": 10.8,
+				"distance": 19,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.39
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Aurora Crest Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-silver-orbit-firefly",
+			"stableId": "observatory:firefly:silver-orbit",
+			"displayName": "Silver Orbit Firefly",
+			"transform": {
+				"position": [2, 21.147, -6],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.24,
+				"speed": 0.18,
+				"hoverHeight": 1.6,
+				"bobAmplitude": 0.26,
+				"bobSpeed": 0.68
+			},
+			"light": {
+				"color": "#a9d8ff",
+				"intensity": 9.8,
+				"distance": 17,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.44
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Silver Orbit Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-rose-crown-firefly",
+			"stableId": "observatory:firefly:rose-crown",
+			"displayName": "Rose Crown Firefly",
+			"transform": {
+				"position": [4, 21.021, -4],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.64,
+				"speed": 0.11,
+				"hoverHeight": 2.65,
+				"bobAmplitude": 0.4,
+				"bobSpeed": 0.52
+			},
+			"light": {
+				"color": "#ff6bb5",
+				"intensity": 10.4,
+				"distance": 17.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.49
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Rose Crown Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-indigo-crown-firefly",
+			"stableId": "observatory:firefly:indigo-crown",
+			"displayName": "Indigo Crown Firefly",
+			"transform": {
+				"position": [-12, 20.937, 8],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.06,
+				"speed": 0.17,
+				"hoverHeight": 1.75,
+				"bobAmplitude": 0.34,
+				"bobSpeed": 0.72
+			},
+			"light": {
+				"color": "#5357ff",
+				"intensity": 10.2,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.54
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Indigo Crown Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-ember-halo-firefly",
+			"stableId": "observatory:firefly:ember-halo",
+			"displayName": "Ember Halo Firefly",
+			"transform": {
+				"position": [-14, 20.592, 10],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.42,
+				"speed": 0.12,
+				"hoverHeight": 2.2,
+				"bobAmplitude": 0.36,
+				"bobSpeed": 0.58
+			},
+			"light": {
+				"color": "#ff3750",
+				"intensity": 10.8,
+				"distance": 18.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.59
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Ember Halo Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-cobalt-summit-firefly",
+			"stableId": "observatory:firefly:cobalt-summit",
+			"displayName": "Cobalt Summit Firefly",
+			"transform": {
+				"position": [6, 20.725, -2],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.18,
+				"speed": 0.15,
+				"hoverHeight": 1.5,
+				"bobAmplitude": 0.24,
+				"bobSpeed": 0.84
+			},
+			"light": {
+				"color": "#276bff",
+				"intensity": 10.8,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.64
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Cobalt Summit Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-magenta-crest-firefly",
+			"stableId": "observatory:firefly:magenta-crest",
+			"displayName": "Magenta Crest Firefly",
+			"transform": {
+				"position": [8, 20.348, 0],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.54,
+				"speed": 0.1,
+				"hoverHeight": 2.45,
+				"bobAmplitude": 0.5,
+				"bobSpeed": 0.46
+			},
+			"light": {
+				"color": "#ff42e6",
+				"intensity": 10.4,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.69
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Magenta Crest Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-pale-needle-firefly",
+			"stableId": "observatory:firefly:pale-needle",
+			"displayName": "Pale Needle Firefly",
+			"transform": {
+				"position": [-2, 20.687, 8],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.28,
+				"speed": 0.14,
+				"hoverHeight": 1.9,
+				"bobAmplitude": 0.28,
+				"bobSpeed": 0.78
+			},
+			"light": {
+				"color": "#dff8ff",
+				"intensity": 10,
+				"distance": 17.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.74
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Pale Needle Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-crimson-crown-firefly",
+			"stableId": "observatory:firefly:crimson-crown",
+			"displayName": "Crimson Crown Firefly",
+			"transform": {
+				"position": [0, 20.723, 6],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.72,
+				"speed": 0.11,
+				"hoverHeight": 2.75,
+				"bobAmplitude": 0.44,
+				"bobSpeed": 0.5
+			},
+			"light": {
+				"color": "#d62745",
+				"intensity": 9.8,
+				"distance": 17,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.79
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Crimson Crown Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-azure-spindle-firefly",
+			"stableId": "observatory:firefly:azure-spindle",
+			"displayName": "Azure Spindle Firefly",
+			"transform": {
+				"position": [-16, 20.11, 12],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.1,
+				"speed": 0.18,
+				"hoverHeight": 2.05,
+				"bobAmplitude": 0.32,
+				"bobSpeed": 0.66
+			},
+			"light": {
+				"color": "#39c8ff",
+				"intensity": 10.6,
+				"distance": 18.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.84
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Azure Spindle Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-lavender-summit-firefly",
+			"stableId": "observatory:firefly:lavender-summit",
+			"displayName": "Lavender Summit Firefly",
+			"transform": {
+				"position": [-20, 18.682, 16],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.44,
+				"speed": 0.13,
+				"hoverHeight": 1.65,
+				"bobAmplitude": 0.3,
+				"bobSpeed": 0.74
+			},
+			"light": {
+				"color": "#b7a1ff",
+				"intensity": 10,
+				"distance": 17.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.89
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Lavender Summit Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-plum-peak-firefly",
+			"stableId": "observatory:firefly:plum-peak",
+			"displayName": "Plum Peak Firefly",
+			"transform": {
+				"position": [-12, 18.992, 18],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.2,
+				"speed": 0.16,
+				"hoverHeight": 2.3,
+				"bobAmplitude": 0.38,
+				"bobSpeed": 0.56
+			},
+			"light": {
+				"color": "#8e3cff",
+				"intensity": 10,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.94
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Plum Peak Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-scarlet-needle-firefly",
+			"stableId": "observatory:firefly:scarlet-needle",
+			"displayName": "Scarlet Needle Firefly",
+			"transform": {
+				"position": [-6, 18.272, 20],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.58,
+				"speed": 0.11,
+				"hoverHeight": 1.8,
+				"bobAmplitude": 0.34,
+				"bobSpeed": 0.8
+			},
+			"light": {
+				"color": "#ff1f3f",
+				"intensity": 11.2,
+				"distance": 19,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.99
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Scarlet Needle Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-electric-crown-firefly",
+			"stableId": "observatory:firefly:electric-crown",
+			"displayName": "Electric Crown Firefly",
+			"transform": {
+				"position": [4, 17.534, 18],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.34,
+				"speed": 0.14,
+				"hoverHeight": 2.6,
+				"bobAmplitude": 0.48,
+				"bobSpeed": 0.42
+			},
+			"light": {
+				"color": "#cf35ff",
+				"intensity": 11.4,
+				"distance": 19,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.05
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Electric Crown Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-wine-cairn-firefly",
+			"stableId": "observatory:firefly:wine-cairn",
+			"displayName": "Wine Cairn Firefly",
+			"transform": {
+				"position": [10, 17.051, 14],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.05,
+				"speed": 0.2,
+				"hoverHeight": 1.55,
+				"bobAmplitude": 0.26,
+				"bobSpeed": 0.88
+			},
+			"light": {
+				"color": "#b21a56",
+				"intensity": 9.6,
+				"distance": 17,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.21
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Wine Cairn Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-sapphire-crown-firefly",
+			"stableId": "observatory:firefly:sapphire-crown",
+			"displayName": "Sapphire Crown Firefly",
+			"transform": {
+				"position": [14, 17.357, 8],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.52,
+				"speed": 0.12,
+				"hoverHeight": 2.15,
+				"bobAmplitude": 0.36,
+				"bobSpeed": 0.6
+			},
+			"light": {
+				"color": "#2f7dff",
+				"intensity": 11,
+				"distance": 18.5,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.67
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Sapphire Crown Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
+				"durationMs": 5600
+			}
+		},
+		{
+			"id": "observatory-deep-violet-peak-firefly",
+			"stableId": "observatory:firefly:deep-violet-peak",
+			"displayName": "Deep Violet Peak Firefly",
+			"transform": {
+				"position": [-24, 18.059, 10],
+				"scale": [0.2, 0.2, 0.2]
+			},
+			"movement": {
+				"radius": 1.26,
+				"speed": 0.16,
+				"hoverHeight": 2.4,
+				"bobAmplitude": 0.42,
+				"bobSpeed": 0.64
+			},
+			"light": {
+				"color": "#7b2cff",
+				"intensity": 10.4,
+				"distance": 18,
+				"decay": 1.35
+			},
+			"lightModulation": {
+				"phase": 0.95
+			},
+			"interaction": {
+				"prompt": "Listen",
+				"activationRadius": 3.2
+			},
+			"conversation": {
+				"mode": "read-only",
+				"title": "Deep Violet Peak Firefly",
+				"excerpt": "A small light gathers above the hilltop air.",
+				"body": "The hill gathers the small lights into a slow crown above the stone.",
 				"durationMs": 5600
 			}
 		}

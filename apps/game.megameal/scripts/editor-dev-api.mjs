@@ -1309,6 +1309,12 @@ function validateNpcVisualPart(value, path, errors) {
 	if (value.transform !== undefined) {
 		validateTransform(value.transform, `${path}.transform`, errors);
 	}
+	if (
+		value.inheritLightColor !== undefined &&
+		typeof value.inheritLightColor !== "boolean"
+	) {
+		errors.push(`${path}.inheritLightColor must be a boolean when provided.`);
+	}
 }
 
 function validateNpcGroup(value, path, errors) {

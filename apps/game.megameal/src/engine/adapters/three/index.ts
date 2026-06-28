@@ -644,6 +644,7 @@ function createSpriteObject(
 	const spriteTexture = createStarSpriteTexture(
 		spriteAsset,
 		options.createCanvas,
+		renderable.color,
 	);
 	const texture = new options.three.CanvasTexture(spriteTexture.canvas);
 	setTextureColorSpace(texture, "srgb", options.three);
@@ -682,9 +683,11 @@ function createSpriteObject(
 function createStarSpriteTexture(
 	asset: ThreeSpriteAsset,
 	createCanvas: (size: number) => ThreeCanvasLike,
+	colorOverride?: string,
 ): StarSpriteTexture {
 	const size = 256;
 	const padding = 8;
+	const color = colorOverride ?? asset.color;
 	const baseRadius = size * 0.03;
 	const shapeExtentMultiplier = starShapeExtentMultiplier(asset.starType);
 	const glowLayers = [
@@ -729,12 +732,9 @@ function createStarSpriteTexture(
 			center,
 			layerRadius,
 		);
-		gradient.addColorStop(0, colorWithAlpha(asset.color, layer.opacity));
-		gradient.addColorStop(
-			0.5,
-			colorWithAlpha(asset.color, layer.opacity * 0.59),
-		);
-		gradient.addColorStop(1, colorWithAlpha(asset.color, 0));
+		gradient.addColorStop(0, colorWithAlpha(color, layer.opacity));
+		gradient.addColorStop(0.5, colorWithAlpha(color, layer.opacity * 0.59));
+		gradient.addColorStop(1, colorWithAlpha(color, 0));
 
 		context.fillStyle = gradient;
 		context.beginPath();
@@ -743,7 +743,7 @@ function createStarSpriteTexture(
 		context.restore();
 	}
 
-	drawStarSpriteShape(context, asset.starType, asset.color, center, radius);
+	drawStarSpriteShape(context, asset.starType, color, center, radius);
 
 	return {
 		canvas,

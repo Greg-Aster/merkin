@@ -5,6 +5,7 @@ export const TRANSFORM_COMPONENT = "Transform";
 export const PREVIOUS_TRANSFORM_COMPONENT = "PreviousTransform";
 export const RENDERABLE_COMPONENT = "Renderable";
 export const LIGHT_COMPONENT = "Light";
+export const LIGHT_TRANSFORM_COMPONENT = "LightTransform";
 export const REFLECTION_PROBE_COMPONENT = "ReflectionProbe";
 
 export type MeshRenderableComponent = {
@@ -17,6 +18,7 @@ export type MeshRenderableComponent = {
 export type SpriteRenderableComponent = {
 	readonly kind: "sprite";
 	readonly spriteId: string;
+	readonly color?: string;
 	readonly visible?: boolean;
 };
 
@@ -298,6 +300,7 @@ export type LightSyncSystemOptions = {
 	readonly transformComponent?: string;
 	readonly previousTransformComponent?: string;
 	readonly lightComponent?: string;
+	readonly lightTransformComponent?: string;
 };
 
 export type ReflectionProbeSyncSystemOptions = {
@@ -436,6 +439,7 @@ export class LightSyncSystem {
 	readonly transformComponent: string;
 	readonly previousTransformComponent: string;
 	readonly lightComponent: string;
+	readonly lightTransformComponent: string | undefined;
 
 	readonly #attachedEntities = new Set<Entity>();
 	readonly #lightKeys = new Map<Entity, string>();
@@ -446,6 +450,7 @@ export class LightSyncSystem {
 		this.previousTransformComponent =
 			options.previousTransformComponent ?? PREVIOUS_TRANSFORM_COMPONENT;
 		this.lightComponent = options.lightComponent ?? LIGHT_COMPONENT;
+		this.lightTransformComponent = options.lightTransformComponent;
 	}
 
 	update(context: RenderSyncContext): void {
@@ -472,7 +477,7 @@ export class LightSyncSystem {
 				entity,
 				this.previousTransformComponent,
 			);
-			const renderedTransform =
+			const interpolatedTransform =
 				previousTransform && context.interpolation !== undefined
 					? interpolateTransform(
 							previousTransform,
@@ -480,6 +485,13 @@ export class LightSyncSystem {
 							context.interpolation,
 						)
 					: transform;
+			const renderedTransform =
+				this.lightTransformComponent !== undefined
+					? context.world.getComponent<RenderTransform>(
+							entity,
+							this.lightTransformComponent,
+						) ?? interpolatedTransform
+					: interpolatedTransform;
 			const key = lightKey(light);
 			const previousKey = this.#lightKeys.get(entity);
 
@@ -728,7 +740,7 @@ export function createTransformHistorySystem<
 
 function renderableKey(renderable: RenderableComponent): string {
 	if (renderable.kind === "sprite") {
-		return `sprite\u0000${renderable.spriteId}`;
+		return `sprite\u0000${renderable.spriteId}\u0000${renderable.color ?? ""}`;
 	}
 
 	return `${renderable.meshId}\u0000${renderable.materialId ?? ""}`;

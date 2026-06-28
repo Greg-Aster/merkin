@@ -121,6 +121,7 @@ export type LevelNpcArchetypeData = {
 
 export type LevelNpcVisualPartData = {
 	readonly idSuffix: string;
+	readonly inheritLightColor?: boolean;
 	readonly prefab: PrefabData;
 	readonly transform?: NonNullable<LevelData["instances"][number]["transform"]>;
 };
@@ -430,6 +431,8 @@ function parseLevelNpcPackageData(
 				...groupDefaults.interaction,
 				...instance.interaction,
 			};
+			const inheritedLightColor =
+				typeof light.color === "string" ? light.color : undefined;
 
 			instances.push({
 				id: instance.id,
@@ -469,6 +472,14 @@ function parseLevelNpcPackageData(
 						visualPart.transform,
 					),
 					components: {
+						...(visualPart.inheritLightColor && inheritedLightColor
+							? {
+									Renderable: npcVisualPartTintedRenderable(
+										visualPart,
+										inheritedLightColor,
+									),
+								}
+							: {}),
 						FollowTarget: {
 							targetStableId: instance.stableId,
 							offset: visualPart.transform?.position ?? [0, 0, 0],
@@ -533,6 +544,26 @@ function composeNpcVisualPartTransform(
 			baseScale[1] * partScale[1],
 			baseScale[2] * partScale[2],
 		],
+	};
+}
+
+function npcVisualPartTintedRenderable(
+	visualPart: LevelNpcVisualPartData,
+	color: string,
+): Record<string, unknown> {
+	const renderable = isRecord(visualPart.prefab.components)
+		? visualPart.prefab.components.Renderable
+		: undefined;
+
+	if (!isRecord(renderable) || renderable.kind !== "sprite") {
+		throw new Error(
+			`NPC visual part "${visualPart.idSuffix}" cannot inherit light color without a sprite Renderable.`,
+		);
+	}
+
+	return {
+		...renderable,
+		color,
 	};
 }
 

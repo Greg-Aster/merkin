@@ -9,6 +9,7 @@ import {
 	EngineRuntime,
 	type Entity,
 	type InputPlatformPort,
+	LIGHT_TRANSFORM_COMPONENT,
 	LevelLoader,
 	type LightRendererPort,
 	LightSyncSystem,
@@ -61,6 +62,7 @@ import {
 	createPlayerCameraSystem,
 	createPlayerChargeLightFeedbackSystem,
 	createPlayerInputSystem,
+	createPlayerLightCameraAnchorSystem,
 	createPortalActivationSystem,
 	createPortalProximitySystem,
 	createStoryNoteActivationSystem,
@@ -145,7 +147,10 @@ export async function createMegamealGameRuntime(
 		adapter: options.physics,
 	});
 	const renderSync = new RenderSyncSystem({ renderer: options.renderer });
-	const lightSync = new LightSyncSystem({ renderer: options.renderer });
+	const lightSync = new LightSyncSystem({
+		renderer: options.renderer,
+		lightTransformComponent: LIGHT_TRANSFORM_COMPONENT,
+	});
 	const reflectionProbeSync = new ReflectionProbeSyncSystem({
 		renderer: options.renderer,
 	});
@@ -219,6 +224,11 @@ export async function createMegamealGameRuntime(
 		},
 	);
 	runtime.scheduler.registerSystem("camera", createPlayerCameraSystem());
+	runtime.scheduler.registerSystem(
+		"camera",
+		createPlayerLightCameraAnchorSystem(),
+		{ order: 5 },
+	);
 	runtime.scheduler.registerSystem("gameplay", createChargedActionSystem());
 	runtime.scheduler.registerSystem(
 		"gameplay",
