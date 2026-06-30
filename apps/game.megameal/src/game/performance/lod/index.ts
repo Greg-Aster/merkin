@@ -33,7 +33,8 @@ export type LodEvaluationReason =
 	| "distance-threshold"
 	| "missing-group"
 	| "empty-group"
-	| "invalid-distance";
+	| "invalid-distance"
+	| "unsupported-mode";
 
 export type LodEvaluationResult = {
 	readonly groupId: string;
@@ -79,7 +80,7 @@ export function validateLodPolicyConfig(
 		return [`${label} must be an object.`];
 	}
 
-	if (!LOD_POLICY_MODES.includes(value.mode as LodPolicyMode)) {
+	if (!isLodPolicyMode(value.mode)) {
 		errors.push(`${label}.mode must be off, diagnostic, or distance.`);
 	}
 
@@ -181,6 +182,7 @@ export function evaluateLodTier(
 	config: LodPolicyConfig,
 	input: LodEvaluationInput,
 ): LodEvaluationResult {
+	const mode = isLodPolicyMode(config.mode) ? config.mode : "off";
 	const group = config.groups.find(
 		(candidate) => candidate.id === input.groupId,
 	);
@@ -189,7 +191,7 @@ export function evaluateLodTier(
 		return createLodEvaluationResult({
 			active: false,
 			groupId: input.groupId,
-			mode: config.mode,
+			mode,
 			reason: "missing-group",
 			recommendedTier: undefined,
 			selectedTier: undefined,
@@ -200,7 +202,7 @@ export function evaluateLodTier(
 		return createLodEvaluationResult({
 			active: false,
 			groupId: input.groupId,
-			mode: config.mode,
+			mode,
 			reason: "empty-group",
 			recommendedTier: undefined,
 			selectedTier: undefined,
@@ -210,22 +212,33 @@ export function evaluateLodTier(
 	const fallbackTier = resolveDefaultTier(group);
 	const recommendation = recommendLodTier(group, input, fallbackTier);
 
-	if (config.mode === "off") {
+	if (!isLodPolicyMode(config.mode)) {
 		return createLodEvaluationResult({
 			active: false,
 			groupId: input.groupId,
-			mode: config.mode,
+			mode,
+			reason: "unsupported-mode",
+			recommendedTier: recommendation.tier,
+			selectedTier: fallbackTier,
+		});
+	}
+
+	if (mode === "off") {
+		return createLodEvaluationResult({
+			active: false,
+			groupId: input.groupId,
+			mode,
 			reason: "mode-off",
 			recommendedTier: recommendation.tier,
 			selectedTier: fallbackTier,
 		});
 	}
 
-	if (config.mode === "diagnostic") {
+	if (mode === "diagnostic") {
 		return createLodEvaluationResult({
 			active: false,
 			groupId: input.groupId,
-			mode: config.mode,
+			mode,
 			reason: "diagnostic-only",
 			recommendedTier: recommendation.tier,
 			selectedTier: fallbackTier,
@@ -235,7 +248,7 @@ export function evaluateLodTier(
 	return createLodEvaluationResult({
 		active: true,
 		groupId: input.groupId,
-		mode: config.mode,
+		mode,
 		reason: recommendation.reason,
 		recommendedTier: recommendation.tier,
 		selectedTier: recommendation.tier,
@@ -328,6 +341,10 @@ function clampSignificance(value: number): number {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isLodPolicyMode(value: unknown): value is LodPolicyMode {
+	return LOD_POLICY_MODES.includes(value as LodPolicyMode);
 }
 
 function isNonEmptyString(value: unknown): value is string {

@@ -134,11 +134,7 @@ export function evaluateCullingBatch(
 	previousDecisions: ReadonlyMap<string, PreviousCullingDecision> = new Map(),
 ): readonly CullingSubjectDecision[] {
 	return subjects.map((subject) =>
-		evaluateCullingSubject(
-			policy,
-			subject,
-			previousDecisions.get(subject.id),
-		),
+		evaluateCullingSubject(policy, subject, previousDecisions.get(subject.id)),
 	);
 }
 
@@ -150,19 +146,28 @@ export function evaluateCullingSubject(
 	validatePolicy(policy);
 	validateSubject(subject);
 
-	const distanceToObserver = distance(policy.observerPosition, subject.position);
+	const distanceToObserver = distance(
+		policy.observerPosition,
+		subject.position,
+	);
 	const alwaysInclude = subject.alwaysInclude === true || policy.mode === "off";
+	const updateRelevanceRadius = resolveUpdateRadius(policy, subject);
 	const updateDistance = evaluateDistanceInclusion({
 		alwaysInclude,
 		distance: distanceToObserver,
-		relevanceRadius: resolveUpdateRadius(policy, subject),
+		...(updateRelevanceRadius !== undefined
+			? { relevanceRadius: updateRelevanceRadius }
+			: {}),
 		hysteresisRadius: resolveDistanceHysteresis(policy),
 		previousIncluded: previous?.updateIncluded ?? false,
 	});
+	const renderRelevanceRadius = resolveRenderRadius(policy, subject);
 	const renderDistance = evaluateDistanceInclusion({
 		alwaysInclude,
 		distance: distanceToObserver,
-		relevanceRadius: resolveRenderRadius(policy, subject),
+		...(renderRelevanceRadius !== undefined
+			? { relevanceRadius: renderRelevanceRadius }
+			: {}),
 		hysteresisRadius: resolveDistanceHysteresis(policy),
 		previousIncluded: previous?.renderIncluded ?? false,
 	});
@@ -170,7 +175,7 @@ export function evaluateCullingSubject(
 		alwaysInclude,
 		center: subject.position,
 		boundsRadius: subject.boundsRadius ?? 0,
-		frustum: policy.frustum,
+		...(policy.frustum ? { frustum: policy.frustum } : {}),
 		hysteresisRadius: resolveFrustumHysteresis(policy),
 		previousIncluded: previous?.renderIncluded ?? false,
 	});
@@ -240,9 +245,7 @@ export function evaluateDistanceInclusion(options: {
 
 	return {
 		included,
-		reason: included
-			? "within-relevance-radius"
-			: "outside-relevance-radius",
+		reason: included ? "within-relevance-radius" : "outside-relevance-radius",
 		distance: options.distance,
 		relevanceRadius: options.relevanceRadius,
 		thresholdRadius,
@@ -330,8 +333,7 @@ export function classifySphereAgainstPlanes(
 
 	for (const [index, plane] of planes.entries()) {
 		validatePlane(plane, `planes[${index}]`);
-		const signedDistance =
-			dot(plane.normal, center) + plane.constant;
+		const signedDistance = dot(plane.normal, center) + plane.constant;
 
 		if (signedDistance < -radius) {
 			return "outside";
@@ -349,10 +351,7 @@ export function distance(a: CullingVector3, b: CullingVector3): number {
 	return Math.sqrt(distanceSquared(a, b));
 }
 
-export function distanceSquared(
-	a: CullingVector3,
-	b: CullingVector3,
-): number {
+export function distanceSquared(a: CullingVector3, b: CullingVector3): number {
 	validateVector3(a, "a");
 	validateVector3(b, "b");
 
@@ -440,7 +439,9 @@ function cullingReasons(options: {
 
 function validatePolicy(policy: CullingPolicy): void {
 	if (policy.mode !== "off" && policy.mode !== "diagnostic") {
-		throw new Error(`Unsupported culling policy mode "${String(policy.mode)}".`);
+		throw new Error(
+			`Unsupported culling policy mode "${String(policy.mode)}".`,
+		);
 	}
 
 	validateVector3(policy.observerPosition, "observerPosition");
@@ -470,7 +471,10 @@ function validateSubject(subject: CullingSubject): void {
 	}
 
 	validateVector3(subject.position, `subject ${subject.id} position`);
-	validateOptionalRadius(subject.boundsRadius, `subject ${subject.id} boundsRadius`);
+	validateOptionalRadius(
+		subject.boundsRadius,
+		`subject ${subject.id} boundsRadius`,
+	);
 	validateOptionalRadius(
 		subject.relevanceRadius,
 		`subject ${subject.id} relevanceRadius`,
@@ -485,7 +489,10 @@ function validateSubject(subject: CullingSubject): void {
 	);
 }
 
-function validateOptionalRadius(value: number | undefined, label: string): void {
+function validateOptionalRadius(
+	value: number | undefined,
+	label: string,
+): void {
 	if (value !== undefined) {
 		assertFiniteNonNegative(value, label);
 	}

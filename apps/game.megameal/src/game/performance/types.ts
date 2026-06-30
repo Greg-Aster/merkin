@@ -36,7 +36,7 @@ export type PerformanceLodSystemConfig = PerformanceSystemConfig & {
 };
 
 export type PerformanceDistanceWindowConfig = {
-	readonly maxDistance: number;
+	readonly maxDistance?: number;
 	readonly hysteresis?: number;
 };
 
@@ -48,8 +48,8 @@ export type PerformanceCullingSystemConfig = PerformanceSystemConfig & {
 };
 
 export type PerformanceResidencyWindowConfig = {
-	readonly loadDistance: number;
-	readonly unloadDistance: number;
+	readonly loadDistance?: number;
+	readonly unloadDistance?: number;
 };
 
 export type PerformanceStreamingSystemConfig = PerformanceSystemConfig & {
@@ -179,7 +179,12 @@ export function validatePerformanceConfig(
 			);
 		}
 
-		validateSystemConfig(systemId, system, `${label}.systems.${systemId}`, errors);
+		validateSystemConfig(
+			systemId,
+			system,
+			`${label}.systems.${systemId}`,
+			errors,
+		);
 	}
 
 	return errors;
@@ -252,7 +257,11 @@ function validateLodSystemConfig(
 		if (typeof tier.id !== "string" || tier.id.length === 0) {
 			errors.push(`${tierPath}.id must be a non-empty string.`);
 		}
-		validateNonNegativeNumber(tier.minDistance, `${tierPath}.minDistance`, errors);
+		validateNonNegativeNumber(
+			tier.minDistance,
+			`${tierPath}.minDistance`,
+			errors,
+		);
 
 		if (tier.maxDistance !== undefined) {
 			validateNonNegativeNumber(
@@ -268,12 +277,18 @@ function validateLodSystemConfig(
 				Number.isFinite(tier.maxDistance) &&
 				tier.maxDistance <= tier.minDistance
 			) {
-				errors.push(`${tierPath}.maxDistance must be greater than minDistance.`);
+				errors.push(
+					`${tierPath}.maxDistance must be greater than minDistance.`,
+				);
 			}
 		}
 
 		if (tier.qualityRatio !== undefined) {
-			validatePositiveNumber(tier.qualityRatio, `${tierPath}.qualityRatio`, errors);
+			validatePositiveNumber(
+				tier.qualityRatio,
+				`${tierPath}.qualityRatio`,
+				errors,
+			);
 		}
 	}
 }
@@ -363,11 +378,7 @@ function validateCollisionSystemConfig(
 
 	validateAllowedFields(
 		system.diagnostics,
-		new Set([
-			"primitiveShapes",
-			"includeMeshColliders",
-			"includeWalkableOnly",
-		]),
+		new Set(["primitiveShapes", "includeMeshColliders", "includeWalkableOnly"]),
 		`${path}.diagnostics`,
 		errors,
 	);
@@ -400,8 +411,16 @@ function validateDistanceWindow(
 		return;
 	}
 
-	validateAllowedFields(value, new Set(["maxDistance", "hysteresis"]), path, errors);
-	validateNonNegativeNumber(value.maxDistance, `${path}.maxDistance`, errors);
+	validateAllowedFields(
+		value,
+		new Set(["maxDistance", "hysteresis"]),
+		path,
+		errors,
+	);
+
+	if (value.maxDistance !== undefined) {
+		validateNonNegativeNumber(value.maxDistance, `${path}.maxDistance`, errors);
+	}
 
 	if (value.hysteresis !== undefined) {
 		validateNonNegativeNumber(value.hysteresis, `${path}.hysteresis`, errors);
@@ -424,8 +443,22 @@ function validateResidencyWindow(
 		path,
 		errors,
 	);
-	validateNonNegativeNumber(value.loadDistance, `${path}.loadDistance`, errors);
-	validateNonNegativeNumber(value.unloadDistance, `${path}.unloadDistance`, errors);
+
+	if (value.loadDistance !== undefined) {
+		validateNonNegativeNumber(
+			value.loadDistance,
+			`${path}.loadDistance`,
+			errors,
+		);
+	}
+
+	if (value.unloadDistance !== undefined) {
+		validateNonNegativeNumber(
+			value.unloadDistance,
+			`${path}.unloadDistance`,
+			errors,
+		);
+	}
 
 	if (
 		typeof value.loadDistance === "number" &&
@@ -434,7 +467,9 @@ function validateResidencyWindow(
 		Number.isFinite(value.unloadDistance) &&
 		value.unloadDistance < value.loadDistance
 	) {
-		errors.push(`${path}.unloadDistance must be greater than or equal to loadDistance.`);
+		errors.push(
+			`${path}.unloadDistance must be greater than or equal to loadDistance.`,
+		);
 	}
 }
 

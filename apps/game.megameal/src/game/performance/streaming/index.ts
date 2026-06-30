@@ -149,7 +149,9 @@ export function createStreamingPlan(input: StreamingPlanInput): StreamingPlan {
 		}),
 	);
 	const desiredLoadedChunkIds = active
-		? decisions.filter((decision) => decision.desired).map((decision) => decision.chunkId)
+		? decisions
+				.filter((decision) => decision.desired)
+				.map((decision) => decision.chunkId)
 		: [];
 	const loadChunkIds = active
 		? decisions
@@ -209,7 +211,10 @@ export function validateStreamingPlanInput(
 		StreamingPlanInput,
 		"chunks" | "defaultLoadRadius" | "defaultUnloadRadius" | "focus"
 	>,
-): { readonly errors: readonly string[]; readonly warnings: readonly string[] } {
+): {
+	readonly errors: readonly string[];
+	readonly warnings: readonly string[];
+} {
 	const errors: string[] = [];
 	const warnings: string[] = [];
 	const chunkIds = new Set<string>();
@@ -225,11 +230,21 @@ export function validateStreamingPlanInput(
 		Number.isFinite(defaultUnloadRadius) &&
 		defaultUnloadRadius < defaultLoadRadius
 	) {
-		errors.push("defaultUnloadRadius must be greater than or equal to defaultLoadRadius.");
+		errors.push(
+			"defaultUnloadRadius must be greater than or equal to defaultLoadRadius.",
+		);
 	}
 
-	validateOptionalVector(input.focus?.playerPosition, "focus.playerPosition", errors);
-	validateOptionalVector(input.focus?.cameraPosition, "focus.cameraPosition", errors);
+	validateOptionalVector(
+		input.focus?.playerPosition,
+		"focus.playerPosition",
+		errors,
+	);
+	validateOptionalVector(
+		input.focus?.cameraPosition,
+		"focus.cameraPosition",
+		errors,
+	);
 
 	for (const chunk of input.chunks) {
 		if (typeof chunk.id !== "string" || chunk.id.trim().length === 0) {
@@ -241,7 +256,9 @@ export function validateStreamingPlanInput(
 		}
 
 		if (!STREAMING_CHUNK_ROLES.includes(chunk.role)) {
-			errors.push(`streaming chunk "${chunk.id}" has unsupported role "${chunk.role}".`);
+			errors.push(
+				`streaming chunk "${chunk.id}" has unsupported role "${chunk.role}".`,
+			);
 		}
 
 		validateChunkContent(chunk, errors);
@@ -282,11 +299,14 @@ export function validateStreamingPlanInput(
 	return { errors, warnings };
 }
 
-function resolveStreamingPolicyMode(input: Pick<StreamingPlanInput, "mode" | "performanceConfig">): {
+function resolveStreamingPolicyMode(
+	input: Pick<StreamingPlanInput, "mode" | "performanceConfig">,
+): {
 	readonly mode: StreamingPolicyMode | "unsupported";
 	readonly errors: readonly string[];
 } {
-	const rawMode = input.mode ?? input.performanceConfig?.systems?.streaming?.mode ?? "off";
+	const rawMode =
+		input.mode ?? input.performanceConfig?.systems?.streaming?.mode ?? "off";
 
 	if (typeof rawMode !== "string") {
 		return {
@@ -312,7 +332,7 @@ function createChunkDecision(input: {
 	readonly active: boolean;
 	readonly chunk: StreamingChunkDefinition;
 	readonly distanceSource: StreamingDistanceSource;
-	readonly focus?: StreamingFocus;
+	readonly focus: StreamingFocus | undefined;
 	readonly loadedChunkIds: ReadonlySet<string>;
 	readonly loadingChunkIds: ReadonlySet<string>;
 	readonly unloadingChunkIds: ReadonlySet<string>;
@@ -362,7 +382,11 @@ function createChunkDecision(input: {
 	const loadRadius = input.chunk.loadRadius ?? input.defaultLoadRadius;
 	const unloadRadius = input.chunk.unloadRadius ?? input.defaultUnloadRadius;
 	const distance = input.chunk.center
-		? distanceToStreamingFocus(input.chunk.center, input.focus, input.distanceSource)
+		? distanceToStreamingFocus(
+				input.chunk.center,
+				input.focus,
+				input.distanceSource,
+			)
 		: undefined;
 
 	if (distance === undefined) {
@@ -434,7 +458,9 @@ function createStreamingOperations(input: {
 		const chunk = chunksById.get(chunkId);
 		const decision = decisionsById.get(chunkId);
 		if (chunk && decision) {
-			operations.push(createStreamingOperation("unload-chunk", chunk, decision));
+			operations.push(
+				createStreamingOperation("unload-chunk", chunk, decision),
+			);
 		}
 	}
 
@@ -458,7 +484,11 @@ function createStreamingOperation(
 
 function operationPriority(chunk: StreamingChunkDefinition): number {
 	const basePriority =
-		chunk.role === "startup" ? 300_000 : chunk.role === "resident" ? 200_000 : 100_000;
+		chunk.role === "startup"
+			? 300_000
+			: chunk.role === "resident"
+				? 200_000
+				: 100_000;
 
 	return basePriority + (chunk.priority ?? 0);
 }
@@ -509,7 +539,10 @@ function distanceToStreamingFocus(
 	return Math.min(playerDistance, cameraDistance);
 }
 
-function distanceBetween(left: StreamingVector3, right: StreamingVector3): number {
+function distanceBetween(
+	left: StreamingVector3,
+	right: StreamingVector3,
+): number {
 	const dx = left[0] - right[0];
 	const dy = left[1] - right[1];
 	const dz = left[2] - right[2];
@@ -541,7 +574,9 @@ function normalizeChunkContent(
 }
 
 function uniqueSorted(values: readonly string[]): readonly string[] {
-	return Array.from(new Set(values)).sort((left, right) => left.localeCompare(right));
+	return Array.from(new Set(values)).sort((left, right) =>
+		left.localeCompare(right),
+	);
 }
 
 function validateChunkContent(
@@ -550,7 +585,9 @@ function validateChunkContent(
 ): void {
 	for (const [field, values] of Object.entries(chunk.content ?? {})) {
 		if (!Array.isArray(values)) {
-			errors.push(`streaming chunk "${chunk.id}" content.${field} must be an array.`);
+			errors.push(
+				`streaming chunk "${chunk.id}" content.${field} must be an array.`,
+			);
 			continue;
 		}
 

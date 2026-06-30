@@ -3,12 +3,12 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import {
+	type CullingPolicy,
 	classifySphereAgainstPlanes,
 	createCullingPolicyFromPerformanceConfig,
 	cullingModeFromPerformanceConfig,
 	evaluateCullingBatch,
 	evaluateCullingSubject,
-	type CullingPolicy,
 } from "../src/game/performance/culling/index.js";
 import type { PerformanceConfig } from "../src/game/performance/types.js";
 
@@ -134,29 +134,28 @@ const directVisibilityPolicy: CullingPolicy = {
 	frustum: { kind: "visibility-state", state: "outside" },
 	applyFrustumToUpdates: true,
 };
-const directVisibilityDecision = evaluateCullingSubject(directVisibilityPolicy, {
-	id: "outside-direct-state",
-	position: { x: 0, y: 0, z: 0 },
-});
+const directVisibilityDecision = evaluateCullingSubject(
+	directVisibilityPolicy,
+	{
+		id: "outside-direct-state",
+		position: { x: 0, y: 0, z: 0 },
+	},
+);
 
 assert.equal(directVisibilityDecision.updateIncluded, false);
 assert.equal(directVisibilityDecision.renderIncluded, false);
 assert.equal(directVisibilityDecision.frustum.reason, "visibility-state");
 
 assert.equal(
-	classifySphereAgainstPlanes(
-		{ x: 6, y: 0, z: 0 },
-		0.5,
-		[{ normal: { x: -1, y: 0, z: 0 }, constant: 5 }],
-	),
+	classifySphereAgainstPlanes({ x: 6, y: 0, z: 0 }, 0.5, [
+		{ normal: { x: -1, y: 0, z: 0 }, constant: 5 },
+	]),
 	"outside",
 );
 assert.equal(
-	classifySphereAgainstPlanes(
-		{ x: 6, y: 0, z: 0 },
-		1.5,
-		[{ normal: { x: -1, y: 0, z: 0 }, constant: 5 }],
-	),
+	classifySphereAgainstPlanes({ x: 6, y: 0, z: 0 }, 1.5, [
+		{ normal: { x: -1, y: 0, z: 0 }, constant: 5 },
+	]),
 	"intersecting",
 	"expanded hysteresis radius can hold a prior frustum edge inclusion.",
 );

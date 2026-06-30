@@ -132,6 +132,22 @@ assert.deepEqual(
 	"unsupported LOD modes must be rejected",
 );
 
+const unsupportedModeResult = evaluateLodTier(
+	{ mode: "automatic", groups } as unknown as ReturnType<
+		typeof parseLodPolicyConfig
+	>,
+	{
+		distance: 80,
+		groupId: "generic-prop",
+		significance: 1,
+	},
+);
+
+assert.equal(unsupportedModeResult.active, false);
+assert.equal(unsupportedModeResult.reason, "unsupported-mode");
+assert.equal(unsupportedModeResult.selectedTierId, "high");
+assert.equal(unsupportedModeResult.recommendedTierId, "low");
+
 assert.throws(
 	() =>
 		parseLodPolicyConfig({
