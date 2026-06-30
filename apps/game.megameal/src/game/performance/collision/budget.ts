@@ -54,9 +54,7 @@ export function collectCollisionBudgetDiagnostics(
 			),
 			createMetric(
 				"collision.chunksPerLargestBucket",
-				maximum(
-					options.bucketPlan.buckets.map((bucket) => bucket.chunkCount),
-				),
+				maximum(options.bucketPlan.buckets.map((bucket) => bucket.chunkCount)),
 				"Largest spatial bucket chunk count.",
 			),
 			createMetric(
@@ -69,9 +67,7 @@ export function collectCollisionBudgetDiagnostics(
 		);
 	}
 
-	for (const [index, queryPlan] of (
-		options.queryPlans ?? []
-	).entries()) {
+	for (const [index, queryPlan] of (options.queryPlans ?? []).entries()) {
 		metrics.push(
 			createMetric(
 				`collision.query.${index}.candidateChunkCount`,
@@ -130,17 +126,13 @@ function createBudgetWarnings(
 		pushWarningIfAbove(
 			warnings,
 			"collision.budget.trianglesPerBucketTarget",
-			maximum(
-				options.bucketPlan.buckets.map((bucket) => bucket.triangleCount),
-			),
+			maximum(options.bucketPlan.buckets.map((bucket) => bucket.triangleCount)),
 			budget.trianglesPerBucketTarget,
 			"A spatial bucket exceeds the configured diagnostic triangle target.",
 		);
 	}
 
-	for (const [index, queryPlan] of (
-		options.queryPlans ?? []
-	).entries()) {
+	for (const [index, queryPlan] of (options.queryPlans ?? []).entries()) {
 		pushWarningIfAbove(
 			warnings,
 			`collision.budget.query.${index}.candidateChunkTarget`,

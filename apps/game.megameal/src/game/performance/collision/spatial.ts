@@ -1,3 +1,4 @@
+import { mergeCollisionBounds } from "./summary.js";
 import type {
 	CollisionPerformanceBounds,
 	CollisionPerformanceChunkSummary,
@@ -7,7 +8,6 @@ import type {
 	CollisionSpatialBucketSummary,
 	CollisionSpatialQueryPlan,
 } from "./types.js";
-import { mergeCollisionBounds } from "./summary.js";
 
 export type CollisionSpatialBucketPlanOptions = {
 	readonly chunks: readonly CollisionPerformanceChunkSummary[];
@@ -49,9 +49,7 @@ export function buildCollisionSpatialBucketPlan(
 			for (let z = minKey[1]; z <= maxKey[1]; z += 1) {
 				const key: CollisionSpatialBucketKey = [x, z];
 				const mapKey = spatialBucketKeyToString(key);
-				const bucket =
-					bucketsByKey.get(mapKey) ??
-					createMutableBucket(key);
+				const bucket = bucketsByKey.get(mapKey) ?? createMutableBucket(key);
 
 				bucket.chunkIds.push(chunk.id);
 				bucket.chunkBounds.push(chunk.bounds);
@@ -65,7 +63,9 @@ export function buildCollisionSpatialBucketPlan(
 	const buckets = [...bucketsByKey.values()]
 		.sort(compareMutableBuckets)
 		.map(finalizeBucket);
-	const bounds = mergeCollisionBounds(options.chunks.map((chunk) => chunk.bounds));
+	const bounds = mergeCollisionBounds(
+		options.chunks.map((chunk) => chunk.bounds),
+	);
 
 	return {
 		bucketSizeMeters: options.bucketSizeMeters,
@@ -170,9 +170,7 @@ export function spatialBucketKeyToString(
 	return `${key[0]}:${key[1]}`;
 }
 
-function createMutableBucket(
-	key: CollisionSpatialBucketKey,
-): MutableBucket {
+function createMutableBucket(key: CollisionSpatialBucketKey): MutableBucket {
 	return {
 		key,
 		chunkIds: [],

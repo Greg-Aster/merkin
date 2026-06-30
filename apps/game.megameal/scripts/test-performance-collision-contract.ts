@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+	type CollisionPerformanceChunkInput,
 	buildCollisionSpatialBucketPlan,
 	collectCollisionBudgetDiagnostics,
 	countCollisionMeshTriangles,
@@ -8,12 +9,11 @@ import {
 	resolveCollisionPerformancePolicy,
 	spatialBucketKeyForPoint,
 	summarizeCollisionChunks,
-	type CollisionPerformanceChunkInput,
 } from "../src/game/performance/collision/index.js";
 import {
+	type PerformanceConfig,
 	defaultPerformanceConfig,
 	parsePerformanceConfig,
-	type PerformanceConfig,
 } from "../src/game/performance/types.js";
 
 const chunks: readonly CollisionPerformanceChunkInput[] = [
@@ -62,8 +62,9 @@ const chunks: readonly CollisionPerformanceChunkInput[] = [
 	},
 ];
 
-const defaultPolicy =
-	resolveCollisionPerformancePolicy(defaultPerformanceConfig);
+const defaultPolicy = resolveCollisionPerformancePolicy(
+	defaultPerformanceConfig,
+);
 assert.equal(defaultPolicy.mode, "diagnostic");
 assert.equal(defaultPolicy.diagnosticsEnabled, true);
 assert.equal(defaultPolicy.activeOptimizationEnabled, false);
@@ -185,15 +186,12 @@ assert(
 	),
 );
 assert(
-	warnings.warnings.every(
-		(diagnostic) => diagnostic.severity === "warning",
-	),
+	warnings.warnings.every((diagnostic) => diagnostic.severity === "warning"),
 );
 assert(
 	warnings.diagnostics.every(
 		(diagnostic) =>
-			diagnostic.severity === "metric" ||
-			diagnostic.severity === "warning",
+			diagnostic.severity === "metric" || diagnostic.severity === "warning",
 	),
 );
 

@@ -51,15 +51,17 @@ function readCollisionMode(
 		return undefined;
 	}
 
-	if (typeof config.mode === "string") {
-		return config.mode;
+	const record = config as Record<string, unknown>;
+
+	if (typeof record.mode === "string") {
+		return record.mode;
 	}
 
-	if (!isRecord(config.systems) || !isRecord(config.systems.collision)) {
+	if (!isRecord(record.systems) || !isRecord(record.systems.collision)) {
 		return undefined;
 	}
 
-	const mode = config.systems.collision.mode;
+	const mode = record.systems.collision.mode;
 	return typeof mode === "string" ? mode : undefined;
 }
 
