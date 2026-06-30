@@ -218,7 +218,10 @@ export function defineLevelPackage(
 ): ResolvedLevelPackage {
 	const packageData = parseLevelPackageData(data);
 	const skyboxData = parseLevelSkyboxData(skybox);
-	const performanceData = composePerformanceConfig(globalPerformance, performance);
+	const performanceData = composePerformanceConfig(
+		globalPerformance,
+		performance,
+	);
 	const npcData = parseLevelNpcPackageData(npcs);
 	const collisionData = resolveStaticEnvironmentCollisionPackage(collision);
 	const level = composeLevel(
@@ -626,7 +629,9 @@ function composeLevel(
 	npcData: ResolvedLevelNpcPackageData,
 	collisionData: ResolvedStaticEnvironmentCollisionPackage,
 ): LevelData {
-	if (packageData.level.resources?.[PERFORMANCE_CONFIG_RESOURCE] !== undefined) {
+	if (
+		packageData.level.resources?.[PERFORMANCE_CONFIG_RESOURCE] !== undefined
+	) {
 		throw new Error(
 			`Level resources must not define ${PERFORMANCE_CONFIG_RESOURCE}; use performance.json instead.`,
 		);

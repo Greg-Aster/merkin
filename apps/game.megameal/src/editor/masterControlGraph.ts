@@ -337,10 +337,10 @@ export function createMasterControlGraph(
 				x: 24,
 				y: 90,
 				owner: "src/game/performance/culling",
-				contract:
-					"Reserved owner for runtime visibility and culling policy.",
+				contract: "Reserved owner for runtime visibility and culling policy.",
 				status: "future",
-				statusNote: "Config and diagnostics only; no active culling system yet.",
+				statusNote:
+					"Config and diagnostics only; no active culling system yet.",
 				removable: false,
 			},
 			{

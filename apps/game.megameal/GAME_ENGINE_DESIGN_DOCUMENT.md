@@ -93,21 +93,22 @@ src/
   levels/
     index.ts
     global/
-      package settings, shared package assets and prefabs, runtime scene router
+      package settings, shared package assets and prefabs, runtime scene router,
+      global performance config
     player/
       configurable player prefab, player assets, player audio defaults,
       readiness constants, and spawn helper data imported by level packages
     <level>/
       level data, local asset manifest, local prefab definitions, audio mappings,
       render profile, runtime scene manifest, player spawn/override config, and
-      level bundle entrypoint
+      per-level performance config and level bundle entrypoint
 
   editor/
     optional external tooling windows, master-control maps, diagnostics
 
   game/
     game-specific rules, actors, objectives, abilities, encounters,
-    generic prefab registry/spawn mechanics
+    generic prefab registry/spawn mechanics, performance systems
 
   engine/
     core/
@@ -1232,6 +1233,10 @@ Rules:
 - Product asset manifests, product prefab definitions, runtime scene IDs,
   runtime scene manifest lists, render profiles, skybox/environment files, and
   per-scene audio mappings belong with the level package, not in `src/game`.
+- Generic performance systems belong in `src/game/performance`, while
+  performance configuration belongs with the level package. Global defaults
+  live under `src/levels/global`, and level-specific overrides live under
+  `src/levels/<level>`.
 - Optional editor tooling must not be a runtime dependency. Editor surfaces are
   owned under `src/editor`; they may visualize architecture/flow and, during
   local development only, edit approved checked-in level package data through
@@ -1377,16 +1382,19 @@ The first separability target is:
 src/levels
   -> product runtime scene package
 src/levels/global
-  -> package settings, shared package data, runtime scene router
+  -> package settings, shared package data, runtime scene router,
+     global performance config
 src/levels/player
   -> configurable player prefab/assets/audio/readiness data imported by levels
 src/levels/<level>
   -> level data, local assets/prefabs/audio, base render profile,
-     skybox/environment data, runtime manifest, player spawn/override config
+     skybox/environment data, runtime manifest, player spawn/override config,
+     per-level performance config
 src/editor
   -> optional external tooling window
 src/game
-  -> gameplay rules, generic prefab registry/spawn mechanics, runtime composition
+  -> gameplay rules, generic prefab registry/spawn mechanics, runtime
+     composition, generic performance systems
 ```
 
 The master-control map remains an interactive architecture graph and live
@@ -1398,6 +1406,14 @@ normal game state or a runtime dependency. Local development live editing
 should use an app-owned bridge that streams serializable game snapshots into
 the editor and sends editor commands back through validated runtime control
 ports.
+
+Generic performance work should follow the same ownership split. LOD, culling,
+streaming, collision-performance diagnostics, and future performance profilers
+belong under `src/game/performance` as game/runtime systems or diagnostic
+services. The tunable values for those systems belong in level package JSON and
+are composed into runtime scene resources. The editor may expose controls and
+diagnostics for these values, but it must save the owning `src/levels` file and
+must not become the runtime owner.
 
 ### Phase 2: Minimal Engine Runtime
 

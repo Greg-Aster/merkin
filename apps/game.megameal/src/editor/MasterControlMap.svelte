@@ -460,9 +460,7 @@ async function loadGlobalPerformance(): Promise<void> {
 		const payload = await response.json();
 
 		if (!response.ok) {
-			throw new Error(
-				payload.error ?? "Performance settings failed to load.",
-			);
+			throw new Error(payload.error ?? "Performance settings failed to load.");
 		}
 
 		const performance = payload.performance as PerformanceConfigDraft;
@@ -504,9 +502,7 @@ async function saveGlobalPerformance(): Promise<void> {
 		const payload = await response.json();
 
 		if (!response.ok) {
-			throw new Error(
-				payload.error ?? "Performance settings failed to save.",
-			);
+			throw new Error(payload.error ?? "Performance settings failed to save.");
 		}
 
 		const performance = payload.performance as PerformanceConfigDraft;

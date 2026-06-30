@@ -439,7 +439,8 @@ src/levels
   -> product level package
 
 src/levels/global
-  -> package settings, shared package assets/prefabs, and the runtime-scene router
+  -> package settings, shared package assets/prefabs, global performance config,
+     and the runtime-scene router
 
 src/levels/player
   -> user-configurable player prefab, assets, audio defaults, readiness constants,
@@ -448,7 +449,8 @@ src/levels/player
 src/levels/<level>
   -> one level folder containing that level's level data, local asset manifest,
      local prefab definitions, audio content mapping, base render profile,
-     skybox/environment data, runtime manifest, and player spawn/override config
+     skybox/environment data, runtime manifest, player spawn/override config,
+     and per-level performance config
 
 src/editor
   -> optional external tooling windows, including the master-control architecture
@@ -456,7 +458,7 @@ src/editor
 
 src/game
   -> gameplay meaning, systems, generic prefab registry/spawn mechanics,
-     runtime composition, and game rules
+     runtime composition, game rules, and generic performance systems
 ```
 
 `src/game` must not be the owner of shipped level packs, product asset catalogs,
@@ -473,13 +475,35 @@ package files through a DEV-only app-layer API. Those saves are source edits,
 not runtime ownership, and the normal game still consumes rebuilt or reloaded
 level package data through the router and manifest contracts.
 
+### Performance System Ownership
+
+Core performance systems belong in `src/game/performance`. This folder owns the
+generic runtime-facing domains for LOD, culling, streaming, collision
+performance, and diagnostics. It must not contain product-specific level data or
+editor UI.
+
+Performance configuration belongs to the level package. Global defaults live in
+`src/levels/global/performance.json`, while each level may override those values
+through `src/levels/<level>/performance.json`. `defineLevelPackage()` composes
+the global and level config into the runtime scene level resources under
+`game:performanceConfig`; runtime systems read that resource and never hardcode
+level IDs.
+
+The editor may expose performance controls and diagnostics through DEV-only
+APIs, but editor code is not part of normal gameplay flow. Saving a performance
+setting edits the owning file under `src/levels`; live diagnostics come from the
+running game through the development bridge. Stage-one support is configuration
+and measurement only: LOD, culling, and streaming runtime behavior remain future
+packets until their systems, data contracts, and focused validation exist.
+
 ### Live Development Editor Bridge
 
 The local development editor may observe and command the running game through a
 DEV-only app-layer bridge. This bridge is not a product runtime dependency and
 does not make the editor the owner of runtime state. The running game publishes
-serializable snapshots, including the active runtime scene ID, and accepts
-explicit editor commands that are validated by existing game/runtime contracts.
+serializable snapshots, including the active runtime scene ID and runtime-owned
+diagnostics, and accepts explicit editor commands that are validated by existing
+game/runtime contracts.
 
 ```mermaid
 flowchart TD
@@ -526,8 +550,10 @@ flowchart TD
     Game --> GameplaySystems[gameplay systems/]
     Game --> PrefabRegistry[prefab registry]
     Game --> GameData[game data/]
+    Game --> Performance[performance/]
 
     Global --> RuntimeSettings[runtime settings]
+    Global --> GlobalPerformance[global performance config]
     Levels --> LevelData[level data]
     Levels --> LevelAssets[product asset manifests]
     Levels --> LevelPrefabs[product prefab definitions]
@@ -536,6 +562,7 @@ flowchart TD
     Levels --> AudioMappings[audio mappings]
     Levels --> RenderProfiles[render profiles]
     Levels --> SkyboxData[skybox/environment data]
+    Levels --> LevelPerformance[per-level performance config]
     Editor --> MasterControl[master-control map]
 
     Engine --> Core[core/]
@@ -583,10 +610,13 @@ flowchart TD
     Core --> Events[Events / Commands]
 
     World --> Gameplay[Gameplay Systems]
+    World --> Performance[Performance Systems]
     World --> Physics[Physics Module]
     World --> Rendering[Rendering Module]
     World --> Audio[Audio Module]
     World --> Input[Input Module]
+
+    Levels[Level Package Performance Config] --> Runtime
 
     Physics --> Rapier[Rapier Adapter]
     Rendering --> Three[Three Adapter]

@@ -10,8 +10,6 @@
 		"profile": "mobile-dense",
 		"chunkSizeMeters": 64,
 		"sampleSpacingMeters": 2,
-		"walkableSlopeDegrees": 52,
-		"maxTrianglesPerChunk": 4096,
-		"maxTotalTriangles": 16384
+		"walkableSlopeDegrees": 52
 	}
 }

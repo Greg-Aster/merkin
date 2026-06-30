@@ -26,6 +26,7 @@
 		"test:runtime-scene-contract": "tsx ./scripts/test-runtime-scene-contract.ts",
 		"test:player-package-contract": "tsx ./scripts/test-player-package-contract.ts",
 		"test:npc-contract": "tsx ./scripts/test-npc-contract.ts",
+		"test:performance-config-contract": "tsx ./scripts/test-performance-config-contract.ts",
 		"test:level-editor-workspace-contract": "tsx ./scripts/test-level-editor-workspace-contract.ts",
 		"test:collision-overlay-contract": "tsx ./scripts/test-collision-overlay-contract.ts",
 		"test:static-environment-collision-contract": "tsx ./scripts/test-static-environment-collision-contract.ts",
