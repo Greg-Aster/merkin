@@ -159,7 +159,11 @@ const serialized = `${JSON.stringify(product, null, "\t")}\n`;
 const current = existsSync(outputPath) ? readFileSync(outputPath, "utf8") : "";
 
 if (check) {
-	if (current !== serialized) {
+	if (
+		!current ||
+		serializedCollisionProductForCheck(JSON.parse(current)) !==
+			serializedCollisionProductForCheck(product)
+	) {
 		throw new Error(
 			`Static environment collision product is stale for ${levelId}. Run pnpm --dir apps/game.megameal cook:static-environment-collision -- --level=${levelId}.`,
 		);
@@ -172,6 +176,15 @@ if (check) {
 	console.log(
 		`Wrote ${relativeAppPath(outputPath)} with ${chunks.length} chunks and ${triangleCount} triangles from ${source.triangles.length} source triangles.`,
 	);
+}
+
+function serializedCollisionProductForCheck(value: unknown): string {
+	if (!isRecord(value)) {
+		throw new Error("Static environment collision product is invalid.");
+	}
+	const comparable = { ...value };
+	delete comparable.generatedAt;
+	return `${JSON.stringify(sortValue(comparable), null, "\t")}\n`;
 }
 
 function parseSourceConfig(value: unknown): SourceConfig {
