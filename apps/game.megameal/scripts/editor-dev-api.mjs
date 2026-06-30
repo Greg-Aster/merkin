@@ -6,6 +6,7 @@ import { basename, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const GLOBAL_SETTINGS_API_PATH = "/__megameal-editor-api/global-settings";
+const GLOBAL_PERFORMANCE_API_PATH = "/__megameal-editor-api/global-performance";
 const LEVELS_API_PATH = "/__megameal-editor-api/levels";
 const PLAYER_PACKAGE_API_PATH = "/__megameal-editor-api/player-package";
 const APP_ROOT_PATH = fileURLToPath(new URL("..", import.meta.url));
@@ -14,6 +15,10 @@ const GLOBAL_SETTINGS_FILE_PATH = fileURLToPath(
 	new URL("../src/levels/global/settings.ts", import.meta.url),
 );
 const GLOBAL_SETTINGS_DISPLAY_PATH = "src/levels/global/settings.ts";
+const GLOBAL_PERFORMANCE_FILE_PATH = fileURLToPath(
+	new URL("../src/levels/global/performance.json", import.meta.url),
+);
+const GLOBAL_PERFORMANCE_DISPLAY_PATH = "src/levels/global/performance.json";
 const PLAYER_PACKAGE_FILE_PATH = fileURLToPath(
 	new URL("../src/levels/player/data.json", import.meta.url),
 );
@@ -27,6 +32,7 @@ const PUBLIC_LEVEL_ASSETS_DIR_PATH = fileURLToPath(
 const LEVEL_FILE_NAMES = [
 	"data.json",
 	"skybox.json",
+	"performance.json",
 	"package.ts",
 	"level.ts",
 	"manifest.ts",
@@ -105,6 +111,13 @@ export function megamealEditorDevApi() {
 					sendJson(res, 500, { error: errorMessage(error) });
 				}
 			});
+			server.middlewares.use(GLOBAL_PERFORMANCE_API_PATH, async (req, res) => {
+				try {
+					await handleGlobalPerformanceRequest(req, res);
+				} catch (error) {
+					sendJson(res, 500, { error: errorMessage(error) });
+				}
+			});
 			server.middlewares.use(LEVELS_API_PATH, async (req, res) => {
 				try {
 					await handleLevelsRequest(req, res);
@@ -144,6 +157,57 @@ async function handleGlobalSettingsRequest(req, res) {
 			settings: nextSettings,
 			filePath: GLOBAL_SETTINGS_DISPLAY_PATH,
 			absoluteFilePath: relative(process.cwd(), GLOBAL_SETTINGS_FILE_PATH),
+		});
+		return;
+	}
+
+	if (req.method === "OPTIONS") {
+		res.statusCode = 204;
+		res.end();
+		return;
+	}
+
+	sendJson(res, 405, { error: `Unsupported method ${req.method}.` });
+}
+
+async function handleGlobalPerformanceRequest(req, res) {
+	if (req.method === "GET") {
+		const source = await readFile(GLOBAL_PERFORMANCE_FILE_PATH, "utf8");
+		sendJson(res, 200, {
+			performance: validatePerformanceConfig(
+				JSON.parse(source),
+				"global performance",
+			),
+			filePath: GLOBAL_PERFORMANCE_DISPLAY_PATH,
+			absoluteFilePath: relative(process.cwd(), GLOBAL_PERFORMANCE_FILE_PATH),
+			sourceHash: sourceHashForText(source),
+		});
+		return;
+	}
+
+	if (req.method === "POST") {
+		const currentSource = await readFile(GLOBAL_PERFORMANCE_FILE_PATH, "utf8");
+		const body = await readJsonBody(req);
+		if (body.sourceHash !== sourceHashForText(currentSource)) {
+			throw new Error(
+				"global performance is stale; reload before saving performance settings.",
+			);
+		}
+		const performance = validatePerformanceConfig(
+			body.performance ?? body,
+			"global performance",
+		);
+		await writeFile(
+			GLOBAL_PERFORMANCE_FILE_PATH,
+			serializeJson(performance),
+			"utf8",
+		);
+		const nextSource = await readFile(GLOBAL_PERFORMANCE_FILE_PATH, "utf8");
+		sendJson(res, 200, {
+			performance,
+			filePath: GLOBAL_PERFORMANCE_DISPLAY_PATH,
+			absoluteFilePath: relative(process.cwd(), GLOBAL_PERFORMANCE_FILE_PATH),
+			sourceHash: sourceHashForText(nextSource),
 		});
 		return;
 	}
@@ -268,27 +332,51 @@ async function handleLevelsRequest(req, res) {
 	if (req.method === "POST" && runtimeSceneId) {
 		const workspace = await readLevelWorkspace(runtimeSceneId);
 		const body = await readJsonBody(req);
-		const nextNpcPackage =
-			body.npcPackage === undefined
-				? workspace.npcPackage
-				: validateWritableNpcPackage(body.npcPackage, workspace.npcPackage);
-		const nextData = validateLevelPackageData(
-			body.document ?? body,
-			nextNpcPackage,
+		const npcWrite = validateNpcPackageWrite(
+			body.npcPackage,
+			workspace.npcPackage,
 		);
+		const performanceWrite = validatePerformancePackageWrite(
+			body.performance,
+			workspace.performance,
+		);
+		const nextNpcPackage = npcWrite.npcPackage;
+		const nextDocument =
+			body.document === undefined ? workspace.document : body.document;
+		const nextData = validateLevelPackageData(nextDocument, nextNpcPackage);
 		await assertUniqueLevelPackageData(workspace.runtimeSceneId, nextData);
-		const { skybox, ...levelData } = nextData;
-		await writeFile(
-			join(workspace.absoluteFolderPath, "data.json"),
-			serializeJson(levelData),
-			"utf8",
-		);
-		await writeFile(
-			join(workspace.absoluteFolderPath, "skybox.json"),
-			serializeJson(skybox),
-			"utf8",
-		);
-		await writeLevelNpcGroupFiles(nextNpcPackage);
+		if (body.document !== undefined) {
+			assertSourceFileCurrent(body.sourceHashes, workspace.files, "data.json");
+			assertSourceFileCurrent(
+				body.sourceHashes,
+				workspace.files,
+				"skybox.json",
+			);
+			const { skybox, ...levelData } = nextData;
+			await writeFile(
+				join(workspace.absoluteFolderPath, "data.json"),
+				serializeJson(levelData),
+				"utf8",
+			);
+			await writeFile(
+				join(workspace.absoluteFolderPath, "skybox.json"),
+				serializeJson(skybox),
+				"utf8",
+			);
+		}
+		if (body.performance !== undefined) {
+			assertSourceFileCurrent(
+				body.sourceHashes,
+				workspace.files,
+				"performance.json",
+			);
+			await writeFile(
+				join(workspace.absoluteFolderPath, "performance.json"),
+				serializeJson(performanceWrite.performance),
+				"utf8",
+			);
+		}
+		await writeLevelNpcGroupFiles(npcWrite.groupsToWrite);
 		sendJson(res, 200, await readLevelWorkspace(nextData.runtimeScene.id));
 		return;
 	}
@@ -356,6 +444,10 @@ async function readLevelSummary(folderPath) {
 	const skybox = JSON.parse(
 		await readFile(join(folderPath, "skybox.json"), "utf8"),
 	);
+	const performance = validatePerformanceConfig(
+		JSON.parse(await readFile(join(folderPath, "performance.json"), "utf8")),
+		`${basename(folderPath)} performance`,
+	);
 	const npcPackage = await readLevelNpcPackage(folderPath);
 	const collisionPackage = await readLevelCollisionPackage(folderPath);
 	const document = validateLevelPackageData(
@@ -373,6 +465,7 @@ async function readLevelSummary(folderPath) {
 		sourceId: document.runtimeScene.source.id,
 		skyboxAssetId: environmentAssetId(document.skybox.environment) ?? "",
 		skyboxBlur: document.skybox.environment.backgroundBlurriness ?? 0,
+		performance,
 		npcPackage,
 		collisionPackage,
 		document,
@@ -384,34 +477,42 @@ async function readLevelSourceFiles(folderPath, npcPackage, collisionPackage) {
 
 	for (const name of LEVEL_FILE_NAMES) {
 		const path = join(folderPath, name);
+		const source = await readFile(path, "utf8");
 		files.push({
 			name,
 			path: relative(process.cwd(), path),
-			source: await readFile(path, "utf8"),
+			sourceHash: sourceHashForText(source),
+			source,
 		});
 	}
 
 	for (const group of npcPackage.groups) {
+		const source = await readFile(group.absolutePath, "utf8");
 		files.push({
 			name: group.name,
 			path: group.path,
-			source: await readFile(group.absolutePath, "utf8"),
+			sourceHash: sourceHashForText(source),
+			source,
 		});
 	}
 
 	for (const archetype of npcPackage.archetypes) {
+		const source = await readFile(archetype.absolutePath, "utf8");
 		files.push({
 			name: archetype.name,
 			path: archetype.path,
-			source: await readFile(archetype.absolutePath, "utf8"),
+			sourceHash: sourceHashForText(source),
+			source,
 		});
 	}
 
 	for (const collisionFile of collisionPackage.files) {
+		const source = await readFile(collisionFile.absolutePath, "utf8");
 		files.push({
 			name: collisionFile.name,
 			path: collisionFile.path,
-			source: await readFile(collisionFile.absolutePath, "utf8"),
+			sourceHash: sourceHashForText(source),
+			source,
 		});
 	}
 
@@ -568,11 +669,13 @@ async function readLevelNpcGroups(folderPath) {
 			}
 
 			const absolutePath = join(npcDir, entry.name);
+			const source = await readFile(absolutePath, "utf8");
 			groups.push({
 				name: `${LEVEL_NPC_DIR_NAME}/${entry.name}`,
 				path: relative(process.cwd(), absolutePath),
 				absolutePath,
-				data: JSON.parse(await readFile(absolutePath, "utf8")),
+				sourceHash: sourceHashForText(source),
+				data: JSON.parse(source),
 			});
 		}
 
@@ -590,12 +693,14 @@ async function readGlobalNpcArchetype(archetypeId) {
 		archetypeId,
 		"archetype.json",
 	);
+	const source = await readFile(absolutePath, "utf8");
 
 	return {
 		name: `global/${LEVEL_NPC_DIR_NAME}/${archetypeId}/archetype.json`,
 		path: relative(process.cwd(), absolutePath),
 		absolutePath,
-		data: JSON.parse(await readFile(absolutePath, "utf8")),
+		sourceHash: sourceHashForText(source),
+		data: JSON.parse(source),
 	};
 }
 
@@ -635,7 +740,13 @@ function validateLevelPackageData(value, npcPackage = emptyNpcPackage()) {
 	return value;
 }
 
-function validateWritableNpcPackage(value, currentNpcPackage) {
+function validateNpcPackageWrite(value, currentNpcPackage) {
+	if (value === undefined) {
+		return {
+			npcPackage: currentNpcPackage,
+			groupsToWrite: [],
+		};
+	}
 	if (!isObject(value) || !Array.isArray(value.groups)) {
 		throw new Error("npcPackage.groups must be an array.");
 	}
@@ -647,11 +758,16 @@ function validateWritableNpcPackage(value, currentNpcPackage) {
 	const nextGroups = currentNpcPackage.groups.map((currentGroup) => {
 		const submittedGroup = submittedGroupsByName.get(currentGroup.name);
 		if (!submittedGroup) {
-			throw new Error(`npcPackage.groups is missing ${currentGroup.name}.`);
+			return currentGroup;
 		}
 		if (submittedGroup.path !== currentGroup.path) {
 			throw new Error(
 				`npcPackage.groups.${currentGroup.name} path does not match the level-owned NPC file.`,
+			);
+		}
+		if (submittedGroup.sourceHash !== currentGroup.sourceHash) {
+			throw new Error(
+				`npcPackage.groups.${currentGroup.name} is stale; reload the level before saving NPC data.`,
 			);
 		}
 		return {
@@ -659,8 +775,22 @@ function validateWritableNpcPackage(value, currentNpcPackage) {
 			data: submittedGroup.data,
 		};
 	});
-	if (nextGroups.length !== value.groups.length) {
+	if (submittedGroupsByName.size !== value.groups.length) {
+		throw new Error("npcPackage.groups contains duplicate NPC group files.");
+	}
+	if (submittedGroupsByName.size > currentNpcPackage.groups.length) {
 		throw new Error("npcPackage.groups contains an unknown NPC group file.");
+	}
+	for (const submittedGroup of value.groups) {
+		if (
+			isObject(submittedGroup) &&
+			typeof submittedGroup.name === "string" &&
+			!currentNpcPackage.groups.some(
+				(currentGroup) => currentGroup.name === submittedGroup.name,
+			)
+		) {
+			throw new Error("npcPackage.groups contains an unknown NPC group file.");
+		}
 	}
 
 	const nextNpcPackage = {
@@ -673,11 +803,28 @@ function validateWritableNpcPackage(value, currentNpcPackage) {
 		throw new Error(errors.join("; "));
 	}
 
-	return nextNpcPackage;
+	return {
+		npcPackage: nextNpcPackage,
+		groupsToWrite: nextGroups.filter((group) =>
+			submittedGroupsByName.has(group.name),
+		),
+	};
 }
 
-async function writeLevelNpcGroupFiles(npcPackage) {
-	for (const group of npcPackage.groups) {
+function validatePerformancePackageWrite(value, currentPerformance) {
+	if (value === undefined) {
+		return {
+			performance: currentPerformance,
+		};
+	}
+
+	return {
+		performance: validatePerformanceConfig(value, "level performance"),
+	};
+}
+
+async function writeLevelNpcGroupFiles(groups) {
+	for (const group of groups) {
 		await writeFile(group.absolutePath, serializeJson(group.data), "utf8");
 	}
 }
@@ -1794,6 +1941,54 @@ function validateGlobalSettings(value) {
 	return { packageId, defaultRuntimeSceneId };
 }
 
+function validatePerformanceConfig(value, label = "performance") {
+	if (!isObject(value)) {
+		throw new Error(`${label} must be an object.`);
+	}
+	const errors = [];
+
+	if (value.schemaVersion !== 1) {
+		errors.push(`${label}.schemaVersion must be 1.`);
+	}
+	if (!isObject(value.systems)) {
+		errors.push(`${label}.systems must be an object.`);
+	} else {
+		const systemIds = ["lod", "culling", "streaming", "collision"];
+		const systemIdSet = new Set(systemIds);
+		for (const key of Object.keys(value.systems)) {
+			if (!systemIdSet.has(key)) {
+				errors.push(`${label}.systems.${key} is not supported.`);
+			}
+		}
+		for (const systemId of systemIds) {
+			const system = value.systems[systemId];
+			if (!isObject(system)) {
+				errors.push(`${label}.systems.${systemId} must be an object.`);
+				continue;
+			}
+			if (system.mode !== "off" && system.mode !== "diagnostic") {
+				errors.push(
+					`${label}.systems.${systemId}.mode must be off or diagnostic.`,
+				);
+			}
+		}
+	}
+
+	if (errors.length > 0) {
+		throw new Error(errors.join("; "));
+	}
+
+	return {
+		schemaVersion: 1,
+		systems: {
+			lod: { mode: value.systems.lod.mode },
+			culling: { mode: value.systems.culling.mode },
+			streaming: { mode: value.systems.streaming.mode },
+			collision: { mode: value.systems.collision.mode },
+		},
+	};
+}
+
 function validatePlayerPackageConfig(value) {
 	if (!isObject(value)) {
 		throw new Error("Player package payload must be an object.");
@@ -2272,6 +2467,27 @@ async function readJsonBody(req) {
 
 function serializeJson(value) {
 	return `${JSON.stringify(value, null, "\t")}\n`;
+}
+
+function sourceHashForText(source) {
+	return `sha256:${sha256(source)}`;
+}
+
+function sha256(value) {
+	return createHash("sha256").update(value).digest("hex");
+}
+
+function assertSourceFileCurrent(sourceHashes, currentFiles, fileName) {
+	if (!isObject(sourceHashes)) {
+		throw new Error("sourceHashes must be provided for source file writes.");
+	}
+	const currentFile = currentFiles.find((file) => file.name === fileName);
+	if (!currentFile) {
+		throw new Error(`Cannot verify unknown source file ${fileName}.`);
+	}
+	if (sourceHashes[fileName] !== currentFile.sourceHash) {
+		throw new Error(`${fileName} is stale; reload the level before saving.`);
+	}
 }
 
 function unique(values) {

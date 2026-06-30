@@ -1,4 +1,5 @@
 import type { RuntimeSnapshot } from "../engine/client-api/index.js";
+import type { PerformanceDiagnosticsState } from "../game/performance/index.js";
 
 const CHANNEL_NAME = "megameal:game-dev-bridge:v1";
 const SNAPSHOT_STORAGE_KEY = "megameal.gameDevBridge.latestSnapshot.v1";
@@ -20,6 +21,7 @@ export type GameDevBridgeCollisionOverlayDiagnostics = {
 
 export type GameDevBridgeDiagnostics = {
 	readonly collisionOverlay: GameDevBridgeCollisionOverlayDiagnostics;
+	readonly performance: PerformanceDiagnosticsState;
 };
 
 export type GameDevBridgeSnapshot = {

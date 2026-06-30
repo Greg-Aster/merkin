@@ -106,6 +106,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 			"Observatory must own firefly NPC instances in level data.",
 		);
 	}
+	assertEqual(
+		fireflyStableIds.length,
+		48,
+		"Observatory must preserve the authored 48-firefly population.",
+	);
 
 	for (const assetId of fireflyPreloadAssetIds) {
 		assertIncludes(
@@ -217,6 +222,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 			);
 		}
 	}
+	assertEqual(
+		groupLightModulation.maxActiveLights,
+		16,
+		"Observatory firefly real-light budget must preserve the level-owned editor setting.",
+	);
 }
 
 for (const stableId of fireflyStableIds) {

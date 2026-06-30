@@ -98,16 +98,6 @@ assertEqual(
 	generatedProfile.sampleSpacingMeters,
 	"Observatory generated collision must use its selected cook profile sample spacing.",
 );
-assertEqual(
-	generated.settings.maxTrianglesPerChunk,
-	generatedProfile.maxTrianglesPerChunk,
-	"Observatory generated collision must use its selected cook profile per-chunk budget.",
-);
-assertEqual(
-	generated.settings.maxTotalTriangles,
-	generatedProfile.maxTotalTriangles,
-	"Observatory generated collision must use its selected cook profile total budget.",
-);
 assert(
 	packageJson.scripts.build.includes("check:static-environment-collision"),
 	"build must run the static environment collision drift gate before compiling.",
@@ -141,12 +131,16 @@ assert(
 	"static environment collision cook must not carry unused streaming radius settings.",
 );
 assert(
-	generated.summary.sourceTriangleCount > generated.summary.triangleCount,
-	"generated collision must be simplified below source render triangle count.",
+	generated.summary.sourceTriangleCount > 0,
+	"generated collision records source render triangle count.",
 );
 assert(
-	generated.summary.walkableTriangleCount > generated.summary.triangleCount,
-	"generated collision must be simplified below source walkable triangle count.",
+	generated.summary.walkableTriangleCount > 0,
+	"generated collision records walkable source triangle count.",
+);
+assert(
+	generated.summary.triangleCount > 0,
+	"generated collision records emitted triangle count.",
 );
 assertEqual(
 	generated.summary.metersPerSample,
@@ -163,10 +157,6 @@ assert(
 	) <=
 		generated.settings.sampleSpacingMeters * 1.25,
 	"generated collision X/Z bounds must cover walkable source bounds within the configured sample spacing tolerance.",
-);
-assert(
-	generated.summary.triangleCount <= generated.settings.maxTotalTriangles,
-	"generated collision must respect total triangle budget.",
 );
 assertEqual(
 	generated.summary.chunkCount,
@@ -197,11 +187,6 @@ for (const chunk of generated.chunks) {
 		chunk.collider.shape.type,
 		"mesh",
 		`${chunk.stableId} mesh shape`,
-	);
-	assert(
-		chunk.collider.shape.indices.length / 3 <=
-			generated.settings.maxTrianglesPerChunk,
-		`${chunk.stableId} respects per-chunk triangle budget.`,
 	);
 	assert(
 		chunk.collider.shape.vertices.length >= 3,

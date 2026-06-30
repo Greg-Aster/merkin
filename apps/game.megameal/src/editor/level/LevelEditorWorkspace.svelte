@@ -16,6 +16,7 @@ const tabs = [
 	"Prefabs",
 	"Assets",
 	"Collision",
+	"Performance",
 	"Audio",
 	"Skybox",
 	"NPCs",
@@ -54,12 +55,14 @@ type LevelSummary = {
 type LevelFile = {
 	readonly name: string;
 	readonly path: string;
+	readonly sourceHash: string;
 	readonly source: string;
 };
 
 type LevelNpcSourceFile = {
 	readonly name: string;
 	readonly path: string;
+	readonly sourceHash: string;
 	readonly data: Record<string, JsonValue>;
 };
 
@@ -88,6 +91,18 @@ type LevelCollisionDiagnostics = {
 type LevelCollisionPackage = {
 	readonly files: readonly LevelCollisionSourceFile[];
 	readonly diagnostics?: LevelCollisionDiagnostics;
+};
+
+type PerformanceSystemId = "lod" | "culling" | "streaming" | "collision";
+type PerformanceSystemMode = "off" | "diagnostic";
+type PerformanceConfig = {
+	schemaVersion: 1;
+	systems: Record<
+		PerformanceSystemId,
+		{
+			mode: PerformanceSystemMode;
+		}
+	>;
 };
 
 type LevelPackageDocument = {
@@ -142,6 +157,7 @@ type LevelWorkspace = LevelSummary & {
 	readonly files: readonly LevelFile[];
 	readonly npcPackage: LevelNpcPackage;
 	readonly collisionPackage: LevelCollisionPackage;
+	readonly performance: PerformanceConfig;
 	readonly document: LevelPackageDocument;
 	readonly diagnostics: readonly string[];
 };
@@ -337,6 +353,32 @@ const tabInfo = {
 			},
 		],
 	},
+	Performance: {
+		summary:
+			"Performance settings are level-owned controls saved in performance.json. Stage one exposes safe diagnostic modes only; runtime optimization modes stay unavailable until their systems exist.",
+		fields: [
+			{
+				label: "LOD",
+				description:
+					"Future level-of-detail behavior for simplifying far or less important renderables.",
+			},
+			{
+				label: "Culling",
+				description:
+					"Future visibility policy for objects outside the useful camera or gameplay area.",
+			},
+			{
+				label: "Streaming",
+				description:
+					"Future runtime residency policy for assets, render content, and collision chunks.",
+			},
+			{
+				label: "Collision",
+				description:
+					"Future broadphase-friendly collision and walkable lookup policy. Diagnostic mode reports current collider costs without changing gameplay.",
+			},
+		],
+	},
 	Audio: {
 		summary:
 			"Audio content maps game events and scene music to sound assets. Use this when a level needs specific ambience, music, or interaction sounds.",
@@ -476,6 +518,12 @@ const DEFAULT_LEVEL_PLAYER_LIGHT = {
 	decay: 2,
 	visible: true,
 } satisfies Record<string, JsonValue>;
+const performanceSystemIds = [
+	"lod",
+	"culling",
+	"streaming",
+	"collision",
+] as const satisfies readonly PerformanceSystemId[];
 
 let levels: readonly LevelSummary[] = $state([]);
 let workspace: LevelWorkspace | undefined = $state();
@@ -485,6 +533,8 @@ let activeTab = $state<Tab>("Overview");
 let selectedSourceFile = $state("data.json");
 let draft: LevelPackageDocument | undefined = $state();
 let savedDraft: LevelPackageDocument | undefined = $state();
+let performanceDraft: PerformanceConfig | undefined = $state();
+let savedPerformance: PerformanceConfig | undefined = $state();
 let savedNpcPackage: LevelNpcPackage | undefined = $state();
 let liveSnapshot: GameDevBridgeSnapshot | undefined = $state();
 let bridgeEndpoint: GameDevBridgeEditorEndpoint | undefined = $state();
@@ -561,6 +611,9 @@ const dirty = $derived(
 	(draft !== undefined &&
 		savedDraft !== undefined &&
 		JSON.stringify(draft) !== JSON.stringify(savedDraft)) ||
+		(performanceDraft !== undefined &&
+			savedPerformance !== undefined &&
+			JSON.stringify(performanceDraft) !== JSON.stringify(savedPerformance)) ||
 		(workspace !== undefined &&
 			savedNpcPackage !== undefined &&
 			JSON.stringify(workspace.npcPackage) !== JSON.stringify(savedNpcPackage)),
@@ -687,6 +740,8 @@ async function loadLevel(runtimeSceneId: string): Promise<void> {
 		selectedRuntimeSceneId = payload.runtimeSceneId;
 		draft = structuredClone(payload.document);
 		savedDraft = structuredClone(payload.document);
+		performanceDraft = structuredClone(payload.performance);
+		savedPerformance = structuredClone(payload.performance);
 		savedNpcPackage = structuredClone(payload.npcPackage);
 		activeTab = "Overview";
 		statusMessage = `Loaded ${payload.levelId}.`;
@@ -708,6 +763,13 @@ async function saveLevel(sourceLabel = "level"): Promise<void> {
 		return;
 	}
 	commitActiveEditorField();
+	const shouldSaveDocument = documentChanged();
+	const shouldSavePerformance = performanceChanged();
+	const npcPackage = dirtyNpcPackageForSave();
+	if (!shouldSaveDocument && !shouldSavePerformance && !npcPackage) {
+		statusMessage = `No changes to save for ${sourceLabel}.`;
+		return;
+	}
 	const previousRuntimeSceneId = workspace.runtimeSceneId;
 	busy = true;
 	statusMessage = `Saving ${sourceLabel}.`;
@@ -720,8 +782,14 @@ async function saveLevel(sourceLabel = "level"): Promise<void> {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					document: draft,
-					npcPackage: workspace.npcPackage,
+					...(shouldSaveDocument ? { document: draft } : {}),
+					...(shouldSavePerformance ? { performance: performanceDraft } : {}),
+					...(npcPackage ? { npcPackage } : {}),
+					sourceHashes: sourceHashesForSave(
+						shouldSaveDocument,
+						shouldSavePerformance,
+						npcPackage,
+					),
 				}),
 			},
 		);
@@ -729,6 +797,8 @@ async function saveLevel(sourceLabel = "level"): Promise<void> {
 		selectedRuntimeSceneId = payload.runtimeSceneId;
 		draft = structuredClone(payload.document);
 		savedDraft = structuredClone(payload.document);
+		performanceDraft = structuredClone(payload.performance);
+		savedPerformance = structuredClone(payload.performance);
 		savedNpcPackage = structuredClone(payload.npcPackage);
 		statusMessage = `Saved ${sourceLabel}.`;
 		history.replaceState(
@@ -743,6 +813,81 @@ async function saveLevel(sourceLabel = "level"): Promise<void> {
 	} finally {
 		busy = false;
 	}
+}
+
+function documentChanged(): boolean {
+	return (
+		draft !== undefined &&
+		savedDraft !== undefined &&
+		JSON.stringify(draft) !== JSON.stringify(savedDraft)
+	);
+}
+
+function performanceChanged(): boolean {
+	return (
+		performanceDraft !== undefined &&
+		savedPerformance !== undefined &&
+		JSON.stringify(performanceDraft) !== JSON.stringify(savedPerformance)
+	);
+}
+
+function dirtyNpcPackageForSave(): LevelNpcPackage | undefined {
+	if (!workspace || !savedNpcPackage) {
+		return undefined;
+	}
+	const savedGroupsByName = new Map(
+		savedNpcPackage.groups.map((group) => [group.name, group]),
+	);
+	const groups = workspace.npcPackage.groups.filter((group) => {
+		const savedGroup = savedGroupsByName.get(group.name);
+		return (
+			savedGroup === undefined ||
+			JSON.stringify(group.data) !== JSON.stringify(savedGroup.data)
+		);
+	});
+
+	return groups.length > 0
+		? {
+				groups,
+				archetypes: [],
+			}
+		: undefined;
+}
+
+function sourceHashesForSave(
+	includeDocument: boolean,
+	includePerformance: boolean,
+	npcPackage: LevelNpcPackage | undefined,
+): Record<string, string> {
+	if (!workspace) {
+		return {};
+	}
+	const hashes: Record<string, string> = {};
+	const requiredFiles = new Set<string>();
+
+	if (includeDocument) {
+		requiredFiles.add("data.json");
+		requiredFiles.add("skybox.json");
+	}
+	if (includePerformance) {
+		requiredFiles.add("performance.json");
+	}
+	for (const group of npcPackage?.groups ?? []) {
+		requiredFiles.add(group.name);
+	}
+
+	for (const file of workspace.files) {
+		if (requiredFiles.has(file.name)) {
+			hashes[file.name] = file.sourceHash;
+		}
+	}
+	for (const group of workspace.npcPackage.groups) {
+		if (requiredFiles.has(group.name)) {
+			hashes[group.name] = group.sourceHash;
+		}
+	}
+
+	return hashes;
 }
 
 function reloadGameIfActive(
@@ -817,6 +962,8 @@ async function checkCollisionCook(): Promise<void> {
 		workspace = payload.workspace;
 		draft = structuredClone(payload.workspace.document);
 		savedDraft = structuredClone(payload.workspace.document);
+		performanceDraft = structuredClone(payload.workspace.performance);
+		savedPerformance = structuredClone(payload.workspace.performance);
 		savedNpcPackage = structuredClone(payload.workspace.npcPackage);
 		statusMessage =
 			payload.status === "current"
@@ -850,6 +997,8 @@ async function cookCollision(): Promise<void> {
 		selectedRuntimeSceneId = payload.workspace.runtimeSceneId;
 		draft = structuredClone(payload.workspace.document);
 		savedDraft = structuredClone(payload.workspace.document);
+		performanceDraft = structuredClone(payload.workspace.performance);
+		savedPerformance = structuredClone(payload.workspace.performance);
 		savedNpcPackage = structuredClone(payload.workspace.npcPackage);
 		statusMessage = "Cooked static environment collision.";
 		reloadGameIfActive(
@@ -1386,6 +1535,26 @@ function updateSkyboxEnvironmentKind(kind: string): void {
 		...draft.skybox.environment,
 		kind,
 	});
+}
+
+function updatePerformanceMode(
+	systemId: PerformanceSystemId,
+	mode: PerformanceSystemMode,
+): void {
+	if (!performanceDraft) {
+		return;
+	}
+
+	performanceDraft = {
+		...performanceDraft,
+		systems: {
+			...performanceDraft.systems,
+			[systemId]: {
+				...performanceDraft.systems[systemId],
+				mode,
+			},
+		},
+	};
 }
 
 function defaultEnvironmentForKind(kind: string): Record<string, JsonValue> {
@@ -2318,10 +2487,6 @@ function numberTuple2(
 										<dd>{String(collisionSettings.sampleSpacingMeters ?? "none")}</dd>
 									</div>
 									<div>
-										<dt>Max Chunk Triangles</dt>
-										<dd>{String(collisionSettings.maxTrianglesPerChunk ?? "none")}</dd>
-									</div>
-									<div>
 										<dt>Collision Asset</dt>
 										<dd>{String(collisionSource?.collisionAssetUrl ?? "automatic visual GLB")}</dd>
 									</div>
@@ -2391,6 +2556,55 @@ function numberTuple2(
 									</div>
 								</dl>
 							</section>
+						</div>
+					{:else if activeTab === "Performance"}
+						<div class="performance-form">
+							<div class="section-actions">
+								<button
+									type="button"
+									disabled={!workspace || busy || !performanceChanged()}
+									onclick={() => void saveLevel("performance")}
+								>
+									Save Performance
+								</button>
+								<p>
+									{workspace?.folderPath ?? "No level selected"}/performance.json
+								</p>
+							</div>
+							{#if performanceDraft}
+								<section class="lighting-group" aria-label="Performance systems">
+									<div class="lighting-group-header">
+										<div>
+											<p>Performance Config</p>
+											<h2>Stage One Diagnostics</h2>
+										</div>
+										<span class="lighting-badge">level-owned</span>
+									</div>
+									<div class="settings-grid">
+										{#each performanceSystemIds as systemId}
+											<label>
+												<span>{systemId}</span>
+												<select
+													value={performanceDraft.systems[systemId].mode}
+													disabled={busy}
+													onchange={(event) =>
+														updatePerformanceMode(
+															systemId,
+															event.currentTarget.value as PerformanceSystemMode,
+														)}
+												>
+													<option value="off">off</option>
+													<option value="diagnostic">diagnostic</option>
+												</select>
+											</label>
+										{/each}
+									</div>
+								</section>
+							{:else}
+								<p class="settings-message">
+									Performance config is not loaded for this level.
+								</p>
+							{/if}
 						</div>
 					{:else if activeTab === "Audio"}
 						<div class="section-actions">
@@ -3749,6 +3963,16 @@ function numberTuple2(
 			display: grid;
 			gap: 1rem;
 			align-content: start;
+		}
+
+		.performance-form,
+		.settings-grid {
+			display: grid;
+			gap: 0.85rem;
+		}
+
+		.settings-grid {
+			grid-template-columns: repeat(2, minmax(10rem, 1fr));
 		}
 
 		.lighting-group {

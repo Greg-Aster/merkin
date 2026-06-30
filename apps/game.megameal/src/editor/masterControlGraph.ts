@@ -222,6 +222,45 @@ export function createMasterControlGraph(
 			},
 			...runtimeSceneLevelNodes,
 			{
+				id: "performance-config",
+				label: "Performance Config",
+				group: "levels",
+				x: 64,
+				y: 37,
+				owner:
+					"src/levels/global/performance.json and src/levels/<level>/performance.json",
+				contract:
+					"Owns saved global defaults and per-level overrides for game performance systems.",
+				status: "partial",
+				statusNote:
+					"Stage one supports off/diagnostic modes and composes the effective config into runtime scene resources.",
+				removable: true,
+				isConfigurable: true,
+				isDataSource: true,
+				details: [
+					{
+						label: "Global Defaults",
+						value:
+							"src/levels/global/performance.json owns package-wide defaults.",
+					},
+					{
+						label: "Level Overrides",
+						value:
+							"Each src/levels/<level>/performance.json owns that level's performance overrides.",
+					},
+					{
+						label: "Runtime Resource",
+						value:
+							"defineLevelPackage() injects the effective config into game:performanceConfig.",
+					},
+					{
+						label: "Boundary",
+						value:
+							"Config belongs to src/levels; runtime behavior belongs to src/game/performance.",
+					},
+				],
+			},
+			{
 				id: "game-runtime",
 				label: "Game Runtime",
 				group: "game",
@@ -251,6 +290,100 @@ export function createMasterControlGraph(
 							"The editor sends DEV bridge commands and displays runtime diagnostics from the live game snapshot.",
 					},
 				],
+			},
+			{
+				id: "performance-systems",
+				label: "Performance Systems",
+				group: "game",
+				x: 22,
+				y: 80,
+				owner: "src/game/performance",
+				contract:
+					"Owns game-level performance policy, diagnostics, and future optimization systems.",
+				status: "partial",
+				statusNote:
+					"Stage one exposes diagnostics only; active LOD, culling, streaming, and collision optimizations remain future.",
+				removable: false,
+				details: [
+					{
+						label: "Config Source",
+						value:
+							"Reads game:performanceConfig from the active runtime scene resource.",
+					},
+					{
+						label: "Boundary",
+						value:
+							"Must not import src/levels, src/editor, adapters, browser APIs, or framework packages.",
+					},
+				],
+			},
+			{
+				id: "performance-lod",
+				label: "LOD",
+				group: "game",
+				x: 10,
+				y: 90,
+				owner: "src/game/performance/lod",
+				contract:
+					"Reserved owner for runtime level-of-detail policy and systems.",
+				status: "future",
+				statusNote: "Config and diagnostics only; no active LOD system yet.",
+				removable: false,
+			},
+			{
+				id: "performance-culling",
+				label: "Culling",
+				group: "game",
+				x: 24,
+				y: 90,
+				owner: "src/game/performance/culling",
+				contract:
+					"Reserved owner for runtime visibility and culling policy.",
+				status: "future",
+				statusNote: "Config and diagnostics only; no active culling system yet.",
+				removable: false,
+			},
+			{
+				id: "performance-streaming",
+				label: "Streaming",
+				group: "game",
+				x: 10,
+				y: 97,
+				owner: "src/game/performance/streaming",
+				contract:
+					"Reserved owner for runtime asset, render, and collision residency policy.",
+				status: "future",
+				statusNote:
+					"Config and diagnostics only; no active streaming system yet.",
+				removable: false,
+			},
+			{
+				id: "performance-collision",
+				label: "Collision Perf",
+				group: "game",
+				x: 24,
+				y: 97,
+				owner: "src/game/performance/collision",
+				contract:
+					"Reserved owner for broadphase-friendly collision and walkable lookup policy.",
+				status: "future",
+				statusNote:
+					"Config and diagnostics only; no active collision optimization yet.",
+				removable: false,
+			},
+			{
+				id: "performance-diagnostics",
+				label: "Performance Diagnostics",
+				group: "game",
+				x: 22,
+				y: 58,
+				owner: "src/game/performance/diagnostics",
+				contract:
+					"Publishes read-only runtime performance counts through the game diagnostics surface.",
+				status: "implemented",
+				statusNote:
+					"Reports effective config, entity/render/light/collider counts, mesh collision triangles, and loaded asset count.",
+				removable: false,
 			},
 			{
 				id: "game-rules",
@@ -485,6 +618,20 @@ export function createMasterControlGraph(
 				label: "validates package",
 				kind: "data",
 			},
+			{
+				id: "levels-performance-config",
+				from: "level-package",
+				to: "performance-config",
+				label: "composes config",
+				kind: "data",
+			},
+			{
+				id: "performance-config-data",
+				from: "performance-config",
+				to: "data-contracts",
+				label: "validates modes",
+				kind: "data",
+			},
 			...routedRuntimeSceneManifests.map((manifest) => ({
 				id: `level-package-${manifestNodeId(manifest.id)}`,
 				from: "level-package",
@@ -498,6 +645,48 @@ export function createMasterControlGraph(
 				to: "game-runtime",
 				label: "feeds playable scene",
 				kind: "data",
+			},
+			{
+				id: "runtime-performance",
+				from: "game-runtime",
+				to: "performance-systems",
+				label: "reads resource",
+				kind: "runtime",
+			},
+			{
+				id: "performance-lod-edge",
+				from: "performance-systems",
+				to: "performance-lod",
+				label: "future",
+				kind: "future",
+			},
+			{
+				id: "performance-culling-edge",
+				from: "performance-systems",
+				to: "performance-culling",
+				label: "future",
+				kind: "future",
+			},
+			{
+				id: "performance-streaming-edge",
+				from: "performance-systems",
+				to: "performance-streaming",
+				label: "future",
+				kind: "future",
+			},
+			{
+				id: "performance-collision-edge",
+				from: "performance-systems",
+				to: "performance-collision",
+				label: "future",
+				kind: "future",
+			},
+			{
+				id: "performance-diagnostics-edge",
+				from: "game-runtime",
+				to: "performance-diagnostics",
+				label: "reports",
+				kind: "runtime",
 			},
 			{
 				id: "rules-runtime",
@@ -539,6 +728,20 @@ export function createMasterControlGraph(
 				from: "master-control",
 				to: "level-router",
 				label: "observes catalog",
+				kind: "editor",
+			},
+			{
+				id: "editor-performance",
+				from: "master-control",
+				to: "performance-config",
+				label: "edits global",
+				kind: "editor",
+			},
+			{
+				id: "editor-performance-diagnostics",
+				from: "master-control",
+				to: "performance-diagnostics",
+				label: "observes live",
 				kind: "editor",
 			},
 			{

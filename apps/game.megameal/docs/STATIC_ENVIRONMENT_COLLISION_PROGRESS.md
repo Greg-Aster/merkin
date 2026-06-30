@@ -12,7 +12,7 @@ This document records the current static environment collision implementation, t
 - The system must be reusable across levels, not an Observatory-only hack.
 - Collision ownership must stay inside the level package under `src/levels/<level>`.
 - The editor may inspect and trigger future tooling, but normal runtime must not depend on `src/editor`.
-- The system must support performance budgets suitable for mobile browser targets.
+- The system must expose collision size and shape diagnostics suitable for mobile browser tuning without hard-capping authored level output.
 - The system must be maintainable when levels and GLB meshes change frequently.
 - The collision system must stay simple, powerful, lightweight, and easy to edit. Do not add broad systems, extra ownership layers, or tooling branches without measured need.
 
@@ -77,16 +77,16 @@ Current source config:
 - Chunk size: `64` meters
 - Sample spacing: `2` meters
 - Source triangle count: `48,246`
-- Walkable source triangle count after slope filtering: `47,377`
+- Walkable source triangle count after slope filtering: `47,395`
 - Sampled point count: `5,932`
 - Generated collision chunk count: `13`
 - Generated collision triangle count: `11,408`
 - Generated collision ratio: about `24.1%` of the walkable source triangle count
-- Source bounds: min `[-99.800819, -0.251673, -98.020256]`, max `[97.325859, 27.506882, 97.326927]`
-- Walkable source bounds: min `[-99.800819, -0.251673, -98.020256]`, max `[97.325859, 27.506882, 97.326927]`
-- Generated collision bounds: min `[-98, -0.052897, -96]`, max `[96, 27.4899, 96]`
+- Source bounds: min `[-99.800819, -0.251673, -98.020256]`, max `[97.325859, 21.422778, 97.326927]`
+- Walkable source bounds: min `[-99.800819, -0.251673, -98.020256]`, max `[97.325859, 21.422778, 97.326927]`
+- Generated collision bounds: min `[-98, -0.052897, -96]`, max `[96, 21.412173, 96]`
 
-The current cook is still simpler than the visual GLB. It samples walkable source triangles onto a 2 meter grid, then creates chunked mesh colliders from that sampled surface. It is tighter than the earlier 8 meter and 4 meter cooks, but it is still a generated gameplay approximation rather than a final high-fidelity collision product.
+The current cook samples walkable source triangles onto a 2 meter grid, then creates chunked mesh colliders from that sampled surface. The emitted triangle count is a diagnostic, not a validation cap. Depending on the source mesh and sampling grid, generated collision can contain more triangles than the filtered source surface.
 
 ## What "Automatic" Currently Means
 
@@ -97,8 +97,7 @@ The current system is automatic in this limited sense:
 - The cook extracts triangles from the GLB.
 - The cook filters walkable triangles by slope.
 - The cook samples the surface into chunked collision meshes.
-- The cook validates triangle budgets.
-- The cook validates source settings before generation, including known profile IDs, positive sample spacing and budgets, and walkable slope range.
+- The cook validates source settings before generation, including known profile IDs, positive chunk/sample spacing, and walkable slope range.
 - The generated output is composed into the level package and readiness gate without hand-writing individual collider instances.
 - `build` now fails if the checked-in generated product is stale for the current source GLB.
 - The level editor can run the same check/cook path through the existing DEV-only level editor API.
@@ -185,7 +184,7 @@ Similarities:
 - Collision is separate from render geometry.
 - Collision is cooked/generated as an explicit asset product.
 - Runtime consumes validated collision data instead of guessing from renderer meshes.
-- Collision data is budgeted and can be chunked.
+- Collision data is chunked and reports emitted geometry counts.
 - Authoring source and generated product are separate.
 
 Deferred mature-engine features:
@@ -232,18 +231,17 @@ Maintainability stop rules:
 
 ## Scale / Overbuild Checkpoint
 
-Current Observatory generated collision is modest:
+Current Observatory generated collision after reverting the unauthorized recook:
 
 - generated collision product size: about `358 KB`;
-- visual GLB size: about `5.9 MB`;
 - generated chunk count: `13`;
 - generated triangle count: `11,408`;
 - generated vertex count: `6,270`;
 - largest chunk: `2,048` triangles.
 
-For the current mobile-browser target, this does not yet justify a runtime collision streaming system. Loading the current product as explicit fixed/worldStatic mesh colliders is simpler and more maintainable than adding streaming, residency state, chunk activation rules, and editor streaming previews before there is profiling evidence.
+This does not justify an authoring-time hard cap by itself. If runtime slowdown is observed, treat it as a runtime profiling and grounding-query problem first, then fix the specific hot path or choose a level-owned simpler collision source.
 
-The current likely bottleneck is not file size. The risk is runtime CPU behavior from the temporary game-side walkable grounding pass scanning mesh triangles in TypeScript. That pass is useful as a V1 bridge, but the long-term direction should be either:
+The current likely bottleneck is runtime CPU behavior from the temporary game-side walkable grounding pass scanning mesh triangles in TypeScript. That pass is useful as a V1 bridge, but the long-term direction should be either:
 
 - keep generated collision coarse enough that the grounding pass remains cheap; or
 - move player-ground contact to the physics/query layer through a focused character-controller or downward raycast contract.

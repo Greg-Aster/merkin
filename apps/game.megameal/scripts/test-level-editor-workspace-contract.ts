@@ -321,8 +321,18 @@ for (const collisionDiagnosticHandle of [
 }
 assert.match(
 	levelEditorWorkspaceSource,
+	/dirtyNpcPackageForSave/,
+	"level editor saves must include only dirty NPC package files",
+);
+assert.match(
+	levelEditorWorkspaceSource,
+	/sourceHashesForSave/,
+	"level editor saves must include source hashes for edited source files",
+);
+assert.doesNotMatch(
+	levelEditorWorkspaceSource,
 	/npcPackage:\s*workspace\.npcPackage/,
-	"level editor saves must include edited NPC package data",
+	"level editor saves must not submit the entire NPC package for every save",
 );
 for (const playerHandle of [
 	"Save Player",
@@ -392,7 +402,7 @@ for (const editorHandle of [
 }
 assert.match(
 	editorDevApiSource,
-	/validateWritableNpcPackage/,
+	/validateNpcPackageWrite/,
 	"editor dev API must validate writable level-owned NPC group payloads",
 );
 assert.match(
@@ -429,6 +439,26 @@ assert.match(
 	editorDevApiSource,
 	/writeLevelNpcGroupFiles/,
 	"editor dev API must persist edited level-owned NPC group files",
+);
+assert.match(
+	editorDevApiSource,
+	/validateNpcPackageWrite/,
+	"editor dev API must validate partial NPC package writes",
+);
+assert.match(
+	editorDevApiSource,
+	/submittedGroup\.sourceHash !== currentGroup\.sourceHash/,
+	"editor dev API must reject stale NPC group source writes",
+);
+assert.match(
+	editorDevApiSource,
+	/assertSourceFileCurrent\(body\.sourceHashes, workspace\.files, "data\.json"\)/,
+	"editor dev API must reject stale data.json document writes",
+);
+assert.match(
+	editorDevApiSource,
+	/assertSourceFileCurrent\(\s*body\.sourceHashes,\s*workspace\.files,\s*"skybox\.json",?\s*\)/,
+	"editor dev API must reject stale skybox.json document writes",
 );
 assert.match(
 	editorDevApiSource,

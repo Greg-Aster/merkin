@@ -24,11 +24,24 @@ const groups: readonly MasterControlGraphNodeGroup[] = [
 	"editor",
 ];
 const GLOBAL_SETTINGS_API_PATH = "/__megameal-editor-api/global-settings";
+const GLOBAL_PERFORMANCE_API_PATH = "/__megameal-editor-api/global-performance";
 const PLAYER_PACKAGE_API_PATH = "/__megameal-editor-api/player-package";
 
 type GlobalSettingsDraft = {
 	readonly packageId: string;
 	readonly defaultRuntimeSceneId: string;
+};
+
+type PerformanceSystemId = "lod" | "culling" | "streaming" | "collision";
+type PerformanceSystemMode = "off" | "diagnostic";
+type PerformanceConfigDraft = {
+	schemaVersion: 1;
+	systems: Record<
+		PerformanceSystemId,
+		{
+			mode: PerformanceSystemMode;
+		}
+	>;
 };
 
 type Vector3Draft = [number, number, number];
@@ -103,6 +116,13 @@ type LiveGameState = {
 	readonly chargeAmount?: number;
 };
 
+const performanceSystemIds = [
+	"lod",
+	"culling",
+	"streaming",
+	"collision",
+] as const satisfies readonly PerformanceSystemId[];
+
 // biome-ignore lint/style/useConst: Svelte state is reassigned from template event handlers.
 let selectedNodeId = $state("level-package");
 // biome-ignore lint/style/useConst: Svelte state is reassigned from template event handlers.
@@ -118,6 +138,12 @@ let savedGlobalSettings: GlobalSettingsDraft | undefined = $state();
 let globalSettingsFilePath: string | undefined = $state();
 let globalSettingsMessage: string | undefined = $state();
 let globalSettingsBusy = $state(false);
+let globalPerformanceDraft: PerformanceConfigDraft | undefined = $state();
+let savedGlobalPerformance: PerformanceConfigDraft | undefined = $state();
+let globalPerformanceFilePath: string | undefined = $state();
+let globalPerformanceSourceHash: string | undefined = $state();
+let globalPerformanceMessage: string | undefined = $state();
+let globalPerformanceBusy = $state(false);
 let playerPackageDraft: PlayerPackageDraft | undefined = $state();
 let savedPlayerPackage: PlayerPackageDraft | undefined = $state();
 let playerPackageFilePath: string | undefined = $state();
@@ -162,6 +188,12 @@ const globalSettingsDirty = $derived(
 			globalSettingsDraft.defaultRuntimeSceneId !==
 				savedGlobalSettings.defaultRuntimeSceneId),
 );
+const globalPerformanceDirty = $derived(
+	globalPerformanceDraft !== undefined &&
+		savedGlobalPerformance !== undefined &&
+		JSON.stringify(globalPerformanceDraft) !==
+			JSON.stringify(savedGlobalPerformance),
+);
 const playerPackageDirty = $derived(
 	playerPackageDraft !== undefined &&
 		savedPlayerPackage !== undefined &&
@@ -171,16 +203,20 @@ const liveGameState = $derived(readLiveGameState(liveSnapshot?.gameState));
 const collisionOverlayDiagnostics = $derived(
 	liveSnapshot?.diagnostics?.collisionOverlay,
 );
+const performanceDiagnostics = $derived(liveSnapshot?.diagnostics?.performance);
 
 onMount(() => {
 	if (!import.meta.env.DEV) {
 		bridgeStatus = "unavailable";
 		globalSettingsMessage = "Global settings editing is available in dev only.";
+		globalPerformanceMessage =
+			"Performance settings editing is available in dev only.";
 		playerPackageMessage = "Player package editing is available in dev only.";
 		return;
 	}
 
 	void loadGlobalSettings();
+	void loadGlobalPerformance();
 	void loadPlayerPackage();
 	void import("../app/gameDevBridge.js").then(
 		({ createGameDevBridgeEditorEndpoint }) => {
@@ -397,6 +433,108 @@ async function saveGlobalSettings(): Promise<void> {
 	} finally {
 		globalSettingsBusy = false;
 	}
+}
+
+async function loadGlobalPerformance(): Promise<void> {
+	globalPerformanceBusy = true;
+	globalPerformanceMessage = "Loading performance settings.";
+
+	try {
+		const response = await fetch(GLOBAL_PERFORMANCE_API_PATH, {
+			headers: { Accept: "application/json" },
+		});
+		const payload = await response.json();
+
+		if (!response.ok) {
+			throw new Error(
+				payload.error ?? "Performance settings failed to load.",
+			);
+		}
+
+		const performance = payload.performance as PerformanceConfigDraft;
+		globalPerformanceDraft = structuredClone(performance);
+		savedGlobalPerformance = structuredClone(performance);
+		globalPerformanceFilePath = payload.filePath as string;
+		globalPerformanceSourceHash = payload.sourceHash as string;
+		globalPerformanceMessage = "Performance settings loaded.";
+	} catch (error) {
+		globalPerformanceMessage =
+			error instanceof Error
+				? error.message
+				: "Performance settings failed to load.";
+	} finally {
+		globalPerformanceBusy = false;
+	}
+}
+
+async function saveGlobalPerformance(): Promise<void> {
+	if (!globalPerformanceDraft || !globalPerformanceSourceHash) {
+		return;
+	}
+
+	globalPerformanceBusy = true;
+	globalPerformanceMessage = "Saving performance settings.";
+
+	try {
+		const response = await fetch(GLOBAL_PERFORMANCE_API_PATH, {
+			method: "POST",
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				performance: globalPerformanceDraft,
+				sourceHash: globalPerformanceSourceHash,
+			}),
+		});
+		const payload = await response.json();
+
+		if (!response.ok) {
+			throw new Error(
+				payload.error ?? "Performance settings failed to save.",
+			);
+		}
+
+		const performance = payload.performance as PerformanceConfigDraft;
+		globalPerformanceDraft = structuredClone(performance);
+		savedGlobalPerformance = structuredClone(performance);
+		globalPerformanceFilePath = payload.filePath as string;
+		globalPerformanceSourceHash = payload.sourceHash as string;
+		globalPerformanceMessage = "Performance settings saved.";
+		addLog({
+			id: `global-performance:${Date.now()}`,
+			timestamp: Date.now(),
+			level: "info",
+			message: `Saved ${payload.filePath}.`,
+		});
+	} catch (error) {
+		globalPerformanceMessage =
+			error instanceof Error
+				? error.message
+				: "Performance settings failed to save.";
+	} finally {
+		globalPerformanceBusy = false;
+	}
+}
+
+function updateGlobalPerformanceMode(
+	systemId: PerformanceSystemId,
+	mode: PerformanceSystemMode,
+): void {
+	if (!globalPerformanceDraft) {
+		return;
+	}
+
+	globalPerformanceDraft = {
+		...globalPerformanceDraft,
+		systems: {
+			...globalPerformanceDraft.systems,
+			[systemId]: {
+				...globalPerformanceDraft.systems[systemId],
+				mode,
+			},
+		},
+	};
 }
 
 async function loadPlayerPackage(): Promise<void> {

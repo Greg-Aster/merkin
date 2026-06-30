@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { stat } from "node:fs/promises";
@@ -22,11 +21,9 @@ type SourceConfig = {
 	readonly mode: "automatic-glb" | "manual-collision-glb";
 	readonly settings: {
 		readonly profile: StaticEnvironmentCollisionProfile;
-		readonly chunkSizeMeters: number;
-		readonly sampleSpacingMeters: number;
-		readonly walkableSlopeDegrees: number;
-		readonly maxTrianglesPerChunk: number;
-		readonly maxTotalTriangles: number;
+			readonly chunkSizeMeters: number;
+			readonly sampleSpacingMeters: number;
+			readonly walkableSlopeDegrees: number;
 	};
 };
 
@@ -109,7 +106,6 @@ const chunks = buildChunks({
 	spacing: sourceConfig.settings.sampleSpacingMeters,
 	chunkSizeMeters: sourceConfig.settings.chunkSizeMeters,
 	productId: sourceConfig.id,
-	maxTrianglesPerChunk: sourceConfig.settings.maxTrianglesPerChunk,
 });
 const triangleCount = chunks.reduce(
 	(total, chunk) => total + chunk.collider.shape.indices.length / 3,
@@ -118,12 +114,6 @@ const triangleCount = chunks.reduce(
 
 if (triangleCount === 0) {
 	throw new Error("Static environment collision cook emitted no triangles.");
-}
-
-if (triangleCount > sourceConfig.settings.maxTotalTriangles) {
-	throw new Error(
-		`Static environment collision cook emitted ${triangleCount} triangles, above maxTotalTriangles ${sourceConfig.settings.maxTotalTriangles}.`,
-	);
 }
 
 const product = sortValue({
@@ -142,7 +132,12 @@ const product = sortValue({
 			: {}),
 		sourceHash: `sha256:${sourceHash}`,
 	},
-	settings: sourceConfig.settings,
+	settings: {
+		chunkSizeMeters: sourceConfig.settings.chunkSizeMeters,
+		profile: sourceConfig.settings.profile,
+		sampleSpacingMeters: sourceConfig.settings.sampleSpacingMeters,
+		walkableSlopeDegrees: sourceConfig.settings.walkableSlopeDegrees,
+	},
 	summary: {
 		bounds: boundsForChunks(chunks),
 		chunkCount: chunks.length,
@@ -160,10 +155,7 @@ const product = sortValue({
 	},
 	chunks,
 });
-const serialized = formatGeneratedJson(
-	`${JSON.stringify(product, null, "\t")}\n`,
-	outputPath,
-);
+const serialized = `${JSON.stringify(product, null, "\t")}\n`;
 const current = existsSync(outputPath) ? readFileSync(outputPath, "utf8") : "";
 
 if (check) {
@@ -232,18 +224,6 @@ function validateSourceSettings(settings: Record<string, unknown>): void {
 	if (walkableSlopeDegrees >= 90) {
 		throw new Error("walkableSlopeDegrees must be less than 90.");
 	}
-	requirePositiveInteger(settings.maxTrianglesPerChunk, "maxTrianglesPerChunk");
-	requirePositiveInteger(settings.maxTotalTriangles, "maxTotalTriangles");
-}
-
-function requirePositiveInteger(value: unknown, label: string): number {
-	const numberValue = requirePositiveNumber(value, label);
-	if (!Number.isInteger(numberValue)) {
-		throw new Error(
-			`Static environment collision ${label} must be an integer.`,
-		);
-	}
-	return numberValue;
 }
 
 function requirePositiveNumber(value: unknown, label: string): number {
@@ -574,7 +554,6 @@ function buildChunks(options: {
 	readonly spacing: number;
 	readonly chunkSizeMeters: number;
 	readonly productId: string;
-	readonly maxTrianglesPerChunk: number;
 }) {
 	const chunks = new Map<
 		string,
@@ -637,14 +616,6 @@ function buildChunks(options: {
 				left.chunkKey[0] - right.chunkKey[0],
 		)
 		.map((chunk) => {
-			const triangleCount = chunk.indices.length / 3;
-
-			if (triangleCount > options.maxTrianglesPerChunk) {
-				throw new Error(
-					`Static environment collision chunk x${chunk.chunkKey[0]}-z${chunk.chunkKey[1]} has ${triangleCount} triangles, above maxTrianglesPerChunk ${options.maxTrianglesPerChunk}.`,
-				);
-			}
-
 			const chunkId = `x${chunk.chunkKey[0]}-z${chunk.chunkKey[1]}`;
 			const stableId = `static-environment:${options.productId}:chunk:${chunkId}`;
 			const vertices = chunk.vertices.map(
@@ -960,19 +931,6 @@ function cliValue(name: string): string | undefined {
 function relativeAppPath(path: string): string {
 	const normalizedRoot = appRoot.endsWith("/") ? appRoot : `${appRoot}/`;
 	return path.replace(normalizedRoot, "");
-}
-
-function formatGeneratedJson(source: string, filePath: string): string {
-	const biomeBin = resolve(appRoot, "node_modules", ".bin", "biome");
-
-	if (!existsSync(biomeBin)) {
-		return source;
-	}
-
-	return execFileSync(biomeBin, ["format", "--stdin-file-path", filePath], {
-		input: source,
-		encoding: "utf8",
-	});
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

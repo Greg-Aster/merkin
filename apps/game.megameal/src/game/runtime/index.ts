@@ -38,6 +38,10 @@ import {
 	collectCollisionOverlayItems,
 	summarizeCollisionOverlay,
 } from "../diagnostics/index.js";
+import {
+	type PerformanceDiagnosticsState,
+	collectPerformanceDiagnostics,
+} from "../performance/index.js";
 import { PrefabRegistry, STABLE_ID_COMPONENT } from "../prefabs/index.js";
 import { createGameScene } from "../scenes/index.js";
 import {
@@ -125,6 +129,7 @@ export type RuntimeDiagnosticToggleResult = {
 
 export type RuntimeDiagnosticsState = {
 	readonly collisionOverlay: CollisionOverlayDiagnosticsState;
+	readonly performance: PerformanceDiagnosticsState;
 };
 
 export async function createMegamealGameRuntime(
@@ -474,6 +479,13 @@ export async function createMegamealGameRuntime(
 				collisionOverlayEnabled,
 				collisionOverlayItems,
 			),
+			performance: collectPerformanceDiagnostics({
+				world: runtime.world,
+				assets: options.assets,
+				...(activeRuntimeSceneManifest
+					? { activeRuntimeSceneId: activeRuntimeSceneManifest.id }
+					: {}),
+			}),
 		};
 	}
 

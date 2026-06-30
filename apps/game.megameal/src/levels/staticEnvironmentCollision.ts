@@ -16,8 +16,6 @@ export type StaticEnvironmentCollisionSettings = {
 	readonly chunkSizeMeters: number;
 	readonly sampleSpacingMeters: number;
 	readonly walkableSlopeDegrees: number;
-	readonly maxTrianglesPerChunk: number;
-	readonly maxTotalTriangles: number;
 };
 
 export type StaticEnvironmentCollisionSource = {

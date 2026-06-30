@@ -15,10 +15,16 @@ import {
 	parseAudioContentManifest,
 } from "../engine/modules/audio/index.js";
 import {
+	PERFORMANCE_CONFIG_RESOURCE,
+	type PerformanceConfig,
+	composePerformanceConfig,
+} from "../game/performance/index.js";
+import {
 	audioAmbientDarkShadowsOfDelight,
 	audioAmbientShadowWaltz,
 	audioAmbientWhistlingDreams,
 } from "./global/ambientAudioAssets.js";
+import globalPerformance from "./global/performance.json";
 import { audioPortalActivate, meshPortalGate } from "./global/portalAssets.js";
 import { portalGatePrefab, waterSurfacePlanePrefab } from "./global/prefabs.js";
 import {
@@ -174,6 +180,7 @@ type ResolvedLevelNpcPackageData = {
 export type ResolvedLevelPackage = {
 	readonly data: LevelPackageData;
 	readonly skybox: LevelSkyboxData;
+	readonly performance: PerformanceConfig;
 	readonly level: LevelData;
 	readonly assetManifest: AssetManifestData;
 	readonly audioContentManifest: AudioContentManifest;
@@ -207,12 +214,20 @@ export function defineLevelPackage(
 	skybox: unknown,
 	npcs: LevelNpcPackageData = {},
 	collision: StaticEnvironmentCollisionPackage = {},
+	performance: unknown = globalPerformance,
 ): ResolvedLevelPackage {
 	const packageData = parseLevelPackageData(data);
 	const skyboxData = parseLevelSkyboxData(skybox);
+	const performanceData = composePerformanceConfig(globalPerformance, performance);
 	const npcData = parseLevelNpcPackageData(npcs);
 	const collisionData = resolveStaticEnvironmentCollisionPackage(collision);
-	const level = composeLevel(packageData, skyboxData, npcData, collisionData);
+	const level = composeLevel(
+		packageData,
+		skyboxData,
+		performanceData,
+		npcData,
+		collisionData,
+	);
 	const readiness = composeReadiness(
 		packageData,
 		skyboxData,
@@ -289,6 +304,7 @@ export function defineLevelPackage(
 	return {
 		data: packageData,
 		skybox: skyboxData,
+		performance: performanceData,
 		level,
 		assetManifest,
 		audioContentManifest,
@@ -606,11 +622,22 @@ function parseNpcGroup(data: unknown): LevelNpcGroupData {
 function composeLevel(
 	packageData: LevelPackageData,
 	skyboxData: LevelSkyboxData,
+	performanceData: PerformanceConfig,
 	npcData: ResolvedLevelNpcPackageData,
 	collisionData: ResolvedStaticEnvironmentCollisionPackage,
 ): LevelData {
+	if (packageData.level.resources?.[PERFORMANCE_CONFIG_RESOURCE] !== undefined) {
+		throw new Error(
+			`Level resources must not define ${PERFORMANCE_CONFIG_RESOURCE}; use performance.json instead.`,
+		);
+	}
+
 	return {
 		...packageData.level,
+		resources: {
+			...(packageData.level.resources ?? {}),
+			[PERFORMANCE_CONFIG_RESOURCE]: performanceData,
+		},
 		preload: unique([
 			...(packageData.level.preload ?? []),
 			...npcData.preload,
