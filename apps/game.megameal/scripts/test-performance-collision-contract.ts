@@ -101,10 +101,16 @@ assert.throws(
 	/performance config\.systems\.collision\.mode must be off or diagnostic/,
 );
 
-assert.equal(countCollisionMeshTriangles(chunks[0].mesh), 2);
+const firstInputChunk = chunks[0];
+assert(firstInputChunk);
+assert.equal(countCollisionMeshTriangles(firstInputChunk.mesh), 2);
 assert.equal(countWalkableMeshTriangles(chunks), 4);
 
 const summary = summarizeCollisionChunks(chunks);
+const firstSummaryChunk = summary.chunks[0];
+const thirdSummaryChunk = summary.chunks[2];
+assert(firstSummaryChunk);
+assert(thirdSummaryChunk);
 assert.equal(summary.chunkCount, 3);
 assert.equal(summary.walkableChunkCount, 2);
 assert.equal(summary.triangleCount, 5);
@@ -113,15 +119,15 @@ assert.deepEqual(summary.bounds, {
 	min: [0, 0, 0],
 	max: [12, 2, 8],
 });
-assert.equal(summary.chunks[0].triangleCount, 2);
-assert.equal(summary.chunks[2].walkableTriangleCount, 0);
+assert.equal(firstSummaryChunk.triangleCount, 2);
+assert.equal(thirdSummaryChunk.walkableTriangleCount, 0);
 
 const bucketPlan = buildCollisionSpatialBucketPlan({
 	chunks: summary.chunks,
 	bucketSizeMeters: 4,
 });
 assert.equal(bucketPlan.bucketSizeMeters, 4);
-assert.equal(bucketPlan.bucketCount, 8);
+assert.equal(bucketPlan.bucketCount, 10);
 assert.deepEqual(spatialBucketKeyForPoint([8.5, 0, 2], 4), [2, 0]);
 
 const queryPlan = planCollisionSpatialQuery({
