@@ -122,6 +122,20 @@ const performanceSystemIds = [
 	"streaming",
 	"collision",
 ] as const satisfies readonly PerformanceSystemId[];
+const performanceSystemLabels: Record<PerformanceSystemId, string> = {
+	lod: "LOD",
+	culling: "Culling",
+	streaming: "Streaming",
+	collision: "Collision",
+};
+const performanceDiagnosticNodeIds = new Set([
+	"performance-systems",
+	"performance-lod",
+	"performance-culling",
+	"performance-streaming",
+	"performance-collision",
+	"performance-diagnostics",
+]);
 
 // biome-ignore lint/style/useConst: Svelte state is reassigned from template event handlers.
 let selectedNodeId = $state("level-package");
@@ -1004,7 +1018,11 @@ function formatLiveCollectibles(state: LiveGameState): string {
 				{#if selectedNode.isDataSource}
 					<div>
 						<dt>Source</dt>
-						<dd>Editor level entries are loaded from this router</dd>
+						<dd>
+							{selectedNode.id === "performance-config"
+								? "Performance settings are loaded from global and per-level package files"
+								: "Editor level entries are loaded from this router"}
+						</dd>
 					</div>
 				{/if}
 				<div>
@@ -1085,6 +1103,67 @@ function formatLiveCollectibles(state: LiveGameState): string {
 					{:else}
 						<p class="settings-message">
 							{globalSettingsMessage ?? "Global settings are not loaded."}
+						</p>
+					{/if}
+				</section>
+			{/if}
+			{#if selectedNode.id === "performance-config"}
+				<section
+					class="settings-panel"
+					aria-label="Global performance editor"
+				>
+					<div class="settings-panel-header">
+						<h2>Global Performance</h2>
+						<button
+							type="button"
+							class="reload-button"
+							disabled={globalPerformanceBusy}
+							onclick={() => void loadGlobalPerformance()}
+						>
+							Reload
+						</button>
+					</div>
+					{#if globalPerformanceDraft}
+						<div class="settings-section">
+							<h3>Systems</h3>
+							<div class="settings-grid">
+								{#each performanceSystemIds as systemId}
+									<label>
+										<span>{performanceSystemLabels[systemId]}</span>
+										<select
+											value={globalPerformanceDraft.systems[systemId].mode}
+											disabled={globalPerformanceBusy}
+											onchange={(event) =>
+												updateGlobalPerformanceMode(
+													systemId,
+													event.currentTarget.value as PerformanceSystemMode,
+												)}
+										>
+											<option value="off">Off</option>
+											<option value="diagnostic">Diagnostic</option>
+										</select>
+									</label>
+								{/each}
+							</div>
+						</div>
+						<div class="settings-actions">
+							<button
+								type="button"
+								class="save-button"
+								disabled={globalPerformanceBusy || !globalPerformanceDirty}
+								onclick={() => void saveGlobalPerformance()}
+							>
+								Save
+							</button>
+							<span>{globalPerformanceMessage}</span>
+						</div>
+						{#if globalPerformanceFilePath}
+							<p class="settings-file">{globalPerformanceFilePath}</p>
+						{/if}
+					{:else}
+						<p class="settings-message">
+							{globalPerformanceMessage ??
+								"Performance settings are not loaded."}
 						</p>
 					{/if}
 				</section>
@@ -1589,6 +1668,68 @@ function formatLiveCollectibles(state: LiveGameState): string {
 					{:else}
 						<p class="settings-message">
 							{playerPackageMessage ?? "Player package is not loaded."}
+						</p>
+					{/if}
+				</section>
+			{/if}
+			{#if performanceDiagnosticNodeIds.has(selectedNode.id)}
+				<section class="live-panel" aria-label="Performance diagnostics">
+					<div class="live-panel-header">
+						<h2>Performance Diagnostics</h2>
+						<span class={`live-status ${bridgeStatus}`}>{bridgeStatus}</span>
+					</div>
+					{#if performanceDiagnostics}
+						<dl>
+							<div>
+								<dt>Active Scene</dt>
+								<dd>{performanceDiagnostics.activeRuntimeSceneId ?? "none"}</dd>
+							</div>
+							<div>
+								<dt>Entities</dt>
+								<dd>{performanceDiagnostics.counts.entities}</dd>
+							</div>
+							<div>
+								<dt>Renderables</dt>
+								<dd>{performanceDiagnostics.counts.renderables}</dd>
+							</div>
+							<div>
+								<dt>Lights</dt>
+								<dd>{performanceDiagnostics.counts.lights}</dd>
+							</div>
+							<div>
+								<dt>Colliders</dt>
+								<dd>{performanceDiagnostics.counts.colliders}</dd>
+							</div>
+							<div>
+								<dt>Walkable Meshes</dt>
+								<dd>{performanceDiagnostics.counts.walkableMeshColliders}</dd>
+							</div>
+							<div>
+								<dt>Mesh Triangles</dt>
+								<dd>{performanceDiagnostics.counts.meshCollisionTriangles}</dd>
+							</div>
+							<div>
+								<dt>Loaded Assets</dt>
+								<dd>{performanceDiagnostics.counts.loadedAssets}</dd>
+							</div>
+						</dl>
+						<div class="settings-section">
+							<h3>Modes</h3>
+							<dl>
+								{#each performanceSystemIds as systemId}
+									<div>
+										<dt>{performanceSystemLabels[systemId]}</dt>
+										<dd>
+											{performanceDiagnostics.config.systems[systemId].mode}
+										</dd>
+									</div>
+								{/each}
+							</dl>
+						</div>
+					{:else}
+						<p class="settings-message">
+							Open the game route in dev mode to stream runtime performance
+							diagnostics.
 						</p>
 					{/if}
 				</section>
