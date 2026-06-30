@@ -4,11 +4,14 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
+	PERFORMANCE_COLLISION_PRIMITIVE_SHAPES,
 	PERFORMANCE_CONFIG_RESOURCE,
 	PERFORMANCE_SYSTEM_IDS,
 	PERFORMANCE_SYSTEM_MODES,
 	composePerformanceConfig,
+	defaultPerformanceConfig,
 	parsePerformanceConfig,
+	validatePerformanceConfig,
 } from "../src/game/performance/index.js";
 import globalPerformance from "../src/levels/global/performance.json";
 import { levelPackageRouter } from "../src/levels/global/router.js";
@@ -42,6 +45,11 @@ const globalPerformanceConfig = parsePerformanceConfig(
 	"global performance config",
 );
 assert.deepEqual(
+	globalPerformanceConfig,
+	defaultPerformanceConfig,
+	"current global performance config must remain compatible with the default stage-one JSON shape",
+);
+assert.deepEqual(
 	Object.keys(globalPerformanceConfig.systems).sort(),
 	[...PERFORMANCE_SYSTEM_IDS].sort(),
 	"global performance config must enumerate every performance system",
@@ -55,6 +63,199 @@ for (const systemId of PERFORMANCE_SYSTEM_IDS) {
 		`global performance mode for ${systemId} must be supported`,
 	);
 }
+
+const stageTwoGlobalConfig = parsePerformanceConfig(
+	{
+		schemaVersion: 1,
+		systems: {
+			lod: {
+				mode: "diagnostic",
+				tiers: [
+					{
+						id: "near",
+						minDistance: 0,
+						maxDistance: 24,
+						qualityRatio: 1,
+					},
+					{
+						id: "far",
+						minDistance: 24,
+						qualityRatio: 0.5,
+					},
+				],
+			},
+			culling: {
+				mode: "diagnostic",
+				visibility: {
+					frustum: true,
+					distance: {
+						maxDistance: 120,
+						hysteresis: 10,
+					},
+				},
+			},
+			streaming: {
+				mode: "diagnostic",
+				residency: {
+					assets: {
+						loadDistance: 64,
+						unloadDistance: 96,
+					},
+					collision: {
+						loadDistance: 48,
+						unloadDistance: 80,
+					},
+				},
+			},
+			collision: {
+				mode: "diagnostic",
+				diagnostics: {
+					primitiveShapes: ["box", "capsule"],
+					includeMeshColliders: true,
+					includeWalkableOnly: false,
+				},
+			},
+		},
+	},
+	"stage two global performance config",
+);
+const stageTwoLevelConfig = parsePerformanceConfig(
+	{
+		schemaVersion: 1,
+		systems: {
+			lod: {
+				mode: "off",
+			},
+			culling: {
+				mode: "diagnostic",
+				visibility: {
+					distance: {
+						hysteresis: 16,
+					},
+				},
+			},
+			streaming: {
+				mode: "off",
+			},
+			collision: {
+				mode: "diagnostic",
+				diagnostics: {
+					primitiveShapes: ["sphere", "cylinder"],
+				},
+			},
+		},
+	},
+	"stage two level performance config",
+);
+const composedStageTwoConfig = composePerformanceConfig(
+	stageTwoGlobalConfig,
+	stageTwoLevelConfig,
+);
+assert.equal(
+	composedStageTwoConfig.systems.lod.mode,
+	"off",
+	"per-level performance mode overrides global defaults",
+);
+assert.equal(
+	composedStageTwoConfig.systems.lod.tiers?.[0]?.id,
+	"near",
+	"per-level mode overrides must preserve unrelated global LOD tier data",
+);
+assert.equal(
+	composedStageTwoConfig.systems.culling.visibility?.distance?.maxDistance,
+	120,
+	"nested per-level culling overrides must preserve global distance shape",
+);
+assert.equal(
+	composedStageTwoConfig.systems.culling.visibility?.distance?.hysteresis,
+	16,
+	"nested per-level culling overrides must replace only authored leaf values",
+);
+assert.deepEqual(
+	composedStageTwoConfig.systems.collision.diagnostics?.primitiveShapes,
+	["sphere", "cylinder"],
+	"per-level collision diagnostics may replace global primitive shape filters",
+);
+assert.deepEqual(
+	[...PERFORMANCE_COLLISION_PRIMITIVE_SHAPES],
+	["box", "sphere", "capsule", "cylinder"],
+	"collision diagnostics must validate the generic primitive shape set",
+);
+
+assertErrorIncludes(
+	() =>
+		parsePerformanceConfig(
+			{
+				...defaultPerformanceConfig,
+				systems: {
+					...defaultPerformanceConfig.systems,
+					lighting: { mode: "diagnostic" },
+				},
+			},
+			"bad performance config",
+		),
+	"bad performance config.systems.lighting is not a supported system.",
+);
+assertErrorIncludes(
+	() =>
+		parsePerformanceConfig(
+			{
+				...defaultPerformanceConfig,
+				systems: {
+					...defaultPerformanceConfig.systems,
+					lod: { mode: "active" },
+				},
+			},
+			"bad performance config",
+		),
+	"bad performance config.systems.lod.mode must be off or diagnostic.",
+);
+assertErrorIncludes(
+	() =>
+		parsePerformanceConfig(
+			{
+				...defaultPerformanceConfig,
+				systems: {
+					...defaultPerformanceConfig.systems,
+					collision: {
+						mode: "diagnostic",
+						diagnostics: {
+							primitiveShapes: ["torus"],
+						},
+					},
+				},
+			},
+			"bad performance config",
+		),
+	"bad performance config.systems.collision.diagnostics.primitiveShapes[0] must be box, sphere, capsule, or cylinder.",
+);
+assertErrorIncludes(
+	() =>
+		parsePerformanceConfig(
+			{
+				...defaultPerformanceConfig,
+				systems: {
+					...defaultPerformanceConfig.systems,
+					streaming: {
+						mode: "diagnostic",
+						residency: {
+							assets: {
+								loadDistance: 20,
+								unloadDistance: 10,
+							},
+						},
+					},
+				},
+			},
+			"bad performance config",
+		),
+	"bad performance config.systems.streaming.residency.assets.unloadDistance must be greater than or equal to loadDistance.",
+);
+assert.deepEqual(
+	validatePerformanceConfig(defaultPerformanceConfig),
+	[],
+	"default performance config must validate without requiring stage-two blocks",
+);
 
 for (const subfolder of ["lod", "culling", "streaming", "collision"]) {
 	await readFile(join(appRoot, "src/game/performance", subfolder, "README.md"));
@@ -188,3 +389,21 @@ for (const apiHandle of [
 console.log(
 	`Performance config contract passed for ${folders.length} level packages.`,
 );
+
+function assertErrorIncludes(action: () => void, expected: string): void {
+	try {
+		action();
+	} catch (error) {
+		const message =
+			error instanceof Error ? error.message : JSON.stringify(error);
+
+		assert.match(message, new RegExp(escapeRegExp(expected)));
+		return;
+	}
+
+	throw new Error(`Expected error including ${JSON.stringify(expected)}.`);
+}
+
+function escapeRegExp(value: string): string {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
