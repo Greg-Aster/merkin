@@ -9,6 +9,11 @@ import {
 	RENDERABLE_COMPONENT,
 } from "../../../engine/modules/rendering/index.js";
 import {
+	PERFORMANCE_RUNTIME_STATE_RESOURCE,
+	type PerformanceRuntimeState,
+	type PerformanceRuntimeStatus,
+} from "../runtime.js";
+import {
 	PERFORMANCE_CONFIG_RESOURCE,
 	PERFORMANCE_SYSTEM_IDS,
 	type PerformanceConfig,
@@ -51,7 +56,8 @@ export type PerformanceDiagnosticsDomainSummary = {
 
 export type PerformanceDiagnosticsRuntimeStatus =
 	| "disabled"
-	| "diagnostic-only";
+	| "diagnostic-only"
+	| "active";
 
 export type PerformanceDiagnosticsSubjectSummary = {
 	readonly id: string;
@@ -94,6 +100,9 @@ export function collectPerformanceDiagnostics(
 		options.world.getResource<PerformanceConfig>(PERFORMANCE_CONFIG_RESOURCE) ??
 			defaultPerformanceConfig,
 	);
+	const runtimeState = options.world.getResource<PerformanceRuntimeState>(
+		PERFORMANCE_RUNTIME_STATE_RESOURCE,
+	);
 	const counts = {
 		entities: options.world.entities().length,
 		renderables: options.world.query([RENDERABLE_COMPONENT]).length,
@@ -112,17 +121,19 @@ export function collectPerformanceDiagnostics(
 			: {}),
 		config,
 		counts,
-		domains: collectPerformanceDomainSummaries(config, counts),
+		domains: collectPerformanceDomainSummaries(config, counts, runtimeState),
 	};
 }
 
 function collectPerformanceDomainSummaries(
 	config: PerformanceConfig,
 	counts: PerformanceDiagnosticsState["counts"],
+	runtimeState: PerformanceRuntimeState | undefined,
 ): PerformanceDiagnosticsState["domains"] {
 	return {
 		lod: createDomainSummary({
 			mode: config.systems.lod.mode,
+			runtimeState: runtimeState?.domains.lod,
 			subjects: [
 				{
 					id: "renderables",
@@ -138,33 +149,27 @@ function collectPerformanceDomainSummaries(
 		}),
 		culling: createDomainSummary({
 			mode: config.systems.culling.mode,
+			runtimeState: runtimeState?.domains.culling,
 			subjects: [
 				{
 					id: "renderables",
 					label: "Renderable visibility candidates",
 					count: counts.renderables,
 				},
-				{
-					id: "lights",
-					label: "Light visibility candidates",
-					count: counts.lights,
-				},
 			],
 			plannedOperation: {
 				id: "culling:evaluate-visibility-candidates",
 				label: "Evaluate visibility candidates",
-				candidateCount: counts.renderables + counts.lights,
+				candidateCount: counts.renderables,
 			},
 		}),
 		streaming: createDomainSummary({
 			mode: config.systems.streaming.mode,
-			subjects: [
-				{
-					id: "loaded-assets",
-					label: "Loaded asset candidates",
-					count: counts.loadedAssets,
-				},
-			],
+			runtimeState: runtimeState?.domains.streaming,
+			subjects: streamingDiagnosticSubjects(
+				counts,
+				runtimeState?.domains.streaming,
+			),
 			plannedOperation: {
 				id: "streaming:evaluate-asset-residency",
 				label: "Evaluate asset residency candidates",
@@ -173,6 +178,7 @@ function collectPerformanceDomainSummaries(
 		}),
 		collision: createDomainSummary({
 			mode: config.systems.collision.mode,
+			runtimeState: runtimeState?.domains.collision,
 			subjects: [
 				{
 					id: "colliders",
@@ -199,8 +205,61 @@ function collectPerformanceDomainSummaries(
 	};
 }
 
+function streamingDiagnosticSubjects(
+	counts: PerformanceDiagnosticsState["counts"],
+	runtimeState: PerformanceRuntimeState["domains"]["streaming"] | undefined,
+): readonly PerformanceDiagnosticsSubjectSummary[] {
+	const subjects: PerformanceDiagnosticsSubjectSummary[] = [
+		{
+			id: "loaded-assets",
+			label: "Loaded asset candidates",
+			count: counts.loadedAssets,
+		},
+	];
+
+	if (!runtimeState) {
+		return subjects;
+	}
+
+	subjects.push(
+		{
+			id: "streaming-chunks",
+			label: "Streaming chunks",
+			count: runtimeState.candidateCount,
+		},
+		{
+			id: "loaded-streaming-chunks",
+			label: "Loaded streaming chunks",
+			count: runtimeState.assetResidency.loadedChunkIds.length,
+		},
+		{
+			id: "loading-streaming-chunks",
+			label: "Loading streaming chunks",
+			count: runtimeState.assetResidency.loadingChunkIds.length,
+		},
+		{
+			id: "retained-streaming-assets",
+			label: "Retained streaming assets",
+			count: runtimeState.assetResidency.retainedAssetIds.length,
+		},
+		{
+			id: "removed-streaming-colliders",
+			label: "Removed streaming colliders",
+			count: runtimeState.removedColliders.length,
+		},
+	);
+
+	return subjects;
+}
+
 function createDomainSummary(options: {
 	readonly mode: PerformanceSystemMode;
+	readonly runtimeState:
+		| Pick<
+				PerformanceRuntimeState["domains"][PerformanceSystemId],
+				"candidateCount" | "runtimeStatus"
+		  >
+		| undefined;
 	readonly subjects: readonly PerformanceDiagnosticsSubjectSummary[];
 	readonly plannedOperation: Omit<
 		PerformanceDiagnosticsPlannedOperation,
@@ -208,7 +267,10 @@ function createDomainSummary(options: {
 	>;
 }): PerformanceDiagnosticsDomainSummary {
 	const runtimeStatus: PerformanceDiagnosticsRuntimeStatus =
-		options.mode === "diagnostic" ? "diagnostic-only" : "disabled";
+		options.runtimeState?.runtimeStatus ?? runtimeStatusForMode(options.mode);
+	const candidateCount =
+		options.runtimeState?.candidateCount ??
+		options.plannedOperation.candidateCount;
 
 	return {
 		mode: options.mode,
@@ -218,9 +280,24 @@ function createDomainSummary(options: {
 			{
 				...options.plannedOperation,
 				status: runtimeStatus,
+				candidateCount,
 			},
 		],
 	};
+}
+
+function runtimeStatusForMode(
+	mode: PerformanceSystemMode,
+): PerformanceRuntimeStatus {
+	if (mode === "off") {
+		return "disabled";
+	}
+
+	if (mode === "diagnostic") {
+		return "diagnostic-only";
+	}
+
+	return "active";
 }
 
 function clonePerformanceConfig(config: PerformanceConfig): PerformanceConfig {

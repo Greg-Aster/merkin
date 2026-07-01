@@ -17,7 +17,6 @@ import {
 	LIGHT_MODULATION_COMPONENT,
 	MOVEMENT_BEHAVIOR_COMPONENT,
 	NPC_COMPONENT,
-	NPC_SIGNIFICANCE_COMPONENT,
 	OPEN_NPC_DIALOG_RESOURCE,
 	PLAYER_ENTITY_RESOURCE,
 	createFollowTargetSystem,
@@ -26,7 +25,6 @@ import {
 	createMovementBehaviorSystem,
 	createNpcDialogSystem,
 	createNpcProximitySystem,
-	createNpcSignificanceSystem,
 } from "../src/game/systems/index.js";
 import fireflyArchetype from "../src/levels/global/npcs/firefly/archetype.json";
 import fireflies from "../src/levels/observatory/npcs/fireflies.json";
@@ -206,15 +204,19 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	assertEqual(
 		archetypeDefaults.lightModulation,
 		undefined,
-		"Firefly blink/budget defaults must be owned by the level NPC group, not the global archetype.",
+		"Firefly blink defaults must be owned by the level NPC group, not the global archetype.",
 	);
-	for (const field of [
-		"maxActiveLights",
-		"activeLightPercent",
-		"nearDistance",
-		"farDistance",
-		"midIntensityScale",
-	]) {
+	assertEqual(
+		groupLightModulation.maxActiveLights,
+		undefined,
+		"Firefly light modulation must not limit the authored real-light population.",
+	);
+	assertEqual(
+		groupLightModulation.farDistance,
+		undefined,
+		"Firefly light modulation must not limit lights by player distance.",
+	);
+	for (const field of ["activeLightPercent"]) {
 		const value = groupLightModulation[field];
 		if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
 			throw new Error(
@@ -222,11 +224,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 			);
 		}
 	}
-	assertEqual(
-		groupLightModulation.maxActiveLights,
-		16,
-		"Observatory firefly real-light budget must preserve the level-owned editor setting.",
-	);
 }
 
 for (const stableId of fireflyStableIds) {
@@ -251,13 +248,17 @@ for (const stableId of fireflyStableIds) {
 		assertRecord(fireflies.defaults, "firefly group defaults").lightModulation,
 		"firefly group lightModulation defaults",
 	);
-	for (const field of [
-		"maxActiveLights",
-		"activeLightPercent",
-		"nearDistance",
-		"farDistance",
-		"midIntensityScale",
-	]) {
+	assertEqual(
+		lightModulation.maxActiveLights,
+		undefined,
+		`${stableId}.LightModulation must not inherit an active-light population limit.`,
+	);
+	assertEqual(
+		lightModulation.farDistance,
+		undefined,
+		`${stableId}.LightModulation must not inherit a player-distance light cutoff.`,
+	);
+	for (const field of ["activeLightPercent"]) {
 		assertEqual(
 			lightModulation[field],
 			groupLightModulation[field],
@@ -418,10 +419,6 @@ for (const stableId of fireflyStableIds) {
 		activeLightPercent: 1,
 		blinkPeriodSeconds: [2, 3],
 		blinkFadeSeconds: 0.1,
-		maxActiveLights: 1,
-		nearDistance: 12,
-		farDistance: 24,
-		midIntensityScale: 0.5,
 	});
 	world.addComponent(visual, "StableId", { id: "test:npc:visual" });
 	world.addComponent<RenderTransform>(visual, TRANSFORM_COMPONENT, {
@@ -435,7 +432,6 @@ for (const stableId of fireflyStableIds) {
 		scale: [0.5, 0.5, 0.5],
 	});
 
-	createNpcSignificanceSystem().update({ world });
 	createMovementBehaviorSystem().update({
 		world,
 		tick: 4,
@@ -448,10 +444,6 @@ for (const stableId of fireflyStableIds) {
 		deltaSeconds: 1 / 60,
 	});
 
-	const significance = assertRecord(
-		world.getComponent(npc, NPC_SIGNIFICANCE_COMPONENT),
-		"NpcSignificance",
-	);
 	const transform = world.getComponent<RenderTransform>(
 		npc,
 		TRANSFORM_COMPONENT,
@@ -462,7 +454,6 @@ for (const stableId of fireflyStableIds) {
 	);
 	const light = world.getComponent<LightComponent>(npc, LIGHT_COMPONENT);
 
-	assertEqual(significance.tier, "near");
 	assertEqual(transform?.position.y !== 1, true);
 	assertEqual(visualTransform?.position.x !== 1, true);
 	assertEqual(light?.kind, "point");

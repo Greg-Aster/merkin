@@ -234,6 +234,7 @@ const chunks: readonly StreamingChunkDefinition[] = [
 		{
 			assetIds: ["mesh_floor"],
 			renderStableIds: [],
+			lightStableIds: [],
 			colliderStableIds: ["floor:main"],
 		},
 		"operations describe content for future runtime services instead of loading it.",

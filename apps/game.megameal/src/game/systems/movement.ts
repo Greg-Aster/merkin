@@ -22,6 +22,12 @@ import {
 	TRANSFORM_COMPONENT,
 } from "../../engine/modules/rendering/index.js";
 import {
+	COLLISION_SPATIAL_INDEX_RESOURCE,
+	type CollisionSpatialIndexResource,
+	planCollisionSpatialQuery,
+} from "../performance/collision/index.js";
+import { STABLE_ID_COMPONENT } from "../prefabs/index.js";
+import {
 	CHARACTER_BOUNDS_RESOURCE,
 	type CharacterMovementBounds,
 	FIRST_PERSON_CONTROLLER_COMPONENT,
@@ -30,6 +36,8 @@ import {
 	type MovementIntentComponent,
 	PLAYER_INPUT_COMPONENT,
 } from "./components.js";
+
+const WALKABLE_GROUNDING_QUERY_RADIUS_METERS = 2.5;
 
 export function createFirstPersonLookSystem<
 	TContext extends FirstPersonLookContext,
@@ -163,22 +171,32 @@ export function createWalkableGroundingSystem<
 		writes: [CHARACTER_CONTROLLER_COMPONENT],
 		update(context) {
 			const walkableColliders = [...context.world.query([COLLIDER_COMPONENT])]
-				.map((entity) => ({
-					entity,
-					collider: context.world.requireComponent<ColliderComponent>(
+				.map((entity) => {
+					const stableId = stableIdForEntity(context.world, entity);
+
+					return {
 						entity,
-						COLLIDER_COMPONENT,
-					),
-					transform: context.world.getComponent<RenderTransform>(
-						entity,
-						TRANSFORM_COMPONENT,
-					),
-				}))
+						collider: context.world.requireComponent<ColliderComponent>(
+							entity,
+							COLLIDER_COMPONENT,
+						),
+						...(stableId ? { stableId } : {}),
+						transform: context.world.getComponent<RenderTransform>(
+							entity,
+							TRANSFORM_COMPONENT,
+						),
+					};
+				})
 				.filter(({ collider }) => collider.intent === "walkable");
 
 			if (walkableColliders.length === 0) {
 				return;
 			}
+
+			const spatialIndex =
+				context.world.getResource<CollisionSpatialIndexResource>(
+					COLLISION_SPATIAL_INDEX_RESOURCE,
+				);
 
 			for (const entity of context.world.query([
 				TRANSFORM_COMPONENT,
@@ -193,10 +211,24 @@ export function createWalkableGroundingSystem<
 						entity,
 						CHARACTER_CONTROLLER_COMPONENT,
 					);
+				const candidateChunkIds = spatialIndex
+					? new Set(
+							planCollisionSpatialQuery({
+								plan: spatialIndex.plan,
+								origin: [
+									transform.position.x,
+									transform.position.y,
+									transform.position.z,
+								],
+								radiusMeters: WALKABLE_GROUNDING_QUERY_RADIUS_METERS,
+							}).candidateChunkIds,
+						)
+					: undefined;
 				const groundY = walkableGroundYAt(
 					transform.position.x,
 					transform.position.z,
 					walkableColliders,
+					candidateChunkIds,
 				);
 
 				if (groundY === undefined) {
@@ -246,7 +278,9 @@ type WalkableGroundingContext = {
 };
 
 type WalkableCollider = {
+	readonly entity: number;
 	readonly collider: ColliderComponent;
+	readonly stableId?: string;
 	readonly transform: RenderTransform | undefined;
 };
 
@@ -258,10 +292,21 @@ function walkableGroundYAt(
 	x: number,
 	z: number,
 	walkableColliders: readonly WalkableCollider[],
+	candidateChunkIds?: ReadonlySet<string>,
 ): number | undefined {
 	let groundY: number | undefined;
 
-	for (const { collider, transform } of walkableColliders) {
+	for (const walkableCollider of walkableColliders) {
+		const { collider, transform } = walkableCollider;
+
+		if (
+			collider.shape.type === "mesh" &&
+			candidateChunkIds &&
+			!candidateChunkIds.has(colliderCandidateId(walkableCollider))
+		) {
+			continue;
+		}
+
 		const candidate = groundYForCollider(collider, transform, x, z);
 		if (
 			candidate !== undefined &&
@@ -272,6 +317,19 @@ function walkableGroundYAt(
 	}
 
 	return groundY;
+}
+
+function colliderCandidateId(walkableCollider: WalkableCollider): string {
+	return walkableCollider.stableId ?? `entity:${walkableCollider.entity}`;
+}
+
+function stableIdForEntity(world: World, entity: number): string | undefined {
+	const stableId = world.getComponent<{ readonly id?: unknown }>(
+		entity,
+		STABLE_ID_COMPONENT,
+	);
+
+	return typeof stableId?.id === "string" ? stableId.id : undefined;
 }
 
 function groundYForCollider(

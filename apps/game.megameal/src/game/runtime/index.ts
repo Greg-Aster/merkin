@@ -41,6 +41,8 @@ import {
 import {
 	type PerformanceDiagnosticsState,
 	collectPerformanceDiagnostics,
+	createCollisionSpatialIndexSystem,
+	createPerformanceRuntimeSystem,
 } from "../performance/index.js";
 import { PrefabRegistry, STABLE_ID_COMPONENT } from "../prefabs/index.js";
 import { createGameScene } from "../scenes/index.js";
@@ -62,7 +64,6 @@ import {
 	createMovementCommandSystem,
 	createNpcDialogSystem,
 	createNpcProximitySystem,
-	createNpcSignificanceSystem,
 	createPlayerCameraSystem,
 	createPlayerChargeLightFeedbackSystem,
 	createPlayerInputSystem,
@@ -213,6 +214,13 @@ export async function createMegamealGameRuntime(
 	runtime.scheduler.registerSystem("character", createFirstPersonLookSystem(), {
 		order: -10,
 	});
+	runtime.scheduler.registerSystem(
+		"character",
+		createCollisionSpatialIndexSystem(),
+		{
+			order: -5,
+		},
+	);
 	runtime.scheduler.registerSystem("character", createCharacterMotorSystem());
 	runtime.scheduler.registerSystem(
 		"character",
@@ -234,6 +242,14 @@ export async function createMegamealGameRuntime(
 		createPlayerLightCameraAnchorSystem(),
 		{ order: 5 },
 	);
+	runtime.scheduler.registerSystem(
+		"camera",
+		createPerformanceRuntimeSystem({
+			assets: options.assets,
+			runtimeSceneManifest: () => activeRuntimeSceneManifest,
+		}),
+		{ order: 50 },
+	);
 	runtime.scheduler.registerSystem("gameplay", createChargedActionSystem());
 	runtime.scheduler.registerSystem(
 		"gameplay",
@@ -243,9 +259,6 @@ export async function createMegamealGameRuntime(
 	runtime.scheduler.registerSystem("gameplay", createCollectibleSystem());
 	runtime.scheduler.registerSystem("gameplay", createPortalProximitySystem(), {
 		order: 10,
-	});
-	runtime.scheduler.registerSystem("gameplay", createNpcSignificanceSystem(), {
-		order: 12,
 	});
 	runtime.scheduler.registerSystem("gameplay", createNpcProximitySystem(), {
 		order: 14,

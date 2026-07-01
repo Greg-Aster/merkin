@@ -1,4 +1,7 @@
-import type { PerformanceConfig, PerformanceSystemMode } from "../types.js";
+import type {
+	PerformanceConfig,
+	PerformanceCullingSystemMode,
+} from "../types.js";
 
 export const CULLING_POLICY_RESULT_COMPONENT = "PerformanceCullingPolicyResult";
 
@@ -30,8 +33,8 @@ export type CullingFrustumRelation =
 	| "unknown";
 
 export type CullingPolicyMode = Extract<
-	PerformanceSystemMode,
-	"off" | "diagnostic"
+	PerformanceCullingSystemMode,
+	"off" | "diagnostic" | "distance"
 >;
 
 export type CullingHysteresisPolicy = {
@@ -111,7 +114,7 @@ export function cullingModeFromPerformanceConfig(
 ): CullingPolicyMode {
 	const mode = config?.systems.culling.mode ?? "off";
 
-	if (mode === "off" || mode === "diagnostic") {
+	if (mode === "off" || mode === "diagnostic" || mode === "distance") {
 		return mode;
 	}
 
@@ -438,7 +441,11 @@ function cullingReasons(options: {
 }
 
 function validatePolicy(policy: CullingPolicy): void {
-	if (policy.mode !== "off" && policy.mode !== "diagnostic") {
+	if (
+		policy.mode !== "off" &&
+		policy.mode !== "diagnostic" &&
+		policy.mode !== "distance"
+	) {
 		throw new Error(
 			`Unsupported culling policy mode "${String(policy.mode)}".`,
 		);

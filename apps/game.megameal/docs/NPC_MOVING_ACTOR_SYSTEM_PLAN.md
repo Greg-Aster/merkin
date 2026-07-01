@@ -32,13 +32,15 @@ level NPC data
 - V1 loads three authored Observatory firefly NPCs.
 - V1 does not need lazy loading for this count.
 - Future large moving-actor groups must use the same NPC contract and the same
-  significance/light-budget path before shipping.
+  authored data path before shipping.
 - Movement is deterministic math from stable data, time, and a phase value.
 - Movement and light work runs in generic fixed-step systems, not per-actor
   timers, animation loops, Svelte effects, or Three object mutations.
-- Distance/significance tiers reduce update cadence for far actors.
-- `LightModulation` can disable or dim far/over-budget point lights before
-  `LightSyncSystem` projects them to Three.
+- Authored moving actors update through the same fixed-step systems regardless
+  of player distance.
+- `LightModulation` applies authored blink and pulse values only. It must not
+  impose hidden population or player-distance limits before `LightSyncSystem`
+  projects lights to Three.
 
 ## Boundaries
 

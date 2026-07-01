@@ -4,6 +4,7 @@ import type {
 	GameDevBridgeEditorEndpoint,
 	GameDevBridgeSnapshot,
 } from "../../app/gameDevBridge.js";
+import PerformanceConfigEditor from "../PerformanceConfigEditor.svelte";
 import StructuredValueEditor from "./StructuredValueEditor.svelte";
 
 const LEVELS_API_PATH = "/__megameal-editor-api/levels";
@@ -94,7 +95,12 @@ type LevelCollisionPackage = {
 };
 
 type PerformanceSystemId = "lod" | "culling" | "streaming" | "collision";
-type PerformanceSystemMode = "off" | "diagnostic";
+type PerformanceSystemMode =
+	| "off"
+	| "diagnostic"
+	| "distance"
+	| "plan"
+	| "spatial";
 type PerformanceConfig = {
 	schemaVersion: 1;
 	systems: Record<
@@ -355,27 +361,27 @@ const tabInfo = {
 	},
 	Performance: {
 		summary:
-			"Performance settings are level-owned controls saved in performance.json. Stage one exposes safe diagnostic modes only; runtime optimization modes stay unavailable until their systems exist.",
+			"Performance settings are level-owned controls saved in performance.json. Runtime systems consume the composed config and report live state through diagnostics.",
 		fields: [
 			{
 				label: "LOD",
 				description:
-					"Future level-of-detail behavior for simplifying far or less important renderables.",
+					"Runtime distance/significance tier policy for renderable candidates.",
 			},
 			{
 				label: "Culling",
 				description:
-					"Future visibility policy for objects outside the useful camera or gameplay area.",
+					"Runtime visibility policy for renderable and light candidates. Distance mode applies visibility through ECS components.",
 			},
 			{
 				label: "Streaming",
 				description:
-					"Future runtime residency policy for assets, render content, and collision chunks.",
+					"Runtime residency policy for assets, renderables, and collision chunks. Plan mode reports chunk operations from current scene data.",
 			},
 			{
 				label: "Collision",
 				description:
-					"Future broadphase-friendly collision and walkable lookup policy. Diagnostic mode reports current collider costs without changing gameplay.",
+					"Broadphase-friendly collision and walkable lookup policy. Spatial mode builds runtime spatial query diagnostics from current colliders.",
 			},
 		],
 	},
@@ -518,13 +524,6 @@ const DEFAULT_LEVEL_PLAYER_LIGHT = {
 	decay: 2,
 	visible: true,
 } satisfies Record<string, JsonValue>;
-const performanceSystemIds = [
-	"lod",
-	"culling",
-	"streaming",
-	"collision",
-] as const satisfies readonly PerformanceSystemId[];
-
 let levels: readonly LevelSummary[] = $state([]);
 let workspace: LevelWorkspace | undefined = $state();
 let selectedRuntimeSceneId = $state("");
@@ -1535,26 +1534,6 @@ function updateSkyboxEnvironmentKind(kind: string): void {
 		...draft.skybox.environment,
 		kind,
 	});
-}
-
-function updatePerformanceMode(
-	systemId: PerformanceSystemId,
-	mode: PerformanceSystemMode,
-): void {
-	if (!performanceDraft) {
-		return;
-	}
-
-	performanceDraft = {
-		...performanceDraft,
-		systems: {
-			...performanceDraft.systems,
-			[systemId]: {
-				...performanceDraft.systems[systemId],
-				mode,
-			},
-		},
-	};
 }
 
 function defaultEnvironmentForKind(kind: string): Record<string, JsonValue> {
@@ -2576,29 +2555,17 @@ function numberTuple2(
 									<div class="lighting-group-header">
 										<div>
 											<p>Performance Config</p>
-											<h2>Stage One Diagnostics</h2>
+											<h2>Runtime Systems</h2>
 										</div>
 										<span class="lighting-badge">level-owned</span>
 									</div>
-									<div class="settings-grid">
-										{#each performanceSystemIds as systemId}
-											<label>
-												<span>{systemId}</span>
-												<select
-													value={performanceDraft.systems[systemId].mode}
-													disabled={busy}
-													onchange={(event) =>
-														updatePerformanceMode(
-															systemId,
-															event.currentTarget.value as PerformanceSystemMode,
-														)}
-												>
-													<option value="off">off</option>
-													<option value="diagnostic">diagnostic</option>
-												</select>
-											</label>
-										{/each}
-									</div>
+									<PerformanceConfigEditor
+										value={performanceDraft}
+										disabled={busy}
+										onChange={(value) => {
+											performanceDraft = value;
+										}}
+									/>
 								</section>
 							{:else}
 								<p class="settings-message">
@@ -2777,28 +2744,11 @@ function numberTuple2(
 															<p>{group.name} -> defaults.lightModulation</p>
 														</div>
 														<span class="lighting-badge">group</span>
-													</div>
-													<div class="lighting-fields">
-														<label>
-															<span>Max Real Lights</span>
-															<input
-																type="number"
-																min="0"
-																step="1"
-																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").maxActiveLights, 8)}
-																disabled={busy}
-																oninput={(event) =>
-																	updateNpcGroupDefaultRecordField(
-																		groupIndex,
-																		"lightModulation",
-																		"maxActiveLights",
-																		Math.floor(readNonNegativeNumberInput(event.currentTarget)),
-																	)}
-															/>
-														</label>
-														<label>
-															<span>Active Fraction</span>
-															<input
+														</div>
+														<div class="lighting-fields">
+															<label>
+																<span>Active Fraction</span>
+																<input
 																type="number"
 																min="0"
 																max="1"
@@ -2898,9 +2848,9 @@ function numberTuple2(
 																	)}
 															/>
 														</label>
-														<label>
-															<span>Pulse Softness</span>
-															<input
+															<label>
+																<span>Pulse Softness</span>
+																<input
 																type="number"
 																min="0"
 																max="1"
@@ -2914,62 +2864,10 @@ function numberTuple2(
 																		"pulseSoftness",
 																		readAlphaNumberInput(event.currentTarget, 1),
 																	)}
-															/>
-														</label>
-														<label>
-															<span>Near Light Range</span>
-															<input
-																type="number"
-																min="0"
-																step="1"
-																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").nearDistance, 48)}
-																disabled={busy}
-																oninput={(event) =>
-																	updateNpcGroupDefaultRecordField(
-																		groupIndex,
-																		"lightModulation",
-																		"nearDistance",
-																		readNonNegativeNumberInput(event.currentTarget),
-																	)}
-															/>
-														</label>
-														<label>
-															<span>Far Light Range</span>
-															<input
-																type="number"
-																min="0"
-																step="1"
-																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").farDistance, 140)}
-																disabled={busy}
-																oninput={(event) =>
-																	updateNpcGroupDefaultRecordField(
-																		groupIndex,
-																		"lightModulation",
-																		"farDistance",
-																		readNonNegativeNumberInput(event.currentTarget),
-																	)}
-															/>
-														</label>
-														<label>
-															<span>Mid Range Scale</span>
-															<input
-																type="number"
-																min="0"
-																max="1"
-																step="0.01"
-																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").midIntensityScale, 0.55)}
-																disabled={busy}
-																oninput={(event) =>
-																	updateNpcGroupDefaultRecordField(
-																		groupIndex,
-																		"lightModulation",
-																		"midIntensityScale",
-																		readAlphaNumberInput(event.currentTarget, 0.55),
-																	)}
-															/>
-														</label>
+																/>
+															</label>
+														</div>
 													</div>
-												</div>
 												{#if npcGroupInstances(group).length}
 													{#each npcGroupInstances(group) as instance, instanceIndex (String(instance.stableId ?? instance.id ?? instanceIndex))}
 														<div class="npc-instance-form">

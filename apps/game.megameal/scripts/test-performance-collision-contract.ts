@@ -82,6 +82,19 @@ assert.equal(offPolicy.mode, "off");
 assert.equal(offPolicy.diagnosticsEnabled, false);
 assert.equal(offPolicy.activeOptimizationEnabled, false);
 
+const spatialConfig: PerformanceConfig = {
+	...defaultPerformanceConfig,
+	systems: {
+		...defaultPerformanceConfig.systems,
+		collision: { mode: "spatial" },
+	},
+};
+const spatialPolicy = resolveCollisionPerformancePolicy(spatialConfig);
+assert.equal(spatialPolicy.mode, "spatial");
+assert.equal(spatialPolicy.diagnosticsEnabled, true);
+assert.equal(spatialPolicy.activeOptimizationEnabled, true);
+assert.deepEqual(spatialPolicy.warnings, []);
+
 const unsupportedPolicy = resolveCollisionPerformancePolicy({
 	mode: "active",
 } as never);
@@ -99,7 +112,7 @@ assert.throws(
 				collision: { mode: "active" },
 			},
 		}),
-	/performance config\.systems\.collision\.mode must be off or diagnostic/,
+	/performance config\.systems\.collision\.mode must be off or diagnostic or spatial/,
 );
 
 const firstInputChunk = chunks[0];

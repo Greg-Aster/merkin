@@ -1604,10 +1604,7 @@ function validateNpcLightModulationOverride(value, path, errors) {
 		"pulseSpeed",
 		"baseIntensity",
 		"baseDistance",
-		"maxActiveLights",
 		"blinkFadeSeconds",
-		"nearDistance",
-		"farDistance",
 	]) {
 		if (value[key] !== undefined) {
 			validateNonNegativeNumber(value[key], `${path}.${key}`, errors);
@@ -1617,7 +1614,6 @@ function validateNpcLightModulationOverride(value, path, errors) {
 		"pulseSoftness",
 		"activeLightPercent",
 		"minimumIntensityScale",
-		"midIntensityScale",
 	]) {
 		if (value[key] !== undefined) {
 			validateAlpha(value[key], `${path}.${key}`, errors);
@@ -1937,8 +1933,23 @@ function validateGlobalSettings(value) {
 		value.defaultRuntimeSceneId,
 		"defaultRuntimeSceneId",
 	);
+	if (typeof value.hudVisible !== "boolean") {
+		throw new Error("hudVisible must be a boolean.");
+	}
+	if (
+		typeof value.audioMasterVolume !== "number" ||
+		!Number.isFinite(value.audioMasterVolume) ||
+		value.audioMasterVolume < 0
+	) {
+		throw new Error("audioMasterVolume must be a finite number >= 0.");
+	}
 
-	return { packageId, defaultRuntimeSceneId };
+	return {
+		packageId,
+		defaultRuntimeSceneId,
+		hudVisible: value.hudVisible,
+		audioMasterVolume: value.audioMasterVolume,
+	};
 }
 
 function validatePerformanceConfig(value, label = "performance") {
@@ -1962,15 +1973,22 @@ function validatePerformanceConfig(value, label = "performance") {
 		}
 		for (const systemId of systemIds) {
 			const system = value.systems[systemId];
+			const supportedModes = performanceModesForSystem(systemId);
 			if (!isObject(system)) {
 				errors.push(`${label}.systems.${systemId} must be an object.`);
 				continue;
 			}
-			if (system.mode !== "off" && system.mode !== "diagnostic") {
+			if (!supportedModes.includes(system.mode)) {
 				errors.push(
-					`${label}.systems.${systemId}.mode must be off or diagnostic.`,
+					`${label}.systems.${systemId}.mode must be ${supportedModes.join(" or ")}.`,
 				);
 			}
+			validatePerformanceSystemConfig(
+				systemId,
+				system,
+				`${label}.systems.${systemId}`,
+				errors,
+			);
 		}
 	}
 
@@ -1981,12 +1999,300 @@ function validatePerformanceConfig(value, label = "performance") {
 	return {
 		schemaVersion: 1,
 		systems: {
-			lod: { mode: value.systems.lod.mode },
-			culling: { mode: value.systems.culling.mode },
-			streaming: { mode: value.systems.streaming.mode },
-			collision: { mode: value.systems.collision.mode },
+			lod: cloneJsonValue(value.systems.lod),
+			culling: cloneJsonValue(value.systems.culling),
+			streaming: cloneJsonValue(value.systems.streaming),
+			collision: cloneJsonValue(value.systems.collision),
 		},
 	};
+}
+
+function performanceModesForSystem(systemId) {
+	if (systemId === "lod" || systemId === "culling") {
+		return ["off", "diagnostic", "distance"];
+	}
+
+	if (systemId === "streaming") {
+		return ["off", "diagnostic", "plan"];
+	}
+
+	return ["off", "diagnostic", "spatial"];
+}
+
+function validatePerformanceSystemConfig(systemId, system, path, errors) {
+	const allowedFields = new Set(["mode"]);
+
+	if (systemId === "lod") {
+		allowedFields.add("tiers");
+		validatePerformanceLodConfig(system, path, errors);
+	}
+	if (systemId === "culling") {
+		allowedFields.add("visibility");
+		validatePerformanceCullingConfig(system, path, errors);
+	}
+	if (systemId === "streaming") {
+		allowedFields.add("residency");
+		validatePerformanceStreamingConfig(system, path, errors);
+	}
+	if (systemId === "collision") {
+		allowedFields.add("diagnostics");
+		validatePerformanceCollisionConfig(system, path, errors);
+	}
+
+	validateAllowedPerformanceFields(system, allowedFields, path, errors);
+}
+
+function validatePerformanceLodConfig(system, path, errors) {
+	if (system.tiers === undefined) {
+		return;
+	}
+	if (!Array.isArray(system.tiers)) {
+		errors.push(`${path}.tiers must be an array.`);
+		return;
+	}
+
+	for (const [index, tier] of system.tiers.entries()) {
+		const tierPath = `${path}.tiers[${index}]`;
+		if (!isObject(tier)) {
+			errors.push(`${tierPath} must be an object.`);
+			continue;
+		}
+
+		validateAllowedPerformanceFields(
+			tier,
+			new Set(["id", "minDistance", "maxDistance", "qualityRatio"]),
+			tierPath,
+			errors,
+		);
+		if (typeof tier.id !== "string" || tier.id.length === 0) {
+			errors.push(`${tierPath}.id must be a non-empty string.`);
+		}
+		validateNonNegativePerformanceNumber(
+			tier.minDistance,
+			`${tierPath}.minDistance`,
+			errors,
+		);
+		if (tier.maxDistance !== undefined) {
+			validateNonNegativePerformanceNumber(
+				tier.maxDistance,
+				`${tierPath}.maxDistance`,
+				errors,
+			);
+			if (
+				typeof tier.minDistance === "number" &&
+				Number.isFinite(tier.minDistance) &&
+				typeof tier.maxDistance === "number" &&
+				Number.isFinite(tier.maxDistance) &&
+				tier.maxDistance <= tier.minDistance
+			) {
+				errors.push(
+					`${tierPath}.maxDistance must be greater than minDistance.`,
+				);
+			}
+		}
+		if (tier.qualityRatio !== undefined) {
+			validatePositivePerformanceNumber(
+				tier.qualityRatio,
+				`${tierPath}.qualityRatio`,
+				errors,
+			);
+		}
+	}
+}
+
+function validatePerformanceCullingConfig(system, path, errors) {
+	if (system.visibility === undefined) {
+		return;
+	}
+	if (!isObject(system.visibility)) {
+		errors.push(`${path}.visibility must be an object.`);
+		return;
+	}
+
+	validateAllowedPerformanceFields(
+		system.visibility,
+		new Set(["frustum", "distance"]),
+		`${path}.visibility`,
+		errors,
+	);
+	if (
+		system.visibility.frustum !== undefined &&
+		typeof system.visibility.frustum !== "boolean"
+	) {
+		errors.push(`${path}.visibility.frustum must be a boolean.`);
+	}
+	if (system.visibility.distance !== undefined) {
+		validatePerformanceDistanceWindow(
+			system.visibility.distance,
+			`${path}.visibility.distance`,
+			errors,
+		);
+	}
+}
+
+function validatePerformanceStreamingConfig(system, path, errors) {
+	if (system.residency === undefined) {
+		return;
+	}
+	if (!isObject(system.residency)) {
+		errors.push(`${path}.residency must be an object.`);
+		return;
+	}
+
+	validateAllowedPerformanceFields(
+		system.residency,
+		new Set(["assets", "renderables", "collision"]),
+		`${path}.residency`,
+		errors,
+	);
+	for (const key of ["assets", "renderables", "collision"]) {
+		if (system.residency[key] !== undefined) {
+			validatePerformanceResidencyWindow(
+				system.residency[key],
+				`${path}.residency.${key}`,
+				errors,
+			);
+		}
+	}
+}
+
+function validatePerformanceCollisionConfig(system, path, errors) {
+	if (system.diagnostics === undefined) {
+		return;
+	}
+	if (!isObject(system.diagnostics)) {
+		errors.push(`${path}.diagnostics must be an object.`);
+		return;
+	}
+
+	validateAllowedPerformanceFields(
+		system.diagnostics,
+		new Set(["primitiveShapes", "includeMeshColliders", "includeWalkableOnly"]),
+		`${path}.diagnostics`,
+		errors,
+	);
+	if (system.diagnostics.primitiveShapes !== undefined) {
+		validatePerformancePrimitiveShapes(
+			system.diagnostics.primitiveShapes,
+			`${path}.diagnostics.primitiveShapes`,
+			errors,
+		);
+	}
+	for (const key of ["includeMeshColliders", "includeWalkableOnly"]) {
+		if (
+			system.diagnostics[key] !== undefined &&
+			typeof system.diagnostics[key] !== "boolean"
+		) {
+			errors.push(`${path}.diagnostics.${key} must be a boolean.`);
+		}
+	}
+}
+
+function validatePerformanceDistanceWindow(value, path, errors) {
+	if (!isObject(value)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	validateAllowedPerformanceFields(
+		value,
+		new Set(["maxDistance", "hysteresis"]),
+		path,
+		errors,
+	);
+	if (value.maxDistance !== undefined) {
+		validateNonNegativePerformanceNumber(
+			value.maxDistance,
+			`${path}.maxDistance`,
+			errors,
+		);
+	}
+	if (value.hysteresis !== undefined) {
+		validateNonNegativePerformanceNumber(
+			value.hysteresis,
+			`${path}.hysteresis`,
+			errors,
+		);
+	}
+}
+
+function validatePerformanceResidencyWindow(value, path, errors) {
+	if (!isObject(value)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	validateAllowedPerformanceFields(
+		value,
+		new Set(["loadDistance", "unloadDistance"]),
+		path,
+		errors,
+	);
+	if (value.loadDistance !== undefined) {
+		validateNonNegativePerformanceNumber(
+			value.loadDistance,
+			`${path}.loadDistance`,
+			errors,
+		);
+	}
+	if (value.unloadDistance !== undefined) {
+		validateNonNegativePerformanceNumber(
+			value.unloadDistance,
+			`${path}.unloadDistance`,
+			errors,
+		);
+	}
+	if (
+		typeof value.loadDistance === "number" &&
+		Number.isFinite(value.loadDistance) &&
+		typeof value.unloadDistance === "number" &&
+		Number.isFinite(value.unloadDistance) &&
+		value.unloadDistance < value.loadDistance
+	) {
+		errors.push(
+			`${path}.unloadDistance must be greater than or equal to loadDistance.`,
+		);
+	}
+}
+
+function validatePerformancePrimitiveShapes(value, path, errors) {
+	if (!Array.isArray(value)) {
+		errors.push(`${path} must be an array.`);
+		return;
+	}
+
+	const shapes = new Set(["box", "sphere", "capsule", "cylinder"]);
+	for (const [index, shape] of value.entries()) {
+		if (!shapes.has(shape)) {
+			errors.push(
+				`${path}[${index}] must be box, sphere, capsule, or cylinder.`,
+			);
+		}
+	}
+}
+
+function validateAllowedPerformanceFields(value, allowedFields, path, errors) {
+	for (const key of Object.keys(value)) {
+		if (!allowedFields.has(key)) {
+			errors.push(`${path}.${key} is not supported.`);
+		}
+	}
+}
+
+function validatePositivePerformanceNumber(value, path, errors) {
+	if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+		errors.push(`${path} must be a finite number greater than 0.`);
+	}
+}
+
+function validateNonNegativePerformanceNumber(value, path, errors) {
+	if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+		errors.push(`${path} must be a finite number greater than or equal to 0.`);
+	}
+}
+
+function cloneJsonValue(value) {
+	return JSON.parse(JSON.stringify(value));
 }
 
 function validatePlayerPackageConfig(value) {
@@ -2207,6 +2513,8 @@ function readGlobalSettings(source) {
 	return {
 		packageId: readStringProperty(source, "packageId"),
 		defaultRuntimeSceneId: readStringProperty(source, "defaultRuntimeSceneId"),
+		hudVisible: readBooleanProperty(source, "hudVisible"),
+		audioMasterVolume: readNumberProperty(source, "audioMasterVolume"),
 	};
 }
 
@@ -2221,7 +2529,68 @@ function writeGlobalSettingsSource(source, settings) {
 		"defaultRuntimeSceneId",
 		settings.defaultRuntimeSceneId,
 	);
+	nextSource = replaceBooleanProperty(
+		nextSource,
+		"hudVisible",
+		settings.hudVisible,
+	);
+	nextSource = replaceNumberProperty(
+		nextSource,
+		"audioMasterVolume",
+		settings.audioMasterVolume,
+	);
 	return nextSource;
+}
+
+function readNumberProperty(source, propertyName) {
+	const match = numberPropertyPattern(propertyName).exec(source);
+
+	if (!match?.[1]) {
+		throw new Error(
+			`Could not read "${propertyName}" from ${GLOBAL_SETTINGS_DISPLAY_PATH}.`,
+		);
+	}
+
+	return Number(match[1]);
+}
+
+function replaceNumberProperty(source, propertyName, value) {
+	const pattern = numberPropertyPattern(propertyName);
+
+	if (!pattern.test(source)) {
+		throw new Error(
+			`Could not update "${propertyName}" in ${GLOBAL_SETTINGS_DISPLAY_PATH}.`,
+		);
+	}
+
+	return source.replace(pattern, `${propertyName}: ${value}`);
+}
+
+function readBooleanProperty(source, propertyName) {
+	const match = booleanPropertyPattern(propertyName).exec(source);
+
+	if (!match?.[1]) {
+		throw new Error(
+			`Could not read "${propertyName}" from ${GLOBAL_SETTINGS_DISPLAY_PATH}.`,
+		);
+	}
+
+	return match[1] === "true";
+}
+
+function replaceBooleanProperty(source, propertyName, value) {
+	const pattern = booleanPropertyPattern(propertyName);
+
+	if (!pattern.test(source)) {
+		throw new Error(
+			`Could not update "${propertyName}" in ${GLOBAL_SETTINGS_DISPLAY_PATH}.`,
+		);
+	}
+
+	return source.replace(
+		pattern,
+		`${propertyName}: ${value ? "true" : "false"}`,
+	);
 }
 
 function readStringProperty(source, propertyName) {
@@ -2250,6 +2619,14 @@ function replaceStringProperty(source, propertyName, value) {
 
 function stringPropertyPattern(propertyName) {
 	return new RegExp(`${propertyName}\\s*:\\s*(["'])([^"']*)\\1`);
+}
+
+function booleanPropertyPattern(propertyName) {
+	return new RegExp(`${propertyName}\\s*:\\s*(true|false)`);
+}
+
+function numberPropertyPattern(propertyName) {
+	return new RegExp(`${propertyName}\\s*:\\s*(-?\\d+(?:\\.\\d+)?)`);
 }
 
 function validateAssetUpload(value) {

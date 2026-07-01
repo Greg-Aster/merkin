@@ -1,7 +1,7 @@
 import type {
+	PerformanceCollisionSystemMode,
 	PerformanceConfig,
 	PerformanceSystemConfig,
-	PerformanceSystemMode,
 } from "../types.js";
 import type { CollisionPerformancePolicy } from "./types.js";
 
@@ -33,6 +33,15 @@ export function resolveCollisionPerformancePolicy(
 		};
 	}
 
+	if (mode === "spatial") {
+		return {
+			mode,
+			diagnosticsEnabled: true,
+			activeOptimizationEnabled: true,
+			warnings: [],
+		};
+	}
+
 	return {
 		mode: "off",
 		diagnosticsEnabled: false,
@@ -46,7 +55,7 @@ export function resolveCollisionPerformancePolicy(
 
 function readCollisionMode(
 	config: CollisionPerformanceConfigInput,
-): PerformanceSystemMode | string | undefined {
+): PerformanceCollisionSystemMode | string | undefined {
 	if (!isRecord(config)) {
 		return undefined;
 	}

@@ -28,6 +28,7 @@ export type StreamingPerformanceConfigLike =
 export type StreamingChunkContent = {
 	readonly assetIds?: readonly string[];
 	readonly renderStableIds?: readonly string[];
+	readonly lightStableIds?: readonly string[];
 	readonly colliderStableIds?: readonly string[];
 };
 
@@ -569,6 +570,7 @@ function normalizeChunkContent(
 	return {
 		assetIds: uniqueSorted(content?.assetIds ?? []),
 		renderStableIds: uniqueSorted(content?.renderStableIds ?? []),
+		lightStableIds: uniqueSorted(content?.lightStableIds ?? []),
 		colliderStableIds: uniqueSorted(content?.colliderStableIds ?? []),
 	};
 }

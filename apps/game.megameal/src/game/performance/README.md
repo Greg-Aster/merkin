@@ -1,6 +1,8 @@
 # Game Performance
 
-Status: stage-one foundation and diagnostics.
+Status: runtime foundation with active culling, authored LOD swaps, async
+asset streaming residency, visual/collider chunk residency, cached collision
+spatial lookup, and scheduled diagnostics.
 
 `src/game/performance` owns Megameal runtime performance behavior and
 diagnostic aggregation. The level package owns saved performance configuration,
@@ -23,18 +25,25 @@ level package has been composed.
 
 ## Folder Boundaries
 
-- `types.ts` owns the stage-one config contract.
-- `diagnostics/` owns read-only runtime performance summaries.
-- `lod/` is reserved for runtime level-of-detail policy and systems.
-- `culling/` is reserved for runtime visibility/culling policy and systems.
-- `streaming/` is reserved for runtime asset, render, or collision residency
-  policy and systems.
-- `collision/` is reserved for runtime collision performance policy such as
-  spatial lookup or broadphase-friendly walkable queries.
+- `types.ts` owns the config contract and per-system mode validation.
+- `runtime.ts` owns the scheduled game-runtime consumer for
+  `game:performanceConfig`.
+- `diagnostics/` owns runtime performance summaries from the scheduled state.
+- `lod/` owns the distance/significance LOD evaluator, runtime reporting, and
+  authored `PerformanceLod` renderable payload swaps.
+- `culling/` owns visibility policy; active distance mode applies
+  `Renderable.visible` and `Light.visible` through ECS.
+- `streaming/` owns residency planning; plan mode uses authored
+  `StreamingChunk` components to retain/load/release chunk-owned assets through
+  the asset manager, apply renderable/light visibility through ECS, and remove
+  or restore opt-in collider components while preserving readiness-required
+  colliders.
+- `collision/` owns collision summaries, cached spatial bucket planning,
+  spatial query diagnostics, and walkable-grounding candidate lookup.
 
-Stage one does not implement active LOD, culling, streaming, or collision
-optimization. Stage one accepts only `off` and `diagnostic` modes so future
-systems cannot be silently enabled before their runtime implementation exists.
+Runtime scheduling happens in the game runtime composition layer. Active modes
+must still use existing engine resources and ports; this folder must not reach
+into renderer objects, Rapier objects, editor modules, or level files directly.
 
 ## Boundaries
 

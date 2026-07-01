@@ -55,7 +55,10 @@ export async function mountGameClient(
 	options: GameClientMountOptions,
 ): Promise<GameClientMount> {
 	const three = await loadDefaultThreeRuntime();
-	const audio = createOptionalAudioManager(options.canvas);
+	const audio = createOptionalAudioManager(
+		options.canvas,
+		runtimeSettings.audioMasterVolume,
+	);
 	const assets = createAssetManager(three, audio);
 	const size = options.platform.displaySize(options.canvas);
 	const runtimeManifest =
@@ -180,9 +183,10 @@ const unavailableAudioAssetLoader: AssetLoader = async (entry) => ({
 
 function createOptionalAudioManager(
 	canvas: HTMLCanvasElement,
+	masterVolume: number,
 ): BrowserAudioManager | undefined {
 	try {
-		const audio = new BrowserAudioManager({ masterVolume: 0.6 });
+		const audio = new BrowserAudioManager({ masterVolume });
 		audio.registerUnlockGestures(canvas);
 		return audio;
 	} catch {

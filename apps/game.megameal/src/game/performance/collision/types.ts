@@ -1,4 +1,4 @@
-import type { PerformanceSystemMode } from "../types.js";
+import type { PerformanceCollisionSystemMode } from "../types.js";
 
 export type CollisionPerformanceVector3 = readonly [number, number, number];
 
@@ -45,9 +45,9 @@ export type CollisionPerformanceMeshSummary = {
 };
 
 export type CollisionPerformancePolicy = {
-	readonly mode: PerformanceSystemMode;
+	readonly mode: PerformanceCollisionSystemMode;
 	readonly diagnosticsEnabled: boolean;
-	readonly activeOptimizationEnabled: false;
+	readonly activeOptimizationEnabled: boolean;
 	readonly unsupportedMode?: string;
 	readonly warnings: readonly string[];
 };

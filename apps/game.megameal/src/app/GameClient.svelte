@@ -186,6 +186,7 @@ function selectedRuntimeSceneManifest() {
 <div class="game-client" data-game-client>
 	<canvas bind:this={canvas} class="game-canvas" data-game-canvas></canvas>
 	<RuntimeHud
+		visible={runtimeSettings.hudVisible}
 		{mounted}
 		{snapshot}
 		{gameState}

@@ -50,8 +50,8 @@ assert.match(
 );
 assert.match(
 	lodReadme,
-	/current shared performance config contract accepts only `off` and\s+`diagnostic`/m,
-	"LOD README must document that active behavior is not enabled by current level config",
+	/can swap authored\s+`PerformanceLod` renderable payloads through ECS/m,
+	"LOD README must document authored runtime payload swaps",
 );
 
 const offPolicy = createLodPolicyConfigFromPerformanceConfig(

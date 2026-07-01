@@ -30,6 +30,14 @@ const offPerformanceConfig: PerformanceConfig = {
 	},
 };
 
+const distancePerformanceConfig: PerformanceConfig = {
+	...diagnosticPerformanceConfig,
+	systems: {
+		...diagnosticPerformanceConfig.systems,
+		culling: { mode: "distance" },
+	},
+};
+
 const diagnosticPolicy = createCullingPolicyFromPerformanceConfig(
 	diagnosticPerformanceConfig,
 	{
@@ -52,6 +60,10 @@ const diagnosticPolicy = createCullingPolicyFromPerformanceConfig(
 
 assert.equal(diagnosticPolicy.mode, "diagnostic");
 assert.equal(cullingModeFromPerformanceConfig(offPerformanceConfig), "off");
+assert.equal(
+	cullingModeFromPerformanceConfig(distancePerformanceConfig),
+	"distance",
+);
 assert.throws(
 	() =>
 		cullingModeFromPerformanceConfig({

@@ -177,7 +177,7 @@ assert.deepEqual(diagnostics.domains.culling.plannedOperations, [
 		id: "culling:evaluate-visibility-candidates",
 		label: "Evaluate visibility candidates",
 		status: "disabled",
-		candidateCount: 3,
+		candidateCount: 2,
 	},
 ]);
 

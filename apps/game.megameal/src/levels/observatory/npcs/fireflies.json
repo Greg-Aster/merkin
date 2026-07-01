@@ -9,10 +9,7 @@
 			"activeLightPercent": 0.68,
 			"blinkPeriodSeconds": [8, 15],
 			"blinkFadeSeconds": 1.6,
-			"maxActiveLights": 16,
-			"nearDistance": 20,
-			"farDistance": 300,
-			"midIntensityScale": 0.7
+			"minimumIntensityScale": 0.12
 		}
 	},
 	"instances": [

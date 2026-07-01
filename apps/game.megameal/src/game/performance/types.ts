@@ -7,7 +7,33 @@ export const PERFORMANCE_SYSTEM_IDS = [
 	"collision",
 ] as const;
 
-export const PERFORMANCE_SYSTEM_MODES = ["off", "diagnostic"] as const;
+export const PERFORMANCE_LOD_SYSTEM_MODES = [
+	"off",
+	"diagnostic",
+	"distance",
+] as const;
+export const PERFORMANCE_CULLING_SYSTEM_MODES = [
+	"off",
+	"diagnostic",
+	"distance",
+] as const;
+export const PERFORMANCE_STREAMING_SYSTEM_MODES = [
+	"off",
+	"diagnostic",
+	"plan",
+] as const;
+export const PERFORMANCE_COLLISION_SYSTEM_MODES = [
+	"off",
+	"diagnostic",
+	"spatial",
+] as const;
+export const PERFORMANCE_SYSTEM_MODES = [
+	"off",
+	"diagnostic",
+	"distance",
+	"plan",
+	"spatial",
+] as const;
 export const PERFORMANCE_COLLISION_PRIMITIVE_SHAPES = [
 	"box",
 	"sphere",
@@ -17,11 +43,21 @@ export const PERFORMANCE_COLLISION_PRIMITIVE_SHAPES = [
 
 export type PerformanceSystemId = (typeof PERFORMANCE_SYSTEM_IDS)[number];
 export type PerformanceSystemMode = (typeof PERFORMANCE_SYSTEM_MODES)[number];
+export type PerformanceLodSystemMode =
+	(typeof PERFORMANCE_LOD_SYSTEM_MODES)[number];
+export type PerformanceCullingSystemMode =
+	(typeof PERFORMANCE_CULLING_SYSTEM_MODES)[number];
+export type PerformanceStreamingSystemMode =
+	(typeof PERFORMANCE_STREAMING_SYSTEM_MODES)[number];
+export type PerformanceCollisionSystemMode =
+	(typeof PERFORMANCE_COLLISION_SYSTEM_MODES)[number];
 export type PerformanceCollisionPrimitiveShape =
 	(typeof PERFORMANCE_COLLISION_PRIMITIVE_SHAPES)[number];
 
-export type PerformanceSystemConfig = {
-	readonly mode: PerformanceSystemMode;
+export type PerformanceSystemConfig<
+	TMode extends PerformanceSystemMode = PerformanceSystemMode,
+> = {
+	readonly mode: TMode;
 };
 
 export type PerformanceLodTierConfig = {
@@ -31,42 +67,46 @@ export type PerformanceLodTierConfig = {
 	readonly qualityRatio?: number;
 };
 
-export type PerformanceLodSystemConfig = PerformanceSystemConfig & {
-	readonly tiers?: readonly PerformanceLodTierConfig[];
-};
+export type PerformanceLodSystemConfig =
+	PerformanceSystemConfig<PerformanceLodSystemMode> & {
+		readonly tiers?: readonly PerformanceLodTierConfig[];
+	};
 
 export type PerformanceDistanceWindowConfig = {
 	readonly maxDistance?: number;
 	readonly hysteresis?: number;
 };
 
-export type PerformanceCullingSystemConfig = PerformanceSystemConfig & {
-	readonly visibility?: {
-		readonly frustum?: boolean;
-		readonly distance?: PerformanceDistanceWindowConfig;
+export type PerformanceCullingSystemConfig =
+	PerformanceSystemConfig<PerformanceCullingSystemMode> & {
+		readonly visibility?: {
+			readonly frustum?: boolean;
+			readonly distance?: PerformanceDistanceWindowConfig;
+		};
 	};
-};
 
 export type PerformanceResidencyWindowConfig = {
 	readonly loadDistance?: number;
 	readonly unloadDistance?: number;
 };
 
-export type PerformanceStreamingSystemConfig = PerformanceSystemConfig & {
-	readonly residency?: {
-		readonly assets?: PerformanceResidencyWindowConfig;
-		readonly renderables?: PerformanceResidencyWindowConfig;
-		readonly collision?: PerformanceResidencyWindowConfig;
+export type PerformanceStreamingSystemConfig =
+	PerformanceSystemConfig<PerformanceStreamingSystemMode> & {
+		readonly residency?: {
+			readonly assets?: PerformanceResidencyWindowConfig;
+			readonly renderables?: PerformanceResidencyWindowConfig;
+			readonly collision?: PerformanceResidencyWindowConfig;
+		};
 	};
-};
 
-export type PerformanceCollisionSystemConfig = PerformanceSystemConfig & {
-	readonly diagnostics?: {
-		readonly primitiveShapes?: readonly PerformanceCollisionPrimitiveShape[];
-		readonly includeMeshColliders?: boolean;
-		readonly includeWalkableOnly?: boolean;
+export type PerformanceCollisionSystemConfig =
+	PerformanceSystemConfig<PerformanceCollisionSystemMode> & {
+		readonly diagnostics?: {
+			readonly primitiveShapes?: readonly PerformanceCollisionPrimitiveShape[];
+			readonly includeMeshColliders?: boolean;
+			readonly includeWalkableOnly?: boolean;
+		};
 	};
-};
 
 export type PerformanceConfig = {
 	readonly schemaVersion: 1;
@@ -172,10 +212,12 @@ export function validatePerformanceConfig(
 		}
 
 		if (
-			!PERFORMANCE_SYSTEM_MODES.includes(system.mode as PerformanceSystemMode)
+			!performanceModesForSystem(systemId).includes(
+				system.mode as PerformanceSystemMode,
+			)
 		) {
 			errors.push(
-				`${label}.systems.${systemId}.mode must be off or diagnostic.`,
+				`${label}.systems.${systemId}.mode must be ${performanceModesForSystem(systemId).join(" or ")}.`,
 			);
 		}
 
@@ -188,6 +230,24 @@ export function validatePerformanceConfig(
 	}
 
 	return errors;
+}
+
+export function performanceModesForSystem(
+	systemId: PerformanceSystemId,
+): readonly PerformanceSystemMode[] {
+	if (systemId === "lod") {
+		return PERFORMANCE_LOD_SYSTEM_MODES;
+	}
+
+	if (systemId === "culling") {
+		return PERFORMANCE_CULLING_SYSTEM_MODES;
+	}
+
+	if (systemId === "streaming") {
+		return PERFORMANCE_STREAMING_SYSTEM_MODES;
+	}
+
+	return PERFORMANCE_COLLISION_SYSTEM_MODES;
 }
 
 function validateSystemConfig(

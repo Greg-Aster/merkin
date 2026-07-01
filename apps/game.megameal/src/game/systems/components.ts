@@ -14,7 +14,6 @@ export const NPC_COMPONENT = "Npc";
 export const MOVEMENT_BEHAVIOR_COMPONENT = "MovementBehavior";
 export const LIGHT_MODULATION_COMPONENT = "LightModulation";
 export const INTERACTION_TARGET_COMPONENT = "InteractionTarget";
-export const NPC_SIGNIFICANCE_COMPONENT = "NpcSignificance";
 export const FOLLOW_TARGET_COMPONENT = "FollowTarget";
 export const COLLECTED_COUNT_RESOURCE = "game:collectedCount";
 export const TOTAL_COLLECTIBLES_RESOURCE = "game:totalCollectibles";
@@ -110,22 +109,12 @@ export type LightModulationComponent = {
 	readonly blinkPeriodSeconds: readonly [number, number];
 	readonly blinkFadeSeconds: number;
 	readonly phase?: number;
-	readonly maxActiveLights?: number;
-	readonly nearDistance?: number;
-	readonly farDistance?: number;
-	readonly midIntensityScale?: number;
 };
 
 export type InteractionTargetComponent = {
 	readonly kind: "npc";
 	readonly prompt: string;
 	readonly activationRadius: number;
-};
-
-export type NpcSignificanceComponent = {
-	readonly tier: "near" | "mid" | "far";
-	readonly distanceSquared: number;
-	readonly updateEveryTicks: number;
 };
 
 export type ConversationComponent = {

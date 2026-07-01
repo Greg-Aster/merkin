@@ -6,12 +6,13 @@ import type {
 	GameDevBridgeLogEntry,
 	GameDevBridgeSnapshot,
 } from "../app/gameDevBridge.js";
+import PerformanceConfigEditor from "./PerformanceConfigEditor.svelte";
 import {
-	type MasterControlGraphEdge,
 	type MasterControlGraphNode,
 	type MasterControlGraphNodeGroup,
 	createMasterControlGraph,
 	graphAsMermaid,
+	graphNodeIdAsMermaidId,
 } from "./masterControlGraph.js";
 
 const groups: readonly MasterControlGraphNodeGroup[] = [
@@ -26,14 +27,24 @@ const groups: readonly MasterControlGraphNodeGroup[] = [
 const GLOBAL_SETTINGS_API_PATH = "/__megameal-editor-api/global-settings";
 const GLOBAL_PERFORMANCE_API_PATH = "/__megameal-editor-api/global-performance";
 const PLAYER_PACKAGE_API_PATH = "/__megameal-editor-api/player-package";
+const MIN_MAP_ZOOM = 0.4;
+const MAX_MAP_ZOOM = 2.4;
+const MAP_ZOOM_STEP = 0.12;
 
 type GlobalSettingsDraft = {
 	readonly packageId: string;
 	readonly defaultRuntimeSceneId: string;
+	readonly hudVisible: boolean;
+	readonly audioMasterVolume: number;
 };
 
 type PerformanceSystemId = "lod" | "culling" | "streaming" | "collision";
-type PerformanceSystemMode = "off" | "diagnostic";
+type PerformanceSystemMode =
+	| "off"
+	| "diagnostic"
+	| "distance"
+	| "plan"
+	| "spatial";
 type PerformanceConfigDraft = {
 	schemaVersion: 1;
 	systems: Record<
@@ -115,6 +126,15 @@ type LiveGameState = {
 	readonly charging?: boolean;
 	readonly chargeAmount?: number;
 };
+type MapPanState = {
+	readonly pointerId: number;
+	readonly originX: number;
+	readonly originY: number;
+	readonly scrollLeft: number;
+	readonly scrollTop: number;
+	readonly candidateNodeId?: string;
+	readonly dragged: boolean;
+};
 
 const performanceSystemIds = [
 	"lod",
@@ -128,6 +148,31 @@ const performanceSystemLabels: Record<PerformanceSystemId, string> = {
 	streaming: "Streaming",
 	collision: "Collision",
 };
+const performanceSystemModeOptions: Record<
+	PerformanceSystemId,
+	readonly { readonly value: PerformanceSystemMode; readonly label: string }[]
+> = {
+	lod: [
+		{ value: "off", label: "Off" },
+		{ value: "diagnostic", label: "Diagnostic" },
+		{ value: "distance", label: "Distance" },
+	],
+	culling: [
+		{ value: "off", label: "Off" },
+		{ value: "diagnostic", label: "Diagnostic" },
+		{ value: "distance", label: "Distance" },
+	],
+	streaming: [
+		{ value: "off", label: "Off" },
+		{ value: "diagnostic", label: "Diagnostic" },
+		{ value: "plan", label: "Plan" },
+	],
+	collision: [
+		{ value: "off", label: "Off" },
+		{ value: "diagnostic", label: "Diagnostic" },
+		{ value: "spatial", label: "Spatial" },
+	],
+};
 const performanceDiagnosticNodeIds = new Set([
 	"performance-systems",
 	"performance-lod",
@@ -137,7 +182,6 @@ const performanceDiagnosticNodeIds = new Set([
 	"performance-diagnostics",
 ]);
 
-// biome-ignore lint/style/useConst: Svelte state is reassigned from template event handlers.
 let selectedNodeId = $state("level-package");
 // biome-ignore lint/style/useConst: Svelte state is reassigned from template event handlers.
 let activeGroup = $state<MasterControlGraphNodeGroup | "all">("all");
@@ -163,7 +207,13 @@ let savedPlayerPackage: PlayerPackageDraft | undefined = $state();
 let playerPackageFilePath: string | undefined = $state();
 let playerPackageMessage: string | undefined = $state();
 let playerPackageBusy = $state(false);
+let isMapPanning = $state(false);
+let mermaidSvg = $state("");
+let mermaidError: string | undefined = $state();
+let mapZoom = $state(1);
 let destroyed = false;
+let mapPanState: MapPanState | undefined;
+let mermaidRenderSequence = 0;
 
 const graph = $derived(
 	createMasterControlGraph({
@@ -180,13 +230,7 @@ const visibleNodes = $derived(
 		? graph.nodes
 		: graph.nodes.filter((node) => node.group === activeGroup),
 );
-const visibleNodeIds = $derived(new Set(visibleNodes.map((node) => node.id)));
-const visibleEdges = $derived(
-	graph.edges.filter(
-		(edge) => visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to),
-	),
-);
-const mermaidSource = $derived(graphAsMermaid(graph));
+const mermaidSource = $derived(graphAsMermaid(graph, { selectedNodeId }));
 const runtimeSceneOptions = $derived(
 	graph.nodes
 		.filter((node) => node.runtimeSceneId)
@@ -200,7 +244,10 @@ const globalSettingsDirty = $derived(
 		savedGlobalSettings !== undefined &&
 		(globalSettingsDraft.packageId !== savedGlobalSettings.packageId ||
 			globalSettingsDraft.defaultRuntimeSceneId !==
-				savedGlobalSettings.defaultRuntimeSceneId),
+				savedGlobalSettings.defaultRuntimeSceneId ||
+			globalSettingsDraft.hudVisible !== savedGlobalSettings.hudVisible ||
+			globalSettingsDraft.audioMasterVolume !==
+				savedGlobalSettings.audioMasterVolume),
 );
 const globalPerformanceDirty = $derived(
 	globalPerformanceDraft !== undefined &&
@@ -218,6 +265,12 @@ const collisionOverlayDiagnostics = $derived(
 	liveSnapshot?.diagnostics?.collisionOverlay,
 );
 const performanceDiagnostics = $derived(liveSnapshot?.diagnostics?.performance);
+
+$effect(() => {
+	const source = mermaidSource;
+
+	void renderMermaidDiagram(source);
+});
 
 onMount(() => {
 	if (!import.meta.env.DEV) {
@@ -267,43 +320,190 @@ onDestroy(() => {
 	bridgeEndpoint?.dispose();
 });
 
-function nodeById(id: string): MasterControlGraphNode {
-	const node = graph.nodes.find((entry) => entry.id === id);
+async function renderMermaidDiagram(source: string): Promise<void> {
+	const sequence = ++mermaidRenderSequence;
 
-	if (!node) {
-		throw new Error(`Unknown master-control node "${id}".`);
+	try {
+		const { default: mermaid } = await import("mermaid");
+
+		mermaid.initialize({
+			startOnLoad: false,
+			securityLevel: "strict",
+			theme: "dark",
+			flowchart: {
+				curve: "basis",
+				htmlLabels: false,
+				useMaxWidth: false,
+			},
+			themeVariables: {
+				background: "#101319",
+				darkMode: true,
+				fontFamily:
+					"Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+				lineColor: "#d8dde4",
+				mainBkg: "#151a23",
+				nodeBorder: "#65d3c8",
+				primaryColor: "#151a23",
+				primaryTextColor: "#f4f0e8",
+				secondaryColor: "#293d55",
+				tertiaryColor: "#4b4f55",
+			},
+		});
+
+		const rendered = await mermaid.render(
+			`master-control-mermaid-${sequence}`,
+			source,
+		);
+
+		if (sequence !== mermaidRenderSequence) {
+			return;
+		}
+
+		mermaidSvg = rendered.svg;
+		mermaidError = undefined;
+	} catch (error) {
+		if (sequence !== mermaidRenderSequence) {
+			return;
+		}
+
+		mermaidSvg = "";
+		mermaidError =
+			error instanceof Error ? error.message : "Mermaid render failed.";
+	}
+}
+
+function startMapPan(event: PointerEvent): void {
+	if (event.button !== 0) {
+		return;
 	}
 
-	return node;
-}
+	const target = event.currentTarget;
 
-function isSelectedEdge(from: string, to: string): boolean {
-	return from === selectedNodeId || to === selectedNodeId;
-}
-
-function edgePath(edge: MasterControlGraphEdge): string {
-	const from = nodeById(edge.from);
-	const to = nodeById(edge.to);
-
-	if (from.x === to.x || from.y === to.y) {
-		return `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
+	if (!(target instanceof HTMLDivElement)) {
+		return;
 	}
 
-	return `M ${from.x} ${from.y} L ${from.x} ${to.y} L ${to.x} ${to.y}`;
+	mapPanState = {
+		pointerId: event.pointerId,
+		originX: event.clientX,
+		originY: event.clientY,
+		scrollLeft: target.scrollLeft,
+		scrollTop: target.scrollTop,
+		candidateNodeId: readMermaidNodeId(event.target),
+		dragged: false,
+	};
+	isMapPanning = true;
+	target.setPointerCapture(event.pointerId);
+	event.preventDefault();
 }
 
-function edgeLabelX(edge: MasterControlGraphEdge): number {
-	const from = nodeById(edge.from);
-	const to = nodeById(edge.to);
+function panMap(event: PointerEvent): void {
+	if (!mapPanState || event.pointerId !== mapPanState.pointerId) {
+		return;
+	}
 
-	return from.y === to.y ? (from.x + to.x) / 2 : from.x;
+	const target = event.currentTarget;
+
+	if (!(target instanceof HTMLDivElement)) {
+		return;
+	}
+
+	const deltaX = event.clientX - mapPanState.originX;
+	const deltaY = event.clientY - mapPanState.originY;
+	const dragged = mapPanState.dragged || Math.hypot(deltaX, deltaY) > 4;
+
+	if (dragged !== mapPanState.dragged) {
+		mapPanState = {
+			...mapPanState,
+			dragged,
+		};
+	}
+
+	target.scrollLeft =
+		mapPanState.scrollLeft - (event.clientX - mapPanState.originX);
+	target.scrollTop =
+		mapPanState.scrollTop - (event.clientY - mapPanState.originY);
+	event.preventDefault();
 }
 
-function edgeLabelY(edge: MasterControlGraphEdge): number {
-	const from = nodeById(edge.from);
-	const to = nodeById(edge.to);
+function stopMapPan(event: PointerEvent): void {
+	if (!mapPanState || event.pointerId !== mapPanState.pointerId) {
+		return;
+	}
 
-	return from.y === to.y ? from.y - 1.2 : (from.y + to.y) / 2;
+	const target = event.currentTarget;
+
+	if (
+		target instanceof HTMLDivElement &&
+		target.hasPointerCapture(event.pointerId)
+	) {
+		target.releasePointerCapture(event.pointerId);
+	}
+
+	if (!mapPanState.dragged && mapPanState.candidateNodeId) {
+		selectedNodeId = mapPanState.candidateNodeId;
+	}
+
+	mapPanState = undefined;
+	isMapPanning = false;
+}
+
+function readMermaidNodeId(target: EventTarget | null): string | undefined {
+	if (!(target instanceof Element)) {
+		return undefined;
+	}
+
+	const mermaidNodeElement = target.closest("g.node, .node, g[id]");
+	if (!mermaidNodeElement) {
+		return undefined;
+	}
+
+	const elementId = mermaidNodeElement.id;
+	const candidates = graph.nodes
+		.map((node) => ({
+			nodeId: node.id,
+			mermaidId: graphNodeIdAsMermaidId(node.id),
+		}))
+		.sort((left, right) => right.mermaidId.length - left.mermaidId.length);
+
+	return candidates.find((candidate) => elementId.includes(candidate.mermaidId))
+		?.nodeId;
+}
+
+function zoomMap(event: WheelEvent): void {
+	const target = event.currentTarget;
+
+	if (!(target instanceof HTMLDivElement)) {
+		return;
+	}
+
+	event.preventDefault();
+
+	const previousZoom = mapZoom;
+	const nextZoom = clampMapZoom(
+		previousZoom + (event.deltaY < 0 ? MAP_ZOOM_STEP : -MAP_ZOOM_STEP),
+	);
+
+	if (nextZoom === previousZoom) {
+		return;
+	}
+
+	const bounds = target.getBoundingClientRect();
+	const cursorX = event.clientX - bounds.left + target.scrollLeft;
+	const cursorY = event.clientY - bounds.top + target.scrollTop;
+	const contentX = cursorX / previousZoom;
+	const contentY = cursorY / previousZoom;
+
+	mapZoom = nextZoom;
+
+	requestAnimationFrame(() => {
+		target.scrollLeft = contentX * nextZoom - (event.clientX - bounds.left);
+		target.scrollTop = contentY * nextZoom - (event.clientY - bounds.top);
+	});
+}
+
+function clampMapZoom(value: number): number {
+	return Math.min(MAX_MAP_ZOOM, Math.max(MIN_MAP_ZOOM, value));
 }
 
 function requestRuntimeScene(runtimeSceneId: string): void {
@@ -432,7 +632,7 @@ async function saveGlobalSettings(): Promise<void> {
 		globalSettingsDraft = settings;
 		savedGlobalSettings = settings;
 		globalSettingsFilePath = payload.filePath as string;
-		globalSettingsMessage = `Saved ${settings.defaultRuntimeSceneId}.`;
+		globalSettingsMessage = "Global settings saved.";
 		addLog({
 			id: `global-settings:${Date.now()}`,
 			timestamp: Date.now(),
@@ -447,6 +647,20 @@ async function saveGlobalSettings(): Promise<void> {
 	} finally {
 		globalSettingsBusy = false;
 	}
+}
+
+function updateGlobalSetting<K extends keyof GlobalSettingsDraft>(
+	key: K,
+	value: GlobalSettingsDraft[K],
+): void {
+	if (!globalSettingsDraft) {
+		return;
+	}
+
+	globalSettingsDraft = {
+		...globalSettingsDraft,
+		[key]: value,
+	};
 }
 
 async function loadGlobalPerformance(): Promise<void> {
@@ -525,26 +739,6 @@ async function saveGlobalPerformance(): Promise<void> {
 	} finally {
 		globalPerformanceBusy = false;
 	}
-}
-
-function updateGlobalPerformanceMode(
-	systemId: PerformanceSystemId,
-	mode: PerformanceSystemMode,
-): void {
-	if (!globalPerformanceDraft) {
-		return;
-	}
-
-	globalPerformanceDraft = {
-		...globalPerformanceDraft,
-		systems: {
-			...globalPerformanceDraft.systems,
-			[systemId]: {
-				...globalPerformanceDraft.systems[systemId],
-				mode,
-			},
-		},
-	};
 }
 
 async function loadPlayerPackage(): Promise<void> {
@@ -891,66 +1085,25 @@ function formatLiveCollectibles(state: LiveGameState): string {
 	</section>
 
 	<section class="map-workspace" aria-label="Master control map">
-		<div class="map-main">
-			<div class="node-map">
-				<svg viewBox="0 0 100 100" aria-hidden="true" class="edge-layer">
-					<defs>
-						<marker
-							id="arrowhead"
-							viewBox="0 0 10 10"
-							refX="8"
-							refY="5"
-							markerWidth="5"
-							markerHeight="5"
-							orient="auto-start-reverse"
-						>
-							<path d="M 0 0 L 10 5 L 0 10 z" />
-						</marker>
-					</defs>
-					{#each visibleEdges as edge}
-						<path
-							d={edgePath(edge)}
-							class={`edge-route edge-${edge.kind}`}
-							class:selected={isSelectedEdge(edge.from, edge.to)}
-						/>
-						<text
-							x={edgeLabelX(edge)}
-							y={edgeLabelY(edge)}
-							class={`edge-label edge-${edge.kind}`}
-							class:selected={isSelectedEdge(edge.from, edge.to)}
-						>
-							{edge.label}
-						</text>
-					{/each}
-				</svg>
-
-				{#each visibleNodes as node}
-					<button
-						type="button"
-						class:selected={node.id === selectedNodeId}
-						class:removable={node.removable}
-						class:active-runtime={node.isActiveRuntimeScene}
-						class:configurable={node.isConfigurable}
-						class:read-only={!node.isConfigurable}
-						class:data-source={node.isDataSource}
-						class={`map-node group-${node.group} status-${node.status}`}
-						style={`left: ${node.x}%; top: ${node.y}%;`}
-						onclick={() => (selectedNodeId = node.id)}
-					>
-						<span>{node.label}</span>
-						<small>{node.group}</small>
-						<small class="node-status">{node.status}</small>
-						{#if node.isConfigurable}
-							<small class="config-badge">config</small>
-						{/if}
-						{#if node.isActiveRuntimeScene}
-							<small class="active-badge">active</small>
-						{/if}
-						{#if node.isDataSource}
-							<small class="source-badge">source</small>
-						{/if}
-					</button>
-				{/each}
+		<div
+			class="map-main"
+			class:panning={isMapPanning}
+			onpointerdown={startMapPan}
+			onpointermove={panMap}
+			onpointerup={stopMapPan}
+			onpointercancel={stopMapPan}
+			onlostpointercapture={stopMapPan}
+			onwheel={zoomMap}
+		>
+			<div class="map-zoom-indicator">{Math.round(mapZoom * 100)}%</div>
+			<div class="mermaid-map" style={`--map-zoom: ${mapZoom};`}>
+				{#if mermaidError}
+					<pre class="mermaid-error">{mermaidError}</pre>
+				{:else if mermaidSvg}
+					{@html mermaidSvg}
+				{:else}
+					<p>Rendering diagram.</p>
+				{/if}
 			</div>
 		</div>
 
@@ -1011,28 +1164,18 @@ function formatLiveCollectibles(state: LiveGameState): string {
 						</dd>
 					</div>
 				{/if}
-				{#if selectedNode.isDataSource}
+				{#if selectedNode.removable}
 					<div>
-						<dt>Source</dt>
-						<dd>
-							{selectedNode.id === "performance-config"
-								? "Performance settings are loaded from global and per-level package files"
-								: "Editor level entries are loaded from this router"}
-						</dd>
+						<dt>Optional Surface</dt>
+						<dd>This node is removable or replaceable by its owning system.</dd>
 					</div>
 				{/if}
-				<div>
-					<dt>Removable</dt>
-					<dd>{selectedNode.removable ? "Yes" : "No"}</dd>
-				</div>
-				<div>
-					<dt>Configurable</dt>
-					<dd>
-						{selectedNode.isConfigurable
-							? "Yes - this node has an editor-backed configuration path."
-							: "No - this node is workflow information or runtime structure only."}
-					</dd>
-				</div>
+				{#if selectedNode.isConfigurable}
+					<div>
+						<dt>Editor Configuration</dt>
+						<dd>This node has an editor-backed configuration path.</dd>
+					</div>
+				{/if}
 				{#if selectedNode.details}
 					{#each selectedNode.details as detail}
 						<div>
@@ -1060,8 +1203,10 @@ function formatLiveCollectibles(state: LiveGameState): string {
 							<span>Package ID</span>
 							<input
 								value={globalSettingsDraft.packageId}
-								disabled
+								disabled={globalSettingsBusy}
 								aria-label="Package ID"
+								onchange={(event) =>
+									updateGlobalSetting("packageId", event.currentTarget.value)}
 							/>
 						</label>
 						<label>
@@ -1069,13 +1214,11 @@ function formatLiveCollectibles(state: LiveGameState): string {
 							<select
 								value={globalSettingsDraft.defaultRuntimeSceneId}
 								disabled={globalSettingsBusy}
-								onchange={(event) => {
-									const target = event.currentTarget;
-									globalSettingsDraft = {
-										...globalSettingsDraft,
-										defaultRuntimeSceneId: target.value,
-									};
-								}}
+								onchange={(event) =>
+									updateGlobalSetting(
+										"defaultRuntimeSceneId",
+										event.currentTarget.value,
+									)}
 							>
 								{#each runtimeSceneOptions as option}
 									<option value={option.id}>{option.label}</option>
@@ -1120,28 +1263,13 @@ function formatLiveCollectibles(state: LiveGameState): string {
 						</button>
 					</div>
 					{#if globalPerformanceDraft}
-						<div class="settings-section">
-							<h3>Systems</h3>
-							<div class="settings-grid">
-								{#each performanceSystemIds as systemId}
-									<label>
-										<span>{performanceSystemLabels[systemId]}</span>
-										<select
-											value={globalPerformanceDraft.systems[systemId].mode}
-											disabled={globalPerformanceBusy}
-											onchange={(event) =>
-												updateGlobalPerformanceMode(
-													systemId,
-													event.currentTarget.value as PerformanceSystemMode,
-												)}
-										>
-											<option value="off">Off</option>
-											<option value="diagnostic">Diagnostic</option>
-										</select>
-									</label>
-								{/each}
-							</div>
-						</div>
+						<PerformanceConfigEditor
+							value={globalPerformanceDraft}
+							disabled={globalPerformanceBusy}
+							onChange={(value) => {
+								globalPerformanceDraft = value;
+							}}
+						/>
 						<div class="settings-actions">
 							<button
 								type="button"
@@ -1722,6 +1850,24 @@ function formatLiveCollectibles(state: LiveGameState): string {
 								{/each}
 							</dl>
 						</div>
+						<div class="settings-section">
+							<h3>Domains</h3>
+							<dl>
+								{#each performanceSystemIds as systemId}
+									<div>
+										<dt>{performanceSystemLabels[systemId]}</dt>
+										<dd>
+											{performanceDiagnostics.domains[systemId].runtimeStatus}
+											/
+											{performanceDiagnostics.domains[
+												systemId
+											].plannedOperations[0]?.candidateCount ?? 0}
+											candidates
+										</dd>
+									</div>
+								{/each}
+							</dl>
+						</div>
 					{:else}
 						<p class="settings-message">
 							Open the game route in dev mode to stream runtime performance
@@ -1786,16 +1932,191 @@ function formatLiveCollectibles(state: LiveGameState): string {
 					</div>
 				</section>
 			{/if}
+			{#if selectedNode.id === "level-package-discovery"}
+				<section
+					class="settings-panel"
+					aria-label="Level package discovery settings"
+				>
+					<div class="settings-panel-header">
+						<h2>Level Package Discovery Settings</h2>
+						<button
+							type="button"
+							class="reload-button"
+							disabled={globalSettingsBusy}
+							onclick={() => void loadGlobalSettings()}
+						>
+							Reload
+						</button>
+					</div>
+					{#if globalSettingsDraft}
+						<label>
+							<span>Package ID</span>
+							<input
+								value={globalSettingsDraft.packageId}
+								disabled={globalSettingsBusy}
+								onchange={(event) =>
+									updateGlobalSetting("packageId", event.currentTarget.value)}
+							/>
+						</label>
+						<label>
+							<span>Default Runtime Scene</span>
+							<select
+								value={globalSettingsDraft.defaultRuntimeSceneId}
+								disabled={globalSettingsBusy}
+								onchange={(event) =>
+									updateGlobalSetting(
+										"defaultRuntimeSceneId",
+										event.currentTarget.value,
+									)}
+							>
+								{#each runtimeSceneOptions as option}
+									<option value={option.id}>{option.label}</option>
+								{/each}
+							</select>
+						</label>
+						<div class="settings-actions">
+							<button
+								type="button"
+								class="save-button"
+								disabled={globalSettingsBusy || !globalSettingsDirty}
+								onclick={() => void saveGlobalSettings()}
+							>
+								Save
+							</button>
+							<span>{globalSettingsMessage}</span>
+						</div>
+						{#if globalSettingsFilePath}
+							<p class="settings-file">{globalSettingsFilePath}</p>
+						{/if}
+					{:else}
+						<p class="settings-message">
+							{globalSettingsMessage ??
+								"Level package discovery settings are not loaded."}
+						</p>
+					{/if}
+				</section>
+			{/if}
+			{#if selectedNode.id === "game-client-mount"}
+				<section class="settings-panel" aria-label="Game client mount settings">
+					<div class="settings-panel-header">
+						<h2>Game Client Mount Settings</h2>
+						<button
+							type="button"
+							class="reload-button"
+							disabled={globalSettingsBusy}
+							onclick={() => void loadGlobalSettings()}
+						>
+							Reload
+						</button>
+					</div>
+					{#if globalSettingsDraft}
+						<label>
+							<span>Audio Master Volume</span>
+							<input
+								type="number"
+								min="0"
+								step="0.05"
+								value={globalSettingsDraft.audioMasterVolume}
+								disabled={globalSettingsBusy}
+								onchange={(event) => {
+									const value = Number(event.currentTarget.value);
+
+									if (Number.isFinite(value)) {
+										updateGlobalSetting("audioMasterVolume", value);
+									}
+								}}
+							/>
+						</label>
+						<div class="settings-actions">
+							<button
+								type="button"
+								class="save-button"
+								disabled={globalSettingsBusy || !globalSettingsDirty}
+								onclick={() => void saveGlobalSettings()}
+							>
+								Save
+							</button>
+							<span>{globalSettingsMessage}</span>
+						</div>
+						{#if globalSettingsFilePath}
+							<p class="settings-file">{globalSettingsFilePath}</p>
+						{/if}
+					{:else}
+						<p class="settings-message">
+							{globalSettingsMessage ??
+								"Game client mount settings are not loaded."}
+						</p>
+					{/if}
+				</section>
+			{/if}
 			{#if selectedNode.id === "runtime-client"}
-				<section class="live-panel" aria-label="Game client HUD telemetry">
+				<section class="settings-panel" aria-label="Game client settings">
+					<div class="settings-panel-header">
+						<h2>Game Client Settings</h2>
+						<button
+							type="button"
+							class="reload-button"
+							disabled={globalSettingsBusy}
+							onclick={() => void loadGlobalSettings()}
+						>
+							Reload
+						</button>
+					</div>
+					{#if globalSettingsDraft}
+						<label>
+							<input
+								type="checkbox"
+								checked={globalSettingsDraft.hudVisible}
+								disabled={globalSettingsBusy}
+								onchange={(event) =>
+									updateGlobalSetting(
+										"hudVisible",
+										event.currentTarget.checked,
+									)}
+							/>
+							<span>Display persistent HUD in game</span>
+						</label>
+						<div class="settings-actions">
+							<button
+								type="button"
+								class="save-button"
+								disabled={globalSettingsBusy || !globalSettingsDirty}
+								onclick={() => void saveGlobalSettings()}
+							>
+								Save
+							</button>
+							<span>{globalSettingsMessage}</span>
+						</div>
+						{#if globalSettingsFilePath}
+							<p class="settings-file">{globalSettingsFilePath}</p>
+						{/if}
+					{:else}
+						<p class="settings-message">
+							{globalSettingsMessage ?? "Game client settings are not loaded."}
+						</p>
+					{/if}
+				</section>
+				<section class="live-panel" aria-label="Game client runtime status">
 					<div class="live-panel-header">
-						<h2>HUD Telemetry</h2>
+						<h2>Game Client Status</h2>
 						<span class={`live-status ${bridgeStatus}`}>{bridgeStatus}</span>
 					</div>
 					<dl>
 						<div>
-							<dt>Session</dt>
-							<dd>{liveSnapshot?.sessionId ?? "none"}</dd>
+							<dt>Bridge Session</dt>
+							<dd>{liveSnapshot?.sessionId ?? "not connected"}</dd>
+						</div>
+						<div>
+							<dt>Runtime Lifecycle</dt>
+							<dd>{liveSnapshot?.runtime.lifecycle ?? "not mounted"}</dd>
+						</div>
+						<div>
+							<dt>Runtime Tick</dt>
+							<dd>{liveSnapshot?.runtime.tick ?? 0}</dd>
+						</div>
+						<div>
+							<dt>Interpolation</dt>
+							<dd>{liveSnapshot?.runtime.interpolation ?? 0}</dd>
 						</div>
 						<div>
 							<dt>Active Scene</dt>
@@ -1806,43 +2127,19 @@ function formatLiveCollectibles(state: LiveGameState): string {
 							<dd>{liveSnapshot?.loadingRuntimeSceneId ?? "none"}</dd>
 						</div>
 						<div>
-							<dt>Tick</dt>
-							<dd>{liveSnapshot?.runtime.tick ?? 0}</dd>
-						</div>
-						<div>
-							<dt>Position</dt>
-							<dd>{formatLivePosition(liveGameState.playerPosition)}</dd>
-						</div>
-						<div>
-							<dt>Move</dt>
-							<dd>{formatLiveMove(liveGameState.moving)}</dd>
-						</div>
-						<div>
-							<dt>Input</dt>
-							<dd>{formatLiveInput(liveGameState)}</dd>
-						</div>
-						<div>
-							<dt>Charge</dt>
-							<dd>{formatLiveCharge(liveGameState)}</dd>
-						</div>
-						<div>
-							<dt>Health</dt>
-							<dd>{formatLiveHealth(liveGameState.health)}</dd>
-						</div>
-						<div>
-							<dt>Collectibles</dt>
-							<dd>{formatLiveCollectibles(liveGameState)}</dd>
+							<dt>Available Scenes</dt>
+							<dd>{liveSnapshot?.availableRuntimeScenes.length ?? 0}</dd>
 						</div>
 						{#if lastCommandMessage}
 							<div>
-								<dt>Last Command</dt>
+								<dt>Last Editor Command</dt>
 								<dd>{lastCommandMessage}</dd>
 							</div>
 						{/if}
 					</dl>
 					<div class="dev-log" aria-label="Game client development log">
 						{#if devLogEntries.length === 0}
-							<p>No live events</p>
+							<p>No live client events</p>
 						{:else}
 							{#each devLogEntries as entry}
 								<p class={`log-entry ${entry.level}`}>
@@ -1854,7 +2151,85 @@ function formatLiveCollectibles(state: LiveGameState): string {
 					</div>
 				</section>
 			{/if}
-			<pre>{mermaidSource}</pre>
+			{#if selectedNode.id === "ui-projection"}
+				<section class="settings-panel" aria-label="HUD display settings">
+					<div class="settings-panel-header">
+						<h2>HUD Display</h2>
+						<button
+							type="button"
+							class="reload-button"
+							disabled={globalSettingsBusy}
+							onclick={() => void loadGlobalSettings()}
+						>
+							Reload
+						</button>
+					</div>
+					{#if globalSettingsDraft}
+						<label>
+							<input
+								type="checkbox"
+								checked={globalSettingsDraft.hudVisible}
+								disabled
+							/>
+							<span>Display persistent HUD in game</span>
+						</label>
+						<div class="settings-actions">
+							<button
+								type="button"
+								class="save-button"
+								disabled={globalSettingsBusy || !globalSettingsDirty}
+								onclick={() => void saveGlobalSettings()}
+							>
+								Save
+							</button>
+							<span>{globalSettingsMessage}</span>
+						</div>
+						{#if globalSettingsFilePath}
+							<p class="settings-file">{globalSettingsFilePath}</p>
+						{/if}
+					{:else}
+						<p class="settings-message">
+							{globalSettingsMessage ?? "HUD display settings are not loaded."}
+						</p>
+					{/if}
+				</section>
+				<section class="live-panel" aria-label="HUD projection telemetry">
+					<div class="live-panel-header">
+						<h2>HUD Projection Telemetry</h2>
+						<span class={`live-status ${bridgeStatus}`}>{bridgeStatus}</span>
+					</div>
+					<dl>
+						<div>
+							<dt>HUD Source Scene</dt>
+							<dd>{liveSnapshot?.activeRuntimeSceneId ?? "none"}</dd>
+						</div>
+						<div>
+							<dt>Player Position</dt>
+							<dd>{formatLivePosition(liveGameState.playerPosition)}</dd>
+						</div>
+						<div>
+							<dt>Movement Display</dt>
+							<dd>{formatLiveMove(liveGameState.moving)}</dd>
+						</div>
+						<div>
+							<dt>Input Display</dt>
+							<dd>{formatLiveInput(liveGameState)}</dd>
+						</div>
+						<div>
+							<dt>Charge Display</dt>
+							<dd>{formatLiveCharge(liveGameState)}</dd>
+						</div>
+						<div>
+							<dt>Health Display</dt>
+							<dd>{formatLiveHealth(liveGameState.health)}</dd>
+						</div>
+						<div>
+							<dt>Collectibles Display</dt>
+							<dd>{formatLiveCollectibles(liveGameState)}</dd>
+						</div>
+					</dl>
+				</section>
+			{/if}
 		</aside>
 	</section>
 </main>
@@ -1874,9 +2249,9 @@ function formatLiveCollectibles(state: LiveGameState): string {
 	}
 
 	.master-control-shell {
-		min-height: 100vh;
+		height: 100vh;
 		display: grid;
-		grid-template-rows: auto 1fr;
+		grid-template-rows: auto minmax(0, 1fr);
 		background: #101319;
 	}
 
@@ -1911,247 +2286,79 @@ function formatLiveCollectibles(state: LiveGameState): string {
 		min-height: 0;
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) minmax(20rem, 26rem);
+		overflow: hidden;
 	}
 
 	.map-main {
 		min-width: 0;
+		min-height: 0;
 		display: grid;
 		align-content: start;
+		overflow: auto;
+		cursor: grab;
+		overscroll-behavior: contain;
+		scrollbar-gutter: stable both-edges;
+		touch-action: none;
 	}
 
-	.node-map {
-		position: relative;
-		min-height: 60rem;
-		overflow: visible;
+	.map-main.panning {
+		cursor: grabbing;
+		user-select: none;
+	}
+
+	.mermaid-map {
+		width: max(100%, calc(170rem * var(--map-zoom)));
+		min-width: 100%;
+		min-height: max(100%, calc(105rem * var(--map-zoom)));
+		padding: 4rem;
 		background-image:
 			linear-gradient(rgba(244, 240, 232, 0.055) 1px, transparent 1px),
 			linear-gradient(90deg, rgba(244, 240, 232, 0.055) 1px, transparent 1px);
 		background-size: 3rem 3rem;
 	}
 
-	.edge-layer {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		pointer-events: none;
+	.mermaid-map :global(svg) {
+		display: block;
+		max-width: none;
+		min-width: 140rem;
+		min-height: 90rem;
+		transform: scale(var(--map-zoom));
+		transform-origin: 0 0;
 	}
 
-	.edge-route {
-		fill: none;
-		stroke: rgba(244, 240, 232, 0.38);
-		stroke-width: 0.32;
-		marker-end: url("#arrowhead");
-	}
-
-	.edge-route.edge-data {
-		stroke: rgba(101, 211, 200, 0.55);
-	}
-
-	.edge-route.edge-editor {
-		stroke: rgba(216, 221, 228, 0.4);
-		stroke-dasharray: 1.4 1.4;
-	}
-
-	.edge-route.edge-future {
-		stroke: rgba(154, 160, 168, 0.5);
-		stroke-dasharray: 2.2 1.6;
-	}
-
-	.edge-route.selected {
-		stroke: #f0b45d;
-		stroke-width: 0.58;
-	}
-
-	.edge-layer marker path {
-		fill: rgba(244, 240, 232, 0.42);
-	}
-
-	.edge-label {
-		fill: rgba(244, 240, 232, 0.72);
-		opacity: 0.22;
-		font-size: 1.35px;
-		text-anchor: middle;
-		paint-order: stroke;
-		stroke: #101319;
-		stroke-width: 0.34;
-	}
-
-	.edge-label.edge-data {
-		fill: rgba(101, 211, 200, 0.78);
-	}
-
-	.edge-label.edge-editor,
-	.edge-label.edge-future {
-		fill: rgba(216, 221, 228, 0.62);
-	}
-
-	.edge-label.selected {
-		fill: #f0b45d;
-		opacity: 1;
-		font-size: 1.75px;
-	}
-
-	.map-node {
-		position: absolute;
-		width: 9.5rem;
-		min-height: 4rem;
-		transform: translate(-50%, -50%);
-		display: grid;
-		gap: 0.2rem;
-		align-content: center;
-		padding: 0.65rem 0.75rem;
-		border: 1px solid rgba(244, 240, 232, 0.24);
-		border-radius: 8px;
-		background: rgba(21, 26, 35, 0.92);
-		color: #f4f0e8;
-		box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+	.mermaid-map :global(g.node) {
 		cursor: pointer;
 	}
 
-	.map-node:hover,
-	.map-node.selected {
-		opacity: 1;
-		border-color: #f0b45d;
-		box-shadow:
-			0 0 0 2px rgba(240, 180, 93, 0.18),
-			0 16px 34px rgba(0, 0, 0, 0.34);
+	.mermaid-error {
+		width: 70rem;
+		margin: 0;
+		white-space: pre-wrap;
 	}
 
-	.map-node.read-only {
-		opacity: 0.56;
-	}
-
-	.map-node.read-only:hover,
-	.map-node.read-only.selected {
-		opacity: 0.94;
-	}
-
-	.map-node span {
-		font-weight: 760;
-		line-height: 1.1;
-	}
-
-	.map-node small {
-		color: rgba(244, 240, 232, 0.72);
-		text-transform: uppercase;
-		font-size: 0.68rem;
-	}
-
-	.map-node .node-status {
+	.map-zoom-indicator {
+		position: sticky;
+		top: 1rem;
+		left: 1rem;
+		z-index: 2;
 		width: fit-content;
-		justify-self: center;
-		padding: 0.1rem 0.36rem;
-		border: 1px solid rgba(244, 240, 232, 0.18);
-		border-radius: 4px;
-		color: rgba(244, 240, 232, 0.82);
-		font-size: 0.62rem;
-	}
-
-	.map-node.removable {
-		border-style: dashed;
-	}
-
-	.map-node.status-partial {
-		border-style: dotted;
-		border-color: rgba(240, 180, 93, 0.86);
-	}
-
-	.map-node.status-partial .node-status {
-		border-color: rgba(240, 180, 93, 0.4);
-		color: #f0b45d;
-	}
-
-	.map-node.status-future {
-		border-color: rgba(154, 160, 168, 0.62);
-		background: rgba(72, 76, 82, 0.82);
-		color: rgba(244, 240, 232, 0.74);
-		box-shadow: none;
-	}
-
-	.map-node.status-future .node-status,
-	.map-node.status-future small {
-		color: rgba(216, 221, 228, 0.72);
-	}
-
-	.map-node.active-runtime {
-		border-color: #65d3c8;
-		box-shadow:
-			0 0 0 2px rgba(101, 211, 200, 0.22),
-			0 0 26px rgba(101, 211, 200, 0.34),
-			0 16px 34px rgba(0, 0, 0, 0.34);
-	}
-
-	.map-node.data-source {
-		border-color: #65d3c8;
-		box-shadow:
-			0 0 0 2px rgba(101, 211, 200, 0.18),
-			0 0 22px rgba(101, 211, 200, 0.26),
-			0 16px 34px rgba(0, 0, 0, 0.3);
-	}
-
-	.map-node .active-badge {
-		width: fit-content;
-		justify-self: center;
-		padding: 0.1rem 0.36rem;
+		margin: 1rem;
+		padding: 0.35rem 0.55rem;
 		border: 1px solid rgba(101, 211, 200, 0.42);
-		border-radius: 4px;
+		border-radius: 6px;
+		background: rgba(13, 16, 21, 0.92);
 		color: #65d3c8;
-		font-size: 0.62rem;
-	}
-
-	.map-node .config-badge {
-		width: fit-content;
-		justify-self: center;
-		padding: 0.1rem 0.36rem;
-		border: 1px solid rgba(240, 180, 93, 0.42);
-		border-radius: 4px;
-		color: #f0b45d;
-		font-size: 0.62rem;
-	}
-
-	.map-node .source-badge {
-		width: fit-content;
-		justify-self: center;
-		padding: 0.1rem 0.36rem;
-		border: 1px solid rgba(101, 211, 200, 0.42);
-		border-radius: 4px;
-		color: #65d3c8;
-		font-size: 0.62rem;
-	}
-
-	.group-app {
-		background: rgba(34, 53, 75, 0.94);
-	}
-
-	.group-global {
-		background: rgba(78, 61, 34, 0.94);
-	}
-
-	.group-engine {
-		background: rgba(28, 67, 60, 0.94);
-	}
-
-	.group-game {
-		background: rgba(69, 45, 76, 0.94);
-	}
-
-	.group-levels {
-		background: rgba(78, 48, 40, 0.94);
-	}
-
-	.group-adapters {
-		background: rgba(40, 61, 85, 0.94);
-	}
-
-	.group-editor {
-		background: rgba(74, 74, 39, 0.94);
+		font-size: 0.78rem;
+		pointer-events: none;
 	}
 
 	.node-detail {
+		min-height: 0;
+		box-sizing: border-box;
 		display: grid;
 		align-content: start;
 		gap: 1rem;
+		overflow-y: auto;
 		padding: 1.25rem;
 		border-left: 1px solid rgba(244, 240, 232, 0.14);
 		background: rgba(13, 16, 21, 0.94);
@@ -2493,21 +2700,12 @@ function formatLiveCollectibles(state: LiveGameState): string {
 	@media (max-width: 900px) {
 		.map-workspace {
 			grid-template-columns: 1fr;
+			grid-template-rows: minmax(0, 1fr) minmax(14rem, 40vh);
 		}
 
 		.node-detail {
 			border-left: 0;
 			border-top: 1px solid rgba(244, 240, 232, 0.14);
-		}
-
-		.node-map {
-			min-height: 50rem;
-		}
-
-		.map-node {
-			width: 7.6rem;
-			min-height: 3.5rem;
-			font-size: 0.82rem;
 		}
 	}
 </style>

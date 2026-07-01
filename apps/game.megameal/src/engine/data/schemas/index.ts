@@ -1245,6 +1245,12 @@ function validateRuntimeSceneReferences(
 			},
 			errors,
 		);
+		validateStreamingChunkAssetReferences(
+			prefab.components,
+			`runtimeSceneManifest.prefabs.${prefab.id}.components`,
+			assetIds,
+			errors,
+		);
 	}
 
 	validateRenderProfileEnvironmentReferences(
@@ -1297,6 +1303,12 @@ function validateRuntimeSceneReferences(
 					assetKinds,
 					scenePreloadAssetIds,
 				},
+				errors,
+			);
+			validateStreamingChunkAssetReferences(
+				instance.components,
+				`runtimeSceneManifest.level.instances.${instance.stableId}.components`,
+				assetIds,
 				errors,
 			);
 		}
@@ -1531,20 +1543,57 @@ function validateRenderableAssetReferences(
 	errors: string[],
 ): void {
 	const renderable = components.Renderable;
+	const streamingAssetIds = streamingChunkAssetIdsForComponents(components);
+	const referenceOptions = {
+		...options,
+		streamingAssetIds,
+	};
 
-	if (renderable === undefined) {
+	if (isRecord(renderable)) {
+		validateRenderableAssetReferencesForRenderable(
+			renderable,
+			`${path}.Renderable`,
+			referenceOptions,
+			errors,
+		);
+	}
+
+	const performanceLod = components.PerformanceLod;
+
+	if (!isRecord(performanceLod) || !Array.isArray(performanceLod.tiers)) {
 		return;
 	}
 
-	if (!isRecord(renderable)) {
-		return;
-	}
+	for (const [tierIndex, tier] of performanceLod.tiers.entries()) {
+		if (!isRecord(tier) || !isRecord(tier.renderable)) {
+			continue;
+		}
 
+		validateRenderableAssetReferencesForRenderable(
+			tier.renderable,
+			`${path}.PerformanceLod.tiers[${tierIndex}].renderable`,
+			referenceOptions,
+			errors,
+		);
+	}
+}
+
+function validateRenderableAssetReferencesForRenderable(
+	renderable: Record<string, unknown>,
+	path: string,
+	options: {
+		readonly assetKinds: ReadonlyMap<string, string>;
+		readonly prefabAssetIds?: ReadonlySet<string>;
+		readonly scenePreloadAssetIds: ReadonlySet<string>;
+		readonly streamingAssetIds?: ReadonlySet<string>;
+	},
+	errors: string[],
+): void {
 	if (renderable.kind === "sprite") {
 		validateRenderableAssetReference(
 			renderable.spriteId,
 			"sprite",
-			`${path}.Renderable.spriteId`,
+			`${path}.spriteId`,
 			options,
 			errors,
 		);
@@ -1554,7 +1603,7 @@ function validateRenderableAssetReferences(
 	validateRenderableAssetReference(
 		renderable.meshId,
 		"mesh",
-		`${path}.Renderable.meshId`,
+		`${path}.meshId`,
 		options,
 		errors,
 	);
@@ -1563,7 +1612,7 @@ function validateRenderableAssetReferences(
 		validateRenderableAssetReference(
 			renderable.materialId,
 			"material",
-			`${path}.Renderable.materialId`,
+			`${path}.materialId`,
 			options,
 			errors,
 		);
@@ -1578,6 +1627,7 @@ function validateRenderableAssetReference(
 		readonly assetKinds: ReadonlyMap<string, string>;
 		readonly prefabAssetIds?: ReadonlySet<string>;
 		readonly scenePreloadAssetIds: ReadonlySet<string>;
+		readonly streamingAssetIds?: ReadonlySet<string>;
 	},
 	errors: string[],
 ): void {
@@ -1607,10 +1657,52 @@ function validateRenderableAssetReference(
 		);
 	}
 
-	if (!options.scenePreloadAssetIds.has(assetId)) {
+	if (
+		!options.scenePreloadAssetIds.has(assetId) &&
+		!options.streamingAssetIds?.has(assetId)
+	) {
 		errors.push(
 			`${path} references asset "${assetId}" that is not declared in the level preload set.`,
 		);
+	}
+}
+
+function streamingChunkAssetIdsForComponents(
+	components: Record<string, unknown>,
+): ReadonlySet<string> {
+	const chunk = components.StreamingChunk;
+	if (!isRecord(chunk) || !Array.isArray(chunk.assetIds)) {
+		return new Set();
+	}
+
+	return new Set(
+		chunk.assetIds.filter(
+			(assetId): assetId is string => typeof assetId === "string",
+		),
+	);
+}
+
+function validateStreamingChunkAssetReferences(
+	components: Record<string, unknown>,
+	path: string,
+	assetIds: ReadonlySet<string>,
+	errors: string[],
+): void {
+	const chunk = components.StreamingChunk;
+	if (!isRecord(chunk) || !Array.isArray(chunk.assetIds)) {
+		return;
+	}
+
+	for (const [index, assetId] of chunk.assetIds.entries()) {
+		if (typeof assetId !== "string") {
+			continue;
+		}
+
+		if (!assetIds.has(assetId)) {
+			errors.push(
+				`${path}.StreamingChunk.assetIds.${index} references unknown asset "${assetId}".`,
+			);
+		}
 	}
 }
 
@@ -1771,6 +1863,16 @@ function validateKnownComponents(
 		`${path}.FollowTarget`,
 		errors,
 	);
+	validatePerformanceLodComponent(
+		components.PerformanceLod,
+		`${path}.PerformanceLod`,
+		errors,
+	);
+	validateStreamingChunkComponent(
+		components.StreamingChunk,
+		`${path}.StreamingChunk`,
+		errors,
+	);
 
 	if (components.MovementBehavior !== undefined && !hasTransform) {
 		errors.push(`${path}.MovementBehavior requires a Transform component.`);
@@ -1778,6 +1880,24 @@ function validateKnownComponents(
 
 	if (components.FollowTarget !== undefined && !hasTransform) {
 		errors.push(`${path}.FollowTarget requires a Transform component.`);
+	}
+
+	if (
+		components.PerformanceLod !== undefined &&
+		components.Renderable === undefined
+	) {
+		errors.push(`${path}.PerformanceLod requires a Renderable component.`);
+	}
+
+	if (
+		isRecord(components.StreamingChunk) &&
+		components.StreamingChunk.role === "streamable" &&
+		components.StreamingChunk.center === undefined &&
+		!hasTransform
+	) {
+		errors.push(
+			`${path}.StreamingChunk with role streamable requires center or Transform.`,
+		);
 	}
 
 	if (
@@ -1795,6 +1915,138 @@ function validateKnownComponents(
 		errors.push(
 			`${path}.InteractionTarget and Conversation require an Npc component.`,
 		);
+	}
+}
+
+function validatePerformanceLodComponent(
+	lod: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (lod === undefined) {
+		return;
+	}
+
+	if (!isRecord(lod)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	if (lod.groupId !== undefined) {
+		requireString(lod, "groupId", `${path}.groupId`, errors);
+	}
+
+	if (!Array.isArray(lod.tiers)) {
+		errors.push(`${path}.tiers must be an array.`);
+		return;
+	}
+
+	if (lod.tiers.length === 0) {
+		errors.push(`${path}.tiers must contain at least one tier.`);
+		return;
+	}
+
+	const tierIds = new Set<string>();
+	for (const [index, tier] of lod.tiers.entries()) {
+		const tierPath = `${path}.tiers[${index}]`;
+
+		if (!isRecord(tier)) {
+			errors.push(`${tierPath} must be an object.`);
+			continue;
+		}
+
+		requireString(tier, "id", `${tierPath}.id`, errors);
+		if (typeof tier.id === "string" && tier.id.length > 0) {
+			if (tierIds.has(tier.id)) {
+				errors.push(`${tierPath}.id duplicates ${tier.id}.`);
+			}
+			tierIds.add(tier.id);
+		}
+
+		if (tier.renderable !== undefined) {
+			if (!isRecord(tier.renderable)) {
+				errors.push(`${tierPath}.renderable must be an object.`);
+			} else {
+				validateRenderableComponent(
+					tier.renderable,
+					`${tierPath}.renderable`,
+					errors,
+				);
+			}
+		}
+	}
+}
+
+function validateStreamingChunkComponent(
+	chunk: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (chunk === undefined) {
+		return;
+	}
+
+	if (!isRecord(chunk)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	if (chunk.id !== undefined) {
+		requireString(chunk, "id", `${path}.id`, errors);
+	}
+
+	if (chunk.role !== "resident" && chunk.role !== "streamable") {
+		errors.push(`${path}.role must be resident or streamable.`);
+	}
+
+	if (chunk.center !== undefined) {
+		validateRequiredNumberTuple(chunk.center, 3, `${path}.center`, errors);
+	}
+
+	if (chunk.loadRadius !== undefined) {
+		validateRequiredNonNegativeNumber(
+			chunk.loadRadius,
+			`${path}.loadRadius`,
+			errors,
+		);
+	}
+
+	if (chunk.unloadRadius !== undefined) {
+		validateRequiredNonNegativeNumber(
+			chunk.unloadRadius,
+			`${path}.unloadRadius`,
+			errors,
+		);
+	}
+
+	if (
+		typeof chunk.loadRadius === "number" &&
+		Number.isFinite(chunk.loadRadius) &&
+		typeof chunk.unloadRadius === "number" &&
+		Number.isFinite(chunk.unloadRadius) &&
+		chunk.unloadRadius < chunk.loadRadius
+	) {
+		errors.push(
+			`${path}.unloadRadius must be greater than or equal to loadRadius.`,
+		);
+	}
+
+	if (chunk.priority !== undefined) {
+		validateRequiredNumber(chunk.priority, `${path}.priority`, errors);
+	}
+
+	if (chunk.assetIds !== undefined) {
+		validateRequiredStringArray(chunk.assetIds, `${path}.assetIds`, errors);
+	}
+
+	for (const key of [
+		"includeRenderable",
+		"includeLight",
+		"includeCollider",
+	] as const) {
+		if (chunk[key] !== undefined && typeof chunk[key] !== "boolean") {
+			errors.push(`${path}.${key} must be a boolean.`);
+		}
 	}
 }
 
@@ -1923,38 +2175,6 @@ function validateLightModulationComponent(
 
 	if (modulation.phase !== undefined) {
 		validateRequiredNumber(modulation.phase, `${path}.phase`, errors);
-	}
-
-	if (modulation.maxActiveLights !== undefined) {
-		validateRequiredNonNegativeNumber(
-			modulation.maxActiveLights,
-			`${path}.maxActiveLights`,
-			errors,
-		);
-	}
-
-	if (modulation.nearDistance !== undefined) {
-		validateRequiredNonNegativeNumber(
-			modulation.nearDistance,
-			`${path}.nearDistance`,
-			errors,
-		);
-	}
-
-	if (modulation.farDistance !== undefined) {
-		validateRequiredNonNegativeNumber(
-			modulation.farDistance,
-			`${path}.farDistance`,
-			errors,
-		);
-	}
-
-	if (modulation.midIntensityScale !== undefined) {
-		validateRequiredAlpha(
-			modulation.midIntensityScale,
-			`${path}.midIntensityScale`,
-			errors,
-		);
 	}
 }
 

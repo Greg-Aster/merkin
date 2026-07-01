@@ -1,15 +1,13 @@
 # Streaming Performance
 
-This folder is reserved for game-owned runtime residency policy for assets,
-render content, and collision products. Stage one provides only configuration
-and diagnostics; active streaming is future work.
+This folder owns game-owned runtime residency policy for assets, render
+content, and collision products.
 
-## Stage Two Foundation
+## Runtime Foundation
 
 `index.ts` defines the pure streaming planner. It is framework-neutral and
-does not load, unload, retain, dispose, or mutate assets by itself. A runtime
-integration must apply the returned operation list through existing scene,
-asset, render, and collision services.
+does not load, unload, retain, dispose, or mutate assets by itself. Runtime
+integration reads the returned operation list through `runtime.ts`.
 
 The planner models three chunk roles:
 
@@ -20,22 +18,34 @@ The planner models three chunk roles:
 - `streamable`: optional content selected by distance from the player and/or
   camera with load/unload hysteresis.
 
-The current shared performance config still accepts only `off` and
-`diagnostic` modes, so using a composed `game:performanceConfig` keeps streaming
-operations inert. The planner only emits operations when called with the
-explicit planner mode `plan`; wiring that mode into level-owned
-`performance.json` files requires a separate shared config/editor/runtime
-integration packet.
+The shared performance config accepts `off`, `diagnostic`, and `plan` for
+streaming. `runtime.ts` calls the planner, exposes deterministic operations in
+runtime diagnostics, and applies residency for authored `StreamingChunk`
+components:
+
+- chunk-owned `assetIds` are retained, loaded, and released through the asset
+  manager without direct unload calls,
+- renderables and lights are hidden or restored through ECS visibility fields
+  while assets are absent or loading,
+- opt-in colliders are removed/restored through ECS `Collider` components, and
+- startup preload chunks remain readiness-owned and are not treated as optional
+  streamable content.
+
+The current runtime does not spawn/despawn entities or mutate adapter internals
+directly. Physics adapter collider creation/destruction follows the existing
+`PhysicsSyncSystem` response to ECS component state.
 
 ## Runtime Integration Contract
 
-A future runtime system should:
+Streaming runtime integration must:
 
 - read the composed `game:performanceConfig` scene resource,
 - pass level-resolved chunk definitions and current residency into
   `createStreamingPlan()`,
-- apply only the returned `load-chunk` and `unload-chunk` operations through
-  existing asset/scene services,
+- apply asset load/unload operations through existing async asset/scene services
+  without bypassing refcounts,
 - keep startup readiness checks separate from streamable optional residency,
+  keep visual residency as ECS `Renderable.visible` / `Light.visible` state,
+  keep collider residency as ECS `Collider` component state,
   and
 - avoid level-specific branches in this folder.

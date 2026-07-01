@@ -7,10 +7,10 @@ import {
 	PERFORMANCE_COLLISION_PRIMITIVE_SHAPES,
 	PERFORMANCE_CONFIG_RESOURCE,
 	PERFORMANCE_SYSTEM_IDS,
-	PERFORMANCE_SYSTEM_MODES,
 	composePerformanceConfig,
 	defaultPerformanceConfig,
 	parsePerformanceConfig,
+	performanceModesForSystem,
 	validatePerformanceConfig,
 } from "../src/game/performance/index.js";
 import globalPerformance from "../src/levels/global/performance.json";
@@ -31,6 +31,10 @@ const masterControlMapSource = await readFile(
 	join(appRoot, "src/editor/MasterControlMap.svelte"),
 	"utf8",
 );
+const performanceConfigEditorSource = await readFile(
+	join(appRoot, "src/editor/PerformanceConfigEditor.svelte"),
+	"utf8",
+);
 const levelEditorWorkspaceSource = await readFile(
 	join(appRoot, "src/editor/level/LevelEditorWorkspace.svelte"),
 	"utf8",
@@ -38,6 +42,9 @@ const levelEditorWorkspaceSource = await readFile(
 const editorDevApiSource = await readFile(
 	join(appRoot, "scripts/editor-dev-api.mjs"),
 	"utf8",
+);
+const packageJson = JSON.parse(
+	await readFile(join(appRoot, "package.json"), "utf8"),
 );
 
 const globalPerformanceConfig = parsePerformanceConfig(
@@ -57,7 +64,7 @@ assert.deepEqual(
 
 for (const systemId of PERFORMANCE_SYSTEM_IDS) {
 	assert.ok(
-		PERFORMANCE_SYSTEM_MODES.includes(
+		performanceModesForSystem(systemId).includes(
 			globalPerformanceConfig.systems[systemId].mode,
 		),
 		`global performance mode for ${systemId} must be supported`,
@@ -95,7 +102,7 @@ const stageTwoGlobalConfig = parsePerformanceConfig(
 				},
 			},
 			streaming: {
-				mode: "diagnostic",
+				mode: "plan",
 				residency: {
 					assets: {
 						loadDistance: 64,
@@ -108,7 +115,7 @@ const stageTwoGlobalConfig = parsePerformanceConfig(
 				},
 			},
 			collision: {
-				mode: "diagnostic",
+				mode: "spatial",
 				diagnostics: {
 					primitiveShapes: ["box", "capsule"],
 					includeMeshColliders: true,
@@ -203,12 +210,12 @@ assertErrorIncludes(
 				...defaultPerformanceConfig,
 				systems: {
 					...defaultPerformanceConfig.systems,
-					lod: { mode: "active" },
+					lod: { mode: "automatic" },
 				},
 			},
 			"bad performance config",
 		),
-	"bad performance config.systems.lod.mode must be off or diagnostic.",
+	"bad performance config.systems.lod.mode must be off or diagnostic or distance.",
 );
 assertErrorIncludes(
 	() =>
@@ -350,6 +357,7 @@ for (const graphHandle of [
 for (const editorHandle of [
 	"GLOBAL_PERFORMANCE_API_PATH",
 	"Global Performance",
+	"PerformanceConfigEditor",
 	"performanceDiagnosticNodeIds",
 	"Performance Diagnostics",
 ]) {
@@ -360,10 +368,24 @@ for (const editorHandle of [
 	);
 }
 
+for (const performanceEditorHandle of [
+	"LOD Tiers",
+	"Max Distance",
+	"Streaming Residency",
+	"Collision Diagnostics",
+	"primitiveShapes",
+]) {
+	assert.match(
+		performanceConfigEditorSource,
+		new RegExp(performanceEditorHandle),
+		`performance config editor must expose ${performanceEditorHandle}`,
+	);
+}
+
 for (const levelEditorHandle of [
 	'"Performance"',
+	"PerformanceConfigEditor",
 	"performanceDraft",
-	"updatePerformanceMode",
 	"Save Performance",
 ]) {
 	assert.match(
@@ -378,11 +400,31 @@ for (const apiHandle of [
 	"performance.json",
 	"validatePerformanceConfig",
 	"validatePerformancePackageWrite",
+	"validatePerformanceLodConfig",
+	"validatePerformanceCullingConfig",
+	"validatePerformanceStreamingConfig",
+	"validatePerformanceCollisionConfig",
 ]) {
 	assert.match(
 		editorDevApiSource,
 		new RegExp(apiHandle),
 		`editor dev API must expose ${apiHandle}`,
+	);
+}
+
+for (const scriptName of [
+	"test:performance-collision-contract",
+	"test:performance-config-contract",
+	"test:performance-culling-contract",
+	"test:performance-diagnostics-contract",
+	"test:performance-lod-contract",
+	"test:performance-runtime-contract",
+	"test:performance-streaming-contract",
+]) {
+	assert.equal(
+		typeof packageJson.scripts?.[scriptName],
+		"string",
+		`package.json must expose ${scriptName}`,
 	);
 }
 

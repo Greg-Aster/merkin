@@ -2,6 +2,12 @@ import type { RuntimeSceneManifestData } from "../engine/index.js";
 import type { AudioContentManifest } from "../engine/modules/audio/index.js";
 
 type RuntimeLevelPackageModule = {
+	readonly levelPackageSettings?: {
+		readonly packageId?: string;
+		readonly defaultRuntimeSceneId?: string;
+		readonly hudVisible?: boolean;
+		readonly audioMasterVolume?: number;
+	};
 	readonly defaultRuntimeSceneManifest?: RuntimeSceneManifestData;
 	readonly defaultRuntimeSceneManifests?: readonly RuntimeSceneManifestData[];
 	readonly runtimeSceneManifests?: readonly RuntimeSceneManifestData[];
@@ -27,6 +33,10 @@ const defaultRuntimeSceneManifest =
 	runtimeSceneManifests[0];
 
 export type RuntimeSettings = {
+	readonly packageId: string;
+	readonly defaultRuntimeSceneId: string | undefined;
+	readonly hudVisible: boolean;
+	readonly audioMasterVolume: number;
 	readonly defaultRuntimeSceneManifest: RuntimeSceneManifestData | undefined;
 	readonly runtimeSceneManifests: readonly RuntimeSceneManifestData[];
 	getRuntimeSceneManifest(id: string): RuntimeSceneManifestData | undefined;
@@ -36,6 +46,12 @@ export type RuntimeSettings = {
 };
 
 export const runtimeSettings: RuntimeSettings = {
+	packageId: installedLevelPackage?.levelPackageSettings?.packageId ?? "",
+	defaultRuntimeSceneId:
+		installedLevelPackage?.levelPackageSettings?.defaultRuntimeSceneId,
+	hudVisible: installedLevelPackage?.levelPackageSettings?.hudVisible ?? false,
+	audioMasterVolume:
+		installedLevelPackage?.levelPackageSettings?.audioMasterVolume ?? 1,
 	defaultRuntimeSceneManifest,
 	runtimeSceneManifests,
 	getRuntimeSceneManifest(id) {

@@ -47,6 +47,7 @@ type HudState = {
 };
 
 type Props = {
+	readonly visible?: boolean;
 	readonly mounted: boolean;
 	readonly snapshot: RuntimeSnapshot;
 	readonly gameState: HudState;
@@ -54,7 +55,14 @@ type Props = {
 	readonly dispatch?: (command: Command) => void;
 };
 
-const { mounted, gameState, startupError, dispatch }: Props = $props();
+const {
+	visible = false,
+	mounted,
+	snapshot,
+	gameState,
+	startupError,
+	dispatch,
+}: Props = $props();
 
 const noteParagraphs = () =>
 	gameState.openStoryNote?.body
@@ -71,14 +79,31 @@ const npcDialogParagraphs = () =>
 function closeStoryNote(): void {
 	dispatch?.({ type: "CloseStoryNote" });
 }
+
+function hudStatus(): string {
+	if (startupError) {
+		return startupError;
+	}
+
+	return mounted ? snapshot.lifecycle : "loading";
+}
 </script>
 
-{#if startupError || !mounted}
+{#if visible || startupError}
 	<section class="hud" aria-label="Game status" data-engine-status>
 		<div class="hud-row hud-topline">
 			<strong>Megameal</strong>
-			<span class:error={startupError}>{startupError ?? "loading"}</span>
+			<span class:error={startupError}>{hudStatus()}</span>
 		</div>
+		{#if visible && mounted && !startupError}
+			<div class="hud-row hud-stats">
+				<span>Tick {snapshot.tick}</span>
+				<span>Health {gameState.health[0]} / {gameState.health[1]}</span>
+				<span>
+					Collectibles {gameState.collectedCount} / {gameState.remainingCollectibles}
+				</span>
+			</div>
+		{/if}
 	</section>
 {/if}
 
@@ -202,12 +227,31 @@ function closeStoryNote(): void {
 		color: #ffb096;
 	}
 
+	.hud-stats {
+		margin-top: 10px;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.hud-stats span {
+		overflow-wrap: anywhere;
+		border: 1px solid rgb(232 243 226 / 14%);
+		border-radius: 6px;
+		background: rgb(8 12 11 / 46%);
+		padding: 6px;
+		font-size: 0.72rem;
+		line-height: 1.2;
+	}
+
 	@media (max-width: 560px) {
 		.hud {
 			top: 10px;
 			left: 10px;
 			width: calc(100vw - 20px);
 			padding: 12px;
+		}
+
+		.hud-stats {
+			grid-template-columns: 1fr;
 		}
 	}
 

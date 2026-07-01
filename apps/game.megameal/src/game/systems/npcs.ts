@@ -7,7 +7,6 @@ import {
 import {
 	LIGHT_COMPONENT,
 	type LightComponent,
-	type PointLightComponent,
 	type RenderTransform,
 	TRANSFORM_COMPONENT,
 } from "../../engine/modules/rendering/index.js";
@@ -27,68 +26,12 @@ import {
 	MOVEMENT_BEHAVIOR_COMPONENT,
 	type MovementBehaviorComponent,
 	NPC_COMPONENT,
-	NPC_SIGNIFICANCE_COMPONENT,
 	type NpcComponent,
-	type NpcSignificanceComponent,
 	OPEN_NPC_DIALOG_RESOURCE,
 	PLAYER_ENTITY_RESOURCE,
 } from "./components.js";
 
-const NEAR_DISTANCE = 48;
-const FAR_DISTANCE = 140;
-const DEFAULT_NPC_LIGHT_MID_INTENSITY_SCALE = 0.55;
 const DEFAULT_NPC_ACTIVATION_RADIUS = 2.4;
-const DEFAULT_ACTIVE_NPC_LIGHT_BUDGET = 8;
-
-export function createNpcSignificanceSystem<
-	TContext extends NpcSignificanceContext,
->(): System<TContext> {
-	return {
-		id: "npc-significance",
-		reads: [TRANSFORM_COMPONENT, NPC_COMPONENT],
-		writes: [NPC_SIGNIFICANCE_COMPONENT],
-		update(context) {
-			const player = context.world.getResource<Entity>(PLAYER_ENTITY_RESOURCE);
-			const playerTransform =
-				player === undefined
-					? undefined
-					: context.world.getComponent<RenderTransform>(
-							player,
-							TRANSFORM_COMPONENT,
-						);
-
-			for (const entity of context.world.query([
-				TRANSFORM_COMPONENT,
-				NPC_COMPONENT,
-			])) {
-				const transform = context.world.getComponent<RenderTransform>(
-					entity,
-					TRANSFORM_COMPONENT,
-				);
-
-				if (!transform) {
-					continue;
-				}
-
-				const distanceSquared = playerTransform
-					? lengthSquaredVec3(
-							subtractVec3(transform.position, playerTransform.position),
-						)
-					: 0;
-				const tier = significanceTier(distanceSquared);
-				context.world.addComponent<NpcSignificanceComponent>(
-					entity,
-					NPC_SIGNIFICANCE_COMPONENT,
-					{
-						tier,
-						distanceSquared,
-						updateEveryTicks: tier === "near" ? 1 : tier === "mid" ? 4 : 12,
-					},
-				);
-			}
-		},
-	};
-}
 
 export function createMovementBehaviorSystem<
 	TContext extends MovementBehaviorContext,
@@ -111,10 +54,6 @@ export function createMovementBehaviorSystem<
 				);
 
 				if (!behavior || !transform || behavior.kind === "static") {
-					continue;
-				}
-
-				if (!shouldUpdateNpc(context, entity)) {
 					continue;
 				}
 
@@ -231,8 +170,6 @@ export function createLightModulationSystem<
 		reads: [LIGHT_COMPONENT, LIGHT_MODULATION_COMPONENT],
 		writes: [LIGHT_COMPONENT],
 		update(context) {
-			const candidates: LightModulationCandidate[] = [];
-
 			for (const entity of context.world.query([
 				LIGHT_COMPONENT,
 				LIGHT_MODULATION_COMPONENT,
@@ -249,83 +186,24 @@ export function createLightModulationSystem<
 					continue;
 				}
 
-				candidates.push({
-					entity,
-					significance: context.world.getComponent<NpcSignificanceComponent>(
-						entity,
-						NPC_SIGNIFICANCE_COMPONENT,
-					),
-					modulation,
-					light,
-				});
-			}
-
-			candidates.sort((left, right) => {
-				const leftDistance =
-					left.significance?.distanceSquared ?? Number.POSITIVE_INFINITY;
-				const rightDistance =
-					right.significance?.distanceSquared ?? Number.POSITIVE_INFINITY;
-				return leftDistance - rightDistance || left.entity - right.entity;
-			});
-
-			const budget =
-				candidates[0]?.modulation.maxActiveLights ??
-				DEFAULT_ACTIVE_NPC_LIGHT_BUDGET;
-
-			for (const [index, candidate] of candidates.entries()) {
-				const light = candidate.light;
-
-				if (light.kind !== "point") {
-					continue;
-				}
-
-				const phase =
-					candidate.modulation.phase ??
-					stableUnit(candidate.entity, "light-phase");
+				const phase = modulation.phase ?? stableUnit(entity, "light-phase");
 				const time = context.tick * context.deltaSeconds;
-				const blinkScale = getBlinkScale(candidate.modulation, time, phase);
-				const pulse = getPulse(candidate.modulation, time, phase);
-				const significanceScale = lightDistanceScale(
-					candidate.significance,
-					candidate.modulation,
-				);
-				const activeScale =
-					index < Math.max(0, Math.floor(budget)) ? significanceScale : 0;
-				const minimumScale = clamp01(
-					candidate.modulation.minimumIntensityScale,
-				);
+				const blinkScale = getBlinkScale(modulation, time, phase);
+				const pulse = getPulse(modulation, time, phase);
+				const minimumScale = clamp01(modulation.minimumIntensityScale);
 				const intensityScale =
-					activeScale *
-					blinkScale *
-					(minimumScale + (1 - minimumScale) * pulse);
+					blinkScale * (minimumScale + (1 - minimumScale) * pulse);
 
-				context.world.addComponent<LightComponent>(
-					candidate.entity,
-					LIGHT_COMPONENT,
-					{
-						...light,
-						intensity: Math.max(
-							0,
-							candidate.modulation.baseIntensity * intensityScale,
-						),
-						distance: Math.max(
-							0,
-							candidate.modulation.baseDistance * (0.7 + pulse * 0.3),
-						),
-						visible: activeScale > 0 && blinkScale > 0.001,
-					},
-				);
+				context.world.addComponent<LightComponent>(entity, LIGHT_COMPONENT, {
+					...light,
+					intensity: Math.max(0, modulation.baseIntensity * intensityScale),
+					distance: Math.max(0, modulation.baseDistance * (0.7 + pulse * 0.3)),
+					visible: blinkScale > 0.001,
+				});
 			}
 		},
 	};
 }
-
-type LightModulationCandidate = {
-	readonly entity: Entity;
-	readonly significance: NpcSignificanceComponent | undefined;
-	readonly modulation: LightModulationComponent;
-	readonly light: PointLightComponent;
-};
 
 export function createNpcProximitySystem<
 	TContext extends NpcProximityContext,
@@ -461,10 +339,6 @@ export function createNpcDialogSystem<
 	};
 }
 
-type NpcSignificanceContext = {
-	readonly world: NpcWorld;
-};
-
 type MovementBehaviorContext = {
 	readonly tick: number;
 	readonly deltaSeconds: number;
@@ -514,33 +388,6 @@ type NpcWorld = {
 	): TComponent;
 };
 
-function significanceTier(
-	distanceSquared: number,
-): NpcSignificanceComponent["tier"] {
-	if (distanceSquared <= NEAR_DISTANCE * NEAR_DISTANCE) {
-		return "near";
-	}
-
-	if (distanceSquared <= FAR_DISTANCE * FAR_DISTANCE) {
-		return "mid";
-	}
-
-	return "far";
-}
-
-function shouldUpdateNpc(
-	context: MovementBehaviorContext,
-	entity: Entity,
-): boolean {
-	const significance = context.world.getComponent<NpcSignificanceComponent>(
-		entity,
-		NPC_SIGNIFICANCE_COMPONENT,
-	);
-	const updateEveryTicks = Math.max(1, significance?.updateEveryTicks ?? 1);
-
-	return (context.tick + entity) % updateEveryTicks === 0;
-}
-
 function getPulse(
 	modulation: LightModulationComponent,
 	time: number,
@@ -550,37 +397,6 @@ function getPulse(
 		(Math.sin(time * modulation.pulseSpeed + phase * Math.PI * 2) + 1) / 2;
 	const softness = clamp(modulation.pulseSoftness, 0.01, 1);
 	return wave * softness + (1 - softness);
-}
-
-function lightDistanceScale(
-	significance: NpcSignificanceComponent | undefined,
-	modulation: LightModulationComponent,
-): number {
-	if (!significance) {
-		return 1;
-	}
-
-	const nearDistance = positiveFinite(modulation.nearDistance, NEAR_DISTANCE);
-	const farDistance = Math.max(
-		nearDistance,
-		positiveFinite(modulation.farDistance, FAR_DISTANCE),
-	);
-	const distance = Math.sqrt(significance.distanceSquared);
-
-	if (distance > farDistance) {
-		return 0;
-	}
-
-	if (distance > nearDistance) {
-		return clamp01(
-			finite(
-				modulation.midIntensityScale,
-				DEFAULT_NPC_LIGHT_MID_INTENSITY_SCALE,
-			),
-		);
-	}
-
-	return 1;
 }
 
 function getBlinkScale(
@@ -776,22 +592,6 @@ function normalizeLightModulation(
 		blinkFadeSeconds: positiveFinite(value.blinkFadeSeconds, 0),
 		...(typeof value.phase === "number" && Number.isFinite(value.phase)
 			? { phase: value.phase }
-			: {}),
-		...(typeof value.maxActiveLights === "number" &&
-		Number.isFinite(value.maxActiveLights)
-			? { maxActiveLights: Math.max(0, Math.floor(value.maxActiveLights)) }
-			: {}),
-		...(typeof value.nearDistance === "number" &&
-		Number.isFinite(value.nearDistance)
-			? { nearDistance: Math.max(0, value.nearDistance) }
-			: {}),
-		...(typeof value.farDistance === "number" &&
-		Number.isFinite(value.farDistance)
-			? { farDistance: Math.max(0, value.farDistance) }
-			: {}),
-		...(typeof value.midIntensityScale === "number" &&
-		Number.isFinite(value.midIntensityScale)
-			? { midIntensityScale: clamp01(value.midIntensityScale) }
 			: {}),
 	};
 }
