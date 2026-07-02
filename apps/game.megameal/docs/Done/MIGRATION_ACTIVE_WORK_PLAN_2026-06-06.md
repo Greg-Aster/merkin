@@ -9,7 +9,6 @@ being done, and how completion must be verified.
 
 This is not a replacement for:
 
-- `GAME_ENGINE_MIGRATION_PLAN.md`
 - `ENGINE_CONTRACT_REGISTER.md`
 - `GAME_ENGINE_DESIGN_DOCUMENT.md`
 - `ARCHITECTURE.md`
@@ -134,9 +133,8 @@ Implementation intent:
    missing floor data.
 5. Extend durable validation only in an existing focused owner file unless a
    new owner is clearly justified.
-6. Update `GAME_ENGINE_MIGRATION_PLAN.md`,
-   `GAME_ENGINE_DESIGN_DOCUMENT.md`, `ENGINE_CONTRACT_REGISTER.md`, and this
-   work-plan file if the contract or implementation status changes.
+6. Update `GAME_ENGINE_DESIGN_DOCUMENT.md`, `ENGINE_CONTRACT_REGISTER.md`, and
+   this work-plan file if the contract or implementation status changes.
 
 Implemented data changes:
 

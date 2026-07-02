@@ -27,8 +27,11 @@ import {
 	createNpcProximitySystem,
 } from "../src/game/systems/index.js";
 import fireflyArchetype from "../src/levels/global/npcs/firefly/archetype.json";
+import { walkableGroundYAt } from "../src/levels/npcPlacement.js";
+import observatoryStaticEnvironmentCollision from "../src/levels/observatory/collision/generated.json";
 import fireflies from "../src/levels/observatory/npcs/fireflies.json";
 import { observatoryLevelPackage } from "../src/levels/observatory/package.js";
+import { parseStaticEnvironmentCollisionProduct } from "../src/levels/staticEnvironmentCollision.js";
 
 const fireflyStableIds = fireflies.instances.map(
 	(instance) => instance.stableId,
@@ -37,6 +40,8 @@ const fireflyPreloadAssetIds = fireflyArchetype.assets?.preload ?? [];
 const fireflyVisualPartSuffixes =
 	fireflyArchetype.visualParts?.map((part) => part.idSuffix) ?? [];
 const observatoryManifest = observatoryLevelPackage.runtimeSceneManifest;
+const observatoryStaticEnvironmentCollisionProduct =
+	parseStaticEnvironmentCollisionProduct(observatoryStaticEnvironmentCollision);
 
 function assertEqual<TValue>(
 	actual: TValue,
@@ -274,12 +279,44 @@ for (const stableId of fireflyStableIds) {
 		(entry) => entry.stableId === stableId,
 	);
 	const transform = assertRecord(instance?.transform, `${stableId}.transform`);
-	assertNumberTuple3(transform.position, `${stableId}.transform.position`);
+	const position = assertNumberTuple3(
+		transform.position,
+		`${stableId}.transform.position`,
+	);
 	const components = assertRecord(
 		instance?.components,
 		`${stableId}.components`,
 	);
 	const light = assertRecord(components.Light, `${stableId}.Light`);
+	const movement = assertRecord(
+		components.MovementBehavior,
+		`${stableId}.MovementBehavior`,
+	);
+	const movementBasePosition = assertNumberTuple3(
+		movement.basePosition,
+		`${stableId}.MovementBehavior.basePosition`,
+	);
+	const authoredInstance = fireflies.instances.find(
+		(entry) => entry.stableId === stableId,
+	);
+	const authoredPosition = assertNumberTuple3(
+		authoredInstance?.transform.position,
+		`${stableId} authored transform.position`,
+	);
+	const groundY = walkableGroundYAt(authoredPosition[0], authoredPosition[2], [
+		observatoryStaticEnvironmentCollisionProduct,
+	]);
+	assertFiniteNumber(groundY, `${stableId} generated walkable groundY`);
+	assertEqual(
+		position[1],
+		Math.round((groundY ?? 0) * 1000) / 1000,
+		`${stableId}.Transform.position.y must resolve from generated walkable collision.`,
+	);
+	assertEqual(
+		movementBasePosition[1],
+		position[1],
+		`${stableId}.MovementBehavior.basePosition.y must match resolved transform Y.`,
+	);
 
 	for (const field of ["intensity", "distance", "decay"]) {
 		const value = light[field];

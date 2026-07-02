@@ -38,6 +38,10 @@ import {
 	meshWaterPlane,
 } from "./global/waterAssets.js";
 import {
+	type LevelNpcPlacementData,
+	resolveNpcPlacementPosition,
+} from "./npcPlacement.js";
+import {
 	type LevelPlayerConfig,
 	PLAYER_PREFAB_ID,
 	PLAYER_REQUIRED_ASSET_IDS,
@@ -135,24 +139,34 @@ export type LevelNpcVisualPartData = {
 export type LevelNpcGroupData = {
 	readonly schemaVersion: 1;
 	readonly archetype: string;
+	readonly collections?: readonly LevelNpcCollectionData[];
 	readonly defaults?: {
 		readonly movement?: Record<string, unknown>;
 		readonly light?: Record<string, unknown>;
 		readonly lightModulation?: Record<string, unknown>;
 		readonly interaction?: Record<string, unknown>;
+		readonly placement?: LevelNpcPlacementData;
 	};
 	readonly instances: readonly LevelNpcInstanceData[];
+};
+
+export type LevelNpcCollectionData = {
+	readonly id: string;
+	readonly label: string;
+	readonly description?: string;
 };
 
 export type LevelNpcInstanceData = {
 	readonly id: string;
 	readonly stableId: string;
 	readonly displayName: string;
+	readonly collectionId?: string;
 	readonly transform: NonNullable<LevelData["instances"][number]["transform"]>;
 	readonly movement?: Record<string, unknown>;
 	readonly light?: Record<string, unknown>;
 	readonly lightModulation?: Record<string, unknown>;
 	readonly interaction?: Record<string, unknown>;
+	readonly placement?: LevelNpcPlacementData;
 	readonly conversation: {
 		readonly mode: "read-only";
 		readonly title: string;
@@ -222,8 +236,8 @@ export function defineLevelPackage(
 		globalPerformance,
 		performance,
 	);
-	const npcData = parseLevelNpcPackageData(npcs);
 	const collisionData = resolveStaticEnvironmentCollisionPackage(collision);
+	const npcData = parseLevelNpcPackageData(npcs, collisionData);
 	const level = composeLevel(
 		packageData,
 		skyboxData,
@@ -386,6 +400,7 @@ function parseLevelSkyboxData(data: unknown): LevelSkyboxData {
 
 function parseLevelNpcPackageData(
 	data: LevelNpcPackageData,
+	collisionData: ResolvedStaticEnvironmentCollisionPackage,
 ): ResolvedLevelNpcPackageData {
 	const archetypes = (data.archetypes ?? []).map(parseNpcArchetype);
 	const archetypesById = catalogById(archetypes);
@@ -403,8 +418,18 @@ function parseLevelNpcPackageData(
 		}
 
 		for (const instance of group.instances) {
-			const position = instance.transform.position ?? [0, 0, 0];
 			const groupDefaults = group.defaults ?? {};
+			const authoredPosition = tuple3(instance.transform.position, [0, 0, 0]);
+			const placement = instance.placement ?? groupDefaults.placement;
+			const position = resolveNpcPlacementPosition(
+				authoredPosition,
+				placement,
+				collisionData.products,
+			);
+			const transform = {
+				...instance.transform,
+				position,
+			};
 			const light = {
 				...archetype.defaults.light,
 				...groupDefaults.light,
@@ -457,7 +482,7 @@ function parseLevelNpcPackageData(
 				id: instance.id,
 				prefabId: archetype.prefab.id,
 				stableId: instance.stableId,
-				transform: instance.transform,
+				transform,
 				components: {
 					Npc: {
 						id: instance.stableId,
@@ -487,7 +512,7 @@ function parseLevelNpcPackageData(
 					prefabId: visualPart.prefab.id,
 					stableId: `${instance.stableId}:${visualPart.idSuffix}`,
 					transform: composeNpcVisualPartTransform(
-						instance.transform,
+						transform,
 						visualPart.transform,
 					),
 					components: {
@@ -831,6 +856,17 @@ function mergePreloadGroups(
 
 function numericValue(value: unknown, fallback: number): number {
 	return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function tuple3(
+	value: unknown,
+	fallback: readonly [number, number, number],
+): readonly [number, number, number] {
+	return Array.isArray(value) &&
+		value.length === 3 &&
+		value.every((entry) => typeof entry === "number" && Number.isFinite(entry))
+		? [value[0], value[1], value[2]]
+		: fallback;
 }
 
 function unique<TValue>(values: readonly TValue[]): readonly TValue[] {

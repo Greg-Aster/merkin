@@ -1,6 +1,18 @@
 {
 	"schemaVersion": 1,
 	"archetype": "firefly",
+	"collections": [
+		{
+			"id": "outer-field",
+			"label": "Outer Field",
+			"description": "Low ring fireflies around the Observatory approach and waterline."
+		},
+		{
+			"id": "spire-cluster",
+			"label": "Spire Cluster",
+			"description": "High fireflies around the Observatory spire and upper stonework."
+		}
+	],
 	"defaults": {
 		"lightModulation": {
 			"minimumIntensityScale": 0.12,
@@ -10,6 +22,10 @@
 			"blinkPeriodSeconds": [8, 15],
 			"blinkFadeSeconds": 1.6,
 			"minimumIntensityScale": 0.12
+		},
+		"placement": {
+			"mode": "walkable-ground",
+			"heightOffset": 0
 		}
 	},
 	"instances": [

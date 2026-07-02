@@ -1477,6 +1477,11 @@ function validateNpcGroup(value, path, errors) {
 		errors.push(`${path}.instances must be an array.`);
 		return;
 	}
+	const collectionIds = validateNpcCollections(
+		value.collections,
+		`${path}.collections`,
+		errors,
+	);
 	validateNpcGroupDefaults(value.defaults, `${path}.defaults`, errors);
 	validateUniqueIds(
 		value.instances.map((instance) => instance?.id),
@@ -1489,8 +1494,52 @@ function validateNpcGroup(value, path, errors) {
 		errors,
 	);
 	for (const [index, instance] of value.instances.entries()) {
-		validateNpcInstance(instance, `${path}.instances.${index}`, errors);
+		validateNpcInstance(
+			instance,
+			`${path}.instances.${index}`,
+			errors,
+			collectionIds,
+		);
 	}
+}
+
+function validateNpcCollections(value, path, errors) {
+	if (value === undefined) {
+		return new Set();
+	}
+	if (!Array.isArray(value)) {
+		errors.push(`${path} must be an array.`);
+		return new Set();
+	}
+	validateUniqueIds(
+		value.map((collection) => collection?.id),
+		`${path}.id`,
+		errors,
+	);
+	const ids = new Set();
+	for (const [index, collection] of value.entries()) {
+		const collectionPath = `${path}.${index}`;
+		if (!isObject(collection)) {
+			errors.push(`${collectionPath} must be an object.`);
+			continue;
+		}
+		validateId(collection.id, `${collectionPath}.id`, errors);
+		if (typeof collection.id === "string" && collection.id.length > 0) {
+			ids.add(collection.id);
+		}
+		if (typeof collection.label !== "string" || !collection.label) {
+			errors.push(`${collectionPath}.label must be a non-empty string.`);
+		}
+		if (
+			collection.description !== undefined &&
+			typeof collection.description !== "string"
+		) {
+			errors.push(
+				`${collectionPath}.description must be a string when provided.`,
+			);
+		}
+	}
+	return ids;
 }
 
 function validateNpcGroupDefaults(value, path, errors) {
@@ -1513,9 +1562,10 @@ function validateNpcGroupDefaults(value, path, errors) {
 		`${path}.interaction`,
 		errors,
 	);
+	validateNpcPlacement(value.placement, `${path}.placement`, errors);
 }
 
-function validateNpcInstance(value, path, errors) {
+function validateNpcInstance(value, path, errors, collectionIds = new Set()) {
 	if (!isObject(value)) {
 		errors.push(`${path} must be an object.`);
 		return;
@@ -1524,6 +1574,18 @@ function validateNpcInstance(value, path, errors) {
 	validateStableId(value.stableId, `${path}.stableId`, errors);
 	if (typeof value.displayName !== "string" || !value.displayName) {
 		errors.push(`${path}.displayName must be a non-empty string.`);
+	}
+	if (value.collectionId !== undefined) {
+		validateId(value.collectionId, `${path}.collectionId`, errors);
+		if (
+			typeof value.collectionId === "string" &&
+			value.collectionId.length > 0 &&
+			!collectionIds.has(value.collectionId)
+		) {
+			errors.push(
+				`${path}.collectionId references unknown NPC collection "${value.collectionId}".`,
+			);
+		}
 	}
 	validateTransform(value.transform, `${path}.transform`, errors);
 	validateNpcMovementOverride(value.movement, `${path}.movement`, errors);
@@ -1538,10 +1600,27 @@ function validateNpcInstance(value, path, errors) {
 		`${path}.interaction`,
 		errors,
 	);
+	validateNpcPlacement(value.placement, `${path}.placement`, errors);
 	if (!isObject(value.conversation)) {
 		errors.push(`${path}.conversation must be an object.`);
 	} else {
 		validateNpcConversation(value.conversation, `${path}.conversation`, errors);
+	}
+}
+
+function validateNpcPlacement(value, path, errors) {
+	if (value === undefined) {
+		return;
+	}
+	if (!isObject(value)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+	if (value.mode !== "absolute" && value.mode !== "walkable-ground") {
+		errors.push(`${path}.mode must be absolute or walkable-ground.`);
+	}
+	if (value.heightOffset !== undefined) {
+		validateFiniteNumber(value.heightOffset, `${path}.heightOffset`, errors);
 	}
 }
 

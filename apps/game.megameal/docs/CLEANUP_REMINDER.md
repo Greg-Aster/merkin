@@ -15,7 +15,6 @@ Required cleanup and verification:
    - ARCHITECTURE.md
    - GAME_ENGINE_DESIGN_DOCUMENT.md
    - ENGINE_CONTRACT_REGISTER.md
-   - docs/GAME_ENGINE_MIGRATION_PLAN.md
    - docs/Done/SCENE_ENVIRONMENT_FEATURE_PLAN.md and docs/SKYBOX_FUTURE_FEATURES_IMPLEMENTATION_PLAN.md when touching scene environment, sky, atmosphere, video sky, or reflection probe work
 
 2. Confirm the architecture boundaries still hold:

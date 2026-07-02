@@ -71,6 +71,7 @@ export type StaticEnvironmentCollisionPackage = {
 };
 
 export type ResolvedStaticEnvironmentCollisionPackage = {
+	readonly products: readonly StaticEnvironmentCollisionProduct[];
 	readonly prefabs: readonly PrefabData[];
 	readonly instances: readonly LevelData["instances"][number][];
 	readonly requiredCollisionStableIds: readonly string[];
@@ -89,6 +90,7 @@ export function resolveStaticEnvironmentCollisionPackage(
 
 	if (products.length === 0) {
 		return {
+			products: [],
 			prefabs: [],
 			instances: [],
 			requiredCollisionStableIds: [],
@@ -97,6 +99,7 @@ export function resolveStaticEnvironmentCollisionPackage(
 	}
 
 	return {
+		products,
 		prefabs: [staticEnvironmentCollisionChunkPrefab],
 		instances: products.flatMap((product) =>
 			product.chunks.map((chunk) => ({

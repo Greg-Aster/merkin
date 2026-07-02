@@ -5,6 +5,7 @@ import type {
 	GameDevBridgeSnapshot,
 } from "../../app/gameDevBridge.js";
 import PerformanceConfigEditor from "../PerformanceConfigEditor.svelte";
+import NpcEditorPanel from "./NpcEditorPanel.svelte";
 import StructuredValueEditor from "./StructuredValueEditor.svelte";
 
 const LEVELS_API_PATH = "/__megameal-editor-api/levels";
@@ -621,9 +622,6 @@ const selectedInstanceCount = $derived(draft?.level.instances.length ?? 0);
 const localAssetCount = $derived(draft?.assets.local.length ?? 0);
 const localPrefabCount = $derived(draft?.prefabs.local.length ?? 0);
 const npcGroupCount = $derived(workspace?.npcPackage.groups.length ?? 0);
-const npcArchetypeCount = $derived(
-	workspace?.npcPackage.archetypes.length ?? 0,
-);
 const npcInstanceCount = $derived(
 	workspace?.npcPackage.groups.reduce((count, group) => {
 		const instances = group.data.instances;
@@ -851,6 +849,16 @@ function dirtyNpcPackageForSave(): LevelNpcPackage | undefined {
 				archetypes: [],
 			}
 		: undefined;
+}
+
+function updateNpcPackage(npcPackage: LevelNpcPackage): void {
+	if (!workspace) {
+		return;
+	}
+	workspace = {
+		...workspace,
+		npcPackage,
+	};
 }
 
 function sourceHashesForSave(
@@ -1336,60 +1344,6 @@ function updateNpcInstanceLightField(
 	updateNpcInstanceRecordField(groupIndex, instanceIndex, "light", key, value);
 }
 
-function updateNpcGroupDefaultRecordField(
-	groupIndex: number | undefined,
-	recordKey: string,
-	key: string,
-	value: JsonValue,
-): void {
-	if (!workspace || groupIndex === undefined) {
-		return;
-	}
-	const groups = workspace.npcPackage.groups.map((group, currentGroupIndex) => {
-		if (currentGroupIndex !== groupIndex) {
-			return group;
-		}
-		const defaults = toRecord(group.data.defaults);
-		const record = toRecord(defaults[recordKey]);
-		return {
-			...group,
-			data: {
-				...group.data,
-				defaults: {
-					...defaults,
-					[recordKey]: {
-						...record,
-						[key]: value,
-					},
-				},
-			},
-		};
-	});
-	workspace = {
-		...workspace,
-		npcPackage: {
-			...workspace.npcPackage,
-			groups,
-		},
-	};
-}
-
-function updateNpcGroupLightPeriodValue(
-	groupIndex: number | undefined,
-	periodIndex: number,
-	value: number,
-): void {
-	const modulation = npcGroupDefaultRecord(groupIndex, "lightModulation");
-	const period = numberTuple2(modulation.blinkPeriodSeconds, [8, 15]);
-	period[periodIndex] = value;
-	updateNpcGroupDefaultRecordField(
-		groupIndex,
-		"lightModulation",
-		"blinkPeriodSeconds",
-		period,
-	);
-}
-
 function updateNpcInstanceField(
 	groupIndex: number | undefined,
 	instanceIndex: number,
@@ -1451,27 +1405,6 @@ function updateNpcInstanceRecordField(
 	});
 }
 
-function updateNpcInstanceTransformVector(
-	groupIndex: number | undefined,
-	instanceIndex: number,
-	key: "position" | "scale",
-	axisIndex: number,
-	value: number,
-): void {
-	const instance = npcInstanceAt(groupIndex, instanceIndex);
-	if (!instance) {
-		return;
-	}
-	const fallback = key === "scale" ? [1, 1, 1] : [0, 0, 0];
-	const transform = toRecord(instance.transform);
-	const vector = vector3Value(transform[key], fallback);
-	vector[axisIndex] = value;
-	updateNpcInstanceField(groupIndex, instanceIndex, "transform", {
-		...transform,
-		[key]: vector,
-	});
-}
-
 function npcInstanceAt(
 	groupIndex: number | undefined,
 	instanceIndex: number,
@@ -1485,18 +1418,6 @@ function npcInstanceAt(
 		: [];
 	const instance = instances[instanceIndex];
 	return hasRecordValue(instance) ? instance : undefined;
-}
-
-function npcGroupDefaultRecord(
-	groupIndex: number | undefined,
-	recordKey: string,
-): Record<string, JsonValue> {
-	if (!workspace || groupIndex === undefined) {
-		return {};
-	}
-	const group = workspace.npcPackage.groups[groupIndex];
-	const defaults = toRecord(group?.data.defaults);
-	return toRecord(defaults[recordKey]);
 }
 
 function updateSkybox<K extends keyof LevelPackageDocument["skybox"]>(
@@ -2712,508 +2633,16 @@ function numberTuple2(
 									)}
 							/>
 						{:else if activeTab === "NPCs"}
-							<div class="npc-workbench">
-								<section class="lighting-group" aria-label="NPC groups">
-									<div class="lighting-group-header">
-										<div>
-											<p>Local NPC Groups</p>
-											<h2>{npcGroupCount} Files</h2>
-										</div>
-										<span class="lighting-badge">editable</span>
-									</div>
-									{#if workspace?.npcPackage.groups.length}
-										{#each workspace.npcPackage.groups as group, groupIndex (group.name)}
-											<article class="lighting-source">
-												<div class="lighting-source-header">
-													<div>
-														<h3>{String(group.data.archetype ?? group.name)}</h3>
-														<p>{group.path}</p>
-													</div>
-													<button
-														type="button"
-														disabled={!workspace || busy}
-														onclick={() => void saveLevel(String(group.data.archetype ?? group.name))}
-													>
-														Save
-													</button>
-												</div>
-												<div class="npc-instance-form">
-													<div class="lighting-source-header">
-														<div>
-															<h3>Population Light Defaults</h3>
-															<p>{group.name} -> defaults.lightModulation</p>
-														</div>
-														<span class="lighting-badge">group</span>
-														</div>
-														<div class="lighting-fields">
-															<label>
-																<span>Active Fraction</span>
-																<input
-																type="number"
-																min="0"
-																max="1"
-																step="0.01"
-																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").activeLightPercent, 1)}
-																disabled={busy}
-																oninput={(event) =>
-																	updateNpcGroupDefaultRecordField(
-																		groupIndex,
-																		"lightModulation",
-																		"activeLightPercent",
-																		readAlphaNumberInput(event.currentTarget, 1),
-																	)}
-															/>
-														</label>
-														<label>
-															<span>Blink Min Seconds</span>
-															<input
-																type="number"
-																min="0.25"
-																step="0.1"
-																value={numberTuple2(npcGroupDefaultRecord(groupIndex, "lightModulation").blinkPeriodSeconds, [8, 15])[0]}
-																disabled={busy}
-																oninput={(event) =>
-																	updateNpcGroupLightPeriodValue(
-																		groupIndex,
-																		0,
-																		readNonNegativeNumberInput(event.currentTarget, 8),
-																	)}
-															/>
-														</label>
-														<label>
-															<span>Blink Max Seconds</span>
-															<input
-																type="number"
-																min="0.25"
-																step="0.1"
-																value={numberTuple2(npcGroupDefaultRecord(groupIndex, "lightModulation").blinkPeriodSeconds, [8, 15])[1]}
-																disabled={busy}
-																oninput={(event) =>
-																	updateNpcGroupLightPeriodValue(
-																		groupIndex,
-																		1,
-																		readNonNegativeNumberInput(event.currentTarget, 15),
-																	)}
-															/>
-														</label>
-														<label>
-															<span>Blink Fade Seconds</span>
-															<input
-																type="number"
-																min="0"
-																step="0.1"
-																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").blinkFadeSeconds, 0)}
-																disabled={busy}
-																oninput={(event) =>
-																	updateNpcGroupDefaultRecordField(
-																		groupIndex,
-																		"lightModulation",
-																		"blinkFadeSeconds",
-																		readNonNegativeNumberInput(event.currentTarget),
-																	)}
-															/>
-														</label>
-														<label>
-															<span>Minimum Intensity</span>
-															<input
-																type="number"
-																min="0"
-																max="1"
-																step="0.01"
-																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").minimumIntensityScale, 0)}
-																disabled={busy}
-																oninput={(event) =>
-																	updateNpcGroupDefaultRecordField(
-																		groupIndex,
-																		"lightModulation",
-																		"minimumIntensityScale",
-																		readAlphaNumberInput(event.currentTarget),
-																	)}
-															/>
-														</label>
-														<label>
-															<span>Pulse Speed</span>
-															<input
-																type="number"
-																min="0"
-																step="0.01"
-																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").pulseSpeed, 0)}
-																disabled={busy}
-																oninput={(event) =>
-																	updateNpcGroupDefaultRecordField(
-																		groupIndex,
-																		"lightModulation",
-																		"pulseSpeed",
-																		readNonNegativeNumberInput(event.currentTarget),
-																	)}
-															/>
-														</label>
-															<label>
-																<span>Pulse Softness</span>
-																<input
-																type="number"
-																min="0"
-																max="1"
-																step="0.01"
-																value={numericField(npcGroupDefaultRecord(groupIndex, "lightModulation").pulseSoftness, 1)}
-																disabled={busy}
-																oninput={(event) =>
-																	updateNpcGroupDefaultRecordField(
-																		groupIndex,
-																		"lightModulation",
-																		"pulseSoftness",
-																		readAlphaNumberInput(event.currentTarget, 1),
-																	)}
-																/>
-															</label>
-														</div>
-													</div>
-												{#if npcGroupInstances(group).length}
-													{#each npcGroupInstances(group) as instance, instanceIndex (String(instance.stableId ?? instance.id ?? instanceIndex))}
-														<div class="npc-instance-form">
-															<div class="lighting-source-header">
-																<div>
-																	<h3>{String(instance.displayName ?? instance.stableId ?? instance.id)}</h3>
-																	<p>{group.name} -> instances[{instanceIndex}]</p>
-																</div>
-																<span class="lighting-badge">
-																	{String(instance.stableId ?? "unstable")}
-																</span>
-															</div>
-
-															<div class="lighting-fields">
-																<label>
-																	<span>ID</span>
-																	<input
-																		value={String(instance.id ?? "")}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceField(
-																				groupIndex,
-																				instanceIndex,
-																				"id",
-																				event.currentTarget.value,
-																			)}
-																	/>
-																</label>
-																<label>
-																	<span>Stable ID</span>
-																	<input
-																		value={String(instance.stableId ?? "")}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceField(
-																				groupIndex,
-																				instanceIndex,
-																				"stableId",
-																				event.currentTarget.value,
-																			)}
-																	/>
-																</label>
-																<label>
-																	<span>Display Name</span>
-																	<input
-																		value={String(instance.displayName ?? "")}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceField(
-																				groupIndex,
-																				instanceIndex,
-																				"displayName",
-																				event.currentTarget.value,
-																			)}
-																	/>
-																</label>
-																{#each vector3Value(toRecord(instance.transform).position, [0, 0, 0]) as positionValue, axisIndex}
-																	<label>
-																		<span>Position {["X", "Y", "Z"][axisIndex]}</span>
-																		<input
-																			type="number"
-																			step="0.1"
-																			value={positionValue}
-																			disabled={busy}
-																			oninput={(event) =>
-																				updateNpcInstanceTransformVector(
-																					groupIndex,
-																					instanceIndex,
-																					"position",
-																					axisIndex,
-																					readFiniteNumberInput(event.currentTarget),
-																				)}
-																		/>
-																	</label>
-																{/each}
-																{#each vector3Value(toRecord(instance.transform).scale, [1, 1, 1]) as scaleValue, axisIndex}
-																	<label>
-																		<span>Scale {["X", "Y", "Z"][axisIndex]}</span>
-																		<input
-																			type="number"
-																			min="0"
-																			step="0.1"
-																			value={scaleValue}
-																			disabled={busy}
-																			oninput={(event) =>
-																				updateNpcInstanceTransformVector(
-																					groupIndex,
-																					instanceIndex,
-																					"scale",
-																					axisIndex,
-																					readNonNegativeNumberInput(event.currentTarget, 1),
-																				)}
-																		/>
-																	</label>
-																{/each}
-																<label>
-																	<span>Movement Radius</span>
-																	<input
-																		type="number"
-																		min="0"
-																		step="0.1"
-																		value={numericField(toRecord(instance.movement).radius)}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"movement",
-																				"radius",
-																				readNonNegativeNumberInput(event.currentTarget),
-																			)}
-																	/>
-																</label>
-																<label>
-																	<span>Movement Speed</span>
-																	<input
-																		type="number"
-																		min="0"
-																		step="0.01"
-																		value={numericField(toRecord(instance.movement).speed)}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"movement",
-																				"speed",
-																				readNonNegativeNumberInput(event.currentTarget),
-																			)}
-																	/>
-																</label>
-																<label>
-																	<span>Hover Height</span>
-																	<input
-																		type="number"
-																		step="0.1"
-																		value={numericField(toRecord(instance.movement).hoverHeight)}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"movement",
-																				"hoverHeight",
-																				readFiniteNumberInput(event.currentTarget),
-																			)}
-																	/>
-																</label>
-																<label>
-																	<span>Bob Amplitude</span>
-																	<input
-																		type="number"
-																		min="0"
-																		step="0.01"
-																		value={numericField(toRecord(instance.movement).bobAmplitude)}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"movement",
-																				"bobAmplitude",
-																				readNonNegativeNumberInput(event.currentTarget),
-																			)}
-																	/>
-																</label>
-																<label>
-																	<span>Bob Speed</span>
-																	<input
-																		type="number"
-																		min="0"
-																		step="0.01"
-																		value={numericField(toRecord(instance.movement).bobSpeed)}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"movement",
-																				"bobSpeed",
-																				readNonNegativeNumberInput(event.currentTarget),
-																			)}
-																	/>
-																</label>
-																<label>
-																	<span>Light Phase</span>
-																	<input
-																		type="number"
-																		min="0"
-																		max="1"
-																		step="0.01"
-																		value={numericField(toRecord(instance.lightModulation).phase)}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"lightModulation",
-																				"phase",
-																				readNonNegativeNumberInput(event.currentTarget),
-																			)}
-																	/>
-																</label>
-																<label>
-																	<span>Prompt</span>
-																	<input
-																		value={String(toRecord(instance.interaction).prompt ?? "Listen")}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"interaction",
-																				"prompt",
-																				event.currentTarget.value,
-																			)}
-																	/>
-																</label>
-																<label>
-																	<span>Activation Radius</span>
-																	<input
-																		type="number"
-																		min="0"
-																		step="0.1"
-																		value={numericField(toRecord(instance.interaction).activationRadius)}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"interaction",
-																				"activationRadius",
-																				readNonNegativeNumberInput(event.currentTarget),
-																			)}
-																	/>
-																</label>
-															</div>
-
-															<div class="npc-conversation-fields">
-																<label>
-																	<span>Conversation Title</span>
-																	<input
-																		value={String(toRecord(instance.conversation).title ?? "")}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"conversation",
-																				"title",
-																				event.currentTarget.value,
-																			)}
-																	/>
-																</label>
-																<label>
-																	<span>Conversation Excerpt</span>
-																	<input
-																		value={String(toRecord(instance.conversation).excerpt ?? "")}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"conversation",
-																				"excerpt",
-																				event.currentTarget.value,
-																			)}
-																	/>
-																</label>
-																<label>
-																	<span>Conversation Body</span>
-																	<textarea
-																		value={String(toRecord(instance.conversation).body ?? "")}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"conversation",
-																				"body",
-																				event.currentTarget.value,
-																			)}
-																	></textarea>
-																</label>
-																<label>
-																	<span>Dialog Duration Ms</span>
-																	<input
-																		type="number"
-																		min="0"
-																		step="100"
-																		value={numericField(toRecord(instance.conversation).durationMs)}
-																		disabled={busy}
-																		oninput={(event) =>
-																			updateNpcInstanceRecordField(
-																				groupIndex,
-																				instanceIndex,
-																				"conversation",
-																				"durationMs",
-																				readNonNegativeNumberInput(event.currentTarget),
-																			)}
-																	/>
-																</label>
-															</div>
-														</div>
-													{/each}
-												{:else}
-													<p class="empty-state">No NPC instances found in this group.</p>
-												{/if}
-											</article>
-										{/each}
-									{:else}
-										<p class="empty-state">No local NPC group files found.</p>
-									{/if}
-								</section>
-
-								<section class="lighting-group" aria-label="NPC archetypes">
-									<div class="lighting-group-header">
-										<div>
-											<p>Global NPC Archetypes</p>
-											<h2>{npcArchetypeCount} Files</h2>
-										</div>
-										<span class="lighting-badge">read-only</span>
-									</div>
-									{#if workspace?.npcPackage.archetypes.length}
-										{#each workspace.npcPackage.archetypes as archetype (archetype.name)}
-											<article class="lighting-source readonly-source">
-												<div class="lighting-source-header">
-													<div>
-														<h3>{String(archetype.data.id ?? archetype.name)}</h3>
-														<p>{archetype.path}</p>
-													</div>
-													<span class="lighting-badge">archetype</span>
-												</div>
-												<StructuredValueEditor
-													value={archetype.data as JsonValue}
-													label={archetype.name}
-													disabled
-													onChange={() => undefined}
-												/>
-											</article>
-										{/each}
-									{:else}
-										<p class="empty-state">No global NPC archetypes referenced.</p>
-									{/if}
-								</section>
-							</div>
+							{#if workspace}
+								<NpcEditorPanel
+									npcPackage={workspace.npcPackage}
+									disabled={busy}
+									onChange={updateNpcPackage}
+									onSave={(label) => void saveLevel(label)}
+								/>
+							{:else}
+								<p class="empty-state">No level selected.</p>
+							{/if}
 						{:else if activeTab === "Lighting"}
 							<div class="lighting-workbench">
 								<section class="lighting-group" aria-label="Level ambience">

@@ -3,7 +3,7 @@
 Status: current framework register
 Last verified: 2026-06-06
 
-This file is the single ownership map for `apps/game.megameal` engine contracts. It maps the contracts from `GAME_ENGINE_DESIGN_DOCUMENT.md` and `docs/GAME_ENGINE_MIGRATION_PLAN.md` to their current owners, writers, consumers, validation, and forbidden shortcuts.
+This file is the single ownership map for `apps/game.megameal` engine contracts. It maps current engine contracts to their owners, writers, consumers, validation, and forbidden shortcuts.
 
 Before changing a runtime, data, adapter, authoring, or validation contract, update the matching row here. If no row exists, add one before editing implementation. The goal is one source of truth per behavior, explicit consumers, repeatable validation, and no hidden runtime repair.
 
@@ -77,7 +77,6 @@ Do not add fallback behavior as a substitute for moving the contract.
 
 | Packet | Status | Notes |
 | --- | --- | --- |
-| Migration plan document | Current; migration execution incomplete | `docs/GAME_ENGINE_MIGRATION_PLAN.md` defines the contract-first migration approach and tracks packet progress. Remaining work includes broader Miranda terrain/cooked collision coverage, expanded/spatial audio, durable import/generation/editor work, and old-app retirement. |
 | Contract register | Current | This root file is the canonical register. Do not recreate a duplicate under `docs/`. |
 | Old-engine import ban | Implemented | `audit:engine-boundaries` rejects source imports/references into sibling `apps/game`. |
 | Legacy runtime cutover | Implemented root-script cutover | Normal root scripts now run/deploy `@merkin/game-megameal`; the old `@merkin/game` app is retained behind explicit `:legacy` aliases for reference-only checks. |

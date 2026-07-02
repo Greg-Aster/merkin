@@ -61,9 +61,9 @@ backgrounds, environment maps, or probe resources.
   `public/assets/environment/samples/` and register them through game asset data.
 - [x] Add focused scene-environment contract validation instead of growing unrelated
   catch-all tests.
-- [x] Update `GAME_ENGINE_DESIGN_DOCUMENT.md`, `ARCHITECTURE.md`,
-  `ENGINE_CONTRACT_REGISTER.md`, and `docs/GAME_ENGINE_MIGRATION_PLAN.md` as
-  the packet moves from active to implemented foundation.
+- [x] Update `GAME_ENGINE_DESIGN_DOCUMENT.md`, `ARCHITECTURE.md`, and
+  `ENGINE_CONTRACT_REGISTER.md` as the packet moves from active to implemented
+  foundation.
 
 ## Implemented Foundation
 

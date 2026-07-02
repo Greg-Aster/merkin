@@ -9,7 +9,6 @@ validation. It is a coordination document, not a replacement for:
 - `ARCHITECTURE.md`
 - `GAME_ENGINE_DESIGN_DOCUMENT.md`
 - `ENGINE_CONTRACT_REGISTER.md`
-- `docs/GAME_ENGINE_MIGRATION_PLAN.md`
 - `docs/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md`
 - `docs/MIGRATION_HANDOFF_2026-06-06.md`
 - `docs/CLEANUP_REMINDER.md`

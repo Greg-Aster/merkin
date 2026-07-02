@@ -11,6 +11,15 @@ const levelEditorWorkspaceSource = await readFile(
 	join(appRoot, "src/editor/level/LevelEditorWorkspace.svelte"),
 	"utf8",
 );
+const npcEditorPanelSource = await readFile(
+	join(appRoot, "src/editor/level/NpcEditorPanel.svelte"),
+	"utf8",
+);
+const npcEditorModelSource = await readFile(
+	join(appRoot, "src/editor/level/npcEditorModel.ts"),
+	"utf8",
+);
+const npcEditorSource = `${npcEditorPanelSource}\n${npcEditorModelSource}`;
 const editorDevApiSource = await readFile(
 	join(appRoot, "scripts/editor-dev-api.mjs"),
 	"utf8",
@@ -364,8 +373,8 @@ assert.doesNotMatch(
 );
 assert.match(
 	levelEditorWorkspaceSource,
-	/savedNpcPackage/,
-	"level editor dirty state must include editable NPC package changes",
+	/NpcEditorPanel/,
+	"level editor workspace must delegate the NPC tab to the focused NPC editor panel",
 );
 assert.match(
 	levelEditorWorkspaceSource,
@@ -378,24 +387,26 @@ assert.match(
 	"level editor NPC light rows must not offer light kinds rejected by NPC save validation",
 );
 for (const editorHandle of [
-	"updateNpcInstanceField",
-	"updateNpcInstanceRecordField",
-	"updateNpcInstanceTransformVector",
-	"updateNpcGroupDefaultRecordField",
-	"updateNpcGroupLightPeriodValue",
+	"updateInstanceField",
+	"updateInstanceRecordField",
+	"updateInstanceTransformVector",
+	"updateGroupDefaultRecordField",
+	"updateGroupLightPeriodValue",
+	"npcCollectionSections",
+	"updateCollectionField",
+	"Placement Mode",
+	"Ground Height Offset",
+	"Collection Label",
 	"Movement Radius",
 	"Light Phase",
-	"Max Real Lights",
 	"Active Fraction",
 	"Blink Min Seconds",
 	"Blink Max Seconds",
-	"Near Light Range",
-	"Far Light Range",
 	"Activation Radius",
 	"Conversation Body",
 ]) {
 	assert.match(
-		levelEditorWorkspaceSource,
+		npcEditorSource,
 		new RegExp(editorHandle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
 		`level editor NPC tab must expose ${editorHandle} controls for level-owned NPC data`,
 	);

@@ -19,7 +19,7 @@ Observatory advanced in one collision packet:
    `ObservatoryCollisionContract` over `CollisionPolicy`,
    `WalkableCollisionContract`, and `LevelReadinessContract`.
 
-The full migration plan is not complete. Do not mark the migration complete.
+The full migration is not complete. Do not mark the migration complete.
 
 ## Completed This Session
 
@@ -56,8 +56,8 @@ The full migration plan is not complete. Do not mark the migration complete.
   walkable stable IDs must also have synced colliders.
 - Extended the existing `scripts/test-runtime-scene-contract.ts`; no new
   one-off scripts were added.
-- Updated `ARCHITECTURE.md`, `GAME_ENGINE_DESIGN_DOCUMENT.md`,
-  `ENGINE_CONTRACT_REGISTER.md`, and `docs/GAME_ENGINE_MIGRATION_PLAN.md`.
+- Updated `ARCHITECTURE.md`, `GAME_ENGINE_DESIGN_DOCUMENT.md`, and
+  `ENGINE_CONTRACT_REGISTER.md`.
 
 ## Validation Run
 
@@ -123,7 +123,6 @@ Expected modified files:
 - `ARCHITECTURE.md`
 - `ENGINE_CONTRACT_REGISTER.md`
 - `GAME_ENGINE_DESIGN_DOCUMENT.md`
-- `docs/GAME_ENGINE_MIGRATION_PLAN.md`
 - `docs/MIGRATION_ACTIVE_WORK_PLAN_2026-06-06.md`
 - `docs/MIGRATION_AGENT_ALIGNMENT_2026-06-06.md`
 - `docs/MIGRATION_HANDOFF_2026-06-06.md`
