@@ -34,13 +34,16 @@
     "deploy:dndiy": "pnpm build:dndiy && find DNDIY.github.io/dist -size +25M -delete && bash ./scripts/deploy-pages-with-retry.sh DNDIY.github.io/dist merkin-dndiy",
     "deploy:temporal": "pnpm build:temporal && bash ./scripts/deploy-pages-with-retry.sh Temporal-Flow/dist merkin-temporal",
     "deploy:travel": "pnpm build:travel && bash ./scripts/deploy-pages-with-retry.sh apps/travel/dist merkin-travel",
-    "deploy:all": "pnpm build:megameal && pnpm deploy:megameal:static && pnpm deploy:dndiy && pnpm deploy:temporal && pnpm deploy:travel && pnpm build:game && pnpm deploy:game:static",
+    "deploy:all": "pnpm build:megameal && pnpm deploy:megameal:static && pnpm deploy:dndiy && pnpm deploy:temporal && pnpm deploy:travel && pnpm deploy:ainekio && pnpm build:game && pnpm deploy:game:static",
     "package:blender-scene-bridge": "bash apps/blender/package-scene-bridge-addon.sh",
     "audit:legacy-game-references": "node scripts/audit-legacy-game-references.mjs",
     "lint:all": "pnpm -r lint",
     "lint:fix:all": "pnpm -r lint:fix",
     "format:all": "pnpm -r format",
-    "type-check:all": "pnpm -r type-check"
+    "type-check:all": "pnpm -r type-check",
+    "dev:ainekio": "pnpm --filter @merkin/ainekio dev",
+    "build:ainekio": "pnpm --filter @merkin/ainekio build",
+    "deploy:ainekio": "pnpm build:ainekio && bash ./scripts/deploy-pages-with-retry.sh apps/ainekio/dist merkin-ainekio"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",

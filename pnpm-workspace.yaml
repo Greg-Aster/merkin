@@ -2,6 +2,7 @@ packages:
   - 'apps/game.megameal'
   - 'apps/megameal'
   - 'apps/travel'
+  - 'apps/ainekio'
   # Sites - blog-only sites in workspace
   - 'Temporal-Flow'
   - 'DNDIY.github.io'
