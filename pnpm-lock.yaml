@@ -570,9 +570,6 @@ importers:
       mermaid:
         specifier: ^11.16.0
         version: 11.16.0
-      peerjs:
-        specifier: ^1.5.5
-        version: 1.5.5
       svelte:
         specifier: 5.26.2
         version: 5.26.2
