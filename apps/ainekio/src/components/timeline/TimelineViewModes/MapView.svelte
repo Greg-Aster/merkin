@@ -10,7 +10,7 @@ import TimelineCard from '../TimelineCard.svelte' // Import the same card compon
 
 // Props
 export let events: TimelineEvent[] = []
-export let background: string = '/assets/banner/0001.png'
+export let background: string = '/assets/banner/0001.webp'
 export let selectedEvent: TimelineEvent | null = null
 
 // Create Svelte event dispatcher

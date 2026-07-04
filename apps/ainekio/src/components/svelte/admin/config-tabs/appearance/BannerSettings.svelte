@@ -41,7 +41,7 @@ function getImageUrl(path) {
   if (!path) return null
 
   // Extract the filename - handle both formats:
-  // 1. "src/assets/banner/0001.png" (from configuration)
+  // 1. "src/assets/banner/0001.webp" (from configuration)
   // 2. Object format (when imported in the TypeScript file)
   let filename
   if (typeof path === 'string') {
@@ -163,7 +163,7 @@ function handleDefaultBannerTypeChange(event) {
       title: '',
       startYear: null,
       endYear: null,
-      background: '/public/posts/timeline/universe.png',
+      background: '/public/posts/timeline/universe.webp',
       compact: false,
       height: '70vh',
     }
@@ -242,14 +242,16 @@ function handleDefaultBannerTypeChange(event) {
                 class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
               >
                 <option value="" class="text-neutral-900 dark:text-neutral-100">Select an image</option>
-                <option value="/src/assets/banner/0001.png" class="text-neutral-900 dark:text-neutral-100">0001.png</option>
-                <option value="/src/assets/banner/0002.png" class="text-neutral-900 dark:text-neutral-100">0002.png</option>
-                <option value="/src/assets/banner/0003.png" class="text-neutral-900 dark:text-neutral-100">0003.png</option>
-                <option value="/src/assets/banner/0004.png" class="text-neutral-900 dark:text-neutral-100">0004.png</option>
-                <option value="/src/assets/banner/0005.png" class="text-neutral-900 dark:text-neutral-100">0005.png</option>
-                <option value="/src/assets/banner/0006.png" class="text-neutral-900 dark:text-neutral-100">0006.png</option>
-                <option value="/src/assets/banner/0007.png" class="text-neutral-900 dark:text-neutral-100">0007.png</option>
-                <option value="/src/assets/banner/0008.png" class="text-neutral-900 dark:text-neutral-100">0008.png</option>
+                <option value="/src/assets/banner/0001.webp" class="text-neutral-900 dark:text-neutral-100">0001.webp</option>
+                <option value="/src/assets/banner/0002.webp" class="text-neutral-900 dark:text-neutral-100">0002.webp</option>
+                <option value="/src/assets/banner/0003.webp" class="text-neutral-900 dark:text-neutral-100">0003.webp</option>
+                <option value="/src/assets/banner/0004.webp" class="text-neutral-900 dark:text-neutral-100">0004.webp</option>
+                <option value="/src/assets/banner/0005.webp" class="text-neutral-900 dark:text-neutral-100">0005.webp</option>
+                <option value="/src/assets/banner/0006.webp" class="text-neutral-900 dark:text-neutral-100">0006.webp</option>
+                <option value="/src/assets/banner/0007.webp" class="text-neutral-900 dark:text-neutral-100">0007.webp</option>
+                <option value="/src/assets/banner/0008.webp" class="text-neutral-900 dark:text-neutral-100">0008.webp</option>
+                <option value="/src/assets/banner/0009.webp" class="text-neutral-900 dark:text-neutral-100">0009.webp</option>
+                <option value="/src/assets/banner/0010.webp" class="text-neutral-900 dark:text-neutral-100">0010.webp</option>
             </select>
             <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
               Select the image to use for the banner
@@ -336,7 +338,7 @@ function handleDefaultBannerTypeChange(event) {
                 bind:value={bannerConfig.defaultBannerData.background}
                 on:input={handleChange}
                 class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-                placeholder="/public/posts/timeline/universe.png"
+                placeholder="/public/posts/timeline/universe.webp"
               />
               <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                 Path to the background image for the timeline
@@ -454,14 +456,16 @@ function handleDefaultBannerTypeChange(event) {
             }}
           >
             <option value="" class="text-neutral-900 dark:text-neutral-100">Select a banner image</option>
-            <option value="src/assets/banner/0001.png"class="text-neutral-900 dark:text-neutral-100">0001.png</option>
-            <option value="src/assets/banner/0002.png"class="text-neutral-900 dark:text-neutral-100">0002.png</option>
-            <option value="src/assets/banner/0003.png"class="text-neutral-900 dark:text-neutral-100">0003.png</option>
-            <option value="src/assets/banner/0004.png"class="text-neutral-900 dark:text-neutral-100">0004.png</option>
-            <option value="src/assets/banner/0005.png"class="text-neutral-900 dark:text-neutral-100">0005.png</option>
-            <option value="src/assets/banner/0006.png"class="text-neutral-900 dark:text-neutral-100">0006.png</option>
-            <option value="src/assets/banner/0007.png"class="text-neutral-900 dark:text-neutral-100">0007.png</option>
-            <option value="src/assets/banner/0008.png"class="text-neutral-900 dark:text-neutral-100">0008.png</option>
+            <option value="src/assets/banner/0001.webp"class="text-neutral-900 dark:text-neutral-100">0001.webp</option>
+            <option value="src/assets/banner/0002.webp"class="text-neutral-900 dark:text-neutral-100">0002.webp</option>
+            <option value="src/assets/banner/0003.webp"class="text-neutral-900 dark:text-neutral-100">0003.webp</option>
+            <option value="src/assets/banner/0004.webp"class="text-neutral-900 dark:text-neutral-100">0004.webp</option>
+            <option value="src/assets/banner/0005.webp"class="text-neutral-900 dark:text-neutral-100">0005.webp</option>
+            <option value="src/assets/banner/0006.webp"class="text-neutral-900 dark:text-neutral-100">0006.webp</option>
+            <option value="src/assets/banner/0007.webp"class="text-neutral-900 dark:text-neutral-100">0007.webp</option>
+            <option value="src/assets/banner/0008.webp"class="text-neutral-900 dark:text-neutral-100">0008.webp</option>
+            <option value="src/assets/banner/0009.webp"class="text-neutral-900 dark:text-neutral-100">0009.webp</option>
+            <option value="src/assets/banner/0010.webp"class="text-neutral-900 dark:text-neutral-100">0010.webp</option>
           </select>
           <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
             Choose a banner image from your project assets
@@ -522,14 +526,16 @@ function handleDefaultBannerTypeChange(event) {
                 }}
               >
                 <option value="" class="text-neutral-900 dark:text-neutral-100">Add banner to sequence...</option>
-                <option value="src/assets/banner/0001.png" class="text-neutral-900 dark:text-neutral-100">0001.png</option>
-                <option value="src/assets/banner/0002.png" class="text-neutral-900 dark:text-neutral-100">0002.png</option>
-                <option value="src/assets/banner/0003.png" class="text-neutral-900 dark:text-neutral-100">0003.png</option>
-                <option value="src/assets/banner/0004.png" class="text-neutral-900 dark:text-neutral-100">0004.png</option>
-                <option value="src/assets/banner/0005.png" class="text-neutral-900 dark:text-neutral-100">0005.png</option>
-                <option value="src/assets/banner/0006.png" class="text-neutral-900 dark:text-neutral-100">0006.png</option>
-                <option value="src/assets/banner/0007.png" class="text-neutral-900 dark:text-neutral-100">0007.png</option>
-                <option value="src/assets/banner/0008.png" class="text-neutral-900 dark:text-neutral-100">0008.png</option>
+                <option value="src/assets/banner/0001.webp" class="text-neutral-900 dark:text-neutral-100">0001.webp</option>
+                <option value="src/assets/banner/0002.webp" class="text-neutral-900 dark:text-neutral-100">0002.webp</option>
+                <option value="src/assets/banner/0003.webp" class="text-neutral-900 dark:text-neutral-100">0003.webp</option>
+                <option value="src/assets/banner/0004.webp" class="text-neutral-900 dark:text-neutral-100">0004.webp</option>
+                <option value="src/assets/banner/0005.webp" class="text-neutral-900 dark:text-neutral-100">0005.webp</option>
+                <option value="src/assets/banner/0006.webp" class="text-neutral-900 dark:text-neutral-100">0006.webp</option>
+                <option value="src/assets/banner/0007.webp" class="text-neutral-900 dark:text-neutral-100">0007.webp</option>
+                <option value="src/assets/banner/0008.webp" class="text-neutral-900 dark:text-neutral-100">0008.webp</option>
+                <option value="src/assets/banner/0009.webp" class="text-neutral-900 dark:text-neutral-100">0009.webp</option>
+                <option value="src/assets/banner/0010.webp" class="text-neutral-900 dark:text-neutral-100">0010.webp</option>
               </select>
               <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                 Select banners to add to the animation sequence

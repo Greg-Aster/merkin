@@ -1,15 +1,47 @@
 import type { RuntimeSnapshot } from "../engine/client-api/index.js";
 import type { PerformanceDiagnosticsState } from "../game/performance/index.js";
+import type { MultiplayerSnapshot } from "../multiplayer/index.js";
 
-const CHANNEL_NAME = "megameal:game-dev-bridge:v1";
-const SNAPSHOT_STORAGE_KEY = "megameal.gameDevBridge.latestSnapshot.v1";
-const HEARTBEAT_INTERVAL_MS = 1000;
+export const DEFAULT_GAME_DEV_BRIDGE_BROADCAST_LOCATION =
+	"megameal:game-dev-bridge:v1";
+const SNAPSHOT_STORAGE_KEY_PREFIX =
+	"megameal.gameDevBridge.latestSnapshot.v1";
 
-export type GameDevBridgeRuntimeScene = {
-	readonly id: string;
-	readonly levelId: string;
-	readonly label: string;
-	readonly sourceId: string;
+export type GameDevBridgeChannels = {
+	readonly text: boolean;
+	readonly location: boolean;
+	readonly state: boolean;
+	readonly snapshots: boolean;
+	readonly levelMap: boolean;
+};
+
+export type GameDevBridgeSettings = {
+	readonly enabled: boolean;
+	readonly broadcastLocation: string;
+	readonly channels: GameDevBridgeChannels;
+};
+
+export type GameDevBridgeSnapshotReason =
+	| "startup"
+	| "scene"
+	| "multiplayer"
+	| "location"
+	| "state"
+	| "visual"
+	| "map"
+	| "commandResult"
+	| "manual";
+
+export const defaultGameDevBridgeSettings: GameDevBridgeSettings = {
+	enabled: false,
+	broadcastLocation: DEFAULT_GAME_DEV_BRIDGE_BROADCAST_LOCATION,
+	channels: {
+		text: true,
+		location: true,
+		state: true,
+		snapshots: false,
+		levelMap: false,
+	},
 };
 
 export type GameDevBridgeCollisionOverlayDiagnostics = {
@@ -30,8 +62,8 @@ export type GameDevBridgeSnapshot = {
 	readonly runtime: RuntimeSnapshot;
 	readonly activeRuntimeSceneId?: string;
 	readonly loadingRuntimeSceneId?: string;
-	readonly availableRuntimeScenes: readonly GameDevBridgeRuntimeScene[];
 	readonly gameState: Record<string, unknown>;
+	readonly multiplayer?: MultiplayerSnapshot;
 	readonly diagnostics?: GameDevBridgeDiagnostics;
 };
 
@@ -49,6 +81,19 @@ export type GameDevBridgeCommand =
 	| (GameDevBridgeCommandBase & {
 			readonly type: "setCollisionOverlay";
 			readonly enabled: boolean;
+	  })
+	| (GameDevBridgeCommandBase & {
+			readonly type: "sendChat";
+			readonly text: string;
+	  })
+	| (GameDevBridgeCommandBase & {
+			readonly type: "setTouchActionValue";
+			readonly touchId: string;
+			readonly value: number;
+			readonly durationMs?: number;
+	  })
+	| (GameDevBridgeCommandBase & {
+			readonly type: "clearTouchControls";
 	  });
 
 export type GameDevBridgeCommandResult = {
@@ -60,6 +105,9 @@ export type GameDevBridgeCommandResult = {
 	readonly message: string;
 	readonly runtimeSceneId?: string;
 	readonly enabled?: boolean;
+	readonly text?: string;
+	readonly touchId?: string;
+	readonly value?: number;
 	readonly diagnostics?: GameDevBridgeDiagnostics;
 };
 
@@ -90,7 +138,7 @@ type GameDevBridgeMessage =
 
 export type GameDevBridgeGameEndpoint = {
 	readonly sessionId: string;
-	publishSnapshot(): void;
+	publishSnapshot(reason?: GameDevBridgeSnapshotReason): void;
 	dispose(): void;
 };
 
@@ -103,10 +151,19 @@ export type GameDevBridgeEditorEndpoint = {
 		enabled: boolean,
 		targetSessionId?: string,
 	): GameDevBridgeCommand;
+	sendChat(text: string, targetSessionId?: string): GameDevBridgeCommand;
+	sendSetTouchActionValue(options: {
+		readonly touchId: string;
+		readonly value: number;
+		readonly durationMs?: number;
+		readonly targetSessionId?: string;
+	}): GameDevBridgeCommand;
+	sendClearTouchControls(targetSessionId?: string): GameDevBridgeCommand;
 	dispose(): void;
 };
 
 export function createGameDevBridgeGameEndpoint(options: {
+	readonly settings?: Partial<GameDevBridgeSettings>;
 	readonly snapshot: (sessionId: string) => GameDevBridgeSnapshot;
 	readonly loadRuntimeScene: (runtimeSceneId: string) => {
 		readonly accepted: boolean;
@@ -118,11 +175,24 @@ export function createGameDevBridgeGameEndpoint(options: {
 		readonly message: string;
 		readonly diagnostics?: GameDevBridgeDiagnostics;
 	};
+	readonly sendChat?: (text: string) => {
+		readonly accepted: boolean;
+		readonly message: string;
+	};
+	readonly setTouchActionValue?: (touchId: string, value: number) => {
+		readonly accepted: boolean;
+		readonly message: string;
+	};
+	readonly clearTouchControls?: () => {
+		readonly accepted: boolean;
+		readonly message: string;
+	};
 	readonly onLog?: (entry: GameDevBridgeLogEntry) => void;
 }): GameDevBridgeGameEndpoint {
 	const sessionId = createSessionId();
+	const settings = normalizeGameDevBridgeSettings(options.settings);
 
-	if (!import.meta.env.DEV) {
+	if (!import.meta.env.DEV || !settings.enabled) {
 		return {
 			sessionId,
 			publishSnapshot() {},
@@ -130,8 +200,10 @@ export function createGameDevBridgeGameEndpoint(options: {
 		};
 	}
 
-	const channel = createBroadcastChannel();
+	const channel = createBroadcastChannel(settings.broadcastLocation);
 	let disposed = false;
+	let lastMultiplayerSignal = "";
+	const touchClearTimers = new Map<string, number>();
 
 	const publishLog = (
 		level: GameDevBridgeLogEntry["level"],
@@ -150,43 +222,108 @@ export function createGameDevBridgeGameEndpoint(options: {
 		} satisfies GameDevBridgeMessage);
 	};
 
-	const publishSnapshot = (): void => {
+	const publishSnapshot = (
+		reason: GameDevBridgeSnapshotReason = "manual",
+	): void => {
 		if (disposed) {
+			return;
+		}
+		if (!shouldPublishSnapshot(reason, settings.channels)) {
 			return;
 		}
 
 		const snapshot = toPlainSnapshot(options.snapshot(sessionId));
-		writeCachedSnapshot(snapshot);
+		if (reason === "multiplayer") {
+			const nextSignal = multiplayerSignalForSnapshot(snapshot);
+			if (nextSignal === lastMultiplayerSignal) {
+				return;
+			}
+			lastMultiplayerSignal = nextSignal;
+		}
+
+		writeCachedSnapshot(snapshot, settings.broadcastLocation);
 		channel?.postMessage({
 			type: "game:snapshot",
 			snapshot,
 		} satisfies GameDevBridgeMessage);
 	};
 
-	const onMessage = (event: MessageEvent<GameDevBridgeMessage>) => {
-		const message = event.data;
-
-		if (message.type !== "editor:command") {
-			return;
+	const executeCommand = (
+		command: GameDevBridgeCommand,
+	): Omit<GameDevBridgeCommandResult, "commandId" | "sessionId" | "timestamp" | "commandType"> => {
+		if (command.type === "loadRuntimeScene") {
+			return {
+				...options.loadRuntimeScene(command.runtimeSceneId),
+				runtimeSceneId: command.runtimeSceneId,
+			};
 		}
 
-		const { command } = message;
+		if (command.type === "setCollisionOverlay") {
+			return (
+				options.setCollisionOverlay?.(command.enabled) ?? {
+					accepted: false,
+					enabled: !command.enabled,
+					message: "Collision overlay diagnostics are not available.",
+				}
+			);
+		}
 
+		if (command.type === "sendChat") {
+			return (
+				options.sendChat?.(command.text) ?? {
+					accepted: false,
+					text: command.text,
+					message: "Chat control is not available.",
+				}
+			);
+		}
+
+		if (command.type === "setTouchActionValue") {
+			if (!options.setTouchActionValue) {
+				return {
+					accepted: false,
+					touchId: command.touchId,
+					value: command.value,
+					message: "Touch control is not available.",
+				};
+			}
+
+			const result = options.setTouchActionValue(command.touchId, command.value);
+			if (result.accepted && command.durationMs !== undefined) {
+				const existingTimer = touchClearTimers.get(command.touchId);
+				if (existingTimer !== undefined) {
+					window.clearTimeout(existingTimer);
+				}
+
+				const durationMs = Math.max(0, Math.min(5000, command.durationMs));
+				const timer = window.setTimeout(() => {
+					options.setTouchActionValue?.(command.touchId, 0);
+					touchClearTimers.delete(command.touchId);
+				}, durationMs);
+				touchClearTimers.set(command.touchId, timer);
+			}
+
+			return {
+				...result,
+				touchId: command.touchId,
+				value: command.value,
+			};
+		}
+
+		return (
+			options.clearTouchControls?.() ?? {
+				accepted: false,
+				message: "Touch control clearing is not available.",
+			}
+		);
+	};
+
+	const executeAndPublishCommandResult = (command: GameDevBridgeCommand): void => {
 		if (command.targetSessionId && command.targetSessionId !== sessionId) {
 			return;
 		}
 
-		const result =
-			command.type === "loadRuntimeScene"
-				? {
-						...options.loadRuntimeScene(command.runtimeSceneId),
-						runtimeSceneId: command.runtimeSceneId,
-					}
-				: options.setCollisionOverlay?.(command.enabled) ?? {
-						accepted: false,
-						enabled: !command.enabled,
-						message: "Collision overlay diagnostics are not available.",
-					};
+		const result = executeCommand(command);
 		const response: GameDevBridgeCommandResult = {
 			commandId: command.id,
 			sessionId,
@@ -200,6 +337,10 @@ export function createGameDevBridgeGameEndpoint(options: {
 			...(command.type === "setCollisionOverlay"
 				? { enabled: command.enabled }
 				: {}),
+			...(command.type === "sendChat" ? { text: command.text } : {}),
+			...(command.type === "setTouchActionValue"
+				? { touchId: command.touchId, value: command.value }
+				: {}),
 			...("diagnostics" in result && result.diagnostics
 				? { diagnostics: result.diagnostics }
 				: {}),
@@ -210,13 +351,22 @@ export function createGameDevBridgeGameEndpoint(options: {
 			result: response,
 		} satisfies GameDevBridgeMessage);
 		publishLog(result.accepted ? "info" : "warn", result.message);
-		publishSnapshot();
+		publishSnapshot("commandResult");
+	};
+
+	const onMessage = (event: MessageEvent<GameDevBridgeMessage>) => {
+		const message = event.data;
+
+		if (message.type !== "editor:command") {
+			return;
+		}
+
+		executeAndPublishCommandResult(message.command);
 	};
 
 	channel?.addEventListener("message", onMessage);
-	const heartbeat = window.setInterval(publishSnapshot, HEARTBEAT_INTERVAL_MS);
 	publishLog("info", `Game dev bridge session ${sessionId} connected.`);
-	publishSnapshot();
+	publishSnapshot("startup");
 
 	return {
 		sessionId,
@@ -227,7 +377,10 @@ export function createGameDevBridgeGameEndpoint(options: {
 			}
 
 			disposed = true;
-			window.clearInterval(heartbeat);
+			for (const timer of touchClearTimers.values()) {
+				window.clearTimeout(timer);
+			}
+			touchClearTimers.clear();
 			channel?.removeEventListener("message", onMessage);
 			channel?.close();
 		},
@@ -235,13 +388,18 @@ export function createGameDevBridgeGameEndpoint(options: {
 }
 
 export function createGameDevBridgeEditorEndpoint(options: {
+	readonly settings?: Partial<GameDevBridgeSettings>;
 	readonly onSnapshot: (snapshot: GameDevBridgeSnapshot) => void;
 	readonly onCommandResult?: (result: GameDevBridgeCommandResult) => void;
 	readonly onLog?: (entry: GameDevBridgeLogEntry) => void;
 }): GameDevBridgeEditorEndpoint {
-	const channel = import.meta.env.DEV ? createBroadcastChannel() : undefined;
+	const settings = normalizeGameDevBridgeSettings(options.settings);
+	const channel =
+		import.meta.env.DEV && settings.enabled
+			? createBroadcastChannel(settings.broadcastLocation)
+			: undefined;
 
-	const cachedSnapshot = readCachedSnapshot();
+	const cachedSnapshot = readCachedSnapshot(settings.broadcastLocation);
 
 	if (cachedSnapshot) {
 		options.onSnapshot(cachedSnapshot);
@@ -251,7 +409,7 @@ export function createGameDevBridgeEditorEndpoint(options: {
 		const message = event.data;
 
 		if (message.type === "game:snapshot") {
-			writeCachedSnapshot(message.snapshot);
+			writeCachedSnapshot(message.snapshot, settings.broadcastLocation);
 			options.onSnapshot(message.snapshot);
 			return;
 		}
@@ -301,6 +459,59 @@ export function createGameDevBridgeEditorEndpoint(options: {
 
 			return command;
 		},
+		sendChat(text, targetSessionId) {
+			const command: GameDevBridgeCommand = {
+				id: createSessionId(),
+				issuedAt: Date.now(),
+				...(targetSessionId ? { targetSessionId } : {}),
+				type: "sendChat",
+				text,
+			};
+
+			channel?.postMessage({
+				type: "editor:command",
+				command,
+			} satisfies GameDevBridgeMessage);
+
+			return command;
+		},
+		sendSetTouchActionValue(options) {
+			const command: GameDevBridgeCommand = {
+				id: createSessionId(),
+				issuedAt: Date.now(),
+				...(options.targetSessionId
+					? { targetSessionId: options.targetSessionId }
+					: {}),
+				type: "setTouchActionValue",
+				touchId: options.touchId,
+				value: options.value,
+				...(options.durationMs !== undefined
+					? { durationMs: options.durationMs }
+					: {}),
+			};
+
+			channel?.postMessage({
+				type: "editor:command",
+				command,
+			} satisfies GameDevBridgeMessage);
+
+			return command;
+		},
+		sendClearTouchControls(targetSessionId) {
+			const command: GameDevBridgeCommand = {
+				id: createSessionId(),
+				issuedAt: Date.now(),
+				...(targetSessionId ? { targetSessionId } : {}),
+				type: "clearTouchControls",
+			};
+
+			channel?.postMessage({
+				type: "editor:command",
+				command,
+			} satisfies GameDevBridgeMessage);
+
+			return command;
+		},
 		dispose() {
 			channel?.removeEventListener("message", onMessage);
 			channel?.close();
@@ -308,25 +519,106 @@ export function createGameDevBridgeEditorEndpoint(options: {
 	};
 }
 
-function createBroadcastChannel(): BroadcastChannel | undefined {
+export function normalizeGameDevBridgeSettings(
+	value: Partial<GameDevBridgeSettings> | undefined,
+): GameDevBridgeSettings {
+	const channels = value?.channels ?? defaultGameDevBridgeSettings.channels;
+	const broadcastLocation =
+		typeof value?.broadcastLocation === "string" &&
+		value.broadcastLocation.trim().length > 0
+			? value.broadcastLocation.trim()
+			: defaultGameDevBridgeSettings.broadcastLocation;
+
+	return {
+		enabled: value?.enabled ?? defaultGameDevBridgeSettings.enabled,
+		broadcastLocation,
+		channels: {
+			text: channels.text ?? defaultGameDevBridgeSettings.channels.text,
+			location:
+				channels.location ?? defaultGameDevBridgeSettings.channels.location,
+			state: channels.state ?? defaultGameDevBridgeSettings.channels.state,
+			snapshots:
+				channels.snapshots ?? defaultGameDevBridgeSettings.channels.snapshots,
+			levelMap: channels.levelMap ?? defaultGameDevBridgeSettings.channels.levelMap,
+		},
+	};
+}
+
+function shouldPublishSnapshot(
+	reason: GameDevBridgeSnapshotReason,
+	channels: GameDevBridgeChannels,
+): boolean {
+	if (reason === "multiplayer") {
+		return channels.text || channels.state;
+	}
+	if (reason === "location") {
+		return channels.location;
+	}
+	if (reason === "state" || reason === "scene" || reason === "startup") {
+		return channels.state;
+	}
+	if (reason === "visual") {
+		return channels.snapshots;
+	}
+	if (reason === "map") {
+		return channels.levelMap;
+	}
+
+	return true;
+}
+
+function multiplayerSignalForSnapshot(snapshot: GameDevBridgeSnapshot): string {
+	const multiplayer = snapshot.multiplayer;
+	if (!multiplayer) {
+		return "none";
+	}
+
+	const lastChatMessage =
+		multiplayer.chatMessages[multiplayer.chatMessages.length - 1];
+
+	return JSON.stringify({
+		status: multiplayer.status,
+		roomName: multiplayer.roomName,
+		mode: multiplayer.mode,
+		localPeerId: multiplayer.localPeerId,
+		connectedPeers: multiplayer.connectedPeers.length,
+		remotePlayers: multiplayer.remotePlayers.length,
+		lastChatMessageId: lastChatMessage?.id,
+		lastChatMessageText: lastChatMessage?.text,
+	});
+}
+
+function createBroadcastChannel(
+	channelName: string,
+): BroadcastChannel | undefined {
 	if (typeof BroadcastChannel === "undefined") {
 		return undefined;
 	}
 
-	return new BroadcastChannel(CHANNEL_NAME);
+	return new BroadcastChannel(channelName);
 }
 
-function writeCachedSnapshot(snapshot: GameDevBridgeSnapshot): void {
+function writeCachedSnapshot(
+	snapshot: GameDevBridgeSnapshot,
+	broadcastLocation: string,
+): void {
 	try {
-		localStorage.setItem(SNAPSHOT_STORAGE_KEY, JSON.stringify(snapshot));
+		localStorage.setItem(
+			snapshotStorageKey(broadcastLocation),
+			JSON.stringify(snapshot),
+		);
 	} catch {
 		// The live channel still works if storage is blocked.
 	}
 }
 
-function readCachedSnapshot(): GameDevBridgeSnapshot | undefined {
+function readCachedSnapshot(
+	broadcastLocation: string,
+): GameDevBridgeSnapshot | undefined {
 	try {
-		const rawSnapshot = localStorage.getItem(SNAPSHOT_STORAGE_KEY);
+		const rawSnapshot = localStorage.getItem(
+			snapshotStorageKey(broadcastLocation),
+		);
 
 		if (!rawSnapshot) {
 			return undefined;
@@ -338,6 +630,10 @@ function readCachedSnapshot(): GameDevBridgeSnapshot | undefined {
 	} catch {
 		return undefined;
 	}
+}
+
+function snapshotStorageKey(broadcastLocation: string): string {
+	return `${SNAPSHOT_STORAGE_KEY_PREFIX}:${broadcastLocation}`;
 }
 
 function toPlainSnapshot(

@@ -1,7 +1,7 @@
 ---
 name: "Your Name"
 role: "Your Title & Creative Description"
-image: "/posts/generic/avatar8.png" 
+image: "/posts/generic/avatar8.webp" 
 email: "your-email@example.com"
 featured: true
 order: 1

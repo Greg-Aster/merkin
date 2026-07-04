@@ -4,6 +4,7 @@ import type {
 	GameDevBridgeEditorEndpoint,
 	GameDevBridgeSnapshot,
 } from "../../app/gameDevBridge.js";
+import { runtimeSettings } from "../../app/levelPackageDiscovery.js";
 import PerformanceConfigEditor from "../PerformanceConfigEditor.svelte";
 import NpcEditorPanel from "./NpcEditorPanel.svelte";
 import StructuredValueEditor from "./StructuredValueEditor.svelte";
@@ -167,6 +168,13 @@ type LevelWorkspace = LevelSummary & {
 	readonly performance: PerformanceConfig;
 	readonly document: LevelPackageDocument;
 	readonly diagnostics: readonly string[];
+};
+
+type TerrainMaterialRow = {
+	readonly assetIndex: number;
+	readonly assetId: string;
+	readonly terrain: Record<string, JsonValue>;
+	readonly layers: readonly Record<string, JsonValue>[];
 };
 
 type EntityLightRow = {
@@ -660,6 +668,8 @@ const npcLightRows = $derived(
 	),
 );
 const materialEmissionRows = $derived(levelMaterialEmissionRows(draft));
+const terrainMaterialRows = $derived(levelTerrainMaterialRows(draft));
+const textureAssetOptions = $derived(levelTextureAssetOptions(draft));
 const skyboxAssetOptions = $derived(
 	draft
 		? [
@@ -680,6 +690,7 @@ onMount(() => {
 		void import("../../app/gameDevBridge.js").then(
 			({ createGameDevBridgeEditorEndpoint }) => {
 				bridgeEndpoint = createGameDevBridgeEditorEndpoint({
+					settings: runtimeSettings.devBridge,
 					onSnapshot(snapshot) {
 						liveSnapshot = snapshot;
 					},
@@ -1041,6 +1052,88 @@ function addLocalAsset(fileName: string, url: string): void {
 					tags: [],
 				},
 			],
+		},
+	});
+}
+
+function updateTerrainMaterialField(
+	assetIndex: number,
+	key: string,
+	value: JsonValue,
+): void {
+	if (!draft) {
+		return;
+	}
+	const asset = draft.assets.local[assetIndex];
+	if (!asset) {
+		return;
+	}
+	const material = toRecord(asset.material);
+	const terrain = toRecord(material.terrain);
+	updateAssetAt(assetIndex, {
+		...asset,
+		material: {
+			...material,
+			terrain: {
+				...terrain,
+				[key]: value,
+			},
+		},
+	});
+}
+
+function updateTerrainLayerField(
+	assetIndex: number,
+	layerIndex: number,
+	key: string,
+	value: JsonValue,
+): void {
+	if (!draft) {
+		return;
+	}
+	const asset = draft.assets.local[assetIndex];
+	if (!asset) {
+		return;
+	}
+	const material = toRecord(asset.material);
+	const terrain = toRecord(material.terrain);
+	const layers = Array.isArray(terrain.layers)
+		? terrain.layers.map((layer) => toRecord(layer))
+		: [];
+	const layer = layers[layerIndex];
+	if (!layer) {
+		return;
+	}
+	layers[layerIndex] = {
+		...layer,
+		[key]: value,
+	};
+	updateAssetAt(assetIndex, {
+		...asset,
+		material: {
+			...material,
+			terrain: {
+				...terrain,
+				layers,
+			},
+		},
+	});
+}
+
+function updateAssetAt(
+	assetIndex: number,
+	nextAsset: Record<string, JsonValue>,
+): void {
+	if (!draft) {
+		return;
+	}
+	updateDocument({
+		...draft,
+		assets: {
+			...draft.assets,
+			local: draft.assets.local.map((asset, index) =>
+				index === assetIndex ? nextAsset : asset,
+			),
 		},
 	});
 }
@@ -1871,6 +1964,51 @@ function levelMaterialEmissionRows(
 	});
 }
 
+function levelTerrainMaterialRows(
+	document: LevelPackageDocument | undefined,
+): readonly TerrainMaterialRow[] {
+	if (!document) {
+		return [];
+	}
+
+	return document.assets.local.flatMap((asset, index) => {
+		const material = toRecord(asset.material);
+		const terrain = toRecord(material.terrain);
+
+		if (
+			String(asset.kind ?? "") !== "material" ||
+			terrain.kind !== "layered-splat"
+		) {
+			return [];
+		}
+
+		return [
+			{
+				assetIndex: index,
+				assetId: String(asset.id ?? `material_${index + 1}`),
+				terrain,
+				layers: Array.isArray(terrain.layers)
+					? terrain.layers.map((layer) => toRecord(layer))
+					: [],
+			},
+		];
+	});
+}
+
+function levelTextureAssetOptions(
+	document: LevelPackageDocument | undefined,
+): readonly string[] {
+	if (!document) {
+		return [];
+	}
+
+	return [...document.assets.local, ...(document.skybox.assets?.local ?? [])]
+		.filter((asset) => String(asset.kind ?? "") === "texture")
+		.map((asset) => String(asset.id ?? ""))
+		.filter((id) => id.length > 0)
+		.sort();
+}
+
 function vector3Value(
 	value: unknown,
 	fallback: readonly [number, number, number],
@@ -2337,6 +2475,210 @@ function numberTuple2(
 							</label>
 							<p>{uploadMessage}</p>
 						</div>
+						{#if terrainMaterialRows.length}
+							<section class="lighting-group" aria-label="Terrain materials">
+								<div class="lighting-group-header">
+									<div>
+										<p>Level-owned Material</p>
+										<h2>Terrain Layers</h2>
+									</div>
+								</div>
+								{#each terrainMaterialRows as row (row.assetId)}
+									<article class="lighting-source">
+										<div class="lighting-source-header">
+											<div>
+												<h3>{row.assetId}</h3>
+												<p>data.json -> assets.local[{row.assetIndex}].material.terrain</p>
+											</div>
+											<span class="lighting-badge">terrain</span>
+										</div>
+										<div class="lighting-fields">
+											<label>
+												<span>Splat Texture</span>
+												<select
+													disabled={busy}
+													value={String(row.terrain.splatTextureId ?? "")}
+													onchange={(event) =>
+														updateTerrainMaterialField(
+															row.assetIndex,
+															"splatTextureId",
+															event.currentTarget.value,
+														)}
+												>
+													<option value="">None</option>
+													{#each textureAssetOptions as assetId}
+														<option value={assetId}>{assetId}</option>
+													{/each}
+												</select>
+											</label>
+											<label>
+												<span>Source Base</span>
+												<input
+													type="number"
+													min="0"
+													max="1"
+													step="0.01"
+													value={numericField(row.terrain.sourceBaseStrength, 1)}
+													disabled={busy}
+													oninput={(event) =>
+														updateTerrainMaterialField(
+															row.assetIndex,
+															"sourceBaseStrength",
+															readAlphaNumberInput(event.currentTarget, 1),
+														)}
+												/>
+											</label>
+											<label>
+												<span>Detail Blend</span>
+												<input
+													type="number"
+													min="0"
+													max="1"
+													step="0.01"
+													value={numericField(row.terrain.detailBlendStrength, 1)}
+													disabled={busy}
+													oninput={(event) =>
+														updateTerrainMaterialField(
+															row.assetIndex,
+															"detailBlendStrength",
+															readAlphaNumberInput(event.currentTarget, 1),
+														)}
+												/>
+											</label>
+										</div>
+										{#each row.layers as layer, layerIndex (`${row.assetId}:${layerIndex}`)}
+											<div class="lighting-fields">
+												<label>
+													<span>Channel</span>
+													<select
+														disabled={busy}
+														value={String(layer.channel ?? "r")}
+														onchange={(event) =>
+															updateTerrainLayerField(
+																row.assetIndex,
+																layerIndex,
+																"channel",
+																event.currentTarget.value,
+															)}
+													>
+														<option value="r">R</option>
+														<option value="g">G</option>
+														<option value="b">B</option>
+														<option value="a">A</option>
+													</select>
+												</label>
+												<label>
+													<span>Label</span>
+													<input
+														value={String(layer.label ?? "")}
+														disabled={busy}
+														oninput={(event) =>
+															updateTerrainLayerField(
+																row.assetIndex,
+																layerIndex,
+																"label",
+																event.currentTarget.value,
+															)}
+													/>
+												</label>
+												<label>
+													<span>Albedo</span>
+													<select
+														disabled={busy}
+														value={String(layer.albedoTextureId ?? "")}
+														onchange={(event) =>
+															updateTerrainLayerField(
+																row.assetIndex,
+																layerIndex,
+																"albedoTextureId",
+																event.currentTarget.value,
+															)}
+													>
+														<option value="">None</option>
+														{#each textureAssetOptions as assetId}
+															<option value={assetId}>{assetId}</option>
+														{/each}
+													</select>
+												</label>
+												<label>
+													<span>Normal</span>
+													<select
+														disabled={busy}
+														value={String(layer.normalTextureId ?? "")}
+														onchange={(event) =>
+															updateTerrainLayerField(
+																row.assetIndex,
+																layerIndex,
+																"normalTextureId",
+																event.currentTarget.value,
+															)}
+													>
+														<option value="">None</option>
+														{#each textureAssetOptions as assetId}
+															<option value={assetId}>{assetId}</option>
+														{/each}
+													</select>
+												</label>
+												<label>
+													<span>Roughness</span>
+													<select
+														disabled={busy}
+														value={String(layer.roughnessTextureId ?? "")}
+														onchange={(event) =>
+															updateTerrainLayerField(
+																row.assetIndex,
+																layerIndex,
+																"roughnessTextureId",
+																event.currentTarget.value,
+															)}
+													>
+														<option value="">None</option>
+														{#each textureAssetOptions as assetId}
+															<option value={assetId}>{assetId}</option>
+														{/each}
+													</select>
+												</label>
+												<label>
+													<span>Meters / Tile</span>
+													<input
+														type="number"
+														min="0.01"
+														step="0.1"
+														value={numericField(layer.metersPerTile, 4)}
+														disabled={busy}
+														oninput={(event) =>
+															updateTerrainLayerField(
+																row.assetIndex,
+																layerIndex,
+																"metersPerTile",
+																Math.max(0.01, readFiniteNumberInput(event.currentTarget, 4)),
+															)}
+													/>
+												</label>
+												<label>
+													<span>Strength</span>
+													<input
+														type="number"
+														min="0"
+														max="1"
+														step="0.01"
+														value={numericField(layer.strength, 1)}
+														disabled={busy}
+														oninput={(event) =>
+															updateTerrainLayerField(
+																row.assetIndex,
+																layerIndex,
+																"strength",
+																readAlphaNumberInput(event.currentTarget, 1),
+															)}
+													/>
+												</label>
+											</div>
+										{/each}
+									</article>
+								{/each}
+							</section>
+						{/if}
 						<StructuredValueEditor
 							value={draft.assets as JsonValue}
 							label="Asset Manifest"

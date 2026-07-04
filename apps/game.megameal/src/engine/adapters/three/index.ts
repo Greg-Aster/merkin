@@ -46,9 +46,14 @@ export type ThreeDisposableLike = {
 
 export type ThreeTextureLike = ThreeDisposableLike & {
 	readonly isTexture?: boolean;
+	wrapS?: unknown;
+	wrapT?: unknown;
 	mapping?: unknown;
 	colorSpace?: unknown;
 	encoding?: unknown;
+	repeat?: {
+		set(x: number, y: number): void;
+	};
 	needsUpdate?: boolean;
 };
 
@@ -114,13 +119,15 @@ export type ThreeBufferGeometryLike = ThreeGeometryLike & {
 export type ThreeMaterialLike = {
 	dispose?(): void;
 	readonly isMaterial?: boolean;
-	readonly map?: ThreeTextureLike | null;
+	map?: ThreeTextureLike | null;
 	readonly alphaMap?: ThreeTextureLike | null;
 	readonly aoMap?: ThreeTextureLike | null;
 	readonly bumpMap?: ThreeTextureLike | null;
 	readonly displacementMap?: ThreeTextureLike | null;
 	readonly emissiveMap?: ThreeTextureLike | null;
 	envMap?: ThreeTextureLike | null | undefined;
+	onBeforeCompile?: (shader: ThreeShaderLike) => void;
+	customProgramCacheKey?: () => string;
 	needsUpdate?: boolean;
 	toneMapped?: boolean;
 	uniforms?: Record<string, unknown>;
@@ -129,6 +136,12 @@ export type ThreeMaterialLike = {
 	readonly normalMap?: ThreeTextureLike | null;
 	readonly roughnessMap?: ThreeTextureLike | null;
 	readonly specularMap?: ThreeTextureLike | null;
+};
+
+export type ThreeShaderLike = {
+	uniforms: Record<string, { value: unknown }>;
+	vertexShader: string;
+	fragmentShader: string;
 };
 
 export type ThreeSpriteMaterialParameters = {
@@ -259,6 +272,7 @@ export type ThreeRuntime = {
 	readonly Sprite?: new (material: ThreeMaterialLike) => ThreeObject3DLike;
 	readonly CanvasTexture?: new (canvas: ThreeCanvasLike) => ThreeTextureLike;
 	readonly AdditiveBlending?: unknown;
+	readonly RepeatWrapping?: unknown;
 	readonly AmbientLight?: new (
 		color: string | number,
 		intensity: number,
@@ -329,7 +343,7 @@ export type ThreeBuiltinMeshAsset = {
 export type ThreeMaterialFactoryAsset = {
 	readonly kind: "three:material-factory";
 	readonly entry: AssetManifestEntry;
-	createMaterial(): ThreeMaterialLike;
+	createMaterial(sourceMaterial?: ThreeMaterialLike): ThreeMaterialLike;
 };
 
 export type ThreeGltfAsset = {
@@ -392,6 +406,9 @@ export type ThreeRenderableAsset =
 export type ThreeAssetLoaderRegistrationTarget = {
 	registerLoader(kind: AssetKind, loader: AssetLoader): void;
 	registerDisposer(kind: AssetKind, disposer: AssetDisposer): void;
+	load(id: string): Promise<unknown>;
+	get(id: string): unknown;
+	has(id: string): boolean;
 };
 
 export type ThreeAssetLoaderOptions = {
@@ -481,6 +498,7 @@ export type ThreeResolvedObject =
 	| {
 			readonly object: ThreeObject3DLike;
 			readonly disposeOnDetach?: boolean;
+			readonly disposeOnDetachMaterials?: readonly ThreeMaterialLike[];
 			readonly scaleMultiplier?: Vec3;
 	  };
 
@@ -526,7 +544,7 @@ export function registerThreeAssetLoaders(
 	options: ThreeAssetLoaderOptions,
 ): void {
 	const meshLoader = createThreeMeshLoader(options);
-	const materialLoader = createThreeMaterialLoader(options.three);
+	const materialLoader = createThreeMaterialLoader(options.three, target);
 	const cubemapLoader = createThreeCubemapLoader(options);
 	const textureLoader = createThreeTextureLoader(options);
 	const videoLoader = createThreeVideoLoader(options);
@@ -562,10 +580,33 @@ export function createThreeAssetObjectResolver(
 		}
 
 		const meshAsset = options.assets.get(renderable.meshId);
+		const materialAsset = renderable.materialId
+			? options.assets.get(renderable.materialId)
+			: undefined;
 
 		if (isThreeGltfAsset(meshAsset)) {
+			const object = meshAsset.clone();
+
+			if (renderable.materialId !== undefined) {
+				if (!isThreeMaterialFactoryAsset(materialAsset)) {
+					throw new Error(
+						`Renderable material asset "${renderable.materialId}" is not loaded as a Three material asset.`,
+					);
+				}
+
+				const overrideMaterials = applyMaterialOverrideToObject(
+					object,
+					materialAsset,
+				);
+				return {
+					object,
+					disposeOnDetach: false,
+					disposeOnDetachMaterials: overrideMaterials,
+				};
+			}
+
 			return {
-				object: meshAsset.clone(),
+				object,
 				disposeOnDetach: false,
 			};
 		}
@@ -582,9 +623,6 @@ export function createThreeAssetObjectResolver(
 			);
 		}
 
-		const materialAsset = renderable.materialId
-			? options.assets.get(renderable.materialId)
-			: undefined;
 		const material = isThreeMaterialFactoryAsset(materialAsset)
 			? materialAsset.createMaterial()
 			: createFallbackMaterial(options, renderable.materialId);
@@ -609,6 +647,44 @@ function createFallbackMaterial(
 	return new options.three.MeshStandardMaterial({
 		color: options.fallbackColor ?? "#9ca3af",
 	});
+}
+
+function applyMaterialOverrideToObject(
+	object: ThreeObject3DLike,
+	materialAsset: ThreeMaterialFactoryAsset,
+): readonly ThreeMaterialLike[] {
+	const materials: ThreeMaterialLike[] = [];
+
+	traverseObject(object, (node) => {
+		if (node.geometry === undefined || node.material === undefined) {
+			return;
+		}
+
+		const sourceMaterial = node.material;
+
+		if (isThreeMaterialArray(sourceMaterial)) {
+			node.material = sourceMaterial.map((materialSource) => {
+				const material = materialAsset.createMaterial(materialSource);
+				materials.push(material);
+				return material;
+			});
+			return;
+		}
+
+		if (sourceMaterial !== null) {
+			const material = materialAsset.createMaterial(sourceMaterial);
+			materials.push(material);
+			node.material = material;
+		}
+	});
+
+	return materials;
+}
+
+function isThreeMaterialArray(
+	material: ThreeMaterialLike | readonly ThreeMaterialLike[] | null,
+): material is readonly ThreeMaterialLike[] {
+	return Array.isArray(material);
 }
 
 function createSpriteObject(
@@ -948,6 +1024,7 @@ function isVideoElementLike(value: unknown): value is HTMLVideoElement {
 type AttachedObject = {
 	readonly object: ThreeObject3DLike;
 	readonly disposeOnDetach: boolean;
+	readonly disposeOnDetachMaterials?: readonly ThreeMaterialLike[];
 	readonly scaleMultiplier?: Vec3;
 };
 
@@ -1418,6 +1495,12 @@ export class ThreeRendererAdapter
 
 		if (attached.disposeOnDetach) {
 			disposeObject3D(attached.object);
+		}
+
+		if (attached.disposeOnDetachMaterials) {
+			for (const material of attached.disposeOnDetachMaterials) {
+				material.dispose?.();
+			}
 		}
 
 		this.#objects.delete(entity);
@@ -2307,12 +2390,31 @@ function createThreeMeshLoader(options: ThreeAssetLoaderOptions): AssetLoader {
 	};
 }
 
-function createThreeMaterialLoader(three: ThreeRuntime): AssetLoader {
+function createThreeMaterialLoader(
+	three: ThreeRuntime,
+	assets: Pick<AssetManagerPort, "load" | "get" | "has">,
+): AssetLoader {
 	return async (entry) => {
 		if (!isBuiltinUrl(entry.url)) {
 			throw new Error(
 				`Material asset "${entry.id}" must use builtin:// until JSON material loading is added.`,
 			);
+		}
+
+		if (entry.material?.terrain !== undefined) {
+			const terrainTextures = await loadTerrainMaterialTextures(entry, assets);
+			return {
+				kind: "three:material-factory",
+				entry,
+				createMaterial(sourceMaterial) {
+					return createLayeredTerrainMaterial(
+						three,
+						entry,
+						terrainTextures,
+						sourceMaterial,
+					);
+				},
+			} satisfies ThreeMaterialFactoryAsset;
 		}
 
 		return {
@@ -2325,6 +2427,340 @@ function createThreeMaterialLoader(three: ThreeRuntime): AssetLoader {
 			},
 		} satisfies ThreeMaterialFactoryAsset;
 	};
+}
+
+type TerrainMaterialTextureLayer = {
+	readonly channel: "r" | "g" | "b" | "a";
+	readonly label: string;
+	readonly albedo: ThreeTextureLike;
+	readonly normal?: ThreeTextureLike;
+	readonly roughness?: ThreeTextureLike;
+	readonly metersPerTile: number;
+	readonly normalScale: number;
+	readonly strength: number;
+};
+
+type TerrainMaterialTextures = {
+	readonly splat: ThreeTextureLike;
+	readonly layers: readonly TerrainMaterialTextureLayer[];
+};
+
+type TerrainMaterialBlendSettings = {
+	readonly sourceBaseTexture?: ThreeTextureLike;
+	readonly sourceBaseStrength: number;
+	readonly detailBlendStrength: number;
+};
+
+async function loadTerrainMaterialTextures(
+	entry: AssetManifestEntry,
+	assets: Pick<AssetManagerPort, "load" | "get" | "has">,
+): Promise<TerrainMaterialTextures> {
+	const terrain = entry.material?.terrain;
+
+	if (terrain === undefined) {
+		throw new Error(
+			`Material asset "${entry.id}" does not declare terrain data.`,
+		);
+	}
+
+	const splat = await loadThreeTextureAsset(
+		terrain.splatTextureId,
+		`${entry.id}.material.terrain.splatTextureId`,
+		assets,
+	);
+	const layers = await Promise.all(
+		terrain.layers.map(async (layer) => {
+			const albedo = await loadThreeTextureAsset(
+				layer.albedoTextureId,
+				`${entry.id}.material.terrain.layers.${layer.channel}.albedoTextureId`,
+				assets,
+			);
+			const normal =
+				layer.normalTextureId === undefined
+					? undefined
+					: await loadThreeTextureAsset(
+							layer.normalTextureId,
+							`${entry.id}.material.terrain.layers.${layer.channel}.normalTextureId`,
+							assets,
+						);
+			const roughness =
+				layer.roughnessTextureId === undefined
+					? undefined
+					: await loadThreeTextureAsset(
+							layer.roughnessTextureId,
+							`${entry.id}.material.terrain.layers.${layer.channel}.roughnessTextureId`,
+							assets,
+						);
+
+			return {
+				channel: layer.channel,
+				label: layer.label,
+				albedo,
+				...(normal === undefined ? {} : { normal }),
+				...(roughness === undefined ? {} : { roughness }),
+				metersPerTile: layer.metersPerTile,
+				normalScale: layer.normalScale ?? 1,
+				strength: layer.strength ?? 1,
+			};
+		}),
+	);
+
+	return {
+		splat,
+		layers,
+	};
+}
+
+async function loadThreeTextureAsset(
+	assetId: string,
+	path: string,
+	assets: Pick<AssetManagerPort, "load" | "get" | "has">,
+): Promise<ThreeTextureLike> {
+	if (!assets.has(assetId)) {
+		throw new Error(`${path} references unknown texture asset "${assetId}".`);
+	}
+
+	const asset = await assets.load(assetId);
+
+	if (isThreeTextureAsset(asset)) {
+		return asset.texture;
+	}
+
+	const loaded = assets.get(assetId);
+
+	if (isThreeTextureAsset(loaded)) {
+		return loaded.texture;
+	}
+
+	throw new Error(`${path} is not loaded as a Three texture asset.`);
+}
+
+function createLayeredTerrainMaterial(
+	three: ThreeRuntime,
+	entry: AssetManifestEntry,
+	textures: TerrainMaterialTextures,
+	sourceMaterial?: ThreeMaterialLike,
+): ThreeMaterialLike {
+	const material = new three.MeshStandardMaterial(
+		meshStandardMaterialParametersFrom(entry),
+	);
+	const terrain = entry.material?.terrain;
+	const sourceBaseTexture = sourceMaterial?.map ?? undefined;
+	const blendSettings: TerrainMaterialBlendSettings = {
+		...(sourceBaseTexture === undefined ? {} : { sourceBaseTexture }),
+		sourceBaseStrength:
+			terrain?.sourceBaseStrength ?? (sourceBaseTexture === undefined ? 0 : 1),
+		detailBlendStrength: terrain?.detailBlendStrength ?? 1,
+	};
+
+	prepareTerrainTexture(textures.splat, three, false);
+
+	if (sourceBaseTexture) {
+		prepareTerrainTexture(sourceBaseTexture, three, false);
+	}
+
+	for (const layer of textures.layers) {
+		prepareTerrainTexture(layer.albedo, three, true);
+
+		if (layer.normal) {
+			prepareTerrainTexture(layer.normal, three, true);
+		}
+
+		if (layer.roughness) {
+			prepareTerrainTexture(layer.roughness, three, true);
+		}
+	}
+
+	// Assigning map enables the shader's UV varyings; onBeforeCompile replaces
+	// the default map sampling with source-map plus splat-controlled terrain sampling.
+	material.map = sourceBaseTexture ?? textures.splat;
+	material.envMap = sourceMaterial?.envMap ?? material.envMap;
+	material.onBeforeCompile = (shader) => {
+		applyLayeredTerrainShader(shader, textures, blendSettings);
+	};
+	material.customProgramCacheKey = () =>
+		`layered-splat:${entry.id}:${blendSettings.sourceBaseStrength}:${blendSettings.detailBlendStrength}:${sourceBaseTexture === undefined ? "no-source-map" : "source-map"}:${textures.layers
+			.map((layer) => `${layer.channel}:${layer.label}:${layer.metersPerTile}`)
+			.join("|")}`;
+	material.needsUpdate = true;
+
+	return material;
+}
+
+function prepareTerrainTexture(
+	texture: ThreeTextureLike,
+	three: ThreeRuntime,
+	repeat: boolean,
+): void {
+	if (repeat && three.RepeatWrapping !== undefined) {
+		texture.wrapS = three.RepeatWrapping;
+		texture.wrapT = three.RepeatWrapping;
+	}
+
+	texture.needsUpdate = true;
+}
+
+function applyLayeredTerrainShader(
+	shader: ThreeShaderLike,
+	textures: TerrainMaterialTextures,
+	blendSettings: TerrainMaterialBlendSettings,
+): void {
+	shader.uniforms.megamealTerrainSplatMap = { value: textures.splat };
+	shader.uniforms.megamealTerrainSourceBaseMap = {
+		value: blendSettings.sourceBaseTexture ?? textures.splat,
+	};
+	shader.uniforms.megamealTerrainSourceBaseStrength = {
+		value: blendSettings.sourceBaseStrength,
+	};
+	shader.uniforms.megamealTerrainDetailBlendStrength = {
+		value: blendSettings.detailBlendStrength,
+	};
+
+	for (const [index, layer] of textures.layers.entries()) {
+		shader.uniforms[`megamealTerrainAlbedo${index}`] = {
+			value: layer.albedo,
+		};
+		shader.uniforms[`megamealTerrainRoughness${index}`] = {
+			value: layer.roughness ?? layer.albedo,
+		};
+		shader.uniforms[`megamealTerrainNormal${index}`] = {
+			value: layer.normal ?? layer.albedo,
+		};
+		shader.uniforms[`megamealTerrainMetersPerTile${index}`] = {
+			value: layer.metersPerTile,
+		};
+		shader.uniforms[`megamealTerrainNormalScale${index}`] = {
+			value: layer.normalScale,
+		};
+		shader.uniforms[`megamealTerrainStrength${index}`] = {
+			value: layer.strength,
+		};
+		shader.uniforms[`megamealTerrainRoughnessEnabled${index}`] = {
+			value: layer.roughness === undefined ? 0 : 1,
+		};
+		shader.uniforms[`megamealTerrainNormalEnabled${index}`] = {
+			value: layer.normal === undefined ? 0 : 1,
+		};
+	}
+
+	shader.vertexShader = shader.vertexShader
+		.replace(
+			"#include <common>",
+			`#include <common>
+varying vec3 vMegamealTerrainWorldPosition;`,
+		)
+		.replace(
+			"#include <project_vertex>",
+			`vMegamealTerrainWorldPosition = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;
+#include <project_vertex>`,
+		);
+
+	shader.fragmentShader = shader.fragmentShader
+		.replace(
+			"#include <common>",
+			`#include <common>
+uniform sampler2D megamealTerrainSplatMap;
+uniform sampler2D megamealTerrainSourceBaseMap;
+uniform float megamealTerrainSourceBaseStrength;
+uniform float megamealTerrainDetailBlendStrength;
+varying vec3 vMegamealTerrainWorldPosition;
+${textures.layers
+	.map(
+		(_, index) => `uniform sampler2D megamealTerrainAlbedo${index};
+uniform sampler2D megamealTerrainRoughness${index};
+uniform sampler2D megamealTerrainNormal${index};
+uniform float megamealTerrainMetersPerTile${index};
+uniform float megamealTerrainNormalScale${index};
+uniform float megamealTerrainStrength${index};
+uniform float megamealTerrainRoughnessEnabled${index};
+uniform float megamealTerrainNormalEnabled${index};`,
+	)
+	.join("\n")}`,
+		)
+		.replace("#include <map_fragment>", layeredTerrainMapFragment(textures))
+		.replace(
+			"#include <normal_fragment_maps>",
+			`#include <normal_fragment_maps>
+${layeredTerrainNormalFragment(textures)}`,
+		)
+		.replace(
+			"#include <roughnessmap_fragment>",
+			`#include <roughnessmap_fragment>
+${layeredTerrainRoughnessFragment(textures)}`,
+		);
+}
+
+function layeredTerrainMapFragment(textures: TerrainMaterialTextures): string {
+	const weightTotal = terrainWeightTerms(textures).join(" + ");
+	const colorTerms = textures.layers
+		.map(
+			(layer, index) =>
+				`texture2D( megamealTerrainAlbedo${index}, vMegamealTerrainWorldPosition.xz / max( megamealTerrainMetersPerTile${index}, 0.001 ) ).rgb * megamealTerrainSplat.${layer.channel}`,
+		)
+		.join(" + ");
+	const strengthTerms = textures.layers
+		.map(
+			(layer, index) =>
+				`megamealTerrainSplat.${layer.channel} * megamealTerrainStrength${index}`,
+		)
+		.join(" + ");
+
+	return `vec4 megamealTerrainSplat = texture2D( megamealTerrainSplatMap, vMapUv );
+vec3 megamealTerrainSourceBaseColor = mix( diffuseColor.rgb, texture2D( megamealTerrainSourceBaseMap, vMapUv ).rgb, megamealTerrainSourceBaseStrength );
+float megamealTerrainWeightTotal = max( ${weightTotal}, 0.0001 );
+vec3 megamealTerrainColor = ( ${colorTerms} ) / megamealTerrainWeightTotal;
+float megamealTerrainStrength = clamp( ( ( ${strengthTerms} ) / megamealTerrainWeightTotal ) * megamealTerrainDetailBlendStrength, 0.0, 1.0 );
+diffuseColor.rgb = mix( megamealTerrainSourceBaseColor, megamealTerrainColor, megamealTerrainStrength );`;
+}
+
+function layeredTerrainNormalFragment(
+	textures: TerrainMaterialTextures,
+): string {
+	const splatVariable = "megamealTerrainNormalSplat";
+	const weightTotal = terrainWeightTerms(textures, splatVariable).join(" + ");
+	const normalTerms = textures.layers
+		.map((layer, index) => {
+			const uv = `vMegamealTerrainWorldPosition.xz / max( megamealTerrainMetersPerTile${index}, 0.001 )`;
+			const sample = `texture2D( megamealTerrainNormal${index}, ${uv} ).xyz * 2.0 - 1.0`;
+			const normalWorld = `normalize( vec3( ( ${sample} ).x * megamealTerrainNormalScale${index}, ( ${sample} ).z, ( ${sample} ).y * megamealTerrainNormalScale${index} ) )`;
+
+			return `mix( vec3( 0.0, 1.0, 0.0 ), ${normalWorld}, megamealTerrainNormalEnabled${index} ) * ${splatVariable}.${layer.channel}`;
+		})
+		.join(" + ");
+	const strengthTerms = textures.layers
+		.map(
+			(layer, index) =>
+				`${splatVariable}.${layer.channel} * megamealTerrainStrength${index} * megamealTerrainNormalEnabled${index}`,
+		)
+		.join(" + ");
+
+	return `vec4 ${splatVariable} = texture2D( megamealTerrainSplatMap, vMapUv );
+float megamealTerrainNormalWeightTotal = max( ${weightTotal}, 0.0001 );
+vec3 megamealTerrainNormalWorld = normalize( ( ${normalTerms} ) / megamealTerrainNormalWeightTotal );
+vec3 megamealTerrainNormalView = normalize( ( viewMatrix * vec4( megamealTerrainNormalWorld, 0.0 ) ).xyz );
+float megamealTerrainNormalStrength = clamp( ( ( ${strengthTerms} ) / megamealTerrainNormalWeightTotal ) * megamealTerrainDetailBlendStrength, 0.0, 1.0 );
+normal = normalize( mix( normal, megamealTerrainNormalView, megamealTerrainNormalStrength ) );`;
+}
+
+function layeredTerrainRoughnessFragment(
+	textures: TerrainMaterialTextures,
+): string {
+	const roughnessTerms = textures.layers
+		.map(
+			(layer, index) =>
+				`mix( roughnessFactor, texture2D( megamealTerrainRoughness${index}, vMegamealTerrainWorldPosition.xz / max( megamealTerrainMetersPerTile${index}, 0.001 ) ).r, megamealTerrainRoughnessEnabled${index} ) * megamealTerrainSplat.${layer.channel}`,
+		)
+		.join(" + ");
+
+	return `float megamealTerrainRoughness = ( ${roughnessTerms} ) / megamealTerrainWeightTotal;
+roughnessFactor = mix( roughnessFactor, megamealTerrainRoughness, megamealTerrainStrength );`;
+}
+
+function terrainWeightTerms(
+	textures: TerrainMaterialTextures,
+	splatVariable = "megamealTerrainSplat",
+): readonly string[] {
+	return textures.layers.map((layer) => `${splatVariable}.${layer.channel}`);
 }
 
 function createThreeSpriteLoader(): AssetLoader {

@@ -47,12 +47,12 @@ import type { ImageBannerData } from './types'
  * - SVG: Vector graphics that scale perfectly
  *
  * URL FORMATS:
- * - Relative paths: '/assets/images/banner.jpg'
+ * - Relative paths: '/assets/images/banner.webp'
  * - Absolute URLs: 'https://example.com/image.jpg'
  * - CDN URLs: 'https://cdn.example.com/optimized/banner.webp'
  */
 export const imageBannerData: ImageBannerData = {
-  imageUrl: '/path/to/your/default/image.jpg', // Replace with actual image path
+  imageUrl: '/path/to/your/default/image.webp', // Replace with actual image path
 }
 
 // =====================================================================
@@ -140,7 +140,7 @@ export const imageDisplayConfig = {
 export const imageFallbackConfig = {
   enabled: true, // Enable fallback when image fails
   fallbackType: 'gradient' as const, // 'image', 'color', or 'gradient'
-  fallbackImage: '/assets/banner/fallback.jpg', // Fallback image path
+  fallbackImage: '/assets/banner/0001.webp', // Fallback image path
   fallbackColor: '#1f2937', // Fallback solid color
   fallbackGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', // Fallback gradient
   showErrorMessage: false, // Show error message to users
@@ -262,7 +262,7 @@ export function validateImageBannerConfig(config: ImageBannerData): {
   // Check if image URL is provided
   if (!config.imageUrl || config.imageUrl.trim() === '') {
     errors.push('Image URL is required for image banner')
-  } else if (config.imageUrl === '/path/to/your/default/image.jpg') {
+  } else if (config.imageUrl === '/path/to/your/default/image.webp') {
     errors.push(
       'Default placeholder image URL detected. Please set a real image URL.',
     )

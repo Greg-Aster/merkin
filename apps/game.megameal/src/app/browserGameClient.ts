@@ -4,11 +4,13 @@ import {
 	createEngineClientApi,
 } from "../engine/client-api/index.js";
 import type { RuntimeSceneManifestData } from "../engine/index.js";
+import type { MultiplayerSession } from "../multiplayer/index.js";
 import { type GameClientMount, mountGameClient } from "./mountGameClient";
 
 export type BrowserGameClientOptions = {
 	readonly canvas: HTMLCanvasElement;
 	readonly runtimeManifest?: RuntimeSceneManifestData;
+	readonly multiplayer?: MultiplayerSession;
 };
 
 export type BrowserGameClient = Omit<GameClientMount, "runtime"> & {
@@ -30,6 +32,7 @@ export async function createBrowserGameClient(
 			...(options.runtimeManifest
 				? { runtimeManifest: options.runtimeManifest }
 				: {}),
+			...(options.multiplayer ? { multiplayer: options.multiplayer } : {}),
 		});
 	} catch (error) {
 		platform.dispose();

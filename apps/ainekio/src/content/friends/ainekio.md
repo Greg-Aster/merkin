@@ -2,7 +2,7 @@
 name: "Ainekio"
 url: "https://ainek.io"
 bio: "Ainekio the Robot Familiar"
-avatar: "https://ainek.io/assets/avatar/avatar.png"
+avatar: "https://ainek.io/assets/avatar/avatar.webp"
 active: true
 ---
 

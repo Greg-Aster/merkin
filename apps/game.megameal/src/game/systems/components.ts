@@ -243,6 +243,22 @@ export type GameHudState = {
 	readonly inputEnabled: boolean;
 	readonly charging: boolean;
 	readonly chargeAmount: number;
+	readonly multiplayer?: {
+		readonly enabled: boolean;
+		readonly mode: "idle" | "host" | "client";
+		readonly status:
+			| "disabled"
+			| "idle"
+			| "connecting"
+			| "connected"
+			| "disconnected"
+			| "error";
+		readonly connectedPeers: number;
+		readonly remotePlayers: number;
+		readonly roomName?: string;
+		readonly localPeerId?: string;
+		readonly error?: string;
+	};
 	readonly activePortal?: {
 		readonly label: string;
 		readonly prompt: string;

@@ -54,7 +54,7 @@ const initialState: TimelineViewState = {
   startYear: null,
   endYear: null,
   showOnlyKeyEvents: false,
-  background: '/assets/banner/0001.png',
+  background: '/assets/banner/0001.webp',
   events: [],
   lastEra: null,
   lastEraScale: null,

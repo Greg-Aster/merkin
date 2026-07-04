@@ -208,7 +208,7 @@ function generateSlug() {
           id="background-image" 
           bind:value={formData.backgroundImage}
           class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-l text-sm text-neutral-900 dark:text-neutral-100"
-          placeholder="/posts/timeline/golden-era.png"
+          placeholder="/posts/timeline/golden-era.webp"
         />
         <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
           Path to the background image for this era

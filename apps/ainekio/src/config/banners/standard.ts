@@ -9,14 +9,16 @@ import type {
 } from './types'
 import { isImageBannerItem, isVideoBannerItem } from './types'
 
-import banner1 from '@/assets/banner/0001.png'
-import banner2 from '@/assets/banner/0002.png'
-import banner3 from '@/assets/banner/0003.png'
-import banner4 from '@/assets/banner/0004.png'
-import banner5 from '@/assets/banner/0005.png'
-import banner6 from '@/assets/banner/0006.png'
-import banner7 from '@/assets/banner/0007.png'
-import banner8 from '@/assets/banner/0008.png'
+import banner1 from '@/assets/banner/0001.webp'
+import banner2 from '@/assets/banner/0002.webp'
+import banner3 from '@/assets/banner/0003.webp'
+import banner4 from '@/assets/banner/0004.webp'
+import banner5 from '@/assets/banner/0005.webp'
+import banner6 from '@/assets/banner/0006.webp'
+import banner7 from '@/assets/banner/0007.webp'
+import banner8 from '@/assets/banner/0008.webp'
+import banner9 from '@/assets/banner/0009.webp'
+import banner10 from '@/assets/banner/0010.webp'
 
 export const standardBannerData: StandardBannerData = {}
 
@@ -38,6 +40,8 @@ export const bannerList: BannerItem[] = [
   { type: 'image', src: banner6, alt: 'Banner image 6' } as ImageBannerItem,
   { type: 'image', src: banner7, alt: 'Banner image 7' } as ImageBannerItem,
   { type: 'image', src: banner8, alt: 'Banner image 8' } as ImageBannerItem,
+  { type: 'image', src: banner9, alt: 'Banner image 9' } as ImageBannerItem,
+  { type: 'image', src: banner10, alt: 'Banner image 10' } as ImageBannerItem,
 ]
 
 export const bannerLinks: (string | null)[] = bannerList.map(() => null)

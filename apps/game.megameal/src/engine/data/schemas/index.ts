@@ -49,6 +49,28 @@ export type VideoAssetMetadataData = {
 	readonly crossOrigin?: "anonymous" | "use-credentials";
 };
 
+export type TerrainMaterialLayerChannelData = "r" | "g" | "b" | "a";
+
+export type TerrainMaterialLayerData = {
+	readonly channel: TerrainMaterialLayerChannelData;
+	readonly label: string;
+	readonly albedoTextureId: string;
+	readonly normalTextureId?: string;
+	readonly roughnessTextureId?: string;
+	readonly metersPerTile: number;
+	readonly normalScale?: number;
+	readonly strength?: number;
+};
+
+export type TerrainMaterialParametersData = {
+	readonly kind: "layered-splat";
+	readonly coordinateSpace: "world-xz";
+	readonly splatTextureId: string;
+	readonly sourceBaseStrength?: number;
+	readonly detailBlendStrength?: number;
+	readonly layers: readonly TerrainMaterialLayerData[];
+};
+
 export type MaterialParametersData = {
 	readonly color?: string;
 	readonly emissive?: string;
@@ -57,6 +79,7 @@ export type MaterialParametersData = {
 	readonly roughness?: number;
 	readonly opacity?: number;
 	readonly transparent?: boolean;
+	readonly terrain?: TerrainMaterialParametersData;
 };
 
 export type SpriteAssetParametersData = {
@@ -380,6 +403,15 @@ export function validateAssetManifest(data: unknown): readonly string[] {
 					`assetManifest.assets.${index}.video.posterAssetId references ${assetKinds.get(posterAssetId)} asset "${posterAssetId}", expected texture.`,
 				);
 			}
+		}
+
+		if (isRecord(entry) && isRecord(entry.material)) {
+			validateMaterialTextureReferences(
+				entry.material,
+				`assetManifest.assets.${index}.material`,
+				assetKinds,
+				errors,
+			);
 		}
 	}
 
@@ -1053,6 +1085,7 @@ const materialParameterKeys = new Set([
 	"roughness",
 	"opacity",
 	"transparent",
+	"terrain",
 ]);
 
 function validateMaterialParameters(
@@ -1114,6 +1147,229 @@ function validateMaterialParameters(
 
 	if (data.transparent !== undefined && typeof data.transparent !== "boolean") {
 		errors.push(`${path}.transparent must be a boolean when provided.`);
+	}
+
+	if (data.terrain !== undefined) {
+		validateTerrainMaterialParameters(data.terrain, `${path}.terrain`, errors);
+	}
+}
+
+const terrainMaterialLayerChannels = new Set(["r", "g", "b", "a"]);
+
+function validateTerrainMaterialParameters(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object when provided.`);
+		return;
+	}
+
+	for (const key of Object.keys(data)) {
+		if (
+			key !== "kind" &&
+			key !== "coordinateSpace" &&
+			key !== "splatTextureId" &&
+			key !== "sourceBaseStrength" &&
+			key !== "detailBlendStrength" &&
+			key !== "layers"
+		) {
+			errors.push(`${path}.${key} is not a supported terrain material field.`);
+		}
+	}
+
+	if (data.kind !== "layered-splat") {
+		errors.push(`${path}.kind must be layered-splat.`);
+	}
+
+	if (data.coordinateSpace !== "world-xz") {
+		errors.push(`${path}.coordinateSpace must be world-xz.`);
+	}
+
+	requireString(data, "splatTextureId", `${path}.splatTextureId`, errors);
+
+	if (data.sourceBaseStrength !== undefined) {
+		validateRequiredAlpha(
+			data.sourceBaseStrength,
+			`${path}.sourceBaseStrength`,
+			errors,
+		);
+	}
+
+	if (data.detailBlendStrength !== undefined) {
+		validateRequiredAlpha(
+			data.detailBlendStrength,
+			`${path}.detailBlendStrength`,
+			errors,
+		);
+	}
+
+	if (!Array.isArray(data.layers)) {
+		errors.push(`${path}.layers must be an array.`);
+		return;
+	}
+
+	if (data.layers.length < 1 || data.layers.length > 4) {
+		errors.push(`${path}.layers must contain between 1 and 4 layers.`);
+	}
+
+	const channels = new Set<string>();
+	for (const [index, layer] of data.layers.entries()) {
+		validateTerrainMaterialLayer(layer, `${path}.layers.${index}`, errors);
+
+		if (isRecord(layer) && typeof layer.channel === "string") {
+			if (channels.has(layer.channel)) {
+				errors.push(`${path}.layers.${index}.channel must be unique.`);
+			}
+			channels.add(layer.channel);
+		}
+	}
+}
+
+function validateTerrainMaterialLayer(
+	data: unknown,
+	path: string,
+	errors: string[],
+): void {
+	if (!isRecord(data)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	for (const key of Object.keys(data)) {
+		if (
+			key !== "channel" &&
+			key !== "label" &&
+			key !== "albedoTextureId" &&
+			key !== "normalTextureId" &&
+			key !== "roughnessTextureId" &&
+			key !== "metersPerTile" &&
+			key !== "normalScale" &&
+			key !== "strength"
+		) {
+			errors.push(`${path}.${key} is not a supported terrain layer field.`);
+		}
+	}
+
+	if (
+		typeof data.channel !== "string" ||
+		!terrainMaterialLayerChannels.has(data.channel)
+	) {
+		errors.push(`${path}.channel must be r, g, b, or a.`);
+	}
+
+	requireString(data, "label", `${path}.label`, errors);
+	requireString(data, "albedoTextureId", `${path}.albedoTextureId`, errors);
+
+	if (data.normalTextureId !== undefined) {
+		requireString(data, "normalTextureId", `${path}.normalTextureId`, errors);
+	}
+
+	if (data.roughnessTextureId !== undefined) {
+		requireString(
+			data,
+			"roughnessTextureId",
+			`${path}.roughnessTextureId`,
+			errors,
+		);
+	}
+
+	validateRequiredPositiveNumber(
+		data.metersPerTile,
+		`${path}.metersPerTile`,
+		errors,
+	);
+
+	if (data.normalScale !== undefined) {
+		validateRequiredNonNegativeNumber(
+			data.normalScale,
+			`${path}.normalScale`,
+			errors,
+		);
+	}
+
+	if (data.strength !== undefined) {
+		validateRequiredAlpha(data.strength, `${path}.strength`, errors);
+	}
+}
+
+function validateMaterialTextureReferences(
+	material: Record<string, unknown>,
+	path: string,
+	assetKinds: ReadonlyMap<string, string>,
+	errors: string[],
+): void {
+	const terrain = material.terrain;
+
+	if (!isRecord(terrain)) {
+		return;
+	}
+
+	validateTextureAssetReference(
+		terrain.splatTextureId,
+		`${path}.terrain.splatTextureId`,
+		assetKinds,
+		errors,
+	);
+
+	if (!Array.isArray(terrain.layers)) {
+		return;
+	}
+
+	for (const [index, layer] of terrain.layers.entries()) {
+		if (!isRecord(layer)) {
+			continue;
+		}
+
+		validateTextureAssetReference(
+			layer.albedoTextureId,
+			`${path}.terrain.layers.${index}.albedoTextureId`,
+			assetKinds,
+			errors,
+		);
+
+		if (layer.normalTextureId !== undefined) {
+			validateTextureAssetReference(
+				layer.normalTextureId,
+				`${path}.terrain.layers.${index}.normalTextureId`,
+				assetKinds,
+				errors,
+			);
+		}
+
+		if (layer.roughnessTextureId !== undefined) {
+			validateTextureAssetReference(
+				layer.roughnessTextureId,
+				`${path}.terrain.layers.${index}.roughnessTextureId`,
+				assetKinds,
+				errors,
+			);
+		}
+	}
+}
+
+function validateTextureAssetReference(
+	assetId: unknown,
+	path: string,
+	assetKinds: ReadonlyMap<string, string>,
+	errors: string[],
+): void {
+	if (typeof assetId !== "string") {
+		return;
+	}
+
+	const kind = assetKinds.get(assetId);
+
+	if (kind === undefined) {
+		errors.push(`${path} references unknown asset "${assetId}".`);
+		return;
+	}
+
+	if (kind !== "texture") {
+		errors.push(
+			`${path} references ${kind} asset "${assetId}", expected texture.`,
+		);
 	}
 }
 
@@ -1261,6 +1517,12 @@ function validateRuntimeSceneReferences(
 			scenePreloadAssetIds,
 			readinessRequiredAssetIds,
 		},
+		errors,
+	);
+
+	validatePreloadedMaterialTextureReferences(
+		manifest.assets.assets,
+		scenePreloadAssetIds,
 		errors,
 	);
 
@@ -1501,6 +1763,52 @@ function validateRenderProfileEnvironmentReferences(
 			`runtimeSceneManifest.renderProfile.environment.assetId "${environment.assetId}" is required for readiness but is missing from runtimeSceneManifest.readiness.requiredAssetIds.`,
 		);
 	}
+}
+
+function validatePreloadedMaterialTextureReferences(
+	assets: readonly AssetManifestEntryData[],
+	scenePreloadAssetIds: ReadonlySet<string>,
+	errors: string[],
+): void {
+	for (const asset of assets) {
+		if (
+			asset.kind !== "material" ||
+			!scenePreloadAssetIds.has(asset.id) ||
+			asset.material?.terrain === undefined
+		) {
+			continue;
+		}
+
+		for (const textureAssetId of terrainMaterialTextureAssetIds(
+			asset.material.terrain,
+		)) {
+			if (!scenePreloadAssetIds.has(textureAssetId)) {
+				errors.push(
+					`runtimeSceneManifest material asset "${asset.id}" references texture asset "${textureAssetId}" that is not declared in the level preload set.`,
+				);
+			}
+		}
+	}
+}
+
+function terrainMaterialTextureAssetIds(
+	terrain: TerrainMaterialParametersData,
+): readonly string[] {
+	const ids = [terrain.splatTextureId];
+
+	for (const layer of terrain.layers) {
+		ids.push(layer.albedoTextureId);
+
+		if (layer.normalTextureId !== undefined) {
+			ids.push(layer.normalTextureId);
+		}
+
+		if (layer.roughnessTextureId !== undefined) {
+			ids.push(layer.roughnessTextureId);
+		}
+	}
+
+	return ids;
 }
 
 function environmentAssetKind(

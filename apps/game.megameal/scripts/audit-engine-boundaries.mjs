@@ -122,6 +122,25 @@ for (const file of files) {
 		}
 	}
 
+	if (pathStartsWith(rel, "src/multiplayer")) {
+		for (const specifier of importsPackage(
+			imports,
+			forbiddenFrameworkPackages,
+		)) {
+			violations.push(
+				`${rel}: multiplayer feature contracts must not import framework package "${specifier}"`,
+			);
+		}
+
+		for (const forbiddenPath of ["src/editor", "src/levels"]) {
+			for (const match of importsPath(imports, forbiddenPath)) {
+				violations.push(
+					`${rel}: multiplayer feature contracts must not import ${forbiddenPath} (${match.specifier})`,
+				);
+			}
+		}
+	}
+
 	if (!isBrowserGlobalAllowed(rel)) {
 		const globals = browserGlobalMatches(source);
 

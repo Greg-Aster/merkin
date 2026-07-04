@@ -45,6 +45,22 @@ const fireflyVisualPartSuffixes =
 const observatoryFireflyStableIds = observatoryFireflies.instances.map(
 	(instance) => instance.stableId,
 );
+const observatoryTerrainAssetIds = [
+	"material_observatory_terrain_layered",
+	"texture_observatory_terrain_splat",
+	"texture_observatory_terrain_rock_albedo",
+	"texture_observatory_terrain_rock_normal",
+	"texture_observatory_terrain_rock_roughness",
+	"texture_observatory_terrain_dirt_albedo",
+	"texture_observatory_terrain_dirt_normal",
+	"texture_observatory_terrain_dirt_roughness",
+	"texture_observatory_terrain_gravel_albedo",
+	"texture_observatory_terrain_gravel_normal",
+	"texture_observatory_terrain_gravel_roughness",
+	"texture_observatory_terrain_moss_albedo",
+	"texture_observatory_terrain_moss_normal",
+	"texture_observatory_terrain_moss_roughness",
+] as const;
 
 function assertEqual<TValue>(
 	actual: TValue,
@@ -441,6 +457,54 @@ function allAssetStrings(
 	assertRecord(playerLight, "Observatory player light");
 
 	assertRecord(terrainRenderable, "Observatory terrain renderable");
+	assertEqual(
+		terrainRenderable.materialId,
+		"material_observatory_terrain_layered",
+		"Observatory source GLB terrain must use the level-owned layered terrain material.",
+	);
+	for (const assetId of observatoryTerrainAssetIds) {
+		assertIncludes(
+			manifest.readiness.requiredAssetIds ?? [],
+			assetId,
+			`Observatory terrain readiness must include ${assetId}.`,
+		);
+		assertIncludes(
+			manifest.level.preload ?? [],
+			assetId,
+			`Observatory level preload must include ${assetId}.`,
+		);
+	}
+	const terrainMaterial = assertRecord(
+		manifest.assets.assets.find(
+			(asset) => asset.id === "material_observatory_terrain_layered",
+		),
+		"Observatory layered terrain material asset",
+	);
+	const terrainParameters = assertRecord(
+		assertRecord(terrainMaterial.material, "Observatory terrain material")
+			.terrain,
+		"Observatory terrain material parameters",
+	);
+	assertEqual(terrainParameters.kind, "layered-splat");
+	assertEqual(terrainParameters.coordinateSpace, "world-xz");
+	assertEqual(
+		terrainParameters.splatTextureId,
+		"texture_observatory_terrain_splat",
+	);
+	assertEqual(terrainParameters.sourceBaseStrength, 1);
+	assertEqual(terrainParameters.detailBlendStrength, 0.35);
+	if (
+		!Array.isArray(terrainParameters.layers) ||
+		terrainParameters.layers.length !== 4
+	) {
+		throw new Error("Observatory terrain material must declare four layers.");
+	}
+	assertDeepEqual(
+		terrainParameters.layers.map(
+			(layer) => assertRecord(layer, "Observatory terrain layer").channel,
+		),
+		["r", "g", "b", "a"],
+	);
 	assertEqual(
 		componentsForStableId(manifest, "observatory:terrain").Collider,
 		undefined,

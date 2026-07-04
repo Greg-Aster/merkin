@@ -59,14 +59,20 @@ Recommended dependency shape:
 ```text
 app
   -> ui
+  -> multiplayer
   -> game
   -> engine
 
 ui
   -> engine/client-api
+  -> multiplayer
 
 game
   -> engine
+
+multiplayer
+  -> engine
+  -> narrow game-owned runtime constants
 
 engine/modules
   -> engine/core
@@ -109,6 +115,10 @@ src/
   game/
     game-specific rules, actors, objectives, abilities, encounters,
     generic prefab registry/spawn mechanics, performance systems
+
+  multiplayer/
+    detachable multiplayer session contracts, replicated-player messages,
+    room/session orchestration, and multiplayer ECS systems
 
   engine/
     core/

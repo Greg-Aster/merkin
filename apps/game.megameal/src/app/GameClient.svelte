@@ -3,11 +3,16 @@ import { onDestroy, onMount } from "svelte";
 import type { RuntimeSnapshot } from "../engine/client-api/index.js";
 import type { Command, MobileInputControlsPort } from "../engine/index.js";
 import { type GameHudState, MOBILE_TOUCH_ACTION_IDS } from "../game/index.js";
+import type { MultiplayerSnapshot } from "../multiplayer/index.js";
 import MobileControls from "../ui/MobileControls.svelte";
 import RuntimeHud from "../ui/RuntimeHud.svelte";
+import MultiplayerPanel from "../ui/multiplayer/MultiplayerPanel.svelte";
 import { createBrowserGameClient } from "./browserGameClient";
-import type { GameDevBridgeGameEndpoint } from "./gameDevBridge.js";
 import { runtimeSettings } from "./levelPackageDiscovery.js";
+import {
+	type BrowserMultiplayerClient,
+	createBrowserMultiplayerClient,
+} from "./multiplayerClient";
 
 const defaultGameState: GameHudState = {
 	playerAlive: false,
@@ -23,6 +28,11 @@ const defaultGameState: GameHudState = {
 	chargeAmount: 0,
 };
 
+type RuntimeBridgeEndpoint = {
+	publishSnapshot(reason?: "scene" | "multiplayer"): void;
+	dispose(): void;
+};
+
 let canvas: HTMLCanvasElement;
 let snapshot: RuntimeSnapshot = $state({
 	lifecycle: "created",
@@ -34,8 +44,12 @@ let mounted = $state(false);
 let startupError: string | undefined = $state();
 let mobileControls: MobileInputControlsPort | undefined = $state();
 let dispatchCommand: ((command: Command) => void) | undefined = $state();
+let multiplayerClient: BrowserMultiplayerClient | undefined = $state();
+let multiplayerSnapshot: MultiplayerSnapshot | undefined = $state();
 let disposeClient: (() => void) | undefined;
-let devBridge: GameDevBridgeGameEndpoint | undefined;
+let devBridge: RuntimeBridgeEndpoint | undefined;
+// biome-ignore lint/style/useConst: Svelte event callbacks mutate this focus flag.
+let uiCapturingInput = false;
 let destroyed = false;
 
 onMount(() => {
@@ -51,78 +65,41 @@ onDestroy(() => {
 async function initializeClient(): Promise<void> {
 	try {
 		const runtimeManifest = selectedRuntimeSceneManifest();
+		const multiplayer = createBrowserMultiplayerClient();
+		const unsubscribeMultiplayer = multiplayer.subscribe((value) => {
+			multiplayerSnapshot = value;
+			devBridge?.publishSnapshot("multiplayer");
+		});
 		const client = await createBrowserGameClient({
 			canvas,
 			...(runtimeManifest ? { runtimeManifest } : {}),
+			multiplayer,
 		});
 
 		if (destroyed) {
+			unsubscribeMultiplayer();
+			multiplayer.disconnect();
 			client.dispose();
 			return;
 		}
 
 		if (import.meta.env.DEV) {
-			const { createGameDevBridgeGameEndpoint } = await import(
-				"./gameDevBridge.js"
+			const { createGameDevBridgeRuntimeEndpoint } = await import(
+				"./gameDevBridgeRuntime.js"
 			);
 
 			if (destroyed) {
+				unsubscribeMultiplayer();
+				multiplayer.disconnect();
 				client.dispose();
 				return;
 			}
 
-			devBridge = createGameDevBridgeGameEndpoint({
-				snapshot: (sessionId) => {
-					const sceneState = client.runtimeSceneState();
-
-					return {
-						sessionId,
-						timestamp: Date.now(),
-						runtime: {
-							lifecycle: snapshot.lifecycle,
-							tick: snapshot.tick,
-							interpolation: snapshot.interpolation,
-						},
-						...(sceneState.activeRuntimeSceneId
-							? {
-									activeRuntimeSceneId: sceneState.activeRuntimeSceneId,
-								}
-							: {}),
-						...(sceneState.loadingRuntimeSceneId
-							? {
-									loadingRuntimeSceneId: sceneState.loadingRuntimeSceneId,
-								}
-							: {}),
-						availableRuntimeScenes: runtimeSettings.runtimeSceneManifests.map(
-							(manifest) => ({
-								id: manifest.id,
-								levelId: manifest.level.id,
-								label: manifest.level.id,
-								sourceId: manifest.source.id,
-							}),
-						),
-						gameState: { ...client.gameState() },
-						diagnostics: client.runtimeDiagnostics(),
-					};
-				},
-				loadRuntimeScene: (runtimeSceneId) => {
-					const result = client.requestRuntimeScene(runtimeSceneId);
-
-					return {
-						accepted: result.accepted,
-						message: result.message,
-					};
-				},
-				setCollisionOverlay: (enabled) => {
-					const result = client.setCollisionOverlayEnabled(enabled);
-
-					return {
-						accepted: result.accepted,
-						enabled: result.enabled,
-						message: result.message,
-						diagnostics: result.diagnostics,
-					};
-				},
+			devBridge = createGameDevBridgeRuntimeEndpoint({
+				settings: runtimeSettings.devBridge,
+				client,
+				multiplayer,
+				runtimeSnapshot: () => snapshot,
 			});
 		}
 
@@ -131,7 +108,11 @@ async function initializeClient(): Promise<void> {
 			snapshot = value;
 			const nextGameState = client.gameState();
 			gameState = nextGameState;
-			client.setUiCapturingInput(nextGameState.openStoryNote !== undefined);
+			client.setUiCapturingInput(
+				uiCapturingInput ||
+					nextGameState.openStoryNote !== undefined ||
+					nextGameState.openNpcDialog !== undefined,
+			);
 
 			const sceneState = client.runtimeSceneState();
 			const bridgeRuntimeSceneKey = [
@@ -141,21 +122,31 @@ async function initializeClient(): Promise<void> {
 
 			if (bridgeRuntimeSceneKey !== lastBridgeRuntimeSceneKey) {
 				lastBridgeRuntimeSceneKey = bridgeRuntimeSceneKey;
-				devBridge?.publishSnapshot();
+				devBridge?.publishSnapshot("scene");
 			}
 		});
 
 		client.startLoop();
 		mobileControls = client.mobileControls;
 		dispatchCommand = client.api.dispatch;
+		multiplayerClient = multiplayer;
 		mounted = true;
+		const roomName = selectedRoomName();
+
+		if (roomName) {
+			void multiplayer.joinRoom(roomName);
+		}
 		disposeClient = () => {
 			unsubscribe();
+			unsubscribeMultiplayer();
 			devBridge?.dispose();
 			client.setUiCapturingInput(false);
 			client.dispose();
+			multiplayer.disconnect();
 			mobileControls = undefined;
 			dispatchCommand = undefined;
+			multiplayerClient = undefined;
+			multiplayerSnapshot = undefined;
 			devBridge = undefined;
 		};
 	} catch (error) {
@@ -181,6 +172,12 @@ function selectedRuntimeSceneManifest() {
 
 	return manifest;
 }
+
+function selectedRoomName() {
+	const url = new URL(window.location.href);
+
+	return url.searchParams.get("room")?.trim() ?? "";
+}
 </script>
 
 <div class="game-client" data-game-client>
@@ -192,6 +189,13 @@ function selectedRuntimeSceneManifest() {
 		{gameState}
 		{startupError}
 		dispatch={dispatchCommand}
+	/>
+	<MultiplayerPanel
+		client={multiplayerClient}
+		snapshot={multiplayerSnapshot}
+		onInputFocusChange={(focused) => {
+			uiCapturingInput = focused;
+		}}
 	/>
 	{#if mobileControls}
 		<MobileControls

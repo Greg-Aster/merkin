@@ -114,7 +114,7 @@ export const aspectRatioConfig = {
 export const videoFallbackConfig = {
   enabled: true, // Enable fallback when video fails
   fallbackType: 'image', // 'image', 'color', or 'gradient'
-  fallbackImage: '/assets/banner/video-fallback.jpg', // Fallback image path
+  fallbackImage: '/assets/banner/0002.webp', // Fallback image path
   fallbackColor: '#1a1a1a', // Fallback solid color
   fallbackGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', // Fallback gradient
   showErrorMessage: false, // Show error message to users

@@ -27,12 +27,14 @@ import type {
 	RuntimeSceneRequestResult,
 	RuntimeSceneState,
 } from "../game/runtime/index.js";
+import type { MultiplayerSession } from "../multiplayer/index.js";
 import { runtimeSettings } from "./levelPackageDiscovery.js";
 
 export type GameClientMountOptions = {
 	readonly canvas: HTMLCanvasElement;
 	readonly platform: BrowserPlatform;
 	readonly runtimeManifest?: RuntimeSceneManifestData;
+	readonly multiplayer?: MultiplayerSession;
 };
 
 export type GameClientMount = {
@@ -103,6 +105,7 @@ export async function mountGameClient(
 		runtimeSceneManifests: runtimeSettings.runtimeSceneManifests,
 		audioContentManifestForRuntimeScene:
 			runtimeSettings.audioContentManifestForRuntimeScene,
+		...(options.multiplayer ? { multiplayer: options.multiplayer } : {}),
 	});
 
 	resize();

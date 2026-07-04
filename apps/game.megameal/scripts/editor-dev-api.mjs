@@ -98,6 +98,17 @@ const SUPPORTED_SPRITE_STAR_TYPES = new Set([
 	"halo",
 	"classic",
 ]);
+const DEFAULT_DEV_BRIDGE_SETTINGS = {
+	enabled: false,
+	broadcastLocation: "megameal:game-dev-bridge:v1",
+	channels: {
+		text: true,
+		location: true,
+		state: true,
+		snapshots: false,
+		levelMap: false,
+	},
+};
 
 export function megamealEditorDevApi() {
 	return {
@@ -1019,6 +1030,134 @@ function validateAsset(value, path, errors) {
 	} else if (value.sprite !== undefined) {
 		errors.push(`${path}.sprite is only supported for sprite assets.`);
 	}
+	if (value.kind === "material") {
+		validateMaterialParameters(value.material, `${path}.material`, errors);
+	} else if (value.material !== undefined) {
+		errors.push(`${path}.material is only supported for material assets.`);
+	}
+}
+
+const SUPPORTED_TERRAIN_LAYER_CHANNELS = new Set(["r", "g", "b", "a"]);
+
+function validateMaterialParameters(value, path, errors) {
+	if (value === undefined) {
+		return;
+	}
+
+	if (!isObject(value)) {
+		errors.push(`${path} must be an object when provided.`);
+		return;
+	}
+
+	if (value.color !== undefined) {
+		validateHexColor(value.color, `${path}.color`, errors);
+	}
+	if (value.emissive !== undefined) {
+		validateHexColor(value.emissive, `${path}.emissive`, errors);
+	}
+	if (value.emissiveIntensity !== undefined) {
+		validateNonNegativeNumber(
+			value.emissiveIntensity,
+			`${path}.emissiveIntensity`,
+			errors,
+		);
+	}
+	for (const key of ["metalness", "roughness", "opacity"]) {
+		if (value[key] !== undefined) {
+			validateAlpha(value[key], `${path}.${key}`, errors);
+		}
+	}
+	if (
+		value.transparent !== undefined &&
+		typeof value.transparent !== "boolean"
+	) {
+		errors.push(`${path}.transparent must be a boolean.`);
+	}
+	if (value.terrain !== undefined) {
+		validateTerrainMaterialParameters(value.terrain, `${path}.terrain`, errors);
+	}
+}
+
+function validateTerrainMaterialParameters(value, path, errors) {
+	if (!isObject(value)) {
+		errors.push(`${path} must be an object when provided.`);
+		return;
+	}
+
+	if (value.kind !== "layered-splat") {
+		errors.push(`${path}.kind must be layered-splat.`);
+	}
+	if (value.coordinateSpace !== "world-xz") {
+		errors.push(`${path}.coordinateSpace must be world-xz.`);
+	}
+	readRequiredString(value.splatTextureId, `${path}.splatTextureId`, errors);
+	if (value.sourceBaseStrength !== undefined) {
+		validateAlpha(
+			value.sourceBaseStrength,
+			`${path}.sourceBaseStrength`,
+			errors,
+		);
+	}
+	if (value.detailBlendStrength !== undefined) {
+		validateAlpha(
+			value.detailBlendStrength,
+			`${path}.detailBlendStrength`,
+			errors,
+		);
+	}
+
+	if (!Array.isArray(value.layers)) {
+		errors.push(`${path}.layers must be an array.`);
+		return;
+	}
+	if (value.layers.length < 1 || value.layers.length > 4) {
+		errors.push(`${path}.layers must contain between 1 and 4 layers.`);
+	}
+
+	const channels = new Set();
+	for (const [index, layer] of value.layers.entries()) {
+		validateTerrainMaterialLayer(layer, `${path}.layers.${index}`, errors);
+		if (isObject(layer) && typeof layer.channel === "string") {
+			if (channels.has(layer.channel)) {
+				errors.push(`${path}.layers.${index}.channel must be unique.`);
+			}
+			channels.add(layer.channel);
+		}
+	}
+}
+
+function validateTerrainMaterialLayer(value, path, errors) {
+	if (!isObject(value)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	if (!SUPPORTED_TERRAIN_LAYER_CHANNELS.has(value.channel)) {
+		errors.push(`${path}.channel must be r, g, b, or a.`);
+	}
+	readRequiredString(value.label, `${path}.label`, errors);
+	readRequiredString(value.albedoTextureId, `${path}.albedoTextureId`, errors);
+	if (value.normalTextureId !== undefined) {
+		readRequiredString(
+			value.normalTextureId,
+			`${path}.normalTextureId`,
+			errors,
+		);
+	}
+	if (value.roughnessTextureId !== undefined) {
+		readRequiredString(
+			value.roughnessTextureId,
+			`${path}.roughnessTextureId`,
+			errors,
+		);
+	}
+	validatePositiveNumber(value.metersPerTile, `${path}.metersPerTile`, errors);
+	if (value.normalScale !== undefined) {
+		validateNonNegativeNumber(value.normalScale, `${path}.normalScale`, errors);
+	}
+	if (value.strength !== undefined) {
+		validateAlpha(value.strength, `${path}.strength`, errors);
+	}
 }
 
 function validateSpriteAssetParameters(value, path, errors) {
@@ -1752,6 +1891,13 @@ function validateNpcConversation(value, path, errors) {
 }
 
 function validateCrossReferences(document, errors, npcPackage) {
+	const localAssets = [
+		...document.assets.local,
+		...(document.skybox.assets?.local ?? []),
+		...npcArchetypes(npcPackage).flatMap(
+			(archetype) => archetype.assets?.local ?? [],
+		),
+	];
 	const assetIds = new Set([
 		...(document.assets.shared ?? []),
 		...(document.skybox.assets?.shared ?? []),
@@ -1759,10 +1905,14 @@ function validateCrossReferences(document, errors, npcPackage) {
 		"material_player",
 		"audio_player_jump",
 		"audio_player_charge_release",
-		...document.assets.local.map((asset) => asset.id),
-		...(document.skybox.assets?.local ?? []).map((asset) => asset.id),
+		...localAssets.map((asset) => asset.id),
 		...npcAssetIds(npcPackage),
 	]);
+	const assetKinds = new Map(
+		localAssets
+			.filter((asset) => typeof asset.id === "string")
+			.map((asset) => [asset.id, asset.kind]),
+	);
 	const prefabIds = new Set([
 		...(document.prefabs.shared ?? []),
 		"player",
@@ -1839,6 +1989,15 @@ function validateCrossReferences(document, errors, npcPackage) {
 			}
 		}
 	}
+	for (const asset of localAssets) {
+		validateMaterialTextureReferences(
+			asset,
+			assetIds,
+			assetKinds,
+			document.level.preload ?? [],
+			errors,
+		);
+	}
 	const skyboxEnvironmentAssetId = environmentAssetId(
 		document.skybox.environment,
 	);
@@ -1883,6 +2042,56 @@ function validateCrossReferences(document, errors, npcPackage) {
 			groupAssetIds,
 			errors,
 		);
+	}
+}
+
+function validateMaterialTextureReferences(
+	asset,
+	assetIds,
+	assetKinds,
+	levelPreload,
+	errors,
+) {
+	if (asset.kind !== "material" || !isObject(asset.material?.terrain)) {
+		return;
+	}
+
+	const textureIds = [
+		asset.material.terrain.splatTextureId,
+		...(Array.isArray(asset.material.terrain.layers)
+			? asset.material.terrain.layers.flatMap((layer) =>
+					isObject(layer)
+						? [
+								layer.albedoTextureId,
+								layer.normalTextureId,
+								layer.roughnessTextureId,
+							]
+						: [],
+				)
+			: []),
+	].filter((id) => typeof id === "string");
+	const preloadedAssetIds = new Set(levelPreload);
+
+	for (const textureId of textureIds) {
+		if (!assetIds.has(textureId)) {
+			errors.push(
+				`material "${asset.id}" references unknown texture asset "${textureId}".`,
+			);
+			continue;
+		}
+
+		const kind = assetKinds.get(textureId);
+		if (kind !== undefined && kind !== "texture") {
+			errors.push(
+				`material "${asset.id}" references ${kind} asset "${textureId}", expected texture.`,
+			);
+		}
+
+		if (preloadedAssetIds.has(asset.id) && !preloadedAssetIds.has(textureId)) {
+			errors.push(
+				`material "${asset.id}" references texture asset "${textureId}" that is not declared in level.preload.`,
+			);
+		}
 	}
 }
 
@@ -2028,7 +2237,71 @@ function validateGlobalSettings(value) {
 		defaultRuntimeSceneId,
 		hudVisible: value.hudVisible,
 		audioMasterVolume: value.audioMasterVolume,
+		devBridge: validateDevBridgeSettings(value.devBridge),
 	};
+}
+
+function validateDevBridgeSettings(value = DEFAULT_DEV_BRIDGE_SETTINGS) {
+	if (!isObject(value)) {
+		throw new Error("devBridge must be an object.");
+	}
+	if (typeof value.enabled !== "boolean") {
+		throw new Error("devBridge.enabled must be a boolean.");
+	}
+	if (
+		typeof value.broadcastLocation !== "string" ||
+		value.broadcastLocation.trim().length === 0 ||
+		/[\u0000-\u001f]/.test(value.broadcastLocation)
+	) {
+		throw new Error("devBridge.broadcastLocation must be a non-empty string.");
+	}
+	const channels = value.channels ?? DEFAULT_DEV_BRIDGE_SETTINGS.channels;
+	if (!isObject(channels)) {
+		throw new Error("devBridge.channels must be an object.");
+	}
+
+	return {
+		enabled: value.enabled,
+		broadcastLocation: value.broadcastLocation.trim(),
+		channels: {
+			text: readBooleanSetting(
+				channels.text,
+				DEFAULT_DEV_BRIDGE_SETTINGS.channels.text,
+				"devBridge.channels.text",
+			),
+			location: readBooleanSetting(
+				channels.location,
+				DEFAULT_DEV_BRIDGE_SETTINGS.channels.location,
+				"devBridge.channels.location",
+			),
+			state: readBooleanSetting(
+				channels.state,
+				DEFAULT_DEV_BRIDGE_SETTINGS.channels.state,
+				"devBridge.channels.state",
+			),
+			snapshots: readBooleanSetting(
+				channels.snapshots,
+				DEFAULT_DEV_BRIDGE_SETTINGS.channels.snapshots,
+				"devBridge.channels.snapshots",
+			),
+			levelMap: readBooleanSetting(
+				channels.levelMap,
+				DEFAULT_DEV_BRIDGE_SETTINGS.channels.levelMap,
+				"devBridge.channels.levelMap",
+			),
+		},
+	};
+}
+
+function readBooleanSetting(value, fallback, label) {
+	if (value === undefined) {
+		return fallback;
+	}
+	if (typeof value !== "boolean") {
+		throw new Error(`${label} must be a boolean.`);
+	}
+
+	return value;
 }
 
 function validatePerformanceConfig(value, label = "performance") {
@@ -2594,6 +2867,7 @@ function readGlobalSettings(source) {
 		defaultRuntimeSceneId: readStringProperty(source, "defaultRuntimeSceneId"),
 		hudVisible: readBooleanProperty(source, "hudVisible"),
 		audioMasterVolume: readNumberProperty(source, "audioMasterVolume"),
+		devBridge: readDevBridgeSettings(source),
 	};
 }
 
@@ -2618,7 +2892,124 @@ function writeGlobalSettingsSource(source, settings) {
 		"audioMasterVolume",
 		settings.audioMasterVolume,
 	);
+	nextSource = replaceDevBridgeSettings(nextSource, settings.devBridge);
 	return nextSource;
+}
+
+function readDevBridgeSettings(source) {
+	try {
+		const devBridgeSource = readObjectPropertySource(source, "devBridge");
+		const channelsSource = readObjectPropertySource(
+			devBridgeSource,
+			"channels",
+		);
+
+		return validateDevBridgeSettings({
+			enabled: readBooleanProperty(devBridgeSource, "enabled"),
+			broadcastLocation: readStringProperty(
+				devBridgeSource,
+				"broadcastLocation",
+			),
+			channels: {
+				text: readBooleanProperty(channelsSource, "text"),
+				location: readBooleanProperty(channelsSource, "location"),
+				state: readBooleanProperty(channelsSource, "state"),
+				snapshots: readBooleanProperty(channelsSource, "snapshots"),
+				levelMap: readBooleanProperty(channelsSource, "levelMap"),
+			},
+		});
+	} catch {
+		return validateDevBridgeSettings(DEFAULT_DEV_BRIDGE_SETTINGS);
+	}
+}
+
+function replaceDevBridgeSettings(source, settings) {
+	const nextObjectSource = serializeDevBridgeSettings(
+		validateDevBridgeSettings(settings),
+	);
+
+	if (objectPropertyPattern("devBridge").test(source)) {
+		return replaceObjectPropertySource(
+			source,
+			"devBridge",
+			nextObjectSource,
+		);
+	}
+
+	const insertAfter = /audioMasterVolume\s*:\s*-?\d+(?:\.\d+)?\s*,?/;
+	if (!insertAfter.test(source)) {
+		throw new Error(
+			`Could not insert "devBridge" in ${GLOBAL_SETTINGS_DISPLAY_PATH}.`,
+		);
+	}
+
+	return source.replace(
+		insertAfter,
+		(match) => `${match}\n\tdevBridge: ${nextObjectSource},`,
+	);
+}
+
+function serializeDevBridgeSettings(settings) {
+	return `{
+\t\tenabled: ${settings.enabled ? "true" : "false"},
+\t\tbroadcastLocation: ${JSON.stringify(settings.broadcastLocation)},
+\t\tchannels: {
+\t\t\ttext: ${settings.channels.text ? "true" : "false"},
+\t\t\tlocation: ${settings.channels.location ? "true" : "false"},
+\t\t\tstate: ${settings.channels.state ? "true" : "false"},
+\t\t\tsnapshots: ${settings.channels.snapshots ? "true" : "false"},
+\t\t\tlevelMap: ${settings.channels.levelMap ? "true" : "false"},
+\t\t},
+\t}`;
+}
+
+function readObjectPropertySource(source, propertyName) {
+	const match = objectPropertyPattern(propertyName).exec(source);
+	if (!match) {
+		throw new Error(
+			`Could not read "${propertyName}" from ${GLOBAL_SETTINGS_DISPLAY_PATH}.`,
+		);
+	}
+
+	const openBraceIndex = source.indexOf("{", match.index);
+	return source.slice(
+		openBraceIndex,
+		matchingBraceIndex(source, openBraceIndex) + 1,
+	);
+}
+
+function replaceObjectPropertySource(source, propertyName, nextObjectSource) {
+	const match = objectPropertyPattern(propertyName).exec(source);
+	if (!match) {
+		throw new Error(
+			`Could not update "${propertyName}" in ${GLOBAL_SETTINGS_DISPLAY_PATH}.`,
+		);
+	}
+
+	const openBraceIndex = source.indexOf("{", match.index);
+	const closeBraceIndex = matchingBraceIndex(source, openBraceIndex);
+
+	return `${source.slice(0, openBraceIndex)}${nextObjectSource}${source.slice(
+		closeBraceIndex + 1,
+	)}`;
+}
+
+function matchingBraceIndex(source, openBraceIndex) {
+	let depth = 0;
+	for (let index = openBraceIndex; index < source.length; index += 1) {
+		const character = source[index];
+		if (character === "{") {
+			depth += 1;
+		}
+		if (character === "}") {
+			depth -= 1;
+			if (depth === 0) {
+				return index;
+			}
+		}
+	}
+
+	throw new Error(`Could not parse ${GLOBAL_SETTINGS_DISPLAY_PATH}.`);
 }
 
 function readNumberProperty(source, propertyName) {
@@ -2706,6 +3097,10 @@ function booleanPropertyPattern(propertyName) {
 
 function numberPropertyPattern(propertyName) {
 	return new RegExp(`${propertyName}\\s*:\\s*(-?\\d+(?:\\.\\d+)?)`);
+}
+
+function objectPropertyPattern(propertyName) {
+	return new RegExp(`${propertyName}\\s*:\\s*\\{`);
 }
 
 function validateAssetUpload(value) {

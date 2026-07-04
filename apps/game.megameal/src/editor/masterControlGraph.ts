@@ -300,15 +300,29 @@ export function createMasterControlGraph(
 			},
 			{
 				id: "live-dev-bridge",
-				label: "Live DEV Bridge",
+				label: "External DEV Bridge",
 				group: "editor",
-				owner: "src/app/gameDevBridge.ts",
+				owner:
+					"src/app/gameDevBridge.ts, src/app/gameDevBridgeRuntime.ts, and src/levels/global/settings.ts",
 				contract:
-					"Streams serializable game snapshots to the editor and routes editor commands back through runtime ports.",
+					"Optionally emits configured runtime observations on a local bridge channel and routes generic commands back through runtime ports.",
 				status: "implemented",
 				statusNote:
-					"Supports live scene load requests and non-saved diagnostics toggles.",
+					"Disabled by default; global settings control enablement, broadcast location, and data categories.",
 				removable: true,
+				isConfigurable: true,
+				details: [
+					{
+						label: "Privacy Control",
+						value:
+							"src/levels/global/settings.ts devBridge.enabled gates bridge emission.",
+					},
+					{
+						label: "Data Categories",
+						value:
+							"Configured channels reserve text, location, state, snapshots, and level map separately.",
+					},
+				],
 			},
 			{
 				id: "global-settings",
@@ -1182,8 +1196,15 @@ export function createMasterControlGraph(
 				id: "live-bridge-runtime",
 				from: "live-dev-bridge",
 				to: "game-runtime",
-				label: "DEV runtime port",
+				label: "configured runtime port",
 				kind: "editor",
+			},
+			{
+				id: "global-settings-live-bridge",
+				from: "global-settings",
+				to: "live-dev-bridge",
+				label: "enables/categories",
+				kind: "data",
 			},
 			{
 				id: "master-control-edits-api",

@@ -1,5 +1,10 @@
 import type { RuntimeSceneManifestData } from "../engine/index.js";
 import type { AudioContentManifest } from "../engine/modules/audio/index.js";
+import {
+	defaultGameDevBridgeSettings,
+	normalizeGameDevBridgeSettings,
+	type GameDevBridgeSettings,
+} from "./gameDevBridge.js";
 
 type RuntimeLevelPackageModule = {
 	readonly levelPackageSettings?: {
@@ -7,6 +12,7 @@ type RuntimeLevelPackageModule = {
 		readonly defaultRuntimeSceneId?: string;
 		readonly hudVisible?: boolean;
 		readonly audioMasterVolume?: number;
+		readonly devBridge?: Partial<GameDevBridgeSettings>;
 	};
 	readonly defaultRuntimeSceneManifest?: RuntimeSceneManifestData;
 	readonly defaultRuntimeSceneManifests?: readonly RuntimeSceneManifestData[];
@@ -37,6 +43,7 @@ export type RuntimeSettings = {
 	readonly defaultRuntimeSceneId: string | undefined;
 	readonly hudVisible: boolean;
 	readonly audioMasterVolume: number;
+	readonly devBridge: GameDevBridgeSettings;
 	readonly defaultRuntimeSceneManifest: RuntimeSceneManifestData | undefined;
 	readonly runtimeSceneManifests: readonly RuntimeSceneManifestData[];
 	getRuntimeSceneManifest(id: string): RuntimeSceneManifestData | undefined;
@@ -52,6 +59,10 @@ export const runtimeSettings: RuntimeSettings = {
 	hudVisible: installedLevelPackage?.levelPackageSettings?.hudVisible ?? false,
 	audioMasterVolume:
 		installedLevelPackage?.levelPackageSettings?.audioMasterVolume ?? 1,
+	devBridge: normalizeGameDevBridgeSettings(
+		installedLevelPackage?.levelPackageSettings?.devBridge ??
+			defaultGameDevBridgeSettings,
+	),
 	defaultRuntimeSceneManifest,
 	runtimeSceneManifests,
 	getRuntimeSceneManifest(id) {

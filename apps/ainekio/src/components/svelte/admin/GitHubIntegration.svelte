@@ -392,14 +392,16 @@ import type { ImageMetadata } from 'astro'
 
 // Import banner images
 // These paths should match your actual banner image locations
-import banner1 from 'src/assets/banner/0001.png'
-import banner2 from 'src/assets/banner/0002.png'
-import banner3 from 'src/assets/banner/0003.png'
-import banner4 from 'src/assets/banner/0004.png'
-import banner5 from 'src/assets/banner/0005.png'
-import banner6 from 'src/assets/banner/0006.png'
-import banner7 from 'src/assets/banner/0007.png'
-import banner8 from 'src/assets/banner/0008.png'
+import banner1 from 'src/assets/banner/0001.webp'
+import banner2 from 'src/assets/banner/0002.webp'
+import banner3 from 'src/assets/banner/0003.webp'
+import banner4 from 'src/assets/banner/0004.webp'
+import banner5 from 'src/assets/banner/0005.webp'
+import banner6 from 'src/assets/banner/0006.webp'
+import banner7 from 'src/assets/banner/0007.webp'
+import banner8 from 'src/assets/banner/0008.webp'
+import banner9 from 'src/assets/banner/0009.webp'
+import banner10 from 'src/assets/banner/0010.webp'
 
 // Define the banner configuration type
 export interface BannerConfig {

@@ -16,7 +16,7 @@ import TimelineCard from './TimelineCard.svelte'
 export let events: TimelineEvent[] = []
 export let startYear: number | undefined = undefined
 export let endYear: number | undefined = undefined
-export let background: string = '/assets/banner/0001.png'
+export let background: string = '/assets/banner/0001.webp'
 export let compact: boolean = false
 export let asBanner: boolean = false
 export let useEraColors: boolean = false

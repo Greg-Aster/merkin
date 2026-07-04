@@ -8,7 +8,7 @@ import {
 
 // Props
 export let events: TimelineEvent[] = []
-export let background: string = '/assets/banner/0001.png'
+export let background: string = '/assets/banner/0001.webp'
 export let selectedEvent: TimelineEvent | null = null
 
 // Reference to component root

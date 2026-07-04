@@ -34,6 +34,13 @@ import {
 	parseAudioContentManifest,
 } from "../../engine/index.js";
 import {
+	type MultiplayerRemoteAvatarRenderable,
+	type MultiplayerSession,
+	createLocalPlayerPoseBroadcastSystem,
+	createRemotePlayerReplicationSystem,
+	selectMultiplayerHudState,
+} from "../../multiplayer/index.js";
+import {
 	type CollisionOverlayDiagnosticsState,
 	collectCollisionOverlayItems,
 	summarizeCollisionOverlay,
@@ -96,6 +103,8 @@ export type MegamealGameRuntimeOptions = {
 	readonly audioContentManifestForRuntimeScene?: (
 		runtimeSceneManifestId: string,
 	) => AudioContentManifest;
+	readonly multiplayer?: MultiplayerSession;
+	readonly multiplayerRemoteAvatar?: MultiplayerRemoteAvatarRenderable;
 };
 
 export type MegamealGameRuntime = {
@@ -315,6 +324,33 @@ export async function createMegamealGameRuntime(
 		createCameraPoseApplySystem({ camera: options.renderer }),
 		{ order: -100 },
 	);
+	if (options.multiplayer) {
+		runtime.scheduler.registerSystem(
+			"render-sync",
+			createLocalPlayerPoseBroadcastSystem({
+				multiplayer: options.multiplayer,
+			}),
+			{ order: -220 },
+		);
+		runtime.scheduler.registerSystem(
+			"render-sync",
+			createRemotePlayerReplicationSystem({
+				multiplayer: options.multiplayer,
+				renderable: options.multiplayerRemoteAvatar ?? {
+					kind: "sprite",
+					spriteId: "sprite_npc_firefly_outer_halo",
+					color: "#66d9ff",
+					scale: [1.25, 1.25, 1],
+					fallback: {
+						meshId: "mesh_player",
+						materialId: "material_player",
+						scale: [0.75, 1.25, 0.75],
+					},
+				},
+			}),
+			{ order: -210 },
+		);
+	}
 	runtime.scheduler.registerSystem("render-sync", {
 		id: "render-sync",
 		update({ interpolation, world }) {
@@ -402,7 +438,10 @@ export async function createMegamealGameRuntime(
 		setCollisionOverlayEnabled,
 		runtimeDiagnostics,
 		gameState() {
-			return selectGameHudState(runtime.world);
+			const hudState = selectGameHudState(runtime.world);
+			const multiplayer = selectMultiplayerHudState(options.multiplayer);
+
+			return multiplayer ? { ...hudState, multiplayer } : hudState;
 		},
 		async dispose() {
 			if (disposed) {

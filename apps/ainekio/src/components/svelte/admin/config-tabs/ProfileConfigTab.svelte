@@ -298,12 +298,16 @@ function updateSelectedPlatform(event) {
               }}
             >
               <option value="" class="text-neutral-900 dark:text-neutral-100">Select an avatar image</option>
-              <option value="/src/content/avatar/avatar.png" class="text-neutral-900 dark:text-neutral-100">avatar.png</option>
-              <option value="/src/content/avatar/avatar2.png" class="text-neutral-900 dark:text-neutral-100">avatar2.png</option>
-              <option value="/src/content/avatar/avatar3.png" class="text-neutral-900 dark:text-neutral-100">avatar3.png</option>
-              <option value="/src/content/avatar/avatar4.png" class="text-neutral-900 dark:text-neutral-100">avatar4.png</option>
-              <option value="/src/content/avatar/avatar5.png" class="text-neutral-900 dark:text-neutral-100">avatar5.png</option>
-              <option value="/src/content/avatar/avatar6.png" class="text-neutral-900 dark:text-neutral-100">avatar6.png</option>
+              <option value="/src/content/avatar/avatar.webp" class="text-neutral-900 dark:text-neutral-100">avatar.webp</option>
+              <option value="/src/content/avatar/avatar2.webp" class="text-neutral-900 dark:text-neutral-100">avatar2.webp</option>
+              <option value="/src/content/avatar/avatar3.webp" class="text-neutral-900 dark:text-neutral-100">avatar3.webp</option>
+              <option value="/src/content/avatar/avatar4.webp" class="text-neutral-900 dark:text-neutral-100">avatar4.webp</option>
+              <option value="/src/content/avatar/avatar5.webp" class="text-neutral-900 dark:text-neutral-100">avatar5.webp</option>
+              <option value="/src/content/avatar/avatar6.webp" class="text-neutral-900 dark:text-neutral-100">avatar6.webp</option>
+              <option value="/src/content/avatar/avatar7.webp" class="text-neutral-900 dark:text-neutral-100">avatar7.webp</option>
+              <option value="/src/content/avatar/avatar8.webp" class="text-neutral-900 dark:text-neutral-100">avatar8.webp</option>
+              <option value="/src/content/avatar/avatar9.webp" class="text-neutral-900 dark:text-neutral-100">avatar9.webp</option>
+              <option value="/src/content/avatar/avatar10.webp" class="text-neutral-900 dark:text-neutral-100">avatar10.webp</option>
             </select>
 
             {#if isAvatarSequence}
@@ -334,12 +338,16 @@ function updateSelectedPlatform(event) {
                   }}
                 >
                   <option value="" class="text-neutral-900 dark:text-neutral-100">Add to sequence...</option>
-                  <option value="/src/content/avatar/avatar.png" class="text-neutral-900 dark:text-neutral-100">avatar.png</option>
-                  <option value="/src/content/avatar/avatar2.png" class="text-neutral-900 dark:text-neutral-100">avatar2.png</option>
-                  <option value="/src/content/avatar/avatar3.png" class="text-neutral-900 dark:text-neutral-100">avatar3.png</option>
-                  <option value="/src/content/avatar/avatar4.png" class="text-neutral-900 dark:text-neutral-100">avatar4.png</option>
-                  <option value="/src/content/avatar/avatar5.png" class="text-neutral-900 dark:text-neutral-100">avatar5.png</option>
-                  <option value="/src/content/avatar/avatar6.png" class="text-neutral-900 dark:text-neutral-100">avatar6.png</option>
+                  <option value="/src/content/avatar/avatar.webp" class="text-neutral-900 dark:text-neutral-100">avatar.webp</option>
+                  <option value="/src/content/avatar/avatar2.webp" class="text-neutral-900 dark:text-neutral-100">avatar2.webp</option>
+                  <option value="/src/content/avatar/avatar3.webp" class="text-neutral-900 dark:text-neutral-100">avatar3.webp</option>
+                  <option value="/src/content/avatar/avatar4.webp" class="text-neutral-900 dark:text-neutral-100">avatar4.webp</option>
+                  <option value="/src/content/avatar/avatar5.webp" class="text-neutral-900 dark:text-neutral-100">avatar5.webp</option>
+                  <option value="/src/content/avatar/avatar6.webp" class="text-neutral-900 dark:text-neutral-100">avatar6.webp</option>
+                  <option value="/src/content/avatar/avatar7.webp" class="text-neutral-900 dark:text-neutral-100">avatar7.webp</option>
+                  <option value="/src/content/avatar/avatar8.webp" class="text-neutral-900 dark:text-neutral-100">avatar8.webp</option>
+                  <option value="/src/content/avatar/avatar9.webp" class="text-neutral-900 dark:text-neutral-100">avatar9.webp</option>
+                  <option value="/src/content/avatar/avatar10.webp" class="text-neutral-900 dark:text-neutral-100">avatar10.webp</option>
                 </select>
                 
                 <div class="mt-4">

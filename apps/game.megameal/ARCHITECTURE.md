@@ -533,6 +533,7 @@ flowchart TD
     Root[src/] --> App[app/]
     Root --> UI[ui/]
     Root --> Game[game/]
+    Root --> Multiplayer[multiplayer/]
     Root --> Global[global/]
     Root --> Levels[levels/]
     Root --> Editor[editor/]
@@ -551,6 +552,10 @@ flowchart TD
     Game --> PrefabRegistry[prefab registry]
     Game --> GameData[game data/]
     Game --> Performance[performance/]
+
+    Multiplayer --> MultiplayerContracts[session contracts]
+    Multiplayer --> MultiplayerSystems[replicated-player systems]
+    Multiplayer --> MultiplayerMessages[wire messages]
 
     Global --> RuntimeSettings[runtime settings]
     Global --> GlobalPerformance[global performance config]
@@ -654,8 +659,10 @@ flowchart TD
 2. engine/modules may import engine/core.
 3. engine/adapters may import third-party libraries.
 4. game may import engine APIs, but engine may not import game code.
-5. ui may observe engine state and dispatch commands.
-6. app initializes the runtime but does not contain gameplay logic.
+5. multiplayer may import engine APIs and narrow game-owned runtime constants,
+   but browser transports stay in adapters and presentation stays in ui/app.
+6. ui may observe engine state and dispatch commands.
+7. app initializes the runtime but does not contain gameplay logic.
 ```
 
 ### Update Rules

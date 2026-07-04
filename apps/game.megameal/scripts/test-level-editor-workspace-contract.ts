@@ -290,6 +290,24 @@ assert.match(
 	/"Collision"/,
 	"level editor must expose a Collision tab for static environment cook inspection",
 );
+for (const terrainEditorHandle of [
+	"Terrain Layers",
+	"updateTerrainMaterialField",
+	"updateTerrainLayerField",
+	"levelTextureAssetOptions",
+	"splatTextureId",
+	"sourceBaseStrength",
+	"detailBlendStrength",
+	"Source Base",
+	"Detail Blend",
+	"metersPerTile",
+]) {
+	assert.match(
+		levelEditorWorkspaceSource,
+		new RegExp(terrainEditorHandle),
+		`level editor Assets tab must expose ${terrainEditorHandle} for level-owned terrain material data`,
+	);
+}
 assert.match(
 	levelEditorWorkspaceSource,
 	/collisionPackage\.files/,
@@ -486,6 +504,20 @@ assert.match(
 	/SUPPORTED_ASSET_KINDS[\s\S]*"sprite"/,
 	"editor dev API supported asset kinds must include engine-owned sprite assets",
 );
+for (const materialValidatorHandle of [
+	"validateMaterialParameters",
+	"validateTerrainMaterialParameters",
+	"validateMaterialTextureReferences",
+	"SUPPORTED_TERRAIN_LAYER_CHANNELS",
+	"sourceBaseStrength",
+	"detailBlendStrength",
+]) {
+	assert.match(
+		editorDevApiSource,
+		new RegExp(materialValidatorHandle),
+		`editor dev API must validate ${materialValidatorHandle} before saving level-owned material data`,
+	);
+}
 for (const validatorHandle of [
 	"validateNpcMovementOverride",
 	"validateNpcLightModulationOverride",

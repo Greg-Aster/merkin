@@ -44,7 +44,7 @@ export async function GET(): Promise<Response> {
         description: siteConfig.description,
         url: siteConfig.url || import.meta.env.SITE || '',
         owner: profileConfig.name,
-        avatar: profileConfig.avatar || '/avatar.png',
+        avatar: profileConfig.avatar || '/assets/avatar/avatar.webp',
       },
       cors: true,
       version: '1.0',

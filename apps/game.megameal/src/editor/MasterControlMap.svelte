@@ -1,10 +1,13 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
-import type {
-	GameDevBridgeCommandResult,
-	GameDevBridgeEditorEndpoint,
-	GameDevBridgeLogEntry,
-	GameDevBridgeSnapshot,
+import {
+	createGameDevBridgeEditorEndpoint,
+	normalizeGameDevBridgeSettings,
+	type GameDevBridgeCommandResult,
+	type GameDevBridgeEditorEndpoint,
+	type GameDevBridgeLogEntry,
+	type GameDevBridgeSettings,
+	type GameDevBridgeSnapshot,
 } from "../app/gameDevBridge.js";
 import PerformanceConfigEditor from "./PerformanceConfigEditor.svelte";
 import {
@@ -36,6 +39,11 @@ type GlobalSettingsDraft = {
 	readonly defaultRuntimeSceneId: string;
 	readonly hudVisible: boolean;
 	readonly audioMasterVolume: number;
+	readonly devBridge: GameDevBridgeSettings;
+};
+
+type GlobalSettingsPayload = Omit<GlobalSettingsDraft, "devBridge"> & {
+	readonly devBridge?: Partial<GameDevBridgeSettings>;
 };
 
 type PerformanceSystemId = "lod" | "culling" | "streaming" | "collision";
@@ -186,7 +194,9 @@ let selectedNodeId = $state("level-package");
 // biome-ignore lint/style/useConst: Svelte state is reassigned from template event handlers.
 let activeGroup = $state<MasterControlGraphNodeGroup | "all">("all");
 let liveSnapshot: GameDevBridgeSnapshot | undefined = $state();
-let bridgeStatus = $state<"waiting" | "connected" | "unavailable">("waiting");
+let bridgeStatus = $state<"waiting" | "connected" | "disabled" | "unavailable">(
+	"waiting",
+);
 let bridgeEndpoint: GameDevBridgeEditorEndpoint | undefined = $state();
 let devLogEntries: GameDevBridgeLogEntry[] = $state([]);
 let pendingCommandId: string | undefined = $state();
@@ -247,7 +257,9 @@ const globalSettingsDirty = $derived(
 				savedGlobalSettings.defaultRuntimeSceneId ||
 			globalSettingsDraft.hudVisible !== savedGlobalSettings.hudVisible ||
 			globalSettingsDraft.audioMasterVolume !==
-				savedGlobalSettings.audioMasterVolume),
+				savedGlobalSettings.audioMasterVolume ||
+			JSON.stringify(globalSettingsDraft.devBridge) !==
+				JSON.stringify(savedGlobalSettings.devBridge)),
 );
 const globalPerformanceDirty = $derived(
 	globalPerformanceDraft !== undefined &&
@@ -285,34 +297,6 @@ onMount(() => {
 	void loadGlobalSettings();
 	void loadGlobalPerformance();
 	void loadPlayerPackage();
-	void import("../app/gameDevBridge.js").then(
-		({ createGameDevBridgeEditorEndpoint }) => {
-			if (destroyed) {
-				return;
-			}
-
-			bridgeEndpoint = createGameDevBridgeEditorEndpoint({
-				onSnapshot(snapshot) {
-					liveSnapshot = snapshot;
-					bridgeStatus = "connected";
-				},
-				onCommandResult(result) {
-					pendingCommandId =
-						pendingCommandId === result.commandId
-							? undefined
-							: pendingCommandId;
-					lastCommandMessage = result.message;
-					addLog(commandResultToLogEntry(result));
-				},
-				onLog(entry) {
-					addLog(entry);
-				},
-			});
-		},
-		() => {
-			bridgeStatus = "unavailable";
-		},
-	);
 });
 
 onDestroy(() => {
@@ -590,11 +574,14 @@ async function loadGlobalSettings(): Promise<void> {
 			throw new Error(payload.error ?? "Global settings failed to load.");
 		}
 
-		const settings = payload.settings as GlobalSettingsDraft;
+		const settings = normalizeGlobalSettings(
+			payload.settings as GlobalSettingsPayload,
+		);
 		globalSettingsDraft = settings;
 		savedGlobalSettings = settings;
 		globalSettingsFilePath = payload.filePath as string;
 		globalSettingsMessage = "Global settings loaded.";
+		connectBridgeEndpoint(settings.devBridge);
 	} catch (error) {
 		globalSettingsMessage =
 			error instanceof Error
@@ -628,11 +615,14 @@ async function saveGlobalSettings(): Promise<void> {
 			throw new Error(payload.error ?? "Global settings failed to save.");
 		}
 
-		const settings = payload.settings as GlobalSettingsDraft;
+		const settings = normalizeGlobalSettings(
+			payload.settings as GlobalSettingsPayload,
+		);
 		globalSettingsDraft = settings;
 		savedGlobalSettings = settings;
 		globalSettingsFilePath = payload.filePath as string;
 		globalSettingsMessage = "Global settings saved.";
+		connectBridgeEndpoint(settings.devBridge);
 		addLog({
 			id: `global-settings:${Date.now()}`,
 			timestamp: Date.now(),
@@ -661,6 +651,78 @@ function updateGlobalSetting<K extends keyof GlobalSettingsDraft>(
 		...globalSettingsDraft,
 		[key]: value,
 	};
+}
+
+function normalizeGlobalSettings(settings: GlobalSettingsPayload): GlobalSettingsDraft {
+	return {
+		...settings,
+		devBridge: normalizeGameDevBridgeSettings(settings.devBridge),
+	};
+}
+
+function updateGlobalBridgeSetting(
+	value: Partial<Omit<GameDevBridgeSettings, "channels">>,
+): void {
+	if (!globalSettingsDraft) {
+		return;
+	}
+
+	globalSettingsDraft = {
+		...globalSettingsDraft,
+		devBridge: {
+			...globalSettingsDraft.devBridge,
+			...value,
+		},
+	};
+}
+
+function updateGlobalBridgeChannel(
+	channel: keyof GameDevBridgeSettings["channels"],
+	enabled: boolean,
+): void {
+	if (!globalSettingsDraft) {
+		return;
+	}
+
+	globalSettingsDraft = {
+		...globalSettingsDraft,
+		devBridge: {
+			...globalSettingsDraft.devBridge,
+			channels: {
+				...globalSettingsDraft.devBridge.channels,
+				[channel]: enabled,
+			},
+		},
+	};
+}
+
+function connectBridgeEndpoint(settings: GameDevBridgeSettings): void {
+	bridgeEndpoint?.dispose();
+	bridgeEndpoint = undefined;
+	liveSnapshot = undefined;
+
+	if (!settings.enabled) {
+		bridgeStatus = "disabled";
+		return;
+	}
+
+	bridgeStatus = "waiting";
+	bridgeEndpoint = createGameDevBridgeEditorEndpoint({
+		settings,
+		onSnapshot(snapshot) {
+			liveSnapshot = snapshot;
+			bridgeStatus = "connected";
+		},
+		onCommandResult(result) {
+			pendingCommandId =
+				pendingCommandId === result.commandId ? undefined : pendingCommandId;
+			lastCommandMessage = result.message;
+			addLog(commandResultToLogEntry(result));
+		},
+		onLog(entry) {
+			addLog(entry);
+		},
+	});
 }
 
 async function loadGlobalPerformance(): Promise<void> {
@@ -1242,6 +1304,140 @@ function formatLiveCollectibles(state: LiveGameState): string {
 					{:else}
 						<p class="settings-message">
 							{globalSettingsMessage ?? "Global settings are not loaded."}
+						</p>
+					{/if}
+				</section>
+			{/if}
+			{#if selectedNode.id === "live-dev-bridge"}
+				<section class="settings-panel" aria-label="External bridge settings">
+					<div class="settings-panel-header">
+						<h2>External Bridge</h2>
+						<button
+							type="button"
+							class="reload-button"
+							disabled={globalSettingsBusy}
+							onclick={() => void loadGlobalSettings()}
+						>
+							Reload
+						</button>
+					</div>
+					{#if globalSettingsDraft}
+						<div class="settings-section">
+							<h3>Browser Local Channel</h3>
+						<div class="settings-grid">
+							<label>
+								<span>Enabled</span>
+								<input
+									type="checkbox"
+									checked={globalSettingsDraft.devBridge.enabled}
+									disabled={globalSettingsBusy}
+									onchange={(event) =>
+										updateGlobalBridgeSetting({
+											enabled: event.currentTarget.checked,
+										})}
+								/>
+							</label>
+							<label>
+								<span>Broadcast Location</span>
+								<input
+									value={globalSettingsDraft.devBridge.broadcastLocation}
+									disabled={globalSettingsBusy}
+									aria-label="Bridge broadcast location"
+									onchange={(event) =>
+										updateGlobalBridgeSetting({
+											broadcastLocation: event.currentTarget.value,
+										})}
+								/>
+							</label>
+						</div>
+						</div>
+						<div class="settings-section">
+							<h3>Event Data</h3>
+						<div class="settings-grid">
+							<label>
+								<span>Text</span>
+								<input
+									type="checkbox"
+									checked={globalSettingsDraft.devBridge.channels.text}
+									disabled={globalSettingsBusy}
+									onchange={(event) =>
+										updateGlobalBridgeChannel(
+											"text",
+											event.currentTarget.checked,
+										)}
+								/>
+							</label>
+							<label>
+								<span>Location</span>
+								<input
+									type="checkbox"
+									checked={globalSettingsDraft.devBridge.channels.location}
+									disabled={globalSettingsBusy}
+									onchange={(event) =>
+										updateGlobalBridgeChannel(
+											"location",
+											event.currentTarget.checked,
+										)}
+								/>
+							</label>
+							<label>
+								<span>State</span>
+								<input
+									type="checkbox"
+									checked={globalSettingsDraft.devBridge.channels.state}
+									disabled={globalSettingsBusy}
+									onchange={(event) =>
+										updateGlobalBridgeChannel(
+											"state",
+											event.currentTarget.checked,
+										)}
+								/>
+							</label>
+							<label>
+								<span>Snapshots</span>
+								<input
+									type="checkbox"
+									checked={globalSettingsDraft.devBridge.channels.snapshots}
+									disabled={globalSettingsBusy}
+									onchange={(event) =>
+										updateGlobalBridgeChannel(
+											"snapshots",
+											event.currentTarget.checked,
+										)}
+								/>
+							</label>
+							<label>
+								<span>Level Map</span>
+								<input
+									type="checkbox"
+									checked={globalSettingsDraft.devBridge.channels.levelMap}
+									disabled={globalSettingsBusy}
+									onchange={(event) =>
+										updateGlobalBridgeChannel(
+											"levelMap",
+											event.currentTarget.checked,
+										)}
+								/>
+							</label>
+						</div>
+						</div>
+						<div class="settings-actions">
+							<button
+								type="button"
+								class="save-button"
+								disabled={globalSettingsBusy || !globalSettingsDirty}
+								onclick={() => void saveGlobalSettings()}
+							>
+								Save
+							</button>
+							<span>{globalSettingsMessage}</span>
+						</div>
+						{#if globalSettingsFilePath}
+							<p class="settings-file">{globalSettingsFilePath}</p>
+						{/if}
+					{:else}
+						<p class="settings-message">
+							{globalSettingsMessage ?? "External bridge settings are not loaded."}
 						</p>
 					{/if}
 				</section>
@@ -2126,10 +2322,6 @@ function formatLiveCollectibles(state: LiveGameState): string {
 							<dt>Loading Scene</dt>
 							<dd>{liveSnapshot?.loadingRuntimeSceneId ?? "none"}</dd>
 						</div>
-						<div>
-							<dt>Available Scenes</dt>
-							<dd>{liveSnapshot?.availableRuntimeScenes.length ?? 0}</dd>
-						</div>
 						{#if lastCommandMessage}
 							<div>
 								<dt>Last Editor Command</dt>
@@ -2647,6 +2839,11 @@ function formatLiveCollectibles(state: LiveGameState): string {
 	.live-status.unavailable {
 		border-color: rgba(154, 160, 168, 0.34);
 		color: rgba(154, 160, 168, 0.9);
+	}
+
+	.live-status.disabled {
+		border-color: rgba(247, 180, 90, 0.36);
+		color: rgba(247, 180, 90, 0.92);
 	}
 
 	.dev-log {

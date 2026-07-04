@@ -10,6 +10,7 @@
 		"@merkin/megameal-engine": "workspace:*",
 		"astro": "5.18.0",
 		"mermaid": "^11.16.0",
+		"peerjs": "^1.5.5",
 		"svelte": "5.26.2",
 		"three": "0.178.0"
 	},
@@ -25,8 +26,10 @@
 		"test:story-note-contract": "tsx ./scripts/test-story-note-contract.ts",
 		"test:scene-environment-contract": "tsx ./scripts/test-scene-environment-contract.ts",
 		"test:runtime-scene-contract": "tsx ./scripts/test-runtime-scene-contract.ts",
+		"test:material-parameter-contract": "tsx ./scripts/test-material-parameter-contract.ts",
 		"test:player-package-contract": "tsx ./scripts/test-player-package-contract.ts",
 		"test:npc-contract": "tsx ./scripts/test-npc-contract.ts",
+		"test:multiplayer-contract": "tsx ./scripts/test-multiplayer-contract.ts",
 		"test:performance-collision-contract": "tsx ./scripts/test-performance-collision-contract.ts",
 		"test:performance-config-contract": "tsx ./scripts/test-performance-config-contract.ts",
 		"test:performance-culling-contract": "tsx ./scripts/test-performance-culling-contract.ts",

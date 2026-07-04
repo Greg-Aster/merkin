@@ -30,6 +30,10 @@ report the conflict instead of editing protected docs.
   and data/schema contracts.
 - `src/game` owns Merkin gameplay meaning, gameplay systems, runtime
   composition, and generic prefab spawning/registry mechanics.
+- `src/multiplayer` owns detachable multiplayer session contracts, replicated
+  player state, multiplayer messages, and multiplayer ECS systems. Browser
+  transports still belong in adapters, and Svelte/Astro presentation still
+  belongs in `src/ui`, `src/app`, or `src/pages`.
 - `src/levels` owns the installed product level package. Each
   `src/levels/<level>` folder owns that level's level data, asset manifest,
   product prefab definitions, audio content mapping, base render profile,
@@ -58,6 +62,8 @@ adapters, or validation.
 - Do not hide level catalogs inside `src/game`.
 - Do not import `src/editor` from normal runtime, game systems, or engine code.
 - Do not add level-id branches to engine core or adapters.
+- Do not put PeerJS, browser globals, Svelte, Astro, Three, Rapier, level data,
+  or editor code inside `src/multiplayer`.
 - Do not make architecture/design docs claim implementation completeness that
   current code and focused validation have not proven.
 - Do not use design or architecture documents as migration logs, implementation

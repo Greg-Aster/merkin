@@ -44,9 +44,6 @@ __pycache__/
 Mesh_Hair_Generator/
 mascot-chatbot-cf-worker/
 
-# Public template export — has its own .git pointing at temporal-flow GitHub repo
-temporal-flow-export/
-
 # BlogPusher app — separate git repo (github.com/Greg-Aster/blog-pusher.git)
 blog-pusher-sync/
 

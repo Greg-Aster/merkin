@@ -20,7 +20,7 @@ export const siteConfig: SiteConfig = {
   defaultTheme: AUTO_MODE,
   banner: {
     enable: false,
-    src: '/assets/banner/0001.png',
+    src: '/assets/banner/0001.webp',
     position: 'center',
     credit: {
       enable: false,
@@ -63,7 +63,7 @@ export const navBarConfig: NavBarConfig = {
 }
 
 export const profileConfig: ProfileConfig = {
-  avatar: '/src/content/avatar/avatar.png',
+  avatar: '/src/content/avatar/avatar.webp',
   name: 'Ainekio',
   bio: 'A small robot companion powered by MetaHuman OS.',
   links: [
@@ -73,7 +73,7 @@ export const profileConfig: ProfileConfig = {
       url: 'https://github.com/Greg-Aster/Ainekio-bot',
     },
   ],
-  avatarFilename: 'avatar.png',
+  avatarFilename: 'avatar.webp',
 }
 
 export const licenseConfig: LicenseConfig = {

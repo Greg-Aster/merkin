@@ -12,6 +12,12 @@ export type NetworkMessage =
 			readonly command: Command;
 	  }
 	| {
+			readonly type: "channel-message";
+			readonly peerId: NetworkPeerId;
+			readonly channel: string;
+			readonly payload: unknown;
+	  }
+	| {
 			readonly type: "state-snapshot";
 			readonly tick: NetworkTick;
 			readonly snapshot: WorldSnapshot;
@@ -133,6 +139,27 @@ export function createStateSnapshotMessage(
 		type: "state-snapshot",
 		tick,
 		snapshot,
+	};
+}
+
+export function createChannelNetworkMessage(
+	peerId: NetworkPeerId,
+	channel: string,
+	payload: unknown,
+): NetworkMessage {
+	if (peerId.length === 0) {
+		throw new Error("Network peer ID must be non-empty.");
+	}
+
+	if (channel.trim().length === 0) {
+		throw new Error("Network channel must be non-empty.");
+	}
+
+	return {
+		type: "channel-message",
+		peerId,
+		channel,
+		payload,
 	};
 }
 

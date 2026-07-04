@@ -71,7 +71,7 @@ export const timelineBannerData: TimelineBannerData = {
   title: 'Site Timeline', // Optional display title
   startYear: 1, // Optional start year
   endYear: 50000, // Optional end year
-  background: '/posts/timeline/universe.png', // Optional background image
+  background: '/posts/timeline/universe.webp', // Optional background image
   compact: false, // Optional compact display mode
   // height: "70vh"                 // Optional custom height
 }
@@ -156,50 +156,50 @@ export const timelineBannerEraConfig: EraConfigMap = {
   // Add banner-specific era overrides
   'all-time': {
     ...defaultEraConfig['all-time'],
-    backgroundImage: '/posts/timeline/universe.png',
+    backgroundImage: '/posts/timeline/universe.webp',
     zoomLevel: 1.0,
     panToYear: 25000,
   },
 
   'ancient-epoch': {
     ...defaultEraConfig['ancient-epoch'],
-    backgroundImage: '/posts/timeline/ancient-epoch.png',
+    backgroundImage: '/posts/timeline/ancient-epoch.webp',
     zoomLevel: 2.5,
   },
 
   'awakening-era': {
     ...defaultEraConfig['awakening-era'],
-    backgroundImage: '/posts/timeline/awakening-era.png',
+    backgroundImage: '/posts/timeline/awakening-era.webp',
     zoomLevel: 2.5,
   },
 
   'golden-age': {
     ...defaultEraConfig['golden-age'],
-    backgroundImage: '/posts/timeline/golden-era.png',
+    backgroundImage: '/posts/timeline/golden-era.webp',
     zoomLevel: 2.5,
   },
 
   'conflict-epoch': {
     ...defaultEraConfig['conflict-epoch'],
-    backgroundImage: '/posts/timeline/conflict-era.png',
+    backgroundImage: '/posts/timeline/conflict-era.webp',
     zoomLevel: 2.5,
   },
 
   'transcendent-age': {
     ...defaultEraConfig['transcendent-age'],
-    backgroundImage: '/posts/timeline/transcendent-age.png',
+    backgroundImage: '/posts/timeline/transcendent-age.webp',
     zoomLevel: 2.5,
   },
 
   'singularity-conflict': {
     ...defaultEraConfig['singularity-conflict'],
-    backgroundImage: '/posts/timeline/singularity-conflict.png',
+    backgroundImage: '/posts/timeline/singularity-conflict.webp',
     zoomLevel: 2.0,
   },
 
   'final-epoch': {
     ...defaultEraConfig['final-epoch'],
-    backgroundImage: '/posts/timeline/final-epoch.png',
+    backgroundImage: '/posts/timeline/final-epoch.webp',
     zoomLevel: 2.5,
   },
 }
@@ -214,28 +214,28 @@ export const timelineBannerCategories = {
     description: 'The complete chronicle of events',
     color: 'var(--color-primary)',
     icon: 'timeline',
-    defaultBackground: '/posts/timeline/universe.png',
+    defaultBackground: '/posts/timeline/universe.webp',
   },
   TECH: {
     displayName: 'Technology Timeline',
     description: 'Technological advancement milestones',
     color: 'var(--color-secondary)',
     icon: 'microchip',
-    defaultBackground: '/posts/timeline/tech.png',
+    defaultBackground: '/posts/timeline/awakening-era.webp',
   },
   HISTORY: {
     displayName: 'Historical Timeline',
     description: 'Major historical events and periods',
     color: 'var(--color-accent)',
     icon: 'scroll',
-    defaultBackground: '/posts/timeline/history.png',
+    defaultBackground: '/posts/timeline/golden-era.webp',
   },
   ALL: {
     displayName: 'Complete Timeline',
     description: 'All events across all categories',
     color: 'var(--color-neutral)',
     icon: 'globe',
-    defaultBackground: '/posts/timeline/universe.png',
+    defaultBackground: '/posts/timeline/universe.webp',
   },
 } as Record<
   string,
