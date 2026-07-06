@@ -1,11 +1,11 @@
-import type { RuntimeSnapshot } from "../engine/client-api/index.js";
-import type { BrowserGameClient } from "./browserGameClient";
+import type { RuntimeSnapshot } from "../../engine/client-api/index.js";
+import type { BrowserGameClient } from "../browserGameClient";
+import type { BrowserMultiplayerClient } from "../multiplayerClient";
 import {
-	createGameDevBridgeGameEndpoint,
 	type GameDevBridgeGameEndpoint,
 	type GameDevBridgeSettings,
+	createGameDevBridgeGameEndpoint,
 } from "./gameDevBridge.js";
-import type { BrowserMultiplayerClient } from "./multiplayerClient";
 
 export type GameDevBridgeRuntimeEndpointOptions = {
 	readonly settings?: Partial<GameDevBridgeSettings>;

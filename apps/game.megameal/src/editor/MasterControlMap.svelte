@@ -1,14 +1,14 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 import {
-	createGameDevBridgeEditorEndpoint,
-	normalizeGameDevBridgeSettings,
 	type GameDevBridgeCommandResult,
 	type GameDevBridgeEditorEndpoint,
 	type GameDevBridgeLogEntry,
 	type GameDevBridgeSettings,
 	type GameDevBridgeSnapshot,
-} from "../app/gameDevBridge.js";
+	createGameDevBridgeEditorEndpoint,
+	normalizeGameDevBridgeSettings,
+} from "../app/dev-bridge/gameDevBridge.js";
 import PerformanceConfigEditor from "./PerformanceConfigEditor.svelte";
 import {
 	type MasterControlGraphNode,
@@ -653,7 +653,9 @@ function updateGlobalSetting<K extends keyof GlobalSettingsDraft>(
 	};
 }
 
-function normalizeGlobalSettings(settings: GlobalSettingsPayload): GlobalSettingsDraft {
+function normalizeGlobalSettings(
+	settings: GlobalSettingsPayload,
+): GlobalSettingsDraft {
 	return {
 		...settings,
 		devBridge: normalizeGameDevBridgeSettings(settings.devBridge),
@@ -1323,7 +1325,7 @@ function formatLiveCollectibles(state: LiveGameState): string {
 					</div>
 					{#if globalSettingsDraft}
 						<div class="settings-section">
-							<h3>Browser Local Channel</h3>
+							<h3>Bridge Transport</h3>
 						<div class="settings-grid">
 							<label>
 								<span>Enabled</span>

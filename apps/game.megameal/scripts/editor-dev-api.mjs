@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { basename, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { installGameDevBridgeRelay } from "../src/app/dev-bridge/server/game-dev-bridge-relay.mjs";
 
 const GLOBAL_SETTINGS_API_PATH = "/__megameal-editor-api/global-settings";
 const GLOBAL_PERFORMANCE_API_PATH = "/__megameal-editor-api/global-performance";
@@ -115,6 +116,9 @@ export function megamealEditorDevApi() {
 		name: "megameal-editor-dev-api",
 		apply: "serve",
 		configureServer(server) {
+			installGameDevBridgeRelay(server, {
+				settingsFilePath: GLOBAL_SETTINGS_FILE_PATH,
+			});
 			server.middlewares.use(GLOBAL_SETTINGS_API_PATH, async (req, res) => {
 				try {
 					await handleGlobalSettingsRequest(req, res);
@@ -2251,7 +2255,7 @@ function validateDevBridgeSettings(value = DEFAULT_DEV_BRIDGE_SETTINGS) {
 	if (
 		typeof value.broadcastLocation !== "string" ||
 		value.broadcastLocation.trim().length === 0 ||
-		/[\u0000-\u001f]/.test(value.broadcastLocation)
+		hasControlCharacter(value.broadcastLocation)
 	) {
 		throw new Error("devBridge.broadcastLocation must be a non-empty string.");
 	}
@@ -2291,6 +2295,15 @@ function validateDevBridgeSettings(value = DEFAULT_DEV_BRIDGE_SETTINGS) {
 			),
 		},
 	};
+}
+
+function hasControlCharacter(value) {
+	for (let index = 0; index < value.length; index += 1) {
+		if (value.charCodeAt(index) <= 0x1f) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function readBooleanSetting(value, fallback, label) {
@@ -2929,11 +2942,7 @@ function replaceDevBridgeSettings(source, settings) {
 	);
 
 	if (objectPropertyPattern("devBridge").test(source)) {
-		return replaceObjectPropertySource(
-			source,
-			"devBridge",
-			nextObjectSource,
-		);
+		return replaceObjectPropertySource(source, "devBridge", nextObjectSource);
 	}
 
 	const insertAfter = /audioMasterVolume\s*:\s*-?\d+(?:\.\d+)?\s*,?/;

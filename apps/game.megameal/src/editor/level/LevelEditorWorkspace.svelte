@@ -3,7 +3,7 @@ import { onDestroy, onMount } from "svelte";
 import type {
 	GameDevBridgeEditorEndpoint,
 	GameDevBridgeSnapshot,
-} from "../../app/gameDevBridge.js";
+} from "../../app/dev-bridge/gameDevBridge.js";
 import { runtimeSettings } from "../../app/levelPackageDiscovery.js";
 import PerformanceConfigEditor from "../PerformanceConfigEditor.svelte";
 import NpcEditorPanel from "./NpcEditorPanel.svelte";
@@ -687,7 +687,7 @@ onMount(() => {
 	void initializeWorkspace();
 
 	if (import.meta.env.DEV) {
-		void import("../../app/gameDevBridge.js").then(
+		void import("../../app/dev-bridge/gameDevBridge.js").then(
 			({ createGameDevBridgeEditorEndpoint }) => {
 				bridgeEndpoint = createGameDevBridgeEditorEndpoint({
 					settings: runtimeSettings.devBridge,

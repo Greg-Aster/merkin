@@ -1,11 +1,11 @@
-import type { RuntimeSnapshot } from "../engine/client-api/index.js";
-import type { PerformanceDiagnosticsState } from "../game/performance/index.js";
-import type { MultiplayerSnapshot } from "../multiplayer/index.js";
+import type { RuntimeSnapshot } from "../../engine/client-api/index.js";
+import type { PerformanceDiagnosticsState } from "../../game/performance/index.js";
+import type { MultiplayerSnapshot } from "../../multiplayer/index.js";
 
 export const DEFAULT_GAME_DEV_BRIDGE_BROADCAST_LOCATION =
 	"megameal:game-dev-bridge:v1";
-const SNAPSHOT_STORAGE_KEY_PREFIX =
-	"megameal.gameDevBridge.latestSnapshot.v1";
+export const GAME_DEV_BRIDGE_RELAY_PATH = "/__megameal-dev-bridge";
+const SNAPSHOT_STORAGE_KEY_PREFIX = "megameal.gameDevBridge.latestSnapshot.v1";
 
 export type GameDevBridgeChannels = {
 	readonly text: boolean;
@@ -179,7 +179,10 @@ export function createGameDevBridgeGameEndpoint(options: {
 		readonly accepted: boolean;
 		readonly message: string;
 	};
-	readonly setTouchActionValue?: (touchId: string, value: number) => {
+	readonly setTouchActionValue?: (
+		touchId: string,
+		value: number,
+	) => {
 		readonly accepted: boolean;
 		readonly message: string;
 	};
@@ -204,6 +207,12 @@ export function createGameDevBridgeGameEndpoint(options: {
 	let disposed = false;
 	let lastMultiplayerSignal = "";
 	const touchClearTimers = new Map<string, number>();
+	const relaySocket = createRelaySocket(sessionId);
+	const sendRelayMessage = (message: GameDevBridgeMessage): void => {
+		if (relaySocket?.readyState === WebSocket.OPEN) {
+			relaySocket.send(JSON.stringify(message));
+		}
+	};
 
 	const publishLog = (
 		level: GameDevBridgeLogEntry["level"],
@@ -220,6 +229,10 @@ export function createGameDevBridgeGameEndpoint(options: {
 			type: "game:log",
 			entry,
 		} satisfies GameDevBridgeMessage);
+		sendRelayMessage({
+			type: "game:log",
+			entry,
+		});
 	};
 
 	const publishSnapshot = (
@@ -246,11 +259,18 @@ export function createGameDevBridgeGameEndpoint(options: {
 			type: "game:snapshot",
 			snapshot,
 		} satisfies GameDevBridgeMessage);
+		sendRelayMessage({
+			type: "game:snapshot",
+			snapshot,
+		});
 	};
 
 	const executeCommand = (
 		command: GameDevBridgeCommand,
-	): Omit<GameDevBridgeCommandResult, "commandId" | "sessionId" | "timestamp" | "commandType"> => {
+	): Omit<
+		GameDevBridgeCommandResult,
+		"commandId" | "sessionId" | "timestamp" | "commandType"
+	> => {
 		if (command.type === "loadRuntimeScene") {
 			return {
 				...options.loadRuntimeScene(command.runtimeSceneId),
@@ -288,7 +308,10 @@ export function createGameDevBridgeGameEndpoint(options: {
 				};
 			}
 
-			const result = options.setTouchActionValue(command.touchId, command.value);
+			const result = options.setTouchActionValue(
+				command.touchId,
+				command.value,
+			);
 			if (result.accepted && command.durationMs !== undefined) {
 				const existingTimer = touchClearTimers.get(command.touchId);
 				if (existingTimer !== undefined) {
@@ -318,7 +341,9 @@ export function createGameDevBridgeGameEndpoint(options: {
 		);
 	};
 
-	const executeAndPublishCommandResult = (command: GameDevBridgeCommand): void => {
+	const executeAndPublishCommandResult = (
+		command: GameDevBridgeCommand,
+	): void => {
 		if (command.targetSessionId && command.targetSessionId !== sessionId) {
 			return;
 		}
@@ -350,6 +375,10 @@ export function createGameDevBridgeGameEndpoint(options: {
 			type: "game:command-result",
 			result: response,
 		} satisfies GameDevBridgeMessage);
+		sendRelayMessage({
+			type: "game:command-result",
+			result: response,
+		});
 		publishLog(result.accepted ? "info" : "warn", result.message);
 		publishSnapshot("commandResult");
 	};
@@ -364,7 +393,31 @@ export function createGameDevBridgeGameEndpoint(options: {
 		executeAndPublishCommandResult(message.command);
 	};
 
+	const onRelayMessage = (event: MessageEvent<string>) => {
+		let message: unknown;
+		try {
+			message = JSON.parse(event.data);
+		} catch {
+			return;
+		}
+
+		if (
+			message &&
+			typeof message === "object" &&
+			(message as { type?: unknown }).type === "controller:command" &&
+			isGameDevBridgeCommand((message as { command?: unknown }).command)
+		) {
+			executeAndPublishCommandResult(
+				(message as { command: GameDevBridgeCommand }).command,
+			);
+		}
+	};
+
 	channel?.addEventListener("message", onMessage);
+	relaySocket?.addEventListener("message", onRelayMessage);
+	relaySocket?.addEventListener("open", () => {
+		publishSnapshot("startup");
+	});
 	publishLog("info", `Game dev bridge session ${sessionId} connected.`);
 	publishSnapshot("startup");
 
@@ -383,6 +436,8 @@ export function createGameDevBridgeGameEndpoint(options: {
 			touchClearTimers.clear();
 			channel?.removeEventListener("message", onMessage);
 			channel?.close();
+			relaySocket?.removeEventListener("message", onRelayMessage);
+			relaySocket?.close();
 		},
 	};
 }
@@ -539,7 +594,8 @@ export function normalizeGameDevBridgeSettings(
 			state: channels.state ?? defaultGameDevBridgeSettings.channels.state,
 			snapshots:
 				channels.snapshots ?? defaultGameDevBridgeSettings.channels.snapshots,
-			levelMap: channels.levelMap ?? defaultGameDevBridgeSettings.channels.levelMap,
+			levelMap:
+				channels.levelMap ?? defaultGameDevBridgeSettings.channels.levelMap,
 		},
 	};
 }
@@ -596,6 +652,45 @@ function createBroadcastChannel(
 	}
 
 	return new BroadcastChannel(channelName);
+}
+
+function isGameDevBridgeCommand(value: unknown): value is GameDevBridgeCommand {
+	if (!value || typeof value !== "object") {
+		return false;
+	}
+
+	const type = (value as { type?: unknown }).type;
+	return (
+		type === "loadRuntimeScene" ||
+		type === "setCollisionOverlay" ||
+		type === "sendChat" ||
+		type === "setTouchActionValue" ||
+		type === "clearTouchControls"
+	);
+}
+
+function createRelaySocket(sessionId: string): WebSocket | undefined {
+	if (typeof WebSocket === "undefined") {
+		return undefined;
+	}
+
+	try {
+		const url = new URL(GAME_DEV_BRIDGE_RELAY_PATH, window.location.href);
+		url.protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+		const socket = new WebSocket(url);
+		socket.addEventListener("open", () => {
+			socket.send(
+				JSON.stringify({
+					type: "bridge:hello",
+					role: "game",
+					sessionId,
+				}),
+			);
+		});
+		return socket;
+	} catch {
+		return undefined;
+	}
 }
 
 function writeCachedSnapshot(

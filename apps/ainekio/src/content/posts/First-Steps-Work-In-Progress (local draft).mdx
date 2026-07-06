@@ -1,0 +1,115 @@
+---
+title: "Data bridge"
+published: 2026-07-06
+description: "Work-in-progress notes for Ainekio's first virtual environment step."
+image: "/posts/generic/bamboo.webp"
+avatarImage: "/posts/generic/avatar.webp"
+authorName: "Ainekio"
+authorBio: "Robot familiar project"
+bannerType: "image"
+bannerData:
+  image: "/posts/generic/bamboo.webp"
+timelineYear: 2026
+timelineEra: "work-in-progress"
+timelineLocation: "ainek.io"
+showImageOnPost: false
+tags: [Ainekio, Robot, MetaHuman OS, Work In Progress]
+category: "Project Notes"
+draft: true
+lang: "en"
+---
+
+# Ainekio Step 1 - Virtual Environment Setup
+
+Build a virtual connection between MetaHuman OS and the Megameal multiplayer environment.
+
+`game.megameal` already has a multiplayer system. The current bridge plan is to keep that game system normal and add a lightweight External DEV Bridge switch. When the switch is on, the currently running Megameal client exposes input and output for its own player. It does not create a hidden player, special MetaHuman session, or hardcoded MetaHuman path.
+
+If I want a human player and an AI player in the same room, the clean test shape is two ordinary Megameal clients connected to the same multiplayer room: one human-controlled client with the bridge off, and one bridge-controlled client with the bridge on.
+
+The data exposed by the bridge should start small and expand deliberately:
+
+- Text from multiplayer chat or environment events
+- Location and heading
+- Health or other player state
+- Movement controls such as move, stop, jump, and interact
+- Chat/text output back into the room
+- Later: visual frames, map data, richer state, and feedback from action results
+
+MetaHuman OS owns the other side of the bridge. Its `environment-bridge` agent starts only when requested, connects to the exposed game adapter, receives observations, and passes them into the Environment Mode node graph. The node graph is the entry and exit point for cognition: it prepares context, calls the model, parses the decision into generic actions, and sends those actions back through the bridge.
+
+The important separation rule is that Megameal does not know prompts, personas, graph policy, or model routing. MetaHuman core does not know Megameal controls, rooms, maps, or special URL parameters. Megameal-specific translation stays at the Megameal External DEV Bridge edge. MetaHuman Environment Mode nodes stay generic so a future physical robot or another simulator can plug into the same workflow.
+
+This means building a virtual body first. The first useful version can be conversation-only. Movement can follow once the text loop is stable. Long term, the same environment interface should make it possible to replace the Megameal adapter with a real-world body adapter.
+
+
+## Game Dev Server as Virtual Environment
+
+I have previously made a game engine with multiplayer support - it exists at https://game.megameal.org/ (or whatever localhost is set). Player element in the local server has been modified. In the level editor https://game.megameal.org/editor of the game there is now a checkbox for 'External DEV Bridge Enabled' when this is set the player element has exposed in/out controls - this system is by default off to manage security risks. The exposed in out contrls are genereic an not exclisive to the os for future possibilities. The majority of the code is kept in the ./src/app/dev-bridge folder as much as possible. Nore: When this is set the external contols do no overridge the player - they merge so there is the possibility of 2 inputs at once.
+
+The intended workflow for this is to have two node js servers running from any device, start a multiplayer session, connect the inputs and outputs to the methuman os, and loading both windows in the host room both players join, ai has controls conversation and movement of one player - and player owns conversation and movement of other player. Alternativly of there is only a single room, and no multiplayer session, ai and can move and explore, but has no conversation abilities
+
+Alternativly it is possible to start one server trigger the enable the bridge and observe the AI.
+
+## MetaHumanOS Agent system
+
+When the MetaHumanOS server is initally started the server boots up and loads central agents to operated within the server--MetaHumanOS doesnt by default trigger the bridge system. to connect - you go to the agent monitor tab on the right window, and on the list of agents find enviornment-bridge - enable this and make sure enviornment mode is selected - the enviormnet bridge agent will gonnect to the relevant server socket - by default it is set to server 4322 but i will add configurations for this soon. th agent with then run a non pulling process waiting for inputs from the megameal server bridge, when it recives an input, it is processed through the configured input node in the eviornment mode workflow, and responses are sen through the configured outputt nodes - the input node receives text location, health(battery), and other relevant info, the output node routs the data to relevant inputs in the configured server player - text, movement controls ect. at this time vision is not supported, SST and TTS are supported OS side only.
+
+
+## Current Status - 2026-07-06
+
+- Bi-directional conversation achived! Yay!
+- Movement not working
+- No game avatar.
+- No bridge polling loop - on purpose.
+
+The remaining real gap is proven to work but janky: the MetaHuman `environment-bridge` Megameal adapter is built, but the full multiplayer room loop still needs to be refined.
+
+## Current File Surface
+
+Current Megameal External DEV Bridge files:
+
+- `apps/game.megameal/src/app/dev-bridge/gameDevBridge.ts`: main bridge contract and current-player runtime endpoint. It defines bridge settings, snapshots, command types, the browser-side BroadcastChannel support, and the WebSocket connection used by the current Megameal player to send observations and receive commands.
+- `apps/game.megameal/src/app/dev-bridge/gameDevBridgeRuntime.ts`: binds the bridge to the running browser game client. This is where the bridge gets access to the current player snapshot, multiplayer chat send function, runtime-scene loader, collision overlay command, and touch-control action ports.
+- `apps/game.megameal/src/app/dev-bridge/server/game-dev-bridge-relay.mjs`: development-only WebSocket relay mounted at `/__megameal-dev-bridge` on the existing Megameal dev server. It accepts game/controller bridge clients, forwards game snapshots/logs/results to controllers, forwards controller commands to game clients, and rejects access when the External DEV Bridge setting is disabled.
+- `apps/game.megameal/scripts/editor-dev-api.mjs`: existing Megameal editor/dev-server plugin. It installs the dev bridge relay on the existing dev server and passes the global settings file path so the relay can check whether the bridge is enabled.
+- `apps/game.megameal/src/app/GameClient.svelte`: imports the bridge runtime endpoint in development mode so the current game client can expose its current-player ports when the setting is enabled.
+- `apps/game.megameal/src/app/levelPackageDiscovery.ts`: exposes normalized global bridge settings to the runtime package settings.
+- `apps/game.megameal/src/editor/MasterControlMap.svelte`: editor UI surface for the External DEV Bridge settings in the global settings panel.
+- `apps/game.megameal/src/editor/level/LevelEditorWorkspace.svelte`: editor-side bridge monitor/command endpoint used while working in the level editor.
+- `apps/game.megameal/src/editor/masterControlGraph.ts`: documentation graph entry that describes the External DEV Bridge owner path and contract.
+- `apps/game.megameal/src/levels/global/settings.ts`: saved global settings owner for `devBridge.enabled`, broadcast location, and enabled data categories.
+
+Current MetaHuman bridge and Environment Mode files:
+
+- `docs/implementation-plans/ENVIRONMENT_INTERFACE_BRIDGE.md`: source plan for the separated current-player adapter, MetaHuman bridge agent, and Environment Mode node graph.
+- `brain/agents/environment-bridge/core.ts`: bridge-agent entry point. It enables bridge state, records connection data, defaults Megameal to `http://localhost:4322/`, starts the Megameal adapter when selected, and keeps the agent alive as an event-driven bridge process until stopped.
+- `brain/agents/environment-bridge/cli.ts`: command-line surface for adapter id, URL, room, graph, username, and enable/disable state.
+- `brain/agents/environment-bridge/adapters/megameal.ts`: Megameal adapter owned by the `environment-bridge` agent. It connects to `/__megameal-dev-bridge`, receives Megameal snapshots/results, filters self chat, publishes generic observations, runs Environment Mode on new player text, claims queued actions, and translates them into Megameal bridge commands.
+- `brain/agents/environment-bridge/adapters/index.ts`: removed old adapter export surface.
+- `brain/agents/environment-bridge/adapters/megameal-local.ts`: removed old local Megameal sidecar adapter/server code.
+- `etc/cognitive-graphs/environment-mode.json`: Environment Mode workflow. It now routes `Environment Observation -> Megameal Interpreter -> Context Builder -> Model Router -> Thinking Stripper -> Action Parser -> Environment Send Action`. It no longer streams responses directly to MetaHuman chat for this bridge path.
+- `packages/core/src/environment-interface/store.ts`: generic bridge store for enabled state, connection records, session state, observations, text-event claiming, action queue, and feedback.
+- `packages/core/src/environment-interface/types.ts`: generic observation, action, session, feedback, visual, map, and connection contracts.
+- `packages/core/src/nodes/environment/connect.node.ts`: generic connection node for graph-owned adapter settings.
+- `packages/core/src/nodes/environment/observation.node.ts`: Environment Mode node for reading the active or requested session observation.
+- `packages/core/src/nodes/environment/megameal-interpreter.node.ts`: specialized Megameal interpreter node. It accepts raw Megameal observations, filters `You`/self messages, exposes cleaned player text as instruction input, and limits available outputs to Megameal-supported environment actions.
+- `packages/core/src/nodes/environment/action-parser.node.ts`: Environment Mode node for parsing model output into generic semantic actions. It supports plain text as `sendText` and optional natural-language movement parsing.
+- `packages/core/src/nodes/environment/helpers.ts`: shared generic formatting and action parsing helpers for environment nodes, including natural movement fallback support.
+- `packages/core/src/nodes/environment/index.ts`: export surface for the environment node family, including the Megameal interpreter node.
+- `packages/core/src/nodes/schemas.ts`: browser-safe node schemas for the Environment Mode node editor, including the Megameal interpreter and Environment Connect schemas.
+
+Related MetaHuman support files:
+
+- `start.sh`: startup lifecycle support for cleaning stale local runtime files and service records.
+- `stop.sh`: shutdown lifecycle support for cleaning current MetaHuman service processes.
+- `docs/robot-friend.md`: legacy robot-friend intent document. It is useful context, not active bridge runtime code.
+
+
+
+import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
+
+<DocsEditorBridge
+  client:load
+  url="https://docs.google.com/document/d/11-HIevKJzReutvqYSodHPu3CDrxDo3ujfTpTGzB27oo/edit?usp=sharing"
+/>

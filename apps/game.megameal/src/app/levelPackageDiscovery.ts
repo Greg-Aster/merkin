@@ -1,10 +1,10 @@
 import type { RuntimeSceneManifestData } from "../engine/index.js";
 import type { AudioContentManifest } from "../engine/modules/audio/index.js";
 import {
+	type GameDevBridgeSettings,
 	defaultGameDevBridgeSettings,
 	normalizeGameDevBridgeSettings,
-	type GameDevBridgeSettings,
-} from "./gameDevBridge.js";
+} from "./dev-bridge/gameDevBridge.js";
 
 type RuntimeLevelPackageModule = {
 	readonly levelPackageSettings?: {

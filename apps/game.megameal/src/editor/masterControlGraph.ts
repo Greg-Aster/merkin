@@ -121,7 +121,7 @@ export function createMasterControlGraph(
 				label: "Game Client",
 				group: "app",
 				owner:
-					"src/app/GameClient.svelte, src/app/browserGameClient.ts, src/app/gameDevBridge.ts",
+					"src/app/GameClient.svelte, src/app/browserGameClient.ts, src/app/dev-bridge/gameDevBridge.ts",
 				contract:
 					"Owns the browser game host lifecycle: canvas mount, selected runtime-scene query params, Svelte state mirroring, frame-loop startup, UI command dispatch, and DEV bridge exposure.",
 				status: "implemented",
@@ -133,7 +133,7 @@ export function createMasterControlGraph(
 					{
 						label: "Composed Files",
 						value:
-							"GameClient.svelte is the Svelte host; browserGameClient.ts owns BrowserPlatform and requestAnimationFrame; gameDevBridge.ts owns DEV-only editor snapshots and commands.",
+							"GameClient.svelte is the Svelte host; browserGameClient.ts owns BrowserPlatform and requestAnimationFrame; src/app/dev-bridge owns DEV-only bridge snapshots and commands.",
 					},
 					{
 						label: "DOM Owned",
@@ -302,20 +302,24 @@ export function createMasterControlGraph(
 				id: "live-dev-bridge",
 				label: "External DEV Bridge",
 				group: "editor",
-				owner:
-					"src/app/gameDevBridge.ts, src/app/gameDevBridgeRuntime.ts, and src/levels/global/settings.ts",
+				owner: "src/app/dev-bridge/* and src/levels/global/settings.ts",
 				contract:
-					"Optionally emits configured runtime observations on a local bridge channel and routes generic commands back through runtime ports.",
+					"Optionally exposes the current player through the centralized DEV bridge folder and routes generic commands back through runtime ports.",
 				status: "implemented",
 				statusNote:
-					"Disabled by default; global settings control enablement, broadcast location, and data categories.",
+					"Global settings control enablement, broadcast location, and data categories. The relay rejects connections when the bridge is disabled.",
 				removable: true,
 				isConfigurable: true,
 				details: [
 					{
 						label: "Privacy Control",
 						value:
-							"src/levels/global/settings.ts devBridge.enabled gates bridge emission.",
+							"src/levels/global/settings.ts devBridge.enabled gates bridge emission and relay access.",
+					},
+					{
+						label: "Network Relay",
+						value:
+							"src/app/dev-bridge/server/game-dev-bridge-relay.mjs owns the dev-only WebSocket relay at /__megameal-dev-bridge.",
 					},
 					{
 						label: "Data Categories",

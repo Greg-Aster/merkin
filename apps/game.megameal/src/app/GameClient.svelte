@@ -85,7 +85,7 @@ async function initializeClient(): Promise<void> {
 
 		if (import.meta.env.DEV) {
 			const { createGameDevBridgeRuntimeEndpoint } = await import(
-				"./gameDevBridgeRuntime.js"
+				"./dev-bridge/gameDevBridgeRuntime.js"
 			);
 
 			if (destroyed) {

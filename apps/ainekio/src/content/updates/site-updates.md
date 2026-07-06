@@ -24,3 +24,9 @@ Location: Website
 Mileage: v0.1.0
 
 Started the Ainekio static site in the Merkin monorepo under `apps/ainekio`, and wired to use `ainek.io`. Made github repo fo Anekio project 'https://github.com/Greg-Aster/Ainekio-bot'.
+
+## 2026-07-06 | First Steps
+Location: Website
+Mileage: v0.1.0
+
+Coding work on bridge between OS and virtual enviornment,
