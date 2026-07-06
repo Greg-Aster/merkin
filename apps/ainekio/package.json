@@ -31,6 +31,7 @@
     "@iconify-json/material-symbols": "^1.2.14",
     "@iconify-json/mdi": "^1.2.3",
     "@merkin/blog-core": "workspace:*",
+    "@merkin/docs-editor-bridge": "workspace:*",
     "@iconify/svelte": "^5.0.0",
     "@tailwindcss/typography": "^0.5.16",
     "astro": "5.18.0",

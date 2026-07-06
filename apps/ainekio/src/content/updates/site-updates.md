@@ -19,10 +19,8 @@ current:
     Ainekio now has a Merkin-managed site scaffold under apps/ainekio, using the shared Temporal Flow architecture without copying it into the robot repo.
 ---
 
-This feed is for short project updates that do not need a full post.
-
 ## 2026-07-04 | Site scaffold
 Location: Website
 Mileage: v0.1.0
 
-Started the Ainekio static site in the Merkin monorepo under `apps/ainekio`, based on the generic Temporal Flow app and wired to use `ainek.io`.
+Started the Ainekio static site in the Merkin monorepo under `apps/ainekio`, and wired to use `ainek.io`. Made github repo fo Anekio project.

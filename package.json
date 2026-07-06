@@ -43,7 +43,10 @@
     "type-check:all": "pnpm -r type-check",
     "dev:ainekio": "pnpm --filter @merkin/ainekio dev",
     "build:ainekio": "pnpm --filter @merkin/ainekio build",
-    "deploy:ainekio": "pnpm build:ainekio && bash ./scripts/deploy-pages-with-retry.sh apps/ainekio/dist merkin-ainekio"
+    "deploy:ainekio": "pnpm build:ainekio && bash ./scripts/deploy-pages-with-retry.sh apps/ainekio/dist merkin-ainekio",
+    "dev:docs-editor-bridge": "pnpm --filter @merkin/docs-editor-bridge dev",
+    "build:docs-editor-bridge": "pnpm --filter @merkin/docs-editor-bridge build",
+    "test:docs-editor-bridge": "pnpm --filter @merkin/docs-editor-bridge test"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",

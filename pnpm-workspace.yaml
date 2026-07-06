@@ -3,6 +3,7 @@ packages:
   - 'apps/megameal'
   - 'apps/travel'
   - 'apps/ainekio'
+  - 'apps/docs-editor-bridge'
   # Sites - blog-only sites in workspace
   - 'Temporal-Flow'
   - 'DNDIY.github.io'
