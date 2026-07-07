@@ -156,6 +156,17 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
     font-weight: 800;
   }
 
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content .ainekio-progress-bar {
+    display: inline-block;
+    min-width: 6.8rem;
+    color: var(--ainekio-amber);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.92em;
+    letter-spacing: 0.03em;
+    text-shadow: 0 0 14px rgba(255, 178, 79, 0.22);
+    white-space: nowrap;
+  }
+
   #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content a {
     color: var(--ainekio-cyan);
     text-decoration-color: rgba(117, 218, 255, 0.42);
@@ -194,3 +205,213 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
   client:load
   url="https://docs.google.com/document/d/1uv5FAk8vwUOn8M2ttY6TtQT92P0Z5SP95sxKeCuTWRM/edit?usp=sharing"
 />
+
+<script>{`
+  const postSelector = '#post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content'
+
+  function getBroadStrokesContent() {
+    return document.querySelector(postSelector)
+  }
+
+  function appendInlineMarkdown(parent, text) {
+    const marker = String.fromCharCode(96)
+    const tokenPattern = new RegExp(
+      marker + '([^' + marker + ']+)' + marker + '|\\\\*\\\\*([^*]+)\\\\*\\\\*|\\\\[([^\\\\]]+)\\\\]\\\\((https?:\\\\/\\\\/[^\\\\s)]+|\\\\/[^\\\\s)]+)\\\\)|([█░]{3,})',
+      'g',
+    )
+    let cursor = 0
+    let match
+
+    while ((match = tokenPattern.exec(text)) !== null) {
+      if (match.index > cursor) {
+        parent.append(document.createTextNode(text.slice(cursor, match.index)))
+      }
+
+      if (match[1]) {
+        const code = document.createElement('code')
+        code.textContent = match[1]
+        parent.append(code)
+      } else if (match[2]) {
+        const strong = document.createElement('strong')
+        strong.textContent = match[2]
+        parent.append(strong)
+      } else if (match[3] && match[4]) {
+        const anchor = document.createElement('a')
+        anchor.textContent = match[3]
+        anchor.href = match[4]
+        if (match[4].startsWith('http')) {
+          anchor.rel = 'noopener noreferrer'
+          anchor.target = '_blank'
+        }
+        parent.append(anchor)
+      } else if (match[5]) {
+        const progress = document.createElement('span')
+        progress.className = 'ainekio-progress-bar'
+        progress.textContent = match[5]
+        parent.append(progress)
+      }
+
+      cursor = tokenPattern.lastIndex
+    }
+
+    if (cursor < text.length) {
+      parent.append(document.createTextNode(text.slice(cursor)))
+    }
+  }
+
+  function splitTableRow(text) {
+    return text.replace(/^\\|/, '').replace(/\\|$/, '').split('|').map((cell) => cell.trim())
+  }
+
+  function isTableLine(element) {
+    return element.tagName === 'P' && /^\\|.+\\|$/.test(element.textContent.trim())
+  }
+
+  function isTableDivider(text) {
+    return /^\\|?\\s*:?-{3,}:?\\s*(\\|\\s*:?-{3,}:?\\s*)+\\|?$/.test(text.trim())
+  }
+
+  function buildTable(rows) {
+    const table = document.createElement('table')
+    table.className = 'ainekio-enhanced-table'
+    const thead = document.createElement('thead')
+    const tbody = document.createElement('tbody')
+    const headerRow = document.createElement('tr')
+
+    splitTableRow(rows[0].textContent.trim()).forEach((cellText) => {
+      const cell = document.createElement('th')
+      appendInlineMarkdown(cell, cellText)
+      headerRow.append(cell)
+    })
+
+    thead.append(headerRow)
+
+    rows.slice(1).forEach((row) => {
+      const text = row.textContent.trim()
+      if (isTableDivider(text)) return
+
+      const bodyRow = document.createElement('tr')
+      splitTableRow(text).forEach((cellText) => {
+        const cell = document.createElement('td')
+        appendInlineMarkdown(cell, cellText)
+        bodyRow.append(cell)
+      })
+      tbody.append(bodyRow)
+    })
+
+    table.append(thead, tbody)
+    return table
+  }
+
+  function enhanceTables(root) {
+    const children = Array.from(root.children)
+    for (let index = 0; index < children.length; index += 1) {
+      const current = children[index]
+      if (!isTableLine(current)) continue
+
+      const rows = []
+      let cursor = index
+      while (cursor < children.length && isTableLine(children[cursor])) {
+        rows.push(children[cursor])
+        cursor += 1
+      }
+
+      if (rows.length >= 3 && isTableDivider(rows[1].textContent)) {
+        rows[0].replaceWith(buildTable(rows))
+        rows.slice(1).forEach((row) => row.remove())
+      }
+
+      index = cursor - 1
+    }
+  }
+
+  function enhanceNumberedLists(root) {
+    const children = Array.from(root.children)
+    for (let index = 0; index < children.length; index += 1) {
+      const current = children[index]
+      if (current.tagName !== 'P') continue
+
+      const firstMatch = current.textContent.trim().match(/^\\d+\\.\\s+(.+)$/)
+      if (!firstMatch) continue
+
+      const items = []
+      let cursor = index
+      while (cursor < children.length && children[cursor].tagName === 'P') {
+        const match = children[cursor].textContent.trim().match(/^\\d+\\.\\s+(.+)$/)
+        if (!match) break
+        items.push({ element: children[cursor], text: match[1] })
+        cursor += 1
+      }
+
+      if (items.length === 0) continue
+
+      const list = document.createElement('ol')
+      items.forEach((item) => {
+        const listItem = document.createElement('li')
+        appendInlineMarkdown(listItem, item.text)
+        list.append(listItem)
+      })
+
+      items[0].element.replaceWith(list)
+      items.slice(1).forEach((item) => item.element.remove())
+      index = cursor - 1
+    }
+  }
+
+  function enhanceBlockquotes(root) {
+    root.querySelectorAll('p').forEach((paragraph) => {
+      const text = paragraph.textContent.trim()
+      if (!text.startsWith('> ')) return
+
+      const blockquote = document.createElement('blockquote')
+      appendInlineMarkdown(blockquote, text.slice(2))
+      paragraph.replaceWith(blockquote)
+    })
+  }
+
+  function enhanceInlineMarkdown(root) {
+    root.querySelectorAll('p, li').forEach((element) => {
+      if (element.dataset.ainekioEnhanced === 'true') return
+      const text = element.textContent
+      if (
+        !text.includes('**') &&
+        !text.includes('[') &&
+        !text.includes(String.fromCharCode(96)) &&
+        !/[█░]{3,}/.test(text)
+      ) {
+        return
+      }
+
+      element.textContent = ''
+      appendInlineMarkdown(element, text)
+      element.dataset.ainekioEnhanced = 'true'
+    })
+  }
+
+  function enhanceBroadStrokes() {
+    const root = getBroadStrokesContent()
+    if (!root) return
+
+    enhanceTables(root)
+    enhanceNumberedLists(root)
+    enhanceBlockquotes(root)
+    enhanceInlineMarkdown(root)
+  }
+
+  const readyCheck = window.setInterval(() => {
+    const root = getBroadStrokesContent()
+    if (!root) return
+    enhanceBroadStrokes()
+    if (!root.textContent.includes('Loading document')) {
+      window.clearInterval(readyCheck)
+    }
+  }, 250)
+
+  const observer = new MutationObserver(() => enhanceBroadStrokes())
+  const observerCheck = window.setInterval(() => {
+    const root = getBroadStrokesContent()
+    if (!root) return
+    observer.observe(root, { childList: true, subtree: true })
+    window.clearInterval(observerCheck)
+  }, 250)
+`}</script>

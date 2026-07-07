@@ -18,6 +18,9 @@ category: "Project Notes"
 draft: true
 lang: "en"
 ---
+
+import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
+
 # Ainekio Step 1 - Virtual Environment Setup
 
 Build a virtual connection between MetaHuman OS and the Megameal multiplayer environment.
@@ -106,10 +109,6 @@ Related MetaHuman support files:
 - `start.sh`: startup lifecycle support for cleaning stale local runtime files and service records.
 - `stop.sh`: shutdown lifecycle support for cleaning current MetaHuman service processes.
 - `docs/robot-friend.md`: legacy robot-friend intent document. It is useful context, not active bridge runtime code.
-
-
-
-import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
 
 <DocsEditorBridge
   client:load
