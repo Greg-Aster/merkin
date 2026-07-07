@@ -1,0 +1,160 @@
+---
+title: "Motion Systems"
+published: 2026-07-06
+description: "Investigation and plan for Ainekio's Sesame-based motion layer, from stock ESP32 firmware to a Pi/PCA9685 module with virtual testing."
+image: "/posts/ainekio/city-battle-banner.webp"
+avatarImage: "/posts/generic/avatar.webp"
+authorName: "Ainekio"
+authorBio: "Robot familiar project"
+bannerType: "image"
+bannerData:
+  imageUrl: "/posts/ainekio/city-battle-banner.webp"
+timelineYear: 2026
+timelineEra: "work-in-progress"
+timelineLocation: "Robot body"
+showImageOnPost: false
+tags: [Ainekio, Robot, Motion Systems, Sesame, Raspberry Pi, MetaHuman OS]
+category: "Project Notes"
+draft: true
+lang: "en"
+---
+
+# Ainekio Motion Systems - Investigation and Plan
+
+The robot body is based on the Sesame bot, but running a Raspberry Pi (likely a Pi Zero 2 W) instead of the stock ESP32. The existing motion system is ESP32 firmware, so the job is to understand what that firmware actually does, then plan a new motion module and related systems that run on Linux. Unusual constraint: this will run in a virtual environment first and get rigorously tested before it ever touches the chassis.
+
+## What the existing ESP32 system actually is
+
+Read through the firmware docs, the companion app repo, and the simulator. The stock system is more useful than expected.
+
+The firmware (`sesame-firmware-main.ino` plus headers) is Arduino-ESP32, single-core event loop, hardware PWM timers for the servos. It splits into:
+
+- `sesame-firmware-main.ino` - setup/loop, core logic, network config, and the API endpoints
+- `movement-sequences.h` - all the procedural movement and pose animations
+- `face-bitmaps.h` - OLED face bitmaps, including conversational faces and talk variants
+- `captive-portal.h` - the built-in web remote
+
+The motion design is keyframe animation, not realtime kinematics. Sesame Studio (a Python desktop app) lets you pose the robot with sliders, capture frames, sequence them, and it generates the C++ that goes into `movement-sequences.h`. Stop-motion workflow. This matters a lot for the port: keyframe playback is easy to move to Python on Linux. There is no gait math to reverse engineer, just pose tables and timing.
+
+The big find: the stock firmware already exposes a semantic command API over HTTP. `POST /api/command` takes JSON like `{"command": "walk", "face": "happy"}`, `GET /api/status` returns current command, current face, and network state. Commands are already intent-level - walk, dance, wave, swim, pushup, bow, shake, idle, stop, rest. There's an official companion app (Python) that drives the robot through this API with an LLM and voice on a desktop PC. mDNS broadcasts `sesame-robot.local`. So the "semantic commands, not servo angles" philosophy from the project overview is not something I have to invent - the platform already works that way. The question is where that API lives once the ESP32 is gone.
+
+Other useful details from the firmware docs:
+
+- The firmware pins ESP32Servo at v3.0.9 - newer versions have a bug where writing one servo can affect multiple channels. Noted as the kind of landmine a rewrite avoids entirely (the Pi + PCA9685 path doesn't use that library at all).
+- Brownout is a known issue - the firmware has a motor current delay "stagger" setting so all 8 servos don't move at once. Whatever replaces it needs the same idea. This confirms the power concerns in the parts list doc.
+- The API has no auth and no HTTPS, designed for trusted local network only. Fine for the bench, but the Ainekio bridge layer stays the only thing facing outward.
+- There's a browser-based simulator (sesame-sim.aperobotics.io) that compiles and runs the firmware virtually - useful for understanding stock behavior without hardware.
+- There's also a sesame-robot-micro experiment in the same ecosystem with per-servo angle commands, subtrim, frame delay, and walk cycle tuning - a good reference for what a tuning interface should expose.
+
+## Three architecture options
+
+**Option A - keep the ESP32 as the motion controller.** Pi rides onboard for senses and network, ESP32 keeps running stock (or lightly modified) firmware, Pi sends commands to it over the existing HTTP API or serial. Least motion work, keeps proven movement sequences and the brownout stagger, and gets servo/logic rail separation for free since they're separate boards. Cost: two boards in a small body, and the ESP32 firmware becomes a dependency I don't fully own.
+
+**Option B - full Pi replacement.** Pi Zero 2 W + PCA9685 servo bonnet, motion layer rewritten in Python. One board stack, full ownership, everything in one OS. Cost: the motion module has to be written, and Linux is not a realtime OS - though keyframe playback at Sesame's animation speeds doesn't need hard realtime, and the PCA9685 generates the actual PWM in hardware, so timing jitter on the Pi side only affects when a pose starts, not the pulse quality.
+
+**Option C - all-in-one on a bigger Pi.** Pi 5 class board, everything onboard including possibly local STT/TTS and vision models. This is the "powerful raspberry pi" future case. Same motion module as Option B - which is the point. If the motion module is written properly, A/B/C are deployment choices, not rewrites.
+
+Current lean: build the motion module as if Option B is the target, but keep the stock HTTP API as the command contract so Option A works as a fallback during hardware bring-up (drive a stock ESP32 Sesame from the Pi while the Python motion layer matures).
+
+## Efficiency and where processing lives - undecided, for consideration
+
+Raised the question: if the ESP32 already runs this robot, isn't moving to a Pi inefficient? The honest answer is "inefficient at what" - so laying out the trade here before it gets decided by accident.
+
+For motion alone, the ESP32 is the better tool. Microcontroller, hardware-timed PWM, no OS in the way, tiny power draw, instant on. The Pi runs full Linux, draws roughly 0.6-3w, boots in ~30 seconds, and the OS can interrupt timing. If Ainekio were only a walking robot, the Pi swap would be strictly worse.
+
+But the ESP32 fundamentally cannot contain STT, TTS, or vision understanding - a few hundred kb of ram, no meaningful ML acceleration. What an ESP32 *can* do is capture and forward: I2S mic streaming raw audio over wifi, ESP32-CAM style JPEG frames, and newer S3 chips can do wake-word detection onboard. Transcription, speech synthesis, and image understanding have to happen somewhere bigger - onboard SBC or across the network.
+
+That gives three honest placements (overlapping with but not identical to the architecture options above):
+
+- **ESP32 captures and forwards everything, no Pi at all.** Mic and camera stream over wifi straight to MetaHuman OS, which does all STT/TTS/vision. Cheapest, lightest, most power efficient, and the intelligence already lives off-board by design - so this is a legitimate minimal v1, not a hack. Costs: robot is completely helpless offline, constant raw streaming eats bandwidth and battery, and ESP32 audio quality/latency is mediocre.
+- **Pi only** (the current parts list). One board owns motion, senses, and network. The Python-servo inefficiency is mostly handled by the PCA9685 doing the actual PWM in hardware - the Pi just sends target angles over I2C. Perspective on power: 8 MG90S servos spike at 10-20w when moving; the Pi's 1-3w is noise next to that. The Pi only really costs battery at idle, which sleep states can address.
+- **Both boards.** Microcontroller does realtime motion and reflexes, SBC does perception and network - this is the standard pattern in real robotics (drone flight controller + companion computer), not a compromise. ESP32 keeps its proven firmware, stagger, and instant-on safety; Pi handles camera, mic, speaker, and the bridge, and commands the ESP32 over the existing HTTP API. Costs: two boards in a small cavity, two power consumers, two codebases to maintain.
+
+STT/TTS placement specifically: OS-side only is the right call for the Zero 2 W. Local STT on a Zero (Vosk small model) is possible but sluggish, Whisper is painful, Piper TTS runs but slowly. Sane split for now - wake word onboard (cheap), everything else in MetaHuman OS. Onboard speech becomes realistic on Pi 5 class hardware, which is Option C territory.
+
+None of this is decided. The motion module design doesn't force the choice - the esp32-http backend covers the two-board path, the pca9685 backend covers the Pi-only path, and the forwards-everything path skips the motion module's hardware backends entirely and just uses stock firmware.
+
+## The motion module plan
+
+A Python package, provisionally `ainekio-motion`, in three layers with swappable backends - same trick as the MetaHuman interface nodes.
+
+**Command surface (top).** Speaks the same JSON contract as the stock firmware: `/api/command`, `/api/status`, same command names, same face names. Reason: instant compatibility with everything that already exists (the companion app, the web remote patterns, and whatever MetaHuman adapter gets written). The Ainekio bridge connects here. Probably add a WebSocket alongside HTTP for the outbound telemetry (battery, pose state, heartbeat) since the overview doc already wants that.
+
+**Sequence engine (middle).** Loads keyframe sequences and plays them: pose interpolation, frame timing, walk cycles, and the servo stagger for current management. First sequences come from porting `movement-sequences.h` - the data is pose tables, so this is translation, not invention. Sesame Studio's slider/capture workflow could eventually export straight to the Python format instead of C++. Also owns the safety behaviors from the overview doc: stop always wins, movement duration limits, refuse commands below battery threshold.
+
+**Servo backend (bottom).** An interface with at least three implementations:
+
+- `pca9685` - the real one, driving the Adafruit bonnet over I2C
+- `virtual` - no hardware, publishes joint angles as data so the virtual environment can consume them
+- `esp32-http` - passthrough that forwards commands to a stock Sesame over its HTTP API (this is Option A as a backend, useful for testing against real hardware before the PCA9685 wiring exists)
+
+The virtual backend is what makes "rigorously tested before it touches the chassis" real. The same sequence engine that will drive metal runs headless, and its joint output can drive a visual body.
+
+## Virtual environment fit
+
+This connects to the Step 1 bridge work. The Megameal environment bridge already moves observations and semantic actions between MetaHuman OS and a body. The motion module slots underneath: MetaHuman sends `walk` through the bridge, the motion module's sequence engine plays the walk keyframes, and the virtual backend emits joint angles.
+
+Staging inside the virtual environment mirrors what the Step 1 doc already says: conversation-only first, then wasd-style movement (which maps to command-level motion - walk, turn, stop - no joints needed), then a virtual body with actual servo points and joints driven by the sequence engine. That last stage is where the motion module gets its real testing, because the exact keyframes that will move the physical servos are what animate the virtual body. The Megameal avatar with jointed legs is the test rig.
+
+Possible shortcut worth checking: the Sesame parametric CAD could be simplified into a jointed GLB for the game engine, so the virtual body is literally the robot's geometry.
+
+## Implementation progress
+
+Started the first motion-module slice in the Ainekio robot repo at `/home/greggles/Ainekio`. The work is intentionally repo-local for now: no Megameal, MetaHuman OS, or Sesame simulator source edits until those decisions are made separately.
+
+Created a progress tracker in the robot repo:
+
+- `/home/greggles/Ainekio/docs/MOTION_MODULE_PROGRESS.md`
+
+Created the first `ainekio-motion` package under:
+
+- `/home/greggles/Ainekio/motion`
+
+Current implemented pieces:
+
+- Semantic robot command model, with no raw servo-angle API for AI callers.
+- Root-motion intent attached to locomotion commands. This fixes the "walks in place" problem for virtual testing: the game adapter will animate joints and move the body/root transform through the world.
+- TTL-aware reconnect catch-up helper. It can do a one-shot reconnect read, but expired actions are discarded so stale movement is not replayed.
+- Safety controller with e-stop latch, low-battery lockout, lease expiry, stale-command stop, and offline idle fallback.
+- Sequence engine with provisional Sesame servo names, basic built-in sequences, angle clamping, and per-servo start staggering for brownout/current management.
+- Virtual backend that emits joint telemetry plus root-motion intent for a future Megameal adapter.
+- Disabled physical backend guard that refuses hardware actuation unless hardware is explicitly enabled in config.
+- JSON config loader and `config.example.json` for bridge URL, ports, backend, telemetry, and safety settings so destinations do not become hardcoded constants.
+
+Validation passed in the Ainekio repo:
+
+```sh
+PYTHONPATH=motion/src python3 -m unittest discover -s motion/tests
+```
+
+Result: 10 standard-library unit tests passed on Python 3.12.3.
+
+The important boundary decision from this slice: the motion module now owns the robot-body behavior, but the Megameal adapter still needs to own virtual-world displacement. Joint telemetry is animation data; root motion is what moves the avatar through the room.
+
+## STT, TTS, vision, sensors
+
+Not motion, but the plan has to leave room:
+
+- STT/TTS - currently supported OS-side only (MetaHuman does the talking). Onboard is possible later, more likely on Option C hardware than a Zero. The motion module doesn't care either way; speech arrives as a `speak` command with text, audio out is a separate audio service.
+- Vision - undecided between a full camera and ultrasonic sensors. These are different jobs: the camera is for the brain (observations up the bridge), ultrasonic is for the body (local reflexes - don't walk off the table, stop before the wall). Could be both. Ultrasonic reflex handling belongs in the motion module's safety layer since it has to work without the network. Camera does not belong in the motion module at all.
+- Sensor data goes up the same telemetry channel as battery and pose state.
+
+## Open questions
+
+- How are the movement sequences actually encoded in `movement-sequences.h` - per-frame servo angle arrays with delays, or something more procedural for the walk cycle? Need to read the actual file, this decides how mechanical the port is.
+- What does the stock firmware's stagger implementation look like, so the Python version manages current the same way?
+- PCA9685 I2C update rate vs. what the sequence timing needs - almost certainly fine, verify anyway.
+- Can Sesame Studio's saved poses/sequences be exported or parsed directly rather than re-capturing everything?
+- How does the sim at sesame-sim.aperobotics.io represent the robot body - anything reusable for the Megameal virtual body?
+- Pi Zero 2 W headroom: sequence engine + camera + network on 512mb - or does the motion module need to be lean enough to prove that out early?
+- Battery voltage sensing on the Pi build - the ESP32 had ADC pins, the Pi has none. Needs an ADC on the I2C bus or a battery monitor board. Add to parts list once picked.
+
+## Current steps
+
+- Keep filling in the Ainekio motion module before touching outside repos: port the real `movement-sequences.h` content, verify command names, verify servo order against the wiring guide, and preserve the stock motor-current delay behavior.
+- Add battery telemetry once the Pi-side ADC or battery monitor is chosen.
+- Add the OLED face/expression channel as a separate body output, not as part of the movement sequence engine.
+- Keep reconnect behavior event-driven: one catch-up read on reconnect is fine, but no primary polling loop.
+- Defer Megameal work until it is opened explicitly: the adapter should consume joint telemetry and root-motion intent, then move the robot through Megameal's existing movement system while the joints animate.
+- Defer MetaHuman OS bridge edits until it is opened explicitly: it should send intent into the motion module and receive telemetry without owning servo safety.
+- Only then decide final hardware: if the Python motion layer proves out, Option B; if it fights back, Option A keeps the project moving.
