@@ -73,9 +73,11 @@ export type InputPointerState = {
 export type MobileInputControlsPort = {
 	setTouchAction(touchId: string, active: boolean): void;
 	setTouchActionValue(touchId: string, value: number): void;
+	setExternalTouchActionValue(touchId: string, value: number): void;
 	setTouchLookActive(active: boolean): void;
 	addTouchLookDelta(deltaX: number, deltaY: number): void;
 	clearTouchControls(): void;
+	clearExternalTouchControls(): void;
 };
 
 export type InputSnapshot = {
@@ -200,6 +202,7 @@ export class InputManager implements InputPlatformPort {
 	#gamepadButtonValues = new Map<number, number>();
 	#gamepadAxisValues = new Map<number, number>();
 	#touchValues = new Map<string, number>();
+	#externalTouchValues = new Map<string, number>();
 	#previousActions = new Map<InputActionId, InputActionState>();
 	#pointerDelta: [number, number] = [0, 0];
 	#pointerLookActive = false;
@@ -287,6 +290,10 @@ export class InputManager implements InputPlatformPort {
 		this.setValue(this.#touchValues, touchId, clamped);
 	}
 
+	setExternalTouchValue(touchId: string, value: number): void {
+		this.setValue(this.#externalTouchValues, touchId, value);
+	}
+
 	setTouchLookActive(active: boolean): void {
 		this.#touchLookActive =
 			active && resolveFocusState(this.#focusState).gameplayInputEnabled;
@@ -343,12 +350,12 @@ export class InputManager implements InputPlatformPort {
 		const focus = resolveFocusState(this.#focusState);
 
 		if (!focus.gameplayInputEnabled) {
-			this.clearGameplayInput();
+			this.clearFocusedGameplayInput();
 		}
 
-		const actions = focus.gameplayInputEnabled
-			? this.resolveActions()
-			: new Map<InputActionId, InputActionState>();
+		const actions = this.resolveActions({
+			includeGameplay: focus.gameplayInputEnabled,
+		});
 		const lookActive =
 			focus.gameplayInputEnabled &&
 			(this.#pointerLookActive || this.#touchLookActive);
@@ -380,11 +387,16 @@ export class InputManager implements InputPlatformPort {
 	}
 
 	clearGameplayInput(): void {
+		this.clearFocusedGameplayInput();
+		this.#externalTouchValues.clear();
+		this.#previousActions.clear();
+	}
+
+	private clearFocusedGameplayInput(): void {
 		this.#keyValues.clear();
 		this.#mouseButtonValues.clear();
 		this.#gamepadButtonValues.clear();
 		this.#gamepadAxisValues.clear();
-		this.#previousActions.clear();
 		this.clearPointerInput();
 		this.clearTouchControls();
 	}
@@ -401,15 +413,21 @@ export class InputManager implements InputPlatformPort {
 		this.#pointerDelta = [0, 0];
 	}
 
+	clearExternalTouchControls(): void {
+		this.#externalTouchValues.clear();
+	}
+
 	gameplayInputEnabled(): boolean {
 		return resolveFocusState(this.#focusState).gameplayInputEnabled;
 	}
 
-	private resolveActions(): Map<InputActionId, InputActionState> {
+	private resolveActions(
+		options: { readonly includeGameplay: boolean } = { includeGameplay: true },
+	): Map<InputActionId, InputActionState> {
 		const values = new Map<InputActionId, number>();
 
 		for (const binding of this.#bindings) {
-			const value = this.readBindingValue(binding);
+			const value = this.readBindingValue(binding, options);
 
 			if (value === 0) {
 				continue;
@@ -440,8 +458,15 @@ export class InputManager implements InputPlatformPort {
 		return actions;
 	}
 
-	private readBindingValue(binding: InputBinding): number {
+	private readBindingValue(
+		binding: InputBinding,
+		options: { readonly includeGameplay: boolean },
+	): number {
 		const scale = binding.scale ?? 1;
+
+		if (!options.includeGameplay && binding.device !== "touch") {
+			return 0;
+		}
 
 		if (binding.device === "keyboard") {
 			return (this.#keyValues.get(binding.code) ?? 0) * scale;
@@ -452,7 +477,12 @@ export class InputManager implements InputPlatformPort {
 		}
 
 		if (binding.device === "touch") {
-			return (this.#touchValues.get(binding.touchId) ?? 0) * scale;
+			return (
+				Math.max(
+					this.#touchValues.get(binding.touchId) ?? 0,
+					this.#externalTouchValues.get(binding.touchId) ?? 0,
+				) * scale
+			);
 		}
 
 		if ("button" in binding) {

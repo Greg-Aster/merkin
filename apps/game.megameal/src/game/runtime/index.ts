@@ -83,6 +83,12 @@ import {
 	selectGameHudState,
 } from "../systems/index.js";
 
+export type RuntimePlayerAvatar = {
+	readonly id: string;
+	readonly name?: string;
+	readonly renderable: MultiplayerRemoteAvatarRenderable;
+};
+
 export type GameRendererPort = RendererPort &
 	LightRendererPort &
 	ReflectionProbeRendererPort &
@@ -104,7 +110,7 @@ export type MegamealGameRuntimeOptions = {
 		runtimeSceneManifestId: string,
 	) => AudioContentManifest;
 	readonly multiplayer?: MultiplayerSession;
-	readonly multiplayerRemoteAvatar?: MultiplayerRemoteAvatarRenderable;
+	readonly playerAvatar?: RuntimePlayerAvatar;
 };
 
 export type MegamealGameRuntime = {
@@ -325,6 +331,12 @@ export async function createMegamealGameRuntime(
 		{ order: -100 },
 	);
 	if (options.multiplayer) {
+		if (!options.playerAvatar) {
+			throw new Error(
+				"Multiplayer remote player projection requires a player avatar from the installed player package.",
+			);
+		}
+
 		runtime.scheduler.registerSystem(
 			"render-sync",
 			createLocalPlayerPoseBroadcastSystem({
@@ -336,17 +348,7 @@ export async function createMegamealGameRuntime(
 			"render-sync",
 			createRemotePlayerReplicationSystem({
 				multiplayer: options.multiplayer,
-				renderable: options.multiplayerRemoteAvatar ?? {
-					kind: "sprite",
-					spriteId: "sprite_npc_firefly_outer_halo",
-					color: "#66d9ff",
-					scale: [1.25, 1.25, 1],
-					fallback: {
-						meshId: "mesh_player",
-						materialId: "material_player",
-						scale: [0.75, 1.25, 0.75],
-					},
-				},
+				renderable: options.playerAvatar.renderable,
 			}),
 			{ order: -210 },
 		);

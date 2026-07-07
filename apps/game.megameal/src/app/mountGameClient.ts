@@ -105,6 +105,9 @@ export async function mountGameClient(
 		runtimeSceneManifests: runtimeSettings.runtimeSceneManifests,
 		audioContentManifestForRuntimeScene:
 			runtimeSettings.audioContentManifestForRuntimeScene,
+		...(runtimeSettings.selectedPlayerAvatar
+			? { playerAvatar: runtimeSettings.selectedPlayerAvatar }
+			: {}),
 		...(options.multiplayer ? { multiplayer: options.multiplayer } : {}),
 	});
 

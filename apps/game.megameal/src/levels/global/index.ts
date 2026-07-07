@@ -5,3 +5,4 @@ export * from "./portalAssets.js";
 export * from "./prefabs.js";
 export * from "./skyboxAssets.js";
 export * from "./waterAssets.js";
+export { selectedPlayerAvatar } from "../player/index.js";

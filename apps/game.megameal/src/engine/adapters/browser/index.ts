@@ -226,6 +226,10 @@ export class BrowserInputAdapter
 		this.input.setTouchValue(touchId, value);
 	}
 
+	setExternalTouchActionValue(touchId: string, value: number): void {
+		this.input.setExternalTouchValue(touchId, value);
+	}
+
 	setTouchLookActive(active: boolean): void {
 		this.input.setTouchLookActive(active);
 	}
@@ -236,6 +240,10 @@ export class BrowserInputAdapter
 
 	clearTouchControls(): void {
 		this.input.clearTouchControls();
+	}
+
+	clearExternalTouchControls(): void {
+		this.input.clearExternalTouchControls();
 	}
 
 	async requestPointerLock(): Promise<void> {

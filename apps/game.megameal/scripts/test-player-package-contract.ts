@@ -3,12 +3,16 @@ import { mirandaDeckLevelPackage } from "../src/levels/miranda-deck/package.js";
 import observatoryData from "../src/levels/observatory/data.json";
 import { observatoryLevelPackage } from "../src/levels/observatory/package.js";
 import {
+	PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,
 	PLAYER_PREFAB_ID,
 	PLAYER_REQUIRED_ASSET_IDS,
 	PLAYER_STABLE_ID,
 	playerAssets,
+	playerAvatarAssets,
+	playerAvatars,
 	playerPackageConfig,
 	playerPrefab,
+	selectedPlayerAvatar,
 } from "../src/levels/player/index.js";
 import portalArenaData from "../src/levels/portal-arena/data.json";
 import { portalArenaLevelPackage } from "../src/levels/portal-arena/package.js";
@@ -226,6 +230,48 @@ assertIncludes(
 	playerAssets.map((asset) => asset.url),
 	playerPackageConfig.assets.chargeReleaseAudioUrl,
 	"Player charge audio URL must come from src/levels/player/data.json.",
+);
+assertIncludes(
+	playerAvatarAssets.map((asset) => asset.id),
+	PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,
+	"Default player avatar sprite asset must come from src/levels/player/avatars.",
+);
+assertIncludes(
+	playerAssets.map((asset) => asset.id),
+	PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,
+	"Player package assets must include the selected avatar sprite asset.",
+);
+assertIncludes(
+	PLAYER_REQUIRED_ASSET_IDS,
+	PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,
+	"Player required assets must include the selected avatar sprite asset.",
+);
+assertEqual(
+	selectedPlayerAvatar.id,
+	"player_avatar_light",
+	"Selected player avatar must come from src/levels/player/avatars.",
+);
+assertEqual(
+	selectedPlayerAvatar.renderable.kind,
+	"sprite",
+	"Default player avatar must remain a sprite-backed ball of light.",
+);
+if (selectedPlayerAvatar.renderable.kind === "sprite") {
+	assertEqual(
+		selectedPlayerAvatar.renderable.spriteId,
+		PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,
+		"Default player avatar must use the player-owned light sprite asset.",
+	);
+	assertEqual(
+		selectedPlayerAvatar.renderable.spriteId.includes("npc"),
+		false,
+		"Default player avatar must not point at NPC-owned sprite assets.",
+	);
+}
+assertEqual(
+	playerAvatars.some((avatar) => avatar.id === selectedPlayerAvatar.id),
+	true,
+	"Selected player avatar must exist in the player avatar catalog.",
 );
 
 for (const entry of packages) {

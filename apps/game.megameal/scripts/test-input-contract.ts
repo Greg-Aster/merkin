@@ -210,6 +210,24 @@ function assertDeepEqual(actual: unknown, expected: unknown, message?: string) {
 }
 
 {
+	const input = new InputManager(createGameplayActionMap());
+
+	input.setFocusState({ uiCapturingInput: true });
+	input.setTouchValue(MOBILE_TOUCH_ACTION_IDS.moveForward, 1);
+	const normalTouch = input.snapshot(1);
+	assertEqual(normalTouch.actions.has("move.forward"), false);
+
+	input.setExternalTouchValue(MOBILE_TOUCH_ACTION_IDS.moveForward, 1);
+	const externalTouch = input.snapshot(2);
+	assertEqual(externalTouch.focus.gameplayInputEnabled, false);
+	assertEqual(externalTouch.actions.get("move.forward")?.value, 1);
+
+	input.clearExternalTouchControls();
+	const cleared = input.snapshot(3);
+	assertEqual(cleared.actions.get("move.forward")?.value, 0);
+}
+
+{
 	const input = emptyInput();
 
 	input.setTouchLookActive(true);

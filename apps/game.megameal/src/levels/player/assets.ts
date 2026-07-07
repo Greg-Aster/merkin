@@ -1,4 +1,5 @@
 import type { AssetManifestEntry } from "../../engine/modules/assets/index.js";
+import { playerAvatarAssets } from "./avatars/index.js";
 import { playerPackageConfig } from "./config.js";
 import {
 	PLAYER_CHARGE_RELEASE_AUDIO_ASSET_ID,
@@ -36,6 +37,7 @@ export const playerChargeReleaseAudioAsset = {
 export const playerAssets = [
 	playerMeshAsset,
 	playerMaterialAsset,
+	...playerAvatarAssets,
 	playerJumpAudioAsset,
 	playerChargeReleaseAudioAsset,
 ] as const;

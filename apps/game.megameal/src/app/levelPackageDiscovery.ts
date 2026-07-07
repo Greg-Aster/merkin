@@ -1,5 +1,6 @@
 import type { RuntimeSceneManifestData } from "../engine/index.js";
 import type { AudioContentManifest } from "../engine/modules/audio/index.js";
+import type { RuntimePlayerAvatar } from "../game/runtime/index.js";
 import {
 	type GameDevBridgeSettings,
 	defaultGameDevBridgeSettings,
@@ -17,6 +18,7 @@ type RuntimeLevelPackageModule = {
 	readonly defaultRuntimeSceneManifest?: RuntimeSceneManifestData;
 	readonly defaultRuntimeSceneManifests?: readonly RuntimeSceneManifestData[];
 	readonly runtimeSceneManifests?: readonly RuntimeSceneManifestData[];
+	readonly selectedPlayerAvatar?: RuntimePlayerAvatar;
 	getRuntimeSceneManifest?(id: string): RuntimeSceneManifestData | undefined;
 	audioContentManifestForRuntimeScene?(
 		runtimeSceneManifestId: string,
@@ -44,6 +46,7 @@ export type RuntimeSettings = {
 	readonly hudVisible: boolean;
 	readonly audioMasterVolume: number;
 	readonly devBridge: GameDevBridgeSettings;
+	readonly selectedPlayerAvatar: RuntimePlayerAvatar | undefined;
 	readonly defaultRuntimeSceneManifest: RuntimeSceneManifestData | undefined;
 	readonly runtimeSceneManifests: readonly RuntimeSceneManifestData[];
 	getRuntimeSceneManifest(id: string): RuntimeSceneManifestData | undefined;
@@ -63,6 +66,7 @@ export const runtimeSettings: RuntimeSettings = {
 		installedLevelPackage?.levelPackageSettings?.devBridge ??
 			defaultGameDevBridgeSettings,
 	),
+	selectedPlayerAvatar: installedLevelPackage?.selectedPlayerAvatar,
 	defaultRuntimeSceneManifest,
 	runtimeSceneManifests,
 	getRuntimeSceneManifest(id) {

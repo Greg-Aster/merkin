@@ -1,0 +1,39 @@
+{
+	"schemaVersion": 1,
+	"selectedAvatarId": "player_avatar_light",
+	"assets": [
+		{
+			"id": "sprite_player_avatar_light",
+			"kind": "sprite",
+			"url": "builtin://star-sprite",
+			"sprite": {
+				"color": "#8defff",
+				"size": 2.35,
+				"opacity": 0.9,
+				"intensity": 0.8,
+				"glow": 2.75,
+				"starType": "halo",
+				"depthTest": true,
+				"renderOrder": 1
+			},
+			"tags": ["player", "avatar", "light", "sprite"]
+		}
+	],
+	"avatars": [
+		{
+			"id": "player_avatar_light",
+			"name": "Ball of Light",
+			"renderable": {
+				"kind": "sprite",
+				"spriteId": "sprite_player_avatar_light",
+				"color": "#66d9ff",
+				"scale": [1.25, 1.25, 1],
+				"fallback": {
+					"meshId": "mesh_player",
+					"materialId": "material_player",
+					"scale": [0.75, 1.25, 0.75]
+				}
+			}
+		}
+	]
+}

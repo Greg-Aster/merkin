@@ -8,6 +8,10 @@ import {
 } from "../src/engine/modules/rendering/index.js";
 import { PLAYER_ENTITY_RESOURCE } from "../src/game/systems/components.js";
 import {
+	PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,
+	selectedPlayerAvatar,
+} from "../src/levels/player/index.js";
+import {
 	MULTIPLAYER_REMOTE_PLAYER_COMPONENT,
 	type MultiplayerTransportPort,
 	type MultiplayerWireMessage,
@@ -144,7 +148,7 @@ async function testRuntimeSystemsBroadcastAndSpawnRemotePlayers(): Promise<void>
 	);
 }
 
-async function testRemotePlayerCanRenderAsFireflySprite(): Promise<void> {
+async function testRemotePlayerCanRenderWithSuppliedPlayerAvatar(): Promise<void> {
 	const session = createMultiplayerSession({
 		timestamp: () => "2026-07-02T00:00:00.000Z",
 	});
@@ -153,16 +157,7 @@ async function testRemotePlayerCanRenderAsFireflySprite(): Promise<void> {
 	const world = new World();
 	const replicationSystem = createRemotePlayerReplicationSystem({
 		multiplayer: session,
-		renderable: {
-			kind: "sprite",
-			spriteId: "sprite_npc_firefly_outer_halo",
-			color: "#66d9ff",
-			scale: [1.25, 1.25, 1],
-			fallback: {
-				meshId: "mesh_player",
-				materialId: "material_player",
-			},
-		},
+		renderable: selectedPlayerAvatar.renderable,
 	});
 
 	hostTransport.connect(clientTransport);
@@ -172,7 +167,7 @@ async function testRemotePlayerCanRenderAsFireflySprite(): Promise<void> {
 	});
 	world.setResource(
 		"assets",
-		new MockAssets(["sprite_npc_firefly_outer_halo"]),
+		new MockAssets([PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID]),
 	);
 
 	clientTransport.receive({
@@ -199,7 +194,7 @@ async function testRemotePlayerCanRenderAsFireflySprite(): Promise<void> {
 	assert.ok(remotePlayer);
 	assert.deepEqual(world.requireComponent(remotePlayer, RENDERABLE_COMPONENT), {
 		kind: "sprite",
-		spriteId: "sprite_npc_firefly_outer_halo",
+		spriteId: PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,
 		color: "#66d9ff",
 		visible: true,
 	});
@@ -339,6 +334,6 @@ function transformTuple(
 
 await testHostRelaysPoseAndChatBetweenClients();
 await testRuntimeSystemsBroadcastAndSpawnRemotePlayers();
-await testRemotePlayerCanRenderAsFireflySprite();
+await testRemotePlayerCanRenderWithSuppliedPlayerAvatar();
 
 console.log("multiplayer contract tests passed");

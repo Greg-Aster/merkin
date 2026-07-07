@@ -2,13 +2,13 @@
 title: "Data bridge"
 published: 2026-07-06
 description: "Work-in-progress notes for Ainekio's first virtual environment step."
-image: "/posts/generic/bamboo.webp"
+image: "/posts/ainekio/rooftop-date-banner.webp"
 avatarImage: "/posts/generic/avatar.webp"
 authorName: "Ainekio"
 authorBio: "Robot familiar project"
 bannerType: "image"
 bannerData:
-  image: "/posts/generic/bamboo.webp"
+  imageUrl: "/posts/ainekio/rooftop-date-banner.webp"
 timelineYear: 2026
 timelineEra: "work-in-progress"
 timelineLocation: "ainek.io"
@@ -18,7 +18,6 @@ category: "Project Notes"
 draft: true
 lang: "en"
 ---
-
 # Ainekio Step 1 - Virtual Environment Setup
 
 Build a virtual connection between MetaHuman OS and the Megameal multiplayer environment.
@@ -42,35 +41,35 @@ The important separation rule is that Megameal does not know prompts, personas, 
 
 This means building a virtual body first. The first useful version can be conversation-only. Movement can follow once the text loop is stable. Long term, the same environment interface should make it possible to replace the Megameal adapter with a real-world body adapter.
 
-
 ## Game Dev Server as Virtual Environment
 
-I have previously made a game engine with multiplayer support - it exists at https://game.megameal.org/ (or whatever localhost is set). Player element in the local server has been modified. In the level editor https://game.megameal.org/editor of the game there is now a checkbox for 'External DEV Bridge Enabled' when this is set the player element has exposed in/out controls - this system is by default off to manage security risks. The exposed in out contrls are genereic an not exclisive to the os for future possibilities. The majority of the code is kept in the ./src/app/dev-bridge folder as much as possible. Nore: When this is set the external contols do no overridge the player - they merge so there is the possibility of 2 inputs at once.
+I have previously made a game engine with multiplayer support - it exists at https://game.megameal.org/ (or whatever localhost is set). The player element in the local server has been modified. In the level editor at https://game.megameal.org/editor there is now a checkbox for 'External DEV Bridge Enabled'. When this is set, the player element has exposed in/out controls - this system is off by default to manage security risks. The exposed in/out controls are generic and not exclusive to the OS, for future possibilities. The majority of the code is kept in the `./src/app/dev-bridge` folder as much as possible. Note: when this is set, the external controls do not override the player - they merge, so there is the possibility of two inputs at once.
 
-The intended workflow for this is to have two node js servers running from any device, start a multiplayer session, connect the inputs and outputs to the methuman os, and loading both windows in the host room both players join, ai has controls conversation and movement of one player - and player owns conversation and movement of other player. Alternativly of there is only a single room, and no multiplayer session, ai and can move and explore, but has no conversation abilities
+The intended workflow for this is to have two Node.js servers running from any device, start a multiplayer session, connect the inputs and outputs to the MetaHuman OS, and load both windows in the host room. Both players join; the AI has control of conversation and movement for one player, and the human owns conversation and movement of the other player. Alternatively, if there is only a single room and no multiplayer session, the AI can move and explore, but has no conversation abilities.
 
-Alternativly it is possible to start one server trigger the enable the bridge and observe the AI.
+Alternatively, it is possible to start one server, enable the bridge, and observe the AI.
 
-## MetaHumanOS Agent system
+## MetaHuman OS Agent System
 
-When the MetaHumanOS server is initally started the server boots up and loads central agents to operated within the server--MetaHumanOS doesnt by default trigger the bridge system. to connect - you go to the agent monitor tab on the right window, and on the list of agents find enviornment-bridge - enable this and make sure enviornment mode is selected - the enviormnet bridge agent will gonnect to the relevant server socket - by default it is set to server 4322 but i will add configurations for this soon. th agent with then run a non pulling process waiting for inputs from the megameal server bridge, when it recives an input, it is processed through the configured input node in the eviornment mode workflow, and responses are sen through the configured outputt nodes - the input node receives text location, health(battery), and other relevant info, the output node routs the data to relevant inputs in the configured server player - text, movement controls ect. at this time vision is not supported, SST and TTS are supported OS side only.
-
+When the MetaHuman OS server is initially started, the server boots up and loads central agents to operate within the server - MetaHuman OS doesn't trigger the bridge system by default. To connect, you go to the agent monitor tab on the right window, and on the list of agents find `environment-bridge` - enable this and make sure environment mode is selected. The environment bridge agent will connect to the relevant server socket - by default it is set to server 4322, but I will add configurations for this soon. The agent will then run a non-polling process waiting for inputs from the Megameal server bridge. When it receives an input, it is processed through the configured input node in the environment mode workflow, and responses are sent through the configured output nodes - the input node receives text, location, health (battery), and other relevant info; the output node routes the data to relevant inputs in the configured server player - text, movement controls, etc. At this time vision is not supported. STT and TTS are supported OS side only.
 
 ## Current Status - 2026-07-06
 
-- Bi-directional conversation achived! Yay!
-- Movement not working
-- No game avatar.
-- No bridge polling loop - on purpose.
+- Bi-directional conversation achieved! Yay!
+- Movement command routing is proven from MetaHuman to Megameal
+- Megameal returned accepted command results for `setTouchActionValue` with value `1`, so MetaHuman was not sending zero
+- The movement failure was traced to the normal Megameal input focus gate: the bridge player had `inputEnabled: false`, so the normal touch path accepted the command but discarded the nonzero movement value before it became gameplay movement
+- The current fix adds a small external-control lane for dev bridge commands so exposed bridge controls can work while normal keyboard, mouse, and mobile touch controls keep their existing UI/focus behavior
+- No bridge polling loop - on purpose
 
-The remaining real gap is proven to work but janky: the MetaHuman `environment-bridge` Megameal adapter is built, but the full multiplayer room loop still needs to be refined.
+The remaining real gap is live retesting after reloading the Megameal client with the external-control fix active. The MetaHuman `environment-bridge` Megameal adapter is built, and the command path is proven through Megameal command-result feedback.
 
 ## Current File Surface
 
 Current Megameal External DEV Bridge files:
 
 - `apps/game.megameal/src/app/dev-bridge/gameDevBridge.ts`: main bridge contract and current-player runtime endpoint. It defines bridge settings, snapshots, command types, the browser-side BroadcastChannel support, and the WebSocket connection used by the current Megameal player to send observations and receive commands.
-- `apps/game.megameal/src/app/dev-bridge/gameDevBridgeRuntime.ts`: binds the bridge to the running browser game client. This is where the bridge gets access to the current player snapshot, multiplayer chat send function, runtime-scene loader, collision overlay command, and touch-control action ports.
+- `apps/game.megameal/src/app/dev-bridge/gameDevBridgeRuntime.ts`: binds the bridge to the running browser game client. This is where the bridge gets access to the current player snapshot, multiplayer chat send function, runtime-scene loader, collision overlay command, and control action ports. Bridge movement commands now use the external touch-control lane instead of the normal UI/focus-gated player touch lane.
 - `apps/game.megameal/src/app/dev-bridge/server/game-dev-bridge-relay.mjs`: development-only WebSocket relay mounted at `/__megameal-dev-bridge` on the existing Megameal dev server. It accepts game/controller bridge clients, forwards game snapshots/logs/results to controllers, forwards controller commands to game clients, and rejects access when the External DEV Bridge setting is disabled.
 - `apps/game.megameal/scripts/editor-dev-api.mjs`: existing Megameal editor/dev-server plugin. It installs the dev bridge relay on the existing dev server and passes the global settings file path so the relay can check whether the bridge is enabled.
 - `apps/game.megameal/src/app/GameClient.svelte`: imports the bridge runtime endpoint in development mode so the current game client can expose its current-player ports when the setting is enabled.
@@ -79,6 +78,9 @@ Current Megameal External DEV Bridge files:
 - `apps/game.megameal/src/editor/level/LevelEditorWorkspace.svelte`: editor-side bridge monitor/command endpoint used while working in the level editor.
 - `apps/game.megameal/src/editor/masterControlGraph.ts`: documentation graph entry that describes the External DEV Bridge owner path and contract.
 - `apps/game.megameal/src/levels/global/settings.ts`: saved global settings owner for `devBridge.enabled`, broadcast location, and enabled data categories.
+- `apps/game.megameal/src/engine/modules/input/index.ts`: input contract owner. It keeps normal keyboard, mouse, gamepad, and mobile touch input focus-gated, and adds a separate external touch value lane for dev bridge controls. This was added because live feedback proved Megameal received `mobile.move.forward = 1`, but the bridge player snapshot had `inputEnabled: false`, causing the normal input path to discard the movement value.
+- `apps/game.megameal/src/engine/adapters/browser/index.ts`: browser input adapter pass-through for the external touch-control lane used by the dev bridge.
+- `apps/game.megameal/scripts/test-input-contract.ts`: focused regression test proving normal touch is blocked while UI capture is active, but external bridge touch still produces `move.forward`; also verifies clearing external controls removes the movement value.
 
 Current MetaHuman bridge and Environment Mode files:
 

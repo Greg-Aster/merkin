@@ -1,0 +1,237 @@
+---
+title: "Ainekio - Broad Strokes"
+published: 2026-07-07
+description: "Master progress index for Ainekio: what exists, what is being tested, what is still planned, and where to get involved."
+image: "/posts/ainekio/laundry-helper-banner.webp"
+avatarImage: "/posts/generic/avatar.webp"
+authorName: "Ainekio"
+authorBio: "Robot familiar project"
+bannerType: "image"
+bannerData:
+  imageUrl: "/posts/ainekio/laundry-helper-banner.webp"
+timelineYear: 2026
+timelineEra: "work-in-progress"
+timelineLocation: "Project index"
+isKeyEvent: true
+showImageOnPost: false
+tags: [Ainekio, Robot, Progress, Project Index, MetaHuman OS]
+category: "Project Notes"
+draft: true
+lang: "en"
+---
+
+<style>{`
+  #post-container[data-post-title="Ainekio - Broad Strokes"] {
+    --ainekio-surface: rgba(9, 13, 18, 0.78);
+    --ainekio-surface-soft: rgba(18, 25, 32, 0.64);
+    --ainekio-line: rgba(117, 203, 255, 0.26);
+    --ainekio-line-hot: rgba(255, 175, 80, 0.42);
+    --ainekio-cyan: rgb(117, 218, 255);
+    --ainekio-amber: rgb(255, 178, 79);
+    --ainekio-pink: rgb(255, 94, 164);
+    --ainekio-cream: rgb(248, 238, 218);
+    --ainekio-muted: rgba(231, 240, 247, 0.74);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255, 178, 79, 0.14), transparent 26rem),
+      radial-gradient(circle at 95% 12%, rgba(117, 218, 255, 0.16), transparent 24rem),
+      linear-gradient(180deg, rgba(10, 14, 19, 0.86), rgba(9, 13, 18, 0.72));
+    border: 1px solid rgba(117, 203, 255, 0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 18px 60px rgba(0, 0, 0, 0.28);
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content {
+    color: var(--ainekio-muted);
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content h1 {
+    margin: 0 0 1rem;
+    color: var(--ainekio-cream);
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    letter-spacing: 0;
+    text-shadow: 0 0 24px rgba(117, 218, 255, 0.18);
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content h1::after {
+    content: "";
+    display: block;
+    width: min(22rem, 100%);
+    height: 2px;
+    margin-top: 0.85rem;
+    background: linear-gradient(90deg, var(--ainekio-amber), var(--ainekio-cyan), transparent);
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content h2 {
+    position: relative;
+    margin-top: 2.4rem;
+    margin-bottom: 1rem;
+    padding: 0.85rem 1rem 0.85rem 1.2rem;
+    color: var(--ainekio-cream);
+    border: 1px solid var(--ainekio-line);
+    border-left: 4px solid var(--ainekio-amber);
+    border-radius: 0.5rem;
+    background:
+      linear-gradient(90deg, rgba(255, 178, 79, 0.14), rgba(117, 218, 255, 0.07), transparent),
+      var(--ainekio-surface);
+    box-shadow:
+      inset 0 0 24px rgba(117, 218, 255, 0.045),
+      0 10px 24px rgba(0, 0, 0, 0.18);
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content h2::before {
+    content: "STATUS";
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content h3 {
+    margin-top: 1.5rem;
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 1rem;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content p:first-of-type,
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content blockquote {
+    margin: 1rem 0 1.3rem;
+    padding: 1rem 1.1rem;
+    color: var(--ainekio-cream);
+    border: 1px solid var(--ainekio-line-hot);
+    border-radius: 0.55rem;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255, 94, 164, 0.14), transparent 18rem),
+      linear-gradient(135deg, rgba(255, 178, 79, 0.13), rgba(117, 218, 255, 0.07)),
+      var(--ainekio-surface);
+    box-shadow: inset 0 0 24px rgba(255, 178, 79, 0.04);
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content table {
+    display: block;
+    width: 100%;
+    margin: 1.2rem 0 1.6rem;
+    overflow-x: auto;
+    border: 1px solid var(--ainekio-line);
+    border-radius: 0.6rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
+      var(--ainekio-surface);
+    box-shadow: inset 0 0 24px rgba(117, 218, 255, 0.04);
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content table thead {
+    background: linear-gradient(90deg, rgba(117, 218, 255, 0.14), rgba(255, 178, 79, 0.1));
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content table th,
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content table td {
+    padding: 0.8rem 0.9rem;
+    border-color: rgba(117, 203, 255, 0.16);
+    vertical-align: top;
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content table th {
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content table td {
+    color: var(--ainekio-muted);
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content table td:first-child {
+    color: var(--ainekio-cream);
+    font-weight: 800;
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content a {
+    color: var(--ainekio-cyan);
+    text-decoration-color: rgba(117, 218, 255, 0.42);
+    text-underline-offset: 0.18em;
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content code {
+    color: var(--ainekio-amber);
+    border: 1px solid rgba(255, 178, 79, 0.18);
+    border-radius: 0.35rem;
+    background: rgba(0, 0, 0, 0.28);
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content ol,
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content ul {
+    padding: 1rem 1.1rem 1rem 2.2rem;
+    border: 1px solid rgba(117, 203, 255, 0.18);
+    border-radius: 0.55rem;
+    background: var(--ainekio-surface-soft);
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content li::marker {
+    color: var(--ainekio-amber);
+    font-weight: 800;
+  }
+
+  #post-container[data-post-title="Ainekio - Broad Strokes"] .markdown-content hr {
+    height: 1px;
+    margin: 1.8rem 0;
+    border: 0;
+    background: linear-gradient(90deg, transparent, rgba(117, 218, 255, 0.5), rgba(255, 178, 79, 0.42), transparent);
+  }
+`}</style>
+
+# Ainekio - Broad Strokes
+
+Last verified: 2026-07-07
+
+Ainekio is in the **virtual-first stage**. The current goal is to prove that MetaHuman OS can observe an environment, choose actions, send commands, and receive feedback before any real robot hardware moves.
+
+Get involved: [Ainekio bot repository](https://github.com/Greg-Aster/Ainekio-bot)
+
+## Snapshot
+
+| Area | Progress | State | Read |
+| --- | --- | --- | --- |
+| Overall project | `██░░░░░░░░` ~20% | Site, plans, and bridge work exist. No physical robot yet. | [Overview](/posts/project-overview/) |
+| Virtual bridge | `██████░░░░` ~60-65% | Conversation works. Movement routing exists. Live movement retest is next. | [Data bridge](/posts/first-steps-work-in-progress/) |
+| Motion systems | `██░░░░░░░░` ~15% | Firmware research and architecture plan are written. No motion package yet. | [Motion systems](/posts/motion-systems/) |
+| Hardware | `██░░░░░░░░` ~20% | Pi/PCA9685 direction is drafted. Fitment and battery choices are open. | [Overview](/posts/project-overview/) |
+| Physical build | `░░░░░░░░░░` 0% | No parts bought, chassis printed, or servos wired. Intentionally waiting. | - |
+
+## What Is Happening Now
+
+1. **Virtual environment bridge:** retest the live Megameal loop so the AI can move a player, not just chat.
+2. **Motion systems:** inspect Sesame firmware movement data before porting keyframes to Python.
+3. **Hardware planning:** measure the Sesame body cavity before choosing the final board and battery layout.
+
+## Current Project Files
+
+| File | Purpose |
+| --- | --- |
+| [Project overview](/posts/project-overview/) | Broad concept, processing options, parts direction, and physical constraints. |
+| [Data bridge](/posts/first-steps-work-in-progress/) | Current virtual environment bridge between MetaHuman OS and Megameal. |
+| [Motion systems](/posts/motion-systems/) | Motion-controller research and the planned Python motion module. |
+| [Broad strokes](/posts/broad-strokes/) | This status index. |
+
+## Key Decisions So Far
+
+- MetaHuman OS is the intelligence layer.
+- The robot body should receive semantic commands like `walk`, `stop`, or `speak`, not raw servo angles from a model.
+- Safety and stop behavior must live on the body.
+- Virtual testing comes before physical movement.
+
+## Open Help
+
+- Test the Megameal bridge with two clients: one human player and one bridge-controlled player.
+- Read Sesame `movement-sequences.h` and summarize the real keyframe format.
+- Prototype `ainekio-motion` with a virtual servo backend.
+- Measure the Sesame body cavity from CAD/STEP files.
+- Review the command and telemetry protocol before hardware work starts.

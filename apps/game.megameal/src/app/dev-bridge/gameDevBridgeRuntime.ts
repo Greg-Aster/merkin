@@ -90,7 +90,10 @@ export function createGameDevBridgeRuntimeEndpoint(
 		},
 		setTouchActionValue: (touchId, value) => {
 			const boundedValue = Math.max(0, Math.min(1, value));
-			client.mobileControls.setTouchActionValue(touchId, boundedValue);
+			client.mobileControls.setExternalTouchActionValue(
+				touchId,
+				boundedValue,
+			);
 
 			return {
 				accepted: true,
@@ -99,6 +102,7 @@ export function createGameDevBridgeRuntimeEndpoint(
 		},
 		clearTouchControls: () => {
 			client.mobileControls.clearTouchControls();
+			client.mobileControls.clearExternalTouchControls();
 
 			return {
 				accepted: true,
