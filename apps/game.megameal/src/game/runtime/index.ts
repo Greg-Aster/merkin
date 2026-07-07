@@ -51,6 +51,13 @@ import {
 	createCollisionSpatialIndexSystem,
 	createPerformanceRuntimeSystem,
 } from "../performance/index.js";
+import {
+	type ArticulatedPhysicsRigDefinition,
+	PHYSICS_RIG_MOTION_QUEUE_RESOURCE,
+	type PhysicsRigServoTargetEvent,
+	createArticulatedPhysicsRigSystem,
+	createPhysicsRigMotionQueue,
+} from "../physics-rigs/index.js";
 import { PrefabRegistry, STABLE_ID_COMPONENT } from "../prefabs/index.js";
 import { createGameScene } from "../scenes/index.js";
 import {
@@ -111,6 +118,7 @@ export type MegamealGameRuntimeOptions = {
 	) => AudioContentManifest;
 	readonly multiplayer?: MultiplayerSession;
 	readonly playerAvatar?: RuntimePlayerAvatar;
+	readonly playerPhysicsRig?: ArticulatedPhysicsRigDefinition;
 };
 
 export type MegamealGameRuntime = {
@@ -121,6 +129,7 @@ export type MegamealGameRuntime = {
 	setCollisionOverlayEnabled(enabled: boolean): RuntimeDiagnosticToggleResult;
 	runtimeDiagnostics(): RuntimeDiagnosticsState;
 	gameState(): GameHudState;
+	submitMotionEvent(event: PhysicsRigServoTargetEvent): void;
 	dispose(): Promise<void>;
 };
 
@@ -167,6 +176,7 @@ export async function createMegamealGameRuntime(
 	const physicsSync = new PhysicsSyncSystem({
 		adapter: options.physics,
 	});
+	const motionQueue = createPhysicsRigMotionQueue();
 	const renderSync = new RenderSyncSystem({ renderer: options.renderer });
 	const lightSync = new LightSyncSystem({
 		renderer: options.renderer,
@@ -208,6 +218,7 @@ export async function createMegamealGameRuntime(
 	runtime.world.setResource("assets", options.assets);
 	runtime.world.setResource("sceneManager", sceneManager);
 	runtime.world.setResource(RUNTIME_SCENE_TRANSITION_RESOURCE, transitionPort);
+	runtime.world.setResource(PHYSICS_RIG_MOTION_QUEUE_RESOURCE, motionQueue);
 
 	if (options.audio) {
 		runtime.world.setResource(AUDIO_MANAGER_RESOURCE, options.audio);
@@ -308,6 +319,16 @@ export async function createMegamealGameRuntime(
 	runtime.scheduler.registerSystem("ai", createLightModulationSystem(), {
 		order: 10,
 	});
+	if (options.playerPhysicsRig) {
+		runtime.scheduler.registerSystem(
+			"ai",
+			createArticulatedPhysicsRigSystem({
+				rig: options.playerPhysicsRig,
+				playerStableId: "player",
+			}),
+			{ order: 20 },
+		);
+	}
 	runtime.scheduler.registerSystem(
 		"physics-pre-sync",
 		createPhysicsPreSyncSystem(physicsSync),
@@ -444,6 +465,9 @@ export async function createMegamealGameRuntime(
 			const multiplayer = selectMultiplayerHudState(options.multiplayer);
 
 			return multiplayer ? { ...hudState, multiplayer } : hudState;
+		},
+		submitMotionEvent(event) {
+			motionQueue.push(event);
 		},
 		async dispose() {
 			if (disposed) {

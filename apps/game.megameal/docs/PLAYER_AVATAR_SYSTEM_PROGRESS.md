@@ -80,9 +80,13 @@ Run focused validation after implementation:
 
 ```bash
 pnpm --dir apps/game.megameal test:player-package-contract
+pnpm --dir apps/game.megameal test:physics-rig-contract
 pnpm --dir apps/game.megameal test:multiplayer-contract
+pnpm --dir apps/game.megameal test:runtime-scene-contract
+pnpm --dir apps/game.megameal test:performance-runtime-contract
 pnpm --dir apps/game.megameal type-check
 pnpm --dir apps/game.megameal audit:engine-boundaries
+pnpm --dir apps/game.megameal build
 git diff --check -- apps/game.megameal
 ```
 
@@ -124,12 +128,38 @@ specific document with user approval.
 - Left multiplayer replication generic: it receives a renderable and projects
   remote players.
 
+## Ainekio/Sesame Physics Rig Foundation
+
+- Added `player_avatar_ainekio_sesame` beside the default ball-of-light avatar.
+- Kept `player_avatar_light` as the selected default avatar.
+- Added isolated Ainekio/Sesame rig data under
+  `src/levels/player/avatars/ainekio-sesame`.
+- Added generic articulated physics-rig runtime support under
+  `src/game/physics-rigs`; Ainekio-specific rig dimensions and servo IDs stay
+  in the player avatar package.
+- Extended the generic physics adapter contract with collider material tuning,
+  revolute joints, and motor position targets.
+- Added a runtime `submitMotionEvent()` queue for stable
+  `servo-target-json-v1` events. The future Ainekio-to-Megameal adapter should
+  translate Ainekio motion-module output into this queue instead of changing the
+  Ainekio physical motion module.
+- Added a DEV-only player avatar package endpoint and Master Control Player
+  Package selector that edits `src/levels/player/avatars/data.json` without
+  rewriting `src/levels/player/data.json`.
+- The implemented simulator foundation is literal physics-driven movement:
+  dynamic chassis and limb bodies plus eight revolute servo joints. It does not
+  add root-motion displacement.
+- Deferred: Ainekio-side adapter repo work, imported Sesame visual robot meshes,
+  live locomotion tuning, and hardware/simulator provenance cleanup beyond the
+  recorded missing-license note.
+
 ## Validation Results
 
 Passed:
 
 ```bash
 pnpm --dir apps/game.megameal test:player-package-contract
+pnpm --dir apps/game.megameal test:physics-rig-contract
 pnpm --dir apps/game.megameal test:multiplayer-contract
 pnpm --dir apps/game.megameal type-check
 pnpm --dir apps/game.megameal audit:engine-boundaries
@@ -139,7 +169,8 @@ git diff --check -- apps/game.megameal
 Also passed for the touched code files:
 
 ```bash
-pnpm --dir apps/game.megameal exec biome check --write src/app/levelPackageDiscovery.ts src/app/mountGameClient.ts src/game/runtime/index.ts src/levels/global/index.ts src/levels/player/assets.ts src/levels/player/constants.ts src/levels/player/index.ts src/levels/player/avatars/index.ts src/levels/player/avatars/types.ts scripts/test-player-package-contract.ts scripts/test-multiplayer-contract.ts
+pnpm --dir apps/game.megameal exec biome check --write src/game/physics-rigs/index.ts src/game/runtime/index.ts src/levels/player/avatars/index.ts scripts/test-physics-rig-contract.ts
+pnpm --dir apps/game.megameal exec biome format --write src/engine/modules/physics/index.ts src/engine/adapters/rapier/index.ts src/game/physics-rigs/index.ts src/game/runtime/index.ts src/app/levelPackageDiscovery.ts src/app/mountGameClient.ts src/levels/global/index.ts src/levels/player/avatars/index.ts src/levels/player/avatars/types.ts src/levels/player/avatars/ainekio-sesame/rig.ts scripts/test-physics-rig-contract.ts scripts/test-player-package-contract.ts package.json
 ```
 
 Full lint is still blocked by existing unrelated formatting/lint debt:

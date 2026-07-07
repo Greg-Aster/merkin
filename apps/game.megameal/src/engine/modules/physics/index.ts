@@ -18,11 +18,13 @@ import {
 export const PHYSICS_TRANSFORM_COMPONENT = "Transform";
 export const RIGID_BODY_COMPONENT = "RigidBody";
 export const COLLIDER_COMPONENT = "Collider";
+export const PHYSICS_JOINT_COMPONENT = "PhysicsJoint";
 export const CHARACTER_CONTROLLER_COMPONENT = "CharacterController";
 export const CHARACTER_MOTOR_COMPONENT = "CharacterMotor";
 
 export type PhysicsBodyHandle = number;
 export type ColliderHandle = number;
+export type PhysicsJointHandle = number;
 
 export type RigidBodyComponent = {
 	readonly type: "dynamic" | "fixed" | "kinematic";
@@ -74,7 +76,35 @@ export type ColliderComponent = {
 	readonly channel: CollisionChannel;
 	readonly colliderHandle?: ColliderHandle;
 	readonly sensor?: boolean;
+	readonly friction?: number;
+	readonly restitution?: number;
+	readonly density?: number;
 };
+
+export type RevoluteJointLimits = {
+	readonly minRadians: number;
+	readonly maxRadians: number;
+};
+
+export type RevoluteJointMotor = {
+	readonly targetRadians: number;
+	readonly stiffness: number;
+	readonly damping: number;
+};
+
+export type RevoluteJointComponent = {
+	readonly type: "revolute";
+	readonly parentEntity: Entity;
+	readonly childEntity: Entity;
+	readonly anchorParent: Vec3;
+	readonly anchorChild: Vec3;
+	readonly axis: Vec3;
+	readonly limits?: RevoluteJointLimits;
+	readonly motor?: RevoluteJointMotor;
+	readonly jointHandle?: PhysicsJointHandle;
+};
+
+export type PhysicsJointComponent = RevoluteJointComponent;
 
 export type SensorComponent = {
 	readonly colliderHandle?: ColliderHandle;
@@ -138,6 +168,16 @@ export type PhysicsAdapterPort = {
 	): ColliderHandle;
 	destroyCollider(handle: ColliderHandle): void;
 	destroyRigidBody(handle: PhysicsBodyHandle): void;
+	createJoint(
+		joint: PhysicsJointComponent,
+		parentBodyHandle: PhysicsBodyHandle,
+		childBodyHandle: PhysicsBodyHandle,
+	): PhysicsJointHandle;
+	destroyJoint(handle: PhysicsJointHandle): void;
+	configureJointMotor(
+		handle: PhysicsJointHandle,
+		motor: RevoluteJointMotor,
+	): void;
 	syncBodyFromTransform(
 		handle: PhysicsBodyHandle,
 		transform: PhysicsTransform,
@@ -218,6 +258,10 @@ export class PhysicsSyncSystem {
 			readonly signature: string;
 		}
 	>();
+	readonly #jointRecords = new Map<
+		Entity,
+		{ readonly handle: PhysicsJointHandle; readonly signature: string }
+	>();
 
 	constructor(options: PhysicsSyncSystemOptions) {
 		this.adapter = options.adapter;
@@ -279,6 +323,8 @@ export class PhysicsSyncSystem {
 				this.destroyCollider(context.world, entity);
 			}
 		}
+
+		this.syncJoints(context.world);
 	}
 
 	postSync(context: PhysicsSyncContext): void {
@@ -311,6 +357,10 @@ export class PhysicsSyncSystem {
 	}
 
 	dispose(): void {
+		for (const entity of [...this.#jointRecords.keys()]) {
+			this.destroyJoint(undefined, entity);
+		}
+
 		for (const entity of [...this.#colliderRecords.keys()]) {
 			this.destroyCollider(undefined, entity);
 		}
@@ -334,6 +384,10 @@ export class PhysicsSyncSystem {
 
 	colliderCount(): number {
 		return this.#colliderRecords.size;
+	}
+
+	jointCount(): number {
+		return this.#jointRecords.size;
 	}
 
 	private ensureBody(
@@ -453,6 +507,12 @@ export class PhysicsSyncSystem {
 	}
 
 	private destroyBody(world: World | undefined, entity: Entity): void {
+		for (const [jointEntity, joint] of this.activeJointComponents(world)) {
+			if (joint.parentEntity === entity || joint.childEntity === entity) {
+				this.destroyJoint(world, jointEntity);
+			}
+		}
+
 		this.destroyCollider(world, entity);
 
 		const bodyRecord = this.#bodyRecords.get(entity);
@@ -479,6 +539,149 @@ export class PhysicsSyncSystem {
 				),
 			);
 		}
+	}
+
+	private syncJoints(world: World): void {
+		const activeJoints = new Set(world.query([PHYSICS_JOINT_COMPONENT]));
+
+		for (const entity of activeJoints) {
+			const joint = world.requireComponent<PhysicsJointComponent>(
+				entity,
+				PHYSICS_JOINT_COMPONENT,
+			);
+			const parentBody = this.bodyHandleFor(world, joint.parentEntity);
+			const childBody = this.bodyHandleFor(world, joint.childEntity);
+
+			if (parentBody === undefined || childBody === undefined) {
+				this.destroyJoint(world, entity);
+				continue;
+			}
+
+			this.ensureJoint(world, entity, joint, parentBody, childBody);
+		}
+
+		for (const entity of [...this.#jointRecords.keys()]) {
+			if (!activeJoints.has(entity)) {
+				this.destroyJoint(world, entity);
+			}
+		}
+	}
+
+	private ensureJoint(
+		world: World,
+		entity: Entity,
+		joint: PhysicsJointComponent,
+		parentBodyHandle: PhysicsBodyHandle,
+		childBodyHandle: PhysicsBodyHandle,
+	): { readonly handle: PhysicsJointHandle; readonly signature: string } {
+		const jointWithoutHandle = withoutJointHandle(joint);
+		const signature = stableComponentSignature({
+			...jointWithoutHandle,
+			motor: undefined,
+			parentBodyHandle,
+			childBodyHandle,
+		});
+		const existing = this.#jointRecords.get(entity);
+
+		if (existing && existing.signature === signature) {
+			if (joint.jointHandle !== existing.handle) {
+				world.addComponent(entity, PHYSICS_JOINT_COMPONENT, {
+					...jointWithoutHandle,
+					jointHandle: existing.handle,
+				} satisfies PhysicsJointComponent);
+			}
+
+			if (joint.motor) {
+				this.adapter.configureJointMotor(existing.handle, joint.motor);
+			}
+
+			return existing;
+		}
+
+		if (existing) {
+			this.destroyJoint(world, entity);
+		}
+
+		const handle = this.adapter.createJoint(
+			jointWithoutHandle,
+			parentBodyHandle,
+			childBodyHandle,
+		);
+		const record = {
+			handle,
+			signature,
+		};
+
+		this.#jointRecords.set(entity, record);
+		world.addComponent(entity, PHYSICS_JOINT_COMPONENT, {
+			...jointWithoutHandle,
+			jointHandle: handle,
+		} satisfies PhysicsJointComponent);
+
+		if (joint.motor) {
+			this.adapter.configureJointMotor(handle, joint.motor);
+		}
+
+		return record;
+	}
+
+	private destroyJoint(world: World | undefined, entity: Entity): void {
+		const jointRecord = this.#jointRecords.get(entity);
+
+		if (jointRecord === undefined) {
+			return;
+		}
+
+		this.adapter.destroyJoint(jointRecord.handle);
+		this.#jointRecords.delete(entity);
+
+		if (
+			world?.isAlive(entity) &&
+			world.hasComponent(entity, PHYSICS_JOINT_COMPONENT)
+		) {
+			world.addComponent(
+				entity,
+				PHYSICS_JOINT_COMPONENT,
+				withoutJointHandle(
+					world.requireComponent<PhysicsJointComponent>(
+						entity,
+						PHYSICS_JOINT_COMPONENT,
+					),
+				),
+			);
+		}
+	}
+
+	private bodyHandleFor(
+		world: World,
+		entity: Entity,
+	): PhysicsBodyHandle | undefined {
+		return (
+			this.#bodyRecords.get(entity)?.handle ??
+			world.getComponent<RigidBodyComponent>(entity, this.rigidBodyComponent)
+				?.bodyHandle
+		);
+	}
+
+	private activeJointComponents(
+		world: World | undefined,
+	): readonly (readonly [Entity, PhysicsJointComponent])[] {
+		if (!world) {
+			return [];
+		}
+
+		return world
+			.query([PHYSICS_JOINT_COMPONENT])
+			.map(
+				(entity) =>
+					[
+						entity,
+						world.requireComponent<PhysicsJointComponent>(
+							entity,
+							PHYSICS_JOINT_COMPONENT,
+						),
+					] as const,
+			);
 	}
 }
 
@@ -611,11 +814,16 @@ export function createPhysicsPreSyncSystem<TContext extends PhysicsSyncContext>(
 ): System<TContext> {
 	return {
 		id: "physics-pre-sync",
-		reads: [sync.transformComponent, sync.rigidBodyComponent],
+		reads: [
+			sync.transformComponent,
+			sync.rigidBodyComponent,
+			PHYSICS_JOINT_COMPONENT,
+		],
 		writes: [
 			sync.transformComponent,
 			sync.rigidBodyComponent,
 			sync.colliderComponent,
+			PHYSICS_JOINT_COMPONENT,
 		],
 		update(context) {
 			sync.preSync(context);
@@ -744,6 +952,26 @@ function withoutColliderHandle(collider: ColliderComponent): ColliderComponent {
 		intent: collider.intent,
 		channel: collider.channel,
 		...(collider.sensor !== undefined ? { sensor: collider.sensor } : {}),
+		...(collider.friction !== undefined ? { friction: collider.friction } : {}),
+		...(collider.restitution !== undefined
+			? { restitution: collider.restitution }
+			: {}),
+		...(collider.density !== undefined ? { density: collider.density } : {}),
+	};
+}
+
+function withoutJointHandle(
+	joint: PhysicsJointComponent,
+): PhysicsJointComponent {
+	return {
+		type: joint.type,
+		parentEntity: joint.parentEntity,
+		childEntity: joint.childEntity,
+		anchorParent: joint.anchorParent,
+		anchorChild: joint.anchorChild,
+		axis: joint.axis,
+		...(joint.limits ? { limits: joint.limits } : {}),
+		...(joint.motor ? { motor: joint.motor } : {}),
 	};
 }
 

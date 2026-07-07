@@ -6,9 +6,12 @@ import type {
 	PhysicsAdapterPort,
 	PhysicsBodyHandle,
 	PhysicsCollisionEvent,
+	PhysicsJointComponent,
+	PhysicsJointHandle,
 	PhysicsRaycastHit,
 	PhysicsRaycastQuery,
 	PhysicsTransform,
+	RevoluteJointMotor,
 	RigidBodyComponent,
 } from "../../modules/physics/index.js";
 
@@ -34,6 +37,9 @@ type RapierRigidBodyDesc = {
 type RapierColliderDesc = {
 	setSensor?(sensor: boolean): RapierColliderDesc;
 	setActiveEvents?(events: number): RapierColliderDesc;
+	setFriction?(friction: number): RapierColliderDesc;
+	setRestitution?(restitution: number): RapierColliderDesc;
+	setDensity?(density: number): RapierColliderDesc;
 };
 
 type RapierRigidBody = {
@@ -47,6 +53,20 @@ type RapierRigidBody = {
 
 type RapierCollider = {
 	readonly handle: ColliderHandle;
+};
+
+type RapierJointData = {
+	setLimits?(min: number, max: number): void;
+};
+
+type RapierImpulseJoint = {
+	readonly handle: PhysicsJointHandle;
+	setLimits?(min: number, max: number): void;
+	configureMotorPosition?(
+		targetPos: number,
+		stiffness: number,
+		damping: number,
+	): void;
 };
 
 type RapierRay = {
@@ -70,6 +90,13 @@ type RapierWorld = {
 		body?: RapierRigidBody,
 	): RapierCollider;
 	removeCollider(collider: RapierCollider, wakeUp?: boolean): void;
+	createImpulseJoint?(
+		params: RapierJointData,
+		parent1: RapierRigidBody,
+		parent2: RapierRigidBody,
+		wakeUp: boolean,
+	): RapierImpulseJoint;
+	removeImpulseJoint?(joint: RapierImpulseJoint, wakeUp: boolean): void;
 	step(eventQueue?: RapierEventQueue): void;
 	castRay?(
 		ray: RapierRay,
@@ -108,6 +135,9 @@ type RapierModule = {
 		capsule(halfHeight: number, radius: number): RapierColliderDesc;
 		cylinder?(halfHeight: number, radius: number): RapierColliderDesc;
 		trimesh?(vertices: Float32Array, indices: Uint32Array): RapierColliderDesc;
+	};
+	JointData?: {
+		revolute(anchor1: Vec3, anchor2: Vec3, axis: Vec3): RapierJointData;
 	};
 };
 
@@ -192,6 +222,7 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 	#eventQueue?: RapierEventQueue;
 	#bodies = new Map<PhysicsBodyHandle, RapierRigidBody>();
 	#colliders = new Map<ColliderHandle, RapierCollider>();
+	#joints = new Map<PhysicsJointHandle, RapierImpulseJoint>();
 	#bodyEntities = new Map<PhysicsBodyHandle, Entity>();
 	#colliderEntities = new Map<ColliderHandle, Entity>();
 	#colliderBodies = new Map<ColliderHandle, PhysicsBodyHandle>();
@@ -243,6 +274,18 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 			desc.setSensor?.(collider.sensor);
 		}
 
+		if (collider.friction !== undefined) {
+			desc.setFriction?.(collider.friction);
+		}
+
+		if (collider.restitution !== undefined) {
+			desc.setRestitution?.(collider.restitution);
+		}
+
+		if (collider.density !== undefined) {
+			desc.setDensity?.(collider.density);
+		}
+
 		const collisionEvents = this.rapier.ActiveEvents?.COLLISION_EVENTS;
 
 		if (collisionEvents !== undefined) {
@@ -276,6 +319,11 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 			return;
 		}
 
+		for (const [jointHandle, joint] of [...this.#joints]) {
+			this.#world.removeImpulseJoint?.(joint, true);
+			this.#joints.delete(jointHandle);
+		}
+
 		for (const [colliderHandle, bodyHandle] of this.#colliderBodies) {
 			if (bodyHandle === handle) {
 				this.#colliderEntities.delete(colliderHandle);
@@ -287,6 +335,64 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 		this.#world.removeRigidBody(body);
 		this.#bodies.delete(handle);
 		this.#bodyEntities.delete(handle);
+	}
+
+	createJoint(
+		joint: PhysicsJointComponent,
+		parentBodyHandle: PhysicsBodyHandle,
+		childBodyHandle: PhysicsBodyHandle,
+	): PhysicsJointHandle {
+		if (!this.#world.createImpulseJoint || !this.rapier.JointData) {
+			throw new Error(
+				"The loaded Rapier module does not support impulse joints.",
+			);
+		}
+
+		const parent = this.requireBody(parentBodyHandle);
+		const child = this.requireBody(childBodyHandle);
+		const desc = this.createJointData(joint);
+		const rawJoint = this.#world.createImpulseJoint(desc, parent, child, true);
+
+		if (joint.limits) {
+			rawJoint.setLimits?.(joint.limits.minRadians, joint.limits.maxRadians);
+		}
+
+		this.#joints.set(rawJoint.handle, rawJoint);
+		return rawJoint.handle;
+	}
+
+	destroyJoint(handle: PhysicsJointHandle): void {
+		const joint = this.#joints.get(handle);
+
+		if (!joint) {
+			return;
+		}
+
+		this.#world.removeImpulseJoint?.(joint, true);
+		this.#joints.delete(handle);
+	}
+
+	configureJointMotor(
+		handle: PhysicsJointHandle,
+		motor: RevoluteJointMotor,
+	): void {
+		const joint = this.#joints.get(handle);
+
+		if (!joint) {
+			throw new Error(`Unknown Rapier impulse joint handle ${handle}.`);
+		}
+
+		if (!joint.configureMotorPosition) {
+			throw new Error(
+				"The loaded Rapier joint does not support motor position targets.",
+			);
+		}
+
+		joint.configureMotorPosition(
+			motor.targetRadians,
+			motor.stiffness,
+			motor.damping,
+		);
 	}
 
 	syncBodyFromTransform(
@@ -384,6 +490,10 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 	}
 
 	dispose(): void {
+		for (const handle of [...this.#joints.keys()]) {
+			this.destroyJoint(handle);
+		}
+
 		for (const handle of [...this.#colliders.keys()]) {
 			this.destroyCollider(handle);
 		}
@@ -458,6 +568,28 @@ export class RapierPhysicsAdapter implements PhysicsAdapterPort {
 			),
 			new Uint32Array(shape.indices),
 		);
+	}
+
+	private createJointData(joint: PhysicsJointComponent): RapierJointData {
+		if (!this.rapier.JointData) {
+			throw new Error("The loaded Rapier module does not expose JointData.");
+		}
+
+		if (joint.type === "revolute") {
+			const desc = this.rapier.JointData.revolute(
+				joint.anchorParent,
+				joint.anchorChild,
+				joint.axis,
+			);
+
+			if (joint.limits) {
+				desc.setLimits?.(joint.limits.minRadians, joint.limits.maxRadians);
+			}
+
+			return desc;
+		}
+
+		throw new Error(`Unsupported physics joint type "${joint.type}".`);
 	}
 
 	private requireBody(handle: PhysicsBodyHandle): RapierRigidBody {

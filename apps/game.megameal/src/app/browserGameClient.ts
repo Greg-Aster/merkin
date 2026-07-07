@@ -98,6 +98,7 @@ export async function createBrowserGameClient(
 		requestRuntimeScene: client.requestRuntimeScene,
 		setCollisionOverlayEnabled: client.setCollisionOverlayEnabled,
 		runtimeDiagnostics: client.runtimeDiagnostics,
+		submitMotionEvent: client.submitMotionEvent,
 		mobileControls: client.mobileControls,
 		setUiCapturingInput: client.setUiCapturingInput,
 		startLoop() {

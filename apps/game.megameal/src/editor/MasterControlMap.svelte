@@ -30,6 +30,8 @@ const groups: readonly MasterControlGraphNodeGroup[] = [
 const GLOBAL_SETTINGS_API_PATH = "/__megameal-editor-api/global-settings";
 const GLOBAL_PERFORMANCE_API_PATH = "/__megameal-editor-api/global-performance";
 const PLAYER_PACKAGE_API_PATH = "/__megameal-editor-api/player-package";
+const PLAYER_AVATAR_PACKAGE_API_PATH =
+	"/__megameal-editor-api/player-avatar-package";
 const MIN_MAP_ZOOM = 0.4;
 const MAX_MAP_ZOOM = 2.4;
 const MAP_ZOOM_STEP = 0.12;
@@ -120,6 +122,22 @@ type PlayerPackageDraft = {
 		readonly decay: number;
 		readonly visible: boolean;
 	};
+};
+
+type PlayerAvatarDraft = {
+	readonly id: string;
+	readonly name: string;
+	readonly physicsRig?: {
+		readonly kind: "articulated-physics-rig";
+		readonly rigId: string;
+	};
+};
+
+type PlayerAvatarPackageDraft = {
+	readonly schemaVersion: 1;
+	readonly selectedAvatarId: string;
+	readonly assets: readonly unknown[];
+	readonly avatars: readonly PlayerAvatarDraft[];
 };
 
 type LiveGameState = {
@@ -217,6 +235,11 @@ let savedPlayerPackage: PlayerPackageDraft | undefined = $state();
 let playerPackageFilePath: string | undefined = $state();
 let playerPackageMessage: string | undefined = $state();
 let playerPackageBusy = $state(false);
+let playerAvatarPackageDraft: PlayerAvatarPackageDraft | undefined = $state();
+let savedPlayerAvatarPackage: PlayerAvatarPackageDraft | undefined = $state();
+let playerAvatarPackageFilePath: string | undefined = $state();
+let playerAvatarPackageMessage: string | undefined = $state();
+let playerAvatarPackageBusy = $state(false);
 let isMapPanning = $state(false);
 let mermaidSvg = $state("");
 let mermaidError: string | undefined = $state();
@@ -272,6 +295,17 @@ const playerPackageDirty = $derived(
 		savedPlayerPackage !== undefined &&
 		JSON.stringify(playerPackageDraft) !== JSON.stringify(savedPlayerPackage),
 );
+const playerAvatarPackageDirty = $derived(
+	playerAvatarPackageDraft !== undefined &&
+		savedPlayerAvatarPackage !== undefined &&
+		JSON.stringify(playerAvatarPackageDraft) !==
+			JSON.stringify(savedPlayerAvatarPackage),
+);
+const selectedPlayerAvatarDraft = $derived(
+	playerAvatarPackageDraft?.avatars.find(
+		(avatar) => avatar.id === playerAvatarPackageDraft?.selectedAvatarId,
+	),
+);
 const liveGameState = $derived(readLiveGameState(liveSnapshot?.gameState));
 const collisionOverlayDiagnostics = $derived(
 	liveSnapshot?.diagnostics?.collisionOverlay,
@@ -291,12 +325,15 @@ onMount(() => {
 		globalPerformanceMessage =
 			"Performance settings editing is available in dev only.";
 		playerPackageMessage = "Player package editing is available in dev only.";
+		playerAvatarPackageMessage =
+			"Player avatar editing is available in dev only.";
 		return;
 	}
 
 	void loadGlobalSettings();
 	void loadGlobalPerformance();
 	void loadPlayerPackage();
+	void loadPlayerAvatarPackage();
 });
 
 onDestroy(() => {
@@ -556,6 +593,41 @@ function requestCollisionOverlay(enabled: boolean): void {
 			timestamp: Date.now(),
 			level: "warn",
 			message: "No live game response for collision overlay.",
+		});
+	}, 2500);
+}
+
+function requestAinekioSesameMotion(kind: "neutral" | "step-cycle"): void {
+	if (!bridgeEndpoint || !liveSnapshot) {
+		return;
+	}
+
+	const motionTestId =
+		kind === "neutral" ? "ainekio-sesame-neutral" : "ainekio-sesame-step-cycle";
+	const command = bridgeEndpoint.sendSubmitMotionTestEvent({
+		motionTestId,
+		targetSessionId: liveSnapshot.sessionId,
+	});
+	pendingCommandId = command.id;
+	lastCommandMessage = `Requested ${motionTestId}.`;
+	addLog({
+		id: command.id,
+		timestamp: command.issuedAt,
+		level: "info",
+		message: `Editor submitted ${motionTestId}.`,
+	});
+	window.setTimeout(() => {
+		if (pendingCommandId !== command.id) {
+			return;
+		}
+
+		pendingCommandId = undefined;
+		lastCommandMessage = `No live game response for ${motionTestId}.`;
+		addLog({
+			id: `${command.id}:timeout`,
+			timestamp: Date.now(),
+			level: "warn",
+			message: `No live game response for ${motionTestId}.`,
 		});
 	}, 2500);
 }
@@ -872,6 +944,88 @@ async function savePlayerPackage(): Promise<void> {
 	} finally {
 		playerPackageBusy = false;
 	}
+}
+
+async function loadPlayerAvatarPackage(): Promise<void> {
+	playerAvatarPackageBusy = true;
+	playerAvatarPackageMessage = "Loading player avatars.";
+
+	try {
+		const response = await fetch(PLAYER_AVATAR_PACKAGE_API_PATH, {
+			headers: { Accept: "application/json" },
+		});
+		const payload = await response.json();
+
+		if (!response.ok) {
+			throw new Error(payload.error ?? "Player avatars failed to load.");
+		}
+
+		const playerAvatarPackage =
+			payload.playerAvatarPackage as PlayerAvatarPackageDraft;
+		playerAvatarPackageDraft = structuredClone(playerAvatarPackage);
+		savedPlayerAvatarPackage = structuredClone(playerAvatarPackage);
+		playerAvatarPackageFilePath = payload.filePath as string;
+		playerAvatarPackageMessage = "Player avatars loaded.";
+	} catch (error) {
+		playerAvatarPackageMessage =
+			error instanceof Error ? error.message : "Player avatars failed to load.";
+	} finally {
+		playerAvatarPackageBusy = false;
+	}
+}
+
+async function savePlayerAvatarPackage(): Promise<void> {
+	if (!playerAvatarPackageDraft) {
+		return;
+	}
+
+	playerAvatarPackageBusy = true;
+	playerAvatarPackageMessage = "Saving player avatars.";
+
+	try {
+		const response = await fetch(PLAYER_AVATAR_PACKAGE_API_PATH, {
+			method: "POST",
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ playerAvatarPackage: playerAvatarPackageDraft }),
+		});
+		const payload = await response.json();
+
+		if (!response.ok) {
+			throw new Error(payload.error ?? "Player avatars failed to save.");
+		}
+
+		const playerAvatarPackage =
+			payload.playerAvatarPackage as PlayerAvatarPackageDraft;
+		playerAvatarPackageDraft = structuredClone(playerAvatarPackage);
+		savedPlayerAvatarPackage = structuredClone(playerAvatarPackage);
+		playerAvatarPackageFilePath = payload.filePath as string;
+		playerAvatarPackageMessage = "Player avatars saved.";
+		addLog({
+			id: `player-avatar-package:${Date.now()}`,
+			timestamp: Date.now(),
+			level: "info",
+			message: `Saved ${payload.filePath}.`,
+		});
+	} catch (error) {
+		playerAvatarPackageMessage =
+			error instanceof Error ? error.message : "Player avatars failed to save.";
+	} finally {
+		playerAvatarPackageBusy = false;
+	}
+}
+
+function updateSelectedPlayerAvatar(selectedAvatarId: string): void {
+	if (!playerAvatarPackageDraft) {
+		return;
+	}
+
+	playerAvatarPackageDraft = {
+		...playerAvatarPackageDraft,
+		selectedAvatarId,
+	};
 }
 
 function updatePlayerAssets(
@@ -1423,6 +1577,32 @@ function formatLiveCollectibles(state: LiveGameState): string {
 							</label>
 						</div>
 						</div>
+						<div class="settings-section">
+							<h3>Ainekio Sesame Simulator</h3>
+							<div class="settings-actions">
+								<button
+									type="button"
+									class="reload-button"
+									disabled={!bridgeEndpoint ||
+										!liveSnapshot ||
+										pendingCommandId !== undefined}
+									onclick={() => requestAinekioSesameMotion("neutral")}
+								>
+									Neutral Pose
+								</button>
+								<button
+									type="button"
+									class="save-button"
+									disabled={!bridgeEndpoint ||
+										!liveSnapshot ||
+										pendingCommandId !== undefined}
+									onclick={() => requestAinekioSesameMotion("step-cycle")}
+								>
+									Step Cycle
+								</button>
+								<span>{lastCommandMessage ?? bridgeStatus}</span>
+							</div>
+						</div>
 						<div class="settings-actions">
 							<button
 								type="button"
@@ -1504,6 +1684,70 @@ function formatLiveCollectibles(state: LiveGameState): string {
 						</button>
 					</div>
 					{#if playerPackageDraft}
+						<div class="settings-section">
+							<h3>Avatar</h3>
+							{#if playerAvatarPackageDraft}
+								<div class="settings-grid">
+									<label>
+										<span>Selected Avatar</span>
+										<select
+											value={playerAvatarPackageDraft.selectedAvatarId}
+											disabled={playerAvatarPackageBusy}
+											onchange={(event) =>
+												updateSelectedPlayerAvatar(event.currentTarget.value)}
+										>
+											{#each playerAvatarPackageDraft.avatars as avatar}
+												<option value={avatar.id}>{avatar.name}</option>
+											{/each}
+										</select>
+									</label>
+									<label>
+										<span>Physics Rig</span>
+										<input
+											value={selectedPlayerAvatarDraft?.physicsRig?.rigId ?? "none"}
+											disabled
+										/>
+									</label>
+								</div>
+								<div class="settings-actions">
+									<button
+										type="button"
+										class="reload-button"
+										disabled={playerAvatarPackageBusy}
+										onclick={() => void loadPlayerAvatarPackage()}
+									>
+										Reload Avatars
+									</button>
+									<button
+										type="button"
+										class="save-button"
+										disabled={playerAvatarPackageBusy || !playerAvatarPackageDirty}
+										onclick={() => void savePlayerAvatarPackage()}
+									>
+										Save Avatar
+									</button>
+									<span>{playerAvatarPackageMessage}</span>
+								</div>
+								{#if playerAvatarPackageFilePath}
+									<p class="settings-file">{playerAvatarPackageFilePath}</p>
+								{/if}
+							{:else}
+								<div class="settings-actions">
+									<button
+										type="button"
+										class="reload-button"
+										disabled={playerAvatarPackageBusy}
+										onclick={() => void loadPlayerAvatarPackage()}
+									>
+										Load Avatars
+									</button>
+									<span>
+										{playerAvatarPackageMessage ?? "Player avatars are not loaded."}
+									</span>
+								</div>
+							{/if}
+						</div>
+
 						<div class="settings-section">
 							<h3>Assets</h3>
 							<label>

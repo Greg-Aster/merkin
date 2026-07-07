@@ -844,6 +844,13 @@ function createPhysicsPort(): PhysicsAdapterPort {
 		},
 		destroyCollider() {},
 		destroyRigidBody() {},
+		createJoint() {
+			const handle = nextHandle;
+			nextHandle += 1;
+			return handle;
+		},
+		destroyJoint() {},
+		configureJointMotor() {},
 		syncBodyFromTransform() {},
 		syncTransformFromBody() {
 			return {

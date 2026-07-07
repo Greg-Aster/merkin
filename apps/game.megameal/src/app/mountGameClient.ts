@@ -21,6 +21,7 @@ import {
 	type RuntimeSceneManifestData,
 } from "../engine/index.js";
 import { type GameHudState, createMegamealGameRuntime } from "../game/index.js";
+import type { PhysicsRigServoTargetEvent } from "../game/physics-rigs/index.js";
 import type {
 	RuntimeDiagnosticToggleResult,
 	RuntimeDiagnosticsState,
@@ -45,6 +46,7 @@ export type GameClientMount = {
 	setCollisionOverlayEnabled(enabled: boolean): RuntimeDiagnosticToggleResult;
 	runtimeDiagnostics(): RuntimeDiagnosticsState;
 	gameState(): GameHudState;
+	submitMotionEvent(event: PhysicsRigServoTargetEvent): void;
 	setUiCapturingInput(capturing: boolean): void;
 	dispose(): void;
 };
@@ -108,6 +110,9 @@ export async function mountGameClient(
 		...(runtimeSettings.selectedPlayerAvatar
 			? { playerAvatar: runtimeSettings.selectedPlayerAvatar }
 			: {}),
+		...(runtimeSettings.selectedPlayerAvatarPhysicsRig
+			? { playerPhysicsRig: runtimeSettings.selectedPlayerAvatarPhysicsRig }
+			: {}),
 		...(options.multiplayer ? { multiplayer: options.multiplayer } : {}),
 	});
 
@@ -123,6 +128,7 @@ export async function mountGameClient(
 		setCollisionOverlayEnabled: game.setCollisionOverlayEnabled,
 		runtimeDiagnostics: game.runtimeDiagnostics,
 		gameState: game.gameState,
+		submitMotionEvent: game.submitMotionEvent,
 		setUiCapturingInput(capturing) {
 			input.setFocusState({ uiCapturingInput: capturing });
 		},

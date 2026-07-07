@@ -10,6 +10,8 @@ const GLOBAL_SETTINGS_API_PATH = "/__megameal-editor-api/global-settings";
 const GLOBAL_PERFORMANCE_API_PATH = "/__megameal-editor-api/global-performance";
 const LEVELS_API_PATH = "/__megameal-editor-api/levels";
 const PLAYER_PACKAGE_API_PATH = "/__megameal-editor-api/player-package";
+const PLAYER_AVATAR_PACKAGE_API_PATH =
+	"/__megameal-editor-api/player-avatar-package";
 const APP_ROOT_PATH = fileURLToPath(new URL("..", import.meta.url));
 const PUBLIC_DIR_PATH = fileURLToPath(new URL("../public", import.meta.url));
 const GLOBAL_SETTINGS_FILE_PATH = fileURLToPath(
@@ -24,6 +26,11 @@ const PLAYER_PACKAGE_FILE_PATH = fileURLToPath(
 	new URL("../src/levels/player/data.json", import.meta.url),
 );
 const PLAYER_PACKAGE_DISPLAY_PATH = "src/levels/player/data.json";
+const PLAYER_AVATAR_PACKAGE_FILE_PATH = fileURLToPath(
+	new URL("../src/levels/player/avatars/data.json", import.meta.url),
+);
+const PLAYER_AVATAR_PACKAGE_DISPLAY_PATH =
+	"src/levels/player/avatars/data.json";
 const LEVELS_DIR_PATH = fileURLToPath(
 	new URL("../src/levels", import.meta.url),
 );
@@ -147,6 +154,16 @@ export function megamealEditorDevApi() {
 					sendJson(res, 500, { error: errorMessage(error) });
 				}
 			});
+			server.middlewares.use(
+				PLAYER_AVATAR_PACKAGE_API_PATH,
+				async (req, res) => {
+					try {
+						await handlePlayerAvatarPackageRequest(req, res);
+					} catch (error) {
+						sendJson(res, 500, { error: errorMessage(error) });
+					}
+				},
+			);
 		},
 	};
 }
@@ -263,6 +280,52 @@ async function handlePlayerPackageRequest(req, res) {
 			playerPackage,
 			filePath: PLAYER_PACKAGE_DISPLAY_PATH,
 			absoluteFilePath: relative(process.cwd(), PLAYER_PACKAGE_FILE_PATH),
+		});
+		return;
+	}
+
+	if (req.method === "OPTIONS") {
+		res.statusCode = 204;
+		res.end();
+		return;
+	}
+
+	sendJson(res, 405, { error: `Unsupported method ${req.method}.` });
+}
+
+async function handlePlayerAvatarPackageRequest(req, res) {
+	if (req.method === "GET") {
+		const playerAvatarPackage = validatePlayerAvatarPackageConfig(
+			JSON.parse(await readFile(PLAYER_AVATAR_PACKAGE_FILE_PATH, "utf8")),
+		);
+		sendJson(res, 200, {
+			playerAvatarPackage,
+			filePath: PLAYER_AVATAR_PACKAGE_DISPLAY_PATH,
+			absoluteFilePath: relative(
+				process.cwd(),
+				PLAYER_AVATAR_PACKAGE_FILE_PATH,
+			),
+		});
+		return;
+	}
+
+	if (req.method === "POST") {
+		const body = await readJsonBody(req);
+		const playerAvatarPackage = validatePlayerAvatarPackageConfig(
+			body.playerAvatarPackage ?? body,
+		);
+		await writeFile(
+			PLAYER_AVATAR_PACKAGE_FILE_PATH,
+			serializeJson(playerAvatarPackage),
+			"utf8",
+		);
+		sendJson(res, 200, {
+			playerAvatarPackage,
+			filePath: PLAYER_AVATAR_PACKAGE_DISPLAY_PATH,
+			absoluteFilePath: relative(
+				process.cwd(),
+				PLAYER_AVATAR_PACKAGE_FILE_PATH,
+			),
 		});
 		return;
 	}
@@ -2783,6 +2846,142 @@ function validatePlayerPackageConfig(value) {
 	}
 
 	return playerPackage;
+}
+
+function validatePlayerAvatarPackageConfig(value) {
+	if (!isObject(value)) {
+		throw new Error("Player avatar package payload must be an object.");
+	}
+
+	const errors = [];
+
+	if (value.schemaVersion !== 1) {
+		errors.push("schemaVersion must be 1.");
+	}
+
+	const selectedAvatarId = readRequiredString(
+		value.selectedAvatarId,
+		"selectedAvatarId",
+		errors,
+	);
+	validateId(selectedAvatarId, "selectedAvatarId", errors);
+
+	if (!Array.isArray(value.assets)) {
+		errors.push("assets must be an array.");
+	} else {
+		validateUniqueIds(
+			value.assets.map((asset) => asset?.id),
+			"assets.id",
+			errors,
+		);
+		for (const [index, asset] of value.assets.entries()) {
+			validateAsset(asset, `assets.${index}`, errors);
+		}
+	}
+
+	if (!Array.isArray(value.avatars)) {
+		errors.push("avatars must be an array.");
+	} else {
+		validateUniqueIds(
+			value.avatars.map((avatar) => avatar?.id),
+			"avatars.id",
+			errors,
+		);
+		for (const [index, avatar] of value.avatars.entries()) {
+			validatePlayerAvatarDefinition(avatar, `avatars.${index}`, errors);
+		}
+		if (
+			typeof selectedAvatarId === "string" &&
+			!value.avatars.some((avatar) => avatar?.id === selectedAvatarId)
+		) {
+			errors.push(
+				`selectedAvatarId references unknown avatar "${selectedAvatarId}".`,
+			);
+		}
+	}
+
+	if (errors.length > 0) {
+		throw new Error(errors.join("; "));
+	}
+
+	return {
+		schemaVersion: 1,
+		selectedAvatarId,
+		assets: cloneJsonValue(value.assets),
+		avatars: cloneJsonValue(value.avatars),
+	};
+}
+
+function validatePlayerAvatarDefinition(value, path, errors) {
+	if (!isObject(value)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	validateId(value.id, `${path}.id`, errors);
+	readRequiredString(value.name, `${path}.name`, errors);
+	validatePlayerAvatarRenderable(
+		value.renderable,
+		`${path}.renderable`,
+		errors,
+	);
+
+	if (value.physicsRig !== undefined) {
+		validatePlayerAvatarPhysicsRig(
+			value.physicsRig,
+			`${path}.physicsRig`,
+			errors,
+		);
+	}
+}
+
+function validatePlayerAvatarRenderable(value, path, errors) {
+	if (!isObject(value)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	if (value.kind === "sprite") {
+		readRequiredString(value.spriteId, `${path}.spriteId`, errors);
+		if (value.color !== undefined) {
+			readRequiredString(value.color, `${path}.color`, errors);
+		}
+		if (value.scale !== undefined) {
+			validateNumberTuple(value.scale, 3, `${path}.scale`, errors);
+		}
+		if (value.fallback !== undefined) {
+			validatePlayerAvatarRenderable(
+				{ kind: "mesh", ...value.fallback },
+				`${path}.fallback`,
+				errors,
+			);
+		}
+		return;
+	}
+
+	if (value.kind !== undefined && value.kind !== "mesh") {
+		errors.push(`${path}.kind must be sprite or mesh when provided.`);
+	}
+
+	readRequiredString(value.meshId, `${path}.meshId`, errors);
+	if (value.materialId !== undefined) {
+		readRequiredString(value.materialId, `${path}.materialId`, errors);
+	}
+	if (value.scale !== undefined) {
+		validateNumberTuple(value.scale, 3, `${path}.scale`, errors);
+	}
+}
+
+function validatePlayerAvatarPhysicsRig(value, path, errors) {
+	if (!isObject(value)) {
+		errors.push(`${path} must be an object.`);
+		return;
+	}
+
+	if (value.kind !== "articulated-physics-rig") {
+		errors.push(`${path}.kind must be articulated-physics-rig.`);
+	}
+	validateId(value.rigId, `${path}.rigId`, errors);
 }
 
 function validatePlayerAssets(value, errors) {

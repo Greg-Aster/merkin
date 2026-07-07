@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"selectedAvatarId": "player_avatar_light",
+	"selectedAvatarId": "player_avatar_ainekio_sesame",
 	"assets": [
 		{
 			"id": "sprite_player_avatar_light",
@@ -17,6 +17,60 @@
 				"renderOrder": 1
 			},
 			"tags": ["player", "avatar", "light", "sprite"]
+		},
+		{
+			"id": "mesh_player_avatar_ainekio_sesame_chassis",
+			"kind": "mesh",
+			"url": "/assets/player/avatars/ainekio-sesame/chassis.glb",
+			"tags": ["player", "avatar", "ainekio", "sesame", "robot", "mesh"]
+		},
+		{
+			"id": "mesh_player_avatar_ainekio_sesame_right_front_leg",
+			"kind": "mesh",
+			"url": "/assets/player/avatars/ainekio-sesame/right_front_leg.glb",
+			"tags": ["player", "avatar", "ainekio", "sesame", "robot", "mesh"]
+		},
+		{
+			"id": "mesh_player_avatar_ainekio_sesame_right_front_foot",
+			"kind": "mesh",
+			"url": "/assets/player/avatars/ainekio-sesame/right_front_foot.glb",
+			"tags": ["player", "avatar", "ainekio", "sesame", "robot", "mesh"]
+		},
+		{
+			"id": "mesh_player_avatar_ainekio_sesame_right_rear_leg",
+			"kind": "mesh",
+			"url": "/assets/player/avatars/ainekio-sesame/right_rear_leg.glb",
+			"tags": ["player", "avatar", "ainekio", "sesame", "robot", "mesh"]
+		},
+		{
+			"id": "mesh_player_avatar_ainekio_sesame_right_rear_foot",
+			"kind": "mesh",
+			"url": "/assets/player/avatars/ainekio-sesame/right_rear_foot.glb",
+			"tags": ["player", "avatar", "ainekio", "sesame", "robot", "mesh"]
+		},
+		{
+			"id": "mesh_player_avatar_ainekio_sesame_left_front_leg",
+			"kind": "mesh",
+			"url": "/assets/player/avatars/ainekio-sesame/left_front_leg.glb",
+			"tags": ["player", "avatar", "ainekio", "sesame", "robot", "mesh"]
+		},
+		{
+			"id": "mesh_player_avatar_ainekio_sesame_left_front_foot",
+			"kind": "mesh",
+			"url": "/assets/player/avatars/ainekio-sesame/left_front_foot.glb",
+			"tags": ["player", "avatar", "ainekio", "sesame", "robot", "mesh"]
+		},
+		{
+			"id": "mesh_player_avatar_ainekio_sesame_left_rear_leg",
+			"kind": "mesh",
+			"url": "/assets/player/avatars/ainekio-sesame/left_rear_leg.glb",
+			"tags": ["player", "avatar", "ainekio", "sesame", "robot", "mesh"]
+		},
+		{
+			"id": "mesh_player_avatar_ainekio_sesame_left_rear_foot",
+			"kind": "mesh",
+			"url": "/assets/player/avatars/ainekio-sesame/left_rear_foot.glb",
+			"tags": ["player", "avatar", "ainekio", "sesame", "robot", "mesh"]
 		}
 	],
 	"avatars": [
@@ -33,6 +87,18 @@
 					"materialId": "material_player",
 					"scale": [0.75, 1.25, 0.75]
 				}
+			}
+		},
+		{
+			"id": "player_avatar_ainekio_sesame",
+			"name": "Ainekio Sesame Physics Rig",
+			"renderable": {
+				"meshId": "mesh_player_avatar_ainekio_sesame_chassis",
+				"scale": [1, 1, 1]
+			},
+			"physicsRig": {
+				"kind": "articulated-physics-rig",
+				"rigId": "ainekio-sesame"
 			}
 		}
 	]

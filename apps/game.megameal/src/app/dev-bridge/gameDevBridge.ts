@@ -1,5 +1,6 @@
 import type { RuntimeSnapshot } from "../../engine/client-api/index.js";
 import type { PerformanceDiagnosticsState } from "../../game/performance/index.js";
+import type { PhysicsRigServoTargetEvent } from "../../game/physics-rigs/index.js";
 import type { MultiplayerSnapshot } from "../../multiplayer/index.js";
 
 export const DEFAULT_GAME_DEV_BRIDGE_BROADCAST_LOCATION =
@@ -94,6 +95,14 @@ export type GameDevBridgeCommand =
 	  })
 	| (GameDevBridgeCommandBase & {
 			readonly type: "clearTouchControls";
+	  })
+	| (GameDevBridgeCommandBase & {
+			readonly type: "submitMotionEvent";
+			readonly motionEvent: PhysicsRigServoTargetEvent;
+	  })
+	| (GameDevBridgeCommandBase & {
+			readonly type: "submitMotionTestEvent";
+			readonly motionTestId: string;
 	  });
 
 export type GameDevBridgeCommandResult = {
@@ -108,6 +117,10 @@ export type GameDevBridgeCommandResult = {
 	readonly text?: string;
 	readonly touchId?: string;
 	readonly value?: number;
+	readonly motionRobot?: string;
+	readonly motionSequence?: string;
+	readonly motionCommand?: string;
+	readonly motionTestId?: string;
 	readonly diagnostics?: GameDevBridgeDiagnostics;
 };
 
@@ -159,6 +172,14 @@ export type GameDevBridgeEditorEndpoint = {
 		readonly targetSessionId?: string;
 	}): GameDevBridgeCommand;
 	sendClearTouchControls(targetSessionId?: string): GameDevBridgeCommand;
+	sendSubmitMotionEvent(options: {
+		readonly motionEvent: PhysicsRigServoTargetEvent;
+		readonly targetSessionId?: string;
+	}): GameDevBridgeCommand;
+	sendSubmitMotionTestEvent(options: {
+		readonly motionTestId: string;
+		readonly targetSessionId?: string;
+	}): GameDevBridgeCommand;
 	dispose(): void;
 };
 
@@ -189,6 +210,17 @@ export function createGameDevBridgeGameEndpoint(options: {
 	readonly clearTouchControls?: () => {
 		readonly accepted: boolean;
 		readonly message: string;
+	};
+	readonly submitMotionEvent?: (event: PhysicsRigServoTargetEvent) => {
+		readonly accepted: boolean;
+		readonly message: string;
+	};
+	readonly submitMotionTestEvent?: (motionTestId: string) => {
+		readonly accepted: boolean;
+		readonly message: string;
+		readonly motionRobot?: string;
+		readonly motionSequence?: string;
+		readonly motionCommand?: string;
 	};
 	readonly onLog?: (entry: GameDevBridgeLogEntry) => void;
 }): GameDevBridgeGameEndpoint {
@@ -333,10 +365,40 @@ export function createGameDevBridgeGameEndpoint(options: {
 			};
 		}
 
-		return (
-			options.clearTouchControls?.() ?? {
+		if (command.type === "clearTouchControls") {
+			return (
+				options.clearTouchControls?.() ?? {
+					accepted: false,
+					message: "Touch control clearing is not available.",
+				}
+			);
+		}
+
+		if (command.type === "submitMotionTestEvent") {
+			return (
+				options.submitMotionTestEvent?.(command.motionTestId) ?? {
+					accepted: false,
+					motionTestId: command.motionTestId,
+					message: "Motion test event submission is not available.",
+				}
+			);
+		}
+
+		if (!isPhysicsRigServoTargetEvent(command.motionEvent)) {
+			return {
 				accepted: false,
-				message: "Touch control clearing is not available.",
+				...motionFieldsForUnknown(command.motionEvent),
+				message: "Motion event payload is invalid.",
+			};
+		}
+
+		return (
+			options.submitMotionEvent?.(command.motionEvent) ?? {
+				accepted: false,
+				motionRobot: command.motionEvent.robot,
+				motionSequence: command.motionEvent.sequence,
+				motionCommand: command.motionEvent.command,
+				message: "Motion event submission is not available.",
 			}
 		);
 	};
@@ -365,6 +427,15 @@ export function createGameDevBridgeGameEndpoint(options: {
 			...(command.type === "sendChat" ? { text: command.text } : {}),
 			...(command.type === "setTouchActionValue"
 				? { touchId: command.touchId, value: command.value }
+				: {}),
+			...(command.type === "submitMotionEvent"
+				? motionFieldsForCommand(command, result)
+				: {}),
+			...(command.type === "submitMotionTestEvent"
+				? {
+						motionTestId: command.motionTestId,
+						...motionFieldsForCommand(command, result),
+					}
 				: {}),
 			...("diagnostics" in result && result.diagnostics
 				? { diagnostics: result.diagnostics }
@@ -567,6 +638,42 @@ export function createGameDevBridgeEditorEndpoint(options: {
 
 			return command;
 		},
+		sendSubmitMotionEvent(options) {
+			const command: GameDevBridgeCommand = {
+				id: createSessionId(),
+				issuedAt: Date.now(),
+				...(options.targetSessionId
+					? { targetSessionId: options.targetSessionId }
+					: {}),
+				type: "submitMotionEvent",
+				motionEvent: options.motionEvent,
+			};
+
+			channel?.postMessage({
+				type: "editor:command",
+				command,
+			} satisfies GameDevBridgeMessage);
+
+			return command;
+		},
+		sendSubmitMotionTestEvent(options) {
+			const command: GameDevBridgeCommand = {
+				id: createSessionId(),
+				issuedAt: Date.now(),
+				...(options.targetSessionId
+					? { targetSessionId: options.targetSessionId }
+					: {}),
+				type: "submitMotionTestEvent",
+				motionTestId: options.motionTestId,
+			};
+
+			channel?.postMessage({
+				type: "editor:command",
+				command,
+			} satisfies GameDevBridgeMessage);
+
+			return command;
+		},
 		dispose() {
 			channel?.removeEventListener("message", onMessage);
 			channel?.close();
@@ -665,8 +772,143 @@ function isGameDevBridgeCommand(value: unknown): value is GameDevBridgeCommand {
 		type === "setCollisionOverlay" ||
 		type === "sendChat" ||
 		type === "setTouchActionValue" ||
-		type === "clearTouchControls"
+		type === "clearTouchControls" ||
+		type === "submitMotionEvent" ||
+		type === "submitMotionTestEvent"
 	);
+}
+
+function isPhysicsRigServoTargetEvent(
+	value: unknown,
+): value is PhysicsRigServoTargetEvent {
+	if (!value || typeof value !== "object") {
+		return false;
+	}
+
+	const event = value as Partial<PhysicsRigServoTargetEvent>;
+	return (
+		event.schemaVersion === 1 &&
+		typeof event.robot === "string" &&
+		event.robot.length > 0 &&
+		typeof event.sequence === "string" &&
+		event.sequence.length > 0 &&
+		typeof event.command === "string" &&
+		event.command.length > 0 &&
+		isFiniteNumber(event.issuedAtMs) &&
+		isFiniteNumber(event.ttlMs) &&
+		event.ttlMs > 0 &&
+		Array.isArray(event.frames) &&
+		event.frames.every(isPhysicsRigServoFrame)
+	);
+}
+
+function isPhysicsRigServoFrame(
+	value: unknown,
+): value is PhysicsRigServoTargetEvent["frames"][number] {
+	if (!value || typeof value !== "object") {
+		return false;
+	}
+
+	const frame = value as Partial<PhysicsRigServoTargetEvent["frames"][number]>;
+	return (
+		typeof frame.servo === "string" &&
+		frame.servo.length > 0 &&
+		isFiniteNumber(frame.angleDeg) &&
+		isFiniteNumber(frame.atMs) &&
+		frame.atMs >= 0
+	);
+}
+
+function isFiniteNumber(value: unknown): value is number {
+	return typeof value === "number" && Number.isFinite(value);
+}
+
+function unknownMotionField(value: unknown, field: string): string | undefined {
+	if (!value || typeof value !== "object") {
+		return undefined;
+	}
+
+	const fieldValue = (value as Record<string, unknown>)[field];
+	return typeof fieldValue === "string" ? fieldValue : undefined;
+}
+
+function motionFieldsForUnknown(value: unknown): {
+	readonly motionRobot?: string;
+	readonly motionSequence?: string;
+	readonly motionCommand?: string;
+} {
+	const fields: {
+		motionRobot?: string;
+		motionSequence?: string;
+		motionCommand?: string;
+	} = {};
+	const motionRobot = unknownMotionField(value, "robot");
+	const motionSequence = unknownMotionField(value, "sequence");
+	const motionCommand = unknownMotionField(value, "command");
+
+	if (motionRobot) {
+		fields.motionRobot = motionRobot;
+	}
+	if (motionSequence) {
+		fields.motionSequence = motionSequence;
+	}
+	if (motionCommand) {
+		fields.motionCommand = motionCommand;
+	}
+
+	return fields;
+}
+
+function motionFieldsForCommand(
+	command: GameDevBridgeCommand,
+	result: Omit<
+		GameDevBridgeCommandResult,
+		"commandId" | "sessionId" | "timestamp" | "commandType"
+	>,
+): {
+	readonly motionRobot?: string;
+	readonly motionSequence?: string;
+	readonly motionCommand?: string;
+} {
+	if (
+		command.type !== "submitMotionEvent" &&
+		command.type !== "submitMotionTestEvent"
+	) {
+		return {};
+	}
+
+	const fields: {
+		motionRobot?: string;
+		motionSequence?: string;
+		motionCommand?: string;
+	} = {};
+	const motionEvent =
+		command.type === "submitMotionEvent"
+			? (
+					command as {
+						readonly motionEvent?: Partial<PhysicsRigServoTargetEvent>;
+					}
+				).motionEvent
+			: undefined;
+	const commandRobot = motionEvent?.robot;
+	const commandSequence = motionEvent?.sequence;
+	const commandCommand = motionEvent?.command;
+
+	const motionRobot = result.motionRobot ?? commandRobot;
+	const motionSequence = result.motionSequence ?? commandSequence;
+	const motionCommand = result.motionCommand ?? commandCommand;
+
+	if (motionRobot) {
+		fields.motionRobot = motionRobot;
+	}
+	if (motionSequence) {
+		fields.motionSequence = motionSequence;
+	}
+	if (motionCommand) {
+		fields.motionCommand = motionCommand;
+	}
+
+	return fields;
 }
 
 function createRelaySocket(sessionId: string): WebSocket | undefined {

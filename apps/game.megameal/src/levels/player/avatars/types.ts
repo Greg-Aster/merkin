@@ -1,3 +1,5 @@
+import type { AssetManifestEntry } from "../../../engine/modules/assets/index.js";
+
 export type PlayerAvatarVector3 = readonly [number, number, number];
 
 export type PlayerAvatarMeshRenderable = {
@@ -23,26 +25,15 @@ export type PlayerAvatarDefinition = {
 	readonly id: string;
 	readonly name: string;
 	readonly renderable: PlayerAvatarRenderable;
+	readonly physicsRig?: {
+		readonly kind: "articulated-physics-rig";
+		readonly rigId: string;
+	};
 };
 
 export type PlayerAvatarPackageConfig = {
 	readonly schemaVersion: 1;
 	readonly selectedAvatarId: string;
-	readonly assets: readonly {
-		readonly id: string;
-		readonly kind: "sprite";
-		readonly url: string;
-		readonly sprite: {
-			readonly color: string;
-			readonly size: number;
-			readonly opacity?: number;
-			readonly intensity?: number;
-			readonly glow?: number;
-			readonly starType?: "point" | "sparkle" | "halo" | "classic";
-			readonly depthTest?: boolean;
-			readonly renderOrder?: number;
-		};
-		readonly tags?: readonly string[];
-	}[];
+	readonly assets: readonly AssetManifestEntry[];
 	readonly avatars: readonly PlayerAvatarDefinition[];
 };

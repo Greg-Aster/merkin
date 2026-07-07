@@ -1,5 +1,7 @@
 import type { RuntimeSceneManifestData } from "../engine/index.js";
 import type { AudioContentManifest } from "../engine/modules/audio/index.js";
+import type { ArticulatedPhysicsRigDefinition } from "../game/physics-rigs/index.js";
+import type { PhysicsRigServoTargetEvent } from "../game/physics-rigs/index.js";
 import type { RuntimePlayerAvatar } from "../game/runtime/index.js";
 import {
 	type GameDevBridgeSettings,
@@ -19,6 +21,10 @@ type RuntimeLevelPackageModule = {
 	readonly defaultRuntimeSceneManifests?: readonly RuntimeSceneManifestData[];
 	readonly runtimeSceneManifests?: readonly RuntimeSceneManifestData[];
 	readonly selectedPlayerAvatar?: RuntimePlayerAvatar;
+	readonly selectedPlayerAvatarPhysicsRig?: ArticulatedPhysicsRigDefinition;
+	createPlayerAvatarMotionTestEvent?(
+		id: string,
+	): PhysicsRigServoTargetEvent | undefined;
 	getRuntimeSceneManifest?(id: string): RuntimeSceneManifestData | undefined;
 	audioContentManifestForRuntimeScene?(
 		runtimeSceneManifestId: string,
@@ -47,6 +53,12 @@ export type RuntimeSettings = {
 	readonly audioMasterVolume: number;
 	readonly devBridge: GameDevBridgeSettings;
 	readonly selectedPlayerAvatar: RuntimePlayerAvatar | undefined;
+	readonly selectedPlayerAvatarPhysicsRig:
+		| ArticulatedPhysicsRigDefinition
+		| undefined;
+	createPlayerAvatarMotionTestEvent(
+		id: string,
+	): PhysicsRigServoTargetEvent | undefined;
 	readonly defaultRuntimeSceneManifest: RuntimeSceneManifestData | undefined;
 	readonly runtimeSceneManifests: readonly RuntimeSceneManifestData[];
 	getRuntimeSceneManifest(id: string): RuntimeSceneManifestData | undefined;
@@ -67,6 +79,11 @@ export const runtimeSettings: RuntimeSettings = {
 			defaultGameDevBridgeSettings,
 	),
 	selectedPlayerAvatar: installedLevelPackage?.selectedPlayerAvatar,
+	selectedPlayerAvatarPhysicsRig:
+		installedLevelPackage?.selectedPlayerAvatarPhysicsRig,
+	createPlayerAvatarMotionTestEvent(id) {
+		return installedLevelPackage?.createPlayerAvatarMotionTestEvent?.(id);
+	},
 	defaultRuntimeSceneManifest,
 	runtimeSceneManifests,
 	getRuntimeSceneManifest(id) {
