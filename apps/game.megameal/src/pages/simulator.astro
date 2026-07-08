@@ -1,0 +1,43 @@
+---
+const title = "Sesame Robot Simulator";
+const simulatorUrl =
+	Astro.url.searchParams.get("url") ?? "http://127.0.0.1:8765/";
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta
+			name="description"
+			content="Megameal development view for the Sesame robot simulator runtime."
+		/>
+		<title>{title}</title>
+		<style is:global>
+			html,
+			body {
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				background: #111;
+			}
+
+			.simulator-frame {
+				display: block;
+				width: 100vw;
+				height: 100vh;
+				border: 0;
+				background: #111;
+			}
+		</style>
+	</head>
+	<body>
+		<iframe
+			class="simulator-frame"
+			src={simulatorUrl}
+			title="Sesame robot simulator"
+			allow="cross-origin-isolated; fullscreen; serial; clipboard-read; clipboard-write"
+		></iframe>
+	</body>
+</html>

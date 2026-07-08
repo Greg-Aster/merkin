@@ -1,12 +1,9 @@
-import { existsSync, readFileSync } from "node:fs";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { readFileSync } from "node:fs";
 import mirandaData from "../src/levels/miranda-deck/data.json";
 import { mirandaDeckLevelPackage } from "../src/levels/miranda-deck/package.js";
 import observatoryData from "../src/levels/observatory/data.json";
 import { observatoryLevelPackage } from "../src/levels/observatory/package.js";
 import {
-	PLAYER_AVATAR_AINEKIO_SESAME_CHASSIS_MESH_ASSET_ID,
-	PLAYER_AVATAR_AINEKIO_SESAME_MESH_ASSET_IDS,
 	PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,
 	PLAYER_PREFAB_ID,
 	PLAYER_REQUIRED_ASSET_IDS,
@@ -38,8 +35,6 @@ const masterControlMapSource = readFileSync(
 	new URL("../src/editor/MasterControlMap.svelte", import.meta.url),
 	"utf8",
 );
-const gltfLoader = new GLTFLoader();
-
 type RawLevelPackageData = {
 	readonly id: string;
 	readonly assets: {
@@ -152,42 +147,6 @@ function assertDeepEqual<TValue>(
 				`Expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}.`,
 		);
 	}
-}
-
-async function materialColorsForPublicGlb(
-	url: string | undefined,
-): Promise<readonly string[]> {
-	if (!url) {
-		throw new Error("Expected a public GLB URL for material validation.");
-	}
-
-	const source = readFileSync(new URL(`../public${url}`, import.meta.url));
-	const gltf = await gltfLoader.parseAsync(
-		source.buffer.slice(
-			source.byteOffset,
-			source.byteOffset + source.byteLength,
-		),
-		"",
-	);
-	const colors = new Set<string>();
-
-	gltf.scene.traverse((node) => {
-		if (!("isMesh" in node) || node.isMesh !== true || !("material" in node)) {
-			return;
-		}
-
-		const materials = Array.isArray(node.material)
-			? node.material
-			: [node.material];
-
-		for (const material of materials) {
-			if (material && "color" in material && material.color) {
-				colors.add(material.color.getHexString());
-			}
-		}
-	});
-
-	return [...colors];
 }
 
 function assertRawPackageHasNoCopiedPlayerData(
@@ -304,62 +263,6 @@ assertIncludes(
 	PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,
 	"Player package assets must include the selected avatar sprite asset.",
 );
-for (const meshAssetId of PLAYER_AVATAR_AINEKIO_SESAME_MESH_ASSET_IDS) {
-	const meshAsset = playerAvatarAssets.find(
-		(asset) => asset.id === meshAssetId,
-	);
-	assertIncludes(
-		playerAvatarAssets.map((asset) => asset.id),
-		meshAssetId,
-		"Ainekio/Sesame robot mesh assets must come from src/levels/player/avatars.",
-	);
-	assertIncludes(
-		playerAssets.map((asset) => asset.id),
-		meshAssetId,
-		"Player package assets must include Ainekio/Sesame robot mesh assets.",
-	);
-	assertIncludes(
-		PLAYER_REQUIRED_ASSET_IDS,
-		meshAssetId,
-		"Player required assets must include selected Ainekio/Sesame robot mesh assets.",
-	);
-	assertEqual(
-		meshAsset?.kind,
-		"mesh",
-		"Ainekio/Sesame robot avatar assets must be mesh assets.",
-	);
-	assertEqual(
-		typeof meshAsset?.url === "string" && meshAsset.url.endsWith(".glb"),
-		true,
-		"Ainekio/Sesame robot avatar assets must point at runtime GLB files.",
-	);
-	assertEqual(
-		existsSync(new URL(`../public${meshAsset?.url ?? ""}`, import.meta.url)),
-		true,
-		"Ainekio/Sesame robot avatar GLB files must exist under public assets.",
-	);
-}
-const sesameChassisAsset = playerAvatarAssets.find(
-	(asset) => asset.id === PLAYER_AVATAR_AINEKIO_SESAME_CHASSIS_MESH_ASSET_ID,
-);
-const sesameChassisMaterialColors = await materialColorsForPublicGlb(
-	sesameChassisAsset?.url,
-);
-assertIncludes(
-	sesameChassisMaterialColors,
-	"ffb74d",
-	"Ainekio/Sesame chassis GLB must preserve the simulator orange material.",
-);
-assertIncludes(
-	sesameChassisMaterialColors,
-	"979797",
-	"Ainekio/Sesame chassis GLB must preserve the simulator gray frame material.",
-);
-assertIncludes(
-	sesameChassisMaterialColors,
-	"515151",
-	"Ainekio/Sesame chassis GLB must preserve the simulator dark OLED material.",
-);
 assertIncludes(
 	PLAYER_REQUIRED_ASSET_IDS,
 	PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,
@@ -367,24 +270,19 @@ assertIncludes(
 );
 assertEqual(
 	selectedPlayerAvatar.id,
-	"player_avatar_ainekio_sesame",
-	"Selected player avatar must come from src/levels/player/avatars.",
+	"player_avatar_light",
+	"Selected player avatar must be the built-in player-owned light avatar.",
 );
 assertEqual(
-	selectedPlayerAvatar.renderable.kind ?? "mesh",
-	"mesh",
-	"Selected Ainekio/Sesame avatar must use robot mesh renderable data.",
+	selectedPlayerAvatar.renderable.kind,
+	"sprite",
+	"Selected player avatar must use sprite renderable data.",
 );
-if (selectedPlayerAvatar.renderable.kind !== "sprite") {
+if (selectedPlayerAvatar.renderable.kind === "sprite") {
 	assertEqual(
-		selectedPlayerAvatar.renderable.meshId,
-		PLAYER_AVATAR_AINEKIO_SESAME_CHASSIS_MESH_ASSET_ID,
-		"Selected Ainekio/Sesame avatar preview must use the robot chassis mesh.",
-	);
-	assertEqual(
-		selectedPlayerAvatar.renderable.meshId === "mesh_player",
-		false,
-		"Selected Ainekio/Sesame avatar must not fall back to the generic player mesh.",
+		selectedPlayerAvatar.renderable.spriteId,
+		PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,
+		"Selected player avatar must use the player-owned light sprite asset.",
 	);
 }
 const ballOfLightAvatar = playerAvatars.find(
@@ -413,23 +311,14 @@ assertEqual(
 	"Selected player avatar must exist in the player avatar catalog.",
 );
 assertEqual(
-	selectedPlayerAvatarPhysicsRig?.id,
-	"ainekio-sesame",
-	"Selected Ainekio/Sesame avatar must activate the Ainekio/Sesame physics rig.",
+	selectedPlayerAvatarPhysicsRig,
+	undefined,
+	"Selected player avatar must not activate a removed avatar physics rig.",
 );
 assertEqual(
-	playerAvatars.some(
-		(avatar) =>
-			avatar.id === "player_avatar_ainekio_sesame" &&
-			avatar.physicsRig?.rigId === "ainekio-sesame",
-	),
-	true,
-	"Ainekio/Sesame physics rig avatar must live in the player avatar catalog.",
-);
-assertEqual(
-	playerAvatarPhysicsRigs.some((rig) => rig.id === "ainekio-sesame"),
-	true,
-	"Ainekio/Sesame physics rig definition must be exported from the player avatar package.",
+	playerAvatarPhysicsRigs.length,
+	0,
+	"Player avatar package must not export removed avatar physics rigs.",
 );
 assertSourceIncludes(
 	editorDevApiSource,

@@ -1,18 +1,8 @@
-import {
-	AINEKIO_SESAME_PHYSICS_RIG_ID,
-	ainekioSesamePhysicsRig,
-} from "./ainekio-sesame/rig.js";
 import data from "./data.json";
 import type {
 	PlayerAvatarDefinition,
 	PlayerAvatarPackageConfig,
 } from "./types.js";
-
-export { createAinekioSesameMotionEvent } from "./ainekio-sesame/motionAdapter.js";
-export {
-	createAinekioSesameNeutralMotionEvent,
-	createAinekioSesameStepMotionEvent,
-} from "./ainekio-sesame/motionTestSequences.js";
 
 export type {
 	PlayerAvatarDefinition,
@@ -33,7 +23,7 @@ export const selectedPlayerAvatar = selectedAvatarFrom(
 	playerAvatarPackageConfig,
 );
 
-export const playerAvatarPhysicsRigs = [ainekioSesamePhysicsRig] as const;
+export const playerAvatarPhysicsRigs = [] as const;
 
 export const selectedPlayerAvatarPhysicsRig =
 	selectedRigFrom(selectedPlayerAvatar);
@@ -57,10 +47,6 @@ function selectedAvatarFrom(
 function selectedRigFrom(avatar: PlayerAvatarDefinition) {
 	if (!avatar.physicsRig) {
 		return undefined;
-	}
-
-	if (avatar.physicsRig.rigId === AINEKIO_SESAME_PHYSICS_RIG_ID) {
-		return ainekioSesamePhysicsRig;
 	}
 
 	throw new Error(

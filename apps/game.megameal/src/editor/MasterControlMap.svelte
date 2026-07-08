@@ -220,10 +220,10 @@ let devLogEntries: GameDevBridgeLogEntry[] = $state([]);
 let pendingCommandId: string | undefined = $state();
 let lastCommandMessage: string | undefined = $state();
 let globalSettingsDraft: GlobalSettingsDraft | undefined = $state();
-let savedGlobalSettings: GlobalSettingsDraft | undefined = $state();
-let globalSettingsFilePath: string | undefined = $state();
+const savedGlobalSettings: GlobalSettingsDraft | undefined = $state();
+const globalSettingsFilePath: string | undefined = $state();
 let globalSettingsMessage: string | undefined = $state();
-let globalSettingsBusy = $state(false);
+const globalSettingsBusy = $state(false);
 let globalPerformanceDraft: PerformanceConfigDraft | undefined = $state();
 let savedGlobalPerformance: PerformanceConfigDraft | undefined = $state();
 let globalPerformanceFilePath: string | undefined = $state();
@@ -595,159 +595,6 @@ function requestCollisionOverlay(enabled: boolean): void {
 			message: "No live game response for collision overlay.",
 		});
 	}, 2500);
-}
-
-function requestAinekioSesameMotion(kind: "neutral" | "step-cycle"): void {
-	if (!bridgeEndpoint || !liveSnapshot) {
-		return;
-	}
-
-	const motionTestId =
-		kind === "neutral" ? "ainekio-sesame-neutral" : "ainekio-sesame-step-cycle";
-	const command = bridgeEndpoint.sendSubmitMotionTestEvent({
-		motionTestId,
-		targetSessionId: liveSnapshot.sessionId,
-	});
-	pendingCommandId = command.id;
-	lastCommandMessage = `Requested ${motionTestId}.`;
-	addLog({
-		id: command.id,
-		timestamp: command.issuedAt,
-		level: "info",
-		message: `Editor submitted ${motionTestId}.`,
-	});
-	window.setTimeout(() => {
-		if (pendingCommandId !== command.id) {
-			return;
-		}
-
-		pendingCommandId = undefined;
-		lastCommandMessage = `No live game response for ${motionTestId}.`;
-		addLog({
-			id: `${command.id}:timeout`,
-			timestamp: Date.now(),
-			level: "warn",
-			message: `No live game response for ${motionTestId}.`,
-		});
-	}, 2500);
-}
-
-async function loadGlobalSettings(): Promise<void> {
-	globalSettingsBusy = true;
-	globalSettingsMessage = "Loading global settings.";
-
-	try {
-		const response = await fetch(GLOBAL_SETTINGS_API_PATH, {
-			headers: { Accept: "application/json" },
-		});
-		const payload = await response.json();
-
-		if (!response.ok) {
-			throw new Error(payload.error ?? "Global settings failed to load.");
-		}
-
-		const settings = normalizeGlobalSettings(
-			payload.settings as GlobalSettingsPayload,
-		);
-		globalSettingsDraft = settings;
-		savedGlobalSettings = settings;
-		globalSettingsFilePath = payload.filePath as string;
-		globalSettingsMessage = "Global settings loaded.";
-		connectBridgeEndpoint(settings.devBridge);
-	} catch (error) {
-		globalSettingsMessage =
-			error instanceof Error
-				? error.message
-				: "Global settings failed to load.";
-	} finally {
-		globalSettingsBusy = false;
-	}
-}
-
-async function saveGlobalSettings(): Promise<void> {
-	if (!globalSettingsDraft) {
-		return;
-	}
-
-	globalSettingsBusy = true;
-	globalSettingsMessage = "Saving global settings.";
-
-	try {
-		const response = await fetch(GLOBAL_SETTINGS_API_PATH, {
-			method: "POST",
-			headers: {
-				Accept: "application/json",
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(globalSettingsDraft),
-		});
-		const payload = await response.json();
-
-		if (!response.ok) {
-			throw new Error(payload.error ?? "Global settings failed to save.");
-		}
-
-		const settings = normalizeGlobalSettings(
-			payload.settings as GlobalSettingsPayload,
-		);
-		globalSettingsDraft = settings;
-		savedGlobalSettings = settings;
-		globalSettingsFilePath = payload.filePath as string;
-		globalSettingsMessage = "Global settings saved.";
-		connectBridgeEndpoint(settings.devBridge);
-		addLog({
-			id: `global-settings:${Date.now()}`,
-			timestamp: Date.now(),
-			level: "info",
-			message: `Saved ${payload.filePath}.`,
-		});
-	} catch (error) {
-		globalSettingsMessage =
-			error instanceof Error
-				? error.message
-				: "Global settings failed to save.";
-	} finally {
-		globalSettingsBusy = false;
-	}
-}
-
-function updateGlobalSetting<K extends keyof GlobalSettingsDraft>(
-	key: K,
-	value: GlobalSettingsDraft[K],
-): void {
-	if (!globalSettingsDraft) {
-		return;
-	}
-
-	globalSettingsDraft = {
-		...globalSettingsDraft,
-		[key]: value,
-	};
-}
-
-function normalizeGlobalSettings(
-	settings: GlobalSettingsPayload,
-): GlobalSettingsDraft {
-	return {
-		...settings,
-		devBridge: normalizeGameDevBridgeSettings(settings.devBridge),
-	};
-}
-
-function updateGlobalBridgeSetting(
-	value: Partial<Omit<GameDevBridgeSettings, "channels">>,
-): void {
-	if (!globalSettingsDraft) {
-		return;
-	}
-
-	globalSettingsDraft = {
-		...globalSettingsDraft,
-		devBridge: {
-			...globalSettingsDraft.devBridge,
-			...value,
-		},
-	};
 }
 
 function updateGlobalBridgeChannel(
@@ -1576,32 +1423,6 @@ function formatLiveCollectibles(state: LiveGameState): string {
 								/>
 							</label>
 						</div>
-						</div>
-						<div class="settings-section">
-							<h3>Ainekio Sesame Simulator</h3>
-							<div class="settings-actions">
-								<button
-									type="button"
-									class="reload-button"
-									disabled={!bridgeEndpoint ||
-										!liveSnapshot ||
-										pendingCommandId !== undefined}
-									onclick={() => requestAinekioSesameMotion("neutral")}
-								>
-									Neutral Pose
-								</button>
-								<button
-									type="button"
-									class="save-button"
-									disabled={!bridgeEndpoint ||
-										!liveSnapshot ||
-										pendingCommandId !== undefined}
-									onclick={() => requestAinekioSesameMotion("step-cycle")}
-								>
-									Step Cycle
-								</button>
-								<span>{lastCommandMessage ?? bridgeStatus}</span>
-							</div>
 						</div>
 						<div class="settings-actions">
 							<button

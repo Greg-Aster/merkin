@@ -28,7 +28,6 @@
 		"test:runtime-scene-contract": "tsx ./scripts/test-runtime-scene-contract.ts",
 		"test:material-parameter-contract": "tsx ./scripts/test-material-parameter-contract.ts",
 		"test:player-package-contract": "tsx ./scripts/test-player-package-contract.ts",
-		"test:physics-rig-contract": "tsx ./scripts/test-physics-rig-contract.ts",
 		"test:dev-bridge-motion-contract": "tsx ./scripts/test-dev-bridge-motion-contract.ts",
 		"test:npc-contract": "tsx ./scripts/test-npc-contract.ts",
 		"test:multiplayer-contract": "tsx ./scripts/test-multiplayer-contract.ts",
@@ -45,7 +44,6 @@
 		"cook:static-environment-collision": "tsx ./scripts/cook-static-environment-collision.ts",
 		"check:static-environment-collision": "tsx ./scripts/cook-static-environment-collision.ts --level=observatory --check",
 		"generate:portal-field-glb": "node ./scripts/generate-portal-field-glb.mjs",
-		"prepare:ainekio-sesame-assets": "node ./scripts/prepare-ainekio-sesame-assets.mjs",
 		"lint": "biome check ./src ./scripts",
 		"format": "biome format --write ./src ./scripts"
 	},
