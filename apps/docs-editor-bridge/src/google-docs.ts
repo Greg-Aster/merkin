@@ -11,7 +11,20 @@ export type GoogleDocBlock =
     }
   | {
       type: 'list'
+      ordered: boolean
       items: string[]
+    }
+  | {
+      type: 'table'
+      headers: string[]
+      rows: string[][]
+    }
+  | {
+      type: 'pre'
+      text: string
+    }
+  | {
+      type: 'thematicBreak'
     }
 
 const docIdPattern = /^[A-Za-z0-9_-]{20,}$/
@@ -52,26 +65,72 @@ export function extractGoogleDocId(input: string): string {
   return match[1]
 }
 
-export function buildGoogleDocTextExportUrl(input: string): string {
+export type GoogleDocExportFormat = 'txt' | 'md'
+
+export function buildGoogleDocExportUrl(
+  input: string,
+  format: GoogleDocExportFormat = 'txt',
+  cacheBust?: string | number,
+): string {
   const docId = extractGoogleDocId(input)
-  return `https://docs.google.com/document/d/${docId}/export?format=txt`
+  const exportUrl = new URL(`https://docs.google.com/document/d/${docId}/export`)
+  exportUrl.searchParams.set('format', format)
+  if (cacheBust !== undefined) {
+    exportUrl.searchParams.set('_', String(cacheBust))
+  }
+  return exportUrl.toString()
+}
+
+export function buildGoogleDocTextExportUrl(input: string, cacheBust?: string | number): string {
+  return buildGoogleDocExportUrl(input, 'txt', cacheBust)
+}
+
+export function buildGoogleDocMarkdownExportUrl(input: string, cacheBust?: string | number): string {
+  return buildGoogleDocExportUrl(input, 'md', cacheBust)
 }
 
 export function convertGoogleDocTextToBlocks(text: string): GoogleDocBlock[] {
   const blocks: GoogleDocBlock[] = []
-  let activeList: string[] = []
+  let activeList: { ordered: boolean; items: string[] } | null = null
   const usedHeadingIds = new Map<string, number>()
 
   const flushList = () => {
-    if (activeList.length === 0) return
-    blocks.push({ type: 'list', items: activeList })
-    activeList = []
+    if (!activeList || activeList.items.length === 0) return
+    if (activeList.ordered && looksLikeDiagramList(activeList.items)) {
+      blocks.push({
+        type: 'pre',
+        text: activeList.items.map((item) => normalizeMarkdownText(item)).join('\n'),
+      })
+    } else {
+      blocks.push({
+        type: 'list',
+        ordered: activeList.ordered,
+        items: activeList.items.map((item) => normalizeMarkdownText(item)),
+      })
+    }
+    activeList = null
   }
 
-  for (const rawLine of normalizeExportText(text)) {
+  const lines = normalizeExportText(text)
+  for (let index = 0; index < lines.length; index += 1) {
+    const rawLine = lines[index] ?? ''
     const line = rawLine.trim()
     if (!line) {
       flushList()
+      continue
+    }
+
+    if (/^-{3,}$/.test(line)) {
+      flushList()
+      blocks.push({ type: 'thematicBreak' })
+      continue
+    }
+
+    if (isMarkdownTableStart(lines, index)) {
+      flushList()
+      const table = readMarkdownTable(lines, index)
+      blocks.push(table.block)
+      index = table.endIndex
       continue
     }
 
@@ -79,27 +138,70 @@ export function convertGoogleDocTextToBlocks(text: string): GoogleDocBlock[] {
     if (heading?.[1] && heading[2]) {
       flushList()
       const depth = heading[1].length as 1 | 2 | 3
+      const headingText = normalizeHeadingText(heading[2])
+      if (!headingText) continue
       blocks.push({
         type: 'heading',
         depth,
-        text: heading[2].trim(),
-        id: createHeadingId(heading[2], usedHeadingIds),
+        text: headingText,
+        id: createHeadingId(headingText, usedHeadingIds),
       })
       continue
     }
 
-    const listItem = line.match(/^[-*]\s+(.+)$/)
-    if (listItem?.[1]) {
-      activeList.push(listItem[1].trim())
+    const unorderedListItem = line.match(/^[-*]\s+(.+)$/)
+    if (unorderedListItem?.[1]) {
+      if (activeList?.ordered) flushList()
+      activeList ??= { ordered: false, items: [] }
+      activeList.items.push(unorderedListItem[1].trim())
+      continue
+    }
+
+    const orderedListItem = line.match(/^\d+\.\s+(.+)$/)
+    if (orderedListItem?.[1]) {
+      if (activeList && !activeList.ordered) flushList()
+      activeList ??= { ordered: true, items: [] }
+      activeList.items.push(orderedListItem[1].trim())
       continue
     }
 
     flushList()
-    blocks.push({ type: 'paragraph', text: line })
+    blocks.push({ type: 'paragraph', text: normalizeMarkdownText(line) })
   }
 
   flushList()
   return blocks
+}
+
+export function renderInlineMarkdown(source: string): string {
+  const text = normalizeMarkdownText(source)
+  const tokenPattern =
+    /`([^`]+)`|\*\*([^*]+)\*\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)/g
+  let cursor = 0
+  let html = ''
+  let match: RegExpExecArray | null
+
+  while ((match = tokenPattern.exec(text)) !== null) {
+    html += escapeHtml(text.slice(cursor, match.index))
+
+    if (match[1]) {
+      html += `<code>${escapeHtml(match[1])}</code>`
+    } else if (match[2]) {
+      html += `<strong>${escapeHtml(match[2])}</strong>`
+    } else if (match[3] && match[4]) {
+      const href = escapeHtmlAttribute(match[4])
+      const label = escapeHtml(match[3])
+      const externalAttributes = match[4].startsWith('/')
+        ? ''
+        : ' target="_blank" rel="noopener noreferrer"'
+      html += `<a href="${href}"${externalAttributes}>${label}</a>`
+    }
+
+    cursor = tokenPattern.lastIndex
+  }
+
+  html += escapeHtml(text.slice(cursor))
+  return html
 }
 
 function normalizeExportText(text: string): string[] {
@@ -108,6 +210,69 @@ function normalizeExportText(text: string): string[] {
     .replace(/\r\n?/g, '\n')
     .split('\n')
     .map((line) => line.replace(/\u00a0/g, ' '))
+}
+
+function normalizeMarkdownText(text: string): string {
+  return text
+    .replace(/\\([\\`*_{}\[\]()#+\-.!|~=])/g, '$1')
+    .replace(/[ \t]+$/g, '')
+    .trim()
+}
+
+function normalizeHeadingText(text: string): string {
+  const normalized = normalizeMarkdownText(text)
+  return normalized.replace(/^\*\*(.+)\*\*$/, '$1').trim()
+}
+
+function isMarkdownTableStart(lines: string[], index: number): boolean {
+  const current = lines[index]?.trim() ?? ''
+  const next = lines[index + 1]?.trim() ?? ''
+  return current.startsWith('|') && current.endsWith('|') && /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(next)
+}
+
+function readMarkdownTable(lines: string[], startIndex: number): { block: GoogleDocBlock; endIndex: number } {
+  const headers = splitMarkdownTableRow(lines[startIndex] ?? '')
+  const rows: string[][] = []
+  let endIndex = startIndex + 1
+
+  for (let index = startIndex + 2; index < lines.length; index += 1) {
+    const line = lines[index]?.trim() ?? ''
+    if (!line.startsWith('|') || !line.endsWith('|')) {
+      break
+    }
+    rows.push(splitMarkdownTableRow(line))
+    endIndex = index
+  }
+
+  return {
+    block: {
+      type: 'table',
+      headers,
+      rows,
+    },
+    endIndex,
+  }
+}
+
+function splitMarkdownTableRow(line: string): string[] {
+  const trimmed = line.trim().replace(/^\|/, '').replace(/\|$/, '')
+  return trimmed.split('|').map((cell) => normalizeMarkdownText(cell))
+}
+
+function looksLikeDiagramList(items: string[]): boolean {
+  if (items.length < 4) return false
+  return items.some((item) => /[\u2500-\u257f\u2190-\u21ff]/.test(item))
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+function escapeHtmlAttribute(text: string): string {
+  return escapeHtml(text).replace(/"/g, '&quot;')
 }
 
 function createHeadingId(text: string, usedIds: Map<string, number>): string {

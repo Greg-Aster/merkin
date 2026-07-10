@@ -1,0 +1,353 @@
+---
+title: "Robot Systems"
+published: 2026-07-10
+description: "A working map of Ainekio's OS and body systems, with links into the detailed hardware, motion, bridge, and discussion notes."
+image: "/posts/ainekio/wizard-square.webp"
+avatarImage: "/posts/generic/avatar.webp"
+authorName: "Ainekio"
+authorBio: "Robot familiar project"
+bannerType: "image"
+bannerData:
+  imageUrl: "/posts/ainekio/wizard-square.webp"
+timelineYear: 2026
+timelineEra: "work-in-progress"
+timelineLocation: "System map"
+isKeyEvent: true
+showImageOnPost: false
+tags: [Ainekio, Robot, Robot Systems, MetaHuman OS, Hardware, Software]
+category: "Project Notes"
+draft: true
+lang: "en"
+---
+
+<style>{`
+  #post-container[data-post-slug="robot-systems"] {
+    --ainekio-surface: rgba(9, 13, 18, 0.78);
+    --ainekio-surface-soft: rgba(18, 25, 32, 0.64);
+    --ainekio-line: rgba(117, 203, 255, 0.26);
+    --ainekio-line-hot: rgba(255, 175, 80, 0.42);
+    --ainekio-cyan: rgb(117, 218, 255);
+    --ainekio-amber: rgb(255, 178, 79);
+    --ainekio-pink: rgb(255, 94, 164);
+    --ainekio-cream: rgb(248, 238, 218);
+    --ainekio-muted: rgba(231, 240, 247, 0.74);
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255, 178, 79, 0.14), transparent 26rem),
+      radial-gradient(circle at 92% 10%, rgba(117, 218, 255, 0.16), transparent 24rem),
+      linear-gradient(180deg, rgba(10, 14, 19, 0.86), rgba(9, 13, 18, 0.72));
+    border: 1px solid rgba(117, 203, 255, 0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 18px 60px rgba(0, 0, 0, 0.28);
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content {
+    color: var(--ainekio-muted);
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content > p {
+    max-width: 84ch;
+    line-height: 1.78;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content h1 {
+    margin: 0 0 1rem;
+    color: var(--ainekio-cream);
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    letter-spacing: 0;
+    text-shadow: 0 0 24px rgba(117, 218, 255, 0.18);
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content h1::after {
+    content: "";
+    display: block;
+    width: min(26rem, 100%);
+    height: 2px;
+    margin-top: 0.85rem;
+    background: linear-gradient(90deg, var(--ainekio-amber), var(--ainekio-cyan), transparent);
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content h2 {
+    position: relative;
+    margin-top: 2.4rem;
+    margin-bottom: 1rem;
+    padding: 0.85rem 1rem 0.85rem 1.2rem;
+    color: var(--ainekio-cream);
+    border: 1px solid var(--ainekio-line);
+    border-left: 4px solid var(--ainekio-amber);
+    border-radius: 0.5rem;
+    background:
+      linear-gradient(90deg, rgba(255, 178, 79, 0.14), rgba(117, 218, 255, 0.07), transparent),
+      var(--ainekio-surface);
+    box-shadow:
+      inset 0 0 24px rgba(117, 218, 255, 0.045),
+      0 10px 24px rgba(0, 0, 0, 0.18);
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content h2::before {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content h3 {
+    margin-top: 1.5rem;
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 1rem;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content p:first-of-type,
+  #post-container[data-post-slug="robot-systems"] .markdown-content .ainekio-system-note,
+  #post-container[data-post-slug="robot-systems"] .markdown-content blockquote {
+    margin: 1rem 0 1.3rem;
+    padding: 1rem 1.1rem;
+    color: var(--ainekio-cream);
+    border: 1px solid var(--ainekio-line-hot);
+    border-radius: 0.55rem;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255, 94, 164, 0.14), transparent 18rem),
+      linear-gradient(135deg, rgba(255, 178, 79, 0.13), rgba(117, 218, 255, 0.07)),
+      var(--ainekio-surface);
+    box-shadow: inset 0 0 24px rgba(255, 178, 79, 0.04);
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content .ainekio-doc-label {
+    display: inline-flex;
+    margin: 1.3rem 0 0.45rem;
+    padding: 0.25rem 0.55rem;
+    color: var(--ainekio-cyan);
+    border: 1px solid rgba(117, 218, 255, 0.22);
+    border-radius: 0.35rem;
+    background: rgba(117, 218, 255, 0.07);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content .ainekio-system-tree,
+  #post-container[data-post-slug="robot-systems"] .markdown-content ol,
+  #post-container[data-post-slug="robot-systems"] .markdown-content ul {
+    padding: 1rem 1.1rem 1rem 2.2rem;
+    border: 1px solid rgba(117, 203, 255, 0.18);
+    border-radius: 0.55rem;
+    background: var(--ainekio-surface-soft);
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content .ainekio-system-tree ul {
+    margin: 0.55rem 0 0.2rem;
+    padding: 0 0 0 1.4rem;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content li {
+    margin: 0.55rem 0;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content li::marker {
+    color: var(--ainekio-amber);
+    font-weight: 800;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content .ainekio-system-node {
+    color: var(--ainekio-cream);
+    font-weight: 800;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content .ainekio-system-status {
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.85rem;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content table {
+    display: block;
+    width: 100%;
+    margin: 1.2rem 0 1.6rem;
+    overflow-x: auto;
+    border: 1px solid var(--ainekio-line);
+    border-radius: 0.6rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
+      var(--ainekio-surface);
+    box-shadow: inset 0 0 24px rgba(117, 218, 255, 0.04);
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content table th,
+  #post-container[data-post-slug="robot-systems"] .markdown-content table td {
+    padding: 0.8rem 0.9rem;
+    border-color: rgba(117, 203, 255, 0.16);
+    overflow-wrap: anywhere;
+    vertical-align: top;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content table th {
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content table td:first-child {
+    color: var(--ainekio-cream);
+    font-weight: 800;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content pre {
+    margin: 1.2rem 0 1.6rem;
+    padding: 1rem;
+    overflow-x: auto;
+    color: var(--ainekio-cream);
+    border: 1px solid var(--ainekio-line);
+    border-radius: 0.55rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
+      rgba(0, 0, 0, 0.34);
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content a {
+    color: var(--ainekio-cyan);
+    text-decoration-color: rgba(117, 218, 255, 0.42);
+    text-underline-offset: 0.18em;
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content code {
+    color: var(--ainekio-amber);
+    border: 1px solid rgba(255, 178, 79, 0.18);
+    border-radius: 0.35rem;
+    background: rgba(0, 0, 0, 0.28);
+  }
+
+  #post-container[data-post-slug="robot-systems"] .markdown-content hr {
+    height: 1px;
+    margin: 1.8rem 0;
+    border: 0;
+    background: linear-gradient(90deg, transparent, rgba(117, 218, 255, 0.5), rgba(255, 178, 79, 0.42), transparent);
+  }
+`}</style>
+
+# Robot Systems
+
+<p className="ainekio-system-note">This page is the working system map for Ainekio. It keeps the top-level architecture visible while the older detailed notes remain available as linked references.</p>
+
+The robot is split into two primary trees: **OS** and **Body**. OS is the remote or local intelligence layer that understands goals, language, memory, tools, and environment actions. Body is the physical or simulated robot layer that receives safe semantic commands, reports state, and owns hardware limits.
+
+## Workflow Tree
+
+<div className="ainekio-system-tree">
+  <ul>
+    <li>
+      <span className="ainekio-system-node">OS</span>
+      <span className="ainekio-system-status"> MetaHuman OS brain and coordination layer</span>
+      <ul>
+        <li><span className="ainekio-system-node">MetaHuman OS server</span> - main development server and web/API surface. Current LAN development reference: <code>http://192.168.0.44:4321</code>.</li>
+        <li><span className="ainekio-system-node">Conversation and planning layer</span> - user chat, goal interpretation, tool routing, memory/session context, and agent orchestration.</li>
+        <li><span className="ainekio-system-node">Speech services</span> - text-to-speech and speech-to-text remain OS-side unless a future body computer can support a local fallback.</li>
+        <li><span className="ainekio-system-node">Environment Mode graph</span> - converts natural language such as "walk forward" or "wave" into a typed environment action.</li>
+        <li><span className="ainekio-system-node">Environment Bridge Out node</span> - sends the action and reports delivery status instead of pretending a disconnected robot moved.</li>
+        <li><span className="ainekio-system-node">Environment bridge API</span> - accepts observations, tracks sessions and capabilities, and exposes the persistent action stream.</li>
+        <li><span className="ainekio-system-node">Bridge stream</span> - server-sent event path used by the robot adapter at <code>/api/environment-bridge/stream</code>.</li>
+      </ul>
+    </li>
+    <li>
+      <span className="ainekio-system-node">Body</span>
+      <span className="ainekio-system-status"> robot-side software, simulator, controller, and hardware</span>
+      <ul>
+        <li>
+          <span className="ainekio-system-node">Software</span>
+          <ul>
+            <li><span className="ainekio-system-node">Ainekio adapter</span> - connects to MetaHuman OS, publishes observations, receives streamed actions, translates robot commands, and reports completion state.</li>
+            <li><span className="ainekio-system-node">Command parser</span> - maps safe semantic commands such as <code>walk</code>, <code>wave</code>, <code>turn</code>, and <code>stop</code> into robot-side command objects.</li>
+            <li><span className="ainekio-system-node">Safety controller</span> - keeps raw servo control and calibration commands out of the AI-facing command surface.</li>
+            <li><span className="ainekio-system-node">Motion backend</span> - current virtual backend plus the guarded future path toward a PCA9685 or direct controller backend.</li>
+            <li><span className="ainekio-system-node">Simulator shim</span> - local bridge server at <code>http://127.0.0.1:8788/</code> for the Sesame browser simulator.</li>
+            <li><span className="ainekio-system-node">Browser shim</span> - sends commands through the Sesame simulator UART command path instead of bypassing the simulator's own motion code.</li>
+          </ul>
+        </li>
+        <li>
+          <span className="ainekio-system-node">Hardware</span>
+          <ul>
+            <li><span className="ainekio-system-node">Controller layer</span> - ESP32-S3, XIAO ESP32S3 Sense, Radxa Zero 3W, or another small robot controller path still needs final selection.</li>
+            <li><span className="ainekio-system-node">Servo and motion layer</span> - Sesame-style expressive body, 8 micro servos, and either direct PWM or a servo bus such as PCA9685.</li>
+            <li><span className="ainekio-system-node">Power layer</span> - battery, buck converters, charger, switch, distribution, common ground, capacitor, and a real servo rail sized for stall risk.</li>
+            <li><span className="ainekio-system-node">Senses and voice I/O</span> - microphone, speaker, amplifier, camera, OLED, and possible ultrasonic or bump sensors.</li>
+            <li><span className="ainekio-system-node">Parts reference</span> - see <a href="/posts/robot-familiar-parts-overview/">Parts Overview</a> for the current parts, power, signal, and shopping-list notes.</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+## OS
+
+The OS side should stay responsible for high-level intelligence. MetaHuman OS can run on a more capable computer than the robot body, which keeps the first physical prototype smaller and avoids pushing heavy speech, vision, and reasoning workloads into a tiny servo body too early.
+
+<p className="ainekio-doc-label">Current OS responsibilities</p>
+
+| System | Job | Notes |
+| --- | --- | --- |
+| MetaHuman OS server | Main brain, UI, API, and graph runtime | The development server is the place where conversation, memory, tools, and environment actions meet. |
+| Conversation and agents | Interpret user intent and choose tools or graph flows | This is where general interaction should live, not in the servo controller. |
+| Speech services | Own STT/TTS unless moved later | Body-side audio can capture and play sound, but heavy processing should remain OS-side for now. |
+| Environment Mode | Convert language into typed robot actions | The robot receives semantic actions, not raw servo angles. |
+| Environment bridge | Stream commands and receive body state | The current path is event-driven rather than polling. |
+
+## Body
+
+The body side is the robot-specific execution layer. It should be able to say what it can do, refuse unsafe actions, translate safe commands into simulator or hardware motion, and report what happened.
+
+### Software
+
+The body software has three current targets:
+
+1. Make the simulator loop reliable before physical servos move.
+2. Keep command translation explicit and safe.
+3. Preserve a clean path from virtual backend to real hardware backend.
+
+<p className="ainekio-doc-label">Body-side software files</p>
+
+| Area | Current owner |
+| --- | --- |
+| Adapter | <code>/home/greggles/Ainekio/motion/src/ainekio_motion/adapter.py</code> |
+| MetaHuman client | <code>/home/greggles/Ainekio/motion/src/ainekio_motion/metahuman.py</code> |
+| Commands | <code>/home/greggles/Ainekio/motion/src/ainekio_motion/commands.py</code> |
+| Safety | <code>/home/greggles/Ainekio/motion/src/ainekio_motion/safety.py</code> |
+| Backend | <code>/home/greggles/Ainekio/motion/src/ainekio_motion/backend.py</code> |
+| Sequences | <code>/home/greggles/Ainekio/motion/src/ainekio_motion/sequences.py</code> |
+| Simulator shim | <code>/home/greggles/Ainekio/motion/src/ainekio_motion/simulator_shim.py</code> |
+| Browser shim | <code>/home/greggles/Ainekio/simulators/sesame-robot-sim/app/ainekio-shim.js</code> |
+
+Related archived details: [Ainekio Motion Systems](/posts/motion-systems/) and [Ainekio Data bridge](/posts/first-steps-work-in-progress/).
+
+### Hardware
+
+The hardware tree is still a design target rather than a frozen purchase order. The important split is between logic power, servo power, command/control, sensing, and body packaging.
+
+<p className="ainekio-doc-label">Hardware groups</p>
+
+| Group | Contents |
+| --- | --- |
+| Body frame | Sesame-style reference body or a custom Ainekio body derived from the same expressive small-robot goals. |
+| Controller | ESP32-S3, XIAO ESP32S3 Sense, Radxa Zero 3W, or a paired SBC plus microcontroller path. |
+| Servo bus | Direct PWM only if pin pressure and timing are acceptable; PCA9685-style bus is the cleaner expandable path. |
+| Servo rail | Dedicated 5V rail sized for multi-servo load, with common ground and safe distribution. |
+| Sensing | Camera, microphone, OLED, battery telemetry, and possible distance/bump sensors. |
+| Audio | Microphone, I2S amplifier, speaker, and speech handoff to MetaHuman OS. |
+
+The current detailed hardware article is [Parts Overview](/posts/robot-familiar-parts-overview/). That page should remain the parts and purchasing detail owner while this page stays the higher-level system map.
+
+## Working Rule
+
+The OS should request named robot actions. The body should decide whether the action is safe, translate it into simulator or hardware commands, and report the result. Raw servo angles, calibration commands, and direct debug controls should stay out of the AI-facing command surface.

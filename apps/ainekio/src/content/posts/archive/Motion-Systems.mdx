@@ -16,13 +16,14 @@ showImageOnPost: false
 tags: [Ainekio, Robot, Motion Systems, Sesame, Raspberry Pi, MetaHuman OS]
 category: "Project Notes"
 draft: false
+archive: true
 lang: "en"
 ---
 
 import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
 
 <style>{`
-  #post-container[data-post-slug="Motion-Systems"] {
+  #post-container[data-post-slug="motion-systems"] {
     --ainekio-surface: rgba(9, 13, 18, 0.78);
     --ainekio-surface-soft: rgba(18, 25, 32, 0.64);
     --ainekio-line: rgba(117, 203, 255, 0.26);
@@ -41,16 +42,16 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
       0 18px 60px rgba(0, 0, 0, 0.28);
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content {
+  #post-container[data-post-slug="motion-systems"] .markdown-content {
     color: var(--ainekio-muted);
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content > p {
+  #post-container[data-post-slug="motion-systems"] .markdown-content > p {
     max-width: 84ch;
     line-height: 1.78;
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content h1 {
+  #post-container[data-post-slug="motion-systems"] .markdown-content h1 {
     margin: 0 0 1rem;
     color: var(--ainekio-cream);
     font-size: clamp(2rem, 4vw, 3.25rem);
@@ -58,7 +59,7 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
     text-shadow: 0 0 24px rgba(117, 218, 255, 0.18);
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content h1::after {
+  #post-container[data-post-slug="motion-systems"] .markdown-content h1::after {
     content: "";
     display: block;
     width: min(32rem, 100%);
@@ -67,7 +68,7 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
     background: linear-gradient(90deg, var(--ainekio-amber), var(--ainekio-cyan), transparent);
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content h2 {
+  #post-container[data-post-slug="motion-systems"] .markdown-content h2 {
     position: relative;
     margin-top: 2.4rem;
     margin-bottom: 1rem;
@@ -84,7 +85,7 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
       0 10px 24px rgba(0, 0, 0, 0.18);
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content h2::before {
+  #post-container[data-post-slug="motion-systems"] .markdown-content h2::before {
     display: block;
     margin-bottom: 0.2rem;
     color: var(--ainekio-cyan);
@@ -94,7 +95,7 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
     letter-spacing: 0.14em;
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content h3 {
+  #post-container[data-post-slug="motion-systems"] .markdown-content h3 {
     margin-top: 1.5rem;
     color: var(--ainekio-cyan);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -103,9 +104,9 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
     text-transform: uppercase;
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content .ainekio-motion-warning,
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content p:first-of-type,
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content blockquote {
+  #post-container[data-post-slug="motion-systems"] .markdown-content .ainekio-motion-warning,
+  #post-container[data-post-slug="motion-systems"] .markdown-content p:first-of-type,
+  #post-container[data-post-slug="motion-systems"] .markdown-content blockquote {
     margin: 1rem 0 1.3rem;
     padding: 1rem 1.1rem;
     color: var(--ainekio-cream);
@@ -118,7 +119,7 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
     box-shadow: inset 0 0 24px rgba(255, 178, 79, 0.04);
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content .ainekio-doc-label {
+  #post-container[data-post-slug="motion-systems"] .markdown-content .ainekio-doc-label {
     display: inline-flex;
     margin: 1.3rem 0 0.45rem;
     padding: 0.25rem 0.55rem;
@@ -133,37 +134,37 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
     text-transform: uppercase;
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content ol,
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content ul {
+  #post-container[data-post-slug="motion-systems"] .markdown-content ol,
+  #post-container[data-post-slug="motion-systems"] .markdown-content ul {
     padding: 1rem 1.1rem 1rem 2.2rem;
     border: 1px solid rgba(117, 203, 255, 0.18);
     border-radius: 0.55rem;
     background: var(--ainekio-surface-soft);
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content li {
+  #post-container[data-post-slug="motion-systems"] .markdown-content li {
     margin: 0.55rem 0;
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content li::marker {
+  #post-container[data-post-slug="motion-systems"] .markdown-content li::marker {
     color: var(--ainekio-amber);
     font-weight: 800;
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content a {
+  #post-container[data-post-slug="motion-systems"] .markdown-content a {
     color: var(--ainekio-cyan);
     text-decoration-color: rgba(117, 218, 255, 0.42);
     text-underline-offset: 0.18em;
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content code {
+  #post-container[data-post-slug="motion-systems"] .markdown-content code {
     color: var(--ainekio-amber);
     border: 1px solid rgba(255, 178, 79, 0.18);
     border-radius: 0.35rem;
     background: rgba(0, 0, 0, 0.28);
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content pre {
+  #post-container[data-post-slug="motion-systems"] .markdown-content pre {
     margin: 1.2rem 0 1.6rem;
     padding: 1rem;
     overflow-x: auto;
@@ -175,14 +176,14 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
       rgba(0, 0, 0, 0.34);
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content pre code {
+  #post-container[data-post-slug="motion-systems"] .markdown-content pre code {
     padding: 0;
     color: inherit;
     border: 0;
     background: transparent;
   }
 
-  #post-container[data-post-slug="Motion-Systems"] .markdown-content hr {
+  #post-container[data-post-slug="motion-systems"] .markdown-content hr {
     height: 1px;
     margin: 1.8rem 0;
     border: 0;
@@ -199,7 +200,7 @@ Achtung! This system is in its highly experimental alpha stage and it likely doe
 
 <script>{`
   ;(() => {
-  const postSelector = '#post-container[data-post-slug="Motion-Systems"] .markdown-content'
+  const postSelector = '#post-container[data-post-slug="motion-systems"] .markdown-content'
   const marker = String.fromCharCode(96)
 
   function getMotionSystemsContent() {

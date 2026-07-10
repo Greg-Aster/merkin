@@ -128,6 +128,7 @@ export function normalizePost(input: {
     published: asIsoDate(frontmatter.published),
     updated: asIsoDate(frontmatter.updated),
     draft: asBoolean(frontmatter.draft, false),
+    archive: asBoolean(frontmatter.archive, false),
     tags: asStringArray(frontmatter.tags),
     category: asString(frontmatter.category),
     yIndex,
@@ -156,7 +157,7 @@ export function toTimelineEvent(
   const publishedYear = post.published ? new Date(post.published).getUTCFullYear() : undefined
   const fallbackYear = options.fallbackYear ?? new Date().getUTCFullYear()
 
-  if (post.showInTimeline === false) return null
+  if (post.archive || post.showInTimeline === false) return null
 
   let year = post.timelineYear
 
@@ -191,6 +192,7 @@ export function toTimelineEvent(
     levelId: post.levelId ?? null,
     location: post.timelineLocation,
     isDraft: post.draft,
+    archive: post.archive,
     showInTimeline: post.showInTimeline,
     tags: post.tags,
     timelineYear: year,

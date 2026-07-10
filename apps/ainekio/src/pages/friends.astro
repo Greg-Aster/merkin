@@ -3,12 +3,40 @@ import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import FriendManager from '../components/svelte/friends/FriendManager.svelte'
 import passwordConfig from '../config/password.config'
+import { siteConfig } from '../config/config'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
+
+function normalizeHost(candidate: string | undefined): string | null {
+  if (!candidate) return null
+
+  try {
+    return new URL(candidate).hostname.toLowerCase()
+  } catch (_error) {
+    try {
+      return new URL(`https://${candidate}`).hostname.toLowerCase()
+    } catch (_fallbackError) {
+      return null
+    }
+  }
+}
+
+const selfHosts = new Set(
+  [siteConfig.url, 'https://ainek.io', 'https://www.ainek.io']
+    .map(normalizeHost)
+    .filter((host): host is string => Boolean(host)),
+)
+
+function isSelfFriend(friend: { data?: { url?: string } }) {
+  const host = normalizeHost(friend.data?.url)
+  return host ? selfHosts.has(host) : false
+}
 
 // Get all saved friends from the content collection
 let savedFriends = []
 try {
-  savedFriends = await getCollection('friends')
+  savedFriends = (await getCollection('friends')).filter(
+    friend => !isSelfFriend(friend),
+  )
   console.log(
     `Loaded ${savedFriends.length} saved friends from content collection`,
   )

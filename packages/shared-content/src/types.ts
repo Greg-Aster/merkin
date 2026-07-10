@@ -30,6 +30,7 @@ export type SharedRawPostFrontmatter = Record<string, unknown> & {
   published?: unknown
   updated?: unknown
   draft?: unknown
+  archive?: unknown
   tags?: unknown
   category?: unknown
   yIndex?: unknown
@@ -60,6 +61,7 @@ export type SharedPost = {
   published: string | null
   updated: string | null
   draft: boolean
+  archive: boolean
   tags: string[]
   category?: string
   yIndex?: number
@@ -95,6 +97,7 @@ export type SharedTimelineEvent = {
   levelId?: string | null
   location?: string
   isDraft?: boolean
+  archive?: boolean
   showInTimeline?: boolean
   tags: string[]
   timelineYear: number

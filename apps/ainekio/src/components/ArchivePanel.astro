@@ -3,7 +3,7 @@ import { UNCATEGORIZED } from '@constants/constants'
 import SharedArchivePanel from '@merkin/blog-core/components/ArchivePanel.astro'
 import I18nKey from '../i18n/i18nKey'
 import { i18n } from '../i18n/translation'
-import { getSortedPosts } from '../utils/content-utils'
+import { getSortedArchivePosts } from '../utils/content-utils'
 import { getPostUrlBySlug } from '../utils/url-utils'
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 const { tags, categories } = Astro.props
 
-let posts = await getSortedPosts()
+let posts = await getSortedArchivePosts()
 const normalizedTags = new Set(
   (tags ?? []).map((tag: string) => tag.toLowerCase()),
 )

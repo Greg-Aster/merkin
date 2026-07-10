@@ -1,12 +1,15 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import {
-    buildGoogleDocTextExportUrl,
+    buildGoogleDocExportUrl,
     convertGoogleDocTextToBlocks,
+    renderInlineMarkdown,
     type GoogleDocBlock,
+    type GoogleDocExportFormat,
   } from './google-docs'
 
   export let url: string
+  export let format: GoogleDocExportFormat = 'txt'
 
   let blocks: GoogleDocBlock[] = []
   let errorMessage = ''
@@ -17,11 +20,13 @@
 
     async function loadDocument() {
       try {
-        const exportUrl = buildGoogleDocTextExportUrl(url)
+        const exportUrl = buildGoogleDocExportUrl(url, format, Date.now())
         const response = await fetch(exportUrl, {
           signal: abortController.signal,
+          cache: 'no-store',
           headers: {
-            Accept: 'text/plain',
+            Accept: format === 'md' ? 'text/markdown,text/plain' : 'text/plain',
+            'Cache-Control': 'no-cache',
           },
         })
 
@@ -65,13 +70,38 @@
         <h3 id={block.id}>{block.text}</h3>
       {/if}
     {:else if block.type === 'paragraph'}
-      <p>{block.text}</p>
-    {:else}
-      <ul>
+      <p>{@html renderInlineMarkdown(block.text)}</p>
+    {:else if block.type === 'list'}
+      <svelte:element this={block.ordered ? 'ol' : 'ul'}>
         {#each block.items as item}
-          <li>{item}</li>
+          <li>{@html renderInlineMarkdown(item)}</li>
         {/each}
-      </ul>
+      </svelte:element>
+    {:else if block.type === 'table'}
+      <table class="docs-editor-table">
+        <thead>
+          <tr>
+            {#each block.headers as header}
+              <th>{@html renderInlineMarkdown(header)}</th>
+            {/each}
+          </tr>
+        </thead>
+        <tbody>
+          {#each block.rows as row}
+            <tr>
+              {#each row as cell, index}
+                <td data-label={block.headers[index] ?? ''}>
+                  {@html renderInlineMarkdown(cell)}
+                </td>
+              {/each}
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    {:else if block.type === 'pre'}
+      <pre class="docs-editor-diagram"><code>{block.text}</code></pre>
+    {:else if block.type === 'thematicBreak'}
+      <hr />
     {/if}
   {/each}
 {/if}

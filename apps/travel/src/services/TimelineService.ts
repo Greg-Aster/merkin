@@ -50,8 +50,9 @@ export async function getTimelineEvents(
     .filter(post => {
       // Include posts that have either timelineYear or bannerType: "timeline"
       return (
-        post.data.timelineYear ||
-        (includeBanners && post.data.bannerType === 'timeline')
+        post.data.archive !== true &&
+        (post.data.timelineYear ||
+          (includeBanners && post.data.bannerType === 'timeline'))
       )
     })
     .map(post => {

@@ -16,12 +16,12 @@ isKeyEvent: true
 showImageOnPost: false
 tags: [Ainekio, Robot, Hardware, Utility, MetaHuman OS]
 category: "Project Notes"
-draft: false
+draft: true
 lang: "en"
 ---
 
 <style>{`
-  #post-container[data-post-slug="Robot-Builder-Calculator"] {
+  #post-container[data-post-slug="robot-builder-calculator"] {
     --ainekio-surface: rgba(9, 13, 18, 0.78);
     --ainekio-surface-soft: rgba(18, 25, 32, 0.64);
     --ainekio-surface-strong: rgba(22, 31, 38, 0.92);
@@ -43,11 +43,11 @@ lang: "en"
       0 18px 60px rgba(0, 0, 0, 0.28);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content {
+  #post-container[data-post-slug="robot-builder-calculator"] .markdown-content {
     color: var(--ainekio-muted);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content h1 {
+  #post-container[data-post-slug="robot-builder-calculator"] .markdown-content h1 {
     margin: 0 0 1rem;
     color: var(--ainekio-cream);
     font-size: clamp(2rem, 4vw, 3.25rem);
@@ -55,7 +55,7 @@ lang: "en"
     text-shadow: 0 0 24px rgba(117, 218, 255, 0.18);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content h1::after {
+  #post-container[data-post-slug="robot-builder-calculator"] .markdown-content h1::after {
     content: "";
     display: block;
     width: min(22rem, 100%);
@@ -64,25 +64,25 @@ lang: "en"
     background: linear-gradient(90deg, var(--ainekio-amber), var(--ainekio-cyan), transparent);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content > p {
+  #post-container[data-post-slug="robot-builder-calculator"] .markdown-content > p {
     max-width: 82ch;
     line-height: 1.78;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content a {
+  #post-container[data-post-slug="robot-builder-calculator"] .markdown-content a {
     color: var(--ainekio-cyan);
     text-decoration-color: rgba(117, 218, 255, 0.45);
     text-underline-offset: 0.18em;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content code {
+  #post-container[data-post-slug="robot-builder-calculator"] .markdown-content code {
     color: var(--ainekio-amber);
     border: 1px solid rgba(255, 178, 79, 0.18);
     border-radius: 0.35rem;
     background: rgba(0, 0, 0, 0.28);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-draft-disclaimer {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-draft-disclaimer {
     margin: 0 0 1rem;
     padding: 0.85rem 1rem;
     border: 1px solid rgba(255, 178, 79, 0.36);
@@ -93,7 +93,7 @@ lang: "en"
     letter-spacing: 0;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .ainekio-builder {
+  #post-container[data-post-slug="robot-builder-calculator"] .ainekio-builder {
     margin: 2rem 0;
     padding: clamp(1rem, 2vw, 1.4rem);
     border: 1px solid var(--ainekio-line);
@@ -106,34 +106,34 @@ lang: "en"
       0 14px 36px rgba(0, 0, 0, 0.18);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-heading {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-heading {
     display: grid;
     gap: 0.55rem;
     margin-bottom: 1.25rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-heading h2 {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-heading h2 {
     margin: 0;
     color: var(--ainekio-cream);
     font-size: clamp(1.45rem, 3vw, 2rem);
     letter-spacing: 0;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-heading p {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-heading p {
     max-width: 78ch;
     margin: 0;
     color: var(--ainekio-muted);
     line-height: 1.65;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-presets {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-presets {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.55rem;
     margin: 0 0 1rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-preset {
     min-height: 4.8rem;
     padding: 0.75rem;
     border: 1px solid rgba(117, 203, 255, 0.2);
@@ -144,42 +144,42 @@ lang: "en"
     text-align: left;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset:hover {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-preset:hover {
     border-color: rgba(117, 218, 255, 0.48);
     background: rgba(117, 218, 255, 0.08);
     color: var(--ainekio-cream);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset strong,
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset span {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-preset strong,
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-preset span {
     display: block;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset strong {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-preset strong {
     color: inherit;
     font-size: 0.9rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset span {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-preset span {
     margin-top: 0.25rem;
     color: rgba(231, 240, 247, 0.68);
     font-size: 0.78rem;
     line-height: 1.35;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-grid {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-grid {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
     gap: 1rem;
     align-items: start;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-questions,
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-results {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-questions,
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-results {
     min-width: 0;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-question {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-question {
     margin: 0 0 1rem;
     padding: 1rem;
     border: 1px solid rgba(117, 203, 255, 0.18);
@@ -187,25 +187,25 @@ lang: "en"
     background: var(--ainekio-surface-soft);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-question h3 {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-question h3 {
     margin: 0 0 0.75rem;
     color: var(--ainekio-cream);
     font-size: 1rem;
     letter-spacing: 0;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-question p {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-question p {
     margin: -0.25rem 0 0.9rem;
     color: rgba(231, 240, 247, 0.7);
     line-height: 1.55;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-options {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-options {
     display: grid;
     gap: 0.55rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option {
     position: relative;
     width: 100%;
     min-height: 5rem;
@@ -223,14 +223,14 @@ lang: "en"
       transform 160ms ease;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option:hover {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option:hover {
     border-color: rgba(117, 218, 255, 0.48);
     background: rgba(117, 218, 255, 0.08);
     color: var(--ainekio-cream);
     transform: translateY(-1px);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option[aria-pressed="true"] {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option[aria-pressed="true"] {
     border-color: var(--ainekio-line-hot);
     background:
       linear-gradient(90deg, rgba(255, 178, 79, 0.2), rgba(117, 218, 255, 0.1)),
@@ -238,35 +238,35 @@ lang: "en"
     color: var(--ainekio-cream);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option:disabled {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option:disabled {
     cursor: not-allowed;
     opacity: 0.46;
     transform: none;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option:disabled:hover {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option:disabled:hover {
     border-color: rgba(117, 203, 255, 0.2);
     background: rgba(0, 0, 0, 0.22);
     color: var(--ainekio-muted);
     transform: none;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option span {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option span {
     display: block;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-top {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option-top {
     display: block;
     padding-right: 11.75rem;
     margin-bottom: 0.22rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option strong {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option strong {
     color: inherit;
     font-size: 0.98rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-cost {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option-cost {
     position: absolute;
     top: 0.65rem;
     right: 0.65rem;
@@ -282,20 +282,20 @@ lang: "en"
     text-align: right;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option small {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option small {
     color: rgba(231, 240, 247, 0.68);
     font-size: 0.85rem;
     line-height: 1.45;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option small em {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option small em {
     display: block;
     margin-top: 0.32rem;
     color: rgba(255, 178, 79, 0.82);
     font-style: normal;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-facts {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option-facts {
     display: grid;
     gap: 0.18rem;
     margin: 0.65rem 0 0;
@@ -304,14 +304,14 @@ lang: "en"
     list-style: none;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-facts li {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option-facts li {
     position: relative;
     padding-left: 0.8rem;
     font-size: 0.78rem;
     line-height: 1.35;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-facts li::before {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-option-facts li::before {
     content: "";
     position: absolute;
     top: 0.55em;
@@ -322,32 +322,32 @@ lang: "en"
     background: rgba(117, 218, 255, 0.74);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-results {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-results {
     position: sticky;
     top: 1rem;
     display: grid;
     gap: 1rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-panel,
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-output {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-meter-panel,
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-output {
     padding: 1rem;
     border: 1px solid rgba(117, 203, 255, 0.2);
     border-radius: 0.55rem;
     background: var(--ainekio-surface-strong);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-meter {
     display: grid;
     gap: 0.42rem;
     margin-bottom: 0.9rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter:last-child {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-meter:last-child {
     margin-bottom: 0;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-label {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-meter-label {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
@@ -356,7 +356,7 @@ lang: "en"
     font-weight: 700;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-track {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-meter-track {
     overflow: hidden;
     height: 0.7rem;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -364,34 +364,34 @@ lang: "en"
     background: rgba(0, 0, 0, 0.34);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-fill {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-meter-fill {
     width: 0%;
     height: 100%;
     border-radius: inherit;
     transition: width 220ms ease;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-fill[data-meter="cost"] {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-meter-fill[data-meter="cost"] {
     background: linear-gradient(90deg, var(--ainekio-green), var(--ainekio-amber), var(--ainekio-rose));
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-fill[data-meter="intelligence"] {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-meter-fill[data-meter="intelligence"] {
     background: linear-gradient(90deg, var(--ainekio-cyan), var(--ainekio-green), var(--ainekio-amber));
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-output {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-output {
     display: grid;
     gap: 0.85rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-nav {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-nav {
     display: flex;
     flex-wrap: wrap;
     gap: 0.55rem;
     margin-top: 0.9rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-nav button {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-nav button {
     padding: 0.55rem 0.75rem;
     border: 1px solid rgba(117, 203, 255, 0.24);
     border-radius: 0.42rem;
@@ -400,12 +400,12 @@ lang: "en"
     cursor: pointer;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-nav button:disabled {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-nav button:disabled {
     cursor: not-allowed;
     opacity: 0.45;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-path {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-path {
     display: grid;
     gap: 0.4rem;
     margin: 0;
@@ -416,22 +416,22 @@ lang: "en"
     list-style: none;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-path li {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-path li {
     display: grid;
     gap: 0.1rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-path strong {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-path strong {
     color: var(--ainekio-amber);
     font-size: 0.76rem;
     text-transform: uppercase;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-path span {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-path span {
     color: var(--ainekio-muted);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-profile-kicker {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-profile-kicker {
     margin: 0;
     color: var(--ainekio-amber);
     font-size: 0.78rem;
@@ -440,20 +440,20 @@ lang: "en"
     text-transform: uppercase;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-profile-title {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-profile-title {
     margin: 0;
     color: var(--ainekio-cream);
     font-size: clamp(1.2rem, 2vw, 1.55rem);
     letter-spacing: 0;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-profile-summary {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-profile-summary {
     margin: 0;
     color: var(--ainekio-muted);
     line-height: 1.6;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-spec-list {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-spec-list {
     display: grid;
     gap: 0.55rem;
     margin: 0;
@@ -461,7 +461,7 @@ lang: "en"
     list-style: none;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-spec-list li {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-spec-list li {
     display: grid;
     grid-template-columns: 7rem minmax(0, 1fr);
     gap: 0.75rem;
@@ -469,24 +469,24 @@ lang: "en"
     border-top: 1px solid rgba(117, 203, 255, 0.12);
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-spec-list strong {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-spec-list strong {
     color: var(--ainekio-amber);
     font-size: 0.84rem;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-spec-list span {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-spec-list span {
     color: var(--ainekio-muted);
     line-height: 1.45;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-section-title {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-section-title {
     margin: 0;
     color: var(--ainekio-cream);
     font-size: 0.92rem;
     letter-spacing: 0;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-parts-list {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-parts-list {
     display: grid;
     gap: 0.45rem;
     margin: 0;
@@ -497,14 +497,14 @@ lang: "en"
     list-style: none;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-parts-list li {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-parts-list li {
     display: grid;
     grid-template-columns: 4.65rem minmax(0, 1fr);
     gap: 0.55rem;
     align-items: start;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-status {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-part-status {
     padding: 0.16rem 0.35rem;
     border: 1px solid rgba(117, 203, 255, 0.18);
     border-radius: 999px;
@@ -517,25 +517,25 @@ lang: "en"
     text-transform: uppercase;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-name,
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-detail {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-part-name,
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-part-detail {
     display: block;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-name {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-part-name {
     color: var(--ainekio-cream);
     font-size: 0.86rem;
     font-weight: 800;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-detail {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-part-detail {
     margin-top: 0.14rem;
     color: rgba(231, 240, 247, 0.68);
     font-size: 0.78rem;
     line-height: 1.35;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-cost-list {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-cost-list {
     display: grid;
     gap: 0.4rem;
     margin: 0;
@@ -546,7 +546,7 @@ lang: "en"
     list-style: none;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-cost-list li {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-cost-list li {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
@@ -555,18 +555,18 @@ lang: "en"
     line-height: 1.35;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-cost-list strong {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-cost-list strong {
     color: var(--ainekio-cream);
     font-weight: 700;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-cost-list span {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-cost-list span {
     flex: none;
     color: var(--ainekio-amber);
     font-weight: 800;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-note {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-note {
     margin: 0;
     padding: 0.75rem;
     border: 1px solid rgba(255, 178, 79, 0.22);
@@ -576,60 +576,60 @@ lang: "en"
     line-height: 1.55;
   }
 
-  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-source-list {
+  #post-container[data-post-slug="robot-builder-calculator"] .builder-source-list {
     padding-left: 1.3rem;
   }
 
   @media (max-width: 860px) {
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-grid {
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-grid {
       grid-template-columns: 1fr;
     }
 
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-presets {
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-presets {
       grid-template-columns: 1fr;
     }
 
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-results {
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-results {
       position: static;
     }
   }
 
   @media (max-width: 560px) {
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .ainekio-builder {
+    #post-container[data-post-slug="robot-builder-calculator"] .ainekio-builder {
       margin-right: -0.25rem;
       margin-left: -0.25rem;
       padding: 0.85rem;
     }
 
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-question,
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-panel,
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-output {
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-question,
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-meter-panel,
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-output {
       padding: 0.85rem;
     }
 
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-spec-list li {
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-spec-list li {
       grid-template-columns: 1fr;
       gap: 0.2rem;
     }
 
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-parts-list li {
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-parts-list li {
       grid-template-columns: 1fr;
       gap: 0.25rem;
     }
 
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-status {
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-part-status {
       width: max-content;
     }
 
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option {
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-option {
       padding-top: 2.45rem;
     }
 
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-top {
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-option-top {
       padding-right: 0;
     }
 
-    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-cost {
+    #post-container[data-post-slug="robot-builder-calculator"] .builder-option-cost {
       max-width: calc(100% - 1.3rem);
     }
   }

@@ -124,6 +124,7 @@ export type BlogPostData = {
   description: string
   tags: string[]
   draft?: boolean
+  archive?: boolean
   yIndex: number
   image?: string
   downloadable?: boolean

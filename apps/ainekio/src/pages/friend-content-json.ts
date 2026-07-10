@@ -6,7 +6,10 @@ export async function GET(): Promise<Response> {
 
   try {
     // Get published posts
-    const posts = await getCollection('posts', post => !post.data.draft)
+    const posts = await getCollection(
+      'posts',
+      post => !post.data.draft && post.data.archive !== true,
+    )
 
     // Sort by published date, newest first
     const sortedPosts = posts.sort(

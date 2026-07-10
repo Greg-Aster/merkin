@@ -7,22 +7,28 @@ type PostEntry = CollectionEntry<'posts'> & {
   data: BlogPostData
 }
 
+type SortedPostsOptions = {
+  includeArchived?: boolean
+}
+
 function isTravelPlaceholderPost(entry: CollectionEntry<'posts'>) {
   return entry.slug === 'placeholder-hidden'
 }
 
 export async function getSortedPosts(
   includeDrafts = false,
+  options: SortedPostsOptions = {},
 ): Promise<PostEntry[]> {
+  const includeArchived = options.includeArchived ?? false
   const allBlogPosts = (await getCollection(
     'posts',
     (entry: CollectionEntry<'posts'>) => {
       if (isTravelPlaceholderPost(entry)) return false
 
       const { data } = entry
-      // If includeDrafts is true, include all posts regardless of draft status
-      // Otherwise, only include non-draft posts
-      return includeDrafts ? true : data.draft !== true
+      if (!includeDrafts && data.draft === true) return false
+      if (!includeArchived && data.archive === true) return false
+      return true
     },
   )) as PostEntry[]
 
@@ -45,6 +51,12 @@ export async function getSortedPosts(
   }
 
   return sorted
+}
+
+export async function getSortedArchivePosts(
+  includeDrafts = false,
+): Promise<PostEntry[]> {
+  return getSortedPosts(includeDrafts, { includeArchived: true })
 }
 
 export type Tag = {

@@ -42,12 +42,34 @@ export interface Friend {
 // Constants for localStorage keys
 const FRIENDS_STORAGE_KEY = 'blogFriends'
 const FRIEND_CONTENT_ENABLED_KEY = 'friendContentEnabled'
+const SELF_SITE_HOSTS = new Set(['ainek.io', 'www.ainek.io'])
 
 // Create a single unified store for all friends
 export const friends: Writable<Friend[]> = writable<Friend[]>([])
 
 // Module-level flag to prevent multiple initializations
 let storageInitialized = false
+
+function toUrl(candidate: string | undefined): URL | null {
+  if (!candidate || typeof window === 'undefined') return null
+  try {
+    return new URL(candidate, window.location.origin)
+  } catch (_error) {
+    try {
+      return new URL(formatUrl(candidate))
+    } catch (_fallbackError) {
+      return null
+    }
+  }
+}
+
+function isSelfSiteUrl(candidate: string | undefined): boolean {
+  const parsed = toUrl(candidate)
+  if (!parsed || typeof window === 'undefined') return false
+
+  if (parsed.origin === window.location.origin) return true
+  return SELF_SITE_HOSTS.has(parsed.hostname.toLowerCase())
+}
 
 /**
  * Initialize friends from localStorage and set up persistence.
@@ -113,19 +135,21 @@ export function updateFriend(updatedFriend: Friend): void {
 export function addPermanentFriends(permanentFriends: any[]): void {
   friends.update(currentFriends => {
     // Convert permanent friends to the Friend interface format
-    const formattedPermanentFriends = permanentFriends.map(pf => ({
-      id:
-        pf.id ||
-        `perm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: pf.data?.name || 'Unknown Friend',
-      url: pf.data?.url || '#',
-      bio: pf.data?.bio || '',
-      avatar: pf.data?.avatar || '',
-      lastSynced: pf.data?.lastSynced || new Date().toISOString(),
-      postCount: pf.posts?.length || 0,
-      posts: pf.posts || [],
-      isPermanent: true, // Mark as permanent
-    }))
+    const formattedPermanentFriends = permanentFriends
+      .filter(pf => !isSelfSiteUrl(pf.data?.url))
+      .map(pf => ({
+        id:
+          pf.id ||
+          `perm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: pf.data?.name || 'Unknown Friend',
+        url: pf.data?.url || '#',
+        bio: pf.data?.bio || '',
+        avatar: pf.data?.avatar || '',
+        lastSynced: pf.data?.lastSynced || new Date().toISOString(),
+        postCount: pf.posts?.length || 0,
+        posts: pf.posts || [],
+        isPermanent: true, // Mark as permanent
+      }))
 
     // Filter out any existing permanent friends to avoid duplicates
     const tempFriends = currentFriends.filter(f => !f.isPermanent)
@@ -151,28 +175,32 @@ export function getFriendContent(): FriendPost[] {
 
   // Process all friends, both temporary and permanent
   allFriends.forEach(friend => {
+    if (isSelfSiteUrl(friend.url)) return
+
     console.log(
       `Friend "${friend.name}" has ${friend.posts?.length || 0} posts (${friend.isPermanent ? 'permanent' : 'temporary'})`,
     )
     if (friend.posts && friend.posts.length > 0) {
-      const posts = friend.posts.map(post => {
-        // Calculate word count and reading time if not already provided
-        const wordCount =
-          post.wordCount ||
-          (post.content ? Math.ceil(post.content.split(/\s+/).length) : 100)
-        const readingTime =
-          post.readingTime || Math.max(1, Math.ceil(wordCount / 200))
+      const posts = friend.posts
+        .filter(post => !isSelfSiteUrl(post.sourceUrl || post.url))
+        .map(post => {
+          // Calculate word count and reading time if not already provided
+          const wordCount =
+            post.wordCount ||
+            (post.content ? Math.ceil(post.content.split(/\s+/).length) : 100)
+          const readingTime =
+            post.readingTime || Math.max(1, Math.ceil(wordCount / 200))
 
-        return {
-          ...post,
-          friendName: friend.name,
-          friendUrl: friend.url,
-          friendAvatar: friend.avatar,
-          isFriendContent: true,
-          wordCount,
-          readingTime,
-        }
-      })
+          return {
+            ...post,
+            friendName: friend.name,
+            friendUrl: friend.url,
+            friendAvatar: friend.avatar,
+            isFriendContent: true,
+            wordCount,
+            readingTime,
+          }
+        })
       allPosts = [...allPosts, ...posts]
     }
   })

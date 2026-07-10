@@ -4,16 +4,32 @@ import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 import {
   comparePublishedDesc,
+  promotedCollectionFilter,
   publicCollectionFilter,
 } from '../contracts/content'
 
+type SortedPost = { body: string; data: BlogPostData; slug: string }
+
+type SortedPostsOptions = {
+  includeArchived?: boolean
+}
+
 export async function getSortedPosts(
   includeDrafts = false,
-): Promise<{ body: string; data: BlogPostData; slug: string }[]> {
+  options: SortedPostsOptions = {},
+): Promise<SortedPost[]> {
+  const filter =
+    includeDrafts && options.includeArchived
+      ? undefined
+      : options.includeArchived
+        ? publicCollectionFilter
+        : promotedCollectionFilter
   const allBlogPosts = (await getCollection(
     'posts',
-    includeDrafts ? undefined : publicCollectionFilter,
-  )) as unknown as { body: string; data: BlogPostData; slug: string }[]
+    includeDrafts
+      ? entry => entry.data.archive !== true || options.includeArchived === true
+      : filter,
+  )) as unknown as SortedPost[]
 
   const sorted = allBlogPosts.sort(comparePublishedDesc)
 
@@ -28,6 +44,12 @@ export async function getSortedPosts(
   }
 
   return sorted
+}
+
+export async function getSortedArchivePosts(
+  includeDrafts = false,
+): Promise<SortedPost[]> {
+  return getSortedPosts(includeDrafts, { includeArchived: true })
 }
 
 export type Tag = {

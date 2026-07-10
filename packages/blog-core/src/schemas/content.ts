@@ -5,6 +5,7 @@ export const postsSchema = z.object({
   published: z.date(),
   updated: z.date().optional(),
   draft: z.boolean().optional().default(false),
+  archive: z.boolean().optional().default(false),
   description: z.string().optional().default(''),
   image: z.string().optional().default(''),
   avatarImage: z.string().optional(),

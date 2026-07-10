@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
+  buildGoogleDocMarkdownExportUrl,
   buildGoogleDocTextExportUrl,
   convertGoogleDocTextToBlocks,
   extractGoogleDocId,
+  renderInlineMarkdown,
 } from '../dist/google-docs.js'
 
 const docId = '1AVtNyFN7AG5ymLqshQI-77jO4nfG0yev8FUABZ8YE9E'
@@ -43,6 +45,20 @@ describe('Google Docs URL handling', () => {
       `https://docs.google.com/document/d/${docId}/export?format=txt`,
     )
   })
+
+  it('can add a cache-busting export URL parameter', () => {
+    assert.equal(
+      buildGoogleDocTextExportUrl(docId, 12345),
+      `https://docs.google.com/document/d/${docId}/export?format=txt&_=12345`,
+    )
+  })
+
+  it('builds the markdown export URL', () => {
+    assert.equal(
+      buildGoogleDocMarkdownExportUrl(docId, 12345),
+      `https://docs.google.com/document/d/${docId}/export?format=md&_=12345`,
+    )
+  })
 })
 
 describe('Google Docs text conversion', () => {
@@ -70,6 +86,7 @@ describe('Google Docs text conversion', () => {
         },
         {
           type: 'list',
+          ordered: false,
           items: ['Servo', 'Camera'],
         },
         {
@@ -83,6 +100,62 @@ describe('Google Docs text conversion', () => {
           text: 'Done.',
         },
       ],
+    )
+  })
+
+  it('converts markdown tables, rules, ordered lists, and diagram lists', () => {
+    assert.deepEqual(
+      convertGoogleDocTextToBlocks(
+        [
+          '## **Parts**',
+          '',
+          '| Part | Qty |',
+          '| ----- | ----- |',
+          '| Buck \\#1 | 2 |',
+          '',
+          '---',
+          '',
+          '1. Item one',
+          '2. Item two',
+          '',
+          '1. USB-C power source',
+          '2. │',
+          '3. Buck \\#1 ── Buck \\#2',
+          '4. Servo rail',
+        ].join('\n'),
+      ),
+      [
+        {
+          type: 'heading',
+          depth: 2,
+          text: 'Parts',
+          id: 'parts',
+        },
+        {
+          type: 'table',
+          headers: ['Part', 'Qty'],
+          rows: [['Buck #1', '2']],
+        },
+        {
+          type: 'thematicBreak',
+        },
+        {
+          type: 'list',
+          ordered: true,
+          items: ['Item one', 'Item two'],
+        },
+        {
+          type: 'pre',
+          text: 'USB-C power source\n│\nBuck #1 ── Buck #2\nServo rail',
+        },
+      ],
+    )
+  })
+
+  it('renders safe inline markdown html', () => {
+    assert.equal(
+      renderInlineMarkdown('**Part:** `ESP32` [Link](https://example.com) <bad>'),
+      '<strong>Part:</strong> <code>ESP32</code> <a href="https://example.com" target="_blank" rel="noopener noreferrer">Link</a> &lt;bad&gt;',
     )
   })
 

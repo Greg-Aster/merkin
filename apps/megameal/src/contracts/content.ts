@@ -2,6 +2,10 @@ export type DraftableData = {
   draft?: boolean
 }
 
+export type ArchivableData = DraftableData & {
+  archive?: boolean
+}
+
 export type DownloadableData = DraftableData & {
   downloadable?: boolean
 }
@@ -18,10 +22,20 @@ export function isPublicContentData(data: DraftableData) {
   return import.meta.env.PROD ? data.draft !== true : true
 }
 
+export function isPromotedContentData(data: ArchivableData) {
+  return isPublicContentData(data) && data.archive !== true
+}
+
 export function publicCollectionFilter<TData extends DraftableData>({
   data,
 }: ContentEntryWithData<TData>) {
   return isPublicContentData(data)
+}
+
+export function promotedCollectionFilter<TData extends ArchivableData>({
+  data,
+}: ContentEntryWithData<TData>) {
+  return isPromotedContentData(data)
 }
 
 export function publicDownloadableCollectionFilter<

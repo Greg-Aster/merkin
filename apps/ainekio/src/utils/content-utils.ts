@@ -3,14 +3,32 @@ import type { BlogPostData } from '@/types/config'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 
+type SortedPost = { body: string; data: BlogPostData; slug: string }
+
+type SortedPostsOptions = {
+  includeArchived?: boolean
+}
+
+type PostVisibilityData = Pick<BlogPostData, 'draft' | 'archive'>
+
+function shouldIncludePost(
+  data: PostVisibilityData,
+  includeDrafts: boolean,
+  includeArchived: boolean,
+) {
+  if (!includeDrafts && data.draft === true) return false
+  if (!includeArchived && data.archive === true) return false
+  return true
+}
+
 export async function getSortedPosts(
   includeDrafts = false,
-): Promise<{ body: string; data: BlogPostData; slug: string }[]> {
+  options: SortedPostsOptions = {},
+): Promise<SortedPost[]> {
+  const includeArchived = options.includeArchived ?? false
   const allBlogPosts = (await getCollection('posts', ({ data }) => {
-    // If includeDrafts is true, include all posts regardless of draft status
-    // Otherwise, only include non-draft posts
-    return includeDrafts ? true : data.draft !== true
-  })) as unknown as { body: string; data: BlogPostData; slug: string }[]
+    return shouldIncludePost(data, includeDrafts, includeArchived)
+  })) as unknown as SortedPost[]
 
   const sorted = allBlogPosts.sort(
     (a: { data: BlogPostData }, b: { data: BlogPostData }) => {
@@ -31,6 +49,12 @@ export async function getSortedPosts(
   }
 
   return sorted
+}
+
+export async function getSortedArchivePosts(
+  includeDrafts = false,
+): Promise<SortedPost[]> {
+  return getSortedPosts(includeDrafts, { includeArchived: true })
 }
 
 export type Tag = {
