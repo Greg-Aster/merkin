@@ -2,6 +2,7 @@ import { defineCollection, z } from 'astro:content'
 import {
   aboutSchema,
   postsSchema,
+  quizSchema,
   specSchema,
   teamSchema,
 } from '@merkin/blog-core/schemas'
@@ -357,46 +358,8 @@ const reviewsCollection = defineCollection({
   }),
 })
 
-const quizOutcomeSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  emoji: z.string().optional(),
-})
-
-const quizNodeSchema = z.object({
-  text: z.string(),
-  options: z
-    .array(
-      z.object({
-        text: z.string(),
-        trait: z.string().optional(),
-        next: z.string(),
-      }),
-    )
-    .min(1),
-})
-
 const quizzesCollection = defineCollection({
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    bannerType: z
-      .enum([
-        'none',
-        'standard',
-        'image',
-        'video',
-        'timeline',
-        'assistant',
-        'cookbook',
-        'archive',
-        'reader',
-      ])
-      .default('none'),
-    initialQuestion: z.string(),
-    outcomes: z.record(quizOutcomeSchema),
-    nodes: z.record(quizNodeSchema),
-  }),
+  schema: quizSchema,
 })
 
 // Export the collections

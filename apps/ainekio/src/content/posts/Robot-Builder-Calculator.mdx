@@ -1,0 +1,1871 @@
+---
+title: "Robot Builder Calculator"
+published: 2026-07-08
+description: "An interactive Ainekio hardware calculator for estimating robot build cost and autonomy tradeoffs."
+image: "/posts/ainekio/rooftop-date-banner.webp"
+avatarImage: "/posts/generic/avatar.webp"
+authorName: "Ainekio"
+authorBio: "Robot familiar project"
+bannerType: "image"
+bannerData:
+  imageUrl: "/posts/ainekio/rooftop-date-banner.webp"
+timelineYear: 2026
+timelineEra: "work-in-progress"
+timelineLocation: "Robot hardware"
+isKeyEvent: true
+showImageOnPost: false
+tags: [Ainekio, Robot, Hardware, Utility, MetaHuman OS]
+category: "Project Notes"
+draft: false
+lang: "en"
+---
+
+<style>{`
+  #post-container[data-post-slug="Robot-Builder-Calculator"] {
+    --ainekio-surface: rgba(9, 13, 18, 0.78);
+    --ainekio-surface-soft: rgba(18, 25, 32, 0.64);
+    --ainekio-surface-strong: rgba(22, 31, 38, 0.92);
+    --ainekio-line: rgba(117, 203, 255, 0.26);
+    --ainekio-line-hot: rgba(255, 175, 80, 0.42);
+    --ainekio-cyan: rgb(117, 218, 255);
+    --ainekio-amber: rgb(255, 178, 79);
+    --ainekio-green: rgb(120, 224, 170);
+    --ainekio-rose: rgb(255, 116, 150);
+    --ainekio-cream: rgb(248, 238, 218);
+    --ainekio-muted: rgba(231, 240, 247, 0.74);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255, 178, 79, 0.14), transparent 26rem),
+      radial-gradient(circle at 95% 12%, rgba(117, 218, 255, 0.16), transparent 24rem),
+      linear-gradient(180deg, rgba(10, 14, 19, 0.86), rgba(9, 13, 18, 0.72));
+    border: 1px solid rgba(117, 203, 255, 0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 18px 60px rgba(0, 0, 0, 0.28);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content {
+    color: var(--ainekio-muted);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content h1 {
+    margin: 0 0 1rem;
+    color: var(--ainekio-cream);
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    letter-spacing: 0;
+    text-shadow: 0 0 24px rgba(117, 218, 255, 0.18);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content h1::after {
+    content: "";
+    display: block;
+    width: min(22rem, 100%);
+    height: 2px;
+    margin-top: 0.85rem;
+    background: linear-gradient(90deg, var(--ainekio-amber), var(--ainekio-cyan), transparent);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content > p {
+    max-width: 82ch;
+    line-height: 1.78;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content a {
+    color: var(--ainekio-cyan);
+    text-decoration-color: rgba(117, 218, 255, 0.45);
+    text-underline-offset: 0.18em;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .markdown-content code {
+    color: var(--ainekio-amber);
+    border: 1px solid rgba(255, 178, 79, 0.18);
+    border-radius: 0.35rem;
+    background: rgba(0, 0, 0, 0.28);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-draft-disclaimer {
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(255, 178, 79, 0.36);
+    border-radius: 0.45rem;
+    color: var(--ainekio-cream);
+    background: rgba(255, 178, 79, 0.11);
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .ainekio-builder {
+    margin: 2rem 0;
+    padding: clamp(1rem, 2vw, 1.4rem);
+    border: 1px solid var(--ainekio-line);
+    border-radius: 0.65rem;
+    background:
+      linear-gradient(135deg, rgba(117, 218, 255, 0.08), rgba(255, 178, 79, 0.08)),
+      var(--ainekio-surface);
+    box-shadow:
+      inset 0 0 34px rgba(117, 218, 255, 0.045),
+      0 14px 36px rgba(0, 0, 0, 0.18);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-heading {
+    display: grid;
+    gap: 0.55rem;
+    margin-bottom: 1.25rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-heading h2 {
+    margin: 0;
+    color: var(--ainekio-cream);
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    letter-spacing: 0;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-heading p {
+    max-width: 78ch;
+    margin: 0;
+    color: var(--ainekio-muted);
+    line-height: 1.65;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-presets {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin: 0 0 1rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset {
+    min-height: 4.8rem;
+    padding: 0.75rem;
+    border: 1px solid rgba(117, 203, 255, 0.2);
+    border-radius: 0.45rem;
+    color: var(--ainekio-muted);
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset:hover {
+    border-color: rgba(117, 218, 255, 0.48);
+    background: rgba(117, 218, 255, 0.08);
+    color: var(--ainekio-cream);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset strong,
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset span {
+    display: block;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset strong {
+    color: inherit;
+    font-size: 0.9rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-preset span {
+    margin-top: 0.25rem;
+    color: rgba(231, 240, 247, 0.68);
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-questions,
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-results {
+    min-width: 0;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-question {
+    margin: 0 0 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(117, 203, 255, 0.18);
+    border-radius: 0.55rem;
+    background: var(--ainekio-surface-soft);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-question h3 {
+    margin: 0 0 0.75rem;
+    color: var(--ainekio-cream);
+    font-size: 1rem;
+    letter-spacing: 0;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-question p {
+    margin: -0.25rem 0 0.9rem;
+    color: rgba(231, 240, 247, 0.7);
+    line-height: 1.55;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-options {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option {
+    position: relative;
+    width: 100%;
+    min-height: 5rem;
+    padding: 0.9rem 0.9rem 0.8rem;
+    border: 1px solid rgba(117, 203, 255, 0.2);
+    border-radius: 0.45rem;
+    background: rgba(0, 0, 0, 0.22);
+    color: var(--ainekio-muted);
+    cursor: pointer;
+    text-align: left;
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option:hover {
+    border-color: rgba(117, 218, 255, 0.48);
+    background: rgba(117, 218, 255, 0.08);
+    color: var(--ainekio-cream);
+    transform: translateY(-1px);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option[aria-pressed="true"] {
+    border-color: var(--ainekio-line-hot);
+    background:
+      linear-gradient(90deg, rgba(255, 178, 79, 0.2), rgba(117, 218, 255, 0.1)),
+      rgba(0, 0, 0, 0.24);
+    color: var(--ainekio-cream);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option:disabled {
+    cursor: not-allowed;
+    opacity: 0.46;
+    transform: none;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option:disabled:hover {
+    border-color: rgba(117, 203, 255, 0.2);
+    background: rgba(0, 0, 0, 0.22);
+    color: var(--ainekio-muted);
+    transform: none;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option span {
+    display: block;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-top {
+    display: block;
+    padding-right: 11.75rem;
+    margin-bottom: 0.22rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option strong {
+    color: inherit;
+    font-size: 0.98rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-cost {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    max-width: 11rem;
+    padding: 0.18rem 0.42rem;
+    border: 1px solid rgba(255, 178, 79, 0.28);
+    border-radius: 999px;
+    color: var(--ainekio-amber);
+    background: rgba(255, 178, 79, 0.08);
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: right;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option small {
+    color: rgba(231, 240, 247, 0.68);
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option small em {
+    display: block;
+    margin-top: 0.32rem;
+    color: rgba(255, 178, 79, 0.82);
+    font-style: normal;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-facts {
+    display: grid;
+    gap: 0.18rem;
+    margin: 0.65rem 0 0;
+    padding: 0;
+    color: rgba(231, 240, 247, 0.7);
+    list-style: none;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-facts li {
+    position: relative;
+    padding-left: 0.8rem;
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-facts li::before {
+    content: "";
+    position: absolute;
+    top: 0.55em;
+    left: 0;
+    width: 0.3rem;
+    height: 0.3rem;
+    border-radius: 999px;
+    background: rgba(117, 218, 255, 0.74);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-results {
+    position: sticky;
+    top: 1rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-panel,
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-output {
+    padding: 1rem;
+    border: 1px solid rgba(117, 203, 255, 0.2);
+    border-radius: 0.55rem;
+    background: var(--ainekio-surface-strong);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter {
+    display: grid;
+    gap: 0.42rem;
+    margin-bottom: 0.9rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter:last-child {
+    margin-bottom: 0;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--ainekio-cream);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-track {
+    overflow: hidden;
+    height: 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.34);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-fill {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    transition: width 220ms ease;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-fill[data-meter="cost"] {
+    background: linear-gradient(90deg, var(--ainekio-green), var(--ainekio-amber), var(--ainekio-rose));
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-fill[data-meter="intelligence"] {
+    background: linear-gradient(90deg, var(--ainekio-cyan), var(--ainekio-green), var(--ainekio-amber));
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-output {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 0.9rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-nav button {
+    padding: 0.55rem 0.75rem;
+    border: 1px solid rgba(117, 203, 255, 0.24);
+    border-radius: 0.42rem;
+    color: var(--ainekio-cream);
+    background: rgba(0, 0, 0, 0.24);
+    cursor: pointer;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-nav button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-path {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid rgba(117, 203, 255, 0.14);
+    border-radius: 0.45rem;
+    background: rgba(0, 0, 0, 0.18);
+    list-style: none;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-path li {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-path strong {
+    color: var(--ainekio-amber);
+    font-size: 0.76rem;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-path span {
+    color: var(--ainekio-muted);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-profile-kicker {
+    margin: 0;
+    color: var(--ainekio-amber);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-profile-title {
+    margin: 0;
+    color: var(--ainekio-cream);
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
+    letter-spacing: 0;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-profile-summary {
+    margin: 0;
+    color: var(--ainekio-muted);
+    line-height: 1.6;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-spec-list {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-spec-list li {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-top: 1px solid rgba(117, 203, 255, 0.12);
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-spec-list strong {
+    color: var(--ainekio-amber);
+    font-size: 0.84rem;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-spec-list span {
+    color: var(--ainekio-muted);
+    line-height: 1.45;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-section-title {
+    margin: 0;
+    color: var(--ainekio-cream);
+    font-size: 0.92rem;
+    letter-spacing: 0;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-parts-list {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid rgba(117, 203, 255, 0.14);
+    border-radius: 0.45rem;
+    background: rgba(0, 0, 0, 0.18);
+    list-style: none;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-parts-list li {
+    display: grid;
+    grid-template-columns: 4.65rem minmax(0, 1fr);
+    gap: 0.55rem;
+    align-items: start;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-status {
+    padding: 0.16rem 0.35rem;
+    border: 1px solid rgba(117, 203, 255, 0.18);
+    border-radius: 999px;
+    color: var(--ainekio-cyan);
+    background: rgba(117, 218, 255, 0.07);
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-name,
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-detail {
+    display: block;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-name {
+    color: var(--ainekio-cream);
+    font-size: 0.86rem;
+    font-weight: 800;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-detail {
+    margin-top: 0.14rem;
+    color: rgba(231, 240, 247, 0.68);
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-cost-list {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid rgba(117, 203, 255, 0.14);
+    border-radius: 0.45rem;
+    background: rgba(0, 0, 0, 0.18);
+    list-style: none;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-cost-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--ainekio-muted);
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-cost-list strong {
+    color: var(--ainekio-cream);
+    font-weight: 700;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-cost-list span {
+    flex: none;
+    color: var(--ainekio-amber);
+    font-weight: 800;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-note {
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 178, 79, 0.22);
+    border-radius: 0.45rem;
+    background: rgba(255, 178, 79, 0.08);
+    color: var(--ainekio-muted);
+    line-height: 1.55;
+  }
+
+  #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-source-list {
+    padding-left: 1.3rem;
+  }
+
+  @media (max-width: 860px) {
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-grid {
+      grid-template-columns: 1fr;
+    }
+
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-presets {
+      grid-template-columns: 1fr;
+    }
+
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-results {
+      position: static;
+    }
+  }
+
+  @media (max-width: 560px) {
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .ainekio-builder {
+      margin-right: -0.25rem;
+      margin-left: -0.25rem;
+      padding: 0.85rem;
+    }
+
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-question,
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-meter-panel,
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-output {
+      padding: 0.85rem;
+    }
+
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-spec-list li {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-parts-list li {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-part-status {
+      width: max-content;
+    }
+
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option {
+      padding-top: 2.45rem;
+    }
+
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-top {
+      padding-right: 0;
+    }
+
+    #post-container[data-post-slug="Robot-Builder-Calculator"] .builder-option-cost {
+      max-width: calc(100% - 1.3rem);
+    }
+  }
+`}</style>
+
+# Robot Builder Calculator
+
+<div class="builder-draft-disclaimer">EXAMPLE ONLY. DRAFT. This calculator is a planning prototype, not a final purchase list or finished Ainekio hardware specification.</div>
+
+Last researched: 2026-07-08
+
+Ainekio does not have one correct brain. It has an architecture choice: borrow a large mind over the network, use a phone as the nearby brain, put a Linux service computer in the body, or pay the cost and power penalty for Jetson-class autonomy.
+
+This calculator can start from a quick preset or from the guided brain choice, then filters the rest of the build around what is actually possible. Greyed-out options are not compatible with the selected brain tier. The cost bar is derived from rough real-world parts estimates, while the intelligence bar estimates useful autonomy rather than vibes.
+
+<section class="ainekio-builder" data-ainekio-builder aria-labelledby="ainekio-builder-title">
+  <div class="builder-heading">
+    <h2 id="ainekio-builder-title">Build Estimate</h2>
+    <p>Use a quick preset, or start with where the brain lives. Later options show their own cost and are disabled when the selected hardware cannot honestly support them.</p>
+  </div>
+  <div class="builder-presets" data-builder-presets aria-label="Quick build presets"></div>
+  <div class="builder-grid">
+    <div class="builder-questions" data-builder-questions></div>
+    <aside class="builder-results" aria-label="Robot builder results">
+      <div class="builder-meter-panel">
+        <div class="builder-meter">
+          <div class="builder-meter-label">
+            <span>Estimated build cost</span>
+            <span data-cost-value>$0</span>
+          </div>
+          <div class="builder-meter-track" role="meter" aria-label="Estimated build cost" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-cost-track>
+            <div class="builder-meter-fill" data-meter="cost" data-cost-fill></div>
+          </div>
+        </div>
+        <div class="builder-meter">
+          <div class="builder-meter-label">
+            <span>Intelligence / autonomy</span>
+            <span data-intelligence-value>0%</span>
+          </div>
+          <div class="builder-meter-track" role="meter" aria-label="Intelligence and autonomy" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-intelligence-track>
+            <div class="builder-meter-fill" data-meter="intelligence" data-intelligence-fill></div>
+          </div>
+        </div>
+      </div>
+      <div class="builder-output" aria-live="polite" data-builder-output>
+        <p class="builder-note">Enable JavaScript to use the live calculator. The hardware tiers below still describe the current options.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+## What The Tiers Mean
+
+**Ainekio body/platform:** the final robot is Ainekio. A Sesame-style body is one possible reference base, not the product identity. The calculator now treats the body as a real tier: Sesame-style reference base, custom Ainekio body, or a popular TurtleBot-class mobile base.
+
+**ESP32-S3 body controller:** an ESP32-S3-WROOM-1U-N16R8 style module can directly control servos if enough pins are available, or it can drive a PCA9685-style servo bus. Direct servo control is cheaper and tighter. A servo bus is cleaner and leaves more room for sensors.
+
+**Seeed XIAO ESP32S3 Sense:** this is the tiny board with onboard camera and microphone. It can still directly control some servos or use a servo bus, but no-bus builds are pin-constrained because camera, mic, SD, I2C, and servo signals all compete for a tiny header.
+
+**Zero-class Linux body:** Radxa Zero 3W plus a servo controller hat/bus is the clean one-board Linux version. It can do audio services, camera handling, bridge work, and light model fallback. A split version can add ESP32 for realtime motion/reflexes.
+
+**Jetson Orin autonomy:** Orin Nano is the approachable local-AI tier, Orin NX is the stronger robot-brain tier, and AGX Orin-class systems are high-end edge AI. These are not tiny-body drop-in choices without serious power, cooling, and body changes.
+
+## Sources
+
+<ul class="builder-source-list">
+  <li><a href="https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf" target="_blank" rel="noreferrer">Espressif ESP32-S3 datasheet</a></li>
+  <li><a href="https://www.espressif.com/sites/default/files/documentation/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf" target="_blank" rel="noreferrer">Espressif ESP32-S3-WROOM-1 / WROOM-1U datasheet</a></li>
+  <li><a href="https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/" target="_blank" rel="noreferrer">Seeed XIAO ESP32S3 Sense wiki</a></li>
+  <li><a href="https://www.seeedstudio.com/XIAO-ESP32S3-p-5627.html" target="_blank" rel="noreferrer">Seeed XIAO ESP32S3 product page</a></li>
+  <li><a href="https://www.seeedstudio.com/XIAO-ESP32S3-Sense-p-5639.html" target="_blank" rel="noreferrer">Seeed XIAO ESP32S3 Sense product page</a></li>
+  <li><a href="https://radxa.com/products/zeros/zero3w/" target="_blank" rel="noreferrer">Radxa Zero 3W product page</a></li>
+  <li><a href="https://ameridroid.com/products/radxa-zero-3w" target="_blank" rel="noreferrer">ameriDroid Radxa Zero 3W retail listing</a></li>
+  <li><a href="https://docs.radxa.com/en/zero/zero3/hardware-design/hardware-interface" target="_blank" rel="noreferrer">Radxa Zero 3 hardware interface docs</a></li>
+  <li><a href="https://www.adafruit.com/product/3416" target="_blank" rel="noreferrer">Adafruit PWM/Servo Bonnet listing</a></li>
+  <li><a href="https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/" target="_blank" rel="noreferrer">NVIDIA Jetson Orin page</a></li>
+  <li><a href="https://turtlebot.github.io/turtlebot4-user-manual/overview/features.html" target="_blank" rel="noreferrer">TurtleBot 4 user manual</a></li>
+  <li><a href="https://clearpathrobotics.com/turtlebot-4/" target="_blank" rel="noreferrer">Clearpath TurtleBot 4 overview</a></li>
+</ul>
+
+<script>{`
+  ;(() => {
+    const rootSelector = '[data-ainekio-builder]'
+    const estimateUpdated = '2026-07-08'
+
+    const questions = {
+      brain: {
+        title: 'Where does Ainekio think?',
+        intro: 'This is the root of the tree. It decides which hardware paths are honest downstream.',
+        options: [
+          {
+            id: 'remote',
+            label: 'Offsite MetaHuman OS',
+            costLabel: '$0 local compute / server fees vary',
+            note: 'Use an existing workstation, home server, or cloud host as the real brain. The robot body only needs motion, sensors, and a bridge.',
+            group: 'brain',
+            min: 0,
+            max: 0,
+            item: 'Offsite brain: no added onboard AI computer; cloud or remote server fees are recurring and not included',
+            facts: [
+              'Robot body compute can stay ESP32/XIAO-class.',
+              'Best model size and memory live off-board; local network and latency become design constraints.',
+              'Cloud/server fees are intentionally not included in the one-time robot BOM.',
+            ],
+            intelligence: 55,
+            next: 'controller',
+          },
+          {
+            id: 'phone',
+            label: 'Phone or tablet brain',
+            costLabel: '$0 reused / $80-$800 device',
+            note: 'A phone becomes the nearby brain or relay. This keeps the robot small but makes the phone app and background behavior a real project.',
+            group: 'brain',
+            min: 0,
+            max: 800,
+            item: 'Phone or tablet brain if not reused',
+            facts: [
+              'Cost is $0 when reusing a phone, but a dedicated used device can dominate the budget.',
+              'Phone RAM/GPU varies by model; app background limits are a real risk.',
+              'Good for local speech APIs or a nearby relay without enlarging the robot body.',
+            ],
+            intelligence: 62,
+            next: 'controller',
+          },
+          {
+            id: 'linux',
+            label: 'Zero-class onboard Linux',
+            costLabel: '$42-$140 SBC',
+            note: 'Radxa Zero 3W or similar. Good for audio services, camera handling, bridge code, and light local LLM fallback.',
+            group: 'brain',
+            min: 42,
+            max: 140,
+            item: 'Radxa Zero 3W or similar small Linux SBC',
+            facts: [
+              'Radxa Zero 3W: RK3566 quad Cortex-A55 up to 1.6GHz, Mali-G52 2EE GPU.',
+              'Uses LPDDR4, onboard eMMC options, Wi-Fi 6 / BT 5.4, USB-C, MicroSD boot, 22-pin MIPI CSI.',
+              'Linux services are realistic here: audio routing, bridge process, camera handling, light fallback tools.',
+            ],
+            intelligence: 70,
+            next: 'zero',
+          },
+          {
+            id: 'edge',
+            label: 'Jetson Orin-class onboard AI',
+            costLabel: '$249-$2,000+ compute',
+            note: 'The fully autonomous path. Orin Nano is the entry point; Orin NX and AGX-class systems raise capability, power, cooling, and price.',
+            group: 'brain',
+            min: 249,
+            max: 2000,
+            item: 'Generic Jetson Orin-class compute path, refined in the next step',
+            facts: [
+              'Orin Nano reaches up to 67 TOPS; Orin NX up to 157 TOPS; AGX Orin up to 275 TOPS.',
+              'Power class jumps from tiny-board milliamps to 7W-60W+ depending on module.',
+              'This is the local autonomy branch, but body fit, cooling, and battery become first-order design problems.',
+            ],
+            intelligence: 90,
+            next: 'orin',
+          },
+        ],
+      },
+      controller: {
+        title: 'What controls Ainekio motion?',
+        intro: 'This branch is for remote-brain or phone-brain builds. Ainekio still needs a controller for servos, sensors, safety, and telemetry.',
+        options: [
+          {
+            id: 'wroom-direct',
+            label: 'ESP32-S3-WROOM-1U-N16R8 direct servos',
+            costLabel: '$8-$28',
+            note: 'Cheapest custom controller path. Direct servo control is possible, but the board layout must reserve enough PWM-capable pins and the servo rail must stay separate.',
+            group: 'controller',
+            min: 8,
+            max: 28,
+            item: 'ESP32-S3-WROOM-1U-N16R8 style module/dev board with direct servo wiring',
+            facts: [
+              'ESP32-S3-WROOM-1U-N16R8: dual-core LX7 up to 240MHz, 512KB SRAM, 16MB flash, 8MB PSRAM.',
+              'WROOM-1U module is about 18.0 x 19.2 x 3.2mm and uses an external antenna connector.',
+              '3.0-3.6V logic; Wi-Fi TX peaks can be hundreds of mA, so servo power must be isolated.',
+              'No onboard camera or mic; direct servos consume GPIO/PWM pins.',
+            ],
+            intelligence: 28,
+            next: 'senses',
+          },
+          {
+            id: 'wroom-bus',
+            label: 'ESP32-S3-WROOM + servo bus',
+            costLabel: '$21-$58',
+            note: 'Adds a PCA9685-style servo controller. Costs more than direct pins, but it gives cleaner servo timing and leaves ESP32 pins for sensors.',
+            group: 'controller',
+            min: 21,
+            max: 58,
+            item: 'ESP32-S3-WROOM controller plus PCA9685-style 16-channel servo bus',
+            facts: [
+              'Same WROOM-1U-N16R8 compute: 16MB flash, 8MB PSRAM, dual-core 240MHz.',
+              'Servo bus uses I2C-style control instead of dedicating one signal pin per servo.',
+              'Cleaner timing and more GPIO headroom for ultrasonic, touch, OLED, or future sensors.',
+            ],
+            intelligence: 34,
+            next: 'senses',
+          },
+          {
+            id: 'xiao-direct',
+            label: 'XIAO ESP32S3 Sense direct servos',
+            costLabel: '$14-$30',
+            note: 'Tiny board with onboard camera and mic. Direct servo control is possible, but no servo bus means the camera, mic, SD, I2C, and servo pins fight for a very small header.',
+            group: 'controller',
+            min: 14,
+            max: 30,
+            item: 'Seeed XIAO ESP32S3 Sense direct-servo build with onboard camera/mic',
+            facts: [
+              'XIAO ESP32S3 Sense: ESP32-S3R8, 8MB PSRAM, 8MB flash, 11 GPIO/PWM, 9 ADC.',
+              'Sense expansion adds OV3660 camera, digital microphone, SD slot, and about 21 x 17.8 x 15mm body size.',
+              'Camera/webcam mode can average around 5V/140mA and peak around 5V/347mA.',
+              'Direct servos are possible, but camera/mic/SD/I2C plus 8 servos makes pin planning tight.',
+            ],
+            intelligence: 42,
+            next: 'senses',
+          },
+          {
+            id: 'xiao-bus',
+            label: 'XIAO ESP32S3 Sense + servo bus',
+            costLabel: '$27-$64',
+            note: 'Best tiny sensory-body path. The Sense board provides camera/mic, while the servo bus reduces pin pressure and cleans up motion control.',
+            group: 'controller',
+            min: 27,
+            max: 64,
+            item: 'Seeed XIAO ESP32S3 Sense plus PCA9685-style servo bus',
+            facts: [
+              'Keeps XIAO Sense camera/mic/SD while moving the 8-servo signal load onto a bus.',
+              'Best tiny board when both sensing and motion are required in one compact package.',
+              'Servo bus adds a small board and wiring, but preserves scarce XIAO pins.',
+            ],
+            intelligence: 48,
+            next: 'senses',
+          },
+        ],
+      },
+      zero: {
+        title: 'How does the Zero-class board drive motion?',
+        intro: 'A Zero-class board can be the only local computer, or it can be paired with an ESP32 that owns realtime body behavior.',
+        options: [
+          {
+            id: 'zero-hat',
+            label: 'Zero + servo controller hat/bus only',
+            costLabel: '$13-$45',
+            note: 'The Radxa Zero 3W owns Linux services and sends servo targets to a PCA9685-style controller. This is the clean one-board Linux build.',
+            group: 'controller',
+            min: 13,
+            max: 45,
+            item: 'PCA9685-style servo controller hat/bus for Zero-only motion',
+            facts: [
+              'Zero owns Linux services and sends target angles to the servo bus over I2C.',
+              'Best if you want one local Linux computer instead of a two-board robot.',
+              'Linux is not realtime, but the servo controller generates PWM; the OS mostly affects command timing.',
+            ],
+            intelligence: 68,
+            next: 'senses',
+          },
+          {
+            id: 'zero-esp32',
+            label: 'Zero + ESP32 motion coprocessor',
+            costLabel: '$35-$95',
+            note: 'The Zero handles camera, audio, bridge, and light cognition. ESP32 handles motion timing, reflexes, and safer instant-on body behavior.',
+            group: 'controller',
+            min: 35,
+            max: 95,
+            item: 'ESP32-S3 motion/reflex coprocessor plus servo bus/interconnects',
+            facts: [
+              'Standard robotics split: microcontroller for motion/reflexes, Linux board for perception/network/audio.',
+              'Costs more and uses more space, but gives safer instant-on body behavior.',
+              'Good match for stale-command stops, low-battery lockout, and local reflexes.',
+            ],
+            intelligence: 76,
+            next: 'senses',
+          },
+        ],
+      },
+      orin: {
+        title: 'Which Orin tier is this?',
+        intro: 'This replaces the broad Jetson estimate from step one with a more specific compute class.',
+        options: [
+          {
+            id: 'orin-nano',
+            label: 'Jetson Orin Nano / Nano Super',
+            costLabel: '$249-$650',
+            note: 'Entry local-AI tier. Real edge inference and perception, but still a serious power/cooling/body-fit jump from Zero or ESP32.',
+            group: 'brain',
+            min: 249,
+            max: 650,
+            item: 'Jetson Orin Nano-class developer kit, carrier, storage, and basic cooling allowance',
+            facts: [
+              'Orin Nano Super Developer Kit is priced at $249 and targets up to 67 TOPS.',
+              'Nano series has 4GB/8GB LPDDR5 module options and 7W/15W/25W power modes.',
+              'Developer kit footprint is roughly 100 x 79 x 21mm including carrier/thermal stack.',
+            ],
+            intelligence: 88,
+            next: 'senses',
+          },
+          {
+            id: 'orin-nx',
+            label: 'Jetson Orin NX',
+            costLabel: '$600-$1,200',
+            note: 'Stronger autonomous robot-brain tier. Better fit for local vision and model loops, with higher carrier, power, and cooling cost.',
+            group: 'brain',
+            min: 600,
+            max: 1200,
+            item: 'Jetson Orin NX module/carrier path with storage, cooling, and power allowance',
+            facts: [
+              'Orin NX series offers 8GB/16GB LPDDR5 module options and up to 157 TOPS.',
+              'Power modes reach 10W/15W/25W/40W depending on module/config.',
+              'Module footprint is about 69.6 x 45mm, but carrier, cooling, and battery dominate robot fit.',
+            ],
+            intelligence: 94,
+            next: 'senses',
+          },
+          {
+            id: 'orin-agx',
+            label: 'AGX Orin-class system',
+            costLabel: '$1,600-$2,600',
+            note: 'High-end edge AI. This is no longer a tiny-body build unless the compute rides in a backpack, mobile base, or much larger chassis.',
+            group: 'brain',
+            min: 1600,
+            max: 2600,
+            item: 'AGX Orin-class development system or equivalent high-end edge-AI compute path',
+            facts: [
+              'AGX Orin class reaches up to 275 TOPS with 32GB/64GB LPDDR5 options.',
+              'Power can be 15W-60W+ depending on AGX configuration.',
+              'Developer kit class is roughly 110 x 110 x 71.65mm, which implies backpack/base/larger body.',
+            ],
+            intelligence: 98,
+            next: 'senses',
+          },
+        ],
+      },
+      senses: {
+        title: 'How does the robot sense the world?',
+        intro: 'Camera is for the brain. Ultrasonic and bump/reflex sensors are for body safety. Those are different jobs.',
+        options: [
+          {
+            id: 'reflex-only',
+            label: 'Body reflex sensors only',
+            costLabel: '$5-$25',
+            note: 'Ultrasonic, bump, or simple proximity sensors for local stop/avoid behavior. Cheapest and most useful for safety.',
+            group: 'senses',
+            min: 5,
+            max: 25,
+            item: 'Ultrasonic/bump/proximity sensors for local body reflexes',
+            facts: [
+              'Best safety-per-dollar option.',
+              'Works even when the brain is off-board or disconnected.',
+              'Does not give scene understanding; it only supports local stop/avoid behavior.',
+            ],
+            intelligence: 22,
+            next: 'voice',
+          },
+          {
+            id: 'xiao-onboard',
+            label: 'Use XIAO onboard camera and mic',
+            costLabel: '$0 added',
+            note: 'Uses the Sense board hardware already selected. This is available only on XIAO ESP32S3 Sense branches.',
+            requiresControllerPrefix: 'xiao',
+            disabledReason: 'Only available if the body controller is XIAO ESP32S3 Sense.',
+            group: 'senses',
+            min: 0,
+            max: 0,
+            item: 'XIAO Sense onboard camera and microphone',
+            facts: [
+              'Uses OV3660 camera and digital microphone already on the Sense expansion board.',
+              'No added sensor BOM, but pins and power budget remain tight.',
+              'Best for frame capture or simple wake/audio experiments, not full local vision understanding.',
+            ],
+            intelligence: 48,
+            next: 'voice',
+          },
+          {
+            id: 'external-av',
+            label: 'Add external camera and microphone',
+            costLabel: '$25-$110',
+            note: 'Use this for WROOM, Zero, or Orin paths that need camera/audio but do not already get them from XIAO Sense.',
+            group: 'senses',
+            min: 25,
+            max: 110,
+            item: 'External camera, microphone, mounting, cable, and small speaker/amplifier allowance',
+            facts: [
+              'Needed for WROOM, Zero, or Orin builds when camera/mic are not already onboard.',
+              'Camera is brain input; ultrasonic/bump sensors still belong to local safety.',
+              'Budget depends heavily on camera module, cable style, and mounting.',
+            ],
+            intelligence: 58,
+            next: 'voice',
+          },
+          {
+            id: 'local-perception',
+            label: 'Local perception pipeline',
+            costLabel: '$70-$260',
+            note: 'Camera/audio are interpreted onboard. Zero-class systems can do light perception; Orin-class systems make this the main point.',
+            requiresBrain: ['linux', 'edge'],
+            disabledReason: 'Needs onboard Linux or Jetson-class hardware.',
+            group: 'senses',
+            min: 70,
+            max: 260,
+            item: 'Camera/audio hardware plus storage, cooling, and perception development margin',
+            facts: [
+              'Zero-class perception should be treated as light preprocessing or simple CV.',
+              'Orin-class perception can run real local vision/audio inference.',
+              'Adds storage, heat, and battery pressure even before model choice.',
+            ],
+            intelligence: 84,
+            next: 'voice',
+          },
+        ],
+      },
+      voice: {
+        title: 'What speech and local mind should this support?',
+        intro: 'This is not just a microphone question. It decides whether the robot only streams audio, wakes locally, or tries to reason locally.',
+        options: [
+          {
+            id: 'no-voice',
+            label: 'No voice yet',
+            costLabel: '$0 added',
+            note: 'Movement, bridge, telemetry, and safety first.',
+            group: 'voice',
+            min: 0,
+            max: 0,
+            item: 'No added speech hardware beyond selected sensors',
+            facts: [
+              'Lowest risk for first motion tests.',
+              'Still supports text/command bridge testing.',
+              'Avoids audio hardware and voice UX problems until movement is proven.',
+            ],
+            intelligence: 15,
+            next: 'fit',
+          },
+          {
+            id: 'remote-speech',
+            label: 'Remote STT/TTS',
+            costLabel: '$15-$55',
+            note: 'The robot captures audio and plays speech, but MetaHuman OS or the phone handles transcription and synthesis.',
+            group: 'voice',
+            min: 15,
+            max: 55,
+            item: 'Microphone/speaker/amplifier path for remote STT/TTS',
+            facts: [
+              'Audio capture/playback on robot, transcription and synthesis elsewhere.',
+              'Good for ESP32/XIAO remote-brain builds.',
+              'Network quality affects perceived conversation latency.',
+            ],
+            intelligence: 45,
+            next: 'fit',
+          },
+          {
+            id: 'wake-vad',
+            label: 'Local wake word or VAD',
+            costLabel: '$20-$90',
+            note: 'Small local audio processing decides when to send speech upstream. Practical on XIAO/ESP32 experiments, phone, Zero, or Orin.',
+            group: 'voice',
+            min: 20,
+            max: 90,
+            item: 'Wake word or voice-activity detection support',
+            facts: [
+              'Local device decides when to send audio upstream.',
+              'Practical on XIAO/ESP32 experiments, phone, Zero, or Orin.',
+              'Saves bandwidth and makes the robot feel less like a raw microphone stream.',
+            ],
+            intelligence: 62,
+            next: 'fit',
+          },
+          {
+            id: 'light-llm',
+            label: 'Light local LLM fallback',
+            costLabel: '$35-$160',
+            note: 'Local fallback for simple responses/tools. Reasonable on phone or Zero-class Linux; stronger on Orin.',
+            requiresBrain: ['phone', 'linux', 'edge'],
+            disabledReason: 'Needs a phone/tablet brain, Zero-class Linux, or Jetson-class hardware.',
+            group: 'voice',
+            min: 35,
+            max: 160,
+            item: 'Storage/setup margin for local fallback model or simple local tools',
+            facts: [
+              'Phone and Zero can handle light fallback, command classification, or small model experiments.',
+              'Not the same as full MetaHuman OS running onboard.',
+              'Useful for disconnected idle, canned responses, and local tools.',
+            ],
+            intelligence: 76,
+            next: 'fit',
+          },
+          {
+            id: 'full-autonomy',
+            label: 'Full local speech and reasoning',
+            costLabel: '$100-$350',
+            note: 'Onboard speech/perception/reasoning loop. This is the Orin-class branch.',
+            requiresBrain: ['edge'],
+            disabledReason: 'Full local autonomy is only honest on the Jetson/Orin branch.',
+            group: 'voice',
+            min: 100,
+            max: 350,
+            item: 'Extra storage, cooling, power headroom, and AI development margin for local autonomy',
+            facts: [
+              'This assumes Jetson-class local compute.',
+              'Speech, vision, and reasoning can stay onboard if the software stack is built for it.',
+              'Power/cooling choices now shape the robot body.',
+            ],
+            intelligence: 96,
+            next: 'fit',
+          },
+        ],
+      },
+      fit: {
+        title: 'What body/base is Ainekio built around?',
+        intro: 'This chooses the physical platform. Sesame is a reference base, custom is the Ainekio-first path, and TurtleBot-class is the mainstream ROS/mobile-base option.',
+        options: [
+          {
+            id: 'sesame-reference',
+            label: 'Sesame-style reference base',
+            costLabel: '$105-$230',
+            note: 'Use the Sesame-style mechanical layout as the starting base for Ainekio. This is the small expressive-body path, not the final bot name.',
+            disallowBrain: ['edge'],
+            disabledReason: 'Orin-class compute needs a custom larger body, backpack, or mobile base.',
+            group: 'body',
+            min: 105,
+            max: 230,
+            item: 'Sesame-style reference body: printed frame, 8 MG90S-class servos, OLED face, screws, switch, XT30/wire, buck regulator, capacitor, small battery',
+            facts: [
+              'Small expressive body with 8 micro servos and OLED face; final identity should still be Ainekio.',
+              '8 micro servos need their own 5V rail; do not power them from logic 3.3V.',
+              'Plan at least 5V 3A for the servo rail before adding Linux or AI compute.',
+              'Best for ESP32-S3-WROOM or XIAO-class controller builds; Zero stacks must be measured.',
+            ],
+            intelligence: 0,
+            next: null,
+          },
+          {
+            id: 'custom-ainekio',
+            label: 'Custom Ainekio body',
+            costLabel: '$180-$650',
+            note: 'Design the body around the chosen hardware instead of forcing boards into a reference cavity. Best long-term product path.',
+            group: 'body',
+            min: 180,
+            max: 650,
+            item: 'Custom Ainekio printed/mechanical body, servo layout, mounting plates, battery bay, wiring, fasteners, and thermal fit margin',
+            facts: [
+              'Lets the body cavity, battery, wiring, speaker, camera angle, and cooling be designed around the selected electronics.',
+              'Better match for Zero, servo bus, larger battery, mic/speaker, and cleaner wiring.',
+              'Can scale up for Orin Nano/NX if the body intentionally includes airflow and a separate compute/battery compartment.',
+              'Costs more because print iterations, stronger servos, mounts, and failed-fit parts are part of the process.',
+            ],
+            intelligence: 5,
+            next: null,
+          },
+          {
+            id: 'turtlebot-class',
+            label: 'TurtleBot-class mobile base',
+            costLabel: '$1,200-$2,800',
+            note: 'A popular ROS-style wheeled platform path. This trades tiny expressive form for navigation, payload, lidar/camera support, and mature robotics tooling.',
+            group: 'body',
+            min: 1200,
+            max: 2800,
+            item: 'TurtleBot-class mobile base or equivalent ROS wheeled platform with lidar/camera/payload allowance',
+            facts: [
+              'TurtleBot 4 is a ROS 2 education/research platform built on an iRobot Create 3 mobile base with Raspberry Pi 4B 4GB.',
+              'TurtleBot 4 Lite specs list about 342 x 339 x 192mm, 3.27kg, 9kg payload, and 2.5-4h runtime depending on load.',
+              'Integrated navigation sensors include RPLIDAR A1M8 and OAK-D-Lite/OAK-D-class camera options.',
+              'Best when the goal is mapping, navigation, and payload expansion rather than a tiny character body.',
+            ],
+            intelligence: 10,
+            next: null,
+          },
+        ],
+      },
+    }
+
+    const questionLabels = {
+      brain: 'Brain',
+      controller: 'Controller',
+      zero: 'Zero motion',
+      orin: 'Orin tier',
+      senses: 'Senses',
+      voice: 'Speech/local mind',
+      fit: 'Body/base',
+    }
+
+    const presets = [
+      {
+        id: 'reference',
+        label: 'Ainekio Reference',
+        summary: 'Remote brain, XIAO Sense bus, reflex sensors, remote speech, Sesame-style base.',
+        answers: {
+          brain: 'remote',
+          controller: 'xiao-bus',
+          senses: 'reflex-only',
+          voice: 'remote-speech',
+          fit: 'sesame-reference',
+        },
+      },
+      {
+        id: 'local-linux',
+        label: 'Ainekio Local Linux',
+        summary: 'Radxa Zero 3W, ESP32 motion split, local wake/VAD, custom body.',
+        answers: {
+          brain: 'linux',
+          zero: 'zero-esp32',
+          senses: 'external-av',
+          voice: 'wake-vad',
+          fit: 'custom-ainekio',
+        },
+      },
+      {
+        id: 'mobile-lab',
+        label: 'TurtleBot Lab Base',
+        summary: 'Orin Nano, local perception, light local model, mobile ROS-style base.',
+        answers: {
+          brain: 'edge',
+          orin: 'orin-nano',
+          senses: 'local-perception',
+          voice: 'light-llm',
+          fit: 'turtlebot-class',
+        },
+      },
+      {
+        id: 'commander',
+        label: 'Commander Mrgulis Bringer of Doom',
+        summary: 'AGX Orin-class, local perception, full autonomy, custom Ainekio body.',
+        answers: {
+          brain: 'edge',
+          orin: 'orin-agx',
+          senses: 'local-perception',
+          voice: 'full-autonomy',
+          fit: 'custom-ainekio',
+        },
+      },
+    ]
+
+    const sesameStarterParts = [
+      {
+        status: 'base',
+        name: 'Sesame-style printed frame',
+        detail: 'Reference shell/frame used as the starting mechanical pattern for the Ainekio prototype.',
+      },
+      {
+        status: 'base',
+        name: '8 MG90S-class micro servos',
+        detail: 'Primary motion actuators for the small expressive body.',
+      },
+      {
+        status: 'base',
+        name: 'OLED face display',
+        detail: 'Small face/status display mounted in the body.',
+      },
+      {
+        status: 'base',
+        name: 'Servo horns, screws, links, and fasteners',
+        detail: 'Mechanical hardware needed to assemble and service the body.',
+      },
+      {
+        status: 'base',
+        name: 'Dedicated 5V servo power rail',
+        detail: 'Separate high-current servo supply; logic power should not drive the servos.',
+      },
+      {
+        status: 'base',
+        name: 'Buck regulator and bulk capacitor',
+        detail: 'Voltage regulation and brownout protection for servo movement spikes.',
+      },
+      {
+        status: 'base',
+        name: 'Small battery, switch, XT30, and wiring',
+        detail: 'Portable power, disconnect, and harness parts for the first body build.',
+      },
+    ]
+
+    function part(status, name, detail) {
+      return { status, name, detail }
+    }
+
+    function clamp(value) {
+      return Math.max(0, Math.min(100, Math.round(value)))
+    }
+
+    function createElement(tag, className, text) {
+      const element = document.createElement(tag)
+      if (className) element.className = className
+      if (text) element.textContent = text
+      return element
+    }
+
+    function formatUsd(value) {
+      return '$' + Math.round(value).toLocaleString('en-US')
+    }
+
+    function formatRange(min, max) {
+      return formatUsd(min) + '-' + formatUsd(max)
+    }
+
+    function getQuestion(id) {
+      return questions[id]
+    }
+
+    function getOption(questionId, optionId) {
+      const question = getQuestion(questionId)
+      if (!question) return null
+      return question.options.find((option) => option.id === optionId) || null
+    }
+
+    function selectedBrain(state) {
+      return state.answers.brain || ''
+    }
+
+    function selectedController(state) {
+      return state.answers.controller || state.answers.zero || ''
+    }
+
+    function optionDisabledReason(option, state) {
+      const brain = selectedBrain(state)
+      const controller = selectedController(state)
+      if (option.requiresBrain && !option.requiresBrain.includes(brain)) {
+        return option.disabledReason || 'Not available for the selected brain.'
+      }
+      if (option.disallowBrain && option.disallowBrain.includes(brain)) {
+        return option.disabledReason || 'Not available for the selected brain.'
+      }
+      if (option.requiresControllerPrefix && !controller.startsWith(option.requiresControllerPrefix)) {
+        return option.disabledReason || 'Not available for the selected controller.'
+      }
+      return ''
+    }
+
+    function optionIsAllowed(option, state) {
+      return optionDisabledReason(option, state) === ''
+    }
+
+    function nextQuestionId(questionId, option) {
+      if (!option) return null
+      return option.next || null
+    }
+
+    function activeQuestionIds(state) {
+      const ids = []
+      let questionId = 'brain'
+      const guard = new Set()
+      while (questionId && !guard.has(questionId)) {
+        guard.add(questionId)
+        ids.push(questionId)
+        const option = getOption(questionId, state.answers[questionId])
+        if (!option) break
+        questionId = nextQuestionId(questionId, option)
+      }
+      return ids
+    }
+
+    function selectedOptions(state) {
+      return activeQuestionIds(state)
+        .map((questionId) => [questionId, getOption(questionId, state.answers[questionId])])
+        .filter((entry) => entry[1] && optionIsAllowed(entry[1], state))
+    }
+
+    function applyPreset(root, state, preset) {
+      state.answers = { ...preset.answers }
+      state.currentId = null
+      pruneAnswers(state)
+      renderQuestion(root, state)
+      renderOutput(root, state)
+    }
+
+    function renderPresets(root, state) {
+      const target = root.querySelector('[data-builder-presets]')
+      if (!target) return
+      target.replaceChildren()
+      presets.forEach((preset) => {
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.className = 'builder-preset'
+        button.append(createElement('strong', '', preset.label))
+        button.append(createElement('span', '', preset.summary))
+        button.addEventListener('click', () => applyPreset(root, state, preset))
+        target.append(button)
+      })
+    }
+
+    function pruneAnswers(state) {
+      const active = new Set(activeQuestionIds(state))
+      Object.keys(state.answers).forEach((questionId) => {
+        if (!active.has(questionId)) delete state.answers[questionId]
+      })
+    }
+
+    function firstAllowedOption(questionId, state) {
+      const question = getQuestion(questionId)
+      return question.options.find((option) => optionIsAllowed(option, state)) || question.options[0]
+    }
+
+    function normalizeCurrent(state) {
+      pruneAnswers(state)
+      const current = getQuestion(state.currentId)
+      if (!current) {
+        state.currentId = null
+        return
+      }
+      const selected = getOption(state.currentId, state.answers[state.currentId])
+      if (selected && !optionIsAllowed(selected, state)) {
+        delete state.answers[state.currentId]
+      }
+      if (state.currentId && !getQuestion(state.currentId)) {
+        state.currentId = 'brain'
+      }
+    }
+
+    function getProfile(state) {
+      const brain = state.answers.brain
+      const controller = selectedController(state)
+      const orin = state.answers.orin
+      const senses = state.answers.senses
+      const voice = state.answers.voice
+      if (brain === 'edge' && orin === 'orin-agx' && senses === 'local-perception' && voice === 'full-autonomy') {
+        return {
+          label: 'Maximum autonomy',
+          name: 'Commander Mrgulis Bringer of Doom',
+          summary: 'The fully loaded Ainekio path: AGX Orin-class compute, onboard perception, local speech/reasoning, and a body designed around power and cooling.',
+        }
+      }
+      if (brain === 'edge') {
+        if (orin === 'orin-agx') return {
+          label: 'High-end edge AI',
+          name: 'AGX Orin-Class Autonomous Build',
+          summary: 'This is a backpack, mobile-base, or larger-body robot brain, not a tiny self-contained body.',
+        }
+        if (orin === 'orin-nx') return {
+          label: 'Strong onboard AI',
+          name: 'Jetson Orin NX Autonomous Build',
+          summary: 'A serious local robot brain for perception, speech, and model loops with major power and cooling work.',
+        }
+        return {
+          label: 'Entry onboard AI',
+          name: 'Jetson Orin Nano Autonomous Build',
+          summary: 'The lowest realistic Orin autonomy path, still much larger and hotter than ESP32 or Zero builds.',
+        }
+      }
+      if (brain === 'linux') {
+        if (controller === 'zero-esp32') return {
+          label: 'Hybrid local services',
+          name: 'Radxa Zero 3W + ESP32 Split Build',
+          summary: 'Zero handles Linux services and light cognition while ESP32 owns timing-sensitive body behavior.',
+        }
+        return {
+          label: 'Zero-only Linux body',
+          name: 'Radxa Zero 3W + Servo Hat Build',
+          summary: 'One local Linux board runs audio/camera/bridge services and drives a servo controller bus.',
+        }
+      }
+      if (brain === 'phone') return {
+        label: 'Phone/tablet brain',
+        name: 'Phone-Brain Familiar',
+        summary: 'The robot stays small while a phone or tablet carries nearby app logic, speech, and model experiments.',
+      }
+      if (controller === 'xiao-direct') return {
+        label: 'Tiny camera/mic body',
+        name: 'XIAO Sense Direct-Servo Build',
+        summary: 'Smallest camera/mic body, but direct servo wiring is pin-constrained and leaves less room for expansion.',
+      }
+      if (controller === 'xiao-bus') return {
+        label: 'Tiny sensory body with bus',
+        name: 'XIAO Sense + Servo Bus Build',
+        summary: 'Camera/mic are onboard and the servo bus keeps motion wiring cleaner.',
+      }
+      if (controller === 'wroom-bus') return {
+        label: 'ESP32 motion body',
+        name: 'ESP32-S3-WROOM + Servo Bus Build',
+        summary: 'A cheap, clean motion body that forwards intelligence to MetaHuman OS or a phone.',
+      }
+      return {
+        label: 'Lowest-cost body',
+        name: 'ESP32-S3-WROOM Direct-Servo Build',
+        summary: 'The cheapest body-controller path, suitable for motion/reflex/telemetry with off-board intelligence.',
+      }
+    }
+
+    function getSpecs(state) {
+      const brain = state.answers.brain || 'unselected'
+      const controller = selectedController(state) || 'unselected'
+      const specs = {
+        Body: 'Choose the Ainekio body/base tier to finish this part.',
+        Brain: 'Choose a brain path to finish this part.',
+        Motion: 'Choose a controller path to finish this part.',
+        Senses: 'Choose sensors/perception to finish this part.',
+        Voice: 'Choose speech/local cognition to finish this part.',
+      }
+      if (brain === 'remote') specs.Brain = 'MetaHuman OS off-board; local robot brain cost is $0 but server/cloud fees are separate.'
+      if (brain === 'phone') specs.Brain = 'Phone/tablet brain or relay; cost depends on whether a device is reused.'
+      if (brain === 'linux') specs.Brain = 'Radxa Zero 3W-class onboard Linux for audio, bridge, camera, and light fallback.'
+      if (brain === 'edge') specs.Brain = 'Jetson Orin-class local AI; exact tier selected in the Orin question.'
+      if (controller === 'wroom-direct') specs.Motion = 'ESP32-S3-WROOM-1U-N16R8 style direct servo control; cheapest, but pin/layout discipline matters.'
+      if (controller === 'wroom-bus') specs.Motion = 'ESP32-S3-WROOM with PCA9685-style servo bus; cleaner timing and more sensor pin headroom.'
+      if (controller === 'xiao-direct') specs.Motion = 'XIAO ESP32S3 Sense direct servos; onboard camera/mic, but no servo bus means pin pressure.'
+      if (controller === 'xiao-bus') specs.Motion = 'XIAO ESP32S3 Sense with servo bus; best tiny camera/mic body-controller compromise.'
+      if (controller === 'zero-hat') specs.Motion = 'Radxa Zero 3W drives a servo controller hat/bus directly.'
+      if (controller === 'zero-esp32') specs.Motion = 'Radxa Zero 3W handles services; ESP32 handles realtime body behavior.'
+      const senses = state.answers.senses
+      if (senses === 'reflex-only') specs.Senses = 'Ultrasonic/bump/proximity sensors for local safety only.'
+      if (senses === 'xiao-onboard') specs.Senses = 'Use XIAO Sense onboard camera and microphone.'
+      if (senses === 'external-av') specs.Senses = 'Add external camera/mic/speaker path.'
+      if (senses === 'local-perception') specs.Senses = 'Onboard camera/audio interpretation; light on Zero, serious on Orin.'
+      const voice = state.answers.voice
+      if (voice === 'no-voice') specs.Voice = 'No voice yet.'
+      if (voice === 'remote-speech') specs.Voice = 'Robot captures/plays audio; remote brain handles STT/TTS.'
+      if (voice === 'wake-vad') specs.Voice = 'Local wake word or VAD, remote heavy speech.'
+      if (voice === 'light-llm') specs.Voice = 'Light local model/tool fallback.'
+      if (voice === 'full-autonomy') specs.Voice = 'Full local speech/reasoning loop on Orin-class compute.'
+      const fit = state.answers.fit
+      if (fit === 'sesame-reference') specs.Body = 'Sesame-style reference base used only as the mechanical starting point; final robot identity remains Ainekio.'
+      if (fit === 'custom-ainekio') specs.Body = 'Custom Ainekio body with room planned around the selected brain, battery, wiring, sensors, and cooling.'
+      if (fit === 'turtlebot-class') specs.Body = 'TurtleBot-class mobile base: larger ROS-style wheeled platform with lidar/camera navigation strengths.'
+      return specs
+    }
+
+    function getPartsList(state) {
+      const parts = sesameStarterParts.map((item) => ({ ...item }))
+      const brain = state.answers.brain
+      const controller = selectedController(state)
+      const orin = state.answers.orin
+      const senses = state.answers.senses
+      const voice = state.answers.voice
+      const fit = state.answers.fit
+
+      if (fit === 'custom-ainekio') {
+        parts.unshift(part('replace', 'Custom Ainekio frame and mounts', 'Replaces the reference printed shell with a body designed around the selected board stack, battery, speaker, camera, and airflow.'))
+        parts.push(part('add', 'Prototype print and fitment allowance', 'Extra filament/resin, inserts, brackets, failed-fit parts, and service access revisions.'))
+      }
+
+      if (fit === 'turtlebot-class') {
+        return [
+          part('replace', 'TurtleBot-class mobile base', 'Replaces the small servo body with a ROS-style wheeled platform such as TurtleBot 4 / Create 3 class hardware.'),
+          part('replace', 'Integrated drive base, battery, charger, and dock', 'Mobile base owns drivetrain, runtime battery, charging, bump/cliff/odometry style sensors, and docking behavior.'),
+          part('replace', 'Raspberry Pi 4B / ROS computer layer', 'Typical TurtleBot-class base includes a ROS computer layer before adding Ainekio-specific AI compute.'),
+          part('replace', 'RPLIDAR and OAK-D-class camera', 'Navigation/perception sensors replace the tiny OLED/servo-body emphasis.'),
+          part('add', 'Ainekio character payload or head module', 'Optional expressive module mounted on the platform if the robot still needs an Ainekio face/body personality.'),
+          ...getAddOnParts(brain, controller, orin, senses, voice),
+        ]
+      }
+
+      return [...parts, ...getAddOnParts(brain, controller, orin, senses, voice)]
+    }
+
+    function getAddOnParts(brain, controller, orin, senses, voice) {
+      const parts = []
+      if (brain === 'remote') {
+        parts.push(part('add', 'Wi-Fi bridge firmware/software', 'Local bridge sends commands and telemetry to the offsite MetaHuman OS brain.'))
+      }
+      if (brain === 'phone') {
+        parts.push(part('add', 'Phone/tablet mount and charging lead', 'Holds the reused or dedicated device and keeps it powered during tests.'))
+      }
+      if (brain === 'linux') {
+        parts.push(part('add', 'Radxa Zero 3W-class SBC', 'Onboard Linux computer for audio services, camera handling, bridge process, and light fallback tools.'))
+        parts.push(part('add', 'MicroSD or eMMC storage and USB-C power path', 'Boot/storage media plus regulated power for the Linux board.'))
+      }
+      if (brain === 'edge') {
+        parts.push(part('add', 'Jetson Orin-class compute stack', 'Local AI computer selected in the Orin tier, with storage, carrier, cooling, and power margin.'))
+      }
+      if (orin === 'orin-nano') {
+        parts.push(part('add', 'Orin Nano carrier/cooling allowance', 'Entry local-AI hardware with thermal and mounting requirements beyond a tiny controller board.'))
+      }
+      if (orin === 'orin-nx') {
+        parts.push(part('add', 'Orin NX module, carrier, storage, and cooler', 'Higher compute path with stronger power and cooling needs.'))
+      }
+      if (orin === 'orin-agx') {
+        parts.push(part('add', 'AGX Orin-class development system', 'High-end edge-AI system; body design must account for heat, mass, and power draw.'))
+      }
+      if (controller === 'wroom-direct') {
+        parts.push(part('add', 'ESP32-S3-WROOM-1U-N16R8 controller', 'Direct servo-control microcontroller with external antenna connector and enough planned PWM/GPIO routing.'))
+      }
+      if (controller === 'wroom-bus') {
+        parts.push(part('add', 'ESP32-S3-WROOM controller', 'Microcontroller for bridge, telemetry, and local safety behavior.'))
+        parts.push(part('add', 'PCA9685-style 16-channel servo bus', 'Moves servo PWM generation off the ESP32 pins and leaves room for sensors.'))
+      }
+      if (controller === 'xiao-direct') {
+        parts.push(part('add', 'Seeed XIAO ESP32S3 Sense', 'Tiny controller with onboard camera/mic; direct servo wiring requires careful pin planning.'))
+      }
+      if (controller === 'xiao-bus') {
+        parts.push(part('add', 'Seeed XIAO ESP32S3 Sense', 'Tiny controller with onboard camera, microphone, and SD support.'))
+        parts.push(part('add', 'PCA9685-style 16-channel servo bus', 'Keeps the XIAO pins available for camera/mic/SD/I2C while controlling servos cleanly.'))
+      }
+      if (controller === 'zero-hat') {
+        parts.push(part('add', 'Zero-compatible servo controller hat/bus', 'Servo PWM controller driven by the Linux board.'))
+      }
+      if (controller === 'zero-esp32') {
+        parts.push(part('add', 'ESP32-S3 motion coprocessor', 'Realtime-ish motion/reflex controller paired with the Zero-class Linux board.'))
+        parts.push(part('add', 'Servo bus and board-to-board interconnect', 'Separates Linux services from timing-sensitive motion and safety behavior.'))
+      }
+      if (senses === 'reflex-only') {
+        parts.push(part('add', 'Ultrasonic, bump, or proximity sensors', 'Low-cost local safety sensors for stop/avoid behavior.'))
+      }
+      if (senses === 'xiao-onboard') {
+        parts.push(part('base', 'XIAO Sense onboard camera and microphone', 'Uses the camera/mic already included with the selected XIAO Sense controller.'))
+      }
+      if (senses === 'external-av') {
+        parts.push(part('add', 'External camera, microphone, and small speaker path', 'Adds audio/video I/O when it is not already provided by the controller/body.'))
+      }
+      if (senses === 'local-perception') {
+        parts.push(part('add', 'Camera/audio perception kit', 'Camera, microphone, mounting, storage, and cooling margin for onboard perception work.'))
+      }
+      if (voice === 'remote-speech') {
+        parts.push(part('add', 'Microphone, speaker, and amplifier', 'Robot captures and plays audio while remote compute handles STT/TTS.'))
+      }
+      if (voice === 'wake-vad') {
+        parts.push(part('add', 'Wake/VAD audio path', 'Local voice activity or wake-word support before streaming audio upstream.'))
+      }
+      if (voice === 'light-llm') {
+        parts.push(part('add', 'Local model storage/setup allowance', 'Storage and configuration margin for simple local tools or fallback model experiments.'))
+      }
+      if (voice === 'full-autonomy') {
+        parts.push(part('add', 'Full autonomy power/cooling allowance', 'Extra storage, regulator capacity, cooling, and battery margin for local speech/perception/reasoning loops.'))
+      }
+      return parts
+    }
+
+    function clampCostBar(max) {
+      return clamp((max / 3800) * 100)
+    }
+
+    function scoreState(state) {
+      const groups = {}
+      let intelligence = 10
+      selectedOptions(state).forEach(([questionId, option]) => {
+        if (option.group) {
+          groups[option.group] = {
+            min: option.min || 0,
+            max: option.max || 0,
+            item: option.item || option.label,
+            facts: option.facts,
+          }
+        }
+        intelligence += option.intelligence || 0
+      })
+      const costItems = Object.values(groups)
+      const estimate = costItems.reduce((total, item) => ({
+        min: total.min + item.min,
+        max: total.max + item.max,
+      }), { min: 0, max: 0 })
+      const selectedCount = selectedOptions(state).length || 1
+      const profile = getProfile(state)
+      return {
+        profile,
+        specs: getSpecs(state),
+        estimate,
+        cost: clampCostBar(estimate.max),
+        intelligence: clamp(intelligence / selectedCount),
+        costItems: costItems.map((item) => [item.item, formatRange(item.min, item.max)]),
+        parts: getPartsList(state),
+        facts: costItems.flatMap((item) => item.facts || []),
+        selections: selectedOptions(state),
+      }
+    }
+
+    function setCostMeter(root, score) {
+      const fill = root.querySelector('[data-cost-fill]')
+      const label = root.querySelector('[data-cost-value]')
+      const track = root.querySelector('[data-cost-track]')
+      if (!fill || !label || !track) return
+      fill.style.width = score.cost + '%'
+      label.textContent = formatRange(score.estimate.min, score.estimate.max)
+      track.setAttribute('aria-valuenow', String(score.cost))
+    }
+
+    function setMeter(root, kind, value) {
+      const fill = root.querySelector('[data-' + kind + '-fill]')
+      const label = root.querySelector('[data-' + kind + '-value]')
+      const track = root.querySelector('[data-' + kind + '-track]')
+      if (!fill || !label || !track) return
+      fill.style.width = value + '%'
+      label.textContent = value + '%'
+      track.setAttribute('aria-valuenow', String(value))
+    }
+
+    function renderOutput(root, state) {
+      const output = root.querySelector('[data-builder-output]')
+      if (!output) return
+      const score = scoreState(state)
+      setCostMeter(root, score)
+      setMeter(root, 'intelligence', score.intelligence)
+      output.replaceChildren()
+      output.append(createElement('p', 'builder-profile-kicker', score.profile.label))
+      output.append(createElement('h3', 'builder-profile-title', score.profile.name))
+      output.append(createElement('p', 'builder-profile-summary', score.profile.summary))
+      output.append(createElement('p', 'builder-note', 'Estimated build cost: ' + formatRange(score.estimate.min, score.estimate.max) + ' USD before shipping, tax, failed parts, tools, or reused hardware.'))
+      const path = createElement('ul', 'builder-path')
+      if (score.selections.length === 0) {
+        const item = document.createElement('li')
+        item.append(createElement('span', '', 'Answer the first question to build an architecture path.'))
+        path.append(item)
+      } else {
+        score.selections.forEach(([questionId, option]) => {
+          const item = document.createElement('li')
+          item.append(createElement('strong', '', questionLabels[questionId] || questionId))
+          item.append(createElement('span', '', option.label))
+          path.append(item)
+        })
+      }
+      output.append(path)
+      output.append(createElement('h4', 'builder-section-title', 'Parts List'))
+      const partsList = createElement('ul', 'builder-parts-list')
+      score.parts.forEach((partItem) => {
+        const item = document.createElement('li')
+        item.append(createElement('span', 'builder-part-status', partItem.status))
+        const body = document.createElement('span')
+        body.append(createElement('span', 'builder-part-name', partItem.name))
+        body.append(createElement('span', 'builder-part-detail', partItem.detail))
+        item.append(body)
+        partsList.append(item)
+      })
+      output.append(partsList)
+      output.append(createElement('h4', 'builder-section-title', 'Cost Groups'))
+      const costList = createElement('ul', 'builder-cost-list')
+      score.costItems.forEach(([label, range]) => {
+        const item = document.createElement('li')
+        item.append(createElement('strong', '', label))
+        item.append(createElement('span', '', range))
+        costList.append(item)
+      })
+      output.append(costList)
+      if (score.facts.length > 0) {
+        const facts = createElement('ul', 'builder-option-facts')
+        score.facts.slice(0, 12).forEach((fact) => {
+          facts.append(createElement('li', '', fact))
+        })
+        output.append(facts)
+      }
+      const specs = createElement('ul', 'builder-spec-list')
+      Object.entries(score.specs).forEach(([key, value]) => {
+        const item = document.createElement('li')
+        item.append(createElement('strong', '', key))
+        item.append(createElement('span', '', value))
+        specs.append(item)
+      })
+      output.append(specs)
+      output.append(createElement('p', 'builder-note', 'Calculator prices are rough retail estimates last checked ' + estimateUpdated + '. The selected Ainekio body/base tier is included once that final choice is made.'))
+    }
+
+    function renderQuestion(root, state) {
+      const target = root.querySelector('[data-builder-questions]')
+      if (!target) return
+      normalizeCurrent(state)
+      target.replaceChildren()
+      if (!state.currentId) {
+        const done = createElement('section', 'builder-question')
+        done.append(createElement('h3', '', 'Build path complete'))
+        done.append(createElement('p', '', 'Use Back to revise the branch, or Reset to start over.'))
+        target.append(done)
+        renderNav(target, root, state)
+        renderOutput(root, state)
+        return
+      }
+      const question = getQuestion(state.currentId)
+      const section = createElement('section', 'builder-question')
+      section.append(createElement('h3', '', question.title))
+      section.append(createElement('p', '', question.intro))
+      const options = createElement('div', 'builder-options')
+      question.options.forEach((option) => {
+        const disabledReason = optionDisabledReason(option, state)
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.className = 'builder-option'
+        button.disabled = disabledReason !== ''
+        button.setAttribute('aria-pressed', String(state.answers[state.currentId] === option.id))
+        if (button.disabled) button.setAttribute('aria-disabled', 'true')
+        const top = createElement('span', 'builder-option-top')
+        top.append(createElement('strong', '', option.label))
+        top.append(createElement('span', 'builder-option-cost', option.costLabel || formatRange(option.min || 0, option.max || 0)))
+        const note = createElement('small', '', option.note)
+        if (disabledReason) note.append(createElement('em', '', disabledReason))
+        if (option.facts && option.facts.length > 0) {
+          const facts = createElement('ul', 'builder-option-facts')
+          option.facts.forEach((fact) => {
+            facts.append(createElement('li', '', fact))
+          })
+          note.append(facts)
+        }
+        const wrap = document.createElement('span')
+        wrap.append(top, note)
+        button.append(wrap)
+        button.addEventListener('click', () => {
+          if (button.disabled) return
+          state.answers[state.currentId] = option.id
+          const next = nextQuestionId(state.currentId, option)
+          state.currentId = next
+          pruneAnswers(state)
+          renderQuestion(root, state)
+          renderOutput(root, state)
+        })
+        options.append(button)
+      })
+      section.append(options)
+      target.append(section)
+      renderNav(target, root, state)
+      renderOutput(root, state)
+    }
+
+    function renderNav(target, root, state) {
+      const nav = createElement('div', 'builder-nav')
+      const back = document.createElement('button')
+      back.type = 'button'
+      back.textContent = 'Back'
+      const path = activeQuestionIds(state)
+      back.disabled = path.length <= 1 && state.currentId === 'brain'
+      back.addEventListener('click', () => {
+        const active = activeQuestionIds(state)
+        const previous = state.currentId ? active[active.length - 2] : active[active.length - 1]
+        if (previous) state.currentId = previous
+        renderQuestion(root, state)
+        renderOutput(root, state)
+      })
+      const reset = document.createElement('button')
+      reset.type = 'button'
+      reset.textContent = 'Reset'
+      reset.addEventListener('click', () => {
+        state.answers = {}
+        state.currentId = 'brain'
+        renderQuestion(root, state)
+        renderOutput(root, state)
+      })
+      nav.append(back, reset)
+      target.append(nav)
+    }
+
+    function initBuilder() {
+      document.querySelectorAll(rootSelector).forEach((root) => {
+        if (root.dataset.ready === 'true') return
+        root.dataset.ready = 'true'
+        const state = { answers: {}, currentId: 'brain' }
+        renderPresets(root, state)
+        renderQuestion(root, state)
+        renderOutput(root, state)
+      })
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initBuilder, { once: true })
+    } else {
+      initBuilder()
+    }
+    document.addEventListener('astro:page-load', initBuilder)
+  })()
+`}</script>

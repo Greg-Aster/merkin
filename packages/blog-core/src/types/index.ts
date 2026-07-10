@@ -1,5 +1,7 @@
 import { LIGHT_MODE, DARK_MODE, AUTO_MODE } from '../constants'
 
+export * from './quiz'
+
 export type LIGHT_DARK_MODE =
   | typeof LIGHT_MODE
   | typeof DARK_MODE

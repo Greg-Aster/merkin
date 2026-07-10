@@ -1,0 +1,758 @@
+---
+title: "Parts Overview"
+published: 2026-07-10
+description: "Parts, power, sensing, signal, and shopping-list overview for the Ainekio robot familiar prototype."
+image: "/posts/ainekio/kaiju-ride-square.webp"
+avatarImage: "/posts/generic/avatar.webp"
+authorName: "Ainekio"
+authorBio: "Robot familiar project"
+bannerType: "image"
+bannerData:
+  imageUrl: "/posts/ainekio/kaiju-battle-banner.webp"
+timelineYear: 2026
+timelineEra: "work-in-progress"
+timelineLocation: "Robot body"
+showImageOnPost: false
+tags: [Ainekio, Robot, Parts, Sesame, ESP32-S3, Power System]
+category: "Project Notes"
+draft: false
+lang: "en"
+---
+
+import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
+
+<style>{`
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] {
+    --ainekio-surface: rgba(9, 13, 18, 0.78);
+    --ainekio-surface-soft: rgba(18, 25, 32, 0.64);
+    --ainekio-line: rgba(117, 203, 255, 0.26);
+    --ainekio-line-hot: rgba(255, 175, 80, 0.42);
+    --ainekio-cyan: rgb(117, 218, 255);
+    --ainekio-amber: rgb(255, 178, 79);
+    --ainekio-pink: rgb(255, 94, 164);
+    --ainekio-cream: rgb(248, 238, 218);
+    --ainekio-muted: rgba(231, 240, 247, 0.74);
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255, 178, 79, 0.14), transparent 26rem),
+      radial-gradient(circle at 94% 10%, rgba(117, 218, 255, 0.16), transparent 24rem),
+      linear-gradient(180deg, rgba(10, 14, 19, 0.86), rgba(9, 13, 18, 0.72));
+    border: 1px solid rgba(117, 203, 255, 0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 18px 60px rgba(0, 0, 0, 0.28);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content {
+    color: var(--ainekio-muted);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content > p {
+    max-width: 84ch;
+    line-height: 1.78;
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content h1 {
+    margin: 0 0 1rem;
+    color: var(--ainekio-cream);
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    letter-spacing: 0;
+    text-shadow: 0 0 24px rgba(117, 218, 255, 0.18);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content h1::after {
+    content: "";
+    display: block;
+    width: min(30rem, 100%);
+    height: 2px;
+    margin-top: 0.85rem;
+    background: linear-gradient(90deg, var(--ainekio-amber), var(--ainekio-cyan), transparent);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content h2 {
+    position: relative;
+    margin-top: 2.4rem;
+    margin-bottom: 1rem;
+    padding: 0.85rem 1rem 0.85rem 1.2rem;
+    color: var(--ainekio-cream);
+    border: 1px solid var(--ainekio-line);
+    border-left: 4px solid var(--ainekio-amber);
+    border-radius: 0.5rem;
+    background:
+      linear-gradient(90deg, rgba(255, 178, 79, 0.14), rgba(117, 218, 255, 0.07), transparent),
+      var(--ainekio-surface);
+    box-shadow:
+      inset 0 0 24px rgba(117, 218, 255, 0.045),
+      0 10px 24px rgba(0, 0, 0, 0.18);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content h2::before {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content h3 {
+    margin-top: 1.5rem;
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 1rem;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content p:first-of-type,
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content .ainekio-parts-note,
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content blockquote {
+    margin: 1rem 0 1.3rem;
+    padding: 1rem 1.1rem;
+    color: var(--ainekio-cream);
+    border: 1px solid var(--ainekio-line-hot);
+    border-radius: 0.55rem;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255, 94, 164, 0.14), transparent 18rem),
+      linear-gradient(135deg, rgba(255, 178, 79, 0.13), rgba(117, 218, 255, 0.07)),
+      var(--ainekio-surface);
+    box-shadow: inset 0 0 24px rgba(255, 178, 79, 0.04);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content .ainekio-doc-label {
+    display: inline-flex;
+    margin: 1.3rem 0 0.45rem;
+    padding: 0.25rem 0.55rem;
+    color: var(--ainekio-cyan);
+    border: 1px solid rgba(117, 218, 255, 0.22);
+    border-radius: 0.35rem;
+    background: rgba(117, 218, 255, 0.07);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content ol,
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content ul {
+    padding: 1rem 1.1rem 1rem 2.2rem;
+    border: 1px solid rgba(117, 203, 255, 0.18);
+    border-radius: 0.55rem;
+    background: var(--ainekio-surface-soft);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content li {
+    margin: 0.55rem 0;
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content li::marker {
+    color: var(--ainekio-amber);
+    font-weight: 800;
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table {
+    display: block;
+    width: 100%;
+    margin: 1.2rem 0 1.6rem;
+    overflow-x: auto;
+    border: 1px solid var(--ainekio-line);
+    border-radius: 0.6rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
+      var(--ainekio-surface);
+    box-shadow: inset 0 0 24px rgba(117, 218, 255, 0.04);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content .ainekio-enhanced-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table thead {
+    background: linear-gradient(90deg, rgba(117, 218, 255, 0.14), rgba(255, 178, 79, 0.1));
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table th,
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table td {
+    padding: 0.8rem 0.9rem;
+    border-color: rgba(117, 203, 255, 0.16);
+    overflow-wrap: anywhere;
+    vertical-align: top;
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table th {
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table td {
+    color: var(--ainekio-muted);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table td:first-child {
+    color: var(--ainekio-cream);
+    font-weight: 800;
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table tbody tr:nth-child(odd) {
+    background: rgba(117, 218, 255, 0.035);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content pre {
+    margin: 1.2rem 0 1.6rem;
+    padding: 1rem;
+    overflow-x: auto;
+    color: var(--ainekio-cream);
+    border: 1px solid var(--ainekio-line);
+    border-radius: 0.55rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
+      rgba(0, 0, 0, 0.34);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content a {
+    color: var(--ainekio-cyan);
+    text-decoration-color: rgba(117, 218, 255, 0.42);
+    text-underline-offset: 0.18em;
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content code {
+    color: var(--ainekio-amber);
+    border: 1px solid rgba(255, 178, 79, 0.18);
+    border-radius: 0.35rem;
+    background: rgba(0, 0, 0, 0.28);
+  }
+
+  #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content hr {
+    height: 1px;
+    margin: 1.8rem 0;
+    border: 0;
+    background: linear-gradient(90deg, transparent, rgba(117, 218, 255, 0.5), rgba(255, 178, 79, 0.42), transparent);
+  }
+
+  @media (max-width: 720px) {
+    #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table,
+    #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table thead,
+    #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table tbody,
+    #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table tr,
+    #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table th,
+    #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table td {
+      display: block;
+    }
+
+    #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table thead {
+      display: none;
+    }
+
+    #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table tr {
+      padding: 0.8rem 0;
+      border-bottom: 1px solid rgba(117, 203, 255, 0.16);
+    }
+
+    #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table td {
+      border: 0;
+    }
+
+    #post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content table td::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 0.25rem;
+      color: var(--ainekio-cyan);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+  }
+`}</style>
+
+<DocsEditorBridge
+  client:load
+  url="https://docs.google.com/document/d/1wz0kyqttPK3HHL0P0_9lLtRW_B87U5u4kEt-UhttHFA/edit?usp=sharing"
+/>
+
+<script>{`
+  ;(() => {
+  const postSelector = '#post-container[data-post-slug="Robot-Familiar-Parts-Overview"] .markdown-content'
+  const marker = String.fromCharCode(96)
+
+  function getPartsOverviewContent() {
+    return document.querySelector(postSelector)
+  }
+
+  function normalizeGoogleDocsMarkdown(text) {
+    let output = String(text || '')
+    const replacements = [
+      ['\\\\#', '#'],
+      ['\\\\*', '*'],
+      ['\\\\[', '['],
+      ['\\\\]', ']'],
+      ['\\\\(', '('],
+      ['\\\\)', ')'],
+      ['\\\\|', '|'],
+      ['\\\\-', '-'],
+      ['\\\\!', '!'],
+      ['\\\\.', '.'],
+      ['\\\\+', '+'],
+      ['\\\\~', '~'],
+    ]
+
+    replacements.forEach(([escaped, value]) => {
+      output = output.split(escaped).join(value)
+    })
+
+    return output
+      .split('\\\\' + marker)
+      .join(marker)
+      .replace(/[ \\t]+$/gm, '')
+      .trim()
+  }
+
+  function normalizedElementText(element) {
+    return normalizeGoogleDocsMarkdown(element.textContent || '')
+  }
+
+  function createAnchor(label, url) {
+    const anchor = document.createElement('a')
+    const href = url.startsWith('http') ? url : 'https://' + url
+    anchor.textContent = label
+    anchor.href = href
+    anchor.rel = 'noopener noreferrer'
+    anchor.target = '_blank'
+    return anchor
+  }
+
+  function appendInlineMarkdown(parent, text) {
+    const sourceText = normalizeGoogleDocsMarkdown(text)
+    const tokenPattern = new RegExp(
+      marker + '([^' + marker + ']+)' + marker + '|\\\\*\\\\*([^*]+)\\\\*\\\\*|\\\\[([^\\\\]]+)\\\\]\\\\((https?:\\\\/\\\\/[^\\\\s)]+|\\\\/[^\\\\s)]+)\\\\)|((?:https?:\\\\/\\\\/|www\\\\.|github\\\\.com\\\\/)[^\\\\s),]+)',
+      'g',
+    )
+    let cursor = 0
+    let match
+
+    while ((match = tokenPattern.exec(sourceText)) !== null) {
+      if (match.index > cursor) {
+        parent.append(document.createTextNode(sourceText.slice(cursor, match.index)))
+      }
+
+      if (match[1]) {
+        const code = document.createElement('code')
+        code.textContent = match[1]
+        parent.append(code)
+      } else if (match[2]) {
+        const strong = document.createElement('strong')
+        strong.textContent = match[2]
+        parent.append(strong)
+      } else if (match[3] && match[4]) {
+        const anchor = createAnchor(match[3], match[4])
+        if (match[4].startsWith('/')) {
+          anchor.removeAttribute('target')
+          anchor.removeAttribute('rel')
+        }
+        parent.append(anchor)
+      } else if (match[5]) {
+        parent.append(createAnchor(match[5], match[5]))
+      }
+
+      cursor = tokenPattern.lastIndex
+    }
+
+    if (cursor < sourceText.length) {
+      parent.append(document.createTextNode(sourceText.slice(cursor)))
+    }
+  }
+
+  function normalizeElement(element) {
+    const text = normalizedElementText(element)
+    element.textContent = ''
+    appendInlineMarkdown(element, text)
+    element.dataset.ainekioEnhanced = 'true'
+  }
+
+  function getParagraphs(root) {
+    return Array.from(root.children).filter((element) => element.tagName === 'P')
+  }
+
+  function findParagraph(root, predicate) {
+    return getParagraphs(root).find((element) => predicate(normalizedElementText(element)))
+  }
+
+  function makeHeading(paragraph, level, text) {
+    const heading = document.createElement('h' + level)
+    heading.className = 'ainekio-doc-heading'
+    appendInlineMarkdown(heading, text)
+    paragraph.replaceWith(heading)
+  }
+
+  function enhanceHeadings(root) {
+    getParagraphs(root).forEach((paragraph) => {
+      if (!paragraph.isConnected) return
+      const text = normalizedElementText(paragraph)
+      const markdownHeading = text.match(/^(#{1,3})\\s+(?:\\*\\*(.+?)\\*\\*|(.+))$/)
+
+      if (markdownHeading) {
+        makeHeading(paragraph, Math.min(markdownHeading[1].length, 3), markdownHeading[2] || markdownHeading[3])
+        return
+      }
+
+      if (/^Ainekio.*Parts Overview$/.test(text)) {
+        makeHeading(paragraph, 1, 'Ainekio - Parts Overview')
+        return
+      }
+
+      if (/^\\d+\\.\\s+.+/.test(text) || text === 'Complete Shopping List') {
+        makeHeading(paragraph, 2, text)
+        return
+      }
+
+      if (text === 'Power flow (the spine of the robot)' || text.includes('Parts list, power section')) {
+        makeHeading(paragraph, 3, text.replace(/^\\s+/, ''))
+      }
+    })
+  }
+
+  function removeElements(elements) {
+    elements.forEach((element) => {
+      if (element.isConnected) element.remove()
+    })
+  }
+
+  function buildTable(headers, rows, className) {
+    const table = document.createElement('table')
+    const thead = document.createElement('thead')
+    const tbody = document.createElement('tbody')
+    const headerRow = document.createElement('tr')
+
+    table.className = 'ainekio-enhanced-table ' + className
+
+    headers.forEach((headerText) => {
+      const cell = document.createElement('th')
+      appendInlineMarkdown(cell, headerText)
+      headerRow.append(cell)
+    })
+
+    thead.append(headerRow)
+
+    rows.forEach((row) => {
+      const bodyRow = document.createElement('tr')
+      row.forEach((cellText, cellIndex) => {
+        const cell = document.createElement('td')
+        cell.dataset.label = headers[cellIndex] || ''
+        appendInlineMarkdown(cell, cellText)
+        bodyRow.append(cell)
+      })
+      tbody.append(bodyRow)
+    })
+
+    table.append(thead, tbody)
+    return table
+  }
+
+  function buildTableFromPlans(root, startPredicate, headers, plans, className) {
+    const start = findParagraph(root, startPredicate)
+    if (!start || start.dataset.ainekioTableStart === 'true') return
+
+    const elements = []
+    const headerElements = []
+    let cursor = start
+    headers.forEach(() => {
+      if (cursor && cursor.tagName === 'P') {
+        headerElements.push(cursor)
+        cursor = cursor.nextElementSibling
+      }
+    })
+
+    if (
+      headerElements.length !== headers.length ||
+      headerElements.some((element, index) => normalizedElementText(element) !== headers[index])
+    ) {
+      return
+    }
+
+    elements.push(...headerElements)
+
+    const rows = []
+    let hasCompleteRows = true
+    plans.forEach((plan) => {
+      const cells = []
+      const sourceElements = []
+      for (let index = 0; index < plan.length; index += 1) {
+        if (!cursor || cursor.tagName !== 'P') {
+          hasCompleteRows = false
+          return
+        }
+        sourceElements.push(cursor)
+        cells.push(normalizedElementText(cursor))
+        cursor = cursor.nextElementSibling
+      }
+
+      const row = []
+      plan.forEach((cellIndexes) => {
+        row.push(cellIndexes.map((cellIndex) => cells[cellIndex]).join(' '))
+      })
+      rows.push(row)
+      elements.push(...sourceElements)
+    })
+
+    if (!hasCompleteRows || rows.length !== plans.length) return
+
+    const table = buildTable(headers, rows, className)
+    start.dataset.ainekioTableStart = 'true'
+    start.replaceWith(table)
+    removeElements(elements.slice(1))
+  }
+
+  function enhanceTables(root) {
+    buildTableFromPlans(
+      root,
+      (text) => text === 'Part',
+      ['Part', 'Interface', 'Power', 'Notes'],
+      [
+        [[0], [1], [2], [3]],
+        [[0], [1], [2], [3]],
+        [[0], [1], [2], [3]],
+        [[0, 1], [2], [3], [4]],
+        [[0], [1], [2], [3]],
+      ],
+      'ainekio-peripheral-table',
+    )
+
+    buildTableFromPlans(
+      root,
+      (text) => text === 'Part' && Boolean(findParagraph(root, (candidate) => candidate === 'Parts list, power section')),
+      ['Part', 'Qty', 'Role'],
+      [
+        [[0], [1], [2]],
+        [[0], [1], [2]],
+        [[0], [1], [2]],
+        [[0], [1], [2]],
+        [[0], [1], [2]],
+        [[0], [1], [2]],
+        [[0], [1], [2]],
+      ],
+      'ainekio-power-table',
+    )
+
+    buildTableFromPlans(
+      root,
+      (text) => text === 'Link',
+      ['Link', 'Medium', 'Direction'],
+      [
+        [[0], [1], [2]],
+        [[0], [1], [2]],
+        [[0], [1], [2]],
+        [[0], [1], [2]],
+        [[0], [1], [2]],
+      ],
+      'ainekio-signal-table',
+    )
+  }
+
+  function enhancePowerFlow(root) {
+    const start = findParagraph(root, (text) => text.startsWith('USB-C power source'))
+    if (!start || start.dataset.ainekioPowerFlow === 'true') return
+
+    const lines = []
+    const elements = []
+    let cursor = start
+
+    while (cursor && cursor.tagName === 'P') {
+      const text = normalizedElementText(cursor)
+      lines.push(text)
+      elements.push(cursor)
+      if (text.startsWith('Servo rail + 1000')) break
+      cursor = cursor.nextElementSibling
+    }
+
+    if (lines.length < 3) return
+
+    const pre = document.createElement('pre')
+    const code = document.createElement('code')
+    code.textContent = lines.join('\\n')
+    pre.append(code)
+    pre.dataset.ainekioPowerFlow = 'true'
+    start.replaceWith(pre)
+    removeElements(elements.slice(1))
+  }
+
+  function isKnownListItem(text) {
+    return [
+      /^Home PC or laptop$/,
+      /^Dedicated AI unit/,
+      /^Capable phone/,
+      /^Servo rail:/,
+      /^Rail power bus:/,
+      /^Rail ground bus:/,
+      /^Signal wires:/,
+      /^Pack protection PCB/,
+      /^Charger CC\\/CV termination:/,
+      /^NTC thermistor:/,
+      /^Buck dropout behavior:/,
+      /^Firmware guardian/,
+      /^Failure point note:/,
+      /^First-charge validation:/,
+      /^Perfboard\\/protoboard/,
+      /^Freenove ESP32-S3-WROOM CAM board/,
+      /^8.*MG90S servos$/,
+      /^2\\.54mm male/,
+      /^INMP441 I2S microphone module$/,
+      /^MAX98357A I2S amplifier module$/,
+      /^28mm/,
+      /^OLED display/,
+      /^2.*MusRock/,
+      /^HiLetgo 2S/,
+      /^18650 2S1P/,
+      /^KCD1 mini rocker switch$/,
+      /^100k/,
+      /^1000/,
+      /^M2 .*self-threading/,
+      /^M2\\.5/,
+      /^11-part printed/,
+      /^\\(maybe\\?\\)Panel-mount/,
+    ].some((pattern) => pattern.test(text))
+  }
+
+  function enhanceKnownLists(root) {
+    const children = Array.from(root.children)
+    for (let index = 0; index < children.length; index += 1) {
+      const current = children[index]
+      if (current.tagName !== 'P' || !isKnownListItem(normalizedElementText(current))) continue
+
+      const items = []
+      let cursor = index
+      while (cursor < children.length && children[cursor].tagName === 'P') {
+        const text = normalizedElementText(children[cursor])
+        if (!isKnownListItem(text)) break
+        items.push({ element: children[cursor], text })
+        cursor += 1
+      }
+
+      if (items.length === 0) continue
+
+      const list = document.createElement('ul')
+      items.forEach((item) => {
+        const listItem = document.createElement('li')
+        appendInlineMarkdown(listItem, item.text)
+        list.append(listItem)
+      })
+
+      items[0].element.replaceWith(list)
+      items.slice(1).forEach((item) => item.element.remove())
+      index = cursor - 1
+    }
+  }
+
+  function enhanceMarkdownLists(root) {
+    const children = Array.from(root.children)
+    for (let index = 0; index < children.length; index += 1) {
+      const current = children[index]
+      if (current.tagName !== 'P') continue
+
+      const firstMatch = normalizedElementText(current).match(/^[-*]\\s+(.+)$/)
+      if (!firstMatch) continue
+
+      const items = []
+      let cursor = index
+      while (cursor < children.length && children[cursor].tagName === 'P') {
+        const match = normalizedElementText(children[cursor]).match(/^[-*]\\s+(.+)$/)
+        if (!match) break
+        items.push({ element: children[cursor], text: match[1] })
+        cursor += 1
+      }
+
+      const list = document.createElement('ul')
+      items.forEach((item) => {
+        const listItem = document.createElement('li')
+        appendInlineMarkdown(listItem, item.text)
+        list.append(listItem)
+      })
+
+      items[0].element.replaceWith(list)
+      items.slice(1).forEach((item) => item.element.remove())
+      index = cursor - 1
+    }
+  }
+
+  function enhanceLabels(root) {
+    getParagraphs(root).forEach((paragraph) => {
+      if (!paragraph.isConnected || paragraph.dataset.ainekioLabel === 'true') return
+      const text = normalizedElementText(paragraph)
+      if (!/^(Part|Role|Power|Connection to robot|Included with board|Servos):/.test(text)) return
+
+      paragraph.classList.add('ainekio-doc-label')
+      paragraph.dataset.ainekioLabel = 'true'
+      normalizeElement(paragraph)
+    })
+  }
+
+  function enhanceNotes(root) {
+    getParagraphs(root).forEach((paragraph) => {
+      if (!paragraph.isConnected || paragraph.classList.contains('ainekio-parts-note')) return
+      const text = normalizedElementText(paragraph)
+      if (!/^(Architecture in one sentence:|Current GPIO budget:|All grounds common across|First-charge validation:)/.test(text)) return
+
+      paragraph.classList.add('ainekio-parts-note')
+      normalizeElement(paragraph)
+    })
+  }
+
+  function enhanceBlockquotes(root) {
+    getParagraphs(root).forEach((paragraph) => {
+      if (!paragraph.isConnected) return
+      const text = normalizedElementText(paragraph)
+      if (!text.startsWith('> ')) return
+
+      const blockquote = document.createElement('blockquote')
+      appendInlineMarkdown(blockquote, text.slice(2))
+      paragraph.replaceWith(blockquote)
+    })
+  }
+
+  function enhanceInlineMarkdown(root) {
+    root.querySelectorAll('p, li').forEach((element) => {
+      if (element.dataset.ainekioEnhanced === 'true' || element.dataset.ainekioLabel === 'true') return
+      const text = normalizedElementText(element)
+      const hasInlineMarkdown = text.includes('**') || text.includes('[') || text.includes(marker) || /(?:https?:\\/\\/|www\\.|github\\.com\\/)/.test(text)
+      if (!hasInlineMarkdown && text === element.textContent.trim()) return
+      normalizeElement(element)
+    })
+  }
+
+  function enhancePartsOverview() {
+    const root = getPartsOverviewContent()
+    if (!root) return
+
+    enhanceTables(root)
+    enhancePowerFlow(root)
+    enhanceHeadings(root)
+    enhanceKnownLists(root)
+    enhanceMarkdownLists(root)
+    enhanceLabels(root)
+    enhanceNotes(root)
+    enhanceBlockquotes(root)
+    enhanceInlineMarkdown(root)
+  }
+
+  const readyCheck = window.setInterval(() => {
+    const root = getPartsOverviewContent()
+    if (!root) return
+    enhancePartsOverview()
+    if (!root.textContent.includes('Loading document')) {
+      window.clearInterval(readyCheck)
+    }
+  }, 250)
+
+  const observer = new MutationObserver(() => enhancePartsOverview())
+  const observerCheck = window.setInterval(() => {
+    const root = getPartsOverviewContent()
+    if (!root) return
+    observer.observe(root, { childList: true, subtree: true })
+    window.clearInterval(observerCheck)
+  }, 250)
+  })()
+`}</script>

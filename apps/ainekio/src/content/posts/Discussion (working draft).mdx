@@ -1,0 +1,162 @@
+---
+title: "Discussion"
+published: 2026-07-07
+description: "Shared Ainekio discussion notes loaded from Google Docs."
+image: "/posts/ainekio/kaiju-battle-banner.webp"
+avatarImage: "/posts/generic/avatar.webp"
+authorName: "Ainekio"
+authorBio: "Robot familiar project"
+bannerType: "image"
+bannerData:
+  imageUrl: "/posts/ainekio/kaiju-battle-banner.webp"
+timelineYear: 2026
+timelineEra: "work-in-progress"
+timelineLocation: "Project discussion"
+showImageOnPost: false
+tags: [Ainekio, Robot, Discussion, MetaHuman OS]
+category: "Project Notes"
+draft: true
+lang: "en"
+---
+
+# Ainekio - Design Discussion
+
+**The working deliberation behind the project - architecture options, hardware comparisons, communication, power, parts, and open questions. The short version of what Ainekio is lives in the project overview.**
+
+## System architecture design options and considerations
+
+Option 1
+
+- Remote machine running heavy hardware broadcasting as a web server. The robot connects to a wifi network and communicates with the server. This option requires a wifi network, the robot could receive this from a local network or tethered to a network from a mobile device - the processing limits on this have fewer restrictions and the robot can be responsive and intelligent - ai models running the robot can be very large. Data for the ai models exchanged has limits if operating mobile - if the robot is using a camera higher quality video is something that must be considered, as well as the text to speech system - the current MetaHuman OS supports text to speech and speech to text, running these on the robot body would be difficult.
+
+Option 2
+
+- AI software running on mobile devices such as a cell phone and then broadcasting to the robot is an option. The robot hardware and programming can be nearly identical as the remote machine, a special app and running ai llms on the mobile device would be needed. This has limited model sizes and the training of the model needs to be considered. Background running processes like boredom services and sleep services need to be considered. This setup is almost certainly going to be implemented, maybe as phase 2. Mobile device gpu processing and ram speed and size need to be considered.
+
+Option 3
+
+- Have a beefier onboard computer for the bot - modified cell phone, raspberry pi, orange pi have been considered - this causes more concern with power consumption, it has a higher buy in, and larger form factor for the boards - but this has the option of being a fully mobile system and is the most attractive for the all in one package.
+
+Notes
+
+Likely solution is a hybrid - all 3 options in one system. Remote system can be a computer broadcasting a wifi server, it can be a fully remote session on the cloud, and remote training is possible though data rates can make it impractical to run on the cloud. MetaHuman OS has an escalation mode and remote training that could be implemented if local processing passes limits of what is practical.
+
+## Chips and hardware considered
+
+- Basic ESP32 chips were considered but do not look like a good fit for full audio/video robot behavior. They may still be useful for low-data sensor/reflex work, but they are not enough for conversational audio, vision relay, and body control all at once.
+- XIAO ESP32S3 Sense is a stronger microcontroller option now under consideration. It has ESP32-S3R8, WiFi/BLE, 8MB PSRAM, 8MB flash, onboard camera support, and a digital microphone. This makes it plausible as the small robot-side bridge/controller: connect to MetaHuman OS, receive semantic commands, send camera/mic data upstream, and drive a servo controller. It can control servos, but it cannot directly power the Sesame servo set.
+- The main benefit of the XIAO ESP32S3 Sense is the onboard camera and microphone in a very small controller package. The serious downside is that it does not remove the large motor-power subsystem. The total robot electronics package may not stay small once the required PCA9685, 5A servo rail, buck converter, capacitor, switch, wiring, and servo connectors are included. The XIAO board may be tiny, but the servo power system is not.
+- There are more exotic options such as ESP32-P4 plus ESP32-S3, but that starts becoming its own architecture rather than the smallest simple controller.
+- Raspberry Pi Zero 2 W - onboard processor, 512 mb ram - can handle audio and video, perhaps some local motion systems, perhaps a lightweight speech to text module. This is a relatively affordable option with a small form factor compromise.
+- Raspberry Pi 5, Orange Pi and others, ram 1-32gb - this would be a good choice for fully autonomous bots but size, cost, and power consumption seem to be issues we need to consider.
+
+Notes
+
+The current board being most considered is Raspberry Pi Zero 2 W - I'm looking into what ram is needed for tasks, how fast a non-gpu computer system is.
+
+## Communication considerations
+
+- How the robot talks to the brain needs to be defined before hardware matters. Leaning toward the robot always dialing out (websocket or similar) to a known address rather than opening ports at home - a cloudflare worker or small relay could be the meeting point.
+- Commands from the brain should probably be intent level (sit, stop, look around, speak this) and let the robot firmware figure out the servo work. Keeps latency and model weirdness from becoming physical problems.
+- What happens to commands during a disconnect - queue them or drop them? Dropping stale commands seems safer. A move command from a minute ago firing on reconnect is a problem.
+- Video bandwidth is the big unknown - full stream vs frames on request vs onboard motion detection that only sends when something happens. Need to test what the Pi Zero and the network can actually sustain. Specs claim up to 1080p - this would be good if we want a first person view mode - we could fall back to the ultrasonic option otherwise. Ultrasonic likely first step for cost - more research needed.
+- Heartbeat both directions so each side knows the other is alive. I dislike polling systems as it is wasted processing. But may be needed for sleep systems and low power modes. :(
+
+## Power considerations
+
+- Servos stall and stall current is significant - servo power and logic power probably need to be on separate rails so a stall doesn't brown out the board mid-move.
+- Need real numbers: measure worst case draw with legs loaded, not spec sheet numbers.
+- Low battery behavior - warn threshold (refuse new movement), cutoff threshold (safe posture, shut down motion).
+- Physical power switch that actually cuts servo power, not just software.
+- Need to check what the Sesame design already handles here before buying parts - possible some of this is solved.
+
+XIAO ESP32S3 Sense power note:
+
+- The XIAO ESP32S3 Sense can handle the controller/sensor side, not the servo power side. It can be powered from 5V USB-C or a single-cell lithium battery input around 3.7V.
+- Official Seeed numbers put webcam use around 5V/~140mA average and ~347mA peak during image capture. Microphone recording is much lighter, around 5V/54.58mA average and 86.7mA peak. WiFi active is listed around 110mA.
+- Practical controller budget: reserve 5V 0.5A-1A for XIAO + camera + mic + WiFi, with extra margin if adding an I2S speaker amplifier.
+- Do not treat the XIAO 5V pin as a motor rail. It is a board power input/output point, not a high-current servo distribution bus. The GPIO pins are control signals only.
+- The onboard microphone uses PDM/I2S on GPIO42 clock and GPIO41 data in Seeed's example. The camera also consumes a set of dedicated camera pins. This makes direct 8-servo PWM from the XIAO unattractive even if it is technically possible.
+- Better architecture: XIAO ESP32S3 Sense handles WiFi, mic, camera, command bridge, and safety logic; PCA9685 handles the 8 servo PWM outputs over I2C; a separate 5V servo rail powers the servos.
+- This means the XIAO option should be judged as XIAO + PCA9685 + servo rail hardware, not as the XIAO board alone. Its advantage is sensor integration and small controller footprint, not eliminating the bulky power-distribution problem.
+
+Servo rail note:
+
+- Servos do not provide power; they consume it and provide torque/motion.
+- The official Sesame BOM says Sesame needs at least 5V 3A available at the rails. Treat that as a minimum, not comfortable headroom.
+- Practical Ainekio estimate: normal movement may be around 1A-3A total, heavy movement around 3A-5A, and a bad multi-servo stall can exceed 5A.
+- Recommended test target: 5V 5A buck converter for the servo rail, common ground with the controller, and a 1000uF or larger electrolytic capacitor near the servo rail.
+- The servo rail is physically large compared with the microcontroller. It is not just a trace or a signal header: it means a 5A-capable buck converter, heavier power wiring, servo power distribution, connector space, a bulk capacitor, and a physical cutoff switch. This may dominate the internal packaging more than the XIAO board itself.
+- Do not power the servo rail through the XIAO. Wire the system as: battery to main switch, then to the 5V 5A servo buck, then to the PCA9685 servo V+ rail, with a separate logic rail for the XIAO.
+
+Original Sesame rail compatibility:
+
+- The original Sesame robot already uses a servo power rail. In the hand-wired S2 Mini build this is literally a 5V rail and ground rail across the servo headers. In the distro-board builds, the custom board acts as the organized rail and signal distribution system.
+- A XIAO-based Ainekio controller could reuse the original Sesame servo rail concept, but it should not send servo current through the XIAO. The safe reuse is: Sesame rail powers servo V+ and servo ground, XIAO has its own clean logic power, and all grounds are common.
+- The easiest XIAO prototype path is probably a hand-wired Sesame-style rail plus PCA9685, or a small servo breakout/distribution board plus PCA9685.
+- A stock Sesame distro board is not automatically a clean XIAO carrier. It may already include or expect its own ESP32/S2/S3 controller, so the servo signal lines need to be inspected before connecting XIAO outputs. Two controllers must not drive the same servo signal pins at the same time.
+- If using a Sesame V3 board, it may be more sensible to treat that board as the body controller and use the XIAO as a camera/mic module, rather than trying to replace the V3 board's onboard controller with the XIAO.
+
+## Parts list -
+
+modified Sesame BOM for Pi Zero 2 W
+
+Based on the [official Sesame BOM](https://github.com/dorianborian/sesame-robot) under `hardware/bom`. Keeping the mechanical and servo side stock, swapping the brain and adding senses.
+
+Kept from stock BOM:
+
+- MG90S all-metal micro servos ×8 (buy 10 for spares)
+- 0.96" SSD1306 I2C OLED (face) - talks I2C, works fine on the Pi, can share the bus with the servo board (different addresses, 0x3C vs 0x40)
+- KCD1 rocker power switch, panel mount
+- 22AWG silicone wire (power bus), 30AWG silicone wire (signal), heat shrink, small zip ties
+- M2 × 5mm self-threading screws (~40), M2.5 × 5mm machine screws (~10, servo horns - included horn screws are too short)
+- XT30 female pigtail (never cut the factory battery connector)
+- 11-part printed frame from the repo STLs
+
+Replaced - ESP32 section out, this in:
+
+- Raspberry Pi Zero 2 W (with pre-soldered header, or a 2×20 header to solder)
+- microSD card, 32gb A1 class
+- Adafruit 16-Channel PWM/Servo Bonnet (PCA9685) - this is the servo bus. Same 65×30 footprint as the Zero, stacks directly on the GPIO header, has its own screw terminal for servo power so the servo rail never touches the Pi's 5v. Only 8 of 16 channels used, leaves headroom for a tail or head servo later.
+
+Added - senses the ESP32 build never had:
+
+- Pi camera module - Zero uses the smaller 22-pin CSI connector, so need the Zero-specific camera cable/adapter, not the standard one
+- I2S MEMS microphone (INMP441 or SPH0645) - the Zero has no mic input, this is not optional for listening
+- I2S amplifier (MAX98357A) + small speaker, 4 or 8 ohm, 1-2w, ~20-30mm - the Zero has no analog audio out either
+
+Power - upgraded from stock:
+
+- Stock BOM calls for 5v 3a minimum at the rails for servos alone. Treat 5v 5a as the safer target for testing. If using the Pi Zero 2 W, use two bucks - one for the servo rail (into the bonnet's screw terminal), one dedicated to the Pi. Two bucks gets the rail separation for free.
+- If using the XIAO ESP32S3 Sense instead of the Pi, still use a PCA9685 or equivalent servo controller and a separate 5v 5a servo rail. The XIAO may command the servos, but it must not be the path that powers them. Budget 5v 0.5a-1a for the XIAO/camera/mic/WiFi side, plus speaker-amp margin if used.
+- The 5v 5a servo rail is a large physical subsystem: buck converter, heavier wire, connector/distribution space, capacitor, and switch. It needs a real packaging check, not just an electrical line item.
+- 1000µF electrolytic cap on the servo rail (stock BOM has this for the V1 board, keep it)
+- Battery - stock option is a 3S 450mah lipo with XT30, high discharge. With the Pi added, runtime on 450mah will be short. Look at 3S 650-850mah if it fits the cavity - fitment check needed.
+
+## Size fitment
+
+The numbers:
+
+- Pi Zero 2 W: 65 × 30 × 5mm bare, ~13mm with header
+- XIAO ESP32S3 Sense: 21 × 17.8mm board footprint, but taller with the Sense camera expansion installed
+- Servo bonnet stacked on top: total stack roughly 16-20mm tall, still 65 × 30 footprint
+- PCA9685 board size depends on the exact board, but the servo power wiring and 5A rail may matter more than the logic board footprint
+- What the body was designed around: Lolin S2 Mini (~34 × 25mm) or ESP32 DevKitC + distro board (~55 × 28mm footprint on 5mm standoffs)
+
+So the Pi stack is ~10mm longer than anything the frame was drawn for. Width and height look plausible, length is the question. The XIAO board is much smaller, but that does not make the total electronics package tiny by itself: the servo rail, 5A buck converter, capacitor, switch, and servo connectors are the bulky part that still has to fit. Once those parts are counted, XIAO + servo rail may be physically closer to other controller options than the bare board dimensions suggest.
+
+Plan: the repo has parametric STEP and Fusion 360 sources for every printed part. Pull the body/internal frame into Fusion, measure the actual cavity, and either it fits or the frame gets stretched ~10-15mm. A stretched body also buys room for the mic, speaker, bigger battery, and servo power rail hardware, so modifying the frame may be worth doing regardless. Camera needs a hole or window in the shell/head - decide placement when the frame is open in CAD anyway.
+
+Downstream note: the stock firmware and Sesame Studio are ESP32/Arduino, so swapping to the Pi means rewriting the motion layer against the PCA9685 (python, well-trodden libraries exist). The kinematics/pose data from Sesame Studio can probably be ported. This is real work, write it into the plan.
+
+## Open questions
+
+- Should the hardware target stay Pi Zero 2 W, or should the first physical controller be XIAO ESP32S3 Sense + PCA9685?
+- How much ram does the Pi Zero 2 W actually need for camera + mic + network at once - is 512 mb enough with headroom?
+- Lightweight local speech to text on the Zero - is this real or is this fantasy?
+- Can XIAO ESP32S3 Sense reliably relay useful camera snapshots/low-FPS video and microphone audio while also receiving movement commands over WiFi?
+- Ultrasonic sensor data rates - cheap enough for the esp32-only version?
+- What does Sesame's stock power and servo setup actually look like? (Partly answered - stock needs 5v 3a at the rails, V1 build uses buck + 1000µF cap, battery routes through the rocker switch before the rails.)
+- Actual internal cavity length of the Sesame body - measure from the STEP files. Does 65mm fit or does the frame get stretched?
+- Does a 3S 650-850mah pack fit the battery cavity, or does that also depend on stretching the frame?
+- Phone-as-brain (phase 2?) - which app framework, and can background services survive android battery management?

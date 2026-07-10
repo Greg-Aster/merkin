@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./constants": "./src/constants/index.ts",
     "./types": "./src/types/index.ts",
+    "./types/*": "./src/types/*.ts",
     "./utils": "./src/utils/index.ts",
     "./utils/*": "./src/utils/*.ts",
     "./services": "./src/services/index.ts",

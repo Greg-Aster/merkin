@@ -111,6 +111,7 @@ const pdfButtonLabel = useDownloadFile
                  ]}
                  data-post-date={formatDateToYYYYMMDD(post.data.published)}
                  data-post-timestamp={post.data.published.getTime()}
+                 data-post-slug={post.slug}
                  data-post-title={post.data.title}
                  data-post-category={post.data.category}
                  data-post-tags={post.data.tags.join(',')}

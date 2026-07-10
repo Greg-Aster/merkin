@@ -135,6 +135,34 @@ export const updatesSchema = z.object({
     .default([]),
 })
 
+export const quizOutcomeSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  emoji: z.string().optional(),
+})
+
+export const quizNodeSchema = z.object({
+  text: z.string(),
+  options: z
+    .array(
+      z.object({
+        text: z.string(),
+        trait: z.string().optional(),
+        next: z.string(),
+      }),
+    )
+    .min(1),
+})
+
+export const quizSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  bannerType: z.string().optional().default('none'),
+  initialQuestion: z.string(),
+  outcomes: z.record(quizOutcomeSchema),
+  nodes: z.record(quizNodeSchema),
+})
+
 export const aboutSchema = z.object({
   title: z.string(),
   description: z.string().optional(),

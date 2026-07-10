@@ -1,5 +1,5 @@
 {
-  "count": 80,
+  "count": 79,
   "items": [
     {
       "id": "explainer",
@@ -333,44 +333,6 @@
       "sourcePath": "reader/first-contact-manual/chapter-1.mdx",
       "collection": "reader",
       "url": "/reader/first-contact-manual/chapter-1/",
-      "title": "Chapter 1: The Indifferent Cosmos and Its Insidious Inhabitants",
-      "description": "A comprehensive catalog of alien life forms that transcend human understanding - organized by scale from quantum manipulators to cosmic entities. Your field guide to what's waiting out there to turn you into space-jello.",
-      "published": "2025-05-29T00:00:00.000Z",
-      "updated": null,
-      "draft": true,
-      "tags": [
-        "First Contact",
-        "Xenobiology",
-        "Interstellar Travel",
-        "Existential Threats",
-        "Cosmic Horror"
-      ],
-      "category": "MEGA MEAL",
-      "image": "/first-contact/aliens.webp",
-      "bannerType": "image",
-      "bannerData": {
-        "category": "MEGA MEAL",
-        "startYear": 1,
-        "endYear": 1e+100,
-        "background": "/posts/timeline/chronos.png"
-      },
-      "timelineYear": 7652,
-      "timelineEra": "awakening-era",
-      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
-      "isKeyEvent": true,
-      "isLevel": false,
-      "levelId": null,
-      "series": "first-contact-manual",
-      "seriesPart": 1,
-      "seriesTitle": "The Interstellar Traveler's First Contact Manual",
-      "contentFormat": "manual"
-    },
-    {
-      "id": "first-contact-manual/chapter-1 (copy)",
-      "slug": "first-contact-manual/chapter-1 (copy)",
-      "sourcePath": "reader/first-contact-manual/chapter-1 (copy).mdx",
-      "collection": "reader",
-      "url": "/reader/first-contact-manual/chapter-1 (copy)/",
       "title": "Chapter 1: The Indifferent Cosmos and Its Insidious Inhabitants",
       "description": "A comprehensive catalog of alien life forms that transcend human understanding - organized by scale from quantum manipulators to cosmic entities. Your field guide to what's waiting out there to turn you into space-jello.",
       "published": "2025-05-29T00:00:00.000Z",

@@ -1,7 +1,7 @@
 ---
 title: "Motion Systems"
-published: 2026-07-06
-description: "Investigation and plan for Ainekio's Sesame-based motion layer, from stock ESP32 firmware to a Pi/PCA9685 module with virtual testing."
+published: 2026-07-08
+description: "Current state of Ainekio's MetaHuman-driven Sesame motion stack, simulator bridge, supported commands, and Pi/PCA9685 hardware path."
 image: "/posts/ainekio/city-battle-banner.webp"
 avatarImage: "/posts/generic/avatar.webp"
 authorName: "Ainekio"
@@ -19,251 +19,315 @@ draft: true
 lang: "en"
 ---
 
-# Ainekio Motion Systems - Investigation and Plan
+# Ainekio Motion Systems - Current Working State
 
-The robot body is based on the Sesame bot, but running a Raspberry Pi (likely a Pi Zero 2 W) instead of the stock ESP32. The existing motion system is ESP32 firmware, so the job is to understand what that firmware actually does, then plan a new motion module and related systems that run on Linux. Unusual constraint: this will run in a virtual environment first and get rigorously tested before it ever touches the chassis.
+Ainekio's motion stack is now less theoretical than the first plan. The current working path is a MetaHuman OS brain sending semantic robot commands to an Ainekio robot-side adapter, which drives the local Sesame simulator through a small bridge. The Raspberry Pi Zero 2 W and PCA9685 servo bonnet remain the hardware target, but the first functional milestone is the simulator loop: prove command interpretation, delivery, safety boundaries, and visible robot behavior before buying parts or touching servos.
 
-## What the existing ESP32 system currently shows
+The important architecture rule is unchanged: the AI does not get raw servo control. MetaHuman can ask for named robot actions such as `walk`, `wave`, `dance`, or `stop`. Ainekio translates those semantic actions into the simulator or hardware command format.
 
-There are two source tracks that must not be blurred together:
+## Current Architecture
 
-- Prior upstream research on the official Sesame robot firmware and companion app indicated a fuller ESP32 firmware with HTTP command/status endpoints, face assets, a captive portal, and a Python companion app.
-- The local simulator checkout reviewed during this pass contains a simulation sketch at `sesame/sesame.ino`, movement data in `sesame/movement-sequences.h`, a generated `docs/robot.urdf`, and mesh assets under `docs/mesh` and `onshape`. That local checkout is useful evidence for servo order, sequences, the URDF body, and simulator assets, but it does not by itself prove the official HTTP API contract.
+The current development stack is:
 
-The checked simulator sketch is Arduino-ESP32 and uses `ESP32Servo.h` with eight servos. It defines the Sesame distro board pinout, subtrim values, `frameDelay`, `walkCycles`, and `motorCurrentDelay = 20` ms. The movement header defines the servo order as `R1, R2, L1, L2, R4, R3, L3, L4` and implements pose/animation functions as direct `setServoAngle(...)` calls with delays and loops. That makes the motion system pose/keyframe playback, not realtime gait kinematics. For the Python port, the first real movement content should come from translating those pose functions into sequence data, not inventing a new gait engine.
+```text
+MetaHuman OS Environment Mode
+        |
+        |  event-driven environment bridge stream
+        v
+Ainekio robot-side adapter
+        |
+        |  semantic command translation + safety boundary
+        v
+Ainekio simulator shim
+        |
+        |  browser event stream
+        v
+Sesame robot simulator browser page
+        |
+        |  simulator UART command path
+        v
+Stock Sesame simulator motion routines
+```
 
-The HTTP API claim needs a source check before it becomes a hard contract. Prior research says the stock firmware exposes semantic commands over endpoints such as `/api/command` and `/api/status`, with command names like walk, dance, wave, swim, pushup, bow, shake, idle, stop, and rest. The simulator sketch I checked uses serial/debug command routing and commented server hooks, so the exact target firmware and companion repo still need to be re-read before `esp32-http` is treated as implemented architecture.
+MetaHuman OS is the remote brain. It runs at the LAN address `http://192.168.0.44:4321` during development. The Ainekio adapter connects out to that address over WiFi or localhost networking, posts its observation/capability state, then keeps a persistent server-sent event stream open for incoming actions.
 
-Useful details that are locally supported now:
+The local simulator stack runs three processes from the Ainekio repo:
 
-- Brownout/current staggering is real in the simulator sketch: every servo write delays through `motorCurrentDelay`.
-- Subtrim, per-servo angle commands, frame delay, and walk-cycle tuning exist in the simulator sketch or adjacent simulator tooling and are good references for a future tuning UI.
-- The browser simulator source includes robot geometry: URDF plus STL/OBJ mesh assets. The Megameal side now uses that path: the simulator URDF and Onshape STL parts are converted into avatar-owned GLB meshes for the visible Ainekio/Sesame player avatar.
-- ESP32Servo is a dependency of the simulator sketch, but the exact official firmware version pin and any version-specific servo bug should be reverified against the target firmware docs before this project relies on that detail.
-- Any stock HTTP API should be treated as trusted-local-network only unless the verified firmware proves otherwise. The Ainekio bridge remains the outward boundary.
+```sh
+./start-ainekio-sim-stack.sh
+```
 
-## Three architecture options
+That starts:
 
-**Option A - keep the ESP32 as the motion controller.** Pi rides onboard for senses and network, ESP32 keeps running stock (or lightly modified) firmware, Pi sends commands to it over the verified stock API or serial. Least motion work, keeps proven movement sequences and the brownout stagger, and gets servo/logic rail separation for free since they're separate boards. Cost: two boards in a small body, and the ESP32 firmware becomes a dependency.
+- Sesame simulator: `http://127.0.0.1:8765/`
+- Ainekio simulator shim: `http://127.0.0.1:8788/`
+- Shim monitor: `http://127.0.0.1:8788/monitor`
+- Ainekio adapter, pointed at MetaHuman OS and session `ainekio-sim-1`
 
-**Option B - full Pi replacement.** Pi Zero 2 W + PCA9685 servo bonnet, motion layer rewritten in Python. One board stack, full ownership, everything in one OS. Cost: the motion module has to be written, and Linux is not a realtime OS - though keyframe playback at Sesame's animation speeds doesn't need hard realtime, and the PCA9685 generates the actual PWM in hardware, so timing jitter on the Pi side only affects when a pose starts, not the pulse quality.
+This is not the final robot runtime. It is the development proving ground for the slave brain.
 
-**Option C - all-in-one on a bigger Pi.** Pi 5 class board, everything onboard including possibly local STT/TTS and vision models. This is the "powerful raspberry pi" future case. Same motion module as Option B - which is the point. If the motion module is written properly, A/B/C are deployment choices, not rewrites.
+## What Works Now
 
-Current lean: build the motion module as if Option B is the target, but keep the semantic command vocabulary close to the stock system so Option A can still work as a fallback during hardware bring-up. The exact ESP32 transport is not locked until the target firmware API is reverified.
+MetaHuman Environment Mode now understands Ainekio as a robot environment, not a Megameal-specific environment. The environment graph can take normal text such as "please walk forward 5 units" and produce a typed robot action.
 
-## Efficiency and where processing lives - undecided, for consideration
+The bridge is event-driven. The old action polling path has been removed from this work path because it was wasteful and unclear. The adapter opens a persistent stream at the MetaHuman environment bridge and receives pushed action events. The stream sends a handshake and heartbeats, and the adapter republishes observations so MetaHuman knows the robot session is alive.
 
-For motion alone, the ESP32 is the better tool. Microcontroller, hardware-timed PWM, no OS in the way, tiny power draw, instant on. The Pi runs full Linux, draws roughly 0.6-3w, boots in ~30 seconds, and the OS can interrupt timing. If Ainekio were only a walking robot, the Pi swap would be strictly worse.
+The Environment Bridge Out node now reports clear delivery state. If the Ainekio adapter is not connected, MetaHuman returns a user-visible message instead of silently accepting a movement command. The expected stopped-adapter message is:
 
-But the ESP32 fundamentally cannot contain STT, TTS, or vision understanding - a few hundred kb of ram, no meaningful ML acceleration. What an ESP32 *can* do is capture and forward: I2S mic streaming raw audio over wifi, ESP32-CAM style JPEG frames, and newer S3 chips can do wake-word detection onboard. Transcription, speech synthesis, and image understanding have to happen somewhere bigger - onboard SBC or across the network.
+```text
+I understood the environment command, but no robot adapter is connected for session ainekio-sim-1. Start the Ainekio adapter and try again.
+```
 
-That gives three honest placements (overlapping with but not identical to the architecture options above):
+When the adapter is connected, commands are queued to the stream, received by Ainekio, translated into motion, sent to the simulator shim, and reported back to MetaHuman as completed.
 
-- **ESP32 captures and forwards everything, no Pi at all.** Mic and camera stream over wifi straight to MetaHuman OS, which does all STT/TTS/vision. Cheapest, lightest, most power efficient, and the intelligence already lives off-board by design - so this is a legitimate minimal v1, not a hack. Costs: robot is completely helpless offline, constant raw streaming eats bandwidth and battery, and ESP32 audio quality/latency is mediocre.
-- **Pi only** (the current parts list). One board owns motion, senses, and network. The Python-servo inefficiency is mostly handled by the PCA9685 doing the actual PWM in hardware - the Pi just sends target angles over I2C. Perspective on power: 8 MG90S servos spike at 10-20w when moving; the Pi's 1-3w is noise next to that. The Pi only really costs battery at idle, which sleep states can address.
-- **Both boards.** Microcontroller does realtime motion and reflexes, SBC does perception and network - this is the standard pattern in real robotics (drone flight controller + companion computer), not a compromise. ESP32 keeps its proven firmware, stagger, and instant-on safety; Pi handles camera, mic, speaker, and the bridge, and commands the ESP32 over the verified stock API or serial. Costs: two boards in a small cavity, two power consumers, two codebases to maintain.
+## Current Command Surface
 
-STT/TTS placement specifically: OS-side only is the right call for the Zero 2 W. Local STT on a Zero (Vosk small model) is possible but sluggish, Whisper is painful, Piper TTS runs but slowly. Sane split for now - wake word onboard (cheap), everything else in MetaHuman OS. Onboard speech becomes realistic on Pi 5 class hardware, which is Option C territory.
+The current semantic command vocabulary is based on the stock Sesame motion routines exposed by the simulator firmware path. Ainekio and MetaHuman now agree on these command names:
 
-None of this is decided. The motion module design doesn't force the choice - a verified ESP32 passthrough backend covers the two-board path, the pca9685 backend covers the Pi-only path, and the forwards-everything path skips the motion module's hardware backends entirely and just uses stock firmware.
+| Intent | Semantic command | Simulator serial command |
+|---|---:|---:|
+| Walk forward | `walk` | `run walk` |
+| Walk backward | `backward` | `rn wb` |
+| Turn left | `left` | `rn tl` |
+| Turn right | `right` | `rn tr` |
+| Stand / stop / idle | `stand`, `stop`, `idle` | `run stand` |
+| Rest | `rest` | `run rest` |
+| Wave | `wave` | `rn wv` |
+| Point | `point` | `rn pt` |
+| Dance | `dance` | `rn dn` |
+| Swim | `swim` | `rn sw` |
+| Cute pose | `cute` | `rn ct` |
+| Pushup | `pushup` | `rn pu` |
+| Freaky motion | `freaky` | `rn fk` |
+| Bow | `bow` | `rn bw` |
+| Worm | `worm` | `rn wm` |
+| Shake | `shake` | `rn sk` |
+| Shrug | `shrug` | `rn sg` |
+| Play dead | `dead` | `rn dd` |
+| Crab motion | `crab` | `rn cb` |
 
-## The motion module plan
+The natural-language parser handles common phrasing such as "walk forward five units," "turn right," "do a push up," and "play dead." It is intentionally conservative. Debug, calibration, subtrim, and direct servo-angle commands are not exposed to the AI command surface.
 
-A Python package, provisionally `ainekio-motion`, in three layers with swappable backends - same trick as the MetaHuman interface nodes.
+## Simulator Control Boundary
 
-**Command surface (top).** Speaks semantic robot commands rather than raw servo angles. The preferred compatibility target is the stock firmware contract once the exact `/api/command`, `/api/status`, command-name, and face-name details are reverified. The Ainekio bridge connects here. Probably add a WebSocket alongside HTTP for outbound telemetry (battery, pose state, heartbeat) since the overview doc already wants that.
+The simulator bridge does not bypass the Sesame simulator's motion code. That point matters.
 
-**Sequence engine (middle).** Loads keyframe/pose sequences and plays them: pose timing, walk cycles, and the servo stagger for current management. First sequences come from porting `movement-sequences.h`; the local simulator copy shows direct pose functions and servo angle calls, so this is translation, not invention. Sesame Studio's slider/capture workflow could eventually export straight to the Python format instead of C++. Also owns the safety behaviors from the overview doc: stop always wins, movement duration limits, refuse commands below battery threshold.
+An earlier experiment tried direct joint manipulation inside the browser simulator. That was removed. The current browser shim sends the simulator's own serial commands through the simulator UART path, for example `rn wv` for wave or `run walk` for walk. This keeps Ainekio aligned with the simulator's programmed routines instead of inventing a separate hidden movement system.
 
-**Servo backend (bottom).** An interface with at least three implementations:
+The shim still shows an overlay and a monitor page for debugging. Those are diagnostic surfaces only. The actual simulator command path is the Sesame runtime's UART command route.
 
-- `pca9685` - the real one, driving the Adafruit bonnet over I2C
-- `virtual` - no hardware, publishes joint angles as data so the virtual environment can consume them
-- `esp32-passthrough` - deferred passthrough that forwards commands to a stock Sesame over the verified stock transport, likely HTTP if the prior API research checks out, or serial if that is the safer bring-up path
+## Ainekio Adapter State
 
-The virtual backend is what makes "rigorously tested before it touches the chassis" real. The same sequence engine that will drive metal runs headless, and its joint output can drive the simulated articulated body.
+The adapter lives in `/home/greggles/Ainekio/motion/src/ainekio_motion/adapter.py`. It currently:
 
-## Virtual environment fit
+- publishes an environment observation to MetaHuman OS
+- advertises `robotCommand`, `move`, `stop`, and `sendText` actions
+- connects to `/api/environment-bridge/stream`
+- handles stream `connected`, `heartbeat`, and `status` events
+- translates `robotCommand` actions into Ainekio `MotionCommand` objects
+- still accepts legacy `move` actions for compatibility
+- acknowledges `sendText` actions without trying to move
+- rejects stale actions so old movement does not fire after reconnect
+- runs the virtual backend and reports completion back to MetaHuman
+- optionally publishes motion payloads to the local simulator shim
 
-This connects to the Step 1 bridge work. The Megameal environment bridge already moves observations and semantic actions between MetaHuman OS and a body. The motion module slots underneath: MetaHuman sends `walk` through the bridge, the motion module's sequence engine plays the walk keyframes, and the virtual backend emits joint angles.
+The adapter can be started directly with:
 
-Staging inside the virtual environment mirrors what the Step 1 doc already says: conversation-only first, then wasd-style movement (which maps to command-level motion - walk, turn, stop - no joints needed), then a virtual body with actual servo points and joints driven by the sequence engine. That last stage is where the motion module gets its real testing, because the exact keyframes that will move the physical servos are what drive the virtual body. The Megameal avatar with jointed legs is the test rig, and for the Sesame simulator the body should move from physics contact rather than root-motion displacement.
+```sh
+./start-ainekio-adapter.sh
+```
 
-The Megameal side has now taken the literal robot-body path. The Sesame simulator URDF is converted into one GLB per simulated rigid body, and those meshes attach to the same chassis, leg, and foot bodies that the physics rig moves.
+or as part of the full simulator stack:
 
-## Implementation progress
+```sh
+./start-ainekio-sim-stack.sh
+```
 
-Started the first motion-module slice in the Ainekio robot repo at `/home/greggles/Ainekio/motion`. The work is intentionally repo-local for now: no Megameal, MetaHuman OS, or Sesame simulator source edits until those decisions are made separately.
+## Motion Module State
+
+The Python motion module is the robot-body boundary. It is intentionally small and standard-library-first so it can stay realistic for the Pi Zero 2 W target.
 
 Current implemented pieces:
 
-- Semantic robot command model, with no raw servo-angle API for AI callers.
-- Virtual joint telemetry path for simulator adapters. The current Ainekio code still carries `RootMotionIntent` fields from the earlier adapter plan; that is now compatibility debt for the Sesame simulator path. The Megameal robot simulator is taking a literal physics approach: servo targets move articulated bodies, and contact with the world generates displacement.
-- TTL-aware reconnect catch-up helper. It can do a one-shot reconnect read, but expired actions are discarded so stale movement is not replayed.
-- Safety controller with e-stop latch, low-battery lockout, lease expiry, stale-command stop, and offline idle fallback.
-- Sequence engine with provisional Sesame servo names, basic built-in sequences, angle clamping, and per-servo start staggering for brownout/current management.
-- Virtual backend that emits joint telemetry for a future Megameal adapter. It currently preserves the legacy root-motion field in telemetry, but the Megameal Sesame adapter should ignore or remove that path rather than using it for locomotion.
-- Disabled physical backend guard that refuses hardware actuation unless hardware is explicitly enabled in config.
-- JSON config loader and `config.example.json` for bridge URL, ports, backend, telemetry, and safety settings so destinations do not become hardcoded constants.
+- semantic robot command enum
+- command alias parsing
+- simulator serial-command mapping
+- virtual backend
+- sequence engine with provisional Sesame servo order
+- guarded PCA9685 backend placeholder that refuses hardware actuation unless explicitly enabled
+- safety controller for e-stop, low battery, stale commands, command lease expiry, and offline fallback
+- JSON config loader
+- focused unit tests
 
+Current local servo-frame sequences exist for:
 
-The important boundary decision from this slice: the motion module owns the robot-body behavior and physical safety, but Megameal owns the virtual physics simulation. Joint telemetry is the bridge data. For the literal robot simulator, Megameal should not fake movement with root motion; it should let the servo-driven body interact with the world and move from physics.
+- `rest`
+- `stand`
+- `idle`
+- `stop`
+- `walk`
+- `backward`
+- `left`
+- `right`
+- `wave`
 
-## Megameal-side simulator progress
+The expanded commands such as `dance`, `pushup`, `bow`, and `dead` are supported through the Sesame simulator serial command path, but their full Python servo-frame sequences still need to be ported if the Pi/PCA9685 backend is going to own those motions directly.
 
-Megameal now has the player-avatar side of the simulator working as a visible, articulated robot body. The selected avatar is `player_avatar_ainekio_sesame`, not the older ball-of-light default. That avatar activates the `ainekio-sesame` physics rig and uses GLB robot meshes generated from the Sesame simulator URDF. The old generic square/player mesh is no longer the Ainekio/Sesame render path.
+## MetaHuman Environment Mode State
 
-The current Megameal-side data flow is:
-
-1. Avatar selection loads the Ainekio/Sesame player avatar package.
-2. The runtime registers the Ainekio/Sesame articulated physics rig.
-3. The rig spawns one chassis body, four upper-leg bodies, and four foot bodies.
-4. Each body has a simplified collider for simulation and a visible GLB robot mesh for rendering.
-5. Servo target events use `servo-target-json-v1`.
-6. The DEV-only game bridge can submit a generic `submitMotionEvent` command to the running game.
-7. Master Control exposes Megameal-owned neutral and step-cycle test buttons that send registered preset IDs through the bridge; the installed level package resolves those IDs to avatar-owned Ainekio/Sesame motion events on the runtime side.
-
-This makes Megameal end-to-end compatible on its side: a motion event can be created in Megameal, resolved through the installed player/avatar package, sent through the dev bridge, queued in the runtime, applied to the eight servo joints, and rendered on the visible robot body. The Ainekio-side adapter is still future work and should connect to the same `servo-target-json-v1` shape without changing the Ainekio motion module's internal output format.
-
-Important limitations:
-
-- The current Megameal test sequences are simulator harness motions, not the final physical movement library.
-- The colliders are simplified proxies sized to the generated meshes; they are not triangle-mesh servo bodies.
-- The Megameal bridge command validates generic motion event shape, but the future Ainekio adapter still needs to translate Ainekio virtual backend output into the Megameal event path.
-- No root-motion displacement is used for the Ainekio/Sesame robot. Any body movement should come from servo-driven physics contact.
-
-## STT, TTS, vision, sensors
-
-Not motion, but the plan has to leave room:
-
-- STT/TTS - currently supported OS-side only (MetaHuman does the talking). Onboard is possible later, more likely on Option C hardware than a Zero. The motion module should not own speech; speech/text and audio output belong to a separate audio service.
-- Vision - undecided between a full camera and ultrasonic sensors. These are different jobs: the camera is for the brain (observations up the bridge), ultrasonic is for the body (local reflexes - don't walk off the table, stop before the wall). Could be both. Ultrasonic reflex handling belongs in the motion module's safety layer since it has to work without the network. Camera does not belong in the motion module at all.
-- Sensor data goes up the same telemetry channel as battery and pose state.
-
-## Motion system file inventory
-
-### Ainekio motion module
-
-- `/home/greggles/Ainekio/motion/README.md` - repo-local overview for the standalone motion module.
-- `/home/greggles/Ainekio/motion/config.example.json` - example configuration for backend, bridge, telemetry, and safety settings.
-- `/home/greggles/Ainekio/motion/pyproject.toml` - Python package/test configuration.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/commands.py` - semantic command model for robot actions.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/sequences.py` - sequence/keyframe playback, servo angle clamping, and stagger behavior.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/backend.py` - backend interface and current virtual/guarded hardware backend boundary.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/bridge.py` - bridge-facing helpers, including TTL-aware catch-up behavior.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/safety.py` - e-stop, battery, stale-command, lease, and offline fallback state handling.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/config.py` - JSON config loader.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/types.py` - shared motion-module data types.
-- `/home/greggles/Ainekio/motion/tests/` - focused tests for bridge, command, config, safety, and sequence behavior.
-
-### Megameal simulator runtime
-
-- `apps/game.megameal/src/game/physics-rigs/index.ts` - generic articulated-rig runtime, servo target queue, TTL filtering, rig spawning, renderable body attachment, and root body follow.
-- `apps/game.megameal/src/game/runtime/index.ts` - runtime composition point that registers the selected player physics rig and exposes `submitMotionEvent(...)`.
-- `apps/game.megameal/src/engine/modules/physics/index.ts` - generic physics module contracts for rigid bodies, colliders, revolute joints, and motor targets.
-- `apps/game.megameal/src/engine/adapters/rapier/index.ts` - Rapier implementation of the generic physics joint/motor contract.
-- `apps/game.megameal/src/app/browserGameClient.ts` and `apps/game.megameal/src/app/mountGameClient.ts` - browser/app mounting path that carries `submitMotionEvent(...)` out to dev tooling.
-- `apps/game.megameal/src/app/levelPackageDiscovery.ts` - app-approved bridge from browser startup into the installed level package, including player-avatar motion test event lookup.
-- `apps/game.megameal/src/levels/global/index.ts` - installed level-package export surface that resolves Ainekio/Sesame motion test preset IDs to avatar-owned event data.
-
-### Megameal Ainekio/Sesame avatar package
-
-- `apps/game.megameal/src/levels/player/avatars/data.json` - selected avatar, ball-of-light option, Ainekio/Sesame avatar definition, and avatar-owned mesh asset entries.
-- `apps/game.megameal/src/levels/player/avatars/types.ts` - avatar package types; avatar assets can now include mesh entries as well as sprites.
-- `apps/game.megameal/src/levels/player/avatars/index.ts` - exports avatar data, selected rig lookup, Ainekio/Sesame motion helpers, and rig registry.
-- `apps/game.megameal/src/levels/player/avatars/ainekio-sesame/rig.ts` - eight-servo Ainekio/Sesame physics rig, body/joint definitions, servo order, collider proxies, and mesh renderables.
-- `apps/game.megameal/src/levels/player/avatars/ainekio-sesame/motionAdapter.ts` - avatar-owned helper that creates Megameal `servo-target-json-v1` events and rejects unknown Sesame servo IDs.
-- `apps/game.megameal/src/levels/player/avatars/ainekio-sesame/motionTestSequences.ts` - Megameal-side neutral and step-cycle test events for the simulator harness.
-- `apps/game.megameal/src/levels/player/avatars/ainekio-sesame/ASSET_SOURCES.md` - source/provenance and regeneration note for the generated robot meshes.
-- `apps/game.megameal/src/levels/player/constants.ts` - player and avatar asset IDs, including required Ainekio/Sesame mesh assets.
-- `apps/game.megameal/public/assets/player/avatars/ainekio-sesame/*.glb` - generated visible robot meshes for the chassis, four upper legs, and four feet.
-
-### Megameal bridge, editor, and validation
-
-- `apps/game.megameal/src/app/dev-bridge/gameDevBridge.ts` - DEV-only bridge command contract; now includes validated `submitMotionEvent`.
-- `apps/game.megameal/src/app/dev-bridge/gameDevBridgeRuntime.ts` - runtime bridge endpoint that submits accepted motion events into `client.submitMotionEvent(...)`.
-- `apps/game.megameal/src/editor/MasterControlMap.svelte` - Master Control UI; exposes neutral and step-cycle simulator buttons that send registered preset IDs through the bridge.
-- `apps/game.megameal/scripts/prepare-ainekio-sesame-assets.mjs` - durable generator that converts the Sesame simulator URDF/STL source into Megameal GLB body meshes.
-- `apps/game.megameal/scripts/test-physics-rig-contract.ts` - focused physics-rig test for servo order, body/joint spawning, renderable robot bodies, and timed servo frames.
-- `apps/game.megameal/scripts/test-player-package-contract.ts` - focused player package test for selected avatar, mesh assets, and required runtime asset composition.
-- `apps/game.megameal/scripts/test-dev-bridge-motion-contract.ts` - focused bridge-motion test for the Megameal `submitMotionEvent` path and avatar-owned test sequences.
-- `apps/game.megameal/ENGINE_CONTRACT_REGISTER.md` - current Megameal contract/status row for the physics rig and simulator bridge.
-
-## Current steps
-
-- Reconcile the Ainekio motion module's legacy `RootMotionIntent` fields with the current literal-physics simulator direction.
-- Re-read the exact target firmware and companion repo before treating the stock HTTP API as a contract.
-- Port the real `movement-sequences.h` content into the Ainekio sequence engine after the target source is selected.
-- Continue Megameal work in its own bounded lane: the current foundation consumes servo target events, spawns a literal articulated 8-servo body, and lets Rapier physics generate movement. The remaining Megameal adapter should translate Ainekio motion-module output into the stable servo target queue without changing the Ainekio physical motion module.
-- Defer MetaHuman OS bridge edits until it is opened explicitly: it should send intent into the motion module and receive telemetry without owning servo safety.
-- Only then decide final hardware: if the Python motion layer proves out, Option B; if it fights back, Option A keeps the project moving.
-
-## Megameal simulator progress - literal servo physics
-
-The Megameal simulator foundation is now started in `/home/greggles/Merkin/apps/game.megameal`. This is separate from the Ainekio motion module. The Ainekio module remains the planned real-world robot motion module; Megameal gets a separate adapter/simulator layer so game requirements do not reshape the physical robot API.
-
-Current simulator direction:
-
-- The selected avatar can reference an articulated physics rig.
-- The Ainekio/Sesame rig lives beside the player avatar data, not in generic game code.
-- Generic articulated-rig code lives under `src/game/physics-rigs` and is data-driven so future robot dimensions, body counts, and servo layouts can change without rewriting the engine.
-- Engine physics now supports generic revolute joints and motor position targets through the physics adapter contract.
-- Rapier implements those joints behind the adapter boundary. Game code does not import Rapier directly.
-- The current Sesame rig is a primitive-collider physics body: one dynamic chassis plus eight limb/foot bodies connected by eight revolute servo joints.
-- Movement is literal simulation, not root motion. Servo target angles drive the joints; friction and collision with the world are what should eventually move the body through a room.
-- The existing ball-of-light avatar remains selected by default. The Sesame physics rig is present as a selectable avatar entry, and the Master Control Player Package panel can now edit the selected avatar through the player avatar package file.
-- The future Ainekio-to-Megameal adapter should emit stable servo-target events shaped like:
+Environment Mode has been adapted to emit Ainekio-compatible action objects. The important output shape is:
 
 ```json
 {
-  "schemaVersion": 1,
-  "robot": "ainekio-sesame",
-  "sequence": "walk",
+  "type": "robotCommand",
+  "sessionId": "ainekio-sim-1",
   "command": "walk",
-  "issuedAtMs": 0,
-  "ttlMs": 250,
-  "frames": [{ "servo": "R1", "angleDeg": 30, "atMs": 50 }]
+  "simulatorCommand": "run walk",
+  "units": 5
 }
 ```
 
-Known remaining simulator work:
+For movement or pose requests, the graph should produce both:
 
-- Build the Ainekio-side Megameal adapter that reads Ainekio motion-module output and submits `servo-target-json-v1` events into Megameal. The adapter should translate or ignore Ainekio's legacy root-motion fields rather than using them to move the Sesame body.
-- Tune the primitive rig so servo commands produce stable locomotion in the virtual room.
-- Import or convert the Sesame visual model from the simulator URDF/mesh asset path and attach visuals to the primitive physics bodies after license and provenance are cleared.
-- Verify the simulator live in Megameal with the Sesame avatar selected.
-- Add battery, face/OLED, and offline fallback behavior to the adapter path without moving physical safety out of the Ainekio motion module.
+- conversational confirmation to the user
+- a `robotCommand` action for the Environment Bridge Out node
 
-## Motion system file map
+The fallback parser prevents a bad user experience where the model says it cannot move while the deterministic parser sends a movement command anyway. If the user clearly asks for a supported robot action, the parser can synthesize the robot command and use a matching confirmation such as "I'll walk forward 5 units."
 
-### Ainekio robot repo
+## Current Verification
 
-- `/home/greggles/Ainekio/docs/MOTION_MODULE_PROGRESS.md` - Progress tracker for the physical robot motion module, including completed slices, validation, and deferred outside-repo work.
-- `/home/greggles/Ainekio/motion` - Python package root for the planned `ainekio-motion` module.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/types.py` - Core motion datatypes: semantic robot commands, servo frames, telemetry, command envelopes, and the legacy `RootMotionIntent` field that needs reconciliation with the literal-physics simulator direction.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/sequences.py` - Sequence engine and provisional Sesame servo order; renders command/keyframe sequences into per-servo frames.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/safety.py` - Safety state machine for e-stop, low-battery lockout, stale-command stop, command leases, and offline idle behavior.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/backend.py` - Backend interface plus current virtual/guarded hardware backend behavior. The virtual backend currently passes through the legacy root-motion field in telemetry.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/config.py` - JSON config loader for backend, bridge, telemetry, and safety settings.
-- `/home/greggles/Ainekio/motion/tests` - Unit tests for the current motion module foundation.
+The current state has been checked with focused validation rather than only manual clicking:
 
-### Megameal simulator repo
+- Ainekio unit tests: `PYTHONPATH=motion/src python3 -m unittest discover -s motion/tests`
+- Browser shim syntax: `node --check simulators/sesame-robot-sim/app/ainekio-shim.js`
+- MetaHuman graph validation: `pnpm validate:graphs`
+- MetaHuman site build: `pnpm --dir apps/site build`
 
-- `/home/greggles/Merkin/apps/game.megameal/src/engine/modules/physics/index.ts` - Generic physics contract. Now includes collider material fields, revolute joint components, joint handles, and motor target sync.
-- `/home/greggles/Merkin/apps/game.megameal/src/engine/adapters/rapier/index.ts` - Rapier implementation of the generic physics port, including revolute impulse joints and motor position targets.
-- `/home/greggles/Merkin/apps/game.megameal/src/game/physics-rigs/index.ts` - Generic data-driven articulated rig runtime. Spawns dynamic bodies, colliders, and joints from rig data; consumes TTL-filtered servo target events; mirrors the rig root back to the player entity for camera/HUD follow.
-- `/home/greggles/Merkin/apps/game.megameal/src/levels/player/avatars/data.json` - Player avatar catalog. Keeps `player_avatar_light` as default and adds `player_avatar_ainekio_sesame` as the rig-backed robot avatar entry.
-- `/home/greggles/Merkin/apps/game.megameal/src/levels/player/avatars/types.ts` - Player avatar data types, including optional `physicsRig` references.
-- `/home/greggles/Merkin/apps/game.megameal/src/levels/player/avatars/index.ts` - Avatar package exports, selected avatar resolution, and exported physics rig definitions.
-- `/home/greggles/Merkin/apps/game.megameal/src/levels/player/avatars/ainekio-sesame/rig.ts` - Isolated Ainekio/Sesame rig data: one chassis, eight limb/foot bodies, eight revolute servo joints, servo channel mapping, idle pose, and simulator source notes.
-- `/home/greggles/Merkin/apps/game.megameal/src/game/runtime/index.ts` - Runtime wiring for optional selected-avatar physics rigs and the `submitMotionEvent()` queue.
-- `/home/greggles/Merkin/apps/game.megameal/src/app/levelPackageDiscovery.ts` - App/package discovery path that exposes the selected player avatar and optional selected physics rig to the runtime mount.
-- `/home/greggles/Merkin/apps/game.megameal/src/app/mountGameClient.ts` - Browser mount path that passes the selected physics rig into the game runtime and exposes `submitMotionEvent()` to the browser game client.
-- `/home/greggles/Merkin/apps/game.megameal/src/app/browserGameClient.ts` - Browser client wrapper that forwards the runtime motion submission method.
-- `/home/greggles/Merkin/apps/game.megameal/scripts/editor-dev-api.mjs` - DEV-only editor file API. Now exposes a player avatar package endpoint that validates and writes `src/levels/player/avatars/data.json`.
-- `/home/greggles/Merkin/apps/game.megameal/src/editor/MasterControlMap.svelte` - Master Control editor surface. The Player Package panel now loads the player avatar package, shows the selected avatar and physics rig, and saves avatar selection separately from `src/levels/player/data.json`.
-- `/home/greggles/Merkin/apps/game.megameal/scripts/test-physics-rig-contract.ts` - Focused contract test for the literal 8-servo rig path: default avatar stays unchanged, Sesame rig exports eight servo channels, rig bodies/joints spawn, and servo frames respect `atMs` timing.
-- `/home/greggles/Merkin/apps/game.megameal/scripts/test-player-package-contract.ts` - Player package regression test updated to assert the Sesame avatar and rig are exported without replacing the default avatar.
-- `/home/greggles/Merkin/apps/game.megameal/ENGINE_CONTRACT_REGISTER.md` - Contract register updated with the generic `PhysicsRigContract` and expanded `PhysicsAdapter` responsibilities.
-- `/home/greggles/Merkin/apps/game.megameal/docs/PLAYER_AVATAR_SYSTEM_PROGRESS.md` - Megameal-side player avatar and physics-rig progress tracker.
+At the last validation pass, Ainekio tests passed, all MetaHuman cognitive graphs validated, and the MetaHuman site rebuilt successfully. The MetaHuman build still prints existing Svelte/Vite warnings that are unrelated to Ainekio motion.
+
+## What Is Not Done Yet
+
+No physical robot hardware has been tested. The Pi Zero 2 W remains the target board, but the current code is not driving PCA9685 hardware yet.
+
+The PCA9685 backend is deliberately disabled behind a guard. That prevents accidental servo movement while the system is still being developed against the simulator.
+
+The simulator motion quality is not final robot gait quality. The Sesame simulator can execute stock routines, but the project still needs real sequence tuning, body fit checks, power measurements, and hardware validation.
+
+The expanded simulator command list is not the same as a complete Python motion library. It means the simulator can receive those named routines. It does not mean every routine has been reimplemented as local Ainekio servo-frame data.
+
+Audio, speech, vision, and sensors are outside the motion module. MetaHuman OS currently owns conversation and voice-side intelligence. The future robot body may add microphone, speaker, camera, and ultrasonic/reflex sensors, but those are separate services or safety inputs, not part of the motion command API.
+
+## Hardware Direction
+
+The working hardware assumption is still Pi Zero 2 W plus a PCA9685 servo bonnet. The reason is packaging and capability: the robot needs WiFi, audio/video possibility, and enough Linux runtime to act as the slave brain. The ESP32 is still useful as a reference and possible fallback, but the current implementation target is one Pi-based body controller rather than a mandatory Pi-plus-ESP32 stack.
+
+The likely physical stack is:
+
+- Raspberry Pi Zero 2 W
+- PCA9685 servo bonnet or equivalent I2C PWM driver
+- eight MG90S-class servos from the Sesame design
+- separate servo and logic power rails
+- physical servo power cutoff
+- local safety gates before movement
+- MetaHuman OS connection over WiFi
+
+The first physical milestone is not autonomy. It is safe command execution: connect to MetaHuman, receive a semantic command, decide whether it is safe, and execute a known sequence without brownout or stale-command replay.
+
+## Roadmap From Here
+
+### 1. Keep the simulator path stable
+
+The simulator should remain the first test target. The immediate goal is a reliable loop where Environment Mode commands produce visible Sesame simulator routines through the UART command path.
+
+### 2. Port real motion routines into Python
+
+The stock Sesame `movement-sequences.h` routines need to be ported into Ainekio sequence data. That will make the Pi/PCA9685 backend independent of the simulator's embedded firmware routines.
+
+Priority routines:
+
+- stand
+- rest
+- walk forward
+- walk backward
+- turn left
+- turn right
+- wave
+- stop / safe posture
+
+Secondary routines:
+
+- dance
+- point
+- pushup
+- bow
+- shake
+- shrug
+- play dead
+- other Sesame emotes once the core motion library is stable
+
+### 3. Implement the PCA9685 backend
+
+Only after simulator behavior and sequence data are stable should the physical backend be enabled. The backend needs explicit hardware configuration, startup checks, safe neutral posture, and a way to refuse movement if power or connection state is unsafe.
+
+### 4. Add telemetry
+
+The robot should report useful state back to MetaHuman:
+
+- connected / disconnected
+- current command
+- last completed command
+- safety lockout state
+- low-battery state
+- backend type
+- future sensor/reflex state
+
+### 5. Add senses separately
+
+Camera, microphone, speaker, and ultrasonic sensors should not be folded into the motion module. They should feed observations or safety/reflex inputs into the body system. Motion remains the actuator boundary.
+
+### 6. Hardware validation
+
+Physical bring-up needs measured data, not assumptions:
+
+- worst-case servo current
+- brownout behavior
+- battery fit and runtime
+- Pi boot time and reconnect behavior
+- servo rail separation
+- safe shutdown posture
+- heat and packaging inside the Sesame body
+
+## Current File Map
+
+### Ainekio repo
+
+- `/home/greggles/Ainekio/motion/src/ainekio_motion/types.py` - semantic command and telemetry datatypes.
+- `/home/greggles/Ainekio/motion/src/ainekio_motion/commands.py` - command parsing, aliases, environment action translation, and simulator serial mapping.
+- `/home/greggles/Ainekio/motion/src/ainekio_motion/sequences.py` - provisional Sesame servo order and local keyframe sequence rendering.
+- `/home/greggles/Ainekio/motion/src/ainekio_motion/backend.py` - virtual backend and guarded PCA9685 backend boundary.
+- `/home/greggles/Ainekio/motion/src/ainekio_motion/safety.py` - safety controller.
+- `/home/greggles/Ainekio/motion/src/ainekio_motion/adapter.py` - MetaHuman environment bridge adapter.
+- `/home/greggles/Ainekio/motion/src/ainekio_motion/metahuman.py` - small MetaHuman HTTP/SSE client.
+- `/home/greggles/Ainekio/motion/src/ainekio_motion/simulator_shim.py` - local simulator shim server and client.
+- `/home/greggles/Ainekio/motion/src/ainekio_motion/cli.py` - adapter CLI and reconnect loop.
+- `/home/greggles/Ainekio/simulators/sesame-robot-sim/app/ainekio-shim.js` - browser-side Sesame simulator shim.
+- `/home/greggles/Ainekio/simulators/sesame-robot-sim/app/ainekio-idle-throttle.js` - idle frame throttling for the browser simulator.
+- `/home/greggles/Ainekio/start-ainekio-adapter.sh` - starts only the Ainekio adapter.
+- `/home/greggles/Ainekio/start-simulator-shim.sh` - starts only the local simulator shim.
+- `/home/greggles/Ainekio/start-ainekio-sim-stack.sh` - starts the simulator, shim, and adapter together.
+- `/home/greggles/Ainekio/motion/tests/` - focused tests for adapter, commands, config, safety, sequences, and simulator shim behavior.
+
+### MetaHuman repo
+
+- `/home/greggles/metahuman/packages/core/src/environment-interface/store.ts` - event-driven environment action dispatch and stream subscription support.
+- `/home/greggles/metahuman/packages/core/src/api/handlers/environment-bridge.ts` - environment bridge HTTP/SSE handlers.
+- `/home/greggles/metahuman/packages/core/src/nodes/environment/helpers.ts` - environment action parsing, Ainekio robot command contract, and natural-language fallback parser.
+- `/home/greggles/metahuman/packages/core/src/nodes/environment/action-parser.node.ts` - action parser node and robot command confirmation behavior.
+- `/home/greggles/metahuman/packages/core/src/nodes/environment/send-action.node.ts` - Environment Bridge Out delivery/status node.
+- `/home/greggles/metahuman/etc/cognitive-graphs/environment-mode.json` - Environment Mode graph using the Ainekio-compatible action flow.
+
+## Bottom Line
+
+Ainekio now has a functional command bridge and simulator-facing slave brain. The system can take a natural-language Environment Mode command, turn it into a semantic robot action, send it over a persistent bridge stream, run it through the Ainekio adapter, and forward it to the Sesame simulator without exposing raw servo control to the AI.
+
+The next hard work is not more architecture. It is motion quality and hardware truth: port the real Sesame sequences, keep the simulator honest, then bring up the Pi/PCA9685 backend with power and safety measurements.

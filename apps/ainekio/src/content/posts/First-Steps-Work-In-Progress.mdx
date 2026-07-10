@@ -22,7 +22,7 @@ lang: "en"
 import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
 
 <style>{`
-  #post-container[data-post-title="Ainekio Data bridge"] {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] {
     --ainekio-surface: rgba(9, 13, 18, 0.78);
     --ainekio-surface-soft: rgba(18, 25, 32, 0.64);
     --ainekio-line: rgba(117, 203, 255, 0.26);
@@ -41,16 +41,16 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
       0 18px 60px rgba(0, 0, 0, 0.28);
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content {
     color: var(--ainekio-muted);
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content > p {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content > p {
     max-width: 82ch;
     line-height: 1.78;
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content h1 {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content h1 {
     margin: 0 0 1rem;
     color: var(--ainekio-cream);
     font-size: clamp(2rem, 4vw, 3.25rem);
@@ -58,7 +58,7 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
     text-shadow: 0 0 24px rgba(117, 218, 255, 0.18);
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content h1::after {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content h1::after {
     content: "";
     display: block;
     width: min(28rem, 100%);
@@ -67,7 +67,7 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
     background: linear-gradient(90deg, var(--ainekio-amber), var(--ainekio-cyan), transparent);
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content h2 {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content h2 {
     position: relative;
     margin-top: 2.4rem;
     margin-bottom: 1rem;
@@ -84,7 +84,7 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
       0 10px 24px rgba(0, 0, 0, 0.18);
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content h2::before {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content h2::before {
     display: block;
     margin-bottom: 0.2rem;
     color: var(--ainekio-cyan);
@@ -94,8 +94,8 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
     letter-spacing: 0.14em;
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content p:first-of-type,
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content blockquote {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content p:first-of-type,
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content blockquote {
     margin: 1rem 0 1.3rem;
     padding: 1rem 1.1rem;
     color: var(--ainekio-cream);
@@ -108,42 +108,42 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
     box-shadow: inset 0 0 24px rgba(255, 178, 79, 0.04);
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content ol,
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content ul {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content ol,
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content ul {
     padding: 1rem 1.1rem 1rem 2.2rem;
     border: 1px solid rgba(117, 203, 255, 0.18);
     border-radius: 0.55rem;
     background: var(--ainekio-surface-soft);
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content li {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content li {
     margin: 0.55rem 0;
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content li::marker {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content li::marker {
     color: var(--ainekio-amber);
     font-weight: 800;
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content li code:first-child {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content li code:first-child {
     display: inline-block;
     margin-right: 0.25rem;
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content a {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content a {
     color: var(--ainekio-cyan);
     text-decoration-color: rgba(117, 218, 255, 0.42);
     text-underline-offset: 0.18em;
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content code {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content code {
     color: var(--ainekio-amber);
     border: 1px solid rgba(255, 178, 79, 0.18);
     border-radius: 0.35rem;
     background: rgba(0, 0, 0, 0.28);
   }
 
-  #post-container[data-post-title="Ainekio Data bridge"] .markdown-content hr {
+  #post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content hr {
     height: 1px;
     margin: 1.8rem 0;
     border: 0;
@@ -158,7 +158,7 @@ import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte
 
 <script>{`
   ;(() => {
-  const postSelector = '#post-container[data-post-title="Ainekio Data bridge"] .markdown-content'
+  const postSelector = '#post-container[data-post-slug="First-Steps-Work-In-Progress"] .markdown-content'
   const marker = String.fromCharCode(96)
 
   function getDataBridgeContent() {
