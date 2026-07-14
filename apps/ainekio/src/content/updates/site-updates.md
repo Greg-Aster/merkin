@@ -9,16 +9,16 @@ labels:
   nextStop: Next
   updated: Updated
 current:
-  status: Hardware planning
+  status: Firmware and physical build
   location: Robot body
-  updated: 2026-07-11
+  updated: 2026-07-13
   mileage: "v0.2.0"
-  section: Parts list complete, fitment check next
-  nextStop: Verify body fit against the chosen parts, then buy them
+  section: Firmware started, first leg parts printed
+  nextStop: Receive and inspect parts, then begin staged hardware bring-up
   note: >
-    The board, power system, and full parts list are decided.
-    Remaining work before purchase is fitment: measure the Sesame
-    body cavity against the Freenove board, 18650 pack, and audio parts.
+    Firmware work is underway, the first leg parts are printed, and
+    the selected hardware has been ordered. Physical assembly and
+    hardware validation are still ahead.
 ---
 
 ## 2026-07-04 | Site scaffold
@@ -59,3 +59,9 @@ Mileage: v0.2.0
 Chose the safer split between the OS brain and the robot body: the OS sends intent-level commands, while the body owns power, motion safety, and fit checks. The power spine is fully specified: 2S 18650 protected pack, USB-C boost charger board behind a panel-mount port so the robot charges like a phone, master rocker switch, and two MINI560 5A bucks on separate servo and electronics rails. Battery voltage divider gives a low-battery voice warning at ~7.0V and parks the servos at ~6.8V.
 
 Also did a full documentation pass: swept stale Pi/PCA9685 references out of every project doc, resolved internal contradictions in the parts list, gave each doc a single owned topic, and merged the old Broad Strokes status page and Project Overview into one Overview &amp; Status page. Complete shopping list is written - nothing bought yet, on purpose, until the body cavity is measured against the chosen parts.
+
+## 2026-07-13 | Firmware and first printed parts
+Location: Robot body
+Mileage: v0.2.0
+
+Started the ESP32-S3 firmware, printed the first leg parts, and ordered the hardware. Updated the system spec and progress plan with the firmware size budget, staged hardware bring-up, and the useful Sesame motion, emulator, and control behaviors to carry into Ainekio.
