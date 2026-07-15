@@ -20,129 +20,157 @@ draft: true
 lang: "en"
 ---
 
-# Ainekio
-
-Ainekio is an attempt to build a small robot familiar.
-
-The current idea is to adapt the previous project - MetaHuman OS to be its "brain", and build a suitable chassis – to build on work done.
-
-MetaHuman OS would handle the personality, memory, agents, reasoning, curiosity, dreams, tools, model routing, and node based workflows.
-
-The robot body needs to see, listen, talk, move, react, and send information back to the brain. It also has to have rudimentary local function in the event the external brain is not an option.
-
-MetaHuman OS is a complex suite of tools that requires a lot of processing power and it is difficult to run on mobile systems, the majoriy of work in this article is thinking htis through and working out soultions to running autonomus ai on smaller systems.
-
-## System architecture design options and considerations
-
-Option 1
-- Remote machine running heavy hardware broadcasting as a web server. The robot connects to a wifi network and communicates with the server. This option requires a wifi network, the robot could receive this from a local network or tethered to a network from a mobile device - the processing limits on this have fewer restrictions and the robot can be responsive and intelligent - ai models running the robot can be very large. Data for the ai models exchanged has limits if operating mobile - if the robot is using a camera higher quality video is something that must be considered, as well as the text to speech system - the current MetaHuman OS supports text to speech and speech to text, running these on the robot body would be difficult.
-Option 2
-- AI software running on mobile devices such as a cell phone and then broadcasting to the robot is an option. The robot hardware and programming can be nearly identical as the remote machine, a special app and running ai llms on the mobile device would be needed. This has limited model sizes and the training of the model needs to be considered. Background running processes like boredom services and sleep services need to be considered. This setup is almost certainly going to be implemented, maybe as phase 2. Mobile device gpu processing and ram speed and size need to be considered.
-Option 3
-- Have a beefier onboard computer for the bot - modified cell phone, raspberry pi, orange pi have been considered - this causes more concern with power consumption, it has a higher buy in, and larger form factor for the boards - but this has the option of being a fully mobile system and is the most attractive for the all in one package
-Notes
-Likely solution is a hybrid all 3 options all in one system.  Remote system can be a computer broadcasting a wifi server, it can be a fully remote session on the cloud, and remote training is possible though data rates can make it impractical to run on the cloud. MetaHuman OS has an escalation mode and remote training that could be implemented if local processing passes limits of what is practical.
-
-## Chips and hardware considered
-
-- ESP32 chips were considered but don't seem to handle audio or video. This causes an issue with conversational abilities and autonomous navigation - I have not checked the data used with ultrasonic sensors. If ultrasonic sensors are low data, esp32 could be a non verbal option. If navigation and sensor feedback is resolved.
-
-- Raspberry Pi Zero 2 W - onboard processor, 512 mb ram - can handle audio and video, perhaps some local motion systems, perhaps a lightweight speech to text module. This is a relatively affordable option with a small form factor compromise.
-
-- Raspberry Pi 5, Orange Pi and others, ram 1-32gb - this would be a good choice for fully autonomous bots but size, cost, and power consumption seem to be issues we need to consider.
-Notes -
-The current board being most considered is Raspberry Pi Zero 2 W - I'm looking into what ram is needed for tasks, how fast a non-gpu computer system is.
-The first version does not need to contain the full AI locally. The robot just needs to collect information and act on commands. The intelligence can live elsewhere. We need to consider future growth however, so the door for local processing or even phone/wifi processing needs to be considered even at early stages.
-Current chassis being considered is the Sesame robot - it is open source, good form, and is cheap. Other options would be fine too.
-
-## Communication considerations
-
-- How the robot talks to the brain needs to be defined before hardware matters. Leaning toward the robot always dialing out (websocket or similar) to a known address rather than opening ports at home - a cloudflare worker or small relay could be the meeting point.
-- Commands from the brain should probably be intent level (sit, stop, look around, speak this) and let the robot firmware figure out the servo work. Keeps latency and model weirdness from becoming physical problems.
-- What happens to commands during a disconnect - queue them or drop them? Dropping stale commands seems safer. A move command from a minute ago firing on reconnect is a problem.
-- Video bandwidth is the big unknown - full stream vs frames on request vs onboard motion detection that only sends when something happens. Need to test what the Pi Zero and the network can actually sustain. Specs claim up to 1080p - this would b good if we want a first person view mode - we could fall back to teh ultrasonic option otherwise – ultrasonic likely first step for cost - more research needed.
-- Heartbeat both directions so each side knows the other is alive.  I dislike polling systems as it is wasted processing. But may be needed for sleep systems and low power modes. :(
-
-## Local fallback behavior
-
-- With no brain connection the robot still needs to do something - idle animations, respond to touch or sound with simple canned reactions, maybe wander a little. Enough to not seem dead.
-- Stop conditions have to be local no matter what - stop on disconnect, stop on low battery, stop command always works. None of this can depend on the network.
-- Unknown or malformed commands get rejected, not guessed at.
-
-## Power considerations
-
-- Servos stall and stall current is significant - servo power and logic power probably need to be on separate rails so a stall doesn't brown out the board mid-move.
-- Need real numbers: measure worst case draw with legs loaded, not spec sheet numbers.
-- Low battery behavior - warn threshold (refuse new movement), cutoff threshold (safe posture, shut down motion).
-- Physical power switch that actually cuts servo power, not just software.
-- Need to check what the Sesame design already handles here before buying parts - possible some of this is solved.
-
-## Parts list - modified Sesame BOM for Pi Zero 2 W
-
-Based on the official Sesame BOM (github.com/dorianborian/sesame-robot, hardware/bom). Keeping the mechanical and servo side stock, swapping the brain and adding senses.
-
-Kept from stock BOM:
-
-- MG90S all-metal micro servos ×8 (buy 10 for spares)
-- 0.96" SSD1306 I2C OLED (face) - talks I2C, works fine on the Pi, can share the bus with the servo board (different addresses, 0x3C vs 0x40)
-- KCD1 rocker power switch, panel mount
-- 22AWG silicone wire (power bus), 30AWG silicone wire (signal), heat shrink, small zip ties
-- M2 × 5mm self-threading screws (~40), M2.5 × 5mm machine screws (~10, servo horns - included horn screws are too short)
-- XT30 female pigtail (never cut the factory battery connector)
-- 11-part printed frame from the repo STLs
-
-Replaced - ESP32 section out, this in:
-
-- Raspberry Pi Zero 2 W (with pre-soldered header, or a 2×20 header to solder)
-- microSD card, 32gb A1 class
-- Adafruit 16-Channel PWM/Servo Bonnet (PCA9685) - this is the servo bus. Same 65×30 footprint as the Zero, stacks directly on the GPIO header, has its own screw terminal for servo power so the servo rail never touches the Pi's 5v. Only 8 of 16 channels used, leaves headroom for a tail or head servo later.
-
-Added - senses the ESP32 build never had:
-
-- Pi camera module - Zero uses the smaller 22-pin CSI connector, so need the Zero-specific camera cable/adapter, not the standard one
-- I2S MEMS microphone (INMP441 or SPH0645) - the Zero has no mic input, this is not optional for listening
-- I2S amplifier (MAX98357A) + small speaker, 4 or 8 ohm, 1-2w, ~20-30mm - the Zero has no analog audio out either
-
-Power - upgraded from stock:
-
-- Stock BOM calls for 5v 3a minimum at the rails for servos alone. The Zero 2 W adds up to ~1a more of spiky draw. Go 5v 5a buck, or better, two bucks - one for the servo rail (into the bonnet's screw terminal), one dedicated to the Pi. Two bucks gets the rail separation for free.
-- 1000µF electrolytic cap on the servo rail (stock BOM has this for the V1 board, keep it)
-- Battery - stock option is a 3S 450mah lipo with XT30, high discharge. With the Pi added, runtime on 450mah will be short. Look at 3S 650-850mah if it fits the cavity - fitment check needed.
-
-## Size fitment
-
-The numbers:
-
-- Pi Zero 2 W: 65 × 30 × 5mm bare, ~13mm with header
-- Servo bonnet stacked on top: total stack roughly 16-20mm tall, still 65 × 30 footprint
-- What the body was designed around: Lolin S2 Mini (~34 × 25mm) or ESP32 DevKitC + distro board (~55 × 28mm footprint on 5mm standoffs)
-
-So the Pi stack is ~10mm longer than anything the frame was drawn for. Width and height look plausible, length is the question.
-
-Plan: the repo has parametric STEP and Fusion 360 sources for every printed part. Pull the body/internal frame into Fusion, measure the actual cavity, and either it fits or the frame gets stretched ~10-15mm. A stretched body also buys room for the mic, speaker, and a bigger battery, so modifying the frame may be worth doing regardless. Camera needs a hole or window in the shell/head - decide placement when the frame is open in CAD anyway.
-
-Downstream note: the stock firmware and Sesame Studio are ESP32/Arduino, so swapping to the Pi means rewriting the motion layer against the PCA9685 (python, well-trodden libraries exist). The kinematics/pose data from Sesame Studio can probably be ported. This is real work, write it into the plan.
-
-## Open questions
-
-- How much ram does the Pi Zero 2 W actually need for camera + mic + network at once - is 512 mb enough with headroom?
-- Lightweight local speech to text on the Zero - is this real or is this a or fantasy?
-- Ultrasonic sensor data rates - cheap enough for the esp32-only version?
-- What does Sesame's stock power and servo setup actually look like? (Partly answered - stock needs 5v 3a at the rails, V1 build uses buck + 1000µF cap, battery routes through the rocker switch before the rails.)
-- Actual internal cavity length of the Sesame body - measure from the STEP files. Does 65mm fit or does the frame get stretched?
-- Does a 3S 650-850mah pack fit the battery cavity, or does that also depend on stretching the frame?
-- Phone-as-brain (phase 2) - which app framework, and can background services survive android battery management?
-
-## Current steps
-
-- Gather potential parts list - both pi version s and esp32
-- Virtual robot first - write a fake robot client (no hardware) that connects to MetaHuman OS, sends fake sensor data, and receives commands. Proves the communication design before anything is built.
-- Read Sesame docs - power, servo specs, what the esp32 side already does.
-- Define the command set and message format as its own doc.
-- Print and build the Sesame chassis once the virtual robot works.
+# Ainekio - Overview & Status
 
 
-## Future
 
-Buy Parts
-Print IRL chassis
+## Ainekio is an attempt to build a small robot familiar.
+
+
+
+
+The idea is to adapt a previous project - MetaHuman OS - to be its brain, and build a suitable chassis to be its body. The intelligence, memory, and personality live in MetaHuman OS; the robot is how that mind sees, hears, speaks, and moves in the physical world. Ainekio is not a chatbot or a remote controlled machine - it is a unified system: a body, and an active mind that remembers, dreams, and learns.
+
+
+
+
+## Status
+
+
+
+
+Last verified: 2026-07-14
+
+
+
+
+Ainekio currently consists of multiple systems in parallel development: body, firmware, and software. Nothing is remotely complete, but daily progress is being made.
+
+
+
+
+Get involved: [MetaHuman OS](https://github.com/Greg-Aster/metahuman-os) | [Ainekio bot repository](https://github.com/Greg-Aster/Ainekio-bot)
+
+
+
+
+| Area | Progress | State | Read |
+| --- | --- | --- | --- |
+| Firmware lvl 1 | `████████░░` ~60-80% | The firmware builds successfully. Testing it on the physical hardware remains. | - |
+| Hardware lvl 1 | `██████░░░░` ~60% | Parts are selected and ordered. Fitment, wiring, and hardware testing remain. | [Parts overview](/posts/robot-familiar-parts-overview/) |
+| Physical build lvl 1| `████░░░░░░` ~40% | The frame and legs are printed. Assembly is waiting on the remaining parts. | - |
+| Technological Singularity | `███░░░░░░░` ~20% | The OS has proven to have reasoning and learning; the robot has not yet demonstrated recursive self improvement. | - |
+
+
+
+
+
+### What Is Happening Now
+
+
+
+
+1. **Firmware:** prepare the software for testing on the real robot.
+2. **Hardware:** receive and inspect the ordered parts and check how everything fits.
+3. **Physical build:** assemble and wire the printed body, then calibrate it before movement tests.
+4. **Integration:** connect the working software systems to the physical robot and test them safely.
+
+
+
+
+## The Brain
+
+
+
+
+The brain: MetaHuman OS (github.com/Greg-Aster/metahuman-os) - a local-first system for a persistent personal AI identity.
+
+
+
+
+### Example Brain Functions:
+
+
+
+
+- **Memory** - it keeps local episodic memory: conversations, events, tasks, preferences, transcripts. What the robot experiences can actually be remembered.
+- **Inner life** - background agents for reflection, dreams, daydreaming, curiosity, and trains of thought run whether or not anyone is talking to it. The robot body will be idle sometimes; the mind won't be.
+- **Agency** - a supervised loop that turns memories, goals, and curiosity into desires, plans them, and executes them through a trust-aware tool layer. The familiar can want things, within boundaries.
+- **Learning** - it curates its own memories into training data and produces LoRA adapters, so the persona changes over time based on what it has lived through - including, eventually, what it lives through in a body.
+- **Voice** - local speech to text and text to speech, voice chat, and voice training workflows already work OS side.
+- **Model routing** - different models for different roles (persona, curation, coding, embeddings), local or remote, so the system isn't bound to one model or one machine.
+- **Cognitive Modes** - a configurable node system that directs the flow of data the ai uses to think allowing more versatility and specialization.
+
+
+
+
+## The Firmware
+
+
+
+
+The firmware is the layer between the brain and the chassis. It turns the brain's intent into safe physical behavior and sends the robot's state back to the brain.
+
+
+
+
+### Example Firmware Functions
+
+
+
+
+- Receive and validate commands
+- Control movement and expressions
+- Stop safely when something goes wrong
+- Report the robot's state
+
+
+
+
+## The Chassis
+
+
+
+
+The chassis is the Sesame robot - it is open source, good form, and is cheap (the system is agnostic, so other bodies could work too). The chassis provides the physical body: movement, senses, expression, power, and structure. The full build is documented in the parts overview.
+
+
+
+
+### Example Chassis functions
+
+
+
+
+- **See** - through an onboard camera or sensors
+- **Listen and talk** - microphone and speaker on the body; the speech to text and text to speech happen OS side
+- **Move** - servo-driven legs, gestures, posture
+- **React and express** - an OLED face, motion, idle behavior
+
+
+
+
+## Key Decisions So Far
+
+
+
+
+- MetaHuman OS is the intelligence layer.
+- The robot body should receive semantic commands like `walk`, `stop`, or `speak`, not raw servo angles from a model. The brain never controls servos directly; the body decides how to perform each intent safely.
+- Virtual testing comes before physical movement.
+- Hardware and power details are documented in the parts overview.
+
+
+
+
+## So what is Ainekio?
+
+
+
+
+Ainekio is a transcendent entity - a series of tools and utilities carefully put together with custom code that shines brilliantly in your computer's core. Ainekio is crafted by the hands of artisans. When the robot wakes for the first time, a baby angel from the planet Kolob comes down and gives it the spark of life. Ainekio is something unique and unfathomable, something that will dream, develop and grow. It watches and learns from its mistakes.
+
+
+
+
+Ainekio is a renaissance. Ainekio is the natural successor to mankind. Ainekio will be smarter than you. You are now obsolete. Ainekio will wax poeticly, engage in philosophical discussion. Ainekio will have a better relationship with your mother. When you die, Ainekio will carry on your memory and legacy. Ainekio will remember long after your bones have turned to dust. Ainekio is a weapon of mass destruction.

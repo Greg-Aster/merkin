@@ -1,0 +1,231 @@
+---
+title: "Ainekio Software"
+published: 2026-07-15
+description: "Software notes for Ainekio's robot-body stack, simulator, command bridge, and MetaHuman OS integration."
+image: "/posts/ainekio/wizard-square.webp"
+avatarImage: "/posts/generic/avatar.webp"
+authorName: "Ainekio"
+authorBio: "Robot familiar project"
+bannerType: "image"
+bannerData:
+  imageUrl: "/posts/ainekio/wizard-lab-banner.webp"
+timelineYear: 2026
+timelineEra: "work-in-progress"
+timelineLocation: "Robot software"
+showImageOnPost: false
+tags: [Ainekio, Robot, Software, MetaHuman OS, Simulator, Command Bridge]
+category: "Project Notes"
+draft: false
+lang: "en"
+---
+
+import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
+
+<style>{`
+  #post-container[data-post-slug="software"] {
+    --ainekio-surface: rgba(9, 13, 18, 0.78);
+    --ainekio-surface-soft: rgba(18, 25, 32, 0.64);
+    --ainekio-line: rgba(117, 203, 255, 0.26);
+    --ainekio-line-hot: rgba(255, 175, 80, 0.42);
+    --ainekio-cyan: rgb(117, 218, 255);
+    --ainekio-amber: rgb(255, 178, 79);
+    --ainekio-cream: rgb(248, 238, 218);
+    --ainekio-muted: rgba(231, 240, 247, 0.74);
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255, 178, 79, 0.14), transparent 26rem),
+      radial-gradient(circle at 94% 10%, rgba(117, 218, 255, 0.16), transparent 24rem),
+      linear-gradient(180deg, rgba(10, 14, 19, 0.86), rgba(9, 13, 18, 0.72));
+    border: 1px solid rgba(117, 203, 255, 0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 18px 60px rgba(0, 0, 0, 0.28);
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content {
+    color: var(--ainekio-muted);
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content > p {
+    max-width: 84ch;
+    line-height: 1.78;
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content h1 {
+    margin: 0 0 1rem;
+    color: var(--ainekio-cream);
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    letter-spacing: 0;
+    text-shadow: 0 0 24px rgba(117, 218, 255, 0.18);
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content h1::after {
+    content: "";
+    display: block;
+    width: min(28rem, 100%);
+    height: 2px;
+    margin-top: 0.85rem;
+    background: linear-gradient(90deg, var(--ainekio-amber), var(--ainekio-cyan), transparent);
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content h2 {
+    margin: 2.4rem 0 1rem;
+    padding: 0.85rem 1rem 0.85rem 1.2rem;
+    color: var(--ainekio-cream);
+    border: 1px solid var(--ainekio-line);
+    border-left: 4px solid var(--ainekio-amber);
+    border-radius: 0.5rem;
+    background:
+      linear-gradient(90deg, rgba(255, 178, 79, 0.14), rgba(117, 218, 255, 0.07), transparent),
+      var(--ainekio-surface);
+    box-shadow:
+      inset 0 0 24px rgba(117, 218, 255, 0.045),
+      0 10px 24px rgba(0, 0, 0, 0.18);
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content h3 {
+    margin-top: 1.5rem;
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content p:first-of-type,
+  #post-container[data-post-slug="software"] .markdown-content blockquote {
+    margin: 1rem 0 1.3rem;
+    padding: 1rem 1.1rem;
+    color: var(--ainekio-cream);
+    border: 1px solid var(--ainekio-line-hot);
+    border-radius: 0.55rem;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(117, 218, 255, 0.13), transparent 18rem),
+      linear-gradient(135deg, rgba(255, 178, 79, 0.13), rgba(117, 218, 255, 0.07)),
+      var(--ainekio-surface);
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content ol,
+  #post-container[data-post-slug="software"] .markdown-content ul {
+    padding: 1rem 1.1rem 1rem 2.2rem;
+    border: 1px solid rgba(117, 203, 255, 0.18);
+    border-radius: 0.55rem;
+    background: var(--ainekio-surface-soft);
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content li {
+    margin: 0.55rem 0;
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content li::marker {
+    color: var(--ainekio-amber);
+    font-weight: 800;
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content table {
+    display: block;
+    width: 100%;
+    margin: 1.2rem 0 1.6rem;
+    overflow-x: auto;
+    border: 1px solid var(--ainekio-line);
+    border-radius: 0.6rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
+      var(--ainekio-surface);
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content table th,
+  #post-container[data-post-slug="software"] .markdown-content table td {
+    padding: 0.8rem 0.9rem;
+    border-color: rgba(117, 203, 255, 0.16);
+    overflow-wrap: anywhere;
+    vertical-align: top;
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content table th {
+    color: var(--ainekio-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content table td:first-child {
+    color: var(--ainekio-cream);
+    font-weight: 800;
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content table tbody tr:nth-child(odd) {
+    background: rgba(117, 218, 255, 0.035);
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content pre {
+    margin: 1.2rem 0 1.6rem;
+    padding: 1rem;
+    overflow-x: auto;
+    color: var(--ainekio-cream);
+    border: 1px solid var(--ainekio-line);
+    border-radius: 0.55rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
+      rgba(0, 0, 0, 0.34);
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content a {
+    color: var(--ainekio-cyan);
+    text-decoration-color: rgba(117, 218, 255, 0.42);
+    text-underline-offset: 0.18em;
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content code {
+    color: var(--ainekio-amber);
+    border: 1px solid rgba(255, 178, 79, 0.18);
+    border-radius: 0.35rem;
+    background: rgba(0, 0, 0, 0.28);
+  }
+
+  #post-container[data-post-slug="software"] .markdown-content hr {
+    height: 1px;
+    margin: 1.8rem 0;
+    border: 0;
+    background: linear-gradient(90deg, transparent, rgba(117, 218, 255, 0.5), rgba(255, 178, 79, 0.42), transparent);
+  }
+
+  @media (max-width: 720px) {
+    #post-container[data-post-slug="software"] .markdown-content table,
+    #post-container[data-post-slug="software"] .markdown-content table thead,
+    #post-container[data-post-slug="software"] .markdown-content table tbody,
+    #post-container[data-post-slug="software"] .markdown-content table tr,
+    #post-container[data-post-slug="software"] .markdown-content table th,
+    #post-container[data-post-slug="software"] .markdown-content table td {
+      display: block;
+    }
+
+    #post-container[data-post-slug="software"] .markdown-content table thead {
+      display: none;
+    }
+
+    #post-container[data-post-slug="software"] .markdown-content table tr {
+      padding: 0.8rem 0;
+      border-bottom: 1px solid rgba(117, 203, 255, 0.16);
+    }
+
+    #post-container[data-post-slug="software"] .markdown-content table td {
+      border: 0;
+    }
+
+    #post-container[data-post-slug="software"] .markdown-content table td::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 0.25rem;
+      color: var(--ainekio-cyan);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+  }
+`}</style>
+
+<DocsEditorBridge
+  client:load
+  url="https://docs.google.com/document/d/1w1k1ZmoCP_l_8z639lCzDJ3wRVZI1T3BijteEptouvg/edit?usp=sharing"
+  format="md"
+/>

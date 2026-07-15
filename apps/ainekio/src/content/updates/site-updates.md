@@ -50,18 +50,22 @@ The motion stack went from plan to working loop. Environment Mode now treats Ain
 Location: Robot body
 Mileage: v0.2.0
 
-Worked through the first real hardware plan and found the main constraint is power and body packaging, not just picking a controller. That work landed on a decision: the body controller is a Freenove ESP32-S3-WROOM CAM (N16R8 - the PSRAM matters for camera streaming). The S3 drives all eight MG90S servos directly over MCPWM, which eliminates the PCA9685 expander entirely and keeps the hand-wired Sesame servo rail. The earlier Pi Zero 2 W path is superseded. Audio is settled too: INMP441 I2S mic, MAX98357A amp, 28mm speaker, OLED face.
+Too much thinking and looking at tables. Am going for esp 32 chip mainly becasue cost and availability.
 
 ## 2026-07-11 | Power system and documentation cleanup
 Location: Robot body and OS bridge
 Mileage: v0.2.0
 
-Chose the safer split between the OS brain and the robot body: the OS sends intent-level commands, while the body owns power, motion safety, and fit checks. The power spine is fully specified: 2S 18650 protected pack, USB-C boost charger board behind a panel-mount port so the robot charges like a phone, master rocker switch, and two MINI560 5A bucks on separate servo and electronics rails. Battery voltage divider gives a low-battery voice warning at ~7.0V and parks the servos at ~6.8V.
-
-Also did a full documentation pass: swept stale Pi/PCA9685 references out of every project doc, resolved internal contradictions in the parts list, gave each doc a single owned topic, and merged the old Broad Strokes status page and Project Overview into one Overview &amp; Status page. Complete shopping list is written - nothing bought yet, on purpose, until the body cavity is measured against the chosen parts.
+A full documentation pass: swept stale references out of every project doc, fixed contradictions in the parts list, gave each doc a single owned topic, and merged the old Broad Strokes status page and Project Overview into one Overview &amp; Status page. Complete shopping list is written - nothing bought yet, on purpose.
 
 ## 2026-07-13 | Firmware and first printed parts
 Location: Robot body
 Mileage: v0.2.0
 
-Started the ESP32-S3 firmware, printed the first leg parts, and ordered the hardware. Updated the system spec and progress plan with the firmware size budget, staged hardware bring-up, and the useful Sesame motion, emulator, and control behaviors to carry into Ainekio.
+Started the ESP32-S3 firmware, printed the first leg parts, and ordered the hardware.
+
+## 2026-07-14 | Firmware and Software
+
+Mileage: v0.2.1
+
+Made 2 documents - Sofware, Firmware. Working on bridge and firmware systems.
