@@ -1,0 +1,228 @@
+---
+import { getCollection, getEntry } from 'astro:content'
+import { Icon } from 'astro-icon/components'
+
+const posts = await getCollection(
+  'posts',
+  ({ data }) => data.draft !== true && data.archive !== true,
+)
+const updates = await getEntry('updates', 'site-updates')
+const current = updates?.data.current
+
+const sections = [
+  {
+    eyebrow: 'Physical robot',
+    title: 'Body and controller',
+    description:
+      'The photographed red-and-black open chassis, the separate Frame8 enclosure revision, controller firmware, peripherals, power, and the line between board bring-up and assembled-body proof.',
+    icon: 'material-symbols:precision-manufacturing-outline',
+    links: [
+      {
+        label: 'Body design and hardware',
+        href: '/posts/body-design-and-hardware/',
+      },
+      { label: 'Controller firmware', href: '/posts/controller-firmware/' },
+    ],
+  },
+  {
+    eyebrow: 'Robot runtime',
+    title: 'Contract and transport',
+    description:
+      'Semantic commands, protocol v1, bounded media, safety gates, the authenticated gateway, operator dashboard, emulator, and simulator.',
+    icon: 'material-symbols:hub-outline',
+    links: [
+      { label: 'Protocol and safety', href: '/posts/protocol-and-safety/' },
+      { label: 'Gateway and simulator', href: '/posts/gateway-and-simulator/' },
+    ],
+  },
+  {
+    eyebrow: 'Perception and voice',
+    title: 'See, hear, and speak',
+    description:
+      'Event-correlated camera stills, visual completion, wake-word and VAD boundaries, Whisper transcription, Kokoro synthesis, and robot speaker feedback.',
+    icon: 'material-symbols:spatial-audio-outline',
+    links: [
+      { label: 'Vision loop', href: '/posts/vision-loop/' },
+      { label: 'Voice loop', href: '/posts/voice-loop/' },
+    ],
+  },
+  {
+    eyebrow: 'MetaHuman OS',
+    title: 'Reasoning and autonomy',
+    description:
+      'Work admission, Environment Mode, Task State, Bridge transport, Robot Operator, and the difference between reactive success and an accepted companion loop.',
+    icon: 'material-symbols:account-tree-outline',
+    links: [
+      {
+        label: 'Closed Environment loop',
+        href: '/posts/metahuman-integration/',
+      },
+      { label: 'Bounded autonomy', href: '/posts/bounded-autonomy/' },
+    ],
+  },
+]
+
+const evidence = [
+  {
+    label: 'Tracked field guide',
+    value: `${posts.length} articles`,
+    detail: 'Local MDX tied to current owners',
+  },
+  {
+    label: 'Controller',
+    value: 'ESP32-S3 N16R8',
+    detail: '16 MB flash · 8 MB PSRAM',
+  },
+  {
+    label: 'Body contract',
+    value: 'Protocol v1',
+    detail: 'Semantic action and bounded media',
+  },
+  {
+    label: 'Acceptance',
+    value: 'Prototype',
+    detail: 'Assembled companion loop still open',
+  },
+]
+
+const loop = [
+  { label: 'Admit', owner: 'Work Coordinator' },
+  { label: 'Decide', owner: 'Environment Mode' },
+  { label: 'Transport', owner: 'Environment Bridge' },
+  { label: 'Execute', owner: 'Ainekio body' },
+  { label: 'Prove', owner: 'Task State + observation' },
+]
+---
+
+<div class="mb-6 space-y-6">
+  <section class="card-base relative min-h-[30rem] overflow-hidden rounded-[var(--radius-large)] border border-cyan-300/20 shadow-2xl shadow-cyan-950/15">
+    <img
+      src="/assets/ainekio/hero.webp"
+      alt="The current red-and-black open-frame Ainekio prototype on a ruined elevated highway"
+      class="absolute inset-0 h-full w-full object-cover object-[68%_center]"
+      loading="eager"
+      fetchpriority="high"
+    />
+    <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,8,12,.97)_0%,rgba(3,8,12,.91)_38%,rgba(3,8,12,.42)_70%,rgba(3,8,12,.14)_100%)]"></div>
+    <div class="relative z-10 flex min-h-[30rem] max-w-[39rem] flex-col justify-between p-6 sm:p-9 lg:p-10">
+      <div class="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100/80">
+        <span class="rounded-full border border-cyan-300/25 bg-cyan-950/55 px-3 py-1.5">Project field guide</span>
+        <span class="rounded-full border border-amber-300/25 bg-amber-950/40 px-3 py-1.5">Updated 27 Aug 2026</span>
+      </div>
+
+      <div class="py-9">
+        <p class="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-amber-300">Ainekio robot familiar</p>
+        <h1 class="max-w-[13ch] text-4xl font-black leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl">
+          A physical interface for MetaHuman OS.
+        </h1>
+        <p class="mt-5 max-w-[39rem] text-base leading-7 text-slate-200/85 sm:text-lg">
+          A desk-scale quadruped with a real protocol, controller, gateway, perception loop, voice path, and bounded autonomy—documented from source to physical proof.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-3">
+        <a href="/posts/project-overview/" class="inline-flex items-center gap-2 rounded-full bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-200 active:scale-95">
+          Start with the system
+          <Icon name="material-symbols:arrow-forward-rounded" class="text-xl" />
+        </a>
+        <a href="/posts/current-status/" class="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-5 py-3 text-sm font-bold text-white backdrop-blur transition hover:border-amber-300/60 hover:bg-black/45 active:scale-95">
+          Read current status
+          <Icon name="material-symbols:fact-check-outline" class="text-xl" />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Project evidence summary" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    {evidence.map(item => (
+      <div class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-cyan-700/15 bg-gradient-to-br from-cyan-500/[0.08] to-transparent p-5 dark:border-cyan-300/20 dark:from-cyan-400/[0.08]">
+        <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent"></div>
+        <p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-cyan-700 dark:text-cyan-300">{item.label}</p>
+        <p class="mt-2 text-xl font-black text-slate-950 dark:text-white">{item.value}</p>
+        <p class="mt-1 text-sm leading-5 text-slate-600 dark:text-slate-300">{item.detail}</p>
+      </div>
+    ))}
+  </section>
+
+  <section class="card-base rounded-[var(--radius-large)] border border-amber-700/15 bg-gradient-to-br from-amber-500/[0.07] via-transparent to-cyan-500/[0.05] p-6 dark:border-amber-300/20 sm:p-8">
+    <div class="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.62fr)] lg:items-end">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-300">Current project position</p>
+        <h2 class="mt-2 text-3xl font-black tracking-[-0.03em] text-slate-950 dark:text-white">Implemented software loop. Physical acceptance in progress.</h2>
+        <p class="mt-3 max-w-[62ch] text-base leading-7 text-slate-700 dark:text-slate-300">
+          {current?.note || 'The source path is broad and validated in focused layers. Final enclosure, combined-load hardware, calibrated movement, robust voice, fresh-frame semantic proof, and repeated autonomy cycles remain open.'}
+        </p>
+      </div>
+      <dl class="grid grid-cols-2 gap-3 text-sm">
+        <div class="rounded-xl border border-slate-900/10 bg-white/50 p-4 dark:border-white/10 dark:bg-slate-950/45">
+          <dt class="text-slate-500 dark:text-slate-400">Location</dt>
+          <dd class="mt-1 font-bold text-slate-950 dark:text-white">{current?.location || 'Integrated prototype'}</dd>
+        </div>
+        <div class="rounded-xl border border-slate-900/10 bg-white/50 p-4 dark:border-white/10 dark:bg-slate-950/45">
+          <dt class="text-slate-500 dark:text-slate-400">Next gate</dt>
+          <dd class="mt-1 font-bold text-slate-950 dark:text-white">{current?.nextStop || 'Assembled loop acceptance'}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="card-base rounded-[var(--radius-large)] border border-cyan-700/15 bg-gradient-to-br from-cyan-500/[0.05] to-transparent p-6 dark:border-cyan-300/20 sm:p-8">
+    <p class="text-xs font-bold uppercase tracking-[0.2em] text-cyan-700 dark:text-cyan-300">One bounded loop</p>
+    <h2 class="mt-2 text-3xl font-black tracking-[-0.03em] text-slate-950 dark:text-white">Every step has one owner.</h2>
+    <div class="mt-6 grid gap-2 lg:grid-cols-5">
+      {loop.map((step, index) => (
+        <div class="relative rounded-xl border border-slate-900/10 bg-white/55 p-4 dark:border-white/10 dark:bg-slate-950/50">
+          <span class="text-xs font-bold tabular-nums text-slate-400 dark:text-slate-500">0{index + 1}</span>
+          <p class="mt-3 text-lg font-black text-slate-950 dark:text-white">{step.label}</p>
+          <p class="mt-1 text-sm leading-5 text-slate-600 dark:text-slate-300">{step.owner}</p>
+          {index < loop.length - 1 && <Icon name="material-symbols:arrow-forward-rounded" class="absolute -right-4 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-[var(--card-bg)] text-2xl text-cyan-500 lg:block" />}
+        </div>
+      ))}
+    </div>
+    <p class="mt-5 text-sm leading-6 text-slate-600 dark:text-slate-300">
+      A successful command proves execution. A correlated fresh observation proves a visual goal. The site keeps those claims separate throughout.
+    </p>
+  </section>
+
+  <section>
+    <div class="mb-4 flex flex-wrap items-end justify-between gap-3 px-1">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-300">Browse by system</p>
+        <h2 class="mt-1 text-3xl font-black tracking-[-0.03em] text-slate-950 dark:text-white">The field guide</h2>
+      </div>
+      <a href="/archive/" class="inline-flex items-center gap-1 text-sm font-bold text-cyan-700 hover:underline dark:text-cyan-300">
+        Open full archive <Icon name="material-symbols:arrow-forward-rounded" class="text-lg" />
+      </a>
+    </div>
+    <div class="grid gap-4 lg:grid-cols-2">
+      {sections.map(section => (
+        <article class="card-base group/card relative overflow-hidden rounded-[var(--radius-large)] border border-slate-900/10 bg-gradient-to-br from-white/40 to-transparent p-6 transition duration-300 hover:-translate-y-0.5 hover:border-cyan-500/40 hover:shadow-xl hover:shadow-cyan-950/10 dark:border-white/10 dark:from-white/[0.035] sm:p-7">
+          <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent opacity-60 transition group-hover/card:opacity-100"></div>
+          <div class="flex items-start gap-4">
+            <div class="rounded-xl bg-cyan-500/10 p-3 text-cyan-700 dark:text-cyan-300">
+              <Icon name={section.icon} class="text-3xl" />
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{section.eyebrow}</p>
+              <h3 class="mt-1 text-2xl font-black tracking-[-0.02em] text-slate-950 dark:text-white">{section.title}</h3>
+              <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{section.description}</p>
+              <div class="mt-5 flex flex-col gap-2">
+                {section.links.map(link => (
+                  <a href={link.href} class="group inline-flex items-center justify-between gap-3 rounded-lg border border-slate-900/10 bg-white/40 px-4 py-3 text-sm font-bold text-slate-800 transition hover:border-cyan-400/60 hover:bg-cyan-500/[0.06] hover:text-cyan-800 dark:border-white/10 dark:bg-slate-950/35 dark:text-slate-100 dark:hover:text-cyan-200">
+                    {link.label}
+                    <Icon name="material-symbols:arrow-forward-rounded" class="text-xl transition group-hover:translate-x-1" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <div class="px-1 pt-2">
+    <p class="text-xs font-bold uppercase tracking-[0.2em] text-cyan-700 dark:text-cyan-300">Chronological reading</p>
+    <h2 class="mt-1 text-3xl font-black tracking-[-0.03em] text-slate-950 dark:text-white">All field notes</h2>
+  </div>
+</div>

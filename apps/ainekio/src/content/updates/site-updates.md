@@ -1,71 +1,60 @@
 ---
-title: Ainekio Updates
-journalTitle: Project Notes
+title: "Ainekio Field Updates"
+journalTitle: "Milestones and field notes"
 labels:
-  status: Status
-  location: Area
-  section: Focus
-  mileage: Version
-  nextStop: Next
-  updated: Updated
+  status: "Status"
+  location: "Layer"
+  section: "Focus"
+  mileage: "Baseline"
+  nextStop: "Next gate"
+  updated: "Updated"
+maxEntries: 8
 current:
-  status: Firmware and physical build
-  location: Robot body
-  updated: 2026-07-13
-  mileage: "v0.2.0"
-  section: Firmware started, first leg parts printed
-  nextStop: Receive and inspect parts, then begin staged hardware bring-up
-  note: >
-    Firmware work is underway, the first leg parts are printed, and
-    the selected hardware has been ordered. Physical assembly and
-    hardware validation are still ahead.
+  status: "Progress site overhaul and source reconciliation"
+  location: "Integrated prototype"
+  updated: 2026-08-27
+  mileage: "Ainekio 6ad9051 · MetaHuman 5191d6fc"
+  section: "Source-to-physical evidence"
+  nextStop: "Assembled companion-loop acceptance"
+  note: "The end-to-end software architecture is implemented and the controller has real bring-up evidence. Final enclosure, combined-load hardware, calibrated movement, robust voice, fresh-frame semantic proof, and repeated autonomy cycles remain open."
+entries:
+  - title: "Progress site rebuilt around current owners"
+    date: 2026-08-27
+    location: "Documentation"
+    mileage: "10-article field guide"
+    summary: "Replaced five remote-doc pages and fantasy art with a local status-led field guide covering the body, controller, protocol, gateway, perception, voice, MetaHuman loop, and bounded autonomy."
+    url: "/posts/current-status/"
+  - title: "MetaHuman autonomy ownership consolidated"
+    date: 2026-08-25
+    location: "MetaHuman OS"
+    mileage: "5191d6fc"
+    summary: "Robot Operator is the tracked robot-autonomy admission owner; Environment Mode, Bridge, Task State, and the Work Coordinator retain their separate responsibilities."
+    url: "/posts/bounded-autonomy/"
+  - title: "Wake-word pilot contained for false triggers"
+    date: 2026-08-23
+    location: "Voice"
+    summary: "Real-room events showed the pilot threshold and negative set were not production-ready. Wake operation remains a tuning and acceptance track, not a finished feature."
+    url: "/posts/voice-loop/"
+  - title: "Camera and semantic motion expansion published"
+    date: 2026-08-04
+    location: "Robot firmware"
+    mileage: "6ad9051"
+    summary: "The tracked controller gained the corrected OV3660 motion-capture profile alongside expanded semantic motions and simulator parity."
+    url: "/posts/controller-firmware/"
+  - title: "Five-second walk assets installed"
+    date: 2026-07-31
+    location: "Motion assets"
+    summary: "Walk assets were regenerated to bounded roughly five-second sequences and installed with a LittleFS-only flash and digest readback."
+    url: "/posts/protocol-and-safety/"
+  - title: "Physical audio path exercised"
+    date: 2026-07-29
+    location: "Robot audio"
+    summary: "Bounded pacing produced clean audible playback in one test while underrun and microphone transport counters remained explicitly open."
+    url: "/posts/voice-loop/"
 ---
 
-## 2026-07-04 | Site scaffold
-Location: Website
-Mileage: v0.1.0
+# Field updates
 
-Started the Ainekio static site in the Merkin monorepo under `apps/ainekio`, and wired to use `ainek.io`. Made github repo fo Anekio project 'https://github.com/Greg-Aster/Ainekio-bot'.
-
-## 2026-07-06 | First Steps
-Location: Website
-Mileage: v0.1.0
-
-Coding work on bridge between OS and virtual enviornment,
-
-
-## 2026-07-07 | Simulation
-Location: Website
-Mileage: v0.1.0
-
-Heavy work on virtual avatar and environment - basic motion module integration groundwork. Website beautification. Google docs bridge for document editing support.
-
-## 2026-07-08 | Simulator loop working
-Location: OS bridge and motion systems
-Mileage: v0.1.0
-
-The motion stack went from plan to working loop. Environment Mode now treats Ainekio as a generic robot environment: natural language in, typed semantic commands out (`walk`, `wave`, `stop` - never raw servo angles). The Ainekio adapter receives pushed actions over a persistent event stream (no polling), runs them through a safety boundary, and drives the stock Sesame simulator through its own UART command path. Nineteen named routines mapped, core sequences ported to Python, unit tests passing.
-
-## 2026-07-10 | Hardware decided
-Location: Robot body
-Mileage: v0.2.0
-
-Too much thinking and looking at tables. Am going for esp 32 chip mainly becasue cost and availability.
-
-## 2026-07-11 | Power system and documentation cleanup
-Location: Robot body and OS bridge
-Mileage: v0.2.0
-
-A full documentation pass: swept stale references out of every project doc, fixed contradictions in the parts list, gave each doc a single owned topic, and merged the old Broad Strokes status page and Project Overview into one Overview &amp; Status page. Complete shopping list is written - nothing bought yet, on purpose.
-
-## 2026-07-13 | Firmware and first printed parts
-Location: Robot body
-Mileage: v0.2.0
-
-Started the ESP32-S3 firmware, printed the first leg parts, and ordered the hardware.
-
-## 2026-07-14 | Firmware and Software
-
-Mileage: v0.2.1
-
-Made 2 documents - Sofware, Firmware. Working on bridge and firmware systems.
+This journal records significant source, integration, and physical milestones.
+Entries name the layer they actually prove. Detailed evidence and current open
+gates live in the linked field-guide articles.

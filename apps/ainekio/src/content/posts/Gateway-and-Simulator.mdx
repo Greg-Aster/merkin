@@ -1,0 +1,145 @@
+---
+title: "Gateway, Dashboard, and Simulator: One Contract, Three Views"
+published: 2026-08-27T08:45:00-07:00
+updated: 2026-08-27
+description: "How the authenticated gateway, operator dashboard, host emulator, and browser simulator inspect one robot contract without becoming competing owners."
+image: "/posts/ainekio-2026/gateway-simulator.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, Gateway, Dashboard, Emulator, Simulator, WebSocket]
+category: "Robot Runtime"
+draft: false
+lang: "en"
+series: "Ainekio Field Guide"
+seriesPart: 6
+seriesTitle: "Robot Runtime"
+contentFormat: "report"
+---
+
+# The Master side of Ainekio
+
+`Master/` is the brain-side owner for Ainekio's authenticated protocol gateway,
+operator dashboard, and MetaHuman Environment adapter. It accepts robot
+connections, validates sessions, translates semantic environment actions, moves
+bounded camera and audio data, and reports correlated outcomes.
+
+It does not own MetaHuman's task queue or decide the semantic completion of an
+objective. It also does not own the body-core safety policy that runs on the
+controller and in the host emulator.
+
+## Gateway service
+
+The production gateway exposes separate authenticated roles for the physical
+robot and the Environment adapter. A robot session publishes identity,
+capabilities, readiness, status, and terminal results. The Environment side sees
+a normalized observation and a bounded action surface rather than raw servo
+control.
+
+The gateway coordinates:
+
+- robot and adapter authentication;
+- protocol-v1 control and binary media framing;
+- sequence allocation and terminal-result waiting;
+- capability and current-readiness translation;
+- camera metadata and JPEG delivery;
+- microphone utterance assembly;
+- paced speaker PCM delivery;
+- status, connection-epoch, error, and operation telemetry.
+
+Local operation prefers DNS-SD discovery with a bounded cached-endpoint attempt.
+A stale cached address is not permanent configuration, and local mode does not
+silently fall back to the optional relay.
+
+## Operator dashboard
+
+The dashboard is an inspection and control surface for the real gateway. It can
+show robot state and readiness, select bounded camera preview, change microphone
+or wake settings, request safe actions, and run narrow hardware checks such as a
+speaker test tone.
+
+That last detail illustrates the ownership model. Dashboard volume is a test-
+tone option; it does not silently change the amplitude of ordinary MetaHuman
+speech. A UI control only owns the behavior explicitly connected to its handler.
+
+The dashboard is also where physical facts become visible without granting the
+browser authority over them. Camera readiness, wake readiness, battery
+classification, media counters, and connection state originate from the robot
+and gateway.
+
+## Environment adapter
+
+The adapter is Ainekio's implementation of the generic MetaHuman Environment
+Bridge contract. It converts capability-bound MetaHuman actions into protocol-v1
+requests and converts robot feedback into Environment observations.
+
+Examples include:
+
+| MetaHuman action | Ainekio path |
+| --- | --- |
+| `robotCommand` | Validated named body command |
+| `robotMotionPlan` | Bounded frame plan when advertised by the body |
+| `captureImage` | Fresh robot snapshot request and correlated JPEG |
+| robot speech | Bounded rendered PCM artifact, paced through the gateway |
+| microphone utterance | VAD-bounded WAV envelope to MetaHuman Whisper |
+
+The adapter advertises only what the selected connected body can currently do.
+It waits for robot terminal feedback and does not turn “bytes written to the
+socket” into a successful action result.
+
+## Host emulator
+
+The host emulator implements the robot side of protocol v1 while reusing the
+portable C body core. It gives the project a deterministic way to test command
+acceptance, lifecycle, provisioning transitions, prepared motion, and error
+handling without flashing the controller for every change.
+
+When no browser renderer is connected, the emulator can complete accepted
+motion headlessly. When the visual renderer is connected, completion requires
+the correlated renderer acceptance. This prevents an open web page from
+becoming a cosmetic afterthought with no relationship to the command lifecycle.
+
+## Browser simulator
+
+The Sesame-derived visual simulator renders accepted poses and sequences. It is
+useful for inspecting motion shape, parity, and state transitions. It is not the
+safety owner, not a physics certificate, and not proof that the printed body can
+carry the same gait under load.
+
+The simulator answers questions such as:
+
+- Did the expected command reach the renderer?
+- Does the pose sequence use the intended joints and timing?
+- Does the host path agree with the protocol and portable core?
+
+It cannot answer:
+
+- Will the servo rail brown out?
+- Does the foot slip on the real floor?
+- Is a printed joint binding?
+- Did the physical camera see the stopping condition?
+
+## The complete local inspection stack
+
+The Ainekio root launcher starts the simulator, protocol-v1 body emulator,
+gateway, dashboard, and authenticated Environment adapter as one managed local
+stack. It refuses to claim a connected MetaHuman path when the shared adapter
+token is absent.
+
+That stack is valuable because it tests the real owner boundaries. A standalone
+UI mock or a script that calls private helpers would prove much less.
+
+## Transport evidence is layered
+
+The physical system has produced authenticated gateway sessions and successful
+terminal commands. It has also produced abnormal WebSocket closes and host
+`No route to host` evidence while the gateway process itself remained alive.
+
+Those observations establish transport loss, not its physical cause. Strong
+RSSI cannot rule out incomplete binary writes, route loss, controller reset,
+power faults, or WebSocket lifecycle errors. The next useful transport run must
+correlate robot-side error detail, connection epochs, media counters, reset
+reason, route state, and gateway operations without changing several retry
+policies at once.

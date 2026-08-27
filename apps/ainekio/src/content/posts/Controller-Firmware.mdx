@@ -1,0 +1,135 @@
+---
+title: "Controller Firmware: One Portable Core, One Physical Port"
+published: 2026-08-27T09:15:00-07:00
+updated: 2026-08-27
+description: "How the ESP32-S3 firmware composes safety, motion, camera, audio, storage, provisioning, and recovery without duplicating robot policy."
+image: "/posts/ainekio-2026/controller-firmware.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, Firmware, ESP-IDF, ESP32-S3, FreeRTOS, Motion]
+category: "Physical Robot"
+draft: false
+lang: "en"
+series: "Ainekio Field Guide"
+seriesPart: 4
+seriesTitle: "Physical Robot"
+contentFormat: "report"
+---
+
+# Firmware is the platform port, not a second robot brain
+
+The physical entry point is `Slave/firmware/esp32s3/main/app_main.c`. It composes
+the Ainekio portable body core with ESP-IDF services for the delivered hardware.
+The portable core owns command acceptance, lifecycle, state, and motion safety;
+the platform port owns FreeRTOS tasks, networking, NVS, filesystems, GPIO, PWM,
+camera, display, audio, and other physical effects.
+
+That split is important. The host emulator compiles the same body core, so tests
+and simulation exercise the command policy that the controller uses. The
+browser renderer cannot invent a second definition of “accepted,” and the
+firmware port does not need to reinterpret every semantic command.
+
+## Toolchain and memory layout
+
+The current physical target is ESP-IDF 5.5.4 on an ESP32-S3 N16R8:
+
+- 16 MB flash;
+- 8 MB octal PSRAM at 80 MHz;
+- dual 3 MB OTA application slots;
+- a large LittleFS partition for deterministic robot assets;
+- size-optimized firmware settings.
+
+The build is expected to report component size and memory use, not merely
+produce a binary. Camera buffers, audio queues, prepared motion plans, network
+traffic, storage, and OTA validation all compete for bounded resources.
+
+## Boot and provisioning
+
+First configuration uses an `Ainekio-Setup` WPA2 access point. The device keeps
+one stable per-device setup key instead of generating a different secret on each
+entry. After joining the setup network, the owner opens the local configuration
+form and supplies the home-network and gateway settings.
+
+Network configuration uses bounded A/B storage slots. A replacement is written
+to the inactive slot and validated before the active metadata changes. A failed
+write or validation leaves the previous slot selected. Calibration, poses, ADC
+settings, and network data remain separate so a network reset does not silently
+erase body configuration.
+
+## Motion services
+
+Eight independent MCPWM channels drive the legs. Motion data is prepared before
+the motion task executes it. Named assets and generated `motion_plan_v1` frames
+pass through the same calibration, range, stop, fail-safe, buffer, and timing
+gates.
+
+The current motion library includes:
+
+- stand, rest, and a dedicated held sit pose;
+- walk and turn assets;
+- 45°, 90°, and 180° open-loop turn names;
+- wave, bow, and other expressive motions;
+- `curious`, which scans right and left before returning to its starting pose;
+- bounded dance sequences including Macarena and salsa patterns;
+- motion plans with at most 32 validated frames.
+
+Playback uses a bounded eased transition rather than jumping instantly between
+servo targets. The semantic name still does not certify physical geometry: a
+90-degree turn must be measured on the assembled robot before it can be treated
+as a calibrated heading.
+
+## Camera behavior
+
+The OV3660 path is optimized for event-related stills rather than a continuous
+model video stream. Fresh still capture uses XGA resolution. Optional operator
+preview is restricted to QVGA or VGA and remains off until explicitly requested.
+
+The current fast profile uses a short manual exposure aligned to indoor 60 Hz
+lighting, moderate gain, denoise, neutral sharpening, and no automatic exposure
+convergence delay. The change was made after a higher-gain profile produced
+severe fixed-pattern cross-hatching.
+
+Motion completion and VAD-bounded utterance completion can queue a still with a
+correlation identifier. The controller sends the JPEG and then reports the
+terminal action result. A failed snapshot does not rewrite already completed
+motion as a motor failure; the observation failure remains visible as its own
+layer.
+
+## Microphone, wake word, and speaker
+
+Microphone capture is 16 kHz mono PCM. The current endpointing path uses a pinned
+neural VAD model with minimum capture, silence, and absolute-duration bounds.
+The outgoing queue uses PSRAM to absorb short network stalls.
+
+The firmware also contains a real microWakeWord/TensorFlow Lite Micro backend.
+It loads a versioned local model package, verifies the manifest and tensor
+contract, and only reports ready after initialization. No accepted production
+Ainekio weights are tracked, so the safe seed state remains not ready.
+
+Speaker PCM arrives inside an explicit TTS burst, enters a bounded queue, and is
+sent over I2S. Orphan frames, queue overflow, interruption, and terminal states
+are protocol events rather than silent audio best-effort.
+
+## Storage and recovery
+
+LittleFS stores versioned motion, face, PCM, and wake package assets. The SD card
+has its own low-priority task and bounded rolling-log behavior so storage work
+does not own motion or networking. OTA uses rollback validation after gateway
+authentication rather than treating a booting image as automatically healthy.
+
+Transport failures enter the robot's fail-safe/offline behavior and begin a
+bounded reconnect loop. Stale control traffic stops active motion without
+destroying an otherwise authenticated idle session.
+
+## What firmware validation proves
+
+The project has run portable-core tests, protocol fixtures, firmware policy
+tests, ESP-IDF builds, application and LittleFS flashes, and digest readback.
+Those checks prove source and controller-image properties.
+
+They do not by themselves prove servo alignment, battery performance,
+microphone acoustics, speaker continuity, camera quality in every room, or
+stable combined-load behavior. Those remain body-level acceptance work.

@@ -32,16 +32,56 @@ export const videoConfig: VideoBannerConfig = {
 }
 
 export const bannerList: BannerItem[] = [
-  { type: 'image', src: banner1, alt: 'Banner image 1' } as ImageBannerItem,
-  { type: 'image', src: banner2, alt: 'Banner image 2' } as ImageBannerItem,
-  { type: 'image', src: banner3, alt: 'Banner image 3' } as ImageBannerItem,
-  { type: 'image', src: banner4, alt: 'Banner image 4' } as ImageBannerItem,
-  { type: 'image', src: banner5, alt: 'Banner image 5' } as ImageBannerItem,
-  { type: 'image', src: banner6, alt: 'Banner image 6' } as ImageBannerItem,
-  { type: 'image', src: banner7, alt: 'Banner image 7' } as ImageBannerItem,
-  { type: 'image', src: banner8, alt: 'Banner image 8' } as ImageBannerItem,
-  { type: 'image', src: banner9, alt: 'Banner image 9' } as ImageBannerItem,
-  { type: 'image', src: banner10, alt: 'Banner image 10' } as ImageBannerItem,
+  {
+    type: 'image',
+    src: banner1,
+    alt: 'Ainekio overlooking a ruined neon megacity',
+  } as ImageBannerItem,
+  {
+    type: 'image',
+    src: banner2,
+    alt: 'Ainekio atop a fallen machine in a storm-blasted scrapyard',
+  } as ImageBannerItem,
+  {
+    type: 'image',
+    src: banner3,
+    alt: 'Ainekio inside a derelict starship reactor chamber',
+  } as ImageBannerItem,
+  {
+    type: 'image',
+    src: banner4,
+    alt: 'Ainekio inside an excessive missile-silo safety facility',
+  } as ImageBannerItem,
+  {
+    type: 'image',
+    src: banner5,
+    alt: 'Ainekio crossing a cyberpunk server canyon beside a USB cable',
+  } as ImageBannerItem,
+  {
+    type: 'image',
+    src: banner6,
+    alt: 'Ainekio facing an alien monolith beneath a cosmic eye',
+  } as ImageBannerItem,
+  {
+    type: 'image',
+    src: banner7,
+    alt: 'Ainekio addressing a ruined opera house full of speakers',
+  } as ImageBannerItem,
+  {
+    type: 'image',
+    src: banner8,
+    alt: 'Ainekio beneath a five-node supercomputer constellation',
+  } as ImageBannerItem,
+  {
+    type: 'image',
+    src: banner9,
+    alt: 'Ainekio crossing a salt flat toward a tiny red ball',
+  } as ImageBannerItem,
+  {
+    type: 'image',
+    src: banner10,
+    alt: 'Ainekio on a mountain of unfinished verification tools',
+  } as ImageBannerItem,
 ]
 
 export const bannerLinks: (string | null)[] = bannerList.map(() => null)

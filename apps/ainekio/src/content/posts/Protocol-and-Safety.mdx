@@ -1,0 +1,159 @@
+---
+title: "Protocol and Safety: Semantic Commands With Bounded Outcomes"
+published: 2026-08-27T09:00:00-07:00
+updated: 2026-08-27
+description: "The protocol-v1 contract, media framing, command lifecycle, capability gates, motion bounds, and why completion has multiple meanings."
+image: "/posts/ainekio-2026/protocol-safety.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, Protocol, Safety, Semantic Commands, Capabilities]
+category: "Robot Runtime"
+draft: false
+lang: "en"
+series: "Ainekio Field Guide"
+seriesPart: 5
+seriesTitle: "Robot Runtime"
+contentFormat: "report"
+---
+
+# The wire contract is part of the safety design
+
+Ainekio protocol v1 is shared by the gateway, host emulator, tests, and physical
+firmware. It carries bounded JSON control messages alongside compact binary
+camera and audio frames. The contract defines more than serialization: it also
+defines authentication, sequence correlation, command lifecycle, feature
+advertisement, payload limits, and the conditions under which work must be
+rejected.
+
+Malformed commands do not partially execute.
+
+## Semantic commands, not model-owned servos
+
+MetaHuman and other upstream callers ask for semantic behavior. Examples include
+`wave`, `bow`, `sit`, `turn_left_45`, `captureImage`, or a validated bounded
+motion plan. The robot core resolves those requests to owner-authored assets and
+calibrated joint limits.
+
+The design intentionally rejects this path:
+
+```text
+model output -> arbitrary joint angles -> immediate PWM
+```
+
+The accepted path is:
+
+```text
+semantic intent
+  -> advertised capability
+  -> protocol validation
+  -> body-core acceptance
+  -> calibrated prepared motion
+  -> physical task
+  -> correlated terminal result
+```
+
+`motion_plan_v1` extends the same path rather than bypassing it. Plans have a
+bounded frame count, bounded fields and durations, joint range checks, and the
+same stop, fail-safe, and completion behavior as named assets.
+
+## Control and media planes
+
+JSON control messages carry lifecycle and state. Binary frames carry media with
+a small header that identifies frame type and counter. The main media types are:
+
+- camera JPEG;
+- microphone PCM;
+- speaker PCM.
+
+Metadata stays in validated control messages. A camera frame can be associated
+with an action sequence, an utterance origin, or an explicit snapshot request
+without embedding the JPEG in JSON.
+
+For example, a completed motion can emit correlated camera metadata, send the
+bounded JPEG frame, and then emit `done` for the original command. MetaHuman can
+therefore distinguish the actuator result from the later visual evidence.
+
+## Command lifecycle
+
+The robot returns explicit states:
+
+| Result | Meaning |
+| --- | --- |
+| `ack` | The command was accepted for execution. |
+| `done` | The robot-side action reached its terminal success path. |
+| `cancelled` | Accepted work was stopped before success. |
+| `nak` | The command was rejected, including invalid, unsafe, or unsupported requests. |
+
+An acknowledgement is not completion. A successful gateway write is not an
+acknowledgement. `done` proves the robot command completed; it does not prove a
+larger semantic claim such as “I found better light.”
+
+## Capability-bound action
+
+The body advertises features and current readiness. The gateway translates those
+facts into Environment capabilities. Camera actions are withheld when the
+camera is unavailable. Wake-gated microphone requests are rejected when no
+accepted model is ready. Motion plans are only advertised when the body reports
+the feature.
+
+MetaHuman's Environment output schema is then narrowed to the connected
+adapter's current actions and robot command names. That stops a model from
+selecting an action merely because some other robot, simulator, or stale prompt
+once supported it.
+
+## Liveness and fail-safe behavior
+
+The local transport uses lightweight application control pings during idle
+conversation. A short absence of valid control traffic stops active motion but
+does not tear down a healthy authenticated idle session. A real WebSocket,
+gateway, or Wi-Fi failure enters fail-safe/offline behavior and begins bounded
+reconnection.
+
+This separation matters in a companion system that may sit quietly for long
+periods. User silence is normal. Lost robot control during motion is not.
+
+Other important bounds include:
+
+- sequence correlation and duplicate protection;
+- fixed camera and audio payload limits;
+- bounded command and outgoing media queues;
+- motion calibration and joint range enforcement;
+- interruption and stop precedence;
+- explicit microphone and TTS burst state;
+- capability and readiness checks before dispatch.
+
+## Motion classes and semantic proof
+
+MetaHuman distinguishes body-local open-loop displacement from target-relative
+movement. Ainekio currently provides body-local and open-loop behavior; a named
+turn or `robotMotionPlan` does not create navigation, localization, or target
+feedback.
+
+This is also why completion needs an explicit basis:
+
+- `action_result` can close an objective whose only requirement is that the
+  robot perform a command;
+- `visual_observation` is required when the stopping condition depends on what
+  the robot sees;
+- user input or environment state can be the basis for other objectives.
+
+The protocol supplies the evidence. Environment Task State decides whether that
+evidence satisfies the bounded objective.
+
+## What remains to prove
+
+The protocol and body core have strong source-level coverage. The next useful
+safety evidence is system-level fault injection on the assembled robot:
+
+- connection loss during each motion class;
+- cancellation at different phases of an eased transition;
+- malformed or duplicated media metadata;
+- camera or speaker queue pressure during motion;
+- controller restart and OTA rollback during an interrupted session;
+- repeated reconnect without replaying stale commands.
+
+The point is not to accumulate more message types. It is to keep a small contract
+truthful under the faults that a physical companion will actually encounter.

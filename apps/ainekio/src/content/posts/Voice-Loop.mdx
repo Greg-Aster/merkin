@@ -1,0 +1,142 @@
+---
+title: "Voice Loop: Wake, Listen, Transcribe, Speak"
+published: 2026-08-27T08:15:00-07:00
+updated: 2026-08-27
+description: "The microphone, wake word, neural VAD, Whisper, Kokoro, speech transport, speaker path, and their remaining physical gates."
+image: "/posts/ainekio-2026/voice-loop.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, Voice, Wake Word, Whisper, Kokoro, Audio]
+category: "Perception and Voice"
+draft: false
+lang: "en"
+series: "Ainekio Field Guide"
+seriesPart: 8
+seriesTitle: "Perception and Voice"
+contentFormat: "report"
+---
+
+# One conversation, two physical directions
+
+Voice crosses the Ainekio and MetaHuman boundary in both directions. Listening
+begins on the robot and ends in MetaHuman's conversation path. Speaking begins
+with MetaHuman synthesis and ends at the robot's I2S speaker.
+
+The implementation is substantial, but “the microphone code exists” and “the
+robot can hold a reliable room conversation” are still different claims.
+
+## Listening path
+
+```text
+digital microphone
+  -> ESP32-S3 I2S capture at 16 kHz mono
+  -> local wake gate and neural VAD
+  -> 20 ms PCM frames
+  -> Ainekio gateway utterance assembly
+  -> bounded WAV envelope
+  -> MetaHuman Environment Bridge
+  -> Whisper transcription
+  -> audio_utterance Environment observation
+  -> canonical conversation admission
+```
+
+Each microphone PCM frame is 640 bytes: 20 milliseconds of 16-bit mono audio at
+16 kHz. The gateway does not ask Whisper to transcribe every frame. It assembles
+one bounded utterance around wake/VAD events, then sends one audio envelope.
+
+The controller uses a pinned neural VAD model with a minimum capture window, a
+silence closing window, and an absolute maximum. Its outgoing queue uses PSRAM
+to absorb short WebSocket stalls without making the microphone an unbounded
+memory source.
+
+## Wake-word ownership
+
+The robot contains a real microWakeWord/TensorFlow Lite Micro runtime. It loads
+an owner-trained package from LittleFS and verifies the manifest, tensor shape,
+frontend, and model identifier before reporting `wake_ready=true`.
+
+No accepted production Ainekio model is tracked. The safe seed therefore starts
+with wake disabled and not ready.
+
+A pilot model has been exercised on the physical path, and its real-room false
+triggers exposed an important problem: the staged cutoff was much lower than the
+documented packaging default, and the negative test set was too small. A small
+threshold sweep was a tuning clue, not production proof.
+
+The production gate needs hours of negatives from the actual room, including
+robot-speaker output, servo noise, television, fans, and similar speech. It also
+needs confidence/rearm evidence from the installed controller.
+
+## Audio and image correlation
+
+When VAD closes an utterance, the robot can capture a still with the same origin
+identifier. Environment Bridge can then join the completed utterance with the
+fresh image before admission. This provides much better context than an old
+uncorrelated camera cache.
+
+The frame is optional when the camera is unavailable. Audio capture should fail
+or proceed according to its own contract rather than fabricate visual context.
+
+## Speaking path
+
+```text
+MetaHuman response
+  -> Kokoro or configured synthesis owner
+  -> bounded PCM speech artifact
+  -> Environment Bridge speech transport
+  -> Ainekio Environment adapter
+  -> gateway paced TTS burst
+  -> protocol speaker PCM frames
+  -> ESP32-S3 audio queue
+  -> I2S amplifier and speaker
+  -> correlated terminal playback result
+```
+
+The current bridge source carries one bounded PCM artifact with session and
+action identifiers. The Ainekio adapter sends it through the gateway, waits for
+the robot terminal result, and reports completed, cancelled, rejected, or timed
+out feedback to the original speech action.
+
+This is stronger than assuming a conversational `sendText` acknowledgement means
+the physical speaker played anything.
+
+## Physical speaker evidence
+
+The firmware accepts speaker PCM only inside an active TTS burst. It queues the
+frames and sends them through the external I2S amplifier. Queue overflow,
+interruption, orphan data, and terminal completion are explicit conditions.
+
+Field testing produced clean audible playback after adding a bounded prebuffer
+and pacing small blocks relative to actual send time. The same run still showed
+speaker underruns and independent microphone transport faults. Subjective audio
+quality and health counters therefore remain separate results.
+
+## Half duplex and motion feedback
+
+Full acoustic echo cancellation is not part of the current physical path. The
+system uses deliberate microphone suspension and cooldown while the robot is
+speaking.
+
+Small listening and speaking motion cues exist, but they are subordinate to
+motion, calibration, stop, sleep, fail-safe, and power readiness. USB-only
+controller bring-up correctly suppresses servo feedback that requires a healthy
+battery path.
+
+## Next voice acceptance
+
+The useful next test is a repeated physical conversation with one evidence trace:
+
+- wake probability and rearm behavior;
+- VAD open/close and PCM-drop counters;
+- correlated utterance and optional frame;
+- Whisper transcript and conversation admission;
+- generated response and speech artifact;
+- gateway speaker sequence;
+- robot terminal playback result;
+- underrun, reconnect, and microphone-resume counters.
+
+Passing that sequence repeatedly in the real room is the threshold for calling
+the voice loop reliable.

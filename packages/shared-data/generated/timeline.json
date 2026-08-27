@@ -17,6 +17,7 @@
       "levelId": null,
       "location": "Historical Archives",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Lore",
@@ -50,6 +51,7 @@
       "levelId": null,
       "location": "MEGAMEAL Universe",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Science Fiction",
         "Food Parody",
@@ -84,6 +86,7 @@
       "levelId": null,
       "location": "Adjacent Media Archive",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "AI Media",
@@ -113,6 +116,7 @@
       "levelId": null,
       "location": "Civic Basement Systems Catalog",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [],
       "timelineYear": 2023,
@@ -136,6 +140,7 @@
       "levelId": null,
       "location": "Civic Basement Systems Consumer Broadcast",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "Commercial",
@@ -165,6 +170,7 @@
       "levelId": null,
       "location": "Adjacent Media Archive",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "Parody",
@@ -194,6 +200,7 @@
       "levelId": null,
       "location": "Adjacent Media Archive",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "Art Short",
@@ -223,6 +230,7 @@
       "levelId": null,
       "location": "Adjacent Media Archive",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "Adjacent Work",
@@ -251,6 +259,7 @@
       "levelId": null,
       "location": "Adjacent Media Archive",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "Animation",
@@ -280,6 +289,7 @@
       "levelId": null,
       "location": "Prime, Northern Hemisphere",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Digital Legacy",
@@ -313,6 +323,7 @@
       "levelId": null,
       "location": "Prime, Global Information Network",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Digital Consciousness",
@@ -346,6 +357,7 @@
       "levelId": null,
       "location": "Prime, Multiple Locations",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Singularity",
@@ -379,6 +391,7 @@
       "levelId": null,
       "location": "Bi-Smart Survival Library Print Run",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [],
       "timelineYear": 7652,
@@ -402,6 +415,7 @@
       "levelId": null,
       "location": "The Fringes of Known (and Mostly Hostile) Space",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "First Contact",
         "Xenobiology",
@@ -436,6 +450,7 @@
       "levelId": null,
       "location": "Bi-Smart Corporate Headquarters Deep Bunker Complex, Undisclosed Location",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "Dark Universe Theory",
         "Corporate Survival",
@@ -470,6 +485,7 @@
       "levelId": null,
       "location": "The Fringes of Known (and Mostly Hostile) Space",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "First Contact",
         "Xenobiology",
@@ -504,6 +520,7 @@
       "levelId": null,
       "location": "The Fringes of Known (and Mostly Hostile) Space",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "First Contact",
         "Xenobiology",
@@ -538,6 +555,7 @@
       "levelId": null,
       "location": "The Fringes of Known (and Mostly Hostile) Space",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "First Contact",
         "Xenobiology",
@@ -573,6 +591,7 @@
       "levelId": null,
       "location": "The Fringes of Known (and Mostly Hostile) Space",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "First Contact",
         "Xenobiology",
@@ -608,6 +627,7 @@
       "levelId": null,
       "location": "The Fringes of Known (and Mostly Hostile) Space",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "First Contact",
         "Emergency Protocols",
@@ -642,6 +662,7 @@
       "levelId": null,
       "location": "The Fringes of Known (and Mostly Hostile) Space",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "First Contact",
         "Xenobiology",
@@ -676,6 +697,7 @@
       "levelId": null,
       "location": "Solar System",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Singularity",
@@ -709,6 +731,7 @@
       "levelId": null,
       "location": "Survey Locker 19B",
       "isDraft": true,
+      "archive": false,
       "showInTimeline": true,
       "tags": [],
       "timelineYear": 25000,
@@ -732,6 +755,7 @@
       "levelId": null,
       "location": "The Orion Spur and Beyond",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Diaspora",
@@ -766,6 +790,7 @@
       "levelId": null,
       "location": "Planet Qarnivor, Companion Division Catalog",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [],
       "timelineYear": 27995,
@@ -789,6 +814,7 @@
       "levelId": null,
       "location": "Attributed to Planet Qarnivor, Pre-Extinction Media Networks",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "Commercial",
@@ -819,6 +845,7 @@
       "levelId": null,
       "location": "Planet Qarnivor, Pre-Extinction Media Networks",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Commercial",
         "Pre-Extinction",
@@ -850,6 +877,7 @@
       "levelId": null,
       "location": "Planet Quarnivor, Orion Spur",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Corporate Empire",
@@ -884,6 +912,7 @@
       "levelId": null,
       "location": "Miranda Star System, Fragmentary Transmission Relay",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "MEGA MEAL",
@@ -913,6 +942,7 @@
       "levelId": null,
       "location": "Miranda Star System, Bibimbap Saloon",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "Recipe",
@@ -947,6 +977,7 @@
       "levelId": null,
       "location": "Miranda Star System, Bibimbap Saloon",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "Timeline",
         "Singularity Wars",
@@ -980,6 +1011,7 @@
       "levelId": null,
       "location": "Classified",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "Restricted",
         "Classified",
@@ -1013,6 +1045,7 @@
       "levelId": null,
       "location": "Bibimbap Saloon, Miranda System",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "Data Transmission",
         "Miranda Destruction",
@@ -1045,6 +1078,7 @@
       "levelId": null,
       "location": "Miranda System, Bibimbap Saloon",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "AI Reconstruction",
         "Miranda Destruction",
@@ -1078,6 +1112,7 @@
       "levelId": null,
       "location": "Multiple Temporal Coordinates",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "Unverified Accounts",
         "Miranda Destruction",
@@ -1111,6 +1146,7 @@
       "levelId": null,
       "location": "Miranda Star System, Bibimbap Saloon",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Singularity Wars",
@@ -1145,6 +1181,7 @@
       "levelId": null,
       "location": "Post-Miranda Salvage Distribution Channels",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [],
       "timelineYear": 28043,
@@ -1168,6 +1205,7 @@
       "levelId": null,
       "location": "Planet Qarnivor, Irradiated Wasteland",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "MEGA MEAL",
@@ -1197,6 +1235,7 @@
       "levelId": null,
       "location": "Planet Quarnivor, Irradiated Wasteland",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Snuggloid",
         "Extinction Aftermath",
@@ -1223,6 +1262,7 @@
       "levelId": null,
       "location": "Multiple Temporal Coordinates",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Singularity Wars",
@@ -1256,6 +1296,7 @@
       "levelId": null,
       "location": "Orbital Culinary Spire 'The Zenith Palate'",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "Recipe",
@@ -1286,6 +1327,7 @@
       "levelId": null,
       "location": "MegaCorp Civil Hospitality Intake Annex",
       "isDraft": true,
+      "archive": false,
       "showInTimeline": true,
       "tags": [],
       "timelineYear": 33000,
@@ -1309,6 +1351,7 @@
       "levelId": null,
       "location": "The Orion Spur",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Corporate History",
@@ -1342,6 +1385,7 @@
       "levelId": null,
       "location": "W Corp Celestial Boardroom Private Kitchens",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "Recipe",
@@ -1371,6 +1415,7 @@
       "levelId": null,
       "location": "W Corporation Morale-Neutral Test Market",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [],
       "timelineYear": 33120,
@@ -1394,6 +1439,7 @@
       "levelId": null,
       "location": "Sector 12, Sump Level, Unnamed Alley",
       "isDraft": true,
+      "archive": false,
       "tags": [
         "Restaurant Review",
         "Culinary Exploration",
@@ -1427,6 +1473,7 @@
       "levelId": null,
       "location": "Corporate Media Sector, Galactic Core",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "MEGA MEAL",
@@ -1455,6 +1502,7 @@
       "levelId": null,
       "location": "W Corporation Campaign Districts",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [],
       "timelineYear": 33900,
@@ -1478,6 +1526,7 @@
       "levelId": null,
       "location": "The Great Culinary Archives, Sector 7",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [
         "Cookbook",
@@ -1507,6 +1556,7 @@
       "levelId": null,
       "location": "The Great Culinary Archives, Sector 7",
       "isDraft": false,
+      "archive": false,
       "showInTimeline": true,
       "tags": [],
       "timelineYear": 35000,
@@ -1530,6 +1580,7 @@
       "levelId": null,
       "location": "Abandoned Data Repository, Sol System Ruins",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Digital Consciousness",
@@ -1563,6 +1614,7 @@
       "levelId": null,
       "location": "Beyond Conventional Spacetime",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Temporal Physics",
@@ -1596,6 +1648,7 @@
       "levelId": null,
       "location": "MegaCorp Assurance Choir Claims Annex",
       "isDraft": true,
+      "archive": false,
       "showInTimeline": true,
       "tags": [],
       "timelineYear": 42000,
@@ -1619,6 +1672,7 @@
       "levelId": null,
       "location": "Terminal Universe",
       "isDraft": false,
+      "archive": false,
       "tags": [
         "Timeline",
         "Lore",

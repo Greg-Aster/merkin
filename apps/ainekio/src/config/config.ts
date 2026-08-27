@@ -9,7 +9,7 @@ import { LinkPreset } from '../types/config'
 
 export const siteConfig: SiteConfig = {
   title: 'Ainekio',
-  subtitle: 'Robot familiar field notes',
+  subtitle: 'Building a physical interface for MetaHuman OS',
   enablePostFooterNav: true,
   lang: 'en',
   themeColor: {
@@ -20,7 +20,7 @@ export const siteConfig: SiteConfig = {
   defaultTheme: AUTO_MODE,
   banner: {
     enable: false,
-    src: '/assets/banner/0001.webp',
+    src: '/assets/ainekio/hero.webp',
     position: 'center',
     credit: {
       enable: false,
@@ -44,7 +44,7 @@ export const siteConfig: SiteConfig = {
       slug: 'site-updates',
       excerptLength: 420,
       pageUrl: '/updates/',
-      pageLinkLabel: 'Open project notes',
+      pageLinkLabel: 'Open field updates',
     },
   },
   favicon: [],
@@ -53,6 +53,10 @@ export const siteConfig: SiteConfig = {
 export const navBarConfig: NavBarConfig = {
   links: [
     LinkPreset.Home,
+    {
+      name: 'Status',
+      url: '/posts/current-status/',
+    },
     {
       name: 'Updates',
       url: '/updates/',
@@ -65,12 +69,17 @@ export const navBarConfig: NavBarConfig = {
 export const profileConfig: ProfileConfig = {
   avatar: '/src/content/avatar/avatar.webp',
   name: 'Ainekio',
-  bio: 'A small robot companion powered by MetaHuman OS.',
+  bio: 'A desk-scale robot familiar. Source, runtime, semantic, and physical proof reported separately.',
   links: [
     {
       name: 'GitHub',
       icon: 'fa6-brands:github',
       url: 'https://github.com/Greg-Aster/Ainekio-bot',
+    },
+    {
+      name: 'MetaHuman OS',
+      icon: 'fa6-brands:github',
+      url: 'https://github.com/Greg-Aster/metahuman-os',
     },
   ],
   avatarFilename: 'avatar.webp',

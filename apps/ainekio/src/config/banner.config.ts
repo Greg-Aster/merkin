@@ -217,7 +217,7 @@ export interface BannerConfig {
  */
 export const bannerConfig: BannerConfig = {
   // Default banner type
-  defaultBannerType: 'standard',
+  defaultBannerType: 'none',
   defaultBannerData: {} as any,
 
   // Banner type configurations
@@ -238,8 +238,8 @@ export const bannerConfig: BannerConfig = {
 
   // WORKING: Layout used by MainGridLayout.astro
   layout: {
-    height: '80vh',
-    mobileHeight: '50vh',
+    height: '52vh',
+    mobileHeight: '34vh',
     maxWidth: 3840,
     mainContentOffset: '.5rem',
   },
@@ -271,7 +271,7 @@ export const bannerConfig: BannerConfig = {
       video: '5.5rem', // ✅ Desktop spacing
       image: '4rem', // ✅ Desktop spacing
       assistant: '5.5rem', // ✅ Desktop spacing
-      none: '-8rem', // ✅ Desktop spacing
+      none: '5rem',
     },
     // No extra mobile banner offset: navbar stays in normal flow above the banner
     mobileBannerGap: '2.75rem',
@@ -286,7 +286,7 @@ export const bannerConfig: BannerConfig = {
       timeline: '-0.5rem', // ✅ WORKING VALUE
       assistant: '-0.5rem', // ✅ WORKING VALUE
       standard: '-2rem', // ✅ Reduced overlap for better content visibility
-      none: '12rem', // ✅ WORKING VALUE
+      none: '0rem',
     },
   },
 
@@ -388,11 +388,7 @@ export function determineBannerType(
   const useDefaultStandard =
     !hasPostBanner &&
     !postData?.wantsNoDefaultBanner &&
-    (bannerConfig.defaultBannerType === 'standard' ||
-      (!useDefaultVideo &&
-        !useDefaultImage &&
-        !useDefaultTimeline &&
-        !useDefaultAssistant))
+    bannerConfig.defaultBannerType === 'standard'
 
   // Determine banner flags
   const hasTimelineBanner = hasPostTimelineBanner || useDefaultTimeline
@@ -557,7 +553,8 @@ export function determineBannerConfiguration(
   const navbarSpacing =
     bannerConfig.navbar.spacing[bannerType.currentBannerType]
 
-  const bannerHeight = bannerConfig.layout.height
+  const bannerHeight =
+    bannerType.currentBannerType === 'none' ? '0' : bannerConfig.layout.height
   const mainContentOffset = bannerConfig.layout.mainContentOffset
 
   const finalBannerLink = postData?.bannerLink || defaultBannerLink
@@ -569,9 +566,15 @@ export function determineBannerConfiguration(
     layout: {
       mainPanelTop, // 🎯 THIS CONTROLS OVERLAP! (RESTORED)
       navbarSpacing, // ⭐ SIMPLIFIED - CSS handles mobile portrait
+      navbarSpacingMobile:
+        bannerType.currentBannerType === 'none'
+          ? bannerConfig.navbar.height
+          : undefined,
       bannerHeight,
       bannerHeightMobile:
-        bannerConfig.layout.mobileHeight ?? bannerConfig.layout.height,
+        bannerType.currentBannerType === 'none'
+          ? '0'
+          : bannerConfig.layout.mobileHeight ?? bannerConfig.layout.height,
       bannerOverlap: '0', // Removed unused value
       dynamicOverlap: '0', // Removed unused value
       mainContentOffset,

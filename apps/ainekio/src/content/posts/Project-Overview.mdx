@@ -1,413 +1,142 @@
 ---
-title: "Ainekio the Robot Familiar - Intro"
-published: 2036-07-04
-description: "Ainekio is a small robot companion project powered by MetaHuman OS."
-image: "/posts/ainekio/wizard-lab-banner.webp"
-avatarImage: "/posts/generic/avatar.webp"
-authorName: "Ainekio"
-authorBio: "Robot familiar project"
-bannerType: "image"
-bannerData:
-  imageUrl: "/posts/ainekio/wizard-lab-banner.webp"
-timelineYear: 2026
-timelineEra: "launch"
-timelineLocation: "ainek.io"
-isKeyEvent: true
-showImageOnPost: false
-tags: [Ainekio, Robot, MetaHuman OS]
-category: "Project Notes"
+title: "Ainekio: A Robot Familiar With Real Boundaries"
+published: 2026-08-27T09:45:00-07:00
+updated: 2026-08-27
+description: "Start here: the physical robot, the MetaHuman OS connection, the evidence model, and the work that remains."
+image: "/assets/ainekio/hero.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, Robot Familiar, MetaHuman OS, Overview]
+category: "Start Here"
 draft: false
 lang: "en"
+series: "Ainekio Field Guide"
+seriesPart: 1
+seriesTitle: "Start Here"
+contentFormat: "report"
 ---
 
-import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
+# A small robot with a large system behind it
 
-<style>{`
-  #post-container[data-post-slug="project-overview"] {
-    --ainekio-surface: rgba(9, 13, 18, 0.78);
-    --ainekio-surface-soft: rgba(18, 25, 32, 0.64);
-    --ainekio-line: rgba(117, 203, 255, 0.26);
-    --ainekio-line-hot: rgba(255, 175, 80, 0.42);
-    --ainekio-cyan: rgb(117, 218, 255);
-    --ainekio-amber: rgb(255, 178, 79);
-    --ainekio-cream: rgb(248, 238, 218);
-    --ainekio-muted: rgba(231, 240, 247, 0.74);
-    background:
-      radial-gradient(circle at 12% 0%, rgba(255, 178, 79, 0.14), transparent 26rem),
-      radial-gradient(circle at 94% 10%, rgba(117, 218, 255, 0.16), transparent 24rem),
-      linear-gradient(180deg, rgba(10, 14, 19, 0.86), rgba(9, 13, 18, 0.72));
-    border: 1px solid rgba(117, 203, 255, 0.18);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 18px 60px rgba(0, 0, 0, 0.28);
-  }
+Ainekio is an owner-built robot companion connected to MetaHuman OS. The current
+red-and-black body is small enough to sit on a workbench: four articulated legs,
+eight micro servos, a cyan OLED face, a camera, microphone and speaker hardware,
+an ESP32-S3 controller, and an open printed chassis whose wiring is still fully
+exposed. A separate enclosure revision is actively evolving around that working
+prototype.
 
-  #post-container[data-post-slug="project-overview"] .markdown-content {
-    color: var(--ainekio-muted);
-  }
+The larger project begins behind that body. Ainekio has a machine-checkable wire
+protocol, a portable safety core, physical firmware, an authenticated gateway,
+an operator dashboard, a host emulator, a browser simulator, and an Environment
+adapter. MetaHuman OS supplies the conversation, model routing, work admission,
+environment reasoning, bounded task state, speech services, and autonomy policy.
 
-  #post-container[data-post-slug="project-overview"] .markdown-content > p {
-    max-width: 82ch;
-    line-height: 1.78;
-  }
+This site documents both halves without pretending they are the same thing.
 
-  #post-container[data-post-slug="project-overview"] .markdown-content h1 {
-    margin: 0 0 1rem;
-    color: var(--ainekio-cream);
-    font-size: clamp(2rem, 4vw, 3.25rem);
-    letter-spacing: 0;
-    text-shadow: 0 0 24px rgba(117, 218, 255, 0.18);
-  }
+## The system in one pass
 
-  #post-container[data-post-slug="project-overview"] .markdown-content h1::after {
-    content: "";
-    display: block;
-    width: min(22rem, 100%);
-    height: 2px;
-    margin-top: 0.85rem;
-    background: linear-gradient(90deg, var(--ainekio-amber), var(--ainekio-cyan), transparent);
-  }
+```text
+Human or bounded autonomous trigger
+  -> MetaHuman Work Coordinator
+  -> Environment Mode
+  -> Environment Task State
+  -> Environment Bridge
+  -> Ainekio Environment adapter
+  -> authenticated gateway
+  -> protocol-v1 robot command
+  -> portable body core and ESP32-S3 services
+  -> motion, face, camera, microphone, or speaker
+  -> correlated result or observation
+  -> the same bounded MetaHuman task
+```
 
-  #post-container[data-post-slug="project-overview"] .markdown-content h2 {
-    position: relative;
-    margin-top: 2.4rem;
-    margin-bottom: 1rem;
-    padding: 0.85rem 1rem 0.85rem 1.2rem;
-    color: var(--ainekio-cream);
-    border: 1px solid var(--ainekio-line);
-    border-left: 4px solid var(--ainekio-amber);
-    border-radius: 0.5rem;
-    background:
-      linear-gradient(90deg, rgba(255, 178, 79, 0.14), rgba(117, 218, 255, 0.07), transparent),
-      var(--ainekio-surface);
-    box-shadow:
-      inset 0 0 24px rgba(117, 218, 255, 0.045),
-      0 10px 24px rgba(0, 0, 0, 0.18);
-  }
+Each arrow has a specific owner. The browser does not own the robot's safety
+rules. The model does not generate raw servo angles for direct execution. The
+gateway does not decide whether an objective is semantically complete. A
+successful motor command does not prove that a visual goal was achieved.
 
-  #post-container[data-post-slug="project-overview"] .markdown-content h2::before {
-    display: block;
-    margin-bottom: 0.2rem;
-    color: var(--ainekio-cyan);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-  }
+Those boundaries are the core design, not incidental plumbing.
 
-  #post-container[data-post-slug="project-overview"] .markdown-content p:first-of-type,
-  #post-container[data-post-slug="project-overview"] .markdown-content blockquote {
-    margin: 1rem 0 1.3rem;
-    padding: 1rem 1.1rem;
-    color: var(--ainekio-cream);
-    border: 1px solid var(--ainekio-line-hot);
-    border-radius: 0.55rem;
-    background:
-      radial-gradient(circle at 100% 0%, rgba(117, 218, 255, 0.13), transparent 18rem),
-      linear-gradient(135deg, rgba(255, 178, 79, 0.13), rgba(117, 218, 255, 0.07)),
-      var(--ainekio-surface);
-    box-shadow: inset 0 0 24px rgba(255, 178, 79, 0.04);
-  }
+## What “robot familiar” means here
 
-  #post-container[data-post-slug="project-overview"] .markdown-content .ainekio-doc-label {
-    display: inline-flex;
-    margin: 1.3rem 0 0.45rem;
-    padding: 0.25rem 0.55rem;
-    color: var(--ainekio-cyan);
-    border: 1px solid rgba(117, 218, 255, 0.22);
-    border-radius: 0.35rem;
-    background: rgba(117, 218, 255, 0.07);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
+“Familiar” is the product direction: a small embodied presence that can listen,
+speak, look, move, and gradually participate in a shared environment. It does
+not mean the robot is a finished autonomous creature or that every service is
+always running.
 
-  #post-container[data-post-slug="project-overview"] .markdown-content ol,
-  #post-container[data-post-slug="project-overview"] .markdown-content ul {
-    padding: 1rem 1.1rem 1rem 2.2rem;
-    border: 1px solid rgba(117, 203, 255, 0.18);
-    border-radius: 0.55rem;
-    background: var(--ainekio-surface-soft);
-  }
+The current design prefers:
 
-  #post-container[data-post-slug="project-overview"] .markdown-content li {
-    margin: 0.55rem 0;
-  }
+- semantic actions such as `wave`, `bow`, `captureImage`, or a bounded motion
+  plan over free-form actuator output;
+- explicit capabilities, timeouts, cancellation, and fail-safe behavior over
+  optimistic dispatch;
+- correlated still images over a continuous video feed to the model;
+- one canonical owner for admission, transport, execution, and completion;
+- local-first operation with authenticated boundaries;
+- evidence that says exactly what passed and what remains unproven.
 
-  #post-container[data-post-slug="project-overview"] .markdown-content li::marker {
-    color: var(--ainekio-amber);
-    font-weight: 800;
-  }
+## The two repositories
 
-  #post-container[data-post-slug="project-overview"] .markdown-content a {
-    color: var(--ainekio-cyan);
-    text-decoration-color: rgba(117, 218, 255, 0.42);
-    text-underline-offset: 0.18em;
-  }
+The [Ainekio repository](https://github.com/Greg-Aster/Ainekio-bot) owns the
+body-side system:
 
-  #post-container[data-post-slug="project-overview"] .markdown-content code {
-    color: var(--ainekio-amber);
-    border: 1px solid rgba(255, 178, 79, 0.18);
-    border-radius: 0.35rem;
-    background: rgba(0, 0, 0, 0.28);
-  }
+- `Slave/` contains the printed-body assets, portable control core, protocol,
+  generated motion/face/audio assets, and ESP32-S3 firmware.
+- `Master/` contains the protocol gateway, operator dashboard, and authenticated
+  MetaHuman Environment adapter.
+- `Emulator/` contains the host body emulator, integration tests, and the Sesame
+  visual simulator.
 
-  #post-container[data-post-slug="project-overview"] .markdown-content hr {
-    height: 1px;
-    margin: 1.8rem 0;
-    border: 0;
-    background: linear-gradient(90deg, transparent, rgba(117, 218, 255, 0.5), rgba(255, 178, 79, 0.42), transparent);
-  }
-`}</style>
+The [MetaHuman OS repository](https://github.com/Greg-Aster/metahuman-os) owns
+the reasoning and orchestration side:
 
-<DocsEditorBridge
-  client:load
-  url="https://docs.google.com/document/d/1AVtNyFN7AG5ymLqshQI-77jO4nfG0yev8FUABZ8YE9E/edit?usp=sharing"
-/>
+- the Work Coordinator admits and tracks finite work;
+- Robot Operator schedules the robot-specific bounded autonomy children;
+- Environment Mode decides what the environment task should do next;
+- Environment Bridge owns the external connection and transport lifecycle;
+- Environment Task State owns correlation, step bounds, continuation, and the
+  completion basis for an objective;
+- Whisper and Kokoro remain the speech recognition and synthesis owners.
 
-<script>{`
-  ;(() => {
-  const postSelector = '#post-container[data-post-slug="project-overview"] .markdown-content'
-  const marker = String.fromCharCode(96)
+The current test body began from the open-source
+[Sesame robot](https://github.com/dorianborian/sesame-robot), but Ainekio is not
+just a theme applied to upstream firmware. The controller, protocol, gateway,
+safety model, media paths, and MetaHuman integration have been replaced or
+expanded around Ainekio's own contracts.
 
-  function getProjectOverviewContent() {
-    return document.querySelector(postSelector)
-  }
+## How progress is reported
 
-  function normalizeGoogleDocsMarkdown(text) {
-    let output = String(text || '')
-    const replacements = [
-      ['\\\\#', '#'],
-      ['\\\\*', '*'],
-      ['\\\\[', '['],
-      ['\\\\]', ']'],
-      ['\\\\(', '('],
-      ['\\\\)', ')'],
-      ['\\\\|', '|'],
-      ['\\\\-', '-'],
-      ['\\\\!', '!'],
-      ['\\\\.', '.'],
-      ['\\\\+', '+'],
-      ['\\\\~', '~'],
-    ]
+This project uses five different evidence levels:
 
-    replacements.forEach(([escaped, value]) => {
-      output = output.split(escaped).join(value)
-    })
+| Evidence | What it proves |
+| --- | --- |
+| Present in source | The implementation exists in its current owner. |
+| Focused validation | A relevant contract, type check, audit, or unit test passed. |
+| Runtime admission | The live system accepted the work through its real owner. |
+| Terminal completion | The adapter or robot returned a correlated final result. |
+| Physical or semantic proof | The actual body behaved correctly, or a fresh observation proved the real-world goal. |
 
-    return output
-      .split('\\\\' + marker)
-      .join(marker)
-      .replace(/[ \\t]+$/gm, '')
-      .trim()
-  }
+The lower rows cannot be inferred from the upper ones. A build is not a walk. A
+gateway connection is not autonomy. `done` is not automatically “the room is
+brighter now.”
 
-  function createAnchor(label, url) {
-    const anchor = document.createElement('a')
-    const href = url.startsWith('http') ? url : 'https://' + url
-    anchor.textContent = label
-    anchor.href = href
-    anchor.rel = 'noopener noreferrer'
-    anchor.target = '_blank'
-    return anchor
-  }
+## Where the project stands
 
-  function appendInlineMarkdown(parent, text) {
-    const sourceText = normalizeGoogleDocsMarkdown(text)
-    const tokenPattern = new RegExp(
-      marker + '([^' + marker + ']+)' + marker + '|\\\\*\\\\*([^*]+)\\\\*\\\\*|\\\\[([^\\\\]]+)\\\\]\\\\((https?:\\\\/\\\\/[^\\\\s)]+|\\\\/[^\\\\s)]+)\\\\)|((?:https?:\\\\/\\\\/|www\\\\.|github\\\\.com\\\\/)[^\\\\s),]+)',
-      'g',
-    )
-    let cursor = 0
-    let match
+As of August 27, 2026, the software path is broad and real. The physical
+controller has substantial bring-up evidence. The robot has executed physical
+motion and audio tests through the gateway. Camera, wake-word, speaker, and
+autonomy work all have concrete implementation and field evidence.
 
-    while ((match = tokenPattern.exec(sourceText)) !== null) {
-      if (match.index > cursor) {
-        parent.append(document.createTextNode(sourceText.slice(cursor, match.index)))
-      }
+The assembled companion loop is still a prototype. Motion calibration, robust
+network behavior, wake-word false-trigger containment, microphone quality,
+speaker underruns, fresh-frame semantic completion, and repeated unattended
+autonomy acceptance remain active engineering work. A newer Robot Status
+workflow is also being developed in MetaHuman OS and is not presented here as a
+released feature.
 
-      if (match[1]) {
-        const code = document.createElement('code')
-        code.textContent = match[1]
-        parent.append(code)
-      } else if (match[2]) {
-        const strong = document.createElement('strong')
-        strong.textContent = match[2]
-        parent.append(strong)
-      } else if (match[3] && match[4]) {
-        const anchor = createAnchor(match[3], match[4])
-        if (match[4].startsWith('/')) {
-          anchor.removeAttribute('target')
-          anchor.removeAttribute('rel')
-        }
-        parent.append(anchor)
-      } else if (match[5]) {
-        parent.append(createAnchor(match[5], match[5]))
-      }
-
-      cursor = tokenPattern.lastIndex
-    }
-
-    if (cursor < sourceText.length) {
-      parent.append(document.createTextNode(sourceText.slice(cursor)))
-    }
-  }
-
-  function normalizeElement(element) {
-    const text = normalizeGoogleDocsMarkdown(element.textContent || '')
-    element.textContent = ''
-    appendInlineMarkdown(element, text)
-    element.dataset.ainekioEnhanced = 'true'
-  }
-
-  function isBlankParagraph(element) {
-    return element && element.tagName === 'P' && normalizeGoogleDocsMarkdown(element.textContent || '') === ''
-  }
-
-  function nextNonBlankSibling(element) {
-    let sibling = element.nextElementSibling
-    while (sibling && isBlankParagraph(sibling)) {
-      sibling = sibling.nextElementSibling
-    }
-
-    return sibling
-  }
-
-  function enhanceHeadings(root) {
-    root.querySelectorAll('p').forEach((paragraph) => {
-      if (!paragraph.isConnected) return
-      const text = normalizeGoogleDocsMarkdown(paragraph.textContent || '')
-      const match = text.match(/^(#{1,3})\\s+(?:\\*\\*(.+?)\\*\\*|(.+))$/)
-      if (!match) return
-
-      const level = Math.min(match[1].length, 3)
-      const heading = document.createElement('h' + level)
-      heading.className = 'ainekio-doc-heading'
-      appendInlineMarkdown(heading, match[2] || match[3])
-      paragraph.replaceWith(heading)
-    })
-  }
-
-  function enhanceLists(root) {
-    const parents = Array.from(new Set(Array.from(root.querySelectorAll('p')).map((paragraph) => paragraph.parentElement).filter(Boolean)))
-
-    parents.forEach((parent) => {
-      const children = Array.from(parent.children)
-      for (let index = 0; index < children.length; index += 1) {
-        const current = children[index]
-        if (current.tagName !== 'P') continue
-
-        const firstMatch = normalizeGoogleDocsMarkdown(current.textContent || '').match(/^[-*]\\s+(.+)$/)
-        if (!firstMatch) continue
-
-        const items = []
-        const spacerItems = []
-        let cursor = index
-        while (cursor < children.length) {
-          const child = children[cursor]
-          if (child.tagName !== 'P') break
-
-          const match = normalizeGoogleDocsMarkdown(child.textContent || '').match(/^[-*]\\s+(.+)$/)
-          if (match) {
-            items.push({ element: child, text: match[1] })
-            cursor += 1
-            continue
-          }
-
-          if (isBlankParagraph(child) && items.length > 0) {
-            const nextListItem = nextNonBlankSibling(child)
-            if (nextListItem && normalizeGoogleDocsMarkdown(nextListItem.textContent || '').match(/^[-*]\\s+(.+)$/)) {
-              spacerItems.push(child)
-              cursor += 1
-              continue
-            }
-          }
-
-          break
-        }
-
-        if (items.length === 0) {
-          cursor += 1
-          continue
-        }
-
-        const list = document.createElement('ul')
-        items.forEach((item) => {
-          const listItem = document.createElement('li')
-          appendInlineMarkdown(listItem, item.text)
-          list.append(listItem)
-        })
-
-        items[0].element.replaceWith(list)
-        items.slice(1).forEach((item) => item.element.remove())
-        spacerItems.forEach((item) => item.remove())
-        index = cursor - 1
-      }
-    })
-  }
-
-  function enhanceLabels(root) {
-    root.querySelectorAll('p').forEach((paragraph) => {
-      if (!paragraph.isConnected || paragraph.dataset.ainekioLabel === 'true') return
-      const text = normalizeGoogleDocsMarkdown(paragraph.textContent || '')
-      if (!/^(Option \\d+|Notes(?: -)?|Kept from stock BOM:|Replaced - .+|Added - .+|Power - .+|The numbers:|Plan:|Downstream note:)$/.test(text)) return
-
-      paragraph.classList.add('ainekio-doc-label')
-      paragraph.dataset.ainekioLabel = 'true'
-      paragraph.textContent = text
-    })
-  }
-
-  function enhanceBlockquotes(root) {
-    root.querySelectorAll('p').forEach((paragraph) => {
-      if (!paragraph.isConnected) return
-      const text = normalizeGoogleDocsMarkdown(paragraph.textContent || '')
-      if (!text.startsWith('> ')) return
-
-      const blockquote = document.createElement('blockquote')
-      appendInlineMarkdown(blockquote, text.slice(2))
-      paragraph.replaceWith(blockquote)
-    })
-  }
-
-  function enhanceInlineMarkdown(root) {
-    root.querySelectorAll('p, li').forEach((element) => {
-      if (element.dataset.ainekioEnhanced === 'true' || element.dataset.ainekioLabel === 'true') return
-      const text = normalizeGoogleDocsMarkdown(element.textContent || '')
-      const hasInlineMarkdown = text.includes('**') || text.includes('[') || text.includes(marker) || /(?:https?:\\/\\/|www\\.|github\\.com\\/)/.test(text)
-      if (!hasInlineMarkdown && text === element.textContent.trim()) return
-      normalizeElement(element)
-    })
-  }
-
-  function enhanceProjectOverview() {
-    const root = getProjectOverviewContent()
-    if (!root) return
-
-    enhanceHeadings(root)
-    enhanceLists(root)
-    enhanceLabels(root)
-    enhanceBlockquotes(root)
-    enhanceInlineMarkdown(root)
-  }
-
-  const readyCheck = window.setInterval(() => {
-    const root = getProjectOverviewContent()
-    if (!root) return
-    enhanceProjectOverview()
-    if (!root.textContent.includes('Loading document')) {
-      window.clearInterval(readyCheck)
-    }
-  }, 250)
-
-  const observer = new MutationObserver(() => enhanceProjectOverview())
-  const observerCheck = window.setInterval(() => {
-    const root = getProjectOverviewContent()
-    if (!root) return
-    observer.observe(root, { childList: true, subtree: true })
-    window.clearInterval(observerCheck)
-  }, 250)
-  })()
-`}</script>
+Read [Current Status](/posts/current-status/) for the dated evidence snapshot,
+then continue through the body, firmware, protocol, gateway, perception, voice,
+MetaHuman, and autonomy articles for the owner-by-owner view.

@@ -1,0 +1,160 @@
+---
+title: "Current Status: Implemented, Proven, and Still Open"
+published: 2026-08-27T10:00:00-07:00
+updated: 2026-08-27
+description: "A dated status snapshot that separates source implementation, focused validation, live results, and physical proof."
+image: "/posts/ainekio-2026/current-status.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, Status, Validation, Hardware, MetaHuman OS]
+category: "Start Here"
+draft: false
+lang: "en"
+series: "Ainekio Field Guide"
+seriesPart: 2
+seriesTitle: "Start Here"
+contentFormat: "report"
+---
+
+# Status snapshot — August 27, 2026
+
+> The honest short version: the end-to-end software architecture is implemented,
+> the controller and several physical paths have real evidence, and the complete
+> assembled companion loop still has important acceptance gates open.
+
+This page records the state observed in the current Ainekio and MetaHuman OS
+checkouts. It deliberately separates tracked work from active local development
+and separates a successful command from proof that a real-world objective was
+achieved.
+
+## Repository state
+
+| Repository | Tracked baseline | Active local work |
+| --- | --- | --- |
+| Ainekio | `main` matches `origin/main` at `6ad9051` | A newer `Frame8` body enclosure exists as local CAD/STL work and is not yet part of the tracked release. |
+| MetaHuman OS | `main` matches `origin/main` at `5191d6fc` | A Robot Status workflow and related Robot Operator integration are under active development and are not counted as released here. |
+
+Commit identifiers are included to make this snapshot reproducible. They are not
+permanent “latest” labels.
+
+## Status by system
+
+| Area | Current implementation | Strongest current evidence | Still open |
+| --- | --- | --- | --- |
+| Physical body | Photographed low open black chassis, red ridged feet and face module, cyan OLED, front camera, exposed wiring, and eight-servo leg system; a separate `Frame8` enclosure revision is active CAD | The August 27 owner photo set documents the current assembled construction; printed-part and controller bring-up work also exists | Installable enclosure fit, cable management, combined-load behavior, and repeatable gait acceptance |
+| ESP32-S3 controller | ESP-IDF firmware for an N16R8 board, portable body core, eight MCPWM channels, camera, audio, OLED, SD, provisioning, OTA, and LittleFS assets | USB boot, PSRAM, camera initialization, servo-channel initialization, firmware build/flash/digest work | Full installed peripheral and combined-load evidence on the assembled body |
+| Motion | Named semantic motions, smoothed playback, open-loop turns, `curious`, dances, and bounded `motion_plan_v1` | Walk and emote commands have reached physical terminal completion; generated assets and firmware paths have focused tests | Floor calibration, repeatable headings, transition behavior, stop behavior, current draw, and completion-image acceptance |
+| Protocol and safety | JSON control messages, binary media frames, validation, capability advertisement, ack/done/cancelled/nak lifecycle, stale-control guard, and fail-safe transport handling | Shared fixtures and focused protocol/core suites | Repeated live fault injection on the complete assembled system |
+| Gateway | Authenticated robot and Environment endpoints, dashboard, status/operations telemetry, semantic translation, and media assembly | Physical robot connections and authenticated command epochs have been observed | Intermittent `1006`/unreachable-route incidents need better root-cause evidence and repeatability |
+| Camera and vision | Fresh OV3660 still capture, bounded preview, action/audio/request correlation, and MetaHuman `visual_observation` handling | Corrected camera profile was built and flashed; correlated snapshot contracts are present and tested | Repeatable physical image-quality acceptance and fresh-frame semantic completion across varied scenes |
+| Microphone and wake word | 16 kHz PCM capture, neural VAD endpointing, local microWakeWord package loading, gateway utterance assembly, and Whisper handoff | Wake-ready and utterance paths have been exercised; false triggers were observed and diagnosed | Production wake model, long-room negative testing, physical microphone quality, clipping/noise, and robust end-to-end speech acceptance |
+| Speaker | Bounded PCM framing, gateway pacing, firmware queue, I2S output, dashboard test tone, and interruption/error paths | Clean audible playback was heard in a bounded test | Remaining speaker underruns, microphone interaction, and the ordinary MetaHuman-speech handoff need current end-to-end acceptance |
+| Environment loop | Capability-bound actions, authenticated bridge transport, task correlation, bounded continuation, and action/visual completion bases | Focused Environment tests pass; physical action completion has been traced | Repeated live proof that visual stopping conditions continue and close on a fresh correlated frame |
+| Robot autonomy | Reactive, Semi, and Full modes; Robot Operator ownership; Boredom Observer, Movement, and Reflection planners; bounded Environment execution | One Movement run physically completed at protocol level; failures were safely expired or rejected | Reliable observation admission, semantically current output, repeated cycles, and full embodied-companion acceptance |
+
+## What is solid at source level
+
+The owner boundaries are substantially clearer than they were earlier in the
+project:
+
+- Ainekio's portable core decides whether a command is acceptable before a
+  platform service moves hardware.
+- The ESP32-S3 port owns physical drivers without becoming the semantic command
+  authority.
+- The gateway translates, authenticates, transports, and reports; it does not
+  decide the meaning of a MetaHuman objective.
+- The emulator reuses the body core, so a browser rendering cannot bypass safety
+  and lifecycle decisions.
+- MetaHuman's Work Coordinator remains the queue owner.
+- Robot Operator owns robot-autonomy admission.
+- Environment Mode owns embodied action decisions.
+- Environment Bridge owns transport.
+- Environment Task State owns bounded objective state and completion basis.
+
+This matters because the project no longer needs a special parallel path every
+time a new behavior is added.
+
+## What has physical evidence
+
+The project has moved well beyond diagrams and stubs. Recorded field work
+includes:
+
+- controller USB boot with the delivered ESP32-S3 board and PSRAM;
+- firmware and LittleFS flashes with digest verification;
+- authenticated robot/gateway sessions;
+- named movement and roughly five-second walk assets reaching the controller;
+- a Boredom Movement task reaching a physical `done` result;
+- audible speaker playback after bounded prebuffering and pacing;
+- camera profile changes installed on the controller;
+- wake-word operation, including the evidence that the pilot threshold was too
+  permissive in the real room.
+
+These are valuable proofs, but they do not erase the remaining faults. Clean
+audio in one test did not eliminate underrun counters. A `walk` result did not
+prove that a lighting objective succeeded. Good RSSI did not explain abnormal
+WebSocket closes.
+
+## Current risk and limitation ledger
+
+### Body and power
+
+The final enclosure and assembled harness need repeatable fit, thermal, current,
+and motion tests. Battery telemetry is intentionally warning-only in the current
+owner policy; the battery pack's hardware protection owns undervoltage shutdown.
+USB-only bring-up must not be mistaken for battery-and-servo-load proof.
+
+### Motion
+
+Turn degrees are open-loop gait estimates, not inertial headings. New motion
+plans remain subject to range, stop, fail-safe, buffer, and duration limits. The
+next useful evidence is measured repeatability on the actual floor, not more
+named animations in source.
+
+### Transport
+
+Historical `1006` disconnects and unreachable-route events show that Wi-Fi RSSI,
+gateway process health, and authenticated WebSocket health are different layers.
+The next diagnosis needs controller error detail, reconnect epochs, route state,
+reset reasons, and media-write completion correlated in one run.
+
+### Perception
+
+The camera sends event-related stills, not continuous model video. A visual goal
+must cite a fresh correlated observation. Terminal motion feedback alone can
+only prove that the motion finished.
+
+### Voice
+
+The tracked seed remains safe when no accepted production wake model is present.
+The current pilot needs much more real-room negative audio before it can be
+called production-ready. Speaker and microphone paths also need repeated tests
+together, not separate one-off successes.
+
+### Autonomy
+
+Reactive command execution is the strongest live path. Semi and Full are bounded
+admission policies, not permission for the robot to roam without limits. Recent
+autonomy work has produced one real movement completion alongside an expired
+observation and a correctly rejected invalid motion plan. That is useful system
+evidence, not a finished companion loop.
+
+## The next meaningful gates
+
+1. Finish and track the current body enclosure revision after fit review.
+2. Validate the assembled power, servo, camera, microphone, speaker, OLED, and SD
+   system under representative combined load.
+3. Calibrate walking and turns on the actual surface with stop and recovery tests.
+4. Collect hours of room-specific wake-word negatives and re-evaluate the model
+   and threshold.
+5. Reproduce transport loss with controller-side error evidence rather than
+   guessing from RSSI.
+6. Demonstrate a visual objective that continues until a fresh correlated frame
+   proves the stopping condition.
+7. Repeat bounded Robot Operator cycles and report each one from admission through
+   semantic completion.
+
+That sequence would turn today's broad implementation into a smaller, more
+credible set of accepted behaviors.
