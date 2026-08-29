@@ -1,8 +1,17 @@
 <script lang="ts">
 import Icon from '@iconify/svelte/dist/Icon.svelte'
 import { onMount } from 'svelte'
-import { minimumSiteAudioVolume, siteAudioConfig } from '../../config/audio'
-import { type SiteAudioState, siteAudioManager } from '../../utils/site-audio'
+import {
+  minimumSiteAudioVolume,
+  readSiteAudioVolume,
+  siteAudioConfig,
+} from '../../config/audio'
+import type { SiteAudioState } from '../../utils/site-audio'
+import {
+  getLoadedSiteAudioManager,
+  loadSiteAudioManager,
+  siteAudioLoadFailedEvent,
+} from '../../utils/site-audio-loader'
 
 import '../../styles/features/extracted/site-audio-control.css'
 let audioState: SiteAudioState = {
@@ -22,6 +31,75 @@ let shellElement: HTMLDivElement | null = null
 let panelElement: HTMLDivElement | null = null
 let isMobileViewport = false
 let panelCloseTimer: number | null = null
+let mounted = false
+let managerUnsubscribe: (() => void) | null = null
+let audioLoadFailed = false
+
+type SiteAudioManager = Awaited<ReturnType<typeof loadSiteAudioManager>>
+
+const subscribeToAudioManager = (manager: SiteAudioManager) => {
+  if (!mounted || managerUnsubscribe) return
+  managerUnsubscribe = manager.subscribe(state => {
+    audioState = state
+  })
+}
+
+const ensureAudioManager = async () => {
+  try {
+    const manager = await loadSiteAudioManager()
+    audioLoadFailed = false
+    subscribeToAudioManager(manager)
+    return manager
+  } catch (error) {
+    audioLoadFailed = true
+    throw error
+  }
+}
+
+const retainVisibleLoadFailure = () => {
+  // The panel exposes the recoverable failure and its reload action.
+}
+
+const readStoredVolume = (
+  storageKey: string,
+  fallback: number,
+  legacyStorageKey?: string,
+) => {
+  const stored = readSiteAudioVolume(window.localStorage.getItem(storageKey))
+  if (stored !== null) return stored
+  if (!legacyStorageKey) return fallback
+
+  return (
+    readSiteAudioVolume(window.localStorage.getItem(legacyStorageKey)) ??
+    fallback
+  )
+}
+
+const syncStoredAudioState = () => {
+  const storedEnabled = window.localStorage.getItem(siteAudioConfig.storageKey)
+  audioState = {
+    ...audioState,
+    enabled:
+      storedEnabled === null
+        ? siteAudioConfig.enabledByDefault
+        : storedEnabled === 'true',
+    masterVolume: readStoredVolume(
+      siteAudioConfig.masterVolumeStorageKey,
+      siteAudioConfig.defaultMasterVolume,
+    ),
+    ambienceVolume: readStoredVolume(
+      siteAudioConfig.ambienceVolumeStorageKey,
+      siteAudioConfig.defaultAmbienceVolume,
+      siteAudioConfig.legacyVolumeStorageKey,
+    ),
+    sfxVolume: readStoredVolume(
+      siteAudioConfig.sfxVolumeStorageKey,
+      siteAudioConfig.defaultSfxVolume,
+      siteAudioConfig.legacyVolumeStorageKey,
+    ),
+    hasConfiguredTracks: siteAudioConfig.tracks.length > 0,
+  }
+}
 
 const portalToBody = (node: HTMLElement, enabled: boolean) => {
   if (typeof document === 'undefined') {
@@ -61,7 +139,8 @@ const portalToBody = (node: HTMLElement, enabled: boolean) => {
       }
     },
     destroy() {
-      restore()
+      marker.remove()
+      portaled = false
     },
   }
 }
@@ -72,32 +151,54 @@ const clearPanelCloseTimer = () => {
   panelCloseTimer = null
 }
 
-const setAudioEnabledFromGesture = async (nextEnabled: boolean) => {
-  await siteAudioManager.unlockFromGesture()
+const setAudioEnabledFromGesture = async (
+  nextEnabled: boolean,
+  event: MouseEvent,
+) => {
+  const siteAudioManager = await ensureAudioManager()
+  await siteAudioManager.unlockFromGesture(event)
   siteAudioManager.setEnabled(nextEnabled)
 }
 
-const toggleAudio = () => {
+const toggleAudio = (event: MouseEvent) => {
   openMixerPanel()
-  void setAudioEnabledFromGesture(!audioState.enabled)
+  void setAudioEnabledFromGesture(!audioState.enabled, event).catch(
+    retainVisibleLoadFailure,
+  )
+}
+
+const prepareAudioManager = () => {
+  void ensureAudioManager().catch(retainVisibleLoadFailure)
 }
 
 const setMasterVolume = (event: Event) => {
   const target = event.currentTarget as HTMLInputElement | null
   if (!target) return
-  siteAudioManager.setMasterVolume(Number(target.value))
+  void ensureAudioManager()
+    .then(manager => {
+      manager.setMasterVolume(Number(target.value))
+    })
+    .catch(retainVisibleLoadFailure)
 }
 
 const setAmbienceVolume = (event: Event) => {
   const target = event.currentTarget as HTMLInputElement | null
   if (!target) return
-  siteAudioManager.setAmbienceVolume(Number(target.value))
+  void ensureAudioManager()
+    .then(manager => {
+      manager.setAmbienceVolume(Number(target.value))
+    })
+    .catch(retainVisibleLoadFailure)
 }
 
 const setSfxVolume = (event: Event) => {
   const target = event.currentTarget as HTMLInputElement | null
   if (!target) return
-  siteAudioManager.setSfxVolume(Number(target.value))
+  void ensureAudioManager()
+    .then(manager => {
+      manager.setSfxVolume(Number(target.value))
+    })
+    .catch(retainVisibleLoadFailure)
 }
 
 const syncViewportMode = () => {
@@ -118,9 +219,14 @@ const closeMixerPanel = () => {
   panelOpen = false
 }
 
+const reloadAfterAudioLoadFailure = () => {
+  window.location.reload()
+}
+
 const openMixerPanel = () => {
   clearPanelCloseTimer()
   panelOpen = true
+  void ensureAudioManager().catch(retainVisibleLoadFailure)
 }
 
 const pinMixerPanel = () => {
@@ -150,11 +256,12 @@ const handleDocumentKeyDown = (event: KeyboardEvent) => {
 }
 
 onMount(() => {
+  mounted = true
+  syncStoredAudioState()
   syncViewportMode()
 
-  const unsubscribe = siteAudioManager.subscribe(state => {
-    audioState = state
-  })
+  const loadedManager = getLoadedSiteAudioManager()
+  if (loadedManager) subscribeToAudioManager(loadedManager)
 
   const mediaQuery = window.matchMedia('(max-width: 767px)')
   const handleViewportChange = () => {
@@ -168,14 +275,22 @@ onMount(() => {
     closeMixerPanel()
   }
 
+  const handleAudioLoadFailure = () => {
+    audioLoadFailed = true
+  }
+
   document.addEventListener('click', handlePointerDown)
   document.addEventListener('keydown', handleDocumentKeyDown)
+  window.addEventListener(siteAudioLoadFailedEvent, handleAudioLoadFailure)
 
   return () => {
+    mounted = false
     clearPanelCloseTimer()
-    unsubscribe()
+    managerUnsubscribe?.()
+    managerUnsubscribe = null
     document.removeEventListener('click', handlePointerDown)
     document.removeEventListener('keydown', handleDocumentKeyDown)
+    window.removeEventListener(siteAudioLoadFailedEvent, handleAudioLoadFailure)
     mediaQuery.removeEventListener('change', handleViewportChange)
   }
 })
@@ -215,6 +330,7 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
     class:site-audio-button--enabled={audioState.enabled}
     data-sfx-hover="hover-soft"
     data-sfx-click="soft"
+    on:pointerdown={prepareAudioManager}
     on:click={toggleAudio}
   >
     <Icon
@@ -254,6 +370,19 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
         </button>
       </div>
 
+      {#if audioLoadFailed}
+        <p role="status" aria-live="polite">
+          Sound controls are temporarily unavailable.
+          <button
+            type="button"
+            class="btn-plain rounded-lg px-2 py-1 text-sm font-medium"
+            on:click={reloadAfterAudioLoadFailure}
+          >
+            Reload to try again
+          </button>
+        </p>
+      {/if}
+
       <label class="site-audio-panel__slider">
         <span>Master</span>
         <span>{masterVolumePercent}%</span>
@@ -263,6 +392,7 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
           max="1"
           step="0.01"
           value={audioState.masterVolume}
+          disabled={audioLoadFailed}
           on:input={setMasterVolume}
         />
       </label>
@@ -276,6 +406,7 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
           max="1"
           step="0.01"
           value={audioState.ambienceVolume}
+          disabled={audioLoadFailed}
           on:input={setAmbienceVolume}
         />
       </label>
@@ -289,6 +420,7 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
           max="1"
           step="0.01"
           value={audioState.sfxVolume}
+          disabled={audioLoadFailed}
           on:input={setSfxVolume}
         />
       </label>

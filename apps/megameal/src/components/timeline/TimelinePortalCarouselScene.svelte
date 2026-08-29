@@ -1,174 +1,24 @@
-<script lang="ts" context="module">
-import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
-import { CanvasTexture } from 'three'
-import type { Texture } from 'three'
-
-type TimelineStarTextureVariant = 0 | 1 | 2 | 3
-
-const timelineStarTextureVariants = [
-  { points: 4, rayRadius: 54, secondaryRadius: 34, rayWidth: 2.4, secondaryWidth: 1.45 },
-  { points: 5, rayRadius: 50, secondaryRadius: 25, rayWidth: 2.05, secondaryWidth: 1.25 },
-  { points: 6, rayRadius: 52, secondaryRadius: 30, rayWidth: 2.2, secondaryWidth: 1.3 },
-  { points: 8, rayRadius: 48, secondaryRadius: 22, rayWidth: 1.85, secondaryWidth: 1.05 },
-] as const
-const sharedTimelineStarTextures = new Map<TimelineStarTextureVariant, Texture>()
-let sharedTimelineOrbitTexture: Texture | null = null
-
-function getTimelineStarTexture(variant: TimelineStarTextureVariant = 0) {
-  const cachedTexture = sharedTimelineStarTextures.get(variant)
-  if (cachedTexture) return cachedTexture
-  if (typeof document === 'undefined') return null
-
-  const textureVariant = timelineStarTextureVariants[variant] ?? timelineStarTextureVariants[0]
-  const canvas = document.createElement('canvas')
-  canvas.width = 128
-  canvas.height = 128
-  const context = canvas.getContext('2d')
-  if (!context) return null
-
-  const center = canvas.width / 2
-  const gradient = context.createRadialGradient(center, center, 0, center, center, center)
-  gradient.addColorStop(0, 'rgb(255 255 255 / 1)')
-  gradient.addColorStop(0.08, 'rgb(255 255 255 / 1)')
-  gradient.addColorStop(0.18, 'rgb(236 254 255 / 0.82)')
-  gradient.addColorStop(0.36, 'rgb(103 232 249 / 0.36)')
-  gradient.addColorStop(0.72, 'rgb(59 130 246 / 0.11)')
-  gradient.addColorStop(1, 'rgb(59 130 246 / 0)')
-  context.fillStyle = gradient
-  context.fillRect(0, 0, canvas.width, canvas.height)
-
-  context.save()
-  context.translate(center, center)
-  context.globalCompositeOperation = 'screen'
-  context.lineCap = 'round'
-  context.strokeStyle = 'rgb(255 255 255 / 0.92)'
-  context.lineWidth = textureVariant.rayWidth
-  context.beginPath()
-  for (let index = 0; index < textureVariant.points; index += 1) {
-    const angle = (index / textureVariant.points) * Math.PI * 2
-    context.moveTo(0, 0)
-    context.lineTo(Math.cos(angle) * textureVariant.rayRadius, Math.sin(angle) * textureVariant.rayRadius)
-  }
-  context.stroke()
-  context.strokeStyle = 'rgb(165 243 252 / 0.58)'
-  context.lineWidth = textureVariant.secondaryWidth
-  context.beginPath()
-  for (let index = 0; index < textureVariant.points; index += 1) {
-    const angle = ((index + 0.5) / textureVariant.points) * Math.PI * 2
-    context.moveTo(0, 0)
-    context.lineTo(
-      Math.cos(angle) * textureVariant.secondaryRadius,
-      Math.sin(angle) * textureVariant.secondaryRadius,
-    )
-  }
-  context.stroke()
-  context.fillStyle = 'rgb(255 255 255 / 0.96)'
-  context.beginPath()
-  context.arc(0, 0, 6.5, 0, Math.PI * 2)
-  context.fill()
-  context.restore()
-
-  const texture = configureGeneratedCanvasTexture(new CanvasTexture(canvas))
-  sharedTimelineStarTextures.set(variant, texture)
-
-  return texture
-}
-
-function getTimelineOrbitTexture() {
-  if (sharedTimelineOrbitTexture) return sharedTimelineOrbitTexture
-  if (typeof document === 'undefined') return null
-
-  const canvas = document.createElement('canvas')
-  canvas.width = 128
-  canvas.height = 128
-  const context = canvas.getContext('2d')
-  if (!context) return null
-
-  const center = canvas.width / 2
-  context.clearRect(0, 0, canvas.width, canvas.height)
-  context.save()
-  context.translate(center, center)
-  context.globalCompositeOperation = 'screen'
-
-  const glow = context.createRadialGradient(0, 0, 12, 0, 0, 56)
-  glow.addColorStop(0, 'rgb(125 211 252 / 0)')
-  glow.addColorStop(0.54, 'rgb(125 211 252 / 0.16)')
-  glow.addColorStop(0.72, 'rgb(125 211 252 / 0.06)')
-  glow.addColorStop(1, 'rgb(125 211 252 / 0)')
-  context.fillStyle = glow
-  context.beginPath()
-  context.arc(0, 0, 58, 0, Math.PI * 2)
-  context.fill()
-
-  context.strokeStyle = 'rgb(186 230 253 / 0.54)'
-  context.lineWidth = 1.35
-  context.setLineDash([4, 7])
-  context.beginPath()
-  context.arc(0, 0, 38, 0, Math.PI * 2)
-  context.stroke()
-
-  context.setLineDash([])
-  context.strokeStyle = 'rgb(255 255 255 / 0.2)'
-  context.lineWidth = 0.9
-  context.beginPath()
-  context.arc(0, 0, 25, 0, Math.PI * 2)
-  context.stroke()
-  context.restore()
-
-  sharedTimelineOrbitTexture = configureGeneratedCanvasTexture(
-    new CanvasTexture(canvas),
-  )
-
-  return sharedTimelineOrbitTexture
-}
-</script>
-
 <script lang="ts">
-import { T, useTask } from '@threlte/core'
+import { T, useTask, useThrelte } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import type * as THREE from 'three'
 import { AdditiveBlending, Color, OrthographicCamera, Vector3 } from 'three'
 import HomeIntroParticleField from '../home/HomeIntroParticleField.svelte'
-import { homeIntroParticleClusters } from '../home/homeIntroParticleClusters'
 import { hashHomeIntroUnit } from '../home/homeIntroSceneMath'
-
-type TimelineCarouselInput = {
-  x: number
-  y: number
-  panX: number
-  panY: number
-  dragX: number
-  dragY: number
-  wheel: number
-  mapZoom: number
-  mapOrbitX: number
-  mapOrbitY: number
-  active: boolean
-}
+import type {
+  TimelineCarouselInput,
+  TimelineCarouselScreen,
+} from './timelinePortalCarouselModel'
+import { createTimelineParticles } from './timelineParticles'
+import type { TimelineStarScreenPosition } from './timelinePortalPresentation'
+import {
+  getTimelineOrbitTexture,
+  getTimelineStarTexture,
+  timelineStarTextureVariantCount,
+  type TimelineStarTextureVariant,
+} from './timelineStarTextures'
 
 type TimelineViewMode = 'travel' | 'map'
-
-export type TimelineCarouselScreen = {
-  kicker: string
-  title: string
-  stat: string
-  ctaLabel: string
-  stillSrc: string
-  videoSrc: string
-  eraKey: string
-  year: number
-  isKeyEvent: boolean
-}
-
-export type TimelineStarScreenPosition = {
-  index: number
-  x: number
-  y: number
-  size: number
-  visible: boolean
-  eraKey: string
-  isKeyEvent: boolean
-}
 
 export let input: TimelineCarouselInput
 export let screens: TimelineCarouselScreen[] = []
@@ -186,8 +36,11 @@ let starRail: THREE.Group | null = null
 let starColumn: THREE.Group | null = null
 let portraitMobile = false
 let viewportAspect = 16 / 9
-let starAnimationTime = 0
 let activeStarIntensities: number[] = []
+let timelineStarTargets: ReturnType<typeof getTimelineStarTarget>[] = []
+let timelineStarVisuals: ReturnType<typeof getTimelineStarVisual>[] = []
+let sceneFrameSignature = ''
+let sceneFramePending = true
 
 const screenOrbitRadiusX = 5.65
 const screenOrbitRadiusY = 3.85
@@ -197,9 +50,6 @@ const starAngleVariance = 0.92
 const starRadiusVariance = 0.48
 const starVerticalVariance = 0.72
 const starDepthVariance = 0.42
-const particleClusterCount = homeIntroParticleClusters.length
-const particleSizeMultiplier = 2.18
-const particleCount = 1200
 const effectScrollStepY = screenStepZ * 2.35
 const particleScrollSpan = 48
 const mapTimelineDepthScale = 8.5
@@ -220,6 +70,7 @@ const mixedStarColor = new Color()
 const mixedStarBaseColor = new Color()
 const mixedStarActiveColor = new Color(activeStarColor)
 let lastProjectedStarPositionSignature = ''
+const { invalidate } = useThrelte()
 
 $: sceneScale = portraitMobile ? 0.78 : 1
 $: cameraPosition = portraitMobile
@@ -239,6 +90,28 @@ $: starColumnScale = portraitMobile
   ? ([2.16, 2.22, 1.38] as [number, number, number])
   : ([2.08, 2.52, 1.54] as [number, number, number])
 $: timelineStarIndexes = screens.map((_, index) => index)
+$: activeStarIntensities = screens.map((_, index) =>
+  index === selectedScreenIndex || index === hoveredScreenIndex ? 1 : 0,
+)
+$: timelineStarTargets = timelineStarIndexes.map(index =>
+  getTimelineStarTarget(index, input.wheel),
+)
+$: timelineStarVisuals = screens.map((screen, index) =>
+  getTimelineStarVisual(index, screen, activeStarIntensities[index] ?? 0, 0),
+)
+$: sceneFrameSignature = [
+  input.wheel,
+  input.panX,
+  input.panY,
+  input.mapZoom,
+  input.mapOrbitX,
+  input.mapOrbitY,
+  viewMode,
+  portraitMobile,
+  viewportAspect,
+  screens.length,
+].join('|')
+$: if (sceneFrameSignature) scheduleSceneFrame()
 
 function syncViewportMode() {
   if (typeof window === 'undefined') return
@@ -246,54 +119,7 @@ function syncViewportMode() {
   viewportAspect = Math.max(0.4, window.innerWidth / Math.max(window.innerHeight, 1))
 }
 
-function createParticle(index: number) {
-  const cluster = index % particleClusterCount
-  const clusterCenter = homeIntroParticleClusters[cluster]
-  const randomA = Math.abs(hashHomeIntroUnit(index + 1))
-  const randomB = Math.abs(hashHomeIntroUnit(index + 17))
-  const randomC = Math.abs(hashHomeIntroUnit(index + 41))
-  const randomD = Math.abs(hashHomeIntroUnit(index + 79))
-  const randomE = Math.abs(hashHomeIntroUnit(index + 131))
-  const randomF = Math.abs(hashHomeIntroUnit(index + 181))
-  const randomG = Math.abs(hashHomeIntroUnit(index + 229))
-  const randomH = Math.abs(hashHomeIntroUnit(index + 283))
-  const radialT = randomA ** 1.25
-  const angle = randomB * Math.PI * 2
-  const verticalAngle = (randomC - 0.5) * Math.PI
-  const strayT = randomE > 0.74 ? ((randomE - 0.74) / 0.26) ** 0.72 : 0
-  const edgeAngle = randomF * Math.PI * 2
-  const radius = clusterCenter.spread * (0.1 + radialT * (0.82 + strayT * 1.45))
-
-  return {
-    anchorX:
-      clusterCenter.x * 0.45 +
-      (randomG - 0.5) * 5.8 +
-      Math.cos(edgeAngle) * strayT * 2.4,
-    anchorY: clusterCenter.y,
-    anchorZ:
-      clusterCenter.z * 0.45 +
-      (randomH - 0.5) * 3.4 +
-      Math.sin(edgeAngle) * strayT * 1.35,
-    angle,
-    cluster,
-    clusterStrength: 0.26 + (1 - radialT) * 0.58,
-    height: Math.sin(verticalAngle) * clusterCenter.spread * 1.42,
-    radius,
-    phase: randomB * Math.PI * 2,
-    radialT,
-    speed: 0.038 + randomD * 0.072 + radialT * 0.032,
-    size:
-      (0.012 + (1 - radialT) * 0.024 + randomE * 0.014) *
-      (1 - strayT * 0.22) *
-      particleSizeMultiplier,
-    hueOffset: clusterCenter.hue + randomD * 0.08,
-    shape: randomE,
-    strayT,
-    zOffset: Math.cos(verticalAngle) * clusterCenter.spread * (randomD - 0.5) * (0.72 + strayT * 0.56),
-  }
-}
-
-const particles = Array.from({ length: particleCount }, (_, index) => createParticle(index))
+const particles = createTimelineParticles()
 
 function clampScreenIndex(value: number) {
   return Math.min(Math.max(screens.length - 1, 0), Math.max(0, value))
@@ -469,8 +295,8 @@ function getTimelineStarVisual(
 ) {
   const size = getTimelineStarSize(index, screen.isKeyEvent)
   const variant = Math.min(
-    timelineStarTextureVariants.length - 1,
-    Math.floor(getStarHash(index, 3571) * timelineStarTextureVariants.length),
+    timelineStarTextureVariantCount - 1,
+    Math.floor(getStarHash(index, 3571) * timelineStarTextureVariantCount),
   ) as TimelineStarTextureVariant
   const activeScale = 1 + activeAmount * 0.42
   const keyScale = screen.isKeyEvent ? 1.12 : 1
@@ -632,7 +458,7 @@ function getTimelineStarTarget(index: number, visualSelectedIndex: number) {
   }
 }
 
-function syncProjectedStarPositions(selectedIndex: number) {
+function syncProjectedStarPositions() {
   if (!camera || !starRail || typeof window === 'undefined') return
 
   camera.updateMatrixWorld(true)
@@ -642,7 +468,8 @@ function syncProjectedStarPositions(selectedIndex: number) {
 
   const positions = timelineStarIndexes
     .map(index => {
-      const star = getTimelineStarTarget(index, selectedIndex)
+      const star = timelineStarTargets[index]
+      if (!star) return null
 
       projectedStarPosition.set(star.x, star.y, star.z)
       projectedStarPosition.applyMatrix4(starRail.matrixWorld)
@@ -674,6 +501,7 @@ function syncProjectedStarPositions(selectedIndex: number) {
         isKeyEvent: Boolean(screens[index]?.isKeyEvent),
       }
     })
+    .filter((position): position is TimelineStarScreenPosition => position !== null)
 
   const signature = positions
     .map(position => `${position.index}:${position.x.toFixed(1)}:${position.y.toFixed(1)}:${position.size.toFixed(1)}:${position.visible ? 1 : 0}`)
@@ -686,9 +514,13 @@ function syncProjectedStarPositions(selectedIndex: number) {
 
 onMount(() => {
   syncViewportMode()
+  let initialFrame = window.requestAnimationFrame(() => {
+    initialFrame = window.requestAnimationFrame(scheduleSceneFrame)
+  })
   window.addEventListener('resize', syncViewportMode)
 
   return () => {
+    window.cancelAnimationFrame(initialFrame)
     window.removeEventListener('resize', syncViewportMode)
   }
 })
@@ -699,18 +531,11 @@ onDestroy(() => {
   }
 })
 
-useTask(delta => {
-  const time = performance.now() * 0.001
-  const ease = 1 - Math.exp(-delta * 4.8)
+useTask(() => {
+  if (!sceneFramePending || !camera || !starRail) return
+
   const selectedIndex = Number.isFinite(input.wheel) ? input.wheel : 0
   const targetCameraPosition = getCameraTimelinePosition(selectedIndex)
-  starAnimationTime += (time - starAnimationTime) * Math.min(1, delta * 6)
-  activeStarIntensities = screens.map((_, index) => {
-    const current = activeStarIntensities[index] ?? 0
-    const target = index === selectedScreenIndex || index === hoveredScreenIndex ? 1 : 0
-    const speed = target > current ? 2.15 : 2.85
-    return current + (target - current) * (1 - Math.exp(-delta * speed))
-  })
 
   if (camera) {
     if (viewMode === 'map') {
@@ -733,35 +558,31 @@ useTask(delta => {
   }
 
   if (world) {
-    world.rotation.x += (0 - world.rotation.x) * ease
-    world.rotation.y += (0 - world.rotation.y) * ease
-    world.position.x += (0 - world.position.x) * ease
-    world.position.y += (0 - world.position.y) * ease
+    world.rotation.set(0, 0, 0)
+    world.position.set(0, 0, 0)
   }
 
   if (starColumn) {
-    starColumn.position.x += (starColumnPosition[0] - starColumn.position.x) * ease
-    starColumn.position.y += (starColumnPosition[1] - starColumn.position.y) * ease
-    starColumn.position.z += (starColumnPosition[2] - starColumn.position.z) * ease
-    starColumn.rotation.x = Math.PI / 2
-    starColumn.rotation.y = 0
-    starColumn.rotation.z = 0
+    starColumn.position.set(...starColumnPosition)
+    starColumn.rotation.set(Math.PI / 2, 0, 0)
   }
 
   if (starRail) {
     const targetRailRotationX = viewMode === 'map' ? -getMapOrbitY() * mapOrbitMaxPitch : 0
     const targetRailRotationY = viewMode === 'map' ? getMapOrbitX() * mapOrbitMaxYaw : 0
 
-    starRail.rotation.z += (0 - starRail.rotation.z) * ease
-    starRail.rotation.x += (targetRailRotationX - starRail.rotation.x) * ease
-    starRail.rotation.y += (targetRailRotationY - starRail.rotation.y) * ease
-    starRail.position.x = railPosition[0]
-    starRail.position.y = railPosition[1]
-    starRail.position.z = railPosition[2]
+    starRail.rotation.set(targetRailRotationX, targetRailRotationY, 0)
+    starRail.position.set(...railPosition)
   }
 
-  syncProjectedStarPositions(selectedIndex)
-})
+  syncProjectedStarPositions()
+  sceneFramePending = false
+}, { autoInvalidate: false })
+
+function scheduleSceneFrame() {
+  sceneFramePending = true
+  invalidate()
+}
 </script>
 
 {#if viewMode === 'map'}
@@ -785,9 +606,9 @@ useTask(delta => {
 <T.Group bind:ref={world} position={[0, 0, 0]} scale={[sceneScale, sceneScale, sceneScale]}>
   <T.Group bind:ref={starRail} position={railPosition}>
     {#each screens as screen, index}
-      {@const star = getTimelineStarTarget(index, input.wheel)}
-      {@const starActiveAmount = activeStarIntensities[index] ?? 0}
-      {@const starVisual = getTimelineStarVisual(index, screen, starActiveAmount, starAnimationTime)}
+      {@const star = timelineStarTargets[index]}
+      {@const starVisual = timelineStarVisuals[index]}
+      {#if star && starVisual}
       <T.Group position={[star.x, star.y, star.z]} scale={[star.scale, star.scale, star.scale]}>
         {#if timelineOrbitTexture}
           <T.Sprite scale={starVisual.orbitScale}>
@@ -833,6 +654,7 @@ useTask(delta => {
           />
         </T.Sprite>
       </T.Group>
+      {/if}
     {/each}
   </T.Group>
 

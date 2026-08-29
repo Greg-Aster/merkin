@@ -1,24 +1,13 @@
 ---
 import '@fontsource/creepster'
 import '@fontsource/metal-mania'
-import {
-  connectionPatterns,
-  constellationConfig,
-  constellationPatterns,
-  defaultEraConfig,
-} from '@/config/timelineconfig'
 import CompactArchiveBanner from '@components/archive/CompactArchiveBanner.astro'
-import Bleepy from '@components/bleepy/Bleepy.astro'
 import SiteAudioRuntime from '@components/client/SiteAudioRuntime.svelte'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
-import TimelinePortalCarousel from '@components/timeline/TimelinePortalCarousel.svelte'
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
-import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
 import {
   isContentPostPage,
-  isTimeline2DPath,
-  isTimelinePath,
   postUsesArchiveBanner,
   resolvePostOneColumn,
 } from '../utils/mainGridLayout.server'
@@ -39,7 +28,6 @@ interface Props {
   post?: unknown
   bannerLink?: string
   isPostPage?: boolean
-  pageMascotContext?: string
   backgroundImage?: string | null
   oneColumn?: boolean
   customAuthorData?: {
@@ -50,8 +38,6 @@ interface Props {
   }
   homeLayout?: 'default' | 'portal'
   contentMode?: 'default' | 'banner-only'
-  showMascot?: boolean
-  showAssistantWidget?: boolean
   timelineEvents?: unknown[]
   timelineEraConfig?: Record<string, unknown>
   timelineConstellationConfig?: Record<string, unknown>
@@ -62,8 +48,7 @@ interface Props {
 const sharedHomeLayout = Astro.props.homeLayout
 const hasCustomBannerSlideContent = Astro.slots.has('banner-slide-content')
 const hasCustomBannerOverlayContent = Astro.slots.has('banner-overlay-content')
-const isTimelineRoute = isTimelinePath(Astro.url.pathname)
-const isTimeline2DRoute = isTimeline2DPath(Astro.url.pathname)
+const hasTimelineBannerContent = Astro.slots.has('timeline-banner-content')
 const originalPost = Astro.props.post as
   | ({ data?: { bannerType?: string } } & Record<string, unknown>)
   | undefined
@@ -72,8 +57,7 @@ const layoutPost = originalPost
 const resolvedOneColumn = isContentPost
   ? resolvePostOneColumn(originalPost)
   : Astro.props.oneColumn
-const usesArchiveBanner =
-  !isContentPost && postUsesArchiveBanner(layoutPost)
+const usesArchiveBanner = !isContentPost && postUsesArchiveBanner(layoutPost)
 const hasPortalDemoContent = Astro.slots.has('portal-demo-content')
 const sharedProps: Omit<Props, 'homeLayout'> & {
   homeLayout?: 'default' | 'portal'
@@ -88,11 +72,6 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
 
 <SharedMainGridLayout
   {...sharedProps}
-  timelineEvents={timelineManifest.items}
-  timelineEraConfig={defaultEraConfig}
-  timelineConstellationConfig={constellationConfig}
-  timelineConstellationPatterns={constellationPatterns}
-  timelineConnectionPatterns={connectionPatterns}
 >
   <Fragment slot="head">
     <slot name="head" />
@@ -103,12 +82,6 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
     initMegamealRouteTransitions()
   </script>
   <slot />
-  <!-- MEGAMEAL-specific: Bleepy AI assistant mascot -->
-  {Astro.props.showMascot && (
-    <Fragment slot="mascot">
-      <Bleepy mascotContext={Astro.props.pageMascotContext} instanceIdentifier="LAYOUT_BLEEPY" />
-    </Fragment>
-  )}
   {hasCustomBannerOverlayContent && (
     <Fragment slot="banner-overlay-content">
       <slot name="banner-overlay-content" />
@@ -124,16 +97,9 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
       <slot name="portal-demo-content" />
     </Fragment>
   )}
-  {(isTimelineRoute || isTimeline2DRoute) && (
+  {hasTimelineBannerContent && (
     <Fragment slot="timeline-banner-content">
-      <h1 class="sr-only">{isTimelineRoute ? 'Timeline' : 'Timeline Map'}</h1>
-      <div id="megameal-timeline-route-marker" hidden></div>
-      <TimelinePortalCarousel
-        events={timelineManifest.items}
-        eraConfig={defaultEraConfig}
-        initialViewMode={isTimeline2DRoute ? 'map' : 'travel'}
-        client:only="svelte"
-      />
+      <slot name="timeline-banner-content" />
     </Fragment>
   )}
   {hasCustomBannerSlideContent ? (

@@ -40,6 +40,7 @@
 		"@iconify-json/mdi": "^1.2.3",
 		"@iconify/svelte": "^5.0.0",
 		"@merkin/blog-core": "workspace:*",
+		"@merkin/docs-editor-bridge": "workspace:*",
 		"@merkin/shared-audio": "workspace:*",
 		"@merkin/shared-content": "workspace:*",
 		"@tailwindcss/typography": "^0.5.16",

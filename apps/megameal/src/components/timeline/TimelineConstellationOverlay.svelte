@@ -1,16 +1,6 @@
 <script lang="ts">
 import { getEraMarkerColor } from './timelinePortalCarouselModel'
-
-export type TimelineConstellationLine = {
-  id: string
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-  eraKey: string
-  isActive: boolean
-  length: number
-}
+import type { TimelineConstellationLine } from './timelinePortalPresentation'
 
 export let lines: TimelineConstellationLine[] = []
 export let guideLine: TimelineConstellationLine | null = null
@@ -54,14 +44,7 @@ export let guideLine: TimelineConstellationLine | null = null
       stroke-dasharray={line.isActive ? '0.75 1.55' : '0.34 1.9'}
       stroke-opacity={line.isActive ? 0.42 : 0.18}
       filter="url(#timelineConstellationGlow)"
-    >
-      <animate
-        attributeName="stroke-dashoffset"
-        values={`0;-${Math.max(2, line.length * 0.18).toFixed(2)}`}
-        dur={line.isActive ? '12s' : '18s'}
-        repeatCount="indefinite"
-      />
-    </line>
+    ></line>
     <line
       x1={line.x1}
       y1={line.y1}
@@ -99,14 +82,7 @@ export let guideLine: TimelineConstellationLine | null = null
       stroke-dasharray="0.56 1.24"
       stroke-opacity="0.48"
       filter="url(#timelineConstellationGlow)"
-    >
-      <animate
-        attributeName="stroke-dashoffset"
-        values={`0;-${Math.max(2, guideLine.length * 0.18).toFixed(2)}`}
-        dur="10s"
-        repeatCount="indefinite"
-      />
-    </line>
+    ></line>
     <circle
       data-timeline-selected-guide
       cx={guideLine.x2}

@@ -67,6 +67,12 @@ export function extractGoogleDocId(input: string): string {
 
 export type GoogleDocExportFormat = 'txt' | 'md'
 
+export interface FetchGoogleDocOptions {
+  cacheBust?: string | number
+  fetch?: typeof globalThis.fetch
+  signal?: AbortSignal
+}
+
 export function buildGoogleDocExportUrl(
   input: string,
   format: GoogleDocExportFormat = 'txt',
@@ -87,6 +93,73 @@ export function buildGoogleDocTextExportUrl(input: string, cacheBust?: string | 
 
 export function buildGoogleDocMarkdownExportUrl(input: string, cacheBust?: string | number): string {
   return buildGoogleDocExportUrl(input, 'md', cacheBust)
+}
+
+export async function fetchGoogleDocBlocks(
+  input: string,
+  format: GoogleDocExportFormat = 'md',
+  options: FetchGoogleDocOptions = {},
+): Promise<GoogleDocBlock[]> {
+  const fetchDocument = options.fetch ?? globalThis.fetch
+  if (!fetchDocument) {
+    throw new Error('Docs Editor Bridge could not find a fetch implementation.')
+  }
+
+  const response = await fetchDocument(
+    buildGoogleDocExportUrl(input, format, options.cacheBust),
+    {
+      signal: options.signal,
+      cache: options.cacheBust === undefined ? 'default' : 'no-store',
+      headers: {
+        Accept:
+          format === 'md'
+            ? 'text/markdown,text/x-markdown,text/plain'
+            : 'text/plain',
+      },
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error(`Google Docs export failed with ${response.status}.`)
+  }
+
+  const contentType = response.headers.get('content-type') ?? ''
+  if (contentType.includes('text/html')) {
+    throw new Error(
+      'Google Docs returned a sign-in page. Share the document as “Anyone with the link” (Viewer).',
+    )
+  }
+
+  const text = await response.text()
+  if (text.length > 1_000_000) {
+    throw new Error('Google Docs export exceeded the 1 MB content limit.')
+  }
+
+  const blocks = convertGoogleDocTextToBlocks(text)
+  if (blocks.length === 0) {
+    throw new Error('Google Docs export did not contain readable content.')
+  }
+
+  return blocks
+}
+
+export function googleDocBlocksToPlainText(blocks: GoogleDocBlock[]): string {
+  return blocks
+    .flatMap((block) => {
+      switch (block.type) {
+        case 'heading':
+        case 'paragraph':
+        case 'pre':
+          return block.text
+        case 'list':
+          return block.items
+        case 'table':
+          return [block.headers.join(' '), ...block.rows.map((row) => row.join(' '))]
+        case 'thematicBreak':
+          return []
+      }
+    })
+    .join('\n')
 }
 
 export function convertGoogleDocTextToBlocks(text: string): GoogleDocBlock[] {

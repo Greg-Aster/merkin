@@ -1,8 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import {
-    buildGoogleDocExportUrl,
-    convertGoogleDocTextToBlocks,
+    fetchGoogleDocBlocks,
     renderInlineMarkdown,
     type GoogleDocBlock,
     type GoogleDocExportFormat,
@@ -10,38 +9,33 @@
 
   export let url: string
   export let format: GoogleDocExportFormat = 'txt'
+  export let initialBlocks: GoogleDocBlock[] = []
 
-  let blocks: GoogleDocBlock[] = []
+  let blocks: GoogleDocBlock[] = initialBlocks
   let errorMessage = ''
-  let isLoading = true
+  let isLoading = initialBlocks.length === 0
+  let isShowingSnapshot = false
 
   onMount(() => {
     const abortController = new AbortController()
 
     async function loadDocument() {
       try {
-        const exportUrl = buildGoogleDocExportUrl(url, format, Date.now())
-        const response = await fetch(exportUrl, {
+        blocks = await fetchGoogleDocBlocks(url, format, {
+          cacheBust: Date.now(),
           signal: abortController.signal,
-          cache: 'no-store',
-          headers: {
-            Accept: format === 'md' ? 'text/markdown,text/plain' : 'text/plain',
-            'Cache-Control': 'no-cache',
-          },
         })
-
-        if (!response.ok) {
-          throw new Error(`Google Docs export failed with ${response.status}.`)
-        }
-
-        const text = await response.text()
-        blocks = convertGoogleDocTextToBlocks(text)
+        isShowingSnapshot = false
       } catch (error) {
         if (abortController.signal.aborted) return
-        errorMessage =
-          error instanceof Error
-            ? error.message
-            : 'Docs Editor Bridge could not load this document.'
+        if (blocks.length > 0) {
+          isShowingSnapshot = true
+        } else {
+          errorMessage =
+            error instanceof Error
+              ? error.message
+              : 'Docs Editor Bridge could not load this document.'
+        }
       } finally {
         if (!abortController.signal.aborted) {
           isLoading = false
@@ -104,4 +98,14 @@
       <hr />
     {/if}
   {/each}
+{/if}
+
+{#if isShowingSnapshot}
+  <p
+    class="text-sm text-amber-800 dark:text-amber-200"
+    role="status"
+    data-google-doc-status="snapshot"
+  >
+    Live update unavailable; showing the published snapshot.
+  </p>
 {/if}

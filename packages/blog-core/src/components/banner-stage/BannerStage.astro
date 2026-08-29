@@ -107,7 +107,6 @@ interface Props {
 		videoBannerData?: BannerMediaData;
 		imageBannerData?: BannerMediaData;
 		timelineBannerData?: BannerMediaData;
-		assistantBannerData?: BannerMediaData;
 		cookbookBannerData?: BannerMediaData;
 		archiveBannerData?: BannerMediaData;
 		readerBannerData?: BannerMediaData;
@@ -194,7 +193,6 @@ const hasVideoBanner = scene?.id === "video";
 const hasTimelineBanner = scene?.id === "timeline";
 const hasImageBanner = scene?.id === "image";
 const hasStandardBanner = scene?.id === "standard";
-const hasAssistantBanner = scene?.id === "assistant";
 const hasCookbookBanner = scene?.id === "cookbook";
 const hasArchiveBanner = scene?.id === "archive";
 const hasReaderBanner = scene?.id === "reader";
@@ -227,7 +225,6 @@ const portalSlideIndexOffset =
     ${hasTimelineBanner ? 'has-timeline-banner' : ''}
     ${hasVideoBanner ? 'has-video-banner' : ''}
     ${hasImageBanner ? 'has-image-banner' : ''}
-    ${hasAssistantBanner ? 'has-assistant-banner' : ''}
     ${hasCookbookBanner ? 'has-cookbook-banner' : ''}
     ${hasArchiveBanner ? 'has-archive-banner' : ''}
     ${hasReaderBanner ? 'has-reader-banner' : ''}

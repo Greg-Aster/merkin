@@ -18,6 +18,7 @@ const portalIntroBackgroundPlaybackRate = 0.25
 
 <script>
   import { homePortalEvents } from '../../contracts/homePortal'
+  import { getRichMediaCapabilities } from '../../utils/richMediaCapabilities'
 
   const slide = document.querySelector<HTMLElement>('.megameal-portal-background-slide')
   const video = slide?.querySelector<HTMLVideoElement>('.megameal-portal-background-slide__video')
@@ -80,28 +81,6 @@ const portalIntroBackgroundPlaybackRate = 0.25
       loadBackgroundVideo()
     }
 
-    const isCompactViewport = () => {
-      return window.innerWidth <= 760 || window.innerHeight <= 640
-    }
-
-    const shouldAutoloadBackgroundVideo = () => {
-      const nav = navigator as Navigator & {
-        connection?: { saveData?: boolean; effectiveType?: string }
-        deviceMemory?: number
-      }
-      const connection = nav.connection
-      const effectiveType = connection?.effectiveType ?? ''
-      const deviceMemory = nav.deviceMemory
-
-      return !(
-        isCompactViewport() ||
-        connection?.saveData === true ||
-        /(^|-)2g$/.test(effectiveType) ||
-        effectiveType === '3g' ||
-        (typeof deviceMemory === 'number' && deviceMemory <= 2)
-      )
-    }
-
     const scheduleBackgroundVideoLoad = () => {
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
@@ -121,7 +100,7 @@ const portalIntroBackgroundPlaybackRate = 0.25
     }
 
     const loadFromPointerIntent = () => {
-      if (isCompactViewport()) return
+      if (getRichMediaCapabilities().compactViewport) return
       loadBackgroundVideo()
     }
 
@@ -132,7 +111,7 @@ const portalIntroBackgroundPlaybackRate = 0.25
     window.addEventListener('keydown', loadBackgroundVideo, { once: true })
     window.addEventListener('scroll', loadAfterScroll, { passive: true })
 
-    if (shouldAutoloadBackgroundVideo()) {
+    if (getRichMediaCapabilities().shouldAutoload) {
       scheduleBackgroundVideoLoad()
     }
   }

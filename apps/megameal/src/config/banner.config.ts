@@ -18,7 +18,6 @@ import type {
   PostBannerData,
 } from './banners/types'
 
-import { assistantBannerConfig } from './banners/assistant'
 import { imageBannerConfig } from './banners/image'
 import {
   bannerLayoutProfiles,
@@ -33,7 +32,6 @@ import { standardBannerConfig } from './banners/standard'
 import { timelineBannerConfig } from './banners/timeline'
 import { videoBannerConfig } from './banners/video'
 
-import { isAssistantBannerData } from './banners/assistant'
 import { isImageBannerData } from './banners/image'
 import { isNoneBannerData } from './banners/none'
 import { isTimelineBannerData } from './banners/timeline'
@@ -137,7 +135,6 @@ export interface BannerConfig {
   videoBannerConfig: typeof videoBannerConfig
   imageBannerConfig: typeof imageBannerConfig
   timelineBannerConfig: typeof timelineBannerConfig
-  assistantBannerConfig: typeof assistantBannerConfig
   noneBannerConfig: typeof noneBannerConfig
 
   // Actual working configuration
@@ -177,7 +174,6 @@ export interface BannerConfig {
       timeline: string
       video: string
       image: string
-      assistant: string
       cookbook?: string
       archive?: string
       reader?: string
@@ -194,7 +190,6 @@ export interface BannerConfig {
       video: string
       image: string
       timeline: string
-      assistant: string
       cookbook?: string
       archive?: string
       reader?: string
@@ -242,7 +237,6 @@ export const bannerConfig: BannerConfig = {
   videoBannerConfig,
   imageBannerConfig,
   timelineBannerConfig,
-  assistantBannerConfig,
   noneBannerConfig,
 
   // 🎯 FIXED: CSS dimensions system - NO MORE clamp() ISSUES
@@ -325,7 +319,6 @@ const articlePostBannerTypes = new Set<BannerType>([
   'standard',
   'image',
   'video',
-  'assistant',
   'cookbook',
   'reader',
   'none',
@@ -382,8 +375,6 @@ export function determineBannerType(
     explicitBannerType === 'video' &&
     !postData?.wantsNoDefaultBanner &&
     post?.data?.bannerData?.videoId
-  const hasPostAssistantBanner =
-    explicitBannerType === 'assistant' && !postData?.wantsNoDefaultBanner
   const hasPostCookbookBanner =
     explicitBannerType === 'cookbook' && !postData?.wantsNoDefaultBanner
   const hasPostArchiveBanner =
@@ -396,7 +387,6 @@ export function determineBannerType(
     (post?.data?.bannerData?.imageUrl || post?.data?.image) &&
     !hasPostVideoBanner &&
     !hasPostTimelineBanner &&
-    !hasPostAssistantBanner &&
     !hasPostCookbookBanner &&
     !hasPostArchiveBanner &&
     !hasPostReaderBanner
@@ -405,7 +395,6 @@ export function determineBannerType(
     hasPostVideoBanner ||
     hasPostImageBanner ||
     hasPostTimelineBanner ||
-    hasPostAssistantBanner ||
     hasPostCookbookBanner ||
     hasPostArchiveBanner ||
     hasPostReaderBanner ||
@@ -427,25 +416,16 @@ export function determineBannerType(
     !postData?.wantsNoDefaultBanner &&
     bannerConfig.defaultBannerType === 'timeline' &&
     isTimelineBannerData(bannerConfig.defaultBannerData)
-  const useDefaultAssistant =
-    !hasPostBanner &&
-    !postData?.wantsNoDefaultBanner &&
-    bannerConfig.defaultBannerType === 'assistant' &&
-    isAssistantBannerData(bannerConfig.defaultBannerData)
   const useDefaultStandard =
     !hasPostBanner &&
     !postData?.wantsNoDefaultBanner &&
     (bannerConfig.defaultBannerType === 'standard' ||
-      (!useDefaultVideo &&
-        !useDefaultImage &&
-        !useDefaultTimeline &&
-        !useDefaultAssistant))
+      (!useDefaultVideo && !useDefaultImage && !useDefaultTimeline))
 
   // Determine banner flags
   const hasTimelineBanner = hasPostTimelineBanner || useDefaultTimeline
   const hasVideoBanner = hasPostVideoBanner || useDefaultVideo
   const hasImageBanner = hasPostImageBanner || useDefaultImage
-  const hasAssistantBanner = hasPostAssistantBanner || useDefaultAssistant
   const hasCookbookBanner = hasPostCookbookBanner
   const hasArchiveBanner = hasPostArchiveBanner
   const hasReaderBanner = hasPostReaderBanner
@@ -457,9 +437,7 @@ export function determineBannerType(
       ? 'image'
       : hasTimelineBanner
         ? 'timeline'
-        : hasAssistantBanner
-          ? 'assistant'
-          : hasCookbookBanner
+        : hasCookbookBanner
             ? 'cookbook'
             : hasArchiveBanner
               ? 'archive'
@@ -473,7 +451,6 @@ export function determineBannerType(
     hasTimelineBanner,
     hasVideoBanner,
     hasImageBanner,
-    hasAssistantBanner,
     hasCookbookBanner,
     hasArchiveBanner,
     hasReaderBanner,
@@ -492,7 +469,6 @@ export function getBannerDataSources(
     hasTimelineBanner,
     hasVideoBanner,
     hasImageBanner,
-    hasAssistantBanner,
     hasCookbookBanner,
     hasArchiveBanner,
     hasReaderBanner,
@@ -539,12 +515,6 @@ export function getBannerDataSources(
           ? bannerConfig.defaultBannerData
           : null,
 
-    assistantBannerData:
-      hasAssistantBanner && post?.data?.bannerType === 'assistant'
-        ? post.data.bannerData
-        : hasAssistantBanner
-          ? bannerConfig.defaultBannerData
-          : null,
     cookbookBannerData:
       hasCookbookBanner && post?.data?.bannerType === 'cookbook'
         ? post.data.bannerData
@@ -594,7 +564,6 @@ export function determineBannerConfiguration(
         hasTimelineBanner: false,
         hasVideoBanner: false,
         hasImageBanner: false,
-        hasAssistantBanner: false,
         hasCookbookBanner: false,
         hasArchiveBanner: false,
         hasReaderBanner: false,
@@ -607,7 +576,6 @@ export function determineBannerConfiguration(
         videoBannerData: null,
         imageBannerData: null,
         timelineBannerData: null,
-        assistantBannerData: null,
         cookbookBannerData: null,
         archiveBannerData: null,
         readerBannerData: null,
@@ -742,7 +710,6 @@ export {
   isVideoBannerData,
   isImageBannerData,
   isTimelineBannerData,
-  isAssistantBannerData,
   isNoneBannerData,
 }
 
@@ -755,7 +722,6 @@ export {
   videoBannerConfig,
   imageBannerConfig,
   timelineBannerConfig,
-  assistantBannerConfig,
   noneBannerConfig,
 }
 

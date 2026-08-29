@@ -1,25 +1,10 @@
 ---
-import MainGridLayout from '../../layouts/MainGridLayout.astro'
-
-const syntheticPost = {
-  slug: 'timeline-2d',
-  data: {
-    title: 'MEGAMEAL Timeline Map',
-    description:
-      'The MEGAMEAL chronology map: eras, incidents, recipes, wars, corporate ascensions, and archival fragments.',
-    bannerType: 'timeline',
-    bannerData: {
-      category: 'MEGA MEAL',
-      compact: false,
-    },
-  },
-}
+import TimelinePageLayout from '../../layouts/TimelinePageLayout.astro'
 ---
 
-<MainGridLayout
+<TimelinePageLayout
   title="Timeline Map"
   description="The MEGAMEAL chronology map: eras, incidents, recipes, wars, corporate ascensions, and archival fragments."
-  post={syntheticPost}
-  contentMode="banner-only"
-  showAssistantWidget={false}
+  slug="timeline-2d"
+  initialViewMode="map"
 />

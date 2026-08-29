@@ -108,6 +108,78 @@ export function getStatusWidth(sideLaneWidth: number) {
   return Math.max(144, Math.min(320, availableWidth))
 }
 
+export function getActiveTimelineEraSegment(
+  position: number,
+  eraSegments: TimelinePortalEraSegment[],
+) {
+  const mainSegments = eraSegments.filter(segment => !segment.isOverlapping)
+  return (
+    mainSegments.find(segment => position >= segment.startIndex && position <= segment.endIndex) ??
+    mainSegments.reduce(
+      (nearest, segment) =>
+        Math.abs(segment.centerIndex - position) < Math.abs(nearest.centerIndex - position)
+          ? segment
+          : nearest,
+      mainSegments[0],
+    ) ??
+    eraSegments[0] ??
+    null
+  )
+}
+
+export function getDefaultTimelinePosition(
+  eraSegments: TimelinePortalEraSegment[],
+  eraKey: string,
+  maxPosition: number,
+) {
+  const preferredEra =
+    eraSegments.find(segment => segment.key === eraKey && segment.eventCount > 0) ??
+    eraSegments.find(segment => segment.key === eraKey)
+
+  return clamp(preferredEra?.centerIndex ?? 0, 0, maxPosition)
+}
+
+export function advanceTimelineAutoplay({
+  position,
+  maxPosition,
+  direction,
+  velocity,
+  delta,
+  stopping,
+  speed,
+  minimumEdgeSpeedScale,
+  velocityEaseRate,
+}: {
+  position: number
+  maxPosition: number
+  direction: -1 | 1
+  velocity: number
+  delta: number
+  stopping: boolean
+  speed: number
+  minimumEdgeSpeedScale: number
+  velocityEaseRate: number
+}) {
+  const turnDistance = clamp(maxPosition * 0.1, 0.8, 2.4)
+  const edgeDistance = Math.min(position, maxPosition - position)
+  const edgeRatio = maxPosition > 0 ? clamp(edgeDistance / turnDistance, 0, 1) : 1
+  const smoothedRatio = edgeRatio * edgeRatio * (3 - 2 * edgeRatio)
+  const edgeSpeedScale =
+    minimumEdgeSpeedScale + smoothedRatio * (1 - minimumEdgeSpeedScale)
+  const targetVelocity = stopping ? 0 : direction * speed * edgeSpeedScale
+  const velocityEase = 1 - Math.exp(-delta * velocityEaseRate)
+  const nextVelocity = velocity + (targetVelocity - velocity) * velocityEase
+  const nextPosition = position + nextVelocity * delta
+
+  if (nextPosition >= maxPosition) {
+    return { position: maxPosition, direction: -1 as const, velocity: 0 }
+  }
+  if (nextPosition <= 0) {
+    return { position: 0, direction: 1 as const, velocity: 0 }
+  }
+  return { position: nextPosition, direction, velocity: nextVelocity }
+}
+
 export function getEraMarkerColor(eraKey: string) {
   const colors: Record<string, string> = {
     'ancient-epoch': '#67e8f9',

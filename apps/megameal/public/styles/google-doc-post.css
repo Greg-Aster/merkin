@@ -1,0 +1,286 @@
+/* Select with googleDoc.style: "google-doc-post". */
+.google-doc-content {
+  --google-doc-cyan: oklch(0.8 0.13 205);
+  --google-doc-pink: oklch(0.7 0.2 345);
+  --google-doc-gold: oklch(0.82 0.15 78);
+  position: relative;
+  isolation: isolate;
+  margin-top: 1.5rem;
+  padding: clamp(1.15rem, 3vw, 2rem);
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--primary) 34%, transparent);
+  border-radius: var(--radius-large);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in oklch, var(--google-doc-pink) 14%, transparent), transparent 28rem),
+    radial-gradient(circle at 0% 18%, color-mix(in oklch, var(--google-doc-cyan) 12%, transparent), transparent 24rem),
+    linear-gradient(145deg, color-mix(in oklch, var(--card-bg) 94%, var(--primary) 6%), var(--card-bg));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 9%, transparent),
+    inset 0 0 50px color-mix(in oklch, var(--primary) 5%, transparent),
+    0 22px 55px rgb(0 0 0 / 18%);
+  counter-reset: google-doc-section;
+}
+
+.google-doc-content::before {
+  content: "LIVE DOCUMENT FEED  /  MEGAMEAL ARCHIVE";
+  display: block;
+  width: fit-content;
+  margin: 0 0 1.4rem;
+  padding: 0.32rem 0.65rem;
+  border: 1px solid color-mix(in oklch, var(--google-doc-cyan) 42%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--google-doc-cyan) 9%, transparent);
+  color: color-mix(in oklch, var(--primary) 82%, var(--google-doc-cyan) 18%);
+  font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.25;
+}
+
+.google-doc-content::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--google-doc-gold), var(--google-doc-pink), var(--google-doc-cyan), transparent 92%);
+  box-shadow: 0 0 22px color-mix(in oklch, var(--google-doc-pink) 35%, transparent);
+}
+
+.google-doc-content h2 {
+  position: relative;
+  counter-increment: google-doc-section;
+  margin: 2.7rem 0 1.15rem;
+  padding: 1rem 1.15rem 1rem 6.2rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--primary) 28%, transparent);
+  border-left: 4px solid var(--google-doc-pink);
+  border-radius: 0.75rem;
+  background:
+    linear-gradient(100deg, color-mix(in oklch, var(--google-doc-pink) 14%, transparent), color-mix(in oklch, var(--google-doc-cyan) 7%, transparent) 55%, transparent),
+    color-mix(in oklch, var(--card-bg) 91%, var(--primary) 9%);
+  color: var(--tw-prose-headings);
+  font-size: clamp(1.2rem, 2.5vw, 1.65rem);
+  line-height: 1.25;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+  box-shadow:
+    inset 0 0 28px color-mix(in oklch, var(--primary) 5%, transparent),
+    0 12px 30px rgb(0 0 0 / 13%);
+}
+
+.google-doc-content h2::before {
+  content: "SECTION " counter(google-doc-section, decimal-leading-zero);
+  position: absolute;
+  top: 50%;
+  left: 1.15rem;
+  translate: 0 -50%;
+  color: color-mix(in oklch, var(--primary) 78%, var(--google-doc-cyan) 22%);
+  font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.google-doc-content h3 {
+  margin-top: 2rem;
+  color: color-mix(in oklch, var(--primary) 76%, var(--google-doc-cyan) 24%);
+  font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.google-doc-content h2:first-of-type + p {
+  margin: 1.1rem 0 1.35rem;
+  padding: 1.05rem 1.15rem;
+  border: 1px solid color-mix(in oklch, var(--google-doc-gold) 34%, transparent);
+  border-radius: 0.75rem;
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in oklch, var(--google-doc-pink) 12%, transparent), transparent 18rem),
+    linear-gradient(130deg, color-mix(in oklch, var(--google-doc-gold) 10%, transparent), color-mix(in oklch, var(--google-doc-cyan) 6%, transparent));
+  color: var(--tw-prose-headings);
+  font-size: clamp(1.02rem, 1.5vw, 1.12rem);
+  line-height: 1.75;
+  box-shadow: inset 0 0 26px color-mix(in oklch, var(--google-doc-gold) 4%, transparent);
+}
+
+.google-doc-content p {
+  max-width: 82ch;
+  line-height: 1.78;
+}
+
+.google-doc-content :is(ul, ol) {
+  margin: 1.25rem 0 1.6rem;
+  padding: 1rem 1.15rem 1rem 2.5rem;
+  border: 1px solid color-mix(in oklch, var(--primary) 22%, transparent);
+  border-radius: 0.75rem;
+  background:
+    linear-gradient(115deg, color-mix(in oklch, var(--google-doc-cyan) 7%, transparent), transparent 60%),
+    color-mix(in oklch, var(--card-bg) 94%, var(--primary) 6%);
+  box-shadow: inset 0 0 24px color-mix(in oklch, var(--primary) 4%, transparent);
+}
+
+.google-doc-content li {
+  margin: 0.65rem 0;
+  padding-left: 0.2rem;
+  line-height: 1.65;
+}
+
+.google-doc-content li::marker {
+  color: var(--google-doc-pink);
+  font-weight: 900;
+}
+
+.google-doc-content strong {
+  color: var(--tw-prose-headings);
+}
+
+.google-doc-content a:not(.no-styling) {
+  text-decoration-color: color-mix(in oklch, var(--google-doc-cyan) 60%, transparent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.24em;
+}
+
+.google-doc-content table {
+  display: table;
+  width: 100%;
+  margin: 1.4rem 0 1.8rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--primary) 28%, transparent);
+  border-radius: 0.75rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: color-mix(in oklch, var(--card-bg) 93%, var(--primary) 7%);
+  box-shadow: 0 14px 30px rgb(0 0 0 / 11%);
+}
+
+.google-doc-content :is(th, td) {
+  padding: 0.78rem 0.9rem;
+  border-color: color-mix(in oklch, var(--primary) 18%, transparent);
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+.google-doc-content th {
+  background: linear-gradient(90deg, color-mix(in oklch, var(--google-doc-cyan) 13%, transparent), color-mix(in oklch, var(--google-doc-pink) 9%, transparent));
+  color: var(--tw-prose-headings);
+  font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.google-doc-content tbody tr:nth-child(odd) {
+  background: color-mix(in oklch, var(--google-doc-cyan) 4%, transparent);
+}
+
+.google-doc-content .docs-editor-diagram {
+  border: 1px solid color-mix(in oklch, var(--google-doc-cyan) 28%, transparent);
+  box-shadow: inset 0 0 28px color-mix(in oklch, var(--google-doc-cyan) 5%, transparent);
+}
+
+.google-doc-content hr {
+  height: 1px;
+  margin: 2rem 0;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--google-doc-cyan), var(--google-doc-pink), var(--google-doc-gold), transparent);
+  opacity: 0.65;
+}
+
+.google-doc-content [data-google-doc-status="snapshot"] {
+  margin-top: 1.4rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid color-mix(in oklch, var(--google-doc-gold) 36%, transparent);
+  border-radius: 0.65rem;
+  background: color-mix(in oklch, var(--google-doc-gold) 8%, transparent);
+}
+
+@media (max-width: 640px) {
+  .google-doc-content {
+    padding: 1rem;
+  }
+
+  .google-doc-content::before {
+    max-width: 100%;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+  }
+
+  .google-doc-content h2 {
+    padding: 0.9rem 1rem;
+  }
+
+  .google-doc-content h2::before {
+    position: static;
+    display: block;
+    margin-bottom: 0.35rem;
+    translate: none;
+  }
+
+  .google-doc-content table,
+  .google-doc-content thead,
+  .google-doc-content tbody,
+  .google-doc-content tr,
+  .google-doc-content th,
+  .google-doc-content td {
+    display: block;
+  }
+
+  .google-doc-content thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .google-doc-content tr {
+    margin: 0.65rem;
+    border: 1px solid color-mix(in oklch, var(--primary) 18%, transparent);
+    border-radius: 0.6rem;
+  }
+
+  .google-doc-content td {
+    border: 0;
+  }
+
+  .google-doc-content td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.2rem;
+    color: color-mix(in oklch, var(--primary) 75%, var(--google-doc-cyan) 25%);
+    font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+@media print {
+  .google-doc-content {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .google-doc-content::before,
+  .google-doc-content::after,
+  .google-doc-content h2::before {
+    display: none;
+  }
+
+  .google-doc-content h2,
+  .google-doc-content h2:first-of-type + p,
+  .google-doc-content :is(ul, ol),
+  .google-doc-content table {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}

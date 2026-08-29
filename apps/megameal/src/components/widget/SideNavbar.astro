@@ -9,8 +9,7 @@
 // 3. Main navigation links (filtered - no Archive/About/Restaurant)
 // 4. Store button (moved down)
 // 5. Menu toggle (Archive/About as subitems)
-// 6. Bleepy button (assistant toggle)
-// 7. Settings gear (search, fullscreen, theme as submenu)
+// 6. Settings gear (search, fullscreen, theme as submenu)
 
 // =====================================================================
 // IMPORTS
@@ -235,16 +234,6 @@ style={style}>
   <!-- REMOVED: Panel moved to MainGridLayout.astro for proper positioning -->
 
   <!-- =============================================================== -->
-  <!-- 6. BLEEPY BUTTON (ASSISTANT TOGGLE) - MOVED UP -->
-  <!-- =============================================================== -->
-  <div class="w-full mb-3">
-    <button id="sidenav-bleepy-btn" aria-label="Toggle Assistant" class="btn-regular rounded-lg h-10 w-full flex items-center justify-center active:scale-90 transition-all duration-200">
-      <span id="bleepy-icon-show">🍴</span>  <!-- Fork = show assistant -->
-      <span id="bleepy-icon-hide" class="hidden">🥄</span>  <!-- Spoon = hide assistant -->
-    </button>
-  </div>
-
-  <!-- =============================================================== -->
   <!-- NEW: TIMELINE BANNER TOGGLE BUTTON -->
   <!-- =============================================================== -->
   <div class="w-full mb-3">
@@ -254,7 +243,7 @@ style={style}>
   </div>
 
   <!-- =============================================================== -->
-  <!-- 7. SETTINGS GEAR (SEARCH, FULLSCREEN, THEME SUBMENU) - BOTTOM -->
+  <!-- 6. SETTINGS GEAR (SEARCH, FULLSCREEN, THEME SUBMENU) - BOTTOM -->
   <!-- =============================================================== -->
   <div class="border-t border-black/10 dark:border-white/10 pt-2 mt-auto">
     <div class="w-full">
@@ -302,37 +291,6 @@ style={style}>
             // Dispatch custom event to MainGridLayout
             document.dispatchEvent(new CustomEvent('profile:toggle'));
         });
-    }
-
-    // ===================================================================
-    // ASSISTANT (BLEEPY) TOGGLE LOGIC - ONLY FUNCTIONALITY REMAINING IN SIDENAV
-    // ===================================================================
-    const bleepyBtn = document.getElementById('sidenav-bleepy-btn');
-    
-    if(bleepyBtn) {
-        const showIcon = bleepyBtn.querySelector('#bleepy-icon-show');
-        const hideIcon = bleepyBtn.querySelector('#bleepy-icon-hide');
-        let isMascotVisible = true;
-        
-        bleepyBtn.addEventListener('click', () => {
-            const eventName = isMascotVisible ? 'bleepy:hide' : 'bleepy:show';
-            document.dispatchEvent(new CustomEvent(eventName));
-        });
-
-        document.addEventListener('bleepy:visibilityChanged', (event) => {
-            const customEvent = event as CustomEvent;
-            isMascotVisible = customEvent.detail.visible;
-            
-            if (isMascotVisible) {
-                showIcon?.classList.remove('hidden');
-                hideIcon?.classList.add('hidden');
-            } else {
-                showIcon?.classList.add('hidden');
-                hideIcon?.classList.remove('hidden');
-            }
-        });
-        
-        document.dispatchEvent(new CustomEvent('bleepy:hide'));
     }
   }
 

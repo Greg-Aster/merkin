@@ -45,7 +45,6 @@ interface Props {
   post?: any
   bannerLink?: string
   isPostPage?: boolean
-  pageMascotContext?: string
   backgroundImage?: string | null
   // ⭐ NEW: OneColumn layout prop
   oneColumn?: boolean
@@ -58,7 +57,6 @@ interface Props {
   }
   homeLayout?: 'default' | 'portal'
   contentMode?: 'default' | 'banner-only'
-  showAssistantWidget?: boolean
   timelineEvents?: any[]
   timelineEraConfig?: Record<string, any>
   timelineConstellationConfig?: Record<string, any>
@@ -85,7 +83,6 @@ const {
   customAuthorData, // ⭐ NEW: Extract custom author data
   homeLayout = 'default',
   contentMode = 'default',
-  showAssistantWidget = false,
   timelineEvents = [],
   timelineEraConfig,
   timelineConstellationConfig,
@@ -280,8 +277,6 @@ function normalizeBannerConfig(config: any) {
         timeline: spacingFromConfig.timeline ?? '5.5rem',
         video: spacingFromConfig.video ?? '5.5rem',
         image: spacingFromConfig.image ?? '0',
-        assistant:
-          spacingFromConfig.assistant ?? spacingFromConfig.standard ?? '0',
         cookbook:
           spacingFromConfig.cookbook ??
           spacingFromConfig.video ??
@@ -307,8 +302,6 @@ function normalizeBannerConfig(config: any) {
         timeline: config.panel?.top?.timeline ?? '0',
         video: config.panel?.top?.video ?? '0',
         image: config.panel?.top?.image ?? '0',
-        assistant:
-          config.panel?.top?.assistant ?? config.panel?.top?.standard ?? '0',
         archive:
           config.panel?.top?.archive ??
           config.panel?.top?.video ??
@@ -357,8 +350,6 @@ const getPanelTopPosition = (bannerType: string): string => {
       return bannerConfig.panel.top.image
     case 'timeline':
       return bannerConfig.panel.top.timeline
-    case 'assistant':
-      return bannerConfig.panel.top.assistant
     case 'cookbook':
       return bannerConfig.panel.top.video ?? bannerConfig.panel.top.standard
     case 'archive':
@@ -397,8 +388,6 @@ const determineBannerConfiguration =
         const hasPostVideoBanner =
           postValue?.data?.bannerType === 'video' &&
           postValue?.data?.bannerData?.videoId
-        const hasPostAssistantBanner =
-          postValue?.data?.bannerType === 'assistant'
         const hasPostCookbookBanner =
           postValue?.data?.bannerType === 'cookbook'
         const hasPostArchiveBanner =
@@ -413,7 +402,6 @@ const determineBannerConfiguration =
           ) &&
           !hasPostVideoBanner &&
           !hasPostTimelineBanner &&
-          !hasPostAssistantBanner &&
           !hasPostCookbookBanner &&
           !hasPostArchiveBanner &&
           !hasPostReaderBanner
@@ -422,7 +410,6 @@ const determineBannerConfiguration =
           hasPostVideoBanner ||
           hasPostImageBanner ||
           hasPostTimelineBanner ||
-          hasPostAssistantBanner ||
           hasPostCookbookBanner ||
           hasPostArchiveBanner ||
           hasPostReaderBanner
@@ -437,9 +424,6 @@ const determineBannerConfiguration =
         const hasImageBanner =
           hasPostImageBanner ||
           (!hasPostBanner && defaultBannerType === 'image')
-        const hasAssistantBanner =
-          hasPostAssistantBanner ||
-          (!hasPostBanner && defaultBannerType === 'assistant')
         const hasCookbookBanner = hasPostCookbookBanner
         const hasArchiveBanner = hasPostArchiveBanner
         const hasReaderBanner = hasPostReaderBanner
@@ -448,7 +432,6 @@ const determineBannerConfiguration =
           !hasTimelineBanner &&
           !hasVideoBanner &&
           !hasImageBanner &&
-          !hasAssistantBanner &&
           !hasCookbookBanner &&
           !hasArchiveBanner &&
           !hasReaderBanner
@@ -459,9 +442,7 @@ const determineBannerConfiguration =
             ? 'image'
             : hasTimelineBanner
               ? 'timeline'
-              : hasAssistantBanner
-                ? 'assistant'
-                : hasCookbookBanner
+              : hasCookbookBanner
                   ? 'cookbook'
                   : hasArchiveBanner
                     ? 'archive'
@@ -481,7 +462,6 @@ const determineBannerConfiguration =
             hasTimelineBanner,
             hasVideoBanner,
             hasImageBanner,
-            hasAssistantBanner,
             hasCookbookBanner,
             hasArchiveBanner,
             hasReaderBanner,
@@ -506,12 +486,6 @@ const determineBannerConfiguration =
               hasTimelineBanner && postValue?.data?.bannerType === 'timeline'
                 ? postValue.data.bannerData
                 : hasTimelineBanner
-                  ? bannerConfig.defaultBannerData
-                  : null,
-            assistantBannerData:
-              hasAssistantBanner && postValue?.data?.bannerType === 'assistant'
-                ? postValue.data.bannerData
-                : hasAssistantBanner
                   ? bannerConfig.defaultBannerData
                   : null,
             cookbookBannerData:
@@ -711,23 +685,6 @@ const currentBackgroundImage = getDynamicBackgroundImage(backgroundImage)
 const shouldShowParallaxBackground =
   !isPortalBannerMode && getShouldShowParallaxBackground(backgroundImage)
 
-// =====================================================================
-// BLEEPY CONTEXT SETUP
-// =====================================================================
-
-let contextForBleepy = null
-if (post && post.data) {
-  contextForBleepy = {
-    title: post.data.title,
-    description: post.data.description,
-    tags: post.data.tags,
-    category: post.data.category,
-    timelineEra: post.data.timelineEra,
-    timelineLocation: post.data.timelineLocation,
-    mascotContext: post.data.mascotContext,
-  }
-}
-
 // Conditionally create the grid classes
 const gridLayoutClasses = [
   'transition duration-700 w-full left-0 right-0 grid mx-auto gap-4 md:gap-4 px-2 md:px-4 relative',
@@ -901,7 +858,7 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
               </div>
             </section>
           )}
-          <SideBar class="flex-1" headings={headings} postSlug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} pageMascotContext={Astro.props.pageMascotContext} hideProfile={true} showAssistantWidget={showAssistantWidget}>
+          <SideBar class="flex-1" headings={headings} postSlug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} hideProfile={true}>
             {shouldMergeRightRailIntoSidebar && (
               <div
                 id="sidebar-right-rail-merge"
@@ -991,13 +948,6 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
   </div>
 
 
-  <!-- =============================================================== -->
-  <!-- APP MASCOT SLOT (e.g. Bleepy for MEGAMEAL)                    -->
-  <!-- =============================================================== -->
-  {contextForBleepy && (
-    <div id="bleepy-page-context" style="display: none;" data-context={JSON.stringify(contextForBleepy)}></div>
-  )}
-  <slot name="mascot" />
   <slot name="overlay" />
 
   <!-- =============================================================== -->
@@ -1237,7 +1187,6 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
     }
 
     #main-grid > div:first-child .card-base,
-    #main-grid > div:first-child :global(#bleepy-post-widget),
     #main-grid > div:first-child :global(.facts-widget-shell) {
       box-shadow: none !important;
       backdrop-filter: none !important;
@@ -1246,7 +1195,6 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
     #main-grid > div:first-child .sidebar-profile-card,
     #main-grid > div:first-child .widget-layout-card,
     #main-grid > div:first-child #sidebar-mobile-toc .card-base,
-    #main-grid > div:first-child :global(#bleepy-post-widget),
     #main-grid > div:first-child :global(.facts-widget-shell) {
       background: rgb(255 255 255 / 0.5) !important;
       border: 1px solid rgb(0 0 0 / 0.06) !important;
@@ -1333,7 +1281,6 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
     :global(.dark) #main-grid > div:first-child .sidebar-profile-card,
     :global(.dark) #main-grid > div:first-child .widget-layout-card,
     :global(.dark) #main-grid > div:first-child #sidebar-mobile-toc .card-base,
-    :global(.dark) #main-grid > div:first-child #bleepy-post-widget,
     :global(.dark) #main-grid > div:first-child .facts-widget-shell {
       background: rgb(255 255 255 / 0.04) !important;
       border-color: rgb(255 255 255 / 0.08) !important;
@@ -1362,8 +1309,6 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
     --rail-social-button-size: 2.5rem;
     --rail-social-icon-size: 1.5rem;
     --rail-facts-min-height: 24rem;
-    --rail-chat-height: 16rem;
-    --rail-chat-mascot-size: 12rem;
   }
 
   @container sidebar-rail (max-width: 13rem) {
@@ -1387,8 +1332,6 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
       --rail-social-button-size: 1.95rem;
       --rail-social-icon-size: 1.05rem;
       --rail-facts-min-height: 18rem;
-      --rail-chat-height: 11rem;
-      --rail-chat-mascot-size: 6.4rem;
     }
   }
 
@@ -1413,8 +1356,6 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
       --rail-social-button-size: 1.7rem;
       --rail-social-icon-size: 0.9rem;
       --rail-facts-min-height: 15.5rem;
-      --rail-chat-height: 9rem;
-      --rail-chat-mascot-size: 4.85rem;
     }
   }
 
@@ -1560,34 +1501,6 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
     padding: clamp(0.7rem, 3cqi, 1rem) !important;
   }
 
-  :global(#sidebar #bleepy-post-widget) {
-    padding: var(--rail-card-padding) !important;
-    gap: var(--rail-card-stack-gap) !important;
-  }
-
-  :global(#sidebar #bleepy-post-widget .chat-history) {
-    height: var(--rail-chat-height) !important;
-    padding: clamp(0.55rem, 2.5cqi, 0.75rem) !important;
-  }
-
-  :global(#sidebar #widget-mascot-visual-area) {
-    width: var(--rail-chat-mascot-size) !important;
-    height: var(--rail-chat-mascot-size) !important;
-    margin-bottom: 0.75rem !important;
-  }
-
-  :global(#sidebar #bleepy-post-widget p),
-  :global(#sidebar #bleepy-post-widget .speech-bubble-content),
-  :global(#sidebar #bleepy-post-widget .chat-input),
-  :global(#sidebar #bleepy-post-widget .chat-send-button) {
-    font-size: var(--rail-button-font-size) !important;
-    line-height: var(--rail-copy-leading) !important;
-  }
-
-  :global(#sidebar #widget-chat-send) {
-    padding-inline: clamp(0.6rem, 2.5cqi, 1rem) !important;
-    padding-block: 0.45rem !important;
-  }
 
   /* Homepage only: keep a compact two-column layout on mobile landscape */
   @media (max-width: 1023px) and (orientation: landscape) and (max-height: 500px) {

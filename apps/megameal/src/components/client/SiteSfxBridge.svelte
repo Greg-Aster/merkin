@@ -1,6 +1,12 @@
 <script lang="ts">
 import { onMount } from 'svelte'
-import { type SiteSfxId, siteSfxManager } from '../../utils/site-sfx'
+import type { AudioSfxId as SiteSfxId } from '../../config/audio'
+import { siteAudioUnlockedEvent } from '../../utils/site-audio-activation'
+import {
+  getLoadedSiteSfxManager,
+  loadSiteSfxManager,
+  readSiteAudioEnabledPreference,
+} from '../../utils/site-audio-loader'
 
 const INTERACTIVE_SELECTOR =
   'a[href], button, [role="button"], summary, .btn-card, .btn-plain, .btn-primary'
@@ -176,22 +182,45 @@ function resolveKeySfx(target: EventTarget | null): SiteSfxId | null {
 }
 
 onMount(() => {
-  siteSfxManager.initialize()
   let lastScrollSfxAt = 0
   let lastHoverAnchor: HTMLElement | null = null
   let lastFocusTarget: HTMLElement | null = null
   let lastPointerAt = -Infinity
+  let pendingActivationSfx: SiteSfxId | null = null
 
-  const handlePointerDown = async (event: PointerEvent) => {
+  const playPendingActivationSfx = async () => {
+    const sfxId = pendingActivationSfx
+    if (!sfxId || !readSiteAudioEnabledPreference()) {
+      pendingActivationSfx = null
+      return
+    }
+
+    const siteSfxManager = await loadSiteSfxManager()
+    if (pendingActivationSfx !== sfxId) return
+    if (siteSfxManager.hasUnlockedAudio()) {
+      pendingActivationSfx = null
+      siteSfxManager.play(sfxId)
+    }
+  }
+
+  const queueActivationSfx = (sfxId: SiteSfxId) => {
+    if (!readSiteAudioEnabledPreference()) return
+    pendingActivationSfx = sfxId
+    void playPendingActivationSfx().catch(() => {
+      // The loader reports the failure to the visible audio control.
+    })
+  }
+
+  const playIfLoaded = (sfxId: SiteSfxId) => {
+    getLoadedSiteSfxManager()?.playIfUnlocked(sfxId)
+  }
+
+  const handlePointerDown = (event: PointerEvent) => {
     if (event.button !== 0) return
 
     lastPointerAt = window.performance.now()
     const sfxId = resolvePointerSfx(event.target)
-    if (sfxId) {
-      if (await siteSfxManager.unlockFromGesture()) {
-        siteSfxManager.play(sfxId)
-      }
-    }
+    if (sfxId) queueActivationSfx(sfxId)
   }
 
   const handleMouseOver = (event: MouseEvent) => {
@@ -203,9 +232,7 @@ onMount(() => {
 
     lastHoverAnchor = anchor
     const sfxId = resolveHoverSfx(anchor)
-    if (sfxId) {
-      siteSfxManager.playIfUnlocked(sfxId)
-    }
+    if (sfxId) playIfLoaded(sfxId)
   }
 
   const handleMouseOut = (event: MouseEvent) => {
@@ -226,9 +253,7 @@ onMount(() => {
 
     lastFocusTarget = target
     const sfxId = resolveFocusSfx(target)
-    if (sfxId) {
-      siteSfxManager.playIfUnlocked(sfxId)
-    }
+    if (sfxId) playIfLoaded(sfxId)
   }
 
   const handleFocusOut = (event: FocusEvent) => {
@@ -237,16 +262,12 @@ onMount(() => {
     }
   }
 
-  const handleKeyDown = async (event: KeyboardEvent) => {
+  const handleKeyDown = (event: KeyboardEvent) => {
     if (event.repeat) return
     if (event.key !== 'Enter' && event.key !== ' ') return
 
     const sfxId = resolveKeySfx(event.target)
-    if (sfxId) {
-      if (await siteSfxManager.unlockFromGesture()) {
-        siteSfxManager.play(sfxId)
-      }
-    }
+    if (sfxId) queueActivationSfx(sfxId)
   }
 
   const handleWheel = (event: WheelEvent) => {
@@ -261,15 +282,27 @@ onMount(() => {
     lastScrollSfxAt = now
     // Wheel is playback-only. Calling unlockFromGesture() here regressed
     // scroll audio by asking the browser to resume WebAudio from wheel.
-    siteSfxManager.playIfUnlocked('scroll')
+    playIfLoaded('scroll')
   }
 
   const handleCustomSfx = (event: Event) => {
     const customEvent = event as CustomEvent<{ id?: SiteSfxId }>
     const sfxId = customEvent.detail?.id
-    if (sfxId) {
-      siteSfxManager.playIfUnlocked(sfxId)
-    }
+    if (!sfxId || !readSiteAudioEnabledPreference()) return
+
+    void loadSiteSfxManager()
+      .then(siteSfxManager => {
+        siteSfxManager.playIfUnlocked(sfxId)
+      })
+      .catch(() => {
+        // The loader reports the failure to the visible audio control.
+      })
+  }
+
+  const handleAudioUnlocked = () => {
+    void playPendingActivationSfx().catch(() => {
+      // The loader reports the failure to the visible audio control.
+    })
   }
 
   document.addEventListener('pointerdown', handlePointerDown, true)
@@ -280,6 +313,7 @@ onMount(() => {
   document.addEventListener('keydown', handleKeyDown, true)
   document.addEventListener('wheel', handleWheel, { passive: true })
   document.addEventListener('megameal:sfx', handleCustomSfx)
+  window.addEventListener(siteAudioUnlockedEvent, handleAudioUnlocked)
 
   return () => {
     document.removeEventListener('pointerdown', handlePointerDown, true)
@@ -290,6 +324,7 @@ onMount(() => {
     document.removeEventListener('keydown', handleKeyDown, true)
     document.removeEventListener('wheel', handleWheel)
     document.removeEventListener('megameal:sfx', handleCustomSfx)
+    window.removeEventListener(siteAudioUnlockedEvent, handleAudioUnlocked)
   }
 })
 </script>

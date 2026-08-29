@@ -7,12 +7,11 @@
 - **Images:** Place in `apps/megameal/public/blog-images/` — reference as `/blog-images/filename.jpg`
 
 ## Schema Notes
-- `bannerType` can be: `image`, `video`, `timeline`, or `assistant`
+- `bannerType` can be: `image`, `video`, or `timeline`
 - For video banners use `bannerData.videoId` (YouTube video ID)
 - For image banners use `bannerData.imageUrl` (**NOT** `image` — different from other sites!)
 - `oneColumn: true` for wide full-width layout
 - `authorLink` should be `/about/slug/` if the author has a profile page
-- `mascotContext` — plain English summary for the AI chatbot — no markdown, just 1-2 sentences
 - Valid `timelineEra` values: `awakening-era`, `golden-age`, `conflict-epoch`, `singularity-wars`
 - `tags` must be an array: `[Tag1, Tag2]`
 - `draft: false` to publish, `draft: true` to hide
@@ -43,7 +42,6 @@ tags: [Tag1, Tag2]
 category: "MEGA MEAL"
 draft: false
 lang: ""
-mascotContext: "Brief plain-English summary of this post for the AI mascot chatbot."
 ---
 
 Post content here. MDX supported — you can use JSX components.
@@ -71,12 +69,11 @@ You are editing a blog post for my MEGAMEAL multimedia website. Please:
 **IMAGES:** Place in `apps/megameal/public/blog-images/` — reference as `/blog-images/filename.jpg`
 
 **SCHEMA NOTES:**
-- bannerType can be: "image", "video", "timeline", or "assistant"
+- bannerType can be: "image", "video", or "timeline"
 - For video banners use bannerData.videoId (YouTube ID)
 - For image banners use bannerData.imageUrl (NOT image — different from other sites!)
 - oneColumn: true for wide full-width layout
 - authorLink should be /about/slug/ if the author has a profile page
-- mascotContext: plain English summary for the AI chatbot — no markdown, just a sentence or two
 - Valid timelineEra values: "awakening-era", "golden-age", "conflict-epoch", "singularity-wars"
 - tags must be an array: [Tag1, Tag2]
 - draft: false to publish, true to hide
@@ -106,7 +103,6 @@ tags: [Tag1, Tag2]
 category: "MEGA MEAL"
 draft: false
 lang: ""
-mascotContext: "Brief plain-English summary of this post for the AI mascot chatbot."
 ---
 ```
 

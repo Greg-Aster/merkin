@@ -140,7 +140,7 @@ export type BlogPostData = {
   timelineEra?: string
   isKeyEvent?: boolean
   timelineLocation?: string
-  bannerType?: 'image' | 'video' | 'timeline' | 'assistant'
+  bannerType?: 'image' | 'video' | 'timeline'
   bannerData?: {
     videoId?: string
     imageUrl?: string

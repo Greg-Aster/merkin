@@ -1,0 +1,56 @@
+---
+import {
+  connectionPatterns,
+  constellationConfig,
+  constellationPatterns,
+  defaultEraConfig,
+} from '@/config/timelineconfig'
+import TimelinePortalCarousel from '@components/timeline/TimelinePortalCarousel.svelte'
+import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
+import MainGridLayout from './MainGridLayout.astro'
+
+interface Props {
+  title: string
+  description: string
+  slug: string
+  initialViewMode: 'travel' | 'map'
+}
+
+const { title, description, slug, initialViewMode } = Astro.props
+const syntheticPost = {
+  slug,
+  data: {
+    title: `MEGAMEAL ${title}`,
+    description,
+    bannerType: 'timeline',
+    bannerData: {
+      category: 'MEGA MEAL',
+      compact: false,
+    },
+  },
+}
+---
+
+<MainGridLayout
+  {title}
+  {description}
+  post={syntheticPost}
+  backgroundImage="none"
+  contentMode="banner-only"
+  timelineEvents={timelineManifest.items}
+  timelineEraConfig={defaultEraConfig}
+  timelineConstellationConfig={constellationConfig}
+  timelineConstellationPatterns={constellationPatterns}
+  timelineConnectionPatterns={connectionPatterns}
+>
+  <Fragment slot="timeline-banner-content">
+    <h1 class="sr-only">{title}</h1>
+    <div id="megameal-timeline-route-marker" hidden></div>
+    <TimelinePortalCarousel
+      events={timelineManifest.items}
+      eraConfig={defaultEraConfig}
+      {initialViewMode}
+      client:only="svelte"
+    />
+  </Fragment>
+</MainGridLayout>

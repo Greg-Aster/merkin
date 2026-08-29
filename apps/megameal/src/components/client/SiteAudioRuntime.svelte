@@ -1,7 +1,11 @@
 <script lang="ts">
 import { onMount } from 'svelte'
-import { siteAudioManager } from '../../utils/site-audio'
 import { addSiteAudioActivationListeners } from '../../utils/site-audio-activation'
+import {
+  getLoadedSiteAudioManager,
+  loadSiteAudioManager,
+  readSiteAudioEnabledPreference,
+} from '../../utils/site-audio-loader'
 
 let currentPathname = ''
 
@@ -9,11 +13,12 @@ const syncAudioForCurrentPage = (forceRescore: boolean) => {
   if (typeof window === 'undefined') return
 
   currentPathname = window.location.pathname
-  siteAudioManager.syncForPath(currentPathname, false, { forceRescore })
+  getLoadedSiteAudioManager()?.syncForPath(currentPathname, false, {
+    forceRescore,
+  })
 }
 
 onMount(() => {
-  siteAudioManager.initialize()
   syncAudioForCurrentPage(false)
 
   const handlePageLoad = () => {
@@ -24,11 +29,20 @@ onMount(() => {
     syncAudioForCurrentPage(routeChanged)
   }
 
-  const stopListeningForAudioActivation = addSiteAudioActivationListeners(
-    event => {
-      void siteAudioManager.unlockFromGesture(event)
-    },
-  )
+  let stopListeningForAudioActivation = () => {}
+  stopListeningForAudioActivation = addSiteAudioActivationListeners(event => {
+    if (!readSiteAudioEnabledPreference()) return
+
+    stopListeningForAudioActivation()
+    void loadSiteAudioManager()
+      .then(siteAudioManager => {
+        siteAudioManager.syncForPath(window.location.pathname, false)
+        return siteAudioManager.unlockFromGesture(event)
+      })
+      .catch(() => {
+        // The loader reports the failure to the visible audio control.
+      })
+  })
 
   document.addEventListener('astro:page-load', handlePageLoad)
 

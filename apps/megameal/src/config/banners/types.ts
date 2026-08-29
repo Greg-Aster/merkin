@@ -42,7 +42,6 @@ export type BannerType =
   | 'video'
   | 'image'
   | 'timeline'
-  | 'assistant'
   | 'cookbook'
   | 'archive'
   | 'reader'
@@ -160,14 +159,6 @@ export interface TimelineBannerData {
 }
 
 /**
- * Assistant banner configuration
- * For AI assistant (Bleepy) interactive banners
- */
-export interface AssistantBannerData {
-  imageUrl?: string // Optional background image for assistant banner
-}
-
-/**
  * Archive banner configuration
  * Custom-rendered archive banner content is supplied via slots.
  */
@@ -194,7 +185,6 @@ export type BannerData =
   | VideoBannerData
   | ImageBannerData
   | TimelineBannerData
-  | AssistantBannerData
   | ArchiveBannerData
   | ReaderBannerData
   | NoneBannerData
@@ -244,7 +234,6 @@ export interface BannerDeterminationResult {
   hasTimelineBanner: boolean
   hasVideoBanner: boolean
   hasImageBanner: boolean
-  hasAssistantBanner: boolean
   hasCookbookBanner?: boolean
   hasArchiveBanner?: boolean
   hasReaderBanner?: boolean
@@ -362,7 +351,6 @@ export interface BannerNavbarConfig {
     timeline: string // For timeline banner
     video: string // For video banner
     image: string // For image banner
-    assistant: string // For assistant banner
     cookbook?: string // For cookbook banner
     archive?: string // For archive banner
     reader?: string // For reader banner
@@ -380,7 +368,6 @@ export interface BannerPanelConfig {
     image: string // CSS value for image banner type
     timeline: string // CSS value for timeline banner type
     standard: string // CSS value for standard banner type
-    assistant: string // CSS value for assistant banner type
     cookbook?: string // CSS value for cookbook banner type
     archive?: string // CSS value for archive banner type
     reader?: string // CSS value for reader banner type
@@ -433,7 +420,6 @@ export interface BannerDimensionsConfig {
     video: string // 16:9 for videos
     image: string // 16:9 for images
     timeline: string // 16:9 for timeline
-    assistant: string // 16:9 for assistant
     ultrawide: string // 21:9 ultrawide option
     square: string // 1:1 square option
     portrait: string // 3:4 portrait option

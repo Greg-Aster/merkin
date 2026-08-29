@@ -3,10 +3,6 @@
   height: 100%;
 }
 
-.marketplace-card-mobile {
-  display: none;
-}
-
 .marketplace-card__media {
   position: relative;
   overflow: hidden;

@@ -106,11 +106,11 @@ function handleSliderKeydown(event: KeyboardEvent) {
   <div class="pointer-events-none absolute inset-x-3 top-1/2 h-3 -translate-y-1/2 rounded-full bg-cyan-950/42 shadow-[inset_0_0_1rem_rgba(6,182,212,0.28)]"></div>
 
   <div
-    class="pointer-events-none absolute left-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-[linear-gradient(90deg,rgba(34,211,238,0.92),rgba(255,255,255,0.9))] shadow-[0_0_1.1rem_rgba(103,232,249,0.7)] transition-[width] duration-200"
+    class="pointer-events-none absolute left-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-[linear-gradient(90deg,rgba(34,211,238,0.92),rgba(255,255,255,0.9))] shadow-[0_0_1.1rem_rgba(103,232,249,0.7)]"
     style={`width: ${sliderPercent}%`}
   ></div>
   <div
-    class="pointer-events-none absolute top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-50/80 bg-slate-950/82 shadow-[0_0_0_1px_rgba(8,47,73,0.85),0_0_1.7rem_rgba(165,243,252,0.76)] transition-[left] duration-200"
+    class="pointer-events-none absolute top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-50/80 bg-slate-950/82 shadow-[0_0_0_1px_rgba(8,47,73,0.85),0_0_1.7rem_rgba(165,243,252,0.76)]"
     style={`left: ${sliderPercent}%`}
   >
     <span class="absolute inset-1 rounded-full border border-cyan-100/32 bg-cyan-100/18"></span>

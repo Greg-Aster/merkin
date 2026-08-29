@@ -7,7 +7,7 @@
 
 In `banner.config.ts`, change this ONE line:
 ```typescript
-defaultBannerType: 'timeline',  // Options: 'standard', 'timeline', 'video', 'image', 'assistant', 'none'
+defaultBannerType: 'timeline',  // Options: 'standard', 'timeline', 'video', 'image', 'none'
 ```
 
 The system automatically uses the correct configuration for each type:
@@ -15,7 +15,6 @@ The system automatically uses the correct configuration for each type:
 - **timeline**: Uses `timelineBannerConfig` (interactive timeline)
 - **video**: Uses `videoBannerConfig` data with the shared BannerStage YouTube embed
 - **image**: Uses `imageBannerConfig` (single static image)
-- **assistant**: Uses `assistantBannerConfig` (Bleepy AI assistant)
 - **none**: No banner displayed
 
 ### 🎛️ **CONFIGURING EACH BANNER TYPE**
@@ -138,7 +137,7 @@ layout: {
 ### 🎯 Switching Banner Types Site-Wide
 In `banner.config.ts`, change the `defaultBannerType`:
 ```typescript
-defaultBannerType: 'standard',  // Options: 'standard', 'timeline', 'video', 'image', 'assistant', 'none'
+defaultBannerType: 'standard',  // Options: 'standard', 'timeline', 'video', 'image', 'none'
 ```
 
 ## File Structure Overview
@@ -240,7 +239,6 @@ Expected console messages:
 - `timelineBannerConfig` - Configuration for timeline banners  
 - `videoBannerConfig` - Configuration for video banners
 - `imageBannerConfig` - Configuration for image banners
-- `assistantBannerConfig` - Configuration for assistant banners
 - **Automatic setup**: `defaultBannerData` is set automatically based on `defaultBannerType`
 
 ### 🏗️ Layout Structure (MainGridLayout.astro)
@@ -364,7 +362,6 @@ Remember: Always test changes on a development environment before deploying to p
 - **Timeline**: Should see interactive timeline interface
 - **Video**: Should see YouTube video embed
 - **Image**: Should see single static image
-- **Assistant**: Should see Bleepy AI assistant interface
 - **None**: Should see no banner, content starts near navbar
 
 ### 🚨 **If Something Goes Wrong**

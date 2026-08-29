@@ -1,7 +1,10 @@
 ---
 import type { CollectionEntry } from 'astro:content'
 import { Icon } from 'astro-icon/components'
-import { url } from '../../utils/url-utils'
+import {
+  getPrimaryProductVisual,
+  getProductHref,
+} from '../../contracts/products'
 
 export interface Props {
   product: CollectionEntry<'products'>
@@ -9,13 +12,7 @@ export interface Props {
 
 const { product } = Astro.props
 
-const resolveAsset = (path: string | undefined) => {
-  if (!path) return undefined
-  return path.startsWith('/') ? url(path) : path
-}
-
-const productSlug = product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')
-const productHref = `/store/${productSlug}/`
+const productHref = getProductHref(product)
 
 const mediaItems =
   Array.isArray(product.data.media) && product.data.media.length > 0
@@ -32,17 +29,7 @@ const mediaItems =
           : []),
       ]
 
-const thumbnail = (() => {
-  for (const item of mediaItems) {
-    if (item.type === 'image' && item.src) return resolveAsset(item.src)
-    if (item.thumbnail) return resolveAsset(item.thumbnail)
-    if (item.poster) return resolveAsset(item.poster)
-    if (item.type === 'youtube' && item.videoId) {
-      return `https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg`
-    }
-  }
-  return undefined
-})()
+const thumbnail = getPrimaryProductVisual(product)
 
 const mediaKinds = Array.from(
   new Set(
@@ -117,7 +104,25 @@ const availabilityTone =
 				)}
 			</div>
 			{thumbnail ? (
-				<img src={thumbnail} alt={product.data.name} loading="lazy" />
+				<Fragment>
+					<img
+						alt={product.data.name}
+						data-src={thumbnail}
+						data-state="pending"
+						data-store-product-image
+						decoding="async"
+					/>
+					<div
+						class="storefront-product-image-placeholder"
+						data-store-product-placeholder
+					>
+						<Icon name="mdi:image-outline" class="h-10 w-10 opacity-40" />
+						<span>Loading asset</span>
+					</div>
+					<noscript>
+						<img src={thumbnail} alt={product.data.name} loading="lazy" />
+					</noscript>
+				</Fragment>
 			) : (
 				<div class="marketplace-card__placeholder">
 					<Icon name="mdi:image-off-outline" class="h-10 w-10 opacity-40" />
@@ -197,35 +202,6 @@ const availabilityTone =
 					</span>
 				</div>
 				<p>Policy, media, and review trail available inside listing.</p>
-			</div>
-		</div>
-	</a>
-
-	<a href={productHref} class="marketplace-card-mobile" aria-label={`Inspect ${product.data.name}`}>
-		<div class="marketplace-card-mobile__media">
-			{thumbnail ? (
-				<img src={thumbnail} alt={product.data.name} loading="lazy" />
-			) : (
-				<div class="marketplace-card-mobile__placeholder">
-					<Icon name="mdi:image-off-outline" class="h-8 w-8 opacity-40" />
-				</div>
-			)}
-			<span class={`marketplace-card-mobile__badge ${availabilityTone.badgeClass}`}>
-				{availabilityTone.label}
-			</span>
-		</div>
-		<div class="marketplace-card-mobile__body">
-			<p>{product.data.category ?? "catalog entry"}</p>
-			<h2>{product.data.name}</h2>
-			<div class="marketplace-card-mobile__footer">
-				<strong>
-					{typeof product.data.price === "number"
-						? `$${product.data.price.toFixed(2)}`
-						: availabilityTone.label}
-				</strong>
-				<span>
-					Inspect <Icon name="mdi:arrow-right" class="h-3.5 w-3.5" />
-				</span>
 			</div>
 		</div>
 	</a>

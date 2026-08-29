@@ -8,18 +8,6 @@ type PostLike = {
   }
 }
 
-export function normalizeRoutePathname(pathname: string) {
-  return pathname.replace(/\/$/, '')
-}
-
-export function isTimelinePath(pathname: string) {
-  return normalizeRoutePathname(pathname) === '/timeline'
-}
-
-export function isTimeline2DPath(pathname: string) {
-  return normalizeRoutePathname(pathname) === '/timeline/2d'
-}
-
 export function isContentPostPage(isPostPage: boolean, post: unknown) {
   return isPostPage === true && Boolean(post)
 }
@@ -46,8 +34,9 @@ function readPostFrontmatter(post: PostLike | undefined) {
 
 export function resolvePostOneColumn(post: PostLike | undefined) {
   const rawPostFrontmatter = readPostFrontmatter(post)
-  const postRequestsVisibleSidebar =
-    /^\s*oneColumn:\s*false\s*(?:#.*)?$/m.test(rawPostFrontmatter)
+  const postRequestsVisibleSidebar = /^\s*oneColumn:\s*false\s*(?:#.*)?$/m.test(
+    rawPostFrontmatter,
+  )
 
   return !postRequestsVisibleSidebar
 }

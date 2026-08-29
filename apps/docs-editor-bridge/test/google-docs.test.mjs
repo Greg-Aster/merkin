@@ -5,6 +5,8 @@ import {
   buildGoogleDocTextExportUrl,
   convertGoogleDocTextToBlocks,
   extractGoogleDocId,
+  fetchGoogleDocBlocks,
+  googleDocBlocksToPlainText,
   renderInlineMarkdown,
 } from '../dist/google-docs.js'
 
@@ -165,6 +167,62 @@ describe('Google Docs text conversion', () => {
         block.type === 'heading' ? block.id : '',
       ),
       ['notes', 'notes-2'],
+    )
+  })
+
+  it('creates plain text for reading-time and search metadata', () => {
+    const blocks = convertGoogleDocTextToBlocks(
+      '## Pilot\n\nIntro text.\n\n- First item\n- Second item',
+    )
+
+    assert.equal(
+      googleDocBlocksToPlainText(blocks),
+      'Pilot\nIntro text.\nFirst item\nSecond item',
+    )
+  })
+})
+
+describe('Google Docs export fetching', () => {
+  it('fetches and converts a document export', async () => {
+    let requestedUrl = ''
+    const blocks = await fetchGoogleDocBlocks(docId, 'md', {
+      cacheBust: 123,
+      fetch: async (url) => {
+        requestedUrl = String(url)
+        return new Response('## Pilot\n\nReadable body.')
+      },
+    })
+
+    assert.equal(
+      requestedUrl,
+      `https://docs.google.com/document/d/${docId}/export?format=md&_=123`,
+    )
+    assert.equal(blocks.length, 2)
+  })
+
+  it('rejects failed and empty exports', async () => {
+    await assert.rejects(
+      fetchGoogleDocBlocks(docId, 'md', {
+        fetch: async () => new Response('private', { status: 401 }),
+      }),
+      /failed with 401/,
+    )
+
+    await assert.rejects(
+      fetchGoogleDocBlocks(docId, 'md', {
+        fetch: async () => new Response('\n\n'),
+      }),
+      /did not contain readable content/,
+    )
+
+    await assert.rejects(
+      fetchGoogleDocBlocks(docId, 'md', {
+        fetch: async () =>
+          new Response('<html>Sign in</html>', {
+            headers: { 'Content-Type': 'text/html; charset=utf-8' },
+          }),
+      }),
+      /returned a sign-in page/,
     )
   })
 })

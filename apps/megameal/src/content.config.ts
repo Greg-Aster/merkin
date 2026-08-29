@@ -156,6 +156,12 @@ const timelineFrontmatterSchema = {
 
 const megamealPostsSchema = postsSchema.extend({
   oneColumn: z.boolean().optional().default(true),
+  googleDoc: z
+    .object({
+      documentId: z.string().regex(/^[A-Za-z0-9_-]{20,}$/),
+      style: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    })
+    .optional(),
   bannerType: z
     .enum([
       'none',
@@ -163,7 +169,6 @@ const megamealPostsSchema = postsSchema.extend({
       'image',
       'video',
       'timeline',
-      'assistant',
       'cookbook',
       'archive',
       'reader',

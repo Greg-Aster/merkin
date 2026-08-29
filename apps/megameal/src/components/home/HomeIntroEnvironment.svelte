@@ -3,7 +3,9 @@ import {
   type AdaptiveCanvasDprController,
   createAdaptiveCanvasDprController,
 } from '@/utils/adaptiveCanvasDpr'
+import { homePortalEvents, type PortalAdvanceDetail } from '@/contracts/homePortal'
 import { navigateWithMegamealTransition } from '@/utils/megamealRouteTransitions'
+import { getRichMediaCapabilities } from '@/utils/richMediaCapabilities'
 import {
   type SiteSfxId,
   siteSfxManager,
@@ -14,8 +16,8 @@ import * as THREE from 'three'
 import HomeIntroEnvironmentScene from './HomeIntroEnvironmentScene.svelte'
 import HomeIntroPostProcessing from './HomeIntroPostProcessing.svelte'
 import {
-  homeIntroIntroOffsetScreens,
   homeIntroFinalScreenGraceScreens,
+  homeIntroIntroOffsetScreens,
   homeIntroMaxWheelForOffset,
   homeIntroMobileIntroOffsetScreens,
   homeIntroScreens,
@@ -36,11 +38,6 @@ type IntroInputState = {
 }
 
 type SceneQuality = 'high' | 'balanced' | 'lean'
-
-type PortalAdvanceDetail = {
-  direction?: number
-  step?: number
-}
 
 export let titleImageSrc = ''
 
@@ -251,45 +248,11 @@ function syncViewportMode() {
   portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
 }
 
-function prefersReducedData() {
-  if (typeof navigator === 'undefined') return false
-
-  const connection = (navigator as Navigator & {
-    connection?: { saveData?: boolean; effectiveType?: string }
-  }).connection
-
-  return (
-    connection?.saveData === true ||
-    connection?.effectiveType === 'slow-2g' ||
-    connection?.effectiveType === '2g'
-  )
-}
-
-function getDeviceMemory() {
-  if (typeof navigator === 'undefined') return undefined
-
-  return (navigator as Navigator & { deviceMemory?: number }).deviceMemory
-}
-
-function getHomeQualityContext() {
-  const devicePixelRatio = Math.max(1, window.devicePixelRatio || 1)
-  const deviceMemory = getDeviceMemory()
-  const lowMemoryDevice = typeof deviceMemory === 'number' && deviceMemory <= 4
-  const compactViewport = window.innerWidth <= 760 || window.innerHeight <= 640
-  const reducedData = prefersReducedData()
-
-  return {
-    compactViewport,
-    devicePixelRatio,
-    lowMemoryDevice,
-    reducedData,
-  }
-}
-
 function getHomeMaxCanvasDpr() {
   if (typeof window === 'undefined') return 1
 
-  const { compactViewport, devicePixelRatio, lowMemoryDevice, reducedData } = getHomeQualityContext()
+  const { compactViewport, devicePixelRatio, lowMemoryDevice, reducedData } =
+    getRichMediaCapabilities()
   const dprCap = lowMemoryDevice || reducedData ? 1 : compactViewport ? 1.5 : 2
 
   return Math.min(devicePixelRatio, dprCap)
@@ -298,7 +261,8 @@ function getHomeMaxCanvasDpr() {
 function getHomeSceneQuality(nextDpr: number): SceneQuality {
   if (typeof window === 'undefined') return 'high'
 
-  const { compactViewport, devicePixelRatio, lowMemoryDevice, reducedData } = getHomeQualityContext()
+  const { compactViewport, devicePixelRatio, lowMemoryDevice, reducedData } =
+    getRichMediaCapabilities()
 
   if (reducedData || lowMemoryDevice || compactViewport) return 'lean'
   if (devicePixelRatio > 1.1 && nextDpr <= 1.01) return 'lean'
@@ -857,7 +821,7 @@ onMount(() => {
   window.addEventListener('touchstart', handleTouchStart, { passive: true })
   window.addEventListener('wheel', handleWheel, { passive: false })
   window.addEventListener('keydown', handleKeyboardScroll)
-  window.addEventListener('merkin:portal-advance', handlePortalAdvance)
+  window.addEventListener(homePortalEvents.portalAdvance, handlePortalAdvance)
   window.addEventListener('resize', handleResize)
   window.addEventListener('scroll', syncPortalVisibility, { passive: true })
 
@@ -871,7 +835,7 @@ onMount(() => {
     unbindActiveTouchListeners()
     window.removeEventListener('wheel', handleWheel)
     window.removeEventListener('keydown', handleKeyboardScroll)
-    window.removeEventListener('merkin:portal-advance', handlePortalAdvance)
+    window.removeEventListener(homePortalEvents.portalAdvance, handlePortalAdvance)
     window.removeEventListener('resize', handleResize)
     window.removeEventListener('scroll', syncPortalVisibility)
     if (scrollFrame) {

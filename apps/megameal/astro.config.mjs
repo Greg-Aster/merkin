@@ -49,9 +49,8 @@ const corsMiddleware = () => {
 
 const site = process.env.SITE_URL || 'https://megameal.org';
 const base = process.env.SITE_BASE || '/';
-const isDev = process.env.NODE_ENV !== 'production';
 
-function manualClientChunks(id) {
+function manualVendorChunks(id) {
   const normalizedId = id.replaceAll('\\', '/');
 
   if (normalizedId.includes('node_modules')) {
@@ -66,61 +65,6 @@ function manualClientChunks(id) {
     if (normalizedId.includes('/node_modules/three/')) return 'vendor-3d-core';
     if (normalizedId.includes('@threlte')) return 'vendor-3d-extras';
     return 'vendor';
-  }
-
-  if (
-    normalizedId.includes('/src/stores/cartStore') ||
-    normalizedId.includes('/src/components/store/')
-  ) {
-    return 'feature-store';
-  }
-
-  if (normalizedId.includes('/src/components/banner-stage/')) {
-    return 'feature-banner-stage';
-  }
-
-  if (
-    normalizedId.includes('/src/components/home/featured-product/') ||
-    normalizedId.includes('/src/components/home/FeaturedProduct') ||
-    normalizedId.includes('/src/components/home/Procedural') ||
-    normalizedId.includes('/src/utils/flagship-product-showcase') ||
-    normalizedId.includes('/src/utils/product-banner-quirks')
-  ) {
-    return 'feature-featured-product';
-  }
-
-  if (
-    normalizedId.includes('/src/components/home/HomeIntroEnvironmentLoader.svelte')
-  ) {
-    return 'feature-home-intro-loader';
-  }
-
-  if (
-    normalizedId.includes('/src/components/home/HomeIntro') ||
-    normalizedId.includes('/src/components/home/homeIntro')
-  ) {
-    return 'feature-home-intro';
-  }
-
-  if (normalizedId.includes('/src/components/home/PortalHeroBackgroundSlide.astro')) {
-    return 'feature-portal-background';
-  }
-
-  if (normalizedId.includes('/src/components/home/UniverseHeroSlide.astro')) {
-    return 'feature-universe-hero';
-  }
-
-  if (normalizedId.includes('/src/components/home/')) {
-    return 'feature-home-content';
-  }
-
-  if (
-    normalizedId.includes('/src/utils/site-audio') ||
-    normalizedId.includes('/src/utils/site-sfx') ||
-    normalizedId.includes('/src/components/client/SiteAudioControl.svelte') ||
-    normalizedId.includes('/src/components/client/SiteAudioRuntime.svelte')
-  ) {
-    return 'feature-audio';
   }
 
   return undefined;
@@ -154,6 +98,12 @@ export default defineConfig({
     }),
     Compress({
       CSS: false,
+      HTML: {
+        'html-minifier-terser': {
+          collapseWhitespace: false,
+          sortClassName: false,
+        },
+      },
       Image: false,
     }),
     mdx(),
@@ -208,7 +158,6 @@ export default defineConfig({
     },
     optimizeDeps: {
       include: ['overlayscrollbars', 'photoswipe', 'photoswipe/lightbox'],
-      force: isDev,
     },
     server: {
       cors: {
@@ -221,16 +170,7 @@ export default defineConfig({
       chunkSizeWarningLimit: 550,
       rollupOptions: {
         output: {
-          manualChunks: manualClientChunks,
-        },
-        onwarn(warning, warn) {
-          if (
-            warning.message.includes("is dynamically imported by") &&
-            warning.message.includes("but also statically imported by")
-          ) {
-            return;
-          }
-          warn(warning);
+          manualChunks: manualVendorChunks,
         },
       },
     },

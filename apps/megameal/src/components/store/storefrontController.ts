@@ -14,10 +14,13 @@ function syncCategoryControls(activeCategory: string) {
 }
 
 export function initStorefrontMarketplace() {
+  const grid = document.getElementById('product-grid')
+  if (!grid || grid.dataset.storefrontMarketplaceBound === 'true') return
+  grid.dataset.storefrontMarketplaceBound = 'true'
+
   const items = Array.from(
     document.querySelectorAll<HTMLElement>('.product-grid-item'),
   )
-  const grid = document.getElementById('product-grid')
   const noResults = document.getElementById('no-results')
   const countEls = Array.from(
     document.querySelectorAll<HTMLElement>('.product-count'),
@@ -34,6 +37,53 @@ export function initStorefrontMarketplace() {
 
   let activeCategory = 'all'
   let activeSearch = ''
+
+  const productImages = Array.from(
+    document.querySelectorAll<HTMLImageElement>('[data-store-product-image]'),
+  )
+
+  function loadProductImage(image: HTMLImageElement) {
+    if (image.dataset.state !== 'pending') return
+    const source = image.dataset.src
+    if (!source) return
+
+    const placeholder = image.nextElementSibling
+    const markState = (state: 'loaded' | 'error') => {
+      image.dataset.state = state
+      if (!(placeholder instanceof HTMLElement)) return
+      placeholder.dataset.state = state
+      if (state === 'error') {
+        const label = placeholder.querySelector('span')
+        if (label) label.textContent = 'Asset unavailable'
+      }
+    }
+
+    image.addEventListener('load', () => markState('loaded'), { once: true })
+    image.addEventListener('error', () => markState('error'), { once: true })
+    image.src = source
+  }
+
+  if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          const image = entry.target
+          if (image instanceof HTMLImageElement) loadProductImage(image)
+          imageObserver.unobserve(entry.target)
+        }
+      },
+      { rootMargin: '240px 0px' },
+    )
+    productImages.forEach(image => imageObserver.observe(image))
+    document.addEventListener(
+      'astro:before-swap',
+      () => imageObserver.disconnect(),
+      { once: true },
+    )
+  } else {
+    productImages.forEach(loadProductImage)
+  }
 
   function applyFilter() {
     let visible = 0

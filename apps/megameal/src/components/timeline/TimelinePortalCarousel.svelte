@@ -8,10 +8,9 @@ import { Canvas } from '@threlte/core'
 import { onDestroy, onMount, tick } from 'svelte'
 import * as THREE from 'three'
 import TimelineAutoplayButton from './TimelineAutoplayButton.svelte'
+import TimelineBackgroundMedia from './TimelineBackgroundMedia.svelte'
 import TimelineCameraPanControls from './TimelineCameraPanControls.svelte'
-import TimelineConstellationOverlay, {
-  type TimelineConstellationLine,
-} from './TimelineConstellationOverlay.svelte'
+import TimelineConstellationOverlay from './TimelineConstellationOverlay.svelte'
 import TimelinePortalCarouselScene from './TimelinePortalCarouselScene.svelte'
 import TimelinePositionSlider from './TimelinePositionSlider.svelte'
 import TimelineSelectedRecord from './TimelineSelectedRecord.svelte'
@@ -20,13 +19,33 @@ import {
   type TimelineCarouselInput,
   type TimelinePortalEraConfig,
   type TimelinePortalEvent,
+  advanceTimelineAutoplay,
   clamp,
   createTimelinePortalModel,
+  getActiveTimelineEraSegment,
+  getDefaultTimelinePosition,
   getSelectedCardWidth,
   getStatusWidth,
   getTimelineDockWidth,
   getTimelineSideMargin,
 } from './timelinePortalCarouselModel'
+import {
+  getDesktopSelectedCardStyle,
+  getSelectedTimelineGuideLine,
+  getTimelineMaxCanvasDpr,
+  getTimelineSelectedCardAnchor,
+  getTimelineStarControlStyle,
+  getVisibleTimelineConstellationLines,
+  applyTimelineCameraPanDrag,
+  createTimelineCameraController,
+  isTimelineInteractiveTarget,
+  isPointInsideTimelineShell,
+  isTimelineSceneDragBlockedTarget,
+  isTimelineShellVisible,
+  setTimelineMapZoom,
+  type TimelineStarScreenPosition,
+  updateTimelinePointer,
+} from './timelinePortalPresentation'
 
 import '../../styles/features/extracted/home-intro-environment.css'
 
@@ -35,16 +54,6 @@ export let eraConfig: TimelinePortalEraConfig = {}
 
 type TimelineViewMode = 'travel' | 'map'
 
-type TimelineStarScreenPosition = {
-  index: number
-  x: number
-  y: number
-  size: number
-  visible: boolean
-  eraKey: string
-  isKeyEvent: boolean
-}
-
 type TimelineStarPositionEvent = CustomEvent<{
   positions: TimelineStarScreenPosition[]
 }>
@@ -52,6 +61,7 @@ type TimelineStarPositionEvent = CustomEvent<{
 export let initialViewMode: TimelineViewMode = 'travel'
 
 let shell: HTMLDivElement | null = null
+let timelineBackgroundMedia: TimelineBackgroundMedia | null = null
 let panPointerId: number | null = null
 let lastPanClientX = 0
 let lastPanClientY = 0
@@ -84,6 +94,7 @@ let autoplayFrame = 0
 let lastAutoplayFrameAt = 0
 let autoplayDirection: -1 | 1 = 1
 let autoplayVelocity = 0
+let prefersReducedMotion = false
 const wheelMomentumDecay = 2.4
 const wheelMomentumImpulse = 5.2
 const wheelMomentumMaxVelocity = 4.8
@@ -123,6 +134,19 @@ const input: TimelineCarouselInput = {
 }
 let viewMode: TimelineViewMode = initialViewMode
 
+const timelineCameraController = createTimelineCameraController({
+  input,
+  isMapMode: () => isMapMode,
+  pause: () => pauseAutoplay(),
+  panStep: cameraPanStep,
+  panLimit: cameraPanLimit,
+  minimumMapZoom: mapZoomMin,
+  maximumMapZoom: mapZoomMax,
+  mapZoomStep,
+  mapOrbitLimit,
+  mapOrbitStep: mapKeyboardOrbitStep,
+})
+
 $: timelineModel = createTimelinePortalModel(events, eraConfig)
 $: sortedEvents = timelineModel.events
 $: screens = timelineModel.screens
@@ -131,7 +155,7 @@ $: selectedScreen = selectedScreenIndex >= 0 ? sortedEvents[selectedScreenIndex]
 $: selectedScreenView = selectedScreenIndex >= 0 ? screens[selectedScreenIndex] : null
 $: maxWheel = Math.max(0, screens.length - 1)
 $: activeTimelineEvent = sortedEvents[Math.round(clamp(input.wheel, 0, maxWheel))] ?? null
-$: activeEraSegment = getActiveEraSegment(input.wheel)
+$: activeEraSegment = getActiveTimelineEraSegment(input.wheel, eraSegments)
 $: timelineDockWidth = getTimelineDockWidth(viewportWidth)
 $: timelineSideLaneWidth = Math.max(0, (viewportWidth - timelineDockWidth) / 2)
 $: timelineSideMargin = getTimelineSideMargin(viewportWidth)
@@ -156,8 +180,16 @@ $: visibleStarControls = projectedStarPositions
 $: constellationControls = projectedStarPositions
   .map(position => ({ ...position, screen: screens[position.index] }))
   .filter(position => !!position.screen && position.size > 0)
-$: constellationLines = getVisibleConstellationLines(constellationControls)
-$: selectedGuideLine = getSelectedGuideLine(selectedCardAnchor, selectedScreenIndex, projectedStarPositions, screens)
+$: constellationLines = getVisibleTimelineConstellationLines(
+  constellationControls,
+  selectedScreenIndex,
+)
+$: selectedGuideLine = getSelectedTimelineGuideLine(
+  selectedCardAnchor,
+  selectedScreenIndex,
+  projectedStarPositions,
+  screens,
+)
 $: timelinePositionText = activeTimelineEvent
   ? `${formatTimelineYear(activeTimelineEvent.year)} / ${activeEraSegment?.displayName ?? 'Unknown Era'}`
   : 'Timeline position'
@@ -190,46 +222,6 @@ function syncViewportMode() {
   portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
 }
 
-function getDesktopSelectedCardStyle(
-  selectedPosition: TimelineStarScreenPosition | null,
-  cardWidth: number,
-  screenHeight: number,
-) {
-  const baseStyle = `width: ${cardWidth}px; max-width: calc(100% - 2rem)`
-  if (!selectedPosition) {
-    return `${baseStyle}; --timeline-selected-bottom: 1rem`
-  }
-
-  const safeX = clamp(selectedPosition.x, 5, 95)
-  const safeY = clamp(selectedPosition.y, 10, 86)
-  const offsetX = safeX > 58 ? 'calc(-100% - 1.25rem)' : '1.25rem'
-  const offsetY = safeY < 28 ? '0rem' : safeY > 68 ? '-100%' : '-50%'
-  const compactHeight = screenHeight < 720
-  const maxHeight = compactHeight ? 'min(32vh, 12rem)' : 'min(34vh, 15rem)'
-
-  return [
-    baseStyle,
-    `max-height: ${maxHeight}`,
-    '--timeline-selected-bottom: auto',
-    `--timeline-selected-left: ${safeX}%`,
-    `--timeline-selected-top: ${safeY}%`,
-    `--timeline-selected-offset-x: ${offsetX}`,
-    `--timeline-selected-offset-y: ${offsetY}`,
-  ].join('; ')
-}
-
-function getTimelineMaxCanvasDpr() {
-  if (typeof window === 'undefined') return 1
-
-  const lowMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (lowMotion) return 1
-
-  const compactViewport = window.innerWidth <= 760 || window.innerHeight <= 640
-  const dprCap = compactViewport ? 1.5 : 2
-
-  return Math.min(Math.max(1, window.devicePixelRatio || 1), dprCap)
-}
-
 function setCanvasDpr(nextDpr: number) {
   canvasDpr = nextDpr
 }
@@ -245,45 +237,17 @@ function syncCanvasDpr() {
   setCanvasDpr(getTimelineMaxCanvasDpr())
 }
 
-function updatePointer(clientX: number, clientY: number) {
-  if (!shell) return
-
-  const bounds = shell.getBoundingClientRect()
-  if (bounds.width <= 0 || bounds.height <= 0) return
-
-  input.x = ((clientX - bounds.left) / bounds.width - 0.5) * 2
-  input.y = ((clientY - bounds.top) / bounds.height - 0.5) * 2
-}
-
-function isShellVisible() {
-  if (!shell) return false
-
-  const bounds = shell.getBoundingClientRect()
-  return (
-    bounds.bottom > 0 &&
-    bounds.top < window.innerHeight &&
-    bounds.right > 0 &&
-    bounds.left < window.innerWidth
-  )
-}
-
-function isInsideShell(clientX: number, clientY: number) {
-  if (!shell) return false
-
-  const bounds = shell.getBoundingClientRect()
-  return (
-    clientX >= bounds.left &&
-    clientX <= bounds.right &&
-    clientY >= bounds.top &&
-    clientY <= bounds.bottom
-  )
-}
-
 function updateScrollDrivenWheel() {
   input.wheel = clamp(virtualWheel, 0, maxWheel)
 }
 
 function runScrollDrivenWheelFrame(timestamp: number) {
+  const minimumFrameInterval = 1000 / (portraitMobile ? 24 : 40)
+  if (lastScrollFrameAt && timestamp - lastScrollFrameAt < minimumFrameInterval) {
+    scrollFrame = window.requestAnimationFrame(runScrollDrivenWheelFrame)
+    return
+  }
+
   const delta = lastScrollFrameAt
     ? Math.min(0.05, (timestamp - lastScrollFrameAt) / 1000)
     : 1 / 60
@@ -317,25 +281,17 @@ function scheduleScrollDrivenWheel() {
   scrollFrame = window.requestAnimationFrame(runScrollDrivenWheelFrame)
 }
 
-function getAutoplayTurnDistance() {
-  return clamp(maxWheel * 0.1, 0.8, 2.4)
-}
-
-function getAutoplayEdgeSpeedScale() {
-  if (maxWheel <= 0) return 1
-
-  const edgeDistance = Math.min(virtualWheel, maxWheel - virtualWheel)
-  const edgeRatio = clamp(edgeDistance / getAutoplayTurnDistance(), 0, 1)
-  const smoothedRatio = edgeRatio * edgeRatio * (3 - 2 * edgeRatio)
-
-  return autoplayTurnMinSpeedScale + smoothedRatio * (1 - autoplayTurnMinSpeedScale)
-}
-
 function runAutoplayFrame(timestamp: number) {
   if (!isAutoplaying && !isAutoplayStopping) {
     autoplayFrame = 0
     lastAutoplayFrameAt = 0
     autoplayVelocity = 0
+    return
+  }
+
+  const minimumFrameInterval = 1000 / (portraitMobile ? 20 : 30)
+  if (lastAutoplayFrameAt && timestamp - lastAutoplayFrameAt < minimumFrameInterval) {
+    autoplayFrame = window.requestAnimationFrame(runAutoplayFrame)
     return
   }
 
@@ -345,11 +301,20 @@ function runAutoplayFrame(timestamp: number) {
   lastAutoplayFrameAt = timestamp
 
   wheelVelocity = 0
-  const targetVelocity = isAutoplayStopping
-    ? 0
-    : autoplayDirection * autoplaySpeed * getAutoplayEdgeSpeedScale()
-  const velocityEase = 1 - Math.exp(-delta * autoplayVelocityEase)
-  autoplayVelocity += (targetVelocity - autoplayVelocity) * velocityEase
+  const nextState = advanceTimelineAutoplay({
+    position: virtualWheel,
+    maxPosition: maxWheel,
+    direction: autoplayDirection,
+    velocity: autoplayVelocity,
+    delta,
+    stopping: isAutoplayStopping,
+    speed: autoplaySpeed,
+    minimumEdgeSpeedScale: autoplayTurnMinSpeedScale,
+    velocityEaseRate: autoplayVelocityEase,
+  })
+  virtualWheel = nextState.position
+  autoplayDirection = nextState.direction
+  autoplayVelocity = nextState.velocity
 
   if (isAutoplayStopping && Math.abs(autoplayVelocity) <= autoplayStopVelocityThreshold) {
     isAutoplayStopping = false
@@ -360,18 +325,6 @@ function runAutoplayFrame(timestamp: number) {
     return
   }
 
-  const nextWheel = virtualWheel + autoplayVelocity * delta
-  if (nextWheel >= maxWheel) {
-    virtualWheel = maxWheel
-    autoplayDirection = -1
-    autoplayVelocity = 0
-  } else if (nextWheel <= 0) {
-    virtualWheel = 0
-    autoplayDirection = 1
-    autoplayVelocity = 0
-  } else {
-    virtualWheel = nextWheel
-  }
   updateScrollDrivenWheel()
 
   autoplayFrame = window.requestAnimationFrame(runAutoplayFrame)
@@ -413,30 +366,23 @@ function toggleAutoplay() {
     return
   }
 
+  timelineBackgroundMedia?.start()
   playAutoplay()
 }
 
 function startInitialAutoplay() {
-  if (isMapMode || hasStartedInitialAutoplay || !hasMounted || !hasInitializedDefaultPosition || maxWheel <= 0) return
+  if (
+    isMapMode ||
+    portraitMobile ||
+    prefersReducedMotion ||
+    hasStartedInitialAutoplay ||
+    !hasMounted ||
+    !hasInitializedDefaultPosition ||
+    maxWheel <= 0
+  ) return
 
   hasStartedInitialAutoplay = true
   playAutoplay()
-}
-
-function isInteractiveTarget(eventTarget: EventTarget | null) {
-  return (
-    eventTarget instanceof Element &&
-    !!eventTarget.closest(
-      'a, button, input, textarea, select, [role="button"], [data-timeline-interactive]',
-    )
-  )
-}
-
-function isSceneDragBlockedTarget(eventTarget: EventTarget | null) {
-  if (!(eventTarget instanceof Element)) return false
-  if (isMapMode && eventTarget.closest('[data-timeline-star-control]')) return false
-
-  return isInteractiveTarget(eventTarget)
 }
 
 function applyPositionDelta(deltaY: number, wheelDistance: number) {
@@ -451,60 +397,14 @@ function applyPositionDelta(deltaY: number, wheelDistance: number) {
   scheduleScrollDrivenWheel()
 }
 
-function setCameraPan(panX: number, panY: number) {
-  input.panX = clamp(panX, -cameraPanLimit, cameraPanLimit)
-  input.panY = clamp(panY, -cameraPanLimit, cameraPanLimit)
-}
-
-function panCameraBy(deltaX: number, deltaY: number) {
-  pauseAutoplay()
-  const mapScale = isMapMode ? 0.72 / Math.max(input.mapZoom, mapZoomMin) : 1
-  setCameraPan(input.panX + deltaX * mapScale, input.panY + deltaY * mapScale)
-}
-
-function setMapZoom(zoom: number) {
-  input.mapZoom = clamp(zoom, mapZoomMin, mapZoomMax)
-}
-
-function zoomMapBy(multiplier: number) {
-  if (!isMapMode) return
-  pauseAutoplay()
-  setMapZoom(input.mapZoom * multiplier)
-}
-
-function orbitMapBy(deltaX: number, deltaY: number) {
-  if (!isMapMode) return
-  pauseAutoplay()
-  input.mapOrbitX = clamp(input.mapOrbitX + deltaX, -mapOrbitLimit, mapOrbitLimit)
-  input.mapOrbitY = clamp(input.mapOrbitY + deltaY, -mapOrbitLimit, mapOrbitLimit)
-}
-
-function resetCameraView() {
-  pauseAutoplay()
-  setCameraPan(0, 0)
-  if (isMapMode) {
-    input.mapZoom = 1
-    input.mapOrbitX = 0
-    input.mapOrbitY = 0
-  }
-}
-
-function applyCameraPanDrag(deltaX: number, deltaY: number) {
-  if (!shell) return
-  pauseAutoplay()
-
-  const bounds = shell.getBoundingClientRect()
-  const xDistance = Math.max(bounds.width, 1)
-  const yDistance = Math.max(bounds.height, 1)
-
-  const panScaleX = isMapMode ? 2.15 / Math.max(input.mapZoom, mapZoomMin) : 3.1
-  const panScaleY = isMapMode ? 2.15 / Math.max(input.mapZoom, mapZoomMin) : 2.7
-
-  setCameraPan(input.panX - (deltaX / xDistance) * panScaleX, input.panY + (deltaY / yDistance) * panScaleY)
-}
-
 function handleScenePointerDown(event: PointerEvent) {
-  if (!shell || event.button !== 0 || !event.isPrimary || isSceneDragBlockedTarget(event.target)) return
+  timelineBackgroundMedia?.start()
+  if (
+    !shell ||
+    event.button !== 0 ||
+    !event.isPrimary ||
+    isTimelineSceneDragBlockedTarget(event.target, isMapMode)
+  ) return
 
   pauseAutoplay()
   event.preventDefault()
@@ -517,7 +417,7 @@ function handleScenePointerDown(event: PointerEvent) {
   hasDraggedScenePan = false
   input.active = true
   wheelVelocity = 0
-  updatePointer(event.clientX, event.clientY)
+  updateTimelinePointer(input, shell, event.clientX, event.clientY)
   shell.setPointerCapture(event.pointerId)
 }
 
@@ -535,8 +435,17 @@ function handleScenePointerMove(event: PointerEvent) {
   }
   lastPanClientX = event.clientX
   lastPanClientY = event.clientY
-  updatePointer(event.clientX, event.clientY)
-  applyCameraPanDrag(deltaX, deltaY)
+  updateTimelinePointer(input, shell, event.clientX, event.clientY)
+  pauseAutoplay()
+  applyTimelineCameraPanDrag(
+    input,
+    shell,
+    deltaX,
+    deltaY,
+    isMapMode,
+    mapZoomMin,
+    cameraPanLimit,
+  )
 }
 
 function handleScenePointerUp(event: PointerEvent) {
@@ -556,21 +465,22 @@ function handleScenePointerUp(event: PointerEvent) {
 
 function handlePointerMove(event: PointerEvent) {
   if (event.pointerType === 'touch') return
-  updatePointer(event.clientX, event.clientY)
+  updateTimelinePointer(input, shell, event.clientX, event.clientY)
 }
 
 function handleTouchStart(event: TouchEvent) {
-  if (isSceneDragBlockedTarget(event.target)) return
+  timelineBackgroundMedia?.start()
+  if (isTimelineSceneDragBlockedTarget(event.target, isMapMode)) return
   if (isMapMode && event.touches.length === 1) {
     const touch = event.touches[0]
-    if (!isInsideShell(touch.clientX, touch.clientY)) return
+    if (!isPointInsideTimelineShell(shell, touch.clientX, touch.clientY)) return
 
     lastTouchCenterY = null
     lastTouchPanClientX = touch.clientX
     lastTouchPanClientY = touch.clientY
     input.active = true
     wheelVelocity = 0
-    updatePointer(touch.clientX, touch.clientY)
+    updateTimelinePointer(input, shell, touch.clientX, touch.clientY)
     return
   }
 
@@ -583,14 +493,17 @@ function handleTouchStart(event: TouchEvent) {
   }
 
   const [touchA, touchB] = Array.from(event.touches)
-  if (!isInsideShell(touchA.clientX, touchA.clientY) && !isInsideShell(touchB.clientX, touchB.clientY)) return
+  if (
+    !isPointInsideTimelineShell(shell, touchA.clientX, touchA.clientY) &&
+    !isPointInsideTimelineShell(shell, touchB.clientX, touchB.clientY)
+  ) return
 
   lastTouchCenterY = (touchA.clientY + touchB.clientY) / 2
   lastTouchPanClientX = null
   lastTouchPanClientY = null
   input.active = true
   wheelVelocity = 0
-  updatePointer((touchA.clientX + touchB.clientX) / 2, lastTouchCenterY)
+  updateTimelinePointer(input, shell, (touchA.clientX + touchB.clientX) / 2, lastTouchCenterY)
 }
 
 function handleTouchMove(event: TouchEvent) {
@@ -606,8 +519,17 @@ function handleTouchMove(event: TouchEvent) {
     const deltaY = touch.clientY - lastTouchPanClientY
     lastTouchPanClientX = touch.clientX
     lastTouchPanClientY = touch.clientY
-    updatePointer(touch.clientX, touch.clientY)
-    applyCameraPanDrag(deltaX, deltaY)
+    updateTimelinePointer(input, shell, touch.clientX, touch.clientY)
+    pauseAutoplay()
+    applyTimelineCameraPanDrag(
+      input,
+      shell,
+      deltaX,
+      deltaY,
+      isMapMode,
+      mapZoomMin,
+      cameraPanLimit,
+    )
     return
   }
 
@@ -619,9 +541,14 @@ function handleTouchMove(event: TouchEvent) {
   const touchCenterY = (touchA.clientY + touchB.clientY) / 2
   const deltaY = (touchCenterY - lastTouchCenterY) * 2.15
   const touchWheelDistance = Math.max(220, Math.min(window.innerHeight * 0.46, 360))
-  updatePointer(touchCenterX, touchCenterY)
+  updateTimelinePointer(input, shell, touchCenterX, touchCenterY)
   if (isMapMode) {
-    setMapZoom(input.mapZoom * Math.exp(-deltaY * 0.0026))
+    setTimelineMapZoom(
+      input,
+      input.mapZoom * Math.exp(-deltaY * 0.0026),
+      mapZoomMin,
+      mapZoomMax,
+    )
   } else {
     applyPositionDelta(deltaY, touchWheelDistance)
   }
@@ -636,13 +563,23 @@ function handleTouchEnd() {
 }
 
 function handleWheel(event: WheelEvent) {
-  if (!shell || (!isInsideShell(event.clientX, event.clientY) && !isShellVisible())) return
+  if (
+    !shell ||
+    (!isPointInsideTimelineShell(shell, event.clientX, event.clientY) &&
+      !isTimelineShellVisible(shell))
+  ) return
 
+  timelineBackgroundMedia?.start()
   pauseAutoplay()
   event.preventDefault()
-  updatePointer(event.clientX, event.clientY)
+  updateTimelinePointer(input, shell, event.clientX, event.clientY)
   if (isMapMode) {
-    setMapZoom(input.mapZoom * Math.exp(-event.deltaY * 0.0018))
+    setTimelineMapZoom(
+      input,
+      input.mapZoom * Math.exp(-event.deltaY * 0.0018),
+      mapZoomMin,
+      mapZoomMax,
+    )
     return
   }
 
@@ -662,30 +599,14 @@ function handleKeyboardScroll(event: KeyboardEvent) {
     event.ctrlKey ||
     event.metaKey ||
     event.shiftKey ||
-    isInteractiveTarget(event.target) ||
-    !isShellVisible()
+    isTimelineInteractiveTarget(event.target) ||
+    !isTimelineShellVisible(shell)
   ) {
     return
   }
 
   if (isMapMode) {
-    const key = event.key.toLowerCase()
-    let handledMapKey = true
-
-    if (event.key === 'ArrowLeft') panCameraBy(-cameraPanStep, 0)
-    else if (event.key === 'ArrowRight') panCameraBy(cameraPanStep, 0)
-    else if (event.key === 'ArrowUp') panCameraBy(0, cameraPanStep)
-    else if (event.key === 'ArrowDown') panCameraBy(0, -cameraPanStep)
-    else if (key === '=' || key === '+') zoomMapBy(mapZoomStep)
-    else if (key === '-' || key === '_') zoomMapBy(1 / mapZoomStep)
-    else if (key === 'a') orbitMapBy(-mapKeyboardOrbitStep, 0)
-    else if (key === 'd') orbitMapBy(mapKeyboardOrbitStep, 0)
-    else if (key === 'w') orbitMapBy(0, -mapKeyboardOrbitStep)
-    else if (key === 's') orbitMapBy(0, mapKeyboardOrbitStep)
-    else if (key === '0') resetCameraView()
-    else handledMapKey = false
-
-    if (handledMapKey) event.preventDefault()
+    if (timelineCameraController.handleKey(event)) event.preventDefault()
     return
   }
 
@@ -701,6 +622,8 @@ function handleKeyboardScroll(event: KeyboardEvent) {
   }
   const step = stepByKey[event.key]
   if (step === undefined) return
+
+  timelineBackgroundMedia?.start()
 
   const direction = Math.sign(step)
   if (
@@ -728,107 +651,17 @@ function handleResize() {
   scheduleSelectedGuideLineSync()
 }
 
-function getStarControlStyle(position: TimelineStarScreenPosition) {
-  return [
-    `left: ${position.x}%`,
-    `top: ${position.y}%`,
-    `width: ${position.size}px`,
-    `height: ${position.size}px`,
-    'transform: translate(-50%, -50%)',
-  ].join(';')
-}
-
-function getActiveEraSegment(position: number) {
-  const mainSegments = eraSegments.filter(segment => !segment.isOverlapping)
-  return (
-    mainSegments.find(segment => position >= segment.startIndex && position <= segment.endIndex) ??
-    mainSegments.reduce(
-      (nearest, segment) =>
-        Math.abs(segment.centerIndex - position) < Math.abs(nearest.centerIndex - position)
-          ? segment
-          : nearest,
-      mainSegments[0],
-    ) ??
-    eraSegments[0] ??
-    null
-  )
-}
-
-function getDefaultTimelinePosition() {
-  const preferredEra =
-    eraSegments.find(segment => segment.key === defaultTimelineEraKey && segment.eventCount > 0) ??
-    eraSegments.find(segment => segment.key === defaultTimelineEraKey)
-
-  return clamp(preferredEra?.centerIndex ?? 0, 0, maxWheel)
-}
-
 function initializeDefaultTimelinePosition() {
-  const defaultPosition = getDefaultTimelinePosition()
+  const defaultPosition = getDefaultTimelinePosition(
+    eraSegments,
+    defaultTimelineEraKey,
+    maxWheel,
+  )
   virtualWheel = defaultPosition
   input.wheel = defaultPosition
   hasInitializedDefaultPosition = true
   autoplayDirection = defaultPosition >= maxWheel ? -1 : 1
   startInitialAutoplay()
-}
-
-function getVisibleConstellationLines(
-  controls: Array<TimelineStarScreenPosition & { screen: (typeof screens)[number] }>,
-): TimelineConstellationLine[] {
-  const groups = controls.reduce<Record<string, typeof controls>>((groupedControls, control) => {
-    groupedControls[control.eraKey] ??= []
-    groupedControls[control.eraKey].push(control)
-    return groupedControls
-  }, {})
-
-  return Object.entries(groups).flatMap(([eraKey, eraControls]) => {
-    const sortedEraControls = [...eraControls].sort((a, b) => a.index - b.index)
-
-    return sortedEraControls
-      .slice(0, -1)
-      .map((control, index) => {
-        const nextControl = sortedEraControls[index + 1]
-        return {
-          id: `${eraKey}-${control.index}-${nextControl.index}`,
-          x1: clampConstellationPoint(control.x),
-          y1: clampConstellationPoint(control.y),
-          x2: clampConstellationPoint(nextControl.x),
-          y2: clampConstellationPoint(nextControl.y),
-          eraKey,
-          isActive: control.index === selectedScreenIndex || nextControl.index === selectedScreenIndex,
-          length: Math.hypot(nextControl.x - control.x, nextControl.y - control.y),
-        }
-      })
-  })
-}
-
-function getSelectedGuideLine(
-  cardAnchor: { x: number; y: number } | null,
-  selectedIndex: number,
-  starPositions: TimelineStarScreenPosition[],
-  screenItems: typeof screens,
-): TimelineConstellationLine | null {
-  if (!cardAnchor || selectedIndex < 0) return null
-
-  const selectedPosition = starPositions.find(
-    position => position.index === selectedIndex && position.size > 0,
-  )
-  const selectedScreen = screenItems[selectedIndex]
-  if (!selectedPosition || !selectedScreen) return null
-
-  return {
-    id: `selected-guide-${selectedIndex}`,
-    x1: clampConstellationPoint(selectedPosition.x),
-    y1: clampConstellationPoint(selectedPosition.y),
-    x2: clampConstellationPoint(cardAnchor.x),
-    y2: clampConstellationPoint(cardAnchor.y),
-    eraKey: selectedScreen.eraKey,
-    isActive: true,
-    length: Math.hypot(cardAnchor.x - selectedPosition.x, cardAnchor.y - selectedPosition.y),
-  }
-}
-
-function clampConstellationPoint(value: number) {
-  return clamp(value, -18, 118)
 }
 
 function handleStarPositions(event: TimelineStarPositionEvent) {
@@ -837,34 +670,11 @@ function handleStarPositions(event: TimelineStarPositionEvent) {
 }
 
 function syncSelectedGuideLineAnchor() {
-  if (!shell || selectedScreenIndex < 0) {
-    selectedCardAnchor = null
-    return
-  }
-
-  const card = shell.querySelector<HTMLElement>('[data-timeline-selected-card]')
-  const selectedPosition = projectedStarPositions.find(position => position.index === selectedScreenIndex)
-  if (!card || !selectedPosition) {
-    selectedCardAnchor = null
-    return
-  }
-
-  const shellRect = shell.getBoundingClientRect()
-  const cardRect = card.getBoundingClientRect()
-  if (shellRect.width <= 0 || shellRect.height <= 0 || cardRect.width <= 0 || cardRect.height <= 0) {
-    selectedCardAnchor = null
-    return
-  }
-
-  const starX = shellRect.left + (selectedPosition.x / 100) * shellRect.width
-  const starY = shellRect.top + (selectedPosition.y / 100) * shellRect.height
-  const anchorX = clamp(starX, cardRect.left, cardRect.right)
-  const anchorY = clamp(starY, cardRect.top, cardRect.bottom)
-
-  selectedCardAnchor = {
-    x: ((anchorX - shellRect.left) / shellRect.width) * 100,
-    y: ((anchorY - shellRect.top) / shellRect.height) * 100,
-  }
+  selectedCardAnchor = getTimelineSelectedCardAnchor(
+    shell,
+    selectedScreenIndex,
+    projectedStarPositions,
+  )
 }
 
 function scheduleSelectedGuideLineSync() {
@@ -928,28 +738,59 @@ function setTimelinePosition(value: number) {
   updateScrollDrivenWheel()
 }
 
-function syncTimelineBackgroundVideoPlayback(event: Event) {
-  const video = event.currentTarget
-  if (video instanceof HTMLVideoElement) {
-    video.playbackRate = timelineBackgroundVideoPlaybackRate
-  }
-}
-
 onMount(() => {
   hasMounted = true
   syncViewportMode()
+  const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+  let runtimeInView = true
+  let resumeAutoplayWhenActive = false
+
+  function isRuntimeActive() {
+    return document.visibilityState === 'visible' && runtimeInView
+  }
+
+  function applyMotionPreference() {
+    prefersReducedMotion = reducedMotionQuery.matches
+    if (prefersReducedMotion) pauseAutoplay()
+    else if (isRuntimeActive()) resumeRuntime()
+  }
+
+  function suspendRuntime() {
+    resumeAutoplayWhenActive ||= isAutoplaying || isAutoplayStopping
+    pauseAutoplay()
+    adaptiveDprController?.stop()
+  }
+
+  function resumeRuntime() {
+    adaptiveDprController?.start()
+    if (resumeAutoplayWhenActive && !prefersReducedMotion) {
+      resumeAutoplayWhenActive = false
+      playAutoplay()
+    }
+  }
+
+  function syncRuntimeActivity() {
+    if (isRuntimeActive()) resumeRuntime()
+    else suspendRuntime()
+  }
+
+  const runtimeObserver = new IntersectionObserver(entries => {
+    runtimeInView = entries.some(entry => entry.isIntersecting)
+    syncRuntimeActivity()
+  })
+  if (shell) runtimeObserver.observe(shell)
+  reducedMotionQuery.addEventListener('change', applyMotionPreference)
+  document.addEventListener('visibilitychange', syncRuntimeActivity)
   adaptiveDprController = createAdaptiveCanvasDprController({
     getMaxDpr: getTimelineMaxCanvasDpr,
     initialDpr: 1.5,
     setDpr: setCanvasDpr,
   })
   adaptiveDprController.start()
+  applyMotionPreference()
   updateScrollDrivenWheel()
   startInitialAutoplay()
   if (shell) shell.dataset.timelineInitialized = 'true'
-  const timelineMobileWrapper = shell?.closest<HTMLElement>('#timeline-mobile-wrapper')
-  timelineMobileWrapper?.classList.remove('timeline-mobile-inactive')
-  timelineMobileWrapper?.classList.add('timeline-mobile-active')
 
   window.addEventListener('pointermove', handlePointerMove)
   window.addEventListener('touchstart', handleTouchStart, { passive: false })
@@ -961,6 +802,9 @@ onMount(() => {
   window.addEventListener('resize', handleResize)
 
   return () => {
+    runtimeObserver.disconnect()
+    reducedMotionQuery.removeEventListener('change', applyMotionPreference)
+    document.removeEventListener('visibilitychange', syncRuntimeActivity)
     window.removeEventListener('pointermove', handlePointerMove)
     window.removeEventListener('touchstart', handleTouchStart)
     window.removeEventListener('touchmove', handleTouchMove)
@@ -976,8 +820,6 @@ onMount(() => {
     adaptiveDprController = null
     pauseAutoplay()
     hasMounted = false
-    timelineMobileWrapper?.classList.remove('timeline-mobile-active')
-    timelineMobileWrapper?.classList.add('timeline-mobile-inactive')
   }
 })
 
@@ -1020,25 +862,12 @@ onDestroy(() => {
     />
   </Canvas>
 
-  <div
-    class="pointer-events-none absolute inset-0 z-0 overflow-hidden"
-    data-timeline-background-video="universe"
-    aria-hidden="true"
-  >
-    <video
-      class="h-full w-full object-cover brightness-[0.88] saturate-[1.12]"
-      src={timelineBackgroundVideoSrc}
-      poster={timelineBackgroundPosterSrc}
-      autoplay
-      muted
-      loop
-      playsinline
-      preload="metadata"
-      on:loadedmetadata={syncTimelineBackgroundVideoPlayback}
-      on:play={syncTimelineBackgroundVideoPlayback}
-    ></video>
-    <div class="absolute inset-0 bg-slate-950/20"></div>
-  </div>
+  <TimelineBackgroundMedia
+    bind:this={timelineBackgroundMedia}
+    videoSrc={timelineBackgroundVideoSrc}
+    posterSrc={timelineBackgroundPosterSrc}
+    playbackRate={timelineBackgroundVideoPlaybackRate}
+  />
 
   <div
     class="pointer-events-auto absolute inset-0 z-[3] cursor-grab touch-none"
@@ -1053,7 +882,7 @@ onDestroy(() => {
       <button
         type="button"
         class="pointer-events-auto absolute cursor-pointer rounded-full border-0 bg-transparent p-0 opacity-0 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
-        style={getStarControlStyle(control)}
+        style={getTimelineStarControlStyle(control)}
         aria-label={`${selectedScreenIndex === control.index ? 'Open' : 'Select'} timeline record: ${control.screen.title}`}
         title={control.screen.title}
         data-timeline-interactive
@@ -1104,10 +933,10 @@ onDestroy(() => {
         <TimelineCameraPanControls
           step={cameraPanStep}
           showMapControls={isMapMode}
-          on:pan={(event) => panCameraBy(event.detail.x, event.detail.y)}
-          on:zoom={(event) => zoomMapBy(event.detail.multiplier)}
-          on:orbit={(event) => orbitMapBy(event.detail.x, event.detail.y)}
-          on:reset={resetCameraView}
+          on:pan={(event) => timelineCameraController.pan(event.detail.x, event.detail.y)}
+          on:zoom={(event) => timelineCameraController.zoom(event.detail.multiplier)}
+          on:orbit={(event) => timelineCameraController.orbit(event.detail.x, event.detail.y)}
+          on:reset={timelineCameraController.reset}
         />
 
         <TimelineViewModeButton {viewMode} on:click={pauseAutoplay} />
@@ -1122,10 +951,10 @@ onDestroy(() => {
       <TimelineCameraPanControls
         step={cameraPanStep}
         showMapControls={isMapMode}
-        on:pan={(event) => panCameraBy(event.detail.x, event.detail.y)}
-        on:zoom={(event) => zoomMapBy(event.detail.multiplier)}
-        on:orbit={(event) => orbitMapBy(event.detail.x, event.detail.y)}
-        on:reset={resetCameraView}
+        on:pan={(event) => timelineCameraController.pan(event.detail.x, event.detail.y)}
+        on:zoom={(event) => timelineCameraController.zoom(event.detail.multiplier)}
+        on:orbit={(event) => timelineCameraController.orbit(event.detail.x, event.detail.y)}
+        on:reset={timelineCameraController.reset}
       />
 
       <TimelineViewModeButton {viewMode} on:click={pauseAutoplay} />

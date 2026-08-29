@@ -32,7 +32,6 @@
 // TYPE DEFINITIONS AND INTERFACES
 // =====================================================================
 
-import * as assistantBannerModule from './assistant'
 import * as imageBannerModule from './image'
 import * as noneBannerModule from './none'
 import * as standardBannerModule from './standard'
@@ -49,7 +48,6 @@ export type {
   VideoBannerData,
   ImageBannerData,
   TimelineBannerData,
-  AssistantBannerData,
   NoneBannerData,
   // Configuration interfaces
   BannerAnimationConfig,
@@ -74,7 +72,6 @@ export { standardBannerConfig } from './standard'
 export { videoBannerConfig } from './video'
 export { imageBannerConfig } from './image'
 export { timelineBannerConfig } from './timeline'
-export { assistantBannerConfig } from './assistant'
 export { noneBannerConfig } from './none'
 
 // Export individual banner data objects for direct access
@@ -82,7 +79,6 @@ export { standardBannerData } from './standard'
 export { videoBannerData } from './video'
 export { imageBannerData } from './image'
 export { timelineBannerData } from './timeline'
-export { assistantBannerData } from './assistant'
 export { noneBannerData } from './none'
 
 // =====================================================================
@@ -161,30 +157,6 @@ export {
 } from './timeline'
 
 // =====================================================================
-// ASSISTANT BANNER SPECIFIC EXPORTS
-// =====================================================================
-
-// Export assistant banner configuration objects
-export {
-  assistantPersonality,
-  assistantGreetings,
-  assistantBannerLayout,
-  assistantBannerInteraction,
-  assistantQuickActions,
-  contextualActions,
-  assistantBannerStyling,
-} from './assistant'
-
-// Export assistant banner helper functions
-export {
-  getContextualGreeting,
-  getContextualQuickActions,
-  validateAssistantBannerConfig,
-  getAssistantBannerStyles,
-  getAssistantAvatar,
-} from './assistant'
-
-// =====================================================================
 // NONE BANNER SPECIFIC EXPORTS
 // =====================================================================
 
@@ -212,7 +184,6 @@ export {
 export { isVideoBannerData } from './video'
 export { isImageBannerData } from './image'
 export { isTimelineBannerData } from './timeline'
-export { isAssistantBannerData } from './assistant'
 export { isNoneBannerData } from './none'
 
 // =====================================================================
@@ -228,7 +199,6 @@ export const allBannerConfigs = {
   video: videoBannerModule.videoBannerConfig,
   image: imageBannerModule.imageBannerConfig,
   timeline: timelineBannerModule.timelineBannerConfig,
-  assistant: assistantBannerModule.assistantBannerConfig,
   none: noneBannerModule.noneBannerConfig,
 } as const
 
@@ -241,7 +211,6 @@ export const allBannerData = {
   video: videoBannerModule.videoBannerData,
   image: imageBannerModule.imageBannerData,
   timeline: timelineBannerModule.timelineBannerData,
-  assistant: assistantBannerModule.assistantBannerData,
   none: noneBannerModule.noneBannerData,
 } as const
 
@@ -253,7 +222,6 @@ export const bannerTypeGuards = {
   isVideoBannerData: videoBannerModule.isVideoBannerData,
   isImageBannerData: imageBannerModule.isImageBannerData,
   isTimelineBannerData: timelineBannerModule.isTimelineBannerData,
-  isAssistantBannerData: assistantBannerModule.isAssistantBannerData,
   isNoneBannerData: noneBannerModule.isNoneBannerData,
 } as const
 
@@ -268,8 +236,6 @@ export const bannerValidators = {
   validateImageBannerConfig: imageBannerModule.validateImageBannerConfig,
   validateTimelineBannerConfig:
     timelineBannerModule.validateTimelineBannerConfig,
-  validateAssistantBannerConfig:
-    assistantBannerModule.validateAssistantBannerConfig,
   validateNoneBannerConfig: noneBannerModule.validateNoneBannerConfig,
 } as const
 
@@ -294,8 +260,6 @@ export function getBannerConfigByType(bannerType: string) {
       return imageBannerModule.imageBannerConfig
     case 'timeline':
       return timelineBannerModule.timelineBannerConfig
-    case 'assistant':
-      return assistantBannerModule.assistantBannerConfig
     case 'none':
       return noneBannerModule.noneBannerConfig
     default:
@@ -320,8 +284,6 @@ export function getBannerDataByType(bannerType: string) {
       return imageBannerModule.imageBannerData
     case 'timeline':
       return timelineBannerModule.timelineBannerData
-    case 'assistant':
-      return assistantBannerModule.assistantBannerData
     case 'none':
       return noneBannerModule.noneBannerData
     default:
@@ -344,8 +306,6 @@ export function getTypeGuardByBannerType(bannerType: string) {
       return imageBannerModule.isImageBannerData
     case 'timeline':
       return timelineBannerModule.isTimelineBannerData
-    case 'assistant':
-      return assistantBannerModule.isAssistantBannerData
     case 'none':
       return noneBannerModule.isNoneBannerData
     case 'standard':
@@ -364,7 +324,7 @@ export function getTypeGuardByBannerType(bannerType: string) {
  * @returns Array of banner type strings
  */
 export function getAllBannerTypes(): string[] {
-  return ['standard', 'video', 'image', 'timeline', 'assistant', 'none']
+  return ['standard', 'video', 'image', 'timeline', 'none']
 }
 
 /**
@@ -398,8 +358,6 @@ export function validateBannerDataByType(bannerType: string, data: any) {
       return imageBannerModule.validateImageBannerConfig(data)
     case 'timeline':
       return timelineBannerModule.validateTimelineBannerConfig(data)
-    case 'assistant':
-      return assistantBannerModule.validateAssistantBannerConfig(data)
     case 'none':
       return noneBannerModule.validateNoneBannerConfig(data)
     default:

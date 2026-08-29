@@ -370,7 +370,7 @@ useTask(() => {
   haloSizeAttribute.needsUpdate = true
   coreAlphaAttribute.needsUpdate = true
   haloAlphaAttribute.needsUpdate = true
-})
+}, { autoInvalidate: false })
 
 onDestroy(() => {
   coreGeometry.dispose()

@@ -3,7 +3,6 @@ export type LegacyBannerSceneId =
   | 'video'
   | 'image'
   | 'timeline'
-  | 'assistant'
   | 'cookbook'
   | 'archive'
   | 'reader'
@@ -20,7 +19,6 @@ const LEGACY_BANNER_SCENES: LegacyBannerSceneDefinition[] = [
   { id: 'video', title: 'Video Banner', transition: 'cut' },
   { id: 'image', title: 'Image Banner', transition: 'cut' },
   { id: 'timeline', title: 'Timeline Banner', transition: 'cut' },
-  { id: 'assistant', title: 'Assistant Banner', transition: 'cut' },
   { id: 'cookbook', title: 'Cookbook Banner', transition: 'cut' },
   { id: 'archive', title: 'Archive Banner', transition: 'cut' },
   { id: 'reader', title: 'Reader Banner', transition: 'cut' },

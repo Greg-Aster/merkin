@@ -65,17 +65,29 @@ const companionCount = allProducts.filter(
 					<a href={getProductHref(featuredProduct)} data-sfx-hover="hover-emphasis" data-sfx-click="sweep" class="grid grid-cols-[8.75rem_minmax(0,1fr)] gap-3 p-3 text-slate-100 transition hover:bg-cyan-400/5">
 						<div class="relative overflow-hidden rounded-[1rem] border border-slate-700/70 bg-slate-900">
 							{featuredPrimaryVisual ? (
-								<img
-									src={featuredPrimaryVisual}
-									alt={featuredProduct.data.name}
-									class="aspect-square h-full w-full object-cover"
-								/>
+								<Fragment>
+									<img
+										alt={featuredProduct.data.name}
+										class="aspect-square h-full w-full object-cover"
+										data-src={featuredPrimaryVisual}
+										data-state="pending"
+										data-store-product-image
+										decoding="async"
+									/>
+									<div class="storefront-product-image-placeholder" data-store-product-placeholder>
+										<Icon name="mdi:image-outline" class="h-8 w-8 opacity-40" />
+										<span>Loading asset</span>
+									</div>
+									<noscript>
+										<img src={featuredPrimaryVisual} alt={featuredProduct.data.name} />
+									</noscript>
+								</Fragment>
 							) : (
 								<div class="grid aspect-square place-items-center text-slate-600">
 									<Icon name="mdi:image-off-outline" class="h-10 w-10 opacity-40" />
 								</div>
 							)}
-							<span class="absolute left-2 top-2 rounded-full bg-[var(--primary)]/90 px-2 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-white">
+							<span class="absolute left-2 top-2 z-[2] rounded-full bg-[var(--primary)]/90 px-2 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-white">
 								Featured
 							</span>
 						</div>
@@ -260,11 +272,26 @@ const companionCount = allProducts.filter(
 								<a href={getProductHref(product)} data-sfx-hover="hover-soft" data-sfx-click="soft" class="storefront-spotlight__card">
 									<div class="storefront-spotlight__media">
 										{getPrimaryProductVisual(product) ? (
+										<Fragment>
 											<img
-												src={getPrimaryProductVisual(product)}
 												alt={product.data.name}
-												loading="lazy"
+												data-src={getPrimaryProductVisual(product)}
+												data-state="pending"
+												data-store-product-image
+												decoding="async"
 											/>
+											<div class="storefront-product-image-placeholder" data-store-product-placeholder>
+												<Icon name="mdi:image-outline" class="h-8 w-8 opacity-40" />
+												<span>Loading asset</span>
+											</div>
+											<noscript>
+												<img
+													src={getPrimaryProductVisual(product)}
+													alt={product.data.name}
+													loading="lazy"
+												/>
+											</noscript>
+										</Fragment>
 										) : (
 											<div class="storefront-spotlight__placeholder">
 												<Icon name="mdi:image-off-outline" class="h-8 w-8 opacity-30" />
@@ -333,5 +360,6 @@ const companionCount = allProducts.filter(
 <script>
 	import { initStorefrontMarketplace } from '../components/store/storefrontController'
 
-	document.addEventListener('DOMContentLoaded', initStorefrontMarketplace)
+	initStorefrontMarketplace()
+	document.addEventListener('astro:page-load', initStorefrontMarketplace)
 </script>

@@ -307,29 +307,4 @@ import '../styles/features/extracted/navbar.css'
     loadButtonScript();
     document.addEventListener('astro:page-load', syncStoreControlsVisibility);
 
-    // SIMPLE TEST: Hide mascot by default - this is a bandaid fix as the mascot features has moves and im too lazy to fix it right now
-    setTimeout(() => {
-        document.dispatchEvent(new CustomEvent('bleepy:hide'));
-        sessionStorage.setItem('cuppyDismissed', 'true');
-    }, 500); // Wait 500ms for mascot to load first
-
 </script>
-
-    
-    {import.meta.env.PROD && <script is:inline define:vars={{scriptUrl: url('/pagefind/pagefind.js')}}>
-    async function loadPagefind() {
-        if (window.pagefind) {
-            window.dispatchEvent(new CustomEvent('pagefind:ready'))
-            return
-        }
-        const pagefind = await import(scriptUrl)
-        await pagefind.options({
-            'excerptLength': 20
-        })
-        pagefind.init()
-        window.pagefind = pagefind
-        window.dispatchEvent(new CustomEvent('pagefind:ready'))
-        pagefind.search('')     // speed up the first search
-    }
-    loadPagefind()
-    </script>}

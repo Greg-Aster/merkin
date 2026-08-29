@@ -18,8 +18,13 @@ import { SERIES_CONFIG } from '../../config/seriesConfig'
 import { getPostsBySeries } from '../../utils/content-utils'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
 import { firstContactManualRedirects } from '../../utils/reader'
+import {
+  loadGoogleDocSnapshot,
+  resolveGoogleDocStylesheet,
+} from '../../utils/googleDocContent.server'
 import '../../styles/pages/post-detail.css'
 
+import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
 import LayoutToggle from '../../components/client/LayoutToggle.svelte'
 
 export async function getStaticPaths() {
@@ -30,15 +35,23 @@ export async function getStaticPaths() {
       new Date(a.data.published).getTime(),
   )
 
-  return sortedPosts.map((post, index) => {
+  return Promise.all(sortedPosts.map(async (post, index) => {
     const newerPost = index > 0 ? sortedPosts[index - 1] : null
     const olderPost =
       index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null
+    const googleDocSnapshot = post.data.googleDoc
+      ? await loadGoogleDocSnapshot(post.data.googleDoc.documentId)
+      : null
+    const googleDocStylesheetHref = post.data.googleDoc
+      ? resolveGoogleDocStylesheet(post.data.googleDoc.style)
+      : null
 
     return {
       params: { slug: post.slug },
       props: {
         post,
+        googleDocSnapshot,
+        googleDocStylesheetHref,
         previousPost: newerPost
           ? { slug: newerPost.slug, title: newerPost.data.title }
           : null,
@@ -47,10 +60,19 @@ export async function getStaticPaths() {
           : null,
       },
     }
-  })
+  }))
 }
 
-const { post, previousPost, nextPost } = Astro.props // Destructure `post` instead of `entry`
+const {
+  post,
+  previousPost,
+  nextPost,
+  googleDocSnapshot,
+  googleDocStylesheetHref,
+} = Astro.props
+const usesGoogleDocContent = Boolean(
+  post.data.googleDoc && googleDocSnapshot && googleDocStylesheetHref,
+)
 const retiredPostRedirects: Record<string, string> = {
   ...firstContactManualRedirects(),
   'introducing-story-mode': '/reader/first-contact-manual/',
@@ -67,8 +89,6 @@ if (retiredPostRedirect) {
   return Astro.redirect(retiredPostRedirect, 301)
 }
 
-const mascotCtx = post.data.mascotContext
-
 // Extract backgroundImage from frontmatter for dynamic background support
 const backgroundImage = post.data.backgroundImage
 
@@ -82,9 +102,14 @@ const customAuthorData = {
   authorLink: post.data.authorLink, // NEW - Extract custom author link
 }
 
-const { Content, headings } = await post.render()
-
-const { remarkPluginFrontmatter } = await post.render()
+const {
+  Content,
+  headings: localHeadings,
+  remarkPluginFrontmatter,
+} = await post.render()
+const headings = googleDocSnapshot?.headings ?? localHeadings
+const postWords = googleDocSnapshot?.words ?? remarkPluginFrontmatter.words
+const postMinutes = googleDocSnapshot?.minutes ?? remarkPluginFrontmatter.minutes
 const contentOwnsPageHeading = headings.some(heading => heading.depth === 1)
 const postTitleClass = `transition w-full block font-bold mb-3
                     text-2xl md:text-[2.25rem]/[2.75rem]
@@ -192,17 +217,24 @@ const pdfButtonLabel = useDownloadFile
   post={post}
   bannerLink={post.data.bannerLink}
   isPostPage={true}
-  pageMascotContext={mascotCtx}
   backgroundImage={backgroundImage}
   customAuthorData={customAuthorData}
   oneColumn={oneColumnMode}
 >
 
-<!-- Add these meta tags for better date extraction -->
-<meta name="publish-date" content={formatDateToYYYYMMDD(post.data.published)} slot="head" />
-<meta property="article:published_time" content={post.data.published.toISOString()} slot="head" />
-
-<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+<Fragment slot="head">
+  <!-- Add these meta tags for better date extraction -->
+  <meta name="publish-date" content={formatDateToYYYYMMDD(post.data.published)} />
+  <meta property="article:published_time" content={post.data.published.toISOString()} />
+  {usesGoogleDocContent && googleDocStylesheetHref && (
+    <link
+      rel="stylesheet"
+      href={url(googleDocStylesheetHref)}
+      data-google-doc-stylesheet
+    />
+  )}
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+</Fragment>
 
 <LayoutToggle 
   client:load 
@@ -229,13 +261,13 @@ const pdfButtonLabel = useDownloadFile
                     <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
                         <Icon name="material-symbols:notes-rounded"></Icon>
                     </div>
-                    <div class="text-sm" data-post-words={remarkPluginFrontmatter.words}>{remarkPluginFrontmatter.words} {" " + i18n(I18nKey.wordsCount)}</div>
+                    <div class="text-sm" data-post-words={postWords}>{postWords} {" " + i18n(I18nKey.wordsCount)}</div>
                 </div>
                 <div class="flex flex-row items-center">
                     <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
                         <Icon name="material-symbols:schedule-outline-rounded"></Icon>
                     </div>
-                    <div class="text-sm" data-post-minutes={remarkPluginFrontmatter.minutes}>{remarkPluginFrontmatter.minutes} {" " + i18n(I18nKey.minutesCount)}</div>
+                    <div class="text-sm" data-post-minutes={postMinutes}>{postMinutes} {" " + i18n(I18nKey.minutesCount)}</div>
                 </div>
             </div>
 
@@ -275,11 +307,20 @@ const pdfButtonLabel = useDownloadFile
             </div>
 
             <!-- Only show cover if it exists and showImageOnPost isn't false -->
-            {post.data.image && post.data.showImageOnPost !== false && post.data.bannerType !== 'assistant' &&
+            {post.data.image && post.data.showImageOnPost !== false &&
               <ImageWrapper id="post-cover" src={post.data.image} basePath={path.join("content/posts/", getDir(post.id))} class="mb-8 rounded-xl banner-container onload-animation"/>
             }
-            <Markdown class="mb-6 markdown-content onload-animation max-md:prose-sm">
-                <Content />
+            <Markdown class={`mb-6 markdown-content onload-animation max-md:prose-sm${usesGoogleDocContent ? ' google-doc-content' : ''}`}>
+                {usesGoogleDocContent && post.data.googleDoc ? (
+                  <DocsEditorBridge
+                    client:load
+                    url={post.data.googleDoc.documentId}
+                    format="md"
+                    initialBlocks={googleDocSnapshot.blocks}
+                  />
+                ) : (
+                  <Content />
+                )}
             </Markdown>
 
             {licenseConfig.enable && <License title={post.data.title} slug={post.slug} pubDate={post.data.published} class="mb-6 rounded-xl license-container onload-animation"></License>}

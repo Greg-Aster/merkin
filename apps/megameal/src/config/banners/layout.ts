@@ -76,12 +76,6 @@ export const bannerLayoutProfiles = {
     panelTop: { desktop: '0', mobile: '0' },
     contentTop: { ...defaultContentTop },
   },
-  assistant: {
-    stageTop: { ...defaultBannerStageTop },
-    stageHeight: { ...defaultStageHeight },
-    panelTop: { desktop: '0', mobile: '0' },
-    contentTop: { ...defaultContentTop },
-  },
   cookbook: {
     stageTop: { ...defaultBannerStageTop },
     stageHeight: {

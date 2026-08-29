@@ -667,6 +667,9 @@ importers:
       '@merkin/blog-core':
         specifier: workspace:*
         version: link:../../packages/blog-core
+      '@merkin/docs-editor-bridge':
+        specifier: workspace:*
+        version: link:../docs-editor-bridge
       '@merkin/shared-audio':
         specifier: workspace:*
         version: link:../../packages/shared-audio
