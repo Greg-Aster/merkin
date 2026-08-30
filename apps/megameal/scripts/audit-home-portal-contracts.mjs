@@ -32,13 +32,6 @@ function assertExcludes(relativePath, forbidden, note) {
   }
 }
 
-function assertDoesNotMatch(relativePath, pattern, note) {
-  const text = readRequiredFile(relativePath)
-  if (pattern.test(text)) {
-    failures.push(`${relativePath} must not contain ${note}: ${pattern}`)
-  }
-}
-
 const protectedContracts = [
   [
     'apps/megameal/src/contracts/homePortal.ts',
@@ -78,46 +71,19 @@ const protectedContracts = [
       ['megameal-home-intro__screen-reader-copy', 'screen-reader copy'],
       ['megameal-home-intro__scroll-cue', 'joystick scroll cue'],
       ['data-joystick-direction="idle"', 'joystick data attribute'],
-      ['HomeIntroActivation', 'progressive environment activation owner'],
+      ['HomeIntroEnvironment', 'interactive environment owner'],
       ['client:only="svelte"', 'client-only activation boundary'],
-      [
-        '/assets/banner/home-intro-stills/home-intro.webp',
-        'server-rendered first-paint still',
-      ],
-      ['data-home-intro-still', 'first-paint still marker'],
       ['homePortalEvents.portalAdvance', 'centralized portal advance dispatch'],
       ['keydown', 'keyboard support'],
-    ],
-  ],
-  [
-    'apps/megameal/src/components/home/HomeIntroActivation.svelte',
-    [
-      [
-        "import('./HomeIntroEnvironment.svelte')",
-        'deferred interactive environment import',
-      ],
-      ['data-home-intro-activation', 'activation state marker'],
-      ['getRichMediaCapabilities', 'viewport and connection admission policy'],
-      ['scheduleRichMediaActivation', 'stable-paint desktop scheduling'],
-      ['prefers-reduced-motion: reduce', 'reduced-motion admission policy'],
-      ['supportsWebGl', 'WebGL support guard'],
-      ['Interactive portal unavailable', 'visible failure state'],
     ],
   ],
   [
     'apps/megameal/src/components/home/PortalHeroBackgroundSlide.astro',
     [
       ['/assets/banner/tunnel.webm', 'background video path'],
-      [
-        'data-portal-background-src={portalIntroBackgroundVideo}',
-        'component-owned progressive background source',
-      ],
-      ['preload="none"', 'non-blocking initial media policy'],
-      ['homePortalEvents.portalAdvance', 'portal-intent admission listener'],
-      ['getRichMediaCapabilities', 'viewport and connection admission policy'],
-      ['scheduleRichMediaActivation', 'stable-paint desktop scheduling'],
-      ['data-media-state="standby"', 'observable media state'],
-      ['handlePlaybackFailure', 'explicit playback failure handling'],
+      ['src={portalIntroBackgroundVideo}', 'component-owned background source'],
+      ['autoplay', 'immediate muted playback policy'],
+      ['preload="auto"', 'primary background preload policy'],
     ],
   ],
   [
@@ -222,10 +188,17 @@ for (const [relativePath, checks] of protectedContracts) {
   }
 }
 
+const removedPortalStillPath =
+  '/assets/banner/home-intro-stills/home-intro.webp'
 const removedBackgroundShadeClass = 'megameal-portal-background-slide__shade'
 assertExcludes(
+  'apps/megameal/src/components/home/PortalHeroSlide.astro',
+  removedPortalStillPath,
+  'the removed full-screen portal still',
+)
+assertExcludes(
   'apps/megameal/src/components/home/homeIntroScreens.ts',
-  '/assets/banner/home-intro-stills/home-intro.webp',
+  removedPortalStillPath,
   'the removed primary-screen portal still',
 )
 assertExcludes(
@@ -238,10 +211,10 @@ assertExcludes(
   removedBackgroundShadeClass,
   'the removed tunnel background shade styles',
 )
-assertDoesNotMatch(
+assertExcludes(
   'apps/megameal/src/components/home/PortalHeroBackgroundSlide.astro',
-  /(?:^|\s)src=\{portalIntroBackgroundVideo\}/m,
-  'the eager background source',
+  'data-portal-background-src',
+  'the interaction-gated background source',
 )
 assertExcludes(
   'apps/megameal/src/components/home/PortalHeroBackgroundSlide.astro',
@@ -250,9 +223,30 @@ assertExcludes(
 )
 assertExcludes(
   'apps/megameal/src/components/home/PortalHeroBackgroundSlide.astro',
-  'preload="auto"',
-  'the eager background preload policy',
+  'getRichMediaCapabilities',
+  'compact-viewport background loading restrictions',
 )
+
+const removedActivationOwner =
+  'apps/megameal/src/components/home/HomeIntroActivation.svelte'
+if (existsSync(path.join(repoRoot, removedActivationOwner))) {
+  failures.push(`${removedActivationOwner} must remain removed`)
+}
+
+const routeStyleBundles = readRequiredFile(
+  'apps/megameal/src/styles/routeStyleBundles.server.ts',
+)
+const homeBundleStart = routeStyleBundles.indexOf('  home: {')
+const listingBundleStart = routeStyleBundles.indexOf(
+  '  listing:',
+  homeBundleStart,
+)
+const homeBundle = routeStyleBundles.slice(homeBundleStart, listingBundleStart)
+if (!homeBundle.includes("appStyle('features/facts-widget/core.css')")) {
+  failures.push(
+    'apps/megameal/src/styles/routeStyleBundles.server.ts must include the facts-widget core styles in the home bundle',
+  )
+}
 
 if (failures.length > 0) {
   console.error('[home-portal-contracts] Contract audit failed:')

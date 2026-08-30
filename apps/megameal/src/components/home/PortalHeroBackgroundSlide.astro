@@ -6,152 +6,44 @@ const portalIntroBackgroundPlaybackRate = 1.0
 <div class="megameal-portal-background-slide" aria-hidden="true">
   <video
     class="megameal-portal-background-slide__video"
+    src={portalIntroBackgroundVideo}
+    autoplay
     loop
     muted
     playsinline
-    preload="none"
-    data-portal-background-src={portalIntroBackgroundVideo}
+    preload="auto"
     data-playback-rate={portalIntroBackgroundPlaybackRate}
-    data-media-state="standby"
   ></video>
 </div>
-<p
-  class="megameal-home-intro__screen-reader-copy"
-  role="status"
-  data-portal-background-status
-></p>
 
 <script>
-  import { homePortalEvents } from '../../contracts/homePortal'
-  import {
-    getRichMediaCapabilities,
-    scheduleRichMediaActivation,
-  } from '../../utils/richMediaCapabilities'
-
   const slide = document.querySelector<HTMLElement>(
     '.megameal-portal-background-slide',
   )
   const video = slide?.querySelector<HTMLVideoElement>(
     '.megameal-portal-background-slide__video',
   )
-  const status = document.querySelector<HTMLElement>(
-    '[data-portal-background-status]',
-  )
 
-  if (video && video.dataset.portalBackgroundBound !== 'true') {
-    video.dataset.portalBackgroundBound = 'true'
+  if (video) {
     const configuredRate = Number(video.dataset.playbackRate)
     const playbackRate =
       Number.isFinite(configuredRate) && configuredRate > 0 ? configuredRate : 1
-    const reducedMotionQuery = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    )
-    let loaded = false
     let visible = false
-    let disposed = false
-    let cancelScheduledActivation = () => {}
 
     video.playbackRate = playbackRate
     video.addEventListener('play', () => {
       video.playbackRate = playbackRate
     })
 
-    const setMediaState = (state: string, message = '') => {
-      video.dataset.mediaState = state
-      if (status) status.textContent = message
-    }
-
     const revealVideo = () => {
-      if (disposed || visible || video.readyState < 2) return
+      if (visible || video.readyState < 2) return
       visible = true
-      setMediaState('ready')
       slide?.classList.add('is-video-visible')
-    }
-
-    const handlePlaybackFailure = () => {
-      if (disposed) return
-      visible = false
-      slide?.classList.remove('is-video-visible')
-      setMediaState(
-        'unavailable',
-        'Portal background motion is unavailable. The interactive portal remains available.',
-      )
-    }
-
-    const removeAdmissionListeners = () => {
-      window.removeEventListener(
-        homePortalEvents.portalAdvance,
-        loadBackgroundVideo,
-      )
-      window.removeEventListener('pointerdown', loadFromPointerIntent)
-      window.removeEventListener('keydown', loadBackgroundVideo)
-      window.removeEventListener('scroll', loadAfterScroll)
-    }
-
-    function loadBackgroundVideo() {
-      if (disposed || loaded || reducedMotionQuery.matches) return
-      const source = video.dataset.portalBackgroundSrc
-      if (!source) return
-
-      loaded = true
-      cancelScheduledActivation()
-      cancelScheduledActivation = () => {}
-      removeAdmissionListeners()
-      setMediaState('loading')
-      video.src = source
-      video.removeAttribute('data-portal-background-src')
-      video.defaultMuted = true
-      video.muted = true
-      video.playsInline = true
-      video.load()
-      void video.play().then(revealVideo).catch(handlePlaybackFailure)
-    }
-
-    function loadAfterScroll() {
-      if (window.scrollY <= 80) return
-      loadBackgroundVideo()
-    }
-
-    function loadFromPointerIntent() {
-      if (getRichMediaCapabilities().compactViewport) return
-      loadBackgroundVideo()
-    }
-
-    const cleanup = () => {
-      if (disposed) return
-      disposed = true
-      cancelScheduledActivation()
-      cancelScheduledActivation = () => {}
-      removeAdmissionListeners()
-      video.removeEventListener('loadeddata', revealVideo)
-      video.removeEventListener('canplay', revealVideo)
-      video.removeEventListener('playing', revealVideo)
-      video.removeEventListener('error', handlePlaybackFailure)
-      document.removeEventListener('astro:before-preparation', cleanup)
-      window.removeEventListener('pagehide', cleanup)
     }
 
     video.addEventListener('loadeddata', revealVideo)
     video.addEventListener('canplay', revealVideo)
     video.addEventListener('playing', revealVideo)
-    video.addEventListener('error', handlePlaybackFailure)
-    window.addEventListener(homePortalEvents.portalAdvance, loadBackgroundVideo, {
-      once: true,
-    })
-    window.addEventListener('pointerdown', loadFromPointerIntent, { once: true })
-    window.addEventListener('keydown', loadBackgroundVideo, { once: true })
-    window.addEventListener('scroll', loadAfterScroll, { passive: true })
-    document.addEventListener('astro:before-preparation', cleanup, { once: true })
-    window.addEventListener('pagehide', cleanup, { once: true })
-
-    if (
-      !reducedMotionQuery.matches &&
-      getRichMediaCapabilities().shouldAutoload
-    ) {
-      cancelScheduledActivation = scheduleRichMediaActivation(
-        loadBackgroundVideo,
-        { fallbackDelayMs: 1400, idleTimeoutMs: 2200 },
-      )
-    }
+    window.requestAnimationFrame(revealVideo)
   }
 </script>

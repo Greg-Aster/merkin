@@ -56,6 +56,7 @@ const bundles: Record<RouteStyleBundleName, RouteStyleBundle> = {
   home: {
     sources: [
       appStyle('features/extracted/home-intro-environment.css'),
+      appStyle('features/facts-widget/core.css'),
       appStyle('features/home/portal-hero-scroll-cue.css'),
       appStyle('features/home/portal-hero-slide.css'),
       appStyle('features/home/portal-sponsored-bloom.css'),
