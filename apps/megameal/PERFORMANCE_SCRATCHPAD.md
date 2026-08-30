@@ -980,11 +980,62 @@ Validation and cross-consumer boundary:
   dependency, public asset, route, or baseline allowance. It modifies the
   shared layout owner and the existing built-output regression script.
 
+### Batch 16 - production hydration-boundary preservation (2026-08-30)
+
+Implemented:
+
+- Traced the production-only `DocsEditorBridge` hydration warning to the
+  Megameal HTML-output owner, not to different document data. The server and
+  client each rendered the same 103 meaningful timeline document nodes, but
+  `astro-compress` removed Svelte's empty `{@html}` boundary comments. Without
+  those markers, Svelte could not reclaim the already-correct server DOM and
+  rebuilt the island while reporting `hydration_mismatch`.
+- Extended the existing `astro-compress` comment allowlist in
+  `astro.config.mjs` with only the empty-comment pattern while retaining every
+  default framework-comment exception and the rest of HTML compression. The
+  shared Docs Editor Bridge, its content parser, and its hydration boundary
+  remain unchanged; no alternate renderer or client-only fallback was added.
+- Extended the existing built-HTML audit to require raw-HTML hydration
+  boundaries in the timeline's Docs Editor Bridge. The regression check fails
+  against the prior build, where the timeline contained zero empty boundaries.
+
+Measured production and browser evidence:
+
+- The repaired timeline output contains 50 required `<!---->` markers. Its
+  compressed HTML increases from 356,468 to 356,818 bytes: exactly 350 bytes,
+  or about 0.10%. Ordinary removable comments remain removable.
+- On `/posts/timeline/`, the bridge has 291 DOM records immediately before and
+  after hydration and 103 identical meaningful nodes. On `/posts/explainer/`,
+  it has 199 records before and after and 88 identical meaningful nodes. Both
+  production routes now hydrate with no console warning/error, exception,
+  failed request, or HTTP error.
+- The exact desktop timeline still renders one visible 1,440 x 810 px canvas
+  with 54 events and zooms from scale 1.3 to 1.5. Switching to two columns
+  reveals the loaded Universe avatar, author name, and bio; switching back
+  removes the hidden profile media. The separately documented desktop
+  horizontal overflow remains open.
+
+Validation and scope boundary:
+
+- Megameal type-check and the exact package build pass. The build completed all
+  367 pages in 119.81 seconds, verified 21 redirect shells and the new
+  hydration-boundary contract, and indexed 84 pages / 9,712 words. The known
+  Tailwind PostCSS and deferred 699 KB Three.js chunk warnings remain.
+- The complete CSS audit passes with its six baselined findings and the
+  warning-only unbaselined `PortalSponsoredBloom.astro` size finding. This
+  batch adds no CSS, component, hydration directive, dependency, public asset,
+  route, or baseline allowance.
+- This is a Megameal build-output repair. It changes neither `packages/blog-core`
+  nor `apps/docs-editor-bridge`, so the other sites in the repository are not
+  modified by this batch.
+
 ## Active owner map
 
 - App route composition: `src/pages/[...page].astro` and the route files under
   `src/pages/`.
 - Megameal layout adapter: `src/layouts/MainGridLayout.astro`.
+- Production HTML integrity and its built-route regression contract:
+  `astro.config.mjs` and `scripts/audit-built-html.mjs`.
 - Shared route shell and client-controller composition:
   `packages/blog-core/src/layouts/MainGridLayout.astro` (1,686 lines).
 - Shared image-viewer, mathematical-notation styling, and code/math scrollbar
@@ -1323,6 +1374,9 @@ proof.
   regular post exceeds the stylesheet budget or links timeline, reader, store,
   or home-only styles, and it protects the populated timeline/custom-author
   contract.
+- Completed in Batch 16: production HTML compression preserves Svelte's empty
+  raw-HTML hydration boundaries, and the built timeline contract fails if they
+  are stripped again.
 - Keep browser validation authoritative: build success does not prove the route
   is usable.
 
