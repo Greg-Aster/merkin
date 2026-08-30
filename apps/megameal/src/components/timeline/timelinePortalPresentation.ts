@@ -358,16 +358,6 @@ export function isTimelineInteractiveTarget(eventTarget: EventTarget | null) {
   )
 }
 
-export function isTimelineSceneDragBlockedTarget(
-  eventTarget: EventTarget | null,
-  isMapMode: boolean,
-) {
-  if (!(eventTarget instanceof Element)) return false
-  if (isMapMode && eventTarget.closest('[data-timeline-star-control]'))
-    return false
-  return isTimelineInteractiveTarget(eventTarget)
-}
-
 function clampConstellationPoint(value: number) {
   return clamp(value, -18, 118)
 }

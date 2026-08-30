@@ -1,0 +1,364 @@
+/* Quote/excerpt/callout/protocols */
+.fcmi-panel-lede {
+  margin: 0 0 0.9rem;
+  color: var(--fcmi-cream);
+  font-size: clamp(1rem, 2vw, 1.12rem);
+  line-height: 1.62;
+}
+
+.fcmi-panel-copy {
+  margin: 0;
+  color: var(--fcmi-muted);
+  line-height: 1.65;
+}
+
+.fcmi-emphasis {
+  color: rgb(var(--fcmi-accent-rgb) / 0.95);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 14px rgb(var(--fcmi-glow-rgb) / 0.34);
+}
+
+.fcmi-quote-card {
+  margin: 1rem 0 0;
+}
+
+.fcmi-quote-card blockquote,
+.fcmi-document-excerpt blockquote {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: var(--fcmi-cream);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  font-style: italic;
+}
+
+.fcmi-quote-card figcaption {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.75rem;
+  color: rgb(var(--fcmi-accent-rgb) / 0.76);
+  font-family: var(--fcmi-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+}
+
+.fcmi-excerpt-label {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 0.7rem;
+  color: rgb(var(--fcmi-accent-rgb) / 0.78);
+  font-family: var(--fcmi-mono);
+  font-size: 0.69rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.fcmi-callout-card {
+  margin-top: 1rem;
+}
+
+.fcmi-callout-card h4,
+.fcmi-protocol-row h4 {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: rgb(var(--fcmi-accent-rgb) / 0.88);
+  font-size: 0.98rem;
+}
+
+.fcmi-protocol-stack {
+  gap: 0.8rem;
+}
+
+.fcmi-protocol-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+  padding: clamp(0.85rem, 2vw, 1.05rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.22);
+  border-radius: var(--fcmi-radius-md);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.10), transparent 70%),
+    rgb(var(--fcmi-surface-rgb) / 0.38);
+  box-shadow: inset 0 0 22px rgb(var(--fcmi-glow-rgb) / 0.05);
+  overflow: hidden;
+}
+
+.fcmi-protocol-row::before {
+  content: "";
+  position: absolute;
+  inset: 0.45rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.055);
+  border-radius: calc(var(--fcmi-radius-md) - 0.25rem);
+  pointer-events: none;
+}
+
+.fcmi-protocol-num {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.32);
+  border-radius: 999px;
+  background: rgb(var(--fcmi-accent-rgb) / 0.08);
+  color: rgb(var(--fcmi-accent-rgb) / 0.88);
+  font-family: var(--fcmi-mono);
+  font-weight: 900;
+  box-shadow: 0 0 18px rgb(var(--fcmi-glow-rgb) / 0.16);
+}
+
+.fcmi-protocol-row p {
+  position: relative;
+  z-index: 1;
+  margin: 0.35rem 0 0;
+  color: var(--fcmi-muted);
+  line-height: 1.55;
+}
+
+/* Slightly polish loose fcmi paragraphs even when used outside panels. */
+.fcmi-panel-copy,
+.fcmi-panel-lede,
+.fcmi-caption {
+  max-width: none;
+}
+
+/* Mobile refinements for repaired forward sections. */
+@media (max-width: 900px) {
+  .fcmi-reference-spread,
+  .fcmi-metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fcmi-routing-row {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .fcmi-reference-spread,
+  .fcmi-section-panel-inner,
+  .fcmi-routing-shell {
+    padding: 0.85rem;
+  }
+
+  .fcmi-routing-frame {
+    padding: 0.95rem;
+  }
+
+  .fcmi-panel-header,
+  .fcmi-index-header {
+    display: grid;
+  }
+
+  .fcmi-protocol-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.fcmi-notice--red { --fcmi-accent-rgb: 248 95 95; --fcmi-accent-2-rgb: 136 30 45; --fcmi-glow-rgb: 255 45 45; }
+.fcmi-notice--blue { --fcmi-accent-rgb: 118 170 255; --fcmi-accent-2-rgb: 58 86 168; --fcmi-glow-rgb: 69 143 220; }
+
+
+/* --------------------------------------------------------------------------
+   Chapter hero and next-link blocks
+   --------------------------------------------------------------------------
+   These replace component-embedded Tailwind styling with the shared fcmi
+   technical-window language. Keep markup semantic; keep appearance here.
+*/
+
+.fcmi-hero {
+  margin-top: 0;
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.fcmi-hero-frame {
+  padding: clamp(1.35rem, 4vw, 2.35rem);
+}
+
+.fcmi-hero-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 1.45rem);
+  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.fcmi-hero-icon {
+  --fcmi-icon-size: clamp(4rem, 9vw, 5.35rem);
+  flex: 0 0 auto;
+  font-size: clamp(2.3rem, 5vw, 3.15rem);
+  border-radius: var(--fcmi-radius-lg);
+}
+
+.fcmi-hero-heading {
+  min-width: 0;
+}
+
+.fcmi-hero-title {
+  margin: 0;
+  color: var(--fcmi-cream);
+  font-family: var(--fcmi-sans);
+  font-size: clamp(1.55rem, 4vw, 2.75rem);
+  font-weight: 850;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  text-shadow:
+    0 0 20px rgb(var(--fcmi-glow-rgb) / 0.18),
+    0 0 40px rgb(var(--fcmi-glow-rgb) / 0.08);
+}
+
+.fcmi-hero-quote {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: clamp(0.9rem, 2vw, 1.15rem) 0 clamp(0.9rem, 2vw, 1.15rem) clamp(1rem, 3vw, 1.45rem);
+  border-left: 3px solid rgb(var(--fcmi-accent-rgb) / 0.62);
+  color: rgb(var(--fcmi-muted-rgb) / 0.86);
+  font-size: clamp(1.02rem, 2vw, 1.22rem);
+  font-style: italic;
+  line-height: 1.62;
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.065), transparent 72%);
+}
+
+.fcmi-hero-cite {
+  position: relative;
+  z-index: 1;
+  margin: clamp(0.9rem, 2vw, 1.2rem) 0 0;
+  color: rgb(var(--fcmi-accent-rgb) / 0.72);
+  font-family: var(--fcmi-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-align: right;
+}
+
+.fcmi-hero-cite cite {
+  font-style: normal;
+}
+
+.fcmi-next-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.fcmi-next-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.fcmi-next-link-frame {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(0.9rem, 2vw, 1.25rem);
+  align-items: center;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.fcmi-next-link:hover .fcmi-next-link-frame {
+  border-color: rgb(var(--fcmi-accent-rgb) / 0.40);
+  background:
+    radial-gradient(circle at 50% -10%, rgb(var(--fcmi-accent-rgb) / 0.15), transparent 34%),
+    radial-gradient(circle at 105% 110%, rgb(var(--fcmi-accent-2-rgb) / 0.12), transparent 38%),
+    rgb(var(--fcmi-surface-3-rgb) / 0.38);
+  transform: translateY(-1px);
+}
+
+.fcmi-next-link-number {
+  position: relative;
+  z-index: 1;
+  color: rgb(var(--fcmi-accent-rgb) / 0.62);
+  font-family: var(--fcmi-mono);
+  font-size: clamp(2.15rem, 5vw, 3.4rem);
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -0.1em;
+  opacity: 0.62;
+  text-shadow: 0 0 22px rgb(var(--fcmi-glow-rgb) / 0.22);
+}
+
+.fcmi-next-link-body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.fcmi-next-link-title {
+  color: var(--fcmi-cream);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.2;
+}
+
+.fcmi-next-link-subtitle {
+  color: rgb(var(--fcmi-accent-rgb) / 0.74);
+  font-family: var(--fcmi-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.fcmi-next-link-arrow {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.28);
+  border-radius: 999px;
+  background: rgb(var(--fcmi-accent-rgb) / 0.06);
+  color: rgb(var(--fcmi-accent-rgb) / 0.82);
+  font-size: 1.35rem;
+  box-shadow: 0 0 16px rgb(var(--fcmi-glow-rgb) / 0.12);
+}
+
+@media (max-width: 640px) {
+  .fcmi-hero-header {
+    align-items: flex-start;
+  }
+
+  .fcmi-hero-icon {
+    --fcmi-icon-size: 3.6rem;
+    font-size: 2.1rem;
+  }
+
+  .fcmi-next-link-frame {
+    grid-template-columns: 1fr;
+  }
+
+  .fcmi-next-link-arrow {
+    justify-self: start;
+  }
+}
+
+/* ─── Survival imperative figure ───────────────────────────────────────── */
+
+.fcmi-imperative {
+  margin-bottom: 2rem;
+  overflow: hidden;
+  border-radius: var(--fcmi-radius-lg, 0.75rem);
+}
+
+.fcmi-imperative img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+

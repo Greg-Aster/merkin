@@ -18,114 +18,36 @@ let isTransitioning = false
 let isReady = false
 let isFullscreenMode = false
 
+interface LayoutStateDetail {
+  isOneColumn: boolean
+  isTransitioning: boolean
+  isFullscreen: boolean
+}
+
 onMount(() => {
-  let retryCount = 0
-  const maxRetries = 20 // Try for up to 2 seconds
-
-  // Wait for SpecialPageFeatures to expose the global toggle function
-  const checkForToggleFunction = () => {
-    if (import.meta.env.DEV) {
-      console.log(
-        `LayoutToggle - Checking for global functions (attempt ${retryCount + 1}/${maxRetries})`,
-      )
-    }
-
-    if ((window as any).toggleLayoutState && (window as any).getLayoutState) {
-      isReady = true
-
-      // Get initial state
-      updateStateFromGlobal()
-
-      // Poll for state changes (mainly for fullscreen mode)
-      const pollInterval = setInterval(() => {
-        updateStateFromGlobal()
-      }, 100)
-
-      if (import.meta.env.DEV) {
-        console.log(
-          'LayoutToggle - Successfully connected to SpecialPageFeatures toggle system',
-        )
-      }
-
-      return () => {
-        clearInterval(pollInterval)
-      }
-    } else {
-      retryCount++
-      if (retryCount < maxRetries) {
-        // Retry with exponential backoff
-        const delay = Math.min(100 * Math.pow(1.2, retryCount), 500)
-        if (import.meta.env.DEV) {
-          console.log(
-            `LayoutToggle - Functions not ready, retrying in ${delay}ms...`,
-          )
-        }
-        setTimeout(checkForToggleFunction, delay)
-      } else {
-        if (import.meta.env.DEV) {
-          console.error(
-            'LayoutToggle - Failed to connect to SpecialPageFeatures after maximum retries',
-          )
-          console.error(
-            'LayoutToggle - Available window functions:',
-            Object.keys(window).filter(
-              k => k.includes('Layout') || k.includes('toggle'),
-            ),
-          )
-        }
-
-        // Set as ready anyway to prevent permanent disabled state
-        isReady = true
-      }
-    }
+  const handleLayoutState = (event: Event) => {
+    const detail = (event as CustomEvent<LayoutStateDetail>).detail
+    if (!detail) return
+    isOneColumn = detail.isOneColumn
+    isTransitioning = detail.isTransitioning
+    isFullscreenMode = detail.isFullscreen
+    isReady = true
   }
 
-  checkForToggleFunction()
-
-  // Listen for fullscreen changes only
-  const handleStorageChange = (e: StorageEvent) => {
-    if (e.key === 'fullscreenMode') {
-      updateStateFromGlobal()
-    }
-  }
-
-  window.addEventListener('storage', handleStorageChange)
+  document.addEventListener('blog-core:layout-state', handleLayoutState)
+  document.dispatchEvent(new CustomEvent('blog-core:layout-state-request'))
 
   return () => {
-    window.removeEventListener('storage', handleStorageChange)
+    document.removeEventListener('blog-core:layout-state', handleLayoutState)
   }
 })
-
-// Update state from global functions and check fullscreen
-function updateStateFromGlobal() {
-  if ((window as any).getLayoutState) {
-    const state = (window as any).getLayoutState()
-    isOneColumn = state.isOneColumn
-    isTransitioning = state.isTransitioning
-
-    // Check fullscreen mode
-    isFullscreenMode = localStorage.getItem('fullscreenMode') === 'true'
-  }
-}
 
 function toggleLayout() {
   // Prevent toggle when in fullscreen mode or transitioning
   if (isTransitioning || isFullscreenMode) return
 
-  // Use centralized toggle function only
-  if ((window as any).toggleLayoutState) {
-    if (import.meta.env.DEV) {
-      console.log('LayoutToggle - Calling centralized toggle function')
-    }
-    const success = (window as any).toggleLayoutState()
-
-    if (!success && import.meta.env.DEV) {
-      console.warn('LayoutToggle - Toggle failed')
-    }
-  } else if (import.meta.env.DEV) {
-    console.error('LayoutToggle - Global toggle function not available')
-    // No fallback DOM manipulation - it was causing the issues
-  }
+  isTransitioning = true
+  document.dispatchEvent(new CustomEvent('blog-core:layout-toggle-request'))
 }
 
 // Position classes

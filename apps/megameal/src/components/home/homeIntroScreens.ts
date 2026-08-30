@@ -8,9 +8,6 @@ export const homeIntroScreens = [
     stat: 'Public orientation feed',
     ctaLabel: 'Begin Intake',
     href: '/videos/',
-    stillSrc: '/assets/banner/home-intro-stills/home-intro.webp',
-    webglStillSrc: '/assets/banner/home-intro-stills/home-intro.webp',
-    ktx2StillSrc: '/assets/banner/home-intro-stills/home-intro.ktx2',
     videoSrc: '/videos/title.webm',
   },
   {

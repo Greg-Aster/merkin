@@ -1,6 +1,10 @@
 ---
 import ArchiveAtmosphere from '@components/archive/ArchiveAtmosphere.svelte'
 import ArchiveStoryMap from '@components/archive/ArchiveStoryMap.astro'
+import storyMapNodesHref from '../../styles/features/archive/story-map-nodes.css?url'
+import storyMapRecordsHref from '../../styles/features/archive/story-map-records.css?url'
+import storyMapResponsiveHref from '../../styles/features/archive/story-map-responsive.css?url'
+import storyMapShellHref from '../../styles/features/archive/story-map-shell.css?url'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
@@ -72,7 +76,14 @@ const archivePagePost = {
   },
 }
 
-import '../../styles/pages/archive-index.css'
+import archiveIndexHref from '../../styles/pages/archive-index.css?url'
+const archiveStyleHrefs = [
+  storyMapNodesHref,
+  storyMapRecordsHref,
+  storyMapResponsiveHref,
+  storyMapShellHref,
+  archiveIndexHref,
+]
 ---
 
 <MainGridLayout
@@ -82,6 +93,11 @@ import '../../styles/pages/archive-index.css'
   oneColumn={true}
   backgroundImage="none"
 >
+    <Fragment slot="head">
+      {archiveStyleHrefs.map(href => (
+        <link rel="stylesheet" href={href} data-route-style="archive" />
+      ))}
+    </Fragment>
     <ArchiveAtmosphere slot="overlay" client:load />
     <section class="archive-summary card-base" aria-labelledby="archive-page-title">
       <div class="archive-summary-head">

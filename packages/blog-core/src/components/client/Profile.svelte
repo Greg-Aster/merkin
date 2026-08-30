@@ -1,16 +1,7 @@
-<!-- Profile.svelte - Enhanced with video playback controls -->
 <script lang="ts">
-import { onDestroy, onMount } from 'svelte'
+import { onDestroy, onMount, tick } from 'svelte'
 
-// Props
-export let slug = ''
-export let customAvatar = ''
-export let customName = ''
-export let customBio = ''
-export let customLink = ''
-export let isHomePage = false
-export let profileConfig: any
-export let avatarConfig: any
+type AvatarSource = string | { src?: string }
 
 interface RuntimeAuthorContext {
   slug: string
@@ -20,6 +11,61 @@ interface RuntimeAuthorContext {
   customLink: string
   isHomePage: boolean
 }
+
+interface LayoutStateDetail {
+  isOneColumn: boolean
+  isFullscreen: boolean
+}
+
+export let slug = ''
+export let customAvatar = ''
+export let customName = ''
+export let customBio = ''
+export let customLink = ''
+export let isHomePage = false
+export let sidebarVisible = true
+export let profileConfig: any = {}
+export let avatarConfig: any = {}
+
+let runtimeAuthorContext: RuntimeAuthorContext | null = null
+let currentAvatarIndex = 0
+let animationDirection = 1
+let animationTimer: number | null = null
+let isCompactViewport = false
+let isSidebarVisible = sidebarVisible
+let isVisible = false
+let mediaActive = false
+let mediaFailed = false
+let mediaRenderKey = 0
+let mounted = false
+let ownerElement: HTMLDivElement | null = null
+let panelElement: HTMLDivElement | null = null
+let triggerElement: HTMLButtonElement | null = null
+let closeElement: HTMLButtonElement | null = null
+
+$: effectiveSlug = runtimeAuthorContext?.slug ?? slug
+$: effectiveCustomAvatar = runtimeAuthorContext?.customAvatar ?? customAvatar
+$: effectiveCustomName = runtimeAuthorContext?.customName ?? customName
+$: effectiveCustomBio = runtimeAuthorContext?.customBio ?? customBio
+$: effectiveCustomLink = runtimeAuthorContext?.customLink ?? customLink
+$: effectiveIsHomePage = runtimeAuthorContext?.isHomePage ?? isHomePage
+
+$: displayName = effectiveCustomName || profileConfig?.name || 'Author'
+$: displayBio = effectiveCustomBio || profileConfig?.bio || ''
+$: displayLink = normalizeBaseUrl(effectiveCustomLink || '/about/')
+$: avatarSources = normalizeAvatarList(avatarConfig?.avatarList)
+$: useDefaultAvatars = !effectiveCustomAvatar
+$: activeAvatarIndex = effectiveIsHomePage || !useDefaultAvatars
+  ? 0
+  : getAvatarIndexFromSlug(effectiveSlug, avatarSources.length || 1)
+$: hasMultipleAvatars =
+  useDefaultAvatars && !effectiveIsHomePage && avatarSources.length > 1
+$: currentAvatarSource = resolveCurrentAvatarSource()
+$: currentAvatarAlt = effectiveCustomAvatar
+  ? `Profile image of ${displayName}`
+  : hasMultipleAvatars
+    ? 'Profile image of the author'
+    : 'Profile image of the site owner'
 
 function normalizeBaseUrl(path: string): string {
   if (!path) return ''
@@ -32,115 +78,171 @@ function normalizeBaseUrl(path: string): string {
     return path
   }
 
-  const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
-
-  if (!path.startsWith('/')) return path
-  if (baseUrl && path.startsWith(`${baseUrl}/`)) return path
-
   const normalizedBase = import.meta.env.BASE_URL || '/'
   const trimmedBase = normalizedBase.endsWith('/')
     ? normalizedBase.slice(0, -1)
     : normalizedBase
 
+  if (!path.startsWith('/')) return path
+  if (trimmedBase && path.startsWith(`${trimmedBase}/`)) return path
   return `${trimmedBase}${path}`.replace(/\/+/g, '/')
 }
 
-// 🎬 NEW: Extended HTMLVideoElement type to support custom properties
-interface ExtendedHTMLVideoElement extends HTMLVideoElement {
-  endedHandler?: () => void
+function normalizeAvatarSource(source: AvatarSource | null | undefined) {
+  if (!source) return ''
+  const resolved = typeof source === 'string' ? source : source.src || ''
+  return normalizeBaseUrl(resolved)
 }
 
-// State
-let currentAvatarIndex = 0
-let animationDirection = 1
-let animationTimer: number | null = null
-let videoElements: ExtendedHTMLVideoElement[] = [] // 🎬 NEW: Track video elements
-let videoElement: ExtendedHTMLVideoElement // 🎬 NEW: Single video element binding
-let runtimeAuthorContext: RuntimeAuthorContext | null = null
-
-// 🎬 NEW: Video configuration from avatarConfig
-$: videoConfig = avatarConfig?.videoConfig || {}
-$: playbackRate = videoConfig.playbackRate || 0.5 // Default to 50% speed
-$: shouldLoop = videoConfig.loop ?? true // Default to true, can be disabled
-$: loopDelay = videoConfig.loopDelay || 5000 // Delay between loops in ms
-$: playOnce = videoConfig.playOnce || false // Play once then stop
-
-// 🎬 NEW: Animated file detection
-function isAnimatedFile(src: string): boolean {
-  if (!src) return false
-  const lowercaseSrc = src.toLowerCase()
-  return (
-    lowercaseSrc.includes('.gif') ||
-    lowercaseSrc.includes('.webp') ||
-    lowercaseSrc.includes('.apng') ||
-    lowercaseSrc.match(/\.(gif|webp|apng)(\?|$)/)
-  )
+function normalizeAvatarList(sources: AvatarSource[] | null | undefined) {
+  if (!Array.isArray(sources)) return []
+  return sources.map(normalizeAvatarSource).filter(Boolean)
 }
 
-// 🎬 NEW: Video file detection
-function isVideoFile(src: string): boolean {
-  if (!src) return false
-  const lowercaseSrc = src.toLowerCase()
-  return (
-    lowercaseSrc.includes('.mp4') ||
-    lowercaseSrc.includes('.webm') ||
-    lowercaseSrc.includes('.mov') ||
-    lowercaseSrc.match(/\.(mp4|webm|mov|avi)(\?|$)/)
-  )
-}
-
-// Computed values
-$: effectiveSlug = runtimeAuthorContext?.slug ?? slug
-$: effectiveCustomAvatar = runtimeAuthorContext?.customAvatar ?? customAvatar
-$: effectiveCustomName = runtimeAuthorContext?.customName ?? customName
-$: effectiveCustomBio = runtimeAuthorContext?.customBio ?? customBio
-$: effectiveCustomLink = runtimeAuthorContext?.customLink ?? customLink
-$: effectiveIsHomePage = runtimeAuthorContext?.isHomePage ?? isHomePage
-
-$: useDefaultAvatars = !effectiveCustomAvatar
-$: displayName = effectiveCustomName || profileConfig?.name || 'Author'
-$: displayBio = effectiveCustomBio || profileConfig?.bio || ''
-$: displayLink = normalizeBaseUrl(effectiveCustomLink || '/about/')
-$: socialLinks = profileConfig?.links || []
-
-// Avatar selection logic
-$: activeAvatarIndex = (() => {
-  if (effectiveIsHomePage || !useDefaultAvatars) return 0
-  return getAvatarIndexFromSlug(effectiveSlug, avatarConfig?.avatarList?.length || 1)
-})()
-
-$: selectedAvatar = (() => {
-  if (!useDefaultAvatars) return effectiveCustomAvatar
+function resolveCurrentAvatarSource() {
+  if (effectiveCustomAvatar) return normalizeAvatarSource(effectiveCustomAvatar)
   if (effectiveIsHomePage && avatarConfig?.homeAvatar) {
-    return typeof avatarConfig.homeAvatar === 'string'
-      ? avatarConfig.homeAvatar
-      : avatarConfig.homeAvatar.src || avatarConfig.homeAvatar
+    return normalizeAvatarSource(avatarConfig.homeAvatar)
   }
-  if (avatarConfig?.avatarList?.length > 0) {
-    const avatar = avatarConfig.avatarList[activeAvatarIndex]
-    return typeof avatar === 'string' ? avatar : avatar.src || avatar
+  return avatarSources[currentAvatarIndex] || avatarSources[activeAvatarIndex] || ''
+}
+
+function getAvatarIndexFromSlug(value: string, arrayLength: number) {
+  if (!value || arrayLength <= 1) return 0
+
+  let hash = 0
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(index)
+    hash &= hash
   }
-  return ''
-})()
+  return Math.abs(hash) % arrayLength
+}
 
-$: avatarList = (() => {
-  if (!avatarConfig?.avatarList) return []
-  return avatarConfig.avatarList.map(avatar =>
-    typeof avatar === 'string' ? avatar : avatar.src || avatar,
-  )
-})()
+function isVideoFile(source: string) {
+  return /\.(mp4|webm|mov|avi)(\?|$)/i.test(source)
+}
 
-$: hasAnimatedAvatar = useDefaultAvatars
-  ? effectiveIsHomePage
-    ? isAnimatedFile(selectedAvatar)
-    : avatarList.some(src => isAnimatedFile(src))
-  : isAnimatedFile(effectiveCustomAvatar)
+function stopAvatarAnimation() {
+  if (animationTimer === null) return
+  window.clearInterval(animationTimer)
+  animationTimer = null
+}
 
-$: hasMultipleAvatars =
-  useDefaultAvatars &&
-  avatarList.length > 1 &&
-  !effectiveIsHomePage &&
-  !hasAnimatedAvatar
+function restartAvatarAnimation(resetIndex = false) {
+  stopAvatarAnimation()
+  if (resetIndex) {
+    currentAvatarIndex = activeAvatarIndex
+    animationDirection = 1
+  }
+  if (!mounted || !mediaActive || !hasMultipleAvatars) return
+
+  const interval = Math.max(Number(avatarConfig?.animationInterval) || 3500, 1000)
+  animationTimer = window.setInterval(() => {
+    let nextIndex = currentAvatarIndex + animationDirection
+    if (nextIndex >= avatarSources.length) {
+      animationDirection = -1
+      nextIndex = Math.max(avatarSources.length - 2, 0)
+    } else if (nextIndex < 0) {
+      animationDirection = 1
+      nextIndex = Math.min(1, avatarSources.length - 1)
+    }
+    currentAvatarIndex = nextIndex
+    mediaFailed = false
+    mediaRenderKey += 1
+  }, interval)
+}
+
+function releaseVideo(video: HTMLVideoElement) {
+  video.pause()
+  video.removeAttribute('src')
+  video.load()
+}
+
+function registerVideo(video: HTMLVideoElement) {
+  const videoConfig = avatarConfig?.videoConfig || {}
+  const playbackRate = Number(videoConfig.playbackRate) || 0.5
+  const shouldLoop = videoConfig.loop ?? true
+  const loopDelay = Number(videoConfig.loopDelay) || 0
+  const playOnce = videoConfig.playOnce || false
+  let loopTimer: number | null = null
+
+  const configure = () => {
+    video.playbackRate = playbackRate
+    video.loop = shouldLoop && loopDelay === 0 && !playOnce
+  }
+
+  const handleEnded = () => {
+    if (playOnce) return
+    if (!shouldLoop || loopDelay <= 0) return
+    loopTimer = window.setTimeout(() => {
+      video.currentTime = 0
+      void video.play().catch(() => {
+        mediaFailed = true
+      })
+    }, loopDelay)
+  }
+
+  const handleError = () => {
+    mediaFailed = true
+  }
+
+  video.addEventListener('loadedmetadata', configure)
+  video.addEventListener('ended', handleEnded)
+  video.addEventListener('error', handleError)
+  if (video.readyState >= 1) configure()
+
+  return {
+    destroy() {
+      if (loopTimer !== null) window.clearTimeout(loopTimer)
+      video.removeEventListener('loadedmetadata', configure)
+      video.removeEventListener('ended', handleEnded)
+      video.removeEventListener('error', handleError)
+      releaseVideo(video)
+    },
+  }
+}
+
+function setMediaActive(nextActive: boolean) {
+  if (mediaActive === nextActive) return
+  mediaActive = nextActive
+  mediaFailed = false
+  mediaRenderKey += 1
+  restartAvatarAnimation(nextActive)
+}
+
+function openProfile() {
+  isVisible = true
+  setMediaActive(true)
+  void tick().then(() => {
+    window.requestAnimationFrame(() => {
+      const closeButton =
+        closeElement ||
+        panelElement?.querySelector<HTMLButtonElement>('[aria-label="Close profile"]')
+      closeButton?.focus()
+    })
+  })
+}
+
+function closeProfile({ restoreFocus = true } = {}) {
+  if (!isVisible) return
+  isVisible = false
+  if (isCompactViewport) setMediaActive(false)
+  if (restoreFocus) {
+    void tick().then(() => {
+      window.requestAnimationFrame(() => {
+        const triggerButton =
+          triggerElement ||
+          ownerElement?.querySelector<HTMLButtonElement>('[aria-label="Open profile"]')
+        triggerButton?.focus()
+      })
+    })
+  }
+}
+
+function toggleProfile() {
+  if (isVisible) closeProfile()
+  else openProfile()
+}
 
 function syncAuthorContextFromDOM() {
   const contextElement = document.getElementById('author-context')
@@ -154,477 +256,301 @@ function syncAuthorContextFromDOM() {
     customLink: contextElement.dataset.customLink || '',
     isHomePage: contextElement.dataset.isHomePage === 'true',
   }
+  void tick().then(() => restartAvatarAnimation(true))
 }
 
-function getAvatarIndexFromSlug(slug: string, arrayLength: number): number {
-  if (!slug || arrayLength === 0) return 0
-
-  let hash = 0
-  for (let i = 0; i < slug.length; i++) {
-    const char = slug.charCodeAt(i)
-    hash = (hash << 5) - hash + char
-    hash = hash & hash
-  }
-  return Math.abs(hash) % arrayLength
+function handleProfileToggle() {
+  if (isCompactViewport) toggleProfile()
+  else panelElement?.focus()
 }
 
-// 🎬 NEW: Configure video element with custom settings
-function configureVideoElement(video: HTMLVideoElement) {
-  if (!video) return
-
-  if (import.meta.env.DEV) {
-    console.log('🎬 Configuring video element:', {
-      playbackRate,
-      shouldLoop,
-      loopDelay,
-      playOnce,
-      videoSrc: video.src,
-    })
-  }
-
-  // Set playback rate
-  video.playbackRate = playbackRate
-  if (import.meta.env.DEV) {
-    console.log('🎬 Video playback rate set to:', video.playbackRate)
-  }
-
-  // Remove any existing event listeners to prevent duplicates
-  if (video.endedHandler) {
-    video.removeEventListener('ended', video.endedHandler)
-  }
-
-  // Handle loop behavior
-  if (playOnce) {
-    video.loop = false
-    video.endedHandler = () => {
-      video.pause()
-    }
-    video.addEventListener('ended', video.endedHandler)
-  } else if (loopDelay > 0) {
-    video.loop = false
-    video.endedHandler = () => {
-      setTimeout(() => {
-        if (video && video.paused) {
-          video.currentTime = 0
-          video.play().catch(e => {
-            if (import.meta.env.DEV) {
-              console.log('Video play failed:', e)
-            }
-          })
-        }
-      }, loopDelay)
-    }
-    video.addEventListener('ended', video.endedHandler)
-  } else {
-    video.loop = shouldLoop
-    video.endedHandler = null
-  }
-
-  // Add to tracking array if not already present
-  if (!videoElements.includes(video)) {
-    videoElements.push(video)
-    if (import.meta.env.DEV) {
-      console.log(
-        '🎬 Added video to tracking array. Total videos:',
-        videoElements.length,
-      )
-    }
-  }
+function handleDocumentClick(event: MouseEvent) {
+  if (!isVisible || !(event.target instanceof Node)) return
+  if (ownerElement?.contains(event.target)) return
+  closeProfile({ restoreFocus: false })
 }
 
-// 🎬 NEW: Update all video elements when config changes
-function updateVideoSettings() {
-  if (import.meta.env.DEV) {
-    console.log('🎬 Updating video settings for', videoElements.length, 'videos')
-  }
-  videoElements.forEach((video: ExtendedHTMLVideoElement) => {
-    if (video && !video.paused) {
-      if (import.meta.env.DEV) {
-        console.log('🎬 Updating video:', video.src, 'to rate:', playbackRate)
-      }
-      video.playbackRate = playbackRate
-      video.loop = shouldLoop && loopDelay === 0 && !playOnce
-    }
-  })
+function handleDocumentKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && isVisible) closeProfile()
 }
 
-// Watch for config changes and update videos
-// Only update if we actually have video elements to configure
-$: {
-  if ((playbackRate || shouldLoop || loopDelay || playOnce) && videoElements.length > 0) {
-    if (import.meta.env.DEV) {
-      console.log('🎬 Video config changed:', {
-        playbackRate,
-        shouldLoop,
-        loopDelay,
-        playOnce,
-        videoElementsCount: videoElements.length,
-      })
-    }
-    updateVideoSettings()
-  }
+function retryMedia() {
+  mediaFailed = false
+  mediaRenderKey += 1
 }
 
-function startAvatarAnimation() {
-  if (!hasMultipleAvatars || !avatarList.length) return
-
-  currentAvatarIndex = activeAvatarIndex
-
-  animationTimer = setInterval(() => {
-    currentAvatarIndex += animationDirection
-
-    if (currentAvatarIndex >= avatarList.length) {
-      currentAvatarIndex = avatarList.length - 1
-      animationDirection = -1
-    }
-    if (currentAvatarIndex < 0) {
-      currentAvatarIndex = 0
-      animationDirection = 1
-    }
-  }, avatarConfig?.animationInterval || 3500)
+function syncMediaAdmission() {
+  setMediaActive((!isCompactViewport && isSidebarVisible) || isVisible)
 }
 
-function stopAvatarAnimation() {
-  if (animationTimer) {
-    clearInterval(animationTimer)
-    animationTimer = null
-  }
-}
-
-// 🎬 NEW: Render media component with video configuration
-function renderMediaElement(
-  src: string,
-  alt: string,
-  className: string,
-  loading = 'eager',
-) {
-  const normalizedSrc = normalizeBaseUrl(src)
-
-  if (isVideoFile(normalizedSrc)) {
-    return {
-      type: 'video',
-      src: normalizedSrc,
-      alt,
-      className,
-      loading,
-      playbackRate,
-      shouldLoop: shouldLoop && loopDelay === 0 && !playOnce,
-      playOnce,
-      loopDelay,
-    }
-  }
-  return { type: 'image', src: normalizedSrc, alt, className, loading }
+function syncLayoutStateFromDOM() {
+  const sidebarState = document.getElementById('main-grid')?.dataset.sidebar
+  isSidebarVisible =
+    sidebarState !== 'hidden' && !document.body.classList.contains('fullscreen-mode')
+  if (!isCompactViewport && !isSidebarVisible) isVisible = false
+  syncMediaAdmission()
 }
 
 onMount(() => {
-  // Initialize currentAvatarIndex to the selected avatar
+  mounted = true
   currentAvatarIndex = activeAvatarIndex
+  syncAuthorContextFromDOM()
 
-  // Debug logging (only if we have valid config)
-  if (import.meta.env.DEV && (avatarConfig || profileConfig)) {
-    console.log('Profile component mounted:', {
-      slug,
-      useDefaultAvatars,
-      hasMultipleAvatars,
-      hasAnimatedAvatar,
-      avatarListLength: avatarList.length,
-      selectedAvatar: selectedAvatar || 'none',
-      activeAvatarIndex,
-      currentAvatarIndex,
-      profileName: displayName,
-      customLink: displayLink,
-      videoConfig: {
-        // 🎬 NEW: Log video configuration
-        playbackRate,
-        shouldLoop,
-        loopDelay,
-        playOnce,
-      },
-    })
+  const mediaQuery = window.matchMedia('(max-width: 767px)')
+  const syncViewport = () => {
+    isCompactViewport = mediaQuery.matches
+    if (!isCompactViewport) isVisible = false
+    syncMediaAdmission()
   }
-
-  if (hasMultipleAvatars) {
-    startAvatarAnimation()
-  }
-})
-
-onMount(() => {
   const handleAuthorContext = (event: Event) => {
     const customEvent = event as CustomEvent<RuntimeAuthorContext>
-    if (!customEvent?.detail) return
+    if (!customEvent.detail) return
     runtimeAuthorContext = customEvent.detail
+    void tick().then(() => restartAvatarAnimation(true))
+  }
+  const handleLayoutState = (event: Event) => {
+    const customEvent = event as CustomEvent<LayoutStateDetail>
+    if (!customEvent.detail) return
+    isSidebarVisible =
+      !customEvent.detail.isOneColumn && !customEvent.detail.isFullscreen
+    if (!isCompactViewport && !isSidebarVisible) isVisible = false
+    syncMediaAdmission()
+  }
+  const handlePageLoad = () => {
+    syncAuthorContextFromDOM()
+    syncLayoutStateFromDOM()
   }
 
-  syncAuthorContextFromDOM()
+  syncViewport()
+  syncLayoutStateFromDOM()
+  mediaQuery.addEventListener('change', syncViewport)
   window.addEventListener('merkin:author-context', handleAuthorContext)
-  document.addEventListener('astro:page-load', syncAuthorContextFromDOM)
+  document.addEventListener('blog-core:layout-state', handleLayoutState)
+  document.addEventListener('astro:page-load', handlePageLoad)
+  document.addEventListener('profile:toggle', handleProfileToggle)
+  document.addEventListener('click', handleDocumentClick)
+  document.addEventListener('keydown', handleDocumentKeydown)
 
   return () => {
+    mediaQuery.removeEventListener('change', syncViewport)
     window.removeEventListener('merkin:author-context', handleAuthorContext)
-    document.removeEventListener('astro:page-load', syncAuthorContextFromDOM)
+    document.removeEventListener('blog-core:layout-state', handleLayoutState)
+    document.removeEventListener('astro:page-load', handlePageLoad)
+    document.removeEventListener('profile:toggle', handleProfileToggle)
+    document.removeEventListener('click', handleDocumentClick)
+    document.removeEventListener('keydown', handleDocumentKeydown)
   }
 })
 
 onDestroy(() => {
+  mounted = false
   stopAvatarAnimation()
-  // 🎬 NEW: Clean up video elements properly
-  videoElements.forEach((video: ExtendedHTMLVideoElement) => {
-    if (video) {
-      video.pause()
-      // Remove custom event listeners
-      if (video.endedHandler) {
-        video.removeEventListener('ended', video.endedHandler)
-      }
-      video.removeAttribute('src')
-      video.load()
-    }
-  })
-  videoElements = []
-})
-
-// Handle navigation changes (Astro page transitions)
-onMount(() => {
-  const handlePageLoad = () => {
-    stopAvatarAnimation()
-    if (hasMultipleAvatars) {
-      setTimeout(startAvatarAnimation, 100)
-    }
-  }
-
-  document.addEventListener('astro:page-load', handlePageLoad)
-  return () => {
-    document.removeEventListener('astro:page-load', handlePageLoad)
-  }
 })
 </script>
 
-<div class="card-base p-3">
-  <a
-    aria-label="Go to About Page"
-    href={displayLink}
-    class="group block relative mx-auto mt-1 md:mx-0 md:mt-0 mb-3 max-w-[12rem] md:max-w-none overflow-hidden rounded-xl active:scale-95"
+<div
+  class="responsive-profile-owner"
+  class:responsive-profile-owner--sidebar-hidden={!isSidebarVisible}
+  bind:this={ownerElement}
+>
+  <button
+    bind:this={triggerElement}
+    type="button"
+    class="profile-mobile-trigger btn-regular md:hidden"
+    aria-label="Open profile"
+    aria-controls="responsive-profile-panel"
+    aria-expanded={isVisible}
+    on:click={toggleProfile}
   >
-    <div class="absolute transition pointer-events-none group-hover:bg-black/30 group-active:bg-black/50 w-full h-full z-50 flex items-center justify-center">
-      <svg 
-        class="transition opacity-0 scale-90 group-hover:scale-100 group-hover:opacity-100 text-white w-12 h-12"
-        fill="none" 
-        stroke="currentColor" 
-        viewBox="0 0 24 24"
+    <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM5 21a7 7 0 0114 0" />
+    </svg>
+  </button>
+
+  <div
+    bind:this={panelElement}
+    id="responsive-profile-panel"
+    class="responsive-profile-panel"
+    class:responsive-profile-panel--open={isVisible}
+    role={isCompactViewport ? 'dialog' : undefined}
+    aria-modal={isCompactViewport ? 'true' : undefined}
+    aria-label={isCompactViewport ? 'Profile' : undefined}
+    tabindex="-1"
+  >
+    <div class="profile-mobile-heading md:hidden">
+      <span>Profile</span>
+      <button
+        bind:this={closeElement}
+        type="button"
+        aria-label="Close profile"
+        class="btn-plain flex h-8 w-8 items-center justify-center rounded-full"
+        on:click={() => closeProfile()}
       >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-              d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V4a2 2 0 114 0v2m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-      </svg>
+        <span aria-hidden="true">✕</span>
+      </button>
     </div>
 
-    <!-- Image container with relative positioning -->
-    <div class="relative w-full aspect-square">
-      {#if useDefaultAvatars}
-        {#if effectiveIsHomePage || !hasMultipleAvatars}
-          <!-- Single avatar (home page, single avatar, or animated avatar) -->
-          {#if selectedAvatar}
-            {@const mediaConfig = renderMediaElement(selectedAvatar, "Profile Image of the Site Owner", "avatar-image w-full h-full object-contain opacity-100 rounded-xl", "eager")}
-            
-            {#if mediaConfig.type === 'video'}
-              <!-- 🎬 ENHANCED: Video avatar with custom controls -->
-              <video
-                bind:this={videoElement}
-                src={mediaConfig.src}
-                class={mediaConfig.className}
-                autoplay
-                muted
-                loop={mediaConfig.shouldLoop}
-                playsinline
-                disablePictureInPicture
-                preload="auto"
-                on:loadedmetadata={(e) => configureVideoElement(e.currentTarget as ExtendedHTMLVideoElement)}
-              >
-                <!-- Fallback for unsupported video -->
-                <div class="avatar-image w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl">
-                  <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                  </svg>
-                </div>
-              </video>
-            {:else}
-              <!-- Image avatar (includes animated GIFs, WebP, etc.) -->
-              <img
-                src={mediaConfig.src}
-                alt={mediaConfig.alt}
-                class={mediaConfig.className}
-                loading={mediaConfig.loading}
-              />
-            {/if}
+    <div class="card-base p-3">
+      <a
+        aria-label="Go to About Page"
+        href={displayLink}
+        class="group relative mx-auto mb-3 mt-1 block max-w-[12rem] overflow-hidden rounded-xl active:scale-95 md:mx-0 md:mt-0 md:max-w-none"
+      >
+        <div class="pointer-events-none absolute z-50 flex h-full w-full items-center justify-center transition group-hover:bg-black/30 group-active:bg-black/50">
+          <svg aria-hidden="true" class="h-12 w-12 scale-90 text-white opacity-0 transition group-hover:scale-100 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V4a2 2 0 114 0v2m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+          </svg>
+        </div>
+
+        <div class="relative aspect-square w-full overflow-hidden rounded-xl">
+          {#if mediaActive && currentAvatarSource && !mediaFailed}
+            {#key `${currentAvatarSource}:${mediaRenderKey}`}
+              {#if isVideoFile(currentAvatarSource)}
+                <video
+                  use:registerVideo
+                  src={currentAvatarSource}
+                  aria-label={currentAvatarAlt}
+                  class="avatar-image h-full w-full object-contain"
+                  autoplay
+                  muted
+                  playsinline
+                  disablePictureInPicture
+                  preload="metadata"
+                ></video>
+              {:else}
+                <img
+                  src={currentAvatarSource}
+                  alt={currentAvatarAlt}
+                  class="avatar-image h-full w-full object-contain"
+                  loading="eager"
+                  on:error={() => (mediaFailed = true)}
+                />
+              {/if}
+            {/key}
+          {:else if mediaFailed}
+            <div class="profile-media-placeholder" role="status">
+              <span>Profile image unavailable.</span>
+              <button type="button" class="btn-plain rounded-lg px-2 py-1 text-sm" on:click|preventDefault={retryMedia}>Retry</button>
+            </div>
           {:else}
-            <!-- Fallback avatar placeholder -->
-            <div class="avatar-image w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl">
-              <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            <div class="profile-media-placeholder" aria-hidden="true">
+              <svg class="h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM5 21a7 7 0 0114 0" />
               </svg>
             </div>
           {/if}
-        {:else}
-          <!-- Multiple avatars with animation -->
-          {#each avatarList as src, index}
-            {#if src}
-              {@const mediaConfig = renderMediaElement(src, "Profile Image of the Author", `avatar-image absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 rounded-xl ${index === currentAvatarIndex ? 'opacity-100' : 'opacity-0'}`, index === activeAvatarIndex ? 'eager' : 'lazy')}
-              
-              {#if mediaConfig.type === 'video'}
-                <!-- 🎬 ENHANCED: Video in cycling mode with controls -->
-                <video
-                  src={mediaConfig.src}
-                  class={mediaConfig.className}
-                  autoplay={index === currentAvatarIndex}
-                  muted
-                  loop={mediaConfig.shouldLoop}
-                  playsinline
-                  disablePictureInPicture
-                  preload={mediaConfig.loading === 'eager' ? 'auto' : 'none'}
-                  on:loadedmetadata={(e) => configureVideoElement(e.currentTarget as ExtendedHTMLVideoElement)}
-                ></video>
-              {:else}
-                <!-- Static image in cycling mode -->
-                <img
-                  src={mediaConfig.src}
-                  alt={mediaConfig.alt}
-                  class={mediaConfig.className}
-                  loading={mediaConfig.loading}
-                />
-              {/if}
-            {/if}
-          {/each}
-        {/if}
-      {:else}
-        <!-- Custom avatar -->
-        {#if effectiveCustomAvatar}
-          {@const mediaConfig = renderMediaElement(effectiveCustomAvatar, `Profile Image of ${displayName}`, "avatar-image w-full h-full object-contain opacity-100 rounded-xl", "eager")}
-          
-          {#if mediaConfig.type === 'video'}
-            <!-- 🎬 ENHANCED: Custom video avatar with controls -->
-            <video
-              bind:this={videoElement}
-              src={mediaConfig.src}
-              class={mediaConfig.className}
-              autoplay
-              muted
-              loop={mediaConfig.shouldLoop}
-              playsinline
-              disablePictureInPicture
-              preload="auto"
-              on:loadedmetadata={(e) => configureVideoElement(e.currentTarget as ExtendedHTMLVideoElement)}
-            >
-              <!-- Fallback for unsupported video -->
-              <div class="avatar-image w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl">
-                <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-              </div>
-            </video>
-          {:else}
-            <!-- Custom image avatar -->
-            <img
-              src={mediaConfig.src}
-              alt={mediaConfig.alt}
-              class={mediaConfig.className}
-              loading={mediaConfig.loading}
-            />
-          {/if}
-        {:else}
-          <!-- Fallback avatar placeholder -->
-          <div class="avatar-image w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl">
-            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-            </svg>
-          </div>
-        {/if}
-      {/if}
-    </div>
-  </a>
+        </div>
+      </a>
 
-   <div class="px-2">
-    <div class="font-bold text-xl text-center mb-1 dark:text-neutral-50 transition">
-      {displayName}
-    </div>
-    <div class="h-1 w-5 bg-[var(--primary)] mx-auto rounded-full mb-2 transition"></div>
-    <div class="text-center text-neutral-400 mb-2.5 transition">
-      {displayBio}
-    </div> 
-    
-    <!-- Social Links -->
-    <!-- {#if socialLinks.length > 0}
-      <div class="flex gap-2 justify-center mb-1">
-        {#if socialLinks.length > 1}
-          {#each socialLinks as link}
-            <a
-              rel="me"
-              aria-label={link.name}
-              href={link.url}
-              target="_blank"
-              class="btn-regular rounded-lg h-10 w-10 active:scale-90 flex items-center justify-center"
-            > -->
-              <!-- Social icon SVGs -->
-              <!-- {#if link.icon.includes('github')}
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-              {:else if link.icon.includes('twitter')}
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                </svg>
-              {:else if link.icon.includes('linkedin')}
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
-              {:else if link.icon.includes('mail') || link.icon.includes('email')}
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-              {:else} -->
-                <!-- Generic link icon for unknown types -->
-                <!-- <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                </svg>
-              {/if}
-            </a>
-          {/each}
-        {:else} -->
-          <!-- Single link with label -->
-          <!-- <a
-            rel="me"
-            aria-label={socialLinks[0].name}
-            href={socialLinks[0].url}
-            target="_blank"
-            class="btn-regular rounded-lg h-10 gap-2 px-3 font-bold active:scale-95 flex items-center"
-          >
-            {#if socialLinks[0].icon.includes('github')}
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-            {:else} -->
-              <!-- Other single link icons... -->
-              <!-- <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-              </svg>
-            {/if}
-            {socialLinks[0].name}
-          </a>
-        {/if}
+      <div class="px-2">
+        <div class="mb-1 text-center text-xl font-bold transition dark:text-neutral-50">{displayName}</div>
+        <div class="mx-auto mb-2 h-1 w-5 rounded-full bg-[var(--primary)] transition"></div>
+        <div class="mb-2.5 text-center text-neutral-400 transition">{displayBio}</div>
       </div>
-    {/if} -->
+    </div>
   </div>
 </div>
 
 <style>
-  .avatar-image {
-    border-radius: 0.75rem;
-  }
-  
-  /* Ensure smooth transitions */
-  .transition-opacity {
-    transition: opacity 1s ease-in-out;
+  .responsive-profile-owner {
+    display: contents;
   }
 
-  /* Ensure videos fit properly */
-  video.avatar-image {
-    object-fit: cover;
+  .profile-mobile-trigger {
+    position: fixed;
+    top: 4.25rem;
+    right: 0.75rem;
+    z-index: 59;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+  }
+
+  .responsive-profile-panel {
+    position: fixed;
+    top: 4.25rem;
+    right: 0.75rem;
+    z-index: 60;
+    width: min(17.5rem, calc(100vw - 1.5rem));
+    max-height: calc(100svh - 5rem);
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(1rem);
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .responsive-profile-panel--open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .profile-mobile-heading {
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.375rem;
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.75rem;
+    background: var(--card-bg);
+    font-weight: 700;
+  }
+
+  .profile-media-placeholder {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    color: rgb(255 255 255 / 0.75);
+    background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+    text-align: center;
+  }
+
+  .avatar-image {
+    border-radius: 0.75rem;
+    animation: profile-media-enter 220ms ease both;
+  }
+
+  @keyframes profile-media-enter {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @media (min-width: 768px) {
+    .responsive-profile-owner {
+      display: block;
+    }
+
+    .responsive-profile-owner--sidebar-hidden {
+      display: none;
+    }
+
+    .profile-mobile-trigger {
+      display: none;
+    }
+
+    .responsive-profile-panel {
+      position: static;
+      width: auto;
+      max-height: none;
+      overflow: visible;
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .responsive-profile-panel,
+    .avatar-image {
+      transition: none;
+      animation: none;
+    }
   }
 </style>

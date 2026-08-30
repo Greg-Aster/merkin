@@ -7,6 +7,8 @@ import {
   FIRST_CONTACT_MANUAL_TITLE,
   firstContactManualHref,
 } from '../../utils/reader'
+import readerStylesHref from '../../styles/reader/first-contact-manual.css?url'
+import readerFlowStylesHref from '../../styles/reader/first-contact-manual-flow.css?url'
 import ReaderBanner from './ReaderBanner.astro'
 
 interface Props {
@@ -51,6 +53,10 @@ const readerArticleClass = [
   backgroundImage={entry.data.image || '/posts/timeline/dont.png'}
   oneColumn={true}
 >
+  <Fragment slot="head">
+    <link rel="stylesheet" href={readerStylesHref} data-route-style="reader" />
+    <link rel="stylesheet" href={readerFlowStylesHref} data-route-style="reader" />
+  </Fragment>
   <ReaderBanner
     slot="banner-slide-content"
     entries={entries}

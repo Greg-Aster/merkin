@@ -1,7 +1,6 @@
 ---
 import '@fontsource/creepster'
 import '@fontsource/metal-mania'
-import CompactArchiveBanner from '@components/archive/CompactArchiveBanner.astro'
 import SiteAudioRuntime from '@components/client/SiteAudioRuntime.svelte'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
@@ -11,12 +10,7 @@ import {
   postUsesArchiveBanner,
   resolvePostOneColumn,
 } from '../utils/mainGridLayout.server'
-import '@/styles/features/banner/banner-base.css'
-import '@/styles/features/banner/banner-billboards.css'
-import '@/styles/features/banner/banner-title-display.css'
-import '@/styles/features/banner/banner-responsive.css'
-import '@/styles/features/banner/banner-site-overlays.css'
-import '@/styles/features/interactions.css'
+import bannerStylesHref from '@/styles/features/banner/index.css?url'
 
 interface Props {
   title?: string
@@ -43,6 +37,7 @@ interface Props {
   timelineConstellationConfig?: Record<string, unknown>
   timelineConstellationPatterns?: Record<string, unknown>
   timelineConnectionPatterns?: Record<string, unknown>
+  renderTimelineBannerSlot?: boolean
 }
 
 const sharedHomeLayout = Astro.props.homeLayout
@@ -50,7 +45,12 @@ const hasCustomBannerSlideContent = Astro.slots.has('banner-slide-content')
 const hasCustomBannerOverlayContent = Astro.slots.has('banner-overlay-content')
 const hasTimelineBannerContent = Astro.slots.has('timeline-banner-content')
 const originalPost = Astro.props.post as
-  | ({ data?: { bannerType?: string } } & Record<string, unknown>)
+  | ({
+      data?: {
+        bannerType?: string
+        bannerData?: Record<string, unknown>
+      }
+    } & Record<string, unknown>)
   | undefined
 const isContentPost = isContentPostPage(Astro.props.isPostPage, originalPost)
 const layoutPost = originalPost
@@ -58,6 +58,16 @@ const resolvedOneColumn = isContentPost
   ? resolvePostOneColumn(originalPost)
   : Astro.props.oneColumn
 const usesArchiveBanner = !isContentPost && postUsesArchiveBanner(layoutPost)
+const CompactArchiveBanner = usesArchiveBanner
+  ? (await import('@components/archive/CompactArchiveBanner.astro')).default
+  : null
+const usesTimelinePostBanner =
+  !hasTimelineBannerContent && layoutPost?.data?.bannerType === 'timeline'
+const TimelineBanner = usesTimelinePostBanner
+  ? (await import('@components/timeline/TimelineBanner.astro')).default
+  : null
+const timelineBannerData = layoutPost?.data?.bannerData ?? {}
+const rendersTimelineBanner = hasTimelineBannerContent || Boolean(TimelineBanner)
 const hasPortalDemoContent = Astro.slots.has('portal-demo-content')
 const sharedProps: Omit<Props, 'homeLayout'> & {
   homeLayout?: 'default' | 'portal'
@@ -67,6 +77,7 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   homeLayout: sharedHomeLayout,
   oneColumn: resolvedOneColumn,
   contentMode: Astro.props.contentMode,
+  renderTimelineBannerSlot: rendersTimelineBanner,
 }
 ---
 
@@ -74,6 +85,7 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   {...sharedProps}
 >
   <Fragment slot="head">
+    <link rel="stylesheet" href={bannerStylesHref} data-feature-style="banner" />
     <slot name="head" />
   </Fragment>
   <script>
@@ -97,16 +109,25 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
       <slot name="portal-demo-content" />
     </Fragment>
   )}
-  {hasTimelineBannerContent && (
+  {hasTimelineBannerContent ? (
     <Fragment slot="timeline-banner-content">
       <slot name="timeline-banner-content" />
     </Fragment>
-  )}
+  ) : TimelineBanner ? (
+    <Fragment slot="timeline-banner-content">
+      <TimelineBanner
+        {...timelineBannerData}
+        class="h-full w-full"
+        asBanner={true}
+        bannerHeight="100%"
+      />
+    </Fragment>
+  ) : null}
   {hasCustomBannerSlideContent ? (
     <Fragment slot="banner-slide-content">
       <slot name="banner-slide-content" />
     </Fragment>
-  ) : usesArchiveBanner ? (
+  ) : usesArchiveBanner && CompactArchiveBanner ? (
     <Fragment slot="banner-slide-content">
       <CompactArchiveBanner post={layoutPost as any} />
     </Fragment>

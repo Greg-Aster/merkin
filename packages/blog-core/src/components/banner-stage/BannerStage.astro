@@ -8,7 +8,6 @@ import {
 	youtubeEmbedReferrerPolicy,
 } from "../../utils/youtube-embed";
 import ImageWrapper from "../misc/ImageWrapper.astro";
-import TimelineController from "../timeline/TimelineBanner.astro";
 import { resolveLegacyBannerScene } from "./legacySceneRegistry";
 
 type BannerMediaData = {
@@ -122,6 +121,7 @@ interface Props {
 	timelineConstellationConfig?: Record<string, unknown>;
 	timelineConstellationPatterns?: Record<string, unknown>;
 	timelineConnectionPatterns?: Record<string, unknown>;
+	renderTimelineBannerSlot?: boolean;
 	shouldShowMobilePortraitRightRailHero?: boolean;
 	mobilePortraitRightRailHeroStyle?: string;
 	currentPath: string;
@@ -150,6 +150,7 @@ const {
 	timelineConstellationConfig,
 	timelineConstellationPatterns,
 	timelineConnectionPatterns,
+	renderTimelineBannerSlot,
 	shouldShowMobilePortraitRightRailHero = false,
 	mobilePortraitRightRailHeroStyle = "default",
 	currentPath,
@@ -161,7 +162,8 @@ const {
 	bannerAspectRatio = "auto",
 	bannerAspectRatioMobile = bannerAspectRatio,
 } = Astro.props;
-const hasTimelineBannerSlot = Astro.slots.has("timeline-banner-content");
+const hasTimelineBannerSlot =
+	renderTimelineBannerSlot ?? Astro.slots.has("timeline-banner-content");
 const hasPortalDemoContent = Astro.slots.has("portal-demo-content");
 
 const scene = resolveLegacyBannerScene(currentBannerType);
@@ -196,6 +198,9 @@ const hasStandardBanner = scene?.id === "standard";
 const hasCookbookBanner = scene?.id === "cookbook";
 const hasArchiveBanner = scene?.id === "archive";
 const hasReaderBanner = scene?.id === "reader";
+const TimelineController = hasTimelineBanner && !hasTimelineBannerSlot
+	? (await import("../timeline/TimelineBanner.astro")).default
+	: null;
 const videoBannerData =
 	hasPostBanner && post?.data?.bannerType === "video"
 		? post.data.bannerData
@@ -286,7 +291,7 @@ const portalSlideIndexOffset =
 
             {hasTimelineBannerSlot ? (
               <slot name="timeline-banner-content" />
-            ) : (
+            ) : TimelineController ? (
               <TimelineController
                 category={hasPostBanner && post?.data?.bannerType === 'timeline'
                   ? post.data.bannerData.category
@@ -324,7 +329,7 @@ const portalSlideIndexOffset =
                 asBanner={true}
                 bannerHeight="100%"
               />
-            )}
+            ) : null}
           </div>
         </div>
       </div>

@@ -424,13 +424,293 @@ Browser and build evidence:
   app-local timeline calculation/texture modules were added inside the existing
   owners; superseded inline calculations and animation paths were removed.
 
+### Batch 7 - retire the uncalled app-local profile fork (2026-08-29)
+
+Implemented:
+
+- A repository-wide caller inventory confirmed that the active profile and
+  mobile overlay are imported only from `packages/blog-core`. The app-local
+  `src/components/client/Profile.svelte` was reachable only from the app-local
+  `MobileProfileOverlay.svelte`, and that overlay had no renderer or external
+  import.
+- Deleted both app-local components and their exclusively imported
+  `src/styles/features/profile.css`: 712 lines of superseded component/style
+  ownership. No replacement, compatibility export, or parallel profile path was
+  added.
+- Removed the retired local profile component's CSS-architecture baseline
+  allowance. Historical audit reports were retained as dated evidence rather
+  than rewritten to conceal their former finding.
+
+Browser and build evidence:
+
+- The final production build completed 367 pages in 233.36 seconds, passed the
+  built-HTML audit, and indexed 84 pages. Its only emitted profile owners were
+  the shared `Profile` (10.38 KB) and `MobileProfileOverlay` (2.25 KB) chunks;
+  deleting the orphan therefore correctly produces no client-payload claim.
+- Type-check and contract audits passed. Changed-file and strict CSS audits
+  report zero existing and zero new findings. The complete CSS inventory still
+  exits zero while printing six baseline and ten pre-existing current-worktree
+  findings; its unreliable error exit remains a separate guardrail repair.
+- On `/posts/first-contact-manual-style-guide/` at 390 x 844, the only direct
+  profile island resolves to
+  `packages/blog-core/src/components/client/Profile.svelte`. The closed shared
+  overlay has no visible profile card or pointer events; its existing
+  `profile:toggle` event exposes one profile card and one avatar. No console
+  error, failed request, hydration warning, or local `profile.css` request was
+  observed.
+- That same probe also confirms the remaining shared defect rather than hiding
+  it: the page still instantiates two shared profile trees with twelve avatar
+  elements, while no maintained `#sidenav-profile-btn` trigger is rendered.
+  The desktop `/archive/` probe did not expose a visible sidebar profile, so
+  desktop visual profile behavior remains unverified. Both behaviors are owned
+  by the shared grid/profile/controller path and were not routed around here.
+- The sandbox purged ignored `dist` contents after the successful build, so the
+  focused interaction probe used the source dev server. Exact production
+  profile interaction, deployed PageSpeed, and physical-device behavior remain
+  unverified.
+- No public asset, production dependency, component, stylesheet, hydration
+  directive, route, or shared package was added. The only non-deletion change
+  is the downward CSS-baseline correction.
+
+### Batch 8 - enforce CSS debt failures and split the reader owner (2026-08-29)
+
+Implemented:
+
+- `scripts/audit-css-architecture.mjs` now returns a nonzero exit code when the
+  complete audit finds error-severity debt that is new or expanded relative to
+  the baseline. With no baseline it blocks every error-severity finding; the
+  JSON report now exposes the same decision as `blockingIssues`. Strict mode
+  retains its broader contract of blocking every new baseline issue.
+- Before editing the reader styles, the repaired audit correctly exited 1 on
+  the unbaselined 1,950-nonblank-line
+  `src/styles/reader/first-contact-manual.css` owner. The baseline was not
+  raised or otherwise changed to hide that failure.
+- Kept `src/styles/reader/first-contact-manual.css` as the canonical import and
+  made it a thin ordered entrypoint for five responsibility-based partials:
+  foundation/tokens (247 nonblank lines), shared primitives (452), extended
+  reference/routing (441), chapter/protocol visuals (313), and legacy chapter
+  compatibility (497). These boundaries follow the stylesheet's existing
+  section ownership rather than introducing another reader style system.
+- The concatenated partials have the same SHA-256 as the former stylesheet,
+  `1af1b9e086c2eb247752b3d72e60f481f14c23ee7e42fc7c388d8c68830f84fe`.
+  Selectors, declarations, and cascade order are therefore byte-for-byte
+  unchanged. No MDX or reader component needed a new import.
+
+Browser, audit, and build evidence:
+
+- The complete CSS audit now exits zero with no blocking issue. The former
+  oversized-reader error is gone; six baseline items and nine unrelated
+  warning-only findings remain. Changed-file and strict audits both report zero
+  existing and zero new findings, and the all-files JSON audit reports an empty
+  `blockingIssues` list.
+- Type-check and the diff whitespace check pass. The final production build
+  completed 367 pages in 387.07 seconds, passed the built-HTML redirect audit,
+  compressed 368 HTML and 1,293 JSON files, and indexed 84 pages with Pagefind.
+- Mobile 390 x 844 checks covered the reader index, foreword, chapters 1 and 5,
+  and afterword; chapter 1 was also checked at 1440 x 900. The existing reader
+  tokens, window/index panels, hero, protocol and imperative treatments,
+  afterword, next link, and legacy compatibility selectors all retained their
+  computed styling. No horizontal overflow, console error, hydration warning,
+  failed request, or missing reader asset was observed.
+- The build still prints Tailwind's known missing-`from` PostCSS warning. Its
+  active local config contains only `postcss-nesting`; the warning traces to
+  `postcss.parse` calls inside Tailwind 3.4.19's rule generation and preflight
+  code. Repair would require a maintained dependency patch or Tailwind
+  migration, so it was not hidden with a local workaround or dependency change
+  without Project Owner approval.
+- The site contract audit passed. At this batch's validation point, the combined
+  command had one unrelated home-portal failure because a concurrent edit
+  changed `PortalHeroBackgroundSlide.astro` away from its then-contracted URL.
+  The concurrent owner subsequently reconciled the protected contract; the
+  final Batch 10 combined contract run verifies all nine portal surfaces.
+- No public asset, production dependency, hydration directive, component,
+  route, or CSS baseline allowance was added. The only new files are the five
+  reader partials behind the existing canonical stylesheet entrypoint.
+
+### Batch 9 - retire the orphan home-route stylesheet family (2026-08-29)
+
+Implemented:
+
+- Traced every CSS audit warning through direct imports, CSS `@import` edges,
+  selector consumers, generated assets, and built HTML. None of the eight
+  reported home styles had a current Astro, Svelte, MDX, TypeScript, or CSS
+  caller, and none of their selector families had current rendered markup.
+- Four files were absent from the generated site as expected. Four others were
+  still emitted and linked by nearly every route despite having no source
+  caller: `portal-route-core.css`, `portal-route-effects.css`,
+  `portal-route-store-community.css`, and `portal-timeline-route.css`. A forced
+  Astro content-cache rebuild proved that this was a retained obsolete module
+  graph rather than an undiscovered owner.
+- Deleted all eight superseded files together: the four stale-output files plus
+  `home-intro-hero-slide.css`, `portal-destinations.css`,
+  `portal-route-archive.css`, and `portal-route-observatory.css`. This retires
+  1,656 source lines without adding a replacement style system. The current
+  home owners remain `portal-hero-slide.css`, `portal-hero-scroll-cue.css`,
+  `portal-sponsored-bloom.css`, and the styles imported by the active 3D scene.
+
+Browser, audit, and build evidence:
+
+- The complete CSS audit dropped from 15 findings to 7: six baseline findings
+  plus the unrelated warning-only `PortalSponsoredBloom.astro` size finding.
+  All eight unreferenced-style warnings are gone. Complete, changed-file, and
+  strict audits exit zero; type-check and the diff whitespace check pass.
+- `astro build --force` explicitly cleared the content data store and completed
+  367 pages in 380.03 seconds. The built-HTML redirect audit passed and Pagefind
+  indexed 84 pages. No retired filename or selector appears in generated HTML,
+  JavaScript, or CSS, and no corresponding asset remains under `dist/_astro`.
+- The four formerly retained CSS files totaled 25,410 uncompressed generated
+  bytes. Mobile home, desktop home, and a mobile regular post now expose 50
+  external stylesheets rather than the measured 54-route baseline: four fewer
+  requestable styles on every route.
+- In exact production preview checks at 390 x 844 and 1440 x 900, home retained
+  its visible banner and portal hero, the scroll cue remained visible and
+  keyboard-focusable, and the regular post loaded normally. All three checks
+  had no retired style URL, retired selector element, horizontal overflow,
+  console error, hydration warning, or failed network request.
+- The dependency-level PostCSS warning and 699 KB Three.js chunk warning remain.
+  The concurrent home-video contract mismatch observed during Batch 8 was
+  subsequently reconciled by its owner. This batch added no component,
+  stylesheet, script, dependency, hydration boundary, route, baseline
+  allowance, or public asset.
+
+### Batch 10 - retire the uncalled SideNavbar and panel fork (2026-08-29)
+
+Implemented:
+
+- A repository-wide caller inventory confirmed that no route, layout,
+  component, content file, or game source renders the app-local
+  `SideNavbar.astro` or imports the app-local `SidenavPanels.svelte`. The active
+  island is rendered by `packages/blog-core/src/layouts/MainGridLayout.astro`
+  and resolves to the shared `SidenavPanels.svelte` owner.
+- Deleted the 313-line app-local SideNavbar, the 390-line app-local panel fork,
+  and its exclusively imported 9-line `side-navbar.css`: 712 lines retired with
+  no replacement, compatibility export, listener family, or style owner added.
+- The scratchpad's neighboring Bleepy item was stale by the time of this batch.
+  Current repository commit `2849a042` had already deleted the complete
+  2,715-line Bleepy family, including both competing controllers, banners,
+  widgets, managers, data, docs, and exclusive styles. No Bleepy path was
+  recreated or redundantly deleted here.
+
+Browser and build evidence:
+
+- The exact `pnpm build` completed 367 pages in 340.36 seconds, passed the
+  built-HTML redirect audit, and indexed 84 pages. Its sole emitted
+  `SidenavPanels` client chunk is the shared package owner at 12.26 KB; no
+  app-local SideNavbar asset or exclusive stylesheet is emitted.
+- Type-check, the complete CSS audit, changed-file CSS audit, strict CSS audit,
+  site contract audit, and diff whitespace check pass. The complete CSS audit
+  remains at the seven findings documented in Batch 9.
+- Exact production preview checks covered mobile and desktop home plus a mobile
+  regular post. The home banner-only composition correctly has no panel island;
+  the post has one shared panel island, no `#unified-sidenav`, and no
+  `side-navbar` stylesheet. Dispatching the maintained `profile:toggle` event
+  opens the shared mobile profile overlay. No console error, hydration warning,
+  failed request, or horizontal overflow was observed.
+- At this batch boundary, the remaining shared panel still probed for deleted
+  SideNavbar IDs and the mobile overlay still targeted its deleted profile
+  button. The authorized cross-package follow-up in Batch 11 deleted both
+  adapters and established the maintained responsive profile trigger.
+- No public asset, production dependency, component, stylesheet, script,
+  hydration directive, route, or baseline allowance was added.
+
+### Batch 11 - consolidate shared profile, timeline, theme, and layout ownership (2026-08-29)
+
+Implemented:
+
+- Audited every live `@merkin/blog-core` layout consumer before changing the
+  package. Megameal, Ainekio, and Travel all import the shared grid/layout;
+  `apps/game` declares the package but has no current source import.
+- Replaced the desktop profile plus independently hydrated mobile-overlay
+  profile with one responsive `Profile.svelte` island. Deleted the superseded
+  shared `MobileProfileOverlay.svelte` and dormant `SidenavPanels.svelte`
+  adapter, and removed their grid mounts. Closed mobile, CSS-hidden desktop,
+  and single-column desktop states now contain no image/video element or media
+  source. Opening activates one asset; close, Escape, or returning to one
+  column releases it.
+- Preserved the live layout feature after its original server-only assumption
+  was exposed in browser testing. `SpecialPageFeatures.svelte` is the layout
+  state owner and now communicates through direct events; `LayoutToggle.svelte`
+  no longer waits for window globals with retry/backoff or polls them every
+  100 ms. The one profile island follows those state events, so switching to
+  two columns shows the author and switching back removes hidden media.
+- Removed the global timeline-view and timeline-banner startup from the base
+  layout. Their existing component scripts now initialize only when their
+  timeline markup renders. A normal post makes no request for either client.
+- Restored explicit timeline article banners. The banner policy had classified
+  `bannerType: timeline` on posts as unsupported, and two adapter layers always
+  forwarded a statically registered but empty named slot. The maintained
+  timeline type is now admitted and explicit slot-presence data reaches the
+  banner stage, allowing a normal timeline post to use its existing default
+  renderer while `/timeline/` keeps its custom 3D carousel.
+- Removed duplicate theme-click ownership from the shared and Megameal navbars.
+  `LightDarkSwitch.svelte` is the sole scheme control and uses static inline
+  SVGs instead of dynamic Iconify components that produced an Ainekio hydration
+  mismatch. One click now produces one stored/document theme transition.
+- Aligned Ainekio's HTML compression with the already proven class/whitespace
+  settings, removed its stale always-pass compression hook, and repaired the
+  Megameal/Ainekio image-banner resolvers to honor a post's canonical image.
+  Ainekio's Current Status route now loads its declared
+  `/posts/ainekio-2026/current-status.webp` rather than the placeholder path.
+
+Measured and browser evidence:
+
+- The three former shared profile chunks totaled 24.85 KB minified
+  (`Profile` 10.38 KB, mobile overlay 2.25 KB, panels 12.22 KB). The final
+  Megameal build emits one 9.61 KB profile chunk, a 15.24 KB/61% reduction, and
+  has exactly one profile owner on tested routes.
+- On `/posts/timeline/`, production preview renders one initialized shared
+  timeline shell and banner. Zoom changes the stage from scale 1 to 1.2. The
+  layout toggle changes `hidden -> visible -> hidden`; the author card is
+  264 x 354 px in two-column mode, media count changes `0 -> 1 -> 0`, and the
+  name/bio remain `The Universe` / `...and everything in it`.
+- A normal mobile post requests no shared timeline client. Its closed profile
+  has no media; opening requests one asset and focuses Close; the forced media
+  error shows a retry control; retry restores media; Escape closes, releases
+  media, and returns focus to Open. There is no overflow, bad response, or
+  failed request.
+- The dedicated `/timeline/` route still renders its custom hydrated carousel,
+  one WebGL canvas, and no default shared-timeline wrapper. Headless Chrome
+  reports only its software-WebGL/driver performance warnings.
+- Ainekio Current Status at 390 x 844 renders the intended image, one profile
+  owner, and one theme switch; a single light-to-dark click updates both
+  storage and the document. Ainekio home verifies the shared profile on a real
+  two-column desktop route. Travel's archived page remains responsive and
+  unchanged. None of those consumer checks has an app console, hydration,
+  network, asset, or overflow failure.
+- Megameal's production post still logs one Svelte hydration mismatch. A clean
+  controlled probe removes it only when the concurrently modified
+  `DocsEditorBridge` island is blocked; all other islands, including Profile,
+  LayoutToggle, and SpecialPageFeatures, hydrate without that warning. The
+  bridge is outside this performance batch and remains a separate defect.
+
+Validation and remaining work:
+
+- Blog-core, Megameal, Ainekio, and Travel type-checks pass. Final production
+  builds pass for 367, 73, and 1 page respectively; Megameal's build completed
+  in 292.53 seconds, passed its 21-shell HTML audit, and indexed 84 pages.
+  Ainekio completed in 49.96 seconds and indexed 14 pages; Travel completed in
+  2.34 seconds.
+- Complete, changed-file, and strict CSS audits exit zero. The complete audit
+  still lists six baselines and the unrelated warning-only
+  `PortalSponsoredBloom.astro` size item; strict reports only the existing
+  `TimelinePortalCarousel.svelte` baseline. Site, home-portal, timeline, and
+  diff-whitespace checks pass.
+- A regular post currently exposes 51 external stylesheets, so the fewer-than-
+  15 target remains open. The known Tailwind PostCSS warning, deferred 699 KB
+  Three.js chunk warning, five missing Miranda link targets, deployed
+  PageSpeed, and physical-device checks also remain open.
+- This batch added no route, component, stylesheet, dependency, hydration
+  boundary, public asset, test, script, or baseline allowance. It modified
+  existing scoped/shared CSS and client owners and deleted the two superseded
+  shared components.
+
 ## Active owner map
 
 - App route composition: `src/pages/[...page].astro` and the route files under
   `src/pages/`.
 - Megameal layout adapter: `src/layouts/MainGridLayout.astro`.
 - Shared route shell and client-controller composition:
-  `packages/blog-core/src/layouts/MainGridLayout.astro` (1,770 lines).
+  `packages/blog-core/src/layouts/MainGridLayout.astro` (1,686 lines).
 - Shared banner renderer:
   `packages/blog-core/src/components/banner-stage/BannerStage.astro` (2,389
   lines).
@@ -460,8 +740,11 @@ Browser and build evidence:
   markup: `src/components/store/MarketplaceListingCard.astro`; filtering,
   sorting, and progressive product media: `storefrontController.ts`.
 - Active profile implementation:
-  `packages/blog-core/src/components/client/Profile.svelte`, mounted by the
-  shared grid and mobile overlay.
+  `packages/blog-core/src/components/client/Profile.svelte`, mounted once by
+  the shared grid and admitted by viewport plus live sidebar state.
+- Shared layout state: `SpecialPageFeatures.svelte`; Megameal's visible
+  `LayoutToggle.svelte` requests changes and consumes state through the direct
+  `blog-core:layout-*` event contract.
 - Shared public assets: `public/`; `apps/game` also consumes this tree, so it is
   not safe to prune based on Megameal callers alone.
 
@@ -557,6 +840,9 @@ empty result, keyboard focus, close action, and subsequent cached query work.
 
 ### 4. Prevent hidden responsive profile media from loading twice
 
+Status: completed and browser-verified in Batch 11, including the live
+one-column/two-column transition and media failure/retry path.
+
 Root cause: the shared grid renders a desktop profile and a separate mobile
 profile overlay. Both use the same active profile component, whose video branch
 uses autoplay and `preload="auto"`. On the mobile post probe,
@@ -605,16 +891,16 @@ navigation and reload.
 ### Timeline
 
 Status: the app-local frame storm, duplicate background scene, and eager mobile
-timeline video are repaired and browser-verified in Batch 6. LCP remains gated
-by the closed shared mobile-profile overlay and requires authorized
-`packages/blog-core` work.
+timeline video are repaired in Batch 6. Batch 11 completes the shared profile
+admission and restores/route-localizes timeline article banners. Deployed
+PageSpeed and physical-device LCP evidence remain open.
 
 - Owner: `TimelinePortalCarousel.svelte`, `TimelineBackgroundMedia.svelte`,
   `TimelinePortalCarouselScene.svelte`, and their adjacent pure calculation and
   texture modules.
-- Optimize or progressively attach the six 0.48 to 1.41 MB PNG avatar images in
-  the actual shared `MobileProfileOverlay`/`Profile.svelte` owner. Do not add a
-  timeline-local profile or duplicate responsive image path.
+- Completed in Batch 11: the responsive profile has one island and attaches one
+  asset only while the mobile overlay or desktop sidebar is visible. No
+  timeline-local profile or duplicate responsive image path was added.
 - Completed: autoplay, scroll, adaptive DPR, scene projection, generated
   textures, constellation motion, slider transitions, visibility, and media
   admission were profiled and consolidated around event-driven work.
@@ -663,15 +949,14 @@ source images and the shared CSS/controller fan-out remain pending.
 
 ## P1 - Consolidate client-controller ownership
 
-Status: the app-local audio admission/unlock path is completed and
-browser-verified in Batch 5. The remaining global layout/controller fan-out is
-owned by `packages/blog-core`; changing it crosses the app boundary and requires
-explicit cross-consumer authorization and validation rather than an app-local
-workaround.
+Status: the app-local audio admission/unlock path is completed in Batch 5. The
+global timeline startup and layout-toggle polling handshake were repaired and
+cross-consumer validated in Batch 11. OverlayScrollbars/PhotoSwipe admission
+and the remaining panel compatibility probes are still open.
 
-- `packages/blog-core/src/layouts/Layout.astro` globally imports timeline view
-  and timeline banner clients, initializes them on direct load, and initializes
-  them again on `astro:page-load`. Move timeline startup to the timeline owner.
+- Completed in Batch 11: timeline view/banner startup lives with the rendering
+  components; a normal post requests neither client and timeline routes keep
+  their intended shared or custom renderer.
 - Audit the global OverlayScrollbars and PhotoSwipe startup. Load PhotoSwipe
   only on pages with an eligible gallery; use native scrolling where the custom
   owner adds no required behavior.
@@ -682,9 +967,8 @@ workaround.
 - `Navbar.astro` mounts search, cart, audio, theme, and display controls and also
   contains a 500 ms "bandaid" that boots then hides Bleepy. Make mascot
   visibility a render/config decision and delete the delayed hide path.
-- The active shared `SidenavPanels.svelte` still probes for retired SideNavbar
-  button IDs. Remove that compatibility path when the unused SideNavbar family
-  is deleted; the active panel should bind only to its real controls.
+- Completed in Batch 11: the uncalled shared `SidenavPanels.svelte`
+  compatibility adapter and its retired SideNavbar button probes were deleted.
 
 ## P2 - Remove confirmed duplicate and orphan code
 
@@ -692,26 +976,22 @@ These items primarily improve maintainability/build work. They should follow
 the critical-path repairs so line-count cleanup is not confused with runtime
 proof.
 
-- The active profile owner is in `packages/blog-core`. The 549-line
-  `src/components/client/Profile.svelte` fork and app-local
-  `MobileProfileOverlay.svelte` have no maintained caller in the current import
-  graph. Confirm no external imports, then remove the whole unused local family,
-  its styles, and stale documentation together.
-- `src/components/bleepy/bleepy-client-setup.ts` (727 lines) has no runtime
-  caller and closely duplicates the inline controller in `Bleepy.astro` (632
-  lines). Establish whether Bleepy is maintained, select the active owner, and
-  delete the superseded implementation rather than merging both into a third
-  controller.
-- `src/components/widget/SideNavbar.astro` has no maintained renderer, but it
-  still contains four competing startup triggers and delayed listener binding.
-  Remove it with the unused app-local `SidenavPanels.svelte` fork and the active
-  shared panel's obsolete SideNavbar adapter after confirming no external
-  consumer.
-- Replace the `SpecialPageFeatures.svelte` + `LayoutToggle.svelte` handshake.
-  It currently uses two `onMount` blocks, a delayed initialization, window
-  globals, retry/backoff, 100 ms polling, and hidden synthetic buttons. Keep one
-  layout-state owner and a direct component/event contract; remove globals,
-  polling, hidden buttons, and retries in the same change.
+- Completed in Batch 7: the active profile owner remains in
+  `packages/blog-core`; the uncalled app-local `Profile.svelte` and
+  `MobileProfileOverlay.svelte` family, its exclusive stylesheet, and its
+  baseline allowance were removed together.
+- Already completed by current repository commit `2849a042`: the complete
+  2,715-line Bleepy component/controller/manager family was retired together;
+  Batch 10 verified that no Bleepy source or runtime caller remains.
+- Completed app-locally in Batch 10: the uncalled SideNavbar renderer, app-local
+  `SidenavPanels.svelte` fork, and exclusive stylesheet were retired together.
+  Batch 11 then removed the obsolete uncalled shared adapter after
+  cross-consumer validation.
+- Completed in Batch 11 for layout ownership: `SpecialPageFeatures.svelte` is
+  the event-driven state owner; delayed global discovery, retry/backoff, and
+  100 ms polling are removed. Its unrelated cookbook compatibility block still
+  creates two uncalled hidden gallery/list triggers and should be retired only
+  with focused cookbook validation.
 - After a caller inventory, remove retired compatibility/default matrices from
   the 1,770-line shared grid and 2,389-line banner stage. Do not split them just
   to improve line-count metrics: each extraction must become the single owner
@@ -744,11 +1024,15 @@ proof.
 
 ## Guardrail repairs
 
-- Make `audit:css` return a nonzero exit code when it reports error-severity new
-  or expanded debt. Do not update the baseline upward to make this pass.
-- Reconcile the eight reported unreferenced home CSS files with the built CSS
-  links. Delete only after the real Vite/Astro import provenance is known.
-- Resolve the PostCSS `from` warning at the responsible plugin/config owner.
+- Completed in Batch 8: `audit:css` returns a nonzero exit code for
+  error-severity new or expanded debt, and the former oversized reader owner
+  was split without raising the baseline or changing its cascade.
+- Completed in Batch 9: the eight reported home styles had no live caller. Four
+  were retained only by an obsolete content/build-cache module graph; all eight
+  were deleted and a forced build removed four global CSS requests per route.
+- Traced in Batch 8: the PostCSS `from` warning originates in Tailwind 3.4.19's
+  internal parser calls, not the local one-plugin PostCSS config. Resolve it
+  through an approved maintained dependency patch or Tailwind migration.
 - Add a small built-route budget audit for requestable CSS/JS ownership. It
   should fail when a regular route links timeline, reader, store, or home-only
   assets.

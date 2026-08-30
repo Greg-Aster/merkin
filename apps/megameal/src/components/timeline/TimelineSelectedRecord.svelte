@@ -3,7 +3,6 @@ import type {
   TimelineCarouselScreen,
   TimelinePortalEvent,
 } from './timelinePortalCarouselModel'
-import '../../styles/features/timeline/timeline-selected-record.css'
 
 export let selectedScreen: TimelinePortalEvent | null = null
 export let selectedScreenView: TimelineCarouselScreen | null = null

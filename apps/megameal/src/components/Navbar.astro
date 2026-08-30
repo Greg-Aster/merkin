@@ -194,15 +194,6 @@ import '../styles/features/extracted/navbar.css'
                 localStorage.theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
         }
 
-        // Theme switch
-        let switchBtn = document.getElementById("scheme-switch");
-        if (switchBtn) {
-            switchBtn.addEventListener("click", function () {
-                switchTheme();
-                updateMobileThemeLabel();
-            });
-        }
-    
         // Display settings button
         let settingBtn = document.getElementById("display-settings-switch");
         if (settingBtn) {

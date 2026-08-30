@@ -5,6 +5,16 @@ import Markdown from '@components/misc/Markdown.astro'
 import { Icon } from 'astro-icon/components'
 import { publicCollectionFilter } from '../../contracts/content'
 import PostMetadata from '../../components/PostMeta.astro'
+import reviewBriefHref from '../../styles/features/extracted/review-brief.css?url'
+import reviewConstellationHref from '../../styles/features/extracted/review-cosmic-constellation.css?url'
+import reviewCosmicVoidHref from '../../styles/features/extracted/review-cosmic-void.css?url'
+import reviewCosmicHref from '../../styles/features/extracted/review-cosmic.css?url'
+import reviewEvidenceHref from '../../styles/features/extracted/review-essay-evidence.css?url'
+import reviewMontageHref from '../../styles/features/extracted/review-essay-montage.css?url'
+import reviewEssayHref from '../../styles/features/extracted/review-essay.css?url'
+import reviewModeSliderHref from '../../styles/features/extracted/review-mode-slider.css?url'
+import horrorRuptureHref from '../../styles/pages/megameal-explained-horror-rupture.css?url'
+import horrorMovieHref from '../../styles/pages/megameal-movie-trailer-explained-horror.css?url'
 
 export async function getStaticPaths() {
   const videos = await getCollection('videos', publicCollectionFilter)
@@ -35,6 +45,18 @@ const videoBannerPost = {
     showToc: false,
   },
 }
+const videoStyleHrefs = [
+  reviewBriefHref,
+  reviewConstellationHref,
+  reviewCosmicVoidHref,
+  reviewCosmicHref,
+  reviewEvidenceHref,
+  reviewMontageHref,
+  reviewEssayHref,
+  reviewModeSliderHref,
+  horrorRuptureHref,
+  horrorMovieHref,
+]
 ---
 
 <MainGridLayout
@@ -45,6 +67,11 @@ const videoBannerPost = {
   backgroundImage={thumbnail}
   oneColumn={true}
 >
+  <Fragment slot="head">
+    {videoStyleHrefs.map(href => (
+      <link rel="stylesheet" href={href} data-route-style="video" />
+    ))}
+  </Fragment>
   <div class="mobile-content-frame-shell flex w-full rounded-[var(--radius-large)] overflow-hidden relative mt-4 mb-4">
     <article
       id="video-container"

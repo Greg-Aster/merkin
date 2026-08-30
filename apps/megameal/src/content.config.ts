@@ -160,6 +160,38 @@ const megamealPostsSchema = postsSchema.extend({
     .object({
       documentId: z.string().regex(/^[A-Za-z0-9_-]{20,}$/),
       style: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+      presentation: z
+        .enum([
+          'origin',
+          'primer',
+          'archive',
+          'network',
+          'laboratory',
+          'strategic',
+          'field-notes',
+          'incident',
+          'temporal',
+          'corporate',
+          'fragment',
+          'causal',
+          'terminal',
+        ])
+        .optional(),
+      media: z
+        .array(
+          z.object({
+            afterHeadingId: z
+              .string()
+              .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+            src: z.string().regex(/^\/[^\s]+$/),
+            alt: z.string().min(1),
+            layout: z
+              .enum(['wide', 'bleed', 'aside-start', 'aside-end'])
+              .optional(),
+          }),
+        )
+        .optional()
+        .default([]),
     })
     .optional(),
   bannerType: z

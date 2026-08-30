@@ -11,7 +11,6 @@ import {
   positionViewerFloorForObject,
   type ProceduralModelViewerVariant,
 } from './proceduralModelLighting'
-import '../../../styles/features/store/featured-product/procedural-model-viewer.css'
 export let label = '3D product preview'
 export let variant: ProceduralModelViewerVariant = 'generic'
 export let fullscreen = false

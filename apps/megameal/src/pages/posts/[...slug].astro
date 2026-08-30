@@ -22,7 +22,7 @@ import {
   loadGoogleDocSnapshot,
   resolveGoogleDocStylesheet,
 } from '../../utils/googleDocContent.server'
-import '../../styles/pages/post-detail.css'
+import postDetailHref from '../../styles/pages/post-detail.css?url'
 
 import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
 import LayoutToggle from '../../components/client/LayoutToggle.svelte'
@@ -73,6 +73,9 @@ const {
 const usesGoogleDocContent = Boolean(
   post.data.googleDoc && googleDocSnapshot && googleDocStylesheetHref,
 )
+const googleDocPresentationClass = post.data.googleDoc?.presentation
+  ? ` google-doc-presentation-${post.data.googleDoc.presentation}`
+  : ''
 const retiredPostRedirects: Record<string, string> = {
   ...firstContactManualRedirects(),
   'introducing-story-mode': '/reader/first-contact-manual/',
@@ -223,6 +226,7 @@ const pdfButtonLabel = useDownloadFile
 >
 
 <Fragment slot="head">
+  <link rel="stylesheet" href={postDetailHref} data-route-style="post" />
   <!-- Add these meta tags for better date extraction -->
   <meta name="publish-date" content={formatDateToYYYYMMDD(post.data.published)} />
   <meta property="article:published_time" content={post.data.published.toISOString()} />
@@ -310,13 +314,14 @@ const pdfButtonLabel = useDownloadFile
             {post.data.image && post.data.showImageOnPost !== false &&
               <ImageWrapper id="post-cover" src={post.data.image} basePath={path.join("content/posts/", getDir(post.id))} class="mb-8 rounded-xl banner-container onload-animation"/>
             }
-            <Markdown class={`mb-6 markdown-content onload-animation max-md:prose-sm${usesGoogleDocContent ? ' google-doc-content' : ''}`}>
+            <Markdown class={`mb-6 markdown-content onload-animation max-md:prose-sm${usesGoogleDocContent ? ` google-doc-content${googleDocPresentationClass}` : ''}`}>
                 {usesGoogleDocContent && post.data.googleDoc ? (
                   <DocsEditorBridge
                     client:load
                     url={post.data.googleDoc.documentId}
                     format="md"
                     initialBlocks={googleDocSnapshot.blocks}
+                    editorialMedia={post.data.googleDoc.media}
                   />
                 ) : (
                   <Content />

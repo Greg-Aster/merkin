@@ -1,9 +1,4 @@
-import './variables.styl'
-import './main.css'
-import './foundation/tokens-accessibility.css'
-import './foundation/timeline-banner-layout.css'
-import './foundation/components-core.css'
-import './foundation/navigation-utilities.css'
-import './foundation/forms-effects-accessibility.css'
-import './foundation/global-elements.css'
-import './pages/mobile-content-frame.css'
+import variablesHref from './variables.styl?url'
+import foundationHref from './foundation/index.css?url'
+
+export const siteStyleHrefs = [variablesHref, foundationHref] as const

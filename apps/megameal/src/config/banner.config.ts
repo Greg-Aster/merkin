@@ -319,6 +319,7 @@ const articlePostBannerTypes = new Set<BannerType>([
   'standard',
   'image',
   'video',
+  'timeline',
   'cookbook',
   'reader',
   'none',
@@ -351,8 +352,8 @@ export function getBannerDataFromPost(post: any): PostBannerData | null {
     customName: post.data.authorName || '',
     customBio: post.data.authorBio || '',
     slug: post.slug || '',
-    // Article posts opt into banners with bannerType. Legacy archive/timeline
-    // article values are treated as no banner.
+    // Article posts opt into maintained banners with bannerType. Legacy archive
+    // article values are still treated as no banner.
     wantsNoDefaultBanner:
       post.data.bannerType === 'none' || wantsNoArticleBanner(post),
   }
@@ -476,16 +477,11 @@ export function getBannerDataSources(
 
   let resolvedImageBannerData: any = null
   if (hasImageBanner) {
-    if (post?.data?.bannerType === 'image') {
-      const imageUrl = post.data.bannerData?.imageUrl || post.data.image
-      if (typeof imageUrl === 'string') {
-        resolvedImageBannerData = { imageUrl: imageUrl }
-      } else {
-        console.warn(
-          'Banner config: Post-specific image banner lacks a valid imageUrl. Falling back to default.',
-        )
-        resolvedImageBannerData = bannerConfig.imageBannerConfig.data
-      }
+    const postImageUrl =
+      post?.data?.bannerData?.imageUrl || post?.data?.image
+
+    if (typeof postImageUrl === 'string' && postImageUrl.trim()) {
+      resolvedImageBannerData = { imageUrl: postImageUrl }
     } else {
       if (isImageBannerData(bannerConfig.imageBannerConfig.data)) {
         resolvedImageBannerData = bannerConfig.imageBannerConfig.data

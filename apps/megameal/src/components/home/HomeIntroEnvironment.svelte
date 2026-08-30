@@ -25,7 +25,6 @@ import {
   homeIntroWheelToScreenRatio,
 } from './homeIntroScreens'
 
-import '../../styles/features/extracted/home-intro-environment.css'
 type IntroInputState = {
   x: number
   y: number

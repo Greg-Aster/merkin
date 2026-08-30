@@ -40,14 +40,11 @@ import {
   createTimelineCameraController,
   isTimelineInteractiveTarget,
   isPointInsideTimelineShell,
-  isTimelineSceneDragBlockedTarget,
   isTimelineShellVisible,
   setTimelineMapZoom,
   type TimelineStarScreenPosition,
   updateTimelinePointer,
 } from './timelinePortalPresentation'
-
-import '../../styles/features/extracted/home-intro-environment.css'
 
 export let events: TimelinePortalEvent[] = []
 export let eraConfig: TimelinePortalEraConfig = {}
@@ -403,7 +400,7 @@ function handleScenePointerDown(event: PointerEvent) {
     !shell ||
     event.button !== 0 ||
     !event.isPrimary ||
-    isTimelineSceneDragBlockedTarget(event.target, isMapMode)
+    isTimelineInteractiveTarget(event.target)
   ) return
 
   pauseAutoplay()
@@ -470,7 +467,7 @@ function handlePointerMove(event: PointerEvent) {
 
 function handleTouchStart(event: TouchEvent) {
   timelineBackgroundMedia?.start()
-  if (isTimelineSceneDragBlockedTarget(event.target, isMapMode)) return
+  if (isTimelineInteractiveTarget(event.target)) return
   if (isMapMode && event.touches.length === 1) {
     const touch = event.touches[0]
     if (!isPointInsideTimelineShell(shell, touch.clientX, touch.clientY)) return

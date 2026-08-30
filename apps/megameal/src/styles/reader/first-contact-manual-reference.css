@@ -1,0 +1,490 @@
+/* --------------------------------------------------------------------------
+   Repair + full-forward coverage
+   These rules complete the shared style system beyond the index. They also
+   make every .fcmi-* component self-contained so styles do not disappear when
+   a wrapper lacks token variables.
+   -------------------------------------------------------------------------- */
+
+:root {
+  --fcmi-text-rgb: 235 245 255;
+  --fcmi-muted-rgb: 190 207 225;
+  --fcmi-dim-rgb: 135 158 184;
+  --fcmi-surface-rgb: 4 8 18;
+  --fcmi-surface-2-rgb: 12 28 52;
+  --fcmi-surface-3-rgb: 2 8 18;
+  --fcmi-accent-rgb: 125 178 235;
+  --fcmi-accent-2-rgb: 77 96 170;
+  --fcmi-glow-rgb: 69 143 220;
+  --fcmi-radius-xl: 1.45rem;
+  --fcmi-radius-lg: 1rem;
+  --fcmi-radius-md: 0.75rem;
+  --fcmi-radius-sm: 0.45rem;
+  --fcmi-mono: var(--font-jetbrains-mono, "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
+  --fcmi-sans: var(--font-sans, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  --fcmi-cream: rgb(var(--fcmi-text-rgb) / 0.94);
+  --fcmi-muted: rgb(var(--fcmi-muted-rgb) / 0.70);
+  --fcmi-dim: rgb(var(--fcmi-dim-rgb) / 0.52);
+  --fcmi-line: rgb(var(--fcmi-accent-rgb) / 0.22);
+  --fcmi-line-soft: rgb(var(--fcmi-accent-rgb) / 0.10);
+  --fcmi-glow: rgb(var(--fcmi-glow-rgb) / 0.18);
+}
+
+:where([class*="fcmi-"]) {
+  --fcmi-cream: rgb(var(--fcmi-text-rgb) / 0.94);
+  --fcmi-muted: rgb(var(--fcmi-muted-rgb) / 0.70);
+  --fcmi-dim: rgb(var(--fcmi-dim-rgb) / 0.52);
+  --fcmi-line: rgb(var(--fcmi-accent-rgb) / 0.22);
+  --fcmi-line-soft: rgb(var(--fcmi-accent-rgb) / 0.10);
+  --fcmi-glow: rgb(var(--fcmi-glow-rgb) / 0.18);
+  box-sizing: border-box;
+}
+
+/* Ensure tone classes work anywhere, not just on index entries. */
+.fcmi-tone-red { --fcmi-accent-rgb: 248 95 95; --fcmi-accent-2-rgb: 136 30 45; --fcmi-glow-rgb: 255 45 45; }
+.fcmi-tone-orange { --fcmi-accent-rgb: 245 151 88; --fcmi-accent-2-rgb: 139 72 28; --fcmi-glow-rgb: 245 115 55; }
+.fcmi-tone-yellow { --fcmi-accent-rgb: 226 207 102; --fcmi-accent-2-rgb: 130 105 35; --fcmi-glow-rgb: 240 210 70; }
+.fcmi-tone-blue { --fcmi-accent-rgb: 118 170 255; --fcmi-accent-2-rgb: 58 86 168; --fcmi-glow-rgb: 69 143 220; }
+.fcmi-tone-cyan { --fcmi-accent-rgb: 105 218 232; --fcmi-accent-2-rgb: 42 130 150; --fcmi-glow-rgb: 65 210 230; }
+.fcmi-tone-purple { --fcmi-accent-rgb: 174 145 255; --fcmi-accent-2-rgb: 92 60 170; --fcmi-glow-rgb: 150 105 255; }
+.fcmi-tone-green { --fcmi-accent-rgb: 115 218 160; --fcmi-accent-2-rgb: 44 130 76; --fcmi-glow-rgb: 80 220 135; }
+.fcmi-tone-gray { --fcmi-accent-rgb: 170 184 200; --fcmi-accent-2-rgb: 76 86 100; --fcmi-glow-rgb: 145 165 185; }
+
+/* Window aliases used by forward.mdx */
+.fcmi-routing-window,
+.fcmi-reference-window {
+  position: relative;
+  margin: clamp(1.25rem, 4vw, 2.5rem) 0;
+  padding: 1px;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.32);
+  border-radius: var(--fcmi-radius-xl);
+  background:
+    radial-gradient(circle at 12% 0%, rgb(var(--fcmi-accent-rgb) / 0.20), transparent 34%),
+    radial-gradient(circle at 100% 12%, rgb(var(--fcmi-accent-2-rgb) / 0.18), transparent 38%),
+    linear-gradient(135deg, rgb(var(--fcmi-accent-rgb) / 0.18), rgb(var(--fcmi-surface-2-rgb) / 0.05) 40%, rgb(var(--fcmi-accent-rgb) / 0.10));
+  box-shadow:
+    0 26px 74px rgb(0 0 0 / 0.42),
+    0 0 36px rgb(var(--fcmi-glow-rgb) / 0.12),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.045);
+  overflow: hidden;
+}
+
+.fcmi-routing-window::before,
+.fcmi-reference-window::before,
+.fcmi-section-panel::before,
+.fcmi-reference-spread::before,
+.fcmi-legend-window::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.105;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgb(var(--fcmi-accent-rgb) / 0.14) 0,
+      rgb(var(--fcmi-accent-rgb) / 0.14) 1px,
+      transparent 1px,
+      transparent 6px
+    );
+  mix-blend-mode: screen;
+}
+
+.fcmi-routing-window::after,
+.fcmi-reference-window::after,
+.fcmi-section-panel::after,
+.fcmi-reference-spread::after,
+.fcmi-legend-window::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgb(var(--fcmi-text-rgb) / 0.42) 0 1px, transparent 1px),
+    radial-gradient(circle at 78% 62%, rgb(var(--fcmi-accent-rgb) / 0.33) 0 1px, transparent 1px);
+  background-size: 21px 21px, 37px 37px;
+}
+
+.fcmi-routing-shell,
+.fcmi-reference-shell {
+  position: relative;
+  z-index: 1;
+  border-radius: calc(var(--fcmi-radius-xl) - 1px);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.04), rgb(var(--fcmi-text-rgb) / 0.012)),
+    linear-gradient(135deg, rgb(var(--fcmi-surface-2-rgb) / 0.92), rgb(var(--fcmi-surface-rgb) / 0.96) 58%, rgb(var(--fcmi-surface-3-rgb) / 0.94));
+  box-shadow:
+    inset 0 0 48px rgb(var(--fcmi-glow-rgb) / 0.08),
+    inset 0 1px 0 rgb(var(--fcmi-text-rgb) / 0.075);
+  padding: clamp(0.9rem, 2.5vw, 1.35rem);
+}
+
+.fcmi-routing-frame,
+.fcmi-reference-frame {
+  position: relative;
+  z-index: 1;
+  border: 1px solid var(--fcmi-line);
+  border-radius: var(--fcmi-radius-lg);
+  padding: clamp(0.95rem, 2.5vw, 1.6rem);
+  background:
+    radial-gradient(circle at 50% -10%, rgb(var(--fcmi-accent-rgb) / 0.10), transparent 36%),
+    rgb(var(--fcmi-surface-3-rgb) / 0.28);
+}
+
+/* Tighter routing rows. */
+.fcmi-routing-list {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  border-top: 1px solid var(--fcmi-line);
+}
+
+.fcmi-routing-row {
+  display: grid;
+  grid-template-columns: minmax(4.8rem, 0.7fr) minmax(0, 0.9fr) minmax(0, 1.4fr);
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.78rem 0.25rem;
+  border-bottom: 1px solid var(--fcmi-line-soft);
+  color: var(--fcmi-muted);
+  text-decoration: none;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.fcmi-routing-row:hover {
+  transform: translateX(2px);
+  background: linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.075), transparent 70%);
+  color: var(--fcmi-cream);
+  text-decoration: none;
+}
+
+.fcmi-routing-code,
+.fcmi-row-code {
+  color: rgb(var(--fcmi-accent-rgb) / 0.78);
+  font-family: var(--fcmi-mono);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.fcmi-routing-title,
+.fcmi-row-title {
+  color: rgb(var(--fcmi-accent-rgb) / 0.88);
+  font-weight: 800;
+}
+
+.fcmi-routing-desc,
+.fcmi-row-desc {
+  color: var(--fcmi-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+/* Reusable transformed panel surface for MDX. */
+.fcmi-section-panel {
+  position: relative;
+  margin: clamp(1.4rem, 4vw, 2.5rem) 0;
+  padding: 1px;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.34);
+  border-radius: var(--fcmi-radius-xl);
+  background:
+    radial-gradient(circle at 8% 0%, rgb(var(--fcmi-accent-rgb) / 0.20), transparent 32%),
+    linear-gradient(135deg, rgb(var(--fcmi-accent-rgb) / 0.16), transparent 38%, rgb(var(--fcmi-accent-2-rgb) / 0.10));
+  box-shadow:
+    0 24px 68px rgb(0 0 0 / 0.34),
+    0 0 32px rgb(var(--fcmi-glow-rgb) / 0.10);
+  overflow: hidden;
+}
+
+.fcmi-section-panel-inner {
+  position: relative;
+  z-index: 1;
+  border-radius: calc(var(--fcmi-radius-xl) - 1px);
+  padding: clamp(1rem, 3vw, 1.55rem);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.045), rgb(var(--fcmi-text-rgb) / 0.012)),
+    linear-gradient(135deg, rgb(var(--fcmi-surface-2-rgb) / 0.84), rgb(var(--fcmi-surface-rgb) / 0.95) 62%, rgb(var(--fcmi-surface-3-rgb) / 0.96));
+  box-shadow:
+    inset 0 0 42px rgb(var(--fcmi-glow-rgb) / 0.075),
+    inset 0 1px 0 rgb(var(--fcmi-text-rgb) / 0.07);
+}
+
+.fcmi-section-panel .fcmi-panel-header {
+  margin-bottom: clamp(0.9rem, 2.5vw, 1.35rem);
+}
+
+.fcmi-panel-heading-group {
+  min-width: 0;
+}
+
+/* Reference spread + legend */
+.fcmi-reference-spread {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.75fr);
+  gap: clamp(1rem, 3vw, 1.5rem);
+  margin: clamp(1.4rem, 4vw, 2.6rem) 0;
+  padding: 1px;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.24);
+  border-radius: var(--fcmi-radius-xl);
+  background:
+    radial-gradient(circle at 0% 0%, rgb(var(--fcmi-accent-rgb) / 0.16), transparent 35%),
+    linear-gradient(135deg, rgb(var(--fcmi-accent-rgb) / 0.10), transparent 46%);
+  box-shadow:
+    0 24px 70px rgb(0 0 0 / 0.32),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.035);
+  overflow: hidden;
+  padding: clamp(1rem, 3vw, 1.45rem);
+}
+
+.fcmi-prose-stack,
+.fcmi-card-stack,
+.fcmi-stat-stack,
+.fcmi-protocol-stack {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: clamp(0.85rem, 2vw, 1rem);
+}
+
+.fcmi-prose-stack {
+  padding: clamp(0.8rem, 2vw, 1.15rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.11);
+  border-radius: var(--fcmi-radius-lg);
+  background: rgb(var(--fcmi-surface-rgb) / 0.28);
+  color: var(--fcmi-muted);
+}
+
+.fcmi-prose-stack p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+.fcmi-legend-window {
+  position: relative;
+  z-index: 1;
+  align-self: start;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.26);
+  border-radius: var(--fcmi-radius-lg);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.045), rgb(var(--fcmi-text-rgb) / 0.008)),
+    rgb(var(--fcmi-surface-rgb) / 0.52);
+  box-shadow:
+    inset 0 0 28px rgb(var(--fcmi-glow-rgb) / 0.06),
+    0 18px 44px rgb(0 0 0 / 0.22);
+  padding: clamp(0.9rem, 2vw, 1.1rem);
+  overflow: hidden;
+}
+
+.fcmi-legend-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.7rem;
+  border-bottom: 1px solid var(--fcmi-line);
+}
+
+.fcmi-legend-header strong {
+  color: var(--fcmi-cream);
+  font-size: 0.92rem;
+}
+
+.fcmi-legend-kicker {
+  color: rgb(var(--fcmi-accent-rgb) / 0.68);
+  font-family: var(--fcmi-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.fcmi-legend-list {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.42rem;
+}
+
+.fcmi-legend-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 0.46rem 0.52rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.13);
+  border-radius: var(--fcmi-radius-sm);
+  background: linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.065), transparent 76%);
+}
+
+.fcmi-legend-name {
+  color: rgb(var(--fcmi-accent-rgb) / 0.84);
+  font-family: var(--fcmi-mono);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+}
+
+.fcmi-legend-meta {
+  color: var(--fcmi-dim);
+  font-size: 0.73rem;
+  text-align: right;
+}
+
+.fcmi-legend-note {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.85rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--fcmi-line-soft);
+  color: var(--fcmi-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.fcmi-legend-note p {
+  margin: 0 0 0.55rem;
+}
+
+.fcmi-legend-note p:last-child {
+  margin-bottom: 0;
+}
+
+/* Metrics/stat cards */
+.fcmi-metric-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  gap: clamp(1rem, 3vw, 1.35rem);
+  align-items: start;
+  margin: clamp(1.2rem, 4vw, 2.2rem) 0;
+}
+
+.fcmi-stat-card,
+.fcmi-mini-card,
+.fcmi-quote-card,
+.fcmi-document-excerpt,
+.fcmi-callout-card {
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.22);
+  border-radius: var(--fcmi-radius-md);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.04), rgb(var(--fcmi-text-rgb) / 0.008)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.075), transparent 62%),
+    rgb(var(--fcmi-surface-rgb) / 0.42);
+  box-shadow:
+    inset 0 0 24px rgb(var(--fcmi-glow-rgb) / 0.055),
+    0 14px 34px rgb(0 0 0 / 0.20);
+  padding: clamp(0.9rem, 2vw, 1.1rem);
+  overflow: hidden;
+}
+
+.fcmi-stat-card::before,
+.fcmi-mini-card::before,
+.fcmi-quote-card::before,
+.fcmi-document-excerpt::before,
+.fcmi-callout-card::before {
+  content: "";
+  position: absolute;
+  inset: 0.48rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.055);
+  border-radius: calc(var(--fcmi-radius-md) - 0.28rem);
+  pointer-events: none;
+}
+
+.fcmi-stat-head,
+.fcmi-mini-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--fcmi-cream);
+  font-weight: 800;
+}
+
+.fcmi-stat-head span,
+.fcmi-mini-head strong {
+  color: rgb(var(--fcmi-accent-rgb) / 0.86);
+}
+
+.fcmi-stat-head strong,
+.fcmi-mini-head span:last-child {
+  font-family: var(--fcmi-mono);
+  color: var(--fcmi-cream);
+  letter-spacing: -0.03em;
+}
+
+.fcmi-stat-card p,
+.fcmi-mini-card p,
+.fcmi-callout-card p {
+  position: relative;
+  z-index: 1;
+  margin: 0.65rem 0 0;
+  color: var(--fcmi-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.fcmi-progress {
+  position: relative;
+  z-index: 1;
+  height: 0.55rem;
+  margin: 0.75rem 0;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.22);
+  border-radius: 999px;
+  background: rgb(var(--fcmi-surface-3-rgb) / 0.58);
+  overflow: hidden;
+}
+
+.fcmi-progress-fill {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.42), rgb(var(--fcmi-accent-rgb) / 0.92));
+  box-shadow: 0 0 16px rgb(var(--fcmi-glow-rgb) / 0.46);
+}
+
+.fcmi-stat-breakdown {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.75rem;
+}
+
+.fcmi-stat-breakdown .fcmi-data-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 0.36rem 0.45rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.11);
+  border-radius: var(--fcmi-radius-sm);
+  background: rgb(var(--fcmi-accent-rgb) / 0.045);
+}
+
+.fcmi-caption {
+  margin: 0;
+  color: var(--fcmi-dim);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.fcmi-card-stack {
+  gap: 0.72rem;
+}
+
+.fcmi-mini-head {
+  font-size: 0.86rem;
+}
+
+.fcmi-mini-head .fcmi-dot {
+  flex: 0 0 auto;
+}
+

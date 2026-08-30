@@ -19,10 +19,6 @@ import type {
   ProductMedia,
   RelatedProduct,
 } from './types'
-import '../../../styles/features/store/featured-product/featured-product-shell.css'
-import '../../../styles/features/store/featured-product/featured-product-commerce.css'
-import '../../../styles/features/store/featured-product/featured-product-panels.css'
-import '../../../styles/features/store/featured-product/featured-product-related-modal.css'
 
 export let product: FeaturedProduct
 export let showBannerControls = true

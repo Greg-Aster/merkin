@@ -7,6 +7,8 @@ import {
 } from '@/config/timelineconfig'
 import TimelinePortalCarousel from '@components/timeline/TimelinePortalCarousel.svelte'
 import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
+import timelineEnvironmentHref from '../styles/features/extracted/home-intro-environment.css?url'
+import timelineSelectedRecordHref from '../styles/features/timeline/timeline-selected-record.css?url'
 import MainGridLayout from './MainGridLayout.astro'
 
 interface Props {
@@ -43,6 +45,10 @@ const syntheticPost = {
   timelineConstellationPatterns={constellationPatterns}
   timelineConnectionPatterns={connectionPatterns}
 >
+  <Fragment slot="head">
+    <link rel="stylesheet" href={timelineEnvironmentHref} data-route-style="timeline" />
+    <link rel="stylesheet" href={timelineSelectedRecordHref} data-route-style="timeline" />
+  </Fragment>
   <Fragment slot="timeline-banner-content">
     <h1 class="sr-only">{title}</h1>
     <div id="megameal-timeline-route-marker" hidden></div>

@@ -434,16 +434,11 @@ export function getBannerDataSources(
 
   let resolvedImageBannerData: any = null
   if (hasImageBanner) {
-    if (post?.data?.bannerType === 'image') {
-      const imageUrl = post.data.bannerData?.imageUrl || post.data.image
-      if (typeof imageUrl === 'string') {
-        resolvedImageBannerData = { imageUrl: imageUrl }
-      } else {
-        console.warn(
-          'Banner config: Post-specific image banner lacks a valid imageUrl. Falling back to default.',
-        )
-        resolvedImageBannerData = bannerConfig.imageBannerConfig.data
-      }
+    const postImageUrl =
+      post?.data?.bannerData?.imageUrl || post?.data?.image
+
+    if (typeof postImageUrl === 'string' && postImageUrl.trim()) {
+      resolvedImageBannerData = { imageUrl: postImageUrl }
     } else {
       if (isImageBannerData(bannerConfig.imageBannerConfig.data)) {
         resolvedImageBannerData = bannerConfig.imageBannerConfig.data

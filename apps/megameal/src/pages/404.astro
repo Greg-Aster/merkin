@@ -5,13 +5,45 @@ import {
 } from '@/content/posts/store/store-placeholder.mdx'
 import MainGridLayout from '@/layouts/MainGridLayout.astro'
 import StoreLayout from '@/layouts/store/StoreLayout.astro'
+import { url } from '@/utils/url-utils'
 import { Icon } from 'astro-icon/components'
-import '../styles/pages/not-found.css'
 
 const isStorePagination404 = Astro.url.pathname.startsWith('/store/page/')
-
-// Get the requested path for display
+const pageTitle = '404: Page Not Found'
+const pageDescription =
+  "This address doesn't point to an active page in the MEGAMEAL archive."
 const requestedPath = Astro.url.pathname
+const baseUrl = import.meta.env.BASE_URL
+const notFoundLayoutPost = {
+  slug: 'not-found',
+  data: {
+    title: pageTitle,
+    description: pageDescription,
+    bannerType: 'none',
+    oneColumn: true,
+    showToc: false,
+  },
+} as const
+const recoveryLinks = [
+  {
+    href: url('/', baseUrl),
+    icon: 'material-symbols:home-rounded',
+    label: 'Home',
+    description: 'Return to the main MEGAMEAL experience.',
+  },
+  {
+    href: url('/archive/', baseUrl),
+    icon: 'material-symbols:archive-outline',
+    label: 'Archive',
+    description: 'Browse stories, records, recipes, and transmissions.',
+  },
+  {
+    href: url('/timeline/', baseUrl),
+    icon: 'material-symbols:timeline',
+    label: 'Timeline',
+    description: 'Follow the chronology of the MEGAMEAL universe.',
+  },
+] as const
 ---
 
 {isStorePagination404 ? (
@@ -19,147 +51,92 @@ const requestedPath = Astro.url.pathname
     <Content />
   </StoreLayout>
 ) : (
-  <MainGridLayout 
-    title="404: Page Not Found" 
-    description="The page you're looking for seems to have vanished into the cosmic void. Let us help you find your way back."
+  <MainGridLayout
+    title={pageTitle}
+    description={pageDescription}
+    post={notFoundLayoutPost}
+    oneColumn={true}
   >
-    <!-- Main 404 Content -->
-    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
-      <div class="not-found-page card-base z-10 px-6 md:px-9 pt-8 pb-8 relative w-full text-center">
-        
-        <!-- 404 Icon and Header -->
-        <div class="onload-animation mb-8">
-          <div class="text-8xl md:text-9xl font-bold text-[var(--primary)] mb-4 leading-none">
+    <section
+      class="card-base megameal-surface mx-auto w-full max-w-5xl px-5 py-7 sm:px-8 sm:py-9 lg:px-12 lg:py-12"
+      aria-labelledby="not-found-title"
+    >
+      <div class="mx-auto max-w-4xl">
+        <header class="grid gap-6 border-b border-black/10 pb-7 dark:border-white/10 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-8 sm:pb-9">
+          <div
+            class="font-jetbrains-mono text-7xl font-black leading-none tracking-[-0.08em] text-[var(--primary)] sm:text-8xl lg:text-9xl"
+            aria-hidden="true"
+          >
             404
           </div>
-          <div class="text-6xl mb-6">🌌</div>
-          <h1 class="text-3xl md:text-4xl font-bold mb-4 text-black/90 dark:text-white/90">
-            Lost in the MEGAMEAL Multiverse
-          </h1>
-          <p class="text-lg text-gray-600 dark:text-neutral-400 max-w-2xl mx-auto mb-2">
-            The page you're looking for seems to have vanished into the cosmic void, possibly consumed by a rogue mascot or displaced by a temporal anomaly.
-          </p>
-          {requestedPath && (
-            <p class="text-sm text-gray-500 dark:text-neutral-500 font-mono bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-lg inline-block mb-6">
-              Requested: {requestedPath}
-            </p>
-          )}
-        </div>
-
-        <!-- Navigation Options -->
-        <div class="onload-animation grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-4xl mx-auto">
-          <!-- Home Button -->
-          <a 
-            href="/" 
-            class="card-base p-6 text-center hover:scale-105 transition-all duration-200 cursor-pointer group bg-gradient-to-br from-[oklch(0.95_0.025_240)] to-[oklch(0.90_0.05_240)] dark:from-[oklch(0.25_0.025_240)] dark:to-[oklch(0.20_0.05_240)] border-2 border-transparent hover:border-[oklch(0.6_0.2_240)] active:scale-95"
-          >
-            <Icon name="material-symbols:home" class="text-4xl mb-3 text-[oklch(0.6_0.2_240)] mx-auto" />
-            <h2 class="font-bold text-lg mb-2 text-gray-800 dark:text-neutral-200 group-hover:text-[oklch(0.4_0.2_240)]">Home Base</h2>
-            <p class="text-sm text-gray-600 dark:text-neutral-400">Return to the main universe</p>
-          </a>
-
-          <!-- Timeline Button -->
-          <a 
-            href="/posts/timeline/" 
-            class="card-base p-6 text-center hover:scale-105 transition-all duration-200 cursor-pointer group bg-gradient-to-br from-[oklch(0.95_0.025_120)] to-[oklch(0.90_0.05_120)] dark:from-[oklch(0.25_0.025_120)] dark:to-[oklch(0.20_0.05_120)] border-2 border-transparent hover:border-[oklch(0.6_0.2_120)] active:scale-95"
-          >
-            <Icon name="material-symbols:schedule" class="text-4xl mb-3 text-[oklch(0.6_0.2_120)] mx-auto" />
-            <h2 class="font-bold text-lg mb-2 text-gray-800 dark:text-neutral-200 group-hover:text-[oklch(0.4_0.2_120)]">Cosmic Timeline</h2>
-            <p class="text-sm text-gray-600 dark:text-neutral-400">Navigate the multiverse</p>
-          </a>
-
-          <!-- About Button -->
-          <a 
-            href="/about/" 
-            class="card-base p-6 text-center hover:scale-105 transition-all duration-200 cursor-pointer group bg-gradient-to-br from-[oklch(0.95_0.025_360)] to-[oklch(0.90_0.05_360)] dark:from-[oklch(0.25_0.025_360)] dark:to-[oklch(0.20_0.05_360)] border-2 border-transparent hover:border-[oklch(0.6_0.2_360)] active:scale-95"
-          >
-            <Icon name="material-symbols:info" class="text-4xl mb-3 text-[oklch(0.6_0.2_360)] mx-auto" />
-            <h2 class="font-bold text-lg mb-2 text-gray-800 dark:text-neutral-200 group-hover:text-[oklch(0.4_0.2_360)]">About Universe</h2>
-            <p class="text-sm text-gray-600 dark:text-neutral-400">Learn about our reality</p>
-          </a>
-        </div>
-
-        <!-- Additional Options -->
-        <div class="onload-animation grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 max-w-2xl mx-auto">
-          <!-- Search/Browse -->
-          <div class="card-base p-4 bg-gray-50 dark:bg-gray-800/50">
-            <Icon name="material-symbols:search" class="text-2xl mb-2 text-gray-600 dark:text-neutral-400 mx-auto" />
-            <h2 class="font-semibold mb-2 text-gray-800 dark:text-neutral-200">Lost Something?</h2>
-            <p class="text-sm text-gray-600 dark:text-neutral-400 mb-3">Try browsing our content categories or use your browser's search function.</p>
-            <div class="flex gap-2 justify-center">
-              <a href="/cookbook/" class="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded hover:bg-green-200 dark:hover:bg-green-900/50 transition">Recipes</a>
-              <a href="/posts/timeline/" class="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-1 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition">Timeline</a>
+          <div class="min-w-0">
+            <div class="mb-3 flex items-center gap-2 font-jetbrains-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--primary)]">
+              <Icon name="material-symbols:public" class="text-lg" />
+              Navigation error
             </div>
-          </div>
-
-          <!-- Report Issue -->
-          <div class="card-base p-4 bg-gray-50 dark:bg-gray-800/50">
-            <Icon name="material-symbols:bug-report" class="text-2xl mb-2 text-gray-600 dark:text-neutral-400 mx-auto" />
-            <h2 class="font-semibold mb-2 text-gray-800 dark:text-neutral-200">Found a Bug?</h2>
-            <p class="text-sm text-gray-600 dark:text-neutral-400 mb-3">If you think this page should exist, let us know!</p>
-            <a
-              href="mailto:Greg@megameal.org?subject=404 Error Report&body=I found a broken link at: {requestedPath}"
-              class="text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-3 py-1 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition inline-flex items-center gap-1"
+            <h1
+              id="not-found-title"
+              class="text-3xl font-bold leading-tight text-black/90 dark:text-white/90 sm:text-4xl lg:text-5xl"
             >
-              <Icon name="material-symbols:mail" class="text-xs" />
-              Report Issue
-            </a>
+              This page is missing.
+            </h1>
+            <p class="mt-4 max-w-2xl text-base leading-relaxed text-black/65 dark:text-white/65 sm:text-lg">
+              The address may be mistyped, retired, or moved. Choose a known destination below to continue exploring.
+            </p>
+            <p class="mt-4 max-w-full break-all rounded-lg border border-black/10 bg-black/5 px-3 py-2 font-jetbrains-mono text-xs text-black/55 dark:border-white/10 dark:bg-white/5 dark:text-white/55">
+              <span class="sr-only">Requested path: </span><span data-requested-path>{requestedPath}</span>
+            </p>
           </div>
-        </div>
+        </header>
 
-        <!-- MEGAMEAL Universe Quote -->
-        <div class="onload-animation">
-          <div class="bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-6 max-w-2xl mx-auto">
-            <Icon name="material-symbols:format-quote" class="text-3xl text-purple-600 dark:text-purple-400 mb-2 mx-auto" />
-            <blockquote class="text-lg italic text-purple-800 dark:text-purple-200 mb-3">
-              "In the MEGAMEAL Universe, every ending is just another beginning's appetizer."
-            </blockquote>
-            <cite class="text-sm text-purple-600 dark:text-purple-400">
-              — Merkin Lord of Love and Light
-            </cite>
+        <nav class="pt-7 sm:pt-9" aria-labelledby="recovery-links-title">
+          <div class="mb-4 flex flex-wrap items-end justify-between gap-2">
+            <h2
+              id="recovery-links-title"
+              class="text-xl font-bold text-black/85 dark:text-white/85 sm:text-2xl"
+            >
+              Choose a destination
+            </h2>
+            <span class="font-jetbrains-mono text-[0.68rem] uppercase tracking-[0.12em] text-black/45 dark:text-white/45">
+              Three stable routes
+            </span>
           </div>
-        </div>
 
-        <!-- Back Button -->
-        <div class="onload-animation mt-8">
-          <button 
-            onclick="history.back()" 
-            class="btn-card rounded-xl px-6 py-3 font-medium active:scale-95 inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-          >
-            <Icon name="material-symbols:arrow-back" class="text-lg" />
-            Go Back
-          </button>
-        </div>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+            {recoveryLinks.map((link) => (
+              <a
+                href={link.href}
+                class="card-base card-base-interactive group flex min-h-40 flex-col p-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)]"
+                data-sfx-hover="hover-soft"
+                data-sfx-click="soft"
+              >
+                <span class="mb-6 flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] transition group-hover:bg-[var(--primary)]/20">
+                  <Icon name={link.icon} class="text-2xl" />
+                </span>
+                <span class="flex items-center justify-between gap-3 text-lg font-bold text-black/85 dark:text-white/85">
+                  {link.label}
+                  <Icon
+                    name="material-symbols:arrow-forward-rounded"
+                    class="text-xl text-[var(--primary)] transition-transform group-hover:translate-x-1"
+                  />
+                </span>
+                <span class="mt-2 text-sm leading-relaxed text-black/55 dark:text-white/55">
+                  {link.description}
+                </span>
+              </a>
+            ))}
+          </div>
+        </nav>
       </div>
-    </div>
+    </section>
+    <script is:inline data-astro-rerun>
+      (() => {
+        const requestedPath = document.querySelector('[data-requested-path]')
 
-    <!-- Fun Easter Egg Section -->
-    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
-      <div class="card-base z-10 px-6 md:px-9 pt-6 pb-6 relative w-full">
-        <div class="text-center">
-          <h2 class="text-xl font-bold mb-4 text-black/90 dark:text-white/90">🎯 Fun Fact</h2>
-          <p class="text-gray-600 dark:text-neutral-400 max-w-2xl mx-auto text-sm">
-            Did you know? In the MEGAMEAL Universe, 404 errors are actually caused by temporal mascots eating web pages. 
-            The Snuggloids are particularly fond of missing content. Don't worry though - they usually leave breadcrumbs.
-          </p>
-        </div>
-      </div>
-    </div>
+        if (requestedPath) {
+          requestedPath.textContent = window.location.pathname
+        }
+      })()
+    </script>
   </MainGridLayout>
 )}
-
-<script>
-  // Add some interactive behavior
-  document.addEventListener('DOMContentLoaded', () => {
-    // Log the 404 for debugging (if needed)
-    console.log('404 Error:', window.location.pathname);
-    
-    // Optional: Track 404s for analytics
-    // if (typeof gtag !== 'undefined') {
-    //   gtag('event', 'page_not_found', {
-    //     'page_location': window.location.href,
-    //     'page_path': window.location.pathname
-    //   });
-    // }
-  });
-</script>

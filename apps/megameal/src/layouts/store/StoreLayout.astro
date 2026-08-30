@@ -8,13 +8,8 @@ import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 import CartDrawer from '../../components/store/CartDrawer.svelte'
 import StoreCartRuntime from '../../components/store/StoreCartRuntime.svelte'
 import { siteConfig } from '../../config/config'
+import storeLayoutHref from '../../styles/layouts/store.css?url'
 import Layout from '../Layout.astro'
-import '../../styles/features/storefront.css'
-import '../../styles/features/marketplace-card.css'
-import '../../styles/features/product-card.css'
-import '../../styles/features/pagination.css'
-import '../../styles/features/responsive.css'
-import '../../styles/layouts/store.css'
 
 type StoreAmbientAudioTrack = {
   id?: string
@@ -52,6 +47,7 @@ const pageAmbientTrackJson = pageAmbientTracks.length
 ---
 <Layout title={title} description={description} {...rest}>
   <Fragment slot="head">
+    <link rel="stylesheet" href={storeLayoutHref} data-route-style="store" />
     {pageAmbientTrackJson && (
       <script
         is:inline

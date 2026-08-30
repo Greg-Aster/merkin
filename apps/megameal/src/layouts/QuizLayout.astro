@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content'
 import MainGridLayout from './MainGridLayout.astro'
+import quizStylesHref from '@merkin/blog-core/styles/quiz/quiz.css?url'
 
 interface Props {
   title?: string
@@ -40,6 +41,9 @@ const layoutPost = entry
   post={layoutPost}
   oneColumn={true}
 >
+  <Fragment slot="head">
+    <link rel="stylesheet" href={quizStylesHref} data-route-style="quiz" />
+  </Fragment>
   <div class="container mx-auto px-4 py-8">
     <div class="max-w-2xl mx-auto">
       <slot />

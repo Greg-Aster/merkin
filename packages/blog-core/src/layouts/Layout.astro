@@ -18,6 +18,8 @@ import { defaultFavicons } from '@/constants/icon'
 import type { Favicon } from '@/types/config'
 import { url, pathsEqual } from '@/utils/url-utils'
 import 'katex/dist/katex.css'
+import overlayScrollbarStylesHref from 'overlayscrollbars/overlayscrollbars.css?url'
+import photoSwipeStylesHref from 'photoswipe/style.css?url'
 
 interface Props {
   title?: string
@@ -80,9 +82,7 @@ const configHue = siteConfig.themeColor.hue
 ---
 
 <!DOCTYPE html>
-<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]"
-    data-overlayscrollbars-initialize
->
+<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]">
   <head>
     <title>{pageTitle}</title>
 
@@ -164,6 +164,9 @@ const configHue = siteConfig.themeColor.hue
 
     <slot name="head"></slot>
 
+    <meta name="blog-core:overlay-scrollbar-styles" content={overlayScrollbarStylesHref} />
+    <meta name="blog-core:photoswipe-styles" content={photoSwipeStylesHref} />
+
     <link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
   </head>
   <body class="min-h-screen transition"
@@ -171,7 +174,6 @@ const configHue = siteConfig.themeColor.hue
           "is-home": isHomePage,
           "lg:is-home": isHomePage,
 		}]}
-      data-overlayscrollbars-initialize
   >
     {/* Accessibility: Skip to main content link */}
     <a href="#main-content-wrapper" class="sr-only focus:not-sr-only fixed top-4 left-4 z-[9999] bg-[var(--primary)] text-white px-4 py-2 rounded font-bold">
@@ -214,14 +216,8 @@ const configHue = siteConfig.themeColor.hue
 </style>
 
 <script>
-import 'overlayscrollbars/overlayscrollbars.css';
-import {
-    OverlayScrollbars,
-} from 'overlayscrollbars';
 import {getHue, getStoredTheme, setHue, setTheme} from '@/utils/setting-utils';
 import {pathsEqual, url} from '@/utils/url-utils';
-import { destroyTimelineViews, initTimelineViews } from '../components/timeline/TimelineViewModes/timelineViewClient.js';
-import { initTimelineBannerControls } from '../components/timeline/timelineBannerClient.js';
 
 function setClickOutsideToClose(panel: string, ignores: string[]) {
     document.addEventListener("click", event => {
@@ -251,50 +247,115 @@ function loadHue() {
     setHue(getHue())
 }
 
-function initCustomScrollbar() {
+type ScrollbarInstance = { destroy: () => void };
+
+let scrollbarInstances: ScrollbarInstance[] = [];
+let scrollbarSchedule = 0;
+let scrollbarGeneration = 0;
+
+function destroyCustomScrollbars() {
+    scrollbarGeneration += 1;
+    scrollbarInstances.forEach(instance => instance.destroy());
+    scrollbarInstances = [];
+    window.clearTimeout(scrollbarSchedule);
+    scrollbarSchedule = 0;
+}
+
+async function initCustomScrollbar() {
+    const generation = ++scrollbarGeneration;
+    scrollbarInstances.forEach(instance => instance.destroy());
+    scrollbarInstances = [];
+
+    if (!window.matchMedia('(min-width: 768px) and (pointer: fine)').matches) {
+        return;
+    }
+
     const bodyElement = document.querySelector('body');
     if (!bodyElement) return;
-    OverlayScrollbars(
-        {
-            target: bodyElement,
-            cancel: {
-                nativeScrollbarsOverlaid: true,
-            }
-        }, {
-        scrollbars: {
-            theme: 'scrollbar-base scrollbar-auto py-1',
-            autoHide: 'move',
-            autoHideDelay: 500,
-            autoHideSuspend: false,
-        },
-    });
-    const preElements = document.querySelectorAll('pre');
-    preElements.forEach((ele) => {
-        OverlayScrollbars(ele, {
-            scrollbars: {
-                theme: 'scrollbar-base scrollbar-dark px-2',
-                autoHide: 'leave',
-                autoHideDelay: 500,
-                autoHideSuspend: false
-            }
+
+    try {
+        const stylesheetHref = document
+            .querySelector<HTMLMetaElement>('meta[name="blog-core:overlay-scrollbar-styles"]')
+            ?.content;
+        if (stylesheetHref) {
+            await ensureStylesheet(stylesheetHref, 'overlay-scrollbars');
+        }
+        const { OverlayScrollbars } = await import('overlayscrollbars');
+
+        if (generation !== scrollbarGeneration) return;
+
+        scrollbarInstances.push(OverlayScrollbars(
+            {
+                target: bodyElement,
+                cancel: {
+                    nativeScrollbarsOverlaid: true,
+                }
+            }, {
+                scrollbars: {
+                    theme: 'scrollbar-base scrollbar-auto py-1',
+                    autoHide: 'move',
+                    autoHideDelay: 500,
+                    autoHideSuspend: false,
+                },
+            },
+        ));
+
+        document.querySelectorAll('pre').forEach((element) => {
+            scrollbarInstances.push(OverlayScrollbars(element, {
+                scrollbars: {
+                    theme: 'scrollbar-base scrollbar-dark px-2',
+                    autoHide: 'leave',
+                    autoHideDelay: 500,
+                    autoHideSuspend: false,
+                },
+            }));
         });
-    });
-    const katexElements = document.querySelectorAll('.katex-display') as NodeListOf<HTMLElement>;
-    katexElements.forEach((ele) => {
-        OverlayScrollbars(ele, {
-            scrollbars: {
-                theme: 'scrollbar-base scrollbar-auto py-1',
-            }
+
+        document.querySelectorAll<HTMLElement>('.katex-display').forEach((element) => {
+            scrollbarInstances.push(OverlayScrollbars(element, {
+                scrollbars: {
+                    theme: 'scrollbar-base scrollbar-auto py-1',
+                },
+            }));
         });
+    } catch (error) {
+        console.error('Unable to enhance scrollbars; native scrolling remains available.', error);
+    }
+}
+
+function ensureStylesheet(href: string, owner: string) {
+    const selector = `link[data-deferred-style="${owner}"]`;
+    const existing = document.querySelector<HTMLLinkElement>(selector);
+    if (existing?.sheet) return Promise.resolve();
+
+    const link = existing ?? document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.dataset.deferredStyle = owner;
+    if (!existing) document.head.append(link);
+
+    return new Promise<void>((resolve, reject) => {
+        link.addEventListener('load', () => resolve(), { once: true });
+        link.addEventListener(
+            'error',
+            () => reject(new Error(`Unable to load ${owner} styles.`)),
+            { once: true },
+        );
     });
+}
+
+function scheduleCustomScrollbar() {
+    destroyCustomScrollbars();
+    scrollbarSchedule = window.setTimeout(() => {
+        scrollbarSchedule = 0;
+        void initCustomScrollbar();
+    }, 1200);
 }
 
 function init() {
     loadTheme();
     loadHue();
-    initCustomScrollbar();
-    initTimelineViews();
-    initTimelineBannerControls();
+    scheduleCustomScrollbar();
 }
 
 /* Load settings when entering the site */
@@ -345,9 +406,8 @@ function syncScrollTargets() {
 }
 
 document.addEventListener('astro:page-load', syncScrollTargets);
-document.addEventListener('astro:before-swap', () => destroyTimelineViews());
-document.addEventListener('astro:page-load', initTimelineViews);
-document.addEventListener('astro:page-load', initTimelineBannerControls);
+document.addEventListener('astro:page-load', scheduleCustomScrollbar);
+window.addEventListener('pagehide', destroyCustomScrollbars);
 
 function scrollFunction() {
     // Back-to-top button visibility
@@ -378,13 +438,22 @@ window.onscroll = scrollFunction;
 </script>
 
 <script>
-import PhotoSwipeLightbox from "photoswipe/lightbox";
-import "photoswipe/style.css";
+let lightbox: { destroy: () => void } | null = null;
+let photoSwipeGeneration = 0;
+let photoSwipeSchedule = 0;
 
-let lightbox: PhotoSwipeLightbox;
+async function createPhotoSwipe(generation: number) {
+    const stylesheetHref = document
+        .querySelector<HTMLMetaElement>('meta[name="blog-core:photoswipe-styles"]')
+        ?.content;
+    if (stylesheetHref) {
+        await ensurePhotoSwipeStylesheet(stylesheetHref);
+    }
+    const { default: PhotoSwipeLightbox } = await import("photoswipe/lightbox");
 
-function createPhotoSwipe() {
-    lightbox = new PhotoSwipeLightbox({
+    if (generation !== photoSwipeGeneration) return;
+
+    const nextLightbox = new PhotoSwipeLightbox({
         gallery: ".custom-md img, #post-cover img",
         // Keep this lazy to avoid holding a stale rejected promise after Vite dep re-optimization.
         pswpModule: () => import("photoswipe"),
@@ -399,7 +468,7 @@ function createPhotoSwipe() {
         doubleTapAction: 'zoom',
     });
 
-    lightbox.addFilter("domItemData", (itemData, element) => {
+    nextLightbox.addFilter("domItemData", (itemData, element) => {
         if (element instanceof HTMLImageElement) {
             itemData.src = element.src;
             itemData.w = Number(element.naturalWidth || window.innerWidth);
@@ -409,14 +478,54 @@ function createPhotoSwipe() {
         return itemData;
     });
 
-    lightbox.init();
+    nextLightbox.init();
+    lightbox = nextLightbox;
+}
+
+function ensurePhotoSwipeStylesheet(href: string) {
+    const existing = document.querySelector<HTMLLinkElement>(
+        'link[data-deferred-style="photoswipe"]',
+    );
+    if (existing?.sheet) return Promise.resolve();
+
+    const link = existing ?? document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.dataset.deferredStyle = 'photoswipe';
+    if (!existing) document.head.append(link);
+
+    return new Promise<void>((resolve, reject) => {
+        link.addEventListener('load', () => resolve(), { once: true });
+        link.addEventListener(
+            'error',
+            () => reject(new Error('Unable to load image viewer styles.')),
+            { once: true },
+        );
+    });
 }
 
 const setupPhotoSwipe = () => {
-    lightbox?.destroy?.();
-    createPhotoSwipe();
+    photoSwipeGeneration += 1;
+    const generation = photoSwipeGeneration;
+    lightbox?.destroy();
+    lightbox = null;
+    window.clearTimeout(photoSwipeSchedule);
+
+    if (!document.querySelector('.custom-md img, #post-cover img')) return;
+
+    photoSwipeSchedule = window.setTimeout(() => {
+        void createPhotoSwipe(generation).catch(error => {
+            console.error('Unable to initialize the image viewer.', error);
+        });
+    }, 800);
 };
 
 setupPhotoSwipe();
 document.addEventListener('astro:page-load', setupPhotoSwipe);
+window.addEventListener('pagehide', () => {
+    photoSwipeGeneration += 1;
+    window.clearTimeout(photoSwipeSchedule);
+    lightbox?.destroy();
+    lightbox = null;
+});
 </script>

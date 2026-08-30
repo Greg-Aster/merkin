@@ -1,21 +1,8 @@
 ---
 import HomeIntroActivation from './HomeIntroActivation.svelte'
-import '../../styles/features/home/portal-hero-slide.css'
-import '../../styles/features/home/portal-hero-scroll-cue.css'
 ---
 
 <section class="megameal-home-intro" aria-label="MEGAMEAL portal introduction">
-  <div class="megameal-home-intro__environment" aria-hidden="true">
-    <img
-      src="/assets/banner/home-intro-stills/home-intro.webp"
-      alt=""
-      class="h-full w-full object-cover"
-      decoding="async"
-      fetchpriority="high"
-      loading="eager"
-    />
-  </div>
-
   <HomeIntroActivation client:only="svelte" />
 
   <div class="megameal-home-intro__screen-reader-copy">

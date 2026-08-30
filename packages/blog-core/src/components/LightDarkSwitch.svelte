@@ -1,6 +1,5 @@
 <script>
 import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@/constants/constants'
-import Icon from '@iconify/svelte/dist/Icon.svelte'
 import {
   applyThemeToDocument,
   getStoredTheme,
@@ -50,12 +49,12 @@ function toggleScheme() {
 
 function showPanel() {
   const panel = document.querySelector('#light-dark-panel')
-  panel.classList.remove('float-panel-closed')
+  panel?.classList.remove('float-panel-closed')
 }
 
 function hidePanel() {
   const panel = document.querySelector('#light-dark-panel')
-  panel.classList.add('float-panel-closed')
+  panel?.classList.add('float-panel-closed')
 }
 </script>
 
@@ -63,13 +62,21 @@ function hidePanel() {
 <div class="relative z-50" role="menu" tabindex="-1" onmouseleave={hidePanel}>
     <button aria-label="Light/Dark Mode" role="menuitem" class="relative btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="scheme-switch" onclick={toggleScheme} onmouseenter={showPanel}>
         <div class="absolute" class:opacity-0={mode !== LIGHT_MODE}>
-            <Icon icon="material-symbols:wb-sunny-outline-rounded" class="text-[1.25rem]"></Icon>
+            <svg aria-hidden="true" class="h-5 w-5" fill="none" focusable="false" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3.5"></circle>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path>
+            </svg>
         </div>
         <div class="absolute" class:opacity-0={mode !== DARK_MODE}>
-            <Icon icon="material-symbols:dark-mode-outline-rounded" class="text-[1.25rem]"></Icon>
+            <svg aria-hidden="true" class="h-5 w-5" fill="none" focusable="false" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+                <path d="M20.5 14.2A8.3 8.3 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"></path>
+            </svg>
         </div>
         <div class="absolute" class:opacity-0={mode !== AUTO_MODE}>
-            <Icon icon="material-symbols:radio-button-partial-outline" class="text-[1.25rem]"></Icon>
+            <svg aria-hidden="true" class="h-5 w-5" fill="none" focusable="false" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8.5"></circle>
+                <path d="M12 3.5a8.5 8.5 0 0 1 0 17Z" fill="currentColor" stroke="none"></path>
+            </svg>
         </div>
     </button>
 
@@ -79,21 +86,29 @@ function hidePanel() {
                     class:current-theme-btn={mode === LIGHT_MODE}
                     onclick={() => switchScheme(LIGHT_MODE)}
             >
-                <Icon icon="material-symbols:wb-sunny-outline-rounded" class="text-[1.25rem] mr-3"></Icon>
+                <svg aria-hidden="true" class="mr-3 h-5 w-5" fill="none" focusable="false" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="3.5"></circle>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path>
+                </svg>
                 {lightModeLabel}
             </button>
             <button class="flex transition whitespace-nowrap items-center !justify-start w-full btn-plain scale-animation rounded-lg h-9 px-3 font-medium active:scale-95 mb-0.5"
                     class:current-theme-btn={mode === DARK_MODE}
                     onclick={() => switchScheme(DARK_MODE)}
             >
-                <Icon icon="material-symbols:dark-mode-outline-rounded" class="text-[1.25rem] mr-3"></Icon>
+                <svg aria-hidden="true" class="mr-3 h-5 w-5" fill="none" focusable="false" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path d="M20.5 14.2A8.3 8.3 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"></path>
+                </svg>
                 {darkModeLabel}
             </button>
             <button class="flex transition whitespace-nowrap items-center !justify-start w-full btn-plain scale-animation rounded-lg h-9 px-3 font-medium active:scale-95"
                     class:current-theme-btn={mode === AUTO_MODE}
                     onclick={() => switchScheme(AUTO_MODE)}
             >
-                <Icon icon="material-symbols:radio-button-partial-outline" class="text-[1.25rem] mr-3"></Icon>
+                <svg aria-hidden="true" class="mr-3 h-5 w-5" fill="none" focusable="false" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="8.5"></circle>
+                    <path d="M12 3.5a8.5 8.5 0 0 1 0 17Z" fill="currentColor" stroke="none"></path>
+                </svg>
                 {systemModeLabel}
             </button>
         </div>

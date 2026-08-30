@@ -164,7 +164,8 @@ function annotateIssuesWithBaseline(issues, baseline) {
 function collectImports(files) {
   const imported = new Set()
   const importPatterns = [
-    /import\s+['"]([^'"]+\.(?:css|styl|pcss|postcss))['"]/g,
+    /import\s+['"]([^'"]+\.(?:css|styl|pcss|postcss)(?:\?[^'"]*)?)['"]/g,
+    /import\s+[^'"]+\s+from\s+['"]([^'"]+\.(?:css|styl|pcss|postcss)(?:\?[^'"]*)?)['"]/g,
     /@import\s+['"]([^'"]+\.(?:css|styl|pcss|postcss))['"]/g,
   ]
 
@@ -175,7 +176,7 @@ function collectImports(files) {
 
     for (const pattern of importPatterns) {
       for (const match of text.matchAll(pattern)) {
-        const specifier = match[1]
+        const specifier = match[1].replace(/\?.*$/, '')
         let resolved
         if (specifier.startsWith('.')) {
           resolved = path.resolve(path.dirname(file), specifier)
@@ -410,6 +411,13 @@ const annotatedIssues = annotateIssuesWithBaseline(issues, baseline)
 const newBaselineIssues = baseline
   ? annotatedIssues.filter(issue => issue.baseline.state !== 'baseline')
   : []
+const blockingErrorIssues = baseline
+  ? newBaselineIssues.filter(
+      issue =>
+        issue.severity === 'error' &&
+        (issue.baseline.state === 'new' || issue.baseline.state === 'expanded'),
+    )
+  : annotatedIssues.filter(issue => issue.severity === 'error')
 const baselineSummary = baseline
   ? {
       path: relativeToApp(baselinePath),
@@ -433,6 +441,7 @@ if (json) {
         baseline: baselineSummary,
         issues: annotatedIssues,
         newIssues: newBaselineIssues,
+        blockingIssues: blockingErrorIssues,
       },
       null,
       2,
@@ -445,5 +454,7 @@ if (json) {
 if (strict && baseline && newBaselineIssues.length > 0) {
   process.exitCode = 1
 } else if (strict && !baseline && issues.some(issue => issue.severity === 'error')) {
+  process.exitCode = 1
+} else if (!strict && blockingErrorIssues.length > 0) {
   process.exitCode = 1
 }

@@ -6,7 +6,6 @@ import type {
   ProductCustomizerOption,
   ProductCustomizerStep,
 } from '../../types/product-customizer'
-import '../../styles/features/store/product-customizer.css'
 
 export let config: ProductCustomizerConfig
 

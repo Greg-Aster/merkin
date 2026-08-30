@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import { publicCollectionFilter } from '../../contracts/content'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
-import '../../styles/pages/videos-index.css'
+import videosIndexHref from '../../styles/pages/videos-index.css?url'
 
 const videos = (await getCollection('videos', publicCollectionFilter)).sort(
   (a, b) => b.data.published.getTime() - a.data.published.getTime(),
@@ -87,6 +87,9 @@ const videoBannerPost = featuredVideo
   backgroundImage="none"
   oneColumn={true}
 >
+  <Fragment slot="head">
+    <link rel="stylesheet" href={videosIndexHref} data-route-style="videos-index" />
+  </Fragment>
   <section data-videos-archive class="mt-2 w-full space-y-5 pb-8 sm:mt-2 sm:space-y-6 sm:pb-10">
     {featuredVideo && (
       <article

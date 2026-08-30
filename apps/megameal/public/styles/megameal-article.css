@@ -1,0 +1,990 @@
+/* Select with googleDoc.style: "megameal-article". */
+/* One isolated reader system; googleDoc.presentation selects the article voice. */
+.google-doc-content {
+  --article-ink: 235 242 249;
+  --article-copy: 194 207 220;
+  --article-muted: 133 153 171;
+  --article-surface: 8 17 29;
+  --article-surface-raised: 14 28 44;
+  --article-accent: 73 192 219;
+  --article-accent-2: 151 112 231;
+  --article-highlight: 232 183 83;
+  --article-rule: var(--article-accent);
+  --article-label: "MEGAMEAL CHRONICLE";
+  --article-body-font: Inter, ui-sans-serif, system-ui, sans-serif;
+  --article-display-font: var(--article-body-font);
+  --article-mono-font: var(--font-jetbrains-mono, "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 76rem;
+  margin: clamp(1.25rem, 3vw, 2rem) auto 0;
+  padding: clamp(1.25rem, 4vw, 3.75rem);
+  overflow: clip;
+  border: 1px solid rgb(var(--article-accent) / 0.2);
+  border-radius: clamp(0.75rem, 2vw, 1.35rem);
+  background:
+    radial-gradient(circle at 8% 0%, rgb(var(--article-accent) / 0.11), transparent 30rem),
+    linear-gradient(145deg, rgb(var(--article-surface-raised) / 0.96), rgb(var(--article-surface) / 0.98) 62%);
+  box-shadow: 0 24px 65px rgb(0 0 0 / 0.28), inset 0 1px rgb(255 255 255 / 0.05);
+  color: rgb(var(--article-copy));
+  font-family: var(--article-body-font);
+  counter-reset: article-section;
+}
+
+.google-doc-content::before {
+  content: var(--article-label);
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto clamp(2rem, 6vw, 4rem);
+  padding: 0.42rem 0.72rem;
+  border-block: 1px solid rgb(var(--article-accent) / 0.38);
+  color: rgb(var(--article-accent));
+  font-family: var(--article-mono-font);
+  font-size: 0.64rem;
+  font-weight: 760;
+  letter-spacing: 0.16em;
+  line-height: 1.35;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.google-doc-content::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, rgb(var(--article-accent) / 0.52), transparent) top / 100% 1px no-repeat,
+    repeating-linear-gradient(to bottom, transparent 0 3.25rem, rgb(var(--article-rule) / 0.025) 3.25rem calc(3.25rem + 1px));
+}
+
+.google-doc-content :is(h1, h2, h3) {
+  clear: both;
+  color: rgb(var(--article-ink));
+  font-family: var(--article-display-font);
+  text-wrap: balance;
+}
+
+.google-doc-content .docs-editor-heading-1 {
+  max-width: 22ch;
+  margin: 0 auto clamp(2rem, 5vw, 3.5rem);
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  text-align: center;
+}
+
+.google-doc-content .docs-editor-heading-2 {
+  position: relative;
+  max-width: 44rem;
+  margin: clamp(3.5rem, 9vw, 6rem) auto clamp(1.15rem, 3vw, 1.8rem);
+  padding: 0 0 0.78rem clamp(2.65rem, 7vw, 4rem);
+  border-bottom: 1px solid rgb(var(--article-rule) / 0.38);
+  font-size: clamp(1.45rem, 3.4vw, 2.25rem);
+  line-height: 1.16;
+  letter-spacing: -0.022em;
+  counter-increment: article-section;
+}
+
+.google-doc-content .docs-editor-heading-2::before {
+  content: counter(article-section, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  bottom: 0.88rem;
+  color: rgb(var(--article-accent));
+  font-family: var(--article-mono-font);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.google-doc-content .docs-editor-heading-2[data-doc-section="navigation"] {
+  margin-top: clamp(4.5rem, 10vw, 7rem);
+  border-bottom-color: rgb(var(--article-accent-2) / 0.5);
+}
+
+.google-doc-content .docs-editor-heading-2[data-doc-section="navigation"]::before {
+  content: "NEXT";
+  color: rgb(var(--article-accent-2));
+}
+
+.google-doc-content .docs-editor-heading-3 {
+  max-width: 68ch;
+  margin: clamp(2.1rem, 5vw, 3.2rem) auto 0.72rem;
+  color: rgb(var(--article-accent));
+  font-family: var(--article-mono-font);
+  font-size: clamp(0.9rem, 1.8vw, 1.04rem);
+  font-weight: 760;
+  letter-spacing: 0.07em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.google-doc-content .docs-editor-paragraph {
+  max-width: 68ch;
+  margin: 0.95rem auto;
+  color: rgb(var(--article-copy));
+  font-size: clamp(1rem, 1.35vw, 1.075rem);
+  line-height: 1.76;
+  text-wrap: pretty;
+}
+
+.google-doc-content .docs-editor-section-lead.docs-editor-paragraph {
+  max-width: 64ch;
+  margin: 0 auto clamp(1.7rem, 4vw, 2.4rem);
+  padding-left: clamp(1rem, 3vw, 1.5rem);
+  border-left: 2px solid rgb(var(--article-highlight) / 0.72);
+  color: rgb(var(--article-ink) / 0.94);
+  font-size: clamp(1.06rem, 1.65vw, 1.18rem);
+  line-height: 1.72;
+}
+
+.google-doc-content :is(strong, b) {
+  color: rgb(var(--article-ink));
+  font-weight: 760;
+}
+
+.google-doc-content :is(em, i) {
+  color: rgb(var(--article-ink) / 0.88);
+}
+
+.google-doc-content a:not(.no-styling) {
+  color: rgb(var(--article-accent));
+  text-decoration-color: rgb(var(--article-accent) / 0.5);
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.22em;
+  transition: color 160ms ease, text-decoration-color 160ms ease;
+}
+
+.google-doc-content a:not(.no-styling):hover {
+  color: rgb(var(--article-ink));
+  text-decoration-color: rgb(var(--article-highlight));
+}
+
+.google-doc-content a:not(.no-styling):focus-visible {
+  border-radius: 0.2rem;
+  outline: 3px solid rgb(var(--article-highlight) / 0.72);
+  outline-offset: 3px;
+}
+
+.google-doc-content .docs-editor-quote {
+  position: relative;
+  max-width: 60ch;
+  margin: clamp(2rem, 5vw, 3.5rem) auto;
+  padding: clamp(1.2rem, 4vw, 2rem) clamp(1.25rem, 5vw, 2.6rem);
+  border-block: 1px solid rgb(var(--article-accent-2) / 0.36);
+  background: linear-gradient(90deg, transparent, rgb(var(--article-accent-2) / 0.075), transparent);
+  color: rgb(var(--article-ink) / 0.92);
+}
+
+.google-doc-content .docs-editor-quote::before {
+  content: "“";
+  position: absolute;
+  top: 0.15rem;
+  left: 0.2rem;
+  color: rgb(var(--article-accent-2) / 0.58);
+  font-family: Georgia, serif;
+  font-size: 3.2rem;
+  line-height: 1;
+}
+
+.google-doc-content .docs-editor-quote p {
+  margin: 0;
+  font-family: var(--article-display-font);
+  font-size: clamp(1.05rem, 2vw, 1.22rem);
+  font-style: italic;
+  line-height: 1.68;
+}
+
+.google-doc-content .docs-editor-quote p + p {
+  margin-top: 0.9rem;
+  color: rgb(var(--article-muted));
+  font-family: var(--article-mono-font);
+  font-size: 0.76rem;
+  font-style: normal;
+  letter-spacing: 0.02em;
+}
+
+.google-doc-content .docs-editor-list {
+  max-width: 68ch;
+  margin: 1.35rem auto 2rem;
+  padding: 0.15rem 0 0.15rem clamp(1.7rem, 5vw, 2.6rem);
+  border-left: 1px solid rgb(var(--article-rule) / 0.28);
+}
+
+.google-doc-content .docs-editor-list .docs-editor-list {
+  margin: 0.5rem 0 0.65rem;
+  padding-left: 1.6rem;
+  border-left-style: dashed;
+}
+
+.google-doc-content .docs-editor-list-item {
+  margin: 0.72rem 0;
+  padding-left: 0.22rem;
+  color: rgb(var(--article-copy));
+  line-height: 1.66;
+}
+
+.google-doc-content .docs-editor-list-item::marker {
+  color: rgb(var(--article-accent));
+  font-weight: 800;
+}
+
+.google-doc-content .docs-editor-navigation-list {
+  display: grid;
+  max-width: 64rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  padding: 0;
+  border: 0;
+  list-style: none;
+}
+
+.google-doc-content .docs-editor-navigation-list > .docs-editor-list-item {
+  display: flex;
+  min-height: 4.5rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgb(var(--article-accent) / 0.28);
+  border-radius: 0.65rem;
+  background: rgb(var(--article-surface-raised) / 0.68);
+  transition: border-color 160ms ease, background-color 160ms ease, translate 160ms ease;
+}
+
+.google-doc-content .docs-editor-navigation-list > .docs-editor-list-item:hover {
+  translate: 0 -2px;
+  border-color: rgb(var(--article-accent) / 0.66);
+  background: rgb(var(--article-surface-raised) / 0.92);
+}
+
+.google-doc-content .docs-editor-navigation-list > .docs-editor-list-item > a {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.95rem 1.05rem;
+  color: rgb(var(--article-ink));
+  font-family: var(--article-mono-font);
+  font-size: 0.78rem;
+  font-weight: 760;
+  letter-spacing: 0.035em;
+  line-height: 1.4;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.google-doc-content .docs-editor-navigation-list > .docs-editor-list-item > a::after {
+  content: "→";
+  margin-left: auto;
+  color: rgb(var(--article-accent));
+  font-size: 1.05rem;
+}
+
+.google-doc-content .docs-editor-table {
+  display: table;
+  width: min(100%, 64rem);
+  margin: clamp(1.8rem, 5vw, 3rem) auto;
+  overflow: hidden;
+  border: 1px solid rgb(var(--article-rule) / 0.27);
+  border-radius: 0.65rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: rgb(var(--article-surface-raised) / 0.64);
+}
+
+.google-doc-content .docs-editor-table :is(th, td) {
+  padding: 0.78rem 0.9rem;
+  border-color: rgb(var(--article-rule) / 0.15);
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+.google-doc-content .docs-editor-table th {
+  background: rgb(var(--article-accent) / 0.1);
+  color: rgb(var(--article-ink));
+  font-family: var(--article-mono-font);
+  font-size: 0.71rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.google-doc-content .docs-editor-table tbody tr:nth-child(odd) {
+  background: rgb(var(--article-accent) / 0.035);
+}
+
+.google-doc-content .docs-editor-figure {
+  position: relative;
+  clear: both;
+  width: 100%;
+  max-width: 58rem;
+  margin: clamp(1.8rem, 5vw, 3.25rem) auto;
+  padding: 0.4rem;
+  overflow: hidden;
+  border: 1px solid rgb(var(--article-accent) / 0.25);
+  border-radius: 0.75rem;
+  background: rgb(var(--article-surface) / 0.86);
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.25);
+}
+
+.google-doc-content .docs-editor-figure img {
+  display: block;
+  width: 100%;
+  max-height: 42rem;
+  border-radius: 0.48rem;
+  object-fit: cover;
+}
+
+.google-doc-content .docs-editor-figure[data-doc-media-source="editorial"] img {
+  aspect-ratio: 16 / 9;
+}
+
+.google-doc-content .docs-editor-figure[data-doc-media-layout="bleed"] {
+  width: calc(100% + clamp(1rem, 5vw, 4.5rem));
+  max-width: none;
+  margin-left: calc(clamp(0.5rem, 2.5vw, 2.25rem) * -1);
+}
+
+.google-doc-content .docs-editor-figure[data-doc-media-layout="aside-start"],
+.google-doc-content .docs-editor-figure[data-doc-media-layout="aside-end"] {
+  clear: none;
+  width: clamp(15rem, 42%, 27rem);
+  margin-top: 0.35rem;
+  margin-bottom: 1.5rem;
+}
+
+.google-doc-content .docs-editor-figure[data-doc-media-layout="aside-start"] {
+  float: left;
+  margin-right: clamp(1rem, 4vw, 2.25rem);
+}
+
+.google-doc-content .docs-editor-figure[data-doc-media-layout="aside-end"] {
+  float: right;
+  margin-left: clamp(1rem, 4vw, 2.25rem);
+}
+
+.google-doc-content .docs-editor-figure[data-doc-media-layout^="aside"] img {
+  aspect-ratio: 4 / 5;
+}
+
+.google-doc-content .docs-editor-figure figcaption {
+  padding: 0.7rem 0.55rem 0.3rem;
+  color: rgb(var(--article-muted));
+  font-family: var(--article-mono-font);
+  font-size: 0.69rem;
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.google-doc-content :not(pre) > code {
+  padding: 0.13em 0.36em;
+  border: 1px solid rgb(var(--article-accent) / 0.2);
+  border-radius: 0.28rem;
+  background: rgb(var(--article-surface) / 0.78);
+  color: rgb(var(--article-accent));
+  font-family: var(--article-mono-font);
+  font-size: 0.86em;
+}
+
+.google-doc-content .docs-editor-diagram {
+  max-width: 64rem;
+  margin: 1.6rem auto 2.2rem;
+  padding: clamp(1rem, 3vw, 1.4rem);
+  overflow-x: auto;
+  border: 1px solid rgb(var(--article-accent) / 0.24);
+  border-radius: 0.65rem;
+  background: rgb(var(--article-surface) / 0.86);
+  color: rgb(var(--article-accent));
+}
+
+.google-doc-content .docs-editor-diagram code {
+  font-family: var(--article-mono-font);
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+
+.google-doc-content .docs-editor-rule {
+  clear: both;
+  width: min(100%, 44rem);
+  height: 1px;
+  margin: clamp(2rem, 6vw, 4rem) auto;
+  border: 0;
+  background: linear-gradient(90deg, transparent, rgb(var(--article-rule) / 0.72), transparent);
+}
+
+.google-doc-content [data-google-doc-status="snapshot"] {
+  clear: both;
+  max-width: 68ch;
+  margin: 2rem auto 0;
+  padding: 0.72rem 0.9rem;
+  border: 1px solid rgb(var(--article-highlight) / 0.34);
+  border-radius: 0.5rem;
+  background: rgb(var(--article-highlight) / 0.07);
+  color: rgb(var(--article-highlight));
+  font-family: var(--article-mono-font);
+  font-size: 0.71rem;
+}
+
+/* ORIGIN RECORD: expansive cosmic chronicle. */
+.google-doc-content.google-doc-presentation-origin {
+  --article-ink: 240 247 255;
+  --article-copy: 191 211 229;
+  --article-muted: 121 153 181;
+  --article-surface: 3 9 21;
+  --article-surface-raised: 8 24 43;
+  --article-accent: 91 213 240;
+  --article-accent-2: 185 125 245;
+  --article-highlight: 246 203 103;
+  --article-label: "ORIGIN RECORD  /  Y1e0";
+  --article-display-font: Georgia, "Times New Roman", serif;
+  background:
+    radial-gradient(circle at 50% -5%, rgb(87 149 255 / 0.2), transparent 30rem),
+    radial-gradient(circle at 92% 22%, rgb(178 104 255 / 0.12), transparent 24rem),
+    linear-gradient(160deg, rgb(8 24 43 / 0.98), rgb(3 9 21 / 0.99) 64%);
+}
+
+.google-doc-content.google-doc-presentation-origin::after {
+  background:
+    radial-gradient(circle at 11% 18%, rgb(255 255 255 / 0.55) 0 1px, transparent 1.5px) 0 0 / 37px 37px,
+    radial-gradient(circle at 74% 63%, rgb(var(--article-accent) / 0.45) 0 1px, transparent 1.5px) 0 0 / 61px 61px,
+    linear-gradient(90deg, transparent, rgb(var(--article-accent) / 0.55), transparent) top / 100% 1px no-repeat;
+  opacity: 0.5;
+}
+
+.google-doc-content.google-doc-presentation-origin .docs-editor-heading-2 {
+  max-width: 49rem;
+  font-weight: 520;
+}
+
+.google-doc-content.google-doc-presentation-origin .docs-editor-section-lead.docs-editor-paragraph {
+  border-left-color: rgb(var(--article-accent) / 0.58);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* PRIMER: energetic editorial field guide. */
+.google-doc-content.google-doc-presentation-primer {
+  --article-ink: 245 249 252;
+  --article-copy: 205 216 225;
+  --article-muted: 139 159 177;
+  --article-surface: 8 19 28;
+  --article-surface-raised: 12 34 45;
+  --article-accent: 66 224 205;
+  --article-accent-2: 244 90 173;
+  --article-highlight: 245 199 67;
+  --article-label: "MEGAMEAL FIELD GUIDE  /  START HERE";
+  border-radius: 0.35rem;
+}
+
+.google-doc-content.google-doc-presentation-primer .docs-editor-heading-2 {
+  padding-left: 0;
+  border-bottom-width: 3px;
+  font-weight: 880;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.google-doc-content.google-doc-presentation-primer .docs-editor-heading-2::before {
+  position: static;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.google-doc-content.google-doc-presentation-primer .docs-editor-navigation-list > .docs-editor-list-item:nth-child(even) {
+  border-color: rgb(var(--article-accent-2) / 0.42);
+}
+
+/* ARCHIVE: recovered institutional record. */
+.google-doc-content.google-doc-presentation-archive {
+  --article-ink: 49 39 28;
+  --article-copy: 74 61 45;
+  --article-muted: 119 98 71;
+  --article-surface: 220 207 177;
+  --article-surface-raised: 239 229 202;
+  --article-accent: 117 71 42;
+  --article-accent-2: 117 48 48;
+  --article-highlight: 152 104 47;
+  --article-label: "RECOVERED ARCHIVE  /  ACCESS COPY";
+  --article-display-font: Georgia, "Times New Roman", serif;
+  border-color: rgb(116 83 48 / 0.48);
+  border-radius: 0.2rem;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.12), rgb(100 65 31 / 0.035)),
+    rgb(var(--article-surface-raised));
+  box-shadow: 0 28px 60px rgb(0 0 0 / 0.34), inset 0 0 6rem rgb(87 56 26 / 0.08);
+}
+
+.google-doc-content.google-doc-presentation-archive::after {
+  background: repeating-linear-gradient(0deg, transparent 0 2rem, rgb(82 55 30 / 0.045) 2rem calc(2rem + 1px));
+}
+
+.google-doc-content.google-doc-presentation-archive .docs-editor-heading-2 {
+  border-bottom-style: double;
+  border-bottom-width: 3px;
+}
+
+.google-doc-content.google-doc-presentation-archive .docs-editor-quote {
+  border: 1px dashed rgb(var(--article-accent-2) / 0.46);
+  background: rgb(255 255 255 / 0.16);
+}
+
+/* NETWORK: digital archaeology and emergent systems. */
+.google-doc-content.google-doc-presentation-network {
+  --article-ink: 225 255 248;
+  --article-copy: 178 222 214;
+  --article-muted: 101 160 152;
+  --article-surface: 2 18 21;
+  --article-surface-raised: 4 31 35;
+  --article-accent: 71 238 210;
+  --article-accent-2: 121 155 255;
+  --article-highlight: 188 238 92;
+  --article-label: "DIGITAL ARCHAEOLOGY NODE  /  CONSCIOUSNESS TRACE";
+  --article-display-font: var(--article-mono-font);
+  background:
+    linear-gradient(90deg, rgb(var(--article-accent) / 0.035) 1px, transparent 1px) 0 0 / 2.5rem 2.5rem,
+    linear-gradient(rgb(var(--article-accent) / 0.035) 1px, transparent 1px) 0 0 / 2.5rem 2.5rem,
+    linear-gradient(150deg, rgb(var(--article-surface-raised)), rgb(var(--article-surface)) 70%);
+}
+
+.google-doc-content.google-doc-presentation-network .docs-editor-heading-2 {
+  font-size: clamp(1.25rem, 2.8vw, 1.85rem);
+  letter-spacing: -0.035em;
+}
+
+.google-doc-content.google-doc-presentation-network .docs-editor-heading-3::before {
+  content: "> ";
+  color: rgb(var(--article-highlight));
+}
+
+/* LABORATORY: restrained scientific paper. */
+.google-doc-content.google-doc-presentation-laboratory {
+  --article-ink: 27 43 48;
+  --article-copy: 51 69 73;
+  --article-muted: 100 117 118;
+  --article-surface: 223 232 228;
+  --article-surface-raised: 243 247 243;
+  --article-accent: 19 112 116;
+  --article-accent-2: 94 79 148;
+  --article-highlight: 166 103 36;
+  --article-label: "COMPUTATIONAL EVOLUTION INSTITUTE  /  RESEARCH BRIEF";
+  --article-display-font: Georgia, "Times New Roman", serif;
+  border-radius: 0;
+  background: rgb(var(--article-surface-raised));
+  box-shadow: 0 26px 58px rgb(0 0 0 / 0.3);
+}
+
+.google-doc-content.google-doc-presentation-laboratory::after {
+  background:
+    linear-gradient(90deg, rgb(var(--article-accent) / 0.08) 1px, transparent 1px) 0 0 / 1rem 1rem,
+    linear-gradient(rgb(var(--article-accent) / 0.08) 1px, transparent 1px) 0 0 / 1rem 1rem;
+  mask-image: linear-gradient(to bottom, black, transparent 22rem);
+}
+
+.google-doc-content.google-doc-presentation-laboratory .docs-editor-heading-2 {
+  padding-left: 3rem;
+  font-weight: 600;
+}
+
+.google-doc-content.google-doc-presentation-laboratory .docs-editor-section-lead.docs-editor-paragraph {
+  background: rgb(var(--article-accent) / 0.045);
+  padding-block: 0.75rem;
+  padding-right: 0.9rem;
+}
+
+/* STRATEGIC: dense academic monograph. */
+.google-doc-content.google-doc-presentation-strategic {
+  --article-ink: 231 237 247;
+  --article-copy: 189 200 218;
+  --article-muted: 121 139 163;
+  --article-surface: 7 15 30;
+  --article-surface-raised: 13 26 49;
+  --article-accent: 116 167 241;
+  --article-accent-2: 194 129 219;
+  --article-highlight: 224 181 105;
+  --article-label: "STRATEGIC THEORY ARCHIVE  /  MONOGRAPH";
+  --article-display-font: Georgia, "Times New Roman", serif;
+}
+
+.google-doc-content.google-doc-presentation-strategic .docs-editor-heading-2 {
+  max-width: 52rem;
+  margin-top: clamp(3.2rem, 7vw, 4.8rem);
+  padding-left: 3.25rem;
+  font-size: clamp(1.3rem, 2.8vw, 1.9rem);
+  font-weight: 560;
+}
+
+.google-doc-content.google-doc-presentation-strategic .docs-editor-paragraph,
+.google-doc-content.google-doc-presentation-strategic .docs-editor-list,
+.google-doc-content.google-doc-presentation-strategic .docs-editor-heading-3 {
+  max-width: 74ch;
+}
+
+.google-doc-content.google-doc-presentation-strategic .docs-editor-paragraph {
+  font-size: clamp(0.98rem, 1.25vw, 1.04rem);
+  line-height: 1.72;
+}
+
+/* FIELD NOTES: reflective xenohistory journal. */
+.google-doc-content.google-doc-presentation-field-notes {
+  --article-ink: 51 45 38;
+  --article-copy: 78 69 57;
+  --article-muted: 126 110 87;
+  --article-surface: 215 204 180;
+  --article-surface-raised: 238 230 211;
+  --article-accent: 61 111 105;
+  --article-accent-2: 126 76 111;
+  --article-highlight: 150 93 48;
+  --article-label: "XENOHISTORIAN FIELD NOTES  /  DEEP TIME";
+  --article-display-font: Georgia, "Times New Roman", serif;
+  border-radius: 0.25rem 1.25rem 0.25rem 0.8rem;
+  background:
+    linear-gradient(90deg, transparent 2.25rem, rgb(158 67 57 / 0.18) 2.25rem calc(2.25rem + 1px), transparent calc(2.25rem + 1px)),
+    repeating-linear-gradient(0deg, transparent 0 2rem, rgb(76 94 91 / 0.08) 2rem calc(2rem + 1px)),
+    rgb(var(--article-surface-raised));
+}
+
+.google-doc-content.google-doc-presentation-field-notes .docs-editor-paragraph {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.03rem, 1.4vw, 1.12rem);
+}
+
+.google-doc-content.google-doc-presentation-field-notes .docs-editor-quote {
+  transform: rotate(-0.35deg);
+  border-inline: 1px solid rgb(var(--article-accent-2) / 0.35);
+}
+
+/* INCIDENT: extinction-event dossier. */
+.google-doc-content.google-doc-presentation-incident {
+  --article-ink: 248 235 222;
+  --article-copy: 218 197 179;
+  --article-muted: 159 132 109;
+  --article-surface: 24 14 13;
+  --article-surface-raised: 43 24 19;
+  --article-accent: 240 109 67;
+  --article-accent-2: 210 54 69;
+  --article-highlight: 245 193 69;
+  --article-label: "EXTINCTION EVENTS DIVISION  /  INCIDENT DOSSIER";
+  border-color: rgb(var(--article-accent-2) / 0.38);
+  background:
+    linear-gradient(135deg, rgb(var(--article-accent-2) / 0.08), transparent 28rem),
+    rgb(var(--article-surface));
+}
+
+.google-doc-content.google-doc-presentation-incident::before {
+  border: 1px solid rgb(var(--article-accent-2) / 0.62);
+  transform: rotate(-0.7deg);
+}
+
+.google-doc-content.google-doc-presentation-incident .docs-editor-heading-2 {
+  border-bottom-width: 2px;
+  border-bottom-color: rgb(var(--article-accent-2) / 0.62);
+}
+
+.google-doc-content.google-doc-presentation-incident .docs-editor-heading-2::before {
+  color: rgb(var(--article-highlight));
+}
+
+.google-doc-content.google-doc-presentation-incident .docs-editor-section-lead.docs-editor-paragraph {
+  border-left-width: 4px;
+}
+
+/* TEMPORAL: causality-conflict record. */
+.google-doc-content.google-doc-presentation-temporal {
+  --article-ink: 239 240 255;
+  --article-copy: 194 194 229;
+  --article-muted: 128 127 170;
+  --article-surface: 7 5 20;
+  --article-surface-raised: 19 12 43;
+  --article-accent: 84 222 239;
+  --article-accent-2: 223 87 242;
+  --article-highlight: 255 179 79;
+  --article-label: "TEMPORAL HISTORIAN COLLECTIVE  /  CAUSALITY DISPUTED";
+  background:
+    linear-gradient(118deg, rgb(var(--article-accent) / 0.09), transparent 38%, rgb(var(--article-accent-2) / 0.1)),
+    rgb(var(--article-surface));
+}
+
+.google-doc-content.google-doc-presentation-temporal::after {
+  background:
+    repeating-linear-gradient(112deg, transparent 0 4rem, rgb(var(--article-accent) / 0.045) 4rem calc(4rem + 1px)),
+    repeating-linear-gradient(68deg, transparent 0 5.5rem, rgb(var(--article-accent-2) / 0.04) 5.5rem calc(5.5rem + 1px));
+}
+
+.google-doc-content.google-doc-presentation-temporal .docs-editor-heading-2 {
+  border-image: linear-gradient(90deg, rgb(var(--article-accent)), rgb(var(--article-accent-2))) 1;
+}
+
+/* CORPORATE: glossy in-universe media brief. */
+.google-doc-content.google-doc-presentation-corporate {
+  --article-ink: 255 244 218;
+  --article-copy: 229 209 194;
+  --article-muted: 165 135 127;
+  --article-surface: 22 8 24;
+  --article-surface-raised: 48 16 45;
+  --article-accent: 255 87 188;
+  --article-accent-2: 118 212 255;
+  --article-highlight: 255 205 72;
+  --article-label: "W CORPORATION MEDIA DIVISION  /  APPROVED NARRATIVE";
+  border-color: rgb(var(--article-highlight) / 0.42);
+  background:
+    radial-gradient(circle at 90% 0%, rgb(var(--article-accent) / 0.22), transparent 28rem),
+    linear-gradient(145deg, rgb(var(--article-surface-raised)), rgb(var(--article-surface)) 65%);
+}
+
+.google-doc-content.google-doc-presentation-corporate::before {
+  border: 1px solid rgb(var(--article-highlight) / 0.55);
+  color: rgb(var(--article-highlight));
+}
+
+.google-doc-content.google-doc-presentation-corporate .docs-editor-heading-2 {
+  border-bottom: 4px solid;
+  border-image: linear-gradient(90deg, rgb(var(--article-accent)), rgb(var(--article-highlight)), transparent) 1;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+
+.google-doc-content.google-doc-presentation-corporate .docs-editor-navigation-list > .docs-editor-list-item {
+  background: linear-gradient(135deg, rgb(var(--article-accent) / 0.16), rgb(var(--article-surface-raised) / 0.85));
+}
+
+/* FRAGMENT: unstable metadata consciousness. */
+.google-doc-content.google-doc-presentation-fragment {
+  --article-ink: 227 255 225;
+  --article-copy: 177 216 184;
+  --article-muted: 102 153 118;
+  --article-surface: 3 15 11;
+  --article-surface-raised: 8 31 21;
+  --article-accent: 107 244 139;
+  --article-accent-2: 244 88 198;
+  --article-highlight: 212 237 92;
+  --article-label: "METADATA FRAGMENT  /  CONTEXT UNAVAILABLE";
+  --article-display-font: var(--article-mono-font);
+  border-style: dashed;
+  background:
+    radial-gradient(circle at 84% 9%, rgb(var(--article-accent-2) / 0.12), transparent 18rem),
+    rgb(var(--article-surface));
+}
+
+.google-doc-content.google-doc-presentation-fragment::after {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 17px, rgb(var(--article-accent) / 0.035) 17px 18px),
+    repeating-linear-gradient(0deg, transparent 0 11px, rgb(var(--article-accent-2) / 0.028) 11px 12px);
+  mask-image: linear-gradient(135deg, black, transparent 75%);
+}
+
+.google-doc-content.google-doc-presentation-fragment .docs-editor-heading-2:nth-of-type(odd) {
+  border-bottom-style: dashed;
+  translate: clamp(-0.35rem, -0.6vw, -0.1rem) 0;
+}
+
+.google-doc-content.google-doc-presentation-fragment .docs-editor-quote {
+  border-block-style: dashed;
+}
+
+/* CAUSAL: post-physical quantum analysis. */
+.google-doc-content.google-doc-presentation-causal {
+  --article-ink: 236 242 255;
+  --article-copy: 193 207 238;
+  --article-muted: 126 145 189;
+  --article-surface: 4 9 29;
+  --article-surface-raised: 11 22 58;
+  --article-accent: 104 164 255;
+  --article-accent-2: 177 103 255;
+  --article-highlight: 79 231 219;
+  --article-label: "CAUSAL SUBLIMATION RECORD  /  OBSERVER DEPENDENT";
+  background:
+    conic-gradient(from 210deg at 90% 12%, rgb(var(--article-accent-2) / 0.16), transparent 18%, rgb(var(--article-accent) / 0.11), transparent 42%),
+    rgb(var(--article-surface));
+}
+
+.google-doc-content.google-doc-presentation-causal .docs-editor-heading-2 {
+  padding-top: 0.55rem;
+  padding-right: 1.25rem;
+  background: linear-gradient(90deg, rgb(var(--article-accent) / 0.09), transparent);
+}
+
+.google-doc-content.google-doc-presentation-causal .docs-editor-rule {
+  background: linear-gradient(90deg, transparent, rgb(var(--article-accent)), rgb(var(--article-accent-2)), transparent);
+}
+
+/* TERMINAL: final, almost-silent record. */
+.google-doc-content.google-doc-presentation-terminal {
+  --article-ink: 226 229 234;
+  --article-copy: 175 181 190;
+  --article-muted: 103 109 119;
+  --article-surface: 5 6 8;
+  --article-surface-raised: 12 13 16;
+  --article-accent: 170 177 187;
+  --article-accent-2: 116 112 137;
+  --article-highlight: 207 202 190;
+  --article-label: "TERMINAL RECORD  /  SIGNAL DECAYING";
+  --article-display-font: Georgia, "Times New Roman", serif;
+  border-color: rgb(255 255 255 / 0.09);
+  background: linear-gradient(180deg, rgb(18 19 23), rgb(4 5 7) 72%);
+  box-shadow: 0 28px 70px rgb(0 0 0 / 0.55);
+}
+
+.google-doc-content.google-doc-presentation-terminal::before {
+  color: rgb(var(--article-muted));
+  border-color: rgb(var(--article-muted) / 0.32);
+  letter-spacing: 0.24em;
+}
+
+.google-doc-content.google-doc-presentation-terminal::after {
+  background: radial-gradient(circle at 50% 0%, rgb(255 255 255 / 0.055), transparent 38rem);
+}
+
+.google-doc-content.google-doc-presentation-terminal .docs-editor-heading-2 {
+  max-width: 39rem;
+  margin-top: clamp(5rem, 12vw, 8.5rem);
+  border-bottom-color: rgb(255 255 255 / 0.15);
+  font-weight: 420;
+  letter-spacing: 0.015em;
+}
+
+.google-doc-content.google-doc-presentation-terminal .docs-editor-paragraph {
+  max-width: 58ch;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.88;
+}
+
+.google-doc-content.google-doc-presentation-terminal .docs-editor-section-lead.docs-editor-paragraph {
+  border-left-color: rgb(var(--article-muted) / 0.5);
+}
+
+@media (max-width: 900px) {
+  .google-doc-content .docs-editor-figure[data-doc-media-layout^="aside"] {
+    float: none;
+    width: min(100%, 42rem);
+    margin: clamp(1.5rem, 5vw, 2.5rem) auto;
+  }
+
+  .google-doc-content .docs-editor-figure[data-doc-media-layout^="aside"] img {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+@media (max-width: 640px) {
+  .google-doc-content {
+    padding: 1rem;
+    border-radius: 0.7rem;
+  }
+
+  .google-doc-content::before {
+    margin-bottom: 2.2rem;
+    font-size: 0.56rem;
+    letter-spacing: 0.1em;
+  }
+
+  .google-doc-content .docs-editor-heading-2 {
+    margin-top: 3.4rem;
+    padding-left: 2.35rem;
+  }
+
+  .google-doc-content .docs-editor-heading-2::before {
+    bottom: 0.82rem;
+  }
+
+  .google-doc-content .docs-editor-section-lead.docs-editor-paragraph {
+    padding-left: 0.85rem;
+  }
+
+  .google-doc-content .docs-editor-navigation-list {
+    grid-template-columns: 1fr;
+  }
+
+  .google-doc-content .docs-editor-figure[data-doc-media-layout="bleed"] {
+    width: calc(100% + 1rem);
+    margin-left: -0.5rem;
+  }
+
+  .google-doc-content .docs-editor-table,
+  .google-doc-content .docs-editor-table :is(thead, tbody, tr, th, td) {
+    display: block;
+  }
+
+  .google-doc-content .docs-editor-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .google-doc-content .docs-editor-table tr {
+    margin: 0.55rem;
+    border: 1px solid rgb(var(--article-rule) / 0.17);
+    border-radius: 0.45rem;
+  }
+
+  .google-doc-content .docs-editor-table td {
+    border: 0;
+  }
+
+  .google-doc-content .docs-editor-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.18rem;
+    color: rgb(var(--article-accent));
+    font-family: var(--article-mono-font);
+    font-size: 0.61rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .google-doc-content.google-doc-presentation-field-notes {
+    background:
+      repeating-linear-gradient(0deg, transparent 0 2rem, rgb(76 94 91 / 0.08) 2rem calc(2rem + 1px)),
+      rgb(var(--article-surface-raised));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .google-doc-content a,
+  .google-doc-content .docs-editor-navigation-list > .docs-editor-list-item {
+    transition: none;
+  }
+
+  .google-doc-content .docs-editor-navigation-list > .docs-editor-list-item:hover {
+    translate: none;
+  }
+}
+
+@media print {
+  .google-doc-content {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #222;
+  }
+
+  .google-doc-content::before,
+  .google-doc-content::after,
+  .google-doc-content .docs-editor-heading-2::before {
+    display: none;
+  }
+
+  .google-doc-content .docs-editor-heading-2,
+  .google-doc-content .docs-editor-section-lead.docs-editor-paragraph,
+  .google-doc-content .docs-editor-quote,
+  .google-doc-content .docs-editor-list,
+  .google-doc-content .docs-editor-table,
+  .google-doc-content .docs-editor-figure,
+  .google-doc-content .docs-editor-diagram {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #222;
+  }
+
+  .google-doc-content :is(h1, h2, h3, p, li, blockquote, a) {
+    color: #222;
+    text-shadow: none;
+  }
+}

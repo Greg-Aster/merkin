@@ -1,5 +1,6 @@
 .home-intro-copy--timeline-selected {
   box-sizing: border-box;
+  z-index: 7;
   display: grid;
   grid-template-rows: auto auto auto;
   gap: 0.55rem;

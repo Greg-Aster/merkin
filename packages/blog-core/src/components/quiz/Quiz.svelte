@@ -9,7 +9,6 @@ import type {
   QuizSfxId,
 } from '../../types/quiz'
 
-import '../../styles/quiz/quiz.css'
 
 export let initialQuestion: string
 export let nodes: Record<string, QuizNode>

@@ -1,3 +1,9 @@
+@import '../features/storefront.css';
+@import '../features/marketplace-card.css';
+@import '../features/product-card.css';
+@import '../features/pagination.css';
+@import '../features/responsive.css';
+
 /* Store layout chrome */
 .parallax-bg {
   transform: translateZ(0);

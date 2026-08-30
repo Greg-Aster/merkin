@@ -1,3 +1,35 @@
+export interface GoogleDocListItem {
+  text: string
+  children: GoogleDocListBlock[]
+}
+
+export interface GoogleDocListBlock {
+  type: 'list'
+  ordered: boolean
+  items: GoogleDocListItem[]
+}
+
+export type GoogleDocSectionKind = 'preamble' | 'content' | 'navigation'
+
+export interface GoogleDocBlockPresentation {
+  block: GoogleDocBlock
+  section: GoogleDocSectionKind
+  isSectionLead: boolean
+}
+
+export type GoogleDocMediaLayout =
+  | 'wide'
+  | 'bleed'
+  | 'aside-start'
+  | 'aside-end'
+
+export interface GoogleDocEditorialMedia {
+  afterHeadingId: string
+  src: string
+  alt: string
+  layout?: GoogleDocMediaLayout
+}
+
 export type GoogleDocBlock =
   | {
       type: 'heading'
@@ -9,10 +41,18 @@ export type GoogleDocBlock =
       type: 'paragraph'
       text: string
     }
+  | GoogleDocListBlock
   | {
-      type: 'list'
-      ordered: boolean
-      items: string[]
+      type: 'blockquote'
+      paragraphs: string[]
+    }
+  | {
+      type: 'image'
+      src: string
+      alt: string
+      caption?: string
+      layout?: GoogleDocMediaLayout
+      editorial?: boolean
     }
   | {
       type: 'table'
@@ -152,7 +192,11 @@ export function googleDocBlocksToPlainText(blocks: GoogleDocBlock[]): string {
         case 'pre':
           return block.text
         case 'list':
-          return block.items
+          return googleDocListToPlainText(block)
+        case 'blockquote':
+          return block.paragraphs
+        case 'image':
+          return [block.alt, block.caption ?? ''].filter(Boolean)
         case 'table':
           return [block.headers.join(' '), ...block.rows.map((row) => row.join(' '))]
         case 'thematicBreak':
@@ -162,45 +206,64 @@ export function googleDocBlocksToPlainText(blocks: GoogleDocBlock[]): string {
     .join('\n')
 }
 
+export function googleDocBlocksToMarkdown(blocks: GoogleDocBlock[]): string {
+  return blocks
+    .map((block) => {
+      switch (block.type) {
+        case 'heading':
+          return `${'#'.repeat(block.depth)} ${block.text}`
+        case 'paragraph':
+          return block.text
+        case 'list':
+          return googleDocListToMarkdown(block).join('\n')
+        case 'blockquote':
+          return block.paragraphs
+            .map((paragraph) =>
+              paragraph
+                .split('\n')
+                .map((line) => `> ${line}`)
+                .join('\n'),
+            )
+            .join('\n>\n')
+        case 'image': {
+          const caption = block.caption ? ` "${block.caption.replace(/"/g, '\\"')}"` : ''
+          return `![${block.alt}](${block.src}${caption})`
+        }
+        case 'table': {
+          const rows = [block.headers, ...block.rows]
+          const markdownRows = rows.map(
+            (row) => `| ${row.map(escapeMarkdownTableCell).join(' | ')} |`,
+          )
+          const divider = `| ${block.headers.map(() => '---').join(' | ')} |`
+          return [markdownRows[0], divider, ...markdownRows.slice(1)].join('\n')
+        }
+        case 'pre':
+          return `\`\`\`\n${block.text}\n\`\`\``
+        case 'thematicBreak':
+          return '---'
+      }
+    })
+    .join('\n\n')
+}
+
 export function convertGoogleDocTextToBlocks(text: string): GoogleDocBlock[] {
   const blocks: GoogleDocBlock[] = []
-  let activeList: { ordered: boolean; items: string[] } | null = null
   const usedHeadingIds = new Map<string, number>()
-
-  const flushList = () => {
-    if (!activeList || activeList.items.length === 0) return
-    if (activeList.ordered && looksLikeDiagramList(activeList.items)) {
-      blocks.push({
-        type: 'pre',
-        text: activeList.items.map((item) => normalizeMarkdownText(item)).join('\n'),
-      })
-    } else {
-      blocks.push({
-        type: 'list',
-        ordered: activeList.ordered,
-        items: activeList.items.map((item) => normalizeMarkdownText(item)),
-      })
-    }
-    activeList = null
-  }
 
   const lines = normalizeExportText(text)
   for (let index = 0; index < lines.length; index += 1) {
     const rawLine = lines[index] ?? ''
     const line = rawLine.trim()
     if (!line) {
-      flushList()
       continue
     }
 
     if (/^-{3,}$/.test(line)) {
-      flushList()
       blocks.push({ type: 'thematicBreak' })
       continue
     }
 
     if (isMarkdownTableStart(lines, index)) {
-      flushList()
       const table = readMarkdownTable(lines, index)
       blocks.push(table.block)
       index = table.endIndex
@@ -209,7 +272,6 @@ export function convertGoogleDocTextToBlocks(text: string): GoogleDocBlock[] {
 
     const heading = line.match(/^(#{1,3})\s+(.+)$/)
     if (heading?.[1] && heading[2]) {
-      flushList()
       const depth = heading[1].length as 1 | 2 | 3
       const headingText = normalizeHeadingText(heading[2])
       if (!headingText) continue
@@ -222,34 +284,100 @@ export function convertGoogleDocTextToBlocks(text: string): GoogleDocBlock[] {
       continue
     }
 
-    const unorderedListItem = line.match(/^[-*]\s+(.+)$/)
-    if (unorderedListItem?.[1]) {
-      if (activeList?.ordered) flushList()
-      activeList ??= { ordered: false, items: [] }
-      activeList.items.push(unorderedListItem[1].trim())
+    if (isMarkdownListLine(rawLine)) {
+      const list = readMarkdownLists(lines, index)
+      blocks.push(...convertDiagramLists(list.blocks))
+      index = list.endIndex
       continue
     }
 
-    const orderedListItem = line.match(/^\d+\.\s+(.+)$/)
-    if (orderedListItem?.[1]) {
-      if (activeList && !activeList.ordered) flushList()
-      activeList ??= { ordered: true, items: [] }
-      activeList.items.push(orderedListItem[1].trim())
+    if (isMarkdownBlockquoteStart(line)) {
+      const quote = readMarkdownBlockquote(lines, index)
+      if (quote.block.paragraphs.length > 0) {
+        blocks.push(quote.block)
+      }
+      index = quote.endIndex
       continue
     }
 
-    flushList()
+    const image = parseStandaloneMarkdownImage(line)
+    if (image) {
+      blocks.push(image)
+      continue
+    }
+
     blocks.push({ type: 'paragraph', text: normalizeMarkdownText(line) })
   }
 
-  flushList()
   return blocks
+}
+
+export function getGoogleDocBlockPresentation(
+  blocks: GoogleDocBlock[],
+): GoogleDocBlockPresentation[] {
+  let section: GoogleDocSectionKind = 'preamble'
+  let awaitsSectionLead = false
+
+  return blocks.map((block) => {
+    if (block.type === 'heading' && block.depth === 2) {
+      section = isNavigationHeading(block.text) ? 'navigation' : 'content'
+      awaitsSectionLead = true
+    }
+
+    const isSectionLead = awaitsSectionLead && isSectionLeadBlock(block)
+    if (isSectionLead) {
+      awaitsSectionLead = false
+    }
+
+    return { block, section, isSectionLead }
+  })
+}
+
+export function insertGoogleDocEditorialMedia(
+  blocks: GoogleDocBlock[],
+  editorialMedia: GoogleDocEditorialMedia[],
+): GoogleDocBlock[] {
+  if (editorialMedia.length === 0) return blocks
+
+  const mediaByHeading = new Map<string, GoogleDocEditorialMedia[]>()
+  for (const media of editorialMedia) {
+    const entries = mediaByHeading.get(media.afterHeadingId) ?? []
+    entries.push(media)
+    mediaByHeading.set(media.afterHeadingId, entries)
+  }
+
+  return blocks.flatMap((block) => {
+    if (block.type !== 'heading') return [block]
+
+    const mediaEntries = mediaByHeading.get(block.id)
+    if (!mediaEntries) return [block]
+
+    return [
+      block,
+      ...mediaEntries.map(
+        (media): GoogleDocBlock => ({
+          type: 'image',
+          src: media.src,
+          alt: media.alt,
+          layout: media.layout,
+          editorial: true,
+        }),
+      ),
+    ]
+  })
+}
+
+export function renderGoogleDocListHtml(
+  block: GoogleDocListBlock,
+  presentation?: Pick<GoogleDocBlockPresentation, 'section' | 'isSectionLead'>,
+): string {
+  return renderListBlock(block, presentation, true)
 }
 
 export function renderInlineMarkdown(source: string): string {
   const text = normalizeMarkdownText(source)
   const tokenPattern =
-    /`([^`]+)`|\*\*([^*]+)\*\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)/g
+    /`([^`]+)`|\*\*([^*]+)\*\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)|(?<!\*)\*([^*\n]+)\*(?!\*)|(?<![\w_])_([^_\n]+)_(?![\w_])/g
   let cursor = 0
   let html = ''
   let match: RegExpExecArray | null
@@ -268,6 +396,8 @@ export function renderInlineMarkdown(source: string): string {
         ? ''
         : ' target="_blank" rel="noopener noreferrer"'
       html += `<a href="${href}"${externalAttributes}>${label}</a>`
+    } else if (match[5] || match[6]) {
+      html += `<em>${escapeHtml(match[5] ?? match[6] ?? '')}</em>`
     }
 
     cursor = tokenPattern.lastIndex
@@ -275,6 +405,217 @@ export function renderInlineMarkdown(source: string): string {
 
   html += escapeHtml(text.slice(cursor))
   return html
+}
+
+interface MarkdownListToken {
+  indent: number
+  ordered: boolean
+  text: string
+}
+
+function isMarkdownListLine(line: string): boolean {
+  return /^[ \t]*(?:[-*+] |\d+[.)] )\S/.test(line)
+}
+
+function readMarkdownLists(
+  lines: string[],
+  startIndex: number,
+): { blocks: GoogleDocListBlock[]; endIndex: number } {
+  const tokens: MarkdownListToken[] = []
+  let endIndex = startIndex
+
+  for (let index = startIndex; index < lines.length; index += 1) {
+    const match = (lines[index] ?? '').match(/^([ \t]*)([-*+]|\d+[.)])\s+(.+)$/)
+    if (!match) break
+    if (!match[2] || !match[3]) break
+
+    tokens.push({
+      indent: measureIndent(match[1]),
+      ordered: /^\d/.test(match[2]),
+      text: normalizeMarkdownText(match[3]),
+    })
+    endIndex = index
+  }
+
+  const blocks: GoogleDocListBlock[] = []
+  let tokenIndex = 0
+  while (tokenIndex < tokens.length) {
+    const parsed = buildListBlock(tokens, tokenIndex, tokens[tokenIndex]?.indent ?? 0)
+    blocks.push(parsed.block)
+    tokenIndex = parsed.nextIndex
+  }
+
+  return { blocks, endIndex }
+}
+
+function buildListBlock(
+  tokens: MarkdownListToken[],
+  startIndex: number,
+  indent: number,
+): { block: GoogleDocListBlock; nextIndex: number } {
+  const ordered = tokens[startIndex]?.ordered ?? false
+  const block: GoogleDocListBlock = { type: 'list', ordered, items: [] }
+  let index = startIndex
+
+  while (index < tokens.length) {
+    const token = tokens[index]
+    if (!token || token.indent < indent) break
+
+    if (token.indent > indent) {
+      const parentItem = block.items.at(-1)
+      if (!parentItem) break
+      const nested = buildListBlock(tokens, index, token.indent)
+      parentItem.children.push(nested.block)
+      index = nested.nextIndex
+      continue
+    }
+
+    if (token.ordered !== ordered) break
+
+    block.items.push({ text: token.text, children: [] })
+    index += 1
+  }
+
+  return { block, nextIndex: index }
+}
+
+function convertDiagramLists(blocks: GoogleDocListBlock[]): GoogleDocBlock[] {
+  return blocks.map((block) => {
+    const flatItems = block.items.every((item) => item.children.length === 0)
+    const itemText = block.items.map((item) => item.text)
+    if (block.ordered && flatItems && looksLikeDiagramList(itemText)) {
+      return { type: 'pre', text: itemText.join('\n') }
+    }
+    return block
+  })
+}
+
+function readMarkdownBlockquote(
+  lines: string[],
+  startIndex: number,
+): { block: Extract<GoogleDocBlock, { type: 'blockquote' }>; endIndex: number } {
+  const paragraphs: string[] = []
+  let activeParagraph: string[] = []
+  let endIndex = startIndex
+
+  const flushParagraph = () => {
+    const paragraph = normalizeMarkdownText(activeParagraph.join(' '))
+    if (paragraph) paragraphs.push(paragraph)
+    activeParagraph = []
+  }
+
+  const exportedGoogleDocsQuote = /^\*\\?>\s?/.test(
+    (lines[startIndex] ?? '').trim(),
+  )
+
+  for (let index = startIndex; index < lines.length; index += 1) {
+    const line = (lines[index] ?? '').trim()
+    const match = exportedGoogleDocsQuote
+      ? line.match(/^\*(?:\\?>\s?)?(.*?)\*\s*$/)
+      : line.match(/^>\s?(.*)$/)
+    if (!match) break
+    endIndex = index
+    if (!match[1]?.trim()) {
+      flushParagraph()
+    } else {
+      activeParagraph.push(match[1])
+    }
+  }
+  flushParagraph()
+
+  return { block: { type: 'blockquote', paragraphs }, endIndex }
+}
+
+function isMarkdownBlockquoteStart(line: string): boolean {
+  return /^>\s?/.test(line) || /^\*\\?>\s?/.test(line)
+}
+
+function parseStandaloneMarkdownImage(
+  line: string,
+): Extract<GoogleDocBlock, { type: 'image' }> | null {
+  const match = line.match(
+    /^!\[([^\]]*)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)(?:\s+["']([^"']+)["'])?\)$/,
+  )
+  if (!match?.[2]) return null
+
+  const caption = match[3] ? normalizeMarkdownText(match[3]) : undefined
+  return {
+    type: 'image',
+    src: match[2],
+    alt: normalizeMarkdownText(match[1] ?? ''),
+    ...(caption ? { caption } : {}),
+  }
+}
+
+function measureIndent(indent: string): number {
+  return indent.replace(/\t/g, '    ').length
+}
+
+function googleDocListToPlainText(block: GoogleDocListBlock): string[] {
+  return block.items.flatMap((item) => [
+    item.text,
+    ...item.children.flatMap((child) => googleDocListToPlainText(child)),
+  ])
+}
+
+function googleDocListToMarkdown(
+  block: GoogleDocListBlock,
+  indent = 0,
+): string[] {
+  return block.items.flatMap((item, index) => {
+    const marker = block.ordered ? `${index + 1}.` : '-'
+    const line = `${' '.repeat(indent)}${marker} ${item.text}`
+    return [
+      line,
+      ...item.children.flatMap((child) =>
+        googleDocListToMarkdown(child, indent + 2),
+      ),
+    ]
+  })
+}
+
+function escapeMarkdownTableCell(cell: string): string {
+  return cell.replace(/\|/g, '\\|').replace(/\n/g, '<br>')
+}
+
+function renderListBlock(
+  block: GoogleDocListBlock,
+  presentation: Pick<GoogleDocBlockPresentation, 'section' | 'isSectionLead'> | undefined,
+  isRoot: boolean,
+): string {
+  const tag = block.ordered ? 'ol' : 'ul'
+  const classNames = ['docs-editor-list']
+  if (isRoot && presentation?.section === 'navigation') {
+    classNames.push('docs-editor-navigation-list')
+  }
+  if (isRoot && presentation?.isSectionLead) {
+    classNames.push('docs-editor-section-lead')
+  }
+  const sectionAttribute =
+    isRoot && presentation ? ` data-doc-section="${presentation.section}"` : ''
+  const items = block.items
+    .map((item) => {
+      const children = item.children
+        .map((child) => renderListBlock(child, undefined, false))
+        .join('')
+      return `<li class="docs-editor-list-item">${renderInlineMarkdown(item.text)}${children}</li>`
+    })
+    .join('')
+
+  return `<${tag} class="${classNames.join(' ')}"${sectionAttribute}>${items}</${tag}>`
+}
+
+function isNavigationHeading(text: string): boolean {
+  return /\b(?:continue|journey|explore|next|related|further reading)\b/i.test(text)
+}
+
+function isSectionLeadBlock(block: GoogleDocBlock): boolean {
+  return (
+    block.type === 'paragraph' ||
+    block.type === 'blockquote' ||
+    block.type === 'list' ||
+    block.type === 'image'
+  )
 }
 
 function normalizeExportText(text: string): string[] {
@@ -287,7 +628,8 @@ function normalizeExportText(text: string): string[] {
 
 function normalizeMarkdownText(text: string): string {
   return text
-    .replace(/\\([\\`*_{}\[\]()#+\-.!|~=])/g, '$1')
+    .replace(/\]\(https?:\/\/\/([^\s)]+)\)/g, '](/$1)')
+    .replace(/\\([\\`*_{}\[\]()#+\-.!|~=>])/g, '$1')
     .replace(/[ \t]+$/g, '')
     .trim()
 }

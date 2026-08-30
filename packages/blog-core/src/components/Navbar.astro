@@ -97,16 +97,6 @@ const isAuthenticated = false
 </div>
 
 <script>
-function switchTheme() {
-    if (localStorage.theme === 'dark') {
-        document.documentElement.classList.remove('dark');
-        localStorage.theme = 'light';
-    } else {
-        document.documentElement.classList.add('dark');
-        localStorage.theme = 'dark';
-    }
-}
-
 function loadButtonScript() {
     function toggleFloatPanel(panel: HTMLElement | null) {
         if (!panel) return;
@@ -119,14 +109,6 @@ function loadButtonScript() {
         } else {
             panel.classList.add('float-panel-closed');
         }
-    }
-
-    // Theme switch
-    let switchBtn = document.getElementById("scheme-switch");
-    if (switchBtn) {
-        switchBtn.addEventListener("click", function () {
-            switchTheme();
-        });
     }
 
     // Display settings button

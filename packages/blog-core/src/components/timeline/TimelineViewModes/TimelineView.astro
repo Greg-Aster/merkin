@@ -297,7 +297,9 @@ const initialBackgroundVideoPlaybackRate =
 ></script>
 
 <script>
-  import { initTimelineViews } from './timelineViewClient.js'
+  import { destroyTimelineViews, initTimelineViews } from './timelineViewClient.js'
 
   initTimelineViews()
+  document.addEventListener('astro:before-swap', destroyTimelineViews)
+  document.addEventListener('astro:page-load', initTimelineViews)
 </script>

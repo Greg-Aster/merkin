@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import SnuggaloidRegistryList from '../../components/snuggaloids/SnuggaloidRegistryList.svelte'
 import ProductCustomizer from '../../components/store/ProductCustomizer.svelte'
+import productCustomizerHref from '../../styles/features/store/product-customizer.css?url'
 import { buildSnuggaloidCustomizerConfig } from '../../config/snuggaloidCustomizer'
 import { publicCollectionFilter } from '../../contracts/content'
 import { publicProductCollectionFilter } from '../../contracts/products'
@@ -56,6 +57,9 @@ const registryUnits = units.map(unit => ({
   title="Snuggaloid Registry"
   description="Known Snuggaloid units, adoption status, bios, photos, and registry notes."
 >
+  <Fragment slot="head">
+    <link rel="stylesheet" href={productCustomizerHref} data-route-style="snuggaloids" />
+  </Fragment>
   <div class="container mx-auto max-w-6xl px-3 py-5 sm:px-4 md:py-6">
     <nav class="mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-500 md:mb-6" aria-label="Breadcrumb">
       <a href="/" class="transition hover:text-[var(--primary)]">Home</a>

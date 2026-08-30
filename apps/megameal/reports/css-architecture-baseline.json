@@ -35,14 +35,6 @@
     },
     {
       "rule": "oversized-component",
-      "file": "src/components/client/Profile.svelte",
-      "line": 1,
-      "severity": "warn",
-      "metric": "nonblank-lines",
-      "maxValue": 507
-    },
-    {
-      "rule": "oversized-component",
       "file": "src/components/home/HomeIntroEnvironment.svelte",
       "line": 1,
       "severity": "error",

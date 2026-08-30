@@ -8,6 +8,8 @@ import {
   defaultTimelineViewConfig,
 } from '../../services/TimelineConfig'
 import TimelineView from './TimelineViewModes/TimelineView.astro'
+import timelineFeatureHref from '../../styles/timeline-feature.css?url'
+import timelineStylesHref from '../../styles/timeline-styles.css?url'
 
 export interface Props {
   id?: string
@@ -85,6 +87,9 @@ const menuEntries = [
 ]
 ---
 
+<link rel="stylesheet" href={timelineStylesHref} data-timeline-style="base" />
+<link rel="stylesheet" href={timelineFeatureHref} data-timeline-style="feature" />
+
 <section
   id={`${id}-wrapper`}
   class:list={['timeline-wrapper relative w-full overflow-hidden', asBanner ? 'timeline-banner-mode' : '', classList]}
@@ -137,4 +142,5 @@ const menuEntries = [
   import { initTimelineBannerControls } from './timelineBannerClient.js'
 
   initTimelineBannerControls()
+  document.addEventListener('astro:page-load', initTimelineBannerControls)
 </script>

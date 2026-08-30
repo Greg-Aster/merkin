@@ -25,6 +25,13 @@ function assertIncludes(relativePath, expected, note) {
   }
 }
 
+function assertExcludes(relativePath, forbidden, note) {
+  const text = readRequiredFile(relativePath)
+  if (text.includes(forbidden)) {
+    failures.push(`${relativePath} must not contain ${note}: ${forbidden}`)
+  }
+}
+
 const protectedContracts = [
   [
     'apps/megameal/src/contracts/homePortal.ts',
@@ -74,7 +81,7 @@ const protectedContracts = [
   [
     'apps/megameal/src/components/home/PortalHeroBackgroundSlide.astro',
     [
-      ['/assets/banner/universbg0001-0121.webm', 'background video path'],
+      ['/assets/banner/tunnel.webm', 'background video path'],
       ['data-src={portalIntroBackgroundVideo}', 'lazy background data source'],
       ['homePortalEvents.portalAdvance', 'centralized portal advance listener'],
     ],
@@ -121,10 +128,7 @@ const protectedContracts = [
       ['href: \'/store/\'', 'store CTA href'],
       ['href: \'/community/\'', 'community CTA href'],
       ['href: \'/reader/first-contact-manual/\'', 'reader CTA href'],
-      [
-        '/assets/banner/home-intro-stills/home-intro.webp',
-        'home intro still path',
-      ],
+      ["videoSrc: '/videos/title.webm'", 'home intro video path'],
       ['/assets/banner/universbg0001-0121.webm', 'universe video path'],
     ],
   ],
@@ -159,6 +163,29 @@ for (const [relativePath, checks] of protectedContracts) {
     assertIncludes(relativePath, expected, note)
   }
 }
+
+const removedPortalStillPath = '/assets/banner/home-intro-stills/home-intro.webp'
+const removedBackgroundShadeClass = 'megameal-portal-background-slide__shade'
+assertExcludes(
+  'apps/megameal/src/components/home/PortalHeroSlide.astro',
+  removedPortalStillPath,
+  'the removed full-screen portal still',
+)
+assertExcludes(
+  'apps/megameal/src/components/home/homeIntroScreens.ts',
+  removedPortalStillPath,
+  'the removed primary-screen portal still',
+)
+assertExcludes(
+  'apps/megameal/src/components/home/PortalHeroBackgroundSlide.astro',
+  removedBackgroundShadeClass,
+  'the removed tunnel background shade element',
+)
+assertExcludes(
+  'apps/megameal/src/styles/features/home/portal-hero-slide.css',
+  removedBackgroundShadeClass,
+  'the removed tunnel background shade styles',
+)
 
 if (failures.length > 0) {
   console.error('[home-portal-contracts] Contract audit failed:')

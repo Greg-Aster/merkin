@@ -233,8 +233,11 @@ export default defineConfig({
     Compress({
       CSS: false,
       Image: false,
-      Action: {
-        Passed: async () => true, // https://github.com/PlayForm/Compress/issues/376
+      HTML: {
+        'html-minifier-terser': {
+          collapseWhitespace: false,
+          sortClassName: false,
+        },
       },
     }),
     mdx()

@@ -1,9 +1,0 @@
-#unified-sidenav {
-  min-width: 0;
-  flex-shrink: 0;
-}
-
-#unified-sidenav button,
-#unified-sidenav a {
-  min-width: 0;
-}

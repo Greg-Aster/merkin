@@ -37,6 +37,18 @@ function getRenderedSidebarState(): boolean | null {
   return null
 }
 
+function emitLayoutState() {
+  document.dispatchEvent(
+    new CustomEvent('blog-core:layout-state', {
+      detail: {
+        isOneColumn,
+        isTransitioning,
+        isFullscreen: getFullscreenLayoutMode(),
+      },
+    }),
+  )
+}
+
 onMount(() => {
   const isCookbookPage = currentPath.includes('cookbook')
   const isFirstContactPage = currentPath.includes('first-contact')
@@ -48,85 +60,29 @@ onMount(() => {
     console.log('SpecialPageFeatures - Is special page:', isSpecialPage)
   }
 
-  // Wait for DOM and determine initial layout state
-  setTimeout(() => {
-    if (import.meta.env.DEV) {
-      console.log('SpecialPageFeatures - Starting initialization...')
-    }
+  const isFullscreen = getFullscreenLayoutMode()
 
-    // Check fullscreen mode first (highest priority)
-    const isFullscreen = getFullscreenLayoutMode()
+  if (isFullscreen) {
+    isOneColumn = true
+    applyLayoutState(true, true)
+  } else {
+    const renderedSidebarState = getRenderedSidebarState()
+    const targetState =
+      renderedSidebarState ?? (oneColumn !== undefined ? oneColumn : isSpecialPage)
 
-    if (isFullscreen) {
-      // Fullscreen mode always forces one column, no toggle allowed
-      if (import.meta.env.DEV) {
-        console.log('Fullscreen mode detected - forcing one column layout')
-      }
-      isOneColumn = true
-      applyLayoutState(true, true) // true for isFullscreen parameter
-    } else {
-      // Page-first priority system - frontmatter overrides saved preferences
-      let targetState: boolean
-      const renderedSidebarState = getRenderedSidebarState()
+    localStorage.removeItem('oneColumnMode')
+    isOneColumn = targetState
+    pageDefaultOneColumn = targetState
+    applyLayoutState(targetState, false)
+  }
 
-      if (renderedSidebarState !== null) {
-        targetState = renderedSidebarState
-        if (import.meta.env.DEV) {
-          console.log('Using rendered sidebar layout:', targetState)
-        }
-      } else if (oneColumn !== undefined) {
-        // Frontmatter has highest priority - each page defines its intended layout
-        targetState = oneColumn
-        if (import.meta.env.DEV) {
-          console.log('Using frontmatter layout (highest priority):', targetState)
-        }
-      } else if (isSpecialPage) {
-        // Special pages default to one column when no frontmatter specified
-        targetState = true
-        if (import.meta.env.DEV) {
-          console.log('Special page detected, defaulting to one column')
-        }
-      } else {
-        // Default to two column for regular pages
-        targetState = false
-        if (import.meta.env.DEV) {
-          console.log('Using default two column layout')
-        }
-      }
+  if (isCookbookPage) initializeCookbookView()
 
-      // Clear any saved user preference that might conflict with page intent
-      localStorage.removeItem('oneColumnMode')
+  const handleToggleRequest = () => toggleLayout()
+  const handleStateRequest = () => emitLayoutState()
 
-      // Set initial state
-      isOneColumn = targetState
-      pageDefaultOneColumn = targetState
-      applyLayoutState(targetState, false)
-    }
-
-    // Handle special page features after layout is set
-    if (isCookbookPage) {
-      initializeCookbookView()
-    }
-
-    // Expose toggle function globally
-    try {
-      ;(window as any).toggleLayoutState = toggleLayout
-      ;(window as any).getLayoutState = () => ({
-        isOneColumn,
-        isTransitioning,
-        isFullscreen: getFullscreenLayoutMode(),
-      })
-
-      if (import.meta.env.DEV) {
-        console.log('SpecialPageFeatures - Global functions exposed successfully')
-      }
-    } catch (error) {
-      console.error(
-        'SpecialPageFeatures - Error exposing global functions:',
-        error,
-      )
-    }
-  }, 50)
+  document.addEventListener('blog-core:layout-toggle-request', handleToggleRequest)
+  document.addEventListener('blog-core:layout-state-request', handleStateRequest)
 
   // Listen for external layout changes (only fullscreen changes matter now)
   const handleStorageChange = (e: StorageEvent) => {
@@ -155,9 +111,8 @@ onMount(() => {
 
   return () => {
     window.removeEventListener('storage', handleStorageChange)
-    // Clean up global functions
-    delete (window as any).toggleLayoutState
-    delete (window as any).getLayoutState
+    document.removeEventListener('blog-core:layout-toggle-request', handleToggleRequest)
+    document.removeEventListener('blog-core:layout-state-request', handleStateRequest)
   }
 })
 
@@ -193,6 +148,7 @@ function toggleLayout() {
   // Reset transition flag
   setTimeout(() => {
     isTransitioning = false
+    emitLayoutState()
   }, 300)
 
   return true
@@ -225,6 +181,8 @@ function applyLayoutState(oneColumnMode: boolean, isFullscreenMode = false) {
   } else {
     document.body.classList.remove('fullscreen-mode')
   }
+
+  emitLayoutState()
 
   // Let the CSS handle the actual layout changes
   if (import.meta.env.DEV) {

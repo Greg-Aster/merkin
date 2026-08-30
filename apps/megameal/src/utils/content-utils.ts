@@ -8,7 +8,14 @@ import {
   publicCollectionFilter,
 } from '../contracts/content'
 
-type SortedPost = { body: string; data: BlogPostData; slug: string }
+type MegamealPostData = BlogPostData & {
+  googleDoc?: {
+    documentId: string
+    style: string
+  }
+}
+
+type SortedPost = { body?: string; data: MegamealPostData; slug: string }
 
 type SortedPostsOptions = {
   includeArchived?: boolean
@@ -89,11 +96,11 @@ export type Category = {
 export async function getPostsBySeries(
   seriesId: string,
   includeDrafts = false,
-): Promise<{ body: string; data: BlogPostData; slug: string }[]> {
+): Promise<{ body?: string; data: MegamealPostData; slug: string }[]> {
   const allPosts = (await getCollection(
     'posts',
     includeDrafts ? undefined : publicCollectionFilter,
-  )) as unknown as { body: string; data: BlogPostData; slug: string }[]
+  )) as unknown as { body?: string; data: MegamealPostData; slug: string }[]
 
   return allPosts
     .filter(post => (post.data as any).series === seriesId)
@@ -107,12 +114,12 @@ export async function getPostsBySeries(
 export async function getAllSeries(
   includeDrafts = false,
 ): Promise<
-  Record<string, { body: string; data: BlogPostData; slug: string }[]>
+  Record<string, { body?: string; data: MegamealPostData; slug: string }[]>
 > {
   const allPosts = (await getCollection(
     'posts',
     includeDrafts ? undefined : publicCollectionFilter,
-  )) as unknown as { body: string; data: BlogPostData; slug: string }[]
+  )) as unknown as { body?: string; data: MegamealPostData; slug: string }[]
 
   const grouped: Record<string, typeof allPosts> = {}
   for (const post of allPosts) {
@@ -138,11 +145,11 @@ export async function getAllSeries(
 export async function getPostsByEra(
   eraSlug: string,
   includeDrafts = false,
-): Promise<{ body: string; data: BlogPostData; slug: string }[]> {
+): Promise<{ body?: string; data: MegamealPostData; slug: string }[]> {
   const allPosts = (await getCollection(
     'posts',
     includeDrafts ? undefined : publicCollectionFilter,
-  )) as unknown as { body: string; data: BlogPostData; slug: string }[]
+  )) as unknown as { body?: string; data: MegamealPostData; slug: string }[]
 
   return allPosts
     .filter(post => post.data.timelineEra === eraSlug)

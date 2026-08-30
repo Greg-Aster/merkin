@@ -6,7 +6,7 @@ import { Icon } from 'astro-icon/components'
 import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 import { avatarConfig, siteConfig } from '../../config/config'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
-import '../../styles/pages/about-detail.css'
+import aboutDetailHref from '../../styles/pages/about-detail.css?url'
 
 // â­ FIXED: Import the correct layout toggle component
 import LayoutToggle from '../../components/client/LayoutToggle.svelte'
@@ -98,8 +98,10 @@ const jsonLd = {
   customAuthorData={customAuthorData}
   oneColumn={oneColumnMode}
 >
-
-<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+<Fragment slot="head">
+  <link rel="stylesheet" href={aboutDetailHref} data-route-style="about" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+</Fragment>
 
 <!-- =============================================================== -->
 <!-- â­ FIXED: BUILT-IN LAYOUT TOGGLE - USING CORRECT COMPONENT     -->

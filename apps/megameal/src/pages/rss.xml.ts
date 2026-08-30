@@ -6,6 +6,8 @@ import type { APIContext } from 'astro'
 import MarkdownIt from 'markdown-it'
 import sanitizeHtml from 'sanitize-html'
 import { createCORSResponse, handleCORS } from '../middleware/cors'
+import { loadGoogleDocSnapshot } from '../utils/googleDocContent.server'
+import { googleDocBlocksToMarkdown } from '@merkin/docs-editor-bridge'
 
 const parser = new MarkdownIt()
 
@@ -17,20 +19,24 @@ export async function GET(context: APIContext) {
   // Get posts
   const blog = await getSortedPosts()
 
-  // Generate RSS feed
-  const response = await rss({
-    title: siteConfig.title,
-    description: siteConfig.subtitle || 'No description',
-    site:
-      context.site ??
-      (context.url ? context.url.origin : 'https://temporalflow.org'),
-    items: blog.map(post => {
+  const items = await Promise.all(
+    blog.map(async post => {
+      const contentMarkdown = post.data.googleDoc
+        ? googleDocBlocksToMarkdown(
+            (await loadGoogleDocSnapshot(post.data.googleDoc.documentId)).blocks,
+          )
+        : post.body
+
+      if (typeof contentMarkdown !== 'string' || !contentMarkdown.trim()) {
+        throw new Error(`Post ${post.slug} does not have readable feed content.`)
+      }
+
       return {
         title: post.data.title,
         pubDate: post.data.published,
         description: post.data.description || '',
         link: `/posts/${post.slug}/`,
-        content: sanitizeHtml(parser.render(post.body), {
+        content: sanitizeHtml(parser.render(contentMarkdown), {
           allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
         }),
         // Add explicit frontmatter data
@@ -48,6 +54,16 @@ export async function GET(context: APIContext) {
       `,
       }
     }),
+  )
+
+  // Generate RSS feed
+  const response = await rss({
+    title: siteConfig.title,
+    description: siteConfig.subtitle || 'No description',
+    site:
+      context.site ??
+      (context.url ? context.url.origin : 'https://temporalflow.org'),
+    items,
     customData: `<language>${siteConfig.lang}</language>`,
   })
 
