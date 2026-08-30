@@ -75,6 +75,9 @@ async function auditRepresentativeRouteAssets() {
     /story-map/i,
     /portal/i,
     /storefront/i,
+    /photoswipe/i,
+    /overlayscrollbars/i,
+    /katex/i,
   ]
   const leakedPostStyles = postStylesheets.filter(href =>
     routeOnlyStylePatterns.some(pattern => pattern.test(href)),

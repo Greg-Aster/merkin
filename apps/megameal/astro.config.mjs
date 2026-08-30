@@ -156,6 +156,9 @@ export default defineConfig({
     ssr: {
       noExternal: [/^@fontsource/, 'katex'],
     },
+    // These literal lazy imports live in shared blog-core outside the app root.
+    // Pre-bundling prevents an on-intent dev-server restart; production
+    // stylesheet and runtime admission remains DOM-conditional in Layout.astro.
     optimizeDeps: {
       include: ['overlayscrollbars', 'photoswipe', 'photoswipe/lightbox'],
     },

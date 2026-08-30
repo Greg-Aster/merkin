@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -174,6 +174,66 @@ for (const [routeFile, expectedFilter] of routeFilterExpectations) {
   )
 }
 
+const arrivalStatusPath = path.join(
+  srcRoot,
+  'components/client/SiteArrivalStatus.astro',
+)
+const arrivalStatus = readFileSync(arrivalStatusPath, 'utf8')
+const appLayout = readFileSync(
+  path.join(srcRoot, 'layouts/Layout.astro'),
+  'utf8',
+)
+const mainGridLayout = readFileSync(
+  path.join(srcRoot, 'layouts/MainGridLayout.astro'),
+  'utf8',
+)
+const routeTransitions = readFileSync(
+  path.join(srcRoot, 'utils/megamealRouteTransitions.ts'),
+  'utf8',
+)
+
+assert(
+  appLayout.includes('<SiteArrivalStatus part="styles" />') &&
+    appLayout.includes('<SiteArrivalStatus part="status" />') &&
+    mainGridLayout.includes('<SiteArrivalStatus part="styles" />') &&
+    mainGridLayout.includes('<SiteArrivalStatus part="status" />'),
+  'both Megameal layout adapters must render the head styles and shared arrival status',
+)
+assert(
+  appLayout.includes('initMegamealRouteTransitions()') &&
+    mainGridLayout.includes('initMegamealRouteTransitions()'),
+  'both Megameal layout adapters must initialize the canonical route-transition owner',
+)
+assert(
+  mainGridLayout.indexOf('</SharedMainGridLayout>') <
+    mainGridLayout.indexOf('<script>'),
+  'MainGrid route-transition initialization must be emitted outside shared slot content',
+)
+assert(
+  arrivalStatus.includes('role="status"') &&
+    arrivalStatus.includes('Artwork is arriving. The site is working.'),
+  'the arrival status must provide visible and assistive reassurance',
+)
+assert(
+  arrivalStatus.includes('pointer-events: none') &&
+    arrivalStatus.includes('position: fixed') &&
+    arrivalStatus.includes('.onload-animation') &&
+    arrivalStatus.includes('opacity: 1 !important'),
+  'the arrival status must leave accessible page content visible and interactive',
+)
+assert(
+  arrivalStatus.includes('megameal-arrival-failsafe') &&
+    routeTransitions.includes('settleArrivalStatus()'),
+  'arrival reassurance must have both CSS and canonical runtime dismissal paths',
+)
+assert(
+  !arrivalStatus.includes('<button') &&
+    !arrivalStatus.includes('aria-modal') &&
+    !arrivalStatus.includes('role="dialog"') &&
+    !arrivalStatus.includes('position: fixed;\n    inset: 0'),
+  'the arrival status must never create an interaction or modal gate',
+)
+
 if (failures.length > 0) {
   console.error('[site-contracts] Contract audit failed:')
   failures.forEach(failure => console.error(`- ${failure}`))
@@ -181,5 +241,5 @@ if (failures.length > 0) {
 }
 
 console.log(
-  `[site-contracts] Verified ${retiredRoutes.size} retired route(s), public post filtering, and no stale retired-route links.`,
+  `[site-contracts] Verified ${retiredRoutes.size} retired route(s), public filtering, the non-blocking arrival status, and no stale retired-route links.`,
 )

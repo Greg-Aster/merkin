@@ -1,0 +1,80 @@
+---
+interface Props {
+  part: 'status' | 'styles'
+}
+
+const { part } = Astro.props
+---
+
+{part === 'status' ? (
+  <div
+    class="megameal-arrival-status"
+    data-megameal-arrival-status
+    data-state="loading"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    <div class="megameal-arrival-status__content">
+      <p class="megameal-arrival-status__kicker">Kitchen signal online</p>
+      <p class="megameal-arrival-status__wordmark" aria-label="MEGA MEAL">
+        MEGA <span>MEAL</span>
+      </p>
+      <div class="megameal-arrival-status__signal" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <p class="megameal-arrival-status__message">
+        Artwork is arriving. The site is working.
+      </p>
+      <p class="megameal-arrival-status__detail">
+        The full broadcast may take a moment on mobile or roaming Wi-Fi.
+      </p>
+    </div>
+  </div>
+) : (
+  <style is:inline>
+    .onload-animation {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    .megameal-arrival-status {
+      position: fixed;
+      top: max(4.75rem, calc(env(safe-area-inset-top) + 3.5rem));
+      right: max(0.75rem, env(safe-area-inset-right));
+      z-index: 45;
+      width: min(17rem, calc(100vw - 1.5rem));
+      padding: 0.85rem 0.9rem;
+      pointer-events: none;
+      color: rgb(226 232 240);
+      background: rgb(2 6 23);
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 440ms ease, visibility 0s linear 440ms;
+      animation: megameal-arrival-failsafe 520ms ease 12s forwards;
+    }
+
+    .megameal-arrival-status[data-state='revealing'] {
+      opacity: 0;
+      visibility: hidden;
+      animation: none;
+    }
+
+    @keyframes megameal-arrival-failsafe {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .megameal-arrival-status {
+        transition: none;
+      }
+    }
+  </style>
+)}

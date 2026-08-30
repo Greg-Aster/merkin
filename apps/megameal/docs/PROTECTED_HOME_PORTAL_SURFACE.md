@@ -36,12 +36,15 @@ Protected responsibilities:
 - Foreground home portal copy and accessibility text.
 - Portal destination advancement.
 - Dispatch of the `merkin:portal-advance` custom event.
-- Direct, eager integration with `HomeIntroEnvironment` on every supported viewport.
+- Immediate server-rendered portal still for a stable first paint.
+- Progressive integration with the existing `HomeIntroEnvironment` through
+  `HomeIntroActivation`.
 - Scroll cue and related portal hero CSS imports.
 
-Do not reintroduce an interaction, viewport-size, network, or device-memory gate
-in front of the primary 3D environment. Do not remove visible copy,
-screen-reader copy, controls, destination rotation, or event dispatch behavior.
+Do not remove the intended 3D environment, visible copy, screen-reader copy,
+controls, destination rotation, or event dispatch behavior. Compact,
+reduced-motion, Save-Data, slow-network, and low-memory contexts keep the still
+until explicit intent; unconstrained desktop may activate after stable paint.
 
 ### PortalHeroBackgroundSlide
 
@@ -50,12 +53,14 @@ Owner: `src/components/home/PortalHeroBackgroundSlide.astro`
 Protected responsibilities:
 
 - Home portal background media.
-- Immediate loading and autoplay of the muted, inline tunnel video.
-- Visual reveal as soon as the video has usable frame data.
+- Progressive loading tied to portal interaction and page readiness.
+- Listener for `merkin:portal-advance`.
+- Viewport, reduced-motion, network, and device-memory safeguards around media
+  loading.
+- Explicit playback-failure state that retains the first-paint still.
 
-Do not place pointer, scroll, idle, compact-viewport, network, device-memory,
-or artificial timing gates in front of this primary background media. Preserve
-muted inline autoplay so first-time visitors never receive unsolicited sound.
+Do not remove the tunnel media path, progressive source attachment, muted inline
+playback, failure state, or portal event listener without a verified equivalent.
 
 ### Site Audio Runtime And Control
 
@@ -149,7 +154,7 @@ These event names are integration contracts. Do not rename them, remove them, ch
 
 | Event | Current protected role |
 | --- | --- |
-| `merkin:portal-advance` | Dispatched by `PortalHeroSlide`; consumed by the intro environment and sponsored bloom behavior. |
+| `merkin:portal-advance` | Dispatched by `PortalHeroSlide`; consumed by the background media, intro environment, progressive activation owner, and sponsored bloom behavior. |
 | `merkin:banner-select-scene` | Dispatched by the home intro scene; consumed by `PortalDemoVideoPlayer` for banner handoff and demo preparation. |
 | `megameal:audio-suspend` | Dispatched by the portal demo player with reason `portal-demo` so site ambience can pause while demo audio is active. |
 | `megameal:audio-resume` | Dispatched by the portal demo player with reason `portal-demo` so site ambience can resume after demo audio. |

@@ -851,6 +851,40 @@
     max-width: min(106rem, calc(100vw - 2rem));
   }
 
+  .google-doc-content {
+    --article-aside-copy-width: 40rem;
+    --article-aside-gap: clamp(1.5rem, 4vw, 3.5rem);
+    --article-aside-half-gap: clamp(0.75rem, 2vw, 1.75rem);
+    --article-aside-gutter: max(0rem, calc(34.5% - 20rem - var(--article-aside-half-gap)));
+  }
+
+  .google-doc-content::before {
+    margin-bottom: 2.75rem;
+  }
+
+  .google-doc-content:not(.google-doc-presentation-terminal) .docs-editor-heading-2 {
+    margin-top: 4.25rem;
+  }
+
+  .google-doc-content:not(.google-doc-presentation-terminal) .docs-editor-heading-2[data-doc-section="navigation"] {
+    margin-top: 5.5rem;
+  }
+
+  .google-doc-content .docs-editor-heading-3 {
+    margin-top: 1.9rem;
+  }
+
+  .google-doc-content .docs-editor-quote {
+    margin-top: 2.25rem;
+    margin-bottom: 2.75rem;
+  }
+
+  .google-doc-content .docs-editor-figure[data-doc-media-layout="wide"] {
+    max-width: 54rem;
+    margin-top: 2.5rem;
+    margin-bottom: 2.75rem;
+  }
+
   .google-doc-content .docs-editor-figure[data-doc-media-layout^="aside"] {
     clear: none;
     width: clamp(18.5rem, 31%, 29rem);
@@ -860,14 +894,29 @@
 
   .google-doc-content .docs-editor-figure[data-doc-media-layout="aside-start"] {
     float: left;
-    margin-right: clamp(1.5rem, 4vw, 3.5rem);
-    margin-left: 0;
+    margin-right: var(--article-aside-gap);
+    margin-left: var(--article-aside-gutter);
   }
 
   .google-doc-content .docs-editor-figure[data-doc-media-layout="aside-end"] {
     float: right;
-    margin-right: 0;
-    margin-left: clamp(1.5rem, 4vw, 3.5rem);
+    margin-right: var(--article-aside-gutter);
+    margin-left: var(--article-aside-gap);
+  }
+
+  .google-doc-content .docs-editor-figure[data-doc-media-layout^="aside"] + .docs-editor-paragraph {
+    width: min(100%, var(--article-aside-copy-width));
+    max-width: var(--article-aside-copy-width);
+  }
+
+  .google-doc-content .docs-editor-figure[data-doc-media-layout="aside-start"] + .docs-editor-paragraph {
+    margin-right: var(--article-aside-gutter);
+    margin-left: auto;
+  }
+
+  .google-doc-content .docs-editor-figure[data-doc-media-layout="aside-end"] + .docs-editor-paragraph {
+    margin-right: auto;
+    margin-left: var(--article-aside-gutter);
   }
 }
 

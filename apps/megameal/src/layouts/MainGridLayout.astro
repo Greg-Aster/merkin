@@ -1,6 +1,7 @@
 ---
 import '@fontsource/creepster'
 import '@fontsource/metal-mania'
+import SiteArrivalStatus from '@components/client/SiteArrivalStatus.astro'
 import SiteAudioRuntime from '@components/client/SiteAudioRuntime.svelte'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
@@ -86,15 +87,11 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   {...sharedProps}
 >
   <Fragment slot="head">
+    <SiteArrivalStatus part="styles" />
     <link rel="stylesheet" href={siteStyleHref} data-site-style />
     <link rel="stylesheet" href={routeStyleHref('banner')} data-feature-style="banner" />
     <slot name="head" />
   </Fragment>
-  <script>
-    import { initMegamealRouteTransitions } from '@/utils/megamealRouteTransitions'
-
-    initMegamealRouteTransitions()
-  </script>
   <slot />
   {hasCustomBannerOverlayContent && (
     <Fragment slot="banner-overlay-content">
@@ -103,6 +100,7 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   )}
   <Fragment slot="overlay">
     <slot name="overlay" />
+    <SiteArrivalStatus part="status" />
     <SiteAudioRuntime client:load />
     <SiteSfxBridge client:load />
   </Fragment>
@@ -139,3 +137,9 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
     </Fragment>
   )}
 </SharedMainGridLayout>
+
+<script>
+  import { initMegamealRouteTransitions } from '@/utils/megamealRouteTransitions'
+
+  initMegamealRouteTransitions()
+</script>

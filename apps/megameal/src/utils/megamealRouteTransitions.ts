@@ -26,6 +26,8 @@ const hardNavigationDelayMs = 300
 const routeReadyTimeoutMs = 3000
 const visualReadyTimeoutMs = 1600
 const visibleImageDecodeTimeoutMs = 1200
+const minimumArrivalStatusMs = 650
+const arrivalStatusRevealDurationMs = 440
 
 let active = false
 
@@ -209,6 +211,26 @@ function waitForRouteReady(url: URL) {
   })
 }
 
+function revealArrivalStatus(status: HTMLElement) {
+  if (status.dataset.state === 'revealing') return
+
+  status.dataset.state = 'revealing'
+  window.setTimeout(() => status.remove(), arrivalStatusRevealDurationMs)
+}
+
+function settleArrivalStatus() {
+  const status = document.querySelector<HTMLElement>(
+    '[data-megameal-arrival-status]',
+  )
+  if (!status) return
+
+  const currentUrl = new URL(window.location.href)
+  void Promise.all([
+    waitForRouteReady(currentUrl),
+    wait(minimumArrivalStatusMs),
+  ]).then(() => revealArrivalStatus(status))
+}
+
 function getVisibleImages() {
   return getRouteReadyContainers()
     .flatMap(container => Array.from(container.querySelectorAll('img')))
@@ -365,5 +387,6 @@ export function initMegamealRouteTransitions() {
     navigate: navigateWithMegamealTransition,
   }
   document.addEventListener('click', handleDocumentClick, { capture: true })
+  settleArrivalStatus()
   consumeHardNavigationArrival()
 }

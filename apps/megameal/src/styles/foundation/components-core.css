@@ -68,10 +68,122 @@
         transform: translateY(10px);
         transition: opacity var(--transition-slow), transform var(--transition-slow);
     }
-    
+
     .onload-animation.loaded {
         opacity: 1;
         transform: translateY(0);
+    }
+
+    /* Non-blocking first-paint reassurance; safety-critical rules stay inline. */
+    .megameal-arrival-status {
+        overflow: hidden;
+        user-select: none;
+        text-align: left;
+        background:
+            radial-gradient(circle at 90% 10%, rgb(30 64 175 / 0.28), transparent 9rem),
+            linear-gradient(160deg, rgb(2 6 23 / 0.94), rgb(8 15 31 / 0.9));
+        border: 1px solid rgb(103 232 249 / 0.18);
+        border-radius: 0.85rem;
+        box-shadow:
+            0 0 0 1px rgb(244 63 94 / 0.08),
+            0 1rem 2.5rem rgb(0 0 0 / 0.36);
+        backdrop-filter: blur(10px) saturate(1.1);
+    }
+
+    .megameal-arrival-status::before {
+        position: absolute;
+        inset: 0;
+        content: '';
+        background: repeating-linear-gradient(
+            180deg,
+            transparent 0,
+            transparent 3px,
+            rgb(148 163 184 / 0.025) 4px
+        );
+    }
+
+    .megameal-arrival-status__content {
+        position: relative;
+    }
+
+    .megameal-arrival-status__kicker,
+    .megameal-arrival-status__message,
+    .megameal-arrival-status__detail,
+    .megameal-arrival-status__wordmark {
+        margin: 0;
+    }
+
+    .megameal-arrival-status__kicker {
+        color: rgb(103 232 249 / 0.88);
+        font: 700 0.7rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .megameal-arrival-status__wordmark {
+        margin-top: 0.35rem;
+        color: rgb(248 250 252);
+        font: 900 1.65rem/0.95 Arial Black, Arial, sans-serif;
+        letter-spacing: -0.06em;
+        text-shadow: 0 0 1.25rem rgb(56 189 248 / 0.2);
+    }
+
+    .megameal-arrival-status__wordmark span {
+        color: rgb(244 63 94);
+        text-shadow: 0 0 2rem rgb(244 63 94 / 0.28);
+    }
+
+    .megameal-arrival-status__signal {
+        display: flex;
+        align-items: end;
+        justify-content: flex-start;
+        gap: 0.28rem;
+        height: 1.1rem;
+        margin: 0.75rem 0 0.6rem;
+    }
+
+    .megameal-arrival-status__signal span {
+        width: 0.28rem;
+        height: 38%;
+        border-radius: 999px;
+        background: rgb(34 211 238);
+        box-shadow: 0 0 0.65rem rgb(34 211 238 / 0.55);
+        animation: megameal-arrival-signal 900ms ease-in-out infinite alternate;
+    }
+
+    .megameal-arrival-status__signal span:nth-child(2),
+    .megameal-arrival-status__signal span:nth-child(4) {
+        animation-delay: 180ms;
+    }
+
+    .megameal-arrival-status__signal span:nth-child(3) {
+        animation-delay: 360ms;
+    }
+
+    .megameal-arrival-status__message {
+        color: rgb(241 245 249 / 0.94);
+        font: 700 0.82rem/1.4 system-ui, sans-serif;
+    }
+
+    .megameal-arrival-status__detail {
+        margin: 0.3rem 0 0;
+        color: rgb(148 163 184 / 0.88);
+        font: 500 0.7rem/1.45 system-ui, sans-serif;
+    }
+
+    @keyframes megameal-arrival-signal {
+        to {
+            height: 100%;
+            background: rgb(244 63 94);
+            box-shadow: 0 0 0.8rem rgb(244 63 94 / 0.6);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .megameal-arrival-status__signal span {
+            height: 62%;
+            animation: none;
+        }
     }
 
     /* ===================================================================
@@ -162,4 +274,3 @@
             background: oklch(0.75 0.14 var(--hue)) !important;
         }
     }
-

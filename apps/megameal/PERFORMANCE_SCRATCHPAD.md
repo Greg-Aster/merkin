@@ -704,6 +704,218 @@ Validation and remaining work:
   existing scoped/shared CSS and client owners and deleted the two superseded
   shared components.
 
+### Batch 12 - route CSS ownership and timeline regression repair (2026-08-30)
+
+Implemented:
+
+- Replaced the universal Vite source-graph CSS fan-out with named route bundles
+  compiled from the existing canonical CSS sources. Static route endpoints under
+  `src/pages/styles/routes/` now serve those bundles with real `.css` URLs, and
+  each layout/page links only its site, feature, and route owners.
+- Narrowed the app and shared image discovery globs from every `/src` file to
+  supported raster image extensions. The broad glob had registered unrelated
+  components and route styles as browser modules. The app-local image wrapper
+  is now a thin adapter over the shared implementation rather than a duplicate
+  130-line resolver.
+- Kept timeline runtime conditional: ordinary posts have no timeline wrapper or
+  timeline client request, while `bannerType: timeline` posts dynamically load
+  the existing shared timeline renderer. Timeline CSS is emitted only with that
+  renderer instead of as two global stylesheet requests.
+- Restored the intended `/posts/timeline/` presentation after the CSS cleanup
+  exposed an accidental dependency on cross-route leakage. `MainGridLayout` now
+  links the canonical site foundation explicitly; without it, the initialized
+  timeline wrapper had zero height and the responsive author presentation did
+  not have its required global layout rules.
+- Extended the built-HTML audit to reject route-only style leakage on a
+  representative post and to require the built timeline post, its populated
+  event markup, and its custom author/avatar.
+
+Measured and browser evidence:
+
+- The production representative post now has 9 blocking stylesheets instead of
+  the 51 recorded after Batch 11. A clean mobile preview load made 54 total
+  requests, rendered no timeline markup, and requested no route-only archive,
+  reader, store, timeline, video, quiz, home, or product CSS.
+- On the exact development URL `http://localhost:4321/posts/timeline/` and in a
+  production preview, the timeline occupies 1440 x 810 px, renders 54 events,
+  and zoom changes scale 1.3 to 1.5. The layout toggle changes one-column to
+  two-column and back; the two-column profile is 264 x 354 px and loads the
+  Universe avatar, name, and bio. The development route has no console or
+  network failure.
+- The regular mobile profile still has one owner, loads no hidden media, exposes
+  a retryable media failure, and releases the asset on Escape. The dedicated
+  `/timeline/` route still renders its custom hydrated carousel and one canvas.
+- Ainekio's current-status/profile/theme interaction and Travel's archived page
+  remain intact in production previews. Travel still requests a missing
+  `/favicon.ico`; that unrelated existing asset defect was not changed here.
+
+Validation and remaining work:
+
+- Megameal and blog-core type-checks pass. Megameal's uncontended production
+  build passed all 367 pages in 118.29 seconds, verified 21 redirect shells,
+  found 54 built timeline events with the custom author, and indexed 84 pages.
+  Ainekio and Travel type-check and production builds pass (73 and 1 page).
+- Complete, changed-file, and strict CSS audits exit zero; the complete audit
+  retains its six baselines and warning-only `PortalSponsoredBloom.astro` item.
+  Site, home-portal, timeline, and whitespace contract checks pass.
+- PhotoSwipe and OverlayScrollbars CSS were still linked by a normal mobile
+  post at the end of this batch; Batch 14 completed their conditional
+  admission. The known
+  DocsEditorBridge production hydration warning, desktop timeline horizontal
+  overflow, Tailwind PostCSS warning, deferred Three.js chunk, deployed
+  PageSpeed, and physical-device checks also remain open.
+- This batch added one route-style manifest/compiler pair, explicit static CSS
+  endpoints, one direct dev dependency already present transitively, and a
+  built-route contract. It added no new component, hydration boundary, public
+  asset, production dependency, or CSS baseline allowance.
+
+### Batch 13 - restore progressive home portal ownership (2026-08-30)
+
+Implemented:
+
+- Restored `HomeIntroActivation.svelte` as the single admission boundary for
+  the existing `HomeIntroEnvironment.svelte` scene. The home now server-renders
+  the existing 17.8 KB still and a 3.14 KB activation chunk; Three.js, Threlte,
+  the scene, models, and sprite atlas remain behind the dynamic import.
+- Restored viewport, connection, memory, reduced-motion, WebGL, and stable-paint
+  policies through the existing `richMediaCapabilities.ts` owner. Compact,
+  Save-Data, 2G/3G, low-memory, and reduced-motion contexts remain on the still
+  until explicit input, while an unconstrained desktop can upgrade during idle.
+- Made `PortalHeroBackgroundSlide.astro` the canonical source/playback owner for
+  the 10,256,563-byte tunnel video. It now starts at `preload="none"`, admits
+  its source on portal intent or eligible desktop idle, and reports playback or
+  loading failure while preserving the still and interactive portal.
+- Removed a duplicate runtime ownership path without modifying shared
+  blog-core: the shared banner stage treats `data-src` as its own active-slide
+  loader contract, so the portal background now uses the component-specific
+  `data-portal-background-src` attribute. The home contract audit rejects both
+  an eager `src` and the generic attribute that previously bypassed admission.
+- Updated the protected home-portal contract and documentation to preserve the
+  immediate still, unchanged portal scene and destinations, joystick/keyboard
+  activation, reduced-motion behavior, and explicit fallback states.
+
+Measured production-preview evidence at 390 x 844:
+
+| State | Requests | Counted transfer | Startup canvas | Tunnel request | Startup long tasks |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Reopened eager source | 60 | 1,894,024 B | 1 | yes | 9 / 1,335 ms |
+| Batch 13 idle | 51 | 363,845 B | 0 | no | 0 / 0 ms |
+
+- The counted startup transfer fell by 1,530,179 bytes (80.8%) and nine
+  requests. The baseline did not count the long-lived media response body, so
+  the avoided 10.26 MB tunnel request is additional to that transfer delta.
+- Mobile and Save-Data + 2G + 2 GB memory idle loads request only the still and
+  activation chunk from the portal owner. Neither case requests the environment
+  module, Three.js chunks, sprite atlas, or tunnel video.
+- Keyboard portal intent loads the unchanged lean scene, creates one canvas,
+  admits the tunnel, and keeps the immediate still underneath as recovery.
+  Reduced-motion intent loads the interactive scene but keeps background motion
+  unrequested. Unconstrained desktop idle retains the full scene.
+- Forced WebGL absence keeps the still, creates no canvas, makes no 3D request,
+  and exposes the explicit unavailable state. A deliberately blocked tunnel
+  request keeps the video hidden, leaves the scene usable, and exposes
+  `Portal background motion is unavailable` without a console error or
+  unhandled rejection.
+- Production mobile screenshots visually confirm both the intact static city
+  first paint and the original logo/particle portal after activation. All
+  normal matrix cases have no console warning/error, hydration warning, failed
+  request, or horizontal overflow; the one blocked request is deliberate
+  failure-path evidence.
+
+Validation and remaining work:
+
+- `pnpm type-check`, the site/home/timeline contract audits, complete CSS audit,
+  changed-file CSS audit, strict CSS audit, focused Biome check, and whitespace
+  check pass. The complete CSS audit still reports its six baseline findings
+  and the warning-only `PortalSponsoredBloom.astro` item.
+- The exact production build completed all 367 pages in 114.30 seconds,
+  verified 21 redirect shells, found 54 timeline events with the custom author,
+  and indexed 84 pages. The known Tailwind PostCSS and deferred 699 KB Three.js
+  chunk warnings remain.
+- The repository-wide Biome command still reports 91 pre-existing formatting
+  and import-order diagnostics across unrelated source files; the three changed
+  home components and the changed contract script pass a focused check.
+- This batch restores one previously deleted client component and one
+  client-only activation boundary. It adds no CSS, public asset, dependency,
+  route, parallel controller, shared-package change, or baseline allowance.
+  The restored component owns and cleans up the portal activation listeners.
+  Because no shared public asset or blog-core file changed, game and other site
+  consumer builds are not implicated by this batch. Deployed PageSpeed and
+  physical-device measurements remain open.
+
+### Batch 14 - conditional image-viewer and scrollbar admission (2026-08-30)
+
+Implemented:
+
+- Repaired the canonical shared owner in
+  `packages/blog-core/src/layouts/Layout.astro`. Astro/Vite was extracting the
+  PhotoSwipe and OverlayScrollbars CSS imports from that universal layout into
+  blocking stylesheet links on every route, even though their JavaScript was
+  dynamically imported. The layout now carries emitted stylesheet asset URLs
+  as body metadata and one shared loader admits each link only with its
+  corresponding runtime.
+- PhotoSwipe retains the existing `.custom-md img, #post-cover img`
+  eligibility and image-viewer behavior. Routes without an eligible image make
+  no PhotoSwipe CSS or JavaScript request.
+- OverlayScrollbars no longer owns the document body. Native page scrolling is
+  the default, and the existing custom treatment is admitted only for `pre` or
+  `.katex-display` targets on a fine-pointer desktop. The existing generation,
+  timer, instance destruction, and page-navigation cleanup remain canonical.
+- Consolidated the two adjacent layout scripts so stylesheet admission is not
+  duplicated. Existing page navigation removes the feature link and controller
+  when leaving an eligible route and re-admits it on browser Back.
+- Kept Megameal's existing `optimizeDeps` entries with an explicit comment:
+  shared-package lazy imports otherwise make the development server restart on
+  first intent. This is development pre-bundling, not production browser
+  admission.
+
+Measured production result:
+
+- The representative post now has 7 blocking stylesheets instead of 9. The two
+  removed global links total 18,473 bytes raw and 4,104 bytes gzip before
+  request overhead.
+- Built home, archive, store, ordinary post, image post, code post, and timeline
+  HTML link neither feature stylesheet. Both CSS assets remain emitted and are
+  available for conditional runtime use.
+- Fresh home and store loads request no PhotoSwipe or OverlayScrollbars CSS or
+  JavaScript. The image post requests only PhotoSwipe, opens its lightbox on the
+  selected image, exposes its close control, and closes cleanly. The code post
+  requests only OverlayScrollbars, enhances its code block, leaves the body
+  native, and has no page overflow in the focused production probe.
+- Client navigation from home to an image post admits the lightbox, navigation
+  to store removes the lightbox and feature stylesheet, and browser Back
+  re-admits the stylesheet. Every case had zero console warnings/errors,
+  unhandled exceptions, failed requests, or HTTP error responses.
+- The exact development timeline route still initializes one 1,440 x 810 px
+  timeline with 54 events. Its layout toggle reveals one 264 x 354 px Universe
+  author panel and loaded avatar in two-column mode, then intentionally hides
+  the sidebar again in one-column mode. No timeline feature was removed.
+
+Validation and cross-consumer boundary:
+
+- Megameal and blog-core type-checks pass. Megameal's production build completed
+  all 367 pages in 176.97 seconds, verified 21 redirect shells, found 54 built
+  timeline events with the custom author, retained the 7-stylesheet budget, and
+  indexed 84 pages. Site, home-portal, timeline, and whitespace contract checks
+  pass.
+- Because the canonical owner is shared blog-core, Ainekio and Travel were
+  treated as affected consumers. Their type-checks and production builds pass
+  (73 and 1 page). Ainekio emits the conditional feature assets without global
+  links; its current-status/profile and home profile interactions have no
+  console or network failure, and mobile avatar admission still occurs only
+  when opened. Travel's archived page has no client islands, console messages,
+  or failed responses.
+- Complete and changed-file CSS audits pass. The complete audit retains the
+  warning-only `PortalSponsoredBloom.astro` item, and the strict audit remains
+  blocked only by the concurrent untracked `SiteArrivalStatus.astro` 126-line
+  style block. Batch 14 adds no CSS source and does not update the baseline.
+- In Vite development, the two `?url` modules are fetched as script metadata by
+  HMR even on an ineligible route, but neither stylesheet is applied and no
+  vendor runtime is requested. The production/PageSpeed graph is clean.
+- This batch adds no component, hydration boundary, CSS source file, public
+  asset, dependency, route, or parallel controller. It changes the shared
+  layout owner and documents the existing Megameal pre-bundling boundary.
+
 ## Active owner map
 
 - App route composition: `src/pages/[...page].astro` and the route files under
@@ -711,12 +923,18 @@ Validation and remaining work:
 - Megameal layout adapter: `src/layouts/MainGridLayout.astro`.
 - Shared route shell and client-controller composition:
   `packages/blog-core/src/layouts/MainGridLayout.astro` (1,686 lines).
+- Shared image-viewer and code/math scrollbar admission:
+  `packages/blog-core/src/layouts/Layout.astro`; its feature stylesheet loader,
+  eligible-target checks, controller creation, and navigation cleanup are the
+  single owner for PhotoSwipe and OverlayScrollbars runtime attachment.
 - Shared banner renderer:
   `packages/blog-core/src/components/banner-stage/BannerStage.astro` (2,389
   lines).
-- Home 3D portal: `src/components/home/PortalHeroSlide.astro` eagerly mounts
-  `HomeIntroEnvironment.svelte`; that component and its scene/post-processing
-  children own the interactive scene.
+- Home 3D portal: `PortalHeroSlide.astro` owns the immediate still and navigation
+  cue; `HomeIntroActivation.svelte` owns deferred admission and dynamically
+  imports `HomeIntroEnvironment.svelte`; that component and its
+  scene/post-processing children retain the interactive scene. The adjacent
+  `PortalHeroBackgroundSlide.astro` is the sole tunnel source/playback owner.
 - Timeline route composition: `src/layouts/TimelinePageLayout.astro`; timeline
   interaction/runtime: `src/components/timeline/TimelinePortalCarousel.svelte`;
   universe poster/video: `TimelineBackgroundMedia.svelte`; 3D scene:
@@ -751,9 +969,11 @@ Validation and remaining work:
 
 ### 1. Stop the universal layout from importing every feature
 
-Status: partially repaired in Batch 1. Timeline data, configuration, carousel,
-and Three.js are route-owned. Shared-grid CSS/controller fan-out and the other
-static feature imports remain.
+Status: partially repaired in Batches 1, 12, and 14. Timeline data,
+configuration, carousel, Three.js, and route CSS are route-owned; PhotoSwipe
+and OverlayScrollbars now use eligible-target admission; and the first
+stylesheet budget is met. The shared grid still statically imports other
+feature owners.
 
 Root cause: both grid layers use static imports for route-only implementations.
 The Megameal adapter imports the timeline carousel, archive banner, default
@@ -779,21 +999,21 @@ Proof:
 
 - Compare the built resource list for `/`, `/archive/`, `/timeline/`, `/store/`,
   and a regular post.
-- First target: fewer than 15 blocking stylesheet requests on a regular post,
-  with no route-only CSS or 3D bundle in its request list.
+- Completed in Batch 12: fewer than 15 blocking stylesheet requests on a
+  regular post, with no route-only CSS or 3D bundle in its request list.
 - Confirm navigation between all route families still selects the intended
   banner and preserves back/forward behavior.
 
 ### 2. Progressively start the home 3D portal
 
-Status: completed and browser-verified in Batch 2. Physical-device and deployed
-PageSpeed evidence remain pending.
+Status: restored and browser-verified in Batch 13 after the eager regression.
+Physical-device and deployed PageSpeed evidence remain pending.
 
-Root cause: `PortalHeroSlide.astro` hydrates `HomeIntroEnvironment.svelte` with
-`client:load`. Mobile therefore downloads and executes the 3D runtime, the
-1.11 MB optimized GLB, and the portal controller before the page is settled.
-The current connection/memory checks select a lean sprite atlas, but they do not
-remove the common model/runtime cost from the critical path.
+Root cause: `PortalHeroSlide.astro` had regressed to hydrating
+`HomeIntroEnvironment.svelte` with `client:only`, so mobile downloaded and
+executed the 3D runtime before the page settled. The tunnel video also used the
+shared banner stage's generic `data-src` contract, which promoted it to an eager
+`src` before the component's own media policy could run.
 
 Repair:
 
@@ -950,15 +1170,17 @@ source images and the shared CSS/controller fan-out remain pending.
 
 Status: the app-local audio admission/unlock path is completed in Batch 5. The
 global timeline startup and layout-toggle polling handshake were repaired and
-cross-consumer validated in Batch 11. OverlayScrollbars/PhotoSwipe admission
-and the remaining panel compatibility probes are still open.
+cross-consumer validated in Batch 11. OverlayScrollbars/PhotoSwipe admission is
+completed and cross-consumer validated in Batch 14; remaining panel
+compatibility probes are still open.
 
 - Completed in Batch 11: timeline view/banner startup lives with the rendering
   components; a normal post requests neither client and timeline routes keep
   their intended shared or custom renderer.
-- Audit the global OverlayScrollbars and PhotoSwipe startup. Load PhotoSwipe
-  only on pages with an eligible gallery; use native scrolling where the custom
-  owner adds no required behavior.
+- Completed in Batch 14: PhotoSwipe loads only for an eligible gallery;
+  OverlayScrollbars loads only for fine-pointer code/math targets; native page
+  scrolling remains the default; route navigation removes and re-admits the
+  feature owner without duplicate controllers.
 - Completed in Batch 5: `SiteAudioRuntime` is the global activation/unlock owner;
   the audio and SFX managers plus Howler load only on enabled audio intent. The
   small runtime and SFX mapping islands still hydrate at page load so they can
@@ -1032,9 +1254,10 @@ proof.
 - Traced in Batch 8: the PostCSS `from` warning originates in Tailwind 3.4.19's
   internal parser calls, not the local one-plugin PostCSS config. Resolve it
   through an approved maintained dependency patch or Tailwind migration.
-- Add a small built-route budget audit for requestable CSS/JS ownership. It
-  should fail when a regular route links timeline, reader, store, or home-only
-  assets.
+- Completed in Batch 12: the built-route audit fails when a representative
+  regular post exceeds the stylesheet budget or links timeline, reader, store,
+  or home-only styles, and it protects the populated timeline/custom-author
+  contract.
 - Keep browser validation authoritative: build success does not prove the route
   is usable.
 
