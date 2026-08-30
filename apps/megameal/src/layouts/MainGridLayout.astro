@@ -11,6 +11,7 @@ import {
   resolvePostOneColumn,
 } from '../utils/mainGridLayout.server'
 import { routeStyleHref } from '../styles/routeStyleBundles'
+import { siteStyleHref } from '../styles/site'
 
 interface Props {
   title?: string
@@ -85,6 +86,7 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   {...sharedProps}
 >
   <Fragment slot="head">
+    <link rel="stylesheet" href={siteStyleHref} data-site-style />
     <link rel="stylesheet" href={routeStyleHref('banner')} data-feature-style="banner" />
     <slot name="head" />
   </Fragment>
