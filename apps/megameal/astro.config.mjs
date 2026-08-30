@@ -1,7 +1,7 @@
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
-import Compress from "astro-compress";
+import Compress, { Default as CompressDefaults } from "astro-compress";
 import icon from "astro-icon";
 import { defineConfig } from "astro/config";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
@@ -49,6 +49,7 @@ const corsMiddleware = () => {
 
 const site = process.env.SITE_URL || 'https://megameal.org';
 const base = process.env.SITE_BASE || '/';
+const htmlMinifierDefaults = CompressDefaults.HTML['html-minifier-terser'];
 
 function manualVendorChunks(id) {
   const normalizedId = id.replaceAll('\\', '/');
@@ -101,6 +102,12 @@ export default defineConfig({
       HTML: {
         'html-minifier-terser': {
           collapseWhitespace: false,
+          // Svelte brackets {@html} output with empty comments during SSR.
+          // Keep those boundaries so hydrated islands can reclaim their DOM.
+          ignoreCustomComments: [
+            /^\s*$/,
+            ...htmlMinifierDefaults.ignoreCustomComments,
+          ],
           sortClassName: false,
         },
       },

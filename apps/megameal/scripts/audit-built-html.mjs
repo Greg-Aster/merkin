@@ -118,6 +118,15 @@ async function auditRepresentativeRouteAssets() {
       'posts/timeline must preserve its custom author and avatar in built HTML',
     )
   }
+  if (
+    !/<blockquote\b[^>]*\bdocs-editor-quote\b[^>]*>[\s\S]*?<p><!---->[\s\S]*?<!----><\/p>/i.test(
+      timelinePostHtml,
+    )
+  ) {
+    routeFailures.push(
+      'posts/timeline must preserve Svelte raw-HTML hydration boundaries in the Docs Editor Bridge',
+    )
+  }
 
   if (routeFailures.length > 0) {
     console.error('[html-audit] Representative route asset contracts failed:')

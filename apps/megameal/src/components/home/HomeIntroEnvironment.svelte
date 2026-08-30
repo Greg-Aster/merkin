@@ -80,6 +80,7 @@ const wheelMomentumMaxVelocity = 4.8
 const mouseWheelSensitivity = 1.15
 const mouseWheelMomentumImpulse = 3.6
 const mouseWheelMomentumMaxVelocity = 2.8
+const mobileTouchDragSensitivity = 0.36
 const keyboardWheelStep = 0.82
 const pageWheelStep = 1.64
 const input: IntroInputState = {
@@ -647,7 +648,7 @@ function handleTouchMove(event: TouchEvent) {
   applyDragDelta(
     touch.clientX,
     touch.clientY,
-    1.075,
+    mobileTouchDragSensitivity,
     Math.max(220, Math.min(window.innerHeight * 0.46, 360)),
   )
 }

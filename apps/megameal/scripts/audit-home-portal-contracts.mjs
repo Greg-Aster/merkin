@@ -87,6 +87,19 @@ const protectedContracts = [
     ],
   ],
   [
+    'apps/megameal/src/components/home/HomeIntroEnvironment.svelte',
+    [
+      [
+        'const mobileTouchDragSensitivity = 0.36',
+        'one-destination-per-swipe mobile touch sensitivity',
+      ],
+      [
+        'mobileTouchDragSensitivity,',
+        'mobile-only touch sensitivity application',
+      ],
+    ],
+  ],
+  [
     'apps/megameal/src/components/client/SiteAudioRuntime.svelte',
     [
       ['loadSiteAudioManager()', 'muted audio-manager initialization'],

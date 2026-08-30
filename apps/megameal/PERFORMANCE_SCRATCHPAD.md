@@ -916,6 +916,70 @@ Validation and cross-consumer boundary:
   asset, dependency, route, or parallel controller. It changes the shared
   layout owner and documents the existing Megameal pre-bundling boundary.
 
+### Batch 15 - conditional mathematical-notation styling (2026-08-30)
+
+Implemented:
+
+- Removed the remaining route-inappropriate stylesheet import from the
+  canonical shared owner, `packages/blog-core/src/layouts/Layout.astro`.
+  Importing `katex/dist/katex.css` from that universal layout made Astro emit a
+  blocking KaTeX link on every page even when the rendered document contained
+  no mathematical notation.
+- The layout now carries the emitted KaTeX asset URL as body metadata and uses
+  the existing shared feature-stylesheet loader to admit it only when `.katex`
+  markup exists. A missing or failed stylesheet remains an explicit console
+  error rather than silently presenting unstyled notation.
+- Kept client navigation ownership in `PageNavigation.svelte`: leaving a math
+  document removes its dynamic feature link with the rest of the stale style
+  graph, and the layout's existing `astro:page-load` hook admits it again if
+  the next document contains math.
+- Extended the existing built-HTML regression audit to reject KaTeX,
+  PhotoSwipe, or OverlayScrollbars as blocking stylesheet links on the
+  representative ordinary post. No parallel loader, component, or route was
+  introduced.
+
+Measured production and browser evidence:
+
+- The representative post now has 6 blocking stylesheets instead of 7. This
+  removes one request and the previously measured 8,287 transferred bytes of
+  KaTeX CSS from every route without math; the emitted 29,203-byte asset remains
+  available for eligible content. Current built Megameal and Ainekio pages do
+  not contain rendered `.katex` markup, so they no longer request it.
+- A production mobile probe begins on home with no math and no KaTeX feature
+  link or request. Injecting actual output from KaTeX admits the emitted
+  stylesheet and required fonts, produces the expected `KaTeX_Main` computed
+  typography, and remains readable. Canonical client navigation to `/store/`
+  removes the fixture and feature stylesheet. The full sequence has no console
+  error, failed request, HTTP error, or horizontal overflow.
+- The exact production `/posts/timeline/` route still renders one visible
+  1,440 x 810 px initialized timeline with 54 events, and zoom changes scale
+  1.3 to 1.5. Switching to two columns reveals the 264 x 354 px Universe
+  profile with its loaded avatar, name, and bio; switching back removes the
+  hidden media. No timeline or author feature changed in this batch.
+
+Validation and cross-consumer boundary:
+
+- Blog-core and Megameal type-checks pass. The exact Megameal package build
+  completed all 367 pages in 107.65 seconds, verified 21 redirect shells,
+  enforced the 6-stylesheet budget, found 54 timeline events with the custom
+  author, and indexed 84 pages / 9,712 words. The known Tailwind PostCSS and
+  deferred 699 KB Three.js chunk warnings remain.
+- Ainekio and Travel type-checks and production builds pass (73 and 1 page).
+  Ainekio's mobile and desktop current-status/home profile interactions remain
+  functional, make no KaTeX request, and have no console, network, asset, or
+  overflow failure. Travel's static archived page remains unchanged and still
+  requests its previously documented missing `/favicon.ico`.
+- Complete and changed-file CSS audits pass. Strict CSS audit remains blocked
+  by the existing unbaselined `PortalSponsoredBloom.astro` size warning; this
+  batch adds no CSS source and does not change the baseline. The production
+  timeline continues to report the separately documented DocsEditorBridge
+  hydration mismatch and desktop horizontal overflow; an attributed probe
+  confirms the bridge island is the warning owner, not the layout, profile, or
+  timeline runtime changed here.
+- This batch adds no component, stylesheet source, hydration boundary,
+  dependency, public asset, route, or baseline allowance. It modifies the
+  shared layout owner and the existing built-output regression script.
+
 ## Active owner map
 
 - App route composition: `src/pages/[...page].astro` and the route files under
@@ -923,10 +987,11 @@ Validation and cross-consumer boundary:
 - Megameal layout adapter: `src/layouts/MainGridLayout.astro`.
 - Shared route shell and client-controller composition:
   `packages/blog-core/src/layouts/MainGridLayout.astro` (1,686 lines).
-- Shared image-viewer and code/math scrollbar admission:
+- Shared image-viewer, mathematical-notation styling, and code/math scrollbar
+  admission:
   `packages/blog-core/src/layouts/Layout.astro`; its feature stylesheet loader,
   eligible-target checks, controller creation, and navigation cleanup are the
-  single owner for PhotoSwipe and OverlayScrollbars runtime attachment.
+  single owner for KaTeX, PhotoSwipe, and OverlayScrollbars runtime attachment.
 - Shared banner renderer:
   `packages/blog-core/src/components/banner-stage/BannerStage.astro` (2,389
   lines).
@@ -969,10 +1034,10 @@ Validation and cross-consumer boundary:
 
 ### 1. Stop the universal layout from importing every feature
 
-Status: partially repaired in Batches 1, 12, and 14. Timeline data,
-configuration, carousel, Three.js, and route CSS are route-owned; PhotoSwipe
-and OverlayScrollbars now use eligible-target admission; and the first
-stylesheet budget is met. The shared grid still statically imports other
+Status: partially repaired in Batches 1, 12, 14, and 15. Timeline data,
+configuration, carousel, Three.js, and route CSS are route-owned; KaTeX,
+PhotoSwipe, and OverlayScrollbars now use eligible-target admission; and the
+first stylesheet budget is met. The shared grid still statically imports other
 feature owners.
 
 Root cause: both grid layers use static imports for route-only implementations.
