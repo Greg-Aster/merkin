@@ -74,6 +74,8 @@ const protectedContracts = [
       ['megameal-home-intro__screen-reader-copy', 'screen-reader copy'],
       ['megameal-home-intro__scroll-cue', 'joystick scroll cue'],
       ['data-joystick-direction="idle"', 'joystick data attribute'],
+      ['HomeIntroEnvironment', 'direct interactive environment owner'],
+      ['client:only="svelte"', 'eager client-only environment mount'],
       ['homePortalEvents.portalAdvance', 'centralized portal advance dispatch'],
       ['keydown', 'keyboard support'],
     ],
@@ -82,8 +84,27 @@ const protectedContracts = [
     'apps/megameal/src/components/home/PortalHeroBackgroundSlide.astro',
     [
       ['/assets/banner/tunnel.webm', 'background video path'],
-      ['data-src={portalIntroBackgroundVideo}', 'lazy background data source'],
-      ['homePortalEvents.portalAdvance', 'centralized portal advance listener'],
+      ['src={portalIntroBackgroundVideo}', 'eager background video source'],
+      ['autoplay', 'muted inline background autoplay'],
+      ['preload="auto"', 'initial background video preload'],
+    ],
+  ],
+  [
+    'apps/megameal/src/components/client/SiteAudioRuntime.svelte',
+    [
+      ['loadSiteAudioManager()', 'muted audio-manager initialization'],
+      ['addSiteAudioActivationListeners', 'browser audio unlock path'],
+      ['readSiteAudioEnabledPreference()', 'persisted audio preference check'],
+    ],
+  ],
+  [
+    'apps/megameal/src/components/client/SiteAudioControl.svelte',
+    [
+      ['data-site-audio-prompt', 'first-visit audio prompt'],
+      ['MEGA MEAL is best experienced with audio', 'audio prompt guidance'],
+      ['Enable audio', 'audio opt-in action'],
+      ['Keep muted', 'muted preference action'],
+      ['readStoredSiteAudioPreference', 'existing preference ownership'],
     ],
   ],
   [
@@ -186,6 +207,27 @@ assertExcludes(
   removedBackgroundShadeClass,
   'the removed tunnel background shade styles',
 )
+assertExcludes(
+  'apps/megameal/src/components/home/PortalHeroSlide.astro',
+  'HomeIntroActivation',
+  'the superseded interaction-gated environment loader',
+)
+assertExcludes(
+  'apps/megameal/src/components/home/PortalHeroBackgroundSlide.astro',
+  'data-src={portalIntroBackgroundVideo}',
+  'the interaction-gated background source',
+)
+assertExcludes(
+  'apps/megameal/src/components/home/PortalHeroBackgroundSlide.astro',
+  'getRichMediaCapabilities',
+  'compact-viewport background loading restrictions',
+)
+
+const removedActivationOwner =
+  'apps/megameal/src/components/home/HomeIntroActivation.svelte'
+if (existsSync(path.join(repoRoot, removedActivationOwner))) {
+  failures.push(`${removedActivationOwner} must remain removed`)
+}
 
 if (failures.length > 0) {
   console.error('[home-portal-contracts] Contract audit failed:')

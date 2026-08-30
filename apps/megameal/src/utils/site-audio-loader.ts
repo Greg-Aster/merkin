@@ -40,11 +40,19 @@ const reportLoadFailure = (surface: SiteAudioLoadSurface) => {
   )
 }
 
-export function readSiteAudioEnabledPreference(): boolean {
-  if (typeof window === 'undefined') return siteAudioConfig.enabledByDefault
+export function readStoredSiteAudioPreference(): boolean | null {
+  if (typeof window === 'undefined') return null
 
-  const stored = window.localStorage.getItem(siteAudioConfig.storageKey)
-  return stored === null ? siteAudioConfig.enabledByDefault : stored === 'true'
+  try {
+    const stored = window.localStorage.getItem(siteAudioConfig.storageKey)
+    return stored === null ? null : stored === 'true'
+  } catch {
+    return null
+  }
+}
+
+export function readSiteAudioEnabledPreference(): boolean {
+  return readStoredSiteAudioPreference() ?? siteAudioConfig.enabledByDefault
 }
 
 export function getLoadedSiteAudioManager(): SiteAudioClientManager | null {

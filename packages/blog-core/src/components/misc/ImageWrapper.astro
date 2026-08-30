@@ -82,9 +82,12 @@ function createRootRelativeCandidates(rootPath: string): string[] {
 // https://github.com/withastro/astro/issues/3373
 let img;
 if (!isVectorOrAnimated && (isLocal || isPublic)) {
-  const files = import.meta.glob<ImageMetadata>('/src/**/*', {
-    import: 'default',
-  });
+  const files = import.meta.glob<ImageMetadata>(
+    '/src/**/*.{avif,jpeg,jpg,png,tiff,webp}',
+    {
+      import: 'default',
+    }
+  );
   const candidatePaths = isLocal
     ? [
         path

@@ -8,8 +8,8 @@ import {
 } from '../../config/audio'
 import type { SiteAudioState } from '../../utils/site-audio'
 import {
-  getLoadedSiteAudioManager,
   loadSiteAudioManager,
+  readStoredSiteAudioPreference,
   siteAudioLoadFailedEvent,
 } from '../../utils/site-audio-loader'
 
@@ -34,6 +34,7 @@ let panelCloseTimer: number | null = null
 let mounted = false
 let managerUnsubscribe: (() => void) | null = null
 let audioLoadFailed = false
+let audioPromptOpen = false
 
 type SiteAudioManager = Awaited<ReturnType<typeof loadSiteAudioManager>>
 
@@ -76,13 +77,11 @@ const readStoredVolume = (
 }
 
 const syncStoredAudioState = () => {
-  const storedEnabled = window.localStorage.getItem(siteAudioConfig.storageKey)
+  const storedEnabled = readStoredSiteAudioPreference()
   audioState = {
     ...audioState,
     enabled:
-      storedEnabled === null
-        ? siteAudioConfig.enabledByDefault
-        : storedEnabled === 'true',
+      storedEnabled === null ? siteAudioConfig.enabledByDefault : storedEnabled,
     masterVolume: readStoredVolume(
       siteAudioConfig.masterVolumeStorageKey,
       siteAudioConfig.defaultMasterVolume,
@@ -99,6 +98,7 @@ const syncStoredAudioState = () => {
     ),
     hasConfiguredTracks: siteAudioConfig.tracks.length > 0,
   }
+  return storedEnabled
 }
 
 const portalToBody = (node: HTMLElement, enabled: boolean) => {
@@ -156,8 +156,9 @@ const setAudioEnabledFromGesture = async (
   event: MouseEvent,
 ) => {
   const siteAudioManager = await ensureAudioManager()
-  await siteAudioManager.unlockFromGesture(event)
+  if (nextEnabled) await siteAudioManager.unlockFromGesture(event)
   siteAudioManager.setEnabled(nextEnabled)
+  audioPromptOpen = false
 }
 
 const toggleAudio = (event: MouseEvent) => {
@@ -169,6 +170,14 @@ const toggleAudio = (event: MouseEvent) => {
 
 const prepareAudioManager = () => {
   void ensureAudioManager().catch(retainVisibleLoadFailure)
+}
+
+const enableAudioFromPrompt = (event: MouseEvent) => {
+  void setAudioEnabledFromGesture(true, event).catch(retainVisibleLoadFailure)
+}
+
+const keepAudioMuted = (event: MouseEvent) => {
+  void setAudioEnabledFromGesture(false, event).catch(retainVisibleLoadFailure)
 }
 
 const setMasterVolume = (event: Event) => {
@@ -257,11 +266,10 @@ const handleDocumentKeyDown = (event: KeyboardEvent) => {
 
 onMount(() => {
   mounted = true
-  syncStoredAudioState()
+  audioPromptOpen = syncStoredAudioState() === null
   syncViewportMode()
 
-  const loadedManager = getLoadedSiteAudioManager()
-  if (loadedManager) subscribeToAudioManager(loadedManager)
+  void ensureAudioManager().catch(retainVisibleLoadFailure)
 
   const mediaQuery = window.matchMedia('(max-width: 767px)')
   const handleViewportChange = () => {
@@ -427,3 +435,41 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
     </div>
   {/if}
 </div>
+
+{#if audioPromptOpen}
+  <div
+    class="site-audio-prompt card-base2"
+    data-site-audio-prompt
+    role="dialog"
+    aria-labelledby="site-audio-prompt-title"
+    aria-describedby="site-audio-prompt-description"
+    use:portalToBody={true}
+  >
+    <div class="site-audio-prompt__icon" aria-hidden="true">
+      <Icon icon="material-symbols:volume-up-rounded" />
+    </div>
+    <div class="site-audio-prompt__copy">
+      <div class="site-audio-panel__kicker">Optional sound</div>
+      <h2 id="site-audio-prompt-title">Hear the full broadcast</h2>
+      <p id="site-audio-prompt-description">
+        MEGA MEAL is best experienced with audio. Sound is muted until you choose to enable it.
+      </p>
+    </div>
+    <div class="site-audio-prompt__actions">
+      <button
+        type="button"
+        class="btn-primary rounded-lg px-4 py-2 text-sm font-semibold"
+        on:click={enableAudioFromPrompt}
+      >
+        Enable audio
+      </button>
+      <button
+        type="button"
+        class="btn-plain rounded-lg px-4 py-2 text-sm font-medium"
+        on:click={keepAudioMuted}
+      >
+        Keep muted
+      </button>
+    </div>
+  </div>
+{/if}

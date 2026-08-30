@@ -8,12 +8,8 @@ import PortalHeroSlide from '../components/home/PortalHeroSlide.astro'
 import PortalSponsoredBloom from '../components/home/PortalSponsoredBloom.astro'
 import { PAGE_SIZE } from '../constants/constants'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
+import { routeStyleHref } from '../styles/routeStyleBundles'
 import { getSortedPosts } from '../utils/content-utils'
-import homeIntroEnvironmentHref from '../styles/features/extracted/home-intro-environment.css?url'
-import factsWidgetCoreHref from '../styles/features/facts-widget/core.css?url'
-import portalHeroScrollCueHref from '../styles/features/home/portal-hero-scroll-cue.css?url'
-import portalHeroSlideHref from '../styles/features/home/portal-hero-slide.css?url'
-import portalSponsoredBloomHref from '../styles/features/home/portal-sponsored-bloom.css?url'
 
 export const getStaticPaths = (async ({ paginate }) => {
   const allBlogPosts = await getSortedPosts()
@@ -24,17 +20,6 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props
 const isFirstPage = page.currentPage === 1
 const len = page.data.length
-import dynamicPageHref from '../styles/pages/dynamic-page.css?url'
-const homeStyleHrefs = isFirstPage
-  ? [
-      homeIntroEnvironmentHref,
-      factsWidgetCoreHref,
-      portalHeroScrollCueHref,
-      portalHeroSlideHref,
-      portalSponsoredBloomHref,
-      dynamicPageHref,
-    ]
-  : [dynamicPageHref]
 ---
 
 <MainGridLayout
@@ -42,9 +27,11 @@ const homeStyleHrefs = isFirstPage
   contentMode={isFirstPage ? 'banner-only' : 'default'}
 >
   <Fragment slot="head">
-    {homeStyleHrefs.map(href => (
-      <link rel="stylesheet" href={href} data-route-style="home" />
-    ))}
+    <link
+      rel="stylesheet"
+      href={routeStyleHref(isFirstPage ? 'home' : 'listing')}
+      data-route-style={isFirstPage ? 'home' : 'listing'}
+    />
   </Fragment>
   {isFirstPage && (
     <Fragment slot="banner-overlay-content">

@@ -62,14 +62,10 @@ const fallbackFact: TimelineFact = {
 const initialFact = availableFacts[0] ?? fallbackFact
 const widgetId = `facts-widget-${Math.random().toString(36).slice(2, 10)}`
 const initialHref = resolveTimelineFactHref(initialFact)
-import factsCoreHref from '../../styles/features/facts-widget/core.css?url'
-import factsMotionHref from '../../styles/features/facts-widget/motion-responsive.css?url'
-import factsOverlayHref from '../../styles/features/facts-widget/overlay.css?url'
+import { routeStyleHref } from '../../styles/routeStyleBundles'
 ---
 
-<link rel="stylesheet" href={factsCoreHref} data-facts-widget-style="core" />
-<link rel="stylesheet" href={factsOverlayHref} data-facts-widget-style="overlay" />
-<link rel="stylesheet" href={factsMotionHref} data-facts-widget-style="motion" />
+<link rel="stylesheet" href={routeStyleHref('facts-widget')} data-feature-style="facts-widget" />
 
 <section
   id={widgetId}

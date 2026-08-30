@@ -1,4 +1,4 @@
-import variablesHref from './variables.styl?url'
-import foundationHref from './foundation/index.css?url'
+import './variables.styl'
+import { routeStyleHref } from './routeStyleBundles'
 
-export const siteStyleHrefs = [variablesHref, foundationHref] as const
+export const siteStyleHref = routeStyleHref('site')

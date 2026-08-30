@@ -10,7 +10,7 @@ import {
   postUsesArchiveBanner,
   resolvePostOneColumn,
 } from '../utils/mainGridLayout.server'
-import bannerStylesHref from '@/styles/features/banner/index.css?url'
+import { routeStyleHref } from '../styles/routeStyleBundles'
 
 interface Props {
   title?: string
@@ -85,7 +85,7 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   {...sharedProps}
 >
   <Fragment slot="head">
-    <link rel="stylesheet" href={bannerStylesHref} data-feature-style="banner" />
+    <link rel="stylesheet" href={routeStyleHref('banner')} data-feature-style="banner" />
     <slot name="head" />
   </Fragment>
   <script>

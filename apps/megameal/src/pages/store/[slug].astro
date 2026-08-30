@@ -12,11 +12,7 @@ import {
   publicProductCollectionFilter,
 } from '../../contracts/products'
 import StoreLayout from '../../layouts/store/StoreLayout.astro'
-import featuredCommerceHref from '../../styles/features/store/featured-product/featured-product-commerce.css?url'
-import featuredPanelsHref from '../../styles/features/store/featured-product/featured-product-panels.css?url'
-import featuredRelatedModalHref from '../../styles/features/store/featured-product/featured-product-related-modal.css?url'
-import featuredShellHref from '../../styles/features/store/featured-product/featured-product-shell.css?url'
-import proceduralModelViewerHref from '../../styles/features/store/featured-product/procedural-model-viewer.css?url'
+import { routeStyleHref } from '../../styles/routeStyleBundles'
 import { buildFlagshipProductShowcase } from '../../utils/flagship-product-showcase'
 
 export async function getStaticPaths() {
@@ -30,13 +26,6 @@ export async function getStaticPaths() {
 }
 
 const { product } = Astro.props
-const productStyleHrefs = [
-  featuredCommerceHref,
-  featuredPanelsHref,
-  featuredRelatedModalHref,
-  featuredShellHref,
-  proceduralModelViewerHref,
-]
 const allProducts = await getCollection('products', publicProductCollectionFilter)
 const { Content: ProductContent } = await product.render()
 const {
@@ -119,9 +108,7 @@ const flagshipShowcase = isShowcaseProduct
 
 <StoreLayout title={name} description={tagline} ambientAudio={ambientAudio}>
   <Fragment slot="head">
-    {productStyleHrefs.map(href => (
-      <link rel="stylesheet" href={href} data-route-style="store-product" />
-    ))}
+    <link rel="stylesheet" href={routeStyleHref('store-product')} data-route-style="store-product" />
   </Fragment>
   <div class="container mx-auto max-w-6xl px-3 py-5 sm:px-4 md:py-6">
 

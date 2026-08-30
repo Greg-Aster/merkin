@@ -1,9 +1,11 @@
 ---
-import HomeIntroActivation from './HomeIntroActivation.svelte'
+import HomeIntroEnvironment from './HomeIntroEnvironment.svelte'
 ---
 
 <section class="megameal-home-intro" aria-label="MEGAMEAL portal introduction">
-  <HomeIntroActivation client:only="svelte" />
+  <div class="megameal-home-intro__environment" aria-hidden="true">
+    <HomeIntroEnvironment client:only="svelte" />
+  </div>
 
   <div class="megameal-home-intro__screen-reader-copy">
     <h1>MEGA MEAL SAGA</h1>

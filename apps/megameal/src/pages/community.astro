@@ -4,14 +4,14 @@ import { communityConfig } from '../config/community.config'
 import I18nKey from '../i18n/i18nKey'
 import { i18n } from '../i18n/translation'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
-import communityHref from '../styles/pages/community.css?url'
+import { routeStyleHref } from '../styles/routeStyleBundles'
 
 const showCommunityHero = false
 ---
 
 <MainGridLayout title={i18n(I18nKey.community) || "Our Community"} description={i18n(I18nKey.community) || "Join our community through multiple channels"}>
   <Fragment slot="head">
-    <link rel="stylesheet" href={communityHref} data-route-style="community" />
+    <link rel="stylesheet" href={routeStyleHref('community')} data-route-style="community" />
   </Fragment>
   <section class="card-base mb-6 rounded-[var(--radius-large)] border border-cyan-400/25 bg-cyan-950/20 p-5">
     <div class="flex flex-col gap-4 md:flex-row md:items-start">

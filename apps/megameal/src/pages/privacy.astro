@@ -1,11 +1,11 @@
 ---
 import MainGridLayout from '../layouts/MainGridLayout.astro'
-import privacyHref from '../styles/pages/privacy.css?url'
+import { routeStyleHref } from '../styles/routeStyleBundles'
 ---
 
 <MainGridLayout title="Privacy Policy" description="Corporate Privacy Division Notice - Data collection and privacy practices">
 	<Fragment slot="head">
-		<link rel="stylesheet" href={privacyHref} data-route-style="privacy" />
+		<link rel="stylesheet" href={routeStyleHref('privacy')} data-route-style="privacy" />
 	</Fragment>
 	<div class="privacy-page max-w-3xl mx-auto">
 		<div class="card-base2 rounded-lg p-8 mb-8">

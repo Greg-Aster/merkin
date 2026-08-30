@@ -1,20 +1,7 @@
 ---
 import FeaturedProductHeroSlide from '../../components/store/featured-product/FeaturedProductHeroSlide.astro'
 import Layout from '../../layouts/Layout.astro'
-import featuredCommerceHref from '../../styles/features/store/featured-product/featured-product-commerce.css?url'
-import featuredHeroHref from '../../styles/features/store/featured-product/featured-product-hero-slide.css?url'
-import featuredPanelsHref from '../../styles/features/store/featured-product/featured-product-panels.css?url'
-import featuredRelatedModalHref from '../../styles/features/store/featured-product/featured-product-related-modal.css?url'
-import featuredShellHref from '../../styles/features/store/featured-product/featured-product-shell.css?url'
-import proceduralModelViewerHref from '../../styles/features/store/featured-product/procedural-model-viewer.css?url'
-const featuredProductStyleHrefs = [
-  featuredCommerceHref,
-  featuredHeroHref,
-  featuredPanelsHref,
-  featuredRelatedModalHref,
-  featuredShellHref,
-  proceduralModelViewerHref,
-]
+import { routeStyleHref } from '../../styles/routeStyleBundles'
 ---
 
 <Layout
@@ -22,9 +9,7 @@ const featuredProductStyleHrefs = [
   description="Milestone 5 verification route for the featured product banner widget."
 >
   <Fragment slot="head">
-    {featuredProductStyleHrefs.map(href => (
-      <link rel="stylesheet" href={href} data-route-style="featured-product-lab" />
-    ))}
+    <link rel="stylesheet" href={routeStyleHref('featured-product-lab')} data-route-style="featured-product-lab" />
   </Fragment>
   <main class="mx-auto max-w-[96rem] px-4 py-10 md:py-16">
     <header class="mb-8 max-w-3xl">

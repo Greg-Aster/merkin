@@ -168,6 +168,16 @@ function collectImports(files) {
     /import\s+[^'"]+\s+from\s+['"]([^'"]+\.(?:css|styl|pcss|postcss)(?:\?[^'"]*)?)['"]/g,
     /@import\s+['"]([^'"]+\.(?:css|styl|pcss|postcss))['"]/g,
   ]
+  const bundleSourcePatterns = [
+    {
+      pattern: /\bappStyle\(\s*['"]([^'"]+\.(?:css|styl|pcss|postcss))['"]\s*\)/g,
+      root: path.join(srcRoot, 'styles'),
+    },
+    {
+      pattern: /\bblogCoreStyle\(\s*['"]([^'"]+\.(?:css|styl|pcss|postcss))['"]\s*\)/g,
+      root: path.join(repoRoot, 'packages', 'blog-core', 'src', 'styles'),
+    },
+  ]
 
   for (const file of files) {
     const ext = path.extname(file)
@@ -186,6 +196,12 @@ function collectImports(files) {
           continue
         }
         imported.add(path.normalize(resolved))
+      }
+    }
+
+    for (const { pattern, root } of bundleSourcePatterns) {
+      for (const match of text.matchAll(pattern)) {
+        imported.add(path.normalize(path.resolve(root, match[1])))
       }
     }
   }

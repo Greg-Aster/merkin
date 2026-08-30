@@ -2,14 +2,12 @@
 import SharedLayout from '@merkin/blog-core/layouts/Layout.astro'
 import SiteAudioRuntime from '../components/client/SiteAudioRuntime.svelte'
 import SiteSfxBridge from '../components/client/SiteSfxBridge.svelte'
-import { siteStyleHrefs } from '../styles/site'
+import { siteStyleHref } from '../styles/site'
 ---
 
 <SharedLayout {...Astro.props}>
   <Fragment slot="head">
-    {siteStyleHrefs.map(href => (
-      <link rel="stylesheet" href={href} data-site-style />
-    ))}
+    <link rel="stylesheet" href={siteStyleHref} data-site-style />
     <slot name="head" />
   </Fragment>
   <slot />

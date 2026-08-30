@@ -18,8 +18,6 @@ import { defaultFavicons } from '@/constants/icon'
 import type { Favicon } from '@/types/config'
 import { url, pathsEqual } from '@/utils/url-utils'
 import 'katex/dist/katex.css'
-import overlayScrollbarStylesHref from 'overlayscrollbars/overlayscrollbars.css?url'
-import photoSwipeStylesHref from 'photoswipe/style.css?url'
 
 interface Props {
   title?: string
@@ -164,9 +162,6 @@ const configHue = siteConfig.themeColor.hue
 
     <slot name="head"></slot>
 
-    <meta name="blog-core:overlay-scrollbar-styles" content={overlayScrollbarStylesHref} />
-    <meta name="blog-core:photoswipe-styles" content={photoSwipeStylesHref} />
-
     <link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
   </head>
   <body class="min-h-screen transition"
@@ -274,13 +269,10 @@ async function initCustomScrollbar() {
     if (!bodyElement) return;
 
     try {
-        const stylesheetHref = document
-            .querySelector<HTMLMetaElement>('meta[name="blog-core:overlay-scrollbar-styles"]')
-            ?.content;
-        if (stylesheetHref) {
-            await ensureStylesheet(stylesheetHref, 'overlay-scrollbars');
-        }
-        const { OverlayScrollbars } = await import('overlayscrollbars');
+        const [{ OverlayScrollbars }] = await Promise.all([
+            import('overlayscrollbars'),
+            import('overlayscrollbars/overlayscrollbars.css'),
+        ]);
 
         if (generation !== scrollbarGeneration) return;
 
@@ -321,27 +313,6 @@ async function initCustomScrollbar() {
     } catch (error) {
         console.error('Unable to enhance scrollbars; native scrolling remains available.', error);
     }
-}
-
-function ensureStylesheet(href: string, owner: string) {
-    const selector = `link[data-deferred-style="${owner}"]`;
-    const existing = document.querySelector<HTMLLinkElement>(selector);
-    if (existing?.sheet) return Promise.resolve();
-
-    const link = existing ?? document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = href;
-    link.dataset.deferredStyle = owner;
-    if (!existing) document.head.append(link);
-
-    return new Promise<void>((resolve, reject) => {
-        link.addEventListener('load', () => resolve(), { once: true });
-        link.addEventListener(
-            'error',
-            () => reject(new Error(`Unable to load ${owner} styles.`)),
-            { once: true },
-        );
-    });
 }
 
 function scheduleCustomScrollbar() {
@@ -443,13 +414,10 @@ let photoSwipeGeneration = 0;
 let photoSwipeSchedule = 0;
 
 async function createPhotoSwipe(generation: number) {
-    const stylesheetHref = document
-        .querySelector<HTMLMetaElement>('meta[name="blog-core:photoswipe-styles"]')
-        ?.content;
-    if (stylesheetHref) {
-        await ensurePhotoSwipeStylesheet(stylesheetHref);
-    }
-    const { default: PhotoSwipeLightbox } = await import("photoswipe/lightbox");
+    const [{ default: PhotoSwipeLightbox }] = await Promise.all([
+        import("photoswipe/lightbox"),
+        import("photoswipe/style.css"),
+    ]);
 
     if (generation !== photoSwipeGeneration) return;
 
@@ -480,28 +448,6 @@ async function createPhotoSwipe(generation: number) {
 
     nextLightbox.init();
     lightbox = nextLightbox;
-}
-
-function ensurePhotoSwipeStylesheet(href: string) {
-    const existing = document.querySelector<HTMLLinkElement>(
-        'link[data-deferred-style="photoswipe"]',
-    );
-    if (existing?.sheet) return Promise.resolve();
-
-    const link = existing ?? document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = href;
-    link.dataset.deferredStyle = 'photoswipe';
-    if (!existing) document.head.append(link);
-
-    return new Promise<void>((resolve, reject) => {
-        link.addEventListener('load', () => resolve(), { once: true });
-        link.addEventListener(
-            'error',
-            () => reject(new Error('Unable to load image viewer styles.')),
-            { once: true },
-        );
-    });
 }
 
 const setupPhotoSwipe = () => {

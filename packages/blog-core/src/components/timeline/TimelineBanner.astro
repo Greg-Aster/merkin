@@ -8,8 +8,8 @@ import {
   defaultTimelineViewConfig,
 } from '../../services/TimelineConfig'
 import TimelineView from './TimelineViewModes/TimelineView.astro'
-import timelineFeatureHref from '../../styles/timeline-feature.css?url'
-import timelineStylesHref from '../../styles/timeline-styles.css?url'
+import timelineFeatureStyles from '../../styles/timeline-feature.css?inline'
+import timelineStyles from '../../styles/timeline-styles.css?inline'
 
 export interface Props {
   id?: string
@@ -85,10 +85,10 @@ const menuEntries = [
     label: config.displayName || eraKey,
   })),
 ]
+const timelineStyleText = [timelineStyles, timelineFeatureStyles].join('\n')
 ---
 
-<link rel="stylesheet" href={timelineStylesHref} data-timeline-style="base" />
-<link rel="stylesheet" href={timelineFeatureHref} data-timeline-style="feature" />
+<style is:inline set:html={timelineStyleText} data-feature-style="timeline-banner"></style>
 
 <section
   id={`${id}-wrapper`}

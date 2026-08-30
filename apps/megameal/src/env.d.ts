@@ -10,6 +10,18 @@ declare module 'howler' {
   export const Howler: any
 }
 
+declare module 'postcss-import' {
+  import type { Plugin } from 'postcss'
+
+  const postcssImport: (options?: Record<string, unknown>) => Plugin
+  export default postcssImport
+}
+
+declare module '*.cjs' {
+  const value: unknown
+  export default value
+}
+
 interface Window {
   THREE?: unknown
 }

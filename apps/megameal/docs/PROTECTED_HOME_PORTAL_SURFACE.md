@@ -36,10 +36,12 @@ Protected responsibilities:
 - Foreground home portal copy and accessibility text.
 - Portal destination advancement.
 - Dispatch of the `merkin:portal-advance` custom event.
-- Direct integration with `HomeIntroEnvironment`.
+- Direct, eager integration with `HomeIntroEnvironment` on every supported viewport.
 - Scroll cue and related portal hero CSS imports.
 
-Do not remove visible copy, screen-reader copy, controls, destination rotation, or event dispatch behavior.
+Do not reintroduce an interaction, viewport-size, network, or device-memory gate
+in front of the primary 3D environment. Do not remove visible copy,
+screen-reader copy, controls, destination rotation, or event dispatch behavior.
 
 ### PortalHeroBackgroundSlide
 
@@ -48,11 +50,31 @@ Owner: `src/components/home/PortalHeroBackgroundSlide.astro`
 Protected responsibilities:
 
 - Home portal background media.
-- Lazy loading tied to portal interaction and page readiness.
-- Listener for `merkin:portal-advance`.
-- Viewport, network, and device-memory safeguards around background media loading.
+- Immediate loading and autoplay of the muted, inline tunnel video.
+- Visual reveal as soon as the video has usable frame data.
 
-Do not remove the media path, data attributes, lazy-load behavior, or event listener without a verified equivalent.
+Do not place pointer, scroll, idle, compact-viewport, network, device-memory,
+or artificial timing gates in front of this primary background media. Preserve
+muted inline autoplay so first-time visitors never receive unsolicited sound.
+
+### Site Audio Runtime And Control
+
+Owners: `src/components/client/SiteAudioRuntime.svelte` and
+`src/components/client/SiteAudioControl.svelte`
+
+Protected responsibilities:
+
+- Initialize the canonical browser audio manager on page load with first-time
+  visitors muted.
+- Show a non-blocking first-visit prompt explaining that the site is best with
+  audio.
+- Persist either the enabled or muted choice using
+  `megameal-site-audio-enabled`.
+- Keep actual audible playback behind a browser-recognized user gesture.
+- Preserve the navbar toggle and master, ambience, and effects controls.
+
+Do not create a second consent key, audio manager, unlock path, prompt owner, or
+playback controller for this behavior.
 
 ### PortalDemoVideoPlayer
 
@@ -127,7 +149,7 @@ These event names are integration contracts. Do not rename them, remove them, ch
 
 | Event | Current protected role |
 | --- | --- |
-| `merkin:portal-advance` | Dispatched by `PortalHeroSlide`; consumed by home portal background, intro environment, loader, and sponsored bloom behavior. |
+| `merkin:portal-advance` | Dispatched by `PortalHeroSlide`; consumed by the intro environment and sponsored bloom behavior. |
 | `merkin:banner-select-scene` | Dispatched by the home intro scene; consumed by `PortalDemoVideoPlayer` for banner handoff and demo preparation. |
 | `megameal:audio-suspend` | Dispatched by the portal demo player with reason `portal-demo` so site ambience can pause while demo audio is active. |
 | `megameal:audio-resume` | Dispatched by the portal demo player with reason `portal-demo` so site ambience can resume after demo audio. |

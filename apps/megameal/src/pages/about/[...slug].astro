@@ -6,7 +6,7 @@ import { Icon } from 'astro-icon/components'
 import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 import { avatarConfig, siteConfig } from '../../config/config'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
-import aboutDetailHref from '../../styles/pages/about-detail.css?url'
+import { routeStyleHref } from '../../styles/routeStyleBundles'
 
 // â­ FIXED: Import the correct layout toggle component
 import LayoutToggle from '../../components/client/LayoutToggle.svelte'
@@ -99,7 +99,7 @@ const jsonLd = {
   oneColumn={oneColumnMode}
 >
 <Fragment slot="head">
-  <link rel="stylesheet" href={aboutDetailHref} data-route-style="about" />
+  <link rel="stylesheet" href={routeStyleHref('about')} data-route-style="about" />
   <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
 </Fragment>
 

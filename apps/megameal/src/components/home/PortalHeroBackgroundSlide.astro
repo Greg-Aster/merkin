@@ -6,19 +6,17 @@ const portalIntroBackgroundPlaybackRate = 1.0
 <div class="megameal-portal-background-slide" aria-hidden="true">
   <video
     class="megameal-portal-background-slide__video"
+    src={portalIntroBackgroundVideo}
+    autoplay
     loop
     muted
     playsinline
-    preload="none"
-    data-src={portalIntroBackgroundVideo}
+    preload="auto"
     data-playback-rate={portalIntroBackgroundPlaybackRate}
   ></video>
 </div>
 
 <script>
-  import { homePortalEvents } from '../../contracts/homePortal'
-  import { getRichMediaCapabilities } from '../../utils/richMediaCapabilities'
-
   const slide = document.querySelector<HTMLElement>('.megameal-portal-background-slide')
   const video = slide?.querySelector<HTMLVideoElement>('.megameal-portal-background-slide__video')
 
@@ -26,11 +24,7 @@ const portalIntroBackgroundPlaybackRate = 1.0
     const configuredRate = Number(video.dataset.playbackRate)
     const playbackRate =
       Number.isFinite(configuredRate) && configuredRate > 0 ? configuredRate : 1
-    const minimumBlackDelayMs = 650
-    const revealReadyAt = performance.now() + minimumBlackDelayMs
-    let loaded = false
     let visible = false
-    let revealTimeout = 0
 
     video.playbackRate = playbackRate
     video.addEventListener('play', () => {
@@ -39,17 +33,6 @@ const portalIntroBackgroundPlaybackRate = 1.0
 
     const revealVideo = () => {
       if (visible || video.readyState < 2) return
-      const remainingDelay = revealReadyAt - performance.now()
-      if (remainingDelay > 0) {
-        if (!revealTimeout) {
-          revealTimeout = window.setTimeout(() => {
-            revealTimeout = 0
-            revealVideo()
-          }, remainingDelay)
-        }
-        return
-      }
-
       visible = true
       slide?.classList.add('is-video-visible')
     }
@@ -57,61 +40,6 @@ const portalIntroBackgroundPlaybackRate = 1.0
     video.addEventListener('loadeddata', revealVideo)
     video.addEventListener('canplay', revealVideo)
     video.addEventListener('playing', revealVideo)
-
-    const loadBackgroundVideo = () => {
-      if (loaded) return
-      const source = video.dataset.src
-      if (!source) return
-
-      loaded = true
-      window.removeEventListener('scroll', loadAfterScroll)
-      video.src = source
-      video.removeAttribute('data-src')
-      video.defaultMuted = true
-      video.muted = true
-      video.playsInline = true
-      video.load()
-      video.play().then(revealVideo).catch(() => {})
-      window.requestAnimationFrame(revealVideo)
-    }
-
-    const loadAfterScroll = () => {
-      if (window.scrollY <= 80) return
-      loadBackgroundVideo()
-    }
-
-    const scheduleBackgroundVideoLoad = () => {
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => {
-          const fallback = window.setTimeout(loadBackgroundVideo, 1400)
-
-          if ('requestIdleCallback' in window) {
-            window.requestIdleCallback(
-              () => {
-                window.clearTimeout(fallback)
-                loadBackgroundVideo()
-              },
-              { timeout: 2200 },
-            )
-          }
-        })
-      })
-    }
-
-    const loadFromPointerIntent = () => {
-      if (getRichMediaCapabilities().compactViewport) return
-      loadBackgroundVideo()
-    }
-
-    window.addEventListener(homePortalEvents.portalAdvance, loadBackgroundVideo, {
-      once: true,
-    })
-    window.addEventListener('pointerdown', loadFromPointerIntent, { once: true })
-    window.addEventListener('keydown', loadBackgroundVideo, { once: true })
-    window.addEventListener('scroll', loadAfterScroll, { passive: true })
-
-    if (getRichMediaCapabilities().shouldAutoload) {
-      scheduleBackgroundVideoLoad()
-    }
+    window.requestAnimationFrame(revealVideo)
   }
 </script>

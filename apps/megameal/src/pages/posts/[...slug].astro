@@ -22,7 +22,7 @@ import {
   loadGoogleDocSnapshot,
   resolveGoogleDocStylesheet,
 } from '../../utils/googleDocContent.server'
-import postDetailHref from '../../styles/pages/post-detail.css?url'
+import { routeStyleHref } from '../../styles/routeStyleBundles'
 
 import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
 import LayoutToggle from '../../components/client/LayoutToggle.svelte'
@@ -226,7 +226,7 @@ const pdfButtonLabel = useDownloadFile
 >
 
 <Fragment slot="head">
-  <link rel="stylesheet" href={postDetailHref} data-route-style="post" />
+  <link rel="stylesheet" href={routeStyleHref('post')} data-route-style="post" />
   <!-- Add these meta tags for better date extraction -->
   <meta name="publish-date" content={formatDateToYYYYMMDD(post.data.published)} />
   <meta property="article:published_time" content={post.data.published.toISOString()} />

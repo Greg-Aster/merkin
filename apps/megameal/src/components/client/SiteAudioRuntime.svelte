@@ -19,7 +19,16 @@ const syncAudioForCurrentPage = (forceRescore: boolean) => {
 }
 
 onMount(() => {
+  let mounted = true
   syncAudioForCurrentPage(false)
+  void loadSiteAudioManager()
+    .then(siteAudioManager => {
+      if (!mounted) return
+      siteAudioManager.syncForPath(window.location.pathname, false)
+    })
+    .catch(() => {
+      // The loader reports the failure to the visible audio control.
+    })
 
   const handlePageLoad = () => {
     if (typeof window === 'undefined') return
@@ -47,6 +56,7 @@ onMount(() => {
   document.addEventListener('astro:page-load', handlePageLoad)
 
   return () => {
+    mounted = false
     stopListeningForAudioActivation()
     document.removeEventListener('astro:page-load', handlePageLoad)
   }

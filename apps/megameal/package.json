@@ -91,6 +91,7 @@
 		"@types/sanitize-html": "^2.13.0",
 		"@types/three": "^0.176.0",
 		"ktx2tools": "1.1.0",
+		"postcss": "8.5.6",
 		"postcss-import": "^16.1.0",
 		"postcss-nesting": "^13.0.1",
 		"svelte-preprocess": "^6.0.3"

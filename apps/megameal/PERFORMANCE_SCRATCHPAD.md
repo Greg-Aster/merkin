@@ -714,10 +714,9 @@ Validation and remaining work:
 - Shared banner renderer:
   `packages/blog-core/src/components/banner-stage/BannerStage.astro` (2,389
   lines).
-- Home 3D portal: `src/components/home/PortalHeroSlide.astro` owns the static
-  first paint, `HomeIntroActivation.svelte` owns progressive activation, and
-  `HomeIntroEnvironment.svelte` plus its scene/post-processing children own the
-  interactive scene.
+- Home 3D portal: `src/components/home/PortalHeroSlide.astro` eagerly mounts
+  `HomeIntroEnvironment.svelte`; that component and its scene/post-processing
+  children own the interactive scene.
 - Timeline route composition: `src/layouts/TimelinePageLayout.astro`; timeline
   interaction/runtime: `src/components/timeline/TimelinePortalCarousel.svelte`;
   universe poster/video: `TimelineBackgroundMedia.svelte`; 3D scene:
