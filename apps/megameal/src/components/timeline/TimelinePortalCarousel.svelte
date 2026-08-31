@@ -23,7 +23,6 @@ import {
   clamp,
   createTimelinePortalModel,
   getActiveTimelineEraSegment,
-  getDefaultTimelinePosition,
   getSelectedCardWidth,
   getStatusWidth,
   getTimelineDockWidth,
@@ -56,6 +55,7 @@ type TimelineStarPositionEvent = CustomEvent<{
 }>
 
 export let initialViewMode: TimelineViewMode = 'travel'
+export let presentation: 'full' | 'banner' = 'full'
 
 let shell: HTMLDivElement | null = null
 let timelineBackgroundMedia: TimelineBackgroundMedia | null = null
@@ -82,9 +82,8 @@ let adaptiveDprController: AdaptiveCanvasDprController | null = null
 let projectedStarPositions: TimelineStarScreenPosition[] = []
 let selectedCardAnchor: { x: number; y: number } | null = null
 let selectedGuideLineFrame = 0
-let hasInitializedDefaultPosition = false
+let hasInitializedBeginningPosition = false
 let hasMounted = false
-let hasStartedInitialAutoplay = false
 let isAutoplaying = false
 let isAutoplayStopping = false
 let autoplayFrame = 0
@@ -108,7 +107,6 @@ const mapZoomMax = 2.8
 const mapZoomStep = 1.16
 const mapOrbitLimit = 1
 const mapKeyboardOrbitStep = 0.18
-const defaultTimelineEraKey = 'golden-age'
 const autoplaySpeed = 0.34
 const autoplayTurnMinSpeedScale = 0.14
 const autoplayVelocityEase = 2.4
@@ -191,8 +189,13 @@ $: timelinePositionText = activeTimelineEvent
   ? `${formatTimelineYear(activeTimelineEvent.year)} / ${activeEraSegment?.displayName ?? 'Unknown Era'}`
   : 'Timeline position'
 $: isMapMode = viewMode === 'map'
-$: if (!hasInitializedDefaultPosition && screens.length > 0) {
-  initializeDefaultTimelinePosition()
+$: isBannerPresentation = presentation === 'banner'
+$: viewModeLabel = isMapMode ? 'Complete overview' : 'First-person chronology'
+$: viewModeInstructions = isMapMode
+  ? 'Select a star to inspect an article. Drag to pan, scroll to zoom.'
+  : 'Travel from the beginning. Scroll, drag, or use the slider to move through time.'
+$: if (!hasInitializedBeginningPosition && screens.length > 0) {
+  initializeBeginningPosition()
 }
 $: if (isMapMode) pauseAutoplay()
 
@@ -364,21 +367,6 @@ function toggleAutoplay() {
   }
 
   timelineBackgroundMedia?.start()
-  playAutoplay()
-}
-
-function startInitialAutoplay() {
-  if (
-    isMapMode ||
-    portraitMobile ||
-    prefersReducedMotion ||
-    hasStartedInitialAutoplay ||
-    !hasMounted ||
-    !hasInitializedDefaultPosition ||
-    maxWheel <= 0
-  ) return
-
-  hasStartedInitialAutoplay = true
   playAutoplay()
 }
 
@@ -648,17 +636,25 @@ function handleResize() {
   scheduleSelectedGuideLineSync()
 }
 
-function initializeDefaultTimelinePosition() {
-  const defaultPosition = getDefaultTimelinePosition(
-    eraSegments,
-    defaultTimelineEraKey,
-    maxWheel,
-  )
-  virtualWheel = defaultPosition
-  input.wheel = defaultPosition
-  hasInitializedDefaultPosition = true
-  autoplayDirection = defaultPosition >= maxWheel ? -1 : 1
-  startInitialAutoplay()
+function initializeBeginningPosition() {
+  virtualWheel = 0
+  input.wheel = 0
+  hasInitializedBeginningPosition = true
+  autoplayDirection = 1
+}
+
+function setViewMode(nextViewMode: TimelineViewMode) {
+  if (viewMode === nextViewMode) return
+
+  pauseAutoplay()
+  viewMode = nextViewMode
+  input.panX = 0
+  input.panY = 0
+  input.mapZoom = 1
+  input.mapOrbitX = 0
+  input.mapOrbitY = 0
+  projectedStarPositions = []
+  selectedCardAnchor = null
 }
 
 function handleStarPositions(event: TimelineStarPositionEvent) {
@@ -786,7 +782,6 @@ onMount(() => {
   adaptiveDprController.start()
   applyMotionPreference()
   updateScrollDrivenWheel()
-  startInitialAutoplay()
   if (shell) shell.dataset.timelineInitialized = 'true'
 
   window.addEventListener('pointermove', handlePointerMove)
@@ -839,8 +834,13 @@ onDestroy(() => {
   class:home-intro-environment--screen-hover={selectedScreenIndex >= 0}
   class:cursor-grabbing={panPointerId !== null}
   style="--portal-reveal-progress: 1"
+  class:h-full={isBannerPresentation}
+  class:w-full={isBannerPresentation}
+  role="region"
+  aria-label={`MEGAMEAL timeline — ${viewModeLabel}`}
   data-timeline-shell="true"
   data-timeline-view-mode={viewMode}
+  data-timeline-presentation={presentation}
   on:pointerdown|capture={handleScenePointerDown}
   on:pointermove|capture={handleScenePointerMove}
   on:pointerup|capture={handleScenePointerUp}
@@ -873,6 +873,23 @@ onDestroy(() => {
   ></div>
 
   <TimelineConstellationOverlay lines={constellationLines} guideLine={selectedGuideLine} />
+
+  <div
+    class="pointer-events-none absolute left-4 top-4 z-[6] hidden max-w-sm rounded-lg border border-cyan-100/15 bg-slate-950/70 px-4 py-3 font-mono text-slate-100 shadow-[0_0_1.4rem_rgba(8,145,178,0.14)] backdrop-blur-md md:block"
+    data-timeline-navigator-heading
+  >
+    <div class="text-[0.65rem] font-black uppercase tracking-[0.18em] text-cyan-200">
+      {screens.length} destinations · {viewModeLabel}
+    </div>
+    <p class="mt-1 text-xs leading-relaxed text-slate-300">{viewModeInstructions}</p>
+    {#if isBannerPresentation}
+      <a
+        href="/timeline/"
+        class="pointer-events-auto mt-2 inline-flex text-[0.65rem] font-black uppercase tracking-[0.14em] text-cyan-200 underline decoration-cyan-400/40 underline-offset-4 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200"
+        data-timeline-interactive
+      >Open full timeline</a>
+    {/if}
+  </div>
 
   <div class="pointer-events-none absolute inset-0 z-[5]" data-timeline-interactive>
     {#each visibleStarControls as control (control.index)}
@@ -936,7 +953,10 @@ onDestroy(() => {
           on:reset={timelineCameraController.reset}
         />
 
-        <TimelineViewModeButton {viewMode} on:click={pauseAutoplay} />
+        <TimelineViewModeButton
+          {viewMode}
+          on:change={(event) => setViewMode(event.detail)}
+        />
 
         {#if !isMapMode}
           <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
@@ -954,7 +974,10 @@ onDestroy(() => {
         on:reset={timelineCameraController.reset}
       />
 
-      <TimelineViewModeButton {viewMode} on:click={pauseAutoplay} />
+      <TimelineViewModeButton
+        {viewMode}
+        on:change={(event) => setViewMode(event.detail)}
+      />
 
       {#if !isMapMode}
         <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />

@@ -127,18 +127,6 @@ export function getActiveTimelineEraSegment(
   )
 }
 
-export function getDefaultTimelinePosition(
-  eraSegments: TimelinePortalEraSegment[],
-  eraKey: string,
-  maxPosition: number,
-) {
-  const preferredEra =
-    eraSegments.find(segment => segment.key === eraKey && segment.eventCount > 0) ??
-    eraSegments.find(segment => segment.key === eraKey)
-
-  return clamp(preferredEra?.centerIndex ?? 0, 0, maxPosition)
-}
-
 export function advanceTimelineAutoplay({
   position,
   maxPosition,

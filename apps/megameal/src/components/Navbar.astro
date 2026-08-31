@@ -109,7 +109,7 @@ import '../styles/features/extracted/navbar.css'
             <!--<SearchPanel client:load>-->
             <Search client:only="svelte" hideMobileTrigger={true}></Search>
             <div class="store-cart-nav-action hidden">
-                <StoreCartButton client:load />
+                <StoreCartButton client:visible />
             </div>
             <SiteAudioControl client:only="svelte" />
             {!siteConfig.themeColor.fixed && (

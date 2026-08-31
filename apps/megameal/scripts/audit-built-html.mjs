@@ -82,10 +82,11 @@ async function auditRepresentativeRouteAssets() {
   const leakedPostStyles = postStylesheets.filter(href =>
     routeOnlyStylePatterns.some(pattern => pattern.test(href)),
   )
+  const timelinePortalIsland = timelinePostHtml.match(
+    /<astro-island\b[^>]*\bcomponent-url=(?:"[^"]*TimelinePortalCarousel[^"]*"|'[^']*TimelinePortalCarousel[^']*'|[^\s>]*TimelinePortalCarousel[^\s>]*)(?=[\s>])[^>]*>/i,
+  )?.[0]
   const timelineEventCount = (
-    timelinePostHtml.match(
-      /\bclass=(?:"[^"]*\btimeline-event\b[^"]*"|'[^']*\btimeline-event\b[^']*'|timeline-event)(?=[\s>])/g,
-    ) ?? []
+    timelinePortalIsland?.match(/&quot;slug&quot;/g) ?? []
   ).length
   const routeFailures = []
 
@@ -104,6 +105,7 @@ async function auditRepresentativeRouteAssets() {
   }
   if (
     !/data-timeline-banner-wrapper=(?:["']true["']|true)(?=[\s>])/i.test(timelinePostHtml) ||
+    !timelinePortalIsland ||
     timelineEventCount === 0
   ) {
     routeFailures.push(

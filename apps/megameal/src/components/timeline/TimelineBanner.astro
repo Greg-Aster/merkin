@@ -1,25 +1,20 @@
 ---
-import SharedTimelineBanner from '@merkin/blog-core/components/timeline/TimelineBanner.astro'
+import { defaultEraConfig } from '@/config/timelineconfig'
+import { isPublishedManifestRecord } from '@/contracts/manifests'
 import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
-import {
-  connectionPatterns,
-  constellationConfig,
-  constellationPatterns,
-  defaultEraConfig,
-} from '../../config/timelineconfig'
+import { routeStyleHref } from '../../styles/routeStyleBundles'
+import TimelinePortalCarousel from './TimelinePortalCarousel.svelte'
 
-export interface Props {
-  [key: string]: any
-}
-
-const props: Props = Astro.props as Props
+const timelineEvents = timelineManifest.items.filter(isPublishedManifestRecord)
 ---
 
-<SharedTimelineBanner
-  events={timelineManifest.items as any}
-  eraConfig={defaultEraConfig}
-  constellationConfig={constellationConfig}
-  constellationPatterns={constellationPatterns}
-  connectionPatterns={connectionPatterns}
-  {...props}
-/>
+<link rel="stylesheet" href={routeStyleHref('timeline')} data-route-style="timeline" />
+<div class="relative h-full w-full" data-timeline-banner-wrapper="true">
+  <TimelinePortalCarousel
+    events={timelineEvents}
+    eraConfig={defaultEraConfig}
+    initialViewMode="map"
+    presentation="banner"
+    client:only="svelte"
+  />
+</div>

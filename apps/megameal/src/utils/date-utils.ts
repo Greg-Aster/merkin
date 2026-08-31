@@ -2,4 +2,4 @@ export {
   formatDate,
   formatDateToYYYYMMDD,
   getRelativeTime,
-} from '@merkin/blog-core/utils'
+} from '@merkin/blog-core/utils/date-utils'

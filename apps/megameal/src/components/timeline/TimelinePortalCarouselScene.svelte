@@ -1,6 +1,6 @@
 <script lang="ts">
 import { T, useTask, useThrelte } from '@threlte/core'
-import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+import { createEventDispatcher, onMount } from 'svelte'
 import type * as THREE from 'three'
 import { AdditiveBlending, Color, OrthographicCamera, Vector3 } from 'three'
 import HomeIntroParticleField from '../home/HomeIntroParticleField.svelte'
@@ -31,6 +31,8 @@ const dispatch = createEventDispatcher<{
 }>()
 
 let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera | null = null
+let travelCamera: THREE.PerspectiveCamera | null = null
+let mapCamera: THREE.OrthographicCamera | null = null
 let world: THREE.Group | null = null
 let starRail: THREE.Group | null = null
 let starColumn: THREE.Group | null = null
@@ -54,8 +56,8 @@ const effectScrollStepY = screenStepZ * 2.35
 const particleScrollSpan = 48
 const mapTimelineDepthScale = 8.5
 const mapDesktopTimelineDepthScale = 15.5
-const mapStarXScale = 30
-const mapEraLaneSpread = 520
+const mapStarXScale = 10
+const mapEraLaneSpread = 150
 const mapDesktopLaneSpread = 320
 const mapPortraitVerticalOffset = 165
 const mapOrbitMaxYaw = 0.34
@@ -70,9 +72,14 @@ const mixedStarColor = new Color()
 const mixedStarBaseColor = new Color()
 const mixedStarActiveColor = new Color(activeStarColor)
 let lastProjectedStarPositionSignature = ''
-const { invalidate } = useThrelte()
+const {
+  camera: defaultCamera,
+  invalidate,
+  size: canvasSize,
+} = useThrelte()
 
 $: sceneScale = portraitMobile ? 0.78 : 1
+$: camera = viewMode === 'map' ? mapCamera : travelCamera
 $: cameraPosition = portraitMobile
   ? ([0, 0.2, 8.85] as [number, number, number])
   : ([0, 0.08, 6.8] as [number, number, number])
@@ -111,12 +118,15 @@ $: sceneFrameSignature = [
   viewportAspect,
   screens.length,
 ].join('|')
-$: if (sceneFrameSignature) scheduleSceneFrame()
+$: if (sceneFrameSignature && camera) {
+  defaultCamera.set(camera)
+  scheduleSceneFrame()
+}
 
-function syncViewportMode() {
-  if (typeof window === 'undefined') return
-  portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
-  viewportAspect = Math.max(0.4, window.innerWidth / Math.max(window.innerHeight, 1))
+function syncViewportMode(width: number, height: number) {
+  if (width <= 0 || height <= 0) return
+  portraitMobile = width <= 760 && height > width
+  viewportAspect = Math.max(0.4, width / height)
 }
 
 const particles = createTimelineParticles()
@@ -419,7 +429,7 @@ function getTimelineStarTarget(index: number, visualSelectedIndex: number) {
     const responsiveXScale = mapStarXScale * 0.68
     const responsiveLaneSpread = mapEraLaneSpread * 0.58
     const eraLane = (getEraHash(getScreenEraKey(index), 887) - 0.5) * responsiveLaneSpread
-    const localJitter = (getStarHash(index, 4567) - 0.5) * 25
+    const localJitter = (getStarHash(index, 4567) - 0.5) * 12
     const localDepth = (getStarHash(index, 6043) - 0.5) * 22
 
     return {
@@ -513,21 +523,18 @@ function syncProjectedStarPositions() {
 }
 
 onMount(() => {
-  syncViewportMode()
+  syncViewportMode(canvasSize.current.width, canvasSize.current.height)
+  const unsubscribeCanvasSize = canvasSize.subscribe(({ width, height }) => {
+    syncViewportMode(width, height)
+    scheduleSceneFrame()
+  })
   let initialFrame = window.requestAnimationFrame(() => {
     initialFrame = window.requestAnimationFrame(scheduleSceneFrame)
   })
-  window.addEventListener('resize', syncViewportMode)
 
   return () => {
     window.cancelAnimationFrame(initialFrame)
-    window.removeEventListener('resize', syncViewportMode)
-  }
-})
-
-onDestroy(() => {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('resize', syncViewportMode)
+    unsubscribeCanvasSize()
   }
 })
 
@@ -585,23 +592,23 @@ function scheduleSceneFrame() {
 }
 </script>
 
-{#if viewMode === 'map'}
-  <T.OrthographicCamera
-    bind:ref={camera}
-    makeDefault
-    position={mapCameraPosition}
-    rotation={[0, 0, 0]}
-    left={-mapCameraFrame.width / 2}
-    right={mapCameraFrame.width / 2}
-    top={mapCameraFrame.height / 2}
-    bottom={-mapCameraFrame.height / 2}
-    zoom={1}
-    near={0.1}
-    far={1600}
-  />
-{:else}
-  <T.PerspectiveCamera bind:ref={camera} makeDefault position={activeCameraPosition} fov={cameraFov} />
-{/if}
+<T.OrthographicCamera
+  bind:ref={mapCamera}
+  position={mapCameraPosition}
+  rotation={[0, 0, 0]}
+  left={-mapCameraFrame.width / 2}
+  right={mapCameraFrame.width / 2}
+  top={mapCameraFrame.height / 2}
+  bottom={-mapCameraFrame.height / 2}
+  zoom={1}
+  near={0.1}
+  far={1600}
+/>
+<T.PerspectiveCamera
+  bind:ref={travelCamera}
+  position={activeCameraPosition}
+  fov={cameraFov}
+/>
 
 <T.Group bind:ref={world} position={[0, 0, 0]} scale={[sceneScale, sceneScale, sceneScale]}>
   <T.Group bind:ref={starRail} position={railPosition}>

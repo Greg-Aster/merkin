@@ -1,10 +1,5 @@
 <script lang="ts">
-import { onMount } from 'svelte'
-import { cart, cartCount } from '../../stores/cartStore'
-
-onMount(() => {
-  cart.init()
-})
+import { cartCount } from '../../stores/cartStore'
 
 function toggleCart() {
   document.dispatchEvent(new CustomEvent('megameal:cart:toggle'))

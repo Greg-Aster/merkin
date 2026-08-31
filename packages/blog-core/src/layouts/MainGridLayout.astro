@@ -53,11 +53,6 @@ interface Props {
   }
   homeLayout?: 'default' | 'portal'
   contentMode?: 'default' | 'banner-only'
-  timelineEvents?: any[]
-  timelineEraConfig?: Record<string, any>
-  timelineConstellationConfig?: Record<string, any>
-  timelineConstellationPatterns?: Record<string, any>
-  timelineConnectionPatterns?: Record<string, any>
   renderTimelineBannerSlot?: boolean
 }
 
@@ -80,11 +75,6 @@ const {
   customAuthorData, // ⭐ NEW: Extract custom author data
   homeLayout = 'default',
   contentMode = 'default',
-  timelineEvents = [],
-  timelineEraConfig,
-  timelineConstellationConfig,
-  timelineConstellationPatterns,
-  timelineConnectionPatterns,
   renderTimelineBannerSlot,
 } = Astro.props
 
@@ -786,11 +776,6 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
     bannerAnimationSettings={bannerAnimationSettings}
     isBannerOnly={isBannerOnly}
     isPortalBannerMode={isPortalBannerMode}
-    timelineEvents={timelineEvents}
-    timelineEraConfig={timelineEraConfig}
-    timelineConstellationConfig={timelineConstellationConfig}
-    timelineConstellationPatterns={timelineConstellationPatterns}
-    timelineConnectionPatterns={timelineConnectionPatterns}
     renderTimelineBannerSlot={hasTimelineBannerContent}
     shouldShowMobilePortraitRightRailHero={shouldShowMobilePortraitRightRailHero}
     mobilePortraitRightRailHeroStyle={mobilePortraitRightRailHeroStyle}

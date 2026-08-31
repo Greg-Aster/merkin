@@ -7,7 +7,7 @@ import {
   getTagUrl as getSharedTagUrl,
   pathsEqual as pathsEqualShared,
   url as sharedUrl,
-} from '@merkin/blog-core/utils'
+} from '@merkin/blog-core/utils/url-utils'
 
 export function pathsEqual(path1: string, path2: string) {
   return pathsEqualShared(path1, path2)

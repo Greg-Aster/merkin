@@ -1,20 +1,146 @@
 # Megameal Performance Scratchpad
 
-Current audit: 2026-08-29. This is an implementation backlog, not a claim that
-the listed repairs are complete.
+Current source reconciliation: 2026-08-31. The measurements in the individual
+batch records are point-in-time evidence, not a claim that every historical
+implementation remains active. Current status and Phase 1 scope are controlled
+by the reconciliation below.
 
 Goal: make the existing site usable on mobile without removing the 3D portal,
 timeline, store, archive media, search, audio, profile, or navigation features.
 Prefer fewer active owners and progressive loading over replacement components
 or permanent low-quality fallbacks.
 
+## Phase 1 reconciliation and scope freeze (2026-08-31)
+
+Current source, live imports, and hydration directives were checked against
+every batch and active-owner entry. The most recent completed production build
+and focused browser probes prove the owned Batches 17 and 18 state before later
+concurrent timeline/layout edits; they do not prove the now-mixed combined
+worktree. No new cleanup discovery belongs in Phase 1 after this checkpoint
+unless it repairs a measured regression or an existing completion gate.
+
+Product decisions that override older batch records:
+
+- The immediate `HomeIntroEnvironment client:only="svelte"` mount in
+  `PortalHeroSlide.astro` is intentional. `HomeIntroActivation.svelte` is
+  absent and must not be recreated to satisfy Batches 2 or 13.
+- `PortalHeroBackgroundSlide.astro` intentionally owns an immediate muted,
+  autoplaying `tunnel.webm` source with `preload="auto"`. The former
+  interaction-gated tunnel policy is not current.
+- The current home portal remains a required feature. Its KTX2 development
+  failure was an operational stale-cache defect, not a reason to remove or
+  defer the scene.
+
+### Implemented and currently validated
+
+The following source claims remain true in the current tree:
+
+| Batch | Current audit result |
+| --- | --- |
+| 1 | Current: timeline route composition, intent-loaded Pagefind in Megameal, and vendor-only manual chunking remain active. |
+| 2 | Superseded: the deferred `HomeIntroActivation` architecture is not current and receives no completion credit. The HTML compression corrections from that batch remain. |
+| 3 | Current: `ArchiveAtmosphere.svelte` remains the one progressive archive poster/video owner with explicit controls and failure recovery. |
+| 4 | Current: one marketplace-card tree and the existing storefront controller own progressive product-image attachment. |
+| 5 | Current after Batch 18: the promise-backed audio loader and single activation/SFX owners remain active without eager ambience or Howler admission. |
+| 6 | Current for timeline ownership and event-driven scene/media work. Its historical statement that home waits for intent is superseded. |
+| 7 | Current: the app-local profile fork and exclusive stylesheet remain absent. |
+| 8 | Current: the complete CSS audit blocks new or expanded error-severity debt, and the reader stylesheet remains split behind one ordered entrypoint. |
+| 9 | Current: all eight orphan home styles remain absent; the four current home style owners remain. |
+| 10 | Current: the app-local SideNavbar/panel fork and Bleepy family remain absent. The shared panel adapter mentioned in the historical record was subsequently removed by Batch 11. |
+| 11 | Current for one shared responsive profile, event-driven layout state, route-owned timeline startup, and canonical image-banner resolution. Megameal is currently theme-locked dark, so the old active-theme-control wording is not a current ownership guarantee. |
+| 12 | Current: named route CSS endpoints, narrowed image globs, the shared image-wrapper adapter, and built timeline/style contracts remain active. |
+| 13 | Superseded: deferred scene/tunnel admission is not current and receives no completion credit. |
+| 14 | Current: PhotoSwipe and OverlayScrollbars CSS/runtime admission remains target-conditional in the shared layout. |
+| 15 | Current: KaTeX styling remains conditional and covered by the ordinary-post built-output gate. |
+| 16 | Current: HTML compression preserves empty Svelte raw-HTML boundaries and the built audit requires them. |
+| 17 | Current and locally validated: the shared banner uses containing-block width and no longer creates scrollbar-width overflow. |
+| 18 | Current and locally validated: audio vendors load on intent and Megameal's adapters use narrow blog-core exports, so Marked is absent from the universal production client graph. |
+
+Current lightweight validation passes Megameal type-check,
+site/home/timeline contracts, complete and changed-file CSS audits, and diff
+whitespace validation. The most recent exact owned-change production build
+generated 367 pages, retained the six-stylesheet ordinary-post gate, found 54
+timeline events plus the custom author contract, preserved Svelte hydration
+boundaries, and emitted no `vendor-markdown` chunk. Its focused browser matrix
+covered home portal KTX2 loading, timeline render/zoom/layout/profile, ordinary
+post, archive, store, audio intent and recovery, responsive overflow, and
+shared-banner consumers. Because additional timeline/layout/contract files
+subsequently changed concurrently, that build and browser matrix must be rerun
+on the final ownership-stable source before Phase 1 completion.
+
+### Implemented but awaiting deployed or physical-device proof
+
+- The locally simulated 390 x 844 throttled browser results are not physical
+  mobile evidence. Home portal interaction, timeline interaction/LCP, archive
+  media, store media, profile admission, and audio output still need a real
+  mobile-device pass after deployment.
+- No deployed PageSpeed Insights or field Core Web Vitals result proves the
+  current uncommitted source. Those measurements must follow commit and deploy.
+- The desktop archive still uses the original wide PNG, and store cards still
+  use their current source images. Responsive derivatives for both are
+  explicitly deferred to the separate future media-optimization goal below;
+  they are not Phase 1 completion gates.
+
+### Genuinely unfinished Phase 1 work
+
+This list is frozen. Do not add cleanup to it merely because a source search
+finds another refactor opportunity.
+
+1. Validate the implemented P0 cart repair on the exact final source. The
+   universal Navbar now admits its existing `StoreCartButton` with
+   `client:visible`, and the button no longer initializes the cart. The existing
+   store-route `StoreCartRuntime` remains the event and initialization owner.
+   Proof must cover direct load and client navigation into and out of the store.
+2. Re-run the focused production/browser matrix after the final owned source
+   set is stable, then deploy that exact commit and record physical-mobile plus
+   deployed PageSpeed evidence.
+3. Commit only the reconciled owned files and reach an ownership-clean
+   worktree. The current tree also contains concurrent home-portal source/CSS
+   edits, so Phase 1 cannot yet claim a clean publication boundary.
+
+### Explicitly deferred Phase 2 work
+
+- Broad shared-grid/banner compatibility-matrix cleanup, the dormant cookbook
+  trigger cleanup, and dependency reshuffling are outside the frozen Phase 1
+  scope unless they become the attributed cause of a completion-gate failure.
+- The multi-gigabyte `public/generated` deployment boundary, authoring-file
+  relocation, and cross-game asset deduplication are a separate proposed goal.
+  Do not inventory for deletion, move, rename, deduplicate, or change shared
+  URLs without Project Owner approval and `apps/game` validation.
+- Proposed separate goal: **Design and validate a Megameal/game shared-asset
+  deployment boundary that excludes confirmed authoring-only files and
+  consolidates proven duplicates without changing any live Megameal or game
+  URL, visual, media, or runtime contract.**
+- Tailwind/PostCSS migration and optional compression/dependency experiments
+  are also Phase 2 unless a current gate begins failing because of them.
+- Archive-poster and store-card responsive image derivatives are explicitly
+  deferred to a separate future media-optimization goal. That goal must compare
+  visual quality and deployed transfer behavior and must not become a broad
+  grid, Navbar, or public-tree rewrite.
+- Proposed separate goal: **Produce, visually review, and deploy responsive
+  archive/store image derivatives through the existing media owners without
+  changing route behavior, source fallbacks, or shared public URLs.**
+
+### Phase 1 completion and stopping point
+
+Phase 1 is complete only when Batch 18 and this reconciliation are final, every
+remaining P0 decision is fixed or explicitly deferred, focused local validation
+passes on the exact final source, deployed and physical-mobile evidence is
+reported, the owned changes are committed, and worktree ownership is clean.
+
+The exact stopping point is after the narrow cart repair is validated, the owned
+patch is committed and deployed, deployed evidence is recorded, and all local
+validation processes are closed. Do not continue into responsive assets, broad
+shared-grid or Navbar cleanup, or public-tree work.
+
 ## Measured baseline
 
-The browser measurements used the current production build served locally. The
-mobile profile used a 390 x 844 viewport, 4x CPU slowdown, 150 ms latency, and
-about 1.6 Mbps download throughput. Local hosting removes production DNS, CDN,
-and server latency, so these numbers are useful for comparisons but are not a
-substitute for a deployed PageSpeed/Lighthouse run.
+The browser measurements used the 2026-08-29 baseline production build served
+locally. The mobile profile used a 390 x 844 viewport, 4x CPU slowdown, 150 ms
+latency, and about 1.6 Mbps download throughput. These values are historical
+comparison inputs, not current route measurements. Local hosting removes
+production DNS, CDN, and server latency, so they are not a substitute for a
+deployed PageSpeed/Lighthouse run.
 
 | Route | Requests | Transfer | CSS requests | FCP | DOM content | Load | Main finding |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -97,51 +223,14 @@ Browser and build evidence:
 
 ### Batch 2 - progressive home portal and stable client boundary (2026-08-28)
 
-Implemented:
+Historical result, superseded by the current product decision:
 
-- `PortalHeroSlide.astro` now owns the immediate server-rendered home still.
-  The new 3.30 KB `HomeIntroActivation.svelte` controller is client-only and
-  dynamically imports the existing scene rather than server-rendering or
-  eagerly hydrating the WebGL tree.
-- Compact, Save-Data, 2G/3G, and low-memory contexts keep the scene in standby
-  until pointer, touch, wheel, keyboard, or scroll-cue intent. Unconstrained
-  desktop starts it after the first paint during idle with a bounded timeout.
-- WebGL support is checked before the scene import. Unsupported WebGL and
-  import/render failures keep the still and expose a user-visible and live-region
-  failure state instead of throwing through the island.
-- Added `richMediaCapabilities.ts` as the shared viewport/network/memory policy
-  for the portal background video, 3D activation, and 3D quality selection.
-  Duplicate capability checks were removed from both existing owners.
-- `astro-compress` class-name sorting is disabled while HTML compression stays
-  enabled. Sorting mutated server-rendered Svelte class values and produced a
-  production hydration mismatch.
-- The existing scene, post processing, screens, navigation links, interaction
-  handlers, quality modes, and assets remain the active implementation.
-
-Measured with the same throttled mobile profile as the baseline and Batch 1:
-
-| Home result | Requests | Transfer | DOM content | Load | Long-task total |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Batch 1 | 106 | 2.03 MB | not recorded | 8.28 s | 2.91 s |
-| Batch 2 | 101 | 0.48 MB | 3.39 s | 5.18 s | 0.07 s |
-
-Browser and build evidence:
-
-- Before mobile intent, the only portal-specific requests are the existing
-  17.8 KB still, 6.05 KB scene stylesheet, and 3.30 KB activation controller.
-  There is no scene module, Three/Threlte chunk, model, or sprite-atlas request.
-- Wheel intent on a 390 x 844 viewport loads the unchanged lean scene and
-  produces its canvas. Unconstrained desktop idle activation produces the full
-  scene. Save-Data + 2G + 2 GB memory + reduced motion remains in standby, then
-  keyboard intent loads the lean scene successfully.
-- Forced WebGL absence retains the complete still, makes no 3D request, and
-  exposes the explicit unavailable status. All four browser states have no
-  hydration warning, console warning/error, exception, or failed request.
-- The production build completed 366 pages in 242.02 seconds, including the
-  built-HTML audit, compression, and Pagefind indexing. The known PostCSS
-  `from` warning and deferred 699 KB Three.js chunk warning remain.
-- This batch changed no public asset, production dependency, or CSS file. A
-  deployed PageSpeed run and physical-device interaction remain unverified.
+- This batch temporarily introduced a deferred portal admission owner. That
+  owner no longer exists, and its request/transfer measurements do not describe
+  the current home route.
+- The surviving correction is the HTML-compression setting that disables class
+  sorting. Current portal ownership is documented in the reconciliation and
+  active-owner map; do not restore the retired activation component.
 
 ### Batch 3 - progressive archive atmosphere media (2026-08-28)
 
@@ -404,9 +493,9 @@ Browser and build evidence:
   controls. Reduced motion remained poster-only. A deliberately blocked WebM
   retained the poster and exposed the Retry background motion status without an
   unhandled exception. Desktop retained idle video and autoplay behavior.
-- The home portal still deferred on mobile, produced its canvas after intent,
-  and retained the explicit WebGL-unavailable fallback after the shared
-  particle task stopped forcing its own frame invalidation.
+- The Batch 6 cross-route home check passed against the portal architecture
+  that existed at that time. Home admission was later changed intentionally;
+  no current home-loading claim is derived from this historical check.
 - The final exact production build completed 367 pages in 303.20 seconds, passed its
   built-HTML audit, and indexed 84 pages. Type-check, contract audits, changed
   CSS audit, strict CSS audit, and diff check passed. The full CSS inventory
@@ -642,10 +731,10 @@ Implemented:
   timeline type is now admitted and explicit slot-presence data reaches the
   banner stage, allowing a normal timeline post to use its existing default
   renderer while `/timeline/` keeps its custom 3D carousel.
-- Removed duplicate theme-click ownership from the shared and Megameal navbars.
-  `LightDarkSwitch.svelte` is the sole scheme control and uses static inline
-  SVGs instead of dynamic Iconify components that produced an Ainekio hydration
-  mismatch. One click now produces one stored/document theme transition.
+- Theme interaction was consolidated and cross-consumer checked at this batch
+  boundary. Megameal is currently locked to dark mode and renders no public
+  scheme switch, so the former claim that `LightDarkSwitch.svelte` is the
+  currently active sole scheme control is not carried forward.
 - Aligned Ainekio's HTML compression with the already proven class/whitespace
   settings, removed its stale always-pass compression hook, and repaired the
   Megameal/Ainekio image-banner resolvers to honor a post's canonical image.
@@ -771,77 +860,15 @@ Validation and remaining work:
 
 ### Batch 13 - restore progressive home portal ownership (2026-08-30)
 
-Implemented:
+Historical result, superseded by the current product decision:
 
-- Restored `HomeIntroActivation.svelte` as the single admission boundary for
-  the existing `HomeIntroEnvironment.svelte` scene. The home now server-renders
-  the existing 17.8 KB still and a 3.14 KB activation chunk; Three.js, Threlte,
-  the scene, models, and sprite atlas remain behind the dynamic import.
-- Restored viewport, connection, memory, reduced-motion, WebGL, and stable-paint
-  policies through the existing `richMediaCapabilities.ts` owner. Compact,
-  Save-Data, 2G/3G, low-memory, and reduced-motion contexts remain on the still
-  until explicit input, while an unconstrained desktop can upgrade during idle.
-- Made `PortalHeroBackgroundSlide.astro` the canonical source/playback owner for
-  the 10,256,563-byte tunnel video. It now starts at `preload="none"`, admits
-  its source on portal intent or eligible desktop idle, and reports playback or
-  loading failure while preserving the still and interactive portal.
-- Removed a duplicate runtime ownership path without modifying shared
-  blog-core: the shared banner stage treats `data-src` as its own active-slide
-  loader contract, so the portal background now uses the component-specific
-  `data-portal-background-src` attribute. The home contract audit rejects both
-  an eager `src` and the generic attribute that previously bypassed admission.
-- Updated the protected home-portal contract and documentation to preserve the
-  immediate still, unchanged portal scene and destinations, joystick/keyboard
-  activation, reduced-motion behavior, and explicit fallback states.
-
-Measured production-preview evidence at 390 x 844:
-
-| State | Requests | Counted transfer | Startup canvas | Tunnel request | Startup long tasks |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Reopened eager source | 60 | 1,894,024 B | 1 | yes | 9 / 1,335 ms |
-| Batch 13 idle | 51 | 363,845 B | 0 | no | 0 / 0 ms |
-
-- The counted startup transfer fell by 1,530,179 bytes (80.8%) and nine
-  requests. The baseline did not count the long-lived media response body, so
-  the avoided 10.26 MB tunnel request is additional to that transfer delta.
-- Mobile and Save-Data + 2G + 2 GB memory idle loads request only the still and
-  activation chunk from the portal owner. Neither case requests the environment
-  module, Three.js chunks, sprite atlas, or tunnel video.
-- Keyboard portal intent loads the unchanged lean scene, creates one canvas,
-  admits the tunnel, and keeps the immediate still underneath as recovery.
-  Reduced-motion intent loads the interactive scene but keeps background motion
-  unrequested. Unconstrained desktop idle retains the full scene.
-- Forced WebGL absence keeps the still, creates no canvas, makes no 3D request,
-  and exposes the explicit unavailable state. A deliberately blocked tunnel
-  request keeps the video hidden, leaves the scene usable, and exposes
-  `Portal background motion is unavailable` without a console error or
-  unhandled rejection.
-- Production mobile screenshots visually confirm both the intact static city
-  first paint and the original logo/particle portal after activation. All
-  normal matrix cases have no console warning/error, hydration warning, failed
-  request, or horizontal overflow; the one blocked request is deliberate
-  failure-path evidence.
-
-Validation and remaining work:
-
-- `pnpm type-check`, the site/home/timeline contract audits, complete CSS audit,
-  changed-file CSS audit, strict CSS audit, focused Biome check, and whitespace
-  check pass. The complete CSS audit still reports its six baseline findings
-  and the warning-only `PortalSponsoredBloom.astro` item.
-- The exact production build completed all 367 pages in 114.30 seconds,
-  verified 21 redirect shells, found 54 timeline events with the custom author,
-  and indexed 84 pages. The known Tailwind PostCSS and deferred 699 KB Three.js
-  chunk warnings remain.
-- The repository-wide Biome command still reports 91 pre-existing formatting
-  and import-order diagnostics across unrelated source files; the three changed
-  home components and the changed contract script pass a focused check.
-- This batch restores one previously deleted client component and one
-  client-only activation boundary. It adds no CSS, public asset, dependency,
-  route, parallel controller, shared-package change, or baseline allowance.
-  The restored component owns and cleans up the portal activation listeners.
-  Because no shared public asset or blog-core file changed, game and other site
-  consumer builds are not implicated by this batch. Deployed PageSpeed and
-  physical-device measurements remain open.
+- This batch's deferred scene and tunnel-video architecture is no longer
+  present. Its mobile request/transfer results are retained only in repository
+  history and do not describe the current home route.
+- `PortalHeroSlide.astro` now mounts the existing environment immediately with
+  `client:only="svelte"`; `PortalHeroBackgroundSlide.astro` owns the immediate
+  muted autoplay source. The protected home contract explicitly requires that
+  current behavior.
 
 ### Batch 14 - conditional image-viewer and scrollbar admission (2026-08-30)
 
@@ -1029,6 +1056,118 @@ Validation and scope boundary:
   nor `apps/docs-editor-bridge`, so the other sites in the repository are not
   modified by this batch.
 
+### Batch 17 - shared banner scrollbar-overflow repair (2026-08-31)
+
+Implemented:
+
+- Traced the remaining desktop horizontal scroll on `/posts/timeline/` to the
+  shared `BannerStage.astro` container, not the timeline scene. On a 1,440 px
+  viewport with a vertical scrollbar, the document content width was 1,425 px,
+  but `width: 100vw` still requested 1,440 px and the negative half-viewport
+  margins positioned the banner from -7.5 to 1,432.5 px. That made the document
+  1,433 px wide and exposed 8 px of horizontal scroll.
+- Replaced that viewport breakout with `width: 100%` and `max-width: 100%` in
+  the canonical shared banner owner. `BannerStage` is already rendered as a
+  direct full-width child of the shared route shell, so its containing block is
+  the intended available width; no page override or second style owner was
+  added. The superseded negative margins were deleted in the same change.
+
+Measured production and browser evidence:
+
+- At 1,440 px, the production timeline banner now occupies exactly 0 to 1,425
+  px and the document client and scroll widths are both 1,425 px. The same
+  source build has no horizontal overflow on Megameal home, archive, store,
+  regular-post, or mobile timeline routes at 1,440 or 390 px.
+- The exact `/posts/timeline/` route still renders one initialized timeline with
+  54 events and zooms from scale 1.3 to 1.5. One-column mode has no hidden
+  profile media; two-column mode reveals the 264 x 354 px Universe profile,
+  loaded avatar, name, and bio; switching back removes that media. The route
+  has no console warning/error, failed response, failed request, or horizontal
+  overflow.
+- Ainekio, the other live shared-layout consumer, has no horizontal overflow on
+  mobile or desktop home and current-status routes. Its mobile profile still
+  opens, loads one avatar on demand, receives focus, closes, removes the media,
+  and restores focus without console or network failures. Travel imports the
+  shared layout package but its sole current archived route does not render the
+  banner stage.
+
+Validation and scope boundary:
+
+- Blog-core, Megameal, Ainekio, and Travel type-checks pass. Megameal's exact
+  package build completes all 367 pages, verifies 21 redirect shells, the
+  six-stylesheet budget, 54 timeline events with the custom author, and the
+  raw-HTML hydration-boundary contract; Pagefind indexes 84 pages / 9,712
+  words. Ainekio and Travel production builds pass for 73 and 1 page.
+- Complete and changed-file CSS audits pass. This repair removes shared CSS
+  declarations and adds no CSS selector, component, stylesheet, client script,
+  hydration boundary, dependency, public asset, route, or baseline allowance,
+  so the new-owner strict CSS audit does not apply. Known Tailwind PostCSS,
+  deferred Three.js chunk, and Ainekio empty-collection warnings are unchanged.
+- Unlike Batch 16, this batch intentionally changes the shared blog-core banner
+  owner. Megameal and Ainekio therefore receive the repair together; both live
+  consumers were built and checked, while Travel's archived surface was built
+  and confirmed not to instantiate the changed owner.
+
+### Batch 18 - restore optional vendor admission (2026-08-31)
+
+Implemented:
+
+- Removed unconditional `loadSiteAudioManager()` calls that a later deployment
+  repair had added to both global audio islands. `SiteAudioRuntime` again loads
+  the existing ambience manager only from its canonical activation listener,
+  while `SiteAudioControl` loads it when the user opens or operates the mixer.
+  The shared promise-backed loader remains the only manager admission owner.
+- Narrowed Megameal's date, theme, and URL adapters from the broad
+  `@merkin/blog-core/utils` barrel to the package's existing dedicated exports.
+  The barrel also re-exported the server journal renderer and therefore linked
+  Marked into universal cart, search, theme, and layout clients even though
+  none of those clients render Markdown. No shared API or utility
+  implementation was duplicated.
+
+Measured production and browser evidence:
+
+- Before this repair, a cold muted store route requested the 15.62 KB
+  `site-audio` implementation and 36.58 KB Howler chunk without audio intent;
+  the browser transferred 10,050 bytes for Howler alone. It also transferred
+  the 12,019-byte Marked chunk through universal utility clients.
+- A cold first-visit store now requests only the small audio profile, loader,
+  and activation boundary needed to render the prompt and capture the first
+  gesture. It requests no `site-audio`, Howler, SFX implementation, ambience,
+  or SFX media. Touch intent loads the existing manager and route ambience;
+  subsequent interaction loads and plays one SFX. Keyboard Enter enables the
+  Explainer route's ambience and opens the complete mixer.
+- Blocking the lazy `site-audio` chunk produces the visible recoverable sound
+  error. Its Reload action restores the page, and the next touch enables audio
+  and loads the route track without a console error or exception.
+- The production client no longer emits a `vendor-markdown` chunk. Under the
+  same store media state, the throttled mobile route falls from 50 to 48
+  requests and from 320,236 to 307,881 transferred bytes, a 12,355-byte
+  reduction attributable to the removed Marked request/import edge. FCP and
+  load remain about 0.95 and 1.83 seconds; no horizontal overflow, failed
+  response, failed request, or console message is present.
+
+Validation and runtime recovery:
+
+- Type-check, site/home/timeline contract audits, complete CSS audit, and the
+  exact package build pass. The build completes all 367 pages in 188.36
+  seconds, verifies 21 redirect shells, the six-stylesheet budget, 54 timeline
+  events with the custom author, and the hydration-boundary contract; Pagefind
+  indexes 84 pages / 9,712 words. The seven known CSS findings and existing
+  PostCSS and deferred Three.js warnings are unchanged.
+- The reported local KTX2 MIME failure was a stale Vite optimized-dependency
+  artifact, not a removed portal feature: the old hashed request returned a
+  404 HTML response while two dev servers and production builds reused the
+  same cache. The old cache was moved to
+  `/tmp/megameal-vite-cache-20260831-0912`, and one clean server was restarted
+  on port 4321. The same URL now returns 200 `text/javascript` (75,715 bytes).
+  A desktop portal-advance browser check dynamically loads
+  `HomeIntroScreenPanel`, `homeIntroKtx2Loader`, and KTX2Loader, renders one
+  canvas, and has no console, response, or request failure.
+- This batch adds no component, stylesheet, hydration boundary, dependency,
+  public asset, route, baseline allowance, or shared-package change. The Vite
+  cache recovery changes no tracked source and preserves the portal carousel's
+  KTX2 path.
+
 ## Active owner map
 
 - App route composition: `src/pages/[...page].astro` and the route files under
@@ -1037,7 +1176,7 @@ Validation and scope boundary:
 - Production HTML integrity and its built-route regression contract:
   `astro.config.mjs` and `scripts/audit-built-html.mjs`.
 - Shared route shell and client-controller composition:
-  `packages/blog-core/src/layouts/MainGridLayout.astro` (1,686 lines).
+  `packages/blog-core/src/layouts/MainGridLayout.astro`.
 - Shared image-viewer, mathematical-notation styling, and code/math scrollbar
   admission:
   `packages/blog-core/src/layouts/Layout.astro`; its feature stylesheet loader,
@@ -1046,17 +1185,22 @@ Validation and scope boundary:
 - Shared banner renderer:
   `packages/blog-core/src/components/banner-stage/BannerStage.astro` (2,389
   lines).
-- Home 3D portal: `PortalHeroSlide.astro` owns the immediate still and navigation
-  cue; `HomeIntroActivation.svelte` owns deferred admission and dynamically
-  imports `HomeIntroEnvironment.svelte`; that component and its
-  scene/post-processing children retain the interactive scene. The adjacent
-  `PortalHeroBackgroundSlide.astro` is the sole tunnel source/playback owner.
+- Home 3D portal: `src/components/home/PortalHeroSlide.astro` owns the
+  accessible server shell and navigation cue and immediately mounts
+  `src/components/home/HomeIntroEnvironment.svelte` with
+  `client:only="svelte"`. That component and its scene/post-processing children
+  own the interactive scene.
+  `src/components/home/PortalHeroBackgroundSlide.astro` owns the immediate
+  muted autoplay tunnel source and playback reveal. There is no separate
+  activation component.
 - Timeline route composition: `src/layouts/TimelinePageLayout.astro`; timeline
   interaction/runtime: `src/components/timeline/TimelinePortalCarousel.svelte`;
-  universe poster/video: `TimelineBackgroundMedia.svelte`; 3D scene:
-  `TimelinePortalCarouselScene.svelte`; pure presentation, particle, and
-  generated-texture work: the adjacent `timelinePortalPresentation.ts`,
-  `timelineParticles.ts`, and `timelineStarTextures.ts` owners.
+  universe poster/video:
+  `src/components/timeline/TimelineBackgroundMedia.svelte`; 3D scene:
+  `src/components/timeline/TimelinePortalCarouselScene.svelte`; pure
+  presentation, particle, and generated-texture work: the adjacent
+  `timelinePortalPresentation.ts`, `timelineParticles.ts`, and
+  `timelineStarTextures.ts` owners.
 - Search UI and Pagefind bootstrap: `src/components/Search.svelte`.
 - Global audio activation and route sync:
   `src/components/client/SiteAudioRuntime.svelte`; intent admission and manager
@@ -1071,89 +1215,64 @@ Validation and scope boundary:
 - Store route/content composition: `src/pages/store.astro`; canonical product
   URLs and primary visuals: `src/contracts/products.ts`; responsive listing
   markup: `src/components/store/MarketplaceListingCard.astro`; filtering,
-  sorting, and progressive product media: `storefrontController.ts`.
+  sorting, and progressive product media:
+  `src/components/store/storefrontController.ts`.
+- Global public navigation/control composition: `src/components/Navbar.astro`.
+  Store cart persistence is `src/stores/cartStore.ts`; store-route event and
+  drawer ownership is mounted by `src/layouts/store/StoreLayout.astro` through
+  `StoreCartRuntime.svelte` and `CartDrawer.svelte`; the visible count/toggle is
+  `StoreCartButton.svelte`. The Navbar admits that existing button only when its
+  route-controlled wrapper becomes visible; the button subscribes to count and
+  dispatches toggle intent but does not initialize or control the cart.
 - Active profile implementation:
   `packages/blog-core/src/components/client/Profile.svelte`, mounted once by
   the shared grid and admitted by viewport plus live sidebar state.
-- Shared layout state: `SpecialPageFeatures.svelte`; Megameal's visible
-  `LayoutToggle.svelte` requests changes and consumes state through the direct
-  `blog-core:layout-*` event contract.
+- Shared layout state:
+  `packages/blog-core/src/components/client/SpecialPageFeatures.svelte`;
+  Megameal's visible `src/components/client/LayoutToggle.svelte` requests
+  changes and consumes state through the direct `blog-core:layout-*` event
+  contract.
 - Shared public assets: `public/`; `apps/game` also consumes this tree, so it is
-  not safe to prune based on Megameal callers alone.
+  not safe to prune based on Megameal callers alone. This owner is documented
+  for the proposed Phase 2 goal only and is not an active Phase 1 work surface.
 
 ## P0 - Remove route-inappropriate critical work
 
-### 1. Stop the universal layout from importing every feature
+### 1. Keep route resources conditional
 
-Status: partially repaired in Batches 1, 12, 14, and 15. Timeline data,
+Status: the measured route-resource requirement is implemented. Timeline data,
 configuration, carousel, Three.js, and route CSS are route-owned; KaTeX,
-PhotoSwipe, and OverlayScrollbars now use eligible-target admission; and the
-first stylesheet budget is met. The shared grid still statically imports other
-feature owners.
+PhotoSwipe, and OverlayScrollbars use eligible-target admission; and the
+ordinary-post six-stylesheet gate passes. Current production probes show no
+route-only CSS or 3D bundle on an ordinary post.
 
-Root cause: both grid layers use static imports for route-only implementations.
-The Megameal adapter imports the timeline carousel, archive banner, default
-universe hero, and home-related owners. The shared grid imports the universal
-banner stage, both rail systems, timeline CSS, and six client controllers. A
-static import is enough for Astro/Vite to link its CSS and shared JavaScript even
-when the server-rendered conditional does not render that branch.
+The former instruction to broadly split every static shared-grid import is
+removed from Phase 1. Current static imports include intentional shell owners,
+and no current completion gate attributes a regression to those imports. Broad
+grid/banner compatibility cleanup is deferred to Phase 2.
 
-Repair:
+The measured P0 exception has a narrow implemented repair: the universal
+Megameal Navbar retains the one existing button but changes its admission from
+`client:load` to `client:visible`, and the button no longer duplicates cart
+initialization owned by `StoreCartRuntime` on store routes.
 
-- Keep the shared grid responsible for the semantic shell only.
-- Let the route provide its banner/timeline/home implementation through a slot
-  or route-specific server composition. Move the existing import to the route
-  that renders it; do not create parallel implementations.
-- Remove each corresponding conditional/import from the universal shell in the
-  same change.
-- Make timeline CSS and the 3D runtime timeline-only. A no-canvas post must not
-  request either 3D vendor chunk.
-- Make reader, quiz, review, store/customizer, Bleepy-banner, and home-route CSS
-  appear only on routes that render those systems.
+Proof required to close the exception: an ordinary post and home must make no
+cart-button/cart-store client request, while direct store load, client
+navigation into/out of store, cart count, drawer, add/remove, and reload remain
+functional without duplicate initialization.
 
-Proof:
+### 2. Preserve the intentional immediate home 3D portal
 
-- Compare the built resource list for `/`, `/archive/`, `/timeline/`, `/store/`,
-  and a regular post.
-- Completed in Batch 12: fewer than 15 blocking stylesheet requests on a
-  regular post, with no route-only CSS or 3D bundle in its request list.
-- Confirm navigation between all route families still selects the intended
-  banner and preserves back/forward behavior.
+Status: closed by current product decision. `PortalHeroSlide.astro` immediately
+mounts `HomeIntroEnvironment.svelte` with `client:only="svelte"`, and
+`PortalHeroBackgroundSlide.astro` immediately loads the muted autoplay tunnel.
+The home contract requires both behaviors. There is no deferred activation
+owner and none should be recreated.
 
-### 2. Progressively start the home 3D portal
-
-Status: restored and browser-verified in Batch 13 after the eager regression.
-Physical-device and deployed PageSpeed evidence remain pending.
-
-Root cause: `PortalHeroSlide.astro` had regressed to hydrating
-`HomeIntroEnvironment.svelte` with `client:only`, so mobile downloaded and
-executed the 3D runtime before the page settled. The tunnel video also used the
-shared banner stage's generic `data-src` contract, which promoted it to an eager
-`src` before the component's own media policy could run.
-
-Repair:
-
-- Keep the existing generated still as the immediate visual and accessible
-  server-rendered copy as the initial experience.
-- Start the existing 3D owner after the first stable paint using the least eager
-  hydration that still makes the above-the-fold interaction timely. User
-  pointer/keyboard/scroll intent should be able to start it immediately.
-- Preserve the current 3D scene and interaction; the still is a loading state,
-  not a permanent mobile replacement.
-- Ensure the scroll cue retains a non-3D navigation fallback while loading.
-- Optimize the shared GLB/texture path only after visual comparison; do not
-  silently lower required quality.
-- Remove the stale manual-chunk condition for the nonexistent
-  `HomeIntroEnvironmentLoader.svelte` after the active path is established.
-
-Proof:
-
-- No hydration warning, console error, rejected playback promise, or missing
-  asset.
-- Home content and navigation are usable before the 3D model completes.
-- Test touch drag, wheel, keyboard, route activation, reduced motion, Save-Data,
-  low-memory mode, and the explicit media failure state.
-- Re-measure startup long tasks and interaction latency on a real mobile device.
+The local desktop portal-advance/KTX2 check passes with one canvas and no
+console or network failure after the clean Vite-cache restart. Real mobile and
+deployed PageSpeed evidence are still pending, but that evidence must evaluate
+the intentional immediate experience rather than a removed standby design.
 
 ### 3. Load Pagefind only when search is requested
 
@@ -1197,29 +1316,19 @@ overlay or CSS-hidden desktop rail on mobile.
 
 ### 5. Undo over-broad manual chunks
 
-Status: the app-feature manual groups and warning suppression were removed in
-Batch 1. The store circular chunk warning is gone and route-transition code is
-independent. Remaining import-edge warnings must be repaired at their owners.
+Status: completed in Batch 1. `astro.config.mjs` now groups third-party vendors
+only; it contains no app-feature manual chunk, warning suppression, Vite
+`force`, or `NODE_ENV` optimization branch. The former store circular-chunk
+warning is absent.
 
-Root cause: `astro.config.mjs` forces every module under
-`src/components/store/` into `feature-store`. The globally hydrated cart button
-therefore pulls store feature code onto unrelated routes. The featured-product
-rules overlap that ownership and produce the current circular-chunk warning.
+The KTX2 MIME incident was instead caused by two long-lived development servers
+and production builds sharing an invalidated optimized-dependency cache. Batch
+18 records the clean-cache operational recovery. No speculative command/mode
+configuration was added because the installed Astro configuration API supplies
+a static config object rather than a reliable command-aware callback.
 
-Repair:
-
-- Let route entrypoints and natural dynamic imports define most feature chunks.
-- Keep the cart count/store only in a small canonical cart module; do not group
-  all store components with it.
-- Remove stale chunk rules and the blanket suppression of static/dynamic import
-  warnings. Fix each remaining warning at its real import edge.
-- Derive dev dependency optimization from Vite command/mode rather than the
-  current `NODE_ENV` test, which forced dependency re-optimization during this
-  production build.
-
-Proof: no circular chunk warning; home and regular posts do not load store
-detail/featured-product code; store and cart behavior still work across
-navigation and reload.
+The hidden Navbar cart island was not a manual-chunk defect; its narrow
+admission and ownership repair is recorded under item 1.
 
 ## P1 - Fix route-specific media and main-thread costs
 
@@ -1269,7 +1378,8 @@ a visually reviewed high-resolution desktop poster derivative remain pending.
 
 Status: duplicate card ownership and progressive product-media attachment are
 completed and browser-verified in Batch 4. Responsive derivatives for the large
-source images and the shared CSS/controller fan-out remain pending.
+source images remain frozen Phase 1 work; broader CSS/controller fan-out cleanup
+is explicitly deferred to Phase 2.
 
 - Owner: `src/pages/store.astro`, `src/contracts/products.ts`,
   `MarketplaceListingCard.astro`, and `storefrontController.ts`.
@@ -1287,8 +1397,9 @@ source images and the shared CSS/controller fan-out remain pending.
 Status: the app-local audio admission/unlock path is completed in Batch 5. The
 global timeline startup and layout-toggle polling handshake were repaired and
 cross-consumer validated in Batch 11. OverlayScrollbars/PhotoSwipe admission is
-completed and cross-consumer validated in Batch 14; remaining panel
-compatibility probes are still open.
+completed and cross-consumer validated in Batch 14. Batch 18 revalidated that
+the audio implementation and Howler remain behind intent. There is no remaining
+SidenavPanels or Bleepy compatibility probe in the current tree.
 
 - Completed in Batch 11: timeline view/banner startup lives with the rendering
   components; a normal post requests neither client and timeline routes keep
@@ -1297,21 +1408,23 @@ compatibility probes are still open.
   OverlayScrollbars loads only for fine-pointer code/math targets; native page
   scrolling remains the default; route navigation removes and re-admits the
   feature owner without duplicate controllers.
-- Completed in Batch 5: `SiteAudioRuntime` is the global activation/unlock owner;
+- Completed in Batches 5 and 18: `SiteAudioRuntime` is the global
+  activation/unlock owner;
   the audio and SFX managers plus Howler load only on enabled audio intent. The
   small runtime and SFX mapping islands still hydrate at page load so they can
   capture the first eligible gesture without adding a second listener family.
-- `Navbar.astro` mounts search, cart, audio, theme, and display controls and also
-  contains a 500 ms "bandaid" that boots then hides Bleepy. Make mascot
-  visibility a render/config decision and delete the delayed hide path.
 - Completed in Batch 11: the uncalled shared `SidenavPanels.svelte`
   compatibility adapter and its retired SideNavbar button probes were deleted.
+- Implemented Phase 1 repair: `Navbar.astro` admits its existing cart button
+  only when visible, and `StoreCartButton.svelte` no longer calls `cart.init()`.
+  The existing store runtime remains canonical; this does not authorize a
+  broader Navbar rewrite.
 
 ## P2 - Remove confirmed duplicate and orphan code
 
-These items primarily improve maintainability/build work. They should follow
-the critical-path repairs so line-count cleanup is not confused with runtime
-proof.
+This section is explicitly deferred outside the frozen Phase 1 scope. The
+completed removals remain current; the remaining ideas are proposals, not
+authorization to continue discovery or implementation.
 
 - Completed in Batch 7: the active profile owner remains in
   `packages/blog-core`; the uncalled app-local `Profile.svelte` and
@@ -1326,38 +1439,38 @@ proof.
   cross-consumer validation.
 - Completed in Batch 11 for layout ownership: `SpecialPageFeatures.svelte` is
   the event-driven state owner; delayed global discovery, retry/backoff, and
-  100 ms polling are removed. Its unrelated cookbook compatibility block still
-  creates two uncalled hidden gallery/list triggers and should be retired only
-  with focused cookbook validation.
-- After a caller inventory, remove retired compatibility/default matrices from
-  the 1,770-line shared grid and 2,389-line banner stage. Do not split them just
-  to improve line-count metrics: each extraction must become the single owner
-  of a real banner/layout responsibility and delete the old branch.
-- Audit package dependencies after the import graph is corrected. Build-only
-  tools/types belong in dev dependencies, and packages with no workspace caller
-  should be removed. Dependency shuffling alone is not a mobile performance fix.
+  100 ms polling are removed.
+- Deferred proposal: validate and retire the unrelated cookbook compatibility
+  triggers only if separately approved with focused cookbook browser coverage.
+- Deferred proposal: audit shared grid/banner compatibility matrices by live
+  callers before any removal. File size alone is not evidence for extraction.
+- Deferred proposal: audit package dependency ownership after runtime work is
+  complete. Dependency shuffling alone is not a mobile performance fix.
 
-## P2 - Separate deployable assets from authoring/archive assets
+## Proposed separate goal - shared deployable asset boundary
 
-- `public/generated/` is about 3.0 GB. The current build copies it into the site
-  and `astro-compress` scans/minifies 1,293 JSON files. Create an explicit
-  deploy manifest or separate game-asset deployment boundary rather than
-  copying every experiment into the website output.
-- There are about 204 MB of `.blend`, `.blend1`, `.py`, `.pyc`, and `.avi` files
-  under `public/`. Move confirmed authoring-only files outside the served tree.
-  Do not delete a file until both Megameal and `apps/game` callers and dynamic
-  manifests have been checked.
-- Two observatory GLBs are byte-identical at about 31.5 MB each, but the dated
-  path is referenced by the game scene and the undated path appears in a
-  quarantined publish test. Choose one canonical URL only after updating and
-  validating the game contract; do not break the alias speculatively.
-- There are 172 exact duplicate hashes across `src/content` and
-  `src/assets/site`; the content-side copies total about 233.11 MB. Select one
-  content-media pipeline, update all MDX/Astro consumers, then delete the
-  duplicate tree in the same change.
-- Profile whether `astro-compress` provides useful deployed transfer savings
-  beyond host/CDN Brotli/gzip. Limit it to intentional web outputs if it remains;
-  do not spend build time rewriting game authoring artifacts.
+Status: Phase 2, not approved, and not part of the active Phase 1 goal. The
+historical inventory found a multi-gigabyte `public/generated` tree,
+authoring-format files under `public`, large cross-game duplicate candidates,
+and duplicated content/site media. Those findings are inputs to a future audit,
+not deletion proof and not current size guarantees.
+
+Proposed goal: design and validate a Megameal/game shared-asset deployment
+boundary that excludes confirmed authoring-only files and consolidates proven
+duplicates without changing any live Megameal or game URL, visual, media, or
+runtime contract.
+
+Required authorization and proof before that goal starts:
+
+- Project Owner approval for the separate goal and its deletion/move boundary.
+- Caller and dynamic-manifest inventory across both Megameal and `apps/game`.
+- A canonical URL and migration plan for every moved or deduplicated asset.
+- Megameal and game builds plus focused browser/runtime checks before removal.
+- Recoverable handling of authoring sources; no deletion based only on hash,
+  extension, age, or Megameal callers.
+
+No public asset was moved, renamed, deleted, deduplicated, or reconfigured as
+part of Phase 1 reconciliation.
 
 ## Guardrail repairs
 
@@ -1377,19 +1490,27 @@ proof.
 - Completed in Batch 16: production HTML compression preserves Svelte's empty
   raw-HTML hydration boundaries, and the built timeline contract fails if they
   are stripped again.
+- Completed in Batch 17: the shared banner sizes against the containing route
+  width rather than scrollbar-inclusive `100vw`; desktop and mobile browser
+  checks cover both live shared-layout consumers.
+- Completed in Batch 18: muted pages retain only the small audio
+  intent/control boundary; ambience, SFX, and Howler load after intent, and
+  universal clients no longer import Marked through the broad utility barrel.
 - Keep browser validation authoritative: build success does not prove the route
   is usable.
 
-## Suggested execution order
+## Frozen Phase 1 next decisions
 
-1. Add resource-list/browser baselines, then repair universal layout imports and
-   manual chunks.
-2. Defer Pagefind and hidden profile media; verify regular posts first.
-3. Progressively start the home 3D scene and resolve the hydration mismatch.
-4. Repair timeline main-thread work, then archive and store media payloads.
-5. Consolidate controller/orphan code after the active runtime path is proven.
-6. Split deployable game/site assets from authoring/archive assets with
-   cross-application validation.
+1. Validate the implemented hidden-cart admission repair; do not expand it into
+   another Navbar or cart-controller refactor.
+2. Keep archive/store responsive derivatives deferred to the proposed future
+   media-optimization goal.
+3. Stabilize worktree ownership, rerun the final focused matrix, and commit only
+   the owned Phase 1 set.
+4. Deploy that exact commit and report real-mobile plus deployed PageSpeed
+   evidence before claiming Phase 1 complete.
+5. Start either proposed asset/media goal only with separate Project Owner
+   approval.
 
 ## Completion gate for each implementation batch
 

@@ -107,14 +107,6 @@
             transform: none !important;
         }
         
-        /* Disable mobile timeline animations for reduced motion */
-        .timeline-tap-hint {
-            animation: none !important;
-        }
-        
-        .timeline-mobile-active::before {
-            animation: none !important;
-        }
     }
 
     /* ðŸŽ¯ HIGH CONTRAST SUPPORT */
@@ -127,9 +119,5 @@
         .btn-plain:hover,
         .btn-regular:hover {
             outline: 2px solid currentColor !important;
-        }
-        
-        .timeline-mobile-active::before {
-            border: 2px solid currentColor !important;
         }
     }

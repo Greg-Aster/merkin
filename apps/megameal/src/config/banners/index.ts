@@ -134,27 +134,7 @@ export {
   getImagePlaceholder,
 } from './image'
 
-// =====================================================================
-// TIMELINE BANNER SPECIFIC EXPORTS
-// =====================================================================
-
-// Export timeline banner configuration objects
-export {
-  timelineBannerViewConfig,
-  timelineBannerLayout,
-  timelineBannerInteraction,
-  timelineBannerEraConfig,
-  timelineBannerCategories,
-} from './timeline'
-
-// Export timeline banner helper functions
-export {
-  getTimelineBannerConfig,
-  validateTimelineBannerConfig,
-  getEraForTimelineRange,
-  getTimelineBannerStyles,
-  getTimelineBannerCategory,
-} from './timeline'
+export { validateTimelineBannerConfig } from './timeline'
 
 // =====================================================================
 // NONE BANNER SPECIFIC EXPORTS

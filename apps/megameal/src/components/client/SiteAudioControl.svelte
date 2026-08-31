@@ -269,8 +269,6 @@ onMount(() => {
   audioPromptOpen = syncStoredAudioState() === null
   syncViewportMode()
 
-  void ensureAudioManager().catch(retainVisibleLoadFailure)
-
   const mediaQuery = window.matchMedia('(max-width: 767px)')
   const handleViewportChange = () => {
     syncViewportMode()

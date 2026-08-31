@@ -1,10 +1,6 @@
 ---
-import {
-  connectionPatterns,
-  constellationConfig,
-  constellationPatterns,
-  defaultEraConfig,
-} from '@/config/timelineconfig'
+import { defaultEraConfig } from '@/config/timelineconfig'
+import { isPublishedManifestRecord } from '@/contracts/manifests'
 import TimelinePortalCarousel from '@components/timeline/TimelinePortalCarousel.svelte'
 import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
 import { routeStyleHref } from '../styles/routeStyleBundles'
@@ -14,10 +10,10 @@ interface Props {
   title: string
   description: string
   slug: string
-  initialViewMode: 'travel' | 'map'
 }
 
-const { title, description, slug, initialViewMode } = Astro.props
+const { title, description, slug } = Astro.props
+const timelineEvents = timelineManifest.items.filter(isPublishedManifestRecord)
 const syntheticPost = {
   slug,
   data: {
@@ -38,11 +34,6 @@ const syntheticPost = {
   post={syntheticPost}
   backgroundImage="none"
   contentMode="banner-only"
-  timelineEvents={timelineManifest.items}
-  timelineEraConfig={defaultEraConfig}
-  timelineConstellationConfig={constellationConfig}
-  timelineConstellationPatterns={constellationPatterns}
-  timelineConnectionPatterns={connectionPatterns}
 >
   <Fragment slot="head">
     <link rel="stylesheet" href={routeStyleHref('timeline')} data-route-style="timeline" />
@@ -51,9 +42,10 @@ const syntheticPost = {
     <h1 class="sr-only">{title}</h1>
     <div id="megameal-timeline-route-marker" hidden></div>
     <TimelinePortalCarousel
-      events={timelineManifest.items}
+      events={timelineEvents}
       eraConfig={defaultEraConfig}
-      {initialViewMode}
+      initialViewMode="travel"
+      presentation="full"
       client:only="svelte"
     />
   </Fragment>

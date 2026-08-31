@@ -93,11 +93,6 @@ type BannerStageConfig = {
 	};
 };
 
-type TimelineEraDefinition = {
-	backgroundVideo?: string;
-	backgroundVideoPlaybackRate?: number;
-};
-
 interface Props {
 	title?: string;
 	post?: LegacyPost;
@@ -116,11 +111,6 @@ interface Props {
 	bannerAnimationSettings: unknown;
 	isBannerOnly?: boolean;
 	isPortalBannerMode?: boolean;
-	timelineEvents?: unknown[];
-	timelineEraConfig?: Record<string, TimelineEraDefinition>;
-	timelineConstellationConfig?: Record<string, unknown>;
-	timelineConstellationPatterns?: Record<string, unknown>;
-	timelineConnectionPatterns?: Record<string, unknown>;
 	renderTimelineBannerSlot?: boolean;
 	shouldShowMobilePortraitRightRailHero?: boolean;
 	mobilePortraitRightRailHeroStyle?: string;
@@ -145,11 +135,6 @@ const {
 	bannerAnimationSettings,
 	isBannerOnly = false,
 	isPortalBannerMode = false,
-	timelineEvents = [],
-	timelineEraConfig,
-	timelineConstellationConfig,
-	timelineConstellationPatterns,
-	timelineConnectionPatterns,
 	renderTimelineBannerSlot,
 	shouldShowMobilePortraitRightRailHero = false,
 	mobilePortraitRightRailHeroStyle = "default",
@@ -198,9 +183,6 @@ const hasStandardBanner = scene?.id === "standard";
 const hasCookbookBanner = scene?.id === "cookbook";
 const hasArchiveBanner = scene?.id === "archive";
 const hasReaderBanner = scene?.id === "reader";
-const TimelineController = hasTimelineBanner && !hasTimelineBannerSlot
-	? (await import("../timeline/TimelineBanner.astro")).default
-	: null;
 const videoBannerData =
 	hasPostBanner && post?.data?.bannerType === "video"
 		? post.data.bannerData
@@ -276,59 +258,9 @@ const portalSlideIndexOffset =
             isBannerOnly ? 'banner-content-wrapper--timeline-hero' : '',
           ]}
         >
-          <div id="timeline-mobile-wrapper" class="timeline-mobile-inactive">
-            <div class="timeline-mobile-indicator md:hidden">
-              <div class="timeline-tap-hint">
-                <Icon
-                  name="fa6-solid:hand-pointer"
-                  class="w-6 h-6 text-white/80"
-                />
-                <span class="text-white/80 text-sm font-medium"
-                  >Tap to interact with timeline</span
-                >
-              </div>
-            </div>
-
+          <div data-timeline-banner-content>
             {hasTimelineBannerSlot ? (
               <slot name="timeline-banner-content" />
-            ) : TimelineController ? (
-              <TimelineController
-                category={hasPostBanner && post?.data?.bannerType === 'timeline'
-                  ? post.data.bannerData.category
-                  : bannerDataSources.timelineBannerData?.category || 'MEGA MEAL'}
-                startYear={hasPostBanner && post?.data?.bannerType === 'timeline'
-                  ? post.data.bannerData.startYear
-                  : bannerDataSources.timelineBannerData?.startYear}
-                endYear={hasPostBanner && post?.data?.bannerType === 'timeline'
-                  ? post.data.bannerData.endYear
-                  : bannerDataSources.timelineBannerData?.endYear}
-                background={hasPostBanner && post?.data?.bannerType === 'timeline'
-                  ? post.data.bannerData.background
-                  : bannerDataSources.timelineBannerData?.background}
-                backgroundVideo={hasPostBanner && post?.data?.bannerType === 'timeline'
-                  ? post.data.bannerData.backgroundVideo
-                  : bannerDataSources.timelineBannerData?.backgroundVideo ||
-                      timelineEraConfig?.['all-eras']?.backgroundVideo ||
-                      timelineEraConfig?.['all-time']?.backgroundVideo}
-                backgroundVideoPlaybackRate={hasPostBanner &&
-                post?.data?.bannerType === 'timeline'
-                  ? post.data.bannerData.backgroundVideoPlaybackRate
-                  : bannerDataSources.timelineBannerData
-                      ?.backgroundVideoPlaybackRate ||
-                    timelineEraConfig?.['all-eras']?.backgroundVideoPlaybackRate ||
-                    timelineEraConfig?.['all-time']?.backgroundVideoPlaybackRate}
-                compact={hasPostBanner && post?.data?.bannerType === 'timeline'
-                  ? post.data.bannerData.compact || false
-                  : bannerDataSources.timelineBannerData?.compact || false}
-                events={timelineEvents}
-                eraConfig={timelineEraConfig}
-                constellationConfig={timelineConstellationConfig}
-                constellationPatterns={timelineConstellationPatterns}
-                connectionPatterns={timelineConnectionPatterns}
-                class="w-full h-full"
-                asBanner={true}
-                bannerHeight="100%"
-              />
             ) : null}
           </div>
         </div>
@@ -939,10 +871,8 @@ const portalSlideIndexOffset =
   }}
 >
   #banner-container {
-    width: 100vw;
-    max-width: 100vw;
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
+    width: 100%;
+    max-width: 100%;
     margin-top: var(--navbar-spacing);
     transition: margin-top 0.3s ease;
   }
@@ -983,7 +913,7 @@ const portalSlideIndexOffset =
 
   #banner-container.banner-only-mode.has-timeline-banner .banner-container-timeline,
   #banner-container.banner-only-mode.has-timeline-banner .banner-content-wrapper,
-  #banner-container.banner-only-mode.has-timeline-banner #timeline-mobile-wrapper {
+  #banner-container.banner-only-mode.has-timeline-banner [data-timeline-banner-content] {
     height: 100%;
   }
 
@@ -2290,60 +2220,6 @@ const portalSlideIndexOffset =
             } else {
               pauseBanner('manual')
             }
-          }
-        },
-        { signal },
-      )
-    }
-
-    const timelineWrapper = document.getElementById('timeline-mobile-wrapper')
-    if (timelineWrapper && window.innerWidth < 768) {
-      let isTimelineActive = false
-
-      timelineWrapper.addEventListener(
-        'click',
-        e => {
-          if (!isTimelineActive) {
-            e.preventDefault()
-            e.stopPropagation()
-            isTimelineActive = true
-            timelineWrapper.classList.remove('timeline-mobile-inactive')
-            timelineWrapper.classList.add('timeline-mobile-active')
-          }
-        },
-        { signal },
-      )
-
-      document.addEventListener(
-        'click',
-        e => {
-          if (isTimelineActive && !timelineWrapper.contains(e.target)) {
-            isTimelineActive = false
-            timelineWrapper.classList.remove('timeline-mobile-active')
-            timelineWrapper.classList.add('timeline-mobile-inactive')
-          }
-        },
-        { signal },
-      )
-
-      window.addEventListener(
-        'beforeunload',
-        () => {
-          isTimelineActive = false
-          timelineWrapper.classList.remove('timeline-mobile-active')
-          timelineWrapper.classList.add('timeline-mobile-inactive')
-        },
-        { signal },
-      )
-
-      document.addEventListener(
-        'astro:page-load',
-        () => {
-          isTimelineActive = false
-          const wrapper = document.getElementById('timeline-mobile-wrapper')
-          if (wrapper) {
-            wrapper.classList.remove('timeline-mobile-active')
-            wrapper.classList.add('timeline-mobile-inactive')
           }
         },
         { signal },
