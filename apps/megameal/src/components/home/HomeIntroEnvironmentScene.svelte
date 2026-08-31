@@ -8,6 +8,7 @@ import HomeIntroLogoModel from './HomeIntroLogoModel.svelte'
 import HomeIntroParticleField from './HomeIntroParticleField.svelte'
 import HomeIntroRingGlow from './HomeIntroRingGlow.svelte'
 import HomeIntroSceneBackdrop from './HomeIntroSceneBackdrop.svelte'
+import HomeIntroTentacleModel from './HomeIntroTentacleModel.svelte'
 import { homeIntroParticleClusters } from './homeIntroParticleClusters'
 import { hashHomeIntroUnit } from './homeIntroSceneMath'
 import {
@@ -49,6 +50,7 @@ let ringGlowA: THREE.Group | null = null
 let ringGlowB: THREE.Group | null = null
 let ringGlowC: THREE.Group | null = null
 let logoMeshRoot: THREE.Group | null = null
+let tentacleRoot: THREE.Group | null = null
 let starColumn: THREE.Group | null = null
 let screenRail: THREE.Group | null = null
 const screenNodes: THREE.Group[] = []
@@ -64,6 +66,7 @@ let carouselComponentReady = false
 let ScreenPanel: ScreenPanelComponent | null = null
 let carouselComponentPromise: Promise<void> | null = null
 let screenOrbitInitialized = false
+let tentacleMounted = false
 let logoImpactSfxIntroStartedAt = 0
 let portalIntroReadyDispatched = false
 
@@ -100,6 +103,7 @@ let effectWheel = 0
 let activeScreenIndex = primaryScreenIndex
 const portalScreens = homeIntroScreens
 const screenCount = portalScreens.length
+const tentacleTargetHeight = screenStepY * (screenCount + 2.2)
 let screenMediaLoadStates = Array.from(
   { length: screenCount },
   (_, index) => index === primaryScreenIndex,
@@ -123,6 +127,15 @@ $: starColumnPosition = portraitMobile
 $: starColumnScale = portraitMobile
   ? ([1.82, 1, 1.14] as [number, number, number])
   : ([1.38, 1, 1.06] as [number, number, number])
+$: tentacleRootScale = portraitMobile
+  ? ([0.46, 0.9, 0.46] as [number, number, number])
+  : ([0.72, 1, 0.72] as [number, number, number])
+$: tentacleInitialTipY = portraitMobile ? -3.25 : -3.15
+$: tentacleInitialPosition = [
+  0,
+  tentacleInitialTipY - (tentacleTargetHeight * tentacleRootScale[1]) / 2,
+  screenOrbitCenterZ + railPosition[2],
+] as [number, number, number]
 $: sceneBackdropSrc =
   portalScreens[activeScreenIndex]?.webglStillSrc ??
   portalScreens[activeScreenIndex]?.stillSrc ??
@@ -523,6 +536,12 @@ useTask(delta => {
   effectWheel = wheel
   const introOffsetScreens = getIntroOffsetScreens()
   const selectedIndex = getSelectedScreenIndex(effectWheel)
+  const revealProgress = clamp01(
+    Number.isFinite(input.reveal) ? input.reveal : 0,
+  )
+  if (!tentacleMounted && revealProgress > 0.02) {
+    tentacleMounted = true
+  }
   syncBannerToFrontScreen(getBannerSelectedScreenIndex(selectedIndex))
   syncScreenMediaLoadStates(selectedIndex)
   syncScreenPanelMountStates(selectedIndex)
@@ -539,9 +558,6 @@ useTask(delta => {
   const logoCarouselPhase = visualScrollScreens * screenAngleStep
   const screenVerticalStep = screenStepY * (portraitMobile ? 0.9 : 1)
   const logoScrollRise = Math.max(0, visualScrollScreens) * screenVerticalStep
-  const revealProgress = clamp01(
-    Number.isFinite(input.reveal) ? input.reveal : 0,
-  )
   const logoIntroElapsed = logoIntroStartedAt
     ? Math.max(0, time - logoIntroStartedAt)
     : 0
@@ -588,6 +604,30 @@ useTask(delta => {
     world.rotation.y += (pointerX * 0.12 - world.rotation.y) * ease
     world.position.x += (pointerX * 0.1 - world.position.x) * ease
     world.position.y += (-pointerY * 0.055 - world.position.y) * ease
+  }
+
+  if (tentacleRoot) {
+    const tentacleTravelStartScreens = portraitMobile ? 0.25 : 0.15
+    const tentacleTravelScreens = Math.max(
+      0,
+      visualScrollScreens + tentacleTravelStartScreens,
+    )
+    const tentacleTargetY =
+      tentacleInitialPosition[1] + tentacleTravelScreens * screenVerticalStep
+    const tentacleYaw =
+      -spiralPhase + time * 0.055 + input.dragX * 0.35
+
+    tentacleRoot.visible = true
+    tentacleRoot.scale.fromArray(tentacleRootScale)
+    tentacleRoot.position.x += (0 - tentacleRoot.position.x) * ease
+    tentacleRoot.position.y +=
+      (tentacleTargetY - tentacleRoot.position.y) * ease
+    tentacleRoot.position.z = tentacleInitialPosition[2]
+    tentacleRoot.rotation.x =
+      -0.045 + Math.sin(time * 0.22) * 0.025 + input.dragY * 0.08
+    tentacleRoot.rotation.y +=
+      (tentacleYaw - tentacleRoot.rotation.y) * ease
+    tentacleRoot.rotation.z = Math.sin(time * 0.17 + 0.8) * 0.018
   }
 
   if (emblem) {
@@ -706,6 +746,12 @@ useTask(delta => {
 		{portalVisible}
 		{motionEnabled}
 	/>
+
+	{#if tentacleMounted}
+		<T.Group bind:ref={tentacleRoot} position={tentacleInitialPosition} scale={tentacleRootScale}>
+			<HomeIntroTentacleModel targetHeight={tentacleTargetHeight} />
+		</T.Group>
+	{/if}
 
 	{#if carouselComponentReady && ScreenPanel}
 		<T.Group bind:ref={screenRail} position={railPosition} visible={screenOrbitInitialized}>

@@ -36,7 +36,7 @@ import {
   getTimelineSelectedCardAnchor,
   getTimelineStarControlStyle,
   getVisibleTimelineConstellationLines,
-  applyTimelineCameraPanDrag,
+  applyTimelineCameraDrag,
   createTimelineCameraController,
   isTimelineInteractiveTarget,
   isPointInsideTimelineShell,
@@ -92,6 +92,7 @@ let lastAutoplayFrameAt = 0
 let autoplayDirection: -1 | 1 = 1
 let autoplayVelocity = 0
 let prefersReducedMotion = false
+let runtimeActive = true
 const wheelMomentumDecay = 2.4
 const wheelMomentumImpulse = 5.2
 const wheelMomentumMaxVelocity = 4.8
@@ -193,7 +194,7 @@ $: timelinePositionText = activeTimelineEvent
 $: isMapMode = viewMode === 'map'
 $: isBannerPresentation = presentation === 'banner'
 $: viewModeLabel = isMapMode ? 'Complete overview' : 'First-person chronology'
-$: viewModeInstructions = isMapMode ? 'Select a star to inspect an article. Drag to pan, scroll to zoom.' : 'Travel from the beginning. Scroll, drag, or use the slider to move through time.'
+$: viewModeInstructions = isMapMode ? 'Select a star to inspect an article. Drag to rotate, scroll to zoom; use the arrow controls to pan.' : 'Travel from the beginning. Scroll, drag, or use the slider to move through time.'
 $: if (!hasInitializedBeginningPosition && screens.length > 0) {
   initializeBeginningPosition()
 }
@@ -422,14 +423,14 @@ function handleScenePointerMove(event: PointerEvent) {
   lastPanClientY = event.clientY
   updateTimelinePointer(input, shell, event.clientX, event.clientY)
   pauseAutoplay()
-  applyTimelineCameraPanDrag(
+  applyTimelineCameraDrag(
     input,
     shell,
     deltaX,
     deltaY,
     isMapMode,
-    mapZoomMin,
     cameraPanLimit,
+    mapOrbitLimit,
   )
 }
 
@@ -507,14 +508,14 @@ function handleTouchMove(event: TouchEvent) {
     lastTouchPanClientY = touch.clientY
     updateTimelinePointer(input, shell, touch.clientX, touch.clientY)
     pauseAutoplay()
-    applyTimelineCameraPanDrag(
+    applyTimelineCameraDrag(
       input,
       shell,
       deltaX,
       deltaY,
       isMapMode,
-      mapZoomMin,
       cameraPanLimit,
+      mapOrbitLimit,
     )
     return
   }
@@ -739,11 +740,10 @@ onMount(() => {
   hasMounted = true
   syncViewportMode()
   const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-  let runtimeInView = true
   let resumeAutoplayWhenActive = false
 
   function isRuntimeActive() {
-    return document.visibilityState === 'visible' && runtimeInView
+    return document.visibilityState === 'visible' && runtimeActive
   }
 
   function applyMotionPreference() {
@@ -772,7 +772,7 @@ onMount(() => {
   }
 
   const runtimeObserver = new IntersectionObserver(entries => {
-    runtimeInView = entries.some(entry => entry.isIntersecting)
+    runtimeActive = entries.some(entry => entry.isIntersecting)
     syncRuntimeActivity()
   })
   if (shell) runtimeObserver.observe(shell)
@@ -859,7 +859,7 @@ onDestroy(() => {
       {screens}
       selectedScreenIndex={displayedScreenIndex}
       hoveredScreenIndex={hoveredStarIndex}
-      {viewMode}
+      {viewMode} ambientOrbitEnabled={!prefersReducedMotion && runtimeActive}
       on:starpositions={handleStarPositions}
     />
   </Canvas>

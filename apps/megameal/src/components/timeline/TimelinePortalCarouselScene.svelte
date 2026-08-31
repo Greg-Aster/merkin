@@ -25,6 +25,7 @@ export let screens: TimelineCarouselScreen[] = []
 export let selectedScreenIndex = -1
 export let hoveredScreenIndex = -1
 export let viewMode: TimelineViewMode = 'travel'
+export let ambientOrbitEnabled = true
 
 const dispatch = createEventDispatcher<{
   starpositions: { positions: TimelineStarScreenPosition[] }
@@ -42,7 +43,7 @@ let activeStarIntensities: number[] = []
 let timelineStarTargets: ReturnType<typeof getTimelineStarTarget>[] = []
 let timelineStarVisuals: ReturnType<typeof getTimelineStarVisual>[] = []
 let sceneFrameSignature = ''
-let sceneFramePending = true
+let sceneFramePending = true, ambientMapOrbitTime = 0
 
 const screenOrbitRadiusX = 5.65
 const screenOrbitRadiusY = 3.85
@@ -60,8 +61,8 @@ const mapStarXScale = 10
 const mapEraLaneSpread = 150
 const mapDesktopLaneSpread = 320
 const mapPortraitVerticalOffset = 165
-const mapOrbitMaxYaw = 0.34
-const mapOrbitMaxPitch = 0.24
+const mapOrbitMaxYaw = 0.62
+const mapOrbitMaxPitch = 0.38
 const starColor = '#67c7d6'
 const activeStarColor = '#dffbff'
 const starGlowColor = '#0891b2'
@@ -72,11 +73,7 @@ const mixedStarColor = new Color()
 const mixedStarBaseColor = new Color()
 const mixedStarActiveColor = new Color(activeStarColor)
 let lastProjectedStarPositionSignature = ''
-const {
-  camera: defaultCamera,
-  invalidate,
-  size: canvasSize,
-} = useThrelte()
+const { camera: defaultCamera, invalidate, size: canvasSize } = useThrelte()
 
 $: sceneScale = portraitMobile ? 0.78 : 1
 $: camera = viewMode === 'map' ? mapCamera : travelCamera
@@ -113,7 +110,9 @@ $: sceneFrameSignature = [
   input.mapZoom,
   input.mapOrbitX,
   input.mapOrbitY,
+  input.active,
   viewMode,
+  ambientOrbitEnabled,
   portraitMobile,
   viewportAspect,
   screens.length,
@@ -182,12 +181,7 @@ function getTimelineMapCameraFrame() {
     const height = baseHeight / getMapZoom()
     const width = height * viewportAspect
 
-    return {
-      width,
-      height,
-      centerX: 0,
-      centerY: 0,
-    }
+    return { width, height, centerX: 0, centerY: 0 }
   }
 
   const starFieldWidth = screenOrbitRadiusX * 5.4
@@ -546,8 +540,11 @@ onMount(() => {
   }
 })
 
-useTask(() => {
-  if (!sceneFramePending || !camera || !starRail) return
+useTask(delta => {
+  const ambientOrbitAvailable = viewMode === 'map' && ambientOrbitEnabled
+  const shouldAdvanceAmbientOrbit = ambientOrbitAvailable && !input.active
+  if ((!sceneFramePending && !shouldAdvanceAmbientOrbit) || !camera || !starRail) return
+  if (shouldAdvanceAmbientOrbit) ambientMapOrbitTime += Math.min(delta, 0.05)
 
   const selectedIndex = Number.isFinite(input.wheel) ? input.wheel : 0
   const targetCameraPosition = getCameraTimelinePosition(selectedIndex)
@@ -583,8 +580,10 @@ useTask(() => {
   }
 
   if (starRail) {
-    const targetRailRotationX = viewMode === 'map' ? -getMapOrbitY() * mapOrbitMaxPitch : 0
-    const targetRailRotationY = viewMode === 'map' ? getMapOrbitX() * mapOrbitMaxYaw : 0
+    const ambientPitch = ambientOrbitAvailable ? Math.sin(ambientMapOrbitTime * 0.09) * 0.035 : 0
+    const ambientYaw = ambientOrbitAvailable ? Math.sin(ambientMapOrbitTime * 0.12 + 0.55) * 0.22 : 0
+    const targetRailRotationX = viewMode === 'map' ? -getMapOrbitY() * mapOrbitMaxPitch + ambientPitch : 0
+    const targetRailRotationY = viewMode === 'map' ? getMapOrbitX() * mapOrbitMaxYaw + ambientYaw : 0
 
     starRail.rotation.set(targetRailRotationX, targetRailRotationY, 0)
     starRail.position.set(...railPosition)
@@ -592,6 +591,7 @@ useTask(() => {
 
   syncProjectedStarPositions()
   sceneFramePending = false
+  if (shouldAdvanceAmbientOrbit) scheduleSceneFrame()
 }, { autoInvalidate: false })
 
 function scheduleSceneFrame() {

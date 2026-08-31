@@ -60,11 +60,14 @@ export const navBarConfig: NavBarConfig = {
       external: true,
     }, */
     3,
-    1,
     {
       name: 'More',
       url: '/about/',
       dropdown: [
+        {
+          name: 'Archive',
+          url: '/archive/',
+        },
 /*         {
           name: 'Cookbook',
           url: '/cookbook/',

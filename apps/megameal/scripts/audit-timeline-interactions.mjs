@@ -84,6 +84,17 @@ if (
   failures.push('the scene must own camera switching, canvas framing, and responsive target updates')
 }
 
+if (
+  !presentation.includes('export function applyTimelineCameraDrag(') ||
+  presentation.includes('applyTimelineCameraPanDrag') ||
+  !carousel.includes('ambientOrbitEnabled={!prefersReducedMotion && runtimeActive}') ||
+  !scene.includes("viewMode === 'map' && ambientOrbitEnabled") ||
+  !scene.includes('shouldAdvanceAmbientOrbit = ambientOrbitAvailable && !input.active') ||
+  !scene.includes('Math.sin(ambientMapOrbitTime * 0.12 + 0.55)')
+) {
+  failures.push('overview drag and ambient motion must use the canonical 3D orbit path')
+}
+
 if (!legacyMapRoute.includes("Astro.redirect('/timeline/', 301)")) {
   failures.push('the legacy map URL must permanently redirect to the canonical timeline')
 }

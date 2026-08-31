@@ -153,27 +153,34 @@ export function panTimelineCamera(
   )
 }
 
-export function applyTimelineCameraPanDrag(
+export function applyTimelineCameraDrag(
   input: TimelineCarouselInput,
   shell: HTMLElement | null,
   deltaX: number,
   deltaY: number,
   isMapMode: boolean,
-  minimumMapZoom: number,
   panLimit: number,
+  orbitLimit: number,
 ) {
   if (!shell) return
   const bounds = shell.getBoundingClientRect()
-  const panScaleX = isMapMode
-    ? 2.15 / Math.max(input.mapZoom, minimumMapZoom)
-    : 3.1
-  const panScaleY = isMapMode
-    ? 2.15 / Math.max(input.mapZoom, minimumMapZoom)
-    : 2.7
+  if (isMapMode) {
+    input.mapOrbitX = clamp(
+      input.mapOrbitX + (deltaX / Math.max(bounds.width, 1)) * 4,
+      -orbitLimit,
+      orbitLimit,
+    )
+    input.mapOrbitY = clamp(
+      input.mapOrbitY + (deltaY / Math.max(bounds.height, 1)) * 3.2,
+      -orbitLimit,
+      orbitLimit,
+    )
+    return
+  }
   setTimelineCameraPan(
     input,
-    input.panX - (deltaX / Math.max(bounds.width, 1)) * panScaleX,
-    input.panY + (deltaY / Math.max(bounds.height, 1)) * panScaleY,
+    input.panX - (deltaX / Math.max(bounds.width, 1)) * 3.1,
+    input.panY + (deltaY / Math.max(bounds.height, 1)) * 2.7,
     panLimit,
   )
 }
