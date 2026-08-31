@@ -4,6 +4,7 @@ import type { TimelineConstellationLine } from './timelinePortalPresentation'
 
 export let lines: TimelineConstellationLine[] = []
 export let guideLine: TimelineConstellationLine | null = null
+export let isOverview = false
 </script>
 
 <svg
@@ -30,7 +31,7 @@ export let guideLine: TimelineConstellationLine | null = null
       stroke={getEraMarkerColor(line.eraKey)}
       stroke-width={line.isActive ? 0.32 : 0.14}
       stroke-linecap="round"
-      stroke-opacity={line.isActive ? 0.12 : 0.035}
+      stroke-opacity={line.isActive ? (isOverview ? 0.2 : 0.12) : (isOverview ? 0.08 : 0.035)}
       filter="url(#timelineConstellationGlow)"
     />
     <line
@@ -42,7 +43,7 @@ export let guideLine: TimelineConstellationLine | null = null
       stroke-width={line.isActive ? 0.11 : 0.055}
       stroke-linecap="round"
       stroke-dasharray={line.isActive ? '0.75 1.55' : '0.34 1.9'}
-      stroke-opacity={line.isActive ? 0.42 : 0.18}
+      stroke-opacity={line.isActive ? (isOverview ? 0.62 : 0.42) : (isOverview ? 0.34 : 0.18)}
       filter="url(#timelineConstellationGlow)"
     ></line>
     <line
@@ -54,7 +55,7 @@ export let guideLine: TimelineConstellationLine | null = null
       stroke-width={line.isActive ? 0.028 : 0.015}
       stroke-linecap="round"
       stroke-dasharray="0.18 2.8"
-      stroke-opacity={line.isActive ? 0.22 : 0.08}
+      stroke-opacity={line.isActive ? (isOverview ? 0.36 : 0.22) : (isOverview ? 0.16 : 0.08)}
     />
   {/each}
   {#if guideLine}

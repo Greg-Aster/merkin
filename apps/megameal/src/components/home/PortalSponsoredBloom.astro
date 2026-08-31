@@ -341,35 +341,86 @@ const sponsoredBloomCleanupKey =
         Math.abs(candidate.centerX / candidate.viewportWidth - 0.5) +
         Math.abs(candidate.centerY / candidate.viewportHeight - 0.5)
       const bottomRightPenalty =
+        !candidate.compact &&
         candidate.centerX > candidate.viewportWidth * 0.68 &&
         candidate.centerY > candidate.viewportHeight * 0.55
           ? 0.55
           : 0
-
-      return nearestClearance + centerBias * 0.18 + randomUnit() * 0.42 - bottomRightPenalty
+      const edgeBias = candidate.compact
+        ? Math.abs(candidate.centerX / candidate.viewportWidth - 0.5) * 0.28
+        : centerBias * 0.18
+      return nearestClearance + edgeBias + randomUnit() * 0.42 - bottomRightPenalty
     }
 
     const createPlacementCandidate = (order, metrics) => {
       const cycle = Math.floor(order / 8)
-      const widthMin = metrics.compact ? 9.75 : 11.5
-      const widthMax = metrics.compact ? 14.5 : 22.5
+      const widthMin = metrics.compact ? 8.25 : 11.5
+      const widthMax = metrics.compact ? 10.25 : 22.5
       const widthRem = Math.min(
         metrics.maxWidthRem,
         randomBetween(widthMin, widthMax) * Math.max(0.82, 1 - cycle * 0.035),
       )
       const widthPx = widthRem * metrics.rootFontSize
       const estimatedHeightPx =
-        widthPx * (metrics.compact ? randomBetween(0.72, 0.92) : randomBetween(0.62, 0.78))
+        widthPx * (metrics.compact ? randomBetween(1.15, 1.65) : randomBetween(0.62, 0.78))
       const maxLeftPx = Math.max(
         metrics.margin,
         metrics.viewportWidth - widthPx - metrics.margin,
       )
-      const maxTopPx = Math.max(
-        metrics.margin,
-        metrics.viewportHeight - estimatedHeightPx - metrics.margin,
-      )
-      const leftPx = randomBetween(metrics.margin, maxLeftPx)
-      const topPx = randomBetween(metrics.margin, maxTopPx)
+      let leftPx
+      let topPx
+
+      if (metrics.compact) {
+        const headerBottomPx = metrics.rootFontSize * 4.4
+        const privacyTopPx =
+          metrics.viewportHeight - metrics.rootFontSize * 9.2
+        const logoCenterX = metrics.viewportWidth * 0.5
+        const logoCenterY = metrics.viewportHeight * 0.46
+        const minCenterX = metrics.margin + widthPx / 2
+        const maxCenterX = metrics.viewportWidth - metrics.margin - widthPx / 2
+        const minCenterY = headerBottomPx + estimatedHeightPx / 2
+        const maxCenterY = Math.max(
+          minCenterY,
+          privacyTopPx - estimatedHeightPx / 2,
+        )
+        const horizontalRadius = Math.max(
+          0,
+          Math.min(
+            logoCenterX - minCenterX,
+            maxCenterX - logoCenterX,
+          ),
+        )
+        const verticalRadius = Math.max(
+          0,
+          Math.min(
+            metrics.viewportHeight * 0.31,
+            logoCenterY - minCenterY,
+            maxCenterY - logoCenterY,
+          ),
+        )
+        const angle = randomBetween(-Math.PI, Math.PI)
+        const radialScale = randomBetween(0.92, 1.08)
+        const centerX = clamp(
+          logoCenterX + Math.cos(angle) * horizontalRadius * radialScale,
+          minCenterX,
+          maxCenterX,
+        )
+        const centerY = clamp(
+          logoCenterY + Math.sin(angle) * verticalRadius * radialScale,
+          minCenterY,
+          maxCenterY,
+        )
+
+        leftPx = centerX - widthPx / 2
+        topPx = centerY - estimatedHeightPx / 2
+      } else {
+        const maxTopPx = Math.max(
+          metrics.margin,
+          metrics.viewportHeight - estimatedHeightPx - metrics.margin,
+        )
+        leftPx = randomBetween(metrics.margin, maxLeftPx)
+        topPx = randomBetween(metrics.margin, maxTopPx)
+      }
 
       return {
         leftPx,
@@ -380,6 +431,7 @@ const sponsoredBloomCleanupKey =
         centerX: leftPx + widthPx / 2,
         centerY: topPx + estimatedHeightPx / 2,
         radius: Math.hypot(widthPx, estimatedHeightPx) * 0.34,
+        compact: metrics.compact,
         viewportWidth: metrics.viewportWidth,
         viewportHeight: metrics.viewportHeight,
       }
@@ -530,6 +582,14 @@ const sponsoredBloomCleanupKey =
       }
     }
 
+    const handleCookieChoice = event => {
+      if (!(event.target instanceof Element)) return
+      if (!event.target.closest('[data-fact-cookie-choice]')) return
+
+      event.preventDefault()
+      stopBloom()
+    }
+
     const handleMovement = () => {
       stopBloom()
     }
@@ -581,6 +641,7 @@ const sponsoredBloomCleanupKey =
     }
 
     window[cleanupKey] = stopBloom
+    root.addEventListener('click', handleCookieChoice, { signal })
     window.addEventListener('wheel', handleMovement, {
       capture: true,
       passive: true,

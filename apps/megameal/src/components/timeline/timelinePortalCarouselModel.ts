@@ -89,6 +89,11 @@ export function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
 
+export function getTimelineRecordHref(url = '') {
+  if (!url.startsWith('/posts/')) return url
+  return `${url.split('#', 1)[0]}#post-container`
+}
+
 export function getTimelineDockWidth(width: number) {
   if (width < 768) return Math.max(0, width - 24)
   return Math.min(672, Math.max(308, width - 400), Math.max(0, width - 32))

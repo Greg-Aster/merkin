@@ -3,6 +3,7 @@ import type {
   TimelineCarouselScreen,
   TimelinePortalEvent,
 } from './timelinePortalCarouselModel'
+import { getTimelineRecordHref } from './timelinePortalCarouselModel'
 
 export let selectedScreen: TimelinePortalEvent | null = null
 export let selectedScreenView: TimelineCarouselScreen | null = null
@@ -19,6 +20,7 @@ function formatRecordType(event: TimelinePortalEvent) {
 }
 
 $: selectedTypeLabel = selectedScreen ? formatRecordType(selectedScreen) : ''
+$: selectedHref = getTimelineRecordHref(selectedScreen?.url)
 $: selectedBackgroundStyle = selectedScreenView?.stillSrc
   ? `${selectedCardStyle}; --timeline-selected-bg: ${cssUrl(selectedScreenView.stillSrc)}`
   : selectedCardStyle
@@ -31,16 +33,16 @@ $: selectedBackgroundStyle = selectedScreenView?.stillSrc
   </div>
 
   <svelte:element
-    this={selectedScreen.url ? 'a' : 'aside'}
-    href={selectedScreen.url || undefined}
+    this={selectedHref ? 'a' : 'aside'}
+    href={selectedHref || undefined}
     class="home-intro-copy home-intro-copy--feature home-intro-copy--timeline-selected"
-    class:home-intro-copy--timeline-link={!!selectedScreen.url}
+    class:home-intro-copy--timeline-link={!!selectedHref}
     style={selectedBackgroundStyle}
     aria-label={`Timeline event: ${selectedScreen.title}`}
     data-timeline-selected-card
     data-timeline-interactive
-    data-sfx-hover={selectedScreen.url ? 'portal-hover' : undefined}
-    data-sfx-click={selectedScreen.url ? 'portal-activate' : undefined}
+    data-sfx-hover={selectedHref ? 'portal-hover' : undefined}
+    data-sfx-click={selectedHref ? 'portal-activate' : undefined}
   >
     {#if selectedScreenView.stillSrc}
       <div class="timeline-selected-record__background" aria-hidden="true"></div>
@@ -51,7 +53,7 @@ $: selectedBackgroundStyle = selectedScreenView?.stillSrc
     <div class="timeline-selected-record__body">
       <h2>{selectedScreen.title}</h2>
     </div>
-    {#if selectedScreen.url}
+    {#if selectedHref}
       <div class="timeline-selected-record__affordance" aria-hidden="true">
         <span>Open record</span>
         <span class="timeline-selected-record__affordance-icon">&gt;</span>

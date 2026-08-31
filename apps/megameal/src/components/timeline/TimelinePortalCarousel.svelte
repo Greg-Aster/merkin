@@ -26,6 +26,7 @@ import {
   getSelectedCardWidth,
   getStatusWidth,
   getTimelineDockWidth,
+  getTimelineRecordHref,
   getTimelineSideMargin,
 } from './timelinePortalCarouselModel'
 import {
@@ -146,9 +147,10 @@ $: timelineModel = createTimelinePortalModel(events, eraConfig)
 $: sortedEvents = timelineModel.events
 $: screens = timelineModel.screens
 $: eraSegments = timelineModel.eraSegments
-$: selectedScreen = selectedScreenIndex >= 0 ? sortedEvents[selectedScreenIndex] : null
-$: selectedScreenView = selectedScreenIndex >= 0 ? screens[selectedScreenIndex] : null
 $: maxWheel = Math.max(0, screens.length - 1)
+$: displayedScreenIndex = selectedScreenIndex >= 0 || isMapMode ? selectedScreenIndex : Math.round(clamp(input.wheel, 0, maxWheel))
+$: selectedScreen = displayedScreenIndex >= 0 ? sortedEvents[displayedScreenIndex] : null
+$: selectedScreenView = displayedScreenIndex >= 0 ? screens[displayedScreenIndex] : null
 $: activeTimelineEvent = sortedEvents[Math.round(clamp(input.wheel, 0, maxWheel))] ?? null
 $: activeEraSegment = getActiveTimelineEraSegment(input.wheel, eraSegments)
 $: timelineDockWidth = getTimelineDockWidth(viewportWidth)
@@ -159,8 +161,8 @@ $: selectedStatusWidth = getStatusWidth(timelineSideLaneWidth)
 $: timelineDockStyle = portraitMobile
   ? `bottom: max(0.75rem, calc(env(safe-area-inset-bottom) + 0.75rem)); width: ${timelineDockWidth}px`
   : `width: ${timelineDockWidth}px`
-$: selectedStarPosition = selectedScreenIndex >= 0
-  ? projectedStarPositions.find(position => position.index === selectedScreenIndex && position.size > 0) ?? null
+$: selectedStarPosition = displayedScreenIndex >= 0
+  ? projectedStarPositions.find(position => position.index === displayedScreenIndex && position.size > 0) ?? null
   : null
 $: selectedCardStyle = portraitMobile
   ? 'bottom: max(7.65rem, calc(env(safe-area-inset-bottom) + 7.65rem)); width: min(24rem, calc(100% - 1.5rem)); max-width: calc(100% - 1.5rem)'
@@ -177,11 +179,11 @@ $: constellationControls = projectedStarPositions
   .filter(position => !!position.screen && position.size > 0)
 $: constellationLines = getVisibleTimelineConstellationLines(
   constellationControls,
-  selectedScreenIndex,
+  displayedScreenIndex,
 )
 $: selectedGuideLine = getSelectedTimelineGuideLine(
   selectedCardAnchor,
-  selectedScreenIndex,
+  displayedScreenIndex,
   projectedStarPositions,
   screens,
 )
@@ -191,9 +193,7 @@ $: timelinePositionText = activeTimelineEvent
 $: isMapMode = viewMode === 'map'
 $: isBannerPresentation = presentation === 'banner'
 $: viewModeLabel = isMapMode ? 'Complete overview' : 'First-person chronology'
-$: viewModeInstructions = isMapMode
-  ? 'Select a star to inspect an article. Drag to pan, scroll to zoom.'
-  : 'Travel from the beginning. Scroll, drag, or use the slider to move through time.'
+$: viewModeInstructions = isMapMode ? 'Select a star to inspect an article. Drag to pan, scroll to zoom.' : 'Travel from the beginning. Scroll, drag, or use the slider to move through time.'
 $: if (!hasInitializedBeginningPosition && screens.length > 0) {
   initializeBeginningPosition()
 }
@@ -456,6 +456,7 @@ function handlePointerMove(event: PointerEvent) {
 function handleTouchStart(event: TouchEvent) {
   timelineBackgroundMedia?.start()
   if (isTimelineInteractiveTarget(event.target)) return
+  if (isBannerPresentation && event.touches.length < 2) return handleTouchEnd()
   if (isMapMode && event.touches.length === 1) {
     const touch = event.touches[0]
     if (!isPointInsideTimelineShell(shell, touch.clientX, touch.clientY)) return
@@ -549,6 +550,7 @@ function handleTouchEnd() {
 
 function handleWheel(event: WheelEvent) {
   if (
+    isBannerPresentation ||
     !shell ||
     (!isPointInsideTimelineShell(shell, event.clientX, event.clientY) &&
       !isTimelineShellVisible(shell))
@@ -580,6 +582,7 @@ function handleWheel(event: WheelEvent) {
 
 function handleKeyboardScroll(event: KeyboardEvent) {
   if (
+    isBannerPresentation ||
     event.altKey ||
     event.ctrlKey ||
     event.metaKey ||
@@ -655,17 +658,18 @@ function setViewMode(nextViewMode: TimelineViewMode) {
   input.mapOrbitY = 0
   projectedStarPositions = []
   selectedCardAnchor = null
+  if (nextViewMode === 'travel' && !prefersReducedMotion) void tick().then(() => playAutoplay())
 }
 
 function handleStarPositions(event: TimelineStarPositionEvent) {
   projectedStarPositions = event.detail.positions
-  if (selectedScreenIndex >= 0) scheduleSelectedGuideLineSync()
+  if (displayedScreenIndex >= 0) scheduleSelectedGuideLineSync()
 }
 
 function syncSelectedGuideLineAnchor() {
   selectedCardAnchor = getTimelineSelectedCardAnchor(
     shell,
-    selectedScreenIndex,
+    displayedScreenIndex,
     projectedStarPositions,
   )
 }
@@ -700,7 +704,7 @@ function openTimelineRecord(index: number) {
   const url = sortedEvents[index]?.url
   if (!url || typeof window === 'undefined') return
 
-  window.location.href = url
+  window.location.href = getTimelineRecordHref(url)
 }
 
 function handleStarClick(event: MouseEvent, index: number) {
@@ -782,6 +786,7 @@ onMount(() => {
   adaptiveDprController.start()
   applyMotionPreference()
   updateScrollDrivenWheel()
+  if (!prefersReducedMotion && !isMapMode) playAutoplay()
   if (shell) shell.dataset.timelineInitialized = 'true'
 
   window.addEventListener('pointermove', handlePointerMove)
@@ -830,8 +835,8 @@ onDestroy(() => {
 
 <div
   bind:this={shell}
-  class="home-intro-environment home-intro-environment--background-ready pointer-events-auto touch-none cursor-grab"
-  class:home-intro-environment--screen-hover={selectedScreenIndex >= 0}
+  class={`home-intro-environment home-intro-environment--background-ready pointer-events-auto cursor-grab ${isBannerPresentation ? 'touch-pan-y' : 'touch-none'}`}
+  class:home-intro-environment--screen-hover={displayedScreenIndex >= 0}
   class:cursor-grabbing={panPointerId !== null}
   style="--portal-reveal-progress: 1"
   class:h-full={isBannerPresentation}
@@ -852,7 +857,7 @@ onDestroy(() => {
     <TimelinePortalCarouselScene
       {input}
       {screens}
-      {selectedScreenIndex}
+      selectedScreenIndex={displayedScreenIndex}
       hoveredScreenIndex={hoveredStarIndex}
       {viewMode}
       on:starpositions={handleStarPositions}
@@ -867,12 +872,12 @@ onDestroy(() => {
   />
 
   <div
-    class="pointer-events-auto absolute inset-0 z-[3] cursor-grab touch-none"
+    class={`pointer-events-auto absolute inset-0 z-[3] cursor-grab ${isBannerPresentation ? 'touch-pan-y' : 'touch-none'}`}
     class:cursor-grabbing={panPointerId !== null}
     aria-hidden="true"
   ></div>
 
-  <TimelineConstellationOverlay lines={constellationLines} guideLine={selectedGuideLine} />
+  <TimelineConstellationOverlay lines={constellationLines} guideLine={selectedGuideLine} isOverview={isMapMode} />
 
   <div
     class="pointer-events-none absolute left-4 top-4 z-[6] hidden max-w-sm rounded-lg border border-cyan-100/15 bg-slate-950/70 px-4 py-3 font-mono text-slate-100 shadow-[0_0_1.4rem_rgba(8,145,178,0.14)] backdrop-blur-md md:block"
@@ -953,10 +958,7 @@ onDestroy(() => {
           on:reset={timelineCameraController.reset}
         />
 
-        <TimelineViewModeButton
-          {viewMode}
-          on:change={(event) => setViewMode(event.detail)}
-        />
+        <TimelineViewModeButton {viewMode} on:change={(event) => setViewMode(event.detail)} />
 
         {#if !isMapMode}
           <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
@@ -974,10 +976,7 @@ onDestroy(() => {
         on:reset={timelineCameraController.reset}
       />
 
-      <TimelineViewModeButton
-        {viewMode}
-        on:change={(event) => setViewMode(event.detail)}
-      />
+      <TimelineViewModeButton {viewMode} on:change={(event) => setViewMode(event.detail)} />
 
       {#if !isMapMode}
         <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />

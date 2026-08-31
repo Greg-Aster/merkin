@@ -101,7 +101,7 @@ $: activeStarIntensities = screens.map((_, index) =>
   index === selectedScreenIndex || index === hoveredScreenIndex ? 1 : 0,
 )
 $: timelineStarTargets = timelineStarIndexes.map(index =>
-  getTimelineStarTarget(index, input.wheel),
+  getTimelineStarTarget(index, input.wheel, viewMode, portraitMobile),
 )
 $: timelineStarVisuals = screens.map((screen, index) =>
   getTimelineStarVisual(index, screen, activeStarIntensities[index] ?? 0, 0),
@@ -125,7 +125,10 @@ $: if (sceneFrameSignature && camera) {
 
 function syncViewportMode(width: number, height: number) {
   if (width <= 0 || height <= 0) return
-  portraitMobile = width <= 760 && height > width
+  portraitMobile =
+    typeof window !== 'undefined'
+      ? window.innerWidth <= 760 && window.innerHeight > window.innerWidth
+      : width <= 760 && height > width
   viewportAspect = Math.max(0.4, width / height)
 }
 
@@ -401,12 +404,17 @@ function getTimelineStarAnchor(index: number) {
   }
 }
 
-function getTimelineStarTarget(index: number, visualSelectedIndex: number) {
+function getTimelineStarTarget(
+  index: number,
+  visualSelectedIndex: number,
+  currentViewMode: TimelineViewMode,
+  isPortraitMobile: boolean,
+) {
   const offset = index - visualSelectedIndex
   const depth = Math.abs(offset)
   const anchor = getTimelineStarAnchor(index)
-  if (viewMode === 'map') {
-    if (!portraitMobile) {
+  if (currentViewMode === 'map') {
+    if (!isPortraitMobile) {
       const desktopTimelineStep = getTimelineStepZ() * mapDesktopTimelineDepthScale
       const timelineSpan = Math.max(1, screens.length - 1) * desktopTimelineStep
       const eraLane = (getEraHash(getScreenEraKey(index), 887) - 0.5) * mapDesktopLaneSpread
@@ -439,7 +447,7 @@ function getTimelineStarTarget(index: number, visualSelectedIndex: number) {
       pitch: 0,
       yaw: 0,
       roll: 0,
-      scale: portraitMobile ? 8.2 : 10.4,
+      scale: isPortraitMobile ? 8.2 : 10.4,
       depth,
     }
   }
@@ -454,7 +462,7 @@ function getTimelineStarTarget(index: number, visualSelectedIndex: number) {
   const yaw = Math.atan2(deltaX, deltaZ) * 0.84
   const pitch = Math.atan2(anchor.y - cameraLocalY, distanceToCamera) * 0.58
   const depthScale =
-    viewMode === 'map' ? 1 : Math.max(0.56, 1 - depth * 0.045)
+    currentViewMode === 'map' ? 1 : Math.max(0.56, 1 - depth * 0.045)
 
   return {
     x: anchor.x,
@@ -463,7 +471,7 @@ function getTimelineStarTarget(index: number, visualSelectedIndex: number) {
     pitch,
     yaw,
     roll: Math.sin(anchor.orbitAngle) * 0.04,
-    scale: (portraitMobile ? 0.82 : 1) * depthScale,
+    scale: (isPortraitMobile ? 0.82 : 1) * depthScale,
     depth,
   }
 }
@@ -594,6 +602,7 @@ function scheduleSceneFrame() {
 
 <T.OrthographicCamera
   bind:ref={mapCamera}
+  manual={true}
   position={mapCameraPosition}
   rotation={[0, 0, 0]}
   left={-mapCameraFrame.width / 2}
