@@ -1,6 +1,6 @@
 # Megameal Performance Scratchpad
 
-Current source reconciliation: 2026-08-31. The measurements in the individual
+Current source reconciliation: 2026-09-01. The measurements in the individual
 batch records are point-in-time evidence, not a claim that every historical
 implementation remains active. Current status and Phase 1 scope are controlled
 by the reconciliation below.
@@ -14,10 +14,11 @@ or permanent low-quality fallbacks.
 
 Current source, live imports, and hydration directives were checked against
 every batch and active-owner entry. The most recent completed production build
-and focused browser probes prove the owned Batches 17 and 18 state before later
-concurrent timeline/layout edits; they do not prove the now-mixed combined
-worktree. No new cleanup discovery belongs in Phase 1 after this checkpoint
-unless it repairs a measured regression or an existing completion gate.
+and focused browser probes now cover the published timeline/home base plus the
+isolated product-overflow repair. They do not prove Greg's newer uncommitted
+tentacle-frame changes in the shared worktree. No new cleanup discovery belongs
+in Phase 1 after this checkpoint unless it repairs a measured regression or an
+existing completion gate.
 
 Product decisions that override older batch records:
 
@@ -53,20 +54,27 @@ The following source claims remain true in the current tree:
 | 14 | Current: PhotoSwipe and OverlayScrollbars CSS/runtime admission remains target-conditional in the shared layout. |
 | 15 | Current: KaTeX styling remains conditional and covered by the ordinary-post built-output gate. |
 | 16 | Current: HTML compression preserves empty Svelte raw-HTML boundaries and the built audit requires them. |
-| 17 | Current and locally validated: the shared banner uses containing-block width and no longer creates scrollbar-width overflow. |
-| 18 | Current and locally validated: audio vendors load on intent and Megameal's adapters use narrow blog-core exports, so Marked is absent from the universal production client graph. |
+| 17 | Current and locally validated on the final isolated candidate: the shared banner uses containing-block width and no longer creates scrollbar-width overflow. |
+| 18 | Current and locally validated on the final isolated candidate: audio vendors load on intent and Megameal's adapters use narrow blog-core exports, so Marked is absent from the universal production client graph. |
 
-Current lightweight validation passes Megameal type-check,
-site/home/timeline contracts, complete and changed-file CSS audits, and diff
-whitespace validation. The most recent exact owned-change production build
-generated 367 pages, retained the six-stylesheet ordinary-post gate, found 54
-timeline events plus the custom author contract, preserved Svelte hydration
-boundaries, and emitted no `vendor-markdown` chunk. Its focused browser matrix
-covered home portal KTX2 loading, timeline render/zoom/layout/profile, ordinary
-post, archive, store, audio intent and recovery, responsive overflow, and
-shared-banner consumers. Because additional timeline/layout/contract files
-subsequently changed concurrently, that build and browser matrix must be rerun
-on the final ownership-stable source before Phase 1 completion.
+The isolated Phase 1 source candidate is `9262962d`, based on published commit
+`e2416b68`. Megameal type-check, contracts, complete CSS audit, production
+build, and diff whitespace validation pass. The build generated 367 pages,
+retained the six-stylesheet ordinary-post gate, found 38 timeline events plus
+the custom author contract, and preserved the required Svelte hydration
+boundaries. Both changed CSS owners are byte-identical to the earlier
+strict/changed-file-audited product repair, which reported zero existing and
+zero new CSS debt.
+
+The final production-browser matrix passed 21 product-route viewport checks:
+all seven product routes fit 390 px, 768 px, and desktop viewports with their
+viewers visible. Focused checks also passed for mobile and desktop timeline
+render/selection/banner sizing, hidden cart admission on non-store routes,
+store cart add/open/persistence/remove, product media zoom, parallax, direct
+load and navigation, audio opt-in/control state, and profile/avatar restoration
+when switching from one to two columns. It reported no app console errors,
+hydration failures, failed requests, failed assets, or HTTP error responses.
+Headless Chrome emitted only its environment-specific software-WebGL warnings.
 
 ### Implemented but awaiting deployed or physical-device proof
 
@@ -74,8 +82,10 @@ on the final ownership-stable source before Phase 1 completion.
   mobile evidence. Home portal interaction, timeline interaction/LCP, archive
   media, store media, profile admission, and audio output still need a real
   mobile-device pass after deployment.
-- No deployed PageSpeed Insights or field Core Web Vitals result proves the
-  current uncommitted source. Those measurements must follow commit and deploy.
+- No deployed PageSpeed Insights, Lighthouse, or field Core Web Vitals result
+  proves the isolated candidate. Those measurements must follow integration and
+  deployment of the exact final commit. PageSpeed HTTP 429 remains an external
+  quota limitation rather than a code-repair task.
 - The desktop archive still uses the original wide PNG, and store cards still
   use their current source images. Responsive derivatives for both are
   explicitly deferred to the separate future media-optimization goal below;
@@ -86,17 +96,12 @@ on the final ownership-stable source before Phase 1 completion.
 This list is frozen. Do not add cleanup to it merely because a source search
 finds another refactor opportunity.
 
-1. Validate the implemented P0 cart repair on the exact final source. The
-   universal Navbar now admits its existing `StoreCartButton` with
-   `client:visible`, and the button no longer initializes the cart. The existing
-   store-route `StoreCartRuntime` remains the event and initialization owner.
-   Proof must cover direct load and client navigation into and out of the store.
-2. Re-run the focused production/browser matrix after the final owned source
-   set is stable, then deploy that exact commit and record physical-mobile plus
-   deployed PageSpeed evidence.
-3. Commit only the reconciled owned files and reach an ownership-clean
-   worktree. The current tree also contains concurrent home-portal source/CSS
-   edits, so Phase 1 cannot yet claim a clean publication boundary.
+1. Integrate the isolated candidate without absorbing or reverting the current
+   uncommitted tentacle-frame work, then deploy that exact final commit.
+2. Record the deployed SHA and deployed browser/Lighthouse evidence.
+3. Record Greg's physical-mobile acceptance for timeline, product overflow,
+   cart, profile/avatar, and audible audio, or Greg's explicit waiver. Local
+   emulation is not physical proof.
 
 ### Explicitly deferred Phase 2 work
 
@@ -128,10 +133,12 @@ remaining P0 decision is fixed or explicitly deferred, focused local validation
 passes on the exact final source, deployed and physical-mobile evidence is
 reported, the owned changes are committed, and worktree ownership is clean.
 
-The exact stopping point is after the narrow cart repair is validated, the owned
-patch is committed and deployed, deployed evidence is recorded, and all local
-validation processes are closed. Do not continue into responsive assets, broad
-shared-grid or Navbar cleanup, or public-tree work.
+The exact stopping point is after the narrow cart repair is integrated and
+deployed, the exact deployed SHA and deployed/physical evidence are recorded,
+and all local validation processes are closed. Only then may the separately
+approved responsive-media Phase 2 goal begin. Broad shared-grid or Navbar
+cleanup remains deferred, and public-tree moves still require their separate
+destructive-boundary approval.
 
 ## Measured baseline
 
@@ -1378,8 +1385,8 @@ a visually reviewed high-resolution desktop poster derivative remain pending.
 
 Status: duplicate card ownership and progressive product-media attachment are
 completed and browser-verified in Batch 4. Responsive derivatives for the large
-source images remain frozen Phase 1 work; broader CSS/controller fan-out cleanup
-is explicitly deferred to Phase 2.
+source images are explicitly deferred to the separate Phase 2 media goal;
+broader CSS/controller fan-out cleanup is also deferred.
 
 - Owner: `src/pages/store.astro`, `src/contracts/products.ts`,
   `MarketplaceListingCard.astro`, and `storefrontController.ts`.
@@ -1501,16 +1508,18 @@ part of Phase 1 reconciliation.
 
 ## Frozen Phase 1 next decisions
 
-1. Validate the implemented hidden-cart admission repair; do not expand it into
-   another Navbar or cart-controller refactor.
-2. Keep archive/store responsive derivatives deferred to the proposed future
-   media-optimization goal.
-3. Stabilize worktree ownership, rerun the final focused matrix, and commit only
-   the owned Phase 1 set.
-4. Deploy that exact commit and report real-mobile plus deployed PageSpeed
-   evidence before claiming Phase 1 complete.
-5. Start either proposed asset/media goal only with separate Project Owner
-   approval.
+1. The hidden-cart admission and product-overflow repairs are implemented and
+   locally validated; do not expand them into Navbar, grid, contract, or cart
+   controller refactors.
+2. Integrate and deploy the isolated candidate without absorbing or reverting
+   the dirty tentacle-frame work.
+3. Report the deployed SHA and deployed browser/Lighthouse evidence.
+4. Obtain Greg's real-mobile acceptance or explicit waiver before claiming
+   Phase 1 complete.
+5. Begin the responsive archive/store media goal only after Phase 1 closes.
+   The shared public/generated boundary still requires a separate explicit
+   destructive-boundary approval before any move, rename, deduplication, or
+   deletion.
 
 ## Completion gate for each implementation batch
 
