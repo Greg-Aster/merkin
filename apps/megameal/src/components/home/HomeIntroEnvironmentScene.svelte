@@ -1,6 +1,6 @@
 <script lang="ts">
 import { siteSfxManager } from '@/utils/site-sfx'
-import { T, useTask } from '@threlte/core'
+import { T, useStage, useTask, useThrelte } from '@threlte/core'
 import { onMount } from 'svelte'
 import { Euler, Quaternion, Vector3 } from 'three'
 import type * as THREE from 'three'
@@ -9,12 +9,17 @@ import HomeIntroParticleField from './HomeIntroParticleField.svelte'
 import HomeIntroRingGlow from './HomeIntroRingGlow.svelte'
 import HomeIntroSceneBackdrop from './HomeIntroSceneBackdrop.svelte'
 import HomeIntroTentacleSprite from './HomeIntroTentacleSprite.svelte'
+import {
+  createHomeIntroMotionStageOptions,
+  homeIntroMotionStageKey,
+} from './homeIntroMotionCadence'
 import { homeIntroParticleClusters } from './homeIntroParticleClusters'
 import { hashHomeIntroUnit } from './homeIntroSceneMath'
 import {
   getHomeIntroBannerSyncEvent,
   getHomeIntroRestedScreenIndex,
   homeIntroIntroOffsetScreens,
+  homeIntroMobileIntroOffsetScreens,
   homeIntroScreens,
   homeIntroWheelToScreenRatio,
 } from './homeIntroScreens'
@@ -42,6 +47,12 @@ export let hoveredScreenIndex = -1
 export let portalVisible = true
 export let motionEnabled = true
 export let logoEffectsEnabled = true
+
+const { renderStage } = useThrelte()
+const motionStage = useStage(
+  homeIntroMotionStageKey,
+  createHomeIntroMotionStageOptions(renderStage),
+)
 
 let world: THREE.Group | null = null
 let camera: THREE.PerspectiveCamera | null = null
@@ -104,7 +115,15 @@ let effectWheel = 0
 let activeScreenIndex = primaryScreenIndex
 const portalScreens = homeIntroScreens
 const screenCount = portalScreens.length
-const tentacleTargetHeight = screenStepY * (screenCount + 2.2)
+const tentacleArtworkScreenSpan = screenCount + 2.2
+const tentacleContinuationScreens = 1.25
+const tentacleDesktopTravelStartScreens = 0.15
+const tentacleMobileTravelStartScreens = 0.25
+const tentacleMobileContinuationOffsetScreens =
+  homeIntroMobileIntroOffsetScreens -
+  homeIntroIntroOffsetScreens +
+  tentacleMobileTravelStartScreens -
+  tentacleDesktopTravelStartScreens
 let screenMediaLoadStates = Array.from(
   { length: screenCount },
   (_, index) => index === primaryScreenIndex,
@@ -128,9 +147,15 @@ $: starColumnPosition = portraitMobile
 $: starColumnScale = portraitMobile
   ? ([1.82, 1, 1.14] as [number, number, number])
   : ([1.38, 1, 1.06] as [number, number, number])
+$: tentacleScreenSpan =
+  tentacleArtworkScreenSpan +
+  tentacleContinuationScreens +
+  (portraitMobile ? tentacleMobileContinuationOffsetScreens : 0)
+$: tentacleTargetHeight = screenStepY * tentacleScreenSpan
+$: tentacleWidthCompensation = tentacleArtworkScreenSpan / tentacleScreenSpan
 $: tentacleRootScale = portraitMobile
-  ? ([0.46, 0.9, 0.46] as [number, number, number])
-  : ([0.72, 1, 0.72] as [number, number, number])
+  ? ([0.46 * tentacleWidthCompensation, 0.9, 0.46] as [number, number, number])
+  : ([0.72 * tentacleWidthCompensation, 1, 0.72] as [number, number, number])
 $: tentacleInitialTipY = portraitMobile ? -3.25 : -3.15
 $: tentacleInitialPosition = [
   0,
@@ -534,7 +559,7 @@ function updateScreenOrbit(wheel: number, ease: number) {
   }
 }
 
-useTask(delta => {
+function updateSceneMotion(delta: number) {
   if (!portalVisible) return
 
   const wheel = Number.isFinite(input.wheel) ? input.wheel : 0
@@ -613,7 +638,9 @@ useTask(delta => {
   }
 
   if (tentacleRoot) {
-    const tentacleTravelStartScreens = portraitMobile ? 0.25 : 0.15
+    const tentacleTravelStartScreens = portraitMobile
+      ? tentacleMobileTravelStartScreens
+      : tentacleDesktopTravelStartScreens
     const tentacleTravelScreens = Math.max(
       0,
       visualScrollScreens + tentacleTravelStartScreens,
@@ -733,7 +760,9 @@ useTask(delta => {
   if (carouselComponentReady) {
     updateScreenOrbit(effectWheel, ease)
   }
-})
+}
+
+useTask(updateSceneMotion, { stage: motionStage, autoInvalidate: false })
 </script>
 
 <T.PerspectiveCamera bind:ref={camera} makeDefault position={cameraPosition} fov={cameraFov} />
@@ -745,6 +774,7 @@ useTask(delta => {
 		size={sceneBackdropSize}
 		{portalVisible}
 		{motionEnabled}
+		{motionStage}
 	/>
 
 	{#if tentacleMounted}
@@ -752,6 +782,7 @@ useTask(delta => {
 			<HomeIntroTentacleSprite
 				targetHeight={tentacleTargetHeight}
 				orbitPhase={tentacleOrbitPhase}
+				{motionStage}
 			/>
 		</T.Group>
 	{/if}
@@ -785,6 +816,7 @@ useTask(delta => {
 							shouldLoadMedia={screenMediaLoadStates[index]}
 							videoPlaybackEnabled={!compactViewport}
 							{motionEnabled}
+							{motionStage}
 							{sceneQuality}
 						/>
 					{/if}
@@ -803,6 +835,7 @@ useTask(delta => {
 			{atmosphereReveal}
 			densityMultiplier={particleDensityMultiplier}
 			{motionEnabled}
+			{motionStage}
 		/>
 	</T.Group>
 
@@ -818,6 +851,7 @@ useTask(delta => {
 					dotCount={72}
 					{atmosphereReveal}
 					{motionEnabled}
+					{motionStage}
 				/>
 			</T.Group>
 
@@ -832,6 +866,7 @@ useTask(delta => {
 					dotCount={68}
 					{atmosphereReveal}
 					{motionEnabled}
+					{motionStage}
 				/>
 			</T.Group>
 
@@ -846,6 +881,7 @@ useTask(delta => {
 					dotCount={64}
 					{atmosphereReveal}
 					{motionEnabled}
+					{motionStage}
 				/>
 			</T.Group>
 
@@ -865,6 +901,7 @@ useTask(delta => {
 			animatedAtlasBaseIntensity={1}
 			animatedAtlasUvScaleX={.92}
 			animatedAtlasUvScaleY={0.8}
+			{motionStage}
 			onReady={handleLogoReady}
 		/>
 	</T.Group>

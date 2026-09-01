@@ -89,6 +89,15 @@ const protectedContracts = [
   [
     'apps/megameal/src/components/home/HomeIntroEnvironment.svelte',
     [
+      ['renderMode="manual"', 'explicit portal render scheduling'],
+      [
+        'portalVisible={portalEffectsVisible}',
+        'full portal render visibility ownership',
+      ],
+      [
+        'effectsEnabled={logoEffectsVisible}',
+        'logo-only post-processing range',
+      ],
       [
         'const mobileTouchDragSensitivity = 0.36',
         'one-destination-per-swipe mobile touch sensitivity',
@@ -97,6 +106,55 @@ const protectedContracts = [
         'mobileTouchDragSensitivity,',
         'mobile-only touch sensitivity application',
       ],
+    ],
+  ],
+  [
+    'apps/megameal/src/components/home/HomeIntroTentacleSprite.svelte',
+    [
+      [
+        '/assets/sprites/tentacle/tiles/manifest.json',
+        'single generated tentacle tile manifest',
+      ],
+      ['getVisibleTileIndexes', 'camera-frustum tile admission'],
+      ['disposeTileTextures', 'GPU texture cleanup'],
+      ['<T.Mesh', 'single-plane tile geometry'],
+      ['depthWrite={true}', 'tentacle depth participation'],
+    ],
+  ],
+  [
+    'apps/megameal/src/components/home/HomeIntroEnvironmentScene.svelte',
+    [
+      [
+        'tentacleContinuationScreens',
+        'below-viewport tentacle continuation reserve',
+      ],
+      ['tentacleWidthCompensation', 'continuation width-preservation geometry'],
+      ['homeIntroMotionStageKey', 'shared fixed portal motion stage'],
+      [
+        '{ stage: motionStage, autoInvalidate: false }',
+        'fixed-stage scene motion task',
+      ],
+    ],
+  ],
+  [
+    'apps/megameal/src/components/home/homeIntroMotionCadence.ts',
+    [
+      ['homeIntroMotionFps = 15', '15 fps stop-motion pose cadence'],
+      ['homeIntroActiveRenderFps = 30', 'active render cadence'],
+      ['homeIntroIdleRenderFps = 15', 'idle render cadence'],
+      ['createHomeIntroRenderCadence', 'single render cadence owner'],
+      ['homeIntroInteractionRenderHoldMs', 'active interaction render hold'],
+      ['runTasks(motionDelta)', 'single shared fixed-stage advancement'],
+    ],
+  ],
+  [
+    'apps/megameal/src/components/home/HomeIntroPostProcessing.svelte',
+    [
+      ['advance()', 'manual render advancement'],
+      ['renderCadence.shouldAdvance', 'manual render admission'],
+      ['effectsEnabled', 'logo effect range separation'],
+      ['useTask(renderScheduledFrame', 'single manually admitted render task'],
+      ['stage: renderStage', 'render-stage ownership'],
     ],
   ],
   [
@@ -239,6 +297,48 @@ assertExcludes(
   'getRichMediaCapabilities',
   'compact-viewport background loading restrictions',
 )
+assertExcludes(
+  'apps/megameal/src/components/home/HomeIntroTentacleSprite.svelte',
+  'atlas-24-',
+  'the superseded full-frame tentacle atlases',
+)
+assertExcludes(
+  'apps/megameal/src/components/home/HomeIntroTentacleSprite.svelte',
+  '<T.Sprite',
+  'independently billboarding tentacle tiles',
+)
+
+const tentacleManifestPath = path.join(
+  repoRoot,
+  'apps/megameal/public/assets/sprites/tentacle/tiles/manifest.json',
+)
+if (!existsSync(tentacleManifestPath)) {
+  failures.push(
+    'apps/megameal/public/assets/sprites/tentacle/tiles/manifest.json is missing',
+  )
+} else {
+  try {
+    const manifest = JSON.parse(readFileSync(tentacleManifestPath, 'utf8'))
+    const expectedTileCount = manifest.frameCount * manifest.tileCount
+    let existingTileCount = 0
+    for (let frame = 0; frame < manifest.frameCount; frame += 1) {
+      for (let tile = 0; tile < manifest.tileCount; tile += 1) {
+        const tilePath = path.join(
+          path.dirname(tentacleManifestPath),
+          `frame-${String(frame).padStart(2, '0')}-tile-${tile}.webp`,
+        )
+        if (existsSync(tilePath)) existingTileCount += 1
+      }
+    }
+    if (existingTileCount !== expectedTileCount) {
+      failures.push(
+        `tentacle tile manifest expects ${expectedTileCount} files but found ${existingTileCount}`,
+      )
+    }
+  } catch (error) {
+    failures.push(`tentacle tile manifest is invalid JSON: ${error}`)
+  }
+}
 
 const removedActivationOwner =
   'apps/megameal/src/components/home/HomeIntroActivation.svelte'

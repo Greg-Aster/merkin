@@ -97,6 +97,7 @@ const bundles: Record<RouteStyleBundleName, RouteStyleBundle> = {
   timeline: {
     sources: [
       appStyle('features/extracted/home-intro-environment.css'),
+      appStyle('features/timeline/timeline-flight.css'),
       appStyle('features/timeline/timeline-selected-record.css'),
     ],
   },

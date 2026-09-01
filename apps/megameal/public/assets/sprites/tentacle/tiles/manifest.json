@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "frameCount": 24,
+  "sourceFrameStart": 25,
+  "sourceWidth": 2160,
+  "sourceHeight": 3840,
+  "crop": {
+    "left": 400,
+    "width": 1440
+  },
+  "renderAspect": 0.375,
+  "alphaTest": 0.06666666666666667,
+  "tileCount": 6,
+  "tiles": [
+    {
+      "index": 0,
+      "sourceY": 0,
+      "sourceHeight": 640
+    },
+    {
+      "index": 1,
+      "sourceY": 640,
+      "sourceHeight": 640
+    },
+    {
+      "index": 2,
+      "sourceY": 1280,
+      "sourceHeight": 640
+    },
+    {
+      "index": 3,
+      "sourceY": 1920,
+      "sourceHeight": 640
+    },
+    {
+      "index": 4,
+      "sourceY": 2560,
+      "sourceHeight": 640
+    },
+    {
+      "index": 5,
+      "sourceY": 3200,
+      "sourceHeight": 640
+    }
+  ]
+}

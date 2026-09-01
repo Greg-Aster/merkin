@@ -1,9 +1,9 @@
 <script lang="ts">
+import { homePortalEvents, type PortalAdvanceDetail } from '@/contracts/homePortal'
 import {
   type AdaptiveCanvasDprController,
   createAdaptiveCanvasDprController,
 } from '@/utils/adaptiveCanvasDpr'
-import { homePortalEvents, type PortalAdvanceDetail } from '@/contracts/homePortal'
 import { navigateWithMegamealTransition } from '@/utils/megamealRouteTransitions'
 import { getRichMediaCapabilities } from '@/utils/richMediaCapabilities'
 import {
@@ -877,7 +877,7 @@ onDestroy(() => {
 >
   <div class="home-intro-background-curtain" aria-hidden="true"></div>
 
-	<Canvas {createRenderer} dpr={canvasDpr}>
+	<Canvas {createRenderer} dpr={canvasDpr} renderMode="manual">
 		<HomeIntroEnvironmentScene
 			{input}
 			{titleImageSrc}
@@ -893,7 +893,8 @@ onDestroy(() => {
 			{sceneQuality}
 			{activeScreenIndex}
 			{backgroundReady}
-			portalVisible={logoEffectsVisible}
+			portalVisible={portalEffectsVisible}
+			effectsEnabled={logoEffectsVisible}
 		/>
 	</Canvas>
 

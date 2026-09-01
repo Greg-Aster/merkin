@@ -1,17 +1,17 @@
 <script lang="ts">
-import { T, useTask, useThrelte } from '@threlte/core'
+import { type Stage, T, useTask, useThrelte } from '@threlte/core'
 import { onMount } from 'svelte'
 import {
   CubeCamera,
   FrontSide,
   LinearFilter,
   LinearMipmapLinearFilter,
-  SRGBColorSpace,
-  TextureLoader,
-  WebGLCubeRenderTarget,
   type Mesh,
   type Object3D,
+  SRGBColorSpace,
   type Texture,
+  TextureLoader,
+  WebGLCubeRenderTarget,
   type WebGLRenderer,
 } from 'three'
 import { homeIntroReflectionOnlyUserDataKey } from './homeIntroReflectionOnly'
@@ -22,6 +22,7 @@ export let size: [number, number] = [16, 9]
 export let probePosition: [number, number, number] = [0, 0, -0.1]
 export let portalVisible = true
 export let motionEnabled = true
+export let motionStage: Stage
 
 const threlte = useThrelte()
 const loader = new TextureLoader()
@@ -185,12 +186,17 @@ onMount(() => {
   }
 })
 
-useTask(() => {
+function updateReflectionProbeIfNeeded() {
   if (!mounted || !texture || !probeNeedsUpdate || !portalVisible || !motionEnabled) {
     return
   }
 
   updateReflectionProbe()
+}
+
+useTask(updateReflectionProbeIfNeeded, {
+  stage: motionStage,
+  autoInvalidate: false,
 })
 
 $: if (mounted && src) {

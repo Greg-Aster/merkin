@@ -1,5 +1,5 @@
 <script lang="ts">
-import { T, useTask, useThrelte } from '@threlte/core'
+import { type Stage, T, useTask, useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import {
   AdditiveBlending,
@@ -50,6 +50,7 @@ export let hovered = false
 export let videoPlaybackEnabled = true
 export let motionEnabled = true
 export let portraitLayout = false
+export let motionStage: Stage
 
 const threlte = useThrelte()
 
@@ -99,8 +100,6 @@ const screenModelZ = -0.07
 const screenContentInset = 0.9
 const mediaWidth = frameWidth * screenContentInset
 const mediaHeight = mediaWidth * (9 / 16)
-const titleWidth = mediaWidth
-const titleHeight = mediaHeight
 const fallbackWidth = 2.76
 const fallbackHeight = 0.44
 const mediaSurfaceZ = screenModelZ + 0.012
@@ -443,7 +442,7 @@ $: if (screenContentMesh && screenContentMaterial) {
   }
 }
 
-useTask(delta => {
+function updateScreenMotion(delta: number) {
   const time = performance.now() * 0.001
   const ease = 1 - Math.exp(-delta * 8)
 
@@ -482,7 +481,9 @@ useTask(delta => {
   }
 
   renderScreenContent()
-})
+}
+
+useTask(updateScreenMotion, { stage: motionStage, autoInvalidate: false })
 </script>
 
 <T.Group bind:ref={panelRoot}>
@@ -520,7 +521,7 @@ useTask(delta => {
 
 	{#if screenContentTexture}
 		<T.Mesh bind:ref={screenContentMesh} position={[0, primary ? 0.02 : 0, mediaSurfaceZ]} renderOrder={80}>
-			<T.PlaneGeometry args={[primary && !portraitLayout ? titleWidth : mediaPlaneWidth, primary && !portraitLayout ? titleHeight : mediaPlaneHeight]} />
+			<T.PlaneGeometry args={[primary && !portraitLayout ? mediaWidth : mediaPlaneWidth, primary && !portraitLayout ? mediaHeight : mediaPlaneHeight]} />
 			<T.MeshBasicMaterial
 				bind:ref={screenContentMaterial}
 				map={screenContentTexture}

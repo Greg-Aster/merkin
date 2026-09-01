@@ -1,5 +1,5 @@
 <script lang="ts">
-import { T, useTask } from '@threlte/core'
+import { type Stage, T, useTask } from '@threlte/core'
 import { onMount } from 'svelte'
 import {
   Box3,
@@ -33,6 +33,7 @@ export let animatedAtlasBaseIntensity = 1
 export let animatedAtlasUvScaleX = 1
 export let animatedAtlasUvScaleY = 1
 export let onReady: (() => void) | undefined
+export let motionStage: Stage
 
 let logoModel: THREE.Object3D | null = null
 let mounted = false
@@ -477,7 +478,7 @@ $: if (mounted && logoModel && atlasTexture) {
   }
 }
 
-useTask(delta => {
+function updateAnimatedAtlas(delta: number) {
   if (!atlasTexture || animatedAtlasFrames <= 1 || animatedAtlasFps <= 0) {
     return
   }
@@ -486,7 +487,9 @@ useTask(delta => {
   syncAtlasFrame(
     Math.floor(atlasElapsed * animatedAtlasFps) % animatedAtlasFrames,
   )
-})
+}
+
+useTask(updateAnimatedAtlas, { stage: motionStage, autoInvalidate: false })
 </script>
 
 {#if logoModel}

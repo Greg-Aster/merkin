@@ -1,4 +1,5 @@
 <script lang="ts">
+import { siteSfxManager } from '@/utils/site-sfx'
 import { useTask, useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import {
@@ -9,7 +10,7 @@ import {
 } from 'three'
 import type { Object3D } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js'
-import { siteSfxManager } from '@/utils/site-sfx'
+import { createHomeIntroRenderCadence } from './homeIntroMotionCadence'
 
 type IntroInputState = {
   x: number
@@ -92,8 +93,18 @@ export let sceneQuality: SceneQuality = 'high'
 export let activeScreenIndex = 0
 export let backgroundReady = false
 export let portalVisible = true
+export let effectsEnabled = true
 
-const { autoRender, camera, dpr, renderStage, renderer, scene, size } = useThrelte()
+const {
+  advance,
+  autoRender,
+  camera,
+  dpr,
+  renderStage,
+  renderer,
+  scene,
+  size,
+} = useThrelte()
 
 let logoRenderTarget: WebGLRenderTarget | null = null
 let glitchMaterial: ShaderMaterial | null = null
@@ -112,11 +123,16 @@ let nextIdleBurstAt = 0
 let prefersReducedMotion = false
 let reducedMotionQuery: MediaQueryList | null = null
 let lastBackgroundReady = backgroundReady
-let lastPortalVisible = portalVisible
+let lastEffectsEnabled = effectsEnabled
 const previousClearColor = new Color()
+const renderCadence = createHomeIntroRenderCadence()
 
 function getTimeSeconds() {
   return typeof performance === 'undefined' ? 0 : performance.now() * 0.001
+}
+
+function getTimeMilliseconds() {
+  return typeof performance === 'undefined' ? 0 : performance.now()
 }
 
 function randomRange(min: number, max: number) {
@@ -212,12 +228,12 @@ function triggerBurst(duration: number, intensity: number) {
   siteSfxManager.playIfUnlocked('portal-glitch')
 }
 
-function syncPortalVisibilityState(now: number) {
-  if (portalVisible === lastPortalVisible) return
+function syncEffectsState(now: number) {
+  if (effectsEnabled === lastEffectsEnabled) return
 
-  lastPortalVisible = portalVisible
+  lastEffectsEnabled = effectsEnabled
   burstUntil = 0
-  if (portalVisible && !prefersReducedMotion) {
+  if (effectsEnabled && !prefersReducedMotion) {
     scheduleNextIdleBurst(now, true)
   }
 }
@@ -359,8 +375,8 @@ function renderLogoGlitchFrame(strength: number) {
 
 function getGlitchStrength() {
   const now = getTimeSeconds()
-  syncPortalVisibilityState(now)
-  if (!portalVisible) return 0
+  syncEffectsState(now)
+  if (!portalVisible || !effectsEnabled) return 0
 
   const reveal = Number.isFinite(input.reveal) ? input.reveal : 0
   const sceneVisible = backgroundReady || reveal > 0.035
@@ -425,17 +441,43 @@ onMount(() => {
   glitchQuad = new FullScreenQuad(glitchMaterial)
   syncTargetSize()
   scheduleNextIdleBurst(getTimeSeconds())
+  renderCadence.holdInitial(getTimeMilliseconds())
 
   reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
   updateReducedMotionPreference()
   reducedMotionQuery.addEventListener('change', updateReducedMotionPreference)
 })
 
-useTask(() => {
+function advanceScheduledFrame() {
+  const nowMs = getTimeMilliseconds()
+  syncEffectsState(nowMs * 0.001)
+  if (
+    !renderCadence.shouldAdvance({
+      active: input.active,
+      burstUntilSeconds: burstUntil,
+      nowMs,
+      portalVisible,
+      signatureValues: [
+        input.x,
+        input.y,
+        input.dragX,
+        input.dragY,
+        input.wheel,
+        input.reveal,
+      ],
+    })
+  ) {
+    return
+  }
+
+  advance()
+}
+
+function renderScheduledFrame() {
   if (!logoRenderTarget || !glitchMaterial || !glitchQuad) return
 
   if (!portalVisible) {
-    syncPortalVisibilityState(getTimeSeconds())
+    syncEffectsState(getTimeSeconds())
     return
   }
 
@@ -446,7 +488,13 @@ useTask(() => {
   } else {
     renderNormalFrame()
   }
-}, { stage: renderStage })
+}
+
+useTask(advanceScheduledFrame, { autoInvalidate: false })
+useTask(renderScheduledFrame, {
+  stage: renderStage,
+  autoInvalidate: false,
+})
 
 onDestroy(() => {
   reducedMotionQuery?.removeEventListener('change', updateReducedMotionPreference)

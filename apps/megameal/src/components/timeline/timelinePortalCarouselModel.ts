@@ -132,45 +132,48 @@ export function getActiveTimelineEraSegment(
   )
 }
 
-export function advanceTimelineAutoplay({
+export function advanceTimelineTargetFlight({
   position,
-  maxPosition,
-  direction,
+  targetPosition,
   velocity,
   delta,
-  stopping,
-  speed,
-  minimumEdgeSpeedScale,
+  maximumSpeed,
+  minimumSpeed,
+  approachRate,
   velocityEaseRate,
+  arrivalThreshold,
 }: {
   position: number
-  maxPosition: number
-  direction: -1 | 1
+  targetPosition: number
   velocity: number
   delta: number
-  stopping: boolean
-  speed: number
-  minimumEdgeSpeedScale: number
+  maximumSpeed: number
+  minimumSpeed: number
+  approachRate: number
   velocityEaseRate: number
+  arrivalThreshold: number
 }) {
-  const turnDistance = clamp(maxPosition * 0.1, 0.8, 2.4)
-  const edgeDistance = Math.min(position, maxPosition - position)
-  const edgeRatio = maxPosition > 0 ? clamp(edgeDistance / turnDistance, 0, 1) : 1
-  const smoothedRatio = edgeRatio * edgeRatio * (3 - 2 * edgeRatio)
-  const edgeSpeedScale =
-    minimumEdgeSpeedScale + smoothedRatio * (1 - minimumEdgeSpeedScale)
-  const targetVelocity = stopping ? 0 : direction * speed * edgeSpeedScale
-  const velocityEase = 1 - Math.exp(-delta * velocityEaseRate)
-  const nextVelocity = velocity + (targetVelocity - velocity) * velocityEase
-  const nextPosition = position + nextVelocity * delta
+  const distance = targetPosition - position
+  if (Math.abs(distance) <= arrivalThreshold) {
+    return { position: targetPosition, velocity: 0, arrived: true }
+  }
 
-  if (nextPosition >= maxPosition) {
-    return { position: maxPosition, direction: -1 as const, velocity: 0 }
+  const direction = Math.sign(distance)
+  const targetSpeed = Math.min(
+    maximumSpeed,
+    Math.max(minimumSpeed, Math.abs(distance) * approachRate),
+  )
+  const velocityEase = 1 - Math.exp(-delta * velocityEaseRate)
+  const nextVelocity = velocity + (direction * targetSpeed - velocity) * velocityEase
+  const nextPosition = position + nextVelocity * delta
+  const remainingDistance = targetPosition - nextPosition
+  const crossedTarget = Math.sign(remainingDistance) !== direction
+
+  if (crossedTarget || Math.abs(remainingDistance) <= arrivalThreshold) {
+    return { position: targetPosition, velocity: 0, arrived: true }
   }
-  if (nextPosition <= 0) {
-    return { position: 0, direction: 1 as const, velocity: 0 }
-  }
-  return { position: nextPosition, direction, velocity: nextVelocity }
+
+  return { position: nextPosition, velocity: nextVelocity, arrived: false }
 }
 
 export function getEraMarkerColor(eraKey: string) {
