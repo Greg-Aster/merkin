@@ -59,7 +59,17 @@ export function initStorefrontMarketplace() {
     }
 
     image.addEventListener('load', () => markState('loaded'), { once: true })
-    image.addEventListener('error', () => markState('error'), { once: true })
+    image.addEventListener('error', () => {
+      if (image.srcset) {
+        image.srcset = ''
+        image.removeAttribute('sizes')
+        image.src = source
+        return
+      }
+      markState('error')
+    })
+    if (image.dataset.sizes) image.sizes = image.dataset.sizes
+    if (image.dataset.srcset) image.srcset = image.dataset.srcset
     image.src = source
   }
 

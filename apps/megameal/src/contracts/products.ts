@@ -19,6 +19,11 @@ export type CardThumbnail = {
   videoId?: string
 }
 
+export type ProductListingVisual = {
+  src: string
+  srcset?: string
+}
+
 export const storeCategories = [
   { id: 'all', label: 'All Products' },
   { id: 'equipment', label: 'Equipment' },
@@ -65,16 +70,45 @@ export function getProductHref(product: ProductEntry) {
 }
 
 export function getPrimaryProductVisual(product: ProductEntry) {
+  return getProductListingVisual(product)?.src
+}
+
+export function getProductListingVisual(
+  product: ProductEntry,
+): ProductListingVisual | null {
   const media = product.data.media ?? []
   for (const item of media) {
-    if (item.type === 'image' && item.src) return resolveStoreAsset(item.src)
-    if (item.thumbnail) return resolveStoreAsset(item.thumbnail)
-    if (item.poster) return resolveStoreAsset(item.poster)
+    const responsiveSources = item.thumbnailSources ?? []
+    const srcset = responsiveSources
+      .map(source => `${resolveStoreAsset(source.src)} ${source.width}w`)
+      .join(', ')
+    const withResponsiveSources = (src: string): ProductListingVisual => ({
+      src,
+      ...(srcset ? { srcset } : {}),
+    })
+
+    if (item.type === 'image' && item.src) {
+      return withResponsiveSources(resolveStoreAsset(item.src) ?? item.src)
+    }
+    if (item.thumbnail) {
+      return withResponsiveSources(
+        resolveStoreAsset(item.thumbnail) ?? item.thumbnail,
+      )
+    }
+    if (item.poster) {
+      return withResponsiveSources(
+        resolveStoreAsset(item.poster) ?? item.poster,
+      )
+    }
     if (item.type === 'youtube' && item.videoId) {
-      return `https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg`
+      return {
+        src: `https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg`,
+      }
     }
   }
-  return resolveStoreAsset(product.data.image)
+
+  const legacyImage = resolveStoreAsset(product.data.image)
+  return legacyImage ? { src: legacyImage } : null
 }
 
 function isGalleryMediaType(type: string): type is MediaGalleryItem['type'] {
