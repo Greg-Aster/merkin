@@ -424,7 +424,7 @@ $: if (screenContentMesh && screenContentMaterial) {
     Boolean(screenModel)
   screenContentMesh.visible = true
   screenContentMaterial.colorWrite = true
-  screenContentMaterial.depthTest = false
+  screenContentMaterial.depthTest = true
   screenContentMaterial.depthWrite = false
   screenContentMesh.onBeforeRender = renderer => {
     const renderTarget = renderer.getRenderTarget()
@@ -433,12 +433,12 @@ $: if (screenContentMesh && screenContentMaterial) {
       Boolean(renderTarget) && renderTargetName === 'HomeIntroLogoGlitch.logo'
 
     screenContentMaterial!.colorWrite = !isLogoGlitchPass
-    screenContentMaterial!.depthTest = false
+    screenContentMaterial!.depthTest = true
     screenContentMaterial!.depthWrite = false
   }
   screenContentMesh.onAfterRender = () => {
     screenContentMaterial!.colorWrite = true
-    screenContentMaterial!.depthTest = false
+    screenContentMaterial!.depthTest = true
     screenContentMaterial!.depthWrite = false
   }
 }
@@ -527,7 +527,7 @@ useTask(delta => {
 				side={frontSide}
 				blending={normalBlending}
 				transparent={true}
-				depthTest={false}
+				depthTest={true}
 				depthWrite={false}
 			/>
 		</T.Mesh>
@@ -540,7 +540,7 @@ useTask(delta => {
 				transparent={true}
 				opacity={primary ? 0.32 : 0.16}
 				blending={additiveBlending}
-				depthTest={false}
+				depthTest={true}
 				depthWrite={false}
 			/>
 		</T.Mesh>
@@ -549,14 +549,14 @@ useTask(delta => {
 	{#if screenTextTexture}
 		<T.Mesh position={[0, 0.01, textSurfaceZ]} renderOrder={90}>
 			<T.PlaneGeometry args={[textPlaneWidth, textPlaneHeight]} />
-			<T.MeshBasicMaterial map={screenTextTexture} side={frontSide} transparent={true} opacity={textOpacity} blending={normalBlending} depthTest={false} depthWrite={false} />
+			<T.MeshBasicMaterial map={screenTextTexture} side={frontSide} transparent={true} opacity={textOpacity} blending={normalBlending} depthTest={true} depthWrite={false} />
 		</T.Mesh>
 	{/if}
 
 	{#if screenInfoTexture}
 		<T.Mesh position={[0, 0.018, textSurfaceZ + 0.006]} renderOrder={91}>
 			<T.PlaneGeometry args={[textPlaneWidth, textPlaneHeight]} />
-			<T.MeshBasicMaterial map={screenInfoTexture} side={frontSide} transparent={true} opacity={infoTextOpacity} blending={normalBlending} depthTest={false} depthWrite={false} />
+			<T.MeshBasicMaterial map={screenInfoTexture} side={frontSide} transparent={true} opacity={infoTextOpacity} blending={normalBlending} depthTest={true} depthWrite={false} />
 		</T.Mesh>
 	{/if}
 

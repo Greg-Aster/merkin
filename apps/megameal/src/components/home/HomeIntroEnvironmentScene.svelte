@@ -8,7 +8,7 @@ import HomeIntroLogoModel from './HomeIntroLogoModel.svelte'
 import HomeIntroParticleField from './HomeIntroParticleField.svelte'
 import HomeIntroRingGlow from './HomeIntroRingGlow.svelte'
 import HomeIntroSceneBackdrop from './HomeIntroSceneBackdrop.svelte'
-import HomeIntroTentacleModel from './HomeIntroTentacleModel.svelte'
+import HomeIntroTentacleSprite from './HomeIntroTentacleSprite.svelte'
 import { homeIntroParticleClusters } from './homeIntroParticleClusters'
 import { hashHomeIntroUnit } from './homeIntroSceneMath'
 import {
@@ -67,6 +67,7 @@ let ScreenPanel: ScreenPanelComponent | null = null
 let carouselComponentPromise: Promise<void> | null = null
 let screenOrbitInitialized = false
 let tentacleMounted = false
+let tentacleOrbitPhase = 0
 let logoImpactSfxIntroStartedAt = 0
 let portalIntroReadyDispatched = false
 
@@ -474,7 +475,11 @@ function getScreenOrbitTarget(index: number, visualSelectedIndex: number) {
   )
   const pitch = Math.sin(spiral) * -0.025
   const roll = Math.sin(spiral) * 0.018
-  const scale = (portraitMobile ? [1.18, 1.18, 1.18] : [1.12, 1.12, 1.12]) as [number, number, number]
+  const scale = (portraitMobile ? [1.18, 1.18, 1.18] : [1.12, 1.12, 1.12]) as [
+    number,
+    number,
+    number,
+  ]
 
   return { x, y, z, pitch, yaw: outwardYaw, roll, scale }
 }
@@ -555,6 +560,7 @@ useTask(delta => {
   const visualScrollScreens =
     visualSelectedIndex - primaryScreenIndex + introOffsetScreens
   const spiralPhase = visualSelectedIndex * screenAngleStep
+  tentacleOrbitPhase = spiralPhase
   const logoCarouselPhase = visualScrollScreens * screenAngleStep
   const screenVerticalStep = screenStepY * (portraitMobile ? 0.9 : 1)
   const logoScrollRise = Math.max(0, visualScrollScreens) * screenVerticalStep
@@ -614,8 +620,6 @@ useTask(delta => {
     )
     const tentacleTargetY =
       tentacleInitialPosition[1] + tentacleTravelScreens * screenVerticalStep
-    const tentacleYaw =
-      -spiralPhase + time * 0.055 + input.dragX * 0.35
 
     tentacleRoot.visible = true
     tentacleRoot.scale.fromArray(tentacleRootScale)
@@ -623,11 +627,7 @@ useTask(delta => {
     tentacleRoot.position.y +=
       (tentacleTargetY - tentacleRoot.position.y) * ease
     tentacleRoot.position.z = tentacleInitialPosition[2]
-    tentacleRoot.rotation.x =
-      -0.045 + Math.sin(time * 0.22) * 0.025 + input.dragY * 0.08
-    tentacleRoot.rotation.y +=
-      (tentacleYaw - tentacleRoot.rotation.y) * ease
-    tentacleRoot.rotation.z = Math.sin(time * 0.17 + 0.8) * 0.018
+    tentacleRoot.rotation.set(0, 0, 0)
   }
 
   if (emblem) {
@@ -749,7 +749,10 @@ useTask(delta => {
 
 	{#if tentacleMounted}
 		<T.Group bind:ref={tentacleRoot} position={tentacleInitialPosition} scale={tentacleRootScale}>
-			<HomeIntroTentacleModel targetHeight={tentacleTargetHeight} />
+			<HomeIntroTentacleSprite
+				targetHeight={tentacleTargetHeight}
+				orbitPhase={tentacleOrbitPhase}
+			/>
 		</T.Group>
 	{/if}
 
