@@ -2,8 +2,8 @@
 import type { CollectionEntry } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import {
-  getPrimaryProductVisual,
   getProductHref,
+  getProductListingVisual,
 } from '../../contracts/products'
 
 export interface Props {
@@ -29,7 +29,7 @@ const mediaItems =
           : []),
       ]
 
-const thumbnail = getPrimaryProductVisual(product)
+const thumbnail = getProductListingVisual(product)
 
 const mediaKinds = Array.from(
   new Set(
@@ -107,7 +107,9 @@ const availabilityTone =
 				<Fragment>
 					<img
 						alt={product.data.name}
-						data-src={thumbnail}
+						data-src={thumbnail.src}
+						data-srcset={thumbnail.srcset}
+						data-sizes="(max-width: 720px) 10rem, (max-width: 1279px) 40vw, 19rem"
 						data-state="pending"
 						data-store-product-image
 						decoding="async"
@@ -120,7 +122,13 @@ const availabilityTone =
 						<span>Loading asset</span>
 					</div>
 					<noscript>
-						<img src={thumbnail} alt={product.data.name} loading="lazy" />
+						<img
+							src={thumbnail.src}
+							srcset={thumbnail.srcset}
+							sizes="(max-width: 720px) 10rem, (max-width: 1279px) 40vw, 19rem"
+							alt={product.data.name}
+							loading="lazy"
+						/>
 					</noscript>
 				</Fragment>
 			) : (

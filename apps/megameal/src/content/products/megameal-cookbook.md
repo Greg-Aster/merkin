@@ -25,6 +25,11 @@ rating: 4.4
 media:
   - type: image
     src: "/posts/cookbook/cookbook.png"
+    thumbnailSources:
+      - src: "/posts/cookbook/cookbook-card-320.webp"
+        width: 320
+      - src: "/posts/cookbook/cookbook-card-640.webp"
+        width: 640
     alt: "The MegaMeal Cookbook first edition cover"
     caption: "First-edition archive cover with culinary index markings intact."
   - type: video

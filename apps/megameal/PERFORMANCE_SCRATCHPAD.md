@@ -140,6 +140,91 @@ approved responsive-media Phase 2 goal begin. Broad shared-grid or Navbar
 cleanup remains deferred, and public-tree moves still require their separate
 destructive-boundary approval.
 
+## Phase 2 responsive archive/store media (2026-09-01)
+
+The separately approved responsive-media implementation is complete on the
+isolated Phase 2 candidate based on Phase 1 reconciliation commit `8a6e8e2e`.
+It does not complete or waive Phase 1's outstanding integration, deployment,
+or physical-mobile gates.
+
+Implemented:
+
+- `ArchiveAtmosphere.svelte` remains the one archive poster/video owner. Its
+  compact 768 px WebP, original 1920 px PNG fallback, progressive video
+  admission, controls, reduced-motion policy, and failure handling are
+  unchanged. Wide viewports now select visually reviewed 1280 px or 1920 px
+  WebP poster candidates through the existing `<picture>`.
+- Product content remains the media-metadata owner. The media schema now accepts
+  explicit width-qualified `thumbnailSources`, and the existing product
+  contract resolves one listing visual for the featured teaser, spotlight, and
+  canonical marketplace card instead of introducing a component-local asset
+  map.
+- `storefrontController.ts` remains the one progressive store-image admission
+  owner. It applies each image's existing `sizes` and generated `srcset` before
+  attaching the original `data-src`. If a responsive candidate fails, the same
+  owner clears that source set and retries the original source before exposing
+  the existing `Asset unavailable` state.
+- Added 320 px and 640 px WebP card candidates for the four oversized local PNG
+  listings, plus 1280 px and 1920 px archive WebPs. No original public URL or
+  source asset was moved, renamed, replaced, or deleted. No CSS, component,
+  hydration boundary, dependency, shared-grid, Navbar, or game owner was added;
+  no CSS file, hydration directive, shared-grid, Navbar, or game owner changed.
+
+Asset and browser evidence:
+
+- The four original listing PNGs total 4,237,012 bytes. Their 320 px candidates
+  total 57,000 bytes (98.65% smaller); their 640 px candidates total 152,710
+  bytes (96.40% smaller). A cold 390 px DPR 1 production-preview run requested
+  the four 320 px candidates rather than those PNGs and transferred 58,072
+  encoded bytes for them.
+- The 2,778,544-byte desktop archive PNG is retained as fallback. Production
+  preview selected the 122,672-byte 1280 px WebP at 768 px and the 192,096-byte
+  1920 px WebP at desktop width, a 93.09% source-size reduction for the desktop
+  candidate. The existing 47,632-byte compact poster remained selected at
+  390 px.
+- Side-by-side visual review preserved text, linework, color, composition, and
+  alpha-opaque presentation. Source-scaled versus decoded-candidate SSIM was
+  0.9861 for the archive and 0.9805 to 0.9889 for the four listing images.
+- Production-browser checks covered 390 px DPR 1 and 2, 768 px DPR 1 and 2, and
+  1440 px DPR 1. The document fit every viewport; cards selected the 320 px or
+  640 px candidate appropriate to their rendered slot; the stacked tablet
+  spotlight selected 640 px media; and no original oversized listing PNG was
+  selected during normal store rendering.
+- Store search, category filtering, price sorting, seven product links, direct
+  product navigation, browser-history return, progressive controller rebinding,
+  and all listing load states passed. A deliberately blocked responsive
+  candidate recovered to the original PNG and the loaded presentation.
+- Mobile archive Play and Pause worked with the existing video owner. Reduced
+  motion remained poster-only with no video or motion control. Normal checks
+  reported no console error or warning, exception, hydration failure, failed
+  asset, HTTP error, or horizontal document overflow.
+
+Validation passed:
+
+- `pnpm --dir apps/megameal type-check`
+- `pnpm --dir apps/megameal audit:contracts`
+- `pnpm --dir apps/megameal audit:css` (the previously deferred
+  `PortalSponsoredBloom.astro` warning remains; this batch does not change it
+  or raise the baseline)
+- `pnpm --dir apps/megameal audit:css:changed`
+- `pnpm --dir apps/megameal audit:css:strict`
+- `pnpm --dir apps/megameal build` (367 pages; built-HTML and Pagefind gates
+  passed). Two earlier attempts reached the existing Google Docs build path and
+  timed out on external exports; all 14 exports returned HTTP 200 when checked,
+  and the exact final retry completed.
+- `pnpm --dir apps/game.megameal build` (static collision check, 175-file type
+  check, and five-page production build passed). The current game app has its
+  own public tree and no caller of the new derivative URLs.
+- `git diff --check`
+
+The implementation is locally complete but not deployed. Exact deployed
+transfer evidence remains pending integration of the Phase 1 base plus this
+candidate. Physical-device proof must be reported by Greg and is not claimed
+here. The multi-gigabyte `public/generated` boundary, authoring-file moves,
+cross-game deduplication, broad grid/Navbar cleanup, Tailwind/PostCSS migration,
+and unrelated dependency experiments remain outside this goal and require
+their previously documented approval and validation boundaries.
+
 ## Measured baseline
 
 The browser measurements used the 2026-08-29 baseline production build served

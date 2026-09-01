@@ -5,8 +5,8 @@ import MarketplaceListingCard from '../components/store/MarketplaceListingCard.a
 import {
   getAvailabilityCounts,
   getCategoryCounts,
-  getPrimaryProductVisual,
   getProductHref,
+  getProductListingVisual,
   getProductSearchText,
   productAvailabilityDisplay,
   publicProductCollectionFilter,
@@ -20,12 +20,13 @@ const allProducts = sortFeaturedProductsFirst(
 )
 
 const featuredProduct = allProducts.find(p => p.data.featured)
-const featuredPrimaryVisual = featuredProduct
-  ? getPrimaryProductVisual(featuredProduct)
+const featuredListingVisual = featuredProduct
+  ? getProductListingVisual(featuredProduct)
   : undefined
-const spotlightProducts = allProducts
+const spotlightListings = allProducts
   .filter(product => product.id !== featuredProduct?.id)
   .slice(0, 3)
+  .map(product => ({ product, visual: getProductListingVisual(product) }))
 
 const categories = storeCategories
 const categoryCounts = getCategoryCounts(allProducts)
@@ -64,12 +65,14 @@ const companionCount = allProducts.filter(
 				<aside class="storefront-featured-teaser overflow-hidden rounded-[1.35rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.96))] shadow-2xl">
 					<a href={getProductHref(featuredProduct)} data-sfx-hover="hover-emphasis" data-sfx-click="sweep" class="grid grid-cols-[8.75rem_minmax(0,1fr)] gap-3 p-3 text-slate-100 transition hover:bg-cyan-400/5">
 						<div class="relative overflow-hidden rounded-[1rem] border border-slate-700/70 bg-slate-900">
-							{featuredPrimaryVisual ? (
+							{featuredListingVisual ? (
 								<Fragment>
 									<img
 										alt={featuredProduct.data.name}
 										class="aspect-square h-full w-full object-cover"
-										data-src={featuredPrimaryVisual}
+										data-src={featuredListingVisual.src}
+										data-srcset={featuredListingVisual.srcset}
+										data-sizes="8.75rem"
 										data-state="pending"
 										data-store-product-image
 										decoding="async"
@@ -79,7 +82,12 @@ const companionCount = allProducts.filter(
 										<span>Loading asset</span>
 									</div>
 									<noscript>
-										<img src={featuredPrimaryVisual} alt={featuredProduct.data.name} />
+										<img
+											src={featuredListingVisual.src}
+											srcset={featuredListingVisual.srcset}
+											sizes="8.75rem"
+											alt={featuredProduct.data.name}
+										/>
 									</noscript>
 								</Fragment>
 							) : (
@@ -261,21 +269,23 @@ const companionCount = allProducts.filter(
 						</div>
 					</div>
 
-					{spotlightProducts.length > 0 && (
+					{spotlightListings.length > 0 && (
 					<section class="storefront-spotlight">
 						<div class="storefront-panel__header">
 							<p>Sponsored Shelf</p>
 							<h2>Secondary Signals</h2>
 						</div>
 						<div class="storefront-spotlight__grid">
-								{spotlightProducts.map((product) => (
+								{spotlightListings.map(({ product, visual }) => (
 								<a href={getProductHref(product)} data-sfx-hover="hover-soft" data-sfx-click="soft" class="storefront-spotlight__card">
 									<div class="storefront-spotlight__media">
-										{getPrimaryProductVisual(product) ? (
+										{visual ? (
 										<Fragment>
 											<img
 												alt={product.data.name}
-												data-src={getPrimaryProductVisual(product)}
+												data-src={visual.src}
+												data-srcset={visual.srcset}
+												data-sizes="(max-width: 820px) calc(100vw - 6.5rem), 7rem"
 												data-state="pending"
 												data-store-product-image
 												decoding="async"
@@ -286,7 +296,9 @@ const companionCount = allProducts.filter(
 											</div>
 											<noscript>
 												<img
-													src={getPrimaryProductVisual(product)}
+													src={visual.src}
+													srcset={visual.srcset}
+													sizes="(max-width: 820px) calc(100vw - 6.5rem), 7rem"
 													alt={product.data.name}
 													loading="lazy"
 												/>
