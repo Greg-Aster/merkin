@@ -217,13 +217,41 @@ Validation passed:
   own public tree and no caller of the new derivative URLs.
 - `git diff --check`
 
-The implementation is locally complete but not deployed. Exact deployed
-transfer evidence remains pending integration of the Phase 1 base plus this
-candidate. Physical-device proof must be reported by Greg and is not claimed
-here. The multi-gigabyte `public/generated` boundary, authoring-file moves,
-cross-game deduplication, broad grid/Navbar cleanup, Tailwind/PostCSS migration,
-and unrelated dependency experiments remain outside this goal and require
-their previously documented approval and validation boundaries.
+Remote build and preview evidence:
+
+- The isolated candidate is commit
+  `d61a0d783800554130a3db11883ff50b1a3ecb44` on branch
+  `codex/megameal-phase2-responsive-media-20260901`. The remote branch resolved
+  to that exact SHA while `origin/main` and `origin/dev` remained at published
+  commit `e2416b68`.
+- GitHub Actions preview run `33539023479` checked out the named branch and its
+  checkout log reported exact SHA `d61a0d783800554130a3db11883ff50b1a3ecb44`.
+  Its dependency install, Megameal production build, Pages setup, artifact
+  upload, and deployment-action jobs all reported success. A first run,
+  `33537912276`, was canceled after a runner checkout stalled for more than ten
+  minutes; it never installed dependencies or ran project code.
+- This green workflow result did **not** publish the candidate. The preview tree
+  measured 4,405,900,158 bytes before its existing greater-than-25-MB pruning
+  and 4,237,518,237 bytes afterward. The compressed Pages artifact was
+  3,903,440,870 bytes, above the documented 1 GB allowance. Although deployment
+  object `6206968223` was marked successful, the public Pages route retained the
+  previous 2026-09-01 02:06 deployment: the new 320 px cookbook derivative
+  returned HTTP 404 and the deployed store HTML contained none of this batch's
+  new card candidates.
+- No production Cloudflare deployment was attempted. The existing manual
+  Cloudflare workflow would publish the selected ref as its `main` production
+  branch, which is not an isolated preview and remains unsafe while Greg's
+  concurrent Megameal work is active.
+
+The implementation is locally complete and remotely build-validated but is not
+deployed. Exact deployed transfer evidence remains pending safe integration of
+the Phase 1 base plus this candidate. Physical-device proof must be reported by
+Greg and is not claimed here. The failed Pages publication is direct evidence
+for the separately proposed multi-gigabyte deployment-boundary goal, but it does
+not authorize public-tree moves in this responsive-media goal. Authoring-file
+moves, cross-game deduplication, broad grid/Navbar cleanup, Tailwind/PostCSS
+migration, and unrelated dependency experiments remain outside this goal and
+require their previously documented approval and validation boundaries.
 
 ## Measured baseline
 
