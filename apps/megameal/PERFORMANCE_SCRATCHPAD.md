@@ -1,6 +1,6 @@
 # Megameal Performance Scratchpad
 
-Current source reconciliation: 2026-08-31. The measurements in the individual
+Current source reconciliation: 2026-09-01. The measurements in the individual
 batch records are point-in-time evidence, not a claim that every historical
 implementation remains active. Current status and Phase 1 scope are controlled
 by the reconciliation below.
@@ -14,10 +14,11 @@ or permanent low-quality fallbacks.
 
 Current source, live imports, and hydration directives were checked against
 every batch and active-owner entry. The most recent completed production build
-and focused browser probes prove the owned Batches 17 and 18 state before later
-concurrent timeline/layout edits; they do not prove the now-mixed combined
-worktree. No new cleanup discovery belongs in Phase 1 after this checkpoint
-unless it repairs a measured regression or an existing completion gate.
+and focused browser probes now cover the published timeline/home base plus the
+isolated product-overflow repair. They do not prove Greg's newer uncommitted
+tentacle-frame changes in the shared worktree. No new cleanup discovery belongs
+in Phase 1 after this checkpoint unless it repairs a measured regression or an
+existing completion gate.
 
 Product decisions that override older batch records:
 
@@ -53,20 +54,27 @@ The following source claims remain true in the current tree:
 | 14 | Current: PhotoSwipe and OverlayScrollbars CSS/runtime admission remains target-conditional in the shared layout. |
 | 15 | Current: KaTeX styling remains conditional and covered by the ordinary-post built-output gate. |
 | 16 | Current: HTML compression preserves empty Svelte raw-HTML boundaries and the built audit requires them. |
-| 17 | Current and locally validated: the shared banner uses containing-block width and no longer creates scrollbar-width overflow. |
-| 18 | Current and locally validated: audio vendors load on intent and Megameal's adapters use narrow blog-core exports, so Marked is absent from the universal production client graph. |
+| 17 | Current and locally validated on the final isolated candidate: the shared banner uses containing-block width and no longer creates scrollbar-width overflow. |
+| 18 | Current and locally validated on the final isolated candidate: audio vendors load on intent and Megameal's adapters use narrow blog-core exports, so Marked is absent from the universal production client graph. |
 
-Current lightweight validation passes Megameal type-check,
-site/home/timeline contracts, complete and changed-file CSS audits, and diff
-whitespace validation. The most recent exact owned-change production build
-generated 367 pages, retained the six-stylesheet ordinary-post gate, found 54
-timeline events plus the custom author contract, preserved Svelte hydration
-boundaries, and emitted no `vendor-markdown` chunk. Its focused browser matrix
-covered home portal KTX2 loading, timeline render/zoom/layout/profile, ordinary
-post, archive, store, audio intent and recovery, responsive overflow, and
-shared-banner consumers. Because additional timeline/layout/contract files
-subsequently changed concurrently, that build and browser matrix must be rerun
-on the final ownership-stable source before Phase 1 completion.
+The isolated Phase 1 source candidate is `9262962d`, based on published commit
+`e2416b68`. Megameal type-check, contracts, complete CSS audit, production
+build, and diff whitespace validation pass. The build generated 367 pages,
+retained the six-stylesheet ordinary-post gate, found 38 timeline events plus
+the custom author contract, and preserved the required Svelte hydration
+boundaries. Both changed CSS owners are byte-identical to the earlier
+strict/changed-file-audited product repair, which reported zero existing and
+zero new CSS debt.
+
+The final production-browser matrix passed 21 product-route viewport checks:
+all seven product routes fit 390 px, 768 px, and desktop viewports with their
+viewers visible. Focused checks also passed for mobile and desktop timeline
+render/selection/banner sizing, hidden cart admission on non-store routes,
+store cart add/open/persistence/remove, product media zoom, parallax, direct
+load and navigation, audio opt-in/control state, and profile/avatar restoration
+when switching from one to two columns. It reported no app console errors,
+hydration failures, failed requests, failed assets, or HTTP error responses.
+Headless Chrome emitted only its environment-specific software-WebGL warnings.
 
 ### Implemented but awaiting deployed or physical-device proof
 
@@ -74,8 +82,10 @@ on the final ownership-stable source before Phase 1 completion.
   mobile evidence. Home portal interaction, timeline interaction/LCP, archive
   media, store media, profile admission, and audio output still need a real
   mobile-device pass after deployment.
-- No deployed PageSpeed Insights or field Core Web Vitals result proves the
-  current uncommitted source. Those measurements must follow commit and deploy.
+- No deployed PageSpeed Insights, Lighthouse, or field Core Web Vitals result
+  proves the isolated candidate. Those measurements must follow integration and
+  deployment of the exact final commit. PageSpeed HTTP 429 remains an external
+  quota limitation rather than a code-repair task.
 - The desktop archive still uses the original wide PNG, and store cards still
   use their current source images. Responsive derivatives for both are
   explicitly deferred to the separate future media-optimization goal below;
@@ -86,17 +96,12 @@ on the final ownership-stable source before Phase 1 completion.
 This list is frozen. Do not add cleanup to it merely because a source search
 finds another refactor opportunity.
 
-1. Validate the implemented P0 cart repair on the exact final source. The
-   universal Navbar now admits its existing `StoreCartButton` with
-   `client:visible`, and the button no longer initializes the cart. The existing
-   store-route `StoreCartRuntime` remains the event and initialization owner.
-   Proof must cover direct load and client navigation into and out of the store.
-2. Re-run the focused production/browser matrix after the final owned source
-   set is stable, then deploy that exact commit and record physical-mobile plus
-   deployed PageSpeed evidence.
-3. Commit only the reconciled owned files and reach an ownership-clean
-   worktree. The current tree also contains concurrent home-portal source/CSS
-   edits, so Phase 1 cannot yet claim a clean publication boundary.
+1. Integrate the isolated candidate without absorbing or reverting the current
+   uncommitted tentacle-frame work, then deploy that exact final commit.
+2. Record the deployed SHA and deployed browser/Lighthouse evidence.
+3. Record Greg's physical-mobile acceptance for timeline, product overflow,
+   cart, profile/avatar, and audible audio, or Greg's explicit waiver. Local
+   emulation is not physical proof.
 
 ### Explicitly deferred Phase 2 work
 
@@ -128,10 +133,125 @@ remaining P0 decision is fixed or explicitly deferred, focused local validation
 passes on the exact final source, deployed and physical-mobile evidence is
 reported, the owned changes are committed, and worktree ownership is clean.
 
-The exact stopping point is after the narrow cart repair is validated, the owned
-patch is committed and deployed, deployed evidence is recorded, and all local
-validation processes are closed. Do not continue into responsive assets, broad
-shared-grid or Navbar cleanup, or public-tree work.
+The exact stopping point is after the narrow cart repair is integrated and
+deployed, the exact deployed SHA and deployed/physical evidence are recorded,
+and all local validation processes are closed. Only then may the separately
+approved responsive-media Phase 2 goal begin. Broad shared-grid or Navbar
+cleanup remains deferred, and public-tree moves still require their separate
+destructive-boundary approval.
+
+## Phase 2 responsive archive/store media (2026-09-01)
+
+The separately approved responsive-media implementation is complete on the
+isolated Phase 2 candidate based on Phase 1 reconciliation commit `8a6e8e2e`.
+It does not complete or waive Phase 1's outstanding integration, deployment,
+or physical-mobile gates.
+
+Implemented:
+
+- `ArchiveAtmosphere.svelte` remains the one archive poster/video owner. Its
+  compact 768 px WebP, original 1920 px PNG fallback, progressive video
+  admission, controls, reduced-motion policy, and failure handling are
+  unchanged. Wide viewports now select visually reviewed 1280 px or 1920 px
+  WebP poster candidates through the existing `<picture>`.
+- Product content remains the media-metadata owner. The media schema now accepts
+  explicit width-qualified `thumbnailSources`, and the existing product
+  contract resolves one listing visual for the featured teaser, spotlight, and
+  canonical marketplace card instead of introducing a component-local asset
+  map.
+- `storefrontController.ts` remains the one progressive store-image admission
+  owner. It applies each image's existing `sizes` and generated `srcset` before
+  attaching the original `data-src`. If a responsive candidate fails, the same
+  owner clears that source set and retries the original source before exposing
+  the existing `Asset unavailable` state.
+- Added 320 px and 640 px WebP card candidates for the four oversized local PNG
+  listings, plus 1280 px and 1920 px archive WebPs. No original public URL or
+  source asset was moved, renamed, replaced, or deleted. No CSS, component,
+  hydration boundary, dependency, shared-grid, Navbar, or game owner was added;
+  no CSS file, hydration directive, shared-grid, Navbar, or game owner changed.
+
+Asset and browser evidence:
+
+- The four original listing PNGs total 4,237,012 bytes. Their 320 px candidates
+  total 57,000 bytes (98.65% smaller); their 640 px candidates total 152,710
+  bytes (96.40% smaller). A cold 390 px DPR 1 production-preview run requested
+  the four 320 px candidates rather than those PNGs and transferred 58,072
+  encoded bytes for them.
+- The 2,778,544-byte desktop archive PNG is retained as fallback. Production
+  preview selected the 122,672-byte 1280 px WebP at 768 px and the 192,096-byte
+  1920 px WebP at desktop width, a 93.09% source-size reduction for the desktop
+  candidate. The existing 47,632-byte compact poster remained selected at
+  390 px.
+- Side-by-side visual review preserved text, linework, color, composition, and
+  alpha-opaque presentation. Source-scaled versus decoded-candidate SSIM was
+  0.9861 for the archive and 0.9805 to 0.9889 for the four listing images.
+- Production-browser checks covered 390 px DPR 1 and 2, 768 px DPR 1 and 2, and
+  1440 px DPR 1. The document fit every viewport; cards selected the 320 px or
+  640 px candidate appropriate to their rendered slot; the stacked tablet
+  spotlight selected 640 px media; and no original oversized listing PNG was
+  selected during normal store rendering.
+- Store search, category filtering, price sorting, seven product links, direct
+  product navigation, browser-history return, progressive controller rebinding,
+  and all listing load states passed. A deliberately blocked responsive
+  candidate recovered to the original PNG and the loaded presentation.
+- Mobile archive Play and Pause worked with the existing video owner. Reduced
+  motion remained poster-only with no video or motion control. Normal checks
+  reported no console error or warning, exception, hydration failure, failed
+  asset, HTTP error, or horizontal document overflow.
+
+Validation passed:
+
+- `pnpm --dir apps/megameal type-check`
+- `pnpm --dir apps/megameal audit:contracts`
+- `pnpm --dir apps/megameal audit:css` (the previously deferred
+  `PortalSponsoredBloom.astro` warning remains; this batch does not change it
+  or raise the baseline)
+- `pnpm --dir apps/megameal audit:css:changed`
+- `pnpm --dir apps/megameal audit:css:strict`
+- `pnpm --dir apps/megameal build` (367 pages; built-HTML and Pagefind gates
+  passed). Two earlier attempts reached the existing Google Docs build path and
+  timed out on external exports; all 14 exports returned HTTP 200 when checked,
+  and the exact final retry completed.
+- `pnpm --dir apps/game.megameal build` (static collision check, 175-file type
+  check, and five-page production build passed). The current game app has its
+  own public tree and no caller of the new derivative URLs.
+- `git diff --check`
+
+Remote build and preview evidence:
+
+- The isolated candidate is commit
+  `d61a0d783800554130a3db11883ff50b1a3ecb44` on branch
+  `codex/megameal-phase2-responsive-media-20260901`. The remote branch resolved
+  to that exact SHA while `origin/main` and `origin/dev` remained at published
+  commit `e2416b68`.
+- GitHub Actions preview run `33539023479` checked out the named branch and its
+  checkout log reported exact SHA `d61a0d783800554130a3db11883ff50b1a3ecb44`.
+  Its dependency install, Megameal production build, Pages setup, artifact
+  upload, and deployment-action jobs all reported success. A first run,
+  `33537912276`, was canceled after a runner checkout stalled for more than ten
+  minutes; it never installed dependencies or ran project code.
+- This green workflow result did **not** publish the candidate. The preview tree
+  measured 4,405,900,158 bytes before its existing greater-than-25-MB pruning
+  and 4,237,518,237 bytes afterward. The compressed Pages artifact was
+  3,903,440,870 bytes, above the documented 1 GB allowance. Although deployment
+  object `6206968223` was marked successful, the public Pages route retained the
+  previous 2026-09-01 02:06 deployment: the new 320 px cookbook derivative
+  returned HTTP 404 and the deployed store HTML contained none of this batch's
+  new card candidates.
+- No production Cloudflare deployment was attempted. The existing manual
+  Cloudflare workflow would publish the selected ref as its `main` production
+  branch, which is not an isolated preview and remains unsafe while Greg's
+  concurrent Megameal work is active.
+
+The implementation is locally complete and remotely build-validated but is not
+deployed. Exact deployed transfer evidence remains pending safe integration of
+the Phase 1 base plus this candidate. Physical-device proof must be reported by
+Greg and is not claimed here. The failed Pages publication is direct evidence
+for the separately proposed multi-gigabyte deployment-boundary goal, but it does
+not authorize public-tree moves in this responsive-media goal. Authoring-file
+moves, cross-game deduplication, broad grid/Navbar cleanup, Tailwind/PostCSS
+migration, and unrelated dependency experiments remain outside this goal and
+require their previously documented approval and validation boundaries.
 
 ## Measured baseline
 
@@ -1378,8 +1498,8 @@ a visually reviewed high-resolution desktop poster derivative remain pending.
 
 Status: duplicate card ownership and progressive product-media attachment are
 completed and browser-verified in Batch 4. Responsive derivatives for the large
-source images remain frozen Phase 1 work; broader CSS/controller fan-out cleanup
-is explicitly deferred to Phase 2.
+source images are explicitly deferred to the separate Phase 2 media goal;
+broader CSS/controller fan-out cleanup is also deferred.
 
 - Owner: `src/pages/store.astro`, `src/contracts/products.ts`,
   `MarketplaceListingCard.astro`, and `storefrontController.ts`.
@@ -1501,16 +1621,18 @@ part of Phase 1 reconciliation.
 
 ## Frozen Phase 1 next decisions
 
-1. Validate the implemented hidden-cart admission repair; do not expand it into
-   another Navbar or cart-controller refactor.
-2. Keep archive/store responsive derivatives deferred to the proposed future
-   media-optimization goal.
-3. Stabilize worktree ownership, rerun the final focused matrix, and commit only
-   the owned Phase 1 set.
-4. Deploy that exact commit and report real-mobile plus deployed PageSpeed
-   evidence before claiming Phase 1 complete.
-5. Start either proposed asset/media goal only with separate Project Owner
-   approval.
+1. The hidden-cart admission and product-overflow repairs are implemented and
+   locally validated; do not expand them into Navbar, grid, contract, or cart
+   controller refactors.
+2. Integrate and deploy the isolated candidate without absorbing or reverting
+   the dirty tentacle-frame work.
+3. Report the deployed SHA and deployed browser/Lighthouse evidence.
+4. Obtain Greg's real-mobile acceptance or explicit waiver before claiming
+   Phase 1 complete.
+5. Begin the responsive archive/store media goal only after Phase 1 closes.
+   The shared public/generated boundary still requires a separate explicit
+   destructive-boundary approval before any move, rename, deduplication, or
+   deletion.
 
 ## Completion gate for each implementation batch
 

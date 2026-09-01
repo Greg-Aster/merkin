@@ -15,6 +15,8 @@ type ArchiveMediaPolicy = 'pending' | 'automatic' | 'manual' | 'reduced-motion'
 
 export let videoSrc = '/assets/banner/archive_1.webm'
 export let posterSrc = '/assets/banner/archive_still.png'
+export let posterSrcset =
+  '/assets/banner/archive-still-1280.webp 1280w, /assets/banner/archive-still-1920.webp 1920w'
 export let compactPosterSrc = '/assets/banner/home-intro-stills/archive.webp'
 export let playbackRate = 0.2
 
@@ -183,6 +185,7 @@ onMount(() => {
       srcset={compactPosterSrc}
       type="image/webp"
     />
+    <source srcset={posterSrcset} sizes="100vw" type="image/webp" />
     <img
       src={posterSrc}
       alt=""

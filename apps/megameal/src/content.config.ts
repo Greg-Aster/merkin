@@ -24,6 +24,14 @@ const mediaAssetSchema = z.object({
   videoId: z.string().optional(),
   poster: z.string().optional(),
   thumbnail: z.string().optional(),
+  thumbnailSources: z
+    .array(
+      z.object({
+        src: z.string(),
+        width: z.number().int().positive(),
+      }),
+    )
+    .optional(),
   alt: z.string().optional(),
   caption: z.string().optional(),
   lowPolyFallback: z.string().optional(),
