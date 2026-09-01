@@ -1,113 +1,146 @@
 <script lang="ts">
-import { T } from '@threlte/core'
+import { type Stage, T, useTask, useThrelte } from '@threlte/core'
 import { onMount } from 'svelte'
 import {
   ClampToEdgeWrapping,
+  DoubleSide,
+  type Group,
   LinearFilter,
   SRGBColorSpace,
-  TextureLoader,
   type Texture,
+  TextureLoader,
+  Vector3,
 } from 'three'
 
-type AtlasSegment = {
-  src: string
-  startFrame: number
-  frames: number
-  columns: number
-  rows: number
+type TentacleTile = {
+  index: number
+  sourceY: number
+  sourceHeight: number
+}
+
+type TentacleTileManifest = {
+  version: number
+  frameCount: number
+  sourceWidth: number
+  sourceHeight: number
+  crop: {
+    left: number
+    width: number
+  }
+  renderAspect: number
+  alphaTest: number
+  tileCount: number
+  tiles: TentacleTile[]
 }
 
 export let targetHeight = 5.75
 export let orbitPhase = 0
+export let motionStage: Stage
 
-const atlasFrames = 24
-const frameAspect = 689 / 1833
-const atlasSegments: AtlasSegment[] = [
-  {
-    src: '/assets/sprites/tentacle/atlas-24-1.webp',
-    startFrame: 0,
-    frames: 6,
-    columns: 3,
-    rows: 2,
-  },
-  {
-    src: '/assets/sprites/tentacle/atlas-24-2.webp',
-    startFrame: 6,
-    frames: 6,
-    columns: 3,
-    rows: 2,
-  },
-  {
-    src: '/assets/sprites/tentacle/atlas-24-3.webp',
-    startFrame: 12,
-    frames: 6,
-    columns: 3,
-    rows: 2,
-  },
-  {
-    src: '/assets/sprites/tentacle/atlas-24-4.webp',
-    startFrame: 18,
-    frames: 6,
-    columns: 3,
-    rows: 2,
-  },
-]
+const manifestSrc = '/assets/sprites/tentacle/tiles/manifest.json'
+const tileBaseSrc = '/assets/sprites/tentacle/tiles'
 const textureLoader = new TextureLoader()
 const tentacleDepthRenderOrder = 10
-const tentacleAlphaTest = 17 / 255
-const preloadBoundaryFrames = 1
+const doubleSide = DoubleSide
+const viewportOverscan = 1.28
+const phaseEpsilon = 0.0001
+const projectedTileTop = new Vector3()
+const projectedTileBottom = new Vector3()
+const { camera } = useThrelte()
 
-let atlasTextures: Array<Texture | null> = atlasSegments.map(() => null)
-let atlasTextureLoading = atlasSegments.map(() => false)
-let activeAtlasTexture: Texture | null = null
-let nextAtlasTexture: Texture | null = null
+let tileRoot: Group | null = null
+let manifest: TentacleTileManifest | null = null
+let tileTextures = new Map<string, Texture>()
+let loadingTileKeys = new Set<string>()
+let visibleTileIndexes: number[] = []
 let activeFrame = 0
+let displayedFrame = -1
+let scrollDirection = 1
+let lastOrbitPhase = orbitPhase
+let lastAdmissionKey = ''
 let loadToken = 0
 let mounted = false
 
-$: spriteScale = [targetHeight * frameAspect, targetHeight, 1] as [
-  number,
-  number,
-  number,
-]
-$: activeFrame = wrapFrame(
-  Math.round((orbitPhase / (Math.PI * 2)) * atlasFrames),
-)
-$: if (mounted) {
-  syncRequiredAtlasSegments(activeFrame, atlasTextures)
-}
-$: nextAtlasTexture = getAtlasTexture(activeFrame, atlasTextures)
-$: if (nextAtlasTexture) {
-  activeAtlasTexture = nextAtlasTexture
-  syncAtlasFrame(nextAtlasTexture, activeFrame)
+function wrapFrame(frame: number, frameCount: number) {
+  return ((frame % frameCount) + frameCount) % frameCount
 }
 
-function wrapFrame(frame: number) {
-  return ((frame % atlasFrames) + atlasFrames) % atlasFrames
+function getTileKey(frame: number, tileIndex: number) {
+  return `${frame}:${tileIndex}`
 }
 
-function getAtlasSegmentIndex(frame: number) {
-  return atlasSegments.findIndex(
-    segment =>
-      frame >= segment.startFrame &&
-      frame < segment.startFrame + segment.frames,
+function getTileSrc(frame: number, tileIndex: number) {
+  return `${tileBaseSrc}/frame-${String(frame).padStart(2, '0')}-tile-${tileIndex}.webp`
+}
+
+function arraysEqual(left: number[], right: number[]) {
+  return (
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
   )
 }
 
-function getAtlasSegment(frame: number) {
-  const segmentIndex = getAtlasSegmentIndex(frame)
-  return segmentIndex >= 0 ? atlasSegments[segmentIndex] : null
+function isFinitePositive(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0
 }
 
-function getAtlasTexture(
-  frame: number,
-  textures: Array<Texture | null>,
-) {
-  const segmentIndex = getAtlasSegmentIndex(frame)
-  return segmentIndex >= 0 ? textures[segmentIndex] : null
+function parseManifest(value: unknown): TentacleTileManifest {
+  if (!value || typeof value !== 'object') {
+    throw new Error('Tentacle tile manifest must be an object')
+  }
+
+  const candidate = value as Partial<TentacleTileManifest>
+  if (
+    candidate.version !== 1 ||
+    !Number.isInteger(candidate.frameCount) ||
+    !isFinitePositive(candidate.frameCount) ||
+    !Number.isInteger(candidate.sourceWidth) ||
+    !isFinitePositive(candidate.sourceWidth) ||
+    !Number.isInteger(candidate.sourceHeight) ||
+    !isFinitePositive(candidate.sourceHeight) ||
+    !candidate.crop ||
+    !Number.isInteger(candidate.crop.left) ||
+    !Number.isInteger(candidate.crop.width) ||
+    !isFinitePositive(candidate.crop.width) ||
+    !isFinitePositive(candidate.renderAspect) ||
+    !isFinitePositive(candidate.alphaTest) ||
+    !Number.isInteger(candidate.tileCount) ||
+    !isFinitePositive(candidate.tileCount) ||
+    !Array.isArray(candidate.tiles) ||
+    candidate.tiles.length !== candidate.tileCount
+  ) {
+    throw new Error('Tentacle tile manifest has an invalid geometry contract')
+  }
+
+  const tiles = candidate.tiles.map((tile, index) => {
+    if (
+      !tile ||
+      tile.index !== index ||
+      !Number.isInteger(tile.sourceY) ||
+      tile.sourceY < 0 ||
+      !Number.isInteger(tile.sourceHeight) ||
+      !isFinitePositive(tile.sourceHeight) ||
+      tile.sourceY + tile.sourceHeight > candidate.sourceHeight!
+    ) {
+      throw new Error(`Tentacle tile manifest entry ${index} is invalid`)
+    }
+    return tile
+  })
+
+  return {
+    ...candidate,
+    frameCount: candidate.frameCount,
+    sourceWidth: candidate.sourceWidth,
+    sourceHeight: candidate.sourceHeight,
+    crop: candidate.crop,
+    renderAspect: candidate.renderAspect,
+    alphaTest: candidate.alphaTest,
+    tileCount: candidate.tileCount,
+    tiles,
+  } as TentacleTileManifest
 }
 
-function configureAtlasTexture(texture: Texture) {
+function configureTileTexture(texture: Texture) {
   texture.colorSpace = SRGBColorSpace
   texture.generateMipmaps = false
   texture.minFilter = LinearFilter
@@ -118,133 +151,250 @@ function configureAtlasTexture(texture: Texture) {
   texture.needsUpdate = true
 }
 
-function syncAtlasFrame(texture: Texture, frame: number) {
-  const segment = getAtlasSegment(frame)
-  if (!segment) return
-
-  const localFrame = frame - segment.startFrame
-  const column = localFrame % segment.columns
-  const row = Math.floor(localFrame / segment.columns)
-
-  texture.repeat.set(1 / segment.columns, 1 / segment.rows)
-  texture.offset.set(column / segment.columns, 1 - (row + 1) / segment.rows)
-  texture.updateMatrix()
+function getTileScale(tile: TentacleTile) {
+  if (!manifest) return [0, 0, 1] as [number, number, number]
+  return [
+    targetHeight * manifest.renderAspect,
+    targetHeight * (tile.sourceHeight / manifest.sourceHeight),
+    1,
+  ] as [number, number, number]
 }
 
-function disposeAtlasTextures() {
-  atlasTextures.forEach(texture => texture?.dispose())
-  atlasTextures = atlasSegments.map(() => null)
-  atlasTextureLoading = atlasSegments.map(() => false)
-  activeAtlasTexture = null
-  nextAtlasTexture = null
+function getTileY(tile: TentacleTile) {
+  if (!manifest) return 0
+  const sourceCenter = tile.sourceY + tile.sourceHeight / 2
+  return (
+    targetHeight / 2 - (sourceCenter / manifest.sourceHeight) * targetHeight
+  )
 }
 
-function getRequiredAtlasSegmentIndexes(frame: number) {
-  const segmentIndex = getAtlasSegmentIndex(frame)
-  if (segmentIndex < 0) return new Set<number>()
+function getVisibleTileIndexes() {
+  const currentCamera = camera.current
+  if (!manifest || !tileRoot || !currentCamera) return []
 
-  const segment = atlasSegments[segmentIndex]
-  const localFrame = frame - segment.startFrame
-  const required = new Set([segmentIndex])
+  currentCamera.updateWorldMatrix(true, false)
+  tileRoot.updateWorldMatrix(true, false)
 
-  if (localFrame <= preloadBoundaryFrames) {
-    required.add(
-      (segmentIndex - 1 + atlasSegments.length) % atlasSegments.length,
+  return manifest.tiles
+    .filter(tile => {
+      const localTop =
+        targetHeight / 2 -
+        (tile.sourceY / manifest!.sourceHeight) * targetHeight
+      const localBottom =
+        targetHeight / 2 -
+        ((tile.sourceY + tile.sourceHeight) / manifest!.sourceHeight) *
+          targetHeight
+
+      projectedTileTop
+        .set(0, localTop, 0)
+        .applyMatrix4(tileRoot!.matrixWorld)
+        .project(currentCamera)
+      projectedTileBottom
+        .set(0, localBottom, 0)
+        .applyMatrix4(tileRoot!.matrixWorld)
+        .project(currentCamera)
+
+      const projectedTop = Math.max(projectedTileTop.y, projectedTileBottom.y)
+      const projectedBottom = Math.min(
+        projectedTileTop.y,
+        projectedTileBottom.y,
+      )
+      return (
+        projectedTop >= -viewportOverscan && projectedBottom <= viewportOverscan
+      )
+    })
+    .map(tile => tile.index)
+}
+
+function getRequiredTileKeys() {
+  if (!manifest || visibleTileIndexes.length === 0) return new Set<string>()
+
+  const requiredFrames = new Set([activeFrame])
+  if (displayedFrame >= 0) requiredFrames.add(displayedFrame)
+  if (displayedFrame === activeFrame) {
+    requiredFrames.add(
+      wrapFrame(activeFrame + scrollDirection, manifest.frameCount),
     )
   }
-  if (localFrame >= segment.frames - 1 - preloadBoundaryFrames) {
-    required.add((segmentIndex + 1) % atlasSegments.length)
-  }
 
-  return required
-}
-
-function syncRequiredAtlasSegments(
-  frame: number,
-  textures: Array<Texture | null>,
-) {
-  const required = getRequiredAtlasSegmentIndexes(frame)
-  const activeSegmentIndex = getAtlasSegmentIndex(frame)
-
-  required.forEach(segmentIndex => {
-    if (textures[segmentIndex] || atlasTextureLoading[segmentIndex]) return
-    loadAtlasSegment(
-      atlasSegments[segmentIndex],
-      segmentIndex,
-      loadToken,
-    )
+  const requiredKeys = new Set<string>()
+  requiredFrames.forEach(frame => {
+    visibleTileIndexes.forEach(tileIndex => {
+      requiredKeys.add(getTileKey(frame, tileIndex))
+    })
   })
+  return requiredKeys
+}
 
-  if (activeSegmentIndex < 0 || !textures[activeSegmentIndex]) return
-
+function disposeUnneededTileTextures() {
+  const requiredKeys = getRequiredTileKeys()
   let changed = false
-  const nextTextures = textures.map((texture, segmentIndex) => {
-    if (!texture || required.has(segmentIndex)) return texture
+  const nextTextures = new Map(tileTextures)
+
+  tileTextures.forEach((texture, key) => {
+    if (requiredKeys.has(key)) return
     texture.dispose()
+    nextTextures.delete(key)
     changed = true
-    return null
   })
 
-  if (changed) atlasTextures = nextTextures
+  if (changed) tileTextures = nextTextures
 }
 
-function loadAtlasSegment(
-  segment: AtlasSegment,
-  segmentIndex: number,
-  token: number,
-) {
-  atlasTextureLoading[segmentIndex] = true
+function tryPromoteActiveFrame() {
+  if (!manifest || visibleTileIndexes.length === 0) return
+  const ready = visibleTileIndexes.every(tileIndex =>
+    tileTextures.has(getTileKey(activeFrame, tileIndex)),
+  )
+  if (!ready || displayedFrame === activeFrame) return
+
+  displayedFrame = activeFrame
+  syncRequiredTileTextures()
+}
+
+function loadTileTexture(frame: number, tileIndex: number, token: number) {
+  const key = getTileKey(frame, tileIndex)
+  loadingTileKeys.add(key)
+  const src = getTileSrc(frame, tileIndex)
+
   textureLoader.load(
-    segment.src,
+    src,
     texture => {
+      loadingTileKeys.delete(key)
       if (!mounted || token !== loadToken) {
         texture.dispose()
         return
       }
 
-      atlasTextureLoading[segmentIndex] = false
-      configureAtlasTexture(texture)
-      const nextTextures = atlasTextures.slice()
-      nextTextures[segmentIndex]?.dispose()
-      nextTextures[segmentIndex] = texture
-      atlasTextures = nextTextures
+      if (!getRequiredTileKeys().has(key)) {
+        texture.dispose()
+        return
+      }
+
+      configureTileTexture(texture)
+      const nextTextures = new Map(tileTextures)
+      nextTextures.get(key)?.dispose()
+      nextTextures.set(key, texture)
+      tileTextures = nextTextures
+      tryPromoteActiveFrame()
+      disposeUnneededTileTextures()
     },
     undefined,
     error => {
+      loadingTileKeys.delete(key)
       if (token !== loadToken) return
-
-      atlasTextureLoading[segmentIndex] = false
-      console.error(
-        `Failed to load portal tentacle sprite atlas: ${segment.src}`,
-        error,
-      )
+      console.error(`Failed to load portal tentacle tile: ${src}`, error)
     },
   )
 }
 
+function syncRequiredTileTextures() {
+  if (!manifest || !mounted) return
+  const requiredKeys = getRequiredTileKeys()
+
+  requiredKeys.forEach(key => {
+    if (tileTextures.has(key) || loadingTileKeys.has(key)) return
+    const [frame, tileIndex] = key.split(':').map(Number)
+    loadTileTexture(frame, tileIndex, loadToken)
+  })
+  disposeUnneededTileTextures()
+}
+
+function disposeTileTextures() {
+  tileTextures.forEach(texture => texture.dispose())
+  tileTextures = new Map()
+  loadingTileKeys.clear()
+}
+
+async function loadManifest(token: number) {
+  try {
+    const response = await fetch(manifestSrc)
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+    const nextManifest = parseManifest(await response.json())
+    if (!mounted || token !== loadToken) return
+    manifest = nextManifest
+  } catch (error) {
+    if (token !== loadToken) return
+    console.error(
+      `Failed to load portal tentacle manifest: ${manifestSrc}`,
+      error,
+    )
+  }
+}
+
+function updateVisibleTentacleTiles() {
+  if (!manifest || !mounted) return
+
+  const phaseDelta = orbitPhase - lastOrbitPhase
+  if (Math.abs(phaseDelta) >= phaseEpsilon) {
+    scrollDirection = phaseDelta > 0 ? 1 : -1
+  }
+  lastOrbitPhase = orbitPhase
+
+  const nextActiveFrame = wrapFrame(
+    Math.round((orbitPhase / (Math.PI * 2)) * manifest.frameCount),
+    manifest.frameCount,
+  )
+  const nextVisibleTileIndexes = getVisibleTileIndexes()
+  const nextAdmissionKey = [
+    nextActiveFrame,
+    scrollDirection,
+    ...nextVisibleTileIndexes,
+  ].join(':')
+
+  if (nextAdmissionKey === lastAdmissionKey) return
+  lastAdmissionKey = nextAdmissionKey
+  activeFrame = nextActiveFrame
+  if (!arraysEqual(nextVisibleTileIndexes, visibleTileIndexes)) {
+    visibleTileIndexes = nextVisibleTileIndexes
+  }
+  syncRequiredTileTextures()
+  tryPromoteActiveFrame()
+}
+
+useTask(updateVisibleTentacleTiles, {
+  stage: motionStage,
+  autoInvalidate: false,
+})
+
 onMount(() => {
   mounted = true
   loadToken += 1
-  syncRequiredAtlasSegments(activeFrame, atlasTextures)
+  void loadManifest(loadToken)
 
   return () => {
     mounted = false
     loadToken += 1
-    disposeAtlasTextures()
+    disposeTileTextures()
   }
 })
 </script>
 
-{#if activeAtlasTexture}
-	<T.Sprite scale={spriteScale} renderOrder={tentacleDepthRenderOrder}>
-		<T.SpriteMaterial
-			map={activeAtlasTexture}
-			color="#ffffff"
-			transparent={true}
-			alphaTest={tentacleAlphaTest}
-			depthTest={true}
-			depthWrite={true}
-			toneMapped={false}
-		/>
-	</T.Sprite>
-{/if}
+<T.Group bind:ref={tileRoot}>
+	{#if manifest && displayedFrame >= 0}
+		{#each manifest.tiles as tile}
+			{@const tileTexture = tileTextures.get(getTileKey(displayedFrame, tile.index))}
+			{#if tileTexture && visibleTileIndexes.includes(tile.index)}
+				<T.Mesh
+					position={[0, getTileY(tile), 0]}
+					scale={getTileScale(tile)}
+					renderOrder={tentacleDepthRenderOrder}
+				>
+					<T.PlaneGeometry args={[1, 1]} />
+					<T.MeshBasicMaterial
+						map={tileTexture}
+						color="#ffffff"
+						side={doubleSide}
+						transparent={true}
+						alphaTest={manifest.alphaTest}
+						depthTest={true}
+						depthWrite={true}
+						toneMapped={false}
+					/>
+				</T.Mesh>
+			{/if}
+		{/each}
+	{/if}
+</T.Group>

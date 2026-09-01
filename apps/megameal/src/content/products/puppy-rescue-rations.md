@@ -25,6 +25,11 @@ rating: 2.8
 media:
   - type: image
     src: "/ads/puppy-rescue.png"
+    thumbnailSources:
+      - src: "/ads/puppy-rescue-card-320.webp"
+        width: 320
+      - src: "/ads/puppy-rescue-card-640.webp"
+        width: 640
     alt: "Puppy Rescue Rations can"
     caption: "Recovered export label from a dialect region no translator will confidently certify."
 specifications:

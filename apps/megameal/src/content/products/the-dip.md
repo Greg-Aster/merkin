@@ -25,6 +25,11 @@ rating: 4.8
 media:
   - type: image
     src: "/ads/the-dip.png"
+    thumbnailSources:
+      - src: "/ads/the-dip-card-320.webp"
+        width: 320
+      - src: "/ads/the-dip-card-640.webp"
+        width: 640
     alt: "The Dip product jar"
     caption: "The Dip: family-format craving support from W Corporation."
   - type: image

@@ -1,7 +1,7 @@
 <script lang="ts" context="module">
+import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 import { CanvasTexture } from 'three'
 import type { Texture } from 'three'
-import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 
 let sharedStarTexture: Texture | null = null
 
@@ -61,7 +61,7 @@ function getStarTexture() {
 </script>
 
 <script lang="ts">
-import { T, useTask } from '@threlte/core'
+import { type Stage, T, useTask } from '@threlte/core'
 import { onDestroy } from 'svelte'
 import {
   AdditiveBlending,
@@ -81,6 +81,7 @@ export let ringOpacity = 0.9
 export let dotSize = 1.25
 export let dotCount = 52
 export let motionEnabled = true
+export let motionStage: Stage
 
 let group: Group | null = null
 let animatedColor = color
@@ -169,7 +170,7 @@ useTask(() => {
   const time = performance.now() * 0.001
   const hue = (((hueCycleBase + time * hueCycleSpeed) % 1) + 1) % 1
   animatedColor = `hsl(${Math.round(hue * 360)} 78% 54%)`
-})
+}, { stage: motionStage, autoInvalidate: false })
 
 onDestroy(() => {
   dotGeometry.dispose()

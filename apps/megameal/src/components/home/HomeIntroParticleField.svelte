@@ -1,7 +1,7 @@
 <script lang="ts" context="module">
+import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 import { CanvasTexture } from 'three'
 import type { Texture } from 'three'
-import { configureGeneratedCanvasTexture } from '@/utils/threeTextureUtils'
 
 let sharedStarTexture: Texture | null = null
 
@@ -62,7 +62,7 @@ function getStarTexture() {
 </script>
 
 <script lang="ts">
-import { T, useTask } from '@threlte/core'
+import { type Stage, T, useTask } from '@threlte/core'
 import { onDestroy } from 'svelte'
 import {
   AdditiveBlending,
@@ -108,6 +108,7 @@ export let pointSizeScale = 1
 export let opacityScale = 1
 export let motionEnabled = true
 export let densityMultiplier = 1
+export let motionStage: Stage
 
 const starTexture = getStarTexture()
 const coreGeometry = new BufferGeometry()
@@ -370,7 +371,7 @@ useTask(() => {
   haloSizeAttribute.needsUpdate = true
   coreAlphaAttribute.needsUpdate = true
   haloAlphaAttribute.needsUpdate = true
-}, { autoInvalidate: false })
+}, { stage: motionStage, autoInvalidate: false })
 
 onDestroy(() => {
   coreGeometry.dispose()

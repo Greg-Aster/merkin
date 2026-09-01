@@ -3,6 +3,11 @@ import type {
   TimelineCarouselScreen,
 } from './timelinePortalCarouselModel'
 import { clamp } from './timelinePortalCarouselModel'
+import {
+  ACESFilmicToneMapping,
+  SRGBColorSpace,
+  WebGLRenderer,
+} from 'three'
 
 export type TimelineConstellationLine = {
   id: string
@@ -27,6 +32,20 @@ export type TimelineStarScreenPosition = {
 
 type TimelineStarControl = TimelineStarScreenPosition & {
   screen: TimelineCarouselScreen
+}
+
+export function createTimelineRenderer(canvas: HTMLCanvasElement) {
+  const renderer = new WebGLRenderer({
+    canvas,
+    alpha: true,
+    antialias: true,
+    powerPreference: 'high-performance',
+  })
+  renderer.outputColorSpace = SRGBColorSpace
+  renderer.toneMapping = ACESFilmicToneMapping
+  renderer.toneMappingExposure = 1.08
+  renderer.setClearColor(0x000000, 0)
+  return renderer
 }
 
 export function getDesktopSelectedCardStyle(
@@ -190,7 +209,7 @@ export function createTimelineCameraController({
   isMapMode,
   pause,
   panStep,
-  panLimit,
+  getPanLimit,
   minimumMapZoom,
   maximumMapZoom,
   mapZoomStep,
@@ -201,7 +220,7 @@ export function createTimelineCameraController({
   isMapMode: () => boolean
   pause: () => void
   panStep: number
-  panLimit: number
+  getPanLimit: () => number
   minimumMapZoom: number
   maximumMapZoom: number
   mapZoomStep: number
@@ -210,7 +229,7 @@ export function createTimelineCameraController({
 }) {
   const pan = (x: number, y: number) => {
     pause()
-    panTimelineCamera(input, x, y, isMapMode(), minimumMapZoom, panLimit)
+    panTimelineCamera(input, x, y, isMapMode(), minimumMapZoom, getPanLimit())
   }
   const zoom = (multiplier: number) => {
     if (!isMapMode()) return
@@ -230,7 +249,7 @@ export function createTimelineCameraController({
   }
   const reset = () => {
     pause()
-    setTimelineCameraPan(input, 0, 0, panLimit)
+    setTimelineCameraPan(input, 0, 0, getPanLimit())
     if (!isMapMode()) return
     input.mapZoom = 1
     input.mapOrbitX = 0

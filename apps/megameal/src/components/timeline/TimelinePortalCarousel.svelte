@@ -6,23 +6,20 @@ import {
 import { formatTimelineYear } from '@merkin/shared-content'
 import { Canvas } from '@threlte/core'
 import { onDestroy, onMount, tick } from 'svelte'
-import * as THREE from 'three'
-import TimelineAutoplayButton from './TimelineAutoplayButton.svelte'
 import TimelineBackgroundMedia from './TimelineBackgroundMedia.svelte'
-import TimelineCameraPanControls from './TimelineCameraPanControls.svelte'
 import TimelineConstellationOverlay from './TimelineConstellationOverlay.svelte'
+import TimelineFlightHud from './TimelineFlightHud.svelte'
+import TimelinePortalNavigation from './TimelinePortalNavigation.svelte'
 import TimelinePortalCarouselScene from './TimelinePortalCarouselScene.svelte'
-import TimelinePositionSlider from './TimelinePositionSlider.svelte'
 import TimelineSelectedRecord from './TimelineSelectedRecord.svelte'
-import TimelineViewModeButton from './TimelineViewModeButton.svelte'
 import {
   type TimelineCarouselInput,
   type TimelinePortalEraConfig,
   type TimelinePortalEvent,
-  advanceTimelineAutoplay,
   clamp,
   createTimelinePortalModel,
   getActiveTimelineEraSegment,
+  getEraMarkerColor,
   getSelectedCardWidth,
   getStatusWidth,
   getTimelineDockWidth,
@@ -37,6 +34,7 @@ import {
   getTimelineStarControlStyle,
   getVisibleTimelineConstellationLines,
   applyTimelineCameraDrag,
+  createTimelineRenderer,
   createTimelineCameraController,
   isTimelineInteractiveTarget,
   isPointInsideTimelineShell,
@@ -45,6 +43,7 @@ import {
   type TimelineStarScreenPosition,
   updateTimelinePointer,
 } from './timelinePortalPresentation'
+import { createTimelineFlightController } from './timelinePortalFlight'
 
 export let events: TimelinePortalEvent[] = []
 export let eraConfig: TimelinePortalEraConfig = {}
@@ -85,12 +84,6 @@ let selectedCardAnchor: { x: number; y: number } | null = null
 let selectedGuideLineFrame = 0
 let hasInitializedBeginningPosition = false
 let hasMounted = false
-let isAutoplaying = false
-let isAutoplayStopping = false
-let autoplayFrame = 0
-let lastAutoplayFrameAt = 0
-let autoplayDirection: -1 | 1 = 1
-let autoplayVelocity = 0
 let prefersReducedMotion = false
 let runtimeActive = true
 const wheelMomentumDecay = 2.4
@@ -103,16 +96,14 @@ const keyboardWheelStep = 0.82
 const pageWheelStep = 1.64
 const clickAwayDragThreshold = 7
 const cameraPanStep = 0.2
-const cameraPanLimit = 1.18
+const manualBoostMultiplier = 2.15
+const travelCameraPanLimit = 6.2
+const mapCameraPanLimit = 1.18
 const mapZoomMin = 0.55
 const mapZoomMax = 2.8
 const mapZoomStep = 1.16
 const mapOrbitLimit = 1
 const mapKeyboardOrbitStep = 0.18
-const autoplaySpeed = 0.34
-const autoplayTurnMinSpeedScale = 0.14
-const autoplayVelocityEase = 2.4
-const autoplayStopVelocityThreshold = 0.006
 const timelineBackgroundVideoSrc = '/assets/banner/universbg0001-0121.webm'
 const timelineBackgroundPosterSrc = '/assets/banner/posters/universe-poster.webp'
 const timelineBackgroundVideoPlaybackRate = 0.25
@@ -131,12 +122,32 @@ const input: TimelineCarouselInput = {
 }
 let viewMode: TimelineViewMode = initialViewMode
 
+const timelineFlight = createTimelineFlightController({
+  getPosition: () => virtualWheel,
+  setPosition: position => {
+    virtualWheel = position
+    updateScrollDrivenWheel()
+  },
+  getCameraPan: () => ({ x: input.panX, y: input.panY }),
+  setCameraPan: (x, y) => {
+    input.panX = clamp(x, -travelCameraPanLimit, travelCameraPanLimit)
+    input.panY = clamp(y, -travelCameraPanLimit, travelCameraPanLimit)
+  },
+  getTargetScreenPosition: getAutopilotTargetScreenPosition,
+  getMaxPosition: () => maxWheel,
+  getIsMapMode: () => isMapMode,
+  getIsPortraitMobile: () => portraitMobile,
+  getPrefersReducedMotion: () => prefersReducedMotion,
+  selectTarget: selectAutopilotTarget,
+  startMedia: () => timelineBackgroundMedia?.start(),
+})
+
 const timelineCameraController = createTimelineCameraController({
   input,
   isMapMode: () => isMapMode,
-  pause: () => pauseAutoplay(),
+  pause: () => pauseAutopilot({ preserveBoost: true }),
   panStep: cameraPanStep,
-  panLimit: cameraPanLimit,
+  getPanLimit: () => isMapMode ? mapCameraPanLimit : travelCameraPanLimit,
   minimumMapZoom: mapZoomMin,
   maximumMapZoom: mapZoomMax,
   mapZoomStep,
@@ -154,6 +165,28 @@ $: selectedScreen = displayedScreenIndex >= 0 ? sortedEvents[displayedScreenInde
 $: selectedScreenView = displayedScreenIndex >= 0 ? screens[displayedScreenIndex] : null
 $: activeTimelineEvent = sortedEvents[Math.round(clamp(input.wheel, 0, maxWheel))] ?? null
 $: activeEraSegment = getActiveTimelineEraSegment(input.wheel, eraSegments)
+$: activeEraAccent = getEraMarkerColor(activeEraSegment?.key ?? 'unknown')
+$: isBoosting = $timelineFlight.isBoosting
+$: autopilotEnabled = $timelineFlight.autopilotEnabled
+$: autopilotPhase = $timelineFlight.autopilotPhase
+$: isAutopilotTraveling = autopilotEnabled && autopilotPhase === 'travel'
+$: travelEffectStrength = isBoosting ? 1 : isAutopilotTraveling ? 0.58 : 0
+$: visitedSlugSet = new Set($timelineFlight.visitedSlugs)
+$: visitedScreenIndexes = sortedEvents.reduce<number[]>((indexes, event, index) => {
+  if (visitedSlugSet.has(event.slug)) indexes.push(index)
+  return indexes
+}, [])
+$: lockOnIndex = hoveredStarIndex >= 0
+  ? hoveredStarIndex
+  : selectedScreenIndex >= 0
+    ? selectedScreenIndex
+    : Math.round(clamp(input.wheel, 0, maxWheel))
+$: lockOnEvent = sortedEvents[lockOnIndex] ?? null
+$: lockOnScreen = screens[lockOnIndex] ?? null
+$: lockOnPosition = projectedStarPositions.find(
+  position => position.index === lockOnIndex && position.size > 0,
+) ?? null
+$: lockOnIsVisited = Boolean(lockOnEvent && visitedSlugSet.has(lockOnEvent.slug))
 $: timelineDockWidth = getTimelineDockWidth(viewportWidth)
 $: timelineSideLaneWidth = Math.max(0, (viewportWidth - timelineDockWidth) / 2)
 $: timelineSideMargin = getTimelineSideMargin(viewportWidth)
@@ -166,7 +199,7 @@ $: selectedStarPosition = displayedScreenIndex >= 0
   ? projectedStarPositions.find(position => position.index === displayedScreenIndex && position.size > 0) ?? null
   : null
 $: selectedCardStyle = portraitMobile
-  ? 'bottom: max(7.65rem, calc(env(safe-area-inset-bottom) + 7.65rem)); width: min(24rem, calc(100% - 1.5rem)); max-width: calc(100% - 1.5rem)'
+  ? ''
   : getDesktopSelectedCardStyle(selectedStarPosition, selectedCardWidth, viewportHeight)
 $: selectedStatusStyle = portraitMobile
   ? 'display: none'
@@ -194,26 +227,22 @@ $: timelinePositionText = activeTimelineEvent
 $: isMapMode = viewMode === 'map'
 $: isBannerPresentation = presentation === 'banner'
 $: viewModeLabel = isMapMode ? 'Complete overview' : 'First-person chronology'
-$: viewModeInstructions = isMapMode ? 'Select a star to inspect an article. Drag to rotate, scroll to zoom; use the arrow controls to pan.' : 'Travel from the beginning. Scroll, drag, or use the slider to move through time.'
+$: viewModeInstructions = isMapMode
+  ? 'Select a star to inspect an article. Drag to rotate, scroll to zoom; use the arrow controls to pan.'
+  : autopilotEnabled
+    ? 'Autopilot is roaming between records, holding for 20 seconds at each destination. Pause or boost from the flight controls below.'
+    : 'Manual flight. Scroll, drag, or use the slider; re-enable autopilot from the flight controls below.'
 $: if (!hasInitializedBeginningPosition && screens.length > 0) {
   initializeBeginningPosition()
 }
-$: if (isMapMode) pauseAutoplay()
-
-const createRenderer = (canvas: HTMLCanvasElement) => {
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    alpha: true,
-    antialias: true,
-    powerPreference: 'high-performance',
-  })
-
-  renderer.outputColorSpace = THREE.SRGBColorSpace
-  renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 1.08
-  renderer.setClearColor(0x000000, 0)
-
-  return renderer
+$: if (isMapMode) pauseAutopilot()
+$: if (
+  hasMounted &&
+  !isBannerPresentation &&
+  activeEraSegment?.key &&
+  activeEraSegment.key !== $timelineFlight.activeEraKey
+) {
+  timelineFlight.enterEra(activeEraSegment.key, activeEraSegment.displayName)
 }
 
 function syncViewportMode() {
@@ -282,101 +311,26 @@ function scheduleScrollDrivenWheel() {
   scrollFrame = window.requestAnimationFrame(runScrollDrivenWheelFrame)
 }
 
-function runAutoplayFrame(timestamp: number) {
-  if (!isAutoplaying && !isAutoplayStopping) {
-    autoplayFrame = 0
-    lastAutoplayFrameAt = 0
-    autoplayVelocity = 0
-    return
-  }
-
-  const minimumFrameInterval = 1000 / (portraitMobile ? 20 : 30)
-  if (lastAutoplayFrameAt && timestamp - lastAutoplayFrameAt < minimumFrameInterval) {
-    autoplayFrame = window.requestAnimationFrame(runAutoplayFrame)
-    return
-  }
-
-  const delta = lastAutoplayFrameAt
-    ? Math.min(0.08, (timestamp - lastAutoplayFrameAt) / 1000)
-    : 1 / 60
-  lastAutoplayFrameAt = timestamp
-
-  wheelVelocity = 0
-  const nextState = advanceTimelineAutoplay({
-    position: virtualWheel,
-    maxPosition: maxWheel,
-    direction: autoplayDirection,
-    velocity: autoplayVelocity,
-    delta,
-    stopping: isAutoplayStopping,
-    speed: autoplaySpeed,
-    minimumEdgeSpeedScale: autoplayTurnMinSpeedScale,
-    velocityEaseRate: autoplayVelocityEase,
-  })
-  virtualWheel = nextState.position
-  autoplayDirection = nextState.direction
-  autoplayVelocity = nextState.velocity
-
-  if (isAutoplayStopping && Math.abs(autoplayVelocity) <= autoplayStopVelocityThreshold) {
-    isAutoplayStopping = false
-    autoplayVelocity = 0
-    autoplayFrame = 0
-    lastAutoplayFrameAt = 0
-    updateScrollDrivenWheel()
-    return
-  }
-
-  updateScrollDrivenWheel()
-
-  autoplayFrame = window.requestAnimationFrame(runAutoplayFrame)
+function pauseAutopilot({ preserveBoost = false } = {}) {
+  timelineFlight.pauseAutopilot({ preserveBoost })
 }
 
-function playAutoplay() {
-  if (isMapMode || isAutoplaying || maxWheel <= 0) return
-  if (virtualWheel >= maxWheel) autoplayDirection = -1
-  if (virtualWheel <= 0) autoplayDirection = 1
-
-  isAutoplaying = true
-  isAutoplayStopping = false
-  wheelVelocity = 0
-  if (!autoplayFrame) autoplayVelocity = 0
-  lastAutoplayFrameAt = 0
-  if (!autoplayFrame) autoplayFrame = window.requestAnimationFrame(runAutoplayFrame)
+function toggleBoost() {
+  if (!isBannerPresentation) timelineFlight.toggleBoost()
 }
 
-function pauseAutoplay({ smooth = false } = {}) {
-  if (smooth && autoplayFrame && Math.abs(autoplayVelocity) > autoplayStopVelocityThreshold) {
-    isAutoplaying = false
-    isAutoplayStopping = true
-    return
-  }
-
-  isAutoplaying = false
-  isAutoplayStopping = false
-  autoplayVelocity = 0
-  lastAutoplayFrameAt = 0
-  if (autoplayFrame) {
-    window.cancelAnimationFrame(autoplayFrame)
-    autoplayFrame = 0
-  }
-}
-
-function toggleAutoplay() {
-  if (isAutoplaying) {
-    pauseAutoplay({ smooth: true })
-    return
-  }
-
-  timelineBackgroundMedia?.start()
-  playAutoplay()
+function toggleAutopilot() {
+  if (isBannerPresentation) return
+  timelineFlight.toggleAutopilot(selectedScreenIndex)
 }
 
 function applyPositionDelta(deltaY: number, wheelDistance: number) {
-  pauseAutoplay()
-  input.dragY += deltaY / Math.max(wheelDistance, 1)
+  pauseAutopilot({ preserveBoost: true })
+  const boostedDeltaY = deltaY * (isBoosting ? manualBoostMultiplier : 1)
+  input.dragY += boostedDeltaY / Math.max(wheelDistance, 1)
   wheelVelocity = 0
   virtualWheel = clamp(
-    virtualWheel - (deltaY / Math.max(wheelDistance, 1)) * 4.2,
+    virtualWheel - (boostedDeltaY / Math.max(wheelDistance, 1)) * 4.2,
     0,
     maxWheel,
   )
@@ -392,7 +346,7 @@ function handleScenePointerDown(event: PointerEvent) {
     isTimelineInteractiveTarget(event.target)
   ) return
 
-  pauseAutoplay()
+  pauseAutopilot({ preserveBoost: true })
   event.preventDefault()
   event.stopPropagation()
   panPointerId = event.pointerId
@@ -422,14 +376,14 @@ function handleScenePointerMove(event: PointerEvent) {
   lastPanClientX = event.clientX
   lastPanClientY = event.clientY
   updateTimelinePointer(input, shell, event.clientX, event.clientY)
-  pauseAutoplay()
+  pauseAutopilot({ preserveBoost: true })
   applyTimelineCameraDrag(
     input,
     shell,
     deltaX,
     deltaY,
     isMapMode,
-    cameraPanLimit,
+    isMapMode ? mapCameraPanLimit : travelCameraPanLimit,
     mapOrbitLimit,
   )
 }
@@ -507,14 +461,14 @@ function handleTouchMove(event: TouchEvent) {
     lastTouchPanClientX = touch.clientX
     lastTouchPanClientY = touch.clientY
     updateTimelinePointer(input, shell, touch.clientX, touch.clientY)
-    pauseAutoplay()
+    pauseAutopilot({ preserveBoost: true })
     applyTimelineCameraDrag(
       input,
       shell,
       deltaX,
       deltaY,
       isMapMode,
-      cameraPanLimit,
+      isMapMode ? mapCameraPanLimit : travelCameraPanLimit,
       mapOrbitLimit,
     )
     return
@@ -558,7 +512,7 @@ function handleWheel(event: WheelEvent) {
   ) return
 
   timelineBackgroundMedia?.start()
-  pauseAutoplay()
+  pauseAutopilot({ preserveBoost: true })
   event.preventDefault()
   updateTimelinePointer(input, shell, event.clientX, event.clientY)
   if (isMapMode) {
@@ -572,7 +526,10 @@ function handleWheel(event: WheelEvent) {
   }
 
   const viewportHeight = Math.max(window.innerHeight, 1)
-  const wheelDelta = -(event.deltaY / viewportHeight) * mouseWheelSensitivity
+  const wheelDelta =
+    -(event.deltaY / viewportHeight) *
+    mouseWheelSensitivity *
+    (isBoosting ? manualBoostMultiplier : 1)
   wheelVelocity = clamp(
     wheelVelocity + wheelDelta * mouseWheelMomentumImpulse,
     -mouseWheelMomentumMaxVelocity,
@@ -582,6 +539,18 @@ function handleWheel(event: WheelEvent) {
 }
 
 function handleKeyboardScroll(event: KeyboardEvent) {
+  if (
+    event.key === 'Shift' &&
+    !isBannerPresentation &&
+    !isMapMode &&
+    !prefersReducedMotion &&
+    !isTimelineInteractiveTarget(event.target) &&
+    isTimelineShellVisible(shell)
+  ) {
+    timelineFlight.setBoostKeyHeld(true)
+    return
+  }
+
   if (
     isBannerPresentation ||
     event.altKey ||
@@ -623,14 +592,19 @@ function handleKeyboardScroll(event: KeyboardEvent) {
     return
   }
 
-  pauseAutoplay()
+  pauseAutopilot({ preserveBoost: true })
+  const boostedStep = step * (isBoosting ? manualBoostMultiplier : 1)
   wheelVelocity = clamp(
-    wheelVelocity + step * wheelMomentumDecay,
+    wheelVelocity + boostedStep * wheelMomentumDecay,
     -wheelMomentumMaxVelocity,
     wheelMomentumMaxVelocity,
   )
   scheduleScrollDrivenWheel()
   event.preventDefault()
+}
+
+function handleKeyboardUp(event: KeyboardEvent) {
+  if (event.key === 'Shift') timelineFlight.setBoostKeyHeld(false)
 }
 
 function handleResize() {
@@ -644,13 +618,12 @@ function initializeBeginningPosition() {
   virtualWheel = 0
   input.wheel = 0
   hasInitializedBeginningPosition = true
-  autoplayDirection = 1
 }
 
 function setViewMode(nextViewMode: TimelineViewMode) {
   if (viewMode === nextViewMode) return
 
-  pauseAutoplay()
+  pauseAutopilot()
   viewMode = nextViewMode
   input.panX = 0
   input.panY = 0
@@ -659,7 +632,6 @@ function setViewMode(nextViewMode: TimelineViewMode) {
   input.mapOrbitY = 0
   projectedStarPositions = []
   selectedCardAnchor = null
-  if (nextViewMode === 'travel' && !prefersReducedMotion) void tick().then(() => playAutoplay())
 }
 
 function handleStarPositions(event: TimelineStarPositionEvent) {
@@ -684,10 +656,27 @@ function scheduleSelectedGuideLineSync() {
   })
 }
 
-function selectStar(index: number) {
-  pauseAutoplay({ smooth: true })
+function selectAutopilotTarget(index: number) {
   selectedScreenIndex = index
+  hoveredStarIndex = -1
   void tick().then(scheduleSelectedGuideLineSync)
+}
+
+function getAutopilotTargetScreenPosition(index: number) {
+  const target = projectedStarPositions.find(position => position.index === index)
+  return target
+    ? { x: target.x, y: target.y, projectable: target.size > 0 }
+    : null
+}
+
+function selectStar(index: number) {
+  pauseAutopilot({ preserveBoost: true })
+  selectAutopilotTarget(index)
+}
+
+function markTimelineRecordVisited(index: number) {
+  const slug = sortedEvents[index]?.slug
+  if (slug) timelineFlight.markVisited(slug)
 }
 
 function clearSelectedStar() {
@@ -705,6 +694,7 @@ function openTimelineRecord(index: number) {
   const url = sortedEvents[index]?.url
   if (!url || typeof window === 'undefined') return
 
+  markTimelineRecordVisited(index)
   window.location.href = getTimelineRecordHref(url)
 }
 
@@ -713,7 +703,7 @@ function handleStarClick(event: MouseEvent, index: number) {
   event.stopPropagation()
 
   if (selectedScreenIndex === index) {
-    pauseAutoplay()
+    pauseAutopilot()
     openTimelineRecord(index)
     return
   }
@@ -730,7 +720,7 @@ function clearHoveredStar(index: number) {
 }
 
 function setTimelinePosition(value: number) {
-  pauseAutoplay()
+  pauseAutopilot({ preserveBoost: true })
   wheelVelocity = 0
   virtualWheel = clamp(value, 0, maxWheel)
   updateScrollDrivenWheel()
@@ -739,8 +729,10 @@ function setTimelinePosition(value: number) {
 onMount(() => {
   hasMounted = true
   syncViewportMode()
+  timelineFlight.loadVisitedProgress()
+  timelineFlight.initializeEra(activeEraSegment?.key ?? '')
   const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-  let resumeAutoplayWhenActive = false
+  let resumeAutopilotWhenActive = false
 
   function isRuntimeActive() {
     return document.visibilityState === 'visible' && runtimeActive
@@ -748,21 +740,23 @@ onMount(() => {
 
   function applyMotionPreference() {
     prefersReducedMotion = reducedMotionQuery.matches
-    if (prefersReducedMotion) pauseAutoplay()
+    if (prefersReducedMotion) {
+      pauseAutopilot()
+    }
     else if (isRuntimeActive()) resumeRuntime()
   }
 
   function suspendRuntime() {
-    resumeAutoplayWhenActive ||= isAutoplaying || isAutoplayStopping
-    pauseAutoplay()
+    resumeAutopilotWhenActive ||= autopilotEnabled
+    pauseAutopilot()
     adaptiveDprController?.stop()
   }
 
   function resumeRuntime() {
     adaptiveDprController?.start()
-    if (resumeAutoplayWhenActive && !prefersReducedMotion) {
-      resumeAutoplayWhenActive = false
-      playAutoplay()
+    if (resumeAutopilotWhenActive && !prefersReducedMotion) {
+      resumeAutopilotWhenActive = false
+      timelineFlight.enableAutopilot()
     }
   }
 
@@ -786,7 +780,7 @@ onMount(() => {
   adaptiveDprController.start()
   applyMotionPreference()
   updateScrollDrivenWheel()
-  if (!prefersReducedMotion && !isMapMode) playAutoplay()
+  if (!prefersReducedMotion && !isMapMode) timelineFlight.enableAutopilot()
   if (shell) shell.dataset.timelineInitialized = 'true'
 
   window.addEventListener('pointermove', handlePointerMove)
@@ -796,6 +790,7 @@ onMount(() => {
   window.addEventListener('touchcancel', handleTouchEnd)
   window.addEventListener('wheel', handleWheel, { passive: false })
   window.addEventListener('keydown', handleKeyboardScroll)
+  window.addEventListener('keyup', handleKeyboardUp)
   window.addEventListener('resize', handleResize)
 
   return () => {
@@ -809,13 +804,14 @@ onMount(() => {
     window.removeEventListener('touchcancel', handleTouchEnd)
     window.removeEventListener('wheel', handleWheel)
     window.removeEventListener('keydown', handleKeyboardScroll)
+    window.removeEventListener('keyup', handleKeyboardUp)
     window.removeEventListener('resize', handleResize)
     if (scrollFrame) window.cancelAnimationFrame(scrollFrame)
     if (selectedGuideLineFrame) window.cancelAnimationFrame(selectedGuideLineFrame)
     selectedGuideLineFrame = 0
     adaptiveDprController?.stop()
     adaptiveDprController = null
-    pauseAutoplay()
+    pauseAutopilot()
     hasMounted = false
   }
 })
@@ -829,7 +825,8 @@ onDestroy(() => {
   selectedGuideLineFrame = 0
   adaptiveDprController?.stop()
   adaptiveDprController = null
-  pauseAutoplay()
+  pauseAutopilot()
+  timelineFlight.destroy()
 })
 </script>
 
@@ -838,7 +835,7 @@ onDestroy(() => {
   class={`home-intro-environment home-intro-environment--background-ready pointer-events-auto cursor-grab ${isBannerPresentation ? 'touch-pan-y' : 'touch-none'}`}
   class:home-intro-environment--screen-hover={displayedScreenIndex >= 0}
   class:cursor-grabbing={panPointerId !== null}
-  style="--portal-reveal-progress: 1"
+  style={`--portal-reveal-progress: 1; --timeline-era-accent: ${activeEraAccent}`}
   class:h-full={isBannerPresentation}
   class:w-full={isBannerPresentation}
   role="region"
@@ -846,6 +843,11 @@ onDestroy(() => {
   data-timeline-shell="true"
   data-timeline-view-mode={viewMode}
   data-timeline-presentation={presentation}
+  data-timeline-era={activeEraSegment?.key ?? 'unknown'}
+  data-timeline-boosting={isBoosting ? 'true' : 'false'}
+  data-timeline-autopilot-enabled={autopilotEnabled ? 'true' : 'false'}
+  data-timeline-autopilot-phase={autopilotPhase}
+  data-timeline-autopilot-target={$timelineFlight.autopilotTargetIndex}
   on:pointerdown|capture={handleScenePointerDown}
   on:pointermove|capture={handleScenePointerMove}
   on:pointerup|capture={handleScenePointerUp}
@@ -853,13 +855,17 @@ onDestroy(() => {
 >
   <div class="home-intro-background-curtain" aria-hidden="true"></div>
 
-  <Canvas {createRenderer} dpr={canvasDpr}>
+  <Canvas createRenderer={createTimelineRenderer} dpr={canvasDpr}>
     <TimelinePortalCarouselScene
       {input}
       {screens}
       selectedScreenIndex={displayedScreenIndex}
       hoveredScreenIndex={hoveredStarIndex}
-      {viewMode} ambientOrbitEnabled={!prefersReducedMotion && runtimeActive}
+      {viewMode}
+      ambientOrbitEnabled={!prefersReducedMotion && runtimeActive}
+      {visitedScreenIndexes}
+      {travelEffectStrength}
+      {autopilotPhase}
       on:starpositions={handleStarPositions}
     />
   </Canvas>
@@ -906,6 +912,8 @@ onDestroy(() => {
         title={control.screen.title}
         data-timeline-interactive
         data-timeline-star-control
+        data-timeline-index={control.index}
+        data-timeline-visited={visitedSlugSet.has(sortedEvents[control.index]?.slug ?? '') ? 'true' : 'false'}
         on:mouseenter={() => setHoveredStar(control.index)}
         on:mouseleave={() => clearHoveredStar(control.index)}
         on:focus={() => setHoveredStar(control.index)}
@@ -916,87 +924,53 @@ onDestroy(() => {
       {/each}
   </div>
 
-  <div class="timeline-mobile-readout pointer-events-none">
-      <div class="timeline-mobile-readout__era truncate">
-        {activeEraSegment?.displayName ?? 'Unknown Era'}
-      </div>
-      <div class="timeline-mobile-readout__title truncate">
-        {activeTimelineEvent?.title ?? 'No timeline record'}
-      </div>
-      <div class="timeline-mobile-readout__year">
-        {#if activeTimelineEvent}
-          {formatTimelineYear(activeTimelineEvent.year)}
-        {:else}
-          {formatTimelineYear(undefined)}
-        {/if}
-      </div>
-    </div>
+  <TimelinePortalNavigation
+    {activeEraSegment}
+    {activeTimelineEvent}
+    {viewMode}
+    {isMapMode}
+    {autopilotEnabled}
+    {autopilotPhase}
+    {isBoosting}
+    boostDisabled={prefersReducedMotion || (autopilotEnabled && !isAutopilotTraveling)}
+    {timelineDockStyle}
+    {cameraPanStep}
+    {maxWheel}
+    position={input.wheel}
+    {timelinePositionText}
+    {keyboardWheelStep}
+    {pageWheelStep}
+    on:pan={(event) => timelineCameraController.pan(event.detail.x, event.detail.y)}
+    on:zoom={(event) => timelineCameraController.zoom(event.detail.multiplier)}
+    on:orbit={(event) => timelineCameraController.orbit(event.detail.x, event.detail.y)}
+    on:reset={timelineCameraController.reset}
+    on:viewmode={(event) => setViewMode(event.detail)}
+    on:autopilottoggle={toggleAutopilot}
+    on:boosttoggle={toggleBoost}
+    on:position={(event) => setTimelinePosition(event.detail)}
+  />
 
-  <div
-    class="pointer-events-auto absolute bottom-4 left-1/2 z-[6] flex w-[min(42rem,calc(100%_-_2rem))] -translate-x-1/2 flex-col gap-2 rounded-lg border border-cyan-100/20 bg-slate-950/72 px-3 py-2.5 text-slate-50 shadow-[0_0_1.4rem_rgba(8,145,178,0.24)] backdrop-blur-md md:gap-3 md:px-4 md:py-3"
-    style={timelineDockStyle}
-    data-timeline-dock
-    data-timeline-interactive
-  >
-    <div class="hidden min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-left font-mono uppercase tracking-[0.13em] text-slate-50 md:grid md:gap-3 md:tracking-[0.16em]">
-      <div class="grid min-w-0 flex-1 gap-1">
-        <div class="truncate text-[0.68rem] font-extrabold text-cyan-200">
-          {activeEraSegment?.displayName ?? 'Unknown Era'}
-        </div>
-        <div class="truncate text-[0.66rem] font-bold text-slate-200/85">
-          {activeTimelineEvent?.title ?? 'No timeline record'}
-        </div>
-      </div>
-
-      <div class="flex min-w-0 items-center justify-center gap-2">
-        <TimelineCameraPanControls
-          step={cameraPanStep}
-          showMapControls={isMapMode}
-          on:pan={(event) => timelineCameraController.pan(event.detail.x, event.detail.y)}
-          on:zoom={(event) => timelineCameraController.zoom(event.detail.multiplier)}
-          on:orbit={(event) => timelineCameraController.orbit(event.detail.x, event.detail.y)}
-          on:reset={timelineCameraController.reset}
-        />
-
-        <TimelineViewModeButton {viewMode} on:change={(event) => setViewMode(event.detail)} />
-
-        {#if !isMapMode}
-          <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
-        {/if}
-      </div>
-    </div>
-
-    <div class="flex min-w-0 items-center justify-center gap-2 md:hidden">
-      <TimelineCameraPanControls
-        step={cameraPanStep}
-        showMapControls={isMapMode}
-        on:pan={(event) => timelineCameraController.pan(event.detail.x, event.detail.y)}
-        on:zoom={(event) => timelineCameraController.zoom(event.detail.multiplier)}
-        on:orbit={(event) => timelineCameraController.orbit(event.detail.x, event.detail.y)}
-        on:reset={timelineCameraController.reset}
-      />
-
-      <TimelineViewModeButton {viewMode} on:change={(event) => setViewMode(event.detail)} />
-
-      {#if !isMapMode}
-        <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
-      {/if}
-    </div>
-
-    <TimelinePositionSlider
-      {maxWheel}
-      value={input.wheel}
-      valueText={timelinePositionText}
-      keyboardStep={keyboardWheelStep}
-      pageStep={pageWheelStep}
-      on:positionchange={(event) => setTimelinePosition(event.detail.value)}
+  {#if !isBannerPresentation}
+    <TimelineFlightHud
+      lockEvent={lockOnEvent}
+      lockScreen={lockOnScreen}
+      lockPosition={lockOnPosition}
+      lockIsVisited={lockOnIsVisited}
+      {isBoosting}
+      visitedCount={visitedScreenIndexes.length}
+      totalCount={sortedEvents.length}
+      eraName={activeEraSegment?.displayName ?? ''}
+      eraTransitionName={$timelineFlight.eraTransitionName}
+      eraTransitionSequence={$timelineFlight.eraTransitionSequence}
+      eraTransitionVisible={$timelineFlight.eraTransitionVisible}
     />
-  </div>
+  {/if}
 
   <TimelineSelectedRecord
     {selectedScreen}
     {selectedScreenView}
     {selectedCardStyle}
     {selectedStatusStyle}
+    on:open={() => markTimelineRecordVisited(displayedScreenIndex)}
   />
 </div>

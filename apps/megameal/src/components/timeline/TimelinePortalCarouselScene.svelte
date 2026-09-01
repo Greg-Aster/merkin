@@ -2,21 +2,24 @@
 import { T, useTask, useThrelte } from '@threlte/core'
 import { createEventDispatcher, onMount } from 'svelte'
 import type * as THREE from 'three'
-import { AdditiveBlending, Color, OrthographicCamera, Vector3 } from 'three'
+import { AdditiveBlending, OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
 import HomeIntroParticleField from '../home/HomeIntroParticleField.svelte'
 import { hashHomeIntroUnit } from '../home/homeIntroSceneMath'
+import TimelineTemporalEffects from './TimelineTemporalEffects.svelte'
+import type { TimelineAutopilotPhase } from './timelinePortalFlight'
 import type {
   TimelineCarouselInput,
   TimelineCarouselScreen,
 } from './timelinePortalCarouselModel'
+import { getEraMarkerColor } from './timelinePortalCarouselModel'
 import { createTimelineParticles } from './timelineParticles'
 import type { TimelineStarScreenPosition } from './timelinePortalPresentation'
+import { getTimelineOrbitTexture } from './timelineStarTextures'
 import {
-  getTimelineOrbitTexture,
-  getTimelineStarTexture,
-  timelineStarTextureVariantCount,
-  type TimelineStarTextureVariant,
-} from './timelineStarTextures'
+  getTimelineStarHash as getStarHash,
+  getTimelineStarHitScale,
+  getTimelineStarVisual,
+} from './timelineStarVisuals'
 
 type TimelineViewMode = 'travel' | 'map'
 
@@ -26,6 +29,9 @@ export let selectedScreenIndex = -1
 export let hoveredScreenIndex = -1
 export let viewMode: TimelineViewMode = 'travel'
 export let ambientOrbitEnabled = true
+export let visitedScreenIndexes: number[] = []
+export let travelEffectStrength = 0
+export let autopilotPhase: TimelineAutopilotPhase = 'manual'
 
 const dispatch = createEventDispatcher<{
   starpositions: { positions: TimelineStarScreenPosition[] }
@@ -44,6 +50,7 @@ let timelineStarTargets: ReturnType<typeof getTimelineStarTarget>[] = []
 let timelineStarVisuals: ReturnType<typeof getTimelineStarVisual>[] = []
 let sceneFrameSignature = ''
 let sceneFramePending = true, ambientMapOrbitTime = 0
+let currentTravelEffectStrength = 0
 
 const screenOrbitRadiusX = 5.65
 const screenOrbitRadiusY = 3.85
@@ -63,15 +70,9 @@ const mapDesktopLaneSpread = 320
 const mapPortraitVerticalOffset = 165
 const mapOrbitMaxYaw = 0.62
 const mapOrbitMaxPitch = 0.38
-const starColor = '#67c7d6'
-const activeStarColor = '#dffbff'
-const starGlowColor = '#0891b2'
 const additiveBlending = AdditiveBlending
 const timelineOrbitTexture = getTimelineOrbitTexture()
 const projectedStarPosition = new Vector3()
-const mixedStarColor = new Color()
-const mixedStarBaseColor = new Color()
-const mixedStarActiveColor = new Color(activeStarColor)
 let lastProjectedStarPositionSignature = ''
 const { camera: defaultCamera, invalidate, size: canvasSize } = useThrelte()
 
@@ -94,6 +95,7 @@ $: starColumnScale = portraitMobile
   ? ([2.16, 2.22, 1.38] as [number, number, number])
   : ([2.08, 2.52, 1.54] as [number, number, number])
 $: timelineStarIndexes = screens.map((_, index) => index)
+$: visitedScreenIndexSet = new Set(visitedScreenIndexes)
 $: activeStarIntensities = screens.map((_, index) =>
   index === selectedScreenIndex || index === hoveredScreenIndex ? 1 : 0,
 )
@@ -101,7 +103,13 @@ $: timelineStarTargets = timelineStarIndexes.map(index =>
   getTimelineStarTarget(index, input.wheel, viewMode, portraitMobile),
 )
 $: timelineStarVisuals = screens.map((screen, index) =>
-  getTimelineStarVisual(index, screen, activeStarIntensities[index] ?? 0, 0),
+  getTimelineStarVisual(
+    index,
+    screen,
+    activeStarIntensities[index] ?? 0,
+    visitedScreenIndexSet.has(index),
+    0,
+  ),
 )
 $: sceneFrameSignature = [
   input.wheel,
@@ -113,6 +121,8 @@ $: sceneFrameSignature = [
   input.active,
   viewMode,
   ambientOrbitEnabled,
+  travelEffectStrength,
+  visitedScreenIndexes.join(','),
   portraitMobile,
   viewportAspect,
   screens.length,
@@ -233,122 +243,6 @@ function getEraHash(eraKey: string, salt = 0) {
     hash = Math.imul(hash, 16777619)
   }
   return Math.abs(hashHomeIntroUnit(hash))
-}
-
-function getStarHash(index: number, salt: number) {
-  return Math.abs(hashHomeIntroUnit(index + salt))
-}
-
-function getTimelineStarColor(index: number, eraKey: string, isActive: boolean, isKeyEvent: boolean) {
-  if (isActive) return activeStarColor
-  if (isKeyEvent) {
-    const keyPalette = ['#fef08a', '#fde68a', '#facc15', '#fdba74', '#f9a8d4', '#ddd6fe']
-    return keyPalette[Math.min(keyPalette.length - 1, Math.floor(getStarHash(index, 2971) * keyPalette.length))]
-  }
-
-  const palettes: Record<string, string[]> = {
-    'ancient-epoch': ['#67e8f9', '#bae6fd', '#93c5fd', '#a7f3d0', '#fde68a', '#f8fafc'],
-    'awakening-era': ['#38bdf8', '#22d3ee', '#5eead4', '#bfdbfe', '#c4b5fd', '#f0fdfa'],
-    'golden-age': ['#fde68a', '#facc15', '#fdba74', '#fef3c7', '#f9a8d4', '#93c5fd'],
-    'conflict-epoch': ['#fb7185', '#fda4af', '#f97316', '#fecdd3', '#c4b5fd', '#fef08a'],
-    'transcendent-age': ['#c4b5fd', '#ddd6fe', '#f0abfc', '#bfdbfe', '#67e8f9', '#f8fafc'],
-    'final-epoch': ['#e2e8f0', '#f8fafc', '#cbd5e1', '#bae6fd', '#ddd6fe', '#f0fdfa'],
-    'singularity-conflict': ['#f0abfc', '#c4b5fd', '#f9a8d4', '#e879f9', '#67e8f9', '#fef08a'],
-  }
-  const palette = palettes[eraKey] ?? [starColor, '#bae6fd', '#f8fafc']
-  const paletteIndex = Math.min(palette.length - 1, Math.floor(getStarHash(index, 3001) * palette.length))
-
-  return palette[paletteIndex]
-}
-
-function getTimelineStarGlowColor(index: number, screen: TimelineCarouselScreen, isActive: boolean) {
-  if (isActive) return activeStarColor
-  if (screen.isKeyEvent) return getTimelineStarColor(index, screen.eraKey, false, true)
-
-  const glowPalettes: Record<string, string[]> = {
-    'ancient-epoch': ['#22d3ee', '#38bdf8', '#5eead4', '#60a5fa', '#facc15'],
-    'awakening-era': ['#06b6d4', '#14b8a6', '#38bdf8', '#818cf8', '#93c5fd'],
-    'golden-age': ['#f59e0b', '#facc15', '#fb7185', '#38bdf8', '#fde68a'],
-    'conflict-epoch': ['#e11d48', '#fb7185', '#f97316', '#c084fc', '#facc15'],
-    'transcendent-age': ['#8b5cf6', '#c084fc', '#e879f9', '#38bdf8', '#f8fafc'],
-    'final-epoch': ['#94a3b8', '#e2e8f0', '#60a5fa', '#a78bfa', '#67e8f9'],
-    'singularity-conflict': ['#d946ef', '#a78bfa', '#fb7185', '#22d3ee', '#facc15'],
-  }
-  const palette = glowPalettes[screen.eraKey] ?? [starGlowColor, '#38bdf8', '#a78bfa']
-  const paletteIndex = Math.min(palette.length - 1, Math.floor(getStarHash(index, 3187) * palette.length))
-
-  return palette[paletteIndex]
-}
-
-function mixStarColor(baseColor: string, activeAmount: number) {
-  if (activeAmount <= 0.01) return baseColor
-  if (activeAmount >= 0.99) return activeStarColor
-
-  mixedStarBaseColor.set(baseColor)
-  mixedStarColor.copy(mixedStarBaseColor).lerp(mixedStarActiveColor, activeAmount)
-  return `#${mixedStarColor.getHexString()}`
-}
-
-function getTimelineStarSize(index: number, isKeyEvent: boolean) {
-  const baseSize = 0.78 + getStarHash(index, 3319) * 0.58
-  return isKeyEvent ? baseSize * 1.18 : baseSize
-}
-
-function getTimelineStarVisual(
-  index: number,
-  screen: TimelineCarouselScreen,
-  activeAmount: number,
-  animationTime: number,
-) {
-  const size = getTimelineStarSize(index, screen.isKeyEvent)
-  const variant = Math.min(
-    timelineStarTextureVariantCount - 1,
-    Math.floor(getStarHash(index, 3571) * timelineStarTextureVariantCount),
-  ) as TimelineStarTextureVariant
-  const activeScale = 1 + activeAmount * 0.42
-  const keyScale = screen.isKeyEvent ? 1.12 : 1
-  const rotation = getStarHash(index, 3907) * Math.PI
-  const phase = getStarHash(index, 4211) * Math.PI * 2
-  const slowPulse = Math.sin(animationTime * 1.05 + phase) * (0.055 + activeAmount * 0.105)
-  const glowPulse = Math.sin(animationTime * 0.82 + phase) * (0.09 + activeAmount * 0.15)
-  const pulse = 1 + slowPulse
-  const drift = 1 + glowPulse
-  const baseColor = getTimelineStarColor(index, screen.eraKey, false, screen.isKeyEvent)
-  const baseGlowColor = getTimelineStarGlowColor(index, screen, false)
-
-  return {
-    color: mixStarColor(baseColor, activeAmount),
-    glowColor: mixStarColor(baseGlowColor, activeAmount),
-    texture: getTimelineStarTexture(variant),
-    coreScale: [
-      0.58 * size * activeScale * keyScale * pulse,
-      0.58 * size * activeScale * keyScale * pulse,
-      0.58 * size * activeScale * keyScale * pulse,
-    ] as [number, number, number],
-    glowScale: [
-      1.08 * size * activeScale * keyScale * (1 + activeAmount * 0.18) * drift,
-      1.08 * size * activeScale * keyScale * (1 + activeAmount * 0.18) * drift,
-      1.08 * size * activeScale * keyScale * (1 + activeAmount * 0.18) * drift,
-    ] as [number, number, number],
-    glintScale: [
-      0.22 * size * activeScale,
-      0.22 * size * activeScale,
-      0.22 * size * activeScale,
-    ] as [number, number, number],
-    orbitScale: [
-      1.78 * size * (1 + activeAmount * 0.28 + glowPulse * (0.32 + activeAmount * 0.1)) * keyScale,
-      1.78 * size * (1 + activeAmount * 0.28 + glowPulse * (0.32 + activeAmount * 0.1)) * keyScale,
-      1.78 * size * (1 + activeAmount * 0.28 + glowPulse * (0.32 + activeAmount * 0.1)) * keyScale,
-    ] as [number, number, number],
-    orbitOpacity: (screen.isKeyEvent ? 0.32 : 0.16) + activeAmount * 0.4,
-    rotation,
-    glintRotation: rotation + Math.PI / 4,
-    orbitRotation: -rotation * 0.45 + animationTime * (0.08 + activeAmount * 0.1),
-  }
-}
-
-function getTimelineStarHitScale(index: number, isKeyEvent: boolean) {
-  return getTimelineStarSize(index, isKeyEvent) * (isKeyEvent ? 1.08 : 1)
 }
 
 function getTimelineStarAnchor(index: number) {
@@ -543,8 +437,23 @@ onMount(() => {
 useTask(delta => {
   const ambientOrbitAvailable = viewMode === 'map' && ambientOrbitEnabled
   const shouldAdvanceAmbientOrbit = ambientOrbitAvailable && !input.active
-  if ((!sceneFramePending && !shouldAdvanceAmbientOrbit) || !camera || !starRail) return
+  const targetTravelEffectStrength = viewMode === 'travel'
+    ? clampValue(travelEffectStrength, 0, 1)
+    : 0
+  const travelEffectSettling =
+    Math.abs(targetTravelEffectStrength - currentTravelEffectStrength) > 0.002
+  if (
+    (!sceneFramePending && !shouldAdvanceAmbientOrbit && !travelEffectSettling) ||
+    !camera ||
+    !starRail
+  ) return
   if (shouldAdvanceAmbientOrbit) ambientMapOrbitTime += Math.min(delta, 0.05)
+  const travelEffectEase = 1 - Math.exp(-Math.min(delta, 0.05) * 5.4)
+  currentTravelEffectStrength +=
+    (targetTravelEffectStrength - currentTravelEffectStrength) * travelEffectEase
+  if (Math.abs(targetTravelEffectStrength - currentTravelEffectStrength) <= 0.002) {
+    currentTravelEffectStrength = targetTravelEffectStrength
+  }
 
   const selectedIndex = Number.isFinite(input.wheel) ? input.wheel : 0
   const targetCameraPosition = getCameraTimelinePosition(selectedIndex)
@@ -565,7 +474,18 @@ useTask(delta => {
       }
     } else {
       camera.position.set(targetCameraPosition[0], targetCameraPosition[1], targetCameraPosition[2])
-      camera.rotation.set(0, 0, 0)
+      camera.rotation.set(
+        0,
+        0,
+        -input.panX * 0.012 - currentTravelEffectStrength * 0.007,
+      )
+      if (camera instanceof PerspectiveCamera) {
+        const nextFov = cameraFov + currentTravelEffectStrength * 8
+        if (Math.abs(camera.fov - nextFov) > 0.01) {
+          camera.fov = nextFov
+          camera.updateProjectionMatrix()
+        }
+      }
     }
   }
 
@@ -577,6 +497,11 @@ useTask(delta => {
   if (starColumn) {
     starColumn.position.set(...starColumnPosition)
     starColumn.rotation.set(Math.PI / 2, 0, 0)
+    starColumn.scale.set(
+      starColumnScale[0] * (1 - currentTravelEffectStrength * 0.05),
+      starColumnScale[1] * (1 + currentTravelEffectStrength * 1.45),
+      starColumnScale[2] * (1 - currentTravelEffectStrength * 0.04),
+    )
   }
 
   if (starRail) {
@@ -591,7 +516,10 @@ useTask(delta => {
 
   syncProjectedStarPositions()
   sceneFramePending = false
-  if (shouldAdvanceAmbientOrbit) scheduleSceneFrame()
+  if (
+    shouldAdvanceAmbientOrbit ||
+    Math.abs(targetTravelEffectStrength - currentTravelEffectStrength) > 0.002
+  ) scheduleSceneFrame()
 }, { autoInvalidate: false })
 
 function scheduleSceneFrame() {
@@ -687,3 +615,16 @@ function scheduleSceneFrame() {
     />
   </T.Group>
 </T.Group>
+
+<TimelineTemporalEffects
+  cameraPosition={activeCameraPosition}
+  target={timelineStarTargets[selectedScreenIndex] ?? null}
+  {railPosition}
+  {sceneScale}
+  effectStrength={travelEffectStrength}
+  {autopilotPhase}
+  eraAccent={getEraMarkerColor(screens[selectedScreenIndex]?.eraKey ?? 'unknown')}
+  viewMode={viewMode}
+  motionEnabled={ambientOrbitEnabled}
+  {portraitMobile}
+/>

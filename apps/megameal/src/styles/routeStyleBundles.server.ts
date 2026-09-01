@@ -89,14 +89,15 @@ const bundles: Record<RouteStyleBundleName, RouteStyleBundle> = {
     sources: [
       appStyle('features/store/featured-product/featured-product-commerce.css'),
       appStyle('features/store/featured-product/featured-product-panels.css'),
-      appStyle('features/store/featured-product/featured-product-related-modal.css'),
       appStyle('features/store/featured-product/featured-product-shell.css'),
+      appStyle('features/store/featured-product/featured-product-related-modal.css'),
       appStyle('features/store/featured-product/procedural-model-viewer.css'),
     ],
   },
   timeline: {
     sources: [
       appStyle('features/extracted/home-intro-environment.css'),
+      appStyle('features/timeline/timeline-flight.css'),
       appStyle('features/timeline/timeline-selected-record.css'),
     ],
   },

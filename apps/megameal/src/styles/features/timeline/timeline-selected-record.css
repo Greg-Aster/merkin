@@ -237,7 +237,7 @@
 
 @media (max-width: 760px) {
   .home-intro-copy--timeline-selected {
-    --timeline-selected-dock-clearance: max(6.95rem, calc(env(safe-area-inset-bottom) + 6.95rem));
+    --timeline-selected-dock-clearance: max(10.25rem, calc(env(safe-area-inset-bottom) + 10.25rem));
     left: 50% !important;
     top: auto !important;
     right: auto !important;
