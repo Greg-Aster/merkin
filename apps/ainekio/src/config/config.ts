@@ -1,4 +1,4 @@
-import { AUTO_MODE } from '@constants/constants.ts'
+import { DARK_MODE } from '@constants/constants.ts'
 import type {
   LicenseConfig,
   NavBarConfig,
@@ -9,7 +9,7 @@ import { LinkPreset } from '../types/config'
 
 export const siteConfig: SiteConfig = {
   title: 'Ainekio',
-  subtitle: 'Building a physical interface for MetaHuman OS',
+  subtitle: 'V2 body development and the MetaHuman OS redesign',
   enablePostFooterNav: true,
   lang: 'en',
   themeColor: {
@@ -17,10 +17,10 @@ export const siteConfig: SiteConfig = {
     fixed: false,
   },
   transparency: 0.9,
-  defaultTheme: AUTO_MODE,
+  defaultTheme: DARK_MODE,
   banner: {
     enable: false,
-    src: '/assets/ainekio/hero.webp',
+    src: '/assets/ainekio/v2/hero-concept.webp',
     position: 'center',
     credit: {
       enable: false,
@@ -54,6 +54,10 @@ export const navBarConfig: NavBarConfig = {
   links: [
     LinkPreset.Home,
     {
+      name: 'V2',
+      url: '/posts/ainekio-v2/',
+    },
+    {
       name: 'Status',
       url: '/posts/current-status/',
     },
@@ -67,9 +71,9 @@ export const navBarConfig: NavBarConfig = {
 }
 
 export const profileConfig: ProfileConfig = {
-  avatar: '/src/content/avatar/avatar.webp',
+  avatar: '/assets/avatar/avatar.webp',
   name: 'Ainekio',
-  bio: 'A desk-scale robot familiar. Source, runtime, semantic, and physical proof reported separately.',
+  bio: 'A robot familiar preparing for v2: twelve-servo mechanics, ESP32-P4, and persistent MetaHuman execution.',
   links: [
     {
       name: 'GitHub',

@@ -1,74 +1,69 @@
 ---
 title: "About Ainekio"
-description: "Project scope, evidence rules, source boundaries, visual provenance, and public-documentation policy."
+description: "The robot project, its source code, design history, and concept artwork."
 ---
 
 # About Ainekio
 
-Ainekio is an owner-built robot familiar: a small physical companion connected
-to MetaHuman OS through a bounded, authenticated Environment interface.
+Ainekio is an owner-built robot familiar: a small four-legged companion connected
+to MetaHuman OS. The project combines printed mechanics, embedded control,
+camera and audio hardware, conversation, and limited autonomous behavior.
 
-The project combines printed mechanics, embedded firmware, camera and audio
-hardware, a machine-checkable protocol, a gateway, simulation, speech services,
-environment reasoning, and carefully limited autonomous behavior. This site is
-the public field guide for that complete system.
+The working V1 has eight servos and an ESP32-S3. The
+[V2 roadmap](/posts/ainekio-v2/) describes the planned twelve-servo body and
+ESP32-P4 controller. The [MetaHuman redesign](/posts/metahuman-integration/)
+adds saved workflows that retain a request through waits, results, and restarts.
 
-## What this site records
+## What the site documents
 
-- the current body and controller design;
-- owner boundaries across Ainekio and MetaHuman OS;
-- protocol, gateway, media, perception, and voice behavior;
-- dated implementation and validation status;
-- physical results and failures when they have real evidence;
-- open acceptance gates without disguising them as future features.
+The guide covers hardware, firmware, commands, gateway, camera, speech, and
+MetaHuman integration. [Dated status reports](/posts/current-status/) record
+implementation, tests, physical results, failures, and remaining work.
 
-## Evidence policy
+A design is a plan. Code establishes implementation; a test establishes the
+behavior it exercises. A running system accepting a request, a command finishing,
+and the robot meeting an objective require their own evidence. For example, a
+completed walk needs a fresh image before it can establish a visual goal.
 
-The site keeps five claims separate: source implementation, focused validation,
-live runtime admission, terminal robot completion, and physical or semantic
-proof. A higher-level result is not inferred from a lower-level check.
+## Software responsibilities
 
-This is why the current status can say both “the closed software loop is
-implemented” and “the assembled companion loop is still pending acceptance.”
+MetaHuman handles conversation, persona, memory, reasoning, and saved objectives.
+Its Work Coordinator schedules finite jobs; Robot Operator controls autonomous
+timing; Environment workflows choose actions; Environment Bridge handles the
+external connection. Robot Status displays execution progress.
 
-## Project boundaries
+Ainekio translates commands, enforces body safety, runs the hardware, and returns
+results. Models request supported actions; they cannot directly write servo PWM.
+The two source repositories are linked below.
 
-Ainekio accepts semantic robot commands through explicit capability and safety
-gates. MetaHuman model output does not directly control raw servo angles.
+## Design history and artwork
 
-The Work Coordinator owns finite work admission. Robot Operator owns robot-
-autonomy timing. Environment Mode owns embodied decisions. Environment Bridge
-owns external transport. Environment Task State owns bounded objective state and
-completion. Ainekio owns protocol translation, body safety, hardware execution,
-and correlated physical feedback.
+V1 derives from the Apache-2.0-licensed
+[Sesame Robot Project](https://github.com/dorianborian/sesame-robot). Owner-supplied
+construction photos show its low open black chassis, red feet and face, cyan
+OLED, camera, and exposed wiring. The tracked Frame8 CAD records enclosure work;
+it does not establish which enclosure is installed.
 
-## Source and design lineage
+V2 evaluates [OpenHarmony Puppy](https://oshwhub.com/pcbguy/shi-er-zi-you-du-hong-meng-si-zu-gou-gou)
+leg geometry with an Ainekio-specific chassis. Current banners, article covers,
+and the avatar are generated concept art: a shorter, broader body with serrated
+red legs and a cyan face. The comparison keeps V1 on the left and prospective
+V2 on the right. Geometry, materials, and electronics remain illustrative.
 
-The current test body is derived from the Apache-2.0-licensed
-[Sesame Robot Project](https://github.com/dorianborian/sesame-robot). Ainekio's
-controller firmware, protocol, gateway, safety core, media paths, and MetaHuman
-integration are maintained in the Ainekio repository.
+The dystopian science-fiction settings are visual humor and inspiration. They
+do not depict hardware tests. Earlier artwork based on V1 remains with historical
+material.
 
-The site's 2026 visual set was regenerated from the owner-supplied photographs
-in `public/photos`. Those photos are the construction reference: low open black
-chassis, red feet and face module, cyan OLED, camera, and exposed wiring. The
-active `Frame8` CAD is documented separately as an uninstalled enclosure
-revision.
+The simulator experiment was unsuccessful and is fully retired. Its
+[motion notes](/posts/archive/motion-systems/) and the earlier
+[virtual-environment notes](/posts/archive/first-steps-work-in-progress/) remain
+as clearly dated history.
 
-The generated article art deliberately places the construction-faithful robot
-in absurdly dramatic science-fiction and dystopian scenes. Those settings are
-editorial humor and inspiration—not photographs, test evidence, or claims about
-installed hardware.
+## Documentation and privacy
 
-## Public documentation boundary
+Current source and fresh results take precedence over older plans. Corrections
+are dated; historical articles retain their context.
 
-Personal MetaHuman profiles, memories, captured media, runtime logs, credentials,
-tokens, model weights, and machine-local state do not belong on this public site.
-Examples stay sanitized, and operational results are summarized without
-publishing private data.
-
-## Corrections
-
-This is a fast-moving prototype. Each status article is dated and tied to a
-repository baseline. If a field note conflicts with current source, current
-tracked owners and fresh evidence win.
+Examples omit personal profiles, memories, captured media, runtime logs,
+credentials, tokens, model weights, and local state. Operational results are
+summarized without publishing that private data.

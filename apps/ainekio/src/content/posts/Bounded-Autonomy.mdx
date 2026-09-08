@@ -1,9 +1,9 @@
 ---
-title: "Bounded Autonomy: Reactive, Semi, Full, and Robot Operator"
+title: "Robot Autonomy Modes"
 published: 2026-08-27T07:45:00-07:00
-updated: 2026-08-27
-description: "What Ainekio autonomy actually does today, who admits it, how it reaches the robot, and why one completed motion is not a finished companion loop."
-image: "/posts/ainekio-2026/bounded-autonomy.webp"
+updated: 2026-09-07
+description: "Reactive, Semi, and Full behavior, how the robot chooses work, and how users steer or stop it."
+image: "/assets/ainekio/v2/bounded-autonomy-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
@@ -19,134 +19,84 @@ seriesTitle: "MetaHuman OS"
 contentFormat: "report"
 ---
 
-# Autonomy is an admission policy, not an alternate robot brain
+# When the robot acts on its own
 
-Ainekio's autonomous behavior is organized around MetaHuman's Active Operator
-modes and Robot Operator service. The modes decide when bounded autonomous work
-may be admitted. They do not grant a model direct access to the robot and do not
-replace Environment Mode, Environment Bridge, Task State, or the Work
-Coordinator.
+MetaHuman has three autonomy modes. They control when Robot Operator can start
+work or resume an eligible saved workflow. Once an objective starts, its progress
+is retained through actions, specialist results, user corrections, and waits.
 
-## The three modes
+This page describes the September 7 development code. The revised system still
+needs deployment and repeated real-robot tests.
 
-### Reactive
+## Modes
 
-Reactive is the most conservative mode. User-triggered environment interaction
-remains available, but Robot Operator stays dormant and robot-specific autonomy
-work is cancelled or suppressed.
+| Mode | Behavior |
+| --- | --- |
+| Reactive | Responds to user interaction; Robot Operator stays dormant |
+| Semi | Uses configured timing and idle conditions to start finite work or resume an eligible saved wait |
+| Full | Responds to Coordinator state, resumes an eligible saved wait, or starts a Robot Autonomy Controller when no execution is active |
 
-A wake-word-triggered wave can succeed in Reactive. That proves the reactive
-speech-to-command path, not autonomous observation or self-directed movement.
+Full mode no longer rotates through Boredom Observer, Movement, and Reflection.
+Those configured workflows remain available, but a controller uses current
+context to choose the next activity.
 
-### Semi
+## Choosing work
 
-Semi permits Robot Operator to schedule bounded children after configured idle
-windows. Current children are:
+The Robot Autonomy Controller receives persona, recent conversation including
+the latest user turn, inner dialogue, robot results, Bridge facts, Robot Status,
+optional desires, and the Agent Catalog. It can choose speech, an available
+finite agent, or a high-level robot objective.
 
-- Boredom Observer;
-- Boredom Movement;
-- Boredom Reflection.
-
-Each child produces a high-level intention. The shared Boredom Autonomy workflow
-then executes the intention through the normal Environment owners. Semi does not
-create a private action queue or a second bridge.
-
-### Full
-
-Full changes the scheduling pattern from independent idle timers to a bounded
-completion/cooldown-driven cycle. Robot Operator still chooses among the same
-children, and only one robot-autonomy cycle should be active at a time.
-
-Full remains bounded by current owner configuration, authorized user state,
-sleep state, capability gates, queue admission, action validation, and
-Environment Task State. It is not an unrestricted roaming mode.
-
-## Robot Operator's job
-
-Robot Operator is a persistent service whose narrow responsibility is robot-
-autonomy timing and admission. It:
-
-- observes the configured Active Operator mode;
-- stays dormant in Reactive or while Sleep is active;
-- arms eligible child work;
-- avoids overlapping robot-autonomy cycles;
-- requires an active authorized owner context;
-- submits finite work to the Work Coordinator;
-- records bounded runtime state and outcomes.
-
-It does not send robot commands. That remains Environment Mode's job through the
-existing bridge and adapter.
-
-## From boredom to a physical action
+Robot Operator handles timing and permission to start work. Environment
+workflows select actions, and the body checks movement. Optional Desire work
+is submitted through the Desire Agent and Work Coordinator.
 
 ```text
-Robot Operator deadline or Full-cycle successor
-  -> Work Coordinator admission
-  -> child planner graph
-  -> high-level intention
-  -> Boredom Autonomy executor
-  -> Environment Task State
-  -> capability-bound Environment action
-  -> Environment Bridge
-  -> Ainekio adapter and protocol
-  -> physical result and/or fresh observation
-  -> bounded task reduction
-  -> Conversation Buffer and speech
+Robot Operator -> Work Coordinator -> Autonomy Controller
+  -> speech, specialist work, or robot objective
+  -> saved wait -> result -> Goal Review
+  -> finish or continue
 ```
 
-The child planner cannot declare physical success by writing a confident
-narrative. The action and observation owners still have to return evidence.
+A specialist returning or the robot speaking does not automatically close an
+unfinished objective. The workflow records that decision explicitly.
 
-## Current field evidence
+## Progress, correction, and stop
 
-Recent physical autonomy work produced three different outcomes, all useful:
+Robot Status displays current facts and workflow decisions. The saved execution
+retains the objective, evidence, and pending work for recovery. This replaces
+the older Task State continuation design and plans for a separate Robot Status
+workflow. Goal Review continues within the execution rather than through an
+independent polling loop or a new graph for every result.
 
-| Child | Result | What it actually proved |
-| --- | --- | --- |
-| Movement | Reached a gateway emote and terminal robot `done` | One bounded autonomous movement completed at protocol level. |
-| Observer | Expired at the adapter boundary in the reviewed run | Admission and planning did not guarantee dispatch; timeout behavior remained visible. |
-| Reflection | Motion plan was rejected because a joint target exceeded `0..180` | The safety validator stopped an invalid plan before physical dispatch. |
+Users can steer or cancel work. Mode eligibility, authorization, Sleep state,
+job scheduling, and current control of the body constrain autonomous actions.
+Robot Operator stays dormant in Reactive mode and during Sleep.
 
-All three produced user-facing Conversation Buffer/TTS output, but that output
-was not equally correct. Movement's narration could be semantically stale even
-when the motion completed. A safe rejection can be spoken successfully without
-turning the rejected action into success.
+Emergency stop has a direct path that does not depend on model interpretation.
+Coordinator and adapter changes coordinate cancellation with body ownership.
+An uncertain physical result must be resolved before assuming the body is free
+for another attempt. Software cancellation tests still need physical stop
+measurements.
 
-## Visual autonomy is the harder gate
+## Recorded results
 
-An autonomous task such as “move somewhere with better light” cannot close only
-because `walk` returned `done`. The system needs a fresh correlated frame and a
-frame-cited decision that the light actually improved. If it did not, bounded
-continuation must decide whether another allowed step is appropriate.
+Earlier V1 tests recorded an autonomous movement reaching `done`, an observation
+request expiring, and an invalid motion plan being rejected. Those runs used
+the previous runtime.
 
-This is why camera continuity, Task State correlation, and explicit completion
-bases matter more than adding another boredom timer.
+The September review records controlled tests for specialist returns, continued
+Goal Review, steering, cancellation, and fresh-process resumption. Live models
+and physical autonomy require separate testing. Exact reported counts are in
+[Current Status](/posts/current-status/).
 
-## Robot Status is active development
+## Next demonstration
 
-The current MetaHuman working tree contains a newer Robot Status workflow. Its
-direction is to derive one bounded semantic status from Environment Bridge facts,
-robot and conversation buffers, active desires, and the previous status, then
-publish through an existing system buffer.
+Repeat one objective through scheduling, model decision, dispatch, robot result,
+fresh observation, and review. Exercise continuation, specialist returns, stop,
+user correction, Sleep, Reactive mode, disconnect, and restart.
 
-That work is not part of the tracked baseline used for this site snapshot. It is
-listed here as active development, not as a completed autonomous capability.
-
-## What “companion loop accepted” would require
-
-A credible acceptance run needs more than waiting a few minutes and seeing a log
-message. It should capture repeated cycles with:
-
-1. mode and Robot Operator eligibility;
-2. child admission through the Work Coordinator;
-3. planner output and bounded Environment envelope;
-4. capability-bound dispatch;
-5. robot acknowledgement and terminal outcome;
-6. fresh observation when the objective requires one;
-7. Task State continuation or semantic completion;
-8. accurate Conversation Buffer and speech output;
-9. cooldown and next-cycle behavior;
-10. stop, user-presence, Sleep, and Reactive-mode suppression.
-
-Until that evidence repeats reliably, Ainekio has bounded autonomy machinery and
-promising physical results—not a finished unattended companion.
+The response should match the result: report rejected actions as rejected, retain
+uncertain outcomes, and use a fresh image for a visual goal such as finding better
+light. These requirements apply to V1 and the planned
+[V2 body](/posts/ainekio-v2/).

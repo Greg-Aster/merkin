@@ -1,9 +1,9 @@
 ---
-title: "Ainekio: A Robot Familiar With Real Boundaries"
+title: "Ainekio: Project Overview"
 published: 2026-08-27T09:45:00-07:00
-updated: 2026-08-27
-description: "Start here: the physical robot, the MetaHuman OS connection, the evidence model, and the work that remains."
-image: "/assets/ainekio/hero.webp"
+updated: 2026-09-07
+description: "A small robot connected to MetaHuman OS, with a working eight-servo body and a twelve-servo successor in development."
+image: "/assets/ainekio/v2/hero-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
@@ -19,124 +19,62 @@ seriesTitle: "Start Here"
 contentFormat: "report"
 ---
 
-# A small robot with a large system behind it
+# Ainekio at a glance
 
-Ainekio is an owner-built robot companion connected to MetaHuman OS. The current
-red-and-black body is small enough to sit on a workbench: four articulated legs,
-eight micro servos, a cyan OLED face, a camera, microphone and speaker hardware,
-an ESP32-S3 controller, and an open printed chassis whose wiring is still fully
-exposed. A separate enclosure revision is actively evolving around that working
-prototype.
+Ainekio is a small, owner-built robot familiar connected to MetaHuman OS. It
+combines a four-legged body with a camera, microphone, speaker, and OLED face.
+MetaHuman handles conversation and reasoning; the robot controller handles
+movement and local safety.
 
-The larger project begins behind that body. Ainekio has a machine-checkable wire
-protocol, a portable safety core, physical firmware, an authenticated gateway,
-an operator dashboard, a host emulator, a browser simulator, and an Environment
-adapter. MetaHuman OS supplies the conversation, model routing, work admission,
-environment reasoning, bounded task state, speech services, and autonomy policy.
+The working V1 uses eight servos and an ESP32-S3. V2 is planned around twelve
+MG90S-class servos, a new chassis, and an ESP32-P4 controller. Its first movement
+system will use scripted poses and sequences.
 
-This site documents both halves without pretending they are the same thing.
+MetaHuman is also being redesigned to save an objective and its progress across
+waits, specialist work, user corrections, and restarts. That software is under
+integration. The new body and the deployed system still need testing.
 
-## The system in one pass
+## What is being built
 
-```text
-Human or bounded autonomous trigger
-  -> MetaHuman Work Coordinator
-  -> Environment Mode
-  -> Environment Task State
-  -> Environment Bridge
-  -> Ainekio Environment adapter
-  -> authenticated gateway
-  -> protocol-v1 robot command
-  -> portable body core and ESP32-S3 services
-  -> motion, face, camera, microphone, or speaker
-  -> correlated result or observation
-  -> the same bounded MetaHuman task
-```
+- **V2 body:** three joints per leg, experimental leg prints, a serviceable
+  chassis, and a power supply sized from measured loads. Start with the
+  [V2 roadmap](/posts/ainekio-v2/).
+- **MetaHuman integration:** saved workflows, action records, and recovery that
+  keep track of what the robot was asked to do and what happened. Read
+  [how the integration works](/posts/metahuman-integration/).
 
-Each arrow has a specific owner. The browser does not own the robot's safety
-rules. The model does not generate raw servo angles for direct execution. The
-gateway does not decide whether an objective is semantically complete. A
-successful motor command does not prove that a visual goal was achieved.
+The [dated status report](/posts/current-status/) records the current code,
+reported test results, and remaining work. V1 motion and audio tests establish
+the starting point; V2 must pass its own tests.
 
-Those boundaries are the core design, not incidental plumbing.
+## How a request reaches the robot
 
-## What “robot familiar” means here
+1. MetaHuman's Work Coordinator accepts the request. A saved workflow retains
+   the objective and selects an action the connected robot supports.
+2. The Environment Bridge sends it through Ainekio's adapter and authenticated
+   gateway.
+3. The body controller checks the command, applies motion limits, and executes it.
+4. Results and observations return to the saved workflow. MetaHuman reviews
+   whether the objective is complete or needs another step.
 
-“Familiar” is the product direction: a small embodied presence that can listen,
-speak, look, move, and gradually participate in a shared environment. It does
-not mean the robot is a finished autonomous creature or that every service is
-always running.
+A command finishing and a goal being met can be different things. Walking can
+finish successfully while a goal such as finding better light still needs a
+new camera image. Robot Status displays the workflow's progress.
 
-The current design prefers:
+## Where the work lives
 
-- semantic actions such as `wave`, `bow`, `captureImage`, or a bounded motion
-  plan over free-form actuator output;
-- explicit capabilities, timeouts, cancellation, and fail-safe behavior over
-  optimistic dispatch;
-- correlated still images over a continuous video feed to the model;
-- one canonical owner for admission, transport, execution, and completion;
-- local-first operation with authenticated boundaries;
-- evidence that says exactly what passed and what remains unproven.
+The [Ainekio repository](https://github.com/Greg-Aster/Ainekio-bot) contains
+hardware designs, the shared body core, firmware, protocol, motion assets,
+gateway, dashboard, and Environment adapter. The simulator experiment has
+been retired; its [July notes](/posts/archive/motion-systems/) remain as history.
 
-## The two repositories
+[MetaHuman OS](https://github.com/Greg-Aster/metahuman-os) provides persona and
+memory, conversation, models, speech services, work scheduling, saved graph
+execution, and autonomy policy. Optional Desire work uses the same Work
+Coordinator to submit jobs.
 
-The [Ainekio repository](https://github.com/Greg-Aster/Ainekio-bot) owns the
-body-side system:
-
-- `Slave/` contains the printed-body assets, portable control core, protocol,
-  generated motion/face/audio assets, and ESP32-S3 firmware.
-- `Master/` contains the protocol gateway, operator dashboard, and authenticated
-  MetaHuman Environment adapter.
-- `Emulator/` contains the host body emulator, integration tests, and the Sesame
-  visual simulator.
-
-The [MetaHuman OS repository](https://github.com/Greg-Aster/metahuman-os) owns
-the reasoning and orchestration side:
-
-- the Work Coordinator admits and tracks finite work;
-- Robot Operator schedules the robot-specific bounded autonomy children;
-- Environment Mode decides what the environment task should do next;
-- Environment Bridge owns the external connection and transport lifecycle;
-- Environment Task State owns correlation, step bounds, continuation, and the
-  completion basis for an objective;
-- Whisper and Kokoro remain the speech recognition and synthesis owners.
-
-The current test body began from the open-source
-[Sesame robot](https://github.com/dorianborian/sesame-robot), but Ainekio is not
-just a theme applied to upstream firmware. The controller, protocol, gateway,
-safety model, media paths, and MetaHuman integration have been replaced or
-expanded around Ainekio's own contracts.
-
-## How progress is reported
-
-This project uses five different evidence levels:
-
-| Evidence | What it proves |
-| --- | --- |
-| Present in source | The implementation exists in its current owner. |
-| Focused validation | A relevant contract, type check, audit, or unit test passed. |
-| Runtime admission | The live system accepted the work through its real owner. |
-| Terminal completion | The adapter or robot returned a correlated final result. |
-| Physical or semantic proof | The actual body behaved correctly, or a fresh observation proved the real-world goal. |
-
-The lower rows cannot be inferred from the upper ones. A build is not a walk. A
-gateway connection is not autonomy. `done` is not automatically “the room is
-brighter now.”
-
-## Where the project stands
-
-As of August 27, 2026, the software path is broad and real. The physical
-controller has substantial bring-up evidence. The robot has executed physical
-motion and audio tests through the gateway. Camera, wake-word, speaker, and
-autonomy work all have concrete implementation and field evidence.
-
-The assembled companion loop is still a prototype. Motion calibration, robust
-network behavior, wake-word false-trigger containment, microphone quality,
-speaker underruns, fresh-frame semantic completion, and repeated unattended
-autonomy acceptance remain active engineering work. A newer Robot Status
-workflow is also being developed in MetaHuman OS and is not presented here as a
-released feature.
-
-Read [Current Status](/posts/current-status/) for the dated evidence snapshot,
-then continue through the body, firmware, protocol, gateway, perception, voice,
-MetaHuman, and autonomy articles for the owner-by-owner view.
+V1's mechanics began with [Sesame](https://github.com/dorianborian/sesame-robot).
+V2 evaluates OpenHarmony Puppy V2 leg geometry with Ainekio's own chassis and
+software. The site's current illustrations show a prospective V2 hybrid with
+a stout body and serrated red legs. The comparison image retains V1 alongside
+that concept; final mechanics and electronics depend on testing.

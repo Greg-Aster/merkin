@@ -1,0 +1,168 @@
+{
+  "title": "Ainekio V2 hybrid artwork set",
+  "date": "2026-09-07",
+  "tool": "Built-in image_gen",
+  "designReference": {
+    "asset": "/assets/ainekio/v2/hybrid-concept.webp",
+    "sha256": "c0c4f9eb6309a7d52890118e40307a8c6cd4615fa3c422b85a9e402e31dac1aa",
+    "prompt": "Use case: stylized-concept / identity-preserve / precise-object-edit.\nAsset type: a new Ainekio V2 HYBRID concept image for the robot's website, wide cinematic 16:9.\nInput image 1 is ORIGINAL AINEKIO V1: this is the dominant identity reference, especially its squat stout body, arched crimson ice-axe-like legs with serrated edges, exposed multicolored wiring, black compact chassis and small cyan emoticon face.\nInput image 2 is the previous V2 concept. Keep ONLY the idea of three compact actuator joints per leg and some supported parallel-link engineering. The user says this version looks too much like Harmony recolored. You MUST substantially redesign its silhouette.\nRequested hybrid:\n- A much shorter, wider, STOUT low central body, approximately 30 percent shorter nose-to-tail than image 2, and broader across the shoulders. Compact sturdy crab/robot-familiar stance rather than a long skinny robot dog.\n- Exactly FOUR substantial crimson curved legs inspired strongly by original Ainekio. Each lower leg resembles the curved head/pick of an ICE AXE: a bold hooked arc with clearly visible serrated/toothed inner or rear edge, ending in a practical contact tip. The red serrated legs must be the dominant instantly recognizable silhouette. Preserve original Ainekio's printed angular red aesthetic, adapting it into new articulated three-joint limbs.\n- No smooth silver teardrop legs, no loop-shaped feet, no long polished silver limbs from Harmony. Dark supporting linkages and compact exposed black micro-servos are acceptable behind the crimson outer members.\n- Keep short broad crimson front housing with the familiar small friendly cyan OLED emoticon face, dark open body frame, compact vented central electronics bay and a modest lively bundle of colored wires. A slightly integrated top electronics deck but still clearly a home-built printed machine. Realistic bolts, pivots, layer lines and modest wear. Do not invent oversized military armor.\nComposition: ONE complete robot seen from a low front-three-quarter angle, all four legs readable and inside the frame, robot taking about 70 percent of the frame, on wet broken concrete in the original ruined dystopian futuristic city. Rain reflections, storm-blue light, restrained teal rim lighting and distant ember-red fires. Same cool cinematic sci-fi illustration style as the existing Ainekio artwork. The friendly scrappy familiar character matters more than sleek product styling.\nThe viewer should immediately read this as an evolution of ORIGINAL AINEKIO, with stout stance and ICE-AXE SERRATED RED LEGS, not a recolored Harmony robot. This is prospective design concept art, not manufacturing documentation.\nNo text, logos, watermarks, weapons, humans, extra limbs, silver loop feet, elongated thin dog body, or generic Boston Dynamics-style anatomy."
+  },
+  "mechanicalReference": {
+    "title": "OpenHarmony Puppy",
+    "author": "杜邦线丶小战士 (pcbguy)",
+    "source": "https://oshwhub.com/pcbguy/shi-er-zi-you-du-hong-meng-si-zu-gou-gou",
+    "mirror": "https://oshwlab.com/hawaii0707/training-camp-based-on-hi3861-op"
+  },
+  "note": "Prospective editorial concepts. Final geometry, electronics, materials, wiring and dimensions remain subject to engineering and physical testing. The V1-to-V2 comparison deliberately preserves V1 on the left.",
+  "assets": [
+    {
+      "key": "hero",
+      "file": "/assets/ainekio/v2/hero-concept.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 154396,
+      "preRefreshSceneReference": {
+        "path": "/public/assets/ainekio/v2/hero-concept.webp",
+        "sha256": "d7c2be05ed7ccfe974841972d1a1761b05728030dbd3fc9ef2f55351373a35ee"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nWide 16:9 homepage HERO: retain rain-soaked ruined elevated highway and storm-lit city. Reframe the approved hybrid into the RIGHT 55 percent with dark quiet negative space in the LEFT 40 percent for page text. Keep the complete robot and feet in the central vertical band (roughly 25–75 percent of image height) so a shallow desktop banner crop retains its silhouette. The body remains stout, not stretched to fill space."
+    },
+    {
+      "key": "workshop",
+      "file": "/assets/ainekio/v2/workshop-concept.webp",
+      "width": 1200,
+      "height": 800,
+      "bytes": 151600,
+      "preRefreshSceneReference": {
+        "path": "/public/assets/ainekio/v2/workshop-concept.webp",
+        "sha256": "e3021681fc3c00f000a46ac0d87d0302c58c01aee81cb56999ac23a780573980"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nLandscape 3:2 WORKSHOP thumbnail: preserve the scarred workbench, teal overhead work light, open ruined-city background, loose servo and printed parts. Replace the long silver-legged robot with the stout serrated RED-legged hybrid. Update the loose printed parts to match its red ice-axe truss geometry. Whole robot large, centered, clear at thumbnail size."
+    },
+    {
+      "key": "body-design",
+      "file": "/assets/ainekio/v2/body-design-concept.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 242280,
+      "preRefreshSceneReference": {
+        "path": "/public/posts/ainekio-2026/body-design.webp",
+        "sha256": "4819e6e872a05cc80933ed9afa36501795102af7c126bd96fb8fb6e9051afa81"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nLandscape 16:9 BODY DESIGN cover: preserve the graveyard of immense rusted robot heads, calipers and loose printed chassis part on the giant head, red lightning sky. The approved small stout hybrid stands on the same foreground robot head. Keep the playful scale contrast, with red serrated limbs clearly readable."
+    },
+    {
+      "key": "controller-firmware",
+      "file": "/assets/ainekio/v2/controller-firmware-concept.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 338098,
+      "preRefreshSceneReference": {
+        "path": "/public/posts/ainekio-2026/controller-firmware.webp",
+        "sha256": "b8b0a9f42bbb9ee21a6ab0b4bb0175b773fea728514cebec89840dc04c3b9057"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nLandscape 16:9 CONTROLLER cover: preserve the ruined circular control room, luminous cyan reactor column, damaged consoles, and oversized red emergency button in foreground right. Replace only the small robot to the button's left with the approved stout hybrid. Rain and cool reflective surfaces, readable crimson serrated legs."
+    },
+    {
+      "key": "protocol-safety",
+      "file": "/assets/ainekio/v2/protocol-safety-concept.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 286040,
+      "preRefreshSceneReference": {
+        "path": "/public/posts/ainekio-2026/protocol-safety.webp",
+        "sha256": "afdb08f4649703b18da9dc3f0126abcfcb3d2d074657110300ea01e2aa71eca5"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nLandscape 16:9 PROTOCOL AND SAFETY cover: preserve the industrial containment test circle, yellow-black hazard markings, sealed round doors, warning lamps and red emergency-stop button. The approved stout hybrid waits in the marked circular area, all four feet visible. No text or claims of actual safety certification."
+    },
+    {
+      "key": "gateway-simulator",
+      "file": "/assets/ainekio/v2/gateway-simulator-concept.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 281404,
+      "preRefreshSceneReference": {
+        "path": "/public/posts/ainekio-2026/gateway-simulator.webp",
+        "sha256": "7baeb6dc4c890f995819fc2ce873ec3286e01dc361c330b926742a511cf6c22e"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nLandscape 16:9 GATEWAY AND SIMULATOR cover: preserve the cavernous server corridor, winding USB cable in foreground and giant cyan holographic robot visualization above. Replace BOTH the small physical robot AND its holographic representation with the same stout serrated-leg hybrid silhouette. One physical robot, one clearly holographic twin; no old robot silhouette left on screen."
+    },
+    {
+      "key": "metahuman-loop",
+      "file": "/assets/ainekio/v2/metahuman-loop-concept.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 204902,
+      "preRefreshSceneReference": {
+        "path": "/public/posts/ainekio-2026/metahuman-loop.webp",
+        "sha256": "e1e0a3e660cd55c19407330267d7fb08b14704b253e7784246e565c190ee2136"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nLandscape 16:9 METAHUMAN OS cover: preserve the monumental dark computing hall, suspended server structure with sparse linked cyan graph nodes, distant blue portal and cable along floor. Replace the small robot in foreground with the stout crimson serrated-leg hybrid. Keep the contrast between tiny friendly robot and vast persistent computation."
+    },
+    {
+      "key": "vision-loop",
+      "file": "/assets/ainekio/v2/vision-loop-concept.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 186522,
+      "preRefreshSceneReference": {
+        "path": "/public/posts/ainekio-2026/vision-loop.webp",
+        "sha256": "f89105bd2ae7725c9a6a1935273f96ddd449243467f6eda6a20bf093b05fd9ce"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nLandscape 16:9 VISION cover: preserve the gigantic black hovering cube, immense cyan eye-shaped storm vortex, lightning, checkerboard calibration targets and little wooden cube. Replace foreground robot with the exact stout hybrid; keep its face display and small front camera, red serrated legs, and curious observation pose. No text or new magical robot abilities."
+    },
+    {
+      "key": "voice-loop",
+      "file": "/assets/ainekio/v2/voice-loop-concept.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 207460,
+      "preRefreshSceneReference": {
+        "path": "/public/posts/ainekio-2026/voice-loop.webp",
+        "sha256": "7df636d5db9d9cfccce727fae1d3d5bc52400ca0e0285c9e09d22a63cd4cf532"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nLandscape 16:9 VOICE cover: preserve the ruined theatrical hall filled with speakers, enormous suspended vintage microphone, warm red and cold cyan lighting. The same stout hybrid stands under the microphone, small friendly cyan face, red serrated ice-axe legs, no arms or extra appendages."
+    },
+    {
+      "key": "bounded-autonomy",
+      "file": "/assets/ainekio/v2/bounded-autonomy-concept.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 191418,
+      "preRefreshSceneReference": {
+        "path": "/public/posts/ainekio-2026/bounded-autonomy.webp",
+        "sha256": "1dc642d2a256f801f317efdf424e22fa7778c32b389e1c1cc918df4bcc654c8c"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nLandscape 16:9 AUTONOMY cover: preserve the salt-flat desert, eclipsed sun, colossal walking industrial structures fading into dust, and small red ball close to the robot. Replace foreground robot with the same stout hybrid looking toward the ball, all four serrated crimson legs clear. Keep the cinematic warm dusty palette of this existing scene."
+    },
+    {
+      "key": "evolution",
+      "file": "/assets/ainekio/v2/evolution-concept.webp",
+      "width": 1774,
+      "height": 887,
+      "bytes": 205824,
+      "preRefreshSceneReference": {
+        "path": "/public/assets/ainekio/v2/evolution-concept.webp",
+        "sha256": "9688e9dd84784c8c7af576a27dae3489ea2f00dc18c7100c34e48ffb4f704dbf"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nWide 2:1 V1 TO V2 comparison. Crucial exception: PRESERVE the original V1 robot on the LEFT unchanged. Replace ONLY the long silver-legged V2 on the RIGHT with the approved stout hybrid from reference 1, matching perspective and lighting. Keep cyan central arrow and faint wireframe progression, workshop setting and all six labels exactly: \"AINEKIO V1\", \"8 SERVOS / ESP32-S3\", \"CURRENT BASELINE\", \"AINEKIO V2\", \"12 SERVOS / ESP32-P4\", \"PROSPECTIVE CONCEPT\". Adjust the right wireframe traces if needed to reflect the hybrid. No other text."
+    },
+    {
+      "key": "avatar",
+      "file": "/assets/avatar/avatar.webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 46410,
+      "preRefreshSceneReference": {
+        "path": "/src/content/avatar/avatar.webp",
+        "sha256": "b1a6a1a414e97412882cb06537a772ebcaefc4593ca1cb7c1e890ced61e6e4e8"
+      },
+      "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nSquare 1:1 PROFILE PORTRAIT. Replace the V1 with the approved stout hybrid on the ruined wet highway. Compose its face and short broad body centrally, with all four pronounced red serrated legs and a little breathing room. The friendly cyan face remains immediately recognizable even at 64px. Simplify the distant city backdrop with soft focus and preserve cyan/red lighting. No lettering."
+    }
+  ],
+  "responsiveHero": {
+    "file": "/assets/ainekio/v2/hero-concept-small.webp",
+    "width": 800,
+    "height": 450
+  }
+}

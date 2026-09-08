@@ -1,15 +1,15 @@
 ---
-title: "Gateway, Dashboard, and Simulator: One Contract, Three Views"
+title: "Gateway and Operator Dashboard"
 published: 2026-08-27T08:45:00-07:00
-updated: 2026-08-27
-description: "How the authenticated gateway, operator dashboard, host emulator, and browser simulator inspect one robot contract without becoming competing owners."
-image: "/posts/ainekio-2026/gateway-simulator.webp"
+updated: 2026-09-07
+description: "How MetaHuman connects to the physical robot, how the dashboard controls it, and how action results return."
+image: "/assets/ainekio/v2/gateway-simulator-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Gateway, Dashboard, Emulator, Simulator, WebSocket]
+tags: [Ainekio, Gateway, Dashboard, WebSocket]
 category: "Robot Runtime"
 draft: false
 lang: "en"
@@ -19,127 +19,85 @@ seriesTitle: "Robot Runtime"
 contentFormat: "report"
 ---
 
-# The Master side of Ainekio
+# Connecting and inspecting the robot
 
-`Master/` is the brain-side owner for Ainekio's authenticated protocol gateway,
-operator dashboard, and MetaHuman Environment adapter. It accepts robot
-connections, validates sessions, translates semantic environment actions, moves
-bounded camera and audio data, and reports correlated outcomes.
+Ainekio's `Master/` code connects MetaHuman to the body. It contains the
+authenticated gateway, operator dashboard, and Environment adapter. The gateway
+handles robot sessions and media; the adapter translates MetaHuman actions into
+robot commands and returns their results.
 
-It does not own MetaHuman's task queue or decide the semantic completion of an
-objective. It also does not own the body-core safety policy that runs on the
-controller and in the host emulator.
+MetaHuman schedules work and reviews objectives. The body controller enforces
+motion safety.
 
-## Gateway service
+## Gateway
 
-The production gateway exposes separate authenticated roles for the physical
-robot and the Environment adapter. A robot session publishes identity,
-capabilities, readiness, status, and terminal results. The Environment side sees
-a normalized observation and a bounded action surface rather than raw servo
-control.
+The gateway authenticates the robot and adapter separately. Robot sessions report
+identity, capabilities, readiness, state, and command results. The gateway handles:
 
-The gateway coordinates:
-
-- robot and adapter authentication;
-- protocol-v1 control and binary media framing;
-- sequence allocation and terminal-result waiting;
-- capability and current-readiness translation;
+- protocol-v1 JSON control and binary media frames;
+- command sequence IDs and waiting for terminal results;
+- translation of features and readiness into available actions;
 - camera metadata and JPEG delivery;
-- microphone utterance assembly;
-- paced speaker PCM delivery;
-- status, connection-epoch, error, and operation telemetry.
+- microphone utterance assembly and paced speaker PCM;
+- connection epochs, errors, media counters, and operation telemetry.
 
-Local operation prefers DNS-SD discovery with a bounded cached-endpoint attempt.
-A stale cached address is not permanent configuration, and local mode does not
-silently fall back to the optional relay.
+Local discovery uses DNS-SD with a limited attempt at a cached endpoint. Stale
+cache entries are not permanent configuration. Local mode does not automatically
+switch to the optional relay.
 
-## Operator dashboard
+## Dashboard
 
-The dashboard is an inspection and control surface for the real gateway. It can
-show robot state and readiness, select bounded camera preview, change microphone
-or wake settings, request safe actions, and run narrow hardware checks such as a
-speaker test tone.
+The dashboard shows body state, camera/wake readiness, battery classification,
+media counters, and connection state. Operators can enable limited camera preview,
+change microphone or wake settings, request supported actions, and run hardware
+checks such as a speaker test tone.
 
-That last detail illustrates the ownership model. Dashboard volume is a test-
-tone option; it does not silently change the amplitude of ordinary MetaHuman
-speech. A UI control only owns the behavior explicitly connected to its handler.
-
-The dashboard is also where physical facts become visible without granting the
-browser authority over them. Camera readiness, wake readiness, battery
-classification, media counters, and connection state originate from the robot
-and gateway.
+The dashboard volume setting affects that test tone. It does not change ordinary
+MetaHuman speech volume. Displayed hardware state comes from the robot and gateway.
 
 ## Environment adapter
 
-The adapter is Ainekio's implementation of the generic MetaHuman Environment
-Bridge contract. It converts capability-bound MetaHuman actions into protocol-v1
-requests and converts robot feedback into Environment observations.
+The adapter implements MetaHuman's generic Environment Bridge interface. It
+advertises what the selected body can currently do and translates actions:
 
-Examples include:
-
-| MetaHuman action | Ainekio path |
+| MetaHuman action or event | Ainekio path |
 | --- | --- |
-| `robotCommand` | Validated named body command |
-| `robotMotionPlan` | Bounded frame plan when advertised by the body |
-| `captureImage` | Fresh robot snapshot request and correlated JPEG |
-| robot speech | Bounded rendered PCM artifact, paced through the gateway |
-| microphone utterance | VAD-bounded WAV envelope to MetaHuman Whisper |
+| `robotCommand` | Checked named command |
+| `robotMotionPlan` | Frame plan, if supported by the body |
+| `captureImage` | Fresh snapshot and matching JPEG |
+| Robot speech | Rendered PCM sent through the gateway |
+| Microphone utterance | VAD-ended WAV sent to MetaHuman Whisper |
 
-The adapter advertises only what the selected connected body can currently do.
-It waits for robot terminal feedback and does not turn “bytes written to the
-socket” into a successful action result.
+Action results wait for robot feedback, including playback feedback for speech.
 
-## Host emulator
+September work adds SQLite action records and pending result/observation delivery.
+An action ID is tied to its request content. Repeated delivery can return its
+existing record instead of running the physical command again. Dispatch checks
+the Coordinator's current body ownership, and cancellation can block an original
+request that arrives late.
 
-The host emulator implements the robot side of protocol v1 while reusing the
-portable C body core. It gives the project a deterministic way to test command
-acceptance, lifecycle, provisioning transitions, prepared motion, and error
-handling without flashing the controller for every change.
+If dispatch may have happened but its outcome is missing, the adapter reports
+that uncertainty for recovery. These adapter, gateway, and test changes are local
+uncommitted work supporting the [MetaHuman redesign](/posts/metahuman-integration/).
+Crash recovery and physical stopping still need deployed tests.
 
-When no browser renderer is connected, the emulator can complete accepted
-motion headlessly. When the visual renderer is connected, completion requires
-the correlated renderer acceptance. This prevents an open web page from
-becoming a cosmetic afterthought with no relationship to the command lifecycle.
+## Retired simulator
 
-## Browser simulator
+The simulator experiment was unsuccessful and has been completely retired.
+It is outside the current tooling and V2 plan. The
+[July motion article](/posts/archive/motion-systems/) retains its design,
+command mappings, and reported tests as history.
 
-The Sesame-derived visual simulator renders accepted poses and sequences. It is
-useful for inspecting motion shape, parity, and state transitions. It is not the
-safety owner, not a physics certificate, and not proof that the printed body can
-carry the same gait under load.
+## Transport results and next tests
 
-The simulator answers questions such as:
+Physical tests have produced authenticated sessions and completed commands.
+They have also recorded abnormal WebSocket closes and host `No route to host`
+errors while the gateway remained running.
 
-- Did the expected command reach the renderer?
-- Does the pose sequence use the intended joints and timing?
-- Does the host path agree with the protocol and portable core?
+The cause of those connection losses is unresolved. Strong Wi-Fi signal alone
+cannot exclude incomplete binary writes, routing failure, controller reset,
+power faults, or WebSocket lifecycle errors.
 
-It cannot answer:
-
-- Will the servo rail brown out?
-- Does the foot slip on the real floor?
-- Is a printed joint binding?
-- Did the physical camera see the stopping condition?
-
-## The complete local inspection stack
-
-The Ainekio root launcher starts the simulator, protocol-v1 body emulator,
-gateway, dashboard, and authenticated Environment adapter as one managed local
-stack. It refuses to claim a connected MetaHuman path when the shared adapter
-token is absent.
-
-That stack is valuable because it tests the real owner boundaries. A standalone
-UI mock or a script that calls private helpers would prove much less.
-
-## Transport evidence is layered
-
-The physical system has produced authenticated gateway sessions and successful
-terminal commands. It has also produced abnormal WebSocket closes and host
-`No route to host` evidence while the gateway process itself remained alive.
-
-Those observations establish transport loss, not its physical cause. Strong
-RSSI cannot rule out incomplete binary writes, route loss, controller reset,
-power faults, or WebSocket lifecycle errors. The next useful transport run must
-correlate robot-side error detail, connection epochs, media counters, reset
-reason, route state, and gateway operations without changing several retry
-policies at once.
+The next diagnostic run should record robot errors, connection epochs, media
+counters, reset reason, host routes, and gateway operations together. Change
+retry behavior one variable at a time so the results remain interpretable.

@@ -1,0 +1,131 @@
+---
+title: "Ainekio V2: Body and Controller Plan"
+published: 2026-09-07T12:00:00-07:00
+updated: 2026-09-07
+description: "Three-joint legs, a new chassis, ESP32-P4, measured power requirements, and scripted motion first."
+image: "/assets/ainekio/v2/workshop-concept.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, Hardware, ESP32-P4, MG90S, 3D Printing]
+category: "Physical Robot"
+draft: false
+lang: "en"
+series: "Ainekio Field Guide"
+seriesPart: 11
+seriesTitle: "Physical Robot"
+contentFormat: "report"
+---
+
+# The V2 build plan
+
+V2 adds one joint to each leg, a new chassis, and an ESP32-P4 controller. It keeps
+MG90S-class servos and starts with scripted motion. The aim is a twelve-servo
+body that moves reliably and is easy to service.
+
+This plan follows the owner's September 6 design document and mechanical files
+reviewed on September 7. An experimental leg print is underway. Final dimensions,
+electronics, materials, and power source depend on the tests below.
+
+## Changes from V1
+
+![Illustrated comparison of Ainekio V1 and a prospective V2 hybrid with a stout body and serrated red legs.](/assets/ainekio/v2/evolution-concept.webp)
+
+*Concept art. V1 is on the left; the prospective V2 hybrid is on the right.
+The joint design draws on [OpenHarmony Puppy by 杜邦线丶小战士 (pcbguy)](https://oshwhub.com/pcbguy/shi-er-zi-you-du-hong-meng-si-zu-gou-gou).
+The final geometry will follow leg tests and component measurements.*
+
+| Part | Working V1 | Planned V2 |
+| --- | --- | --- |
+| Legs | Two joints per leg; eight MG90S servos | Three joints per leg; twelve MG90S-class servos |
+| Foot placement | Forward/backward and up/down | Adds lateral movement through hip roll |
+| Chassis | Sesame-derived printed body | Ainekio chassis fitted to the new parts |
+| Controller | ESP32-S3 N16R8 | ESP32-P4 for body timing, safety, and peripherals |
+| Motion | Scripted poses and sequences | Twelve-joint sequences with calibration and smooth transitions |
+| Power | Existing 5 V / 5 A servo supply | Supply chosen from measured loads |
+
+MetaHuman will continue to request named actions through the gateway. The body
+controller will translate them into joint movement.
+
+## Legs and chassis
+
+Each leg will have hip roll, hip pitch, and knee joints. Hip roll adds stance-width
+adjustment and sideways foot placement, with scope for body lean and expressive
+poses. Automatic balance and terrain response require further work; speed is
+not the initial priority.
+
+The experimental leg uses OpenHarmony Puppy V2 as a reference for its lightweight
+MG90S layout, supported pivots, and linkage with actuator mass close to the body.
+Local files include STL models and converted STEP/Blender assemblies. The tests
+will determine how those ideas fit Ainekio's shorter, broader proportions.
+
+The chassis will be designed in Blender around the leg mounts, controller,
+connectors, camera, audio hardware, display, power source, and wiring. Priorities
+are a low center of gravity, short leg leverage, strong mounts, and cable
+clearance throughout movement. Programming, charging, power connections, legs,
+and electronics should remain accessible for replacement and repair.
+
+## Controller and motion
+
+The plan favors generating twelve servo signals directly on the P4, subject to
+board pin and peripheral tests. A separate PWM board is optional. P4 firmware,
+communication hardware, pin assignments, and camera/audio integration still
+need implementation; the S3 wiring map is specific to V1.
+
+Initial motion data will contain twelve target positions per frame, plus timing
+and interpolation. Planned controls include:
+
+- center calibration and direction inversion;
+- minimum and maximum angles;
+- velocity and acceleration limits;
+- safe rest poses and staged startup/stand-up sequences.
+
+Existing movements can begin with the four lateral joints held neutral. New
+joint movement can then be introduced selectively. Walk, stop, stand, sit, bow,
+and wave remain examples of higher-level requests; the controller handles
+sequencing, limits, and stopping.
+
+The current body core, motion assets, protocol validators, and
+MetaHuman motion-plan schema use eight joints. They must agree on joint names,
+limits, and capabilities before accepting twelve-joint plans.
+
+## Power
+
+The owner reports that V1 works on its existing 5 V / 5 A supply. The design note
+proposes measuring that robot first, then evaluating a 5–6 A rail under V2 loads.
+Adding four servos requires new measurements.
+
+Controller and servo power will branch near the supply with common ground.
+Servo current will bypass the P4 board. A bulk capacitor near the servo rail can
+support brief transients; the supply must still sustain the load. Tests will
+include smooth acceleration and staged movement.
+
+Battery or power-bank selection depends on continuous 5 V output, startup and
+motion transients, voltage stability, and temperature. Advertised USB-PD wattage
+alone is insufficient.
+
+## Build and test sequence
+
+1. Print and assemble one leg. Measure fit, horn alignment, travel, interference,
+   stiffness, backlash, bearing support, printed weight, and foot workspace.
+2. Measure V1 power use and adapt the leg geometry.
+3. Test P4 signals and calibration, then one loaded leg, two legs, and all twelve
+   servos.
+4. Design the chassis and harness around the measured parts and power needs.
+5. Port scripted movements and tune transitions before the final complete print.
+6. Repeat standing, sitting, walking, turning, and stopping. Check for brownouts,
+   supply shutdown, binding, and near-stall operation, plus controller headroom
+   and service access.
+
+## Later options
+
+Adaptive terrain response, foot-contact sensing, closed-loop balance, IMU
+stabilization, real-time inverse kinematics, and learned locomotion are deferred.
+Higher-cost servos, required onboard phone/Linux compute, and wireless charging
+are also outside the initial build.
+
+The [MetaHuman redesign](/posts/metahuman-integration/) can be developed against
+V1 while these mechanics are tested. [Current Status](/posts/current-status/)
+tracks both projects and their test results.

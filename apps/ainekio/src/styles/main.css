@@ -1,5 +1,11 @@
 @tailwind components;
 
+/* Ainekio's full navigation needs the menu button at tablet widths. */
+@media (min-width: 768px) and (max-width: 1023px) {
+    #standard-nav { display: none !important; }
+    #nav-menu-switch { display: inline-flex !important; }
+}
+
 @layer components {
     /* PostCard image fix - override ImageWrapper's object-cover */
     .postcard-image-fix img {

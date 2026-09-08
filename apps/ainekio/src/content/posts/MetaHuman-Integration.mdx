@@ -1,15 +1,15 @@
 ---
-title: "MetaHuman OS Integration: The Closed Environment Loop"
+title: "MetaHuman OS: Robot Integration"
 published: 2026-08-27T08:00:00-07:00
-updated: 2026-08-27
-description: "How work admission, Environment Mode, Task State, Bridge transport, Ainekio execution, and correlated observations form one bounded loop."
-image: "/posts/ainekio-2026/metahuman-loop.webp"
+updated: 2026-09-07
+description: "How MetaHuman saves an objective, sends robot actions, receives results, and resumes work after a wait or restart."
+image: "/assets/ainekio/v2/metahuman-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, MetaHuman OS, Environment Mode, Work Coordinator, Task State]
+tags: [Ainekio, MetaHuman OS, Durable Execution, Work Coordinator, LangGraph]
 category: "MetaHuman OS"
 draft: false
 lang: "en"
@@ -19,123 +19,95 @@ seriesTitle: "MetaHuman OS"
 contentFormat: "report"
 ---
 
-# The robot is an environment, not a special chat shortcut
+# Keeping track of a robot request
 
-MetaHuman OS connects to Ainekio through its generic Environment system. Ainekio
-implements that contract with a robot-specific adapter, but it does not require a
-parallel queue, a second reasoning service, or a private completion store.
+MetaHuman's September redesign saves each objective with its workflow progress.
+A request can wait for a robot result, call a specialist, receive a correction,
+or resume after restart without rebuilding the task from a conversation summary.
 
-This is the main architectural achievement behind the project: conversation,
-action, perception, speech, bounded continuation, and robot autonomy can reuse
-the same maintained owners.
+This is development code with focused test results. Deployment and repeated
+physical operation still need validation.
 
-## Work Coordinator: admission and lifecycle of finite work
+## Saved execution
 
-The Work Coordinator is the system queue owner. User environment requests,
-Robot Operator children, and other finite producers submit work to it. Those
-producers do not start private coordinators.
+The graph runtime uses LangGraph to schedule editable workflows. A SQLite store
+for the selected profile retains the objective, ordered events, immutable node
+outputs, versioned checkpoints, and actions waiting to be dispatched.
 
-Admission records why the work exists, who requested it, its priority, and the
-workflow handler that will execute it. Queue completion remains distinct from
-robot terminal feedback and semantic objective completion inside the workflow.
+Child robot workflows share that execution. Finite specialist agents run as
+Work Coordinator jobs and return results linked to the parent request. A plan
+can remain saved while later stages wait, retry, or continue.
 
-## Environment Mode: semantic decision owner
+Robot Status displays the saved execution's decisions. Conversation buffers
+provide recent context, and memory supports recall. The execution record now
+retains the objective, replacing the previous guide's Environment Task State
+description.
 
-Environment Mode receives the current observation and bounded task envelope. Its
-context includes the connected session, advertised actions and robot commands,
-current state, fresh visual or audio material when available, prior task state,
-and request provenance.
+## Sending an action
 
-One semantic selector produces a narrow result:
+The Work Coordinator accepts finite jobs and manages their lifecycle, recovery,
+and access to the body. The execution store records intended work; the
+Coordinator schedules it and records acceptance.
 
-- a conversational response;
-- a capability-bound action list;
-- an optional bounded movement request;
-- a task decision describing objective state, completion basis, and continuation.
+Environment Bridge Out saves dispatch intent with the graph checkpoint. The
+Environment Bridge maintains the external connection. Ainekio's adapter
+translates the selected action into the robot protocol.
 
-The Action Parser validates and normalizes that output. It does not accept an
-action simply because the model emitted a familiar word.
+Local adapter changes retain action records across interruptions. They reject
+an action ID reused with different content, check current body ownership before
+dispatch, and redeliver acknowledgements/results without issuing another command.
+If a physical outcome is uncertain after interruption, recovery must reconcile
+it before deciding on further movement.
 
-## Environment Task State: one bounded objective owner
+## Decisions and review
 
-Task State prepares and reduces each Environment objective. It owns:
-
-- objective identity and correlation;
-- step and continuation bounds;
-- pending action state;
-- expected completion basis;
-- correlated action and observation evidence;
-- terminal outcome and the reason for it.
-
-This prevents other nodes from creating their own competing validators or
-completion stores. The selector proposes; Task State decides whether the
-objective lifecycle can advance or close.
-
-For visual goals, current behavior requires fresh frame-cited evidence. If the
-frame does not prove the stopping condition, a bounded continuation preserves
-the admitted action rather than substituting an unrelated motion or fabricating
-success.
-
-## Environment Bridge: external transport owner
-
-The singleton Environment Bridge agent owns the connection to the Ainekio
-adapter. It transports observations and actions, publishes connection state, and
-handles the bounded camera, microphone, and robot-speech envelopes.
-
-It does not reinterpret Ainekio protocol details inside Environment Mode. The
-Ainekio adapter translates the generic action to the selected robot, waits for
-terminal robot feedback, and returns the normalized result.
-
-## A complete action turn
+The orchestrator routes input as a new request, a correction, or cancellation.
+The Environment Action Selector can choose conversation, a supported body
+action, or generation of a limited motion plan. Parsing and body checks constrain
+the result.
 
 ```text
-1. Work Coordinator admits the Environment work.
-2. Task State prepares the bounded objective.
-3. Environment context binds the selector to current Ainekio capabilities.
-4. The selector proposes a response, action, and task decision.
-5. Action Parser validates the proposal.
-6. Environment Bridge Out sends the correlated action.
-7. Ainekio adapter translates and admits it to protocol v1.
-8. The robot acknowledges, executes, and returns a terminal result.
-9. Camera or state observations return with their own correlation.
-10. Task State reduces the evidence and continues or closes the objective.
-11. Conversation Buffer and TTS publish the user-facing response.
+Accept request -> start or resume saved workflow
+  -> select and validate action -> save dispatch intent
+  -> Coordinator -> Bridge -> adapter -> body
+  -> wait for result and observation
+  -> Action Result -> Goal Review
+  -> finish, wait for input, or continue
 ```
 
-No single “robot done” message owns all eleven steps.
+Action Result interprets feedback. Goal Review decides whether the objective
+has been met. Both run within the same saved execution. Rejected, expired, or
+cancelled actions can return without an image from a movement that never ran.
+Visual goals require a current image linked to the action.
 
-## Conversation from the robot
+## Conversation and speech
 
-A VAD-bounded microphone utterance enters Environment Bridge as a typed audio
-envelope. MetaHuman Whisper produces the transcript. The Environment path admits
-it into the canonical Conversation Buffer rather than a robot-only chat history.
+Microphone utterances enter through Environment Bridge and Whisper. An image
+with the same origin ID can join the turn. Conversation uses the same submission
+and context handling as other MetaHuman interfaces.
 
-When a camera frame shares the utterance origin, the audio and visual material
-can be joined before the Environment turn. The response can then use the same
-Conversation Buffer and TTS owners as other MetaHuman interactions.
+Current context work preserves the latest user instruction within the configured
+history window so intervening assistant actions do not crowd it out. The saved
+execution separately retains the objective and its events.
 
-## Speech back to Ainekio
+Speech uses the configured synthesis and delivery services, then Bridge transport
+and Ainekio's paced speaker output. Playback results, interruptions, and delivery
+failures are tracked separately from synthesis and workflow completion. See
+[listening and speech](/posts/voice-loop/).
 
-Environment speech uses the configured MetaHuman synthesis owner, creates a
-bounded PCM artifact, and transports it through Environment Bridge. Ainekio
-paces the artifact to the robot speaker and returns correlated playback status.
+## V2 and remaining tests
 
-This preserves a clean division:
+MetaHuman will continue requesting actions while the body changes from S3/eight
+servos to P4/twelve. Current motion contracts have eight joints. V2 needs matching
+joint names, assets, validators, capabilities, camera/audio support, and
+communication before new movement is exposed.
 
-- MetaHuman owns provider choice, voice configuration, synthesis, and the speech
-  artifact;
-- Environment Bridge owns robot speech transport;
-- Ainekio owns physical pacing, readiness, cancellation, I2S delivery, and
-  terminal playback feedback.
+The September review records tests of saved workflows, specialist returns,
+steering, cancellation, retries, result ordering, and fresh-process resumption.
+The providers were controlled fixtures; results apply to that recorded snapshot.
 
-## What the current integration proves
-
-Source-level validation covers capability binding, action parsing, task
-lifecycle, visual completion bases, bridge envelopes, and robot adapter paths.
-Physical traces have shown reactive actions and at least one autonomous movement
-reaching terminal robot completion.
-
-The integration is therefore implemented, not hypothetical. The remaining work
-is acceptance under real conditions: current rebuilt runtime, repeated transport
-stability, fresh-frame semantic proof, reliable voice, and multiple bounded
-autonomy cycles without stale or misleading output.
+Remaining work includes migration coverage, deployed recovery, compatibility
+between adapter and Coordinator, direct stop, and repeated physical runs.
+[Current Status](/posts/current-status/) lists baselines and test counts;
+[autonomy modes](/posts/bounded-autonomy/) describes how work starts without a
+new user request.

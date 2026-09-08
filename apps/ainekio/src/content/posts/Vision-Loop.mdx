@@ -1,15 +1,15 @@
 ---
-title: "Vision Loop: Fresh Frames, Correlation, and Honest Completion"
+title: "Camera and Visual Feedback"
 published: 2026-08-27T08:30:00-07:00
-updated: 2026-08-27
-description: "Why Ainekio uses event-correlated still images, how frames return to MetaHuman OS, and what visual proof requires."
-image: "/posts/ainekio-2026/vision-loop.webp"
+updated: 2026-09-07
+description: "When Ainekio takes pictures, how they reach MetaHuman, and how an image is used to check a robot objective."
+image: "/assets/ainekio/v2/vision-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Camera, Vision, OV3660, Environment Task State]
+tags: [Ainekio, Camera, Vision, OV3660, Durable Execution]
 category: "Perception and Voice"
 draft: false
 lang: "en"
@@ -19,116 +19,83 @@ seriesTitle: "Perception and Voice"
 contentFormat: "report"
 ---
 
-# A camera result is evidence, not decoration
+# Pictures tied to actions
 
-Ainekio does not continuously stream room video into a model. The physical
-camera path is designed around fresh, bounded still images tied to a reason:
-an explicit snapshot request, a completed motion action, or a VAD-bounded
-utterance.
+Ainekio takes still images when requested, after selected movements, or when a
+spoken utterance ends. Each image carries an ID linking it to the event that
+requested it. MetaHuman uses these images for perception. Continuous room video
+is not sent to the model.
 
-The operator dashboard can request a low-rate preview for human inspection, but
-preview remains off until explicitly enabled. Model-facing perception uses the
-correlated still path.
+The dashboard can enable a low-rate preview for an operator. Preview starts off.
 
-## Camera behavior on the robot
+## Camera settings
 
-The OV3660 controller captures fresh XGA JPEG stills. Preview is limited to QVGA
-or VGA at a bounded requested rate. One PSRAM framebuffer is used, and the
-capture engine is idle between frames.
+The current S3/OV3660 path captures XGA JPEG stills. Preview is limited to QVGA
+or VGA at a capped requested rate. It uses one PSRAM framebuffer and leaves the
+capture engine idle between frames to limit memory and bandwidth use.
 
-This keeps the camera from becoming an always-on bandwidth and memory owner. It
-also makes the source of an observation explicit.
+The fast capture profile uses:
 
-The current fast capture profile favors the first useful frame after motion:
+- short manual exposure for common indoor 60 Hz lighting;
+- moderate gain, denoise, and neutral sharpening;
+- no automatic-exposure settling delay;
+- JPEG quality chosen to retain detail within the payload limit.
 
-- short manual exposure aligned with common indoor 60 Hz lighting;
-- moderate gain rather than maximum brightness at any cost;
-- denoise with neutral sharpening;
-- no slow automatic exposure convergence;
-- JPEG quality chosen to preserve detail inside the bounded payload.
+An earlier high-gain, sharpened profile produced cross-hatch artifacts. Reducing
+gain and removing sharpening improved the capture. The planned P4 body still
+needs its own camera and communication integration.
 
-That profile came from physical evidence. An earlier high-gain and sharpened
-profile produced severe cross-hatch artifacts, so the repair reduced gain and
-removed sharpening instead of assuming a brighter signal was always better.
+## When a picture is taken
 
-## Three snapshot origins
+| Trigger | Image identifier |
+| --- | --- |
+| MetaHuman or dashboard snapshot request | Request ID |
+| Completed motion | Command sequence ID |
+| Voice activity detection (VAD) closes an utterance | Robot-generated utterance ID |
 
-### Explicit request
+For a motion snapshot, camera metadata and the JPEG are sent before `done`.
+For an utterance snapshot, the shared ID lets MetaHuman join what was heard
+with what was visible.
 
-MetaHuman or the dashboard asks for a fresh frame. The robot publishes camera
-metadata with a request origin and sends the bounded JPEG.
+Images travel through the gateway, Environment adapter, and Environment Bridge.
+The resulting context includes frame identity, its action or utterance ID,
+capabilities, and current body state. The saved workflow can wait for that
+specific result and image.
 
-### Action completion
+## Checking a visual goal
 
-After a completed motion, the controller can capture a frame with the command
-sequence as its origin identifier. The JPEG is sent before the final `done` so
-the Environment path can associate the physical result with the action that
-preceded it.
+Suppose the request is “Walk until there is enough light.” A completed `walk`
+establishes that the command ran. A fresh image is needed to decide whether
+the robot reached a brighter place.
 
-### Audio utterance
+MetaHuman represents this with a `visual_observation` completion requirement.
+A command-only objective can use `action_result`. Action Result and Goal Review
+evaluate the returned evidence and decide whether to finish or continue.
+An inconclusive image may lead to another validated action.
 
-When VAD closes an utterance, the controller can capture a frame with the same
-robot-generated utterance identifier. The gateway and Environment Bridge can
-join what was heard with what was visible at that event boundary.
+September workflow code handles results and images arriving in different orders.
+Rejected, expired, or cancelled actions can return for review without waiting
+for a picture from a movement that never happened. Controlled workflow tests
+cover those cases; real camera quality and visual goal completion still need
+physical testing.
 
-## The return path
+## Current limits
 
-```text
-OV3660 fresh JPEG
-  -> protocol camera metadata and binary frame
-  -> Ainekio gateway
-  -> Environment adapter observation
-  -> MetaHuman Environment Bridge
-  -> current correlated Environment context
-  -> Environment Task State
-```
+Ainekio does not advertise target-relative navigation or visual approach. A
+`findObject` concept elsewhere in MetaHuman does not provide the robot with
+object localization or approach behavior.
 
-The Environment context carries frame identity, action or utterance correlation,
-capabilities, and current body state. A visual selector can therefore reason
-about a specific frame rather than whatever image happens to be latest in a
-mutable cache.
+Earlier Active View research explored detection and temporal segmentation. It
+remains outside the current production path; tracking a detection does not by
+itself establish an object's identity or satisfy a goal.
 
-## Action completion versus visual completion
+## Next physical test
 
-Consider: “Walk until there is enough light.”
+Repeat a visual objective while recording the accepted task, required result,
+action ID, robot acknowledgement, terminal result, and matching fresh image.
+Each review should identify the frame used to judge the goal. If the condition
+is absent, continuation should remain limited; completion should occur only
+when a later image establishes it.
 
-If the task closes on `action_result`, a successful `walk` only proves that the
-robot walked. It does not prove that the new location is brighter. The stopping
-condition depends on a fresh view, so the task must require
-`visual_observation`.
-
-Environment Task State now keeps those bases distinct. When a fresh frame does
-not prove the stopping condition, bounded continuation should preserve the
-previously admitted action rather than silently substituting a different action
-or declaring success.
-
-This is one of the project's most important semantic boundaries:
-
-> Terminal robot success answers “did the command finish?” Visual evidence
-> answers “did the world now satisfy the objective?”
-
-## What the visual system is not yet
-
-Ainekio does not currently advertise a general target-relative navigation or
-visual-approach capability. A named `findObject` concept elsewhere in MetaHuman
-OS does not make the body capable of locating and approaching an object.
-
-Earlier Active View research explored detection and temporal segmentation, but
-it remains isolated from the maintained production path. Detection continuity
-cannot create semantic identity or completion authority on its own.
-
-## Next visual acceptance
-
-The next meaningful demonstration is a repeated physical objective with all of
-these captured together:
-
-1. admitted Environment task and required completion basis;
-2. dispatched action identifier;
-3. robot acknowledgement and terminal result;
-4. fresh frame with matching correlation;
-5. frame-cited decision about the stopping condition;
-6. bounded continuation when the condition is absent;
-7. final completion only when a later fresh frame proves it.
-
-That is more demanding than showing a camera preview, and much closer to what an
-embodied companion actually needs.
+See [MetaHuman integration](/posts/metahuman-integration/) for saved workflows
+and [Current Status](/posts/current-status/) for reported tests.
