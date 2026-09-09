@@ -1,7 +1,7 @@
 ---
 title: "July 2026: The Virtual Environment Bridge"
 published: 2026-07-06
-updated: 2026-09-07
+updated: 2026-09-08
 description: "Historical notes on the early Megameal conversation bridge, its test results, and its original implementation."
 image: "/posts/ainekio-2026/metahuman-loop.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -21,30 +21,39 @@ archive: true
 lang: "en"
 ---
 
-# The first virtual environment experiment
+# Before the physical robot connection
 
-**Historical notes, July 2026.** This page describes the early Megameal bridge,
-before the current robot integration. Ainekio's simulator work has since been
-retired. For the current system, read [MetaHuman integration](/posts/metahuman-integration/)
-and [Project Status](/posts/current-status/).
+**Historical notes, July 2026.** Ainekio is a robot project connected to
+MetaHuman OS, software for conversation, memory, and decisions. Before that
+physical connection was working, an experiment used **Megameal**, a multiplayer
+game environment, as a place for MetaHuman to receive events and send actions.
 
-The first experiment connected MetaHuman OS to a player in the Megameal
-multiplayer environment. It aimed to establish conversation, then movement,
-before connecting a physical body through the same generic interface.
+The intended sequence was conversation first, movement next, then a physical
+body using the same general device interface. A **bridge** carried information
+between MetaHuman and the game; an **adapter** translated game-specific events
+and commands. This early design is part of the project’s history, not a setup
+guide for the current robot.
 
 The July 6 report recorded two-way conversation. Movement was not working,
-there was no game avatar, and the multiplayer loop needed refinement. Vision
-was unsupported; speech recognition and synthesis were available only on the
-MetaHuman side.
+there was no game avatar, and the multiplayer interaction still needed work.
+Vision was unsupported. Speech recognition and synthesis were available only
+on the MetaHuman side, so this was not a demonstrated talking robot in a room.
 
-## The proposed connection
+The subsequent Ainekio simulator experiment was unsuccessful and has been
+completely retired. For the maintained robot integration, read
+[how MetaHuman controls Ainekio](/posts/metahuman-integration/) and the
+[dated status report](/posts/current-status/).
+
+## What the two-player test was meant to show
 
 An **External DEV Bridge Enabled** setting exposed input and output for the
 currently running game player. It started disabled. The intended test used two
 ordinary clients in the same room: a human-controlled player with the bridge off
 and a MetaHuman-controlled player with it on.
 
-External controls merged with local input, so both could affect the same player.
+The human-controlled player would provide someone for MetaHuman to talk to.
+External controls merged with local keyboard or touch input, so both could
+affect the bridged player.
 The plan also allowed a single bridged client for observation and exploration;
 without multiplayer there was no room conversation.
 
@@ -56,9 +65,10 @@ Initial data and controls were:
 
 Images, maps, richer state, and more action feedback were proposed extensions.
 
-The bridge used events instead of polling. MetaHuman connected when the
-`environment-bridge` agent was enabled. Environment Mode prepared context,
-called the model, parsed actions, and sent them back to the game adapter.
+The bridge received events as they happened instead of repeatedly asking the
+game for changes. MetaHuman connected when its `environment-bridge` software
+agent was enabled. **Environment Mode** was the workflow that prepared context,
+called the model, read its proposed actions, and sent them back to the adapter.
 Game-specific commands stayed at the adapter; persona, prompts, and model
 selection stayed in MetaHuman.
 
@@ -70,7 +80,8 @@ monitor enabled `environment-bridge` with Environment Mode selected. The adapter
 then waited for socket events; the documented development default used port 4322.
 
 The source document described a Megameal-specific interpreter inside the graph
-as well as the intended generic interface. This was an early implementation,
+(the connected steps of the workflow), alongside the intended generic interface.
+That interpreter converted game observations into information the model could use. This was an early implementation,
 not a completed separation of the two systems. These setup details are retained
 as history and have not been retested against today's software.
 

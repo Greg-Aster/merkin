@@ -1,7 +1,7 @@
 ---
 title: "Robot Commands and Safety"
 published: 2026-08-27T09:00:00-07:00
-updated: 2026-09-07
+updated: 2026-09-09
 description: "How commands are validated, how results are reported, and how the robot handles interruption and connection loss."
 image: "/assets/ainekio/v2/protocol-safety-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -19,103 +19,137 @@ seriesTitle: "Robot Runtime"
 contentFormat: "report"
 ---
 
-# Commands and results
+# From a request to a checked action
 
-Ainekio protocol v1 carries JSON control messages and binary camera/audio frames
-between the gateway and robot. The firmware, gateway, and tests use the
-same contract for authentication, message IDs, capabilities, payload limits,
-and command results. Malformed commands are rejected before execution.
+Ainekio’s robot controller and MetaHuman OS need an agreed way to ask for work
+and report what happened. That agreement is the **robot protocol**: the message
+formats, supported commands, limits, and result states used by the firmware
+and its network gateway.
+
+For a request such as “wave,” MetaHuman selects a supported action. The gateway
+sends it to the body, the controller checks and runs it, and a result comes back
+with the same command ID. The ID connects the reply to the original request,
+even when several messages are in flight.
+
+The current message format is called **protocol v1**. That version refers to
+the communication format; the robot’s V1 and V2 names refer to body generations.
 
 ## Requesting movement
 
-MetaHuman requests named actions such as `wave`, `bow`, `sit`, or `turn_left_45`,
-or submits a checked `motion_plan_v1`. The body core translates commands into
-authored motion assets and calibrated joint movement.
+MetaHuman can request named actions such as `wave`, `bow`, `sit`, and
+`turn_left_45`. It can also submit a `motion_plan_v1`: a limited sequence of
+joint positions and timings. The body core—the firmware component that owns
+command rules—turns an accepted request into calibrated movement.
 
-```text
-Supported action -> protocol checks -> body checks
-  -> prepared motion -> execution -> result with the command ID
-```
+Plans have limits on frame count, fields, duration, and joint ranges. They use
+the same stopping and failure behavior as named motions. Model output must
+pass these checks before it can affect the motors; it cannot write directly
+to the servo-control pulses.
 
-Motion plans have limits on frame count, fields, duration, and joint ranges.
-They use the same stopping and fail-safe behavior as named motions. Model output
-cannot write directly to servo PWM.
+The current contract describes eight joints. The planned V2 body has twelve,
+so joint names, calibration, motion assets, validators, and advertised features
+must be updated together before twelve-joint plans are accepted. The
+[V2 roadmap](/posts/ainekio-v2/) covers that transition.
 
-The current contract has eight joints. V2 must update joint names, calibration,
-assets, validators, and advertised capabilities together
-before accepting twelve-joint plans. See the [V2 roadmap](/posts/ainekio-v2/).
+## Accepted, finished, and successful are different steps
 
-## Command states
-
-| Result | Meaning |
+| Result | What it tells the caller |
 | --- | --- |
-| `ack` | Accepted for execution |
-| `done` | Robot-side action completed successfully |
+| `ack` | The robot accepted the command for execution |
+| `done` | The robot-side action completed successfully |
 | `cancelled` | Accepted work stopped before success |
-| `nak` | Rejected as invalid, unsafe, or unsupported |
+| `nak` | The request was rejected as invalid, unsafe, or unsupported |
 
-A successful socket write only confirms delivery to the local transport.
-`ack` confirms robot acceptance; `done` confirms command completion.
+Sending bytes into a network socket confirms only that the local transport
+accepted them. The caller still needs the robot’s acknowledgement and final
+result. Otherwise a broken connection could look like a successful action.
 
-An objective may need more evidence. For “find better light,” a finished walk
-must be followed by a fresh image showing whether the light improved.
-MetaHuman uses `action_result` for command-only goals and `visual_observation`
-for visual goals. Other goals can depend on user input or environment state.
-Action Result and Goal Review evaluate this evidence in the saved execution;
-Robot Status displays progress.
+Even `done` has a limit: it describes the command. A future goal such as moving
+into better light would need a new camera image to establish whether the
+lighting improved. A completed walk alone cannot answer that question.
 
-## Capabilities and media
+MetaHuman’s **Action Result** step interprets feedback. **Goal Review** then
+decides whether the requested outcome is complete, needs another action, or
+needs input. Command-only goals can use `action_result` evidence; visual goals
+require `visual_observation`. Other goals may depend on user input or environment
+state. The workflow saves this progress, and Robot Status displays it.
 
-The body reports supported features and current readiness. The gateway translates
-them into the actions MetaHuman can select:
+## Only offer actions the connected body can perform
 
-- camera requests require a ready camera;
-- wake-gated microphone requests require an accepted, ready wake model;
-- motion plans must be advertised by the connected body.
+The robot reports both its **capabilities**, meaning supported features, and
+its current **readiness**. A camera can be supported but unavailable right now.
+The gateway uses these reports to limit the actions MetaHuman can select:
 
-MetaHuman's output schema uses those current actions and command names.
+- a snapshot requires a ready camera;
+- wake-gated listening requires an accepted, ready wake-word model;
+- a motion plan requires support advertised by the connected body.
 
-JSON carries control state and media metadata. Binary frames carry JPEG,
-microphone PCM, or speaker PCM with a small type/counter header. Camera metadata
-can identify a motion, utterance, or explicit snapshot request. A completed motion
-can send that metadata and its JPEG before reporting `done`.
+The model’s permitted output uses those current action and command names.
+Ainekio owns the named-command catalog and advertises it to MetaHuman, whose
+selector schema and parser use that list. This keeps command coverage aligned
+and an unavailable feature from being offered as an executable choice.
+
+Control messages use JSON. Images and audio travel as binary frames containing
+JPEG images or PCM audio samples, with a small type and counter header. Metadata
+identifies the originating snapshot request, movement, or utterance. When a
+movement requests an image, its metadata and JPEG can arrive before `done`,
+allowing the result and observation to be reviewed together.
 
 ## Stops and connection loss
 
-Application control pings keep idle sessions alive. A short gap in valid control
-traffic stops active motion without disconnecting a healthy idle session.
-WebSocket, gateway, or Wi-Fi loss enters fail-safe/offline behavior and starts
-limited reconnect attempts.
+Periodic application control pings show that the control connection is still
+active. A short gap in valid control traffic stops active motion without
+forcing a healthy idle session to disconnect. Loss of WebSocket, gateway, or
+Wi-Fi connectivity enters fail-safe/offline behavior and begins limited
+reconnect attempts.
 
-Other controls include duplicate detection, message IDs, fixed media-size limits,
-limited command/media queues, joint calibration, interruption and stop precedence,
-and explicit microphone/TTS burst state.
+The body also checks duplicate IDs, payload sizes, queue limits, joint
+calibration, and the ordering of stops and interruptions. Microphone and speech
+streams have explicit start/end states so stray media cannot be mistaken for
+a valid stream.
 
-Ainekio's movement is body-local and open-loop. Named turns and motion plans
-do not supply localization or feedback relative to a target.
+These checks do not give the robot navigation or measured balance. Its current
+movement is body-local and open-loop: it follows joint sequences without
+measuring its position relative to a target. Named turn angles are estimates.
 
-## Recovery work
+## Recover without accidentally repeating a movement
 
-September adapter changes retain action IDs, dispatch records, terminal results,
-and pending feedback. They reject reuse of an ID with different content and
-check which Coordinator instance currently controls the body. A stale instance
-must not issue a new action.
+A difficult case is a connection failing after the robot moves but before the
+result reaches MetaHuman. Re-sending the command might make it move twice.
 
-If a restart leaves a command's outcome uncertain, the adapter reports
-`outcome_unknown`. This is an adapter result, separate from robot protocol states.
-Recovery must reconcile it before deciding whether another movement is safe.
-The receipt work is under local integration; disconnect, cancellation, and
-restart behavior still need deployed robot tests.
+September adapter work addresses this with saved **action records**, also called
+receipts. They retain an action’s ID, request content, dispatch record, final
+result, and feedback waiting to be delivered. Reusing an ID with different
+content is rejected. Dispatch also checks which Work Coordinator process is
+currently allowed to control the body, preventing an old process from sending
+new commands after a replacement takes over.
 
-## Next fault tests
+The September 8 repair removes the adapter’s fixed 30-second cutoff for waiting
+on a dispatched command. A late final result can still settle the original
+request. This changes result tracking; it does not remove firmware motion limits,
+control-connection checks, or direct stop.
 
-- Lose the connection during each class of motion.
-- Cancel at different points in an eased transition.
-- Send malformed or duplicate media metadata.
-- Fill camera or speaker queues while moving.
-- Restart the controller or trigger OTA rollback during an interrupted session.
-- Reconnect repeatedly and check that old commands are not replayed.
+Recovery matches the saved gateway instance, robot session, and command sequence
+without resending movement. A confirmed stop settles earlier asynchronous
+commands. Reconnection to a new host session can close the old control session
+as cancelled while recording that its earlier physical effect is unverified.
+
+If the action may have run and no result can be established, the adapter retains
+`outcome_unknown`. This is an adapter result, separate from the robot’s protocol
+states. Elapsed time alone does not prove success or failure. Controlled tests
+cover late results, session changes, and cancellation; deployment, physical
+stop timing, and the cause of the original missing result remain unverified.
+
+## Tests still needed on the robot
+
+The next fault tests cover connection loss during each motion type, cancellation
+partway through a smooth transition, malformed or duplicate media metadata,
+and full camera or speaker queues while moving. Controller restarts and rollback
+of a failed over-the-air update must also be tested during interrupted sessions.
+Repeated reconnects should show that old commands are not replayed.
 
 Source tests cover the protocol and shared body core. The
-[status report](/posts/current-status/) separates those results from tests on
-the assembled robot.
+[status report](/posts/current-status/) distinguishes those results from physical
+tests. Read [the gateway guide](/posts/gateway-and-simulator/) for the connection
+itself and [MetaHuman integration](/posts/metahuman-integration/) for how a
+request is saved and reviewed.

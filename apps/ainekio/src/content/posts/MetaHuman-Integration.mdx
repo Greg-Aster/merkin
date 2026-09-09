@@ -1,8 +1,8 @@
 ---
 title: "MetaHuman OS: Robot Integration"
 published: 2026-08-27T08:00:00-07:00
-updated: 2026-09-07
-description: "How MetaHuman saves an objective, sends robot actions, receives results, and resumes work after a wait or restart."
+updated: 2026-09-09
+description: "How saved requests, specialist returns, current goals, and reviewed Desire plans stay connected to Ainekio’s action results."
 image: "/assets/ainekio/v2/metahuman-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
@@ -19,95 +19,161 @@ seriesTitle: "MetaHuman OS"
 contentFormat: "report"
 ---
 
-# Keeping track of a robot request
+# How MetaHuman keeps track of a robot request
 
-MetaHuman's September redesign saves each objective with its workflow progress.
-A request can wait for a robot result, call a specialist, receive a correction,
-or resume after restart without rebuilding the task from a conversation summary.
+MetaHuman OS is the software that gives Ainekio conversation, memory, and
+decisions. Ainekio’s controller handles the physical body. Their integration
+must connect a user’s request to an action, then bring back enough information
+to decide what should happen next.
 
-This is development code with focused test results. Deployment and repeated
-physical operation still need validation.
+A request may outlast one command. Imagine asking the robot to move into better
+light: it would need to choose a movement, wait for it to finish, inspect a new
+image, and decide whether the lighting improved. That is an illustrative goal,
+not a completed physical demonstration.
 
-## Saved execution
+The September redesign saves the request and its progress through those steps.
+A September 8 live review found the revised workflows running with robot
+feedback, images, and speech-delivery records. It also led to further repairs
+to goal context and Desire execution. This page reflects the September 9 source;
+the latest repairs still need deployment and repeated physical validation.
 
-The graph runtime uses LangGraph to schedule editable workflows. A SQLite store
-for the selected profile retains the objective, ordered events, immutable node
-outputs, versioned checkpoints, and actions waiting to be dispatched.
+## A workflow remembers where the request got to
 
-Child robot workflows share that execution. Finite specialist agents run as
-Work Coordinator jobs and return results linked to the parent request. A plan
-can remain saved while later stages wait, retry, or continue.
+A **workflow**, also called a graph, connects software steps such as choosing
+an action, sending it, waiting for feedback, and reviewing the result. One
+running request is an **execution**. Its **objective** is the outcome the user
+or system asked it to achieve.
 
-Robot Status displays the saved execution's decisions. Conversation buffers
-provide recent context, and memory supports recall. The execution record now
-retains the objective, replacing the previous guide's Environment Task State
-description.
+Saving an execution lets it pause without losing that objective. A **saved
+wait** means the request stays open while something else happens—for example,
+while the robot moves or another software worker returns an answer. When the
+needed result arrives, the workflow can continue from its saved position.
 
-## Sending an action
+LangGraph schedules the connected steps. A SQLite database for the selected
+profile retains the objective, events in order, completed step outputs, saved
+checkpoints, and actions waiting to be sent. A checkpoint records where the
+workflow can resume; completed outputs are kept without being overwritten.
 
-The Work Coordinator accepts finite jobs and manages their lifecycle, recovery,
-and access to the body. The execution store records intended work; the
-Coordinator schedules it and records acceptance.
+A robot sub-workflow shares the parent execution. A **specialist agent** is a
+software worker assigned a finite job, not another robot. It runs through the
+Work Coordinator and returns a result linked to the parent request. The parent
+can remain open while these smaller jobs finish or eligible work retries.
 
-Environment Bridge Out saves dispatch intent with the graph checkpoint. The
-Environment Bridge maintains the external connection. Ainekio's adapter
-translates the selected action into the robot protocol.
+Robot Status displays the execution’s decisions. Recent conversation provides
+context, and memory supports recall, but the saved execution keeps the active
+objective. Status now carries the execution’s actual lifecycle: an old failed,
+cancelled, or completed request remains history instead of appearing as a new
+request’s current goal. A fresh command result updates the action facts even
+when the model makes no change to the objective.
 
-Local adapter changes retain action records across interruptions. They reject
-an action ID reused with different content, check current body ownership before
-dispatch, and redeliver acknowledgements/results without issuing another command.
-If a physical outcome is uncertain after interruption, recovery must reconcile
-it before deciding on further movement.
+## Sending an action without losing track of it
 
-## Decisions and review
+The **Work Coordinator** accepts and schedules finite jobs, manages recovery,
+and determines which process may control the body. Saving an intention to act
+and accepting that job are separate steps; both need records.
 
-The orchestrator routes input as a new request, a correction, or cancellation.
-The Environment Action Selector can choose conversation, a supported body
-action, or generation of a limited motion plan. Parsing and body checks constrain
-the result.
+The workflow’s **Environment Bridge Out** step saves the intended action with
+its checkpoint. The **Environment Bridge** maintains MetaHuman’s connection to
+external devices. Ainekio’s **adapter** translates the action into a robot
+command, and its authenticated **gateway** carries that command to the body.
+The firmware then validates and executes it.
 
-```text
-Accept request -> start or resume saved workflow
-  -> select and validate action -> save dispatch intent
-  -> Coordinator -> Bridge -> adapter -> body
-  -> wait for result and observation
-  -> Action Result -> Goal Review
-  -> finish, wait for input, or continue
-```
+Saving before dispatch matters when a process stops unexpectedly. Local adapter
+changes retain action records, reject an ID reused for different content, and
+check the current Coordinator’s authority before sending. They can redeliver
+acknowledgements and results without issuing the physical command again.
 
-Action Result interprets feedback. Goal Review decides whether the objective
-has been met. Both run within the same saved execution. Rejected, expired, or
-cancelled actions can return without an image from a movement that never ran.
-Visual goals require a current image linked to the action.
+If an interruption leaves it unclear whether a movement happened, recovery
+must keep that uncertainty and reconcile it before deciding on further movement.
+“Body ownership” in the implementation refers to the software process allowed
+to send commands; it does not refer to ownership of the physical robot.
 
-## Conversation and speech
+The September 8 gateway repair keeps tracking a dispatched command beyond the
+old fixed 30-second wait. Recovery follows its saved gateway instance, robot
+session, and sequence rather than sending it again. Controlled integration
+checks show a late result settling the original execution and releasing the
+queued next action. That host repair still needs a gateway restart and live
+verification.
 
-Microphone utterances enter through Environment Bridge and Whisper. An image
-with the same origin ID can join the turn. Conversation uses the same submission
-and context handling as other MetaHuman interfaces.
+## Reviewing the result and continuing
 
-Current context work preserves the latest user instruction within the configured
+The input router, or **orchestrator**, treats incoming user input as a new
+request, a correction, or a cancellation. The **Environment Action Selector**
+chooses conversation, a supported body action, or a limited generated motion
+plan. Parsing and firmware checks constrain what can actually run.
+
+After dispatch, the workflow waits for the appropriate feedback:
+
+1. **Action Result** interprets whether the action completed, failed, was
+   rejected, or was interrupted.
+2. **Goal Review**, when an objective remains, asks whether the result satisfies
+   it and can choose a robot step, another available specialist, or no new work.
+3. The saved execution finishes, waits for input, or continues with another step.
+
+For “stand,” a command result may be enough. For the better-light example,
+review needs a current image linked to the movement. A rejected, expired, or
+cancelled action can return without waiting for an image from movement that
+never happened. The [command guide](/posts/protocol-and-safety/) explains these
+result states in more detail.
+
+Specialist work now carries the actual task brief into the worker, and its
+answer returns to the waiting parent request. A failed worker returns failure;
+an intermediate output is not substituted for a completed answer. This lets
+the next decision use what the specialist actually found while keeping the
+original request intact.
+
+## Connecting a Desire to a result
+
+MetaHuman’s optional **Desire** system tracks possible work through planning,
+review, execution, and outcome review. The latest changes connect its approved
+robot steps to the same durable workflow used for ordinary body actions.
+
+Each step reloads the saved reviewed plan and carries the Desire ID, plan
+version, step number, and expected outcome. Its result returns to Agency, the
+Desire lifecycle owner, before the plan advances. A failed or unsatisfied step
+stops progress; an uncertain effect needs evidence before another attempt.
+General Goal Review does not expand the admitted Desire step into open-ended
+robot work.
+
+Robot Status retains compact awareness of pending desires. Full motivations
+and plans are loaded for the selected Desire work, so an unresolved idea does
+not act as a standing instruction in every robot decision. The
+[autonomy guide](/posts/bounded-autonomy/) explains the practical difference.
+
+## Keeping conversation connected to the action
+
+Robot microphone recordings enter through the Environment Bridge and Whisper,
+which transcribes speech to text. A camera image with the same originating ID
+can join that conversation turn. The turn then uses the same submission and
+context handling as other MetaHuman interfaces.
+
+Current context work keeps the latest user instruction within the configured
 history window so intervening assistant actions do not crowd it out. The saved
-execution separately retains the objective and its events.
+execution separately retains the objective and its events, allowing a correction
+to affect ongoing work instead of disappearing among status messages.
 
-Speech uses the configured synthesis and delivery services, then Bridge transport
-and Ainekio's paced speaker output. Playback results, interruptions, and delivery
-failures are tracked separately from synthesis and workflow completion. See
-[listening and speech](/posts/voice-loop/).
+For a spoken response, synthesis produces audio and delivery sends it through
+the Bridge and Ainekio’s paced speaker output. Producing audio, playing it, and
+completing the broader request are separate outcomes. Playback results,
+interruptions, and delivery failures are recorded accordingly. See
+[listening and speech](/posts/voice-loop/) for that full path.
 
-## V2 and remaining tests
+## What changes for V2, and what still needs testing
 
-MetaHuman will continue requesting actions while the body changes from S3/eight
-servos to P4/twelve. Current motion contracts have eight joints. V2 needs matching
-joint names, assets, validators, capabilities, camera/audio support, and
-communication before new movement is exposed.
+MetaHuman will continue asking for actions while the body changes from an
+ESP32-S3 with eight servos to an ESP32-P4 with twelve. The current motion
+contracts describe eight joints. New joint names, motion assets, validators,
+advertised features, camera/audio support, and communication must agree before
+V2 movement becomes available.
 
-The September review records tests of saved workflows, specialist returns,
-steering, cancellation, retries, result ordering, and fresh-process resumption.
-The providers were controlled fixtures; results apply to that recorded snapshot.
+The September 8 reviews record saved-graph tests of specialist returns, user
+corrections, cancellation, result ordering, and recovery in a fresh process.
+The later Desire suite also checks ordered robot steps, altered instructions,
+unsatisfied outcomes, and closure after outcome review. These use controlled
+provider responses and establish behavior for their recorded snapshots.
 
-Remaining work includes migration coverage, deployed recovery, compatibility
-between adapter and Coordinator, direct stop, and repeated physical runs.
-[Current Status](/posts/current-status/) lists baselines and test counts;
-[autonomy modes](/posts/bounded-autonomy/) describes how work starts without a
-new user request.
+The live run establishes that part of the redesigned path was operating; it
+does not validate the later repairs. Deployed recovery, direct stop, model
+judgment, and repeated physical runs remain to be checked. The
+[status report](/posts/current-status/) separates the dated test results from
+live observations and remaining faults.

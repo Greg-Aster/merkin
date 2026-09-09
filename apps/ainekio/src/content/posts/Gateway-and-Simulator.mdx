@@ -1,8 +1,8 @@
 ---
 title: "Gateway and Operator Dashboard"
 published: 2026-08-27T08:45:00-07:00
-updated: 2026-09-07
-description: "How MetaHuman connects to the physical robot, how the dashboard controls it, and how action results return."
+updated: 2026-09-09
+description: "The robot connection, operator dashboard, and September repairs for late command results and recovery without repeated movement."
 image: "/assets/ainekio/v2/gateway-simulator-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
@@ -19,85 +19,136 @@ seriesTitle: "Robot Runtime"
 contentFormat: "report"
 ---
 
-# Connecting and inspecting the robot
+# Connecting MetaHuman to the physical robot
 
-Ainekio's `Master/` code connects MetaHuman to the body. It contains the
-authenticated gateway, operator dashboard, and Environment adapter. The gateway
-handles robot sessions and media; the adapter translates MetaHuman actions into
-robot commands and returns their results.
+Ainekio’s body handles motors and sensors. MetaHuman OS handles conversation,
+memory, and decisions. Three pieces of Ainekio software connect the two and
+let a person inspect the robot:
 
-MetaHuman schedules work and reviews objectives. The body controller enforces
-motion safety.
+- The **gateway** maintains the authenticated network connection to the body
+  and carries commands, results, images, and audio.
+- The **adapter** translates between MetaHuman’s device interface and Ainekio’s
+  robot commands.
+- The **operator dashboard** gives a person controls and a view of the robot’s
+  reported state.
 
-## Gateway
+They live in the robot repository’s `Master/` code. MetaHuman schedules work
+and reviews its outcome; the controller on the body checks movement limits.
 
-The gateway authenticates the robot and adapter separately. Robot sessions report
-identity, capabilities, readiness, state, and command results. The gateway handles:
+## Follow a command through the connection
 
-- protocol-v1 JSON control and binary media frames;
-- command sequence IDs and waiting for terminal results;
-- translation of features and readiness into available actions;
-- camera metadata and JPEG delivery;
-- microphone utterance assembly and paced speaker PCM;
-- connection epochs, errors, media counters, and operation telemetry.
+Consider a request to sit. MetaHuman sends an action through its **Environment
+Bridge**, the interface it uses to connect to external devices. Ainekio’s adapter
+translates that action into a checked robot command. The gateway delivers it
+to the controller, then waits for the robot’s result rather than treating a
+network write as completion.
 
-Local discovery uses DNS-SD with a limited attempt at a cached endpoint. Stale
-cache entries are not permanent configuration. Local mode does not automatically
-switch to the optional relay.
+The gateway authenticates the robot and adapter separately. Robot sessions
+report identity, supported features, current readiness, state, and command
+results. This tells MetaHuman which actions are available now.
 
-## Dashboard
+The adapter advertises the body-owned catalog of named commands. MetaHuman
+uses that advertised list and its descriptions to construct and validate model
+choices, keeping the supported repertoire consistent across the connection.
+Readiness still determines whether a feature can be used at that moment.
 
-The dashboard shows body state, camera/wake readiness, battery classification,
-media counters, and connection state. Operators can enable limited camera preview,
-change microphone or wake settings, request supported actions, and run hardware
-checks such as a speaker test tone.
+The connection carries protocol-v1 JSON control messages and binary media.
+The gateway matches command IDs to final results, pairs camera metadata with
+JPEG images, assembles microphone utterances, and paces outgoing speaker audio.
+It also records errors, media counters, and **connection epochs**: identifiers
+that distinguish one connection session from the next during diagnosis.
 
-The dashboard volume setting affects that test tone. It does not change ordinary
-MetaHuman speech volume. Displayed hardware state comes from the robot and gateway.
+Local discovery uses DNS Service Discovery (DNS-SD), which finds the service on
+the local network, with a limited attempt at a cached address. A stale cached
+address is not permanent configuration. Local mode does not automatically
+switch to the optional relay service.
 
-## Environment adapter
+## What the dashboard is for
 
-The adapter implements MetaHuman's generic Environment Bridge interface. It
-advertises what the selected body can currently do and translates actions:
+The dashboard shows body state, connection state, battery classification,
+camera and wake-word readiness, and media counters. These are reports from the
+robot and gateway, useful when checking whether a device is connected and
+ready to act.
 
-| MetaHuman action or event | Ainekio path |
+An operator can enable limited camera preview, change microphone or wake
+settings, request supported actions, and run hardware checks such as a speaker
+test tone. The dashboard’s volume setting changes that test tone; ordinary
+MetaHuman speech uses a separate volume path.
+
+## What the adapter translates
+
+MetaHuman’s Environment Bridge works with device-independent actions. The
+Ainekio adapter implements them using the selected body’s current features:
+
+| Action or event | What happens on the Ainekio path |
 | --- | --- |
-| `robotCommand` | Checked named command |
-| `robotMotionPlan` | Frame plan, if supported by the body |
-| `captureImage` | Fresh snapshot and matching JPEG |
-| Robot speech | Rendered PCM sent through the gateway |
-| Microphone utterance | VAD-ended WAV sent to MetaHuman Whisper |
+| `robotCommand` | Send a checked named command such as sit or wave |
+| `robotMotionPlan` | Send a sequence of joint-position frames, if supported |
+| `captureImage` | Request a fresh snapshot and return the matching JPEG |
+| Robot speech | Send rendered PCM audio samples through the gateway |
+| Microphone utterance | Package a speech segment as WAV for MetaHuman’s Whisper transcription |
 
-Action results wait for robot feedback, including playback feedback for speech.
+Voice activity detection (VAD) determines where a microphone utterance ends.
+Whisper converts that recorded speech to text. In the other direction, a
+speech action waits for playback feedback from the robot, not just creation
+of an audio file.
 
-September work adds SQLite action records and pending result/observation delivery.
-An action ID is tied to its request content. Repeated delivery can return its
-existing record instead of running the physical command again. Dispatch checks
-the Coordinator's current body ownership, and cancellation can block an original
-request that arrives late.
+## Keeping action records across an interruption
 
-If dispatch may have happened but its outcome is missing, the adapter reports
-that uncertainty for recovery. These adapter, gateway, and test changes are local
-uncommitted work supporting the [MetaHuman redesign](/posts/metahuman-integration/).
-Crash recovery and physical stopping still need deployed tests.
+Suppose the robot receives a movement but the connection drops before its
+reply arrives. The adapter needs to know whether it can return a saved result,
+wait for more evidence, or report an unknown outcome. Simply sending the
+movement again could repeat a physical action.
 
-## Retired simulator
+September work adds SQLite action records and pending result and observation
+delivery. Each action ID is tied to its request content. Repeated delivery can
+return the existing record instead of running the command again. Dispatch
+checks which Work Coordinator process is currently authorized to control the
+body. Cancellation can also block an original request that arrives late.
 
-The simulator experiment was unsuccessful and has been completely retired.
-It is outside the current tooling and V2 plan. The
-[July motion article](/posts/archive/motion-systems/) retains its design,
-command mappings, and reported tests as history.
+## Keeping a late result connected to its command
 
-## Transport results and next tests
+The September 8 investigation found a concrete stall: the adapter stopped
+waiting after 30 seconds, saved an unknown outcome, and ended its result
+monitor. MetaHuman retained the unresolved body job, so the following movement
+could not start.
+
+The repaired adapter keeps following the gateway’s original pending command
+until completion, rejection, cancellation, or disconnect. Recovery uses that
+same command record and matches the gateway process, robot, connection epoch,
+and sequence. A reused sequence in a new session cannot complete old work.
+Recovered image results use the same matching and cleanup path as normal ones.
+
+An acknowledged stop releases earlier pending asynchronous commands and their
+camera reservation. If the host restarts, authenticated robot reconnection
+ends the old control session while retaining uncertainty about any earlier
+physical effect. Recovery does not send the old movement again.
+
+The September 8 record reports 68 passing receipt, adapter, speech, gateway,
+and command-catalog tests, plus an isolated MetaHuman check of late completion
+and cancellation. They use simulated physical execution. The repair remains
+local source work and needs a **host gateway restart**, followed by a deployed
+test. A MetaHuman Site rebuild alone will not activate this host change. Why
+the original body completion went missing remains unresolved.
+
+## Connection results and the unresolved fault
 
 Physical tests have produced authenticated sessions and completed commands.
 They have also recorded abnormal WebSocket closes and host `No route to host`
-errors while the gateway remained running.
+errors while the gateway remained running. WebSocket is the persistent network
+connection used here; its closure interrupts the exchange even if the gateway
+process itself is still alive.
 
-The cause of those connection losses is unresolved. Strong Wi-Fi signal alone
-cannot exclude incomplete binary writes, routing failure, controller reset,
-power faults, or WebSocket lifecycle errors.
+The cause is unresolved. Strong Wi-Fi signal cannot rule out routing problems,
+incomplete binary writes, controller resets, power faults, or connection
+lifecycle errors. The next diagnostic run should collect robot errors, session
+IDs, media counters, reset reason, host routes, and gateway operations together.
+Changing one retry setting at a time will make the results easier to interpret.
 
-The next diagnostic run should record robot errors, connection epochs, media
-counters, reset reason, host routes, and gateway operations together. Change
-retry behavior one variable at a time so the results remain interpretable.
+## Why the old URL mentions a simulator
+
+This page previously covered a simulator alongside the physical connection.
+That experiment was unsuccessful and has been completely retired. It is outside
+the current tooling and V2 plan. The URL remains usable for existing links;
+the [July motion article](/posts/archive/motion-systems/) preserves the old
+design, command mappings, and reported tests as history.

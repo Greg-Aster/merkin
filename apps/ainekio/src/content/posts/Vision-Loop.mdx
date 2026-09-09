@@ -1,7 +1,7 @@
 ---
 title: "Camera and Visual Feedback"
 published: 2026-08-27T08:30:00-07:00
-updated: 2026-09-07
+updated: 2026-09-09
 description: "When Ainekio takes pictures, how they reach MetaHuman, and how an image is used to check a robot objective."
 image: "/assets/ainekio/v2/vision-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -19,83 +19,114 @@ seriesTitle: "Perception and Voice"
 contentFormat: "report"
 ---
 
-# Pictures tied to actions
+# How a picture becomes useful feedback
 
-Ainekio takes still images when requested, after selected movements, or when a
-spoken utterance ends. Each image carries an ID linking it to the event that
-requested it. MetaHuman uses these images for perception. Continuous room video
-is not sent to the model.
+Ainekio’s camera gives MetaHuman OS, its conversation and decision-making
+software, a view from the robot. The current system takes still images on
+request, after selected movements, or when a spoken utterance ends. It does
+not continuously send room video to the model.
 
-The dashboard can enable a low-rate preview for an operator. Preview starts off.
+Each picture carries an ID linking it to the event that requested it. That
+connection matters: an image taken before a movement cannot show the result
+of that movement, and an unrelated image should not be used to judge it.
 
-## Camera settings
+The operator dashboard has a separate, low-rate preview for a person inspecting
+the camera. Preview starts off and does not replace the images tied to actions.
 
-The current S3/OV3660 path captures XGA JPEG stills. Preview is limited to QVGA
-or VGA at a capped requested rate. It uses one PSRAM framebuffer and leaves the
-capture engine idle between frames to limit memory and bandwidth use.
+## When the robot takes a picture
 
-The fast capture profile uses:
-
-- short manual exposure for common indoor 60 Hz lighting;
-- moderate gain, denoise, and neutral sharpening;
-- no automatic-exposure settling delay;
-- JPEG quality chosen to retain detail within the payload limit.
-
-An earlier high-gain, sharpened profile produced cross-hatch artifacts. Reducing
-gain and removing sharpening improved the capture. The planned P4 body still
-needs its own camera and communication integration.
-
-## When a picture is taken
-
-| Trigger | Image identifier |
+| Trigger | How the picture is matched |
 | --- | --- |
-| MetaHuman or dashboard snapshot request | Request ID |
-| Completed motion | Command sequence ID |
-| Voice activity detection (VAD) closes an utterance | Robot-generated utterance ID |
+| MetaHuman or dashboard requests a snapshot | The picture uses the request ID |
+| A movement completes with a snapshot requested | The picture uses the command sequence ID |
+| Voice activity detection ends an utterance | Audio and picture share the robot’s utterance ID |
 
-For a motion snapshot, camera metadata and the JPEG are sent before `done`.
-For an utterance snapshot, the shared ID lets MetaHuman join what was heard
-with what was visible.
+Voice activity detection (VAD) finds the end of a spoken segment. Pairing an
+image with that segment lets MetaHuman receive what was said and what the
+camera saw as part of the same conversation turn.
 
-Images travel through the gateway, Environment adapter, and Environment Bridge.
-The resulting context includes frame identity, its action or utterance ID,
-capabilities, and current body state. The saved workflow can wait for that
-specific result and image.
+For a motion snapshot, camera metadata and the JPEG are sent before the robot’s
+`done` result. The gateway carries them from the robot; Ainekio’s adapter
+translates them for MetaHuman’s Environment Bridge, its external-device
+connection. The resulting context includes the frame ID, originating action or
+utterance, supported features, and current body state.
 
-## Checking a visual goal
+MetaHuman’s saved workflow—the software steps handling one request—can then
+wait for that specific result and image.
 
-Suppose the request is “Walk until there is enough light.” A completed `walk`
-establishes that the command ran. A fresh image is needed to decide whether
-the robot reached a brighter place.
+## A finished movement may not finish the goal
 
-MetaHuman represents this with a `visual_observation` completion requirement.
-A command-only objective can use `action_result`. Action Result and Goal Review
-evaluate the returned evidence and decide whether to finish or continue.
-An inconclusive image may lead to another validated action.
+Consider a future request to move into better light. A successful walk result
+would establish that the command finished. A fresh image would be needed to
+judge whether the lighting improved. This is an example of the intended review
+process, not a visual goal already demonstrated on the revised robot system.
 
-September workflow code handles results and images arriving in different orders.
-Rejected, expired, or cancelled actions can return for review without waiting
-for a picture from a movement that never happened. Controlled workflow tests
-cover those cases; real camera quality and visual goal completion still need
-physical testing.
+MetaHuman records the required evidence as `visual_observation` for a visual
+goal. A command-only goal can use `action_result`. Its **Action Result** step
+interprets the returned feedback, then **Goal Review** decides whether the
+objective is complete or needs another step. An inconclusive image may lead
+to another validated action rather than a claim of success.
 
-## Current limits
+September workflow code handles results and images arriving in different
+orders. If an action is rejected, expires, or is cancelled, review can proceed
+without waiting for a picture from movement that never happened. Controlled
+software tests cover those cases. Actual camera quality and visual goal
+completion still need physical testing.
 
-Ainekio does not advertise target-relative navigation or visual approach. A
-`findObject` concept elsewhere in MetaHuman does not provide the robot with
-object localization or approach behavior.
+## September progress: images reaching decisions
 
-Earlier Active View research explored detection and temporal segmentation. It
-remains outside the current production path; tracking a detection does not by
-itself establish an object's identity or satisfy a goal.
+The September 8 live review found available images attached to later Autonomy
+Controller calls. A follow-up compared saved image-content hashes with the
+inputs to Action Result, the next Controller, and the Environment selector.
+That established that the captured bytes reached those model requests.
 
-## Next physical test
+Source repairs also keep the originating instruction alongside the returned
+image, even when a standalone action has no saved broader goal. Controlled
+workflow tests use a returned image distinct from the starting image to check
+that the request and new evidence survive dispatch and resumption.
 
-Repeat a visual objective while recording the accepted task, required result,
-action ID, robot acknowledgement, terminal result, and matching fresh image.
-Each review should identify the frame used to judge the goal. If the condition
-is absent, continuation should remain limited; completion should occur only
-when a later image establishes it.
+These checks establish delivery and continuity. They do not show that the model
+interpreted the scene correctly or that the robot achieved a visual objective.
+Those questions still require a new deployed run with an observable outcome.
 
-See [MetaHuman integration](/posts/metahuman-integration/) for saved workflows
-and [Current Status](/posts/current-status/) for reported tests.
+## Camera settings and their purpose
+
+The working V1 uses an OV3660 camera on its ESP32-S3 controller. It takes XGA
+(1024×768) JPEG stills. JPEG compression keeps images within the network payload
+limit while retaining useful detail. Preview uses the smaller QVGA or VGA
+formats at a capped requested rate.
+
+One image buffer in PSRAM, the board’s temporary working memory, holds the
+capture. The camera remains idle between frames to limit memory and bandwidth
+use. The fast capture profile uses short manual exposure for common indoor
+60 Hz lighting, moderate gain, denoise, neutral sharpening, and no delay for
+automatic exposure to settle.
+
+An earlier high-gain, sharpened profile produced cross-hatch artifacts.
+Reducing gain and removing sharpening improved the capture. Lighting still
+needs real-room evaluation, and the planned P4 body needs its own camera and
+communication integration.
+
+## Seeing is not yet navigating
+
+Ainekio does not currently advertise target-relative navigation or visual
+approach: it cannot be assumed to locate an object and move to it just because
+it can return a picture. A `findObject` concept elsewhere in MetaHuman does
+not supply those abilities to this robot.
+
+Earlier **Active View** research explored detection and temporal segmentation,
+which follows image regions across frames. It remains outside the current
+production path. A tracked detection alone does not establish the object’s
+identity or show that a requested goal has been met.
+
+## The next physical test
+
+Repeat a visual objective while recording the accepted request, required
+evidence, action ID, robot acknowledgement, final command result, and matching
+fresh image. Each review should identify the actual frame used to judge the
+goal. If the condition is absent, further action should stay limited; completion
+requires an image that establishes it.
+
+[MetaHuman integration](/posts/metahuman-integration/) explains saved workflows.
+The [dated status report](/posts/current-status/) separates reported software
+tests from physical results.

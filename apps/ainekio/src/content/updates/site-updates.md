@@ -10,30 +10,48 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "V2 body and MetaHuman software development"
+  status: "Robot recovery and finite-work integration"
   location: "Working V1 / planned V2"
-  updated: 2026-09-07
-  mileage: "Ainekio 0592ca4 · MetaHuman c57a56ff + local work"
-  section: "Twelve-servo mechanics and saved workflows"
-  nextStop: "One leg and measured power"
-  note: "V1 is the working eight-servo S3 robot. V2 leg work and power tests come next. MetaHuman workflows and adapter recovery are under integration; P4 firmware and deployed robot tests remain ahead. The simulator has been retired."
+  updated: 2026-09-09
+  mileage: "Ainekio 0592ca4 · MetaHuman a94fbfdd + local work"
+  section: "Saved goals, command results, and Desire plans"
+  nextStop: "Test a leg and measure power"
+  note: "The September 8 live review recorded robot feedback, images in model inputs, and speech-delivery acknowledgements. Later source repairs address stale goals, delayed command results, and finite Desire plans; a new deployed run is still needed. V1 remains the eight-servo ESP32-S3 body, with twelve-servo V2 mechanics under development."
 entries:
-  - title: "Saved workflows integrated in development"
+  - title: "Giving Desire-driven work a finish line"
+    date: 2026-09-08
+    location: "MetaHuman OS · Agency and robot workflows"
+    mileage: "Source repair · controlled workflow tests"
+    summary: "Robot work from a Desire now carries a reviewed plan, ordered steps, and an observable completion condition. Results return to the originating intention; pending ideas remain visible without becoming standing movement instructions. Deployment verification remains."
+    url: "/posts/bounded-autonomy/"
+  - title: "Keeping late command results connected"
+    date: 2026-09-08
+    location: "Ainekio gateway and adapter"
+    mileage: "68 recorded software checks"
+    summary: "The adapter no longer ends result tracking after a fixed 30 seconds. Recovery follows the original command and session without resending movement. Controlled late-result and cancellation tests passed; the host repair still needs a gateway restart and live testing."
+    url: "/posts/gateway-and-simulator/"
+  - title: "Live workflow evidence and goal-context repairs"
+    date: 2026-09-08
+    location: "MetaHuman OS · execution and perception"
+    mileage: "Recorded live run and later source repairs"
+    summary: "A live review found command feedback, images reaching model requests, and acknowledged speech deliveries. It also exposed stale goals. Later repairs retain truthful execution status and connect specialist answers to the waiting request; physical validation of those repairs remains."
+    url: "/posts/current-status/"
+  - title: "Keeping a request through waits and restarts"
     date: 2026-09-07
     location: "MetaHuman OS and Ainekio gateway"
     mileage: "Local integration work"
-    summary: "Development code now saves workflow waits, specialist results, and robot action records across interruptions. Focused tests have passed; deployment and physical tests remain."
+    summary: "MetaHuman’s development code saves what the robot was asked to do, what has finished, and what it is waiting for. This helps a request continue after an interruption. Focused software tests have passed; deployed robot tests remain."
     url: "/posts/metahuman-integration/"
   - title: "V2 plan: twelve servos and ESP32-P4"
     date: 2026-09-06
     location: "Mechanical design"
     mileage: "Design note and local leg references"
-    summary: "The plan keeps MG90S servos, tests an OpenHarmony Puppy V2 leg, and sizes a new chassis and supply from measurements. Scripted movement comes first; balance and terrain response are deferred."
+    summary: "V2 adds a sideways hip joint to each leg. An OpenHarmony Puppy V2 reference leg will be tested before the chassis and power supply are sized. Prepared movement sequences come first; adaptive balance is deferred."
     url: "/posts/ainekio-v2/"
   - title: "V1 parts and wiring corrected"
     date: 2026-09-02
     location: "Hardware documentation"
-    summary: "The build reference documents the Freenove N16R8, corrected S3 pins, SSD1306 display, and 1000 mAh 2S battery. V2 wiring and power selection remain separate design work."
+    summary: "The existing robot’s parts list now identifies its Freenove controller, display, and 1000 mAh battery, and corrects wiring assignments. These V1 details do not determine the planned V2 wiring or power supply."
     url: "/posts/body-design-and-hardware/"
   - title: "Local field guide published"
     date: 2026-08-27
@@ -45,12 +63,12 @@ entries:
     date: 2026-08-25
     location: "MetaHuman OS"
     mileage: "5191d6fc"
-    summary: "Robot Operator took responsibility for starting autonomous work. Environment Mode, Bridge, Task State, and the Work Coordinator retained distinct roles in that version; the September redesign changed task continuation."
+    summary: "Robot Operator became responsible for when the robot could start an activity. Other software selected actions, carried commands, saved progress, and scheduled jobs. September’s redesign later changed how ongoing requests resume."
     url: "/posts/bounded-autonomy/"
   - title: "Wake-word pilot limited after false triggers"
     date: 2026-08-23
     location: "Voice"
-    summary: "Room tests exposed problems with the pilot threshold and negative examples. Wake detection still needs model tuning and room testing."
+    summary: "The pilot sometimes treated ordinary room sounds as the wake phrase. Its detection threshold and test recordings needed more work; an accepted production wake model is still outstanding."
     url: "/posts/voice-loop/"
   - title: "Camera profile and motion commands updated"
     date: 2026-08-04
@@ -61,16 +79,18 @@ entries:
   - title: "Five-second walk assets installed"
     date: 2026-07-31
     location: "Motion assets"
-    summary: "Walk sequences were shortened to roughly five seconds, flashed to LittleFS, and checked by digest readback."
+    summary: "Prepared walk sequences were shortened to roughly five seconds and installed in the robot’s LittleFS asset storage. Reading them back and comparing digests checked the installed bytes; it did not measure gait quality."
     url: "/posts/protocol-and-safety/"
   - title: "Physical audio playback tested"
     date: 2026-07-29
     location: "Robot audio"
-    summary: "Paced delivery produced clean audible playback in one test. Speaker underruns and microphone transport faults remained unresolved."
+    summary: "Pacing audio delivery produced clean audible speech in one test. Logs still showed the speaker queue running empty and faults sending microphone audio, so repeated conversation needed further work."
     url: "/posts/voice-loop/"
 ---
 
 # Field updates
 
-Dated changes and test results. Linked articles contain the details and current
-status; older entries describe the system at the time.
+Ainekio is a four-legged robot connected to MetaHuman OS for conversation and
+decisions. These entries follow its hardware and software development. Each
+entry describes its own date; linked articles explain the components, current
+limitations, and next tests.

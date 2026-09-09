@@ -1,8 +1,8 @@
 ---
 title: "Robot Autonomy Modes"
 published: 2026-08-27T07:45:00-07:00
-updated: 2026-09-07
-description: "Reactive, Semi, and Full behavior, how the robot chooses work, and how users steer or stop it."
+updated: 2026-09-09
+description: "Reactive, Semi, and Full behavior, result-driven choices, and how finite Desire plans give robot work a verifiable end."
 image: "/assets/ainekio/v2/bounded-autonomy-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
@@ -19,84 +19,145 @@ seriesTitle: "MetaHuman OS"
 contentFormat: "report"
 ---
 
-# When the robot acts on its own
+# When Ainekio can start an activity
 
-MetaHuman has three autonomy modes. They control when Robot Operator can start
-work or resume an eligible saved workflow. Once an objective starts, its progress
-is retained through actions, specialist results, user corrections, and waits.
+Ainekio’s autonomy settings control when it can begin work without a new user
+request. MetaHuman OS, the software behind its conversation and decisions,
+provides three modes: Reactive, Semi, and Full.
 
-This page describes the September 7 development code. The revised system still
-needs deployment and repeated real-robot tests.
+These modes govern permission and timing. They do not give the body new motor,
+camera, or navigation abilities. Any chosen action still has to be supported
+by the connected robot and pass its command checks.
 
-## Modes
+This page describes the September 9 source, including repairs prompted by the
+September 8 live run. The latest changes still need deployed robot validation.
 
-| Mode | Behavior |
+## What the modes mean in use
+
+| Mode | Expected behavior |
 | --- | --- |
-| Reactive | Responds to user interaction; Robot Operator stays dormant |
-| Semi | Uses configured timing and idle conditions to start finite work or resume an eligible saved wait |
-| Full | Responds to Coordinator state, resumes an eligible saved wait, or starts a Robot Autonomy Controller when no execution is active |
+| Reactive | Respond to user interaction; do not let Robot Operator initiate activities |
+| Semi | Allow activities under configured timing and idle conditions, or resume saved work when its wait is ready |
+| Full | Use the work system’s state to continue ready work or choose a new activity when no execution is active |
 
-Full mode no longer rotates through Boredom Observer, Movement, and Reflection.
-Those configured workflows remain available, but a controller uses current
-context to choose the next activity.
+**Robot Operator** is the service that decides when autonomous work may start.
+The **Work Coordinator** schedules that work. A saved **execution** is one
+request with its objective and progress recorded; a saved wait keeps that
+request open until a needed result or input arrives.
 
-## Choosing work
+In Full mode, an eligible saved wait can resume. If no execution is active,
+the Coordinator can start the **Robot Autonomy Controller**, a software workflow
+that chooses the next activity from current context.
 
-The Robot Autonomy Controller receives persona, recent conversation including
-the latest user turn, inner dialogue, robot results, Bridge facts, Robot Status,
-optional desires, and the Agent Catalog. It can choose speech, an available
-finite agent, or a high-level robot objective.
+Older documentation described Full as a rotation through Boredom Observer,
+Movement, and Reflection workflows. Those configured workflows remain available,
+but they no longer describe Full mode’s selection process.
 
-Robot Operator handles timing and permission to start work. Environment
-workflows select actions, and the body checks movement. Optional Desire work
-is submitted through the Desire Agent and Work Coordinator.
+## How an activity is chosen
 
-```text
-Robot Operator -> Work Coordinator -> Autonomy Controller
-  -> speech, specialist work, or robot objective
-  -> saved wait -> result -> Goal Review
-  -> finish or continue
-```
+The Autonomy Controller receives the configured persona, recent conversation
+including the latest user turn, internal reflections, recent robot results,
+and facts from connected devices. It also receives Robot Status, compact
+awareness of pending Desire work, and an Agent Catalog explaining the available
+software workers. Available camera images include their recorded identity and
+time; reviewing a particular action still requires evidence matched to it.
 
-A specialist returning or the robot speaking does not automatically close an
-unfinished objective. The workflow records that decision explicitly.
+From that context it can choose to speak, assign a finite job to a specialist
+worker, or start a robot objective. A specialist agent is software doing one
+assigned job. Its task brief and returned answer stay connected to the parent
+request. Goal Review can choose among the available workers after a result,
+so continuation is no longer restricted to another robot action.
 
-## Progress, correction, and stop
+After work starts, Environment workflows choose specific actions and the body
+checks movement. For example, choosing to wave still results in a supported
+robot command with limits, an ID, and a result. The autonomy mode does not
+bypass that path.
+
+## Giving Desire work a finish line
+
+A **Desire** is a candidate intention managed by MetaHuman’s Agency system.
+It may need clarification, planning, or approval before execution. The
+September 8 review found unresolved motivations repeatedly influencing new
+movement decisions without passing through that lifecycle.
+
+The repair gives executable Desire work a finite contract:
+
+1. Define an observable outcome and identify equivalent intentions so they do
+   not become duplicate work.
+2. Prepare and review a plan of one to ten ordered steps, each with an execution
+   target and expected result, under the existing trust and approval policy.
+3. Admit the plan through Desire Agent and the Work Coordinator. Robot steps
+   use the existing body workflow and retain the exact plan version and step.
+4. Return matched results to Agency. Completion requires the ordered steps
+   and reviewed criteria to be satisfied; a model’s success claim cannot
+   overrule an unsatisfied robot result.
+
+For example, “slow down” alone has no observable finish line. A candidate such
+as “perform one supported slow walk and check its completion” has a bounded
+outcome, if that is the intended task. This illustrates the distinction; it
+does not report a new physical demonstration or silently turn a preference
+into a robot request.
+
+Pending desires remain visible in Robot Status with their lifecycle and next
+required action. Their full rationale, strength, and plan are no longer general
+movement instructions. A record waiting for an answer remains dormant for
+execution. The existing reduced-inhibition policy is retained: strength and
+maturity can lower trust requirements, while a finite reviewed plan and outcome
+check remain necessary.
+
+An unknown result is held for reconciliation instead of automatically repeating
+the effect. Completion stops that execution, including a recurring cycle;
+another phase of long-running work requires a newly reviewed plan. Existing
+records with incomplete contracts can be held for attention by the explicit
+migration, which has only been dry-run locally.
+
+## Why an activity can continue after one action
+
+An **objective** describes the intended outcome. A command is one step toward
+it. A workflow saves the objective, sends an action, waits for its result, and
+runs **Goal Review** to decide whether to finish or continue.
+
+A specialist returning an answer or the robot saying something does not
+necessarily complete the parent objective. That completion decision is recorded
+explicitly. For a visual goal, such as the proposed example of moving into
+better light, review needs a fresh image showing the result.
 
 Robot Status displays current facts and workflow decisions. The saved execution
 retains the objective, evidence, and pending work for recovery. This replaces
-the older Task State continuation design and plans for a separate Robot Status
-workflow. Goal Review continues within the execution rather than through an
-independent polling loop or a new graph for every result.
+the older Task State continuation design and a proposed separate Robot Status
+workflow. Review continues within the same execution rather than starting a
+new graph for every result or relying on a separate polling loop.
 
-Users can steer or cancel work. Mode eligibility, authorization, Sleep state,
-job scheduling, and current control of the body constrain autonomous actions.
-Robot Operator stays dormant in Reactive mode and during Sleep.
+## User correction, Sleep, and stop
 
-Emergency stop has a direct path that does not depend on model interpretation.
-Coordinator and adapter changes coordinate cancellation with body ownership.
-An uncertain physical result must be resolved before assuming the body is free
-for another attempt. Software cancellation tests still need physical stop
-measurements.
+Users can steer or cancel ongoing work. Mode eligibility, authorization, Sleep,
+scheduling, and which software process is currently allowed to control the body
+all constrain autonomous actions. Robot Operator remains dormant in Reactive
+mode and during Sleep.
 
-## Recorded results
+Emergency stop has a direct path that does not require a model to interpret a
+sentence. Coordinator and adapter changes coordinate cancellation with control
+of the body. If a connection loss leaves a physical result unknown, the system
+must resolve that uncertainty before assuming it is safe to try the action again.
+Software cancellation tests still need physical stop measurements.
 
-Earlier V1 tests recorded an autonomous movement reaching `done`, an observation
-request expiring, and an invalid motion plan being rejected. Those runs used
-the previous runtime.
+## What has been tested
 
-The September review records controlled tests for specialist returns, continued
-Goal Review, steering, cancellation, and fresh-process resumption. Live models
-and physical autonomy require separate testing. Exact reported counts are in
-[Current Status](/posts/current-status/).
+Earlier V1 runs recorded an autonomous movement reaching `done`, an observation
+request expiring, and an invalid motion plan being rejected. Those results
+belong to the previous runtime.
 
-## Next demonstration
+The September 8 live review found current workflows and adapter-reported
+movement results, but also stale goals and repeated influence from unresolved
+desires. Later controlled tests cover truthful goal projection, specialist
+returns, continued review, ordered Desire steps, stopping on an unsatisfied
+result, cancellation, and recovery. Those source repairs have not yet been
+verified together in a new physical run. The dated evidence is in
+[the status report](/posts/current-status/).
 
-Repeat one objective through scheduling, model decision, dispatch, robot result,
-fresh observation, and review. Exercise continuation, specialist returns, stop,
-user correction, Sleep, Reactive mode, disconnect, and restart.
-
-The response should match the result: report rejected actions as rejected, retain
-uncertain outcomes, and use a fresh image for a visual goal such as finding better
-light. These requirements apply to V1 and the planned
-[V2 body](/posts/ainekio-v2/).
+The next demonstration should follow one objective through scheduling, model
+choice, dispatch, robot result, observation, and review. It also needs repeated
+runs with user corrections, specialist returns, stop, Sleep, Reactive mode,
+disconnection, and restart. Rejections must remain rejections, and unknown
+outcomes must remain explicit. The same requirements apply to V1 and the
+planned [V2 body](/posts/ainekio-v2/).

@@ -73,7 +73,7 @@ export const navBarConfig: NavBarConfig = {
 export const profileConfig: ProfileConfig = {
   avatar: '/assets/avatar/avatar.webp',
   name: 'Ainekio',
-  bio: 'A robot familiar preparing for v2: twelve-servo mechanics, ESP32-P4, and persistent MetaHuman execution.',
+  bio: 'A small four-legged robot connected to MetaHuman OS for conversation and decisions. A new body and software are in development.',
   links: [
     {
       name: 'GitHub',

@@ -1,7 +1,7 @@
 ---
 title: "Listening and Speech"
 published: 2026-08-27T08:15:00-07:00
-updated: 2026-09-07
+updated: 2026-09-09
 description: "Microphone capture, wake detection, transcription, speech playback, and the remaining room tests."
 image: "/assets/ainekio/v2/voice-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -19,93 +19,133 @@ seriesTitle: "Perception and Voice"
 contentFormat: "report"
 ---
 
-# From the microphone to a spoken response
+# From hearing speech to answering aloud
 
-Ainekio records speech on the robot, sends utterances to MetaHuman for
-transcription and conversation, and plays generated speech through its speaker.
+Ainekio records speech through its microphone, sends it to MetaHuman OS for
+transcription and conversation, and plays the response through its speaker.
+The robot handles capture and playback; MetaHuman handles speech-to-text,
+conversation, and speech generation.
+
 V1 has produced audible playback. Reliable repeated conversation in the room
 still needs testing, including wake detection, interruptions, and reconnects.
+In particular, **no production Ainekio wake-word model has been accepted and
+tracked**, so the initial configuration leaves wake detection unavailable.
 
-## Listening
+## Listening: decide when a spoken turn ends
 
-```text
-Microphone -> S3 capture -> wake gate and voice activity detection
-  -> gateway utterance assembly -> WAV -> Environment Bridge
-  -> Whisper -> audio_utterance observation -> conversation
-```
+Wake detection and voice activity detection do different jobs. A **wake-word
+model** would recognize a chosen phrase that starts listening. **Voice activity
+detection (VAD)** separates speech from silence and decides when the spoken
+segment, or utterance, has ended.
 
-The microphone produces 16 kHz, 16-bit mono PCM in 20 ms frames of 640 bytes.
-The gateway assembles one utterance before sending it for transcription.
+The S3 firmware captures microphone audio and applies those listening controls
+when available. The gateway assembles an utterance into a WAV audio file and
+sends it through MetaHuman’s Environment Bridge, the connection for external
+devices. Whisper transcribes the recording into text, which enters the
+conversation as an `audio_utterance` observation.
 
-A pinned neural voice activity detection (VAD) model uses a minimum capture
-window, a silence window, and an absolute maximum duration. A PSRAM queue absorbs
-short WebSocket stalls within a fixed memory limit.
+The VAD model uses a minimum recording window, a silence window to end the
+turn, and an absolute maximum duration. A fixed-size queue in PSRAM, temporary
+board memory, absorbs short network stalls without letting buffering grow
+without limit.
 
-At utterance completion, the robot can take a still with the same ID. Environment
-Bridge can join it with the audio before submitting the conversation turn. If
-the camera is unavailable, the audio proceeds or fails under its own rules;
-no image context is invented.
+At the end of an utterance, the robot can take a still image with the same ID.
+The Bridge can join that image to the audio before submitting the turn. If the
+camera is unavailable, audio proceeds or fails under its own rules; an image
+is not invented to fill the gap.
 
-## Wake detection
+## Wake detection: the model is still unfinished
 
-The microWakeWord/TensorFlow Lite Micro runtime loads an owner-trained package
-from LittleFS. It checks the manifest, tensor shape, audio frontend, and model
-ID before reporting `wake_ready=true`.
+The firmware includes microWakeWord and TensorFlow Lite Micro to run a small
+wake detector locally. It loads an owner-trained model package from LittleFS,
+the robot’s asset filesystem, and checks the package description, expected
+input/output shapes, audio preprocessing, and model ID before reporting
+`wake_ready=true`.
 
-**No production Ainekio wake model has been accepted and tracked.** The initial
-configuration therefore leaves wake detection disabled and unavailable.
+A pilot ran on the physical robot but triggered on sounds that were not the
+wake phrase. Its staged confidence threshold was much lower than the documented
+package default, and the test set had too few **negative examples**: ordinary
+sounds that should leave the detector silent. A threshold sweep provided tuning
+data, not an accepted production model.
 
-A pilot ran on the physical robot but produced false triggers. Its staged
-threshold was much lower than the documented package default, and the negative
-test set was too small. A threshold sweep provided tuning data.
+The next evaluation needs hours of room audio containing robot speech, servo
+noise, television, fans, and similar-sounding words. It must record detection
+confidence and **rearm behavior**—whether the detector returns to a ready state
+for the next wake phrase after handling one turn.
 
-The next evaluation needs hours of room negatives: robot speech, servo noise,
-television, fans, and similar-sounding words. It must also record detection
-confidence and rearm behavior on the installed controller.
+## Speaking: generating audio is only the first step
 
-## Speaking
+MetaHuman uses Kokoro or the configured speech-synthesis service to turn a
+response into audio. The resulting file has size limits, a session identity,
+and an action ID. The Environment Bridge and Ainekio adapter send its PCM
+samples through the gateway to the robot’s speaker queue.
 
-```text
-MetaHuman response -> Kokoro or configured synthesis service
-  -> PCM artifact -> Environment Bridge -> Ainekio adapter
-  -> paced gateway TTS burst -> S3 queue -> I2S speaker
-  -> playback result
-```
+The gateway paces delivery rather than sending the whole file as fast as
+possible. The firmware accepts samples during an explicitly opened
+text-to-speech (TTS) burst and plays them through the I2S audio interface.
+It reports queue overflow, interruption, data outside a burst, and completion.
 
-The speech artifact has size limits, session identity, and an action ID. The
-adapter sends it through the gateway and returns the robot's playback result
-to that action. Successful synthesis or a `sendText` acknowledgement alone
-does not establish playback.
+The adapter returns that playback result to the originating action. Successful
+synthesis, or a `sendText` acknowledgement, does not establish that the speaker
+played the response. September adapter work also keeps an uncertain outcome
+when playback may have started but its final result is missing.
 
-The firmware accepts PCM only during an active TTS burst. It reports queue
-overflow, interruption, data outside a burst, and completion explicitly. September
-adapter work also retains uncertain outcomes when playback may have started
-but its final result is missing.
+## September progress: recorded speech delivery
 
-## Physical results and remaining faults
+The September 8 live review found eight durable TTS deliveries claimed and
+acknowledged on their first attempt, with new outward responses in the
+conversation buffer. This establishes activity through the revised delivery
+path. It is not audible confirmation of every response, a wake-word acceptance
+test, or proof that an entire conversation completed.
 
-A bounded prebuffer and small blocks paced relative to send time produced clean
-audible V1 playback. That run still recorded speaker underruns and separate
-microphone transport faults. Those faults remain relevant even when the audio
-sounds good.
+Saved speech results let the parent request distinguish a delivered response,
+an interruption, and a failure. Speaking can be one step in a larger objective;
+its result returns to that request so unfinished work can be reviewed.
+
+## What the physical playback test showed
+
+A limited **prebuffer**, which queues some audio before playback starts, and
+small blocks paced relative to send time produced clean audible V1 playback
+in one test. The run still recorded speaker **underruns**, where the playback
+queue empties before the next samples arrive, and separate microphone transport
+faults. Those records matter even when a particular response sounds good.
 
 Full acoustic echo cancellation is absent. The microphone is deliberately
-suspended during speech and resumes after a cooldown. Small listening and
-speaking motion cues are subject to calibration, stop, Sleep, and fail-safe
-rules. Battery ADC warnings do not establish servo-supply readiness; combined
-motion/audio loads need physical power tests.
+suspended while the robot speaks, then resumes after a cooldown. This avoids
+listening to its own speaker during that interval, but also limits conversational
+turn-taking while speech is playing.
 
-MetaHuman's September changes cover audio/image joining, conversation context,
-speech delivery, and saved graph outcomes. They are under integration. Earlier
-playback does not validate the revised deployed path. P4 also requires its own
-microphone, speaker, camera, and transport implementation.
+Small listening and speaking motion cues use the normal calibration, stop,
+Sleep, and fail-safe rules. Battery-voltage warnings do not establish whether
+the motor supply can handle combined motion and audio loads; that needs a
+physical power test.
 
-## Next conversation test
+## Audio format reference
 
-Record a repeated room conversation from wake detection through VAD, utterance
-and optional image, Whisper transcript, conversation, generated response, speech
-artifact, gateway sequence, and robot playback result. Include wake rearm,
-PCM drops, underruns, reconnects, and microphone-resume counters.
+<details>
+<summary className="cursor-pointer py-3">Capture format and firmware details</summary>
 
-Repeatability across those stages is the remaining test for a reliable voice
-loop. [Current Status](/posts/current-status/) records the dated progress.
+The microphone produces **16 kHz, 16-bit mono PCM**, meaning one channel of
+16,000 samples per second, with two bytes per sample. Each 20 ms frame contains
+640 bytes. The gateway packages a completed utterance as WAV for transcription.
+
+A version-pinned neural VAD model applies the minimum, silence, and maximum
+windows. Its PSRAM queue has a fixed memory limit. The wake runtime validates
+the model manifest, tensor shape, audio frontend, and model ID before making
+wake-gated listening available.
+
+</details>
+
+## The next conversation test
+
+MetaHuman’s September changes connect audio and images to conversation context,
+speech delivery, and saved workflow results. The September 8 delivery records
+show part of that path running; the later workflow repairs and repeated acoustic
+performance still need validation. P4 also needs its own microphone, speaker,
+camera, and transport implementation.
+
+The next room test should repeat the whole exchange: wake detection, utterance
+capture and optional image, Whisper transcript, conversation, generated speech,
+gateway delivery, and robot playback result. Record wake rearming, dropped PCM,
+underruns, reconnects, and microphone resumption across multiple turns.
+The [status report](/posts/current-status/) records the dated progress.

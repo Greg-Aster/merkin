@@ -1,7 +1,7 @@
 ---
 title: "Ainekio V2: Body and Controller Plan"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-09-07
+updated: 2026-09-08
 description: "Three-joint legs, a new chassis, ESP32-P4, measured power requirements, and scripted motion first."
 image: "/assets/ainekio/v2/workshop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -19,13 +19,20 @@ seriesTitle: "Physical Robot"
 contentFormat: "report"
 ---
 
-# The V2 build plan
+# Building the next Ainekio body
 
-V2 adds one joint to each leg, a new chassis, and an ESP32-P4 controller. It keeps
-MG90S-class servos and starts with scripted motion. The aim is a twelve-servo
-body that moves reliably and is easy to service.
+Ainekio is a small four-legged robot. Its working V1 body uses eight servos,
+with two motors positioning each leg. V2 adds a third joint per leg, a new
+chassis, and an ESP32-P4 controller. The aim is a twelve-servo body that moves
+reliably and is easy to service.
 
-This plan follows the owner's September 6 design document and mechanical files
+The extra joint matters because it moves a foot sideways. V1’s legs primarily
+move forward, backward, up, and down. V2 will also be able to change its stance
+width and use that movement in poses. It will start with scripted motion:
+prepared joint positions and timings. Automatic balance and adaptation to
+uneven ground require additional sensing and control work.
+
+This plan follows the owner’s September 6 design document and mechanical files
 reviewed on September 7. An experimental leg print is underway. Final dimensions,
 electronics, materials, and power source depend on the tests below.
 
@@ -33,99 +40,117 @@ electronics, materials, and power source depend on the tests below.
 
 ![Illustrated comparison of Ainekio V1 and a prospective V2 hybrid with a stout body and serrated red legs.](/assets/ainekio/v2/evolution-concept.webp)
 
-*Concept art. V1 is on the left; the prospective V2 hybrid is on the right.
-The joint design draws on [OpenHarmony Puppy by 杜邦线丶小战士 (pcbguy)](https://oshwhub.com/pcbguy/shi-er-zi-you-du-hong-meng-si-zu-gou-gou).
+*Concept art: V1 is on the left and the prospective V2 hybrid is on the right.
+The leg reference is [OpenHarmony Puppy by 杜邦线丶小战士 (pcbguy)](https://oshwhub.com/pcbguy/shi-er-zi-you-du-hong-meng-si-zu-gou-gou).
 The final geometry will follow leg tests and component measurements.*
 
 | Part | Working V1 | Planned V2 |
 | --- | --- | --- |
 | Legs | Two joints per leg; eight MG90S servos | Three joints per leg; twelve MG90S-class servos |
-| Foot placement | Forward/backward and up/down | Adds lateral movement through hip roll |
+| Foot placement | Forward/backward and up/down | Adds sideways movement at the hip |
 | Chassis | Sesame-derived printed body | Ainekio chassis fitted to the new parts |
 | Controller | ESP32-S3 N16R8 | ESP32-P4 for body timing, safety, and peripherals |
 | Motion | Scripted poses and sequences | Twelve-joint sequences with calibration and smooth transitions |
 | Power | Existing 5 V / 5 A servo supply | Supply chosen from measured loads |
 
-MetaHuman will continue to request named actions through the gateway. The body
-controller will translate them into joint movement.
+MetaHuman OS, the software that handles conversation and decisions, will
+continue to request actions such as “stand” or “walk” through the robot’s
+network gateway. The controller on the body will turn those requests into
+joint movements and enforce their limits.
 
 ## Legs and chassis
 
-Each leg will have hip roll, hip pitch, and knee joints. Hip roll adds stance-width
-adjustment and sideways foot placement, with scope for body lean and expressive
-poses. Automatic balance and terrain response require further work; speed is
-not the initial priority.
+The planned leg has **hip roll** for sideways movement, **hip pitch** for
+forward and backward movement, and a **knee** that bends the leg. Together they
+provide more foot-placement options and room for body lean and expressive
+poses. Speed is not the first priority.
 
-The experimental leg uses OpenHarmony Puppy V2 as a reference for its lightweight
-MG90S layout, supported pivots, and linkage with actuator mass close to the body.
-Local files include STL models and converted STEP/Blender assemblies. The tests
-will determine how those ideas fit Ainekio's shorter, broader proportions.
+OpenHarmony Puppy V2 provides a reference for lightweight MG90S legs, supported
+pivots, and linkages that keep motor weight close to the body. Local files
+include printable STL models and STEP assemblies converted for Blender.
+Testing will establish how those ideas fit Ainekio’s shorter, broader shape.
 
-The chassis will be designed in Blender around the leg mounts, controller,
-connectors, camera, audio hardware, display, power source, and wiring. Priorities
-are a low center of gravity, short leg leverage, strong mounts, and cable
-clearance throughout movement. Programming, charging, power connections, legs,
-and electronics should remain accessible for replacement and repair.
+The chassis will be designed in Blender around the tested leg mounts,
+controller, connectors, camera, audio hardware, display, power source, and
+wiring. Keeping weight low and close to the body reduces the leverage each
+servo must resist. Strong mounts and short leg leverage also matter: a motor
+that can move an unloaded leg may struggle once it supports the robot.
+
+Cables need clearance throughout a leg’s movement. Programming, charging, power
+connections, legs, and electronics should remain accessible for replacement
+and repair without dismantling the whole body.
 
 ## Controller and motion
 
-The plan favors generating twelve servo signals directly on the P4, subject to
-board pin and peripheral tests. A separate PWM board is optional. P4 firmware,
-communication hardware, pin assignments, and camera/audio integration still
-need implementation; the S3 wiring map is specific to V1.
+ESP32-S3 and ESP32-P4 name different controller chip families. Choosing the P4
+does not make the existing firmware ready for the new body. Board pins,
+communication hardware, camera, and audio still need their own implementation
+and tests; V1’s S3 wiring map is not a P4 wiring guide.
 
-Initial motion data will contain twelve target positions per frame, plus timing
-and interpolation. Planned controls include:
+The plan favors twelve servo-control signals generated directly by the P4,
+subject to available pins and peripheral tests. A separate pulse-width
+modulation (PWM) board, which generates those control pulses, remains optional.
 
-- center calibration and direction inversion;
-- minimum and maximum angles;
-- velocity and acceleration limits;
-- safe rest poses and staged startup/stand-up sequences.
+A scripted motion consists of frames. Each frame specifies a target angle for
+each joint and how long the transition should take. For V2, a frame will contain
+twelve targets. Interpolation supplies the positions between frames so the
+robot moves smoothly instead of jumping from one pose to the next.
 
-Existing movements can begin with the four lateral joints held neutral. New
-joint movement can then be introduced selectively. Walk, stop, stand, sit, bow,
-and wave remain examples of higher-level requests; the controller handles
-sequencing, limits, and stopping.
+Planned controls include center calibration, direction inversion, minimum and
+maximum angles, velocity and acceleration limits, safe rest poses, and staged
+startup and stand-up sequences. Existing movements can first be adapted with
+the four new lateral joints held neutral, then use those joints selectively.
 
-The current body core, motion assets, protocol validators, and
-MetaHuman motion-plan schema use eight joints. They must agree on joint names,
-limits, and capabilities before accepting twelve-joint plans.
+Walk, stop, stand, sit, bow, and wave remain examples of higher-level requests.
+The current body core, motion assets, protocol validators, and MetaHuman
+motion-plan schema all describe eight joints. They must agree on the new joint
+names, limits, and advertised capabilities before accepting twelve-joint plans.
 
-## Power
+## Power: measure the load before choosing the supply
 
-The owner reports that V1 works on its existing 5 V / 5 A supply. The design note
-proposes measuring that robot first, then evaluating a 5–6 A rail under V2 loads.
-Adding four servos requires new measurements.
+The owner reports V1 operating on its existing 5 V / 5 A supply. The design note
+proposes measuring that robot first, then evaluating a 5–6 A supply line, or
+rail, under V2 loads. Four extra servos mean the V1 result cannot establish the
+new robot’s requirements.
 
-Controller and servo power will branch near the supply with common ground.
-Servo current will bypass the P4 board. A bulk capacitor near the servo rail can
-support brief transients; the supply must still sustain the load. Tests will
-include smooth acceleration and staged movement.
+Controller and servo power will branch near the supply. Motor current will
+bypass the P4 board, while a common ground gives the controller and servos the
+same electrical reference. A bulk capacitor near the servo rail can help with
+brief current demands; the supply still has to sustain the load. Smooth
+acceleration and staged movement will be part of testing.
 
-Battery or power-bank selection depends on continuous 5 V output, startup and
-motion transients, voltage stability, and temperature. Advertised USB-PD wattage
-alone is insufficient.
+A battery or power bank must deliver the needed current at 5 V continuously,
+cope with startup and motion peaks, and remain stable in voltage and
+temperature. An advertised USB-PD wattage does not by itself establish those
+properties. The final power source remains undecided.
 
 ## Build and test sequence
 
-1. Print and assemble one leg. Measure fit, horn alignment, travel, interference,
-   stiffness, backlash, bearing support, printed weight, and foot workspace.
-2. Measure V1 power use and adapt the leg geometry.
-3. Test P4 signals and calibration, then one loaded leg, two legs, and all twelve
-   servos.
-4. Design the chassis and harness around the measured parts and power needs.
-5. Port scripted movements and tune transitions before the final complete print.
-6. Repeat standing, sitting, walking, turning, and stopping. Check for brownouts,
-   supply shutdown, binding, and near-stall operation, plus controller headroom
-   and service access.
+1. **Make one leg.** Measure fit, servo horn alignment, travel, interference,
+   stiffness, bearing support, printed weight, and reachable foot positions.
+   The horn is the arm on the servo shaft; backlash is unwanted joint play.
+   Both affect how accurately a printed assembly follows a commanded angle.
+2. **Measure V1 power use and adjust the leg design.** Use the existing robot
+   and the experimental leg to inform the mechanical and electrical choices.
+3. **Test the P4 in stages.** Check signals and calibration, then one loaded
+   leg, two legs, and all twelve servos.
+4. **Design the chassis and wiring harness.** Fit them to the measured parts
+   and power needs, keeping room for motion and service access.
+5. **Port scripted movements.** Tune transitions before the final complete print.
+6. **Repeat normal movements under load.** Test standing, sitting, walking,
+   turning, and stopping. Watch for binding, supply shutdown, brownouts
+   (voltage drops that reset electronics), and frequent near-stall operation.
+   Check controller capacity and repair access as well.
 
 ## Later options
 
-Adaptive terrain response, foot-contact sensing, closed-loop balance, IMU
-stabilization, real-time inverse kinematics, and learned locomotion are deferred.
-Higher-cost servos, required onboard phone/Linux compute, and wireless charging
-are also outside the initial build.
+Adaptive terrain response, foot-contact sensing, and closed-loop balance—
+adjusting movement from sensor feedback—are deferred. So are stabilization
+with an inertial sensor (IMU), calculating joint angles from desired foot
+positions in real time (inverse kinematics), and learned locomotion.
+Higher-cost servos, required onboard phone or Linux computing, and wireless
+charging are outside the initial build too.
 
-The [MetaHuman redesign](/posts/metahuman-integration/) can be developed against
-V1 while these mechanics are tested. [Current Status](/posts/current-status/)
-tracks both projects and their test results.
+The [MetaHuman redesign](/posts/metahuman-integration/) can develop against V1
+while these mechanics are tested. The [dated status report](/posts/current-status/)
+separates progress on the two projects from work that still needs validation.

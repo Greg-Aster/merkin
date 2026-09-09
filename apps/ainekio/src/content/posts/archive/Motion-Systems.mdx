@@ -1,7 +1,7 @@
 ---
 title: "July 2026: The Retired Simulator Experiment"
 published: 2026-07-06
-updated: 2026-09-07
+updated: 2026-09-08
 description: "The unsuccessful simulator project: its original command bridge, discarded hardware plans, and reported July tests."
 image: "/posts/ainekio-2026/bounded-autonomy.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -21,28 +21,42 @@ archive: true
 lang: "en"
 ---
 
-# A retired experiment
+# Trying robot commands in a browser
 
-**The simulator was unsuccessful and has been completely retired.** It is not
-part of the current robot system or the V2 plan. This page preserves the July
-design and reported tests as project history.
+Before Ainekio’s physical robot was tested, the project tried connecting
+MetaHuman OS to a simulated body in a browser. MetaHuman supplies conversation
+and decisions; the simulator was meant to provide a place to try movement
+requests before driving real joint motors.
 
-Current documentation is in [controller firmware](/posts/controller-firmware/),
-[gateway and dashboard](/posts/gateway-and-simulator/), and the
-[V2 roadmap](/posts/ainekio-v2/).
+**The simulator was unsuccessful and has been completely retired.** It is
+outside the current robot system and the V2 plan. This page preserves the July
+design, reported intermediate results, and later simulator approach as history.
+It does not provide instructions for a supported development tool.
+
+The current system uses an ESP32-S3 controller on the physical V1 robot.
+Read [controller firmware](/posts/controller-firmware/),
+[gateway and dashboard](/posts/gateway-and-simulator/), or the
+[V2 roadmap](/posts/ainekio-v2/) for maintained work.
 
 ## What it attempted
 
-The experiment tried to turn a MetaHuman request into a named motion in the
-Sesame browser simulator:
+The experiment used the browser simulator from Sesame, the robot project that
+also supplied the starting mechanical design for Ainekio V1. A named request
+such as “wave” was supposed to run the corresponding prepared motion.
+
+**Environment Mode** was MetaHuman’s workflow for choosing an action. A Python
+**adapter** translated that action into the simulator’s commands. A **shim**,
+a small connecting layer, then sent them through the simulator’s existing
+UART-style serial interface:
 
 ```text
 Environment Mode -> event stream -> Ainekio Python adapter
   -> simulator shim -> browser UART path -> Sesame motion routine
 ```
 
-The adapter published observations and capabilities, maintained a server-sent
-event connection, and translated commands such as walk, wave, dance, and stop.
+The adapter reported observations and supported actions, received pushed events
+through a server-sent event connection, and translated walk, wave, dance, and
+stop requests.
 The shim sent the simulator's existing serial commands. An earlier attempt at
 direct browser joint manipulation had already been removed.
 
@@ -52,13 +66,14 @@ physical robot had been tested at that point.
 
 ## Hardware decisions at the time
 
-The initial Python motion module targeted a Pi Zero 2 W and PCA9685 servo board.
+The initial Python motion module targeted a Pi Zero 2 W, a small Linux computer,
+and a PCA9685 board to generate the servo-control pulses.
 The Pi plan was rejected because of availability and package size. It also left
 the servo power rail necessary. A guarded PCA9685 placeholder remained disabled
 in that revision.
 
-The replacement plan selected Freenove ESP32-S3-WROOM CAM N16R8 with eight direct
-MCPWM servo outputs. July parts notes proposed MG90S servos, an OV2640 camera,
+The replacement plan selected Freenove ESP32-S3-WROOM CAM N16R8, using eight
+hardware pulse outputs (MCPWM) to control the servos directly. July parts notes proposed MG90S servos, an OV2640 camera,
 INMP441 microphone, MAX98357A amplifier/speaker, OLED, a USB-C-charged 2S 18650
 pack, two MINI560 5 A converters, and a physical servo-power cutoff.
 
@@ -68,6 +83,10 @@ a 1000 mAh 2S pack, and the tested S3 wiring. Use the
 
 ## Adapter and motion design
 
+The names below describe the retired software interface. A semantic command
+states an intended action, such as walk, while a motion sequence supplies the
+joint positions needed to perform it.
+
 The Python adapter advertised `robotCommand`, `move`, `stop`, and `sendText`.
 It received pushed actions at `/api/environment-bridge/stream`, handled
 connection/heartbeat/status events, rejected stale actions after reconnect,
@@ -76,8 +95,9 @@ and returned virtual-backend results. Legacy `move` compatibility remained;
 
 The module contained command types, aliases, serial mappings, a virtual backend,
 a provisional eight-servo sequence engine, JSON configuration, and focused tests.
-Its safety logic covered emergency stop, low battery, stale commands, command
-lease expiry, and offline behavior.
+Its safety logic covered emergency stop, low battery, stale commands, offline
+behavior, and command lease expiry: ending permission to keep moving when a
+command’s allowed time ran out.
 
 Local frame sequences existed for rest, stand, idle, stop, walk, backward, left,
 right, and wave. Other named routines ran through Sesame's serial interface;
@@ -149,15 +169,19 @@ shake, shrug, play dead, and other emotes followed.
 
 Planned telemetry included connection state, current/last command, safety
 lockout, low battery, backend type, and later sensor/reflex state. Physical tests
-were to measure servo current, brownouts, battery fit/runtime, boot and reconnect,
+were to measure servo current, brownouts (voltage drops that reset electronics),
+battery fit/runtime, boot and reconnect,
 power-rail separation, safe shutdown posture, heat, and enclosure fit. Those
 requirements were not satisfied by the simulator's software results.
 
 ## Later simulator design
 
-Later code paired a host emulator with the browser renderer and reused the
-firmware's C body core. It defined headless completion when no renderer was
-connected and required matching renderer acceptance when one was present.
+A later approach split the simulator into a **host emulator**, which ran robot
+command logic on a computer, and a **browser renderer**, which displayed the
+movement. It reused the firmware’s C body core. When no renderer was connected,
+the emulator could finish a command without a visual display, called headless
+completion. When a renderer was present, the design required its matching
+acceptance.
 The development launcher grouped the emulator, simulator, gateway, dashboard,
 and authenticated adapter; MetaHuman connection required a shared token.
 

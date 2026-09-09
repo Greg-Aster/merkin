@@ -1,8 +1,8 @@
 ---
-title: "Project Status: September 7, 2026"
+title: "Project Status: September 9, 2026"
 published: 2026-08-27T10:00:00-07:00
-updated: 2026-09-07
-description: "The working V1, planned V2, software integration results, and next hardware and deployment tests."
+updated: 2026-09-09
+description: "Saved workflows, robot-command recovery, finite Desire plans, and the latest live-run evidence alongside the V2 hardware work."
 image: "/assets/ainekio/v2/evolution-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
@@ -19,103 +19,166 @@ seriesTitle: "Start Here"
 contentFormat: "report"
 ---
 
-# September 7 snapshot
+# Progress through September 9
 
-Ainekio's working body has eight MG90S servos and an ESP32-S3 controller. V2 is
-planned with twelve servos and an ESP32-P4. Experimental leg work has
-started; the complete body and P4 firmware remain ahead.
+Ainekio is a four-legged robot connected to MetaHuman OS, the software that
+provides its conversation, memory, and decisions. The latest work strengthens
+what happens between choosing an activity and knowing whether it finished:
+saved workflows, recovery of delayed command results, and finite plans for
+Desire-driven actions. A replacement body called V2 is developing alongside it.
 
-MetaHuman's development code now includes persistent graph execution, saved
-waits, child-workflow returns, and recovery. Ainekio's adapter is being updated
-to retain action records across interruptions. Focused tests have passed, but
-the revised system has not completed deployment or physical testing.
+The working **V1** uses eight servos and an ESP32-S3 controller. The planned
+**V2** uses twelve servos and an ESP32-P4. A servo moves a joint to a chosen
+angle; adding one to each leg will allow sideways foot placement. Experimental
+leg work has started, but the complete V2 body and P4 firmware remain ahead.
 
-*The cover compares V1 with a V2 concept illustration. See the
-[V2 roadmap](/posts/ainekio-v2/) for the actual design work.*
+The **September 8 live review** found the revised MetaHuman workflows running,
+with command feedback, camera images reaching model inputs, and speech-delivery
+acknowledgements. It also exposed problems with stale goals and repeated
+movement. Later source repairs address those findings, with controlled tests;
+the complete repaired system still needs a new deployed run.
 
-## Hardware
+This **September 9, 2026 source snapshot** incorporates the September 8 reviews
+and subsequent local work. Hardware details retain their earlier evidence dates.
+The cover compares V1 with a V2 concept illustration.
 
-| Area | Current position | Next step |
-| --- | --- | --- |
-| V1 | Eight servos; scripted motion; owner reports useful torque margin on the existing 5 V / 5 A supply | Measure current, voltage, and temperature during motion |
-| V2 legs | Twelve MG90S-class servos; hip roll, hip pitch, and knee on each leg; local OpenHarmony Puppy V2 models and Blender conversions | Assemble and measure the experimental leg reported in the September 6 design note |
-| Controller | ESP32-P4 selected for V2; firmware and shared body core still target the eight-servo S3 | Implement P4 peripherals, communication, pin allocation, and twelve-channel motion |
-| Power and chassis | Existing supply proposed for initial tests; final battery or power bank undecided | Measure twelve-servo loads and design an Ainekio chassis around the tested parts |
+## Hardware: test the parts before committing to a body
 
-`Frame8` Blender and STL files are now tracked, correcting the August report.
-They belong to V1 enclosure history; their presence does not identify the
-installed enclosure. The local `12servo/` files are separate V2 design work.
+V1 provides the starting point. It runs prepared poses and movement sequences,
+and the owner reports useful motor turning force, or torque, on the existing
+5 V / 5 A supply. Current, voltage, and temperature still need measurements
+under representative loads before that supply informs the V2 design.
 
-## Software
+V2 adds three joints per leg: hip roll for sideways movement, hip pitch for
+forward and backward movement, and a knee. Local OpenHarmony Puppy V2 models
+and Blender conversions provide the leg reference. The September 6 design note
+reports an experimental leg print. Its fit, range, and stiffness need testing
+before the rest of the chassis is designed around it.
 
-- **Execution:** SQLite records and LangGraph scheduling retain outputs, event
-  waits, child returns, retries, and recovery state.
-- **Autonomy:** Full mode continues an eligible saved execution or starts a
-  Robot Autonomy Controller when none is active. It can choose speech,
-  specialist work, or a robot objective. This replaces the earlier description
-  of Full as a rotation among boredom workflows.
-- **Robot Status:** displays execution decisions and current facts. The saved
-  execution retains the objective.
-- **Adapter:** local work adds persistent action IDs, dispatch records, feedback
-  redelivery, cancellation, and rejection of stale controllers. If a command
-  may have run but its result is missing, recovery must retain that uncertainty.
-- **Voice and vision:** S3 capture and playback paths exist. MetaHuman changes
-  link utterances, images, and playback results to their originating actions.
-  Repeated conversations and camera-based goals still need live testing.
+The ESP32-P4 has been selected as the new body controller, but the firmware and
+shared movement code still target the eight-servo S3. Twelve-channel motion,
+board wiring, communication, camera, and audio support need implementation.
+The final battery or power bank is also undecided.
 
-**Simulator:** the experiment was unsuccessful and has been completely
-retired. It is outside the current system and V2 plan. The
+One correction to older documentation: `Frame8` Blender and STL design files
+are now tracked in the repository. They record V1 enclosure work; that does not
+establish which enclosure is installed. The local `12servo/` files are separate
+V2 design work. See [the hardware guide](/posts/body-design-and-hardware/) for
+the existing parts and [the V2 plan](/posts/ainekio-v2/) for the proposed changes.
+
+## Software: keep a request intact while work happens
+
+A request may need more than one command. The robot can move, wait for an image,
+and then decide whether another step is necessary. The redesign saves that
+progress so a delay or restart does not erase the original request.
+
+- **Saved workflows:** SQLite stores progress and results. LangGraph runs the
+  connected software steps. A workflow can wait for an event, receive a result
+  from another workflow, retry eligible work, and recover after interruption.
+- **Choosing what happens next:** Full mode can start a robot objective, speech,
+  or a finite specialist job. Goal Review can now choose among available workers
+  after a result, and specialist answers return to the same saved request.
+- **Truthful progress:** the current execution owns its goal. Robot Status now
+  includes the execution’s lifecycle, keeping failed or completed work from
+  appearing as an active objective. A command result updates the facts even
+  when the model leaves the broader goal unchanged.
+- **Command recovery:** the adapter no longer abandons result tracking after
+  a fixed 30 seconds. It follows the original command until final feedback or
+  connection loss. Saved gateway and robot-session identities prevent a later
+  command from being mistaken for the old one; recovery does not resend motion.
+- **Finite Desire work:** the optional Desire system now requires an observable
+  outcome and a reviewed plan. Native robot steps carry the originating Desire,
+  plan version, and step identity back to outcome review. Pending ideas remain
+  visible without becoming standing instructions for the body.
+- **Voice and vision:** available camera images and their identities reach the
+  decision context. Speech delivery has saved results. Live records show these
+  paths operating, while repeated room conversations and visually verified
+  goals remain separate tests.
+
+**The simulator experiment was unsuccessful and has been completely retired.**
+It is outside the current system and the V2 plan. The
 [July article](/posts/archive/motion-systems/) preserves its history.
 
-## Recorded test results
+## What the live run showed
 
-The MetaHuman progress review at **19:20 UTC on September 7** records:
+The September 8 inspection after a rebuild found camera images and all eleven
+then-available worker choices in later Controller inputs. The adapter reported
+completed walks, generated motion plans, and a turn. Eight saved speech
+deliveries were acknowledged on their first attempt. These are runtime and
+adapter records, without independent observation of each movement or audible
+confirmation of every response.
 
-| Test group | Passing tests |
-| --- | ---: |
-| Coordinator admission | 9 |
-| Recovery | 4 |
-| Graph outcomes | 11 |
-| Saved workflows | 18 |
+The same run exposed an old failed goal in new decision context. Goal Review
+was skipped when no current objective had been saved, and unresolved desires
+repeatedly influenced new movement choices. Later source changes repair those
+context and lifecycle paths. A user command expiring before dispatch and
+intermittent backend availability remain separate diagnostic findings.
 
-Cases include specialist returns, user steering, cancellation, continued Goal
-Review, saved waits, and resumption in a fresh process. Tests use controlled
-provider fixtures where applicable. These are reported results for that
-snapshot, not tests rerun by this website update or validation of later edits.
+## What the recorded tests establish
 
-Earlier V1 field work recorded controller bring-up, authenticated gateway
-sessions, completed motion commands, and audible playback. The revised execution
-system and P4 body still need those checks on the deployed hardware.
+The September 8 repair records describe these passing groups. They belong to
+different snapshots and overlap; their counts should not be added together.
 
-## Next tests
+| Recorded review | Passing checks | What they establish |
+| --- | --- | --- |
+| MetaHuman goal-context repair | 207 durable tests, 25 focused owner tests, 4 Environment graph checks | Saved execution, truthful goal projection, request/image continuity, and result handling |
+| Desire lifecycle repair | 23 saved-workflow tests | Ordered two-step robot work, rejection of altered instructions, unsatisfied-step stopping, outcome review, and parent completion |
+| Ainekio completion recovery | 68 receipt, adapter, speech, gateway, and catalog tests | Late results, session identity, cancellation cleanup, and recovery without redispatch |
 
-1. **One leg:** check fit, horn alignment, travel, stiffness, backlash, bearing
-   support, weight, and reachable foot positions.
-2. **Power:** measure V1 startup, standing, walking, and demanding normal motion,
-   including voltage and temperature.
-3. **P4:** validate signals, calibration, and peripherals; progress through one
-   loaded leg, two legs, and the complete servo set.
-4. **Chassis and motion:** verify clearance, power distribution, and service
-   access. Test standing, sitting, walking, turning, and stopping without
-   brownouts, binding, or routine near-stall loads.
-5. **Integrated software:** finish migration checks, deploy the services, and
-   repeat a complete request through dispatch, feedback, observation, and review.
-   Include interruption, restart, cancellation, and direct stop. Visual goals
-   need images showing the result; speech needs actual playback feedback.
+The MetaHuman reviews also record graph validation, type checks, architecture
+checks, and, for the goal-context repair, an isolated Site build. An isolated
+cross-system check verified that late completion or cancellation releases the
+original body job and admits the queued next action without repeating model
+calls. These tests use controlled model replies and simulated physical effects.
+They do not establish reliable model judgment or physical Full Auto success.
+
+This website update inspected the current implementations and those dated
+records; it did not rerun the robot or MetaHuman suites. The later Desire and
+goal-context repairs still need deployment verification. Ainekio’s completion
+repair needs the host gateway restarted; rebuilding the website or MetaHuman
+Site alone does not activate it. The original missing body completion remains
+unexplained.
+
+## What comes next, and why
+
+1. **Assemble and measure one leg.** Check the fit, the servo’s output arm
+   (horn), joint travel, stiffness, bearing support, weight, and reachable foot
+   positions. Measure backlash—the unwanted play in a joint—before repeating
+   the design four times.
+2. **Measure power on V1.** Startup, standing, walking, and demanding normal
+   motions place different loads on the supply. Record voltage and temperature
+   as well as current so brief voltage drops are not missed.
+3. **Bring up the P4 in stages.** Verify signals, calibration, and peripherals,
+   then test one loaded leg, two legs, and all twelve servos.
+4. **Fit the chassis and tune movement.** Check cables, clearance, power
+   distribution, and repair access. Standing, sitting, walking, turning, and
+   stopping must avoid binding, voltage drops that reset electronics
+   (brownouts), and routine operation near a motor’s stall limit.
+5. **Run a complete request on the revised software.** Follow it from dispatch
+   through feedback and review, including interruption, restart, cancellation,
+   and direct stop. A visual goal needs an image showing the result; a spoken
+   response needs feedback from actual playback.
+6. **Verify that Desire work ends.** Run a reviewed finite plan, confirm its
+   outcome, and check that completion stops further work for that intention.
+   An unanswered question or an uncertain movement result must not authorize
+   another attempt.
 
 ## Sources and scope
 
-The inspected starting commits were Ainekio `0592ca4` and MetaHuman `c57a56ff`,
-both with additional uncommitted work. Public repository links may not contain
-all the local changes described here.
+The inspected checkouts on September 9 were Ainekio `0592ca4` and MetaHuman
+`a94fbfdd`, both with additional uncommitted work. Public repository links may
+not contain all the local changes described here.
 
-- Owner's **Ainekio v2** design document, updated September 6: design choices,
+- Owner’s **Ainekio v2** design document, updated September 6: design choices,
   build report, test sequence, and deferred features.
 - [ESP32-S3 Build & Firmware Reference](https://docs.google.com/document/d/1JZMMG3J96v6cnw2YupPp9OF9fiw0H4j0tS8t8fsplJk/edit), updated September 2.
 - [Ainekio source](https://github.com/Greg-Aster/Ainekio-bot): firmware, body
-  core, CAD, adapter changes, and receipt tests.
-- [MetaHuman source](https://github.com/Greg-Aster/metahuman-os): execution,
-  Coordinator, workflows, Robot Operator, and the September 7 progress review.
+  core, CAD, adapter code, and the September 8 completion-recovery entry in
+  `docs/BRIDGE_HARDENING_PLAN.md`.
+- [MetaHuman source](https://github.com/Greg-Aster/metahuman-os): saved execution,
+  Agency, robot workflows, and the September 8 Full Auto and Desire-to-robot
+  outcome reviews under `docs/audits/`, including their implementation follow-ups.
 
-For design details, see [MetaHuman integration](/posts/metahuman-integration/)
-and [autonomy modes](/posts/bounded-autonomy/).
+For the design behind these changes, read
+[how MetaHuman controls Ainekio](/posts/metahuman-integration/) and
+[how its autonomy modes differ](/posts/bounded-autonomy/).

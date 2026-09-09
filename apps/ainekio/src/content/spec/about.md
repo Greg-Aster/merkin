@@ -1,69 +1,78 @@
 ---
 title: "About Ainekio"
-description: "The robot project, its source code, design history, and concept artwork."
+description: "A small robot companion, the software behind it, and the work toward a new body."
 ---
 
 # About Ainekio
 
-Ainekio is an owner-built robot familiar: a small four-legged companion connected
-to MetaHuman OS. The project combines printed mechanics, embedded control,
-camera and audio hardware, conversation, and limited autonomous behavior.
+Ainekio is an owner-built, four-legged robot companion with a camera, microphone,
+speaker, and a face on a small display. The project combines printed mechanics
+with MetaHuman OS, software for conversation, memory, and decisions.
 
-The working V1 has eight servos and an ESP32-S3. The
-[V2 roadmap](/posts/ainekio-v2/) describes the planned twelve-servo body and
-ESP32-P4 controller. The [MetaHuman redesign](/posts/metahuman-integration/)
-adds saved workflows that retain a request through waits, results, and restarts.
+The robot’s controller runs the hardware and checks movement limits. MetaHuman
+chooses supported actions and reviews the results that come back. The aim is a
+companion that can follow a request through several steps while keeping track
+of what it was asked to do.
 
-## What the site documents
+## What exists, and what is changing
 
-The guide covers hardware, firmware, commands, gateway, camera, speech, and
-MetaHuman integration. [Dated status reports](/posts/current-status/) record
-implementation, tests, physical results, failures, and remaining work.
+The working V1 has eight joint motors, or servos, and an ESP32-S3 controller.
+Motion commands and audible playback have been demonstrated. Reliable repeated
+conversation and the revised software’s physical operation still need testing.
 
-A design is a plan. Code establishes implementation; a test establishes the
-behavior it exercises. A running system accepting a request, a command finishing,
-and the robot meeting an objective require their own evidence. For example, a
-completed walk needs a fresh image before it can establish a visual goal.
+The planned V2 adds a third joint to each leg for twelve servos in total, an
+ESP32-P4 controller, and a new chassis. Experimental leg work is underway.
+The [V2 roadmap](/posts/ainekio-v2/) explains what the extra joints are for and
+how the design will be tested.
 
-## Software responsibilities
+At the same time, the [MetaHuman redesign](/posts/metahuman-integration/) saves
+a request’s objective and progress. That lets work wait for a robot result,
+receive a correction, or resume after a restart without losing its place.
+The integration remains under development.
 
-MetaHuman handles conversation, persona, memory, reasoning, and saved objectives.
-Its Work Coordinator schedules finite jobs; Robot Operator controls autonomous
-timing; Environment workflows choose actions; Environment Bridge handles the
-external connection. Robot Status displays execution progress.
+## Finding your way around the guide
 
-Ainekio translates commands, enforces body safety, runs the hardware, and returns
-results. Models request supported actions; they cannot directly write servo PWM.
-The two source repositories are linked below.
+Start with the [project overview](/posts/project-overview/) for how the pieces
+fit together, or [the dated status report](/posts/current-status/) for reported
+results and remaining work. The other articles cover hardware, firmware,
+commands, the network connection, camera, speech, and autonomy modes.
+
+The distinction between a plan, implemented code, and a physical result matters
+throughout the guide. For example, software can correctly report that a walk
+finished without establishing that the robot reached better light. That visual
+goal would need a fresh image as evidence.
+
+Source code is split between the [Ainekio robot repository](https://github.com/Greg-Aster/Ainekio-bot)
+for the body and connection software, and [MetaHuman OS](https://github.com/Greg-Aster/metahuman-os)
+for conversation, reasoning, and work scheduling.
 
 ## Design history and artwork
 
-V1 derives from the Apache-2.0-licensed
-[Sesame Robot Project](https://github.com/dorianborian/sesame-robot). Owner-supplied
-construction photos show its low open black chassis, red feet and face, cyan
-OLED, camera, and exposed wiring. The tracked Frame8 CAD records enclosure work;
-it does not establish which enclosure is installed.
+V1’s mechanics derive from the Apache-2.0-licensed
+[Sesame Robot Project](https://github.com/dorianborian/sesame-robot). Construction
+photos show its low open black chassis, red feet and face, cyan display, camera,
+and exposed wiring. The repository’s Frame8 design files record enclosure work;
+the files alone do not identify which enclosure is installed.
 
 V2 evaluates [OpenHarmony Puppy](https://oshwhub.com/pcbguy/shi-er-zi-you-du-hong-meng-si-zu-gou-gou)
-leg geometry with an Ainekio-specific chassis. Current banners, article covers,
-and the avatar are generated concept art: a shorter, broader body with serrated
-red legs and a cyan face. The comparison keeps V1 on the left and prospective
-V2 on the right. Geometry, materials, and electronics remain illustrative.
+leg geometry with an Ainekio-specific chassis. Current banners, covers, and the
+avatar are generated concept art: a shorter, broader body with serrated red legs
+and a cyan face. The comparison image keeps V1 on the left and prospective V2
+on the right. Final geometry, materials, and electronics depend on testing.
 
-The dystopian science-fiction settings are visual humor and inspiration. They
-do not depict hardware tests. Earlier artwork based on V1 remains with historical
-material.
+The dystopian science-fiction settings are visual humor and inspiration; they
+do not depict hardware tests. Earlier artwork based on V1 remains with
+historical material.
 
 The simulator experiment was unsuccessful and is fully retired. Its
 [motion notes](/posts/archive/motion-systems/) and the earlier
-[virtual-environment notes](/posts/archive/first-steps-work-in-progress/) remain
-as clearly dated history.
+[virtual-environment notes](/posts/archive/first-steps-work-in-progress/) explain
+what was attempted and how it relates to the project’s history.
 
 ## Documentation and privacy
 
 Current source and fresh results take precedence over older plans. Corrections
-are dated; historical articles retain their context.
-
-Examples omit personal profiles, memories, captured media, runtime logs,
-credentials, tokens, model weights, and local state. Operational results are
-summarized without publishing that private data.
+are dated, and historical articles identify the period they describe.
+Operational results are summarized without publishing personal profiles,
+memories, captured media, runtime logs, credentials, tokens, model weights,
+or local state.

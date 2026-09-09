@@ -26,11 +26,11 @@ const sections = [
   },
   {
     title: 'Firmware & gateway',
-    description: 'How commands reach the body through its controller and safety gates.',
+    description: 'The software that carries commands to the robot and checks movement.',
     icon: 'material-symbols:hub-outline',
     links: [
       { label: 'Controller firmware', href: '/posts/controller-firmware/' },
-      { label: 'Protocol & safety', href: '/posts/protocol-and-safety/' },
+      { label: 'Commands & safety', href: '/posts/protocol-and-safety/' },
       { label: 'Gateway & dashboard', href: '/posts/gateway-and-simulator/' },
     ],
   },
@@ -39,17 +39,17 @@ const sections = [
     description: 'Camera observations, listening, and speech connect Ainekio to the room.',
     icon: 'material-symbols:spatial-audio-outline',
     links: [
-      { label: 'Vision loop', href: '/posts/vision-loop/' },
-      { label: 'Voice loop', href: '/posts/voice-loop/' },
+      { label: 'Camera & vision', href: '/posts/vision-loop/' },
+      { label: 'Listening & speech', href: '/posts/voice-loop/' },
     ],
   },
   {
     title: 'MetaHuman OS',
-    description: 'The reasoning and persistent execution behind the robot’s behavior.',
+    description: 'Conversation, decisions, and keeping track of a request while the robot acts.',
     icon: 'material-symbols:account-tree-outline',
     links: [
-      { label: 'System integration', href: '/posts/metahuman-integration/' },
-      { label: 'Bounded autonomy', href: '/posts/bounded-autonomy/' },
+      { label: 'Robot integration', href: '/posts/metahuman-integration/' },
+      { label: 'Autonomy modes', href: '/posts/bounded-autonomy/' },
     ],
   },
 ]
@@ -57,7 +57,7 @@ const sections = [
 const milestones = [
   { label: 'Working V1', value: '8 servos · ESP32-S3', detail: 'The current physical prototype.' },
   { label: 'Planned V2', value: '12 servos · ESP32-P4', detail: 'New mechanics and controller development.' },
-  { label: 'Next milestone', value: current.nextStop, detail: 'Physical testing before the final body design.' },
+  { label: 'Next milestone', value: current.nextStop, detail: 'Check joint movement and power needs before finalizing the body.' },
 ]
 ---
 
@@ -82,8 +82,8 @@ const milestones = [
       </div>
       <h1 id="home-title" class="font-black tracking-[-0.04em] text-white">A new body.<br />A persistent mind.</h1>
       <p class="home-intro text-slate-200/85">
-        A robot familiar powered by MetaHuman OS. Follow the new body,
-        the software redesign, and the next steps toward V2.
+        A small four-legged robot connected to MetaHuman OS for conversation,
+        memory, and decisions. Follow the work toward its next body and software.
       </p>
       <div class="flex flex-wrap gap-3">
         <a href="/posts/ainekio-v2/" class="inline-flex items-center gap-2 rounded-full bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-200 active:scale-95">

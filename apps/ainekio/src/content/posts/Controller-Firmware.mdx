@@ -1,7 +1,7 @@
 ---
 title: "ESP32-S3 Controller Firmware"
 published: 2026-08-27T09:15:00-07:00
-updated: 2026-09-07
+updated: 2026-09-08
 description: "Motion, camera, audio, provisioning, storage, and recovery on the current eight-servo controller."
 image: "/assets/ainekio/v2/controller-firmware-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -19,29 +19,109 @@ seriesTitle: "Physical Robot"
 contentFormat: "report"
 ---
 
-# Firmware on the current robot
+# The software running on the body
 
-The ESP32-S3 firmware starts at `Slave/firmware/esp32s3/main/app_main.c`.
-It connects the shared C body core to ESP-IDF services. The core checks commands,
-tracks their state, and enforces motion safety. The platform code handles
-FreeRTOS tasks, networking, NVS storage, filesystems, GPIO, PWM, camera, display,
-and audio.
+Firmware is the software installed on Ainekio’s body controller. On the working
+V1 robot, an ESP32-S3 controls eight joint motors, the camera, microphone,
+speaker, and face display. MetaHuman OS handles conversation and decisions
+elsewhere; the firmware turns its requests into physical actions.
 
-Portable-core tests check those command rules separately from the physical
-controller. The former simulator has been retired.
+For example, a “wave” request selects a prepared movement. The firmware checks
+that movement, applies joint calibration and limits, drives the servos, and
+reports the result. It also has to handle a stop or connection loss while
+camera and audio work compete for the same small computer’s resources.
 
-## Hardware and build
+This page describes the current S3 implementation. The planned twelve-servo
+P4 body needs its own port and hardware tests.
 
-The current target is **ESP-IDF 5.5.4 on ESP32-S3 N16R8**, with:
+## How commands become movement
 
-- 16 MB flash and 8 MB octal PSRAM at 80 MHz;
-- two 3 MB OTA application slots;
-- a large LittleFS partition for robot assets;
-- size-optimized firmware settings.
+A shared **body core**, written in C, checks commands, tracks their progress,
+and applies motion rules. S3-specific platform code connects that core to the
+board’s motor outputs, network, storage, and media devices. This separation
+allows command rules to be tested without running the physical controller.
+The former simulator has been retired.
 
-Build reports include component size and memory use. Camera buffers, audio
-queues, prepared motion plans, networking, storage, and OTA checks share limited
-resources.
+Eight hardware pulse channels drive the servos. Before playback starts, the
+firmware prepares the motion data and checks its size, timing, and joint
+ranges. Named movements and custom `motion_plan_v1` plans use the same
+calibration, angle limits, stop behavior, and failure checks. A plan can contain
+at most 32 frames, each describing joint targets and timing.
+
+The movement library includes stand, rest, a held sit, walking, turns, wave,
+bow, and dances including Macarena and salsa. The `curious` gesture looks right
+and left, then returns to its starting pose. Transitions ease between targets
+to avoid abrupt pose changes.
+
+Named 45°, 90°, and 180° turns are **open-loop estimates**: the robot runs the
+sequence without measuring and correcting its final heading. They need
+measurement on the assembled body. V2 will require twelve-joint assets and
+matching checks, with its planned direction calibration, acceleration limits,
+and staged startup.
+
+## Camera, listening, and speech
+
+The camera takes still images on request or after selected events. A limited
+operator preview starts disabled. Images can carry the ID of the movement or
+utterance that caused them, so MetaHuman can tell which result they describe.
+After a movement, the JPEG image is sent before the command’s final result.
+A failed snapshot is reported separately from a movement that already finished.
+
+The microphone supplies digital audio samples. Voice activity detection (VAD)
+finds speech and ends an utterance after silence, subject to minimum and maximum
+duration limits. A queue in temporary memory absorbs short network stalls.
+
+Wake-word detection is a separate step that would let a spoken phrase start
+listening. The runtime is present, but no accepted production Ainekio model
+weights are tracked. The initial configuration therefore leaves wake detection
+unavailable. Code being installed is not enough to make that feature ready.
+
+Speech output arrives as PCM, the digital samples to play. The firmware accepts
+samples within an explicitly opened text-to-speech (TTS) burst, queues them,
+and sends them to the amplifier over the I2S audio interface. It reports queue
+overflow, interruption, samples arriving outside a burst, and completion.
+The [camera](/posts/vision-loop/) and [voice](/posts/voice-loop/) articles follow
+these paths through MetaHuman.
+
+## Setup, stored data, and recovery
+
+For initial setup, the owner joins the `Ainekio-Setup` WPA2 Wi-Fi network with
+a stable per-device key, then supplies Wi-Fi and gateway settings through a
+local form. New network settings are written and validated in an inactive
+storage slot before it is selected. If the write fails, the previous settings
+remain selected. Resetting network settings preserves calibration, poses,
+and battery-measurement settings.
+
+LittleFS, an on-device filesystem, holds versioned motion, face, audio, and
+wake-model assets. A low-priority task writes limited rolling logs to microSD.
+Over-the-air (OTA) updates use two application slots so an unsuccessful new
+boot can roll back. The new image must reach gateway authentication before
+it is marked healthy for rollback validation.
+
+Loss of the connection stops normal operation and begins limited reconnect
+attempts. Stale control traffic stops active motion while a healthy,
+authenticated idle session can remain connected.
+
+## Build and wiring reference
+
+The details below are for building or wiring **V1**. GPIO numbers identify board
+input/output pins. The S3 pin allocation must not be copied to the planned P4
+without its own design and tests.
+
+<details>
+<summary className="cursor-pointer py-3">S3 firmware target, pin map, and media settings</summary>
+
+The entrypoint is `Slave/firmware/esp32s3/main/app_main.c`. It connects the C body
+core to ESP-IDF, Espressif’s device framework. Platform code owns FreeRTOS tasks,
+networking, nonvolatile settings (NVS), filesystems, GPIO, motor pulses (MCPWM),
+camera, display, and audio.
+
+The target is **ESP-IDF 5.5.4 on ESP32-S3 N16R8**: 16 MB flash, 8 MB octal PSRAM
+at 80 MHz, two 3 MB OTA application slots, a large LittleFS asset partition,
+and size-optimized firmware settings. Flash retains code and data; PSRAM is
+working memory. Build reports track component size and memory use because
+camera buffers, audio queues, prepared plans, networking, storage, and update
+checks share limited resources.
 
 The September 2 [build reference](https://docs.google.com/document/d/1JZMMG3J96v6cnw2YupPp9OF9fiw0H4j0tS8t8fsplJk/edit)
 and S3 pin map agree on these assignments:
@@ -55,75 +135,26 @@ and S3 pin map agree on these assignments:
 | I2S audio | Microphone 19, amplifier 20, BCLK 41, WS 42 |
 | Octal PSRAM | 33–37 reserved |
 
-These pins are specific to V1. The planned P4 port needs its own allocation and
-bench tests; see the [V2 roadmap](/posts/ainekio-v2/).
+The OV3660 camera captures XGA stills; preview is limited to QVGA/VGA. Its fast
+profile uses short manual exposure for indoor 60 Hz lighting, moderate gain,
+denoise, neutral sharpening, and no auto-exposure settling delay. This replaced
+a higher-gain profile that produced cross-hatch artifacts.
 
-## Setup and configuration
+Microphone capture is 16 kHz mono PCM. A version-pinned neural VAD model uses
+minimum-duration, silence, and maximum-duration limits. The microWakeWord /
+TensorFlow Lite Micro runtime validates a versioned local model package,
+including its manifest and tensor format, before reporting readiness.
 
-Initial setup uses the `Ainekio-Setup` WPA2 access point and a stable per-device
-key. The owner joins that network and supplies Wi-Fi and gateway settings through
-a local form.
+</details>
 
-Network settings use two storage slots. New settings are written and validated
-in the inactive slot before it becomes active. A failed write leaves the previous
-settings selected. Network resets preserve calibration, poses, and ADC settings.
-
-## Motion
-
-Eight MCPWM channels drive the servos. Motion data is prepared before playback;
-named assets and `motion_plan_v1` frames use the same calibration, angle limits,
-stop, fail-safe, buffer, and timing checks. Plans allow at most 32 frames.
-
-The library includes stand, rest, a held sit pose, walking, turns, wave, bow,
-`curious`, and dances including Macarena and salsa. `curious` looks right and
-left before returning to its starting pose. Named 45°, 90°, and 180° turns remain
-open-loop estimates until measured on the assembled robot.
-
-Playback eases between targets. V2 will need twelve-joint assets and matching
-validators, plus its planned per-joint calibration,
-inversion, limits, acceleration control, and staged startup.
-
-## Camera and microphone
-
-The OV3660 takes XGA stills after requests or selected events. Operator preview
-is limited to QVGA/VGA and starts disabled. The fast capture profile uses short
-manual exposure for indoor 60 Hz lighting, moderate gain, denoise, neutral
-sharpening, and no auto-exposure settling delay. It replaced a higher-gain
-profile that produced cross-hatch artifacts.
-
-Motion and utterance completion can request a still tagged with the originating
-event's ID. For motion, the JPEG precedes the terminal result. A snapshot failure
-is reported separately from a motion that already completed.
-
-Microphone capture is 16 kHz mono PCM. A pinned neural voice activity detection
-(VAD) model closes utterances using minimum-duration, silence, and maximum-duration
-limits. A PSRAM queue absorbs short network stalls.
-
-The microWakeWord/TensorFlow Lite Micro runtime loads a versioned local model
-package and validates its manifest and tensor format before reporting readiness.
-No accepted production Ainekio weights are tracked, so the initial configuration
-leaves wake detection unavailable. See [camera feedback](/posts/vision-loop/)
-and [listening and speech](/posts/voice-loop/) for the complete paths.
-
-## Speaker, storage, and recovery
-
-Speaker PCM is accepted during an explicit TTS burst, queued, and sent over I2S.
-Overflow, interruption, data outside a burst, and completion have explicit
-protocol results.
-
-LittleFS stores versioned motion, face, PCM, and wake assets. SD logging uses a
-low-priority task and limited rolling logs. OTA images must pass gateway
-authentication before rollback validation marks the boot healthy.
-
-Transport loss stops normal operation and starts limited reconnect attempts.
-Stale control traffic stops active motion while allowing an authenticated idle
-session to remain connected.
-
-## Testing still needed
+## What still needs physical testing
 
 Portable-core tests, protocol fixtures, firmware policy tests, ESP-IDF builds,
-application/LittleFS flashes, and digest readback have checked code and installed
-images. Physical testing must establish servo alignment, battery performance,
-microphone acoustics, speaker continuity, camera quality, and stability when
-motion and media run together. [Current Status](/posts/current-status/) records
-the dated results and remaining work.
+flashes of the application and asset filesystem, and digest readback have
+checked code and installed images. A digest comparison checks that flashed
+bytes match; it does not establish how the assembled robot behaves.
+
+Servo alignment, battery performance, microphone acoustics, speaker continuity,
+camera quality, and stability with motion and media together need physical
+checks. The [dated status report](/posts/current-status/) records reported
+results, while the [V2 roadmap](/posts/ainekio-v2/) describes the next controller.
