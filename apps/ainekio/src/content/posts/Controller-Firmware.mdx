@@ -108,8 +108,7 @@ The details below are for building or wiring **V1**. GPIO numbers identify board
 input/output pins. The S3 pin allocation must not be copied to the planned P4
 without its own design and tests.
 
-<details>
-<summary className="cursor-pointer py-3">S3 firmware target, pin map, and media settings</summary>
+### S3 firmware target, pin map, and media settings
 
 The entrypoint is `Slave/firmware/esp32s3/main/app_main.c`. It connects the C body
 core to ESP-IDF, Espressif’s device framework. Platform code owns FreeRTOS tasks,
@@ -145,8 +144,6 @@ minimum-duration, silence, and maximum-duration limits. The microWakeWord /
 TensorFlow Lite Micro runtime validates a versioned local model package,
 including its manifest and tensor format, before reporting readiness.
 
-</details>
-
 ## What still needs physical testing
 
 Portable-core tests, protocol fixtures, firmware policy tests, ESP-IDF builds,
@@ -156,5 +153,5 @@ bytes match; it does not establish how the assembled robot behaves.
 
 Servo alignment, battery performance, microphone acoustics, speaker continuity,
 camera quality, and stability with motion and media together need physical
-checks. The [dated status report](/posts/current-status/) records reported
+checks. The [dated status report](/posts/archive/2026-09-09-project-status/) records reported
 results, while the [V2 roadmap](/posts/ainekio-v2/) describes the next controller.

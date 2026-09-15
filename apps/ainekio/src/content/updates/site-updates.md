@@ -10,32 +10,60 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "Robot recovery and finite-work integration"
-  location: "Working V1 / planned V2"
-  updated: 2026-09-09
-  mileage: "Ainekio 0592ca4 · MetaHuman a94fbfdd + local work"
-  section: "Saved goals, command results, and Desire plans"
-  nextStop: "Test a leg and measure power"
-  note: "The September 8 live review recorded robot feedback, images in model inputs, and speech-delivery acknowledgements. Later source repairs address stale goals, delayed command results, and finite Desire plans; a new deployed run is still needed. V1 remains the eight-servo ESP32-S3 body, with twelve-servo V2 mechanics under development."
+  status: "V2 printed leg prototypes and fit refinements"
+  location: "Working V1 / V2 leg prototyping"
+  updated: 2026-09-15
+  mileage: "September 12–14 leg revisions · September 14 prototype photos"
+  section: "Printed legs, linkage fit, horn pockets, and foot iterations"
+  nextStop: "Check the next printed leg and foot pair, resolve sleeve and fastener fit, and measure bending and shoulder clearance."
+  note: "V2 leg prototypes have been printed and assembled. Greg finds their movement much more expressive than the models he has seen online. Recent work refines the linkage, shell clearances, horn pockets, and feet. Shoulder motion remains in development; full-body test results are not yet documented."
+  areas:
+    - label: "V1 robot"
+      status: "Working physical prototype"
+      detail: "Eight servos and an ESP32-S3 controller."
+    - label: "V2 body"
+      status: "Printed leg prototypes"
+      detail: "Assembly photos and fit-driven CAD revisions; full-body powered and load results not yet documented."
+    - label: "MetaHuman OS"
+      status: "Last reported September 10"
+      detail: "Input continuity, training, and profile-memory refinements."
 entries:
-  - title: "Giving Desire-driven work a finish line"
+  - title: "From CAD to printed leg prototypes"
+    date: 2026-09-15
+    location: "Leg assembly and 3D printing"
+    mileage: "Prototype photos · September 12–14 design records"
+    summary: "Greg finds the printed legs much more expressive than the models he has seen online. See three prototype photos, fit lessons from the real parts, revised dimensions, and the latest foot options."
+    url: "/posts/2026-09-15-leg-prototypes/"
+  - title: "Fitting the V2 body together"
+    date: 2026-09-10T12:00:00-07:00
+    location: "Hardware + MetaHuman OS"
+    mileage: "Daily design update · actual CAD renders"
+    summary: "The four-leg CAD assembly now includes a wider chassis, electronics, smoother linkages, revised covers, and a camera/display carrier. Follow fourteen saved revisions, component dimensions, remaining fit checks, and a brief MetaHuman OS update."
+    url: "/posts/2026-09-10-v2-body-design/"
+  - title: "Three ways to drive a knee with short rods"
+    date: 2026-09-09T12:00:00-07:00
+    location: "Leg mechanism research"
+    mileage: "Three CAD variants · modeled motion and collision checks"
+    summary: "A direct rod, a supported relay yoke, and an offset cascade were compared. The relay remains the next research candidate; none met the complete range and pose brief."
+    url: "/posts/2026-09-09-leg-mechanism-study/"
+  - title: "Giving robot tasks a clear finish line"
     date: 2026-09-08
-    location: "MetaHuman OS · Agency and robot workflows"
+    location: "MetaHuman OS"
     mileage: "Source repair · controlled workflow tests"
-    summary: "Robot work from a Desire now carries a reviewed plan, ordered steps, and an observable completion condition. Results return to the originating intention; pending ideas remain visible without becoming standing movement instructions. Deployment verification remains."
+    summary: "Robot tasks now follow a finite plan with a clear completion condition. Pending ideas remain visible without becoming standing movement instructions. Deployment verification remains."
     url: "/posts/bounded-autonomy/"
-  - title: "Keeping late command results connected"
+  - title: "Keeping delayed robot feedback connected"
     date: 2026-09-08
     location: "Ainekio gateway and adapter"
     mileage: "68 recorded software checks"
-    summary: "The adapter no longer ends result tracking after a fixed 30 seconds. Recovery follows the original command and session without resending movement. Controlled late-result and cancellation tests passed; the host repair still needs a gateway restart and live testing."
+    summary: "Delayed feedback stays attached to the original command. Recovery tracks the result without repeating movement. Controlled tests passed; a gateway restart and live testing remain."
     url: "/posts/gateway-and-simulator/"
   - title: "Live workflow evidence and goal-context repairs"
     date: 2026-09-08
-    location: "MetaHuman OS · execution and perception"
+    location: "MetaHuman OS"
     mileage: "Recorded live run and later source repairs"
     summary: "A live review found command feedback, images reaching model requests, and acknowledged speech deliveries. It also exposed stale goals. Later repairs retain truthful execution status and connect specialist answers to the waiting request; physical validation of those repairs remains."
-    url: "/posts/current-status/"
+    url: "/posts/archive/2026-09-09-project-status/"
   - title: "Keeping a request through waits and restarts"
     date: 2026-09-07
     location: "MetaHuman OS and Ainekio gateway"
@@ -58,7 +86,7 @@ entries:
     location: "Documentation"
     mileage: "10-article field guide"
     summary: "A local guide replaced five remote-document pages and earlier fantasy artwork. It covered hardware, firmware, commands, gateway, camera, speech, MetaHuman integration, and autonomy."
-    url: "/posts/current-status/"
+    url: "/posts/archive/2026-09-09-project-status/"
   - title: "Robot autonomy responsibilities consolidated"
     date: 2026-08-25
     location: "MetaHuman OS"
@@ -94,3 +122,9 @@ Ainekio is a four-legged robot connected to MetaHuman OS for conversation and
 decisions. These entries follow its hardware and software development. Each
 entry describes its own date; linked articles explain the components, current
 limitations, and next tests.
+
+See [current project status](/posts/current-status/) for the latest summary,
+or [browse the full article archive](/archive/) for guides and earlier reports.
+
+Latest build post: [September 15: From CAD to Printed Leg Prototypes](/posts/2026-09-15-leg-prototypes/),
+with original prototype photos, measured fit revisions, and the latest foot options.

@@ -158,6 +158,20 @@
         "sha256": "b1a6a1a414e97412882cb06537a772ebcaefc4593ca1cb7c1e890ced61e6e4e8"
       },
       "prompt": "Use case: identity-preserve / precise-object-edit. Website editorial concept artwork.\nReference 1 is the OWNER-APPROVED Ainekio V2 HYBRID robot and is the exact character/design authority. Reference 2 is the existing scene to update.\nReplace the robot in reference 2 with the SAME hybrid from reference 1, preserving reference 2's scene concept, atmosphere, principal props, and composition unless a framing adjustment is requested.\nIdentity invariants: short broad STOUT low black chassis; compact crimson face module with a small cyan friendly emoticon display; modest exposed multicolored wire loops and a compact circuit board deck; exactly FOUR robust articulated legs with small exposed black servo housings, three-joint design intent. The lower legs are bold arched CRIMSON ICE-AXE forms with clearly pronounced serrated/toothed outer/back edges and hooked ground-contact tips. Preserve the red printed trusses, angular edges and familiar scrappy construction. No elongated Harmony dog torso, NO smooth silver teardrop legs or loop feet, no huge armor. This must look like the approved hybrid, not another new robot.\nMaintain the cinematic dystopian science-fiction rendering, realistic miniature plastic and bolts, dark atmospheric environments, scarlet and cyan character accents, clear subject silhouette. Do not introduce text, logos, watermarks or engineering measurements. Concept art, not physical test evidence. Keep the entire four-legged robot comfortably inside the frame.\nSquare 1:1 PROFILE PORTRAIT. Replace the V1 with the approved stout hybrid on the ruined wet highway. Compose its face and short broad body centrally, with all four pronounced red serrated legs and a little breathing room. The friendly cyan face remains immediately recognizable even at 64px. Simplify the distant city backdrop with soft focus and preserve cyan/red lighting. No lettering."
+    },
+    {
+      "key": "assembly-september-10",
+      "file": "/assets/ainekio/v2/assembly-september-10-concept.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 299864,
+      "kind": "AI-generated concept illustration; not a physical build photograph",
+      "geometryReference": {
+        "file": "robot-front-face/Face-assembly.png",
+        "sha256": "6a35f4a933cb676a0a3606650de4b44e1aff3cb7e9161358fb9c9c9e72bb5960"
+      },
+      "styleReference": "/assets/ainekio/v2/hero-concept.webp",
+      "prompt": "Reimagine the WIP 14 CAD assembly in the existing dystopian city style. Preserve four articulated legs, broad closed top cover, front ports, and camera above landscape LCD. Charcoal chassis, crimson leg links, cyan face. No added hardware, lettering, or engineering claims."
     }
   ],
   "responsiveHero": {

@@ -1,8 +1,8 @@
 ---
-title: "Ainekio V2: Body and Controller Plan"
+title: "Ainekio V2: Parts, Assembly, and Design Iterations"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-09-08
-description: "Three-joint legs, a new chassis, ESP32-P4, measured power requirements, and scripted motion first."
+updated: 2026-09-15
+description: "V2 parts, mounting dimensions, the earlier body assembly, and September's printed leg prototypes, fit corrections, and foot options."
 image: "/assets/ainekio/v2/workshop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
@@ -32,9 +32,16 @@ width and use that movement in poses. It will start with scripted motion:
 prepared joint positions and timings. Automatic balance and adaptation to
 uneven ground require additional sensing and control work.
 
-This plan follows the owner’s September 6 design document and mechanical files
-reviewed on September 7. An experimental leg print is underway. Final dimensions,
-electronics, materials, and power source depend on the tests below.
+The September 6 plan has progressed to a four-leg CAD assembly and printed leg
+prototypes. This page covers the **September 12–14 leg refinements**, with
+prototype photographs documented in the September 15 build update. It also
+retains the earlier WIP 1–14 body and electronics record. V1 remains the working
+complete robot; these records do not establish a complete powered V2 assembly
+or its load performance.
+
+For the latest photos and fit revisions, see [From CAD to Printed Leg Prototypes](/posts/2026-09-15-leg-prototypes/).
+The earlier body sequence is in [Fitting the V2 Body Together](/posts/2026-09-10-v2-body-design/).
+For the existing robot’s components and wiring, use the [V1 hardware guide](/posts/body-design-and-hardware/).
 
 ## Changes from V1
 
@@ -70,15 +77,124 @@ pivots, and linkages that keep motor weight close to the body. Local files
 include printable STL models and STEP assemblies converted for Blender.
 Testing will establish how those ideas fit Ainekio’s shorter, broader shape.
 
-The chassis will be designed in Blender around the tested leg mounts,
-controller, connectors, camera, audio hardware, display, power source, and
-wiring. Keeping weight low and close to the body reduces the leverage each
-servo must resist. Strong mounts and short leg leverage also matter: a motor
-that can move an unloaded leg may struggle once it supports the robot.
+The chassis is being assembled in Blender around the leg mounts, board models,
+connectors, and front camera/display carrier. Power and audio packaging remain
+unfinished. The current four-leg assembly uses the OpenHarmony-derived leg
+geometry and its Ainekio revisions. The separate
+[fixed-servo, short-rod study](/posts/2026-09-09-leg-mechanism-study/) compares
+alternatives; it has not replaced those legs with a validated mechanism.
 
 Cables need clearance throughout a leg’s movement. Programming, charging, power
 connections, legs, and electronics should remain accessible for replacement
 and repair without dismantling the whole body.
+
+## Printed leg development: September 12–14
+
+The new [prototype photographs](/posts/2026-09-15-leg-prototypes/#building-the-leg-then-checking-the-fit)
+show a printed leg assembled in partly folded, folded, and extended poses.
+The records now include a failed shell fit and horn measurements from actual
+hardware, as well as saved CAD changes. Many refinements apply to one
+front-left leg or a separate review file; they are not all combined into one
+released four-leg print set.
+
+| Part or interface | Recorded revision | What still needs checking |
+| --- | --- | --- |
+| Part_009 input arm and Part_024 link | A 21 mm input arm was paired with an imported approximately 24.64 mm link, 4 mm thick, then matched to four legs | Full moving-part clearance and recalibration; earlier 40 mm shared-link and 27 mm trials remain separate iterations |
+| Part_020 / Part_022 shells over Part_027 | A failed print fit led to 0.30 mm mating allowance and a 0.15 mm entrance chamfer in the FL clearance review | Reprinted fit and the thinner local collar rims |
+| Horn arm pockets in Part_009 / Part_023 | Physical arms measured 2 mm; pockets revised to 2.1 mm while reference horn meshes remain 1.75 mm | Actual seating and the separate Part_008 sleeve interface |
+| Part_023 cavity | Later uniform 2.1 mm floor and flush outer ledge; inner seat retained | Printed seating and loaded behavior |
+| Part_027 lower-leg neck | Nominal 8 mm neck and enlarged end, retaining 5 mm thickness and mounting bores | Physical strength and joint travel |
+| Part_025 screw collar | Separate 1.5 mm-high collar, retaining its bore and mating faces | A longer screw than the modeled M3×6 reference is required |
+| Slim foot options | 9.2 mm assembled width; flat, chevron, then lugged tread with Ø7 × 1.5 mm bolt pockets | The slim variants retain about 0.10 mm cavity allowance, distinct from the earlier 0.30 mm fit revision; print fit and traction remain open |
+
+The shoulder-motion work is still an unfinished chassis-clearance study.
+Its 270° swivel-servo brief does not establish usable assembled travel: the
+recorded draft has pose-dependent interference and awaits final review.
+The [latest build log](/posts/2026-09-15-leg-prototypes/) shows the source images
+and explains the alternatives and their remaining limitations.
+
+## Parts in the September 10 CAD assembly
+
+This is the earlier electronics/body snapshot. The leg refinements above are
+newer; inclusion here does not make a reference board or display a final choice.
+
+These quantities describe **models in the assembly or the stated servo plan**.
+They are not a purchase checklist. Dimensions below are in millimeters; board
+dimensions exclude connectors unless stated. Mounting patterns are distances
+between hole centers. The electronics import notes and front-face design record
+identify the following references.
+
+| Component | Quantity | Board size; mounting pattern | How it is used and what remains open |
+| --- | --- | --- | --- |
+| Radxa Dragon Q6A v1.21 | 1 model | 85 × 56 × 1.6; four Ø3.5 holes, 58 × 49 pattern | Computer model at the front, ports facing the end panel. Its CAD placement does not establish an installed OS or onboard MetaHuman runtime. |
+| ESP32-P4-WIFI6 | 1 model | Supplied STEP measures about 71.07 × 21.02 × 1.60 | Body controller candidate at the rear. Exact board wiring and the twelve-servo firmware port remain open. |
+| Adafruit PCA9685 servo driver, product 815 | 1 model | 62.23 × 25.4 × 1.57; four Ø2.5 holes, 55.88 × 19.05 pattern | Separate servo-pulse board modeled beside the P4. Final driver selection and wiring are not proven by placement. |
+| MG90S-class joint servos | 12 planned | Three joints per leg | The new body still needs loaded leg tests and calibration; supplier-specific dimensions and torque must be checked against the actual motors. |
+| Waveshare 2inch LCD Module | 1 reference model | 58 × 35 × 1.6; four Ø2 holes, 53 × 30 pattern | Landscape face display, including four M2×6 spacers in the official model. Final display product remains undecided. |
+| OV5647 camera, Arducam B0033 dimensional reference | 1 reference model | 25 × 24; four Ø2 holes, 21 × 12.5 pattern | Above the display. Thickness, lens depth, rear connector, and minor components are approximate envelopes. |
+| Top and bottom covers | 2 CAD parts | Each 112 wide, 3 base thickness, eight Ø3 mounting holes | WIP 13 closed unused openings. Bottom tabs remain. Printed seating and strength are untested. |
+| Removable front carrier | 1 CAD part | Adds 3 to the two front cover screw stacks; four 4-high camera standoffs | LCD and camera share the carrier. Screw lengths, retention, and cables still need actual hardware. |
+
+The P4 model came from the supplied `ESP32-P4-WIFI6_3d-20260109.stp` file.
+Its four polygonal mounting openings measure about 1.66 mm across the inscribed
+circle, on a 54.164 × 18.25 mm pattern. These are **model measurements**, not a
+manufacturer drilling specification.
+
+The Q6A and PCA9685 models came from [Radxa’s hardware downloads](https://docs.radxa.com/en/dragon/q6a/download)
+and [Adafruit’s CAD files](https://github.com/adafruit/Adafruit_CAD_Parts/tree/main/815%20Servo%20Driver%2016%20Channel).
+The display uses the [Waveshare module reference](https://www.waveshare.com/wiki/2inch_LCD_Module)
+and its [mechanical drawing](https://files.waveshare.com/upload/6/6d/2inch_LCD_Module_2D_Drawing.pdf).
+The camera board dimensions come from the [Arducam B0033 drawing](https://www.uctronics.com/download/Amazon/B0033.pdf).
+
+## How the CAD assembly was built
+
+The revision names below refer to saved `Complete-WIP` Blender files. Their
+order documents the modeling work, not a completed physical assembly procedure.
+
+| Revision | Construction change | Retained features or unfinished work |
+| --- | --- | --- |
+| WIP 1 | Arrange four leg assemblies around the body | Establishes a layout, not balanced motion. |
+| WIP 2 | Fit center mounts and front/rear end panels | Check mount interfaces before adding electronics. |
+| WIP 3–4 | Import Q6A, PCA9685, then P4 STEP models at millimeter scale | Include connector overhangs and underside components. |
+| WIP 5 | Widen the chassis 40 mm, 20 each side, and place the three boards | Preserve screw and bearing features; Q6A at front, P4 and PCA9685 toward rear. |
+| WIP 6–8 | Round the servo housings, try oval then vertical openings, synchronize the manually edited housing across all four legs | WIP 8 supersedes the earlier opening patterns. |
+| WIP 9–10 | Add 3 mm center bow to Part_026, then replace the concentrated bend with continuous arcs | Preserve bearing seats, pivot holes, 4 mm thickness, approximately 5.015 mm waist, and 2.2 mm slots. |
+| WIP 11 | Cut two USB-stack openings and an Ethernet opening in the front panel | No extra nominal port allowance; Q6A tray lip trimming remains. |
+| WIP 12 | Widen top and bottom covers from 72 to 112 mm and align their eight frame holes | Preserve 3 mm base thickness; frame still has a 0.2 mm mounting-height step. |
+| WIP 13 | Close 18 unused top openings and 15 unused bottom openings | Each cover retains only eight Ø3 frame holes and the existing outer contour. |
+| WIP 14 | Mount a camera above a landscape LCD on a removable front carrier | Reuse front cover screw axes; hardware selection, cabling, optics, and electrical compatibility remain open. |
+
+![Actual CAD layout showing the computer at the front and two controller boards toward the rear.](/posts/2026-09-10-v2-design/electronics-layout.png)
+
+*WIP 5 board placement, before the later covers and face. This records that
+revision’s layout; it is not a wiring diagram.*
+
+`Robot Layout → LeftRightSpacing_mm` controls the leg roots, center mounts,
+inserted panel sections, covers, and later face mounting positions. At the
+97 mm setting, the covers are 112 mm wide. Widening moves the existing mounting
+features rather than scaling their holes. The cover and face checks also
+exercised the 107 mm setting.
+
+The WIP 5 layout provides a 6 mm gap behind the Q6A tray and between the rear
+board envelopes. Four tray cutouts include 0.3 mm around modeled connectors.
+Those clearances belong to that saved layout. Real plugs, cable bends, cooling,
+and full leg motion need a separate check; the tray still overlaps the later
+panel and bottom cover and requires trimming.
+
+## Choices and alternatives
+
+| Decision | Earlier option | September 10 evidence |
+| --- | --- | --- |
+| Servo pulses | Direct P4 outputs favored; external PWM optional | A PCA9685 board is now modeled. The electrical choice and firmware integration remain unverified. |
+| Onboard computer | Required onboard Linux computing outside the initial plan | A Q6A is now included in the packaging study. This is a mechanical change; no deployed software role is established here. |
+| Knee linkage | OpenHarmony-derived printed links | Three fixed-servo short-rod mechanisms were also studied. The supported relay is a research candidate; none passed the complete brief. |
+| Cover openings | Broad access cutouts in WIP 12 | WIP 13 keeps only the frame screw holes; cooling still needs investigation. |
+| Face hardware | Camera and display not yet packaged | WIP 14 uses Waveshare LCD and OV5647 references on a removable carrier. Final modules are not selected. |
+
+Exact fastener counts and lengths, bearing/shaft procurement, filament and print
+settings, V2 audio hardware, battery, regulator, harness, and assembly torque
+are not settled in the reviewed records. This page will need those measured
+details before it can serve as a complete replication guide.
 
 ## Controller and motion
 
@@ -87,9 +203,10 @@ does not make the existing firmware ready for the new body. Board pins,
 communication hardware, camera, and audio still need their own implementation
 and tests; V1’s S3 wiring map is not a P4 wiring guide.
 
-The plan favors twelve servo-control signals generated directly by the P4,
-subject to available pins and peripheral tests. A separate pulse-width
-modulation (PWM) board, which generates those control pulses, remains optional.
+The original plan favored twelve servo-control signals generated directly by
+the P4. The newer CAD includes a PCA9685 pulse-width modulation (PWM) board.
+Both approaches still require pin allocation, control software, calibration,
+and peripheral tests; a board model is not evidence that either path is wired.
 
 A scripted motion consists of frames. Each frame specifies a target angle for
 each joint and how long the transition should take. For V2, a frame will contain
@@ -134,8 +251,8 @@ properties. The final power source remains undecided.
    and the experimental leg to inform the mechanical and electrical choices.
 3. **Test the P4 in stages.** Check signals and calibration, then one loaded
    leg, two legs, and all twelve servos.
-4. **Design the chassis and wiring harness.** Fit them to the measured parts
-   and power needs, keeping room for motion and service access.
+4. **Validate the modeled chassis and design the wiring harness.** Check them
+   against measured parts and power needs, with room for motion and service access.
 5. **Port scripted movements.** Tune transitions before the final complete print.
 6. **Repeat normal movements under load.** Test standing, sitting, walking,
    turning, and stopping. Watch for binding, supply shutdown, brownouts
@@ -148,9 +265,13 @@ Adaptive terrain response, foot-contact sensing, and closed-loop balance—
 adjusting movement from sensor feedback—are deferred. So are stabilization
 with an inertial sensor (IMU), calculating joint angles from desired foot
 positions in real time (inverse kinematics), and learned locomotion.
-Higher-cost servos, required onboard phone or Linux computing, and wireless
-charging are outside the initial build too.
+Higher-cost servos and wireless charging were outside the initial build plan.
+Onboard Linux computing was also excluded from that first scope; the Q6A model
+now records a later packaging direction whose runtime role still needs work.
 
 The [MetaHuman redesign](/posts/metahuman-integration/) can develop against V1
-while these mechanics are tested. The [dated status report](/posts/current-status/)
-separates progress on the two projects from work that still needs validation.
+while these mechanics are tested. [Current project status](/posts/current-status/)
+tracks the latest summary. This page’s September 10 mechanical details come
+from the electronics import notes and the WIP 5, 10–14 design and saved-file
+reports. Their checks cover saved geometry and static fit; no new physical test
+was performed for this documentation update.

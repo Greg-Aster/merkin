@@ -1,0 +1,45 @@
+---
+import { getEntry } from 'astro:content'
+import MainGridLayout from '../../layouts/MainGridLayout.astro'
+import ProjectStatus from '../../components/ProjectStatus.astro'
+
+const updates = await getEntry('updates', 'site-updates')
+if (!updates) throw new Error('Project status requires updates/site-updates')
+const latest = [...updates.data.entries].sort((a, b) => b.date.getTime() - a.date.getTime())[0]
+if (!latest?.url) throw new Error('Project status requires a linked development update')
+---
+
+<MainGridLayout title="Current Project Status" description={updates.data.current.note} oneColumn={true}>
+  <article class="status-page" data-pagefind-body>
+    <header>
+      <h1>Current project status</h1>
+      <p>The latest state of the robot and MetaHuman OS, with the next practical checks.</p>
+    </header>
+    <ProjectStatus />
+    <section aria-labelledby="status-latest-title">
+      <h2 id="status-latest-title">Latest development update</h2>
+      <a href={latest.url}>{latest.title} <span aria-hidden="true">→</span></a>
+      <p>{latest.summary}</p>
+    </section>
+    <section aria-labelledby="status-history-title">
+      <h2 id="status-history-title">Earlier reviews</h2>
+      <p>These reports preserve what was known and tested at the time.</p>
+      <a href="/posts/archive/2026-09-09-project-status/">September 9, 2026: robot workflows and V2 planning <span aria-hidden="true">→</span></a>
+    </section>
+    <nav aria-label="Continue exploring">
+      <a href="/updates/">All development updates</a>
+      <a href="/#project-guides">Project guides</a>
+    </nav>
+  </article>
+</MainGridLayout>
+
+<style>
+  .status-page { max-width: 70rem; width: 100%; margin: 0 auto; display: grid; gap: 1.5rem; color: var(--text-color); }
+  .status-page > header, .status-page > section, nav { padding: 1.25rem; }
+  h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 750; line-height: 1.2; }
+  h2 { font-size: 1.25rem; font-weight: 700; }
+  p { margin-top: 0.65rem; max-width: 80ch; line-height: 1.7; }
+  a { color: var(--primary); font-weight: 650; display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; }
+  a:hover { text-decoration: underline; }
+  nav { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; border-top: 1px solid color-mix(in srgb, var(--primary) 20%, transparent); }
+</style>

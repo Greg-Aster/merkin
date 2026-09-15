@@ -33,7 +33,7 @@ The integration remains under development.
 ## Finding your way around the guide
 
 Start with the [project overview](/posts/project-overview/) for how the pieces
-fit together, or [the dated status report](/posts/current-status/) for reported
+fit together, or [current project status](/posts/current-status/) for reported
 results and remaining work. The other articles cover hardware, firmware,
 commands, the network connection, camera, speech, and autonomy modes.
 

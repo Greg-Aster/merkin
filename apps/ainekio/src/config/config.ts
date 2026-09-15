@@ -52,20 +52,22 @@ export const siteConfig: SiteConfig = {
 
 export const navBarConfig: NavBarConfig = {
   links: [
-    LinkPreset.Home,
     {
-      name: 'V2',
-      url: '/posts/ainekio-v2/',
-    },
-    {
-      name: 'Status',
-      url: '/posts/current-status/',
+      name: 'Overview',
+      url: '/',
     },
     {
       name: 'Updates',
       url: '/updates/',
     },
-    LinkPreset.Archive,
+    {
+      name: 'Guides',
+      url: '/#project-guides',
+    },
+    {
+      name: 'All articles',
+      url: '/archive/',
+    },
     LinkPreset.About,
   ],
 }

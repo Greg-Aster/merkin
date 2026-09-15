@@ -1,0 +1,66 @@
+---
+import { getEntry } from 'astro:content'
+
+const updates = await getEntry('updates', 'site-updates')
+if (!updates) throw new Error('Project status requires updates/site-updates')
+const current = updates.data.current
+const dateFormat = new Intl.DateTimeFormat('en-US', {
+  month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+})
+---
+
+<section id="project-status" class="project-status" aria-labelledby="project-status-title" data-status-updated={current.updated.toISOString()}>
+  <header>
+    <div>
+      <p class="status-label">Project status</p>
+      <h2 id="project-status-title">{current.status}</h2>
+    </div>
+    <time datetime={current.updated.toISOString()}>As of {dateFormat.format(current.updated)}</time>
+  </header>
+  <p class="status-summary">{current.note}</p>
+  <dl class="status-areas">
+    {current.areas.map(area => (
+      <div>
+        <dt>{area.label}</dt>
+        <dd>
+          <strong>{area.status}</strong>
+          <span>{area.detail}</span>
+        </dd>
+      </div>
+    ))}
+  </dl>
+  <div class="status-next">
+    <span class="status-label">Next step</span>
+    <p>{current.nextStop}</p>
+  </div>
+</section>
+
+<style>
+  .project-status {
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+    border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+    border-radius: var(--radius-large);
+    background: var(--card-bg);
+    color: var(--text-color);
+    scroll-margin-top: 6rem;
+  }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.75rem 1.5rem; }
+  .status-label, dt { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--primary); }
+  h2 { margin-top: 0.35rem; font-size: clamp(1.15rem, 2vw, 1.4rem); font-weight: 700; line-height: 1.35; }
+  time { font-size: 0.8rem; color: var(--text-color-muted); }
+  .status-summary { margin-top: 0.85rem; max-width: 90ch; font-size: 0.95rem; line-height: 1.65; }
+  .status-areas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin-top: 1.25rem; }
+  dd { margin-top: 0.4rem; }
+  dd strong { display: block; font-size: 0.95rem; font-weight: 650; line-height: 1.45; }
+  dd span { display: block; margin-top: 0.3rem; font-size: 0.85rem; line-height: 1.55; color: var(--text-color-muted); }
+  .status-next { display: flex; align-items: baseline; gap: 0.75rem 1.5rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid color-mix(in srgb, var(--primary) 16%, transparent); }
+  .status-next > span { flex-shrink: 0; }
+  .status-next p { font-size: 0.9rem; line-height: 1.6; }
+  @media (max-width: 600px) {
+    .status-areas { grid-template-columns: 1fr; gap: 0.85rem; }
+    .status-areas > div { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); column-gap: 0.75rem; }
+    dt { padding-top: 0.2rem; }
+    dd { margin-top: 0; }
+    .status-next { flex-direction: column; gap: 0.35rem; }
+  }
+</style>
