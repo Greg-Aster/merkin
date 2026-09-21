@@ -172,6 +172,43 @@
       },
       "styleReference": "/assets/ainekio/v2/hero-concept.webp",
       "prompt": "Reimagine the WIP 14 CAD assembly in the existing dystopian city style. Preserve four articulated legs, broad closed top cover, front ports, and camera above landscape LCD. Charcoal chassis, crimson leg links, cyan face. No added hardware, lettering, or engineering claims."
+    },
+    {
+      "key": "assembly-september-20",
+      "file": "/assets/ainekio/v2/assembly-september-20-concept.webp",
+      "date": "2026-09-21",
+      "tool": "Built-in image_gen",
+      "width": 1672,
+      "height": 941,
+      "bytes": 305112,
+      "sha256": "05d54aa75601baf8eb1025d61df0c317c8399dc405319ba859f6ad623941d0aa",
+      "kind": "AI-generated concept illustration based on dated CAD views; not a physical build photograph or dimensional drawing",
+      "geometryReferences": [
+        {
+          "file": "/posts/2026-09-21-design-progress/assembly-september-20.webp",
+          "sha256": "82334ea8012e7eadc249ca8b0e7a4ae4c90a889321977b67258c43400c9d9f18"
+        },
+        {
+          "file": "/posts/2026-09-21-design-progress/assembly-side-september-20.webp",
+          "sha256": "b54f73714b43dacc7bb83dc28d248ffc64b686087003a9dee601bd38699e04b5"
+        }
+      ],
+      "styleReference": "/assets/ainekio/v2/assembly-september-10-concept.webp",
+      "prompt": "Use case: stylized-concept. Asset type: wide 16:9 website hero illustration for Ainekio's robot build journal, 2048x1152 if possible. Primary request: refresh the existing dystopian sci-fi visual style to depict the NEW robot in the first two reference images. Input image 1 is the authoritative September 20 three-quarter CAD assembly; image 2 is the same robot's side view for mechanical identity. Image 3 is ONLY the reference for cinematic atmosphere, setting, texture and lighting; do NOT copy its old boxy robot, exposed top camera, or front USB/Ethernet panel. Subject: one small four-legged robot with the exact recognizable silhouette of images 1 and 2: narrow black chassis, compact exposed black servo housings, paired silver servo horns, curved red linkages, red serrated lower legs, small round treaded feet that are fixed feet not wheels, low layered pale ivory armor roof with vents, swept helmet/brow and cheek pieces framing a small black cyan-lit face, small chin camera. Keep the leg mechanism exposed and visibly articulated. Exactly four legs, no extra limbs, no new sensors, antennas or machinery, no humanoid features. Render the pale shell as weathered off-white material, keep red leg links and dark frame. Setting: rain-soaked ruined futuristic city, distant damaged towers and low red-orange embers, cool blue-gray night sky, wet ground reflecting cyan and red. Lighting: cinematic but robot clearly readable, subtle wear and raindrops, crisp mechanical detail. Composition: entire robot in front three-quarter view, centered, occupy about 65 percent of image width, all feet fully visible, generous breathing room for 16:9 crops, no text overlaid, no people, no logos, no watermark. This is explicitly concept artwork inspired by CAD, not a technical drawing or physical test photograph."
+    },
+    {
+      "key": "avatar-september-20",
+      "file": "/assets/avatar/assembly-september-20.webp",
+      "sourceImport": "src/content/avatar/assembly-september-20.webp",
+      "date": "2026-09-21",
+      "tool": "Built-in image_gen",
+      "width": 512,
+      "height": 512,
+      "bytes": 90822,
+      "sha256": "f528321b50a07fb2babf90e69cf9adcfc5e45085bb6541626ca15450e7aff3aa",
+      "kind": "AI-generated concept portrait; not a physical build photograph",
+      "reference": "/assets/ainekio/v2/assembly-september-20-concept.webp",
+      "prompt": "Use case: precise-object-edit. Reframe this exact Ainekio robot illustration as a square 1:1 website profile portrait. Preserve this robot's design, four red articulated legs, exposed black servos, silver horns, narrow dark chassis, layered off-white shell, cyan face, chin camera, weathered materials and its front three-quarter viewing angle. Fit the entire robot and all feet inside the square with breathing room; the face and silhouette must be readable at thumbnail size. Only change the framing and extend the rainy ruined futuristic city background as needed. Keep the same cool blue, ember red and cyan lighting. Do not add or remove hardware, legs, antennas or other robot details. No lettering, labels, watermark or logo. This is concept artwork based on CAD, not a physical photograph."
     }
   ],
   "responsiveHero": {

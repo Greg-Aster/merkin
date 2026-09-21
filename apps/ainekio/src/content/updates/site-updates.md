@@ -10,24 +10,60 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "V2 printed leg prototypes and fit refinements"
-  location: "Working V1 / V2 leg prototyping"
-  updated: 2026-09-15
-  mileage: "September 12–14 leg revisions · September 14 prototype photos"
-  section: "Printed legs, linkage fit, horn pockets, and foot iterations"
-  nextStop: "Check the next printed leg and foot pair, resolve sleeve and fastener fit, and measure bending and shoulder clearance."
-  note: "V2 leg prototypes have been printed and assembled. Greg finds their movement much more expressive than the models he has seen online. Recent work refines the linkage, shell clearances, horn pockets, and feet. Shoulder motion remains in development; full-body test results are not yet documented."
+  status: "V2: compact legs, a narrower chassis and an evolving shell"
+  location: "Working V1 / V2 geometry and assembly studies"
+  updated: 2026-09-21
+  mileage: "September 17–20 design records · CAD views and print files"
+  section: "Chassis packaging, compact linkages, horn fit and shell development"
+  nextStop: "Confirm the chosen compact assembly, check its printed horn fit and shell/cable clearances, then retarget and evaluate the first full-body gait on that exact revision."
+  note: "Recent work has concentrated on the robot's chassis, leg geometry and outer shell. The September 17 chassis revision narrowed the body from 103 to 51.2 mm; later leg studies use a 22 mm crank, 36 mm rod and 55 mm lower leg. CAD motion research is now available, with results tied to specific revisions. The latest assembly still needs fit, clearance and loaded-motion checks."
   areas:
     - label: "V1 robot"
       status: "Working physical prototype"
       detail: "Eight servos and an ESP32-S3 controller."
-    - label: "V2 body"
-      status: "Printed leg prototypes"
-      detail: "Assembly photos and fit-driven CAD revisions; full-body powered and load results not yet documented."
+    - label: "V2 chassis and legs"
+      status: "Compact geometry and print-fit iteration"
+      detail: "Narrower chassis, upright and angled leg variants, and a horn cavity revised after a failed printed fit."
+    - label: "V2 shell"
+      status: "CAD refinement in progress"
+      detail: "September 20 views document the evolving face, collar and vented roof around the mechanism."
+    - label: "Gait development"
+      status: "Calculated motion studies"
+      detail: "Motion sources and 10/20/30 mm single-leg probes; the current complete assembly still needs validation."
     - label: "MetaHuman OS"
       status: "Last reported September 10"
       detail: "Input continuity, training, and profile-memory refinements."
 entries:
+  - title: "Developing the shell around the mechanism"
+    date: 2026-09-21
+    location: "Body and shell design"
+    mileage: "September 19 iterations · September 20 CAD views"
+    summary: "Actual assembly views follow the face, collar, roof and fin work, including rejected trials and a matched roof before/after comparison."
+    url: "/posts/2026-09-21-shell-design/"
+  - title: "Compact legs: geometry, print faces and horn fit"
+    date: 2026-09-21
+    location: "Leg mechanism and 3D printing"
+    mileage: "22/36/55 mm compact geometry · recorded STL exports"
+    summary: "Compare earlier and compact legs side by side, examine the targeted horn-cavity correction, and download the dated upright print files."
+    url: "/posts/2026-09-21-compact-leg-design/"
+  - title: "Narrowing the chassis and making room for the face"
+    date: 2026-09-21
+    location: "Chassis and electronics packaging"
+    mileage: "103 to 51.2 mm · board and cable clearance"
+    summary: "The narrow-body revision moves the side assemblies inward and revisits electronics packaging. A later front-panel change moves the camera-cable recess below the face."
+    url: "/posts/2026-09-21-chassis-packaging/"
+  - title: "Gait journal: motion studies and compact-leg probes"
+    date: 2026-09-21
+    location: "Continuing gait experiments"
+    mileage: "September 17 motion integration · September 19 single-leg study"
+    summary: "Dated entries add the motion library and 10/20/30 mm compact-leg probes, with comparison tables, contact assumptions and downloadable results."
+    url: "/posts/gait-development/"
+  - title: "Starting the gait development journal"
+    date: 2026-09-15
+    location: "Linkage math and gait development"
+    mileage: "Eight-servo motion baseline · twelve-servo geometry"
+    summary: "A continuing technical journal compares the original robot's stored motion ranges with the new linkage's theoretical travel. The first entry includes the mechanism diagram, nonlinear input/output examples, and downloadable range data. Gait calculations are still ahead."
+    url: "/posts/gait-development/"
   - title: "From CAD to printed leg prototypes"
     date: 2026-09-15
     location: "Leg assembly and 3D printing"
@@ -126,5 +162,9 @@ limitations, and next tests.
 See [current project status](/posts/current-status/) for the latest summary,
 or [browse the full article archive](/archive/) for guides and earlier reports.
 
-Latest build post: [September 15: From CAD to Printed Leg Prototypes](/posts/2026-09-15-leg-prototypes/),
-with original prototype photos, measured fit revisions, and the latest foot options.
+Latest build entries: [shell development](/posts/2026-09-21-shell-design/),
+[compact legs and horn fit](/posts/2026-09-21-compact-leg-design/), and
+[chassis packaging](/posts/2026-09-21-chassis-packaging/). The
+[gait journal](/posts/gait-development/) now includes later motion studies
+and compact-leg probes. The [printed-leg update](/posts/2026-09-15-leg-prototypes/)
+retains the original prototype photos and earlier fit revisions.

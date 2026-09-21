@@ -1,0 +1,146 @@
+{
+  "review_date": "2026-09-21",
+  "scope": "Dated CAD and research records; physical fit and loaded motion are not established by these downloads. STL units: millimetres. Upright exports and earlier horn correction are separate revisions.",
+  "files": [
+    {
+      "file": "data/chassis-record.txt",
+      "source": "Blender workspace/robot-chassis-width-20260917/DESIGN.md",
+      "source_sha256": "80561b0206fff742d507d21fcaa646b15d736e45b99efb901a2f079be32a2566",
+      "published_sha256": "80561b0206fff742d507d21fcaa646b15d736e45b99efb901a2f079be32a2566",
+      "transform": "Workspace prefixes shortened"
+    },
+    {
+      "file": "data/board-clearance-record.txt",
+      "source": "Blender workspace/robot-board-motion-audit-20260917/REPORT.md",
+      "source_sha256": "8fa8ee14a8c4bf97517c36cb15ab672bc6b2a095e151078d47a7ba790dc31c1d",
+      "published_sha256": "4907742002372418ae71d6906460dece836bb676125cefe41ffe0749949c684a",
+      "transform": "Workspace prefixes shortened"
+    },
+    {
+      "file": "data/camera-cable-record.txt",
+      "source": "Blender workspace/robot-front-panel-cable-recess-20260918/REPORT.md",
+      "source_sha256": "50aae20f7c4a89ceffde3ac58f23bfd2b2358628f8bf7f56c7fdf11551693aea",
+      "published_sha256": "71e4265f720f9a078eac198c1c22fe369bfd686827d2ba643f5d65b8bcd1608b",
+      "transform": "Workspace prefixes shortened"
+    },
+    {
+      "file": "data/level-shafts-record.txt",
+      "source": "Blender workspace/robot-leg-level-shafts-direct-screws-20260918/README.md",
+      "source_sha256": "95f1891380303e30dd3a2d9c90bc0db743a7348294bd0e15470ddd4a1430cc8e",
+      "published_sha256": "95f1891380303e30dd3a2d9c90bc0db743a7348294bd0e15470ddd4a1430cc8e",
+      "transform": "Workspace prefixes shortened"
+    },
+    {
+      "file": "data/horn-fit-record.txt",
+      "source": "Blender workspace/robot-part023-arm-clearance-20260919/README.md",
+      "source_sha256": "b85d482dba6720556bab5e253511bfd0caf9a60fa15a2373d7da1e26eff752b1",
+      "published_sha256": "b85d482dba6720556bab5e253511bfd0caf9a60fa15a2373d7da1e26eff752b1",
+      "transform": "Workspace prefixes shortened"
+    },
+    {
+      "file": "data/compact-leg-record.txt",
+      "source": "Blender workspace/robot-compact-22-36-test-20260919/README.md",
+      "source_sha256": "39414717f6e53677177d5904aaf80b95b5ebb3711379fe80832d59da098cc20a",
+      "published_sha256": "eba474ad257c8deb0deb8f37df04c5ea554ee3d46023e065abe27815c2d52d0a",
+      "transform": "Workspace prefixes shortened"
+    },
+    {
+      "file": "data/range-comparison-record.txt",
+      "source": "Blender workspace/robot-range-comparison-20260919/README.md",
+      "source_sha256": "cf07f9928d66da230ac0d5a4a6f4680afe370cda663b5194e0d863691eeda6ae",
+      "published_sha256": "fe05f86c4b1277da335ceda9b688ca887f4ad6c1f6d65b6f547d622e010a9979",
+      "transform": "Workspace prefixes shortened"
+    },
+    {
+      "file": "data/shell-iteration-log.txt",
+      "source": "Blender workspace/robot-carapace-iterations-20260919/edit-log.md",
+      "source_sha256": "ae1d91f57d2ac42b1f1096dfb8d48072b9e56a25ffd0f3963ea8c1c955d5be65",
+      "published_sha256": "592f07679ad5cdffde1c8b73293fc925e12da882a4f40e2ffea2258bb09c7be1",
+      "transform": "Workspace prefixes shortened"
+    },
+    {
+      "file": "data/range-comparison.json",
+      "source": "Blender workspace/robot-range-comparison-20260919/comparison.json",
+      "source_sha256": "de063769bd0db8e843d69afd4c52f6b626ad3f5aec3dfb1871739ffd0ddab6d1",
+      "published_sha256": "16a57f991b51160a2627d10c98d5ddc9f06db4ecdfde4b143d134b4d9330d943",
+      "transform": "Workspace prefixes shortened; JSON serialized for web download"
+    },
+    {
+      "file": "data/research-target.json",
+      "source": "Blender workspace/robot-compact-22-36-test-20260919/research-target.json",
+      "source_sha256": "3242ea735c25f13bbc04934381480e26324cf1b926f40bb5855a114cd81b3852",
+      "published_sha256": "d7b8aca79694bc125028908b61bc8304aa23755087f056ba340f1b698ab6f2b6",
+      "transform": "Workspace prefixes shortened; JSON serialized for web download"
+    },
+    {
+      "file": "data/motion-validation.json",
+      "source": "Blender workspace/robot-compact-22-36-test-20260919/motion-validation.json",
+      "source_sha256": "6c892689b15d6a18394da13a893203076339246bede1fdae7196fd17184d37b6",
+      "published_sha256": "98d30de549e01abc68ae87a20391633b7ebee2fbb88002145df7c654fea95558",
+      "transform": "Workspace prefixes shortened; JSON serialized for web download"
+    },
+    {
+      "file": "data/isolated-leg-probes.csv",
+      "source": "Blender workspace/robot-compact-22-36-test-20260919/isolated-leg-probes.csv",
+      "source_sha256": "30dc0ae0dd281dbe05d7f9d58246fa113175719de4c4b7edeba5ed80c2b0a58e",
+      "published_sha256": "1b6d0e0e75b421b4cf4aada56dbb4a9b15d8590c771542f49ad037e62f397f52",
+      "transform": "CSV line endings normalized to LF; data values unchanged"
+    },
+    {
+      "file": "stl/upright/Part_009-22mm-Upright.stl",
+      "source": "Ainekio/Slave/hardware/v2-12servo/upright-compact-STLs/Part_009-22mm-Upright.stl",
+      "source_sha256": "f5d7417c7f2c4c803564ce9a16da8a1252b501a2d084a03b72c3a121541ad908",
+      "published_sha256": "f5d7417c7f2c4c803564ce9a16da8a1252b501a2d084a03b72c3a121541ad908",
+      "transform": "Unchanged"
+    },
+    {
+      "file": "stl/upright/Part_020-Upright-Foot.stl",
+      "source": "Ainekio/Slave/hardware/v2-12servo/upright-compact-STLs/Part_020-Upright-Foot.stl",
+      "source_sha256": "a91c60730cd4b06cbb3705cfebb2ba286f91fb783bcbe22cbb74fe653a17333f",
+      "published_sha256": "a91c60730cd4b06cbb3705cfebb2ba286f91fb783bcbe22cbb74fe653a17333f",
+      "transform": "Unchanged"
+    },
+    {
+      "file": "stl/upright/Part_022-Upright-Foot.stl",
+      "source": "Ainekio/Slave/hardware/v2-12servo/upright-compact-STLs/Part_022-Upright-Foot.stl",
+      "source_sha256": "43ee145b3443a2415c9b0e500840b014478db0f8e0574c81fcc669bf42f2ca9a",
+      "published_sha256": "43ee145b3443a2415c9b0e500840b014478db0f8e0574c81fcc669bf42f2ca9a",
+      "transform": "Unchanged"
+    },
+    {
+      "file": "stl/upright/Part_023-Upright-Horn-Clearance.stl",
+      "source": "Ainekio/Slave/hardware/v2-12servo/upright-compact-STLs/Part_023-Upright-Horn-Clearance.stl",
+      "source_sha256": "7d9ea6f48a815f30d62e06dc7de0504a2d322bcb35d1377b6cd9994d02b5e02d",
+      "published_sha256": "7d9ea6f48a815f30d62e06dc7de0504a2d322bcb35d1377b6cd9994d02b5e02d",
+      "transform": "Unchanged"
+    },
+    {
+      "file": "stl/upright/Part_026-36mm-Upright.stl",
+      "source": "Ainekio/Slave/hardware/v2-12servo/upright-compact-STLs/Part_026-36mm-Upright.stl",
+      "source_sha256": "e3156e0888236bc02fac3ce326d6be77c4b648892a5739b6149e4a2020d43b6a",
+      "published_sha256": "e3156e0888236bc02fac3ce326d6be77c4b648892a5739b6149e4a2020d43b6a",
+      "transform": "Unchanged"
+    },
+    {
+      "file": "stl/upright/Part_027-55mm-Upright.stl",
+      "source": "Ainekio/Slave/hardware/v2-12servo/upright-compact-STLs/Part_027-55mm-Upright.stl",
+      "source_sha256": "c76b056167b1ecc868d41c35c78fc0ae57112f67fd195fb6e21641b415e711e2",
+      "published_sha256": "c76b056167b1ecc868d41c35c78fc0ae57112f67fd195fb6e21641b415e711e2",
+      "transform": "Unchanged"
+    },
+    {
+      "file": "stl/earlier-horn-correction/Part_023-Horn-Arm-Clearance-Plus5pct.stl",
+      "source": "Blender workspace/robot-part023-arm-clearance-20260919/Part_023-Horn-Arm-Clearance-Plus5pct.stl",
+      "source_sha256": "4f6632a5b94817b6f4561d1efee97686a905d3482cc9dc670a82a58441b2280e",
+      "published_sha256": "4f6632a5b94817b6f4561d1efee97686a905d3482cc9dc670a82a58441b2280e",
+      "transform": "Unchanged"
+    },
+    {
+      "file": "data/motion-integration-record.txt",
+      "source": "Ainekio/docs/v2-12servo/MOTION_INTEGRATION_20260917.md",
+      "source_sha256": "f97da3db6028a41c77786a8ddab273416f4c9dcdc11c5ac08217e014001f2ad0",
+      "published_sha256": "0475b9f60ae29574f130c196e74696b1678c676f46dd199b8fd461226c95b410",
+      "transform": "Workspace prefixes shortened"
+    }
+  ]
+}

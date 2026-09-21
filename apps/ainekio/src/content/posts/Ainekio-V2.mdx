@@ -1,10 +1,10 @@
 ---
 title: "Ainekio V2: Parts, Assembly, and Design Iterations"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-09-15
-description: "V2 parts, mounting dimensions, the earlier body assembly, and September's printed leg prototypes, fit corrections, and foot options."
-image: "/assets/ainekio/v2/workshop-concept.webp"
-avatarImage: "/assets/avatar/avatar.webp"
+updated: 2026-09-21
+description: "V2's narrower chassis, compact legs, shell development and motion studies, alongside the earlier parts, prototype and assembly records."
+image: "/posts/2026-09-21-design-progress/assembly-september-20.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
@@ -21,6 +21,9 @@ contentFormat: "report"
 
 # Building the next Ainekio body
 
+*Cover: September 20 CAD assembly showing the developing shell and compact
+leg mechanisms. This is a design view, not a completed physical build.*
+
 Ainekio is a small four-legged robot. Its working V1 body uses eight servos,
 with two motors positioning each leg. V2 adds a third joint per leg, a new
 chassis, and an ESP32-P4 controller. The aim is a twelve-servo body that moves
@@ -32,22 +35,40 @@ width and use that movement in poses. It will start with scripted motion:
 prepared joint positions and timings. Automatic balance and adaptation to
 uneven ground require additional sensing and control work.
 
-The September 6 plan has progressed to a four-leg CAD assembly and printed leg
-prototypes. This page covers the **September 12–14 leg refinements**, with
-prototype photographs documented in the September 15 build update. It also
-retains the earlier WIP 1–14 body and electronics record. V1 remains the working
-complete robot; these records do not establish a complete powered V2 assembly
-or its load performance.
+## Current revision: September 21
 
-For the latest photos and fit revisions, see [From CAD to Printed Leg Prototypes](/posts/2026-09-15-leg-prototypes/).
-The earlier body sequence is in [Fitting the V2 Body Together](/posts/2026-09-10-v2-body-design/).
-For the existing robot’s components and wiring, use the [V1 hardware guide](/posts/body-design-and-hardware/).
+Recent work has concentrated on the chassis, compact leg geometry and shell.
+The September 17 chassis revision is 51.2 mm wide, down from 103 mm. Later
+22/36/55 mm leg variants shorten the crank, connecting rod and lower leg,
+with angled and upright alternatives retained. A printed horn-fit problem
+also led to a targeted cavity correction.
+
+| Build record | What it covers |
+| --- | --- |
+| [Chassis packaging](/posts/2026-09-21-chassis-packaging/) | Narrower body, board clearance and the camera-cable opening |
+| [Compact legs and horn fit](/posts/2026-09-21-compact-leg-design/) | Side-by-side dimensions, measured articulation, part renders and dated STL downloads |
+| [Shell development](/posts/2026-09-21-shell-design/) | Actual CAD views, face/roof/fin iterations and remaining attachment work |
+| [Continuing gait journal](/posts/gait-development/) | V1/V2 baseline, later motion sources and compact single-leg probes |
+
+V1 remains the working complete robot. The V2 CAD studies and print exports
+do not establish a complete powered assembly or its load performance. The
+September 17 software record now includes a model-specific thirty-motion
+library; calibration, electrical acceptance and execution on the latest body
+remain separate work.
+
+The rest of this guide preserves the earlier design decisions with their
+dates. The [September 15 prototype post](/posts/2026-09-15-leg-prototypes/)
+contains the physical leg photographs. The
+[September 10 body post](/posts/2026-09-10-v2-body-design/) records the earlier
+wide electronics layout, including the Q6A fit later retired from the narrow
+chassis. Use the [V1 hardware guide](/posts/body-design-and-hardware/) for the
+existing robot's parts and wiring.
 
 ## Changes from V1
 
 ![Illustrated comparison of Ainekio V1 and a prospective V2 hybrid with a stout body and serrated red legs.](/assets/ainekio/v2/evolution-concept.webp)
 
-*Concept art: V1 is on the left and the prospective V2 hybrid is on the right.
+*September 7 concept art: V1 is on the left and an earlier V2 concept is on the right.
 The leg reference is [OpenHarmony Puppy by 杜邦线丶小战士 (pcbguy)](https://oshwhub.com/pcbguy/shi-er-zi-you-du-hong-meng-si-zu-gou-gou).
 The final geometry will follow leg tests and component measurements.*
 
@@ -78,11 +99,11 @@ include printable STL models and STEP assemblies converted for Blender.
 Testing will establish how those ideas fit Ainekio’s shorter, broader shape.
 
 The chassis is being assembled in Blender around the leg mounts, board models,
-connectors, and front camera/display carrier. Power and audio packaging remain
-unfinished. The current four-leg assembly uses the OpenHarmony-derived leg
-geometry and its Ainekio revisions. The separate
-[fixed-servo, short-rod study](/posts/2026-09-09-leg-mechanism-study/) compares
-alternatives; it has not replaced those legs with a validated mechanism.
+connectors, and front camera/display carrier. The original OpenHarmony-derived
+assembly has since been revised through the
+[direct-rod and compact-leg work](/posts/2026-09-21-compact-leg-design/).
+The [September 9 short-rod study](/posts/2026-09-09-leg-mechanism-study/)
+remains a separate historical comparison of alternatives.
 
 Cables need clearance throughout a leg’s movement. Programming, charging, power
 connections, legs, and electronics should remain accessible for replacement
@@ -196,7 +217,14 @@ settings, V2 audio hardware, battery, regulator, harness, and assembly torque
 are not settled in the reviewed records. This page will need those measured
 details before it can serve as a complete replication guide.
 
-## Controller and motion
+## Controller and motion: earlier plan and September progress
+
+The paragraphs below preserve the earlier controller plan. By September 17,
+the project had a separate twelve-joint model and thirty geometric motions,
+and the selected signal driver was a HUAREW PCA9685 breakout. That hardware
+selection is distinct from the Adafruit board model in the September 10 CAD
+table. The [integration record](/posts/2026-09-21-design-progress/data/motion-integration-record.txt)
+reports a built motion image, pending flash and unavailable physical motion.
 
 ESP32-S3 and ESP32-P4 name different controller chip families. Choosing the P4
 does not make the existing firmware ready for the new body. Board pins,
@@ -219,8 +247,8 @@ startup and stand-up sequences. Existing movements can first be adapted with
 the four new lateral joints held neutral, then use those joints selectively.
 
 Walk, stop, stand, sit, bow, and wave remain examples of higher-level requests.
-The current body core, motion assets, protocol validators, and MetaHuman
-motion-plan schema all describe eight joints. They must agree on the new joint
+At the initial planning stage, the body core, motion assets, protocol validators,
+and MetaHuman motion-plan schema described eight joints. They needed to agree on the new joint
 names, limits, and advertised capabilities before accepting twelve-joint plans.
 
 ## Power: measure the load before choosing the supply
@@ -266,8 +294,10 @@ adjusting movement from sensor feedback—are deferred. So are stabilization
 with an inertial sensor (IMU), calculating joint angles from desired foot
 positions in real time (inverse kinematics), and learned locomotion.
 Higher-cost servos and wireless charging were outside the initial build plan.
-Onboard Linux computing was also excluded from that first scope; the Q6A model
-now records a later packaging direction whose runtime role still needs work.
+Onboard Linux computing was also excluded from that first scope. The Q6A model
+records the September 10 wide-body packaging study; its board and tray were
+retired from the September 17 narrow chassis. No onboard Q6A runtime is
+established by either CAD layout.
 
 The [MetaHuman redesign](/posts/metahuman-integration/) can develop against V1
 while these mechanics are tested. [Current project status](/posts/current-status/)

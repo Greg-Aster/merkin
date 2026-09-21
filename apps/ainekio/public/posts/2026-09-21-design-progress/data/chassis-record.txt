@@ -1,0 +1,31 @@
+# Current prototype chassis width: 51.2 mm
+
+2026-09-17. The user selected the current 1.9 inch Waveshare display, superseding the initial 73.15 mm bar-display width answer. The target is nominal PCB width, not active image width or overall width across the legs.
+
+Source: `robot-motion-batch-20260916/Ainekio-Motion-Library.blend`, active scene `AINEKIO - Motion Library`, frame 1. A full backup is `Before-chassis-width.blend` in this directory. The user is working on `temp_mesh.ply.003`, a separate carapace sculpt; the older named windshield is hidden.
+
+## Geometry and placement
+
+- Chassis outer width reduced from 103.0 to 51.2 mm. The top and bottom plates and front carrier reach +/-25.6 mm across world Y. The rear cover is 47.2 mm across, maintaining its original 2 mm inset on each side.
+- Left and right side assemblies translate inward 25.9 mm each. Their mesh geometry, scale, orientation, support thicknesses, servo bores, arm link lengths and hardware dimensions are retained.
+- Only four mesh objects are replaced: top plate, bottom plate, front cover/carrier, and rear cover. The original mesh datablocks remain available to older scene objects; no shared source mesh is edited.
+- Plate side regions and their mounting bores translate rigidly. The center spans are shortened. Nominal plate thickness remains 3 mm, with the existing 3.2 mm top support-contact regions.
+- The front panel retains its translated chassis and bearing interfaces. Its central LCD/camera carrier remains at the existing face position and is bounded to the new body width. The obsolete outer carapace posts at +/-29 mm are removed. The current user sculpt, LCD and camera are unchanged; final attachment of the current sculpt is still a fit-design task.
+- Old center-strip electronics posts and partial mounting holes on the bottom plate are removed/closed. The Q6A board, tray and its associated cutters/helpers are moved to `90 REVIEW - Helpers and old variants / Q6A - Retired wide-chassis fit`, hidden as a collection and recoverable.
+- ESP32-P4 and PCA9685 models retain their original geometry and locations. Their mounting/packing must be revised for the narrower chassis; this revision does not claim they fit the retained 11.9 mm gap between the innermost support surfaces.
+
+## Ownership and animation
+
+Only seven current-prototype width drivers are rebound to `TESTS | Robot Layout`. The new leg placement center spacing is 32.2 mm; the 51.2 mm body envelope includes the unchanged side housing depth. Existing motion actions and their keyframes remain unchanged, as do the CRAWL and other historical assemblies. Current panel meshes are baked geometry: changing the spacing property alone does not regenerate panels.
+
+## Validation and limits
+
+`geometry-report.json` records solid volumes, bounds, interface comparison and static intersections. The four panels are connected solids. Boolean numerical fragments below 0.001 mm3 were removed; they are listed explicitly in the report. Side-interface comparisons use numerical tolerances, while all protected rigid parts retain identical mesh-coordinate hashes.
+
+Imported near-planar plate faces were restored to their nominal planes within 0.0002 mm before filling the obsolete center holes. The front mesh was simplified in Blender's local float32 coordinate representation with a 0.0001 mm tolerance. Sub-0.00005 mm degenerate edges were cleaned during import, with native closed-mesh and face-area assertions before accepting each part.
+
+Static interference checks include the retained translated leg/support solids and the LCD/camera. Existing near-coplanar plate contacts are approximately 0.012-0.016 mm3 in the original scene; the new layout does not increase those contacts. There is no substantive new collision in that set at frame 1. The user-supplied carapace remains a visual sculpt in progress and is not treated as a qualified enclosure solid.
+
+`saved-verification.json` is written only after reopening the saved file and checking mesh topology, exact action hashes, protected geometry, side translations, and unchanged screen/sculpt transforms. Archived objects' world matrices are reconstructed from unchanged local transforms because disabled collections have unevaluated transform caches after reopening.
+
+This is a chassis packaging prototype. Full motion clearance, new interior electronics mounting, final carapace attachments, print tolerances, strength and physical fit remain unqualified. Existing unrelated animation visibility drivers using restricted functions produce warnings in background Blender with auto-execution disabled; no claim of playback validation is made from those runs.

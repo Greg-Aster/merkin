@@ -3,6 +3,7 @@ import { getEntry } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import Markdown from '../components/misc/Markdown.astro'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
+import { siteConfig } from '../config/config'
 
 const about = await getEntry('spec', 'about')
 if (!about) throw new Error("About content not found in 'spec/about'")
@@ -12,11 +13,16 @@ const { Content, headings } = await about.render()
 
 <MainGridLayout title="About Ainekio" description={about.data.description} headings={headings}>
   <article class="card-base overflow-hidden rounded-[var(--radius-large)] border border-black/5 dark:border-white/10">
-    <img
-      src="/assets/ainekio/v2/hero-concept.webp"
-      alt="Prospective Ainekio V2 hybrid with a stout body and serrated red legs overlooking a ruined science-fiction city"
-      class="aspect-[16/7] w-full object-cover object-center"
-    />
+    <figure>
+      <img
+        src={siteConfig.banner.src}
+        alt="Concept artwork of the pale-shelled Ainekio with exposed red leg linkages in a ruined futuristic city"
+        width="1672"
+        height="941"
+        class="aspect-video w-full object-cover object-center"
+      />
+      <figcaption class="px-6 pt-3 text-sm text-50 sm:px-9">{siteConfig.banner.credit.text}</figcaption>
+    </figure>
     <div class="p-6 sm:p-9">
       <Markdown class="prose max-w-none dark:prose-invert">
         <Content />

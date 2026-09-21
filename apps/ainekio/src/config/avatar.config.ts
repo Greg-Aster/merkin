@@ -1,7 +1,7 @@
 // Import type - use import type syntax to fix verbatimModuleSyntax error
 import type { ImageMetadata } from 'astro'
 
-import avatar1 from '/src/content/avatar/avatar.webp'
+import avatar1 from '/src/content/avatar/assembly-september-20.webp'
 
 // Define the avatar configuration type
 export interface AvatarConfig {

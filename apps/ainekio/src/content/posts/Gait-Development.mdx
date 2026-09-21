@@ -1,0 +1,471 @@
+---
+title: "Gait Development Journal: From Eight Servos to Twelve"
+published: 2026-09-15
+updated: 2026-09-21
+description: "A continuing gait journal: V1 and V2 range comparisons, later motion studies, and 10/20/30 mm compact-leg probes with downloadable data."
+image: "/posts/gait-development/2026-09-15/mechanism.png"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V1, V2, Gait, Kinematics, Linkages]
+category: "Mechanical Research"
+draft: false
+lang: "en"
+contentFormat: "report"
+---
+
+# Gait development journal
+
+This is the working document for developing Ainekio's gait. It begins with
+the original eight-servo robot, then compares that motion baseline with the
+radically different twelve-servo linkage design. New calculations, experiments,
+and physical results will be recorded here as dated entries.
+
+**Current stage, September 21: calculated motion studies and compact-leg
+probes.** The September 15 baseline below is preserved as the starting point.
+Later entries cover [the motion library](#september-17-2026--motion-studies-and-the-software-library)
+and [compact-leg probes](#september-19-2026--compact-leg-probes). Their results
+belong to specific CAD revisions; physical gait performance and qualification
+of the latest complete assembly remain open.
+
+## September 15, 2026 — Establishing the movement baseline
+
+At this entry's date, the prepared material covered movement ranges and
+kinematic groundwork; the V2 gait had not yet been calculated. “Current” in
+this entry refers to its September 15 source snapshot.
+
+### 1. What the eight-servo Ainekio currently commands
+
+V1 has two actuators per leg and eight stored joint channels. Its motion
+library contains **38 named assets**, including standing, walking, turning,
+and expressive poses. The following values were extracted from the current
+`motions-v1.json` and checked against all 38 packed `.amot` files used by the
+firmware asset loader.
+
+There are three different quantities to keep track of: the controller's
+accepted angle range, the angles actually used by a motion, and the assembled
+leg's physical travel. The first two are available in these files. They do not
+supply a measured foot workspace or the mechanical stops of every V1 joint.
+
+The V1 software accepts logical angles from **0° to 180°**. The checked S3
+configuration uses 100% motion range. Before output, each logical target is
+mapped through the joint's calibrated center and direction and checked against
+its calibrated minimum and maximum. With the default center of 90° and no
+inversion, the mapping is unchanged; installed calibration can differ.
+
+#### Joint ranges in the stored motions
+
+All columns below use **V1 logical degrees**. “All motions” is the minimum and
+maximum explicit target across the 38 assets, including emotes. “Walk” is
+`walk_forward`, including its setup and final stand pose. These are separate
+target envelopes, not a set of limits to send to the new body.
+
+| ID · joint | All motions | Stand | Walk | Walk excursion from stand |
+| --- | ---: | ---: | ---: | ---: |
+| 0 · R1 | 85–180° | 135° | 90–180° | −45 to +45° |
+| 1 · R2 | 0–100° | 45° | 45–100° | 0 to +55° |
+| 2 · L1 | 0–95° | 45° | 0–90° | −45 to +45° |
+| 3 · L2 | 90–180° | 135° | 90–135° | −45 to 0° |
+| 4 · R4 | 0–180° | 0° | 0–45° | 0 to +45° |
+| 5 · R3 | 0–180° | 180° | 135–180° | −45 to 0° |
+| 6 · L3 | 0–180° | 0° | 0–45° | 0 to +45° |
+| 7 · L4 | 0–180° | 180° | 135–180° | −45 to 0° |
+
+The unusual **R4-before-R3** order is the actual version-1 channel map.
+The all-90° rest/neutral command is also different from the stand pose above.
+Neither establishes the neutral geometry of V2.
+
+[Download the per-motion, per-joint range table (CSV)](/posts/gait-development/2026-09-15/v1-motion-ranges.csv).
+It includes all 38 assets rather than only the walking subset shown here.
+
+#### Walking targets and timing are separate
+
+The existing forward pattern has six repeated target groups. A joint omitted
+from a group keeps its preceding target. The group labels below preserve the
+source channel names rather than assigning them to V2 parts.
+
+| Group | Changed V1 targets, logical degrees | Stored duration |
+| --- | --- | ---: |
+| 1 | R3 = 135; L3 = 0 | 140 ms |
+| 2 | L4 = 135; L2 = 90; R4 = 0; R1 = 180 | 180 ms |
+| 3 | R2 = 45; L1 = 90 | 140 ms |
+| 4 | R4 = 45; L4 = 180 | 140 ms |
+| 5 | R3 = 180; L3 = 45; R2 = 90; L1 = 0 | 180 ms |
+| 6 | L2 = 135; R1 = 90 | 140 ms |
+
+One repetition totals **920 ms**. The stored `walk_forward` asset contains
+five repetitions, a 180 ms setup, and a 160 ms final stand frame: **4,940 ms
+across 32 frames**. This is a timed command sequence, not a measurement of
+distance covered or foot contact duration.
+
+| V1 asset | Repeated six-group pattern | Pattern repetitions | Complete stored asset |
+| --- | ---: | ---: | ---: |
+| `walk_forward` | 920 ms | 5 | 4,940 ms · 32 frames |
+| `walk_slow` | 1,840 ms | 3 | 6,740 ms · 21 frames |
+| `run` | 720 ms | 6 | 5,180 ms · 39 frames |
+
+The two cadence variants keep the forward-walk target envelope. Their complete
+durations include their own entry and exit frames; a longer total asset does
+not necessarily mean a slower repeated pattern. The name `run` describes the
+stored command and does not establish an airborne running gait.
+
+The checked S3 profile interpolates addressed joints with cubic easing on a
+20 ms update tick, using a transition window of at most 300 ms within each
+frame. That playback behavior matters when interpreting the older sequence
+data. It does not supply V2's required timing or loaded servo speed.
+
+### 2. What changes in the twelve-servo mechanism
+
+V2 has three actuators per leg, but its change is larger than adding a sideways
+joint to the old pose arrays. Two planar motors control a carrier and a
+linkage-driven lower assembly; a third rotates the leg sideways at the
+shoulder. **The lower assembly's angle is not equal to its driving servo's
+angle.** The new gait needs a geometric conversion between desired foot
+positions and all three actuator angles.
+
+![Labeled front-left linkage at neutral: the 21 mm crank drives a 40 mm coupler and two-armed rocker; a 40 mm carrier and return link position the 60 mm lower assembly.](/posts/gait-development/2026-09-15/mechanism.png)
+
+*Supplied September 15 mechanism diagram. Dimensions join pivot centers. F is
+the foot attachment-bolt datum, not the point where the sole touches ground.*
+
+#### Parts and angle definitions
+
+| Variable | Part / role | Reference and direction |
+| --- | --- | --- |
+| `alpha` | Part_006 drives the Part_023 upper carrier | Change from saved frame 1, about CAD +Z |
+| `theta` | Part_005 drives the Part_009 crank and Part_024 coupler | Change from the current frame-1 horn position, about CAD +Z |
+| `beta` | Passive Part_025 rocker and lower-assembly orientation | Change from frame 1, about CAD +Z; determined by `theta` |
+| `h` | Part_002 shoulder swivel | Change from frame 1, about CAD +X |
+
+Part_023 and Part_025 share pivot O but rotate independently. Part_006 drives
+the carrier; Part_025 follows the other motor through C–P–Q–O. Holding
+`theta` fixed holds the lower assembly's planar orientation while `alpha`
+moves its upper attachment. The bend between the upper and lower segments
+therefore changes with `beta − alpha`, plus the neutral geometry offset.
+
+| Pivot pair | Front-left dimension | Function |
+| --- | ---: | --- |
+| O–C | 16.9853 mm | Fixed spacing between the two planar servo axes |
+| C–P | 21 mm | Input crank, Part_009 |
+| P–Q | 40 mm | Current front-left Part_024 coupler |
+| O–Q and O–B | 20 mm each | Two arms of the Part_025 rocker |
+| O–D and B–E | 40 mm each | Carrier and return link |
+| D–E | 20 mm | Lower assembly's return-link arm |
+| D–F | 60.0003 mm, nominally 60 mm | Distal pivot to foot-bolt datum |
+
+The saved assembly is currently a mixture of revisions:
+
+| CAD leg label | Part_024 pivot spacing | Motion evidence in this handoff |
+| --- | ---: | --- |
+| FL | 40.0000 mm | 505 saved frames covering separate planar sweeps |
+| FR | 24.6395 mm | Neutral assembly only |
+| RL | 24.6395 mm | Neutral assembly only |
+| RR | 24.6395 mm | Neutral assembly only |
+
+These are the literal Blender labels. Their correspondence to physical
+front/back and hardware channels still needs confirmation. In the handoff's
+chosen coordinate frame, the objects labeled FL/FR are at negative longitudinal
+coordinates. The journal retains that convention.
+
+The 40 mm FL linkage is a later revision than the short-link fit discussed in
+the [printed-leg update](/posts/2026-09-15-leg-prototypes/). It must not be
+silently applied to the other three legs. The replacement also re-clocked the
+FL input horn by 46.4615°; the new `theta = 0` already includes that change.
+
+### 3. Theoretical movement ranges of the current FL leg
+
+The prepared handoff records the following **single-actuator animation
+intervals**. They describe the modeled range study; they are not newly proven
+absolute maximum travel or measured physical limits. All angles are relative
+to the saved neutral pose, with the definitions above.
+
+| Motion | Interval | Angular span | Other inputs held fixed |
+| --- | ---: | ---: | --- |
+| Upper-carrier input `alpha` | −53.4000 to +67.4000° | 120.8000° | `theta = 0`, `h = 0` |
+| Linkage-crank input `theta` | −51.9533 to +51.6303° | 103.5837° | `alpha = 0`, `h = 0` |
+| Resulting lower orientation `beta` | −48.1011 to +25.8715° | 73.9727° | Output of the `theta` sweep |
+| Shoulder input `h` | Not established | Not established | Shoulder was not animated |
+
+The `beta` row is a passive output, not a fourth actuator or a direct measure
+of the knee bend across all carrier positions. Likewise, subtracting the
+extreme `alpha` and `beta` values would combine separate tests and would not
+establish a usable bending range.
+
+The replacement's saved verification reports no new modeled contacts across
+those frames relative to the existing mating overlaps, using a 0.03 mm³
+added-overlap criterion. **The two input intervals do not define a proven
+collision-free rectangle.** Combined carrier, crank, and shoulder motion still
+needs checking against the links, screws, housings, chassis, other legs, and
+ground. No sweep limits for FR, RL, or RR are established by this package.
+
+#### Why a fixed servo-to-knee scale will not work
+
+Evaluating the supplied forward-kinematics function at a few FL crank angles
+gives the following lower-assembly changes, with the carrier and shoulder held
+at neutral:
+
+| Crank input `theta` | Lower orientation `beta` |
+| ---: | ---: |
+| −51.9533° | −48.1011° |
+| −30° | −24.6516° |
+| 0° | 0° |
+| +30° | +17.4942° |
+| +51.6303° | +25.8715° |
+
+Equal positive and negative crank changes produce different output changes.
+A constant multiplier or an old V1 target array would lose that relationship.
+These sample calculations establish geometry, not motor torque or performance.
+
+### 4. V1 and V2 side by side
+
+The columns below put the available numbers together while keeping their
+references explicit. A row compares the same question for each design; it does
+not assign a V1 channel to a V2 joint.
+
+#### Actuation and movement ranges
+
+| Measurement | V1 · eight servos | V2 · twelve-servo design |
+| --- | --- | --- |
+| Actuators per leg | 2 | 3: carrier, linkage crank, shoulder |
+| Source of range data | Explicit targets in 38 stored motion assets | Saved geometry and 505 FL animation frames |
+| Angle reference | Logical 0–180° scale, then calibrated; stand differs by channel | Changes from saved frame 1; electrical centers and signs uncalibrated |
+| Recorded motor-input intervals | R1: 85–180°; R2: 0–100°; L1: 0–95°; L2: 90–180°; R4/R3/L3/L4: 0–180° | FL `alpha`: −53.4 to +67.4°; FL `theta`: −51.9533 to +51.6303°; `h`: not established |
+| Spans of those input intervals | R1: 95°; R2: 100°; L1: 95°; L2: 90°; R4/R3/L3/L4: 180° | FL `alpha`: 120.8°; FL `theta`: 103.5837°; `h`: not established |
+| Separate lower-link output measurement | No geometric lower-link output range derived here from the logical targets | FL passive `beta`: −48.1011 to +25.8715°, a 73.9727° span with the carrier fixed |
+| Sideways actuator | No third actuator in each leg's channel pair | Shoulder actuator present in the model; usable travel not established |
+| Foot workspace in millimeters | Comparable measured workspace not established in this entry | Foot-bolt FK available; combined collision-free workspace and sole contact still open |
+| Coverage of the four legs | Target arrays address all eight V1 channels | Sweep evidence applies to FL's 40 mm coupler; the other three retain 24.6395 mm couplers |
+
+#### Walking and timing
+
+| Measurement | V1 · stored forward movement | V2 · gait work to come |
+| --- | --- | --- |
+| Input spans used by walking | R1/L1: 90°; R2: 55°; L2/R4/R3/L3/L4: 45° | No gait target envelope calculated |
+| Repeated forward pattern | Six target groups totaling 920 ms | No period or phase sequence selected |
+| Complete forward asset | Five repetitions plus setup and stand: 4,940 ms, 32 frames | No twelve-servo walking asset calculated |
+| Slow / brisk variants | 1,840 / 720 ms per repeated pattern, with the same forward target envelope | No cadence variants calculated |
+| Stance fraction and contact sequence | Not measured from the physical robot in this entry; target timing alone does not establish contact | Contact model and stance/swing scheduling still to be selected |
+| Stride length, swing height, and speed over ground | Not established by the angle arrays alone | Not calculated or measured |
+
+V1's 180° command scale cannot be ranked against V2's 120.8° carrier sweep or
+73.97° passive output as if they measured the same joint motion. A quantitative
+comparison of stride length, foot lift, or reachable area will need both
+robots expressed in millimeters using an agreed body frame and sole reference.
+The current comparison establishes the control and geometry differences first.
+
+### 5. Geometry to carry into the first gait calculation
+
+The handoff uses CAD X longitudinally, CAD Y downward, and CAD Z laterally.
+One Blender coordinate unit represents 1 mm. The supplied planning conversion
+makes body Z point upward:
+
+```text
+B = (92.899998, -5.850000, -21.000000) mm in CAD coordinates
+x_body =  X_CAD - B.x
+y_body =  Z_CAD - B.z
+z_body = -(Y_CAD - B.y)
+```
+
+B is the midpoint of the leg-placement datums, not the measured center of
+mass. The model named `world` has its own scale; it must not be applied again
+to the independently rooted robot assembly.
+
+The following is the planar forward model from the handoff. Vectors come from
+the individual leg's neutral pivots; angles inside the equations are radians.
+`R(t)` is a two-dimensional rotation by `t`.
+
+```text
+P = C + R(theta) (P0 - C)
+v = P - O
+d = length(v)
+a = length(Q0 - O)
+L = length(P0 - Q0)            # this leg's coupler length
+c = (a² + d² - L²) / (2 a d)
+psi = atan2(v.y, v.x) - acos(c)
+beta = wrap(psi - atan2((Q0-O).y, (Q0-O).x))
+
+D = O + R(alpha) (D0 - O)
+F_XY = D + R(beta) (F0_XY - D0)
+F_CAD = H + Rx(h) ((F_XY.x, F_XY.y, F0.z) - H)
+```
+
+H is a point on the shoulder axis. The minus-`acos` solution is the current
+assembly branch; impossible circle intersections must be rejected and branch
+continuity checked along any future trajectory. These mathematical signs are
+not yet the electrical signs of the twelve installed actuators.
+
+At neutral, the FL foot-bolt datum is at CAD
+**(53.7795, 65.5118, 42.7000) mm**, with a **21.7000 mm lateral offset** from
+its shoulder axis. The sole reaches about 9.6 mm farther downward at that pose.
+The sole rotates with the lower assembly, so subtracting a fixed vertical
+9.6 mm at every angle would misplace the contact point. Foot pitch also cannot
+be assigned independently after solving the foot position.
+
+The supplied IK function returns geometric `(h, alpha, theta)` candidates.
+It does not decide which are within calibrated limits, collision-free, stable,
+or achievable at the requested speed. The changing linkage ratio must also
+enter the velocity calculation: a Jacobian maps joint rates to endpoint
+velocity. [Modern Robotics explains that velocity relationship](https://modernrobotics.northwestern.edu/nu-gm-book-resource/5-1-1-space-jacobian/).
+
+### 6. First experiment to define — no gait result yet
+
+The next calculation needs a specific geometry and contact model before it
+needs a gait name. The following questions remain open for this journal:
+
+| Input or decision | Current state |
+| --- | --- |
+| Geometry for all four legs | Confirm whether the next assembly uses four 40 mm couplers or retains mixed lengths |
+| Hardware mapping | Confirm leg labels, all twelve channels, directions, neutral settings, and usable limits |
+| Nominal stance | Body height, foot spacing, sole/contact reference, and body orientation not selected |
+| Foot and body paths | Stride displacement, swing clearance, and body translation not calculated |
+| Timing | Period, stance fraction, per-leg phase offsets, and speed limits not selected |
+| Support and loading | Mass, center of mass, payload, contact friction/compliance, and loaded servo capability needed |
+| Combined travel | Continuous multi-actuator collision and ground-contact checks outstanding |
+
+For a no-slip stance model, a planted contact stays fixed in the world while
+its coordinates relative to the moving body change. Swing then brings the
+foot to its next contact. The contact assumptions belong in the calculation,
+alongside geometry and timing; they cannot be inferred from a pose animation.
+[MIT's treatment of planning through contact provides the background](https://underactuated.mit.edu/contact.html).
+
+The first trial record should identify the exact leg revision, candidate
+stance and path, solved joint sequence, any rejected poses, contact assumptions,
+and the outcome. Later physical entries can add observed fit, slipping,
+clearance, repeatability, and loaded behavior. Until those experiments are
+performed, this entry remains the range comparison that precedes them.
+
+### Sources and checks for this entry
+
+The V1 source is `Slave/software/assets/seed/motions-v1.json` in the Ainekio
+repository, compared with `motions-bin-v1.json` and its 38 packed assets.
+Channel order, calibration mapping, and playback were checked in
+`protocol.h`, `servo.c`, `motion_service.c`, and the S3 configuration. The
+range table summarizes explicit targets; it does not measure interpolated
+physical motion or establish the current contents of a connected controller.
+
+The V2 baseline is the September 15 `robot-leg-motion-20260915/agent-handoff`
+package, measured from
+`Part024-Replaced-With-Part026-Motion-Updated.blend`. Its neutral pose is frame
+1 of the saved file. The handoff records an unsaved live scene at frame 182;
+mesh and nonanimated-transform agreement was checked there, but live animation
+curves were not compared. This entry uses the saved study.
+
+For this entry, the geometry calculator was rechecked against **all 505 saved
+animation-plan frames**, with maximum foot-datum disagreement of approximately
+**0.000006 mm**. Inverse recovery, four neutral positions, and eight mathematical
+shoulder round trips passed. This is numerical agreement with the prepared
+data. Blender collision checks were not rerun, and no hardware was commanded.
+
+- [Range analysis and source hashes (JSON)](/posts/gait-development/2026-09-15/range-analysis.json)
+- [V1 ranges for every motion (CSV)](/posts/gait-development/2026-09-15/v1-motion-ranges.csv)
+- [Supplied per-leg geometry snapshot (JSON)](/posts/gait-development/2026-09-15/robot-gait-parameters.json)
+- [Full-size mechanism diagram](/posts/gait-development/2026-09-15/mechanism.png)
+
+The [V2 build guide](/posts/ainekio-v2/) records parts and assembly iterations.
+The [printed-leg update](/posts/2026-09-15-leg-prototypes/) contains the physical
+prototype photographs and fit work that led into this motion study.
+
+## September 17, 2026 — Motion studies and the software library
+
+Work after the initial range handoff produced walking, turning and expressive
+motion studies. The September 17 integration record describes **30 geometric
+motions**: one repeating walk, eight turns and twenty-one gestures, with stop
+handled separately. That changes the research status from “no gait calculated”
+to a collection of revision-specific motion sources and software samplers.
+
+| Question | September 15 baseline | September 17 integration record |
+| --- | --- | --- |
+| V2 motion data | Separate linkage-range sweeps | Walk, eight turns and twenty-one gestures |
+| Software representation | Geometry and motion-planning handoff | Twelve-joint model, source contracts and compiled samplers |
+| Recorded validation | Numerical agreement with the range study | Source/sampler comparisons and software checks |
+| Physical execution | Not established | Unavailable: `motion=false`; motion-image flash and electrical acceptance still pending in this record |
+
+The record reports the motion software built and checked while the board was
+disconnected. Those results do not establish servo tracking, loaded movement
+or compatibility with every subsequent body revision. The later direct-rod
+and compact-leg changes require the desired poses to be mapped back through
+their own geometry.
+
+The [integration record](/posts/2026-09-21-design-progress/data/motion-integration-record.txt)
+preserves the command inventory, checks and outstanding hardware work. This
+journal continues to separate a calculated path, an installed software asset
+and a measured physical gait.
+
+## September 19, 2026 — Compact-leg probes
+
+The next study used a **22 mm crank, 36 mm rod, 40 mm upper carrier, 24 mm
+pickup and 55 mm lower-leg projection**. It applied to one physical front-left
+leg, labeled RL in that revision, with the shoulder fixed at zero. The
+[compact-leg post](/posts/2026-09-21-compact-leg-design/) gives the design and
+print-fit history.
+
+### Starting target and contact assumptions
+
+The selected research target was **20 mm world advance per eight-second
+cycle**, with a 5 mm sole-clearance target and one second of swing. That gives
+an 87.5% stance fraction. The 10 and 30 mm cases bracket the selected target;
+none is an optimized or hardware-approved stride.
+
+| Research quantity | 10 mm advance | 20 mm advance | 30 mm advance |
+| --- | ---: | ---: | ---: |
+| Cycle time | 8 s | 8 s | 8 s |
+| Stance fraction | 87.5% | 87.5% | 87.5% |
+| Body-relative stance bolt sweep | 8.75 mm | 17.50 mm | 26.25 mm |
+| Sole-clearance target | 5 mm | 5 mm | 5 mm |
+| Carrier `alpha` | −6.64 to +5.22° | −10.37 to +10.69° | −14.35 to +16.33° |
+| Crank `theta` | −8.04 to +7.92° | −16.06 to +15.62° | −23.95 to +22.96° |
+| Peak estimated carrier speed | 31.3°/s | 50.8°/s | 71.9°/s |
+| Peak estimated crank speed | 34.7°/s | 69.3°/s | 103.9°/s |
+
+These angles are offsets from the compact neutral, not V1 logical degrees or
+PWM values. In this model, the stance bolt sweep equals world advance times
+the stance fraction: **20 × 0.875 = 17.5 mm**. The assumed body speed for that
+case is 20 / 8 = 2.5 mm/s. This is an input to the isolated calculation, not
+measured robot speed.
+
+The sole height was obtained from the rotated full foot-shell geometry rather
+than a fixed offset below the bolt. That improves the lift calculation, but
+the stance model still holds the bolt's world X stationary under assumed
+constant body speed. A rotating rounded foot can move its contact point, so
+this does not prove a no-slip stance.
+
+### Recorded results and their limits
+
+Each case contains 161 target poses, for **483 poses in total**. The record
+reports closure on the existing linkage branch and return to the starting
+joint angles. Sampled checks against the other link plates, servo cases,
+mount, horn references and foot shells found no intersection above 0.02 mm³.
+Intended hardware interfaces and the rest of the body were excluded.
+
+The saved-file check evaluated 22 Blender poses per case and found a maximum
+sole-height difference from the target of about 0.000021 mm. These small
+numerical errors describe agreement within the model. They do not measure
+print accuracy or actual foot tracking.
+
+Whole-body shifts, support margin, stance slip, continuous collisions, loaded
+servo speed and torque, calibrated travel and print strength were not verified.
+The probes were not installed as a complete walking animation. Later upright
+assemblies retain the compact lengths, but their full-body gait needs its own
+validation rather than inheriting these single-leg results.
+
+### Experiment data
+
+- [20 mm starting target and assumptions, JSON](/posts/2026-09-21-design-progress/data/research-target.json)
+- [All three probes, CSV](/posts/2026-09-21-design-progress/data/isolated-leg-probes.csv)
+- [Motion validation and scope, JSON](/posts/2026-09-21-design-progress/data/motion-validation.json)
+- [Compact-leg geometry and saved-file report](/posts/2026-09-21-design-progress/data/compact-leg-record.txt)
+- [Earlier versus compact articulation comparison](/posts/2026-09-21-design-progress/data/range-comparison-record.txt)
+
+These dated source checks were reviewed for the September 21 journal update,
+not rerun. The earlier V1/V2 tables remain the September 15 comparison; the
+newer probe table adds a different mechanism and a stated contact model.
+
+### Next experiment on the chosen body
+
+Record the exact upright or angled assembly, map its twelve actuators, and
+retarget the chosen foot path. Then add body shifts and support calculations,
+check the complete shell and cable envelope, and compare the results with a
+printed leg under measured load. Each new result should identify its geometry,
+contact assumptions and whether it came from calculation, CAD or hardware.

@@ -1,0 +1,347 @@
+{
+  "schema": "robot-gait-handoff-1",
+  "date": "2026-09-15",
+  "source_blend": "/home/greggles/blender-5.0.0-linux-x64/robot-part024-from-part026-20260915/Part024-Replaced-With-Part026-Motion-Updated.blend",
+  "live_dirty_at_inspection": true,
+  "live_frame_at_inspection": 182,
+  "live_mesh_and_nonanimated_transform_match": true,
+  "geometry_units": "millimeters",
+  "angle_units": "radians in equations and reference calculator",
+  "neutral": "frame 1 of source_blend; not an electrical servo center",
+  "controller_body_datum_CAD_xyz_mm": [
+    92.89999771118164,
+    -5.849999904632568,
+    -21.0
+  ],
+  "controller_from_CAD_rotation": [
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      -1,
+      0
+    ]
+  ],
+  "controller_axes": {
+    "x": "+CAD X; positive longitudinal direction chosen for math",
+    "y": "+CAD Z; lateral",
+    "z": "-CAD Y; up"
+  },
+  "leg_labels": "Literal Blender FL/FR/RL/RR names; physical front and command signs need confirmation",
+  "legs": {
+    "FL": {
+      "object_prefix": "",
+      "pivots_xy_mm": {
+        "O": [
+          30.31219214449264,
+          -6.100000165455614
+        ],
+        "C": [
+          42.812198862899386,
+          5.400009640613147
+        ],
+        "P": [
+          62.04290804438743,
+          13.83685135594471
+        ],
+        "Q": [
+          43.16147360344422,
+          -21.426308817895077
+        ],
+        "B": [
+          14.985871303169318,
+          -18.949284883396615
+        ],
+        "D": [
+          7.800360149180912,
+          26.963829039532655
+        ],
+        "E": [
+          -7.525960692142412,
+          14.11454432159165
+        ],
+        "F": [
+          53.779520988464355,
+          65.51182890470844
+        ]
+      },
+      "hip_axis_point_xyz_mm": [
+        16.549999713897705,
+        -5.85,
+        21.0
+      ],
+      "hip_axis_direction": [
+        1,
+        0,
+        0
+      ],
+      "foot_bolt_reference_xyz_mm": [
+        53.779520988464355,
+        65.51182890470844,
+        42.700013999999996
+      ],
+      "leg_placement_datum_xyz_mm": [
+        54.400001525878906,
+        -5.849999904632568,
+        21.0
+      ],
+      "lengths_mm": {
+        "ground_OC": 16.98529933501001,
+        "input_CP": 21.000011279819052,
+        "coupler_PQ": 39.99998789991713,
+        "rocker_OQ": 19.999994273029117,
+        "rocker_OB": 20.00000570734653,
+        "primary_OD": 39.99999226852145,
+        "return_BE": 39.99999226852145,
+        "foot_DE": 20.00000570734653,
+        "distal_DF_bolt": 60.000262708510604
+      },
+      "independent_coupler_ring_measurement_mm": null,
+      "neutral_sole_max_CAD_Y_mm": 75.1118272455301,
+      "tested_single_axis_limits_degrees": {
+        "alpha_006": [
+          -53.4,
+          67.4
+        ],
+        "theta_005": [
+          -51.95331106142828,
+          51.63033976291183
+        ],
+        "h_002": null
+      },
+      "combined_motion_collision_checked": false,
+      "neutral_assembly_only": false
+    },
+    "FR": {
+      "object_prefix": "FR - ",
+      "pivots_xy_mm": {
+        "O": [
+          30.422620000937954,
+          -6.0999921784327595
+        ],
+        "C": [
+          42.9226267193447,
+          5.400009640613147
+        ],
+        "P": [
+          61.34547213918809,
+          -4.6796302219435795
+        ],
+        "Q": [
+          43.27190319523842,
+          -21.42630264427934
+        ],
+        "B": [
+          15.096299159614361,
+          -18.949284596380174
+        ],
+        "D": [
+          7.910788005626224,
+          26.963837409819682
+        ],
+        "E": [
+          -7.415532835696899,
+          14.114544705962542
+        ],
+        "F": [
+          53.88994884490967,
+          65.51183703657678
+        ]
+      },
+      "hip_axis_point_xyz_mm": [
+        16.549999713897705,
+        -5.85,
+        -63.0
+      ],
+      "hip_axis_direction": [
+        1,
+        0,
+        0
+      ],
+      "foot_bolt_reference_xyz_mm": [
+        53.88994884490967,
+        65.51183703657678,
+        -84.69999456606435
+      ],
+      "leg_placement_datum_xyz_mm": [
+        54.400001525878906,
+        -5.849999904632568,
+        -63.0
+      ],
+      "lengths_mm": {
+        "ground_OC": 16.985293927344113,
+        "input_CP": 21.0000088838621,
+        "coupler_PQ": 24.639499418468773,
+        "rocker_OQ": 19.999996777571013,
+        "rocker_OB": 20.00001065432493,
+        "primary_OD": 39.99999258532604,
+        "return_BE": 39.99999234899398,
+        "foot_DE": 20.00001083801136,
+        "distal_DF_bolt": 60.00026255533522
+      },
+      "independent_coupler_ring_measurement_mm": 24.63950480303249,
+      "neutral_sole_max_CAD_Y_mm": 75.1118343862328,
+      "tested_single_axis_limits_degrees": null,
+      "combined_motion_collision_checked": false,
+      "neutral_assembly_only": true
+    },
+    "RL": {
+      "object_prefix": "RL - ",
+      "pivots_xy_mm": {
+        "O": [
+          142.64999121675828,
+          -6.099995711079152
+        ],
+        "C": [
+          155.149997935165,
+          5.400009640613147
+        ],
+        "P": [
+          173.57284421710102,
+          -4.67963148127885
+        ],
+        "Q": [
+          155.4992667816642,
+          -21.426304300558062
+        ],
+        "B": [
+          127.32367037543568,
+          -18.949284655982577
+        ],
+        "D": [
+          120.13815922144654,
+          26.963833609732376
+        ],
+        "E": [
+          104.81183838012441,
+          14.114544527150265
+        ],
+        "F": [
+          166.11732006072998,
+          65.51183332391228
+        ]
+      },
+      "hip_axis_point_xyz_mm": [
+        169.24998807907104,
+        -5.85,
+        21.0
+      ],
+      "hip_axis_direction": [
+        1,
+        0,
+        0
+      ],
+      "foot_bolt_reference_xyz_mm": [
+        166.11732006072998,
+        65.51183332391228,
+        42.700001246965094
+      ],
+      "leg_placement_datum_xyz_mm": [
+        131.39999389648438,
+        -5.849999904632568,
+        21.0
+      ],
+      "lengths_mm": {
+        "ground_OC": 16.985296319145117,
+        "input_CP": 21.00001024461607,
+        "coupler_PQ": 24.639505916935835,
+        "rocker_OQ": 19.9999904380683,
+        "rocker_OB": 20.000008423017647,
+        "primary_OD": 39.999992364260486,
+        "return_BE": 39.999992250455584,
+        "foot_DE": 20.000008511470913,
+        "distal_DF_bolt": 60.00026261150121
+      },
+      "independent_coupler_ring_measurement_mm": 24.639512143674853,
+      "neutral_sole_max_CAD_Y_mm": 75.1118309277361,
+      "tested_single_axis_limits_degrees": null,
+      "combined_motion_collision_checked": false,
+      "neutral_assembly_only": true
+    },
+    "RR": {
+      "object_prefix": "RR - ",
+      "pivots_xy_mm": {
+        "O": [
+          142.64999121675828,
+          -6.099994757404835
+        ],
+        "C": [
+          155.149997935165,
+          5.400009640613147
+        ],
+        "P": [
+          173.57284421710102,
+          -4.679632434953298
+        ],
+        "Q": [
+          155.4992667816642,
+          -21.42630525423238
+        ],
+        "B": [
+          127.32367037543568,
+          -18.94928415713251
+        ],
+        "D": [
+          120.13815922144654,
+          26.963835084338257
+        ],
+        "E": [
+          104.81183838012441,
+          14.11454506971246
+        ],
+        "F": [
+          166.11732006072998,
+          65.51183479851817
+        ]
+      },
+      "hip_axis_point_xyz_mm": [
+        169.24998807907104,
+        -5.85,
+        -63.0
+      ],
+      "hip_axis_direction": [
+        1,
+        0,
+        0
+      ],
+      "foot_bolt_reference_xyz_mm": [
+        166.11732006072998,
+        65.51183479851817,
+        -84.70000029329078
+      ],
+      "leg_placement_datum_xyz_mm": [
+        131.39999389648438,
+        -5.849999904632568,
+        -63.0
+      ],
+      "lengths_mm": {
+        "ground_OC": 16.985295673453734,
+        "input_CP": 21.0000107023633,
+        "coupler_PQ": 24.639505916935747,
+        "rocker_OQ": 19.999991899699722,
+        "rocker_OB": 20.00000871522594,
+        "primary_OD": 39.99999279486038,
+        "return_BE": 39.999992286587855,
+        "foot_DE": 20.000009110275606,
+        "distal_DF_bolt": 60.00026261150121
+      },
+      "independent_coupler_ring_measurement_mm": 24.639515762709355,
+      "neutral_sole_max_CAD_Y_mm": 75.11183240234197,
+      "tested_single_axis_limits_degrees": null,
+      "combined_motion_collision_checked": false,
+      "neutral_assembly_only": true
+    }
+  },
+  "FL_new_input_clocking_vs_previous_26_667mm_link_degrees": 46.46147376258193,
+  "FL_input_assembly_branch": "arg(P-O) minus acos; continue without branch changes",
+  "limits_scope": "FL one axis at a time with other planar axis and shoulder neutral; not a collision-free box",
+  "foot_reference": "Foot attachment bolt axis at pad split plane; not a fixed ground contact point"
+}

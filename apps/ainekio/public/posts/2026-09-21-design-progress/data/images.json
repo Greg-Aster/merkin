@@ -1,0 +1,90 @@
+[
+  {
+    "file": "assembly-september-20.webp",
+    "width": 1600,
+    "height": 1067,
+    "bytes": 39656,
+    "source": "Ainekio wip-images/01-front-three-quarter.png",
+    "source_sha256": "7b90a8b518627132117191d6565984c662bdac74b3daeeb01341b395bd8a0b19"
+  },
+  {
+    "file": "assembly-side-september-20.webp",
+    "width": 1600,
+    "height": 1067,
+    "bytes": 34540,
+    "source": "Ainekio wip-images/03-left-side.png",
+    "source_sha256": "2620ceeb36b11c84e42365a411a8bb078d91cc0eb1b3982a973de75e0e0b8538"
+  },
+  {
+    "file": "assembly-top-september-20.webp",
+    "width": 1600,
+    "height": 1067,
+    "bytes": 28124,
+    "source": "Ainekio wip-images/07-top.png",
+    "source_sha256": "2b9a4a737f100496a7eff78271cf76322175556ab1aa0903e40a3ecdf616bd11"
+  },
+  {
+    "file": "narrow-chassis-top.webp",
+    "width": 1400,
+    "height": 1000,
+    "bytes": 27990,
+    "source": "Blender workspace/robot-chassis-width-20260917/Top.png",
+    "source_sha256": "3513ce9244412e132d3b6ff4e412675217c4cb9b1a2110d8827b84bab23f19e9"
+  },
+  {
+    "file": "flat-parts-september-18.webp",
+    "width": 1280,
+    "height": 960,
+    "bytes": 25054,
+    "source": "Blender workspace/robot-flat-links-refined-20260918/Refined-flat-print-faces.png",
+    "source_sha256": "a877cdabad7df6beb22a81aa4a60c2725269bbf4ad5ab4053df4153c0e8d2222"
+  },
+  {
+    "file": "roof-before.webp",
+    "width": 1200,
+    "height": 773,
+    "bytes": 62176,
+    "source": "Blender workspace/robot-carapace-iterations-20260919/49-roof-quarter-before.png",
+    "source_sha256": "0c0499b7be461977e6b966153a0e5e13765dfad9dd8d29fc757a809a40799870"
+  },
+  {
+    "file": "roof-after.webp",
+    "width": 1200,
+    "height": 773,
+    "bytes": 62060,
+    "source": "Blender workspace/robot-carapace-iterations-20260919/49-roof-quarter-after.png",
+    "source_sha256": "7d6c20c2940e2526d3b170efb3b7e7c663dc0e0eb83afbd33fecbf4ac7693d11"
+  },
+  {
+    "file": "compact-crank.webp",
+    "width": 1200,
+    "height": 900,
+    "bytes": 14194,
+    "source": "New STL render/compact-crank.png",
+    "source_sha256": "6f8d7295144f4d057392988ca86e298d80513baa592a3980f2da09e62b624729"
+  },
+  {
+    "file": "compact-rod.webp",
+    "width": 1200,
+    "height": 900,
+    "bytes": 13468,
+    "source": "New STL render/compact-rod.png",
+    "source_sha256": "31bf88fab8561077ec087071fcb11dedc8c4b63e8683da9fe34a8c118c21a2c4"
+  },
+  {
+    "file": "compact-lower-leg.webp",
+    "width": 1200,
+    "height": 900,
+    "bytes": 14020,
+    "source": "New STL render/compact-lower-leg.png",
+    "source_sha256": "5b5e296de8a5b19f0b7402ff848a45c40ad6d2246b76f313bd266733dadc5462"
+  },
+  {
+    "file": "horn-cavity.webp",
+    "width": 1200,
+    "height": 900,
+    "bytes": 11370,
+    "source": "New STL render/horn-cavity.png",
+    "source_sha256": "f373a1e2b1f03ffb748f43b7498b22f149b105ff0f8b27cf5841c7e96009aba8"
+  }
+]

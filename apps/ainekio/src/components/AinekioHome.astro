@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry } from 'astro:content'
 import { Icon } from 'astro-icon/components'
+import { siteConfig } from '../config/config'
 import ProjectStatus from './ProjectStatus.astro'
 
 const updates = await getEntry('updates', 'site-updates')
@@ -10,7 +11,11 @@ const latestUpdates = [...updates.data.entries]
   .slice(0, 4)
 const [featured, ...recentUpdates] = latestUpdates
 const posts = await getCollection('posts', ({ data }) => !data.draft)
-const library = [...posts].sort((a, b) => b.data.published.getTime() - a.data.published.getTime())
+const library = posts.map(post => ({
+  ...post,
+  latestDate: post.data.updated && post.data.updated > post.data.published
+    ? post.data.updated : post.data.published,
+})).sort((a, b) => b.latestDate.getTime() - a.latestDate.getTime())
 const featuredPost = posts.find(post => `/posts/${post.slug}/` === featured?.url)
 if (!featured?.url || !featuredPost?.data.image) {
   throw new Error('The latest Ainekio update must link to a published post with a cover image')
@@ -22,12 +27,13 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
 const sections = [
   {
     title: 'Body & mechanics',
-    description: 'V1 hardware, the V2 design plan, and mechanical references.',
+    description: 'Chassis revisions, printed leg iterations, gait studies, and the working V1 hardware.',
     icon: 'material-symbols:precision-manufacturing-outline',
     links: [
       { label: 'V2 parts & assembly record', href: '/posts/ainekio-v2/' },
-      { label: 'Body design & hardware', href: '/posts/body-design-and-hardware/' },
-      { label: 'Leg mechanism alternatives', href: '/posts/2026-09-09-leg-mechanism-study/' },
+      { label: 'Gait development journal', href: '/posts/gait-development/' },
+      { label: 'Compact legs & print files', href: '/posts/2026-09-21-compact-leg-design/' },
+      { label: 'V1 body & hardware', href: '/posts/body-design-and-hardware/' },
     ],
   },
   {
@@ -74,7 +80,7 @@ const sections = [
         <time datetime={featured.date.toISOString()}>{dateFormat.format(featured.date)}</time>
       </div>
       <h1 id="home-title">{featured.title}</h1>
-      <p class="home-intro">A small four-legged robot connected to MetaHuman OS for conversation, memory, and decisions.</p>
+      <p class="home-intro">Building Ainekio, a four-legged robot connected to MetaHuman OS. Follow the chassis, printed leg prototypes, and gait experiments as the design develops.</p>
       <p class="home-feature-summary">{featured.summary}</p>
       <div class="home-actions">
         <a class="home-primary-link" href={featured.url}>Read the latest update <Icon name="material-symbols:arrow-forward-rounded" /></a>
@@ -84,12 +90,12 @@ const sections = [
     </div>
     <figure class="home-feature-image">
       <a href={featured.url} aria-label="Explore the latest Ainekio build">
-        <img class="home-concept" src="/assets/ainekio/v2/assembly-september-10-concept.webp" alt="Concept illustration of the September 10 CAD body with red articulated legs and a camera above its cyan face, in a ruined futuristic city" loading="eager" fetchpriority="high" decoding="async" />
+        <img class="home-concept" src={siteConfig.banner.src} alt="Concept artwork of Ainekio's pale layered shell, narrow dark chassis and exposed red leg linkages in a rain-soaked futuristic city" width="1672" height="941" loading="eager" fetchpriority="high" decoding="async" />
       </a>
-      <figcaption>Concept illustration based on the September 10 CAD design</figcaption>
+      <figcaption>{siteConfig.banner.credit.text}</figcaption>
       <a class="home-update-preview" href={featured.url}>
         <img src={featuredPost.data.image} alt={`Build update: ${featuredPost.data.title}`} loading="eager" decoding="async" />
-        <span>See the build photos and details <span aria-hidden="true">→</span></span>
+        <span>Explore the latest update <span aria-hidden="true">→</span></span>
       </a>
     </figure>
   </section>
@@ -145,7 +151,7 @@ const sections = [
 
   <section id="article-library" aria-labelledby="home-library-title">
     <div class="home-section-heading">
-      <div><h2 id="home-library-title">All articles & build history</h2><p class="home-section-intro">Parts, wiring, software, design revisions, and earlier experiments.</p></div>
+      <div><h2 id="home-library-title">All articles & build history</h2><p class="home-section-intro">Parts, wiring, software, and earlier experiments, ordered by their latest revision.</p></div>
       <a class="home-text-link" href="/archive/">Open the archive <Icon name="material-symbols:arrow-forward-rounded" /></a>
     </div>
     <div class="home-library-grid">
@@ -153,7 +159,7 @@ const sections = [
         <article class="home-library-entry">
           <a class="home-library-image" href={`/posts/${post.slug}/`} aria-label={post.data.title}><img src={post.data.image} alt="" loading="lazy" decoding="async" /></a>
           <div>
-            <p class="home-library-meta">{post.data.archive ? 'Earlier build record' : post.data.category} · <time datetime={post.data.published.toISOString()}>{dateFormat.format(post.data.published)}</time></p>
+            <p class="home-library-meta">{post.data.archive ? 'Earlier build record' : post.data.category} · {post.latestDate > post.data.published ? 'Updated ' : ''}<time datetime={post.latestDate.toISOString()}>{dateFormat.format(post.latestDate)}</time></p>
             <h3><a href={`/posts/${post.slug}/`}>{post.data.title}</a></h3>
             <p>{post.data.description}</p>
           </div>

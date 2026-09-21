@@ -9,7 +9,7 @@ import { LinkPreset } from '../types/config'
 
 export const siteConfig: SiteConfig = {
   title: 'Ainekio',
-  subtitle: 'V2 body development and the MetaHuman OS redesign',
+  subtitle: 'A robot build journal: chassis, printed legs, and gait experiments',
   enablePostFooterNav: true,
   lang: 'en',
   themeColor: {
@@ -20,11 +20,11 @@ export const siteConfig: SiteConfig = {
   defaultTheme: DARK_MODE,
   banner: {
     enable: false,
-    src: '/assets/ainekio/v2/hero-concept.webp',
+    src: '/assets/ainekio/v2/assembly-september-20-concept.webp',
     position: 'center',
     credit: {
       enable: false,
-      text: '',
+      text: 'AI concept illustration based on the September 20, 2026 CAD assembly',
       url: '',
     },
   },
@@ -73,9 +73,9 @@ export const navBarConfig: NavBarConfig = {
 }
 
 export const profileConfig: ProfileConfig = {
-  avatar: '/assets/avatar/avatar.webp',
+  avatar: '/assets/avatar/assembly-september-20.webp',
   name: 'Ainekio',
-  bio: 'A small four-legged robot connected to MetaHuman OS for conversation and decisions. A new body and software are in development.',
+  bio: 'Ainekio’s build journal: a working eight-servo robot, and the chassis, printed legs, and gait experiments for its twelve-servo successor.',
   links: [
     {
       name: 'GitHub',
@@ -88,7 +88,7 @@ export const profileConfig: ProfileConfig = {
       url: 'https://github.com/Greg-Aster/metahuman-os',
     },
   ],
-  avatarFilename: 'avatar.webp',
+  avatarFilename: 'assembly-september-20.webp',
 }
 
 export const licenseConfig: LicenseConfig = {

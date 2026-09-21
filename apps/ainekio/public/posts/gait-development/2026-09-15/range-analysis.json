@@ -1,0 +1,4136 @@
+{
+  "date": "2026-09-15",
+  "scope": "V1 explicit stored logical targets; V2 saved single-axis CAD sweeps. No gait calculated or hardware commanded.",
+  "v1": {
+    "motion_count": 38,
+    "packed_assets_match": 38,
+    "joint_order": [
+      "R1",
+      "R2",
+      "L1",
+      "L2",
+      "R4",
+      "R3",
+      "L3",
+      "L4"
+    ],
+    "all_motion_ranges_degrees": [
+      {
+        "id": 0,
+        "label": "R1",
+        "min": 85.0,
+        "max": 180.0,
+        "span": 95.0
+      },
+      {
+        "id": 1,
+        "label": "R2",
+        "min": 0.0,
+        "max": 100.0,
+        "span": 100.0
+      },
+      {
+        "id": 2,
+        "label": "L1",
+        "min": 0.0,
+        "max": 95.0,
+        "span": 95.0
+      },
+      {
+        "id": 3,
+        "label": "L2",
+        "min": 90.0,
+        "max": 180.0,
+        "span": 90.0
+      },
+      {
+        "id": 4,
+        "label": "R4",
+        "min": 0.0,
+        "max": 180.0,
+        "span": 180.0
+      },
+      {
+        "id": 5,
+        "label": "R3",
+        "min": 0.0,
+        "max": 180.0,
+        "span": 180.0
+      },
+      {
+        "id": 6,
+        "label": "L3",
+        "min": 0.0,
+        "max": 180.0,
+        "span": 180.0
+      },
+      {
+        "id": 7,
+        "label": "L4",
+        "min": 0.0,
+        "max": 180.0,
+        "span": 180.0
+      }
+    ],
+    "motions": [
+      {
+        "name": "rest",
+        "frames": 1,
+        "duration_ms": 160,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 90.0,
+            "max": 90.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              -45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 90.0,
+            "max": 90.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              45.0,
+              45.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 90.0,
+            "max": 90.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              45.0,
+              45.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 90.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              -45.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 90.0,
+            "max": 90.0,
+            "span": 0.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              90.0,
+              90.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 90.0,
+            "max": 90.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              -90.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 90.0,
+            "max": 90.0,
+            "span": 0.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              90.0,
+              90.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 90.0,
+            "max": 90.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              -90.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "stand",
+        "frames": 1,
+        "duration_ms": 160,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 0.0,
+            "span": 0.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 180.0,
+            "max": 180.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 0.0,
+            "span": 0.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 180.0,
+            "max": 180.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "wave",
+        "frames": 14,
+        "duration_ms": 4240,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 100.0,
+            "max": 135.0,
+            "span": 35.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -35.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 80.0,
+            "span": 80.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              80.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 180.0,
+            "max": 180.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              180.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 180.0,
+            "max": 180.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "dance",
+        "frames": 12,
+        "duration_ms": 4420,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 90.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 90.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 160.0,
+            "span": 160.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              160.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 115.0,
+            "max": 180.0,
+            "span": 65.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -65.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 65.0,
+            "span": 65.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              65.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 10.0,
+            "max": 180.0,
+            "span": 170.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -170.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "swim",
+        "frames": 10,
+        "duration_ms": 4160,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 90.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 90.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "point",
+        "frames": 2,
+        "duration_ms": 2320,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 100.0,
+            "span": 55.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              55.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 25.0,
+            "max": 45.0,
+            "span": 20.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -20.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 80.0,
+            "span": 80.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              80.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 170.0,
+            "max": 180.0,
+            "span": 10.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -10.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 145.0,
+            "span": 145.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              145.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 180.0,
+            "max": 180.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "pushup",
+        "frames": 11,
+        "duration_ms": 5820,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 0.0,
+            "span": 0.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 180.0,
+            "max": 180.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "bow",
+        "frames": 4,
+        "duration_ms": 4320,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 0.0,
+            "span": 0.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 180.0,
+            "max": 180.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "cute",
+        "frames": 13,
+        "duration_ms": 4280,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 20.0,
+            "max": 45.0,
+            "span": 25.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -25.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 160.0,
+            "span": 25.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              25.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              180.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -180.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              180.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -180.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "freaky",
+        "frames": 9,
+        "duration_ms": 3360,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -180.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 0.0,
+            "span": 0.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 180.0,
+            "max": 180.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "worm",
+        "frames": 13,
+        "duration_ms": 4680,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 135.0,
+            "span": 135.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              135.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 45.0,
+            "max": 180.0,
+            "span": 135.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -135.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 135.0,
+            "span": 135.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              135.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 45.0,
+            "max": 180.0,
+            "span": 135.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -135.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "shake",
+        "frames": 13,
+        "duration_ms": 4240,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 90.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "shrug",
+        "frames": 4,
+        "duration_ms": 3180,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              180.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -180.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              180.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -180.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "dead",
+        "frames": 2,
+        "duration_ms": 440,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "crab",
+        "frames": 13,
+        "duration_ms": 4480,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 90.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 90.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "walk_forward",
+        "frames": 32,
+        "duration_ms": 4940,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 100.0,
+            "span": 55.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              55.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              45.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "walk_backward",
+        "frames": 31,
+        "duration_ms": 4760,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 90.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              45.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "turn_left",
+        "frames": 81,
+        "duration_ms": 11360,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 90.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 90.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "turn_right",
+        "frames": 81,
+        "duration_ms": 11360,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "sit",
+        "frames": 2,
+        "duration_ms": 1450,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 60.0,
+            "max": 60.0,
+            "span": 0.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              60.0,
+              60.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 180.0,
+            "max": 180.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 0.0,
+            "span": 0.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 120.0,
+            "max": 120.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -60.0,
+              -60.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "nod",
+        "frames": 9,
+        "duration_ms": 2460,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 0.0,
+            "span": 0.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 104.0,
+            "max": 180.0,
+            "span": 76.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -76.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 76.0,
+            "span": 76.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              76.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 180.0,
+            "max": 180.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "celebrate",
+        "frames": 13,
+        "duration_ms": 6130,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 20.0,
+            "max": 45.0,
+            "span": 25.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -25.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 160.0,
+            "span": 25.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              25.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              180.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -180.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              180.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -180.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "stretch",
+        "frames": 8,
+        "duration_ms": 4330,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 60.0,
+            "span": 15.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              15.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 120.0,
+            "max": 135.0,
+            "span": 15.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -15.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 37.5,
+            "span": 37.5,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              37.5
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 72.0,
+            "max": 180.0,
+            "span": 108.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -108.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 108.0,
+            "span": 108.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              108.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 142.5,
+            "max": 180.0,
+            "span": 37.5,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -37.5,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "macarena",
+        "frames": 34,
+        "duration_ms": 15680,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 85.0,
+            "max": 150.0,
+            "span": 65.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -50.0,
+              15.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 30.0,
+            "max": 60.0,
+            "span": 30.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -15.0,
+              15.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 30.0,
+            "max": 95.0,
+            "span": 65.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -15.0,
+              50.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 120.0,
+            "max": 150.0,
+            "span": 30.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -15.0,
+              15.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 25.0,
+            "span": 25.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              25.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 160.0,
+            "max": 180.0,
+            "span": 20.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -20.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "salsa",
+        "frames": 34,
+        "duration_ms": 13120,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 115.0,
+            "max": 150.0,
+            "span": 35.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -20.0,
+              15.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 65.0,
+            "span": 20.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              20.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 25.0,
+            "max": 65.0,
+            "span": 40.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -20.0,
+              20.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 115.0,
+            "max": 135.0,
+            "span": 20.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -20.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 35.0,
+            "span": 35.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              35.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 130.0,
+            "max": 180.0,
+            "span": 50.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -50.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 50.0,
+            "span": 50.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              50.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 145.0,
+            "max": 180.0,
+            "span": 35.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -35.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "surprised",
+        "frames": 12,
+        "duration_ms": 5000,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -180.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 180.0,
+            "span": 180.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              180.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "sad",
+        "frames": 8,
+        "duration_ms": 4660,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 172.5,
+            "span": 37.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              37.5
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 52.5,
+            "span": 7.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              7.5
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 7.5,
+            "max": 45.0,
+            "span": 37.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -37.5,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 127.5,
+            "max": 135.0,
+            "span": 7.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -7.5,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 15.0,
+            "span": 15.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              15.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 165.0,
+            "max": 180.0,
+            "span": 15.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -15.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "curious",
+        "frames": 72,
+        "duration_ms": 18490,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 112.5,
+            "max": 157.5,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -22.5,
+              22.5
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 22.5,
+            "max": 67.5,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -22.5,
+              22.5
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 22.5,
+            "max": 67.5,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -22.5,
+              22.5
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 112.5,
+            "max": 157.5,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -22.5,
+              22.5
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "turn_left_45",
+        "frames": 26,
+        "duration_ms": 6240,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 157.5,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 67.5,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 67.5,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 157.5,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "turn_right_45",
+        "frames": 26,
+        "duration_ms": 6240,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 112.5,
+            "max": 135.0,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 22.5,
+            "max": 45.0,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 22.5,
+            "max": 45.0,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 112.5,
+            "max": 135.0,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "turn_left_90",
+        "frames": 50,
+        "duration_ms": 11520,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 157.5,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 67.5,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 67.5,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 157.5,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "turn_right_90",
+        "frames": 50,
+        "duration_ms": 11520,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 112.5,
+            "max": 135.0,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 22.5,
+            "max": 45.0,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 22.5,
+            "max": 45.0,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 112.5,
+            "max": 135.0,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "turn_left_180",
+        "frames": 98,
+        "duration_ms": 22180,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 157.5,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 67.5,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 67.5,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 135.0,
+            "max": 157.5,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              22.5
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "turn_right_180",
+        "frames": 98,
+        "duration_ms": 22180,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 112.5,
+            "max": 135.0,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 22.5,
+            "max": 45.0,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 22.5,
+            "max": 45.0,
+            "span": 22.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 112.5,
+            "max": 135.0,
+            "span": 22.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -22.5,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 26.2,
+            "span": 26.2,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              26.2
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 153.8,
+            "max": 180.0,
+            "span": 26.19999999999999,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -26.19999999999999,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "walk_slow",
+        "frames": 21,
+        "duration_ms": 6740,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 100.0,
+            "span": 55.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              55.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              45.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "run",
+        "frames": 39,
+        "duration_ms": 5180,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 100.0,
+            "span": 55.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              55.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              45.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              45.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 135.0,
+            "max": 180.0,
+            "span": 45.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "number_one",
+        "frames": 18,
+        "duration_ms": 7690,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 112.5,
+            "max": 180.0,
+            "span": 67.5,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -22.5,
+              45.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 22.5,
+            "max": 100.0,
+            "span": 77.5,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -22.5,
+              55.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 0.0,
+            "max": 45.0,
+            "span": 45.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 90.0,
+            "max": 135.0,
+            "span": 45.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -45.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 80.0,
+            "span": 80.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              80.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 90.0,
+            "max": 180.0,
+            "span": 90.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -90.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 90.0,
+            "span": 90.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              90.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 35.0,
+            "max": 180.0,
+            "span": 145.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -145.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "number_two",
+        "frames": 9,
+        "duration_ms": 4870,
+        "repeat_count": 1,
+        "ranges_degrees": [
+          {
+            "id": 0,
+            "label": "R1",
+            "min": 135.0,
+            "max": 135.0,
+            "span": 0.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 1,
+            "label": "R2",
+            "min": 45.0,
+            "max": 80.0,
+            "span": 35.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              35.0
+            ]
+          },
+          {
+            "id": 2,
+            "label": "L1",
+            "min": 45.0,
+            "max": 45.0,
+            "span": 0.0,
+            "stand": 45.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 3,
+            "label": "L2",
+            "min": 100.0,
+            "max": 135.0,
+            "span": 35.0,
+            "stand": 135.0,
+            "relative_to_stand": [
+              -35.0,
+              0.0
+            ]
+          },
+          {
+            "id": 4,
+            "label": "R4",
+            "min": 0.0,
+            "max": 65.0,
+            "span": 65.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              65.0
+            ]
+          },
+          {
+            "id": 5,
+            "label": "R3",
+            "min": 180.0,
+            "max": 180.0,
+            "span": 0.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 6,
+            "label": "L3",
+            "min": 0.0,
+            "max": 0.0,
+            "span": 0.0,
+            "stand": 0.0,
+            "relative_to_stand": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "id": 7,
+            "label": "L4",
+            "min": 115.0,
+            "max": 180.0,
+            "span": 65.0,
+            "stand": 180.0,
+            "relative_to_stand": [
+              -65.0,
+              0.0
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "v2": {
+    "frames_compared": 505,
+    "angle_ranges_degrees": {
+      "alpha": [
+        -53.4,
+        67.4
+      ],
+      "theta": [
+        -51.95331106142828,
+        51.63033976291183
+      ],
+      "beta": [
+        -48.101135946762014,
+        25.87154763252526
+      ]
+    },
+    "spans_degrees": {
+      "alpha": 120.80000000000001,
+      "theta": 103.58365082434011,
+      "beta": 73.97268357928728
+    },
+    "FL_input_output_samples": [
+      {
+        "theta_degrees": -51.95331106142828,
+        "beta_degrees": -48.101135946762014
+      },
+      {
+        "theta_degrees": -30,
+        "beta_degrees": -24.65155034369531
+      },
+      {
+        "theta_degrees": 0,
+        "beta_degrees": 0.0
+      },
+      {
+        "theta_degrees": 30,
+        "beta_degrees": 17.494151777465202
+      },
+      {
+        "theta_degrees": 51.63033976291183,
+        "beta_degrees": 25.87154763252526
+      }
+    ],
+    "coupler_lengths_mm": {
+      "FL": 39.99998789991713,
+      "FR": 24.639499418468773,
+      "RL": 24.639505916935835,
+      "RR": 24.639505916935747
+    },
+    "verification_errors": {
+      "forward_foot_mm": 5.5689969474787816e-06,
+      "inverse_foot_mm": 6.394884621840902e-14,
+      "inverse_joint_radians": 3.1086244689504383e-15
+    },
+    "neutral_positions_checked": 4,
+    "shoulder_math_round_trips": 8,
+    "combined_clearance_checked": false,
+    "gait_calculated": false
+  },
+  "sources": [
+    {
+      "file": "Slave/software/assets/seed/motions-v1.json",
+      "root": "Ainekio",
+      "sha256": "958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7"
+    },
+    {
+      "file": "Slave/software/assets/seed/motions-bin-v1.json",
+      "root": "Ainekio",
+      "sha256": "90233e0e50a73cc7afbf511fd1c59cb041a194bc08622a5c81130b33a740413b"
+    },
+    {
+      "file": "Slave/software/core/src/servo.c",
+      "root": "Ainekio",
+      "sha256": "ebc36674daa86afd92a3d9c8f8958db7ab376879e55cdada96eb2498a2f68a24"
+    },
+    {
+      "file": "Slave/firmware/esp32s3/sdkconfig.defaults",
+      "root": "Ainekio",
+      "sha256": "7acc31ca5266f26a8c2b88a6c9efb0a3013217f8af2b900d24721ee992b1ada5"
+    },
+    {
+      "file": "robot-leg-motion-20260915/agent-handoff/robot-gait-parameters.json",
+      "root": "Blender",
+      "sha256": "ee58044b02c5e9ae36d40fd0c59e334f0e7a0da22c13c6a2eac1d9abe438f629"
+    },
+    {
+      "file": "robot-leg-motion-20260915/agent-handoff/gait_kinematics.py",
+      "root": "Blender",
+      "sha256": "003f557cad47a5fb63932c01345fe87212346b69d742a50f8fd455b5aa9b4c84"
+    },
+    {
+      "file": "robot-leg-motion-20260915/agent-handoff/WALKING_GAIT_HANDOFF.md",
+      "root": "Blender",
+      "sha256": "489fac572633406e75b65be5fd2da49e2c9f6c2078002f175187c08b6e5abdc0"
+    },
+    {
+      "file": "robot-leg-motion-20260915/animation-plan.json",
+      "root": "Blender",
+      "sha256": "ba559fad8b923581c48bb9a7d8422c9d46f89b77af36daa76016d036315dcc74"
+    },
+    {
+      "file": "robot-part024-from-part026-20260915/replacement-plan.json",
+      "root": "Blender",
+      "sha256": "8222a52f7c03660e045fcb6c65a663b2e4f86c83e8061a1b25fa8972882e6d99"
+    }
+  ]
+}

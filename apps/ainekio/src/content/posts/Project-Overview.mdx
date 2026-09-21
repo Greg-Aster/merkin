@@ -1,10 +1,10 @@
 ---
 title: "Ainekio: Project Overview"
 published: 2026-08-27T09:45:00-07:00
-updated: 2026-09-09
-description: "A small robot connected to MetaHuman OS, with a working eight-servo body and a twelve-servo successor in development."
-image: "/assets/ainekio/v2/hero-concept.webp"
-avatarImage: "/assets/avatar/avatar.webp"
+updated: 2026-09-21
+description: "Ainekio's working eight-servo robot and the twelve-servo build journal: narrower chassis, printed leg iterations, shell design and gait studies."
+image: "/assets/ainekio/v2/assembly-september-20-concept.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
@@ -20,6 +20,9 @@ contentFormat: "report"
 ---
 
 # Meet Ainekio
+
+*Cover: AI concept artwork based on the September 20 CAD assembly. The build
+journal includes the actual CAD views and prototype photographs.*
 
 Ainekio is a small, owner-built, four-legged robot with a camera, microphone,
 speaker, and a face on a small display. The project explores a robot companion
@@ -42,17 +45,27 @@ The working body is **V1**. It has eight MG90S servos: small motors that move to
 chosen angles, with two serving each leg. An ESP32-S3 controller runs scripted
 poses and movement sequences.
 
-**V2** is the planned replacement body. It adds a third joint to each leg for
-twelve servos in total, along with a new chassis and an ESP32-P4 controller.
-The extra joints will allow sideways foot placement. Experimental leg work has
-started; the complete robot has not been built and tested. Its first movements
-will follow prepared sequences. Adaptive balance and terrain handling are later
-possibilities.
+**V2** is a substantially different twelve-servo design, with a third joint
+per leg for sideways foot placement and an ESP32-P4 selected as its controller.
+The September 21 build review follows a narrower chassis, compact leg links,
+printed fit trials and a layered outer shell. Modeling and prototype printing
+have occupied most of the recent work.
 
-The site’s illustrations explore that future body: a stout robot with serrated
-red legs. They are concept art, not photographs of completed hardware. The
-[V2 roadmap](/posts/ainekio-v2/) explains the mechanical plan and test sequence;
-[the V1 hardware guide](/posts/body-design-and-hardware/) records the existing build.
+| Build area | Latest documented work | Next physical questions |
+| --- | --- | --- |
+| [Chassis](/posts/2026-09-21-chassis-packaging/) | Width reduced from 103 to 51.2 mm; board-clearance study and a lower camera-cable recess | Mounting, connectors and cable routing in the chosen assembly |
+| [Legs](/posts/2026-09-21-compact-leg-design/) | 22 mm crank, 36 mm rod and 55 mm lower-leg variants; horn cavity corrected after a failed printed fit | Revised print fit and loaded movement |
+| [Shell](/posts/2026-09-21-shell-design/) | Face, collar, roof and fin iterations shown in September 20 CAD views | Attachments, access and clearance around moving legs |
+| [Gait](/posts/gait-development/) | Model-specific motion library and compact single-leg probes | Calibration and physical performance of the latest complete body |
+
+These records establish design and prototype progress; they do not establish
+a completed, powered twelve-servo robot. Prepared motion sequences come first.
+Adaptive balance and terrain handling remain later possibilities.
+
+The [V2 parts and assembly record](/posts/ainekio-v2/) connects the dated
+iterations and downloads. [The V1 hardware guide](/posts/body-design-and-hardware/)
+records the existing build. The dystopian illustrations remain concept art;
+each technical image identifies its CAD or physical prototype source.
 
 ## Why the software is changing too
 
