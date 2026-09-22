@@ -25,16 +25,18 @@ selected as the controller. Recent work has concentrated on modeling the
 chassis and legs and printing prototype assemblies. The **September 21 review**
 documents a chassis narrowed from 103 to 51.2 mm, compact 22/36/55 mm leg
 geometry, a horn pocket revised after a failed printed fit, and a developing
-pale outer shell. Those dimensions belong to dated iterations, not a final
-parts specification.
+outer shell. The later variable gait demo uses upright 24/38/55 mm legs.
+Those dimensions belong to dated iterations, not a final parts specification.
 
 The [V2 parts and assembly record](/posts/ainekio-v2/) connects the
 [chassis](/posts/2026-09-21-chassis-packaging/),
 [leg](/posts/2026-09-21-compact-leg-design/) and
 [shell](/posts/2026-09-21-shell-design/) updates. The
-[gait journal](/posts/gait-development/) now includes calculated motion studies
-and compact single-leg probes. Fit, clearance, calibration and loaded motion
-of the latest complete body still need validation.
+[gait journal](/posts/gait-development/) now includes a fourteen-second Blender
+demo with independent stride and motion-rate controls, comparison tables and
+timestamped twelve-joint data. Integration is in progress; controller timing,
+calibration, balance and loaded walking still need validation. The earlier
+single-leg probes remain in the journal as design history.
 
 At the same time, the [MetaHuman redesign](/posts/metahuman-integration/) saves
 a request’s objective and progress. That lets work wait for a robot result,

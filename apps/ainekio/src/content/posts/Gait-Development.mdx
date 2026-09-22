@@ -2,8 +2,8 @@
 title: "Gait Development Journal: From Eight Servos to Twelve"
 published: 2026-09-15
 updated: 2026-09-21
-description: "A continuing gait journal: V1 and V2 range comparisons, later motion studies, and 10/20/30 mm compact-leg probes with downloadable data."
-image: "/posts/gait-development/2026-09-15/mechanism.png"
+description: "Integrating independent stride and motion-rate controls: a continuous Blender walking demo, geometry comparisons, timestamped motion data and the earlier V1/V2 studies."
+image: "/posts/gait-development/2026-09-21-variable-gait/demo-poster.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
@@ -23,12 +23,24 @@ the original eight-servo robot, then compares that motion baseline with the
 radically different twelve-servo linkage design. New calculations, experiments,
 and physical results will be recorded here as dated entries.
 
-**Current stage, September 21: calculated motion studies and compact-leg
-probes.** The September 15 baseline below is preserved as the starting point.
-Later entries cover [the motion library](#september-17-2026--motion-studies-and-the-software-library)
-and [compact-leg probes](#september-19-2026--compact-leg-probes). Their results
-belong to specific CAD revisions; physical gait performance and qualification
-of the latest complete assembly remain open.
+**Current stage, September 21: integrating a variable gait system.** The new
+Blender demonstration independently changes stride length and motion rate
+through a continuous nine-cycle sequence. Its upright mechanism uses a 24 mm
+crank and 38 mm rod, a later revision than the compact probes below.
+
+<figure>
+  <video controls playsInline preload="metadata" width="960" height="540" poster="/posts/gait-development/2026-09-21-variable-gait/demo-poster.webp" aria-describedby="variable-gait-video-caption" className="w-full rounded-xl">
+    <source src="/posts/gait-development/2026-09-21-variable-gait/ainekio-variable-gait-demo.mp4" type="video/mp4" />
+    <a href="/posts/gait-development/2026-09-21-variable-gait/ainekio-variable-gait-demo.mp4">Download the variable gait demonstration.</a>
+  </video>
+  <figcaption id="variable-gait-video-caption">September 21 Blender animation, 14 seconds, no audio. The robot starts with short steps, lengthens its stride, speeds up, then returns to short steps. This records the modeled motion; physical walking remains unverified.</figcaption>
+</figure>
+
+[Read the new stride-and-rate entry](#september-21-2026--independent-stride-and-motion-rate)
+for the controls, comparisons and downloadable data.
+[Download the video (MP4, 2.97 MB)](/posts/gait-development/2026-09-21-variable-gait/ainekio-variable-gait-demo.mp4).
+The September 15 baseline, [motion-library record](#september-17-2026--motion-studies-and-the-software-library)
+and [compact-leg probes](#september-19-2026--compact-leg-probes) remain below as dated experiments.
 
 ## September 15, 2026 — Establishing the movement baseline
 
@@ -469,3 +481,169 @@ retarget the chosen foot path. Then add body shifts and support calculations,
 check the complete shell and cable envelope, and compare the results with a
 printed leg under measured load. Each new result should identify its geometry,
 contact assumptions and whether it came from calculation, CAD or hardware.
+
+## September 21, 2026 — Independent stride and motion rate
+
+The variable gait work now brings all four legs into one continuous Blender
+animation, with separate controls for **how far each step reaches** and
+**how quickly the cycle runs**. The video at the top of this journal shows
+the `stride-and-rate-v3` demonstration. Integration is in progress: the
+current deliverable is a geometric planner, Blender controls and timestamped
+motion data. It does not yet demonstrate the new gait on the physical robot.
+
+### The mechanism used for this demonstration
+
+This entry uses the upright 24/38 revision on all four legs. It should not
+inherit the dimensions or validation results of the September 19 22/36 study.
+
+| Dimension or scope | September 19 compact probes | September 21 variable gait |
+| --- | ---: | ---: |
+| Input crank | 22 mm | 24 mm |
+| Connecting rod | 36 mm | 38 mm |
+| Upper carrier | 40 mm | 40 mm |
+| Lower-leg pickup | 24 mm | 24 mm |
+| Lower leg, nominal | 55 mm | 55 mm |
+| Solved motion | One leg; shoulder fixed | Four legs, twelve joints and body sway |
+| Stance fraction | 87.5% | 70% |
+| Timing | Fixed eight-second probe | Shared clock with independent stride and rate |
+
+The geometry snapshot records the transfer of the refined front-left mechanism
+to the other three legs. Its CAD labels are unusual: **RL means physical
+front-left, RR front-right, FL rear-left and FR rear-right**. The downloadable
+schema retains both names so the motion channels can be mapped deliberately.
+
+### Two controls, with different effects
+
+**Stride %** changes the nominal planted fore–aft sweep. At 100%, that sweep
+is 92 mm; at 25%, it is 23 mm. **Motion rate** changes the common clock:
+1× gives a 1.8-second cycle and 2× gives a 0.9-second cycle. Changing rate at
+a fixed stride retains the same geometric path rather than scaling joint angles.
+
+For stride fraction `p = Stride % / 100` and motion-rate multiplier `r`:
+
+```text
+planted sweep S = 92 × p mm
+body advance per cycle L = S / 0.7 mm
+cycle period T = 1.8 / r seconds
+nominal forward speed v = L / T = 73.015873 × p × r mm/s
+```
+
+The 0.7 divisor is the stance fraction: body advance over the whole cycle is
+larger than the body-relative sweep during the planted portion. These are
+commanded geometric quantities, not measured ground speed.
+
+| Steady setting | 25% · 1× | 25% · 2× | 100% · 1× | 100% · 2× |
+| --- | ---: | ---: | ---: | ---: |
+| Planted sweep | 23 mm | 23 mm | 92 mm | 92 mm |
+| Body advance per cycle | 32.86 mm | 32.86 mm | 131.43 mm | 131.43 mm |
+| Cycle period | 1.8 s | 0.9 s | 1.8 s | 0.9 s |
+| Nominal forward speed | 18.25 mm/s | 36.51 mm/s | 73.02 mm/s | 146.03 mm/s |
+| Swing lift setting | 6.5 mm | 6.5 mm | 14 mm | 14 mm |
+
+These examples come from the exported stride/rate grid. The video visits
+25% at 1×, 100% at 1× and 100% at 2×, with smooth transitions between them.
+The 25% at 2× column illustrates the independence of the controls; it is not
+a separate segment of this clip.
+
+### What happens during the fourteen-second sequence
+
+| Video time | Stride | Motion rate | Change being demonstrated |
+| --- | --- | --- | --- |
+| 0–1.80 s | 25% | 1× | Short steady steps |
+| 1.80–4.50 s | 25 → 100% | 1× | Lengthen steps while retaining cadence |
+| 4.50–6.30 s | 100% | 1× | Full stride at the base rate |
+| 6.30–8.22 s | 100% | 1 → 2× | Accelerate the same stride geometry |
+| 8.22–9.12 s | 100% | 2× | Full stride at twice the rate |
+| 9.12–10.41 s | 100% | 2 → 1× | Reduce cadence |
+| 10.41–12.21 s | 100 → 25% | 1× | Shorten steps |
+| 12.21–14.01 s | 25% | 1× | Return to the starting control settings |
+
+All twelve joints, body sway and contact states use one continuous gait phase.
+Quintic curves join the control settings smoothly. Body travel is integrated
+over phase, while elapsed time is calculated from the changing cycle frequency.
+The joint pose closes at the end; world travel resets when this finite clip
+repeats, and the presentation camera follows the body through that reset.
+
+### Keeping planted references in place as stride changes
+
+The planner predicts body travel over each upcoming stance and places the
+next touchdown anchor accordingly. Its rearward bias is `30/92` of that
+predicted stance travel. At a steady full stride, the nominal planted
+endpoints are +16 mm forward and −76 mm rearward from the original standing
+reference. At a steady quarter stride they scale to +4 mm and −19 mm.
+Transition anchors use the predicted travel, so they can differ from these
+steady endpoints.
+
+A foot already in stance keeps its world XY reference until liftoff. During
+swing, a smooth path joins the old and new anchors with zero world XY velocity
+and acceleration at the endpoints. Lift is chosen for that swing. This avoids
+moving a planted reference merely because the stride setting changed.
+
+That reference is attached to the rigid foot, but it is not always the material
+point touching the ground. The solver checks the lowest part of the full sole
+hull. The faceted sole can rock and the contact point can migrate; fixed
+reference coordinates therefore do not prove physical traction or zero slip.
+
+### Blender controls and the integration data
+
+The saved `ainekio-variable-gait.blend` contains the **Gait - Stride and Rate**
+scene and **Gait playback** layer. Its **Ainekio > Gait** sidebar exposes
+Stride %, Motion rate, **Build steady gait** and **Build ramp demo**. The
+steady option creates four cycles. The ramp begins at a quarter of the selected
+stride and half the selected rate, then reaches the selected settings and returns.
+Rebuilding runs the numerical solver before replacing the gait curves.
+
+The exported demonstration contains **3,889 samples over nine cycles**, lasting
+14.007649 seconds. Sampling is uniform in phase, not time: the effective rate
+changes from about 240 to 480 Hz as cadence doubles. Consumers must use the
+actual timestamps in the CSV. These are source samples; the supplied video is
+a 210-frame presentation at about 15 fps, and the Blender playback spans
+420 frames at about 29.984 fps.
+
+The joint columns are signed geometric **radians relative to CAD neutral**,
+not PWM values or calibrated electrical angles. Across this specific demo,
+the recorded joint demands span:
+
+| Geometric input, across four legs | Minimum | Maximum | Peak requested speed |
+| --- | ---: | ---: | ---: |
+| Shoulder `h` | −4.47° | +4.25° | 30.51°/s |
+| Carrier input `alpha` | −46.24° | +22.96° | 872.21°/s |
+| Crank input `theta` | −107.70° | +29.62° | 1,282.64°/s |
+
+The roughly 1,283°/s peak is an animation demand, not demonstrated loaded
+servo capability. A real-time command/replanning loop, embedded kinematics,
+channel mapping, calibration and usable speed limits remain integration work.
+
+### Checks completed, and what they establish
+
+| Evidence | Result | Scope |
+| --- | --- | --- |
+| Independent-control check | 2× rate halves time while preserving the steady path; stance references and control boundaries pass | Rechecked from an isolated copy of the supplied source and numerical data for this journal update |
+| Saved Blender validation | 7,777 source-key and midpoint poses; maximum closure error 0.00219 mm and baked-angle error 0.000655° | Reported reopened-file checks; not rerun for the website update |
+| Sole-height validation | Maximum recorded ground penetration 0.000305 mm | Geometric agreement, not print or floor-contact accuracy |
+| Collision screen | 841 poses at 60 Hz; no flagged pairs in the tested set | Printed link pairs and crank/rod versus boots, with intended pin interfaces excluded |
+| Video | H.264, 960 × 540, 14.007649 seconds; full decode passed | The supplied animation, checked for this update |
+
+The collision screen excludes complete containment, between-sample collisions,
+the full chassis and shell, all hardware and neighbouring-leg interactions.
+It cannot establish unrestricted clearance for the assembled robot.
+
+The contact schedule has **two or three grounded feet**, with no all-four-foot
+stance samples. The assumed-centre-of-mass calculation reaches a static support
+margin of **−60.47 mm**. Static balance is therefore not established; the mass
+model, support strategy and dynamics need further work. These findings belong
+alongside the successful linkage and timing checks when choosing a physical trial.
+
+### Download this revision
+
+- [Stride-and-rate grid (CSV)](/posts/gait-development/2026-09-21-variable-gait/data/speed-percentage-table.csv): nominal settings and timing, not a validation of every combination.
+- [Timestamped twelve-joint trajectory (CSV, 4.11 MB)](/posts/gait-development/2026-09-21-variable-gait/data/ainekio-gait-timestamps.csv) and [column/units schema (JSON)](/posts/gait-development/2026-09-21-variable-gait/data/gait-data-schema.json).
+- [Geometry snapshot (JSON)](/posts/gait-development/2026-09-21-variable-gait/data/ainekio-gait-geometry.json), [numerical arrays (NPZ)](/posts/gait-development/2026-09-21-variable-gait/data/gait-data.npz) and [results (JSON)](/posts/gait-development/2026-09-21-variable-gait/data/gait-data-results.json).
+- [Planner source (Python)](/posts/gait-development/2026-09-21-variable-gait/data/ainekio_gait.py), [control-check source (Python)](/posts/gait-development/2026-09-21-variable-gait/data/check_controls.py) and [recorded control results (JSON)](/posts/gait-development/2026-09-21-variable-gait/data/control-checks.json).
+- [Saved-file validation (JSON)](/posts/gait-development/2026-09-21-variable-gait/data/blender-validation.json) and [collision screen with its exclusions (JSON)](/posts/gait-development/2026-09-21-variable-gait/data/collision-screen.json).
+- [Source report](/posts/gait-development/2026-09-21-variable-gait/data/source-report.txt) and [filenames, transformations and checksums](/posts/gait-development/2026-09-21-variable-gait/data/provenance.json).
+
+Workspace prefixes are shortened in the published records. The large Blender
+project and its linked libraries are not included in these downloads. The
+earlier comparison videos and percentage measurements in the working folder
+describe preceding control revisions; this entry uses `stride-and-rate-v3`.

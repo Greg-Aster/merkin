@@ -2,7 +2,7 @@
 title: "Ainekio: Project Overview"
 published: 2026-08-27T09:45:00-07:00
 updated: 2026-09-21
-description: "Ainekio's working eight-servo robot and the twelve-servo build journal: narrower chassis, printed leg iterations, shell design and gait studies."
+description: "Ainekio's working eight-servo robot and the twelve-servo build journal: chassis and printed-leg revisions, shell design and variable gait integration."
 image: "/assets/ainekio/v2/assembly-september-20-concept.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -49,14 +49,16 @@ poses and movement sequences.
 per leg for sideways foot placement and an ESP32-P4 selected as its controller.
 The September 21 build review follows a narrower chassis, compact leg links,
 printed fit trials and a layered outer shell. Modeling and prototype printing
-have occupied most of the recent work.
+have occupied most of the recent work. A new variable gait demonstration now
+adds independent stride and cadence controls, with a video and downloadable
+motion data in the [continuing gait journal](/posts/gait-development/).
 
 | Build area | Latest documented work | Next physical questions |
 | --- | --- | --- |
 | [Chassis](/posts/2026-09-21-chassis-packaging/) | Width reduced from 103 to 51.2 mm; board-clearance study and a lower camera-cable recess | Mounting, connectors and cable routing in the chosen assembly |
-| [Legs](/posts/2026-09-21-compact-leg-design/) | 22 mm crank, 36 mm rod and 55 mm lower-leg variants; horn cavity corrected after a failed printed fit | Revised print fit and loaded movement |
+| [Legs](/posts/2026-09-21-compact-leg-design/) | Earlier 22/36/55 mm variants and horn-fit correction; the new gait uses a later upright 24/38/55 mm revision | Revised print fit and loaded movement |
 | [Shell](/posts/2026-09-21-shell-design/) | Face, collar, roof and fin iterations shown in September 20 CAD views | Attachments, access and clearance around moving legs |
-| [Gait](/posts/gait-development/) | Model-specific motion library and compact single-leg probes | Calibration and physical performance of the latest complete body |
+| [Gait](/posts/gait-development/) | Four-leg Blender demo with independent stride/rate controls and timestamped twelve-joint data | Controller integration, support, calibration and loaded performance |
 
 These records establish design and prototype progress; they do not establish
 a completed, powered twelve-servo robot. Prepared motion sequences come first.

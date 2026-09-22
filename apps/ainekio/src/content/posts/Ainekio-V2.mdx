@@ -2,7 +2,7 @@
 title: "Ainekio V2: Parts, Assembly, and Design Iterations"
 published: 2026-09-07T12:00:00-07:00
 updated: 2026-09-21
-description: "V2's narrower chassis, compact legs, shell development and motion studies, alongside the earlier parts, prototype and assembly records."
+description: "V2's narrower chassis, leg revisions, shell development and variable gait integration, alongside the earlier parts, prototype and assembly records."
 image: "/posts/2026-09-21-design-progress/assembly-september-20.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -37,24 +37,32 @@ uneven ground require additional sensing and control work.
 
 ## Current revision: September 21
 
-Recent work has concentrated on the chassis, compact leg geometry and shell.
-The September 17 chassis revision is 51.2 mm wide, down from 103 mm. Later
-22/36/55 mm leg variants shorten the crank, connecting rod and lower leg,
-with angled and upright alternatives retained. A printed horn-fit problem
-also led to a targeted cavity correction.
+Recent work now includes **variable gait integration**. A fourteen-second
+Blender sequence changes stride and cadence independently across all four
+legs. The demonstration uses upright 24/38/55 mm geometry: 24 mm cranks,
+38 mm rods and 55 mm lower legs. The
+[new gait entry](/posts/gait-development/#september-21-2026--independent-stride-and-motion-rate)
+contains the video, control tables and timestamped twelve-joint data.
+
+The September 17 chassis revision is 51.2 mm wide, down from 103 mm. The
+earlier 22/36/55 mm leg studies, angled and upright alternatives, and printed
+horn-fit correction remain separate dated records. Their exported parts should
+not be treated as the unchanged geometry of the new gait demonstration.
 
 | Build record | What it covers |
 | --- | --- |
 | [Chassis packaging](/posts/2026-09-21-chassis-packaging/) | Narrower body, board clearance and the camera-cable opening |
 | [Compact legs and horn fit](/posts/2026-09-21-compact-leg-design/) | Side-by-side dimensions, measured articulation, part renders and dated STL downloads |
 | [Shell development](/posts/2026-09-21-shell-design/) | Actual CAD views, face/roof/fin iterations and remaining attachment work |
-| [Continuing gait journal](/posts/gait-development/) | V1/V2 baseline, later motion sources and compact single-leg probes |
+| [Continuing gait journal](/posts/gait-development/) | Variable stride/rate video and data, plus the V1/V2 baseline and earlier probes |
 
 V1 remains the working complete robot. The V2 CAD studies and print exports
 do not establish a complete powered assembly or its load performance. The
 September 17 software record now includes a model-specific thirty-motion
 library; calibration, electrical acceptance and execution on the latest body
-remain separate work.
+remain separate work. The September 21 variable planner and Blender controls
+are a further integration step; they are not evidence that this new gait has
+been installed on the controller or walked under load.
 
 The rest of this guide preserves the earlier design decisions with their
 dates. The [September 15 prototype post](/posts/2026-09-15-leg-prototypes/)

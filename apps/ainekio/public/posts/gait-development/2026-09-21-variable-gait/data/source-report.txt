@@ -1,0 +1,143 @@
+# Ainekio stride and motion-rate demonstration
+
+Open `Ainekio/Slave/hardware/v2-12servo/ainekio-variable-gait.blend`.
+Select **Gait - Stride and Rate / Gait playback** and press Space.
+The current animation is a continuous nine-cycle demonstration, about 14 seconds,
+frames 1–420. Timeline markers identify each control change.
+
+## Controls in Blender
+
+Open the 3D View sidebar with N, then select **Ainekio > Gait**.
+
+- **Stride %** controls planted fore–aft travel: 100% is 92 mm; 25% is 23 mm.
+- **Motion rate** changes the shared cycle clock independently: 1x is 1.8 seconds
+  per cycle, 2x is 0.9 seconds. It does not scale joint angles or stride geometry.
+- **Build steady gait** creates four continuous cycles at the selected settings.
+- **Build ramp demo** begins at quarter of the selected stride and half the
+  selected rate, extends to full selected stride, raises cadence, then returns.
+
+Rebuilding runs the numerical solver in a separate process, then replaces the
+existing gait curves in place. Ctrl-S saves the result. Geometry, the source
+modeling scene, fitting setup, and face cache are preserved. If Blender opens
+with scripts disabled, run the packed **gait_controls.py** text once to restore
+the sidebar and changing playback labels. This does not require changing Blender's
+script-security preferences.
+
+## Current demonstration
+
+| Time | Motion |
+| --- | --- |
+| 0–1.8 s | 25% stride, 1x rate |
+| 1.8–4.5 s | Smoothly lengthen stride to 100%, retain 1x rate |
+| 4.5–6.3 s | Full corrected stride at 1x |
+| 6.3–8.22 s | Full stride, smoothly accelerate cadence to 2x |
+| 8.22–9.12 s | Full stride at 2x |
+| 9.12–10.41 s | Smoothly reduce cadence to 1x |
+| 10.41–12.21 s | Smoothly shorten stride to 25% |
+| 12.21–14.01 s | 25% stride, 1x; closes into the beginning |
+
+The Blender frame rate is approximately 29.984 fps so the whole repeating
+trajectory fits exactly into 420 frames. Physical trajectory timing is preserved;
+the final duplicate pose is an interpolation endpoint outside the playback range.
+The camera follows body translation, including at the finite clip's travel reset.
+
+## Formula and variable rearward reach
+
+For stride fraction `p = Stride % / 100` and rate multiplier `r`:
+
+```text
+planted sweep S = 92 p mm
+body advance L = S / 0.7 mm per cycle
+cycle frequency f = r / 1.8 Hz
+forward speed v = L f = 73.015873 p r mm/s
+nominal rearward bias = 30 p mm
+foot lift = 4 + 10 p mm
+body roll = +/-3 p degrees; pitch = +/-2 p degrees
+```
+
+At full stride, the nominal planted endpoints remain **+16 mm forward and
+-76 mm backward** from the original standing reference. Shorter strides reduce
+both endpoints proportionally. Increasing rate at a fixed stride preserves this
+path exactly. This replaces the previous single percentage control, whose stride
+had a nonzero intercept and whose cycle rate changed together with stride.
+
+During stride changes, the planner predicts body travel over each upcoming stance.
+Its rearward bias is `30/92` of that travel. Each touchdown anchor is positioned
+between the predicted body positions at touchdown and liftoff, using that bias.
+An already planted foot stays at its existing world XY reference until liftoff;
+it does not slide to follow a changed percentage. Swing joins the old anchor to
+the next planned anchor with zero world XY velocity and acceleration at both ends.
+Foot lift is selected for that swing. The faceted sole can still rock and its
+material contact point can migrate.
+
+Stride and rate change through quintic curves in a continuous gait phase. Body
+translation integrates stride over phase; elapsed time integrates inverse cycle
+frequency. All twelve joints, body sway and contact states use that same clock.
+This is an offline planned ramp with lookahead, not an online disturbance or
+terrain controller. Rearward bias is a geometric gait setting, not an optimized
+physical balance solution.
+
+## Geometry and validation
+
+All four current legs retain the 40 mm primary, 24 mm input, 38 mm rod,
+24 mm pickup and 55 mm distal geometry. Part009 and Part023 remain coordinated
+through the existing closed linkage. The previous corrected full-stride joint
+curve is preserved; only its clock changes during cadence acceleration.
+
+- `control-checks.json` verifies independent stride/rate controls, exact 2x
+  retiming, fixed stance references, smooth control boundaries and loop closure.
+- `blender-validation.json` evaluates all source keys and their midpoints after
+  reopening the saved file, including actual driver angles, closure and sole height.
+- `collision-screen.json` samples the entire changing-speed demo at 60 Hz. It
+  covers printed link pairs and crank/rod versus boots, excluding intended pin
+  interfaces. It does not cover containment, the whole chassis, all hardware,
+  neighbouring legs or continuous swept volumes.
+
+The saved project passed **7,777** source and midpoint pose checks: maximum
+linkage closure error 0.00219 mm, joint-angle error 0.000655 degrees, and ground
+penetration 0.000305 mm. The geometric collision screen evaluated **841** poses
+with no flagged pairs in its stated scope, using the reopened recovery with the
+new gait applied. The live build preserved all 414 non-ground mesh identities.
+The Blender **Build ramp demo** button was also exercised through completion.
+
+The source uses 432 samples per cycle, yielding approximately 240–480 Hz in this
+1x–2x demonstration. Timestamps are nonuniform and authoritative. The 2x segment
+requests peak joint speed around 1,283 degrees/s. This is animation demand, not
+measured loaded servo capability. Balance, traction and physical execution are
+not established by these checks.
+
+## Files and regeneration
+
+- Saved project: `ainekio-variable-gait.blend` in the V2 hardware directory.
+- Rolling recovery: adjacent **ainekio-variable-gait-Recovery.blend**.
+- The older **ainekio-variable-gait-Backup.blend** is now a linked library used by
+  the live project; it is retained as a dependency and must not be overwritten.
+- The pre-existing linked library `linked-library/robot-boot-edge/saved-verification.blend`
+  also remains a dependency; this task's scratch cleanup does not touch it.
+- Current preview: **ainekio-variable-gait-demo.mp4** in this directory.
+- Sources: `ainekio_gait.py`, `gait_controls.py`, `apply_blender.py`,
+  `ainekio-gait-geometry.json`.
+- Data: `gait-data.npz`, `ainekio-gait-timestamps.csv`, `gait-data-schema.json`.
+- `speed-percentage-table.csv` now contains the two-dimensional stride/rate grid.
+
+```bash
+env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python ainekio_gait.py --generate --demo --stride 100 --rate 2
+# Or choose one steady gait:
+env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python ainekio_gait.py --generate --steady --stride 60 --rate 1.5
+```
+
+Run `apply_blender.py` in Blender after external generation, and `export_data.py`
+with the same Python environment for CSV/schema exports. The sidebar performs
+both application and export automatically. `check_controls.py` checks the current
+numerical data; saved-file Blender validation is a separate background command.
+
+For face edits, retain the editable fitting layer and run the packed
+`VARIABLE GAIT - Refresh cached face.py` before playback. The cache remains a
+playback asset and the editable mask is the modeling source.
+
+Earlier comparison videos, `gait-25-preview-results.json`,
+`additional-percent-checks.json`, `stride-adjustment.json`,
+`candidate-comparison.json`, `steady-cycle-measurements.json`,
+`joint-ranges-by-speed.json`, `rocking-contact-measurements.json`, and
+`playback-profile.json` are historical measurements of preceding gait revisions.
+They do not describe the new independent controls or ramp demonstration.
