@@ -1,0 +1,160 @@
+---
+title: "Ainekio V1 and V2: Eight Servos Versus Twelve"
+published: 2026-09-24
+updated: 2026-09-24
+description: "Compare the working eight-servo robot and twelve-servo development body: movement ranges, gait controls, ESP32-S3/P4 processing, removable battery and unmeasured runtime."
+image: "/posts/2026-09-24-progress/v2-appearance.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V1, V2, Hardware, Motion, Battery]
+category: "Physical Robot"
+draft: false
+lang: "en"
+contentFormat: "report"
+---
+
+# Eight servos versus twelve
+
+V2 changes the mechanism, controller and power arrangement. The third actuator
+on each leg adds sideways placement; the new software can vary a gait while it
+runs. This comparison separates those implemented capabilities from the
+physical results still to be measured. It is a September 24 snapshot of a
+continuing build.
+
+<div className="grid grid-cols-2 gap-3">
+  <figure>
+    <img src="/posts/2026-09-24-progress/v1-physical.webp" alt="Physical V1 with an open black chassis, eight servos, red feet and exposed wiring." width="700" height="933" loading="lazy" className="w-full aspect-square object-contain" />
+    <figcaption><strong>V1 · physical robot.</strong> August 27 construction photograph.</figcaption>
+  </figure>
+  <figure>
+    <img src="/posts/2026-09-24-progress/v2-appearance.webp" alt="V2 CAD body with a red mask and carapace, black center supports and exposed three-actuator leg mechanisms." width="880" height="640" loading="lazy" className="w-full aspect-square object-contain" />
+    <figcaption><strong>V2 · CAD development.</strong> September 23 animation frame; before the later battery and width edits.</figcaption>
+  </figure>
+</div>
+
+The images are not at the same scale and show different evidence: an assembled
+V1 and a modeled V2. [Printed V2 leg prototypes](/posts/2026-09-15-leg-prototypes/)
+are documented separately.
+
+## Mechanics and motion capability
+
+| Comparison | V1 · eight servos | V2 · twelve servos |
+| --- | --- | --- |
+| Actuators per leg | Two MG90S | Three; current physical selection recorded as MG90, exact variant still to identify |
+| Mechanism | Sesame-derived leg and open chassis | Shoulder roll plus coupled carrier/crank linkage; purpose-built supports, shell and underside |
+| Foot placement | Primarily forward/backward and up/down | Adds sideways placement and variable stance width |
+| Motion generation | Stored poses and timed sequences; 38 named assets | Continuous Walk, Run, Crawl and six-direction Crab, plus 23 declared gestures/postures |
+| Speed controls | Timing of existing sequences | Normal Speed control; independent stride 1–100% and cadence 0.25–3× in advanced mode |
+| Turns | Stored 45°, 90° and 180° left/right clips; open-loop heading estimates | Ongoing gait turns or finite cycle counts; fixed-angle V2 clips retired |
+| Expressive movement | Wave, bow, dances and other prepared gestures | Retargeted gestures plus reviewed Worm, seated Shrug, Play Dead, Lay Down and experimental Upright |
+| Balance and terrain | No measured adaptive balance result | Contact/geometry planning implemented; no demonstrated loaded dynamic balance or terrain adaptation |
+| Physical evidence | Working complete prototype; movement and audio demonstrated | Printed leg prototypes and P4 bench work; current application flashed and booted September 24; full-body loaded walking unverified |
+
+The counts describe different things: one V2 gait can continue indefinitely and
+change settings, while a V1 asset is a finite stored sequence. Twenty-three
+finite gestures therefore does not mean V2 has fewer movement options.
+
+## Movement ranges: compare the quantities first
+
+**A commanded angle is not a measured mechanical limit.** V1 uses logical
+controller angles. V2 uses signed CAD angles for three coupled inputs. Their
+zeros, joint axes and mechanisms differ; subtracting the numbers does not give
+a meaningful percentage increase in reachable workspace.
+
+| Range or movement | V1 | V2 |
+| --- | --- | --- |
+| Software angle convention | Logical 0–180°; individual assets use subsets | Signed CAD angles for shoulder, carrier and crank, followed by per-joint calibration |
+| Stored/sample envelope | Combined explicit targets span 0–180° across the eight channels | Shoulder −96.99 to +17.57°; carrier −79.02 to +135.37°; crank −128.11 to +101.29° |
+| Walking data | V1 forward-walk targets use 45–90° excursions on individual channels; detailed table in the journal | Sampled current forward-walk recording: shoulder −4.47 to +4.25°, carrier −46.05 to +22.88°, crank −107.48 to +29.56° |
+| Sideways travel | No dedicated third leg actuator; no measured lateral workspace supplied | Crab planner specifies 32 mm sideways travel per full-stride cycle |
+| Foot travel in walking | No measured distance-per-cycle result in this review | 92 mm full planted sweep; nominal 131.43 mm advance per cycle at full stride |
+| Whole-body usable limits | Installed stops, loaded workspace and travel measurements not supplied | Shoulder/body clearance, tracking, load and all-settings motion envelope remain unqualified |
+
+The V2 envelope above was extracted afresh from **23 declared gesture sources,
+14 locomotion recordings and the Run recording**, pooling all four legs by
+input type. It excludes the retired fixed-angle turn recordings. Its shoulder
+maximum therefore differs from older audits that included those turns.
+The forward-walk row includes its recorded Speed changes, advanced settings and
+Finish; it is not the extrema of every possible walking control setting.
+
+[Download the per-recording, per-joint CSV](/posts/2026-09-24-progress/motion-ranges.csv)
+and its [read-only extraction script](/posts/2026-09-24-progress/extract-motion-ranges.py).
+The CSV includes source hashes, preserves the two angle conventions and also
+lists all V1 explicit target ranges. The [gait journal](/posts/gait-development/)
+retains the original V1 channel table and earlier linkage studies.
+
+The current V2 linkage uses a **40/24/38/24 mm four-bar and 55 mm distal link**.
+A recorded pulse span of 300–2900 µs and provisional 234° conversion are
+calibration research inputs, not measured shaft travel or approved assembled
+motion limits. Some original poses still conflict with modeled clearance or
+reference pulse spans. Neither a larger servo-angle range nor a passing
+linkage-closure calculation proves that the whole robot can execute that pose.
+
+## Controller and processing
+
+| Comparison | V1 | V2 |
+| --- | --- | --- |
+| Board | Freenove ESP32-S3-WROOM CAM, N16R8 | Waveshare ESP32-P4-WIFI6; tested P4 revision 1.3 |
+| Main processor | Dual-core Xtensa LX7 | Dual-core high-performance RISC-V |
+| Checked firmware clock | **160 MHz** in local S3 configuration | **360 MHz** in local P4 configuration |
+| Flash / PSRAM | 16 MB / 8 MB | 32 MB / 32 MB |
+| Wireless | S3's own 2.4 GHz Wi-Fi | Separate ESP32-C6 coprocessor over SDIO |
+| Servo signals | Eight direct hardware PWM outputs | PCA9685 driver for the twelve channels |
+| Camera/audio hardware | OV3660 parallel camera; external microphone and I2S amplifier | Kit specifies OV5647 MIPI camera; onboard codec/audio path; installed peripheral operation needs its own evidence |
+| Conversation and reasoning | MetaHuman OS on a separate computer | MetaHuman OS remains separate from the body controller |
+
+Processor families and board interfaces follow
+[Espressif's S3 description](https://www.espressif.com/en/products/socs/esp32-s3)
+and the [Waveshare board documentation](https://docs.waveshare.com/ESP32-P4-WIFI6).
+Memory and clock values above also follow the local board records and checked
+`sdkconfig` files. The S3 silicon supports up to 240 MHz; this checkout selects
+160 MHz. These clock rates and memory capacities are **not an application
+benchmark** or evidence of longer battery life.
+
+The concrete software change is that the P4 now solves the leg linkage directly
+and plays compact gesture curves through one output controller. The September
+24 deployment record reports a **2,369,264-byte application**, a verified flash,
+boot and authenticated gateway connection. The prior bench work used two
+unloaded servos without linkages. Loaded twelve-servo timing, tracking and
+power are separate measurements still to make.
+
+## Battery, charging and running time
+
+| Comparison | V1 | V2 |
+| --- | --- | --- |
+| Owner-reported battery | 1,000 mAh LiPo | 10,000 mAh Anker PowerCore Slim |
+| Voltage / energy record | Earlier parts record: 2S, 7.4 V; nominal 7.4 Wh by multiplication | Exact label voltage and rated Wh still to record |
+| Conversion arrangement | External buck converter | Removable bank output; no separate buck converter |
+| Charging | External charger | Integrated bank charging; plug-in Qi add-on planned |
+| Packaging | Existing robot arrangement | Underside being fitted around a 155 × 72 × 16 mm CAD proxy |
+| Measured run time | **Not measured** | **Not measured** |
+| Measured loaded consumption | Not supplied | Not supplied; power monitoring is not ready in the current P4 record |
+
+The capacity labels differ by ten times, but they may use different nominal
+voltages. They cannot establish ten times the running time. A useful estimate
+requires usable delivered energy in watt-hours and average whole-robot power:
+**runtime in hours ≈ delivered Wh ÷ average W**. Idle, walking and expressive
+motions will need separately identified test conditions. The bank's peak
+output capability also needs checking against the assembled load.
+
+The [battery fit entry](/posts/2026-09-24-body-and-battery/) records the actual
+placement experiments, exclusions and outstanding holder work. Greg confirmed
+the battery arrangements and that neither runtime had been measured on
+September 24; that owner report takes precedence over older chemistry labels.
+
+## Sources and next comparison
+
+This review uses the local Ainekio checkout after commit `3f872e7`, including
+uncommitted September 24 work. The declared catalog, locomotion README,
+`CONTROLLER_VALIDATION.md`, model geometry, V1 seed motions, hardware records
+and both firmware configurations supplied the figures. The
+[source manifest](/posts/2026-09-24-progress/sources.json) records snapshot hashes.
+These are dated source and validation records, not a new hardware test performed
+for the website.
+
+The next comparison should add the completed assembly's mass, physically
+measured foot workspace, loaded motion observations, delivered battery energy
+and timed runtime under stated gait settings.

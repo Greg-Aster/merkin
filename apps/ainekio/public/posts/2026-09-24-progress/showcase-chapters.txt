@@ -1,0 +1,35 @@
+Ainekio - Gaits and Motions | 2x | Standard front three-quarter view
+
+00:00.000  01. Walk
+00:07.533  02. Sit
+00:10.567  03. Rest
+00:13.567  04. Wave
+00:22.100  05. Point
+00:28.100  06. Nod
+00:32.867  07. Pushup
+00:40.633  08. Bow
+00:45.400  09. Dance
+00:52.167  10. Swim
+01:04.433  11. Cute
+01:11.700  12. Freaky
+01:17.067  13. Worm
+01:23.833  14. Shake
+01:27.867  15. Shrug
+01:33.467  16. Dead
+01:40.133  17. Crab
+01:55.967  18. Celebrate
+02:02.733  19. Stretch
+02:06.600  20. Surprised
+02:13.100  21. Sad
+02:18.000  22. Curious
+02:23.400  23. Crouch
+02:25.933  24. Crawl Forward
+02:35.633  25. Crawl Backward
+02:45.400  26. Crawl Turn Left
+02:55.100  27. Crawl Turn Right
+03:04.833  28. Walk Forward
+03:14.433  29. Walk Backward
+03:24.067  30. Walk Turn Left
+03:33.667  31. Walk Turn Right
+03:43.300  32. Walk > Run > Walk
+03:58.600  33. Upright (experimental)

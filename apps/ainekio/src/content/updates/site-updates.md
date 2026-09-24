@@ -10,30 +10,51 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "V2: integrating independent stride and motion-rate controls"
-  location: "Working V1 / V2 variable gait in Blender"
-  updated: 2026-09-21
-  mileage: "September 21 · nine-cycle variable gait demo and motion data"
-  section: "Stride length, cadence, stance planning and controller integration"
-  nextStop: "Resolve support and full-assembly clearance questions, then integrate the model-specific trajectory with controller timing, calibrated joint limits and measured loaded-servo capability."
-  note: "A new 14-second Blender demo independently varies stride from 25% to 100% and motion rate from 1× to 2×. Its four upright legs use 24 mm cranks and 38 mm rods with 55 mm lower legs. The journal now includes the video, control comparisons and timestamped twelve-joint data. Physical walking and balance remain unverified."
+  status: "V2: new motion controls; underside and battery fit in progress"
+  location: "Working V1 / V2 CAD, printed prototypes and P4 bench"
+  updated: 2026-09-24
+  mileage: "September 24 · deployed motion catalog and removable 10,000 mAh battery design"
+  section: "Continuous gaits, revised body and Anker battery packaging"
+  nextStop: "Reconcile the wider supports with the plates and underside, complete the battery holder and motion clearances, then measure loaded movement and runtime."
+  note: "Walk, Run, Crawl, six-direction Crab and 23 finite gestures/postures are in the latest P4 application; September 24 records verify flash, boot and gateway connection. The red body has revised mask mounts and reinforced tabs. The modeling supports now span 80 mm while plates and animations retain the earlier layout. A removable 10,000 mAh Anker bank is being fitted underneath; loaded walking and battery runtime remain unmeasured."
   areas:
     - label: "V1 robot"
-      status: "Working physical prototype"
-      detail: "Eight servos and an ESP32-S3 controller."
-    - label: "V2 chassis and legs"
-      status: "Compact geometry and print-fit iteration"
-      detail: "The new gait uses upright 24/38/55 mm geometry; earlier 22/36/55 mm variants and print-fit records remain documented."
-    - label: "V2 shell"
-      status: "CAD refinement in progress"
-      detail: "September 20 views document the evolving face, collar and vented roof around the mechanism."
-    - label: "Gait development"
-      status: "Variable stride and cadence in Blender"
-      detail: "Independent controls, fixed stance references and a continuous four-leg demo. Controller integration and loaded motion remain work in progress."
+      status: "Working eight-servo prototype"
+      detail: "ESP32-S3; 1,000 mAh LiPo, external charger and buck converter. Runtime not measured."
+    - label: "V2 body"
+      status: "Shell, mounts and support spacing revised"
+      detail: "Red mask and carapace, compact screw mounts and reinforced printed tabs. Latest modeling width is 80 mm at the outer support walls; spanning plates still need reconciliation."
+    - label: "Motion controls"
+      status: "Continuous gaits and reviewed gestures"
+      detail: "Speed, independent stride/cadence, direction and Finish; automatic Walk/Run transitions and ongoing six-direction Crab. Full-body loaded performance remains unverified."
+    - label: "P4 controller"
+      status: "September 24 application deployment verified"
+      detail: "New catalog flashed, booted and connected. Previous bench work used two unloaded servos without linkages; this does not qualify twelve-servo walking."
+    - label: "Battery and underside"
+      status: "Fitting a removable 10,000 mAh Anker bank"
+      detail: "Integrated bank charging, no separate buck converter; plug-in Qi add-on planned. Latest battery placement has a one-pose contact check, not a complete motion qualification."
     - label: "MetaHuman OS"
-      status: "Last reported September 10"
-      detail: "Input continuity, training, and profile-memory refinements."
+      status: "No new review in this entry"
+      detail: "Conversation and reasoning remain on the separate host. This update covers the robot and its body controls."
 entries:
+  - title: "Refining the body and fitting the Anker battery"
+    date: 2026-09-24
+    location: "Chassis, shell and removable power"
+    mileage: "Revised mounts · 80 mm support placement · 10,000 mAh bank"
+    summary: "The red body gains compact mask mounts and reinforced tabs while the underside is fitted around the Anker bank already on hand. Follow the width changes, battery clearance studies and remaining assembly work, with actual CAD images."
+    url: "/posts/2026-09-24-body-and-battery/"
+  - title: "Eight servos versus twelve: the current comparison"
+    date: 2026-09-24
+    location: "V1 and V2 side by side"
+    mileage: "Motion ranges · controls · processing · batteries"
+    summary: "Compare the physical V1 and evolving V2, with fresh per-joint range data, ESP32-S3/P4 configuration, the two power arrangements and an explicit record that neither runtime has been measured."
+    url: "/posts/v1-v2-comparison/"
+  - title: "Continuous gaits, reviewed expressions and P4 deployment"
+    date: 2026-09-24
+    location: "Continuing gait journal"
+    mileage: "Walk / Run / Crawl / Crab · 23 finite gestures and postures"
+    summary: "A playable Blender showcase accompanies the new Speed, stride, cadence and Finish controls. The latest entry records revised expressions, six-direction Crab and the September 24 application flash, with the physical tests still ahead."
+    url: "/posts/gait-development/"
   - title: "Integrating variable gait: stride and motion rate"
     date: 2026-09-21
     location: "Gait development and integration"
@@ -168,9 +189,10 @@ limitations, and next tests.
 See [current project status](/posts/current-status/) for the latest summary,
 or [browse the full article archive](/archive/) for guides and earlier reports.
 
-Latest build entries: [shell development](/posts/2026-09-21-shell-design/),
-[compact legs and horn fit](/posts/2026-09-21-compact-leg-design/), and
-[chassis packaging](/posts/2026-09-21-chassis-packaging/). The
-[gait journal](/posts/gait-development/) now includes later motion studies
-and compact-leg probes. The [printed-leg update](/posts/2026-09-15-leg-prototypes/)
-retains the original prototype photos and earlier fit revisions.
+Latest: [body and Anker battery fit](/posts/2026-09-24-body-and-battery/),
+[V1/V2 comparison](/posts/v1-v2-comparison/), and the
+[gait and controller journal](/posts/gait-development/). Earlier
+[shell development](/posts/2026-09-21-shell-design/),
+[compact legs and print files](/posts/2026-09-21-compact-leg-design/) and
+[printed-leg photographs](/posts/2026-09-15-leg-prototypes/) remain available
+as dated build records.

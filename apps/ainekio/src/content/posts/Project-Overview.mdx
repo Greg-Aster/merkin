@@ -1,8 +1,8 @@
 ---
 title: "Ainekio: Project Overview"
 published: 2026-08-27T09:45:00-07:00
-updated: 2026-09-21
-description: "Ainekio's working eight-servo robot and the twelve-servo build journal: chassis and printed-leg revisions, shell design and variable gait integration."
+updated: 2026-09-24
+description: "The working eight-servo Ainekio and twelve-servo development body: new motion controls, revised shell, removable battery fit and a detailed V1/V2 comparison."
 image: "/assets/ainekio/v2/assembly-september-20-concept.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -45,29 +45,30 @@ The working body is **V1**. It has eight MG90S servos: small motors that move to
 chosen angles, with two serving each leg. An ESP32-S3 controller runs scripted
 poses and movement sequences.
 
-**V2** is a substantially different twelve-servo design, with a third joint
-per leg for sideways foot placement and an ESP32-P4 selected as its controller.
-The September 21 build review follows a narrower chassis, compact leg links,
-printed fit trials and a layered outer shell. Modeling and prototype printing
-have occupied most of the recent work. A new variable gait demonstration now
-adds independent stride and cadence controls, with a video and downloadable
-motion data in the [continuing gait journal](/posts/gait-development/).
+**V2** is a substantially different twelve-servo design with sideways leg
+placement, a red mask and carapace, revised printed mounts and an ESP32-P4
+controller. The September 24 application deployment verifies the new motion
+catalog's flash, boot and gateway connection. Walk, Run, Crawl and six-direction
+Crab have continuous controls; 23 finite gestures/postures include revised
+expressions and experimental Upright.
 
-| Build area | Latest documented work | Next physical questions |
-| --- | --- | --- |
-| [Chassis](/posts/2026-09-21-chassis-packaging/) | Width reduced from 103 to 51.2 mm; board-clearance study and a lower camera-cable recess | Mounting, connectors and cable routing in the chosen assembly |
-| [Legs](/posts/2026-09-21-compact-leg-design/) | Earlier 22/36/55 mm variants and horn-fit correction; the new gait uses a later upright 24/38/55 mm revision | Revised print fit and loaded movement |
-| [Shell](/posts/2026-09-21-shell-design/) | Face, collar, roof and fin iterations shown in September 20 CAD views | Attachments, access and clearance around moving legs |
-| [Gait](/posts/gait-development/) | Four-leg Blender demo with independent stride/rate controls and timestamped twelve-joint data | Controller integration, support, calibration and loaded performance |
+The underside is now being fitted around a **removable 10,000 mAh Anker bank**.
+The modeling supports have widened to 80 mm at their exterior walls; matching
+the spanning plates and verifying the latest assembly are still in progress.
+Neither robot's battery runtime has been measured.
 
-These records establish design and prototype progress; they do not establish
-a completed, powered twelve-servo robot. Prepared motion sequences come first.
-Adaptive balance and terrain handling remain later possibilities.
+| Start here | What you can find |
+| --- | --- |
+| [Eight servos versus twelve](/posts/v1-v2-comparison/) | Actual V1 photo and V2 CAD view, motion ranges, controls, processing and batteries side by side |
+| [Body and battery progress](/posts/2026-09-24-body-and-battery/) | Shell attachment, printed-tab failures, reinforcement and successive Anker fit studies |
+| [Gait journal](/posts/gait-development/) | Playable Blender showcase, controls, revised gestures and controller deployment evidence |
+| [V2 parts and assembly record](/posts/ainekio-v2/) | Earlier design iterations, prototype photos and dated print downloads |
 
-The [V2 parts and assembly record](/posts/ainekio-v2/) connects the dated
-iterations and downloads. [The V1 hardware guide](/posts/body-design-and-hardware/)
-records the existing build. The dystopian illustrations remain concept art;
-each technical image identifies its CAD or physical prototype source.
+V1 remains the working complete robot. V2's modeling, printed leg prototypes
+and unloaded servo bench work do not establish complete-body loaded walking,
+balance or battery life. The [V1 hardware guide](/posts/body-design-and-hardware/)
+records the existing build. Dystopian illustrations remain concept artwork;
+technical images identify their CAD or physical sources.
 
 ## Why the software is changing too
 

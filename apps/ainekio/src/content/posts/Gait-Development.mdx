@@ -1,9 +1,9 @@
 ---
 title: "Gait Development Journal: From Eight Servos to Twelve"
 published: 2026-09-15
-updated: 2026-09-21
-description: "Integrating independent stride and motion-rate controls: a continuous Blender walking demo, geometry comparisons, timestamped motion data and the earlier V1/V2 studies."
-image: "/posts/gait-development/2026-09-21-variable-gait/demo-poster.webp"
+updated: 2026-09-24
+description: "Continuous Walk, Run, Crawl and Crab, reviewed gestures and the September 24 P4 deployment; a continuing journal with videos, range comparisons and earlier linkage experiments."
+image: "/posts/2026-09-24-progress/motion-showcase.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
@@ -23,24 +23,25 @@ the original eight-servo robot, then compares that motion baseline with the
 radically different twelve-servo linkage design. New calculations, experiments,
 and physical results will be recorded here as dated entries.
 
-**Current stage, September 21: integrating a variable gait system.** The new
-Blender demonstration independently changes stride length and motion rate
-through a continuous nine-cycle sequence. Its upright mechanism uses a 24 mm
-crank and 38 mm rod, a later revision than the compact probes below.
+**Current stage, September 24: continuous gaits and controller integration.**
+Walk, Run, Crawl and six-direction Crab now share the walking controls, with
+23 finite gestures/postures in the current V2 catalog. The latest P4 application
+has been flashed and booted; complete-body loaded walking remains unverified.
 
 <figure>
-  <video controls playsInline preload="metadata" width="960" height="540" poster="/posts/gait-development/2026-09-21-variable-gait/demo-poster.webp" aria-describedby="variable-gait-video-caption" className="w-full rounded-xl">
-    <source src="/posts/gait-development/2026-09-21-variable-gait/ainekio-variable-gait-demo.mp4" type="video/mp4" />
-    <a href="/posts/gait-development/2026-09-21-variable-gait/ainekio-variable-gait-demo.mp4">Download the variable gait demonstration.</a>
+  <video controls playsInline preload="metadata" width="960" height="540" poster="/posts/2026-09-24-progress/motion-showcase.webp" aria-describedby="motion-showcase-caption" className="w-full rounded-xl">
+    <source src="/posts/2026-09-24-progress/motion-showcase-2x.mp4" type="video/mp4" />
+    <a href="/posts/2026-09-24-progress/motion-showcase-2x.mp4">Download the motion showcase.</a>
   </video>
-  <figcaption id="variable-gait-video-caption">September 21 Blender animation, 14 seconds, no audio. The robot starts with short steps, lengthens its stride, speeds up, then returns to short steps. This records the modeled motion; physical walking remains unverified.</figcaption>
+  <figcaption id="motion-showcase-caption">September 23 Blender showcase: 33 chapters, 4 minutes 10 seconds, 2× playback, no audio. This shows the red body and the preceding motion library. The later reviewed Worm, Shrug, Play Dead, Lay Down and six-direction Crab changes are described in the September 24 entry; they are not all shown in this export.</figcaption>
 </figure>
 
-[Read the new stride-and-rate entry](#september-21-2026--independent-stride-and-motion-rate)
-for the controls, comparisons and downloadable data.
-[Download the video (MP4, 2.97 MB)](/posts/gait-development/2026-09-21-variable-gait/ainekio-variable-gait-demo.mp4).
-The September 15 baseline, [motion-library record](#september-17-2026--motion-studies-and-the-software-library)
-and [compact-leg probes](#september-19-2026--compact-leg-probes) remain below as dated experiments.
+[Read the latest journal entry](#september-24-2026--continuous-gaits-and-controller-integration)
+for controls, revised motions and deployment evidence, or open the
+[V1/V2 comparison](/posts/v1-v2-comparison/) for ranges, processing and batteries.
+[Download the showcase](/posts/2026-09-24-progress/motion-showcase-2x.mp4) and
+[chapter times](/posts/2026-09-24-progress/showcase-chapters.txt).
+The earlier experiments remain below in chronological order.
 
 ## September 15, 2026 — Establishing the movement baseline
 
@@ -484,6 +485,14 @@ contact assumptions and whether it came from calculation, CAD or hardware.
 
 ## September 21, 2026 — Independent stride and motion rate
 
+<figure>
+  <video controls playsInline preload="metadata" width="960" height="540" poster="/posts/gait-development/2026-09-21-variable-gait/demo-poster.webp" aria-describedby="variable-gait-video-caption" className="w-full rounded-xl">
+    <source src="/posts/gait-development/2026-09-21-variable-gait/ainekio-variable-gait-demo.mp4" type="video/mp4" />
+    <a href="/posts/gait-development/2026-09-21-variable-gait/ainekio-variable-gait-demo.mp4">Download the variable gait demonstration.</a>
+  </video>
+  <figcaption id="variable-gait-video-caption">September 21 Blender animation, 14 seconds, no audio. The robot starts with short steps, lengthens its stride, speeds up, then returns to short steps. This records the modeled motion; physical walking remains unverified.</figcaption>
+</figure>
+
 The variable gait work now brings all four legs into one continuous Blender
 animation, with separate controls for **how far each step reaches** and
 **how quickly the cycle runs**. The video at the top of this journal shows
@@ -647,3 +656,128 @@ Workspace prefixes are shortened in the published records. The large Blender
 project and its linked libraries are not included in these downloads. The
 earlier comparison videos and percentage measurements in the working folder
 describe preceding control revisions; this entry uses `stride-and-rate-v3`.
+
+## September 24, 2026 — Continuous gaits and controller integration
+
+The work has moved from the September 21 variable-stride demonstration into
+continuous controller gaits, reviewed gestures and a refreshed body in Blender.
+The September 24 deployment record confirms that the new catalog was flashed
+to the P4, booted and connected to the gateway. It does not establish loaded
+walking on the complete twelve-servo robot.
+
+### Walk, Run, Crawl and Crab
+
+Normal **Speed** coordinates stride and cadence. Advanced controls expose
+those quantities independently. The dashboard supports direction, ongoing
+operation, finite cycle counts and **Finish**. A settings update keeps the
+active gait's phase; Finish completes active swings and settles the feet.
+Emergency output disable is a separate action. Finish before selecting a new
+direction or gait; automatic Walk/Run blending is the supported exception.
+
+| Planner setting | Walk | Run | Crawl | Crab |
+| --- | --- | --- | --- | --- |
+| Normal Speed | 1–100%; higher values transition to Run | Automatic above 100%, up to 200% | 1–100% | 1–100% |
+| Advanced stride | 1–100% | 1–100% | 1–100% | 1–100% |
+| Advanced cadence | 0.25–3× | 0.25–3× | 0.25–3× | 0.25–3× |
+| Base cycle | 1.8 s | 1.2 s | 1.8 s | 2.4 s |
+| Full planted sweep | 92 mm | Forward 80–104 mm across automatic Run range | 18 mm | Travel per cycle: 48 mm fore/aft, 32 mm sideways |
+| Maximum configured lift | 14 mm | 22 mm | 4 mm | 12 mm |
+| Body/contact pattern | Stance anchors held through speed changes | Alternating front/rear pairs with brief modeled flight intervals | Body lowered 35 mm | 190 mm foot-reference stance width; three feet planted while one steps |
+
+Sweep is the modeled planted-foot path relative to the body, not automatically
+the distance traveled in a complete cycle. The Crab row explicitly reports
+**per-cycle travel**, a different quantity. These are planner settings, not
+measured speed, traction, jump height or physical robot performance.
+
+| Normal Speed | Walk/Crawl stride | Walk/Crawl cadence | Steady cycle |
+| --- | ---: | ---: | ---: |
+| 25% | 50% | 1× | 1.8 s |
+| 50% | 100% | 1× | 1.8 s |
+| 75% | 100% | 1.5× | 1.2 s |
+| 100% | 100% | 2× | 0.9 s |
+
+Speed zero requests Finish. For automatic Run, 150% gives approximately a
+0.514 s cycle and 200% gives 0.45 s. Crossing the Walk/Run boundary blends the
+contact pattern over four gait cycles; feet already in stance retain their
+anchors. These short periods are mathematical timing targets, not a claim
+that loaded servos can track them.
+
+<figure>
+  <video controls playsInline preload="metadata" width="1280" height="720" poster="/posts/2026-09-24-progress/run-poster.webp" aria-describedby="run-transition-caption" className="w-full rounded-xl">
+    <source src="/posts/2026-09-24-progress/walk-run-walk-2x.mp4" type="video/mp4" />
+    <a href="/posts/2026-09-24-progress/walk-run-walk-2x.mp4">Download the Walk–Run–Walk excerpt.</a>
+  </video>
+  <figcaption id="run-transition-caption">Walk → Run → Walk, excerpted from the September 23 Blender export. 15.3 seconds at 2× playback, without audio. Flight and planted contacts are animation/kinematic results; physical bounding stability is unverified.</figcaption>
+</figure>
+
+Crab now has **six ongoing directions**: left, right, forward, backward and two
+turning directions. The planner enters its wider stance over three seconds,
+one foot at a time. Finish holds that stance. Full-stride Crab turning specifies
+32.73° per cycle in the model; it is not a measured final heading. V2's eight
+old fixed-angle turn clips were removed from firmware. V1 keeps its existing
+fixed turns and finite Crab asset.
+
+### Reviewed expressions and posture distinctions
+
+The current firmware catalog has **23 finite gestures/postures** alongside the
+algorithmic gaits. These revisions preserve different intentions rather than
+using one lying-down pose for every command.
+
+| Motion | Current recording | End behavior |
+| --- | --- | --- |
+| Worm | 20 s; two slow deep body waves | Returns to standing |
+| Shrug | 14 s; seated, both front arms raised to the sides | Returns to standing |
+| Play Dead | 7 s; collapse with front hands about 45.35 mm farther forward than Lay Down | Holds the collapsed pose |
+| Lay Down | 7 s; retains the previous reviewed Dead pose | Holds the splayed-leg pose |
+| Rest | Existing all-lower-legs-flat, chassis-grounded pose | Remains distinct from Lay Down |
+| Upright | 22 s; Sit, reposition front feet, supported push, then vertical chassis over rear lower legs | Experimental held pose; balance, torque and recovery remain unqualified |
+
+The full video at the top of this journal was exported **before** the latest
+Worm, Shrug, Play Dead and six-direction Crab revisions. It shows the preceding
+choreography and evolving appearance; it is not a visual verification of every
+current command. The current range download is taken from the newer sources.
+
+### Calibration and the deployed application
+
+Body Control now exposes channel mapping, direction, model reference angles,
+pulse conversion, Home and explicit Save. Saved values belong to the individual
+body. Commanded pulse readback is not feedback from a joint-position sensor.
+Mapping edits and Save disable outputs; deliberate Home/move actions engage
+them. The output controller checks linkage closure and bounds entry transitions.
+
+The latest `CONTROLLER_VALIDATION.md` records:
+
+| Evidence | September 24 result |
+| --- | --- |
+| Current application | `0.7.0-p4-compact-motion`, 2,369,264 bytes |
+| Flash and boot | Application write verified; boot and gateway authentication confirmed |
+| Stored calibration | Saved mapping retained through the application-only update; outputs disabled afterward |
+| Software checks | 29 native/desktop checks and 72 gateway/protocol checks passed; dashboard motion-race checks also passed |
+| Compiled clip geometry | 23 clips, 61,919 comparison samples; maximum full-sole vertex difference 0.012861 mm |
+| Still unverified | Loaded motion, current-build P4 frame timing, shaft travel, full-body clearance and dynamic balance |
+
+Those are recorded development results, not checks rerun on the robot for this
+website entry. Earlier deployment and offline sections refer to their own
+application checkpoints. Previous hardware bench observations used two
+unloaded servos with no linkages.
+
+### Range data and geometry revisions
+
+The new [V1/V2 comparison](/posts/v1-v2-comparison/) includes motion envelopes,
+processing and power arrangements. Download the
+[current per-joint motion ranges](/posts/2026-09-24-progress/motion-ranges.csv)
+and [extraction script](/posts/2026-09-24-progress/extract-motion-ranges.py).
+The script reads source files only; it issues no robot commands.
+
+The runtime geometry still identifies the upright 24/38/24/55 mechanism from
+September 21. The September 23 scene synchronization and September 24 support
+widening are later CAD work. Updating appearance or placement in Blender does
+not regenerate controller geometry or qualify the changed body automatically.
+The [body and battery entry](/posts/2026-09-24-body-and-battery/) records those
+packaging changes and the remaining reconciliation.
+
+Sources: V2 model `README.md`, `motions/gestures/catalog.json`, gesture records,
+locomotion configuration, the dashboard controls and `CONTROLLER_VALIDATION.md`
+in the local robot checkout after `3f872e7`; Blender motion-export and
+expressive-motion records. The [source manifest](/posts/2026-09-24-progress/sources.json)
+identifies the exact files and hashes used for this entry.

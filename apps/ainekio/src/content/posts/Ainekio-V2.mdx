@@ -1,9 +1,9 @@
 ---
 title: "Ainekio V2: Parts, Assembly, and Design Iterations"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-09-21
-description: "V2's narrower chassis, leg revisions, shell development and variable gait integration, alongside the earlier parts, prototype and assembly records."
-image: "/posts/2026-09-21-design-progress/assembly-september-20.webp"
+updated: 2026-09-24
+description: "V2 build record: revised shell and mounts, 80 mm support placement, removable Anker battery fit and deployed continuous-gait controls, with earlier parts and print iterations."
+image: "/posts/2026-09-24-progress/motion-showcase.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
@@ -21,8 +21,8 @@ contentFormat: "report"
 
 # Building the next Ainekio body
 
-*Cover: September 20 CAD assembly showing the developing shell and compact
-leg mechanisms. This is a design view, not a completed physical build.*
+*Cover: September 23 Blender motion-export frame with the red mask and carapace.
+Later battery and 80 mm support edits are separate modeling work.*
 
 Ainekio is a small four-legged robot. Its working V1 body uses eight servos,
 with two motors positioning each leg. V2 adds a third joint per leg, a new
@@ -31,48 +31,47 @@ reliably and is easy to service.
 
 The extra joint matters because it moves a foot sideways. V1’s legs primarily
 move forward, backward, up, and down. V2 will also be able to change its stance
-width and use that movement in poses. It will start with scripted motion:
-prepared joint positions and timings. Automatic balance and adaptation to
-uneven ground require additional sensing and control work.
+width and use that movement in poses. The current controller combines continuous
+gait planning with prepared gestures.
+Automatic balance and adaptation to uneven ground require further sensing,
+control and physical testing.
 
-## Current revision: September 21
+## Current revision: September 24
 
-Recent work now includes **variable gait integration**. A fourteen-second
-Blender sequence changes stride and cadence independently across all four
-legs. The demonstration uses upright 24/38/55 mm geometry: 24 mm cranks,
-38 mm rods and 55 mm lower legs. The
-[new gait entry](/posts/gait-development/#september-21-2026--independent-stride-and-motion-rate)
-contains the video, control tables and timestamped twelve-joint data.
+The body now has compact mask screw mounts, a tapered rear plate and reinforced
+center-support tabs following reported failures in printed parts. The latest
+modeling scene measures **80 mm across the exterior support walls**, while the
+spanning plates and animation layouts retain the earlier revision. This remains
+an assembly in development, with alignment and clearance work outstanding.
 
-The September 17 chassis revision is 51.2 mm wide, down from 103 mm. The
-earlier 22/36/55 mm leg studies, angled and upright alternatives, and printed
-horn-fit correction remain separate dated records. Their exported parts should
-not be treated as the unchanged geometry of the new gait demonstration.
+The underside is being fitted around the **10,000 mAh Anker PowerCore Slim**
+already on hand. The removable bank has integrated charging and uses no separate
+buck converter; a plug-in Qi charging add-on is planned. Runtime has not been
+measured. Its latest placement has a one-pose contact check, separate from the
+earlier broader motion study.
 
-| Build record | What it covers |
+| Build record | Current detail |
 | --- | --- |
-| [Chassis packaging](/posts/2026-09-21-chassis-packaging/) | Narrower body, board clearance and the camera-cable opening |
-| [Compact legs and horn fit](/posts/2026-09-21-compact-leg-design/) | Side-by-side dimensions, measured articulation, part renders and dated STL downloads |
-| [Shell development](/posts/2026-09-21-shell-design/) | Actual CAD views, face/roof/fin iterations and remaining attachment work |
-| [Continuing gait journal](/posts/gait-development/) | Variable stride/rate video and data, plus the V1/V2 baseline and earlier probes |
+| [Body and battery fit](/posts/2026-09-24-body-and-battery/) | Red shell, mask mounts, reinforced tabs, 75/80 mm comparisons and successive battery placements |
+| [V1 versus V2](/posts/v1-v2-comparison/) | Side-by-side mechanics, fresh motion ranges, controller processing and power arrangements |
+| [Continuing gait journal](/posts/gait-development/) | Playable showcase; Walk, Run, Crawl, six-direction Crab and reviewed gestures; September 24 deployment |
+| [Compact legs and horn fit](/posts/2026-09-21-compact-leg-design/) | Earlier geometry alternatives and dated print files |
+| [Earlier shell design](/posts/2026-09-21-shell-design/) | Face, roof and fin development before the current assembly refinements |
 
-V1 remains the working complete robot. The V2 CAD studies and print exports
-do not establish a complete powered assembly or its load performance. The
-September 17 software record now includes a model-specific thirty-motion
-library; calibration, electrical acceptance and execution on the latest body
-remain separate work. The September 21 variable planner and Blender controls
-are a further integration step; they are not evidence that this new gait has
-been installed on the controller or walked under load.
+The latest P4 application was flashed, booted and connected on September 24.
+It contains continuous gaits and 23 finite gestures/postures. Previous bench
+work used two unloaded servos without linkages. V1 remains the working complete
+robot; loaded movement and battery performance of the revised twelve-servo
+body remain unverified.
 
-The rest of this guide preserves the earlier design decisions with their
-dates. The [September 15 prototype post](/posts/2026-09-15-leg-prototypes/)
-contains the physical leg photographs. The
-[September 10 body post](/posts/2026-09-10-v2-body-design/) records the earlier
-wide electronics layout, including the Q6A fit later retired from the narrow
-chassis. Use the [V1 hardware guide](/posts/body-design-and-hardware/) for the
-existing robot's parts and wiring.
+The rest of this guide preserves earlier decisions with their dates. The
+[September 15 prototype post](/posts/2026-09-15-leg-prototypes/) contains physical
+leg photographs; the [V1 hardware guide](/posts/body-design-and-hardware/)
+records the earlier robot's parts and wiring.
 
 ## Changes from V1
+
+*September 7 design comparison. The current comparison is linked above.*
 
 ![Illustrated comparison of Ainekio V1 and a prospective V2 hybrid with a stout body and serrated red legs.](/assets/ainekio/v2/evolution-concept.webp)
 
@@ -96,7 +95,9 @@ joint movements and enforce their limits.
 
 ## Legs and chassis
 
-The planned leg has **hip roll** for sideways movement, **hip pitch** for
+*Earlier design direction, retained for the build history.*
+
+The early V2 leg plan had **hip roll** for sideways movement, **hip pitch** for
 forward and backward movement, and a **knee** that bends the leg. Together they
 provide more foot-placement options and room for body lean and expressive
 poses. Speed is not the first priority.

@@ -20,11 +20,11 @@ export const siteConfig: SiteConfig = {
   defaultTheme: DARK_MODE,
   banner: {
     enable: false,
-    src: '/assets/ainekio/v2/assembly-september-20-concept.webp',
+    src: '/posts/2026-09-24-progress/motion-showcase.webp',
     position: 'center',
     credit: {
       enable: false,
-      text: 'AI concept illustration based on the September 20, 2026 CAD assembly',
+      text: 'September 23, 2026 Blender motion-export frame; later battery and width edits are separate modeling work',
       url: '',
     },
   },

@@ -20,23 +20,23 @@ The working V1 has eight joint motors, or servos, and an ESP32-S3 controller.
 Motion commands and audible playback have been demonstrated. Reliable repeated
 conversation and the revised software’s physical operation still need testing.
 
-V2 adds a third joint to each leg for twelve servos in total, with an ESP32-P4
-selected as the controller. Recent work has concentrated on modeling the
-chassis and legs and printing prototype assemblies. The **September 21 review**
-documents a chassis narrowed from 103 to 51.2 mm, compact 22/36/55 mm leg
-geometry, a horn pocket revised after a failed printed fit, and a developing
-outer shell. The later variable gait demo uses upright 24/38/55 mm legs.
-Those dimensions belong to dated iterations, not a final parts specification.
+V2 adds a third joint to each leg for twelve servos, with an ESP32-P4 body
+controller. The **September 24 update** documents the red shell, compact mask
+mounts, reinforced tabs and a modeling layout now 80 mm across the support
+walls. The underside is being fitted around a removable 10,000 mAh Anker bank
+with integrated charging, no separate buck converter and a planned plug-in Qi
+add-on. Battery life has not been measured.
 
-The [V2 parts and assembly record](/posts/ainekio-v2/) connects the
-[chassis](/posts/2026-09-21-chassis-packaging/),
-[leg](/posts/2026-09-21-compact-leg-design/) and
-[shell](/posts/2026-09-21-shell-design/) updates. The
-[gait journal](/posts/gait-development/) now includes a fourteen-second Blender
-demo with independent stride and motion-rate controls, comparison tables and
-timestamped twelve-joint data. Integration is in progress; controller timing,
-calibration, balance and loaded walking still need validation. The earlier
-single-leg probes remain in the journal as design history.
+The new [V1/V2 comparison](/posts/v1-v2-comparison/) places motion ranges,
+capabilities, processing and the two power arrangements side by side. The
+[body and battery entry](/posts/2026-09-24-body-and-battery/) follows the fit
+experiments. The [gait journal](/posts/gait-development/) includes a Blender
+showcase and the current Walk, Run, Crawl and Crab controls, reviewed gestures
+and September 24 firmware deployment. Flash and boot are verified in that
+record; complete-body loaded walking remains unverified.
+
+The [V2 assembly guide](/posts/ainekio-v2/) retains the earlier parts, geometry
+alternatives, print exports and prototype photographs.
 
 At the same time, the [MetaHuman redesign](/posts/metahuman-integration/) saves
 a request’s objective and progress. That lets work wait for a robot result,
@@ -72,13 +72,12 @@ leg geometry with an Ainekio-specific chassis. The continuing journal records
 the changes since that starting point, including alternative linkages and
 compact printed parts.
 
-The portal artwork interprets the September 20 CAD assembly: a narrow dark
-chassis, pale layered shell and exposed red links. It is AI-generated concept
-art in the site's dystopian science-fiction style. Technical posts separately
-show dated CAD views, renders of the exported parts, and physical prototype
-photographs. These images serve different purposes; artwork does not establish
-a finished build or a hardware test. Earlier illustrations remain with the
-design history they accompanied.
+The portal now shows a September 23 CAD motion-export frame of the red body.
+The dystopian science-fiction illustrations remain with the
+[project overview](/posts/project-overview/) and earlier design articles.
+They are labeled AI-generated concept art. Technical posts show dated CAD
+views, renders of exported parts and physical prototype photographs; each has
+its own evidence and date.
 
 The simulator experiment was unsuccessful and is fully retired. Its
 [motion notes](/posts/archive/motion-systems/) and the earlier
