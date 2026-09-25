@@ -76,34 +76,31 @@ when switching from one to two columns. It reported no app console errors,
 hydration failures, failed requests, failed assets, or HTTP error responses.
 Headless Chrome emitted only its environment-specific software-WebGL warnings.
 
-### Implemented but awaiting deployed or physical-device proof
+### Implemented but awaiting physical-device proof
 
-- The locally simulated 390 x 844 throttled browser results are not physical
-  mobile evidence. Home portal interaction, timeline interaction/LCP, archive
-  media, store media, profile admission, and audio output still need a real
-  mobile-device pass after deployment.
-- No deployed PageSpeed Insights, Lighthouse, or field Core Web Vitals result
-  proves the isolated candidate. Those measurements must follow integration and
-  deployment of the exact final commit. PageSpeed HTTP 429 remains an external
-  quota limitation rather than a code-repair task.
-- The desktop archive still uses the original wide PNG, and store cards still
-  use their current source images. Responsive derivatives for both are
-  explicitly deferred to the separate future media-optimization goal below;
-  they are not Phase 1 completion gates.
+- Phase 1 and the approved responsive-media Phase 2 were integrated in
+  `4e4cb6d513987a01af1080a2dac144e50e010479`, published to both `origin/main`
+  and `origin/dev`, and deployed successfully to production. Deployed browser
+  evidence is recorded in the Phase 2 section below.
+- The local and deployed 390 px browser results are not physical-mobile
+  evidence. Timeline interaction, product overflow/viewer behavior, cart,
+  profile/avatar presentation, audible audio, and the responsive store/archive
+  media still need Greg's real-device acceptance or explicit waiver.
+- PageSpeed HTTP 429 is an external quota limitation and is not a repair task or
+  completion blocker. No field Core Web Vitals claim is made.
+- The archive/store responsive derivatives formerly deferred from Phase 1 are
+  now implemented and deployed as the narrowly approved Phase 2 goal below.
 
 ### Genuinely unfinished Phase 1 work
 
 This list is frozen. Do not add cleanup to it merely because a source search
 finds another refactor opportunity.
 
-1. Integrate the isolated candidate without absorbing or reverting the current
-   uncommitted tentacle-frame work, then deploy that exact final commit.
-2. Record the deployed SHA and deployed browser/Lighthouse evidence.
-3. Record Greg's physical-mobile acceptance for timeline, product overflow,
+1. Record Greg's physical-mobile acceptance for timeline, product overflow,
    cart, profile/avatar, and audible audio, or Greg's explicit waiver. Local
    emulation is not physical proof.
 
-### Explicitly deferred Phase 2 work
+### Explicitly deferred work outside the approved responsive-media Phase 2
 
 - Broad shared-grid/banner compatibility-matrix cleanup, the dormant cookbook
   trigger cleanup, and dependency reshuffling are outside the frozen Phase 1
@@ -118,13 +115,9 @@ finds another refactor opportunity.
   URL, visual, media, or runtime contract.**
 - Tailwind/PostCSS migration and optional compression/dependency experiments
   are also Phase 2 unless a current gate begins failing because of them.
-- Archive-poster and store-card responsive image derivatives are explicitly
-  deferred to a separate future media-optimization goal. That goal must compare
-  visual quality and deployed transfer behavior and must not become a broad
-  grid, Navbar, or public-tree rewrite.
-- Proposed separate goal: **Produce, visually review, and deploy responsive
-  archive/store image derivatives through the existing media owners without
-  changing route behavior, source fallbacks, or shared public URLs.**
+- Archive-poster and store-card responsive image derivatives were subsequently
+  approved and completed as the narrow Phase 2 goal recorded below. That
+  approval did not authorize any of the other deferred work in this section.
 
 ### Phase 1 completion and stopping point
 
@@ -133,11 +126,11 @@ remaining P0 decision is fixed or explicitly deferred, focused local validation
 passes on the exact final source, deployed and physical-mobile evidence is
 reported, the owned changes are committed, and worktree ownership is clean.
 
-The exact stopping point is after the narrow cart repair is integrated and
-deployed, the exact deployed SHA and deployed/physical evidence are recorded,
-and all local validation processes are closed. Only then may the separately
-approved responsive-media Phase 2 goal begin. Broad shared-grid or Navbar
-cleanup remains deferred, and public-tree moves still require their separate
+The source, local-validation, integration, publication, and deployed-browser
+gates are complete at `4e4cb6d5`. The only retained Phase 1 gate is Greg's
+physical-mobile acceptance or explicit waiver. The separately approved
+responsive-media Phase 2 proceeded without broadening into shared-grid, Navbar,
+tentacle, or public-tree work. Public-tree moves still require their separate
 destructive-boundary approval.
 
 ## Phase 2 responsive archive/store media (2026-09-01)
@@ -217,13 +210,15 @@ Validation passed:
   own public tree and no caller of the new derivative URLs.
 - `git diff --check`
 
-Remote build and preview evidence:
+Remote build, deployment, and production evidence:
 
-- The isolated candidate is commit
+- The isolated implementation candidate is commit
   `d61a0d783800554130a3db11883ff50b1a3ecb44` on branch
-  `codex/megameal-phase2-responsive-media-20260901`. The remote branch resolved
-  to that exact SHA while `origin/main` and `origin/dev` remained at published
-  commit `e2416b68`.
+  `codex/megameal-phase2-responsive-media-20260901`. Its final evidence commit
+  was `828690edcdba26a5dd4594b6f2486d91bbe7b6cb`. Pull request 8 integrated the
+  Phase 1 reconciliation and Phase 2 media work as merge commit
+  `4e4cb6d513987a01af1080a2dac144e50e010479`; both `origin/main` and
+  `origin/dev` resolved to that exact commit before deployment.
 - GitHub Actions preview run `33539023479` checked out the named branch and its
   checkout log reported exact SHA `d61a0d783800554130a3db11883ff50b1a3ecb44`.
   Its dependency install, Megameal production build, Pages setup, artifact
@@ -238,20 +233,40 @@ Remote build and preview evidence:
   previous 2026-09-01 02:06 deployment: the new 320 px cookbook derivative
   returned HTTP 404 and the deployed store HTML contained none of this batch's
   new card candidates.
-- No production Cloudflare deployment was attempted. The existing manual
-  Cloudflare workflow would publish the selected ref as its `main` production
-  branch, which is not an isolated preview and remains unsafe while Greg's
-  concurrent Megameal work is active.
+- Production Cloudflare workflow run `33546064795` checked out exact SHA
+  `4e4cb6d513987a01af1080a2dac144e50e010479`. Its first Megameal checkout job
+  stalled before project code ran and was canceled; the failed-job rerun built
+  367 pages and deployed successfully at version URL
+  `https://80cac39e.merkin-megameal.pages.dev`. The game deployment triggered by
+  the shared public-asset change also passed.
+- Production `https://megameal.org/store/` contains all four 320/640 card source
+  sets, and `https://megameal.org/archive/` contains the 1280/1920 archive
+  source set. Representative cookbook, puppy, dip, manual, and archive WebPs
+  returned HTTP 200 from production.
+- A fresh deployed-browser matrix covered store widths 390, 768, and 1440 px,
+  including DPR 1 and 2 at the responsive breakpoints. Every document fit its
+  viewport; all seven marketplace cards loaded; the four optimized cards chose
+  320 or 640 px WebPs rather than their original oversized PNGs; and search
+  filtering and result counts remained functional.
+- The deployed 390 px CrateClip XL route retained its product viewer, controls,
+  navigation, and zero horizontal overflow. Add-to-cart, drawer open, reload
+  persistence, and removal passed. The archive selected the compact poster at
+  390 px, 1280 px poster at 768 px, and 1920 px poster at 1440 px; Play/Pause
+  worked, while reduced motion remained poster-only with no motion control.
+- The deployed matrix reported no application console warning/error, exception,
+  hydration failure, failed request, HTTP error, failed responsive image, or
+  horizontal document overflow. PageSpeed remained quota-limited, and no field
+  Core Web Vitals claim is made.
 
-The implementation is locally complete and remotely build-validated but is not
-deployed. Exact deployed transfer evidence remains pending safe integration of
-the Phase 1 base plus this candidate. Physical-device proof must be reported by
-Greg and is not claimed here. The failed Pages publication is direct evidence
-for the separately proposed multi-gigabyte deployment-boundary goal, but it does
-not authorize public-tree moves in this responsive-media goal. Authoring-file
-moves, cross-game deduplication, broad grid/Navbar cleanup, Tailwind/PostCSS
-migration, and unrelated dependency experiments remain outside this goal and
-require their previously documented approval and validation boundaries.
+The approved Phase 2 implementation, automated validation, integration,
+publication, and production-browser gates are complete. Physical-device proof
+must still be reported by Greg and is not claimed here. The failed Pages
+publication remains direct evidence for the separately proposed multi-gigabyte
+deployment-boundary goal, but it does not authorize public-tree moves.
+Authoring-file moves, cross-game deduplication, broad grid/Navbar cleanup,
+Tailwind/PostCSS migration, tentacle work, and unrelated dependency experiments
+remain outside this goal and require their previously documented approval and
+validation boundaries.
 
 ## Measured baseline
 
