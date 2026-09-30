@@ -1,10 +1,37 @@
 # Ainekio Image Sources
 
-Updated: 2026-08-27
+Updated: 2026-09-30
 
-## Construction reference
+## September 30 communication diagrams
 
-The source of truth for the robot's current appearance is the owner photo set in
+The September 30 progress post uses editable, repository-native SVG diagrams,
+not generated robot imagery or photographs:
+
+- `public/posts/ainekio-2026/q6a-communication.svg`: intended P4/Q6A/remote-compute
+  deployment split. Gateway and Environment Bridge stay together on the intended
+  Q6A host; no remote Environment endpoint or direct model-to-servo link is shown.
+- `public/posts/ainekio-2026/active-loop.svg`: earlier interaction pattern and
+  current source foundations, with the recognition backend and local task
+  producer marked as integration work.
+- `public/posts/ainekio-2026/q6a-communication-cover.svg`: simplified thumbnail of
+  the first diagram, explicitly labeled as a planned split.
+
+These diagrams were drawn for the site from Ainekio
+[`6437b24`](https://github.com/Greg-Aster/Ainekio-bot/commit/6437b24c0f91273aed160add0e42ac0ddbb5275c)
+([integration](https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/docs/BODY_CONTROL_INTEGRATION.md),
+[gateway](https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/Master/gateway/README.md))
+and MetaHuman
+[`c3f56d4`](https://github.com/Greg-Aster/metahuman-os/blob/c3f56d41dfb396cd68391d12a2910aee8c32870b/docs/technical/MAINTAINED_SURFACE.md).
+Cyan identifies source-level owners or paths; amber dashed marks identify
+intended placement or missing integration. Neither diagram proves a deployed
+Q6A topology, qualified combined-load latency, live IMU feedback, or physical
+autonomy. No external image or new hardware appearance is asserted. The fixed
+dark-teal canvas preserves label contrast in both site themes. Descriptive alt
+text, visible captions, full-size links, and source links accompany the figures.
+
+## August 27 construction reference
+
+The source of truth for the original robot's appearance is the owner photo set in
 `public/photos/`. The generated art must preserve these visible features:
 
 - low, open black rectangular printed chassis;

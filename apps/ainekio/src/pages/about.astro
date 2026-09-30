@@ -4,6 +4,7 @@ import { Icon } from 'astro-icon/components'
 import Markdown from '../components/misc/Markdown.astro'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
 import { siteConfig } from '../config/config'
+import { url } from '../utils/url-utils'
 
 const about = await getEntry('spec', 'about')
 if (!about) throw new Error("About content not found in 'spec/about'")
@@ -15,7 +16,7 @@ const { Content, headings } = await about.render()
   <article class="card-base overflow-hidden rounded-[var(--radius-large)] border border-black/5 dark:border-white/10">
     <figure>
       <img
-        src={siteConfig.banner.src}
+        src={url(siteConfig.banner.src)}
         alt="September 23 Blender view of the red Ainekio V2 body and exposed leg mechanisms"
         width="1440"
         height="810"

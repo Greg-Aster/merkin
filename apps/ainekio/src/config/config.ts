@@ -61,6 +61,10 @@ export const navBarConfig: NavBarConfig = {
       url: '/updates/',
     },
     {
+      name: 'Project Index',
+      url: '/project-guide/',
+    },
+    {
       name: 'Guides',
       url: '/#project-guides',
     },

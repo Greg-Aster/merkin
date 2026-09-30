@@ -1,5 +1,8 @@
 ---
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
+// The shared grid uses its own Layout, so app styles belong at this entry point.
+import '../styles/variables.styl'
+import '../styles/main.css'
 ---
 
 <SharedMainGridLayout {...Astro.props}>

@@ -7,7 +7,11 @@ import {
 } from '@merkin/docs-editor-bridge'
 import getReadingTime from 'reading-time'
 
-const GOOGLE_DOC_FETCH_TIMEOUT_MS = 10_000
+// Preview builds fetch each document once, with bounded retries for transient
+// failures. Production retains its existing timeout and fetch behavior.
+const IS_DEV_PREVIEW = process.env.MERKIN_DEV_PREVIEW === 'true'
+const GOOGLE_DOC_FETCH_TIMEOUT_MS = IS_DEV_PREVIEW ? 30_000 : 10_000
+const previewSnapshots = new Map<string, Promise<GoogleDocSnapshot>>()
 const GOOGLE_DOC_STYLE_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const GOOGLE_DOC_STYLES_DIRECTORY = new URL('../../public/styles/', import.meta.url)
 
@@ -36,6 +40,40 @@ export function resolveGoogleDocStylesheet(style: string): string {
 }
 
 export async function loadGoogleDocSnapshot(
+  documentId: string,
+): Promise<GoogleDocSnapshot> {
+  if (!IS_DEV_PREVIEW) return fetchGoogleDocSnapshot(documentId)
+
+  let snapshot = previewSnapshots.get(documentId)
+  if (!snapshot) {
+    snapshot = fetchPreviewSnapshot(documentId).catch((error) => {
+      previewSnapshots.delete(documentId)
+      throw error
+    })
+    previewSnapshots.set(documentId, snapshot)
+  }
+  return snapshot
+}
+
+async function fetchPreviewSnapshot(documentId: string): Promise<GoogleDocSnapshot> {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      return await fetchGoogleDocSnapshot(documentId)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      const transient =
+        /did not respond within|fetch failed|export failed with (429|5\d\d)/.test(message)
+      if (!transient || attempt === 3) throw error
+      console.warn(
+        `Retrying Google Doc ${documentId} after transient failure (${attempt}/3).`,
+      )
+      await new Promise((resolve) => setTimeout(resolve, attempt * 1_000))
+    }
+  }
+  throw new Error(`Google Doc ${documentId} could not be loaded.`)
+}
+
+async function fetchGoogleDocSnapshot(
   documentId: string,
 ): Promise<GoogleDocSnapshot> {
   const abortController = new AbortController()

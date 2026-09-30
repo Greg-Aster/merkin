@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="1040" viewBox="0 0 760 1040" role="img" aria-labelledby="title desc">
+  <title id="title">From action-by-action turns toward an active local loop</title>
+  <desc id="desc">The earlier simplified pattern is observe, LLM decision, action and check. Current camera processing and bounded gateway updates are implemented in source. A selected recognition backend and MetaHuman local task producer still need connecting. MetaHuman carries a saved task across waits, can steer or cancel it and receives parent-action results through the gateway. Active-update acknowledgements are not cognitive feedback. The complete autonomous physical loop remains unvalidated.</desc>
+  <defs>
+    <marker id="cyan-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto"><path d="M1 1 11 6 1 11" fill="none" stroke="#65d9e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="amber-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto"><path d="M1 1 11 6 1 11" fill="none" stroke="#f4c16d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <style>
+      text{font-family:Arial,Helvetica,sans-serif;fill:#eefaf6;text-anchor:middle}
+      .title{font-size:36px;font-weight:700}.head{font-size:30px;font-weight:700}.body{font-size:28px}.muted{fill:#b6d0ce}.amber{fill:#f4c16d}.cyan{fill:#65d9e8}
+      .source{fill:#10373a;stroke:#65d9e8;stroke-width:2}.planned{fill:#113337;stroke:#f4c16d;stroke-width:2;stroke-dasharray:10 8}
+      .existing{fill:none;stroke:#65d9e8;stroke-width:3;marker-end:url(#cyan-arrow)}.pending{fill:none;stroke:#f4c16d;stroke-width:3;stroke-dasharray:9 7;marker-end:url(#amber-arrow)}
+    </style>
+  </defs>
+  <rect width="760" height="1040" rx="28" fill="#062426"/>
+  <text x="380" y="58" class="title">Keep a task moving</text>
+  <text x="380" y="105" class="body muted">Earlier pattern, simplified</text>
+  <text x="380" y="150" class="head">Observe → LLM → act → check</text>
+  <text x="380" y="195" class="body muted">Saved workflows can span these steps.</text>
+  <path d="M58 227H702" stroke="#3b595a" stroke-width="2"/>
+  <text x="380" y="276" class="head">Current pieces, still being connected</text>
+  <path d="M100 316H145" stroke="#65d9e8" stroke-width="3"/>
+  <text x="232" y="325" class="body cyan">In source</text>
+  <path d="M405 316H450" stroke="#f4c16d" stroke-width="3" stroke-dasharray="9 7"/>
+  <text x="563" y="325" class="body amber">To integrate</text>
+  <rect x="55" y="363" width="407" height="130" rx="16" class="source"/>
+  <text x="258" y="408" class="head">Camera worker</text>
+  <text x="258" y="451" class="body muted">Newest fresh frame</text>
+  <path d="M258 493V531" class="pending"/>
+  <rect x="55" y="547" width="407" height="86" rx="16" class="planned"/>
+  <text x="258" y="600" class="head">Recognition backend</text>
+  <path d="M258 633V671" class="pending"/>
+  <rect x="55" y="687" width="407" height="86" rx="16" class="planned"/>
+  <text x="258" y="740" class="head">Local task producer</text>
+  <rect x="504" y="363" width="202" height="257" rx="16" class="source"/>
+  <text x="605" y="407" class="head">MetaHuman</text>
+  <text x="605" y="454" class="body">Saved task</text>
+  <text x="605" y="492" class="body">+ planning</text>
+  <text x="605" y="548" class="body muted">Intent</text>
+  <text x="605" y="585" class="body muted">Steer / cancel</text>
+  <path d="M562 620V730H479" class="pending"/>
+  <path d="M258 773V811" class="pending"/>
+  <rect x="55" y="827" width="407" height="84" rx="16" class="source"/>
+  <text x="258" y="880" class="head">Bounded gateway update</text>
+  <path d="M258 911V941" class="existing"/>
+  <rect x="55" y="957" width="407" height="60" rx="16" class="source"/>
+  <text x="258" y="997" class="head">P4 ongoing walk</text>
+  <path d="M462 987H677V638" class="existing"/>
+  <text x="581" y="771" class="body muted">Via gateway</text>
+  <text x="581" y="816" class="body cyan">Action</text>
+  <text x="581" y="854" class="body cyan">results</text>
+  <text x="581" y="913" class="body muted">Same action</text>
+  <text x="581" y="951" class="body muted">Same lease</text>
+</svg>

@@ -1,6 +1,7 @@
 ---
 import UpdatesRail from '@merkin/blog-core/components/widget/UpdatesRail.astro'
 import { siteConfig } from '../../config/config'
+import { url } from '../../utils/url-utils'
 
 const widgetConfig = siteConfig.rightRail?.widget
 ---
@@ -10,7 +11,7 @@ const widgetConfig = siteConfig.rightRail?.widget
     collection={widgetConfig.collection || 'updates'}
     slug={widgetConfig.slug || 'site-updates'}
     excerptLength={widgetConfig.excerptLength ?? 320}
-    journalUrl={widgetConfig.pageUrl || '/updates/'}
+    journalUrl={url(widgetConfig.pageUrl || '/updates/')}
     journalLinkLabel={widgetConfig.pageLinkLabel || 'Open full updates page'}
   />
 )}

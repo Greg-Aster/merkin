@@ -2,6 +2,7 @@
 import { getEntry } from 'astro:content'
 import MainGridLayout from '../../layouts/MainGridLayout.astro'
 import ProjectStatus from '../../components/ProjectStatus.astro'
+import { url } from '../../utils/url-utils'
 
 const updates = await getEntry('updates', 'site-updates')
 if (!updates) throw new Error('Project status requires updates/site-updates')
@@ -14,21 +15,22 @@ if (!latest?.url) throw new Error('Project status requires a linked development 
     <header>
       <h1>Current project status</h1>
       <p>The latest state of the robot and MetaHuman OS, with the next practical checks.</p>
+      <p>The original eight-servo S3 Ainekio remains supported alongside the twelve-servo Ainekio v2. <a href={url('/project-guide/#original-ainekio-and-ainekio-v2')}>Project Index and design context</a></p>
     </header>
     <ProjectStatus />
     <section aria-labelledby="status-latest-title">
       <h2 id="status-latest-title">Latest development update</h2>
-      <a href={latest.url}>{latest.title} <span aria-hidden="true">→</span></a>
+      <a href={url(latest.url)}>{latest.title} <span aria-hidden="true">→</span></a>
       <p>{latest.summary}</p>
     </section>
     <section aria-labelledby="status-history-title">
       <h2 id="status-history-title">Earlier reviews</h2>
       <p>These reports preserve what was known and tested at the time.</p>
-      <a href="/posts/archive/2026-09-09-project-status/">September 9, 2026: robot workflows and V2 planning <span aria-hidden="true">→</span></a>
+      <a href={url('/posts/archive/2026-09-09-project-status/')}>September 9, 2026: robot workflows and V2 planning <span aria-hidden="true">→</span></a>
     </section>
     <nav aria-label="Continue exploring">
-      <a href="/updates/">All development updates</a>
-      <a href="/#project-guides">Project guides</a>
+      <a href={url('/updates/')}>All development updates</a>
+      <a href={url('/#project-guides')}>Project guides</a>
     </nav>
   </article>
 </MainGridLayout>

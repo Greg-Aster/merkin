@@ -2,6 +2,7 @@
 import { getCollection, getEntry } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import { siteConfig } from '../config/config'
+import { url } from '../utils/url-utils'
 import ProjectStatus from './ProjectStatus.astro'
 
 const updates = await getEntry('updates', 'site-updates')
@@ -84,18 +85,19 @@ const sections = [
       <p class="home-intro">Building Ainekio, a four-legged robot connected to MetaHuman OS. Follow the chassis, printed leg prototypes, and gait experiments as the design develops.</p>
       <p class="home-feature-summary">{featured.summary}</p>
       <div class="home-actions">
-        <a class="home-primary-link" href={featured.url}>Read the latest update <Icon name="material-symbols:arrow-forward-rounded" /></a>
-        <a class="home-text-link" href="/posts/project-overview/">What is Ainekio?</a>
-        <a class="home-text-link" href="/archive/">All articles <Icon name="material-symbols:arrow-forward-rounded" /></a>
+        <a class="home-primary-link" href={url(featured.url)}>Read the latest update <Icon name="material-symbols:arrow-forward-rounded" /></a>
+        <a class="home-text-link" href={url('/posts/project-overview/')}>What is Ainekio?</a>
+        <a class="home-text-link" href={url('/project-guide/')}>Project Index</a>
+        <a class="home-text-link" href={url('/archive/')}>All articles <Icon name="material-symbols:arrow-forward-rounded" /></a>
       </div>
     </div>
     <figure class="home-feature-image">
-      <a href={featured.url} aria-label="Explore the latest Ainekio build">
-        <img class="home-concept" src={siteConfig.banner.src} alt="Ainekio V2 CAD body with a red mask and carapace, black supports and exposed leg linkages in the September 23 motion showcase" width="1440" height="810" loading="eager" fetchpriority="high" decoding="async" />
+      <a href={url(featured.url)} aria-label="Explore the latest Ainekio build">
+        <img class="home-concept" src={url(siteConfig.banner.src)} alt="Ainekio V2 CAD body with a red mask and carapace, black supports and exposed leg linkages in the September 23 motion showcase" width="1440" height="810" loading="eager" fetchpriority="high" decoding="async" />
       </a>
       <figcaption>{siteConfig.banner.credit.text}</figcaption>
-      <a class="home-update-preview" href={featured.url}>
-        <img src={featuredPost.data.image} alt={`Build update: ${featuredPost.data.title}`} loading="eager" decoding="async" />
+      <a class="home-update-preview" href={url(featured.url)}>
+        <img src={url(featuredPost.data.image)} alt={`Build update: ${featuredPost.data.title}`} loading="eager" decoding="async" />
         <span>Explore the latest update <span aria-hidden="true">→</span></span>
       </a>
     </figure>
@@ -103,24 +105,24 @@ const sections = [
 
   <div class="home-status">
     <ProjectStatus />
-    <a class="home-text-link home-status-link" href="/posts/current-status/">Status details and earlier reviews <Icon name="material-symbols:arrow-forward-rounded" /></a>
+    <a class="home-text-link home-status-link" href={url('/posts/current-status/')}>Status details and earlier reviews <Icon name="material-symbols:arrow-forward-rounded" /></a>
   </div>
 
   <section class="home-recent" aria-labelledby="home-updates-title">
     <div class="home-section-heading">
       <h2 id="home-updates-title">Recent updates</h2>
-      <a class="home-text-link" href="/updates/">All development updates <Icon name="material-symbols:arrow-forward-rounded" /></a>
+      <a class="home-text-link" href={url('/updates/')}>All development updates <Icon name="material-symbols:arrow-forward-rounded" /></a>
     </div>
     <div class="home-update-list">
       {recentUpdates.map(entry => (
         <article class="home-update">
-          {posts.find(post => `/posts/${post.slug}/` === entry.url)?.data.image && <a class="home-update-image" href={entry.url} aria-label={entry.title}><img src={posts.find(post => `/posts/${post.slug}/` === entry.url)!.data.image} alt="" loading="lazy" decoding="async" /></a>}
+          {posts.find(post => `/posts/${post.slug}/` === entry.url)?.data.image && <a class="home-update-image" href={url(entry.url)} aria-label={entry.title}><img src={url(posts.find(post => `/posts/${post.slug}/` === entry.url)!.data.image)} alt="" loading="lazy" decoding="async" /></a>}
           <div class="home-update-meta">
             <time datetime={entry.date.toISOString()}>{dateFormat.format(entry.date)}</time>
             {entry.location && <span>{entry.location}</span>}
           </div>
           <div>
-            <h3>{entry.url ? <a href={entry.url}>{entry.title} <span aria-hidden="true">→</span></a> : entry.title}</h3>
+            <h3>{entry.url ? <a href={url(entry.url)}>{entry.title} <span aria-hidden="true">→</span></a> : entry.title}</h3>
             <p>{entry.summary}</p>
           </div>
         </article>
@@ -139,11 +141,11 @@ const sections = [
     <div class="home-guide-grid">
       {sections.map(section => (
         <article class="home-guide">
-          <a class="home-guide-image" href={section.links[0].href} aria-label={section.title}><img src={section.image} alt="" loading="lazy" decoding="async" /></a>
+          <a class="home-guide-image" href={url(section.links[0].href)} aria-label={section.title}><img src={url(section.image)} alt="" loading="lazy" decoding="async" /></a>
           <h3><Icon name={section.icon} />{section.title}</h3>
           <p>{section.description}</p>
           <ul>
-            {section.links.map(link => <li><a class="home-text-link" href={link.href}>{link.label} <span aria-hidden="true">→</span></a></li>)}
+            {section.links.map(link => <li><a class="home-text-link" href={url(link.href)}>{link.label} <span aria-hidden="true">→</span></a></li>)}
           </ul>
         </article>
       ))}
@@ -153,15 +155,15 @@ const sections = [
   <section id="article-library" aria-labelledby="home-library-title">
     <div class="home-section-heading">
       <div><h2 id="home-library-title">All articles & build history</h2><p class="home-section-intro">Parts, wiring, software, and earlier experiments, ordered by their latest revision.</p></div>
-      <a class="home-text-link" href="/archive/">Open the archive <Icon name="material-symbols:arrow-forward-rounded" /></a>
+      <a class="home-text-link" href={url('/archive/')}>Open the archive <Icon name="material-symbols:arrow-forward-rounded" /></a>
     </div>
     <div class="home-library-grid">
       {library.map(post => (
         <article class="home-library-entry">
-          <a class="home-library-image" href={`/posts/${post.slug}/`} aria-label={post.data.title}><img src={post.data.image} alt="" loading="lazy" decoding="async" /></a>
+          <a class="home-library-image" href={url(`/posts/${post.slug}/`)} aria-label={post.data.title}><img src={url(post.data.image)} alt="" loading="lazy" decoding="async" /></a>
           <div>
             <p class="home-library-meta">{post.data.archive ? 'Earlier build record' : post.data.category} · {post.latestDate > post.data.published ? 'Updated ' : ''}<time datetime={post.latestDate.toISOString()}>{dateFormat.format(post.latestDate)}</time></p>
-            <h3><a href={`/posts/${post.slug}/`}>{post.data.title}</a></h3>
+            <h3><a href={url(`/posts/${post.slug}/`)}>{post.data.title}</a></h3>
             <p>{post.data.description}</p>
           </div>
         </article>

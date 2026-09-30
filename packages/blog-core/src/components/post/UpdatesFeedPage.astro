@@ -1,9 +1,10 @@
 ---
 import { getCollection } from 'astro:content'
 import MainGridLayout from '../../layouts/MainGridLayout.astro'
-import Markdown from '../misc/Markdown.astro'
-import { parseJournalContent } from '../../utils/journal-utils'
 import { formatDate } from '../../utils/date-utils'
+import { parseJournalContent } from '../../utils/journal-utils'
+import { url } from '../../utils/url-utils'
+import Markdown from '../misc/Markdown.astro'
 
 interface Props {
   collection?: string
@@ -31,12 +32,16 @@ if (!sourceEntry) {
 const feedContent = await parseJournalContent(
   sourceEntry.body,
   sourceEntry.data.entries ?? [],
+  { baseUrl: import.meta.env.BASE_URL },
 )
 const entries = feedContent.entries
 const pageTitle =
   title ?? sourceEntry.data.journalTitle ?? sourceEntry.data.title ?? 'Updates'
 const pageEyebrow =
-  eyebrow ?? sourceEntry.data.title ?? sourceEntry.data.journalTitle ?? 'Updates'
+  eyebrow ??
+  sourceEntry.data.title ??
+  sourceEntry.data.journalTitle ??
+  'Updates'
 ---
 
 <MainGridLayout title={pageTitle} description={description}>
@@ -63,7 +68,13 @@ const pageEyebrow =
             <div class="updates-feed-meta">
               <div>
                 <div class="updates-feed-title">
-                  {entry.title || formatDate(entry.date)}
+                  {entry.url ? (
+                    <a href={entry.url.startsWith('/') && !entry.url.startsWith('//')
+                      ? url(entry.url, import.meta.env.BASE_URL)
+                      : entry.url}>
+                      {entry.title || formatDate(entry.date)}
+                    </a>
+                  ) : entry.title || formatDate(entry.date)}
                 </div>
                 <div class="updates-feed-date">
                   {formatDate(entry.date)}

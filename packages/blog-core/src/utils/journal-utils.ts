@@ -1,4 +1,4 @@
-import { marked } from 'marked'
+import { Marked } from 'marked'
 
 export type LegacyJournalEntry = {
   title?: string
@@ -10,6 +10,7 @@ export type LegacyJournalEntry = {
 }
 
 export type ParsedJournalEntry = {
+  url?: string
   title?: string
   date: Date
   status?: string
@@ -46,18 +47,23 @@ const NOTE_PATTERN = /^note\s*:\s*(.+)$/i
 export async function parseJournalContent(
   body: string,
   legacyEntries: LegacyJournalEntry[] = [],
-  options: { excerptLength?: number } = {},
+  options: { excerptLength?: number; baseUrl?: string } = {},
 ): Promise<ParsedJournalContent> {
   const excerptLength = options.excerptLength ?? 1000
+  const baseUrl = options.baseUrl ?? '/'
   const normalizedBody = body.replace(/\r\n/g, '\n').trim()
   const bodySections = splitBodySections(normalizedBody)
 
   if (bodySections.length > 0) {
     const introMarkdown = extractIntroMarkdown(normalizedBody, bodySections[0])
-    const introHtml = introMarkdown ? await renderMarkdown(introMarkdown) : ''
+    const introHtml = introMarkdown
+      ? await renderMarkdown(introMarkdown, baseUrl)
+      : ''
     const parsedEntries = (
       await Promise.all(
-        bodySections.map(async (section) => parseBodySection(section, excerptLength)),
+        bodySections.map(async section =>
+          parseBodySection(section, excerptLength, baseUrl),
+        ),
       )
     ).sort((a, b) => b.date.getTime() - a.date.getTime())
 
@@ -71,22 +77,25 @@ export async function parseJournalContent(
 
   const parsedLegacyEntries = (
     await Promise.all(
-      legacyEntries.map(async (entry) => {
+      legacyEntries.map(async entry => {
         const contentMarkdown = entry.summary.trim()
         return {
           title: entry.title,
+          url: entry.url,
           date: entry.date,
           location: entry.location,
           mileage: entry.mileage,
           contentMarkdown,
-          contentHtml: await renderMarkdown(contentMarkdown),
+          contentHtml: await renderMarkdown(contentMarkdown, baseUrl),
           excerpt: summarizeMarkdown(contentMarkdown, excerptLength),
         }
       }),
     )
   ).sort((a, b) => b.date.getTime() - a.date.getTime())
 
-  const introHtml = normalizedBody ? await renderMarkdown(normalizedBody) : ''
+  const introHtml = normalizedBody
+    ? await renderMarkdown(normalizedBody, baseUrl)
+    : ''
 
   return {
     introMarkdown: normalizedBody,
@@ -108,13 +117,17 @@ function splitBodySections(body: string): BodySection[] {
       const nextStart = matches[index + 1]?.index ?? body.length
       const rawSection = body.slice(start, nextStart).trim()
       const lines = rawSection.split('\n')
-      const heading = lines.shift()?.replace(/^##\s+/, '').trim() ?? ''
+      const heading =
+        lines
+          .shift()
+          ?.replace(/^##\s+/, '')
+          .trim() ?? ''
       return {
         heading,
         markdown: lines.join('\n').trim(),
       }
     })
-    .filter((section) => DATE_PREFIX_PATTERN.test(section.heading))
+    .filter(section => DATE_PREFIX_PATTERN.test(section.heading))
 }
 
 function extractIntroMarkdown(body: string, firstSection: BodySection): string {
@@ -130,6 +143,7 @@ function extractIntroMarkdown(body: string, firstSection: BodySection): string {
 async function parseBodySection(
   section: BodySection,
   excerptLength: number,
+  baseUrl: string,
 ): Promise<ParsedJournalEntry> {
   const { date, title } = parseHeading(section.heading)
   const {
@@ -141,7 +155,7 @@ async function parseBodySection(
     note,
     contentMarkdown,
   } = extractSectionMetadata(section.markdown)
-  const contentHtml = await renderMarkdown(contentMarkdown)
+  const contentHtml = await renderMarkdown(contentMarkdown, baseUrl)
 
   return {
     title,
@@ -254,12 +268,34 @@ function extractSectionMetadata(markdown: string): {
   }
 }
 
-async function renderMarkdown(markdown: string): Promise<string> {
+async function renderMarkdown(
+  markdown: string,
+  baseUrl: string,
+): Promise<string> {
   if (!markdown.trim()) {
     return ''
   }
 
-  return await marked.parse(markdown)
+  // These journals are rendered by Marked, outside Astro's Markdown pipeline.
+  // Use a per-render instance so one site's preview base cannot leak to another.
+  const prefix = `/${baseUrl.split('/').filter(Boolean).join('/')}`
+  const markdownRenderer = new Marked({
+    walkTokens(token) {
+      if ((token.type === 'link' || token.type === 'image') && prefix !== '/') {
+        const href = token.href
+        if (
+          href.startsWith('/') &&
+          !href.startsWith('//') &&
+          href !== prefix &&
+          !href.startsWith(`${prefix}/`) &&
+          !href.startsWith(`${prefix}?`) &&
+          !href.startsWith(`${prefix}#`)
+        )
+          token.href = `${prefix}${href}`
+      }
+    },
+  })
+  return await markdownRenderer.parse(markdown)
 }
 
 function summarizeMarkdown(markdown: string, maxLength = 220): string {

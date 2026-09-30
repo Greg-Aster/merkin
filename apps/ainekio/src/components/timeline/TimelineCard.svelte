@@ -3,6 +3,7 @@ import { cubicOut } from 'svelte/easing'
 import { fade, fly } from 'svelte/transition'
 import type { TimelineEvent } from '../../services/TimelineService.client'
 import { getEraDisplayName } from '../../services/TimelineService.client'
+import { getPostUrlBySlug } from '../../utils/url-utils'
 
 // Props
 export let event: TimelineEvent
@@ -61,7 +62,7 @@ function getEraBadgeClass(era?: string): string {
     </div>
   {/if}
   
-  <a href="/posts/{event.slug}/#post-container" class="timeline-link text-[0.65rem] mt-1 inline-block py-0.5 px-1.5 rounded-full bg-[oklch(0.9_0.05_var(--hue))/0.1] dark:bg-[oklch(0.3_0.05_var(--hue))/0.2] text-[oklch(0.4_0.05_var(--hue))] dark:text-[oklch(0.9_0.05_var(--hue))]">
+  <a href={`${getPostUrlBySlug(event.slug)}#post-container`} class="timeline-link text-[0.65rem] mt-1 inline-block py-0.5 px-1.5 rounded-full bg-[oklch(0.9_0.05_var(--hue))/0.1] dark:bg-[oklch(0.3_0.05_var(--hue))/0.2] text-[oklch(0.4_0.05_var(--hue))] dark:text-[oklch(0.9_0.05_var(--hue))]">
     View Event →
   </a>
   

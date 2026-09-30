@@ -10,33 +10,39 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "V2: new motion controls; underside and battery fit in progress"
-  location: "Working V1 / V2 CAD, printed prototypes and P4 bench"
-  updated: 2026-09-24
-  mileage: "September 24 · deployed motion catalog and removable 10,000 mAh battery design"
-  section: "Continuous gaits, revised body and Anker battery packaging"
-  nextStop: "Reconcile the wider supports with the plates and underside, complete the battery holder and motion clearances, then measure loaded movement and runtime."
-  note: "Walk, Run, Crawl, six-direction Crab and 23 finite gestures/postures are in the latest P4 application; September 24 records verify flash, boot and gateway connection. The red body has revised mask mounts and reinforced tabs. The modeling supports now span 80 mm while plates and animations retain the earlier layout. A removable 10,000 mAh Anker bank is being fitted underneath; loaded walking and battery runtime remain unmeasured."
+  status: "Q6A integration, revised chassis and active-loop foundations"
+  location: "Working S3 Ainekio / P4 + Q6A development"
+  updated: 2026-09-30
+  mileage: "Ainekio 6437b24 · MetaHuman c3f56d4"
+  section: "Body, perception and saved workflows"
+  nextStop: "Fit the revised body and measure loaded movement; bring up Q6A services together, then connect recognition and fresh results to bounded motion updates."
+  note: "Q6A integration, revised v2 geometry and a more active perception loop are in progress. Fresh-frame processing and bounded walk updates have source and simulated-body coverage. September 24 P4 flash/boot evidence and September 25 saved-speed readback remain dated milestones; September 29 regenerated geometry has not been flashed or powered-tested. YOLO selection, live IMU acquisition and the connected physical loop remain open."
   areas:
-    - label: "V1 robot"
-      status: "Working eight-servo prototype"
-      detail: "ESP32-S3; 1,000 mAh LiPo, external charger and buck converter. Runtime not measured."
-    - label: "V2 body"
-      status: "Shell, mounts and support spacing revised"
-      detail: "Red mask and carapace, compact screw mounts and reinforced printed tabs. Latest modeling width is 80 mm at the outer support walls; spanning plates still need reconciliation."
+    - label: "Original Ainekio"
+      status: "Supported eight-servo S3 design"
+      detail: "Working prototype with a 1,000 mAh LiPo, external charger and buck converter. Runtime not measured."
+    - label: "Ainekio v2 body"
+      status: "Q6A mounting and shoulder geometry revised"
+      detail: "The later geometry regenerated all 47 motion sources with offline model and build checks. Fit, balance and loaded movement remain unverified; earlier shell, printed-leg and battery studies remain dated build records."
     - label: "Motion controls"
-      status: "Continuous gaits and reviewed gestures"
-      detail: "Speed, independent stride/cadence, direction and Finish; automatic Walk/Run transitions and ongoing six-direction Crab. Full-body loaded performance remains unverified."
-    - label: "P4 controller"
-      status: "September 24 application deployment verified"
-      detail: "New catalog flashed, booted and connected. Previous bench work used two unloaded servos without linkages; this does not qualify twelve-servo walking."
+      status: "Continuous gaits and bounded walk updates"
+      detail: "The existing gait catalog and Finish controls are joined by authenticated updates to speed or paired stride/cadence settings, retaining the gait, direction, action and body lease. New paths have simulated-body coverage, not loaded-body acceptance."
+    - label: "P4 controller and Q6A"
+      status: "Direct Wi-Fi integration in progress"
+      detail: "P4 keeps gait execution; the intended Q6A host keeps the gateway and Environment Bridge local. September 24 application flash/boot and September 25 speed readback precede the unflashed September 29 geometry. Concurrent camera, audio and motion load still needs measurement."
     - label: "Battery and underside"
-      status: "Fitting a removable 10,000 mAh Anker bank"
-      detail: "Integrated bank charging, no separate buck converter; plug-in Qi add-on planned. Latest battery placement has a one-pose contact check, not a complete motion qualification."
-    - label: "MetaHuman OS"
-      status: "No new review in this entry"
-      detail: "Conversation and reasoning remain on the separate host. This update covers the robot and its body controls."
+      status: "Removable 10,000 mAh Anker fit remains open"
+      detail: "The September 24 design uses integrated bank charging without a separate buck converter; plug-in Qi is planned. Earlier one-pose contact checks do not establish complete motion clearance or battery runtime."
+    - label: "MetaHuman OS and perception"
+      status: "Saved workflows and fresh-frame foundations"
+      detail: "Saved executions span waits, new-input steering and correlated results. Recognition and the local task producer still need joining up; YOLO remains research. Portable IMU estimation is source-tested, with live acquisition and balance feedback still unconnected."
 entries:
+  - title: "Q6A, chassis work, and a more active loop"
+    date: 2026-09-30
+    location: "Body + MetaHuman OS"
+    mileage: "6437b24 · c3f56d4"
+    summary: "Revised v2 geometry, Q6A integration, fresh-frame processing, and saved MetaHuman executions. YOLO and the connected active loop are still being worked out."
+    url: "/posts/q6a-chassis-and-active-loop/"
   - title: "Refining the body and fitting the Anker battery"
     date: 2026-09-24
     location: "Chassis, shell and removable power"
@@ -189,7 +195,9 @@ limitations, and next tests.
 See [current project status](/posts/current-status/) for the latest summary,
 or [browse the full article archive](/archive/) for guides and earlier reports.
 
-Latest: [body and Anker battery fit](/posts/2026-09-24-body-and-battery/),
+Latest: [Q6A, chassis work, and a more active loop](/posts/q6a-chassis-and-active-loop/).
+
+Earlier [body and Anker battery fit](/posts/2026-09-24-body-and-battery/),
 [V1/V2 comparison](/posts/v1-v2-comparison/), and the
 [gait and controller journal](/posts/gait-development/). Earlier
 [shell development](/posts/2026-09-21-shell-design/),
