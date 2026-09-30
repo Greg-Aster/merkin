@@ -152,6 +152,13 @@ assert.doesNotMatch(
 for (const [route, html] of [
   ['/', home],
   ['/project-guide/', guide],
+  [
+    '/posts/q6a-chassis-and-active-loop/',
+    readFileSync(
+      path.join(dist, 'posts/q6a-chassis-and-active-loop/index.html'),
+      'utf8',
+    ),
+  ],
   ['/about/', readFileSync(path.join(dist, 'about/index.html'), 'utf8')],
 ]) {
   for (const attribute of ['href', 'src', 'component-url', 'renderer-url']) {
