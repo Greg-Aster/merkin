@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry } from 'astro:content'
 import { Icon } from 'astro-icon/components'
+import { url } from '../utils/url-utils'
 
 const posts = await getCollection(
   'posts',
@@ -97,7 +98,7 @@ const loop = [
 <div class="mb-6 space-y-6">
   <section class="card-base relative min-h-[30rem] overflow-hidden rounded-[var(--radius-large)] border border-cyan-300/20 shadow-2xl shadow-cyan-950/15">
     <img
-      src="/assets/ainekio/hero.webp"
+      src={url('/assets/ainekio/hero.webp')}
       alt="The current red-and-black open-frame Ainekio prototype on a ruined elevated highway"
       class="absolute inset-0 h-full w-full object-cover object-[68%_center]"
       loading="eager"
@@ -121,11 +122,11 @@ const loop = [
       </div>
 
       <div class="flex flex-wrap gap-3">
-        <a href="/project-guide/" class="inline-flex items-center gap-2 rounded-full bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-200 active:scale-95">
+        <a href={url('/project-guide/')} class="inline-flex items-center gap-2 rounded-full bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-200 active:scale-95">
           Open project index
           <Icon name="material-symbols:arrow-forward-rounded" class="text-xl" />
         </a>
-        <a href="/posts/current-status/" class="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-5 py-3 text-sm font-bold text-white backdrop-blur transition hover:border-amber-300/60 hover:bg-black/45 active:scale-95">
+        <a href={url('/posts/current-status/')} class="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-5 py-3 text-sm font-bold text-white backdrop-blur transition hover:border-amber-300/60 hover:bg-black/45 active:scale-95">
           Read current status
           <Icon name="material-symbols:fact-check-outline" class="text-xl" />
         </a>
@@ -135,7 +136,7 @@ const loop = [
 
   <p class="px-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
     Following the original S3 robot or the twelve-servo Ainekio v2 exploration?
-    <a href="/project-guide/#original-ainekio-and-ainekio-v2" class="font-bold text-cyan-700 underline underline-offset-4 dark:text-cyan-300">See how the supported designs fit together.</a>
+    <a href={url('/project-guide/#original-ainekio-and-ainekio-v2')} class="font-bold text-cyan-700 underline underline-offset-4 dark:text-cyan-300">See how the supported designs fit together.</a>
   </p>
 
   <section aria-label="Project evidence summary" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -195,7 +196,7 @@ const loop = [
         <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-300">Browse by system</p>
         <h2 class="mt-1 text-3xl font-black tracking-[-0.03em] text-slate-950 dark:text-white">The field guide</h2>
       </div>
-      <a href="/archive/" class="inline-flex items-center gap-1 text-sm font-bold text-cyan-700 hover:underline dark:text-cyan-300">
+      <a href={url('/archive/')} class="inline-flex items-center gap-1 text-sm font-bold text-cyan-700 hover:underline dark:text-cyan-300">
         Open full archive <Icon name="material-symbols:arrow-forward-rounded" class="text-lg" />
       </a>
     </div>
@@ -213,7 +214,7 @@ const loop = [
               <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{section.description}</p>
               <div class="mt-5 flex flex-col gap-2">
                 {section.links.map(link => (
-                  <a href={link.href} class="group inline-flex items-center justify-between gap-3 rounded-lg border border-slate-900/10 bg-white/40 px-4 py-3 text-sm font-bold text-slate-800 transition hover:border-cyan-400/60 hover:bg-cyan-500/[0.06] hover:text-cyan-800 dark:border-white/10 dark:bg-slate-950/35 dark:text-slate-100 dark:hover:text-cyan-200">
+                  <a href={url(link.href)} class="group inline-flex items-center justify-between gap-3 rounded-lg border border-slate-900/10 bg-white/40 px-4 py-3 text-sm font-bold text-slate-800 transition hover:border-cyan-400/60 hover:bg-cyan-500/[0.06] hover:text-cyan-800 dark:border-white/10 dark:bg-slate-950/35 dark:text-slate-100 dark:hover:text-cyan-200">
                     {link.label}
                     <Icon name="material-symbols:arrow-forward-rounded" class="text-xl transition group-hover:translate-x-1" />
                   </a>

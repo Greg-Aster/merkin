@@ -5,6 +5,12 @@ import { fileURLToPath } from 'node:url'
 
 const app = fileURLToPath(new URL('..', import.meta.url))
 const dist = path.join(app, 'dist')
+const base =
+  `/${(process.env.SITE_BASE || '/').split('/').filter(Boolean).join('/')}/`.replace(
+    /\/+/g,
+    '/',
+  )
+const sitePath = pathname => `${base}${pathname.replace(/^\/+/, '')}`
 const guide = readFileSync(path.join(dist, 'project-guide/index.html'), 'utf8')
 const home = readFileSync(path.join(dist, 'index.html'), 'utf8')
 const source = readFileSync(
@@ -22,7 +28,7 @@ const attributeValues = (html, name) =>
   ].map(match => match[1] ?? match[2] ?? match[3])
 
 assert.ok(
-  attributeValues(home, 'href').includes('/project-guide/'),
+  attributeValues(home, 'href').includes(sitePath('/project-guide/')),
   'Home must link to guide',
 )
 for (const id of ['standard-nav', 'default-links']) {
@@ -44,7 +50,7 @@ for (const id of ['standard-nav', 'default-links']) {
   assert.ok(end > start, `Unclosed navigation region: ${id}`)
   assert.ok(
     attributeValues(guide.slice(start, end), 'href').includes(
-      '/project-guide/',
+      sitePath('/project-guide/'),
     ),
     `${id} must link to guide`,
   )
@@ -78,7 +84,11 @@ for (const href of hrefs) {
   }
   if (href.startsWith('/') && !href.startsWith('//')) {
     const pathname = href.split(/[?#]/)[0]
-    const target = path.join(dist, pathname)
+    assert.ok(
+      pathname.startsWith(base),
+      `Local link escapes SITE_BASE: ${href}`,
+    )
+    const target = path.join(dist, pathname.slice(base.length))
     assert.ok(
       existsSync(target) || existsSync(path.join(target, 'index.html')),
       `Missing built local target: ${href}`,
@@ -121,7 +131,7 @@ for (const slug of [
   )
   assert.ok(
     attributeValues(html, 'href').includes(
-      '/project-guide/#original-ainekio-and-ainekio-v2',
+      sitePath('/project-guide/#original-ainekio-and-ainekio-v2'),
     ),
     `Missing history context link: ${slug}`,
   )
@@ -137,6 +147,62 @@ assert.doesNotMatch(
   'Do not restore presentation sections',
 )
 
+// Check all rendered local links/assets on the entry points, including shared
+// navigation, image wrappers, hydration modules and stylesheet URLs.
+for (const [route, html] of [
+  ['/', home],
+  ['/project-guide/', guide],
+  ['/about/', readFileSync(path.join(dist, 'about/index.html'), 'utf8')],
+]) {
+  for (const attribute of ['href', 'src', 'component-url', 'renderer-url']) {
+    for (const value of attributeValues(html, attribute)) {
+      if (!value.startsWith('/') || value.startsWith('//')) continue
+      assert.ok(
+        value.startsWith(base),
+        `${route}: ${attribute} escapes SITE_BASE: ${value}`,
+      )
+      const pathname = decodeURIComponent(value.split(/[?#]/)[0])
+      // These targets are missing on production too. Still check their base prefix.
+      if (
+        ['/privacy/', '/thumb/favicon-dark-180.png'].some(
+          missing => pathname === sitePath(missing),
+        )
+      )
+        continue
+      const target = path.join(dist, pathname.slice(base.length))
+      assert.ok(
+        existsSync(target) || existsSync(path.join(target, 'index.html')),
+        `${route}: missing ${attribute} target: ${value}`,
+      )
+    }
+  }
+}
+const rssLink = [...home.matchAll(/<link\b[^>]*>/g)].find(match =>
+  attributeValues(match[0], 'type').includes('application/rss+xml'),
+)
+assert.ok(rssLink, 'RSS discovery link must render')
+assert.equal(
+  new URL(attributeValues(rssLink[0], 'href')[0]).pathname,
+  sitePath('/rss.xml'),
+  'RSS discovery must honor SITE_BASE',
+)
+assert.ok(
+  attributeValues(home, 'href').includes(sitePath('/2/')),
+  'Numbered pagination must honor SITE_BASE',
+)
+assert.ok(
+  home.includes(sitePath('/pagefind/pagefind.js')),
+  'Pagefind loader must honor SITE_BASE',
+)
+assert.ok(
+  existsSync(path.join(dist, 'pagefind/pagefind.js')),
+  'Pagefind index must be built',
+)
+assert.ok(
+  attributeValues(home, 'src').includes(sitePath('/assets/ainekio/hero.webp')),
+  'Homepage hero must honor SITE_BASE',
+)
+
 console.log(
-  `Project Index smoke checks passed (${ids.size} anchors, ${hrefs.length} links).`,
+  `Project Index smoke checks passed at ${base} (${ids.size} anchors, ${hrefs.length} links).`,
 )

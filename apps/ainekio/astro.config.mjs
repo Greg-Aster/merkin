@@ -18,6 +18,7 @@ import { GithubCardComponent } from "./src/plugins/rehype-component-github-card.
 import { parseDirectiveNode } from "./src/plugins/remark-directive-rehype.js";
 import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
+import { rehypeBasePath } from "./src/plugins/rehype-base-path.mjs";
 import mdx from "@astrojs/mdx";
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
@@ -253,6 +254,7 @@ export default defineConfig({
       parseDirectiveNode,
     ],
     rehypePlugins: [
+      [rehypeBasePath, { base: basePath }],
       rehypeKatex,
       rehypeSlug,
       [

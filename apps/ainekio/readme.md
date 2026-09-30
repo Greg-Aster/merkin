@@ -33,7 +33,18 @@ pnpm build:ainekio
 ```
 
 After a build, `node apps/ainekio/scripts/check-project-guide.mjs` checks the
-rendered route, section anchors, navigation, and linked local pages.
+rendered route, section anchors, navigation, local links/assets, and the Pagefind
+loader. For a subdirectory preview, pass the same base used for the build:
+
+```sh
+pnpm --filter @merkin/ainekio test:base-path
+SITE_URL=https://greg-aster.github.io SITE_BASE=/merkin/ainekio/ pnpm build:ainekio
+SITE_BASE=/merkin/ainekio/ node apps/ainekio/scripts/check-project-guide.mjs
+```
+
+Markdown and MDX root-local links are prefixed at build time, so canonical content
+works unchanged on both `ainek.io` and the GitHub Pages preview. Astro components
+should use `url()` or `getPostUrlBySlug()` for local links and public assets.
 
 Working rows name a next check, repository, state, and dated source. Recheck means
 verification is needed, not that the cited issue is known to remain open.

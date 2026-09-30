@@ -11,18 +11,6 @@ on:
         required: true
         default: "dev"
         type: string
-      site:
-        description: "Site selection for manual previews"
-        required: true
-        default: "all"
-        type: choice
-        options:
-          - all
-          - changed
-          - travel
-          - temporal
-          - dndiy
-          - megameal
       prune_mode:
         description: "Large-asset pruning mode"
         required: true
@@ -70,11 +58,14 @@ jobs:
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Test preview paths and document reliability
+        run: |
+          node apps/ainekio/scripts/test-base-path.mjs
+          node apps/megameal/scripts/test-google-doc-preview.mjs
+
       - name: Build all sites into subfolders
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          EVENT_BEFORE: ${{ github.event.before || '' }}
-          SITE_INPUT: ${{ inputs.site || 'all' }}
+          MERKIN_DEV_PREVIEW: "true"
           PRUNE_INPUT: ${{ inputs.prune_mode || 'auto' }}
         run: |
           set -euo pipefail
@@ -86,93 +77,10 @@ jobs:
           mkdir -p preview-dist
           touch preview-dist/.nojekyll
 
-          travel=false
-          temporal=false
-          dndiy=false
-          megameal=false
-          detect_changed=false
-
-          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
-            case "${SITE_INPUT}" in
-              all)
-                travel=true
-                temporal=true
-                dndiy=true
-                megameal=true
-                ;;
-              changed)
-                detect_changed=true
-                ;;
-              travel)
-                travel=true
-                ;;
-              temporal)
-                temporal=true
-                ;;
-              dndiy)
-                dndiy=true
-                ;;
-              megameal)
-                megameal=true
-                ;;
-              *)
-                echo "Unsupported site input: ${SITE_INPUT}" >&2
-                exit 64
-                ;;
-            esac
-          else
-            detect_changed=true
-          fi
-
-          if [[ "${detect_changed}" == "true" ]]; then
-            base_sha="${EVENT_BEFORE}"
-            if [[ -z "${base_sha}" || "${base_sha}" == "0000000000000000000000000000000000000000" ]]; then
-              if git rev-parse HEAD^ >/dev/null 2>&1; then
-                base_sha="$(git rev-parse HEAD^)"
-              else
-                base_sha=""
-              fi
-            fi
-
-            if [[ -n "${base_sha}" ]]; then
-              changed_files="$(git diff --name-only "${base_sha}" "${GITHUB_SHA}" || true)"
-            else
-              changed_files="$(git show --pretty='' --name-only "${GITHUB_SHA}" || true)"
-            fi
-
-            shared=false
-            while IFS= read -r file; do
-              [[ -z "${file}" ]] && continue
-              case "${file}" in
-                apps/travel/*) travel=true ;;
-                Temporal-Flow/*) temporal=true ;;
-                DNDIY.github.io/*) dndiy=true ;;
-                apps/megameal/*) megameal=true ;;
-              esac
-              case "${file}" in
-                packages/*|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|.github/workflows/dev-pages-preview.yml)
-                  shared=true
-                  ;;
-              esac
-            done <<< "${changed_files}"
-
-            if [[ "${shared}" == "true" ]]; then
-              travel=true
-              temporal=true
-              dndiy=true
-              megameal=true
-            fi
-          fi
-
-          echo "Preview selection:"
-          echo "  travel=${travel}"
-          echo "  temporal=${temporal}"
-          echo "  dndiy=${dndiy}"
-          echo "  megameal=${megameal}"
-
+          # Pages replaces the whole artifact on each deployment. Always build
+          # every site so a changed-only run cannot erase working previews.
           links_file="$(mktemp)"
           built_count=0
-          placeholder_count=0
           prune_note=""
 
           build_site() {
@@ -188,56 +96,12 @@ jobs:
             built_count=$((built_count + 1))
           }
 
-          create_placeholder() {
-            local key="$1"
-            local label="$2"
-            local live_url="$3"
-
-            mkdir -p "preview-dist/${key}"
-            cat > "preview-dist/${key}/index.html" <<EOF
-          <!DOCTYPE html>
-          <html>
-          <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${label} Preview</title>
-          <style>body{font-family:sans-serif;max-width:680px;margin:4rem auto;padding:0 1rem;line-height:1.5}a{word-break:break-word}</style>
-          </head>
-          <body>
-          <h1>${label}</h1>
-          <p>This site was not rebuilt in this changed-only preview run, so this path is a placeholder.</p>
-          <p>Live site: <a href="${live_url}">${live_url}</a></p>
-          <p><a href="../">Back to preview index</a></p>
-          </body>
-          </html>
-          EOF
-
-            printf '<li><a href="%s/">%s</a> <em>(placeholder, not rebuilt)</em></li>\n' "${key}" "${label}" >> "${links_file}"
-            placeholder_count=$((placeholder_count + 1))
-          }
-
-          if [[ "${megameal}" == "true" ]]; then
-            build_site "megameal" "MEGA MEAL SAGA" "apps/megameal/dist" "build:megameal"
-          fi
-          if [[ "${travel}" == "true" ]]; then
-            build_site "travel" "Trail Log (Travel)" "apps/travel/dist" "build:travel"
-          fi
-          if [[ "${dndiy}" == "true" ]]; then
-            build_site "dndiy" "DNDIY" "DNDIY.github.io/dist" "build:dndiy"
-          fi
-          if [[ "${temporal}" == "true" ]]; then
-            build_site "temporal" "Temporal Flow" "Temporal-Flow/dist" "build:temporal"
-          fi
-
-          if [[ "${megameal}" != "true" ]]; then
-            create_placeholder "megameal" "MEGA MEAL SAGA" "https://megameal.org"
-          fi
-          if [[ "${travel}" != "true" ]]; then
-            create_placeholder "travel" "Trail Log (Travel)" "https://travel.dndiy.org"
-          fi
-          if [[ "${dndiy}" != "true" ]]; then
-            create_placeholder "dndiy" "DNDIY" "https://dndiy.org"
-          fi
-          if [[ "${temporal}" != "true" ]]; then
-            create_placeholder "temporal" "Temporal Flow" "https://temporalflow.org"
-          fi
+          build_site "ainekio" "Ainekio" "apps/ainekio/dist" "build:ainekio"
+          SITE_BASE="${BASE}/ainekio/" node apps/ainekio/scripts/check-project-guide.mjs
+          build_site "megameal" "MEGA MEAL SAGA" "apps/megameal/dist" "build:megameal"
+          build_site "travel" "Trail Log (Travel)" "apps/travel/dist" "build:travel"
+          build_site "dndiy" "DNDIY" "DNDIY.github.io/dist" "build:dndiy"
+          build_site "temporal" "Temporal Flow" "Temporal-Flow/dist" "build:temporal"
 
           prune_mode="${PRUNE_INPUT}"
           if [[ -z "${prune_mode}" ]]; then
@@ -275,8 +139,7 @@ jobs:
           <body>
           <h1>Merkin Dev Preview</h1>
           <p>Built ${built_count} site(s) for this preview.</p>
-          <p>Placeholder site(s): ${placeholder_count}</p>
-          $(if [[ "${built_count}" -eq 0 ]]; then echo '<p>No site changes detected for this commit; all sites are placeholders in this preview.</p>'; fi)
+          <p>Source commit: <a href="https://github.com/${GITHUB_REPOSITORY}/commit/$(git rev-parse HEAD)">$(git rev-parse --short HEAD)</a></p>
           <ul>
           $(cat "${links_file}")
           </ul>
