@@ -203,6 +203,66 @@ assert.ok(
   'Homepage hero must honor SITE_BASE',
 )
 
+// A successful CSS request is not enough: the shared layout must also include
+// this app's global theme and component styles, not just Tailwind utilities.
+for (const [route, html] of [
+  ['/', home],
+  ['/project-guide/', guide],
+  ...['about', 'updates', '2', 'posts/project-overview'].map(route => [
+    `/${route}/`,
+    readFileSync(path.join(dist, route, 'index.html'), 'utf8'),
+  ]),
+]) {
+  const stylesheetLinks = [...html.matchAll(/<link\b[^>]*>/g)]
+    .filter(match => attributeValues(match[0], 'rel').includes('stylesheet'))
+    .flatMap(match => attributeValues(match[0], 'href'))
+  assert.ok(stylesheetLinks.length, `${route}: page must link its stylesheets`)
+  const css = stylesheetLinks
+    .filter(href => href.startsWith(base))
+    .map(href => {
+      const pathname = decodeURIComponent(href.split(/[?#]/)[0])
+      return readFileSync(path.join(dist, pathname.slice(base.length)), 'utf8')
+    })
+    .join('\n')
+  for (const themeSelector of [':root', ':root.dark']) {
+    const theme = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+      .filter(match =>
+        match[1]
+          .split(',')
+          .map(value => value.trim())
+          .includes(themeSelector),
+      )
+      .map(match => match[2])
+      .join('\n')
+    for (const variable of [
+      'page-bg',
+      'primary',
+      'card-bg',
+      'btn-regular-bg',
+    ]) {
+      assert.match(
+        theme,
+        new RegExp(`--${variable}\\s*:\\s*[^;{}]+`),
+        `${route}: ${themeSelector} missing theme variable definition --${variable}`,
+      )
+    }
+  }
+  for (const selector of ['card-base', 'float-panel', 'float-panel-closed']) {
+    assert.match(
+      css,
+      new RegExp(`\\.${selector}\\s*\\{`),
+      `${route}: missing global component selector .${selector}`,
+    )
+  }
+  const closedPanel = css.match(/\.float-panel-closed\s*\{([^}]+)\}/)?.[1]
+  assert.match(closedPanel, /opacity:\s*0(?:;|$)/, `${route}: panels must hide`)
+  assert.match(
+    closedPanel,
+    /pointer-events:\s*none(?:;|$)/,
+    `${route}: closed panels must not intercept clicks`,
+  )
+}
+
 console.log(
   `Project Index smoke checks passed at ${base} (${ids.size} anchors, ${hrefs.length} links).`,
 )
