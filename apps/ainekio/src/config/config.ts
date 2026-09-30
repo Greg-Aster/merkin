@@ -54,6 +54,10 @@ export const navBarConfig: NavBarConfig = {
   links: [
     LinkPreset.Home,
     {
+      name: 'Project Index',
+      url: '/project-guide/',
+    },
+    {
       name: 'Status',
       url: '/posts/current-status/',
     },
