@@ -10,6 +10,7 @@ export type LegacyJournalEntry = {
 }
 
 export type ParsedJournalEntry = {
+  url?: string
   title?: string
   date: Date
   status?: string
@@ -57,7 +58,9 @@ export async function parseJournalContent(
     const introHtml = introMarkdown ? await renderMarkdown(introMarkdown) : ''
     const parsedEntries = (
       await Promise.all(
-        bodySections.map(async (section) => parseBodySection(section, excerptLength)),
+        bodySections.map(async section =>
+          parseBodySection(section, excerptLength),
+        ),
       )
     ).sort((a, b) => b.date.getTime() - a.date.getTime())
 
@@ -71,10 +74,11 @@ export async function parseJournalContent(
 
   const parsedLegacyEntries = (
     await Promise.all(
-      legacyEntries.map(async (entry) => {
+      legacyEntries.map(async entry => {
         const contentMarkdown = entry.summary.trim()
         return {
           title: entry.title,
+          url: entry.url,
           date: entry.date,
           location: entry.location,
           mileage: entry.mileage,
@@ -108,13 +112,17 @@ function splitBodySections(body: string): BodySection[] {
       const nextStart = matches[index + 1]?.index ?? body.length
       const rawSection = body.slice(start, nextStart).trim()
       const lines = rawSection.split('\n')
-      const heading = lines.shift()?.replace(/^##\s+/, '').trim() ?? ''
+      const heading =
+        lines
+          .shift()
+          ?.replace(/^##\s+/, '')
+          .trim() ?? ''
       return {
         heading,
         markdown: lines.join('\n').trim(),
       }
     })
-    .filter((section) => DATE_PREFIX_PATTERN.test(section.heading))
+    .filter(section => DATE_PREFIX_PATTERN.test(section.heading))
 }
 
 function extractIntroMarkdown(body: string, firstSection: BodySection): string {

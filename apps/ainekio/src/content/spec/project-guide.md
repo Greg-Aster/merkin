@@ -5,7 +5,9 @@ description: "Working items, decisions, evidence, and direct links across Aineki
 
 # Project Index
 
-**Updated 30 September 2026** · Selected published records; no live-system recheck.
+**Updated 30 September 2026** · September 30 pushes reviewed; no live-system recheck.
+
+[Latest field note: Q6A, chassis work, and a more active loop](/posts/q6a-chassis-and-active-loop/).
 
 **Recheck** = dated finding, not a confirmed current blocker. **Proposed** = decision or contract still to settle. **Recorded complete** = done in the cited record.
 
@@ -13,27 +15,29 @@ description: "Working items, decisions, evidence, and direct links across Aineki
 
 | State | Work / repo | Next action | Record |
 | --- | --- | --- | --- |
-| Proposed | Host takeover · **Both** | Set body-grant ownership, cancellation, and independent manual fallback before implementation. | [Sep 28 foundation][foundation] |
-| Recheck | Transport · **Both** | Reconcile the recorded wireless direction with the USB recommendation; locate the missing linked foundation document. | [Sep 28 integration][integration] |
-| Recheck | Loaded motion · **Body / v2** | Confirm installed build; plan loaded tracking/balance, frame-time, and heap checks. Recorded timing used two unloaded servos. | [Sep 25 validation][validation] |
-| Recheck | Concurrent media/control · **Body / v2** | Measure mic/media draining, frame age, RAM pools, and body deadlines before raising stream targets. | [Sep 28 budget][budget] |
-| Recheck | Q6A speech/perception · **Both** | Confirm installed services and cache placement; measure the intended concurrent workload. | [Sep 28 host audit][host-budget] |
-| Proposed | IMU + display · **Body / v2** | Confirm LCD identity/pins; scope IMU acquisition and local correction through existing P4 owners. | [Sep 28 integration][integration] |
-| Recheck | Active Operator acceptance · **MetaHuman** | Recheck Reactive/Semi/Full outcomes, fresh correlated observations, and cancel/stop/reconnect on the selected build. | [Sep 1 roadmap][roadmap] |
+| Proposed | Host takeover · **Both** | Set body-grant ownership and independent manual fallback; keep the distributed-runtime proposal separate from shipped behavior. | [Foundation][foundation] |
+| In progress | Q6A transport · **Both** | Integrate direct P4–Q6A Wi-Fi, the current choice; USB remains an alternative. Measure concurrent latency. | [Sep 30 integration][integration] |
+| Recheck | Chassis + loaded motion · **Body / v2** | Fit revised geometry and test it under load. Sep 29 motion regeneration and P4 build were offline, not flashed or powered-tested. | [Geometry validation][validation] |
+| In progress | Active perception · **Both** | Connect a recognition backend and MetaHuman task producer to fresh-frame processing and bounded walk updates. YOLO remains research. | [Gateway foundations][gateway] |
+| Recheck | Concurrent media/control · **Body / v2** | Measure frame age, memory, audio queues, and motion deadlines together before raising stream targets. | [System budget][budget] |
+| Recheck | Q6A speech/perception · **Both** | Confirm installed services and cache placement; measure the intended concurrent workload. | [Host audit][host-budget] |
+| In progress | IMU + display · **Body / v2** | Connect live IMU acquisition and local feedback; confirm display identity/pins. Portable estimation is source-tested only. | [IMU foundation][imu] · [Integration][integration] |
+| Recheck | Active workflow acceptance · **MetaHuman** | Exercise saved waits, new-input steering, correlated results, and cancel/stop/reconnect on the assembled system. | [Workflow owners][surface] · [Input continuity][continuity] · [Observation history][observations] |
 
 ## Recorded complete
 
 | Item | Evidence | Revisit when |
 | --- | --- | --- |
-| Profile + chat-history sync · **MetaHuman** | [Sep 29 repair and live verification][profile-sync] | Login/manual-sync behavior changes |
+| One-way profile + memory + conversation transfer · **MetaHuman** | [Sep 29 repair and live verification][profile-sync] | Login/manual-sync behavior changes |
+| Body Control sessions + P4 network settings · **Body / v2** | [Sep 30 source and simulated-body coverage][body-push] | Recheck on the installed body and host |
 | Motion-speed build + saved-speed readback · **Body / v2** | [Sep 25 flash/digest and readback][validation] | Build or calibration changes; loaded motion remains a separate check |
 
 ## Plans, audits, and code
 
 | Repo | Start / code | Plans and evidence |
 | --- | --- | --- |
-| **[Body][body]** · `main` | [Repository map][map] · [Gateway][gateway] · [P4 firmware][p4] · [12-servo controller][controller] | [Integration][integration] · [Budget][budget] · [Budget evidence][budget-evidence] · [Validation][validation] |
-| **[MetaHuman][meta]** · `main` | [Agent instructions][agents] · [Maintained surface][surface] | [Operator roadmap][roadmap] · [Motion progress][motion] · [Refactor plan][blueprint] · [Audit protocol][protocol] · [Consolidation][consolidation] |
+| **[Body][body]** · `main` | [Repository map][map] · [Gateway][gateway] · [P4 firmware][p4] · [12-servo controller][controller] | [Integration][integration] · [Budget][budget] · [Budget evidence][budget-evidence] · [Validation][validation] · [IMU][imu] · [ROS setup][ros] |
+| **[MetaHuman][meta]** · `main` | [Agent instructions][agents] · [Maintained surface][surface] | [Sep 1 roadmap (history)][roadmap] · [Motion progress][motion] · [Refactor plan][blueprint] · [Audit protocol][protocol] · [Consolidation][consolidation] |
 | **[Site][web]** · `dev` | [Website source][web] | [Progress scratchpad][scratchpad] · [Image sources][images] |
 
 Update the owning record first; then change this index's row or link. Rows are review candidates, not execution approvals. No next robot behavior is selected here.
@@ -78,3 +82,10 @@ Update the owning record first; then change this index's row or link. Rows are r
 [p4]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/firmware/esp32p4-wifi6/README.md
 [controller]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/software/models/v2-12servo/README.md
 [validation]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/software/models/v2-12servo/CONTROLLER_VALIDATION.md
+
+[imu]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/software/imu/README.md
+[ros]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/docs/ROS2_SETUP.md
+[observations]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/audits/robot-observation-history-review-2026-09-10.md
+[body-push]: https://github.com/Greg-Aster/Ainekio-bot/commit/6437b24c0f91273aed160add0e42ac0ddbb5275c
+
+[continuity]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/audits/environment-followup-context-review-2026-09-09.md

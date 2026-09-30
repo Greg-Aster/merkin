@@ -263,6 +263,56 @@ for (const [route, html] of [
   )
 }
 
+// The current entry points must surface the new note without redating history.
+const latestRoute = '/posts/q6a-chassis-and-active-loop/'
+const latest = readFileSync(path.join(dist, latestRoute, 'index.html'), 'utf8')
+const updates = readFileSync(path.join(dist, 'updates/index.html'), 'utf8')
+for (const [route, html] of [
+  ['/', home],
+  ['/project-guide/', guide],
+  ['/updates/', updates],
+  [
+    '/posts/current-status/',
+    readFileSync(path.join(dist, 'posts/current-status/index.html'), 'utf8'),
+  ],
+]) {
+  assert.ok(
+    attributeValues(html, 'href').includes(sitePath(latestRoute)),
+    `${route}: must link to the latest field note`,
+  )
+}
+assert.match(
+  home,
+  /Updated 30 Sep 2026/,
+  'Homepage date must reflect the update',
+)
+assert.match(
+  latest,
+  /YOLO/,
+  'Latest note must cover the current perception work',
+)
+assert.match(
+  latest,
+  /not been flashed/,
+  'Keep offline checks distinct from body tests',
+)
+assert.match(latest, /remains supported/, 'Keep the original robot supported')
+assert.match(
+  updates,
+  /Ainekio Updates/,
+  'Updates page must identify this project',
+)
+assert.doesNotMatch(
+  updates,
+  /Temporal Flow Updates/,
+  'Do not use template update metadata',
+)
+assert.match(
+  readFileSync(path.join(app, 'src/content/posts/Current-Status.mdx'), 'utf8'),
+  /updated: 2026-08-27/,
+  'Preserve the historical status date',
+)
+
 console.log(
   `Project Index smoke checks passed at ${base} (${ids.size} anchors, ${hrefs.length} links).`,
 )

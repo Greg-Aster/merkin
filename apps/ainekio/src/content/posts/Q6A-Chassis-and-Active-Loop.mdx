@@ -1,0 +1,70 @@
+---
+title: "Q6A, chassis work, and a more active loop"
+published: 2026-09-30
+updated: 2026-09-30
+description: "Q6A integration, the revised Ainekio v2 chassis, and the first pieces of a more active perception and control loop."
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, Q6A, Hardware, Perception, MetaHuman OS]
+category: "Progress"
+draft: false
+lang: "en"
+contentFormat: "update"
+---
+
+I'm working on the Q6A SBC integration, the Ainekio v2 chassis, and how to make
+the robot more active between LLM turns. YOLO is part of that research. The aim
+is to keep useful perception and movement running while the slower planning
+work catches up.
+
+## Q6A and the body
+
+The current connection choice is direct Wi-Fi between the P4 and Q6A. USB stays
+an alternative, and ROS 2 is an optional integration layer. Gait execution stays
+on the P4; the host takes on perception and heavier planning. That split still
+needs testing under the combined camera, audio, and motion workload.
+
+The latest chassis work adds Q6A mounting space and revises the shoulder
+geometry. All 47 motion sources were regenerated. The recorded checks cover
+software tests, model parity, and a P4 build; that geometry has not been flashed
+or tested on the powered body. Fit, balance, and loaded movement are still open.
+
+## From turns toward an active loop
+
+The gateway can now process fresh camera frames outside its receive loop. It
+also has an authenticated path for adjusting an ongoing walk's speed or its
+stride/cadence settings while keeping the original action and body lease. Cancellation,
+expiry, and session checks still apply.
+
+MetaHuman's newly pushed workflow code carries an execution across waits and
+correlated results. New input can steer that saved execution, and visual
+observations can carry their frame IDs and timestamps forward. Those are useful
+pieces for moving beyond isolated request-and-response turns.
+
+The recognition backend and MetaHuman's local task producer still need joining
+up. No YOLO detection pipeline is selected or running through the gateway CLI,
+and the source checks do not establish an autonomous physical loop. Portable
+IMU estimation is also in the tree, but live acquisition and balance feedback
+are not connected yet.
+
+## Next on the bench
+
+- Fit the revised body and check movement under load
+- Bring up the intended Q6A services and measure them together
+- Try recognition models on the assembled prototype, then connect fresh results
+  to bounded movement updates
+
+The original eight-servo S3 Ainekio remains supported alongside the twelve-servo
+Ainekio v2 work. The [project index](/project-guide/) keeps the current work and
+source links in one place.
+
+### Source snapshot
+
+Reviewed September 30 pushes: [Ainekio `6437b24`](https://github.com/Greg-Aster/Ainekio-bot/commit/6437b24c0f91273aed160add0e42ac0ddbb5275c)
+and [MetaHuman `c3f56d4`](https://github.com/Greg-Aster/metahuman-os/commit/c3f56d41dfb396cd68391d12a2910aee8c32870b).
+Details: [body integration](https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/docs/BODY_CONTROL_INTEGRATION.md),
+[September 29 geometry checks](https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/Slave/software/models/v2-12servo/CONTROLLER_VALIDATION.md),
+and [MetaHuman workflow ownership](https://github.com/Greg-Aster/metahuman-os/blob/c3f56d41dfb396cd68391d12a2910aee8c32870b/docs/technical/MAINTAINED_SURFACE.md).
+These pushes include earlier recorded work; the push date is not a new hardware-test date.

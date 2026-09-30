@@ -10,14 +10,20 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "Progress site overhaul and source reconciliation"
-  location: "Integrated prototype"
-  updated: 2026-08-27
-  mileage: "Ainekio 6ad9051 · MetaHuman 5191d6fc"
-  section: "Source-to-physical evidence"
-  nextStop: "Assembled companion-loop acceptance"
-  note: "The end-to-end software architecture is implemented and the controller has real bring-up evidence. Final enclosure, combined-load hardware, calibrated movement, robust voice, fresh-frame semantic proof, and repeated autonomy cycles remain open."
+  status: "Q6A integration, chassis work, and an active loop"
+  location: "P4 + Q6A integration"
+  updated: 2026-09-30
+  mileage: "Ainekio 6437b24 · MetaHuman c3f56d4"
+  section: "Body, perception, and saved workflows"
+  nextStop: "Assembled tests under load"
+  note: "Working on Q6A integration, the revised v2 chassis, and perception that can keep up with ongoing movement. Fresh-frame processing and bounded walk updates are in source; YOLO selection, task integration, and combined-load physical tests are still ahead."
 entries:
+  - title: "Q6A, chassis work, and a more active loop"
+    date: 2026-09-30
+    location: "Body + MetaHuman OS"
+    mileage: "6437b24 · c3f56d4"
+    summary: "Revised v2 geometry, Q6A integration, fresh-frame processing, and saved MetaHuman executions. YOLO and the connected active loop are still being worked out."
+    url: "/posts/q6a-chassis-and-active-loop/"
   - title: "Progress site rebuilt around current owners"
     date: 2026-08-27
     location: "Documentation"
