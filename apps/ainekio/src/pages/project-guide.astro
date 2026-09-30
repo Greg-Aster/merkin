@@ -1,0 +1,48 @@
+---
+import { getEntry } from 'astro:content'
+import Markdown from '../components/misc/Markdown.astro'
+import MainGridLayout from '../layouts/MainGridLayout.astro'
+
+const guide = await getEntry('spec', 'project-guide')
+if (!guide)
+  throw new Error("Project Index content not found in 'spec/project-guide'")
+
+const { Content, headings } = await guide.render()
+---
+
+<MainGridLayout title={guide.data.title} description={guide.data.description} headings={headings} oneColumn={true}>
+  <article data-pagefind-body class="card-base project-guide overflow-hidden rounded-[var(--radius-large)] border border-cyan-700/15 p-6 dark:border-cyan-300/20 sm:p-9">
+    <nav aria-label="Project Index sections" class="mb-5 flex flex-wrap gap-x-4 gap-y-2 border-b border-black/10 pb-4 text-sm dark:border-white/10">
+      {headings.filter(heading => heading.depth === 2).map(heading => (
+        <a class="font-bold text-cyan-800 underline underline-offset-4 dark:text-cyan-200" href={`#${heading.slug}`}>{heading.text}</a>
+      ))}
+    </nav>
+    <Markdown class="prose max-w-none dark:prose-invert">
+      <Content />
+    </Markdown>
+  </article>
+</MainGridLayout>
+
+<style>
+  .project-guide :global(h2),
+  .project-guide :global(h3) {
+    scroll-margin-top: 6rem;
+  }
+
+  .project-guide :global(table) {
+    display: block;
+    overflow-x: auto;
+    font-size: 0.9rem;
+  }
+
+  .project-guide :global(th),
+  .project-guide :global(td) {
+    min-width: 8rem;
+    vertical-align: top;
+    padding: 0.75rem;
+  }
+
+  .project-guide :global(a) {
+    overflow-wrap: anywhere;
+  }
+</style>
