@@ -313,6 +313,42 @@ assert.match(
   'Preserve the historical status date',
 )
 
+// The progress diagrams must work on both the custom domain and preview prefix.
+for (const file of ['q6a-communication.svg', 'active-loop.svg']) {
+  assert.ok(
+    attributeValues(latest, 'src').includes(
+      sitePath(`/posts/ainekio-2026/${file}`),
+    ),
+    `Latest note must display ${file}`,
+  )
+  assert.ok(
+    existsSync(path.join(dist, 'posts/ainekio-2026', file)),
+    `Diagram must be copied to the build: ${file}`,
+  )
+}
+assert.equal(
+  (latest.match(/<figure\b/g) || []).length,
+  2,
+  'Render both diagrams',
+)
+assert.ok(
+  attributeValues(latest, 'alt').some(value =>
+    value.startsWith('Intended communication split:'),
+  ),
+  'Communication diagram needs descriptive alt text',
+)
+assert.ok(
+  attributeValues(home, 'src').includes(
+    sitePath('/posts/ainekio-2026/q6a-communication-cover.svg'),
+  ),
+  'The latest article card must load its SVG thumbnail',
+)
+assert.match(
+  latest,
+  /update acknowledgements are not cognitive feedback/,
+  'Preserve the action-result boundary',
+)
+
 console.log(
   `Project Index smoke checks passed at ${base} (${ids.size} anchors, ${hrefs.length} links).`,
 )

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 720 720" role="img" aria-labelledby="title desc">
+  <title id="title">Planned Ainekio communication split</title>
+  <desc id="desc">A simplified thumbnail of remote inference, Q6A host integration and the P4 body controller. Full status and connection details are in the article diagrams.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M1 1 11 6 1 11" fill="none" stroke="#f4c16d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect width="720" height="720" fill="#062426"/>
+  <g fill="none" stroke="#f4c16d" stroke-width="5" stroke-dasharray="12 9" marker-start="url(#arrow)" marker-end="url(#arrow)">
+    <path d="M360 230V284"/><path d="M360 426V480"/>
+  </g>
+  <g fill="#113337" stroke="#f4c16d" stroke-width="3" stroke-dasharray="12 9">
+    <rect x="135" y="98" width="450" height="116" rx="22"/>
+    <rect x="135" y="302" width="450" height="108" rx="22"/>
+  </g>
+  <rect x="135" y="498" width="450" height="112" rx="22" fill="#10373a" stroke="#65d9e8" stroke-width="3"/>
+  <g font-family="Arial,Helvetica,sans-serif" text-anchor="middle" fill="#eefaf6" font-weight="700">
+    <text x="360" y="172" font-size="56">REMOTE</text>
+    <text x="360" y="375" font-size="68">Q6A</text>
+    <text x="360" y="573" font-size="68">P4</text>
+    <text x="360" y="669" font-size="32" fill="#f4c16d">PLANNED SPLIT</text>
+  </g>
+</svg>
