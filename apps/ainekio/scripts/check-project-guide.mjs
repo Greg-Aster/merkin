@@ -104,6 +104,23 @@ for (const repo of ['metahuman-os', 'Ainekio-bot', 'merkin']) {
   )
 }
 assert.ok(ids.has('working-items'), 'Working items need a stable heading')
+const overview = readFileSync(
+  path.join(dist, 'posts/project-overview/index.html'),
+  'utf8',
+)
+assert.ok(
+  attributeValues(overview, 'id').includes('project-intent'),
+  'The existing overview must hold the public project purpose',
+)
+assert.ok(
+  hrefs.includes(sitePath('/posts/project-overview/#project-intent')),
+  'The queue must link to the public project purpose',
+)
+assert.doesNotMatch(
+  `${overview} ${guide}`,
+  /Let the LLM choose goals and behavior|The methods matter as much|Update the technical owner first|docs\/AGENT_PREP\.md/,
+  'Agent instructions belong in repository docs, not the public pages',
+)
 assert.ok(
   ids.has('plans-audits-and-code'),
   'Document map needs a stable heading',
@@ -139,7 +156,7 @@ for (const slug of [
 
 assert.ok(ids.has('recorded-complete'), 'Separate recorded completed work')
 assert.match(source, /Next action/, 'Working items must identify a next action')
-assert.match(source, /Recheck/, 'Dated findings must have explicit uncertainty')
+assert.match(source, /Evidence is dated/, 'Dated findings must identify their evidence boundary')
 assert.match(source, /Sep 29 repair/, 'Include recorded completed work')
 assert.doesNotMatch(
   source,
@@ -345,7 +362,7 @@ assert.match(
   'Preserve the archived status observation date',
 )
 for (const [file, date] of [
-  ['Project-Overview.mdx', '2026-09-24'],
+  ['Project-Overview.mdx', '2026-10-01'],
   ['Body-Design-and-Hardware.mdx', '2026-09-15'],
   ['Controller-Firmware.mdx', '2026-09-08'],
 ]) {

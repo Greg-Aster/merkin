@@ -2,6 +2,12 @@
 
 Updated: 2026-08-27
 
+**Historical site-overhaul record.** The snapshot and plan below retain their
+original observation period. Current work is maintained once in the
+[Project Index](src/content/spec/project-guide.md); use the
+[site editing instructions](readme.md#project-index) and linked technical owners
+before continuing work. This scratchpad is not an active backlog.
+
 This is the working record for rebuilding `ainek.io` as an accurate progress
 document for the Ainekio robot and its MetaHuman OS integration. It is not an
 architecture authority for either source repository.

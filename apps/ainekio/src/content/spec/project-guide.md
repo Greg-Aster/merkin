@@ -5,42 +5,48 @@ description: "Working items, decisions, evidence, and direct links across Aineki
 
 # Project Index
 
-**Updated 30 September 2026** · September 30 pushes reviewed; no live-system recheck.
+**Updated 1 October 2026** · Source review plus the September 30–October 1 owner reports; no new hardware test.
 
-[Latest field note: Q6A, chassis work, and a more active loop](/posts/q6a-chassis-and-active-loop/).
+Current work across the robot, MetaHuman and website. [Project purpose](/posts/project-overview/#project-intent) · [Latest field note](/posts/q6a-chassis-and-active-loop/).
 
-**Recheck** = dated finding, not a confirmed current blocker. **Proposed** = decision or contract still to settle. **Recorded complete** = done in the cited record.
+## Current baseline
+
+- **Owner reports, September 30–October 1:** P4 firmware flashed, exact revision unrecorded; v2 unassembled, parts printing. Q6A runs Radxa Ubuntu, local repo clones, llama.cpp with Qwen3.5 0.8B, and Kokoro. Cooling/throttling needs attention. No Q6A–P4 connection or system test yet.
+- **Decided:** direct P4–Q6A Wi-Fi; USB is an alternative and ROS adapters are optional. **Current boundary:** one body-command owner; the gateway’s Environment endpoint accepts only local Bridge connections.
+- **Implemented:** saved MetaHuman executions, input steering, visual history, bounded camera processing and same-action walk updates. Integration remains open below.
 
 ## Working items
 
-| State | Work / repo | Next action | Record |
-| --- | --- | --- | --- |
-| Proposed | Host takeover · **Both** | Set body-grant ownership and independent manual fallback; keep the distributed-runtime proposal separate from shipped behavior. | [Foundation][foundation] |
-| In progress | Q6A transport · **Both** | Integrate direct P4–Q6A Wi-Fi, the current choice; USB remains an alternative. Measure concurrent latency. | [Sep 30 integration][integration] |
-| Recheck | Chassis + loaded motion · **Body / v2** | Fit revised geometry and test it under load. Sep 29 motion regeneration and P4 build were offline, not flashed or powered-tested. | [Geometry validation][validation] |
-| In progress | Active perception · **Both** | Connect a recognition backend and MetaHuman task producer to fresh-frame processing and bounded walk updates. YOLO remains research. | [Gateway foundations][gateway] |
-| Recheck | Concurrent media/control · **Body / v2** | Measure frame age, memory, audio queues, and motion deadlines together before raising stream targets. | [System budget][budget] |
-| Recheck | Q6A speech/perception · **Both** | Confirm installed services and cache placement; measure the intended concurrent workload. | [Host audit][host-budget] |
-| In progress | IMU + display · **Body / v2** | Connect live IMU acquisition and local feedback; confirm display identity/pins. Portable estimation is source-tested only. | [IMU foundation][imu] · [Integration][integration] |
-| Recheck | Active workflow acceptance · **MetaHuman** | Exercise saved waits, new-input steering, correlated results, and cancel/stop/reconnect on the assembled system. | [Workflow owners][surface] · [Input continuity][continuity] · [Observation history][observations] |
+**Open** = unfinished integration. **Review** = awaiting cross-repo review. **Hardware-gated** = requires assembly. Evidence is dated to its recorded setup.
+
+| ID / state | Next action and owner | Dependency / acceptance |
+| --- | --- | --- |
+| **DOCS · Review** | Reconcile conflicting current plans and link the existing [body][integration] and [MetaHuman][surface] records. | Consistent current status and clearly dated history; independent of assembly. |
+| **HOST · Open** | Record the actual Q6A deployment and local changes; wire the preferred Wi-Fi path. [Body integration][integration] · [Host evidence][host-budget] | Gateway/Bridge placement and installed services first. Record revisions, link behavior, and sustained speech/perception timing after cooling is checked; isolated desktop/host measurements are not concurrent robot acceptance. |
+| **MOVE · Open** | Connect MetaHuman's task/Bridge producer and update acknowledgements to the existing active-walk boundary. [Gateway][gateway] · [Integration map][roadmap] | Preserve action, lease/epoch and revision. Pass expiry, uncertain-reply/no-replay, cancel and stop host tests; no new movement authority. |
+| **VISION · Open** | Define and connect the recognition result, source-frame age and pose contract to the local task producer. [Gateway][gateway] · [Integration map][roadmap] | Reuse the bounded camera worker. Reject stale/uncorrelated results before visual motion control; compare YOLO or another backend on the assembled prototype; that comparison does not block contract work. |
+| **REMOTE · Open** | Remove full remote-provider configuration logging and test safe metadata logging. [Integration map][roadmap] | Required before activating credentialed remote inference; independent of assembly. |
+| **IMU · Open** | Add sensor acquisition/telemetry, then bounded local correction. [IMU owner][imu] · [Body integration][integration] | Confirm wiring, bus ownership and axes. Reuse the estimator; host tests precede powered feedback acceptance. |
+| **BODY · Hardware-gated** | Check assembled geometry, loaded motion and concurrent camera/audio/control. [Validation][validation] · [Budget][budget] | Record the flashed revision and assembled configuration; measure tracking, balance, frame age, queues and deadlines. Independent of DOCS and host contracts. |
+
+Automatic host takeover, continuous profile replication, combined forward/turn motion, and higher media targets remain later design work in their owning records. None blocks consolidation.
 
 ## Recorded complete
 
-| Item | Evidence | Revisit when |
-| --- | --- | --- |
-| One-way profile + memory + conversation transfer · **MetaHuman** | [Sep 29 repair and live verification][profile-sync] | Login/manual-sync behavior changes |
-| Body Control sessions + P4 network settings · **Body / v2** | [Sep 30 source and simulated-body coverage][body-push] | Recheck on the installed body and host |
-| Motion-speed build + saved-speed readback · **Body / v2** | [Sep 25 flash/digest and readback][validation] | Build or calibration changes; loaded motion remains a separate check |
+| Item | Evidence / limit |
+| --- | --- |
+| Durable execution + visual history · **MetaHuman** | [Input continuity][continuity] · [Observation history][observations]. Source and isolated/mocked checks; connected physical acceptance remains in BODY. |
+| One-way profile, memory + conversation transfer · **MetaHuman** | [Sep 29 repair and live verification][profile-sync]; not continuous replication. |
+| Camera worker, active-walk updates, Body Control sessions + network settings · **Body** | [Sep 30 source and simulated-body coverage][body-push]. MOVE/VISION connect the existing pieces. |
+| Motion regeneration, portable IMU estimator + desktop ROS toolchain · **Body** | [Geometry validation][validation] · [IMU][imu] · [ROS setup][ros]. Build/host evidence does not establish loaded motion or live sensing. |
 
 ## Plans, audits, and code
 
-| Repo | Start / code | Plans and evidence |
+| Scope | Technical authority | Supporting records |
 | --- | --- | --- |
-| **[Body][body]** · `main` | [Repository map][map] · [Gateway][gateway] · [P4 firmware][p4] · [12-servo controller][controller] | [Integration][integration] · [Budget][budget] · [Budget evidence][budget-evidence] · [Validation][validation] · [IMU][imu] · [ROS setup][ros] |
-| **[MetaHuman][meta]** · `main` | [Agent instructions][agents] · [Maintained surface][surface] | [Sep 1 roadmap (history)][roadmap] · [Motion progress][motion] · [Refactor plan][blueprint] · [Audit protocol][protocol] · [Consolidation][consolidation] |
-| **[Site][web]** · `main` / `dev` | [Website source][web] | [Progress scratchpad][scratchpad] · [Image sources][images] |
-
-Update the owning record first; then change this index's row or link. Rows are review candidates, not execution approvals. No next robot behavior is selected here.
+| **[Body][body]** | [Body integration][integration] · [Gateway][gateway] | [Documentation map][body-docs] · [Controller][controller] · [Validation][validation] |
+| **[MetaHuman][meta]** | [Maintained surface][surface] | [Integration/source map][roadmap] · [Distributed proposal][foundation] · [Host evidence][host-budget] |
+| **[Site][web]** | [This queue's source][queue-source] | [Archived site-overhaul record][scratchpad] |
 
 ## History
 
@@ -64,30 +70,21 @@ These guides retain their own revision dates. The [September 9 status review](/p
 [meta]: https://github.com/Greg-Aster/metahuman-os
 [body]: https://github.com/Greg-Aster/Ainekio-bot
 [web]: https://github.com/Greg-Aster/merkin/tree/main/apps/ainekio
-[agents]: https://github.com/Greg-Aster/metahuman-os/blob/main/AGENTS.md
 [surface]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/technical/MAINTAINED_SURFACE.md
-[blueprint]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/technical/REFACTOR_BLUEPRINT.md
-[protocol]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/technical/AUDIT_PROTOCOL.md
-[consolidation]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/audits/consolidation-progress.md
-[map]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/docs/REPOSITORY_MAP.md
 [gateway]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/Master/gateway/README.md
 [integration]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/docs/BODY_CONTROL_INTEGRATION.md
 [budget]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/docs/v2-12servo/RESOURCE_BUDGET.md
-[budget-evidence]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/docs/v2-12servo/BUDGET_AUDIT_EVIDENCE.md
 [roadmap]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/implementation-plans/robot-active-operator-roadmap.md
-[motion]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/audits/robot-operator-motion-control-progress.md
 [foundation]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/audits/2026-09-28-distributed-robot-foundation.md
 [host-budget]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/audits/2026-09-28-robot-resource-budget.md
 [profile-sync]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/audits/2026-09-29-profile-sync-repair.md
 [scratchpad]: https://github.com/Greg-Aster/merkin/blob/main/apps/ainekio/PROGRESS_SCRATCHPAD.md
-[images]: https://github.com/Greg-Aster/merkin/blob/main/apps/ainekio/IMAGE_SOURCES.md
-[p4]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/firmware/esp32p4-wifi6/README.md
 [controller]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/software/models/v2-12servo/README.md
 [validation]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/software/models/v2-12servo/CONTROLLER_VALIDATION.md
-
 [imu]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/software/imu/README.md
 [ros]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/docs/ROS2_SETUP.md
 [observations]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/audits/robot-observation-history-review-2026-09-10.md
 [body-push]: https://github.com/Greg-Aster/Ainekio-bot/commit/6437b24c0f91273aed160add0e42ac0ddbb5275c
-
 [continuity]: https://github.com/Greg-Aster/metahuman-os/blob/main/docs/audits/environment-followup-context-review-2026-09-09.md
+[body-docs]: https://github.com/Greg-Aster/Ainekio-bot/blob/main/docs/README.md
+[queue-source]: https://github.com/Greg-Aster/merkin/blob/main/apps/ainekio/src/content/spec/project-guide.md
