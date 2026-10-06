@@ -5,15 +5,17 @@ description: "Working items, decisions, evidence, and direct links across Aineki
 
 # Project Index
 
-**Updated 1 October 2026** · Source review plus the September 30–October 1 owner reports; no new hardware test.
+**Updated 6 October 2026** · Source review, recorded connection checks and the owner’s printed-chassis report. The lighter revision remains untested.
 
-Current work across the robot, MetaHuman and website. [Project purpose](/posts/project-overview/#project-intent) · [Latest field note](/posts/q6a-chassis-and-active-loop/).
+Current work across the robot, MetaHuman and website. [Project purpose](/posts/project-overview/#project-intent) · [Latest field note](/posts/2026-10-06-lighter-rebuild/).
 
 ## Current baseline
 
-- **Owner reports, September 30–October 1:** P4 firmware flashed, exact revision unrecorded; v2 unassembled, parts printing. Q6A runs Radxa Ubuntu, local repo clones, llama.cpp with Qwen3.5 0.8B, and Kokoro. Cooling/throttling needs attention. No Q6A–P4 connection or system test yet.
-- **Decided:** direct P4–Q6A Wi-Fi; USB is an alternative and ROS adapters are optional. **Current boundary:** one body-command owner; the gateway’s Environment endpoint accepts only local Bridge connections.
-- **Implemented:** saved MetaHuman executions, input steering, visual history, bounded camera processing and same-action walk updates. Integration remains open below.
+- **Physical build, October 6 owner report:** the printed chassis could not stand on its MG90 servos; LCD and shell pieces were not printed. The next revision keeps MG90 servos, removes material in Blender, shortens the leg carrier and replaces the heavy 10,000 mAh bank with separate batteries and onboard charging boards. Approximately 20% less weight and 20% more lifting force are owner estimates. New parts are still printing; the revised assembly is untested. [Lighter rebuild](/posts/2026-10-06-lighter-rebuild/) · [Linkage comparison](/posts/2026-10-06-compact-linkage/).
+- **Q6A host, September 30–October 1 owner reports:** Radxa Ubuntu, local repo clones, llama.cpp with Qwen3.5 0.8B, and Kokoro. Cooling/throttling needs attention. The flashed P4 revision and concurrent service performance still need recording.
+- **Connection evidence, reviewed October 6:** P4 hotspot association and authenticated Q6A readback were recorded with servo power off. The sustained-session test did not pass its continuous-connection target; this is not a connected walking or balance test. [Steering, sensing and connection record](/posts/2026-10-06-steering-sensing-connections/).
+- **Decided:** Wireless with an offboard Q6A over direct Wi-Fi is the current priority; Wired with an onboard Q6A/native USB remains an alternative. ROS adapters are optional. **Current boundary:** one body-command owner; the gateway’s Environment endpoint accepts only local Bridge connections.
+- **Implemented:** saved MetaHuman executions, input steering, visual history, bounded camera processing and same-action walk updates remain the active-loop foundations. Continuous steering and shared joint-speed controls now have source and software-check evidence; loaded turning, live IMU acquisition and physical balance feedback remain unverified. [September 30 active-loop history](/posts/q6a-chassis-and-active-loop/).
 
 ## Working items
 
@@ -22,14 +24,14 @@ Current work across the robot, MetaHuman and website. [Project purpose](/posts/p
 | ID / state | Next action and owner | Dependency / acceptance |
 | --- | --- | --- |
 | **DOCS · Review** | Reconcile conflicting current plans and link the existing [body][integration] and [MetaHuman][surface] records. | Consistent current status and clearly dated history; independent of assembly. |
-| **HOST · Open** | Record the actual Q6A deployment and local changes; wire the preferred Wi-Fi path. [Body integration][integration] · [Host evidence][host-budget] | Gateway/Bridge placement and installed services first. Record revisions, link behavior, and sustained speech/perception timing after cooling is checked; isolated desktop/host measurements are not concurrent robot acceptance. |
+| **HOST · Open** | Record the actual Q6A deployment and local changes; stabilize the preferred Wi-Fi path. [Body integration][integration] · [Host evidence][host-budget] | Gateway/Bridge placement and installed services first. Record revisions, link behavior, and sustained speech/perception timing after cooling is checked; isolated desktop/host measurements are not concurrent robot acceptance. |
 | **MOVE · Open** | Connect MetaHuman's task/Bridge producer and update acknowledgements to the existing active-walk boundary. [Gateway][gateway] · [Integration map][roadmap] | Preserve action, lease/epoch and revision. Pass expiry, uncertain-reply/no-replay, cancel and stop host tests; no new movement authority. |
 | **VISION · Open** | Define and connect the recognition result, source-frame age and pose contract to the local task producer. [Gateway][gateway] · [Integration map][roadmap] | Reuse the bounded camera worker. Reject stale/uncorrelated results before visual motion control; compare YOLO or another backend on the assembled prototype; that comparison does not block contract work. |
 | **REMOTE · Open** | Remove full remote-provider configuration logging and test safe metadata logging. [Integration map][roadmap] | Required before activating credentialed remote inference; independent of assembly. |
 | **IMU · Open** | Add sensor acquisition/telemetry, then bounded local correction. [IMU owner][imu] · [Body integration][integration] | Confirm wiring, bus ownership and axes. Reuse the estimator; host tests precede powered feedback acceptance. |
-| **BODY · Hardware-gated** | Check assembled geometry, loaded motion and concurrent camera/audio/control. [Validation][validation] · [Budget][budget] | Record the flashed revision and assembled configuration; measure tracking, balance, frame age, queues and deadlines. Independent of DOCS and host contracts. |
+| **BODY · Hardware-gated** | Assemble the lighter parts, repeat the standing test, then check loaded motion and concurrent camera/audio/control. [Validation][validation] · [Budget][budget] | Record actual weight, power arrangement, flashed revision and assembled configuration; measure tracking, balance, frame age, queues and deadlines. Independent of DOCS and host contracts. |
 
-Automatic host takeover, continuous profile replication, combined forward/turn motion, and higher media targets remain later design work in their owning records. None blocks consolidation.
+Automatic host takeover, continuous profile replication and higher media targets remain later design work in their owning records. None blocks consolidation.
 
 ## Recorded complete
 

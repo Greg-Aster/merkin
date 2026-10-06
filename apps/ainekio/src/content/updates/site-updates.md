@@ -10,44 +10,98 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "Q6A integration, revised chassis and active-loop foundations"
-  location: "Working S3 Ainekio / P4 + Q6A development"
-  updated: 2026-09-30
-  mileage: "Ainekio 6437b24 · MetaHuman c3f56d4"
-  section: "Body, perception and saved workflows"
-  nextStop: "Fit the revised body and measure loaded movement; bring up Q6A services together, then connect recognition and fresh results to bounded motion updates."
-  note: "Q6A integration, revised v2 geometry and a more active perception loop are in progress. Fresh-frame processing and bounded walk updates have source and simulated-body coverage. September 24 P4 flash/boot evidence and September 25 saved-speed readback remain dated milestones; September 29 regenerated geometry has not been flashed or powered-tested. YOLO selection, live IMU acquisition and the connected physical loop remain open."
+  status: "Lighter rebuild printing after the standing test"
+  location: "Printed V2 chassis, Blender motion studies and P4/Q6A software"
+  updated: 2026-10-06
+  mileage: "October 6 · weight reduction, compact linkage and 23 remapped motions"
+  section: "Lighter Wireless build, revised power and sensing integration"
+  nextStop: "Assemble the lighter parts and repeat the standing test, recording actual weight and the installed power arrangement."
+  note: "The printed chassis could not stand on its MG90 servos. The next iteration keeps those servos, removes weight, replaces the battery bank with batteries and onboard charging boards, and revises the legs. New parts are still printing; the revised assembly has not been tested."
   areas:
     - label: "Original Ainekio"
       status: "Supported eight-servo S3 design"
       detail: "Working prototype with a 1,000 mAh LiPo, external charger and buck converter. Runtime not measured."
-    - label: "Ainekio v2 body"
-      status: "Q6A mounting and shoulder geometry revised"
-      detail: "The later geometry regenerated all 47 motion sources with offline model and build checks. Fit, balance and loaded movement remain unverified; earlier shell, printed-leg and battery studies remain dated build records."
+    - label: "Physical build"
+      status: "Chassis printed; revised parts printing"
+      detail: "The previous chassis could not stand on MG90 servos. LCD and shell pieces remain unprinted. The lighter revision has not been tested."
+    - label: "Body and power"
+      status: "Material removal and a new battery direction"
+      detail: "Keep MG90 servos; replace the heavy 10,000 mAh bank with separate batteries and onboard charging boards. Approximately 20% lighter and 20% more lifting force are current owner estimates, not measured results."
+    - label: "Linkage and expressions"
+      status: "35 mm carrier candidate; 23 offline motions"
+      detail: "Complete remapped library in Blender. Upright retains reduced reach; its historical reach test still fails. Servo travel, collisions and loaded performance remain unresolved."
     - label: "Motion controls"
-      status: "Continuous gaits and bounded walk updates"
-      detail: "The existing gait catalog and Finish controls are joined by authenticated updates to speed or paired stride/cadence settings, retaining the gait, direction, action and body lease. New paths have simulated-body coverage, not loaded-body acceptance."
-    - label: "P4 controller and Q6A"
-      status: "Direct Wi-Fi integration in progress"
-      detail: "P4 keeps gait execution; the intended Q6A host keeps the gateway and Environment Bridge local. September 24 application flash/boot and September 25 speed readback precede the unflashed September 29 geometry. Concurrent camera, audio and motion load still needs measurement."
-    - label: "Battery and underside"
-      status: "Removable 10,000 mAh Anker fit remains open"
-      detail: "The September 24 design uses integrated bank charging without a separate buck converter; plug-in Qi is planned. Earlier one-pose contact checks do not establish complete motion clearance or battery runtime."
+      status: "Continuous steering and shared joint-speed control"
+      detail: "Source and recorded software checks cover steering updates and motion retiming. Physical turning and loaded cadence remain unmeasured."
+    - label: "Sensing and ROS 2"
+      status: "IMU estimator implemented; live feedback pending"
+      detail: "The estimator is not yet fed by a hardware task or used for balance correction. Desktop Jazzy checks passed; a robot telemetry adapter remains work to do."
+    - label: "Build options and connection"
+      status: "Wireless priority; sustained link under investigation"
+      detail: "Offboard Q6A over Wi-Fi is the selected direction; onboard Q6A/native USB remains an alternative. P4 hotspot association succeeded, but the recorded sustained-session test did not pass."
     - label: "MetaHuman OS and perception"
       status: "Saved workflows and fresh-frame foundations"
       detail: "Saved executions span waits, new-input steering and correlated results. Recognition and the local task producer still need joining up; YOLO remains research. Portable IMU estimation is source-tested, with live acquisition and balance feedback still unconnected."
 entries:
+  - title: "A lighter rebuild after the standing test"
+    date: 2026-10-06
+    location: "Printed chassis, Blender revisions and power"
+    mileage: "Keep MG90 · remove weight · replace the battery bank"
+    summary: "The printed chassis could not stand on its MG90 servos. Follow the material removal, move to separate batteries and onboard charging boards, and assembly changes while replacement parts are printing. The revised assembly remains untested."
+    url: "/posts/2026-10-06-lighter-rebuild/"
+  - title: "Shorter carriers and the complete motion library"
+    date: 2026-10-06
+    location: "Linkage geometry and motion experiments"
+    mileage: "35 mm carrier · 20 mm crank · 28 mm pickup · 23 motions"
+    summary: "Compare the shared model and compact candidate, see which foot placements changed, and follow all 23 remapped motions in Blender. Reduced Upright reach and the provisional servo-travel mismatch remain explicit."
+    url: "/posts/2026-10-06-compact-linkage/"
+  - title: "Steering, sensing and keeping the robot connected"
+    date: 2026-10-06
+    location: "P4 motion, gateway and ROS 2"
+    mileage: "Continuous steering · IMU estimator · camera profiles · wireless tests"
+    summary: "The software now includes steering updates, an IMU estimator and expanded camera/recognition interfaces. Desktop ROS checks and a real hotspot connection are recorded separately from live balance control and sustained wireless reliability still to establish."
+    url: "/posts/2026-10-06-steering-sensing-connections/"
+  - title: "Gait journal: physical results and the compact candidate"
+    date: 2026-10-06
+    location: "Continuing technical journal"
+    mileage: "Standing result · side-by-side dimensions · retained earlier experiments"
+    summary: "The newest journal entry connects the failed standing attempt to the revised linkage, records the complete offline library and separates modeled motion from the next physical test."
+    url: "/posts/gait-development/"
   - title: "Q6A, chassis work, and a more active loop"
     date: 2026-09-30
     location: "Body + MetaHuman OS"
     mileage: "6437b24 · c3f56d4"
     summary: "Revised v2 geometry, Q6A integration, fresh-frame processing, and saved MetaHuman executions. YOLO and the connected active loop are still being worked out."
     url: "/posts/q6a-chassis-and-active-loop/"
+  - title: "Two builds: Wired, Wireless and ROS 2 integration"
+    date: 2026-09-28
+    location: "Build options, software and power"
+    mileage: "Onboard / offboard Q6A · ROS telemetry · local IMU feedback"
+    summary: "The project now has two build directions: onboard Q6A with a planned USB body link, or offboard Q6A over Wi-Fi. Compare their packaging and power budgets, the installed ROS 2 environment, and the remaining work toward responsive gait."
+    url: "/posts/2026-09-28-wired-wireless-ros2/"
+  - title: "Compact Wireless body: battery, face and assembly"
+    date: 2026-09-28
+    location: "Chassis and electronics packaging"
+    mileage: "82.5 mm frame · front-leg relocation · rear carrier relief"
+    summary: "Actual Blender images follow the new build scenes, slimmer tray, LCD carrier and alignment marks. The latest front/rear clearance study keeps the original front carriers and moves those legs forward; body refitting remains in progress."
+    url: "/posts/2026-09-28-compact-body/"
+  - title: "Gait leverage, saved motion speed and feedback planning"
+    date: 2026-09-28
+    location: "Continuing gait journal"
+    mileage: "Revised body references · separate gesture speed · deployment record"
+    summary: "Before/after tables explain the Walk, Run and Crab changes and distinguish continuous gait controls from saved named-motion speed. Offline geometry and settings checks are recorded separately from the local IMU correction loop still to implement."
+    url: "/posts/gait-development/"
+  - title: "V1 and V2 comparison: two new build options"
+    date: 2026-09-28
+    location: "Eight servos versus twelve"
+    mileage: "Controllers · Q6A placement · SHARGE battery · dated ranges"
+    summary: "The comparison now includes Wired and Wireless V2, the new bank and current control changes, while retaining the explicitly dated September 24 motion-range dataset and unmeasured runtime."
+    url: "/posts/v1-v2-comparison/"
   - title: "Refining the body and fitting the Anker battery"
     date: 2026-09-24
     location: "Chassis, shell and removable power"
     mileage: "Revised mounts · 80 mm support placement · 10,000 mAh bank"
-    summary: "The red body gains compact mask mounts and reinforced tabs while the underside is fitted around the Anker bank already on hand. Follow the width changes, battery clearance studies and remaining assembly work, with actual CAD images."
+    summary: "The red body gains compact mask mounts and reinforced tabs while the underside is fitted around the Anker bank already on hand. Follow the width changes, battery clearance studies and remaining assembly work, with actual Blender images."
     url: "/posts/2026-09-24-body-and-battery/"
   - title: "Eight servos versus twelve: the current comparison"
     date: 2026-09-24
@@ -70,7 +124,7 @@ entries:
   - title: "Developing the shell around the mechanism"
     date: 2026-09-21
     location: "Body and shell design"
-    mileage: "September 19 iterations · September 20 CAD views"
+    mileage: "September 19 iterations · September 20 Blender views"
     summary: "Actual assembly views follow the face, collar, roof and fin work, including rejected trials and a matched roof before/after comparison."
     url: "/posts/2026-09-21-shell-design/"
   - title: "Compact legs: geometry, print faces and horn fit"
@@ -97,7 +151,7 @@ entries:
     mileage: "Eight-servo motion baseline · twelve-servo geometry"
     summary: "A continuing technical journal compares the original robot's stored motion ranges with the new linkage's theoretical travel. The first entry includes the mechanism diagram, nonlinear input/output examples, and downloadable range data. Gait calculations are still ahead."
     url: "/posts/gait-development/"
-  - title: "From CAD to printed leg prototypes"
+  - title: "From Blender to printed leg prototypes"
     date: 2026-09-15
     location: "Leg assembly and 3D printing"
     mileage: "Prototype photos · September 12–14 design records"
@@ -106,13 +160,13 @@ entries:
   - title: "Fitting the V2 body together"
     date: 2026-09-10T12:00:00-07:00
     location: "Hardware + MetaHuman OS"
-    mileage: "Daily design update · actual CAD renders"
-    summary: "The four-leg CAD assembly now includes a wider chassis, electronics, smoother linkages, revised covers, and a camera/display carrier. Follow fourteen saved revisions, component dimensions, remaining fit checks, and a brief MetaHuman OS update."
+    mileage: "Daily design update · actual Blender renders"
+    summary: "The four-leg Blender assembly now includes a wider chassis, electronics, smoother linkages, revised covers, and a camera/display carrier. Follow fourteen saved revisions, component dimensions, remaining fit checks, and a brief MetaHuman OS update."
     url: "/posts/2026-09-10-v2-body-design/"
   - title: "Three ways to drive a knee with short rods"
     date: 2026-09-09T12:00:00-07:00
     location: "Leg mechanism research"
-    mileage: "Three CAD variants · modeled motion and collision checks"
+    mileage: "Three Blender variants · modeled motion and collision checks"
     summary: "A direct rod, a supported relay yoke, and an offset cascade were compared. The relay remains the next research candidate; none met the complete range and pose brief."
     url: "/posts/2026-09-09-leg-mechanism-study/"
   - title: "Giving robot tasks a clear finish line"
@@ -195,11 +249,16 @@ limitations, and next tests.
 See [current project status](/posts/current-status/) for the latest summary,
 or [browse the full article archive](/archive/) for guides and earlier reports.
 
-Latest: [Q6A, chassis work, and a more active loop](/posts/q6a-chassis-and-active-loop/).
+Latest: [the lighter rebuild](/posts/2026-10-06-lighter-rebuild/),
+[compact linkage and motions](/posts/2026-10-06-compact-linkage/),
+[steering, sensing and connections](/posts/2026-10-06-steering-sensing-connections/),
+the [V1/V2 comparison](/posts/v1-v2-comparison/) and
+[gait journal](/posts/gait-development/).
 
-Earlier [body and Anker battery fit](/posts/2026-09-24-body-and-battery/),
-[V1/V2 comparison](/posts/v1-v2-comparison/), and the
-[gait and controller journal](/posts/gait-development/). Earlier
+Earlier [September 30 Q6A and active-loop work](/posts/q6a-chassis-and-active-loop/),
+[September 28 Wired / Wireless and ROS 2](/posts/2026-09-28-wired-wireless-ros2/),
+[compact body and face](/posts/2026-09-28-compact-body/),
+[Anker fit studies](/posts/2026-09-24-body-and-battery/),
 [shell development](/posts/2026-09-21-shell-design/),
 [compact legs and print files](/posts/2026-09-21-compact-leg-design/) and
 [printed-leg photographs](/posts/2026-09-15-leg-prototypes/) remain available

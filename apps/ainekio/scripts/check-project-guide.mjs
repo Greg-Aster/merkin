@@ -234,7 +234,7 @@ assert.ok(
 )
 assert.ok(
   attributeValues(home, 'src').includes(
-    sitePath('/posts/2026-09-24-progress/motion-showcase.webp'),
+    sitePath('/posts/2026-10-06-progress/motion-library-point.webp'),
   ),
   'Homepage hero must honor SITE_BASE',
 )
@@ -306,8 +306,12 @@ for (const [route, html] of [
 }
 
 // The current entry points must surface the new note without redating history.
-const latestRoute = '/posts/q6a-chassis-and-active-loop/'
+const latestRoute = '/posts/2026-10-06-lighter-rebuild/'
 const latest = readFileSync(path.join(dist, latestRoute, 'index.html'), 'utf8')
+const septemberNote = readFileSync(
+  path.join(dist, 'posts/q6a-chassis-and-active-loop/index.html'),
+  'utf8',
+)
 const updates = readFileSync(path.join(dist, 'updates/index.html'), 'utf8')
 for (const [route, html] of [
   ['/', home],
@@ -325,20 +329,18 @@ for (const [route, html] of [
 }
 assert.match(
   home,
-  /As of September 30, 2026/,
+  /As of October 6, 2026/,
   'Homepage date must reflect the update',
 )
+assert.match(latest, /could not stand/, 'Latest note must retain the physical result')
+assert.match(latest, /still\s+printing/, 'Keep the rebuild separate from tested hardware')
+assert.match(septemberNote, /YOLO/, 'Preserve the September perception record')
 assert.match(
-  latest,
-  /YOLO/,
-  'Latest note must cover the current perception work',
-)
-assert.match(
-  latest,
+  septemberNote,
   /not been flashed/,
   'Keep offline checks distinct from body tests',
 )
-assert.match(latest, /remains supported/, 'Keep the original robot supported')
+assert.match(septemberNote, /remains supported/, 'Keep the original robot supported')
 assert.match(
   updates,
   /Ainekio Development Updates/,
@@ -362,9 +364,10 @@ assert.match(
   'Preserve the archived status observation date',
 )
 for (const [file, date] of [
-  ['Project-Overview.mdx', '2026-10-01'],
+  ['Project-Overview.mdx', '2026-10-06'],
   ['Body-Design-and-Hardware.mdx', '2026-09-15'],
-  ['Controller-Firmware.mdx', '2026-09-08'],
+  ['Q6A-Chassis-and-Active-Loop.mdx', '2026-09-30'],
+  ['Controller-Firmware.mdx', '2026-10-06'],
 ]) {
   assert.ok(
     readFileSync(path.join(app, 'src/content/posts', file), 'utf8').includes(
@@ -377,10 +380,10 @@ for (const [file, date] of [
 // The progress diagrams must work on both the custom domain and preview prefix.
 for (const file of ['q6a-communication.svg', 'active-loop.svg']) {
   assert.ok(
-    attributeValues(latest, 'src').includes(
+    attributeValues(septemberNote, 'src').includes(
       sitePath(`/posts/ainekio-2026/${file}`),
     ),
-    `Latest note must display ${file}`,
+    `September note must display ${file}`,
   )
   assert.ok(
     existsSync(path.join(dist, 'posts/ainekio-2026', file)),
@@ -388,12 +391,12 @@ for (const file of ['q6a-communication.svg', 'active-loop.svg']) {
   )
 }
 assert.equal(
-  (latest.match(/<figure\b/g) || []).length,
+  (septemberNote.match(/<figure\b/g) || []).length,
   2,
   'Render both diagrams',
 )
 assert.ok(
-  attributeValues(latest, 'alt').some(value =>
+  attributeValues(septemberNote, 'alt').some(value =>
     value.startsWith('Intended communication split:'),
   ),
   'Communication diagram needs descriptive alt text',
@@ -402,10 +405,10 @@ assert.ok(
   attributeValues(home, 'src').includes(
     sitePath('/posts/ainekio-2026/q6a-communication-cover.svg'),
   ),
-  'The latest article card must load its SVG thumbnail',
+  'The September article card must retain its SVG thumbnail',
 )
 assert.match(
-  latest,
+  septemberNote,
   /update acknowledgements are not cognitive feedback/,
   'Preserve the action-result boundary',
 )

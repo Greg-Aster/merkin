@@ -1,0 +1,306 @@
+{
+  "review_date": "2026-10-06",
+  "captured_at_utc": "2026-10-06T17:15:42.856523+00:00",
+  "robot_commit": "13fc3e46009f9b0cbb0b5c1c63af8cc659e415c6",
+  "robot_branch": "dev",
+  "previous_review_robot_commit": "270537fa56c8d77efd72ff694f4294d15381de52",
+  "website_last_commit": "5eced092bcfb56a4c2b57a84a6a4ff7572cf3d00",
+  "website_baseline": "September 28 local website update, still uncommitted at this review.",
+  "scope": "Read-only robot and Blender review plus website draft preparation. October 5-6 motion candidates and some STL exports are local development artifacts. Blender renders, software checks and reported physical results are distinguished. No robot command, firmware installation or live Blender edit was performed for this review.",
+  "sources": [
+    {
+      "workspace": "robot",
+      "path": "docs/BODY_CONTROL_INTEGRATION.md",
+      "sha256": "570d551b4483923689bbef8b0ac9fa53dc091f87683001833ec46e8e8a326201"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/DISTRIBUTED_ROBOT_FOUNDATION.md",
+      "sha256": "22deb41b31ee31e4f758ec9938f73d5b3b63ca6e8650f8a2184eca7c263b1335"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/ROS2_SETUP.md",
+      "sha256": "cae79caed7cdd9fd00bd62e2ca20bc404206d05eeecec327abd5081930fcba98"
+    },
+    {
+      "workspace": "robot",
+      "path": "Master/gateway/README.md",
+      "sha256": "9db65587a166f50b6672483e92f137975844dd6c39015fe1ea49c865e1542f92"
+    },
+    {
+      "workspace": "robot",
+      "path": "Master/gateway/perception.py",
+      "sha256": "c0a283130db3fb2106e990209aac0f55f6ef3d8a56b7929eb73e0582e8ab53f6"
+    },
+    {
+      "workspace": "robot",
+      "path": "Master/gateway/plugins.py",
+      "sha256": "3cfba41afb5bf2cf9e5caf1484adcd220db63fe410265e81636234f8b33ca7ef"
+    },
+    {
+      "workspace": "robot",
+      "path": "Master/gateway/security.py",
+      "sha256": "0326f54d47afe4437b5da3d9f75b9ab2e3bef6a7f419ea24dc5f972bd761172f"
+    },
+    {
+      "workspace": "robot",
+      "path": "Slave/firmware/esp32p4-wifi6/README.md",
+      "sha256": "37f3a90fe2cf24cd00f22ce4c30f8700e5d59cbbf3fbe869b2d9357dd179f3ab"
+    },
+    {
+      "workspace": "robot",
+      "path": "Slave/software/imu/README.md",
+      "sha256": "6ff8439b696784eb2bc2b8d8ba60fce2f3cc1eaadb5d44f18dd1847ed5e67ac9"
+    },
+    {
+      "workspace": "robot",
+      "path": "Slave/software/imu/imu.c",
+      "sha256": "b7477300279f30f489e0b9089a81d63394491138d102b9d00c3a64b20ec8359a"
+    },
+    {
+      "workspace": "robot",
+      "path": "Slave/software/models/v2-12servo/README.md",
+      "sha256": "ce8de5e4a41f470c1bb867db868e08aec4ab694de0806ca1f9d06011d3eb1322"
+    },
+    {
+      "workspace": "robot",
+      "path": "Slave/software/models/v2-12servo/CONTROLLER_VALIDATION.md",
+      "sha256": "6546d32c3b4801bb8ae14afdaa35e7eaad5a79e13dd50989aca7848f08eea40b"
+    },
+    {
+      "workspace": "robot",
+      "path": "Slave/software/models/v2-12servo/geometry.json",
+      "sha256": "d7b06b9ed179fb3835a17ff8e5c40144df2b5844b17c28ef5ba99dfae9cdbe38"
+    },
+    {
+      "workspace": "robot",
+      "path": "Slave/software/models/v2-12servo/motion.c",
+      "sha256": "dd018e96178f469b9c42c95e079627e6c4852b0e5fb11f313287952d9a4f68fa"
+    },
+    {
+      "workspace": "robot",
+      "path": "Slave/software/models/v2-12servo/motions/locomotion/config.json",
+      "sha256": "163e8cda0a2845f568a0624452292138cc4cd4d073c859494bce272f1c4f2334"
+    },
+    {
+      "workspace": "robot",
+      "path": "Slave/software/models/v2-12servo/motions/run/config.json",
+      "sha256": "00da71746733c1c60828cbfc143fcba00585d8cc818df51a169ce680bcef1f4c"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/gait-research/compact-linkage-20261005/summary.json",
+      "sha256": "42d916f99f6c2287a65ce34f9a48acfe7073dd75c00093425c9aed03be28ba33"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/gait-research/linkage-motion-parity-20261005/handoff.json",
+      "sha256": "a8f69925d431e4b51c4914bd46a4ea13b56c1d3cba9dd5f87dd1fc4e59ebb754"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/gait-research/seated-support-20261005/README.md",
+      "sha256": "a8ff90948834f4f23059eaf23f1976db8596c942073bb2a6e0bdb6b577aa001a"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/gait-research/seated-support-20261005/library-handoff.json",
+      "sha256": "d28b7a4337088c5b2b5258549e296f8c9d095305ab2c95865c98f3d66e3aa7a5"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/gait-research/seated-support-20261005/library-native-check.txt",
+      "sha256": "8766e8e7991afaf04e9a0becb31247ba74e289dad3f189962b9ac83a56e9bcf7"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/gait-research/seated-support-20261005/library-blender-check.json",
+      "sha256": "7700050a7ccdc9d75ac09ad628af37cb19376b5fe9fa612ea080a12120c16ed6"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/gait-research/seated-support-20261005/library-saved-blender-check.json",
+      "sha256": "9bb815c6ebf11abe1acaaec5b8a5c978f79fb31cd235da94e4b120f5e7651134"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/gait-research/seated-support-20261005/library-travel.json",
+      "sha256": "f466eaa35e71929476c46d2888e984895a8938ce30f1a9674565a9f2b5b8387f"
+    },
+    {
+      "workspace": "blender",
+      "path": "electronics-bridge-fit-review.md",
+      "sha256": "f874dc79de299c20335194b470d67b83225aa8b11ab9974aaf8acb5d1230f469"
+    },
+    {
+      "workspace": "blender",
+      "path": "rear-tray-joint-review.md",
+      "sha256": "d2d0c61e5b57b1d05695f8c85d7ef59230d29824996b9903492087b29cef1f40"
+    },
+    {
+      "workspace": "blender",
+      "path": "side-tray-joint-review.md",
+      "sha256": "e01a2be3b0bbaf5f35160442a2b151f9d91da8e1c240b39e6ab05e7cdd20a3ec"
+    },
+    {
+      "workspace": "blender",
+      "path": "front-tray-joint-review.md",
+      "sha256": "56dddc783747ccb694d67ed097389a87b3ec8444d56e2ee47d8b6004e8599938"
+    },
+    {
+      "workspace": "blender",
+      "path": "front-panel-mask-fit-review.md",
+      "sha256": "66f3eef743521ff9f9e5cad14220eca7c9a446bc69d477105fb4da20f8f8d018"
+    },
+    {
+      "workspace": "blender",
+      "path": "part003-width-trim-study.md",
+      "sha256": "9b1af661b013735d4dabd82293435e0532ea252e25377b1e1b536b1fde684504"
+    },
+    {
+      "workspace": "blender",
+      "path": "mask-side-mount-fit-review.md",
+      "sha256": "c7225d827f9acff8e519f5a96e1c8255455d0a09033a4bf3ddeb63d326aae232"
+    },
+    {
+      "workspace": "blender",
+      "path": "rear-port-fit-review.md",
+      "sha256": "611d54dceb86691d6bc5aec6119dfbe1a8fc97a3aa098a56c302d72748c9ffb0"
+    },
+    {
+      "workspace": "blender",
+      "path": "assembly-match-marks-review.md",
+      "sha256": "0c99f5a61c0a6f58045b2f8d9db3f3c257c0bd92002cb39aa523f4f41269f9e7"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/gait-research/seated-support-20261005/library-point-preview.png",
+      "sha256": "bd9e56f51a303f7e055d8e64212b21e6eec7ecdc2164295bb3c2764e8b4993a7",
+      "web_asset": "motion-library-point.webp"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/gait-research/seated-support-20261005/upright-preview.png",
+      "sha256": "d4f4810fdc2760cc44cd43b74c73f53c8971714ad0fa329431b66cc6cc0a4b53",
+      "web_asset": "upright-study.webp"
+    },
+    {
+      "workspace": "robot",
+      "path": "docs/gait-research/seated-support-20261005/sit-preview.png",
+      "sha256": "537c1bb93ba3517b1ae28099e89aa403f86a18bf38bb542017aae5f478318ef2",
+      "web_asset": "sit-study.webp"
+    },
+    {
+      "workspace": "blender",
+      "path": "current-state-images/front-mask-replacement-oblique.png",
+      "sha256": "c72dd0a7e6e9a99dc8ef95cd71f5933258a914a61d3451f2f1c940104dc4e62e",
+      "web_asset": "multipart-face.webp"
+    },
+    {
+      "workspace": "blender",
+      "path": "electronics-bridge-fit.png",
+      "sha256": "419d35223a2d7399e69b4097b83ccadcd3be21a7c4ed521869dd09b033d8c85e",
+      "web_asset": "electronics-bridge.webp"
+    },
+    {
+      "workspace": "robot-remote",
+      "commit": "a129fe65bafb459e77c32d53468eb313c66914e3",
+      "path": "Master/gateway/hotspot.py",
+      "sha256": "2bc0a254daf4b0d1502446ea77c824be85d9d1ab0f5671f6b2d005b6d51f2a99"
+    },
+    {
+      "workspace": "robot-remote",
+      "commit": "a129fe65bafb459e77c32d53468eb313c66914e3",
+      "path": "Master/gateway/dashboard/static/dashboard.js",
+      "sha256": "629d13896206d33b39e7334daae0ea18e72cc37f4d2cee6ea83bc5e9255d3cea"
+    },
+    {
+      "workspace": "robot-remote",
+      "commit": "a129fe65bafb459e77c32d53468eb313c66914e3",
+      "path": "Master/gateway/dashboard/server.py",
+      "sha256": "0ed29d41844ba679aee6fa0b608d34f7ba8ae15fc5fea3f0c457a3308155c1b1"
+    }
+  ],
+  "assets": [
+    {
+      "path": "motion-library-point.webp",
+      "source_sha256": "bd9e56f51a303f7e055d8e64212b21e6eec7ecdc2164295bb3c2764e8b4993a7",
+      "sha256": "1b0d8742fabea326f7f58397483899b9a484fa0d5b53a279dd125dd38a49af4c",
+      "width": 1280,
+      "height": 800,
+      "bytes": 22826,
+      "processing": "PNG to WebP conversion only; no visual reconstruction."
+    },
+    {
+      "path": "upright-study.webp",
+      "source_sha256": "d4f4810fdc2760cc44cd43b74c73f53c8971714ad0fa329431b66cc6cc0a4b53",
+      "sha256": "06d2c505897dd0bc83b7825dcfe18b4370b5cfea8a07c9c48c8914ba72692f61",
+      "width": 768,
+      "height": 480,
+      "bytes": 14248,
+      "processing": "PNG to WebP conversion only; no visual reconstruction."
+    },
+    {
+      "path": "sit-study.webp",
+      "source_sha256": "537c1bb93ba3517b1ae28099e89aa403f86a18bf38bb542017aae5f478318ef2",
+      "sha256": "85a5565db802af6ab4b569942a1ccbbfdff706be135a9efe8965cab3baae4be7",
+      "width": 768,
+      "height": 480,
+      "bytes": 16018,
+      "processing": "PNG to WebP conversion only; no visual reconstruction."
+    },
+    {
+      "path": "multipart-face.webp",
+      "source_sha256": "c72dd0a7e6e9a99dc8ef95cd71f5933258a914a61d3451f2f1c940104dc4e62e",
+      "sha256": "8111b21271ddc88f4a9d80e4ccfb3710b868602af0488087ddb6e3623393d0d7",
+      "width": 1200,
+      "height": 950,
+      "bytes": 31630,
+      "processing": "PNG to WebP conversion only; no visual reconstruction."
+    },
+    {
+      "path": "electronics-bridge.webp",
+      "source_sha256": "419d35223a2d7399e69b4097b83ccadcd3be21a7c4ed521869dd09b033d8c85e",
+      "sha256": "d177c9a7f2667d9ee6fc6d0737968727abf400bb3ef7af4d171ef420af3a85d2",
+      "width": 1400,
+      "height": 900,
+      "bytes": 25990,
+      "processing": "PNG to WebP conversion only; no visual reconstruction."
+    }
+  ],
+  "remote_dev_commit": "a129fe65bafb459e77c32d53468eb313c66914e3",
+  "remote_note": "Fetched and inspected separately; local robot checkout remained at 13fc3e4.",
+  "owner_report": {
+    "date": "2026-10-06",
+    "authority": "Direct build report from the project owner in this review",
+    "physical_result": "Chassis printed; LCD and shell pieces not printed. Robot could not stand on its MG90 servos.",
+    "servo_decision": "Retain MG90 for now after researching available alternatives.",
+    "modeling_tool": "Blender only.",
+    "structure": "Remove material and add cutouts with the intent of retaining structural integrity.",
+    "power_direction": "Abandon the heavy 10000 mAh integrated rechargeable bank. Use separate batteries and onboard charging circuit boards for a more adjustable and versatile arrangement.",
+    "leg_direction": "Shorter carrier and revised linkage intended to increase lifting capability and speed.",
+    "estimates": "Approximately 20 percent lighter and 20 percent more lifting force; not independently measured or verified in this review.",
+    "qualification": "New parts still printing; revised assembly not yet tested.",
+    "unspecified": [
+      "Measured before/after mass",
+      "Exact battery cells and capacities",
+      "Charging-board models and power arrangement",
+      "Measured lifting force",
+      "Loaded runtime"
+    ]
+  },
+  "image_dates": {
+    "motion-library-point.webp": "2026-10-06",
+    "upright-study.webp": "2026-10-05",
+    "sit-study.webp": "2026-10-05",
+    "multipart-face.webp": "2026-09-28 afternoon",
+    "electronics-bridge.webp": "2026-09-28; predates October 3 retainers and latest power decision"
+  },
+  "review_limits": [
+    "Existing physical and software test records were reviewed; robot checks were not rerun.",
+    "Image appearance includes unprinted parts and older power packaging.",
+    "The October 6 motion candidate is not the installed/shared model.",
+    "User-reported improvement estimates are separate from the measured Blender volume change of the front bearing panel."
+  ]
+}

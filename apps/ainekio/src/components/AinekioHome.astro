@@ -32,6 +32,8 @@ const sections = [
     icon: 'material-symbols:precision-manufacturing-outline',
     links: [
       { label: 'V2 parts & assembly record', href: '/posts/ainekio-v2/' },
+      { label: 'Lighter chassis & new power plan', href: '/posts/2026-10-06-lighter-rebuild/' },
+      { label: 'Compact linkage & 23 motions', href: '/posts/2026-10-06-compact-linkage/' },
       { label: 'Eight vs twelve servos', href: '/posts/v1-v2-comparison/' },
       { label: 'Gait development journal', href: '/posts/gait-development/' },
       { label: 'Compact legs & print files', href: '/posts/2026-09-21-compact-leg-design/' },
@@ -43,6 +45,7 @@ const sections = [
     description: 'The software that carries commands to the robot and checks movement.',
     icon: 'material-symbols:hub-outline',
     links: [
+      { label: 'Steering, sensing & connections', href: '/posts/2026-10-06-steering-sensing-connections/' },
       { label: 'Controller firmware', href: '/posts/controller-firmware/' },
       { label: 'Commands & safety', href: '/posts/protocol-and-safety/' },
       { label: 'Gateway & dashboard', href: '/posts/gateway-and-simulator/' },
@@ -93,7 +96,7 @@ const sections = [
     </div>
     <figure class="home-feature-image">
       <a href={url(featured.url)} aria-label="Explore the latest Ainekio build">
-        <img class="home-concept" src={url(siteConfig.banner.src)} alt="Ainekio V2 CAD body with a red mask and carapace, black supports and exposed leg linkages in the September 23 motion showcase" width="1440" height="810" loading="eager" fetchpriority="high" decoding="async" />
+        <img class="home-concept" src={url(siteConfig.banner.src)} alt="October 6 Blender preview of Ainekio performing Point with the compact linkage; this is a modeled pose, not a physical test" width="1280" height="800" loading="eager" fetchpriority="high" decoding="async" />
       </a>
       <figcaption>{siteConfig.banner.credit.text}</figcaption>
       <a class="home-update-preview" href={url(featured.url)}>

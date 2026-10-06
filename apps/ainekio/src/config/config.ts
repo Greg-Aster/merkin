@@ -20,11 +20,11 @@ export const siteConfig: SiteConfig = {
   defaultTheme: DARK_MODE,
   banner: {
     enable: false,
-    src: '/posts/2026-09-24-progress/motion-showcase.webp',
+    src: '/posts/2026-10-06-progress/motion-library-point.webp',
     position: 'center',
     credit: {
       enable: false,
-      text: 'September 23, 2026 Blender motion-export frame; later battery and width edits are separate modeling work',
+      text: 'October 6 Blender motion preview. The model includes unprinted shell and display parts; the lighter assembly has not yet been tested.',
       url: '',
     },
   },

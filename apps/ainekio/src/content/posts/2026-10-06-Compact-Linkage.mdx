@@ -1,0 +1,150 @@
+---
+title: "Shorter Carriers, the Same Repertoire: Reworking 23 Motions"
+published: 2026-10-06
+updated: 2026-10-06
+description: "The 35 mm carrier candidate has a complete offline motion library, with explicit changes to foot placement, reduced Upright reach and unresolved servo travel."
+image: "/posts/2026-10-06-progress/motion-library-point.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, Blender, Gait, Linkage, Motion]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+---
+
+# A stronger lifting arrangement without losing the character
+
+The printed chassis could not stand on the MG90 servos. Alongside removing
+weight and changing the battery plan, I have been revising the legs in Blender.
+The aim is more lifting capability and quicker movement from the servos I am
+keeping. The replacement parts are still printing; the revised robot has not
+passed a physical standing test.
+
+The October 5–6 work now includes a **complete offline candidate for all 23
+named motions**. That matters because the robot needs to keep its gestures as
+well as its walking motion. The new linkage changes what those poses require.
+
+<figure>
+  <img src="/posts/2026-10-06-progress/motion-library-point.webp" alt="Blender render of the compact-linkage robot performing the Point gesture." width="1280" height="800" loading="eager" />
+  <figcaption>October 6 Point preview from the Blender scene “Motion Library - 35-20-28.” The complete modeled body includes appearance parts that have not been printed. This is an offline motion preview.</figcaption>
+</figure>
+
+## Geometry, side by side
+
+These dimensions compare the shared software model at commit `13fc3e4` with
+the new experimental model. They are model dimensions, not a measurement of
+every link currently installed on the printed robot.
+
+| Dimension | Shared model | October 5–6 candidate | Change |
+| --- | ---: | ---: | ---: |
+| Carrier | 40 mm | 35 mm | −5 mm |
+| Crank | 24 mm | 20 mm | −4 mm |
+| Pickup radius | 24 mm | 28 mm | +4 mm |
+| Connecting rod | 38 mm | 38 mm | Unchanged |
+| Distal leg | 55 mm | 55 mm | Unchanged |
+
+The candidate is identified as `compact-35-20-28-38-55-visible-20261005`.
+It lives in a separate development package and Blender scene. The handoff
+explicitly records that the active shared model was not replaced and this
+candidate was not installed in firmware.
+
+My estimate of approximately 20% more lifting force is a design estimate, not
+a measured result from these motion checks. The carrier reduction itself is
+12.5%; it should not be relabeled as a measured 20% change in either travel or
+force. The whole linkage and its changing poses still need to be tested.
+
+## Preserving the motions, recording the compromises
+
+Thirteen clips preserve their original body trajectory, foot positions in the
+horizontal plane and full-sole height: Celebrate, Curious, Cute, Dance, Freaky,
+Lay Down, Sad, Shake, Shrug, Stretch, Surprised, Swim and Worm. Crouch uses the
+native inverse-kinematics planner with the same targets, including its −35 mm
+terminal body translation.
+
+Other movements needed explicit changes:
+
+| Motion | Retained behavior | Change in the compact candidate |
+| --- | --- | --- |
+| Sit | Body trajectory, timing, contact sequence and supporting-sole orientation | Rear landings move about 5.584 mm forward |
+| Wave | Seated three-wave sequence and return to standing | Uses the revised Sit |
+| Upright | Sit entry, two front steps and full −90° body rise | Refitted body path; selected forelimb reach falls from 90.339 to 76.585 mm |
+| Rest | Step timing, final boot orientations and chassis lowering | Landings move about 5.018 mm forward |
+| Bow / Nod | Foot paths and original timing | Body translation adjusted by as much as 5 mm |
+| Pushup | Five repetitions and timing | Body translation refitted by up to 4.767 mm |
+| Play Dead | Remaining sequence and timing | Front slide endpoint moves about 7.158 mm rearward |
+| Point | Original carrier angle, boot orientation and extension timing | Pointing boot displaced by 5 mm because the carrier is shorter |
+
+<figure>
+  <img src="/posts/2026-10-06-progress/sit-study.webp" alt="Blender view of the compact-linkage Sit study with the rear legs folded." width="768" height="480" loading="lazy" />
+  <figcaption>October 5 seated-support study. The rear foot-placement adjustment lets the new linkage follow the intended sequence; it does not establish physical balance or load capacity.</figcaption>
+</figure>
+
+Upright is being kept as an experimental, best-effort motion. Its **76.585 mm
+reach describes this selected fit**, not the maximum reach of the mechanism in
+every direction. The original extension would require a different linkage
+branch, and the retained fit reaches an input dead center. On October 6 I chose
+to continue with the rest of the library while keeping these limitations visible.
+
+<figure>
+  <img src="/posts/2026-10-06-progress/upright-study.webp" alt="Blender preview of the experimental Upright pose on the compact linkage." width="768" height="480" loading="lazy" />
+  <figcaption>Experimental Upright study from October 5. Reduced reach, the dead-center finding and unqualified physical feasibility remain part of the record.</figcaption>
+</figure>
+
+## What the checks establish
+
+The final library contains **31,031 source/preview samples**. The recorded
+native sampler checks cover all twelve joints at **62,517 timestamps**.
+Forty-six nonsequential Blender poses agree with the native forward-kinematics
+calculation to within approximately **0.000027 mm**. The saved scene was
+reopened and checked.
+
+Those results establish agreement between the motion data, software calculation
+and Blender scene. They do not establish that MG90 servos can carry the load,
+that the body avoids every collision, or that the robot balances.
+
+The native test record is **six passes out of seven**. `v2_upright` still fails
+its historical requirement for more than 90 mm forelimb reach. That assertion
+has been retained as comparison evidence; the reduced-reach experiment is not
+being described as a clean test pass.
+
+There is also a servo-travel problem to resolve. Across Upright and Bow, the
+front cranks require approximately **243.868°** of combined travel. The
+provisional mapping covers **225°** over its 400–2,900 μs reference interval.
+Simply shifting the center cannot fit that span. Actual usable shaft travel
+has not been measured; these reference values are not installation instructions.
+
+## Continuous gait work remains connected to this study
+
+The earlier continuous-motion candidate checked 70 planner cases, retaining
+the intended foot targets, phase/contact schedule and shared motion clock.
+The October 6 library then completed the named gestures that were still missing
+from that earlier handoff.
+
+Separately, the committed controller now uses a 96 mm full Walk sweep,
+8.85 mm Walk lift and a −8 mm body offset. Continuous Crawl uses a −22 mm body
+offset, an 18 mm sweep and 4 mm lift. **Crawl and the named Crouch gesture are
+different motions**; their offsets should not be interchanged. A shared joint
+speed limit can stretch automatic motion timing while preserving the planned
+path. Requested cadence is therefore not proof of achievable loaded speed.
+
+The next evidence needed is the revised printed assembly: actual mass, usable
+servo travel, standing ability and movement under load. That will determine
+which of these modeled gains survive the physical build.
+
+## Record behind this entry
+
+The [committed model and controller notes](https://github.com/Greg-Aster/Ainekio-bot/tree/13fc3e46009f9b0cbb0b5c1c63af8cc659e415c6/Slave/software/models/v2-12servo)
+provide the baseline. The local October 5–6 records are
+`docs/gait-research/linkage-motion-parity-20261005/handoff.json` and
+`docs/gait-research/seated-support-20261005/`, particularly its README,
+`library-handoff.json`, `library-native-check.txt` and `library-travel.json`.
+These experimental files were local development artifacts at review time.
+
+The [review manifest](/posts/2026-10-06-progress/sources.json) records their
+hashes and image origins. The [dimension comparison CSV](/posts/2026-10-06-progress/linkage-comparison.csv)
+contains the five dimensions above. This entry continues the
+[gait development journal](/posts/gait-development/).

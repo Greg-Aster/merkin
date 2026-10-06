@@ -1,0 +1,136 @@
+---
+title: "Steering, Sensing and Keeping the Robot Connected"
+published: 2026-10-06
+updated: 2026-10-06
+description: "Continuous steering, camera profiles, recognition interfaces and an IMU estimator have progressed. Live balance control and sustained wireless reliability still need work."
+image: "/posts/2026-10-06-progress/motion-library-point.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, Firmware, ROS 2, Gait, Wireless]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+---
+
+# More responsive controls, with the feedback loop still to connect
+
+While the lighter chassis and revised legs are printing, the software has been
+moving forward too. Recent changes add continuous steering, more control over
+camera capture, recognition interfaces and clearer connection management. An
+IMU attitude estimator now exists in source.
+
+This is progress toward responsive gait. The hardware acquisition task does
+not yet feed the estimator, and its output is not driving balance corrections.
+The printed chassis also could not stand in its previous configuration. Neither
+the software work nor the Blender motion previews replace that physical result.
+
+## Wireless is the current build priority
+
+The two build options remain, with **Wireless/offboard Q6A** now the selected
+priority for reducing the weight and power demand carried by the robot.
+
+| Responsibility | Wireless — current priority | Wired — retained alternative |
+| --- | --- | --- |
+| Q6A computer | Offboard | Carried on the robot |
+| Body connection | Wi-Fi | Planned native USB connection to the P4 |
+| Local motion and servo output | P4 | P4 |
+| Compute placement | Q6A gateway and selected higher-level work offboard | Q6A gateway and selected higher-level work onboard |
+| Current qualification | Real hotspot association recorded; sustained connection remains unreliable | Native USB body transport remains integration work |
+
+The P4 remains responsible for local motion execution and servo output. ROS 2,
+recognition and remote reasoning do not become independent owners of the legs.
+
+## Steering an ongoing walk
+
+The gateway can update a running Walk action with paired forward and turn
+commands. Both use a signed −100 to +100 scale; positive turn is left yaw.
+The motion transitions through the gait cycle without starting a new action
+or resetting its phase.
+
+The body and gateway negotiate steering support. A body without that capability
+rejects the new steering fields. An acknowledgement means that a setting was
+accepted; it does not mean the robot has reached a destination or completed
+a measured turn.
+
+There are now separate controls for gait speed, stride/rate, named-motion
+speed and maximum joint speed. The common joint limit can slow the automatic
+motion clock while retaining its path. This makes the distinction between
+requested cadence and speed-limited output visible instead of implying that
+every requested rate is physically achievable.
+
+## The estimator is implemented; live balance is not
+
+The portable C IMU module accepts timestamped six-axis samples, applies
+sensor-to-body alignment and calibration, and produces orientation plus
+freshness/startup/recovery status. It uses fixed state and has analytical host
+tests. Its code is compiled with the P4 build and host checks.
+
+It contains no sensor driver, acquisition task or motor output. The current
+hardware task does not call it. Connecting the sensor, acquiring reliable
+samples and then using the estimates for motion correction remain separate
+steps. ROS 2 is not required to sit inside that fast local loop.
+
+Desktop ROS 2 work has also advanced: the recorded Jazzy checks include matching
+talker/listener messages, an MCAP recording, a temporary workspace build and
+RViz startup. These verify the desktop tools. They do not establish an Ainekio
+ROS telemetry adapter or a running robot ROS graph.
+
+## Camera capture and recognition
+
+The P4 camera code keeps one sensor/encoder owner while allowing independent
+preview and still-image profiles. Preview supports QVGA or VGA at 0–15 fps;
+still capture supports QVGA, VGA or XGA. A still can be requested with preview
+disabled. These profiles currently remain session settings rather than saved
+NVS configuration.
+
+The gateway's recognition worker processes one frame with at most one newest
+frame pending. Results from an old session are discarded. Configured local or
+HTTPS remote recognition can report a summary, objects and uncertainties through
+the existing environment bridge. The interface does not install a vision model
+or establish its accuracy, and recognition does not directly control gait.
+
+## A connection is useful only if it stays up
+
+The Q6A hotspot work progressed beyond configuration: the P4 associated,
+obtained an address and completed authenticated settings readback. Servo power
+was disconnected for that networking test. The 120-second follow-up did **not**
+maintain the required 30-second continuous session; drops remain unresolved.
+
+Portable pairing and gateway-selection support have been added in source, but
+the recorded installed firmware did not advertise gateway switching. Automatic
+switching between hosts therefore remains unproven on that device.
+
+The latest remote development commit also adds the robot's Wi-Fi network name
+beside connection status when the gateway can identify it. That improves
+diagnosis; seeing the feature in source does not establish that the running
+gateway has been updated.
+
+| Area | Evidence available | Still to demonstrate |
+| --- | --- | --- |
+| Continuous steering | Implementation and gateway/simulated-body checks | Loaded physical steering and turning behavior |
+| IMU estimation | C implementation and recorded analytical tests | Sensor acquisition and balance feedback |
+| ROS 2 | Desktop message, recording, build and visualization checks | Robot adapter and end-to-end telemetry |
+| Camera / recognition | Capture profiles, worker and transport interfaces; software checks | Physical image quality, recognition accuracy and combined-load latency |
+| Wireless connection | P4 association and authenticated settings readback | Sustained connection, recovery and device gateway switching |
+
+Focused checks have passed in the development records, but broader recorded
+test runs still contain failures. This entry does not claim a fully green
+software suite or a completed hardware integration.
+
+## Record behind this entry
+
+The baseline is robot commit `13fc3e4`: the
+[gateway README](https://github.com/Greg-Aster/Ainekio-bot/blob/13fc3e46009f9b0cbb0b5c1c63af8cc659e415c6/Master/gateway/README.md),
+[body-control integration record](https://github.com/Greg-Aster/Ainekio-bot/blob/13fc3e46009f9b0cbb0b5c1c63af8cc659e415c6/docs/BODY_CONTROL_INTEGRATION.md),
+[IMU module](https://github.com/Greg-Aster/Ainekio-bot/tree/13fc3e46009f9b0cbb0b5c1c63af8cc659e415c6/Slave/software/imu)
+and [ROS 2 setup record](https://github.com/Greg-Aster/Ainekio-bot/blob/13fc3e46009f9b0cbb0b5c1c63af8cc659e415c6/docs/ROS2_SETUP.md).
+The later [network-name status change](https://github.com/Greg-Aster/Ainekio-bot/commit/a129fe65bafb459e77c32d53468eb313c66914e3)
+was reviewed from remote `dev` separately.
+
+The [source manifest](/posts/2026-10-06-progress/sources.json) records the
+reviewed files. Hardware observations here are from those dated records and
+my October 6 build report; no new device test was performed for this article.

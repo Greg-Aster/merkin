@@ -21,19 +21,28 @@ Motion commands and audible playback have been demonstrated. Reliable repeated
 conversation and the revised software’s physical operation still need testing.
 
 V2 adds a third joint to each leg for twelve servos, with an ESP32-P4 body
-controller. The **September 24 update** documents the red shell, compact mask
-mounts, reinforced tabs and a modeling layout now 80 mm across the support
-walls. The underside is being fitted around a removable 10,000 mAh Anker bank
-with integrated charging, no separate buck converter and a planned plug-in Qi
-add-on. Battery life has not been measured.
+controller. **As of October 6, the chassis has been printed but could not
+stand on its MG90 servos.** The LCD and shell pieces remain unprinted.
+Greg is keeping the servos, removing weight in Blender and revising the
+linkage. New parts are printing; the revised assembly is untested. The
+approximately 20% weight reduction and lifting-force improvement are estimates.
 
-The new [V1/V2 comparison](/posts/v1-v2-comparison/) places motion ranges,
-capabilities, processing and the two power arrangements side by side. The
-[body and battery entry](/posts/2026-09-24-body-and-battery/) follows the fit
-experiments. The [gait journal](/posts/gait-development/) includes a Blender
-showcase and the current Walk, Run, Crawl and Crab controls, reviewed gestures
-and September 24 firmware deployment. Flash and boot are verified in that
-record; complete-body loaded walking remains unverified.
+The heavy 10,000 mAh battery-bank approach has been replaced by a plan for
+separate batteries and onboard charging boards. Exact components, capacity
+and battery life remain to be documented.
+
+Wireless, with an offboard Q6A over Wi-Fi, is the current priority. Wired
+retains the onboard Q6A and planned native-USB body link. An IMU estimator
+now exists in code; live acquisition, balance correction and the ROS 2 robot
+adapter remain integration work. The recorded hotspot connection succeeded,
+but sustained wireless operation still needs work.
+
+Read the [lighter rebuild](/posts/2026-10-06-lighter-rebuild/),
+[compact-linkage motion study](/posts/2026-10-06-compact-linkage/) and
+[steering/sensing update](/posts/2026-10-06-steering-sensing-connections/).
+The [V1/V2 comparison](/posts/v1-v2-comparison/) retains side-by-side hardware,
+range and power records. The [gait journal](/posts/gait-development/) adds
+the new results while preserving earlier Blender videos and experiments.
 
 The [V2 assembly guide](/posts/ainekio-v2/) retains the earlier parts, geometry
 alternatives, print exports and prototype photographs.
@@ -72,10 +81,12 @@ leg geometry with an Ainekio-specific chassis. The continuing journal records
 the changes since that starting point, including alternative linkages and
 compact printed parts.
 
-The portal now shows a September 23 CAD motion-export frame of the red body.
+All robot design work is done in Blender. The portal shows an October 6
+Blender preview from the compact-linkage motion library, including appearance
+parts that remain unprinted.
 The dystopian science-fiction illustrations remain with the
 [project overview](/posts/project-overview/) and earlier design articles.
-They are labeled AI-generated concept art. Technical posts show dated CAD
+They are labeled AI-generated concept art. Technical posts show dated Blender
 views, renders of exported parts and physical prototype photographs; each has
 its own evidence and date.
 

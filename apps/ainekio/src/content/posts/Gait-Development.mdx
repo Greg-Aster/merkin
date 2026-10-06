@@ -1,9 +1,9 @@
 ---
 title: "Gait Development Journal: From Eight Servos to Twelve"
 published: 2026-09-15
-updated: 2026-09-24
-description: "Continuous Walk, Run, Crawl and Crab, reviewed gestures and the September 24 P4 deployment; a continuing journal with videos, range comparisons and earlier linkage experiments."
-image: "/posts/2026-09-24-progress/motion-showcase.webp"
+updated: 2026-10-06
+description: "The printed chassis result, lighter rebuild and complete compact-linkage motion candidate; a continuing technical journal with Blender previews, range comparisons and dated software checks."
+image: "/posts/2026-10-06-progress/motion-library-point.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
@@ -23,10 +23,12 @@ the original eight-servo robot, then compares that motion baseline with the
 radically different twelve-servo linkage design. New calculations, experiments,
 and physical results will be recorded here as dated entries.
 
-**Current stage, September 24: continuous gaits and controller integration.**
-Walk, Run, Crawl and six-direction Crab now share the walking controls, with
-23 finite gestures/postures in the current V2 catalog. The latest P4 application
-has been flashed and booted; complete-body loaded walking remains unverified.
+**Current stage, October 6: lighter parts printing after the chassis could
+not stand on its MG90 servos.** A compact-linkage candidate now has all 23
+named motions remapped in Blender. It retains explicit reach and servo-travel
+limitations and has not replaced the active shared firmware model. The new
+physical assembly is untested. Steering controls and an IMU estimator exist
+in source; live balance feedback remains integration work.
 
 <figure>
   <video controls playsInline preload="metadata" width="960" height="540" poster="/posts/2026-09-24-progress/motion-showcase.webp" aria-describedby="motion-showcase-caption" className="w-full rounded-xl">
@@ -36,9 +38,11 @@ has been flashed and booted; complete-body loaded walking remains unverified.
   <figcaption id="motion-showcase-caption">September 23 Blender showcase: 33 chapters, 4 minutes 10 seconds, 2× playback, no audio. This shows the red body and the preceding motion library. The later reviewed Worm, Shrug, Play Dead, Lay Down and six-direction Crab changes are described in the September 24 entry; they are not all shown in this export.</figcaption>
 </figure>
 
-[Read the latest journal entry](#september-24-2026--continuous-gaits-and-controller-integration)
-for controls, revised motions and deployment evidence, or open the
-[V1/V2 comparison](/posts/v1-v2-comparison/) for ranges, processing and batteries.
+[Read the latest journal entry](#october-6-2026--physical-test-compact-linkage-and-the-full-motion-library)
+for the physical result and compact candidate, or follow the
+[steering and sensing work](/posts/2026-10-06-steering-sensing-connections/).
+The [V1/V2 comparison](/posts/v1-v2-comparison/) covers dated ranges, processing
+and batteries. The video above remains the September 23 animation export.
 [Download the showcase](/posts/2026-09-24-progress/motion-showcase-2x.mp4) and
 [chapter times](/posts/2026-09-24-progress/showcase-chapters.txt).
 The earlier experiments remain below in chronological order.
@@ -147,10 +151,10 @@ the foot attachment-bolt datum, not the point where the sole touches ground.*
 
 | Variable | Part / role | Reference and direction |
 | --- | --- | --- |
-| `alpha` | Part_006 drives the Part_023 upper carrier | Change from saved frame 1, about CAD +Z |
-| `theta` | Part_005 drives the Part_009 crank and Part_024 coupler | Change from the current frame-1 horn position, about CAD +Z |
-| `beta` | Passive Part_025 rocker and lower-assembly orientation | Change from frame 1, about CAD +Z; determined by `theta` |
-| `h` | Part_002 shoulder swivel | Change from frame 1, about CAD +X |
+| `alpha` | Part_006 drives the Part_023 upper carrier | Change from saved frame 1, about Blender +Z |
+| `theta` | Part_005 drives the Part_009 crank and Part_024 coupler | Change from the current frame-1 horn position, about Blender +Z |
+| `beta` | Passive Part_025 rocker and lower-assembly orientation | Change from frame 1, about Blender +Z; determined by `theta` |
+| `h` | Part_002 shoulder swivel | Change from frame 1, about Blender +X |
 
 Part_023 and Part_025 share pivot O but rotate independently. Part_006 drives
 the carrier; Part_025 follows the other motor through C–P–Q–O. Holding
@@ -170,7 +174,7 @@ therefore changes with `beta − alpha`, plus the neutral geometry offset.
 
 The saved assembly is currently a mixture of revisions:
 
-| CAD leg label | Part_024 pivot spacing | Motion evidence in this handoff |
+| Blender leg label | Part_024 pivot spacing | Motion evidence in this handoff |
 | --- | ---: | --- |
 | FL | 40.0000 mm | 505 saved frames covering separate planar sweeps |
 | FR | 24.6395 mm | Neutral assembly only |
@@ -270,7 +274,7 @@ The current comparison establishes the control and geometry differences first.
 
 ### 5. Geometry to carry into the first gait calculation
 
-The handoff uses CAD X longitudinally, CAD Y downward, and CAD Z laterally.
+The handoff uses Blender X longitudinally, Blender Y downward, and Blender Z laterally.
 One Blender coordinate unit represents 1 mm. The supplied planning conversion
 makes body Z point upward:
 
@@ -309,7 +313,7 @@ assembly branch; impossible circle intersections must be rejected and branch
 continuity checked along any future trajectory. These mathematical signs are
 not yet the electrical signs of the twelve installed actuators.
 
-At neutral, the FL foot-bolt datum is at CAD
+At neutral, the FL foot-bolt datum has Blender coordinates
 **(53.7795, 65.5118, 42.7000) mm**, with a **21.7000 mm lateral offset** from
 its shoulder axis. The sole reaches about 9.6 mm farther downward at that pose.
 The sole rotates with the lower assembly, so subtracting a fixed vertical
@@ -481,7 +485,7 @@ Record the exact upright or angled assembly, map its twelve actuators, and
 retarget the chosen foot path. Then add body shifts and support calculations,
 check the complete shell and cable envelope, and compare the results with a
 printed leg under measured load. Each new result should identify its geometry,
-contact assumptions and whether it came from calculation, CAD or hardware.
+contact assumptions and whether it came from calculation, Blender or hardware.
 
 ## September 21, 2026 — Independent stride and motion rate
 
@@ -517,7 +521,7 @@ inherit the dimensions or validation results of the September 19 22/36 study.
 | Timing | Fixed eight-second probe | Shared clock with independent stride and rate |
 
 The geometry snapshot records the transfer of the refined front-left mechanism
-to the other three legs. Its CAD labels are unusual: **RL means physical
+to the other three legs. Its Blender labels are unusual: **RL means physical
 front-left, RR front-right, FL rear-left and FR rear-right**. The downloadable
 schema retains both names so the motion channels can be mapped deliberately.
 
@@ -609,7 +613,7 @@ actual timestamps in the CSV. These are source samples; the supplied video is
 a 210-frame presentation at about 15 fps, and the Blender playback spans
 420 frames at about 29.984 fps.
 
-The joint columns are signed geometric **radians relative to CAD neutral**,
+The joint columns are signed geometric **radians relative to Blender neutral**,
 not PWM values or calibrated electrical angles. Across this specific demo,
 the recorded joint demands span:
 
@@ -771,7 +775,7 @@ The script reads source files only; it issues no robot commands.
 
 The runtime geometry still identifies the upright 24/38/24/55 mechanism from
 September 21. The September 23 scene synchronization and September 24 support
-widening are later CAD work. Updating appearance or placement in Blender does
+widening are later Blender work. Updating appearance or placement in Blender does
 not regenerate controller geometry or qualify the changed body automatically.
 The [body and battery entry](/posts/2026-09-24-body-and-battery/) records those
 packaging changes and the remaining reconciliation.
@@ -781,3 +785,158 @@ locomotion configuration, the dashboard controls and `CONTROLLER_VALIDATION.md`
 in the local robot checkout after `3f872e7`; Blender motion-export and
 expressive-motion records. The [source manifest](/posts/2026-09-24-progress/sources.json)
 identifies the exact files and hashes used for this entry.
+
+
+## September 28, 2026 — Leverage, motion speed and feedback planning
+
+This entry reviews the September 25 gait revision and the latest saved
+motion-speed implementation, including the current uncommitted controller
+validation record. It also records the next step toward responsive gait in
+the September 28 integration plan.
+
+### Lower working references, unchanged gesture paths
+
+The continuous gaits were revised to improve linkage leverage while retaining
+the established solver. These signed body-reference values belong to the
+planner's geometry; they are not measured chassis-to-floor heights.
+
+| Planner quantity | Before revision | Revised value |
+| --- | ---: | ---: |
+| Walk body reference | −2 mm | −8 mm |
+| Forward Run body reference | −6 mm | −9 mm |
+| Forward Run nose-up bias | 6° | 3° |
+| Forward Run maximum lift | 22 mm | 18 mm |
+| Backward Run / turn body reference | −2 mm | −8 mm |
+| Crab body reference | −18 mm | −22 mm |
+| Crawl body reference | −35 mm | −35 mm, retained |
+
+Walk retains its **92 mm sweep, 30 mm rearward bias and 14 mm lift**. Forward
+Run retains its 104 mm maximum sweep. Crab establishes its first anchors over
+two cycles, with three for backward movement. Its steady travel, stance width
+and cadence are unchanged. Crawl enters from the revised walking-ready pose.
+Named Stand and the 23 compiled gestures retain their existing paths; Stand
+is distinct from the continuous gait's working reference.
+
+The recorded offline full-sole check covers **14,391 robot poses**, including
+speed changes and Finish. Maximum horizontal foot error is 0.000070 mm;
+minimum output transmission angle is 46.61° in planned stance and 37.57° in
+swing, with at least 3.13 mm extension remaining. These are sampled geometric
+results for the controller model. They do not establish torque, traction,
+continuous collision clearance or the fit of the subsequently narrowed body.
+
+### Two different speed controls
+
+| Control | Continuous gait | Stand, Sit and finite gestures |
+| --- | --- | --- |
+| Main setting | Normal Speed, or advanced stride and cadence | Shared **Motion speed (×)** |
+| Accepted values | Advanced stride 1–100%; cadence 0.25–3× | Any finite positive numeric multiplier; default 2× |
+| What changes | Step planning and cadence; settings can change during walking | Entry and clip clocks use the multiplier when the next named motion starts |
+| Persistence | Existing gait-control behavior | Save on robot stores the multiplier; Read from robot confirms it |
+| Geometry | Revised working references above | Existing motion paths retained |
+| Physical qualification | Loaded gait still unverified | Accepted multipliers are not a measured safe tracking envelope |
+
+Saving the named-motion value stops outputs through the existing controller;
+starting a subsequent motion resumes operation. The setting has its own
+four-byte storage record and does not rewrite joint calibration. A value
+above 3× is valid for this control even though advanced gait cadence has a
+separate 3× maximum.
+
+### What the deployment record proves
+
+| Evidence layer | Recorded result | Limit of the result |
+| --- | --- | --- |
+| Software checks | 30 native/desktop, 27 gateway/dashboard and 42 variable-walk checks; JavaScript race checks also passed | Controlled software results, not loaded servo motion |
+| Browser controls | 6.125× input, command, save and readback after reload; mobile checks recorded | Confirms the control path, not mechanical speed |
+| Compiled application | 2,370,848 bytes, 1,440 bytes above the pre-feature application | Build size, not measured live headroom under all peripherals |
+| Deployment | Application flash digest verified; matching boots; all twelve joint mappings retained | Startup Home and settings operations only |
+| Saved setting | Prior 3× value retained and read back after another reboot | Persistence, not high-speed tracking |
+
+Production-controller tests exercise all 23 clips at several rates up to 12×.
+Those numbers test time scaling; they are not recommended assembled operating
+speeds. Higher-rate frame timing, physical shaft tracking and loaded gestures
+remain unmeasured. The recorded application SHA-256 is
+`50a9092e3cde37a7c2644820f6e5082e2b5de29be79cac8f89b556fca0e9eaed`.
+
+### Next: response to the body, not just changing a command
+
+Variable stride and speed are implemented. Response to tilt is a separate
+feedback problem. The proposed loop is **LSM6DS3 samples → attitude estimate →
+local P4 gait correction → existing servo output controller**. The sensor is
+reported received; its driver, installation and active correction loop have
+not been verified. Initial targets are 208 Hz acquisition and 50 Hz servo
+updates, subject to implementation and physical testing.
+
+ROS 2 can help expose and record this telemetry through a Q6A adapter. The
+fast correction loop remains local to the P4 for either build option. See
+[Wired, Wireless and ROS 2](/posts/2026-09-28-wired-wireless-ros2/) for the planned
+software responsibilities and current implementation stages.
+
+The latest compact Wireless model in Blender uses a different front/rear placement and
+rear shoulder-clearance study. Neither moving the legs in Blender nor passing
+the older controller-model checks synchronizes or qualifies that assembly.
+The [mechanical journal](/posts/2026-09-28-compact-body/) records the 82.5 mm
+frame, remaining refit work and separate calibration references.
+
+Sources: the captured `CONTROLLER_VALIDATION.md`, robot commit `270537f` and
+its integration/budget records, plus the dated Blender reviews. The
+[source manifest](/posts/2026-09-28-progress/sources.json) identifies the
+September 28 snapshot. These results were read from development records;
+no hardware tests were rerun for this website entry.
+
+## October 6, 2026 — Physical test, compact linkage and the full motion library
+
+The chassis has been printed, but it **could not stand on its MG90 servos**.
+LCD and shell pieces remain unprinted. After researching alternatives, Greg
+is retaining the MG90s and reducing weight, replacing the heavy battery bank
+with separate batteries and onboard charging boards, and revising the legs.
+Replacement parts are still printing; this new assembly has not been tested.
+The approximately 20% lower weight and 20% greater lifting force are current
+owner estimates, not measured loaded results.
+
+### Shared model and new candidate
+
+| Dimension | Shared model at `13fc3e4` | October 5–6 offline candidate |
+| --- | ---: | ---: |
+| Carrier | 40 mm | 35 mm |
+| Crank | 24 mm | 20 mm |
+| Pickup radius | 24 mm | 28 mm |
+| Connecting rod | 38 mm | 38 mm |
+| Distal leg | 55 mm | 55 mm |
+
+The candidate now includes **all 23 named motions**, with 31,031 source/preview
+samples in the Blender motion library. It has not replaced the shared model
+or been installed in firmware. The [detailed motion entry](/posts/2026-10-06-compact-linkage/)
+records the per-motion changes, including adjusted Sit/Rest landings and
+refitted body paths, alongside the preserved timing and choreography.
+
+<figure>
+  <img src="/posts/2026-10-06-progress/motion-library-point.webp" alt="October 6 Blender Point preview using the compact-linkage candidate." width="1280" height="800" loading="lazy" />
+  <figcaption>Point from the complete offline library. Modeled appearance parts remain unprinted; this preview does not show the revised robot lifting itself.</figcaption>
+</figure>
+
+### What still fails or needs physical evidence
+
+| Check | Recorded result | Meaning for the next build |
+| --- | --- | --- |
+| Selected Upright reach | 76.585 mm versus 90.339 mm baseline | Reduced reach accepted as an experimental fit; input dead center remains |
+| Native candidate tests | Six of seven pass; historical Upright reach assertion fails | The old reach comparison is retained, not weakened to report a clean pass |
+| Combined front-crank travel | 243.868° versus 225° in the provisional mapping | A center shift alone cannot fit the span; measure usable shaft travel |
+| Blender/native pose agreement | 46 nonsequential poses agree within about 0.000027 mm | Confirms model agreement, not torque, balance or whole-body clearance |
+| Physical revised assembly | Parts still printing | Standing, loaded tracking, clearances and power remain to test |
+
+Separately, the committed controller uses a 96 mm full Walk sweep, 8.85 mm
+Walk lift and −8 mm body offset. Continuous Crawl has a −22 mm body offset,
+18 mm sweep and up to 4 mm lift. The named **Crouch** gesture retains a −35 mm
+terminal body translation; it is a different motion. Automatic movement uses
+a common joint-speed limit that can stretch timing without shortening the path.
+
+The IMU estimator is now implemented in source. Sensor acquisition and balance
+correction are not connected to it yet. The [software entry](/posts/2026-10-06-steering-sensing-connections/)
+also records continuous steering, ROS desktop checks and the hotspot result,
+including the failed sustained-session test. The [rebuild entry](/posts/2026-10-06-lighter-rebuild/)
+documents the physical result and structural/power response.
+
+Sources: the [October 6 manifest](/posts/2026-10-06-progress/sources.json)
+identifies the reviewed controller files, local research handoffs and Blender
+images. Physical observations and improvement estimates are Greg's October 6
+report; the earlier entries above retain their original dates and assumptions.

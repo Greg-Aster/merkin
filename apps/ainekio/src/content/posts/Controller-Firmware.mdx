@@ -1,7 +1,7 @@
 ---
 title: "ESP32-S3 Controller Firmware"
 published: 2026-08-27T09:15:00-07:00
-updated: 2026-09-08
+updated: 2026-10-06
 description: "Motion, camera, audio, provisioning, storage, and recovery on the current eight-servo controller."
 image: "/assets/ainekio/v2/controller-firmware-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -33,11 +33,18 @@ that movement, applies joint calibration and limits, drives the servos, and
 reports the result. It also has to handle a stop or connection loss while
 camera and audio work compete for the same small computer’s resources.
 
-This page describes the S3 implementation. **September 24 update:** the
-twelve-servo P4 application has now been flashed, booted and connected, with
-continuous gaits and a model-specific gesture catalog. See the
-[gait and controller journal](/posts/gait-development/#september-24-2026--continuous-gaits-and-controller-integration)
-for that separate body's current evidence and outstanding physical tests.
+This page describes the S3 implementation. **October 6 update:** the separate
+twelve-servo P4/gateway source includes continuous steering, a shared automatic
+joint-speed limit and independent camera profiles. A portable IMU estimator
+is implemented but is not yet fed by a hardware task or used for balance
+correction. The [steering and sensing entry](/posts/2026-10-06-steering-sensing-connections/)
+separates source checks, desktop ROS tools and recorded connection tests from
+device behavior still to establish.
+
+The [compact-linkage library](/posts/2026-10-06-compact-linkage/) is an offline
+candidate, not the installed P4 model. The printed chassis could not stand on
+its MG90 servos; the lighter revision remains untested. Earlier deployment
+records are retained in the [gait journal](/posts/gait-development/).
 
 ## How commands become movement
 
@@ -60,9 +67,9 @@ to avoid abrupt pose changes.
 
 Named 45°, 90°, and 180° turns are **open-loop estimates**: the robot runs the
 sequence without measuring and correcting its final heading. They need
-measurement on the assembled body. V2 will require twelve-joint assets and
-matching checks, with its planned direction calibration, acceleration limits,
-and staged startup.
+measurement on the assembled body. V2 now has its own twelve-joint model,
+continuous gait planner and gesture library; its hardware qualification is
+tracked separately from these V1 clips.
 
 ## Camera, listening, and speech
 

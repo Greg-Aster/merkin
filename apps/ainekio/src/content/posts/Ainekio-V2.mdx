@@ -1,9 +1,9 @@
 ---
 title: "Ainekio V2: Parts, Assembly, and Design Iterations"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-09-24
-description: "V2 build record: revised shell and mounts, 80 mm support placement, removable Anker battery fit and deployed continuous-gait controls, with earlier parts and print iterations."
-image: "/posts/2026-09-24-progress/motion-showcase.webp"
+updated: 2026-10-06
+description: "V2 build record: a printed chassis that could not stand, lighter Blender revisions, a new battery direction, compact-linkage motions and steering/sensing integration."
+image: "/posts/2026-10-06-progress/motion-library-point.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
@@ -21,8 +21,9 @@ contentFormat: "report"
 
 # Building the next Ainekio body
 
-*Cover: September 23 Blender motion-export frame with the red mask and carapace.
-Later battery and 80 mm support edits are separate modeling work.*
+*Cover: October 6 Blender Point preview with the compact-linkage candidate.
+The model includes unprinted LCD and shell pieces; it does not show a successful
+physical standing test.*
 
 Ainekio is a small four-legged robot. Its working V1 body uses eight servos,
 with two motors positioning each leg. V2 adds a third joint per leg, a new
@@ -36,33 +37,50 @@ gait planning with prepared gestures.
 Automatic balance and adaptation to uneven ground require further sensing,
 control and physical testing.
 
-## Current revision: September 24
+## Current revision: October 6
 
-The body now has compact mask screw mounts, a tapered rear plate and reinforced
-center-support tabs following reported failures in printed parts. The latest
-modeling scene measures **80 mm across the exterior support walls**, while the
-spanning plates and animation layouts retain the earlier revision. This remains
-an assembly in development, with alignment and clearance work outstanding.
+The chassis has been printed, but **the robot could not stand on its MG90
+servos**. LCD and shell pieces remain unprinted. After researching other
+servos, Greg is keeping the MG90s and reducing the load through a lighter
+structure, a new battery arrangement and revised leg geometry. Replacement
+parts are still printing; the revised assembly has not been tested.
 
-The underside is being fitted around the **10,000 mAh Anker PowerCore Slim**
-already on hand. The removable bank has integrated charging and uses no separate
-buck converter; a plug-in Qi charging add-on is planned. Runtime has not been
-measured. Its latest placement has a one-pose contact check, separate from the
-earlier broader motion study.
+The roughly **20% lower weight and 20% higher lifting force** are current owner
+estimates. One independently documented Blender change is the front bearing
+panel's **19.81% mesh-volume reduction**; that figure applies to that part only.
+The side supports/trays and rear tray joints have been consolidated, panel
+braces revised, and screw-secured board retainers added to the electronics
+bridge. Printed fit and strength of the new revisions remain to establish.
 
-| Build record | Current detail |
+The heavy **10,000 mAh rechargeable bank has been dropped** in favor of
+separate batteries and onboard charging circuit boards. Cell capacity, board
+selection, the final power arrangement and runtime are not established here.
+The earlier Anker and SHARGE studies remain dated design iterations.
+
+**Wireless**, with the Q6A offboard over Wi-Fi, is the current build priority.
+**Wired** retains the onboard-Q6A/native-USB alternative. The new offline leg
+candidate uses a **35 mm carrier, 20 mm crank, 28 mm pickup, 38 mm rod and
+55 mm distal leg**. All 23 named motions have been remapped in Blender, with
+reduced Upright reach and unresolved servo travel. This candidate has not
+replaced the active shared firmware model.
+
+| Build record | Latest detail |
 | --- | --- |
-| [Body and battery fit](/posts/2026-09-24-body-and-battery/) | Red shell, mask mounts, reinforced tabs, 75/80 mm comparisons and successive battery placements |
-| [V1 versus V2](/posts/v1-v2-comparison/) | Side-by-side mechanics, fresh motion ranges, controller processing and power arrangements |
-| [Continuing gait journal](/posts/gait-development/) | Playable showcase; Walk, Run, Crawl, six-direction Crab and reviewed gestures; September 24 deployment |
+| [Lighter rebuild and new power direction](/posts/2026-10-06-lighter-rebuild/) | Standing result, servo decision, material removal, board retainers and the next printed assembly |
+| [Compact linkage and 23 motions](/posts/2026-10-06-compact-linkage/) | Geometry comparison, changed gestures, Blender previews and remaining qualification |
+| [Steering, sensing and connections](/posts/2026-10-06-steering-sensing-connections/) | Wireless priority, IMU estimator, camera profiles, ROS tools and connection tests |
+| [V1 versus V2](/posts/v1-v2-comparison/) | Mechanics, dated motion ranges, controllers, Q6A and the two power options |
+| [Continuing gait journal](/posts/gait-development/) | Physical result and compact candidate, followed by dated controller records and earlier videos |
+| [September 28 compact body and face](/posts/2026-09-28-compact-body/) | Earlier frame narrowing, bank packaging, LCD carrier and assembly marks |
+| [September 24 body and battery study](/posts/2026-09-24-body-and-battery/) | Earlier red shell, reinforced tabs, width changes and Anker placement experiments |
 | [Compact legs and horn fit](/posts/2026-09-21-compact-leg-design/) | Earlier geometry alternatives and dated print files |
-| [Earlier shell design](/posts/2026-09-21-shell-design/) | Face, roof and fin development before the current assembly refinements |
 
-The latest P4 application was flashed, booted and connected on September 24.
-It contains continuous gaits and 23 finite gestures/postures. Previous bench
-work used two unloaded servos without linkages. V1 remains the working complete
-robot; loaded movement and battery performance of the revised twelve-servo
-body remain unverified.
+The P4/gateway source now includes continuous steering and shared joint-speed
+control. The IMU estimator is implemented, but hardware acquisition and balance
+correction remain disconnected. ROS 2 tools have recorded checks; the robot
+adapter and native-USB body transport remain integration work. The recorded
+P4 hotspot connection succeeded, while sustained-session testing failed.
+V1 remains the working complete robot; V2's next loaded test is still ahead.
 
 The rest of this guide preserves earlier decisions with their dates. The
 [September 15 prototype post](/posts/2026-09-15-leg-prototypes/) contains physical
@@ -123,7 +141,7 @@ and repair without dismantling the whole body.
 The new [prototype photographs](/posts/2026-09-15-leg-prototypes/#building-the-leg-then-checking-the-fit)
 show a printed leg assembled in partly folded, folded, and extended poses.
 The records now include a failed shell fit and horn measurements from actual
-hardware, as well as saved CAD changes. Many refinements apply to one
+hardware, as well as saved Blender changes. Many refinements apply to one
 front-left leg or a separate review file; they are not all combined into one
 released four-leg print set.
 
@@ -143,7 +161,7 @@ recorded draft has pose-dependent interference and awaits final review.
 The [latest build log](/posts/2026-09-15-leg-prototypes/) shows the source images
 and explains the alternatives and their remaining limitations.
 
-## Parts in the September 10 CAD assembly
+## Parts in the September 10 Blender assembly
 
 This is the earlier electronics/body snapshot. The leg refinements above are
 newer; inclusion here does not make a reference board or display a final choice.
@@ -156,14 +174,14 @@ identify the following references.
 
 | Component | Quantity | Board size; mounting pattern | How it is used and what remains open |
 | --- | --- | --- | --- |
-| Radxa Dragon Q6A v1.21 | 1 model | 85 × 56 × 1.6; four Ø3.5 holes, 58 × 49 pattern | Computer model at the front, ports facing the end panel. Its CAD placement does not establish an installed OS or onboard MetaHuman runtime. |
+| Radxa Dragon Q6A v1.21 | 1 model | 85 × 56 × 1.6; four Ø3.5 holes, 58 × 49 pattern | Computer model at the front, ports facing the end panel. Its Blender placement does not establish an installed OS or onboard MetaHuman runtime. |
 | ESP32-P4-WIFI6 | 1 model | Supplied STEP measures about 71.07 × 21.02 × 1.60 | Body controller candidate at the rear. Exact board wiring and the twelve-servo firmware port remain open. |
 | Adafruit PCA9685 servo driver, product 815 | 1 model | 62.23 × 25.4 × 1.57; four Ø2.5 holes, 55.88 × 19.05 pattern | Separate servo-pulse board modeled beside the P4. Final driver selection and wiring are not proven by placement. |
 | MG90S-class joint servos | 12 planned | Three joints per leg | The new body still needs loaded leg tests and calibration; supplier-specific dimensions and torque must be checked against the actual motors. |
 | Waveshare 2inch LCD Module | 1 reference model | 58 × 35 × 1.6; four Ø2 holes, 53 × 30 pattern | Landscape face display, including four M2×6 spacers in the official model. Final display product remains undecided. |
 | OV5647 camera, Arducam B0033 dimensional reference | 1 reference model | 25 × 24; four Ø2 holes, 21 × 12.5 pattern | Above the display. Thickness, lens depth, rear connector, and minor components are approximate envelopes. |
-| Top and bottom covers | 2 CAD parts | Each 112 wide, 3 base thickness, eight Ø3 mounting holes | WIP 13 closed unused openings. Bottom tabs remain. Printed seating and strength are untested. |
-| Removable front carrier | 1 CAD part | Adds 3 to the two front cover screw stacks; four 4-high camera standoffs | LCD and camera share the carrier. Screw lengths, retention, and cables still need actual hardware. |
+| Top and bottom covers | 2 Blender parts | Each 112 wide, 3 base thickness, eight Ø3 mounting holes | WIP 13 closed unused openings. Bottom tabs remain. Printed seating and strength are untested. |
+| Removable front carrier | 1 Blender part | Adds 3 to the two front cover screw stacks; four 4-high camera standoffs | LCD and camera share the carrier. Screw lengths, retention, and cables still need actual hardware. |
 
 The P4 model came from the supplied `ESP32-P4-WIFI6_3d-20260109.stp` file.
 Its four polygonal mounting openings measure about 1.66 mm across the inscribed
@@ -176,7 +194,7 @@ The display uses the [Waveshare module reference](https://www.waveshare.com/wiki
 and its [mechanical drawing](https://files.waveshare.com/upload/6/6d/2inch_LCD_Module_2D_Drawing.pdf).
 The camera board dimensions come from the [Arducam B0033 drawing](https://www.uctronics.com/download/Amazon/B0033.pdf).
 
-## How the CAD assembly was built
+## How the Blender assembly was built
 
 The revision names below refer to saved `Complete-WIP` Blender files. Their
 order documents the modeling work, not a completed physical assembly procedure.
@@ -194,7 +212,7 @@ order documents the modeling work, not a completed physical assembly procedure.
 | WIP 13 | Close 18 unused top openings and 15 unused bottom openings | Each cover retains only eight Ø3 frame holes and the existing outer contour. |
 | WIP 14 | Mount a camera above a landscape LCD on a removable front carrier | Reuse front cover screw axes; hardware selection, cabling, optics, and electrical compatibility remain open. |
 
-![Actual CAD layout showing the computer at the front and two controller boards toward the rear.](/posts/2026-09-10-v2-design/electronics-layout.png)
+![Actual Blender layout showing the computer at the front and two controller boards toward the rear.](/posts/2026-09-10-v2-design/electronics-layout.png)
 
 *WIP 5 board placement, before the later covers and face. This records that
 revision’s layout; it is not a wiring diagram.*
@@ -231,7 +249,7 @@ details before it can serve as a complete replication guide.
 The paragraphs below preserve the earlier controller plan. By September 17,
 the project had a separate twelve-joint model and thirty geometric motions,
 and the selected signal driver was a HUAREW PCA9685 breakout. That hardware
-selection is distinct from the Adafruit board model in the September 10 CAD
+selection is distinct from the Adafruit board model in the September 10 Blender
 table. The [integration record](/posts/2026-09-21-design-progress/data/motion-integration-record.txt)
 reports a built motion image, pending flash and unavailable physical motion.
 
@@ -241,7 +259,7 @@ communication hardware, camera, and audio still need their own implementation
 and tests; V1’s S3 wiring map is not a P4 wiring guide.
 
 The original plan favored twelve servo-control signals generated directly by
-the P4. The newer CAD includes a PCA9685 pulse-width modulation (PWM) board.
+the P4. The later Blender model includes a PCA9685 pulse-width modulation (PWM) board.
 Both approaches still require pin allocation, control software, calibration,
 and peripheral tests; a board model is not evidence that either path is wired.
 
@@ -261,6 +279,10 @@ and MetaHuman motion-plan schema described eight joints. They needed to agree on
 names, limits, and advertised capabilities before accepting twelve-joint plans.
 
 ## Power: measure the load before choosing the supply
+
+*Earlier electrical planning, retained for context. The October 6 direction
+uses separate batteries and onboard charging boards. The bank option below
+is historical; the final cells, boards and power arrangement are unspecified.*
 
 The owner reports V1 operating on its existing 5 V / 5 A supply. The design note
 proposes measuring that robot first, then evaluating a 5–6 A supply line, or
@@ -306,7 +328,7 @@ Higher-cost servos and wireless charging were outside the initial build plan.
 Onboard Linux computing was also excluded from that first scope. The Q6A model
 records the September 10 wide-body packaging study; its board and tray were
 retired from the September 17 narrow chassis. No onboard Q6A runtime is
-established by either CAD layout.
+established by either Blender layout.
 
 The [MetaHuman redesign](/posts/metahuman-integration/) can develop against V1
 while these mechanics are tested. [Current project status](/posts/current-status/)
