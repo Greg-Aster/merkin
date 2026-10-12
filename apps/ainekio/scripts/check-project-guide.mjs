@@ -18,7 +18,7 @@ const source = readFileSync(
   'utf8',
 )
 
-assert.match(guide, /Ainekio Project Index/, 'Guide title must render')
+assert.match(guide, /Ainekio Development Tracker/, 'Guide title must render')
 assert.match(guide, /data-pagefind-body/, 'Guide must be search-indexable')
 const attributeValues = (html, name) =>
   [
@@ -50,9 +50,9 @@ for (const id of ['standard-nav', 'default-links']) {
   assert.ok(end > start, `Unclosed navigation region: ${id}`)
   assert.ok(
     attributeValues(guide.slice(start, end), 'href').includes(
-      sitePath('/project-guide/'),
+      sitePath('/posts/project-overview/'),
     ),
-    `${id} must link to guide`,
+    `${id} must link to the reader introduction`,
   )
 }
 assert.match(
@@ -71,7 +71,7 @@ const ids = new Set(attributeValues(guide, 'id'))
 const article = guide.match(
   /<article\b[^>]*\bproject-guide\b[^>]*>([\s\S]*?)<\/article>/,
 )?.[1]
-assert.ok(article, 'Project Index article must render')
+assert.ok(article, 'Development tracker article must render')
 const hrefs = [...article.matchAll(/<a\b[^>]*>/g)].flatMap(match =>
   attributeValues(match[0], 'href'),
 )
@@ -234,7 +234,7 @@ assert.ok(
 )
 assert.ok(
   attributeValues(home, 'src').includes(
-    sitePath('/posts/2026-10-06-progress/motion-library-point.webp'),
+    sitePath('/assets/ainekio/2026-10-12-refresh/render-front.webp'),
   ),
   'Homepage hero must honor SITE_BASE',
 )
@@ -306,7 +306,7 @@ for (const [route, html] of [
 }
 
 // The current entry points must surface the new note without redating history.
-const latestRoute = '/posts/2026-10-06-lighter-rebuild/'
+const latestRoute = '/posts/2026-10-12-shell-power-and-motion/'
 const latest = readFileSync(path.join(dist, latestRoute, 'index.html'), 'utf8')
 const septemberNote = readFileSync(
   path.join(dist, 'posts/q6a-chassis-and-active-loop/index.html'),
@@ -329,11 +329,13 @@ for (const [route, html] of [
 }
 assert.match(
   home,
-  /As of October 6, 2026/,
+  /As of October 12, 2026/,
   'Homepage date must reflect the update',
 )
-assert.match(latest, /could not stand/, 'Latest note must retain the physical result')
-assert.match(latest, /still\s+printing/, 'Keep the rebuild separate from tested hardware')
+assert.match(latest, /stand, walk and respond to commands/, 'Latest note must retain the owner-reported physical result')
+assert.match(latest, /Active Operator remains untested/, 'Do not imply autonomous acceptance')
+assert.match(latest, /I have begun printing the exterior shell/, 'Preserve the physical assembly boundary')
+assert.match(latest, /4 A power supply/, 'Retain the current owner-reported supply')
 assert.match(septemberNote, /YOLO/, 'Preserve the September perception record')
 assert.match(
   septemberNote,
@@ -343,7 +345,7 @@ assert.match(
 assert.match(septemberNote, /remains supported/, 'Keep the original robot supported')
 assert.match(
   updates,
-  /Ainekio Development Updates/,
+  /Ainekio Build Journal/,
   'Updates page must identify this project',
 )
 assert.doesNotMatch(
@@ -364,10 +366,11 @@ assert.match(
   'Preserve the archived status observation date',
 )
 for (const [file, date] of [
-  ['Project-Overview.mdx', '2026-10-06'],
+  ['Project-Overview.mdx', '2026-10-12'],
   ['Body-Design-and-Hardware.mdx', '2026-09-15'],
   ['Q6A-Chassis-and-Active-Loop.mdx', '2026-09-30'],
-  ['Controller-Firmware.mdx', '2026-10-06'],
+  ['2026-10-06-Lighter-Rebuild.mdx', '2026-10-06'],
+  ['Controller-Firmware.mdx', '2026-10-08'],
 ]) {
   assert.ok(
     readFileSync(path.join(app, 'src/content/posts', file), 'utf8').includes(
@@ -402,7 +405,7 @@ assert.ok(
   'Communication diagram needs descriptive alt text',
 )
 assert.ok(
-  attributeValues(home, 'src').includes(
+  attributeValues(readFileSync(path.join(dist, 'archive/index.html'), 'utf8'), 'src').includes(
     sitePath('/posts/ainekio-2026/q6a-communication-cover.svg'),
   ),
   'The September article card must retain its SVG thumbnail',
@@ -414,5 +417,5 @@ assert.match(
 )
 
 console.log(
-  `Project Index smoke checks passed at ${base} (${ids.size} anchors, ${hrefs.length} links).`,
+  `Development tracker smoke checks passed at ${base} (${ids.size} anchors, ${hrefs.length} links).`,
 )

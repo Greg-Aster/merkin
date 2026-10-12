@@ -203,6 +203,13 @@ export default defineConfig({
   site: siteUrl,
   base: basePath,
   trailingSlash: "always",
+  // Preserve the original Google Docs reading-map links after archival moves.
+  redirects: {
+    '/posts/broad-strokes/': '/posts/archive/broad-strokes/',
+    '/posts/first-steps-work-in-progress/': '/posts/archive/first-steps-work-in-progress/',
+    '/posts/motion-systems/': '/posts/archive/motion-systems/',
+    '/posts/discussion-ainekio/': '/posts/discussion/',
+  },
   integrations: [
     corsMiddleware(), // Add the CORS middleware as an integration
     tailwind(),

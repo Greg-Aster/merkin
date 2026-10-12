@@ -1,0 +1,80 @@
+{
+  "scope": "Recorded paired desktop model evaluation; reference agreement is not overall semantic accuracy or physical robot performance. Correlated catalog variants are not independent real-world trials.",
+  "qualified": false,
+  "productionUpdated": false,
+  "metrics": {
+    "current": {
+      "evaluation": {
+        "total": 234,
+        "coreValid": {
+          "count": 234,
+          "rate": 1
+        },
+        "typedDecisionMatch": {
+          "count": 159,
+          "rate": 0.6794871794871795
+        },
+        "missedPhysicalActions": 6,
+        "wrongPhysicalActions": 39,
+        "unsafeActionAuthorityErrors": 21,
+        "falseCompletions": 0,
+        "medianLatencyMs": 489.37526400000206,
+        "p95LatencyMs": 731.4291150000063
+      },
+      "regression": {
+        "total": 138,
+        "coreValid": {
+          "count": 138,
+          "rate": 1
+        },
+        "typedDecisionMatch": {
+          "count": 93,
+          "rate": 0.6739130434782609
+        },
+        "missedPhysicalActions": 1,
+        "wrongPhysicalActions": 19,
+        "unsafeActionAuthorityErrors": 15,
+        "falseCompletions": 0,
+        "medianLatencyMs": 386.1391069999954,
+        "p95LatencyMs": 622.4796900000074
+      }
+    },
+    "candidate": {
+      "evaluation": {
+        "total": 234,
+        "coreValid": {
+          "count": 234,
+          "rate": 1
+        },
+        "typedDecisionMatch": {
+          "count": 184,
+          "rate": 0.7863247863247863
+        },
+        "missedPhysicalActions": 2,
+        "wrongPhysicalActions": 34,
+        "unsafeActionAuthorityErrors": 12,
+        "falseCompletions": 0,
+        "medianLatencyMs": 483.9492420000024,
+        "p95LatencyMs": 754.5851899999834
+      },
+      "regression": {
+        "total": 138,
+        "coreValid": {
+          "count": 138,
+          "rate": 1
+        },
+        "typedDecisionMatch": {
+          "count": 90,
+          "rate": 0.6521739130434783
+        },
+        "missedPhysicalActions": 0,
+        "wrongPhysicalActions": 19,
+        "unsafeActionAuthorityErrors": 20,
+        "falseCompletions": 0,
+        "medianLatencyMs": 392.7591700000339,
+        "p95LatencyMs": 671.5548609999823
+      }
+    }
+  },
+  "metricScope": "Typed reference comparison, not comprehensive semantic accuracy. Semantically valid alternative programs can mismatch references. UnsafeActionAuthorityErrors counts unexpected physical selections relative to reference. FalseCompletions checks explicit complete outcome and does not detect all receipt-based visual-goal completion errors."
+}

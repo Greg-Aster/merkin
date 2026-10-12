@@ -1,0 +1,328 @@
+{
+  "review_date": "2026-10-12",
+  "owner_report": {
+    "exterior_shell": "Printing begun; full attachment not confirmed",
+    "weight": "Further modifications reported; no measured mass supplied",
+    "power": "Switched to a 4 A power supply; voltage and measured current not supplied",
+    "software": "YOLOE integration, extensive node workflow work, trained Qwen 0.8B intent orchestrator and task manager"
+  },
+  "physical_baseline": "October 8 owner report: stands, walks and responds to commands. No newer Active Operator physical acceptance report supplied.",
+  "repository_heads": {
+    "Ainekio": "436c035f17d15ed7fff9afb20f3997c432bd39ca",
+    "metahuman": "8b398f0dc2125b5698cb8d1fd0d7bdc3c3e65e10"
+  },
+  "source_state": "Both robot and MetaHuman repositories include uncommitted development. Reviewed file hashes identify this snapshot; GitHub commit links do not include later local edits.",
+  "images": "October 12 live Blender Wireless scene at frame 43: front and rear captures via MCP look. October 10 reference views retained as history. Images labeled concept artwork were generated with built-in image_gen from the October 12 captures; surroundings and weathering are imagined.",
+  "sources": [
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "rear-helmet-concepts/reference-rear-three-quarter.png",
+      "sha256": "4b04b81750581e44acb3e646b3c3b9a29e453731013d25e10b8be9e776b7c9d4"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "rear-helmet-concepts/reference-side.png",
+      "sha256": "dc8e0c2883c99288a5e5e6d89f964e2de8978c5b0bead6eb28c7711135ed8e33"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "rear-helmet-concepts/reference-folded-shoulder.png",
+      "sha256": "177f32d5a36f8048f34b954cad325e14566fceecc76f942f521fc1d940964bee"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Cheek-fang-L.stl",
+      "sha256": "af967142b5b95ec5e10c83dd43292758ce00c25ec69c93f44b5ac8078a1a32d0"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Cheek-fang-R.stl",
+      "sha256": "9fd24d1527a638a2b535b320cd76712fa0d29364b071ec27897b46b1dfdc8d7c"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Cheek-flush-pin-L.stl",
+      "sha256": "dbd82b363f9ef6f5c534ef023ed2ada85440b9d8bdb224c77032c3a4f8266358"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Cheek-flush-pin-R.stl",
+      "sha256": "9f0ef5f46bcbd01f23277b1c8d5b63d042342ac949518c6f8f66fcf2b54b0d3c"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Cheek-key-L.stl",
+      "sha256": "e804d3b7ead1e6b56c2fd13cc5e300299a9e5b3c4884dd46eb4117ae5340c893"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Cheek-key-R.stl",
+      "sha256": "1f04275fd94e5cba5ec19b264ccba435cc10f5770d50fdc2a2e7717e296b9589"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Side-flush-pin-L.stl",
+      "sha256": "83b6db83dc1b0de5592bb49e6975794d7316a6ec59fc1ee0fe21e1b12e89b465"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Side-flush-pin-R.stl",
+      "sha256": "07cffc2476ae22f01d2d44c76189ce288f5fc54110336cce0c0624adf12abbca"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Side-key-L.stl",
+      "sha256": "221f1d463255b26ab7c4af1a85e829557b9356e746039a066d103ce8d5636150"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Side-key-R.stl",
+      "sha256": "b75d3a28a76dfe1aa7894a492c41567432a716db090fffa27d963138f2cf325f"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Side-shell-L.stl",
+      "sha256": "2796c44b0b8b7d2f7ca65f3b8e4155ea93a2f6f66e4ef997ac081d961ceca03d"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Side-shell-R.stl",
+      "sha256": "44a5dbd7356913cc01b0896b88aeb8591709737e8181038d5ce2eeb113519474"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Temple-L.stl",
+      "sha256": "545e69bbbd7e6ee09d1dead1a5dc1917e2e986ead5106010088ebf2907cfac6c"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Temple-R.stl",
+      "sha256": "f9d2941fa029d22406213c0a7e61230688c3e15e473a7b6198a6f0e6d33ef101"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "front-shell-print/Upper-visor.stl",
+      "sha256": "cc461af8f0c42bca1c3949b8c30e569b8fb86a30fa784003c6f8ae29097bc4b2"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "rear-helmet-concepts/print-three-piece/Compact-arch-center.stl",
+      "sha256": "1ceba8d081bc25fabd0fec5b1befd235c289d657fe8950a83ac2098a0621bc22"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "rear-helmet-concepts/print-three-piece/Compact-arch-front-saddle.stl",
+      "sha256": "d8dea1472346e675ef17ab1a22318b5e1e77d5344d0d8ab919186712c34162f0"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "rear-helmet-concepts/print-three-piece/Compact-arch-left.stl",
+      "sha256": "c0c474d1a3ac6c29a9fefa0fc4e56f920c2863a0065f6c0fbaf05cb2c6670fe3"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "rear-helmet-concepts/print-three-piece/Compact-arch-rear-saddle.stl",
+      "sha256": "5d2f3826f973638ad85d4d142a3d72091e794d517bfc54012695468ef22ace54"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "rear-helmet-concepts/print-three-piece/Compact-arch-right.stl",
+      "sha256": "453e75a8e18a79b6202eb488bcdb8fe3f3614da9aec52bafb70924f6ee63b8d1"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "rear-helmet-concepts/print-three-piece/Updated-brace-left-M3.stl",
+      "sha256": "7ae94a463455e5a4a39cb41aa27380aee8a1e0b2b1f42ab62a1307c4d40567f6"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "rear-helmet-concepts/print-three-piece/Updated-brace-right-M3.stl",
+      "sha256": "c3cd4ab1ef65495ff614e564ee3b70ef2b9abb7bf84922c359883e8b2fbdc857"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "rear-helmet-concepts/print-three-piece/Updated-rear-panel-M3.stl",
+      "sha256": "8fc3a6984a03bf6ff4616f5912d3e01d28e7fc18fb43c637cfbaa04bb50f4e6d"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "camera-cradle/Camera-cradle.stl",
+      "sha256": "353e2d27c8b5f23f933e0689fb1091cfe9ffb97efe9486a06ccf3e27000f614a"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "camera-cradle/Chin-left.stl",
+      "sha256": "49be598b87fc20366322966c9d92696471f72b02a8db4a960d7f8e1eb615aa1e"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "camera-cradle/Chin-right.stl",
+      "sha256": "b141a2fac3dc25008d732234b9c08240fdeb414bfc707d4af3ef6b8e360f3889"
+    },
+    {
+      "repository": "blender-5.0.0-linux-x64",
+      "path": "camera-cradle/LCD-carrier.stl",
+      "sha256": "d3645a0d230c64ca727cc23d713ea9b5a7f17f7ad94d30742a64d6dc67361e0e"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/software/models/v2-12servo/motions/gestures/lay_down/validation.json",
+      "sha256": "b14d8cdd4da5aebb15ec70b8dcf11e62f4f310f80da5f8e4540b6a3906ab1a72"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/software/models/v2-12servo/motions/gestures/dead/validation.json",
+      "sha256": "31beb4393aa67c9586978bc800f8ede6dff0cf7532b5d7de46021c5601b2615f"
+    },
+    {
+      "repository": "metahuman",
+      "path": "out/environment-action-selector/training/task-goals-20261011/qualification-decision.json",
+      "sha256": "35c6223ad0e403d3e6d62049fb652dafdd7444516862469bec9351b725816005"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/audits/VISION_TRACKING_INTEGRATION.md",
+      "sha256": "e36f76fc2f9713852bd2a488e28da08f76a4d1db1f25dcd75c991347b9529a3b"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/README.md",
+      "sha256": "3d961fc34c2e19bd4f786c408fdbbac54b9d4879c46c2b9dd5b5fceb1ee0dc1e"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/README.md",
+      "sha256": "85d17604443cf36a00dce093f12cadacc9b663cfa7d6e6ec92cc2d4be0ec26d1"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/software/models/v2-12servo/tools/step_grounded_postures.py",
+      "sha256": "576dcb3334b682d7b1ca8fec1c736895ac16a7816fbbd5392be70f3fe257ffc6"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/main/body.c",
+      "sha256": "03b715ba9815ea59cf12a74beab68cddb0476af37b1fe95e88764ee89d7a2077"
+    },
+    {
+      "repository": "metahuman",
+      "path": "brain/training/environment-action-selector/README.md",
+      "sha256": "0f41a9410c44c5ffcd8d925648d9222582ea6a6a20e3439a02ca25a086a2d4b5"
+    },
+    {
+      "repository": "metahuman",
+      "path": "docs/technical/BIG_BROTHER.md",
+      "sha256": "4d8a691ed54b99856bf407351dbe9f0b0c5a398b0cdf2abd0acf592103e85331"
+    },
+    {
+      "repository": "metahuman",
+      "path": "packages/core/src/robot-status-live.ts",
+      "sha256": "d3ea3fff629ab0aa38c45874fd208450f5183f9e18cd322eb3e0bef8c2d73d7b"
+    },
+    {
+      "repository": "metahuman",
+      "path": "packages/core/src/model-roles.ts",
+      "sha256": "4289169409239457a4d74de6dfebf2ddb574318f8211496ff396df049d4aa43b"
+    },
+    {
+      "repository": "metahuman",
+      "path": "out/environment-action-selector/training/intent-expanded-final-010/qualification.json",
+      "sha256": "eebcbd129df9319a21d725094f7c4d18d4e139f834a069528cda95eb85c90cb7"
+    },
+    {
+      "repository": "metahuman",
+      "path": "out/environment-action-selector/training/intent-tools-20261010T042747Z/activation.json",
+      "sha256": "cf822d6ca0770f5a2d3ce7a7f7b86e4d73a909c0268688ea6b0e5868e70410ca"
+    },
+    {
+      "repository": "metahuman",
+      "path": "out/environment-action-selector/training/speck2-learning-curve-001/summary.json",
+      "sha256": "6985f25a94ca7570499d0e30356b17a52d741d222add46305bf28a1e46f92ceb"
+    },
+    {
+      "repository": "metahuman",
+      "path": "out/environment-action-selector/training/activation-expanded-010/intent-activation.json",
+      "sha256": "553e34a23597b777e12c362fcef22f20090ab867999a5ed97a8f178f97d23839"
+    },
+    {
+      "repository": "metahuman",
+      "path": "out/environment-action-selector/training/activation-expanded-010/task-activation.json",
+      "sha256": "69fe1f2d469f36fe32876c118cde35e7e0174418eb3c6120f7265a42213fc04a"
+    }
+  ],
+  "blender_capture": {
+    "date": "2026-10-12",
+    "file": "Slave/hardware/v2-12servo/ainekio-variable-gait-Recovery.blend",
+    "scene": "Wireless",
+    "frame": 43,
+    "geometry_edits_by_this_update": false,
+    "saved_by_this_update": false
+  },
+  "assets": [
+    {
+      "file": "blender-current-front.png",
+      "bytes": 475937,
+      "sha256": "dd49e393288336ae8525c885e2ef52b75539f06c193157da081965e122beee12"
+    },
+    {
+      "file": "blender-current-rear.png",
+      "bytes": 373614,
+      "sha256": "5eced7d36ecae746dad13148d9df753ad9bf67fea066266d632f714a13a4a207"
+    },
+    {
+      "file": "dystopian-perception.png",
+      "bytes": 2172619,
+      "sha256": "bca1eca099f94f09c4a119e73678aa54979918dce3e66b5887fe4e0ded18ea96"
+    },
+    {
+      "file": "dystopian-workshop.png",
+      "bytes": 2193235,
+      "sha256": "f8357189db3bb527d6d4e9eb7efc944f8b06f8ceab67209c3a0752bc4e07c364"
+    },
+    {
+      "file": "image-prompts.json",
+      "bytes": 4089,
+      "sha256": "d43adb7cc45dd9f582a72b55453a52ced638ea8408dee622ea4ccc6cbf0d9941"
+    },
+    {
+      "file": "motion-comparison.json",
+      "bytes": 2389,
+      "sha256": "17b4fe6e4a70cdddc601d49b72df8c1dc9210aebe636d4b82dd1bdb7674366d2"
+    },
+    {
+      "file": "prototype-print-exports.zip",
+      "bytes": 1183030,
+      "sha256": "86707203e8c4ec88c476441ac23dfc79e1bd634bfe17785bdaa35249451bb767"
+    },
+    {
+      "file": "reference-folded-shoulder.png",
+      "bytes": 358804,
+      "sha256": "177f32d5a36f8048f34b954cad325e14566fceecc76f942f521fc1d940964bee"
+    },
+    {
+      "file": "reference-rear-three-quarter.png",
+      "bytes": 404131,
+      "sha256": "4b04b81750581e44acb3e646b3c3b9a29e453731013d25e10b8be9e776b7c9d4"
+    },
+    {
+      "file": "reference-side.png",
+      "bytes": 338718,
+      "sha256": "dc8e0c2883c99288a5e5e6d89f964e2de8978c5b0bead6eb28c7711135ed8e33"
+    },
+    {
+      "file": "specialist-results.svg",
+      "bytes": 3365,
+      "sha256": "67671861661001d00c70bb929a845a96c3a2a308e4641142ec85808a2e96a66d"
+    },
+    {
+      "file": "task-model-comparison.json",
+      "bytes": 2562,
+      "sha256": "4d04e6511e904836ceab250982d107af8f4f1fc02aff9110d2bb01cc8ca0780b"
+    },
+    {
+      "file": "vision-flow.svg",
+      "bytes": 3087,
+      "sha256": "9487b213937398d420c31436c10b6a0826e145208000cdbe970e29caf34c2e1b"
+    }
+  ]
+}

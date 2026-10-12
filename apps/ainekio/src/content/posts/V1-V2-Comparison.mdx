@@ -1,9 +1,9 @@
 ---
 title: "Ainekio V1 and V2: Eight Servos Versus Twelve"
 published: 2026-09-24
-updated: 2026-10-06
-description: "Compare working eight-servo V1 with V2's printed chassis and lighter revision: dated motion ranges, compact linkage, controllers, new battery direction and physical results."
-image: "/posts/2026-10-06-progress/motion-library-point.webp"
+updated: 2026-10-12
+description: "Compare eight-servo V1 and twelve-servo V2: dated physical photographs and motion ranges, current shell printing, controllers, and the October 12 4 A supply report."
+image: "/posts/2026-09-24-progress/v1-physical.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
@@ -14,6 +14,12 @@ category: "Physical Robot"
 draft: false
 lang: "en"
 contentFormat: "report"
+reading:
+  topic: overview
+  generation: both
+  kind: reference
+  next: ainekio-v2
+  related: ["ainekio-v2", "v1-original-posts"]
 ---
 
 # Eight servos versus twelve
@@ -22,14 +28,15 @@ V2 changes the mechanism, controller and power arrangement. The third actuator
 on each leg adds sideways placement; the new software can vary a gait while it
 runs. This comparison separates those implemented capabilities from the
 physical results still to be measured. **Build options, controls and power are
-updated through October 6. The downloadable motion-range dataset remains
+updated through October 12. The downloadable motion-range dataset remains
 the September 24 snapshot**, before the later gait and chassis changes.
 
-**The printed V2 chassis could not stand on its MG90 servos.** The LCD and
-shell pieces remain unprinted. The [lighter rebuild](/posts/2026-10-06-lighter-rebuild/)
-keeps those servos, removes material, replaces the heavy battery bank and
-revises the legs. The owner estimates about 20% less weight and 20% more lifting
-force; replacement parts are printing and the revised assembly is untested.
+**V2 can now stand, walk and respond to commands**, according to the owner's
+October 8 report. At that time its carapace was not attached and Active Operator
+had not been tested. Exterior printing has since begun; no newer physical
+Active Operator result was supplied. This supersedes the [October 6 standing failure](/posts/2026-10-06-lighter-rebuild/)
+as current status. The earlier 20% weight/lifting-force estimates remain
+estimates, with no new measurements supplied.
 
 **Wireless**, with the Q6A offboard over Wi-Fi, is the current priority.
 **Wired** retains the onboard-Q6A/native-USB alternative. The
@@ -42,13 +49,13 @@ status and separates implemented controls from hardware qualification.
     <figcaption><strong>V1 · physical robot.</strong> August 27 construction photograph.</figcaption>
   </figure>
   <figure>
-    <img src="/posts/2026-10-06-progress/motion-library-point.webp" alt="October 6 Blender preview of the compact-linkage V2 performing Point, with modeled appearance parts." width="1280" height="800" loading="lazy" className="w-full aspect-square object-contain" />
-    <figcaption><strong>V2 · Blender development.</strong> October 6 motion-library preview. LCD and shell pieces shown here remain unprinted; the revised physical assembly is untested.</figcaption>
+    <img src="/posts/2026-10-08-progress/standing-prototype.jpg" alt="Physical V2 on October 8, with exposed chassis, printed legs and illuminated wide face display." width="1244" height="868" loading="lazy" className="w-full aspect-square object-contain" />
+    <figcaption><strong>V2 · physical robot.</strong> October 8 owner photograph. Carapace not attached; standing, walking and command response reported. Active Operator untested.</figcaption>
   </figure>
 </div>
 
-The images are not at the same scale and show different evidence: an assembled
-V1 and a modeled V2. [Printed V2 leg prototypes](/posts/2026-09-15-leg-prototypes/)
+The images are not at the same scale. Both show physical prototypes, photographed
+on different dates; neither still image measures walking performance. [Printed V2 leg prototypes](/posts/2026-09-15-leg-prototypes/)
 are documented separately.
 
 ## Mechanics and motion capability
@@ -63,7 +70,7 @@ are documented separately.
 | Turns | Stored 45°, 90° and 180° left/right clips; open-loop heading estimates | Continuous forward/turn updates during an admitted Walk; loaded steering remains to measure |
 | Expressive movement | Wave, bow, dances and other prepared gestures | Retargeted gestures plus reviewed Worm, seated Shrug, Play Dead, Lay Down and experimental Upright |
 | Balance and terrain | No measured adaptive balance result | Kinematic planning and IMU estimator implemented; live sensor acquisition and balance correction remain unconnected |
-| Physical evidence | Working complete prototype; movement and audio demonstrated | Printed chassis could not stand on MG90s; lighter replacement parts still printing, without LCD/shell pieces |
+| Physical evidence | Working complete prototype; movement and audio demonstrated | October 8 owner reports standing, walking and command response; illuminated LCD visible, carapace not attached, Active Operator untested |
 
 The counts describe different things: one V2 gait can continue indefinitely and
 change settings, while a V1 asset is a finite stored sequence. Twenty-three
@@ -164,15 +171,21 @@ specifications are not a measured speedup over V1. An IMU estimator now exists
 in source; live acquisition, balance feedback, the ROS adapter and the
 native-USB body path remain integration work.
 
-## Battery, charging and running time
+## Power supply, battery, charging and running time
+
+**October 12:** the owner has switched to a **4 A power supply**. This rating
+is not a battery capacity, measured consumption or runtime. Voltage and the
+installed rail arrangement have not been supplied. The earlier battery decisions
+below remain part of the iteration record.
 
 | Comparison | V1 | V2 |
 | --- | --- | --- |
-| Battery | 1,000 mAh LiPo, owner-reported | Separate batteries replacing the heavy 10,000 mAh bank; cell type and capacity not established in this update |
+| Current supply report | Original LiPo arrangement | 4 A supply, owner-reported October 12; voltage unspecified |
+| Battery | 1,000 mAh LiPo, owner-reported | October 6 separate-cell/charging-board direction; final untethered arrangement after the supply change remains undocumented |
 | Voltage / energy record | Earlier parts record: 2S, 7.4 V; nominal 7.4 Wh by multiplication | New pack voltage and usable energy not yet documented |
 | Conversion arrangement | External buck converter | Final power path to be documented; the earlier no-separate-buck bank plan is historical |
 | Charging | External charger | Onboard charging circuit boards planned; exact boards and implementation not yet documented |
-| Packaging | Existing robot arrangement | Lighter Blender rebuild; earlier bank envelopes do not define the new battery arrangement |
+| Packaging | Existing robot arrangement | Exterior shell printing begun; further weight modifications reported, without a new mass measurement |
 | Build-dependent battery load | Existing V1 body | Wired carries Q6A load; Wireless powers Q6A separately offboard |
 | Measured run time | **Not measured** | **Not measured for either option** |
 | Measured loaded consumption | Not supplied | Whole-system consumption and twelve-servo peaks still to measure |
@@ -211,3 +224,12 @@ and approximate improvement estimates come from Greg's October 6 report.
 The next comparison should add the completed assembly's mass, physically
 measured foot workspace, loaded motion observations, delivered battery energy
 and timed runtime under stated gait settings.
+
+October 8 update: current V2 physical observations and photograph come from the
+owner. See the [new build entry](/posts/2026-10-08-standing-walking/) and
+[source manifest](/posts/2026-10-08-progress/sources.json). Earlier range datasets
+and improvement estimates retain their original evidence boundaries.
+
+October 12: [shell/power and motion revisions](/posts/2026-10-12-shell-power-and-motion/), [YOLOE](/posts/2026-10-12-yoloe-tracking/) and
+[trained MetaHuman specialists](/posts/2026-10-12-trained-specialists/) extend this record. Model timings
+are desktop evidence, not a V1/V2 or Q6A hardware benchmark.

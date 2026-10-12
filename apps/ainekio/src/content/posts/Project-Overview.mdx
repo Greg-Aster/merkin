@@ -1,9 +1,9 @@
 ---
 title: "Ainekio: Project Overview"
 published: 2026-08-27T09:45:00-07:00
-updated: 2026-10-06
-description: "Ainekio build journal: the printed V2 chassis, lighter rebuild, revised leg linkage and power direction, with steering, sensing and ROS 2 integration alongside the working V1."
-image: "/assets/ainekio/v2/assembly-september-20-concept.webp"
+updated: 2026-10-12
+description: "Ainekio build journal: exterior printing, weight revisions, a 4 A supply, live YOLOE integration and trained Qwen specialists, with earlier physical results retained."
+image: "/assets/ainekio/2026-10-12-refresh/render-overview.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
@@ -13,139 +13,90 @@ tags: [Ainekio, Robot Familiar, MetaHuman OS, Overview]
 category: "Start Here"
 draft: false
 lang: "en"
-series: "Ainekio Field Guide"
-seriesPart: 1
-seriesTitle: "Start Here"
 contentFormat: "report"
+reading:
+  topic: overview
+  generation: both
+  kind: reference
+  next: v1-v2-comparison
+  related: ["ainekio-v2", "v1-original-posts"]
 ---
 
-> The original eight-servo S3 Ainekio remains supported alongside the twelve-servo Ainekio v2 work. See the [Project Index design context](/project-guide/#original-ainekio-and-ainekio-v2) for that distinction and the [September 30 field note](/posts/q6a-chassis-and-active-loop/) for the later Q6A and active-loop work. The intent below was clarified on October 1; the hardware and runtime observations retain their cited dates.
+# Ainekio
 
-# Meet Ainekio
-
-*Cover: AI concept artwork based on the September 20 Blender assembly. The build
-journal includes the actual Blender views and prototype photographs.*
-
-Ainekio is a small, owner-built, four-legged robot with a camera, microphone,
-speaker, and a face on a small display. The project explores a robot companion
-that can talk, observe its surroundings, and act on a request.
-
-Two systems make that possible. The computer on the robot controls its motors
-and checks movement limits. [MetaHuman OS](https://github.com/Greg-Aster/metahuman-os),
-a separate software project, provides conversation, memory, reasoning, and
-speech services. The connection between them lets a conversation lead to an
-action, then brings the result back into the conversation.
-
-That is the project’s direction, with parts still under development. The current
-robot has demonstrated motion commands and audible playback. Reliable repeated
-conversations and requests that combine reasoning, movement, and observation
-still need testing on the revised system.
+Ainekio is my four-legged robot familiar project. The body has a camera,
+microphone, speaker, and display. [MetaHuman OS](https://github.com/Greg-Aster/metahuman-os)
+handles conversation, memory, perception, and task planning; the body controller
+handles motors and movement limits.
 
 ## Project intent
 
-The aim is a **robot familiar that grows and learns**. Conversation, memory,
-perception and physical action should stay connected. Ongoing work should
-respond to fresh input rather than depend on isolated turns. This is an evolving
-goal; implementation evidence and physical test results remain distinct.
+A robot familiar that grows and learns: conversation and memory connected to
+perception and physical action. A request should carry through multiple actions,
+waits, and corrections without losing its objective.
 
-## The current robot and its successor
+## The two builds
 
-The working body is **V1**. It has eight MG90S servos: small motors that move to
-chosen angles, with two serving each leg. An ESP32-S3 controller runs scripted
-poses and movement sequences.
+| | Original V1 | Current V2 |
+| --- | --- | --- |
+| Servos | Eight MG90S; two per leg | Twelve; three per leg |
+| Controller | ESP32-S3 | ESP32-P4 |
+| Mechanics | Sesame-derived body | Redesigned chassis and compact linkages with sideways leg placement |
+| Motion | Scripted poses and sequences | Walk, Run, Crawl, six-direction Crab, and 23 finite gestures |
 
-**V2** is a substantially different twelve-servo design with sideways leg
-placement and an ESP32-P4 controller. Continuous Walk, Run, Crawl and
-six-direction Crab share the gait controls; 23 finite gestures have a separate
-saved speed multiplier. Revised gait geometry and controller deployment are
-recorded in the journal; loaded walking remains to be measured.
+V1 remains supported. [Design history](/project-guide/#original-ainekio-and-ainekio-v2)
+and [V1/V2 comparison](/posts/v1-v2-comparison/).
 
-**October 6: the printed V2 chassis could not stand on its MG90 servos.**
-The LCD and shell pieces have not been printed. After researching alternatives,
-Greg is keeping the servos, removing weight in Blender and revising the legs.
-New parts are still printing; the lighter assembly has not been tested.
-Roughly 20% less weight and 20% more lifting force are current owner estimates.
+## October 12
 
-The heavy **10,000 mAh battery-bank approach has been dropped** in favor of
-separate batteries and onboard charging circuit boards. Exact cells, boards,
-capacity and runtime are not established in this update. Earlier Anker and
-SHARGE packaging studies remain in the dated build history.
+I have begun printing the exterior shell, made further weight modifications,
+and switched to a **4 A power supply**. Current work:
 
-Wireless, with the Q6A offboard over Wi-Fi, is the current priority. Wired
-retains the onboard-Q6A/native-USB alternative. The P4 IMU estimator is now
-implemented, while live acquisition, balance correction and the robot ROS 2
-adapter remain integration work. Continuous steering and camera/recognition
-interfaces have progressed; sustained wireless reliability remains unresolved.
+- [Shell, power, and motion](/posts/2026-10-12-shell-power-and-motion/): Blender revisions, 27 prototype STLs, and revised Lay Down / Play Dead foot placement.
+- [YOLOE tracking](/posts/2026-10-12-yoloe-tracking/): a stationary chair retained one track across eight frames; camera-stream recovery still needs work.
+- [Trained specialists](/posts/2026-10-12-trained-specialists/): Qwen 0.8B intent/task models, node workflows, and a rejected goal-planning candidate.
 
-| Start here | What you can find |
-| --- | --- |
-| [Lighter rebuild](/posts/2026-10-06-lighter-rebuild/) | Physical standing result, MG90 decision, weight removal, new power direction and assembly changes |
-| [Compact linkage and 23 motions](/posts/2026-10-06-compact-linkage/) | Side-by-side dimensions, Blender previews, changed poses and unresolved travel/load limits |
-| [Steering, sensing and connections](/posts/2026-10-06-steering-sensing-connections/) | Current build options, implemented controls, IMU estimator, ROS tools and recorded connection tests |
-| [Eight servos versus twelve](/posts/v1-v2-comparison/) | Physical V1 and modeled V2, dated ranges, controls, processing and batteries |
-| [Gait journal](/posts/gait-development/) | Dated geometry, physical results, software checks and earlier Blender videos |
-| [V2 parts and assembly record](/posts/ainekio-v2/) | Current build links, earlier design iterations, prototype photos and dated print downloads |
+The lighter robot **stood, walked, and responded to commands on October 8**.
+The [build photograph](/posts/2026-10-08-standing-walking/) shows it without
+the carapace. Active Operator remains untested. The roughly 20% weight and
+lifting-force improvements from the rebuild are estimates; mass, loaded gait
+performance, and endurance still need measurement.
 
-V1 remains the working complete robot. V2 now has a reported chassis test,
-with a lighter revision still to assemble and test. Loaded walking, balance
-and battery life remain unqualified. The [V1 hardware guide](/posts/body-design-and-hardware/)
-records the existing build. Dystopian illustrations remain concept artwork;
-technical images identify their Blender or physical sources.
+I dropped the heavy **10,000 mAh battery bank** on October 6 in favor of separate
+batteries and charging boards. The final battery arrangement is still open.
 
-## Why the software is changing too
+## Wired and wireless
 
-A short command such as “stand” has a clear end. A broader request may take
-several actions and pauses. The software needs to remember what was requested,
-which steps have finished, and what it is waiting for.
+**Wireless** is the current priority: Q6A offboard over Wi-Fi. **Wired** keeps the
+Q6A on the robot with a native USB connection to the P4.
 
-MetaHuman’s redesign saves that progress in a **workflow**: a sequence of software
-steps that can pause for a result and continue afterward. Saved requests retain
-user corrections and results from specialist software workers. A September 8
-live review found the revised workflows running with robot feedback, camera
-images, and speech-delivery acknowledgements.
+The P4 IMU estimator is implemented. Live sensor acquisition, balance correction,
+and the robot ROS 2 adapter remain integration work. Sustained wireless
+reliability is unresolved.
 
-That run also exposed stale goals and repeated influence from unresolved
-intentions. Later source repairs keep finished work out of the active-goal
-display and require optional Desire-driven robot work to follow a finite,
-reviewed plan with an observable outcome. Ainekio’s gateway work separately
-keeps delayed command results connected to their original request without
-repeating movement during recovery. Controlled tests cover these repairs;
-the complete revised system still needs deployed and physical validation.
+## Command path
 
-## How a request reaches the body
+1. MetaHuman's Work Coordinator admits the request and selects a supported action.
+2. The Environment Bridge passes it through Ainekio's adapter and authenticated gateway.
+3. The controller checks movement limits and executes the command.
+4. Results return to MetaHuman's task workflow.
 
-For a simple example, consider a request to stand:
+Workflows retain requests, corrections, and results across waits and restarts.
+Gateway recovery reconnects delayed results to their original command without
+repeating movement. The September live run exposed stale goals; subsequent
+repairs have controlled-test coverage and still need connected-system testing.
 
-1. MetaHuman’s **Work Coordinator** decides when the request can run. Its
-   workflow selects an action supported by the connected robot.
-2. The **Environment Bridge**, MetaHuman’s connection to external devices, passes
-   the request to Ainekio’s **adapter**, which translates it into the robot’s
-   command format. An authenticated **gateway** carries it to the body.
-3. The controller checks the command and moves the joints within their limits.
-4. The result travels back to MetaHuman so it can continue or finish the request.
+## Build notes
 
-A broader goal needs another check. For example, a future request to move into
-better light would require a new image afterward. A completed movement alone
-would not show whether the lighting improved. This distinction guides the
-[software integration](/posts/metahuman-integration/) and
-[camera work](/posts/vision-loop/); it is not a claim that this example has
-passed a physical test.
+- [Gait journal](/posts/gait-development/): geometry, ranges, motion data, and walking experiments.
+- [V2 parts and assembly](/posts/ainekio-v2/): component revisions, print exports, and prototype photos.
+- [V1 hardware](/posts/body-design-and-hardware/) and [S3 firmware](/posts/controller-firmware/).
+- [MetaHuman integration](/posts/metahuman-integration/), [autonomy](/posts/bounded-autonomy/), [vision](/posts/vision-loop/), and [voice](/posts/voice-loop/).
+- [Current status](/posts/current-status/) and [development tracker](/project-guide/).
 
-## Where to read next
+V1 began with [Sesame](https://github.com/dorianborian/sesame-robot); V2 began by
+evaluating OpenHarmony Puppy leg geometry. The unsuccessful simulator experiment
+is retired; its [July notes](/posts/archive/motion-systems/) remain in the journal.
 
-- **What works today:** the [current project status](/posts/current-status/)
-  separates reported hardware results, development code, and remaining tests.
-- **How actions are controlled:** [commands and safety](/posts/protocol-and-safety/)
-  explains the checks between a request and movement.
-- **When the robot acts:** [autonomy modes](/posts/bounded-autonomy/)
-  explains responses to the user and optional self-initiated work.
-
-The [Ainekio repository](https://github.com/Greg-Aster/Ainekio-bot) contains body
-designs, firmware, motion assets, and the gateway, dashboard, and adapter.
-MetaHuman OS contains the conversational and decision-making software.
-
-V1’s mechanics began with [Sesame](https://github.com/dorianborian/sesame-robot).
-V2 evaluates OpenHarmony Puppy V2 leg geometry with Ainekio’s own chassis and
-software. An earlier simulator experiment was unsuccessful and has been
-completely retired. Its [July notes](/posts/archive/motion-systems/) remain as
-project history.
+[Robot source](https://github.com/Greg-Aster/Ainekio-bot) ·
+[MetaHuman OS source](https://github.com/Greg-Aster/metahuman-os)

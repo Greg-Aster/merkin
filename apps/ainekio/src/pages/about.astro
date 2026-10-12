@@ -3,7 +3,6 @@ import { getEntry } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import Markdown from '../components/misc/Markdown.astro'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
-import { siteConfig } from '../config/config'
 import { url } from '../utils/url-utils'
 
 const about = await getEntry('spec', 'about')
@@ -16,13 +15,12 @@ const { Content, headings } = await about.render()
   <article class="card-base overflow-hidden rounded-[var(--radius-large)] border border-black/5 dark:border-white/10">
     <figure>
       <img
-        src={url(siteConfig.banner.src)}
-        alt="October 6 Blender preview of Ainekio's compact-linkage Point gesture, including unprinted appearance parts"
-        width="1280"
-        height="800"
-        class="aspect-video w-full object-cover object-center"
+        src={url('/assets/ainekio/2026-10-12-refresh/render-rear.webp')}
+        alt="Rear three-quarter Blender render of Ainekio’s shell and linkage assembly"
+        width="1536"
+        height="1024"
+        class="h-auto w-full"
       />
-      <figcaption class="px-6 pt-3 text-sm text-50 sm:px-9">{siteConfig.banner.credit.text}</figcaption>
     </figure>
     <div class="p-6 sm:p-9">
       <Markdown class="prose max-w-none dark:prose-invert">

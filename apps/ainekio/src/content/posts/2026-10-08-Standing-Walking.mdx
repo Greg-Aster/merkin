@@ -1,0 +1,101 @@
+---
+title: "Standing, Walking, and Responding to Commands"
+published: 2026-10-08
+updated: 2026-10-08
+description: "The revised twelve-servo robot can stand, walk and respond to commands. A current build photograph, the October 6 comparison, and the latest mounting-part exports."
+image: "/posts/2026-10-08-progress/standing-prototype.jpg"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, Blender, Chassis, Gait, 3D Printing]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  related: ["gait-development", "2026-10-12-shell-power-and-motion"]
+---
+
+# The robot is on its feet
+
+The robot can now **stand, walk and respond to commands**. Two days ago, the
+printed chassis could not stand on its MG90 servos. That was the starting point
+for the lighter rebuild, material removal and shorter-carrier work described in
+the [October 6 entry](/posts/2026-10-06-lighter-rebuild/).
+
+The carapace pieces are not attached yet, so the robot is still “naked.”
+**I have not tested Active Operator.**
+
+<figure>
+  <img src="/posts/2026-10-08-progress/standing-prototype.jpg" alt="October 8 physical Ainekio V2 standing on a desk, with exposed wiring, printed leg linkages and an illuminated cyan face; the carapace is not attached." width="1244" height="868" loading="eager" />
+  <figcaption>October 8: standing with the carapace off.</figcaption>
+</figure>
+
+## Two days of build progress, side by side
+
+| Question | October 6 report | October 8 report |
+| --- | --- | --- |
+| Can the assembled robot stand? | The printed chassis could not stand on its MG90 servos | The robot can stand |
+| Can it walk? | Revised parts were still printing; the new assembly had not been tested | Walking |
+| Does it respond to commands? | The entry focused on the failed standing attempt and rebuild | Responds to commands |
+| What is fitted? | Chassis printed; LCD and shell pieces not printed for that attempt | Photo shows the exposed assembly and illuminated LCD; carapace pieces are not attached |
+| Active Operator | No physical acceptance result | Explicitly not tested |
+| Weight and lifting force | Approximately 20% lighter and 20% more lifting force were estimates | No new measurements supplied; those estimates remain estimates |
+| Battery endurance | Not measured | No runtime measurement supplied |
+
+Still to measure: walking speed and distance, behavior on different surfaces,
+endurance, and loaded gestures. I also need to record the installed calibration
+and part revisions.
+
+## The printed-part record is growing
+
+All design work continues in Blender. The robot repository now includes more
+of the printable hardware behind the assembly. The table lists the latest export revisions.
+
+| Assembly area | Newly recorded files | Where to inspect them |
+| --- | --- | --- |
+| Compact legs | 35 mm carrier exports, plus 20 mm recessed-horn cranks and 28 mm pickup parts | [October 7 hardware snapshot](https://github.com/Greg-Aster/Ainekio-bot/tree/f264161/Slave/hardware/v2-12servo/STL/Red) |
+| Electronics and power packaging | Wireless bridge, board retainers, battery cradle and rear power-carrier parts | [October 7 export set](https://github.com/Greg-Aster/Ainekio-bot/tree/cc4326a/Slave/hardware/v2-12servo/STL/Red) |
+| Display support | Left/right front-panel braces and the LCD carrier | [October 8 LCD support exports](https://github.com/Greg-Aster/Ainekio-bot/tree/7f7b3c2/Slave/hardware/v2-12servo/STL/Red/lcd_carrier_speaker_support) |
+| Speaker mounting | A holder identified in the source as “Speaker holder - 20x30” | [October 8 speaker housing](https://github.com/Greg-Aster/Ainekio-bot/tree/7f7b3c2/Slave/hardware/v2-12servo/STL/Red/speaker%20housing) |
+
+The current local work also includes camera-carrier and longer front-tray
+exports. Those are still uncommitted at this review. They are not included in
+the linked repository snapshots above.
+
+The [parts and assembly guide](/posts/ainekio-v2/) retains earlier options,
+prototype photographs and print downloads. The
+[compact-linkage study](/posts/2026-10-06-compact-linkage/) explains the
+35/20/28 mm candidate and its remaining reach/travel questions. The new walking
+report does not identify the exact firmware/model revision used, so it should
+not be used to declare every offline motion or clearance check complete.
+
+## The face is now part of the physical build
+
+The photograph shows the wide LCD displaying its cyan resting expression.
+The firmware records also document October 6 LCD/camera orientation fixes,
+a working-speaker report, and wake-word transport checks. The
+[face and media update](/posts/2026-10-08-face-and-media/) separates those device
+records from the newer local expression refinements.
+
+MetaHuman and Body Control have also changed: request handling, conversation,
+task planning and connection selection are being developed together. The
+[responsive-command update](/posts/2026-10-08-responsive-commands/)
+describes that software work and its current test boundaries.
+
+## What remains to document
+
+The carapace still needs attaching, and Active Operator needs its own test.
+Useful next measurements are the assembled mass, exact power arrangement,
+walking settings and duration, and the flashed firmware/calibration revision.
+None of those values is inferred from the photograph.
+
+Sources: the owner's October 8 report and photograph, the linked hardware
+commits, and the [source and image manifest](/posts/2026-10-08-progress/sources.json).
+The [gait journal](/posts/gait-development/) now records this physical milestone
+alongside the earlier calculations and unsuccessful standing attempt.

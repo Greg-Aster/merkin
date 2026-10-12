@@ -1,0 +1,118 @@
+---
+title: "Responsive Commands, Separate Conversation, and Connection Choices"
+published: 2026-10-08
+updated: 2026-10-08
+description: "MetaHuman now separates request routing, task planning and conversation. Body Control gains connection choices, while perception and speech refinements remain under review and Active Operator is untested on the robot."
+image: "/posts/2026-10-08-progress/thinking.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, MetaHuman OS, Gateway, Perception, Software]
+category: "Software Progress"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: control
+  generation: v2
+  kind: journal
+  related: ["protocol-and-safety", "metahuman-integration"]
+---
+
+# Keeping work responsive while the robot is active
+
+The robot now **responds to commands and can walk**.
+Alongside that physical progress, the October 7–8 repository changes develop
+how new instructions, conversation and ongoing robot work fit together.
+**I have not tested Active Operator on the robot.**
+
+<figure>
+  <img src="/posts/2026-10-08-progress/thinking.webp" alt="Ainekio's local renderer preview of the Thinking expression, with cyan eyes and traveling dots" width="320" height="170" loading="lazy" />
+  <figcaption>Thinking expression, October 8 renderer.</figcaption>
+</figure>
+
+## What changed in the request path
+
+| Responsibility | Earlier arrangement | October 7–8 source direction |
+| --- | --- | --- |
+| Understand the incoming request | Context selection and action/conversation decisions were more closely coupled | An initial request-only pass selects the evidence needed by task and conversation consumers |
+| Plan robot work | Task selection shared more of the response-producing path | A task specialist produces an ordered program; conversation uses a separate model/workflow |
+| Select models | General backend configuration | Individual graph nodes can choose models; intent and task specialists have separate training lanes |
+| Handle new input during movement | Slow interpretation could occupy the active work path | Read-only interpretation runs as finite background work while the existing execution retains its feedback handling |
+| Keep command ownership | Delayed results and manual takeover could cross program boundaries | Results carry the original execution/command context; gateway checks prevent obsolete interpreted work from taking over a newer manual command |
+
+The body still owns its gait and servo timing. MetaHuman supplies supported
+tasks through the existing execution and gateway paths. A background language
+model result must return to the current task owner before it can affect the body.
+
+The task-specialist work also includes an explicit branch for delegating a plan
+to a configured larger model. The reviewed training lane uses separate
+Qwen3.5 0.8B intent and task adapters and synthetic, text-only examples. Training
+and export do not activate a model, qualify vision, or demonstrate faster
+inference on the Q6A. Later local corpus and workflow edits remain in progress.
+
+## Connection choices are easier to find
+
+Body Control's launcher now remembers a startup choice, and its dashboard can
+save addresses. MetaHuman has its own **Agent Monitor → Body connection**
+selector. These controls serve different purposes:
+
+| Control | Available choices | What the choice does |
+| --- | --- | --- |
+| Body Control startup | This computer; LAN / Wi-Fi; Cloudflare | Selects the dashboard bind/public-address arrangement and remembers it on the gateway machine |
+| Body Control Settings → Connections | Saved local/forwarded, LAN and Cloudflare dashboard addresses | Opens a configured dashboard in a new tab; the saved addresses belong to that browser/origin |
+| MetaHuman Body connection | This computer; LAN / Wi-Fi via SSH; Remote via Cloudflare | Saves and starts the existing local bridge or its configured forwarding path |
+
+For the dashboard, “local” means the browser's device. For MetaHuman's bridge
+selector, “This computer” means the MetaHuman host. Neither dropdown selects
+a Wi-Fi SSID. Existing remote routes and credentials must already be configured;
+switching connections does not migrate a running task. These choices are
+independent of the robot's Wired/onboard-Q6A and Wireless/offboard-Q6A build options.
+
+## Perception and speech: local work still being reviewed
+
+The gateway working tree adds an optional local YOLO adapter to the existing
+camera worker. It accepts an existing checkpoint and returns detections through
+the same recognition interface. The reviewed `person_yolov8m-seg.pt` checkpoint
+detects **people only**, not personal identity or the full general-object class
+set. Its boxes do not provide distance, traversability or balance information.
+
+The documented offline trial used a public bus image on the desktop's i9-9900K
+with four CPU threads and no GPU. Ten warm predictions had a 210 ms median and
+247 ms maximum, approximately 4.64 serial predictions per second. Those numbers
+are a small desktop benchmark; they are not Q6A measurements or a live following
+test. The adapter and evaluation notes are still uncommitted in this review.
+
+MetaHuman's local speech changes pass synthesized chunks to the existing
+playback workflow as they become available. This lets admission begin while
+later audio is rendering. It does not yet establish the perceived pauses,
+endurance or speech quality on this physical robot.
+
+## What the software checks do—and what remains open
+
+The paired test path exercises real routing, task coordination, receipt handling
+and gateway admission against a simulated body. Its simulated model outputs
+test the software's handling of a choice; they do not establish that a live
+model will make that choice correctly.
+
+The maintained performance record includes an unresolved text-only local-model
+probe: a request to stop was interpreted as steering and then a completion
+claim, while replay of those outputs sent no Stop to the simulated body.
+That is a recorded model/completion failure. It is not a passing spoken-stop
+test, and it should remain visible while the new workflow is developed.
+
+| Established in this update | Still to test or measure |
+| --- | --- |
+| Owner reports physical standing, walking and command response | Active Operator on the assembled robot |
+| Committed routing, ownership and connection-selector changes | Exact paired installed revisions and behavior after reconnect/manual takeover |
+| Local face, speech and detector work can be inspected | Integrated perception-driven movement and reliable model interpretation |
+| Desktop detector timing is recorded for one checkpoint/image setup | Q6A performance, concurrent workloads and sustained robot speech |
+
+Sources: [Ainekio connection-selector commit](https://github.com/Greg-Aster/Ainekio-bot/commit/dbd15b9),
+[MetaHuman task/conversation split](https://github.com/Greg-Aster/metahuman-os/commit/f466f0b3),
+[MetaHuman connection and specialist workflows](https://github.com/Greg-Aster/metahuman-os/commit/273bbe58),
+and the [dated execution/qualification record](https://github.com/Greg-Aster/metahuman-os/blob/273bbe58/docs/technical/environment-mode-performance.md).
+The [October 8 manifest](/posts/2026-10-08-progress/sources.json) distinguishes
+committed source from the local refinements reviewed for this entry.

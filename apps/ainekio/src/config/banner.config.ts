@@ -333,9 +333,8 @@ export function getBannerDataFromPost(post: any): PostBannerData | null {
     customName: post.data.authorName || '',
     customBio: post.data.authorBio || '',
     slug: post.slug || '',
-    // `showImageOnPost` only hides the inline cover image inside the article body.
-    // It should not disable the top banner or the site's fallback banner system.
-    wantsNoDefaultBanner: false,
+    // Article artwork belongs beside the text, without a duplicate page banner.
+    wantsNoDefaultBanner: true,
   }
 }
 

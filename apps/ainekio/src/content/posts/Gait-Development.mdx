@@ -1,19 +1,25 @@
 ---
 title: "Gait Development Journal: From Eight Servos to Twelve"
 published: 2026-09-15
-updated: 2026-10-06
-description: "The printed chassis result, lighter rebuild and complete compact-linkage motion candidate; a continuing technical journal with Blender previews, range comparisons and dated software checks."
-image: "/posts/2026-10-06-progress/motion-library-point.webp"
+updated: 2026-10-12
+description: "October 12 staged Lay Down and Play Dead revisions, sampled joint-speed comparisons, and the retained standing/walking milestones and earlier linkage studies."
+image: "/assets/ainekio/2026-10-12-refresh/blender-side.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
-showImageOnPost: false
+showImageOnPost: true
 showToc: true
 tags: [Ainekio, V1, V2, Gait, Kinematics, Linkages]
 category: "Mechanical Research"
 draft: false
 lang: "en"
 contentFormat: "report"
+reading:
+  topic: legs
+  generation: both
+  kind: reference
+  next: protocol-and-safety
+  related: ["2026-10-06-compact-linkage", "2026-10-08-standing-walking"]
 ---
 
 # Gait development journal
@@ -23,12 +29,11 @@ the original eight-servo robot, then compares that motion baseline with the
 radically different twelve-servo linkage design. New calculations, experiments,
 and physical results will be recorded here as dated entries.
 
-**Current stage, October 6: lighter parts printing after the chassis could
-not stand on its MG90 servos.** A compact-linkage candidate now has all 23
-named motions remapped in Blender. It retains explicit reach and servo-travel
-limitations and has not replaced the active shared firmware model. The new
-physical assembly is untested. Steering controls and an IMU estimator exist
-in source; live balance feedback remains integration work.
+**Physical baseline, October 8: the robot can stand, walk and respond to commands.**
+This is the owner's physical result. The carapace is not attached, and Active
+Operator has not been tested. Exact installed revisions and measured walking
+performance remain to document; the earlier offline reach/travel questions
+are preserved in their dated entries.
 
 <figure>
   <video controls playsInline preload="metadata" width="960" height="540" poster="/posts/2026-09-24-progress/motion-showcase.webp" aria-describedby="motion-showcase-caption" className="w-full rounded-xl">
@@ -38,9 +43,9 @@ in source; live balance feedback remains integration work.
   <figcaption id="motion-showcase-caption">September 23 Blender showcase: 33 chapters, 4 minutes 10 seconds, 2× playback, no audio. This shows the red body and the preceding motion library. The later reviewed Worm, Shrug, Play Dead, Lay Down and six-direction Crab changes are described in the September 24 entry; they are not all shown in this export.</figcaption>
 </figure>
 
-[Read the latest journal entry](#october-6-2026--physical-test-compact-linkage-and-the-full-motion-library)
-for the physical result and compact candidate, or follow the
-[steering and sensing work](/posts/2026-10-06-steering-sensing-connections/).
+[Read the latest journal entry](#october-12-2026--lift-place-then-lower)
+for the staged grounded-motion revisions, or follow the
+[responsive-command work](/posts/2026-10-08-responsive-commands/).
 The [V1/V2 comparison](/posts/v1-v2-comparison/) covers dated ranges, processing
 and batteries. The video above remains the September 23 animation export.
 [Download the showcase](/posts/2026-09-24-progress/motion-showcase-2x.mp4) and
@@ -940,3 +945,60 @@ Sources: the [October 6 manifest](/posts/2026-10-06-progress/sources.json)
 identifies the reviewed controller files, local research handoffs and Blender
 images. Physical observations and improvement estimates are Greg's October 6
 report; the earlier entries above retain their original dates and assumptions.
+
+## October 8, 2026 — Standing, walking and command response
+
+The owner reports that **the robot can now stand, walk and respond to commands**.
+The carapace is not attached and Active Operator has not been tested.
+
+| Observation | October 6 | October 8 |
+| --- | --- | --- |
+| Physical standing | Printed chassis could not stand on MG90 servos | Standing reported |
+| Physical walking | Lighter parts still printing; revised assembly untested | Walking reported |
+| Command response | No new physical result in that rebuild entry | Responding to commands reported |
+| Appearance | LCD and shell pieces unprinted for the failed attempt | LCD lit in current photograph; carapace not attached |
+| Performance measurements | Approximate improvements only | No new mass, lifting-force, speed or endurance measurements supplied |
+| Active Operator | No physical acceptance result | Explicitly untested |
+
+<figure>
+  <img src="/posts/2026-10-08-progress/standing-prototype.jpg" alt="Physical twelve-servo Ainekio on October 8, standing with exposed wiring and illuminated face" width="1244" height="868" loading="lazy" />
+  <figcaption>Owner photograph of the current exposed assembly. Walking and command response are owner reports; the still image does not establish speed, tracking accuracy or endurance.</figcaption>
+</figure>
+
+This result changes the physical-build status. It does not identify the exact
+firmware/model/calibration used, regenerate the September range dataset, or
+close every reach, servo-travel and clearance question in the October 6 study.
+The [new build entry](/posts/2026-10-08-standing-walking/) links the latest
+mounting-part exports. [Face/media work](/posts/2026-10-08-face-and-media/) and
+[responsive commands](/posts/2026-10-08-responsive-commands/) have their own
+source and device evidence. Live IMU balance correction remains integration work.
+
+Source: the owner's October 8 report and photograph; provenance is recorded in
+the [October 8 manifest](/posts/2026-10-08-progress/sources.json).
+
+## October 12, 2026 — Lift, place, then lower
+
+Exterior shell printing has begun, the owner reports further weight modifications,
+and the power supply is now rated 4 A. The [build entry](/posts/2026-10-12-shell-power-and-motion/)
+contains the current Blender design, dated print exports and the power details
+still to document. The October 8 walking report remains the physical baseline.
+
+Local Lay Down and Play Dead authoring now lifts and places each foot before
+lowering the body. The generator specifies an 8 mm lift, 0.8 seconds per initial
+placement, and a two-second lowering segment. Original start/end references and
+seven-second authored clip durations are retained.
+
+| Offline comparison | Lay Down | Play Dead |
+| --- | --- | --- |
+| Previous peak joint speed | 216.36°/s | 308.62°/s |
+| Revised peak joint speed | 137.59°/s | 156.16°/s |
+| Revised minimum modeled body clearance | 0.15 mm | 0.15 mm |
+| Hardware qualified | No | No |
+| Collision checked | No | No |
+
+The local P4 recovery path retraces the completed grounded clip before entering
+a new named motion. These are source and sampled-geometry observations, not
+measured torque, physical balance or proof of the installed firmware. The
+[before/after JSON](/posts/2026-10-12-progress/motion-comparison.json) and
+[source manifest](/posts/2026-10-12-progress/sources.json) retain the values and
+reviewed hashes. All earlier geometry experiments above remain dated history.

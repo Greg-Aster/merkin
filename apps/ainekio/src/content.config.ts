@@ -1,4 +1,5 @@
 import { defineCollection, z } from 'astro:content'
+import { readingSchema } from './lib/reading'
 import {
   friendsSchema,
   postsSchema,
@@ -7,7 +8,13 @@ import {
   updatesSchema,
 } from '@merkin/blog-core/schemas/content'
 
-const posts = defineCollection({ schema: postsSchema })
+const posts = defineCollection({
+  schema: postsSchema.extend({ reading: readingSchema.optional() }).superRefine((post, ctx) => {
+    if (!post.draft && !post.reading) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['reading'], message: 'Published articles need a topic, robot version, and document type.' })
+    }
+  }),
+})
 const spec = defineCollection({ schema: specSchema })
 const team = defineCollection({ schema: teamSchema })
 const friends = defineCollection({ schema: friendsSchema })

@@ -10,39 +10,87 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "Lighter rebuild printing after the standing test"
-  location: "Printed V2 chassis, Blender motion studies and P4/Q6A software"
-  updated: 2026-10-06
-  mileage: "October 6 · weight reduction, compact linkage and 23 remapped motions"
-  section: "Lighter Wireless build, revised power and sensing integration"
-  nextStop: "Assemble the lighter parts and repeat the standing test, recording actual weight and the installed power arrangement."
-  note: "The printed chassis could not stand on its MG90 servos. The next iteration keeps those servos, removes weight, replaces the battery bank with batteries and onboard charging boards, and revises the legs. New parts are still printing; the revised assembly has not been tested."
+  status: "Shell printing, YOLOE and trained Qwen specialists"
+  location: "Twelve-servo build · Blender · desktop integration"
+  updated: 2026-10-12
+  mileage: "October 12 · exterior printing · 4 A supply · perception and workflows"
+  section: "Printed exterior, selected targets and specialist models"
+  nextStop: "Check printed shell fit and weight, document the 4 A power arrangement, and complete the live vision/workflow tests."
+  note: "Exterior shell printing has begun, with further weight modifications and a switch to a 4 A power supply. YOLOE integration now has a live stationary chair-tracking result, while trained Qwen 0.8B specialists and node workflows continue to develop. The robot stood, walked and responded to commands on October 8."
   areas:
+    - label: "Shell and weight"
+      status: "Exterior printing underway"
+      detail: "Further weight reduction; 27 shell and camera-mount STLs exported. Shell fit and assembled mass still need checking."
+    - label: "Power"
+      status: "Switched to a 4 A power supply"
+      detail: "Voltage, current draw and final battery arrangement still need recording."
+    - label: "Physical movement"
+      status: "Standing and walking since October 8"
+      detail: "The robot also responds to commands. Local Lay Down and Play Dead revisions lift feet before lowering the body; their validation files still mark hardware and collision qualification incomplete."
+    - label: "YOLOE perception"
+      status: "Live stationary chair tracking on desktop"
+      detail: "YOLOE, MobileCLIP and ByteTrack support search/select/release. A tighter reference region retained one chair track in eight observed frames; the tested 0.8B region failed to produce detections."
+    - label: "MetaHuman specialists"
+      status: "Trained Qwen 0.8B intent and task models"
+      detail: "Expanded context/tool routing and node workflows. Rejected a later goal-planning candidate after regressions."
+    - label: "Integration limits"
+      status: "Camera recovery and complete vision workflow still open"
+      detail: "Real P4 camera data reached MetaHuman. The recorded session had reconnects and a stalled stream; a new vision-handler build awaited activation. Active Operator remains untested."
+    - label: "Build options"
+      status: "Wireless priority; Wired alternative retained"
+      detail: "Offboard Q6A/Wi-Fi and onboard Q6A/native-USB remain distinct designs. The latest vision pilot used the desktop; Q6A throughput, remote-route reliability, live balance and the robot ROS adapter remain unqualified."
     - label: "Original Ainekio"
       status: "Supported eight-servo S3 design"
-      detail: "Working prototype with a 1,000 mAh LiPo, external charger and buck converter. Runtime not measured."
-    - label: "Physical build"
-      status: "Chassis printed; revised parts printing"
-      detail: "The previous chassis could not stand on MG90 servos. LCD and shell pieces remain unprinted. The lighter revision has not been tested."
-    - label: "Body and power"
-      status: "Material removal and a new battery direction"
-      detail: "Keep MG90 servos; replace the heavy 10,000 mAh bank with separate batteries and onboard charging boards. Approximately 20% lighter and 20% more lifting force are current owner estimates, not measured results."
-    - label: "Linkage and expressions"
-      status: "35 mm carrier candidate; 23 offline motions"
-      detail: "Complete remapped library in Blender. Upright retains reduced reach; its historical reach test still fails. Servo travel, collisions and loaded performance remain unresolved."
-    - label: "Motion controls"
-      status: "Continuous steering and shared joint-speed control"
-      detail: "Source and recorded software checks cover steering updates and motion retiming. Physical turning and loaded cadence remain unmeasured."
-    - label: "Sensing and ROS 2"
-      status: "IMU estimator implemented; live feedback pending"
-      detail: "The estimator is not yet fed by a hardware task or used for balance correction. Desktop Jazzy checks passed; a robot telemetry adapter remains work to do."
-    - label: "Build options and connection"
-      status: "Wireless priority; sustained link under investigation"
-      detail: "Offboard Q6A over Wi-Fi is the selected direction; onboard Q6A/native USB remains an alternative. P4 hotspot association succeeded, but the recorded sustained-session test did not pass."
-    - label: "MetaHuman OS and perception"
-      status: "Saved workflows and fresh-frame foundations"
-      detail: "Saved executions span waits, new-input steering and correlated results. Recognition and the local task producer still need joining up; YOLO remains research. Portable IMU estimation is source-tested, with live acquisition and balance feedback still unconnected."
+      detail: "V1 guides, the original LiPo power arrangement, earlier prototype photographs and dated range comparisons are retained."
 entries:
+  - title: "Shell printing, weight changes and a 4 A supply"
+    date: 2026-10-12
+    location: "Physical build and Blender development"
+    mileage: "Exterior printing · prototype exports · revised grounded motions"
+    summary: "Exterior printing has begun, with more weight modifications and a switch to a 4 A supply. See the current Blender design, explore dated shell and camera-mount files, and compare revised Lay Down and Play Dead paths."
+    url: "/posts/2026-10-12-shell-power-and-motion/"
+  - title: "YOLOE: from person detection to selected targets"
+    date: 2026-10-12
+    location: "P4 camera, desktop gateway and MetaHuman"
+    mileage: "Search / select / release · ByteTrack · live chair test"
+    summary: "Real camera observations now reach MetaHuman with query and track IDs. The stationary chair test shows both a weak model-selected region and a successful tighter reference, with sustained camera recovery still unresolved."
+    url: "/posts/2026-10-12-yoloe-tracking/"
+  - title: "Training the intent orchestrator and task manager"
+    date: 2026-10-12
+    location: "MetaHuman OS models and node workflows"
+    mileage: "Qwen 0.8B specialists · tool routing · paired candidate results"
+    summary: "Follow the trained intent/task split, recorded activations and computer-task delegation. Side-by-side results explain why a later goal-planning candidate was rejected despite a better evaluation score."
+    url: "/posts/2026-10-12-trained-specialists/"
+  - title: "Gait journal: lift, place, then lower"
+    date: 2026-10-12
+    location: "Continuing motion experiments"
+    mileage: "8 mm authored lift · seven-second clips · modeled speed comparison"
+    summary: "Lay Down and Play Dead gain staged foot placements and a reverse recovery path in local source. The journal preserves the original end poses and distinguishes sampled geometry from physical qualification."
+    url: "/posts/gait-development/"
+  - title: "Standing, walking and responding to commands"
+    date: 2026-10-08
+    location: "Physical twelve-servo robot"
+    mileage: "Owner report · new photograph · carapace still off"
+    summary: "The robot can now stand, walk and respond to commands. The exposed assembly, October 6 comparison, and latest mounting-part exports. Active Operator has not been tested."
+    url: "/posts/2026-10-08-standing-walking/"
+  - title: "A face on the robot: display, camera and voice"
+    date: 2026-10-08
+    location: "P4 display and media"
+    mileage: "Wide LCD · 59 face names · renderer previews · dated device checks"
+    summary: "The physical display is illuminated, and the local expression library keeps growing. Explore actual animated renderer previews alongside the recorded camera, speaker and wake-capture results, with newer local refinements clearly identified."
+    url: "/posts/2026-10-08-face-and-media/"
+  - title: "Responsive commands and connection choices"
+    date: 2026-10-08
+    location: "MetaHuman OS and Body Control"
+    mileage: "Task / conversation split · background interpretation · saved connections"
+    summary: "Request routing and connection changes, plus speech and person-detection work. Model stop/completion failures and physical Active Operator testing remain open."
+    url: "/posts/2026-10-08-responsive-commands/"
+  - title: "Gait journal: the robot can stand and walk"
+    date: 2026-10-08
+    location: "Continuing technical journal"
+    mileage: "October 6 / October 8 comparison · physical prototype photograph"
+    summary: "The latest entry records standing, walking and command response while preserving the failed standing attempt and all earlier linkage experiments. Exact installed revisions and measured gait performance remain to document."
+    url: "/posts/gait-development/"
   - title: "A lighter rebuild after the standing test"
     date: 2026-10-06
     location: "Printed chassis, Blender revisions and power"
@@ -119,7 +167,7 @@ entries:
     date: 2026-09-21
     location: "Gait development and integration"
     mileage: "14-second Blender demo · independent stride and rate controls"
-    summary: "Watch the new walking sequence lengthen its steps, double its cadence, then return to short steps. The continuing journal compares the revised linkage, explains stance planning, and provides the motion data and validation limits."
+    summary: "The walking sequence lengthens its steps, doubles its cadence, then returns to short steps. Revised linkage, stance planning, and motion data."
     url: "/posts/gait-development/"
   - title: "Developing the shell around the mechanism"
     date: 2026-09-21
@@ -131,7 +179,7 @@ entries:
     date: 2026-09-21
     location: "Leg mechanism and 3D printing"
     mileage: "22/36/55 mm compact geometry · recorded STL exports"
-    summary: "Compare earlier and compact legs side by side, examine the targeted horn-cavity correction, and download the dated upright print files."
+    summary: "Earlier and compact legs compared side by side, with the horn-cavity correction and upright print files."
     url: "/posts/2026-09-21-compact-leg-design/"
   - title: "Narrowing the chassis and making room for the face"
     date: 2026-09-21
@@ -155,13 +203,13 @@ entries:
     date: 2026-09-15
     location: "Leg assembly and 3D printing"
     mileage: "Prototype photos · September 12–14 design records"
-    summary: "Greg finds the printed legs much more expressive than the models he has seen online. See three prototype photos, fit lessons from the real parts, revised dimensions, and the latest foot options."
+    summary: "The printed legs have much more expressive movement than the models I have seen online. Three prototype photos, fit problems, revised dimensions, and foot options."
     url: "/posts/2026-09-15-leg-prototypes/"
   - title: "Fitting the V2 body together"
     date: 2026-09-10T12:00:00-07:00
     location: "Hardware + MetaHuman OS"
     mileage: "Daily design update · actual Blender renders"
-    summary: "The four-leg Blender assembly now includes a wider chassis, electronics, smoother linkages, revised covers, and a camera/display carrier. Follow fourteen saved revisions, component dimensions, remaining fit checks, and a brief MetaHuman OS update."
+    summary: "The four-leg Blender assembly now includes a wider chassis, electronics, smoother linkages, revised covers, and a camera/display carrier. Fourteen saved revisions, component dimensions, remaining fit checks, and a MetaHuman OS update."
     url: "/posts/2026-09-10-v2-body-design/"
   - title: "Three ways to drive a knee with short rods"
     date: 2026-09-09T12:00:00-07:00
@@ -249,11 +297,18 @@ limitations, and next tests.
 See [current project status](/posts/current-status/) for the latest summary,
 or [browse the full article archive](/archive/) for guides and earlier reports.
 
-Latest: [the lighter rebuild](/posts/2026-10-06-lighter-rebuild/),
-[compact linkage and motions](/posts/2026-10-06-compact-linkage/),
-[steering, sensing and connections](/posts/2026-10-06-steering-sensing-connections/),
+Latest: [shell, power and motion](/posts/2026-10-12-shell-power-and-motion/), [YOLOE tracking](/posts/2026-10-12-yoloe-tracking/) and
+[trained specialists](/posts/2026-10-12-trained-specialists/).
+
+October 8: [standing and walking](/posts/2026-10-08-standing-walking/),
+[face and media](/posts/2026-10-08-face-and-media/),
+[responsive commands and connections](/posts/2026-10-08-responsive-commands/),
 the [V1/V2 comparison](/posts/v1-v2-comparison/) and
 [gait journal](/posts/gait-development/).
+
+The October 6 [lighter rebuild](/posts/2026-10-06-lighter-rebuild/),
+[compact linkage](/posts/2026-10-06-compact-linkage/) and
+[steering/sensing](/posts/2026-10-06-steering-sensing-connections/) entries retain that earlier observation period.
 
 Earlier [September 30 Q6A and active-loop work](/posts/q6a-chassis-and-active-loop/),
 [September 28 Wired / Wireless and ROS 2](/posts/2026-09-28-wired-wireless-ros2/),

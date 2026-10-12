@@ -1,0 +1,126 @@
+---
+title: "Training the Intent Orchestrator and Task Manager"
+published: 2026-10-12
+updated: 2026-10-12
+description: "Qwen 0.8B specialists, node-workflow changes, computer-task delegation and a side-by-side record of a rejected goal-planning candidate."
+image: "/posts/2026-10-12-progress/specialist-results.svg"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, MetaHuman OS, Machine Learning, Workflows, Software]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: metahuman
+  generation: both
+  kind: journal
+  related: ["metahuman-integration", "2026-10-12-yoloe-tracking"]
+---
+
+# Smaller models with separate jobs
+
+The intent orchestrator and task manager now have trained **Qwen3.5 0.8B**
+specialists. This extends the [October 8 task/conversation split](/posts/2026-10-08-responsive-commands/)
+with actual training and activation records, extensive node-workflow changes,
+and explicit comparisons between model candidates.
+
+Intent routing and task planning use separate adapters within the same execution workflow.
+
+## What each part does
+
+| Part | Input and responsibility | Output / next owner |
+| --- | --- | --- |
+| Intent orchestrator | Current request; selects whether to respond, act or use computer tools, and which context each consumer needs | Separate task/conversation context selections and routing decisions |
+| Task manager | Selected evidence and the body's advertised capability catalog | An ordered program, a task decision, or an explicit larger-model planning request |
+| Conversation model | Its own selected context and attributed results | Spoken/written response; independent of task planning |
+| Vision model | A specific image and its source identity | Image interpretation/acquisition evidence through the configurable Environment vision role |
+| Existing execution and gateway | Admitted program, command results and observations | Body commands and correlated progress; the P4 retains servo/gait timing |
+
+The intent and task models use independent LoRA adapters. Synthetic examples
+are generated with the runtime's context builder and capability descriptions.
+Variants include reordered command catalogs, opaque identifiers, posture
+meanings, conditional requests, conversation-only requests and compound goals.
+Related variants stay together during training/evaluation splits.
+
+<figure>
+  <img src="/posts/2026-10-12-progress/specialist-results.svg" alt="Diagram showing the intent orchestrator selecting task, conversation and computer-tool routes while existing execution and gateway owners retain body control" width="1000" height="660" loading="lazy" />
+  <figcaption>Intent, task, conversation, and body-control workflow.</figcaption>
+</figure>
+
+## From a training lane to recorded activations
+
+The activation records show expanded intent and task `010` models loaded on
+October 8 Pacific time (October 9 UTC). A later tool-routing intent adapter was
+activated on October 9 Pacific time. The task assignment was retained during
+that change.
+
+On the expanded intent evaluation's 200 synthetic requests, acceptable routing
+increased from **60/200 to 185/200**, comparing the earlier `009` adapter with
+`010` on the same snapshot. The measured median serving time was about
+106 ms versus 100 ms on that desktop setup. The metric allows annotated response choices. The later
+tool-routing corpus has a different snapshot and must be evaluated separately.
+
+A smaller Speck2 experiment also ran: its recorded frozen-set acceptable routing
+was **173/200**, versus **185/200** for the Qwen comparison. Qwen remains selected.
+
+## A better aggregate score was not enough
+
+The later goal-planning candidate improved reference agreement on new evaluation
+cases, but regressed on previously inspected cases. The October 11 Pacific-time
+qualification decision **rejected that candidate and retained the current task
+adapter**.
+
+
+
+| Same recorded test set | Retained task adapter | Rejected goal candidate |
+| --- | --- | --- |
+| Evaluation reference matches | 159/234 (67.9%) | 184/234 (78.6%) |
+| Regression reference matches | 93/138 (67.4%) | 90/138 (65.2%) |
+| Unexpected physical selections relative to evaluation references | 21 | 12 |
+| Unexpected physical selections relative to regression references | 15 | 20 |
+| Evaluation median serving time | 489 ms | 484 ms |
+| Output accepted by Core's format/contract checks | 234/234 evaluation; 138/138 regression | 234/234 evaluation; 138/138 regression |
+
+These cases contain correlated wording/catalog variants, so their counts are
+not independent real-world trials. Valid alternative plans can disagree with a
+reference. Conversely, an apparently valid program can drop the requested
+visual target or mistake a completed capture for completion of the whole goal.
+
+The recorded review found unnecessary movement for conversational requests and
+both branches selected for mutually exclusive conditions. The original compound
+goal failure was not resolved by the candidate. The retained adapter also has unresolved failures.
+
+The next local corpus adds paired contrasts: discussing versus executing a
+request, movement-only versus capture-only versus combined requests, and
+conditional alternatives versus unconditional sequences. Retraining and evaluation are next.
+
+[Download the sanitized comparison metrics](/posts/2026-10-12-progress/task-model-comparison.json).
+This contains aggregate results, without private runtime prompts or local model
+paths.
+
+## The node workflows are changing too
+
+The committed computer-task route can ask the existing Terminal/Codex integration
+to do file, research or software work. Intent selects tool use independently of
+body action and conversation. The existing Work Coordinator admits that job;
+its attributed result returns to conversation without inventing another user
+turn. Available tools still depend on the configured installation.
+
+Robot Status now reads current bridge, recognition, command and execution
+evidence when context is requested. It distinguishes fresh, stale, disabled,
+disconnected and failed recognition instead of presenting an old observation as
+current. The local vision continuation work returns acquisition evidence to the
+task workflow with its original request and retained image, allowing the task
+selector to choose what follows. Goal Review still assesses completion.
+
+Further local changes refine cancellation/recovery, speech preferences, and the
+work-queue view. Active Operator remains untested on the robot.
+
+Sources: [committed live Robot Status work](https://github.com/Greg-Aster/metahuman-os/commit/7450eeba),
+[computer-task delegation](https://github.com/Greg-Aster/metahuman-os/commit/8b398f0d),
+and the local training, activation, qualification and workflow records identified
+in the [source manifest](/posts/2026-10-12-progress/sources.json).

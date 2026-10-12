@@ -14,8 +14,7 @@ if (!latest?.url) throw new Error('Project status requires a linked development 
   <article class="status-page" data-pagefind-body>
     <header>
       <h1>Current project status</h1>
-      <p>The latest state of the robot and MetaHuman OS, with the next practical checks.</p>
-      <p>The original eight-servo S3 Ainekio remains supported alongside the twelve-servo Ainekio v2. <a href={url('/project-guide/#original-ainekio-and-ainekio-v2')}>Project Index and design context</a></p>
+      <p>The original eight-servo S3 Ainekio remains supported alongside the twelve-servo Ainekio v2. <a href={url('/project-guide/#original-ainekio-and-ainekio-v2')}>Development tracker</a></p>
     </header>
     <ProjectStatus />
     <section aria-labelledby="status-latest-title">
@@ -25,12 +24,11 @@ if (!latest?.url) throw new Error('Project status requires a linked development 
     </section>
     <section aria-labelledby="status-history-title">
       <h2 id="status-history-title">Earlier reviews</h2>
-      <p>These reports preserve what was known and tested at the time.</p>
       <a href={url('/posts/archive/2026-09-09-project-status/')}>September 9, 2026: robot workflows and V2 planning <span aria-hidden="true">→</span></a>
     </section>
     <nav aria-label="Continue exploring">
-      <a href={url('/updates/')}>All development updates</a>
-      <a href={url('/#project-guides')}>Project guides</a>
+      <a href={url('/updates/')}>Build journal</a>
+      <a href={url('/archive/?kind=reference')}>Build reference</a>
     </nav>
   </article>
 </MainGridLayout>

@@ -5,7 +5,6 @@ import type {
   ProfileConfig,
   SiteConfig,
 } from '../types/config'
-import { LinkPreset } from '../types/config'
 
 export const siteConfig: SiteConfig = {
   title: 'Ainekio',
@@ -20,11 +19,11 @@ export const siteConfig: SiteConfig = {
   defaultTheme: DARK_MODE,
   banner: {
     enable: false,
-    src: '/posts/2026-10-06-progress/motion-library-point.webp',
+    src: '/assets/ainekio/2026-10-12-refresh/render-front.webp',
     position: 'center',
     credit: {
       enable: false,
-      text: 'October 6 Blender motion preview. The model includes unprinted shell and display parts; the lighter assembly has not yet been tested.',
+      text: 'October 12 shell design.',
       url: '',
     },
   },
@@ -52,34 +51,17 @@ export const siteConfig: SiteConfig = {
 
 export const navBarConfig: NavBarConfig = {
   links: [
-    {
-      name: 'Overview',
-      url: '/',
-    },
-    {
-      name: 'Updates',
-      url: '/updates/',
-    },
-    {
-      name: 'Project Index',
-      url: '/project-guide/',
-    },
-    {
-      name: 'Guides',
-      url: '/#project-guides',
-    },
-    {
-      name: 'All articles',
-      url: '/archive/',
-    },
-    LinkPreset.About,
+    { name: 'Start here', url: '/posts/project-overview/' },
+    { name: 'Build journal', url: '/updates/' },
+    { name: 'Build reference', url: '/archive/?kind=reference' },
+    { name: 'Original V1', url: '/posts/v1-original-posts/' },
   ],
 }
 
 export const profileConfig: ProfileConfig = {
   avatar: '/assets/avatar/assembly-september-20.webp',
   name: 'Ainekio',
-  bio: 'Ainekio’s build journal: a working eight-servo robot, and the chassis, printed legs, and gait experiments for its twelve-servo successor.',
+  bio: 'Ainekio’s build journal: the original eight-servo robot and a twelve-servo prototype now standing, walking and responding to commands.',
   links: [
     {
       name: 'GitHub',

@@ -1,5 +1,9 @@
 ---
 import { getEntry } from 'astro:content'
+import { url } from '../utils/url-utils'
+
+interface Props { compact?: boolean }
+const { compact = false } = Astro.props
 
 const updates = await getEntry('updates', 'site-updates')
 if (!updates) throw new Error('Project status requires updates/site-updates')
@@ -18,7 +22,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
     <time datetime={current.updated.toISOString()}>As of {dateFormat.format(current.updated)}</time>
   </header>
   <p class="status-summary">{current.note}</p>
-  <dl class="status-areas">
+  {!compact && <dl class="status-areas">
     {current.areas.map(area => (
       <div>
         <dt>{area.label}</dt>
@@ -28,14 +32,16 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
         </dd>
       </div>
     ))}
-  </dl>
-  <div class="status-next">
+  </dl>}
+  {!compact && <div class="status-next">
     <span class="status-label">Next step</span>
     <p>{current.nextStop}</p>
-  </div>
+  </div>}
+  {compact && <a class="status-detail" href={url('/posts/current-status/')}>Status and next steps →</a>}
 </section>
 
 <style>
+  .status-detail { display: inline-block; padding-top: .9rem; color: var(--primary); font-weight: 650; }
   .project-status {
     padding: clamp(1.25rem, 3vw, 1.75rem);
     border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);

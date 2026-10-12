@@ -1,13 +1,66 @@
 ---
-import UpdatesFeedPage from '@merkin/blog-core/components/post/UpdatesFeedPage.astro'
-// This shared page renders its own grid instead of the app's layout wrapper.
-import '../styles/variables.styl'
-import '../styles/main.css'
----
+import { getCollection, getEntry } from 'astro:content'
+import { parseJournalContent } from '@merkin/blog-core/utils/journal-utils'
+import MainGridLayout from '../layouts/MainGridLayout.astro'
+import Markdown from '../components/misc/Markdown.astro'
+import { topics, getReading, validateReadingPaths, generations } from '../lib/reading'
+import { url, getPostUrlBySlug } from '../utils/url-utils'
 
-<UpdatesFeedPage
-  slug="site-updates"
-  title="Ainekio Development Updates"
-  eyebrow="Robot project field notes"
-  description="Dated progress on Ainekio’s robot body and MetaHuman software, with reported results and work still ahead."
-/>
+const source = await getEntry('updates','site-updates')
+if (!source) throw new Error('Build journal requires updates/site-updates')
+const feed = await parseJournalContent(source.body,source.data.entries,{baseUrl:import.meta.env.BASE_URL})
+const posts = await getCollection('posts',({data})=>!data.draft)
+validateReadingPaths(posts)
+const stories = Object.entries(topics).filter(([id])=>!['overview','v1'].includes(id)).map(([id,topic])=>{
+  const entries = posts.filter(post=>getReading(post).topic===id && getReading(post).kind==='journal')
+  const start = entries.find(post=>!entries.some(previous=>getReading(previous).next===post.slug))
+  if (!start) throw new Error(`Topic needs a story entry point: ${id}`)
+  return { ...topic, start }
+})
+const dateFormat = new Intl.DateTimeFormat('en-US',{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'})
+---
+<MainGridLayout title="Ainekio Build Journal" description="Robot build notes, design changes, and test results." oneColumn={true}>
+  <article class="card-base build-journal" data-pagefind-body>
+    <header><p class="journal-eyebrow">Ainekio</p><h1>Build journal</h1><nav aria-label="Journal resources"><a href={url('/posts/current-status/')}>Current status →</a><a href={url('/archive/?kind=journal')}>Filter journal articles →</a><a href={url('/project-guide/')}>Development tracker →</a></nav></header>
+    <section class="journal-paths" aria-labelledby="journal-stories"><h2 id="journal-stories">Build history by topic</h2><ul>{stories.map(story=><li><a href={getPostUrlBySlug(story.start.slug)}>{story.title} →</a></li>)}</ul><a href={url('/posts/v1-original-posts/')}>Original eight-servo journal →</a></section>
+    <section aria-labelledby="journal-latest"><h2 id="journal-latest">Latest entries</h2>
+      <div class="journal-entries">{feed.entries.map(entry=>{
+        const post=posts.find(post=>`/posts/${post.slug}/`===entry.url)
+        return <article class="journal-entry">
+          <div><time datetime={entry.date.toISOString()}>{dateFormat.format(entry.date)}</time>{post && <p class="journal-context">{topics[getReading(post).topic].title} · {generations[getReading(post).generation]}</p>}
+          <h3>{entry.url?<a href={entry.url.startsWith('/')?url(entry.url):entry.url}>{entry.title}</a>:entry.title}</h3>
+          <Markdown class="journal-summary"><div set:html={entry.contentHtml} /></Markdown>
+          {entry.location && <p class="journal-context">{entry.location}</p>}
+          {entry.mileage && <p class="journal-context">{entry.mileage}</p>}
+          </div>
+          {post?.data.image && <a class="journal-image" href={getPostUrlBySlug(post.slug)} tabindex="-1" aria-hidden="true"><img src={url(post.data.image)} alt="" loading="lazy" decoding="async" /></a>}
+        </article>
+      })}</div>
+    </section>
+    {feed.introHtml && <details class="journal-context-notes"><summary>Earlier work</summary><Markdown class="journal-notes"><div set:html={feed.introHtml} /></Markdown></details>}
+  </article>
+</MainGridLayout>
+
+<style>
+ .build-journal { padding:clamp(1.2rem,3vw,2rem);color:var(--text-color); }
+ h1 { font-size:clamp(1.8rem,3vw,2.4rem);font-weight:750;margin:.5rem 0; }
+ header > p { max-width:75ch;line-height:1.65; }
+ .journal-eyebrow { text-transform:uppercase;font-size:.75rem;letter-spacing:.05em;color:var(--primary); }
+ a { color:var(--primary);text-underline-offset:.2em; }
+ a:hover { text-decoration:underline; }
+ nav { display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;margin-top:.75rem; }
+ nav a,.journal-paths a { display:inline-block;padding-block:.6rem; }
+ .journal-paths { margin:1.5rem 0 2rem;padding:1.25rem;border:1px solid color-mix(in srgb,var(--primary) 25%,transparent);border-radius:.6rem; }
+ h2 { font-size:1.3rem;font-weight:700; }
+ .journal-paths ul { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 1rem;margin:.5rem 0; }
+ .journal-paths li { font-size:.9rem; }
+ .journal-context { font-size:.8rem;color:var(--text-color-muted);line-height:1.6; }
+ .journal-entry { display:grid;grid-template-columns:minmax(0,1fr) 11rem;gap:1.25rem;padding:1.5rem 0;border-top:1px solid color-mix(in srgb,var(--primary) 20%,transparent); }
+ time { font-size:.8rem;color:var(--primary); }
+ h3 { font-size:1.2rem;font-weight:700;line-height:1.4;margin:.45rem 0; }
+ .journal-summary :global(p) { margin:.4rem 0 .65rem;line-height:1.65;font-size:.95rem; }
+ .journal-image img { width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:.4rem; }
+ summary { padding:1rem 0;cursor:pointer;font-weight:650; }
+ .journal-context-notes { border-top:1px solid color-mix(in srgb,var(--primary) 25%,transparent); }
+ @media(max-width:640px) { .journal-paths ul,.journal-entry { grid-template-columns:1fr; } .journal-image img { max-height:13rem;aspect-ratio:16/9; } }
+</style>

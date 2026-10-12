@@ -1,0 +1,104 @@
+---
+title: "A Face on the Robot: Display, Camera, and Voice Progress"
+published: 2026-10-08
+updated: 2026-10-08
+description: "The physical robot has an illuminated wide LCD. Explore actual renderer previews, recorded camera and speaker checks, and the expression and speech work still in development."
+image: "/posts/2026-10-08-progress/contact-sheet.png"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, ESP32-P4, Display, Camera, Audio, Firmware]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: perception
+  generation: v2
+  kind: journal
+  next: 2026-10-12-yoloe-tracking
+  related: ["vision-loop", "2026-10-12-trained-specialists"]
+---
+
+# A working display, with a growing expression library
+
+The [October 8 photograph](/posts/2026-10-08-standing-walking/) shows the
+physical robot's wide LCD lit with its cyan resting face. The selected module
+is the recorded **XIITIA 1.9-inch ST7789**, using its 170 × 320 panel in
+**320 × 170 landscape** orientation.
+
+The local face library contains **59 selectable names**, including resting
+expressions, speaking variants and faces associated with movements. Its
+previews come from the same C renderer used by the firmware. They are rendered
+pixels from the project, not concept artwork or photographs of the LCD.
+
+<figure>
+  <img src="/posts/2026-10-08-progress/contact-sheet.png" alt="Sixteen examples from Ainekio's wide LCD renderer, including cyan resting eyes, happy and sad faces, colored hearts, stars, thinking, wave and run expressions." width="1360" height="920" loading="lazy" />
+  <figcaption>16 of the 59 expressions in the October 8 renderer library.</figcaption>
+</figure>
+
+## Recorded device results and current source work
+
+| Area | Recorded result | What remains distinct |
+| --- | --- | --- |
+| LCD and camera orientation | The October 6 firmware record says both were connected and working; LCD orientation was confirmed upright by the owner and fresh camera stills were upright | The photograph establishes a lit panel, not every expression or camera mode |
+| Connected-screen presentation | The recorded `0.8.3` installation removes the connected text footer and adds small fault icons | Later workflow-driven expression selection is a newer source extension |
+| Speaker output | The `0.8.4` installation record includes a completed low-volume tone; the owner reported that the connected speaker works | It is not a measurement of long-form speech quality or simultaneous media/motion load |
+| Wake-word capture | The normal `0.8.6` image was reinstalled after transport and acoustic checks; live wake events and PCM were recorded without reported microphone drops | The owner reported needing close, loud speech; normal speaking-distance accuracy remains unqualified |
+| Expression refinements | Local source adds revised animation, colored halos and workflow feedback through the existing renderer | These working-tree changes are separate from the recorded installed versions |
+| Longer speech | Local MetaHuman source admits synthesized speech chunks while later chunks are still rendering | The robot's sustained playback quality needs its own listening test |
+
+The wake-word work fixed a specific recording problem: the gateway needed a
+recording-start event as well as the wake event to assemble the following audio.
+A later microphone-task stack increase addressed a live inference overflow.
+The recorded follow-up kept the controller connected through a 60-second check
+and reported 3,712 bytes of minimum free microphone stack. These are dated
+firmware observations, not a general claim that voice interaction is finished.
+
+## Expressions without requesting movement
+
+Body Control's **Faces** section selects an expression independently of motion.
+Selecting a face named `run` or `walk` sends a face command; it does not start
+that gait. Actual motion can select its associated presentation, and speaker
+playback adds animated voice bars.
+
+<details>
+  <summary>Open six animated previews from the renderer</summary>
+  <div className="grid grid-cols-2 gap-3">
+    <figure><img src="/posts/2026-10-08-progress/default.webp" alt="Animated cyan resting face" width="320" height="170" loading="lazy" /><figcaption>Resting</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/happy.webp" alt="Animated happy face" width="320" height="170" loading="lazy" /><figcaption>Happy</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/thinking.webp" alt="Thinking eyes and traveling dots" width="320" height="170" loading="lazy" /><figcaption>Thinking</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/listening.webp" alt="Attentive listening expression" width="320" height="170" loading="lazy" /><figcaption>Listening</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/wave.webp" alt="Animated wave expression" width="320" height="170" loading="lazy" /><figcaption>Wave</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/run.webp" alt="Animated run expression" width="320" height="170" loading="lazy" /><figcaption>Run</figcaption></figure>
+  </div>
+</details>
+
+The current local profile targets a deliberately stepped **15 fps** animation
+style. The preview generator uses the firmware scheduler's 66 ms frame interval.
+This is a configured target, not a measured CPU saving or display-throughput
+result. Thinking has a 7.2-second sequence; Listening uses a 2.4-second pulse.
+An animated thinking face by itself is not evidence that remote work is progressing.
+
+The new workflow-feedback source gives each temporary expression its own
+selection identity. An old release message cannot clear a newer selection,
+and a configurable robot-local timeout returns to the underlying face.
+This extension requires updated P4 firmware and its matching MetaHuman path.
+
+## Reproducing the display work
+
+The recorded panel uses SPI signals, despite its pins being labeled `SCL` and
+`SDA`; they are not the servo controller's I²C bus. The
+[project LCD guide](https://github.com/Greg-Aster/Ainekio-bot/blob/dbd15b9/docs/v2-12servo/LCD_FACE.md)
+contains the module-specific pin table, wiring image and earlier implementation
+record. `faces.def` owns the expression recipes, `face.c` draws them, and the
+gallery tool invokes that renderer for its previews. Display work runs outside
+the servo task.
+
+The committed guide above predates some of the local refinements illustrated
+here. The [October 8 manifest](/posts/2026-10-08-progress/sources.json) records
+the exact reviewed source and preview hashes. The
+[P4 firmware record](https://github.com/Greg-Aster/Ainekio-bot/blob/dbd15b9/Slave/firmware/esp32p4-wifi6/README.md)
+provides the dated installation and media-test details.

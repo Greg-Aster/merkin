@@ -1,0 +1,161 @@
+{
+  "review_date": "2026-10-08",
+  "website_baseline": "536a3d87db2cfa2b3863f91233eafb560d0c810d",
+  "owner_report": {
+    "date": "2026-10-08",
+    "standing": true,
+    "walking": true,
+    "responds_to_commands": true,
+    "active_operator_tested": false,
+    "carapace_attached": false,
+    "measurements": "No walking speed, endurance, weight, lifting force or battery runtime supplied."
+  },
+  "photo": {
+    "original_filename": "20261008_181333.jpg",
+    "published_filename": "standing-prototype.jpg",
+    "source": "Photograph supplied by the owner for this update",
+    "width": 1244,
+    "height": 868,
+    "processing": "Original JPEG copied without cropping or visual edits."
+  },
+  "face_previews": {
+    "source": "Ainekio/docs/v2-12servo/face-preview",
+    "count_in_reviewed_catalog": 59,
+    "kind": "Offline output of the firmware C renderer; latest local visual refinements are not a claim about installed firmware."
+  },
+  "reviewed_sources": [
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/LCD_FACE.md",
+      "reviewed_head": "dbd15b921b4adf3db8ce9672f3c5c544778fa824",
+      "uncommitted_at_review": true,
+      "sha256": "846609667500a55fb0b8b895cb32acaeb617e4c6eb6dcc64493dca3ffc541b85"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/README.md",
+      "reviewed_head": "dbd15b921b4adf3db8ce9672f3c5c544778fa824",
+      "uncommitted_at_review": true,
+      "sha256": "b61e885d9874612fc1dba3bfcf79b24f9523ee8af3a6ee51882a0065c834b7b8"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/README.md",
+      "reviewed_head": "dbd15b921b4adf3db8ce9672f3c5c544778fa824",
+      "uncommitted_at_review": true,
+      "sha256": "8249a042deb923c503b65054111ff7292ed81a5f8a1e0f97654f4b539f15ab63"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/launch_connection.py",
+      "reviewed_head": "dbd15b921b4adf3db8ce9672f3c5c544778fa824",
+      "uncommitted_at_review": false,
+      "sha256": "34193d2d8dee3c631ce876098c3b9d9157f516ac6824f1d86d12b2cd1d1d3a12"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/yolo_backend.py",
+      "reviewed_head": "dbd15b921b4adf3db8ce9672f3c5c544778fa824",
+      "uncommitted_at_review": true,
+      "sha256": "9615501e62a45b6a8593aa752f2713fc6abc4e3c982b204a3e1412deeafce7c5"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/software/faces/face.c",
+      "reviewed_head": "dbd15b921b4adf3db8ce9672f3c5c544778fa824",
+      "uncommitted_at_review": true,
+      "sha256": "6303ca50240448b5f2171d2af824f180d9160279749f11832bb5d41b624a16dc"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/software/faces/faces.def",
+      "reviewed_head": "dbd15b921b4adf3db8ce9672f3c5c544778fa824",
+      "uncommitted_at_review": true,
+      "sha256": "9b9fbf1b2358960fd9072dcdfe35a51538bd49367f2a7ffee84a98553cd8a000"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/software/faces/tools/gallery.py",
+      "reviewed_head": "dbd15b921b4adf3db8ce9672f3c5c544778fa824",
+      "uncommitted_at_review": true,
+      "sha256": "e3cd18b814895a9275fc18d517a3d8d981c533681c17546365be9400cb195262"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/face-preview/catalog.json",
+      "reviewed_head": "dbd15b921b4adf3db8ce9672f3c5c544778fa824",
+      "uncommitted_at_review": true,
+      "sha256": "3a129d7c5b3effcd23ee0fee9d3c068329b8161a739aa0c0a79572c33d84dcd5"
+    },
+    {
+      "repository": "metahuman",
+      "path": "docs/technical/environment-mode-performance.md",
+      "reviewed_head": "273bbe58309c8602243be2b2869d7d93fdeb9d48",
+      "uncommitted_at_review": false,
+      "sha256": "81c668f448f837e678ba1f3455039391898072699761a1297e58da3c8e4eea13"
+    },
+    {
+      "repository": "metahuman",
+      "path": "docs/user-guide/configuration-admin/deployment.md",
+      "reviewed_head": "273bbe58309c8602243be2b2869d7d93fdeb9d48",
+      "uncommitted_at_review": false,
+      "sha256": "3454f314751882ca0f8ece7f2a4b7b6f90ffaf764376c2c2c9e6a6bc3aa27bbf"
+    },
+    {
+      "repository": "metahuman",
+      "path": "brain/training/environment-action-selector/README.md",
+      "reviewed_head": "273bbe58309c8602243be2b2869d7d93fdeb9d48",
+      "uncommitted_at_review": true,
+      "sha256": "fc41f4a6fc633ad7680b24eb2a41ce72c2c01fe3d44a5f59fca7f678c7c6575d"
+    },
+    {
+      "repository": "metahuman",
+      "path": "packages/core/src/tts/robot-speech.ts",
+      "reviewed_head": "273bbe58309c8602243be2b2869d7d93fdeb9d48",
+      "uncommitted_at_review": true,
+      "sha256": "1ead9b586630d153a344d5be93911e93cafcc2b614dc84df068c314471844083"
+    }
+  ],
+  "assets": [
+    {
+      "file": "contact-sheet.png",
+      "bytes": 141919,
+      "sha256": "e0221c55b41f6509350a0f7f82b83e31577f48729b634e18bd30cae899053bbd"
+    },
+    {
+      "file": "default.webp",
+      "bytes": 139878,
+      "sha256": "bc4f1b622f4f521cdec910f0b56b7d776b495e7e7983265132b978bdf438ed25"
+    },
+    {
+      "file": "happy.webp",
+      "bytes": 118566,
+      "sha256": "b479648d3c05fe15dd29f2136a78424e71074afab47a3d0666f2a95ede7c0645"
+    },
+    {
+      "file": "listening.webp",
+      "bytes": 158368,
+      "sha256": "090d5a3f9922a7d5f740f5e130b402a5d6cc61456430cf0e130b998ba1963320"
+    },
+    {
+      "file": "run.webp",
+      "bytes": 41960,
+      "sha256": "bf447737539602fab299e68d9a26e20c05fac2873adb650096dd94158b986b07"
+    },
+    {
+      "file": "standing-prototype.jpg",
+      "bytes": 214437,
+      "sha256": "301b6b243c3bb5fede13500611cc7107878c0a823d90d57437ae09b179d0adea"
+    },
+    {
+      "file": "thinking.webp",
+      "bytes": 354586,
+      "sha256": "17c00f22004b63183ea50fdaafac640fa34284aba8f4d421b8b97d058c7d35f7"
+    },
+    {
+      "file": "wave.webp",
+      "bytes": 99246,
+      "sha256": "f8e4c99a1bb2952f0c297c81d053516c051e9f5655fc6f7f6ff55be631127943"
+    }
+  ]
+}

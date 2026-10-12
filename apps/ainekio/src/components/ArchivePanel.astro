@@ -1,80 +1,138 @@
 ---
-import { UNCATEGORIZED } from '@constants/constants'
-import SharedArchivePanel from '@merkin/blog-core/components/ArchivePanel.astro'
-import I18nKey from '../i18n/i18nKey'
-import { i18n } from '../i18n/translation'
-import { getSortedArchivePosts } from '../utils/content-utils'
-import { getPostUrlBySlug } from '../utils/url-utils'
+import { getCollection } from 'astro:content'
+import { getReading, validateReadingPaths, topics, generations, kinds } from '../lib/reading'
+import { getPostUrlBySlug, url } from '../utils/url-utils'
 
-interface Props {
-  keyword?: string
-  tags?: string[]
-  categories?: string[]
-}
-const { tags, categories } = Astro.props
-
-let posts = await getSortedArchivePosts()
-const normalizedTags = new Set(
-  (tags ?? []).map((tag: string) => tag.toLowerCase()),
-)
-const normalizedCategories = new Set(
-  (categories ?? []).map((category: string) => category.toLowerCase()),
-)
-
-if (Array.isArray(tags) && tags.length > 0) {
-  posts = posts.filter(
-    post =>
-      Array.isArray(post.data.tags) &&
-      post.data.tags.some(tag => normalizedTags.has(tag.toLowerCase())),
-  )
-}
-
-if (Array.isArray(categories) && categories.length > 0) {
-  posts = posts.filter(
-    post =>
-      (post.data.category &&
-        normalizedCategories.has(post.data.category.toLowerCase())) ||
-      (!post.data.category &&
-        normalizedCategories.has(UNCATEGORIZED.toLowerCase())),
-  )
-}
-
-const groups: { year: number; posts: typeof posts }[] = (() => {
-  const groupedPosts = posts.reduce(
-    (grouped: { [year: number]: typeof posts }, post) => {
-      const year = post.data.published.getFullYear()
-      if (!grouped[year]) {
-        grouped[year] = []
-      }
-      grouped[year].push(post)
-      return grouped
-    },
-    {},
-  )
-
-  // convert the object to an array
-  const groupedPostsArray = Object.keys(groupedPosts).map(key => ({
-    year: Number.parseInt(key),
-    posts: groupedPosts[Number.parseInt(key)],
-  }))
-
-  // sort years by latest first
-  groupedPostsArray.sort((a, b) => b.year - a.year)
-  return groupedPostsArray
-})()
-
-const archiveGroups = groups.map(group => ({
-  year: group.year,
-  posts: group.posts.map(post => ({
-    title: post.data.title,
-    url: getPostUrlBySlug(post.slug),
-    published: post.data.published,
-    tags: post.data.tags || [],
-  })),
-}))
+interface Props { keyword?: string; tags?: string[]; categories?: string[] }
+const { tags = [], categories = [] } = Astro.props
+const allPosts = await getCollection('posts', ({data}) => !data.draft)
+validateReadingPaths(allPosts)
+const normalizedTags = tags.map(tag => tag.toLowerCase())
+const normalizedCategories = categories.map(category => category.toLowerCase())
+const posts = allPosts.filter(post =>
+  (!tags.length || post.data.tags.some(tag => normalizedTags.includes(tag.toLowerCase()))) &&
+  (!categories.length || normalizedCategories.includes((post.data.category || 'uncategorized').toLowerCase()))
+).sort((a,b) => {
+  const rank = {reference:0,journal:1,original:2}
+  return rank[getReading(a).kind] - rank[getReading(b).kind] || b.data.published.getTime() - a.data.published.getTime() || a.slug.localeCompare(b.slug)
+})
+const dateFormat = new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})
+const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `Category: ${categories.join(', ')}` : ''
 ---
+<section class="card-base article-library" data-article-library>
+  <header>
+    <p class="library-eyebrow">Ainekio documentation</p>
+    <h1 data-library-title>Article library</h1>
+    {scope && <p>{scope} · <a href={url('/archive/')}>Browse the complete library</a></p>}
+    <nav aria-label="Library shortcuts"><a href={url('/archive/?kind=reference')}>Build reference</a><a href={url('/updates/')}>Dated build journal</a><a href={url('/posts/v1-original-posts/')}>Original V1 reading guide</a></nav>
+  </header>
+  <form class="library-filters" method="get" data-library-filters aria-label="Filter articles">
+    <label>Topic<select name="topic"><option value="">All topics</option>{Object.entries(topics).map(([id,topic]) => <option value={id}>{topic.title}</option>)}</select></label>
+    <label>Robot version<select name="generation"><option value="">Both versions</option><option value="v1">V1 · 8 servos</option><option value="v2">V2 · 12 servos</option><option value="both">Cross-version articles</option></select></label>
+    <label>Document type<select name="kind"><option value="">All documents</option>{Object.entries(kinds).map(([id,label]) => <option value={id}>{label}</option>)}</select></label>
+    <label class="library-query">Title or summary<input name="q" type="search" placeholder="For example: battery or linkage" autocomplete="off" /></label>
+    <div class="library-buttons"><button type="submit">Apply filters</button><button type="reset">Clear filters</button></div>
+  </form>
+  <noscript><p>Interactive filters require JavaScript. All matching category articles are listed below; your browser’s Find command can search this page.</p></noscript>
+  <p class="library-results" aria-live="polite" aria-atomic="true" data-library-results>{posts.length} articles</p>
+  <p class="library-topic-note" data-library-topic-note>References first, then journal entries.</p>
+  <div class="library-list">
+    {posts.map(post => {
+      const reading = getReading(post)
+      return <article data-library-entry data-topic={reading.topic} data-generation={reading.generation} data-kind={reading.kind} data-search={`${post.data.title} ${post.data.description}`.toLowerCase()}>
+        <a class="library-image" href={getPostUrlBySlug(post.slug)} tabindex="-1" aria-hidden="true"><img src={url(post.data.image)} alt="" loading="lazy" decoding="async" /></a>
+        <div><p class="library-meta">{generations[reading.generation]} · {kinds[reading.kind]} · <time datetime={post.data.published.toISOString()}>{dateFormat.format(post.data.published)}</time></p>
+          <h2><a href={getPostUrlBySlug(post.slug)}>{post.data.title}</a></h2>
+          <p>{post.data.description}</p>
+          <span class="library-topic">{topics[reading.topic].title}</span>
+        </div>
+      </article>
+    })}
+  </div>
+  <p data-library-empty hidden>No articles match these filters. Try another topic, version, or search phrase.</p>
+</section>
 
-<SharedArchivePanel
-  groups={archiveGroups}
-  postsCountLabel={i18n(I18nKey.postsCount)}
-/>
+<script>
+  const root = document.querySelector<HTMLElement>('[data-article-library]')
+  if (root) {
+    const form = root.querySelector<HTMLFormElement>('[data-library-filters]')!
+    const names = ['topic', 'generation', 'kind', 'q'] as const
+    const controls = Object.fromEntries(names.map(name => [name, form.elements.namedItem(name)])) as Record<typeof names[number], HTMLSelectElement | HTMLInputElement>
+    const entries = [...root.querySelectorAll<HTMLElement>('[data-library-entry]')]
+    const count = root.querySelector<HTMLElement>('[data-library-results]')!
+    const title = root.querySelector<HTMLElement>('[data-library-title]')!
+    const note = root.querySelector<HTMLElement>('[data-library-topic-note]')!
+    const empty = root.querySelector<HTMLElement>('[data-library-empty]')!
+    const kindTitles: Record<string,string> = { reference: 'Build reference', journal: 'Build journal articles', original: 'Original documents' }
+    function applyFilters(historyMode: 'push' | 'replace' | false) {
+      const {topic, generation, kind, q} = Object.fromEntries(names.map(name => [name,controls[name].value]))
+      const terms = q.trim().toLowerCase().split(/\s+/).filter(Boolean)
+      let visible = 0
+      for (const entry of entries) {
+        const matches = (!topic || entry.dataset.topic === topic) &&
+          (!generation || entry.dataset.generation === generation || (generation !== 'both' && entry.dataset.generation === 'both')) &&
+          (!kind || entry.dataset.kind === kind) && terms.every(term => entry.dataset.search!.includes(term))
+        entry.hidden = !matches
+        if (matches) visible++
+      }
+      count.textContent = `${visible} ${visible === 1 ? 'article' : 'articles'} shown`
+      empty.hidden = visible !== 0
+      const topicControl = controls.topic as HTMLSelectElement
+      title.textContent = topic ? topicControl.selectedOptions[0].text : kindTitles[kind] || 'Article library'
+      note.textContent = generation === 'v1' || generation === 'v2'
+        ? 'Includes cross-version references.'
+        : 'References first, then journal entries.'
+      if (historyMode) {
+        const address = new URL(location.href)
+        for (const name of names) {
+          const value = controls[name].value.trim()
+          if (value) address.searchParams.set(name,value)
+          else address.searchParams.delete(name)
+        }
+        history[historyMode === 'push' ? 'pushState' : 'replaceState'](null,'',address)
+      }
+    }
+    function readAddress() {
+      const params = new URLSearchParams(location.search)
+      for (const name of names) controls[name].value = params.get(name) || ''
+      applyFilters(false)
+    }
+    form.addEventListener('submit', event => { event.preventDefault(); applyFilters('push') })
+    form.addEventListener('change', event => { if (event.target instanceof HTMLSelectElement) applyFilters('push') })
+    controls.q.addEventListener('input', () => applyFilters('replace'))
+    form.addEventListener('reset', event => { event.preventDefault(); for (const name of names) controls[name].value = ''; applyFilters('push') })
+    window.addEventListener('popstate',readAddress)
+    document.addEventListener('astro:before-swap', () => window.removeEventListener('popstate',readAddress), { once: true })
+    readAddress()
+  }
+</script>
+
+<style>
+  .article-library { padding: clamp(1.2rem,3vw,2rem); color: var(--text-color); }
+  .library-eyebrow { text-transform: uppercase; letter-spacing: .05em; font-size: .75rem; color: var(--primary); }
+  h1 { font-size: clamp(1.8rem,3vw,2.4rem); font-weight: 750; margin: .5rem 0; line-height: 1.2; }
+  header > p { max-width: 75ch; line-height: 1.65; }
+  a { color: var(--primary); text-underline-offset: .2em; }
+  a:hover { text-decoration: underline; }
+  nav { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; margin-top: .75rem; }
+  nav a { padding-block: .6rem; }
+  .library-filters { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1rem; margin: 1.5rem 0; padding: 1rem; border: 1px solid color-mix(in srgb,var(--primary) 25%,transparent); border-radius: .5rem; }
+  label { font-size: .8rem; font-weight: 650; display: grid; gap: .4rem; }
+  select, input { min-width: 0; width: 100%; border: 1px solid color-mix(in srgb,var(--primary) 35%,transparent); background: var(--card-bg); color: var(--text-color); padding: .7rem .6rem; border-radius: .3rem; font: inherit; }
+  select option { background: var(--card-bg); color: var(--text-color); }
+  .library-query { grid-column: span 2; }
+  .library-buttons { display: flex; align-items: end; flex-wrap: wrap; gap: .5rem; }
+  button { padding: .7rem .8rem; border: 1px solid var(--primary); border-radius: .3rem; color: var(--primary); font-size: .8rem; cursor: pointer; }
+  button[type=submit] { background: var(--primary); color: #071b20; }
+  .library-results { font-weight: 700; }
+  .library-topic-note { font-size: .85rem; margin: .4rem 0 1rem; color: var(--text-color-muted); }
+  .library-list { display: grid; gap: 1rem; }
+  .library-list article { display: grid; grid-template-columns: 10rem minmax(0,1fr); gap: 1.2rem; padding: 1rem 0; border-top: 1px solid color-mix(in srgb,var(--primary) 18%,transparent); }
+  .library-list article[hidden], [data-library-empty][hidden] { display: none; }
+  .library-image img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: .4rem; }
+  .library-meta, .library-topic { font-size: .75rem; color: var(--text-color-muted); }
+  h2 { font-size: 1.12rem; font-weight: 700; line-height: 1.4; margin: .4rem 0; }
+  h2 + p { line-height: 1.6; font-size: .9rem; }
+  .library-topic { display: block; margin-top: .4rem; }
+  @media(max-width:640px) { .library-filters { grid-template-columns: 1fr; } .library-query { grid-column: auto; } .library-list article { grid-template-columns: 1fr; } .library-image img { max-height: 12rem; aspect-ratio: 16/9; } }
+</style>

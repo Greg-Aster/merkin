@@ -1,9 +1,9 @@
 ---
 title: "Ainekio V2: Parts, Assembly, and Design Iterations"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-10-06
-description: "V2 build record: a printed chassis that could not stand, lighter Blender revisions, a new battery direction, compact-linkage motions and steering/sensing integration."
-image: "/posts/2026-10-06-progress/motion-library-point.webp"
+updated: 2026-10-12
+description: "V2 build record: exterior printing, current Blender captures and prototype exports, a 4 A supply and revised grounded motions, alongside the October 8 walking milestone."
+image: "/assets/ainekio/2026-10-12-refresh/blender-front.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
@@ -13,17 +13,18 @@ tags: [Ainekio, V2, Hardware, ESP32-P4, MG90S, 3D Printing]
 category: "Physical Robot"
 draft: false
 lang: "en"
-series: "Ainekio Field Guide"
-seriesPart: 11
-seriesTitle: "Physical Robot"
 contentFormat: "report"
+reading:
+  topic: body
+  generation: v2
+  kind: reference
+  next: gait-development
+  related: ["2026-10-12-shell-power-and-motion", "2026-10-08-standing-walking"]
 ---
 
 # Building the next Ainekio body
 
-*Cover: October 6 Blender Point preview with the compact-linkage candidate.
-The model includes unprinted LCD and shell pieces; it does not show a successful
-physical standing test.*
+*October 12 Blender assembly, neutral stance.*
 
 Ainekio is a small four-legged robot. Its working V1 body uses eight servos,
 with two motors positioning each leg. V2 adds a third joint per leg, a new
@@ -37,35 +38,43 @@ gait planning with prepared gestures.
 Automatic balance and adaptation to uneven ground require further sensing,
 control and physical testing.
 
-## Current revision: October 6
+## Current revision: October 12
 
-The chassis has been printed, but **the robot could not stand on its MG90
-servos**. LCD and shell pieces remain unprinted. After researching other
-servos, Greg is keeping the MG90s and reducing the load through a lighter
-structure, a new battery arrangement and revised leg geometry. Replacement
-parts are still printing; the revised assembly has not been tested.
+I have begun printing the shell, made further weight modifications, and
+switched to a **4 A power supply**. Voltage, current draw, and the final battery
+configuration still need recording. The [new build entry](/posts/2026-10-12-shell-power-and-motion/)
+contains current Blender views, 27 prototype exports and revised grounded-motion
+comparisons. Shell fit and Active Operator testing are still pending.
 
-The roughly **20% lower weight and 20% higher lifting force** are current owner
-estimates. One independently documented Blender change is the front bearing
-panel's **19.81% mesh-volume reduction**; that figure applies to that part only.
-The side supports/trays and rear tray joints have been consolidated, panel
-braces revised, and screw-secured board retainers added to the electronics
-bridge. Printed fit and strength of the new revisions remain to establish.
+## Physical movement baseline: October 8
 
-The heavy **10,000 mAh rechargeable bank has been dropped** in favor of
+**The robot can stand, walk and respond to commands.** This follows the failed
+standing attempt two days earlier.
+The carapace is not attached and Active Operator has not been tested. The
+[physical build update](/posts/2026-10-08-standing-walking/) includes the current
+photograph and a side-by-side account of the two attempts.
+
+The latest committed exports add LCD-carrier braces, a 20×30 speaker holder,
+compact carriers/cranks/pickups, and electronics/power mounting parts. Local
+camera-carrier and longer front-tray exports are still being developed. The installed firmware, calibration, power arrangement and measured weight still
+need a reproducible assembly record. Earlier 20% improvements remain estimates.
+
+The October 6 power decision dropped the heavy **10,000 mAh rechargeable bank** in favor of
 separate batteries and onboard charging circuit boards. Cell capacity, board
 selection, the final power arrangement and runtime are not established here.
 The earlier Anker and SHARGE studies remain dated design iterations.
 
 **Wireless**, with the Q6A offboard over Wi-Fi, is the current build priority.
-**Wired** retains the onboard-Q6A/native-USB alternative. The new offline leg
+**Wired** retains the onboard-Q6A/native-USB alternative. The October 5–6 offline leg
 candidate uses a **35 mm carrier, 20 mm crank, 28 mm pickup, 38 mm rod and
 55 mm distal leg**. All 23 named motions have been remapped in Blender, with
-reduced Upright reach and unresolved servo travel. This candidate has not
-replaced the active shared firmware model.
+reduced Upright reach and unresolved servo travel. The installed walking build’s firmware/model revision still needs recording.
 
 | Build record | Latest detail |
 | --- | --- |
+| [Standing, walking and mounting exports](/posts/2026-10-08-standing-walking/) | Current physical result, photograph and repository part snapshots |
+| [Face, camera and voice](/posts/2026-10-08-face-and-media/) | Working LCD and dated media evidence, plus local expression previews |
+| [Responsive commands](/posts/2026-10-08-responsive-commands/) | Task/conversation split, connection controls and Active Operator test boundary |
 | [Lighter rebuild and new power direction](/posts/2026-10-06-lighter-rebuild/) | Standing result, servo decision, material removal, board retainers and the next printed assembly |
 | [Compact linkage and 23 motions](/posts/2026-10-06-compact-linkage/) | Geometry comparison, changed gestures, Blender previews and remaining qualification |
 | [Steering, sensing and connections](/posts/2026-10-06-steering-sensing-connections/) | Wireless priority, IMU estimator, camera profiles, ROS tools and connection tests |
@@ -80,9 +89,9 @@ control. The IMU estimator is implemented, but hardware acquisition and balance
 correction remain disconnected. ROS 2 tools have recorded checks; the robot
 adapter and native-USB body transport remain integration work. The recorded
 P4 hotspot connection succeeded, while sustained-session testing failed.
-V1 remains the working complete robot; V2's next loaded test is still ahead.
+V1 remains supported. V2 stood and walked on October 8.
 
-The rest of this guide preserves earlier decisions with their dates. The
+The
 [September 15 prototype post](/posts/2026-09-15-leg-prototypes/) contains physical
 leg photographs; the [V1 hardware guide](/posts/body-design-and-hardware/)
 records the earlier robot's parts and wiring.

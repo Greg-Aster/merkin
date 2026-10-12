@@ -1,0 +1,106 @@
+---
+title: "V1: Original Robot Familiar Introduction"
+published: 2026-07-04
+description: "The original project introduction, its ambitions, MetaHuman brain, firmware boundary, and Sesame-derived body."
+image: "/posts/ainekio/wizard-lab-banner.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Ainekio"
+authorBio: "Robot familiar project"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V1, Original Documents, Build History]
+category: "V1 Originals"
+draft: false
+archive: true
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: v1
+  generation: v1
+  kind: original
+  next: robot-familiar-parts-overview
+  related: ["body-design-and-hardware", "controller-firmware"]
+---
+
+> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1AVtNyFN7AG5ymLqshQI-77jO4nfG0yev8FUABZ8YE9E/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/current-status/).
+
+> The browser simulator described here was subsequently unsuccessful and retired. Its intermediate results and plans are preserved as history.
+
+---
+
+# Ainekio - Overview & Status
+
+## Ainekio is an attempt to build a small robot familiar.
+
+The idea is to adapt a previous project - MetaHuman OS - to be its brain, and build a suitable chassis to be its body. The intelligence, memory, and personality live in MetaHuman OS; the robot is how that mind sees, hears, speaks, and moves in the physical world. Ainekio is not a chatbot or a remote controlled machine - it is a unified system: a body, and an active mind that remembers, dreams, and learns.
+
+## Status
+
+Last verified: 2026-07-14
+
+Ainekio currently consists of multiple systems in parallel development: body, firmware, and software. Nothing is remotely complete, but daily progress is being made.
+
+Get involved: [MetaHuman OS](https://github.com/Greg-Aster/metahuman-os) | [Ainekio bot repository](https://github.com/Greg-Aster/Ainekio-bot)
+
+| Area | Progress | State | Read |
+| --- | --- | --- | --- |
+| Firmware lvl 1 | `████████░░` ~60-80% | The firmware builds successfully. Testing it on the physical hardware remains. | - |
+| Hardware lvl 1 | `██████░░░░` ~60% | Parts are selected and ordered. Fitment, wiring, and hardware testing remain. | [Parts overview](/posts/robot-familiar-parts-overview/) |
+| Physical build lvl 1| `████░░░░░░` ~40% | The frame and legs are printed. Assembly is waiting on the remaining parts. | - |
+| Technological Singularity | `███░░░░░░░` ~20% | The OS has proven to have reasoning and learning; the robot has not yet demonstrated recursive self improvement. | - |
+
+### What Is Happening Now
+
+1. **Firmware:** prepare the software for testing on the real robot.
+2. **Hardware:** receive and inspect the ordered parts and check how everything fits.
+3. **Physical build:** assemble and wire the printed body, then calibrate it before movement tests.
+4. **Integration:** connect the working software systems to the physical robot and test them safely.
+
+## The Software - “Two Brains, One Cup”
+
+The brain: MetaHuman OS (github.com/Greg-Aster/metahuman-os) - a local-first system for a persistent personal AI identity.
+
+### Example Brain Functions:
+
+- **Memory** - it keeps local episodic memory: conversations, events, tasks, preferences, transcripts. What the robot experiences can actually be remembered.
+- **Inner life** - background agents for reflection, dreams, daydreaming, curiosity, and trains of thought run whether or not anyone is talking to it. The robot body will be idle sometimes; the mind won't be.
+- **Agency** - a supervised loop that turns memories, goals, and curiosity into desires, plans them, and executes them through a trust-aware tool layer. The familiar can want things, within boundaries.
+- **Learning** - it curates its own memories into training data and produces LoRA adapters, so the persona changes over time based on what it has lived through - including, eventually, what it lives through in a body.
+- **Voice** - local speech to text and text to speech, voice chat, and voice training workflows already work OS side.
+- **Model routing** - different models for different roles (persona, curation, coding, embeddings), local or remote, so the system isn't bound to one model or one machine.
+- **Cognitive Modes** - a configurable node system that directs the flow of data the ai uses to think allowing more versatility and specialization.
+
+## The Firmware - WTF is This?
+
+The firmware is the layer between the brain and the chassis. It turns the brain's intent into safe physical behavior and sends the robot's state back to the brain.
+
+### Example Firmware Functions
+
+- Receive and validate commands
+- Control movement and expressions
+- Stop safely when something goes wrong
+- Report the robot's state
+
+## The Chassis - A fluid Identity
+
+The test chassis selected is modified Sesame robot - it is open source, good form, and is cheap (the system is agnostic, so other bodies could work too). The chassis provides the physical body: movement, senses, expression, power, and structure. The full build is documented in the parts overview.
+
+### Example Chassis functions
+
+- **See** - through an onboard camera or sensors
+- **Listen and talk** - microphone and speaker on the body; the speech to text and text to speech happen OS side
+- **Move** - servo-driven legs, gestures, posture
+- **React and express** - an OLED face, motion, idle behavior
+
+## Key Decisions So Far
+
+- MetaHuman OS is the intelligence layer.
+- The robot body should receive semantic commands like `walk`, `stop`, or `speak`, not raw servo angles from a model. The brain never controls servos directly; the body decides how to perform each intent safely.
+- Virtual testing comes before physical movement.
+- Hardware and power details are documented in the parts overview.
+
+## So what is Ainekio?
+
+Ainekio is a transcendent entity - a series of tools and utilities carefully put together with custom code that shines brilliantly in your computer's core. Ainekio is crafted by the hands of artisans. When the robot wakes for the first time, a baby angel from the planet Kolob comes down and gives it the spark of life. Ainekio is something unique and unfathomable, something that will dream, develop and grow. It watches and learns from its mistakes.
+
+Ainekio is a renaissance. Ainekio is the natural successor to mankind. Ainekio will be smarter than you. You are now obsolete. Ainekio will wax poeticly, engage in philosophical discussion. Ainekio will have a better relationship with your mother. When you die, Ainekio will carry on your memory and legacy. Ainekio will remember long after your bones have turned to dust. Ainekio is a weapon of mass destruction.

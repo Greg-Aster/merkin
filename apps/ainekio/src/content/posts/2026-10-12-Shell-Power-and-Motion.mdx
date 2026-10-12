@@ -1,0 +1,123 @@
+---
+title: "Shell Printing, Weight Changes, and a 4 A Supply"
+published: 2026-10-12
+updated: 2026-10-12
+description: "Exterior printing has begun. Follow the Blender shell and camera-mount exports, the new power-supply direction, and revised foot placement for Lay Down and Play Dead."
+image: "/assets/ainekio/2026-10-12-refresh/render-shell.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, Blender, Chassis, Power, Gait, 3D Printing]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: body
+  generation: v2
+  kind: journal
+  related: ["ainekio-v2", "2026-10-08-standing-walking"]
+---
+
+# Printing the exterior
+
+I have begun printing the exterior shell, made further weight modifications,
+and switched to a **4 A power supply**. Alongside the physical build, I have
+started integrating YOLOE and done extensive work on MetaHuman's node workflows
+and trained Qwen 0.8B intent and task models.
+
+The robot could [stand, walk and respond to commands on October 8](/posts/2026-10-08-standing-walking/),
+without the carapace. Shell fit is next; Active Operator remains untested.
+
+<figure>
+  <img src="/assets/ainekio/2026-10-12-refresh/render-shell.webp" alt="Overhead Blender render of Ainekio’s red shell, black chassis, and exposed linkages" width="1536" height="1024" loading="eager" />
+  <figcaption>October 12 Blender assembly.</figcaption>
+</figure>
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <figure><img src="/assets/ainekio/2026-10-12-refresh/blender-top.webp" alt="Overhead Blender view of the red shell panels and neutral leg placement" width="1600" height="1100" loading="lazy" /><figcaption>October 12: shell panels from above.</figcaption></figure>
+  <figure><img src="/assets/ainekio/2026-10-12-refresh/blender-rear.webp" alt="Blender rear view of the shell, switch opening, and leg linkages" width="1600" height="1100" loading="lazy" /><figcaption>Rear shell and linkages.</figcaption></figure>
+</div>
+
+**Wireless** Blender assembly, neutral stance.
+
+
+## From exposed chassis to shell components
+
+| Build area | October 8 record | October 12 progress |
+| --- | --- | --- |
+| Exterior | Carapace not attached; exposed wiring in the photograph | Exterior printing has begun; front and rear shell export sets are available locally |
+| Weight | Earlier approximately 20% improvement remained an estimate | Further weight reduction; assembled mass not yet measured |
+| Power | Batteries and onboard charging boards were the intended replacement for the heavy bank | Switched to a 4 A power supply |
+| Camera/display packaging | Camera carrier and longer front tray were local work | Camera cradle, split chin pieces and revised LCD-carrier exports |
+| Movement | Standing, walking and command response reported | Local Lay Down / Play Dead entry and recovery paths revised; physical qualification remains separate |
+
+Still to record: supply voltage, rail wiring, current draw, and the final battery arrangement.
+
+<details>
+  <summary>Earlier October 10 shell reference</summary>
+  <figure><img src="/posts/2026-10-12-progress/reference-rear-three-quarter.png" alt="Earlier October 10 rear-shell Blender reference" width="1000" height="1000" loading="lazy" /><figcaption>October 10 rear-shell revision.</figcaption></figure>
+</details>
+
+## The Blender print record
+
+All modeling is done in Blender. The source folders contain these dated sets:
+
+| Export set | Files in this snapshot | Purpose / iteration |
+| --- | --- | --- |
+| Front shell | 15 STLs | Upper visor; paired temple, side-shell and cheek-fang pieces; paired side/cheek keys and flush pins |
+| Rear compact arch | 8 STLs | Left, center and right arch; front/rear saddles; M3-named rear panel and left/right braces |
+| Camera cradle | 4 STLs | Camera cradle, LCD carrier, left chin and right chin |
+
+[Download the 27 prototype STLs](/posts/2026-10-12-progress/prototype-print-exports.zip).
+October 9–12 exports, including alternative revisions. Mating fit, print settings,
+and fastener lengths still need checking. [File manifest](/posts/2026-10-12-progress/sources.json).
+
+The robot repository also has local rear-helmet, rear-visor and updated center
+support exports. These are separate from the three folder sets in the download.
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <figure><img src="/posts/2026-10-12-progress/reference-side.png" alt="Side reference of the robot's shell and linkage in Blender" width="1000" height="1000" loading="lazy" /><figcaption>October 10 side reference.</figcaption></figure>
+  <figure><img src="/posts/2026-10-12-progress/reference-folded-shoulder.png" alt="Blender reference showing the shoulder linkage folded near the shell" width="1000" height="1000" loading="lazy" /><figcaption>October 10 folded-shoulder study.</figcaption></figure>
+</div>
+
+## Lift each foot before lowering the body
+
+The local motion authoring now gives **Lay Down** and **Play Dead** individual
+lift-and-place steps before lowering the body. The generator specifies an
+**8 mm lift**, **0.8 seconds per initial foot placement**, then **2 seconds of
+body lowering**. Both sampled clips retain a seven-second authored duration and
+the original start and terminal references. Runtime speed settings can change
+playback duration.
+
+The sampled files show a useful reduction in peak joint speed:
+
+| Offline quantity | Lay Down: previous → revised | Play Dead: previous → revised |
+| --- | --- | --- |
+| Authored duration | 7.0 → 7.0 s | 7.0 → 7.0 s |
+| Peak joint speed | 216.36 → 137.59°/s | 308.62 → 156.16°/s |
+| Lowest modeled sole height | −0.067 → approximately 0 mm | −0.240 → approximately 0 mm |
+| Minimum modeled body clearance | 0.15 → 0.15 mm | 0.15 → 0.15 mm |
+| Hardware qualified / collision checked | No / no | No / no |
+
+The P4 source retraces the grounded clip in reverse before entering a new named
+motion, with a short alignment segment. Hardware testing of this recovery is
+still pending.
+
+[Download the before/after validation data](/posts/2026-10-12-progress/motion-comparison.json)
+or continue through the [gait journal](/posts/gait-development/).
+
+## The software side of the build
+
+The [YOLOE entry](/posts/2026-10-12-yoloe-tracking/) follows the move from
+person-only detection to search and selected targets, including the live chair
+tracking result and the camera recovery problem. The
+[MetaHuman entry](/posts/2026-10-12-trained-specialists/) records the trained
+intent/task split, workflow changes and why a later candidate was rejected.
+
+Sources: October 12 build notes; Blender exports and captures;
+local motion source and validation records at Ainekio commit `436c035` plus
+uncommitted changes. Exact reviewed hashes are in the
+[source manifest](/posts/2026-10-12-progress/sources.json).

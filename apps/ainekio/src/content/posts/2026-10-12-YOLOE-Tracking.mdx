@@ -1,0 +1,112 @@
+---
+title: "YOLOE: From Person Detection to Selected Targets"
+published: 2026-10-12
+updated: 2026-10-12
+description: "A desktop YOLOE pilot now searches and tracks using the robot camera. Follow the live chair result, exact-frame selection, model limitations, and remaining integration work."
+image: "/posts/2026-10-12-progress/dystopian-perception.png"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, Vision, YOLOE, MetaHuman OS, Gateway]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: perception
+  generation: v2
+  kind: journal
+  related: ["vision-loop", "2026-10-12-trained-specialists"]
+---
+
+# Search, select, and keep the right image
+
+YOLOE integration has moved beyond the earlier person-only detector experiment.
+The October 11 record documents a desktop pilot using **YOLOE-26n-seg**,
+**MobileCLIP2-B** for text prompts, and **ByteTrack** for continuity between
+frames. On October 12, real P4 camera observations reached MetaHuman, and a
+stationary chair-selection test retained a track across eight observed frames.
+
+Moving-target tests and Q6A benchmarks are still pending.
+
+<figure>
+  <img src="/posts/2026-10-12-progress/vision-flow.svg" alt="Diagram of P4 camera frames entering the gateway YOLOE and ByteTrack worker, then the Body Control display and MetaHuman task workflow; target selection returns with the original image identity" width="1000" height="660" loading="eager" />
+  <figcaption>Diagram of the reviewed source path. Detection/tracking and slower image reasoning remain separate; physical movement still uses the existing task and body-command owners.</figcaption>
+</figure>
+
+<figure>
+  <img src="/posts/2026-10-12-progress/dystopian-perception.png" alt="AI-generated dystopian illustration of the red Ainekio robot facing a chair in an abandoned industrial archive" width="1536" height="1024" loading="lazy" />
+  <figcaption>Ainekio perception concept.</figcaption>
+</figure>
+
+## What the detector can be asked to do
+
+| Operation | Earlier detector | Current desktop pilot |
+| --- | --- | --- |
+| Default view | Person-only YOLO checkpoint | Prepared YOLOE person vocabulary, retaining the familiar starting view |
+| Text search | Fixed checkpoint classes | Search for a named category using local text embeddings |
+| Visual selection | No general reference-target workflow | Submit a region together with the original reference JPEG |
+| Continuity | A detection in one image | Track IDs associated across accepted frames with ByteTrack |
+| Release | No selected-target mode | Release selection and restore the configured default person detector |
+| Operator view | Camera/recognition health | Exact-image detection overlays, text search, selection and release |
+
+A track ID estimates continuity. It does not prove a person's identity or that a
+similar replacement is the same object. Named-face recognition remains a
+separate annotation. The existing camera worker owns inference and tracking;
+these features do not create another camera stream or a second movement sender.
+
+## October 12: a chair through the real camera path
+
+| Check | Recorded result | What it establishes |
+| --- | --- | --- |
+| P4 camera → gateway → MetaHuman | Real person detections and track IDs arrived; a Coordinator read returned the robot JPEG with its complete source identity | Live camera/bridge data flow on the desktop |
+| Text search for chair | Chair observations carried the search query ID and a track ID | Live category search through the existing request owner |
+| CPU Qwen 0.8B acquisition | About 10.2 s; returned an ambiguous, imprecise chair region | Actual model inference occurred, but localization was weak |
+| Tracking from that candidate | Selection receipt succeeded; no detections in 13 distinct observed frames | Selection accepted; tracking failed |
+| Tighter region on the same reference image | Chair detected in all eight observed frames, with one track ID; scores 0.37–0.65 | A live stationary selected-target result for this particular reference |
+| Sustained camera session | Reconnects occurred; later frames stopped while heartbeats continued | Camera recovery remains unresolved; toggling the saved camera setting off/on restored frames |
+
+The Qwen trial used the **base 0.8B model and its vision projector on desktop
+CPU**, without the trained intent/task adapters. It is not a Q6A benchmark or
+a result for the separate 9B vision model. The camera tests issued no body
+movement commands.
+
+## Why the exact reference matters
+
+A selected box belongs to one image, not to whichever frame arrives next.
+Search and selection carry their query identity, and visual selection retains
+the original JPEG and gateway/robot/session/frame identity. Body Control draws
+boxes over the image that produced them. MetaHuman receives fresh recognition
+through the same bridge and keeps older observations as history.
+
+The local source now lets **Environment vision** choose a model through the
+existing Model Router. This removes a forced remote placement that had selected
+an adapter unable to accept images. The intent and task specialist assignments
+remain independent. The October 12 integration record says the new Site build
+was prepared, but its vision-handler update had not yet been activated in the
+running process at that checkpoint.
+
+## What the earlier trials taught
+
+Desktop fixture trials found limits that are still relevant. A visual person
+reference returned no detections at detector size 320, but two people at 640;
+that did not isolate one intended individual. A wheel reference returned none
+at either size. Qwen also confused a front-wheel request with the rear wheel.
+
+The live chair test advances beyond those fixture checks, while leaving
+independently moving targets, crossings, occlusion and reacquisition to test.
+Physical following also needs the selected-track loss policy reconciled with
+the existing single-person behavior. The last Cloudflare route check returned
+502; neither that route nor Q6A throughput is qualified by the desktop pilot.
+
+Next work is to activate and exercise the complete conversational acquisition
+path, investigate camera-stream recovery, and test continuity under actual
+motion before enabling physical following.
+
+Sources: the October 12 local camera/tracking integration record, gateway source,
+and MetaHuman image-routing changes, identified in the
+[source manifest](/posts/2026-10-12-progress/sources.json). The committed
+[October 9 camera-health work](https://github.com/Greg-Aster/Ainekio-bot/commit/436c035)
+provides an earlier public baseline; the newer integration is still local work.

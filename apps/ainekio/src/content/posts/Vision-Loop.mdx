@@ -1,7 +1,7 @@
 ---
 title: "Camera and Visual Feedback"
 published: 2026-08-27T08:30:00-07:00
-updated: 2026-09-09
+updated: 2026-10-12
 description: "When Ainekio takes pictures, how they reach MetaHuman, and how an image is used to check a robot objective."
 image: "/assets/ainekio/v2/vision-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -13,11 +13,18 @@ tags: [Ainekio, Camera, Vision, OV3660, Durable Execution]
 category: "Perception and Voice"
 draft: false
 lang: "en"
-series: "Ainekio Field Guide"
-seriesPart: 7
-seriesTitle: "Perception and Voice"
 contentFormat: "report"
+reading:
+  topic: perception
+  generation: both
+  kind: reference
+  next: voice-loop
+  related: ["2026-10-12-yoloe-tracking", "2026-10-08-face-and-media"]
 ---
+
+## October 12: YOLOE and selected-target integration
+
+The P4 camera now feeds a desktop YOLOE/ByteTrack pilot with exact-image overlays and search/select/release. A stationary chair track was observed, while camera recovery and the complete acquisition workflow remain unfinished. [Read the dated tracking record](/posts/2026-10-12-yoloe-tracking/). The guide below preserves the earlier snapshot-driven design.
 
 # How a picture becomes useful feedback
 

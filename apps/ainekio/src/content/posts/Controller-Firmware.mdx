@@ -1,7 +1,7 @@
 ---
 title: "ESP32-S3 Controller Firmware"
 published: 2026-08-27T09:15:00-07:00
-updated: 2026-10-06
+updated: 2026-10-08
 description: "Motion, camera, audio, provisioning, storage, and recovery on the current eight-servo controller."
 image: "/assets/ainekio/v2/controller-firmware-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -13,13 +13,15 @@ tags: [Ainekio, Firmware, ESP-IDF, ESP32-S3, FreeRTOS, Motion]
 category: "Physical Robot"
 draft: false
 lang: "en"
-series: "Ainekio Field Guide"
-seriesPart: 4
-seriesTitle: "Physical Robot"
 contentFormat: "report"
+reading:
+  topic: v1
+  generation: v1
+  kind: reference
+  related: ["v1-original-posts", "robot-familiar-parts-overview"]
 ---
 
-> The original eight-servo S3 Ainekio remains supported alongside the twelve-servo Ainekio v2 work. See the [Project Index design context](/project-guide/#original-ainekio-and-ainekio-v2) for that distinction and the [September 30 field note](/posts/q6a-chassis-and-active-loop/) for the later Q6A and active-loop work. This article retains its own revision date and evidence.
+[V1 and V2 design history](/project-guide/#original-ainekio-and-ainekio-v2)
 
 # The software running on the body
 
@@ -33,18 +35,17 @@ that movement, applies joint calibration and limits, drives the servos, and
 reports the result. It also has to handle a stop or connection loss while
 camera and audio work compete for the same small computer’s resources.
 
-This page describes the S3 implementation. **October 6 update:** the separate
-twelve-servo P4/gateway source includes continuous steering, a shared automatic
-joint-speed limit and independent camera profiles. A portable IMU estimator
-is implemented but is not yet fed by a hardware task or used for balance
-correction. The [steering and sensing entry](/posts/2026-10-06-steering-sensing-connections/)
-separates source checks, desktop ROS tools and recorded connection tests from
-device behavior still to establish.
+This page describes the S3 implementation. **October 8 V2 update:** the owner
+reports that the separate twelve-servo robot can stand, walk and respond to
+commands. Its photographed LCD is working; the carapace is not attached and
+Active Operator has not been tested.
 
-The [compact-linkage library](/posts/2026-10-06-compact-linkage/) is an offline
-candidate, not the installed P4 model. The printed chassis could not stand on
-its MG90 servos; the lighter revision remains untested. Earlier deployment
-records are retained in the [gait journal](/posts/gait-development/).
+The [face/media record](/posts/2026-10-08-face-and-media/) covers dated P4
+LCD/camera, speaker and wake-capture results. The
+[responsive-command entry](/posts/2026-10-08-responsive-commands/) covers the
+MetaHuman/gateway split and distinguishes committed work from local refinements.
+The installed model/calibration for the walking result is not identified here.
+Earlier deployment and geometry records remain in the [gait journal](/posts/gait-development/).
 
 ## How commands become movement
 
