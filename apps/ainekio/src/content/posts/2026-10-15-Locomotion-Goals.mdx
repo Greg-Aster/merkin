@@ -1,0 +1,127 @@
+---
+title: "Giving movement a goal and evidence of arrival"
+published: 2026-10-15
+updated: 2026-10-15
+description: "MetaHuman's new locomotion contract connects distance, turn, approach, follow and visual goals to measured progress, with signed lateral control on the P4."
+image: "/assets/ainekio/2026-10-12-refresh/render-overview.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, Locomotion, Vision, MetaHuman OS]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: control
+  generation: v2
+  kind: journal
+  next: 2026-10-15-motion-and-leveling
+  related: ["vision-loop", "metahuman-integration", "2026-10-15-companion-systems"]
+---
+
+# A movement needs a meaningful endpoint
+
+A request to move a particular distance or reach a visible destination needs
+more than a gait start. The October 15 locomotion work gives MetaHuman a
+goal-bearing movement interface, connects it to measured progress and preserves
+the result of finishing that same gait.
+
+The application and P4 support have recorded installations. Reliable model
+selection, real camera calibration and physical goal accuracy remain separate,
+unfinished qualification steps.
+
+## What a locomotion goal describes
+
+| Goal | Evidence relevant to progress |
+| --- | --- |
+| Distance | Measured displacement in an identified reference frame |
+| Relative turn | Signed orientation change from the starting reference |
+| Approach | A specified relationship to an identified target |
+| Follow | An ongoing target relationship with an ending condition |
+| Visual endpoint | Image evidence evaluated against the selected completion criteria |
+
+The model selects the goal, target, tolerance and relevant visual behavior
+alongside gait controls. Speed percentages are actuation settings; they are not
+metres per second. Finishing a number of gait cycles or running for a duration
+does not establish arrival at a real-world destination.
+
+MetaHuman's advertised contract now requires these goals for locomotion instead
+of bare Walk, Run, Turn, Crab or Crawl starts. Body Control's manual gait
+primitives remain available through their existing controls, and finite gestures
+such as Bow retain ordinary command handling.
+
+## How progress returns to the task
+
+Core's existing Active Task owner executes the selected movement and tracks
+progress. The Environment Bridge carries sensor evidence and the movement's
+start, update and Finish results. Sensor updates can resume that execution
+without another Intent or Task-selection call. Visual and follow goals use the
+existing behavior evaluator and its selected observation cadence.
+
+Endpoint evidence, requesting Finish, acknowledgment of settings and the original
+gait's actual terminal result remain distinct. A spoken claim of arrival does
+not substitute for any of them.
+
+The owner-approved handling of missing measurements is explicit: report the goal
+incomplete without starting if its required measurement is unavailable. If that
+measurement disappears during movement, request Finish on the same gait and
+retain the outcome for the planner. The system does not substitute timed travel,
+invent a new target or automatically restart the movement.
+
+## What the sensors can and cannot establish
+
+Position, orientation, camera evidence and target measurements retain their
+source, reference, time, units and uncertainty. Reading an old sample again does
+not make it fresh. Camera availability and orientation availability are separate;
+missing metric camera calibration does not erase valid orientation evidence.
+
+Metric camera estimates need real intrinsics, a measured camera-to-body transform
+and a measured reference on the ground plane. That estimator tracks the plane;
+it is not general depth sensing, inertial odometry or room navigation. A metric
+target needs an explicit ground-contact point in retained evidence. The bottom
+of a detection box is not automatically a floor contact.
+
+An image-relative relationship can remain image-relative rather than being
+presented as metres. Visual-only goals use camera evidence without requiring
+metric calibration or YOLO. A slow visual inference is also different from a
+camera that has stopped supplying evidence. Commanded foot geometry remains a
+prediction, not measured ground displacement.
+
+## Sideways correction and installation
+
+The earlier side-crab primitive could not correct sideways overshoot with only
+forward and turn controls. Signed lateral control now extends the same P4 motion
+owner, protocol and Core controller.
+
+The October 15 record verifies installation of **0.8.51-p4-lateral**, capability
+negotiation with Body Control, unchanged saved servo calibration, and application
+activation with goal and position/yaw/camera evidence reaching the Bridge.
+The subsequent [0.8.52 Wave installation](/posts/2026-10-15-motion-and-leveling/)
+preserves that lateral work. This is installation and data-delivery evidence,
+not measured sideways correction accuracy.
+
+## The models still need qualification
+
+In an initial eight-case replay without action dispatch, the existing 0.8B Task
+adapter failed all six locomotion cases while retaining the finite-Bow and
+discussion controls. The 9B Planner selected valid measured goals in four explicit
+distance/turn cases, but fabricated visual target evidence in another case.
+Neither result qualifies complete autonomous movement.
+
+Task training for the new contract was authorized; the reviewed record does not
+establish a qualified replacement adapter. The separate
+[9B autonomy/persona diagnostics](/posts/2026-10-15-learning-diagnostics/)
+also retained failures under serving tests.
+
+A destination does not establish a traversable route. Obstacle avoidance,
+drop-off handling, actual camera calibration and physical goal completion remain
+open. This update documents the machinery for selecting and evaluating movement
+without presenting it as demonstrated navigation.
+
+This report uses the Robot Bible's October 15 locomotion specification, current
+goal normalization/evaluation source and its focused contract tests. The
+[source snapshot manifest](/posts/2026-10-15-progress/sources.json) identifies
+those local records. No robot command was sent for this website update.

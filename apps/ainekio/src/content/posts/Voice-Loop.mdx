@@ -1,7 +1,7 @@
 ---
 title: "Listening and Speech"
 published: 2026-08-27T08:15:00-07:00
-updated: 2026-09-09
+updated: 2026-10-15
 description: "Microphone capture, wake detection, transcription, speech playback, and the remaining room tests."
 image: "/assets/ainekio/v2/voice-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -16,7 +16,7 @@ lang: "en"
 contentFormat: "report"
 reading:
   topic: perception
-  generation: v1
+  generation: both
   kind: reference
   related: ["2026-10-12-yoloe-tracking", "2026-10-08-face-and-media"]
 ---
@@ -32,6 +32,18 @@ V1 has produced audible playback. Reliable repeated conversation in the room
 still needs testing, including wake detection, interruptions, and reconnects.
 In particular, **no production Ainekio wake-word model has been accepted and
 tracked**, so the initial configuration leaves wake detection unavailable.
+
+## October 15: one outward speech owner
+
+MetaHuman now routes the final reply through Persona and the existing conversation
+speech system. Intent chooses whether a reply is needed; Task selects actions;
+Goal Review supplies assessment rather than another spoken response. Ordered Task
+speech steps have been removed. [The systems report](/posts/2026-10-15-companion-systems/)
+records deployment and the remaining model and playback qualification.
+
+The listening and S3 implementation notes below retain their earlier evidence
+period. This response-owner change does not establish a newly trained wake-word
+model or a successful end-to-end room conversation.
 
 ## Listening: decide when a spoken turn ends
 

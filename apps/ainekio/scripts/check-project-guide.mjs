@@ -306,8 +306,9 @@ for (const [route, html] of [
 }
 
 // The current entry points must surface the new note without redating history.
-const latestRoute = '/posts/2026-10-14-body-events/'
+const latestRoute = '/posts/2026-10-15-companion-systems/'
 const latest = readFileSync(path.join(dist, latestRoute, 'index.html'), 'utf8')
+const eventNote = readFileSync(path.join(dist, 'posts/2026-10-14-body-events/index.html'), 'utf8')
 const octoberBuild = readFileSync(
   path.join(dist, 'posts/2026-10-12-shell-power-and-motion/index.html'),
   'utf8',
@@ -333,12 +334,14 @@ for (const [route, html] of [
 }
 assert.match(
   home,
-  /As of October 14, 2026/,
+  /As of October 15, 2026/,
   'Homepage date must reflect the update',
 )
 assert.match(latest, /Body Event Trigger/, 'Latest note must describe the event workflow')
 assert.match(latest, /Environment Mode/, 'Event decisions must reach the existing execution workflow')
-assert.match(latest, /omitted the requested stretch/, 'Retain the unresolved wake behavior')
+assert.match(eventNote, /omitted the requested stretch/, 'Retain the unresolved wake behavior')
+assert.match(latest, /Task speech steps have been removed/, 'Latest note must explain the current speech owner')
+assert.match(latest, /Psychotherapist/, 'Latest note must explain persona review ownership')
 assert.match(octoberBuild, /stand, walk and respond to commands/, 'Retain the owner-reported physical result')
 assert.match(octoberBuild, /Active Operator remains untested/, 'Do not imply autonomous acceptance')
 assert.match(octoberBuild, /I have begun printing the exterior shell/, 'Preserve the physical assembly boundary')
@@ -373,7 +376,7 @@ assert.match(
   'Preserve the archived status observation date',
 )
 for (const [file, date] of [
-  ['Project-Overview.mdx', '2026-10-14'],
+  ['Project-Overview.mdx', '2026-10-15'],
   ['Body-Design-and-Hardware.mdx', '2026-09-15'],
   ['Q6A-Chassis-and-Active-Loop.mdx', '2026-09-30'],
   ['2026-10-06-Lighter-Rebuild.mdx', '2026-10-06'],

@@ -1,7 +1,7 @@
 ---
 title: "MetaHuman OS: Robot Integration"
 published: 2026-08-27T08:00:00-07:00
-updated: 2026-10-14
+updated: 2026-10-15
 description: "Body-event decisions, live IMU status, specialist planning and saved requests connected to Ainekio’s action results."
 image: "/assets/ainekio/v2/metahuman-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -35,11 +35,39 @@ everyday terms, including dreams, autonomy modes and the intended learned
 personality. The sections below describe the engineering path for keeping a
 request and its results connected.
 
+## October 15: shared categories, evidence and response ownership
+
+[The current systems report](/posts/2026-10-15-companion-systems/) describes ten
+shared model categories, Active Operator's catalog entry and Desire review with
+attributed operational context. The trained Environment Intent assignment now
+uses the common Orchestrator category; model and adapter selection remains
+configurable by mode.
+
+Persona is the outward response owner. Intent selects whether a reply is needed;
+Task selects actions; Goal Review assesses outcomes. Task speech steps and Goal
+Review's competing outward reply have been removed. This supersedes the
+ordered-speech interface in the October 14 record below.
+
+Pending resume requests for one execution are combined while retaining its
+incoming events. Admitted workflows retain their original graph definitions
+across template edits; executable/schema compatibility checks still apply.
+Recorded activation and a live event burst establish those mechanisms, not
+correct model decisions or physical task success.
+
+## Movement with an endpoint
+
+[Goal-directed locomotion](/posts/2026-10-15-locomotion-goals/) now connects
+model-selected distance, turn, approach, follow and visual goals to the existing
+Active Task owner. Progress uses attributed measurements; reaching an endpoint,
+requesting Finish and receiving the gait's terminal result remain separate.
+Signed lateral support and application activation are recorded. Real calibration,
+Task-model qualification and physical arrival accuracy remain outstanding.
+
 ## October 14: events from the body
 
 A separate [Body Event Trigger workflow](/posts/2026-10-14-body-events/) now interprets wake, tilt and rapid-movement events and forwards model-selected intentions to Environment Mode. Robot Status carries gyro, acceleration, orientation and balance evidence. Recent conversation and active execution context inform reactions; Body Control exposes editable detection thresholds and a rapid-event interval.
 
-Ordered speech and visual-planner routing accompany this work. [Two new Task candidates](/posts/2026-10-14-speech-and-task-training/) have completed qualification; neither is deployed because important failures remain. The complete wake/photo/stretch/stand routine is not yet reliable.
+The October 14 implementation included ordered speech and visual-planner routing. [Two new Task candidates](/posts/2026-10-14-speech-and-task-training/) were evaluated; neither qualified for deployment. The speech interface is superseded by the October 15 change above. The complete wake/photo/stretch/stand routine is not yet reliable.
 
 ## October 12: trained specialists and workflow changes
 

@@ -1,0 +1,167 @@
+---
+title: "More expressive motion and clearer self-leveling controls"
+published: 2026-10-15
+updated: 2026-10-15
+description: "Revised Walk, Run, Crawl, Crab and seated Wave, plus a level reference, per-leg feedback and stationary gyro calibration in Body Control."
+image: "/assets/ainekio/2026-10-12-refresh/blender-side.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, Gait, IMU, Body Control]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-10-15-learning-diagnostics
+  related: ["gait-development", "ainekio-v2", "2026-10-14-startup-and-leveling"]
+---
+
+# Better motion tools for the twelve-servo body
+
+V2 now has revised locomotion paths, a faster seated Wave and more informative
+self-leveling controls. The October 15 journal records Wi-Fi installation and
+boot verification through **0.8.52-p4-wave**. That establishes deployed firmware;
+the new gait performance and expressive motion still need loaded physical tests.
+
+The revisions use the last-confirmed installed linkage: 35 mm carrier, 20 mm
+crank, 28 mm pickup, 38 mm rod and 55 mm lower leg, with the bare lower-leg part
+touching the floor. Saved joint references and inversions are preserved. These
+are V2/P4 changes; the original eight-servo V1 remains a separate supported body.
+
+## See what self-leveling is doing
+
+Body Control now shows measured tilt even while self-leveling is Off, error
+relative to the saved target, the commanded body correction, and modeled
+extension and joint-angle changes for each physical leg. Reduced correction is
+also visible. **Per-leg values are commanded/model data**, not sensed joint
+positions or confirmed foot contact.
+
+| Control or readout | What it means |
+| --- | --- |
+| Measured roll and pitch | Current orientation from the IMU |
+| Target offset | Difference from the saved attitude reference |
+| Commanded correction | The adjustment requested by the controller |
+| Per-leg changes | Modeled extension and joint-angle changes relative to the nominal motion |
+| Use current pose as level reference | Copy measured roll/pitch into the target fields |
+| Save on robot | Persist the selected targets and existing response settings |
+| Calibrate stationary gyro bias | Collect 256 fresh raw samples, save their mean bias and apply it without rebooting |
+
+Capturing a level reference does not change sensor axes or gyro calibration;
+saving is explicit. Gyro calibration requires a still robot and reports sample
+variation and storage errors. It does not calibrate accelerometer scale or
+measure the physical direction of a servo.
+
+Enabled and active remain different states. The recorded Stop command clears
+the standing balance hold, so leveling can be On while inactive. Stand re-enters
+the supported hold. A supported chassis may also keep the same measured tilt
+despite leg correction, allowing the integrator to approach its modeled reach.
+That explains why commanded adjustment alone cannot prove successful leveling.
+
+The 0.8.48 installation and desktop/mobile controls were checked in the source
+journal. Physical correction direction and loaded disturbance rejection remain
+open; this website update did not change the robot's settings.
+
+## Walk: longer steps and a broader lift
+
+Walk retains staggered footfalls and its existing clock. The foot's swing now
+uses a broader arch, clearing the floor earlier at the same peak height, while
+the support transfer is retimed around the moving leg.
+
+| Commanded Walk parameter | Previous | Revised |
+| --- | ---: | ---: |
+| Full planted sweep | 32 mm | 37 mm |
+| Low/full-gain lift | 4 / 8 mm | 6 / 10 mm |
+| Stance fraction | 80% | 78% |
+| Lateral support shift | 9 mm | 7 mm |
+| Cycle at Speed 100 | 0.9 s | 0.9 s |
+| Planned travel at Speed 100 | 44.44 mm/s | 52.71 mm/s |
+
+The planned travel increase is **18.6%**. It is not a measured increase in ground
+speed. The sampled straight-path study has only 0.064 mm minimum modeled dynamic
+support margin at one speed, with actual center of mass and friction unmeasured.
+This is a candidate trajectory, not robust stability qualification.
+
+The PCA9685 driver also staggers the start phases of servo pulses while retaining
+their widths and one frame transaction. Electrical benefit still needs current
+measurement and an oscilloscope check; distributing pulse edges does not by
+itself prove reduced motor-current peaks.
+
+## Run, Crawl and Crab
+
+Run keeps its front/rear paired bound and flight intervals. Crawl and Crab now
+use the installed bare-leg contact surface instead of the historical boot/toe
+profile. Their revised swing and body shifts transfer modeled support while
+preserving planted anchors and the gait clock.
+
+| Commanded parameter | Previous | Revised |
+| --- | ---: | ---: |
+| Run planted stroke | 40 mm | 44 mm |
+| Run lift range | 2–8 mm | 5–12 mm |
+| Crawl planted stroke | 18 mm | 32 mm |
+| Crawl lift range | 2–4 mm | 5–8 mm |
+| Crab fore/aft stroke | 36 mm | 40 mm |
+| Crab sideways stroke | 24 mm | 32 mm |
+| Crab stance width | 190 mm | 160 mm |
+| Crab lift range | 6–12 mm | 8–14 mm |
+
+At full gain, planned Crawl cycle travel increases about 59.5%; Crab sideways
+travel increases 25%. Stroke, stance fraction and cycle time all contribute to
+travel, so these are not measured speed claims.
+
+The support study assumes a centered mass distribution. Crawl's sampled support
+margin stays positive in the studied cases; Crab still has negative margins
+during full turns and a small negative margin in one backward case. The
+three-foot support model does not qualify the dynamics of Run's paired contacts
+and flight. Friction, actual mass distribution, collision clearance, motor load
+and tracking remain to measure.
+
+## A quicker, larger seated Wave
+
+Wave keeps its seated character, lifts the arm promptly and makes three larger
+waves before replacing the foot and returning to standing.
+
+| Authored timing at 1× | Previous | Revised |
+| --- | ---: | ---: |
+| Seated entry complete | 3.0 s | 1.2 s |
+| Arm lift complete | 4.2 s | 1.6 s |
+| Shoulder amplitude | ±18° | ±42° |
+| Standing recovery complete | 15.2 s | 6.0 s |
+| Clip duration | 16.0 s | 6.2 s |
+
+Wave has its own bare-leg contact geometry; the separate Sit command is unchanged.
+The other three legs and body pose stay constant during the waving portion.
+Offline checks show positive assumed support margin with the arm airborne, but
+the inherited seating/recovery transition still has a negative modeled margin.
+That transition, the larger swing and whole-body clearance need physical testing.
+
+The journal records 51 native tests, 24 compiler/handoff checks and a successful
+firmware build for Wave, followed by verified installation of 0.8.52. No Wave
+command was sent during that installation record. The website's older Blender
+images and showcase remain dated; they do not depict this revised motion.
+
+## Goals above the gait controller
+
+These body trajectories supply movement to MetaHuman's new
+[locomotion goal interface](/posts/2026-10-15-locomotion-goals/). That interface
+adds distance, turn, approach, follow and visual endpoints with actual progress
+evidence. The intervening 0.8.51 update installed signed lateral control, retained
+by 0.8.52. Calibrated navigation and physical arrival accuracy remain unqualified.
+
+## Evidence and next work
+
+The [gait journal](https://github.com/Greg-Aster/Ainekio-bot/blob/main/docs/v2-12servo/GAIT_RESEARCH_JOURNAL.md)
+is the engineering owner for these dated comparisons. This report uses the
+reviewed local October 15 snapshot, whose changes may precede the repository's
+published branch. Its hash and supporting source files are listed in the
+[snapshot manifest](/posts/2026-10-15-progress/sources.json).
+
+Firmware installation, mathematical reach and passing software checks do not
+establish loaded movement quality. The next evidence needed is actual foot
+clearance, body support, displacement, current demand and response to tilt.
+Earlier experiments remain in the [continuing gait history](/posts/gait-development/).

@@ -10,39 +10,66 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "Body events, self-leveling and Wi-Fi maintenance"
-  location: "V2 / P4 · Body Control · MetaHuman OS"
-  updated: 2026-10-14
-  mileage: "October 14 · sensor events · saved leveling controls · model qualification"
-  section: "The body reports events and gains configurable local feedback"
-  nextStop: "Verify loaded startup and leveling, resolve speech/action planning regressions, and complete the wake/photo/stretch/stand routine."
-  note: "Body events now reach a dedicated MetaHuman workflow. Body Control adds adjustable self-leveling, SD video and downloads, Wi-Fi firmware updates and robot logs. Dated records verify installed controls and a short recording/network run; reliable physical reactions and loaded leveling remain unfinished."
+  status: "Connected companion systems and revised motion"
+  location: "MetaHuman OS · Agency · V2 / P4"
+  updated: 2026-10-15
+  mileage: "October 15 · one speech owner · evidence-aware desires · firmware 0.8.52"
+  section: "Agency, model roles and body controls become clearer"
+  nextStop: "Qualify grounded decisions, dream recall, speech delivery and the revised gaits under load; expand reviewed training data."
+  note: "Persona now owns outward speech. Desire review receives attributed experience and actual task evidence, and ten shared model categories connect settings to workflow nodes. Body Control adds level-reference and gyro tools; revised locomotion and Wave have recorded installations. Two small 9B training diagnostics completed without qualifying a production adapter."
   areas:
-    - label: "Body events"
-      status: "Wake, tipped and rapid-movement events"
-      detail: "Editable per-robot thresholds and a 10-second rapid-event interval. Event Trigger chooses a response or no action, then delegates to Environment Mode."
-    - label: "IMU and leveling"
-      status: "Telemetry and saved response controls implemented"
-      detail: "The October 14 record verifies installed 0.8.46 tuning controls. On/Off, strength, damping and roll/pitch targets are separate from calibration; loaded leveling remains unverified."
-    - label: "Recording and service"
-      status: "SD video, downloads, Wi-Fi updates and logs"
-      detail: "Shared camera JPEGs feed segmented video. Firmware stages before explicit activation. A dated 469-second run recorded 411 frames with no reconnects; endurance remains open."
-    - label: "Task models"
-      status: "Two new candidates tested; existing adapter retained"
-      detail: "The latest candidate improved evaluation reference matches from 44% to 83%, but introduced three historical missed-action failures. Neither new candidate is deployed."
+    - label: "Conversation"
+      status: "Persona owns the outward reply"
+      detail: "Intent selects response routing; Task selects actions and Goal Review assesses results. Task speech steps and competing Goal Review replies have been removed. Repeated-turn behavior still needs qualification."
+    - label: "Agency and memory"
+      status: "Desires receive attributed operational evidence"
+      detail: "Standing aspirations remain separate from specific desires. Relevance review can archive obsolete intentions; Psychotherapist is the sole autonomous persona editor. Reliable recall remains open."
+    - label: "Models and workflows"
+      status: "Ten shared categories; existing specialists retained"
+      detail: "Orchestrator preserves the trained Intent assignment. Active Operator is visible in the Agent Catalog; saved graph definitions and consolidated resume requests improve continuity."
+    - label: "Locomotion goals"
+      status: "Measured endpoints and signed lateral control"
+      detail: "Goal selection and progress use the existing task owner. Application/firmware support is installed; camera calibration, the updated Task adapter and physical arrival accuracy remain unqualified."
+    - label: "Motion"
+      status: "Revised gaits and seated Wave installed"
+      detail: "The October 15 journal verifies firmware through 0.8.52. Longer commanded strokes, bare-leg contact geometry and a 6.2-second Wave have software checks; loaded performance remains unverified."
+    - label: "Leveling controls"
+      status: "Level reference, per-leg diagnostics and gyro bias"
+      detail: "Body Control distinguishes measured tilt from commanded correction. Reference saving is explicit; stationary gyro calibration uses 256 samples. Loaded correction remains to test."
+    - label: "Learning"
+      status: "Two 9B diagnostic fits completed; neither deployed"
+      detail: "Actual serving comparisons retained planning and attribution failures. Production services and assignments were restored; broader data and fresh evaluation are needed."
     - label: "Physical build"
-      status: "566 g and 5 V reported on October 13"
-      detail: "MG90 servos; shell printing and a 4 A supply were reported October 12. Final shell mass, measured current, battery arrangement and endurance remain to document."
-    - label: "Vision"
-      status: "Selected-target tracking and larger-model planning"
-      detail: "The earlier stationary chair result remains dated. Camera/image objectives route to the configured vision planner; full moving-target acquisition remains unqualified."
-    - label: "Motion and geometry"
-      status: "Staged startup and a local geometry calculator"
-      detail: "Crouch, shoulder alignment and rise replace calibration Home at boot. Modeled linkage comparisons do not establish physical tracking, torque margin or automatic get-up."
-    - label: "Build options"
-      status: "V1 supported; V2 Wireless priority"
-      detail: "Eight-servo S3 remains separate from twelve-servo P4. Wired Q6A remains an alternative; desktop results do not qualify Q6A concurrency or the robot ROS adapter."
+      status: "566 g / 5 V remains the dated assembly report"
+      detail: "V1's eight-servo S3 and V2's twelve-servo P4 remain distinct. No newer measured mass, current or endurance result is supplied by this update."
+    - label: "Body events and media"
+      status: "Existing event, recording and Wi-Fi service paths"
+      detail: "Wake, tilt and rapid movement reach Event Trigger; the rapid-event interval defaults to 10 seconds. Full wake/stretch, sustained camera operation and recording endurance remain open."
 entries:
+  - title: "A more connected companion: agency, memory and one voice"
+    date: 2026-10-15
+    location: "MetaHuman OS and Agency"
+    mileage: "Active Operator · shared model categories · attributed evidence"
+    summary: "Persona becomes the outward speech owner. Desire review gains standing goals, memory provenance and task results; workflow recovery retains events and admitted graph definitions. Grounded companion behavior remains under qualification."
+    url: "/posts/2026-10-15-companion-systems/"
+  - title: "Giving movement a goal and evidence of arrival"
+    date: 2026-10-15
+    location: "MetaHuman Active Task, Bridge and P4"
+    mileage: "Distance / turn / approach / follow / visual goals · lateral control"
+    summary: "Selected locomotion goals now connect to measurement and Finish evidence. Signed lateral control has an installation record; camera calibration, model qualification and physical arrival accuracy remain open."
+    url: "/posts/2026-10-15-locomotion-goals/"
+  - title: "More expressive motion and clearer self-leveling controls"
+    date: 2026-10-15
+    location: "V2 / P4 and Body Control"
+    mileage: "Revised Walk / Run / Crawl / Crab · seated Wave · gyro tools"
+    summary: "Longer commanded steps, revised bare-leg contact paths, staggered servo pulses and a quicker Wave accompany level-reference and per-leg diagnostics. Firmware installation through 0.8.52 is recorded; loaded performance remains unverified."
+    url: "/posts/2026-10-15-motion-and-leveling/"
+  - title: "Testing 9B learning for autonomy and personality"
+    date: 2026-10-15
+    location: "Remote training and local serving comparisons"
+    mileage: "Two independent diagnostic adapters · no production promotion"
+    summary: "Small autonomy and persona fits completed, but actual serving tests retained objective loss and invented experiences. The production setup was restored; revised Task references now follow the single Persona speech contract."
+    url: "/posts/2026-10-15-learning-diagnostics/"
   - title: "The body can start a conversation"
     date: 2026-10-14
     location: "Body Control and MetaHuman OS"
@@ -324,7 +351,9 @@ For an introduction to personality, memory, autonomy and learning, read
 See [current project status](/posts/current-status/) for the latest summary,
 or [browse the full article archive](/archive/) for guides and earlier reports.
 
-Latest: [body events](/posts/2026-10-14-body-events/), [startup and leveling](/posts/2026-10-14-startup-and-leveling/), [recording and Wi-Fi updates](/posts/2026-10-14-recording-and-updates/), and [Task model qualification](/posts/2026-10-14-speech-and-task-training/).
+Latest: [companion systems](/posts/2026-10-15-companion-systems/), [locomotion goals](/posts/2026-10-15-locomotion-goals/), [motion and leveling](/posts/2026-10-15-motion-and-leveling/), and [9B learning diagnostics](/posts/2026-10-15-learning-diagnostics/).
+
+October 14: [body events](/posts/2026-10-14-body-events/), [startup and leveling](/posts/2026-10-14-startup-and-leveling/), [recording and Wi-Fi updates](/posts/2026-10-14-recording-and-updates/), and [Task model qualification](/posts/2026-10-14-speech-and-task-training/).
 
 October 12: [shell, power and motion](/posts/2026-10-12-shell-power-and-motion/), [YOLOE tracking](/posts/2026-10-12-yoloe-tracking/) and
 [trained specialists](/posts/2026-10-12-trained-specialists/).

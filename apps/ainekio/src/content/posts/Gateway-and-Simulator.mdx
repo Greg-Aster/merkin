@@ -1,7 +1,7 @@
 ---
 title: "Gateway and Operator Dashboard"
 published: 2026-08-27T08:45:00-07:00
-updated: 2026-10-14
+updated: 2026-10-15
 description: "Body Control connections, event and leveling settings, SD video, Wi-Fi maintenance, and the retained command-recovery record."
 image: "/assets/ainekio/v2/gateway-simulator-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -21,6 +21,18 @@ reading:
   next: metahuman-integration
   related: ["controller-firmware", "2026-09-28-wired-wireless-ros2"]
 ---
+
+## October 15: understand the leveling response
+
+Body Control now shows measured tilt, error from the saved reference, commanded
+body correction and modeled changes for each physical leg. A level-reference
+control copies the current attitude into editable targets; saving remains
+explicit. A separate stationary gyro calibration collects 256 samples and applies
+the saved bias without a restart. These operations preserve joint calibration.
+
+[The motion and leveling report](/posts/2026-10-15-motion-and-leveling/) explains
+the controls, installed firmware evidence and distinction between commanded
+adjustment and actual physical movement.
 
 ## October 14: V2 Body Control additions
 

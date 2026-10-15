@@ -1,0 +1,101 @@
+---
+title: "Testing 9B learning for autonomy and personality"
+published: 2026-10-15
+updated: 2026-10-15
+description: "Two small remote LoRA diagnostics tested autonomy and conversational personality, including actual serving comparisons. Neither candidate qualified for deployment."
+image: "/posts/2026-10-15-progress/companion-systems.svg"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, MetaHuman OS, Training, LoRA, Persona]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: metahuman
+  generation: both
+  kind: journal
+  next: ainekio-companion
+  related: ["2026-10-15-companion-systems", "2026-10-14-speech-and-task-training"]
+---
+
+# Learning actions and learning a voice
+
+The latest training work explores two separate 9B adapters: one for autonomous
+planning and one for conversational personality. Both small remote diagnostics
+completed, and both were compared through the actual llama.cpp serving path.
+**Neither candidate qualified for production.**
+
+These experiments extend the earlier 0.8B Intent/Task work. A learned persona
+would express a consistent identity while still receiving current observations,
+memory and instructions. It would not acquire live experience simply by having
+been trained.
+
+## What the diagnostics tested
+
+| Candidate | Reviewed training / evaluation samples | Main result |
+| --- | --- | --- |
+| Autonomy | 4 / 2 | Native cancellation outputs improved, but serving comparisons still lost lighting objectives and regressed one unconstrained cancellation format |
+| Persona | 5 / 1 | Responses became more concise, but retained invented experiences, source confusion and an unsupported completed-movement claim |
+
+These are diagnostic seed sets, not broad coverage. Evaluation families were
+separated from training, exact messages and authorship were retained, and both
+adapters started independently from the same pinned Qwen3.5 9B base. They were
+not trained on top of one another or qualified as a combined adapter.
+
+The existing remote training path now installs the uploaded pinned requirements
+before validation. Reloading also explicitly loads the pinned base before
+attaching the adapter. That matters because dependency behavior could otherwise
+discard the adapter's recorded base revision.
+
+## Lower loss is not enough
+
+Autonomy's native held-out loss fell from about 0.416 to 0.022, and reloaded native
+outputs produced correct cancellation handoffs on the two evaluation cases.
+The production base already succeeded at cancellation under its runtime schema,
+however. A native improvement does not automatically improve the served system.
+
+For the serving comparison, the complete GPU projector configuration did not
+fit. Text tests moved only the unused projector to CPU; 22 unchanged-base
+outputs matched the production configuration. Each adapter was then sampled
+independently with full context. That controlled adjustment is part of the
+comparison's limits, not a production configuration change.
+
+The persona experiment also tested less static persona context. Fewer prompt
+tokens did not demonstrate reliable identity learning. The resulting replies
+still confused sources and made unsupported claims. Reducing production persona
+context or deploying either candidate is therefore not supported by this result.
+
+## Training data follows the current interface
+
+The [single Persona response owner](/posts/2026-10-15-companion-systems/) changes
+the Task training contract. Speech-only requests now have no Task program;
+mixed requests retain physical or sensing actions, with the reply routed through
+Intent and Persona. Version 16 contains 6,358 development, 1,518 evaluation and
+187 regression records with no Task speech-step targets.
+
+Those are revised comparison references, not an additional completed specialist
+training run. Earlier adapters and run snapshots are retained. Scores from the
+old speech-step interface must not be compared as though they used the same
+contract, and reviewed cases are no longer newly unseen evaluation examples.
+
+## Production and next work
+
+The diagnostic record confirms both remote jobs finished and their pods were
+terminated. The production 9B service was restored with its original startup
+arguments and no loaded candidate adapter; model assignments matched the saved
+pre-comparison state. The existing 0.8B process was unchanged. No physical actions
+were dispatched by these comparisons.
+
+The next requirement is broader, correctly attributed planner/persona data and
+fresh final evaluation families. A larger fit on this tiny seed set would not
+resolve the coverage gap. The [companion guide](/posts/ainekio-companion/) explains
+how reviewed learning differs from memory and personality context.
+
+This public summary uses the October 15 integration investigation and training
+handoff records, identified in the [source snapshot manifest](/posts/2026-10-15-progress/sources.json).
+Private conversations, account details and raw training messages are not part
+of the website report.

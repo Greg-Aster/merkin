@@ -1,0 +1,183 @@
+---
+title: "A more connected companion: agency, memory and one voice"
+published: 2026-10-15
+updated: 2026-10-15
+description: "How Active Operator, model categories, attributed memory and Desire review connect to task execution, with Persona now responsible for the spoken reply."
+image: "/posts/2026-10-15-progress/companion-systems.svg"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, MetaHuman OS, Agency, Memory, Workflows]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: metahuman
+  generation: both
+  kind: journal
+  next: 2026-10-15-locomotion-goals
+  related: ["ainekio-companion", "metahuman-integration", "bounded-autonomy"]
+---
+
+# Connecting the companion's decisions
+
+The latest MetaHuman work connects Ainekio's conversation, intentions and
+physical results more closely. It clarifies who chooses an action, who speaks,
+which experiences inform a desire, and what happens when a workflow receives
+new information or its template is edited.
+
+These are substantial improvements to the foundation. Recorded deployments and
+live component checks support the changes below; reliable everyday companionship,
+accurate goal assessment and sustained autonomous activity remain unfinished.
+
+## Agents, workflows and models do different jobs
+
+An **agent** initiates or coordinates a function. A **node workflow** connects
+its context, model calls, actions and saved results. A **model category** selects
+the responsibility of one inference call; the status widget assigns a concrete
+model or adapter to that category. One model may serve several categories.
+
+The shared category list now appears in both model settings and workflow nodes:
+
+| Category | Responsibility |
+| --- | --- |
+| Orchestrator | Interpret requests and events; select routes, tools and context |
+| Task Decisions | Select supported actions and task controls |
+| Planner | Develop and revise complex plans |
+| Persona | Express identity, personality, conversation and self-directed intentions |
+| Psychotherapist | Independently assess attributed experience, behavior and outcomes |
+| Vision | Interpret images and support visually grounded planning |
+| Curator | Review and prepare attributed memory and training records |
+| Coder | Work on code and technical solutions |
+| Summarizer | Condense information while preserving meaning and attribution |
+| Embedder | Represent records for retrieval and similarity search |
+
+The former separate Environment Intent setting is consolidated into
+**Orchestrator**, preserving its trained small-model assignment. The October 15
+activation record confirms the existing 0.8B Intent and Task adapters remained
+selected. Persona and Planner used the configured 9B service; Psychotherapist
+used the configured Big Brother provider. These are dated, editable assignments.
+
+Visual work explicitly selects Vision. An incompatible image request no longer
+silently substitutes the Orchestrator category. Selecting a model category also
+does not grant an agent permission to change another system's records.
+
+## One owner for the spoken reply
+
+Intent decides whether a response is needed. Task selects executable actions.
+Goal Review assesses the evidence and whether work should continue. Persona
+receives the selected results and applicable assessment, then generates the
+outward reply through the existing conversation delivery path.
+
+**Task speech steps have been removed.** This supersedes the ordered-speech
+interface described in the October 14 reports. Task no longer inserts exact
+spoken lines between movement steps, and Goal Review no longer publishes a
+competing reply. Persona owns conversation persistence and speech delivery.
+Independent work can still overlap; this change does not impose a global serial
+schedule.
+
+The repair has source, workflow, build and served-graph evidence. It removes
+competing publishers, but does not establish that the model will always say
+something appropriate or avoid repetition across separate turns. Physical
+playback was not part of that activation check.
+
+<figure>
+  <img src="/posts/2026-10-15-progress/companion-systems.svg" alt="Requests, body events and autonomous intentions enter Environment Mode. Selected context informs routing and planning; body actions return evidence for review; Persona supplies the outward reply. Attributed experience can inform later Desire review." width="1000" height="660" loading="lazy" />
+  <figcaption>Responsibilities in the current system. Arrows show information dependencies, not a mandatory schedule for every request.</figcaption>
+</figure>
+
+## Standing goals and specific desires
+
+Persona goals describe longer-term development and aspirations. A **desire**
+is a specific desired outcome managed in Agency. A desire may be reviewed,
+planned, acted on or retired as the situation changes.
+
+Desire review now receives standing goals, attributed memories and operational
+evidence: selected-robot status, available capabilities, original requests,
+selected programs and actual recorded results. What the robot promised, what
+it selected and what returned from the body remain separate evidence.
+
+This matters when interpretation goes wrong. One recorded request asked the
+robot to watch a person stretch; the Task model instead selected the robot's
+own stretch, with no watching action. The new context exposes that mismatch to
+Desire review. It does not repair the originating Task decision or force the
+model to create a desire.
+
+The model can reassess all open desires and choose their strength directly.
+A zero-strength decision archives the desire and requests cancellation of its
+associated work through the existing work coordinator. Agency now defaults to
+**All Open**, so an intention below its activation threshold remains visible.
+Proposed relevance decisions reach generation with their uncommitted status
+identified; unchanged evidence is not relabeled as a new experience.
+
+An October 15 live review archived two old desires and retained their histories.
+Neither had active work to cancel, so this verifies persisted review and archival,
+not physical cancellation. A later diagnostic with richer operational context
+changed one assessment while leaving production records untouched. These are
+useful checks of context delivery, not broad proof of decision accuracy.
+
+## Memory and persona keep their authorship
+
+Desire's inputs now retain who spoke, when, the source and cognitive mode,
+execution identity, and the memory's recorded type. A daydream remains
+imaginative content; a prior assistant claim remains a claim. Background work
+also preserves the originating cognitive mode separately from its internal
+agent execution mode.
+
+The **Psychotherapist agent** is the sole autonomous editor of persona through
+the existing review system. Desire no longer promotes reinforced intentions
+into persona goals. Manual persona editing remains available. Selecting the
+Psychotherapist model category for a Desire review does not transfer that
+agent's authority to write persona.
+
+Dream storage, retrieval and use still need separate qualification. Recent
+tests found both temporal-routing failures and model confusion about attributed
+inner activity. Saved memories alone do not establish reliable recall, and the
+complete Sleep/curation/learning cycle remains unqualified.
+
+## Active Operator and workflow continuity
+
+The existing autonomy scheduler now appears as **Active Operator** in the Agent
+Catalog, with its mode control and six existing child-workflow links. The
+implementation was moved into that agent; no second scheduler or new model call
+was added. Reactive, Semi and Full retain their existing responsibilities.
+Body Event Trigger remains the separate path for wake, tilt and rapid movement,
+forwarding its decisions to Environment Mode.
+
+The live catalog confirms the new agent entry. The background worker had not
+been relaunched in that check, and concurrent source edits prevented a claim of
+complete build parity for that refactor. A visible catalog entry is not proof
+of a newly started worker or qualified Full autonomy.
+
+Two execution changes address earlier continuity failures:
+
+- Incoming results remain recorded, while the existing execution store combines
+  pending requests to resume the same workflow. A live mixed-event burst grew
+  from 23 to 41 events without an expanding pending-resume backlog.
+- Admitted work retains its original graph; a child retains its graph once
+  entered. New work uses the edited template. Runtime and schema compatibility
+  checks still apply, so a code upgrade can still invalidate older work.
+
+Neither change decides the robot's behavior. The model can still invent an
+objective, select an unsuitable action or overstate success from a command
+receipt. Those failures remain visible rather than being counted as completed
+companion behavior.
+
+## Evidence and next work
+
+This report draws on the October 14–15 Robot Bible and integration records,
+checked against the shared category catalog, Agency context reader and current
+workflow source. It summarizes public system behavior without publishing the
+private conversations or diagnostic packets. The
+[source snapshot manifest](/posts/2026-10-15-progress/sources.json) identifies
+the reviewed records.
+
+Next qualification includes grounded action selection, reliable dream recall,
+end-to-end priority and speech delivery, and successful autonomous outcomes.
+[Locomotion goals](/posts/2026-10-15-locomotion-goals/),
+[motion controls](/posts/2026-10-15-motion-and-leveling/) and
+[the new 9B training diagnostics](/posts/2026-10-15-learning-diagnostics/)
+have their own evidence and limitations.

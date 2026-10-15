@@ -1,7 +1,7 @@
 ---
 title: "Ainekio as a Companion: Personality, Memory and Learning"
 published: 2026-10-14
-updated: 2026-10-14
+updated: 2026-10-15
 description: "Meet the robot familiar: how conversation, perception, personality, memory, inner activity and autonomous goals are intended to work together."
 image: "/posts/companion-guide/companion-loop.svg"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
@@ -59,6 +59,22 @@ actions and review of the result. The model chooses the steps from the situation
 there is no fixed search routine for every object. Reliable autonomous search
 and navigation still require their own demonstrations.
 
+## How the software functions connect
+
+An agent coordinates a function; its node workflow connects context, model calls
+and results. A model category assigns a responsibility to each call, while the
+status widget selects the concrete model. Active Operator coordinates the
+selected autonomy mode; Body Event Trigger interprets physical events.
+
+Orchestrator routes the request, Task Decisions selects supported actions,
+Vision handles visual evidence, and Planner handles complex planning. Persona
+owns the outward reply using selected results and applicable assessment.
+Task no longer inserts speech steps between motions. This separates action
+selection from expression while allowing independent work to overlap.
+
+[The October 15 systems report](/posts/2026-10-15-companion-systems/) explains
+all ten categories, the actual activation records and remaining failures.
+
 ## Personality and continuity
 
 Ainekio's **persona** describes its identity, background, personality, values and
@@ -107,12 +123,14 @@ Ainekio has three intended robot autonomy modes:
 
 | Mode | Intended behavior |
 | --- | --- |
-| Reactive | Respond to commands and requests without independently choosing new activities |
+| Reactive | Respond to requests and physical events without independently choosing new activities |
 | Semi-autonomous | Let configured agents and triggers initiate selected functions and activities |
 | Fully autonomous | Choose high-level activities, pursue goals, review desires and use outcomes to decide what comes next |
 
-A **goal** is an outcome to pursue. A **desire** is a candidate intention that
-can be considered, planned and reviewed. An action is one step toward an outcome.
+A **persona goal** is a longer-term developmental or aspirational direction.
+A **desire** is a specific desired outcome managed in Agency. An execution
+objective identifies what a particular task should achieve. An action is one
+step toward that outcome.
 Completing a camera capture, for instance, does not prove that a missing object
 has been found.
 
@@ -121,6 +139,32 @@ Repeated commands without progress do not demonstrate that capability. Ordinary
 conversation also has value on its own; every exchange need not become a
 physical task or a new goal. The [autonomy guide](/posts/bounded-autonomy/)
 explains the operating modes and their development history.
+
+## Carrying a movement through to its outcome
+
+The new [locomotion goal interface](/posts/2026-10-15-locomotion-goals/) describes
+a measured distance, relative turn, target relationship or visual endpoint
+alongside gait controls. The task receives progress evidence and the outcome of
+finishing that movement. A motor setting or completed gait cycle does not prove
+arrival. Installed support is recorded; calibration, model selection and physical
+accuracy still need qualification.
+
+## Reviewing intentions and identity
+
+Desire review can consider standing goals, attributed memories, selected-robot
+status, capabilities, original requests, chosen actions and actual results.
+It can revise an intention's strength or archive it when it is no longer
+warranted. Agency's All Open view includes desires that are not yet active.
+
+The Psychotherapist agent reviews experience for persona changes during manual
+review or Sleep. It is the sole autonomous persona editor; ordinary Desire
+reinforcement no longer creates persona goals. Using the Psychotherapist model
+category for a Desire call does not give that workflow authority to edit persona.
+Manual persona editing remains available.
+
+These implemented boundaries improve what the models can assess. They do not
+establish that every assessment is correct or that a complete learning cycle
+has been qualified.
 
 ## Learning skills and learning a personality
 
@@ -152,6 +196,14 @@ runs are not enough to establish improvement. The
 [Task training report](/posts/2026-10-14-speech-and-task-training/) shows why
 better aggregate scores can still leave a candidate undeployed.
 
+## Latest learning evidence
+
+Two small independent 9B diagnostics for autonomy and conversational personality
+completed on October 15. Serving tests still found lost objectives and invented
+experience; neither adapter qualified for production. The
+[diagnostic report](/posts/2026-10-15-learning-diagnostics/) explains the limited
+coverage and why lower training loss did not establish a better companion.
+
 ## Understanding and steering the system
 
 MetaHuman's node editor exposes workflows, prompts, model roles and results.
@@ -172,7 +224,8 @@ motion selection and physical validation. Individual working components are
 progress toward that experience.
 
 This guide adapts the purpose and functional descriptions in the local **Ainekio
-Robot Bible**, reviewed October 14, 2026. The
-[source record](/posts/companion-guide/sources.json) identifies that snapshot.
+Robot Bible**, updated through the October 15, 2026 review. The
+[original source record](/posts/companion-guide/sources.json) and
+[October 15 snapshot](/posts/2026-10-15-progress/sources.json) identify the evidence.
 For dated results, follow the [build journal](/updates/) and
 [development tracker](/project-guide/).
