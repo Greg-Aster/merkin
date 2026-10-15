@@ -17,11 +17,19 @@ const { page } = Astro.props
 
 const len = page.data.length
 const isFirstPage = page.currentPage === 1
+const description = isFirstPage
+  ? 'Follow the development of Ainekio, a robot companion combining a 3D-printed body with MetaHuman OS for conversation, memory, vision, personality, and movement.'
+  : `Browse page ${page.currentPage} of the Ainekio build journal: robot hardware, firmware, motion, and MetaHuman OS development.`
 ---
 
-<MainGridLayout homeLayout={isFirstPage ? 'portal' : 'default'} oneColumn={isFirstPage}>
+<MainGridLayout title={isFirstPage ? undefined : `Build journal — page ${page.currentPage}`} description={description} homeLayout={isFirstPage ? 'portal' : 'default'} oneColumn={isFirstPage}>
+    {isFirstPage && <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org', '@type': 'WebSite', name: 'Ainekio',
+      url: Astro.site, description, inLanguage: 'en',
+    })} />}
     {isFirstPage ? <AinekioHome /> : (
       <>
+        <header class="card-base p-6 mb-4"><h1 class="text-2xl font-bold">Build journal — page {page.currentPage}</h1></header>
         <PostPage page={page}></PostPage>
         <Pagination class="mx-auto onload-animation" page={page} style=`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`></Pagination>
       </>

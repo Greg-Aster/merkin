@@ -8,7 +8,7 @@ import type {
 
 export const siteConfig: SiteConfig = {
   title: 'Ainekio',
-  subtitle: 'A robot build journal: chassis, printed legs, and gait experiments',
+  subtitle: 'Building a robot companion with MetaHuman OS',
   enablePostFooterNav: true,
   lang: 'en',
   themeColor: {

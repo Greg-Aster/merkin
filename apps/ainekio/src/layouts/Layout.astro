@@ -1,8 +1,10 @@
 ---
 import SharedLayout from '@merkin/blog-core/layouts/Layout.astro'
+import { getPageSocialImage } from '../lib/social-images'
+const socialImage = await getPageSocialImage(Astro.props)
 ---
 
-<SharedLayout {...Astro.props}>
+<SharedLayout {...Astro.props} socialImage={socialImage}>
   <slot slot="head" name="head" />
   <slot />
 </SharedLayout>

@@ -1,11 +1,13 @@
 ---
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
+import { getPageSocialImage } from '../lib/social-images'
+const socialImage = await getPageSocialImage(Astro.props)
 // The shared grid uses its own Layout, so app styles belong at this entry point.
 import '../styles/variables.styl'
 import '../styles/main.css'
 ---
 
-<SharedMainGridLayout {...Astro.props}>
+<SharedMainGridLayout {...Astro.props} socialImage={socialImage}>
   <slot slot="head" name="head" />
   <slot />
 </SharedMainGridLayout>

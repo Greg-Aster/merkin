@@ -1,19 +1,18 @@
 ---
 import ArchivePanel from '@components/ArchivePanel.astro'
-import I18nKey from '@i18n/i18nKey'
-import { i18n } from '@i18n/translation'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
 import { getSortedArchivePosts } from '@utils/content-utils'
 
 export async function getStaticPaths() {
   const posts = await getSortedArchivePosts()
 
-  const allTags = posts.reduce<Set<string>>((acc, post) => {
-    post.data.tags.forEach(tag => acc.add(tag.toLowerCase()))
+  const allTags = posts.reduce<Map<string, string>>((acc, post) => {
+    post.data.tags.forEach(tag => acc.set(tag.toLowerCase(), tag))
     return acc
-  }, new Set())
+  }, new Map())
 
-  return Array.from(allTags).map(tag => ({
+  return Array.from(allTags).map(([tag, label]) => ({
+    props: { label },
     params: {
       tag,
     },
@@ -21,8 +20,9 @@ export async function getStaticPaths() {
 }
 
 const tag = decodeURIComponent(Astro.params.tag as string).toLowerCase()
+const { label } = Astro.props
 ---
 
-<MainGridLayout title={i18n(I18nKey.archive)} description={i18n(I18nKey.archive)}>
+<MainGridLayout title={`${label} — tag archive`} description={`Explore Ainekio articles in the ${label} tag archive, with robot build notes, reference guides, and development updates.`}>
     <ArchivePanel tags={[tag]}></ArchivePanel>
 </MainGridLayout>

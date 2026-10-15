@@ -15,6 +15,7 @@ import {
   PAGE_WIDTH,
 } from '@/constants/constants'
 import { defaultFavicons } from '@/constants/icon'
+import type { SocialImageMetadata } from '../types'
 import type { Favicon } from '@/types/config'
 import { url, pathsEqual } from '@/utils/url-utils'
 import katexStylesheetHref from 'katex/dist/katex.css?url'
@@ -28,9 +29,10 @@ interface Props {
   lang?: string
   setOGTypeArticle?: boolean
   post?: any
+  socialImage?: SocialImageMetadata
 }
 
-let { title, banner, description, lang, setOGTypeArticle, post } = Astro.props
+let { title, banner, description, lang, setOGTypeArticle, post, socialImage: suppliedSocialImage } = Astro.props
 
 // Check if we're on the home or post page for class assignments
 const isHomePage = pathsEqual(Astro.url.pathname, url('/'))
@@ -72,6 +74,7 @@ function getBaseAwareAssetUrl(assetPath?: string): string | null {
 }
 
 const socialImage =
+  getBaseAwareAssetUrl(suppliedSocialImage?.src) ||
   getBaseAwareAssetUrl(post?.data?.image) ||
   getBaseAwareAssetUrl(banner) ||
   getBaseAwareAssetUrl(siteConfig.banner?.src) ||
@@ -98,8 +101,12 @@ const configHue = siteConfig.themeColor.hue
     <meta property="og:image" content={
         new URL(socialImage, Astro.site)
     }>
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+    {suppliedSocialImage && <>
+      <meta property="og:image:width" content={suppliedSocialImage.width}>
+      <meta property="og:image:height" content={suppliedSocialImage.height}>
+      {suppliedSocialImage.type && <meta property="og:image:type" content={suppliedSocialImage.type}>}
+      {suppliedSocialImage.alt && <meta property="og:image:alt" content={suppliedSocialImage.alt}>}
+    </>}
     {setOGTypeArticle ? (
         <meta property="og:type" content="article" />
     ) : (

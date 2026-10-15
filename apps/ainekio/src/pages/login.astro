@@ -4,6 +4,7 @@ import { url } from '../utils/url-utils'
 ---
 
 <MainGridLayout title="Admin Login" description="Admin login entry point">
+  <meta name="robots" content="noindex, follow" slot="head" />
   <meta http-equiv="refresh" content={`0;url=${url('/configs/')}`} slot="head" />
   <div class="card-base w-full rounded-[var(--radius-large)] p-6">
     <h1 class="text-xl font-bold mb-2">Admin Login</h1>

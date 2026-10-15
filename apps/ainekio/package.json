@@ -10,6 +10,7 @@
     "astro": "astro",
     "type-check": "tsc --noEmit",
     "test:base-path": "node --test scripts/test-base-path.mjs",
+    "check:seo": "node scripts/check-seo.mjs",
     "new-post": "node scripts/new-post.js",
     "format": "biome format --write ./src",
     "lint": "biome check ./src",

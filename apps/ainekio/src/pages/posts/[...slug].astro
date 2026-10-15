@@ -10,6 +10,7 @@ import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 import { licenseConfig, profileConfig, siteConfig } from '../../config/config'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
 import { getReading, validateReadingPaths, topics, generations, kinds } from '../../lib/reading'
+import { getPageSocialImage } from '../../lib/social-images'
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => !data.draft)
@@ -33,10 +34,13 @@ const { Content, headings, remarkPluginFrontmatter } = await post.render()
 const reading = getReading(post)
 const topic = topics[reading.topic]
 const topicUrl = `/archive/?topic=${reading.topic}`
+const socialImage = await getPageSocialImage({ post })
 const jsonLd = {
   '@context': 'https://schema.org', '@type': 'BlogPosting',
   headline: post.data.title, description: post.data.description,
   keywords: post.data.tags,
+  image: new URL(socialImage.src, Astro.site).href,
+  mainEntityOfPage: Astro.url.href,
   datePublished: formatDateToYYYYMMDD(post.data.published),
   ...(post.data.updated ? { dateModified: formatDateToYYYYMMDD(post.data.updated) } : {}),
   author: { '@type': 'Person', name: profileConfig.name, url: Astro.site },
@@ -52,7 +56,6 @@ const contents = headings.filter(heading => heading.depth <= 2)
 ---
 <MainGridLayout title={post.data.title} description={post.data.description} lang={post.data.lang} setOGTypeArticle={true} headings={headings} post={post}>
   <meta name="publish-date" content={formatDateToYYYYMMDD(post.data.published)} slot="head" />
-  <meta property="article:published_time" content={post.data.published.toISOString()} slot="head" />
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
 
   <article id="post-container" class="card-base article-page"

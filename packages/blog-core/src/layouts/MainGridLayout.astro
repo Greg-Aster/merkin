@@ -31,6 +31,8 @@ import * as bannerModule from '@/config/banner.config'
 // TYPESCRIPT INTERFACES
 // =====================================================================
 
+import type { SocialImageMetadata } from '../types'
+
 interface Props {
   title?: string
   banner?: string
@@ -39,6 +41,7 @@ interface Props {
   setOGTypeArticle?: boolean
   headings?: MarkdownHeading[]
   post?: any
+  socialImage?: SocialImageMetadata
   bannerLink?: string
   isPostPage?: boolean
   backgroundImage?: string | null
@@ -68,6 +71,7 @@ const {
   setOGTypeArticle,
   headings = [],
   post,
+  socialImage,
   bannerLink = '',
   isPostPage = false,
   backgroundImage,
@@ -695,6 +699,7 @@ const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
   lang={lang} 
   setOGTypeArticle={setOGTypeArticle}
   post={post} 
+  socialImage={socialImage}
 >
 
   <!-- =============================================================== -->

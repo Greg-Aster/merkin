@@ -165,3 +165,12 @@ export type BlogPostData = {
     | 'update'
     | 'classified'
 }
+
+/** Explicit dimensions describe the actual image supplied by the application. */
+export interface SocialImageMetadata {
+  src: string
+  width: number
+  height: number
+  type?: string
+  alt?: string
+}
