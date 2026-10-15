@@ -1,0 +1,130 @@
+---
+title: "Startup, self-leveling and the real leg geometry"
+published: 2026-10-14
+updated: 2026-10-14
+description: "A staged startup rise, saved self-leveling controls, a 566 g build report and a geometry calculator, with installed firmware separated from loaded-motion results."
+image: "/assets/ainekio/2026-10-12-refresh/blender-side.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, Gait, IMU, Body Control, Linkages]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-10-14-body-events
+  related: ["gait-development", "ainekio-v2", "2026-10-14-recording-and-updates"]
+---
+
+# Standing starts before walking
+
+The latest work separates calibration Home from ordinary startup, adds adjustable
+self-leveling to Body Control, and investigates why a smaller linkage is not
+automatically easier for the motors to drive.
+
+The October 13 hardware journal records an owner-reported **566 g assembled
+mass**, **5 V supply** and **MG90 servos**. These replace earlier unknown mass
+and voltage entries for that reported configuration. They do not establish the
+finished shell's mass, measured current draw or battery endurance.
+
+## Crouch, align the shoulders, then rise
+
+Ordinary boot previously drove toward saved calibration Home. On the floor,
+that could extend the legs before the shoulders were aligned. Startup now
+requests a staged rise from the body controller:
+
+1. Fold the carrier and crank joints toward a modeled crouch.
+2. Align the shoulders while retaining the crouch.
+3. Raise the body into Stand over the modeled foot contacts.
+
+The later revision staggers the front pair and rear pair by **100 ms**, with
+a total commanded sequence of **2.5 seconds**. Calibration Home remains a
+separate explicit operation. Staggering command starts has not yet demonstrated
+a measured reduction in peak current.
+
+The firmware journal records Wi-Fi installation and acceptance of the startup
+revisions, preservation of joint calibration and native tests of phase order,
+joint mapping, contact geometry and cancellation. These are commanded
+trajectories: the standard servo interface does not report actual arrival or
+foot contact. A completed startup command alone cannot prove that the chassis
+physically rose.
+
+## Self-leveling has its own controls
+
+The P4 now exposes self-leveling settings through the selected robot's Body
+Control connection. They are saved on the robot independently of joint and IMU
+calibration.
+
+| Control | Meaning |
+| --- | --- |
+| On / Off | Enables correction in supported standing and moving states; separate from whether correction is currently active |
+| Response strength | Multiplier for the attitude-error response; original default 1× |
+| Damping | Multiplier for the angular-rate response; original default 1× |
+| Roll target | Desired roll offset; positive raises the left side, original default 0° |
+| Pitch target | Desired pitch offset; positive raises the nose, original default 0° |
+
+Turning correction off does not stop a gait or disable outputs. Returning to
+On can resume correction in an eligible state without starting another motion.
+The controls read their values from the robot; selecting default response values
+only edits the form until they are saved.
+
+An earlier tilt test found fresh gyro data but inactive balance after a shrug.
+Selecting Stand activated correction. Further checks found changing reported
+joint commands while the owner still reported little physical response. The
+investigation then identified a separate controller issue: the old standing
+response settled at a fraction of a persistent tilt error rather than continuing
+to correct it.
+
+Stationary hold now accumulates accepted correction over time. Moving gait and
+rise retain their separate response. An ideal-actuator test exercises rejection
+of a sustained disturbance; real linkage fit still determines which corrections
+can be applied. Increasing a setting does not increase the servo's available
+torque.
+
+## Installed controls, remaining physical work
+
+The October 14 journal records **0.8.46-p4-leveling-tuning** uploaded, explicitly
+activated and accepted over Wi-Fi. Live browser checks read and saved the four
+response values, preserving the previously selected Off state. The recorded
+session ended in Doze with outputs disabled.
+
+This establishes firmware installation and working configuration controls.
+**Successful loaded self-leveling remains unverified.** The IMU measures body
+attitude; it cannot identify an individual stalled joint or tell a level body
+standing above the floor from one sagging onto it. An automatic fallen-body
+get-up routine is also not established by this work.
+
+## A calculator for the actual linkage
+
+The new local leg-geometry calculator keeps the servo shaft locations fixed by
+default while changing link lengths. It can animate a requested path, compare
+design snapshots, plot joint travel and modeled load demand, and export JSON,
+CSV and SVG. It has no connection to robot controls.
+
+The October 14 comparison uses the last-confirmed assembled geometry of
+**55 / 35 / 38 / 28 / 20 mm** for leg, carrier, rod, pickup and crank, versus
+an active Blender study of **45 / 35 / 30 / 28 / 20 mm**. The shorter study
+reduces reach, but its shorter rod approaches an unfavorable alignment as the
+body rises. Under the journal's particular 65 mm shaft-height benchmark,
+modeled carrier peak torque falls about 3%, while crank demand rises about 16%.
+That is not a general torque improvement.
+
+The calculator uses ideal point feet and external-force geometry. It omits
+housing collisions, servo torque-speed limits and whole-body balance. Its
+plots are design evidence, not a recommendation to change the assembled robot's
+calibration or a physical gait qualification.
+
+The Blender work also has a separate motion working file retaining the main
+23-chapter motion library and both body configurations. Earlier design scenes
+remain in the original reference file. The article thumbnail is an **October 12
+Blender view**, not a new photograph or a render of the later geometry study.
+
+Source: the October 13–14 gait research journal, calculator source, production
+body/balance code and dashboard controls, identified in the
+[source manifest](/posts/2026-10-14-progress/sources.json).

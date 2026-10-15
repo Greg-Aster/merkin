@@ -1,8 +1,8 @@
 ---
 title: "Ainekio V1 and V2: Eight Servos Versus Twelve"
 published: 2026-09-24
-updated: 2026-10-12
-description: "Compare eight-servo V1 and twelve-servo V2: dated physical photographs and motion ranges, current shell printing, controllers, and the October 12 4 A supply report."
+updated: 2026-10-14
+description: "Compare eight-servo V1 and twelve-servo V2: dated physical photographs and motion ranges, current leveling controls, recording, and the October 13 mass and voltage report."
 image: "/posts/2026-09-24-progress/v1-physical.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -28,7 +28,7 @@ V2 changes the mechanism, controller and power arrangement. The third actuator
 on each leg adds sideways placement; the new software can vary a gait while it
 runs. This comparison separates those implemented capabilities from the
 physical results still to be measured. **Build options, controls and power are
-updated through October 12. The downloadable motion-range dataset remains
+updated through October 14. The downloadable motion-range dataset remains
 the September 24 snapshot**, before the later gait and chassis changes.
 
 **V2 can now stand, walk and respond to commands**, according to the owner's
@@ -36,7 +36,7 @@ October 8 report. At that time its carapace was not attached and Active Operator
 had not been tested. Exterior printing has since begun; no newer physical
 Active Operator result was supplied. This supersedes the [October 6 standing failure](/posts/2026-10-06-lighter-rebuild/)
 as current status. The earlier 20% weight/lifting-force estimates remain
-estimates, with no new measurements supplied.
+estimates. The October 13 owner report adds 566 g mass and 5 V supply for that assembly; it does not measure a before/after lifting-force improvement.
 
 **Wireless**, with the Q6A offboard over Wi-Fi, is the current priority.
 **Wired** retains the onboard-Q6A/native-USB alternative. The
@@ -69,7 +69,7 @@ are documented separately.
 | Speed controls | Timing of existing sequences | Gait Speed or advanced stride/rate; separate named-motion multiplier; shared joint-speed limit can retime automatic motion while retaining the path |
 | Turns | Stored 45°, 90° and 180° left/right clips; open-loop heading estimates | Continuous forward/turn updates during an admitted Walk; loaded steering remains to measure |
 | Expressive movement | Wave, bow, dances and other prepared gestures | Retargeted gestures plus reviewed Worm, seated Shrug, Play Dead, Lay Down and experimental Upright |
-| Balance and terrain | No measured adaptive balance result | Kinematic planning and IMU estimator implemented; live sensor acquisition and balance correction remain unconnected |
+| Balance and terrain | No measured adaptive balance result | Live IMU telemetry and configurable local leveling implemented; loaded correction and adaptive terrain response remain unqualified |
 | Physical evidence | Working complete prototype; movement and audio demonstrated | October 8 owner reports standing, walking and command response; illuminated LCD visible, carapace not attached, Active Operator untested |
 
 The counts describe different things: one V2 gait can continue indefinitely and
@@ -167,15 +167,18 @@ separate measurements.
 The Q6A figures come from the September 28
 [resource audit](https://github.com/Greg-Aster/Ainekio-bot/blob/270537fa56c8d77efd72ff694f4294d15381de52/docs/v2-12servo/RESOURCE_BUDGET.md).
 More RAM and different processors allow different workloads, but their
-specifications are not a measured speedup over V1. An IMU estimator now exists
-in source; live acquisition, balance feedback, the ROS adapter and the
-native-USB body path remain integration work.
+specifications are not a measured speedup over V1. [Live IMU telemetry and saved
+leveling controls](/posts/2026-10-14-startup-and-leveling/) now have dated firmware
+installation records. Loaded leveling, the ROS adapter and native-USB body path
+remain unqualified. [SD video and Wi-Fi maintenance](/posts/2026-10-14-recording-and-updates/)
+are additional P4 features, with controller tests separated from loaded motion.
 
 ## Power supply, battery, charging and running time
 
 **October 12:** the owner has switched to a **4 A power supply**. This rating
-is not a battery capacity, measured consumption or runtime. Voltage and the
-installed rail arrangement have not been supplied. The earlier battery decisions
+is not a battery capacity, measured consumption or runtime. The October 13
+owner report specifies **5 V**; the complete installed rail arrangement remains
+to document. The earlier battery decisions
 below remain part of the iteration record.
 
 | Comparison | V1 | V2 |
@@ -185,7 +188,7 @@ below remain part of the iteration record.
 | Voltage / energy record | Earlier parts record: 2S, 7.4 V; nominal 7.4 Wh by multiplication | New pack voltage and usable energy not yet documented |
 | Conversion arrangement | External buck converter | Final power path to be documented; the earlier no-separate-buck bank plan is historical |
 | Charging | External charger | Onboard charging circuit boards planned; exact boards and implementation not yet documented |
-| Packaging | Existing robot arrangement | Exterior shell printing begun; further weight modifications reported, without a new mass measurement |
+| Packaging | Existing robot arrangement | Exterior printing begun; owner reports 566 g on October 13, with final shell configuration still to document |
 | Build-dependent battery load | Existing V1 body | Wired carries Q6A load; Wireless powers Q6A separately offboard |
 | Measured run time | **Not measured** | **Not measured for either option** |
 | Measured loaded consumption | Not supplied | Whole-system consumption and twelve-servo peaks still to measure |

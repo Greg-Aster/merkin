@@ -1,7 +1,7 @@
 ---
 title: "Robot Autonomy Modes"
 published: 2026-08-27T07:45:00-07:00
-updated: 2026-09-09
+updated: 2026-10-14
 description: "Reactive, Semi, and Full behavior, result-driven choices, and how finite Desire plans give robot work a verifiable end."
 image: "/assets/ainekio/v2/bounded-autonomy-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -19,7 +19,7 @@ reading:
   generation: both
   kind: reference
   next: vision-loop
-  related: ["2026-10-12-trained-specialists", "2026-10-08-responsive-commands"]
+  related: ["ainekio-companion", "2026-10-12-trained-specialists", "2026-10-08-responsive-commands"]
 ---
 
 # When Ainekio can start an activity
@@ -28,20 +28,30 @@ Ainekio’s autonomy settings control when it can begin work without a new user
 request. MetaHuman OS, the software behind its conversation and decisions,
 provides three modes: Reactive, Semi, and Full.
 
-These modes govern permission and timing. They do not give the body new motor,
-camera, or navigation abilities. Any chosen action still has to be supported
-by the connected robot and pass its command checks.
-
-This page describes the September 9 source, including repairs prompted by the
-September 8 live run. The latest changes still need deployed robot validation.
+The October 14 Robot Bible clarifies their intended role in the companion.
+They select how activity begins and continues; any chosen physical action must
+be supported by the connected body. These are distinct from MetaHuman's
+cognitive modes and from physical Idle, Doze or sleep states.
 
 ## What the modes mean in use
 
 | Mode | Expected behavior |
 | --- | --- |
-| Reactive | Respond to user interaction; do not let Robot Operator initiate activities |
-| Semi | Allow activities under configured timing and idle conditions, or resume saved work when its wait is ready |
-| Full | Use the work system’s state to continue ready work or choose a new activity when no execution is active |
+| Reactive | Respond to commands and requests without independently choosing new activities |
+| Semi | Let configured agents and triggers initiate selected functions and activities |
+| Full | Choose high-level activities, pursue goals, review desires and use experience to decide what comes next |
+
+Full autonomy is intended to connect perception, identity, personality, memory
+and outcomes into purposeful activity. Repeated commands or repeated no-action
+decisions without useful progress do not demonstrate that experience. Complete
+companion autonomy remains unqualified. [Personality, memory and learning](/posts/ainekio-companion/)
+explain the wider context in which these modes operate.
+
+## September 9 implementation record
+
+The following sections retain the September 9 source and September 8 live-test
+period. Their scheduling and plan details describe that implementation, rather
+than redefining the October 14 intended modes or claiming current physical acceptance.
 
 **Robot Operator** is the service that decides when autonomous work may start.
 The **Work Coordinator** schedules that work. A saved **execution** is one

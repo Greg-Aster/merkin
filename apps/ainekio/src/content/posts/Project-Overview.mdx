@@ -1,8 +1,8 @@
 ---
 title: "Ainekio: Project Overview"
 published: 2026-08-27T09:45:00-07:00
-updated: 2026-10-12
-description: "Ainekio build journal: exterior printing, weight revisions, a 4 A supply, live YOLOE integration and trained Qwen specialists, with earlier physical results retained."
+updated: 2026-10-14
+description: "Meet Ainekio, a robot familiar combining conversation, personality, memory, perception and physical action, with two body designs and a continuing build journal."
 image: "/assets/ainekio/2026-10-12-refresh/render-overview.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -18,8 +18,8 @@ reading:
   topic: overview
   generation: both
   kind: reference
-  next: v1-v2-comparison
-  related: ["ainekio-v2", "v1-original-posts"]
+  next: ainekio-companion
+  related: ["ainekio-v2", "v1-original-posts", "v1-v2-comparison"]
 ---
 
 # Ainekio
@@ -31,9 +31,28 @@ handles motors and movement limits.
 
 ## Project intent
 
-A robot familiar that grows and learns: conversation and memory connected to
-perception and physical action. A request should carry through multiple actions,
-waits, and corrections without losing its objective.
+Ainekio is being built as a persistent companion with a recognizable personality
+and continuity between interactions. The aim is to converse, notice the
+surroundings, remember useful experiences, express itself, choose activities
+and improve through reviewed learning. A request should carry through actions
+and corrections without losing its objective.
+
+## Understanding the companion
+
+| Function | Its part in Ainekio |
+| --- | --- |
+| Conversation and personality | A consistent identity, with words and expression appropriate to the situation |
+| Perception and expression | Camera, listening and body sensing connected to speech, faces and supported movement |
+| Memory | Recent context and longer-term experiences that can inform later interactions |
+| Goals and autonomy | Respond to requests, act on configured triggers, or choose and pursue activities according to the selected mode |
+| Inner activity | Reflection, dreams, daydreams and curiosity, retained as internal content with its origin identified |
+| Learning | Review experience and corrections, train specialist skills or conversational personality, then evaluate the changes |
+
+These describe the intended connected experience. Components are implemented
+and under test, but reliable recall, sustained autonomy and the complete
+learning loop remain unfinished. [Meet Ainekio as a companion](/posts/ainekio-companion/)
+for a plain-language explanation of how the functions fit together; the
+[status page](/posts/current-status/) records the latest results.
 
 ## The two builds
 
@@ -47,6 +66,15 @@ waits, and corrections without losing its objective.
 V1 remains supported. [Design history](/project-guide/#original-ainekio-and-ainekio-v2)
 and [V1/V2 comparison](/posts/v1-v2-comparison/).
 
+## October 14
+
+- [Body events](/posts/2026-10-14-body-events/): wake, tilt and rapid movement reach a dedicated model workflow; thresholds and the rapid-event interval are editable in Body Control.
+- [Startup and self-leveling](/posts/2026-10-14-startup-and-leveling/): staged rise, saved response controls, a geometry calculator, and the October 13 report of 566 g at 5 V.
+- [Recording and Wi-Fi maintenance](/posts/2026-10-14-recording-and-updates/): SD video, downloads, staged firmware updates and robot logs, with a successful short controller run.
+- [Task model qualification](/posts/2026-10-14-speech-and-task-training/): two new candidates tested; the existing adapter remains deployed because regressions remain.
+
+Reliable wake/stretch behavior and loaded self-leveling are still unfinished.
+
 ## October 12
 
 I have begun printing the exterior shell, made further weight modifications,
@@ -59,8 +87,8 @@ and switched to a **4 A power supply**. Current work:
 The lighter robot **stood, walked, and responded to commands on October 8**.
 The [build photograph](/posts/2026-10-08-standing-walking/) shows it without
 the carapace. Active Operator remains untested. The roughly 20% weight and
-lifting-force improvements from the rebuild are estimates; mass, loaded gait
-performance, and endurance still need measurement.
+lifting-force improvements from the rebuild are estimates. The later owner-reported
+mass is 566 g; loaded gait performance and endurance still need measurement.
 
 I dropped the heavy **10,000 mAh battery bank** on October 6 in favor of separate
 batteries and charging boards. The final battery arrangement is still open.
@@ -70,9 +98,9 @@ batteries and charging boards. The final battery arrangement is still open.
 **Wireless** is the current priority: Q6A offboard over Wi-Fi. **Wired** keeps the
 Q6A on the robot with a native USB connection to the P4.
 
-The P4 IMU estimator is implemented. Live sensor acquisition, balance correction,
-and the robot ROS 2 adapter remain integration work. Sustained wireless
-reliability is unresolved.
+The P4 now supplies live IMU evidence and configurable local balance correction.
+Loaded leveling and the robot ROS 2 adapter remain unqualified. A dated short
+Wi-Fi recovery run passed; sustained wireless reliability still needs testing.
 
 ## Command path
 

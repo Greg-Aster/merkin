@@ -1,8 +1,8 @@
 ---
 title: "MetaHuman OS: Robot Integration"
 published: 2026-08-27T08:00:00-07:00
-updated: 2026-10-12
-description: "How saved requests, specialist returns, current goals, and reviewed Desire plans stay connected to Ainekio’s action results."
+updated: 2026-10-14
+description: "Body-event decisions, live IMU status, specialist planning and saved requests connected to Ainekio’s action results."
 image: "/assets/ainekio/v2/metahuman-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
@@ -19,8 +19,27 @@ reading:
   generation: both
   kind: reference
   next: bounded-autonomy
-  related: ["2026-10-12-trained-specialists", "2026-10-08-responsive-commands"]
+  related: ["ainekio-companion", "2026-10-12-trained-specialists", "2026-10-08-responsive-commands"]
 ---
+
+## How MetaHuman supports the companion
+
+MetaHuman connects Ainekio's persona, conversation, memory, inner activity and
+high-level choices to its physical body. Its editable workflows let selected
+context inform a response or action, preserve what happened, and make useful
+experience available for later recall and reviewed learning. This whole loop
+is still being developed and qualified.
+
+[The companion guide](/posts/ainekio-companion/) explains these functions in
+everyday terms, including dreams, autonomy modes and the intended learned
+personality. The sections below describe the engineering path for keeping a
+request and its results connected.
+
+## October 14: events from the body
+
+A separate [Body Event Trigger workflow](/posts/2026-10-14-body-events/) now interprets wake, tilt and rapid-movement events and forwards model-selected intentions to Environment Mode. Robot Status carries gyro, acceleration, orientation and balance evidence. Recent conversation and active execution context inform reactions; Body Control exposes editable detection thresholds and a rapid-event interval.
+
+Ordered speech and visual-planner routing accompany this work. [Two new Task candidates](/posts/2026-10-14-speech-and-task-training/) have completed qualification; neither is deployed because important failures remain. The complete wake/photo/stretch/stand routine is not yet reliable.
 
 ## October 12: trained specialists and workflow changes
 

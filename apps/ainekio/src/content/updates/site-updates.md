@@ -10,39 +10,63 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "Shell printing, YOLOE and trained Qwen specialists"
-  location: "Twelve-servo build · Blender · desktop integration"
-  updated: 2026-10-12
-  mileage: "October 12 · exterior printing · 4 A supply · perception and workflows"
-  section: "Printed exterior, selected targets and specialist models"
-  nextStop: "Check printed shell fit and weight, document the 4 A power arrangement, and complete the live vision/workflow tests."
-  note: "Exterior shell printing has begun, with further weight modifications and a switch to a 4 A power supply. YOLOE integration now has a live stationary chair-tracking result, while trained Qwen 0.8B specialists and node workflows continue to develop. The robot stood, walked and responded to commands on October 8."
+  status: "Body events, self-leveling and Wi-Fi maintenance"
+  location: "V2 / P4 · Body Control · MetaHuman OS"
+  updated: 2026-10-14
+  mileage: "October 14 · sensor events · saved leveling controls · model qualification"
+  section: "The body reports events and gains configurable local feedback"
+  nextStop: "Verify loaded startup and leveling, resolve speech/action planning regressions, and complete the wake/photo/stretch/stand routine."
+  note: "Body events now reach a dedicated MetaHuman workflow. Body Control adds adjustable self-leveling, SD video and downloads, Wi-Fi firmware updates and robot logs. Dated records verify installed controls and a short recording/network run; reliable physical reactions and loaded leveling remain unfinished."
   areas:
-    - label: "Shell and weight"
-      status: "Exterior printing underway"
-      detail: "Further weight reduction; 27 shell and camera-mount STLs exported. Shell fit and assembled mass still need checking."
-    - label: "Power"
-      status: "Switched to a 4 A power supply"
-      detail: "Voltage, current draw and final battery arrangement still need recording."
-    - label: "Physical movement"
-      status: "Standing and walking since October 8"
-      detail: "The robot also responds to commands. Local Lay Down and Play Dead revisions lift feet before lowering the body; their validation files still mark hardware and collision qualification incomplete."
-    - label: "YOLOE perception"
-      status: "Live stationary chair tracking on desktop"
-      detail: "YOLOE, MobileCLIP and ByteTrack support search/select/release. A tighter reference region retained one chair track in eight observed frames; the tested 0.8B region failed to produce detections."
-    - label: "MetaHuman specialists"
-      status: "Trained Qwen 0.8B intent and task models"
-      detail: "Expanded context/tool routing and node workflows. Rejected a later goal-planning candidate after regressions."
-    - label: "Integration limits"
-      status: "Camera recovery and complete vision workflow still open"
-      detail: "Real P4 camera data reached MetaHuman. The recorded session had reconnects and a stalled stream; a new vision-handler build awaited activation. Active Operator remains untested."
+    - label: "Body events"
+      status: "Wake, tipped and rapid-movement events"
+      detail: "Editable per-robot thresholds and a 10-second rapid-event interval. Event Trigger chooses a response or no action, then delegates to Environment Mode."
+    - label: "IMU and leveling"
+      status: "Telemetry and saved response controls implemented"
+      detail: "The October 14 record verifies installed 0.8.46 tuning controls. On/Off, strength, damping and roll/pitch targets are separate from calibration; loaded leveling remains unverified."
+    - label: "Recording and service"
+      status: "SD video, downloads, Wi-Fi updates and logs"
+      detail: "Shared camera JPEGs feed segmented video. Firmware stages before explicit activation. A dated 469-second run recorded 411 frames with no reconnects; endurance remains open."
+    - label: "Task models"
+      status: "Two new candidates tested; existing adapter retained"
+      detail: "The latest candidate improved evaluation reference matches from 44% to 83%, but introduced three historical missed-action failures. Neither new candidate is deployed."
+    - label: "Physical build"
+      status: "566 g and 5 V reported on October 13"
+      detail: "MG90 servos; shell printing and a 4 A supply were reported October 12. Final shell mass, measured current, battery arrangement and endurance remain to document."
+    - label: "Vision"
+      status: "Selected-target tracking and larger-model planning"
+      detail: "The earlier stationary chair result remains dated. Camera/image objectives route to the configured vision planner; full moving-target acquisition remains unqualified."
+    - label: "Motion and geometry"
+      status: "Staged startup and a local geometry calculator"
+      detail: "Crouch, shoulder alignment and rise replace calibration Home at boot. Modeled linkage comparisons do not establish physical tracking, torque margin or automatic get-up."
     - label: "Build options"
-      status: "Wireless priority; Wired alternative retained"
-      detail: "Offboard Q6A/Wi-Fi and onboard Q6A/native-USB remain distinct designs. The latest vision pilot used the desktop; Q6A throughput, remote-route reliability, live balance and the robot ROS adapter remain unqualified."
-    - label: "Original Ainekio"
-      status: "Supported eight-servo S3 design"
-      detail: "V1 guides, the original LiPo power arrangement, earlier prototype photographs and dated range comparisons are retained."
+      status: "V1 supported; V2 Wireless priority"
+      detail: "Eight-servo S3 remains separate from twelve-servo P4. Wired Q6A remains an alternative; desktop results do not qualify Q6A concurrency or the robot ROS adapter."
 entries:
+  - title: "The body can start a conversation"
+    date: 2026-10-14
+    location: "Body Control and MetaHuman OS"
+    mileage: "Wake / tipped / rapid movement · configurable reporting"
+    summary: "A dedicated Event Trigger workflow receives body measurements and selects an intention for Environment Mode. Robot Status includes IMU evidence; reaction wording comes from the model. Full wake/stretch reliability remains open."
+    url: "/posts/2026-10-14-body-events/"
+  - title: "Startup, self-leveling and the real leg geometry"
+    date: 2026-10-14
+    location: "P4 body controller and linkage research"
+    mileage: "Staged rise · saved tuning · 566 g / 5 V report"
+    summary: "Boot posture is separate from calibration Home. Body Control gains saved leveling strength, damping and attitude targets; the geometry calculator explores load and reach. Installation is recorded, with loaded correction still unverified."
+    url: "/posts/2026-10-14-startup-and-leveling/"
+  - title: "Video on the robot, firmware updates over Wi-Fi"
+    date: 2026-10-14
+    location: "P4 camera, SD storage and Body Control"
+    mileage: "Record / download · staged OTA · robot logs"
+    summary: "Shared JPEGs feed internal-card video; Body Control retrieves clips and logs and stages P4 updates for explicit activation. A 469-second controller run recorded 411 frames without reconnecting."
+    url: "/posts/2026-10-14-recording-and-updates/"
+  - title: "Teaching the Task model what to say and what to move"
+    date: 2026-10-14
+    location: "MetaHuman specialist training"
+    mileage: "Two 0.8B candidates · held-out comparison · no deployment"
+    summary: "Training addresses quoted speech mistaken for physical movement. The latest candidate improves overall reference agreement but misses three historical actions; the existing Task adapter remains in production."
+    url: "/posts/2026-10-14-speech-and-task-training/"
   - title: "Shell printing, weight changes and a 4 A supply"
     date: 2026-10-12
     location: "Physical build and Blender development"
@@ -294,10 +318,15 @@ decisions. These entries follow its hardware and software development. Each
 entry describes its own date; linked articles explain the components, current
 limitations, and next tests.
 
+For an introduction to personality, memory, autonomy and learning, read
+[Ainekio as a companion](/posts/ainekio-companion/).
+
 See [current project status](/posts/current-status/) for the latest summary,
 or [browse the full article archive](/archive/) for guides and earlier reports.
 
-Latest: [shell, power and motion](/posts/2026-10-12-shell-power-and-motion/), [YOLOE tracking](/posts/2026-10-12-yoloe-tracking/) and
+Latest: [body events](/posts/2026-10-14-body-events/), [startup and leveling](/posts/2026-10-14-startup-and-leveling/), [recording and Wi-Fi updates](/posts/2026-10-14-recording-and-updates/), and [Task model qualification](/posts/2026-10-14-speech-and-task-training/).
+
+October 12: [shell, power and motion](/posts/2026-10-12-shell-power-and-motion/), [YOLOE tracking](/posts/2026-10-12-yoloe-tracking/) and
 [trained specialists](/posts/2026-10-12-trained-specialists/).
 
 October 8: [standing and walking](/posts/2026-10-08-standing-walking/),

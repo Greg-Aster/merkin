@@ -1,0 +1,116 @@
+---
+title: "The body can start a conversation"
+published: 2026-10-14
+updated: 2026-10-14
+description: "Wake, tilt and rapid-movement events now travel from Body Control to a dedicated MetaHuman workflow, with editable detection settings and model-selected reactions."
+image: "/posts/2026-10-14-progress/body-events.svg"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, MetaHuman OS, IMU, Workflows]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: metahuman
+  generation: v2
+  kind: journal
+  next: 2026-10-14-speech-and-task-training
+  related: ["metahuman-integration", "2026-10-14-startup-and-leveling"]
+---
+
+# The robot reports what happens to it
+
+Ainekio's command path now works in both directions. Alongside executing a
+request and returning its result, the V2/P4 reports waking and motion-sensor
+measurements. Body Control turns selected changes into events for MetaHuman OS
+to interpret.
+
+The first events are **wake**, **tipped over**, and **rapid movement**. They have
+their own **Body Event Trigger** node workflow. That workflow can choose an
+intention and forward it to the existing Environment Mode workflow, or decide
+that no response is needed.
+
+<figure>
+  <img src="/posts/2026-10-14-progress/body-events.svg" alt="P4 measurements pass through Body Control and the Environment Bridge to Body Event Trigger. Its model can take no action or delegate to Environment Mode, which sends selected actions back to the body." width="1000" height="640" loading="lazy" />
+  <figcaption>Detection, interpretation and execution have separate owners. Ordinary sensor updates do not each call a model.</figcaption>
+</figure>
+
+## What is in Robot Status?
+
+Robot Status now includes the selected robot's gyro angular rates, acceleration
+including gravity, estimated orientation and balance state. Acquisition and
+reception times, sample age, availability, calibration and freshness accompany
+the values. An old sample or disconnected body should not look like a fresh
+measurement.
+
+The six-axis sensor estimates roll and pitch relative to gravity; it does not
+provide an absolute compass heading. Its readings describe the body, not the
+measured position of an individual servo.
+
+## Settings in Body Control
+
+**Perception → Body events** provides independent event switches, editable
+trigger and clearing thresholds, recent event evidence, and a **Good morning**
+control. Settings are saved per selected robot on the Body Control host.
+
+| Event | Initial detection settings | What happens next |
+| --- | --- | --- |
+| Wake | Boot, waking from sleep, or an explicit Good morning request | Event Trigger evaluates the wake intention |
+| Tipped over | More than 60° tilt for 300 ms; clears below 45° | One event for the tilt episode |
+| Rapid movement | Acceleration magnitude differs from gravity by more than 0.75 g, or rotation exceeds 180°/s | One event until readings clear below both 0.35 g and 90°/s |
+| Rapid-movement interval | **10 seconds by default**, editable; 0 disables it | Crossings inside the interval are discarded, not queued for later speech |
+
+A continued high reading is one episode. After it clears, a fresh crossing can
+produce another event, subject to the configured rapid-movement interval.
+Editing settings or reconnecting the robot preserves that interval's history;
+restarting Body Control begins a fresh history. These controls change event
+reporting, not actuator speed or the local balancing controller.
+
+Boot and sleep-wake events originate in firmware. A network reconnect is not a
+new wake. The connection must be available to deliver the event; this transport
+does not replay sensor events lost while disconnected.
+
+## Reactions come from the model
+
+The event includes measurements and thresholds. Event Trigger also receives
+Robot Status, the current task, active executions and recent conversation.
+Its prompt asks it to use that situation when deciding whether to speak, gesture,
+do both, or do nothing. Previous reactions are history, not a script to repeat.
+
+The current preference for tipped and rapid-movement reactions is brief, darkly
+humorous self-preservation. The prompt supplies that tone without example
+phrases. There is no fixed “whoa” response or mandatory shrug in the detector.
+When Event Trigger chooses speech, it supplies the chosen words to Environment
+Mode, which selects available actions and their order.
+
+The wake intention is **greet, take an environment picture, stretch, then stand**.
+This is prompt guidance, not a firmware routine. It also differs from the
+[controller's startup rise](/posts/2026-10-14-startup-and-leveling/), which handles
+the body's initial posture locally.
+
+## What the tests have exposed
+
+Live use exposed repeated reactions and a growing command queue. Episode
+detection, the configurable interval and event attribution address different
+parts of that problem. Retained event context is no longer treated as a new
+event merely because another observation arrives. Current execution context
+also lets the model consider an activity already underway.
+
+There are still planning failures. In one recorded reaction, Event Trigger
+requested speech followed by a shrug; the small Task model selected continuous
+Crab instead. Wake cycles have also omitted the requested stretch. The new
+event path is implemented, but these observations prevent calling the complete
+routine reliable. [The training report](/posts/2026-10-14-speech-and-task-training/)
+records the attempted fix and why neither new candidate is deployed.
+
+Local body balance remains a firmware responsibility. A tipped event and a
+request for help do not establish an automatic get-up capability.
+
+Source: reviewed Body Control detection, dashboard controls, bridge attribution,
+Robot Status projection and both copies of the Event Trigger graph. The
+[source manifest](/posts/2026-10-14-progress/sources.json) identifies the local
+snapshot; later local changes are not implied to be present in published GitHub revisions.

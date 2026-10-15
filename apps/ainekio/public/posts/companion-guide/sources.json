@@ -1,0 +1,25 @@
+{
+  "review_date": "2026-10-14",
+  "purpose": "Public companion-function guide adapted from the owner-maintained Robot Bible. Intended functions are distinguished from qualified behavior.",
+  "sources": [
+    {
+      "repository": "metahuman",
+      "path": "docs/robot/ROBOT_BIBLE.md",
+      "sha256": "b5aa30bf0604da0fc6b76566982fd87d74fa18a7ee5e53b488fffddaeec430fa",
+      "sections": [
+        "1 Companion purpose",
+        "2 MetaHuman OS",
+        "4 Responsibilities and deployment",
+        "5 Modes and lifecycle",
+        "6 Physical and interactive abilities",
+        "7 Memory, persona, and inner dialogue",
+        "8 Goals, desires, and autonomy",
+        "10 Models and learning",
+        "11 Interfaces",
+        "13 Qualification"
+      ]
+    }
+  ],
+  "publication_scope": "Public functional descriptions only. The local troubleshooting diary, private conversations and installation-specific diagnostic records are not included.",
+  "illustration": "Authored SVG explanatory diagram of intended information flow; not a runtime trace or physical demonstration."
+}

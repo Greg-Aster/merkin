@@ -1,7 +1,7 @@
 ---
 title: "Ainekio V2: Parts, Assembly, and Design Iterations"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-10-12
+updated: 2026-10-14
 description: "V2 build record: exterior printing, current Blender captures and prototype exports, a 4 A supply and revised grounded motions, alongside the October 8 walking milestone."
 image: "/assets/ainekio/2026-10-12-refresh/blender-front.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
@@ -38,11 +38,17 @@ gait planning with prepared gestures.
 Automatic balance and adaptation to uneven ground require further sensing,
 control and physical testing.
 
-## Current revision: October 12
+## Current revision: October 14
+
+The hardware journal records **566 g**, **5 V** and MG90 servos for the October 13 assembly. The [startup and leveling report](/posts/2026-10-14-startup-and-leveling/) covers staged boot posture, saved self-leveling controls and the new local geometry calculator. Firmware 0.8.46 installation and live control readback are recorded; loaded self-leveling remains unverified.
+
+Body Control also gains [body-event settings](/posts/2026-10-14-body-events/), [SD recording, downloads and Wi-Fi maintenance](/posts/2026-10-14-recording-and-updates/). The full model-selected wake/stretch routine remains incomplete. The existing thumbnail is the October 12 Blender view, not a new assembly photograph.
+
+## Shell and power report: October 12
 
 I have begun printing the shell, made further weight modifications, and
-switched to a **4 A power supply**. Voltage, current draw, and the final battery
-configuration still need recording. The [new build entry](/posts/2026-10-12-shell-power-and-motion/)
+switched to a **4 A power supply**. The later October 13 report specifies 5 V;
+measured current draw and the final battery configuration still need recording. The [new build entry](/posts/2026-10-12-shell-power-and-motion/)
 contains current Blender views, 27 prototype exports and revised grounded-motion
 comparisons. Shell fit and Active Operator testing are still pending.
 
@@ -56,8 +62,9 @@ photograph and a side-by-side account of the two attempts.
 
 The latest committed exports add LCD-carrier braces, a 20×30 speaker holder,
 compact carriers/cranks/pickups, and electronics/power mounting parts. Local
-camera-carrier and longer front-tray exports are still being developed. The installed firmware, calibration, power arrangement and measured weight still
-need a reproducible assembly record. Earlier 20% improvements remain estimates.
+camera-carrier and longer front-tray exports are still being developed. The October 14
+firmware record and October 13 mass/voltage report add evidence; a complete
+reproducible assembly record remains open. Earlier 20% improvements remain estimates.
 
 The October 6 power decision dropped the heavy **10,000 mAh rechargeable bank** in favor of
 separate batteries and onboard charging circuit boards. Cell capacity, board
@@ -85,10 +92,11 @@ reduced Upright reach and unresolved servo travel. The installed walking build�
 | [Compact legs and horn fit](/posts/2026-09-21-compact-leg-design/) | Earlier geometry alternatives and dated print files |
 
 The P4/gateway source now includes continuous steering and shared joint-speed
-control. The IMU estimator is implemented, but hardware acquisition and balance
-correction remain disconnected. ROS 2 tools have recorded checks; the robot
-adapter and native-USB body transport remain integration work. The recorded
-P4 hotspot connection succeeded, while sustained-session testing failed.
+control. IMU acquisition and configurable balance correction are now connected.
+Loaded correction remains unverified. ROS 2 tools have recorded checks; the robot
+adapter and native-USB body transport remain integration work. The October 13
+Wi-Fi recovery run passed for 469 seconds; earlier sustained-session failures
+remain part of the connection history.
 V1 remains supported. V2 stood and walked on October 8.
 
 The
@@ -329,10 +337,10 @@ properties. The final power source remains undecided.
 
 ## Later options
 
-Adaptive terrain response, foot-contact sensing, and closed-loop balance—
-adjusting movement from sensor feedback—are deferred. So are stabilization
-with an inertial sensor (IMU), calculating joint angles from desired foot
-positions in real time (inverse kinematics), and learned locomotion.
+The initial plan deferred IMU stabilization and real-time inverse kinematics.
+The current V2 controller now implements both, including configurable local
+leveling; successful loaded correction still needs physical validation. Adaptive
+terrain response, foot-contact sensing and learned locomotion remain later work.
 Higher-cost servos and wireless charging were outside the initial build plan.
 Onboard Linux computing was also excluded from that first scope. The Q6A model
 records the September 10 wide-body packaging study; its board and tray were

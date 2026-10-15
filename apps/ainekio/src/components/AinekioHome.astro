@@ -20,7 +20,7 @@ const topicCards = Object.entries(topics).filter(([id]) => !['overview','v1'].in
 })
 const dateFormat = new Intl.DateTimeFormat('en-US', {month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})
 const paths = [
-  { title: 'Project overview', href: '/posts/project-overview/', text: 'Eight- and twelve-servo designs, controllers, and MetaHuman OS.' },
+  { title: 'Meet the companion', href: '/posts/ainekio-companion/', text: 'Personality, memory, perception, autonomy and learning: what Ainekio is being built to do.' },
   { title: 'Build journal', href: '/updates/', text: 'Prints, revisions, tests, and setbacks.' },
   { title: 'Build reference', href: '/archive/?kind=reference', text: 'Parts, geometry, assembly, firmware, and software.' },
 ]
@@ -30,8 +30,8 @@ const paths = [
     <div>
       <p class="home-eyebrow">Ainekio · build journal</p>
       <h1 id="home-title">Building a robot familiar</h1>
-      <p class="home-intro">My four-legged robot and its MetaHuman OS integration. Printed parts, leg geometry, electronics, firmware, and experiments.</p>
-      <p class="home-intro">The current build has twelve servos and an ESP32-P4. The original eight-servo S3 build is documented here too.</p>
+      <p class="home-intro">A four-legged companion in development: conversation, personality and memory connected to a body that can see, hear, move and express itself.</p>
+      <p class="home-intro">MetaHuman OS connects its decisions, experiences and learning. The current twelve-servo P4 body and original eight-servo S3 build are both documented here.</p>
       <a class="home-primary-link" href={url('/posts/project-overview/')}>Start here →</a>
     </div>
     <figure>

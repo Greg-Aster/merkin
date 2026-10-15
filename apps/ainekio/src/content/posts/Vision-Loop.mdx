@@ -1,7 +1,7 @@
 ---
 title: "Camera and Visual Feedback"
 published: 2026-08-27T08:30:00-07:00
-updated: 2026-10-12
+updated: 2026-10-14
 description: "When Ainekio takes pictures, how they reach MetaHuman, and how an image is used to check a robot objective."
 image: "/assets/ainekio/v2/vision-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -21,6 +21,12 @@ reading:
   next: voice-loop
   related: ["2026-10-12-yoloe-tracking", "2026-10-08-face-and-media"]
 ---
+
+## October 14: recording and visual planning
+
+The P4 can now save its preview JPEGs as segmented SD video and download clips through Body Control. A [dated hardware run](/posts/2026-10-14-recording-and-updates/) verified concurrent preview, recording and download over 469 seconds without reconnecting. This short result does not establish endurance or visual-task completion.
+
+Camera and image objectives, including mixed requests, route to the configured larger vision planner. The 0.8B Task specialist handles nonvisual planning and can request delegation. [Current model qualification](/posts/2026-10-14-speech-and-task-training/) remains separate from physical vision acceptance.
 
 ## October 12: YOLOE and selected-target integration
 

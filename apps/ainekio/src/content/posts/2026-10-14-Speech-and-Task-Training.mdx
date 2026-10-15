@@ -1,0 +1,117 @@
+---
+title: "Teaching the Task model what to say and what to move"
+published: 2026-10-14
+updated: 2026-10-14
+description: "Two new 0.8B Task LoRA candidates address speech/action confusion. Both improve aggregate scores; neither replaces the deployed adapter after qualification."
+image: "/posts/2026-10-14-progress/task-qualification.svg"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, MetaHuman OS, Machine Learning, Workflows]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: metahuman
+  generation: both
+  kind: journal
+  related: ["2026-10-14-body-events", "2026-10-12-trained-specialists", "metahuman-integration"]
+---
+
+# Correct words, wrong movement
+
+A live body-event reaction exposed a specific planning error. Event Trigger
+asked for spoken words followed by a brief shrug. The 0.8B Task model treated
+the words about quick movement as a movement request and selected continuous
+Crab instead. The command catalog already described Crab as ongoing sideways
+movement; the model chose the wrong operation.
+
+This is why the latest training focuses on distinguishing **speech content**
+from **an instruction to move**. The detector does not prescribe a reaction,
+and the repair does not replace model decisions with a list of fixed phrases.
+
+This report concerns specialist task skills. [Conversational personality and
+learning from experience](/posts/ainekio-companion/#learning-skills-and-learning-a-personality)
+are related development goals with their own training and evaluation path.
+
+## The model roles remain separate
+
+- **Event Trigger** interprets the body event and chooses an intention using its configured persona model. That role is configurable; it is not the small Task specialist.
+- **Environment Intent** routes the request and selects relevant context.
+- **The trained 0.8B Task specialist** plans nonvisual tasks against the available capability catalog, including ordered speech and action steps.
+- **The configured vision planner**, currently the 9B vision role, handles camera/image objectives, including requests that mix vision with other actions. The small specialist can also explicitly delegate planning.
+- **Execution and the body controller** send the selected program and report its results; they do not establish that the model understood the request correctly.
+
+An ordered speech step gives the model a way to place its chosen words within
+a program. A camera capture is its own action type. These interface descriptions
+were updated alongside the training data; a syntactically valid response can
+still select the wrong action or omit a requested step.
+
+## Two candidates, separate evaluation
+
+The first new Task fit used **4,350 development examples**. Added contrasts
+paired quoted movement language with actual speech, gestures, continuous gaits
+and discussion-only requests. It corrected the recorded Crab failure in a
+model-only replay. But it still confused another request to walk and then say
+“Take a bow, my friend” with an instruction to physically bow.
+
+The second fit used **4,926 development examples**, adding broader quoted
+instructions paired with different actual movements, plus polite and indirect
+requests. Evaluation and historical regression cases remained outside fitting.
+Neither the recorded Crab incident nor that exact bow failure was copied into
+training as an answer to memorize.
+
+Both were evaluated using the actual local llama.cpp Q4 serving backend.
+The second comparison reused verified baseline outputs for unchanged cases
+and ran the old adapter again on the newly added cases. Latencies from that
+mixed baseline should not be read as a controlled speed comparison.
+
+<figure>
+  <img src="/posts/2026-10-14-progress/task-qualification.svg" alt="On 1,221 evaluation cases, acceptable reference matches rose from 533 to 1,011. Historical regression tests still showed three missed actions versus zero, so the new candidate was not deployed." width="1000" height="640" loading="lazy" />
+  <figcaption>Better aggregate results did not resolve every important regression. These are model-test counts, not robot success rates.</figcaption>
+</figure>
+
+## Latest candidate versus the deployed adapter
+
+| Same frozen cases | Existing Task adapter | Second candidate |
+| --- | ---: | ---: |
+| Acceptable evaluation reference matches | 533 / 1,221 (43.7%) | 1,011 / 1,221 (82.8%) |
+| Evaluation wrong physical actions | 313 | 94 |
+| Evaluation unintended physical selections | 125 | 50 |
+| Historical acceptable reference matches | 82 / 141 | 110 / 141 |
+| Historical wrong physical actions | 18 | 15 |
+| Historical missed physical actions | **0** | **3** |
+| Historical unintended physical selections | 7 | 0 |
+
+The first candidate had a different, smaller evaluation set, so its headline
+score is not a direct comparison with the second. On the shared historical
+suite, it selected 20 wrong physical actions and missed one, versus 18 and zero
+for the existing adapter.
+
+These tests include related wording and command-catalog variants. Their
+percentages describe agreement with the frozen reference cases, not independent
+real-world trials. Valid formatting does not prove correct intent, and valid
+alternative plans can disagree with a reference. Individual failures still
+need inspection.
+
+## Production status at this review
+
+**Training and qualification finished. Neither new candidate is deployed.**
+The October 13 Task refinement adapter remains selected and loaded alongside
+the separate Intent adapter. The latest candidate's aggregate improvement did
+not erase its three new historical missed-action failures. The existing adapter
+also has known errors; retaining it is not a declaration that the current
+robot behavior is reliable.
+
+No physical commands were dispatched by these qualification runs. The complete
+wake/photo/stretch/stand routine and repeated body-event use still need reliable
+planning and physical validation.
+
+[Download the sanitized comparison results](/posts/2026-10-14-progress/task-model-comparison.json).
+Only aggregate counts and qualification status are included, without private
+conversations, profile configuration or raw model inputs. The
+[source manifest](/posts/2026-10-14-progress/sources.json) identifies both runs
+and the reviewed workflow source.

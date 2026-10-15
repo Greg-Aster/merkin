@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620" role="img" aria-labelledby="title desc"><title id="title">Ainekio: a companion with continuity</title><desc id="desc">Interaction, decisions, attributed experience and reviewed learning connect over time. Intended design, not a fixed execution schedule.</desc><rect width="1000" height="620" rx="20" fill="#101f26"/><g font-family="sans-serif"><text x="40" y="55" fill="#f0f6f7" font-size="30" font-weight="700">A companion with continuity</text><text x="40" y="92" fill="#a7c3ce" font-size="20">Personality and relevant context inform each interaction.</text>
+<rect x="40" y="125" width="920" height="120" rx="12" fill="#19333d" stroke="#3b7787"/><text x="62" y="159" fill="#79ece0" font-size="24" font-weight="700">Interact and decide</text>
+<text x="62" y="194" fill="#e1edf1" font-size="21">Conversation, observations and events inform model choices.</text>
+<text x="62" y="223" fill="#e1edf1" font-size="21">Speak, express, act or pursue an objective.</text>
+<rect x="40" y="265" width="920" height="120" rx="12" fill="#19333d" stroke="#3b7787"/><text x="62" y="299" fill="#79ece0" font-size="24" font-weight="700">Retain and recall</text>
+<text x="62" y="334" fill="#e1edf1" font-size="21">Keep recent context, useful memories and task progress.</text>
+<text x="62" y="363" fill="#e1edf1" font-size="21">Preserve who said it, what happened, and what was imagined.</text>
+<rect x="40" y="405" width="920" height="120" rx="12" fill="#19333d" stroke="#3b7787"/><text x="62" y="439" fill="#79ece0" font-size="24" font-weight="700">Review and learn</text>
+<text x="62" y="474" fill="#e1edf1" font-size="21">Curate experience and corrections; train and evaluate changes.</text>
+<text x="62" y="503" fill="#e1edf1" font-size="21">Use qualified improvements in later interactions.</text>
+<text x="40" y="581" fill="#bcced6" font-size="19">Intended information flow · the complete companion loop is still in development.</text></g></svg>

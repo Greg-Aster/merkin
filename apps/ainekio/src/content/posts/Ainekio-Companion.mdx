@@ -1,0 +1,178 @@
+---
+title: "Ainekio as a Companion: Personality, Memory and Learning"
+published: 2026-10-14
+updated: 2026-10-14
+description: "Meet the robot familiar: how conversation, perception, personality, memory, inner activity and autonomous goals are intended to work together."
+image: "/posts/companion-guide/companion-loop.svg"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, Robot Familiar, MetaHuman OS, Memory, Personality, Learning]
+category: "Start Here"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: overview
+  generation: both
+  kind: reference
+  next: v1-v2-comparison
+  related: ["project-overview", "metahuman-integration", "bounded-autonomy"]
+---
+
+## A familiar with a physical body
+
+Ainekio is a four-legged robot familiar being developed as a persistent
+conversational companion. The aim is a recognizable personality that carries
+experience from one interaction into the next: talking, noticing its surroundings,
+expressing itself, choosing activities and learning from what happens.
+
+Its body provides movement, a camera, a microphone, a speaker and a face display.
+**MetaHuman OS** provides the software for identity, conversation, memory,
+perception, decisions and learning. Body Control connects the two and gives the
+owner a manual interface. The original eight-servo V1 and the twelve-servo V2
+have different physical capabilities; the connected body's capabilities determine
+which actions are available.
+
+This guide describes the companion's intended functions and the systems being
+built to support them. The complete companion experience is still in development.
+[Current status](/posts/current-status/) and the dated build reports record what
+has been tested and what remains unresolved.
+
+## What Ainekio is being built to do
+
+| Function | What it means for the companion |
+| --- | --- |
+| Converse | Respond through text or speech, follow the exchange and connect an answer to the relevant situation |
+| Perceive | Use camera observations, recognition and body sensing to inform answers and activities |
+| Move and express | Combine supported postures, gestures, locomotion, speech and face expressions |
+| Remember | Retain useful experiences and retrieve them for later conversation and decisions |
+| Pursue goals | Keep track of an objective, choose steps, examine results and decide what to do next |
+| Reflect and imagine | Produce attributed internal reflections, dreams, daydreams and questions that can contribute to later activity |
+| Learn | Use reviewed interactions and corrections to improve specialist skills and, ultimately, conversational personality |
+
+These functions belong to one companion. For example, an intended request to
+help find an object would connect conversation, visual evidence, selected
+actions and review of the result. The model chooses the steps from the situation;
+there is no fixed search routine for every object. Reliable autonomous search
+and navigation still require their own demonstrations.
+
+## Personality and continuity
+
+Ainekio's **persona** describes its identity, background, personality, values and
+goals. Relevant parts can inform how it responds and what it considers doing.
+The aim is consistent character with reactions appropriate to the moment.
+Variation should come from context, experience and model choices.
+
+Personality and memory play different roles. A persona can describe an interest;
+a memory records a particular experience. A generated story or imagined event
+must remain distinguishable from something the robot actually observed.
+
+Three forms of continuity work together:
+
+- **Recent context** keeps the current conversation and relevant internal activity available across successive turns.
+- **Persistent memory** stores experiences beyond that recent context and retrieves useful records later.
+- **Saved task progress** retains an objective, corrections, actions and results while work continues.
+
+Model training is a fourth, slower process: it changes learned behavior. Saving
+a conversation does not immediately train the model, and a trained model does
+not automatically contain the current conversation.
+
+## Inner activity and sleep
+
+MetaHuman includes workflows for reflection, dreams, daydreams, curiosity,
+associative thought and mood review. Reflection examines supplied experience;
+dreams and daydreams produce imaginative material. Some internal activity may
+inform a later conversation or choice without being spoken as it is generated.
+Here, “inner activity” names software-generated content, not a claim of subjective
+experience.
+
+The software's **Sleep Workflow** brings together memory organization, curation,
+eligible personalization training, desire processing, dreaming, persona review
+and memory-index refresh. Which stages run depends on their settings and results.
+This cognitive maintenance is separate from putting the physical body into
+Doze or a low-power state. A body waking up does not mean a software sleep
+cycle has completed.
+
+The intended connection is that useful material remains available and can
+influence later interaction. Recorded tests have found dreams that were saved
+but did not reach the answering model. Generation, storage, retrieval and
+use therefore remain separate parts of the work to verify.
+
+## Choosing when to act
+
+Ainekio has three intended robot autonomy modes:
+
+| Mode | Intended behavior |
+| --- | --- |
+| Reactive | Respond to commands and requests without independently choosing new activities |
+| Semi-autonomous | Let configured agents and triggers initiate selected functions and activities |
+| Fully autonomous | Choose high-level activities, pursue goals, review desires and use outcomes to decide what comes next |
+
+A **goal** is an outcome to pursue. A **desire** is a candidate intention that
+can be considered, planned and reviewed. An action is one step toward an outcome.
+Completing a camera capture, for instance, does not prove that a missing object
+has been found.
+
+Full autonomy is intended to support purposeful, varied activity with continuity.
+Repeated commands without progress do not demonstrate that capability. Ordinary
+conversation also has value on its own; every exchange need not become a
+physical task or a new goal. The [autonomy guide](/posts/bounded-autonomy/)
+explains the operating modes and their development history.
+
+## Learning skills and learning a personality
+
+The project has two related learning directions. **Specialist training** improves
+functions such as interpreting intent and selecting task actions. **Conversational
+personalization** aims to teach the model Ainekio's identity and expression from
+reviewed companion replies and experience.
+
+The intended local model arrangement uses small 0.8B specialists for Intent and
+Task, with a larger 9B model for conversation and higher-level functions. Roles
+are configurable, and an investigation may use another provider. A particular
+running assignment is documented separately from this design direction.
+
+Today, a persona description supplies identity through context. The longer-term
+aim is a trained conversational persona that expresses that identity without
+needing the full description repeated in every request. Selected memories,
+current observations and instructions would still provide the information needed
+for the situation. This is a development direction, not a claim that the learned
+persona has already been deployed.
+
+<figure>
+  <img src="/posts/companion-guide/companion-loop.svg" alt="Intended companion loop: interaction and observations inform decisions and expression; attributed experience is retained for later recall and reviewed learning, which can improve future interactions." width="1000" height="620" loading="lazy" />
+  <figcaption>Information connects the functions over time. Independent work can overlap; this is not a required serial schedule.</figcaption>
+</figure>
+
+Learning requires review and correction, training, comparison on separate test
+cases, and a decision about deployment. Fluent replies and successful training
+runs are not enough to establish improvement. The
+[Task training report](/posts/2026-10-14-speech-and-task-training/) shows why
+better aggregate scores can still leave a candidate undeployed.
+
+## Understanding and steering the system
+
+MetaHuman's node editor exposes workflows, prompts, model roles and results.
+Conversation, memory, persona and agency interfaces let the owner inspect
+different aspects of the companion. Robot Status shows body evidence and task
+state. Body Control supplies manual motion, sensing, audio and maintenance
+controls for the selected robot.
+
+Processing can be distributed between the body, a nearby computer and more
+powerful compute. The body retains motor timing and peripheral control while
+MetaHuman handles high-level cognition. Seamless transfer of an ongoing goal
+between installations remains a separate development problem.
+
+The test of this project is the connected experience: useful conversation,
+appropriate action, remembered context and meaningful improvement. The current
+work still includes reliable recall, sustained autonomy, voice delivery, correct
+motion selection and physical validation. Individual working components are
+progress toward that experience.
+
+This guide adapts the purpose and functional descriptions in the local **Ainekio
+Robot Bible**, reviewed October 14, 2026. The
+[source record](/posts/companion-guide/sources.json) identifies that snapshot.
+For dated results, follow the [build journal](/updates/) and
+[development tracker](/project-guide/).
