@@ -52,6 +52,7 @@ export const siteConfig: SiteConfig = {
 export const navBarConfig: NavBarConfig = {
   links: [
     { name: 'Start here', url: '/posts/project-overview/' },
+    { name: 'Gallery', url: '/gallery/' },
     { name: 'Build journal', url: '/updates/' },
     { name: 'Build reference', url: '/archive/?kind=reference' },
     { name: 'Original V1', url: '/posts/v1-original-posts/' },
@@ -61,7 +62,7 @@ export const navBarConfig: NavBarConfig = {
 export const profileConfig: ProfileConfig = {
   avatar: '/assets/avatar/assembly-september-20.webp',
   name: 'Ainekio',
-  bio: 'Ainekio’s build journal: the original eight-servo robot and a twelve-servo prototype now standing, walking and responding to commands.',
+  bio: 'Ainekio’s build journal: an eight-servo original and a twelve-servo companion in development, now adding measured servo feedback and a revised chassis.',
   links: [
     {
       name: 'GitHub',

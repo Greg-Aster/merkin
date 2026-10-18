@@ -1,0 +1,142 @@
+{
+  "observed": "2026-10-18",
+  "scope": "Local source and maintained dated qualification records, including unpublished working-tree changes. Firmware and OS activation claims refer to the dated records, not a fresh hardware test.",
+  "sources": [
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/GAIT_RESEARCH_JOURNAL.md",
+      "sha256": "b64fa6221439799f2e1aa1a6e9c5a3c47e7e4fc93ce4087a5e2c10141ea78960",
+      "bytes": 358550,
+      "workingTreeStatus": "M docs/v2-12servo/GAIT_RESEARCH_JOURNAL.md"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/PCA9685_WIRING.md",
+      "sha256": "08366e2f8cb19e4f0737455bc01ba096cbdc84f6385659c6d9d3bccee9f775c3",
+      "bytes": 11773,
+      "workingTreeStatus": "M docs/v2-12servo/PCA9685_WIRING.md"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/main/servo_feedback.c",
+      "sha256": "e12154891dd9b8c2b91de0898cd90c968e28e6b01ccc1012980bd6c45d24e447",
+      "bytes": 14586,
+      "workingTreeStatus": "?? Slave/firmware/esp32p4-wifi6/main/servo_feedback.c"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/main/servo_feedback.h",
+      "sha256": "017f6b4565afb0b606aea122bd6ab86dd733f160adc45b2d5f9d5a0bdbdf1a0b",
+      "bytes": 1103,
+      "workingTreeStatus": "?? Slave/firmware/esp32p4-wifi6/main/servo_feedback.h"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/main/servo_feedback_model.c",
+      "sha256": "5e5a19feebc6b631db20fa069b435940e6ab23847982c072fe6645c6843b818c",
+      "bytes": 2191,
+      "workingTreeStatus": "?? Slave/firmware/esp32p4-wifi6/main/servo_feedback_model.c"
+    },
+    {
+      "repository": "metahuman",
+      "path": "docs/robot/ROBOT_BIBLE.md",
+      "sha256": "5a16f035a014b69d6f17f4ab8cfe2c59b521ebd62a187da0e5361fd178b85a89",
+      "bytes": 278977,
+      "workingTreeStatus": "M docs/robot/ROBOT_BIBLE.md"
+    },
+    {
+      "repository": "metahuman",
+      "path": "docs/investigations/robot-status-workflow-scratchpad.md",
+      "sha256": "3a50a07edae67c99562ef0695d802cf4ac8d6a9fd8b3e753ac0f48111bfe1886",
+      "bytes": 116037,
+      "workingTreeStatus": "M docs/investigations/robot-status-workflow-scratchpad.md"
+    }
+  ],
+  "prototypeExports": [
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/advanced battery carrier/Ainekio-Motion-Working-Gyro carrier.stl",
+      "bytes": 176184,
+      "sha256": "587639e9ca18d5a938977d0f1b07848aa2c315be5bd8dc298e0412c9a05532a8"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/advanced battery carrier/Ainekio-Motion-Working-STRUCTURAL  Battery carrier - rear power module cradle.stl",
+      "bytes": 437984,
+      "sha256": "e90c0527aebb447f02db052d01709c34d79300e7947a9df08ff2fb8eb938f6d1"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/bottom slot/Ainekio-Motion-Working-Radxa_Dragon_Q6A_Bottom_Slot.stl",
+      "bytes": 342984,
+      "sha256": "abd2142f086e698d8cadd186cb8917c2a4cc73c6ca96f82ecc3d22b5a96661ed"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/extended front tray/Ainekio-Motion-Working-STRUCTURAL  Tray mount plate - Front.stl",
+      "bytes": 240784,
+      "sha256": "105235f429d9e81e3ec79ee74d0b205cef9f52f640e564f7a22b21413ce38704"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/extra housings front/Ainekio-Motion-Working-REFINED  FL  Part_003 - original mount - separate rectangular shims.stl",
+      "bytes": 383584,
+      "sha256": "80f0f4a41d28e8ce106b592a99ba51e7454976dc2d7a9d389970572a6ac84eb3"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/extra housings front/Ainekio-Motion-Working-REFINED  FR  Part_003 - original mount - separate rectangular shims.stl",
+      "bytes": 383584,
+      "sha256": "2b77a50f2ff55df1fab9ca0d240a414da586423a6d3291d3ae358be5c53973a9"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/forward gyro carrier/Ainekio-Motion-Working-Gyro carrier.stl",
+      "bytes": 275184,
+      "sha256": "09038b4a0b9b883cd0df9c8e84a3fcd72159c5d1521a70a196a02bf7b498fb14"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/forward gyro carrier/Ainekio-Motion-Working-STRUCTURAL  PCB clip - P4 front.stl",
+      "bytes": 33584,
+      "sha256": "82a3b9837d917dbcfb80dbb3b8049b79967b5d49107c039d16196bea0d61050e"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/forward gyro carrier/Ainekio-Motion-Working-STRUCTURAL  PCB clip - P4 rear inner.stl",
+      "bytes": 33584,
+      "sha256": "6d09374d62952d6940638b3aaed72e03e078fd2266addb0411cea3b74fede205"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/forward gyro carrier/Ainekio-Motion-Working-STRUCTURAL  PCB clip - P4 rear outer.stl",
+      "bytes": 33584,
+      "sha256": "3bc4a9aaf3abeb3601d9dba06e7f9be079a7ea7bf5443a4268ba58e1aa5128b3"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/forward gyro carrier/Ainekio-Motion-Working-STRUCTURAL  PCB retainer - Adafruit 1.stl",
+      "bytes": 32084,
+      "sha256": "defa89eda56fd76a35a0f3774f18caf9a7b698630aef7b52ea2c24695af79237"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/forward gyro carrier/Ainekio-Motion-Working-STRUCTURAL  PCB retainer - Adafruit 2.stl",
+      "bytes": 32084,
+      "sha256": "49fc7466cf7a301dfabc33c49b3a7b5c225d5a0065953ae908f777c18c668b13"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/keeper bridge/Ainekio-Motion-Working-STRUCTURAL  Wireless keeper bridge - battery mounted.stl",
+      "bytes": 1119684,
+      "sha256": "5ea541d41dcd7e9efe02a801f870cfcd086b24261cd8e36df12e5e12bc112356"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/lcd carrirer spacer/Ainekio-Motion-Working-MOUNT  Wireless LCD carrier spacer 1.stl",
+      "bytes": 28884,
+      "sha256": "dfc788070f9f874f4c6f710a1f2db913c308d80877d5f35080da0422f2c5cf4d"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/lcd carrirer spacer/Ainekio-Motion-Working-MOUNT  Wireless LCD carrier spacer 2.stl",
+      "bytes": 28884,
+      "sha256": "ad893051909a27a3d474012fddb67a1a97f55e7a513b75881e422a46d07f4d8c"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/lcd carrirer spacer/Ainekio-Motion-Working-MOUNT  Wireless LCD carrier spacer 3.stl",
+      "bytes": 28884,
+      "sha256": "d07351fd2e3bd41b3de60947c0b95f790c9837a99363a742153fd0e281adf205"
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/lcd carrirer spacer/Ainekio-Motion-Working-MOUNT  Wireless LCD carrier spacer 4.stl",
+      "bytes": 28884,
+      "sha256": "d35180eea5fd1b63f332b3308428a3bf33d84322a4bfaec02fc4c445fa0e607a"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 ---
 title: "Ainekio as a Companion: Personality, Memory and Learning"
 published: 2026-10-14
-updated: 2026-10-15
+updated: 2026-10-18
 description: "Meet the robot familiar: how conversation, perception, personality, memory, inner activity and autonomous goals are intended to work together."
 image: "/posts/companion-guide/companion-loop.svg"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
@@ -173,10 +173,11 @@ functions such as interpreting intent and selecting task actions. **Conversation
 personalization** aims to teach the model Ainekio's identity and expression from
 reviewed companion replies and experience.
 
-The intended local model arrangement uses small 0.8B specialists for Intent and
-Task, with a larger 9B model for conversation and higher-level functions. Roles
-are configurable, and an investigation may use another provider. A particular
-running assignment is documented separately from this design direction.
+The latest recorded production arrangement uses trained **Qwen3.5 2B** Intent
+and Task adapters on a shared Q8_0 base, with **9B** conversation and vision.
+A separate 9B autonomy adapter has an experimental assignment. Roles remain
+configurable; [the latest model report](/posts/2026-10-18-metahuman-models-and-execution/)
+records the comparisons, deployment decisions and remaining regressions.
 
 Today, a persona description supplies identity through context. The longer-term
 aim is a trained conversational persona that expresses that identity without
@@ -197,6 +198,14 @@ runs are not enough to establish improvement. The
 better aggregate scores can still leave a candidate undeployed.
 
 ## Latest learning evidence
+
+The subsequent October 15–16 records add the deployed 2B specialists and an
+explicitly experimental autonomy adapter. Both-speaker memory indexing and
+camera freshness have repairs, while recall and visual grounding still fail in
+some live cases. Version 20 memory-routing training data is prepared, not newly
+trained. [Read the October 18 update](/posts/2026-10-18-metahuman-models-and-execution/).
+
+### Earlier diagnostics
 
 Two small independent 9B diagnostics for autonomy and conversational personality
 completed on October 15. Serving tests still found lost objectives and invented
@@ -224,8 +233,8 @@ motion selection and physical validation. Individual working components are
 progress toward that experience.
 
 This guide adapts the purpose and functional descriptions in the local **Ainekio
-Robot Bible**, updated through the October 15, 2026 review. The
+Robot Bible**, reviewed through October 16 and inspected on October 18, 2026. The
 [original source record](/posts/companion-guide/sources.json) and
-[October 15 snapshot](/posts/2026-10-15-progress/sources.json) identify the evidence.
+[October 18 snapshot](/posts/2026-10-18-progress/sources.json) identify the evidence.
 For dated results, follow the [build journal](/updates/) and
 [development tracker](/project-guide/).

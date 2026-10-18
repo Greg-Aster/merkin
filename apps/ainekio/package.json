@@ -15,7 +15,9 @@
     "format": "biome format --write ./src",
     "lint": "biome check ./src",
     "lint:fix": "biome check --write ./src",
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "prepare:gallery": "node scripts/prepare-gallery.mjs",
+    "check:gallery": "node scripts/check-gallery.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

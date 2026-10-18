@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry } from 'astro:content'
-import { siteConfig } from '../config/config'
+import gallery from '../data/gallery.json'
+import GalleryImage from './GalleryImage.astro'
 import { topics, getReading, validateReadingPaths, generations } from '../lib/reading'
 import { url } from '../utils/url-utils'
 import ProjectStatus from './ProjectStatus.astro'
@@ -19,6 +20,8 @@ const topicCards = Object.entries(topics).filter(([id]) => !['overview','v1'].in
   return { id, ...topic, count: posts.filter(post => getReading(post).topic === id).length }
 })
 const dateFormat = new Intl.DateTimeFormat('en-US', {month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})
+const hero = gallery.find(item => item.id === '20261008_181333')!
+const galleryPreview = ['20261017_200604', '20261017_213601', '20261015_172412'].map(id => gallery.find(item => item.id === id)!)
 const paths = [
   { title: 'Meet the companion', href: '/posts/ainekio-companion/', text: 'Personality, memory, perception, autonomy and learning: what Ainekio is being built to do.' },
   { title: 'Build journal', href: '/updates/', text: 'Prints, revisions, tests, and setbacks.' },
@@ -35,11 +38,19 @@ const paths = [
       <a class="home-primary-link" href={url('/posts/project-overview/')}>Start here →</a>
     </div>
     <figure>
-      <img src={url(siteConfig.banner.src)} alt="Blender render of Ainekio’s red shell and four linkage legs in a neutral stance" width="1536" height="1024" loading="eager" fetchpriority="high" decoding="async" />
+      <a href={url('/gallery/')} aria-label="See Ainekio in the photo and video gallery"><GalleryImage item={hero} eager sizes="(max-width: 767px) 100vw, 50vw" /></a>
+      <figcaption class="home-meta">The physical V2 prototype, October 8. <a href={url('/gallery/')}>See the latest rebuild and videos →</a></figcaption>
     </figure>
   </section>
 
   <ProjectStatus compact />
+
+  <section aria-labelledby="home-gallery-title">
+    <div class="home-section-heading"><div><h2 id="home-gallery-title">From the workbench</h2><p>The real robot, its rebuild, and the experiments behind it.</p></div><a href={url('/gallery/')}>Explore photos and videos →</a></div>
+    <div class="home-recent-grid">
+      {galleryPreview.map(item => <figure class="home-update"><a href={url(`/gallery/#${item.id}`)}><GalleryImage item={item} /><figcaption>{item.title} →</figcaption></a></figure>)}
+    </div>
+  </section>
 
   <nav class="home-paths" aria-label="Choose a reading path">
     {paths.map(path => <a href={url(path.href)}><h2>{path.title} <span aria-hidden="true">→</span></h2><p>{path.text}</p></a>)}
@@ -86,7 +97,9 @@ const paths = [
   .home-intro { margin-top: .85rem; max-width: 55ch; }
   .home-eyebrow { color: var(--primary); text-transform: uppercase; font-size: .75rem; font-weight: 700; letter-spacing: .05em; }
   .home-meta { font-size: .75rem; line-height: 1.6; color: var(--text-color-muted); }
-  figure img { width: 100%; border-radius: .7rem; }
+  figure :global(img) { width: 100%; border-radius: .7rem; }
+  .home-feature figcaption { margin-top: .65rem; }
+  .home-update figcaption { padding: 1rem; font-weight: 650; }
   a { color: var(--primary); text-underline-offset: .2em; }
   a:hover { text-decoration: underline; }
   .home-primary-link { display: inline-block; margin-top: 1.1rem; padding: .75rem 1rem; border-radius: .4rem; background: var(--primary); color: #071b20; font-weight: 700; }
@@ -98,7 +111,7 @@ const paths = [
   .home-section-heading > a { padding-block: .6rem; font-size: .9rem; }
   .home-section-heading p { font-size: .9rem; color: var(--text-color-muted); margin-top: .4rem; }
   .home-update { border-radius: .65rem; overflow: hidden; background: var(--card-bg); }
-  .home-update img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .home-update :global(img) { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
   .home-update > div { padding: 1.15rem; }
   .home-update h3 { margin: .4rem 0 .6rem; }
   .home-update > div > p:last-child { font-size: .9rem; }

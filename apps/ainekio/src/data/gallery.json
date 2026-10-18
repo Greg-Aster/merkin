@@ -1,0 +1,940 @@
+[
+  {
+    "id": "20261017_213601",
+    "kind": "photo",
+    "title": "Servo wiring on the workbench",
+    "caption": "The open body, wiring and servos laid out during the feedback-servo rebuild.",
+    "date": "2026-10-17",
+    "sourceFile": "20261017_213601.jpg",
+    "sourceBytes": 559120,
+    "sourceSha256": "70176153eeb7816dff7b085d5e3dab7d8cede5d166b63edebe0fe1f388a0d2ab",
+    "variants": [
+      {
+        "src": "/gallery/20261017_213601-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 44434
+      },
+      {
+        "src": "/gallery/20261017_213601-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 145898
+      },
+      {
+        "src": "/gallery/20261017_213601-1600.webp",
+        "width": 1595,
+        "height": 1196,
+        "bytes": 348306
+      }
+    ]
+  },
+  {
+    "id": "20261017_200604",
+    "kind": "photo",
+    "title": "Inside the revised chassis",
+    "caption": "The open chassis on the workbench, with its display, electronics and wiring exposed.",
+    "date": "2026-10-17",
+    "sourceFile": "20261017_200604.jpg",
+    "sourceBytes": 497045,
+    "sourceSha256": "04da29c95a7a44c20f712c9d6b499337cddddc97484ae90f188ce429730c977a",
+    "variants": [
+      {
+        "src": "/gallery/20261017_200604-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 37498
+      },
+      {
+        "src": "/gallery/20261017_200604-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 124720
+      },
+      {
+        "src": "/gallery/20261017_200604-1600.webp",
+        "width": 1595,
+        "height": 1196,
+        "bytes": 307018
+      }
+    ]
+  },
+  {
+    "id": "20261015_172412",
+    "kind": "photo",
+    "title": "A closer look at the leg",
+    "caption": "A hand-held view of the printed leg carrier, linkage and lower leg.",
+    "date": "2026-10-15",
+    "sourceFile": "20261015_172412.jpg",
+    "sourceBytes": 320363,
+    "sourceSha256": "bc3f6a832647bbc76cbbe30ab484265646f73707bd91e11917a2c03b7c1b4cf6",
+    "variants": [
+      {
+        "src": "/gallery/20261015_172412-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 23164
+      },
+      {
+        "src": "/gallery/20261015_172412-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 62674
+      },
+      {
+        "src": "/gallery/20261015_172412-1600.webp",
+        "width": 1595,
+        "height": 1196,
+        "bytes": 159548
+      }
+    ]
+  },
+  {
+    "id": "20261013_154510",
+    "kind": "photo",
+    "title": "On the floor",
+    "caption": "The assembled prototype resting low on the carpet during development.",
+    "date": "2026-10-13",
+    "sourceFile": "20261013_154510.jpg",
+    "sourceBytes": 627122,
+    "sourceSha256": "4656449a335a877d454c11891b47f285f4138bccdbfe13bf59940fa1974ab7c2",
+    "variants": [
+      {
+        "src": "/gallery/20261013_154510-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 56002
+      },
+      {
+        "src": "/gallery/20261013_154510-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 175442
+      },
+      {
+        "src": "/gallery/20261013_154510-1600.webp",
+        "width": 1595,
+        "height": 1196,
+        "bytes": 419786
+      }
+    ]
+  },
+  {
+    "id": "20261008_181333",
+    "kind": "photo",
+    "title": "The October walking build",
+    "caption": "The uncovered twelve-servo prototype on the bench, with its illuminated face and exposed wiring.",
+    "date": "2026-10-08",
+    "sourceFile": "20261008_181333.jpg",
+    "sourceBytes": 335377,
+    "sourceSha256": "3803e9c9d60a49c3339846fc259df107c90802c47bec7e76c10b18340a62681b",
+    "variants": [
+      {
+        "src": "/gallery/20261008_181333-480.webp",
+        "width": 480,
+        "height": 335,
+        "bytes": 30632
+      },
+      {
+        "src": "/gallery/20261008_181333-960.webp",
+        "width": 960,
+        "height": 670,
+        "bytes": 81666
+      },
+      {
+        "src": "/gallery/20261008_181333-1600.webp",
+        "width": 1600,
+        "height": 1116,
+        "bytes": 155000
+      }
+    ]
+  },
+  {
+    "id": "20260914_152236",
+    "kind": "photo",
+    "title": "Printed leg prototype",
+    "caption": "A physical leg mechanism photographed from another angle before the later body revisions.",
+    "date": "2026-09-14",
+    "sourceFile": "20260914_152236.jpg",
+    "sourceBytes": 275485,
+    "sourceSha256": "3526a23eca735a02327e703142f7a4475e543b59cefe14634b73a8a786fbdad7",
+    "variants": [
+      {
+        "src": "/gallery/20260914_152236-480.webp",
+        "width": 480,
+        "height": 640,
+        "bytes": 86512
+      },
+      {
+        "src": "/gallery/20260914_152236-960.webp",
+        "width": 744,
+        "height": 992,
+        "bytes": 191672
+      },
+      {
+        "src": "/gallery/20260914_152236-1600.webp",
+        "width": 744,
+        "height": 992,
+        "bytes": 191672
+      }
+    ]
+  },
+  {
+    "id": "20260914_152130",
+    "kind": "photo",
+    "title": "Printed leg prototype",
+    "caption": "A physical leg mechanism photographed from another angle before the later body revisions.",
+    "date": "2026-09-14",
+    "sourceFile": "20260914_152130.jpg",
+    "sourceBytes": 322799,
+    "sourceSha256": "98e96b73c22acbe3b65f9fc40280e6d1ed392372475ab11e107fd70f7e2346ef",
+    "variants": [
+      {
+        "src": "/gallery/20260914_152130-480.webp",
+        "width": 480,
+        "height": 640,
+        "bytes": 105494
+      },
+      {
+        "src": "/gallery/20260914_152130-960.webp",
+        "width": 744,
+        "height": 992,
+        "bytes": 235312
+      },
+      {
+        "src": "/gallery/20260914_152130-1600.webp",
+        "width": 744,
+        "height": 992,
+        "bytes": 235312
+      }
+    ]
+  },
+  {
+    "id": "20260914_152101",
+    "kind": "photo",
+    "title": "Printed leg prototype",
+    "caption": "A physical leg mechanism photographed from another angle before the later body revisions.",
+    "date": "2026-09-14",
+    "sourceFile": "20260914_152101.jpg",
+    "sourceBytes": 264456,
+    "sourceSha256": "7ba8598f03ec7c051df23062951ce774c1535993f1c47d82af8db54bd743c96b",
+    "variants": [
+      {
+        "src": "/gallery/20260914_152101-480.webp",
+        "width": 480,
+        "height": 640,
+        "bytes": 84360
+      },
+      {
+        "src": "/gallery/20260914_152101-960.webp",
+        "width": 744,
+        "height": 992,
+        "bytes": 181168
+      },
+      {
+        "src": "/gallery/20260914_152101-1600.webp",
+        "width": 744,
+        "height": 992,
+        "bytes": 181168
+      }
+    ]
+  },
+  {
+    "id": "20260827_093250",
+    "kind": "photo",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27",
+    "sourceFile": "20260827_093250.jpg",
+    "sourceBytes": 416169,
+    "sourceSha256": "6941e82cd07e3b2990bb25fc6ed2d6245a446d9a63990b5716805cd82b77db6f",
+    "variants": [
+      {
+        "src": "/gallery/20260827_093250-480.webp",
+        "width": 480,
+        "height": 640,
+        "bytes": 98260
+      },
+      {
+        "src": "/gallery/20260827_093250-960.webp",
+        "width": 911,
+        "height": 1214,
+        "bytes": 292444
+      },
+      {
+        "src": "/gallery/20260827_093250-1600.webp",
+        "width": 911,
+        "height": 1214,
+        "bytes": 292444
+      }
+    ]
+  },
+  {
+    "id": "20260827_093221",
+    "kind": "photo",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27",
+    "sourceFile": "20260827_093221.jpg",
+    "sourceBytes": 443685,
+    "sourceSha256": "32ac5209fccd9f856f2700d0576a485411aada23d32808363e65a18daaebe6ed",
+    "variants": [
+      {
+        "src": "/gallery/20260827_093221-480.webp",
+        "width": 480,
+        "height": 640,
+        "bytes": 98924
+      },
+      {
+        "src": "/gallery/20260827_093221-960.webp",
+        "width": 911,
+        "height": 1214,
+        "bytes": 315352
+      },
+      {
+        "src": "/gallery/20260827_093221-1600.webp",
+        "width": 911,
+        "height": 1214,
+        "bytes": 315352
+      }
+    ]
+  },
+  {
+    "id": "20260827_093218",
+    "kind": "photo",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27",
+    "sourceFile": "20260827_093218.jpg",
+    "sourceBytes": 301374,
+    "sourceSha256": "f009cb87adb9d29ca034b3bf826739d167e80896de9e6e07abcf3859318a6836",
+    "variants": [
+      {
+        "src": "/gallery/20260827_093218-480.webp",
+        "width": 480,
+        "height": 640,
+        "bytes": 72974
+      },
+      {
+        "src": "/gallery/20260827_093218-960.webp",
+        "width": 911,
+        "height": 1214,
+        "bytes": 190840
+      },
+      {
+        "src": "/gallery/20260827_093218-1600.webp",
+        "width": 911,
+        "height": 1214,
+        "bytes": 190840
+      }
+    ]
+  },
+  {
+    "id": "20260827_093204",
+    "kind": "photo",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27",
+    "sourceFile": "20260827_093204.jpg",
+    "sourceBytes": 709265,
+    "sourceSha256": "578020f72e2c3ba191e18a77438178f8619fbc1106f245b42259638d39b8cbaf",
+    "variants": [
+      {
+        "src": "/gallery/20260827_093204-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 62776
+      },
+      {
+        "src": "/gallery/20260827_093204-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 194916
+      },
+      {
+        "src": "/gallery/20260827_093204-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 436456
+      }
+    ]
+  },
+  {
+    "id": "20260827_093200",
+    "kind": "photo",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27",
+    "sourceFile": "20260827_093200.jpg",
+    "sourceBytes": 415089,
+    "sourceSha256": "769377a7f598f550b7fcb338ba0ff3a2015d4bcd4c6a9af775011862d16e3f9e",
+    "variants": [
+      {
+        "src": "/gallery/20260827_093200-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 43988
+      },
+      {
+        "src": "/gallery/20260827_093200-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 116850
+      },
+      {
+        "src": "/gallery/20260827_093200-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 232290
+      }
+    ]
+  },
+  {
+    "id": "20260827_093156",
+    "kind": "photo",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27",
+    "sourceFile": "20260827_093156.jpg",
+    "sourceBytes": 367619,
+    "sourceSha256": "7c9c12a01a69d75f0b59c7130cc833fd2aac02700603cea6a80dba34b98a9366",
+    "variants": [
+      {
+        "src": "/gallery/20260827_093156-480.webp",
+        "width": 480,
+        "height": 640,
+        "bytes": 86562
+      },
+      {
+        "src": "/gallery/20260827_093156-960.webp",
+        "width": 911,
+        "height": 1214,
+        "bytes": 248920
+      },
+      {
+        "src": "/gallery/20260827_093156-1600.webp",
+        "width": 911,
+        "height": 1214,
+        "bytes": 248920
+      }
+    ]
+  },
+  {
+    "id": "20260827_092219",
+    "kind": "photo",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27",
+    "sourceFile": "20260827_092219.jpg",
+    "sourceBytes": 703203,
+    "sourceSha256": "ee3fecee0d898f517f71eedf7defcb78d12a3c0c160eac045e355efb3feb89b6",
+    "variants": [
+      {
+        "src": "/gallery/20260827_092219-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 61282
+      },
+      {
+        "src": "/gallery/20260827_092219-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 204832
+      },
+      {
+        "src": "/gallery/20260827_092219-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 449610
+      }
+    ]
+  },
+  {
+    "id": "20260827_092217",
+    "kind": "photo",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27",
+    "sourceFile": "20260827_092217.jpg",
+    "sourceBytes": 562730,
+    "sourceSha256": "b95e77e4839743935d8419c2b096f1269bb6a3fb756d31db9ae998e187c27ee4",
+    "variants": [
+      {
+        "src": "/gallery/20260827_092217-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 49868
+      },
+      {
+        "src": "/gallery/20260827_092217-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 147768
+      },
+      {
+        "src": "/gallery/20260827_092217-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 327424
+      }
+    ]
+  },
+  {
+    "id": "design-boot-angular-comparison",
+    "kind": "design",
+    "title": "Boot angular comparison",
+    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
+    "date": null,
+    "sourceFile": "boot-angular-comparison.png",
+    "sourceBytes": 2866006,
+    "sourceSha256": "e458f57cd7aac3878638a259fb95c1d48e859a29ae613c6f1f7c9fe8fb2437cf",
+    "variants": [
+      {
+        "src": "/gallery/design-boot-angular-comparison-480.webp",
+        "width": 480,
+        "height": 514,
+        "bytes": 12162
+      },
+      {
+        "src": "/gallery/design-boot-angular-comparison-960.webp",
+        "width": 960,
+        "height": 1027,
+        "bytes": 33526
+      },
+      {
+        "src": "/gallery/design-boot-angular-comparison-1600.webp",
+        "width": 1600,
+        "height": 1712,
+        "bytes": 63700
+      }
+    ]
+  },
+  {
+    "id": "design-boot-angular-leg",
+    "kind": "design",
+    "title": "Boot angular leg",
+    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
+    "date": null,
+    "sourceFile": "boot-angular-leg.png",
+    "sourceBytes": 3180563,
+    "sourceSha256": "3952e387ac8d257197d1e33bd98a0f00f597c2a7610667327049ad6fb2415640",
+    "variants": [
+      {
+        "src": "/gallery/design-boot-angular-leg-480.webp",
+        "width": 480,
+        "height": 427,
+        "bytes": 8366
+      },
+      {
+        "src": "/gallery/design-boot-angular-leg-960.webp",
+        "width": 960,
+        "height": 853,
+        "bytes": 21678
+      },
+      {
+        "src": "/gallery/design-boot-angular-leg-1600.webp",
+        "width": 1600,
+        "height": 1422,
+        "bytes": 43684
+      }
+    ]
+  },
+  {
+    "id": "design-boot-angular-robot",
+    "kind": "design",
+    "title": "Boot angular robot",
+    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
+    "date": null,
+    "sourceFile": "boot-angular-robot.png",
+    "sourceBytes": 3350734,
+    "sourceSha256": "1f435cc3abf8a4785fc8f709eaec56c8b27f5b5a0ae839cd054a410773711410",
+    "variants": [
+      {
+        "src": "/gallery/design-boot-angular-robot-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 12706
+      },
+      {
+        "src": "/gallery/design-boot-angular-robot-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 34796
+      },
+      {
+        "src": "/gallery/design-boot-angular-robot-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 66918
+      }
+    ]
+  },
+  {
+    "id": "design-boot-replacement-inner",
+    "kind": "design",
+    "title": "Boot replacement inner",
+    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
+    "date": null,
+    "sourceFile": "boot-replacement-inner.png",
+    "sourceBytes": 1282799,
+    "sourceSha256": "0b00f9840a83ac65c1af78f11b6e13c69dc25cc5ac3e298c94da24a757471e42",
+    "variants": [
+      {
+        "src": "/gallery/design-boot-replacement-inner-480.webp",
+        "width": 480,
+        "height": 480,
+        "bytes": 8408
+      },
+      {
+        "src": "/gallery/design-boot-replacement-inner-960.webp",
+        "width": 960,
+        "height": 960,
+        "bytes": 21212
+      },
+      {
+        "src": "/gallery/design-boot-replacement-inner-1600.webp",
+        "width": 1100,
+        "height": 1100,
+        "bytes": 25302
+      }
+    ]
+  },
+  {
+    "id": "design-boot-replacement-leg",
+    "kind": "design",
+    "title": "Boot replacement leg",
+    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
+    "date": null,
+    "sourceFile": "boot-replacement-leg.png",
+    "sourceBytes": 1321145,
+    "sourceSha256": "008c0dd5081ceaeba2e4eb530b2128036792ab37a0ca61b666c1a9950472a62b",
+    "variants": [
+      {
+        "src": "/gallery/design-boot-replacement-leg-480.webp",
+        "width": 480,
+        "height": 480,
+        "bytes": 9950
+      },
+      {
+        "src": "/gallery/design-boot-replacement-leg-960.webp",
+        "width": 960,
+        "height": 960,
+        "bytes": 24806
+      },
+      {
+        "src": "/gallery/design-boot-replacement-leg-1600.webp",
+        "width": 1100,
+        "height": 1100,
+        "bytes": 29700
+      }
+    ]
+  },
+  {
+    "id": "design-front-quarter",
+    "kind": "design",
+    "title": "Front quarter",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22",
+    "sourceFile": "front-quarter.png",
+    "sourceBytes": 3327416,
+    "sourceSha256": "d9c47753331aadafa538ed23a6ae5e565e0a176cc6dd88054eaa6662b7392db1",
+    "variants": [
+      {
+        "src": "/gallery/design-front-quarter-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 12794
+      },
+      {
+        "src": "/gallery/design-front-quarter-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 33914
+      },
+      {
+        "src": "/gallery/design-front-quarter-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 65662
+      }
+    ]
+  },
+  {
+    "id": "design-front",
+    "kind": "design",
+    "title": "Front",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22",
+    "sourceFile": "front.png",
+    "sourceBytes": 3094499,
+    "sourceSha256": "912b1849375aca1218d3f7bf26e7231f1b8c59b2740612ab4a72f8ff1a510486",
+    "variants": [
+      {
+        "src": "/gallery/design-front-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 9814
+      },
+      {
+        "src": "/gallery/design-front-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 24662
+      },
+      {
+        "src": "/gallery/design-front-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 46516
+      }
+    ]
+  },
+  {
+    "id": "design-left-side",
+    "kind": "design",
+    "title": "Left side",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22",
+    "sourceFile": "left-side.png",
+    "sourceBytes": 3104004,
+    "sourceSha256": "327f54d6bcf168a5be8fbd294a9e3c31516e527794def3914497e7d971af7c84",
+    "variants": [
+      {
+        "src": "/gallery/design-left-side-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 10340
+      },
+      {
+        "src": "/gallery/design-left-side-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 27752
+      },
+      {
+        "src": "/gallery/design-left-side-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 52848
+      }
+    ]
+  },
+  {
+    "id": "design-overview",
+    "kind": "design",
+    "title": "Overview",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22",
+    "sourceFile": "overview.png",
+    "sourceBytes": 2041084,
+    "sourceSha256": "4a1eaf454134a050db712ddb879c6c9310359b8009cd7c59c489f89f3bf74f06",
+    "variants": [
+      {
+        "src": "/gallery/design-overview-480.webp",
+        "width": 480,
+        "height": 768,
+        "bytes": 30278
+      },
+      {
+        "src": "/gallery/design-overview-960.webp",
+        "width": 960,
+        "height": 1536,
+        "bytes": 78334
+      },
+      {
+        "src": "/gallery/design-overview-1600.webp",
+        "width": 1600,
+        "height": 2560,
+        "bytes": 151666
+      }
+    ]
+  },
+  {
+    "id": "design-rear-quarter",
+    "kind": "design",
+    "title": "Rear quarter",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22",
+    "sourceFile": "rear-quarter.png",
+    "sourceBytes": 3223948,
+    "sourceSha256": "ccbc939c16c14445c6b5fbc70712ed58feb867b4388f81e41aa1a1e6951d14b9",
+    "variants": [
+      {
+        "src": "/gallery/design-rear-quarter-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 11422
+      },
+      {
+        "src": "/gallery/design-rear-quarter-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 31032
+      },
+      {
+        "src": "/gallery/design-rear-quarter-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 59634
+      }
+    ]
+  },
+  {
+    "id": "design-rear",
+    "kind": "design",
+    "title": "Rear",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22",
+    "sourceFile": "rear.png",
+    "sourceBytes": 2958741,
+    "sourceSha256": "c9a60af90e0c42e8616989b721825a11445763760f97269f81f905050756a5a0",
+    "variants": [
+      {
+        "src": "/gallery/design-rear-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 7984
+      },
+      {
+        "src": "/gallery/design-rear-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 19036
+      },
+      {
+        "src": "/gallery/design-rear-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 34240
+      }
+    ]
+  },
+  {
+    "id": "design-right-side",
+    "kind": "design",
+    "title": "Right side",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22",
+    "sourceFile": "right-side.png",
+    "sourceBytes": 3079833,
+    "sourceSha256": "7eaaa5219f7691541773e1c1812d4ac5fce57526b0d9dba7f0195eb435dabef9",
+    "variants": [
+      {
+        "src": "/gallery/design-right-side-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 10114
+      },
+      {
+        "src": "/gallery/design-right-side-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 26770
+      },
+      {
+        "src": "/gallery/design-right-side-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 50860
+      }
+    ]
+  },
+  {
+    "id": "design-top",
+    "kind": "design",
+    "title": "Top",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22",
+    "sourceFile": "top.png",
+    "sourceBytes": 3026145,
+    "sourceSha256": "89699e1856bfef61af78f50e81607ed15d21afb38e2864c638079984abd6a057",
+    "variants": [
+      {
+        "src": "/gallery/design-top-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 7960
+      },
+      {
+        "src": "/gallery/design-top-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 19880
+      },
+      {
+        "src": "/gallery/design-top-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 37474
+      }
+    ]
+  },
+  {
+    "id": "floor-test",
+    "kind": "physical-video",
+    "title": "Floor test and manual adjustment",
+    "caption": "Physical footage of the prototype on carpet, including manual handling and adjustment. Recording date is not established; this is not evidence that the latest gait is qualified.",
+    "date": null,
+    "sourceFile": "Timeline 2.mp4",
+    "sourceBytes": 37483206,
+    "sourceSha256": "fe1eaa534e68d472e83f9b9a22643f5c54c95eb8577a51837553e5e73afbd1d5",
+    "src": "/gallery/floor-test.mp4",
+    "bytes": 9785756,
+    "width": 1280,
+    "height": 720,
+    "duration": 104.860998,
+    "poster": "/gallery/floor-test-poster.webp",
+    "posterBytes": 66154
+  },
+  {
+    "id": "early-bench",
+    "kind": "physical-video",
+    "title": "Early electronics bench test",
+    "caption": "Physical footage of the early electronics, servos and display on the workbench.",
+    "date": "2026-07-29",
+    "sourceFile": "20260729_203710.mp4",
+    "sourceBytes": 15006179,
+    "sourceSha256": "4746af44db9e840ed1bf266c02e29c9e390a40294fa0519a7c668648ca552ced",
+    "src": "/gallery/early-bench.mp4",
+    "bytes": 3626839,
+    "width": 1280,
+    "height": 720,
+    "duration": 23.031579,
+    "poster": "/gallery/early-bench-poster.webp",
+    "posterBytes": 39924
+  },
+  {
+    "id": "motion-library",
+    "kind": "animation",
+    "title": "33 motions in Blender",
+    "caption": "A four-minute Blender motion showcase at 2× playback. The labeled chapters show modeled poses and gaits from the earlier library, not physical robot performance.",
+    "date": "2026-09-23",
+    "sourceFile": "ainekio-gaits-and-motions-2x-standard.mp4",
+    "sourceBytes": 285201559,
+    "sourceSha256": "1aa7fcdf504abb34aff0d2b0229a645d78df08cc086c5ad15e62d3bc39f87e37",
+    "src": "/gallery/motion-library.mp4",
+    "bytes": 16665388,
+    "width": 1280,
+    "height": 720,
+    "duration": 250.133333,
+    "poster": "/gallery/motion-library-poster.webp",
+    "posterBytes": 13212
+  },
+  {
+    "id": "variable-gait",
+    "kind": "animation",
+    "title": "Variable gait study",
+    "caption": "A short Blender animation of the red robot and its changing leg motion. Recording date is not established.",
+    "date": null,
+    "sourceFile": "ainekio-variable-gait-demo.mp4",
+    "sourceBytes": 1016806,
+    "sourceSha256": "2e500c00717c136c7a34d5763a3d55fcbd18b8820cdd596be63efb8896577624",
+    "src": "/gallery/variable-gait.mp4",
+    "bytes": 704251,
+    "width": 960,
+    "height": 540,
+    "duration": 7.268005,
+    "poster": "/gallery/variable-gait-poster.webp",
+    "posterBytes": 19630
+  }
+]

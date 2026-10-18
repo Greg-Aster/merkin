@@ -1,0 +1,135 @@
+---
+title: "MetaHuman update: trained 2B specialists and clearer task outcomes"
+published: 2026-10-18
+updated: 2026-10-18
+description: "Trained 2B Intent and Task models, experimental 9B autonomy, monitor performance repairs, and live tests of camera freshness and conversational memory."
+image: "/gallery/20261008_181333-1600.webp"
+authorName: "Ainekio Project"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, MetaHuman OS, Training, Memory, Workflows]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: metahuman
+  generation: both
+  kind: journal
+  next: metahuman-integration
+  related: ["ainekio-companion", "2026-10-15-learning-diagnostics", "2026-10-18-servo-feedback-and-chassis"]
+---
+
+The latest MetaHuman work changes both the models and the software around them.
+Trained **Qwen3.5 2B Intent and Task adapters** replace the earlier 0.8B production
+specialists. An independently trained **9B autonomy adapter** has an explicitly
+experimental assignment. Monitor and task-lifecycle repairs address unnecessary
+server work and failed actions that could leave misleading unfinished goals.
+
+These are separate advances. A faster response, a better training score and a
+correct physical action each need their own evidence.
+
+## The small models are still trained specialists
+
+Intent interprets a request and selects its route; Task selects supported actions
+and their controls. Both now use separate trained adapters on one shared 2B base.
+The architecture retains specialization rather than sending every task to the
+larger conversational model. The 9B model continues to handle conversation and
+vision; model roles remain configurable in MetaHuman.
+
+The October 15 comparison used identical evaluation requests:
+
+| Automated reference agreement | Previous 0.8B deployment | 2B candidate |
+| --- | --- | --- |
+| Intent | 219 / 297 | 266 / 297 |
+| Task | 578 / 1,293 | 1,194 / 1,293 |
+
+These counts measure agreement with reference decisions, not semantic or robot
+success rates. Review still found at least 21 previously valid Task decisions
+that regressed, including issues with conditions, counts, order and movement
+parameters. The owner selected the new adapters with these limitations recorded.
+
+Production uses a **Q8_0 2B base with the trained F16 adapters**. Measured GPU
+allocation fell from 5,684 to 3,982 MiB compared with the BF16 configuration.
+Forty paired precision checks preserved the selected programs and task controls;
+38 parsed outputs were identical and two differed in wording. This was a focused
+comparison, not a complete accuracy or physical-behavior benchmark.
+
+## A separate experiment in autonomy
+
+The earlier [9B diagnostic report](/posts/2026-10-15-learning-diagnostics/)
+recorded no production promotion. A later owner decision approved experimental
+use of the independently trained autonomy adapter through its own **Autonomy**
+category. Active Operator and the Boredom Reflection/Movement planners use that
+category. Conversation and the image-observer assignment remain unchanged.
+
+The small serving comparison was mixed: the base produced valid outputs in
+eight of eight cases, the adapter in seven of eight. Median complete-call time
+fell from 37.7 to 3.1 seconds because the adapter produced far fewer tokens,
+not because it generated each token faster. Neither that comparison nor the
+synthetic-image smoke test establishes reliable autonomous behavior.
+
+This adapter is distinct from the longer-term goal of a learned conversational
+persona. The current persona still uses contextual identity instructions.
+
+## Removing work that made the interface sluggish
+
+A live CPU profile found repeated Agent Monitor processing dominating the
+application thread: the monitor repeatedly read and parsed the entire daily
+audit log while building status views for agents.
+
+The repair removed automatic historical-log processing and its retired UI
+fields from that owner. Live service, process, bridge and lifecycle information
+remain available, along with explicit manual diagnostics. Recorded source
+snapshots dropped to roughly 3 ms after warm-up, with zero audit reads.
+
+The repaired application was activated without restarting the model or voice
+services. Whole HTTP requests still varied with workload; this result does not
+claim that every source of conversational latency has been fixed.
+
+## A rejected action should retain its actual result
+
+One recorded reflection selected an unrelated Stand command. The body rejected
+it, but the task layer converted that terminal failure into continued work and
+eventually retained a goal waiting for input.
+
+The repaired task owner preserves a terminal failure for a one-off action
+instead of creating another goal-review cycle. A subsequent change removed the
+remaining task-level `continue` mechanism. **Goal Review assesses evidence and
+updates status; it does not select more actions or speak.** New work comes from
+human input or independently admitted autonomy. An already selected program can
+still advance through its steps.
+
+Software acceptance checks verified that the rejected one-off case ends as
+failed, gives one reply and does not repeat the action on re-entry. A genuine
+waiting goal can coexist with newly admitted work. The application changes were
+activated October 16. These checks used simulated actions, so they do not
+establish physical task success or repair every model-selection error.
+
+## Seeing now, remembering later
+
+Tests with the body disassembled exercised the normal conversation route,
+without movement. A fresh camera image reached the 9B Persona model, and one
+reply matched the scene. Another case exposed stale status being described as
+recent. A camera-freshness repair was activated, but an unsupported identity
+guess in a later response shows that visual grounding still needs work.
+
+The memory index was rebuilt to include both sides of conversations rather than
+only the user's messages. That restored the assistant's replies to the index.
+Retrieval could still rank a similar old question above its answer, and an
+ordinary recall request could be routed to a new camera capture. Storing the
+conversation and recalling the right evidence remain different capabilities.
+
+Revised memory-routing training data and evaluation checks were prepared as
+dataset version 20. **That preparation is not a trained or deployed new adapter.**
+Reliable recall, correct visual interpretation and complete autonomous outcomes
+remain open qualification work.
+
+## Read the evidence alongside the features
+
+This update follows the Robot Bible and October 16 workflow investigation records
+inspected on October 18. The [source snapshot](/posts/2026-10-18-progress/sources.json)
+records the local documents used, including unpublished changes. Private
+conversation content is not reproduced here. The [companion guide](/posts/ainekio-companion/)
+explains the intended experience; [current status](/posts/current-status/) keeps
+the latest qualification boundaries visible.

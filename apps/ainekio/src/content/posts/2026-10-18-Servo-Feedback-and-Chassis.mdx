@@ -1,0 +1,130 @@
+---
+title: "Listening to the servos: feedback wiring and a rebuilt chassis"
+published: 2026-10-18
+updated: 2026-10-18
+description: "Twelve modified servos, a CD74HC4067 multiplexer, measured-position tools and revised chassis parts give Ainekio a way to check what its joints actually did."
+image: "/gallery/20261017_213601-1600.webp"
+authorName: "Ainekio Project"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, Servo Feedback, Hardware, Body Control]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: body
+  generation: v2
+  kind: journal
+  next: 2026-10-18-metahuman-models-and-execution
+  related: ["ainekio-v2", "gait-development", "gateway-and-simulator"]
+---
+
+The latest rebuild adds a fourth wire to each of V2's twelve servos and a
+**CD74HC4067 analog multiplexer**. It gives the ESP32-P4 a measurement from each
+servo's internal position sensor. Body Control can now show the difference
+between a requested position and the position reported by the servo.
+
+This addresses a concrete problem in the walking experiments. Sending a position
+command did not establish that a loaded leg had reached it. October 16 floor
+trials still showed a sagging rear, dragging feet and weak movement at smaller
+strides. Legs could extend unloaded while the assembled body struggled to rise.
+No gait winner or reliable walking distance was established in those trials.
+
+The October 8 standing-and-walking milestone remains part of the build history;
+it did not establish repeatable locomotion across later revisions.
+
+## The extra wire and the multiplexer
+
+The added wire reads the servo's internal potentiometer wiper while retaining its
+original connection. The servo still has its own internal controller. The
+**PCA9685 continues to send PWM commands**; the new multiplexer carries analog
+feedback in the other direction.
+
+Twelve feedback wires connect to mux inputs **C4 through C15**. The P4 selects
+one input at a time and reads it through its ADC, building a set of joint
+measurements without needing twelve separate ADC pins. Each reading carries
+sample age and spread, so a stale or noisy observation can be distinguished
+from useful position evidence.
+
+<figure>
+  <img src="/posts/2026-10-18-progress/multiplexer-wiring.png" alt="V2 feedback wiring diagram showing twelve servo wiper wires on CD74HC4067 channels C4 through C15, selector lines to the P4, and the separate PCA9685 PWM command path." width="2400" height="1740" loading="lazy" />
+  <figcaption>The October 17 wiring reference. Channel names identify connections; this is not a physical pin-layout drawing.</figcaption>
+</figure>
+
+This measurement concerns the servo shaft. It does not directly measure foot
+contact, joint torque, body height or distance traveled. Linkage geometry,
+mechanical play and load still matter. The IMU complements it with body attitude,
+acceleration and rotation; a level IMU alone cannot tell a standing robot from a
+stationary crouch.
+
+## What the physical checks established
+
+The October 17 record confirms **0.8.64-p4-lcd-restored** running on the P4 with
+the feedback feature available. All twelve loose servos responded on their
+assigned mux channels during individual movement checks.
+
+Each servo then received a saved three-point calibration at **500, 1650 and
+2800 microseconds**. These are recorded calibration points from an unloaded
+test with clear horns, not a recommended motion range for an assembled leg.
+Intermediate checks covered **48 positions and 480 settled observations**:
+
+| Check | Recorded result |
+| --- | --- |
+| Calibrated joints | All twelve; socket N mapped to mux C(N+4) |
+| Largest absolute median difference from command | 15.31 µs in estimated pulse-equivalent position |
+| Largest individual difference | 23.34 µs |
+| Existing arrival tolerance | 30 µs; unchanged during the checks |
+| Saved operating state | Feedback acquisition enabled; measured Stand disabled |
+
+These results establish **unloaded command/feedback agreement**. They are not
+an independent angular-accuracy measurement or proof that the legs can lift
+and carry the robot. Saved motor Home, direction and output mapping were
+preserved.
+
+## What changes in Body Control
+
+The Servo Feedback tool exposes raw readings, input-to-joint mapping,
+calibration points, sample freshness and measured-versus-commanded position.
+Acquisition and feedback-guided standing have separate saved controls.
+
+The new Stand path can start from measured positions and advance its leg stages
+when fresh feedback confirms arrival. In that path, a shoulder change follows
+the measured leg lift instead of assuming elapsed command time means the lift
+happened. Acquisition runs separately from motion control; this does not create
+a global command barrier, and replacement commands remain available. Missing
+readings cannot count as successful arrival.
+
+**Feedback-guided Stand remains off in the latest physical record.** Reassembled,
+supported tests are the next step. Continuous walking is not yet qualified by
+the servo calibration.
+
+## Repackaging the body
+
+The feedback rebuild accompanies substantial chassis work. The latest local
+prototype exports include a revised battery cradle, a lower electronics slot,
+an extended front tray, extra front servo housings, a forward gyro carrier and
+board retainers, a battery-mounted keeper bridge, and four LCD-carrier spacers.
+
+These parts address how the electronics, wiring, face and moving legs fit within
+the body. Their presence in the design files does not establish that every part
+is printed, installed or fit-tested. The earlier **566 g** assembly report is
+dated October 13; a new complete mass and endurance measurement is still needed.
+
+<figure>
+  <img src="/gallery/20261017_200604-960.webp" alt="Open Ainekio chassis on the October 17 workbench, showing the display, circuit boards and wiring during the rebuild." width="960" height="720" loading="lazy" />
+  <figcaption>The physical rebuild on October 17. <a href="/gallery/">Explore the photographs, floor footage and earlier design studies.</a></figcaption>
+</figure>
+
+## Evidence and next steps
+
+This report uses the October 16–17 entries in the robot's gait research journal,
+the feedback driver and calibration model, wiring documentation, and the local
+chassis export inventory inspected on October 18. The
+[source snapshot](/posts/2026-10-18-progress/sources.json) records paths and hashes,
+including working-tree changes that may not yet be published upstream.
+
+The next physical questions are whether the assembled linkages reach their
+targets under load, whether measured standing restores useful body height, and
+how that evidence informs repeatable walking. The new feedback makes those
+questions measurable; it does not answer them in advance.

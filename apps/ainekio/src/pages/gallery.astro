@@ -1,0 +1,70 @@
+---
+import MainGridLayout from '../layouts/MainGridLayout.astro'
+import GalleryImage from '../components/GalleryImage.astro'
+import gallery from '../data/gallery.json'
+import { url } from '../utils/url-utils'
+const groups = [
+  { id: 'photos', title: 'From the workbench', intro: 'Real photographs of the build: the October rebuild, leg prototypes and the earlier robot.', kinds: ['photo'] },
+  { id: 'videos', title: 'The physical robot on video', intro: 'Bench experiments and floor trials, including the adjustments along the way.', kinds: ['physical-video'] },
+  { id: 'design', title: 'Inside the design', intro: 'Earlier Blender assembly and leg studies. These show modeled geometry, not the current physical assembly.', kinds: ['design'] },
+  { id: 'animation', title: 'Motion studies', intro: 'Blender animations make the intended movements easier to see. Physical walking remains under development.', kinds: ['animation'] },
+]
+const date = (value: string) => new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(value))
+---
+<MainGridLayout oneColumn={true} title="Ainekio Robot Gallery — Photos, Videos and Design Studies" description="See Ainekio taking shape: real robot photographs, bench and floor videos, the feedback-servo rebuild, and dated Blender design and motion studies.">
+  <article class="robot-gallery" data-pagefind-body>
+    <header>
+      <p class="eyebrow">The build, in pictures</p>
+      <h1>Meet the robot</h1>
+      <p>Printed parts, exposed wiring, experiments on the floor—and the design work behind them. This is Ainekio as it takes shape.</p>
+      <p>The latest photographs show the October 17 rebuild. Read about the <a href={url('/posts/2026-10-18-servo-feedback-and-chassis/')}>modified servos, multiplexer and revised chassis</a>.</p>
+      <nav aria-label="Gallery sections">{groups.map(group => <a href={`#${group.id}`}>{group.title} ↓</a>)}</nav>
+    </header>
+    {groups.map(group => <section id={group.id} aria-labelledby={`${group.id}-title`}>
+      <h2 id={`${group.id}-title`}>{group.title}</h2><p class="section-intro">{group.intro}</p>
+      <div class:list={['gallery-grid', { 'video-grid': group.kinds.some(k => ['physical-video', 'animation'].includes(k)) }]}>
+        {gallery.filter(item => group.kinds.includes(item.kind)).map(item => <figure id={item.id}>
+          {item.variants ? <a class="image-link" href={url(item.variants.at(-1)!.src)} aria-label={`Open larger image: ${item.title}`}><GalleryImage item={item} /></a> :
+            <video controls playsinline preload="none" width={item.width} height={item.height} poster={url(item.poster!)} aria-describedby={`${item.id}-caption`}>
+              <source src={url(item.src!)} type="video/mp4" />
+              <a href={url(item.src!)}>Download {item.title}</a>
+            </video>}
+          <figcaption id={`${item.id}-caption`}>
+            <p class="media-label">{item.kind === 'photo' ? 'Photograph' : item.kind === 'physical-video' ? 'Physical footage' : item.kind === 'animation' ? 'Blender animation' : 'Blender study'} · {item.date ? <time datetime={item.date}>{date(item.date)}</time> : 'Undated'}</p>
+            <h3>{item.title}</h3><p>{item.caption}</p>
+            {item.src && <a class="download" href={url(item.src)} download>Download MP4 · {Math.floor(item.duration! / 60)}:{String(Math.round(item.duration! % 60)).padStart(2, '0')} · {(item.bytes! / 1024 / 1024).toFixed(1)} MB</a>}
+          </figcaption>
+        </figure>)}
+      </div>
+    </section>)}
+    <footer><a href={url('/updates/')}>Follow the build journal →</a><a href={url('/posts/current-status/')}>What works today →</a></footer>
+  </article>
+</MainGridLayout>
+<style>
+  .robot-gallery { max-width: 80rem; margin: 0 auto 2rem; color: var(--text-color); }
+  header { padding: clamp(1.25rem,4vw,3rem); border-radius: var(--radius-large); background: var(--card-bg); }
+  h1 { font-size: clamp(2.2rem,5vw,3.8rem); line-height: 1.1; font-weight: 750; margin: .6rem 0 1rem; }
+  h2 { font-size: clamp(1.5rem,3vw,2rem); font-weight: 700; }
+  h3 { font-size: 1.1rem; font-weight: 700; margin: .4rem 0; }
+  p { line-height: 1.65; }
+  header > p { max-width: 65ch; margin-bottom: .8rem; }
+  .eyebrow, .media-label { color: var(--primary); font-size: .75rem; letter-spacing: .03em; }
+  .eyebrow { text-transform: uppercase; font-weight: 700; }
+  a { color: var(--primary); text-underline-offset: .2em; }
+  a:hover { text-decoration: underline; }
+  nav, footer { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin-top: 1.5rem; }
+  nav a, footer a { padding-block: .6rem; }
+  section { margin-top: 2.5rem; scroll-margin-top: 6rem; }
+  .section-intro { margin: .5rem 0 1.25rem; }
+  .gallery-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1.2rem; }
+  .video-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  figure { background: var(--card-bg); border-radius: .8rem; overflow: hidden; }
+  .image-link { display: block; background: #161c22; }
+  .image-link :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 4/3; object-fit: contain; }
+  video { display: block; width: 100%; height: auto; aspect-ratio: 16/9; background: #111; }
+  figcaption { padding: 1.1rem; }
+  figcaption > p:not(.media-label) { font-size: .9rem; }
+  .download { display: inline-block; margin-top: .75rem; font-size: .85rem; }
+  @media (max-width: 1000px) { .gallery-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+  @media (max-width: 640px) { .gallery-grid { grid-template-columns: 1fr; } }
+</style>

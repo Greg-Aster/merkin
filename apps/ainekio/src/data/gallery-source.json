@@ -1,0 +1,270 @@
+[
+  {
+    "id": "20261017_213601",
+    "kind": "photo",
+    "source": "media-originals/photos/20261017_213601.jpg",
+    "title": "Servo wiring on the workbench",
+    "caption": "The open body, wiring and servos laid out during the feedback-servo rebuild.",
+    "date": "2026-10-17"
+  },
+  {
+    "id": "20261017_200604",
+    "kind": "photo",
+    "source": "media-originals/photos/20261017_200604.jpg",
+    "title": "Inside the revised chassis",
+    "caption": "The open chassis on the workbench, with its display, electronics and wiring exposed.",
+    "date": "2026-10-17"
+  },
+  {
+    "id": "20261015_172412",
+    "kind": "photo",
+    "source": "media-originals/photos/20261015_172412.jpg",
+    "title": "A closer look at the leg",
+    "caption": "A hand-held view of the printed leg carrier, linkage and lower leg.",
+    "date": "2026-10-15"
+  },
+  {
+    "id": "20261013_154510",
+    "kind": "photo",
+    "source": "media-originals/photos/20261013_154510.jpg",
+    "title": "On the floor",
+    "caption": "The assembled prototype resting low on the carpet during development.",
+    "date": "2026-10-13"
+  },
+  {
+    "id": "20261008_181333",
+    "kind": "photo",
+    "source": "media-originals/photos/20261008_181333.jpg",
+    "title": "The October walking build",
+    "caption": "The uncovered twelve-servo prototype on the bench, with its illuminated face and exposed wiring.",
+    "date": "2026-10-08"
+  },
+  {
+    "id": "20260914_152236",
+    "kind": "photo",
+    "source": "public/photos/20260914_152236.jpg",
+    "title": "Printed leg prototype",
+    "caption": "A physical leg mechanism photographed from another angle before the later body revisions.",
+    "date": "2026-09-14"
+  },
+  {
+    "id": "20260914_152130",
+    "kind": "photo",
+    "source": "public/photos/20260914_152130.jpg",
+    "title": "Printed leg prototype",
+    "caption": "A physical leg mechanism photographed from another angle before the later body revisions.",
+    "date": "2026-09-14"
+  },
+  {
+    "id": "20260914_152101",
+    "kind": "photo",
+    "source": "public/photos/20260914_152101.jpg",
+    "title": "Printed leg prototype",
+    "caption": "A physical leg mechanism photographed from another angle before the later body revisions.",
+    "date": "2026-09-14"
+  },
+  {
+    "id": "20260827_093250",
+    "kind": "photo",
+    "source": "public/photos/20260827_093250.jpg",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_093221",
+    "kind": "photo",
+    "source": "public/photos/20260827_093221.jpg",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_093218",
+    "kind": "photo",
+    "source": "public/photos/20260827_093218.jpg",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_093204",
+    "kind": "photo",
+    "source": "public/photos/20260827_093204.jpg",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_093200",
+    "kind": "photo",
+    "source": "public/photos/20260827_093200.jpg",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_093156",
+    "kind": "photo",
+    "source": "public/photos/20260827_093156.jpg",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_092219",
+    "kind": "photo",
+    "source": "public/photos/20260827_092219.jpg",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_092217",
+    "kind": "photo",
+    "source": "public/photos/20260827_092217.jpg",
+    "title": "Early physical prototype",
+    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "design-boot-angular-comparison",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/boot-angular-comparison.png",
+    "title": "Boot angular comparison",
+    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
+    "date": null
+  },
+  {
+    "id": "design-boot-angular-leg",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/boot-angular-leg.png",
+    "title": "Boot angular leg",
+    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
+    "date": null
+  },
+  {
+    "id": "design-boot-angular-robot",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/boot-angular-robot.png",
+    "title": "Boot angular robot",
+    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
+    "date": null
+  },
+  {
+    "id": "design-boot-replacement-inner",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/boot-replacement-inner.png",
+    "title": "Boot replacement inner",
+    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
+    "date": null
+  },
+  {
+    "id": "design-boot-replacement-leg",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/boot-replacement-leg.png",
+    "title": "Boot replacement leg",
+    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
+    "date": null
+  },
+  {
+    "id": "design-front-quarter",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/front-quarter.png",
+    "title": "Front quarter",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-front",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/front.png",
+    "title": "Front",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-left-side",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/left-side.png",
+    "title": "Left side",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-overview",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/overview.png",
+    "title": "Overview",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-rear-quarter",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/rear-quarter.png",
+    "title": "Rear quarter",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-rear",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/rear.png",
+    "title": "Rear",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-right-side",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/right-side.png",
+    "title": "Right side",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-top",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/top.png",
+    "title": "Top",
+    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "floor-test",
+    "kind": "physical-video",
+    "source": "media-originals/photos/Timeline 2.mp4",
+    "title": "Floor test and manual adjustment",
+    "caption": "Physical footage of the prototype on carpet, including manual handling and adjustment. Recording date is not established; this is not evidence that the latest gait is qualified.",
+    "date": null,
+    "posterTime": 5
+  },
+  {
+    "id": "early-bench",
+    "kind": "physical-video",
+    "source": "media-originals/photos/20260729_203710.mp4",
+    "title": "Early electronics bench test",
+    "caption": "Physical footage of the early electronics, servos and display on the workbench.",
+    "date": "2026-07-29",
+    "posterTime": 3
+  },
+  {
+    "id": "motion-library",
+    "kind": "animation",
+    "source": "media-originals/photos/ainekio-gaits-and-motions-2x-standard.mp4",
+    "title": "33 motions in Blender",
+    "caption": "A four-minute Blender motion showcase at 2\u00d7 playback. The labeled chapters show modeled poses and gaits from the earlier library, not physical robot performance.",
+    "date": "2026-09-23",
+    "posterTime": 3
+  },
+  {
+    "id": "variable-gait",
+    "kind": "animation",
+    "source": "media-originals/photos/ainekio-variable-gait-demo.mp4",
+    "title": "Variable gait study",
+    "caption": "A short Blender animation of the red robot and its changing leg motion. Recording date is not established.",
+    "date": null,
+    "posterTime": 1
+  }
+]
