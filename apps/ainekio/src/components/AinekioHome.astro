@@ -20,8 +20,8 @@ const topicCards = Object.entries(topics).filter(([id]) => !['overview','v1'].in
   return { id, ...topic, count: posts.filter(post => getReading(post).topic === id).length }
 })
 const dateFormat = new Intl.DateTimeFormat('en-US', {month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})
-const hero = gallery.find(item => item.id === '20261008_181333')!
-const galleryPreview = ['20261017_200604', '20261017_213601', '20261015_172412'].map(id => gallery.find(item => item.id === id)!)
+const hero = gallery.find(item => item.id === '20261021_083818')!
+const galleryPreview = ['20261021_081323', '20261021_081343', '20261021_083818'].map(id => gallery.find(item => item.id === id)!)
 const paths = [
   { title: 'Meet the companion', href: '/posts/ainekio-companion/', text: 'Personality, memory, perception, autonomy and learning: what Ainekio is being built to do.' },
   { title: 'Build journal', href: '/updates/', text: 'Prints, revisions, tests, and setbacks.' },
@@ -39,7 +39,7 @@ const paths = [
     </div>
     <figure>
       <a href={url('/gallery/')} aria-label="See Ainekio in the photo and video gallery"><GalleryImage item={hero} eager sizes="(max-width: 767px) 100vw, 50vw" /></a>
-      <figcaption class="home-meta">The physical V2 prototype, October 8. <a href={url('/gallery/')}>See the latest rebuild and videos →</a></figcaption>
+      <figcaption class="home-meta">The rebuilt V2 prototype, October 21. <a href={url('/gallery/')}>See the latest rebuild and videos →</a></figcaption>
     </figure>
   </section>
 

@@ -1,5 +1,95 @@
 [
   {
+    "id": "20261021_083818",
+    "kind": "photo",
+    "title": "The rebuilt robot, front view",
+    "caption": "The assembled V2 prototype on the October 21 workbench, with its red face surround, illuminated display and exposed upper wiring.",
+    "date": "2026-10-21",
+    "sourceFile": "20261021_083818.jpg",
+    "sourceBytes": 392644,
+    "sourceSha256": "0c01d9a29dc21fff8d7c946beb4b565cf768ead808ddad3dd85fba1cd42ca9bd",
+    "variants": [
+      {
+        "src": "/gallery/20261021_083818-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 27582
+      },
+      {
+        "src": "/gallery/20261021_083818-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 75928
+      },
+      {
+        "src": "/gallery/20261021_083818-1600.webp",
+        "width": 1588,
+        "height": 1191,
+        "bytes": 209132
+      }
+    ]
+  },
+  {
+    "id": "20261021_081323",
+    "kind": "photo",
+    "title": "Red shell and revised face",
+    "caption": "A three-quarter view of the rebuilt body and its four linkage legs on the workbench.",
+    "date": "2026-10-21",
+    "sourceFile": "20261021_081323.jpg",
+    "sourceBytes": 513207,
+    "sourceSha256": "f4116c015330c5346c89ce373e58d2aa956b18919811f010072ff881c87e7a7b",
+    "variants": [
+      {
+        "src": "/gallery/20261021_081323-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 32336
+      },
+      {
+        "src": "/gallery/20261021_081323-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 112610
+      },
+      {
+        "src": "/gallery/20261021_081323-1600.webp",
+        "width": 1588,
+        "height": 1191,
+        "bytes": 326608
+      }
+    ]
+  },
+  {
+    "id": "20261021_081343",
+    "kind": "photo",
+    "title": "A low stance, from the side",
+    "caption": "The October 21 prototype in a low stance, showing its side frame, leg mechanisms and new red body pieces.",
+    "date": "2026-10-21",
+    "sourceFile": "20261021_081343.jpg",
+    "sourceBytes": 393028,
+    "sourceSha256": "5a71f46218829a1f34690c7a0812d11d6b70e37ae32997b6416f556134b895a0",
+    "variants": [
+      {
+        "src": "/gallery/20261021_081343-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 24640
+      },
+      {
+        "src": "/gallery/20261021_081343-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 80122
+      },
+      {
+        "src": "/gallery/20261021_081343-1600.webp",
+        "width": 1588,
+        "height": 1191,
+        "bytes": 215596
+      }
+    ]
+  },
+  {
     "id": "20261017_213601",
     "kind": "photo",
     "title": "Servo wiring on the workbench",

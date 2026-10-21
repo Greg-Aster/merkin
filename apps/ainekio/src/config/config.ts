@@ -62,7 +62,7 @@ export const navBarConfig: NavBarConfig = {
 export const profileConfig: ProfileConfig = {
   avatar: '/assets/avatar/assembly-september-20.webp',
   name: 'Ainekio',
-  bio: 'Ainekio’s build journal: an eight-servo original and a twelve-servo companion in development, now adding measured servo feedback and a revised chassis.',
+  bio: 'Ainekio’s build journal: an eight-servo original and a twelve-servo companion in development, with measured servo feedback, a rebuilt body and learning from real walking.',
   links: [
     {
       name: 'GitHub',

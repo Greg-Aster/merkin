@@ -1,7 +1,7 @@
 ---
 title: "Ainekio as a Companion: Personality, Memory and Learning"
 published: 2026-10-14
-updated: 2026-10-18
+updated: 2026-10-21
 description: "Meet the robot familiar: how conversation, perception, personality, memory, inner activity and autonomous goals are intended to work together."
 image: "/posts/companion-guide/companion-loop.svg"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
@@ -197,7 +197,21 @@ runs are not enough to establish improvement. The
 [Task training report](/posts/2026-10-14-speech-and-task-training/) shows why
 better aggregate scores can still leave a candidate undeployed.
 
-## Latest learning evidence
+## October 21: learning through the body
+
+[Motor-policy learning](/posts/2026-10-21-learning-from-walking/) is now a
+separate practical learning path: Body Control records joint, IMU and camera
+observations, proposes compact Walk/Run policies and compares them on normal
+commands. The P4 executes those policies locally. This is distinct from LLM
+training, and the current automatic comparison has not demonstrated a better gait.
+
+[Fast Body Event](/posts/2026-10-21-reactions-and-recovery/) uses the unadapted
+2B base in a configurable Lightweight category for tip/shake speech, with preset
+initial faces and no conversational memory capture. Boot/wake keeps its contextual
+workflow. The body also has a successful ground-repair Stand trial and
+[an updated physical face](/posts/2026-10-21-body-face-and-standing/).
+
+## Earlier language-model learning evidence
 
 The subsequent October 15–16 records add the deployed 2B specialists and an
 explicitly experimental autonomy adapter. Both-speaker memory indexing and
@@ -233,8 +247,8 @@ motion selection and physical validation. Individual working components are
 progress toward that experience.
 
 This guide adapts the purpose and functional descriptions in the local **Ainekio
-Robot Bible**, reviewed through October 16 and inspected on October 18, 2026. The
+Robot Bible**, reviewed through the October 19–20 records and inspected on October 21, 2026. The
 [original source record](/posts/companion-guide/sources.json) and
-[October 18 snapshot](/posts/2026-10-18-progress/sources.json) identify the evidence.
+[October 21 snapshot](/posts/2026-10-21-progress/sources.json) identify the evidence.
 For dated results, follow the [build journal](/updates/) and
 [development tracker](/project-guide/).

@@ -1,7 +1,7 @@
 ---
 title: "Camera and Visual Feedback"
 published: 2026-08-27T08:30:00-07:00
-updated: 2026-10-15
+updated: 2026-10-21
 description: "When Ainekio takes pictures, how they reach MetaHuman, and how an image is used to check a robot objective."
 image: "/assets/ainekio/v2/vision-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -21,6 +21,16 @@ reading:
   next: voice-loop
   related: ["2026-10-12-yoloe-tracking", "2026-10-08-face-and-media"]
 ---
+
+## October 21: depth estimates and walking progress
+
+[Body Control's experimental depth source](/posts/2026-10-21-learning-from-walking/)
+uses MoGe-2 and retained visual landmarks to estimate local motion for gait
+learning. This is a separate host measurement path from conversational image
+interpretation. It is activated, but metric accuracy is unverified and failed
+tracking intervals remain unavailable. The measured ground-plane method remains
+an alternative. Camera-origin motion becomes body-origin motion only when the
+mounting transform is supplied; neither source establishes physical foot contact.
 
 ## October 15: visual goals and measured relationships
 

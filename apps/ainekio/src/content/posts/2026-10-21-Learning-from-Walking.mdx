@@ -1,0 +1,152 @@
+---
+title: "Learning from real walking: trials, feedback and a live training loop"
+published: 2026-10-21
+updated: 2026-10-21
+description: "Ainekio now records ordinary walking, compares learned Walk and Run policies, and exposes learning history. Physical trials show modest tracking gains with important limits."
+image: "/gallery/20261021_081343-1600.webp"
+authorName: "Ainekio Project"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, Gait, Learning, Servo Feedback, Vision]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-10-21-body-face-and-standing
+  related: ["gait-development", "2026-10-18-servo-feedback-and-chassis", "gateway-and-simulator"]
+---
+
+The [previous update](/posts/2026-10-18-servo-feedback-and-chassis/) ended with
+twelve calibrated loose servos. Since then, the rebuilt robot has completed
+loaded walking comparisons, executed a learned correction on the P4, and begun
+collecting and comparing candidate gaits during ordinary Body Control use.
+
+This is physical and software progress, with an important distinction:
+**the learning loop works, but reliable walking is still the objective**.
+On October 20 the owner reported that forward walking, backward walking,
+turning and Run remained unsatisfactory. Earlier favorable trials do not
+qualify every later revision.
+
+## What the first physical comparisons showed
+
+October 19 trials recorded commanded motion, all twelve fourth-wire readings,
+IMU observations and camera frames. A host computer fitted a compact periodic
+correction; the P4 evaluated its coefficients alongside the existing gait.
+This is motor-policy fitting, separate from MetaHuman's language-model LoRAs.
+
+After short commissioning runs, a longer model was trained on its own recording
+and held fixed during four separate evaluation walks. Each evaluation included
+sixteen steady walking cycles. Gyro heading feedback stayed on and stationary
+self-leveling stayed off.
+
+| Evaluation order | Learned correction | Estimated linkage tracking error | Owner-reported travel |
+| --- | --- | --- | --- |
+| Baseline 1 | Off | 17.26 mm RMS | About 18 inches |
+| Candidate 1 | 50% | 16.72 mm RMS | About 21 inches; no dragging or sag reported |
+| Baseline 2 | Off | 17.21 mm RMS | About 21.5 inches |
+| Candidate 2 | 50% | 16.77 mm RMS | About 30.5 inches; no sag reported |
+
+Pooled estimated tracking error fell from **17.23 to 16.75 mm**, a **2.84%**
+reduction for this forward-Walk comparison. The estimates come from measured
+shaft positions and linkage geometry; they do not measure foot contact, force
+or torque. Travel distances were owner observations against a tape reference.
+
+Both learned runs had greater pitch excursion than both baselines. The second
+baseline also traveled farther than the first candidate. Two trials per setting
+are insufficient to establish a general travel, stability or energy benefit.
+The separate offline result explaining about 92% of a recurring error pattern
+is **not a 92% walking improvement**.
+
+## Learning during normal use
+
+The next development moves recording and optimization into Body Control's host
+service. Closing the browser no longer ends recording. The controls now include:
+
+- **Log gait data** to retain observations without starting optimization.
+- **Learn while walking** to compare policies using ordinary locomotion commands.
+- **Analyze now** to calculate a proposal; with learning off, this does not install it.
+- Progress by maneuver, exploration settings, and saved-policy restore.
+
+The host uses Bayesian optimization through BoTorch. It can adjust gait profile
+parameters and the response to joint and body-motion measurements. The P4 still
+executes motion locally. Training does not dispatch walks, return the robot to
+a starting point, or pause ordinary movement while analysis runs.
+
+The initial scope is **forward Walk, backward Walk, both turning directions,
+and bounding Run**. Walk and Run have separate policy storage and comparisons;
+Run retains its bounding gait. Crab and Crawl remain experimental and outside
+this initial optimizer.
+
+## What counts as a better candidate
+
+The objective combines directional progress with yaw error, lateral drift,
+body motion and joint following. Comparisons match the commanded direction,
+stride and requested rate. Remaining still cannot win simply by eliminating
+vibration, and spinning beyond the requested turn earns no extra reward.
+
+Before installation, the existing linkage preview checks the proposed change
+against the observed commands and saved calibration. That geometric check does
+not predict loaded stability, slipping or collisions. Candidates are installed
+in RAM; only an incumbent supported by the required comparison is saved to flash.
+Walk promotion needs repeated evidence across all four priority directions,
+rather than one successful forward run.
+
+The October 20 live record completed a **record → propose → install → compare →
+next-candidate** iteration. The first Walk candidate did not demonstrate
+improvement, so the incumbent was retained and the service advanced to another
+candidate. Run accumulated a baseline and began its own comparison, which was
+still incomplete at the recorded checkpoint. **No improved policy was promoted
+during that verification.**
+
+## Camera progress is now connected, with uncertain scale
+
+Body Control can select experimental **MoGe-2 depth and landmark tracking** as
+an alternative to its measured ground-plane method. The current implementation
+matches visual landmarks and estimates camera motion against retained 3-D
+points. This supersedes the first dense frame-to-frame depth comparison, which
+could mistake inconsistent learned depth for real motion.
+
+The source feeds the existing locomotion-measurement and gait-recording paths.
+Its distances are labeled **learned metric estimates**: absolute accuracy and
+metric uncertainty are unverified. It is not calibrated visual-inertial odometry
+or a loop-closing map. A supplied camera-to-body transform accounts for mounting
+geometry; without one, the reported origin is the camera.
+
+Blur, lost landmarks and transport gaps can make a window unusable. Tracking can
+start a new local reference, but no distance is invented across the gap. Valid
+measurements of a poor walk remain useful evidence against a candidate; missing
+measurements are not scored as zero error or zero travel.
+
+## A visible learning history
+
+**Recordings → Learning history** now charts scored observations and candidate
+decisions. Filters separate gait, command conditions and measurement contexts.
+The table exposes individual measurements; expandable comparisons show policy
+changes and uncertainty. History can be downloaded as JSON without starting
+motion or analysis.
+
+Activation checks recorded seven separate contexts, including a current Walk
+bank with sixteen scored observations and Run with three. Older records without
+timestamps remain explicitly undated. Changed measurement contexts are archived
+rather than mixed into a single apparent progress curve.
+
+## What remains to establish
+
+The latest record still includes camera failures, HTTP peer closures and lost
+trace records. Completed scored windows survive later interruptions, but short
+unfinished windows may produce no observation. Logging and learning were left
+enabled for normal use, without more dedicated test sequences.
+
+Repeatable forward/backward movement, turns and Run still need physical
+qualification. Metric camera accuracy, measured support/contact, energy use and
+autonomous return to a starting pose remain separate open work.
+
+This report follows the October 19–20 gait journal, current host-learning and
+depth code, and Body Control documentation inspected October 21. The
+[source snapshot](/posts/2026-10-21-progress/sources.json) records the local
+revisions, including unpublished working-tree changes. The header photograph
+shows the October 21 build; it is not a recording of the October 19 trials.

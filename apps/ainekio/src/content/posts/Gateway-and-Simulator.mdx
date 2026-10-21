@@ -1,7 +1,7 @@
 ---
 title: "Gateway and Operator Dashboard"
 published: 2026-08-27T08:45:00-07:00
-updated: 2026-10-18
+updated: 2026-10-21
 description: "Body Control connections, event and leveling settings, SD video, Wi-Fi maintenance, and the retained command-recovery record."
 image: "/assets/ainekio/v2/gateway-simulator-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -21,6 +21,19 @@ reading:
   next: metahuman-integration
   related: ["controller-firmware", "2026-09-28-wired-wireless-ros2"]
 ---
+
+## October 21: learning, measurement and connection continuity
+
+Body Control now owns persistent gait logging, learning controls, candidate
+comparison and a read-only Learning history view. The host can use experimental
+MoGe-2 landmark odometry for progress estimates; metric accuracy is unverified.
+[Read the walking and learning report](/posts/2026-10-21-learning-from-walking/).
+
+Feedback health and position-verification receipts distinguish an executed path
+from measured arrival. The P4 retains local motion through control loss; new
+unsolicited bridge input needs an authenticated recipient, while already-admitted
+work survives reconnect. See the [body report](/posts/2026-10-21-body-face-and-standing/)
+and [OS/bridge report](/posts/2026-10-21-reactions-and-recovery/).
 
 ## October 18: measured servo feedback
 

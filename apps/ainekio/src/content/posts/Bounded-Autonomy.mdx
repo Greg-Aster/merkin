@@ -1,7 +1,7 @@
 ---
 title: "Robot Autonomy Modes"
 published: 2026-08-27T07:45:00-07:00
-updated: 2026-10-15
+updated: 2026-10-21
 description: "Reactive, Semi, and Full behavior, result-driven choices, and how finite Desire plans give robot work a verifiable end."
 image: "/assets/ainekio/v2/bounded-autonomy-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -32,6 +32,20 @@ The October 14 Robot Bible clarifies their intended role in the companion.
 They select how activity begins and continues; any chosen physical action must
 be supported by the connected body. These are distinct from MetaHuman's
 cognitive modes and from physical Idle, Doze or sleep states.
+
+## October 21: inactivity and finite event completion
+
+[Semi Auto now has a configurable inactivity interval](/posts/2026-10-21-reactions-and-recovery/),
+with a five-minute default in the prepared build. Queue bookkeeping no longer
+immediately triggers another Semi assessment. The latest preparation record
+leaves live activation and interval testing unverified; the model still chooses
+whether to activate an operation.
+
+Tip/shake events use a separate one-call Fast Body Event workflow. A finite body
+event can finish its admitted work while preserving an unresolved objective;
+ending the invocation does not mean the objective succeeded. This is separate
+from the robot's prepared three-minute rest setting and Body Control's host gait
+learning, which uses ordinary commands without dispatching autonomous test walks.
 
 ## October 15: Active Operator and Agency
 

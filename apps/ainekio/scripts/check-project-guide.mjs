@@ -176,7 +176,7 @@ for (const [route, html] of [
       'utf8',
     ),
   ],
-  ...['about', 'updates', 'posts/current-status', '2', 'archive', 'gallery', 'posts/2026-10-18-servo-feedback-and-chassis', 'posts/2026-10-18-metahuman-models-and-execution'].map(route => [
+  ...['about', 'updates', 'posts/current-status', '2', 'archive', 'gallery', 'posts/2026-10-18-servo-feedback-and-chassis', 'posts/2026-10-18-metahuman-models-and-execution', 'posts/2026-10-21-learning-from-walking', 'posts/2026-10-21-body-face-and-standing', 'posts/2026-10-21-reactions-and-recovery'].map(route => [
     `/${route}/`,
     readFileSync(path.join(dist, route, 'index.html'), 'utf8'),
   ]),
@@ -234,7 +234,7 @@ assert.ok(
 )
 assert.ok(
   attributeValues(home, 'src').includes(
-    sitePath('/gallery/20261008_181333-960.webp'),
+    sitePath('/gallery/20261021_083818-960.webp'),
   ),
   'Homepage hero must honor SITE_BASE',
 )
@@ -306,8 +306,9 @@ for (const [route, html] of [
 }
 
 // The current entry points must surface the new note without redating history.
-const latestRoute = '/posts/2026-10-18-servo-feedback-and-chassis/'
+const latestRoute = '/posts/2026-10-21-learning-from-walking/'
 const latest = readFileSync(path.join(dist, latestRoute, 'index.html'), 'utf8')
+const feedbackNote = readFileSync(path.join(dist, 'posts/2026-10-18-servo-feedback-and-chassis/index.html'), 'utf8')
 const companionNote = readFileSync(path.join(dist, 'posts/2026-10-15-companion-systems/index.html'), 'utf8')
 const eventNote = readFileSync(path.join(dist, 'posts/2026-10-14-body-events/index.html'), 'utf8')
 const octoberBuild = readFileSync(
@@ -335,11 +336,12 @@ for (const [route, html] of [
 }
 assert.match(
   home,
-  /As of October 18, 2026/,
+  /As of October 21, 2026/,
   'Homepage date must reflect the update',
 )
-assert.match(latest, /CD74HC4067/, 'Latest note must explain the feedback multiplexer')
-assert.match(latest, /measured Stand disabled/, 'Preserve the physical qualification boundary')
+assert.match(feedbackNote, /CD74HC4067/, 'Retain the feedback multiplexer record')
+assert.match(feedbackNote, /measured Stand disabled/, 'Preserve the dated physical qualification boundary')
+assert.match(latest, /No improved policy was promoted/, 'Current learning report must preserve the actual comparison outcome')
 assert.match(companionNote, /Body Event Trigger/, 'Retain the event workflow record')
 assert.match(companionNote, /Environment Mode/, 'Event decisions must reach the existing execution workflow')
 assert.match(eventNote, /omitted the requested stretch/, 'Retain the unresolved wake behavior')
@@ -379,7 +381,7 @@ assert.match(
   'Preserve the archived status observation date',
 )
 for (const [file, date] of [
-  ['Project-Overview.mdx', '2026-10-18'],
+  ['Project-Overview.mdx', '2026-10-21'],
   ['Body-Design-and-Hardware.mdx', '2026-09-15'],
   ['Q6A-Chassis-and-Active-Loop.mdx', '2026-09-30'],
   ['2026-10-06-Lighter-Rebuild.mdx', '2026-10-06'],
