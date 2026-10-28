@@ -1,8 +1,8 @@
 ---
 title: "Ainekio V1 and V2: Eight Servos Versus Twelve"
 published: 2026-09-24
-updated: 2026-10-14
-description: "Compare eight-servo V1 and twelve-servo V2: dated physical photographs and motion ranges, current leveling controls, recording, and the October 13 mass and voltage report."
+updated: 2026-10-27
+description: "Eight versus twelve servos: motion generation, measured feedback, processors and the current 650 g V2 battery/charger assembly, alongside dated motion ranges."
 image: "/posts/2026-09-24-progress/v1-physical.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -24,22 +24,20 @@ reading:
 
 # Eight servos versus twelve
 
-V2 changes the mechanism, controller and power arrangement. The third actuator
-on each leg adds sideways placement; the new software can vary a gait while it
-runs. This comparison separates those implemented capabilities from the
-physical results still to be measured. **Build options, controls and power are
-updated through October 14. The downloadable motion-range dataset remains
-the September 24 snapshot**, before the later gait and chassis changes.
+V2 adds a third actuator per leg, an ESP32-P4 controller and shaft feedback.
+The **October 26** hardware record reports a **650 g** assembly with a 2S battery,
+Mini560 converter and HiLetgo USB-C charger. The current Freestyle work adds
+model-generated targets and measured arrival to the existing gait solver.
 
-**V2 can now stand, walk and respond to commands**, according to the owner's
-October 8 report. At that time its carapace was not attached and Active Operator
-had not been tested. Exterior printing has since begun; no newer physical
-Active Operator result was supplied. This supersedes the [October 6 standing failure](/posts/2026-10-06-lighter-rebuild/)
-as current status. The earlier 20% weight/lifting-force estimates remain
-estimates. The October 13 owner report adds 566 g mass and 5 V supply for that assembly; it does not measure a before/after lifting-force improvement.
+The October 8 standing/walking report and later failed trials remain part of the
+build history. The latest supported Stand/Walk test repaired a firmware reboot;
+it did not establish loaded floor-walking quality. [Current body results](/posts/2026-10-26-body-power-and-training-stand/)
+and [latest motion-training results](/posts/2026-10-27-finite-motion-and-recovery/).
+The downloadable motion ranges below remain the **September 24 snapshot**.
 
 **Wireless**, with the Q6A offboard over Wi-Fi, is the current priority.
-**Wired** retains the onboard-Q6A/native-USB alternative. The
+**Wired** remains an onboard-Q6A/native-USB design alternative; native USB is
+not an implemented replacement for the current Wi-Fi body-command path. The
 [software update](/posts/2026-10-06-steering-sensing-connections/) compares their
 status and separates implemented controls from hardware qualification.
 
@@ -49,8 +47,8 @@ status and separates implemented controls from hardware qualification.
     <figcaption><strong>V1 · physical robot.</strong> August 27 construction photograph.</figcaption>
   </figure>
   <figure>
-    <img src="/posts/2026-10-08-progress/standing-prototype.jpg" alt="Physical V2 on October 8, with exposed chassis, printed legs and illuminated wide face display." width="1244" height="868" loading="lazy" className="w-full aspect-square object-contain" />
-    <figcaption><strong>V2 · physical robot.</strong> October 8 owner photograph. Carapace not attached; standing, walking and command response reported. Active Operator untested.</figcaption>
+    <img src="/gallery/20261021_083818-1600.webp" alt="V2 on the October 21 workbench with red face surround, linkage legs and exposed upper wiring." width="1588" height="1191" loading="lazy" className="w-full aspect-square object-contain" />
+    <figcaption><strong>V2 · October 21.</strong> Reassembled body and red face surround.</figcaption>
   </figure>
 </div>
 
@@ -62,19 +60,19 @@ are documented separately.
 
 | Comparison | V1 · eight servos | V2 · twelve servos |
 | --- | --- | --- |
-| Actuators per leg | Two MG90S | Three MG90-family servos; the owner is retaining MG90 for the lighter revision |
+| Actuators per leg | Two MG90S | Three Miuzei MG90S with added potentiometer-wiper feedback wires |
 | Mechanism | Sesame-derived leg and open chassis | Shoulder roll plus coupled carrier/crank linkage; purpose-built supports, shell and underside |
 | Foot placement | Primarily forward/backward and up/down | Adds sideways placement and variable stance width |
-| Motion generation | Stored poses and timed sequences; 38 named assets | Continuous Walk, Run, Crawl and six-direction Crab, plus 23 declared gestures/postures |
+| Motion generation | Stored poses and timed sequences; 38 named assets | Freestyle-generated joint/foot/body targets, shared gait solver, and legacy library retained for manual control |
 | Speed controls | Timing of existing sequences | Gait Speed or advanced stride/rate; separate named-motion multiplier; shared joint-speed limit can retime automatic motion while retaining the path |
 | Turns | Stored 45°, 90° and 180° left/right clips; open-loop heading estimates | Continuous forward/turn updates during an admitted Walk; loaded steering remains to measure |
-| Expressive movement | Wave, bow, dances and other prepared gestures | Retargeted gestures plus reviewed Worm, seated Shrug, Play Dead, Lay Down and experimental Upright |
+| Expressive movement | Wave, bow, dances and other prepared gestures | Prepared gestures plus generated movements; brisk lift and rear-sway corrections approved in individual October 25 trials |
 | Balance and terrain | No measured adaptive balance result | Live IMU telemetry and configurable local leveling implemented; loaded correction and adaptive terrain response remain unqualified |
-| Physical evidence | Working complete prototype; movement and audio demonstrated | October 8 owner reports standing, walking and command response; illuminated LCD visible, carapace not attached, Active Operator untested |
+| Physical evidence | Working complete prototype; movement and audio demonstrated | October 25 supported Stand/Walk passed after a firmware stack repair; loaded chatter and reliable floor walking remain unresolved |
 
-The counts describe different things: one V2 gait can continue indefinitely and
-change settings, while a V1 asset is a finite stored sequence. Twenty-three
-finite gestures therefore does not mean V2 has fewer movement options.
+The V1 asset count is a finite library. A generated V2 program can combine
+targets, holds and face changes, with actual events requesting recovery. Counting named clips no longer
+describes its whole motion system.
 
 ## Movement ranges: compare the quantities first
 
@@ -127,8 +125,9 @@ The candidate remaps all 23 named motions. Its selected Upright fit reaches
 **76.585 mm**, compared with **90.339 mm** in the baseline. Combined front-crank
 travel is **243.868°**, exceeding the **225°** span in the provisional servo
 mapping used by that study. Usable physical shaft travel remains unmeasured.
-These are pose/model comparisons, not approved mechanical limits. The candidate
-has not replaced the active shared model or been installed in firmware.
+These are pose/model comparisons, not approved mechanical limits. At the time of that study the candidate was separate. The October 26 working
+Blender assembly and geometry export now agree on **35 / 20 / 28 / 38 / 55 mm**.
+The older pose values above remain results of their original study.
 
 Earlier pulse-endpoint and assembly-mark studies retain their own dates in
 the [gait journal](/posts/gait-development/). They should not be combined into
@@ -175,23 +174,19 @@ are additional P4 features, with controller tests separated from loaded motion.
 
 ## Power supply, battery, charging and running time
 
-**October 12:** the owner has switched to a **4 A power supply**. This rating
-is not a battery capacity, measured consumption or runtime. The October 13
-owner report specifies **5 V**; the complete installed rail arrangement remains
-to document. The earlier battery decisions
-below remain part of the iteration record.
+The separate-cell power arrangement is now identified in the October 26 hardware
+record. Earlier Anker and SHARGE bank plans remain historical iterations.
 
-| Comparison | V1 | V2 |
+| Comparison | V1 | V2 · October 26 record |
 | --- | --- | --- |
-| Current supply report | Original LiPo arrangement | 4 A supply, owner-reported October 12; voltage unspecified |
-| Battery | 1,000 mAh LiPo, owner-reported | October 6 separate-cell/charging-board direction; final untethered arrangement after the supply change remains undocumented |
-| Voltage / energy record | Earlier parts record: 2S, 7.4 V; nominal 7.4 Wh by multiplication | New pack voltage and usable energy not yet documented |
-| Conversion arrangement | External buck converter | Final power path to be documented; the earlier no-separate-buck bank plan is historical |
-| Charging | External charger | Onboard charging circuit boards planned; exact boards and implementation not yet documented |
-| Packaging | Existing robot arrangement | Exterior printing begun; owner reports 566 g on October 13, with final shell configuration still to document |
-| Build-dependent battery load | Existing V1 body | Wired carries Q6A load; Wireless powers Q6A separately offboard |
-| Measured run time | **Not measured** | **Not measured for either option** |
-| Measured loaded consumption | Not supplied | Whole-system consumption and twelve-servo peaks still to measure |
+| Battery | 1,000 mAh LiPo, owner-reported | 2S pack; 73.6 × 46 × 22 mm measured envelope; capacity not recorded |
+| Voltage / energy record | Earlier parts record: 2S, 7.4 V; nominal 7.4 Wh by multiplication | October 15 report: 8.4 V battery; usable energy not measured |
+| Conversion | External buck converter | Mini560; recorded 5 A rating, separate 5 V servo rail |
+| Charging | External charger | Onboard HiLetgo 2S USB-C charger |
+| Assembly mass | No comparable mass supplied | 650 g, owner report recorded October 26; earlier 566 g belongs to October 13 |
+| Companion-computer power | Separate host | Selected offboard Q6A has its own supply |
+| Running time | Not measured | Not measured |
+| Loaded consumption | Not supplied | Current peaks, loaded voltage and average power remain to measure |
 
 The revised V2 battery capacity is unspecified, so there is no current
 capacity-ratio comparison. A useful runtime estimate requires
@@ -205,7 +200,8 @@ the earlier removable-bank iterations, including the proposed two-port
 5 V / 3 A branch allocation. That allocation is historical, not a specification
 for the new batteries and charging boards. The
 [October 6 rebuild](/posts/2026-10-06-lighter-rebuild/) records why the bank
-was dropped and what remains to be selected and measured.
+was dropped. The [October 26 packaging record](/posts/2026-10-26-body-power-and-training-stand/)
+identifies the later pack, converter, charger and printed parts.
 
 ## Sources and next comparison
 

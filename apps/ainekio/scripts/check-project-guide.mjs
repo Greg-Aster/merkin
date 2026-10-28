@@ -306,7 +306,7 @@ for (const [route, html] of [
 }
 
 // The current entry points must surface the new note without redating history.
-const latestRoute = '/posts/2026-10-21-learning-from-walking/'
+const latestRoute = '/posts/2026-10-27-finite-motion-and-recovery/'
 const latest = readFileSync(path.join(dist, latestRoute, 'index.html'), 'utf8')
 const feedbackNote = readFileSync(path.join(dist, 'posts/2026-10-18-servo-feedback-and-chassis/index.html'), 'utf8')
 const companionNote = readFileSync(path.join(dist, 'posts/2026-10-15-companion-systems/index.html'), 'utf8')
@@ -336,12 +336,14 @@ for (const [route, html] of [
 }
 assert.match(
   home,
-  /As of October 21, 2026/,
+  /As of October 27, 2026/,
   'Homepage date must reflect the update',
 )
 assert.match(feedbackNote, /CD74HC4067/, 'Retain the feedback multiplexer record')
 assert.match(feedbackNote, /measured Stand disabled/, 'Preserve the dated physical qualification boundary')
-assert.match(latest, /No improved policy was promoted/, 'Current learning report must preserve the actual comparison outcome')
+assert.match(readFileSync(path.join(dist, 'posts/2026-10-21-learning-from-walking/index.html'), 'utf8'), /No improved policy was promoted/, 'Retain the earlier learning comparison outcome')
+assert.match(readFileSync(path.join(dist, 'posts/2026-10-26-freestyle-targets-and-training/index.html'), 'utf8'), /53.51/, 'Keep the failed Stand acquisition result visible')
+assert.match(latest, /339/, 'Surface the current finite-event training record')
 assert.match(companionNote, /Body Event Trigger/, 'Retain the event workflow record')
 assert.match(companionNote, /Environment Mode/, 'Event decisions must reach the existing execution workflow')
 assert.match(eventNote, /omitted the requested stretch/, 'Retain the unresolved wake behavior')
@@ -381,7 +383,7 @@ assert.match(
   'Preserve the archived status observation date',
 )
 for (const [file, date] of [
-  ['Project-Overview.mdx', '2026-10-21'],
+  ['Project-Overview.mdx', '2026-10-27'],
   ['Body-Design-and-Hardware.mdx', '2026-09-15'],
   ['Q6A-Chassis-and-Active-Loop.mdx', '2026-09-30'],
   ['2026-10-06-Lighter-Rebuild.mdx', '2026-10-06'],

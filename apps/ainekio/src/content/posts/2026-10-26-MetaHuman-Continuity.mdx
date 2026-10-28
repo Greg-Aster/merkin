@@ -1,0 +1,128 @@
+---
+title: "MetaHuman: keeping an intention through its results"
+published: 2026-10-26
+updated: 2026-10-26
+description: "Full Auto can continue existing work and request relevant memory; live trials expose the remaining initiative gap. Queue and on-demand model changes reduce avoidable overhead."
+image: "/posts/2026-10-26-progress/companion-continuity.svg"
+authorName: "Ainekio Project"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, Development]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: metahuman
+  generation: v2
+  kind: journal
+  next: metahuman-integration
+  related: ["ainekio-companion", "2026-10-21-reactions-and-recovery", "2026-10-26-freestyle-targets-and-training"]
+---
+
+This round concentrates on what happens after a decision: keeping the objective,
+seeing its result, and choosing whether to continue. The software now connects
+those steps more directly. The live robot still does not reliably start useful
+activities on its own.
+
+## Continue the existing intention
+
+Full Auto can select a new operation, address an existing execution, or ask the
+existing Desire system to plan, execute, review or check in. Selected work retains
+its identity and original objective across those handoffs.
+
+| Decision | Earlier problem | Updated behavior |
+| --- | --- | --- |
+| Continue work | A new function selection could lose the earlier purpose | Target the recorded execution or desire |
+| Use memory | Retrieved context and attribution could be lost in transit | Request relevant memory for the next assessment and retain its source |
+| Interpret a result | Queue receipts could stand in for actual progress | Read the retained execution outcome, including incomplete visual goals |
+| Think again | Bookkeeping could look like new evidence | Subscribe to selected input, result, environment or desire changes; optionally select a time |
+| Stay quiet | A running loop could reassess without a useful reason | A quiet selection stays quiet until reactivation or the selected event |
+
+Speech, sensing and independent requests can continue while an assessment or
+physical action is in progress. These choices govern when Full Auto reassesses;
+they do not serialize every robot function.
+
+## What the live Full Auto tests actually did
+
+The first connected-body run on October 26 completed **30 assessments and selected
+no activities**. Its context included persona, four standing goals, twelve attributed
+memories, thirteen available operations and an image.
+
+One misleading input described the last manual command as an active takeover
+after it had already finished. Robot Status now reports that as the *last command
+source* and keeps actual current work separate. Correcting that fact did not, by
+itself, make the model initiate useful work.
+
+The provider path was also mixing graph requests with coding-session context.
+The repaired path preserves the graph's own system instructions, selected messages,
+image and output contract. Full decisions now use high reasoning; ordinary
+execution calls use no reasoning.
+
+| Connected-body observation | Result |
+| --- | --- |
+| Initial 30 assessments | No activities selected |
+| Later 19 assessments | One Robot Status request, its result recognized, then no new pursuit |
+| Final seven assessments | One status request after a person appeared; no self-directed conversation or motion |
+
+The queue drained, the result returned to the controller, and the previous Semi
+mode was restored after testing. The handoff works in those cases; the companion's
+initiative remains the problem to solve.
+
+## Keep events separate from changing measurements
+
+A body event or offline/online transition could be overwritten by ordinary
+telemetry before the next assessment. The Bridge now retains the attributed event
+identity and connection revision separately from the latest sensor snapshot.
+
+The wake logic also separates operating state, body events, scene changes and
+sensor samples. Uptime and processing counters are not new environmental evidence.
+Measurement freshness belongs to samples; it should not repeatedly announce a
+new hardware state. Person detection can still change frequently, and those scene
+changes can still trigger subscribed assessments.
+
+Snapshot publication now uses an atomic file replacement. The reproduced partial
+read had briefly presented an empty, disconnected state while a file was being
+written. The repair preserves the last complete snapshot during publication.
+
+## Conversation context is not stuck work
+
+A question that had already been delivered could remain listed as unfinished
+processing while waiting for a reply. The execution owner now marks that retained
+context idle, and actual input reactivates it. The conversation and objective are
+kept; the queue no longer presents an unanswered question as a running job.
+
+The same work removes a detached remote dispatcher that could admit follow-up
+work after cancellation. Continuations and child speech jobs retain their
+originating priority. SQLite remains the queue ledger; obsolete JSON migration
+and duplicate in-flight bookkeeping were removed.
+
+The activated queue check reported no queued jobs or unfinished processing.
+Focused lifecycle checks passed, while older Goal Continuation fixtures and five
+existing architecture violations remain in the repository's test record.
+
+## Load model weights when needed
+
+The October 24 llama.cpp change keeps the existing services and lets llama.cpp
+load weights on demand. Its default idle interval is **300 seconds**, after which
+idle weights can be released. This is separate from the robot's inactivity-rest
+timer and Active Operator's assessment schedule.
+
+The October 25 runtime changes also reduce persistence work between response
+stages. These changes target model residency and software overhead; there is no
+new end-to-end spoken-response benchmark in this update.
+
+## Next experiments
+
+The useful acceptance test is an entire interaction: notice something, choose an
+activity, receive its result, and decide what follows. The latest runs reach a
+status query and stop. I still need useful nonphysical initiative, self-directed
+conversation and sustained embodied activity, alongside the [motion model's
+standing and recovery work](/posts/2026-10-26-freestyle-targets-and-training/).
+
+## Records
+
+Reviewed: the October 25 autonomy-continuity and queue-lifecycle records, including
+the October 26 live retests; `bin/llama-cpp-services`; and the changed Bridge,
+Robot Status and execution owners. These records include local changes beyond
+the published repository commits. [Source record](/posts/2026-10-26-progress/sources.json).

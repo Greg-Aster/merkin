@@ -1,8 +1,8 @@
 ---
 title: "Ainekio V2: Parts, Assembly, and Design Iterations"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-10-21
-description: "V2 build record: the October 21 assembly and face, measured standing after ground repair, physical gait comparisons and host learning, with remaining qualification limits."
+updated: 2026-10-27
+description: "Current V2 hardware: 650 g assembly, 2S battery and USB-C charger, compact linkage geometry, feedback servos, training stand and dated physical trials."
 image: "/assets/ainekio/2026-10-12-refresh/blender-front.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -33,12 +33,35 @@ reliably and is easy to service.
 
 The extra joint matters because it moves a foot sideways. V1’s legs primarily
 move forward, backward, up, and down. V2 will also be able to change its stance
-width and use that movement in poses. The current controller combines continuous
-gait planning with prepared gestures.
+width and use that movement in poses. The current work adds Freestyle-generated targets to the shared gait solver;
+prepared gestures remain available in manual Body Control.
 Automatic balance and adaptation to uneven ground require further sensing,
 control and physical testing.
 
-## Current revision: October 21
+## October 27 motion follow-up
+
+[A supported stretch verified all nine targets](/posts/2026-10-27-finite-motion-and-recovery/)
+after calibration positioning. The asymmetric compensation from that trial is
+kept separate from the generic training motion. Freestyle now uses complete
+programs and actual body events for recovery; loaded performance remains open.
+
+## Current hardware: October 26
+
+The [current body record](/posts/2026-10-26-body-power-and-training-stand/)
+reports **650 g**, twelve feedback-modified Miuzei MG90S servos and a **2S
+battery / Mini560 buck / HiLetgo USB-C charger** assembly. SHARGE is no longer
+used. Pack capacity and running time remain unmeasured. The compact linkage
+lengths are **35 / 20 / 28 / 38 / 55 mm** for carrier, crank, pickup, rod and lower leg.
+
+The new fixed training stand has three printable parts and a 140 × 110 mm base.
+[Download its STLs and the one-piece power carrier](/posts/2026-10-26-progress/stand-and-power-carrier.zip).
+Supported Stand and one finite Walk cycle completed after a firmware stack repair;
+loaded chatter and reliable floor walking remain open. [Freestyle's new target
+and training work](/posts/2026-10-26-freestyle-targets-and-training/) uses shaft
+arrival to work toward those results. The October 27 follow-up replaces the
+continuation loop with finite programs and event-triggered recovery.
+
+## October 21 revision
 
 [New photographs and body-control results](/posts/2026-10-21-body-face-and-standing/)
 show the reassembled robot, revised red face surround and brighter LCD design.
@@ -97,8 +120,8 @@ firmware record and October 13 mass/voltage report add evidence; a complete
 reproducible assembly record remains open. Earlier 20% improvements remain estimates.
 
 The October 6 power decision dropped the heavy **10,000 mAh rechargeable bank** in favor of
-separate batteries and onboard charging circuit boards. Cell capacity, board
-selection, the final power arrangement and runtime are not established here.
+separate batteries and onboard charging circuit boards. The October 26 entry above records the selected boards and pack arrangement.
+Cell capacity and runtime remain unmeasured.
 The earlier Anker and SHARGE studies remain dated design iterations.
 
 **Wireless**, with the Q6A offboard over Wi-Fi, is the current build priority.

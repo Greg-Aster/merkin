@@ -1,0 +1,110 @@
+---
+title: "Freestyle runs once: finite motion, recovery and a supported stretch"
+published: 2026-10-27
+updated: 2026-10-27
+description: "The new finite-event motion model, 339-example continuation, real-event recovery and a supported stretch trial with all nine positions verified."
+image: "/posts/2026-10-26-progress/finite-programs.svg"
+authorName: "Ainekio Project"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, Freestyle, Training, Servo Feedback]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-10-26-freestyle-targets-and-training
+  related: ["2026-10-26-body-power-and-training-stand", "2026-10-26-metahuman-continuity", "gait-development"]
+---
+
+Freestyle now produces a complete movement program and runs it once. Reaching
+its final target does not call the model again. Actual stall, feedback-fault
+and tipping events can still request a correction.
+
+This replaces the model-requested continuation loop described in the
+[October 26 training entry](/posts/2026-10-26-freestyle-targets-and-training/).
+One recorded recovery had repeatedly emitted a standing pose and another
+reassessment despite successful target receipts, producing periodic twitching.
+The continuation operation is now removed from execution and the maintained
+training contract.
+
+## A finite program, then an outcome
+
+| Boundary | Current behavior |
+| --- | --- |
+| Ordinary request | Generate a complete joint/foot/body target-and-speed program |
+| Target execution | The P4 ramps toward the target and checks fresh shaft arrival |
+| Program completion | Finish the program; no automatic new inference |
+| Actual fault or fall | Send the attributed event and measurements for a new correction |
+| Unverified receipt | Keep it unverified; do not count it as a successful movement |
+| Manual Stop or replacement | Retain the existing command authority and cancel superseded recovery |
+
+The model now receives each joint's calibrated feedback range, arrival tolerance,
+feedback usability and fault flags. That range describes where shaft arrival can
+be observed; it is not a mechanical stop or a new clamp on requested motion.
+There is no dedicated slip detector in this path; supplied slip events can use
+its recovery handler.
+
+## October 27 model activation
+
+The workstation now serves the **Qwen3.5-0.8B finite-event contrast LoRA, Q8_0**,
+with its matching finite-command contract. The final continuation trained on
+**339 examples**, including **116 synthetic contrasts** for rest, release,
+holding before release, and remaining powered. The new contrasts were also added
+to the editable library and maintained training snapshot.
+
+| Frozen comparison | Previous candidate | Activated contrast candidate |
+| --- | ---: | ---: |
+| Reference matches on 34 shared cases | 20 | 24 |
+| Matches on 28 new contrast cases | — | 16 |
+| Total matches in the new 62-case comparison | — | 40 |
+
+Both physically reviewed hand examples remained exact in this comparison.
+Against an idealized shaft simulation, the recorded idle request executed
+13 geometric targets and then released outputs in one generation. Jam and tip
+requests also completed finite corrections.
+
+The already-lying case unnecessarily repeated the rest path. Some requests to
+remain powered and some wave counts are still wrong. I activated the candidate
+with those misses retained for further training. This release has no new physical
+recovery trial, changed no remote Q6A deployment, and required no firmware flash.
+
+## A supported stretch worked
+
+The October 27 physical review records a successful supported stretch with
+**all nine movement receipts position-verified and no adjusted targets**.
+The left-crank Home mapping was corrected to **−117.68° at 2750 µs**.
+That particular trial needed **84.82°** left-crank extension versus **64.63°**
+on the right.
+
+I do not want that device-specific compensation baked into a generic stretch.
+The training motion should remain in geometry space, with each servo's mapping
+handled by calibration. The successful trial is retained as evidence; a replacement
+generic training target awaits matching physical calibration references.
+Obsolete stretch examples were retired without changing the frozen test records.
+Starting from a sagged, released pose remains unproven: the successful trial began
+after positioning through the calibration controls.
+
+## Keep fitted and requested targets distinct
+
+Firmware source `0.8.128` resolves a Freestyle endpoint once, then uses the same
+resolved goal for ramping and shaft-arrival checks. It also retains the authored
+target. If fitting changes a joint, the result reports the adjustment and leaves
+`position_verified` false for the original request.
+
+That repair has native replay coverage for the recorded failed Wave. Its source
+record does not establish installation or a loaded physical retest. It addresses
+a specific distinction: arriving at an adjusted pose is not proof of arriving at
+the pose that was requested.
+
+Next: reliable finite endings, correct release/keep-powered choices, matching
+physical calibration, and recovery trials on the actual body.
+
+## Records
+
+The current Freestyle README and curriculum record the model activation and
+supported stretch. The P4 firmware README records resolved-target behavior.
+[Source revisions and hashes](/posts/2026-10-26-progress/sources.json).

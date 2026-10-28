@@ -5,11 +5,17 @@ description: "Working items, decisions, evidence, and direct links across Aineki
 
 # Development tracker
 
-**Updated 21 October 2026** · Loaded gait comparisons, host learning and history, a measured Stand retest, revised face/body photographs, and faster body-event recovery. Earlier physical observations retain their dates.
+**Updated 27 October 2026** · Freestyle targets and training, a 650 g build with revised power packaging, and live MetaHuman continuity tests.
 
-Current work across the robot, MetaHuman and website. [Companion functions](/posts/ainekio-companion/) explain the intended experience. [Project purpose](/posts/project-overview/#project-intent) · [Latest field note](/posts/2026-10-21-learning-from-walking/) · [Photo and video gallery](/gallery/).
+Current work across the robot, MetaHuman and website. [Companion functions](/posts/ainekio-companion/) explain the intended experience. [Project purpose](/posts/project-overview/#project-intent) · [Latest field note](/posts/2026-10-27-finite-motion-and-recovery/) · [Photo and video gallery](/gallery/).
 
 ## Current baseline
+
+- **Motion:** the October 27 finite-event model runs each program once. A separate supported stretch verified nine targets; generic calibration and physical recovery remain open. [Latest trials](/posts/2026-10-27-finite-motion-and-recovery/) · [Earlier training comparison](/posts/2026-10-26-freestyle-targets-and-training/).
+- **Body:** 650 g assembled; 2S battery, Mini560 and HiLetgo charger; three-part training stand and one-piece power-carrier exports. Supported Stand/Walk trials passed after the stack repair; loaded chatter and floor walking remain open. [Body record](/posts/2026-10-26-body-power-and-training-stand/).
+- **MetaHuman:** existing-intention handoff, memory selection, event retention, queue lifecycle and on-demand model changes. Live Full Auto tests returned status results but no sustained initiative. [Continuity report](/posts/2026-10-26-metahuman-continuity/).
+
+### Retained October 21 baseline
 
 - **Learning from motion:** October 19 forward-Walk comparisons showed a modest tracking improvement with mixed pitch/travel results. October 20 host learning compared a candidate and advanced without promoting it. Separate Walk/Run banks, ordinary-use recording and Learning history are activated. [Walking report](/posts/2026-10-21-learning-from-walking/).
 - **Body and standing:** the owner repaired a ground fault; measured Stand and a 19.22-second hold passed with verification temporarily enabled. The new face and rebuilt shell are visible in October 21 photographs. Installed firmware is recorded through 0.8.113; disconnect-under-motion and the prepared inactivity-rest feature remain unqualified. [Body report](/posts/2026-10-21-body-face-and-standing/).

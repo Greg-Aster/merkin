@@ -1,7 +1,7 @@
 ---
 title: "Ainekio: Project Overview"
 published: 2026-08-27T09:45:00-07:00
-updated: 2026-10-21
+updated: 2026-10-27
 description: "Meet Ainekio, a robot familiar combining conversation, personality, memory, perception and physical action, with two body designs and a continuing build journal."
 image: "/assets/ainekio/2026-10-12-refresh/render-overview.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
@@ -61,10 +61,26 @@ for a plain-language explanation of how the functions fit together; the
 | Servos | Eight MG90S; two per leg | Twelve; three per leg |
 | Controller | ESP32-S3 | ESP32-P4 |
 | Mechanics | Sesame-derived body | Redesigned chassis and compact linkages with sideways leg placement |
-| Motion | Scripted poses and sequences | Walk, Run, Crawl, six-direction Crab, and 23 finite gestures |
+| Motion | Scripted poses and sequences | Freestyle-generated targets, measured arrival, shared gait solver and a retained manual motion library |
 
 V1 remains supported. [Design history](/project-guide/#original-ainekio-and-ainekio-v2)
 and [V1/V2 comparison](/posts/v1-v2-comparison/).
+
+## October 27
+
+[Finite motion and recovery](/posts/2026-10-27-finite-motion-and-recovery/):
+a new workstation model runs each program once, with actual body events handling
+recovery. A supported stretch verified all nine targets. Generic stretch
+calibration, release choices and physical recovery remain in development.
+
+## October 26
+
+- [Freestyle motion training](/posts/2026-10-26-freestyle-targets-and-training/): editable examples, compact Q6A inference, measured shaft arrival and the latest Stand model's results.
+- [Body, power and training stand](/posts/2026-10-26-body-power-and-training-stand/): 650 g assembled mass, 2S battery/charger packaging, current linkage dimensions and downloadable stand parts.
+- [MetaHuman continuity](/posts/2026-10-26-metahuman-continuity/): existing intentions and results stay connected; live Full Auto trials still stop short of sustained initiative.
+
+Individual lift and sway corrections passed review. Reliable loaded standing,
+floor walking and autonomous activity remain the next experiments.
 
 ## October 21
 

@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-26",
+  "training": {
+    "training_samples": 1261,
+    "before_loss": 0.07716371864080429,
+    "after_loss": 0.06992814689874649,
+    "duration_seconds": 2869.729992389679
+  },
+  "dataset": {
+    "general_rehearsal_rows": 900,
+    "feedback_rows": 361,
+    "new_starting_geometries": 40,
+    "truncated_examples": 0
+  },
+  "comparison": {
+    "attempted_cases_each": 148,
+    "baseline_completed_outputs": 147,
+    "candidate_completed_outputs": 146,
+    "baseline_incomplete_manually_cancelled": 1,
+    "candidate_incomplete_manually_cancelled": 2,
+    "shared_completed_cases": 145,
+    "baseline_reference_matches_on_shared": 26,
+    "candidate_reference_matches_on_shared": 59,
+    "baseline_reference_matches_all_completed": 26,
+    "candidate_reference_matches_all_completed": 59,
+    "baseline_target_translation_failures": 26,
+    "candidate_target_compile_failures": 12,
+    "interpretation": "Reference agreement is not physical success or a complete semantic grade; valid alternative motions can differ. No inference speed superiority is claimed because some baseline timings overlapped training."
+  },
+  "self_fed_stand": {
+    "geometric_goal_passes": 1,
+    "trials": 3,
+    "physical_trials": 0,
+    "cases": [
+      {
+        "starting_case": "nominal",
+        "inference_rounds": 3,
+        "terminal_nominal_max_error_deg": 0.0014403999999998973,
+        "state": "model_finished"
+      },
+      {
+        "starting_case": "lower15",
+        "inference_rounds": 4,
+        "terminal_nominal_max_error_deg": 53.5085864,
+        "state": "model_finished"
+      },
+      {
+        "starting_case": "held-out spread legs",
+        "inference_rounds": 24,
+        "terminal_nominal_max_error_deg": 10.201413599999999,
+        "state": "offline_trial_budget_exhausted"
+      }
+    ]
+  },
+  "activation": {
+    "date": "2026-10-26",
+    "host": "workstation",
+    "model": "Qwen3.5-0.8B LoRA / stand-entry-balanced / Q8_0",
+    "generation_only_seconds": 0.662596531,
+    "robot_commands_sent": 0,
+    "remote_q6a_changed": false
+  },
+  "next_training_focus": [
+    "Apply the three reviewed ending corrections without relabelling unqualified physical success.",
+    "Improve fit to known entry and reached-target advancement examples; current errors are not solely unseen-state generalization.",
+    "Retain general gestures and test full generated trajectories, not only loss or terminal face calls."
+  ]
+}

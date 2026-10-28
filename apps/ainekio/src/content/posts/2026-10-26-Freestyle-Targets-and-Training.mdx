@@ -1,0 +1,143 @@
+---
+title: "Freestyle: teaching targets, speed and recovery"
+published: 2026-10-26
+updated: 2026-10-26
+description: "Editable motion examples, compact Qwen inference on the Q6A, measured shaft arrival, and the October 26 Stand-training results."
+image: "/posts/2026-10-26-progress/measured-targets.svg"
+authorName: "Ainekio Project"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, Development]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-10-26-body-power-and-training-stand
+  related: ["gait-development", "2026-10-21-learning-from-walking", "2026-10-26-metahuman-continuity"]
+---
+
+[October 27 follow-up: finite programs replace the continuation loop, with a new model and a supported stretch trial.](/posts/2026-10-27-finite-motion-and-recovery/)
+
+The new motion work asks a small trained model to generate joint, foot and body
+movements from a request and the robot's measured state. Freestyle now has an
+editable training library, compact output, and a target-and-speed execution path.
+The existing gait solver still handles gait execution.
+
+This is a different experiment from the [October 21 Walk/Run optimizer](/posts/2026-10-21-learning-from-walking/).
+That loop compares gait parameters during normal walking. Freestyle learns how
+to turn an instruction and feedback into a sequence of movements.
+
+## From timed frames to measured arrival
+
+| Part of a motion | Earlier generated sequences | New target-and-speed path |
+| --- | --- | --- |
+| Requested movement | Joint/foot/body operations compiled into timed frames | Joint/foot/body targets with `speed_pct` |
+| Advance to the next target | Sequence timing | Fresh shaft feedback confirms arrival within the configured tolerance |
+| Deliberate pause | Authored duration | An explicit `hold` retains its duration |
+| Something has not moved as expected | Record the discrepancy and request correction | Retain the target and powered support; send current measurements and unfinished intent for reassessment |
+| Start another request | Existing Stop/replacement behavior | Same owner; pending arrival does not prevent replacement |
+
+The fourth wires measure servo shafts. They do not measure whether a foot is
+actually touching the floor. Foot clearance is calculated from linkage geometry
+and attitude, so carpet contact and loaded motion still need observation.
+
+The current `0.8.127` firmware source moves boot/wake standing and inactivity
+rest requests to Freestyle. Manual Body Control retains the legacy library.
+This change needs matching model, host and firmware versions; the October 26
+model activation did not flash the robot. The separate [body entry](/posts/2026-10-26-body-power-and-training-stand/)
+records the latest supported firmware trials.
+
+## Editing what the model will learn
+
+Body Control's motion library exposes the exact compact training input and target.
+I can edit a movement, send that draft directly to the robot, review the result,
+and export the dataset for another training pass.
+
+| Control | What changes |
+| --- | --- |
+| Save training example | Updates the local library; superseded targets are replaced |
+| Send motion to robot | Executes the displayed target, including unsaved changes, without another model call |
+| Export training data | Downloads the current training split, held-out files and matching tool contract |
+| Train and activate | Produces and selects new weights; saving an example alone does not update the model |
+
+The October 25 working-library record contains **889 active examples** after six
+superseded targets were removed. A committed training snapshot can travel between
+machines; the working SQLite database and model weights remain local. Later
+Stand training uses its own frozen dataset, rather than treating every library
+edit as already learned.
+
+## Q6A inference and physical corrections
+
+The compact Q6A model reduces the text needed to describe the same motion.
+For one uncached happy-face/10 mm foot-lift request, the recorded comparison was:
+
+| Q6A CPU measurement | Earlier v8 | Compact candidate |
+| --- | ---: | ---: |
+| Input tokens | 3,154 | 823 |
+| Output tokens | 91 | 49 |
+| Generation time | 72.89 s | 17.90 s |
+| Decoded operations | 4 | 4 |
+| Authored movement time | 2 s | 2 s |
+
+These are individual requests, not average response times. A later check of the
+activated model took 10.23 seconds for the same frozen request.
+
+The first physical foot-lift attempt failed my visual review. A repeat after a
+power cycle and Stand setup worked, but subsequent small lifts were too subtle,
+slow and disturbed balance. A rear-crouch/25 mm brisk-lift correction passed review
+and was saved for training.
+
+A separate rear-sway trial exposed a host preparation bottleneck. Moving IK
+preparation out of the gateway's Python thread reduced the same authored
+2.8-second sway from **9.96 to 5.03 seconds** end to end. Shortening the authored
+sway to 1.28 seconds produced a **2.54-second** trial that I approved. The recorded
+shaft discrepancies remain; the approved example was still pending retraining.
+
+## October 26: learning to acquire Stand
+
+The latest continuation uses **1,261 examples**: 900 general-motion examples and
+361 feedback-conditioned Stand examples, including 40 synthetic starting
+geometries. The teacher uses the existing posture solver and installed servo
+mapping. Its examples cover lift/place/lower, lag, slip, settling, completion and
+gyro attitude. They are geometric training examples, not successful robot trials.
+
+| Evaluation | Earlier v8 | Stand-entry-balanced |
+| --- | ---: | ---: |
+| Requests attempted | 148 | 148 |
+| Completed outputs | 147 | 146 |
+| Reference matches among 145 mutually completed cases | 26 | 59 |
+| Target translation/compilation failures in each run | 26 | 12 |
+
+Reference agreement improved, but the model still struggles to reach Stand from
+other starting poses. In three offline trials that fed each generated result
+into the next request:
+
+| Starting case | Result |
+| --- | --- |
+| Already standing | Raised, returned to nominal and finished in three responses |
+| Lower starting posture | Finished with a maximum nominal-joint error of 53.51° |
+| Held-out spread-leg posture | Repeated an off-target pose through all 24 evaluation rounds |
+
+Only the already-standing case reached the geometric goal. One compound request
+also grew from a 58-call reference to 476 generated calls. Three later ending-data
+corrections are not included in these weights.
+
+After reviewing those failures, I activated the **Qwen3.5-0.8B LoRA exported as
+Q8_0** on the workstation on October 26. The live API returned a nominal-Stand
+program in **0.663 seconds**, using a saved synthetic observation and sending no
+robot commands. The Q6A deployment was not changed. The failures above remain
+the next training work: entry selection, advancing after arrival, and stopping
+when the requested movement is complete.
+
+## Records
+
+[Download the evaluation summary](/posts/2026-10-26-progress/training-results.json)
+and [source record](/posts/2026-10-26-progress/sources.json).
+The reviewed files are `experiments/freestyle/README.md`, `CURRICULUM.md`,
+`program.py`, the frozen `stand-entry-balanced/final-review.json`, and its later
+`activation/verification.json`. The activation record supersedes the evaluation's
+earlier “not deployed” status; it does not change its scores.
