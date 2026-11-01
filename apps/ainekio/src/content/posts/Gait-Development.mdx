@@ -1,7 +1,7 @@
 ---
 title: "Gait Development Journal: From Eight Servos to Twelve"
 published: 2026-09-15
-updated: 2026-10-27
+updated: 2026-11-01
 description: "Gait and motion journal: V1/V2 geometry, loaded walking comparisons, Freestyle targets, measured shaft arrival and the latest Stand-training results."
 image: "/assets/ainekio/2026-10-12-refresh/blender-side.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
@@ -28,6 +28,19 @@ This is the working document for developing Ainekio's gait. It begins with
 the original eight-servo robot, then compares that motion baseline with the
 radically different twelve-servo linkage design. New calculations, experiments,
 and physical results will be recorded here as dated entries.
+
+## November 1: neural walking through Body Control
+
+[The new walking entry](/posts/2026-11-01-neural-walking/) follows demonstration-based
+training through forward, reverse and turn trials. It includes simulation footage,
+a five-command direct-versus-connected table, the failed RL refinements and the
+November 1 continuation through the gateway and native P4 executor.
+
+The body prototype is complete. The selected policy reaches 27.82 mm/s forward in
+direct simulation and 22.45 mm/s through Body Control, against an 80 mm/s request.
+Left-turn response drops sharply through the connected path. Physical neural
+walking is the next experiment; these results do not supersede the earlier
+physical walking records.
 
 ## October 27: complete programs and event recovery
 

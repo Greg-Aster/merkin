@@ -5,13 +5,19 @@ description: "Working items, decisions, evidence, and direct links across Aineki
 
 # Development tracker
 
-**Updated 27 October 2026** · Freestyle targets and training, a 650 g build with revised power packaging, and live MetaHuman continuity tests.
+**Updated 1 November 2026** · Completed body prototype, neural walking and MetaHuman connection/context work.
 
-Current work across the robot, MetaHuman and website. [Companion functions](/posts/ainekio-companion/) explain the intended experience. [Project purpose](/posts/project-overview/#project-intent) · [Latest field note](/posts/2026-10-27-finite-motion-and-recovery/) · [Photo and video gallery](/gallery/).
+Current work across the robot, MetaHuman and website. [Companion functions](/posts/ainekio-companion/) explain the intended experience. [Project purpose](/posts/project-overview/#project-intent) · [Latest field note](/posts/2026-11-01-neural-walking/) · [Photo and video gallery](/gallery/).
 
-## Current baseline
+## November 1 progress
 
-- **Motion:** the October 27 finite-event model runs each program once. A separate supported stretch verified nine targets; generic calibration and physical recovery remain open. [Latest trials](/posts/2026-10-27-finite-motion-and-recovery/) · [Earlier training comparison](/posts/2026-10-26-freestyle-targets-and-training/).
+- **Body prototype complete:** latest Blender face, LCD, servo-cover and power-cradle exports are in the [body entry](/posts/2026-11-01-body-prototype/). Last recorded mass: 650 g on October 26.
+- **Neural walking:** the [five-command comparison](/posts/2026-11-01-neural-walking/) measures the same policy in direct simulation and through Body Control/P4. Left turning loses most of its response through the connected path; physical neural trials remain ahead.
+- **MetaHuman:** [one Bridge, health-event admission and context training](/posts/2026-11-01-metahuman-connections/). Local source changes and the October 29 runtime commit are distinguished from live companion acceptance.
+
+## Retained October 26–27 baseline
+
+- **Motion:** the October 27 finite-event model runs each program once. A separate supported stretch verified nine targets; generic calibration and physical recovery remain open. [October 27 trials](/posts/2026-10-27-finite-motion-and-recovery/) · [Earlier training comparison](/posts/2026-10-26-freestyle-targets-and-training/).
 - **Body:** 650 g assembled; 2S battery, Mini560 and HiLetgo charger; three-part training stand and one-piece power-carrier exports. Supported Stand/Walk trials passed after the stack repair; loaded chatter and floor walking remain open. [Body record](/posts/2026-10-26-body-power-and-training-stand/).
 - **MetaHuman:** existing-intention handoff, memory selection, event retention, queue lifecycle and on-demand model changes. Live Full Auto tests returned status results but no sustained initiative. [Continuity report](/posts/2026-10-26-metahuman-continuity/).
 
@@ -60,7 +66,7 @@ Current work across the robot, MetaHuman and website. [Companion functions](/pos
 | **DOCS · Review** | Reconcile conflicting current plans and link the existing [body][integration] and [MetaHuman][surface] records. | Consistent current status and clearly dated history; independent of assembly. |
 | **HOST · Open** | Record the actual Q6A deployment and local changes; stabilize the preferred Wi-Fi path. [Body integration][integration] · [Host evidence][host-budget] | Gateway/Bridge placement and installed services first. Record revisions, link behavior, and sustained speech/perception timing after cooling is checked; isolated desktop/host measurements are not concurrent robot acceptance. |
 | **MOVE · Open** | Qualify the paired task/Bridge producer, correlated updates and selected-track behavior on the assembled robot. [Gateway][gateway] · [Integration map][roadmap] | Preserve action, lease/epoch and revision. Pass expiry, uncertain-reply/no-replay, cancel and stop host tests; no new movement authority. |
-| **LEARNING · Open** | Qualify useful forward/backward Walk, both turns and Run under ordinary use. [Learning record](/posts/2026-10-21-learning-from-walking/) | First automatic Walk comparison did not demonstrate improvement; Run comparison incomplete. Validate camera scale, retain missing-data evidence and do not promote on one forward win. |
+| **LEARNING · Open** | Finish the connected neural-gait comparison, then qualify forward/reverse and both turns on the body. [Walking record](/posts/2026-11-01-neural-walking/) | Direct simulation and Body Control/P4 replay differ sharply on left turn. Record loaded clearance, tracking, Stop/Release and actual travel; Run and recovery remain open. |
 | **VISION · Open** | Complete the deployed conversational acquisition workflow and selected-target continuity tests. [Gateway][gateway] · [Integration map][roadmap] | Exact-frame and live stationary YOLOE results are recorded. Test moving targets, ambiguity/loss/reacquisition, camera recovery and Q6A workloads through the existing camera/task owners. |
 | **REMOTE · Open** | Remove full remote-provider configuration logging and test safe metadata logging. [Integration map][roadmap] | Required before activating credentialed remote inference; independent of assembly. |
 | **IMU · Open** | Qualify loaded correction direction and tracking using the new level-reference and diagnostic controls. [Leveling record](/posts/2026-10-15-motion-and-leveling/) · [IMU owner][imu] | Per-leg changes are commanded/model data. Stationary gyro bias is separate from attitude reference and physical joint calibration. |
@@ -69,7 +75,7 @@ Current work across the robot, MetaHuman and website. [Companion functions](/pos
 | **AGENCY · Open** | Qualify desire judgments, dream recall and complete autonomous outcomes. [Systems evidence](/posts/2026-10-15-companion-systems/) | Context and ownership repairs are activated; correct task interpretation and evidence-supported goal review remain open. |
 | **MEDIA · Open** | Extend recording and Wi-Fi recovery checks to longer concurrent workloads and storage faults. [Controller record](/posts/2026-10-14-recording-and-updates/) | Preserve the 469-second result as short-run evidence; full-card reuse and power-loss recovery need their own physical qualification. |
 | **FEEDBACK · Open** | Extend the successful ground-repair Stand test to repeatability and supported recovery. [Stand record](/posts/2026-10-21-body-face-and-standing/) | One measured 19.22-second hold passed. Saved verification and jam settings were restored off; broader corrective behavior remains unqualified. |
-| **BODY · Hardware-gated** | Check printed exterior and the reported 5 V / 4 A supply arrangement, document the complete assembly, then test Active Operator and concurrent camera/audio/control. [Validation][validation] · [Budget][budget] | The 566 g report belongs to October 13; document the rebuilt shell mass, measured current and battery endurance. Installed firmware records do not qualify loaded startup or gait. |
+| **BODY · Open** | Measure the completed prototype under load and record its latest mass and battery endurance. [Body record](/posts/2026-11-01-body-prototype/) | Prototype completion reported November 1. Latest exports and the October 26 650 g measurement are retained; new current, runtime and neural-walking results remain to record. |
 
 Automatic host takeover, continuous profile replication and higher media targets remain later design work in their owning records. None blocks consolidation.
 

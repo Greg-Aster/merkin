@@ -1,5 +1,22 @@
 [
   {
+    "id": "neural-walking-20261030",
+    "kind": "animation",
+    "title": "Neural walking: initial and selected policy",
+    "caption": "October 30 simulation training comparison: two 16-second forward trials, before and after demonstration aggregation. Selected checkpoint: 360,000 imitation updates.",
+    "date": "2026-10-30",
+    "sourceFile": "neural-walking-20261030.mp4",
+    "sourceBytes": 6269957,
+    "sourceSha256": "2f4d6e2c304f4b810028eaf4f794664ebcb7277b87ef35737d67bf2c25900349",
+    "src": "/gallery/neural-walking-20261030.mp4",
+    "bytes": 2463659,
+    "width": 1280,
+    "height": 720,
+    "duration": 34,
+    "poster": "/gallery/neural-walking-20261030-poster.webp",
+    "posterBytes": 18812
+  },
+  {
     "id": "20261021_083818",
     "kind": "photo",
     "title": "The rebuilt robot, front view",

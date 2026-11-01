@@ -7,7 +7,7 @@ const groups = [
   { id: 'photos', title: 'From the workbench', intro: 'Real photographs of the build: the October rebuild, leg prototypes and the earlier robot.', kinds: ['photo'] },
   { id: 'videos', title: 'The physical robot on video', intro: 'Bench experiments and floor trials, including the adjustments along the way.', kinds: ['physical-video'] },
   { id: 'design', title: 'Inside the design', intro: 'Earlier Blender assembly and leg studies. These show modeled geometry, not the current physical assembly.', kinds: ['design'] },
-  { id: 'animation', title: 'Motion studies', intro: 'Blender animations make the intended movements easier to see. Physical walking remains under development.', kinds: ['animation'] },
+  { id: 'animation', title: 'Motion studies and training', intro: 'Recorded neural gait trials and Blender motion studies.', kinds: ['animation'] },
 ]
 const date = (value: string) => new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(value))
 ---
@@ -17,7 +17,7 @@ const date = (value: string) => new Intl.DateTimeFormat('en-US', { dateStyle: 'm
       <p class="eyebrow">The build, in pictures</p>
       <h1>Meet the robot</h1>
       <p>Printed parts, exposed wiring, experiments on the floor—and the design work behind them. This is Ainekio as it takes shape.</p>
-      <p>The latest photographs show the October 21 assembly. Read about the <a href={url('/posts/2026-10-21-body-face-and-standing/')}>rebuilt body, new face and measured standing</a>.</p>
+      <p>New: <a href={url('/posts/2026-11-01-neural-walking/')}>neural walking trials and the execution comparison</a>. The latest workbench photographs show the October 21 assembly.</p>
       <nav aria-label="Gallery sections">{groups.map(group => <a href={`#${group.id}`}>{group.title} ↓</a>)}</nav>
     </header>
     {groups.map(group => <section id={group.id} aria-labelledby={`${group.id}-title`}>
@@ -30,7 +30,7 @@ const date = (value: string) => new Intl.DateTimeFormat('en-US', { dateStyle: 'm
               <a href={url(item.src!)}>Download {item.title}</a>
             </video>}
           <figcaption id={`${item.id}-caption`}>
-            <p class="media-label">{item.kind === 'photo' ? 'Photograph' : item.kind === 'physical-video' ? 'Physical footage' : item.kind === 'animation' ? 'Blender animation' : 'Blender study'} · {item.date ? <time datetime={item.date}>{date(item.date)}</time> : 'Undated'}</p>
+            <p class="media-label">{item.kind === 'photo' ? 'Photograph' : item.kind === 'physical-video' ? 'Physical footage' : item.kind === 'animation' ? 'Motion study' : 'Blender study'} · {item.date ? <time datetime={item.date}>{date(item.date)}</time> : 'Undated'}</p>
             <h3>{item.title}</h3><p>{item.caption}</p>
             {item.src && <a class="download" href={url(item.src)} download>Download MP4 · {Math.floor(item.duration! / 60)}:{String(Math.round(item.duration! % 60)).padStart(2, '0')} · {(item.bytes! / 1024 / 1024).toFixed(1)} MB</a>}
           </figcaption>

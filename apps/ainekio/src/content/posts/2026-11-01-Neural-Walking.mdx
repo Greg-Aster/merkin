@@ -1,0 +1,123 @@
+---
+title: "Teaching Ainekio to walk: imitation, turns and the execution gap"
+published: 2026-11-01
+updated: 2026-11-01
+description: "Neural gait training from Blender geometry, five-command comparisons, failed reinforcement-learning refinements and replay through Body Control."
+image: "/gallery/neural-walking-20261030-poster.webp"
+authorName: "Ainekio Project"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, Gait, Training, Simulation]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-11-01-body-prototype
+  related: ["gait-development", "2026-10-21-learning-from-walking", "2026-10-27-finite-motion-and-recovery"]
+---
+
+Most of this week's work has gone into walking. The body prototype is done;
+the next problem is making it move well. The new neural policy learns foot
+placements from demonstrations, then runs from sensor and command inputs.
+Forward, reverse and both turn directions now work in simulation, with a
+substantial difference between direct simulation and the full execution path.
+
+## Learning on the Blender body
+
+The simulation uses the exported Blender assembly, articulated linkages and boot
+collision surfaces. It retains the **35 / 20 / 28 / 38 / 55 mm** mechanism,
+twelve servos and the last recorded **650 g** assembly mass. Loaded servo torque,
+friction and mass distribution still need better physical measurements.
+
+The policy requests standing-relative foot offsets. Existing inverse kinematics
+convert those offsets to the coupled joint targets. This matters: an early
+independent-joint experiment produced geometrically rejected requests in all
+100 sampled cases.
+
+The productive approach has been **DAgger**, or dataset aggregation: run the
+learner, collect the states it actually reaches, label those states with the
+demonstration's next action, and train again. The teacher's contribution decreases
+across rounds; final evaluations run the policy alone.
+
+<figure>
+  <video controls playsInline preload="metadata" width="1280" height="720" poster="/gallery/neural-walking-20261030-poster.webp" aria-describedby="neural-walking-caption" className="w-full rounded-xl">
+    <source src="/gallery/neural-walking-20261030.mp4" type="video/mp4" />
+  </video>
+  <figcaption id="neural-walking-caption">October 30 simulation: initial and selected forward trials, 16 seconds each. The selected checkpoint has 360,000 imitation updates.</figcaption>
+</figure>
+
+## Same policy, two execution paths
+
+The October 30 selected policy was replayed on November 1 through Body Control's
+real WebSocket and native P4 executor, connected to simulated hardware. Each row
+below is a 16-second trial. Linear speeds are in **mm/s**; turns are in **rad/s**.
+These are fixed-reference trials, not a robustness sweep across varied surfaces
+or noisy sensors.
+
+| Request | Requested | Direct simulation | Body Control + P4 replay |
+| --- | ---: | ---: | ---: |
+| Forward | +80 mm/s | +27.82 mm/s | +22.45 mm/s |
+| Reverse | −20 mm/s | −22.20 mm/s | −20.55 mm/s |
+| Slower reverse | −15 mm/s | −18.28 mm/s | −13.48 mm/s |
+| Left turn | +0.120 rad/s | +0.128 rad/s | +0.021 rad/s |
+| Right turn | −0.120 rad/s | −0.148 rad/s | −0.113 rad/s |
+
+Neither set recorded a fall. The connected replay rejected no targets, but the
+left turn deteriorated sharply and acquired sideways drift. Forward reached
+about 28% of requested speed through Body Control. A clean completion receipt
+therefore does not settle the walking problem.
+
+These are the recorded baseline results before correcting fractional command
+encoding: the adapter had rounded a −18.75% request to −19%. That correction
+needs a fresh comparison; it is not an explanation for the entire transfer gap.
+
+## What improved, and what failed
+
+| Experiment | Result | Consequence |
+| --- | --- | --- |
+| Better forward demonstration, matched 60-second direct trials | 16.40 → 20.96 mm/s | Teacher quality improved the learned gait. |
+| Five-command aggregation | Forward, two reverse speeds and both turn directions acquired | A command-responsive policy replaced the forward-only candidate. |
+| SAC reinforcement learning after imitation | The good gait degraded; lower learning rate did not preserve it | Retained the imitation policy rather than promoting the degraded runs. |
+| Earlier PPO reward | Reward improved while travel fell toward zero | The objective was rewarding stability without useful movement. |
+
+The SAC handoff copied the actor but started with an untrained critic. A lower
+learning rate softened the damage without solving it. More optimizer steps were
+not automatically better walking.
+
+The reward investigation also changed how progress is scored. Linear and turning
+tracking now interact; optional short-window velocity scoring avoids punishing
+every surge within a real step. Bounded swing credit rewards lifting the feet
+without rewarding indefinitely raised feet or rapid tiny shuffles. Those changes
+are training tools, not a measured physical speed gain.
+
+## Training through the execution path
+
+The November 1 continuation replays the demonstrations through Body Control to
+collect fresh observations. It carries over the selected actor weights, discards
+the old optimizer and replay state, and trains against the connected executor.
+The run was launched with 32-second episodes and 55,000 additional imitation
+updates planned; no completed result was available at this review.
+
+Two integration defects surfaced during preparation: fractional command rounding
+and the collection environment retaining the native executor during checkpoint
+evaluation. Both have source repairs and focused regression coverage. The robot
+was not commanded or switched to a neural policy by these trials.
+
+Next are matched connected evaluations, then supervised trials on the completed
+body: foot clearance, loaded tracking, actual displacement, turns and Stop/Release.
+Run, uneven terrain and recovery still need their own results.
+
+The [gait journal](/posts/gait-development/) retains the earlier eight-servo
+comparison and physical walking experiments. The [body entry](/posts/2026-11-01-body-prototype/)
+covers the current printable parts.
+
+## Data
+
+[Download the five-command comparison](/posts/2026-11-01-progress/gait-comparison.json).
+Source: [neural gait implementation](https://github.com/Greg-Aster/Ainekio-bot/tree/main/Master/gateway/neural_gait),
+the local gait research journal, and the October 30 / November 1 evaluation files.
+[Source snapshot](/posts/2026-11-01-progress/sources.json).

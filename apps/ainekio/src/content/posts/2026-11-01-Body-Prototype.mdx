@@ -1,0 +1,71 @@
+---
+title: "Body prototype complete: face panels, servo covers and power packaging"
+published: 2026-11-01
+updated: 2026-11-01
+description: "The completed body prototype and October 27–29 Blender exports for the face, servo housing and battery/power cradle."
+image: "/posts/2026-11-01-progress/printed-parts.webp"
+authorName: "Ainekio Project"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, Blender, 3D Printing, Hardware]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: body
+  generation: v2
+  kind: journal
+  next: 2026-11-01-metahuman-connections
+  related: ["ainekio-v2", "2026-10-26-body-power-and-training-stand", "2026-11-01-neural-walking"]
+---
+
+The body prototype is done. Most of my time is now going into the
+[walking system](/posts/2026-11-01-neural-walking/).
+The latest mechanical work is saved in `front-shell-fixes.blend`, with fresh
+exports for the face, servo cover and underside power packaging.
+
+## Latest Blender exports
+
+The illustration above renders the exported meshes. The downloadable set keeps
+the original filenames and groups the parts by their existing export folders.
+
+| Area | October 27–29 exports | Role in the assembly |
+| --- | --- | --- |
+| Display | Black LCD carrier, recessed bezel, compact front-end panel | Mount and surround the face display |
+| Exterior | Left/right chin, cheek fangs and side guards | Separate face and side-shell pieces |
+| Servo | MG90S lower housing | Revised lower servo-cover geometry |
+| Power | Rear charger retainer; combined battery floor and power-module cradle | Package the battery and charging/converter boards beneath the body |
+
+These are the latest part files, not a new robot geometry or a change to the
+twelve-servo linkage. The newest combined floor/cradle export is separate from
+the earlier rear-carrier and retainer options; both are retained for comparison.
+
+[Download the November 1 part snapshot](/posts/2026-11-01-progress/body-prototype-parts.zip).
+The archive contains the twelve STL exports listed in its manifest.
+
+## Hardware baseline
+
+| Component | Current recorded arrangement |
+| --- | --- |
+| Controller | Waveshare ESP32-P4-WIFI6, with C6 wireless coprocessor |
+| Actuation | Twelve Miuzei MG90S servos, PCA9685 output |
+| Joint readings | Added potentiometer wires through a CD74HC4067 multiplexer |
+| Power | 2S pack, Mini560 converter, HiLetgo 2S USB-C charger |
+| Body design | Blender; compact 35 / 20 / 28 / 38 / 55 mm linkage |
+| Last measured assembly mass | 650 g, recorded October 26 |
+
+Completion of the prototype does not supply a new mass or battery-runtime
+measurement. The earlier [power and support-stand entry](/posts/2026-10-26-body-power-and-training-stand/)
+retains the component envelopes and stand downloads. The [V2 build reference](/posts/ainekio-v2/)
+collects the assembly history and alternatives.
+
+## Next physical work
+
+The next useful record is a walking trial on this body, paired with shaft feedback,
+IMU data and external video. The simulation is exposing where the learned gait
+loses speed or turning authority; the physical trial needs to show how those
+requests behave under the real weight and servo load.
+
+Source: November 1 build report and the local Blender/STL files.
+[File hashes and provenance](/posts/2026-11-01-progress/sources.json).

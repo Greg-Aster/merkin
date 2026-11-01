@@ -1,0 +1,89 @@
+---
+title: "MetaHuman: one body connection, quieter health events and context training"
+published: 2026-11-01
+updated: 2026-11-01
+description: "A unified Environment Bridge, feedback-health admission fixes, native inference cancellation and revised autonomy context-selection examples."
+image: "/posts/2026-11-01-progress/body-connection.svg"
+authorName: "Ainekio Project"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, MetaHuman OS, Training, Environment Bridge]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: metahuman
+  generation: v2
+  kind: journal
+  next: metahuman-integration
+  related: ["metahuman-integration", "2026-10-26-metahuman-continuity", "ainekio-companion"]
+---
+
+Alongside walking, the MetaHuman work has concentrated on connection ownership,
+unnecessary inference and the context selected for autonomous decisions.
+The October 29 runtime commit and the current local changes cover different
+stages of that work; there is no new full-companion acceptance trial here.
+
+## One Environment Bridge
+
+The local source now uses one Environment Bridge with a selected body and
+connection settings. Local, SSH and Cloudflare connections share that owner,
+replacing the separate Local and Remote bridge entrypoints. Forwarding still
+terminates at Body Control's local environment endpoint.
+
+| Layer | Responsibility |
+| --- | --- |
+| MetaHuman | Interpret the request, select context, plan work and retain results |
+| Environment Bridge | Carry observations, actions and their correlated outcomes |
+| Body Control | Select the body connection, translate requests and run motion services |
+| P4 | Execute calibrated targets and report feedback and completion |
+
+Freestyle generation belongs in Body Control. MetaHuman requests movement with
+a description through `requestMotion`; it no longer needs its own joint-generation
+workflow. Neural gait training is a separate movement experiment, described in
+the [walking entry](/posts/2026-11-01-neural-walking/).
+
+## Health changes should not flood conversation
+
+Servo feedback fault/restored messages had been eligible to trigger fresh
+cognitive turns merely because they carried body-event metadata. The October 29
+repair keeps those health changes as recorded state and body-recovery evidence.
+A health change by itself no longer starts another conversation invocation;
+actual text, visual input and action feedback retain their existing routes.
+
+The same commit includes a native llama.cpp cancellation patch. Its purpose is
+to carry cancellation into inference rather than leaving superseded generation
+occupying the backend. Deployment and end-to-end speech latency still need their
+own measured results; a source patch is not a new latency benchmark.
+
+## Training context selection from the situation
+
+The newer Intent curriculum addresses an overly rigid pattern: Semi Auto examples
+had taught the selector to return the same four context sources regardless of
+the situation. Version 22 varies open activity, ongoing work, environmental
+interest and inner interests in both Semi and Full modes.
+
+| Version 22 record | Count |
+| --- | ---: |
+| Autonomy-context development examples | 256 |
+| Separate autonomy-context evaluation examples | 128 |
+| Total Intent development examples | 1,803 |
+| Total Intent evaluation examples | 485 |
+| Retained Intent regression examples | 46 |
+
+Equivalent situations in either mode share context targets. An ongoing task can
+need its execution evidence in either mode; persona goals and desires can also
+be relevant in either mode. These are supervised example changes, not a new
+hardcoded runtime decision rule. The source update does not establish that a
+new adapter has passed evaluation or been activated.
+
+The remaining companion test is still practical: does selected context lead to
+useful action, grounded conversation and continuity through the outcome?
+The [October 26 trials](/posts/2026-10-26-metahuman-continuity/) remain the dated
+record of Full Auto completing status queries but falling short of sustained
+self-directed activity.
+
+Sources: [October 29 runtime commit](https://github.com/Greg-Aster/metahuman-os/commit/4817fff97ee0ad34ccfcc6d818b1389f0eb21f1e),
+current Environment Bridge source, and the Intent training README.
+[Source snapshot](/posts/2026-11-01-progress/sources.json).
