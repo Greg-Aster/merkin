@@ -23,6 +23,7 @@ Depending on the selected autonomy mode—**Reactive**, **Semi Mode** (5-minute 
 Closed-loop `Stand` (`2 mm` settle) and `Walk` execution, `0.8.150` Cartesian workspace boundary projection, the 349-example SQLite **Freestyle** motion library, `50 Hz` neural gait streaming (`walk_nominal_v1`) on physical carpet, and **Stock Pupper V3 + full-CAD Ainekio MJCF reinforcement learning** in JAX/Brax/MuJoCo MJX are active alongside the unified `llama-cpp.service` MetaHuman OS runtime.
 
 - [Project Overview & System Status](/posts/project-overview/#project-status)
+- [How Does Ainekio Stack Up? (Robot Leaderboard & Comparison)](/posts/how-does-ainekio-stack-up/)
 - [Ainekio as a Companion](/posts/ainekio-companion/)
 - [V2 Hardware & Wiring Reference](/posts/ainekio-v2/)
 - [Gait Development & Locomotion Guide](/posts/gait-development/)

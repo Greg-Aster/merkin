@@ -1,0 +1,191 @@
+---
+title: "How Does Ainekio Stack Up? Robot Leaderboard & Comparison (Furby to Atlas)"
+published: 2026-11-06T14:30:00-08:00
+updated: 2026-11-06
+description: "An honest, data-driven comparison of Ainekio (~$60–$100 BOM) and MetaHuman OS against Stanford Pupper V3, Microduck, Petoi Bittle X, Loona, Unitree Go2/G1, Spot, Figure 02, and Electric Atlas."
+image: "/gallery/ainekio-v2-physical-three-quarter-1600.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & MetaHuman OS"
+showImageOnPost: true
+showToc: true
+featured: true
+pinned: true
+order: 2
+tags: [Ainekio, Robot Comparison, Leaderboard, Stanford Pupper V3, Microduck, MetaHuman OS, Freestyle, Quadruped]
+category: "Start Here"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: overview
+  generation: v2
+  kind: reference
+  next: ainekio-companion
+  related: ["project-overview", "ainekio-v2", "gait-development", "metahuman-integration"]
+---
+
+Building a quadruped robot from scratch for **`~$60–$100` in parts** raises an obvious question: **how does Ainekio actually stack up against the rest of the robotics world?**
+
+If you judge a robot strictly by how many kilograms it can deadlift or how fast it can sprint across gravel, a `650 g` 3D-printed quadruped driven by twelve `$1.50` `MG90S` micro servos will never beat a `$74,500` **Boston Dynamics Spot** or an all-electric **Atlas**. Physics and actuator budgets are unforgiving.
+
+But when we audited upstream open-source and commercial robot stacks—including **Stanford Pupper V3**, **Pollen Robotics / Hugging Face Microduck**, **Petoi Bittle X**, and consumer AI pets like **EMO** and **Loona**—something surprising stood out. On the axes that turn a robot from a remote-controlled mechanical puppet into an **autonomous, expressive companion**—closed-loop joint verification at low cost, natural-language generative motion synthesis (**Freestyle**), persistent episodic memory, internal drives, dreaming/sleep consolidation, and full-computer agency (**MetaHuman OS + Big Brother**)—Ainekio does more than hold its own. In several architectural categories, this `$60–$100` build is meaningfully ahead of platforms costing `$400` to `$3,400+`.
+
+This page is an honest, numbers-first breakdown of where Ainekio excels, where larger commercial and research robots beat it, and how the current robotics landscape stacks up from a `$60` **Furby** to **Boston Dynamics Electric Atlas**.
+
+---
+
+## 1. The Five Echelons of Modern Robotics
+
+To make a fair comparison, we group robots into five tiers based on what they physically do and how their brains are architected:
+
+1. **Echelon 1 — Toys & Single-Task Appliances (`$60–$1,400`)**:
+   - **Hasbro Furby (2023)** (`~$60–$70`): Capacitive touch sensors, pre-recorded voice triggers, and a cam-driven rocking mechanism with 600+ scripted phrases. Zero spatial navigation, zero LLM cognition, zero memory.
+   - **iRobot Roomba j9+** (`~$899–$1,399`): Excellent single-purpose appliance with Visual SLAM (`PrecisionVision`), cliff/wall sensors, and obstacle avoidance—but 2-wheel differential drive only and zero conversational or expressive identity.
+2. **Echelon 2 — Consumer AI Pets & Desk Companions (`$279–$530`)**:
+   - **Living.AI EMO** (`~$279–$379`): `248 g` desk biped (4-servo ankle/foot shuffle) with a pixel face, 4-mic array, cliff sensors, and cloud voice commands. Charming desk presence, but cannot walk over uneven surfaces or synthesize novel body language.
+   - **KEYi Tech Loona** (`~$430–$530`): `1.1 kg` wheeled petbot (`2` brushless wheel motors + `4` body/ear servos), `2.4"` LCD face, `720p` RGB camera, `3D ToF` sensor, and cloud GPT chat. Fast on flat floors because it rolls on wheels, not legs.
+3. **Echelon 3 — Open-Source Maker & Academic Legged Robots (`$60–$3,400`, Ainekio's Direct Peer Group)**:
+   - **Petoi Bittle X** (`~$319`): Palm-sized `ESP32` quadruped with `9` servos (`8` leg + `1` head, no hip roll/abduction) and an `MPU6050` IMU. Great STEM kit, but relies on open-loop hobby servos without shaft feedback and plays pre-authored frame tables.
+   - **Pollen Robotics / Hugging Face Microduck (`OpenDuck Mini`)** (`~$399` BOM): `15–16 DOF` Disney-BDX-inspired biped using `DYNAMIXEL XL330` serial bus servos and a `50 Hz` MuJoCo RL walking policy. Purpose-built for RL walking, without generative pose synthesis or a full companion OS.
+   - **Ainekio V2** (`~$60–$100` BOM): `650 g`, `12-DOF` closed-loop four-bar quadruped (`Waveshare ESP32-P4-WIFI6` + `ESP32-C6`) with **4th-wire potentiometer feedback** across all 12 `MG90S` servos (`50 Hz` `CD74HC4067` ADC scan), `208 Hz` `LSM6DS3` IMU, `OV5647` MIPI-CSI camera, `1.9"` `ST7789` LCD (59 procedural expressions), onboard `WakeNet9s` / `micro_wake_word`, dual locomotion (native C IK gait + `50 Hz` MJX PPO neural policy), **Freestyle** natural-language motion synthesis, and **MetaHuman OS**.
+   - **Stanford Pupper V3** (`~$1,450–$2,000` self-sourced BOM / `$3,400+` assembled kit): `3 kg`, `12-DOF` academic quadruped with `12× SteadyWin GIM4305-10` brushless QDD planetary actuators, Raspberry Pi 5, Luxonis depth camera, `50 Hz` MJX PPO locomotion, and ROS 2 + OpenAI Realtime voice integration.
+4. **Echelon 4 — Prosumer & Industrial Quadrupeds (`$1,600–$150,000+`)**:
+   - **Unitree Go2 (`Air / Pro / EDU`)** (`$1,600–$4,500+`): `15 kg`, `12-DOF` quadruped with `45 N·m` peak joint torque, `3.5 m/s` sprint speed, and `4D LiDAR L2`. Incredible hardware value per Newton-meter, though its stock AI mode is a thin cloud wrapper.
+   - **Boston Dynamics Spot** (`~$74,500` base / `$150,000+` enterprise): `32.5 kg` (`14 kg` payload), IP54 industrial inspection workhorse with `360°` stereo vision and optional 6-DOF arm.
+5. **Echelon 5 — Frontier Industrial Humanoids (`$18,000–$150,000+`)**:
+   - **Unitree G1** (`$17,990–$53,900+`): `35 kg`, `23–43 DOF` bipedal humanoid with `90–120 N·m` knee torque and `100 TOPS` Orin NX compute.
+   - **Figure AI Figure 02** (Enterprise pilot / `$100k+` class): `70 kg`, `26-DOF` body + `16-DOF` dexterous hands, `25 kg` payload, speech-to-speech VLM manipulation.
+   - **Boston Dynamics Electric Atlas** (Enterprise pilot / `$150k+` class): `90 kg`, `56-DOF` all-electric humanoid with `360°` rotating joints and `50 kg` peak lift.
+
+---
+
+## 2. Full-Spectrum Comparison Table (Furby to Electric Atlas)
+
+| Robot | Echelon | Approx. Cost | Mass & Form | Actuators & DOF | Joint / Pose Verification | Locomotion Engine | Cognitive Brain & Memory |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Hasbro Furby (2023)** | 1 · Toy | `~$60–$70` | Stationary plush | 1 cam motor (ears/eyes/body rock) | Limit switches | Stationary rocking | Fixed state machine (600+ canned clips; zero LLM/memory) |
+| **Living.AI EMO** | 2 · Desk Pet | `~$279–$379` | `248 g` desk biped | 4 ankle/foot servos | Basic internal | Scripted desk shuffle | Proprietary cloud/on-chip command parser (remembers ~10 faces) |
+| **KEYi Loona** | 2 · Wheeled Pet | `~$430–$530` | `1.1 kg` wheeled pet | 2 brushless wheels + 4 body/ear servos | Wheel encoders | Differential wheeled drive | Cloud GPT chat + scripted state tree (5 TOPS BPU vision) |
+| **iRobot Roomba j9+** | 1 · Appliance | `~$899–$1,399` | `~3.4 kg` disc | 2 drive wheels + brushes | Wheel odometry + vSLAM | 2D floor coverage | iRobot OS (`Dirt Detective` + obstacle classification; no persona) |
+| **Petoi Bittle X** | 3 · Maker Quad | `~$319` | `~290 g` quadruped | 9 hobby servos (8 leg, 1 head; no hip roll) | **Open-loop** (IMU body angle only; no shaft feedback) | Scripted C gait tables (`OpenCat`) | Optional external serial commands (no native cognitive runtime) |
+| **Microduck (`OpenDuck`)** | 3 · Maker Biped | `~$399` BOM | `~600 g` biped | 15–16 `DYNAMIXEL XL330` bus servos | Serial bus encoders (`50 Hz`) | `50 Hz` MuJoCo RL policy (`mjlab`) | Locomotion research platform (no native companion brain) |
+| **Ainekio V2** | **3 · Companion Quad** | **`~$60–$100` BOM** | **`650 g` quadruped** | **12× `MG90S` in closed-loop 4-bar linkages** | **Closed-loop 4th-wire ADC mux (`50 Hz`) + `208 Hz` IMU** | **Dual: Native C 4-bar IK (`Walk`/`Run`/`Crawl`/`Crab`) + `50 Hz` MJX PPO RL + Freestyle IK compiler** | **MetaHuman OS: Standing Persona, episodic vector memory, 19+ cognitive graphs, Sleep/Dreamer/Psychotherapist, Big Brother CLI** |
+| **Stanford Pupper V3** | 3 · Academic Quad | `~$1,450–$2,000` BOM (`$3,400+` kit) | `~3.0 kg` quadruped | 12× `GIM4305-10` brushless QDD planetary | Brushless FOC encoder feedback (`520 Hz` loop) | `50 Hz` MJX PPO RL (`neural_controller`) + open-loop CSV animations | Stateless OpenAI Realtime API voice wrapper over ROS 2 (`ros_node.py`) |
+| **Unitree Go2** | 4 · Prosumer Quad | `$1,600–$4,500+` | `15 kg` quadruped | 12 brushless actuators (`45 N·m` peak) | Full FOC torque/position encoders + 4D LiDAR | High-speed dynamic RL/MPC (`3.5 m/s`, backflips, stairs) | Cloud GPT app wrapper (EDU exposes ROS 2 SDK) |
+| **Unitree G1** | 5 · Humanoid | `$17,990–$53,900+` | `35 kg` (`1.32 m`) | 23–43 DOF (`90–120 N·m` knee) | Full industrial joint torque/angle telemetry | Whole-body RL bipedal locomotion & manipulation | UnifoLM / developer ROS 2 SDK (`100 TOPS` Orin NX) |
+| **Boston Dynamics Spot** | 4 · Industrial Quad | `$74,500–$150,000+` | `32.5 kg` (`14 kg` payload) | 12 custom hydraulic/electric actuators (+ 6-DOF arm) | Industrial force/torque + `360°` stereo depth | Industry-leading MPC + RL terrain locomotion | ` Autowalk` industrial inspection autonomy |
+| **Figure 02 / Electric Atlas** | 5 · Frontier Humanoid | `$100,000–$150,000+` (Enterprise) | `70–90 kg` (`1.68–1.9 m`) | 26–56 DOF (`25–50 kg` payload) | Full whole-body force/tactile/torque sensing | Frontier whole-body RL manipulation & bipedal agility | Custom end-to-end VLA / OpenAI & DeepMind industrial task models |
+
+---
+
+## 3. Direct Peer Deep-Dive: Stanford Pupper V3 & Microduck vs. Ainekio Freestyle
+
+During November 2026 gait development, we vendor-pinned and audited both the upstream **Stanford Pupper V3** monorepo (`Nate711/pupperv3-monorepo`, `cs123-stanford/pupper_gait_deploy`, `cs123-stanford/pupper-mjlab`) and **Pollen Robotics Microduck** (`pollen-robotics/microduck_rl` on `mjlab`) inside `/home/greggles/Ainekio`.
+
+That code-level audit revealed a major capability gap in how current open-source robots handle **expressive motion, natural-language body control, and physical stall recovery**:
+
+| Capability | Stanford Pupper V3 (`~$2,000` BOM) | Microduck (`mjlab`, `~$399` BOM) | Ainekio V2 + Freestyle (`~$60–$100` BOM) |
+| :--- | :--- | :--- | :--- |
+| **Walking / Locomotion** | `50 Hz` MJX PPO policy (4-legged + 3-legged policies via `neural_controller` at `520 Hz` ROS 2 timer) | `50 Hz` RL velocity policy in `mjlab` (`DYNAMIXEL XL330` bus) | **Both** deterministic `50 Hz` Native C closed-loop 4-bar IK (`Walk`, `Run`, `Crawl`, `Crab` + `gait_learning_v4`) **and** `50 Hz` MJX PPO Neural Gait (`walk_nominal_v1`) |
+| **Poses & Emotes** | `animation_controller.py`: plays fixed `30 Hz` CSV recordings (`sit`, `shake`, `downward_dog`, `superman`) **open-loop** | **None** (locomotion policy only) | **Spatial IK + joint compiler** (`body`, `feet`, `pose`, `move`, `oscillate`, `gait`, `stand`, `hold`, `face`) + 23 cubic-spline finite gestures gated by **4th-wire arrival checkpoints** |
+| **LLM Motion Interface** | `ros_node.py`: only calls `move(vx, vy, wz)` or `change_gait()`—**cannot synthesize new poses or multi-step gestures** | **None** | **Freestyle (`Qwen3.5-0.8B` + LoRA)**: synthesizes multi-step motion programs directly from natural language (*"shift weight left, lift front right foot, and wave"*) |
+| **Stall / Fall Recovery & Continual Learning** | **None** (plays CSV frames blindly; no stall recovery or trajectory splicing) | **None** | **Closed-loop `Bridge.event` recovery** (`servo_stall`, `tipped`, `rapid_movement`, `slip`) + human-in-the-loop review/correction saved back to `motion-library.sqlite` (`349` curated examples) |
+| **Simulation & Kinematic Solver** | Open-chain 3-link serial legs with `20 mm` sphere feet in MJX | Open-chain serial biped in `mujoco_warp` (Newton solver) | **Closed-loop 4-bar linkage MJCF** (`solver="cg"`, custom `MG90SActuator` speed-torque curve, GPU `FootAction` IK, and 720-feature `TensorSensors` proprioception) |
+
+### What we found when benchmarking Pupper V3 and Microduck
+
+1. **Stock Pupper V3 Virtual Benchmark (`stock-pupper-v3-forward-result.json`)**:
+   - Running the unmodified upstream Pupper V3 policy (`policy_latest.json`) on its stock MuJoCo model for `15.0 s` at a commanded `+0.30 m/s` yielded `+1.68 m` forward travel (`0.112 m/s` mean speed, `~37%` of command) with `-0.275 m` lateral drift and `-16.14°` yaw drift, while the `520 Hz` ROS 2 timer experienced deadline overruns (`~31 Hz` effective target delivery vs `52 Hz` nominal).
+2. **Closed-Loop 4-Bar Physics in `microduck.py`**:
+   - Upstream `microduck_rl` assumes an open kinematic chain using `mujoco_warp`'s Newton solver, which hits `float32` Hessian `NaN` failures (`mujoco_warp#1415`) on Ainekio's closed four-bar loop-closure constraints.
+   - Ainekio's `microduck.py` switches the GPU simulation to **Conjugate Gradient (`solver="cg"`, `500 Hz` physics / `50 Hz` control)**, models the true `MG90S` speed-torque ceiling (`545.45°/s`, custom `MG90SActuator`), decodes `12D` normalized foot targets (`FootAction`) on GPU through analytical four-bar IK and `PCA9685` quantization, and feeds a **720-feature (`15 × 48`) proprioceptive history** (`ainekio-neural-gait-v7-proprio`) matching the physical `CD74HC4067` 4th-wire ADC scan and `208 Hz` `LSM6DS3` IMU.
+3. **Honest Hardware Realities on `$1.50` `MG90S` Servos**:
+   - While Pupper V3's `$100+` brushless QDD actuators can brute-force through high-friction carpet sweeps, Ainekio's `$1.50` `MG90S` micro servos require smart trajectory hygiene.
+   - Our audit of `motion-library.sqlite` showed that any fragility during complex emotes comes down to **seed trajectory representation, not the Freestyle architecture**:
+     - **Weight shifting before lifting**: Instead of raw multi-leg `pose` sweeps that drag loaded feet across carpet, Freestyle trajectories use `body` (6-DOF torso translation/roll/pitch solved against planted feet) and small vertical `feet` lifts (`+Z` unload → move → `0` place).
+     - **Preventing rear-carrier stall points**: Auditing and replacing extreme loaded angles (such as `rear_right_carrier` at `-31.3° / -32.69°`) keeps the four-bar linkage inside its high-mechanical-advantage envelope—and when an unexpected obstruction still blocks a leg, the `ESP32-P4` emits a non-terminal `servo_stall` event while keeping outputs powered so `Bridge.event` can splice in a live backoff-and-resume recovery program.
+
+---
+
+## 4. The Brain Gap: Why MetaHuman OS Separates Ainekio from `$2,000+` Robots
+
+Even on `$2,000` academic robots and `$4,500` commercial quadrupeds, the "AI brain" is almost always an afterthought: a stateless Python script that streams audio to a cloud API and exposes two or three hardcoded tool calls (`move(vx, vy, wz)`, `sit()`, `bark()`). When you power-cycle the robot, it forgets who you are, what it was trying to do five minutes ago, and whether its rear leg stalled on the rug.
+
+Ainekio's brain is **[MetaHuman OS](https://github.com/Greg-Aster/metahuman-os)**—a full cognitive architecture built around continuity, introspection, and autonomous agency:
+
+| Cognitive Layer | Typical Consumer / Research Robot (EMO, Loona, Pupper V3, Go2) | Ainekio + MetaHuman OS (`/home/greggles/metahuman`) |
+| :--- | :--- | :--- |
+| **Identity & Persona** | Hardcoded system prompt or fixed state tree | **Standing Persona (`persona/core.json`)**: Big Five traits, values, short/mid/long-term goals, decision heuristics, and **5 trust levels** (`observe` → `adaptive_auto`). |
+| **Memory & Continuity** | Stateless session or cloud chat log | **Multi-channel rolling buffers** (`conversation`, `inner`, `robot`, `system`, `terminal`), attributed **episodic JSON memory**, L2-normalized **vector search**, and WAL-mode **`executions.sqlite`** durable checkpoints. |
+| **Cognitive Architecture** | Single LLM call or finite state machine | **19+ editable Svelte-Flow node graphs** (`environment-mode.json`, `fast-body-event-mode.json`, `big-brother-tool-mode.json`, `dreamer-mode.json`) routing across **12 specialist model roles** on a unified `llama-cpp.service` (`Qwen3.5 9B` multimodal + `0.8B/2B` per-request LoRAs). |
+| **Autonomy & Internal Drives** | Random idle animations | **3 Autonomy Modes**: `Reactive`, `Semi Mode` (5-minute signed `delta` drive updates in `[0, 100]`), and `Full Auto Mode` driving embodied curiosity (`boredom-observer`, `boredom-movement`, `boredom-reflection`, `desire-agent`). |
+| **Sleep, Dreams & Self-Reflection** | None (charging dock standby) | **8-Stage Sequential Sleep Cycle**: `organizer` → `curator` → `environment-training-curator` → LoRA adapter fitting → `desire-agent` → **Dreamer** (`15` lifetime memories sampled with `227-day` decay, symbolic dreams/nightmares, up to `4` continuations) → **Psychotherapist** (sole autonomous editor of `persona/core.json`) → vector index rebuild. |
+| **Physical Reflexes (`<1 s`)** | Tip cutoff or silent fault | **`fast-body-event-mode.json`**: Immediate foreground `be_` LCD expression (`confused` / `surprised`) + low-latency `lightweight` model remark on `tipped`, `rapid_movement`, or `servo_stall` without polluting long-term chat history. |
+| **Voice & Expression Stack** | Cloud wake-word / cloud TTS | On-chip **`micro_wake_word`** (`ESP-NN` on `ESP32-P4`) with physical **`+6°` front-shoulder listening perk**, local **Whisper STT** (`:9883`), local **Kokoro TTS** (`:9882`) with custom `.pt` voicepacks, and **59 procedural `ST7789` LCD expressions** with audio-synced voice bars. |
+| **Vision & Spatial Awareness** | Basic face/ball tracking or raw depth | **Qwen3.5 9B VLM** structured scene JSON + **YOLOE** open-vocabulary object detection + named-person identity tracking (`single_person_resume` safety gate) + on-demand **MoGe metric depth** + **SIFT/OpenGV `p2p`** visual odometry. |
+| **Computer & Coding Agency ("Big Brother")** | None | **Unified Big Brother Escalation (`big-brother-tool-mode.json` & `TerminalChat.svelte`)**: Delegates complex coding, shell, web, and self-healing runtime repair (`system-code-review`) to **OpenAI Codex CLI**, **Claude Code CLI**, **Aider**, **Gemini CLI**, or **Qwen Code**. |
+
+---
+
+## 5. The Robot Leaderboard
+
+No single number captures every robot fairly—a factory foreman buying an inspection dog cares about IP54 weatherproofing and `45 N·m` actuators, while an embodied-AI builder or companion owner cares about cognitive depth, expressive freedom, and not spending `$3,000` on actuators.
+
+Below is our multi-axis **Robot Leaderboard**, scoring all 12 platforms from `0–10` across five explicit dimensions:
+
+1. **Physical Power & Mobility (`/10`)**: Actuator torque, speed, payload, terrain clearance, and manipulation hardware.
+2. **Closed-Loop Proprioception & Locomotion Engineering (`/10`)**: Sensor fusion, joint verification, IK/RL control rigor, and recovery mechanics relative to form factor.
+3. **Expressive Motion & Natural-Language Body Control (`/10`)**: Ability to synthesize novel poses, emotes, weight shifts, and expressive face/body choreography from natural language.
+4. **Cognitive Depth, Memory & Tool Agency (`/10`)**: Persistent persona, episodic memory, autonomous drives, sleep/dream consolidation, perception integration, and external tool/computer agency.
+5. **Affordability & Open Hackability (`/10`)**: Bill-of-materials accessibility, open-source transparency, and capability delivered per dollar spent.
+
+| Rank (Companion-Builder Value) | Robot | Approx. Cost | 1. Physical Power (`/10`) | 2. Closed-Loop Control (`/10`) | 3. Expressive Motion (`/10`) | 4. Cognitive Depth & Agency (`/10`) | 5. Affordability & Openness (`/10`) | **Composite Score (`/50`)** |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **#1** | **Ainekio V2 + MetaHuman OS** | **`~$60–$100` BOM** | `3.5` | `8.5` | **`9.4`** | **`9.7`** | **`9.8`** | **`40.9 / 50`** |
+| **#2** | **Unitree Go2 (Air / Pro / EDU)** | `$1,600–$4,500+` | `8.5` | `9.0` | `6.5` | `5.0` | `7.0` | **`36.0 / 50`** |
+| **#3** | **Stanford Pupper V3** | `$1,450–$3,400+` | `6.5` | `8.0` | `5.0` | `4.8` | `6.5` | **`30.8 / 50`** |
+| **#4** | **Figure AI Figure 02** | `$100k+` (Enterprise) | `9.5` | `9.5` | `7.5` | `8.0` | `1.0` | **`35.5 / 50`** *(Industrial)* |
+| **#5** | **Boston Dynamics Electric Atlas** | `$150k+` (Enterprise) | **`10.0`** | **`10.0`** | `8.0` | `7.0` | `0.5` | **`35.5 / 50`** *(Industrial)* |
+| **#6** | **Unitree G1 Humanoid** | `$17,990–$53,900+` | `9.0` | `9.0` | `7.0` | `5.5` | `4.0` | **`34.5 / 50`** |
+| **#7** | **Boston Dynamics Spot** | `$74,500–$150,000+` | `9.2` | `9.8` | `6.5` | `6.0` | `1.5` | **`33.0 / 50`** |
+| **#8** | **Microduck (`OpenDuck Mini`)** | `~$399` BOM | `4.0` | `7.5` | `5.5` | `3.0` | `8.5` | **`28.5 / 50`** |
+| **#9** | **KEYi Tech Loona** | `$430–$530` | `3.5` | `5.0` | `6.5` | `5.5` | `6.5` | **`27.0 / 50`** |
+| **#10** | **Petoi Bittle X** | `~$319` | `3.0` | `3.5` | `4.5` | `2.5` | `8.5` | **`22.0 / 50`** |
+| **#11** | **Living.AI EMO** | `$279–$379` | `1.5` | `3.0` | `5.5` | `4.5` | `6.5` | **`21.0 / 50`** |
+| **#12** | **iRobot Roomba j9+** | `$899–$1,399` | `4.0` | `7.0` | `1.0` | `3.5` | `4.5` | **`20.0 / 50`** |
+| **#13** | **Hasbro Furby (2023)** | `$60–$70` | `0.5` | `1.0` | `3.0` | `0.5` | `8.0` | **`13.0 / 50`** |
+
+> [!IMPORTANT]
+> **How to read the leaderboard honestly:**
+> - **If you need industrial payload, outdoor stairs, or factory manipulation**, **Electric Atlas (`10.0` Physical)**, **Figure 02 (`9.5` Physical)**, **Spot (`9.2` Physical)**, and **Unitree Go2 (`8.5` Physical)** are in a completely different mechanical universe than Ainekio (`3.5` Physical).
+> - **If you are evaluating capability-per-dollar, closed-loop maker engineering, natural-language motion synthesis, and autonomous companion intelligence**, **Ainekio V2 + MetaHuman OS (`40.9 / 50`)** sits at the top of the chart—delivering closed-loop 12-DOF locomotion, `50 Hz` MJX reinforcement learning, Freestyle IK synthesis, dreaming/memory consolidation, and Big Brother computer agency for the price of a Furby (`~$60–$100` BOM).
+
+---
+
+## 6. Complete Ainekio V2 Bill of Materials (`~$60–$100` Target)
+
+For builders wondering how a 12-DOF closed-loop quadruped with MIPI-CSI vision, 208 Hz IMU, 1.9" IPS LCD, onboard wake-word audio, and 2S Li-ion power lands between **`$60` and `$100`**, here is the exact hardware breakdown from `/home/greggles/Ainekio/docs/v2-12servo/SPECIFICATIONS.md`:
+
+| Subsystem | Component | Typical Street / Kit Price | Role in Ainekio V2 |
+| :--- | :--- | :--- | :--- |
+| **Main Compute + Wireless** | **Waveshare ESP32-P4-WIFI6** + onboard **ESP32-C6** (`B0FLXX1BZ6`) | `~$20–$28` (often bundled with camera) | Dual `360 MHz` RISC-V HP cores, `32 MiB` PSRAM, hardware MIPI-CSI ISP/JPEG, Wi-Fi 6 over SDIO |
+| **Actuators (`12 DOF`)** | **12× Miuzei MG90S** metal-gear micro servos (modified with 4th-wire wiper tap) | `~$18–$22` (12-pack) | 3 joints per leg (`shoulder`, `carrier`, `crank`), `545.45°/s` no-load speed |
+| **PWM Controller** | **HUAREW PCA9685** 16-ch 12-bit PWM board (`I2C1` `0x40`) | `~$3–$5` | Deterministic `50 Hz` PWM generation with `GPIO4` output-enable safety cutoff |
+| **4th-Wire Analog Mux** | **HiLetgo CD74HC4067** 16-ch multiplexer (`ADC2` `GPIO49`) | `~$2–$3` | Scans all 12 servo potentiometer wipers at `50 Hz` (`~15.9 ms` full frame) for closed-loop control |
+| **Inertial Sensing** | **GY-LSM6DS3** 6-axis IMU (`I2C0` `0x6A`) | `~$2–$4` | Continuous `208 Hz` hardware FIFO sampling + x-io Fusion attitude estimation |
+| **Vision** | **OV5647** 5 MP MIPI-CSI camera | `~$5–$8` (or included in P4 kit) | `1280×960` RAW10 binned stream + `1920×1080` stills + `10,000 µs` motion-exposure ceiling |
+| **Face Display** | **XIITIA 1.9" ST7789** `320×170` IPS SPI LCD (`B0DFWMC16W`) | `~$5–$8` | `15 fps` RGB565 rendering of 59 procedural expressions + live speech voice bars |
+| **Onboard Audio** | **ES8311** codec + **NS4150B** Class-D amp + mic + `8 Ω / 2 W` speaker | `~$4–$6` | `16 kHz` PCM mic capture (`micro_wake_word` + `esp_vad`) and onboard TTS playback |
+| **Power System** | **2× 18650 2S Li-ion cells** + **Mini560 5V/5A buck** + **HiLetgo 2S USB-C BMS** | `~$8–$14` | `8.4 V` pack stepped down to a regulated `5 V / 5 A` rail for the 12-servo bus |
+| **Chassis & Linkages** | **3D-printed PLA/PETG** (`375` evaluated meshes, `Part027` soles) + M2/M2.5 fasteners | `~$5–$8` in filament/hardware | `650 g` total assembled mass (`245.85 × 182.79 × 109.06 mm` Wireless envelope) |
+| **Total BOM** | **Complete V2 Physical Robot** | **`~$72–$98` (`~$60–$100` range)** | **Full 12-DOF closed-loop body** *(paired with your existing desktop/laptop running MetaHuman OS)* |
+
+---
+
+## Where to Go Next
+
+- **[Project Overview & Live System Status](/posts/project-overview/)**: Full system architecture across the `ESP32-P4` body and `MetaHuman OS`.
+- **[Ainekio as a Companion](/posts/ainekio-companion/)**: Deep dive into Standing Persona, autonomous drives, Dreaming, and the Psychotherapist sleep cycle.
+- **[Gait Development & Locomotion Guide](/posts/gait-development/)**: See the physical carpet trials, `50 Hz` neural gait videos, and the 3-stage MuJoCo/MJX training progression (`tiny hops` → `"scootybooty"` fix → `200M-step` centered stride).
+- **[V2 Hardware & Wiring Reference](/posts/ainekio-v2/)**: Complete pinouts, 4th-wire servo modification guide, and assembly diagrams.
