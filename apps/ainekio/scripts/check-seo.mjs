@@ -27,7 +27,8 @@ await check('one XML sitemap owner with an HTTP redirect for the alias', () => {
   assert.match(read('_redirects'), /^\/sitemap.xml\s+\/sitemap-index.xml\s+301$/m)
   assert.equal(existsSync(path.join(dist, 'sitemap.xml')), false)
   const sitemap = read('sitemap-0.xml')
-  assert.doesNotMatch(sitemap, /\/(?:404|login|configs|new-post|friends|social)(?:\/|\.)/)
+  assert.doesNotMatch(sitemap, /\/(?:404|login|configs|new-post|friends|social|archive\/tag|archive\/category)(?:\/|\.)/)
+  assert.match(sitemap, /<lastmod>2026-/)
 })
 await check('homepage and pagination have descriptive, distinct metadata', () => {
   const home = read('index.html')
@@ -38,16 +39,28 @@ await check('homepage and pagination have descriptive, distinct metadata', () =>
   const titles = [title(home), ...pages.map(page => title(read(`${page}/index.html`)))]
   assert.equal(new Set(titles).size, titles.length)
 })
-await check('all topic archives have unique titles and descriptions', () => {
+await check('all topic archives have unique titles, descriptions, and noindex', () => {
   const titles = [], descriptions = []
   for (const kind of ['tag', 'category']) {
     for (const topic of readdirSync(path.join(dist, 'archive', kind))) {
       const html = read(`archive/${kind}/${topic}/index.html`)
+      assert.match(meta(html, 'robots') || '', /noindex/)
       titles.push(title(html)); descriptions.push(meta(html, 'description'))
     }
   }
   assert.equal(new Set(titles).size, titles.length)
   assert.equal(new Set(descriptions).size, descriptions.length)
+})
+await check('all articles have a single h1, BreadcrumbList JSON-LD, and share bar', () => {
+  const postFiles = readdirSync(path.join(dist, 'posts'), { recursive: true }).filter(file => file.endsWith('index.html'))
+  for (const file of postFiles) {
+    const html = read(path.join('posts', file))
+    if (!html.includes('data-reading-path')) continue
+    const h1Count = [...html.matchAll(/<h1\b/gi)].length
+    assert.equal(h1Count, 1, `posts/${file} expected 1 <h1>, found ${h1Count}`)
+    assert.match(html, /BreadcrumbList/, `posts/${file} missing BreadcrumbList JSON-LD`)
+    assert.match(html, /data-share-bar/, `posts/${file} missing ShareBar`)
+  }
 })
 await check('sharing images are raster files with accurate dimensions', async () => {
   const files = readdirSync(dist, { recursive: true }).filter(file => file.endsWith('.html'))

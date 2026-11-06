@@ -1,15 +1,15 @@
 ---
-title: "Camera and Visual Feedback"
+title: "ESP32-P4 Robot Vision & Face Display: OV5647 MIPI-CSI Camera, 1.9-Inch ST7789 LCD, YOLOE & OpenGV"
 published: 2026-08-27T08:30:00-07:00
-updated: 2026-10-21
-description: "When Ainekio takes pictures, how they reach MetaHuman, and how an image is used to check a robot objective."
+updated: 2026-11-06
+description: "Ainekio's 1.9-inch ST7789 LCD face (58 expressions), OV5647 CSI camera (180° inverted mount, 10,000 µs motion-safe exposure ceiling), YOLOE tracking, and OpenGV / MoGe visual depth odometry."
 image: "/assets/ainekio/v2/vision-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Camera, Vision, OV3660, Durable Execution]
+tags: [Ainekio, Camera, Vision, ST7789, OV5647, Odometry, YOLOE]
 category: "Perception and Voice"
 draft: false
 lang: "en"
@@ -19,150 +19,42 @@ reading:
   generation: both
   kind: reference
   next: voice-loop
-  related: ["2026-10-12-yoloe-tracking", "2026-10-08-face-and-media"]
+  related: ["ainekio-v2", "gateway-and-simulator", "2026-10-21-body-face-and-standing"]
 ---
 
-## October 21: depth estimates and walking progress
+Ainekio's front face carrier combines visual expression and visual perception in one removable module: a **1.9-inch `ST7789` color IPS LCD** (`320 × 170`) displaying **58 animated facial expressions**, and an **`OV5647` MIPI-CSI camera** above the display that provides action-correlated snapshots, YOLOE/ByteTrack target tracking, and monocular depth odometry.
 
-[Body Control's experimental depth source](/posts/2026-10-21-learning-from-walking/)
-uses MoGe-2 and retained visual landmarks to estimate local motion for gait
-learning. This is a separate host measurement path from conversational image
-interpretation. It is activated, but metric accuracy is unverified and failed
-tracking intervals remain unavailable. The measured ground-plane method remains
-an alternative. Camera-origin motion becomes body-origin motion only when the
-mounting transform is supplied; neither source establishes physical foot contact.
+## 1.9-inch `ST7789` LCD face and 58 expressions
 
-## October 15: visual goals and measured relationships
+The V2 face display uses a landscape 1.9-inch `ST7789` SPI module mounted behind the red face surround. The firmware renderer drives 58 named expression animations—covering idle blinking, speaking cues, directional glances, curiosity, sleep/doze states, Freestyle gesture accompaniments, and **`be_` token-matched Fast Body Event reactions** (`fast-body-event-mode.json`) when the robot is tipped, shaken, or stalled.
 
-[Goal-directed locomotion](/posts/2026-10-15-locomotion-goals/) distinguishes
-image-relative targets from metric distance. Ground-plane estimates require real
-camera calibration and an explicit target contact point; detection boxes alone
-do not supply depth. Visual-only endpoints can use available camera evidence
-without metric calibration or YOLO. Physical arrival accuracy remains unqualified.
+![Contact sheet of Ainekio's 58 animated ST7789 LCD facial expressions](/gallery/lcd-face-contact-sheet-1600.webp)
 
-The shared Vision category retains its selected provider and image input;
-unsupported image input no longer silently switches to Orchestrator. The
-[systems report](/posts/2026-10-15-companion-systems/) describes that category
-boundary and the current role assignments.
+## `OV5647` MIPI-CSI camera and motion-safe capture
 
-## October 14: recording and visual planning
+On V2 (`Waveshare ESP32-P4-WIFI6`), vision is captured through an `OV5647` MIPI-CSI sensor (superseding V1's parallel `OV3660` sensor on the `ESP32-S3`):
 
-The P4 can now save its preview JPEGs as segmented SD video and download clips through Body Control. A [dated hardware run](/posts/2026-10-14-recording-and-updates/) verified concurrent preview, recording and download over 469 seconds without reconnecting. This short result does not establish endurance or visual-task completion.
+- **180° inverted mounting**: To route the CSI ribbon cleanly inside the compact front face carrier above the LCD, the `OV5647` module is mounted upside-down and rotated **180°** in the image pipeline so all snapshots, previews, and tracking overlays arrive right-side up.
+- **`10,000 µs` (`10 ms`) motion-safe exposure ceiling**: Indoor auto-exposure algorithms often lengthen shutter times at the expense of severe motion blur during walking or head turning. The V2 camera pipeline enforces a **`10,000 µs` maximum exposure ceiling**, keeping frames sharp during active locomotion and visual odometry.
+- **On-device microSD video recording**: The `ESP32-P4` can simultaneously stream preview JPEGs and record segmented video clips to the onboard microSD card for retrieval through Body Control.
 
-Camera and image objectives, including mixed requests, route to the configured larger vision planner. The 0.8B Task specialist handles nonvisual planning and can request delegation. [October 14 model qualification](/posts/2026-10-14-speech-and-task-training/) remains separate from physical vision acceptance.
+## How images connect to actions and conversation
 
-## October 12: YOLOE and selected-target integration
+Rather than flooding the language model with continuous raw room video, Ainekio binds still captures to specific events so cognition always knows **when** an image was taken and **which action** it reflects:
 
-The P4 camera now feeds a desktop YOLOE/ByteTrack pilot with exact-image overlays and search/select/release. A stationary chair track was observed, while camera recovery and the complete acquisition workflow remain unfinished. [Read the dated tracking record](/posts/2026-10-12-yoloe-tracking/). The guide below preserves the earlier snapshot-driven design.
+| Capture Trigger | Correlation Identifier | Purpose |
+| --- | --- | --- |
+| **Explicit snapshot (`captureImage`)** | `action_id` | On-demand visual inspection requested by MetaHuman OS or the operator |
+| **Post-motion snapshot** | `command_sequence_id` | Sent immediately before a movement's `done` receipt so Goal Review can verify the physical outcome |
+| **Voice utterance end (VAD)** | `utterance_id` | Pairs what the user said with what Ainekio was looking at during that spoken turn |
+| **Visual tracking & odometry** | `frame_id` + timestamp | Feeds host YOLOE/ByteTrack detection and OpenGV / MoGe depth estimation in Body Control |
 
-# How a picture becomes useful feedback
+In MetaHuman OS, visual objectives require `visual_observation` evidence routed through the **Vision** model role (`Qwen3.5 9B` on `llama-cpp.service`) rather than assuming that a completed `Walk` command automatically satisfied a visual goal.
 
-Ainekio’s camera gives MetaHuman OS, its conversation and decision-making
-software, a view from the robot. The current system takes still images on
-request, after selected movements, or when a spoken utterance ends. It does
-not continuously send room video to the model.
+## YOLOE tracking and visual depth odometry
 
-Each picture carries an ID linking it to the event that requested it. That
-connection matters: an image taken before a movement cannot show the result
-of that movement, and an unrelated image should not be used to judge it.
+Host perception in `Master/gateway` extends the camera from passive snapshots to active spatial measurement:
 
-The operator dashboard has a separate, low-rate preview for a person inspecting
-the camera. Preview starts off and does not replace the images tied to actions.
-
-## When the robot takes a picture
-
-| Trigger | How the picture is matched |
-| --- | --- |
-| MetaHuman or dashboard requests a snapshot | The picture uses the request ID |
-| A movement completes with a snapshot requested | The picture uses the command sequence ID |
-| Voice activity detection ends an utterance | Audio and picture share the robot’s utterance ID |
-
-Voice activity detection (VAD) finds the end of a spoken segment. Pairing an
-image with that segment lets MetaHuman receive what was said and what the
-camera saw as part of the same conversation turn.
-
-For a motion snapshot, camera metadata and the JPEG are sent before the robot’s
-`done` result. The gateway carries them from the robot; Ainekio’s adapter
-translates them for MetaHuman’s Environment Bridge, its external-device
-connection. The resulting context includes the frame ID, originating action or
-utterance, supported features, and current body state.
-
-MetaHuman’s saved workflow—the software steps handling one request—can then
-wait for that specific result and image.
-
-## A finished movement may not finish the goal
-
-Consider a future request to move into better light. A successful walk result
-would establish that the command finished. A fresh image would be needed to
-judge whether the lighting improved. This is an example of the intended review
-process, not a visual goal already demonstrated on the revised robot system.
-
-MetaHuman records the required evidence as `visual_observation` for a visual
-goal. A command-only goal can use `action_result`. Its **Action Result** step
-interprets the returned feedback, then **Goal Review** decides whether the
-objective is complete or needs another step. An inconclusive image may lead
-to another validated action rather than a claim of success.
-
-September workflow code handles results and images arriving in different
-orders. If an action is rejected, expires, or is cancelled, review can proceed
-without waiting for a picture from movement that never happened. Controlled
-software tests cover those cases. Actual camera quality and visual goal
-completion still need physical testing.
-
-## September progress: images reaching decisions
-
-The September 8 live review found available images attached to later Autonomy
-Controller calls. A follow-up compared saved image-content hashes with the
-inputs to Action Result, the next Controller, and the Environment selector.
-That established that the captured bytes reached those model requests.
-
-Source repairs also keep the originating instruction alongside the returned
-image, even when a standalone action has no saved broader goal. Controlled
-workflow tests use a returned image distinct from the starting image to check
-that the request and new evidence survive dispatch and resumption.
-
-These checks establish delivery and continuity. They do not show that the model
-interpreted the scene correctly or that the robot achieved a visual objective.
-Those questions still require a new deployed run with an observable outcome.
-
-## Camera settings and their purpose
-
-The working V1 uses an OV3660 camera on its ESP32-S3 controller. It takes XGA
-(1024×768) JPEG stills. JPEG compression keeps images within the network payload
-limit while retaining useful detail. Preview uses the smaller QVGA or VGA
-formats at a capped requested rate.
-
-One image buffer in PSRAM, the board’s temporary working memory, holds the
-capture. The camera remains idle between frames to limit memory and bandwidth
-use. The fast capture profile uses short manual exposure for common indoor
-60 Hz lighting, moderate gain, denoise, neutral sharpening, and no delay for
-automatic exposure to settle.
-
-An earlier high-gain, sharpened profile produced cross-hatch artifacts.
-Reducing gain and removing sharpening improved the capture. Lighting still
-needs real-room evaluation, and the planned P4 body needs its own camera and
-communication integration.
-
-## Seeing is not yet navigating
-
-Ainekio does not currently advertise target-relative navigation or visual
-approach: it cannot be assumed to locate an object and move to it just because
-it can return a picture. A `findObject` concept elsewhere in MetaHuman does
-not supply those abilities to this robot.
-
-Earlier **Active View** research explored detection and temporal segmentation,
-which follows image regions across frames. It remains outside the current
-production path. A tracked detection alone does not establish the object’s
-identity or show that a requested goal has been met.
-
-## The next physical test
-
-Repeat a visual objective while recording the accepted request, required
-evidence, action ID, robot acknowledgement, final command result, and matching
-fresh image. Each review should identify the actual frame used to judge the
-goal. If the condition is absent, further action should stay limited; completion
-requires an image that establishes it.
-
-[MetaHuman integration](/posts/metahuman-integration/) explains saved workflows.
-The [dated status report](/posts/archive/2026-09-09-project-status/) separates reported software
-tests from physical results.
+1. **YOLOE + ByteTrack target tracking**: Body Control runs open-vocabulary YOLOE detection paired with ByteTrack multi-frame association, allowing MetaHuman OS (`Active Task`) to search for, select, and track a specific object or person across frames with exact-image bounding-box overlays.
+2. **OpenGV 2-point RANSAC depth odometry**: To measure real forward progress and turning during walking trials and locomotion goals, the host gateway combines monocular depth points with `LSM6DS3` IMU rotation priors inside an **OpenGV 2-point RANSAC** solver, transforming camera-frame motion into body-frame displacement via the calibrated face-carrier mounting transform.
+3. **On-demand MoGe depth loading via `Active Task`**: Because monocular metric depth (`MoGe-2`) is compute-intensive, the depth model is loaded **on demand** only when `Active Task` or a gait-learning session actively requests visual depth progress, and unloaded when idle so GPU/host memory stays free for `llama-cpp.service`.

@@ -30,8 +30,6 @@ reading:
 > [Read the complete original Google document below](#original-document-text) · [All original eight-servo posts](/posts/v1-original-posts/).
 
 
-# Trying robot commands in a browser
-
 Before Ainekio’s physical robot was tested, the project tried connecting
 MetaHuman OS to a simulated body in a browser. MetaHuman supplies conversation
 and decisions; the simulator was meant to provide a place to try movement
@@ -250,7 +248,7 @@ These paths and commands are a historical reference, not installation instructio
 The [original Google document](https://docs.google.com/document/d/1STxKMbLI6e3qjGkIlxk1ea7HBDYXW6MEF5rsJpfY0tU/edit)
 was last modified July 10, 2026. The retirement status above reflects the owner's
 September 7 correction. Current development is documented in
-[Project Status](/posts/current-status/).
+[Project Overview & Status](/posts/project-overview/#project-status).
 
 
 ## Original document text
@@ -259,7 +257,7 @@ The complete original text was copied from the [Google document](https://docs.go
 
 ---
 
-# Ainekio Motion Systems - Current Working State
+## Ainekio Motion Systems - Current Working State
 
 Ainekio's motion stack is now less theoretical than the first plan. The current working path is a MetaHuman OS brain sending semantic robot commands to an Ainekio robot-side adapter, which drives the local Sesame simulator through a small bridge. The hardware target is now the Freenove ESP32-S3-WROOM CAM N16R8 driving all eight servos directly over MCPWM (see the Parts Overview), but the first functional milestone is the simulator loop: prove command interpretation, delivery, safety boundaries, and visible robot behavior before buying parts or touching servos.
 

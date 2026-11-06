@@ -1,15 +1,15 @@
 ---
-title: "Gateway and Operator Dashboard"
+title: "Robot Host Gateway, Body Control Dashboard, Servo Calibration & MuJoCo Simulator"
 published: 2026-08-27T08:45:00-07:00
-updated: 2026-10-21
-description: "Body Control connections, event and leveling settings, SD video, Wi-Fi maintenance, and the retained command-recovery record."
+updated: 2026-11-06
+description: "How Ainekio's Master/gateway and Body Control dashboard manage authenticated robot sessions, 12-channel servo feedback, IMU leveling, the 349-example Freestyle library, 50 Hz neural gait streaming, and visual odometry."
 image: "/assets/ainekio/v2/gateway-simulator-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Gateway, Dashboard, WebSocket]
+tags: [Ainekio, Gateway, Dashboard, WebSocket, Body Control]
 category: "Robot Runtime"
 draft: false
 lang: "en"
@@ -19,177 +19,44 @@ reading:
   generation: both
   kind: reference
   next: metahuman-integration
-  related: ["controller-firmware", "2026-09-28-wired-wireless-ros2"]
+  related: ["protocol-and-safety", "gait-development", "vision-loop"]
 ---
 
-## October 21: learning, measurement and connection continuity
+Three components in the robot repository's `Master/gateway/` package connect the physical `ESP32-P4` (or V1 `ESP32-S3`) controller to [MetaHuman OS](/posts/metahuman-integration/) and give the operator direct instrumentation and control:
 
-Body Control now owns persistent gait logging, learning controls, candidate
-comparison and a read-only Learning history view. The host can use experimental
-MoGe-2 landmark odometry for progress estimates; metric accuracy is unverified.
-[Read the walking and learning report](/posts/2026-10-21-learning-from-walking/).
+1. **The Gateway (`Master/gateway/server`)**: Owns the authenticated `protocol-v1` WebSocket session with the robot, correlates command sequences and connection epochs, routes JPEG camera frames and bidirectional PCM audio, and streams `50 Hz` neural gait targets.
+2. **The Environment Adapter (`Master/gateway/environment_adapter`)**: Translates generic MetaHuman `environment-bridge` actions into checked Ainekio commands, maintains durable SQLite action receipts, and publishes structured `Robot Status` and event observations.
+3. **Body Control (`Master/gateway` Operator Dashboard)**: The web interface for manual posture and gait control, 12-channel servo feedback calibration, `LSM6DS3` self-leveling tuning, the 349-example SQLite Freestyle library, gait learning telemetry, visual tracking/odometry, and over-the-air firmware updates.
 
-Feedback health and position-verification receipts distinguish an executed path
-from measured arrival. The P4 retains local motion through control loss; new
-unsolicited bridge input needs an authenticated recipient, while already-admitted
-work survives reconnect. See the [body report](/posts/2026-10-21-body-face-and-standing/)
-and [OS/bridge report](/posts/2026-10-21-reactions-and-recovery/).
+The gateway stack runs either on the desktop workstation or on a **Radxa Dragon Q6A** (`QCS6490`) single-board computer, with MetaHuman's unified `environment-bridge` automatically following whichever host is active.
 
-## October 18: measured servo feedback
+## Body Control capabilities on V2
 
-Body Control's Servo Feedback tool now exposes twelve modified servo readings,
-input mapping, calibration curves, sample age and commanded-versus-measured
-position. Acquisition and measured Stand have separate saved controls. All
-channels passed unloaded checks; measured Stand remains off pending reassembly
-and supported tests. [Read the feedback report](/posts/2026-10-18-servo-feedback-and-chassis/)
-and [see the rebuild](/gallery/).
-
-## October 15: understand the leveling response
-
-Body Control now shows measured tilt, error from the saved reference, commanded
-body correction and modeled changes for each physical leg. A level-reference
-control copies the current attitude into editable targets; saving remains
-explicit. A separate stationary gyro calibration collects 256 samples and applies
-the saved bias without a restart. These operations preserve joint calibration.
-
-[The motion and leveling report](/posts/2026-10-15-motion-and-leveling/) explains
-the controls, installed firmware evidence and distinction between commanded
-adjustment and actual physical movement.
-
-## October 14: V2 Body Control additions
-
-The selected P4 now has [body-event controls](/posts/2026-10-14-body-events/), [saved self-leveling settings](/posts/2026-10-14-startup-and-leveling/), and [video recording, clip downloads, Wi-Fi firmware updates and robot logs](/posts/2026-10-14-recording-and-updates/). These use the existing gateway and dashboard. The dated reports distinguish controller tests from loaded physical motion; the original gateway explanation below retains its September evidence period.
-
-# Connecting MetaHuman to the physical robot
-
-Ainekio’s body handles motors and sensors. MetaHuman OS handles conversation,
-memory, and decisions. Three pieces of Ainekio software connect the two and
-let a person inspect the robot:
-
-- The **gateway** maintains the authenticated network connection to the body
-  and carries commands, results, images, and audio.
-- The **adapter** translates between MetaHuman’s device interface and Ainekio’s
-  robot commands.
-- The **operator dashboard** gives a person controls and a view of the robot’s
-  reported state.
-
-They live in the robot repository’s `Master/` code. MetaHuman schedules work
-and reviews its outcome; the controller on the body checks movement limits.
-
-## Follow a command through the connection
-
-Consider a request to sit. MetaHuman sends an action through its **Environment
-Bridge**, the interface it uses to connect to external devices. Ainekio’s adapter
-translates that action into a checked robot command. The gateway delivers it
-to the controller, then waits for the robot’s result rather than treating a
-network write as completion.
-
-The gateway authenticates the robot and adapter separately. Robot sessions
-report identity, supported features, current readiness, state, and command
-results. This tells MetaHuman which actions are available now.
-
-The adapter advertises the body-owned catalog of named commands. MetaHuman
-uses that advertised list and its descriptions to construct and validate model
-choices, keeping the supported repertoire consistent across the connection.
-Readiness still determines whether a feature can be used at that moment.
-
-The connection carries protocol-v1 JSON control messages and binary media.
-The gateway matches command IDs to final results, pairs camera metadata with
-JPEG images, assembles microphone utterances, and paces outgoing speaker audio.
-It also records errors, media counters, and **connection epochs**: identifiers
-that distinguish one connection session from the next during diagnosis.
-
-Local discovery uses DNS Service Discovery (DNS-SD), which finds the service on
-the local network, with a limited attempt at a cached address. A stale cached
-address is not permanent configuration. Local mode does not automatically
-switch to the optional relay service.
-
-## What the dashboard is for
-
-The dashboard shows body state, connection state, battery classification,
-camera and wake-word readiness, and media counters. These are reports from the
-robot and gateway, useful when checking whether a device is connected and
-ready to act.
-
-An operator can enable limited camera preview, change microphone or wake
-settings, request supported actions, and run hardware checks such as a speaker
-test tone. The dashboard’s volume setting changes that test tone; ordinary
-MetaHuman speech uses a separate volume path.
-
-## What the adapter translates
-
-MetaHuman’s Environment Bridge works with device-independent actions. The
-Ainekio adapter implements them using the selected body’s current features:
-
-| Action or event | What happens on the Ainekio path |
+| Workspace / Tool | Function in Body Control |
 | --- | --- |
-| `robotCommand` | Send a checked named command such as sit or wave |
-| `robotMotionPlan` | Send a sequence of joint-position frames, if supported |
-| `captureImage` | Request a fresh snapshot and return the matching JPEG |
-| Robot speech | Send rendered PCM audio samples through the gateway |
-| Microphone utterance | Package a speech segment as WAV for MetaHuman’s Whisper transcription |
+| **Manual Locomotion & Postures** | Direct trigger and live parameter tuning (`Speed`, `Stride %`, `Motion rate`, steering, `Motion speed ×`, and `Finish`) for `Stand`, `Walk`, `Run`, `Crawl`, 6-direction `Crab`, and 23 finite gestures |
+| **12-Channel Servo Feedback (`CD74HC4067`)** | Live commanded-versus-measured angle readouts, analog multiplexer channel mapping, per-servo calibration curves, sample age, and closed-loop `Stand` (`2 mm` settle) / `Walk` arrival verification |
+| **IMU Attitude & Self-Leveling (`LSM6DS3`)** | Live `208 Hz` roll/pitch telemetry, one-click level-reference capture, 256-sample stationary gyro bias calibration, and saved self-leveling gain/damping controls |
+| **Freestyle Motion Library (`349` Examples)** | SQLite-backed editor and runner for 349 curated 12-servo target programs, supporting `Freestyle Qwen` and **Big Brother** model generation plus jam/fall recovery testing |
+| **Neural Gait Streaming & Learning** | Streams `50 Hz` neural policies (`walk_nominal_v1`) to the `ESP32-P4`, logs synchronized joint/IMU/camera trajectories, and manages candidate policy comparisons and `v6-pending` GRU datasets |
+| **Vision, Depth & Audio Controls** | `OV5647` camera preview (`180°` rotation, `10,000 µs` motion-safe exposure ceiling), YOLOE/ByteTrack target selection, OpenGV 2-point RANSAC & on-demand MoGe depth odometry, and `WakeNet9s` / 5-mode VAD configuration |
+| **SD Video & Wi-Fi OTA Maintenance** | Records segmented camera clips to the robot's microSD card, downloads recordings and rolling device logs, and stages `ESP32-P4` firmware binaries over Wi-Fi for explicit activation |
 
-Voice activity detection (VAD) determines where a microphone utterance ends.
-Whisper converts that recorded speech to text. In the other direction, a
-speech action waits for playback feedback from the robot, not just creation
-of an audio file.
+## Command translation and durable receipts
 
-## Keeping action records across an interruption
+When MetaHuman OS dispatches an action through `environment-bridge`, the Ainekio adapter translates it into the connected robot's capabilities:
 
-Suppose the robot receives a movement but the connection drops before its
-reply arrives. The adapter needs to know whether it can return a saved result,
-wait for more evidence, or report an unknown outcome. Simply sending the
-movement again could repeat a physical action.
+| MetaHuman Action / Event | Gateway & Adapter Execution Path |
+| --- | --- |
+| `robotCommand` / `locomotionGoal` | Dispatches a checked posture, gesture, or measured distance/turn/approach/visual walk and tracks progress until terminal `Finish` |
+| `freestyleProgram` | Validates and streams a multi-target 12-DOF sequence, waiting for 4th-wire shaft arrival at each step |
+| `captureImage` | Requests a correlated still frame (or attaches a post-motion snapshot before `done`) and returns the matched JPEG |
+| **Robot Speech (TTS)** | Paces rendered Kokoro PCM audio frames to the `ES8311` / `NS4150B` speaker queue and sets `external_speech_ms` to suppress self-triggering |
+| **Microphone Utterance (STT)** | Assembles `WakeNet9s` + VAD speech segments into WAV files (optionally paired with a contemporaneous camera frame) for Whisper transcription |
+| **Body Events (`tipped`, `shaken`, `jammed`)** | Forwards thresholded `LSM6DS3` and servo-stall events to `fast-body-event-mode.json` while keeping routine feedback-health updates in `Robot Status` |
 
-September work adds SQLite action records and pending result and observation
-delivery. Each action ID is tied to its request content. Repeated delivery can
-return the existing record instead of running the command again. Dispatch
-checks which Work Coordinator process is currently authorized to control the
-body. Cancellation can also block an original request that arrives late.
+To prevent a temporary Wi-Fi drop from causing duplicate physical movements, the adapter stores every dispatched action in SQLite keyed by action ID, payload hash, gateway process, connection epoch, and sequence number. Late completions settle the original waiting execution cleanly without re-sending the movement command.
 
-## Keeping a late result connected to its command
+## Historical note on the URL (`gateway-and-simulator`)
 
-The September 8 investigation found a concrete stall: the adapter stopped
-waiting after 30 seconds, saved an unknown outcome, and ended its result
-monitor. MetaHuman retained the unresolved body job, so the following movement
-could not start.
-
-The repaired adapter keeps following the gateway’s original pending command
-until completion, rejection, cancellation, or disconnect. Recovery uses that
-same command record and matches the gateway process, robot, connection epoch,
-and sequence. A reused sequence in a new session cannot complete old work.
-Recovered image results use the same matching and cleanup path as normal ones.
-
-An acknowledged stop releases earlier pending asynchronous commands and their
-camera reservation. If the host restarts, authenticated robot reconnection
-ends the old control session while retaining uncertainty about any earlier
-physical effect. Recovery does not send the old movement again.
-
-The September 8 record reports 68 passing receipt, adapter, speech, gateway,
-and command-catalog tests, plus an isolated MetaHuman check of late completion
-and cancellation. They use simulated physical execution. The repair remains
-local source work and needs a **host gateway restart**, followed by a deployed
-test. A MetaHuman Site rebuild alone will not activate this host change. Why
-the original body completion went missing remains unresolved.
-
-## Connection results and the unresolved fault
-
-Physical tests have produced authenticated sessions and completed commands.
-They have also recorded abnormal WebSocket closes and host `No route to host`
-errors while the gateway remained running. WebSocket is the persistent network
-connection used here; its closure interrupts the exchange even if the gateway
-process itself is still alive.
-
-The cause is unresolved. Strong Wi-Fi signal cannot rule out routing problems,
-incomplete binary writes, controller resets, power faults, or connection
-lifecycle errors. The next diagnostic run should collect robot errors, session
-IDs, media counters, reset reason, host routes, and gateway operations together.
-Changing one retry setting at a time will make the results easier to interpret.
-
-## Why the old URL mentions a simulator
-
-This page previously covered a simulator alongside the physical connection.
-That experiment was unsuccessful and has been completely retired. It is outside
-the current tooling and V2 plan. The URL remains usable for existing links;
-the [July motion article](/posts/archive/motion-systems/) preserves the old
-design, command mappings, and reported tests as history.
+This URL originally covered a July 2026 browser simulator alongside the gateway. That early Sesame browser simulator was retired when physical V1 and V2 hardware bring-up began; for modern physics simulation, Ainekio now uses a **full-CAD MuJoCo (`MJCF`) / JAX / Brax / MJX** pipeline paired with the **Stock Pupper V3** baseline (see the [Gait Development Guide](/posts/gait-development/)). The historical July browser-simulator notes remain preserved in the [V1 Archive](/posts/archive/motion-systems/).

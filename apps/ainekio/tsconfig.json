@@ -4,6 +4,7 @@
     "baseUrl": ".",
     "strictNullChecks": true,
     "allowJs": false,
+    "verbatimModuleSyntax": true,
     "declaration": true,
     "plugins": [
       {

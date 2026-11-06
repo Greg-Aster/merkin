@@ -22,13 +22,11 @@ reading:
   related: ["body-design-and-hardware", "controller-firmware"]
 ---
 
-> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1lc4L2lCaWBcMhWY4lfOYCHUTjKad6MjmrFsp2GbDA4Y/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/current-status/).
+> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1lc4L2lCaWBcMhWY4lfOYCHUTjKad6MjmrFsp2GbDA4Y/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
 
 > **Later V1 correction:** the built robot used a 1000 mAh pack, not the proposed 2600 mAh pack. GPIO33–37 belong to octal PSRAM on the delivered N16R8; the provisional GPIO33/34 assignments below were superseded. Use the [V1 hardware guide](/posts/body-design-and-hardware/) and [maintained S3 pin map](https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/firmware/esp32s3/components/ainekio_platform/include/ainekio/platform/pin_map.h) for the later build record.
 
 ---
-
-# Ainekio Firmware
 
 Ainekio's firmware is the software that runs inside the physical robot body. It receives intent-level commands from the remote MetaHuman OS brain, decides whether they are safe, turns accepted commands into hardware behavior, and reports the robot's state back to the brain.\
 Current status — inspected 2026-07-15 against repository commit f010ff5 plus the current firmware working tree: the software implementation and ESP32-S3 cross-build are complete, including 16 MB flash, 8 MB octal PSRAM, and the pinned OV2640 camera service. The firmware has not yet been flashed and proven on the physical robot. The provisional pin map, electrical assumptions, camera identity and wiring, battery calibration, and every H1-H15 hardware gate still need real evidence.

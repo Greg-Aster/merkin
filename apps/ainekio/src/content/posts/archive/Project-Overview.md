@@ -22,13 +22,11 @@ reading:
   related: ["body-design-and-hardware", "controller-firmware"]
 ---
 
-> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1AVtNyFN7AG5ymLqshQI-77jO4nfG0yev8FUABZ8YE9E/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/current-status/).
+> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1AVtNyFN7AG5ymLqshQI-77jO4nfG0yev8FUABZ8YE9E/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
 
 > The browser simulator described here was subsequently unsuccessful and retired. Its intermediate results and plans are preserved as history.
 
 ---
-
-# Ainekio - Overview & Status
 
 ## Ainekio is an attempt to build a small robot familiar.
 

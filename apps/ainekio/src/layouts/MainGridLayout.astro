@@ -2,9 +2,12 @@
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
 import { getPageSocialImage } from '../lib/social-images'
 const socialImage = await getPageSocialImage(Astro.props)
-// The shared grid uses its own Layout, so app styles belong at this entry point.
 import '../styles/variables.styl'
 import '../styles/main.css'
+import '../styles/markdown.css'
+import '../styles/markdown-extend.styl'
+import '../styles/scrollbar.css'
+import '../styles/transition.css'
 ---
 
 <SharedMainGridLayout {...Astro.props} socialImage={socialImage}>

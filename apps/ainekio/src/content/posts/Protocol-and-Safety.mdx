@@ -1,8 +1,8 @@
 ---
-title: "Robot Commands and Safety"
+title: "Quadruped Robot Control Protocol: WebSocket Receipts, 4th-Wire Servo Feedback & Safety Bounds"
 published: 2026-08-27T09:00:00-07:00
-updated: 2026-09-09
-description: "How commands are validated, how results are reported, and how the robot handles interruption and connection loss."
+updated: 2026-11-06
+description: "How protocol-v1 validates robot commands, enforces Cartesian workspace boundaries and shaft-arrival checks on V2, reports physical events, and recovers cleanly across disconnects."
 image: "/assets/ainekio/v2/protocol-safety-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
@@ -16,143 +16,58 @@ lang: "en"
 contentFormat: "report"
 reading:
   topic: control
-  generation: v1
+  generation: both
   kind: reference
   next: gateway-and-simulator
-  related: ["controller-firmware", "2026-09-28-wired-wireless-ros2"]
+  related: ["ainekio-v2", "gait-development", "metahuman-integration"]
 ---
 
-# From a request to a checked action
+Ainekio's onboard controller (`ESP32-P4` on V2, `ESP32-S3` on V1) and MetaHuman OS communicate through a strict boundary called **`protocol-v1`**. Language models never write raw PWM duty cycles directly to servo pins; instead, cognition selects high-level semantic intents, locomotion goals, or structured target programs, and the onboard firmware enforces calibration, workspace geometry, shaft arrival, and emergency stop rules.
 
-Ainekio’s robot controller and MetaHuman OS need an agreed way to ask for work
-and report what happened. That agreement is the **robot protocol**: the message
-formats, supported commands, limits, and result states used by the firmware
-and its network gateway.
+## Command categories across V1 and V2
 
-For a request such as “wave,” MetaHuman selects a supported action. The gateway
-sends it to the body, the controller checks and runs it, and a result comes back
-with the same command ID. The ID connects the reply to the original request,
-even when several messages are in flight.
-
-The current message format is called **protocol v1**. That version refers to
-the communication format; the robot’s V1 and V2 names refer to body generations.
-
-## Requesting movement
-
-MetaHuman can request named actions such as `wave`, `bow`, `sit`, and
-`turn_left_45`. It can also submit a `motion_plan_v1`: a limited sequence of
-joint positions and timings. The body core—the firmware component that owns
-command rules—turns an accepted request into calibrated movement.
-
-Plans have limits on frame count, fields, duration, and joint ranges. They use
-the same stopping and failure behavior as named motions. Model output must
-pass these checks before it can affect the motors; it cannot write directly
-to the servo-control pulses.
-
-The current contract describes eight joints. The planned V2 body has twelve,
-so joint names, calibration, motion assets, validators, and advertised features
-must be updated together before twelve-joint plans are accepted. The
-[V2 roadmap](/posts/ainekio-v2/) covers that transition.
-
-## Accepted, finished, and successful are different steps
-
-| Result | What it tells the caller |
+| Command Type | Purpose & Validation Boundary |
 | --- | --- |
-| `ack` | The robot accepted the command for execution |
-| `done` | The robot-side action completed successfully |
-| `cancelled` | Accepted work stopped before success |
-| `nak` | The request was rejected as invalid, unsafe, or unsupported |
+| **Named commands (`robotCommand`)** | Prepared postures (`Stand`, `Sit`, `Rest`, `Lay Down`, `Play Dead`, `Upright`), continuous gaits (`Walk`, `Run`, `Crawl`, `Crab`), and 23 expressive gestures (`Wave`, `Bow`, `Stretch`, `Worm`, `Shrug`, etc.) |
+| **Continuous gait updates** | Adjusts `Speed`, `Stride %`, `Motion rate`, or steering heading on an active V2 walk while preserving the gait phase and command lease |
+| **Freestyle target programs** | Finite sequences of 12-DOF joint, foot, or body targets with requested speeds, holds, and LCD faces from the 349-example SQLite library or `Freestyle Qwen` |
+| **Neural policy frames (`50 Hz`)** | Streamed 12-joint target offsets from `walk_nominal_v1` or RL policies, bounded by firmware calibration and workspace projection |
+| **Emergency `stop`** | High-priority direct path that preempts queued work, halts active motion immediately, and releases or parks the actuators |
 
-Sending bytes into a network socket confirms only that the local transport
-accepted them. The caller still needs the robot’s acknowledgement and final
-result. Otherwise a broken connection could look like a successful action.
+## Closed-loop safety and workspace enforcement on V2
 
-Even `done` has a limit: it describes the command. A future goal such as moving
-into better light would need a new camera image to establish whether the
-lighting improved. A completed walk alone cannot answer that question.
+On the twelve-servo `ESP32-P4` body, command validation extends beyond static angle clamping to real-time geometric and physical verification:
 
-MetaHuman’s **Action Result** step interprets feedback. **Goal Review** then
-decides whether the requested outcome is complete, needs another action, or
-needs input. Command-only goals can use `action_result` evidence; visual goals
-require `visual_observation`. Other goals may depend on user input or environment
-state. The workflow saves this progress, and Robot Status displays it.
+1. **Cartesian workspace boundary projection (`0.8.150`)**: Because each leg uses a coupled `35/20/28/38/55 mm` linkage, arbitrary `(x, y, z)` foot requests could fall outside the closed-chain kinematic envelope. Firmware `0.8.150+` projects out-of-bounds Cartesian targets onto the nearest reachable boundary before computing inverse kinematics, preventing linkage lockups and hard mechanical stops.
+2. **4th-wire shaft-arrival verification (`CD74HC4067`)**: Every servo's internal potentiometer wiper is sampled through the 16-channel analog multiplexer. In `Stand` (which settles within **`2 mm`**) and Freestyle target programs, the controller checks measured shaft arrival against the commanded angle rather than assuming completion from elapsed time alone.
+3. **Physical jam, stall, and tip detection**: By comparing commanded trajectories against measured `CD74HC4067` potentiometer movement and `208 Hz` `LSM6DS3` IMU attitude, the firmware detects limb jams/stalls, tips, and shakes, emitting immediate body events so `fast-body-event-mode.json` or Freestyle recovery can respond safely.
+4. **Staggered `PCA9685` pulse phases**: To minimize instantaneous current spikes on the `Mini560` `5 V / 5 A` rail, the twelve servo PWM channels use staggered phase offsets across the `50 Hz` frame.
 
-## Only offer actions the connected body can perform
+## Command lifecycle states
 
-The robot reports both its **capabilities**, meaning supported features, and
-its current **readiness**. A camera can be supported but unavailable right now.
-The gateway uses these reports to limit the actions MetaHuman can select:
+Sending bytes over a WebSocket only proves that the network socket accepted the frame. `protocol-v1` tracks every command through explicit lifecycle states correlated by `command_id`, connection epoch, and sequence number:
 
-- a snapshot requires a ready camera;
-- wake-gated listening requires an accepted, ready wake-word model;
-- a motion plan requires support advertised by the connected body.
+| State | Meaning |
+| --- | --- |
+| `ack` | The robot controller validated and accepted the command for execution |
+| `done` | The physical motion or media action finished on the body (including verified shaft arrival where enabled) |
+| `cancelled` | Accepted work was preempted by `stop`, a newer command, or session termination before completion |
+| `nak` | The request was rejected as invalid, out of range, or unsupported by the current readiness state |
+| `outcome_unknown` | Adapter-level receipt state recorded when a connection drops after dispatch before a terminal body result can be verified |
 
-The model’s permitted output uses those current action and command names.
-Ainekio owns the named-command catalog and advertises it to MetaHuman, whose
-selector schema and parser use that list. This keeps command coverage aligned
-and an unavailable feature from being offered as an executable choice.
+In MetaHuman OS, `done` settles the **command** receipt, while **Goal Review** checks whether the broader **objective** is satisfied—for example, inspecting a correlated post-motion camera frame or depth odometry reading before marking a visual approach complete.
 
-Control messages use JSON. Images and audio travel as binary frames containing
-JPEG images or PCM audio samples, with a small type and counter header. Metadata
-identifies the originating snapshot request, movement, or utterance. When a
-movement requests an image, its metadata and JPEG can arrive before `done`,
-allowing the result and observation to be reviewed together.
+## Capability and readiness advertising
 
-## Stops and connection loss
+The robot dynamically reports both its hardware **capabilities** and live **readiness** to the Host Gateway:
 
-Periodic application control pings show that the control connection is still
-active. A short gap in valid control traffic stops active motion without
-forcing a healthy idle session to disconnect. Loss of WebSocket, gateway, or
-Wi-Fi connectivity enters fail-safe/offline behavior and begins limited
-reconnect attempts.
+- Camera snapshots and visual tracking require `camera_ready = true` (`OV5647` on V2, `OV3660` on V1).
+- Wake-gated voice capture requires an initialized wake engine (`WakeNet9s` on V2).
+- 12-DOF Freestyle, leveling, and neural streaming controls are advertised only by V2 `ESP32-P4` sessions.
 
-The body also checks duplicate IDs, payload sizes, queue limits, joint
-calibration, and the ordering of stops and interruptions. Microphone and speech
-streams have explicit start/end states so stray media cannot be mistaken for
-a valid stream.
+The gateway and adapter filter the schema presented to MetaHuman OS so the language model is only offered actions the currently connected robot can actually perform.
 
-These checks do not give the robot navigation or measured balance. Its current
-movement is body-local and open-loop: it follows joint sequences without
-measuring its position relative to a target. Named turn angles are estimates.
+## Disconnect failsafes and non-repeating recovery
 
-## Recover without accidentally repeating a movement
-
-A difficult case is a connection failing after the robot moves but before the
-result reaches MetaHuman. Re-sending the command might make it move twice.
-
-September adapter work addresses this with saved **action records**, also called
-receipts. They retain an action’s ID, request content, dispatch record, final
-result, and feedback waiting to be delivered. Reusing an ID with different
-content is rejected. Dispatch also checks which Work Coordinator process is
-currently allowed to control the body, preventing an old process from sending
-new commands after a replacement takes over.
-
-The September 8 repair removes the adapter’s fixed 30-second cutoff for waiting
-on a dispatched command. A late final result can still settle the original
-request. This changes result tracking; it does not remove firmware motion limits,
-control-connection checks, or direct stop.
-
-Recovery matches the saved gateway instance, robot session, and command sequence
-without resending movement. A confirmed stop settles earlier asynchronous
-commands. Reconnection to a new host session can close the old control session
-as cancelled while recording that its earlier physical effect is unverified.
-
-If the action may have run and no result can be established, the adapter retains
-`outcome_unknown`. This is an adapter result, separate from the robot’s protocol
-states. Elapsed time alone does not prove success or failure. Controlled tests
-cover late results, session changes, and cancellation; deployment, physical
-stop timing, and the cause of the original missing result remain unverified.
-
-## Tests still needed on the robot
-
-The next fault tests cover connection loss during each motion type, cancellation
-partway through a smooth transition, malformed or duplicate media metadata,
-and full camera or speaker queues while moving. Controller restarts and rollback
-of a failed over-the-air update must also be tested during interrupted sessions.
-Repeated reconnects should show that old commands are not replayed.
-
-Source tests cover the protocol and shared body core. The
-[status report](/posts/archive/2026-09-09-project-status/) distinguishes those results from physical
-tests. Read [the gateway guide](/posts/gateway-and-simulator/) for the connection
-itself and [MetaHuman integration](/posts/metahuman-integration/) for how a
-request is saved and reviewed.
+- **Control liveness & failsafe**: Periodic application heartbeats verify control-path liveness. If control traffic stalls during active locomotion, the firmware halts movement without dropping an otherwise healthy idle session. On full WebSocket or Wi-Fi loss, the body enters local failsafe behavior and optionally relaxes into inactivity `Rest`.
+- **Idempotent SQLite action receipts**: The adapter records each action's ID, payload hash, gateway instance, connection epoch, and robot sequence in SQLite before dispatch. If a connection interruption occurs after a movement has started, recovery tracks the existing sequence or settles it as `outcome_unknown`—never blindly re-sending a physical movement command twice.

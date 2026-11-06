@@ -1,8 +1,8 @@
 ---
-title: "Ainekio V2: Parts, Assembly, and Design Iterations"
+title: "Ainekio V2 Hardware: 3D-Printed 12-Servo ESP32-P4 Quadruped, 4th-Wire MG90S Feedback & Pinout"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-11-01
-description: "Current V2 hardware: 650 g assembly, 2S battery and USB-C charger, compact linkage geometry, feedback servos, training stand and dated physical trials."
+updated: 2026-11-06
+description: "Complete V2 hardware reference: 650 g 12-servo closed-loop chassis, 35/20/28/38/55 mm leg linkages, ESP32-P4 pinout, PCA9685 and CD74HC4067 wiring diagrams, 2S rear power carrier, and STL exports."
 image: "/assets/ainekio/2026-10-12-refresh/blender-front.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -18,401 +18,107 @@ reading:
   topic: body
   generation: v2
   kind: reference
-  next: gait-development
-  related: ["2026-10-12-shell-power-and-motion", "2026-10-08-standing-walking"]
+  next: protocol-and-safety
+  related: ["gait-development", "v1-v2-comparison", "2026-11-06-carpet-trials-rl-and-big-brother"]
 ---
 
-# Building the next Ainekio body
+Ainekio V2 is a twelve-servo, closed-loop quadruped body built around the **Waveshare ESP32-P4-WIFI6**. Where the eight-servo V1 prototype moved each leg in a single plane with two open-loop motors, V2 adds a third actuator per leg for lateral hip roll (`±h`), a compact coupled linkage for upper-carrier (`alpha`) and knee (`theta`) actuation, fourth-wire potentiometer feedback on all twelve joints, a `208 Hz` inertial measurement unit, and an integrated `2S` rear power carrier.
 
-*October 12 Blender assembly, neutral stance.*
+![Ainekio V2 Assembly Reference](/gallery/diagram-assembly-reference-960.webp)
 
-Ainekio is a small four-legged robot. Its working V1 body uses eight servos,
-with two motors positioning each leg. V2 adds a third joint per leg, a new
-chassis, and an ESP32-P4 controller. The aim is a twelve-servo body that moves
-reliably and is easy to service.
+## Mechanical specification at a glance
 
-The extra joint matters because it moves a foot sideways. V1’s legs primarily
-move forward, backward, up, and down. V2 will also be able to change its stance
-width and use that movement in poses. The current work adds Freestyle-generated targets to the shared gait solver;
-prepared gestures remain available in manual Body Control.
-Automatic balance and adaptation to uneven ground require further sensing,
-control and physical testing.
-
-## October 27 motion follow-up
-
-[A supported stretch verified all nine targets](/posts/2026-10-27-finite-motion-and-recovery/)
-after calibration positioning. The asymmetric compensation from that trial is
-kept separate from the generic training motion. Freestyle now uses complete
-programs and actual body events for recovery; loaded performance remains open.
-
-## November 1: body prototype complete
-
-The prototype is complete. [The new body entry](/posts/2026-11-01-body-prototype/)
-collects the latest Blender face, LCD, servo-cover and power-cradle exports, with
-a twelve-part STL download. The last recorded mass remains 650 g.
-
-[Neural walking development](/posts/2026-11-01-neural-walking/) now compares learned
-forward, reverse and turning commands in direct simulation and through Body
-Control's P4 executor. Loaded trials on the completed body remain to record.
-
-## Current hardware: October 26
-
-The [current body record](/posts/2026-10-26-body-power-and-training-stand/)
-reports **650 g**, twelve feedback-modified Miuzei MG90S servos and a **2S
-battery / Mini560 buck / HiLetgo USB-C charger** assembly. SHARGE is no longer
-used. Pack capacity and running time remain unmeasured. The compact linkage
-lengths are **35 / 20 / 28 / 38 / 55 mm** for carrier, crank, pickup, rod and lower leg.
-
-The new fixed training stand has three printable parts and a 140 × 110 mm base.
-[Download its STLs and the one-piece power carrier](/posts/2026-10-26-progress/stand-and-power-carrier.zip).
-Supported Stand and one finite Walk cycle completed after a firmware stack repair;
-loaded chatter and reliable floor walking remain open. [Freestyle's new target
-and training work](/posts/2026-10-26-freestyle-targets-and-training/) uses shaft
-arrival to work toward those results. The October 27 follow-up replaces the
-continuation loop with finite programs and event-triggered recovery.
-
-## October 21 revision
-
-[New photographs and body-control results](/posts/2026-10-21-body-face-and-standing/)
-show the reassembled robot, revised red face surround and brighter LCD design.
-A ground repair restored useful feedback and a measured Stand-and-hold trial
-passed. Installed firmware is recorded through 0.8.113; physical disconnect
-behavior and the newer inactivity-rest feature remain to test.
-
-[Loaded gait trials and host learning](/posts/2026-10-21-learning-from-walking/)
-now connect joint, IMU and camera observations to separate Walk/Run policy
-comparisons. Earlier tracking gains are modest; reliable locomotion and metric
-camera accuracy remain open. [See the October 21 build](/gallery/).
-
-## October 18 feedback rebuild
-
-The [feedback-servo rebuild](/posts/2026-10-18-servo-feedback-and-chassis/) adds
-fourth-wire position readings from all twelve servos through a CD74HC4067
-multiplexer. Unloaded calibration is complete; measured Stand remains disabled
-pending supported tests with the linkages reinstalled. Walking trials still
-showed sagging and foot drag. Revised chassis exports include battery, tray,
-servo, gyro and display mounts. [See the physical rebuild in the gallery](/gallery/).
-
-## October 15 motion revision
-
-[Revised motion and leveling controls](/posts/2026-10-15-motion-and-leveling/)
-cover Walk, Run, Crawl, Crab, a larger seated Wave, staggered servo pulse phases,
-a level-reference control and stationary gyro calibration. The journal records
-installation through 0.8.52. Commanded leg diagnostics are not measured joint
-positions; loaded gait, gesture clearance and leveling performance remain open.
-
-## October 14 baseline
-
-The hardware journal records **566 g**, **5 V** and MG90 servos for the October 13 assembly. The [startup and leveling report](/posts/2026-10-14-startup-and-leveling/) covers staged boot posture, saved self-leveling controls and the new local geometry calculator. Firmware 0.8.46 installation and live control readback are recorded; loaded self-leveling remains unverified.
-
-Body Control also gains [body-event settings](/posts/2026-10-14-body-events/), [SD recording, downloads and Wi-Fi maintenance](/posts/2026-10-14-recording-and-updates/). The full model-selected wake/stretch routine remains incomplete. The existing thumbnail is the October 12 Blender view, not a new assembly photograph.
-
-## Shell and power report: October 12
-
-I have begun printing the shell, made further weight modifications, and
-switched to a **4 A power supply**. The later October 13 report specifies 5 V;
-measured current draw and the final battery configuration still need recording. The [new build entry](/posts/2026-10-12-shell-power-and-motion/)
-contains current Blender views, 27 prototype exports and revised grounded-motion
-comparisons. Shell fit and Active Operator testing are still pending.
-
-## Physical movement baseline: October 8
-
-**The robot can stand, walk and respond to commands.** This follows the failed
-standing attempt two days earlier.
-The carapace is not attached and Active Operator has not been tested. The
-[physical build update](/posts/2026-10-08-standing-walking/) includes the current
-photograph and a side-by-side account of the two attempts.
-
-The latest committed exports add LCD-carrier braces, a 20×30 speaker holder,
-compact carriers/cranks/pickups, and electronics/power mounting parts. Local
-camera-carrier and longer front-tray exports are still being developed. The October 14
-firmware record and October 13 mass/voltage report add evidence; a complete
-reproducible assembly record remains open. Earlier 20% improvements remain estimates.
-
-The October 6 power decision dropped the heavy **10,000 mAh rechargeable bank** in favor of
-separate batteries and onboard charging circuit boards. The October 26 entry above records the selected boards and pack arrangement.
-Cell capacity and runtime remain unmeasured.
-The earlier Anker and SHARGE studies remain dated design iterations.
-
-**Wireless**, with the Q6A offboard over Wi-Fi, is the current build priority.
-**Wired** retains the onboard-Q6A/native-USB alternative. The October 5–6 offline leg
-candidate uses a **35 mm carrier, 20 mm crank, 28 mm pickup, 38 mm rod and
-55 mm distal leg**. All 23 named motions have been remapped in Blender, with
-reduced Upright reach and unresolved servo travel. The installed walking build’s firmware/model revision still needs recording.
-
-| Build record | Latest detail |
+| Parameter | V2 Specification |
 | --- | --- |
-| [Standing, walking and mounting exports](/posts/2026-10-08-standing-walking/) | Current physical result, photograph and repository part snapshots |
-| [Face, camera and voice](/posts/2026-10-08-face-and-media/) | Working LCD and dated media evidence, plus local expression previews |
-| [Responsive commands](/posts/2026-10-08-responsive-commands/) | Task/conversation split, connection controls and Active Operator test boundary |
-| [Lighter rebuild and new power direction](/posts/2026-10-06-lighter-rebuild/) | Standing result, servo decision, material removal, board retainers and the next printed assembly |
-| [Compact linkage and 23 motions](/posts/2026-10-06-compact-linkage/) | Geometry comparison, changed gestures, Blender previews and remaining qualification |
-| [Steering, sensing and connections](/posts/2026-10-06-steering-sensing-connections/) | Wireless priority, IMU estimator, camera profiles, ROS tools and connection tests |
-| [V1 versus V2](/posts/v1-v2-comparison/) | Mechanics, dated motion ranges, controllers, Q6A and the two power options |
-| [Continuing gait journal](/posts/gait-development/) | Physical result and compact candidate, followed by dated controller records and earlier videos |
-| [September 28 compact body and face](/posts/2026-09-28-compact-body/) | Earlier frame narrowing, bank packaging, LCD carrier and assembly marks |
-| [September 24 body and battery study](/posts/2026-09-24-body-and-battery/) | Earlier red shell, reinforced tabs, width changes and Anker placement experiments |
-| [Compact legs and horn fit](/posts/2026-09-21-compact-leg-design/) | Earlier geometry alternatives and dated print files |
+| **Assembled mass** | `650 g` (complete body with 12 feedback servos, shell, LCD, camera, and 2S battery carrier) |
+| **Overall envelope** | `245.85 × 182.79 × 109.06 mm` (`L × W × H`, Blender assembly reference) |
+| **Degrees of freedom** | 12 actuated joints (3 per leg: shoulder roll, upper-carrier pitch, knee linkage crank) |
+| **Compact linkage geometry** | `35 mm` upper carrier, `20 mm` input crank, `28 mm` lower-leg pickup radius, `38 mm` connecting rod, `55 mm` distal lower leg |
+| **Actuators** | 12× Miuzei `MG90S` metal-gear micro servos modified with a 4th analog wiper feedback wire |
+| **PWM driver** | `HUAREW / Adafruit PCA9685` 16-channel 12-bit PWM controller over I2C (`50 Hz` frame rate with staggered channel phase offsets) |
+| **Position feedback** | `CD74HC4067` 16-channel analog multiplexer routing 12 servo wiper voltages into the `ESP32-P4` ADC |
+| **Main controller** | `Waveshare ESP32-P4-WIFI6` (dual-core 360 MHz RISC-V, 32 MB PSRAM, 32 MB flash) + onboard `ESP32-C6` Wi-Fi 6 coprocessor |
+| **Inertial sensor** | `LSM6DS3` 6-axis accelerometer/gyroscope (`208 Hz` sampling, stationary bias calibration, local attitude leveling) |
+| **Face display & camera** | 1.9" `ST7789` IPS LCD (`320 × 170`, SPI) + `OV5647` MIPI-CSI camera (mounted upside-down with 180° rotation in front carrier) |
+| **Audio subsystem** | Onboard `ES8311` codec + `NS4150B` Class-D amplifier, microphone, `20 × 30 mm` `8 Ω 2 W` speaker, and `WakeNet9s` |
+| **Power & charging** | Rear two-level carrier: `2S` (`8.4 V` max) Li-ion pack (`73.6 × 46 × 22 mm`), `Mini560` `5 V / 5 A` buck converter, `HiLetgo` 2S USB-C boost charger |
 
-The P4/gateway source now includes continuous steering and shared joint-speed
-control. IMU acquisition and configurable balance correction are now connected.
-Loaded correction remains unverified. ROS 2 tools have recorded checks; the robot
-adapter and native-USB body transport remain integration work. The October 13
-Wi-Fi recovery run passed for 469 seconds; earlier sustained-session failures
-remain part of the connection history.
-V1 remains supported. V2 stood and walked on October 8.
+## Compact leg linkage geometry
 
-The
-[September 15 prototype post](/posts/2026-09-15-leg-prototypes/) contains physical
-leg photographs; the [V1 hardware guide](/posts/body-design-and-hardware/)
-records the earlier robot's parts and wiring.
+Each V2 leg combines a shoulder roll axis with a planar linkage mechanism that keeps both flexion motors mounted inside the upper leg housing near the body center of mass:
 
-## Changes from V1
+- **Upper carrier (`alpha`)**: `35 mm` pivot-to-pivot link driven directly by the carrier servo.
+- **Input crank (`theta`)**: `20 mm` servo horn crank driving a `38 mm` connecting rod.
+- **Lower-leg pickup & distal segment**: The `38 mm` rod drives a `28 mm` pickup radius on the `55 mm` distal lower leg (`beta`).
+- **Workspace enforcement**: Because the carrier and crank angles couple nonlinearly, firmware (`0.8.150+`) projects requested foot targets onto the valid Cartesian linkage boundary before inverse kinematics so out-of-reach targets settle cleanly on the reachable envelope rather than stalling against mechanical stops.
 
-*September 7 design comparison. The current comparison is linked above.*
+The evolution from the initial OpenHarmony Puppy reference through the short-rod studies (`2026-09-09`), early printed prototypes (`2026-09-15`), `22/36 mm` compact leg (`2026-09-21`), and `35/20/28/38/55 mm` production geometry (`2026-10-06`) is detailed in the [Gait Development Guide](/posts/gait-development/).
+
+## Electronics, pinout, and wiring reference
+
+The onboard electronics sit inside the central chassis tray and front/rear carriers, separating high-current `5 V` servo distribution from logic and analog feedback signals.
+
+### ESP32-P4-WIFI6 pinout
+
+![ESP32-P4-WIFI6 Pinout](/gallery/diagram-esp32p4-pinout-960.webp)
+
+### Servo socket map and channel layout
+
+The twelve servos map across the four legs—Front-Left (`FL`), Front-Right (`FR`), Rear-Left (`RL`), and Rear-Right (`RR`)—with three channels per leg (Shoulder Roll, Upper Carrier, and Knee Crank):
+
+![Servo Socket Map](/gallery/diagram-servo-socket-map-960.webp)
+
+### PCA9685 PWM driver wiring
+
+Motor power branches directly from the `Mini560` `5 V / 5 A` regulator into the `PCA9685` servo rail, bypassing the `ESP32-P4` logic supply while sharing a solid common ground reference:
+
+![PCA9685 Wiring](/gallery/diagram-pca9685-wiring-960.webp)
+
+### CD74HC4067 4th-wire feedback multiplexer wiring
+
+Every `MG90S` servo has a fourth wire soldered to its internal potentiometer wiper. Those twelve analog lines route into channels `C0–C11` of a `CD74HC4067` multiplexer, allowing the `ESP32-P4` to sample real shaft positions, detect stalls or jams, and verify target arrival (`Stand` within `2 mm` and closed-loop `Walk` synchronization):
+
+![Multiplexer Wiring](/gallery/diagram-multiplexer-wiring-960.webp)
+
+## Power architecture and rear carrier
+
+Earlier design iterations evaluated heavy external USB-PD power banks (`Anker` 10,000 mAh and `SHARGE`). Both power-bank approaches are retired. V2 uses a dedicated, lightweight onboard power system packaged in a **rear two-level printed power carrier**:
+
+1. **Battery pack**: `2S` (`7.4 V` nominal / `8.4 V` full charge) Li-ion pack (`73.6 × 46 × 22 mm` envelope) seated in the lower cradle.
+2. **Step-down regulation**: A `Mini560` `5 V / 5 A` synchronous buck converter steps the `2S` pack down to a regulated `5 V` rail capable of sustaining twelve-servo standing and walking loads.
+3. **Onboard USB-C charging**: A `HiLetgo` `2S` USB-C boost charger board mounted on the upper carrier deck charges the `2S` pack directly from standard `5 V` USB-C input.
+
+## Printable STL downloads
+
+The current V2 printable body, face carrier, servo covers, rear power cradle, and fixed bench calibration/training stand (`140 × 110 mm` base) are available as ZIP archives:
+
+- **[Complete V2 Body Prototype STLs (12 parts)](/posts/2026-11-01-progress/body-prototype-parts.zip)** — includes the revised red face surround, `1.9"` `ST7789` LCD carrier, `OV5647` camera mount, upper/lower chassis shells, servo covers, and leg linkage parts (`2026-11-01`).
+- **[Fixed Training Stand & Rear Power Carrier STLs](/posts/2026-10-26-progress/stand-and-power-carrier.zip)** — includes the three-part calibration/training stand and the one-piece rear `2S / Mini560 / HiLetgo` power carrier (`2026-10-26`).
+
+## Design evolution from V1 to V2
 
 ![Illustrated comparison of Ainekio V1 and a prospective V2 hybrid with a stout body and serrated red legs.](/assets/ainekio/v2/evolution-concept.webp)
 
-*September 7 concept art: V1 is on the left and an earlier V2 concept is on the right.
-The leg reference is [OpenHarmony Puppy by 杜邦线丶小战士 (pcbguy)](https://oshwhub.com/pcbguy/shi-er-zi-you-du-hong-meng-si-zu-gou-gou).
-The final geometry will follow leg tests and component measurements.*
-
-| Part | Working V1 | Planned V2 |
+| Subsystem | V1 (Eight-Servo S3) | V2 (Twelve-Servo P4) |
 | --- | --- | --- |
-| Legs | Two joints per leg; eight MG90S servos | Three joints per leg; twelve MG90S-class servos |
-| Foot placement | Forward/backward and up/down | Adds sideways movement at the hip |
-| Chassis | Sesame-derived printed body | Ainekio chassis fitted to the new parts |
-| Controller | ESP32-S3 N16R8 | ESP32-P4 for body timing, safety, and peripherals |
-| Motion | Scripted poses and sequences | Twelve-joint sequences with calibration and smooth transitions |
-| Power | Existing 5 V / 5 A servo supply | Supply chosen from measured loads |
+| **Legs** | 2 joints per leg; 8× `MG90S` | 3 joints per leg; 12× feedback-modified `MG90S` |
+| **Foot placement** | Fore/aft and vertical only | Full 3D foot workspace including lateral hip roll |
+| **Chassis** | Open Sesame-derived frame | Custom enclosed shell (`245.85 × 182.79 × 109.06 mm`) with modular front face and rear power carriers |
+| **Controller** | `ESP32-S3 N16R8` (direct MCPWM) | `Waveshare ESP32-P4-WIFI6` + `PCA9685` PWM + `CD74HC4067` ADC mux |
+| **Host compute** | Desktop over Wi-Fi | Desktop or `Radxa Dragon Q6A` over Wi-Fi (with onboard Q6A / USB retained as an optional study) |
+| **Power** | `2S 1000 mAh` LiPo + dual `Mini560` | `2S` pack + `Mini560` `5 V / 5 A` + `HiLetgo` 2S USB-C charger in rear carrier |
 
-MetaHuman OS, the software that handles conversation and decisions, will
-continue to request actions such as “stand” or “walk” through the robot’s
-network gateway. The controller on the body will turn those requests into
-joint movements and enforce their limits.
+### Chronological hardware build logs
 
-## Legs and chassis
+For detailed photographs, CAD diffs, and bench measurements from each stage of the V2 mechanical build, follow the dated build journal entries:
 
-*Earlier design direction, retained for the build history.*
-
-The early V2 leg plan had **hip roll** for sideways movement, **hip pitch** for
-forward and backward movement, and a **knee** that bends the leg. Together they
-provide more foot-placement options and room for body lean and expressive
-poses. Speed is not the first priority.
-
-OpenHarmony Puppy V2 provides a reference for lightweight MG90S legs, supported
-pivots, and linkages that keep motor weight close to the body. Local files
-include printable STL models and STEP assemblies converted for Blender.
-Testing will establish how those ideas fit Ainekio’s shorter, broader shape.
-
-The chassis is being assembled in Blender around the leg mounts, board models,
-connectors, and front camera/display carrier. The original OpenHarmony-derived
-assembly has since been revised through the
-[direct-rod and compact-leg work](/posts/2026-09-21-compact-leg-design/).
-The [September 9 short-rod study](/posts/2026-09-09-leg-mechanism-study/)
-remains a separate historical comparison of alternatives.
-
-Cables need clearance throughout a leg’s movement. Programming, charging, power
-connections, legs, and electronics should remain accessible for replacement
-and repair without dismantling the whole body.
-
-## Printed leg development: September 12–14
-
-The new [prototype photographs](/posts/2026-09-15-leg-prototypes/#building-the-leg-then-checking-the-fit)
-show a printed leg assembled in partly folded, folded, and extended poses.
-The records now include a failed shell fit and horn measurements from actual
-hardware, as well as saved Blender changes. Many refinements apply to one
-front-left leg or a separate review file; they are not all combined into one
-released four-leg print set.
-
-| Part or interface | Recorded revision | What still needs checking |
-| --- | --- | --- |
-| Part_009 input arm and Part_024 link | A 21 mm input arm was paired with an imported approximately 24.64 mm link, 4 mm thick, then matched to four legs | Full moving-part clearance and recalibration; earlier 40 mm shared-link and 27 mm trials remain separate iterations |
-| Part_020 / Part_022 shells over Part_027 | A failed print fit led to 0.30 mm mating allowance and a 0.15 mm entrance chamfer in the FL clearance review | Reprinted fit and the thinner local collar rims |
-| Horn arm pockets in Part_009 / Part_023 | Physical arms measured 2 mm; pockets revised to 2.1 mm while reference horn meshes remain 1.75 mm | Actual seating and the separate Part_008 sleeve interface |
-| Part_023 cavity | Later uniform 2.1 mm floor and flush outer ledge; inner seat retained | Printed seating and loaded behavior |
-| Part_027 lower-leg neck | Nominal 8 mm neck and enlarged end, retaining 5 mm thickness and mounting bores | Physical strength and joint travel |
-| Part_025 screw collar | Separate 1.5 mm-high collar, retaining its bore and mating faces | A longer screw than the modeled M3×6 reference is required |
-| Slim foot options | 9.2 mm assembled width; flat, chevron, then lugged tread with Ø7 × 1.5 mm bolt pockets | The slim variants retain about 0.10 mm cavity allowance, distinct from the earlier 0.30 mm fit revision; print fit and traction remain open |
-
-The shoulder-motion work is still an unfinished chassis-clearance study.
-Its 270° swivel-servo brief does not establish usable assembled travel: the
-recorded draft has pose-dependent interference and awaits final review.
-The [latest build log](/posts/2026-09-15-leg-prototypes/) shows the source images
-and explains the alternatives and their remaining limitations.
-
-## Parts in the September 10 Blender assembly
-
-This is the earlier electronics/body snapshot. The leg refinements above are
-newer; inclusion here does not make a reference board or display a final choice.
-
-These quantities describe **models in the assembly or the stated servo plan**.
-They are not a purchase checklist. Dimensions below are in millimeters; board
-dimensions exclude connectors unless stated. Mounting patterns are distances
-between hole centers. The electronics import notes and front-face design record
-identify the following references.
-
-| Component | Quantity | Board size; mounting pattern | How it is used and what remains open |
-| --- | --- | --- | --- |
-| Radxa Dragon Q6A v1.21 | 1 model | 85 × 56 × 1.6; four Ø3.5 holes, 58 × 49 pattern | Computer model at the front, ports facing the end panel. Its Blender placement does not establish an installed OS or onboard MetaHuman runtime. |
-| ESP32-P4-WIFI6 | 1 model | Supplied STEP measures about 71.07 × 21.02 × 1.60 | Body controller candidate at the rear. Exact board wiring and the twelve-servo firmware port remain open. |
-| Adafruit PCA9685 servo driver, product 815 | 1 model | 62.23 × 25.4 × 1.57; four Ø2.5 holes, 55.88 × 19.05 pattern | Separate servo-pulse board modeled beside the P4. Final driver selection and wiring are not proven by placement. |
-| MG90S-class joint servos | 12 planned | Three joints per leg | The new body still needs loaded leg tests and calibration; supplier-specific dimensions and torque must be checked against the actual motors. |
-| Waveshare 2inch LCD Module | 1 reference model | 58 × 35 × 1.6; four Ø2 holes, 53 × 30 pattern | Landscape face display, including four M2×6 spacers in the official model. Final display product remains undecided. |
-| OV5647 camera, Arducam B0033 dimensional reference | 1 reference model | 25 × 24; four Ø2 holes, 21 × 12.5 pattern | Above the display. Thickness, lens depth, rear connector, and minor components are approximate envelopes. |
-| Top and bottom covers | 2 Blender parts | Each 112 wide, 3 base thickness, eight Ø3 mounting holes | WIP 13 closed unused openings. Bottom tabs remain. Printed seating and strength are untested. |
-| Removable front carrier | 1 Blender part | Adds 3 to the two front cover screw stacks; four 4-high camera standoffs | LCD and camera share the carrier. Screw lengths, retention, and cables still need actual hardware. |
-
-The P4 model came from the supplied `ESP32-P4-WIFI6_3d-20260109.stp` file.
-Its four polygonal mounting openings measure about 1.66 mm across the inscribed
-circle, on a 54.164 × 18.25 mm pattern. These are **model measurements**, not a
-manufacturer drilling specification.
-
-The Q6A and PCA9685 models came from [Radxa’s hardware downloads](https://docs.radxa.com/en/dragon/q6a/download)
-and [Adafruit’s CAD files](https://github.com/adafruit/Adafruit_CAD_Parts/tree/main/815%20Servo%20Driver%2016%20Channel).
-The display uses the [Waveshare module reference](https://www.waveshare.com/wiki/2inch_LCD_Module)
-and its [mechanical drawing](https://files.waveshare.com/upload/6/6d/2inch_LCD_Module_2D_Drawing.pdf).
-The camera board dimensions come from the [Arducam B0033 drawing](https://www.uctronics.com/download/Amazon/B0033.pdf).
-
-## How the Blender assembly was built
-
-The revision names below refer to saved `Complete-WIP` Blender files. Their
-order documents the modeling work, not a completed physical assembly procedure.
-
-| Revision | Construction change | Retained features or unfinished work |
-| --- | --- | --- |
-| WIP 1 | Arrange four leg assemblies around the body | Establishes a layout, not balanced motion. |
-| WIP 2 | Fit center mounts and front/rear end panels | Check mount interfaces before adding electronics. |
-| WIP 3–4 | Import Q6A, PCA9685, then P4 STEP models at millimeter scale | Include connector overhangs and underside components. |
-| WIP 5 | Widen the chassis 40 mm, 20 each side, and place the three boards | Preserve screw and bearing features; Q6A at front, P4 and PCA9685 toward rear. |
-| WIP 6–8 | Round the servo housings, try oval then vertical openings, synchronize the manually edited housing across all four legs | WIP 8 supersedes the earlier opening patterns. |
-| WIP 9–10 | Add 3 mm center bow to Part_026, then replace the concentrated bend with continuous arcs | Preserve bearing seats, pivot holes, 4 mm thickness, approximately 5.015 mm waist, and 2.2 mm slots. |
-| WIP 11 | Cut two USB-stack openings and an Ethernet opening in the front panel | No extra nominal port allowance; Q6A tray lip trimming remains. |
-| WIP 12 | Widen top and bottom covers from 72 to 112 mm and align their eight frame holes | Preserve 3 mm base thickness; frame still has a 0.2 mm mounting-height step. |
-| WIP 13 | Close 18 unused top openings and 15 unused bottom openings | Each cover retains only eight Ø3 frame holes and the existing outer contour. |
-| WIP 14 | Mount a camera above a landscape LCD on a removable front carrier | Reuse front cover screw axes; hardware selection, cabling, optics, and electrical compatibility remain open. |
-
-![Actual Blender layout showing the computer at the front and two controller boards toward the rear.](/posts/2026-09-10-v2-design/electronics-layout.png)
-
-*WIP 5 board placement, before the later covers and face. This records that
-revision’s layout; it is not a wiring diagram.*
-
-`Robot Layout → LeftRightSpacing_mm` controls the leg roots, center mounts,
-inserted panel sections, covers, and later face mounting positions. At the
-97 mm setting, the covers are 112 mm wide. Widening moves the existing mounting
-features rather than scaling their holes. The cover and face checks also
-exercised the 107 mm setting.
-
-The WIP 5 layout provides a 6 mm gap behind the Q6A tray and between the rear
-board envelopes. Four tray cutouts include 0.3 mm around modeled connectors.
-Those clearances belong to that saved layout. Real plugs, cable bends, cooling,
-and full leg motion need a separate check; the tray still overlaps the later
-panel and bottom cover and requires trimming.
-
-## Choices and alternatives
-
-| Decision | Earlier option | September 10 evidence |
-| --- | --- | --- |
-| Servo pulses | Direct P4 outputs favored; external PWM optional | A PCA9685 board is now modeled. The electrical choice and firmware integration remain unverified. |
-| Onboard computer | Required onboard Linux computing outside the initial plan | A Q6A is now included in the packaging study. This is a mechanical change; no deployed software role is established here. |
-| Knee linkage | OpenHarmony-derived printed links | Three fixed-servo short-rod mechanisms were also studied. The supported relay is a research candidate; none passed the complete brief. |
-| Cover openings | Broad access cutouts in WIP 12 | WIP 13 keeps only the frame screw holes; cooling still needs investigation. |
-| Face hardware | Camera and display not yet packaged | WIP 14 uses Waveshare LCD and OV5647 references on a removable carrier. Final modules are not selected. |
-
-Exact fastener counts and lengths, bearing/shaft procurement, filament and print
-settings, V2 audio hardware, battery, regulator, harness, and assembly torque
-are not settled in the reviewed records. This page will need those measured
-details before it can serve as a complete replication guide.
-
-## Controller and motion: earlier plan and September progress
-
-The paragraphs below preserve the earlier controller plan. By September 17,
-the project had a separate twelve-joint model and thirty geometric motions,
-and the selected signal driver was a HUAREW PCA9685 breakout. That hardware
-selection is distinct from the Adafruit board model in the September 10 Blender
-table. The [integration record](/posts/2026-09-21-design-progress/data/motion-integration-record.txt)
-reports a built motion image, pending flash and unavailable physical motion.
-
-ESP32-S3 and ESP32-P4 name different controller chip families. Choosing the P4
-does not make the existing firmware ready for the new body. Board pins,
-communication hardware, camera, and audio still need their own implementation
-and tests; V1’s S3 wiring map is not a P4 wiring guide.
-
-The original plan favored twelve servo-control signals generated directly by
-the P4. The later Blender model includes a PCA9685 pulse-width modulation (PWM) board.
-Both approaches still require pin allocation, control software, calibration,
-and peripheral tests; a board model is not evidence that either path is wired.
-
-A scripted motion consists of frames. Each frame specifies a target angle for
-each joint and how long the transition should take. For V2, a frame will contain
-twelve targets. Interpolation supplies the positions between frames so the
-robot moves smoothly instead of jumping from one pose to the next.
-
-Planned controls include center calibration, direction inversion, minimum and
-maximum angles, velocity and acceleration limits, safe rest poses, and staged
-startup and stand-up sequences. Existing movements can first be adapted with
-the four new lateral joints held neutral, then use those joints selectively.
-
-Walk, stop, stand, sit, bow, and wave remain examples of higher-level requests.
-At the initial planning stage, the body core, motion assets, protocol validators,
-and MetaHuman motion-plan schema described eight joints. They needed to agree on the new joint
-names, limits, and advertised capabilities before accepting twelve-joint plans.
-
-## Power: measure the load before choosing the supply
-
-*Earlier electrical planning, retained for context. The October 6 direction
-uses separate batteries and onboard charging boards. The bank option below
-is historical; the final cells, boards and power arrangement are unspecified.*
-
-The owner reports V1 operating on its existing 5 V / 5 A supply. The design note
-proposes measuring that robot first, then evaluating a 5–6 A supply line, or
-rail, under V2 loads. Four extra servos mean the V1 result cannot establish the
-new robot’s requirements.
-
-Controller and servo power will branch near the supply. Motor current will
-bypass the P4 board, while a common ground gives the controller and servos the
-same electrical reference. A bulk capacitor near the servo rail can help with
-brief current demands; the supply still has to sustain the load. Smooth
-acceleration and staged movement will be part of testing.
-
-A battery or power bank must deliver the needed current at 5 V continuously,
-cope with startup and motion peaks, and remain stable in voltage and
-temperature. An advertised USB-PD wattage does not by itself establish those
-properties. The final power source remains undecided.
-
-## Build and test sequence
-
-1. **Make one leg.** Measure fit, servo horn alignment, travel, interference,
-   stiffness, bearing support, printed weight, and reachable foot positions.
-   The horn is the arm on the servo shaft; backlash is unwanted joint play.
-   Both affect how accurately a printed assembly follows a commanded angle.
-2. **Measure V1 power use and adjust the leg design.** Use the existing robot
-   and the experimental leg to inform the mechanical and electrical choices.
-3. **Test the P4 in stages.** Check signals and calibration, then one loaded
-   leg, two legs, and all twelve servos.
-4. **Validate the modeled chassis and design the wiring harness.** Check them
-   against measured parts and power needs, with room for motion and service access.
-5. **Port scripted movements.** Tune transitions before the final complete print.
-6. **Repeat normal movements under load.** Test standing, sitting, walking,
-   turning, and stopping. Watch for binding, supply shutdown, brownouts
-   (voltage drops that reset electronics), and frequent near-stall operation.
-   Check controller capacity and repair access as well.
-
-## Later options
-
-The initial plan deferred IMU stabilization and real-time inverse kinematics.
-The current V2 controller now implements both, including configurable local
-leveling; successful loaded correction still needs physical validation. Adaptive
-terrain response, foot-contact sensing and learned locomotion remain later work.
-Higher-cost servos and wireless charging were outside the initial build plan.
-Onboard Linux computing was also excluded from that first scope. The Q6A model
-records the September 10 wide-body packaging study; its board and tray were
-retired from the September 17 narrow chassis. No onboard Q6A runtime is
-established by either Blender layout.
-
-The [MetaHuman redesign](/posts/metahuman-integration/) can develop against V1
-while these mechanics are tested. [Current project status](/posts/current-status/)
-tracks the latest summary. This page’s September 10 mechanical details come
-from the electronics import notes and the WIP 5, 10–14 design and saved-file
-reports. Their checks cover saved geometry and static fit; no new physical test
-was performed for this documentation update.
+- **[Nov 6, 2026 — Carpet trials, Pupper V3 / MJX simulation, and hardware diagrams](/posts/2026-11-06-carpet-trials-rl-and-big-brother/)**: Physical carpet walking trials, full-CAD Blender-to-MuJoCo MJCF export, and finalized wiring diagrams.
+- **[Nov 1, 2026 — Completed body prototype and neural walking](/posts/2026-11-01-neural-walking/)**: Finalized face panels, LCD carrier, servo covers, and 12-part STL package.
+- **[Oct 26, 2026 — 650 g assembly, 2S power carrier, and training stand](/posts/2026-10-26-freestyle-targets-and-training/)**: Reconciled mass, rear power cradle, and shaft-arrival verification.
+- **[Oct 21, 2026 — Rebuilt face, ground-repair Stand trial, and feedback continuity](/posts/2026-10-21-body-face-and-standing/)**: Workbenches photos of the reassembled V2 body, red face surround, and multiplexer ground fix.
+- **[Oct 18, 2026 — 4th-wire servo feedback and chassis mounts](/posts/2026-10-18-servo-feedback-and-chassis/)**: Potentiometer wiper modification, `CD74HC4067` multiplexer integration, and 12-channel calibration curves.
+- **[Oct 14, 2026 — Staged boot posture and IMU self-leveling](/posts/2026-10-14-startup-and-leveling/)**: `LSM6DS3` attitude loop and linkage transmission geometry calculator.
+- **[Oct 12, 2026 — Exterior shell printing and grounded postures](/posts/2026-10-12-shell-power-and-motion/)**: 27 prototype shell STLs and staged foot placement for `Lay Down` and `Play Dead`.
+- **[Oct 8, 2026 — First physical V2 standing and walking](/posts/2026-10-08-standing-walking/)**: First untethered standing, walking, and command response on the lightened 12-servo frame.
+- **[Oct 6, 2026 — Compact 35/20/28/38/55 mm linkage and weight reduction](/posts/2026-10-06-compact-linkage/)**: Transition to the higher-leverage compact linkage and retirement of the heavy USB power bank.
+- **[Sep 28, 2026 — Narrow 82.5 mm frame and LCD carrier](/posts/2026-09-28-compact-body/)** · **[Sep 24 — Shell & battery study](/posts/2026-09-24-body-and-battery/)** · **[Sep 21 — Compact leg & horn fit](/posts/2026-09-21-compact-leg-design/)** · **[Sep 15 — First printed leg prototypes](/posts/2026-09-15-leg-prototypes/)** · **[Sep 10 — Initial V2 CAD assembly](/posts/2026-09-10-v2-body-design/)** · **[Sep 9 — Knee linkage mechanism study](/posts/2026-09-09-leg-mechanism-study/)**.

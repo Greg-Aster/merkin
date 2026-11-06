@@ -1,123 +1,160 @@
 ---
-title: "Shell Printing, Weight Changes, and a 4 A Supply"
+title: "Shell Printing, YOLOE Target Tracking, and Trained Qwen 0.8B Specialists"
 published: 2026-10-12
 updated: 2026-10-12
-description: "Exterior printing has begun. Follow the Blender shell and camera-mount exports, the new power-supply direction, and revised foot placement for Lay Down and Play Dead."
+description: "Printing the exterior shell, switching to a 4 A supply, smoothing Lay Down/Play Dead foot placement, integrating YOLOE + ByteTrack target selection, and evaluating Qwen 0.8B Intent and Task LoRAs."
 image: "/assets/ainekio/2026-10-12-refresh/render-shell.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: false
 showToc: true
-tags: [Ainekio, Blender, Chassis, Power, Gait, 3D Printing]
+tags: [Ainekio, V2, Blender, Chassis, Vision, YOLOE, MetaHuman OS, Machine Learning]
 category: "Build Journal"
 draft: false
 lang: "en"
 contentFormat: "report"
 reading:
-  topic: body
+  topic: perception
   generation: v2
   kind: journal
-  related: ["ainekio-v2", "2026-10-08-standing-walking"]
+  next: 2026-10-14-startup-and-leveling
+  related: ["vision-loop", "metahuman-integration", "2026-10-08-standing-walking"]
 ---
 
-# Printing the exterior
-
-I have begun printing the exterior shell, made further weight modifications,
-and switched to a **4 A power supply**. Alongside the physical build, I have
-started integrating YOLOE and done extensive work on MetaHuman's node workflows
-and trained Qwen 0.8B intent and task models.
-
-The robot could [stand, walk and respond to commands on October 8](/posts/2026-10-08-standing-walking/),
-without the carapace. Shell fit is next; Active Operator remains untested.
+Since getting the bare chassis [standing and walking on October 8](/posts/2026-10-08-standing-walking/),
+work has advanced across three fronts: printing the exterior carapace panels and
+upgrading to a **4 A power supply**, wiring **YOLOE-26n-seg + MobileCLIP2-B +
+ByteTrack** into the live P4 camera pipeline, and training dedicated **Qwen3.5 0.8B**
+Intent and Task LoRA specialists in MetaHuman OS.
 
 <figure>
   <img src="/assets/ainekio/2026-10-12-refresh/render-shell.webp" alt="Overhead Blender render of Ainekio’s red shell, black chassis, and exposed linkages" width="1536" height="1024" loading="eager" />
-  <figcaption>October 12 Blender assembly.</figcaption>
+  <figcaption>October 12 Wireless Blender assembly in neutral stance.</figcaption>
 </figure>
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  <figure><img src="/assets/ainekio/2026-10-12-refresh/blender-top.webp" alt="Overhead Blender view of the red shell panels and neutral leg placement" width="1600" height="1100" loading="lazy" /><figcaption>October 12: shell panels from above.</figcaption></figure>
-  <figure><img src="/assets/ainekio/2026-10-12-refresh/blender-rear.webp" alt="Blender rear view of the shell, switch opening, and leg linkages" width="1600" height="1100" loading="lazy" /><figcaption>Rear shell and linkages.</figcaption></figure>
+  <figure><img src="/assets/ainekio/2026-10-12-refresh/blender-top.webp" alt="Overhead Blender view of the red shell panels and neutral leg placement" width="1600" height="1100" loading="lazy" /><figcaption>Top view of the shell panels and linkage stance.</figcaption></figure>
+  <figure><img src="/assets/ainekio/2026-10-12-refresh/blender-rear.webp" alt="Blender rear view of the shell, switch opening, and leg linkages" width="1600" height="1100" loading="lazy" /><figcaption>Rear shell arch, switch opening, and linkages.</figcaption></figure>
 </div>
 
-**Wireless** Blender assembly, neutral stance.
+## 27 printable shell and cradle STLs
 
+All shell modeling continues in Blender, organized into three export sets:
 
-## From exposed chassis to shell components
-
-| Build area | October 8 record | October 12 progress |
+| Export set | Files | Parts included |
 | --- | --- | --- |
-| Exterior | Carapace not attached; exposed wiring in the photograph | Exterior printing has begun; front and rear shell export sets are available locally |
-| Weight | Earlier approximately 20% improvement remained an estimate | Further weight reduction; assembled mass not yet measured |
-| Power | Batteries and onboard charging boards were the intended replacement for the heavy bank | Switched to a 4 A power supply |
-| Camera/display packaging | Camera carrier and longer front tray were local work | Camera cradle, split chin pieces and revised LCD-carrier exports |
-| Movement | Standing, walking and command response reported | Local Lay Down / Play Dead entry and recovery paths revised; physical qualification remains separate |
+| Front shell | 15 STLs | Upper visor; paired temple, side-shell, and cheek-fang pieces; paired side/cheek keys and flush pins |
+| Rear compact arch | 8 STLs | Left, center, and right arch; front/rear saddles; M3 rear panel; left/right braces |
+| Camera cradle | 4 STLs | Camera cradle, LCD carrier, left chin, and right chin |
 
-Still to record: supply voltage, rail wiring, current draw, and the final battery arrangement.
+- [Download the 27 prototype STLs (`/posts/2026-10-12-progress/prototype-print-exports.zip`)](/posts/2026-10-12-progress/prototype-print-exports.zip)
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <figure><img src="/posts/2026-10-12-progress/reference-side.png" alt="Side reference of the robot's shell and linkage in Blender" width="1000" height="1000" loading="lazy" /><figcaption>October 10 side profile reference.</figcaption></figure>
+  <figure><img src="/posts/2026-10-12-progress/reference-folded-shoulder.png" alt="Blender reference showing the shoulder linkage folded near the shell" width="1000" height="1000" loading="lazy" /><figcaption>October 10 folded-shoulder clearance study.</figcaption></figure>
+</div>
 
 <details>
-  <summary>Earlier October 10 shell reference</summary>
+  <summary>Earlier October 10 rear-shell reference</summary>
   <figure><img src="/posts/2026-10-12-progress/reference-rear-three-quarter.png" alt="Earlier October 10 rear-shell Blender reference" width="1000" height="1000" loading="lazy" /><figcaption>October 10 rear-shell revision.</figcaption></figure>
 </details>
 
-## The Blender print record
+## Lift each foot before lowering: smoother Lay Down and Play Dead
 
-All modeling is done in Blender. The source folders contain these dated sets:
+**Lay Down** and **Play Dead** now perform individual **8 mm lift-and-place steps**
+(0.8 s per foot) before the 2.0 s body-lowering ramp, keeping the 7.0 s authored
+duration while cutting peak joint angular velocity nearly in half:
 
-| Export set | Files in this snapshot | Purpose / iteration |
+| Metric | Lay Down (previous → revised) | Play Dead (previous → revised) |
 | --- | --- | --- |
-| Front shell | 15 STLs | Upper visor; paired temple, side-shell and cheek-fang pieces; paired side/cheek keys and flush pins |
-| Rear compact arch | 8 STLs | Left, center and right arch; front/rear saddles; M3-named rear panel and left/right braces |
-| Camera cradle | 4 STLs | Camera cradle, LCD carrier, left chin and right chin |
+| Authored duration | 7.0 s → 7.0 s | 7.0 s → 7.0 s |
+| Peak joint speed | **216.36 → 137.59°/s** | **308.62 → 156.16°/s** |
+| Lowest modeled sole height | −0.067 → ~0.0 mm | −0.240 → ~0.0 mm |
+| Minimum modeled body clearance | 0.15 mm | 0.15 mm |
 
-[Download the 27 prototype STLs](/posts/2026-10-12-progress/prototype-print-exports.zip).
-October 9–12 exports, including alternative revisions. Mating fit, print settings,
-and fastener lengths still need checking. [File manifest](/posts/2026-10-12-progress/sources.json).
+When exiting a grounded posture, the P4 controller retraces the grounded clip in
+reverse with a short alignment segment before entering the next named motion.
+See the [before/after validation JSON](/posts/2026-10-12-progress/motion-comparison.json)
+and the [gait development log](/posts/gait-development/).
 
-The robot repository also has local rear-helmet, rear-visor and updated center
-support exports. These are separate from the three folder sets in the download.
+## YOLOE: open-vocabulary search and visual target tracking
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  <figure><img src="/posts/2026-10-12-progress/reference-side.png" alt="Side reference of the robot's shell and linkage in Blender" width="1000" height="1000" loading="lazy" /><figcaption>October 10 side reference.</figcaption></figure>
-  <figure><img src="/posts/2026-10-12-progress/reference-folded-shoulder.png" alt="Blender reference showing the shoulder linkage folded near the shell" width="1000" height="1000" loading="lazy" /><figcaption>October 10 folded-shoulder study.</figcaption></figure>
-</div>
+Perception has moved beyond the fixed person-only detector to an open-vocabulary
+pipeline combining **YOLOE-26n-seg**, **MobileCLIP2-B** text embeddings, and
+**ByteTrack** multi-frame track association.
 
-## Lift each foot before lowering the body
+<figure>
+  <img src="/posts/2026-10-12-progress/vision-flow.svg" alt="Diagram of P4 camera frames entering the gateway YOLOE and ByteTrack worker, then the Body Control display and MetaHuman task workflow; target selection returns with the original image identity" width="1000" height="660" loading="lazy" />
+  <figcaption>P4 camera frames flow through the gateway YOLOE + ByteTrack worker to Body Control and MetaHuman OS, preserving exact source-frame identity across target selections.</figcaption>
+</figure>
 
-The local motion authoring now gives **Lay Down** and **Play Dead** individual
-lift-and-place steps before lowering the body. The generator specifies an
-**8 mm lift**, **0.8 seconds per initial foot placement**, then **2 seconds of
-body lowering**. Both sampled clips retain a seven-second authored duration and
-the original start and terminal references. Runtime speed settings can change
-playback duration.
-
-The sampled files show a useful reduction in peak joint speed:
-
-| Offline quantity | Lay Down: previous → revised | Play Dead: previous → revised |
+| Capability | Earlier detector | YOLOE + ByteTrack pipeline |
 | --- | --- | --- |
-| Authored duration | 7.0 → 7.0 s | 7.0 → 7.0 s |
-| Peak joint speed | 216.36 → 137.59°/s | 308.62 → 156.16°/s |
-| Lowest modeled sole height | −0.067 → approximately 0 mm | −0.240 → approximately 0 mm |
-| Minimum modeled body clearance | 0.15 → 0.15 mm | 0.15 → 0.15 mm |
-| Hardware qualified / collision checked | No / no | No / no |
+| Default vocabulary | Fixed person-only YOLO checkpoint | Prepared YOLOE person prompt vocabulary |
+| Open-vocabulary text search | Not supported | Search any named category using local MobileCLIP2-B text embeddings |
+| Visual region selection | Not supported | Submit a bounding box together with the exact reference JPEG (`gateway/robot/session/frame` identity) |
+| Multi-frame continuity | Single-frame detections | Persistent track IDs across frames via ByteTrack |
+| Release to default | Not supported | Clear target selection and restore default person tracking |
 
-The P4 source retraces the grounded clip in reverse before entering a new named
-motion, with a short alignment segment. Hardware testing of this recovery is
-still pending.
+<figure>
+  <img src="/posts/2026-10-12-progress/dystopian-perception.png" alt="AI-generated dystopian illustration of the red Ainekio robot facing a chair in an abandoned industrial archive" width="1536" height="1024" loading="lazy" />
+  <figcaption>Concept illustration of Ainekio locking onto a chair target.</figcaption>
+</figure>
 
-[Download the before/after validation data](/posts/2026-10-12-progress/motion-comparison.json)
-or continue through the [gait journal](/posts/gait-development/).
+### Live P4 camera-to-MetaHuman chair tracking trial
 
-## The software side of the build
+On October 12, we tested the full P4 camera → gateway → MetaHuman bridge path against
+a physical chair in the room:
 
-The [YOLOE entry](/posts/2026-10-12-yoloe-tracking/) follows the move from
-person-only detection to search and selected targets, including the live chair
-tracking result and the camera recovery problem. The
-[MetaHuman entry](/posts/2026-10-12-trained-specialists/) records the trained
-intent/task split, workflow changes and why a later candidate was rejected.
+1. **Live person & category search:** Real P4 camera frames streamed into MetaHuman
+   with person track IDs, and a text search for `"chair"` returned chair detections
+   tagged with the query ID and track ID.
+2. **Visual prompt specificity:** An initial coarse region proposed by CPU Qwen 0.8B
+   (10.2 s inference) was too wide to hold a track across 13 frames, whereas a tight
+   bounding box on the same reference JPEG locked onto the chair across **all 8
+   subsequent frames** with a single consistent track ID (confidence scores `0.37–0.65`).
+3. **Model Router vision role:** `Environment vision` now routes through the Model
+   Router so image queries always hit a vision-capable model rather than falling back
+   to a text-only adapter.
 
-Sources: October 12 build notes; Blender exports and captures;
-local motion source and validation records at Ainekio commit `436c035` plus
-uncommitted changes. Exact reviewed hashes are in the
-[source manifest](/posts/2026-10-12-progress/sources.json).
+## Trained Qwen3.5 0.8B Intent and Task specialists
+
+Extending the [October 8 task/conversation split](/posts/2026-10-08-standing-walking/),
+the **Intent orchestrator** and **Task manager** now run independent LoRA adapters on
+**Qwen3.5 0.8B**, trained on synthetic capability catalogs with reordered commands,
+opaque identifiers, conditional requests, and compound goals.
+
+<figure>
+  <img src="/posts/2026-10-12-progress/specialist-results.svg" alt="Diagram showing the intent orchestrator selecting task, conversation and computer-tool routes while existing execution and gateway owners retain body control" width="1000" height="660" loading="lazy" />
+  <figcaption>Intent orchestrator, Task specialist, Conversation, Computer-task delegation, and Body Control execution boundaries.</figcaption>
+</figure>
+
+- **Intent routing (`009` → `010`):** On the 200-request expanded evaluation benchmark,
+  acceptable routing jumped from **60/200 to 185/200** at a **100 ms median latency**
+  (outperforming a parallel Speck2 experiment at 173/200).
+- **Computer-task delegation & live Robot Status:** Intent can now route file,
+  research, or software jobs to the Terminal/Codex integration via Work Coordinator
+  ([`8b398f0d`](https://github.com/Greg-Aster/metahuman-os/commit/8b398f0d)), while
+  `Robot Status` ([`7450eeba`](https://github.com/Greg-Aster/metahuman-os/commit/7450eeba))
+  distinguishes fresh, stale, disabled, and disconnected recognition states.
+
+### Why we rejected a higher-scoring Task candidate
+
+A subsequent goal-planning Task candidate improved overall evaluation matches from
+67.9% to 78.6%, but regressed on previously passing regression cases and introduced
+more unintended physical movements on conversational turns:
+
+| Benchmark metric | Retained `010` Task adapter | Rejected goal candidate |
+| --- | ---: | ---: |
+| Evaluation reference matches | 159 / 234 (67.9%) | 184 / 234 (78.6%) |
+| Regression reference matches | **93 / 138 (67.4%)** | 90 / 138 (65.2%) |
+| Unintended physical actions (evaluation) | 21 | 12 |
+| Unintended physical actions (regression) | **15** | 20 |
+| Median serving latency | 489 ms | 484 ms |
+| Contract/schema validity | 100% (234/234 & 138/138) | 100% (234/234 & 138/138) |
+
+Keeping the regression gate strict prevented promoting an adapter that moved the robot
+during conversation-only turns. Download the
+[comparison metrics JSON](/posts/2026-10-12-progress/task-model-comparison.json) for
+the full breakdown.

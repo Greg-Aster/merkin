@@ -1,15 +1,15 @@
 ---
-title: "Standing, Walking, and Responding to Commands"
+title: "Standing, Walking, LCD Face, and Responsive Command Routing"
 published: 2026-10-08
 updated: 2026-10-08
-description: "The revised twelve-servo robot can stand, walk and respond to commands. A current build photograph, the October 6 comparison, and the latest mounting-part exports."
+description: "The rebuilt 12-servo Ainekio V2 stands, walks, and responds to commands with an illuminated 1.9-inch ST7789 LCD face, 59 procedural expressions, and split MetaHuman task/conversation routing."
 image: "/posts/2026-10-08-progress/standing-prototype.jpg"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: false
 showToc: true
-tags: [Ainekio, V2, Blender, Chassis, Gait, 3D Printing]
+tags: [Ainekio, V2, Gait, Display, Camera, Audio, Firmware, MetaHuman OS]
 category: "Build Journal"
 draft: false
 lang: "en"
@@ -18,84 +18,99 @@ reading:
   topic: legs
   generation: v2
   kind: journal
-  related: ["gait-development", "2026-10-12-shell-power-and-motion"]
+  next: 2026-10-12-shell-power-and-motion
+  related: ["gait-development", "ainekio-v2", "metahuman-integration"]
 ---
 
-# The robot is on its feet
-
-The robot can now **stand, walk and respond to commands**. Two days ago, the
-printed chassis could not stand on its MG90 servos. That was the starting point
-for the lighter rebuild, material removal and shorter-carrier work described in
-the [October 6 entry](/posts/2026-10-06-lighter-rebuild/).
-
-The carapace pieces are not attached yet, so the robot is still “naked.”
-**I have not tested Active Operator.**
+Two days after the first chassis failed its standing test, the rebuilt twelve-servo
+robot can **stand, walk, and respond to commands**. The lighter frame, 35/20/28 mm
+compact leg linkage, and discrete battery arrangement from the
+[October 6 rebuild](/posts/2026-10-06-compact-linkage/) put the physical robot on
+its feet with its wide cyan LCD face lit and running.
 
 <figure>
   <img src="/posts/2026-10-08-progress/standing-prototype.jpg" alt="October 8 physical Ainekio V2 standing on a desk, with exposed wiring, printed leg linkages and an illuminated cyan face; the carapace is not attached." width="1244" height="868" loading="eager" />
-  <figcaption>October 8: standing with the carapace off.</figcaption>
+  <figcaption>October 8: Ainekio V2 standing on the workbench with the 1.9-inch ST7789 LCD face active and outer carapace panels off.</figcaption>
 </figure>
 
-## Two days of build progress, side by side
+## Two days of hardware progress
 
-| Question | October 6 report | October 8 report |
+| Milestone | October 6 | October 8 |
 | --- | --- | --- |
-| Can the assembled robot stand? | The printed chassis could not stand on its MG90 servos | The robot can stand |
-| Can it walk? | Revised parts were still printing; the new assembly had not been tested | Walking |
-| Does it respond to commands? | The entry focused on the failed standing attempt and rebuild | Responds to commands |
-| What is fitted? | Chassis printed; LCD and shell pieces not printed for that attempt | Photo shows the exposed assembly and illuminated LCD; carapace pieces are not attached |
-| Active Operator | No physical acceptance result | Explicitly not tested |
-| Weight and lifting force | Approximately 20% lighter and 20% more lifting force were estimates | No new measurements supplied; those estimates remain estimates |
-| Battery endurance | Not measured | No runtime measurement supplied |
+| Standing on MG90 servos | Could not stand with heavy power bank and 40 mm carriers | Stands cleanly on the 35/20/28 mm linkage |
+| Locomotion | Replacement parts still printing | Walking on the physical assembly |
+| Command response & audio | Bench networking checks only | Responds to commands; speaker tone and wake-word capture verified |
+| Display & camera | Unmounted in chassis test | 1.9-inch ST7789 LCD (320×170 landscape) and OV5647 camera upright and active |
 
-Still to measure: walking speed and distance, behavior on different surfaces,
-endurance, and loaded gestures. I also need to record the installed calibration
-and part revisions.
+### Printed hardware additions in the repository
 
-## The printed-part record is growing
+The robot repository now tracks the STL sets behind this physical build:
 
-All design work continues in Blender. The robot repository now includes more
-of the printable hardware behind the assembly. The table lists the latest export revisions.
+- **Compact legs:** 35 mm carriers, 20 mm recessed-horn cranks, and 28 mm pickup parts
+  ([October 7 STL set](https://github.com/Greg-Aster/Ainekio-bot/tree/f264161/Slave/hardware/v2-12servo/STL/Red)).
+- **Electronics & power packaging:** Wireless bridge, board retainers, battery cradle,
+  and rear power-carrier parts ([October 7 export set](https://github.com/Greg-Aster/Ainekio-bot/tree/cc4326a/Slave/hardware/v2-12servo/STL/Red)).
+- **Display & speaker mounts:** Left/right front-panel braces, LCD carrier
+  ([October 8 LCD support exports](https://github.com/Greg-Aster/Ainekio-bot/tree/7f7b3c2/Slave/hardware/v2-12servo/STL/Red/lcd_carrier_speaker_support)),
+  and the 20×30 speaker housing ([October 8 speaker housing](https://github.com/Greg-Aster/Ainekio-bot/tree/7f7b3c2/Slave/hardware/v2-12servo/STL/Red/speaker%20housing)).
 
-| Assembly area | Newly recorded files | Where to inspect them |
+## 1.9-inch ST7789 face renderer and 59 expressions
+
+The physical robot uses a **XIITIA 1.9-inch ST7789** SPI panel in **320 × 170
+landscape** orientation (wired via SPI despite its PCB pins being silkscreened `SCL`
+and `SDA`; see the [LCD wiring guide](https://github.com/Greg-Aster/Ainekio-bot/blob/dbd15b9/docs/v2-12servo/LCD_FACE.md)).
+
+The C firmware renderer (`faces.def` and `face.c`) drives **59 selectable
+expressions** at a stepped **15 fps** (66 ms frame interval) outside the servo task,
+including resting eyes, speaking voice-bar overlays, workflow status halos, and
+motion-linked faces:
+
+<figure>
+  <img src="/posts/2026-10-08-progress/contact-sheet.png" alt="Sixteen examples from Ainekio's wide LCD renderer, including cyan resting eyes, happy and sad faces, colored hearts, stars, thinking, wave and run expressions." width="1360" height="920" loading="lazy" />
+  <figcaption>16 of the 59 procedural expressions rendered directly by the C firmware engine.</figcaption>
+</figure>
+
+<details>
+  <summary>Open six animated expression previews (320×170)</summary>
+  <div className="grid grid-cols-2 gap-3">
+    <figure><img src="/posts/2026-10-08-progress/default.webp" alt="Animated cyan resting face" width="320" height="170" loading="lazy" /><figcaption>Resting</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/happy.webp" alt="Animated happy face" width="320" height="170" loading="lazy" /><figcaption>Happy</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/thinking.webp" alt="Thinking eyes and traveling dots" width="320" height="170" loading="lazy" /><figcaption>Thinking (7.2 s loop)</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/listening.webp" alt="Attentive listening expression" width="320" height="170" loading="lazy" /><figcaption>Listening (2.4 s pulse)</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/wave.webp" alt="Animated wave expression" width="320" height="170" loading="lazy" /><figcaption>Wave</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/run.webp" alt="Animated run expression" width="320" height="170" loading="lazy" /><figcaption>Run</figcaption></figure>
+  </div>
+</details>
+
+### Onboard camera, speaker, and wake-word fixes
+
+- **Display & camera orientation (`0.8.3`):** Confirmed upright LCD and fresh camera
+  stills on the assembled head; removed the connected text footer in favor of compact
+  corner fault icons.
+- **Speaker & wake-word capture (`0.8.4`–`0.8.6`):** Verified speaker tone output and
+  fixed wake-word audio assembly by emitting a recording-start event alongside the
+  wake trigger. Increasing the microphone task stack eliminated a live inference
+  overflow and left 3,712 bytes of free stack margin across a 60-second continuous check.
+- **Token-scoped workflow faces:** Temporary workflow expressions (`Thinking`,
+  `Listening`) now carry a unique selection identity and robot-local timeout so stale
+  release messages cannot clobber a newer expression.
+
+## Responsive command routing and specialist split in MetaHuman OS
+
+Alongside the hardware bring-up, October 7–8 commits in MetaHuman OS ([`f466f0b3`](https://github.com/Greg-Aster/metahuman-os/commit/f466f0b3)
+and [`273bbe58`](https://github.com/Greg-Aster/metahuman-os/commit/273bbe58)) and the
+gateway ([`dbd15b9`](https://github.com/Greg-Aster/Ainekio-bot/commit/dbd15b9))
+separated request routing, task planning, and conversation:
+
+| Responsibility | Earlier path | October 8 architecture |
 | --- | --- | --- |
-| Compact legs | 35 mm carrier exports, plus 20 mm recessed-horn cranks and 28 mm pickup parts | [October 7 hardware snapshot](https://github.com/Greg-Aster/Ainekio-bot/tree/f264161/Slave/hardware/v2-12servo/STL/Red) |
-| Electronics and power packaging | Wireless bridge, board retainers, battery cradle and rear power-carrier parts | [October 7 export set](https://github.com/Greg-Aster/Ainekio-bot/tree/cc4326a/Slave/hardware/v2-12servo/STL/Red) |
-| Display support | Left/right front-panel braces and the LCD carrier | [October 8 LCD support exports](https://github.com/Greg-Aster/Ainekio-bot/tree/7f7b3c2/Slave/hardware/v2-12servo/STL/Red/lcd_carrier_speaker_support) |
-| Speaker mounting | A holder identified in the source as “Speaker holder - 20x30” | [October 8 speaker housing](https://github.com/Greg-Aster/Ainekio-bot/tree/7f7b3c2/Slave/hardware/v2-12servo/STL/Red/speaker%20housing) |
+| Request routing | Context selection and action/reply coupled | Fast initial request pass selects context for task and conversation consumers |
+| Task planning vs reply | Shared response generation path | Dedicated **Task specialist** produces an ordered action program; **Conversation** runs on its own workflow and streams speech chunks as they synthesize |
+| Model selection | Single global backend | Per-node model assignment with separate **Qwen3.5 0.8B** Intent and Task LoRA training lanes and larger-model planner delegation |
+| Input during active motion | Slow interpretation could block active work | Read-only interpretation runs in the background while the active execution retains feedback and manual-takeover guards |
+| Connection selector | Manual bridge configuration | Saved startup and dashboard selectors (`This computer`, `LAN / Wi-Fi`, `Cloudflare`) in both Body Control and MetaHuman's Agent Monitor |
 
-The current local work also includes camera-carrier and longer front-tray
-exports. Those are still uncommitted at this review. They are not included in
-the linked repository snapshots above.
-
-The [parts and assembly guide](/posts/ainekio-v2/) retains earlier options,
-prototype photographs and print downloads. The
-[compact-linkage study](/posts/2026-10-06-compact-linkage/) explains the
-35/20/28 mm candidate and its remaining reach/travel questions. The new walking
-report does not identify the exact firmware/model revision used, so it should
-not be used to declare every offline motion or clearance check complete.
-
-## The face is now part of the physical build
-
-The photograph shows the wide LCD displaying its cyan resting expression.
-The firmware records also document October 6 LCD/camera orientation fixes,
-a working-speaker report, and wake-word transport checks. The
-[face and media update](/posts/2026-10-08-face-and-media/) separates those device
-records from the newer local expression refinements.
-
-MetaHuman and Body Control have also changed: request handling, conversation,
-task planning and connection selection are being developed together. The
-[responsive-command update](/posts/2026-10-08-responsive-commands/)
-describes that software work and its current test boundaries.
-
-## What remains to document
-
-The carapace still needs attaching, and Active Operator needs its own test.
-Useful next measurements are the assembled mass, exact power arrangement,
-walking settings and duration, and the flashed firmware/calibration revision.
-None of those values is inferred from the photograph.
-
-Sources: the owner's October 8 report and photograph, the linked hardware
-commits, and the [source and image manifest](/posts/2026-10-08-progress/sources.json).
-The [gait journal](/posts/gait-development/) now records this physical milestone
-alongside the earlier calculations and unsuccessful standing attempt.
+An initial local YOLO adapter (`person_yolov8m-seg.pt`) was also wired into the
+gateway camera worker, benchmarking at a 210 ms median (4.64 fps on 4 desktop CPU
+threads) ahead of the full open-vocabulary YOLOE upgrade in the
+[October 12 update](/posts/2026-10-12-shell-power-and-motion/).

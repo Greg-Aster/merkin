@@ -30,8 +30,6 @@ reading:
 > [Read the complete original Google document below](#original-document-text) · [All original eight-servo posts](/posts/v1-original-posts/).
 
 
-# Before the physical robot connection
-
 **Historical notes, July 2026.** Ainekio is a robot project connected to
 MetaHuman OS, software for conversation, memory, and decisions. Before that
 physical connection was working, an experiment used **Megameal**, a multiplayer
@@ -167,7 +165,7 @@ The complete original text was copied from the [Google document](https://docs.go
 
 ---
 
-# Ainekio Step 1 - Virtual Environment Setup
+## Ainekio Step 1 - Virtual Environment Setup
 
 Build a virtual connection between MetaHuman OS and the Megameal multiplayer environment.
 

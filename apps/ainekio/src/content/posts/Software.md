@@ -22,13 +22,11 @@ reading:
   related: ["body-design-and-hardware", "controller-firmware"]
 ---
 
-> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1w1k1ZmoCP_l_8z639lCzDJ3wRVZI1T3BijteEptouvg/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/current-status/).
+> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1w1k1ZmoCP_l_8z639lCzDJ3wRVZI1T3BijteEptouvg/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
 
 > The browser simulator described here was subsequently unsuccessful and retired. Its intermediate results and plans are preserved as history.
 
 ---
-
-# Ainekio Software and MetaHuman OS
 
 Ainekio is the embodied side of a larger personal-AI system. The robot supplies a body, sensors, movement, sound, and a local safety boundary. MetaHuman OS supplies the persistent identity, memory, cognition, model routing, tools, and supervised agency that decide what the body should try to do. The Ainekio bridge is the narrow, replaceable connection between those two worlds.\
 Current status — inspected 2026-07-15 against Ainekio commit f010ff5 plus the current firmware, gateway, emulator, and dashboard working tree, and the current MetaHuman OS working tree based on commit 260c6251: the authenticated software loop is implemented and passes focused bridge, graph, and security validation. A local microWakeWord engine and its protocol/control surfaces are now implemented and cross-built, but no validated Ainekio wake model is installed. Physical Ainekio hardware has not completed bring-up, so the overall loop remains proven through the gateway, body emulator, and Sesame visual renderer rather than a fully validated physical robot.

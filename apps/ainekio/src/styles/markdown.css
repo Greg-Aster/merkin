@@ -11,7 +11,7 @@
 
     h1, h2, h3, h4, h5, h6 {
         .anchor {
-            @apply transition -m-0.5 ml-[0.2ch] p-0.5 select-none opacity-0 no-underline !important;
+            @apply transition -m-0.5 ml-[0.2ch] p-0.5 select-none opacity-40 hover:opacity-100 no-underline !important;
 
             .anchor-icon {
                 @apply mx-[0.45ch] !important;
@@ -23,6 +23,14 @@
                 @apply opacity-100 !important;
             }
         }
+    }
+
+    table {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     a:not(.no-styling) {

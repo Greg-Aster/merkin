@@ -10,11 +10,11 @@
     }
 }
 
-/* Main components */
+/* Main components: keep server-rendered HTML immediately visible for LCP and crawlers */
 .onload-animation {
-    opacity: 0;
-    animation: 300ms fade-in-up;
-    animation-fill-mode: forwards;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
 }
 #navbar {
     animation-delay: 0ms

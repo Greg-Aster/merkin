@@ -1,52 +1,39 @@
 ---
 title: "About Ainekio"
-description: "Ainekio is a robot familiar in development: a physical companion with conversation, personality, memory, perception and reviewed learning."
+description: "Ainekio is a quadruped robot familiar combining a 3D-printed 12-servo closed-loop body with MetaHuman OS for conversation, memory, perception, and autonomous agency."
 ---
 
 # About Ainekio
 
-Ainekio is my robot familiar project: a printed four-legged body connected to
-[MetaHuman OS](https://github.com/Greg-Aster/metahuman-os) for conversation,
-memory, perception, and task planning. The body controller handles motor timing
-and movement limits. All mechanical design is done in Blender.
+Ainekio is a quadruped robot familiar project combining a custom 3D-printed, twelve-servo closed-loop body with [MetaHuman OS](https://github.com/Greg-Aster/metahuman-os) for conversation, persistent memory, perception, personality, and task planning. All mechanical design and MuJoCo `MJCF` physics exports are authored in Blender.
 
 ## A companion with continuity
 
-The aim is a recognizable personality that carries experience from one
-interaction to the next. Ainekio should be able to talk, notice its surroundings,
-express itself, remember useful context, pursue goals and learn from reviewed
-experience. Reflection, dreams and daydreams are intended to contribute internal
-material for later interaction, with imagination distinguished from observations.
+Ainekio is built around a persistent **Standing Persona** (`persona/core.json`), attributed episodic memory, and editable cognitive node graphs (`environment-mode.json`). Rather than treating each prompt as an isolated turn, Ainekio carries context across conversations, physical movements, visual observations, and software Sleep maintenance cycles—where memories are curated, dreams and reflections are recorded with clear source attribution, and the **Psychotherapist** agent reviews long-term identity.
 
-MetaHuman's editable node workflows connect these functions. Recent context,
-persistent memory and model training each play a different role in continuity.
-The complete companion experience is still under development, including reliable
-recall and sustained autonomous activity. [The companion guide](/posts/ainekio-companion/)
-explains the functions and their intended relationship.
+Depending on the selected autonomy mode—**Reactive**, **Semi Mode** (5-minute signed drive deltas), or **Full Auto Mode** (continuous high-reasoning activity selection)—Ainekio can answer questions, react immediately to physical tip/shake/stall events (`fast-body-event-mode.json`), pursue multi-step goals, or delegate software and desktop workflows to **Big Brother** (`TerminalChat.svelte` / `big-brother-tool-mode.json`).
 
-## Building the body
+## Two hardware generations
 
-The original robot uses eight MG90S servos and an ESP32-S3. The current build
-uses twelve servos and an ESP32-P4, adding sideways leg placement.
+- **V1 (Eight-Servo Baseline)**: Built around a Freenove `ESP32-S3-WROOM CAM` (`N16R8`), eight `MG90S` servos in a Sesame-derived frame, an `OV3660` camera, and a `0.96"` OLED face.
+- **V2 (Twelve-Servo Closed-Loop Body)**: A `650 g` (`245.85 × 182.79 × 109.06 mm`) quadruped controlled by a **`Waveshare ESP32-P4-WIFI6`** (`+ ESP32-C6`). Each leg combines shoulder roll with a compact `35/20/28/38/55 mm` linkage driven by `PCA9685` PWM and verified via 4th-wire potentiometer feedback through a `CD74HC4067` multiplexer. The front carrier houses a **1.9-inch `ST7789` LCD** (58 animated expressions) and an **`OV5647` MIPI-CSI camera** (`10,000 µs` motion-safe exposure ceiling), paired with a `208 Hz` `LSM6DS3` IMU, onboard `ES8311` / `NS4150B` audio with **`WakeNet9s`**, and a rear two-level `2S` (`8.4 V`) + `Mini560` (`5 V / 5 A`) + `HiLetgo` USB-C power carrier.
 
-V1 started from the [Sesame Robot Project](https://github.com/dorianborian/sesame-robot).
-V2 began with [OpenHarmony Puppy](https://oshwhub.com/pcbguy/shi-er-zi-you-du-hong-meng-si-zu-gou-gou)
-leg geometry, followed by my own chassis, compact linkages, and shell revisions.
+## Current status (November 2026)
 
-## Current work
+Closed-loop `Stand` (`2 mm` settle) and `Walk` execution, `0.8.150` Cartesian workspace boundary projection, the 349-example SQLite **Freestyle** motion library, `50 Hz` neural gait streaming (`walk_nominal_v1`) on physical carpet, and **Stock Pupper V3 + full-CAD Ainekio MJCF reinforcement learning** in JAX/Brax/MuJoCo MJX are active alongside the unified `llama-cpp.service` MetaHuman OS runtime.
 
-The lighter robot stood, walked, and responded to commands on October 8.
-I have since begun printing the exterior, made further weight changes, and
-switched to a 4 A supply. YOLOE tracking, trained Qwen 0.8B intent/task models,
-and the MetaHuman node workflows are part of the ongoing software work. Later
-October 14 reports add body events, adjustable self-leveling, SD recording and
-Wi-Fi maintenance. The status page separates tested features from open work.
+- [Project Overview & System Status](/posts/project-overview/#project-status)
+- [Ainekio as a Companion](/posts/ainekio-companion/)
+- [V2 Hardware & Wiring Reference](/posts/ainekio-v2/)
+- [Gait Development & Locomotion Guide](/posts/gait-development/)
+- [Field Updates](/updates/)
+- [Reference Library](/archive/?kind=reference) · [Original V1 Build Notes](/posts/v1-original-posts/)
 
-- [Build journal](/updates/)
-- [Status and next steps](/posts/current-status/)
-- [Parts and technical references](/archive/?kind=reference)
-- [Original eight-servo notes](/posts/v1-original-posts/)
+## Builder & contact
 
-The [Ainekio repository](https://github.com/Greg-Aster/Ainekio-bot) contains the
-body designs, firmware, motion assets, gateway, and adapter. MetaHuman OS contains
-the conversation, memory, and task software.
+Ainekio and MetaHuman OS are built and maintained by **Greg the Mechanic** ([`@Greg-Aster`](https://github.com/Greg-Aster)). If you have questions about the 3D-printed hardware, closed-loop servo modifications, MuJoCo/MJX training, or cognitive architecture—or want to get in touch regarding collaboration—reach out anytime:
+
+- **Name**: Greg the Mechanic
+- **Email**: [greg@ainek.io](mailto:greg@ainek.io)
+- **GitHub**: [github.com/Greg-Aster](https://github.com/Greg-Aster)
+- **Project Issues & Discussions**: [Greg-Aster/Ainekio-bot](https://github.com/Greg-Aster/Ainekio-bot) (hardware, firmware, simulator & RL) · [Greg-Aster/metahuman-os](https://github.com/Greg-Aster/metahuman-os) (cognitive runtime & companion brain) · [Hosted MetaHuman UI (`mh.ainek.io`)](https://mh.ainek.io)

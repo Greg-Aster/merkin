@@ -1,15 +1,15 @@
 ---
-title: "Robot Autonomy Modes"
+title: "Bounded Robot Autonomy: Reactive, Semi-Auto & Full-Auto LLM Control Modes"
 published: 2026-08-27T07:45:00-07:00
-updated: 2026-10-21
-description: "Reactive, Semi, and Full behavior, result-driven choices, and how finite Desire plans give robot work a verifiable end."
+updated: 2026-11-06
+description: "How Ainekio operates across Reactive, Semi Mode (5-minute signed drive deltas), and Full Auto Mode (continuous high-reasoning activity selection), alongside Fast Body Events and Big Brother delegation."
 image: "/assets/ainekio/v2/bounded-autonomy-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Autonomy, Robot Operator, Boredom, Active Operator]
+tags: [Ainekio, Autonomy, Robot Operator, Active Operator, MetaHuman OS]
 category: "MetaHuman OS"
 draft: false
 lang: "en"
@@ -19,187 +19,52 @@ reading:
   generation: both
   kind: reference
   next: vision-loop
-  related: ["ainekio-companion", "2026-10-12-trained-specialists", "2026-10-08-responsive-commands"]
+  related: ["ainekio-companion", "metahuman-integration", "2026-11-06-carpet-trials-rl-and-big-brother"]
 ---
 
-# When Ainekio can start an activity
+Ainekio's autonomy architecture governs when and how the companion initiates physical actions, speech, internal reflections, or computer tasks without waiting for a human prompt. Managed by **Active Operator** in MetaHuman OS, every autonomous decision flows through the same unified `environment-mode.json` cognitive graph, Work Coordinator lease checks, and `ESP32-P4` hardware safety boundaries as a direct user command.
 
-Ainekio’s autonomy settings control when it can begin work without a new user
-request. MetaHuman OS, the software behind its conversation and decisions,
-provides three modes: Reactive, Semi, and Full.
+## The three operating modes
 
-The October 14 Robot Bible clarifies their intended role in the companion.
-They select how activity begins and continues; any chosen physical action must
-be supported by the connected body. These are distinct from MetaHuman's
-cognitive modes and from physical Idle, Doze or sleep states.
+| Mode | Scheduling & Decision Mechanism | Typical Use |
+| --- | --- | --- |
+| **Reactive** | Dormant between external triggers. Responds immediately to user chat/voice and physical disturbances (`fast-body-event-mode.json`). | Bench testing, quiet companionship, and direct operator control |
+| **Semi Mode** | Runs a **5-minute periodic evaluation** that applies **signed delta updates** to internal drives and initiates bounded activities when a drive crosses threshold. | Ambient room presence with periodic self-initiated check-ins, stretches, or observations |
+| **Full Auto Mode** | **Continuous high-reasoning activity selection** (`Qwen3.5 9B` via `llama-cpp.service`). Never idles: as soon as an execution settles, the controller selects the next purposeful activity. | Autonomous exploration, goal pursuit, environment inspection, and multi-step task chaining |
 
-## October 21: inactivity and finite event completion
+## Semi Mode: 5-minute signed drive deltas
 
-[Semi Auto now has a configurable inactivity interval](/posts/2026-10-21-reactions-and-recovery/),
-with a five-minute default in the prepared build. Queue bookkeeping no longer
-immediately triggers another Semi assessment. The latest preparation record
-leaves live activation and interval testing unverified; the model still chooses
-whether to activate an operation.
+In **Semi Mode**, Ainekio does not loop continuously. Instead, Active Operator ticks on a configurable **5-minute (`300 s`) interval**:
 
-Tip/shake events use a separate one-call Fast Body Event workflow. A finite body
-event can finish its admitted work while preserving an unresolved objective;
-ending the invocation does not mean the objective succeeded. This is separate
-from the robot's prepared three-minute rest setting and Body Control's host gait
-learning, which uses ordinary commands without dispatching autonomous test walks.
+1. **Signed delta drive updates**: Each tick evaluates recent interaction history, time elapsed since the last conversation or movement, sensor state, and pending Agency desires, applying signed deltas (`+/-`) to internal drive states (such as curiosity, social engagement, or restlessness).
+2. **Situation-dependent trigger**: If drives remain below threshold or a user turn is already active, the tick settles quietly without firing a conversational turn. When a drive crosses its activation threshold, Active Operator launches an `environment-mode.json` execution tailored to that situation—such as taking a fresh camera look, performing a Freestyle stretch, or speaking a brief observation.
 
-## October 15: Active Operator and Agency
+## Full Auto Mode: continuous high-reasoning agency
 
-The existing scheduler is now presented as Active Operator in the Agent Catalog,
-with its mode control and existing child workflows. Persona goals remain
-long-term directions; specific desires belong to Agency. Desire review can use
-actual requests, selected programs and returned evidence, revise relevance and
-archive obsolete intentions. Psychotherapist remains the sole autonomous
-persona editor.
+In **Full Auto Mode**, Ainekio stays continuously active—never idling between completed tasks:
 
-[The systems report](/posts/2026-10-15-companion-systems/) separates catalog
-activation, live Desire review and workflow recovery from still-unqualified
-companion outcomes. Body Event Trigger remains available for interpreting
-physical events in Reactive mode as well as requests; Reactive does not mean
-ignoring the robot's sensors.
+1. **Continuous activity selection**: Whenever no execution is currently running or waiting on a hardware receipt, Active Operator invokes the high-reasoning `Qwen3.5 9B` model with the **Standing Persona** (`persona/core.json`), attributed episodic memories, live `Robot Status`, recent action outcomes, and open Agency desires.
+2. **Continuity across turns**: Rather than issuing isolated one-off commands, Full Auto can resume an unfinished objective, inspect the visual or telemetry result of its previous step, adjust its plan, or transition into a new activity when the prior goal is satisfied.
+3. **Multi-tool reach**: Full Auto can choose physical robot locomotion (`Walk`, `Stand`, `Freestyle`), camera inspection, spoken remarks, internal reflection, or asynchronous computer delegation via **Big Brother** (`big-brother-tool-mode.json` and `system-code-review`).
 
-## What the modes mean in use
+## Fast Body Events (`fast-body-event-mode.json`)
 
-| Mode | Expected behavior |
-| --- | --- |
-| Reactive | Respond to requests and physical events without independently choosing new activities |
-| Semi | Let configured agents and triggers initiate selected functions and activities |
-| Full | Choose high-level activities, pursue goals, review desires and use experience to decide what comes next |
+Regardless of whether Ainekio is in Reactive, Semi, or Full Auto mode, physical disturbances from the `ESP32-P4` body are handled immediately:
 
-Full autonomy is intended to connect perception, identity, personality, memory
-and outcomes into purposeful activity. Repeated commands or repeated no-action
-decisions without useful progress do not demonstrate that experience. Complete
-companion autonomy remains unqualified. [Personality, memory and learning](/posts/ainekio-companion/)
-explain the wider context in which these modes operate.
+- **Trigger sources**: The `208 Hz` `LSM6DS3` IMU and 12-channel `CD74HC4067` servo feedback multiplexer detect `tipped`, `shaken`, and motor `jam/stall` events.
+- **Lightweight reflex path**: Tip, shake, and stall events route to `fast-body-event-mode.json`, which uses a single fast model call to emit a **`be_` token-matched facial expression** (rendered on the 1.9" `ST7789` LCD) and a short, immediate vocal reaction.
+- **Non-disruptive**: Fast body events do not overwrite long-term conversational memory or clobber an in-progress durable objective, while high-rate feedback health updates are absorbed into `Robot Status` state without spamming the cognitive queue.
 
-## September 9 implementation record
+## Desire lifecycle vs. Standing Persona
 
-The following sections retain the September 9 source and September 8 live-test
-period. Their scheduling and plan details describe that implementation, rather
-than redefining the October 14 intended modes or claiming current physical acceptance.
+MetaHuman OS separates long-term identity from actionable autonomous intentions:
 
-**Robot Operator** is the service that decides when autonomous work may start.
-The **Work Coordinator** schedules that work. A saved **execution** is one
-request with its objective and progress recorded; a saved wait keeps that
-request open until a needed result or input arrives.
+- **Standing Persona (`persona/core.json`)**: Defines Ainekio's enduring character and long-term values. Autonomous edits to `persona/core.json` are restricted exclusively to the **Psychotherapist** agent during Sleep review.
+- **Desire Agent**: Evaluates candidate desires in Agency against attributed memories, robot capabilities, and actual task outcomes. It updates **desire strengths** via signed adjustments and archives completed or obsolete desires.
+- **Finite execution contracts**: Before a Desire can drive physical robot commands, it must be formulated into a finite plan (`1–10` ordered steps with explicit completion criteria). Each step executes through the Work Coordinator and returns its verified receipt (`done`, `cancelled`, `nak`) to Agency before the next step is admitted.
 
-In Full mode, an eligible saved wait can resume. If no execution is active,
-the Coordinator can start the **Robot Autonomy Controller**, a software workflow
-that chooses the next activity from current context.
+## Preemption, Sleep, and emergency stop
 
-Older documentation described Full as a rotation through Boredom Observer,
-Movement, and Reflection workflows. Those configured workflows remain available,
-but they no longer describe Full mode’s selection process.
-
-## How an activity is chosen
-
-The Autonomy Controller receives the configured persona, recent conversation
-including the latest user turn, internal reflections, recent robot results,
-and facts from connected devices. It also receives Robot Status, compact
-awareness of pending Desire work, and an Agent Catalog explaining the available
-software workers. Available camera images include their recorded identity and
-time; reviewing a particular action still requires evidence matched to it.
-
-From that context it can choose to speak, assign a finite job to a specialist
-worker, or start a robot objective. A specialist agent is software doing one
-assigned job. Its task brief and returned answer stay connected to the parent
-request. Goal Review can choose among the available workers after a result,
-so continuation is no longer restricted to another robot action.
-
-After work starts, Environment workflows choose specific actions and the body
-checks movement. For example, choosing to wave still results in a supported
-robot command with limits, an ID, and a result. The autonomy mode does not
-bypass that path.
-
-## Giving Desire work a finish line
-
-A **Desire** is a candidate intention managed by MetaHuman’s Agency system.
-It may need clarification, planning, or approval before execution. The
-September 8 review found unresolved motivations repeatedly influencing new
-movement decisions without passing through that lifecycle.
-
-The repair gives executable Desire work a finite contract:
-
-1. Define an observable outcome and identify equivalent intentions so they do
-   not become duplicate work.
-2. Prepare and review a plan of one to ten ordered steps, each with an execution
-   target and expected result, under the existing trust and approval policy.
-3. Admit the plan through Desire Agent and the Work Coordinator. Robot steps
-   use the existing body workflow and retain the exact plan version and step.
-4. Return matched results to Agency. Completion requires the ordered steps
-   and reviewed criteria to be satisfied; a model’s success claim cannot
-   overrule an unsatisfied robot result.
-
-For example, “slow down” alone has no observable finish line. A candidate such
-as “perform one supported slow walk and check its completion” has a bounded
-outcome, if that is the intended task. This illustrates the distinction; it
-does not report a new physical demonstration or silently turn a preference
-into a robot request.
-
-Pending desires remain visible in Robot Status with their lifecycle and next
-required action. Their full rationale, strength, and plan are no longer general
-movement instructions. A record waiting for an answer remains dormant for
-execution. The existing reduced-inhibition policy is retained: strength and
-maturity can lower trust requirements, while a finite reviewed plan and outcome
-check remain necessary.
-
-An unknown result is held for reconciliation instead of automatically repeating
-the effect. Completion stops that execution, including a recurring cycle;
-another phase of long-running work requires a newly reviewed plan. Existing
-records with incomplete contracts can be held for attention by the explicit
-migration, which has only been dry-run locally.
-
-## Why an activity can continue after one action
-
-An **objective** describes the intended outcome. A command is one step toward
-it. A workflow saves the objective, sends an action, waits for its result, and
-runs **Goal Review** to decide whether to finish or continue.
-
-A specialist returning an answer or the robot saying something does not
-necessarily complete the parent objective. That completion decision is recorded
-explicitly. For a visual goal, such as the proposed example of moving into
-better light, review needs a fresh image showing the result.
-
-Robot Status displays current facts and workflow decisions. The saved execution
-retains the objective, evidence, and pending work for recovery. This replaces
-the older Task State continuation design and a proposed separate Robot Status
-workflow. Review continues within the same execution rather than starting a
-new graph for every result or relying on a separate polling loop.
-
-## User correction, Sleep, and stop
-
-Users can steer or cancel ongoing work. Mode eligibility, authorization, Sleep,
-scheduling, and which software process is currently allowed to control the body
-all constrain autonomous actions. Robot Operator remains dormant in Reactive
-mode and during Sleep.
-
-Emergency stop has a direct path that does not require a model to interpret a
-sentence. Coordinator and adapter changes coordinate cancellation with control
-of the body. If a connection loss leaves a physical result unknown, the system
-must resolve that uncertainty before assuming it is safe to try the action again.
-Software cancellation tests still need physical stop measurements.
-
-## What has been tested
-
-Earlier V1 runs recorded an autonomous movement reaching `done`, an observation
-request expiring, and an invalid motion plan being rejected. Those results
-belong to the previous runtime.
-
-The September 8 live review found current workflows and adapter-reported
-movement results, but also stale goals and repeated influence from unresolved
-desires. Later controlled tests cover truthful goal projection, specialist
-returns, continued review, ordered Desire steps, stopping on an unsatisfied
-result, cancellation, and recovery. Those source repairs have not yet been
-verified together in a new physical run. The dated evidence is in
-[the status report](/posts/archive/2026-09-09-project-status/).
-
-The next demonstration should follow one objective through scheduling, model
-choice, dispatch, robot result, observation, and review. It also needs repeated
-runs with user corrections, specialist returns, stop, Sleep, Reactive mode,
-disconnection, and restart. Rejections must remain rejections, and unknown
-outcomes must remain explicit. The same requirements apply to V1 and the
-planned [V2 body](/posts/ainekio-v2/).
+- **Native inference cancellation**: If a user speaks a correction or issues a stop command while an autonomous turn is generating on `llama-cpp.service`, the router cancels the in-flight inference natively and admits the user's input.
+- **Direct emergency stop**: `stop` bypasses language-model planning altogether, cancelling queued coordinator actions for the session and instructing the gateway and `ESP32-P4` firmware to halt motion immediately.
+- **Software Sleep vs. hardware rest**: Entering the cognitive **Sleep Workflow** pauses Active Operator so memory curation, dreaming, and Psychotherapist review can run cleanly. Separately, the `ESP32-P4` firmware can relax the body into a low-power `Rest` posture after configurable physical inactivity.

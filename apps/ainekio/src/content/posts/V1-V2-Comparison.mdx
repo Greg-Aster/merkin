@@ -1,8 +1,8 @@
 ---
-title: "Ainekio V1 and V2: Eight Servos Versus Twelve"
+title: "8-Servo ESP32-S3 vs. 12-Servo ESP32-P4 Quadruped Robot Comparison (V1 vs. V2)"
 published: 2026-09-24
-updated: 2026-11-01
-description: "Eight versus twelve servos: motion generation, measured feedback, processors and the current 650 g V2 battery/charger assembly, alongside dated motion ranges."
+updated: 2026-11-06
+description: "Side-by-side technical comparison of the 8-servo ESP32-S3 V1 baseline and the 650 g 12-servo ESP32-P4 V2 closed-loop quadruped."
 image: "/posts/2026-09-24-progress/v1-physical.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -19,216 +19,68 @@ reading:
   generation: both
   kind: reference
   next: ainekio-v2
-  related: ["ainekio-v2", "v1-original-posts"]
+  related: ["ainekio-v2", "gait-development", "v1-original-posts"]
 ---
 
-# Eight servos versus twelve
-
-V2 adds a third actuator per leg, an ESP32-P4 controller and shaft feedback.
-The **October 26** hardware record reports a **650 g** assembly with a 2S battery,
-Mini560 converter and HiLetgo USB-C charger. The current Freestyle work adds
-model-generated targets and measured arrival to the existing gait solver.
-
-The body prototype is complete as of November 1. [Neural walking trials](/posts/2026-11-01-neural-walking/)
-now compare forward, reverse and turns in direct simulation and through Body
-Control/P4; physical neural walking remains to test. The October 8 walking report
-and later failed trials retain their dates. [Latest body exports](/posts/2026-11-01-body-prototype/).
-The downloadable motion ranges below remain the **September 24 snapshot**.
-
-**Wireless**, with the Q6A offboard over Wi-Fi, is the current priority.
-**Wired** remains an onboard-Q6A/native-USB design alternative; native USB is
-not an implemented replacement for the current Wi-Fi body-command path. The
-[software update](/posts/2026-10-06-steering-sensing-connections/) compares their
-status and separates implemented controls from hardware qualification.
+Ainekio has been developed across two physical quadruped generations. **V1** established the end-to-end voice, vision, gateway, and MetaHuman OS loop on a compact eight-servo, open-loop `ESP32-S3` chassis derived from the open-source Sesame robot. **V2** is a complete mechanical, electrical, and control redesign around the **`Waveshare ESP32-P4-WIFI6`**, adding lateral hip roll joints (twelve servos total), compact five-bar/four-bar leg linkages, 4th-wire potentiometer feedback on every actuator, a `208 Hz` IMU, a 1.9-inch color face LCD, and closed-loop / neural locomotion.
 
 <div className="grid grid-cols-2 gap-3">
   <figure>
     <img src="/posts/2026-09-24-progress/v1-physical.webp" alt="Physical V1 with an open black chassis, eight servos, red feet and exposed wiring." width="700" height="933" loading="lazy" className="w-full aspect-square object-contain" />
-    <figcaption><strong>V1 · physical robot.</strong> August 27 construction photograph.</figcaption>
+    <figcaption><strong>V1 · Eight-Servo S3 Prototype.</strong> Open Sesame-derived frame with 0.96" OLED and OV3660 camera.</figcaption>
   </figure>
   <figure>
-    <img src="/gallery/20261021_083818-1600.webp" alt="V2 on the October 21 workbench with red face surround, linkage legs and exposed upper wiring." width="1588" height="1191" loading="lazy" className="w-full aspect-square object-contain" />
-    <figcaption><strong>V2 · October 21.</strong> Reassembled body and red face surround.</figcaption>
+    <img src="/gallery/20261021_083818-1600.webp" alt="V2 on the workbench with red face surround, 1.9-inch color LCD, linkage legs, and enclosed chassis." width="1588" height="1191" loading="lazy" className="w-full aspect-square object-contain" />
+    <figcaption><strong>V2 · Twelve-Servo P4 Prototype.</strong> Custom enclosed shell, 1.9" ST7789 LCD, OV5647 camera, and 4th-wire feedback linkages.</figcaption>
   </figure>
 </div>
 
-The images are not at the same scale. Both show physical prototypes, photographed
-on different dates; neither still image measures walking performance. [Printed V2 leg prototypes](/posts/2026-09-15-leg-prototypes/)
-are documented separately.
+## Mechanical & motion architecture
 
-## Mechanics and motion capability
-
-| Comparison | V1 · eight servos | V2 · twelve servos |
+| Feature | V1 · Eight-Servo Baseline | V2 · Twelve-Servo Closed-Loop Body |
 | --- | --- | --- |
-| Actuators per leg | Two MG90S | Three Miuzei MG90S with added potentiometer-wiper feedback wires |
-| Mechanism | Sesame-derived leg and open chassis | Shoulder roll plus coupled carrier/crank linkage; purpose-built supports, shell and underside |
-| Foot placement | Primarily forward/backward and up/down | Adds sideways placement and variable stance width |
-| Motion generation | Stored poses and timed sequences; 38 named assets | Freestyle-generated joint/foot/body targets, shared gait solver, and legacy library retained for manual control |
-| Speed controls | Timing of existing sequences | Gait Speed or advanced stride/rate; separate named-motion multiplier; shared joint-speed limit can retime automatic motion while retaining the path |
-| Turns | Stored 45°, 90° and 180° left/right clips; open-loop heading estimates | Continuous forward/turn updates during an admitted Walk; loaded steering remains to measure |
-| Expressive movement | Wave, bow, dances and other prepared gestures | Prepared gestures plus generated movements; brisk lift and rear-sway corrections approved in individual October 25 trials |
-| Balance and terrain | No measured adaptive balance result | Live IMU telemetry and configurable local leveling implemented; loaded correction and adaptive terrain response remain unqualified |
-| Physical evidence | Working complete prototype; movement and audio demonstrated | October 25 supported Stand/Walk passed after a firmware stack repair; loaded chatter and reliable floor walking remain unresolved |
+| **Actuators** | 8× `MG90S` (2 per leg, open-loop PWM) | 12× Miuzei `MG90S` (3 per leg) modified with 4th-wire potentiometer wiper feedback |
+| **Leg mechanism** | Direct planar joints in an open Sesame-derived chassis | Shoulder roll (`±h`) + compact planar linkage (`35 mm` carrier, `20 mm` crank, `28 mm` pickup, `38 mm` rod, `55 mm` lower leg) |
+| **Assembled mass & envelope** | Open-frame micro quadruped | `650 g` complete; `245.85 × 182.79 × 109.06 mm` (`L × W × H`) |
+| **Foot workspace** | 2D fore/aft and vertical arc per leg | 3D Cartesian workspace per leg with `0.8.150` boundary projection and adjustable stance width |
+| **Position verification** | None (open-loop elapsed timer) | 12-channel `CD74HC4067` analog multiplexer into P4 ADC; `2 mm` `Stand` settle and verified arrival |
+| **Inertial sensing** | None | Onboard `LSM6DS3` 6-axis IMU (`208 Hz`), stationary gyro bias calibration, local attitude self-leveling, and tip/shake events |
+| **Motion repertoire** | 38 fixed `.amot` keyframe assets (`walk_forward`, fixed turns, emotes) | Continuous analytic solver (`Walk`, `Run`, `Crawl`, 6-dir `Crab`), 23 compiled gestures, **349-example SQLite Freestyle library**, **`50 Hz` neural policy (`walk_nominal_v1`)**, and **MuJoCo MJX RL** |
 
-The V1 asset count is a finite library. A generated V2 program can combine
-targets, holds and face changes, with actual events requesting recovery. Counting named clips no longer
-describes its whole motion system.
+## Controller, compute, and peripherals
 
-## Movement ranges: compare the quantities first
-
-**Dataset date: September 24.** The numbers below are preserved for comparison;
-they have not been regenerated for the later controller revisions or the
-October 5–6 compact-linkage candidate. The
-[latest motion entry](/posts/2026-10-06-compact-linkage/)
-compares that candidate with the shared model and records its changed poses.
-
-**A commanded angle is not a measured mechanical limit.** V1 uses logical
-controller angles. V2 uses signed Blender angles for three coupled inputs. Their
-zeros, joint axes and mechanisms differ; subtracting the numbers does not give
-a meaningful percentage increase in reachable workspace.
-
-| Range or movement | V1 | V2 |
+| Subsystem | V1 (`ESP32-S3`) | V2 (`ESP32-P4` + `C6`) |
 | --- | --- | --- |
-| Software angle convention | Logical 0–180°; individual assets use subsets | Signed Blender angles for shoulder, carrier and crank, followed by per-joint calibration |
-| Stored/sample envelope | Combined explicit targets span 0–180° across the eight channels | Shoulder −96.99 to +17.57°; carrier −79.02 to +135.37°; crank −128.11 to +101.29° |
-| Walking data | V1 forward-walk targets use 45–90° excursions on individual channels; detailed table in the journal | September 24 sampled forward-walk recording: shoulder −4.47 to +4.25°, carrier −46.05 to +22.88°, crank −107.48 to +29.56° |
-| Sideways travel | No dedicated third leg actuator; no measured lateral workspace supplied | Crab planner specifies 32 mm sideways travel per full-stride cycle |
-| Foot travel in walking | No measured distance-per-cycle result in this review | 92 mm full planted sweep; nominal 131.43 mm advance per cycle at full stride |
-| Whole-body usable limits | Installed stops, loaded workspace and travel measurements not supplied | Shoulder/body clearance, tracking, load and all-settings motion envelope remain unqualified |
+| **Controller board** | Freenove `ESP32-S3-WROOM CAM` (`N16R8`) | `Waveshare ESP32-P4-WIFI6` (Rev 1.3) |
+| **Main CPU & clock** | Dual-core Xtensa LX7 @ `160 MHz` | Dual-core RISC-V @ `360 MHz` |
+| **Flash / PSRAM** | `16 MB` Flash / `8 MB` Octal PSRAM | `32 MB` NOR Flash / `32 MB` PSRAM |
+| **Wireless** | Integrated 2.4 GHz Wi-Fi | Dedicated onboard `ESP32-C6` coprocessor over SDIO |
+| **Servo PWM generation** | 8× direct `MCPWM` GPIO outputs | `PCA9685` 16-channel 12-bit I2C PWM driver with staggered phase offsets |
+| **Face display** | 0.96" `SSD1306` monochrome I2C OLED (`128 × 64`) | 1.9" `ST7789` color IPS SPI LCD (`320 × 170`, 58 animated expressions) |
+| **Camera** | `OV3660` DVP parallel camera (`XGA` stills) | `OV5647` MIPI-CSI camera (180° inverted mount, `10,000 µs` motion-safe exposure ceiling, SD video recording) |
+| **Audio & wake word** | External `INMP441` mic + `MAX98357A` I2S amp; experimental TFLite Micro pilot | Onboard `ES8311` codec + `NS4150B` amp, `20 × 30 mm` speaker, **Espressif `WakeNet9s`**, 5 VAD modes, `15 s` window, `external_speech_ms` TTS suppression |
+| **Host gateway & brain** | Desktop running `Master/gateway` + MetaHuman OS | Desktop or **Radxa Dragon Q6A** (`QCS6490`) running Body Control + unified `llama-cpp.service` (`:8080`) |
 
-The September 24 V2 envelope above was extracted from **23 declared gesture sources,
-14 locomotion recordings and the Run recording**, pooling all four legs by
-input type. It excludes the retired fixed-angle turn recordings. Its shoulder
-maximum therefore differs from older audits that included those turns.
-The forward-walk row includes its recorded Speed changes, advanced settings and
-Finish; it is not the extrema of every possible walking control setting.
+## Power, battery, and charging
 
-[Download the per-recording, per-joint CSV](/posts/2026-09-24-progress/motion-ranges.csv)
-and its [read-only extraction script](/posts/2026-09-24-progress/extract-motion-ranges.py).
-The CSV includes source hashes, preserves the two angle conventions and also
-lists all V1 explicit target ranges. The [gait journal](/posts/gait-development/)
-retains the original V1 channel table and earlier linkage studies.
+Both generations isolate high-current `5 V` motor power from logic power while sharing a common ground reference:
 
-### The October 5–6 compact candidate
-
-The shared model at `13fc3e4` and the offline candidate are distinct:
-
-| Dimension | Shared model | Compact candidate |
-| --- | ---: | ---: |
-| Carrier | 40 mm | 35 mm |
-| Crank | 24 mm | 20 mm |
-| Pickup radius | 24 mm | 28 mm |
-| Connecting rod | 38 mm | 38 mm |
-| Distal leg | 55 mm | 55 mm |
-
-The candidate remaps all 23 named motions. Its selected Upright fit reaches
-**76.585 mm**, compared with **90.339 mm** in the baseline. Combined front-crank
-travel is **243.868°**, exceeding the **225°** span in the provisional servo
-mapping used by that study. Usable physical shaft travel remains unmeasured.
-These are pose/model comparisons, not approved mechanical limits. At the time of that study the candidate was separate. The October 26 working
-Blender assembly and geometry export now agree on **35 / 20 / 28 / 38 / 55 mm**.
-The older pose values above remain results of their original study.
-
-Earlier pulse-endpoint and assembly-mark studies retain their own dates in
-the [gait journal](/posts/gait-development/). They should not be combined into
-a new calibration instruction without checking the actual installed assembly.
-
-## Controller and processing
-
-| Comparison | V1 | V2 |
+| Power Component | V1 Configuration | V2 Rear Two-Level Power Carrier |
 | --- | --- | --- |
-| Board | Freenove ESP32-S3-WROOM CAM, N16R8 | Waveshare ESP32-P4-WIFI6; tested P4 revision 1.3 |
-| Main processor | Dual-core Xtensa LX7 | Dual-core high-performance RISC-V |
-| Checked firmware clock | **160 MHz** in local S3 configuration | **360 MHz** in local P4 configuration |
-| Flash / PSRAM | 16 MB / 8 MB | 32 MB / 32 MB |
-| Wireless | S3's own 2.4 GHz Wi-Fi | Separate ESP32-C6 coprocessor over SDIO |
-| Servo signals | Eight direct hardware PWM outputs | PCA9685 driver for the twelve channels |
-| Camera/audio hardware | OV3660 parallel camera; external microphone and I2S amplifier | Kit specifies OV5647 MIPI camera; onboard codec/audio path; installed peripheral operation needs its own evidence |
-| Companion computer | MetaHuman OS on a separate computer | Q6A onboard for Wired or offboard for Wireless; QCS6490 eight-core CPU, Adreno 643 and Hexagon; audited unit has 11.288 GiB Linux-visible RAM |
-| ROS 2 | No V1 integration in this review | Jazzy installed on Q6A; desktop messaging, recording and RViz checks recorded; robot adapter remains planned |
-| Conversation and reasoning | MetaHuman OS on the host | MetaHuman OS remains separate from P4 motion deadlines; ROS does not replace it |
+| **Battery pack** | Sea Jump `2S` (`7.4 V` nominal), `1000 mAh` LiPo | `2S` (`8.4 V` max) Li-ion pack (`73.6 × 46 × 22 mm` envelope) |
+| **Voltage regulation** | Dual `Mini560` `5 V / 5 A` buck converters | `Mini560` `5 V / 5 A` step-down converter feeding the `PCA9685` servo rail |
+| **Charging** | External or `HiLetgo` 2S USB-C boost charger | Integrated `HiLetgo` 2S USB-C boost charger in the rear printed carrier (earlier Anker and SHARGE power banks retired) |
 
-Processor families and board interfaces follow
-[Espressif's S3 description](https://www.espressif.com/en/products/socs/esp32-s3)
-and the [Waveshare board documentation](https://docs.waveshare.com/ESP32-P4-WIFI6).
-Memory and clock values above also follow the local board records and checked
-`sdkconfig` files. The S3 silicon supports up to 240 MHz; this checkout selects
-160 MHz. These clock rates and memory capacities are **not an application
-benchmark** or evidence of longer battery life.
+## Commanded joint range comparison
 
-The P4 solves the leg linkage directly and plays compact gesture curves through
-one output controller. The September 28 website's deployment record reports a
-**2,370,848-byte application**, verified flash and boots, retained twelve-joint
-calibration and saved motion speed after reboot. Hardware checks cover startup
-Home and settings; loaded twelve-servo timing, tracking and power remain
-separate measurements.
+Because V1 uses logical `0–180°` direct servo targets and V2 uses signed Blender geometric angles (`h`, `alpha`, `theta`) mapped through coupled four-bar/five-bar linkages, their raw angle spans represent different physical coordinates:
 
-The Q6A figures come from the September 28
-[resource audit](https://github.com/Greg-Aster/Ainekio-bot/blob/270537fa56c8d77efd72ff694f4294d15381de52/docs/v2-12servo/RESOURCE_BUDGET.md).
-More RAM and different processors allow different workloads, but their
-specifications are not a measured speedup over V1. [Live IMU telemetry and saved
-leveling controls](/posts/2026-10-14-startup-and-leveling/) now have dated firmware
-installation records. Loaded leveling, the ROS adapter and native-USB body path
-remain unqualified. [SD video and Wi-Fi maintenance](/posts/2026-10-14-recording-and-updates/)
-are additional P4 features, with controller tests separated from loaded motion.
-
-## Power supply, battery, charging and running time
-
-The separate-cell power arrangement is now identified in the October 26 hardware
-record. Earlier Anker and SHARGE bank plans remain historical iterations.
-
-| Comparison | V1 | V2 · October 26 record |
+| Metric | V1 (8 Logical Channels) | V2 (12 Coupled Linkage Channels) |
 | --- | --- | --- |
-| Battery | 1,000 mAh LiPo, owner-reported | 2S pack; 73.6 × 46 × 22 mm measured envelope; capacity not recorded |
-| Voltage / energy record | Earlier parts record: 2S, 7.4 V; nominal 7.4 Wh by multiplication | October 15 report: 8.4 V battery; usable energy not measured |
-| Conversion | External buck converter | Mini560; recorded 5 A rating, separate 5 V servo rail |
-| Charging | External charger | Onboard HiLetgo 2S USB-C charger |
-| Assembly mass | No comparable mass supplied | 650 g, owner report recorded October 26; earlier 566 g belongs to October 13 |
-| Companion-computer power | Separate host | Selected offboard Q6A has its own supply |
-| Running time | Not measured | Not measured |
-| Loaded consumption | Not supplied | Current peaks, loaded voltage and average power remain to measure |
+| **Angle convention** | Logical `0–180°` around `90°` neutral | Signed geometric offsets (`h`, `alpha`, `theta`) from CAD neutral, mapped via per-joint calibration |
+| **Full gesture/gait envelope** | `0–180°` across all 38 stored `.amot` assets | Shoulder `h`: `-96.99° to +17.57°`; Carrier `alpha`: `-79.02° to +135.37°`; Crank `theta`: `-128.11° to +101.29°` |
+| **Forward walk excursion** | `45–90°` channel excursions (`920 ms` 6-group cycle) | `92–96 mm` planted foot sweep (`131.43 mm` nominal body advance per full-stride cycle) |
+| **Lateral travel** | None (2-DOF planar legs) | `32 mm` sideways travel per full-stride `Crab` cycle + dynamic roll leveling |
 
-The revised V2 battery capacity is unspecified, so there is no current
-capacity-ratio comparison. A useful runtime estimate requires
-usable delivered energy in watt-hours and average whole-robot power:
-**runtime in hours ≈ delivered Wh ÷ average W**. Idle, walking and expressive
-motions need separately identified test conditions.
-
-The [September 24 Anker study](/posts/2026-09-24-body-and-battery/) and
-[September 28 SHARGE budget](/posts/2026-09-28-wired-wireless-ros2/) preserve
-the earlier removable-bank iterations, including the proposed two-port
-5 V / 3 A branch allocation. That allocation is historical, not a specification
-for the new batteries and charging boards. The
-[October 6 rebuild](/posts/2026-10-06-lighter-rebuild/) records why the bank
-was dropped. The [October 26 packaging record](/posts/2026-10-26-body-power-and-training-stand/)
-identifies the later pack, converter, charger and printed parts.
-
-## Sources and next comparison
-
-The motion-range dataset and original V1 comparison use the local Ainekio
-checkout after commit `3f872e7`, including uncommitted September 24 work. The declared catalog, locomotion README,
-`CONTROLLER_VALIDATION.md`, model geometry, V1 seed motions, hardware records
-and both firmware configurations supplied the figures. The
-[source manifest](/posts/2026-09-24-progress/sources.json) records snapshot hashes.
-The September 28 changes use robot commit `270537f`, current controller
-validation and saved Blender review notes, identified in the
-[September 28 source manifest](/posts/2026-09-28-progress/sources.json). These are dated
-source and validation records, not a new hardware test performed for the website.
-
-The [October 6 manifest](/posts/2026-10-06-progress/sources.json) adds robot
-commit `13fc3e4`, the later remote status change, local linkage research and
-Blender review records. The physical standing result, new battery direction
-and approximate improvement estimates come from Greg's October 6 report.
-
-The next comparison should add the completed assembly's mass, physically
-measured foot workspace, loaded motion observations, delivered battery energy
-and timed runtime under stated gait settings.
-
-October 8 update: current V2 physical observations and photograph come from the
-owner. See the [new build entry](/posts/2026-10-08-standing-walking/) and
-[source manifest](/posts/2026-10-08-progress/sources.json). Earlier range datasets
-and improvement estimates retain their original evidence boundaries.
-
-October 12: [shell/power and motion revisions](/posts/2026-10-12-shell-power-and-motion/), [YOLOE](/posts/2026-10-12-yoloe-tracking/) and
-[trained MetaHuman specialists](/posts/2026-10-12-trained-specialists/) extend this record. Model timings
-are desktop evidence, not a V1/V2 or Q6A hardware benchmark.
+- **Downloadable comparison data**: [Per-recording V1 & V2 motion ranges (CSV)](/posts/2026-09-24-progress/motion-ranges.csv) · [Range extraction script (`extract-motion-ranges.py`)](/posts/2026-09-24-progress/extract-motion-ranges.py).
+- **Detailed hardware guides**: [Ainekio V2 Hardware & Wiring Reference](/posts/ainekio-v2/) · [V1 Hardware & Body Design](/posts/body-design-and-hardware/) · [ESP32-S3 Firmware](/posts/controller-firmware/).

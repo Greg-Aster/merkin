@@ -1,189 +1,139 @@
 ---
-title: "Compact Wireless Body: Battery Clearance, Face and Assembly"
+title: "Compact Wireless Body, Onboard Q6A Split, and ROS 2 Architecture"
 published: 2026-09-28
 updated: 2026-09-28
-description: "Independent Wired and Wireless Blender designs, an 82.5 mm Wireless frame, revised front-leg placement, rear carrier relief, a fitted LCD carrier and assembly reference marks."
+description: "Splitting Ainekio into Wired (onboard Q6A) and Wireless (82.5 mm offboard Q6A) builds, fitting the 1.9-inch LCD and SHARGE Pouch, and planning ROS 2 Jazzy and LSM6DS3 IMU integration."
 image: "/posts/2026-09-28-progress/front-mask.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: false
 showToc: true
-tags: [Ainekio, V2, Blender, Chassis, Battery, 3D Printing]
+tags: [Ainekio, V2, Blender, Chassis, ROS 2, ESP32-P4, Q6A, Battery]
 category: "Build Journal"
 draft: false
 lang: "en"
 contentFormat: "report"
 reading:
-  topic: body
+  topic: control
   generation: v2
   kind: journal
-  next: q6a-chassis-and-active-loop
-  related: ["ainekio-v2", "2026-10-08-standing-walking"]
+  next: 2026-10-06-compact-linkage
+  related: ["ainekio-v2", "protocol-and-safety", "metahuman-integration"]
 ---
 
-# Making room for two build options
+Ainekio V2 now has two distinct build configurations in Blender and software:
 
-**Later development — October 6:** the printed chassis could not stand on its
-MG90 servos. The [lighter rebuild](/posts/2026-10-06-lighter-rebuild/) keeps those
-servos and replaces the heavy battery bank with separate batteries and onboard
-charging boards. New parts are printing. The dimensions and bank packaging
-below preserve the September 28 iteration.
+- **Wired** carries the **Radxa Dragon Q6A** computer onboard in a slimmed slotted
+  tray, with a planned native-USB link to the ESP32-P4.
+- **Wireless** moves the Q6A offboard and connects over Wi-Fi through the P4's
+  ESP32-C6 coprocessor, allowing an **82.5 mm outer frame width** and a smaller
+  onboard electronics bridge.
 
-The mechanical work since September 24 covers the frame, electronics tray,
-battery, face and assembly references. The build is now split into **Wired**,
-which carries the Q6A computer, and **Wireless**, which leaves it offboard.
-The [integration entry](/posts/2026-09-28-wired-wireless-ros2/) compares their
-transport, ROS 2 and power plans.
-
-The latest Wireless record reaches **82.5 mm across the outside of the frame**.
-It restores the original front carriers, moves the front leg assemblies
-**4.1 mm forward**, and retains relief cuts in the rear carriers. The tray,
-support length, end panels and shell still need to follow that new placement.
-This is an in-progress fit revision, not a finished print set.
+> **October 6 follow-up:** Wireless became the active physical build priority, and
+> after the first printed chassis could not stand on its MG90 servos with a heavy
+> USB power bank, the [October 6 compact linkage and lighter rebuild](/posts/2026-10-06-compact-linkage/)
+> replaced the power bank with a 2S battery and onboard buck/charger boards.
 
 <figure>
   <img src="/posts/2026-09-28-progress/front-mask.webp" alt="Oblique Blender view of Ainekio's angular red face with the revised display opening and lower chin." width="1150" height="950" loading="eager" />
-  <figcaption>September 27 mask fit preview around the new LCD reference. Uniform review colors show the angular transitions. Later carrier, spacer and Wireless frame edits are described below; this image predates them.</figcaption>
+  <figcaption>September 27 mask fit around the 1.9-inch LCD reference and separate lower chin piece.</figcaption>
 </figure>
 
-## Separate designs in Blender
+## Wired and Wireless side by side
 
-The former modeling scene became **Wireless**, with **Wired** made as an
-independent copy. Their objects, mesh data and materials can now be edited
-separately. Parent relationships, constraints and driver references were
-retargeted within each design. The existing Gait and Motions scenes were
-preserved, and save/reopen checks verified the split.
+In Blender, the modeling scene was split into independent **Wireless** and **Wired**
+scenes with retargeted parent relationships, constraints, and driver references,
+while preserving all 71 animation actions in the Gait and Motions scenes.
 
-Both designs started from the same hardware layout. Subsequent compact edits
-apply to Wireless; they do not automatically change the animation scenes or
-the Wired body. The older Blender showcase therefore remains useful motion
-history, but does not show today's frame clearances.
-
-## Width, battery and leg placement
-
-The battery reference has changed from the earlier Anker envelope to the
-**115 × 51 × 26 mm SHARGE Pouch**. The bank stays centered laterally with its
-port facing rearward. The table keeps the successive frame dimensions tied
-to their own revisions.
-
-| Geometry decision | Wider baseline / intermediate revision | Latest Wireless record |
+| Build decision | Wired (Onboard Q6A) | Wireless (Offboard Q6A) |
 | --- | --- | --- |
-| Outer frame width | 100.3 mm restored baseline; then 94.3 mm compact Wireless layout | 82.5 mm |
-| Front-to-rear pivot spacing | 147.7 mm in the 94.3 mm layout | 151.8 mm after moving the front assemblies 4.1 mm forward |
-| Front Part_003 carriers | An intermediate trial relieved all four carriers | Original front geometry restored, including mounting holes, rails and surface details |
-| Rear Part_003 carriers | Original outline constrained narrowing around the bank | Battery relief retained |
-| Checked inward shoulder movement | 0–17° in the 94.3 mm layout at fixed carrier/crank pose | Front 0–17°; rear 0–13.4°, at the reviewed carrier/crank poses |
-| Electronics tray and bridge | Included in the 94.3 mm layout's fit checks | Excluded from the final narrowing decision; refit outstanding |
-| Panels and shell | Earlier placements and geometry | Support length, end-panel and shell fitting still to follow |
+| Q6A placement | Onboard in a 173.92 × 61 mm slotted tray | Offboard, powered separately |
+| P4-to-Q6A link | Native USB (P1 interface) under investigation | Wi-Fi via ESP32-C6 coprocessor and gateway |
+| Outer frame width | 100.3 mm outer-support baseline | **82.5 mm** (narrowed from 94.3 mm intermediate pass) |
+| Front-to-rear pivot spacing | 147.7 mm | **151.8 mm** (front leg assemblies moved 4.1 mm forward) |
+| Carried electronics | ESP32-P4, PCA9685, Q6A + Armor case, IMU, peripherals, 12 servos | ESP32-P4, PCA9685, IMU, peripherals, 12 servos |
+| Sept 28 battery study | SHARGE Pouch (115 × 51 × 26 mm, 10,000 mAh / 36 Wh), two 5 V / 3 A branches (Q6A on branch 1, P4 + servos on branch 2) | Same bank envelope, splitting P4 logic and servo rails across the two 5 V / 3 A branches |
 
-Moving the front assemblies forward recovered clearance for the original
-front carriers without continuing to cut them down. Their sampled minimum
-battery gap is approximately **0.590 mm at 17° inward swing**, with a
-conservative bound above 0.56 mm between 0.1° samples. At the rear, the
-limiting moving hardware is Part_006 at approximately **0.523 mm** over the
-checked 0–13.4° range.
+## Narrowing the Wireless frame to 82.5 mm
 
-**The fixed Part_002 servo bodies still nominally touch the battery sides.**
-Those near-zero clearances do not provide a practical manufacturing allowance.
-The bank, boards and fixed hardware kept their dimensions; no servo casing
-was trimmed to make the fit work.
+Replacing the 155 mm Anker reference with the shorter **115 × 51 × 26 mm SHARGE Pouch**
+allowed pulling the Wireless frame inward to **82.5 mm** across the outer walls.
+
+Moving the front leg assemblies **4.1 mm forward** (to 151.8 mm pivot spacing)
+restored the original uncut front Part_003 carriers while maintaining a **0.590 mm**
+minimum battery gap at 17° inward shoulder swing. At the rear, relief cuts in the
+Part_003 carriers provide a **0.523 mm** minimum clearance for Part_006 across a
+0–13.4° inward swing window.
 
 <figure>
   <img src="/posts/2026-09-28-progress/rear-carrier-relief.webp" alt="Two cross-sections of the rear Part_003 carrier: the left marks removed material in red; the right shows the retained wall, screw hole and horn opening." width="1650" height="1200" loading="lazy" />
-  <figcaption>Rear-carrier study for the 82.5 mm frame and 13.4° inward swing. Red marks removed material at this section. The front carriers were subsequently restored to their original geometry and moved forward with their complete leg assemblies.</figcaption>
+  <figcaption>Rear Part_003 carrier relief section for the 82.5 mm Wireless frame at 13.4° inward shoulder swing (removed material shown in red).</figcaption>
 </figure>
 
-These are **battery-clearance checks at particular carrier/crank poses**.
-They neither establish a complete gait envelope nor change firmware limits.
-The most recent review preserves the rear assemblies, unrelated geometry and
-all 71 animation actions. It does not prove loaded strength, printed fit or
-unrestricted motion of the narrower body.
+## Onboard electronics tray and Wireless bridge
 
-## The onboard electronics tray
-
-Before the split, the Q6A tray was reduced from roughly **189.42 × 81 mm** to
-**173.92 × 61 mm**. It retains a **1.2 mm floor**, rounded ventilation slots and
-supports for the P4 and servo driver. Small ledges carry the underside of the
-Q6A Armor case while leaving its fins exposed.
+For the Wired layout, the Q6A electronics tray was trimmed from **189.42 × 81 mm**
+down to **173.92 × 61 mm** with a **1.2 mm floor**, rounded ventilation slots, and
+ledges that support the Q6A Armor case while leaving its cooling fins exposed. That
+cut modeled tray volume from **20.28 cm³ to 12.96 cm³ (−36.1%)**.
 
 <figure>
   <img src="/posts/2026-09-28-progress/electronics-tray.webp" alt="Q6A case, servo driver and P4 arranged on the slim slotted electronics tray." width="1400" height="850" loading="lazy" />
-  <figcaption>September 27 onboard electronics layout. This view documents the Wired packaging baseline; the Wireless option removes the Q6A from the carried assembly.</figcaption>
+  <figcaption>September 27 Wired electronics tray carrying the Q6A Armor case, PCA9685 servo driver, and ESP32-P4.</figcaption>
 </figure>
 
-The tray's modeled material volume fell from **20.28 to 12.96 cm³**, a
-**36.1% reduction**. That is a geometric comparison, not a measured print mass
-or strength result. The case remains an approximate reference with about
-0.3 mm modeled side clearance. A later rear-panel wrap follows the tray with
-a nominal 0.2 mm gap; full-motion checks were not repeated for that panel edit.
+In the Wireless layout, the Q6A is omitted and the ESP32-P4 and PCA9685 sit side by
+side on a bridge over the battery, with the LSM6DS3 IMU mounted at the lower front.
 
-The intermediate 94.3 mm Wireless design instead placed the P4 and Adafruit
-servo driver side by side over the bank, with the purple IMU reference at the
-bottom/front and its headers facing outward. A separate bridge locates on
-tray pegs. Positive retention and cable fit remain physical prototype work,
-and the subsequent 82.5 mm narrowing requires that bridge to be refitted.
+## 1.9-inch LCD carrier and assembly alignment marks
 
-## Display, carrier and front panel
-
-The face now uses a **62 × 29 mm PCB reference** for the XIITIA 1.9-inch
-display. This imported reference was reconstructed from product information
-and images; hole and component details are estimated rather than supplied by the manufacturer.
-The front mask was widened locally around it, retaining the angular exterior,
-and the chin became a separate object.
+The face assembly now packages a **62 × 29 mm PCB reference** for the XIITIA 1.9-inch
+LCD (58 × 25 mm mounting pattern), widening the mask locally while splitting the
+chin into a separate part.
 
 <figure>
   <img src="/posts/2026-09-28-progress/lcd-carrier.webp" alt="Rear Blender view of the fitted LCD board and gray carrier inside the red mask, showing the open center and header route." width="1100" height="950" loading="lazy" />
-  <figcaption>September 27 fitted carrier. Its rear plane is flat for printing. The following Wireless revision moves the face assembly forward and adds four spacers; they are not shown in this earlier image.</figcaption>
+  <figcaption>Rear view of the flat-backed LCD carrier inside the front mask, showing the 3.04 × 20.82 mm header passage and separate lower camera-ribbon slot.</figcaption>
 </figure>
 
-| Interface | September 27 fit | September 28 Wireless change |
-| --- | --- | --- |
-| Carrier back | Flat rear plane; 7.3374 mm maximum seating depth | Face assembly moved 1.5 mm forward; four matching 1.5 mm spacers retain mounting alignment |
-| LCD-to-mask mounting | Modeled 58 × 25 mm pattern; 2.1 mm carrier clearance holes aligned to mask pilots | Pattern retained; actual board and screw fit still need checking |
-| Header passage | 3.04 × 20.82 mm opening with a 3 mm reinforcing web above and below | Approximately 0.337 mm axial gap to the front bearing-support face in that review's placement |
-| Camera ribbon | Separate lower passage | Preview transition adjusted to follow the moved camera |
-| Fasteners | Separate PCB-to-mask and carrier-to-panel patterns | Screw-head seats and screw lengths remain deferred |
-
-The header measurement covers the modeled bare pins, not an installed plug
-or wire bend. It was made before the latest front-leg relocation, so it is
-not a clearance certificate for the complete 82.5 mm assembly. Some side
-protector contacts also remain. This is why front-panel and shell refitting
-stay on the next-work list.
-
-## Assembly marks and calibration references
-
-The leg assembly work added **12 pairs of alignment marks across four legs**:
-carrier to end panel, main arm to carrier, and crank to main arm. The modeled
-grooves are **0.6 mm wide and 0.3 mm deep**.
+- **LCD carrier fit:** Flat print-bed rear plane with 7.34 mm seating depth, moved
+  1.5 mm forward in the Wireless scene on four matching 1.5 mm spacers.
+- **Assembly alignment grooves:** Twelve pairs of **0.6 mm wide × 0.3 mm deep**
+  alignment marks across all four legs (carrier-to-end-panel, main-arm-to-carrier,
+  and crank-to-main-arm) index the physical 1300 µs assembly reference pose.
 
 <figure>
   <img src="/posts/2026-09-28-progress/assembly-marks.webp" alt="Close Blender view of matching grooves on the red leg arm, gray crank and adjacent carrier surfaces." width="1400" height="1000" loading="lazy" />
-  <figcaption>Assembly-reference grooves in the September 25–26 work. They refer to the earlier 1300 µs assembly pose; the later pulse-endpoint review does not redefine these marks.</figcaption>
+  <figcaption>0.6 × 0.3 mm alignment grooves across the leg arm, crank, and carrier surfaces.</figcaption>
 </figure>
 
-The newer reported pulse endpoints are **300–3000 µs**. Their arithmetic
-midpoint is **1650 µs**, but measured shaft travel and a matching assembled
-neutral remain unresolved. The marks must not be reinterpreted as a new
-1650 µs installation reference merely because that number is the midpoint.
-The review did not change firmware calibration or qualify all four legs.
+## ROS 2 Jazzy, IMU feedback plan, and transport bandwidth
 
-## What is ready to use from this entry?
+**ROS 2 Jazzy** is installed on the Q6A, with the gateway remaining the single
+command authority to the P4's motor outputs:
 
-The images and dimensions above document saved modeling work through
-**13:04 PDT on September 28**. The latest scene split, face fit and Wireless
-carrier changes were saved and independently reopened in their review records.
-They did **not** create a new complete STL/GLB release. Earlier
-[dated print downloads](/posts/2026-09-21-compact-leg-design/) remain available
-as earlier revisions.
+| Subsystem | Role in the V2 architecture |
+| --- | --- |
+| Q6A ROS 2 adapter | Publishes gateway telemetry (camera frames, timestamped IMU samples, and body state) to ROS 2 topics for inspection in RViz and recording via `rosbag2` |
+| MetaHuman OS | High-level conversation, personality, memory, and intent routing through the gateway interface |
+| ESP32-P4 local loop | Inverse kinematics, 50 Hz servo trajectory supervision, and planned **208 Hz LSM6DS3 IMU** acquisition for fast local posture correction without round-tripping through ROS 2 or an LLM |
 
-The next mechanical work is to fit the supports, panels, electronics bridge
-and shell to the latest front/rear positions, resolve practical battery and
-connector allowances, and check the resulting assembly through its required
-motions before recording printed and loaded results.
+Meanwhile, the P4 gait controller gained lower working body references for better
+geometric leverage and a saved **Motion speed (×)** multiplier for Stand, Sit, and
+finite gestures (see the [gait development log](/posts/gait-development/#september-28-2026--leverage-motion-speed-and-feedback-planning)).
 
-The [source and image manifest](/posts/2026-09-28-progress/sources.json) identifies
-the reviewed files and their hashes. Download the captured
-[Wireless clearance note](/posts/2026-09-28-progress/wireless-clearance-review.md)
-for the exact scope of the final front/rear study. For controls and feedback,
-continue to the [gait journal](/posts/gait-development/).
+### Media and compute bandwidth notes
+
+Evaluating native USB (on P4 header **P1**, separate from the CH343 debug USB-C port)
+versus Wi-Fi highlighted concrete throughput boundaries:
+
+- **Camera & PSRAM:** Three uncompressed 5 MP RGB888 frames would require 43.25 MiB
+  (exceeding the P4's 32 MiB PSRAM), keeping the processed pipeline capped at 1080p
+  hardware JPEG or XGA/VGA preview streams.
+- **Link scheduling:** A 256 KiB JPEG stream at 30 fps represents 62.9 Mbit/s before
+  audio and protocol framing, whereas the current link loop services one microphone
+  packet and one JPEG frame per 20 ms iteration.
+- **Q6A CPU TTS baseline:** Synthesizing a 5-second spoken phrase with Kokoro on the
+  Q6A CPU (8 threads, 1.54 GiB peak RSS) took 15.07–15.90 seconds, showing that voice
+  latency is dominated by synthesis compute rather than body-link transport.

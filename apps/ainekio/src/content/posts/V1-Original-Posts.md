@@ -51,4 +51,4 @@ The early documents include proposals that changed. The older parts list specifi
 - [ESP32-S3 Build & Firmware Reference — local document copy](/posts/v1-originals/esp32-s3-build-reference.md) preserves the September 2 reference linked by those guides. [Original Google Doc](https://docs.google.com/document/d/1JZMMG3J96v6cnw2YupPp9OF9fiw0H4j0tS8t8fsplJk/edit).
 - [System Specification v1.0 — local plain-text copy](/posts/v1-originals/system-specification-v1.txt) preserves the additional specification URL in the site's original source list. It is a historical protocol and implementation plan, not a current wiring authority. [Original Google Doc](https://docs.google.com/document/d/1TqrlbjaKIxkAuf-49KdEVl6QT0yXZnAPgf1siMnWOcg/edit).
 
-[Current project status](/posts/current-status/) · [Development tracker](/project-guide/) · [Restoration sources and checksums](/posts/v1-originals/sources.json)
+[Project overview & status](/posts/project-overview/#project-status) · [Restoration sources and checksums](/posts/v1-originals/sources.json)

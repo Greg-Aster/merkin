@@ -10,432 +10,136 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "Body prototype complete; neural walking in development"
-  location: "V2 / P4 · Body Control · MetaHuman OS"
-  updated: 2026-11-01
-  mileage: "Blender body · five-command gait · connected simulation"
-  section: "From learned foot placements to loaded walking"
-  nextStop: "Complete connected gait comparisons, then measure walking, turning and foot clearance on the finished body."
-  note: "The body prototype is complete. Demonstration-based neural training now produces forward, reverse and turning motion in simulation. Replaying the same policy through Body Control and the P4 executor exposes a large left-turn gap; physical neural walking remains to test."
+  status: "Physical 650 g V2 quadruped walking under 200M-step MJX neural policy; closed-loop Stand/Walk and unified MetaHuman runtime active"
+  location: "V2 / ESP32-P4 · Body Control · MetaHuman OS"
+  updated: 2026-11-06
+  mileage: "650 g closed-loop V2 · 200M-step MJX neural walk · Big Brother"
+  section: "Real-world neural network walking, full-CAD MJX reinforcement learning, and unified companion agency"
+  nextStop: "Complete the 200M-step rough-terrain and push-recovery MJX continuation run (7 mm carpet strips + kick disturbances) and validate sustained autonomous room navigation."
+  note: "The 650 g twelve-servo V2 robot now walks forward and reverses cleanly on physical carpet under its 200M-step JAX/Brax/MJX neural policy after resolving early tiny-hop and 'scootybooty' reverse-dragging failure modes. Onboard, 4th-wire CD74HC4067 shaft verification and 0.8.150 Cartesian workspace projection pair with the unified llama-cpp.service + Big Brother MetaHuman runtime."
   areas:
-    - label: "Physical build"
-      status: "Body prototype complete"
-      detail: "November 1 build report, with October 27–29 Blender exports for the LCD carrier, face panels, servo cover and combined battery/power cradle. The last recorded mass is 650 g; no new runtime measurement."
-    - label: "Neural walking"
-      status: "Forward, reverse and both turns learned in simulation"
-      detail: "The selected October 30 policy has 360,000 imitation updates. Five-command trials reach 27.82 mm/s forward directly and 22.45 mm/s through Body Control; the request was 80 mm/s."
-    - label: "Execution transfer"
-      status: "Left turning is the clearest gap"
-      detail: "Left yaw falls from 0.128 to 0.021 rad/s through the P4 execution path. Neither replay recorded falls, but task accuracy is still poor. November 1 continuation collects fresh connected observations."
-    - label: "Training lessons"
-      status: "Better demonstrations help; more RL did not"
-      detail: "Forward demonstration refinement improved a matched 60-second simulation from 16.40 to 20.96 mm/s. SAC refinement damaged that gait. Reward changes address policies learning to remain still."
-    - label: "MetaHuman connections"
-      status: "One Bridge; fewer unnecessary cognitive turns"
-      detail: "The current source consolidates local and remote body connections. The October 29 runtime repair keeps feedback-health changes as state without starting a new conversation for each change."
-    - label: "Context training"
-      status: "Situation-dependent autonomy examples"
-      detail: "Intent version 22 varies ongoing tasks, open activity and environmental or inner interests across both modes. The dataset update is recorded separately from adapter evaluation and activation."
+    - label: "Body & firmware"
+      status: "650 g closed-loop V2 hardware complete; 0.8.150 firmware verified"
+      detail: "Waveshare ESP32-P4-WIFI6 + C6, 12× feedback-modified MG90S via PCA9685 and CD74HC4067 mux, 35/20/28/38/55 mm linkages, 1.9\" ST7789 LCD (58 faces), inverted OV5647 camera (10,000 µs cap), 208 Hz LSM6DS3 IMU, ES8311/NS4150B audio with WakeNet9s, and rear 2S + Mini560 + HiLetgo power carrier."
+    - label: "Locomotion & learning"
+      status: "Real-life 200M-step MJX neural walk, closed-loop Stand/Walk, and 349 Freestyle motions"
+      detail: "Trained 200M-step full-CAD MJX policy (56.6–63.7 mm centered stride, upright reverse, 3.5× air-time credit) walking on the physical 650 g V2 robot; closed-loop Stand settles within 2 mm; Freestyle pairs 349 SQLite examples with jam/fall recovery and Big Brother inference."
+    - label: "MetaHuman OS & companion"
+      status: "Unified llama-cpp.service router, single bridge, Full Auto, and Big Brother"
+      detail: "Single :8080 router (Qwen3.5 9B, Environment 0.8B/2B LoRAs, Freestyle Qwen, CPU-only embeddings, 5-min idle unload), multi-host environment-bridge, Standing Persona (Psychotherapist-edited), Semi (5-min drive deltas) & continuous Full Auto, fast-body-event-mode.json (be_ faces), and Big Brother terminal/delegation."
 entries:
-  - title: "Teaching Ainekio to walk: imitation, turns and the execution gap"
+  - title: "Real-life neural walking, 200M-step MuJoCo/MJX gait training, and Big Brother"
+    date: 2026-11-06
+    location: "V2 physical robot, MuJoCo MJX, and MetaHuman OS"
+    mileage: "Real-life neural walk · 200M centered-stride MJX · unified llama.cpp"
+    summary: "First real-life neural network walking run on the 650 g physical V2 robot after fixing tiny-hop and 'scootybooty' reverse-dragging failure modes in a 200M-step MJX policy, plus onboard OV5647 carpet trials, 58 LCD expressions, and MetaHuman OS consolidation."
+    url: "/posts/2026-11-06-carpet-trials-rl-and-big-brother/"
+  - title: "Teaching Ainekio to walk: imitation, turns, and the execution path"
     date: 2026-11-01
-    location: "Neural gait, Body Control and P4 replay"
-    mileage: "Five-command comparison · simulation video · training failures"
-    summary: "Learned foot placements produce forward, reverse and turns. Compare direct simulation with the full execution path, including the left-turn gap and the next connected training run."
+    location: "Neural gait, completed V2 body, and Environment Bridge"
+    mileage: "walk_nominal_v1 · 12-part body STLs · unified multi-host Bridge"
+    summary: "Demonstration-trained five-command neural walking compared between direct simulation and the connected Body Control / P4 executor, alongside the completed 650 g V2 shell exports and consolidated Environment Bridge."
     url: "/posts/2026-11-01-neural-walking/"
-  - title: "Body prototype complete: face panels, servo covers and power packaging"
-    date: 2026-11-01
-    location: "Blender and printed body"
-    mileage: "Completed prototype · twelve STL exports"
-    summary: "The body prototype is done. Latest face, LCD carrier, servo-cover and battery-cradle geometry, with a downloadable snapshot of the revised parts."
-    url: "/posts/2026-11-01-body-prototype/"
-  - title: "MetaHuman: one body connection, quieter health events and context training"
-    date: 2026-11-01
-    location: "Environment Bridge, inference and Intent training"
-    mileage: "Unified Bridge · cancellation · version 22 context examples"
-    summary: "Connection ownership, health-event admission and native inference cancellation, plus autonomy context examples that depend on the situation rather than mode alone."
-    url: "/posts/2026-11-01-metahuman-connections/"
-  - title: "Freestyle runs once: finite motion, recovery and a supported stretch"
-    date: 2026-10-27
-    location: "Freestyle model, feedback and physical review"
-    mileage: "339 training examples · 40/62 reference matches · nine verified targets"
-    summary: "A new finite-event model replaces the continuation loop. Simulated event corrections finish; a separate supported stretch passes physical review, while generic calibration and real recovery remain open."
-    url: "/posts/2026-10-27-finite-motion-and-recovery/"
-  - title: "Freestyle: teaching targets, speed and recovery"
+  - title: "Freestyle motion library, 650 g power carrier, and task continuity"
     date: 2026-10-26
-    location: "Motion model, Body Control and P4"
-    mileage: "Editable library · Q6A inference · Stand continuation"
-    summary: "Compact motion programs, measured shaft arrival and reviewed gesture corrections lead into a 1,261-example Stand training run. Reference agreement improves, but acquiring Stand and finishing compound movements remain difficult."
+    location: "Freestyle model, rear 2S power carrier, and Full Auto"
+    mileage: "SQLite motion library · 2S + Mini560 + HiLetgo · shaft-arrival checks"
+    summary: "Finite Freestyle target programs with 4th-wire shaft-arrival verification and event-driven recovery, the reconciled 650 g assembly with rear two-level 2S power carrier and training stand STLs, and durable Full Auto goal continuity."
     url: "/posts/2026-10-26-freestyle-targets-and-training/"
-  - title: "650 g, revised power packaging and a training stand"
-    date: 2026-10-26
-    location: "Blender, printed parts and firmware"
-    mileage: "2S battery · Mini560 · three-part stand exports"
-    summary: "Current mass, power components, linkage dimensions and support-stand files, alongside the supported Stand/Walk trials and fresh-feedback arrival changes."
-    url: "/posts/2026-10-26-body-power-and-training-stand/"
-  - title: "MetaHuman: keeping an intention through its results"
-    date: 2026-10-26
-    location: "Full Auto, Environment Bridge and execution"
-    mileage: "Existing goals · attributed memory · live initiative tests"
-    summary: "Full Auto can continue recorded work and use its outcomes. Live testing exposes the remaining initiative gap; queue, event publication and on-demand model changes improve the supporting runtime."
-    url: "/posts/2026-10-26-metahuman-continuity/"
-  - title: "Learning from real walking: trials, feedback and a live training loop"
+  - title: "Rebuilt face, ground-repair Stand trial, gait learning, and Fast Body Events"
     date: 2026-10-21
-    location: "P4 motion and Body Control learning"
-    mileage: "Loaded comparisons · separate Walk / Run policies · learning history"
-    summary: "Physical trials demonstrate modest tracking gains, followed by a host learning loop that records normal walking and compares candidates. Camera estimates, transport gaps and unresolved locomotion quality remain explicit."
-    url: "/posts/2026-10-21-learning-from-walking/"
-  - title: "The rebuilt body: a new face, measured standing and powered continuity"
-    date: 2026-10-21
-    location: "Physical assembly, P4 and Body Control"
-    mileage: "October 21 photos · ground-repair retest · installed 0.8.113"
-    summary: "A repaired ground connection restores useful joint feedback and steady measured standing in one trial. New face geometry, final-pass verification and connection-loss handling accompany the rebuilt body; inactivity rest is prepared."
+    location: "Physical V2 assembly, Body Control, and MetaHuman workflows"
+    mileage: "Repaired feedback ground · host gait learning · fast-body-event-mode.json"
+    summary: "Reassembled V2 body with revised red face surround and 1.9\" LCD, ground-repaired closed-loop Stand verification, host Walk/Run policy comparison with depth odometry, and single-call Fast Body Event reactions."
     url: "/posts/2026-10-21-body-face-and-standing/"
-  - title: "Faster body reactions and cleaner recovery in MetaHuman OS"
-    date: 2026-10-21
-    location: "MetaHuman workflows and Environment Bridge"
-    mileage: "One Lightweight call · motion-aware events · durable receipts"
-    summary: "A dedicated tip/shake workflow shortens reaction planning. Activated lifecycle and transport repairs finish admitted event work and preserve it across reconnect, while new offline input is not queued for later delivery."
-    url: "/posts/2026-10-21-reactions-and-recovery/"
-  - title: "Listening to the servos: feedback wiring and a rebuilt chassis"
+  - title: "Fourth-wire servo feedback, CD74HC4067 multiplexer, and 2B specialists"
     date: 2026-10-18
-    location: "V2 / P4 and Body Control"
-    mileage: "Twelve calibrated channels · revised mounts · real build photographs"
-    summary: "Fourth-wire servo readings now reach the P4 through a CD74HC4067 multiplexer. All twelve loose servos are calibrated; revised chassis parts accompany the rebuild. Loaded standing and walking remain to qualify."
+    location: "V2 / ESP32-P4 hardware and MetaHuman model routing"
+    mileage: "12 calibrated feedback channels · revised chassis mounts · 2B Intent/Task LoRAs"
+    summary: "All twelve MG90S servos modified with 4th-wire potentiometer wiper feedback through a CD74HC4067 analog multiplexer, accompanied by revised chassis mounts and deployed Qwen3.5 2B Intent and Task adapters."
     url: "/posts/2026-10-18-servo-feedback-and-chassis/"
-  - title: "MetaHuman update: trained 2B specialists and clearer task outcomes"
-    date: 2026-10-18
-    location: "MetaHuman models, execution and memory"
-    mileage: "2B Intent / Task · experimental 9B autonomy · monitor repair"
-    summary: "New trained specialists, a separate autonomy adapter and activated execution repairs accompany camera and memory tests. The report separates deployed changes from remaining decision, recall and physical qualification work."
-    url: "/posts/2026-10-18-metahuman-models-and-execution/"
-  - title: "A more connected companion: agency, memory and one voice"
+  - title: "Companion systems, goal-directed locomotion, and leveling diagnostics"
     date: 2026-10-15
-    location: "MetaHuman OS and Agency"
-    mileage: "Active Operator · shared model categories · attributed evidence"
-    summary: "Persona becomes the outward speech owner. Desire review gains standing goals, memory provenance and task results; workflow recovery retains events and admitted graph definitions. Grounded companion behavior remains under qualification."
+    location: "MetaHuman OS, Active Task, and Body Control"
+    mileage: "Standing Persona voice owner · locomotion endpoints · 0.8.52 leveling tools"
+    summary: "Standing Persona becomes the single outward speech owner, Active Task connects distance/turn/approach/visual locomotion goals to measured progress and Finish receipts, and Body Control adds level-reference and gyro bias calibration."
     url: "/posts/2026-10-15-companion-systems/"
-  - title: "Giving movement a goal and evidence of arrival"
-    date: 2026-10-15
-    location: "MetaHuman Active Task, Bridge and P4"
-    mileage: "Distance / turn / approach / follow / visual goals · lateral control"
-    summary: "Selected locomotion goals now connect to measurement and Finish evidence. Signed lateral control has an installation record; camera calibration, model qualification and physical arrival accuracy remain open."
-    url: "/posts/2026-10-15-locomotion-goals/"
-  - title: "More expressive motion and clearer self-leveling controls"
-    date: 2026-10-15
-    location: "V2 / P4 and Body Control"
-    mileage: "Revised Walk / Run / Crawl / Crab · seated Wave · gyro tools"
-    summary: "Longer commanded steps, revised bare-leg contact paths, staggered servo pulses and a quicker Wave accompany level-reference and per-leg diagnostics. Firmware installation through 0.8.52 is recorded; loaded performance remains unverified."
-    url: "/posts/2026-10-15-motion-and-leveling/"
-  - title: "Testing 9B learning for autonomy and personality"
-    date: 2026-10-15
-    location: "Remote training and local serving comparisons"
-    mileage: "Two independent diagnostic adapters · no production promotion"
-    summary: "Small autonomy and persona fits completed, but actual serving tests retained objective loss and invented experiences. The production setup was restored; revised Task references now follow the single Persona speech contract."
-    url: "/posts/2026-10-15-learning-diagnostics/"
-  - title: "The body can start a conversation"
+  - title: "Staged startup, IMU self-leveling, body events, and Wi-Fi OTA maintenance"
     date: 2026-10-14
-    location: "Body Control and MetaHuman OS"
-    mileage: "Wake / tipped / rapid movement · configurable reporting"
-    summary: "A dedicated Event Trigger workflow receives body measurements and selects an intention for Environment Mode. Robot Status includes IMU evidence; reaction wording comes from the model. Full wake/stretch reliability remains open."
-    url: "/posts/2026-10-14-body-events/"
-  - title: "Startup, self-leveling and the real leg geometry"
-    date: 2026-10-14
-    location: "P4 body controller and linkage research"
-    mileage: "Staged rise · saved tuning · 566 g / 5 V report"
-    summary: "Boot posture is separate from calibration Home. Body Control gains saved leveling strength, damping and attitude targets; the geometry calculator explores load and reach. Installation is recorded, with loaded correction still unverified."
+    location: "ESP32-P4 firmware, Body Control, and Event Trigger"
+    mileage: "Staged boot rise · LSM6DS3 leveling · SD video & staged OTA"
+    summary: "Staged crouch-to-stand boot sequence, saved LSM6DS3 attitude self-leveling controls, body-event routing for wake/tilt/shake, and concurrent SD video recording with staged Wi-Fi firmware updates."
     url: "/posts/2026-10-14-startup-and-leveling/"
-  - title: "Video on the robot, firmware updates over Wi-Fi"
-    date: 2026-10-14
-    location: "P4 camera, SD storage and Body Control"
-    mileage: "Record / download · staged OTA · robot logs"
-    summary: "Shared JPEGs feed internal-card video; Body Control retrieves clips and logs and stages P4 updates for explicit activation. A 469-second controller run recorded 411 frames without reconnecting."
-    url: "/posts/2026-10-14-recording-and-updates/"
-  - title: "Teaching the Task model what to say and what to move"
-    date: 2026-10-14
-    location: "MetaHuman specialist training"
-    mileage: "Two 0.8B candidates · held-out comparison · no deployment"
-    summary: "Training addresses quoted speech mistaken for physical movement. The latest candidate improves overall reference agreement but misses three historical actions; the existing Task adapter remains in production."
-    url: "/posts/2026-10-14-speech-and-task-training/"
-  - title: "Shell printing, weight changes and a 4 A supply"
+  - title: "Exterior shell printing, YOLOE tracking, and trained specialist workflows"
     date: 2026-10-12
-    location: "Physical build and Blender development"
-    mileage: "Exterior printing · prototype exports · revised grounded motions"
-    summary: "Exterior printing has begun, with more weight modifications and a switch to a 4 A supply. See the current Blender design, explore dated shell and camera-mount files, and compare revised Lay Down and Play Dead paths."
+    location: "Blender shell exports, desktop gateway, and MetaHuman OS"
+    mileage: "27 shell STLs · YOLOE + ByteTrack · 0.8B Intent/Task specialists"
+    summary: "Exterior shell printing begins alongside staged foot placement for Lay Down and Play Dead, live YOLOE/ByteTrack camera target tracking, and trained Qwen specialist routing."
     url: "/posts/2026-10-12-shell-power-and-motion/"
-  - title: "YOLOE: from person detection to selected targets"
-    date: 2026-10-12
-    location: "P4 camera, desktop gateway and MetaHuman"
-    mileage: "Search / select / release · ByteTrack · live chair test"
-    summary: "Real camera observations now reach MetaHuman with query and track IDs. The stationary chair test shows both a weak model-selected region and a successful tighter reference, with sustained camera recovery still unresolved."
-    url: "/posts/2026-10-12-yoloe-tracking/"
-  - title: "Training the intent orchestrator and task manager"
-    date: 2026-10-12
-    location: "MetaHuman OS models and node workflows"
-    mileage: "Qwen 0.8B specialists · tool routing · paired candidate results"
-    summary: "Follow the trained intent/task split, recorded activations and computer-task delegation. Side-by-side results explain why a later goal-planning candidate was rejected despite a better evaluation score."
-    url: "/posts/2026-10-12-trained-specialists/"
-  - title: "Gait journal: lift, place, then lower"
-    date: 2026-10-12
-    location: "Continuing motion experiments"
-    mileage: "8 mm authored lift · seven-second clips · modeled speed comparison"
-    summary: "Lay Down and Play Dead gain staged foot placements and a reverse recovery path in local source. The journal preserves the original end poses and distinguishes sampled geometry from physical qualification."
-    url: "/posts/gait-development/"
-  - title: "Standing, walking and responding to commands"
+  - title: "First physical V2 standing, walking, LCD expressions, and command response"
     date: 2026-10-08
-    location: "Physical twelve-servo robot"
-    mileage: "Owner report · new photograph · carapace still off"
-    summary: "The robot can now stand, walk and respond to commands. The exposed assembly, October 6 comparison, and latest mounting-part exports. Active Operator has not been tested."
+    location: "Physical 12-servo V2 prototype and P4 media stack"
+    mileage: "First untethered V2 Stand & Walk · 58 LCD faces · task/chat split"
+    summary: "The lightened twelve-servo V2 prototype stands, walks, and responds to commands on its MG90S actuators, accompanied by the illuminated wide LCD face renderer and responsive task/conversation routing."
     url: "/posts/2026-10-08-standing-walking/"
-  - title: "A face on the robot: display, camera and voice"
-    date: 2026-10-08
-    location: "P4 display and media"
-    mileage: "Wide LCD · 59 face names · renderer previews · dated device checks"
-    summary: "The physical display is illuminated, and the local expression library keeps growing. Explore actual animated renderer previews alongside the recorded camera, speaker and wake-capture results, with newer local refinements clearly identified."
-    url: "/posts/2026-10-08-face-and-media/"
-  - title: "Responsive commands and connection choices"
-    date: 2026-10-08
-    location: "MetaHuman OS and Body Control"
-    mileage: "Task / conversation split · background interpretation · saved connections"
-    summary: "Request routing and connection changes, plus speech and person-detection work. Model stop/completion failures and physical Active Operator testing remain open."
-    url: "/posts/2026-10-08-responsive-commands/"
-  - title: "Gait journal: the robot can stand and walk"
-    date: 2026-10-08
-    location: "Continuing technical journal"
-    mileage: "October 6 / October 8 comparison · physical prototype photograph"
-    summary: "The latest entry records standing, walking and command response while preserving the failed standing attempt and all earlier linkage experiments. Exact installed revisions and measured gait performance remain to document."
-    url: "/posts/gait-development/"
-  - title: "A lighter rebuild after the standing test"
+  - title: "Compact 35/20/28/38/55 mm linkage, weight reduction, and continuous steering"
     date: 2026-10-06
-    location: "Printed chassis, Blender revisions and power"
-    mileage: "Keep MG90 · remove weight · replace the battery bank"
-    summary: "The printed chassis could not stand on its MG90 servos. Follow the material removal, move to separate batteries and onboard charging boards, and assembly changes while replacement parts are printing. The revised assembly remains untested."
-    url: "/posts/2026-10-06-lighter-rebuild/"
-  - title: "Shorter carriers and the complete motion library"
-    date: 2026-10-06
-    location: "Linkage geometry and motion experiments"
-    mileage: "35 mm carrier · 20 mm crank · 28 mm pickup · 23 motions"
-    summary: "Compare the shared model and compact candidate, see which foot placements changed, and follow all 23 remapped motions in Blender. Reduced Upright reach and the provisional servo-travel mismatch remain explicit."
+    location: "V2 leg geometry, chassis rebuild, and P4 controller"
+    mileage: "35/20/28/38/55 mm linkage · 23 remapped motions · separate battery architecture"
+    summary: "After the heavy power-bank build failed to stand, V2 switches to separate 2S cells and a compact 35/20/28/38/55 mm linkage across all 23 motions, adding continuous steering and portable IMU estimation."
     url: "/posts/2026-10-06-compact-linkage/"
-  - title: "Steering, sensing and keeping the robot connected"
-    date: 2026-10-06
-    location: "P4 motion, gateway and ROS 2"
-    mileage: "Continuous steering · IMU estimator · camera profiles · wireless tests"
-    summary: "The software now includes steering updates, an IMU estimator and expanded camera/recognition interfaces. Desktop ROS checks and a real hotspot connection are recorded separately from live balance control and sustained wireless reliability still to establish."
-    url: "/posts/2026-10-06-steering-sensing-connections/"
-  - title: "Gait journal: physical results and the compact candidate"
-    date: 2026-10-06
-    location: "Continuing technical journal"
-    mileage: "Standing result · side-by-side dimensions · retained earlier experiments"
-    summary: "The newest journal entry connects the failed standing attempt to the revised linkage, records the complete offline library and separates modeled motion from the next physical test."
-    url: "/posts/gait-development/"
-  - title: "Q6A, chassis work, and a more active loop"
+  - title: "Q6A host integration, chassis work, and an active perception loop"
     date: 2026-09-30
-    location: "Body + MetaHuman OS"
-    mileage: "6437b24 · c3f56d4"
-    summary: "Revised v2 geometry, Q6A integration, fresh-frame processing, and saved MetaHuman executions. YOLO and the connected active loop are still being worked out."
+    location: "Radxa Dragon Q6A, gateway, and MetaHuman OS"
+    mileage: "Direct Wi-Fi P4 link · newest-frame camera pipeline · bounded walk updates"
+    summary: "Integrating the Radxa Dragon Q6A with the P4 over Wi-Fi, processing newest camera frames outside the receive loop, and adjusting ongoing walk speed/stride while preserving the action lease."
     url: "/posts/q6a-chassis-and-active-loop/"
-  - title: "Two builds: Wired, Wireless and ROS 2 integration"
+  - title: "Compact 82.5 mm Wireless body, gait leverage revision, and ROS 2 telemetry"
     date: 2026-09-28
-    location: "Build options, software and power"
-    mileage: "Onboard / offboard Q6A · ROS telemetry · local IMU feedback"
-    summary: "The project now has two build directions: onboard Q6A with a planned USB body link, or offboard Q6A over Wi-Fi. Compare their packaging and power budgets, the installed ROS 2 environment, and the remaining work toward responsive gait."
-    url: "/posts/2026-09-28-wired-wireless-ros2/"
-  - title: "Compact Wireless body: battery, face and assembly"
-    date: 2026-09-28
-    location: "Chassis and electronics packaging"
-    mileage: "82.5 mm frame · front-leg relocation · rear carrier relief"
-    summary: "Actual Blender images follow the new build scenes, slimmer tray, LCD carrier and alignment marks. The latest front/rear clearance study keeps the original front carriers and moves those legs forward; body refitting remains in progress."
+    location: "Blender chassis, P4 motion controller, and Q6A"
+    mileage: "82.5 mm frame · lowered gait references · saved Motion speed ×"
+    summary: "Narrowed Wireless chassis with front-leg relocation and LCD carrier, lowered Walk/Run/Crab body references for improved linkage transmission angles, and Wired vs. Wireless Q6A architecture."
     url: "/posts/2026-09-28-compact-body/"
-  - title: "Gait leverage, saved motion speed and feedback planning"
-    date: 2026-09-28
-    location: "Continuing gait journal"
-    mileage: "Revised body references · separate gesture speed · deployment record"
-    summary: "Before/after tables explain the Walk, Run and Crab changes and distinguish continuous gait controls from saved named-motion speed. Offline geometry and settings checks are recorded separately from the local IMU correction loop still to implement."
-    url: "/posts/gait-development/"
-  - title: "V1 and V2 comparison: two new build options"
-    date: 2026-09-28
-    location: "Eight servos versus twelve"
-    mileage: "Controllers · Q6A placement · SHARGE battery · dated ranges"
-    summary: "The comparison now includes Wired and Wireless V2, the new bank and current control changes, while retaining the explicitly dated September 24 motion-range dataset and unmeasured runtime."
-    url: "/posts/v1-v2-comparison/"
-  - title: "Refining the body and fitting the Anker battery"
+  - title: "Red shell refinements, battery packaging study, and continuous P4 gaits"
     date: 2026-09-24
-    location: "Chassis, shell and removable power"
-    mileage: "Revised mounts · 80 mm support placement · 10,000 mAh bank"
-    summary: "The red body gains compact mask mounts and reinforced tabs while the underside is fitted around the Anker bank already on hand. Follow the width changes, battery clearance studies and remaining assembly work, with actual Blender images."
+    location: "V2 shell CAD, gait solver, and ESP32-P4 deployment"
+    mileage: "Walk / Run / Crawl / 6-dir Crab · 33-chapter showcase · 0.7.0 P4 flash"
+    summary: "Reinforced shell mounts and underside battery studies alongside continuous Walk, Run, Crawl, and six-direction Crab planners, 23 expressive gestures, and verified ESP32-P4 application deployment."
     url: "/posts/2026-09-24-body-and-battery/"
-  - title: "Eight servos versus twelve: the current comparison"
-    date: 2026-09-24
-    location: "V1 and V2 side by side"
-    mileage: "Motion ranges · controls · processing · batteries"
-    summary: "Compare the physical V1 and evolving V2, with fresh per-joint range data, ESP32-S3/P4 configuration, the two power arrangements and an explicit record that neither runtime has been measured."
-    url: "/posts/v1-v2-comparison/"
-  - title: "Continuous gaits, reviewed expressions and P4 deployment"
-    date: 2026-09-24
-    location: "Continuing gait journal"
-    mileage: "Walk / Run / Crawl / Crab · 23 finite gestures and postures"
-    summary: "A playable Blender showcase accompanies the new Speed, stride, cadence and Finish controls. The latest entry records revised expressions, six-direction Crab and the September 24 application flash, with the physical tests still ahead."
-    url: "/posts/gait-development/"
-  - title: "Integrating variable gait: stride and motion rate"
+  - title: "Compact leg geometry, narrowed chassis, and independent stride/rate solver"
     date: 2026-09-21
-    location: "Gait development and integration"
-    mileage: "14-second Blender demo · independent stride and rate controls"
-    summary: "The walking sequence lengthens its steps, doubles its cadence, then returns to short steps. Revised linkage, stance planning, and motion data."
-    url: "/posts/gait-development/"
-  - title: "Developing the shell around the mechanism"
-    date: 2026-09-21
-    location: "Body and shell design"
-    mileage: "September 19 iterations · September 20 Blender views"
-    summary: "Actual assembly views follow the face, collar, roof and fin work, including rejected trials and a matched roof before/after comparison."
-    url: "/posts/2026-09-21-shell-design/"
-  - title: "Compact legs: geometry, print faces and horn fit"
-    date: 2026-09-21
-    location: "Leg mechanism and 3D printing"
-    mileage: "22/36/55 mm compact geometry · recorded STL exports"
-    summary: "Earlier and compact legs compared side by side, with the horn-cavity correction and upright print files."
+    location: "Leg mechanism, 3D printing, and numerical gait planner"
+    mileage: "Compact linkage STLs · horn-pocket fix · 14 s variable-gait animation"
+    summary: "Transition to the compact direct-rod linkage with corrected 2.1 mm servo horn pockets, narrowed internal electronics packaging, and a four-leg continuous solver with independent Stride % and Motion rate controls."
     url: "/posts/2026-09-21-compact-leg-design/"
-  - title: "Narrowing the chassis and making room for the face"
-    date: 2026-09-21
-    location: "Chassis and electronics packaging"
-    mileage: "103 to 51.2 mm · board and cable clearance"
-    summary: "The narrow-body revision moves the side assemblies inward and revisits electronics packaging. A later front-panel change moves the camera-cable recess below the face."
-    url: "/posts/2026-09-21-chassis-packaging/"
-  - title: "Gait journal: motion studies and compact-leg probes"
-    date: 2026-09-21
-    location: "Continuing gait experiments"
-    mileage: "September 17 motion integration · September 19 single-leg study"
-    summary: "Dated entries add the motion library and 10/20/30 mm compact-leg probes, with comparison tables, contact assumptions and downloadable results."
-    url: "/posts/gait-development/"
-  - title: "Starting the gait development journal"
+  - title: "First printed V2 leg prototypes and eight-vs-twelve servo kinematics baseline"
     date: 2026-09-15
-    location: "Linkage math and gait development"
-    mileage: "Eight-servo motion baseline · twelve-servo geometry"
-    summary: "A continuing technical journal compares the original robot's stored motion ranges with the new linkage's theoretical travel. The first entry includes the mechanism diagram, nonlinear input/output examples, and downloadable range data. Gait calculations are still ahead."
-    url: "/posts/gait-development/"
-  - title: "From Blender to printed leg prototypes"
-    date: 2026-09-15
-    location: "Leg assembly and 3D printing"
-    mileage: "Prototype photos · September 12–14 design records"
-    summary: "The printed legs have much more expressive movement than the models I have seen online. Three prototype photos, fit problems, revised dimensions, and foot options."
+    location: "Printed 3-DOF leg hardware and kinematic modeling"
+    mileage: "Physical leg photos · 0.30 mm shell clearance · nonlinear FK/IK equations"
+    summary: "First physical 3-DOF leg prints tested across folded and extended poses, mating-allowance and foot-tread refinements, and the mathematical baseline comparing V1's 8 channels with V2's 12-servo coupled linkages."
     url: "/posts/2026-09-15-leg-prototypes/"
-  - title: "Fitting the V2 body together"
-    date: 2026-09-10T12:00:00-07:00
-    location: "Hardware + MetaHuman OS"
-    mileage: "Daily design update · actual Blender renders"
-    summary: "The four-leg Blender assembly now includes a wider chassis, electronics, smoother linkages, revised covers, and a camera/display carrier. Fourteen saved revisions, component dimensions, remaining fit checks, and a MetaHuman OS update."
+  - title: "Assembling the four-leg V2 body and electronics in Blender"
+    date: 2026-09-10
+    location: "Blender CAD assembly and component packaging"
+    mileage: "14 WIP revisions · ESP32-P4, PCA9685 & Q6A models · removable face carrier"
+    summary: "Fourteen iterative Blender assembly steps combining four 3-DOF leg modules, center mounts, board envelopes, rounded servo housings, top/bottom covers, and a removable camera/LCD front carrier."
     url: "/posts/2026-09-10-v2-body-design/"
   - title: "Three ways to drive a knee with short rods"
-    date: 2026-09-09T12:00:00-07:00
-    location: "Leg mechanism research"
-    mileage: "Three Blender variants · modeled motion and collision checks"
-    summary: "A direct rod, a supported relay yoke, and an offset cascade were compared. The relay remains the next research candidate; none met the complete range and pose brief."
+    date: 2026-09-09
+    location: "Leg linkage mechanism research"
+    mileage: "Direct rod · supported relay yoke · offset cascade"
+    summary: "Kinematic and collision comparison of three fixed-servo short-rod knee mechanisms in Blender, establishing the linkage transmission trade-offs that guided the V2 leg."
     url: "/posts/2026-09-09-leg-mechanism-study/"
-  - title: "Giving robot tasks a clear finish line"
-    date: 2026-09-08
-    location: "MetaHuman OS"
-    mileage: "Source repair · controlled workflow tests"
-    summary: "Robot tasks now follow a finite plan with a clear completion condition. Pending ideas remain visible without becoming standing movement instructions. Deployment verification remains."
-    url: "/posts/bounded-autonomy/"
-  - title: "Keeping delayed robot feedback connected"
-    date: 2026-09-08
-    location: "Ainekio gateway and adapter"
-    mileage: "68 recorded software checks"
-    summary: "Delayed feedback stays attached to the original command. Recovery tracks the result without repeating movement. Controlled tests passed; a gateway restart and live testing remain."
-    url: "/posts/gateway-and-simulator/"
-  - title: "Live workflow evidence and goal-context repairs"
-    date: 2026-09-08
-    location: "MetaHuman OS"
-    mileage: "Recorded live run and later source repairs"
-    summary: "A live review found command feedback, images reaching model requests, and acknowledged speech deliveries. It also exposed stale goals. Later repairs retain truthful execution status and connect specialist answers to the waiting request; physical validation of those repairs remains."
+  - title: "September 9 milestone: durable robot workflows, receipt recovery, and V2 plan"
+    date: 2026-09-09
+    location: "MetaHuman OS, gateway adapter, and V1/V2 transition"
+    mileage: "207 durable workflow tests · 68 receipt/gateway checks · V2 12-servo brief"
+    summary: "Consolidating LangGraph SQLite execution checkpoints, non-repeating command recovery across disconnects, finite Desire execution plans, and the initial 12-servo ESP32-P4 V2 specification."
     url: "/posts/archive/2026-09-09-project-status/"
-  - title: "Keeping a request through waits and restarts"
-    date: 2026-09-07
-    location: "MetaHuman OS and Ainekio gateway"
-    mileage: "Local integration work"
-    summary: "MetaHuman’s development code saves what the robot was asked to do, what has finished, and what it is waiting for. This helps a request continue after an interruption. Focused software tests have passed; deployed robot tests remain."
-    url: "/posts/metahuman-integration/"
-  - title: "V2 plan: twelve servos and ESP32-P4"
-    date: 2026-09-06
-    location: "Mechanical design"
-    mileage: "Design note and local leg references"
-    summary: "V2 adds a sideways hip joint to each leg. An OpenHarmony Puppy V2 reference leg will be tested before the chassis and power supply are sized. Prepared movement sequences come first; adaptive balance is deferred."
-    url: "/posts/ainekio-v2/"
-  - title: "V1 parts and wiring corrected"
-    date: 2026-09-02
-    location: "Hardware documentation"
-    summary: "The existing robot’s parts list now identifies its Freenove controller, display, and 1000 mAh battery, and corrects wiring assignments. These V1 details do not determine the planned V2 wiring or power supply."
-    url: "/posts/body-design-and-hardware/"
-  - title: "Local field guide published"
-    date: 2026-08-27
-    location: "Documentation"
-    mileage: "10-article field guide"
-    summary: "A local guide replaced five remote-document pages and earlier fantasy artwork. It covered hardware, firmware, commands, gateway, camera, speech, MetaHuman integration, and autonomy."
-    url: "/posts/archive/2026-09-09-project-status/"
-  - title: "Robot autonomy responsibilities consolidated"
-    date: 2026-08-25
-    location: "MetaHuman OS"
-    mileage: "5191d6fc"
-    summary: "Robot Operator became responsible for when the robot could start an activity. Other software selected actions, carried commands, saved progress, and scheduled jobs. September’s redesign later changed how ongoing requests resume."
-    url: "/posts/bounded-autonomy/"
-  - title: "Wake-word pilot limited after false triggers"
-    date: 2026-08-23
-    location: "Voice"
-    summary: "The pilot sometimes treated ordinary room sounds as the wake phrase. Its detection threshold and test recordings needed more work; an accepted production wake model is still outstanding."
-    url: "/posts/voice-loop/"
-  - title: "Camera profile and motion commands updated"
-    date: 2026-08-04
-    location: "Robot firmware"
-    mileage: "6ad9051"
-    summary: "Firmware gained the corrected OV3660 capture profile and more named motions. The simulator was also updated at the time; that project is now retired."
-    url: "/posts/controller-firmware/"
-  - title: "Five-second walk assets installed"
-    date: 2026-07-31
-    location: "Motion assets"
-    summary: "Prepared walk sequences were shortened to roughly five seconds and installed in the robot’s LittleFS asset storage. Reading them back and comparing digests checked the installed bytes; it did not measure gait quality."
-    url: "/posts/protocol-and-safety/"
-  - title: "Physical audio playback tested"
-    date: 2026-07-29
-    location: "Robot audio"
-    summary: "Pacing audio delivery produced clean audible speech in one test. Logs still showed the speaker queue running empty and faults sending microphone audio, so repeated conversation needed further work."
-    url: "/posts/voice-loop/"
 ---
 
 # Field updates
 
-Ainekio is a four-legged robot connected to MetaHuman OS for conversation and
-decisions. These entries follow its hardware and software development. Each
-entry describes its own date; linked articles explain the components, current
-limitations, and next tests.
+These chronological build entries follow Ainekio's hardware, firmware, locomotion, and [MetaHuman OS](https://github.com/Greg-Aster/metahuman-os) development from the initial eight-servo `ESP32-S3` prototype to the `650 g`, twelve-servo closed-loop `ESP32-P4` quadruped.
 
-For an introduction to personality, memory, autonomy and learning, read
-[Ainekio as a companion](/posts/ainekio-companion/).
-
-See [current project status](/posts/current-status/) for the latest summary,
-or [browse the full article archive](/archive/) for guides and earlier reports.
-
-Latest: [companion systems](/posts/2026-10-15-companion-systems/), [locomotion goals](/posts/2026-10-15-locomotion-goals/), [motion and leveling](/posts/2026-10-15-motion-and-leveling/), and [9B learning diagnostics](/posts/2026-10-15-learning-diagnostics/).
-
-October 14: [body events](/posts/2026-10-14-body-events/), [startup and leveling](/posts/2026-10-14-startup-and-leveling/), [recording and Wi-Fi updates](/posts/2026-10-14-recording-and-updates/), and [Task model qualification](/posts/2026-10-14-speech-and-task-training/).
-
-October 12: [shell, power and motion](/posts/2026-10-12-shell-power-and-motion/), [YOLOE tracking](/posts/2026-10-12-yoloe-tracking/) and
-[trained specialists](/posts/2026-10-12-trained-specialists/).
-
-October 8: [standing and walking](/posts/2026-10-08-standing-walking/),
-[face and media](/posts/2026-10-08-face-and-media/),
-[responsive commands and connections](/posts/2026-10-08-responsive-commands/),
-the [V1/V2 comparison](/posts/v1-v2-comparison/) and
-[gait journal](/posts/gait-development/).
-
-The October 6 [lighter rebuild](/posts/2026-10-06-lighter-rebuild/),
-[compact linkage](/posts/2026-10-06-compact-linkage/) and
-[steering/sensing](/posts/2026-10-06-steering-sensing-connections/) entries retain that earlier observation period.
-
-Earlier [September 30 Q6A and active-loop work](/posts/q6a-chassis-and-active-loop/),
-[September 28 Wired / Wireless and ROS 2](/posts/2026-09-28-wired-wireless-ros2/),
-[compact body and face](/posts/2026-09-28-compact-body/),
-[Anker fit studies](/posts/2026-09-24-body-and-battery/),
-[shell development](/posts/2026-09-21-shell-design/),
-[compact legs and print files](/posts/2026-09-21-compact-leg-design/) and
-[printed-leg photographs](/posts/2026-09-15-leg-prototypes/) remain available
-as dated build records.
+For a structured system introduction and live component summary, start with the [Project Overview & Status](/posts/project-overview/#project-status) and [Ainekio as a Companion](/posts/ainekio-companion/). Technical architecture guides are organized in the [Reference Library](/archive/?kind=reference), and the July–September 2026 eight-servo engineering documents are preserved in the [Original V1 Build Journal](/posts/v1-original-posts/).

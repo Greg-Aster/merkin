@@ -1,15 +1,15 @@
 ---
-title: "Listening and Speech"
+title: "ESP32-P4 Robot Voice Loop: WakeNet9s Wake Word, ES8311 Audio, Whisper STT & Kokoro TTS"
 published: 2026-08-27T08:15:00-07:00
-updated: 2026-10-15
-description: "Microphone capture, wake detection, transcription, speech playback, and the remaining room tests."
+updated: 2026-11-06
+description: "How Ainekio captures wake-gated speech with Espressif WakeNet9s and 5-mode VAD, transcribes with Whisper, synthesizes replies with Kokoro through the Standing Persona, and suppresses self-triggering via external_speech_ms."
 image: "/assets/ainekio/v2/voice-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Voice, Wake Word, Whisper, Kokoro, Audio]
+tags: [Ainekio, Voice, Wake Word, WakeNet9s, Whisper, Kokoro, Audio]
 category: "Perception and Voice"
 draft: false
 lang: "en"
@@ -18,148 +18,34 @@ reading:
   topic: perception
   generation: both
   kind: reference
-  related: ["2026-10-12-yoloe-tracking", "2026-10-08-face-and-media"]
+  next: ainekio-companion
+  related: ["vision-loop", "metahuman-integration", "gateway-and-simulator"]
 ---
 
-# From hearing speech to answering aloud
+Ainekio's voice loop connects onboard acoustic capture and speaker playback on the `ESP32-P4` body to speech-to-text (`Whisper`), conversational reasoning (`Qwen3.5 9B` Standing Persona), and text-to-speech synthesis (`Kokoro`) in MetaHuman OS.
 
-Ainekio records speech through its microphone, sends it to MetaHuman OS for
-transcription and conversation, and plays the response through its speaker.
-The robot handles capture and playback; MetaHuman handles speech-to-text,
-conversation, and speech generation.
+## Onboard V2 audio hardware (`ES8311` + `NS4150B`)
 
-V1 has produced audible playback. Reliable repeated conversation in the room
-still needs testing, including wake detection, interruptions, and reconnects.
-In particular, **no production Ainekio wake-word model has been accepted and
-tracked**, so the initial configuration leaves wake detection unavailable.
+Where the V1 `ESP32-S3` prototype wired an external `INMP441` microphone and `MAX98357A` breakout over shared I2S lines, the V2 `Waveshare ESP32-P4-WIFI6` body uses an integrated low-noise audio path:
 
-## October 15: one outward speech owner
+- **Audio codec & microphone**: Onboard **`ES8311`** low-power mono audio codec sampling at **`16 kHz`, 16-bit mono PCM** (`640 bytes` per `20 ms` frame), buffered in `32 MB` PSRAM.
+- **Speaker amplifier**: Onboard **`NS4150B`** Class-D amplifier driving a chassis-mounted **`20 × 30 mm` `8 Ω 2 W` speaker** enclosed in its dedicated printed holder.
 
-MetaHuman now routes the final reply through Persona and the existing conversation
-speech system. Intent chooses whether a reply is needed; Task selects actions;
-Goal Review supplies assessment rather than another spoken response. Ordered Task
-speech steps have been removed. [The systems report](/posts/2026-10-15-companion-systems/)
-records deployment and the remaining model and playback qualification.
+## Wake-word detection (`WakeNet9s`) and 5-mode VAD
 
-The listening and S3 implementation notes below retain their earlier evidence
-period. This response-owner change does not establish a newly trained wake-word
-model or a successful end-to-end room conversation.
+To support hands-free room interaction without streaming continuous room audio when idle, V2 runs Espressif's embedded speech front-end directly on the `ESP32-P4`:
 
-## Listening: decide when a spoken turn ends
+1. **Espressif `WakeNet9s`**: Replaces the earlier experimental TFLite Micro pilot with **`WakeNet9s`**, providing reliable onboard wake-word detection before opening an upstream utterance stream.
+2. **5 VAD sensitivity modes**: Once woken (or when listening is opened continuously in Body Control), voice activity detection (`VAD`) segments speech from background room and servo noise using **five selectable sensitivity modes** (`0–4`) tunable from the operator dashboard.
+3. **Configurable `15 s` recording window**: Utterance capture supports a configurable maximum recording window of up to **`15 seconds`**, alongside minimum speech and trailing-silence cutoffs, so longer multi-clause instructions are not clipped mid-sentence.
+4. **`external_speech_ms` TTS self-suppression**: Because a compact quadruped chassis couples speaker vibrations toward the microphone, the gateway and firmware coordinate an explicit **`external_speech_ms` suppression window** during and immediately after TTS playback. While speaker PCM is playing—and through the configured `external_speech_ms` tail cooldown—wake detection and VAD capture are suppressed so Ainekio never wakes or transcribes its own voice.
 
-Wake detection and voice activity detection do different jobs. A **wake-word
-model** would recognize a chosen phrase that starts listening. **Voice activity
-detection (VAD)** separates speech from silence and decides when the spoken
-segment, or utterance, has ended.
+## From spoken utterance to Standing Persona reply
 
-The S3 firmware captures microphone audio and applies those listening controls
-when available. The gateway assembles an utterance into a WAV audio file and
-sends it through MetaHuman’s Environment Bridge, the connection for external
-devices. Whisper transcribes the recording into text, which enters the
-conversation as an `audio_utterance` observation.
-
-The VAD model uses a minimum recording window, a silence window to end the
-turn, and an absolute maximum duration. A fixed-size queue in PSRAM, temporary
-board memory, absorbs short network stalls without letting buffering grow
-without limit.
-
-At the end of an utterance, the robot can take a still image with the same ID.
-The Bridge can join that image to the audio before submitting the turn. If the
-camera is unavailable, audio proceeds or fails under its own rules; an image
-is not invented to fill the gap.
-
-## Wake detection: the model is still unfinished
-
-The firmware includes microWakeWord and TensorFlow Lite Micro to run a small
-wake detector locally. It loads an owner-trained model package from LittleFS,
-the robot’s asset filesystem, and checks the package description, expected
-input/output shapes, audio preprocessing, and model ID before reporting
-`wake_ready=true`.
-
-A pilot ran on the physical robot but triggered on sounds that were not the
-wake phrase. Its staged confidence threshold was much lower than the documented
-package default, and the test set had too few **negative examples**: ordinary
-sounds that should leave the detector silent. A threshold sweep provided tuning
-data, not an accepted production model.
-
-The next evaluation needs hours of room audio containing robot speech, servo
-noise, television, fans, and similar-sounding words. It must record detection
-confidence and **rearm behavior**—whether the detector returns to a ready state
-for the next wake phrase after handling one turn.
-
-## Speaking: generating audio is only the first step
-
-MetaHuman uses Kokoro or the configured speech-synthesis service to turn a
-response into audio. The resulting file has size limits, a session identity,
-and an action ID. The Environment Bridge and Ainekio adapter send its PCM
-samples through the gateway to the robot’s speaker queue.
-
-The gateway paces delivery rather than sending the whole file as fast as
-possible. The firmware accepts samples during an explicitly opened
-text-to-speech (TTS) burst and plays them through the I2S audio interface.
-It reports queue overflow, interruption, data outside a burst, and completion.
-
-The adapter returns that playback result to the originating action. Successful
-synthesis, or a `sendText` acknowledgement, does not establish that the speaker
-played the response. September adapter work also keeps an uncertain outcome
-when playback may have started but its final result is missing.
-
-## September progress: recorded speech delivery
-
-The September 8 live review found eight durable TTS deliveries claimed and
-acknowledged on their first attempt, with new outward responses in the
-conversation buffer. This establishes activity through the revised delivery
-path. It is not audible confirmation of every response, a wake-word acceptance
-test, or proof that an entire conversation completed.
-
-Saved speech results let the parent request distinguish a delivered response,
-an interruption, and a failure. Speaking can be one step in a larger objective;
-its result returns to that request so unfinished work can be reviewed.
-
-## What the physical playback test showed
-
-A limited **prebuffer**, which queues some audio before playback starts, and
-small blocks paced relative to send time produced clean audible V1 playback
-in one test. The run still recorded speaker **underruns**, where the playback
-queue empties before the next samples arrive, and separate microphone transport
-faults. Those records matter even when a particular response sounds good.
-
-Full acoustic echo cancellation is absent. The microphone is deliberately
-suspended while the robot speaks, then resumes after a cooldown. This avoids
-listening to its own speaker during that interval, but also limits conversational
-turn-taking while speech is playing.
-
-Small listening and speaking motion cues use the normal calibration, stop,
-Sleep, and fail-safe rules. Battery-voltage warnings do not establish whether
-the motor supply can handle combined motion and audio loads; that needs a
-physical power test.
-
-## Audio format reference
-
-<details>
-<summary className="cursor-pointer py-3">Capture format and firmware details</summary>
-
-The microphone produces **16 kHz, 16-bit mono PCM**, meaning one channel of
-16,000 samples per second, with two bytes per sample. Each 20 ms frame contains
-640 bytes. The gateway packages a completed utterance as WAV for transcription.
-
-A version-pinned neural VAD model applies the minimum, silence, and maximum
-windows. Its PSRAM queue has a fixed memory limit. The wake runtime validates
-the model manifest, tensor shape, audio frontend, and model ID before making
-wake-gated listening available.
-
-</details>
-
-## The next conversation test
-
-MetaHuman’s September changes connect audio and images to conversation context,
-speech delivery, and saved workflow results. The September 8 delivery records
-show part of that path running; the later workflow repairs and repeated acoustic
-performance still need validation. P4 also needs its own microphone, speaker,
-camera, and transport implementation.
-
-The next room test should repeat the whole exchange: wake detection, utterance
-capture and optional image, Whisper transcript, conversation, generated speech,
-gateway delivery, and robot playback result. Record wake rearming, dropped PCM,
-underruns, reconnects, and microphone resumption across multiple turns.
-The [status report](/posts/archive/2026-09-09-project-status/) records the dated progress.
+1. **Utterance assembly & paired vision**: When VAD closes an utterance, the Host Gateway packages the `16 kHz` PCM stream as a WAV file and optionally attaches a contemporaneous `OV5647` camera frame sharing the same `utterance_id`.
+2. **Whisper transcription**: `environment-bridge` delivers the utterance to MetaHuman OS, where `Whisper` transcribes the audio into an `audio_utterance` observation entering `environment-mode.json`.
+3. **Single outward speech owner (Standing Persona)**:
+   - **Orchestrator (Intent)** determines whether the spoken turn calls for a conversational reply, a physical action, or both.
+   - **Task Decisions** dispatches any requested robot commands (`Stand`, `Walk`, `Freestyle`, camera capture, or Big Brother delegation) without injecting robotic step-by-step announcements between movements.
+   - **Standing Persona (`persona/core.json`)** owns the single outward response, combining conversational context and action outcomes into Ainekio's natural voice. (For physical tip, shake, or stall reflexes, `fast-body-event-mode.json` produces brief situational remarks paired with `be_` LCD faces.)
+4. **Paced `Kokoro` TTS playback and settlement**: MetaHuman synthesizes the reply with **`Kokoro` TTS** (earlier Kitten and GPT-SoVITS voice paths are retired). The gateway paces `16 kHz` PCM bursts to the `ESP32-P4` speaker queue, sets `external_speech_ms`, drives synchronized talking expressions on the 1.9-inch `ST7789` LCD, and returns the terminal playback receipt (`done`, `cancelled`, or `outcome_unknown`) to the waiting workflow.

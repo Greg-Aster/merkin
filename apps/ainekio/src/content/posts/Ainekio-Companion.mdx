@@ -1,8 +1,8 @@
 ---
-title: "Ainekio as a Companion: Personality, Memory and Learning"
+title: "AI Companion Robot Architecture: Standing Persona, Episodic Memory & Local LLM Learning"
 published: 2026-10-14
-updated: 2026-10-26
-description: "Meet the robot familiar: how conversation, perception, personality, memory, inner activity and autonomous goals are intended to work together."
+updated: 2026-11-06
+description: "How Ainekio combines a Standing Persona, attributed episodic memory, sleep maintenance, bounded autonomy, and specialist model training into a physical companion."
 image: "/posts/companion-guide/companion-loop.svg"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -22,242 +22,66 @@ reading:
   related: ["project-overview", "metahuman-integration", "bounded-autonomy"]
 ---
 
-## A familiar with a physical body
-
-Ainekio is a four-legged robot familiar being developed as a persistent
-conversational companion. The aim is a recognizable personality that carries
-experience from one interaction into the next: talking, noticing its surroundings,
-expressing itself, choosing activities and learning from what happens.
-
-Its body provides movement, a camera, a microphone, a speaker and a face display.
-**MetaHuman OS** provides the software for identity, conversation, memory,
-perception, decisions and learning. Body Control connects the two and gives the
-owner a manual interface. The original eight-servo V1 and the twelve-servo V2
-have different physical capabilities; the connected body's capabilities determine
-which actions are available.
-
-This guide describes the companion's intended functions and the systems being
-built to support them. The complete companion experience is still in development.
-[Current status](/posts/current-status/) and the dated build reports record what
-has been tested and what remains unresolved.
-
-## October 26 experiments
-
-The [latest Full Auto trials](/posts/2026-10-26-metahuman-continuity/) carry an
-intention through a status result but still do not develop it into sustained
-activity. [Freestyle training](/posts/2026-10-26-freestyle-targets-and-training/)
-works on another part of the companion: turning requests and joint feedback into
-expressive motion. The new model's Stand-acquisition failures remain visible
-alongside the individual gestures that worked.
-
-## What Ainekio is being built to do
-
-| Function | What it means for the companion |
-| --- | --- |
-| Converse | Respond through text or speech, follow the exchange and connect an answer to the relevant situation |
-| Perceive | Use camera observations, recognition and body sensing to inform answers and activities |
-| Move and express | Combine supported postures, gestures, locomotion, speech and face expressions |
-| Remember | Retain useful experiences and retrieve them for later conversation and decisions |
-| Pursue goals | Keep track of an objective, choose steps, examine results and decide what to do next |
-| Reflect and imagine | Produce attributed internal reflections, dreams, daydreams and questions that can contribute to later activity |
-| Learn | Use reviewed interactions and corrections to improve specialist skills and, ultimately, conversational personality |
-
-These functions belong to one companion. For example, an intended request to
-help find an object would connect conversation, visual evidence, selected
-actions and review of the result. The model chooses the steps from the situation;
-there is no fixed search routine for every object. Reliable autonomous search
-and navigation still require their own demonstrations.
-
-## How the software functions connect
-
-An agent coordinates a function; its node workflow connects context, model calls
-and results. A model category assigns a responsibility to each call, while the
-status widget selects the concrete model. Active Operator coordinates the
-selected autonomy mode; Body Event Trigger interprets physical events.
-
-Orchestrator routes the request, Task Decisions selects supported actions,
-Vision handles visual evidence, and Planner handles complex planning. Persona
-owns the outward reply using selected results and applicable assessment.
-Task no longer inserts speech steps between motions. This separates action
-selection from expression while allowing independent work to overlap.
-
-[The October 15 systems report](/posts/2026-10-15-companion-systems/) explains
-all ten categories, the actual activation records and remaining failures.
-
-## Personality and continuity
-
-Ainekio's **persona** describes its identity, background, personality, values and
-goals. Relevant parts can inform how it responds and what it considers doing.
-The aim is consistent character with reactions appropriate to the moment.
-Variation should come from context, experience and model choices.
-
-Personality and memory play different roles. A persona can describe an interest;
-a memory records a particular experience. A generated story or imagined event
-must remain distinguishable from something the robot actually observed.
-
-Three forms of continuity work together:
-
-- **Recent context** keeps the current conversation and relevant internal activity available across successive turns.
-- **Persistent memory** stores experiences beyond that recent context and retrieves useful records later.
-- **Saved task progress** retains an objective, corrections, actions and results while work continues.
-
-Model training is a fourth, slower process: it changes learned behavior. Saving
-a conversation does not immediately train the model, and a trained model does
-not automatically contain the current conversation.
-
-## Inner activity and sleep
-
-MetaHuman includes workflows for reflection, dreams, daydreams, curiosity,
-associative thought and mood review. Reflection examines supplied experience;
-dreams and daydreams produce imaginative material. Some internal activity may
-inform a later conversation or choice without being spoken as it is generated.
-Here, “inner activity” names software-generated content, not a claim of subjective
-experience.
-
-The software's **Sleep Workflow** brings together memory organization, curation,
-eligible personalization training, desire processing, dreaming, persona review
-and memory-index refresh. Which stages run depends on their settings and results.
-This cognitive maintenance is separate from putting the physical body into
-Doze or a low-power state. A body waking up does not mean a software sleep
-cycle has completed.
-
-The intended connection is that useful material remains available and can
-influence later interaction. Recorded tests have found dreams that were saved
-but did not reach the answering model. Generation, storage, retrieval and
-use therefore remain separate parts of the work to verify.
-
-## Choosing when to act
-
-Ainekio has three intended robot autonomy modes:
-
-| Mode | Intended behavior |
-| --- | --- |
-| Reactive | Respond to requests and physical events without independently choosing new activities |
-| Semi-autonomous | Let configured agents and triggers initiate selected functions and activities |
-| Fully autonomous | Choose high-level activities, pursue goals, review desires and use outcomes to decide what comes next |
-
-A **persona goal** is a longer-term developmental or aspirational direction.
-A **desire** is a specific desired outcome managed in Agency. An execution
-objective identifies what a particular task should achieve. An action is one
-step toward that outcome.
-Completing a camera capture, for instance, does not prove that a missing object
-has been found.
-
-Full autonomy is intended to support purposeful, varied activity with continuity.
-Repeated commands without progress do not demonstrate that capability. Ordinary
-conversation also has value on its own; every exchange need not become a
-physical task or a new goal. The [autonomy guide](/posts/bounded-autonomy/)
-explains the operating modes and their development history.
-
-## Carrying a movement through to its outcome
-
-The new [locomotion goal interface](/posts/2026-10-15-locomotion-goals/) describes
-a measured distance, relative turn, target relationship or visual endpoint
-alongside gait controls. The task receives progress evidence and the outcome of
-finishing that movement. A motor setting or completed gait cycle does not prove
-arrival. Installed support is recorded; calibration, model selection and physical
-accuracy still need qualification.
-
-## Reviewing intentions and identity
-
-Desire review can consider standing goals, attributed memories, selected-robot
-status, capabilities, original requests, chosen actions and actual results.
-It can revise an intention's strength or archive it when it is no longer
-warranted. Agency's All Open view includes desires that are not yet active.
-
-The Psychotherapist agent reviews experience for persona changes during manual
-review or Sleep. It is the sole autonomous persona editor; ordinary Desire
-reinforcement no longer creates persona goals. Using the Psychotherapist model
-category for a Desire call does not give that workflow authority to edit persona.
-Manual persona editing remains available.
-
-These implemented boundaries improve what the models can assess. They do not
-establish that every assessment is correct or that a complete learning cycle
-has been qualified.
-
-## Learning skills and learning a personality
-
-The project has two related learning directions. **Specialist training** improves
-functions such as interpreting intent and selecting task actions. **Conversational
-personalization** aims to teach the model Ainekio's identity and expression from
-reviewed companion replies and experience.
-
-The latest recorded production arrangement uses trained **Qwen3.5 2B** Intent
-and Task adapters on a shared Q8_0 base, with **9B** conversation and vision.
-A separate 9B autonomy adapter has an experimental assignment. Roles remain
-configurable; [the latest model report](/posts/2026-10-18-metahuman-models-and-execution/)
-records the comparisons, deployment decisions and remaining regressions.
-
-Today, a persona description supplies identity through context. The longer-term
-aim is a trained conversational persona that expresses that identity without
-needing the full description repeated in every request. Selected memories,
-current observations and instructions would still provide the information needed
-for the situation. This is a development direction, not a claim that the learned
-persona has already been deployed.
+Ainekio is a four-legged robot familiar built as a persistent conversational companion. Its twelve-servo physical body provides locomotion, expressive postures, a camera, a microphone, a speaker, and a 1.9-inch color face LCD; [MetaHuman OS](https://github.com/Greg-Aster/metahuman-os) provides identity, conversation, episodic memory, inner reflection, autonomous agency, and learning.
 
 <figure>
-  <img src="/posts/companion-guide/companion-loop.svg" alt="Intended companion loop: interaction and observations inform decisions and expression; attributed experience is retained for later recall and reviewed learning, which can improve future interactions." width="1000" height="620" loading="lazy" />
-  <figcaption>Information connects the functions over time. Independent work can overlap; this is not a required serial schedule.</figcaption>
+  <img src="/posts/companion-guide/companion-loop.svg" alt="Companion loop connecting interaction, perception, decisions, physical expression, attributed memory, sleep maintenance, and reviewed learning." width="1000" height="620" loading="lazy" />
+  <figcaption>Interaction, physical sensing, and task outcomes feed attributed memory and sleep review, which in turn shape future choices and specialist adapters.</figcaption>
 </figure>
 
-Learning requires review and correction, training, comparison on separate test
-cases, and a decision about deployment. Fluent replies and successful training
-runs are not enough to establish improvement. The
-[Task training report](/posts/2026-10-14-speech-and-task-training/) shows why
-better aggregate scores can still leave a candidate undeployed.
+## Core companion functions
 
-## October 21: learning through the body
+| Function | What it means for Ainekio |
+| --- | --- |
+| **Converse** | Hold natural text or voice conversations through a single **Standing Persona** (`persona/core.json`), grounded in live context and action results |
+| **Perceive** | Combine `OV5647` camera snapshots, YOLOE/depth tracking, `WakeNet9s` speech capture, `LSM6DS3` IMU attitude, and 12-channel servo feedback |
+| **Move & Express** | Pair spoken replies with 58 animated `ST7789` LCD facial expressions, closed-loop gaits, and 349+ Freestyle motion programs |
+| **Remember** | Store conversations, observations, and task outcomes with explicit provenance so real observations stay distinct from imagined content |
+| **Pursue Goals** | Track multi-step objectives across waits and reconnects, or delegate heavy computer tasks to **Big Brother** (`big-brother-tool-mode.json`) |
+| **Reflect & Sleep** | Run background reflection, dreaming, memory curation, and **Psychotherapist** persona review during the software Sleep Workflow |
+| **Learn** | Train specialist LoRA adapters (`Environment 0.8B/2B`, `Freestyle Qwen`) and motor policies (`walk_nominal_v1`, MuJoCo/MJX RL) from reviewed runs |
 
-[Motor-policy learning](/posts/2026-10-21-learning-from-walking/) is now a
-separate practical learning path: Body Control records joint, IMU and camera
-observations, proposes compact Walk/Run policies and compares them on normal
-commands. The P4 executes those policies locally. This is distinct from LLM
-training, and the current automatic comparison has not demonstrated a better gait.
+## Standing Persona and three layers of continuity
 
-[Fast Body Event](/posts/2026-10-21-reactions-and-recovery/) uses the unadapted
-2B base in a configurable Lightweight category for tip/shake speech, with preset
-initial faces and no conversational memory capture. Boot/wake keeps its contextual
-workflow. The body also has a successful ground-repair Stand trial and
-[an updated physical face](/posts/2026-10-21-body-face-and-standing/).
+Ainekio's identity is anchored by a single **Standing Persona** stored in `persona/core.json`. To prevent drift or accidental self-modification during ordinary chat, only the **Psychotherapist** agent (during scheduled Sleep review) or the operator can edit `persona/core.json`. Short-term wants and candidate activities are managed separately by the **Desire Agent**, which adjusts desire strengths based on real outcomes.
 
-## Earlier language-model learning evidence
+Three mechanisms maintain continuity across time:
 
-The subsequent October 15–16 records add the deployed 2B specialists and an
-explicitly experimental autonomy adapter. Both-speaker memory indexing and
-camera freshness have repairs, while recall and visual grounding still fail in
-some live cases. Version 20 memory-routing training data is prepared, not newly
-trained. [Read the October 18 update](/posts/2026-10-18-metahuman-models-and-execution/).
+1. **Active working context**: Keeps the current conversation turn, live `Robot Status` (posture, IMU attitude, battery, feedback health), and recent internal reflections available to the unified `environment-mode.json` graph.
+2. **Attributed persistent memory**: Indexes episodic memories using CPU-only embeddings (`Qwen3 Embedding 0.6B` and `Nomic Embed v1.5` via `llama-cpp.service`) while tagging each record's origin—user conversation, camera observation, task outcome, dream, or reflection—so imagined material is never confused with physical fact.
+3. **Durable task executions**: Checkpoints multi-step goals in SQLite so an ongoing task survives movement waits, camera captures, or network reconnects.
 
-### Earlier diagnostics
+## Inner activity, fast reflexes, and the Sleep Workflow
 
-Two small independent 9B diagnostics for autonomy and conversational personality
-completed on October 15. Serving tests still found lost objectives and invented
-experience; neither adapter qualified for production. The
-[diagnostic report](/posts/2026-10-15-learning-diagnostics/) explains the limited
-coverage and why lower training loss did not establish a better companion.
+MetaHuman OS runs background cognitive workflows alongside live interaction:
 
-## Understanding and steering the system
+- **Fast Body Events (`fast-body-event-mode.json`)**: When the robot is tipped, shaken, or experiences a servo stall, a low-latency Lightweight model call immediately triggers a token-matched `be_` LCD face expression and a brief in-character remark without cluttering long-term conversational memory.
+- **Inner life**: Reflection, curiosity, and daydream workflows examine recent experiences and generate internal thoughts tagged with their provenance.
+- **Sleep Workflow**: Consolidates episodic memory, refreshes embedding indexes, processes open desires, runs dreaming and **Psychotherapist** persona evaluation, and prepares curated datasets for specialist training. Software Sleep is a cognitive maintenance cycle, distinct from putting the physical `ESP32-P4` body into `Doze` or `Rest`.
 
-MetaHuman's node editor exposes workflows, prompts, model roles and results.
-Conversation, memory, persona and agency interfaces let the owner inspect
-different aspects of the companion. Robot Status shows body evidence and task
-state. Body Control supplies manual motion, sensing, audio and maintenance
-controls for the selected robot.
+## Autonomy modes: Reactive, Semi, and Full Auto
 
-Processing can be distributed between the body, a nearby computer and more
-powerful compute. The body retains motor timing and peripheral control while
-MetaHuman handles high-level cognition. Seamless transfer of an ongoing goal
-between installations remains a separate development problem.
+Ainekio's **Active Operator** supports three operating modes, detailed in [Robot Autonomy Modes](/posts/bounded-autonomy/):
 
-The test of this project is the connected experience: useful conversation,
-appropriate action, remembered context and meaningful improvement. The current
-work still includes reliable recall, sustained autonomy, voice delivery, correct
-motion selection and physical validation. Individual working components are
-progress toward that experience.
+| Mode | Behavior |
+| --- | --- |
+| **Reactive** | Responds to user requests, wake-word speech, and physical body events (`fast-body-event-mode.json`) without self-initiating new activities |
+| **Semi Mode** | Evaluates signed drive deltas every **5 minutes**, initiating bounded activities or reflections when internal drives cross their threshold |
+| **Full Auto Mode** | Continuously selects high-reasoning activities (`Qwen3.5 9B`)—never idling—by chaining perception, movement, memory review, Desire plans, and Big Brother delegations |
 
-This guide adapts the purpose and functional descriptions in the local **Ainekio
-Robot Bible**, reviewed through the October 19–20 records and inspected on October 21, 2026. The
-[original source record](/posts/companion-guide/sources.json) and
-[October 21 snapshot](/posts/2026-10-21-progress/sources.json) identify the evidence.
-For dated results, follow the [build journal](/updates/) and
-[development tracker](/project-guide/).
+## Learning through models and the physical body
+
+Improvement happens across two complementary tracks, both served through the unified `llama-cpp.service` router (`:8080`, on-demand loading with 5-minute idle unload):
+
+1. **Cognitive & Motion Specialists**:
+   - **Orchestrator & Task LoRAs (`Environment 0.8B / 2B`)**: Per-request LoRA adapters trained on curated situation-dependent datasets (including ongoing task continuity, cancellation, and tool delegation) select actions and route context cleanly.
+   - **Freestyle Motion Model (`Freestyle Qwen`)**: Trained against a 349-example SQLite motion library in Body Control to translate natural-language gesture requests and jam/fall recovery prompts into checked 12-servo target sequences.
+2. **Embodied Locomotion Learning**:
+   - **Closed-loop gait & neural policies**: Body Control logs 12-channel potentiometer feedback, `208 Hz` IMU telemetry, and visual odometry to evaluate `50 Hz` neural policies (`walk_nominal_v1`) on physical carpet and train quadruped reinforcement-learning policies (Walk in the Park DroQ, Microduck RL, Pupper V3, and full-CAD Ainekio MJCF in JAX/Brax/MJX). See the [Gait Development Guide](/posts/gait-development/).
+
+## Steering and inspecting the companion
+
+Operators can interact with and inspect Ainekio through two connected web surfaces:
+
+- **MetaHuman OS UI ([`https://mh.ainek.io`](https://mh.ainek.io))**: Exposes the conversation view, `TerminalChat.svelte` (**Big Brother** terminal), cognitive node editor, memory inspector, Standing Persona & Agency dashboards, and live `Robot Status`.
+- **Body Control (`Master/gateway`)**: Provides direct manual posture and gait controls, 12-channel servo feedback calibration curves, IMU self-leveling tuning, the 349-example Freestyle editor, camera/audio controls, and over-the-air `ESP32-P4` firmware management.

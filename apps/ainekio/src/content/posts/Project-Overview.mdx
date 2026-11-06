@@ -1,8 +1,8 @@
 ---
-title: "Ainekio: Project Overview"
+title: "Ainekio: Open-Source 12-Servo ESP32-P4 Quadruped Robot & MetaHuman OS Overview"
 published: 2026-08-27T09:45:00-07:00
-updated: 2026-11-01
-description: "Meet Ainekio, a robot familiar combining conversation, personality, memory, perception and physical action, with two body designs and a continuing build journal."
+updated: 2026-11-06
+description: "System overview and architecture guide for Ainekio, a four-legged robot companion combining a 3D-printed 12-servo closed-loop body with MetaHuman OS."
 image: "/assets/ainekio/2026-10-12-refresh/render-overview.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -19,163 +19,88 @@ reading:
   generation: both
   kind: reference
   next: ainekio-companion
-  related: ["ainekio-v2", "v1-original-posts", "v1-v2-comparison"]
+  related: ["ainekio-v2", "metahuman-integration", "gait-development"]
 ---
+import ProjectStatus from '../../components/ProjectStatus.astro'
 
-# Ainekio
+Ainekio is a quadruped robot companion combining a 3D-printed, twelve-servo closed-loop body with [MetaHuman OS](https://github.com/Greg-Aster/metahuman-os) for conversation, persistent memory, perception, personality, and autonomous task planning. The physical body handles real-time motor control, joint-position verification, inertial sensing, vision capture, wake-word listening, speaker playback, and facial expression, while MetaHuman OS and the host gateway coordinate cognition, locomotion learning, and long-horizon goals.
 
-Ainekio is my four-legged robot familiar project. The body has a camera,
-microphone, speaker, and display. [MetaHuman OS](https://github.com/Greg-Aster/metahuman-os)
-handles conversation, memory, perception, and task planning; the body controller
-handles motors and movement limits.
+<ProjectStatus />
 
-## Project intent
+## What Ainekio is built to do
 
-Ainekio is being built as a persistent companion with a recognizable personality
-and continuity between interactions. The aim is to converse, notice the
-surroundings, remember useful experiences, express itself, choose activities
-and improve through reviewed learning. A request should carry through actions
-and corrections without losing its objective.
+Ainekio is designed as a persistent robot familiar with continuity across interactions:
 
-## Understanding the companion
-
-| Function | Its part in Ainekio |
+| Function | Role in the system |
 | --- | --- |
-| Conversation and personality | A consistent identity, with words and expression appropriate to the situation |
-| Perception and expression | Camera, listening and body sensing connected to speech, faces and supported movement |
-| Memory | Recent context and longer-term experiences that can inform later interactions |
-| Goals and autonomy | Respond to requests, act on configured triggers, or choose and pursue activities according to the selected mode |
-| Inner activity | Reflection, dreams, daydreams and curiosity, retained as internal content with its origin identified |
-| Learning | Review experience and corrections, train specialist skills or conversational personality, then evaluate the changes |
+| **Conversation & Standing Persona** | Maintain a consistent identity (`persona/core.json`), converse naturally, and ground replies in current context and action outcomes |
+| **Perception & Expression** | Connect camera observations, wake-gated speech, and IMU/joint sensing to spoken responses, 58 animated LCD faces, and physical posture |
+| **Persistent Memory** | Retain episodic context and long-term experiences with clear source attribution, distinguishing direct observation from internal imagination |
+| **Locomotion & Freestyle Motion** | Execute closed-loop standing, continuous gaits (`Walk`, `Run`, `Crawl`, `Crab`), neural policies, and 349+ model-generated Freestyle motion programs |
+| **Bounded Autonomy** | Operate in Reactive, Semi-Autonomous (drive-delta interval), or Full Auto (continuous high-reasoning activity selection) modes |
+| **Delegation & Review** | Escalate complex coding, diagnostics, or desktop workflows to Big Brother (`TerminalChat.svelte` / `big-brother-tool-mode.json`) and review experience during Sleep |
 
-These describe the intended connected experience. Components are implemented
-and under test, but reliable recall, sustained autonomy and the complete
-learning loop remain unfinished. [Meet Ainekio as a companion](/posts/ainekio-companion/)
-for a plain-language explanation of how the functions fit together; the
-[status page](/posts/current-status/) records the latest results.
+## System architecture at a glance
 
-## The two builds
+The runtime is divided into three cooperating layers so hard real-time motor and safety loops never block on language-model inference:
 
-| | Original V1 | Current V2 |
+### 1. Onboard Body (`Slave/firmware/esp32p4`)
+
+- **Compute & Wireless**: `Waveshare ESP32-P4-WIFI6` (dual-core 360 MHz RISC-V, 32 MB PSRAM, 32 MB flash) paired with an onboard `ESP32-C6` Wi-Fi 6 / Bluetooth coprocessor over SDIO.
+- **Actuation & Closed-Loop Feedback**: Twelve modified Miuzei `MG90S` servos (three per leg: shoulder roll, upper-carrier pitch, and five-bar/four-bar knee linkage crank) driven by a `PCA9685` 16-channel PWM controller, with 4th-wire potentiometer wiper feedback read through a `CD74HC4067` 16-channel analog multiplexer.
+- **Face & Vision**: 1.9-inch `ST7789` IPS LCD (`320 × 170`, 58 expression animations) and an `OV5647` MIPI-CSI camera mounted in the front face carrier with 180° rotation and a `10,000 µs` motion-safe exposure ceiling.
+- **Inertial & Audio Peripherals**: `LSM6DS3` 6-axis IMU sampled at `208 Hz` for attitude estimation, self-leveling, and tip/shake detection; `ES8311` codec and `NS4150B` amplifier with onboard microphone, speaker, and Espressif `WakeNet9s` wake-word detection.
+- **Mass & Power**: `650 g` assembled mass in a `245.85 × 182.79 × 109.06 mm` envelope, powered by a rear two-level carrier housing a `2S` (`8.4 V`) Li-ion pack, `Mini560` `5 V / 5 A` step-down converter, and `HiLetgo` 2S USB-C boost charger.
+
+### 2. Host Gateway & Body Control (`Master/gateway`)
+
+- Runs on the desktop workstation or an offboard/onboard **Radxa Dragon Q6A** (`QCS6490`).
+- Maintains the authenticated `protocol-v1` WebSocket session with the robot, manages action receipts and connection epochs, streams camera frames and PCM audio, and serves the **Body Control** operator dashboard.
+- Hosts the SQLite **Freestyle** motion library (`349` curated examples), gait telemetry logger, neural policy streamer (`50 Hz`), YOLOE/ByteTrack object tracker, and OpenGV / MoGe visual depth odometry tools.
+
+### 3. MetaHuman OS Brain (`metahuman-os`)
+
+- **Unified Model Router**: A single `llama-cpp.service` instance on `:8080` (`load-on-startup = false`, 5-minute idle unload) serving `Qwen3.5 9B` (conversation/vision/autonomy), `Environment 0.8B/2B` specialists with per-request LoRAs, `Freestyle Qwen` motion generation, and CPU-only embedding models (`Qwen3 Embedding 0.6B` and `Nomic Embed v1.5`).
+- **Single Bridge & Unified Graph**: One consolidated `environment-bridge` with multi-host following feeds observations into the unified `environment-mode.json` cognitive graph.
+- **Identity & Agency**: A single **Standing Persona** (`persona/core.json`, edited autonomously only by the Psychotherapist agent) works alongside the **Desire Agent** (which adjusts desire strengths), `fast-body-event-mode.json` (`be_` token-matched facial expressions and brief reactions on tip/shake/stall), and **Big Brother** (`big-brother-tool-mode.json` and `system-code-review`) for asynchronous computer tasks.
+- **Web & Operator Surface**: Accessible locally or via the hosted static interface at `https://mh.ainek.io`.
+
+## The two hardware generations
+
+| Feature | V1 (Eight-Servo Baseline) | V2 (Twelve-Servo Closed-Loop Body) |
 | --- | --- | --- |
-| Servos | Eight MG90S; two per leg | Twelve; three per leg |
-| Controller | ESP32-S3 | ESP32-P4 |
-| Mechanics | Sesame-derived body | Redesigned chassis and compact linkages with sideways leg placement |
-| Motion | Scripted poses and sequences | Freestyle-generated targets, measured arrival, shared gait solver and a retained manual motion library |
+| **Actuators** | 8× MG90S (2 per leg, open-loop PWM) | 12× MG90S (3 per leg, 4th-wire analog position feedback via `CD74HC4067`) |
+| **Controller** | Freenove `ESP32-S3-WROOM CAM` (`N16R8`) | `Waveshare ESP32-P4-WIFI6` + `ESP32-C6` + `PCA9685` |
+| **Mechanics** | Open Sesame-derived frame, planar legs | Enclosed shell (`245.85 × 182.79 × 109.06 mm`), hip roll + `35/20/28/38/55 mm` linkage legs |
+| **Display & Camera** | 0.96" `SSD1306` OLED + `OV3660` | 1.9" `ST7789` color LCD (58 expressions) + `OV5647` MIPI-CSI |
+| **Inertial & Audio** | External `INMP441` + `MAX98357A`, no IMU | `LSM6DS3` 208 Hz IMU + `ES8311` / `NS4150B` + `WakeNet9s` |
+| **Locomotion & Control** | 38 fixed `.amot` keyframe sequences | Closed-loop `Stand`/`Walk`, continuous solver, 349-example Freestyle library, 50 Hz neural policies, MuJoCo/MJX RL |
 
-V1 remains supported. [Design history](/project-guide/#original-ainekio-and-ainekio-v2)
-and [V1/V2 comparison](/posts/v1-v2-comparison/).
+V1 remains documented and supported alongside V2. See the [V1 vs. V2 comparison](/posts/v1-v2-comparison/) for detailed mechanical, electrical, and motion data.
 
-## November 1
+## End-to-end command and perception path
 
-The body prototype is complete, and walking is the main development focus.
+1. **Observation**: Spoken utterances (via `WakeNet9s` and 5-mode VAD), camera snapshots, or physical body events (`tipped`, `shaken`, `jammed`, `boot`) arrive at the Host Gateway and flow through `environment-bridge` into MetaHuman OS.
+2. **Cognition & Routing**: The Work Coordinator runs `environment-mode.json` (or `fast-body-event-mode.json` for rapid physical reflexes). Specialist adapters select semantic robot commands, locomotion goals, Freestyle target programs, or Big Brother delegations while the Standing Persona owns outward speech.
+3. **Closed-Loop Execution**: The gateway dispatches checked commands to the `ESP32-P4`. Firmware enforces joint calibration and Cartesian workspace boundaries (`0.8.150`), drives the `PCA9685`, verifies physical shaft arrival via the `CD74HC4067` multiplexer, and applies `LSM6DS3` attitude corrections.
+4. **Settlement & Review**: Correlated action receipts, shaft-arrival telemetry, and fresh post-action camera frames return to the waiting workflow so Goal Review and the Desire Agent can verify physical outcomes before advancing.
 
-- [Neural walking](/posts/2026-11-01-neural-walking/): demonstration-based training, five-command measurements, simulation footage and the gap between direct and P4-connected execution.
-- [Finished body and revised parts](/posts/2026-11-01-body-prototype/): face panels, LCD mounting, servo cover and battery/power-cradle exports.
-- [MetaHuman connections and context](/posts/2026-11-01-metahuman-connections/): one body Bridge, health-event admission, native cancellation and situation-dependent training examples.
+## Guide to the reference library
 
-## October 27
+| Guide | Focus |
+| --- | --- |
+| [Ainekio as a Companion](/posts/ainekio-companion/) | Standing Persona, memory attribution, sleep maintenance, autonomy modes, and specialist learning |
+| [Ainekio V2 Hardware & Assembly](/posts/ainekio-v2/) | 650 g mechanical architecture, `35/20/28/38/55 mm` linkages, 2S power carrier, wiring diagrams, and STL downloads |
+| [MetaHuman OS Integration](/posts/metahuman-integration/) | Unified `llama-cpp.service` router, `environment-mode.json`, durable executions, and Big Brother delegation |
+| [Robot Autonomy Modes](/posts/bounded-autonomy/) | Reactive, Semi Mode (5-min drive deltas), Full Auto Mode, Desire lifecycle, and `fast-body-event-mode.json` |
+| [Gait Development & Locomotion](/posts/gait-development/) | Linkage kinematics, closed-loop `Stand`/`Walk`, Freestyle library, 50 Hz neural policies, carpet trials, and Pupper V3 / MJX RL |
+| [Robot Commands & Safety](/posts/protocol-and-safety/) | `protocol-v1` lifecycle, Cartesian workspace projection, shaft-arrival verification, and receipt recovery |
+| [Gateway & Body Control](/posts/gateway-and-simulator/) | Host gateway architecture, servo feedback calibration, gait learning dashboard, and OTA maintenance |
+| [Camera & Visual Feedback](/posts/vision-loop/) | 1.9" ST7789 face LCD, OV5647 motion-safe capture, YOLOE tracking, and OpenGV / MoGe depth odometry |
+| [Listening & Speech](/posts/voice-loop/) | Espressif WakeNet9s, 5 VAD sensitivity modes, 15 s capture window, Whisper STT, Kokoro TTS, and `external_speech_ms` suppression |
+| [V1 vs. V2 Comparison](/posts/v1-v2-comparison/) | Side-by-side comparison of the 8-servo ESP32-S3 baseline and 12-servo ESP32-P4 robot |
+| [Original V1 Build Journal](/posts/v1-original-posts/) | Preserved July–September 2026 Google Docs design notes, S3 pin maps, and early virtual bridge experiments |
 
-[Finite motion and recovery](/posts/2026-10-27-finite-motion-and-recovery/):
-a new workstation model runs each program once, with actual body events handling
-recovery. A supported stretch verified all nine targets. Generic stretch
-calibration, release choices and physical recovery remain in development.
+For chronological engineering milestones and test evidence, browse the [Field Updates](/updates/) feed.
 
-## October 26
-
-- [Freestyle motion training](/posts/2026-10-26-freestyle-targets-and-training/): editable examples, compact Q6A inference, measured shaft arrival and the latest Stand model's results.
-- [Body, power and training stand](/posts/2026-10-26-body-power-and-training-stand/): 650 g assembled mass, 2S battery/charger packaging, current linkage dimensions and downloadable stand parts.
-- [MetaHuman continuity](/posts/2026-10-26-metahuman-continuity/): existing intentions and results stay connected; live Full Auto trials still stop short of sustained initiative.
-
-Individual lift and sway corrections passed review. Reliable loaded standing,
-floor walking and autonomous activity remain the next experiments.
-
-## October 21
-
-- [Learning from real walking](/posts/2026-10-21-learning-from-walking/): loaded comparisons, host recording and optimization, separate Walk/Run policies, experimental visual progress and navigable learning history.
-- [The rebuilt body](/posts/2026-10-21-body-face-and-standing/): new face/shell photographs, a successful ground-repair Stand trial, final-pass feedback and powered motion continuity.
-- [Faster reactions and recovery](/posts/2026-10-21-reactions-and-recovery/): a dedicated one-call tip/shake workflow, motion-aware events and repaired completion/reconnect behavior.
-
-Walking quality, camera distance accuracy, grounded interpretation and reliable
-recall remain under development. [The gallery](/gallery/) now includes three
-October 21 photographs of the assembled robot.
-
-## October 18
-
-- [Feedback servos and a revised chassis](/posts/2026-10-18-servo-feedback-and-chassis/): twelve modified servos and a multiplexer provide measured position alongside PWM commands. Calibration is complete; loaded standing and walking still need qualification.
-- [MetaHuman models and execution](/posts/2026-10-18-metahuman-models-and-execution/): trained 2B specialists, experimental 9B autonomy, activated monitor and task repairs, and current vision/recall limitations.
-- [See the robot](/gallery/): real photographs and videos, with dated CAD and motion studies clearly separated from the physical build.
-
-## October 15
-
-- [Companion systems](/posts/2026-10-15-companion-systems/): shared model categories, Active Operator, attributed memory, evidence-aware Desire review and a single Persona reply owner.
-- [Locomotion goals](/posts/2026-10-15-locomotion-goals/): distance, turn, approach, follow and visual endpoints use measured progress and the same gait's Finish result; signed lateral support is installed, with physical accuracy still unqualified.
-- [Motion and leveling](/posts/2026-10-15-motion-and-leveling/): revised Walk, Run, Crawl, Crab and seated Wave; level-reference, per-leg feedback and stationary gyro calibration controls. Installation is recorded through 0.8.52.
-- [9B learning diagnostics](/posts/2026-10-15-learning-diagnostics/): independent autonomy and persona fits completed; neither qualified for production after actual serving comparisons.
-
-Task no longer inserts spoken steps between movements. Persona supplies the
-outward reply using selected task results. Grounded autonomous outcomes,
-reliable dream recall and loaded performance of the revised motions remain open.
-
-## October 14
-
-- [Body events](/posts/2026-10-14-body-events/): wake, tilt and rapid movement reach a dedicated model workflow; thresholds and the rapid-event interval are editable in Body Control.
-- [Startup and self-leveling](/posts/2026-10-14-startup-and-leveling/): staged rise, saved response controls, a geometry calculator, and the October 13 report of 566 g at 5 V.
-- [Recording and Wi-Fi maintenance](/posts/2026-10-14-recording-and-updates/): SD video, downloads, staged firmware updates and robot logs, with a successful short controller run.
-- [Task model qualification](/posts/2026-10-14-speech-and-task-training/): two candidates were tested against the earlier speech-step contract and were not deployed. The October 15 report records the subsequent contract revision.
-
-Reliable wake/stretch behavior and loaded self-leveling are still unfinished.
-
-## October 12
-
-I have begun printing the exterior shell, made further weight modifications,
-and switched to a **4 A power supply**. Current work:
-
-- [Shell, power, and motion](/posts/2026-10-12-shell-power-and-motion/): Blender revisions, 27 prototype STLs, and revised Lay Down / Play Dead foot placement.
-- [YOLOE tracking](/posts/2026-10-12-yoloe-tracking/): a stationary chair retained one track across eight frames; camera-stream recovery still needs work.
-- [Trained specialists](/posts/2026-10-12-trained-specialists/): Qwen 0.8B intent/task models, node workflows, and a rejected goal-planning candidate.
-
-The lighter robot **stood, walked, and responded to commands on October 8**.
-The [build photograph](/posts/2026-10-08-standing-walking/) shows it without
-the carapace. Later Active Operator component checks are recorded in the October 15 report; complete autonomous behavior remains unqualified. The roughly 20% weight and
-lifting-force improvements from the rebuild are estimates. The later owner-reported
-mass is 566 g; loaded gait performance and endurance still need measurement.
-
-I dropped the heavy **10,000 mAh battery bank** on October 6 in favor of separate
-batteries and charging boards. The final battery arrangement is still open.
-
-## Wired and wireless
-
-**Wireless** is the current priority: Q6A offboard over Wi-Fi. **Wired** keeps the
-Q6A on the robot with a native USB connection to the P4.
-
-The P4 now supplies live IMU evidence and configurable local balance correction.
-Loaded leveling and the robot ROS 2 adapter remain unqualified. A dated short
-Wi-Fi recovery run passed; sustained wireless reliability still needs testing.
-
-## Command path
-
-1. MetaHuman's Work Coordinator admits the request and selects a supported action.
-2. The Environment Bridge passes it through Ainekio's adapter and authenticated gateway.
-3. The controller checks movement limits and executes the command.
-4. Results return to MetaHuman's task workflow.
-
-Workflows retain requests, corrections, and results across waits and restarts.
-Gateway recovery reconnects delayed results to their original command without
-repeating movement. The September live run exposed stale goals; subsequent
-repairs have controlled-test coverage and still need connected-system testing.
-
-## Build notes
-
-- [Gait journal](/posts/gait-development/): geometry, ranges, motion data, and walking experiments.
-- [V2 parts and assembly](/posts/ainekio-v2/): component revisions, print exports, and prototype photos.
-- [V1 hardware](/posts/body-design-and-hardware/) and [S3 firmware](/posts/controller-firmware/).
-- [MetaHuman integration](/posts/metahuman-integration/), [autonomy](/posts/bounded-autonomy/), [vision](/posts/vision-loop/), and [voice](/posts/voice-loop/).
-- [Current status](/posts/current-status/) and [development tracker](/project-guide/).
-
-V1 began with [Sesame](https://github.com/dorianborian/sesame-robot); V2 began by
-evaluating OpenHarmony Puppy leg geometry. The unsuccessful simulator experiment
-is retired; its [July notes](/posts/archive/motion-systems/) remain in the journal.
-
-[Robot source](https://github.com/Greg-Aster/Ainekio-bot) ·
-[MetaHuman OS source](https://github.com/Greg-Aster/metahuman-os)
+[Robot repository (`Ainekio-bot`)](https://github.com/Greg-Aster/Ainekio-bot) · [Brain repository (`metahuman-os`)](https://github.com/Greg-Aster/metahuman-os)

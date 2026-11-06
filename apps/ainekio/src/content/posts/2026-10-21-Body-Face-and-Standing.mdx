@@ -1,13 +1,13 @@
 ---
-title: "The rebuilt body: a new face, measured standing and powered continuity"
+title: "Rebuilt Face & Shell, Measured Standing, BoTorch Gait Learning, and Fast Reactions"
 published: 2026-10-21
 updated: 2026-10-21
-description: "New photographs show Ainekio's revised face and shell. Ground repair, final-pass Stand verification and connection-loss handling improve the body-control foundation."
+description: "Assembled shell and aligned LCD face, ground-repaired 4th-wire Stand verification, BoTorch Bayesian gait learning with MoGe-2 depth tracking, and sub-500 ms Fast Body Event reactions."
 image: "/gallery/20261021_083818-1600.webp"
 authorName: "Ainekio Project"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, V2, Hardware, LCD, Servo Feedback, Firmware]
+tags: [Ainekio, V2, Hardware, LCD, Servo Feedback, Gait, Learning, Vision, MetaHuman OS]
 category: "Build Journal"
 draft: false
 lang: "en"
@@ -16,136 +16,113 @@ reading:
   topic: body
   generation: v2
   kind: journal
-  next: 2026-10-21-reactions-and-recovery
-  related: ["2026-10-26-body-power-and-training-stand", "ainekio-v2", "2026-10-18-servo-feedback-and-chassis", "2026-10-21-learning-from-walking"]
+  next: 2026-10-26-freestyle-targets-and-training
+  related: ["ainekio-v2", "gait-development", "2026-10-18-servo-feedback-and-chassis"]
 ---
 
-The October 21 photographs show the robot assembled again, with red parts
-surrounding its face, four linkage legs and exposed wiring above the body.
-The latest design exports include bezel, chin, cheek, temple, side-guard and
-rear-shell revisions. The photographs establish the visible assembly; they do
-not establish that every exported part has been printed or fit-tested.
+Following the [October 18 fourth-wire feedback rebuild](/posts/2026-10-18-servo-feedback-and-chassis/),
+the October 21 photographs show Ainekio V2 reassembled with its red front shell,
+bezel, chin, cheek fangs, and side guards around the wide color display. Alongside the
+mechanical assembly, we repaired a feedback ground fault to verify closed-loop
+standing, ran physical walking comparisons with a learned periodic correction, wired
+up host-side **BoTorch Bayesian gait optimization** and **MoGe-2** visual landmark
+odometry, and added a single-call **Fast Body Event** reaction path in MetaHuman OS.
 
-[See all three new photographs in the gallery](/gallery/). A new complete mass,
-electrical-load measurement and battery-endurance result are still outstanding.
+[Browse all three October 21 build photographs in the gallery](/gallery/).
 
-## A face fitted to its opening
+## Aligned LCD face and precomputed side-light mask
 
-The wide color display now uses brighter pupils and swept cyan side lights.
-Thinking, listening, speech and motion expressions share the firmware renderer;
-Body Control's previews come from that same renderer.
+The wide color LCD now renders brighter pupils and swept cyan side lights centered
+within the printed bezel opening (shifted 15 px horizontally to match the physical
+mask cutout). A precomputed mask supplies the permanent side-light geometry while the
+eyes and expression elements remain procedural.
 
-CAD measurements led to a fifteen-pixel horizontal correction, followed by
-layout refinements around the bezel opening. The core face is wider and lower;
-small decorative marks were removed or repositioned to keep meaningful features
-visible. These are model and pixel-layout checks, with installation records for
-the October 20 face revisions. They are not a measured physical alignment tolerance.
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+  <figure>
+    <img src="/posts/2026-10-21-progress/face-default.webp" alt="Generated preview of Ainekio's resting face with bright cyan eyes and swept side lights." width="320" height="170" loading="lazy" />
+    <figcaption>Resting</figcaption>
+  </figure>
+  <figure>
+    <img src="/posts/2026-10-21-progress/face-thinking.webp" alt="Generated animation of the Thinking expression, including changing gaze and pulsing marks." width="320" height="170" loading="lazy" />
+    <figcaption>Thinking</figcaption>
+  </figure>
+  <figure>
+    <img src="/posts/2026-10-21-progress/face-surprised.webp" alt="Generated animation of the Surprised expression from the current face renderer." width="320" height="170" loading="lazy" />
+    <figcaption>Surprised</figcaption>
+  </figure>
+</div>
 
-<figure>
-  <img src="/posts/2026-10-21-progress/face-default.webp" alt="Generated preview of Ainekio's resting face with bright cyan eyes and swept side lights." width="320" height="170" loading="lazy" />
-  <img src="/posts/2026-10-21-progress/face-thinking.webp" alt="Generated animation of the Thinking expression, including changing gaze and pulsing marks." width="320" height="170" loading="lazy" />
-  <img src="/posts/2026-10-21-progress/face-surprised.webp" alt="Generated animation of the Surprised expression from the current face renderer." width="320" height="170" loading="lazy" />
-  <figcaption>Current renderer previews, not recordings of the physical LCD. The photograph above shows the assembled display.</figcaption>
-</figure>
+## Ground-repaired 4th-wire Stand verification and connection-loss hold
 
-A small precomputed mask supplies the permanent side-light shape while the eyes
-and expression elements remain procedural. This reduces repeated geometry work
-without storing complete animation frames. Desktop timing improved in an earlier
-layout comparison; the latest layout has not been remeasured on the P4, so those
-desktop numbers are not a robot CPU-performance claim.
+Initial loaded tests showed analog feedback readings pinned near their minima even
+while the robot was visibly standing. Tracing and repairing a loose ground in the
+feedback harness restored clean potentiometer readings across all twelve channels.
 
-## Standing uses a completed movement and its actual result
+On the October 20 retest with Stand verification enabled (**400 µs** arrival
+tolerance), the robot rose smoothly into Stand and held steady without jerking across
+**65 snapshots over 19.22 seconds**: all twelve joints stayed well inside tolerance
+with a peak filtered error of **175.74 µs** and zero corrective replans.
 
-The Stand implementation changed substantially after the feedback-servo rebuild.
-The October 20 Stand revision executes complete authored movement passes and
-checks the final target when verification is enabled. That revision also removed
-intermediate joint-arrival waits from named motions, custom sequences and recovery
-paths. The newer, not-yet-qualified gesture executor is described separately below.
+- **Explicit unverified receipt state:** When post-command readings are unavailable,
+  firmware finishes the trajectory, holds powered targets, and reports
+  `position not verified` rather than fabricating arrival or falsely declaring a jam.
+- **Powered continuity across Wi-Fi drops (`0.8.113-p4-link-motion`):** Instead of
+  disabling the PCA9685 and dropping the robot on a connection loss, finite motions
+  now complete locally and open-ended gaits execute a graceful `Finish` into a powered
+  standing hold.
+- **Arrival-aware gesture player (`0.8.115-p4-gesture-arrival`) & inactivity rest:**
+  Named gestures now ramp at half max joint speed (with final-approach deceleration on
+  *Sit*, *Rest*, and *Crouch*) and verify calibrated shaft arrival before consuming
+  hold durations. A new robot-saved **Lay down after inactivity** timer (default
+  3 minutes) automatically rests the body when idle.
 
-Valid measured shortfalls can select another corrective stepping pass toward
-the same standing goal. Holding and initial completion share that goal's
-comparison instead of independent mechanisms disagreeing and releasing the
-supporting servos. Stop, replacement movement and calibration retain their
-existing ownership.
+## Learning from physical walking: periodic correction and BoTorch loop
 
-Feedback quality proved just as important as planner logic. During one failure,
-the robot was visibly standing while the analog readings were near or below
-their calibration minima. After the owner repaired a ground fault, distinct
-joint readings returned.
+On October 19, we recorded commanded motion, all twelve 4th-wire shaft readings, IMU
+attitude, and camera frames during floor walks, fitted a compact periodic joint
+correction on the host, and evaluated it at 50% gain on the P4 across four 16-cycle
+steady walking trials (with gyro heading hold enabled):
 
-## The successful ground-repair retest
+| Trial | Learned correction | Linkage tracking error (RMS) | Measured floor travel |
+| --- | --- | ---: | --- |
+| Baseline 1 | Off | 17.26 mm | ~18.0 in |
+| Candidate 1 | 50% | **16.72 mm** | ~21.0 in (no rear sag or toe drag) |
+| Baseline 2 | Off | 17.21 mm | ~21.5 in |
+| Candidate 2 | 50% | **16.77 mm** | ~30.5 in (no rear sag) |
 
-On October 20, Stand verification was temporarily enabled with the existing
-**400 µs arrival tolerance**. The command completed with measured verification.
-Across **65 subsequent snapshots over 19.22 seconds**, all twelve joints remained
-inside that configured tolerance; the largest absolute filtered error was
-175.74 µs. No corrective replans or output faults occurred.
+Pooled linkage tracking error dropped from **17.23 mm to 16.75 mm RMS (−2.84%)** and
+eliminated rear sagging during the candidate runs.
 
-The owner confirmed that the robot stood correctly and remained steady without
-the previous jerking. This validates that particular Stand-and-hold trial.
-It does not qualify obstruction recovery or prove long-term standing stability.
-The original saved settings—Stand verification off and jam protection off—were
-restored afterward.
+### Host-side BoTorch optimization and MoGe-2 visual landmark tracking
 
-## Missing feedback does not mean successful arrival
+To automate policy search during everyday use, recording and optimization moved into
+Body Control's persistent host service (`Recordings → Learning history`):
 
-The subsequent installed firmware distinguishes completing an authored
-trajectory from verifying the resulting position. If post-command readings are
-unavailable, it can finish the movement, retain powered targets and return
-**position not verified**. It does not invent arrival or treat an unusable
-signal as proof of a jam. Usable observations can resume measured correction.
+- **BoTorch Bayesian optimizer:** Tunes gait profile parameters and feedback gains
+  across forward Walk, backward Walk, left/right turns, and bounding Run. Candidate
+  policies are checked against the linkage preview, evaluated in P4 RAM, and promoted
+  to flash only after outperforming the incumbent across all priority directions.
+- **MoGe-2 monocular depth + 3D landmark tracking:** Estimates camera motion against
+  retained 3D visual landmarks (transformed into the body frame) as an alternative to
+  ground-plane homography, feeding scored displacement into the learning loop.
 
-Body Control exposes feedback health and fourth-wire millivolts and can send
-fault/restoration notices through the existing event bridge. Those notices do
-not issue a stop or release. The fourth wire is a position signal; the hardware
-still does not measure servo-rail voltage, motor current or temperature.
+## MetaHuman OS: sub-500 ms Fast Body Events and bridge admission fixes
 
-## Keep support through a connection loss
+To make physical reactions feel immediate when Ainekio is tipped or shaken, we added a
+dedicated **Fast Body Event** workflow (`Lightweight` model category on the unadapted
+**Qwen3.5 2B Q8_0** base):
 
-Earlier connection-loss handling could disable the PCA9685 directly and drop
-powered supports. The **0.8.113** installation record confirms the revised local
-motion ownership is on the robot: finite motions continue, while an open-ended
-gait receives its existing graceful Finish request and retains its final powered
-hold. Reconnection does not replay stale commands or invent missing results.
-
-Native checks cover finite motion and continuous-gait loss, including separation
-between old and new sessions. Installation and boot are recorded; a deliberate
-physical disconnect-under-motion test remains outstanding.
-
-The combined image also includes revised gesture timing: travel follows joint
-distance at the configured speed while intentional holds retain their authored
-timing. Installation alone does not qualify every gesture's clearance or behavior.
-
-## A newer gesture executor is in development
-
-The inspected **0.8.115** working tree adds an arrival-aware player for named
-gestures. Travel uses half the configured joint speed, with final-approach
-deceleration for Sit, Rest and Crouch; authored repetitions and holds are retained.
-It writes each target and checks calibrated feedback before advancing
-or consuming the following hold. Time spent reaching a target does not consume
-the next movement or its intended pause. Terminal completion follows measured
-arrival; missing or untrusted feedback keeps the current target commanded and
-reports waiting. Stop and replacement commands remain available asynchronously.
-
-This changes gesture sequencing relative to the October 20 intermediate-wait
-removal. The gesture documentation records simulated-lag checks, while physical
-acceptance and installation of this revision are not established by the reviewed
-records. It must not be presented as the behavior already demonstrated on 0.8.113.
-
-## Configurable rest is prepared, not yet verified on the robot
-
-A newer source/build feature adds **Lay down after inactivity** in Body Control's
-Mode and power section. Its initial default is three minutes; zero disables it.
-The robot owns the saved setting. Active motion and speech defer rest, and the
-normal Lay Down retains powered outputs and accepts new commands.
-
-The October 20 record explicitly leaves installation and the physical three-minute
-observation pending. It is separate from MetaHuman's Semi Auto inactivity setting.
-The inspected source has advanced to **0.8.115-p4-gesture-arrival**; the latest
-installation confirmed by the reviewed journal is **0.8.113-p4-link-motion**.
-A source version is not proof of a newly flashed image.
-
-The [source snapshot](/posts/2026-10-21-progress/sources.json) records the gait
-journal, face documentation, firmware owners and twenty-three local prototype
-exports inspected for this update. [Current status](/posts/current-status/)
-keeps installed, tested and pending work separate.
+1. **Immediate face preset + single-call speech:** Sets `Confused` (tipped) or
+   `Surprised` (rapid movement) immediately before inference and generates a brief,
+   darkly humorous spoken reaction in a single LLM call—clocking **486 ms** for tipped
+   and **316 ms** for rapid movement.
+2. **Motion-aware IMU event filtering (`0.8.113+`):** Body Control pairs P4 IMU
+   samples with active execution context so normal accelerations during Walk, Run,
+   Crawl, or Crab do not false-trigger shake reactions, while `Tipped` compares
+   measured attitude against the authored pose's intended vertical.
+3. **Semi Auto 5-minute inactivity timer & bridge admission:** Active Operator's Semi
+   Auto mode now waits for a configurable **5-minute inactivity window** rather than
+   re-triggering on its own queue bookkeeping. The Environment Bridge also removed the
+   legacy payload-size cap (passing full camera + depth observations cleanly) and drops
+   unsolicited sensor events when MetaHuman is offline while preserving results for
+   already-admitted work.

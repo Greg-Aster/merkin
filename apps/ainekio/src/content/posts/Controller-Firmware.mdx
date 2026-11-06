@@ -21,9 +21,7 @@ reading:
   related: ["v1-original-posts", "robot-familiar-parts-overview"]
 ---
 
-[V1 and V2 design history](/project-guide/#original-ainekio-and-ainekio-v2)
-
-# The software running on the body
+[V1 and V2 comparison](/posts/v1-v2-comparison/)
 
 Firmware is the software installed on Ainekio’s body controller. On the working
 V1 robot, an ESP32-S3 controls eight joint motors, the camera, microphone,
@@ -35,17 +33,10 @@ that movement, applies joint calibration and limits, drives the servos, and
 reports the result. It also has to handle a stop or connection loss while
 camera and audio work compete for the same small computer’s resources.
 
-This page describes the S3 implementation. **October 8 V2 update:** the owner
-reports that the separate twelve-servo robot can stand, walk and respond to
-commands. Its photographed LCD is working; the carapace is not attached and
-Active Operator has not been tested.
-
-The [face/media record](/posts/2026-10-08-face-and-media/) covers dated P4
-LCD/camera, speaker and wake-capture results. The
-[responsive-command entry](/posts/2026-10-08-responsive-commands/) covers the
-MetaHuman/gateway split and distinguishes committed work from local refinements.
-The installed model/calibration for the walking result is not identified here.
-Earlier deployment and geometry records remain in the [gait journal](/posts/gait-development/).
+This page describes the eight-servo ESP32-S3 implementation. For the twelve-servo
+ESP32-P4 V2 robot, see the [V2 hardware reference](/posts/ainekio-v2/),
+[standing and walking milestone](/posts/2026-10-08-standing-walking/), and
+[gait development guide](/posts/gait-development/).
 
 ## How commands become movement
 

@@ -1,10 +1,8 @@
 import { defineCollection, z } from 'astro:content'
 import { readingSchema } from './lib/reading'
 import {
-  friendsSchema,
   postsSchema,
   specSchema,
-  teamSchema,
   updatesSchema,
 } from '@merkin/blog-core/schemas/content'
 
@@ -16,8 +14,6 @@ const posts = defineCollection({
   }),
 })
 const spec = defineCollection({ schema: specSchema })
-const team = defineCollection({ schema: teamSchema })
-const friends = defineCollection({ schema: friendsSchema })
 const updates = defineCollection({
   schema: updatesSchema.extend({
     current: updatesSchema.shape.current.unwrap().extend({
@@ -39,7 +35,5 @@ export const collections = {
   avatar,
   posts,
   spec,
-  team,
-  friends,
   updates,
 }

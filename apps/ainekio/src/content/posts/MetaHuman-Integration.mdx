@@ -1,8 +1,8 @@
 ---
-title: "MetaHuman OS: Robot Integration"
+title: "MetaHuman OS Robot Brain: Unified llama.cpp Router, LangGraph Workflows & Big Brother"
 published: 2026-08-27T08:00:00-07:00
-updated: 2026-11-01
-description: "Body-event decisions, live IMU status, specialist planning and saved requests connected to Ainekio’s action results."
+updated: 2026-11-06
+description: "How MetaHuman OS connects a unified llama.cpp model router, environment-bridge, durable LangGraph workflows, Fast Body Events, and Big Brother delegation to Ainekio."
 image: "/assets/ainekio/v2/metahuman-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
@@ -19,256 +19,67 @@ reading:
   generation: both
   kind: reference
   next: bounded-autonomy
-  related: ["ainekio-companion", "2026-10-12-trained-specialists", "2026-10-08-responsive-commands"]
+  related: ["ainekio-companion", "2026-10-15-companion-systems", "2026-11-06-carpet-trials-rl-and-big-brother"]
 ---
 
-## How MetaHuman supports the companion
+[MetaHuman OS](https://github.com/Greg-Aster/metahuman-os) is the cognitive runtime behind Ainekio's conversation, memory, identity, perception, and autonomous planning. While the onboard `ESP32-P4` controller owns real-time servo loops and hardware safety limits, MetaHuman OS turns multimodal observations and user requests into durable, multi-step executions and spoken companion responses.
 
-MetaHuman connects Ainekio's persona, conversation, memory, inner activity and
-high-level choices to its physical body. Its editable workflows let selected
-context inform a response or action, preserve what happened, and make useful
-experience available for later recall and reviewed learning. This whole loop
-is still being developed and qualified.
+For a high-level view of how personality, sleep maintenance, and memory work together, see [Ainekio as a Companion](/posts/ainekio-companion/).
 
-[The companion guide](/posts/ainekio-companion/) explains these functions in
-everyday terms, including dreams, autonomy modes and the intended learned
-personality. The sections below describe the engineering path for keeping a
-request and its results connected.
+## Unified inference architecture (`llama-cpp.service`)
 
-## November 1: connections, health events and context selection
+All local language, vision, specialist, motion, and embedding inference runs through a **single consolidated `llama-cpp.service` router** on port `:8080` (with earlier `node-llama-cpp`, vLLM, Kitten, and GPT-SoVITS paths retired):
 
-[The new integration entry](/posts/2026-11-01-metahuman-connections/) covers the
-unified Environment Bridge, the October 29 feedback-health admission and native
-cancellation repair, and Intent version 22's situation-dependent autonomy examples.
-The previous Full Auto trial remains the latest acceptance record discussed here.
+| Model / Role | Configuration & Purpose |
+| --- | --- |
+| **`Qwen3.5 9B`** | Primary conversational Persona, multimodal Vision reasoning, and Full Auto high-reasoning activity selection |
+| **`Environment 0.8B / 2B`** | Fast Orchestrator (Intent) and Task Decisions specialists served from shared base weights with **per-request LoRA adapters** |
+| **`Freestyle Qwen`** | Generates compact joint, foot, and body target programs and event-recovery motions for the 12-servo V2 body |
+| **`Qwen3 Embedding 0.6B` & `Nomic Embed v1.5`** | CPU-only embedding models (`--device none`) for episodic memory retrieval and semantic indexing without consuming GPU VRAM |
 
-## October 26: intentions, results and initiative
+To preserve workstation and host memory, `llama-cpp.service` runs with `load-on-startup = false` and a **5-minute (`300 s`) idle unload timeout**, loading weights on demand and supports native inference cancellation when a newer priority event preempts an in-flight turn.
 
-[The latest MetaHuman report](/posts/2026-10-26-metahuman-continuity/) follows
-Full Auto's ability to continue an existing execution or desire, request relevant
-memory and select when to reassess. Provider context, body-event retention and
-snapshot publication have activated repairs. Live tests completed status queries,
-but still did not produce self-directed conversation or movement.
+## Single `environment-bridge` and `environment-mode.json`
 
-Conversation context can now wait idle without appearing as stuck processing.
-Model services load weights on demand, with a default 300-second idle release.
-[Freestyle motion](/posts/2026-10-26-freestyle-targets-and-training/) is a separate
-trained function, with its own deployment and physical-test record.
+Ainekio connects to MetaHuman OS through a single consolidated **`environment-bridge`** agent with **multi-host following**:
 
-## October 21: faster reactions and completed-work recovery
+1. **Multi-host connection following**: Whether the robot's `Master/gateway` is running on the local desktop or an offboard **Radxa Dragon Q6A**, `environment-bridge` maintains one authoritative observation and action stream. High-frequency feedback-health updates update live `Robot Status` state directly without spawning redundant conversational turns.
+2. **Unified `environment-mode.json` cognitive graph**: Incoming user requests, voice transcripts, camera frames, and action settlements enter a single validated graph.
+3. **Clear role separation**:
+   - **Orchestrator (Intent)** classifies whether incoming input is a new request, a modification, a cancellation, or a conversational turn, and decides whether an outward spoken reply is needed.
+   - **Task Decisions** selects concrete robot actions (`robotCommand`, `locomotionGoal`, `freestyleProgram`, `captureImage`, or specialist delegation) without injecting intermediate filler speech between movements.
+   - **Goal Review** evaluates returned action receipts and visual evidence against the active objective.
+   - **Standing Persona** (`persona/core.json`) is the single outward voice owner, synthesizing the final conversational response from the completed or in-progress task state.
 
-[Fast Body Event and recovery repairs](/posts/2026-10-21-reactions-and-recovery/)
-add one Lightweight call for tip/shake speech, preset initial faces and live-only
-feed delivery. Boot/wake retains its contextual workflow. Finite event completion,
-speech cancellation recovery and large-observation transport have activated
-repairs. New unsolicited input needs a connected recipient; accepted work and
-its results survive disconnection.
+## Fast Body Events (`fast-body-event-mode.json`)
 
-Semi Auto's five-minute inactivity default is configurable in the prepared build;
-its recorded live acceptance remains pending. The trained Intent/Task assignments
-are retained, and model interpretation and recall still require qualification.
+Physical disturbances require immediate, lightweight reactions rather than full multi-step planning:
 
-## October 18: new specialists and clearer execution outcomes
+- When the `ESP32-P4` detects a physical tip, shake, or servo jam/stall, it emits a body event with live `LSM6DS3` IMU and `CD74HC4067` joint-error telemetry.
+- MetaHuman routes tip, shake, and stall events to **`fast-body-event-mode.json`**, a dedicated single-call Lightweight workflow.
+- The model emits **`be_` token-matched facial expressions** (mapped directly to the 58 expressions on the 1.9" `ST7789` LCD) paired with a brief, situational remark, without polluting long-term episodic memory or derailing an existing saved execution.
+- Boot and wake transitions retain the full contextual workflow so Ainekio can orient itself, check its surroundings, and rise cleanly.
 
-[The latest OS report](/posts/2026-10-18-metahuman-models-and-execution/) covers
-trained 2B Intent/Task adapters, experimental 9B autonomy and activated monitor
-and task-lifecycle repairs. Goal Review assesses and updates status; it does
-not select more work. Camera freshness and both-speaker indexing have changed,
-while grounded vision and reliable conversational recall remain open.
+## Durable execution and the Work Coordinator
 
-## October 15: shared categories, evidence and response ownership
+A robot request often spans multiple physical actions and sensor checks—for example, standing up, turning toward a target, capturing a fresh frame, and verifying arrival.
 
-[The current systems report](/posts/2026-10-15-companion-systems/) describes ten
-shared model categories, Active Operator's catalog entry and Desire review with
-attributed operational context. The trained Environment Intent assignment now
-uses the common Orchestrator category; model and adapter selection remains
-configurable by mode.
+- **LangGraph + SQLite checkpoints**: Every admitted request runs as a durable **execution** managed by the **Work Coordinator**. The execution's objective, ordered event history, completed node outputs, and pending actions are checkpointed in SQLite.
+- **Saved waits**: While the physical robot executes a gait or a specialist worker runs in the background, the execution enters a saved wait rather than holding open a fragile polling loop.
+- **Action receipts and epoch correlation**: `Environment Bridge Out` records the intended action before dispatch. The gateway tracks the command across connection epochs until a terminal receipt (`done`, `cancelled`, `nak`, or `outcome_unknown` on unverified disconnect) arrives, preventing accidental duplicate motion after a Wi-Fi drop.
+- **Goal-directed locomotion**: Active Task connects model-selected distance, turn, approach, follow, and visual endpoints to measured progress (joint arrival, IMU heading, and OpenGV / MoGe depth odometry) and the gait solver's terminal `Finish` receipt.
 
-Persona is the outward response owner. Intent selects whether a reply is needed;
-Task selects actions; Goal Review assesses outcomes. Task speech steps and Goal
-Review's competing outward reply have been removed. This supersedes the
-ordered-speech interface in the October 14 record below.
+## Standing Persona and Desire management
 
-Pending resume requests for one execution are combined while retaining its
-incoming events. Admitted workflows retain their original graph definitions
-across template edits; executable/schema compatibility checks still apply.
-Recorded activation and a live event burst establish those mechanisms, not
-correct model decisions or physical task success.
+Identity and autonomous motivation have strict ownership boundaries:
 
-## Movement with an endpoint
+- **Standing Persona (`persona/core.json`)**: Represents Ainekio's core identity, values, and voice. Only the **Psychotherapist** agent (during Sleep or explicit review) and manual operator edits may modify `persona/core.json`.
+- **Desire Agent**: Manages candidate intentions in Agency, adjusting desire strengths based on attributed memories, standing goals, and real task outcomes, and archiving desires once satisfied or obsolete. Approved desires execute through finite, step-tracked plans (`1–10` steps) rather than acting as unbounded background prompts.
 
-[Goal-directed locomotion](/posts/2026-10-15-locomotion-goals/) now connects
-model-selected distance, turn, approach, follow and visual goals to the existing
-Active Task owner. Progress uses attributed measurements; reaching an endpoint,
-requesting Finish and receiving the gait's terminal result remain separate.
-Signed lateral support and application activation are recorded. Real calibration,
-Task-model qualification and physical arrival accuracy remain outstanding.
+## Big Brother delegation and hosted UI
 
-## October 14: events from the body
+When a request requires heavy software engineering, repository inspection, or complex host operations beyond the local embedded specialists:
 
-A separate [Body Event Trigger workflow](/posts/2026-10-14-body-events/) now interprets wake, tilt and rapid-movement events and forwards model-selected intentions to Environment Mode. Robot Status carries gyro, acceleration, orientation and balance evidence. Recent conversation and active execution context inform reactions; Body Control exposes editable detection thresholds and a rapid-event interval.
-
-The October 14 implementation included ordered speech and visual-planner routing. [Two new Task candidates](/posts/2026-10-14-speech-and-task-training/) were evaluated; neither qualified for deployment. The speech interface is superseded by the October 15 change above. The complete wake/photo/stretch/stand routine is not yet reliable.
-
-## October 12: trained specialists and workflow changes
-
-The October 12 work included trained Qwen 0.8B intent/task specialists, independent computer-tool routing, a live Robot Status projection and local vision continuations. [Read the dated model and workflow update](/posts/2026-10-12-trained-specialists/). The September record below retains its original evidence period.
-
-# How MetaHuman keeps track of a robot request
-
-MetaHuman OS is the software that gives Ainekio conversation, memory, and
-decisions. Ainekio’s controller handles the physical body. Their integration
-must connect a user’s request to an action, then bring back enough information
-to decide what should happen next.
-
-A request may outlast one command. Imagine asking the robot to move into better
-light: it would need to choose a movement, wait for it to finish, inspect a new
-image, and decide whether the lighting improved. That is an illustrative goal,
-not a completed physical demonstration.
-
-The September redesign saves the request and its progress through those steps.
-A September 8 live review found the revised workflows running with robot
-feedback, images, and speech-delivery records. It also led to further repairs
-to goal context and Desire execution. This page reflects the September 9 source;
-the latest repairs still need deployment and repeated physical validation.
-
-## A workflow remembers where the request got to
-
-A **workflow**, also called a graph, connects software steps such as choosing
-an action, sending it, waiting for feedback, and reviewing the result. One
-running request is an **execution**. Its **objective** is the outcome the user
-or system asked it to achieve.
-
-Saving an execution lets it pause without losing that objective. A **saved
-wait** means the request stays open while something else happens—for example,
-while the robot moves or another software worker returns an answer. When the
-needed result arrives, the workflow can continue from its saved position.
-
-LangGraph schedules the connected steps. A SQLite database for the selected
-profile retains the objective, events in order, completed step outputs, saved
-checkpoints, and actions waiting to be sent. A checkpoint records where the
-workflow can resume; completed outputs are kept without being overwritten.
-
-A robot sub-workflow shares the parent execution. A **specialist agent** is a
-software worker assigned a finite job, not another robot. It runs through the
-Work Coordinator and returns a result linked to the parent request. The parent
-can remain open while these smaller jobs finish or eligible work retries.
-
-Robot Status displays the execution’s decisions. Recent conversation provides
-context, and memory supports recall, but the saved execution keeps the active
-objective. Status now carries the execution’s actual lifecycle: an old failed,
-cancelled, or completed request remains history instead of appearing as a new
-request’s current goal. A fresh command result updates the action facts even
-when the model makes no change to the objective.
-
-## Sending an action without losing track of it
-
-The **Work Coordinator** accepts and schedules finite jobs, manages recovery,
-and determines which process may control the body. Saving an intention to act
-and accepting that job are separate steps; both need records.
-
-The workflow’s **Environment Bridge Out** step saves the intended action with
-its checkpoint. The **Environment Bridge** maintains MetaHuman’s connection to
-external devices. Ainekio’s **adapter** translates the action into a robot
-command, and its authenticated **gateway** carries that command to the body.
-The firmware then validates and executes it.
-
-Saving before dispatch matters when a process stops unexpectedly. Local adapter
-changes retain action records, reject an ID reused for different content, and
-check the current Coordinator’s authority before sending. They can redeliver
-acknowledgements and results without issuing the physical command again.
-
-If an interruption leaves it unclear whether a movement happened, recovery
-must keep that uncertainty and reconcile it before deciding on further movement.
-“Body ownership” in the implementation refers to the software process allowed
-to send commands; it does not refer to ownership of the physical robot.
-
-The September 8 gateway repair keeps tracking a dispatched command beyond the
-old fixed 30-second wait. Recovery follows its saved gateway instance, robot
-session, and sequence rather than sending it again. Controlled integration
-checks show a late result settling the original execution and releasing the
-queued next action. That host repair still needs a gateway restart and live
-verification.
-
-## Reviewing the result and continuing
-
-The input router, or **orchestrator**, treats incoming user input as a new
-request, a correction, or a cancellation. The **Environment Action Selector**
-chooses conversation, a supported body action, or a limited generated motion
-plan. Parsing and firmware checks constrain what can actually run.
-
-After dispatch, the workflow waits for the appropriate feedback:
-
-1. **Action Result** interprets whether the action completed, failed, was
-   rejected, or was interrupted.
-2. **Goal Review**, when an objective remains, asks whether the result satisfies
-   it and can choose a robot step, another available specialist, or no new work.
-3. The saved execution finishes, waits for input, or continues with another step.
-
-For “stand,” a command result may be enough. For the better-light example,
-review needs a current image linked to the movement. A rejected, expired, or
-cancelled action can return without waiting for an image from movement that
-never happened. The [command guide](/posts/protocol-and-safety/) explains these
-result states in more detail.
-
-Specialist work now carries the actual task brief into the worker, and its
-answer returns to the waiting parent request. A failed worker returns failure;
-an intermediate output is not substituted for a completed answer. This lets
-the next decision use what the specialist actually found while keeping the
-original request intact.
-
-## Connecting a Desire to a result
-
-MetaHuman’s optional **Desire** system tracks possible work through planning,
-review, execution, and outcome review. The latest changes connect its approved
-robot steps to the same durable workflow used for ordinary body actions.
-
-Each step reloads the saved reviewed plan and carries the Desire ID, plan
-version, step number, and expected outcome. Its result returns to Agency, the
-Desire lifecycle owner, before the plan advances. A failed or unsatisfied step
-stops progress; an uncertain effect needs evidence before another attempt.
-General Goal Review does not expand the admitted Desire step into open-ended
-robot work.
-
-Robot Status retains compact awareness of pending desires. Full motivations
-and plans are loaded for the selected Desire work, so an unresolved idea does
-not act as a standing instruction in every robot decision. The
-[autonomy guide](/posts/bounded-autonomy/) explains the practical difference.
-
-## Keeping conversation connected to the action
-
-Robot microphone recordings enter through the Environment Bridge and Whisper,
-which transcribes speech to text. A camera image with the same originating ID
-can join that conversation turn. The turn then uses the same submission and
-context handling as other MetaHuman interfaces.
-
-Current context work keeps the latest user instruction within the configured
-history window so intervening assistant actions do not crowd it out. The saved
-execution separately retains the objective and its events, allowing a correction
-to affect ongoing work instead of disappearing among status messages.
-
-For a spoken response, synthesis produces audio and delivery sends it through
-the Bridge and Ainekio’s paced speaker output. Producing audio, playing it, and
-completing the broader request are separate outcomes. Playback results,
-interruptions, and delivery failures are recorded accordingly. See
-[listening and speech](/posts/voice-loop/) for that full path.
-
-## What changes for V2, and what still needs testing
-
-MetaHuman will continue asking for actions while the body changes from an
-ESP32-S3 with eight servos to an ESP32-P4 with twelve. The current motion
-contracts describe eight joints. New joint names, motion assets, validators,
-advertised features, camera/audio support, and communication must agree before
-V2 movement becomes available.
-
-The September 8 reviews record saved-graph tests of specialist returns, user
-corrections, cancellation, result ordering, and recovery in a fresh process.
-The later Desire suite also checks ordered robot steps, altered instructions,
-unsatisfied outcomes, and closure after outcome review. These use controlled
-provider responses and establish behavior for their recorded snapshots.
-
-The live run establishes that part of the redesigned path was operating; it
-does not validate the later repairs. Deployed recovery, direct stop, model
-judgment, and repeated physical runs remain to be checked. The
-[status report](/posts/archive/2026-09-09-project-status/) separates the dated test results from
-live observations and remaining faults.
+- **Big Brother Terminal (`TerminalChat.svelte`)**: Provides a direct interactive operator and escalation channel inside MetaHuman OS.
+- **Asynchronous Computer Tasks (`big-brother-tool-mode.json`)**: Environment workflows can delegate asynchronous computer tasks and run **`system-code-review`** through Big Brother while the robot continues interacting and reporting progress.
+- **Hosted Static UI (`https://mh.ainek.io`)**: The MetaHuman OS web interface—covering chat, node editor, Agent Monitor, memory browser, Agency, and Robot Status—is also published as a hosted static UI at [`https://mh.ainek.io`](https://mh.ainek.io) that connects to the operator's active runtime.

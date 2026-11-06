@@ -8,7 +8,7 @@ import type {
 
 export const siteConfig: SiteConfig = {
   title: 'Ainekio',
-  subtitle: 'Building a robot companion with MetaHuman OS',
+  subtitle: 'Open-Source 12-Servo ESP32-P4 Quadruped Robot Companion & MetaHuman OS',
   enablePostFooterNav: true,
   lang: 'en',
   themeColor: {
@@ -23,7 +23,7 @@ export const siteConfig: SiteConfig = {
     position: 'center',
     credit: {
       enable: false,
-      text: 'October 12 shell design.',
+      text: 'Ainekio V2 shell design.',
       url: '',
     },
   },
@@ -43,7 +43,7 @@ export const siteConfig: SiteConfig = {
       slug: 'site-updates',
       excerptLength: 420,
       pageUrl: '/updates/',
-      pageLinkLabel: 'Open field updates',
+      pageLinkLabel: 'Open build journal',
     },
   },
   favicon: [],
@@ -51,18 +51,18 @@ export const siteConfig: SiteConfig = {
 
 export const navBarConfig: NavBarConfig = {
   links: [
-    { name: 'Start here', url: '/posts/project-overview/' },
+    { name: 'Overview', url: '/posts/project-overview/' },
+    { name: 'System Reference', url: '/archive/?kind=reference' },
+    { name: 'Build Journal', url: '/updates/' },
     { name: 'Gallery', url: '/gallery/' },
-    { name: 'Build journal', url: '/updates/' },
-    { name: 'Build reference', url: '/archive/?kind=reference' },
-    { name: 'Original V1', url: '/posts/v1-original-posts/' },
+    { name: 'About', url: '/about/' },
   ],
 }
 
 export const profileConfig: ProfileConfig = {
   avatar: '/assets/avatar/assembly-september-20.webp',
   name: 'Ainekio',
-  bio: 'Ainekio’s build journal: an eight-servo original and a twelve-servo companion in development, with measured servo feedback, a rebuilt body and learning from real walking.',
+  bio: 'A twelve-servo quadruped robot companion in active development: closed-loop 4th-wire ESP32-P4 hardware paired with MetaHuman OS for conversation, memory, perception, bounded autonomy, and learned locomotion.',
   links: [
     {
       name: 'GitHub',
@@ -73,6 +73,11 @@ export const profileConfig: ProfileConfig = {
       name: 'MetaHuman OS',
       icon: 'fa6-brands:github',
       url: 'https://github.com/Greg-Aster/metahuman-os',
+    },
+    {
+      name: 'Contact Greg',
+      icon: 'fa6-solid:envelope',
+      url: 'mailto:greg@ainek.io',
     },
   ],
   avatarFilename: 'assembly-september-20.webp',

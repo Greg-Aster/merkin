@@ -3,8 +3,8 @@ import { getCollection } from 'astro:content'
 import { getReading, validateReadingPaths, topics, generations, kinds } from '../lib/reading'
 import { getPostUrlBySlug, url } from '../utils/url-utils'
 
-interface Props { keyword?: string; tags?: string[]; categories?: string[] }
-const { tags = [], categories = [] } = Astro.props
+interface Props { keyword?: string; tags?: string[]; categories?: string[]; heading?: string }
+const { tags = [], categories = [], heading = 'Article library' } = Astro.props
 const allPosts = await getCollection('posts', ({data}) => !data.draft)
 validateReadingPaths(allPosts)
 const normalizedTags = tags.map(tag => tag.toLowerCase())
@@ -22,7 +22,7 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
 <section class="card-base article-library" data-article-library>
   <header>
     <p class="library-eyebrow">Ainekio documentation</p>
-    <h1 data-library-title>Article library</h1>
+    <h1 data-library-title data-default-heading={heading}>{heading}</h1>
     {scope && <p>{scope} · <a href={url('/archive/')}>Browse the complete library</a></p>}
     <nav aria-label="Library shortcuts"><a href={url('/archive/?kind=reference')}>Build reference</a><a href={url('/updates/')}>Dated build journal</a><a href={url('/posts/v1-original-posts/')}>Original V1 reading guide</a></nav>
   </header>
@@ -78,7 +78,7 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
       count.textContent = `${visible} ${visible === 1 ? 'article' : 'articles'} shown`
       empty.hidden = visible !== 0
       const topicControl = controls.topic as HTMLSelectElement
-      title.textContent = topic ? topicControl.selectedOptions[0].text : kindTitles[kind] || 'Article library'
+      title.textContent = topic ? topicControl.selectedOptions[0].text : kindTitles[kind] || title.dataset.defaultHeading || 'Article library'
       note.textContent = generation === 'v1' || generation === 'v2'
         ? 'Includes cross-version references.'
         : 'References first, then journal entries.'

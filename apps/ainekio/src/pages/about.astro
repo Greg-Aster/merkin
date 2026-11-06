@@ -29,7 +29,7 @@ const { Content, headings } = await about.render()
     </div>
   </article>
 
-  <section class="mt-4 grid gap-4 sm:grid-cols-2">
+  <section class="mt-4 grid gap-4 sm:grid-cols-3">
     <a href="https://github.com/Greg-Aster/Ainekio-bot" target="_blank" rel="noreferrer" class="card-base group flex items-center gap-4 rounded-[var(--radius-large)] border border-black/5 p-5 transition hover:border-cyan-400/50 dark:border-white/10">
       <span class="rounded-xl bg-cyan-500/10 p-3 text-cyan-700 dark:text-cyan-300"><Icon name="fa6-brands:github" class="text-2xl" /></span>
       <span class="min-w-0">
@@ -45,6 +45,13 @@ const { Content, headings } = await about.render()
         <span class="mt-1 block font-black text-90 group-hover:text-amber-700 dark:group-hover:text-amber-300">Greg-Aster/metahuman-os</span>
       </span>
       <Icon name="material-symbols:open-in-new-rounded" class="ml-auto text-xl text-slate-400 dark:text-slate-500" />
+    </a>
+    <a href="mailto:greg@ainek.io" class="card-base group flex items-center gap-4 rounded-[var(--radius-large)] border border-black/5 p-5 transition hover:border-emerald-400/50 dark:border-white/10">
+      <span class="rounded-xl bg-emerald-500/10 p-3 text-emerald-700 dark:text-emerald-300"><Icon name="material-symbols:mail-outline-rounded" class="text-2xl" /></span>
+      <span class="min-w-0">
+        <span class="block text-xs font-bold uppercase tracking-[0.16em] text-50">Greg the Mechanic</span>
+        <span class="mt-1 block font-black text-90 group-hover:text-emerald-700 dark:group-hover:text-emerald-300">greg@ainek.io</span>
+      </span>
     </a>
   </section>
 </MainGridLayout>

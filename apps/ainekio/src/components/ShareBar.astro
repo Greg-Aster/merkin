@@ -1,0 +1,113 @@
+---
+interface Props {
+  title: string
+  description?: string
+  url: string
+}
+
+const { title, description = '', url } = Astro.props
+const encodedUrl = encodeURIComponent(url)
+const encodedTitle = encodeURIComponent(title)
+---
+
+<aside class="share-bar" aria-label="Share this page" data-share-bar data-share-title={title} data-share-text={description} data-share-url={url}>
+  <span class="share-label">Share:</span>
+  <button type="button" class="share-btn" data-copy-link>Copy link</button>
+  <button type="button" class="share-btn" data-native-share hidden>Share…</button>
+  <a class="share-link" href={`https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`} target="_blank" rel="noopener noreferrer">Reddit</a>
+  <a class="share-link" href={`https://news.ycombinator.com/submitlink?u=${encodedUrl}&t=${encodedTitle}`} target="_blank" rel="noopener noreferrer">Hacker News</a>
+  <a class="share-link" href={`https://x.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`} target="_blank" rel="noopener noreferrer">X / Twitter</a>
+</aside>
+
+<script>
+  function initShareBars() {
+    for (const bar of document.querySelectorAll<HTMLElement>('[data-share-bar]')) {
+      if (bar.dataset.initialized === 'true') continue
+      bar.dataset.initialized = 'true'
+      const shareUrl = bar.dataset.shareUrl || window.location.href
+      const shareTitle = bar.dataset.shareTitle || document.title
+      const shareText = bar.dataset.shareText || ''
+      const copyBtn = bar.querySelector<HTMLButtonElement>('[data-copy-link]')
+      const nativeBtn = bar.querySelector<HTMLButtonElement>('[data-native-share]')
+
+      if (nativeBtn && typeof navigator.share === 'function') {
+        nativeBtn.hidden = false
+        nativeBtn.addEventListener('click', () => {
+          navigator.share({ title: shareTitle, text: shareText, url: shareUrl }).catch(() => {})
+        })
+      }
+
+      if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(shareUrl)
+            const prev = copyBtn.textContent
+            copyBtn.textContent = 'Copied!'
+            setTimeout(() => { copyBtn.textContent = prev }, 1800)
+          } catch {}
+        })
+      }
+    }
+
+    for (const anchor of document.querySelectorAll<HTMLAnchorElement>('.custom-md h2 > a.anchor, .custom-md h3 > a.anchor, .custom-md h4 > a.anchor')) {
+      if (anchor.dataset.copyBound === 'true') continue
+      anchor.dataset.copyBound = 'true'
+      anchor.title = 'Copy link to section'
+      anchor.addEventListener('click', () => {
+        const href = anchor.getAttribute('href')
+        if (!href) return
+        const full = new URL(href, window.location.href).href
+        navigator.clipboard?.writeText(full).catch(() => {})
+      })
+    }
+  }
+
+  initShareBars()
+  document.addEventListener('astro:page-load', initShareBars)
+</script>
+
+<style>
+  .share-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.65rem;
+    margin: 1rem 0;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--primary) 5%, transparent);
+    font-size: 0.8rem;
+  }
+  .share-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-color-muted);
+    margin-right: 0.2rem;
+  }
+  .share-btn, .share-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.65rem;
+    border-radius: 0.35rem;
+    border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+    background: var(--card-bg);
+    color: var(--primary);
+    font-weight: 650;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .share-btn[hidden] {
+    display: none;
+  }
+  .share-btn:hover, .share-link:hover {
+    background: color-mix(in srgb, var(--primary) 14%, var(--card-bg));
+    text-decoration: none;
+  }
+  @media print {
+    .share-bar { display: none; }
+  }
+</style>

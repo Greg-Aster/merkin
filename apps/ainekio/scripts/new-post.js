@@ -1,7 +1,7 @@
 /* This is a script to create a new post markdown file with front-matter */
 
-import fs from "fs"
-import path from "path"
+import fs from "node:fs"
+import path from "node:path"
 
 function getDate() {
   const today = new Date()
@@ -16,39 +16,40 @@ const args = process.argv.slice(2)
 
 if (args.length === 0) {
   console.error(`Error: No filename argument provided
-Usage: npm run new-post -- <filename>`)
-  process.exit(1) // Terminate the script and return error code 1
+Usage: pnpm new-post <filename>`)
+  process.exit(1)
 }
 
 let fileName = args[0]
 
-// Add .md extension if not present
 const fileExtensionRegex = /\.(md|mdx)$/i
 if (!fileExtensionRegex.test(fileName)) {
-  fileName += ".md"
+  fileName += ".mdx"
 }
 
 const targetDir = "./src/content/posts/"
 const fullPath = path.join(targetDir, fileName)
 
 if (fs.existsSync(fullPath)) {
-  console.error(`Error: File ${fullPath} already exists `)
+  console.error(`Error: File ${fullPath} already exists`)
   process.exit(1)
 }
 
 const content = `---
-title: ${args[0]}
+title: "${args[0]}"
 published: ${getDate()}
-description: ''
-image: ''
-showImageOnPost: false  # This image will only show on the landing page
+description: ""
+image: ""
 tags: []
-category: ''
-draft: false 
-lang: ''
+category: "Build Journal"
+draft: false
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
 ---
 `
 
-fs.writeFileSync(path.join(targetDir, fileName), content)
+fs.writeFileSync(fullPath, content)
 
 console.log(`Post ${fullPath} created`)

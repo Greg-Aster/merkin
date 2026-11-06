@@ -1,9 +1,231 @@
 [
   {
+    "id": "ainekio-v2-neural-walk-first-run",
+    "kind": "physical-video",
+    "title": "First real-life neural network walking run",
+    "caption": "November 6 milestone: the physical 650 g 12-servo Ainekio V2 quadruped walking forward across carpet and reversing cleanly under its trained 200M-step MJX neural network policy.",
+    "date": "2026-11-06",
+    "sourceFile": "ainekio-v2-neural-walk-first-run.mp4",
+    "sourceBytes": 20655820,
+    "sourceSha256": "2c1b070fc6b0649caa88eb7310aaac1871acf4629e90a4e4f1a8bb30eef30d3a",
+    "src": "/gallery/ainekio-v2-neural-walk-first-run.mp4",
+    "bytes": 5744178,
+    "width": 1280,
+    "height": 720,
+    "duration": 43.477,
+    "poster": "/gallery/ainekio-v2-neural-walk-first-run-poster.webp",
+    "posterBytes": 87144
+  },
+  {
+    "id": "ainekio-v2-physical-three-quarter",
+    "kind": "photo",
+    "title": "Physical Ainekio V2 on carpet (three-quarter view)",
+    "caption": "The 650 g 12-servo Ainekio V2 quadruped in its printed red-and-black shell with 4th-wire servo feedback harness and four-bar legs before neural gait trials.",
+    "date": "2026-11-06",
+    "sourceFile": "ainekio-v2-physical-three-quarter.jpg",
+    "sourceBytes": 412070,
+    "sourceSha256": "b1e488925d3cf36947887cb9b89ae2388b8cd36ffdc249fc67feb97ad2decf74",
+    "variants": [
+      {
+        "src": "/gallery/ainekio-v2-physical-three-quarter-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 50018
+      },
+      {
+        "src": "/gallery/ainekio-v2-physical-three-quarter-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 151494
+      },
+      {
+        "src": "/gallery/ainekio-v2-physical-three-quarter-1600.webp",
+        "width": 1383,
+        "height": 1037,
+        "bytes": 267682
+      }
+    ]
+  },
+  {
+    "id": "ainekio-v2-physical-front",
+    "kind": "photo",
+    "title": "Physical Ainekio V2 on carpet (front profile)",
+    "caption": "Front-on floor view showing the 1.9-inch ST7789 LCD face bay, lower-jaw OV5647 CSI camera mount, and wide-stance 3-DOF leg linkages.",
+    "date": "2026-11-06",
+    "sourceFile": "ainekio-v2-physical-front.jpg",
+    "sourceBytes": 342558,
+    "sourceSha256": "97a45987a07f78e8f5f8fde762fe83dcaf67ee3e71db754716752a57d0c09af1",
+    "variants": [
+      {
+        "src": "/gallery/ainekio-v2-physical-front-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 22664
+      },
+      {
+        "src": "/gallery/ainekio-v2-physical-front-960.webp",
+        "width": 921,
+        "height": 691,
+        "bytes": 59272
+      },
+      {
+        "src": "/gallery/ainekio-v2-physical-front-1600.webp",
+        "width": 921,
+        "height": 691,
+        "bytes": 59272
+      }
+    ]
+  },
+  {
+    "id": "rl-centered-stride-200m",
+    "kind": "animation",
+    "title": "200M-step centered-stride & upright reverse rollout (Run #5)",
+    "caption": "Resolved full-CAD MuJoCo policy after fixing tiny hops and reverse dragging: 56.6–63.7 mm centered fore-aft stride, 3.5× higher foot air-time credit, and upright reverse walking (0.072 m torso height, zero rear scoot).",
+    "date": "2026-11-05",
+    "sourceFile": "rl-centered-stride-200m.mp4",
+    "sourceBytes": 2640756,
+    "sourceSha256": "b1a5beb0154a40c6eaa424f7c5ca985487b083a5694f94092af8495478b57fec",
+    "src": "/gallery/rl-centered-stride-200m.mp4",
+    "bytes": 845661,
+    "width": 640,
+    "height": 480,
+    "duration": 10,
+    "poster": "/gallery/rl-centered-stride-200m-poster.webp",
+    "posterBytes": 16314
+  },
+  {
+    "id": "rl-scootybooty-200m",
+    "kind": "animation",
+    "title": "RL failure mode: 'Scootybooty' reverse dragging (Run #4)",
+    "caption": "Intermediate 200M-step rollout before stance centering: the policy parked in an asymmetric split stance and dropped its rear end to 0.044 m to scoot backward instead of lifting its rear feet.",
+    "date": "2026-11-05",
+    "sourceFile": "rl-scootybooty-200m.mp4",
+    "sourceBytes": 2731819,
+    "sourceSha256": "6c0dbd31c4a8021531cfbb8dc671689e632331a318e46f8ab574be1d7cf9c257",
+    "src": "/gallery/rl-scootybooty-200m.mp4",
+    "bytes": 809308,
+    "width": 640,
+    "height": 480,
+    "duration": 10,
+    "poster": "/gallery/rl-scootybooty-200m-poster.webp",
+    "posterBytes": 13006
+  },
+  {
+    "id": "rl-tiny-hops-35m",
+    "kind": "animation",
+    "title": "RL failure mode: rapid tiny hops (35M-step rollout)",
+    "caption": "Early 35M-step full-CAD rollout where narrow action scaling produced rapid miniature hops (20–27 mm foot swing) rather than full four-bar strides.",
+    "date": "2026-11-05",
+    "sourceFile": "rl-tiny-hops-35m.mp4",
+    "sourceBytes": 2514130,
+    "sourceSha256": "7e0d6720ab951bc0499697572d129be894a0a077130ef2102157e772b7a1f92a",
+    "src": "/gallery/rl-tiny-hops-35m.mp4",
+    "bytes": 745180,
+    "width": 640,
+    "height": 480,
+    "duration": 10,
+    "poster": "/gallery/rl-tiny-hops-35m-poster.webp",
+    "posterBytes": 17292
+  },
+  {
+    "id": "rl-progress-centered-200m",
+    "kind": "diagram",
+    "title": "200M-step JAX/Brax/MJX PPO training curve",
+    "caption": "Evaluation episode reward curve across 201.5 million MJX environment steps for the centered-stride neural gait policy (28.97 ± 13.18 reward).",
+    "date": "2026-11-05",
+    "sourceFile": "rl-progress-centered-200m.png",
+    "sourceBytes": 23533,
+    "sourceSha256": "206e9c5a7483c4fe927af33a1f579b120ec1fafe36a6fa251288ebcab2a7870e",
+    "variants": [
+      {
+        "src": "/gallery/rl-progress-centered-200m-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 6310
+      },
+      {
+        "src": "/gallery/rl-progress-centered-200m-960.webp",
+        "width": 640,
+        "height": 480,
+        "bytes": 8962
+      },
+      {
+        "src": "/gallery/rl-progress-centered-200m-1600.webp",
+        "width": 640,
+        "height": 480,
+        "bytes": 8962
+      }
+    ]
+  },
+  {
+    "id": "carpet-trial-20261102",
+    "kind": "physical-video",
+    "title": "Onboard camera: carpet walking trial",
+    "caption": "November 2 physical forward-refinement trial recorded from Ainekio's onboard OV5647 CSI camera (with 180° firmware rotation and motion-safe 10,000 µs exposure ceiling) while testing native-C imitation gait updates on carpet.",
+    "date": "2026-11-02",
+    "sourceFile": "650a-carpet26-onboard.mp4",
+    "sourceBytes": 1883378,
+    "sourceSha256": "0a4b1bef72e2c26aeadb0deb1bcd11a17acd51b8806361bef97c63214494e46d",
+    "src": "/gallery/carpet-trial-20261102.mp4",
+    "bytes": 1685867,
+    "width": 640,
+    "height": 528,
+    "duration": 41.52,
+    "poster": "/gallery/carpet-trial-20261102-poster.webp",
+    "posterBytes": 57358
+  },
+  {
+    "id": "pupper-v3-mujoco-baseline",
+    "kind": "animation",
+    "title": "Stock Pupper V3 MuJoCo RL baseline",
+    "caption": "November 5 reference simulation: the upstream Pupper V3 policy walking +1.68 m forward in MuJoCo as the verified quadruped RL baseline before transferring to the Ainekio MJX four-bar model.",
+    "date": "2026-11-05",
+    "sourceFile": "stock-pupper-v3-forward.mp4",
+    "sourceBytes": 5332738,
+    "sourceSha256": "6525282b01f4dfe67e1e1fd2ce49ef7304d509bb8bc558dfd908fb6fd3faaff6",
+    "src": "/gallery/pupper-v3-mujoco-baseline.mp4",
+    "bytes": 1266829,
+    "width": 1280,
+    "height": 720,
+    "duration": 22.033333,
+    "poster": "/gallery/pupper-v3-mujoco-baseline-poster.webp",
+    "posterBytes": 6892
+  },
+  {
+    "id": "ainekio-mjcf-preview",
+    "kind": "design",
+    "title": "Ainekio full-CAD MuJoCo MJCF model",
+    "caption": "November 5 MuJoCo model exported directly from the V2 Blender CAD assembly (0.650 kg, 12 servo actuators, 8 passive hinges, and 4 planar four-bar equality constraints) for JAX/Brax/MJX gait training.",
+    "date": "2026-11-05",
+    "sourceFile": "ainekio-mjcf-preview.png",
+    "sourceBytes": 131574,
+    "sourceSha256": "2231f25261d7b824b74f6b284d4502077014fd1e5e01a4e6800e482ca39f8f6f",
+    "variants": [
+      {
+        "src": "/gallery/ainekio-mjcf-preview-480.webp",
+        "width": 480,
+        "height": 336,
+        "bytes": 5676
+      },
+      {
+        "src": "/gallery/ainekio-mjcf-preview-960.webp",
+        "width": 960,
+        "height": 672,
+        "bytes": 14478
+      },
+      {
+        "src": "/gallery/ainekio-mjcf-preview-1600.webp",
+        "width": 1000,
+        "height": 700,
+        "bytes": 15968
+      }
+    ]
+  },
+  {
     "id": "neural-walking-20261030",
     "kind": "animation",
-    "title": "Neural walking: initial and selected policy",
-    "caption": "October 30 simulation training comparison: two 16-second forward trials, before and after demonstration aggregation. Selected checkpoint: 360,000 imitation updates.",
+    "title": "Neural walking: initial vs. aggregated imitation policy",
+    "caption": "October 30 simulation comparison: two 16-second forward trials before and after C-gait teacher demonstration aggregation (360,000 imitation updates).",
     "date": "2026-10-30",
     "sourceFile": "neural-walking-20261030.mp4",
     "sourceBytes": 6269957,
@@ -19,8 +241,8 @@
   {
     "id": "20261021_083818",
     "kind": "photo",
-    "title": "The rebuilt robot, front view",
-    "caption": "The assembled V2 prototype on the October 21 workbench, with its red face surround, illuminated display and exposed upper wiring.",
+    "title": "The rebuilt V2 prototype, front view",
+    "caption": "The assembled 12-servo V2 prototype on the workbench with its red face shell, restored 1.9-inch ST7789 LCD, OV5647 camera, and 4th-wire feedback harness.",
     "date": "2026-10-21",
     "sourceFile": "20261021_083818.jpg",
     "sourceBytes": 392644,
@@ -49,8 +271,8 @@
   {
     "id": "20261021_081323",
     "kind": "photo",
-    "title": "Red shell and revised face",
-    "caption": "A three-quarter view of the rebuilt body and its four linkage legs on the workbench.",
+    "title": "Red shell and five-bar leg linkages",
+    "caption": "Three-quarter view of the rebuilt V2 chassis showing the planar leg linkages and compact body shell.",
     "date": "2026-10-21",
     "sourceFile": "20261021_081323.jpg",
     "sourceBytes": 513207,
@@ -79,8 +301,8 @@
   {
     "id": "20261021_081343",
     "kind": "photo",
-    "title": "A low stance, from the side",
-    "caption": "The October 21 prototype in a low stance, showing its side frame, leg mechanisms and new red body pieces.",
+    "title": "Low stance, side profile",
+    "caption": "Side profile of the V2 prototype in a low rest stance, showing the side frame, linkage geometry, and rear electronics bay.",
     "date": "2026-10-21",
     "sourceFile": "20261021_081343.jpg",
     "sourceBytes": 393028,
@@ -109,8 +331,8 @@
   {
     "id": "20261017_213601",
     "kind": "photo",
-    "title": "Servo wiring on the workbench",
-    "caption": "The open body, wiring and servos laid out during the feedback-servo rebuild.",
+    "title": "4th-wire feedback servo harness on the bench",
+    "caption": "The open V2 body, modified MG90S servos, and analog potentiometer feedback wiring laid out during the closed-loop rebuild.",
     "date": "2026-10-17",
     "sourceFile": "20261017_213601.jpg",
     "sourceBytes": 559120,
@@ -139,8 +361,8 @@
   {
     "id": "20261017_200604",
     "kind": "photo",
-    "title": "Inside the revised chassis",
-    "caption": "The open chassis on the workbench, with its display, electronics and wiring exposed.",
+    "title": "Inside the V2 electronics bay",
+    "caption": "The open chassis during assembly with the ST7789 display, ESP32-P4, PCA9685 PWM driver, and CD74HC4067 multiplexer wiring exposed.",
     "date": "2026-10-17",
     "sourceFile": "20261017_200604.jpg",
     "sourceBytes": 497045,
@@ -169,8 +391,8 @@
   {
     "id": "20261015_172412",
     "kind": "photo",
-    "title": "A closer look at the leg",
-    "caption": "A hand-held view of the printed leg carrier, linkage and lower leg.",
+    "title": "Printed leg carrier and linkage assembly",
+    "caption": "Close-up of a single 3-DOF leg module showing the 35 mm carrier, 20 mm crank, 28 mm pickup, 38 mm rod, and 55 mm lower leg.",
     "date": "2026-10-15",
     "sourceFile": "20261015_172412.jpg",
     "sourceBytes": 320363,
@@ -199,8 +421,8 @@
   {
     "id": "20261013_154510",
     "kind": "photo",
-    "title": "On the floor",
-    "caption": "The assembled prototype resting low on the carpet during development.",
+    "title": "Resting stance on carpet",
+    "caption": "The assembled twelve-servo prototype resting low on the floor between standing and leveling tests.",
     "date": "2026-10-13",
     "sourceFile": "20261013_154510.jpg",
     "sourceBytes": 627122,
@@ -229,8 +451,8 @@
   {
     "id": "20261008_181333",
     "kind": "photo",
-    "title": "The October walking build",
-    "caption": "The uncovered twelve-servo prototype on the bench, with its illuminated face and exposed wiring.",
+    "title": "Uncovered twelve-servo prototype",
+    "caption": "The uncovered V2 chassis on the bench during initial standing, walking, and display bring-up.",
     "date": "2026-10-08",
     "sourceFile": "20261008_181333.jpg",
     "sourceBytes": 335377,
@@ -259,8 +481,8 @@
   {
     "id": "20260914_152236",
     "kind": "photo",
-    "title": "Printed leg prototype",
-    "caption": "A physical leg mechanism photographed from another angle before the later body revisions.",
+    "title": "Single-leg linkage bench prototype",
+    "caption": "Early physical leg linkage prototype used to verify joint ranges and bell-crank clearances before printing the full V2 frame.",
     "date": "2026-09-14",
     "sourceFile": "20260914_152236.jpg",
     "sourceBytes": 275485,
@@ -289,8 +511,8 @@
   {
     "id": "20260914_152130",
     "kind": "photo",
-    "title": "Printed leg prototype",
-    "caption": "A physical leg mechanism photographed from another angle before the later body revisions.",
+    "title": "Linkage prototype, side view",
+    "caption": "Side angle of the September single-leg mechanism test rig.",
     "date": "2026-09-14",
     "sourceFile": "20260914_152130.jpg",
     "sourceBytes": 322799,
@@ -319,8 +541,8 @@
   {
     "id": "20260914_152101",
     "kind": "photo",
-    "title": "Printed leg prototype",
-    "caption": "A physical leg mechanism photographed from another angle before the later body revisions.",
+    "title": "Linkage prototype, upper pivot detail",
+    "caption": "Upper carrier and horn pivot detail on the early single-leg test print.",
     "date": "2026-09-14",
     "sourceFile": "20260914_152101.jpg",
     "sourceBytes": 264456,
@@ -349,8 +571,8 @@
   {
     "id": "20260827_093250",
     "kind": "photo",
-    "title": "Early physical prototype",
-    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "title": "Original V1 eight-servo build",
+    "caption": "The earlier red eight-servo ESP32-S3 prototype on the floor.",
     "date": "2026-08-27",
     "sourceFile": "20260827_093250.jpg",
     "sourceBytes": 416169,
@@ -379,8 +601,8 @@
   {
     "id": "20260827_093221",
     "kind": "photo",
-    "title": "Early physical prototype",
-    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "title": "V1 prototype, three-quarter view",
+    "caption": "Three-quarter view of the original eight-servo build and exposed servo leads.",
     "date": "2026-08-27",
     "sourceFile": "20260827_093221.jpg",
     "sourceBytes": 443685,
@@ -409,8 +631,8 @@
   {
     "id": "20260827_093218",
     "kind": "photo",
-    "title": "Early physical prototype",
-    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "title": "V1 prototype, front stance",
+    "caption": "Front stance of the early eight-servo printed chassis.",
     "date": "2026-08-27",
     "sourceFile": "20260827_093218.jpg",
     "sourceBytes": 301374,
@@ -439,8 +661,8 @@
   {
     "id": "20260827_093204",
     "kind": "photo",
-    "title": "Early physical prototype",
-    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "title": "V1 prototype, side view",
+    "caption": "Side profile of the original eight-servo quadruped.",
     "date": "2026-08-27",
     "sourceFile": "20260827_093204.jpg",
     "sourceBytes": 709265,
@@ -469,8 +691,8 @@
   {
     "id": "20260827_093200",
     "kind": "photo",
-    "title": "Early physical prototype",
-    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "title": "V1 prototype, top-down packaging",
+    "caption": "Top-down view of the original eight-servo frame and electronics bay.",
     "date": "2026-08-27",
     "sourceFile": "20260827_093200.jpg",
     "sourceBytes": 415089,
@@ -499,8 +721,8 @@
   {
     "id": "20260827_093156",
     "kind": "photo",
-    "title": "Early physical prototype",
-    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "title": "V1 prototype, rear quarter",
+    "caption": "Rear-quarter view of the August eight-servo prototype.",
     "date": "2026-08-27",
     "sourceFile": "20260827_093156.jpg",
     "sourceBytes": 367619,
@@ -529,8 +751,8 @@
   {
     "id": "20260827_092219",
     "kind": "photo",
-    "title": "Early physical prototype",
-    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "title": "V1 prototype, low pose",
+    "caption": "The early eight-servo chassis resting on carpet.",
     "date": "2026-08-27",
     "sourceFile": "20260827_092219.jpg",
     "sourceBytes": 703203,
@@ -559,8 +781,8 @@
   {
     "id": "20260827_092217",
     "kind": "photo",
-    "title": "Early physical prototype",
-    "caption": "The early red printed robot on the carpet, with its mechanisms and wiring visible.",
+    "title": "V1 prototype, close-up",
+    "caption": "Close-up of the original eight-servo leg and frame print.",
     "date": "2026-08-27",
     "sourceFile": "20260827_092217.jpg",
     "sourceBytes": 562730,
@@ -587,11 +809,251 @@
     ]
   },
   {
+    "id": "lcd-face-contact-sheet",
+    "kind": "diagram",
+    "title": "58 animated LCD face expressions",
+    "caption": "Contact sheet of all 58 procedural face expressions rendered by the ESP32-P4 firmware at 320×170 (15 FPS) on the 1.9-inch ST7789 SPI display.",
+    "date": "2026-11-03",
+    "sourceFile": "lcd-face-contact-sheet.png",
+    "sourceBytes": 164525,
+    "sourceSha256": "285d8f1fb655e713febc2b15b755a7f38520c09243b8da16a973e1f5eb2322a8",
+    "variants": [
+      {
+        "src": "/gallery/lcd-face-contact-sheet-480.webp",
+        "width": 480,
+        "height": 325,
+        "bytes": 14100
+      },
+      {
+        "src": "/gallery/lcd-face-contact-sheet-960.webp",
+        "width": 960,
+        "height": 649,
+        "bytes": 33260
+      },
+      {
+        "src": "/gallery/lcd-face-contact-sheet-1600.webp",
+        "width": 1360,
+        "height": 920,
+        "bytes": 52264
+      }
+    ]
+  },
+  {
+    "id": "diagram-assembly-reference",
+    "kind": "diagram",
+    "title": "V2 system assembly & bus reference",
+    "caption": "Complete V2 hardware interconnect diagram covering the Waveshare ESP32-P4-WIFI6, PCA9685 PWM driver, CD74HC4067 4th-wire feedback mux, ST7789 LCD, OV5647 CSI camera, LSM6DS3 IMU, and 2S power system.",
+    "date": "2026-10-18",
+    "sourceFile": "Assembly_Reference.png",
+    "sourceBytes": 1702087,
+    "sourceSha256": "6f28b83f81c82fd4cd6bf7a8ef3f789adb9398d071e1e99c0014aabad3fccea1",
+    "variants": [
+      {
+        "src": "/gallery/diagram-assembly-reference-480.webp",
+        "width": 480,
+        "height": 320,
+        "bytes": 30342
+      },
+      {
+        "src": "/gallery/diagram-assembly-reference-960.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 86070
+      },
+      {
+        "src": "/gallery/diagram-assembly-reference-1600.webp",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 155688
+      }
+    ]
+  },
+  {
+    "id": "diagram-esp32p4-pinout",
+    "kind": "diagram",
+    "title": "Waveshare ESP32-P4-WIFI6 GPIO pinout",
+    "caption": "Pin allocation on the ESP32-P4 header for I2C0 (LSM6DS3), I2C1 (PCA9685), SPI2 (ST7789 LCD), ADC2/MUX (CD74HC4067 4th-wire feedback), and onboard audio.",
+    "date": "2026-10-18",
+    "sourceFile": "ESP32P4_Pinout.png",
+    "sourceBytes": 841109,
+    "sourceSha256": "11a90976bc6460029bc0b453714f4975f6bb982753c463b378daf96dfd68c9f3",
+    "variants": [
+      {
+        "src": "/gallery/diagram-esp32p4-pinout-480.webp",
+        "width": 480,
+        "height": 294,
+        "bytes": 25414
+      },
+      {
+        "src": "/gallery/diagram-esp32p4-pinout-960.webp",
+        "width": 960,
+        "height": 589,
+        "bytes": 80604
+      },
+      {
+        "src": "/gallery/diagram-esp32p4-pinout-1600.webp",
+        "width": 1600,
+        "height": 981,
+        "bytes": 155796
+      }
+    ]
+  },
+  {
+    "id": "diagram-multiplexer-wiring",
+    "kind": "diagram",
+    "title": "CD74HC4067 4th-wire servo feedback wiring",
+    "caption": "Routing of the 12 modified MG90S potentiometer wiper leads into MUX channels C4–C15 and ADC2_CH0 (GPIO16) for closed-loop position and stall detection.",
+    "date": "2026-10-18",
+    "sourceFile": "Multiplexer_Wiring.png",
+    "sourceBytes": 470100,
+    "sourceSha256": "7e3bf666fafe93cb728f8ae8a0b2383701d36b1a443a43d80460df6680dc7479",
+    "variants": [
+      {
+        "src": "/gallery/diagram-multiplexer-wiring-480.webp",
+        "width": 480,
+        "height": 348,
+        "bytes": 22318
+      },
+      {
+        "src": "/gallery/diagram-multiplexer-wiring-960.webp",
+        "width": 960,
+        "height": 696,
+        "bytes": 60464
+      },
+      {
+        "src": "/gallery/diagram-multiplexer-wiring-1600.webp",
+        "width": 1600,
+        "height": 1160,
+        "bytes": 117062
+      }
+    ]
+  },
+  {
+    "id": "diagram-pca9685-wiring",
+    "kind": "diagram",
+    "title": "PCA9685 12-servo PWM driver wiring",
+    "caption": "I2C1 (GPIO2/3) and Output Enable (GPIO4) wiring to the HUAREW PCA9685 50 Hz servo controller and 5V 5A Mini560 power rail.",
+    "date": "2026-10-18",
+    "sourceFile": "PCA9685_Wiring.png",
+    "sourceBytes": 339362,
+    "sourceSha256": "533d30f5a9f7b3411a8cdf7e898bf196a67c8493a4ad90a7d343d27527a3afb2",
+    "variants": [
+      {
+        "src": "/gallery/diagram-pca9685-wiring-480.webp",
+        "width": 480,
+        "height": 316,
+        "bytes": 19256
+      },
+      {
+        "src": "/gallery/diagram-pca9685-wiring-960.webp",
+        "width": 960,
+        "height": 632,
+        "bytes": 55784
+      },
+      {
+        "src": "/gallery/diagram-pca9685-wiring-1600.webp",
+        "width": 1600,
+        "height": 1053,
+        "bytes": 114324
+      }
+    ]
+  },
+  {
+    "id": "diagram-servo-socket-map",
+    "kind": "diagram",
+    "title": "V2 12-servo channel & leg socket map",
+    "caption": "Physical mapping of Rear-Left (0–2), Rear-Right (3–5), Front-Left (6–8), and Front-Right (9–11) abduction, hip, and knee servos.",
+    "date": "2026-10-18",
+    "sourceFile": "Servo_Socket_Map.png",
+    "sourceBytes": 382421,
+    "sourceSha256": "848e0d52a86d6013fe304f521c9168a6e391e1c423fd8a05aac8636b0acc53bd",
+    "variants": [
+      {
+        "src": "/gallery/diagram-servo-socket-map-480.webp",
+        "width": 480,
+        "height": 349,
+        "bytes": 20686
+      },
+      {
+        "src": "/gallery/diagram-servo-socket-map-960.webp",
+        "width": 960,
+        "height": 698,
+        "bytes": 54764
+      },
+      {
+        "src": "/gallery/diagram-servo-socket-map-1600.webp",
+        "width": 1600,
+        "height": 1164,
+        "bytes": 102204
+      }
+    ]
+  },
+  {
+    "id": "diagram-lcd-wiring",
+    "kind": "diagram",
+    "title": "XIITIA 1.9-inch ST7789 SPI LCD wiring",
+    "caption": "SPI2 wiring (GPIO21–26) for the 320×170 landscape face display.",
+    "date": "2026-10-18",
+    "sourceFile": "LCD_Wiring.png",
+    "sourceBytes": 475379,
+    "sourceSha256": "2bf1196b8d00758f3030df2fc12cc0ecb0cb5b905e5876d1b8b2fa7a7d38c583",
+    "variants": [
+      {
+        "src": "/gallery/diagram-lcd-wiring-480.webp",
+        "width": 480,
+        "height": 372,
+        "bytes": 20444
+      },
+      {
+        "src": "/gallery/diagram-lcd-wiring-960.webp",
+        "width": 960,
+        "height": 744,
+        "bytes": 57630
+      },
+      {
+        "src": "/gallery/diagram-lcd-wiring-1600.webp",
+        "width": 1600,
+        "height": 1240,
+        "bytes": 105904
+      }
+    ]
+  },
+  {
+    "id": "diagram-lsm6ds3-wiring",
+    "kind": "diagram",
+    "title": "GY-LSM6DS3 6-DOF IMU wiring",
+    "caption": "Shared I2C0 (GPIO7/8 at 400 kHz, address 0x6A) wiring for 208 Hz x-io Fusion attitude estimation and body motion event detection.",
+    "date": "2026-10-18",
+    "sourceFile": "LSM6DS3_Wiring.png",
+    "sourceBytes": 385490,
+    "sourceSha256": "2b06307837e131d299bde355fe8ab0be2174ec613cc28291e350ac7782aba365",
+    "variants": [
+      {
+        "src": "/gallery/diagram-lsm6ds3-wiring-480.webp",
+        "width": 480,
+        "height": 349,
+        "bytes": 20740
+      },
+      {
+        "src": "/gallery/diagram-lsm6ds3-wiring-960.webp",
+        "width": 960,
+        "height": 698,
+        "bytes": 55044
+      },
+      {
+        "src": "/gallery/diagram-lsm6ds3-wiring-1600.webp",
+        "width": 1600,
+        "height": 1164,
+        "bytes": 102486
+      }
+    ]
+  },
+  {
     "id": "design-boot-angular-comparison",
     "kind": "design",
-    "title": "Boot angular comparison",
-    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
-    "date": null,
+    "title": "Lower-leg and foot profile comparison",
+    "caption": "Blender geometry comparison of candidate lower-leg and foot profiles.",
+    "date": "2026-09-23",
     "sourceFile": "boot-angular-comparison.png",
     "sourceBytes": 2866006,
     "sourceSha256": "e458f57cd7aac3878638a259fb95c1d48e859a29ae613c6f1f7c9fe8fb2437cf",
@@ -619,9 +1081,9 @@
   {
     "id": "design-boot-angular-leg",
     "kind": "design",
-    "title": "Boot angular leg",
-    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
-    "date": null,
+    "title": "Angular lower-leg linkage study",
+    "caption": "Modeled single-leg linkage with the angular lower-leg profile.",
+    "date": "2026-09-23",
     "sourceFile": "boot-angular-leg.png",
     "sourceBytes": 3180563,
     "sourceSha256": "3952e387ac8d257197d1e33bd98a0f00f597c2a7610667327049ad6fb2415640",
@@ -649,9 +1111,9 @@
   {
     "id": "design-boot-angular-robot",
     "kind": "design",
-    "title": "Boot angular robot",
-    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
-    "date": null,
+    "title": "Full assembly with angular boots",
+    "caption": "Blender study of the four-leg assembly fitted with the angular lower legs.",
+    "date": "2026-09-23",
     "sourceFile": "boot-angular-robot.png",
     "sourceBytes": 3350734,
     "sourceSha256": "1f435cc3abf8a4785fc8f709eaec56c8b27f5b5a0ae839cd054a410773711410",
@@ -679,9 +1141,9 @@
   {
     "id": "design-boot-replacement-inner",
     "kind": "design",
-    "title": "Boot replacement inner",
-    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
-    "date": null,
+    "title": "Inner linkage pivot clearance study",
+    "caption": "Blender check of inner linkage clearances across the leg stroke.",
+    "date": "2026-09-23",
     "sourceFile": "boot-replacement-inner.png",
     "sourceBytes": 1282799,
     "sourceSha256": "0b00f9840a83ac65c1af78f11b6e13c69dc25cc5ac3e298c94da24a757471e42",
@@ -709,9 +1171,9 @@
   {
     "id": "design-boot-replacement-leg",
     "kind": "design",
-    "title": "Boot replacement leg",
-    "caption": "Blender boot and leg design study; capture date is not established. This is a modeled assembly.",
-    "date": null,
+    "title": "Replacement lower-leg geometry",
+    "caption": "Candidate lower-leg geometry modeled in Blender.",
+    "date": "2026-09-23",
     "sourceFile": "boot-replacement-leg.png",
     "sourceBytes": 1321145,
     "sourceSha256": "008c0dd5081ceaeba2e4eb530b2128036792ab37a0ca61b666c1a9950472a62b",
@@ -739,8 +1201,8 @@
   {
     "id": "design-front-quarter",
     "kind": "design",
-    "title": "Front quarter",
-    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "title": "September V2 CAD: front quarter",
+    "caption": "September 22 Blender assembly study of the 12-servo frame.",
     "date": "2026-09-22",
     "sourceFile": "front-quarter.png",
     "sourceBytes": 3327416,
@@ -769,8 +1231,8 @@
   {
     "id": "design-front",
     "kind": "design",
-    "title": "Front",
-    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "title": "September V2 CAD: front view",
+    "caption": "Front orthographic view of the September 22 CAD assembly.",
     "date": "2026-09-22",
     "sourceFile": "front.png",
     "sourceBytes": 3094499,
@@ -799,8 +1261,8 @@
   {
     "id": "design-left-side",
     "kind": "design",
-    "title": "Left side",
-    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "title": "September V2 CAD: left profile",
+    "caption": "Left orthographic view of the September 22 CAD assembly.",
     "date": "2026-09-22",
     "sourceFile": "left-side.png",
     "sourceBytes": 3104004,
@@ -829,8 +1291,8 @@
   {
     "id": "design-overview",
     "kind": "design",
-    "title": "Overview",
-    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "title": "September V2 CAD: perspective overview",
+    "caption": "Perspective overview of the September 22 CAD assembly.",
     "date": "2026-09-22",
     "sourceFile": "overview.png",
     "sourceBytes": 2041084,
@@ -859,8 +1321,8 @@
   {
     "id": "design-rear-quarter",
     "kind": "design",
-    "title": "Rear quarter",
-    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "title": "September V2 CAD: rear quarter",
+    "caption": "Rear-quarter view of the September 22 CAD assembly.",
     "date": "2026-09-22",
     "sourceFile": "rear-quarter.png",
     "sourceBytes": 3223948,
@@ -889,8 +1351,8 @@
   {
     "id": "design-rear",
     "kind": "design",
-    "title": "Rear",
-    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "title": "September V2 CAD: rear view",
+    "caption": "Rear orthographic view of the September 22 CAD assembly.",
     "date": "2026-09-22",
     "sourceFile": "rear.png",
     "sourceBytes": 2958741,
@@ -919,8 +1381,8 @@
   {
     "id": "design-right-side",
     "kind": "design",
-    "title": "Right side",
-    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "title": "September V2 CAD: right profile",
+    "caption": "Right orthographic view of the September 22 CAD assembly.",
     "date": "2026-09-22",
     "sourceFile": "right-side.png",
     "sourceBytes": 3079833,
@@ -949,8 +1411,8 @@
   {
     "id": "design-top",
     "kind": "design",
-    "title": "Top",
-    "caption": "September 22 Blender assembly study; this predates the October feedback-servo rebuild.",
+    "title": "September V2 CAD: top view",
+    "caption": "Top orthographic view showing shoulder spacing and internal bay layout.",
     "date": "2026-09-22",
     "sourceFile": "top.png",
     "sourceBytes": 3026145,
@@ -979,9 +1441,9 @@
   {
     "id": "floor-test",
     "kind": "physical-video",
-    "title": "Floor test and manual adjustment",
-    "caption": "Physical footage of the prototype on carpet, including manual handling and adjustment. Recording date is not established; this is not evidence that the latest gait is qualified.",
-    "date": null,
+    "title": "Early prototype floor test",
+    "caption": "Physical footage of the early prototype on carpet during linkage and stance adjustments.",
+    "date": "2026-08-31",
     "sourceFile": "Timeline 2.mp4",
     "sourceBytes": 37483206,
     "sourceSha256": "fe1eaa534e68d472e83f9b9a22643f5c54c95eb8577a51837553e5e73afbd1d5",
@@ -997,7 +1459,7 @@
     "id": "early-bench",
     "kind": "physical-video",
     "title": "Early electronics bench test",
-    "caption": "Physical footage of the early electronics, servos and display on the workbench.",
+    "caption": "July workbench test of the initial electronics, servos, and display.",
     "date": "2026-07-29",
     "sourceFile": "20260729_203710.mp4",
     "sourceBytes": 15006179,
@@ -1013,8 +1475,8 @@
   {
     "id": "motion-library",
     "kind": "animation",
-    "title": "33 motions in Blender",
-    "caption": "A four-minute Blender motion showcase at 2× playback. The labeled chapters show modeled poses and gaits from the earlier library, not physical robot performance.",
+    "title": "33 motions in Blender (2× showcase)",
+    "caption": "Blender showcase of 33 modeled poses, emotes, and gait trajectories at 2× playback speed.",
     "date": "2026-09-23",
     "sourceFile": "ainekio-gaits-and-motions-2x-standard.mp4",
     "sourceBytes": 285201559,
@@ -1030,9 +1492,9 @@
   {
     "id": "variable-gait",
     "kind": "animation",
-    "title": "Variable gait study",
-    "caption": "A short Blender animation of the red robot and its changing leg motion. Recording date is not established.",
-    "date": null,
+    "title": "Variable gait study in Blender",
+    "caption": "Blender animation studying stride transitions across the four-bar leg linkages.",
+    "date": "2026-10-05",
     "sourceFile": "ainekio-variable-gait-demo.mp4",
     "sourceBytes": 1016806,
     "sourceSha256": "2e500c00717c136c7a34d5763a3d55fcbd18b8820cdd596be63efb8896577624",

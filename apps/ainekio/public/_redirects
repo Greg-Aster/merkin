@@ -1,6 +1,32 @@
 # HTTP redirects for Cloudflare Pages; the sitemap generator owns the XML.
 /sitemap.xml /sitemap-index.xml 301
+/project-guide/ /posts/project-overview/ 301
+/posts/current-status/ /posts/project-overview/#project-status 301
 /posts/broad-strokes/ /posts/archive/broad-strokes/ 301
 /posts/first-steps-work-in-progress/ /posts/archive/first-steps-work-in-progress/ 301
 /posts/motion-systems/ /posts/archive/motion-systems/ 301
 /posts/discussion-ainekio/ /posts/discussion/ 301
+# Consolidated same-day micro-posts -> milestone journal entries
+/posts/2026-09-21-chassis-packaging/ /posts/2026-09-21-compact-leg-design/ 301
+/posts/2026-09-21-shell-design/ /posts/2026-09-21-compact-leg-design/ 301
+/posts/2026-09-28-wired-wireless-ros2/ /posts/2026-09-28-compact-body/ 301
+/posts/2026-10-06-lighter-rebuild/ /posts/2026-10-06-compact-linkage/ 301
+/posts/2026-10-06-steering-sensing-connections/ /posts/2026-10-06-compact-linkage/ 301
+/posts/2026-10-08-responsive-commands/ /posts/2026-10-08-standing-walking/ 301
+/posts/2026-10-08-face-and-media/ /posts/2026-10-08-standing-walking/ 301
+/posts/2026-10-12-yoloe-tracking/ /posts/2026-10-12-shell-power-and-motion/ 301
+/posts/2026-10-12-trained-specialists/ /posts/2026-10-12-shell-power-and-motion/ 301
+/posts/2026-10-14-body-events/ /posts/2026-10-14-startup-and-leveling/ 301
+/posts/2026-10-14-recording-and-updates/ /posts/2026-10-14-startup-and-leveling/ 301
+/posts/2026-10-14-speech-and-task-training/ /posts/2026-10-14-startup-and-leveling/ 301
+/posts/2026-10-15-motion-and-leveling/ /posts/2026-10-15-companion-systems/ 301
+/posts/2026-10-15-locomotion-goals/ /posts/2026-10-15-companion-systems/ 301
+/posts/2026-10-15-learning-diagnostics/ /posts/2026-10-15-companion-systems/ 301
+/posts/2026-10-18-metahuman-models-and-execution/ /posts/2026-10-18-servo-feedback-and-chassis/ 301
+/posts/2026-10-21-learning-from-walking/ /posts/2026-10-21-body-face-and-standing/ 301
+/posts/2026-10-21-reactions-and-recovery/ /posts/2026-10-21-body-face-and-standing/ 301
+/posts/2026-10-26-body-power-and-training-stand/ /posts/2026-10-26-freestyle-targets-and-training/ 301
+/posts/2026-10-26-metahuman-continuity/ /posts/2026-10-26-freestyle-targets-and-training/ 301
+/posts/2026-10-27-finite-motion-and-recovery/ /posts/2026-10-26-freestyle-targets-and-training/ 301
+/posts/2026-11-01-body-prototype/ /posts/2026-11-01-neural-walking/ 301
+/posts/2026-11-01-metahuman-connections/ /posts/2026-11-01-neural-walking/ 301

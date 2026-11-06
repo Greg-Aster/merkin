@@ -1,23 +1,56 @@
 ---
 import MainGridLayout from '../layouts/MainGridLayout.astro'
 import GalleryImage from '../components/GalleryImage.astro'
+import ShareBar from '../components/ShareBar.astro'
 import gallery from '../data/gallery.json'
 import { url } from '../utils/url-utils'
+
+const galleryTitle = 'Ainekio Robot Gallery — Photos, Videos, Wiring Diagrams & Simulation'
+const galleryDescription = 'Explore Ainekio in photos, videos, and diagrams: the 12-servo V2 prototype, onboard carpet trial footage, MuJoCo/MJX simulation, 58 LCD expressions, and ESP32-P4 wiring diagrams.'
+const galleryJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: galleryTitle,
+  description: galleryDescription,
+  url: Astro.url.href,
+  hasPart: gallery.filter(item => item.src).map(item => ({
+    '@type': 'VideoObject',
+    name: item.title,
+    description: item.caption,
+    contentUrl: new URL(url(item.src!), Astro.site).href,
+    thumbnailUrl: new URL(url(item.poster!), Astro.site).href,
+    uploadDate: `${item.date || '2026-11-06'}T00:00:00Z`,
+    duration: `PT${Math.max(1, Math.round(item.duration || 1))}S`,
+  })),
+}
 const groups = [
-  { id: 'photos', title: 'From the workbench', intro: 'Real photographs of the build: the October rebuild, leg prototypes and the earlier robot.', kinds: ['photo'] },
-  { id: 'videos', title: 'The physical robot on video', intro: 'Bench experiments and floor trials, including the adjustments along the way.', kinds: ['physical-video'] },
-  { id: 'design', title: 'Inside the design', intro: 'Earlier Blender assembly and leg studies. These show modeled geometry, not the current physical assembly.', kinds: ['design'] },
-  { id: 'animation', title: 'Motion studies and training', intro: 'Recorded neural gait trials and Blender motion studies.', kinds: ['animation'] },
+  { id: 'photos', title: 'From the workbench', intro: 'Photographs of the physical build: the 12-servo V2 feedback rebuild, single-leg linkage prototypes, and the earlier 8-servo V1 robot.', kinds: ['photo'] },
+  { id: 'videos', title: 'The physical robot on video', intro: 'Onboard OV5647 camera footage from November carpet walking trials, plus floor and bench tests.', kinds: ['physical-video'] },
+  { id: 'animation', title: 'Simulation, neural gait & motion studies', intro: 'MuJoCo quadruped RL baselines (stock Pupper V3), C-gait imitation policy comparisons, and Blender motion studies.', kinds: ['animation'] },
+  { id: 'diagrams', title: 'V2 hardware, wiring & LCD expressions', intro: 'Pinouts, PCA9685 PWM and CD74HC4067 4th-wire feedback wiring diagrams, and the 58-expression ST7789 LCD contact sheet.', kinds: ['diagram'] },
+  { id: 'design', title: 'CAD & MuJoCo MJCF models', intro: 'The November 5 full-CAD MuJoCo MJCF model (0.650 kg, four-bar equality constraints) and earlier Blender assembly studies.', kinds: ['design'] },
 ]
 const date = (value: string) => new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(value))
+const labelForKind = (kind: string) =>
+  kind === 'photo'
+    ? 'Photograph'
+    : kind === 'physical-video'
+      ? 'Physical footage'
+      : kind === 'animation'
+        ? 'Simulation & motion'
+        : kind === 'diagram'
+          ? 'Hardware reference'
+          : 'CAD model'
 ---
-<MainGridLayout oneColumn={true} title="Ainekio Robot Gallery — Photos, Videos and Design Studies" description="See Ainekio taking shape: real robot photographs, bench and floor videos, the feedback-servo rebuild, and dated Blender design and motion studies.">
+<MainGridLayout oneColumn={true} title={galleryTitle} description={galleryDescription}>
+  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(galleryJsonLd)}></script>
   <article class="robot-gallery" data-pagefind-body>
     <header>
-      <p class="eyebrow">The build, in pictures</p>
+      <p class="eyebrow">Visual reference & media library</p>
       <h1>Meet the robot</h1>
-      <p>Printed parts, exposed wiring, experiments on the floor—and the design work behind them. This is Ainekio as it takes shape.</p>
-      <p>New: <a href={url('/posts/2026-11-01-neural-walking/')}>neural walking trials and the execution comparison</a>. The latest workbench photographs show the October 21 assembly.</p>
+      <p>Workbench photos, onboard camera footage from physical carpet trials, MuJoCo/MJX simulation baselines, 58 LCD facial expressions, and complete V2 wiring diagrams.</p>
+      <p>Latest milestone: <a href={url('/posts/2026-11-06-carpet-trials-rl-and-big-brother/')}>November 6 real-life neural walk, 200M-step MJX gait training, and Big Brother runtime</a>.</p>
+      <ShareBar title={galleryTitle} description={galleryDescription} url={Astro.url.href} />
       <nav aria-label="Gallery sections">{groups.map(group => <a href={`#${group.id}`}>{group.title} ↓</a>)}</nav>
     </header>
     {groups.map(group => <section id={group.id} aria-labelledby={`${group.id}-title`}>
@@ -30,14 +63,14 @@ const date = (value: string) => new Intl.DateTimeFormat('en-US', { dateStyle: 'm
               <a href={url(item.src!)}>Download {item.title}</a>
             </video>}
           <figcaption id={`${item.id}-caption`}>
-            <p class="media-label">{item.kind === 'photo' ? 'Photograph' : item.kind === 'physical-video' ? 'Physical footage' : item.kind === 'animation' ? 'Motion study' : 'Blender study'} · {item.date ? <time datetime={item.date}>{date(item.date)}</time> : 'Undated'}</p>
+            <p class="media-label">{labelForKind(item.kind)} · {item.date ? <time datetime={item.date}>{date(item.date)}</time> : 'Undated'}</p>
             <h3>{item.title}</h3><p>{item.caption}</p>
             {item.src && <a class="download" href={url(item.src)} download>Download MP4 · {Math.floor(item.duration! / 60)}:{String(Math.round(item.duration! % 60)).padStart(2, '0')} · {(item.bytes! / 1024 / 1024).toFixed(1)} MB</a>}
           </figcaption>
         </figure>)}
       </div>
     </section>)}
-    <footer><a href={url('/updates/')}>Follow the build journal →</a><a href={url('/posts/current-status/')}>What works today →</a></footer>
+    <footer><a href={url('/updates/')}>Read the build journal →</a><a href={url('/posts/project-overview/')}>System overview & status →</a></footer>
   </article>
 </MainGridLayout>
 <style>

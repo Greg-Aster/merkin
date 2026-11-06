@@ -1,5 +1,4 @@
 ---
-import fs from 'node:fs'
 import path from 'node:path'
 import { getCollection } from 'astro:content'
 import License from '@components/misc/License.astro'
@@ -11,6 +10,7 @@ import { licenseConfig, profileConfig, siteConfig } from '../../config/config'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
 import { getReading, validateReadingPaths, topics, generations, kinds } from '../../lib/reading'
 import { getPageSocialImage } from '../../lib/social-images'
+import ShareBar from '../../components/ShareBar.astro'
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => !data.draft)
@@ -35,22 +35,30 @@ const reading = getReading(post)
 const topic = topics[reading.topic]
 const topicUrl = `/archive/?topic=${reading.topic}`
 const socialImage = await getPageSocialImage({ post })
-const jsonLd = {
-  '@context': 'https://schema.org', '@type': 'BlogPosting',
-  headline: post.data.title, description: post.data.description,
-  keywords: post.data.tags,
-  image: new URL(socialImage.src, Astro.site).href,
-  mainEntityOfPage: Astro.url.href,
-  datePublished: formatDateToYYYYMMDD(post.data.published),
-  ...(post.data.updated ? { dateModified: formatDateToYYYYMMDD(post.data.updated) } : {}),
-  author: { '@type': 'Person', name: profileConfig.name, url: Astro.site },
-  inLanguage: (post.data.lang || siteConfig.lang).replace('_', '-'),
-}
-const isDownloadable = post.data.downloadable === true
-const isDev = import.meta.env.DEV
-const hasDevPdfFile = fs.existsSync(path.join(process.cwd(), 'public', 'downloads', 'posts', `${post.slug}.pdf`))
-const useDownloadFile = !isDev || hasDevPdfFile
-const pdfDownloadUrl = useDownloadFile ? url(`/downloads/posts/${post.slug}.pdf`) : url(`/pdf/posts/${post.slug}/`)
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': reading.kind === 'reference' ? 'TechArticle' : 'BlogPosting',
+    headline: post.data.title,
+    description: post.data.description,
+    keywords: post.data.tags,
+    image: new URL(socialImage.src, Astro.site).href,
+    mainEntityOfPage: Astro.url.href,
+    datePublished: formatDateToYYYYMMDD(post.data.published),
+    ...(post.data.updated ? { dateModified: formatDateToYYYYMMDD(post.data.updated) } : {}),
+    author: { '@type': 'Person', name: profileConfig.name, url: Astro.site },
+    inLanguage: (post.data.lang || siteConfig.lang).replace('_', '-'),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Ainekio', item: new URL(url('/'), Astro.site).href },
+      { '@type': 'ListItem', position: 2, name: topic.title, item: new URL(url(topicUrl), Astro.site).href },
+      { '@type': 'ListItem', position: 3, name: post.data.title, item: Astro.url.href },
+    ],
+  },
+]
 const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 const contents = headings.filter(heading => heading.depth <= 2)
 ---
@@ -75,7 +83,8 @@ const contents = headings.filter(heading => heading.depth <= 2)
         {post.data.updated && post.data.updated > post.data.published && <span>Updated <time datetime={post.data.updated.toISOString()}>{dateFormat.format(post.data.updated)}</time></span>}
         <span data-post-minutes={remarkPluginFrontmatter.minutes}>{remarkPluginFrontmatter.minutes} min read</span>
       </p>
-      {reading.kind !== 'reference' && <p class="article-period"><a href={url('/posts/current-status/')}>Current status →</a></p>}
+      {reading.kind !== 'reference' && <p class="article-period"><a href={url('/posts/project-overview/#project-status')}>Current system status & overview →</a></p>}
+      <ShareBar title={post.data.title} description={post.data.description} url={Astro.url.href} />
     </header>
 
     {contents.length >= 3 && <details class="article-contents"><summary>On this page</summary><ol>{contents.map(heading => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol></details>}
@@ -84,13 +93,12 @@ const contents = headings.filter(heading => heading.depth <= 2)
     <Markdown class="mb-6 markdown-content"><Content /></Markdown>
 
     <nav class="article-reading" aria-label="Article reading path" data-reading-path>
-      {nextPost && <div class="article-next"><p class="reading-label">{reading.kind === 'reference' ? 'Next reference' : reading.kind === 'original' ? 'Next entry' : 'Next entry'}</p><a data-reading-next href={getPostUrlBySlug(nextPost.slug)}>{nextPost.data.title} →</a><p>{nextPost.data.description}</p></div>}
-      {previousPosts.length > 0 && <div><p class="reading-label">Previous entries</p><ul>{previousPosts.map(previous => <li><a href={getPostUrlBySlug(previous.slug)}>← {previous.data.title}</a></li>)}</ul></div>}
-      {relatedPosts.length > 0 && <div><h2>Related notes</h2><ul>{relatedPosts.map(related => <li><a href={getPostUrlBySlug(related.slug)}>{related.data.title}</a><span class="related-kind">{generations[getReading(related).generation]} · {kinds[getReading(related).kind]}</span></li>)}</ul></div>}
+      {nextPost && <div class="article-next"><p class="reading-label">{reading.kind === 'reference' ? 'Next reference' : 'Next milestone'}</p><a data-reading-next href={getPostUrlBySlug(nextPost.slug)}>{nextPost.data.title} →</a><p>{nextPost.data.description}</p></div>}
+      {previousPosts.length > 0 && <div><p class="reading-label">Previous entry</p><ul>{previousPosts.map(previous => <li><a href={getPostUrlBySlug(previous.slug)}>← {previous.data.title}</a></li>)}</ul></div>}
+      {relatedPosts.length > 0 && <div><h2>Related reference & notes</h2><ul>{relatedPosts.map(related => <li><a href={getPostUrlBySlug(related.slug)}>{related.data.title}</a><span class="related-kind">{generations[getReading(related).generation]} · {kinds[getReading(related).kind]}</span></li>)}</ul></div>}
       <a class="article-back" href={url(topicUrl)}>All {topic.title.toLowerCase()} articles →</a>
     </nav>
 
-    {isDownloadable && <p class="article-download"><a href={pdfDownloadUrl} download={useDownloadFile ? `${post.slug}.pdf` : undefined}>{useDownloadFile ? 'Download article (PDF)' : 'Open printable view'}</a></p>}
     {licenseConfig.enable && <License title={post.data.title} slug={post.slug} pubDate={post.data.published} class="mb-6 rounded-xl license-container" />}
   </article>
 </MainGridLayout>
@@ -120,8 +128,8 @@ const contents = headings.filter(heading => heading.depth <= 2)
   .article-reading li { margin-top: .6rem; line-height: 1.5; }
   .article-reading li a { display: inline-block; padding-block: .25rem; }
   .related-kind { display: block; font-size: .75rem; color: var(--text-color-muted); }
-  .article-back, .article-download a { display: inline-block; padding-block: .75rem; font-weight: 650; }
+  .article-back { display: inline-block; padding-block: .75rem; font-weight: 650; }
   :global(.article-page [id]) { scroll-margin-top: 6rem; }
   @media (min-width: 1280px) { .article-contents { display: none; } }
-  @media print { .article-reading, .article-download, .article-contents { display: none; } }
+  @media print { .article-reading, .article-contents { display: none; } }
 </style>

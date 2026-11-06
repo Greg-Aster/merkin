@@ -24,7 +24,7 @@ for (const item of catalog) {
   const original = await readFile(source)
   const { source: sourcePath, posterTime, ...details } = item
   const record = { ...details, sourceFile: path.basename(sourcePath), sourceBytes: original.length, sourceSha256: createHash('sha256').update(original).digest('hex') }
-  if (['photo', 'design'].includes(item.kind)) {
+  if (['photo', 'design', 'diagram'].includes(item.kind)) {
     const variants = []
     for (const width of [480, 960, 1600]) {
       const file = `gallery/${item.id}-${width}.webp`

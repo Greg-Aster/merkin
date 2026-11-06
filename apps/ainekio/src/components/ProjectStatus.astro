@@ -16,10 +16,10 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
 <section id="project-status" class="project-status" aria-labelledby="project-status-title" data-status-updated={current.updated.toISOString()}>
   <header>
     <div>
-      <p class="status-label">Project status</p>
+      <p class="status-label">Current system status</p>
       <h2 id="project-status-title">{current.status}</h2>
     </div>
-    <time datetime={current.updated.toISOString()}>As of {dateFormat.format(current.updated)}</time>
+    <time datetime={current.updated.toISOString()}>Updated {dateFormat.format(current.updated)}</time>
   </header>
   <p class="status-summary">{current.note}</p>
   {!compact && <dl class="status-areas">
@@ -34,10 +34,10 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
     ))}
   </dl>}
   {!compact && <div class="status-next">
-    <span class="status-label">Next step</span>
+    <span class="status-label">Active focus</span>
     <p>{current.nextStop}</p>
   </div>}
-  {compact && <a class="status-detail" href={url('/posts/current-status/')}>Status and next steps →</a>}
+  {compact && <a class="status-detail" href={url('/posts/project-overview/#project-status')}>System status & architecture overview →</a>}
 </section>
 
 <style>

@@ -3,41 +3,76 @@ import { getCollection, getEntry } from 'astro:content'
 import { parseJournalContent } from '@merkin/blog-core/utils/journal-utils'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
 import Markdown from '../components/misc/Markdown.astro'
+import ProjectStatus from '../components/ProjectStatus.astro'
 import { topics, getReading, validateReadingPaths, generations } from '../lib/reading'
 import { url, getPostUrlBySlug } from '../utils/url-utils'
 
-const source = await getEntry('updates','site-updates')
+const source = await getEntry('updates', 'site-updates')
 if (!source) throw new Error('Build journal requires updates/site-updates')
-const feed = await parseJournalContent(source.body,source.data.entries,{baseUrl:import.meta.env.BASE_URL})
-const posts = await getCollection('posts',({data})=>!data.draft)
+const feed = await parseJournalContent(source.body, source.data.entries, { baseUrl: import.meta.env.BASE_URL })
+const posts = await getCollection('posts', ({ data }) => !data.draft)
 validateReadingPaths(posts)
-const stories = Object.entries(topics).filter(([id])=>!['overview','v1'].includes(id)).map(([id,topic])=>{
-  const entries = posts.filter(post=>getReading(post).topic===id && getReading(post).kind==='journal')
-  const start = entries.find(post=>!entries.some(previous=>getReading(previous).next===post.slug))
-  if (!start) throw new Error(`Topic needs a story entry point: ${id}`)
-  return { ...topic, start }
+const subsystemTopics = Object.entries(topics).filter(([id]) => !['overview', 'v1'].includes(id)).map(([id, topic]) => {
+  const count = posts.filter(post => getReading(post).topic === id).length
+  return { id, ...topic, count }
 })
-const dateFormat = new Intl.DateTimeFormat('en-US',{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'})
+const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 ---
-<MainGridLayout title="Ainekio Build Journal" description="Robot build notes, design changes, and test results." oneColumn={true}>
+<MainGridLayout title="Ainekio Build Journal & Engineering Milestones — 12-Servo ESP32-P4 Quadruped" description="Chronological engineering milestones, hardware revisions, closed-loop 4th-wire servo feedback verification, MuJoCo/MJX neural gait training, and MetaHuman OS updates." oneColumn={true}>
+  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Ainekio Build Journal & Engineering Milestones',
+    description: 'Chronological engineering milestones documenting the twelve-servo ESP32-P4 robot body, closed-loop 4th-wire motion verification, Freestyle & neural gait training, and the MetaHuman OS brain.',
+    url: Astro.url.href,
+  })}></script>
   <article class="card-base build-journal" data-pagefind-body>
-    <header><p class="journal-eyebrow">Ainekio</p><h1>Build journal</h1><nav aria-label="Journal resources"><a href={url('/posts/current-status/')}>Current status →</a><a href={url('/archive/?kind=journal')}>Filter journal articles →</a><a href={url('/project-guide/')}>Development tracker →</a></nav></header>
-    <section class="journal-paths" aria-labelledby="journal-stories"><h2 id="journal-stories">Build history by topic</h2><ul>{stories.map(story=><li><a href={getPostUrlBySlug(story.start.slug)}>{story.title} →</a></li>)}</ul><a href={url('/posts/v1-original-posts/')}>Original eight-servo journal →</a></section>
-    <section aria-labelledby="journal-latest"><h2 id="journal-latest">Latest entries</h2>
-      <div class="journal-entries">{feed.entries.map(entry=>{
-        const post=posts.find(post=>`/posts/${post.slug}/`===entry.url)
+    <header>
+      <p class="journal-eyebrow">Ainekio · Development Log</p>
+      <h1>Build journal</h1>
+      <p>Cohesive engineering milestones documenting the twelve-servo ESP32-P4 robot body, closed-loop 4th-wire motion verification, Freestyle & neural gait training, and the MetaHuman OS brain.</p>
+      <nav aria-label="Journal resources">
+        <a href={url('/posts/project-overview/')}>System overview →</a>
+        <a href={url('/archive/?kind=reference')}>Technical reference guides →</a>
+        <a href={url('/archive/?kind=journal')}>Filter journal articles →</a>
+        <a href={url('/gallery/')}>Photos, videos & diagrams →</a>
+      </nav>
+    </header>
+
+    <div class="journal-status">
+      <ProjectStatus />
+    </div>
+
+    <section class="journal-paths" aria-labelledby="journal-stories">
+      <h2 id="journal-stories">Explore by subsystem</h2>
+      <ul>
+        {subsystemTopics.map(topic => (
+          <li>
+            <a href={url(`/archive/?topic=${topic.id}`)}>{topic.title} ({topic.count}) →</a>
+          </li>
+        ))}
+      </ul>
+      <a href={url('/posts/v1-original-posts/')}>Original V1 eight-servo build archive →</a>
+    </section>
+
+    <section aria-labelledby="journal-latest">
+      <h2 id="journal-latest">Chronological milestones</h2>
+      <div class="journal-entries">{feed.entries.map(entry => {
+        const post = posts.find(post => `/posts/${post.slug}/` === entry.url)
         return <article class="journal-entry">
-          <div><time datetime={entry.date.toISOString()}>{dateFormat.format(entry.date)}</time>{post && <p class="journal-context">{topics[getReading(post).topic].title} · {generations[getReading(post).generation]}</p>}
-          <h3>{entry.url?<a href={entry.url.startsWith('/')?url(entry.url):entry.url}>{entry.title}</a>:entry.title}</h3>
-          <Markdown class="journal-summary"><div set:html={entry.contentHtml} /></Markdown>
-          {entry.location && <p class="journal-context">{entry.location}</p>}
-          {entry.mileage && <p class="journal-context">{entry.mileage}</p>}
+          <div>
+            <time datetime={entry.date.toISOString()}>{dateFormat.format(entry.date)}</time>
+            {post && <p class="journal-context">{topics[getReading(post).topic].title} · {generations[getReading(post).generation]}</p>}
+            <h3>{entry.url ? <a href={entry.url.startsWith('/') ? url(entry.url) : entry.url}>{entry.title}</a> : entry.title}</h3>
+            <Markdown class="journal-summary"><div set:html={entry.contentHtml} /></Markdown>
+            {entry.location && <p class="journal-context">{entry.location}</p>}
+            {entry.mileage && <p class="journal-context">{entry.mileage}</p>}
           </div>
           {post?.data.image && <a class="journal-image" href={getPostUrlBySlug(post.slug)} tabindex="-1" aria-hidden="true"><img src={url(post.data.image)} alt="" loading="lazy" decoding="async" /></a>}
         </article>
       })}</div>
     </section>
-    {feed.introHtml && <details class="journal-context-notes"><summary>Earlier work</summary><Markdown class="journal-notes"><div set:html={feed.introHtml} /></Markdown></details>}
+    {feed.introHtml && <details class="journal-context-notes"><summary>About the V1 & V2 archives</summary><Markdown class="journal-notes"><div set:html={feed.introHtml} /></Markdown></details>}
   </article>
 </MainGridLayout>
 
@@ -50,6 +85,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US',{month:'long',day:'numeric',y
  a:hover { text-decoration:underline; }
  nav { display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;margin-top:.75rem; }
  nav a,.journal-paths a { display:inline-block;padding-block:.6rem; }
+ .journal-status { margin: 1.5rem 0; }
  .journal-paths { margin:1.5rem 0 2rem;padding:1.25rem;border:1px solid color-mix(in srgb,var(--primary) 25%,transparent);border-radius:.6rem; }
  h2 { font-size:1.3rem;font-weight:700; }
  .journal-paths ul { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 1rem;margin:.5rem 0; }
