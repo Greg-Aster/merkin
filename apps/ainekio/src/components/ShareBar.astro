@@ -16,7 +16,6 @@ const encodedTitle = encodeURIComponent(title)
   <button type="button" class="share-btn" data-native-share hidden>Share…</button>
   <a class="share-link" href={`https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`} target="_blank" rel="noopener noreferrer">Reddit</a>
   <a class="share-link" href={`https://news.ycombinator.com/submitlink?u=${encodedUrl}&t=${encodedTitle}`} target="_blank" rel="noopener noreferrer">Hacker News</a>
-  <a class="share-link" href={`https://x.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`} target="_blank" rel="noopener noreferrer">X / Twitter</a>
 </aside>
 
 <script>
