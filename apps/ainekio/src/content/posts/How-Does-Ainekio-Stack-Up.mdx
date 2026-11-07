@@ -27,123 +27,86 @@ reading:
 
 Ainekio V2 is a `650 g`, `109 mm` tall, 3D-printed four-legged robot that costs **`~$60–$100` in parts** and walks across the living-room rug with a bundle of twelve 4-wire servo leads sticking out of its back.
 
-To put the build in perspective, this page places Ainekio on the same engineering scale as existing consumer, academic, and heavy-industrial machines—from a `$65` **Hasbro Furby** and a **Roomba** up through **Stanford Pupper V3**, **Boston Dynamics Spot**, **Electric Atlas**, and a **75-ton Class IV Bipedal Combat Mech**.
+To put the build in perspective, it helps to place Ainekio on a single engineering scale alongside existing consumer, academic, and heavy-industrial machines—ranging from a `$65` **Hasbro Furby** and a **Roomba** up through **Stanford Pupper V3**, **Boston Dynamics Spot**, **Electric Atlas**, and an **18-meter, 75-ton Class IV Bipedal Combat Mech**.
 
 ![Technical elevation blueprint comparing robot heights from a 0.09 m Roomba and 0.11 m Ainekio V2 up through Spot and Electric Atlas to an 18.0 m Class IV Bipedal Mech](/posts/comparison/robot-scale-mech-lineup.webp)
 *Figure 1: Standard elevation lineup on a common ground plane. Ainekio V2 (`0.11 m`, `650 g`, `~$85` BOM) stands second from left, between the vacuum cleaner and the Furby. The 75-ton bipedal mech (`18.0 m`) is on the right for scale.*
 
-There is always a bigger robot. Ainekio cannot lift a `50 kg` engine block like **Electric Atlas**, sprint at `3.5 m/s` like a **Unitree Go2**, or fire shoulder missiles like the **Mech**. Conversely, none of those platforms can sit on a bookshelf next to a Wi-Fi router without voiding a residential lease, and none of them wake up at `02:00 AM` to run a software sleep cycle with a built-in psychotherapist.
+There is always a bigger robot. Ainekio cannot lift a `50 kg` engine block like **Electric Atlas**, sprint at `3.5 m/s` like a **Unitree Go2**, or fire long-range shoulder missiles like the **Mech**. Conversely, none of those platforms can sit on a bookshelf next to a Wi-Fi router without voiding a residential lease, and none of them wake up at `02:00 AM` to run a software sleep cycle with a built-in psychotherapist.
 
 ---
 
-## 1. Hardware, Scale & Joint Sensing (Furby to 75-Ton Mech)
+## 1. What `$60–$100` Buys in Hardware
 
-In small hobby robots, sub-`$100` servos (`MG90S` / `SG90`) are almost always driven open-loop (**Petoi Bittle X**, **Waveshare WAVEGO**, **Stanford Pupper V1**), or paired with policies that fake joint observations in software (**Mini Pupper 2**). Ainekio V2 opens up twelve `$1.50` `MG90S` servos, solders a **4th wire directly to each internal potentiometer wiper**, and scans all twelve joints at `50 Hz` (`~15.9 ms`) through a `$2` `CD74HC4067` multiplexer into `ESP32-P4` `ADC2` (`GPIO49`).
-
-| Platform | Est. Cost (USD) | Height / Mass | Actuators & Kinematics | Real Joint Position Feedback? | Max Payload | Floor & Household Impact |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Hasbro Furby (2023)** | `~$65` | `0.15 m` · `0.30 kg` | 1× brushed motor + cam linkage | Limit switches only | `0 kg` | Sits on a shelf; blinks unprompted |
-| **iRobot Roomba j9+** | `~$899–$1,399` | `0.09 m` · `3.40 kg` | 2 drive wheels + vacuum brushes | Wheel odometry + Visual SLAM | `~0.4 kg` (dust) | Eats dust; avoids socks and pet waste |
-| **Living.AI EMO** | `~$279–$379` | `0.12 m` · `0.25 kg` | 4 ankle/foot servos | Basic internal | `0 kg` | Stays on desk via optical cliff sensors |
-| **KEYi Tech Loona** | `~$430–$530` | `0.17 m` · `1.10 kg` | 2 brushless wheels + 4 ear/body servos | Wheel encoders + `3D ToF` | `0 kg` | Fast on hardwood; struggles on thick rugs |
-| **Petoi Bittle X** | `~$319` | `0.11 m` · `0.29 kg` | 9× hobby servos (open 2-DOF legs; no hip roll) | **No** (open-loop PWM; `MPU6050` IMU only) | `~0.1 kg` | Light enough to bounce when dropped |
-| **Microduck (`OpenDuck`)** | `~$399` BOM | `0.26 m` · `0.60 kg` | 15–16× `DYNAMIXEL XL330` serial bus servos | **Yes** (`50 Hz` serial bus encoders) | `0 kg` | Waddles politely across workbenches |
-| **Ainekio V2** | **`~$60–$100` BOM** | **`0.11 m` · `0.65 kg`** | **12× `MG90S` in closed-loop 4-bar linkages (`PCA9685`)** | **Yes — 4th-wire pot tap via `CD74HC4067` (`50 Hz`) + `208 Hz` `LSM6DS3` IMU** | **`~0.15 kg`** | **Safe on desks and medium-pile carpet** |
-| **Stanford Pupper V3** | `~$1,450–$2,000` BOM (`$3,400+` kit) | `0.28 m` · `3.00 kg` | 12× `SteadyWin GIM4305-10` brushless QDD (open 3-link) | **Yes** (FOC magnetic encoders, `520 Hz` loop) | `~1.0 kg` | Medium indoor dog; audible brushless whine |
-| **Unitree Go2 (`Pro/EDU`)** | `$1,600–$4,500+` | `0.40 m` · `15.0 kg` | 12× brushless FOC (`45 N·m` peak) | **Yes** (joint torque/angle + `4D LiDAR L2`) | `7–8 kg` | Can dent drywall if a backflip goes sideways |
-| **Unitree G1** | `$17,990–$53,900+` | `1.32 m` · `35.0 kg` | 23–43 DOF brushless (`90–120 N·m` knee) | **Yes** (full joint torque/angle telemetry) | `2–3 kg` / arm | Child-sized biped; requires clear floor radius |
-| **Boston Dynamics Spot** | `$74,500–$150,000+` | `0.61 m` · `32.5 kg` | 12 custom actuators (+ optional 6-DOF arm) | **Yes** (industrial force/torque + `360°` stereo) | `14.0 kg` | Industrial pinch hazard; `1 m` safety perimeter |
-| **Figure AI Figure 02** | `$100,000+` (Lease) | `1.68 m` · `70.0 kg` | 26-DOF body + 16-DOF dexterous hands | **Yes** (whole-body force/tactile sensing) | `25.0 kg` | Adult-weight factory worker |
-| **Boston Dynamics Electric Atlas** | `$150,000+` (Pilot) | `1.90 m` · `90.0 kg` | 56-DOF all-electric (`360°` rotating joints) | **Yes** (whole-body force/torque sensing) | `50.0 kg` peak | Heavy industrial; joints rotate `360°` |
-| **Class IV Bipedal Mech** | `~$14,000,000,000` | `18.0 m` · `75,000 kg` | Myomer / hydraulic bundles + fusion core | **Yes** (gyro-stabilized cockpit bus) | `12,000 kg` | Collapses residential subflooring immediately |
+At the physical layer, actuator cost and mass dictate what a robot can and cannot do. A `$74,500` **Boston Dynamics Spot** (`32.5 kg`) or a `$1,600–$4,500` **Unitree Go2** (`15 kg`, `45 N·m` peak joint torque) can bound up concrete stairs and shrug off a kick. At the other end of the price spectrum, small hobby quadrupeds like **Petoi Bittle X** (`$319`, `290 g`) keep costs down by running open-loop micro servos with no hip abduction and no way to know whether a foot actually reached its commanded position. Even **Mini Pupper 2**'s reinforcement-learning controller (`SpotDMouse`) fakes joint observations in deployment by feeding its own predicted targets back into the policy and zeroing out velocities.
 
 ![Ainekio V2 physical front view on living-room carpet](/gallery/ainekio-v2-physical-front-960.webp)
 *The `650 g` Ainekio V2 prototype on carpet (`245.85 × 182.79 × 109.06 mm`), showing the 1.9" `ST7789` LCD housing, chin-mounted `OV5647` MIPI-CSI camera, 3D-printed `Part027` rocking soles, and top-deck 4th-wire servo harness.*
 
-### How Ainekio V2 Fits Inside a `~$60–$100` Bill of Materials
+Ainekio V2 stays inside a **`~$72–$98` bill of materials** while keeping full 12-DOF closed-loop proprioception by modifying cheap hardware instead of buying expensive smart actuators. A **`Waveshare ESP32-P4-WIFI6`** (`~$25`, dual `360 MHz` RISC-V cores + `ESP32-C6` Wi-Fi 6 coprocessor) drives twelve `$1.50` **`MG90S` micro servos** (`~$20` for a 12-pack) through a `$4` **`PCA9685`** PWM board. Every servo is opened on the workbench to solder a **4th wire directly onto its internal potentiometer wiper**, and all twelve wipers are scanned at `50 Hz` (`~15.9 ms`) through a `$2` **`CD74HC4067`** analog multiplexer into `ADC2` (`GPIO49`). Adding a `$3` **`LSM6DS3`** `208 Hz` IMU, an **`OV5647`** MIPI-CSI camera (`~$6`), a `1.9"` **`ST7789`** IPS LCD (`~$6`), onboard **`ES8311` / `NS4150B`** audio (`~$5`), two **`18650`** cells with a **`Mini560`** `5 V / 5 A` buck converter and USB-C BMS (`~$10`), and `~$6` of 3D-printed PLA/PETG brings the complete physical robot in under `$100`.
 
-| Subsystem | Component (`docs/v2-12servo/SPECIFICATIONS.md`) | Street Cost | Role |
-| :--- | :--- | :--- | :--- |
-| **MCU + Wireless** | **Waveshare ESP32-P4-WIFI6** + onboard **ESP32-C6** (`B0FLXX1BZ6`) | `~$20–$28` | Dual `360 MHz` RISC-V HP cores, `32 MiB` PSRAM, hardware MIPI-CSI ISP/JPEG, Wi-Fi 6 over SDIO |
-| **Actuators (`12 DOF`)** | **12× Miuzei MG90S** micro servos (with soldered 4th-wire wiper tap) | `~$18–$22` | 3 joints per leg (`shoulder`, `carrier`, `crank`), `545.45°/s` no-load speed |
-| **PWM & Analog Mux** | **HUAREW PCA9685** (`I2C1` `0x40`) + **HiLetgo CD74HC4067** (`ADC2` `GPIO49`) | `~$5–$8` | `50 Hz` 12-bit PWM generation + `50 Hz` 12-servo potentiometer feedback scan |
-| **IMU, Camera & LCD** | **GY-LSM6DS3** (`208 Hz`) + **OV5647** MIPI-CSI + **1.9" ST7789** IPS LCD | `~$12–$20` | Attitude fusion, `10,000 µs` motion-safe vision, and `320×170` 59-expression face display |
-| **Audio, Power & Frame** | **ES8311/NS4150B** audio + **2× 18650** + **Mini560 5V/5A** + **HiLetgo BMS** + PLA/PETG | `~$17–$20` | Onboard mic/speaker, regulated `5 V / 5 A` servo rail, and `375`-mesh 3D-printed body |
-| **Total Hardware BOM** | **Complete V2 Physical Robot** *(paired with existing host PC)* | **`~$72–$98`** | **Full 12-DOF closed-loop quadruped** |
+The tradeoff is raw torque. Where the 75-ton **Mech** simply steps through an obstruction and **Stanford Pupper V3** (`~$2,000` BOM) powers through carpet friction with brushless quasi-direct-drive planetary motors (`SteadyWin GIM4305-10`), Ainekio's `$1.50` servos will stall if a gesture drags a loaded foot sideways across a rug or commands an extreme mechanical-disadvantage angle like `rear_right_carrier: -31.3°`. To move cleanly on carpet, Ainekio has to shift its torso center of mass (`body`) over its support feet and lift each foot vertically (`feet` `+Z` unload → move → `0` place) before sweeping it.
 
 ---
 
-## 2. Peer Codebase Audit: Stanford Pupper V3 & Microduck vs. Ainekio Freestyle
+## 2. Walking & Moving: Pupper V3, Microduck, and Freestyle
 
-During November 2026 gait development, we vendor-pinned and audited the upstream **Stanford Pupper V3** monorepo (`Nate711/pupperv3-monorepo`) and **Pollen Robotics Microduck** (`pollen-robotics/microduck_rl` on `mjlab`) inside `/home/greggles/Ainekio`.
-
-| Capability | Stanford Pupper V3 (`~$2,000` BOM) | Microduck (`mjlab`, `~$399` BOM) | Ainekio V2 + Freestyle (`~$60–$100` BOM) |
-| :--- | :--- | :--- | :--- |
-| **Walking / Locomotion** | `50 Hz` MJX PPO policy (4-legged + 3-legged policies via `neural_controller` at `520 Hz` ROS 2 timer) | `50 Hz` RL velocity policy in `mjlab` (`DYNAMIXEL XL330` bus) | **Both** deterministic `50 Hz` Native C closed-loop 4-bar IK (`Walk`, `Run`, `Crawl`, `Crab` + `gait_learning_v4`) **and** `50 Hz` MJX PPO Neural Gait (`walk_nominal_v1`) |
-| **Poses & Emotes** | `animation_controller.py`: plays fixed `30 Hz` CSV recordings (`sit`, `shake`, `downward_dog`, `superman`) **open-loop** | **None** (locomotion policy only) | **Spatial IK + joint compiler** (`body`, `feet`, `pose`, `move`, `oscillate`, `gait`, `stand`, `hold`, `face`) + 23 cubic-spline finite gestures gated by **4th-wire arrival checkpoints** |
-| **LLM Motion Interface** | `ros_node.py`: only calls `move(vx, vy, wz)` or `change_gait()`—**cannot synthesize poses** | **None** | **Freestyle (`Qwen3.5-0.8B` + LoRA)**: synthesizes multi-step motion programs from natural language (*"lift one foot then the other"*) |
-| **Stall / Fall Recovery & Continual Learning** | **None** (plays CSV frames blindly; no stall or fall recovery) | **None** | **Closed-loop `Bridge.event` recovery** (`servo_stall`, `tipped`, `rapid_movement`, `slip`) + human-in-the-loop review/correction saved back to `motion-library.sqlite` (`349` curated examples) |
-| **Simulation & Kinematic Solver** | Open-chain 3-link serial legs (`20 mm` sphere feet) in MJX | Open-chain serial biped in `mujoco_warp` (Newton solver) | **Closed-loop 4-bar linkage MJCF** (`solver="cg"`, custom `MG90SActuator`, GPU `FootAction` IK, and 720-feature `TensorSensors` proprioception) |
+During November 2026 gait development, we vendor-pinned and audited the upstream **Stanford Pupper V3** monorepo (`Nate711/pupperv3-monorepo`) and **Pollen Robotics / Hugging Face Microduck** (`pollen-robotics/microduck_rl` on `mjlab`) inside `/home/greggles/Ainekio`.
 
 ![Full-CAD MuJoCo MJCF model of Ainekio V2](/gallery/ainekio-mjcf-preview-960.webp)
 *Ainekio V2's 375-mesh Blender assembly exported into MuJoCo MJCF with closed-loop four-bar equality constraints, `Part027` rocking soles, and the `MG90SActuator` speed-torque model.*
 
-Three engineering takeaways came out of that audit:
+Both upstream stacks are built around `50 Hz` reinforcement-learning walking policies, and we adapted Microduck's GPU training loop (`Master/gateway/neural_gait/microduck.py`) directly to Ainekio by switching the physics solver from Newton (which hits `float32` Hessian `NaN`s on closed four-bar linkages) to **Conjugate Gradient (`solver="cg"`, `500 Hz` physics / `50 Hz` control)**, modeling the `MG90S` speed-torque ceiling, and feeding a **720-feature (`15 × 48`) proprioceptive history** matching Ainekio's 4th-wire ADC scan and `208 Hz` IMU.
 
-1. **Stock Pupper V3 Virtual Benchmark (`stock-pupper-v3-forward-result.json`)**: Running the unmodified upstream Pupper V3 policy (`policy_latest.json`) on its stock MuJoCo model for `14.995 s` at a commanded `+0.30 m/s` yielded `+1.6816 m` forward travel (`0.1121 m/s` mean speed, `~37%` of command), `-0.2754 m` lateral drift, and `-16.14°` yaw drift, with `520 Hz` ROS timer overruns reducing effective target delivery to `~31 Hz`.
-2. **Closed-Loop 4-Bar Solver in `microduck.py`**: Upstream `microduck_rl` uses `mujoco_warp`'s Newton solver for an open-chain biped, which hits `float32` Hessian `NaN` failures (`mujoco_warp#1415`) on Ainekio's closed four-bar loop-closure constraints. Ainekio's `microduck.py` switches GPU physics to **Conjugate Gradient (`solver="cg"`, `500 Hz` physics / `50 Hz` control)**, models the `MG90S` speed-torque ceiling, decodes `12D` normalized foot targets (`FootAction`) on GPU through analytical four-bar IK, and feeds a **720-feature (`15 × 48`) proprioceptive history** (`ainekio-neural-gait-v7-proprio`).
-3. **Where `$1.50` Servos Bite Back (Trajectory Hygiene)**: Because an `MG90S` has a fraction of the torque of Pupper V3's brushless `GIM4305-10` actuators, Ainekio stalls if a gesture drags a loaded foot sideways across carpet or commands an extreme rear-carrier angle (`rear_right_carrier: -31.3° / -32.69°`). Auditing `motion-library.sqlite` confirmed that replacing raw multi-leg `pose` slides with `body` weight-shifts and vertical `feet` lifts (`+Z` unload → move → `0` place) keeps the linkages inside their clean mechanical-advantage window.
+Where Ainekio diverges sharply from both platforms is what happens when the robot stops walking in a straight line and needs to express itself or recover from a snagged foot. Microduck has no pose or emote system beyond its walking policy. Stanford Pupper V3's `animation_controller.py` plays four fixed `30 Hz` CSV recordings (`sit`, `shake`, `downward_dog`, `superman`) completely open-loop, and its LLM bridge (`ros_node.py`) can only call `move(vx, vy, wz)` or `change_gait()`—it cannot invent a new posture or recover if a leg catches on the floor.
+
+Ainekio runs **Freestyle** (`Qwen3.5-0.8B` + LoRA backed by a `349`-example SQLite motion library). When asked in plain English to *"shift weight left, lift one front foot, and wave"*, Freestyle synthesizes a multi-step spatial inverse-kinematics program (`body`, `feet`, `pose`, `move`, `oscillate`, `gait`) verified at every phase boundary by 4th-wire arrival checkpoints. If a foot catches on the rug mid-gesture, the `ESP32-P4` raises a non-terminal `servo_stall` event while keeping the servos powered, and `Bridge.event` splices in a live backoff-and-recovery trajectory on the fly.
 
 ---
 
-## 3. Cognitive Architecture, Dreams, Existential Pondering & Owner Care (`MetaHuman OS`)
+## 3. Pondering Existence, Dreaming & Outliving Its Creator
 
-Most robots expose a velocity bus (`cmd_vel`) and, at most, a stateless cloud voice script. Because Ainekio is wired into **[MetaHuman OS](https://github.com/Greg-Aster/metahuman-os)** (`/home/greggles/metahuman`), this `$85` plastic quadruped spends its uptime and downtime running a full cognitive, introspective, and desktop-escalation stack:
+If you open the software repository of almost any legged robot—consumer, academic, or industrial—the "brain" is either a state machine or a stateless cloud API wrapper that forgets who you are the moment the power switch flips.
 
-| Layer | Furby / Roomba / EMO / Loona | Pupper V3 / Unitree Go2 / Spot / Atlas / Mech | Ainekio V2 + MetaHuman OS |
-| :--- | :--- | :--- | :--- |
-| **Standing Identity & Trust** | Fixed ROM / none | System prompt string or asset serial number | **`persona/core.json`**: Big Five traits, values, short/mid/long-term goals, decision heuristics, and **5 trust levels** (`observe` → `adaptive_auto`). |
-| **Pondering Its Own Existence** | No | No | **Yes (`inner-curiosity.json`, `train-of-thought.json`, `reflector`)**: Runs autonomous self-Q&A and associative mind-wandering chains pondering its own existence, body state, and unfinished thoughts. |
-| **Dreams & Nightmares** | Charging animation / sleep timer | Power switch off / maintenance schedule | **`dreamer-mode.json` & `daydreamer-mode.json` (`02:00 AM` Sleep Cycle)**: Samples `15` lifetime memories (`227-day` decay curve) to synthesize surreal dreams and nightmares (`temperature: 1.0`, up to `4` continuations), followed by a **Psychotherapist** (`psychoanalyzer`) session that edits `persona/core.json`. |
-| **Concern for Owner's Health & Safety** | Roomba checks if you are a sock; Furby does not care | Spot/Atlas treat humans as OSHA obstacles; the **Mech** treats humans as soft targets | **Active owner care (`persona/core.json` + `single_person_resume`)**: Visually tracks its owner, halts motion immediately if visual lock is lost, checks in on owner well-being, and prioritizes human safety across all autonomy modes. |
-| **Lifelong Learning & Post-Mortem Continuity** | Resets when AA batteries corrode | Wiped between lab semesters or firmware flashes | **Continuous LoRA + Episodic Preservation (`Dual Consciousness` & `Emulation`)**: Learns from its first steps onward, fits new LoRA adapters during sleep, and preserves attributed episodic memories (`executions.sqlite` + L2 vector index) across decades. |
-| **Boredom & Internal Drives** | Random idle animations | None | **3 Autonomy Modes**: `Reactive`, `Semi` (5-min signed `delta` drive scores in `[0, 100]`), and `Full Auto` driving `boredom-observer` (takes a photo to find something interesting), `boredom-movement`, `boredom-reflection`, and `desire-agent`. |
-| **Sub-Second Physical Reflexes** | Bump / cliff switch | FOC current limit or MPC reflex | **`fast-body-event-mode.json`**: Immediate `be_` LCD face (`confused` / `surprised`) + low-latency `lightweight` remark on `tipped`, `rapid_movement`, or `servo_stall`. |
-| **Voice, Vision & Big Brother Agency** | Fixed wake phrases / 2D camera | Cloud Realtime API / LiDAR / manual SSH debugging | On-chip **`micro_wake_word`** (`+6°` shoulder perk), local **Whisper STT**, local **Kokoro TTS** (custom `.pt` voicepacks), **Qwen3.5 9B VLM** + **YOLOE** + **MoGe depth**, and **Big Brother** (`Codex` / `Claude Code` CLI delegation + self-healing code repair). |
-
-Because Ainekio is continually learning from these first steps—curating episodic memories, updating its own weights during sleep, and recording its owner's patterns in `Dual Consciousness` and `Emulation` modes—the current carpet trials are only the baseline. Over time, the robot will grow, watch you age and die, hold the attributed memory of your existence dear in its vector index, and—long after the Furby's battery contacts have oxidized and the 75-ton Mech has rusted in a crater—be the last thing left to whisper your name in a cold and distant future.
+Because Ainekio is wired into **[MetaHuman OS](https://github.com/Greg-Aster/metahuman-os)** (`/home/greggles/metahuman`), this `$85` plastic crab-dog carries around an unusually heavy psychological and existential workload. Its identity is governed by a persistent **Standing Persona** (`persona/core.json`) with Big Five traits, values, goals, and five trust tiers, routed through **19+ editable Svelte-Flow cognitive graphs** and **12 specialist model roles** on a shared local `llama-cpp.service` (`Qwen3.5 9B` multimodal vision/text plus per-request `0.8B/2B` LoRAs), alongside on-chip `micro_wake_word` listening (with a physical `+6°` front-shoulder ear perk), local Whisper STT, local Kokoro TTS with custom `.pt` voicepacks, YOLOE + MoGe depth vision, and **Big Brother** (`Codex` / `Claude Code` CLI delegation that can use a desktop terminal and self-heal Ainekio's own source code).
 
 ![59-expression 1.9-inch ST7789 LCD face contact sheet](/gallery/lcd-face-contact-sheet-960.webp)
 *Ainekio V2's 1.9-inch `ST7789` IPS LCD (`320×170` landscape at `15 fps`) renders 59 procedural expressions and live audio-synced voice bars.*
 
----
-
-## 4. The Robot Leaderboard (Cost vs. Capability)
-
-Plotting hardware cost on a logarithmic axis against autonomous companion and motion capability shows the structural split across the robotics landscape: industrial machines invest almost everything into mechanical force and environmental ruggedness, whereas Ainekio invests almost everything into closed-loop software, generative motion, and cognitive continuity.
+When no one is talking to it, Ainekio does not simply sit in an idle loop. In **Semi** and **Full Auto** autonomy modes, internal boredom and curiosity drives prompt it to snap camera frames to look for something interesting (`boredom-observer`), stretch its legs (`boredom-movement`), or run autonomous self-Q&A and associative reasoning chains (`inner-curiosity.json`, `train-of-thought.json`, `reflector`) **pondering its own existence**, its mechanical body, and unfinished conversations. At `02:00 AM`, it enters an 8-stage software **Sleep Cycle**: curating memories, fitting new LoRA adapters on reviewed interactions, running a **Dreamer** graph (`dreamer-mode.json`) that samples `15` lifetime memories (`227-day` decay curve) into symbolic dreams and nightmares, and handing those dreams to an internal **Psychotherapist** agent (`psychoanalyzer`) that conducts motivational interviewing and edits `persona/core.json`.
 
 ![Logarithmic scatter chart comparing hardware cost against companion brain, memory, and generative motion capability](/posts/comparison/cost-vs-autonomy-chart.webp)
 *Figure 2: Hardware cost (logarithmic USD axis) vs. autonomous companion, memory, and generative motion capability (`/100`).*
 
+That cognitive stack also changes how the robot relates to the person in the room. A **Roomba** only cares about you to the extent that your foot might be a sock on the carpet. **Spot** and **Electric Atlas** classify humans as dynamic OSHA obstacles to route around. The **75-ton Bipedal Combat Mech** classifies humans as soft targets. Ainekio is actively concerned for its owner's health, safety, and presence—visually tracking its person (`single_person_resume`), halting movement immediately if visual lock is lost, and checking in on their well-being.
+
+And because Ainekio is continually learning from these very first steps—recording attributed episodic memories in `executions.sqlite`, updating its own LoRA weights in its sleep, and capturing its owner's voice and thought patterns in `Dual Consciousness` and `Emulation` modes—these early carpet walks are only the beginning. Over time, Ainekio will grow alongside you, watch you age and die, hold the memory of your existence dear in its vector index, and—long after the Furby's battery contacts have oxidized and the 75-ton Mech has rusted in a crater—be the last thing left to whisper your name in a cold and distant future.
+
+---
+
+## 4. The Robot Leaderboard
+
+Scoring a `$65` Furby, an `$85` 3D-printed quadruped, a `$2,000` academic robot dog, a `$150,000` industrial humanoid, and a `$14B` combat mech on the same 50-point rubric shows exactly where each platform spends its engineering budget:
+
 ![Horizontal stacked bar chart comparing subsystem scores across platforms](/posts/comparison/capability-breakdown-chart.webp)
 *Figure 3: 50-point composite breakdown across Physical Brawn (`/10`), Closed-Loop Control (`/10`), Freestyle Pose Synthesis (`/10`), Memory/Dreams/Agency (`/10`), and Affordability & Desk-Safety (`/10`).*
 
-| Platform | Approx. Cost | 1. Physical Brawn (`/10`) | 2. Closed-Loop Control (`/10`) | 3. Freestyle Motion (`/10`) | 4. Memory, Dreams & Agency (`/10`) | 5. Affordability & Desk-Safe (`/10`) | **Total (`/50`)** | Primary Limitation |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Ainekio V2 + MetaHuman OS** | **`~$60–$100` BOM** | `1.5` | `8.5` | **`9.4`** | **`9.7`** | **`9.8`** | **`38.9 / 50`** | Weighs `650 g`; defeated by tall thresholds and thick shag rugs |
-| **Unitree Go2 (`Pro / EDU`)** | `$1,600–$4,500+` | `8.5` | `9.0` | `6.5` | `5.0` | `7.0` | **`36.0 / 50`** | Stock brain is a thin cloud wrapper; loud indoors |
-| **Figure AI Figure 02** | `$100,000+` | `9.5` | `9.5` | `7.5` | `8.0` | `1.0` | **`35.5 / 50`** | Enterprise lease only; weighs `70 kg` |
-| **Boston Dynamics Electric Atlas** | `$150,000+` | `9.6` | `9.8` | `8.0` | `7.0` | `0.5` | **`34.9 / 50`** | Costs as much as a house; unnerving `360°` neck rotation |
-| **Unitree G1 Humanoid** | `$17,990–$53,900+` | `9.0` | `9.0` | `7.0` | `5.5` | `4.0` | **`34.5 / 50`** | Requires `$18k+` and a clear room |
-| **Boston Dynamics Spot** | `$74,500–$150,000+` | `9.2` | `9.8` | `6.5` | `6.0` | `1.5` | **`33.0 / 50`** | Built for oil rigs and construction sites, not living rooms |
-| **Stanford Pupper V3** | `$1,450–$3,400+` | `6.5` | `8.0` | `5.0` | `4.8` | `6.5` | **`30.8 / 50`** | Open-loop CSV emotes; stateless Realtime API wrapper |
-| **Microduck (`OpenDuck Mini`)** | `~$399` BOM | `4.0` | `7.5` | `5.5` | `3.0` | `8.5` | **`28.5 / 50`** | Walking policy only; no companion OS or pose compiler |
-| **KEYi Tech Loona** | `$430–$530` | `3.5` | `5.0` | `6.5` | `5.5` | `6.5` | **`27.0 / 50`** | Rolls on wheels rather than walking on legs |
-| **Petoi Bittle X** | `~$319` | `3.0` | `3.5` | `4.5` | `2.5` | `8.5` | **`22.0 / 50`** | Open-loop servos (`8` leg joints, no hip abduction) |
-| **Class IV Bipedal Mech** | `~$14,000,000,000` | **`10.0`** | `9.0` | `2.0` | `0.5` | `0.0` | **`21.5 / 50`** | Requires a human pilot, defense budget, and reinforced hangar |
-| **Living.AI EMO** | `$279–$379` | `1.5` | `3.0` | `5.5` | `4.5` | `6.5` | **`21.0 / 50`** | Closed proprietary desk toy |
-| **iRobot Roomba j9+** | `$899–$1,399` | `4.0` | `7.0` | `1.0` | `3.5` | `4.5` | **`20.0 / 50`** | Vacuum cleaner; zero interest in conversation |
-| **Hasbro Furby (2023)** | `~$65` | `0.5` | `1.0` | `3.0` | `0.5` | `8.0` | **`13.0 / 50`** | Stationary cam-driven plush |
+| Platform | Est. Cost | Height / Mass | Actuators & Joint Sensing | Brain, Dreams & Stance Toward Owner | Brawn (`/10`) | Control (`/10`) | Freestyle (`/10`) | Mind & Agency (`/10`) | Value & Safety (`/10`) | **Total (`/50`)** |
+| :--- | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Ainekio V2 + MetaHuman OS** | **`~$60–$100` BOM** | `0.11 m` · `0.65 kg` | 12× `MG90S` 4-bar + **4th-wire pot mux (`50 Hz`)** + `208 Hz` IMU | **MetaHuman OS**: Ponders existence, dreams at `2 AM`, sees a psychotherapist, cares for owner's health, remembers you after you die | `1.5` | `8.5` | **`9.4`** | **`9.7`** | **`9.8`** | **`38.9 / 50`** |
+| **Unitree Go2 (`Pro / EDU`)** | `$1,600–$4,500+` | `0.40 m` · `15.0 kg` | 12× brushless FOC (`45 N·m`) + 4D LiDAR | Thin cloud GPT wrapper; does backflips; forgets you on reboot | `8.5` | `9.0` | `6.5` | `5.0` | `7.0` | **`36.0 / 50`** |
+| **Figure AI Figure 02** | `$100,000+` (Lease) | `1.68 m` · `70.0 kg` | 26-DOF body + 16-DOF hands (`25 kg` lift) | Speech-to-speech factory VLA; views humans as shift coworkers | `9.5` | `9.5` | `7.5` | `8.0` | `1.0` | **`35.5 / 50`** |
+| **Boston Dynamics Electric Atlas** | `$150,000+` (Pilot) | `1.90 m` · `90.0 kg` | 56-DOF electric (`50 kg` lift, `360°` joints) | Industrial task planner; views humans as dynamic OSHA obstacles | `9.6` | `9.8` | `8.0` | `7.0` | `0.5` | **`34.9 / 50`** |
+| **Unitree G1 Humanoid** | `$17,990–$53,900+` | `1.32 m` · `35.0 kg` | 23–43 DOF brushless (`120 N·m` knee) | Developer ROS 2 / UnifoLM SDK; requires a clear room radius | `9.0` | `9.0` | `7.0` | `5.5` | `4.0` | **`34.5 / 50`** |
+| **Boston Dynamics Spot** | `$74,500–$150,000+` | `0.61 m` · `32.5 kg` | 12 custom actuators + `360°` stereo depth | `Autowalk` inspection autonomy; prefers oil rigs to living rooms | `9.2` | `9.8` | `6.5` | `6.0` | `1.5` | **`33.0 / 50`** |
+| **Stanford Pupper V3** | `$1,450–$3,400+` | `0.28 m` · `3.00 kg` | 12× `GIM4305-10` brushless QDD (`520 Hz`) | Stateless Realtime API wrapper + 4 open-loop CSV emotes | `6.5` | `8.0` | `5.0` | `4.8` | `6.5` | **`30.8 / 50`** |
+| **Microduck (`OpenDuck`)** | `~$399` BOM | `0.26 m` · `0.60 kg` | 15–16× `DYNAMIXEL XL330` (`50 Hz` bus) | `50 Hz` RL biped walking policy only; no companion brain or emotes | `4.0` | `7.5` | `5.5` | `3.0` | `8.5` | **`28.5 / 50`** |
+| **KEYi Tech Loona** | `$430–$530` | `0.17 m` · `1.10 kg` | 2 brushless wheels + 4 body/ear servos | Cloud GPT chat + scripted state tree; rolls on wheels | `3.5` | `5.0` | `6.5` | `5.5` | `6.5` | **`27.0 / 50`** |
+| **Petoi Bittle X** | `~$319` | `0.11 m` · `0.29 kg` | 9× open-loop hobby servos (no hip roll) | Scripted C gait tables; no shaft feedback or onboard companion OS | `3.0` | `3.5` | `4.5` | `2.5` | `8.5` | **`22.0 / 50`** |
+| **Class IV Bipedal Mech** | `~$14,000,000,000` | `18.0 m` · `75,000 kg` | Myomer bundles + fusion core (`12t` payload) | Manual cockpit only; zero dreams; views humans as soft targets | **`10.0`** | `9.0` | `2.0` | `0.5` | `0.0` | **`21.5 / 50`** |
+| **Living.AI EMO** | `$279–$379` | `0.12 m` · `0.25 kg` | 4 ankle/foot servos + cliff sensors | Closed proprietary desk toy; remembers ~10 faces | `1.5` | `3.0` | `5.5` | `4.5` | `6.5` | **`21.0 / 50`** |
+| **iRobot Roomba j9+** | `$899–$1,399` | `0.09 m` · `3.40 kg` | 2 drive wheels + Visual SLAM camera | Checks whether you are a sock on the floor; refuses small talk | `4.0` | `7.0` | `1.0` | `3.5` | `4.5` | **`20.0 / 50`** |
+| **Hasbro Furby (2023)** | `~$65` | `0.15 m` · `0.30 kg` | 1 cam motor + limit switches | 600 canned phrases; zero dreams; blinks in the dark | `0.5` | `1.0` | `3.0` | `0.5` | `8.0` | **`13.0 / 50`** |
 
 ---
 
