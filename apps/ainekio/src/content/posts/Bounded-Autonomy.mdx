@@ -1,16 +1,16 @@
 ---
-title: "Bounded Robot Autonomy: Reactive, Semi-Auto & Full-Auto LLM Control Modes"
+title: "Bounded Robot Autonomy: Reactive, Semi-Auto & Full-Auto Modes in Ainekio OS"
 published: 2026-08-27T07:45:00-07:00
-updated: 2026-11-06
-description: "How Ainekio operates across Reactive, Semi Mode (5-minute signed drive deltas), and Full Auto Mode (continuous high-reasoning activity selection), alongside Fast Body Events and Big Brother delegation."
+updated: 2026-11-11
+description: "How Ainekio OS governs physical robot autonomy across Reactive, Semi Mode (5-minute signed drive deltas), and Full Auto Mode (continuous high-reasoning activity selection), alongside 5 trust tiers, varied Fast Body Events, and Big Brother delegation."
 image: "/assets/ainekio/v2/bounded-autonomy-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Autonomy, Robot Operator, Active Operator, MetaHuman OS]
-category: "MetaHuman OS"
+tags: [Ainekio, Autonomy, Robot Operator, Active Operator, Ainekio OS, MetaHuman OS]
+category: "Ainekio OS"
 draft: false
 lang: "en"
 contentFormat: "report"
@@ -19,47 +19,49 @@ reading:
   generation: both
   kind: reference
   next: vision-loop
-  related: ["ainekio-companion", "metahuman-integration", "2026-11-06-carpet-trials-rl-and-big-brother"]
+  related: ["ainekio-os", "ainekio-companion", "metahuman-integration", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
 ---
 
-Ainekio's autonomy architecture governs when and how the companion initiates physical actions, speech, internal reflections, or computer tasks without waiting for a human prompt. Managed by **Active Operator** in MetaHuman OS, every autonomous decision flows through the same unified `environment-mode.json` cognitive graph, Work Coordinator lease checks, and `ESP32-P4` hardware safety boundaries as a direct user command.
+Ainekio's autonomy architecture governs when and how the companion initiates physical actions, speech, internal reflections, or computer tasks without waiting for a human prompt. Managed by **Active Operator** in **[Ainekio OS (`Greg-Aster/ainekio-os`)](https://github.com/Greg-Aster/ainekio-os)** (formerly MetaHuman OS; [architecture guide](/posts/ainekio-os/)), every autonomous decision flows through the same unified `environment-mode.json` cognitive graph, Work Coordinator lease checks, five progressive trust levels (`observe` → `adaptive_auto`), and `ESP32-P4` hardware safety boundaries as a direct user command.
 
-## The three operating modes
+## The three robot autonomy modes
+
+In addition to Ainekio OS's four cognitive modes (`Dual Consciousness`, `Agent`, `Emulation`, and `Environment`), embodied operation offers three robot autonomy levels—plus an instant top-bar **Ainekio OS control** enable/pause toggle in Body Control and Cockpit HUD:
 
 | Mode | Scheduling & Decision Mechanism | Typical Use |
 | --- | --- | --- |
 | **Reactive** | Dormant between external triggers. Responds immediately to user chat/voice and physical disturbances (`fast-body-event-mode.json`). | Bench testing, quiet companionship, and direct operator control |
 | **Semi Mode** | Runs a **5-minute periodic evaluation** that applies **signed delta updates** to internal drives and initiates bounded activities when a drive crosses threshold. | Ambient room presence with periodic self-initiated check-ins, stretches, or observations |
-| **Full Auto Mode** | **Continuous high-reasoning activity selection** (`Qwen3.5 9B` via `llama-cpp.service`). Never idles: as soon as an execution settles, the controller selects the next purposeful activity. | Autonomous exploration, goal pursuit, environment inspection, and multi-step task chaining |
+| **Full Auto Mode** | **Continuous high-reasoning activity selection** (`Qwen3.5 9B` locally or Hybrid `ServerStatus` routing). Never idles: as soon as an execution settles, the controller selects the next purposeful activity. | Autonomous exploration, goal pursuit, environment inspection, and multi-step task chaining |
 
 ## Semi Mode: 5-minute signed drive deltas
 
 In **Semi Mode**, Ainekio does not loop continuously. Instead, Active Operator ticks on a configurable **5-minute (`300 s`) interval**:
 
 1. **Signed delta drive updates**: Each tick evaluates recent interaction history, time elapsed since the last conversation or movement, sensor state, and pending Agency desires, applying signed deltas (`+/-`) to internal drive states (such as curiosity, social engagement, or restlessness).
-2. **Situation-dependent trigger**: If drives remain below threshold or a user turn is already active, the tick settles quietly without firing a conversational turn. When a drive crosses its activation threshold, Active Operator launches an `environment-mode.json` execution tailored to that situation—such as taking a fresh camera look, performing a Freestyle stretch, or speaking a brief observation.
+2. **Situation-dependent trigger**: If drives remain below threshold or a user turn is already active, the tick settles quietly without firing a conversational turn. When a drive crosses its activation threshold, Active Operator launches an `environment-mode.json` execution tailored to that situation—such as taking a fresh camera look (`boredom-observer`), performing a Freestyle stretch (`boredom-movement`), or running internal curiosity/reflection (`inner-curiosity.json`, `train-of-thought.json`).
 
 ## Full Auto Mode: continuous high-reasoning agency
 
 In **Full Auto Mode**, Ainekio stays continuously active—never idling between completed tasks:
 
-1. **Continuous activity selection**: Whenever no execution is currently running or waiting on a hardware receipt, Active Operator invokes the high-reasoning `Qwen3.5 9B` model with the **Standing Persona** (`persona/core.json`), attributed episodic memories, live `Robot Status`, recent action outcomes, and open Agency desires.
+1. **Continuous activity selection**: Whenever no execution is currently running or waiting on a hardware receipt, Active Operator invokes the high-reasoning `fullAutoController` role (`Qwen3.5 9B` or Hybrid specialist in `ServerStatus`) with the **Standing Persona** (`persona/core.json`), attributed episodic memories, live `Robot Status`, recent action outcomes, and open Agency desires.
 2. **Continuity across turns**: Rather than issuing isolated one-off commands, Full Auto can resume an unfinished objective, inspect the visual or telemetry result of its previous step, adjust its plan, or transition into a new activity when the prior goal is satisfied.
-3. **Multi-tool reach**: Full Auto can choose physical robot locomotion (`Walk`, `Stand`, `Freestyle`), camera inspection, spoken remarks, internal reflection, or asynchronous computer delegation via **Big Brother** (`big-brother-tool-mode.json` and `system-code-review`).
+3. **Multi-tool reach**: Full Auto can choose physical robot locomotion (on-chip `50 Hz` MicroDuck neural walking, closed-loop `Walk`/`Stand`, or `Freestyle`), camera inspection, spoken remarks, internal reflection, or asynchronous computer delegation via **Big Brother** (`codex`, `claude-code`, and warm 2-session `GeminiAcpServer` via `big-brother-tool-mode.json` and `system-code-review`).
 
-## Fast Body Events (`fast-body-event-mode.json`)
+## Varied Fast Body Events (`fast-body-event-mode.json`)
 
 Regardless of whether Ainekio is in Reactive, Semi, or Full Auto mode, physical disturbances from the `ESP32-P4` body are handled immediately:
 
 - **Trigger sources**: The `208 Hz` `LSM6DS3` IMU and 12-channel `CD74HC4067` servo feedback multiplexer detect `tipped`, `shaken`, and motor `jam/stall` events.
-- **Lightweight reflex path**: Tip, shake, and stall events route to `fast-body-event-mode.json`, which uses a single fast model call to emit a **`be_` token-matched facial expression** (rendered on the 1.9" `ST7789` LCD) and a short, immediate vocal reaction.
-- **Non-disruptive**: Fast body events do not overwrite long-term conversational memory or clobber an in-progress durable objective, while high-rate feedback health updates are absorbed into `Robot Status` state without spamming the cognitive queue.
+- **Lightweight reflex path with 6-turn variety**: Tip, shake, and stall events route to `fast-body-event-mode.json`, which queries the last **6 `fast_body_event_response` speech entries** (`temperature = 0.8`, `repeatPenalty = 1.2`) and uses a single fast model call to emit a **`be_` token-matched facial expression** (rendered across 59 expressions on the 1.9" `ST7789` LCD) and a fresh, dryly varied vocal reaction.
+- **Non-disruptive**: Fast body events do not clobber an in-progress durable objective, while high-rate feedback health updates are absorbed into `Robot Status` state without spamming the cognitive queue.
 
 ## Desire lifecycle vs. Standing Persona
 
-MetaHuman OS separates long-term identity from actionable autonomous intentions:
+Ainekio OS separates long-term identity from actionable autonomous intentions:
 
-- **Standing Persona (`persona/core.json`)**: Defines Ainekio's enduring character and long-term values. Autonomous edits to `persona/core.json` are restricted exclusively to the **Psychotherapist** agent during Sleep review.
+- **Standing Persona (`persona/core.json`)**: Defines Ainekio's enduring character and long-term values. Autonomous edits to `persona/core.json` are restricted exclusively to the **Psychotherapist** agent during the `02:00` Sleep Cycle.
 - **Desire Agent**: Evaluates candidate desires in Agency against attributed memories, robot capabilities, and actual task outcomes. It updates **desire strengths** via signed adjustments and archives completed or obsolete desires.
 - **Finite execution contracts**: Before a Desire can drive physical robot commands, it must be formulated into a finite plan (`1–10` ordered steps with explicit completion criteria). Each step executes through the Work Coordinator and returns its verified receipt (`done`, `cancelled`, `nak`) to Agency before the next step is admitted.
 
@@ -67,4 +69,4 @@ MetaHuman OS separates long-term identity from actionable autonomous intentions:
 
 - **Native inference cancellation**: If a user speaks a correction or issues a stop command while an autonomous turn is generating on `llama-cpp.service`, the router cancels the in-flight inference natively and admits the user's input.
 - **Direct emergency stop**: `stop` bypasses language-model planning altogether, cancelling queued coordinator actions for the session and instructing the gateway and `ESP32-P4` firmware to halt motion immediately.
-- **Software Sleep vs. hardware rest**: Entering the cognitive **Sleep Workflow** pauses Active Operator so memory curation, dreaming, and Psychotherapist review can run cleanly. Separately, the `ESP32-P4` firmware can relax the body into a low-power `Rest` posture after configurable physical inactivity.
+- **Software Sleep vs. hardware rest**: Entering the 8-stage `02:00` cognitive **Sleep Cycle** pauses Active Operator so memory curation, LoRA adapter fitting, symbolic dreaming (`dreamer-mode.json`), and Psychotherapist review can run cleanly. Separately, the `ESP32-P4` firmware can relax the body into a low-power `Rest` posture after configurable physical inactivity.

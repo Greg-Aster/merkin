@@ -8,7 +8,7 @@ import type {
 
 export const siteConfig: SiteConfig = {
   title: 'Ainekio',
-  subtitle: 'Open-Source 12-Servo ESP32-P4 Quadruped Robot Companion & MetaHuman OS',
+  subtitle: 'Open-Source 12-Servo ESP32-P4 Quadruped Robot Companion & Ainekio OS',
   enablePostFooterNav: true,
   lang: 'en',
   themeColor: {
@@ -52,6 +52,7 @@ export const siteConfig: SiteConfig = {
 export const navBarConfig: NavBarConfig = {
   links: [
     { name: 'Overview', url: '/posts/project-overview/' },
+    { name: 'Ainekio OS', url: '/posts/ainekio-os/' },
     { name: 'System Reference', url: '/archive/?kind=reference' },
     { name: 'Build Journal', url: '/updates/' },
     { name: 'Gallery', url: '/gallery/' },
@@ -62,17 +63,17 @@ export const navBarConfig: NavBarConfig = {
 export const profileConfig: ProfileConfig = {
   avatar: '/assets/avatar/assembly-september-20.webp',
   name: 'Ainekio',
-  bio: 'A twelve-servo quadruped robot companion in active development: closed-loop 4th-wire ESP32-P4 hardware paired with MetaHuman OS for conversation, memory, perception, bounded autonomy, and learned locomotion.',
+  bio: 'A twelve-servo quadruped robot companion in active development: closed-loop 4th-wire ESP32-P4 hardware (with on-chip 50 Hz L2-cached neural gait) paired with Ainekio OS for conversation, episodic memory, 47 cognitive graphs, bounded autonomy, and Big Brother.',
   links: [
     {
-      name: 'GitHub',
+      name: 'Ainekio-bot',
       icon: 'fa6-brands:github',
       url: 'https://github.com/Greg-Aster/Ainekio-bot',
     },
     {
-      name: 'MetaHuman OS',
+      name: 'Ainekio OS',
       icon: 'fa6-brands:github',
-      url: 'https://github.com/Greg-Aster/metahuman-os',
+      url: 'https://github.com/Greg-Aster/ainekio-os',
     },
     {
       name: 'Contact Greg',

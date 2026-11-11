@@ -1,15 +1,15 @@
 ---
-title: "Robot Host Gateway, Body Control Dashboard, Servo Calibration & MuJoCo Simulator"
+title: "Robot Host Gateway, Cockpit HUD, Body Control & MuJoCo Hardware Twins"
 published: 2026-08-27T08:45:00-07:00
-updated: 2026-11-06
-description: "How Ainekio's Master/gateway and Body Control dashboard manage authenticated robot sessions, 12-channel servo feedback, IMU leveling, the 349-example Freestyle library, 50 Hz neural gait streaming, and visual odometry."
+updated: 2026-11-11
+description: "How Ainekio's Master/gateway, Cockpit HUD, and Body Control dashboard manage authenticated robot sessions, optical-flow obstacle range, 12-channel servo feedback, on-chip vs. host neural gait control, and Ainekio OS integration."
 image: "/assets/ainekio/v2/gateway-simulator-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Gateway, Dashboard, WebSocket, Body Control]
+tags: [Ainekio, Gateway, Cockpit HUD, Dashboard, WebSocket, Body Control, Ainekio OS]
 category: "Robot Runtime"
 draft: false
 lang: "en"
@@ -18,45 +18,46 @@ reading:
   topic: control
   generation: both
   kind: reference
-  next: metahuman-integration
-  related: ["protocol-and-safety", "gait-development", "vision-loop"]
+  next: ainekio-os
+  related: ["protocol-and-safety", "gait-development", "metahuman-integration", "vision-loop"]
 ---
 
-Three components in the robot repository's `Master/gateway/` package connect the physical `ESP32-P4` (or V1 `ESP32-S3`) controller to [MetaHuman OS](/posts/metahuman-integration/) and give the operator direct instrumentation and control:
+Three components in the robot repository's `Master/gateway/` package connect the physical `ESP32-P4` (or V1 `ESP32-S3`) controller to **[Ainekio OS](/posts/ainekio-os/)** ([embodied integration](/posts/metahuman-integration/)) and give the operator direct instrumentation and control:
 
-1. **The Gateway (`Master/gateway/server`)**: Owns the authenticated `protocol-v1` WebSocket session with the robot, correlates command sequences and connection epochs, routes JPEG camera frames and bidirectional PCM audio, and streams `50 Hz` neural gait targets.
-2. **The Environment Adapter (`Master/gateway/environment_adapter`)**: Translates generic MetaHuman `environment-bridge` actions into checked Ainekio commands, maintains durable SQLite action receipts, and publishes structured `Robot Status` and event observations.
-3. **Body Control (`Master/gateway` Operator Dashboard)**: The web interface for manual posture and gait control, 12-channel servo feedback calibration, `LSM6DS3` self-leveling tuning, the 349-example SQLite Freestyle library, gait learning telemetry, visual tracking/odometry, and over-the-air firmware updates.
+1. **The Gateway (`Master/gateway/server`)**: Owns the authenticated `protocol-v1` WebSocket session with the robot, correlates command sequences and connection epochs, routes JPEG camera frames and bidirectional PCM audio, commands on-chip `50 Hz` MicroDuck velocity twists (`native`), or streams `50 Hz` host neural gait targets (`neural`).
+2. **The Environment Adapter (`Master/gateway/environment_adapter`)**: Translates Ainekio OS `environment-bridge` actions into checked Ainekio commands, maintains durable SQLite action receipts, exposes a top-bar **Ainekio OS control** enable/pause switch, and publishes structured `Robot Status` and event observations.
+3. **Cockpit HUD & Body Control (`Master/gateway` Operator Dashboard)**: Combines a full-viewport **Cockpit HUD** (`data-workspace="cockpit"`) for live teleoperation and optical-flow obstacle range with engineering workspaces for 12-channel servo calibration, `LSM6DS3` self-leveling tuning, the 349-example SQLite Freestyle library (`489` training rows), neural gait telemetry, and Wi-Fi OTA updates.
 
-The gateway stack runs either on the desktop workstation or on a **Radxa Dragon Q6A** (`QCS6490`) single-board computer, with MetaHuman's unified `environment-bridge` automatically following whichever host is active.
+The gateway stack runs either on the desktop workstation or on a **Radxa Dragon Q6A** (`QCS6490`) single-board computer, supporting optional **no-login local operator access** (`AINEKIO_DASHBOARD_NO_LOGIN`) and **automatic hotspot fallback** when local Wi-Fi infrastructure is unavailable. Ainekio OS's `environment-bridge` (`followRobot: true`) automatically follows whichever LAN, SSH, or `bridge.ainek.io` Cloudflare host is active.
 
-## Body Control capabilities on V2
+## Cockpit HUD and Body Control capabilities on V2
 
 | Workspace / Tool | Function in Body Control |
 | --- | --- |
+| **Ainekio Cockpit HUD (`cockpit`)** | Full-viewport live `OV5647` camera HUD with **Lucas-Kanade pyramidal optical-flow + Depth-Anything ground-contact obstacle range**, compact servo/IMU/battery telemetry, **On-chip MicroDuck (`native`) vs. Host neural gait (`neural`)** selector, and top-bar **Ainekio OS control** toggle |
 | **Manual Locomotion & Postures** | Direct trigger and live parameter tuning (`Speed`, `Stride %`, `Motion rate`, steering, `Motion speed ×`, and `Finish`) for `Stand`, `Walk`, `Run`, `Crawl`, 6-direction `Crab`, and 23 finite gestures |
-| **12-Channel Servo Feedback (`CD74HC4067`)** | Live commanded-versus-measured angle readouts, analog multiplexer channel mapping, per-servo calibration curves, sample age, and closed-loop `Stand` (`2 mm` settle) / `Walk` arrival verification |
-| **IMU Attitude & Self-Leveling (`LSM6DS3`)** | Live `208 Hz` roll/pitch telemetry, one-click level-reference capture, 256-sample stationary gyro bias calibration, and saved self-leveling gain/damping controls |
-| **Freestyle Motion Library (`349` Examples)** | SQLite-backed editor and runner for 349 curated 12-servo target programs, supporting `Freestyle Qwen` and **Big Brother** model generation plus jam/fall recovery testing |
-| **Neural Gait Streaming & Learning** | Streams `50 Hz` neural policies (`walk_nominal_v1`) to the `ESP32-P4`, logs synchronized joint/IMU/camera trajectories, and manages candidate policy comparisons and `v6-pending` GRU datasets |
+| **12-Channel Servo Feedback (`CD74HC4067`)** | Live commanded-versus-measured angle readouts, analog multiplexer channel mapping, One-Euro velocity filter diagnostics, per-servo calibration curves, and closed-loop `Stand` (`2 mm` settle) / `Walk` arrival verification |
+| **IMU Attitude & Self-Leveling (`LSM6DS3`)** | Live `208 Hz` `FusionAhrs` roll/pitch telemetry, one-click level-reference capture, 256-sample stationary gyro bias calibration, and saved self-leveling gain/damping controls |
+| **Freestyle Motion Library (`349` Examples / `489` Rows)** | SQLite-backed editor and runner for 349 curated 12-servo target programs (`489`-row `motion-targets-v1` dataset with `416` native-`stand` fault-recovery rows), supporting `Freestyle Qwen` and **Big Brother** escalation |
+| **On-Chip & Host Neural Gait Tools** | Compiles symmetric `int8` `"AMDK"` policies (`compile_microduck.py`, `107.8 KB` L2-cached `microduck-v17-p4`) for Core 1 `50 Hz` execution or streams `600M/800M` Pupper V3 MJX host policies (`pupper_mjx_actor.py`) while logging synchronized telemetry |
 | **Vision, Depth & Audio Controls** | `OV5647` camera preview (`180°` rotation, `10,000 µs` motion-safe exposure ceiling), YOLOE/ByteTrack target selection, OpenGV 2-point RANSAC & on-demand MoGe depth odometry, and `WakeNet9s` / 5-mode VAD configuration |
-| **SD Video & Wi-Fi OTA Maintenance** | Records segmented camera clips to the robot's microSD card, downloads recordings and rolling device logs, and stages `ESP32-P4` firmware binaries over Wi-Fi for explicit activation |
+| **SD Video & Wi-Fi OTA Maintenance** | Records segmented camera clips to the robot's microSD card, downloads recordings and rolling device logs, and stages `ESP32-P4` firmware binaries (`0.8.159-p4-microduck-v17`) over Wi-Fi for explicit activation |
 
 ## Command translation and durable receipts
 
-When MetaHuman OS dispatches an action through `environment-bridge`, the Ainekio adapter translates it into the connected robot's capabilities:
+When Ainekio OS dispatches an action through `environment-bridge`, the Ainekio adapter translates it into the connected robot's capabilities:
 
-| MetaHuman Action / Event | Gateway & Adapter Execution Path |
+| Ainekio OS Action / Event | Gateway & Adapter Execution Path |
 | --- | --- |
-| `robotCommand` / `locomotionGoal` | Dispatches a checked posture, gesture, or measured distance/turn/approach/visual walk and tracks progress until terminal `Finish` |
+| `robotCommand` / `locomotionGoal` | Dispatches a checked posture, gesture, or measured distance/turn/approach/visual walk (analytical or on-chip `50 Hz` MicroDuck) and tracks progress until terminal `Finish` |
 | `freestyleProgram` | Validates and streams a multi-target 12-DOF sequence, waiting for 4th-wire shaft arrival at each step |
 | `captureImage` | Requests a correlated still frame (or attaches a post-motion snapshot before `done`) and returns the matched JPEG |
-| **Robot Speech (TTS)** | Paces rendered Kokoro PCM audio frames to the `ES8311` / `NS4150B` speaker queue and sets `external_speech_ms` to suppress self-triggering |
-| **Microphone Utterance (STT)** | Assembles `WakeNet9s` + VAD speech segments into WAV files (optionally paired with a contemporaneous camera frame) for Whisper transcription |
-| **Body Events (`tipped`, `shaken`, `jammed`)** | Forwards thresholded `LSM6DS3` and servo-stall events to `fast-body-event-mode.json` while keeping routine feedback-health updates in `Robot Status` |
+| **Robot Speech (TTS)** | Paces rendered Kokoro (`:9882`) or Piper PCM audio frames to the `ES8311` / `NS4150B` speaker queue and sets `external_speech_ms` to suppress self-triggering |
+| **Microphone Utterance (STT)** | Assembles `WakeNet9s` + VAD speech segments into WAV files (optionally paired with a contemporaneous camera frame) for local or remote Whisper (`:9883`) transcription |
+| **Body Events (`tipped`, `shaken`, `jammed`)** | Forwards thresholded `LSM6DS3` and servo-stall events to `fast-body-event-mode.json` (6-turn varied reactions) while keeping routine feedback-health updates in `Robot Status` |
 
 To prevent a temporary Wi-Fi drop from causing duplicate physical movements, the adapter stores every dispatched action in SQLite keyed by action ID, payload hash, gateway process, connection epoch, and sequence number. Late completions settle the original waiting execution cleanly without re-sending the movement command.
 
 ## Historical note on the URL (`gateway-and-simulator`)
 
-This URL originally covered a July 2026 browser simulator alongside the gateway. That early Sesame browser simulator was retired when physical V1 and V2 hardware bring-up began; for modern physics simulation, Ainekio now uses a **full-CAD MuJoCo (`MJCF`) / JAX / Brax / MJX** pipeline paired with the **Stock Pupper V3** baseline (see the [Gait Development Guide](/posts/gait-development/)). The historical July browser-simulator notes remain preserved in the [V1 Archive](/posts/archive/motion-systems/).
+This URL originally covered a July 2026 browser simulator alongside the gateway. That early Sesame browser simulator was retired when physical V1 and V2 hardware bring-up began; for modern physics simulation, Ainekio now uses **`4,096`-environment GPU hardware twins (`tensor_sensors.py` + `tensor_body.py`)** in **MuJoCo (`MJCF`) / JAX / Brax / MJX** paired with the **Stanford Pupper V3** baseline (see the [Gait Development Guide](/posts/gait-development/)). The historical July browser-simulator notes remain preserved in the [V1 Archive](/posts/archive/motion-systems/).

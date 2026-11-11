@@ -18,21 +18,22 @@ const subsystemTopics = Object.entries(topics).filter(([id]) => !['overview', 'v
 })
 const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 ---
-<MainGridLayout title="Ainekio Build Journal & Engineering Milestones — 12-Servo ESP32-P4 Quadruped" description="Chronological engineering milestones, hardware revisions, closed-loop 4th-wire servo feedback verification, MuJoCo/MJX neural gait training, and MetaHuman OS updates." oneColumn={true}>
+<MainGridLayout title="Ainekio Build Journal & Engineering Milestones — 12-Servo ESP32-P4 Quadruped & Ainekio OS" description="Chronological engineering milestones, hardware revisions, on-chip ESP32-P4 L2-cached neural gait distillation, MuJoCo/MJX RL, and Ainekio OS updates." oneColumn={true}>
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'Ainekio Build Journal & Engineering Milestones',
-    description: 'Chronological engineering milestones documenting the twelve-servo ESP32-P4 robot body, closed-loop 4th-wire motion verification, Freestyle & neural gait training, and the MetaHuman OS brain.',
+    description: 'Chronological engineering milestones documenting the twelve-servo ESP32-P4 robot body, on-chip 50 Hz MicroDuck neural gait, Freestyle motion recovery, and the Ainekio OS mind.',
     url: Astro.url.href,
   })}></script>
   <article class="card-base build-journal" data-pagefind-body>
     <header>
       <p class="journal-eyebrow">Ainekio · Development Log</p>
       <h1>Build journal</h1>
-      <p>Cohesive engineering milestones documenting the twelve-servo ESP32-P4 robot body, closed-loop 4th-wire motion verification, Freestyle & neural gait training, and the MetaHuman OS brain.</p>
+      <p>Cohesive engineering milestones documenting the twelve-servo ESP32-P4 robot body, on-chip 50 Hz L2-cached neural gait, Freestyle motion recovery, and the Ainekio OS mind.</p>
       <nav aria-label="Journal resources">
         <a href={url('/posts/project-overview/')}>System overview →</a>
+        <a href={url('/posts/ainekio-os/')}>Ainekio OS architecture →</a>
         <a href={url('/archive/?kind=reference')}>Technical reference guides →</a>
         <a href={url('/archive/?kind=journal')}>Filter journal articles →</a>
         <a href={url('/gallery/')}>Photos, videos & diagrams →</a>

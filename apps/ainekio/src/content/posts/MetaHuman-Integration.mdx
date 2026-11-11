@@ -1,16 +1,16 @@
 ---
-title: "MetaHuman OS Robot Brain: Unified llama.cpp Router, LangGraph Workflows & Big Brother"
+title: "Embodied Ainekio OS Integration: Environment Bridge, ServerStatus Routing & Durable Workflows"
 published: 2026-08-27T08:00:00-07:00
-updated: 2026-11-06
-description: "How MetaHuman OS connects a unified llama.cpp model router, environment-bridge, durable LangGraph workflows, Fast Body Events, and Big Brother delegation to Ainekio."
+updated: 2026-11-11
+description: "How Ainekio OS (formerly MetaHuman OS) wires its ServerStatus model router, environment-bridge, durable SQLite cognitive graphs, varied Fast Body Events, and Big Brother delegation into the physical Ainekio V2 body."
 image: "/assets/ainekio/v2/metahuman-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, MetaHuman OS, Durable Execution, Work Coordinator, LangGraph]
-category: "MetaHuman OS"
+tags: [Ainekio, Ainekio OS, MetaHuman OS, Durable Execution, Work Coordinator, Environment Bridge]
+category: "Ainekio OS"
 draft: false
 lang: "en"
 contentFormat: "report"
@@ -19,67 +19,69 @@ reading:
   generation: both
   kind: reference
   next: bounded-autonomy
-  related: ["ainekio-companion", "2026-10-15-companion-systems", "2026-11-06-carpet-trials-rl-and-big-brother"]
+  related: ["ainekio-os", "ainekio-companion", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
 ---
 
-[MetaHuman OS](https://github.com/Greg-Aster/metahuman-os) is the cognitive runtime behind Ainekio's conversation, memory, identity, perception, and autonomous planning. While the onboard `ESP32-P4` controller owns real-time servo loops and hardware safety limits, MetaHuman OS turns multimodal observations and user requests into durable, multi-step executions and spoken companion responses.
+**[Ainekio OS (`Greg-Aster/ainekio-os`)](https://github.com/Greg-Aster/ainekio-os)** (formerly MetaHuman OS) is the standalone personal AI operating system behind Ainekio's conversation, memory, identity, perception, and autonomous planning. While [Ainekio OS Architecture](/posts/ainekio-os/) covers the full standalone OS—its 123 unified API modules, 47 cognitive graphs, 24 background agents, CLI/Android surfaces, and 8-stage `02:00` Sleep Cycle—this guide focuses specifically on **embodied robot integration**: how Ainekio OS connects to `Master/gateway` and the `ESP32-P4` body.
 
-For a high-level view of how personality, sleep maintenance, and memory work together, see [Ainekio as a Companion](/posts/ainekio-companion/).
+For a companion-centered view of how personality, sleep maintenance, and memory work together, see [Ainekio as a Companion](/posts/ainekio-companion/).
 
-## Unified inference architecture (`llama-cpp.service`)
+## `ServerStatus` routing and `llama-cpp.service`
 
-All local language, vision, specialist, motion, and embedding inference runs through a **single consolidated `llama-cpp.service` router** on port `:8080` (with earlier `node-llama-cpp`, vLLM, Kitten, and GPT-SoVITS paths retired):
+All local language, vision, specialist, motion, and embedding inference runs through a **single consolidated `llama-cpp.service` router** on port `:8080`, managed alongside remote and Big Brother providers from the **`ServerStatus`** right-drawer control plane:
 
-| Model / Role | Configuration & Purpose |
+| Model / Provider Role | Configuration & Purpose |
 | --- | --- |
-| **`Qwen3.5 9B`** | Primary conversational Persona, multimodal Vision reasoning, and Full Auto high-reasoning activity selection |
-| **`Environment 0.8B / 2B`** | Fast Orchestrator (Intent) and Task Decisions specialists served from shared base weights with **per-request LoRA adapters** |
-| **`Freestyle Qwen`** | Generates compact joint, foot, and body target programs and event-recovery motions for the 12-servo V2 body |
-| **`Qwen3 Embedding 0.6B` & `Nomic Embed v1.5`** | CPU-only embedding models (`--device none`) for episodic memory retrieval and semantic indexing without consuming GPU VRAM |
+| **`Qwen3.5 9B`** | Primary conversational Persona, multimodal `environmentVision` reasoning, and Full Auto high-reasoning activity selection |
+| **`Environment 0.8B / 2B`** | Fast `environmentOrchestrator` (Intent) and `environmentTask` specialists served from shared base weights with **per-request LoRA adapters** |
+| **`Freestyle Qwen` (`0.8B` + LoRA)** | Generates compact joint, foot, and body target programs and native-`stand` recovery motions (`489` training rows) for the 12-servo V2 body |
+| **`Qwen3 Embedding 0.6B` & `Nomic Embed v1.5`** | CPU-only embedding models (`--device none`) for episodic memory retrieval (`indexContentMode: "all"`) without consuming GPU VRAM |
+| **Hybrid & Big Brother (`ServerStatus`)** | One-click **`Local`**, **`Hybrid`**, **`BB-Codex`**, and **`BB-Gemini`** presets across 12 specialist roles, remote `llama.cpp` endpoint discovery, persistent warm 2-session `GeminiAcpServer` (`agy acp`), and per-service **local ↔ remote** CUDA **Whisper (`:9883`)** & **Kokoro (`:9882`)** voice targets (with local **Piper ONNX** fallback) |
 
-To preserve workstation and host memory, `llama-cpp.service` runs with `load-on-startup = false` and a **5-minute (`300 s`) idle unload timeout**, loading weights on demand and supports native inference cancellation when a newer priority event preempts an in-flight turn.
+To preserve workstation and host memory, `llama-cpp.service` runs with `load-on-startup = false` and a **5-minute (`300 s`) idle unload timeout**, loading weights on demand and supporting native inference cancellation when a newer priority event preempts an in-flight turn. Operators can also enable or pause Ainekio OS control directly from the top bar of Body Control / Cockpit HUD.
 
 ## Single `environment-bridge` and `environment-mode.json`
 
-Ainekio connects to MetaHuman OS through a single consolidated **`environment-bridge`** agent with **multi-host following**:
+Ainekio connects to Ainekio OS through a single consolidated **`environment-bridge`** agent with **multi-host robot following**:
 
-1. **Multi-host connection following**: Whether the robot's `Master/gateway` is running on the local desktop or an offboard **Radxa Dragon Q6A**, `environment-bridge` maintains one authoritative observation and action stream. High-frequency feedback-health updates update live `Robot Status` state directly without spawning redundant conversational turns.
-2. **Unified `environment-mode.json` cognitive graph**: Incoming user requests, voice transcripts, camera frames, and action settlements enter a single validated graph.
+1. **Multi-host connection following (`followRobot: true`)**: Whether the robot's `Master/gateway` is running on the local desktop, over an SSH tunnel, on an offboard **Radxa Dragon Q6A**, or behind `bridge.ainek.io` (Cloudflare Access), `environment-bridge` pins to `robotId` (`ainekio-p4-e6ebe5`) and maintains one authoritative observation and action stream. High-frequency feedback-health updates update live `Robot Status` state directly without spawning redundant conversational turns.
+2. **Unified `environment-mode.json` cognitive graph**: Incoming user requests, voice transcripts, camera frames, and action settlements enter a single validated graph inside the 47-graph workflow catalog.
 3. **Clear role separation**:
    - **Orchestrator (Intent)** classifies whether incoming input is a new request, a modification, a cancellation, or a conversational turn, and decides whether an outward spoken reply is needed.
    - **Task Decisions** selects concrete robot actions (`robotCommand`, `locomotionGoal`, `freestyleProgram`, `captureImage`, or specialist delegation) without injecting intermediate filler speech between movements.
    - **Goal Review** evaluates returned action receipts and visual evidence against the active objective.
    - **Standing Persona** (`persona/core.json`) is the single outward voice owner, synthesizing the final conversational response from the completed or in-progress task state.
 
-## Fast Body Events (`fast-body-event-mode.json`)
+## Varied durable Fast Body Events (`fast-body-event-mode.json`)
 
 Physical disturbances require immediate, lightweight reactions rather than full multi-step planning:
 
 - When the `ESP32-P4` detects a physical tip, shake, or servo jam/stall, it emits a body event with live `LSM6DS3` IMU and `CD74HC4067` joint-error telemetry.
-- MetaHuman routes tip, shake, and stall events to **`fast-body-event-mode.json`**, a dedicated single-call Lightweight workflow.
-- The model emits **`be_` token-matched facial expressions** (mapped directly to the 58 expressions on the 1.9" `ST7789` LCD) paired with a brief, situational remark, without polluting long-term episodic memory or derailing an existing saved execution.
+- Ainekio OS routes tip, shake, and stall events to **`fast-body-event-mode.json`**, a dedicated single-call Lightweight workflow executed under the durable coordinator.
+- To prevent repetitive canned quips when the robot is jostled repeatedly, `environment_fast_body_event` queries the **last 6 `fast_body_event_response` speech entries** (`recentReactionLimit = 6`) and injects them with `temperature = 0.8` and `repeatPenalty = 1.2`.
+- The model emits **`be_` token-matched facial expressions** (mapped directly to the 59 expressions on the 1.9" `ST7789` LCD) paired with fresh, dryly varied situational remarks, without derailing an existing saved execution.
 - Boot and wake transitions retain the full contextual workflow so Ainekio can orient itself, check its surroundings, and rise cleanly.
 
 ## Durable execution and the Work Coordinator
 
-A robot request often spans multiple physical actions and sensor checks—for example, standing up, turning toward a target, capturing a fresh frame, and verifying arrival.
+A robot request often spans multiple physical actions and sensor checks—for example, standing up, walking across a hardwood-to-carpet seam under the on-chip `50 Hz` MicroDuck gait, capturing a fresh frame, and verifying arrival.
 
-- **LangGraph + SQLite checkpoints**: Every admitted request runs as a durable **execution** managed by the **Work Coordinator**. The execution's objective, ordered event history, completed node outputs, and pending actions are checkpointed in SQLite.
+- **14-table WAL `executions.sqlite` checkpoints**: Every admitted request runs as a durable **execution** managed by the **Work Coordinator** (`Scheduler Contract v1`, content-addressed SHA-256 payload blobs, replay-safe `waitForEvent`).
 - **Saved waits**: While the physical robot executes a gait or a specialist worker runs in the background, the execution enters a saved wait rather than holding open a fragile polling loop.
 - **Action receipts and epoch correlation**: `Environment Bridge Out` records the intended action before dispatch. The gateway tracks the command across connection epochs until a terminal receipt (`done`, `cancelled`, `nak`, or `outcome_unknown` on unverified disconnect) arrives, preventing accidental duplicate motion after a Wi-Fi drop.
-- **Goal-directed locomotion**: Active Task connects model-selected distance, turn, approach, follow, and visual endpoints to measured progress (joint arrival, IMU heading, and OpenGV / MoGe depth odometry) and the gait solver's terminal `Finish` receipt.
+- **Goal-directed locomotion**: Active Task connects model-selected distance, turn, approach, follow, and visual endpoints to measured progress (joint arrival, IMU heading, optical-flow obstacle clearance, and OpenGV / MoGe depth odometry) and the gait controller's terminal `Finish` receipt.
 
 ## Standing Persona and Desire management
 
 Identity and autonomous motivation have strict ownership boundaries:
 
-- **Standing Persona (`persona/core.json`)**: Represents Ainekio's core identity, values, and voice. Only the **Psychotherapist** agent (during Sleep or explicit review) and manual operator edits may modify `persona/core.json`.
+- **Standing Persona (`persona/core.json`)**: Represents Ainekio's core identity, values, and voice. Only the **Psychotherapist** agent (during the `02:00` Sleep Cycle or explicit review) and manual operator edits may modify `persona/core.json`.
 - **Desire Agent**: Manages candidate intentions in Agency, adjusting desire strengths based on attributed memories, standing goals, and real task outcomes, and archiving desires once satisfied or obsolete. Approved desires execute through finite, step-tracked plans (`1–10` steps) rather than acting as unbounded background prompts.
 
 ## Big Brother delegation and hosted UI
 
 When a request requires heavy software engineering, repository inspection, or complex host operations beyond the local embedded specialists:
 
-- **Big Brother Terminal (`TerminalChat.svelte`)**: Provides a direct interactive operator and escalation channel inside MetaHuman OS.
+- **Big Brother CLI & Warm ACP (`TerminalChat.svelte`)**: Connects to `codex`, `claude-code`, and a persistent 2-session warm **`GeminiAcpServer` (`agy acp`)** pool directly inside Ainekio OS.
 - **Asynchronous Computer Tasks (`big-brother-tool-mode.json`)**: Environment workflows can delegate asynchronous computer tasks and run **`system-code-review`** through Big Brother while the robot continues interacting and reporting progress.
-- **Hosted Static UI (`https://mh.ainek.io`)**: The MetaHuman OS web interface—covering chat, node editor, Agent Monitor, memory browser, Agency, and Robot Status—is also published as a hosted static UI at [`https://mh.ainek.io`](https://mh.ainek.io) that connects to the operator's active runtime.
+- **Hosted Static UI (`https://mh.ainek.io`)**: The Ainekio OS web interface—covering chat, `/architecture` system map, node editor, `ServerStatus`, Agent Monitor, memory browser, Agency, and Robot Status—is also published as a hosted static UI at [`https://mh.ainek.io`](https://mh.ainek.io) that connects to the operator's active runtime.

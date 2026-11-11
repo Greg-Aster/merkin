@@ -1,15 +1,15 @@
 ---
 title: "ESP32-P4 Robot Voice Loop: WakeNet9s Wake Word, ES8311 Audio, Whisper STT & Kokoro TTS"
 published: 2026-08-27T08:15:00-07:00
-updated: 2026-11-06
-description: "How Ainekio captures wake-gated speech with Espressif WakeNet9s and 5-mode VAD, transcribes with Whisper, synthesizes replies with Kokoro through the Standing Persona, and suppresses self-triggering via external_speech_ms."
+updated: 2026-11-11
+description: "How Ainekio captures wake-gated speech with Espressif WakeNet9s and 5-mode VAD, routes local or remote CUDA Whisper STT and Kokoro TTS (with Piper ONNX fallback) in Ainekio OS, and suppresses self-triggering via external_speech_ms."
 image: "/assets/ainekio/v2/voice-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Voice, Wake Word, WakeNet9s, Whisper, Kokoro, Audio]
+tags: [Ainekio, Voice, Wake Word, WakeNet9s, Whisper, Kokoro, Piper, Ainekio OS, Audio]
 category: "Perception and Voice"
 draft: false
 lang: "en"
@@ -19,10 +19,10 @@ reading:
   generation: both
   kind: reference
   next: ainekio-companion
-  related: ["vision-loop", "metahuman-integration", "gateway-and-simulator"]
+  related: ["vision-loop", "ainekio-os", "metahuman-integration", "gateway-and-simulator"]
 ---
 
-Ainekio's voice loop connects onboard acoustic capture and speaker playback on the `ESP32-P4` body to speech-to-text (`Whisper`), conversational reasoning (`Qwen3.5 9B` Standing Persona), and text-to-speech synthesis (`Kokoro`) in MetaHuman OS.
+Ainekio's voice loop connects onboard acoustic capture and speaker playback on the `ESP32-P4` body to speech-to-text (`Whisper`), conversational reasoning (`Qwen3.5 9B` Standing Persona), and text-to-speech synthesis (`Kokoro` + `Piper` fallback) in **[Ainekio OS](/posts/ainekio-os/)** (formerly MetaHuman OS).
 
 ## Onboard V2 audio hardware (`ES8311` + `NS4150B`)
 
@@ -43,9 +43,9 @@ To support hands-free room interaction without streaming continuous room audio w
 ## From spoken utterance to Standing Persona reply
 
 1. **Utterance assembly & paired vision**: When VAD closes an utterance, the Host Gateway packages the `16 kHz` PCM stream as a WAV file and optionally attaches a contemporaneous `OV5647` camera frame sharing the same `utterance_id`.
-2. **Whisper transcription**: `environment-bridge` delivers the utterance to MetaHuman OS, where `Whisper` transcribes the audio into an `audio_utterance` observation entering `environment-mode.json`.
+2. **Local ↔ Remote `Whisper` transcription (`:9883`)**: `environment-bridge` delivers the utterance to Ainekio OS. In the `ServerStatus` right drawer, operators can toggle **`Whisper` STT** per-service between the local CUDA server (`:9883`) and a discovered remote GPU workstation, transcribing the audio into an `audio_utterance` observation entering `environment-mode.json`.
 3. **Single outward speech owner (Standing Persona)**:
    - **Orchestrator (Intent)** determines whether the spoken turn calls for a conversational reply, a physical action, or both.
-   - **Task Decisions** dispatches any requested robot commands (`Stand`, `Walk`, `Freestyle`, camera capture, or Big Brother delegation) without injecting robotic step-by-step announcements between movements.
-   - **Standing Persona (`persona/core.json`)** owns the single outward response, combining conversational context and action outcomes into Ainekio's natural voice. (For physical tip, shake, or stall reflexes, `fast-body-event-mode.json` produces brief situational remarks paired with `be_` LCD faces.)
-4. **Paced `Kokoro` TTS playback and settlement**: MetaHuman synthesizes the reply with **`Kokoro` TTS** (earlier Kitten and GPT-SoVITS voice paths are retired). The gateway paces `16 kHz` PCM bursts to the `ESP32-P4` speaker queue, sets `external_speech_ms`, drives synchronized talking expressions on the 1.9-inch `ST7789` LCD, and returns the terminal playback receipt (`done`, `cancelled`, or `outcome_unknown`) to the waiting workflow.
+   - **Task Decisions** dispatches any requested robot commands (`Stand`, `Walk`, on-chip MicroDuck twists, `Freestyle`, camera capture, or Big Brother delegation) without injecting robotic step-by-step announcements between movements.
+   - **Standing Persona (`persona/core.json`)** owns the single outward response, combining conversational context and action outcomes into Ainekio's natural voice. (For physical tip, shake, or stall reflexes, `fast-body-event-mode.json` queries the last 6 reactions and produces varied situational remarks paired with `be_` LCD faces.)
+4. **Paced `Kokoro` TTS (`:9882`), `Piper` fallback, and settlement**: Ainekio OS synthesizes the reply with **`Kokoro` TTS** (`:9882`, toggleable between `local` and `remote` CUDA targets in `ServerStatus` with custom `.pt` voicepacks) or falls back automatically to fast local **`Piper` ONNX** when CUDA voice servers are offline (legacy Kitten, GPT-SoVITS, and RVC paths are retired). The gateway paces `16 kHz` PCM bursts to the `ESP32-P4` speaker queue, sets `external_speech_ms`, drives synchronized talking expressions on the 1.9-inch `ST7789` LCD, and returns the terminal playback receipt (`done`, `cancelled`, or `outcome_unknown`) to the waiting workflow.

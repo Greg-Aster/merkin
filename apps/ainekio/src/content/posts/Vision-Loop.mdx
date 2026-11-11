@@ -1,15 +1,15 @@
 ---
-title: "ESP32-P4 Robot Vision & Face Display: OV5647 MIPI-CSI Camera, 1.9-Inch ST7789 LCD, YOLOE & OpenGV"
+title: "ESP32-P4 Robot Vision & Face Display: OV5647 Camera, 1.9-Inch ST7789 LCD, Optical Flow & YOLOE"
 published: 2026-08-27T08:30:00-07:00
-updated: 2026-11-06
-description: "Ainekio's 1.9-inch ST7789 LCD face (58 expressions), OV5647 CSI camera (180° inverted mount, 10,000 µs motion-safe exposure ceiling), YOLOE tracking, and OpenGV / MoGe visual depth odometry."
+updated: 2026-11-11
+description: "Ainekio's 1.9-inch ST7789 LCD face (59 expressions), OV5647 CSI camera (180° inverted mount, 10,000 µs motion-safe exposure ceiling), Cockpit HUD optical-flow obstacle range, YOLOE tracking, and OpenGV / MoGe depth odometry."
 image: "/assets/ainekio/v2/vision-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio Project"
 authorBio: "Robot familiar field notes"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Camera, Vision, ST7789, OV5647, Odometry, YOLOE]
+tags: [Ainekio, Camera, Vision, ST7789, OV5647, Optical Flow, Odometry, YOLOE, Ainekio OS]
 category: "Perception and Voice"
 draft: false
 lang: "en"
@@ -19,16 +19,16 @@ reading:
   generation: both
   kind: reference
   next: voice-loop
-  related: ["ainekio-v2", "gateway-and-simulator", "2026-10-21-body-face-and-standing"]
+  related: ["ainekio-v2", "gateway-and-simulator", "ainekio-os", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
 ---
 
-Ainekio's front face carrier combines visual expression and visual perception in one removable module: a **1.9-inch `ST7789` color IPS LCD** (`320 × 170`) displaying **58 animated facial expressions**, and an **`OV5647` MIPI-CSI camera** above the display that provides action-correlated snapshots, YOLOE/ByteTrack target tracking, and monocular depth odometry.
+Ainekio's front face carrier combines visual expression and visual perception in one removable module: a **1.9-inch `ST7789` color IPS LCD** (`320 × 170`) displaying **59 animated facial expressions**, and an **`OV5647` MIPI-CSI camera** above the display that provides action-correlated snapshots, Cockpit HUD optical-flow obstacle range, YOLOE/ByteTrack target tracking, and monocular depth odometry.
 
-## 1.9-inch `ST7789` LCD face and 58 expressions
+## 1.9-inch `ST7789` LCD face and 59 expressions
 
-The V2 face display uses a landscape 1.9-inch `ST7789` SPI module mounted behind the red face surround. The firmware renderer drives 58 named expression animations—covering idle blinking, speaking cues, directional glances, curiosity, sleep/doze states, Freestyle gesture accompaniments, and **`be_` token-matched Fast Body Event reactions** (`fast-body-event-mode.json`) when the robot is tipped, shaken, or stalled.
+The V2 face display uses a landscape 1.9-inch `ST7789` SPI module seated in a recessed red bezel with four wireless spacers (`2026-11-11`). The C firmware shader (`Slave/software/faces/face.c`) drives 59 procedural expression animations at `15 fps`—covering idle blinking, live audio-synced speaking bars, directional glances, curiosity, sleep/doze states, Freestyle gesture accompaniments, `cosmic horror`, and **`be_` token-matched Fast Body Event reactions** (`fast-body-event-mode.json`) when the robot is tipped, shaken, or stalled.
 
-![Contact sheet of Ainekio's 58 animated ST7789 LCD facial expressions](/gallery/lcd-face-contact-sheet-1600.webp)
+![Contact sheet of Ainekio's animated ST7789 LCD facial expressions](/gallery/lcd-face-contact-sheet-1600.webp)
 
 ## `OV5647` MIPI-CSI camera and motion-safe capture
 
@@ -40,21 +40,22 @@ On V2 (`Waveshare ESP32-P4-WIFI6`), vision is captured through an `OV5647` MIPI-
 
 ## How images connect to actions and conversation
 
-Rather than flooding the language model with continuous raw room video, Ainekio binds still captures to specific events so cognition always knows **when** an image was taken and **which action** it reflects:
+Rather than flooding the language model with continuous raw room video, Ainekio binds still captures to specific events so cognition in **[Ainekio OS](/posts/ainekio-os/)** always knows **when** an image was taken and **which action** it reflects:
 
 | Capture Trigger | Correlation Identifier | Purpose |
 | --- | --- | --- |
-| **Explicit snapshot (`captureImage`)** | `action_id` | On-demand visual inspection requested by MetaHuman OS or the operator |
+| **Explicit snapshot (`captureImage`)** | `action_id` | On-demand visual inspection requested by Ainekio OS or the operator |
 | **Post-motion snapshot** | `command_sequence_id` | Sent immediately before a movement's `done` receipt so Goal Review can verify the physical outcome |
 | **Voice utterance end (VAD)** | `utterance_id` | Pairs what the user said with what Ainekio was looking at during that spoken turn |
-| **Visual tracking & odometry** | `frame_id` + timestamp | Feeds host YOLOE/ByteTrack detection and OpenGV / MoGe depth estimation in Body Control |
+| **Cockpit HUD, tracking & odometry** | `frame_id` + timestamp | Feeds Cockpit HUD optical-flow contact range, YOLOE/ByteTrack detection, and OpenGV / MoGe depth estimation |
 
-In MetaHuman OS, visual objectives require `visual_observation` evidence routed through the **Vision** model role (`Qwen3.5 9B` on `llama-cpp.service`) rather than assuming that a completed `Walk` command automatically satisfied a visual goal.
+In Ainekio OS, visual objectives require `visual_observation` evidence routed through the **`environmentVision`** specialist role (`Qwen3.5 9B` locally on `llama-cpp.service` or Hybrid warm `GeminiAcpServer` in `ServerStatus`) rather than assuming that a completed `Walk` command automatically satisfied a visual goal.
 
-## YOLOE tracking and visual depth odometry
+## Optical-flow obstacle range, YOLOE tracking, and depth odometry
 
 Host perception in `Master/gateway` extends the camera from passive snapshots to active spatial measurement:
 
-1. **YOLOE + ByteTrack target tracking**: Body Control runs open-vocabulary YOLOE detection paired with ByteTrack multi-frame association, allowing MetaHuman OS (`Active Task`) to search for, select, and track a specific object or person across frames with exact-image bounding-box overlays.
-2. **OpenGV 2-point RANSAC depth odometry**: To measure real forward progress and turning during walking trials and locomotion goals, the host gateway combines monocular depth points with `LSM6DS3` IMU rotation priors inside an **OpenGV 2-point RANSAC** solver, transforming camera-frame motion into body-frame displacement via the calibrated face-carrier mounting transform.
-3. **On-demand MoGe depth loading via `Active Task`**: Because monocular metric depth (`MoGe-2`) is compute-intensive, the depth model is loaded **on demand** only when `Active Task` or a gait-learning session actively requests visual depth progress, and unloaded when idle so GPU/host memory stays free for `llama-cpp.service`.
+1. **Cockpit HUD Lucas-Kanade optical-flow + Depth-Anything obstacle contact range (`depth_motion.py`)**: During live walking in the **Cockpit HUD**, pyramidal Lucas-Kanade sparse optical flow is fused with Depth-Anything monocular ground-plane contact projection to compute real-time obstacle range and approach clearance directly in front of the `OV5647` lens.
+2. **YOLOE + ByteTrack target tracking**: Body Control runs open-vocabulary YOLOE detection paired with ByteTrack multi-frame association, allowing Ainekio OS (`Active Task`) to search for, select, and track a specific object or person across frames with exact-image bounding-box overlays.
+3. **OpenGV 2-point RANSAC depth odometry**: To measure real forward progress and turning during walking trials and locomotion goals, the host gateway combines monocular depth points with `LSM6DS3` IMU rotation priors inside an **OpenGV 2-point RANSAC** solver, transforming camera-frame motion into body-frame displacement via the calibrated face-carrier mounting transform.
+4. **On-demand MoGe depth loading via `Active Task`**: Because monocular metric depth (`MoGe-2`) is compute-intensive, the depth model is loaded **on demand** only when `Active Task` or a gait-learning session actively requests visual depth progress, and unloaded when idle so GPU/host memory stays free for `llama-cpp.service`.

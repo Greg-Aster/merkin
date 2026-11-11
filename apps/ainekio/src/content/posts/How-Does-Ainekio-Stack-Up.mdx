@@ -1,18 +1,18 @@
 ---
 title: "How Does Ainekio Stack Up? Robot Leaderboard & Comparison"
 published: 2026-11-06T14:30:00-08:00
-updated: 2026-11-06
-description: "A comparison of Ainekio (~$80–$100 BOM) and MetaHuman OS against a Furby, Roomba, Stanford Pupper V3, Microduck, Unitree Go2, Spot, Electric Atlas, and a 75-ton bipedal mech."
+updated: 2026-11-11
+description: "A comparison of Ainekio (~$80–$100 BOM) and Ainekio OS (MetaHuman OS) against a Furby, Roomba, Stanford Pupper V3, Microduck, Unitree Go2, Spot, Electric Atlas, and a 75-ton bipedal mech."
 image: "/assets/ainekio/2026-10-12-refresh/render-overview.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Greg the Mechanic"
-authorBio: "Builder of Ainekio & MetaHuman OS"
+authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: true
 showToc: true
 featured: true
 pinned: true
 order: 2
-tags: [Ainekio, Robot Comparison, Leaderboard, Stanford Pupper V3, Microduck, MetaHuman OS, Freestyle, Quadruped]
+tags: [Ainekio, Robot Comparison, Leaderboard, Stanford Pupper V3, Microduck, Ainekio OS, MetaHuman OS, Freestyle, Quadruped]
 category: "Start Here"
 draft: false
 lang: "en"
@@ -22,7 +22,7 @@ reading:
   generation: v2
   kind: reference
   next: ainekio-companion
-  related: ["project-overview", "ainekio-v2", "gait-development", "metahuman-integration"]
+  related: ["ainekio-os", "project-overview", "ainekio-v2", "gait-development"]
 ---
 
 Ainekio V2 is a `650 g`, `109 mm` tall, 3D-printed four-legged robot that costs **`~$80–$100` in parts** and walks across the living-room rug with a bundle of twelve 4-wire servo leads sticking out of its back.
@@ -59,7 +59,7 @@ The tradeoff is raw torque. Where the 75-ton **Mech** (`~$14B` BOM) simply steps
 </video>
 *Ainekio V2's 375-mesh Blender assembly exported into MuJoCo MJCF with closed-loop four-bar equality constraints, `Part027` rocking soles, and the `MG90SActuator` speed-torque model.*
 
-Both upstream stacks are built around `50 Hz` reinforcement-learning walking policies, and we adapted Microduck's GPU training loop (`Master/gateway/neural_gait/microduck.py`) directly to Ainekio by switching the physics solver from Newton (which hits `float32` Hessian `NaN`s on closed four-bar linkages) to **Conjugate Gradient (`solver="cg"`, `500 Hz` physics / `50 Hz` control)**, modeling the `MG90S` speed-torque ceiling, and feeding a **720-feature (`15 × 48`) proprioceptive history** matching Ainekio's 4th-wire ADC scan and `208 Hz` IMU.
+Both upstream stacks are built around `50 Hz` reinforcement-learning walking policies, and we adapted Microduck's GPU training loop (`Master/gateway/neural_gait/microduck.py`) directly to Ainekio by switching the physics solver from Newton (which hits `float32` Hessian `NaN`s on closed four-bar linkages) to **Conjugate Gradient (`solver="cg"`, `500 Hz` physics / `50 Hz` control)**, modeling the `MG90S` speed-torque ceiling, feeding a **720-feature (`15 × 48`) proprioceptive history** matching Ainekio's 4th-wire ADC scan and `208 Hz` IMU, and distilling the policy via 2-round DAgger into a **`107.8 KB` `int8` student** that runs natively at `50 Hz` inside the **`ESP32-P4`'s `128 KB` L2 cache** (`0.8.159-p4-microduck-v17`).
 
 Where Ainekio diverges sharply from both platforms is what happens when the robot stops walking in a straight line and needs to express itself or recover from a snagged foot. Microduck has no pose or emote system beyond its walking policy. Stanford Pupper V3's `animation_controller.py` plays four fixed `30 Hz` CSV recordings (`sit`, `shake`, `downward_dog`, `superman`) completely open-loop, and its LLM bridge (`ros_node.py`) can only call `move(vx, vy, wz)` or `change_gait()`—it cannot invent a new posture or recover if a leg catches on the floor.
 
@@ -71,7 +71,7 @@ Ainekio runs **Freestyle** (`Qwen3.5-0.8B` + LoRA backed by a `349`-example SQLi
 
 If you open the software repository of almost any legged robot—consumer, academic, or industrial—the "brain" is either a state machine or a stateless cloud API wrapper that forgets who you are the moment the power switch flips.
 
-Because Ainekio is wired into **[MetaHuman OS](https://github.com/Greg-Aster/metahuman-os)**, this `$85` plastic crab-dog carries around an unusually heavy psychological and existential workload. Its identity is governed by an **Evolving Persona** (`persona/core.json`) with Big Five traits, values, goals, and five trust tiers, routed through **19+ editable Svelte-Flow cognitive graphs** and **12 specialist model roles** on a shared local `llama-cpp.service` (`Qwen3.5 9B` multimodal vision/text plus per-request `0.8B/2B` LoRAs), alongside on-chip `micro_wake_word` listening (with a physical `+6°` front-shoulder ear perk), local Whisper STT, local Kokoro TTS with custom `.pt` voicepacks, YOLOE + MoGe depth vision, and "**Big Brother**" CLI delegation that can use a desktop terminal and self-heal Ainekio's own source code (getting dangerously close to recursive self improvement here).
+Because Ainekio is wired into **[Ainekio OS](https://github.com/Greg-Aster/ainekio-os)** (formerly MetaHuman OS; [architecture guide](/posts/ainekio-os/)), this `$85` plastic crab-dog carries around an unusually heavy psychological and existential workload. Its identity is governed by an **Evolving Persona** (`persona/core.json`) with Big Five traits, values, goals, and five trust tiers, routed through **47 editable Svelte-Flow cognitive graphs** and **12 specialist model roles** on a shared local `llama-cpp.service` (`Qwen3.5 9B` multimodal vision/text plus per-request `0.8B/2B` LoRAs and `ServerStatus` Hybrid routing), alongside on-chip `WakeNet9s` listening (with a physical `+6°` front-shoulder ear perk), local/remote Whisper STT, local/remote Kokoro TTS with custom `.pt` voicepacks (plus Piper ONNX fallback), YOLOE + MoGe depth vision, and "**Big Brother**" CLI delegation (`codex`, `claude-code`, and warm `GeminiAcpServer`) that can use a desktop terminal and self-heal Ainekio's own source code (getting dangerously close to recursive self improvement here).
 
 ![59-expression 1.9-inch ST7789 LCD face contact sheet](/posts/comparison/lcd-face-cosmic-horror.webp)
 *Ainekio V2's 1.9-inch `ST7789` IPS LCD (`320×170` landscape at `15 fps`) renders 59 procedural expressions and live audio-synced voice bars.*
@@ -96,7 +96,7 @@ Scoring a `$65` Furby, an `$85` 3D-printed quadruped, a `$2,000` academic robot 
 
 | Platform | Est. Cost | Height / Mass | Actuators & Joint Sensing | Brain, Dreams & Stance Toward Owner | Brawn (`/10`) | Control (`/10`) | Freestyle (`/10`) | Mind & Agency (`/10`) | Value & Safety (`/10`) | **Total (`/50`)** |
 | :--- | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Ainekio V2 + MetaHuman OS** | **`~$60–$100` BOM** | `0.11 m` · `0.65 kg` | 12× `MG90S` 4-bar + **4th-wire pot mux (`50 Hz`)** + `208 Hz` IMU | **MetaHuman OS**: Ponders existence, dreams, cares for owner's health, remembers you after you die | `1.5` | `8.5` | **`9.4`** | **`9.7`** | **`9.8`** | **`38.9 / 50`** |
+| **Ainekio V2 + Ainekio OS** | **`~$60–$100` BOM** | `0.11 m` · `0.65 kg` | 12× `MG90S` 4-bar + **4th-wire pot mux (`50 Hz`)** + on-chip `107.8 KB` RL + `208 Hz` IMU | **Ainekio OS**: Ponders existence, dreams, cares for owner's health, remembers you after you die | `1.5` | `8.5` | **`9.4`** | **`9.7`** | **`9.8`** | **`38.9 / 50`** |
 | **Unitree Go2 (`Pro / EDU`)** | `$1,600–$4,500+` | `0.40 m` · `15.0 kg` | 12× brushless FOC (`45 N·m`) + 4D LiDAR | Thin cloud GPT wrapper; does backflips; forgets you on reboot | `8.5` | `9.0` | `6.5` | `5.0` | `7.0` | **`36.0 / 50`** |
 | **Figure AI Figure 02** | `$100,000+` (Lease) | `1.68 m` · `70.0 kg` | 26-DOF body + 16-DOF hands (`25 kg` lift) | Speech-to-speech factory VLA; views humans as shift coworkers | `9.5` | `9.5` | `7.5` | `8.0` | `1.0` | **`35.5 / 50`** |
 | **Boston Dynamics Electric Atlas** | `$150,000+` (Pilot) | `1.90 m` · `90.0 kg` | 56-DOF electric (`50 kg` lift, `360°` joints) | Industrial task planner; views humans as dynamic OSHA obstacles | `9.6` | `9.8` | `8.0` | `7.0` | `0.5` | **`34.9 / 50`** |
@@ -115,7 +115,8 @@ Scoring a `$65` Furby, an `$85` 3D-printed quadruped, a `$2,000` academic robot 
 
 ## Related Notes & References
 
-- **[Project Overview & System Status](/posts/project-overview/)**: End-to-end architecture across the `ESP32-P4` body and `MetaHuman OS`.
+- **[Ainekio OS Architecture](/posts/ainekio-os/)**: Standalone & embodied personal AI operating system (`Greg-Aster/ainekio-os`), 47 cognitive graphs, `ServerStatus` routing, and the 8-stage `02:00` Sleep Cycle.
+- **[Project Overview & System Status](/posts/project-overview/)**: End-to-end architecture across the `ESP32-P4` body and `Ainekio OS`.
 - **[Ainekio as a Companion](/posts/ainekio-companion/)**: Standing Persona, autonomous drives, Dreaming, and the Psychotherapist sleep cycle.
-- **[Gait Development & Locomotion Guide](/posts/gait-development/)**: Physical carpet trials, `50 Hz` neural gait videos, and the 3-stage MuJoCo/MJX training progression (`tiny hops` → `"scootybooty"` fix → `200M-step` centered stride).
-- **[V2 Hardware & Wiring Reference](/posts/ainekio-v2/)**: Complete pinouts, 4th-wire servo modification guide, and assembly diagrams.
+- **[Gait Development & Locomotion Guide](/posts/gait-development/)**: On-chip `50 Hz` `107.8 KB` L2-cached P4 neural gait, physical carpet & hardwood trials, and the MuJoCo/MJX training progression (`tiny hops` → `"scootybooty"` fix → `200M-step` centered stride → DAgger distillation).
+- **[V2 Hardware & Wiring Reference](/posts/ainekio-v2/)**: Complete pinouts, 4th-wire servo modification guide, Wireless Keeper Bridge STLs, and assembly diagrams.

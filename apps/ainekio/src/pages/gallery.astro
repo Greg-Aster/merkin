@@ -48,8 +48,8 @@ const labelForKind = (kind: string) =>
     <header>
       <p class="eyebrow">Visual reference & media library</p>
       <h1>Meet the robot</h1>
-      <p>Workbench photos, onboard camera footage from physical carpet trials, MuJoCo/MJX simulation baselines, 58 LCD facial expressions, and complete V2 wiring diagrams.</p>
-      <p>Latest milestone: <a href={url('/posts/2026-11-06-carpet-trials-rl-and-big-brother/')}>November 6 real-life neural walk, 200M-step MJX gait training, and Big Brother runtime</a>.</p>
+      <p>Workbench photos, onboard camera footage from physical carpet trials, DAgger-distilled on-chip ESP32-P4 neural gait rollouts, 59 LCD facial expressions, and complete V2 wiring diagrams.</p>
+      <p>Latest milestone: <a href={url('/posts/2026-11-11-on-chip-neural-gait-and-ainekio-os/')}>November 11 on-chip ESP32-P4 L2-cached MicroDuck neural gait, Cockpit HUD, and Ainekio OS</a>.</p>
       <ShareBar title={galleryTitle} description={galleryDescription} url={Astro.url.href} />
       <nav aria-label="Gallery sections">{groups.map(group => <a href={`#${group.id}`}>{group.title} ↓</a>)}</nav>
     </header>

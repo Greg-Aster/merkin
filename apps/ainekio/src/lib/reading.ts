@@ -7,7 +7,7 @@ export const topics = {
   body: { title: 'Chassis, shell & power', description: 'Parts, packaging, weight, battery choices, and the evolving assembly.', reference: 'ainekio-v2' },
   control: { title: 'Firmware & connections', description: 'Body control, commands, safety, wired and wireless links.', reference: 'protocol-and-safety' },
   perception: { title: 'Vision, face & voice', description: 'Camera observations, target tracking, display, listening, and speech.', reference: 'vision-loop' },
-  metahuman: { title: 'MetaHuman OS', description: 'Robot integration, workflows, trained models, and supervised actions.', reference: 'metahuman-integration' },
+  metahuman: { title: 'Ainekio OS (MetaHuman)', description: 'Local-first personal AI operating system, 47 cognitive graphs, specialist model routing, and robot embodiment.', reference: 'ainekio-os' },
   v1: { title: 'Original eight-servo robot', description: 'The original documents, alternatives considered, and later V1 build reference.', reference: 'body-design-and-hardware' },
 } satisfies Record<typeof topicIds[number], { title: string; description: string; reference: string }>
 export const generations = { v1: 'V1 · 8 servos', v2: 'V2 · 12 servos', both: 'V1 + V2' }

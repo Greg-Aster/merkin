@@ -23,22 +23,23 @@ const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
 const hero = gallery.find(item => item.id === 'ainekio-v2-physical-three-quarter')!
 const galleryPreview = ['ainekio-v2-physical-front', 'ainekio-mjcf-preview', 'lcd-face-contact-sheet'].map(id => gallery.find(item => item.id === id)!)
 const paths = [
-  { title: 'System & Companion Guide', href: '/posts/ainekio-companion/', text: 'How MetaHuman OS connects Standing Persona, memory, vision, voice, bounded autonomy, and Big Brother task delegation to the physical robot.' },
-  { title: 'V2 Hardware & Firmware Reference', href: '/posts/ainekio-v2/', text: 'The 650 g 12-servo planar linkage body, Waveshare ESP32-P4-WIFI6, 4th-wire feedback mux, ST7789 LCD, OV5647 camera, and 2S rear power carrier.' },
-  { title: 'Build Journal & Milestones', href: '/updates/', text: 'Chronological engineering milestones from early leg linkage studies to closed-loop walking, carpet trials, and MuJoCo/MJX RL.' },
+  { title: 'Ainekio OS Architecture', href: '/posts/ainekio-os/', text: 'The local-first personal AI OS (Greg-Aster/ainekio-os): 47 cognitive graphs, 14-table SQLite durable execution, ServerStatus hybrid compute, warm Gemini ACP, and the 02:00 Sleep Cycle.' },
+  { title: 'V2 Hardware & On-Chip Neural Gait', href: '/posts/ainekio-v2/', text: 'The 650 g 12-servo four-bar body, Waveshare ESP32-P4-WIFI6 running a 107.8 KB L2-cached 50 Hz MicroDuck policy, 4th-wire feedback mux, ST7789 LCD, and Keeper Bridge STLs.' },
+  { title: 'Build Journal & Milestones', href: '/updates/', text: 'Chronological engineering milestones from early linkage prototypes through carpet trials, DAgger L2-cache policy distillation, Cockpit HUD, and Ainekio OS.' },
 ]
 ---
 <div class="ainekio-home">
   <section class="home-feature" aria-labelledby="home-title">
     <div>
-      <p class="home-eyebrow">Open-Source 3D-Printed Quadruped · Closed-Loop MG90S · MuJoCo/MJX RL · MetaHuman OS</p>
-      <h1 id="home-title">Ainekio: 12-Servo ESP32-P4 Quadruped Robot Companion</h1>
-      <p class="home-intro">Ainekio is an open-source quadruped companion combining a 3D-printed, twelve-servo closed-loop body with <strong>MetaHuman OS</strong> for conversation, episodic memory, active perception, bounded autonomy, and learned locomotion.</p>
-      <p class="home-intro">Onboard, a Waveshare ESP32-P4-WIFI6 drives 12 modified MG90S servos with 4th-wire potentiometer feedback, a 1.9-inch ST7789 face display, an OV5647 CSI camera, and an LSM6DS3 IMU—paired over Wi-Fi to the Body Control gateway and a shared local <code>llama.cpp</code> / Big Brother brain.</p>
+      <p class="home-eyebrow">Open-Source 3D-Printed Quadruped · On-Chip ESP32-P4 Neural Gait · Ainekio OS</p>
+      <h1 id="home-title">Ainekio: 12-Servo ESP32-P4 Quadruped &amp; Ainekio OS</h1>
+      <p class="home-intro">Ainekio pairs an open-source, 3D-printed twelve-servo closed-loop quadruped (<code>Ainekio-bot</code>) with <strong><a href={url('/posts/ainekio-os/')}>Ainekio OS</a></strong> (<code>ainekio-os</code>, formerly MetaHuman OS)—a local-first personal AI operating system for persistent identity, episodic memory, 47 cognitive graphs, and bounded autonomy.</p>
+      <p class="home-intro">Onboard, a Waveshare ESP32-P4-WIFI6 executes a DAgger-distilled <code>107.8 KB</code> neural gait policy natively at <code>50 Hz</code> inside its <code>128 KB</code> L2 cache alongside 4th-wire potentiometer feedback, a 1.9-inch ST7789 LCD, an OV5647 CSI camera, and a 208 Hz LSM6DS3 IMU—bridged over Wi-Fi to the Body Control Cockpit HUD and Ainekio OS.</p>
       <div class="home-actions">
         <a class="home-primary-link" href={url('/posts/project-overview/')}>System Overview →</a>
+        <a class="home-secondary-link" href={url('/posts/ainekio-os/')}>Ainekio OS Guide →</a>
         <a class="home-secondary-link" href={url('/posts/how-does-ainekio-stack-up/')}>How Does Ainekio Stack Up? →</a>
-        <a class="home-secondary-link" href={url('/updates/')}>Latest Build Milestones →</a>
+        <a class="home-secondary-link" href={url('/updates/')}>Latest Milestones →</a>
       </div>
     </div>
     <figure>

@@ -10,24 +10,30 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "Physical 650 g V2 quadruped walking under 200M-step MJX neural policy; closed-loop Stand/Walk and unified MetaHuman runtime active"
-  location: "V2 / ESP32-P4 · Body Control · MetaHuman OS"
-  updated: 2026-11-06
-  mileage: "650 g closed-loop V2 · 200M-step MJX neural walk · Big Brother"
-  section: "Real-world neural network walking, full-CAD MJX reinforcement learning, and unified companion agency"
-  nextStop: "Complete the 200M-step rough-terrain and push-recovery MJX continuation run (7 mm carpet strips + kick disturbances) and validate sustained autonomous room navigation."
-  note: "The 650 g twelve-servo V2 robot now walks forward and reverses cleanly on physical carpet under its 200M-step JAX/Brax/MJX neural policy after resolving early tiny-hop and 'scootybooty' reverse-dragging failure modes. Onboard, 4th-wire CD74HC4067 shaft verification and 0.8.150 Cartesian workspace projection pair with the unified llama-cpp.service + Big Brother MetaHuman runtime."
+  status: "On-chip 50 Hz ESP32-P4 neural gait (107.8 KB L2-cached MicroDuck v17), Body Control Cockpit HUD, and Ainekio OS hybrid runtime active"
+  location: "V2 / ESP32-P4 (0.8.159) · Body Control Cockpit · Ainekio OS"
+  updated: 2026-11-11
+  mileage: "107.8 KB L2-cached P4 neural gait · 600M–800M Pupper MJX · Ainekio OS"
+  section: "On-chip microcontroller RL locomotion, DAgger L2-cache distillation, and Ainekio OS compute/voice consolidation"
+  nextStop: "Validate untethered multi-room autonomous navigation combining on-chip MicroDuck v17 locomotion, Cockpit optical-flow obstacle range, and Ainekio OS Hybrid edge+ACP routing."
+  note: "Neural walking now runs natively at 50 Hz on ESP32-P4 Core 1 with zero Wi-Fi round-trip dependency: 2-round DAgger distillation compressed the 720-input MicroDuck policy by 79.8% (547 KB → 107.8 KB int8) so it fits completely inside the P4's 128 KB L2 cache (+0.213 m/s forward, -0.179 m/s reverse, ±60.9°/s yaw turn). In parallel, MetaHuman OS publicly became Ainekio OS (Greg-Aster/ainekio-os) with a unified ServerStatus control plane, remote Whisper/Kokoro/llama.cpp targets, warm 2-session GeminiAcpServer inference, and 6-turn varied Fast Body Event reactions."
   areas:
     - label: "Body & firmware"
-      status: "650 g closed-loop V2 hardware complete; 0.8.150 firmware verified"
-      detail: "Waveshare ESP32-P4-WIFI6 + C6, 12× feedback-modified MG90S via PCA9685 and CD74HC4067 mux, 35/20/28/38/55 mm linkages, 1.9\" ST7789 LCD (58 faces), inverted OV5647 camera (10,000 µs cap), 208 Hz LSM6DS3 IMU, ES8311/NS4150B audio with WakeNet9s, and rear 2S + Mini560 + HiLetgo power carrier."
-    - label: "Locomotion & learning"
-      status: "Real-life 200M-step MJX neural walk, closed-loop Stand/Walk, and 349 Freestyle motions"
-      detail: "Trained 200M-step full-CAD MJX policy (56.6–63.7 mm centered stride, upright reverse, 3.5× air-time credit) walking on the physical 650 g V2 robot; closed-loop Stand settles within 2 mm; Freestyle pairs 349 SQLite examples with jam/fall recovery and Big Brother inference."
-    - label: "MetaHuman OS & companion"
-      status: "Unified llama-cpp.service router, single bridge, Full Auto, and Big Brother"
-      detail: "Single :8080 router (Qwen3.5 9B, Environment 0.8B/2B LoRAs, Freestyle Qwen, CPU-only embeddings, 5-min idle unload), multi-host environment-bridge, Standing Persona (Psychotherapist-edited), Semi (5-min drive deltas) & continuous Full Auto, fast-body-event-mode.json (be_ faces), and Big Brother terminal/delegation."
+      status: "0.8.159-p4-microduck-v17 on-chip neural firmware & Wireless Keeper Bridge STLs"
+      detail: "Waveshare ESP32-P4-WIFI6 running 50 Hz Core 1 int8×int16 MicroDuck inference in 128 KB L2 cache, 12× 4th-wire MG90S via PCA9685 + CD74HC4067 One-Euro filter, 208 Hz LSM6DS3 FusionAhrs IMU, 1.9\" ST7789 LCD (59 faces), OV5647 CSI camera, WakeNet9s audio, and 30 updated Red shell, LCD spacer, and battery-mounted Keeper Bridge STLs."
+    - label: "Locomotion & Cockpit"
+      status: "Distilled v17-p4 (+0.213 m/s, ±60.9°/s), 13 floor seam bouts, Cockpit HUD & 489 Freestyle rows"
+      detail: "GPU hardware-twin RL (tensor_sensors.py + tensor_body.py across 4,096 envs, slick wood/carpet seams & ADC rail sag), parallel Pupper V3 MJX 600M–800M hardwood/seam floor trials (zero falls), full-viewport Cockpit HUD with Lucas-Kanade optical-flow obstacle range & no-login/hotspot fallback, and 489-row Freestyle native-Stand recovery."
+    - label: "Ainekio OS (Mind)"
+      status: "Greg-Aster/ainekio-os rebrand, 47 graphs, ServerStatus presets & warm Gemini ACP"
+      detail: "Local-first personal AI OS (123 Core API handlers, 14-table executions.sqlite, 47 cognitive graphs, 24 Brain agents, 8-stage 02:00 Sleep Cycle), ServerStatus right drawer (Local / Hybrid / BB-Codex / BB-Gemini presets for 12 roles), toggleable local/remote CUDA Whisper & Kokoro + Piper fallback, warm 2-session GeminiAcpServer, and varied Fast Body Event wit."
 entries:
+  - title: "On-chip ESP32-P4 neural gait (110 KB L2-cached MicroDuck), Cockpit HUD, and Ainekio OS"
+    date: 2026-11-11
+    location: "ESP32-P4 Core 1, Body Control Cockpit, V2 Red CAD, and Ainekio OS"
+    mileage: "0.8.159-p4-microduck-v17 · 107.8 KB L2-hot MLP · Greg-Aster/ainekio-os"
+    summary: "Compiling and 2-round DAgger-distilling the 50 Hz MicroDuck policy (547 KB → 107.8 KB int8) into the ESP32-P4's 128 KB L2 cache (+0.213 m/s forward, ±60.9°/s yaw), 13 Pupper MJX hardwood/seam bouts, Cockpit HUD with optical-flow range, 30 Keeper Bridge & shell STLs, and the Ainekio OS rebrand with ServerStatus hybrid/remote routing and warm Gemini ACP."
+    url: "/posts/2026-11-11-on-chip-neural-gait-and-ainekio-os/"
   - title: "Real-life neural walking, 200M-step MuJoCo/MJX gait training, and Big Brother"
     date: 2026-11-06
     location: "V2 physical robot, MuJoCo MJX, and MetaHuman OS"
@@ -140,6 +146,6 @@ entries:
 
 # Field updates
 
-These chronological build entries follow Ainekio's hardware, firmware, locomotion, and [MetaHuman OS](https://github.com/Greg-Aster/metahuman-os) development from the initial eight-servo `ESP32-S3` prototype to the `650 g`, twelve-servo closed-loop `ESP32-P4` quadruped.
+These chronological build entries follow Ainekio's hardware, firmware, locomotion, and [Ainekio OS](https://github.com/Greg-Aster/ainekio-os) (formerly MetaHuman OS) development from the initial eight-servo `ESP32-S3` prototype to the `650 g`, twelve-servo closed-loop `ESP32-P4` quadruped running on-chip `50 Hz` neural locomotion.
 
-For a structured system introduction and live component summary, start with the [Project Overview & Status](/posts/project-overview/#project-status) and [Ainekio as a Companion](/posts/ainekio-companion/). Technical architecture guides are organized in the [Reference Library](/archive/?kind=reference), and the July–September 2026 eight-servo engineering documents are preserved in the [Original V1 Build Journal](/posts/v1-original-posts/).
+For a structured system introduction and live component summary, start with the [Project Overview & Status](/posts/project-overview/#project-status), the [Ainekio OS Architecture Guide](/posts/ainekio-os/), and [Ainekio as a Companion](/posts/ainekio-companion/). Technical architecture guides are organized in the [Reference Library](/archive/?kind=reference), and the July–September 2026 eight-servo engineering documents are preserved in the [Original V1 Build Journal](/posts/v1-original-posts/).
