@@ -22,23 +22,22 @@ reading:
   related: ["ainekio-companion", "metahuman-integration", "gait-development"]
 ---
 
-The October 15 updates across MetaHuman OS and the V2 firmware tighten how Ainekio
-decides what to do, who speaks, how locomotion progress is measured, and how the legs
-move across Walk, Run, Crawl, Crab, and Wave.
+On October 15 I cleaned up two things that kept rubbing against each other during live
+voice and floor tests: making sure only one model voice ever speaks for the robot, and
+tying physical walking commands to real camera and IMU progress instead of blind timers.
 
 <figure>
   <img src="/posts/2026-10-15-progress/companion-systems.svg" alt="Requests, body events and autonomous intentions enter Environment Mode. Selected context informs routing and planning; body actions return evidence for review; Persona supplies the outward reply. Attributed experience can inform later Desire review." width="1000" height="660" loading="lazy" />
-  <figcaption>MetaHuman OS architecture: Orchestrator routes requests, Task selects physical/sensing actions, Goal Review evaluates outcomes, and Persona owns the spoken reply.</figcaption>
+  <figcaption>Companion loop: Orchestrator routes incoming speech and body events, Task chooses physical or camera actions, Goal Review checks what actually happened, and Persona owns the spoken reply.</figcaption>
 </figure>
 
-## Ten model categories and a single owner for outward speech
+## Ten model roles and one owner for outward speech
 
-Workflow nodes and the model settings panel now share a unified ten-category routing
-table:
+Workflows and model settings now route across ten clear specialist roles:
 
 | Category | Responsibility |
 | --- | --- |
-| **Orchestrator** | Interpret requests and events; select routes, tools, and context (consolidating `Environment Intent`) |
+| **Orchestrator** | Interpret requests and events; select routes, tools, and context |
 | **Task Decisions** | Select executable body/sensing actions and task controls |
 | **Planner** | Develop and revise multi-step plans |
 | **Persona** | Express identity, personality, conversation, and self-directed intentions |
@@ -49,44 +48,34 @@ table:
 | **Summarizer** | Condense history while preserving meaning and attribution |
 | **Embedder** | Represent records for vector retrieval and similarity search |
 
-### Removing speech steps from Task
+### Stripping speech out of the Task planner
 
-Following the [October 14 speech/action confusion analysis](/posts/2026-10-14-startup-and-leveling/),
-**Task speech steps have been removed completely.** Task now selects only physical or
-sensing actions, Goal Review evaluates execution evidence, and **Persona** is the sole
-owner of conversation persistence and spoken reply delivery. Dataset Version 16
-(6,358 development, 1,518 evaluation, and 187 regression examples) updates the
-specialist training corpus to this clean action-only contract.
+Following yesterday's [speech/action confusion on the 0.8B planner](/posts/2026-10-14-startup-and-leveling/),
+I removed spoken lines from the Task model completely. Task now picks only physical
+postures, gaits, or camera actions; Goal Review checks the resulting sensor telemetry;
+and **Persona** is the only path that writes conversation history or speaks out loud
+through the wake-word voice loop. Retraining the specialist dataset (6,358 training,
+1,518 evaluation, and 187 regression examples) around that strict action-only schema
+stopped spoken figures of speech from accidentally triggering leg movements.
 
-### Desire review, authorship attribution, and Active Operator
+### Grounding desires and memory in physical outcomes
 
-- **Operational evidence in Desire review:** Agency's Desire review now receives
-  selected-robot status, capabilities, original requests, selected programs, and
-  actual body execution outcomes—allowing it to spot mismatches between what was
-  requested and what the body actually did, adjust desire strength directly, or
-  archive a zero-strength desire and cancel its active work.
-- **Strict memory authorship:** Memories retain speaker, timestamp, cognitive mode,
-  execution ID, and record type (keeping daydreams distinct from physical events),
-  while the **Psychotherapist** agent is the sole autonomous editor of persona goals.
-- **Active Operator & resume coalescing:** The autonomy scheduler is now registered as
-  **Active Operator** (`Reactive`, `Semi`, `Full`) in the Agent Catalog. Pending
-  workflow resume requests coalesce in the execution store (tested against a
-  23-to-41 mixed-event burst with zero backlog growth), and running workflows pin
-  their admitted graph template across live edits.
+Autonomous reflection also needed a reality check against the physical body. Desire
+review now sees live robot status and actual execution outcomes—so if the robot tried
+to walk toward something and couldn't, it recognizes the mismatch rather than assuming
+the action succeeded. Every stored memory keeps strict attribution (who spoke, when,
+and whether an episode happened in the physical room or during an internal reflection
+pass), while bursty sensor events coalesce cleanly instead of piling up duplicate
+workflow resumes.
 
-### 9B LoRA diagnostics for Autonomy and Persona
+Quick diagnostic LoRA runs on a **Qwen3.5 9B** base also confirmed that tiny 4–5 sample
+seed sets aren't enough to replace explicit persona context without muddling memory
+attribution, so larger curated transcripts will come first before promoting 9B adapters.
 
-Two diagnostic remote LoRA runs on the pinned **Qwen3.5 9B** base tested whether tiny
-seed sets (4/2 samples for Autonomy, 5/1 for Persona) could compress outputs or
-replace static persona prompts. While Autonomy's held-out loss dropped from `0.416`
-to `0.022`, serving checks through `llama.cpp` showed dropped lighting objectives in
-Autonomy and source confusion when static persona context was reduced, confirming that
-broader attributed datasets are required before promoting 9B adapters.
+## Goal-bearing locomotion and lateral drift correction
 
-## Goal-bearing locomotion and signed lateral control (`0.8.51`)
-
-Rather than dispatching open-ended Walk or Turn starts, MetaHuman's locomotion
-contract now requires an explicit goal paired with sensor progress evidence:
+Instead of firing open-ended Walk or Turn commands and guessing when to stop, walking
+tasks now pair each movement with a concrete sensor check across the camera and IMU:
 
 | Locomotion goal | Progress & completion evidence |
 | --- | --- |
@@ -96,20 +85,20 @@ contract now requires an explicit goal paired with sensor progress evidence:
 | **Follow** | Maintaining an ongoing target relationship until an ending condition |
 | **Visual endpoint** | Camera observations evaluated against completion criteria |
 
-If a required measurement is unavailable at start, the task reports incomplete
-without moving; if the measurement drops mid-gait, it requests a clean `Finish` on
-the active gait rather than falling back to blind timed dead-reckoning. Firmware
-**`0.8.51-p4-lateral`** also adds signed lateral drift correction to the P4 gait
-controller so the robot can correct sideways overshoot during visual approaches.
+If the needed camera or IMU signal isn't available at the start, the task declines to
+move; if tracking drops mid-walk, it brings the gait to a clean standing finish rather
+than marching blindly on a timer. On the ESP32-P4, the gait controller also gained
+signed sideways trim so the robot can nudge back onto centerline during visual
+approaches.
 
-## Expressive gait refinements and faster seated Wave (`0.8.52`)
+## Livelier gaits and a faster seated Wave
 
-Installed over Wi-Fi through **`0.8.52-p4-wave`**, the V2 gait generator refines
-foot clearance and stroke across all four locomotion modes on the bare-leg contact
-profile (35 mm carrier, 20 mm crank, 28 mm pickup, 38 mm rod, 55 mm lower leg) and
-staggers PCA9685 PWM channel start phases across each frame:
+Over Wi-Fi OTA, I bumped foot clearance and planted sweep across all four continuous
+gaits on the `35 / 20 / 28 / 38 / 55 mm` linkage and staggered the PCA9685 PWM channel
+phases so all twelve servos don't draw their current spikes on the exact same
+microsecond:
 
-| Gait parameter | Previous | Revised (`0.8.52`) | Notes |
+| Gait parameter | Previous | Revised | Notes |
 | --- | ---: | ---: | --- |
 | **Walk** planted sweep | 32 mm | **37 mm** | +18.6% planned travel (`44.44 → 52.71 mm/s` at Speed 100, `0.9 s` cycle) |
 | **Walk** lift (low / full) & stance | 4 / 8 mm (80%) | **6 / 10 mm (78%)** | Broader swing arch clears floor earlier; lateral shift reduced `9 → 7 mm` |
@@ -119,21 +108,20 @@ staggers PCA9685 PWM channel start phases across each frame:
 
 ### Snappier seated Wave (`16.0 s → 6.2 s`)
 
-Seated **Wave** was retimed for much livelier interaction, cutting total clip
-duration from 16.0 s down to **6.2 s** while more than doubling shoulder wave
-amplitude:
+Watching the robot wave in person made it obvious how sluggish the original 16-second
+clip felt. Retiming seated **Wave** down to **6.2 seconds** and more than doubling the
+front shoulder sweep made the gesture read immediately across the desk:
 
-| Wave phase (at 1× speed) | Previous | Revised (`0.8.52`) |
+| Wave phase (at 1× speed) | Previous | Revised |
 | --- | ---: | ---: |
 | Seated entry complete | 3.0 s | **1.2 s** |
 | Front arm lift complete | 4.2 s | **1.6 s** |
 | Shoulder wave amplitude (3× waves) | ±18° | **±42°** |
 | Standing recovery & total duration | 15.2 s / 16.0 s | **6.0 s / 6.2 s** |
 
-### Per-leg self-leveling telemetry and stationary gyro calibration
+### Live IMU leveling readouts and stationary gyro zeroing
 
-Body Control's self-leveling panel (`0.8.48+`) now displays live IMU roll/pitch even
-when leveling is Off, target offset error, commanded body correction, and modeled
-per-leg extension and joint-angle deltas. Operators can click **Use current pose as
-level reference** to capture the current attitude or **Calibrate stationary gyro bias**
-to average 256 fresh stationary samples into NVS without rebooting.
+Body Control now shows live roll/pitch angles, target error, and per-leg extension
+deltas even while self-leveling is toggled off, with one-click buttons on the bench to
+capture the current stance as level reference or average 256 stationary samples into
+saved gyro bias without rebooting.

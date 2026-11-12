@@ -1,12 +1,12 @@
 ---
 title: "Ainekio: Open-Source 12-Servo ESP32-P4 Quadruped Robot & Ainekio OS Overview"
 published: 2026-08-27T09:45:00-07:00
-updated: 2026-11-11
-description: "System overview and architecture guide for Ainekio, a four-legged robot companion combining a 3D-printed 12-servo closed-loop ESP32-P4 body with Ainekio OS."
+updated: 2026-11-12
+description: "Start-here overview and architecture tour for Ainekio, an open-source 650 g 3D-printed 12-servo ESP32-P4 quadruped robot (~$85 BOM) paired with Ainekio OS."
 image: "/assets/ainekio/2026-10-12-refresh/render-overview.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
-authorName: "Ainekio Project"
-authorBio: "Robot familiar field notes"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: true
 showToc: true
 tags: [Ainekio, Robot Familiar, Ainekio OS, MetaHuman OS, Overview]
@@ -23,86 +23,88 @@ reading:
 ---
 import ProjectStatus from '../../components/ProjectStatus.astro'
 
-Ainekio is a quadruped robot companion combining a 3D-printed, twelve-servo closed-loop body ([`Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) with **[Ainekio OS](https://github.com/Greg-Aster/ainekio-os)** (formerly MetaHuman OS; [system reference](/posts/ainekio-os/)) for conversation, persistent memory, perception, personality, and autonomous task planning. The physical `ESP32-P4` body handles real-time motor control, `50 Hz` on-chip neural gait execution, joint-position verification, inertial sensing, vision capture, wake-word listening, speaker playback, and facial expression, while Ainekio OS and the host gateway coordinate cognition, locomotion training, and long-horizon goals.
+Ainekio is an open-source hobby robot project built on a workbench: a `650 g`, 3D-printed twelve-servo quadruped body (`~$85` in parts, [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) paired with **[Ainekio OS](https://github.com/Greg-Aster/ainekio-os)** (formerly MetaHuman OS; [architecture guide](/posts/ainekio-os/)), a local-first AI operating system for conversation, long-term memory, perception, and bounded autonomy.
+
+This site is the project's build journal and technical reference library. It tracks what worked on the bench, what broke on the living-room carpet, and how the physical hardware and persistent software mind fit together.
 
 <ProjectStatus />
 
-## What Ainekio is built to do
+## What Ainekio does
 
-Ainekio is designed as a persistent robot familiar with continuity across interactions:
+Rather than treating the robot as a stateless remote-controlled toy that forgets everything on power-off, Ainekio splits work cleanly between real-time embedded control on the body and persistent memory and planning in Ainekio OS:
 
-| Function | Role in the system |
+| Capability | Role in the system |
 | --- | --- |
-| **Conversation & Standing Persona** | Maintain a consistent identity (`persona/core.json`), converse naturally across web, CLI, Android, or voice, and ground replies in current context and action outcomes |
-| **Perception & Expression** | Connect camera observations, optical-flow obstacle range, wake-gated speech, and IMU/joint sensing to spoken responses, 59 animated LCD faces, and physical posture |
-| **Persistent Memory** | Retain episodic context and long-term experiences with clear source attribution, distinguishing direct observation from internal imagination |
-| **Locomotion & Freestyle Motion** | Execute closed-loop standing, continuous gaits (`Walk`, `Run`, `Crawl`, `Crab`), on-chip `50 Hz` `107.8 KB` MicroDuck neural walking (`0.8.159-p4-microduck-v17`), host Pupper V3 MJX policies, and 349+ Freestyle motion programs (`489` training rows with native-`stand` recovery) |
-| **Bounded Autonomy** | Operate across 4 Cognitive Modes (`Dual`, `Agent`, `Emulation`, `Environment`) and 3 Robot Autonomy Modes (`Reactive`, `Semi`, `Full Auto`) |
-| **Delegation & Review** | Escalate complex coding, diagnostics, or desktop workflows to Big Brother (`codex`, `claude-code`, and warm 2-session `GeminiAcpServer`) and consolidate memories, LoRAs, and dreams during the 8-stage `02:00` Sleep Cycle |
+| **Conversation & Standing Persona** | Holds natural voice or text conversations through a single persistent identity grounded in live room context and verified action outcomes |
+| **Perception & Expression** | Connects camera snapshots, optical-flow obstacle range, wake-word speech capture, and IMU/joint sensing to spoken replies, 59 animated LCD facial expressions, and physical posture |
+| **Attributed Memory** | Remembers conversations, camera observations, and task outcomes across days while tagging each memory's source so imagined thoughts are never confused with physical facts |
+| **Closed-Loop & Neural Locomotion** | Runs closed-loop standing and analytical gaits (`Walk`, `Run`, `Crawl`, `Crab`), an on-chip `50 Hz` `107.8 KB` MicroDuck neural walking policy, host reinforcement-learning policies, and a 349-motion Freestyle library |
+| **Bounded Autonomy** | Operates across Reactive, Semi Mode, and Full Auto modes while keeping language models strictly behind geometric and electrical safety checks |
+| **Overnight Consolidation** | Reviews recent interactions, updates specialist adapters, runs symbolic dreaming, and evaluates persona drift during a scheduled `02:00` software sleep cycle |
 
-## System architecture at a glance
+## How the three layers fit together
 
-The runtime is divided into three cooperating layers so hard real-time motor and safety loops never block on language-model inference:
+The system is split across three cooperating layers so hard real-time motor control and stall protection never wait on language-model inference or Wi-Fi round trips:
 
-### 1. Onboard Body (`Slave/firmware/esp32p4-wifi6`)
+![System architecture connecting Ainekio OS, the host gateway and Cockpit HUD, and the onboard ESP32-P4 quadruped body](/posts/ainekio-os/ainekio-os-architecture.webp)
 
-- **Compute, Wireless & On-Chip Neural Inference**: `Waveshare ESP32-P4-WIFI6` (dual-core 360 MHz RISC-V, 32 MB PSRAM, 32 MB flash) paired with an onboard `ESP32-C6` Wi-Fi 6 / Bluetooth coprocessor over SDIO. Core 1 runs a DAgger-distilled **`110,432-byte` (`107.8 KB`) `int8` MicroDuck neural gait policy** (`720 → 128 → 64 → 32 → 12`, `0.8.159-p4-microduck-v17`) natively at `50 Hz` inside the P4's `128 KB` L2 cache.
-- **Actuation & Closed-Loop Feedback**: Twelve modified Miuzei `MG90S` servos (three per leg: shoulder roll, upper-carrier pitch, and five-bar/four-bar knee linkage crank) driven by a `PCA9685` 16-channel PWM controller, with 4th-wire potentiometer wiper feedback read through a `CD74HC4067` 16-channel analog multiplexer and smoothed by a One-Euro velocity filter.
-- **Face & Vision**: 1.9-inch `ST7789` IPS LCD (`320 × 170`, 59 expression animations in a recessed bezel with 4 wireless spacers) and an `OV5647` MIPI-CSI camera mounted in the front face carrier with 180° rotation and a `10,000 µs` motion-safe exposure ceiling.
-- **Inertial & Audio Peripherals**: `LSM6DS3` 6-axis IMU sampled at `208 Hz` (`FusionAhrs` yaw-zeroed gravity projection, self-leveling, and tip/shake detection); `ES8311` codec and `NS4150B` amplifier with onboard microphone, speaker, and Espressif `WakeNet9s` wake-word detection.
-- **Mass & Power**: `650 g` assembled mass in a `245.85 × 182.79 × 109.06 mm` envelope, powered by a redesigned battery-mounted **Wireless Keeper Bridge** housing a `2S` (`8.4 V`) Li-ion pack, `Mini560` `5 V / 5 A` step-down converter, `HiLetgo` 2S USB-C boost charger, and dedicated PCB clips.
+### 1. Onboard `ESP32-P4` Body
 
-### 2. Host Gateway & Body Control (`Master/gateway`)
+- **Controller & On-Chip Neural Gait**: A `Waveshare ESP32-P4-WIFI6` board (dual-core `360 MHz` RISC-V with `32 MB` PSRAM, `32 MB` flash, and an onboard `ESP32-C6` Wi-Fi 6 coprocessor) runs body safety and peripheral control. Core 1 executes a distilled `107.8 KB` `int8` MicroDuck neural walking policy natively at `50 Hz` inside the processor's `128 KB` L2 cache.
+- **12-Servo Closed-Loop Actuation**: Twelve modified `MG90S` metal-gear micro servos (three per leg: shoulder roll, upper-carrier pitch, and four-bar knee crank) are driven by a `PCA9685` PWM board. A soldered 4th wire on every servo's internal potentiometer routes through channels `C4–C15` of a `CD74HC4067` analog multiplexer into `GPIO49` (`ADC2_CH0`) so the microcontroller can measure real shaft angles and detect stalls.
+- **Face, Chin Camera, IMU & Audio**: The front carrier houses a `1.9"` `ST7789` IPS color LCD (`320 × 170`) rendering **59 animated expressions**, with an `OV5647` MIPI-CSI camera mounted in the lower-jaw / chin mount below the display (`180°` rotated in software with a `10,000 µs` motion-safe exposure cap). Inside the shell sit a `208 Hz` `LSM6DS3` 6-axis IMU for self-leveling and tip/shake detection, plus onboard `ES8311` / `NS4150B` audio with `WakeNet9s` wake-word detection.
+- **Chassis & Power**: The complete robot weighs `650 g` (`245.85 × 182.79 × 109.06 mm`) and runs untethered from a battery-mounted **Wireless Keeper Bridge** carrying a `2S` (`8.4 V` max) Li-ion pack, a `Mini560` `5 V / 5 A` buck regulator, and an onboard `2S` USB-C boost charger.
 
-- Runs on the desktop workstation or an offboard/onboard **Radxa Dragon Q6A** (`QCS6490`), with optional no-login local operator access (`AINEKIO_DASHBOARD_NO_LOGIN`) and automatic hotspot fallback when Wi-Fi infrastructure is absent.
-- Maintains the authenticated `protocol-v1` WebSocket session with the robot, manages action receipts and connection epochs, streams camera frames and PCM audio, and serves the **Body Control** workspace and full-viewport **Cockpit HUD** (live **Lucas-Kanade pyramidal optical-flow + Depth-Anything obstacle contact range**, **On-chip MicroDuck vs. Host neural gait** toggle, and top-bar **Ainekio OS control** switch).
-- Hosts the SQLite **Freestyle** motion library (`349` curated examples / `489`-row fault-recovery dataset), `4,096`-environment GPU hardware-twin RL trainer (`tensor_sensors.py` + `tensor_body.py`), `50 Hz` host neural policy streamer, YOLOE/ByteTrack object tracker, and OpenGV / MoGe visual depth odometry tools.
+### 2. Host Gateway & Cockpit HUD
 
-### 3. Ainekio OS Mind (`Greg-Aster/ainekio-os`)
+- Runs on a nearby desktop workstation or an offboard `Radxa Dragon Q6A` single-board computer, maintaining the authenticated `protocol-v1` WebSocket session with the robot over LAN (with automatic Wi-Fi hotspot fallback when away from home infrastructure).
+- Serves the **Body Control** workbench and full-viewport **Cockpit HUD**, giving live camera video, optical-flow + monocular depth obstacle range, 12-channel servo tracking health, a switch between on-chip and host-streamed neural gaits, and a one-click pause toggle for Ainekio OS control.
+- Houses the **349-motion Freestyle library** (alongside the **489-row** training dataset combining **73** library motions with **416** synthesized fault-recovery trajectories ending in `Stand`), GPU MuJoCo hardware-twin reinforcement-learning pipelines, object tracking, and visual depth odometry.
 
-- **Standalone & Embodied Personal AI OS**: Runs standalone across Astro/Svelte (`123` unified API modules + `/architecture` `@xyflow/svelte` map), CLI (`mh`), and Android, or embodied in Ainekio V2 via `environment-bridge` (LAN, SSH, or `bridge.ainek.io` Cloudflare tunnel with `followRobot`). See [Ainekio OS Architecture](/posts/ainekio-os/).
-- **`ServerStatus` Compute & Voice Control Plane**: Routes **12 specialist model roles** across `Local`, `Hybrid`, `BB-Codex`, and `BB-Gemini` presets—combining a shared `llama-cpp.service` (`:8080`, 5-minute idle eviction, per-request LoRAs, remote `llama.cpp` discovery) with Big Brother CLI (`codex`, `claude-code`, warm 2-session `GeminiAcpServer`) and toggleable **local ↔ remote** CUDA **Whisper (`:9883`)** & **Kokoro (`:9882`)** voice servers plus fast local **Piper ONNX** fallback.
-- **47 Cognitive Graphs & SQLite Durable Execution**: Executes **47 editable JSON workflows** over a 14-table WAL `executions.sqlite` engine (`Scheduler Contract v1`, replay-safe `waitForEvent`).
-- **Identity, Agency & Sleep**: Anchored by **Standing Persona** (`persona/core.json`, edited autonomously only by the Psychotherapist during the 8-stage `02:00` Sleep Cycle), **Desire Agent**, varied 6-turn `fast-body-event-mode.json` reactions on tip/shake/stall, and hosted static operator UI (`https://mh.ainek.io`).
+### 3. Ainekio OS Mind
 
-## The two hardware generations
+- Runs as a standalone local-first personal AI system across its local web workbench, terminal CLI, and Android app, or connects to the robot through its embodied bridge (locally or across an optional remote tunnel).
+- Routes specialist cognitive roles—intent classification, robot action selection, vision grounding, outward persona speech, fast physical reflexes, memory curation, and optional cloud/CLI coding delegates—across local `llama.cpp` / Ollama models, local or LAN-shared Whisper speech-to-text, and Kokoro or Piper text-to-speech.
+- Executes inspectable node-based cognitive workflows backed by crash-safe SQLite checkpoints so multi-step physical tasks survive movement waits or brief disconnects without repeating actions twice.
+
+## V1 and V2 hardware at a glance
 
 | Feature | V1 (Eight-Servo Baseline) | V2 (Twelve-Servo Closed-Loop Body) |
 | --- | --- | --- |
-| **Actuators** | 8× MG90S (2 per leg, open-loop PWM) | 12× MG90S (3 per leg, 4th-wire analog position feedback via `CD74HC4067`) |
+| **Actuators** | 8× `MG90S` (2 per leg, open-loop PWM) | 12× `MG90S` (3 per leg, 4th-wire analog feedback on `CD74HC4067` `C4–C15` → `GPIO49`) |
 | **Controller** | Freenove `ESP32-S3-WROOM CAM` (`N16R8`) | `Waveshare ESP32-P4-WIFI6` + `ESP32-C6` + `PCA9685` |
-| **Mechanics** | Open Sesame-derived frame, planar legs | Enclosed shell (`245.85 × 182.79 × 109.06 mm`), hip roll + `35/20/28/38/55 mm` linkage legs |
-| **Display & Camera** | 0.96" `SSD1306` OLED + `OV3660` | 1.9" `ST7789` color LCD (59 expressions) + `OV5647` MIPI-CSI |
-| **Inertial & Audio** | External `INMP441` + `MAX98357A`, no IMU | `LSM6DS3` 208 Hz IMU + `ES8311` / `NS4150B` + `WakeNet9s` |
-| **Locomotion & Control** | 38 fixed `.amot` keyframe sequences | On-chip `50 Hz` `107.8 KB` MicroDuck neural gait, closed-loop `Stand`/`Walk`, 349-example Freestyle library, Pupper V3 / MJX RL |
+| **Mechanics** | Open Sesame-derived frame, planar legs | Enclosed shell (`650 g`), hip roll + `35/20/28/38/55 mm` four-bar linkage legs |
+| **Display & Camera** | `0.96"` `SSD1306` OLED + `OV3660` | `1.9"` `ST7789` color LCD (59 expressions) + chin-mounted `OV5647` MIPI-CSI |
+| **Inertial & Audio** | External `INMP441` + `MAX98357A`, no IMU | `LSM6DS3` `208 Hz` IMU + onboard `ES8311` / `NS4150B` + `WakeNet9s` |
+| **Locomotion** | 38 fixed keyframe sequences | On-chip `50 Hz` `107.8 KB` neural gait, closed-loop `Stand`/`Walk`, 349-motion Freestyle library, MuJoCo RL |
 
-V1 remains documented and supported alongside V2. See the [V1 vs. V2 comparison](/posts/v1-v2-comparison/) for detailed mechanical, electrical, and motion data.
+V1 remains documented in the archive as the baseline that proved out the early bridge and firmware architecture. See the [V1 vs. V2 comparison](/posts/v1-v2-comparison/) for side-by-side specs.
 
-## End-to-end command and perception path
+## How a spoken request becomes physical motion
 
-1. **Observation**: Spoken utterances (via `WakeNet9s` and 5-mode VAD), camera snapshots, or physical body events (`tipped`, `shaken`, `jammed`, `boot`) arrive at the Host Gateway and flow through `environment-bridge` into Ainekio OS.
-2. **Cognition & Routing**: The Work Coordinator runs `environment-mode.json` (or `fast-body-event-mode.json` with 6-turn reaction memory for rapid physical reflexes). Specialist adapters select semantic robot commands, locomotion goals, Freestyle target programs, or Big Brother delegations while the Standing Persona owns outward speech.
-3. **Closed-Loop & On-Chip Execution**: The gateway dispatches checked commands or velocity twists to the `ESP32-P4`. Firmware enforces joint calibration and 8-pass Gauss-Newton Cartesian workspace projection (`0.8.150+`), executes either the analytical solver or Core 1's `50 Hz` `int8` MicroDuck neural actor (`0.8.159-p4-microduck-v17`), drives the `PCA9685`, verifies physical shaft arrival via the `CD74HC4067` multiplexer, and applies `LSM6DS3` attitude corrections.
-4. **Settlement & Review**: Correlated action receipts, shaft-arrival telemetry, and fresh post-action camera frames return to the waiting workflow so Goal Review and the Desire Agent can verify physical outcomes before advancing.
+1. **Sense**: A spoken phrase (captured after the `WakeNet9s` wake word), a camera snapshot, or a physical body event (`tipped`, `shaken`, `stalled`) reaches the Host Gateway and forwards to Ainekio OS.
+2. **Decide**: Ainekio OS classifies the turn—routing sudden physical jostles to a fast reflex path with varied vocal/LCD reactions, or routing multi-step requests through specialist models that pick bounded robot commands, locomotion goals, or Freestyle posture programs while the Standing Persona owns outward speech.
+3. **Move & Verify**: The gateway sends checked commands or velocity twists to the `ESP32-P4`. Onboard firmware projects foot targets onto the valid four-bar workspace, runs either the analytical solver or Core 1's `50 Hz` MicroDuck neural policy, verifies physical shaft arrival via the `CD74HC4067` feedback mux, and applies `LSM6DS3` attitude leveling.
+4. **Confirm**: Action receipts, shaft-arrival status, and a fresh post-motion camera frame return to Ainekio OS so it can verify whether the physical goal actually succeeded before deciding what to do next.
 
-## Guide to the reference library
+## Guide to the reference pages
 
-| Guide | Focus |
+| Guide | What it covers |
 | --- | --- |
-| [Ainekio OS Architecture](/posts/ainekio-os/) | Standalone & embodied personal AI OS (`Greg-Aster/ainekio-os`), 47 cognitive graphs, 14-table SQLite durability, `ServerStatus` routing, and the 8-stage `02:00` Sleep Cycle |
-| [How Does Ainekio Stack Up?](/posts/how-does-ainekio-stack-up/) | Engineering and cost comparison of Ainekio (`~$85` BOM) + Ainekio OS against consumer, academic, and industrial robots |
-| [Ainekio as a Companion](/posts/ainekio-companion/) | Standing Persona, memory attribution, sleep maintenance, autonomy modes, and specialist learning |
-| [Ainekio V2 Hardware & Assembly](/posts/ainekio-v2/) | 650 g mechanical architecture, `35/20/28/38/55 mm` linkages, Wireless Keeper Bridge, wiring diagrams, and STL downloads |
-| [Embodied Robot Integration](/posts/metahuman-integration/) | How `environment-bridge`, `environment-mode.json`, `llama-cpp.service`, Fast Body Events, and Big Brother wire Ainekio OS into the V2 body |
-| [Robot Autonomy Modes](/posts/bounded-autonomy/) | Reactive, Semi Mode (5-min drive deltas), Full Auto Mode, Desire lifecycle, and `fast-body-event-mode.json` |
-| [Gait Development & Locomotion](/posts/gait-development/) | On-chip `50 Hz` `107.8 KB` MicroDuck v17 distillation, GPU hardware twins, Pupper V3 600M/800M MJX trials, Freestyle, and linkage kinematics |
-| [Robot Commands & Safety](/posts/protocol-and-safety/) | `protocol-v1` lifecycle, Cartesian workspace projection, shaft-arrival verification, and receipt recovery |
-| [Gateway, Cockpit HUD & Body Control](/posts/gateway-and-simulator/) | Host gateway architecture, Cockpit HUD optical-flow contact range, servo calibration, no-login/hotspot mode, and OTA maintenance |
-| [Camera & Visual Feedback](/posts/vision-loop/) | 1.9" ST7789 face LCD (59 expressions), OV5647 motion-safe capture, optical-flow obstacle range, YOLOE tracking, and OpenGV / MoGe depth odometry |
-| [Listening & Speech](/posts/voice-loop/) | Espressif WakeNet9s, 5 VAD sensitivity modes, toggleable local/remote Whisper STT & Kokoro TTS, Piper fallback, and `external_speech_ms` suppression |
-| [V1 vs. V2 Comparison](/posts/v1-v2-comparison/) | Side-by-side comparison of the 8-servo ESP32-S3 baseline and 12-servo ESP32-P4 robot |
-| [Original V1 Build Journal](/posts/v1-original-posts/) | Preserved July–September 2026 Google Docs design notes, S3 pin maps, and early virtual bridge experiments |
+| [How Does Ainekio Stack Up?](/posts/how-does-ainekio-stack-up/) | Cost and capability comparison (`~$85` BOM) against consumer toys, academic quadrupeds, industrial humanoids, and a 75-ton mech |
+| [Ainekio as a Companion](/posts/ainekio-companion/) | What Ainekio is like on a desk or living-room floor: voice chat, 59 faces, pickup/tip reactions, memory continuity, and standalone vs. host operation |
+| [Ainekio OS Architecture](/posts/ainekio-os/) | Canonical guide to the personal AI operating system: Standing Persona, cognitive graphs, SQLite durability, local/hybrid model routing, and the `02:00` sleep cycle |
+| [Embodied Robot Integration](/posts/metahuman-integration/) | How observations, telemetry, and bounded motion/face/speech intents cross the bridge between Ainekio OS and the physical robot |
+| [Bounded Autonomy Modes](/posts/bounded-autonomy/) | Reactive, Semi Mode, and Full Auto operation, plus the hardware safety boundaries that keep LLMs away from raw servo PWM |
+| [Ainekio V2 Hardware & Wiring](/posts/ainekio-v2/) | `650 g` mechanical build, `35/20/28/38/55 mm` leg linkages, `CD74HC4067` `C4–C15` → `GPIO49` feedback wiring, Wireless Keeper Bridge, and printable STLs |
+| [Gait Development & Locomotion](/posts/gait-development/) | Linkage kinematics, closed-loop `Stand`/`Walk`, Freestyle motion library, carpet trials, MuJoCo RL, and `50 Hz` on-chip neural walking |
+| [Gateway, Cockpit HUD & Simulator](/posts/gateway-and-simulator/) | Host gateway, full-viewport Cockpit HUD, optical-flow obstacle range, servo calibration, and MuJoCo hardware twins |
+| [Protocol, Telemetry & Safety](/posts/protocol-and-safety/) | `protocol-v1` framing, command leases, watchdogs, startup slew limiting, and 4th-wire stall protection |
+| [Camera & Face Display](/posts/vision-loop/) | `1.9"` `ST7789` LCD (59 expressions), chin-mounted `OV5647` camera, optical-flow obstacle range, object tracking, and depth odometry |
+| [Listening & Speech](/posts/voice-loop/) | Onboard `ES8311` / `NS4150B` audio, `WakeNet9s` wake word, Whisper STT, Kokoro/Piper TTS, and self-speech suppression |
+| [V1 vs. V2 Comparison](/posts/v1-v2-comparison/) | Side-by-side mechanical, electrical, and control comparison of the 8-servo `ESP32-S3` V1 and 12-servo `ESP32-P4` V2 |
+| [Original V1 Build Notes](/posts/v1-original-posts/) | Preserved July–September 2026 design notes, `ESP32-S3` pin maps, and early virtual-bridge experiments |
 
-For chronological engineering milestones and test evidence, browse the [Field Updates](/updates/) feed.
+For chronological bench experiments, CAD iterations, and walking videos, browse the [Field Updates](/updates/) journal.
 
-[Robot repository (`Ainekio-bot`)](https://github.com/Greg-Aster/Ainekio-bot) · [Ainekio OS repository (`ainekio-os`)](https://github.com/Greg-Aster/ainekio-os)
+Source repositories: [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) · [`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os)

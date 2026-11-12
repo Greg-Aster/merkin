@@ -25,6 +25,24 @@
     "date": "2026-11-06"
   },
   {
+    "id": "microduck-p4-student-110kb",
+    "kind": "animation",
+    "source": "public/gallery/microduck-p4-student-110kb.mp4",
+    "title": "Distilled 107.8 KB on-chip ESP32-P4 MicroDuck student rollout",
+    "caption": "2-round DAgger student policy (720→128→64→32→12, 110,432 B int8) fitting inside the ESP32-P4's 128 KB L2 cache, trained with multi-surface slick/carpet friction and simulated 4th-wire ADC rail sag.",
+    "date": "2026-11-10",
+    "posterTime": 3
+  },
+  {
+    "id": "microduck-terrain-showcase",
+    "kind": "animation",
+    "source": "public/gallery/microduck-terrain-showcase.mp4",
+    "title": "MicroDuck teacher terrain rollout: sloped ramps, steps, rocks, slip & pushes",
+    "caption": "Full-CAD 650 g Ainekio V2 traversing sloped ramps, discrete steps, rocks, low-friction slip zones, and lateral push disturbances under the 512-256-128 MicroDuck teacher policy.",
+    "date": "2026-11-07",
+    "posterTime": 3
+  },
+  {
     "id": "rl-centered-stride-200m",
     "kind": "animation",
     "source": "media-originals/rl-centered-stride-200m.mp4",
@@ -250,8 +268,8 @@
     "id": "lcd-face-contact-sheet",
     "kind": "diagram",
     "source": "media-originals/diagrams/lcd-face-contact-sheet.png",
-    "title": "58 animated LCD face expressions",
-    "caption": "Contact sheet of all 58 procedural face expressions rendered by the ESP32-P4 firmware at 320×170 (15 FPS) on the 1.9-inch ST7789 SPI display.",
+    "title": "59 animated LCD face expressions",
+    "caption": "Contact sheet of all 59 procedural face expressions rendered by the ESP32-P4 firmware at 320×170 (15 FPS) on the 1.9-inch ST7789 SPI display.",
     "date": "2026-11-03"
   },
   {
@@ -275,7 +293,7 @@
     "kind": "diagram",
     "source": "media-originals/diagrams/Multiplexer_Wiring.png",
     "title": "CD74HC4067 4th-wire servo feedback wiring",
-    "caption": "Routing of the 12 modified MG90S potentiometer wiper leads into MUX channels C4–C15 and ADC2_CH0 (GPIO16) for closed-loop position and stall detection.",
+    "caption": "Routing of the 12 modified MG90S potentiometer wiper leads into MUX channels C4–C15 and ADC2_CH0 (GPIO49) for closed-loop position and stall detection.",
     "date": "2026-10-18"
   },
   {

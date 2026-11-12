@@ -70,7 +70,7 @@ Authoritative pin map:\
 https\://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/firmware/esp32s3/components/ainekio\_platform/include/ainekio/platform/pin\_map.h
 
 Build and flash from Slave/firmware/esp32s3:\
-source /home/greggles/esp/esp-idf-v5.5.4/export.sh\
+source esp/esp-idf-v5.5.4/export.sh\
 idf.py set-target esp32s3\
 idf.py build\
 idf.py flash\

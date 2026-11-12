@@ -5,7 +5,7 @@ updated: 2026-11-01
 description: "Training a 5-command neural gait policy via DAgger in simulation, replaying through Body Control and the native P4 executor, releasing the 12 completed body prototype STLs, and unifying MetaHuman's Environment Bridge."
 image: "/gallery/neural-walking-20261030-poster.webp"
 authorName: "Ainekio Project"
-showImageOnPost: true
+showImageOnPost: false
 showToc: true
 tags: [Ainekio, V2, Gait, Training, Simulation, Blender, 3D Printing, MetaHuman OS]
 category: "Build Journal"
@@ -44,8 +44,9 @@ targets.
 
 Using **DAgger (Dataset Aggregation)** across 360,000 updates—rolling out the learner,
 labeling the states it actually visits with the teacher demonstration's next action,
-and annealing teacher intervention to zero—produced a single policy (`Master/gateway/neural_gait`)
-covering **five commands**: forward, two reverse speeds, left turn, and right turn.
+and annealing teacher intervention to zero—produced our first unified neural gait policy
+(`walk_nominal_v1`) covering **five commands**: forward, two reverse speeds, left turn,
+and right turn.
 
 ### Direct simulation vs Body Control + native P4 executor replay
 
@@ -81,9 +82,9 @@ roadmap.
 
 ## Body prototype complete: 12 final face, servo-cover, and power STLs
 
-The mechanical body prototype is now complete (`front-shell-fixes.blend`), with fresh
-October 27–29 STL exports covering the display bezel, split face panels, lower MG90S
-servo housing, and combined underside battery/power cradle:
+The 650 g mechanical body prototype is now wrapped up, with 12 updated October 27–29 STL
+exports covering the recessed display bezel, split face panels, lower MG90S servo
+bracket, and combined underside battery and power cradle:
 
 <figure>
   <img src="/posts/2026-11-01-progress/printed-parts.webp" alt="Render of the twelve exported STL parts for Ainekio's face, servo covers, and underside battery/power packaging." width="1400" height="900" loading="lazy" />
@@ -99,24 +100,18 @@ servo housing, and combined underside battery/power cradle:
 
 - [Download the 12 body prototype STLs (`/posts/2026-11-01-progress/body-prototype-parts.zip`)](/posts/2026-11-01-progress/body-prototype-parts.zip)
 
-## MetaHuman OS: unified Environment Bridge and Dataset v22 context training
+## Unifying the Environment Bridge and autonomy context training
 
 <figure>
   <img src="/posts/2026-11-01-progress/body-connection.svg" alt="Diagram showing MetaHuman OS connecting through a single Environment Bridge to Body Control and the ESP32-P4." width="1000" height="560" loading="lazy" />
-  <figcaption>Local, SSH, and Cloudflare body connections now share a single Environment Bridge owner between MetaHuman OS and Body Control.</figcaption>
+  <figcaption>Local, SSH, and Cloudflare body connections now share one Environment Bridge between MetaHuman OS and Body Control.</figcaption>
 </figure>
 
-On the software side ([commit `4817fff9`](https://github.com/Greg-Aster/ainekio-os/commit/4817fff97ee0ad34ccfcc6d818b1389f0eb21f1e)):
-
-- **Unified Environment Bridge:** Consolidated the separate Local and Remote bridge
-  entrypoints into a single Environment Bridge owner handling Local, SSH, and
-  Cloudflare connections, while delegating Freestyle motion generation cleanly to Body
-  Control via `requestMotion`.
-- **Quieter servo-health telemetry & native `llama.cpp` cancellation:** Fourth-wire
-  feedback fault/restored notices now update robot health state and recovery context
-  without triggering unsolicited conversational turns, and a native `llama.cpp` patch
-  propagates request cancellation directly into in-flight token generation.
-- **Intent Dataset Version 22 (`1,803` dev / `485` eval / `46` regression):** Added
-  256 development and 128 evaluation autonomy-context examples that vary open activity,
-  ongoing work, environmental interest, and inner desires across both Semi Auto and
-  Full Auto modes.
+On the companion host, I folded the separate local and remote bridge paths into a single
+**Environment Bridge** that handles local bench links, SSH tunnels, and Cloudflare
+connections identically while handing Freestyle motion requests straight to Body Control.
+Fourth-wire servo fault and recovery notices now update the robot's health state quietly
+instead of interrupting conversation with unprompted chatter, `llama.cpp` cancels
+in-flight token generation immediately when a turn is superseded, and the Intent
+training set (`1,803` training / `485` evaluation / `46` regression examples) gained
+fresh autonomy scenarios spanning ongoing tasks, room activity, and internal desires.

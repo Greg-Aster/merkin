@@ -1,12 +1,12 @@
 ---
 title: "Ainekio V2 Hardware: 3D-Printed 12-Servo ESP32-P4 Quadruped, 4th-Wire MG90S Feedback & Pinout"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-11-11
-description: "Complete V2 hardware reference: 650 g 12-servo closed-loop chassis, 35/20/28/38/55 mm leg linkages, on-chip 107.8 KB L2-cached ESP32-P4 neural gait, PCA9685 and CD74HC4067 wiring diagrams, battery-mounted Wireless Keeper Bridge, and STL exports."
+updated: 2026-11-12
+description: "Complete V2 hardware reference: 650 g 12-servo closed-loop chassis, 35/20/28/38/55 mm leg linkages, on-chip 107.8 KB L2-cached ESP32-P4 neural gait, PCA9685 and CD74HC4067 (C4–C15 → GPIO49) wiring diagrams, Wireless Keeper Bridge, and STL exports."
 image: "/assets/ainekio/2026-10-12-refresh/blender-front.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
-authorName: "Ainekio Project"
-authorBio: "Robot familiar field notes"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: true
 showToc: true
 tags: [Ainekio, V2, Hardware, ESP32-P4, MG90S, 3D Printing]
@@ -22,7 +22,7 @@ reading:
   related: ["gait-development", "ainekio-os", "v1-v2-comparison", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
 ---
 
-Ainekio V2 is a twelve-servo, closed-loop quadruped body built around the **Waveshare ESP32-P4-WIFI6**. Where the eight-servo V1 prototype moved each leg in a single plane with two open-loop motors, V2 adds a third actuator per leg for lateral hip roll (`±h`), a compact coupled linkage for upper-carrier (`alpha`) and knee (`theta`) actuation, fourth-wire potentiometer feedback on all twelve joints, a `208 Hz` inertial measurement unit, on-chip `50 Hz` Core 1 neural gait execution inside the P4's `128 KB` L2 cache (`0.8.159-p4-microduck-v17`), and a modular **Wireless Keeper Bridge** `2S` power carrier.
+Ainekio V2 ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) is a `650 g`, twelve-servo, closed-loop quadruped body built around the **Waveshare ESP32-P4-WIFI6**. Where the eight-servo V1 prototype moved each leg in a single plane with two open-loop motors, V2 adds a third actuator per leg for lateral hip roll (`±h`), a compact four-bar linkage for upper-carrier (`alpha`) and knee (`theta`) actuation with curved rocking soles, 4th-wire potentiometer feedback on all twelve joints, a `208 Hz` inertial measurement unit, on-chip `50 Hz` Core 1 neural gait execution inside the `ESP32-P4`'s `128 KB` L2 cache, and a modular **Wireless Keeper Bridge** `2S` power carrier.
 
 ![Ainekio V2 Assembly Reference](/gallery/diagram-assembly-reference-960.webp)
 
@@ -30,33 +30,33 @@ Ainekio V2 is a twelve-servo, closed-loop quadruped body built around the **Wave
 
 | Parameter | V2 Specification |
 | --- | --- |
-| **Assembled mass** | `650 g` (complete body with 12 feedback servos, shell, LCD, camera, and 2S battery carrier) |
+| **Assembled mass** | `650 g` (complete body with 12 feedback servos, shell, LCD, chin camera, and `2S` battery carrier) |
 | **Overall envelope** | `245.85 × 182.79 × 109.06 mm` (`L × W × H`, Blender assembly reference) |
 | **Degrees of freedom** | 12 actuated joints (3 per leg: shoulder roll, upper-carrier pitch, knee linkage crank) |
-| **Compact linkage geometry** | `35 mm` upper carrier, `20 mm` input crank, `28 mm` lower-leg pickup radius, `38 mm` connecting rod, `55 mm` distal lower leg |
-| **Actuators** | 12× Miuzei `MG90S` metal-gear micro servos modified with a 4th analog wiper feedback wire (housed in shimmed `Part_003` leg brackets) |
+| **Compact linkage geometry** | `35 mm` upper carrier, `20 mm` input crank, `28 mm` lower-leg pickup radius, `38 mm` connecting rod, `55 mm` distal lower leg with curved rocking sole |
+| **Actuators** | 12× Miuzei `MG90S` metal-gear micro servos modified with a 4th analog wiper feedback wire (housed in shimmed upper servo brackets) |
 | **PWM driver** | `HUAREW / Adafruit PCA9685` 16-channel 12-bit PWM controller over I2C (`50 Hz` frame rate with staggered channel phase offsets) |
-| **Position feedback** | `CD74HC4067` 16-channel analog multiplexer routing 12 servo wiper voltages into `ESP32-P4` `GPIO49` (`ADC2`) with One-Euro velocity filtering |
-| **Main controller & on-chip RL** | `Waveshare ESP32-P4-WIFI6` (dual-core 360 MHz RISC-V, `128 KB` L2 cache running a `107.8 KB` `int8` MicroDuck neural actor at `50 Hz` on Core 1, 32 MB PSRAM, 32 MB flash) + `ESP32-C6` Wi-Fi 6 |
-| **Inertial sensor** | `LSM6DS3` 6-axis accelerometer/gyroscope (`208 Hz` sampling, `FusionAhrs` yaw-zeroed attitude, dedicated gyro carrier) |
-| **Face display & camera** | 1.9" `ST7789` IPS LCD (`320 × 170`, 59 expressions, recessed bezel + 4 wireless spacers) + `OV5647` MIPI-CSI camera (180° inverted mount) |
+| **Position feedback** | `CD74HC4067` 16-channel analog multiplexer routing 12 servo wiper voltages on **`C4–C15`** into `ESP32-P4` **`GPIO49`** (`ADC2_CH0`, select lines `S0–S3` on `GPIO28–31`) with One-Euro velocity filtering |
+| **Main controller & on-chip RL** | `Waveshare ESP32-P4-WIFI6` (dual-core `360 MHz` RISC-V, `128 KB` L2 cache running a `107.8 KB` `int8` MicroDuck neural actor at `50 Hz` on Core 1, `32 MB` PSRAM, `32 MB` flash) + `ESP32-C6` Wi-Fi 6 |
+| **Inertial sensor** | `LSM6DS3` 6-axis accelerometer/gyroscope (`208 Hz` sampling, yaw-zeroed attitude filter, dedicated gyro carrier) |
+| **Face display & camera** | `1.9"` `ST7789` IPS LCD (`320 × 170`, **59** animated expressions, recessed bezel + 4 wireless spacers) + chin-mounted `OV5647` MIPI-CSI camera below the LCD (`180°` inverted mount) |
 | **Audio subsystem** | Onboard `ES8311` codec + `NS4150B` Class-D amplifier, microphone, `20 × 30 mm` `8 Ω 2 W` speaker, and `WakeNet9s` |
-| **Power & Keeper Bridge** | Battery-mounted **Wireless Keeper Bridge**: `2S` (`8.4 V` max) Li-ion pack (`73.6 × 46 × 22 mm`), `Mini560` `5 V / 5 A` buck converter, `HiLetgo` 2S USB-C boost charger, and snap-in P4/PCA9685/HiLetgo PCB clips |
+| **Power & Keeper Bridge** | Battery-mounted **Wireless Keeper Bridge**: `2S` (`8.4 V` max) Li-ion pack (`73.6 × 46 × 22 mm`), `Mini560` `5 V / 5 A` buck converter, `HiLetgo` `2S` USB-C boost charger, and snap-in `ESP32-P4`/`PCA9685`/`HiLetgo` PCB clips |
 
 ## Compact leg linkage geometry
 
-Each V2 leg combines a shoulder roll axis with a planar linkage mechanism that keeps both flexion motors mounted inside the upper leg housing near the body center of mass:
+Each V2 leg combines a shoulder roll axis with a planar four-bar linkage mechanism that keeps both flexion motors mounted high inside the upper servo bracket near the body center of mass:
 
 - **Upper carrier (`alpha`)**: `35 mm` pivot-to-pivot link driven directly by the carrier servo.
 - **Input crank (`theta`)**: `20 mm` servo horn crank driving a `38 mm` connecting rod.
-- **Lower-leg pickup & distal segment**: The `38 mm` rod drives a `28 mm` pickup radius on the `55 mm` distal lower leg (`beta`).
-- **Workspace enforcement**: Because the carrier and crank angles couple nonlinearly, firmware (`0.8.150+`) projects requested foot targets onto the valid Cartesian linkage boundary before inverse kinematics so out-of-reach targets settle cleanly on the reachable envelope rather than stalling against mechanical stops.
+- **Lower-leg pickup, distal segment & sole**: The `38 mm` rod drives a `28 mm` pickup radius on the `55 mm` distal lower leg (`beta`), terminating in a 3D-printed curved rocking sole.
+- **Workspace enforcement**: Because the carrier and crank angles couple nonlinearly, onboard firmware projects requested foot targets onto the valid Cartesian linkage boundary via analytical inverse kinematics and 8-pass Gauss-Newton refinement before driving the servos, ensuring out-of-reach targets settle cleanly on the reachable envelope rather than stalling against mechanical stops.
 
-The evolution from the initial OpenHarmony Puppy reference through the short-rod studies (`2026-09-09`), early printed prototypes (`2026-09-15`), `22/36 mm` compact leg (`2026-09-21`), and `35/20/28/38/55 mm` production geometry (`2026-10-06`) is detailed in the [Gait Development Guide](/posts/gait-development/).
+The progression from the initial OpenHarmony Puppy reference through the short-rod studies (`2026-09-09`), early printed prototypes (`2026-09-15`), `22/36 mm` compact leg (`2026-09-21`), and `35/20/28/38/55 mm` production geometry (`2026-10-06`) is covered in the [Gait Development Guide](/posts/gait-development/).
 
 ## Electronics, pinout, and wiring reference
 
-The onboard electronics sit inside the central chassis tray and front/rear carriers, separating high-current `5 V` servo distribution from logic and analog feedback signals.
+The onboard electronics sit inside the central chassis tray and front/rear carriers, isolating high-current `5 V` servo distribution from logic and analog feedback signals.
 
 ### ESP32-P4-WIFI6 pinout
 
@@ -76,13 +76,13 @@ Motor power branches directly from the `Mini560` `5 V / 5 A` regulator into the 
 
 ### CD74HC4067 4th-wire feedback multiplexer wiring
 
-Every `MG90S` servo has a fourth wire soldered to its internal potentiometer wiper. Those twelve analog lines route into channels `C0–C11` of a `CD74HC4067` multiplexer, allowing the `ESP32-P4` to sample real shaft positions, detect stalls or jams, and verify target arrival (`Stand` within `2 mm` and closed-loop `Walk` synchronization):
+Every `MG90S` servo is opened on the bench to solder a 4th wire onto its internal potentiometer wiper. Those twelve analog lines route into channels **`C4–C15`** of a `CD74HC4067` multiplexer—addressed via select lines `S0–S3` on `GPIO28–31` and sampled at `50 Hz` into `ESP32-P4` **`GPIO49` (`ADC2_CH0`)**—allowing the controller to measure real shaft positions, detect stalls or jams, and verify target arrival (`Stand` within `2 mm` and closed-loop `Walk` synchronization):
 
 ![Multiplexer Wiring](/gallery/diagram-multiplexer-wiring-960.webp)
 
 ## Power architecture and Wireless Keeper Bridge
 
-Earlier design iterations evaluated heavy external USB-PD power banks (`Anker` 10,000 mAh and `SHARGE`). Both power-bank approaches are retired. V2 packages onboard power and board retention together in a **battery-mounted Wireless Keeper Bridge** and rear carrier assembly (`2026-11-11`):
+Earlier design studies tested heavy external USB-PD power banks (`Anker` 10,000 mAh and `SHARGE`). Both power-bank approaches were retired to keep total mass down to `650 g`. V2 packages onboard power and board retention together in a **battery-mounted Wireless Keeper Bridge** and rear carrier assembly:
 
 1. **Battery pack**: `2S` (`7.4 V` nominal / `8.4 V` full charge) Li-ion pack (`73.6 × 46 × 22 mm` envelope) seated in the lower cradle beneath the Keeper Bridge.
 2. **Step-down regulation**: A `Mini560` `5 V / 5 A` synchronous buck converter steps the `2S` pack down to a regulated `5 V` rail capable of sustaining twelve-servo standing and walking loads.
@@ -90,10 +90,10 @@ Earlier design iterations evaluated heavy external USB-PD power banks (`Anker` 1
 
 ## Printable STL downloads
 
-The current V2 printable body, recessed LCD bezel & spacers, Wireless Keeper Bridge, servo housings, and fixed bench calibration/training stand (`140 × 110 mm` base) are available as ZIP archives:
+The V2 printable body, recessed LCD bezel & spacers, Wireless Keeper Bridge, upper servo brackets, and fixed bench calibration/training stand (`140 × 110 mm` base) are available as ZIP archives:
 
-- **[V2 Keeper Bridge, Recessed LCD Bezel & Front-Shell Fixes STLs (30 parts)](/posts/2026-11-11-progress/keeper-bridge-and-shell-fixes.zip)** — includes the battery-mounted Wireless Keeper Bridge, P4/PCA9685/HiLetgo PCB clips, `LSM6DS3` gyro carrier, recessed `1.9"` LCD bezel + 4 wireless spacers, top crossbars, shell mounts, and shimmed `Part_003` servo housings (`2026-11-11`).
-- **[Complete V2 Body Prototype STLs (12 parts)](/posts/2026-11-01-progress/body-prototype-parts.zip)** — includes the revised red face surround, `1.9"` `ST7789` LCD carrier, `OV5647` camera mount, upper/lower chassis shells, servo covers, and leg linkage parts (`2026-11-01`).
+- **[V2 Keeper Bridge, Recessed LCD Bezel & Front-Shell Fixes STLs (30 parts)](/posts/2026-11-11-progress/keeper-bridge-and-shell-fixes.zip)** — includes the battery-mounted Wireless Keeper Bridge, `ESP32-P4`/`PCA9685`/`HiLetgo` PCB clips, `LSM6DS3` gyro carrier, recessed `1.9"` LCD bezel + 4 wireless spacers, top crossbars, shell mounts, and shimmed upper servo brackets (`2026-11-11`).
+- **[Complete V2 Body Prototype STLs (12 parts)](/posts/2026-11-01-progress/body-prototype-parts.zip)** — includes the red face surround, `1.9"` `ST7789` LCD carrier, lower-jaw `OV5647` camera mount, upper/lower chassis shells, servo covers, leg linkage parts, and curved rocking soles (`2026-11-01`).
 - **[Fixed Training Stand & Rear Power Carrier STLs](/posts/2026-10-26-progress/stand-and-power-carrier.zip)** — includes the three-part calibration/training stand and the one-piece rear `2S / Mini560 / HiLetgo` power carrier (`2026-10-26`).
 
 ## Design evolution from V1 to V2
@@ -103,21 +103,21 @@ The current V2 printable body, recessed LCD bezel & spacers, Wireless Keeper Bri
 | Subsystem | V1 (Eight-Servo S3) | V2 (Twelve-Servo P4) |
 | --- | --- | --- |
 | **Legs** | 2 joints per leg; 8× `MG90S` | 3 joints per leg; 12× feedback-modified `MG90S` |
-| **Foot placement** | Fore/aft and vertical only | Full 3D foot workspace including lateral hip roll |
+| **Foot placement** | Fore/aft and vertical only | Full 3D foot workspace including lateral hip roll and curved rocking soles |
 | **Chassis** | Open Sesame-derived frame | Custom enclosed shell (`245.85 × 182.79 × 109.06 mm`) with modular front face and Wireless Keeper Bridge |
-| **Controller** | `ESP32-S3 N16R8` (direct MCPWM) | `Waveshare ESP32-P4-WIFI6` (`50 Hz` Core 1 `107.8 KB` L2 neural gait) + `PCA9685` PWM + `CD74HC4067` ADC mux |
-| **Host compute** | Desktop over Wi-Fi | Desktop or `Radxa Dragon Q6A` over Wi-Fi (with onboard Q6A / USB retained as an optional study) |
-| **Power** | `2S 1000 mAh` LiPo + dual `Mini560` | `2S` pack + `Mini560` `5 V / 5 A` + `HiLetgo` 2S USB-C charger in Wireless Keeper Bridge |
+| **Controller** | `ESP32-S3 N16R8` (direct MCPWM) | `Waveshare ESP32-P4-WIFI6` (`50 Hz` Core 1 `107.8 KB` L2 neural gait) + `PCA9685` PWM + `CD74HC4067` (`C4–C15` → `GPIO49`) ADC mux |
+| **Host compute** | Desktop over Wi-Fi | Desktop or `Radxa Dragon Q6A` over Wi-Fi running **[Ainekio OS](/posts/ainekio-os/)** |
+| **Power** | `2S 1000 mAh` LiPo + dual `Mini560` | `2S` pack + `Mini560` `5 V / 5 A` + `HiLetgo` `2S` USB-C charger in Wireless Keeper Bridge |
 
 ### Chronological hardware build logs
 
-For detailed photographs, CAD diffs, and bench measurements from each stage of the V2 mechanical build, follow the dated build journal entries:
+For photographs, CAD diffs, and bench measurements from each stage of the V2 mechanical build, follow the dated journal milestones:
 
-- **[Nov 11, 2026 — On-chip 107.8 KB P4 neural gait, Wireless Keeper Bridge, and 30 Red shell/bezel STLs](/posts/2026-11-11-on-chip-neural-gait-and-ainekio-os/)**: Core 1 `50 Hz` L2-cached MicroDuck inference (`0.8.159-p4-microduck-v17`), physical hardwood & seam bouts, and 30 updated Red STLs.
+- **[Nov 11, 2026 — On-chip 107.8 KB P4 neural gait, Wireless Keeper Bridge, and 30 Red shell/bezel STLs](/posts/2026-11-11-on-chip-neural-gait-and-ainekio-os/)**: Core 1 `50 Hz` L2-cached MicroDuck inference, physical hardwood & seam bouts, and 30 updated Red STLs.
 - **[Nov 6, 2026 — Carpet trials, Pupper V3 / MJX simulation, and hardware diagrams](/posts/2026-11-06-carpet-trials-rl-and-big-brother/)**: Physical carpet walking trials, full-CAD Blender-to-MuJoCo MJCF export, and finalized wiring diagrams.
 - **[Nov 1, 2026 — Completed body prototype and neural walking](/posts/2026-11-01-neural-walking/)**: Finalized face panels, LCD carrier, servo covers, and 12-part STL package.
 - **[Oct 26, 2026 — 650 g assembly, 2S power carrier, and training stand](/posts/2026-10-26-freestyle-targets-and-training/)**: Reconciled mass, rear power cradle, and shaft-arrival verification.
-- **[Oct 21, 2026 — Rebuilt face, ground-repair Stand trial, and feedback continuity](/posts/2026-10-21-body-face-and-standing/)**: Workbenches photos of the reassembled V2 body, red face surround, and multiplexer ground fix.
+- **[Oct 21, 2026 — Rebuilt face, ground-repair Stand trial, and feedback continuity](/posts/2026-10-21-body-face-and-standing/)**: Workbench photos of the reassembled V2 body, red face surround, and multiplexer ground fix.
 - **[Oct 18, 2026 — 4th-wire servo feedback and chassis mounts](/posts/2026-10-18-servo-feedback-and-chassis/)**: Potentiometer wiper modification, `CD74HC4067` multiplexer integration, and 12-channel calibration curves.
 - **[Oct 14, 2026 — Staged boot posture and IMU self-leveling](/posts/2026-10-14-startup-and-leveling/)**: `LSM6DS3` attitude loop and linkage transmission geometry calculator.
 - **[Oct 12, 2026 — Exterior shell printing and grounded postures](/posts/2026-10-12-shell-power-and-motion/)**: 27 prototype shell STLs and staged foot placement for `Lay Down` and `Play Dead`.

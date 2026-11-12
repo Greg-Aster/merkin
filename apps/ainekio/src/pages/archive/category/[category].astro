@@ -25,7 +25,7 @@ const category = decodeURIComponent(
 const { label } = Astro.props
 ---
 
-<MainGridLayout title={`${label} — category archive`} description={`Explore Ainekio articles in the ${label} category archive, with robot build notes, reference guides, and development updates.`}>
+<MainGridLayout title={`${label} — category archive`} description={`Explore Ainekio articles in the ${label} category archive, with robot build notes, reference guides, and development updates.`} oneColumn={true}>
     <meta name="robots" content="noindex, follow" slot="head" />
     <ArchivePanel categories={[category]} heading={`${label} — category archive`}></ArchivePanel>
 </MainGridLayout>

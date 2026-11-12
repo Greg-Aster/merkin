@@ -1,9 +1,12 @@
 @tailwind components;
 
-/* Ainekio's full navigation needs the menu button at tablet widths. */
-@media (min-width: 768px) and (max-width: 1023px) {
-    #standard-nav { display: none !important; }
-    #nav-menu-switch { display: inline-flex !important; }
+/* Keep one-column Ainekio pages clean on mobile portrait & landscape by suppressing hidden blog sidebars */
+#main-grid[data-sidebar='hidden'] > .layout-sidebar,
+#main-grid[data-sidebar='hidden'] > .layout-right-rail {
+    display: none !important;
+}
+#main-grid[data-sidebar='hidden'] {
+    grid-template-columns: minmax(0, 1fr) !important;
 }
 
 @layer components {
@@ -46,28 +49,15 @@
 
         /* 🎯 RESPONSIVE SPACING - Tailwind-aligned */
         --radius-large: 0.75rem; /* Tailwind lg rounded */
-        --spacing-panel: 5.25rem; /* Standard panel offset */
+        --spacing-panel: 4.85rem; /* Snug dropdown offset directly below 4.5rem navbar */
 
-        /* 🎯 LAYOUT - Responsive page width */
-        --page-width: 1280px; /* Default max width for content */
+        /* 🎯 LAYOUT - Unified container width matching navbar and all page shells */
+        --page-width: 78rem; /* 1248px max width across all desktop screens */
 
         /* 🎯 ANIMATION TIMINGS - Consistent across site */
         --transition-fast: 0.15s ease;
         --transition-normal: 0.3s ease;
         --transition-slow: 0.5s ease;
-    }
-
-    /* 🎯 RESPONSIVE PAGE WIDTH - Adjust for different screen sizes */
-    @media (min-width: 1536px) {
-        :root {
-            --page-width: 1536px; /* Larger width for 2xl screens */
-        }
-    }
-
-    @media (min-width: 1920px) {
-        :root {
-            --page-width: 1920px; /* Even larger for very wide screens */
-        }
     }
     
     /* 🎯 DARK MODE - Controlled by the app theme switcher */

@@ -1,15 +1,15 @@
 ---
-title: "V1 Hardware and Body Design"
+title: "V1 Eight-Servo Body & Hardware Reference (Historical V1 Reference)"
 published: 2026-08-27T09:30:00-07:00
-updated: 2026-09-15
-description: "The eight-servo robot, its documented components and wiring, enclosure history, and the move to V2."
+updated: 2026-11-12
+description: "Historical V1 reference for the original eight-servo ESP32-S3 Ainekio frame, its documented components and wiring, enclosure history, and how it led to V2."
 image: "/assets/ainekio/v2/body-design-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
-authorName: "Ainekio Project"
-authorBio: "Robot familiar field notes"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, V2, CAD, Hardware, 3D Printing, ESP32-S3, ESP32-P4]
+tags: [Ainekio, V1, CAD, Hardware, 3D Printing, ESP32-S3]
 category: "Physical Robot"
 draft: false
 lang: "en"
@@ -19,97 +19,50 @@ reading:
   generation: v1
   kind: reference
   next: controller-firmware
-  related: ["v1-original-posts", "robot-familiar-parts-overview"]
+  related: ["v1-original-posts", "robot-familiar-parts-overview", "v1-v2-comparison"]
 ---
 
-[V1 and V2 comparison](/posts/v1-v2-comparison/)
+> *Historical V1 note: This guide documents the original eight-servo ESP32-S3 Ainekio V1 frame. For the current 650 g twelve-servo ESP32-P4 robot, see [Ainekio V2 Hardware & Architecture](/posts/ainekio-v2/) and the [V1 vs. V2 Comparison](/posts/v1-v2-comparison/).*
 
-Ainekio’s working V1 is a four-legged robot built around an ESP32-S3 controller
-and eight MG90S servos. Each servo turns a joint to a chosen angle, with two
-joints per leg. The controller runs prepared poses and movement sequences;
-MetaHuman OS supplies the conversation and decision-making software connected
-to it.
+Ainekio’s original V1 baseline was a four-legged robot built around a Freenove `ESP32-S3` controller and eight open-loop `MG90S` servos. Each servo drove a joint directly to a commanded angle, with two planar joints per leg. The onboard microcontroller ran prepared poses and keyframe sequences while MetaHuman OS (now **[Ainekio OS](/posts/ainekio-os/)**) handled conversation and decision-making over Wi-Fi.
 
-The body uses a black, Sesame-derived printed chassis, red feet and face
-module, a cyan OLED display, and a camera below the display. Its electronics
-and wiring are exposed. The cover shows the prospective V2 hybrid, not the
-installed V1 hardware.
+The physical V1 body used a black, Sesame-derived 3D-printed chassis, red feet and face surround, a cyan `0.96"` monochrome OLED display, and an `OV3660` camera below the screen, with exposed electronics and jumper harnesses. (The header illustration above depicts an early V1-to-V2 concept study rather than the bare V1 frame.)
 
-## What the mechanics can do
+## What the V1 mechanics could do
 
-V1 can perform scripted walking and gestures within the controller’s motion
-limits. Turns are **open-loop**: the controller follows a sequence without
-measuring and correcting the final heading. A requested turn angle is therefore
-an estimate. Floor friction, leg geometry, cable clearance, power stability,
-and alignment of the servo’s output arm all affect where the robot ends up.
+V1 performed scripted walking and 38 keyframe gestures within fixed angle limits. Turns were **open-loop**: without an IMU or joint-position feedback, the controller played a timed sequence without measuring heading or shaft arrival. Actual turn angles therefore depended on floor friction, horn alignment, cable drag, and rail voltage.
 
-The owner reports useful torque margin—the motors have turning force to spare
-in the observed conditions—and operation on the existing 5 V / 5 A supply.
-Measurements under representative loads are still needed for power planning.
-Gestures and walking use the same motion limits and stop behavior.
+Bench runs on the `5 V / 5 A` buck supply showed comfortable torque margin for the lightweight eight-servo frame, though full current-transient logging under loaded maneuvers was superseded once work shifted to the twelve-servo V2 linkage chassis.
 
-## Documented components
+## Documented V1 components
 
-The September 2 [ESP32-S3 Build & Firmware Reference](https://docs.google.com/document/d/1JZMMG3J96v6cnw2YupPp9OF9fiw0H4j0tS8t8fsplJk/edit)
-records these V1 parts. The controller handles the body’s immediate work:
-motor signals, sensors, display, and audio. It does not run all of MetaHuman OS.
+The September 2, 2026 [ESP32-S3 Build & Firmware Reference](https://docs.google.com/document/d/1JZMMG3J96v6cnw2YupPp9OF9fiw0H4j0tS8t8fsplJk/edit) recorded the final V1 bill of materials:
 
 | Part and purpose | Documented V1 configuration |
 | --- | --- |
-| Controller: runs body firmware | Freenove ESP32-S3-WROOM CAM / FNK0085, N16R8; 16 MB flash and 8 MB octal PSRAM |
-| Joint motors | Eight MG90S servos, two per leg |
-| Face display | 0.96-inch SSD1306 I2C OLED, 128×64 pixels |
-| Camera: captures still images and limited preview | OV3660 |
-| Audio input and output | Digital microphone and external I2S amplifier/speaker |
+| Controller: runs body firmware | Freenove `ESP32-S3-WROOM CAM` (`FNK0085`, `N16R8`); `16 MB` flash and `8 MB` octal PSRAM |
+| Joint motors | Eight `MG90S` servos, two per leg (open-loop PWM) |
+| Face display | `0.96"` `SSD1306` I2C OLED, `128 × 64` pixels |
+| Camera: captures still images and low-rate preview | `OV3660` parallel camera |
+| Audio input and output | External `INMP441` I2S microphone and `MAX98357A` I2S amplifier/speaker |
 | Storage: assets and diagnostic records | LittleFS filesystem and low-priority microSD logs |
-| Battery | Sea Jump 2S pack, 7.4 V nominal, 1000 mAh |
-| Servo supply: steps battery voltage down | 5 V / 5 A buck converter |
+| Battery | Sea Jump `2S` pack, `7.4 V` nominal, `1000 mAh` |
+| Servo supply: steps battery voltage down | `Mini560` `5 V / 5 A` buck converter |
 
-Flash stores firmware and persistent assets. PSRAM provides temporary working
-memory, including room for media buffers. I2C and I2S are the electrical
-interfaces used for the display and audio hardware respectively.
+Flash held firmware and LittleFS assets, while `8 MB` octal PSRAM buffered camera stills and PCM audio bursts. Notably, the installed **`1000 mAh`** Sea Jump `2S` pack replaced an earlier `2600 mAh` `18650` proposal from the July shopping list that proved bulky inside the stock Sesame cavity.
 
-The **1000 mAh** battery capacity corrects an older 2600 mAh parts list. V2’s P4
-board, battery or power bank, and wiring harness have not been finalized.
+## V1 wiring and power
 
-## Wiring and power
+The authoritative V1 pin assignments live in the repository's [ESP32-S3 pin map](https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/firmware/esp32s3/components/ainekio_platform/include/ainekio/platform/pin_map.h). Because `GPIO33–37` are occupied internally by octal PSRAM on the `N16R8` module, earlier provisional `GPIO33/34` servo maps were retired; see the [V1 ESP32-S3 Firmware Reference](/posts/controller-firmware/) for the final peripheral table.
 
-Use the firmware’s [S3 pin map](https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/firmware/esp32s3/components/ainekio_platform/include/ainekio/platform/pin_map.h)
-for wiring. GPIO numbers identify the controller’s input/output pins.
-GPIO33–37 are already occupied by octal PSRAM on the delivered N16R8 board, so
-older provisional assignments cannot be used. The
-[firmware guide](/posts/controller-firmware/) lists the current peripheral pins.
+V1 sampled battery voltage through a resistor divider into `GPIO3` (`ADC`) for telemetry and low-voltage warnings, while physical pack protection relied on the battery's inline protection circuit and master power switch.
 
-V1 measures battery voltage through an analog-to-digital converter (ADC) for
-telemetry and warnings. That reading does not itself protect the battery; pack
-protection depends on the installed hardware. Powering the controller over USB
-also does not test the separate supply under motor loads.
+## How V1 led to Ainekio V2
 
-## How this build leads to V2
+`Frame8` tracked the V1 enclosure Blender and STL files in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot), preserving the open-frame eight-servo baseline.
 
-`Frame8` is a set of V1 enclosure designs. Its Blender and STL files are now
-tracked in the body repository, correcting the August site’s description of
-them as untracked. Those files alone do not identify the installed enclosure.
+Running V1 exposed the clear limits of two-joint open-loop legs: no lateral hip roll for balance or side-stepping, no way to tell when a servo stalled on carpet, and tight peripheral contention on the `ESP32-S3`. In September and October 2026, those lessons drove the complete [Ainekio V2 redesign](/posts/ainekio-v2/):
 
-The separate local `12servo/` work contains OpenHarmony Puppy V2 leg references
-and converted Blender assemblies. A September 6 note reports an experimental
-print. By September 10, the CAD work includes four legs, a widened chassis,
-three board models, revised covers, and a camera/display carrier. The
-[V2 parts and assembly record](/posts/ainekio-v2/) documents that sequence.
-September 14 photographs now show printed leg prototypes assembled in several
-poses. The [latest leg update](/posts/2026-09-15-leg-prototypes/) records the
-shell-fit problem, horn measurements, and later foot alternatives. These records
-do not yet establish complete V2 powered motion or load performance.
-
-V2 adds a sideways hip joint to each leg. Its chassis will favor supported
-joints, stiff linkages, motor weight near the body, and a low center of gravity.
-These choices reduce unwanted flex and the load caused by long lever arms.
-Accessible wiring and replaceable parts should make repairs easier, while
-camera sight lines, display visibility, and cable clearance need to survive
-the full range of movement.
-
-The [V2 roadmap](/posts/ainekio-v2/) covers the leg measurements, controller
-work, power tests, and motion trials. Servo power is planned to branch directly
-from the supply, bypassing the P4 board, with a common ground shared by both.
-Supply choice depends on measured startup, standing, walking, and loaded-motion
-results.
+- **Three joints per leg & compact four-bar linkages**: Adding lateral hip roll (`12` servos total) and a `35/20/28/38/55 mm` four-bar linkage kept motor mass high near the torso while opening a full 3D foot workspace ([linkage evolution](/posts/gait-development/)).
+- **Closed-loop sensing**: Opening every `MG90S` to add a 4th potentiometer feedback wire (`CD74HC4067` `C4–C15` → `GPIO49`) plus a `208 Hz` `LSM6DS3` IMU turned blind timed playback into verified `2 mm` `Stand` settling, stall recovery, and on-chip `50 Hz` neural walking.
+- **Dedicated media, PWM, and `2S` Keeper Bridge**: Moving to the `Waveshare ESP32-P4-WIFI6` + `PCA9685` + chin-mounted `OV5647` MIPI-CSI camera + **59-expression** `1.9"` `ST7789` LCD and a `2S` Wireless Keeper Bridge delivered a self-contained `650 g` quadruped while keeping servo current isolated from logic power on a shared ground reference.

@@ -1,12 +1,57 @@
 ---
-import SharedFooter from '@merkin/blog-core/components/Footer.astro'
 import { profileConfig } from '../config/config'
 import { url } from '../utils/url-utils'
+
+const currentYear = new Date().getFullYear()
 ---
 
-<SharedFooter
-  profileName={profileConfig.name}
-  rssUrl={url('rss.xml')}
-  sitemapUrl={url('sitemap-index.xml')}
-  privacyUrl={null}
-/>
+<footer class="ainekio-footer" aria-label="Site footer">
+  <div class="footer-copy">
+    <span>&copy; <span id="copyright-year">{currentYear}</span> {profileConfig.name}</span>
+    <span aria-hidden="true">·</span>
+    <span>Personal robotics &amp; AI build logbook</span>
+  </div>
+  <nav class="footer-links" aria-label="Footer links">
+    <a href="https://github.com/Greg-Aster/Ainekio-bot" target="_blank" rel="noreferrer">Ainekio-bot</a>
+    <a href="https://github.com/Greg-Aster/ainekio-os" target="_blank" rel="noreferrer">Ainekio OS</a>
+    <a href={url('/archive/')}>All Articles</a>
+    <a href={url('rss.xml')} target="_blank">RSS</a>
+    <a href={url('sitemap-index.xml')} target="_blank">Sitemap</a>
+  </nav>
+</footer>
+
+<style>
+  .ainekio-footer {
+    margin-top: 1.65rem;
+    padding: 1rem 0.25rem 1.75rem;
+    border-top: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem 1.5rem;
+    font-size: 0.82rem;
+    color: var(--text-color-muted);
+  }
+  .footer-copy {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 1.1rem;
+  }
+  .footer-links a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    text-underline-offset: 0.2em;
+  }
+  .footer-links a:hover {
+    text-decoration: underline;
+  }
+</style>

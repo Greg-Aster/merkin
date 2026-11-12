@@ -92,69 +92,8 @@ That interpreter converted game observations into information the model could us
 not a completed separation of the two systems. These setup details are retained
 as history and have not been retested against today's software.
 
-## Implementation reference from July
-
-<details>
-<summary className="cursor-pointer py-3">Game bridge files and responsibilities</summary>
-
-Paths below are relative to the repository layout recorded at the time.
-
-- `apps/game.megameal/src/app/dev-bridge/gameDevBridge.ts`: settings, snapshots,
-  commands, BroadcastChannel support, and the player's WebSocket endpoint.
-- `gameDevBridgeRuntime.ts` in the same directory: player state, multiplayer chat,
-  scene loading, collision overlays, and touch-control actions.
-- `dev-bridge/server/game-dev-bridge-relay.mjs`: relay at
-  `/__megameal-dev-bridge`; forwarded snapshots, logs, results, and commands,
-  rejecting access when the bridge setting was disabled.
-- `apps/game.megameal/scripts/editor-dev-api.mjs`: installed that relay on the
-  development server and supplied its settings path.
-- `apps/game.megameal/src/app/GameClient.svelte`: loaded the bridge runtime in
-  development mode.
-- `apps/game.megameal/src/app/levelPackageDiscovery.ts`: normalized runtime settings.
-- `apps/game.megameal/src/editor/MasterControlMap.svelte`: bridge settings UI.
-- `apps/game.megameal/src/editor/level/LevelEditorWorkspace.svelte`: editor monitor
-  and command endpoint.
-- `apps/game.megameal/src/editor/masterControlGraph.ts`: documentation graph.
-- `apps/game.megameal/src/levels/global/settings.ts`: saved `devBridge.enabled`,
-  broadcast location, and enabled data categories.
-
-</details>
-
-<details>
-<summary className="cursor-pointer py-3">MetaHuman files and responsibilities</summary>
-
-- `docs/implementation-plans/ENVIRONMENT_INTERFACE_BRIDGE.md`: the original plan.
-- `brain/agents/environment-bridge/core.ts`: event-driven bridge process and
-  connection lifecycle.
-- `brain/agents/environment-bridge/cli.ts`: adapter, URL, room, graph, username,
-  and enabled-state arguments.
-- `brain/agents/environment-bridge/adapters/megameal.ts`: socket connection,
-  self-chat filtering, observations, action translation, and results.
-- The older `adapters/index.ts` and `adapters/megameal-local.ts` paths had been
-  removed in that revision.
-- `etc/cognitive-graphs/environment-mode.json`: observation → Megameal
-  interpreter → context builder → model router → thinking stripper → action
-  parser → send action. Responses returned through the bridge rather than
-  streaming directly into MetaHuman chat.
-- `packages/core/src/environment-interface/store.ts`: connections, sessions,
-  observations, text-event claims, queued actions, and feedback.
-- `packages/core/src/environment-interface/types.ts`: observation, action,
-  session, feedback, image, map, and connection types.
-- `packages/core/src/nodes/environment/connect.node.ts`: graph connection settings.
-- `observation.node.ts` in the same directory: selected-session observations.
-- `megameal-interpreter.node.ts`: player-text extraction, self-message filtering,
-  and game-supported action selection.
-- `action-parser.node.ts` and `helpers.ts`: output parsing, plain-text `sendText`,
-  and optional natural-language movement parsing.
-- `index.ts`: environment-node exports.
-- `packages/core/src/nodes/schemas.ts`: browser-safe editor schemas.
-- `start.sh` and `stop.sh`: service startup/shutdown and stale-state cleanup.
-- `docs/robot-friend.md`: earlier project intent, separate from runtime code.
-
-</details>
-
 The [original Google document](https://docs.google.com/document/d/11-HIevKJzReutvqYSodHPu3CDrxDo3ujfTpTGzB27oo/edit)
-was last modified July 7, 2026. This edited article preserves its history locally.
+was last modified July 7, 2026. This edited article preserves its history locally, including the original 25-file implementation inventory in [Current File Surface](#current-file-surface) below.
 The later [motion experiment](/posts/archive/motion-systems/) records the move
 from a game player to a robot simulator.
 

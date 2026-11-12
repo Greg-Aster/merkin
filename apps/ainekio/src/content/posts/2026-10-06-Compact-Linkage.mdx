@@ -41,22 +41,22 @@ robot around their torque envelope across three fronts:
 
 <figure>
   <img src="/posts/2026-10-06-progress/motion-library-point.webp" alt="Blender render of the compact-linkage robot performing the Point gesture." width="1280" height="800" loading="eager" />
-  <figcaption>October 6 Point gesture preview from the Blender scene “Motion Library - 35-20-28.”</figcaption>
+  <figcaption>October 6 Point gesture preview on the compact 35/20/28 mm linkage.</figcaption>
 </figure>
 
 ## Reworking the linkage: 35 mm carrier, 20 mm crank, 28 mm pickup
 
 To increase mechanical advantage without losing the robot's expressive repertoire,
-the `compact-35-20-28-38-55` geometry shortens the upper carrier and input crank
-while lengthening the lower-leg pickup lever:
+the compact `35 / 20 / 28 / 38 / 55 mm` geometry shortens the upper carrier and input
+crank while lengthening the lower-leg pickup lever:
 
 | Dimension | Previous model | October 5–6 compact linkage | Change |
 | --- | ---: | ---: | ---: |
-| Upper carrier (`Part_023`) | 40 mm | **35 mm** | −5 mm (−12.5%) |
-| Input crank (`Part_009`) | 24 mm | **20 mm** | −4 mm |
+| Upper carrier | 40 mm | **35 mm** | −5 mm (−12.5%) |
+| Knee input crank | 24 mm | **20 mm** | −4 mm |
 | Lower-leg pickup radius | 24 mm | **28 mm** | +4 mm |
-| Connecting rod (`Part_026`) | 38 mm | **38 mm** | Unchanged |
-| Distal lower leg (`Part_027`) | 55 mm | **55 mm** | Unchanged |
+| Connecting rod | 38 mm | **38 mm** | Unchanged |
+| Distal lower leg | 55 mm | **55 mm** | Unchanged |
 
 Download the [dimension comparison CSV](/posts/2026-10-06-progress/linkage-comparison.csv)
 or see the [gait development log](/posts/gait-development/) for the full kinematic history.
@@ -138,9 +138,9 @@ several core capabilities:
   left yaw), transitioning smoothly through the gait cycle without resetting phase.
   Independent controls govern gait speed, stride/rate, named-motion speed, and maximum
   joint speed.
-- **Portable C IMU attitude estimator:** A new six-axis C module (`Slave/software/imu`)
-  applies sensor-to-body alignment and gyro bias calibration to compute roll/pitch
-  orientation and sample freshness, ready to wire into the P4 hardware task.
+- **Portable C IMU attitude estimator:** A new six-axis C estimator module applies
+  sensor-to-body alignment and gyro bias calibration to compute roll/pitch orientation
+  and sample freshness, ready to wire into the P4 hardware loop.
 - **Dual camera profiles & recognition worker:** The P4 camera driver supports
   independent preview (QVGA/VGA at 0–15 fps) and still capture (QVGA/VGA/XGA)
   profiles under a single sensor/encoder owner, feeding a gateway recognition worker

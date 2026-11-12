@@ -1,12 +1,12 @@
 ---
-title: "AI Companion Robot Architecture: Standing Persona, Episodic Memory & Ainekio OS Learning"
+title: "Ainekio as a Companion: Voice, 59-Expression Face, Physical Reactions & Memory Continuity"
 published: 2026-10-14
-updated: 2026-11-11
-description: "How Ainekio combines a Standing Persona, attributed episodic memory, an 8-stage 02:00 Sleep Cycle, bounded autonomy, and specialist model training in Ainekio OS into a physical companion."
+updated: 2026-11-12
+description: "What Ainekio is like on a desk or living-room floor: wake-word conversation, 59 animated LCD expressions, varied pickup and tip reactions, multi-day memory continuity, and standalone vs. host operation."
 image: "/posts/companion-guide/companion-loop.svg"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
-authorName: "Ainekio Project"
-authorBio: "Robot familiar field notes"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: false
 showToc: true
 tags: [Ainekio, Robot Familiar, Ainekio OS, MetaHuman OS, Memory, Personality, Learning]
@@ -22,66 +22,56 @@ reading:
   related: ["ainekio-os", "project-overview", "metahuman-integration", "bounded-autonomy"]
 ---
 
-Ainekio is a four-legged robot familiar built as a persistent conversational companion. Its twelve-servo physical body ([`Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) provides closed-loop and on-chip neural locomotion, expressive postures, a camera, a microphone, a speaker, and a 1.9-inch color face LCD; **[Ainekio OS (`Greg-Aster/ainekio-os`)](https://github.com/Greg-Aster/ainekio-os)** (formerly MetaHuman OS; [architecture guide](/posts/ainekio-os/)) provides identity, conversation, attributed episodic memory, inner reflection, autonomous agency, and learning.
+Most small hobby quadrupeds are built around gait demos: you press a button on a gamepad, the robot trots in a circle, and when you flip the power switch off it has no idea who you are or what happened five minutes ago.
+
+Ainekio (`650 g` V2 body in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot), paired with **[Ainekio OS](https://github.com/Greg-Aster/ainekio-os)**; [architecture guide](/posts/ainekio-os/)) is built around day-to-day room presence—combining a compact twelve-servo body that can sit safely next to a monitor or walk across a rug with a persistent local-first mind that remembers past conversations, reacts when picked up, and consolidates what it learned overnight.
 
 <figure>
   <img src="/posts/companion-guide/companion-loop.svg" alt="Companion loop connecting interaction, perception, decisions, physical expression, attributed memory, sleep maintenance, and reviewed learning." width="1000" height="620" loading="lazy" />
-  <figcaption>Interaction, physical sensing, and task outcomes feed attributed memory and sleep review, which in turn shape future choices and specialist adapters.</figcaption>
+  <figcaption>Room interaction, physical sensing, and task outcomes feed attributed memory and overnight sleep review, shaping how Ainekio responds over weeks rather than single turns.</figcaption>
 </figure>
 
-## Core companion functions
+## Voice conversation without robotic filler
 
-| Function | What it means for Ainekio |
-| --- | --- |
-| **Converse** | Hold natural text or voice conversations through a single **Standing Persona** (`persona/core.json`), grounded in live context and action results across web, CLI, Android, or physical room audio |
-| **Perceive** | Combine `OV5647` camera snapshots, optical-flow obstacle contact range, YOLOE/depth tracking, `WakeNet9s` speech capture, `LSM6DS3` IMU attitude, and 12-channel servo feedback |
-| **Move & Express** | Pair spoken replies with 59 animated `ST7789` LCD facial expressions, on-chip `50 Hz` `107.8 KB` MicroDuck neural walking (`0.8.159-p4-microduck-v17`), closed-loop gaits, and 349+ Freestyle motion programs |
-| **Remember** | Store conversations, observations, and task outcomes with explicit provenance (`indexContentMode: "all"`) so real observations stay distinct from imagined content |
-| **Pursue Goals** | Track multi-step objectives across durable SQLite waits and reconnects, or delegate heavy computer tasks to **Big Brother** (`codex`, `claude-code`, warm `GeminiAcpServer`) |
-| **Reflect & Sleep** | Run background reflection, symbolic dreaming (`dreamer-mode.json`), LoRA adapter fitting, and **Psychotherapist** persona review during the 8-stage `02:00` Sleep Cycle |
-| **Learn** | Train specialist LoRA adapters (`Environment 0.8B/2B`, `489`-row `Freestyle Qwen`) and motor policies (DAgger-distilled on-chip MicroDuck v17 & Pupper V3 MJX RL) |
+In a room, talking to Ainekio starts with onboard **`WakeNet9s`** wake-word detection on the `ESP32-P4` body. When it hears its wake phrase, the robot perks its front shoulders slightly (`+6°`) so you can tell physically that it is listening, captures your spoken turn until voice activity settles, and pairs the audio with a camera frame if visual context is helpful.
 
-## Standing Persona and three layers of continuity
+Rather than narrating every internal tool call (*"Step 1: standing up. Step 2: taking photo"*), Ainekio OS separates action selection from outward speech:
 
-Ainekio's identity is anchored by a single **Standing Persona** stored in `persona/core.json` (with four orthogonal operating modes in [Ainekio OS](/posts/ainekio-os/): `Dual Consciousness`, `Agent`, `Emulation`, and embodied `Environment`). To prevent drift or accidental self-modification during ordinary chat, only the **Psychotherapist** agent (during scheduled Sleep review) or the operator can edit `persona/core.json`. Short-term wants and candidate activities are managed separately by the **Desire Agent**, which adjusts desire strengths based on real outcomes.
+- **Silent task execution**: Specialist models dispatch movements, camera checks, or posture shifts quietly in the background.
+- **One outward voice**: A single **Standing Persona** synthesizes the spoken reply once Ainekio has actually moved or looked, played back through the onboard speaker (`ES8311` codec + `NS4150B` amplifier) using local or LAN-hosted **Kokoro** text-to-speech (with a fast local **Piper** fallback). While speaking, the body suppresses wake-word and microphone re-triggering so it never answers its own voice.
 
-Three mechanisms maintain continuity across time:
+## A 59-expression face and expressive body language
 
-1. **Active working context**: Keeps the current conversation turn, live `Robot Status` (posture, IMU attitude, battery, feedback health), and recent internal reflections available to the unified `environment-mode.json` graph.
-2. **Attributed persistent memory**: Indexes episodic memories using CPU-only embeddings (`Qwen3 Embedding 0.6B` and `Nomic Embed v1.5` via `llama-cpp.service`) while tagging each record's origin—user conversation, camera observation, task outcome, dream, or reflection—so imagined material is never confused with physical fact.
-3. **Durable task executions**: Checkpoints multi-step goals in the 14-table `executions.sqlite` engine so an ongoing task survives movement waits, camera captures, or network reconnects.
+Because a headless four-legged frame is hard to read across a desk, Ainekio's V2 front carrier pairs a **1.9-inch `ST7789` color IPS LCD** (`320 × 170` landscape at `15 fps`) with a chin-mounted **`OV5647` camera** tucked into the lower jaw below the screen.
 
-## Inner activity, fast reflexes, and the `02:00` Sleep Cycle
+- **59 procedural expressions**: The onboard display renders **59 animated expressions**—spanning idle blinks, directional glances, curiosity, drowsiness, live audio-synced voice bars while talking, gesture accompaniments, startled/grumpy contact faces, and `cosmic_horror`.
+- **Freestyle postures and fault recovery**: Beyond analytical gaits (`Walk`, `Run`, `Crawl`, `Crab`), Core 1's `50 Hz` neural walk, and 23 compiled gestures (`Wave`, `Bow`, `Stretch`, `Sit`, `Play Dead`), Ainekio draws on a **349-motion Freestyle library**. Its generative posture specialist was trained on a **489-row dataset** combining **73** curated library motions with **416** synthesized fault-recovery trajectories that safely untangle snagged legs and return to a stable `Stand`.
 
-Ainekio OS runs background cognitive workflows alongside live interaction:
+## Physical reactions when picked up, tipped, or stalled
 
-- **Varied Fast Body Events (`fast-body-event-mode.json`)**: When the robot is tipped, shaken, or experiences a servo stall, a low-latency Lightweight model call queries the last **6 `fast_body_event_response` speech entries** (`temperature = 0.8`, `repeatPenalty = 1.2`) and immediately triggers a token-matched `be_` LCD face expression with a fresh, non-repetitive remark.
-- **Inner life**: Reflection (`reflector`), curiosity (`inner-curiosity.json`), and associative reasoning (`train-of-thought.json`) workflows examine recent experiences and generate internal thoughts tagged with their provenance.
-- **8-Stage `02:00` Sleep Cycle**: Consolidates episodic memory, refreshes embedding indexes, fits overnight LoRA adapters, runs `dreamer-mode.json` (`15` weighted lifetime memories with a `227-day` decay curve), conducts **Psychotherapist** (`psychoanalyzer`) persona evaluation, and updates **Desire Agent** strengths. Software Sleep is a cognitive maintenance cycle, distinct from putting the physical `ESP32-P4` body into `Doze` or `Rest`.
+A desk or floor companion inevitably gets bumped, picked up, or caught on the edge of a rug. Every joint on V2 has a 4th wire soldered to its internal potentiometer wiper and routed through channels `C4–C15` of a `CD74HC4067` multiplexer into `GPIO49` (`ADC2_CH0`), paired with a `208 Hz` `LSM6DS3` IMU.
 
-## Autonomy modes: Reactive, Semi, and Full Auto
+When Ainekio is tipped over, shaken, or hits a servo stall:
 
-Ainekio's **Active Operator** supports three robot autonomy modes, detailed in [Robot Autonomy Modes](/posts/bounded-autonomy/):
+1. **Immediate hardware awareness**: Onboard firmware detects the attitude excursion or shaft-tracking error in milliseconds and emits a structured body event without cutting servo holding power unnecessarily on minor snags.
+2. **Non-repetitive vocal and facial reflexes**: Instead of playing a fixed sound effect, Ainekio OS routes sudden jostles through a fast reflex path that checks the **last 6 body-event remarks** (with elevated sampling diversity) so it pairs a matching LCD expression with a fresh, dryly varied comment rather than repeating the same canned line every time you pick it up.
+3. **Preserved task context**: Answering a bump or pickup does not erase a paused multi-step goal that Ainekio was working on beforehand.
 
-| Mode | Behavior |
-| --- | --- |
-| **Reactive** | Responds to user requests, wake-word speech, and physical body events (`fast-body-event-mode.json`) without self-initiating new activities |
-| **Semi Mode** | Evaluates signed drive deltas every **5 minutes**, initiating bounded activities or reflections when internal drives cross their threshold |
-| **Full Auto Mode** | Continuously selects high-reasoning activities (`Qwen3.5 9B` or Hybrid `ServerStatus` routing)—never idling—by chaining perception, movement, memory review, Desire plans, and Big Brother delegations |
+## Continuity across days (and at `02:00 AM`)
 
-## Learning through models and the physical body
+What makes Ainekio feel like an ongoing familiar rather than a fresh session each morning is how memory and identity are separated from transient chat context:
 
-Improvement happens across two complementary tracks:
+- **Provenance-tagged episodic memory**: Conversations, visual observations, task results, internal curiosity chains, and dreams are indexed locally with explicit source tags. Ainekio knows whether it *saw* your coffee mug through its chin camera, *heard* you mention it, or *imagined* it during a background reflection.
+- **Protected Standing Persona**: Core character traits, values, and voice live in a dedicated persona record that ordinary chat turns cannot overwrite, preventing prompt drift over long conversations.
+- **Overnight `02:00` consolidation**: During its nightly software sleep cycle, Ainekio organizes the day's memories, curates clean adapter training examples, samples 15 weighted memories into symbolic dreams, and runs an internal psychotherapist review that updates long-term persona notes and autonomous desire strengths. (See [Ainekio OS Architecture](/posts/ainekio-os/) for the full 8-stage pipeline.)
 
-1. **Cognitive & Motion Specialists (`ServerStatus` & `llama-cpp.service`)**:
-   - **Orchestrator & Task LoRAs (`Environment 0.8B / 2B`)**: Per-request LoRA adapters trained on curated situation-dependent datasets (including ongoing task continuity, cancellation, and tool delegation) select actions and route context cleanly.
-   - **Freestyle Motion Model (`Freestyle Qwen`)**: Trained on a **`489`-row `motion-targets-v1` dataset** (`349` SQLite library motions + `416` hardware fault-recovery rows using native `stand`) to translate natural-language gesture requests and jam/fall events into checked 12-servo target sequences.
-2. **Embodied Locomotion Learning**:
-   - **On-chip `50 Hz` neural gait & MJX RL**: Trained across `4,096` GPU hardware-twin MuJoCo environments (`tensor_sensors.py` + `tensor_body.py`) and distilled via 2-round DAgger (`547 KB` → **`107.8 KB`** `int8`), `microduck-v17-p4` runs directly inside the `ESP32-P4`'s `128 KB` L2 cache (`+0.213 m/s` forward, `-0.179 m/s` reverse, `±60.9°/s` yaw), alongside `600M/800M`-step Pupper V3 MJX host actors validated across physical hardwood and carpet-seam bouts. See the [Gait Development Guide](/posts/gait-development/).
+## What works standalone vs. with a host PC
 
-## Steering and inspecting the companion
+Because the physical body weighs `650 g` and runs on a microcontroller rather than carrying a heavy laptop GPU on its back, capabilities divide cleanly between standalone onboard operation and host-connected companion mode:
 
-Operators can interact with and inspect Ainekio through two connected web surfaces:
+| Operating Setup | What runs onboard the `ESP32-P4` V2 robot | What the host PC or `Radxa Dragon Q6A` adds |
+| --- | --- | --- |
+| **Standalone Body (`ESP32-P4` only)** | Closed-loop `Stand` (`2 mm` settle), analytical `Walk`/`Run`/`Crawl`/`Crab`, 23 built-in gestures, **on-chip `50 Hz` `107.8 KB` MicroDuck neural walking**, `208 Hz` IMU self-leveling, `CD74HC4067` (`C4–C15` → `GPIO49`) stall detection, **59 LCD expressions**, `WakeNet9s` wake detection, microSD clip recording, and local failsafe / inactivity `Rest` | *Not required for self-contained standing, leveling, or onboard controller/gait testing* |
+| **Connected Companion (Body + Host Gateway & Ainekio OS)** | All real-time motor control, workspace projection, shaft-arrival verification, audio capture/playback, and camera/IMU streaming | Whisper speech-to-text, Kokoro/Piper speech synthesis, Standing Persona conversation, multimodal vision & optical-flow obstacle range, Freestyle posture synthesis, attributed episodic memory, Reactive/Semi/Full Auto agency ([autonomy guide](/posts/bounded-autonomy/)), and overnight `02:00` sleep consolidation |
 
-- **Ainekio OS UI ([`https://mh.ainek.io`](https://mh.ainek.io))**: Exposes the conversation view, `/architecture` interactive system map, `ServerStatus` compute/voice routing drawer, `TerminalChat.svelte` (**Big Brother** terminal), 47-graph cognitive node editor, memory inspector, Standing Persona & Agency dashboards, and live `Robot Status`.
-- **Body Control & Cockpit HUD (`Master/gateway`)**: Provides the full-viewport **Cockpit HUD** (live optical-flow obstacle range, on-chip vs. host neural gait toggle, and top-bar Ainekio OS control switch), 12-channel servo feedback calibration curves, IMU self-leveling tuning, the 349-example Freestyle editor, and over-the-air `ESP32-P4` firmware management.
+You can inspect and steer both halves from the local web workbench (for chat, memory inspection, cognitive workflows, and model routing) and the **Body Control / Cockpit HUD** interface ([gateway guide](/posts/gateway-and-simulator/)) for live camera views, servo calibration, and manual teleoperation.

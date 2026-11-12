@@ -16,88 +16,197 @@ const subsystemTopics = Object.entries(topics).filter(([id]) => !['overview', 'v
   const count = posts.filter(post => getReading(post).topic === id).length
   return { id, ...topic, count }
 })
-const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 ---
-<MainGridLayout title="Ainekio Build Journal & Engineering Milestones — 12-Servo ESP32-P4 Quadruped & Ainekio OS" description="Chronological engineering milestones, hardware revisions, on-chip ESP32-P4 L2-cached neural gait distillation, MuJoCo/MJX RL, and Ainekio OS updates." oneColumn={true}>
+<MainGridLayout title="Ainekio Build Journal — Workbench Milestones & Robot Progress" description="Chronological workbench notes following Ainekio from early 3D-printed leg linkages through fourth-wire servo feedback, carpet walking trials, on-chip neural gait distillation, and Ainekio OS." oneColumn={true}>
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: 'Ainekio Build Journal & Engineering Milestones',
-    description: 'Chronological engineering milestones documenting the twelve-servo ESP32-P4 robot body, on-chip 50 Hz MicroDuck neural gait, Freestyle motion recovery, and the Ainekio OS mind.',
+    name: 'Ainekio Build Journal',
+    description: 'Chronological workbench notes documenting the twelve-servo ESP32-P4 quadruped robot and Ainekio OS.',
     url: Astro.url.href,
   })}></script>
-  <article class="card-base build-journal" data-pagefind-body>
-    <header>
-      <p class="journal-eyebrow">Ainekio · Development Log</p>
-      <h1>Build journal</h1>
-      <p>Cohesive engineering milestones documenting the twelve-servo ESP32-P4 robot body, on-chip 50 Hz L2-cached neural gait, Freestyle motion recovery, and the Ainekio OS mind.</p>
-      <nav aria-label="Journal resources">
-        <a href={url('/posts/project-overview/')}>System overview →</a>
-        <a href={url('/posts/ainekio-os/')}>Ainekio OS architecture →</a>
-        <a href={url('/archive/?kind=reference')}>Technical reference guides →</a>
-        <a href={url('/archive/?kind=journal')}>Filter journal articles →</a>
-        <a href={url('/gallery/')}>Photos, videos & diagrams →</a>
-      </nav>
-    </header>
 
-    <div class="journal-status">
-      <ProjectStatus />
-    </div>
+  <div class="journal-shell">
+    <article class="card-base build-journal" data-pagefind-body>
+      <header class="journal-header">
+        <div class="journal-header-copy">
+          <p class="journal-eyebrow">Workbench Logbook · Chronological Notes</p>
+          <h1>Build journal</h1>
+          <p>Dated notes from the workbench: what got modeled in Blender, what printed well, what broke during floor trials, and how the twelve-servo V2 body and Ainekio OS came together step by step.</p>
+        </div>
+        <nav class="journal-top-nav" aria-label="Journal shortcuts">
+          <a href={url('/posts/project-overview/')}>System overview →</a>
+          <a href={url('/posts/ainekio-os/')}>Ainekio OS guide →</a>
+          <a href={url('/posts/v1-original-posts/')}>V1 archive →</a>
+        </nav>
+      </header>
 
-    <section class="journal-paths" aria-labelledby="journal-stories">
-      <h2 id="journal-stories">Explore by subsystem</h2>
-      <ul>
+      <div class="journal-status">
+        <ProjectStatus compact />
+      </div>
+
+      <nav class="journal-filter-chips" aria-label="Filter by subsystem">
+        <span class="chip-label">Jump by topic:</span>
         {subsystemTopics.map(topic => (
-          <li>
-            <a href={url(`/archive/?topic=${topic.id}`)}>{topic.title} ({topic.count}) →</a>
-          </li>
+          <a class="topic-chip" href={url(`/archive/?topic=${topic.id}`)}>{topic.title} <span>({topic.count})</span></a>
         ))}
-      </ul>
-      <a href={url('/posts/v1-original-posts/')}>Original V1 eight-servo build archive →</a>
-    </section>
+      </nav>
 
-    <section aria-labelledby="journal-latest">
-      <h2 id="journal-latest">Chronological milestones</h2>
-      <div class="journal-entries">{feed.entries.map(entry => {
-        const post = posts.find(post => `/posts/${post.slug}/` === entry.url)
-        return <article class="journal-entry">
-          <div>
-            <time datetime={entry.date.toISOString()}>{dateFormat.format(entry.date)}</time>
-            {post && <p class="journal-context">{topics[getReading(post).topic].title} · {generations[getReading(post).generation]}</p>}
-            <h3>{entry.url ? <a href={entry.url.startsWith('/') ? url(entry.url) : entry.url}>{entry.title}</a> : entry.title}</h3>
-            <Markdown class="journal-summary"><div set:html={entry.contentHtml} /></Markdown>
-            {entry.location && <p class="journal-context">{entry.location}</p>}
-            {entry.mileage && <p class="journal-context">{entry.mileage}</p>}
-          </div>
-          {post?.data.image && <a class="journal-image" href={getPostUrlBySlug(post.slug)} tabindex="-1" aria-hidden="true"><img src={url(post.data.image)} alt="" loading="lazy" decoding="async" /></a>}
-        </article>
-      })}</div>
-    </section>
-    {feed.introHtml && <details class="journal-context-notes"><summary>About the V1 & V2 archives</summary><Markdown class="journal-notes"><div set:html={feed.introHtml} /></Markdown></details>}
-  </article>
+      <section aria-labelledby="journal-latest">
+        <div class="journal-list-header">
+          <h2 id="journal-latest">All dated milestones ({feed.entries.length})</h2>
+          <a href={url('/archive/?kind=journal')}>Filter in library →</a>
+        </div>
+        <div class="journal-entries">
+          {feed.entries.map(entry => {
+            const post = posts.find(post => `/posts/${post.slug}/` === entry.url)
+            const reading = post ? getReading(post) : null
+            return (
+              <article class="journal-entry">
+                <div class="entry-date-col">
+                  <time datetime={entry.date.toISOString()}>{dateFormat.format(entry.date)}</time>
+                  {reading && (
+                    <span class:list={['entry-gen', { 'is-v1': reading.generation === 'v1' }]}>
+                      {generations[reading.generation]}
+                    </span>
+                  )}
+                </div>
+                <div class="entry-main">
+                  {reading && <p class="journal-context">{topics[reading.topic].title}</p>}
+                  <h3>{entry.url ? <a href={entry.url.startsWith('/') ? url(entry.url) : entry.url}>{entry.title}</a> : entry.title}</h3>
+                  <Markdown class="journal-summary"><div set:html={entry.contentHtml} /></Markdown>
+                </div>
+                {post?.data.image && (
+                  <a class="journal-image" href={getPostUrlBySlug(post.slug)} tabindex="-1" aria-hidden="true">
+                    <img src={url(post.data.image)} alt="" loading="lazy" decoding="async" />
+                  </a>
+                )}
+              </article>
+            )
+          })}
+        </div>
+      </section>
+
+      {feed.introHtml && (
+        <details class="journal-context-notes">
+          <summary>About the V1 &amp; V2 build archives</summary>
+          <Markdown class="journal-notes"><div set:html={feed.introHtml} /></Markdown>
+        </details>
+      )}
+    </article>
+  </div>
 </MainGridLayout>
 
 <style>
- .build-journal { padding:clamp(1.2rem,3vw,2rem);color:var(--text-color); }
- h1 { font-size:clamp(1.8rem,3vw,2.4rem);font-weight:750;margin:.5rem 0; }
- header > p { max-width:75ch;line-height:1.65; }
- .journal-eyebrow { text-transform:uppercase;font-size:.75rem;letter-spacing:.05em;color:var(--primary); }
- a { color:var(--primary);text-underline-offset:.2em; }
- a:hover { text-decoration:underline; }
- nav { display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;margin-top:.75rem; }
- nav a,.journal-paths a { display:inline-block;padding-block:.6rem; }
- .journal-status { margin: 1.5rem 0; }
- .journal-paths { margin:1.5rem 0 2rem;padding:1.25rem;border:1px solid color-mix(in srgb,var(--primary) 25%,transparent);border-radius:.6rem; }
- h2 { font-size:1.3rem;font-weight:700; }
- .journal-paths ul { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 1rem;margin:.5rem 0; }
- .journal-paths li { font-size:.9rem; }
- .journal-context { font-size:.8rem;color:var(--text-color-muted);line-height:1.6; }
- .journal-entry { display:grid;grid-template-columns:minmax(0,1fr) 11rem;gap:1.25rem;padding:1.5rem 0;border-top:1px solid color-mix(in srgb,var(--primary) 20%,transparent); }
- time { font-size:.8rem;color:var(--primary); }
- h3 { font-size:1.2rem;font-weight:700;line-height:1.4;margin:.45rem 0; }
- .journal-summary :global(p) { margin:.4rem 0 .65rem;line-height:1.65;font-size:.95rem; }
- .journal-image img { width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:.4rem; }
- summary { padding:1rem 0;cursor:pointer;font-weight:650; }
- .journal-context-notes { border-top:1px solid color-mix(in srgb,var(--primary) 25%,transparent); }
- @media(max-width:640px) { .journal-paths ul,.journal-entry { grid-template-columns:1fr; } .journal-image img { max-height:13rem;aspect-ratio:16/9; } }
+  .journal-shell { width: 100%; margin: 0; }
+  .build-journal { padding: clamp(1.25rem, 2.6vw, 2rem); color: var(--text-color); }
+  .journal-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.85rem 1.5rem;
+  }
+  .journal-header-copy { min-width: 0; flex: 1 1 34rem; }
+  .journal-eyebrow { text-transform: uppercase; font-size: .73rem; font-weight: 750; letter-spacing: .07em; color: var(--primary); }
+  h1 { font-size: clamp(1.8rem, 3vw, 2.35rem); font-weight: 760; margin: .35rem 0 .45rem; line-height: 1.16; }
+  .journal-header-copy > p { max-width: 74ch; font-size: 0.94rem; line-height: 1.6; color: color-mix(in srgb, var(--text-color) 88%, transparent); }
+  a { color: var(--primary); text-underline-offset: .2em; }
+  a:hover { text-decoration: underline; }
+
+  .journal-top-nav { display: flex; flex-wrap: wrap; gap: 0.4rem; font-size: 0.82rem; font-weight: 680; }
+  .journal-top-nav a {
+    padding: 0.36rem 0.7rem;
+    border-radius: 0.4rem;
+    background: rgb(0 0 0 / 0.22);
+    border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .journal-top-nav a:hover {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    text-decoration: none;
+  }
+
+  .journal-status { margin: 1.05rem 0 0.95rem; }
+
+  .journal-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.7rem 0;
+    margin-bottom: 1.1rem;
+    border-block: 1px solid rgb(255 255 255 / 0.08);
+  }
+  .chip-label { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-color-muted); margin-right: 0.2rem; }
+  .topic-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 650;
+    background: rgb(0 0 0 / 0.22);
+    border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent);
+    text-decoration: none;
+  }
+  .topic-chip span { color: var(--text-color-muted); font-weight: 500; }
+  .topic-chip:hover { text-decoration: none; border-color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, transparent); }
+
+  .journal-list-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.4rem 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .journal-list-header a { font-size: 0.85rem; font-weight: 680; }
+  h2 { font-size: 1.22rem; font-weight: 750; }
+  .journal-entry {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr) 11.5rem;
+    gap: 1.15rem;
+    padding: 1.1rem 0;
+    border-top: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+    align-items: center;
+  }
+  .entry-date-col { align-self: start; }
+  .entry-date-col time { display: block; font-size: .85rem; font-weight: 750; color: var(--primary); }
+  .entry-gen {
+    display: inline-block;
+    margin-top: 0.3rem;
+    padding: 0.12rem 0.42rem;
+    border-radius: 0.26rem;
+    font-size: 0.69rem;
+    font-weight: 650;
+    color: var(--text-color-muted);
+    border: 1px solid rgb(255 255 255 / 0.12);
+  }
+  .entry-gen.is-v1 { color: #fcd34d; border-color: rgb(245 158 11 / 0.35); background: rgb(245 158 11 / 0.08); }
+
+  .entry-main { min-width: 0; align-self: start; }
+  .journal-context { font-size: .73rem; font-weight: 650; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color-muted); }
+  h3 { font-size: 1.1rem; font-weight: 720; line-height: 1.36; margin: .2rem 0 .35rem; }
+  h3 a { color: var(--text-color); }
+  h3 a:hover { color: var(--primary); }
+  .journal-summary :global(p) { margin: 0; line-height: 1.58; font-size: .91rem; color: color-mix(in srgb, var(--text-color) 86%, transparent); }
+  .journal-image img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: .45rem; border: 1px solid rgb(255 255 255 / 0.09); }
+  summary { padding: 0.85rem 0; cursor: pointer; font-weight: 680; font-size: 0.92rem; }
+  .journal-context-notes { margin-top: 0.4rem; border-top: 1px solid color-mix(in srgb, var(--primary) 22%, transparent); }
+
+  @media (max-width: 820px) {
+    .journal-entry { grid-template-columns: 7.5rem minmax(0, 1fr); }
+    .journal-image { grid-column: 2; max-width: 15rem; }
+  }
+  @media (max-width: 600px) {
+    .journal-entry { grid-template-columns: 1fr; gap: 0.5rem; }
+    .entry-date-col { display: flex; align-items: center; gap: 0.65rem; }
+    .entry-gen { margin-top: 0; }
+    .journal-image { grid-column: 1; max-width: none; }
+  }
 </style>

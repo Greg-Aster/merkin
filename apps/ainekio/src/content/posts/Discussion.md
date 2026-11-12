@@ -101,7 +101,9 @@ The next likely sensor is a 6-axis IMU: an accelerometer and gyroscope. One smal
 
 Leading options:
 
-- Pololu LSM6DSO, 13 × 23 × 3mm — compact, simple, and the safest general choice## Wireless charging
+- Pololu LSM6DSO, 13 × 23 × 3mm — compact, simple, and the safest general choice
+
+## Wireless charging
 
 Wireless charging is a feasible optional modification, but it should use a dedicated Qi receiver rather than a conventional RFID energy-harvesting antenna. RFID and ordinary NFC harvesting provide far too little power for the robot's approximately 19Wh 2S battery pack.
 
@@ -194,7 +196,7 @@ Original Sesame rail compatibility:
 - The original Sesame robot already uses a servo power rail. In the hand-wired S2 Mini build this is literally a 5V rail and ground rail across the servo headers. In the distro-board builds, the custom board acts as the organized rail and signal distribution system.
 - A XIAO-based Ainekio controller could reuse the original Sesame servo rail concept, but it should not send servo current through the XIAO. The safe reuse is: Sesame rail powers servo V+ and servo ground, XIAO has its own clean logic power, and all grounds are common.
 - The easiest XIAO prototype path is probably a hand-wired Sesame-style rail plus PCA9685, or a small servo breakout/distribution board plus PCA9685.
-- rail architecture is now settled in the Parts Overview (hand-wired Sesame-style rail, two MINI560 branches, common ground). The remaining rail questions are validation, not architecture: measured worst-case current and physical fitment.
+- Rail architecture is now settled in the Parts Overview (hand-wired Sesame-style rail, two MINI560 branches, common ground). The remaining rail questions are validation, not architecture: measured worst-case current and physical fitment.
 
 ## Earlier XIAO/PCA9685 parts concept (superseded)
 
@@ -240,6 +242,7 @@ The numbers:
 - Pi Zero 2 W: 65 × 30 × 5mm bare, ~13mm with header
 - XIAO ESP32S3 Sense: 21 × 17.8mm board footprint, but taller with the Sense camera expansion installed
 - PCA9685 board/HAT stacked or wired nearby: board footprint depends on exact model; total stack height with headers is likely the fitment problem, not the bare SBC
+
 ## Fitment checkpoint - original Sesame vs Ainekio electronics
 
 Known / working dimensions:
@@ -308,6 +311,7 @@ The overlap between the Linux computer and motion controller is limited and inte
 - Existing servos for prototype testing, although later quadrupeds may move to smart actuators with position, current, temperature, and fault feedback
 
 ### ESP32-P4-WIFI6 media/network-board candidate
+
 This board is now a serious Generation 2 media-controller candidate rather than the earlier abstract ESP32-P4-plus-ESP32-S3 concept. The Waveshare design combines an ESP32-P4, a separate onboard ESP32-C6 for Wi-Fi 6 and Bluetooth, 32MB PSRAM, 32MB NOR flash, MIPI-CSI camera input, MIPI-DSI display output, onboard microphone, audio codec/amplifier with an 8Ω 2W speaker connector, TF/microSD storage, USB 2.0 OTG, hardware H.264/JPEG encoding, and exposed GPIO/UART/I2C/I2S/SPI/CAN/MCPWM resources. An Amazon listing currently places the standard board near $18, but the exact seller, board revision, delivered accessories, and long-term availability must be verified.
 
 The strongest proposed pairing is:

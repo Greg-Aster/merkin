@@ -1,12 +1,12 @@
 ---
 title: "8-Servo ESP32-S3 vs. 12-Servo ESP32-P4 Quadruped Robot Comparison (V1 vs. V2)"
 published: 2026-09-24
-updated: 2026-11-06
-description: "Side-by-side technical comparison of the 8-servo ESP32-S3 V1 baseline and the 650 g 12-servo ESP32-P4 V2 closed-loop quadruped."
+updated: 2026-11-12
+description: "Side-by-side technical comparison of the 8-servo ESP32-S3 V1 baseline and the 650 g 12-servo ESP32-P4 V2 closed-loop quadruped running on-chip 50 Hz neural walking and Ainekio OS."
 image: "/posts/2026-09-24-progress/v1-physical.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
-authorName: "Ainekio Project"
-authorBio: "Robot familiar field notes"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: false
 showToc: true
 tags: [Ainekio, V1, V2, Hardware, Motion, Battery]
@@ -22,7 +22,7 @@ reading:
   related: ["ainekio-v2", "gait-development", "v1-original-posts"]
 ---
 
-Ainekio has been developed across two physical quadruped generations. **V1** established the end-to-end voice, vision, gateway, and MetaHuman OS loop on a compact eight-servo, open-loop `ESP32-S3` chassis derived from the open-source Sesame robot. **V2** is a complete mechanical, electrical, and control redesign around the **`Waveshare ESP32-P4-WIFI6`**, adding lateral hip roll joints (twelve servos total), compact five-bar/four-bar leg linkages, 4th-wire potentiometer feedback on every actuator, a `208 Hz` IMU, a 1.9-inch color face LCD, and closed-loop / neural locomotion.
+Ainekio ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) has been built across two physical quadruped generations. **V1** proved out the end-to-end voice, vision, gateway, and **[Ainekio OS](/posts/ainekio-os/)** ([`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os), formerly MetaHuman OS) loop on a compact eight-servo, open-loop `ESP32-S3` frame derived from the open-source Sesame robot. **V2** is a complete mechanical, electrical, and control redesign around the **`Waveshare ESP32-P4-WIFI6`**, adding lateral hip roll joints (twelve servos total), compact four-bar leg linkages with curved rocking soles, 4th-wire potentiometer feedback on every actuator, a `208 Hz` IMU, a 1.9-inch **59-expression** color LCD, a `2S` **Wireless Keeper Bridge**, and **on-chip `50 Hz` `107.8 KB` L2-cached MicroDuck neural walking**.
 
 <div className="grid grid-cols-2 gap-3">
   <figure>
@@ -31,7 +31,7 @@ Ainekio has been developed across two physical quadruped generations. **V1** est
   </figure>
   <figure>
     <img src="/gallery/20261021_083818-1600.webp" alt="V2 on the workbench with red face surround, 1.9-inch color LCD, linkage legs, and enclosed chassis." width="1588" height="1191" loading="lazy" className="w-full aspect-square object-contain" />
-    <figcaption><strong>V2 · Twelve-Servo P4 Prototype.</strong> Custom enclosed shell, 1.9" ST7789 LCD, OV5647 camera, and 4th-wire feedback linkages.</figcaption>
+    <figcaption><strong>V2 · Twelve-Servo P4 Prototype.</strong> Custom enclosed shell, 1.9" ST7789 LCD, chin-mounted OV5647 camera, and 4th-wire feedback linkages.</figcaption>
   </figure>
 </div>
 
@@ -40,47 +40,47 @@ Ainekio has been developed across two physical quadruped generations. **V1** est
 | Feature | V1 · Eight-Servo Baseline | V2 · Twelve-Servo Closed-Loop Body |
 | --- | --- | --- |
 | **Actuators** | 8× `MG90S` (2 per leg, open-loop PWM) | 12× Miuzei `MG90S` (3 per leg) modified with 4th-wire potentiometer wiper feedback |
-| **Leg mechanism** | Direct planar joints in an open Sesame-derived chassis | Shoulder roll (`±h`) + compact planar linkage (`35 mm` carrier, `20 mm` crank, `28 mm` pickup, `38 mm` rod, `55 mm` lower leg) |
+| **Leg mechanism** | Direct planar joints in an open Sesame-derived chassis | Shoulder roll (`±h`) + compact four-bar linkage (`35 mm` carrier, `20 mm` crank, `28 mm` pickup, `38 mm` rod, `55 mm` lower leg) + curved rocking soles |
 | **Assembled mass & envelope** | Open-frame micro quadruped | `650 g` complete; `245.85 × 182.79 × 109.06 mm` (`L × W × H`) |
-| **Foot workspace** | 2D fore/aft and vertical arc per leg | 3D Cartesian workspace per leg with `0.8.150` boundary projection and adjustable stance width |
-| **Position verification** | None (open-loop elapsed timer) | 12-channel `CD74HC4067` analog multiplexer into P4 ADC; `2 mm` `Stand` settle and verified arrival |
+| **Foot workspace** | 2D fore/aft and vertical arc per leg | 3D Cartesian workspace per leg with 8-pass Gauss-Newton boundary projection and adjustable stance width |
+| **Position verification** | None (open-loop elapsed timer) | `CD74HC4067` multiplexer channels **`C4–C15`** → `ESP32-P4` **`GPIO49` (`ADC2_CH0`)**; `2 mm` `Stand` settle and verified shaft arrival |
 | **Inertial sensing** | None | Onboard `LSM6DS3` 6-axis IMU (`208 Hz`), stationary gyro bias calibration, local attitude self-leveling, and tip/shake events |
-| **Motion repertoire** | 38 fixed `.amot` keyframe assets (`walk_forward`, fixed turns, emotes) | Continuous analytic solver (`Walk`, `Run`, `Crawl`, 6-dir `Crab`), 23 compiled gestures, **349-example SQLite Freestyle library**, **`50 Hz` neural policy (`walk_nominal_v1`)**, and **MuJoCo MJX RL** |
+| **Motion repertoire** | 38 fixed `.amot` keyframe assets (`walk_forward`, fixed turns, emotes) | **On-chip `50 Hz` `107.8 KB` L2-cached MicroDuck neural gait**, continuous analytic solver (`Walk`, `Run`, `Crawl`, 6-dir `Crab`), 23 compiled gestures, **349-motion Freestyle library** (`489`-row fault-recovery dataset), and **Pupper V3 / MuJoCo MJX RL** |
 
 ## Controller, compute, and peripherals
 
 | Subsystem | V1 (`ESP32-S3`) | V2 (`ESP32-P4` + `C6`) |
 | --- | --- | --- |
 | **Controller board** | Freenove `ESP32-S3-WROOM CAM` (`N16R8`) | `Waveshare ESP32-P4-WIFI6` (Rev 1.3) |
-| **Main CPU & clock** | Dual-core Xtensa LX7 @ `160 MHz` | Dual-core RISC-V @ `360 MHz` |
+| **Main CPU & cache** | Dual-core Xtensa LX7 @ `160 MHz` | Dual-core RISC-V @ `360 MHz` (`128 KB` L2 cache running Core 1 `50 Hz` `int8` neural gait) |
 | **Flash / PSRAM** | `16 MB` Flash / `8 MB` Octal PSRAM | `32 MB` NOR Flash / `32 MB` PSRAM |
-| **Wireless** | Integrated 2.4 GHz Wi-Fi | Dedicated onboard `ESP32-C6` coprocessor over SDIO |
+| **Wireless** | Integrated 2.4 GHz Wi-Fi | Dedicated onboard `ESP32-C6` Wi-Fi 6 / Bluetooth coprocessor over SDIO |
 | **Servo PWM generation** | 8× direct `MCPWM` GPIO outputs | `PCA9685` 16-channel 12-bit I2C PWM driver with staggered phase offsets |
-| **Face display** | 0.96" `SSD1306` monochrome I2C OLED (`128 × 64`) | 1.9" `ST7789` color IPS SPI LCD (`320 × 170`, 58 animated expressions) |
-| **Camera** | `OV3660` DVP parallel camera (`XGA` stills) | `OV5647` MIPI-CSI camera (180° inverted mount, `10,000 µs` motion-safe exposure ceiling, SD video recording) |
-| **Audio & wake word** | External `INMP441` mic + `MAX98357A` I2S amp; experimental TFLite Micro pilot | Onboard `ES8311` codec + `NS4150B` amp, `20 × 30 mm` speaker, **Espressif `WakeNet9s`**, 5 VAD modes, `15 s` window, `external_speech_ms` TTS suppression |
-| **Host gateway & brain** | Desktop running `Master/gateway` + MetaHuman OS | Desktop or **Radxa Dragon Q6A** (`QCS6490`) running Body Control + unified `llama-cpp.service` (`:8080`) |
+| **Face display** | `0.96"` `SSD1306` monochrome I2C OLED (`128 × 64`) | `1.9"` `ST7789` color IPS SPI LCD (`320 × 170`, **59 animated expressions**) |
+| **Camera** | `OV3660` DVP parallel camera (`XGA` stills) | Chin-mounted `OV5647` MIPI-CSI camera below the LCD (`180°` inverted mount, `10,000 µs` motion-safe exposure ceiling, microSD clip recording) |
+| **Audio & wake word** | External `INMP441` mic + `MAX98357A` I2S amp; experimental TFLite Micro pilot | Onboard `ES8311` codec + `NS4150B` amp, `20 × 30 mm` speaker, **Espressif `WakeNet9s`**, 5 VAD modes, `15 s` window, self-speech suppression |
+| **Host gateway & mind** | Desktop running host gateway + MetaHuman OS | Desktop or **Radxa Dragon Q6A** running Body Control / Cockpit HUD + **[Ainekio OS](/posts/ainekio-os/)** (`Greg-Aster/ainekio-os`) |
 
 ## Power, battery, and charging
 
 Both generations isolate high-current `5 V` motor power from logic power while sharing a common ground reference:
 
-| Power Component | V1 Configuration | V2 Rear Two-Level Power Carrier |
+| Power Component | V1 Configuration | V2 Wireless Keeper Bridge |
 | --- | --- | --- |
-| **Battery pack** | Sea Jump `2S` (`7.4 V` nominal), `1000 mAh` LiPo | `2S` (`8.4 V` max) Li-ion pack (`73.6 × 46 × 22 mm` envelope) |
+| **Battery pack** | Sea Jump `2S` (`7.4 V` nominal), `1000 mAh` LiPo | `2S` (`8.4 V` max) Li-ion pack (`73.6 × 46 × 22 mm` envelope) seated beneath the battery-mounted **Wireless Keeper Bridge** |
 | **Voltage regulation** | Dual `Mini560` `5 V / 5 A` buck converters | `Mini560` `5 V / 5 A` step-down converter feeding the `PCA9685` servo rail |
-| **Charging** | External or `HiLetgo` 2S USB-C boost charger | Integrated `HiLetgo` 2S USB-C boost charger in the rear printed carrier (earlier Anker and SHARGE power banks retired) |
+| **Charging & retention** | External or `HiLetgo` `2S` USB-C boost charger | Integrated `HiLetgo` `2S` USB-C boost charger + snap-in `ESP32-P4`, `PCA9685`, `HiLetgo`, and `LSM6DS3` PCB clips (retiring earlier Anker and SHARGE power banks) |
 
 ## Commanded joint range comparison
 
-Because V1 uses logical `0–180°` direct servo targets and V2 uses signed Blender geometric angles (`h`, `alpha`, `theta`) mapped through coupled four-bar/five-bar linkages, their raw angle spans represent different physical coordinates:
+Because V1 uses logical `0–180°` direct servo targets and V2 uses signed Blender geometric angles (`h`, `alpha`, `theta`) mapped through coupled four-bar linkages, their raw angle spans represent different physical coordinates:
 
 | Metric | V1 (8 Logical Channels) | V2 (12 Coupled Linkage Channels) |
 | --- | --- | --- |
 | **Angle convention** | Logical `0–180°` around `90°` neutral | Signed geometric offsets (`h`, `alpha`, `theta`) from CAD neutral, mapped via per-joint calibration |
 | **Full gesture/gait envelope** | `0–180°` across all 38 stored `.amot` assets | Shoulder `h`: `-96.99° to +17.57°`; Carrier `alpha`: `-79.02° to +135.37°`; Crank `theta`: `-128.11° to +101.29°` |
-| **Forward walk excursion** | `45–90°` channel excursions (`920 ms` 6-group cycle) | `92–96 mm` planted foot sweep (`131.43 mm` nominal body advance per full-stride cycle) |
-| **Lateral travel** | None (2-DOF planar legs) | `32 mm` sideways travel per full-stride `Crab` cycle + dynamic roll leveling |
+| **Forward walk excursion** | `45–90°` channel excursions (`920 ms` 6-group cycle) | `92–96 mm` planted foot sweep (`131.43 mm` nominal analytic cycle; up to `+0.213 m/s` under on-chip `50 Hz` MicroDuck gait) |
+| **Lateral travel** | None (2-DOF planar legs) | `32 mm` sideways travel per full-stride `Crab` cycle + `±0.08 m/s` neural strafe + dynamic roll leveling |
 
 - **Downloadable comparison data**: [Per-recording V1 & V2 motion ranges (CSV)](/posts/2026-09-24-progress/motion-ranges.csv) · [Range extraction script (`extract-motion-ranges.py`)](/posts/2026-09-24-progress/extract-motion-ranges.py).
-- **Detailed hardware guides**: [Ainekio V2 Hardware & Wiring Reference](/posts/ainekio-v2/) · [V1 Hardware & Body Design](/posts/body-design-and-hardware/) · [ESP32-S3 Firmware](/posts/controller-firmware/).
+- **Detailed hardware guides**: [Ainekio V2 Hardware & Wiring Reference](/posts/ainekio-v2/) · [V1 Eight-Servo Body & Hardware Reference](/posts/body-design-and-hardware/) · [V1 ESP32-S3 Controller Firmware](/posts/controller-firmware/).

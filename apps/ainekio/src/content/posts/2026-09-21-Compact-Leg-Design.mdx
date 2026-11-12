@@ -22,62 +22,61 @@ reading:
   related: ["gait-development", "ainekio-v2", "2026-10-06-compact-linkage"]
 ---
 
-Since the [first printed leg prototypes](/posts/2026-09-15-leg-prototypes/), work
-across the September 17–21 CAD revisions has tightened all three mechanical layers of
-Ainekio V2: a direct connecting-rod leg shortened to **22 / 36 / 55 mm**, a chassis
-narrowed from **103 mm to 51.2 mm**, and an evolving outer carapace shaped around the
-moving linkages.
+Since the [first printed leg prototypes](/posts/2026-09-15-leg-prototypes/), CAD and
+fit passes between September 17 and 21 simplified all three mechanical layers of
+Ainekio V2: a direct four-bar leg shortened to **22 / 36 / 55 mm**, a central frame
+narrowed from **103 mm to 51.2 mm**, and an outer carapace shaped around the moving
+links.
 
-![Four labeled leg parts laid out on their printing faces: Part_009 crank, Part_023 carrier, Part_026 rod and Part_027 lower leg.](/posts/2026-09-21-design-progress/flat-parts-september-18.webp)
+![Four leg parts laid out on their printing faces: knee crank, upper carrier, connecting rod, and lower leg.](/posts/2026-09-21-design-progress/flat-parts-september-18.webp)
 
-*September 18 flat-face leg layout showing Part_009 (crank), Part_023 (carrier), Part_026 (connecting rod), and Part_027 (lower leg) on their print beds.*
+*September 18 print-bed layout showing the knee crank, upper carrier, curved connecting rod, and lower leg.*
 
 ## Direct crank-to-lower-leg linkage
 
-The earlier mechanism used a coupler and relay rocker between the input crank
-and lower assembly. The revised layout connects Part_009 directly to Part_027
-through Part_026, while Part_023 serves as the upper carrier driven by the other
-planar servo and the shoulder provides the third axis.
+The earlier prototype routed knee drive through an intermediate coupler and relay
+rocker. Dropping that extra relay lets the **knee crank** drive the **lower leg**
+directly through a single curved **connecting rod**, while the second planar servo
+drives the **upper carrier** and the hip-roll servo swings the whole leg plane.
 
-On September 18, the level-shaft revision placed both planar servo shafts at the
-same height, **12.5 mm apart horizontally**, using a **24 mm crank, 24 mm pickup,
-41 mm rod, 40 mm carrier, and 60 mm lower leg**. Short M3×6 screw envelopes
-(with 2.7 mm support engagement past the bearing and washer stack) replaced three
-long through-bolts and nut pockets, paired with two **12.4 × 4.2 × 5.25 mm**
-servo mounting shims with 2.2 mm holes.
+On September 18 I leveled both planar servo shafts at the same height (**12.5 mm apart
+horizontally**) with a **24 mm crank, 24 mm lower-leg pickup, 41 mm connecting rod,
+40 mm upper carrier, and 60 mm lower leg**. Short M3×6 screws (threading 2.7 mm past the
+bearing and washer stack) replaced three long through-bolts and nut traps, paired with
+two **12.4 × 4.2 × 5.25 mm** servo mounting shims.
 
 ## Comparing 24/41/60 mm and compact 22/36/55 mm geometry
 
-On September 19, we compared the 24/41/60 mm baseline against a compact **22/36/55 mm**
-revision (crank spacing / rod spacing / knee-to-foot-bolt projection), keeping the
-upper carrier at 40 mm and the lower-leg pickup at 24 mm:
+On September 19 I tested a tighter **22 / 36 / 55 mm** leg (crank / connecting rod /
+knee-to-foot projection) against the 24 / 41 / 60 mm baseline, keeping the upper carrier
+at 40 mm and the lower-leg pickup radius at 24 mm:
 
 | Dimension | Earlier leg | Compact revision |
 | --- | ---: | ---: |
-| Part_009 crank, joint centers | 24 mm | 22 mm |
-| Part_026 connecting rod, joint centers | 41 mm | 36 mm |
-| Part_023 upper carrier | 40 mm | 40 mm |
-| Part_027 linkage pickup | 24 mm | 24 mm |
-| Part_027 knee-to-foot-bolt projection | 60 mm | 55 mm |
+| Knee crank (joint centers) | 24 mm | 22 mm |
+| Connecting rod (joint centers) | 41 mm | 36 mm |
+| Upper carrier | 40 mm | 40 mm |
+| Lower-leg pickup radius | 24 mm | 24 mm |
+| Lower-leg knee-to-foot projection | 60 mm | 55 mm |
 
 <div className="grid gap-5 sm:grid-cols-3">
   <figure>
-    <a href="/posts/2026-09-21-design-progress/compact-crank.webp"><img src="/posts/2026-09-21-design-progress/compact-crank.webp" alt="Rendered upright Part_009 crank with its horn pocket and joint bore" width="1200" height="900" loading="lazy" /></a>
-    <figcaption>Part_009: 22 mm joint spacing.</figcaption>
+    <a href="/posts/2026-09-21-design-progress/compact-crank.webp"><img src="/posts/2026-09-21-design-progress/compact-crank.webp" alt="Rendered upright knee crank with its horn pocket and joint bore" width="1200" height="900" loading="lazy" /></a>
+    <figcaption>Knee crank: 22 mm pivot spacing.</figcaption>
   </figure>
   <figure>
-    <a href="/posts/2026-09-21-design-progress/compact-rod.webp"><img src="/posts/2026-09-21-design-progress/compact-rod.webp" alt="Rendered upright Part_026 curved connecting rod with bores at both ends" width="1200" height="900" loading="lazy" /></a>
-    <figcaption>Part_026: 36 mm joint spacing.</figcaption>
+    <a href="/posts/2026-09-21-design-progress/compact-rod.webp"><img src="/posts/2026-09-21-design-progress/compact-rod.webp" alt="Rendered upright curved connecting rod with bores at both ends" width="1200" height="900" loading="lazy" /></a>
+    <figcaption>Connecting rod: 36 mm pivot spacing.</figcaption>
   </figure>
   <figure>
-    <a href="/posts/2026-09-21-design-progress/compact-lower-leg.webp"><img src="/posts/2026-09-21-design-progress/compact-lower-leg.webp" alt="Rendered upright Part_027 lower leg with knee, linkage pickup and foot attachment" width="1200" height="900" loading="lazy" /></a>
-    <figcaption>Part_027: 55 mm knee-to-foot projection.</figcaption>
+    <a href="/posts/2026-09-21-design-progress/compact-lower-leg.webp"><img src="/posts/2026-09-21-design-progress/compact-lower-leg.webp" alt="Rendered upright lower leg with knee, linkage pickup and foot attachment" width="1200" height="900" loading="lazy" /></a>
+    <figcaption>Lower leg: 55 mm knee-to-foot projection.</figcaption>
   </figure>
 </div>
 
-Matching nine reference poses across 520 sampled actuator pairs showed that the
-compact linkage preserves full angular sweep while reducing overall foot-bolt
-excursion only slightly:
+Matching nine reference poses across 520 sampled actuator pairs confirmed that the
+shorter linkage preserves the full angular sweep while giving up very little foot
+reach:
 
 | Matched exercise | Earlier leg | Compact revision |
 | --- | ---: | ---: |
@@ -87,35 +86,34 @@ excursion only slightly:
 | Foot-bolt horizontal extent | 67.268 mm | 66.248 mm (−1.5%) |
 | Foot-bolt vertical extent | 45.383 mm | 41.200 mm (−9.2%) |
 
-See the [gait development log](/posts/gait-development/#september-19-2026--compact-leg-probes)
-for the single-leg walking probes generated from this geometry.
+See the [gait development guide](/posts/gait-development/#linkage-kinematics-and-workspace-geometry)
+for the kinematics and workspace analysis behind this four-bar geometry.
 
-## Fixing the Part_023 horn-arm cavity
+## Fixing the upper-carrier horn cavity
 
-When assembling the printed Part_023 carrier, the cylindrical horn hub seated
-properly, but the horn arm could not enter the cavity because earlier profile edits
-had pinched the arm slot. We enlarged **only the arm cavity by 5% in-plane**
-(blending near the hub while leaving the cylindrical seat within a 4.05 mm radius,
-pocket floor, and mounting holes untouched).
+When test-fitting the printed upper carrier onto a servo horn, the round hub seated
+cleanly, but earlier profile edits had pinched the narrow arm slot so the horn arm
+couldn't drop in. Enlarging **only the arm slot by 5% in-plane**—while leaving the
+4.05 mm hub seat, pocket floor, and screw holes untouched—fixed the press fit.
 
-![CAD render of Part_023 showing the corrected horn-arm cavity and retained cylindrical mating seat.](/posts/2026-09-21-design-progress/horn-cavity.webp)
+![CAD render of the upper carrier showing the widened horn-arm cavity and retained cylindrical hub seat.](/posts/2026-09-21-design-progress/horn-cavity.webp)
 
-*Part_023 with the +5% in-plane horn-arm cavity clearance and preserved cylindrical hub seat.*
+*Upper carrier with +5% in-plane horn-arm clearance and unchanged hub seat.*
 
 ### Upright compact leg STL files
 
-By September 20, the 22/36/55 mm upright compact leg geometry was applied across all
-four legs:
+By September 20, the 22/36/55 mm compact leg set was synchronized across all four
+corners:
 
-| Part | Role / dimension | Download |
+| Component | Role / dimension | Download |
 | --- | --- | --- |
-| Part_009 | 22 mm input crank | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_009-22mm-Upright.stl) |
-| Part_026 | 36 mm connecting rod | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_026-36mm-Upright.stl) |
-| Part_027 | 55 mm lower-leg projection | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_027-55mm-Upright.stl) |
-| Part_023 | Upper carrier, horn-clearance variant | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_023-Upright-Horn-Clearance.stl) |
-| Part_020 | Outer foot shell | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_020-Upright-Foot.stl) |
-| Part_022 | Mating inner foot shell | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_022-Upright-Foot.stl) |
-| Part_023 (earlier trial) | +5% horn-arm clearance test piece | [Earlier STL](/posts/2026-09-21-design-progress/stl/earlier-horn-correction/Part_023-Horn-Arm-Clearance-Plus5pct.stl) |
+| Knee crank | 22 mm input crank | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_009-22mm-Upright.stl) |
+| Connecting rod | 36 mm curved coupler | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_026-36mm-Upright.stl) |
+| Lower leg | 55 mm knee-to-foot projection | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_027-55mm-Upright.stl) |
+| Upper carrier | 40 mm carrier with horn-arm clearance | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_023-Upright-Horn-Clearance.stl) |
+| Outer foot shell | Clamping outer sole half | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_020-Upright-Foot.stl) |
+| Inner foot shell | Mating inner sole half | [Upright STL](/posts/2026-09-21-design-progress/stl/upright/Part_022-Upright-Foot.stl) |
+| Upper carrier (test piece) | Earlier +5% horn-slot fit check | [Earlier STL](/posts/2026-09-21-design-progress/stl/earlier-horn-correction/Part_023-Horn-Arm-Clearance-Plus5pct.stl) |
 
 ## Narrowing the chassis from 103 mm to 51.2 mm
 
@@ -143,7 +141,7 @@ translating each side assembly inward **25.9 mm**.
 
 ### Shoulder-to-board clearance and bottom camera-cable routing
 
-A 308-pose shoulder rotation audit checked the four Part_003 housings against the
+A 308-pose shoulder rotation check swept all four **upper servo brackets** against the
 ESP32-P4 and PCA9685 board envelopes inside the narrowed frame:
 
 | Housing pair | Board model | Clear rotation window | Minimum clearance | Contact angle |
@@ -183,7 +181,7 @@ collar, roof, shoulder fins, guards, and chin.
 <div className="grid gap-5 sm:grid-cols-2">
   <figure>
     <a href="/posts/2026-09-21-design-progress/roof-before.webp"><img src="/posts/2026-09-21-design-progress/roof-before.webp" alt="Earlier red roof with the near outer tip flaring farther from the central body" width="1200" height="773" loading="lazy" /></a>
-    <figcaption>Before: September 19 iteration 049 with asymmetric roof-tip flare.</figcaption>
+    <figcaption>Before: earlier roof pass with asymmetric tip flare.</figcaption>
   </figure>
   <figure>
     <a href="/posts/2026-09-21-design-progress/roof-after.webp"><img src="/posts/2026-09-21-design-progress/roof-after.webp" alt="The same red roof after its outer tips were brought to a matched span and lowered locally" width="1200" height="773" loading="lazy" /></a>

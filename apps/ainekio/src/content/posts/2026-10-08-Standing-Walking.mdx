@@ -60,10 +60,9 @@ The physical robot uses a **XIITIA 1.9-inch ST7789** SPI panel in **320 × 170
 landscape** orientation (wired via SPI despite its PCB pins being silkscreened `SCL`
 and `SDA`; see the [LCD wiring guide](https://github.com/Greg-Aster/Ainekio-bot/blob/dbd15b9/docs/v2-12servo/LCD_FACE.md)).
 
-The C firmware renderer (`faces.def` and `face.c`) drives **59 selectable
-expressions** at a stepped **15 fps** (66 ms frame interval) outside the servo task,
-including resting eyes, speaking voice-bar overlays, workflow status halos, and
-motion-linked faces:
+The C firmware face engine drives **59 selectable expressions** at a stepped **15 fps**
+(66 ms frame interval) outside the servo loop, including resting eyes, speaking
+voice-bar overlays, workflow status halos, and motion-linked faces:
 
 <figure>
   <img src="/posts/2026-10-08-progress/contact-sheet.png" alt="Sixteen examples from Ainekio's wide LCD renderer, including cyan resting eyes, happy and sad faces, colored hearts, stars, thinking, wave and run expressions." width="1360" height="920" loading="lazy" />
@@ -84,23 +83,24 @@ motion-linked faces:
 
 ### Onboard camera, speaker, and wake-word fixes
 
-- **Display & camera orientation (`0.8.3`):** Confirmed upright LCD and fresh camera
-  stills on the assembled head; removed the connected text footer in favor of compact
+- **Display & camera orientation:** Confirmed upright LCD rendering and fresh camera
+  stills on the assembled head, replacing the old status-text footer with compact
   corner fault icons.
-- **Speaker & wake-word capture (`0.8.4`–`0.8.6`):** Verified speaker tone output and
-  fixed wake-word audio assembly by emitting a recording-start event alongside the
-  wake trigger. Increasing the microphone task stack eliminated a live inference
-  overflow and left 3,712 bytes of free stack margin across a 60-second continuous check.
+- **Speaker & wake-word capture:** Verified speaker tone output and fixed wake-word
+  audio capture by emitting a recording-start event alongside the wake trigger.
+  Enlarging the microphone task stack cured a live inference stack overflow and left
+  3,712 bytes of free margin across a 60-second continuous check.
 - **Token-scoped workflow faces:** Temporary workflow expressions (`Thinking`,
-  `Listening`) now carry a unique selection identity and robot-local timeout so stale
-  release messages cannot clobber a newer expression.
+  `Listening`) now carry a unique token and local timeout so stale release messages
+  cannot overwrite a newer expression.
 
 ## Responsive command routing and specialist split in MetaHuman OS
 
-Alongside the hardware bring-up, October 7–8 commits in MetaHuman OS ([`f466f0b3`](https://github.com/Greg-Aster/ainekio-os/commit/f466f0b3)
-and [`273bbe58`](https://github.com/Greg-Aster/ainekio-os/commit/273bbe58)) and the
-gateway ([`dbd15b9`](https://github.com/Greg-Aster/Ainekio-bot/commit/dbd15b9))
-separated request routing, task planning, and conversation:
+Alongside the hardware bring-up, updates across
+[MetaHuman OS](https://github.com/Greg-Aster/ainekio-os) and
+[Ainekio-bot](https://github.com/Greg-Aster/Ainekio-bot) separated request routing,
+task planning, and conversation so spoken replies no longer wait behind slow planning
+passes:
 
 | Responsibility | Earlier path | October 8 architecture |
 | --- | --- | --- |
@@ -110,7 +110,7 @@ separated request routing, task planning, and conversation:
 | Input during active motion | Slow interpretation could block active work | Read-only interpretation runs in the background while the active execution retains feedback and manual-takeover guards |
 | Connection selector | Manual bridge configuration | Saved startup and dashboard selectors (`This computer`, `LAN / Wi-Fi`, `Cloudflare`) in both Body Control and MetaHuman's Agent Monitor |
 
-An initial local YOLO adapter (`person_yolov8m-seg.pt`) was also wired into the
-gateway camera worker, benchmarking at a 210 ms median (4.64 fps on 4 desktop CPU
-threads) ahead of the full open-vocabulary YOLOE upgrade in the
+I also wired a baseline local YOLO person-segmentation detector into the gateway camera
+worker—benchmarking at a 210 ms median (4.64 fps on 4 desktop CPU threads)—ahead of the
+open-vocabulary YOLOE upgrade in the
 [October 12 update](/posts/2026-10-12-shell-power-and-motion/).

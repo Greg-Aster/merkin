@@ -1,12 +1,12 @@
 ---
-title: "Quadruped Robot Control Protocol: WebSocket Receipts, 4th-Wire Servo Feedback & Safety Bounds"
+title: "Quadruped Robot Control Protocol: Framing, Leases, Watchdogs & 4th-Wire Safety Bounds"
 published: 2026-08-27T09:00:00-07:00
-updated: 2026-11-11
-description: "How protocol-v1 validates robot commands between Ainekio OS and ESP32-P4 firmware, enforces 8-pass Gauss-Newton Cartesian workspace boundaries and shaft-arrival checks, runs on-chip 50 Hz MicroDuck walking, and recovers cleanly across disconnects."
+updated: 2026-11-12
+description: "How protocol-v1 frames binary media and JSON control messages between the host gateway and ESP32-P4 firmware, enforces command leases, startup slew limiting, Cartesian workspace projection, and 4th-wire stall protection."
 image: "/assets/ainekio/v2/protocol-safety-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
-authorName: "Ainekio Project"
-authorBio: "Robot familiar field notes"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: true
 showToc: true
 tags: [Ainekio, Protocol, Safety, Semantic Commands, Capabilities, Ainekio OS]
@@ -22,53 +22,48 @@ reading:
   related: ["ainekio-v2", "gait-development", "ainekio-os", "metahuman-integration"]
 ---
 
-Ainekio's onboard controller (`ESP32-P4` on V2, `ESP32-S3` on V1) and **[Ainekio OS](/posts/ainekio-os/)** (formerly MetaHuman OS) communicate through a strict boundary called **`protocol-v1`**. Language models never write raw PWM duty cycles directly to servo pins; instead, cognition selects high-level semantic intents, locomotion goals, or structured target programs, and the onboard firmware enforces calibration, workspace geometry, shaft arrival, and emergency stop rules.
+Ainekio's onboard microcontroller (`ESP32-P4` on V2, `ESP32-S3` on V1; [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) and **[Ainekio OS](/posts/ainekio-os/)** communicate across a strict wire and safety boundary called **`protocol-v1`**. Language models never write raw PWM duty cycles to servo pins; cognition proposes high-level postures, bounded velocity twists, or structured target programs, and onboard C firmware enforces calibration, linkage geometry, slew limits, shaft arrival, and emergency stop rules.
 
-## Command categories across V1 and V2
+## Binary and JSON framing over `protocol-v1`
 
-| Command Type | Purpose & Validation Boundary |
+An authenticated WebSocket session carries both structured control envelopes and low-overhead media streams without blocking motor execution:
+
+- **JSON control & telemetry envelopes**: Carry capability handshakes (`hello`), sequence-numbered movement commands, parameter updates, lifecycle receipts, `208 Hz` `LSM6DS3` attitude summaries, 12-channel servo tracking health, and thresholded body-contact events.
+- **Binary media frames**: Stream correlated `OV5647` JPEG camera stills/previews and bidirectional `16 kHz` 16-bit mono PCM audio bursts (`640 bytes` per `20 ms` frame) with explicit burst headers and utterance/sequence IDs so media traffic never starves control-loop parsing.
+
+### Command categories across V1 and V2
+
+| Command Category | Purpose & Firmware Validation Boundary |
 | --- | --- |
-| **Named commands (`robotCommand`)** | Prepared postures (`Stand`, `Sit`, `Rest`, `Lay Down`, `Play Dead`, `Upright`), continuous gaits (`Walk`, `Run`, `Crawl`, `Crab`), and 23 expressive gestures (`Wave`, `Bow`, `Stretch`, `Worm`, `Shrug`, etc.) |
-| **On-chip neural twist (`native`, `50 Hz`)** | Commands velocity twists (`-0.22..+0.20 m/s` fwd/rev, `±0.08 m/s` strafe, `±1.0 rad/s` yaw) executed directly on Core 1 by the L2-cached `107.8 KB` `int8` MicroDuck policy (`0.8.159-p4-microduck-v17`) |
-| **Continuous gait updates** | Adjusts `Speed`, `Stride %`, `Motion rate`, or steering heading on an active V2 walk while preserving the gait phase and command lease |
-| **Freestyle target programs** | Finite sequences of 12-DOF joint, foot, or body targets with requested speeds, holds, and LCD faces from the 349-example SQLite library (`489`-row training set with native-`stand` recovery) |
-| **Host neural policy frames (`neural`, `50 Hz`)** | Streamed 12-joint target offsets from host RL policies (`pupper_mjx_actor.py`), bounded by firmware calibration and workspace projection |
-| **Emergency `stop`** | High-priority direct path that preempts queued work, halts active motion immediately, and parks or releases the actuators |
+| **Named postures & gaits** | Prepared postures (`Stand`, `Sit`, `Rest`, `Lay Down`, `Play Dead`, `Upright`), continuous analytical gaits (`Walk`, `Run`, `Crawl`, `Crab`), and 23 finite gestures (`Wave`, `Bow`, `Stretch`, `Worm`, `Shrug`) |
+| **On-chip neural twist (`50 Hz`)** | Bounded velocity twists (`-0.22..+0.20 m/s` fore/aft, `±0.08 m/s` strafe, `±1.0 rad/s` yaw) executed directly on Core 1 by the L2-cached `107.8 KB` `int8` MicroDuck actor |
+| **In-stride gait updates** | Adjusts `Speed`, `Stride %`, `Motion rate`, or steering heading on an active V2 walk while preserving the gait phase and active command lease |
+| **Freestyle target programs** | Finite sequences of 12-DOF joint, foot, or body targets with explicit speeds, holds, and **59** LCD expressions from the **349-motion** library (**489-row** training set: **73** library motions + **416** `Stand` fault-recovery trajectories) |
+| **Host neural policy frames (`50 Hz`)** | Streamed 12-joint target offsets from host RL policies, clamped by firmware calibration and Cartesian workspace projection |
+| **Emergency `stop`** | High-priority direct path that preempts queued work, halts active motion immediately, and parks or detaches the actuators |
 
-## Closed-loop safety and workspace enforcement on V2
+## Closed-loop hardware safety on V2
 
-On the twelve-servo `ESP32-P4` body, command validation extends beyond static angle clamping to real-time geometric and physical verification:
+On the twelve-servo `ESP32-P4` body, safety checks operate continuously from boot through dynamic walking:
 
-1. **8-pass Gauss-Newton Cartesian workspace boundary projection (`0.8.150+`)**: Because each leg uses a coupled `35/20/28/38/55 mm` linkage, arbitrary `(x, y, z)` foot requests or neural offsets (`[45, 28, 30] mm` action scale) could fall outside the closed-chain kinematic envelope. Firmware projects out-of-bounds Cartesian targets onto the nearest reachable boundary via analytical 4-bar IK, 8-pass Gauss-Newton Jacobian refinement, and 13 dyadic step fractions before driving the servos, preventing linkage lockups and hard mechanical stops.
-2. **4th-wire shaft-arrival verification (`CD74HC4067`)**: Every servo's internal potentiometer wiper is sampled through the 16-channel analog multiplexer and smoothed by a One-Euro velocity filter. In `Stand` (which settles within **`2 mm`**) and Freestyle target programs, the controller checks measured shaft arrival against the commanded angle rather than assuming completion from elapsed time alone.
-3. **Physical jam, stall, and tip detection**: By comparing commanded trajectories against measured `CD74HC4067` potentiometer movement and `208 Hz` `LSM6DS3` `FusionAhrs` attitude, the firmware detects limb jams/stalls, tips, and shakes, emitting immediate body events so `fast-body-event-mode.json` (6-turn varied reactions) or Freestyle native-`stand` recovery can respond safely.
-4. **Staggered `PCA9685` pulse phases**: To minimize instantaneous current spikes on the `Mini560` `5 V / 5 A` rail, the twelve servo PWM channels use staggered phase offsets across the `50 Hz` frame.
+1. **Disarmed boot & startup slew limiting**: On power-up, the `PCA9685` output-enable line stays disarmed until joint calibration and initial `CD74HC4067` potentiometer readings are acquired. Rather than snapping all twelve servos violently to a neutral angle at full stall current, startup ramps smoothly from the measured resting shaft angles into a staged boot posture under bounded angular slew rates, while `PCA9685` PWM channels use staggered phase offsets across the `50 Hz` frame to prevent `5 V` rail brownouts.
+2. **8-pass Gauss-Newton Cartesian workspace projection**: Because each V2 leg uses a coupled `35/20/28/38/55 mm` four-bar linkage, arbitrary `(x, y, z)` foot requests or neural offsets (`[45, 28, 30] mm` action scale) can fall outside the closed-chain kinematic envelope. Firmware projects out-of-bounds Cartesian targets onto the nearest reachable boundary via analytical four-bar IK, 8-pass Gauss-Newton Jacobian refinement, and 13 dyadic step fractions before driving the servos—preventing linkage lockup against hard stops.
+3. **4th-wire shaft-arrival & stall protection (`CD74HC4067`)**: Every servo's internal potentiometer wiper routes through multiplexer channels **`C4–C15`** (selected via `S0–S3` on `GPIO28–31`) into `ESP32-P4` **`GPIO49` (`ADC2_CH0`)** with One-Euro velocity filtering. In `Stand` (which settles within **`2 mm`**) and Freestyle programs, steps advance on measured shaft arrival rather than blind timers. Comparing commanded motion against measured wiper velocity and `208 Hz` `LSM6DS3` attitude catches limb stalls, rug snags, tips, and shakes in real time.
 
-## Command lifecycle states
+## Command lifecycle states, leases, and watchdogs
 
-Sending bytes over a WebSocket only proves that the network socket accepted the frame. `protocol-v1` tracks every command through explicit lifecycle states correlated by `command_id`, connection epoch, and sequence number:
+Writing bytes to a socket only proves the network accepted the packet. `protocol-v1` tracks every command across explicit lifecycle states keyed by `command_id`, connection epoch, and sequence number:
 
-| State | Meaning |
+| Receipt State | Meaning |
 | --- | --- |
-| `ack` | The robot controller validated and accepted the command for execution |
-| `done` | The physical motion or media action finished on the body (including verified shaft arrival where enabled) |
-| `cancelled` | Accepted work was preempted by `stop`, a newer command, or session termination before completion |
-| `nak` | The request was rejected as invalid, out of range, or unsupported by the current readiness state |
-| `outcome_unknown` | Adapter-level receipt state recorded when a connection drops after dispatch before a terminal body result can be verified |
+| `ack` | The microcontroller validated capabilities, workspace bounds, and readiness, and accepted the command |
+| `done` | Physical motion or audio playback completed on the body (including verified shaft arrival where enabled) |
+| `cancelled` | Accepted work was preempted by `stop`, a newer command, or session teardown before finishing |
+| `nak` | Rejected as out of range, malformed, or unsupported by current hardware readiness |
+| `outcome_unknown` | Recorded by the gateway adapter if Wi-Fi drops after dispatch before a terminal body receipt can be verified |
 
-In Ainekio OS, `done` settles the **command** receipt, while **Goal Review** checks whether the broader **objective** is satisfied—for example, inspecting a correlated post-motion camera frame or depth odometry reading before marking a visual approach complete.
+### Leases, heartbeats, and non-repeating reconnect recovery
 
-## Capability and readiness advertising
-
-The robot dynamically reports both its hardware **capabilities** and live **readiness** to the Host Gateway:
-
-- Camera snapshots and visual tracking require `camera_ready = true` (`OV5647` on V2, `OV3660` on V1).
-- Wake-gated voice capture requires an initialized wake engine (`WakeNet9s` on V2).
-- 12-DOF Freestyle, leveling, and on-chip / host neural gait controls are advertised only by V2 `ESP32-P4` sessions.
-
-The gateway and adapter filter the schema presented to Ainekio OS so the language model is only offered actions the currently connected robot can actually perform, and operators can pause Ainekio OS control at any moment from the Cockpit HUD / Body Control top bar.
-
-## Disconnect failsafes and non-repeating recovery
-
-- **Control liveness & failsafe**: Periodic application heartbeats verify control-path liveness. If control traffic stalls during active locomotion, the firmware halts movement without dropping an otherwise healthy idle session. On full WebSocket or Wi-Fi loss, the body enters local failsafe behavior and optionally relaxes into inactivity `Rest`.
-- **Idempotent SQLite action receipts**: The adapter records each action's ID, payload hash, gateway instance, connection epoch, and robot sequence in SQLite before dispatch. If a connection interruption occurs after a movement has started, recovery tracks the existing sequence or settles it as `outcome_unknown`—never blindly re-sending a physical movement command twice.
+- **Command leases & liveness watchdogs**: Continuous walking and neural velocity twists run under bounded command leases backed by bidirectional application heartbeats. If control packets stall mid-walk, the onboard watchdog halts locomotion smoothly while keeping an otherwise healthy idle session alive; on full Wi-Fi loss, the robot enters local failsafe behavior and relaxes into inactivity `Rest` after extended quiet.
+- **Capability advertising**: The controller dynamically advertises `camera_ready`, wake-engine readiness (`WakeNet9s`), and 12-DOF V2 vs. 8-DOF V1 motion capabilities so the gateway never exposes unavailable actions to Ainekio OS.
+- **Idempotent SQLite recovery**: Because every action's ID, payload hash, epoch, and sequence number are persisted before dispatch, reconnecting after a network drop reconciles the existing sequence or settles it as `outcome_unknown`—never blindly re-sending a physical movement command twice.

@@ -61,9 +61,9 @@ export const navBarConfig: NavBarConfig = {
 }
 
 export const profileConfig: ProfileConfig = {
-  avatar: '/assets/avatar/assembly-september-20.webp',
+  avatar: '/assets/ainekio/2026-10-12-refresh/render-front.webp',
   name: 'Ainekio',
-  bio: 'A twelve-servo quadruped robot companion in active development: closed-loop 4th-wire ESP32-P4 hardware (with on-chip 50 Hz L2-cached neural gait) paired with Ainekio OS for conversation, episodic memory, 47 cognitive graphs, bounded autonomy, and Big Brother.',
+  bio: 'Personal workbench log and documentation for an open-source 12-servo quadruped robot and Ainekio OS—its local-first software mind for voice, memory, and personality.',
   links: [
     {
       name: 'Ainekio-bot',

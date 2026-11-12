@@ -11,11 +11,11 @@ const encodedTitle = encodeURIComponent(title)
 ---
 
 <aside class="share-bar" aria-label="Share this page" data-share-bar data-share-title={title} data-share-text={description} data-share-url={url}>
-  <span class="share-label">Share:</span>
+  <span class="share-label">Share</span>
   <button type="button" class="share-btn" data-copy-link>Copy link</button>
   <button type="button" class="share-btn" data-native-share hidden>Share…</button>
   <a class="share-link" href={`https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`} target="_blank" rel="noopener noreferrer">Reddit</a>
-  <a class="share-link" href={`https://news.ycombinator.com/submitlink?u=${encodedUrl}&t=${encodedTitle}`} target="_blank" rel="noopener noreferrer">Hacker News</a>
+  <a class="share-link" href={`https://news.ycombinator.com/submitlink?u=${encodedUrl}&t=${encodedTitle}`} target="_blank" rel="noopener noreferrer">HN</a>
 </aside>
 
 <script>
@@ -67,35 +67,38 @@ const encodedTitle = encodeURIComponent(title)
 
 <style>
   .share-bar {
-    display: flex;
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.45rem 0.65rem;
-    margin: 1rem 0;
-    padding: 0.65rem 0.85rem;
-    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
-    border-radius: 0.5rem;
-    background: color-mix(in srgb, var(--primary) 5%, transparent);
-    font-size: 0.8rem;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0.3rem 0.45rem 0.3rem 0.6rem;
+    border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+    border-radius: 0.45rem;
+    background: color-mix(in srgb, var(--primary) 5%, rgb(0 0 0 / 0.16));
+    font-size: 0.76rem;
   }
   .share-label {
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
+    font-size: 0.68rem;
     color: var(--text-color-muted);
-    margin-right: 0.2rem;
+    margin-right: 0.15rem;
   }
   .share-btn, .share-link {
     display: inline-flex;
     align-items: center;
-    padding: 0.3rem 0.65rem;
-    border-radius: 0.35rem;
-    border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+    padding: 0.22rem 0.55rem;
+    border-radius: 0.3rem;
+    border: 1px solid color-mix(in srgb, var(--primary) 32%, transparent);
     background: var(--card-bg);
     color: var(--primary);
     font-weight: 650;
-    font-size: 0.8rem;
-    line-height: 1.3;
+    font-size: 0.76rem;
+    line-height: 1.25;
     text-decoration: none;
     cursor: pointer;
   }
@@ -103,7 +106,7 @@ const encodedTitle = encodeURIComponent(title)
     display: none;
   }
   .share-btn:hover, .share-link:hover {
-    background: color-mix(in srgb, var(--primary) 14%, var(--card-bg));
+    background: color-mix(in srgb, var(--primary) 15%, var(--card-bg));
     text-decoration: none;
   }
   @media print {

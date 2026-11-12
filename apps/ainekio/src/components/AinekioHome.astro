@@ -2,134 +2,719 @@
 import { getCollection, getEntry } from 'astro:content'
 import gallery from '../data/gallery.json'
 import GalleryImage from './GalleryImage.astro'
-import { topics, getReading, validateReadingPaths, generations } from '../lib/reading'
+import { topics, getReading, validateReadingPaths } from '../lib/reading'
 import { url } from '../utils/url-utils'
-import ProjectStatus from './ProjectStatus.astro'
 
 const updates = await getEntry('updates', 'site-updates')
 if (!updates) throw new Error('Ainekio homepage requires updates/site-updates')
+const current = updates.data.current
 const posts = await getCollection('posts', ({ data }) => !data.draft)
 validateReadingPaths(posts)
-const latestUpdates = [...updates.data.entries].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 3)
+
+const latestUpdates = [...updates.data.entries].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 4)
 const recent = latestUpdates.map(entry => {
   const post = posts.find(post => `/posts/${post.slug}/` === entry.url)
   if (!post?.data.image) throw new Error(`Homepage update needs an illustrated article: ${entry.title}`)
   return { entry, post }
 })
-const topicCards = Object.entries(topics).filter(([id]) => !['overview', 'v1'].includes(id)).map(([id, topic]) => {
-  return { id, ...topic, count: posts.filter(post => getReading(post).topic === id).length }
-})
+
 const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 const hero = gallery.find(item => item.id === 'ainekio-v2-physical-three-quarter')!
-const galleryPreview = ['ainekio-v2-physical-front', 'ainekio-mjcf-preview', 'lcd-face-contact-sheet'].map(id => gallery.find(item => item.id === id)!)
-const paths = [
-  { title: 'Ainekio OS Architecture', href: '/posts/ainekio-os/', text: 'The local-first personal AI OS (Greg-Aster/ainekio-os): 47 cognitive graphs, 14-table SQLite durable execution, ServerStatus hybrid compute, warm Gemini ACP, and the 02:00 Sleep Cycle.' },
-  { title: 'V2 Hardware & On-Chip Neural Gait', href: '/posts/ainekio-v2/', text: 'The 650 g 12-servo four-bar body, Waveshare ESP32-P4-WIFI6 running a 107.8 KB L2-cached 50 Hz MicroDuck policy, 4th-wire feedback mux, ST7789 LCD, and Keeper Bridge STLs.' },
-  { title: 'Build Journal & Milestones', href: '/updates/', text: 'Chronological engineering milestones from early linkage prototypes through carpet trials, DAgger L2-cache policy distillation, Cockpit HUD, and Ainekio OS.' },
+const featuredVideo = gallery.find(item => item.id === 'ainekio-v2-neural-walk-first-run')!
+const stageTiles = [
+  { item: gallery.find(item => item.id === 'ainekio-v2-physical-front')!, badge: 'Front CSI Cam & LCD', label: 'Front profile on carpet', fit: 'cover' },
+  { item: gallery.find(item => item.id === 'lcd-face-contact-sheet')!, badge: '59 LCD Faces', label: 'Procedural 1.9" LCD face sheet', fit: 'cover' },
+  { item: gallery.find(item => item.id === 'ainekio-mjcf-preview')!, badge: 'Blender → MuJoCo', label: 'Full-CAD 650 g MJCF twin', fit: 'cover' },
+  { item: gallery.find(item => item.id === 'diagram-assembly-reference')!, badge: 'V2 Wiring & Buses', label: 'ESP32-P4 & 4th-wire schematic', fit: 'contain' },
+]
+
+const directoryCards = [
+  {
+    num: '01',
+    title: 'Overview & Robot Lineup',
+    description: 'How the ~$85 hardware and local AI mind fit together, plus where Ainekio sits next to other open-source and commercial quadrupeds.',
+    primaryHref: '/posts/project-overview/',
+    primaryLabel: 'System Overview',
+    secondaryHref: '/posts/how-does-ainekio-stack-up/',
+    secondaryLabel: 'Robot leaderboard',
+    count: posts.filter(p => getReading(p).topic === 'overview').length,
+  },
+  {
+    num: '02',
+    title: 'Legs & Neural Walking',
+    description: 'Compact four-bar knee linkages, printed tolerances, reinforcement learning failure modes, and the 50 Hz L2-cached walking policy.',
+    primaryHref: '/posts/gait-development/',
+    primaryLabel: 'Gait Guide',
+    secondaryHref: '/archive/?topic=legs',
+    secondaryLabel: `All ${posts.filter(p => getReading(p).topic === 'legs').length} leg notes`,
+    count: posts.filter(p => getReading(p).topic === 'legs').length,
+  },
+  {
+    num: '03',
+    title: 'Chassis, Shell & Power',
+    description: 'The 650 g 3D-printed shell, fourth-wire modified MG90S servos, GPIO pinouts, rear 2S battery carrier, and downloadable STLs.',
+    primaryHref: '/posts/ainekio-v2/',
+    primaryLabel: 'V2 Hardware & STLs',
+    secondaryHref: '/archive/?topic=body',
+    secondaryLabel: `All ${posts.filter(p => getReading(p).topic === 'body').length} chassis notes`,
+    count: posts.filter(p => getReading(p).topic === 'body').length,
+  },
+  {
+    num: '04',
+    title: 'Firmware, Cockpit & Safety',
+    description: 'ESP32-P4 control loops, shaft-arrival verification, stall protection, gentle startup rise, and the live camera Cockpit HUD.',
+    primaryHref: '/posts/protocol-and-safety/',
+    primaryLabel: 'Protocol & Safety',
+    secondaryHref: '/posts/gateway-and-simulator/',
+    secondaryLabel: 'Cockpit HUD',
+    count: posts.filter(p => getReading(p).topic === 'control').length,
+  },
+  {
+    num: '05',
+    title: 'Vision, Face & Voice',
+    description: 'Chin-mounted OV5647 camera tracking, 59 procedural expressions on the 1.9" LCD, wake-word listening, and room speech.',
+    primaryHref: '/posts/vision-loop/',
+    primaryLabel: 'Vision & Face',
+    secondaryHref: '/posts/voice-loop/',
+    secondaryLabel: 'Voice Loop',
+    count: posts.filter(p => getReading(p).topic === 'perception').length,
+  },
+  {
+    num: '06',
+    title: 'Ainekio OS (The Mind)',
+    description: 'The local-first personal AI OS behind Ainekio: persistent persona, episodic memory, nightly sleep consolidation, and robot reflexes.',
+    primaryHref: '/posts/ainekio-os/',
+    primaryLabel: 'Ainekio OS Guide',
+    secondaryHref: '/posts/ainekio-companion/',
+    secondaryLabel: 'Companion Loop',
+    count: posts.filter(p => getReading(p).topic === 'metahuman').length,
+  },
+]
+
+const specs = [
+  { label: 'Physical body', value: '650 g · 12 feedback servos' },
+  { label: 'Onboard brain', value: 'ESP32-P4 · 50 Hz neural gait' },
+  { label: 'Face & senses', value: '1.9" LCD (59 faces) · Cam · IMU' },
+  { label: 'Companion mind', value: 'Ainekio OS · Local memory & voice' },
 ]
 ---
+
 <div class="ainekio-home">
-  <section class="home-feature" aria-labelledby="home-title">
-    <div>
-      <p class="home-eyebrow">Open-Source 3D-Printed Quadruped · On-Chip ESP32-P4 Neural Gait · Ainekio OS</p>
-      <h1 id="home-title">Ainekio: 12-Servo ESP32-P4 Quadruped &amp; Ainekio OS</h1>
-      <p class="home-intro">Ainekio pairs an open-source, 3D-printed twelve-servo closed-loop quadruped (<code>Ainekio-bot</code>) with <strong><a href={url('/posts/ainekio-os/')}>Ainekio OS</a></strong> (<code>ainekio-os</code>, formerly MetaHuman OS)—a local-first personal AI operating system for persistent identity, episodic memory, 47 cognitive graphs, and bounded autonomy.</p>
-      <p class="home-intro">Onboard, a Waveshare ESP32-P4-WIFI6 executes a DAgger-distilled <code>107.8 KB</code> neural gait policy natively at <code>50 Hz</code> inside its <code>128 KB</code> L2 cache alongside 4th-wire potentiometer feedback, a 1.9-inch ST7789 LCD, an OV5647 CSI camera, and a 208 Hz LSM6DS3 IMU—bridged over Wi-Fi to the Body Control Cockpit HUD and Ainekio OS.</p>
-      <div class="home-actions">
-        <a class="home-primary-link" href={url('/posts/project-overview/')}>System Overview →</a>
-        <a class="home-secondary-link" href={url('/posts/ainekio-os/')}>Ainekio OS Guide →</a>
-        <a class="home-secondary-link" href={url('/posts/how-does-ainekio-stack-up/')}>How Does Ainekio Stack Up? →</a>
-        <a class="home-secondary-link" href={url('/updates/')}>Latest Milestones →</a>
+  <!-- ZONE 1: WORKBENCH HERO + INTEGRATED LIVE BENCH STATUS BAR -->
+  <section class="home-hero" aria-labelledby="home-title">
+    <div class="hero-main">
+      <div class="hero-copy">
+        <p class="home-eyebrow">Personal Build Journal · Open-Source Robotics &amp; Local AI</p>
+        <h1 id="home-title">Building Ainekio: a 3D-printed quadruped with a persistent mind</h1>
+        <p class="home-intro">
+          Ainekio is an ongoing workbench project pairing a custom <strong>650&nbsp;g</strong>, twelve-servo walking robot (<a href="https://github.com/Greg-Aster/Ainekio-bot" target="_blank" rel="noreferrer">Ainekio-bot</a>) with <strong><a href={url('/posts/ainekio-os/')}>Ainekio OS</a></strong> (<a href="https://github.com/Greg-Aster/ainekio-os" target="_blank" rel="noreferrer">ainekio-os</a>)—a local-first AI companion runtime that remembers past days, talks in the room, and reacts when the robot is picked up or nudged.
+        </p>
+        <p class="home-intro home-intro-sub">
+          Nothing here is a commercial product. This site is my engineering logbook: CAD files modeled in Blender, fourth-wire servo modifications, reinforcement-learning faceplants on the living-room rug, and the notes behind getting a ~$85 hobby quadruped walking untethered.
+        </p>
+
+        <dl class="hero-specs" aria-label="At-a-glance specifications">
+          {specs.map(spec => (
+            <div>
+              <dt>{spec.label}</dt>
+              <dd>{spec.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <div class="home-actions">
+          <a class="home-primary-link" href={url('/posts/project-overview/')}>Start with the Overview →</a>
+          <a class="home-secondary-link" href={url('/updates/')}>Read the Build Journal →</a>
+          <a class="home-secondary-link" href={url('/posts/how-does-ainekio-stack-up/')}>How It Stacks Up →</a>
+        </div>
+      </div>
+
+      <figure class="hero-media">
+        <a href={url('/gallery/')} aria-label="Open the Ainekio photo, video, and wiring gallery">
+          <GalleryImage item={hero} eager sizes="(max-width: 860px) 100vw, 44vw" />
+        </a>
+        <figcaption>
+          <span>The 650 g twelve-servo V2 prototype on carpet with its printed shell and fourth-wire feedback harness.</span>
+          <a href={url('/gallery/')}>Browse photos &amp; videos →</a>
+        </figcaption>
+      </figure>
+    </div>
+
+    <div class="hero-status-bar" aria-label="Current workbench status">
+      <div class="hero-status-left">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-tag">Bench status · {dateFormat.format(current.updated)}</span>
+        <span class="status-headline">{current.status}</span>
+      </div>
+      <a class="hero-status-link" href={url('/posts/project-overview/#project-status')}>Full status &amp; next steps →</a>
+    </div>
+  </section>
+
+  <!-- ZONE 2: DARK STUDIO MEDIA STAGE (VIDEO + BALANCED 2x2 VISUAL GRID) -->
+  <section class="home-stage" aria-labelledby="home-stage-title">
+    <div class="stage-header">
+      <div>
+        <p class="stage-eyebrow">Floor Footage, CAD &amp; Schematics</p>
+        <h2 id="home-stage-title">See the robot in motion</h2>
+      </div>
+      <a class="stage-all-link" href={url('/gallery/')}>Open full media gallery ({gallery.length} items) →</a>
+    </div>
+
+    <div class="stage-grid">
+      <figure class="stage-feature-video">
+        <video
+          controls
+          playsinline
+          preload="none"
+          width={featuredVideo.width}
+          height={featuredVideo.height}
+          poster={url(featuredVideo.poster!)}
+        >
+          <source src={url(featuredVideo.src!)} type="video/mp4" />
+          <a href={url(featuredVideo.src!)}>Download walking video</a>
+        </video>
+        <figcaption>
+          <div class="stage-caption-top">
+            <span class="stage-pill">Physical Carpet Test · MP4</span>
+            <a class="stage-video-more" href={url('/gallery/#videos')}>All floor videos →</a>
+          </div>
+          <h3>{featuredVideo.title}</h3>
+          <p>{featuredVideo.caption}</p>
+        </figcaption>
+      </figure>
+
+      <div class="stage-tile-grid">
+        {stageTiles.map(({ item, badge, label, fit }) => (
+          <a class:list={['stage-tile', { 'is-contain': fit === 'contain' }]} href={url(`/gallery/#${item.id}`)}>
+            <div class="stage-tile-thumb">
+              <GalleryImage item={item} sizes="(max-width: 640px) 50vw, 260px" />
+            </div>
+            <div class="stage-tile-copy">
+              <span class="stage-tile-badge">{badge}</span>
+              <h3>{label}&nbsp;→</h3>
+            </div>
+          </a>
+        ))}
       </div>
     </div>
-    <figure>
-      <a href={url('/gallery/')} aria-label="See Ainekio in the photo, video, and diagram gallery"><GalleryImage item={hero} eager sizes="(max-width: 767px) 100vw, 50vw" /></a>
-      <figcaption class="home-meta">The 650 g twelve-servo V2 prototype on the workbench. <a href={url('/gallery/')}>Explore workbench photos, carpet trial videos, and wiring diagrams →</a></figcaption>
-    </figure>
   </section>
 
-  <ProjectStatus compact />
+  <!-- ZONE 3: OPEN 3x2 TECHNICAL SYSTEM DIRECTORY (NO DOUBLE-BOX WRAPPER) -->
+  <section id="project-guides" class="home-directory" aria-labelledby="home-guide-title">
+    <div class="open-section-header">
+      <div>
+        <p class="home-eyebrow">Technical Notebook &amp; Reference</p>
+        <h2 id="home-guide-title">Explore how each part works</h2>
+      </div>
+      <a class="section-link" href={url('/archive/?kind=reference')}>All 16 reference guides →</a>
+    </div>
 
-  <nav class="home-paths" aria-label="Choose a reading path">
-    {paths.map(path => <a href={url(path.href)}><h2>{path.title} <span aria-hidden="true">→</span></h2><p>{path.text}</p></a>)}
-  </nav>
-
-  <section aria-labelledby="home-updates-title">
-    <div class="home-section-heading"><h2 id="home-updates-title">Latest milestones</h2><a href={url('/updates/')}>All build journal milestones →</a></div>
-    <div class="home-recent-grid">
-      {recent.map(({ entry, post }) => <article class="home-update">
-        <a href={url(entry.url)} tabindex="-1" aria-hidden="true"><img src={url(post.data.image)} alt="" loading="lazy" decoding="async" /></a>
-        <div><p class="home-meta"><time datetime={entry.date.toISOString()}>{dateFormat.format(entry.date)}</time> · {generations[getReading(post).generation]}</p><h3><a href={url(entry.url)}>{entry.title}</a></h3><p>{entry.summary}</p></div>
-      </article>)}
+    <div class="directory-grid">
+      {directoryCards.map(card => (
+        <article class="directory-card">
+          <div class="directory-card-top">
+            <span class="directory-num">{card.num}</span>
+            <span class="directory-count">{card.count} {card.count === 1 ? 'note' : 'notes'}</span>
+          </div>
+          <h3><a href={url(card.primaryHref)}>{card.title}</a></h3>
+          <p>{card.description}</p>
+          <div class="directory-links">
+            <a class="directory-primary" href={url(card.primaryHref)}>{card.primaryLabel}&nbsp;→</a>
+            <span class="directory-dot" aria-hidden="true">·</span>
+            <a class="directory-secondary" href={url(card.secondaryHref)}>{card.secondaryLabel}</a>
+          </div>
+        </article>
+      ))}
     </div>
   </section>
 
-  <section aria-labelledby="home-gallery-title">
-    <div class="home-section-heading"><div><h2 id="home-gallery-title">From the workbench & simulator</h2><p>Physical hardware, full-CAD MuJoCo MJCF simulation, 58 LCD expressions, and V2 wiring diagrams.</p></div><a href={url('/gallery/')}>Open full gallery →</a></div>
-    <div class="home-recent-grid">
-      {galleryPreview.map(item => <figure class="home-update"><a href={url(`/gallery/#${item.id}`)}><GalleryImage item={item} /><figcaption>{item.title} →</figcaption></a></figure>)}
+  <!-- ZONE 4: 2x2 ILLUSTRATED BUILD JOURNAL GRID -->
+  <section class="home-journal" aria-labelledby="home-updates-title">
+    <div class="panel-section-header">
+      <div>
+        <p class="home-eyebrow">Chronological Workbench Log</p>
+        <h2 id="home-updates-title">Recent build journal entries</h2>
+      </div>
+      <a class="section-link" href={url('/updates/')}>View all {updates.data.entries.length} milestones →</a>
     </div>
+
+    <ol class="logbook-grid">
+      {recent.map(({ entry, post }) => (
+        <li class="logbook-card">
+          <a class="logbook-thumb" href={url(entry.url)} tabindex="-1" aria-hidden="true">
+            <img src={url(post.data.image)} alt="" loading="lazy" decoding="async" />
+          </a>
+          <div class="logbook-body">
+            <div class="logbook-meta">
+              <time datetime={entry.date.toISOString()}>{dateFormat.format(entry.date)}</time>
+              <span aria-hidden="true">·</span>
+              <span>{topics[getReading(post).topic].title}</span>
+            </div>
+            <h3><a href={url(entry.url)}>{entry.title}</a></h3>
+            <p>{entry.summary}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
   </section>
 
-  <section id="project-guides" aria-labelledby="home-guide-title">
-    <div class="home-section-heading"><div><h2 id="home-guide-title">Explore by subsystem</h2></div><a href={url('/archive/?kind=reference')}>All reference guides →</a></div>
-    <div class="home-topic-grid">
-      {topicCards.map(topic => <a class="home-topic" href={url(`/archive/?topic=${topic.id}`)}><h3>{topic.title} →</h3><p>{topic.description}</p><span class="home-meta">{topic.count} articles</span></a>)}
+  <!-- ZONE 5: HISTORICAL V1 FOOTNOTE & FULL ARCHIVE BAR -->
+  <footer class="home-origins" aria-labelledby="home-original-title">
+    <div class="origins-card">
+      <img
+        src={url('/posts/ainekio/wizard-lab-banner.webp')}
+        alt="Illustration from the original summer 2026 eight-servo Ainekio V1 concept notes"
+        loading="lazy"
+        decoding="async"
+      />
+      <div class="origins-copy">
+        <p class="home-eyebrow">Where the project started (Summer 2026)</p>
+        <h2 id="home-original-title">Looking for the original eight-servo V1 prototype?</h2>
+        <p>
+          Before the twelve-servo ESP32-P4 rebuild, Ainekio started as a simpler eight-servo ESP32-S3 frame with an OLED screen. Those early parts lists, wiring notes, and lessons learned are kept intact in the archive.
+        </p>
+        <div id="article-library" class="origins-links">
+          <a href={url('/posts/v1-original-posts/')}>Original V1 build archive →</a>
+          <a href={url('/archive/')}>Search &amp; filter all {posts.length} articles →</a>
+          <a href={url('/about/')}>About the builder &amp; GitHub repos →</a>
+        </div>
+      </div>
     </div>
-  </section>
-
-  <section class="home-original" aria-labelledby="home-original-title">
-    <img src={url('/posts/ainekio/wizard-lab-banner.webp')} alt="Original Ainekio illustration: the eight-servo robot as a familiar in a wizard's workshop" loading="lazy" decoding="async" />
-    <div><p class="home-eyebrow">Where the build began</p><h2 id="home-original-title">The original V1 eight-servo robot</h2><p>Before the twelve-servo ESP32-P4 rebuild, Ainekio began as an eight-servo ESP32-S3 quadruped. All original parts lists, firmware notes, and design documents remain preserved for reference.</p><a href={url('/posts/v1-original-posts/')}>Explore the V1 archive →</a></div>
-  </section>
-
-  <nav id="article-library" class="home-library-links" aria-label="More project resources">
-    <a href={url('/archive/')}>Browse all {posts.length} articles →</a>
-    <a href={url('/archive/?kind=reference')}>Technical reference library →</a>
-    <a href={url('/about/')}>About Ainekio & repositories →</a>
-  </nav>
+  </footer>
 </div>
 
 <style>
-  :global(body:has(.ainekio-home) #main-grid) { grid-template-columns: minmax(0,1fr) !important; }
+  :global(body:has(.ainekio-home) #main-grid) { grid-template-columns: minmax(0, 1fr) !important; }
   :global(body:has(.ainekio-home) main#main) { grid-column: 1 / -1; min-width: 0; }
-  .ainekio-home { max-width: 80rem; margin: 0 auto 2rem; display: grid; gap: 2rem; color: var(--text-color); }
-  .home-feature { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 2rem; align-items: center; padding: clamp(1.2rem,3vw,2rem); background: var(--card-bg); border-radius: var(--radius-large); }
-  h1 { font-size: clamp(2rem,4vw,3.2rem); line-height: 1.1; font-weight: 750; margin: .75rem 0; }
-  h2 { font-size: 1.4rem; font-weight: 700; line-height: 1.3; }
-  h3 { font-size: 1.1rem; font-weight: 700; line-height: 1.4; }
-  p { line-height: 1.65; }
-  .home-intro { margin-top: .85rem; max-width: 58ch; }
-  .home-eyebrow { color: var(--primary); text-transform: uppercase; font-size: .75rem; font-weight: 700; letter-spacing: .05em; }
-  .home-meta { font-size: .75rem; line-height: 1.6; color: var(--text-color-muted); }
-  figure :global(img) { width: 100%; border-radius: .7rem; }
-  .home-feature figcaption { margin-top: .65rem; }
-  .home-update figcaption { padding: 1rem; font-weight: 650; }
-  a { color: var(--primary); text-underline-offset: .2em; }
+
+  .ainekio-home {
+    width: 100%;
+    margin: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.65rem;
+    color: var(--text-color);
+  }
+  .ainekio-home > * { min-width: 0; }
+
+  h1 { font-size: clamp(1.85rem, 3.3vw, 2.65rem); line-height: 1.12; font-weight: 780; margin: 0.45rem 0 0.75rem; letter-spacing: -0.015em; }
+  h2 { font-size: clamp(1.3rem, 2vw, 1.55rem); font-weight: 750; line-height: 1.24; }
+  h3 { font-size: 1.02rem; font-weight: 700; line-height: 1.34; }
+  p { line-height: 1.6; }
+  a { color: var(--primary); text-underline-offset: 0.2em; }
   a:hover { text-decoration: underline; }
-  .home-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.25rem; }
-  .home-primary-link { display: inline-block; padding: .75rem 1.1rem; border-radius: .4rem; background: var(--primary); color: #071b20; font-weight: 700; }
-  .home-secondary-link { display: inline-block; padding: .75rem 1.1rem; border-radius: .4rem; border: 1px solid color-mix(in srgb,var(--primary) 45%,transparent); font-weight: 650; }
-  .home-paths, .home-recent-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1rem; }
-  .home-paths > a, .home-topic { padding: 1.25rem; border: 1px solid color-mix(in srgb,var(--primary) 25%,transparent); border-radius: .65rem; background: var(--card-bg); }
-  .home-paths h2 { font-size: 1.1rem; }
-  .home-paths p, .home-topic p { margin-top: .6rem; color: var(--text-color); font-size: .9rem; }
-  .home-section-heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
-  .home-section-heading > a { padding-block: .6rem; font-size: .9rem; }
-  .home-section-heading p { font-size: .9rem; color: var(--text-color-muted); margin-top: .4rem; }
-  .home-update { border-radius: .65rem; overflow: hidden; background: var(--card-bg); }
-  .home-update :global(img) { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-  .home-update > div { padding: 1.15rem; }
-  .home-update h3 { margin: .4rem 0 .6rem; }
-  .home-update > div > p:last-child { font-size: .9rem; }
-  .home-topic-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
-  .home-topic .home-meta { display: block; margin-top: .6rem; }
-  .home-original { display: grid; grid-template-columns: 1fr 2fr; align-items: center; gap: 1.5rem; background: var(--card-bg); border-radius: .65rem; padding: 1.25rem; }
-  .home-original img { width: 100%; border-radius: .5rem; }
-  .home-original p { margin: .65rem 0; }
-  .home-original a { display: inline-block; padding-block: .6rem; }
-  .home-library-links { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; }
-  .home-library-links a { padding-block: .75rem; }
-  section[id], nav[id] { scroll-margin-top: 6rem; }
-  @media (max-width: 767px) { .home-feature, .home-paths, .home-recent-grid, .home-topic-grid, .home-original { grid-template-columns: 1fr; } .home-feature { gap: 1.2rem; } .home-original img { max-height: 14rem; object-fit: cover; } }
+  .home-eyebrow { color: var(--primary); text-transform: uppercase; font-size: 0.72rem; font-weight: 750; letter-spacing: 0.08em; }
+
+  /* ZONE 1: WORKBENCH HERO + INTEGRATED STATUS FOOTER */
+  .home-hero {
+    border-radius: var(--radius-large);
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 92% 12%, color-mix(in srgb, var(--primary) 13%, transparent), transparent 46%),
+      var(--card-bg);
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.65);
+  }
+  .hero-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.82fr);
+    gap: clamp(1.25rem, 2.6vw, 2rem);
+    align-items: center;
+    padding: clamp(1.25rem, 2.6vw, 2rem);
+  }
+  .hero-copy, .hero-media { min-width: 0; }
+  .home-intro { font-size: 0.97rem; }
+  .home-intro strong { font-weight: 700; color: var(--text-color); }
+  .home-intro-sub { margin-top: 0.55rem; font-size: 0.9rem; color: color-mix(in srgb, var(--text-color) 82%, transparent); }
+  .hero-specs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 0.65rem;
+    margin-top: 1rem;
+  }
+  .hero-specs > div {
+    padding: 0.48rem 0.7rem;
+    border-radius: 0.45rem;
+    background: rgb(0 0 0 / 0.24);
+    border: 1px solid rgb(255 255 255 / 0.08);
+  }
+  .hero-specs dt { font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-color-muted); font-weight: 700; }
+  .hero-specs dd { margin-top: 0.12rem; font-size: 0.83rem; font-weight: 680; color: var(--text-color); }
+
+  .home-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-top: 1.05rem; }
+  .home-primary-link {
+    display: inline-block;
+    padding: 0.62rem 1.05rem;
+    border-radius: 0.45rem;
+    background: var(--primary);
+    color: #06191e;
+    font-weight: 750;
+    font-size: 0.9rem;
+  }
+  .home-primary-link:hover { text-decoration: none; filter: brightness(1.08); }
+  .home-secondary-link {
+    display: inline-block;
+    padding: 0.62rem 0.95rem;
+    border-radius: 0.45rem;
+    border: 1px solid color-mix(in srgb, var(--primary) 42%, transparent);
+    background: rgb(0 0 0 / 0.18);
+    font-weight: 650;
+    font-size: 0.9rem;
+  }
+  .hero-media :global(img) { width: 100%; height: auto; border-radius: 0.65rem; border: 1px solid rgb(255 255 255 / 0.1); }
+  .hero-media figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.3rem 0.85rem;
+    margin-top: 0.55rem;
+    font-size: 0.77rem;
+    color: var(--text-color-muted);
+  }
+  .hero-media figcaption a { font-weight: 700; white-space: nowrap; }
+
+  .hero-status-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.25rem;
+    padding: 0.78rem clamp(1.25rem, 2.6vw, 2rem);
+    border-top: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--primary) 8%, rgb(0 0 0 / 0.25)), rgb(0 0 0 / 0.28));
+    font-size: 0.85rem;
+  }
+  .hero-status-left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.65rem;
+    min-width: 0;
+  }
+  .status-dot {
+    width: 0.48rem;
+    height: 0.48rem;
+    border-radius: 999px;
+    background: #34d399;
+    box-shadow: 0 0 0 3px rgb(52 211 153 / 0.18);
+    flex-shrink: 0;
+  }
+  .status-tag {
+    font-size: 0.71rem;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--primary);
+    white-space: nowrap;
+  }
+  .status-headline {
+    font-weight: 650;
+    color: color-mix(in srgb, var(--text-color) 92%, transparent);
+  }
+  .hero-status-link {
+    font-weight: 700;
+    font-size: 0.83rem;
+    white-space: nowrap;
+  }
+
+  /* SECTION HEADERS */
+  .open-section-header,
+  .panel-section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
+  .open-section-header {
+    padding: 0 0.15rem 0.65rem;
+    margin-bottom: 0.9rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+  .panel-section-header {
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  }
+  .open-section-header h2,
+  .panel-section-header h2 { margin-top: 0.2rem; }
+  .section-link { font-size: 0.88rem; font-weight: 680; white-space: nowrap; }
+
+  /* ZONE 2: DARK RECESSED MEDIA STAGE */
+  .home-stage {
+    padding: clamp(1.2rem, 2.4vw, 1.7rem);
+    border-radius: var(--radius-large);
+    background: #070f13;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  }
+  .stage-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.95rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.09);
+  }
+  .stage-eyebrow { text-transform: uppercase; letter-spacing: 0.09em; font-size: 0.71rem; font-weight: 750; color: #fcd34d; }
+  .stage-header h2 { margin-top: 0.18rem; }
+  .stage-all-link { font-size: 0.88rem; font-weight: 680; white-space: nowrap; }
+  .stage-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+    gap: 0.9rem;
+    align-items: stretch;
+  }
+  .stage-feature-video {
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.65rem;
+    overflow: hidden;
+    background: #0f191e;
+    border: 1px solid rgb(255 255 255 / 0.09);
+    min-width: 0;
+  }
+  .stage-feature-video video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    object-fit: cover;
+  }
+  .stage-feature-video figcaption {
+    padding: 0.85rem 1.05rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+  }
+  .stage-caption-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .stage-video-more { font-size: 0.78rem; font-weight: 680; }
+  .stage-pill {
+    display: inline-block;
+    padding: 0.16rem 0.5rem;
+    border-radius: 999px;
+    background: rgb(245 158 11 / 0.16);
+    color: #fcd34d;
+    font-size: 0.68rem;
+    font-weight: 750;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .stage-feature-video h3 { margin: 0.38rem 0 0.22rem; font-size: 1.02rem; }
+  .stage-feature-video p { font-size: 0.84rem; color: var(--text-color-muted); line-height: 1.5; }
+
+  .stage-tile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+  .stage-tile {
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.6rem;
+    overflow: hidden;
+    background: #0f191e;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    min-width: 0;
+  }
+  .stage-tile:hover {
+    text-decoration: none;
+    border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+    background: #132128;
+  }
+  .stage-tile-thumb {
+    background: #070d10;
+    overflow: hidden;
+    border-bottom: 1px solid rgb(255 255 255 / 0.06);
+  }
+  .stage-tile-thumb :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+  .stage-tile.is-contain .stage-tile-thumb {
+    padding: 0.25rem;
+    background: #0b1419;
+  }
+  .stage-tile.is-contain .stage-tile-thumb :global(img) {
+    object-fit: contain;
+  }
+  .stage-tile-copy {
+    padding: 0.55rem 0.75rem 0.6rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+    min-width: 0;
+  }
+  .stage-tile-badge {
+    font-size: 0.65rem;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--primary);
+  }
+  .stage-tile h3 {
+    font-size: 0.85rem;
+    line-height: 1.3;
+    margin: 0.16rem 0 0;
+    color: var(--text-color);
+  }
+
+  /* ZONE 3: OPEN 3x2 SUBSYSTEM DIRECTORY */
+  .directory-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+  .directory-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.1rem 1.2rem;
+    border-radius: 0.65rem;
+    background: var(--card-bg);
+    border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+    border-top: 3px solid color-mix(in srgb, var(--primary) 70%, transparent);
+    min-width: 0;
+  }
+  .directory-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.45rem;
+  }
+  .directory-num {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.74rem;
+    font-weight: 750;
+    color: var(--primary);
+    padding: 0.1rem 0.42rem;
+    border-radius: 0.28rem;
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+  }
+  .directory-count { font-size: 0.72rem; color: var(--text-color-muted); }
+  .directory-card h3 a { color: var(--text-color); }
+  .directory-card h3 a:hover { color: var(--primary); }
+  .directory-card p { margin: 0.42rem 0 0.85rem; font-size: 0.87rem; line-height: 1.56; color: color-mix(in srgb, var(--text-color) 84%, transparent); flex-grow: 1; }
+  .directory-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.5rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid rgb(255 255 255 / 0.08);
+    font-size: 0.82rem;
+  }
+  .directory-primary { font-weight: 700; white-space: nowrap; }
+  .directory-dot { color: var(--text-color-muted); }
+  .directory-secondary { color: var(--text-color-muted); font-size: 0.8rem; white-space: nowrap; }
+  .directory-secondary:hover { color: var(--primary); }
+
+  /* ZONE 4: 2x2 ILLUSTRATED BUILD JOURNAL GRID */
+  .home-journal {
+    padding: clamp(1.2rem, 2.4vw, 1.7rem);
+    border-radius: var(--radius-large);
+    background: var(--card-bg);
+    border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  }
+  .logbook-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+  .logbook-card {
+    display: grid;
+    grid-template-columns: 8.75rem minmax(0, 1fr);
+    gap: 0.9rem;
+    align-items: center;
+    padding: 0.85rem 0.95rem;
+    border-radius: 0.6rem;
+    background: rgb(0 0 0 / 0.2);
+    border: 1px solid rgb(255 255 255 / 0.08);
+    min-width: 0;
+  }
+  .logbook-thumb img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 0.42rem;
+    border: 1px solid rgb(255 255 255 / 0.09);
+  }
+  .logbook-body { min-width: 0; }
+  .logbook-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.73rem;
+    color: var(--text-color-muted);
+  }
+  .logbook-meta time { font-weight: 750; color: var(--primary); }
+  .logbook-body h3 {
+    margin: 0.22rem 0 0.28rem;
+    font-size: 0.96rem;
+    line-height: 1.32;
+  }
+  .logbook-body h3 a { color: var(--text-color); }
+  .logbook-body h3 a:hover { color: var(--primary); }
+  .logbook-body p {
+    font-size: 0.84rem;
+    line-height: 1.48;
+    color: color-mix(in srgb, var(--text-color) 82%, transparent);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ZONE 5: COMPACT HISTORICAL ARCHIVE FOOTNOTE */
+  .origins-card {
+    display: grid;
+    grid-template-columns: 9.5rem minmax(0, 1fr);
+    gap: 1.15rem;
+    align-items: center;
+    padding: 0.95rem 1.2rem;
+    border-radius: var(--radius-large);
+    border: 1px dashed color-mix(in srgb, var(--primary) 32%, transparent);
+    background: color-mix(in srgb, var(--card-bg) 72%, rgb(0 0 0 / 0.25));
+  }
+  .origins-card img { width: 100%; aspect-ratio: 16 / 11; object-fit: cover; border-radius: 0.45rem; opacity: 0.92; }
+  .origins-copy h2 { font-size: 1.1rem; margin: 0.18rem 0 0.28rem; }
+  .origins-copy p:not(.home-eyebrow) { font-size: 0.85rem; color: var(--text-color-muted); }
+  .origins-links { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; margin-top: 0.5rem; font-size: 0.84rem; font-weight: 680; }
+
+  section[id], nav[id], div[id] { scroll-margin-top: 6rem; }
+
+  @media (max-width: 980px) {
+    .hero-main, .stage-grid, .logbook-grid { grid-template-columns: 1fr; }
+    .directory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 640px) {
+    .ainekio-home { gap: 1.25rem; }
+    .hero-specs, .directory-grid, .origins-card { grid-template-columns: 1fr; }
+    .stage-tile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+    .logbook-card { grid-template-columns: 1fr; gap: 0.55rem; }
+    .logbook-thumb img { aspect-ratio: 16 / 9; max-height: 10.5rem; }
+    .origins-card img { max-height: 10rem; }
+  }
 </style>

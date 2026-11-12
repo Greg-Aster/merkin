@@ -45,11 +45,11 @@ sample age and spread so Body Control can display live measured-versus-commanded
 joint positions and advance multi-stage movements (such as `Stand`) as soon as fresh
 feedback confirms arrival.
 
-### Three-point calibration across all 12 servos (`0.8.64`)
+### Three-point calibration across all 12 servos
 
-With firmware **`0.8.64-p4-lcd-restored`** running on the P4, all twelve servos were
-calibrated across a three-point sweep at **500, 1650, and 2800 µs** and verified over
-**48 intermediate positions (480 settled observations)**:
+With the LCD and ADC multiplexer running together on the ESP32-P4, I calibrated all
+twelve servos across a three-point sweep at **500, 1650, and 2800 µs** and checked
+linearity across **48 intermediate positions (480 settled readings)**:
 
 | Calibration check | Measured result |
 | --- | --- |
@@ -87,16 +87,11 @@ An experimental **9B Autonomy adapter** was also assigned to the dedicated `Auto
 category for Active Operator and Boredom Reflection/Movement planning, cutting median
 call time from `37.7 s` to `3.1 s` via much more concise output generation.
 
-### Agent Monitor CPU fix, terminal failure handling, and memory indexing
+### Runtime responsiveness and memory recall cleanup
 
-- **Agent Monitor snapshot speedup (`~3 ms`):** Profiling showed Agent Monitor
-  repeatedly parsing the full daily audit log on the main application thread.
-  Removing automatic historical-log parsing from live status polling dropped status
-  snapshot generation to **~3 ms** with zero disk audit reads.
-- **Clean one-off task failure termination:** Rejected one-off body commands now
-  terminate cleanly as failed rather than looping back into `Goal Review` (`continue`
-  was removed from Task; Goal Review now strictly evaluates status without emitting
-  competing replies or new actions).
-- **Bidirectional conversation memory index:** Rebuilt the vector memory index to
-  embed both user messages and assistant replies, and prepared Dataset Version 20 to
-  sharpen memory-recall versus live-camera routing.
+Profiling the companion UI also caught why status polling occasionally stuttered: the
+monitor panel was re-parsing the full daily log file on the main thread every refresh.
+Dropping historical log reads from live polling brought status snapshots down to
+**~3 ms**. One-off body commands that get rejected by safety bounds now fail cleanly
+instead of looping back into goal review, and the vector memory index now embeds both
+sides of each conversation so past replies recall as reliably as user prompts.

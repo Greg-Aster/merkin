@@ -1,12 +1,12 @@
 ---
-title: "Bounded Robot Autonomy: Reactive, Semi-Auto & Full-Auto Modes in Ainekio OS"
+title: "Bounded Robot Autonomy: Reactive, Semi Mode, Full Auto & Hardware Safety Boundaries"
 published: 2026-08-27T07:45:00-07:00
-updated: 2026-11-11
-description: "How Ainekio OS governs physical robot autonomy across Reactive, Semi Mode (5-minute signed drive deltas), and Full Auto Mode (continuous high-reasoning activity selection), alongside 5 trust tiers, varied Fast Body Events, and Big Brother delegation."
+updated: 2026-11-12
+description: "How Ainekio governs self-initiated robot behavior across Reactive, Semi Mode, and Full Auto, why language models never drive raw servo PWM, how fast tip/stall reflexes work, and how multi-step goals persist safely."
 image: "/assets/ainekio/v2/bounded-autonomy-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
-authorName: "Ainekio Project"
-authorBio: "Robot familiar field notes"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: true
 showToc: true
 tags: [Ainekio, Autonomy, Robot Operator, Active Operator, Ainekio OS, MetaHuman OS]
@@ -22,51 +22,50 @@ reading:
   related: ["ainekio-os", "ainekio-companion", "metahuman-integration", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
 ---
 
-Ainekio's autonomy architecture governs when and how the companion initiates physical actions, speech, internal reflections, or computer tasks without waiting for a human prompt. Managed by **Active Operator** in **[Ainekio OS (`Greg-Aster/ainekio-os`)](https://github.com/Greg-Aster/ainekio-os)** (formerly MetaHuman OS; [architecture guide](/posts/ainekio-os/)), every autonomous decision flows through the same unified `environment-mode.json` cognitive graph, Work Coordinator lease checks, five progressive trust levels (`observe` → `adaptive_auto`), and `ESP32-P4` hardware safety boundaries as a direct user command.
+Letting a language model initiate physical motion on a walking robot only works if agency and actuator safety have a hard wall between them. In **[Ainekio OS](/posts/ainekio-os/)** ([`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os)), every self-initiated action passes through the same [embodied bridge](/posts/metahuman-integration/), trust-tier checks, and onboard `ESP32-P4` geometric/electrical safety gates ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) as a direct human command.
 
-## The three robot autonomy modes
+## The three robot operating modes
 
-In addition to Ainekio OS's four cognitive modes (`Dual Consciousness`, `Agent`, `Emulation`, and `Environment`), embodied operation offers three robot autonomy levels—plus an instant top-bar **Ainekio OS control** enable/pause toggle in Body Control and Cockpit HUD:
+When running in embodied mode, Ainekio offers three distinct autonomy levels—alongside a one-click **Ainekio OS pause switch** in the top bar of the Body Control workbench and Cockpit HUD:
 
-| Mode | Scheduling & Decision Mechanism | Typical Use |
+| Operating Mode | Scheduling & Initiative | When to Use It |
 | --- | --- | --- |
-| **Reactive** | Dormant between external triggers. Responds immediately to user chat/voice and physical disturbances (`fast-body-event-mode.json`). | Bench testing, quiet companionship, and direct operator control |
-| **Semi Mode** | Runs a **5-minute periodic evaluation** that applies **signed delta updates** to internal drives and initiates bounded activities when a drive crosses threshold. | Ambient room presence with periodic self-initiated check-ins, stretches, or observations |
-| **Full Auto Mode** | **Continuous high-reasoning activity selection** (`Qwen3.5 9B` locally or Hybrid `ServerStatus` routing). Never idles: as soon as an execution settles, the controller selects the next purposeful activity. | Autonomous exploration, goal pursuit, environment inspection, and multi-step task chaining |
+| **Reactive** | Quiet between external triggers. Responds only when spoken to, messaged, or physically jostled/tipped. | Bench calibration, focused desk work, and direct manual control |
+| **Semi Mode** | Evaluates internal drives every **5 minutes**, applying signed (`+/-`) delta updates and initiating a bounded look, stretch, or reflection only when a drive crosses threshold. | Everyday room companionship with occasional unprompted check-ins or posture shifts |
+| **Full Auto** | Continuous high-reasoning activity selection. As soon as one task settles, Ainekio evaluates its surroundings, memories, and open desires to pick the next purposeful step. | Supervised floor exploration, multi-step errands, and active room inspection |
 
-## Semi Mode: 5-minute signed drive deltas
+### Semi Mode: 5-minute drive ticks
 
-In **Semi Mode**, Ainekio does not loop continuously. Instead, Active Operator ticks on a configurable **5-minute (`300 s`) interval**:
+Rather than polling an LLM in a tight loop while nothing is happening, **Semi Mode** runs on a calm **5-minute (`300 s`) cadence**:
 
-1. **Signed delta drive updates**: Each tick evaluates recent interaction history, time elapsed since the last conversation or movement, sensor state, and pending Agency desires, applying signed deltas (`+/-`) to internal drive states (such as curiosity, social engagement, or restlessness).
-2. **Situation-dependent trigger**: If drives remain below threshold or a user turn is already active, the tick settles quietly without firing a conversational turn. When a drive crosses its activation threshold, Active Operator launches an `environment-mode.json` execution tailored to that situation—such as taking a fresh camera look (`boredom-observer`), performing a Freestyle stretch (`boredom-movement`), or running internal curiosity/reflection (`inner-curiosity.json`, `train-of-thought.json`).
+1. **Signed drive updates**: Each tick weighs time since the last interaction or movement, current posture and battery health, and open desires—applying small positive or negative deltas to internal curiosity, restlessness, and social engagement drives.
+2. **Thresholded initiative**: If all drives sit below threshold (or a human conversation is already underway), nothing fires. Once a drive crosses threshold, Ainekio launches a single bounded activity—snapping a chin-camera frame to see what changed in the room, running a brief Freestyle leg stretch, or recording an associative inner reflection.
 
-## Full Auto Mode: continuous high-reasoning agency
+### Full Auto: continuous purposeful chaining
 
-In **Full Auto Mode**, Ainekio stays continuously active—never idling between completed tasks:
+In **Full Auto**, Ainekio never sits idle between settled executions. Whenever no movement or tool wait is active, a high-reasoning controller reviews the Standing Persona, attributed episodic memories, live V2 telemetry, optical-flow obstacle clearance, and open desires to continue an unfinished objective or start a new one—chaining on-chip `50 Hz` MicroDuck walking, camera checks, spoken remarks, or background computer tasks.
 
-1. **Continuous activity selection**: Whenever no execution is currently running or waiting on a hardware receipt, Active Operator invokes the high-reasoning `fullAutoController` role (`Qwen3.5 9B` or Hybrid specialist in `ServerStatus`) with the **Standing Persona** (`persona/core.json`), attributed episodic memories, live `Robot Status`, recent action outcomes, and open Agency desires.
-2. **Continuity across turns**: Rather than issuing isolated one-off commands, Full Auto can resume an unfinished objective, inspect the visual or telemetry result of its previous step, adjust its plan, or transition into a new activity when the prior goal is satisfied.
-3. **Multi-tool reach**: Full Auto can choose physical robot locomotion (on-chip `50 Hz` MicroDuck neural walking, closed-loop `Walk`/`Stand`, or `Freestyle`), camera inspection, spoken remarks, internal reflection, or asynchronous computer delegation via **Big Brother** (`codex`, `claude-code`, and warm 2-session `GeminiAcpServer` via `big-brother-tool-mode.json` and `system-code-review`).
+## Why the LLM never drives raw servo PWM
 
-## Varied Fast Body Events (`fast-body-event-mode.json`)
+Regardless of operating mode, **no language model can write raw pulse widths or unvalidated angles to a servo pin**. Autonomy is bounded by four nested safety layers:
 
-Regardless of whether Ainekio is in Reactive, Semi, or Full Auto mode, physical disturbances from the `ESP32-P4` body are handled immediately:
+1. **Capability-filtered intent vocabulary**: Ainekio OS can only choose high-level semantic postures, bounded velocity twists, locomotion goals, or structured 12-DOF Freestyle target programs that match the connected robot's live readiness state (V2 `ESP32-P4` vs. V1 `ESP32-S3`).
+2. **Onboard Cartesian workspace projection**: Each V2 leg uses a coupled `35/20/28/38/55 mm` four-bar linkage. Before converting any foot target or neural offset into servo angles, `ESP32-P4` firmware projects out-of-reach coordinates back onto the valid reachable linkage boundary using analytical inverse kinematics and 8-pass Gauss-Newton refinement—preventing linkage lockups and mechanical bind.
+3. **4th-wire shaft tracking & current staging**: All twelve `MG90S` servos feed potentiometer wiper voltages through `CD74HC4067` channels `C4–C15` into `GPIO49` (`ADC2_CH0`) while `PCA9685` PWM pulses are phase-staggered across the `50 Hz` frame to prevent `5 V` rail brownouts. Target sequences wait for measured physical shaft arrival (`2 mm` settle in `Stand`) rather than blindly trusting a timer.
+4. **Command leases, preemption & instant `stop`**: Spoken human interruptions cancel in-flight local model inference immediately, while a `stop` command bypasses language models altogether—dropping queued actions and halting the servos on the microcontroller. If Wi-Fi drops mid-stride, lease watchdogs halt locomotion locally without replaying stale motion on reconnect ([protocol guide](/posts/protocol-and-safety/)).
 
-- **Trigger sources**: The `208 Hz` `LSM6DS3` IMU and 12-channel `CD74HC4067` servo feedback multiplexer detect `tipped`, `shaken`, and motor `jam/stall` events.
-- **Lightweight reflex path with 6-turn variety**: Tip, shake, and stall events route to `fast-body-event-mode.json`, which queries the last **6 `fast_body_event_response` speech entries** (`temperature = 0.8`, `repeatPenalty = 1.2`) and uses a single fast model call to emit a **`be_` token-matched facial expression** (rendered across 59 expressions on the 1.9" `ST7789` LCD) and a fresh, dryly varied vocal reaction.
-- **Non-disruptive**: Fast body events do not clobber an in-progress durable objective, while high-rate feedback health updates are absorbed into `Robot Status` state without spamming the cognitive queue.
+## Fast reflexes when tipped, shaken, or stalled
 
-## Desire lifecycle vs. Standing Persona
+Physical surprises cannot wait for multi-step deliberation:
 
-Ainekio OS separates long-term identity from actionable autonomous intentions:
+- **Millisecond hardware detection**: Comparing `208 Hz` `LSM6DS3` IMU attitude and `CD74HC4067` potentiometer velocities against commanded trajectories lets the `ESP32-P4` catch falls, pickups, shakes, and rug snags immediately.
+- **Non-terminal stall recovery**: On a minor foot snag, the body raises a `servo_stall` event while keeping holding torque alive so a backoff-and-`Stand` recovery trajectory (trained across the **489-row** Freestyle dataset: **73** library motions + **416** fault-recovery trajectories) can clear the leg cleanly.
+- **Varied 6-turn vocal & facial reactions**: Tip, shake, and stall events trigger one of the **59 animated expressions** on the `1.9"` `ST7789` LCD alongside a quick vocal remark that checks the last 6 reactions to avoid repeating canned lines—all without wiping out a paused multi-step goal.
 
-- **Standing Persona (`persona/core.json`)**: Defines Ainekio's enduring character and long-term values. Autonomous edits to `persona/core.json` are restricted exclusively to the **Psychotherapist** agent during the `02:00` Sleep Cycle.
-- **Desire Agent**: Evaluates candidate desires in Agency against attributed memories, robot capabilities, and actual task outcomes. It updates **desire strengths** via signed adjustments and archives completed or obsolete desires.
-- **Finite execution contracts**: Before a Desire can drive physical robot commands, it must be formulated into a finite plan (`1–10` ordered steps with explicit completion criteria). Each step executes through the Work Coordinator and returns its verified receipt (`done`, `cancelled`, `nak`) to Agency before the next step is admitted.
+## How longer goals persist safely
 
-## Preemption, Sleep, and emergency stop
+Longer autonomous intentions are kept bounded so an old idea never turns into an infinite loop:
 
-- **Native inference cancellation**: If a user speaks a correction or issues a stop command while an autonomous turn is generating on `llama-cpp.service`, the router cancels the in-flight inference natively and admits the user's input.
-- **Direct emergency stop**: `stop` bypasses language-model planning altogether, cancelling queued coordinator actions for the session and instructing the gateway and `ESP32-P4` firmware to halt motion immediately.
-- **Software Sleep vs. hardware rest**: Entering the 8-stage `02:00` cognitive **Sleep Cycle** pauses Active Operator so memory curation, LoRA adapter fitting, symbolic dreaming (`dreamer-mode.json`), and Psychotherapist review can run cleanly. Separately, the `ESP32-P4` firmware can relax the body into a low-power `Rest` posture after configurable physical inactivity.
+- **Finite `1–10` step Desire plans**: Candidate desires are scored against real outcomes and must be compiled into a finite `1–10` step plan with explicit completion criteria before executing any physical robot commands.
+- **Verified step checkpoints**: Each step suspends in SQLite until the gateway returns a correlated hardware receipt (`done`, `cancelled`, `nak`, or `outcome_unknown`) and, for visual goals, a fresh post-motion camera frame confirming the result.
+- **Software sleep vs. hardware rest**: Entering the nightly `02:00` software sleep cycle pauses autonomous initiative while memory curation, dreaming, and persona review run; independently, the `ESP32-P4` can relax the legs into a low-power `Rest` posture during extended room quiet.

@@ -2,10 +2,10 @@
 title: "Real-Life Neural Walking, MuJoCo/MJX Gait Training, and Big Brother Integration"
 published: 2026-11-06
 updated: 2026-11-06
-description: "First real-life neural network walking run on the 650 g physical V2 robot, resolving MJX training failure modes (tiny hops and 'scootybooty' reverse dragging) in a 200M-step centered-stride policy, onboard OV5647 carpet trials, a 58-expression LCD sheet, and MetaHuman OS runtime consolidation."
+description: "First real-life neural network walking run on the 650 g physical V2 robot, fixing tiny-hop and 'scootybooty' RL failure modes in a 200M-step MuJoCo MJX policy, onboard OV5647 carpet trials, a 59-expression LCD sheet, and remote Big Brother model delegation."
 image: "/gallery/ainekio-v2-physical-three-quarter-960.webp"
 authorName: "Ainekio Project"
-showImageOnPost: true
+showImageOnPost: false
 showToc: true
 tags: [Ainekio, V2, Gait, Reinforcement Learning, MuJoCo, MJX, Vision, Firmware, MetaHuman OS]
 category: "Build Journal"
@@ -20,21 +20,19 @@ reading:
   related: ["2026-11-11-on-chip-neural-gait-and-ainekio-os", "gait-development", "ainekio-v2", "metahuman-integration"]
 ---
 
-Between November 2 and November 6, work progressed from physical carpet refinement and
-ESP32-P4 camera/IMU odometry upgrades to training a **200-million-step neural gait
-policy in JAX 0.7.1 / Brax / MuJoCo MJX**—resolving both early miniature-hopping and
-reverse rear-dragging ("scootybooty") failure modes—and deploying that policy onto the
-**650 g physical V2 quadruped** for its first real-life neural network walk. In
-parallel, MetaHuman OS unified its local `llama-cpp.service` runtime, Big Brother
-(`gpt-6-sol` / Codex) delegation, and HTTP API router.
+Between November 2 and November 6, work moved from physical carpet walking trials and
+ESP32-P4 camera/IMU odometry fixes to training a **200-million-step neural gait policy
+in JAX 0.7.1 / Brax / MuJoCo MJX**—debugging both rapid miniature hopping and reverse
+rear-end dragging ("scootybooty") along the way—and running that policy on the **650 g
+physical V2 quadruped** for its first real-life neural walk on carpet. In parallel, I
+cleaned up remote Big Brother delegation and local model serving in MetaHuman OS.
 
 ## First real-life neural network walk on the physical 650 g V2 robot
 
-After exporting the full 376-mesh Blender V2 CAD assembly into MuJoCo MJCF and resolving
-the simulation stride and posture issues described below, we deployed the trained neural
-policy onto the physical 12-servo Ainekio V2 quadruped on carpet. The robot now walks
-forward and reverses cleanly under closed-loop neural control without dragging its rear
-assembly:
+After exporting the full 376-mesh Blender V2 CAD assembly into MuJoCo MJCF and working
+through the stride and posture failure modes below, I deployed the trained policy onto
+the physical 12-servo Ainekio V2 quadruped on carpet. Under closed-loop neural control,
+the robot walks forward and backs up cleanly without dragging its hindquarters:
 
 <figure>
   <video controls playsInline preload="metadata" width="960" height="540" poster="/gallery/ainekio-v2-neural-walk-first-run-poster.webp" className="w-full rounded-xl">
@@ -57,28 +55,27 @@ assembly:
 
 ## Quadruped RL in MuJoCo/MJX: from tiny hops and "scootybooty" to a centered 200M-step stride
 
-To move beyond open-loop keyframe tables and pure imitation learning, we integrated
-**Walk in the Park (DroQ)**, **Microduck RL**, a verified **Stock Pupper V3 MuJoCo
-baseline** (`+1.68 m` forward walk; [watch in the Gallery](/gallery/#pupper-v3-mujoco-baseline)),
-and a **full-CAD Ainekio V2 MJCF model** (`0.650 kg`, 12 servo actuators, 8 passive
-hinges, and 4 planar four-bar loop-closure equality constraints) wired into
-`jax_hardware.py` for GPU training in **JAX 0.7.1 / Brax / MJX**.
+To move past hand-tuned sine tables and pure imitation learning, I stood up a GPU
+reinforcement-learning pipeline in **JAX 0.7.1 / Brax / MJX** combining ideas from
+**Walk in the Park (DroQ)** and **MicroDuck RL**, verified it first on a **Stock Pupper
+V3 MuJoCo baseline** (`+1.68 m` forward walk; [watch in the Gallery](/gallery/#pupper-v3-mujoco-baseline)),
+and then imported the **full-CAD Ainekio V2 MJCF model** (`0.650 kg`, 12 servo
+actuators, 8 passive hinges, and 4 planar four-bar loop-closure equality constraints).
 
 <figure>
   <img src="/gallery/ainekio-mjcf-preview-960.webp" alt="MuJoCo MJCF preview of the 0.650 kg Ainekio V2 quadruped with 12 actuators, 8 passive hinges, and 4 four-bar loop-closure constraints." width="960" height="720" loading="lazy" />
   <figcaption>Ainekio V2 in MuJoCo / MJX: 0.650 kg mass, 12 actuators, 8 passive hinges, and 4 planar four-bar equality constraints.</figcaption>
 </figure>
 
-Getting the closed-chain four-bar model to walk naturally in both forward and reverse
-required diagnosing and fixing two classic reinforcement-learning failure modes across
-successive training runs:
+Getting the closed-chain four-bar model to step naturally in both forward and reverse
+took debugging two classic RL reward loopholes:
 
 ### 1. Failure mode #1: Rapid tiny hops (`35M`-step narrow-scale rollout)
 
-In our initial 35-million-step full-CAD run (`ainekio_full_cad_35M_policy.mp4`),
-conservative action scaling constrained joint excursions so tightly that the policy
-discovered it could track forward velocity by vibrating its feet in rapid miniature hops
-(`20–27 mm` fore-aft foot swing) rather than sweeping through a real stride:
+In my first 35-million-step full-CAD run, conservative action scaling clamped joint
+excursions so tightly that the policy realized it could match target forward speed by
+buzzing its feet in rapid miniature hops (`20–27 mm` fore-aft swing) instead of picking
+up its legs for a real stride:
 
 <figure>
   <video controls playsInline preload="metadata" width="960" height="540" poster="/gallery/rl-tiny-hops-35m-poster.webp" className="w-full rounded-xl">
@@ -90,12 +87,12 @@ discovered it could track forward velocity by vibrating its feet in rapid miniat
 
 ### 2. Failure mode #2: Asymmetric split stance & "scootybooty" reverse dragging (`200M`-step Run #4)
 
-Widening the action scale eliminated the tiny hops, but in the next 200-million-step
-run (`Run #4`, `ainekio_wide_stride_200M_policy.mp4`), the policy parked its rear legs
-in an asymmetric split stance (`RL` parked forward at `-54.3 .. -30.7 mm`, `RR` parked
-back at `-92.3 .. -72.0 mm`). Worse, when commanded to walk backward (`-0.10 m/s`), the
-robot lowered its rear torso to **`0.044 m`** and dragged/scooted its back end along
-the floor—nicknamed **"scootybooty"**—instead of lifting its rear feet cleanly:
+Widening the action scale cured the tiny hops, but in the next 200-million-step run
+(`Run #4`), the policy parked its rear legs in a permanent split stance (`RL` camped
+forward at `-54.3 .. -30.7 mm`, `RR` camped back at `-92.3 .. -72.0 mm`). Worse, as soon
+as it got a reverse command (`-0.10 m/s`), the robot squatted its tail down to
+**`0.044 m`** and scooted its rear shell backward across the floor—immediately dubbed
+**"scootybooty"**—rather than lifting its hind feet:
 
 <figure>
   <video controls playsInline preload="metadata" width="960" height="540" poster="/gallery/rl-scootybooty-200m-poster.webp" className="w-full rounded-xl">
@@ -107,14 +104,13 @@ the floor—nicknamed **"scootybooty"**—instead of lifting its rear feet clean
 
 ### 3. Resolved 200M-step centered-stride & upright reverse policy (`Run #5`)
 
-By penalizing off-center foot parking and shaping foot air-time and orientation
-tracking across a fresh 200-million-step MJX run (`Run #5`,
-`policy_2026-11-05_20-13-42.json`), both failure modes were eliminated:
+Penalizing off-center foot parking and shaping air-time and torso pitch across a fresh
+200-million-step MJX run (`Run #5`) wiped out both habits:
 
-- **`eval/episode_feet_air_time`** jumped **`3.5×`** (from `157.29` in Run #4 to **`557.11`** in Run #5).
-- **`eval/episode_reward`** reached **`28.97 ± 13.18`**, with **`0.0` body collisions** and **`0.0` knee collisions**.
+- **Episode foot air-time** jumped **`3.5×`** (from `157.29` in Run #4 to **`557.11`** in Run #5).
+- **Episode evaluation reward** reached **`28.97 ± 13.18`**, with **`0.0` body collisions** and **`0.0` knee collisions**.
 - **Fore-aft foot stride (`X_body`)** widened **`2.2×–2.8×`** to **`56.6–63.7 mm`** across all four legs, centered cleanly around each leg's home stance (`-59.2 mm` rear, `+74.2 mm` front).
-- **Upright reverse walking:** During `-0.10 m/s` reverse commands, final torso height improved from `0.044 m` to **`0.072 m`** (`rear_z_min = 0.060 m`) with zero rear dragging.
+- **Upright reverse walking:** During `-0.10 m/s` reverse commands, final torso height improved from `0.044 m` to **`0.072 m`** (`0.060 m` minimum rear clearance) with zero rear dragging.
 
 <figure>
   <video controls playsInline preload="metadata" width="960" height="540" poster="/gallery/rl-centered-stride-200m-poster.webp" className="w-full rounded-xl">
@@ -136,58 +132,49 @@ tracking across a fresh 200-million-step MJX run (`Run #5`,
 | **Front Left (`FL`)** | `+74.2 mm` | `+51.0 .. +78.3 mm` (parked back) | `27.3 mm` | **`+50.0 .. +110.0 mm`** | `+80.8 mm` | **`60.0 mm`** | **`2.2×` wider, centered** |
 | **Front Right (`FR`)** | `+74.2 mm` | `+76.4 .. +101.1 mm` (parked fwd) | `24.7 mm` | **`+45.8 .. +109.5 mm`** | `+76.5 mm` | **`63.7 mm`** | **`2.6×` wider, centered** |
 
-## Physical carpet trials (`20261102-forward-refinement`) and onboard OV5647 video
+## Physical carpet trials and onboard OV5647 camera tuning
 
-Prior to deploying the 200M-step MJX policy, our November 2 physical carpet refinement
-trials (`20261102-forward-refinement`) logged **601 physical state transitions** under
-load while capturing live video from the onboard OV5647 camera:
+Before deploying the 200M-step MJX policy, November 2 carpet walking trials logged
+**601 physical state transitions** under load while recording live video from the
+lower-jaw OV5647 camera:
 
-- **Watch the onboard camera footage:** [Physical Carpet Trial (`20261102-forward-refinement`) in the Gallery](/gallery/#carpet-trial-20261102)
+- **Watch the onboard camera footage:** [November 2 Physical Carpet Trial in the Gallery](/gallery/#carpet-trial-20261102)
 
-Running gait learning over real carpet highlighted how motion blur, rolling frame
-timestamps, and foot-boundary projection affect visual odometry and safety bounds,
-driving four targeted ESP32-P4 firmware upgrades:
+Watching real carpet footage made it obvious how easily slow shutter speeds, loose frame
+timestamps, and idealized workspace limits trip up visual odometry and leg protection,
+driving four concrete firmware fixes on the ESP32-P4:
 
-| Firmware revision | Physical sensing & audio improvement |
+| Subsystem | Physical sensing & control fix |
 | --- | --- |
-| **`0.8.138`** | Configurable **15-second** Espressif **WakeNet9s / VAD** voice recording window after wake-word detection |
-| **`0.8.139-p4-motion-exposure`** | Enforces a **10,000 µs (10 ms)** camera exposure ceiling during movement to prevent motion blur from corrupting visual landmark tracking |
-| **Frame completion + IMU SLERP** | Tags every captured frame with its exact end-of-exposure timestamp and interpolates IMU quaternions for **OpenGV 2-point RANSAC** depth odometry |
-| **`0.8.150-p4-foot-projection`** | Calibrated Cartesian foot-boundary projection so workspace limits match physical linkage reach under load |
+| **Wake-word voice window** | Configurable **15-second** Espressif **WakeNet9s / VAD** capture window after wake-word detection |
+| **Motion shutter cap** | Caps OV5647 exposure at **10,000 µs (10 ms)** while moving so blurred carpet texture doesn't smear landmark tracking |
+| **Frame + IMU timestamp sync** | Stamps every frame at exact end-of-exposure and interpolates IMU quaternions (SLERP) for **OpenGV 2-point RANSAC** depth odometry |
+| **Cartesian workspace projection** | Projects out-of-reach foot requests onto the calibrated four-bar boundary so loaded legs settle smoothly instead of stalling |
 
-## Updated 58-expression 1.9" ST7789 LCD contact sheet
+## Updated 59-expression 1.9" ST7789 LCD contact sheet
 
-The C firmware face engine (`320 × 170` landscape on the 1.9-inch ST7789 display) was
-audited and consolidated into a clean **58-expression** library covering resting
-states, speaking overlays, emotional reactions, and gait-linked faces:
+I also audited the C firmware face renderer (`320 × 170` landscape on the 1.9-inch
+ST7789 panel) across all **59 procedural expressions**—spanning resting eyes, speaking
+bars, gait-linked faces, emotional cues, and oddities like `cosmic_horror`:
 
 <figure>
-  <img src="/gallery/lcd-face-contact-sheet-1600.webp" alt="Contact sheet showing all 58 procedural expressions rendered at 320x170 for Ainekio's 1.9-inch ST7789 LCD." width="1600" height="1200" loading="lazy" />
-  <figcaption>Complete 58-expression contact sheet generated directly from the ESP32-P4 C firmware renderer.</figcaption>
+  <img src="/gallery/lcd-face-contact-sheet-1600.webp" alt="Contact sheet showing procedural expressions rendered at 320x170 for Ainekio's 1.9-inch ST7789 LCD." width="1600" height="1200" loading="lazy" />
+  <figcaption>Expression contact sheet rendered directly from the ESP32-P4 C firmware face engine (59 total expressions, including <code>cosmic_horror</code>).</figcaption>
 </figure>
 
-## Freestyle Big Brother SSH inference (`gpt-6-sol` / Codex fast mode)
+## Remote Big Brother motion synthesis and companion host cleanup
 
-Alongside local Qwen LoRA serving via `llama-cpp.service`, the Freestyle motion
-generator now supports a remote **Big Brother** inference provider via
-`--big-brother-ssh`, routing complex or novel motion synthesis requests to
-**`gpt-6-sol` / Codex fast mode** over SSH while keeping local `llama.cpp` ready for
-low-latency offline operation.
+Alongside local Qwen LoRA serving via `llama.cpp`, Freestyle can now escalate novel or
+tricky motion requests over SSH to a larger **Big Brother** model—either a local test
+model on a GPU workstation or Codex in fast mode—while keeping the lightweight local
+adapter ready for instant offline moves.
 
-## MetaHuman OS runtime and Big Brother consolidations
+On the companion host, I also swept out accumulated scaffolding: merging the separate
+terminal and chat views into one workspace, standardizing background coding delegation
+and automated architecture checks, keeping robot traffic under the single Environment
+Bridge, and replacing **257 thin API wrapper files** with a single catch-all HTTP
+router.
 
-On the cognitive host, we completed a sweeping architectural consolidation across
-terminal interfaces, Big Brother delegation, environment bridging, and the HTTP API
-router:
-
-| Subsystem | Consolidation milestone |
-| --- | --- |
-| **Unified terminal subsystem** | Consolidated terminal and chat interactions into a single **`TerminalChat.svelte`** component |
-| **Async computer task delegation** | Standardized asynchronous coding and system task delegation through **`big-brother-tool-mode.json`** |
-| **Automated code review agent** | Added a dedicated **`system-code-review`** agent for automated repository and architecture checks |
-| **Single Environment Bridge** | Unified robot communication under a single **`environment-bridge`** runtime owner and **`environment-mode.json`** workflow |
-| **Core API router (`[...path].ts`)** | Replaced **257 individual wrapper route files** with a single canonical catch-all **`[...path].ts`** Core API router |
-
-Continue to the [Project Overview](/posts/project-overview/) for the complete system
-map, or explore the [Gait Development](/posts/gait-development/) and
+Continue to the [November 11 on-chip neural gait & Ainekio OS milestone](/posts/2026-11-11-on-chip-neural-gait-and-ainekio-os/),
+or explore the [Gait Development](/posts/gait-development/) and
 [MetaHuman Integration](/posts/metahuman-integration/) reference guides.

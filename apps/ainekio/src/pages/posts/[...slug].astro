@@ -60,76 +60,300 @@ const jsonLd = [
   },
 ]
 const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
-const contents = headings.filter(heading => heading.depth <= 2)
+const cleanHeading = (text: string) => text.replace(/\s*#$/, '').trim()
+const contents = headings.filter(heading => heading.depth >= 2 && heading.depth <= 3).map(h => ({ ...h, text: cleanHeading(h.text) }))
+const topContents = headings.filter(heading => heading.depth === 2).map(h => ({ ...h, text: cleanHeading(h.text) }))
+const hasMobileToc = topContents.length >= 2
 ---
 <MainGridLayout title={post.data.title} description={post.data.description} lang={post.data.lang} setOGTypeArticle={true} headings={headings} post={post}>
   <meta name="publish-date" content={formatDateToYYYYMMDD(post.data.published)} slot="head" />
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
 
-  <article id="post-container" class="card-base article-page"
-    data-post-date={formatDateToYYYYMMDD(post.data.published)} data-post-timestamp={post.data.published.getTime()}
-    data-post-slug={post.slug} data-post-title={post.data.title} data-post-category={post.data.category}
-    data-post-tags={post.data.tags.join(',')} data-post-image={post.data.image} data-post-description={post.data.description}>
-    <nav class="article-breadcrumb" aria-label="Breadcrumb">
-      <a href={url('/')}>Ainekio</a><span aria-hidden="true">/</span>
-      <a href={url(topicUrl)}>{topic.title}</a><span aria-hidden="true">/</span><span aria-current="page">{kinds[reading.kind]}</span>
-    </nav>
-    <header>
-      <div class="article-context"><span>{generations[reading.generation]}</span><span>{kinds[reading.kind]}</span></div>
-      <h1 data-pagefind-body data-pagefind-weight="10" data-pagefind-meta="title">{post.data.title}</h1>
-      <p class="article-description">{post.data.description}</p>
-      <p class="article-dates">
-        <span>Published <time datetime={post.data.published.toISOString()}>{dateFormat.format(post.data.published)}</time></span>
-        {post.data.updated && post.data.updated > post.data.published && <span>Updated <time datetime={post.data.updated.toISOString()}>{dateFormat.format(post.data.updated)}</time></span>}
-        <span data-post-minutes={remarkPluginFrontmatter.minutes}>{remarkPluginFrontmatter.minutes} min read</span>
-      </p>
-      {reading.kind !== 'reference' && <p class="article-period"><a href={url('/posts/project-overview/#project-status')}>Current system status & overview →</a></p>}
-      <ShareBar title={post.data.title} description={post.data.description} url={Astro.url.href} />
-    </header>
+  <div class="article-shell">
+    <article id="post-container" class="card-base article-page"
+      data-post-date={formatDateToYYYYMMDD(post.data.published)} data-post-timestamp={post.data.published.getTime()}
+      data-post-slug={post.slug} data-post-title={post.data.title} data-post-category={post.data.category}
+      data-post-tags={post.data.tags.join(',')} data-post-image={post.data.image} data-post-description={post.data.description}>
+      <nav class="article-breadcrumb" aria-label="Breadcrumb">
+        <a href={url('/')}>Ainekio</a><span aria-hidden="true">/</span>
+        <a href={url(topicUrl)}>{topic.title}</a><span aria-hidden="true">/</span><span aria-current="page">{kinds[reading.kind]}</span>
+      </nav>
 
-    {contents.length >= 3 && <details class="article-contents"><summary>On this page</summary><ol>{contents.map(heading => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol></details>}
-    {post.data.image && post.data.showImageOnPost !== false && <ImageWrapper id="post-cover" src={post.data.image} basePath={path.join('content/posts/', getDir(post.id))} class="mb-8 rounded-xl" />}
+      <header>
+        <div class="article-context">
+          <span class:list={[{ 'is-v1': reading.generation === 'v1' }]}>{generations[reading.generation]}</span>
+          <span>{kinds[reading.kind]}</span>
+        </div>
+        <h1 data-pagefind-body data-pagefind-weight="10" data-pagefind-meta="title">{post.data.title}</h1>
+        <p class="article-description">{post.data.description}</p>
 
-    <Markdown class="mb-6 markdown-content"><Content /></Markdown>
+        <div class="article-meta-bar">
+          <p class="article-dates">
+            <span>Published <time datetime={post.data.published.toISOString()}>{dateFormat.format(post.data.published)}</time></span>
+            {post.data.updated && post.data.updated > post.data.published && <span>Updated <time datetime={post.data.updated.toISOString()}>{dateFormat.format(post.data.updated)}</time></span>}
+            <span data-post-minutes={remarkPluginFrontmatter.minutes}>{remarkPluginFrontmatter.minutes} min read</span>
+          </p>
+          <ShareBar title={post.data.title} description={post.data.description} url={Astro.url.href} />
+        </div>
 
-    <nav class="article-reading" aria-label="Article reading path" data-reading-path>
-      {nextPost && <div class="article-next"><p class="reading-label">{reading.kind === 'reference' ? 'Next reference' : 'Next milestone'}</p><a data-reading-next href={getPostUrlBySlug(nextPost.slug)}>{nextPost.data.title} →</a><p>{nextPost.data.description}</p></div>}
-      {previousPosts.length > 0 && <div><p class="reading-label">Previous entry</p><ul>{previousPosts.map(previous => <li><a href={getPostUrlBySlug(previous.slug)}>← {previous.data.title}</a></li>)}</ul></div>}
-      {relatedPosts.length > 0 && <div><h2>Related reference & notes</h2><ul>{relatedPosts.map(related => <li><a href={getPostUrlBySlug(related.slug)}>{related.data.title}</a><span class="related-kind">{generations[getReading(related).generation]} · {kinds[getReading(related).kind]}</span></li>)}</ul></div>}
-      <a class="article-back" href={url(topicUrl)}>All {topic.title.toLowerCase()} articles →</a>
-    </nav>
+        {reading.kind !== 'reference' && (
+          <p class="article-period">
+            Dated workbench entry from <time datetime={post.data.published.toISOString()}>{dateFormat.format(post.data.published)}</time>.
+            <a href={url('/posts/project-overview/#project-status')}>See where the robot stands today →</a>
+          </p>
+        )}
+      </header>
 
-    {licenseConfig.enable && <License title={post.data.title} slug={post.slug} pubDate={post.data.published} class="mb-6 rounded-xl license-container" />}
-  </article>
+      {hasMobileToc && (
+        <details class="article-contents">
+          <summary>On this page ({topContents.length} sections)</summary>
+          <ol>{topContents.map(heading => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol>
+        </details>
+      )}
+
+      {post.data.image && post.data.showImageOnPost !== false && (
+        <ImageWrapper id="post-cover" src={post.data.image} basePath={path.join('content/posts/', getDir(post.id))} class="mb-6 rounded-xl post-cover-frame" />
+      )}
+
+      <Markdown class="mb-6 markdown-content"><Content /></Markdown>
+
+      <nav class="article-reading" aria-label="Article reading path" data-reading-path>
+        {(previousPosts.length > 0 || nextPost) && (
+          <div class:list={['reading-step-grid', { 'is-pair': previousPosts.length > 0 && Boolean(nextPost) }]}>
+            {previousPosts.length > 0 && (
+              <div class="article-prev-card">
+                <p class="reading-label">Previous entry</p>
+                <ul class="prev-list">
+                  {previousPosts.map(previous => (
+                    <li>
+                      <a href={getPostUrlBySlug(previous.slug)}>← {previous.data.title}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {nextPost && (
+              <div class="article-next">
+                <p class="reading-label">{reading.kind === 'reference' ? 'Next reference guide' : 'Next in the build journal'}</p>
+                <a data-reading-next href={getPostUrlBySlug(nextPost.slug)}>{nextPost.data.title} →</a>
+                <p>{nextPost.data.description}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div class="related-section">
+          <div class="related-header">
+            <h2>{relatedPosts.length > 0 ? 'Related reference & notes' : `Explore ${topic.title}`}</h2>
+            <a class="article-back" href={url(topicUrl)}>All {topic.title.toLowerCase()} articles →</a>
+          </div>
+          {relatedPosts.length > 0 && (
+            <ul class="related-grid">
+              {relatedPosts.map(related => (
+                <li>
+                  <a href={getPostUrlBySlug(related.slug)}>{related.data.title}</a>
+                  <span class="related-kind">{generations[getReading(related).generation]} · {kinds[getReading(related).kind]}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </nav>
+
+      {licenseConfig.enable && <License title={post.data.title} slug={post.slug} pubDate={post.data.published} class="rounded-xl license-container" />}
+    </article>
+
+    <aside class="article-toc-rail" aria-label="On this page">
+      <div class="card-base toc-rail-card">
+        {contents.length > 0 && (
+          <>
+            <p class="toc-rail-label">On this page</p>
+            <ol class="toc-rail-list">
+              {contents.map(heading => (
+                <li class:list={[{ 'is-sub': heading.depth === 3 }]}>
+                  <a href={`#${heading.slug}`}>{heading.text}</a>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
+        <div class:list={['toc-rail-footer', { 'no-toc': contents.length === 0 }]}>
+          <p class="toc-rail-label">Navigate</p>
+          {nextPost && <a href={getPostUrlBySlug(nextPost.slug)}>Next: {nextPost.data.title} →</a>}
+          <a href={url(topicUrl)}>More in {topic.title} →</a>
+          <a href={url('/updates/')}>Build journal →</a>
+          <a href={url('/archive/?kind=reference')}>System reference →</a>
+        </div>
+      </div>
+    </aside>
+  </div>
 </MainGridLayout>
 
 <style>
-  .article-page { padding: clamp(1.2rem, 3vw, 2.25rem); color: var(--text-color); min-width: 0; }
-  .article-breadcrumb, .article-context, .article-dates { display: flex; flex-wrap: wrap; gap: .5rem 1rem; font-size: .8rem; color: var(--text-color-muted); }
-  .article-breadcrumb { margin-bottom: 1.5rem; align-items: center; }
-  .article-breadcrumb a { padding-block: .5rem; }
-  .article-context span { border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent); padding: .25rem .6rem; border-radius: .3rem; color: var(--primary); }
-  h1 { font-size: clamp(1.65rem, 3.4vw, 2.4rem); font-weight: 750; line-height: 1.2; margin: .8rem 0; }
-  .article-description { font-size: 1.05rem; line-height: 1.65; max-width: 75ch; }
-  .article-dates { margin: .85rem 0 1.25rem; }
-  .article-period { padding: .75rem 1rem; border-left: 2px solid var(--primary); font-size: .85rem; line-height: 1.6; margin-bottom: 1.25rem; }
+  .article-shell {
+    width: 100%;
+    margin: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.15rem;
+  }
+  .article-page { padding: clamp(1.25rem, 2.6vw, 2.15rem); color: var(--text-color); min-width: 0; }
+  .article-breadcrumb, .article-context, .article-dates { display: flex; flex-wrap: wrap; gap: .45rem .85rem; font-size: .79rem; color: var(--text-color-muted); }
+  .article-breadcrumb { margin-bottom: 1rem; align-items: center; }
+  .article-breadcrumb a { padding-block: .2rem; }
+  .article-context span { border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent); padding: .18rem .55rem; border-radius: .3rem; color: var(--primary); font-weight: 650; }
+  .article-context span.is-v1 { border-color: rgb(245 158 11 / 0.4); color: #fcd34d; background: rgb(245 158 11 / 0.1); }
+  h1 { font-size: clamp(1.65rem, 3vw, 2.25rem); font-weight: 760; line-height: 1.18; margin: .6rem 0; }
+  .article-description { font-size: 1rem; line-height: 1.62; max-width: 74ch; color: color-mix(in srgb, var(--text-color) 88%, transparent); }
+
+  .article-meta-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 1.25rem;
+    margin: 0.85rem 0 1rem;
+    padding-block: 0.65rem;
+    border-block: 1px solid rgb(255 255 255 / 0.08);
+  }
+  .article-dates { margin: 0; align-items: center; }
+
+  .article-period {
+    padding: .65rem .95rem;
+    border-left: 3px solid var(--primary);
+    background: color-mix(in srgb, var(--primary) 6%, transparent);
+    border-radius: 0 .4rem .4rem 0;
+    font-size: .84rem;
+    line-height: 1.55;
+    margin-bottom: 1rem;
+  }
+  .article-period a { margin-left: .35rem; font-weight: 680; }
   a { color: var(--primary); text-underline-offset: .2em; }
   a:hover { text-decoration: underline; }
-  .article-contents { margin-bottom: 1.5rem; border-block: 1px solid color-mix(in srgb, var(--primary) 20%, transparent); padding: .75rem 0; }
-  summary { cursor: pointer; font-weight: 650; padding: .5rem 0; }
-  .article-contents ol { padding-left: 1.2rem; max-height: 50vh; overflow-y: auto; }
-  .article-contents a { display: inline-block; padding: .4rem 0; }
-  .article-reading { border-top: 1px solid color-mix(in srgb, var(--primary) 30%, transparent); padding-top: 1.5rem; margin: 2rem 0; display: grid; gap: 1.5rem; }
-  .article-next { padding: 1.25rem; background: color-mix(in srgb, var(--primary) 7%, transparent); border-radius: .6rem; }
-  .reading-label { text-transform: uppercase; letter-spacing: .05em; font-size: .75rem; color: var(--text-color-muted); margin-bottom: .5rem; }
-  .article-next > a { display: block; font-size: 1.2rem; font-weight: 700; line-height: 1.4; }
-  .article-next > p:last-child { margin-top: .6rem; line-height: 1.6; font-size: .9rem; }
-  .article-reading h2 { font-size: 1.1rem; font-weight: 700; }
-  .article-reading li { margin-top: .6rem; line-height: 1.5; }
-  .article-reading li a { display: inline-block; padding-block: .25rem; }
-  .related-kind { display: block; font-size: .75rem; color: var(--text-color-muted); }
-  .article-back { display: inline-block; padding-block: .75rem; font-weight: 650; }
+
+  /* Proportion cover image so wide 16:9 renders never swallow the first screen */
+  :global(#post-cover.post-cover-frame) {
+    max-height: 23rem;
+    background: #0a1216;
+    border: 1px solid rgb(255 255 255 / 0.08);
+  }
+  :global(#post-cover.post-cover-frame img) {
+    max-height: 23rem;
+    width: 100%;
+    object-fit: contain !important;
+  }
+
+  .article-contents { margin-bottom: 1.25rem; border-block: 1px solid color-mix(in srgb, var(--primary) 20%, transparent); padding: .5rem 0; }
+  summary { cursor: pointer; font-weight: 680; padding: .35rem 0; font-size: .9rem; }
+  .article-contents ol { padding-left: 1.2rem; max-height: 45vh; overflow-y: auto; margin-top: .3rem; }
+  .article-contents a { display: inline-block; padding: .25rem 0; font-size: .88rem; }
+
+  /* Desktop right TOC & quick-navigation rail */
+  .article-toc-rail { display: none; }
+  .toc-rail-card { padding: 1rem 1.1rem; }
+  .toc-rail-label { font-size: 0.7rem; font-weight: 750; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary); margin-bottom: 0.55rem; }
+  .toc-rail-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.3rem; max-height: calc(100vh - 15rem); overflow-y: auto; }
+  .toc-rail-list li a {
+    display: block;
+    padding: 0.2rem 0 0.2rem 0.65rem;
+    border-left: 2px solid rgb(255 255 255 / 0.08);
+    font-size: 0.81rem;
+    line-height: 1.38;
+    color: color-mix(in srgb, var(--text-color) 82%, transparent);
+    text-decoration: none;
+  }
+  .toc-rail-list li.is-sub a { padding-left: 1.2rem; font-size: 0.76rem; color: var(--text-color-muted); }
+  .toc-rail-list li a:hover { color: var(--primary); border-left-color: var(--primary); }
+  .toc-rail-footer {
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgb(255 255 255 / 0.08);
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 650;
+  }
+  .toc-rail-footer.no-toc { margin-top: 0; padding-top: 0; border-top: 0; }
+  .toc-rail-footer .toc-rail-label { margin-bottom: 0.2rem; }
+
+  /* Bottom reading path — balanced 2-column Prev/Next + 2-column Related grid (zero dead space) */
+  .article-reading {
+    border-top: 1px solid color-mix(in srgb, var(--primary) 26%, transparent);
+    padding-top: 1.25rem;
+    margin: 1.65rem 0 1.25rem;
+    display: grid;
+    gap: 1.15rem;
+  }
+  .reading-step-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.85rem; }
+  .reading-step-grid.is-pair { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
+  .article-prev-card, .article-next {
+    padding: 1rem 1.15rem;
+    border-radius: 0.55rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .article-prev-card {
+    background: rgb(0 0 0 / 0.2);
+    border: 1px solid rgb(255 255 255 / 0.09);
+  }
+  .article-next {
+    background: color-mix(in srgb, var(--primary) 7%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  }
+  .reading-label { text-transform: uppercase; letter-spacing: .06em; font-size: .7rem; font-weight: 750; color: var(--text-color-muted); margin-bottom: .35rem; }
+  .prev-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.35rem; }
+  .prev-list a { font-size: 0.96rem; font-weight: 700; line-height: 1.38; }
+  .article-next > a { display: block; font-size: 1.06rem; font-weight: 750; line-height: 1.36; }
+  .article-next > p:last-child { margin-top: .4rem; line-height: 1.52; font-size: .86rem; color: color-mix(in srgb, var(--text-color) 85%, transparent); }
+
+  .related-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.4rem 1rem;
+    margin-bottom: 0.65rem;
+  }
+  .article-reading h2 { font-size: 1.02rem; font-weight: 720; }
+  .article-back { font-size: 0.85rem; font-weight: 680; }
+  .related-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+  .related-grid li {
+    padding: 0.7rem 0.85rem;
+    border-radius: 0.5rem;
+    background: rgb(0 0 0 / 0.18);
+    border: 1px solid rgb(255 255 255 / 0.08);
+    line-height: 1.42;
+  }
+  .related-grid li a { font-size: 0.9rem; font-weight: 680; display: block; }
+  .related-kind { display: block; margin-top: 0.2rem; font-size: .73rem; color: var(--text-color-muted); }
+
+  /* Compact license block at bottom of article */
+  :global(.article-page .license-container) {
+    padding: 0.85rem 1.1rem !important;
+    margin-bottom: 0 !important;
+    font-size: 0.84rem;
+  }
+
   :global(.article-page [id]) { scroll-margin-top: 6rem; }
-  @media (min-width: 1280px) { .article-contents { display: none; } }
-  @media print { .article-reading, .article-contents { display: none; } }
+
+  @media (min-width: 1100px) {
+    .article-shell {
+      grid-template-columns: minmax(0, 1fr) 17rem;
+      align-items: start;
+    }
+    .article-shell .article-contents { display: none; }
+    .article-toc-rail { display: block; position: sticky; top: 6.15rem; }
+  }
+  @media (max-width: 720px) {
+    .reading-step-grid.is-pair, .related-grid { grid-template-columns: 1fr; }
+  }
+  @media print { .article-reading, .article-contents, .article-toc-rail { display: none; } }
 </style>

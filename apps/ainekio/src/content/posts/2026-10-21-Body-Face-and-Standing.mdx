@@ -54,34 +54,32 @@ eyes and expression elements remain procedural.
 
 ## Ground-repaired 4th-wire Stand verification and connection-loss hold
 
-Initial loaded tests showed analog feedback readings pinned near their minima even
-while the robot was visibly standing. Tracing and repairing a loose ground in the
-feedback harness restored clean potentiometer readings across all twelve channels.
+On the first loaded standing test after reassembly, every analog feedback channel read
+pinned near zero even though the robot was clearly standing on the desk. Tracing the
+harness with a multimeter turned up a loose ground lead on the multiplexer board;
+resoldering that ground immediately brought back clean potentiometer voltages across all
+twelve joints.
 
-On the October 20 retest with Stand verification enabled (**400 µs** arrival
-tolerance), the robot rose smoothly into Stand and held steady without jerking across
-**65 snapshots over 19.22 seconds**: all twelve joints stayed well inside tolerance
-with a peak filtered error of **175.74 µs** and zero corrective replans.
+Retesting on October 20 with closed-loop Stand verification enabled (**400 µs** arrival
+tolerance), the robot pressed smoothly into Stand and held steady across **65 snapshots
+over 19.22 seconds**: all twelve joints stayed well inside bounds with a peak filtered
+error of **175.74 µs** and zero corrective replans.
 
-- **Explicit unverified receipt state:** When post-command readings are unavailable,
-  firmware finishes the trajectory, holds powered targets, and reports
-  `position not verified` rather than fabricating arrival or falsely declaring a jam.
-- **Powered continuity across Wi-Fi drops (`0.8.113-p4-link-motion`):** Instead of
-  disabling the PCA9685 and dropping the robot on a connection loss, finite motions
-  now complete locally and open-ended gaits execute a graceful `Finish` into a powered
-  standing hold.
-- **Arrival-aware gesture player (`0.8.115-p4-gesture-arrival`) & inactivity rest:**
-  Named gestures now ramp at half max joint speed (with final-approach deceleration on
-  *Sit*, *Rest*, and *Crouch*) and verify calibrated shaft arrival before consuming
-  hold durations. A new robot-saved **Lay down after inactivity** timer (default
-  3 minutes) automatically rests the body when idle.
+I also hardened what happens when something goes wrong mid-motion. If analog readings
+drop out, the P4 finishes its trajectory, keeps holding servo torque, and reports the
+pose as unverified instead of pretending it arrived or declaring a phantom jam. If Wi-Fi
+drops mid-walk, the controller no longer cuts power to the PCA9685 and flops onto its
+belly—finite gestures finish locally and continuous walks step cleanly into a powered
+standing hold, followed by an automatic rest lay-down after 3 minutes of inactivity.
+Named gestures like *Sit*, *Rest*, and *Crouch* now ease into their final approach and
+wait for real shaft arrival before starting hold timers.
 
 ## Learning from physical walking: periodic correction and BoTorch loop
 
-On October 19, we recorded commanded motion, all twelve 4th-wire shaft readings, IMU
-attitude, and camera frames during floor walks, fitted a compact periodic joint
-correction on the host, and evaluated it at 50% gain on the P4 across four 16-cycle
-steady walking trials (with gyro heading hold enabled):
+On October 19 I logged commanded poses, all twelve 4th-wire shaft readings, IMU
+attitude, and camera frames across real floor walks, fitted a periodic joint-lag
+correction on the workstation, and tested it at 50% gain on the P4 across four 16-cycle
+walking bouts (with gyro heading hold active):
 
 | Trial | Learned correction | Linkage tracking error (RMS) | Measured floor travel |
 | --- | --- | ---: | --- |
@@ -90,39 +88,29 @@ steady walking trials (with gyro heading hold enabled):
 | Baseline 2 | Off | 17.21 mm | ~21.5 in |
 | Candidate 2 | 50% | **16.77 mm** | ~30.5 in (no rear sag) |
 
-Pooled linkage tracking error dropped from **17.23 mm to 16.75 mm RMS (−2.84%)** and
-eliminated rear sagging during the candidate runs.
+Pooled linkage tracking error tightened from **17.23 mm to 16.75 mm RMS (−2.84%)** and
+stopped the rear hindquarters from sagging mid-stride.
 
 ### Host-side BoTorch optimization and MoGe-2 visual landmark tracking
 
-To automate policy search during everyday use, recording and optimization moved into
-Body Control's persistent host service (`Recordings → Learning history`):
+To tune gait parameters systematically rather than tweaking numbers by hand, I built a
+host-side **BoTorch Bayesian optimizer** paired with **MoGe-2** monocular depth
+landmark tracking. Candidate gait profiles are checked against the four-bar kinematic
+workspace first, tested in P4 RAM across forward, reverse, turn, and bound trials
+scored by 3D visual landmark displacement, and saved to flash only when they beat the
+incumbent across all priority directions.
 
-- **BoTorch Bayesian optimizer:** Tunes gait profile parameters and feedback gains
-  across forward Walk, backward Walk, left/right turns, and bounding Run. Candidate
-  policies are checked against the linkage preview, evaluated in P4 RAM, and promoted
-  to flash only after outperforming the incumbent across all priority directions.
-- **MoGe-2 monocular depth + 3D landmark tracking:** Estimates camera motion against
-  retained 3D visual landmarks (transformed into the body frame) as an alternative to
-  ground-plane homography, feeding scored displacement into the learning loop.
+## Sub-500 ms physical reactions when tipped or shaken
 
-## MetaHuman OS: sub-500 ms Fast Body Events and bridge admission fixes
+Routing physical bumps through the full multi-step planning graph felt noticeably too
+slow, so I added a dedicated single-call **Fast Body Event** reflex path running on the
+local **Qwen3.5 2B Q8_0** model. As soon as the IMU flags a tip or sudden shake, the P4
+flips the LCD face to `Confused` or `Surprised` and fires a single inference call for a
+short, dryly observant spoken reaction—landing in **486 ms** for a tip-over and
+**316 ms** when picked up and shaken.
 
-To make physical reactions feel immediate when Ainekio is tipped or shaken, we added a
-dedicated **Fast Body Event** workflow (`Lightweight` model category on the unadapted
-**Qwen3.5 2B Q8_0** base):
-
-1. **Immediate face preset + single-call speech:** Sets `Confused` (tipped) or
-   `Surprised` (rapid movement) immediately before inference and generates a brief,
-   darkly humorous spoken reaction in a single LLM call—clocking **486 ms** for tipped
-   and **316 ms** for rapid movement.
-2. **Motion-aware IMU event filtering (`0.8.113+`):** Body Control pairs P4 IMU
-   samples with active execution context so normal accelerations during Walk, Run,
-   Crawl, or Crab do not false-trigger shake reactions, while `Tipped` compares
-   measured attitude against the authored pose's intended vertical.
-3. **Semi Auto 5-minute inactivity timer & bridge admission:** Active Operator's Semi
-   Auto mode now waits for a configurable **5-minute inactivity window** rather than
-   re-triggering on its own queue bookkeeping. The Environment Bridge also removed the
-   legacy payload-size cap (passing full camera + depth observations cleanly) and drops
-   unsolicited sensor events when MetaHuman is offline while preserving results for
-   already-admitted work.
+Because walking and bounding shake the chassis on purpose, Body Control now filters IMU
+triggers against the active gait and compares tilt against the intended pose angle so
+the robot doesn't startle itself mid-trot. Autonomous check-ins also wait for a genuine
+5-minute quiet window rather than re-triggering on internal queue updates, and full
+camera-plus-depth frames now cross the bridge without hitting old payload caps.

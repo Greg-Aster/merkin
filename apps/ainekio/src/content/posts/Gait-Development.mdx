@@ -1,12 +1,12 @@
 ---
 title: "Quadruped Gait Development: On-Chip ESP32-P4 Neural Gait, Four-Bar Kinematics & MuJoCo MJX RL"
 published: 2026-09-15
-updated: 2026-11-11
-description: "Complete technical guide and progression for Ainekio locomotion: on-chip 50 Hz 107.8 KB L2-cached ESP32-P4 MicroDuck neural gait, DAgger distillation, 4,096-env GPU hardware twins, 600M/800M Pupper V3 physical floor trials, 349-example Freestyle library, and V2 linkage kinematics."
+updated: 2026-11-12
+description: "Complete locomotion reference for Ainekio: V2 four-bar linkage kinematics, closed-loop Stand and Walk, the 349-motion Freestyle library, imitation carpet trials, MuJoCo MJX reinforcement learning, and on-chip 50 Hz 107.8 KB ESP32-P4 MicroDuck walking."
 image: "/assets/ainekio/2026-10-12-refresh/blender-side.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
-authorName: "Ainekio Project"
-authorBio: "Robot familiar field notes"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: true
 showToc: true
 tags: [Ainekio, V1, V2, Gait, Kinematics, Linkages, Reinforcement Learning, MuJoCo, ESP32-P4]
@@ -22,20 +22,21 @@ reading:
   related: ["ainekio-v2", "2026-11-11-on-chip-neural-gait-and-ainekio-os", "2026-11-06-carpet-trials-rl-and-big-brother", "2026-11-01-neural-walking"]
 ---
 
-Ainekio's locomotion stack has evolved from eight open-loop servo channels playing fixed keyframe tables on V1 to a twelve-servo, closed-loop kinematic and **on-chip neural locomotion architecture** on V2. Today the system spans six integrated layers:
+Ainekio's locomotion stack ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) has grown from eight open-loop servo channels playing fixed keyframe tables on V1 to a twelve-servo, closed-loop kinematic and **on-chip neural walking architecture** on V2:
 
-1. **Compact 12-DOF linkage kinematics** (`35 mm` carrier, `20 mm` crank, `28 mm` pickup, `38 mm` rod, `55 mm` distal leg) with onboard analytical inverse kinematics and 8-pass Gauss-Newton Cartesian workspace boundary projection (`0.8.150+`).
-2. **Closed-loop `ESP32-P4` execution** using 4th-wire potentiometer feedback through a `CD74HC4067` multiplexer (with One-Euro velocity filtering) and `208 Hz` `LSM6DS3` `FusionAhrs` attitude feedback, achieving `2 mm` settle accuracy in `Stand` and closed-loop phase synchronization in `Walk` (`0.8.123+`).
-3. **The 349-example SQLite Freestyle motion library (`489`-row `motion-targets-v1` dataset)**, pairing finite target programs, shaft-arrival verification, native-`stand` physical jam/fall recovery, and Big Brother escalation.
-4. **Host neural gait streaming (`50 Hz`)**, spanning early `walk_nominal_v1` carpet trials (`2026-11-02`) and the `600M` / `800M`-step **Stanford Pupper V3 MJX host actor** validated across physical slick hardwood and carpet-seam bouts (`2026-11-09`).
-5. **Full-CAD GPU Hardware-Twin Reinforcement Learning (`4,096` MuJoCo envs)**, modeling the 12-bit ADC + rail sag, `208 Hz` `LSM6DS3` + `FusionAhrs`, `PCA9685` `4.07 µs` quantization, multi-surface friction (`0.14–1.45`), and `21–40 mm` ledges (`tensor_sensors.py` + `tensor_body.py`).
-6. **On-Chip `50 Hz` `ESP32-P4` MicroDuck Inference (`0.8.159-p4-microduck-v17`, `2026-11-11`)**, distilling the `547 KB` teacher policy via 2-round DAgger into a **`110,432-byte` (`107.8 KB`) `int8` student** (`720 → 128 → 64 → 32 → 12`) that runs natively on Core 1 inside the `ESP32-P4`'s **`128 KB` L2 cache** with zero Wi-Fi step jitter.
+1. **Compact 12-DOF four-bar kinematics** (`35 mm` carrier, `20 mm` crank, `28 mm` pickup, `38 mm` rod, `55 mm` distal leg) with analytical inverse kinematics and 8-pass Gauss-Newton Cartesian workspace boundary projection.
+2. **Closed-loop `ESP32-P4` execution** reading 4th-wire potentiometer feedback through `CD74HC4067` channels `C4–C15` into `GPIO49` (`ADC2_CH0`) alongside `208 Hz` `LSM6DS3` attitude sensing, settling within `2 mm` in `Stand` and synchronizing gait phases in `Walk`.
+3. **The 349-motion Freestyle library** and **489-row** training dataset (**73** curated library motions + **416** synthesized fault-recovery trajectories returning to `Stand`).
+4. **Imitation and host neural gait streaming (`50 Hz`)**, spanning early carpet trials and `600M` / `800M`-step Stanford Pupper V3 MJX host policies validated across slick hardwood and carpet seams.
+5. **Full-CAD GPU Hardware-Twin Reinforcement Learning (`4,096` MuJoCo environments)** modeling the exact `650 g` CAD masses, 12-bit ADC scan and rail sag, `208 Hz` IMU filter, `PCA9685` `4.07 µs` PWM quantization, multi-surface floor friction (`0.14–1.45`), and `21–40 mm` ledges.
+6. **On-chip `50 Hz` MicroDuck gait on `ESP32-P4`**, distilling the `547 KB` teacher policy via 2-round DAgger into a **`110,432-byte` (`107.8 KB`) `int8` student** (`720 → 128 → 64 → 32 → 12`) that runs natively on Core 1 inside the `ESP32-P4`'s **`128 KB` L2 cache** with zero Wi-Fi step jitter.
 
 ---
 
-## 1. V2 linkage kinematics and workspace geometry
+## Linkage kinematics and workspace geometry
 
-Unlike V1's direct two-servo legs, each V2 leg uses three actuators mounted high in the upper leg housing:
+Unlike V1's direct two-servo planar legs, each V2 leg places three `MG90S` actuators high inside the upper servo bracket near the torso:
+
 - **Shoulder roll (`h`)**: Rotates the leg plane laterally (`±h` about body `X`) to control stance width, lateral balance, and sideways crabbing.
 - **Upper-carrier pitch (`alpha`)**: Directly rotates the `35 mm` upper carrier link.
 - **Knee linkage crank (`theta`)**: Rotates a `20 mm` input crank that drives a `38 mm` connecting rod attached to a `28 mm` pickup radius on the `55 mm` distal lower leg (`beta`).
@@ -49,7 +50,7 @@ Unlike V1's direct two-servo legs, each V2 leg uses three actuators mounted high
 | **Sep 15 FL Baseline** | `40 mm` | `21 mm` | `20 mm` | `40 mm` | `60 mm` | Initial OpenHarmony-derived planar sweep study |
 | **Sep 19 Compact Probe** | `40 mm` | `22 mm` | `24 mm` | `36 mm` | `55 mm` | Single-leg `10 / 20 / 30 mm` advance study |
 | **Sep 21 Variable Gait** | `40 mm` | `24 mm` | `24 mm` | `38 mm` | `55 mm` | Four-leg continuous `Stride %` and `Motion rate` solver |
-| **Oct 6 – Nov 6 Production V2** | **`35 mm`** | **`20 mm`** | **`28 mm`** | **`38 mm`** | **`55 mm`** | Higher mechanical leverage (`~20%` improved lifting torque) for the `650 g` body |
+| **Oct 6 – Nov 11 Production V2** | **`35 mm`** | **`20 mm`** | **`28 mm`** | **`38 mm`** | **`55 mm`** | Higher mechanical leverage (`~20%` improved lifting torque) for the `650 g` body |
 
 ### Planar forward and inverse kinematics
 
@@ -70,18 +71,17 @@ F_XY = D + R(beta) (F0_XY - D0)
 F_CAD = H + Rx(h) ((F_XY.x, F_XY.y, F0.z) - H)
 ```
 
-Because equal positive and negative crank changes produce asymmetric changes in `beta`, the `ESP32-P4` solves the exact four-bar/five-bar closure at runtime and accounts for the rotating sole hull rather than assuming a constant gear ratio or fixed vertical foot offset.
+Because equal positive and negative crank changes produce asymmetric changes in `beta`, the `ESP32-P4` solves the exact four-bar closure at runtime and accounts for the curved 3D-printed rocking sole rather than assuming a constant gear ratio or point foot.
 
 ---
 
-## 2. Closed-loop `ESP32-P4` `Stand` and `Walk` execution
+## Closed-loop Stand and Walk execution
 
-The `ESP32-P4` controller combines the analytic gait planner with real-time joint and inertial feedback:
+The `ESP32-P4` controller pairs the analytic gait planner with real-time joint and inertial feedback:
 
-- **4th-wire shaft arrival verification**: All twelve `MG90S` servos route potentiometer wiper voltages through the `CD74HC4067` multiplexer into the P4 ADC, calibrated with per-joint curves in Body Control. Rather than assuming a pose completed merely because a timer expired, the controller verifies physical shaft arrival before advancing target sequences.
-- **Closed-loop `Stand` (`2 mm` settle)**: During `Stand`, local feedback and `LSM6DS3` (`208 Hz`) attitude leveling drive all four feet to their target reference and settle the body within **`2 mm`** of the geometric target.
-- **Stack repair (`0.8.123`) & continuous `Walk`**: Firmware `0.8.123` resolved the FreeRTOS motion-task stack overflow that previously interrupted multi-joint feedback solving, enabling sustained closed-loop `Stand` and `Walk` execution.
-- **Cartesian boundary projection (`0.8.150`)**: When an operator, Freestyle program, or neural policy requests a foot target outside the physical `35/20/28/38/55 mm` linkage envelope, firmware `0.8.150` projects the target onto the nearest valid point on the Cartesian workspace boundary so the leg tracks smoothly without linkage lockup or servo stall.
+- **4th-wire shaft arrival verification**: All twelve `MG90S` servos route potentiometer wiper voltages through `CD74HC4067` channels `C4–C15` into `GPIO49` (`ADC2_CH0`), smoothed by a One-Euro velocity filter and calibrated with per-joint curves in Body Control. Rather than assuming a pose completed because a timer expired, the controller verifies physical shaft arrival before advancing target sequences.
+- **Closed-loop `Stand` (`2 mm` settle) & `Walk`**: During `Stand`, local joint feedback and `LSM6DS3` (`208 Hz`) attitude leveling drive all four feet to their target reference and settle the torso within **`2 mm`** of the geometric target, while continuous `Walk` synchronizes phase transitions against measured leg tracking.
+- **Cartesian boundary projection**: When an operator, Freestyle program, or neural policy requests a foot target outside the physical `35/20/28/38/55 mm` linkage envelope, onboard 8-pass Gauss-Newton projection maps the target onto the nearest reachable boundary point so the leg tracks smoothly without linkage lockup or servo stall.
 
 ### Continuous gait family (`Walk`, `Run`, `Crawl`, `Crab`)
 
@@ -90,7 +90,7 @@ The `ESP32-P4` controller combines the analytic gait planner with real-time join
     <source src="/posts/gait-development/2026-09-21-variable-gait/ainekio-variable-gait-demo.mp4" type="video/mp4" />
     <a href="/posts/gait-development/2026-09-21-variable-gait/ainekio-variable-gait-demo.mp4">Download the variable gait demonstration.</a>
   </video>
-  <figcaption>Independent Stride % and Motion rate controls in the continuous gait solver, transitioning smoothly between 25% and 100% stride and 1× to 2× cadence while holding planted stance anchors fixed.</figcaption>
+  <figcaption>Independent Stride % and Motion rate controls in the continuous gait solver, transitioning between 25% and 100% stride and 1× to 2× cadence while holding planted stance anchors fixed.</figcaption>
 </figure>
 
 | Planner Parameter | Walk | Run | Crawl | Crab |
@@ -110,9 +110,9 @@ The `ESP32-P4` controller combines the analytic gait planner with real-time join
 
 ---
 
-## 3. The 349-example SQLite Freestyle library and recovery
+## Freestyle motion library and fault recovery
 
-Alongside algorithmic gaits and the 23 compiled finite gestures (`Wave`, `Bow`, `Stretch`, `Worm`, `Shrug`, `Lay Down`, `Play Dead`, `Sit`, `Rest`, `Upright`, etc.), V2 features **Freestyle**: a generative motion system backed by an editable **SQLite library of 349 curated examples** in Body Control.
+Alongside algorithmic gaits and 23 compiled finite gestures (`Wave`, `Bow`, `Stretch`, `Worm`, `Shrug`, `Lay Down`, `Play Dead`, `Sit`, `Rest`, `Upright`), V2 runs **Freestyle**: a generative motion system backed by an editable **349-motion library** in Body Control.
 
 <figure>
   <video controls playsInline preload="metadata" width="960" height="540" poster="/posts/2026-09-24-progress/motion-showcase.webp" className="w-full rounded-xl">
@@ -122,44 +122,44 @@ Alongside algorithmic gaits and the 23 compiled finite gestures (`Wave`, `Bow`, 
   <figcaption>33-chapter Blender motion showcase covering Ainekio's expressive gesture repertoire and continuous gaits.</figcaption>
 </figure>
 
-- **Finite target programs**: Given a natural-language prompt and current joint/IMU state, `Freestyle Qwen` (or escalated **Big Brother** inference) emits a complete, finite sequence of joint, foot, or body targets with explicit speeds, holds, and LCD facial expressions.
-- **Verified shaft arrival**: Each step in a Freestyle program waits for measured potentiometer arrival (`CD74HC4067`) within tolerance before advancing to the next keyframe—proven across nine-target supported `Stretch` and lift/sway trials.
-- **Event-driven jam and fall recovery**: Rather than looping blindly inside the model, Freestyle executes a program once and relies on real hardware events (`tipped`, `jammed`, `stalled`) from the `ESP32-P4` to trigger targeted recovery programs that unjam a limb or return the body to `Stand`.
+- **489-row posture & fault-recovery dataset**: The local `Qwen3.5-0.8B` LoRA specialist was trained on a **489-row** dataset combining **73** curated motions from the 349-motion library with **416** synthesized hardware fault-recovery trajectories that safely unload snagged feet and settle back into a stable `Stand`.
+- **Verified shaft arrival**: Given a plain-English request and live joint/IMU telemetry, Freestyle synthesizes a finite spatial IK program (`body`, `feet`, `pose`, `move`, `oscillate`, `gait`) paired with **59** `ST7789` LCD expressions, waiting at each phase boundary for measured `CD74HC4067` potentiometer arrival within tolerance.
+- **Event-driven jam & fall recovery**: If a foot catches on carpet pile mid-gesture, the `ESP32-P4` raises a non-terminal `servo_stall` event while keeping holding torque alive so the gateway can splice in a live backoff-and-`Stand` recovery trajectory.
 
 ---
 
-## 4. Neural gait streaming (`walk_nominal_v1`) and physical carpet trials
+## Imitation walking and physical carpet trials
 
-To move beyond hand-tuned trajectories, Body Control includes a **50 Hz neural policy streamer** and demonstration/imitation training pipeline:
+Before training pure reinforcement-learning policies from scratch, Body Control validated `50 Hz` closed-loop neural command streaming through imitation learning:
 
-- **Demonstration-trained policy (`walk_nominal_v1`)**: Trained across `360,000` imitation updates across five locomotion commands (`forward`, `reverse`, `turn_left`, `turn_right`, and `stand_hold`). In five-command simulation benchmarks, `walk_nominal_v1` achieved `27.82 mm/s` forward directly and `22.45 mm/s` through the connected Body Control → `ESP32-P4` execution path with zero falls.
-- **Physical carpet trials (`2026-11-02`)**: Streaming `walk_nominal_v1` at `50 Hz` to the `650 g` physical V2 robot on carpet verified end-to-end closed-loop neural command streaming, shaft-feedback capture, and attitude tracking under real surface friction and linkage compliance.
-- **`v6-pending` GRU observation schema**: Captured carpet telemetry directly informed the recurrent **`v6-pending` GRU** architecture, which expands the observation vector with historical joint position errors, measured shaft velocities, `208 Hz` IMU angular rates, gravity projection, and active command phase so the policy can adapt to servo lag and carpet drag online.
+- **Demonstration-trained policy**: Trained across `360,000` imitation updates spanning five locomotion commands (`forward`, `reverse`, `turn_left`, `turn_right`, and `stand_hold`), achieving `27.82 mm/s` forward in simulation and `22.45 mm/s` through the full gateway-to-`ESP32-P4` control loop with zero falls.
+- **Physical carpet trials (`2026-11-02`)**: Streaming `50 Hz` targets to the `650 g` V2 robot on living-room carpet verified closed-loop 4th-wire shaft-feedback capture and `208 Hz` attitude tracking under real surface friction and four-bar linkage compliance.
+- **Proprioceptive history design**: Real carpet logs showed where single-step observations lagged behind `MG90S` gearing backlash and pile drag, motivating multi-step proprioceptive history windows (`15 × 48 = 720` features) in subsequent RL trainers.
 
 ---
 
-## 5. Quadruped reinforcement learning & real-world neural walking (`2026-11-05` – `2026-11-06`)
+## Reinforcement learning and real-world neural walking
 
-To train policies that transfer cleanly from simulation to the `650 g` robot without hand-crafted demonstrations, four quadruped reinforcement-learning frameworks and a full-CAD physics pipeline were integrated in November 2026:
+To train policies that transfer directly from simulation to the `650 g` physical robot without hand-authored trajectories, a full-CAD MuJoCo physics export and four quadruped RL references were brought onto the bench in November 2026:
 
-| RL / Simulation Milestone | Architecture & Role in Ainekio |
+| RL / Simulation Milestone | Role in Ainekio Locomotion |
 | --- | --- |
-| **Walk in the Park (`DroQ`)** | Sample-efficient Dropout Q-Functions (`DroQ`) actor-critic pipeline adapted for direct quadruped real-world / fine-tuning data collection and low-sample policy updates |
-| **Microduck RL** | Compact bipedal/quadruped locomotion reward shaping, phase-clock conditioning, and domain randomization reference adapted to small servo-driven linkages |
-| **Stock Pupper V3 MuJoCo Baseline** | End-to-end validation of the JAX / Brax / MuJoCo MJX GPU training pipeline on the proven 12-DOF Stanford Pupper V3 quadruped model before swapping in Ainekio's closed-chain geometry |
-| **Ainekio Full-CAD MJCF in JAX/Brax/MJX** | Direct export of the complete Blender V2 CAD assembly—including exact part masses totaling `650 g`, `35/20/28/38/55 mm` four-bar/five-bar closed-loop equality constraints, `MG90S` actuator dynamics, and sole collision meshes—into MuJoCo XML (`MJCF`) for massively parallel GPU reinforcement learning |
+| **Walk in the Park (`DroQ`)** | Sample-efficient Dropout Q-Functions actor-critic reference adapted for low-sample fine-tuning |
+| **Microduck RL** | Phase-clock conditioning, reward shaping, and domain randomization adapted from `OpenDuck` to closed-chain hobby linkages |
+| **Stanford Pupper V3 MuJoCo Baseline** | End-to-end verification of the JAX / Brax / MuJoCo MJX GPU training pipeline on a proven 12-DOF quadruped before swapping in Ainekio's geometry |
+| **Ainekio Full-CAD MJCF** | Direct export of the 375-mesh Blender V2 assembly—exact `650 g` part masses, `35/20/28/38/55 mm` four-bar equality constraints, `MG90S` speed-torque ceiling, and curved 3D-printed rocking soles—into MuJoCo XML (`MJCF`) using Conjugate Gradient (`500 Hz` physics / `50 Hz` control) |
 
-### Resolving MJX training failure modes: tiny hops $\rightarrow$ "scootybooty" $\rightarrow$ centered stride (`200M` steps)
+### Fixing MJX failure modes: tiny hops $\rightarrow$ "scootybooty" $\rightarrow$ centered stride (`200M` steps)
 
-Training a closed-chain four-bar quadruped over 200 million MJX steps required diagnosing and resolving two distinct locomotion failure modes before sim-to-real deployment:
+Training a closed-chain four-bar quadruped over 200 million MJX steps exposed two distinct sim-to-real failure modes before clean walking emerged:
 
-1. **Rapid tiny hops (`35M`-step rollout, [watch in Gallery](/gallery/#rl-tiny-hops-35m))**: With narrow initial action scaling, the policy vibrated its feet in rapid miniature hops (`20–27 mm` fore-aft span) rather than sweeping through full four-bar strides.
-2. **"Scootybooty" reverse dragging (`200M`-step Run #4, [watch in Gallery](/gallery/#rl-scootybooty-200m))**: Widening the action scale fixed forward stride length, but the policy parked its rear legs in an asymmetric split stance and dropped its rear torso to `0.044 m` during `-0.10 m/s` reverse commands—dragging/scooting its back end along the floor instead of stepping cleanly.
-3. **Centered-stride & upright reverse (`200M`-step Run #5, [watch in Gallery](/gallery/#rl-centered-stride-200m))**: Penalizing off-center foot parking and shaping foot air-time credit increased `eval/episode_feet_air_time` **`3.5×`** (`157.29` $\rightarrow$ `557.11`), widened fore-aft foot swing **`2.2×–2.8×`** (`56.6–63.7 mm` centered around home `X_body`), eliminated chassis and knee collisions (`0.0`), and kept reverse walking upright at **`0.072 m`** (`rear_z_min = 0.060 m`, zero rear scoot).
+1. **Rapid tiny hops (`35M`-step rollout, [watch in Gallery](/gallery/#rl-tiny-hops-35m))**: With narrow initial action scaling, the policy vibrated its feet in miniature hops (`20–27 mm` fore-aft span) instead of sweeping through full four-bar strides.
+2. **"Scootybooty" reverse dragging (`200M`-step Run #4, [watch in Gallery](/gallery/#rl-scootybooty-200m))**: Widening the action scale fixed forward stride length, but the policy parked its rear legs in an asymmetric split stance and dropped its rear torso to `0.044 m` during `-0.10 m/s` reverse commands—scooting its back end across the floor instead of stepping.
+3. **Centered stride & upright reverse (`200M`-step Run #5, [watch in Gallery](/gallery/#rl-centered-stride-200m))**: Penalizing off-center foot parking and shaping foot air-time credit increased `feet_air_time` **`3.5×`** (`157.29` $\rightarrow$ `557.11`), widened fore-aft foot swing **`2.2×–2.8×`** (`56.6–63.7 mm` centered around home `X_body`), eliminated chassis and knee collisions (`0.0`), and kept reverse walking upright at **`0.072 m`** (`rear_z_min = 0.060 m`, zero rear scoot).
 
-### First real-life neural network walking run on the physical 650 g V2 robot
+### First physical neural network walk on carpet
 
-Deploying the resolved 200M-step MJX neural policy onto the physical 12-servo Ainekio V2 quadruped produced its first real-world neural network walk across carpet—walking forward and reversing cleanly without rear dragging:
+Deploying the resolved `200M`-step MJX policy onto the `650 g` 12-servo Ainekio V2 quadruped produced its first real-world neural network walk across carpet—stepping forward and reversing cleanly without rear dragging:
 
 <figure>
   <video controls playsInline preload="metadata" width="960" height="540" poster="/gallery/ainekio-v2-neural-walk-first-run-poster.webp" className="w-full rounded-xl">
@@ -171,16 +171,16 @@ Deploying the resolved 200M-step MJX neural policy onto the physical 12-servo Ai
 
 ---
 
-## 6. On-chip `50 Hz` `ESP32-P4` MicroDuck inference, L2-cache DAgger distillation & hardwood/seam bouts (`2026-11-08` – `2026-11-11`)
+## On-chip 50 Hz MicroDuck gait on ESP32-P4
 
-Between November 8 and November 11, 2026, neural locomotion moved from host-streamed WebSocket frames directly onto the robot's microcontroller (`0.8.159-p4-microduck-v17`; full milestone notes in [Nov 11 On-Chip Neural Gait & Ainekio OS](/posts/2026-11-11-on-chip-neural-gait-and-ainekio-os/)):
+Between November 8 and November 11, 2026, neural walking moved off the Wi-Fi link and directly onto the robot's microcontroller (milestone details in [Nov 11 On-Chip Neural Gait & Ainekio OS](/posts/2026-11-11-on-chip-neural-gait-and-ainekio-os/)):
 
 ![On-chip MicroDuck distillation and 50 Hz ESP32-P4 execution pipeline](/posts/2026-11-11-progress/on-chip-microduck-distillation.webp)
 
-- **GPU Hardware Twins (`4,096` MuJoCo envs)**: `tensor_sensors.py` and `tensor_body.py` replicate the 12-bit `CD74HC4067` ADC scan (rail sag `0.96–1.02`, `1.5%` stale hold, One-Euro velocity filter), `208 Hz` `LSM6DS3` + `FusionAhrs` yaw-zeroed gravity projection, exact 4-bar coupler Jacobian + `PCA9685` `4.07 µs` PWM quantization, multi-surface floor friction (`0.14–1.45`: 45% slick wood, 35% wood/carpet seam, 20% carpet), and `21–40 mm` ledges—verified bit-for-bit against the C firmware via `native.c`.
-- **2-Round DAgger Teacher-to-Student Distillation (`547 KB` → `107.8 KB`)**: Compressing the `720 → 512 → 256 → 128 → 12` teacher (`547,040 B`) via 2 rounds of Dataset Aggregation (`MAE = 0.0577`) and PPO fine-tuning produced **`microduck-v17-p4`** (`720 → 128 → 64 → 32 → 12`, **`110,432 B` / `107.8 KB`**, `-79.8%`), keeping the entire symmetric `int8` `"AMDK"` weight binary hot inside the **`ESP32-P4`'s `128 KB` L2 cache**.
-- **Native Core 1 `50 Hz` Execution**: Pinned to **Core 1** (`output_task`, `20,000 µs` period) with 8-way unrolled `int8 × int16 → int32` MACs and 8-pass Gauss-Newton Cartesian boundary projection, `microduck-v17-p4` reaches **`+0.213 m/s` forward**, **`-0.179 m/s` reverse**, and **`±60.9°/s` yaw turn** with `0` falls across 8 evaluation scenarios (deleting the `831`-line legacy `gait_learning.c`).
-- **Physical `600M` / `800M` Pupper V3 MJX Floor Trials (`2026-11-09`)**: In parallel, the host-streamed Stanford Pupper V3 MJX actor (`pupper_mjx_actor.py`) was trained to `600M` and `800M` steps and validated on physical `ainekio-p4-e6ebe5` across **6 slick hardwood bouts** and **7 carpet↔hardwood seam transitions** with zero falls.
+- **GPU Hardware Twins (`4,096` MuJoCo environments)**: Parallel GPU environments model the 12-bit `CD74HC4067` (`C4–C15` → `GPIO49`) ADC scan (rail sag `0.96–1.02`, `1.5%` stale hold, One-Euro velocity filter), `208 Hz` `LSM6DS3` yaw-zeroed gravity projection, exact four-bar coupler Jacobian + `PCA9685` `4.07 µs` PWM quantization, multi-surface floor friction (`0.14–1.45`: 45% slick wood, 35% wood/carpet seam, 20% carpet), and `21–40 mm` ledges—verified bit-for-bit against the C firmware.
+- **2-Round DAgger Teacher-to-Student Distillation (`547 KB` → `107.8 KB`)**: Compressing the `720 → 512 → 256 → 128 → 12` teacher (`547,040 B`) through two rounds of Dataset Aggregation (`MAE = 0.0577`) and PPO fine-tuning produced an `int8` student (`720 → 128 → 64 → 32 → 12`, **`110,432 B` / `107.8 KB`**, `-79.8%`) that fits hot inside the **`ESP32-P4`'s `128 KB` L2 cache**.
+- **Native Core 1 `50 Hz` Execution**: Pinned to **Core 1** (`20,000 µs` period) with 8-way unrolled `int8 × int16 → int32` multiply-accumulates and 8-pass Gauss-Newton Cartesian boundary projection, the on-chip policy reaches **`+0.213 m/s` forward**, **`-0.179 m/s` reverse**, and **`±60.9°/s` yaw turn** with `0` falls across 8 evaluation scenarios.
+- **Physical `600M` / `800M` Pupper V3 MJX Floor Trials (`2026-11-09`)**: Alongside the on-chip MicroDuck policy, the host-streamed Pupper V3 MJX actor was trained to `600M` and `800M` steps and validated on the physical V2 robot across **6 slick hardwood bouts** and **7 carpet-to-hardwood seam transitions** with zero falls.
 
 <figure>
   <video controls playsInline preload="metadata" width="1280" height="720" poster="/gallery/microduck-p4-student-110kb-poster.webp" className="w-full rounded-xl">
@@ -192,9 +192,9 @@ Between November 8 and November 11, 2026, neural locomotion moved from host-stre
 
 ---
 
-## Reference datasets and scripts
+## Reference datasets and milestones
 
-The historical V1/V2 range datasets, variable-gait trajectories, and validation scripts remain available for offline analysis:
+Historical V1/V2 range datasets, variable-gait trajectories, and dated milestone logs remain available for offline inspection:
 
 - **V1 vs. V2 Motion Envelopes**: [Per-recording, per-joint motion ranges (CSV)](/posts/2026-09-24-progress/motion-ranges.csv) · [Extraction script (Python)](/posts/2026-09-24-progress/extract-motion-ranges.py) · [V1 38-asset ranges (CSV)](/posts/gait-development/2026-09-15/v1-motion-ranges.csv).
 - **Sep 15 Linkage Kinematics Baseline**: [Range analysis (JSON)](/posts/gait-development/2026-09-15/range-analysis.json) · [Per-leg geometry snapshot (JSON)](/posts/gait-development/2026-09-15/robot-gait-parameters.json) · [Mechanism diagram (PNG)](/posts/gait-development/2026-09-15/mechanism.png).

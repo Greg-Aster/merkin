@@ -130,22 +130,22 @@ opaque identifiers, conditional requests, and compound goals.
   <figcaption>Intent orchestrator, Task specialist, Conversation, Computer-task delegation, and Body Control execution boundaries.</figcaption>
 </figure>
 
-- **Intent routing (`009` → `010`):** On the 200-request expanded evaluation benchmark,
+- **Intent routing accuracy:** On the 200-request expanded evaluation benchmark,
   acceptable routing jumped from **60/200 to 185/200** at a **100 ms median latency**
   (outperforming a parallel Speck2 experiment at 173/200).
-- **Computer-task delegation & live Robot Status:** Intent can now route file,
-  research, or software jobs to the Terminal/Codex integration via Work Coordinator
-  ([`8b398f0d`](https://github.com/Greg-Aster/ainekio-os/commit/8b398f0d)), while
-  `Robot Status` ([`7450eeba`](https://github.com/Greg-Aster/ainekio-os/commit/7450eeba))
-  distinguishes fresh, stale, disabled, and disconnected recognition states.
+- **Computer-task delegation & live Robot Status:** Intent can now hand off file,
+  research, or coding jobs to the background work coordinator in
+  [MetaHuman OS](https://github.com/Greg-Aster/ainekio-os), while the live robot status
+  summary cleanly distinguishes fresh, stale, disabled, and disconnected camera
+  recognition states.
 
-### Why we rejected a higher-scoring Task candidate
+### Why I rejected a higher-scoring Task candidate
 
 A subsequent goal-planning Task candidate improved overall evaluation matches from
-67.9% to 78.6%, but regressed on previously passing regression cases and introduced
-more unintended physical movements on conversational turns:
+67.9% to 78.6%, but regressed on previously passing regression cases and triggered more
+unintended physical movements during purely conversational turns:
 
-| Benchmark metric | Retained `010` Task adapter | Rejected goal candidate |
+| Benchmark metric | Retained Task adapter | Rejected goal candidate |
 | --- | ---: | ---: |
 | Evaluation reference matches | 159 / 234 (67.9%) | 184 / 234 (78.6%) |
 | Regression reference matches | **93 / 138 (67.4%)** | 90 / 138 (65.2%) |
@@ -154,7 +154,7 @@ more unintended physical movements on conversational turns:
 | Median serving latency | 489 ms | 484 ms |
 | Contract/schema validity | 100% (234/234 & 138/138) | 100% (234/234 & 138/138) |
 
-Keeping the regression gate strict prevented promoting an adapter that moved the robot
-during conversation-only turns. Download the
+Keeping the regression gate strict stopped me from promoting an adapter that twitched
+the legs when someone was just chatting with the robot. Download the
 [comparison metrics JSON](/posts/2026-10-12-progress/task-model-comparison.json) for
 the full breakdown.

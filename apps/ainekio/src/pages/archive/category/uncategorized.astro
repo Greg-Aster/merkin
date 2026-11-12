@@ -4,7 +4,7 @@ import { UNCATEGORIZED } from '@constants/constants'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
 ---
 
-<MainGridLayout title="Uncategorized — category archive" description="Browse Ainekio robot development articles without a category, including build notes and project updates.">
+<MainGridLayout title="Uncategorized — category archive" description="Browse Ainekio robot development articles without a category, including build notes and project updates." oneColumn={true}>
     <meta name="robots" content="noindex, follow" slot="head" />
     <ArchivePanel categories={[UNCATEGORIZED]} heading="Uncategorized — category archive"></ArchivePanel>
 </MainGridLayout>

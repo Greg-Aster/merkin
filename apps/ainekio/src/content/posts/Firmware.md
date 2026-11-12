@@ -165,7 +165,7 @@ GPIO 19/20 are assigned to I2S, so USB-JTAG is sacrificed and UART remains the d
 
 Run the ESP-IDF build from Slave/firmware/esp32s3 after loading the pinned toolchain:
 
-* source /home/greggles/esp/esp-idf-v5.5.4/export.sh
+* source esp/esp-idf-v5.5.4/export.sh
 * idf.py set-target esp32s3
 * idf.py build
 * idf.py size

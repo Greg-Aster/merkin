@@ -33,16 +33,17 @@ chosen because it is already on hand. Rather than treating battery packaging as 
 afterthought once the shell is finished, the underside is being designed around a
 removable pack from the start.
 
-The [V1 vs V2 comparison](/posts/v1-v2-comparison/) brings the
-mechanics, processing, and power arrangements together, while the
-[gait development log](/posts/gait-development/#september-24-2026--continuous-gaits-and-controller-integration)
-covers the new continuous gait controls and September 24 firmware deployment.
+The [V1 vs V2 comparison](/posts/v1-v2-comparison/) and
+[V2 power architecture guide](/posts/ainekio-v2/#power-architecture-and-wireless-keeper-bridge)
+track how the power rail evolved from here, while the
+[gait development guide](/posts/gait-development/#closed-loop-stand-and-walk-execution)
+covers the continuous gait controls deployed alongside this chassis pass.
 
 ## Chassis width and structural updates
 
-The modeling scene now measures **80.0 mm between the exterior walls of the
-center supports**, widened from 75 mm by translating each support and its leg
-mechanisms 2.5 mm outward (increasing shoulder-center spacing from 56 mm to 61 mm).
+The chassis now measures **80.0 mm across the exterior walls of the center supports**,
+widened from 75 mm by shifting each support and its leg assemblies 2.5 mm outward
+(opening shoulder-center spacing from 56 mm to 61 mm).
 
 | Area | September 22–24 change | Next focus |
 | --- | --- | --- |
@@ -69,11 +70,11 @@ cleanly inside the mask silhouette.
 
 *Reinforced center-support roots and recessed fastener seats in the underside X brace.*
 
-After all four original lower tabs split along print layers during linkage fastener
-assembly, the revised support adopted the smaller screws that worked well in
-Part_003: **1.5 mm pilots, 4 mm deep**, backed by rounded, flared roots. The mating
-brace uses 2.2 mm clearance holes with **5.4 × 2.2 mm** head recesses, leaving 2 mm
-of material beneath each screw head.
+After all four original lower tabs split along print layers when tightening linkage
+screws on the bench, I switched the center support to the smaller self-threading screws
+that held cleanly in the upper servo brackets: **1.5 mm pilots, 4 mm deep**, backed by
+rounded, flared roots. The mating brace uses 2.2 mm clearance holes with **5.4 × 2.2 mm**
+head recesses, leaving 2 mm of plastic beneath each screw head.
 
 ![Rear-panel CAD comparison showing the revised upper taper and relocated mounting holes.](/posts/2026-09-24-progress/rear-panel-y-taper.webp)
 
@@ -95,18 +96,18 @@ connector clearance is finalized for the physical HUAREW PCA9685 board.
 | Conversion | External buck converter | Regulated bank output |
 | Charging | External balance charger | Integrated USB charging in removable bank |
 
-Three successive CAD clearance checkpoints evaluated how high the rounded bank can
-sit beneath the moving housings:
+Three successive CAD clearance checks tested how high the rounded power bank could sit
+under the swinging shoulder brackets without rubbing:
 
-| Checkpoint | Battery height in CAD | Clearance findings |
+| Clearance pass | Battery top height | Clearance findings |
 | --- | --- | --- |
-| 75 mm / Z54 baseline | Upper face Z54.0 mm (center Z46.0 mm) | Checked across 15,627 integer-frame poses (25 sequences) + 690 quarter-frame samples with zero bank mesh intersections; minimum ground clearance 31.29 mm in Walk, 16.07 mm in Walk–Run–Walk, 20.00 mm in Crab, and **2.29 mm in Crawl** |
-| 75 mm vs 80 mm width study | Z54.590 mm (75 mm) vs Z55.956 mm (80 mm) | Widening the support walls from 75 mm (69 mm inner) to 80 mm (74 mm inner) allows raising the battery 1.37 mm while retaining a 0.5 mm housing gap (leaving 2.755 mm below the center-mount undersides) |
-| 17° front-left pose check | Upper face Z56.792 mm (center Z48.792 mm) | Lowered 0.501 mm from the contact limit to clear the Part_003 housing at front-left shoulder `h=17°, carrier=0°, crank=0°` |
+| 75 mm width baseline | 54.0 mm datum | Zero mesh intersections across 15,627 gait frames (25 sequences) + 690 quarter-frame checks; minimum ground clearance 31.29 mm in Walk, 16.07 mm in Walk–Run–Walk, 20.00 mm in Crab, and **2.29 mm in Crawl** |
+| 75 mm vs 80 mm width study | 54.59 mm vs 55.96 mm | Widening the support walls from 75 mm (69 mm inner) to 80 mm (74 mm inner) lets the battery sit 1.37 mm higher while keeping a 0.5 mm bracket gap (leaving 2.76 mm below the center mounts) |
+| 17° inward shoulder check | 56.79 mm datum | Backed off 0.50 mm from contact to clear the front-left upper servo bracket at `17°` inward shoulder roll |
 
 ![Cross-section study comparing battery positions beneath the 75 mm and 80 mm chassis layouts.](/posts/2026-09-24-progress/anker-battery-width-comparison.webp)
 
-*Cross-section comparison of battery height beneath the 75 mm and 80 mm support-wall widths (cyan: battery, orange: Part_003 housing, purple: screw envelope, gray: servo).*
+*Cross-section comparison of battery height beneath the 75 mm and 80 mm support-wall widths (cyan: battery, orange: upper servo bracket, purple: screw envelope, gray: servo).*
 
 The next step splits the Blender project into dedicated Wired and Wireless builds
 and explores a shorter, lighter power bank in the

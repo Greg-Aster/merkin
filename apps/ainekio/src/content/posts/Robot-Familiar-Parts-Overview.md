@@ -81,6 +81,7 @@ Current GPIO budget: 8 MCPWM servo outputs \+ 4 I2S \+ 2 I2C \+ 1 ADC \= 15 pins
 * Rail power bus: 5V from Buck \#1
 * Rail ground bus: common ground
 * Signal wires: individually from Freenove GPIO pins to each servo
+
 ---
 
 ## **5\. Power System**
@@ -135,6 +136,7 @@ All grounds are electrically common, but the servo return and electronics return
 * **Firmware guardian (voltage divider):** at \~7.0V the robot announces "battery low" through its speaker; at \~6.8V it parks servos and deep-sleeps
 * **Failure point note:** Proper operation is to flip the KCD1 off when the robot runs down. If the robot sits with the switch on for months on low/no charge, the battery could fully drain and not take a charge later.
 * **First-charge validation:** supervise the first full charge — confirm the charger is set to 2S, voltage never exceeds 8.4V, nothing more than warm. Explosion hazard otherwise — Suicide bomber robot bad.
+
 ---
 
 ## **7\. Signal & Data Map (who talks to whom)**
@@ -245,6 +247,6 @@ All grounds are electrically common, but the servo return and electronics return
 * Verify simultaneous camera capture/H.264 streaming, microphone input, speaker playback, TF-card access, and UART communication with the Kakute.
 * Confirm that the required ESP-IDF camera, audio, ESP32-C6 networking, and storage drivers are stable enough for the project.
 * Bench-test a compatible MIPI camera and verify image quality, latency, ribbon routing, lens placement, and availability.
-* Keep servo timing and body safety on the Kakute when the two-board architecture is used, even though the P4 exposes MCPWM-capable GPIO.\
-  Status\
-  This section records an architecture under investigation. Generation 1 is not finished, and the existing shopping list remains the active prototype build. No Generation 2 component named below is a committed purchase or final design. As Generation 1 develops, testing and new use cases reveal limitations and make different
+* Keep servo timing and body safety on the Kakute when the two-board architecture is used, even though the P4 exposes MCPWM-capable GPIO.
+
+**Status:** This section records an architecture under investigation. Generation 1 is not finished, and the existing shopping list remains the active prototype build. No Generation 2 component named above is a committed purchase or final design. As Generation 1 develops, testing and new use cases reveal limitations and make different controller and packaging trade-offs clearer.

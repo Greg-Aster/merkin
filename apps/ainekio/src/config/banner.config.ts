@@ -14,7 +14,8 @@ export const bannerConfig = {
     height: '0',
     mobileHeight: '0',
     maxWidth: 1920,
-    mainContentOffset: '.5rem',
+    mainContentOffset: '1.65rem',
+    mainContentOffsetMobile: '1.25rem',
   },
   visual: {
     objectFit: 'cover' as const,
@@ -29,17 +30,17 @@ export const bannerConfig = {
     value: 'none',
   },
   navbar: {
-    height: '5rem',
+    height: '4.5rem',
     spacing: {
       standard: '3rem',
       timeline: '5.5rem',
       video: '5.5rem',
       image: '4rem',
       assistant: '5.5rem',
-      none: '5rem',
+      none: '6.15rem',
     },
-    mobileBannerGap: '2.75rem',
-    mobilePortraitSpacing: '0.75rem',
+    mobileBannerGap: '5.75rem',
+    mobilePortraitSpacing: '5.75rem',
   },
   panel: {
     top: {
@@ -107,12 +108,13 @@ export function determineBannerConfiguration(post: any, _pageType = 'default', d
     layout: {
       mainPanelTop: '0rem',
       navbarSpacing: bannerConfig.navbar.spacing.none,
-      navbarSpacingMobile: bannerConfig.navbar.height,
+      navbarSpacingMobile: bannerConfig.navbar.mobileBannerGap,
       bannerHeight: '0',
       bannerHeightMobile: '0',
       bannerOverlap: '0',
       dynamicOverlap: '0',
       mainContentOffset: bannerConfig.layout.mainContentOffset,
+      mainContentOffsetMobile: bannerConfig.layout.mainContentOffsetMobile,
     },
     finalBannerLink: postData?.bannerLink || defaultBannerLink,
     currentBannerType: 'none' as const,

@@ -4,53 +4,110 @@ import { getReading, validateReadingPaths, topics, generations, kinds } from '..
 import { getPostUrlBySlug, url } from '../utils/url-utils'
 
 interface Props { keyword?: string; tags?: string[]; categories?: string[]; heading?: string }
-const { tags = [], categories = [], heading = 'Article library' } = Astro.props
+const { tags = [], categories = [], heading = 'Article library & system reference' } = Astro.props
 const allPosts = await getCollection('posts', ({data}) => !data.draft)
 validateReadingPaths(allPosts)
+
+// Curated reading order for reference guides so start-here and current V2 guides always appear first,
+// while historical V1 reference guides sort cleanly at the bottom of the reference group.
+const referencePriority: Record<string, number> = {
+  'project-overview': 1,
+  'how-does-ainekio-stack-up': 2,
+  'ainekio-os': 3,
+  'ainekio-companion': 4,
+  'ainekio-v2': 5,
+  'gait-development': 6,
+  'protocol-and-safety': 7,
+  'gateway-and-simulator': 8,
+  'vision-loop': 9,
+  'voice-loop': 10,
+  'metahuman-integration': 11,
+  'bounded-autonomy': 12,
+  'v1-v2-comparison': 13,
+  'v1-original-posts': 90,
+  'body-design-and-hardware': 91,
+  'controller-firmware': 92,
+}
+
 const normalizedTags = tags.map(tag => tag.toLowerCase())
 const normalizedCategories = categories.map(category => category.toLowerCase())
 const posts = allPosts.filter(post =>
   (!tags.length || post.data.tags.some(tag => normalizedTags.includes(tag.toLowerCase()))) &&
   (!categories.length || normalizedCategories.includes((post.data.category || 'uncategorized').toLowerCase()))
-).sort((a,b) => {
-  const rank = {reference:0,journal:1,original:2}
-  return rank[getReading(a).kind] - rank[getReading(b).kind] || b.data.published.getTime() - a.data.published.getTime() || a.slug.localeCompare(b.slug)
+).sort((a, b) => {
+  const readA = getReading(a)
+  const readB = getReading(b)
+  const kindRank = { reference: 0, journal: 1, original: 2 }
+  if (kindRank[readA.kind] !== kindRank[readB.kind]) {
+    return kindRank[readA.kind] - kindRank[readB.kind]
+  }
+  if (readA.kind === 'reference') {
+    const prioA = referencePriority[a.slug] ?? (readA.generation === 'v1' ? 85 : 50)
+    const prioB = referencePriority[b.slug] ?? (readB.generation === 'v1' ? 85 : 50)
+    if (prioA !== prioB) return prioA - prioB
+  }
+  return b.data.published.getTime() - a.data.published.getTime() || a.slug.localeCompare(b.slug)
 })
 const dateFormat = new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})
 const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `Category: ${categories.join(', ')}` : ''
 ---
-<section class="card-base article-library" data-article-library>
-  <header>
-    <p class="library-eyebrow">Ainekio documentation</p>
-    <h1 data-library-title data-default-heading={heading}>{heading}</h1>
-    {scope && <p>{scope} · <a href={url('/archive/')}>Browse the complete library</a></p>}
-    <nav aria-label="Library shortcuts"><a href={url('/archive/?kind=reference')}>Build reference</a><a href={url('/updates/')}>Dated build journal</a><a href={url('/posts/v1-original-posts/')}>Original V1 reading guide</a></nav>
-  </header>
-  <form class="library-filters" method="get" data-library-filters aria-label="Filter articles">
-    <label>Topic<select name="topic"><option value="">All topics</option>{Object.entries(topics).map(([id,topic]) => <option value={id}>{topic.title}</option>)}</select></label>
-    <label>Robot version<select name="generation"><option value="">Both versions</option><option value="v1">V1 · 8 servos</option><option value="v2">V2 · 12 servos</option><option value="both">Cross-version articles</option></select></label>
-    <label>Document type<select name="kind"><option value="">All documents</option>{Object.entries(kinds).map(([id,label]) => <option value={id}>{label}</option>)}</select></label>
-    <label class="library-query">Title or summary<input name="q" type="search" placeholder="For example: battery or linkage" autocomplete="off" /></label>
-    <div class="library-buttons"><button type="submit">Apply filters</button><button type="reset">Clear filters</button></div>
-  </form>
-  <noscript><p>Interactive filters require JavaScript. All matching category articles are listed below; your browser’s Find command can search this page.</p></noscript>
-  <p class="library-results" aria-live="polite" aria-atomic="true" data-library-results>{posts.length} articles</p>
-  <p class="library-topic-note" data-library-topic-note>References first, then journal entries.</p>
-  <div class="library-list">
-    {posts.map(post => {
-      const reading = getReading(post)
-      return <article data-library-entry data-topic={reading.topic} data-generation={reading.generation} data-kind={reading.kind} data-search={`${post.data.title} ${post.data.description}`.toLowerCase()}>
-        <a class="library-image" href={getPostUrlBySlug(post.slug)} tabindex="-1" aria-hidden="true"><img src={url(post.data.image)} alt="" loading="lazy" decoding="async" /></a>
-        <div><p class="library-meta">{generations[reading.generation]} · {kinds[reading.kind]} · <time datetime={post.data.published.toISOString()}>{dateFormat.format(post.data.published)}</time></p>
-          <h2><a href={getPostUrlBySlug(post.slug)}>{post.data.title}</a></h2>
-          <p>{post.data.description}</p>
-          <span class="library-topic">{topics[reading.topic].title}</span>
-        </div>
-      </article>
-    })}
-  </div>
-  <p data-library-empty hidden>No articles match these filters. Try another topic, version, or search phrase.</p>
-</section>
+<div class="library-shell">
+  <section class="card-base article-library" data-article-library>
+    <header class="library-header">
+      <div class="library-header-copy">
+        <p class="library-eyebrow">Ainekio Documentation &amp; Archive</p>
+        <h1 data-library-title data-default-heading={heading}>{heading}</h1>
+        <p class="library-lead">Browse current V2 hardware and Ainekio OS reference guides, dated workbench logs, or preserved notes from the original eight-servo V1 prototype.</p>
+        {scope && <p class="library-scope">{scope} · <a href={url('/archive/')}>Browse complete library</a></p>}
+      </div>
+      <nav class="library-shortcuts" aria-label="Library shortcuts">
+        <a href={url('/posts/project-overview/')}>System Overview →</a>
+        <a href={url('/updates/')}>Build Journal →</a>
+        <a href={url('/posts/v1-original-posts/')}>V1 Archive →</a>
+      </nav>
+    </header>
+
+    <form class="library-filters" method="get" data-library-filters aria-label="Filter articles">
+      <label>Subsystem / topic<select name="topic"><option value="">All topics</option>{Object.entries(topics).map(([id,topic]) => <option value={id}>{topic.title}</option>)}</select></label>
+      <label>Robot version<select name="generation"><option value="">All versions</option><option value="v2">Current V2 · 12 servos</option><option value="both">Cross-version guides</option><option value="v1">Historical V1 · 8 servos</option></select></label>
+      <label>Document type<select name="kind"><option value="">All documents</option>{Object.entries(kinds).map(([id,label]) => <option value={id}>{label}</option>)}</select></label>
+      <label class="library-query">Search title or summary<input name="q" type="search" placeholder="Linkage, battery, LCD, memory…" autocomplete="off" /></label>
+      <div class="library-buttons"><button type="submit">Apply</button><button type="reset">Reset</button></div>
+    </form>
+
+    <noscript><p>Interactive filters require JavaScript. All matching articles are listed below; your browser’s Find command can search this page.</p></noscript>
+
+    <div class="library-status-bar">
+      <p class="library-results" aria-live="polite" aria-atomic="true" data-library-results>{posts.length} articles</p>
+      <p class="library-topic-note" data-library-topic-note>Ordered with start-here &amp; current V2 reference guides first, followed by dated journal logs and historical V1 notes.</p>
+    </div>
+
+    <div class="library-list">
+      {posts.map(post => {
+        const reading = getReading(post)
+        const isV1 = reading.generation === 'v1'
+        const postHref = getPostUrlBySlug(post.slug)
+        return <article data-library-entry data-topic={reading.topic} data-generation={reading.generation} data-kind={reading.kind} data-search={`${post.data.title} ${post.data.description}`.toLowerCase()}>
+          <a class="library-image" href={postHref} tabindex="-1" aria-hidden="true"><img src={url(post.data.image)} alt="" loading="lazy" decoding="async" /></a>
+          <div class="library-item-body">
+            <div class="library-badges">
+              <span class:list={['badge-gen', { 'is-v1': isV1 }]}>{isV1 ? 'Historical V1 · 8 servos' : generations[reading.generation]}</span>
+              <span class="badge-kind">{kinds[reading.kind]}</span>
+              <time datetime={post.data.published.toISOString()}>{dateFormat.format(post.data.published)}</time>
+            </div>
+            <h2><a href={postHref}>{post.data.title}</a></h2>
+            <p>{post.data.description}</p>
+          </div>
+          <div class="library-item-side">
+            <span class="library-topic">{topics[reading.topic].title}</span>
+            <a class="library-open" href={postHref}>Read note →</a>
+          </div>
+        </article>
+      })}
+    </div>
+    <p class="library-empty" data-library-empty hidden>No articles match these filters. Try another topic, version, or search phrase.</p>
+  </section>
+</div>
 
 <script>
   const root = document.querySelector<HTMLElement>('[data-article-library]')
@@ -63,7 +120,7 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
     const title = root.querySelector<HTMLElement>('[data-library-title]')!
     const note = root.querySelector<HTMLElement>('[data-library-topic-note]')!
     const empty = root.querySelector<HTMLElement>('[data-library-empty]')!
-    const kindTitles: Record<string,string> = { reference: 'Build reference', journal: 'Build journal articles', original: 'Original documents' }
+    const kindTitles: Record<string,string> = { reference: 'System reference guides', journal: 'Dated build journal entries', original: 'Original V1 archive documents' }
     function applyFilters(historyMode: 'push' | 'replace' | false) {
       const {topic, generation, kind, q} = Object.fromEntries(names.map(name => [name,controls[name].value]))
       const terms = q.trim().toLowerCase().split(/\s+/).filter(Boolean)
@@ -79,9 +136,11 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
       empty.hidden = visible !== 0
       const topicControl = controls.topic as HTMLSelectElement
       title.textContent = topic ? topicControl.selectedOptions[0].text : kindTitles[kind] || title.dataset.defaultHeading || 'Article library'
-      note.textContent = generation === 'v1' || generation === 'v2'
-        ? 'Includes cross-version references.'
-        : 'References first, then journal entries.'
+      note.textContent = kind === 'reference'
+        ? 'Start-here overview & current V2 system guides first; historical V1 references appear at the end.'
+        : generation === 'v1' || generation === 'v2'
+          ? 'Includes cross-version comparison and architecture guides.'
+          : 'Ordered with current V2 reference guides first, followed by dated journal logs and V1 archive notes.'
       if (historyMode) {
         const address = new URL(location.href)
         for (const name of names) {
@@ -108,31 +167,120 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
 </script>
 
 <style>
-  .article-library { padding: clamp(1.2rem,3vw,2rem); color: var(--text-color); }
-  .library-eyebrow { text-transform: uppercase; letter-spacing: .05em; font-size: .75rem; color: var(--primary); }
-  h1 { font-size: clamp(1.8rem,3vw,2.4rem); font-weight: 750; margin: .5rem 0; line-height: 1.2; }
-  header > p { max-width: 75ch; line-height: 1.65; }
+  .library-shell { width: 100%; margin: 0; }
+  .article-library { padding: clamp(1.25rem, 2.6vw, 2rem); color: var(--text-color); }
+  .library-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.85rem 1.5rem;
+  }
+  .library-header-copy { min-width: 0; flex: 1 1 34rem; }
+  .library-eyebrow { text-transform: uppercase; letter-spacing: .07em; font-size: .73rem; font-weight: 750; color: var(--primary); }
+  h1 { font-size: clamp(1.8rem, 3vw, 2.35rem); font-weight: 760; margin: .35rem 0 .45rem; line-height: 1.16; }
+  .library-lead { max-width: 74ch; font-size: 0.94rem; line-height: 1.6; color: color-mix(in srgb, var(--text-color) 88%, transparent); }
+  .library-scope { margin-top: .35rem; font-size: .88rem; }
   a { color: var(--primary); text-underline-offset: .2em; }
   a:hover { text-decoration: underline; }
-  nav { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; margin-top: .75rem; }
-  nav a { padding-block: .6rem; }
-  .library-filters { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1rem; margin: 1.5rem 0; padding: 1rem; border: 1px solid color-mix(in srgb,var(--primary) 25%,transparent); border-radius: .5rem; }
-  label { font-size: .8rem; font-weight: 650; display: grid; gap: .4rem; }
-  select, input { min-width: 0; width: 100%; border: 1px solid color-mix(in srgb,var(--primary) 35%,transparent); background: var(--card-bg); color: var(--text-color); padding: .7rem .6rem; border-radius: .3rem; font: inherit; }
+
+  .library-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 680;
+  }
+  .library-shortcuts a {
+    padding: 0.36rem 0.7rem;
+    border-radius: 0.4rem;
+    background: rgb(0 0 0 / 0.22);
+    border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .library-shortcuts a:hover {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    text-decoration: none;
+  }
+
+  /* Single compact horizontal filter bar on desktop — zero wasted second-row space */
+  .library-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr) minmax(0, 0.9fr) minmax(0, 1.35fr) auto;
+    align-items: end;
+    gap: 0.65rem;
+    margin: 1.1rem 0 1rem;
+    padding: 0.85rem 1rem;
+    background: rgb(0 0 0 / 0.22);
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    border-radius: 0.55rem;
+  }
+  label { font-size: .74rem; font-weight: 680; display: grid; gap: .32rem; color: color-mix(in srgb, var(--text-color) 88%, transparent); min-width: 0; }
+  select, input { min-width: 0; width: 100%; height: 2.35rem; border: 1px solid color-mix(in srgb,var(--primary) 30%,transparent); background: var(--card-bg); color: var(--text-color); padding: 0 .6rem; border-radius: .35rem; font: inherit; font-size: .86rem; }
   select option { background: var(--card-bg); color: var(--text-color); }
-  .library-query { grid-column: span 2; }
-  .library-buttons { display: flex; align-items: end; flex-wrap: wrap; gap: .5rem; }
-  button { padding: .7rem .8rem; border: 1px solid var(--primary); border-radius: .3rem; color: var(--primary); font-size: .8rem; cursor: pointer; }
-  button[type=submit] { background: var(--primary); color: #071b20; }
-  .library-results { font-weight: 700; }
-  .library-topic-note { font-size: .85rem; margin: .4rem 0 1rem; color: var(--text-color-muted); }
-  .library-list { display: grid; gap: 1rem; }
-  .library-list article { display: grid; grid-template-columns: 10rem minmax(0,1fr); gap: 1.2rem; padding: 1rem 0; border-top: 1px solid color-mix(in srgb,var(--primary) 18%,transparent); }
+  .library-buttons { display: flex; align-items: center; gap: .45rem; height: 2.35rem; }
+  button { height: 2.35rem; padding: 0 .8rem; border: 1px solid color-mix(in srgb, var(--primary) 55%, transparent); border-radius: .35rem; color: var(--primary); font-size: .8rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  button[type=submit] { background: var(--primary); border-color: var(--primary); color: #071b20; }
+  button:hover { filter: brightness(1.08); }
+
+  .library-status-bar { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .35rem 1rem; margin-bottom: .7rem; }
+  .library-results { font-weight: 750; font-size: .92rem; }
+  .library-topic-note { font-size: .8rem; color: var(--text-color-muted); }
+
+  .library-list { display: grid; }
+  .library-list article {
+    display: grid;
+    grid-template-columns: 10.5rem minmax(0, 1fr) 10.5rem;
+    gap: 1.15rem;
+    padding: 1rem 0;
+    border-top: 1px solid color-mix(in srgb,var(--primary) 18%,transparent);
+    align-items: center;
+  }
   .library-list article[hidden], [data-library-empty][hidden] { display: none; }
-  .library-image img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: .4rem; }
-  .library-meta, .library-topic { font-size: .75rem; color: var(--text-color-muted); }
-  h2 { font-size: 1.12rem; font-weight: 700; line-height: 1.4; margin: .4rem 0; }
-  h2 + p { line-height: 1.6; font-size: .9rem; }
-  .library-topic { display: block; margin-top: .4rem; }
-  @media(max-width:640px) { .library-filters { grid-template-columns: 1fr; } .library-query { grid-column: auto; } .library-list article { grid-template-columns: 1fr; } .library-image img { max-height: 12rem; aspect-ratio: 16/9; } }
+  .library-image img { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: .45rem; border: 1px solid rgb(255 255 255 / 0.08); }
+  .library-item-body { min-width: 0; align-self: start; }
+  .library-badges { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; font-size: .72rem; color: var(--text-color-muted); }
+  .badge-gen, .badge-kind { padding: .1rem .45rem; border-radius: .26rem; font-weight: 650; border: 1px solid rgb(255 255 255 / 0.12); }
+  .badge-gen { color: var(--primary); border-color: color-mix(in srgb, var(--primary) 30%, transparent); }
+  .badge-gen.is-v1 { color: #fcd34d; border-color: rgb(245 158 11 / 0.38); background: rgb(245 158 11 / 0.1); }
+  h2 { font-size: 1.08rem; font-weight: 720; line-height: 1.35; margin: .32rem 0 .28rem; }
+  h2 a { color: var(--text-color); }
+  h2 a:hover { color: var(--primary); }
+  h2 + p { line-height: 1.55; font-size: .88rem; color: color-mix(in srgb, var(--text-color) 85%, transparent); }
+
+  .library-item-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+    text-align: right;
+  }
+  .library-topic {
+    font-size: 0.72rem;
+    font-weight: 650;
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.04);
+    border: 1px solid rgb(255 255 255 / 0.08);
+    color: var(--text-color-muted);
+  }
+  .library-open { font-size: 0.82rem; font-weight: 700; white-space: nowrap; }
+  .library-empty { padding: 1.25rem 0 0.25rem; color: var(--text-color-muted); font-size: 0.92rem; }
+
+  @media (max-width: 960px) {
+    .library-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .library-query { grid-column: span 2; }
+    .library-list article { grid-template-columns: 9.5rem minmax(0, 1fr); }
+    .library-item-side { grid-column: 2; flex-direction: row; align-items: center; justify-content: space-between; text-align: left; }
+  }
+
+  @media (max-width: 640px) {
+    .library-filters { grid-template-columns: 1fr; }
+    .library-query { grid-column: auto; }
+    .library-list article { grid-template-columns: 1fr; gap: .6rem; }
+    .library-item-side { grid-column: 1; }
+    .library-image img { max-height: 11.5rem; aspect-ratio: 16/9; }
+  }
 </style>

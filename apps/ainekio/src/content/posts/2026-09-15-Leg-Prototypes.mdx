@@ -22,85 +22,79 @@ reading:
   related: ["gait-development", "2026-10-12-shell-power-and-motion"]
 ---
 
-The last few days have concentrated on the part of Ainekio that has to carry
-the body: the leg assembly. Work now includes **3D-printed prototypes
-assembled with servos, linkages, and fasteners**, alongside continued Blender
-revisions. These September 14 photos show a physical leg assembly across three poses.
-
-> The printed prototypes have much more expressive movement than the models
-> I have seen online.
-
-*Greg’s observation from the physical prototypes, September 15.*
+The last few days focused on the assembly that actually has to carry Ainekio V2: the
+three-servo leg. I printed the first physical prototypes and bolted them up with MG90S
+servos, bearings, linkages, and two-piece feet while iterating tolerances back in
+Blender. Even on the bench by hand, these printed legs have much more expressive range
+than the stock reference models I had seen online.
 
 <div className="grid gap-5 sm:grid-cols-3">
   <figure>
     <a href="/photos/20260914_152101.jpg"><img src="/photos/20260914_152101.jpg" alt="Printed robot leg partly folded, showing the servo housings, curved links, screw joints, and two-piece foot" width="744" height="992" loading="eager" /></a>
-    <figcaption>Partly folded, with the linkage and fasteners visible.</figcaption>
+    <figcaption>Partly folded, showing the curved links and M3 joint hardware.</figcaption>
   </figure>
   <figure>
     <a href="/photos/20260914_152130.jpg"><img src="/photos/20260914_152130.jpg" alt="The printed leg folded closely alongside its servo assembly" width="744" height="992" loading="lazy" /></a>
-    <figcaption>Folded close to the servo assembly.</figcaption>
+    <figcaption>Tucked tight against the upper servo bracket.</figcaption>
   </figure>
   <figure>
     <a href="/photos/20260914_152236.jpg"><img src="/photos/20260914_152236.jpg" alt="The printed robot leg extended, with a long gray lower leg, black curved links, and a black foot" width="744" height="992" loading="lazy" /></a>
-    <figcaption>Extended, showing the lower leg and foot.</figcaption>
+    <figcaption>Extended, showing the gray lower leg and two-piece foot shell.</figcaption>
   </figure>
 </div>
 
 ## Finding a linkage that fits around the servos
 
-The September 12–13 linkage work explored several link lengths while retaining the
-servo axes and surrounding housing geometry. Lengthening a link can solve a
-local clearance issue while changing the mechanical advantage and angular sweep of
-the leg.
+Over September 12–13 I tested several link combinations around the existing servo shaft
+spacing. Lengthening a single link can clear a bolt head locally, but it shifts mechanical
+advantage and total knee sweep everywhere else.
 
-An initial pass used the same **40 mm, 4 mm-thick link** at both Part_024 and
-Part_026, with Part_025's two arms made equal at 20 mm and Part_009 shortened
-to 21 mm. While that reduced unique link shapes, a bolt near the second servo
-still restricted travel.
+My first pass tried using identical **40 mm, 4 mm-thick links** for both the upper and
+lower coupler rods, paired with a symmetric **20 mm relay rocker** and a shortened
+**21 mm knee crank**. Cutting down unique link parts was appealing, but a fastener head
+near the second servo still clipped the sweep.
 
-A subsequent revision fitted an imported Part_024 at its **~24.64 mm pivot spacing
-and 4 mm thickness**, keeping Part_009 at 21 mm. Turning the link over seated the
-bearings from the proper side and cleared the housing through the reviewed sweep.
-That geometry was then synchronized across all four legs and oriented end-for-end
-to preserve pivot clearance.
+The next pass switched the upper coupler to a **24.64 mm pivot spacing (4 mm thick)**
+while keeping the **21 mm knee crank**. Flipping that short link seated the flange
+bearings from the outer face and cleared the servo bracket across the full travel, so I
+mirrored that arrangement across all four legs.
 
 ![CAD view of the imported short linkage fitted to the leg assembly.](/posts/2026-09-15-leg-prototypes/imported-linkage-cad.png)
 
-*September 13 imported-linkage fit in Blender.*
+*September 13 short-coupler linkage fitted in Blender.*
 
 ## Opening up the foot-shell entrance
 
-The first printed Part_020 and Part_022 foot shells would not slide over the
-Part_027 lower leg at the entrance, where the CAD gaps were only **0.106 mm and
-0.150 mm** on the two sides.
+On the bench, the first printed outer and inner curved foot shells refused to slide
+onto the lower leg shank—the original CAD only left **0.106 mm and 0.150 mm** of
+clearance on the two mating faces.
 
-The September 14 clearance revision opened both cavities to **0.30 mm per
-mating surface** and added a **0.15 mm entrance chamfer** (~0.45 mm at the opening).
-The cut follows the full insertion profile of Part_027, including the central
-teardrop key, while preserving the cavity floors, 5 mm clamping stack, screw seats,
-and exterior tread. Opening the cavity leaves thin local collar lips (~0.57 mm and
-0.40 mm) backed by the thicker shell wall, which will be checked on the next print.
+On September 14 I opened both shell cavities to **0.30 mm per mating surface** and added
+a **0.15 mm lead-in chamfer** (~0.45 mm at the mouth). The pocket follows the full
+insertion profile of the lower leg, including its central teardrop key, while keeping
+the cavity floor, 5 mm clamping thickness, screw seats, and sole tread intact. That
+leaves thin local collar lips (~0.57 mm and 0.40 mm) backed by the main shell wall,
+which I will check on the next print.
 
 ![Comparison of the original and revised shell entrances, showing 0.30 mm mating clearance and 0.45 mm at the lead-in.](/posts/2026-09-15-leg-prototypes/shell-clearance-comparison.png)
 
-*CAD comparison of the original and widened foot-shell entrances.*
+*Original vs widened entrance clearance on the two-piece curved foot shells.*
 
 ## Measuring the servo horn directly
 
-Physical servo horn arms measured **2.0 mm thick**, whereas the imported reference
-meshes were **1.75 mm**—explaining why pockets cut to the reference mesh were too
-shallow.
+Another bench surprise: the physical plastic servo horns measured **2.0 mm thick** with
+calipers, whereas the imported CAD reference horns were **1.75 mm**—which explained why
+horns bottomed out proud of the printed pockets.
 
-The revised arm pockets in Part_009 and Part_023 are **2.1 mm deep** (0.1 mm nominal
-clearance for the physical horn), leaving 2.8 mm and 1.9 mm backing walls
-respectively. Straight tapered horn-arm outlines replaced an earlier wide-shoulder
-profile, and Part_023 gained a uniform 2.1 mm pocket floor and flush outer ledge
-around its 2.5 mm center bore.
+I deepened the horn-arm pockets in both the **knee crank** and the **upper carrier** to
+**2.1 mm** (0.1 mm nominal clearance over the real horn), leaving 2.8 mm and 1.9 mm
+backing walls. Straight tapered arm slots replaced an earlier wide-shoulder cutout, and
+the upper carrier got a flat 2.1 mm pocket floor and flush outer rim around its 2.5 mm
+center screw bore.
 
-At the lower leg, Part_027's neck was widened to a nominal **8 mm** (retaining its
-5 mm thickness and pivot bores), and Part_025's outward screw boss was split into a
-separate **1.5 mm-high collar** for a longer M3 fastener.
+Down at the knee, I widened the **lower leg** neck to **8 mm** (keeping its 5 mm
+thickness and pivot bores) and split the **relay rocker's** outer boss into a separate
+**1.5 mm-tall spacer collar** for a longer M3 screw.
 
 ## Three iterations of the foot
 

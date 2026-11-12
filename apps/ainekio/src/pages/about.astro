@@ -9,49 +9,153 @@ const about = await getEntry('spec', 'about')
 if (!about) throw new Error("About content not found in 'spec/about'")
 
 const { Content, headings } = await about.render()
+const quickFacts = [
+  { label: 'Active frame', value: 'V2 · 650 g · 3D-printed PLA/PETG' },
+  { label: 'Actuators', value: '12 × 4th-wire feedback MG90S' },
+  { label: 'Onboard MCU', value: 'Waveshare ESP32-P4-WIFI6' },
+  { label: 'Locomotion', value: '50 Hz L2-cached int8 neural policy' },
+  { label: 'Face & camera', value: '1.9" ST7789 (59 faces) · OV5647' },
+  { label: 'Companion OS', value: 'Ainekio OS · Local memory & voice' },
+]
 ---
 
-<MainGridLayout title="About Ainekio" description={about.data.description} headings={headings}>
-  <article class="card-base overflow-hidden rounded-[var(--radius-large)] border border-black/5 dark:border-white/10">
-    <figure>
-      <img
-        src={url('/assets/ainekio/2026-10-12-refresh/render-rear.webp')}
-        alt="Rear three-quarter Blender render of Ainekio’s shell and linkage assembly"
-        width="1536"
-        height="1024"
-        class="h-auto w-full"
-      />
-    </figure>
-    <div class="p-6 sm:p-9">
-      <Markdown class="prose max-w-none dark:prose-invert">
-        <Content />
-      </Markdown>
-    </div>
-  </article>
+<MainGridLayout title="About Ainekio — Personal Robot Build Log & Open-Source Repositories" description={about.data.description} headings={headings} oneColumn={true}>
+  <div class="about-shell">
+    <section class="card-base about-hero">
+      <div class="about-hero-copy">
+        <p class="about-eyebrow">Personal Workbench Project · Open Source</p>
+        <h1>About Ainekio</h1>
+        <p class="about-lead">
+          Ainekio is my personal robotics and AI build project: a small 3D-printed four-legged robot designed in Blender, wired and tested on the workbench, and paired with <strong>Ainekio OS</strong>—a local-first software mind that remembers past days, talks over room audio, and reacts to being picked up or nudged.
+        </p>
+        <p class="about-note">
+          Nothing here is for sale. This site is my build journal and technical notebook—a place to document what works, what failed on the carpet, and how the parts fit together.
+        </p>
+      </div>
+      <figure class="about-hero-media">
+        <img
+          src={url('/gallery/ainekio-v2-physical-three-quarter-960.webp')}
+          alt="The physical 650 g twelve-servo Ainekio V2 prototype on the floor in its red and black 3D-printed shell"
+          width="960"
+          height="720"
+          loading="eager"
+          decoding="async"
+        />
+        <figcaption>The 650 g V2 prototype during November floor walking tests.</figcaption>
+      </figure>
+    </section>
 
-  <section class="mt-4 grid gap-4 sm:grid-cols-3">
-    <a href="https://github.com/Greg-Aster/Ainekio-bot" target="_blank" rel="noreferrer" class="card-base group flex items-center gap-4 rounded-[var(--radius-large)] border border-black/5 p-5 transition hover:border-cyan-400/50 dark:border-white/10">
-      <span class="rounded-xl bg-cyan-500/10 p-3 text-cyan-700 dark:text-cyan-300"><Icon name="fa6-brands:github" class="text-2xl" /></span>
-      <span class="min-w-0">
-        <span class="block text-xs font-bold uppercase tracking-[0.16em] text-50">Robot source</span>
-        <span class="mt-1 block font-black text-90 group-hover:text-cyan-700 dark:group-hover:text-cyan-300">Greg-Aster/Ainekio-bot</span>
-      </span>
-      <Icon name="material-symbols:open-in-new-rounded" class="ml-auto text-xl text-slate-400 dark:text-slate-500" />
-    </a>
-    <a href="https://github.com/Greg-Aster/ainekio-os" target="_blank" rel="noreferrer" class="card-base group flex items-center gap-4 rounded-[var(--radius-large)] border border-black/5 p-5 transition hover:border-amber-400/50 dark:border-white/10">
-      <span class="rounded-xl bg-amber-500/10 p-3 text-amber-700 dark:text-amber-300"><Icon name="fa6-brands:github" class="text-2xl" /></span>
-      <span class="min-w-0">
-        <span class="block text-xs font-bold uppercase tracking-[0.16em] text-50">Ainekio OS (Mind)</span>
-        <span class="mt-1 block font-black text-90 group-hover:text-amber-700 dark:group-hover:text-amber-300">Greg-Aster/ainekio-os</span>
-      </span>
-      <Icon name="material-symbols:open-in-new-rounded" class="ml-auto text-xl text-slate-400 dark:text-slate-500" />
-    </a>
-    <a href="mailto:greg@ainek.io" class="card-base group flex items-center gap-4 rounded-[var(--radius-large)] border border-black/5 p-5 transition hover:border-emerald-400/50 dark:border-white/10">
-      <span class="rounded-xl bg-emerald-500/10 p-3 text-emerald-700 dark:text-emerald-300"><Icon name="material-symbols:mail-outline-rounded" class="text-2xl" /></span>
-      <span class="min-w-0">
-        <span class="block text-xs font-bold uppercase tracking-[0.16em] text-50">Greg the Mechanic</span>
-        <span class="mt-1 block font-black text-90 group-hover:text-emerald-700 dark:group-hover:text-emerald-300">greg@ainek.io</span>
-      </span>
-    </a>
-  </section>
+    <section class="about-links" aria-label="Repositories and contact">
+      <a href="https://github.com/Greg-Aster/Ainekio-bot" target="_blank" rel="noreferrer" class="card-base about-link-card group">
+        <span class="about-icon about-icon-cyan"><Icon name="fa6-brands:github" class="text-2xl" /></span>
+        <span class="min-w-0">
+          <span class="about-link-label">Hardware, firmware &amp; RL</span>
+          <span class="about-link-title group-hover:text-cyan-300">Greg-Aster/Ainekio-bot</span>
+        </span>
+        <Icon name="material-symbols:open-in-new-rounded" class="ml-auto text-xl text-slate-400 dark:text-slate-500" />
+      </a>
+      <a href="https://github.com/Greg-Aster/ainekio-os" target="_blank" rel="noreferrer" class="card-base about-link-card group">
+        <span class="about-icon about-icon-amber"><Icon name="fa6-brands:github" class="text-2xl" /></span>
+        <span class="min-w-0">
+          <span class="about-link-label">Ainekio OS (The Mind)</span>
+          <span class="about-link-title group-hover:text-amber-300">Greg-Aster/ainekio-os</span>
+        </span>
+        <Icon name="material-symbols:open-in-new-rounded" class="ml-auto text-xl text-slate-400 dark:text-slate-500" />
+      </a>
+      <a href="mailto:greg@ainek.io" class="card-base about-link-card group">
+        <span class="about-icon about-icon-emerald"><Icon name="material-symbols:mail-outline-rounded" class="text-2xl" /></span>
+        <span class="min-w-0">
+          <span class="about-link-label">Greg the Mechanic</span>
+          <span class="about-link-title group-hover:text-emerald-300">greg@ainek.io</span>
+        </span>
+      </a>
+    </section>
+
+    <div class="about-content-grid">
+      <article class="card-base about-body">
+        <Markdown class="prose max-w-none dark:prose-invert">
+          <Content />
+        </Markdown>
+      </article>
+
+      <aside class="about-rail" aria-label="Workbench quick facts">
+        <div class="card-base about-rail-card">
+          <p class="rail-eyebrow">Workbench snapshot</p>
+          <dl class="rail-facts">
+            {quickFacts.map(fact => (
+              <div>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <nav class="rail-links" aria-label="Start reading">
+            <a href={url('/posts/project-overview/')}>System Overview →</a>
+            <a href={url('/posts/ainekio-os/')}>Ainekio OS Architecture →</a>
+            <a href={url('/posts/how-does-ainekio-stack-up/')}>Robot Comparison →</a>
+            <a href={url('/updates/')}>Dated Build Journal →</a>
+            <a href={url('/gallery/')}>Photos, Videos &amp; Wiring →</a>
+          </nav>
+        </div>
+      </aside>
+    </div>
+  </div>
 </MainGridLayout>
+
+<style>
+  .about-shell { width: 100%; margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.15rem; color: var(--text-color); }
+  .about-hero { display: grid; grid-template-columns: 1.18fr 0.82fr; gap: clamp(1.25rem, 2.6vw, 2rem); align-items: center; padding: clamp(1.25rem, 2.6vw, 2rem); }
+  .about-eyebrow, .rail-eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.73rem; font-weight: 750; color: var(--primary); }
+  h1 { font-size: clamp(1.85rem, 3.2vw, 2.55rem); font-weight: 760; line-height: 1.14; margin: 0.4rem 0 0.75rem; }
+  .about-lead { font-size: 1rem; line-height: 1.65; max-width: 60ch; }
+  .about-note { margin-top: 0.75rem; padding: 0.65rem 0.95rem; border-left: 3px solid var(--primary); background: color-mix(in srgb, var(--primary) 8%, transparent); border-radius: 0 0.45rem 0.45rem 0; font-size: 0.9rem; line-height: 1.58; max-width: 58ch; }
+  .about-hero-media img { width: 100%; height: auto; aspect-ratio: 4/3; object-fit: cover; border-radius: 0.65rem; border: 1px solid rgb(255 255 255 / 0.09); }
+  .about-hero-media figcaption { margin-top: 0.5rem; font-size: 0.78rem; color: var(--text-color-muted); }
+
+  .about-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.9rem; }
+  .about-link-card { display: flex; align-items: center; gap: 0.85rem; padding: 0.95rem 1.1rem; text-decoration: none; }
+  .about-icon { display: inline-flex; padding: 0.65rem; border-radius: 0.65rem; flex-shrink: 0; }
+  .about-icon-cyan { background: rgb(6 182 212 / 0.12); color: #67e8f9; }
+  .about-icon-amber { background: rgb(245 158 11 / 0.14); color: #fcd34d; }
+  .about-icon-emerald { background: rgb(16 185 129 / 0.14); color: #6ee7b7; }
+  .about-link-label { display: block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-color-muted); }
+  .about-link-title { display: block; margin-top: 0.15rem; font-weight: 750; font-size: 0.92rem; color: var(--text-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .about-content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.15rem;
+    align-items: start;
+  }
+  .about-body { padding: clamp(1.25rem, 2.6vw, 2.15rem); min-width: 0; }
+  .about-rail-card { padding: 1.1rem 1.15rem; }
+  .rail-facts { display: grid; gap: 0.6rem; margin-top: 0.75rem; }
+  .rail-facts > div {
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.07);
+  }
+  .rail-facts dt { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-color-muted); }
+  .rail-facts dd { margin-top: 0.12rem; font-size: 0.84rem; font-weight: 650; color: var(--text-color); }
+  .rail-links {
+    margin-top: 0.85rem;
+    display: grid;
+    gap: 0.4rem;
+    font-size: 0.84rem;
+    font-weight: 680;
+  }
+  .rail-links a { color: var(--primary); text-decoration: none; }
+  .rail-links a:hover { text-decoration: underline; }
+
+  @media (min-width: 1080px) {
+    .about-content-grid {
+      grid-template-columns: minmax(0, 1fr) 17.5rem;
+    }
+    .about-rail {
+      position: sticky;
+      top: 6.15rem;
+    }
+  }
+  @media (max-width: 820px) {
+    .about-hero, .about-links { grid-template-columns: 1fr; }
+  }
+</style>

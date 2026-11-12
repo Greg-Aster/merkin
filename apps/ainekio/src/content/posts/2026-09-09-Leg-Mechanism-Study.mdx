@@ -22,28 +22,28 @@ reading:
   related: ["gait-development", "2026-10-12-shell-power-and-motion"]
 ---
 
-This September 9 study investigated driving a knee through short rigid rods
-while its servo stays fixed to the chassis, even when the leg rolls sideways.
-Keeping that motor and cable off the moving leg was a core design constraint. The
-study compared three mechanisms against the same requested poses and a useful
-knee-travel target of 160–180°.
+On September 9 I ran a CAD study to see whether a quadruped knee could be driven
+through short rigid pushrods while keeping its servo fixed to the chassis—even as the
+leg rolls sideways at the hip. Keeping that motor and its cable off the swinging leg
+was a central constraint. I tested three candidate mechanisms against the same 15
+target poses and a desired knee sweep of 160–180°.
 
-**None met the complete brief.** The supported relay yoke, Variant 2, emerged as the
-best candidate for further research, separate from the
-[four-leg CAD assembly](/posts/2026-09-10-v2-body-design/).
+**None of the three cleared every target pose.** Variant 2—a supported relay yoke on
+the upper leg—came closest and gave the cleanest starting point for follow-up linkage
+work, alongside the [four-leg V2 body assembly](/posts/2026-09-10-v2-body-design/).
 
 ## Study constraints and baseline
 
-An available M3×30 bolt was modeled as allowing at most
-**25 mm between rod-end pivot centers**. All three mechanisms use 40 mm effective
-upper links and 60 mm lower links. The knee and roll servos stay chassis-fixed,
-while the proximal hip-pitch servo moves with the roll carrier. Each modeled servo
-case occupies a 22.8 × 12.2 × 28.5 mm envelope, and the input sweep is a 180° span
-indexed from 10° to 190° in the geometric model.
+An off-the-shelf M3×30 bolt limited each pushrod to at most
+**25 mm between rod-end pivot centers**. All three mechanisms share 40 mm effective
+upper links and 60 mm lower links. Both the knee and hip-roll servos stay fixed to the
+chassis, while the hip-pitch servo rides on the roll carrier. Each modeled MG90S case
+occupies a 22.8 × 12.2 × 28.5 mm envelope, sweeping a 180° actuator window (10° to
+190° in the geometric solver).
 
-The baseline came from the OpenHarmony Puppy V2 leg reference, with its 27 imported
-meshes preserved for comparison. Credit and the original reference are documented in
-the [V2 build guide](/posts/ainekio-v2/#legs-and-chassis).
+The starting leg envelope came from the OpenHarmony Puppy V2 reference geometry; credit
+and the production linkage that eventually grew out of these experiments are documented
+in the [V2 build guide](/posts/ainekio-v2/#compact-leg-linkage-geometry).
 
 ## Comparing the three mechanisms
 

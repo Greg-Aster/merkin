@@ -22,26 +22,24 @@ reading:
   related: ["gait-development", "ainekio-v2", "metahuman-integration"]
 ---
 
-With the assembled chassis weighing in at **566 g** on its **5 V supply** and twelve
-MG90 servos, the October 13–14 engineering sprint focused on how the robot wakes up,
-balances, services its firmware over Wi-Fi, and reacts when picked up or tipped.
+With the assembled chassis weighing **566 g** on its **5 V bench supply** and twelve
+MG90S servos, October 13–14 went into fixing how Ainekio V2 wakes up on the floor, holds
+the body level on uneven surfaces, updates over Wi-Fi without cracking the shell open,
+and reacts when picked up or tipped over.
 
 ## Staged startup rise (`2.5 s` crouch → shoulder align → stand)
 
-Previously, booting drove all twelve servos straight toward calibration Home, which on
-the floor could extend the lower legs before the shoulders were aligned. Ordinary
-startup now runs a three-stage rise on the P4 (keeping calibration Home as a separate
-explicit maintenance command):
-
-1. Fold the carrier and crank joints into a compact crouch.
-2. Align the four shoulders while holding the crouch.
-3. Raise the body into Stand over the foot contacts, with the front and rear leg pairs
-   staggered by **100 ms** across a **2.5-second** sequence.
+Up to now, booting drove all twelve servos straight toward calibration Home. On a desk
+or floor, that could kick the lower legs outward before the hip-roll servos had squared
+up the shoulders. Normal startup on the ESP32-P4 now runs a smooth three-stage rise
+(leaving calibration Home as a separate bench maintenance command): the legs first tuck
+into a compact crouch, the four shoulders align while unloaded, and the front and rear
+leg pairs press up into Stand with a **100 ms** stagger over **2.5 seconds**.
 
 ## IMU self-leveling controls and integral hold
 
-The P4 firmware (`0.8.46-p4-leveling-tuning`) now exposes persistent self-leveling
-settings in Body Control, stored in NVS independently of joint and IMU calibration:
+The ESP32-P4 now stores persistent IMU self-leveling settings in non-volatile memory,
+independent of joint and gyro calibration:
 
 | Control | Function |
 | --- | --- |
@@ -51,51 +49,48 @@ settings in Body Control, stored in NVS independently of joint and IMU calibrati
 | Roll target | Desired roll offset in degrees (positive raises left side, default `0°`) |
 | Pitch target | Desired pitch offset in degrees (positive raises nose, default `0°`) |
 
-Early tilt checks revealed why pure proportional feedback felt weak while standing:
-the standing hold settled at a fraction of a persistent tilt error. Stationary hold
-now accumulates integral correction over time so the legs continue pushing against a
-sustained tilt until the body reaches its target attitude.
+Bench tilt checks quickly exposed why proportional-only feedback felt spongy while
+standing: under gravity, the legs settled partway short of horizontal. Adding an
+integral hold term while stationary lets the legs keep pushing against a sustained tilt
+until the torso comes all the way back to its target angle.
 
-### Linkage torque calculator: 55/35/38/28/20 mm vs 45/35/30/28/20 mm
+### Linkage torque check: 55/35/38/28/20 mm vs 45/35/30/28/20 mm
 
-To test whether shortening the lower leg and rod would ease motor load, we built a
-standalone linkage calculator (`JSON`/`CSV`/`SVG` export) that compares link lengths
-at fixed servo shaft locations. Comparing the installed **55 / 35 / 38 / 28 / 20 mm**
-geometry (leg / carrier / rod / pickup / crank) against a shorter **45 / 35 / 30 / 28 / 20 mm**
-study at a 65 mm shaft-height benchmark showed that while carrier peak torque drops
-~3%, the shorter 30 mm rod approaches a steeper transmission angle as the body rises,
-**increasing crank torque demand by ~16%**—confirming the 55 mm leg / 38 mm rod
-configuration as the better mechanical baseline.
+Before printing any more leg revisions, I wrote a quick kinematic torque script to check
+whether shortening the lower leg and coupler rod would ease servo load. Comparing the
+installed **55 / 35 / 38 / 28 / 20 mm** linkage (lower leg / upper carrier / connecting
+rod / pickup / crank) against a shorter **45 / 35 / 30 / 28 / 20 mm** candidate at a
+65 mm hip height showed that while carrier peak torque dropped ~3%, the shorter 30 mm
+rod hit a steeper transmission angle near full stand and **pushed knee-crank torque up
+by ~16%**. That kept the 55 mm leg and 38 mm rod locked in as the better mechanical fit.
 
-## Onboard SD video recording, Wi-Fi OTA updates, and logs
+## Onboard SD video recording, Wi-Fi OTA updates, and crash logs
 
-Firmware `0.8.37` makes the P4 fully serviceable over Wi-Fi without opening the shell:
+Once the shell panels go on, plugging a USB-C cable into the buried ESP32-P4 header gets
+old fast. The P4 now handles video capture, firmware updates, and crash diagnostics
+entirely over Wi-Fi:
 
 <figure>
   <img src="/posts/2026-10-14-progress/recording-and-updates.svg" alt="One encoded camera image feeds both the existing preview and SD recorder. Body Control retrieves clips and logs, and uploads firmware for separate explicit activation." width="1000" height="640" loading="lazy" />
-  <figcaption>Shared JPEG pipeline for live preview and SD recording, plus two-stage Wi-Fi OTA firmware updates and diagnostic log retrieval.</figcaption>
+  <figcaption>Shared hardware JPEG pipeline for live preview and SD recording, paired with rollback-safe Wi-Fi OTA updates and remote log retrieval.</figcaption>
 </figure>
 
-- **Zero-reencode SD card recording:** The storage worker writes standard MJPEG AVI
-  clips (`60 s` or `64 MiB` segments) directly from the camera's hardware-encoded
-  JPEGs, with rolling overwrite of the oldest completed clip when full and concurrent
-  HTTP clip downloads.
-- **Two-stage Wi-Fi OTA with automatic rollback:** Uploading a P4 binary places the
-  robot in Doze, finalizes any open recording, writes the inactive OTA slot, and
-  validates the image. The operator then chooses **Activate on next boot** or
-  **Activate and restart**. First boot verifies startup readiness and authenticated
-  gateway connection before marking the image valid (with hardware-tested bootloader
-  rollback on pre-acceptance reset).
-- **Retained diagnostic logs:** Current and previous boot logs (including panic
-  backtraces across warm resets) can be read or downloaded directly from Body Control.
+The camera task feeds hardware-encoded JPEGs straight to both the live preview stream
+and an onboard SD card writer, saving 60-second (or 64 MiB) MJPEG AVI segments with
+zero re-encoding and rolling over the oldest clip when the card fills. Uploading new
+firmware over Wi-Fi drops the robot into a safe resting crouch, closes any active video
+segment, writes the inactive flash slot, and waits for an explicit reboot—rolling back
+automatically in the bootloader if the new build fails to come up and authenticate with
+the gateway. Current and prior-boot crash logs can also be pulled straight from the
+browser.
 
 ### 469-second Wi-Fi stability and concurrent recording run
 
-Keeping the ESP32-C6 radio awake, tolerating transient TCP ACK delays before tearing
-down the socket, and using the WebSocket library's dedicated transmit lock eliminated
-the earlier session drops during a 469-second hardware verification run on `0.8.37`:
+Keeping the ESP32-C6 Wi-Fi coprocessor out of power-save sleep, riding through brief
+TCP ACK stalls instead of tearing down the socket, and serializing WebSocket transmits
+cured the intermittent link drops from earlier bench runs:
 
-| Metric | Hardware result (`0.8.37`) |
+| Metric | Hardware verification run |
 | --- | --- |
 | Continuous session window | **469 s** (235 status samples, 1 connection epoch, **0 reconnects**) |
 | Concurrent preview + SD recording | VGA at 1 fps; **411 frames** across 8 finalized AVI segments |
@@ -105,13 +100,14 @@ the earlier session drops during a 469-second hardware verification run on `0.8.
 
 ## Body Event Trigger: wake, tipped over, and rapid movement
 
-Ainekio's sensor path now initiates cognitive turns when something physical happens to
-the robot. P4 IMU and lifecycle telemetry flow through Body Control (`Perception →
-Body events`) into a dedicated **Body Event Trigger** node workflow in MetaHuman OS:
+Physical disturbances on the bench now kick off real reactions instead of going
+unnoticed. IMU attitude and boot/wake transitions route from Body Control into a
+dedicated **Body Event Trigger** workflow in MetaHuman OS, debounced into single
+episodes so a bumped robot doesn't spam itself:
 
 <figure>
   <img src="/posts/2026-10-14-progress/body-events.svg" alt="P4 measurements pass through Body Control and the Environment Bridge to Body Event Trigger. Its model can take no action or delegate to Environment Mode, which sends selected actions back to the body." width="1000" height="640" loading="lazy" />
-  <figcaption>P4 IMU and wake transitions trigger episode-debounced events in Body Control, which Body Event Trigger evaluates in MetaHuman OS.</figcaption>
+  <figcaption>IMU tilt, sudden acceleration, and wake transitions fire episode-debounced events into MetaHuman OS.</figcaption>
 </figure>
 
 | Event | Trigger threshold | Clearing / debounce behavior |
@@ -122,18 +118,17 @@ Body events`) into a dedicated **Body Event Trigger** node workflow in MetaHuman
 
 ## Teaching the Task model to separate quoted speech from movement
 
-Live body-event testing exposed an interesting failure mode: when `Body Event Trigger`
-asked for a quip about sudden movement followed by a brief shrug, the 0.8B Task
-specialist treated the words inside the speech string as a movement command and
-started continuous sideways **Crab** instead.
+Testing those body events on the live robot turned up a funny failure mode: when a
+shake event asked for a dry remark followed by a quick shrug, the 0.8B Task model read
+the words inside the suggested spoken line as a literal movement command and started
+walking sideways in **Crab** instead.
 
-We trained two new 0.8B Task LoRA candidates (4,350 and 4,926 development examples)
-pairing quoted movement idioms (e.g., *"Take a bow, my friend"*) with contrasting
-physical actions:
+I trained two contrast LoRA candidates (4,350 and 4,926 examples) pairing movement
+idioms in dialogue—like *"Take a bow, my friend"*—with unrelated physical gestures:
 
 <figure>
   <img src="/posts/2026-10-14-progress/task-qualification.svg" alt="On 1,221 evaluation cases, acceptable reference matches rose from 533 to 1,011. Historical regression tests still showed three missed actions versus zero, so the new candidate was not deployed." width="1000" height="640" loading="lazy" />
-  <figcaption>Evaluation accuracy jumped from 43.7% to 82.8%, but 3 missed actions on the historical regression suite blocked deployment—leading directly to the October 15 architectural fix.</figcaption>
+  <figcaption>Evaluation accuracy jumped from 43.7% to 82.8%, but 3 missed actions on the historical regression suite held back deployment—pointing directly to the October 15 architectural split.</figcaption>
 </figure>
 
 | Frozen benchmark metric | Deployed Task adapter | Second contrast candidate |
@@ -144,8 +139,8 @@ physical actions:
 | Historical regression matches | 82 / 141 | **110 / 141** |
 | Historical missed physical actions | **0** | 3 |
 
-Rather than forcing a 0.8B action planner to carry verbatim spoken lines inside its
-action schema, this result motivated the architectural cleanup in the
-[October 15 companion systems update](/posts/2026-10-15-companion-systems/): removing
-speech steps from the Task model entirely so **Persona** is the sole owner of outward
-speech. ([Download the October 14 Task comparison JSON](/posts/2026-10-14-progress/task-model-comparison.json).)
+Forcing a tiny 0.8B action model to carry spoken dialogue inside its action JSON was the
+wrong boundary in the first place. That realization set up the cleaner fix in the
+[October 15 companion systems update](/posts/2026-10-15-companion-systems/): stripping
+speech out of the Task planner altogether so **Persona** owns every spoken word.
+([Download the October 14 Task comparison JSON](/posts/2026-10-14-progress/task-model-comparison.json).)

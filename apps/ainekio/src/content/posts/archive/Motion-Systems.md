@@ -287,7 +287,7 @@ v
 Stock Sesame simulator motion routines
 ```
 
-MetaHuman OS is the remote brain. It runs at the LAN address `http://192.168.0.44:4321` during development. The Ainekio adapter connects out to that address over WiFi or localhost networking, posts its observation/capability state, then keeps a persistent server-sent event stream open for incoming actions.
+MetaHuman OS is the remote brain. It runs at `http://<robot-ip>` on the local network during development. The Ainekio adapter connects out to that address over WiFi or localhost networking, posts its observation/capability state, then keeps a persistent server-sent event stream open for incoming actions.
 
 The local simulator stack runs three processes from the Ainekio repo:
 
@@ -356,7 +356,7 @@ The shim still shows an overlay and a monitor page for debugging. Those are diag
 
 ## Ainekio Adapter State
 
-The adapter lives in `/home/greggles/Ainekio/motion/src/ainekio_motion/adapter.py`. It currently:
+The adapter lives in `Master/motion/src/ainekio_motion/adapter.py`. It currently:
 
 - publishes an environment observation to MetaHuman OS
 - advertises `robotCommand`, `move`, `stop`, and `sendText` actions
@@ -539,30 +539,30 @@ Physical bring-up needs measured data, not assumptions:
 
 ### Ainekio repo
 
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/types.py` - semantic command and telemetry datatypes.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/commands.py` - command parsing, aliases, environment action translation, and simulator serial mapping.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/sequences.py` - provisional Sesame servo order and local keyframe sequence rendering.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/backend.py` - virtual backend and guarded hardware backend boundary (PCA9685 code retained as superseded fallback).
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/safety.py` - safety controller.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/adapter.py` - MetaHuman environment bridge adapter.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/metahuman.py` - small MetaHuman HTTP/SSE client.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/simulator_shim.py` - local simulator shim server and client.
-- `/home/greggles/Ainekio/motion/src/ainekio_motion/cli.py` - adapter CLI and reconnect loop.
-- `/home/greggles/Ainekio/simulators/sesame-robot-sim/app/ainekio-shim.js` - browser-side Sesame simulator shim.
-- `/home/greggles/Ainekio/simulators/sesame-robot-sim/app/ainekio-idle-throttle.js` - idle frame throttling for the browser simulator.
-- `/home/greggles/Ainekio/start-ainekio-adapter.sh` - starts only the Ainekio adapter.
-- `/home/greggles/Ainekio/start-simulator-shim.sh` - starts only the local simulator shim.
-- `/home/greggles/Ainekio/start-ainekio-sim-stack.sh` - starts the simulator, shim, and adapter together.
-- `/home/greggles/Ainekio/motion/tests/` - focused tests for adapter, commands, config, safety, sequences, and simulator shim behavior.
+- `Master/motion/src/ainekio_motion/types.py` - semantic command and telemetry datatypes.
+- `Master/motion/src/ainekio_motion/commands.py` - command parsing, aliases, environment action translation, and simulator serial mapping.
+- `Master/motion/src/ainekio_motion/sequences.py` - provisional Sesame servo order and local keyframe sequence rendering.
+- `Master/motion/src/ainekio_motion/backend.py` - virtual backend and guarded hardware backend boundary (PCA9685 code retained as superseded fallback).
+- `Master/motion/src/ainekio_motion/safety.py` - safety controller.
+- `Master/motion/src/ainekio_motion/adapter.py` - MetaHuman environment bridge adapter.
+- `Master/motion/src/ainekio_motion/metahuman.py` - small MetaHuman HTTP/SSE client.
+- `Master/motion/src/ainekio_motion/simulator_shim.py` - local simulator shim server and client.
+- `Master/motion/src/ainekio_motion/cli.py` - adapter CLI and reconnect loop.
+- `Master/simulators/sesame-robot-sim/app/ainekio-shim.js` - browser-side Sesame simulator shim.
+- `Master/simulators/sesame-robot-sim/app/ainekio-idle-throttle.js` - idle frame throttling for the browser simulator.
+- `Master/start-ainekio-adapter.sh` - starts only the Ainekio adapter.
+- `Master/start-simulator-shim.sh` - starts only the local simulator shim.
+- `Master/start-ainekio-sim-stack.sh` - starts the simulator, shim, and adapter together.
+- `Master/motion/tests/` - focused tests for adapter, commands, config, safety, sequences, and simulator shim behavior.
 
 ### MetaHuman repo
 
-- `/home/greggles/metahuman/packages/core/src/environment-interface/store.ts` - event-driven environment action dispatch and stream subscription support.
-- `/home/greggles/metahuman/packages/core/src/api/handlers/environment-bridge.ts` - environment bridge HTTP/SSE handlers.
-- `/home/greggles/metahuman/packages/core/src/nodes/environment/helpers.ts` - environment action parsing, Ainekio robot command contract, and natural-language fallback parser.
-- `/home/greggles/metahuman/packages/core/src/nodes/environment/action-parser.node.ts` - action parser node and robot command confirmation behavior.
-- `/home/greggles/metahuman/packages/core/src/nodes/environment/send-action.node.ts` - Environment Bridge Out delivery/status node.
-- `/home/greggles/metahuman/etc/cognitive-graphs/environment-mode.json` - Environment Mode graph using the Ainekio-compatible action flow.
+- `packages/core/src/environment-interface/store.ts` - event-driven environment action dispatch and stream subscription support.
+- `packages/core/src/api/handlers/environment-bridge.ts` - environment bridge HTTP/SSE handlers.
+- `packages/core/src/nodes/environment/helpers.ts` - environment action parsing, Ainekio robot command contract, and natural-language fallback parser.
+- `packages/core/src/nodes/environment/action-parser.node.ts` - action parser node and robot command confirmation behavior.
+- `packages/core/src/nodes/environment/send-action.node.ts` - Environment Bridge Out delivery/status node.
+- `etc/cognitive-graphs/environment-mode.json` - Environment Mode graph using the Ainekio-compatible action flow.
 
 ## Bottom Line
 

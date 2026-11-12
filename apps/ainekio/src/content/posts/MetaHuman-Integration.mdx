@@ -1,15 +1,15 @@
 ---
-title: "Embodied Ainekio OS Integration: Environment Bridge, ServerStatus Routing & Durable Workflows"
+title: "Embodied Robot Integration: Bridging Ainekio OS to the Physical ESP32-P4 Body"
 published: 2026-08-27T08:00:00-07:00
-updated: 2026-11-11
-description: "How Ainekio OS (formerly MetaHuman OS) wires its ServerStatus model router, environment-bridge, durable SQLite cognitive graphs, varied Fast Body Events, and Big Brother delegation into the physical Ainekio V2 body."
+updated: 2026-11-12
+description: "How the embodied bridge carries camera snapshots, IMU and 4th-wire joint telemetry, voice transcripts, and body-contact events up into Ainekio OS, and dispatches bounded motion, face, and speech intents back down."
 image: "/assets/ainekio/v2/metahuman-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
-authorName: "Ainekio Project"
-authorBio: "Robot familiar field notes"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Ainekio OS, MetaHuman OS, Durable Execution, Work Coordinator, Environment Bridge]
+tags: [Ainekio, Ainekio OS, MetaHuman OS, Durable Execution, Environment Bridge]
 category: "Ainekio OS"
 draft: false
 lang: "en"
@@ -22,66 +22,47 @@ reading:
   related: ["ainekio-os", "ainekio-companion", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
 ---
 
-**[Ainekio OS (`Greg-Aster/ainekio-os`)](https://github.com/Greg-Aster/ainekio-os)** (formerly MetaHuman OS) is the standalone personal AI operating system behind Ainekio's conversation, memory, identity, perception, and autonomous planning. While [Ainekio OS Architecture](/posts/ainekio-os/) covers the full standalone OS—its 123 unified API modules, 47 cognitive graphs, 24 background agents, CLI/Android surfaces, and 8-stage `02:00` Sleep Cycle—this guide focuses specifically on **embodied robot integration**: how Ainekio OS connects to `Master/gateway` and the `ESP32-P4` body.
+While **[Ainekio OS](/posts/ainekio-os/)** ([`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os), formerly MetaHuman OS) owns identity, episodic memory, cognitive graphs, and model routing, and [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) owns the physical quadruped firmware and host gateway, the **Embodied Bridge** is the narrow, event-driven connection between those two worlds.
 
-For a companion-centered view of how personality, sleep maintenance, and memory work together, see [Ainekio as a Companion](/posts/ainekio-companion/).
+Instead of letting a language model poll hardware sensors or stream raw servo angles over Wi-Fi, the bridge translates physical robot state into structured multimodal observations flowing upward, and translates high-level cognitive decisions into checked motion, facial, and speech intents flowing downward.
 
-## `ServerStatus` routing and `llama-cpp.service`
+## Connection topology and robot following
 
-All local language, vision, specialist, motion, and embedding inference runs through a **single consolidated `llama-cpp.service` router** on port `:8080`, managed alongside remote and Big Brother providers from the **`ServerStatus`** right-drawer control plane:
+The bridge connects Ainekio OS to the robot's **Host Gateway** ([gateway guide](/posts/gateway-and-simulator/)) across whichever link is active—local workstation loopback, home Wi-Fi LAN, an edge `Radxa Dragon Q6A` board, an SSH tunnel, or an optional remote tunnel.
 
-| Model / Provider Role | Configuration & Purpose |
-| --- | --- |
-| **`Qwen3.5 9B`** | Primary conversational Persona, multimodal `environmentVision` reasoning, and Full Auto high-reasoning activity selection |
-| **`Environment 0.8B / 2B`** | Fast `environmentOrchestrator` (Intent) and `environmentTask` specialists served from shared base weights with **per-request LoRA adapters** |
-| **`Freestyle Qwen` (`0.8B` + LoRA)** | Generates compact joint, foot, and body target programs and native-`stand` recovery motions (`489` training rows) for the 12-servo V2 body |
-| **`Qwen3 Embedding 0.6B` & `Nomic Embed v1.5`** | CPU-only embedding models (`--device none`) for episodic memory retrieval (`indexContentMode: "all"`) without consuming GPU VRAM |
-| **Hybrid & Big Brother (`ServerStatus`)** | One-click **`Local`**, **`Hybrid`**, **`BB-Codex`**, and **`BB-Gemini`** presets across 12 specialist roles, remote `llama.cpp` endpoint discovery, persistent warm 2-session `GeminiAcpServer` (`agy acp`), and per-service **local ↔ remote** CUDA **Whisper (`:9883`)** & **Kokoro (`:9882`)** voice targets (with local **Piper ONNX** fallback) |
+- **Single authoritative stream**: Multi-host connection following keeps one active observation and action session pinned to the physical robot (supporting both the 12-servo `ESP32-P4` V2 body and the earlier 8-servo `ESP32-S3` V1 frame) so switching between bench and living-room hosts never spawns duplicate command streams.
+- **Instant operator override**: A top-bar switch in the Body Control workbench and Cockpit HUD pauses or resumes Ainekio OS control immediately without dropping telemetry or manual teleoperation.
 
-To preserve workstation and host memory, `llama-cpp.service` runs with `load-on-startup = false` and a **5-minute (`300 s`) idle unload timeout**, loading weights on demand and supporting native inference cancellation when a newer priority event preempts an in-flight turn. Operators can also enable or pause Ainekio OS control directly from the top bar of Body Control / Cockpit HUD.
+## Upward flow: how sensory data and telemetry enter Ainekio OS
 
-## Single `environment-bridge` and `environment-mode.json`
+Not every hardware reading should trigger a language-model call. The bridge separates high-rate background telemetry from discrete events that warrant cognitive attention:
 
-Ainekio connects to Ainekio OS through a single consolidated **`environment-bridge`** agent with **multi-host robot following**:
+| Upward Signal | Source on V2 Body & Gateway | How Ainekio OS Consumes It |
+| --- | --- | --- |
+| **Live Robot Status** | `208 Hz` `LSM6DS3` attitude, battery voltage, active posture, and 12-channel `CD74HC4067` (`C4–C15` → `GPIO49`) servo tracking health | Updates live context quietly in the background without firing redundant conversational turns |
+| **Voice Transcripts** | `WakeNet9s` wake-gated `16 kHz` audio from the `ES8311` codec, segmented by 5-mode VAD and transcribed by Whisper ([voice guide](/posts/voice-loop/)) | Enters the embodied workflow as an attributed spoken turn, optionally paired with a camera still taken at utterance end |
+| **Correlated Camera Snapshots** | Chin-mounted `OV5647` MIPI-CSI stills (explicit captures, post-motion verification frames, or tracked object crops; [vision guide](/posts/vision-loop/)) | Tagged with the exact `action_id`, `command_sequence_id`, or `utterance_id` so vision grounding knows *when* and *why* the frame was captured |
+| **Spatial & Obstacle Metrics** | Cockpit HUD optical-flow + monocular depth obstacle range, YOLOE target boxes, and OpenGV / MoGe depth odometry | Supplies measured forward progress, heading change, and approach clearance during locomotion goals |
+| **Body-Contact Events** | Thresholded `tipped`, `shaken`, `stalled` / `jammed`, and `boot` events from the IMU and 4th-wire servo wipers | Routes sudden jostles to the fast body-reflex workflow, and routes `boot` / wake transitions to full contextual orientation |
 
-1. **Multi-host connection following (`followRobot: true`)**: Whether the robot's `Master/gateway` is running on the local desktop, over an SSH tunnel, on an offboard **Radxa Dragon Q6A**, or behind `bridge.ainek.io` (Cloudflare Access), `environment-bridge` pins to `robotId` (`ainekio-p4-e6ebe5`) and maintains one authoritative observation and action stream. High-frequency feedback-health updates update live `Robot Status` state directly without spawning redundant conversational turns.
-2. **Unified `environment-mode.json` cognitive graph**: Incoming user requests, voice transcripts, camera frames, and action settlements enter a single validated graph inside the 47-graph workflow catalog.
-3. **Clear role separation**:
-   - **Orchestrator (Intent)** classifies whether incoming input is a new request, a modification, a cancellation, or a conversational turn, and decides whether an outward spoken reply is needed.
-   - **Task Decisions** selects concrete robot actions (`robotCommand`, `locomotionGoal`, `freestyleProgram`, `captureImage`, or specialist delegation) without injecting intermediate filler speech between movements.
-   - **Goal Review** evaluates returned action receipts and visual evidence against the active objective.
-   - **Standing Persona** (`persona/core.json`) is the single outward voice owner, synthesizing the final conversational response from the completed or in-progress task state.
+## Downward flow: how cognitive intents become robot actions
 
-## Varied durable Fast Body Events (`fast-body-event-mode.json`)
+When an observation enters Ainekio OS's embodied workflow, four distinct cognitive roles split the work so outward speech stays natural and physical actions stay bounded:
 
-Physical disturbances require immediate, lightweight reactions rather than full multi-step planning:
+1. **Intent Orchestration**: Classifies whether incoming input is a new request, a mid-walk adjustment, a cancellation, or pure conversation, and decides whether a spoken reply is appropriate.
+2. **Task Selection**: Picks concrete, schema-validated robot intents—named postures or gaits (`Stand`, `Walk`, `Run`, `Crawl`, `Crab`, or 23 gestures), measured locomotion goals (distance, turn angle, visual approach/follow using on-chip `50 Hz` MicroDuck or analytical gaits), **Freestyle** 12-DOF target programs (backed by the **349-motion** library and **489-row** training set of **73** library motions + **416** `Stand` fault-recovery trajectories), explicit camera snapshots, or background coding delegations—without injecting robotic step-by-step narration between movements.
+3. **Goal Review**: Inspects the returned hardware action receipt, shaft-arrival telemetry, and post-motion camera frame before marking a multi-step physical objective complete or selecting a follow-up step.
+4. **Outward Expression (Standing Persona, Face & Voice)**: Synthesizes the single conversational reply in Ainekio's voice, pairs it with one of the **59 animated expressions** on the `1.9"` `ST7789` LCD, and streams paced Kokoro or Piper audio to the `NS4150B` speaker while holding an explicit self-speech suppression window so the microphone ignores playback.
 
-- When the `ESP32-P4` detects a physical tip, shake, or servo jam/stall, it emits a body event with live `LSM6DS3` IMU and `CD74HC4067` joint-error telemetry.
-- Ainekio OS routes tip, shake, and stall events to **`fast-body-event-mode.json`**, a dedicated single-call Lightweight workflow executed under the durable coordinator.
-- To prevent repetitive canned quips when the robot is jostled repeatedly, `environment_fast_body_event` queries the **last 6 `fast_body_event_response` speech entries** (`recentReactionLimit = 6`) and injects them with `temperature = 0.8` and `repeatPenalty = 1.2`.
-- The model emits **`be_` token-matched facial expressions** (mapped directly to the 59 expressions on the 1.9" `ST7789` LCD) paired with fresh, dryly varied situational remarks, without derailing an existing saved execution.
-- Boot and wake transitions retain the full contextual workflow so Ainekio can orient itself, check its surroundings, and rise cleanly.
+## Fast body-contact reflexes vs. durable multi-step tasks
 
-## Durable execution and the Work Coordinator
+Physical contact and multi-step errands operate on very different timescales, so the bridge gives each its own execution path:
 
-A robot request often spans multiple physical actions and sensor checks—for example, standing up, walking across a hardwood-to-carpet seam under the on-chip `50 Hz` MicroDuck gait, capturing a fresh frame, and verifying arrival.
+- **Sub-second jostle & stall reflexes**: When the `ESP32-P4` reports that Ainekio was tipped, shaken, or stalled against a rug seam, the event routes to a lightweight single-call reflex workflow rather than full task planning. To keep reactions fresh when someone picks the robot up repeatedly, the reflex prompt includes the **last 6 body-event remarks** with diversity penalties, emitting a matching LCD reaction face and a dry, non-repetitive comment without derailing an in-progress goal.
+- **Crash-safe receipts across Wi-Fi drops**: Multi-step tasks (such as standing up, walking across a room, snapping a verification photo, and reporting back) suspend cleanly in SQLite while the body moves. Before dispatching any command over `protocol-v1` ([protocol guide](/posts/protocol-and-safety/)), the gateway adapter records its action ID, payload hash, connection epoch, and sequence number. Every command settles to an explicit terminal state (`done`, `cancelled`, `nak`, or `outcome_unknown` if Wi-Fi drops mid-move), ensuring that reconnect recovery **never blindly replays a physical movement twice**.
 
-- **14-table WAL `executions.sqlite` checkpoints**: Every admitted request runs as a durable **execution** managed by the **Work Coordinator** (`Scheduler Contract v1`, content-addressed SHA-256 payload blobs, replay-safe `waitForEvent`).
-- **Saved waits**: While the physical robot executes a gait or a specialist worker runs in the background, the execution enters a saved wait rather than holding open a fragile polling loop.
-- **Action receipts and epoch correlation**: `Environment Bridge Out` records the intended action before dispatch. The gateway tracks the command across connection epochs until a terminal receipt (`done`, `cancelled`, `nak`, or `outcome_unknown` on unverified disconnect) arrives, preventing accidental duplicate motion after a Wi-Fi drop.
-- **Goal-directed locomotion**: Active Task connects model-selected distance, turn, approach, follow, and visual endpoints to measured progress (joint arrival, IMU heading, optical-flow obstacle clearance, and OpenGV / MoGe depth odometry) and the gait controller's terminal `Finish` receipt.
+## Related guides
 
-## Standing Persona and Desire management
-
-Identity and autonomous motivation have strict ownership boundaries:
-
-- **Standing Persona (`persona/core.json`)**: Represents Ainekio's core identity, values, and voice. Only the **Psychotherapist** agent (during the `02:00` Sleep Cycle or explicit review) and manual operator edits may modify `persona/core.json`.
-- **Desire Agent**: Manages candidate intentions in Agency, adjusting desire strengths based on attributed memories, standing goals, and real task outcomes, and archiving desires once satisfied or obsolete. Approved desires execute through finite, step-tracked plans (`1–10` steps) rather than acting as unbounded background prompts.
-
-## Big Brother delegation and hosted UI
-
-When a request requires heavy software engineering, repository inspection, or complex host operations beyond the local embedded specialists:
-
-- **Big Brother CLI & Warm ACP (`TerminalChat.svelte`)**: Connects to `codex`, `claude-code`, and a persistent 2-session warm **`GeminiAcpServer` (`agy acp`)** pool directly inside Ainekio OS.
-- **Asynchronous Computer Tasks (`big-brother-tool-mode.json`)**: Environment workflows can delegate asynchronous computer tasks and run **`system-code-review`** through Big Brother while the robot continues interacting and reporting progress.
-- **Hosted Static UI (`https://mh.ainek.io`)**: The Ainekio OS web interface—covering chat, `/architecture` system map, node editor, `ServerStatus`, Agent Monitor, memory browser, Agency, and Robot Status—is also published as a hosted static UI at [`https://mh.ainek.io`](https://mh.ainek.io) that connects to the operator's active runtime.
+- **[Ainekio OS Architecture](/posts/ainekio-os/)**: Full reference for Standing Persona, cognitive graphs, SQLite durability, local/hybrid model routing, and the `02:00` sleep cycle.
+- **[Bounded Autonomy Modes](/posts/bounded-autonomy/)**: How Reactive, Semi Mode, and Full Auto govern self-initiated robot behavior and hardware safety boundaries.
+- **[Gateway, Cockpit HUD & Simulator](/posts/gateway-and-simulator/)** · **[Protocol, Telemetry & Safety](/posts/protocol-and-safety/)**.

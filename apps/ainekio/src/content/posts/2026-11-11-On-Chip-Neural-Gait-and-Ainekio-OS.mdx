@@ -1,11 +1,11 @@
 ---
-title: "On-Chip ESP32-P4 Neural Gait (110 KB L2-Cached MicroDuck), Cockpit HUD & Ainekio OS"
+title: "On-Chip ESP32-P4 Neural Walking, Keeper Bridge Rebuild & Ainekio OS"
 published: 2026-11-11
 updated: 2026-11-11
-description: "Compiling and DAgger-distilling a 50 Hz proprioceptive MicroDuck RL policy (720→128→64→32→12, 107.8 KB int8) directly into the ESP32-P4's 128 KB L2 cache, Pupper V3 MJX physical seam trials, the Body Control Cockpit HUD, V2 Keeper Bridge STLs, and the Ainekio OS rebrand & ServerStatus compute plane."
+description: "Distilling a 50 Hz MicroDuck neural gait policy down to 107.8 KB int8 inside the ESP32-P4's 128 KB L2 cache, hardwood and carpet-seam floor trials, a redesigned 2S Keeper Bridge, the Cockpit HUD, and rebranding MetaHuman OS to Ainekio OS."
 image: "/posts/2026-11-11-progress/on-chip-microduck-distillation.webp"
 authorName: "Ainekio Project"
-showImageOnPost: true
+showImageOnPost: false
 showToc: true
 tags: [Ainekio, Ainekio OS, V2, ESP32-P4, Neural Gait, MicroDuck, Distillation, Reinforcement Learning, Firmware, Hardware]
 category: "Build Journal"
@@ -20,40 +20,77 @@ reading:
   related: ["ainekio-os", "gait-development", "ainekio-v2", "gateway-and-simulator"]
 ---
 
-Between November 7 and November 11, development across [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) and [`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os) crossed two major architectural thresholds:
+Between November 7 and November 11, work on the workbench and in simulation crossed two
+milestones I had been aiming toward since V2 first stood up:
 
-1. **Neural locomotion moved off the Wi-Fi link and directly onto the `ESP32-P4` microcontroller (`0.8.159-p4-microduck-v17`)**: Our GPU-trained **MicroDuck** proprioceptive policy (`720` inputs from `300 ms` of 4th-wire potentiometer and `208 Hz` `LSM6DS3` IMU history) is now compiled to symmetric `int8` (`policy.bin`) and distilled via **2-round DAgger** from `547,040 B` (`512-256-128`) down to **`110,432 B` (`107.8 KB`, `128-64-32`)**—fitting completely inside the **`ESP32-P4`'s `128 KB` L2 cache** and running native closed-loop `walk` at **`50 Hz` on Core 1** with zero host or UDP dependency.
-2. **MetaHuman OS publicly became [Ainekio OS (`Greg-Aster/ainekio-os`)](/posts/ainekio-os/)**: Consolidating 150+ route shims into a single 3-line Astro API adapter (`123` Core handlers), moving all **12 specialist model roles** into a unified right-drawer **`ServerStatus`** compute/voice plane (`Local` / `Hybrid` / `BB-Codex` / `BB-Gemini` presets + remote `llama.cpp`, Whisper, and Kokoro targets), adding a warm 2-session **`GeminiAcpServer`** daemon, and introducing durable 6-turn varied **Fast Body Event** reactions.
+1. **Neural walking now runs natively on the `ESP32-P4` itself—no Wi-Fi host stream required.** Using two rounds of DAgger teacher-student distillation, I shrunk our GPU-trained **MicroDuck** proprioceptive gait network by **~80%**—from a `547 KB` teacher down to a **`107.8 KB` (`110,432-byte`) `int8` policy** that fits completely inside the `ESP32-P4`'s **`128 KB` L2 cache** and runs closed-loop at **`50 Hz` on Core 1**.
+2. **MetaHuman OS officially became [Ainekio OS (`Greg-Aster/ainekio-os`)](https://github.com/Greg-Aster/ainekio-os).** Alongside opening up and renaming the companion mind repository, I unified local and LAN GPU model/voice routing with warm cloud coding delegates, built a single live-camera **Cockpit HUD** for driving the robot on the floor, and redesigned the rear **Wireless Keeper Bridge** around our `2S` power electronics.
 
 ![On-Chip ESP32-P4 Neural Gait DAgger Distillation, Core 1 50 Hz Pipeline, and Benchmark Progression](/posts/2026-11-11-progress/on-chip-microduck-distillation.webp)
 
 ---
 
-## 1. Compiling neural gait onto `ESP32-P4` Core 1 (`ae131f9` → `0.8.159-p4-microduck-v17`)
+## 1. Moving neural walking onto the ESP32-P4's 128 KB L2 cache
 
-In the [November 6 milestone](/posts/2026-11-06-carpet-trials-rl-and-big-brother/), physical neural walking still relied on the Python host gateway streaming `50 Hz` `gait` frames over Wi-Fi UDP (`walk->host_nominal = true`). Any Wi-Fi jitter stretched the `20 ms` control loop.
+During the [November 6 carpet walks](/posts/2026-11-06-carpet-trials-rl-and-big-brother/),
+neural control worked, but with a catch: the workstation gateway was still running the
+policy and streaming `50 Hz` foot targets over Wi-Fi UDP. On a busy room network, even a
+brief Wi-Fi hiccup stretched the `20 ms` control tick and broke the rhythm of a stride.
+Untethered floor walking meant putting the neural network on the microcontroller right
+next to the sensors and servos.
 
-In commit `ae131f9` (`2026-11-09`) and subsequent distillation runs through **`microduck-v17-p4`** (`2026-11-11`), we embedded neural policy inference directly inside `Slave/software/models/v2-12servo/microduck.c` and `Slave/firmware/esp32p4-wifi6/main/body.c` while deleting `-831` lines of legacy phase-residual learning (`gait_learning.c`):
+The proprioceptive **MicroDuck** policy takes a **720-float rolling history** (`15`
+frames × `48` values covering `300 ms` at `50 Hz`):
 
-- **Zero-dependency ONNX-to-C compiler (`compile_microduck.py`)**: At CMake build time, `compile_microduck.py` parses `policy.onnx`, extracts the `720`-element observation `mean` and `std` vectors, symmetrically quantizes each linear layer's weights per output row to `int8_t` (`scale[row] = max_abs / 127.0f`), packs `"AMDK"` `policy.bin`, and emits 16-byte-aligned `microduck_data.c`.
-- **`50 Hz` integer MAC on Core 1 (`microduck.c` + `body.c`)**: Pinned to **Core 1** (`output_task`, `20,000 µs` period), the firmware normalizes the `720`-float causal ring buffer (`15 × 48` frames = `300 ms`), dynamically quantizes each layer's input vector to `int16_t`, and executes an **8-way loop-unrolled `int8 × int16 → int32` dot product** with `ELU` hidden activations and `tanh` outputs.
-- **Exact 48-float per-frame proprioceptive vector (`ainekio-neural-gait-v7-proprio`)**:
-  - `[0..11]`: 12 measured joint positions (`rad`, relative to calibrated neutral) from the 4th-wire `CD74HC4067` ADC multiplexer through the firmware One-Euro filter.
-  - `[12..23]`: 12 measured joint velocities (`rad/s`) from the One-Euro derivative channel.
-  - `[24..26]`: 3-axis body angular velocity (`rad/s`) from the `208 Hz` `LSM6DS3` gyroscope.
-  - `[27..29]`: 3-axis linear acceleration (`g`) from the `LSM6DS3` accelerometer.
-  - `[30..32]`: Negative projected gravity (`-g_body`) from the yaw-zeroed Madgwick `FusionAhrs` quaternion.
-  - `[33..35]`: Commanded body twist `[vx, vy, wz]` (`-0.22..+0.20 m/s` on firmware, `±0.08 m/s` strafe, `±1.0 rad/s` turn).
-  - `[36..47]`: Previous step's normalized `12D` action (`[-1, 1]`).
-- **Closed-chain 4-bar safety fit**: Raw `[-1, 1]` outputs scale by `[45.0, 28.0, 30.0] mm` (`× stride_scale` / `z_scale`) into `[RL, RR, FL, FR]` foot offsets and pass through `ainekio_v2_nominal_foot_pose()`—solving analytical 4-bar IK with **8-pass Gauss-Newton Jacobian boundary projection** and **13 dyadic step-shortening fractions** before `PCA9685` PWM output. Camera UDP chunking in `controller.c` also yields immediately whenever the `20 ms` telemetry deadline arrives, and stand-range `[500, 2800] µs` false alerts are suppressed during wide neural strides.
+- **Joint positions & velocities (`24` values):** All 12 modified `MG90S` 4th-wire
+  potentiometer angles (sampled through the `CD74HC4067` multiplexer) and One-Euro
+  filtered joint velocities.
+- **Inertial state (`9` values):** 3-axis angular rate and 3-axis linear acceleration
+  from the `208 Hz` `LSM6DS3` IMU, plus the yaw-zeroed gravity vector from Madgwick
+  attitude fusion.
+- **Commands & prior action (`15` values):** Desired body velocity (`vx`, `vy`, `wz`)
+  and the previous step's `12` normalized foot-offset outputs.
+
+My first on-chip compile quantized the `512-256-128` teacher network directly to
+symmetric per-row `int8` weights. It ran on the board, but at **`547,040 bytes`
+(`534 KB`)** it was more than **4× larger than the `ESP32-P4`'s `128 KB` L2 cache**,
+forcing external PSRAM fetches across the memory bus every `20 ms`.
+
+Running **two rounds of DAgger distillation** from that teacher into a compact
+`720 → 128 → 64 → 32 → 12` student shrunk the compiled `int8` weights by **`79.8%`** down
+to **`110,432 bytes` (`107.8 KB`)**—small enough to stay hot inside the `128 KB` L2
+cache on **Core 1** using 8-way unrolled `int8 × int16 → int32` dot products. Every
+`20 ms`, its Cartesian foot offsets pass through analytical `35 / 20 / 28 / 38 / 55 mm`
+four-bar inverse kinematics and workspace boundary projection before driving the
+`PCA9685` PWM channels, while legacy phase-residual correction tables (`-831` lines of C)
+were deleted completely.
+
+Even better, continuing PPO reinforcement learning on the distilled `107.8 KB` student
+under simulated rail sag and multi-surface friction ended up **beating the larger
+`547 KB` teacher** across every direction:
+
+| Policy Milestone | Network & Compiled Size | Eval Score | Forward | Reverse | Yaw Turn (`L / R`) | Falls (8 Benchmarks) |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| **Teacher (`Nov 7`)** | `512-256-128` · `547,040 B` | `0.1558` | `+0.172 m/s` | `-0.123 m/s` | `+55.7°/s` / `-50.2°/s` | `0` |
+| **First On-Chip Compile (`Nov 9`)** | `512-256-128` · `547,040 B` | `0.1632` | `+0.165 m/s` | `-0.127 m/s` | `+49.7°/s` / `-49.9°/s` | `0` |
+| **Distilled Student (`Nov 9`)** | `128-64-32` · `110,432 B` | `0.1645` | `+0.178 m/s` | `-0.130 m/s` | `+54.4°/s` / `-50.8°/s` | `0` |
+| **Multi-Surface Pass (`Nov 10`)** | `128-64-32` · `110,432 B` | `0.1574` | `+0.176 m/s` | `-0.119 m/s` | `+48.7°/s` / `-48.9°/s` | `0` |
+| **L2-Cached Student (`Nov 11`)** | **`128-64-32` · `110,432 B` (`107.8 KB`)** | **`0.1945`** | **`+0.213 m/s`** | **`-0.179 m/s`** | **`+60.8°/s` / `-60.9°/s`** | **`0`** |
 
 ---
 
-## 2. GPU hardware twins & 2-round DAgger distillation into the `128 KB` L2 cache
+## 2. Hardwood & carpet-seam trials, hardware-twin RL, and Freestyle recovery
 
-To ensure policies trained at **4,096 parallel MuJoCo environments** transfer cleanly onto `$1.50` feedback-modified `MG90S` servos, we built exact GPU PyTorch twins of the C firmware (`Master/gateway/neural_gait/tensor_sensors.py` and `tensor_body.py`, cross-checked against C via `native.c` ctypes):
+Cheap `$1.50` `MG90S` micro servos don't behave like idealized torque actuators in a
+clean physics engine. To make policies trained across **4,096 parallel MuJoCo
+environments** hold up on a real living-room floor, I built GPU simulation twins of the
+physical sensor and power quirks we kept hitting on the bench:
 
-- **Simulated electrical & mechanical imperfections**: `tensor_sensors.py` models 12-bit ratiometric 4th-wire ADC quantization, **supply-rail sag (`0.96–1.02` + load droop)**, `1.5%` `60 ms` stale-sample holds, One-Euro filtering, `LSM6DS3` white noise/bias walk/clipping, and exact `FusionAhrs` integration. `tensor_body.py` models closed-chain `35/20/28/38/55 mm` 4-bar couplers, `PCA9685` `4.07 µs` tick quantization, weak-corner sag, and rear `2S` battery load compliance across **3 friction regimes (`0.14–1.45`: 45% slick wood, 35% wood/carpet split seam, 20% carpet)** plus **cable ledges (`21–40 mm` clearance)**.
+- **Realistic electrical & linkage quirks:** 12-bit ratiometric 4th-wire ADC steps,
+  **5 V supply-rail voltage sag** when multiple servos load up together, occasional
+  `60 ms` stale ADC samples, `LSM6DS3` gyro noise and bias drift, `PCA9685` `4.07 µs`
+  PWM resolution, rear `2S` battery mass distribution, **mixed floor friction (`0.14`
+  slick hardwood through `1.45` carpet)**, and **`21–40 mm` floor/cable ledges**.
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
   <figure>
@@ -61,60 +98,89 @@ To ensure policies trained at **4,096 parallel MuJoCo environments** transfer cl
       <source src="/gallery/microduck-terrain-showcase.mp4" type="video/mp4" />
       <a href="/gallery/microduck-terrain-showcase.mp4">Download the MicroDuck sloped-staircase, rocks, slip, and push terrain rollout.</a>
     </video>
-    <figcaption>Teacher MicroDuck policy (<code>512-256-128</code>) traversing sloped ramps, discrete steps, rocks, low-friction slip patches, and lateral push disturbances on the full-CAD V2 model.</figcaption>
+    <figcaption>Teacher MicroDuck policy (<code>512-256-128</code>) climbing sloped ramps, steps, rocks, low-friction slip patches, and lateral shoves on the full-CAD V2 model.</figcaption>
   </figure>
   <figure>
     <video controls playsInline preload="metadata" width="1280" height="720" poster="/gallery/microduck-p4-student-110kb-poster.webp" className="w-full rounded-xl">
       <source src="/gallery/microduck-p4-student-110kb.mp4" type="video/mp4" />
       <a href="/gallery/microduck-p4-student-110kb.mp4">Download the distilled 110 KB ESP32-P4 student rollout.</a>
     </video>
-    <figcaption>Distilled <code>128-64-32</code> on-chip student policy (<code>107.8 KB</code> int8) walking cleanly after 2-round DAgger teacher distillation and multi-surface rail-sag PPO continuation.</figcaption>
+    <figcaption>Distilled <code>107.8 KB</code> on-chip student policy (<code>128-64-32</code>) walking cleanly after 2-round DAgger distillation and rail-sag PPO continuation.</figcaption>
   </figure>
 </div>
 
-The initial on-chip `512-256-128` actor (`547,040 B` in `ae131f9`) exceeded the `ESP32-P4`'s `128 KB` L2 cache by `4.2×`, forcing PSRAM traffic every `20 ms`. Adding **2-round DAgger distillation** (`_distill_from_teacher()` in `microduck.py`, `MAE = 0.0577`) compressed the actor to **`720 → 128 → 64 → 32 → 12`** (**`110,432 B` / `107.8 KB`**, a **`79.8%` reduction** that stays L2-cache-hot) while PPO continuation (`v14-p4` → `v17-p4`) actually **outperformed** the larger teacher:
+Alongside the on-chip distillation work, I trained a `600M`–`800M`-step **Pupper V3 MJX**
+policy and ran **13 physical floor bouts** on the real V2 robot across two surfaces that
+usually trip small quadrupeds: **6 bouts on slick hardwood** (forward, reverse, and four
+turning arcs with `5.4°–15.4°` peak roll and **zero falls**) and **7 bouts crossing and
+straddling a raised carpet-to-hardwood seam** (**zero falls**).
 
-| Policy Revision | Hidden Layers & `policy.bin` | Eval Score | Forward (`fwd100`) | Reverse (`bwd100`) | Yaw Turn (`L / R`) | Falls (8 Scenarios) |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| **Rev 11 Teacher (`Nov 7`)** | `512-256-128` · `547,040 B` | `0.1558` | `+0.172 m/s` | `-0.123 m/s` | `+55.7°/s` / `-50.2°/s` | `0` |
-| **Rev 12 Initial P4 (`ae131f9`)** | `512-256-128` · `547,040 B` | `0.1632` | `+0.165 m/s` | `-0.127 m/s` | `+49.7°/s` / `-49.9°/s` | `0` |
-| **`microduck-v14-p4` (`Nov 9`)** | `128-64-32` · `110,432 B` | `0.1645` | `+0.178 m/s` | `-0.130 m/s` | `+54.4°/s` / `-50.8°/s` | `0` |
-| **`microduck-v15-p4` (`Nov 10`)** | `128-64-32` · `110,432 B` | `0.1574` | `+0.176 m/s` | `-0.119 m/s` | `+48.7°/s` / `-48.9°/s` | `0` |
-| **`microduck-v17-p4` (`Nov 11`)** | **`128-64-32` · `110,432 B`** | **`0.1945`** | **`+0.213 m/s`** | **`-0.179 m/s`** | **`+60.8°/s` / `-60.9°/s`** | **`0`** |
-
-In parallel, we added a **Stanford Pupper V3 MJX host actor** (`import_pupper_mjx.py`, `pupper_mjx_actor.py`) trained through `600M` and `800M` steps (`804.6M` env steps) and ran **13 physical floor bouts** on `ainekio-p4-e6ebe5` (`2026-11-09`) across slick hardwood (6 bouts: forward, reverse, and four turning arcs; peak roll `5.4°–15.4°`, zero falls) and **carpet↔hardwood transitions** (7 bouts crossing and straddling the seam; zero falls).
+For finite expressive gestures, I also expanded the **Freestyle** recovery dataset to
+**`489` trajectories** covering jam and slip recovery across all `23` base motions,
+returning cleanly to native closed-loop `Stand` whenever a foot catches or stalls.
 
 ---
 
-## 3. Body Control Cockpit HUD, optical-flow range & `489`-row Freestyle recovery
+## 3. Redesigned Wireless Keeper Bridge and 30 updated Red V2 shell STLs
 
-To instrument and drive both on-chip and host policies cleanly, `Master/gateway` added several operator upgrades (`ae131f9` & `1779b9c`):
+Floor bouts quickly exposed every loose wire and tight tolerance left in the `650 g`
+body. Between November 6 and November 11 I reworked the rear power/electronics bridge
+and front face mounts, exporting **30 updated STL parts** to
+[Ainekio-bot](https://github.com/Greg-Aster/Ainekio-bot):
 
-- **Ainekio Cockpit HUD (`data-workspace="cockpit"`)**: Full-viewport flight-style drive view combining live `OV5647` video, WASD/gamepad twist controls, posture/emote triggers, speech controls, and a persistent top-bar **Ainekio OS / MetaHuman control** safety toggle (`#quick-behavior-enabled`) plus an **On-chip MicroDuck (`native`) vs. Host neural gait (`neural`)** walk-mode selector.
-- **Optical-flow ground-contact range (`depth_motion.py`)**: Fuses pyramidal Lucas-Kanade optical flow (`cv2.calcOpticalFlowPyrLK`, up to 36 features) anchored at the lowest obstacle ground-contact point with relative inverse depth and forward displacement for live obstacle range readouts on the Cockpit HUD.
-- **No-login local mode & hotspot fallback (`1779b9c`)**: Added `AINEKIO_DASHBOARD_NO_LOGIN` automatic `HttpOnly; SameSite=Strict` session minting for trusted local benches, plus automatic concrete-unit fallback in `hotspot.py` when `ainekio-hotspot.target` is absent.
-- **`489`-row Freestyle `motion-targets-v1` dataset**: Expanded closed-loop jam/slip semantic teachers (`library_recovery.py`, `semantic_teachers.py`) across all `23 / 23` eligible base motions (`489` rows including `416` synthesized fault-recovery trajectories) and migrated recovery to native closed-loop `stand`.
+- **Battery-mounted Wireless Keeper Bridge:** Moves the `2S` Li-ion pack (`73.6 × 46 ×
+  22 mm`), `Mini560` `5 V / 5 A` buck regulator, and `HiLetgo` 2S USB-C charger board
+  onto a cleaner rear carrier with snap-in PCB clips for the `ESP32-P4`, `PCA9685`,
+  charger, and a dedicated `LSM6DS3` gyro mount so nothing shifts during hard turns.
+- **Thicker LCD spacers & recessed bezel:** Adds four wireless spacers, a deeper
+  recessed bezel, and an updated camera-to-LCD retainer so the 1.9-inch `ST7789` screen
+  sits flush behind the mask without pinching its ribbon cable.
+- **Front carrier & shimmed servo brackets:** Cleans up the compact front bulkhead,
+  crossbars, tray plates, and all four upper servo brackets with separate rectangular
+  shims for tighter bearing preload.
+- **Download Archive:** **[V2 Keeper Bridge, LCD Bezel & Shell Fixes STLs (30 parts, ZIP)](/posts/2026-11-11-progress/keeper-bridge-and-shell-fixes.zip)**.
 
 ---
 
-## 4. V2 Red shell, LCD spacers & Wireless Keeper Bridge CAD/STL refinements
+## 4. Body Control Cockpit HUD for live floor driving
 
-Between November 6 and November 11 (`front-shell-fixes.blend` and `keper-bridge-redisign1.blend`), 30 updated Red structural and mounting STLs were exported for the `650 g` V2 chassis:
+Jumping between separate telemetry tabs while driving the robot across hardwood and
+carpet got clumsy fast, so I built a single full-viewport **Cockpit HUD** around the
+live lower-jaw `OV5647` camera feed.
 
-- **Recessed LCD bezel & wireless spacers**: Updated `Black LCD Carrier`, `Recessed LCD bezel`, `Camera retainer to LCD carrier`, and 4 dedicated `Wireless LCD carrier spacers`.
-- **Shell & crossbar reinforcement**: Compact front end panel, Q6A-port rear panel, front/rear tray mount plates, left/right center mounts, front/rear center support crossbars, rear arch mount, and left/right front panel braces.
-- **Battery-mounted Wireless Keeper Bridge & shimmed servo housings**: Redesigned `Wireless keeper bridge - battery mounted` paired with a dedicated `Gyro carrier`, `ESP32-P4` front/rear inner/outer PCB clips, `Adafruit PCA9685` retainers, `HiLetgo` left/right charger clips, and refined `FL/FR/RL/RR Part_003` servo housings with separate rectangular shims.
-- **Download Archive**: **[V2 Keeper Bridge, LCD Bezel & Front-Shell Fixes STLs (30 parts, ZIP)](/posts/2026-11-11-progress/keeper-bridge-and-shell-fixes.zip)**.
+Driving with WASD or a gamepad now overlays live joint tracking and load, `LSM6DS3`
+roll/pitch attitude, posture and gesture triggers, spoken-line controls, a switch
+between **on-chip `ESP32-P4` walking** and **host-streamed policies**, and a top-bar
+autonomy cut-off toggle. To gauge clearance from a single monocular camera close to the
+floor, pyramidal Lucas-Kanade optical flow tracks up to 36 ground-contact features at
+the base of nearby obstacles and fuses them with forward displacement into a live
+range readout.
 
 ---
 
-## 5. MetaHuman OS becomes Ainekio OS (`Greg-Aster/ainekio-os`)
+## 5. MetaHuman OS becomes Ainekio OS
 
-On the cognitive side (`2dc83693`, `96e74c01`, and November 11 runtime updates), the companion brain repository was publicly rebranded to **[Ainekio OS (`Greg-Aster/ainekio-os`)](https://github.com/Greg-Aster/ainekio-os)** and streamlined across its API, compute, and reflex layers:
+Finally, the companion mind repository has a home and name that actually match the
+robot: **[Greg-Aster/ainekio-os](https://github.com/Greg-Aster/ainekio-os)**.
 
-- **Single Core API router & dead-path cleanup (`2dc83693`)**: Replaced 150+ Astro route shims with a 3-line catch-all `[...path].ts` adapter backed by `123` Core handler modules, added the live `/architecture` Svelte-Flow System Map, and deleted legacy RVC voice-training and obsolete skill wrappers.
-- **Right-drawer `ServerStatus` & remote compute/voice targets (`96e74c01`)**: Moved all **12 specialist model roles** into `ServerStatus.svelte` with **`Local`**, **`Hybrid`**, **`BB-Codex`**, and **`BB-Gemini`** presets, remote `llama.cpp` discovery across LAN/Cloudflare nodes, and per-service **`local` ↔ `remote`** toggling on CUDA **Whisper (`:9883`)** and **Kokoro (`:9882`)** servers (with fast local Piper ONNX fallback).
-- **Warm `GeminiAcpServer` daemon & direct cloud multimodal routing**: Added a persistent `agy acp` JSON-RPC daemon (`gemini-acp-server.ts`) maintaining **2 pre-warmed sessions** for sub-second multimodal subscription turns alongside `codex`, `claude-code`, and direct Gemini/Claude/OpenRouter REST providers.
-- **Varied durable Fast Body Event reactions**: `fast-body-event-mode.json` now queries the last **6 non-cancelled `fast_body_event_response` speech turns** from `executions.sqlite` (`temperature = 0.8`, `repeatPenalty = 1.2`) so tip, shake, and servo-stall reflexes stay fresh and dryly observant.
+![Ainekio OS Hybrid Compute, Cognitive Graph, and Body Bridge Architecture](/posts/ainekio-os/ainekio-os-architecture.webp)
 
-For a complete architectural walkthrough of the mind repository, read the new **[Ainekio OS System Reference](/posts/ainekio-os/)**.
+Consolidating the repository let me clear out a pile of old scaffolding and tighten how
+the brain talks to both local GPUs and the physical body:
+
+- **Unified local, LAN GPU, and cloud routing:** All **12 specialist model roles** and
+  voice services now route from one status drawer—switching cleanly between local or LAN
+  GPU **`Ollama`** / **`llama.cpp`** endpoints, CUDA **`Whisper`** speech recognition,
+  and **`Kokoro`** text-to-speech (with instant local **`Piper`** ONNX fallback), plus
+  warm persistent sessions for cloud coding and multimodal delegates.
+- **Lean HTTP core & interactive architecture map:** Collapsed 150+ leftover route
+  wrappers into a single Core API router (`123` handlers), removed unused RVC
+  voice-cloning clutter, and added a live node-graph architecture viewer.
+- **Fresh physical reflex lines:** Previously, tipping or shaking the robot twice in a
+  row could get the exact same quip back. Physical reflex turns (tips, shakes, and leg
+  stalls) now check the robot's **last six spoken reflex lines** before replying,
+  keeping its reactions varied and dryly observant instead of sounding canned.
+
+For the full tour of how the mind and body fit together, head to the
+**[Ainekio OS System Reference](/posts/ainekio-os/)** or continue to the
+**[Project Overview](/posts/project-overview/)**.

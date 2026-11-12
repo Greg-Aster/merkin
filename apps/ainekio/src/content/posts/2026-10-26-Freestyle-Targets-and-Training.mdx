@@ -2,10 +2,10 @@
 title: "Freestyle Finite Motion, 650 g Power Packaging, and In-Place Jam Recovery"
 published: 2026-10-26
 updated: 2026-10-27
-description: "Fixing the ESP32-P4 start_motion stack overflow (0.8.123), reconciling the 650 g physical build with its 2S battery and Mini560/HiLetgo rear carrier, training the 349-example Freestyle finite-motion library with in-place servo_stall recovery, and sharing llama-cpp.service with 5-minute idle unload."
+description: "Fixing an ESP32-P4 motion-planner stack overflow, weighing the 650 g build with its rear 2S power carrier and compact calibration stand, moving Freestyle to verified 4th-wire finite motion programs with in-place jam recovery, and unloading idle local LLM weights."
 image: "/posts/2026-10-26-progress/measured-targets.svg"
 authorName: "Ainekio Project"
-showImageOnPost: true
+showImageOnPost: false
 showToc: true
 tags: [Ainekio, V2, Freestyle, Firmware, Servo Feedback, Power, MetaHuman OS]
 category: "Build Journal"
@@ -20,26 +20,25 @@ reading:
   related: ["gait-development", "ainekio-v2", "metahuman-integration"]
 ---
 
-Between October 25 and October 27, work across the ESP32-P4 firmware, Blender
-packaging, and the Freestyle motion generator converged on a closed-loop execution
-pipeline: fixing a critical P4 stack overflow, locking in the **650 g** physical power
-and chassis baseline, evolving Freestyle from open-ended continuation loops into
-**one-shot finite programs** backed by a **349-example SQLite training library**, and
-handling `servo_stall` jams and falls in-place while preserving the active
-`motion_goal`.
+Between October 25 and October 27, work across the ESP32-P4 firmware, power packaging,
+and the Freestyle motion generator converged on real closed-loop movement: curing a
+nasty motion-task stack crash, weighing the complete **650 g** robot with its rear 2S
+power carrier and bench calibration stand, switching Freestyle from twitchy open-ended
+continuation loops to **one-shot finite target sequences** verified by the 4th-wire
+potentiometers, and keeping multi-step tasks alive across turns.
 
 <figure>
   <img src="/posts/2026-10-26-progress/measured-targets.svg" alt="Diagram of Freestyle target-and-speed execution with fourth-wire shaft arrival and in-place fault recovery." width="1000" height="600" loading="eager" />
-  <figcaption>Freestyle target-and-speed execution: the model emits joint/foot/body targets with speed_pct, while the P4 ramps and verifies 4th-wire shaft arrival.</figcaption>
+  <figcaption>Freestyle target-and-speed execution: the model emits joint, foot, and body targets with speed percentages, while the ESP32-P4 ramps and verifies 4th-wire shaft arrival.</figcaption>
 </figure>
 
-## 650 g physical mass reconciliation, 2S power carrier, and training stand
+## 650 g physical build, rear 2S power carrier, and compact calibration stand
 
-Weighing the fully assembled robot reconciled the physical build at **650 g**
-(up from the 566 g partial assembly on October 13), matching the `Wireless` scene in
-`Ainekio-Motion-Working.blend` (spanning **245.85 × 182.79 × 109.06 mm** at frame 168).
-The earlier USB power banks have been retired in favor of a compact rear power carrier
-housing a **2S LiPo pack, Mini560 5 V / 5 A buck converter, and HiLetgo 2S USB-C
+Putting the fully assembled wireless robot on the scale brought the real hardware in at
+**650 g** (up from 566 g on October 13 before the shell panels, harness, and power
+carrier went on), spanning **245.85 × 182.79 × 109.06 mm** in neutral stance. Both
+earlier USB power banks are gone for good—replaced by a compact one-piece rear carrier
+holding a **2S LiPo pack, Mini560 5 V / 5 A buck regulator, and HiLetgo 2S USB-C boost
 charger**:
 
 | Component / dimension | Current V2 specification |
@@ -53,51 +52,48 @@ charger**:
 | Shoulder spacing (fore-aft × left-right) | **173.434 × 63.500 mm** |
 | Joint feedback | 12× modified Miuzei MG90S servos via **CD74HC4067** mux |
 
-### Compact 3-piece training stand (`87%` less volume)
+### Compact 3-piece calibration stand (`87%` less print volume)
 
-To test standing and walking transitions with the feet clear of the desk, we replaced
-the bulky clamping stand with a 3-piece printed cradle (**140 × 110 mm** base,
-**77.1 mm** height, **75.9 mm** tray support height) that locates into the underside
-vent slots with two **4.0 × 40.0 mm** blades (42 mm center-to-center), cutting solid
-volume from `440.8 cm³` down to **`58.0 cm³` (−87%)**.
+To run standing and walking checks on the desk with all four feet clear of the surface,
+I replaced the bulky clamp fixture with a 3-piece printed stand (**140 × 110 mm** base,
+**77.1 mm** overall height) whose two **4.0 × 40.0 mm** blades key directly into the
+belly vent slots (42 mm center-to-center). Print volume dropped from `440.8 cm³` to
+**`58.0 cm³` (−87%)**.
 
-- [Download the 3 training stand STLs, assembly notes, and one-piece rear power carrier (`/posts/2026-10-26-progress/stand-and-power-carrier.zip`)](/posts/2026-10-26-progress/stand-and-power-carrier.zip)
+- [Download the 3 calibration stand STLs, assembly notes, and one-piece rear power carrier (`/posts/2026-10-26-progress/stand-and-power-carrier.zip`)](/posts/2026-10-26-progress/stand-and-power-carrier.zip)
 
-## ESP32-P4 `start_motion` stack-overflow fix (`0.8.123`) and verified arrival
+## Fixing the ESP32-P4 motion stack crash and waiting for real shaft arrival
 
-When launching `Stand` or `Walk`, an earlier firmware build rebooted because the
-motion planner's temporary structures overflowed the 16 KiB task stack. Moving the
-candidate planner into task-owned static storage in **`0.8.123`** cut `start_motion`
-stack usage more than in half—from **8,496 bytes down to 3,760 bytes**—allowing the
-robot on the training stand to complete `Stand` and a full `Walk` cycle cleanly
-without rebooting or dropping Wi-Fi.
+Triggering `Stand` or `Walk` on an earlier test build suddenly started rebooting the
+ESP32-P4. Checking FreeRTOS high-water marks caught the culprit: temporary candidate
+structures inside the motion starter were blowing past the 16 KiB task stack. Moving
+that scratch buffer into static task-owned storage cut peak stack use more than in
+half—from **8,496 bytes down to 3,760 bytes**—letting the robot cycle cleanly through
+`Stand` and `Walk` on the bench stand without resetting or dropping Wi-Fi.
 
-Subsequent firmware updates tightened closed-loop execution and settling across both
-the legacy planner and Freestyle:
+With the stack solid, I moved `Stand`, `Walk`, and Freestyle steps from blind timer
+playback to **verified 4th-wire shaft arrival**. Lift and placement landmarks now wait
+for fresh potentiometer confirmation (within a **100 µs** tolerance) plus a **2 mm
+lift-and-return settle** step. Each Freestyle waypoint resolves its inverse-kinematics
+target once for both ramping and arrival checks; if a requested foot position has to be
+clamped to stay inside the four-bar workspace, the controller reports the clamped delta
+honestly instead of claiming the unadjusted target was reached.
 
-| Firmware revision | Closed-loop motion behavior |
-| --- | --- |
-| **`0.8.123`** | Fixed `start_motion` stack overflow (`8,496 → 3,760 B`); verified physical Stand and Walk cycle on stand |
-| **`0.8.124`–`0.8.125`** | `Stand` and `Walk` lift/place landmarks wait for fresh 4th-wire shaft arrival (`100 µs` saved tolerance) plus a **2 mm lift-and-return settle** step |
-| **`0.8.127`** | Boot/wake standing and inactivity rest route to Freestyle; in-place `servo_stall` jam and fall recovery preserves the active `motion_goal` |
-| **`0.8.128`** | Resolves each Freestyle endpoint once for both ramping and shaft-arrival checks; if IK fitting clamps a target, reports the adjustment and keeps `position_verified: false` for the unadjusted request |
+## Freestyle: from twitchy continuation loops to finite programs (`349` curated examples)
 
-## Freestyle: from continuation loops to finite programs (`349` SQLite examples)
-
-Freestyle trains a compact **Qwen3.5-0.8B LoRA (Q8_0)** to translate natural-language
-movement requests and live sensor state into joint, foot, and body targets with
-`speed_pct`.
+Freestyle uses a compact **Qwen3.5-0.8B LoRA (Q8_0)** to turn natural-language movement
+requests and live posture telemetry into concrete joint, foot, and body targets.
 
 <figure>
   <img src="/posts/2026-10-26-progress/finite-programs.svg" alt="Diagram showing Freestyle emitting a complete finite program executed once by the P4, with real fault or fall events triggering in-place recovery." width="1000" height="600" loading="lazy" />
-  <figcaption>Finite Freestyle execution: ordinary requests generate a single complete program that runs to completion without re-invoking the model, while real servo_stall or tipped events trigger in-place recovery.</figcaption>
+  <figcaption>Finite Freestyle execution: ordinary requests generate one complete multi-step sequence that runs to completion, while real servo stalls or tip-overs trigger in-place recovery.</figcaption>
 </figure>
 
-### Compact token encoding and off-thread IK preparation
+### Compact prompt encoding and off-thread IK preparation
 
-Compressing the Freestyle prompt/target representation cut Q6A CPU inference time by
-**4×**, and moving inverse-kinematics preparation off the gateway's main Python thread
-halved end-to-end sway execution time:
+Trimming verbose JSON keys out of the Freestyle prompt cut Q6A CPU inference time by
+**4×**, and moving inverse-kinematics preparation off the gateway's main loop cut sway
+execution latency in half:
 
 | Optimization | Before | After |
 | --- | ---: | ---: |
@@ -106,49 +102,39 @@ halved end-to-end sway execution time:
 | Host IK preparation + 2.8 s rear sway execution | 9.96 s | **5.03 s** (2.54 s for 1.28 s sway) |
 | Workstation Q8_0 LoRA API latency | — | **0.663 s** |
 
-### Why we replaced continuation loops with finite programs
+### Why continuation loops had to go
 
-In the October 26 continuation model (trained on 1,261 examples including 361
-synthetic Stand continuations), feeding each movement receipt back into the model
-caused a recovery loop that repeatedly re-emitted a standing pose and twitching
-reassessments.
+On October 26 I tried feeding every finished movement receipt right back into the model
+so it could decide whether to keep going. On the physical robot, that turned into an
+annoying feedback loop: the model kept re-emitting subtle Stand adjustments and
+twitching its legs between steps.
 
-On October 27, we removed model-requested continuation from the contract:
+On October 27 I dropped model-driven continuation altogether. Freestyle now emits a
+complete finite multi-step sequence and runs it once; when the final waypoint verifies
+arrival, the gesture is done. Only an actual physical fault—a leg stalling under load,
+a dropped feedback wire, or the IMU catching a tip-over—interrupts execution, holding
+powered support in place while requesting a targeted recovery sequence without losing
+track of the active movement goal.
 
-1. **One-shot finite programs:** Freestyle now emits a complete multi-step program and
-   runs it once. Reaching the final target finishes the command cleanly.
-2. **In-place `servo_stall` & fall recovery:** If a joint stalls (`servo_stall`), a
-   feedback wire faults, or the IMU detects a tip/fall during execution, the P4 holds
-   powered support, preserves the active **`motion_goal`**, and dispatches the
-   attributed fault and joint measurements for an in-place recovery trajectory.
-3. **Curated 349-example SQLite library:** Editable directly in Body Control (`Save
-   training example`, `Send motion to robot`, `Export training data`), the working
-   SQLite library was distilled to **349 curated examples** (339 core + 116 synthetic
-   rest/release/hold contrasts plus physical hand-reviewed corrections), raising
-   frozen 62-case reference agreement to **40/62** (and **24/34** on the shared core
-   set, up from 20/34).
-4. **Verified 9-step physical stretch:** With left-crank Home calibration corrected to
-   `−117.68° at 2750 µs`, the supported robot executed a full 9-step Freestyle stretch
-   with **all 9 movement receipts position-verified** and zero clamped targets.
+Curating the training library down to **349 hand-checked and contrast examples** lifted
+agreement on the frozen 62-case benchmark to **40/62** (**24/34** on core motions, up
+from 20/34). After fixing a left-crank Home offset (`−117.68° at 2750 µs`), the robot
+ran a 9-step Freestyle stretch on the stand with **all 9 steps verified by 4th-wire
+feedback** and zero clamped joints.
 
 Download the [Freestyle evaluation summary JSON](/posts/2026-10-26-progress/training-results.json).
 
-## MetaHuman OS: shared `llama-cpp.service` with 5-minute idle unload and Full Auto continuity
+## Keeping multi-step tasks alive and unloading idle local models
 
 <figure>
   <img src="/posts/2026-10-26-progress/companion-continuity.svg" alt="Diagram of MetaHuman Full Auto continuity, atomic Bridge snapshot publication, and on-demand llama.cpp weight loading." width="1000" height="600" loading="lazy" />
-  <figcaption>MetaHuman OS execution continuity: Full Auto tracks existing executions and desires, Bridge snapshots publish atomically, and llama-cpp.service unloads idle weights after 300 seconds.</figcaption>
+  <figcaption>Multi-turn task continuity, atomic bridge state updates, and automatic 5-minute idle weight unloading for local model serving.</figcaption>
 </figure>
 
-- **Shared `llama-cpp.service` with 300 s idle unload:** `bin/llama-cpp-services` now
-  manages local model serving on demand and automatically unloads idle model weights
-  after **5 minutes (300 seconds)** of inactivity, freeing GPU/system RAM when the
-  robot is resting.
-- **Full Auto continuity & provider isolation:** Full Auto can now target an existing
-  execution or Desire, subscribe to specific event/environment/desire wake triggers,
-  and use high reasoning for autonomous decisions while keeping graph system prompts
-  isolated from coding-session context.
-- **Atomic Bridge snapshots & idle conversation state:** Environment Bridge state
-  files now update via atomic rename (eliminating transient empty reads), `Robot Status`
-  distinguishes `last command source` from active manual takeover, and delivered
-  conversational questions mark their execution context `idle` until the user replies.
+On the host side, local `llama.cpp` model serving now loads weights on demand and
+automatically unloads them after **5 minutes (300 seconds)** of quiet time so GPU and
+system memory aren't tied up while the robot sleeps on the desk. Multi-step autonomous
+tasks also stay attached to their active goal across wake triggers instead of starting
+over from scratch, bridge state snapshots write atomically so fast readers never catch a
+half-written file, and open-ended conversational questions wait quietly in an idle state
+until someone answers.

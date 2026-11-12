@@ -1,14 +1,14 @@
 ---
-title: "Q6A, chassis work, and a more active loop"
+title: "September 30, 2026 Study: Onboard Radxa Q6A Packaging & Active Perception Loop"
 published: 2026-09-30
-updated: 2026-09-30
-description: "Q6A integration, the revised Ainekio v2 chassis, and the first pieces of a more active perception and control loop."
+updated: 2026-11-12
+description: "September 30, 2026 design study exploring an onboard Radxa Dragon Q6A SBC inside the V2 shell and early active-loop foundations prior to the October 6 pivot to the 650 g wireless ESP32-P4 body."
 image: "/posts/ainekio-2026/q6a-communication-cover.svg"
-authorName: "Ainekio Project"
-authorBio: "Robot familiar field notes"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Q6A, Hardware, Perception, MetaHuman OS]
+tags: [Ainekio, V2, Q6A, Hardware, Perception, MetaHuman OS]
 category: "Progress"
 draft: false
 lang: "en"
@@ -17,71 +17,40 @@ reading:
   topic: body
   generation: v2
   kind: journal
-  next: 2026-10-06-compact-linkage
-  related: ["ainekio-v2", "2026-10-08-standing-walking"]
+  next: ainekio-v2
+  related: ["ainekio-v2", "2026-10-06-compact-linkage", "2026-10-08-standing-walking"]
 ---
 
-I'm working on the Q6A SBC integration, the Ainekio v2 chassis, and how to make
-the robot more active between LLM turns. YOLO is part of that research. The aim
-is to keep useful perception and movement running while the slower planning
-work catches up.
+> *Historical design-study note (September 30, 2026): This milestone explored packaging a `Radxa Dragon Q6A` Linux SBC directly inside the Ainekio V2 shell. Six days later, to shed weight and let the twelve `MG90S` servos stand and walk cleanly without overheating, onboard SBC packaging was dropped in favor of the lighter **`650 g` wireless `ESP32-P4` body** with the Q6A or desktop running offboard ([see the October 6 compact linkage rebuild](/posts/2026-10-06-compact-linkage/) and [current V2 hardware](/posts/ainekio-v2/)).*
 
-## Q6A and the body
+In late September 2026, bench work focused on two questions at once: whether a `Radxa Dragon Q6A` single-board computer could fit inside the Ainekio V2 chassis alongside the `ESP32-P4` controller, and how to keep camera perception and walk adjustments responsive between slower language-model turns.
 
-<figure class="mx-auto max-w-[48rem]">
-  <img src="/posts/ainekio-2026/q6a-communication.svg" width="760" height="940" loading="eager" decoding="async" alt="Intended communication split: remote desktop inference connects to the Q6A host, which keeps the gateway and Environment Bridge local and uses the preferred direct Wi-Fi link to the P4 body controller. Host placement and loaded-link validation remain in progress." />
-  <figcaption>Intended deployment, September 30. The Bridge–gateway connection stays local to Q6A. Dashed boxes and links mark integration work; service placement and concurrent Wi-Fi load still need validation. <a href="/posts/ainekio-2026/q6a-communication.svg">Open full-size diagram</a> · <a href="https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/docs/BODY_CONTROL_INTEGRATION.md">Integration record</a></figcaption>
+## Q6A and the V2 body study
+
+<figure className="mx-auto max-w-[48rem]">
+  <img src="/posts/ainekio-2026/q6a-communication.svg" width="760" height="940" loading="eager" decoding="async" alt="September 30 communication split study: remote desktop inference connected to a Q6A host keeping the gateway and Environment Bridge local over Wi-Fi to the ESP32-P4 body controller." />
+  <figcaption>September 30, 2026 deployment study. The Bridge–gateway connection stayed local to the Q6A while communicating with the ESP32-P4 over Wi-Fi. <a href="/posts/ainekio-2026/q6a-communication.svg">Open full-size diagram</a> · <a href="https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/docs/BODY_CONTROL_INTEGRATION.md">Integration record</a></figcaption>
 </figure>
 
-The current connection choice is direct Wi-Fi between the P4 and Q6A. USB stays
-an alternative, and ROS 2 is an optional integration layer. Gait execution stays
-on the P4; the host takes on perception and heavier planning. That split still
-needs testing under the combined camera, audio, and motion workload.
+At this stage of the study, direct Wi-Fi connected the `ESP32-P4` and `Q6A` (with USB kept as a bench alternative and ROS 2 evaluated only as an optional bridge). Real-time gait timing remained on the `ESP32-P4` while the Linux host handled camera perception and heavier planning.
 
-The latest chassis work adds Q6A mounting space and revises the shoulder
-geometry. All 47 motion sources were regenerated. The recorded checks cover
-software tests, model parity, and a P4 build; that geometry has not been flashed
-or tested on the powered body. Fit, balance, and loaded movement are still open.
+The September 30 CAD revision carved out internal mounting volume for the Q6A board and updated shoulder clearances, regenerating the 47 motion sources to match. While software parity tests and the `ESP32-P4` firmware build passed, physical mass and balance checks soon showed that carrying both an SBC and a large USB-PD battery inside the shell overloaded the micro servos—leading directly to the [October 6 weight-reduction and compact linkage rebuild](/posts/2026-10-06-compact-linkage/), where the Q6A moved offboard as an edge host.
 
-## From turns toward an active loop
+## From isolated turns toward an active loop
 
-<figure class="mx-auto max-w-[48rem]">
-  <img src="/posts/ainekio-2026/active-loop.svg" width="760" height="1040" loading="lazy" decoding="async" alt="An earlier observe, decide, act and check sequence compared with current source foundations: newest-frame camera processing, a pending recognition backend and local task producer, bounded gateway updates and ongoing P4 movement. MetaHuman carries a saved task and receives parent-action results through the gateway." />
-  <figcaption>Solid cyan marks source foundations; dashed amber marks work still to connect. Camera processing and movement updates have desktop/simulated-body coverage. Updates change speed or stride/cadence, keeping the gait, direction, and lease. The return arrow is parent-action feedback; update acknowledgements are not cognitive feedback. Physical-loop acceptance is still open. <a href="/posts/ainekio-2026/active-loop.svg">Open full-size diagram</a> · <a href="https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/Master/gateway/README.md">Gateway</a> · <a href="https://github.com/Greg-Aster/ainekio-os/blob/c3f56d41dfb396cd68391d12a2910aee8c32870b/docs/technical/MAINTAINED_SURFACE.md">Workflow owners</a></figcaption>
+<figure className="mx-auto max-w-[48rem]">
+  <img src="/posts/ainekio-2026/active-loop.svg" width="760" height="1040" loading="lazy" decoding="async" alt="Comparison between an earlier isolated observe-decide-act turn sequence and the active-loop foundations introduced in late September 2026." />
+  <figcaption>September 30 active-loop architecture snapshot. Solid cyan marked implemented gateway frame handling, in-stride parameter updates, and durable workflow waits; dashed amber marked recognition and IMU loops that were subsequently completed in October. <a href="/posts/ainekio-2026/active-loop.svg">Open full-size diagram</a> · <a href="https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/Master/gateway/README.md">Gateway</a> · <a href="https://github.com/Greg-Aster/ainekio-os/blob/c3f56d41dfb396cd68391d12a2910aee8c32870b/docs/technical/MAINTAINED_SURFACE.md">Workflow owners</a></figcaption>
 </figure>
 
-The gateway can now process fresh camera frames outside its receive loop. It
-also has an authenticated path for adjusting an ongoing walk's speed or its
-stride/cadence settings while keeping the original action and body lease. Cancellation,
-expiry, and session checks still apply.
+Unlike the onboard SBC layout, the software foundations landed in this September 30 push became permanent building blocks of V2 and **[Ainekio OS](/posts/ainekio-os/)**:
 
-MetaHuman's newly pushed workflow code carries an execution across waits and
-correlated results. New input can steer that saved execution, and visual
-observations can carry their frame IDs and timestamps forward. Those are useful
-pieces for moving beyond isolated request-and-response turns.
+- **Out-of-band camera processing & in-stride walk updates**: The host gateway gained newest-frame camera handling outside its WebSocket receive loop, plus an authenticated path for adjusting an active walk's `Speed`, `Stride %`, or `Motion rate` while preserving its gait phase and command lease.
+- **Durable execution across waits**: MetaHuman OS (now Ainekio OS) introduced saved SQLite workflow checkpoints capable of suspending across physical movement waits, accepting mid-task user steering, and carrying correlated `frame_id` timestamps forward.
+- **Pieces completed in subsequent October milestones**: On September 30, live YOLO tracking and closed-loop `LSM6DS3` IMU balance were not yet wired into physical motion; both were brought online in the October milestones that followed ([Vision Loop](/posts/vision-loop/) and [Oct 14 Startup & Leveling](/posts/2026-10-14-startup-and-leveling/)).
 
-The recognition backend and MetaHuman's local task producer still need joining
-up. No YOLO detection pipeline is selected or running through the gateway CLI,
-and the source checks do not establish an autonomous physical loop. Portable
-IMU estimation is also in the tree, but live acquisition and balance feedback
-are not connected yet.
+The original eight-servo `ESP32-S3` V1 baseline remained supported alongside V2 throughout this transition; see the [Project Overview](/posts/project-overview/) for the current system architecture.
 
-## Next on the bench
+### Source snapshot (September 30, 2026)
 
-- Fit the revised body and check movement under load
-- Bring up the intended Q6A services and measure them together
-- Try recognition models on the assembled prototype, then connect fresh results
-  to bounded movement updates
-
-The original eight-servo S3 Ainekio remains supported alongside the twelve-servo
-Ainekio v2 work. The [project overview](/posts/project-overview/) keeps the current work and
-source links in one place.
-
-### Source snapshot
-
-Reviewed September 30 pushes: [Ainekio `6437b24`](https://github.com/Greg-Aster/Ainekio-bot/commit/6437b24c0f91273aed160add0e42ac0ddbb5275c)
-and [MetaHuman `c3f56d4`](https://github.com/Greg-Aster/ainekio-os/commit/c3f56d41dfb396cd68391d12a2910aee8c32870b).
-Details: [body integration](https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/docs/BODY_CONTROL_INTEGRATION.md),
-[September 29 geometry checks](https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/Slave/software/models/v2-12servo/CONTROLLER_VALIDATION.md),
-and [MetaHuman workflow ownership](https://github.com/Greg-Aster/ainekio-os/blob/c3f56d41dfb396cd68391d12a2910aee8c32870b/docs/technical/MAINTAINED_SURFACE.md).
-These pushes include earlier recorded work; the push date is not a new hardware-test date.
+Reviewed September 30 commits: [Ainekio `6437b24`](https://github.com/Greg-Aster/Ainekio-bot/commit/6437b24c0f91273aed160add0e42ac0ddbb5275c) and [Ainekio OS `c3f56d4`](https://github.com/Greg-Aster/ainekio-os/commit/c3f56d41dfb396cd68391d12a2910aee8c32870b).

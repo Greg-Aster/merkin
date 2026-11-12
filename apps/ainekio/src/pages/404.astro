@@ -4,9 +4,9 @@ import { url } from '../utils/url-utils'
 ---
 <MainGridLayout title="Page not found" description="This Ainekio page could not be found." oneColumn={true}>
   <meta name="robots" content="noindex, follow" slot="head" />
-  <section class="card-base p-8">
-    <h1 class="text-3xl font-bold mb-4">Page not found</h1>
-    <p class="mb-4">This address may have changed, or the page may no longer exist.</p>
-    <p><a class="text-[var(--primary)] underline" href={url('/')}>Return to Ainekio</a> or <a class="text-[var(--primary)] underline" href={url('/archive/')}>browse the article library</a>.</p>
+  <section class="card-base p-8 w-full">
+    <h1 class="text-2xl font-bold mb-3">Page not found</h1>
+    <p class="mb-3 text-sm opacity-85">This address may have changed, or the page may no longer exist.</p>
+    <p class="text-sm"><a class="text-[var(--primary)] underline" href={url('/')}>Return to Ainekio</a> or <a class="text-[var(--primary)] underline" href={url('/archive/')}>browse the article library</a>.</p>
   </section>
 </MainGridLayout>

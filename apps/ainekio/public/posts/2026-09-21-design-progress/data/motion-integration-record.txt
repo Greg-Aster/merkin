@@ -76,9 +76,9 @@ flashed. The live gateway was not restarted during this update.
 Reproduce the maintained software tests from the repository root:
 
 ```bash
-cmake -S Slave/software/models/v2-12servo -B /tmp/ainekio-v2-motions-tests
-cmake --build /tmp/ainekio-v2-motions-tests -j4
-/usr/bin/ctest --test-dir /tmp/ainekio-v2-motions-tests --output-on-failure
+cmake -S Slave/software/models/v2-12servo -B build/ainekio-v2-motions-tests
+cmake --build build/ainekio-v2-motions-tests -j4
+ctest --test-dir build/ainekio-v2-motions-tests --output-on-failure
 PYTHONPATH=Master:Slave/software:Emulator:Emulator/tests:. python3 -m unittest \
   Emulator.tests.test_v2_commands Emulator.tests.test_environment_command_catalog \
   Emulator.tests.test_gateway_service Emulator.tests.test_gateway_dashboard \
@@ -92,8 +92,8 @@ outside the sandbox. Affected-file whitespace checks passed. A full-repository
 unrelated existing `Emulator/tests/test_gateway_handshake_timeout.py`; it is not
 reported as a full-worktree pass. No unrelated file was
 repaired or reverted. Temporary build/probe logs are under
-`/tmp/ainekio-motions-20260917/`; CTest details are in
-`/tmp/ainekio-v2-motions-tests/Testing/Temporary/LastTest.log`.
+`build/ainekio-motions-20260917/`; CTest details are in
+`build/ainekio-v2-motions-tests/Testing/Temporary/LastTest.log`.
 
 ## Build artifact and partition change
 
@@ -159,7 +159,7 @@ After flashing, verify `0.4.0-p4-motions`, disarmed startup, authentication,
 all thirty-one installed names, and `motion=false`. Query each new clip at a
 midpoint and beyond its duration using `gait <name> <elapsed-ms>`; compare all
 twelve angles and terminal holds with the source. Confirm Body Control still
-selects `ainekio-p4-e6ebe5` and preserves V1's registration. These are pending
+selects the V2 ESP32-P4 device and preserves V1's registration. These are pending
 runtime checks; they do not require connecting or powering servos.
 
 ## Remaining physical work

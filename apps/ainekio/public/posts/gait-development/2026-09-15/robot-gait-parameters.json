@@ -1,7 +1,7 @@
 {
   "schema": "robot-gait-handoff-1",
   "date": "2026-09-15",
-  "source_blend": "/home/greggles/blender-5.0.0-linux-x64/robot-part024-from-part026-20260915/Part024-Replaced-With-Part026-Motion-Updated.blend",
+  "source_blend": "CAD/Ainekio-Leg.blend",
   "live_dirty_at_inspection": true,
   "live_frame_at_inspection": 182,
   "live_mesh_and_nonanimated_transform_match": true,

@@ -23,7 +23,7 @@ const tag = decodeURIComponent(Astro.params.tag as string).toLowerCase()
 const { label } = Astro.props
 ---
 
-<MainGridLayout title={`${label} — tag archive`} description={`Explore Ainekio articles in the ${label} tag archive, with robot build notes, reference guides, and development updates.`}>
+<MainGridLayout title={`${label} — tag archive`} description={`Explore Ainekio articles in the ${label} tag archive, with robot build notes, reference guides, and development updates.`} oneColumn={true}>
     <meta name="robots" content="noindex, follow" slot="head" />
     <ArchivePanel tags={[tag]} heading={`${label} — tag archive`}></ArchivePanel>
 </MainGridLayout>

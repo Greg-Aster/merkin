@@ -1,15 +1,14 @@
 ---
-title: "Ainekio OS: Local-First Personal AI Operating System, 47 Cognitive Graphs & Robot Mind"
+title: "Ainekio OS Architecture: Local-First Personal AI, Cognitive Graphs & Overnight Consolidation"
 published: 2026-11-09T09:00:00-08:00
-updated: 2026-11-11
-description: "Complete architectural reference for Ainekio OS (Greg-Aster/ainekio-os, formerly MetaHuman OS): standalone and embodied operating modes, 47 Svelte-Flow cognitive graphs, 14-table SQLite durable execution, ServerStatus compute/voice routing, warm Gemini ACP & Big Brother, and the 8-stage 02:00 Sleep Cycle."
+updated: 2026-11-12
+description: "Canonical architectural reference for Ainekio OS (Greg-Aster/ainekio-os, formerly MetaHuman OS): standalone and embodied modes, Standing Persona, episodic memory, SQLite durable execution, node-based cognitive graphs, local/hybrid model routing, and the 02:00 sleep cycle."
 image: "/posts/ainekio-os/ainekio-os-architecture.webp"
-avatarImage: "/assets/avatar/assembly-september-20.webp"
-authorName: "Ainekio Project"
-authorBio: "Robot familiar field notes"
-showImageOnPost: true
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
+showImageOnPost: false
 showToc: true
-tags: [Ainekio OS, MetaHuman OS, Cognitive Graphs, Durable Execution, Local LLM, Big Brother, Architecture]
+tags: [Ainekio OS, MetaHuman OS, Cognitive Graphs, Durable Execution, Local LLM, Architecture]
 category: "Ainekio OS"
 draft: false
 lang: "en"
@@ -22,109 +21,99 @@ reading:
   related: ["project-overview", "ainekio-companion", "bounded-autonomy", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
 ---
 
-While [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) owns the 3D-printed 12-servo V2 quadruped hardware, `ESP32-P4` C firmware, MuJoCo/MJX reinforcement learning, and the Python **Body Control** gateway, the companion's mind lives in a separate, standalone operating system: **[Ainekio OS (`Greg-Aster/ainekio-os`)](https://github.com/Greg-Aster/ainekio-os)**.
+While [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) contains the 3D-printed quadruped CAD, `ESP32-P4` C firmware, MuJoCo reinforcement-learning pipelines, and the Python Body Control gateway, the robot's mind lives in its own repository: **[Ainekio OS (`Greg-Aster/ainekio-os`)](https://github.com/Greg-Aster/ainekio-os)** (formerly MetaHuman OS).
 
-Publicly rebranded to **Ainekio OS** in November 2026 (`2dc83693`, while retaining internal `@metahuman/*` workspace package names and the `mh` CLI), Ainekio OS is a **local-first operating system for a persistent personal AI identity**. Rather than acting as a stateless chatbot wrapper or a robot-only script, it combines a web workbench, terminal CLI, Android client, attributed episodic memory, 47 node-based cognitive graphs, durable SQLite execution, autonomous background agents, voice servers, LoRA training pipelines, and **Big Brother** CLI escalation—capable of running either **standalone as a digital counterpart** or **embodied inside the physical Ainekio V2 robot**.
+Ainekio OS is a **local-first operating system for a persistent personal AI identity**. Instead of wrapping a stateless chat prompt around robot commands, it provides a shared runtime for identity, attributed episodic memory, node-based cognitive workflows, crash-safe SQLite task execution, voice synthesis/recognition, LoRA adapter training, and background reflection—capable of running **standalone on a workstation** or **embodied inside the physical Ainekio V2 quadruped** (and the earlier V1 prototype).
 
-![Ainekio OS full system architecture diagram connecting operator surfaces, core engine, brain metabolism, ServerStatus compute control plane, and embodied robot runtime](/posts/ainekio-os/ainekio-os-architecture.webp)
+![Ainekio OS system architecture connecting client surfaces, core execution engine, background brain agents, model/voice routing, and the embodied robot runtime](/posts/ainekio-os/ainekio-os-architecture.webp)
 
 ---
 
-## 1. Two repositories, clear ownership boundaries
+## 1. Standalone vs. embodied roles
 
-Splitting the project across two repositories keeps real-time motor loops decoupled from long-horizon reasoning and allows Ainekio OS to run on a desktop workstation, laptop, or edge computer even when no physical robot is powered on:
+Splitting the project across two repositories keeps hard real-time motor loops decoupled from language-model latency and lets Ainekio OS keep running on a desktop, laptop, or edge computer even when no physical robot is switched on:
 
-| System Layer | Canonical Repository | Primary Responsibilities |
+| System | Repository | Core Responsibilities |
 | --- | --- | --- |
-| **Ainekio OS (Mind & Personal AI OS)** | [`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os) | Persistent `Standing Persona` (`persona/core.json`), Web/CLI/Android interfaces, **47 cognitive graphs**, **14-table SQLite durable execution**, episodic memory & CPU vector search, **24 background agents**, **8-stage `02:00` Sleep Cycle**, **12 specialist model roles** (`ServerStatus`), Whisper/Kokoro/Piper voice orchestration, LoRA training, Big Brother CLI escalation, and `Environment Bridge`. |
-| **Ainekio-bot (Body, Firmware & Gait)** | [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) | `650 g` 12-servo V2 hardware & Blender/MJCF CAD (plus V1 8-servo archive), `ESP32-P4` C firmware (`0.8.159-p4-microduck-v17` with **on-chip `50 Hz` L2-cached MicroDuck neural gait**, 4th-wire `CD74HC4067` feedback, `208 Hz` `LSM6DS3` IMU, 59 `ST7789` LCD expressions), **Body Control** Python gateway & **Cockpit HUD** (`:8790` / `:8791`), optical-flow contact range, and **Freestyle** (`489` training rows). |
+| **Ainekio OS (Mind)** | [`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os) | Standing Persona, local web workbench, CLI, and Android clients, visual cognitive graphs, durable SQLite workflow execution, provenance-tagged episodic memory, background reflection & desire agents, local/hybrid model & voice routing, LoRA training pipelines, and the embodied bridge |
+| **Ainekio-bot (Body & Gateway)** | [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) | `650 g` 12-servo V2 hardware (and 8-servo V1 archive), `ESP32-P4` C firmware (`50 Hz` on-chip MicroDuck neural gait, `CD74HC4067` `C4–C15` → `GPIO49` feedback, `208 Hz` IMU, 59 LCD expressions), Body Control gateway & Cockpit HUD, optical-flow obstacle range, and the 349-motion Freestyle library |
+
+Every client surface—the local Astro/Svelte web workbench (including an interactive system architecture map with read-aloud subsystem tours), the terminal CLI, the Android mobile client, and the embodied robot bridge—talks to a single unified core engine and profile store, with optional AES encryption for personal profile data.
 
 ---
 
-## 2. Monorepo structure & client surfaces
+## 2. Standing Persona, cognitive modes, and trust tiers
 
-Ainekio OS is organized as a `pnpm` TypeScript monorepo (`Node >=22.3`) where every user surface speaks to one canonical API router:
+Because Ainekio OS can operate both as a personal digital counterpart and as a physical robot companion, it separates **who the system is modeling** from **how much autonomy it is granted**.
 
-- **`packages/core` (`@metahuman/core`)**: The single canonical engine owning authentication, optional AES-encrypted profile storage (`profiles/<username>/`), `UnifiedQueueManager` (**Work Coordinator**), `ExecutionStore` (`executions.sqlite`), the **Cognitive Graph Executor** (`graph-executor.ts` + **176 `.node.ts` files across 24 node categories**), the Model Router/Registry, Voice/TTS delivery queues, Terminal/Big Brother runtime, and **123 unified HTTP/SSE API handler modules** (`src/api/router.ts`).
-- **`apps/site` (`metahuman-site`)**: Astro 5 + Svelte 5 + Tailwind + `@xyflow/svelte` web workbench. In `2dc83693`, over 150 per-route forwarding files were replaced by a single 3-line catch-all adapter (`src/pages/api/[...path].ts`) delegating directly to `@metahuman/core`. Supports atomic server release builds (`build-release.mjs`) as well as static hosted builds ([`https://mh.ainek.io`](https://mh.ainek.io)) that connect to a local or remote Ainekio OS node.
-- **Interactive System Map (`/architecture`)**: A live collapsible `@xyflow/svelte` architecture canvas (`apps/site/src/pages/architecture.astro`) visualizing data flow across human inputs, Core subsystems, Brain services, Body Control, and inference backends, complete with **TTS Read-Aloud** subsystem walkthroughs.
-- **`packages/cli` (`metahuman-cli`) & `apps/react-native`**: The **`mh`** command-line interface (`mh start`, `mh status`, `mh chat`, `mh task`, `mh trust`, `mh persona`, `mh agent`, `mh big-brother`, `mh voice-server`) and the maintained **Android React Native** mobile shell sharing Core's HTTP router and cognitive graphs.
-- **`brain/` (`@metahuman/brain`)**: Background cognitive metabolism housing **24 autonomous agent workers**, persistent services (`maintenance-service`, `terminal`, `environment-bridge`, `active-operator`), and GGUF LoRA training pipelines (`environment-action-selector` for `0.8B/2B` Intent/Task specialists and `personalization` for profile adapters).
+### Standing Persona
 
----
+Identity is anchored by a single **Standing Persona** record holding core traits (including Big Five dimensions), values, communication style, and long-term goals. To prevent personality drift or accidental self-modification during everyday conversation, ordinary chat and task workflows treat the Standing Persona as read-only; only the scheduled overnight **Psychotherapist** review (or a direct edit by the human owner) can update it. Short-term intentions and candidate activities live separately in an **Agency / Desire** store where their strengths rise or decay based on real outcomes.
 
-## 3. Orthogonal operating modes & five trust tiers
+### Four cognitive modes & five trust tiers
 
-Because Ainekio OS serves both as a personal digital counterpart and as an embodied quadruped brain, it separates **who the AI is modeling** (Cognitive Mode) from **how proactively a connected robot acts** (Robot Autonomy Mode), governed by explicit **Trust Levels** (`observe`, `suggest`, `supervised_auto`, `bounded_auto`, `adaptive_auto`):
-
-| Cognitive Mode | Memory & Training Posture | Default Trust Coupling & Purpose |
+| Cognitive Mode | Memory & Learning Behavior | Typical Trust Tier & Role |
 | --- | --- | --- |
-| **Dual Consciousness (`dual`)** | Full episodic memory writes; proactive background agents; personalization LoRA learns the *human operator's* voice and reasoning patterns. | `adaptive_auto` — Digital counterpart and long-term personal mirror. |
-| **Agent Mode (`agent`)** | Command-scoped memory writes; direct task assistant escalating coding and host operations to Big Brother. | `suggest` — Focused engineering and desktop automation assistant. |
-| **Emulation Mode (`emulation`)** | Read-only derived memory; freezes `persona/core.json` and adapter state with zero background mutation. | `observe` — Safe demonstration, snapshotting, and historical replay. |
-| **Environment Mode (`environment`)** | Bridges multimodal robot observations and verified physical actions; conversational training learns *Ainekio's companion* replies. | Paired with **Reactive**, **Semi-Autonomous** (`5 min` signed drive deltas), or **Fully Autonomous** (continuous high-reasoning loop). |
+| **Dual Consciousness** | Full episodic memory writes, proactive background agents, and personalization adapters that learn the *human owner's* voice and thought patterns | `adaptive_auto` — Long-term personal mirror and digital counterpart |
+| **Agent Mode** | Task-scoped memory writes; direct engineering and desktop assistant that can delegate heavy coding or terminal jobs | `suggest` — Focused workbench and coding assistant |
+| **Emulation Mode** | Read-only memory and frozen persona/adapter state with zero background mutation | `observe` — Safe demonstrations, snapshots, and historical replay |
+| **Environment Mode** | Connects multimodal robot observations to bounded physical actions while training Ainekio's *companion* replies and action routing | Paired with **Reactive**, **Semi Mode**, or **Full Auto** ([autonomy guide](/posts/bounded-autonomy/)) across `observe` → `supervised_auto` → `bounded_auto` → `adaptive_auto` |
 
 ---
 
-## 4. Cognitive Graph Engine & all 47 built-in workflows
+## 3. Episodic memory & SQLite durable execution
 
-Instead of hardcoding prompt chains in imperative TypeScript, every conversational turn, physical reflex, curiosity loop, desire plan, and sleep stage runs as an inspectable JSON graph in `etc/cognitive-graphs/` executed under **Scheduler Contract v1** (`graph-executor.ts`) and editable live in the `@xyflow/svelte` **Cognitive Workflow Editor**:
+Long-running companions fail in two predictable ways: hallucinated memories get mixed up with real events, and multi-step physical tasks lose their place whenever a movement takes several seconds or Wi-Fi hiccups. Ainekio OS addresses both in storage:
 
-- **Deterministic graph semantics**: Explicit `sourceHandle` routing, conditional edge predicates (`data.when`), node activation guards (`activation.when`), control-only dependency edges (`data.kind: "control"`), bounded iteration loops (`maxLoopIterations`), nested `workflow-call` subgraphs, and LangGraph-backed durable suspension (`waitForEvent`).
-- **47 built-in cognitive graphs across 7 functional families**:
-  1. **Interactive Modes (4)**: `dual-mode`, `agent-mode`, `emulation-mode`, `environment-mode`.
-  2. **Robot Embodiment, Tasks & Reflexes (12)**: `environment-conversation-mode`, `robot-active-task-mode`, `robot-autonomy-controller-mode`, `robot-goal-review-mode`, `robot-status-mode`, `robot-wake-up-mode`, `fast-body-event-mode`, `body-event-trigger-mode`, `robot-speech-mode`, `robot-display-feedback-mode`, `robot-buffer-admission`, `environment-training-curator-mode`.
-  3. **Embodied Boredom & Initiative (3)**: `boredom-observer-mode`, `boredom-movement-mode`, `boredom-reflection-mode`.
-  4. **Inner Life, Existential Curiosity & Dreams (7)**: `reflector-mode`, `dreamer-mode`, `daydreamer-mode`, `curiosity-mode`, `curiosity-researcher`, `inner-curiosity`, `train-of-thought`.
-  5. **Agency & Desire Lifecycle (6)**: `desire-generator`, `desire-planner`, `desire-reviewer`, `desire-executor`, `desire-outcome-reviewer`, `desire-checkin`.
-  6. **Persona, Memory Curation & Therapy (6)**: `organizer-agent`, `audio-organizer`, `curator-mode`, `psychoanalyzer`, `mood-review`, `goal-review`.
-  7. **Onboarding, Big Brother & Self-Healing (9)**: `persona-interview-question`, `persona-extraction`, `big-brother-response-mode`, `big-brother-tool-mode`, `system-code-review-mode`, `self-healing-analysis`, `response-pipeline`, `semantic-turn`, `system-event`.
+- **Provenance-tagged episodic memory**: Every stored memory carries explicit origin metadata—human chat, room voice transcript, robot camera observation, verified action outcome, internal reflection, or symbolic dream. Semantic search runs on **CPU-only embedding models** (`Qwen3-Embedding-0.6B` and `Nomic-Embed-Text-v1.5`) so vector retrieval never competes with conversational or vision models for GPU VRAM.
+- **Crash-safe SQLite durable execution**: Multi-step turns and autonomous goals execute inside a write-ahead-logged SQLite state machine with leased coordinator ownership and content-addressed image/payload blobs. When Ainekio starts walking across a room, requests a camera snapshot, or delegates a coding job, the workflow writes a durable event checkpoint (`waitForEvent`) instead of holding open a fragile in-memory timer. If a process restarts, recovery reconciles sequence receipts so physical robot motions are **never replayed twice**.
 
 ---
 
-## 5. `ServerStatus` compute plane, 12 specialist roles & hybrid inference
+## 4. Node-based cognitive graphs
 
-Commit `96e74c01` consolidated all LLM, LoRA, CLI escalation, and voice routing controls into the right-drawer **`ServerStatus`** control plane (`ServerStatus.svelte`), routing **12 specialist cognitive roles** independently across local, remote-LAN, and cloud/CLI providers:
+Rather than burying prompt chains inside imperative server code, conversational turns, robot reflexes, curiosity loops, desire planners, and sleep stages are defined as **47 inspectable node-based cognitive graphs** that can be viewed and edited live in the local web workbench.
 
-1. **12 Specialist Roles**: `orchestrator` (Intent), `environmentActionSelector` (Task Decisions), `environmentVision`, `persona`, `autonomy`, `lightweight` (Fast Body Events), `curator`, `coder`, `planner`, `summarizer`, `psychotherapist`, and `embedder`.
-2. **One-Click Routing Presets**:
-   - **`Local`**: Runs every role locally through the shared **`llama-cpp.service`** router (`:8080`, `load-on-startup = false`, 5-minute idle weight eviction, custom `shared-host-kv.patch` cancellation, and `json-schema-number-sign.patch`), sharing a single base model in VRAM across per-request `0.8B/2B` GGUF LoRA adapters while keeping `Qwen3-Embedding-0.6B` (`1024D`) / `Nomic-Embed-Text-v1.5` (`768D`) on CPU (`--device none`).
-   - **`Hybrid`**: Keeps sub-100 ms edge action routing (`orchestrator`, `environmentActionSelector`) on local `0.8B` LoRA specialists while routing heavy multimodal and reflective roles (`persona`, `environmentVision`, `autonomy`, `lightweight`) to the warm `GeminiAcpServer` daemon or a connected desktop server.
-   - **`BB-Codex` & `BB-Gemini`**: Routes high-reasoning roles through persistent Big Brother sessions.
-3. **Remote `llama.cpp` & Toggleable CUDA Voice Servers**:
-   - An edge host (such as a **Radxa Dragon Q6A**) can discover and assign `remote-server:remote-llama-cpp-*` models exposed by a workstation Ainekio OS instance.
-   - **Whisper STT (`:9883`)** and **Kokoro TTS (`:9882`)** each support live **`local` ↔ `remote`** target switching (`POST action: "set-target"`), automatically stopping local GPU/CPU processes when pointed at a remote host, paired with a fast local **Piper ONNX** TTS fallback and ordered speech chunk delivery (`delivery-queue.ts`). (Legacy RVC and `voice-training.ts` paths were retired in `2dc83693`.)
-4. **Big Brother CLI & Warm `GeminiAcpServer` Pool**:
-   - Supports **`codex`** (native app-server), **`claude-code`**, and **`gemini`** as first-class Big Brother CLI providers, plus direct multimodal REST routing (`gemini`, `claude`, `openrouter`).
-   - `TerminalRuntime` maintains a persistent **`GeminiAcpServer`** (`agy acp` over JSON-RPC stdio in an isolated profile home) with a **warm pool of 2 pre-initialized sessions** (`WARM_SESSION_POOL_SIZE = 2`), eliminating CLI cold-start overhead for sub-second multimodal text+image turns.
+Graphs support conditional edge predicates, activation guards, bounded iteration loops, nested sub-workflows, and durable event suspension across seven functional groups:
+
+1. **Interactive Modes**: Top-level workflows for Dual Consciousness, Agent, Emulation, and Embodied Environment turns.
+2. **Robot Embodiment & Reflexes**: Intent routing, active robot task loops, locomotion goal review, wake-up orientation, varied fast body-contact reflexes, speech pacing, and training-example curation ([embodied bridge guide](/posts/metahuman-integration/)).
+3. **Embodied Boredom & Initiative**: Camera observation, Freestyle leg-stretching, and reflection workflows triggered when internal drives cross threshold in Semi or Full Auto mode.
+4. **Inner Life, Curiosity & Dreams**: Associative train-of-thought chains, self-directed Q&A curiosity, background reflection, daydreaming, and overnight symbolic dreaming.
+5. **Desire Lifecycle**: Generating, planning (`1–10` finite steps), reviewing, executing, and scoring autonomous intentions.
+6. **Memory Curation & Therapy**: Tagging raw memories, curating supervised training pairs, mood/goal review, and Psychotherapist persona evaluation.
+7. **Onboarding & Coding Escalation**: Guided persona interviews, asynchronous coding/terminal delegation, and automated repository code review.
 
 ---
 
-## 6. Durable SQLite execution, Inner Life & the `02:00` Sleep Cycle
+## 5. Local & hybrid model and voice routing
 
-### Crash-safe `executions.sqlite` (14 tables)
+Instead of binding the entire operating system to one monolithic model, Ainekio OS assigns **12 specialist cognitive roles**—including intent orchestration, robot action selection, vision grounding, outward persona speech, fast body-event reflexes, memory curation, planning, coding, psychotherapy, and embeddings—independently across local, LAN, and optional cloud backends:
 
-Every multi-step request or autonomous activity runs inside per-profile `executions.sqlite` (WAL mode) backed by **14 relational tables**, SHA-256 content-addressed image/payload blobs, leased `Work Coordinator` ownership, and `currentTask` vs. `parkedGoals` (`idle` executions awaiting user or autonomy input). When the robot waits for a gait, camera snapshot, or Big Brother job, `waitForEvent` persists an event checkpoint rather than holding open a fragile in-memory promise—and crash recovery reconciles sequence receipts so physical robot movements are **never replayed twice**.
+- **Local `llama.cpp` & Ollama inference**: In pure local mode, a shared `llama.cpp` router (or Ollama) serves a primary multimodal model (`Qwen3.5 9B` for persona conversation, vision grounding, and high-reasoning autonomy) alongside lightweight `0.8B` and `2B` specialist **LoRA adapters** swapped per request for fast intent classification, robot task selection, and **Freestyle** motion synthesis (**489-row** dataset: **73** curated library motions + **416** fault-recovery trajectories). Idle model weights unload automatically after five minutes of inactivity, and in-flight generations cancel immediately if a higher-priority human turn arrives.
+- **LAN-shared edge compute**: When the robot gateway runs on a compact SBC such as a `Radxa Dragon Q6A`, it can keep sub-100 ms intent routing local or point heavy vision and speech roles at a desktop GPU workstation on the same LAN.
+- **Voice pipeline (`Whisper` STT + `Kokoro` / `Piper` TTS)**: Speech-to-text (**Whisper**) and expressive text-to-speech (**Kokoro** with custom voicepacks) can each switch live between local GPU/CPU execution and a remote LAN workstation, backed by a fast local **Piper ONNX** voice fallback when GPU servers are offline ([voice loop guide](/posts/voice-loop/)).
+- **Optional "Big Brother" coding delegates**: For heavy software debugging, repository analysis, or desktop terminal workflows that exceed small local models, Ainekio OS can escalate tasks to persistent CLI coding sessions (**Codex**, **Claude Code**, or warm **Gemini** sessions) while keeping the Standing Persona in charge of conversation.
 
-Even rapid physical reflexes leverage this ledger: when V2 is tipped, shaken, or hits a servo stall, **`fast-body-event-mode.json`** queries the last **6 durable `fast_body_event_response` entries** (`recentReactionLimit = 6`, `temperature = 0.8`, `repeatPenalty = 1.2`) so Ainekio pairs its `be_` `ST7789` facial expression with fresh dry wit rather than repeating the same canned exclamation.
+---
 
-### 8-stage `02:00 AM` software Sleep Workflow
+## 6. The nightly `02:00` consolidation sleep cycle
 
-Inside the nightly `23:00–06:30` window (`etc/sleep.json`, default trigger **`02:00`**), Ainekio OS pauses autonomous movement and runs an 8-stage cognitive maintenance pipeline (`sleep-workflow.ts`)—waking cleanly and cancelling remaining stages immediately if a human speaks or interacts:
+Inside a configurable overnight window (defaulting to **`02:00 AM`**), Ainekio OS pauses autonomous robot motion and runs an **8-stage software sleep cycle**—waking immediately and cancelling remaining stages if someone speaks to it:
 
-1. **`organize-memory` (`Organizer`)**: Enriches raw episodic memories (both human turns and Ainekio's attributed replies under `indexContentMode: "all"`) with entities and semantic tags.
-2. **`curate-memory` (`Curator`)**: Distills clean supervised conversational pairs while filtering out transient system noise.
-3. **`curate-environment-decisions` (`Environment Training Curator`)**: Surfaces candidate `0.8B/2B` Intent and Task LoRA training examples from real robot runs for operator review.
-4. **`train-personalization` (`Personalization Trainer`)**: Fits candidate profile LoRA weights on curated history.
-5. **`run-desire-agent` (`Desire Agent`)**: Updates autonomous desire strengths across `[0, 1]`, archives zero-strength desires, and formulates finite `1–10` step plans.
-6. **`dream` (`Dreamer`)**: Samples 15 lifetime memories along a `227-day` decay curve into symbolic dreams and nightmares stored with explicit `dream` provenance so imagined scenes are never mistaken for physical events.
-7. **`review-persona` (`Psychotherapist`)**: Runs `psychoanalyzer.json`—the **sole autonomous agent authorized to edit `persona/core.json`**—conducting motivational interviewing over recent memories and dreams to evolve long-term traits and goals safely.
-8. **`rebuild-index` (`Refresh Memory Index`)**: Reconciles CPU vector embeddings across the updated memory store.
+1. **Organize Memories**: Enriches the day's raw episodic turns and observations with entities and semantic tags.
+2. **Curate Dialogue**: Distills clean conversational training pairs while filtering out transient command noise.
+3. **Curate Robot Decisions**: Surfaces candidate `0.8B / 2B` action-routing examples from real physical robot runs for human review.
+4. **Fit Personalization Adapters**: Trains candidate LoRA weights on reviewed interaction history.
+5. **Update Desires**: Adjusts autonomous desire strengths across `[0, 1]` from actual outcomes, archives completed desires, and drafts bounded `1–10` step plans.
+6. **Dream**: Samples **15 lifetime memories** along a **227-day decay curve** into symbolic dreams and nightmares, stored with explicit `dream` provenance so imagined scenes are never mistaken for real room events.
+7. **Psychotherapist Persona Review**: Conducts reflective interviewing over recent experiences and dreams to make careful, auditable adjustments to the Standing Persona.
+8. **Rebuild Vector Index**: Refreshes CPU embeddings across the consolidated memory store for the next day.
 
 ---
 
 ## Related guides
 
-- **[Embodied Robot Integration (`MetaHuman / Ainekio OS ↔ Body Control`)](/posts/metahuman-integration/)**: Detailed walkthrough of `Environment Bridge`, `robot-active-task-mode.json`, `depthDemand` leases, and action receipts.
-- **[Nov 11, 2026 Milestone — On-Chip ESP32-P4 Neural Gait & Ainekio OS](/posts/2026-11-11-on-chip-neural-gait-and-ainekio-os/)**: Details on the `110 KB` L2-cached P4 MicroDuck policy, Cockpit HUD, and the November 9–11 Ainekio OS architecture updates.
-- **[Ainekio as a Companion](/posts/ainekio-companion/)** · **[Bounded Autonomy Modes](/posts/bounded-autonomy/)**.
+- **[Embodied Robot Integration](/posts/metahuman-integration/)**: How camera frames, IMU/servo telemetry, voice transcripts, and bounded motion/face/speech intents cross the bridge between Ainekio OS and the physical V2 robot.
+- **[Bounded Autonomy Modes](/posts/bounded-autonomy/)**: Reactive, Semi Mode, and Full Auto operation, plus the hardware safety boundaries between language models and servos.
+- **[Ainekio as a Companion](/posts/ainekio-companion/)**: Day-to-day voice interaction, 59 LCD expressions, pickup/tip reactions, and standalone vs. host capabilities.

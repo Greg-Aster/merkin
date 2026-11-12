@@ -29,7 +29,7 @@ reading:
 ---
 
 Ainekio is the embodied side of a larger personal-AI system. The robot supplies a body, sensors, movement, sound, and a local safety boundary. MetaHuman OS supplies the persistent identity, memory, cognition, model routing, tools, and supervised agency that decide what the body should try to do. The Ainekio bridge is the narrow, replaceable connection between those two worlds.\
-Current status — inspected 2026-07-15 against Ainekio commit f010ff5 plus the current firmware, gateway, emulator, and dashboard working tree, and the current MetaHuman OS working tree based on commit 260c6251: the authenticated software loop is implemented and passes focused bridge, graph, and security validation. A local microWakeWord engine and its protocol/control surfaces are now implemented and cross-built, but no validated Ainekio wake model is installed. Physical Ainekio hardware has not completed bring-up, so the overall loop remains proven through the gateway, body emulator, and Sesame visual renderer rather than a fully validated physical robot.
+Current status — inspected 2026-07-15 against the initial working servo test build plus the current firmware, gateway, emulator, dashboard, and MetaHuman OS working trees: the authenticated software loop is implemented and passes focused bridge, graph, and security validation. A local microWakeWord engine and its protocol/control surfaces are now implemented and cross-built, but no validated Ainekio wake model is installed. Physical Ainekio hardware has not completed bring-up, so the overall loop remains proven through the gateway, body emulator, and Sesame visual renderer rather than a fully validated physical robot.
 
 ## The system in one sentence
 
