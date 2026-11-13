@@ -28,15 +28,16 @@ const stageTiles = [
   { item: gallery.find(item => item.id === 'diagram-assembly-reference')!, badge: 'V2 Wiring & Buses', label: 'ESP32-P4 & 4th-wire schematic', fit: 'contain' },
 ]
 
+const referenceCount = posts.filter(p => getReading(p).kind === 'reference').length
 const directoryCards = [
   {
     num: '01',
-    title: 'Overview & Robot Lineup',
-    description: 'How the ~$85 hardware and local AI mind fit together, plus where Ainekio sits next to other open-source and commercial quadrupeds.',
+    title: 'Overview, Capabilities & Lineup',
+    description: 'What Ainekio can do in the room, how the ~$85 hardware and local AI mind fit together, and how it compares to other quadrupeds.',
     primaryHref: '/posts/project-overview/',
     primaryLabel: 'System Overview',
-    secondaryHref: '/posts/how-does-ainekio-stack-up/',
-    secondaryLabel: 'Robot leaderboard',
+    secondaryHref: '/posts/what-ainekio-can-do/',
+    secondaryLabel: 'What It Can Do',
     count: posts.filter(p => getReading(p).topic === 'overview').length,
   },
   {
@@ -124,7 +125,7 @@ const specs = [
 
         <div class="home-actions">
           <a class="home-primary-link" href={url('/posts/project-overview/')}>Start with the Overview →</a>
-          <a class="home-secondary-link" href={url('/updates/')}>Read the Build Journal →</a>
+          <a class="home-secondary-link" href={url('/posts/what-ainekio-can-do/')}>What It Can Do →</a>
           <a class="home-secondary-link" href={url('/posts/how-does-ainekio-stack-up/')}>How It Stacks Up →</a>
         </div>
       </div>
@@ -206,7 +207,7 @@ const specs = [
         <p class="home-eyebrow">Technical Notebook &amp; Reference</p>
         <h2 id="home-guide-title">Explore how each part works</h2>
       </div>
-      <a class="section-link" href={url('/archive/?kind=reference')}>All 16 reference guides →</a>
+      <a class="section-link" href={url('/archive/?kind=reference')}>All {referenceCount} reference guides →</a>
     </div>
 
     <div class="directory-grid">
