@@ -4,7 +4,7 @@ import MainGridLayout from '../layouts/MainGridLayout.astro'
 import { getVideoMetaBySrc, REPO_URLS, toVideoObjectJsonLd } from '../lib/seo-media'
 
 const description =
-  'Open-source build journal and technical specification for Ainekio, a 650 g 3D-printed 12-servo ESP32-P4 quadruped robot companion running an on-chip neural gait and paired with Ainekio OS for voice conversation, persistent memory, and local autonomy.'
+  'Engineering build journal and technical specification for Ainekio, a custom 650 g 3D-printed 12-servo ESP32-P4 quadruped robot companion running an on-chip neural gait and paired with Ainekio OS for voice conversation, persistent memory, and local autonomy.'
 
 const siteOrigin = Astro.site ?? new URL('https://ainek.io')
 const featuredVideo = getVideoMetaBySrc('/gallery/ainekio-v2-neural-walk-first-run.mp4')
@@ -23,9 +23,9 @@ const homeJsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'SoftwareSourceCode',
-    name: 'Ainekio Robot Hardware, ESP32-P4 Firmware & Ainekio OS',
+    name: 'Ainekio ESP32-P4 Firmware, Gateway & Ainekio OS',
     description:
-      'Open-source 3D-printed 12-servo quadruped hardware, ESP32-P4 firmware, closed-loop 4-bar MuJoCo MJCF model, 107.8 KB int8 RL gait policy, and Ainekio OS local-first cognitive runtime.',
+      'ESP32-P4 embedded C firmware, Python Body Control gateway, RL locomotion pipeline, and Ainekio OS local-first cognitive runtime for the Ainekio 12-servo quadruped companion.',
     url: siteOrigin.href,
     codeRepository: [...REPO_URLS],
     programmingLanguage: ['C', 'Python', 'TypeScript'],

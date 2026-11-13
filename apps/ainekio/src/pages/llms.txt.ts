@@ -21,9 +21,9 @@ export const GET: APIRoute = async ({ site }) => {
   const videos = gallery.filter(item => item.src)
 
   const lines: string[] = [
-    '# Ainekio — Open-Source 12-Servo ESP32-P4 Quadruped Companion & Ainekio OS',
+    '# Ainekio — 12-Servo ESP32-P4 Quadruped Companion & Ainekio OS',
     '',
-    '> Ainekio is an open-source 650 g 3D-printed 12-servo quadruped robot companion (~$85 electronics/hardware BOM) running a 107.8 KB int8 DAgger-distilled RL locomotion policy at 50 Hz inside the Waveshare ESP32-P4-WIFI6 128 KB L2 cache, paired with Ainekio OS—a local-first cognitive runtime for persistent memory, room-audio voice conversation, generative Freestyle inverse-kinematics motion, and bounded physical autonomy.',
+    '> Ainekio is a custom 650 g 3D-printed 12-servo quadruped robot companion (~$85 electronics/hardware BOM) running a 107.8 KB int8 DAgger-distilled RL locomotion policy at 50 Hz inside the Waveshare ESP32-P4-WIFI6 128 KB L2 cache, paired with Ainekio OS—a local-first cognitive runtime for persistent memory, room-audio voice conversation, generative Freestyle inverse-kinematics motion, and bounded physical autonomy. Printable CAD/STL files and trained model weights are kept private; this site documents the architecture, specifications, and workbench build history.',
     '',
     '## Key Technical Facts',
     '',
@@ -31,7 +31,7 @@ export const GET: APIRoute = async ({ site }) => {
     '- **Locomotion & Motion Stack**: Analytical 4-bar IK/FK (`Walk`, `Run`, `Crawl`, `Crab`, 23 finite gestures), 375-mesh closed-chain MuJoCo MJCF digital twin (`solver="cg"`, 500 Hz physics / 50 Hz control), 200M+ step JAX/MJX PPO teacher distilled via 2-round DAgger into a 110,432-byte (`107.8 KB`) `int8` student policy (`720 → 128 → 64 → 32 → 12`) executing natively on the ESP32-P4, plus **Freestyle** (`Qwen3.5-0.8B` LoRA + 349-motion SQLite library + 416 fault-recovery trajectories).',
     '- **Ainekio OS (The Mind)**: Local-first TypeScript/LangGraph cognitive architecture (`Dual Consciousness`, `Agent`, `Emulation`, `Environment` modes) with `llama.cpp`/Ollama/cloud routing, Whisper STT, Kokoro/Piper TTS, episodic/vector memory, nightly Sleep/Dreaming consolidation, and an authenticated WebSocket Environment Bridge.',
     '- **Source Repositories**:',
-    '  - Hardware, ESP-IDF firmware, Python Body Control gateway, MuJoCo MJCF & RL: https://github.com/Greg-Aster/Ainekio-bot',
+    '  - ESP-IDF firmware, Python Body Control gateway & locomotion runtime (CAD/STLs and trained weights omitted): https://github.com/Greg-Aster/Ainekio-bot',
     '  - Ainekio OS cognitive runtime, memory, voice & Environment Bridge: https://github.com/Greg-Aster/ainekio-os',
     `- **Complete Markdown Corpus**: ${origin}/llms-full.txt`,
     `- **RSS Feed**: ${origin}/rss.xml`,

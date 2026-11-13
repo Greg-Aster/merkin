@@ -75,7 +75,7 @@ export async function GET(context: APIContext): Promise<Response> {
 
   const response = await rss({
     title: siteConfig.title,
-    description: siteConfig.subtitle || 'Open-source 12-servo ESP32-P4 quadruped robot companion & Ainekio OS',
+    description: siteConfig.subtitle || '12-servo ESP32-P4 quadruped robot companion & Ainekio OS',
     site: siteOrigin,
     xmlns: {
       atom: 'http://www.w3.org/2005/Atom',

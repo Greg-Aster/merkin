@@ -17,11 +17,10 @@ not generated robot imagery or photographs:
   the first diagram, explicitly labeled as a planned split.
 
 These diagrams were drawn for the site from Ainekio
-[`6437b24`](https://github.com/Greg-Aster/Ainekio-bot/commit/6437b24c0f91273aed160add0e42ac0ddbb5275c)
-([integration](https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/docs/BODY_CONTROL_INTEGRATION.md),
-[gateway](https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/Master/gateway/README.md))
-and MetaHuman
-[`c3f56d4`](https://github.com/Greg-Aster/metahuman-os/blob/c3f56d41dfb396cd68391d12a2910aee8c32870b/docs/technical/MAINTAINED_SURFACE.md).
+([integration](https://github.com/Greg-Aster/Ainekio-bot/blob/dev/docs/BODY_CONTROL_INTEGRATION.md),
+[gateway](https://github.com/Greg-Aster/Ainekio-bot/blob/dev/Master/gateway/README.md))
+and MetaHuman / Ainekio OS
+[`c3f56d4`](https://github.com/Greg-Aster/ainekio-os/blob/c3f56d41dfb396cd68391d12a2910aee8c32870b/docs/technical/MAINTAINED_SURFACE.md).
 Cyan identifies source-level owners or paths; amber dashed marks identify
 intended placement or missing integration. Neither diagram proves a deployed
 Q6A topology, qualified combined-load latency, live IMU feedback, or physical

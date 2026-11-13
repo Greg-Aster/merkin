@@ -1,8 +1,8 @@
 ---
-title: "Ainekio: Open-Source 12-Servo ESP32-P4 Quadruped Robot & Ainekio OS Overview"
+title: "Ainekio: 12-Servo ESP32-P4 Quadruped Robot & Ainekio OS Overview"
 published: 2026-08-27T09:45:00-07:00
 updated: 2026-11-12
-description: "Start-here overview and architecture tour for Ainekio, an open-source 650 g 3D-printed 12-servo ESP32-P4 quadruped robot (~$85 BOM) paired with Ainekio OS."
+description: "Start-here overview and architecture tour for Ainekio, a custom 650 g 3D-printed 12-servo ESP32-P4 quadruped robot (~$85 BOM) paired with Ainekio OS."
 image: "/assets/ainekio/2026-10-12-refresh/render-overview.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Greg the Mechanic"
@@ -23,7 +23,7 @@ reading:
 ---
 import ProjectStatus from '../../components/ProjectStatus.astro'
 
-Ainekio is an open-source hobby robot project built on a workbench: a `650 g`, 3D-printed twelve-servo quadruped body (`~$85` in parts, [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) paired with **[Ainekio OS](https://github.com/Greg-Aster/ainekio-os)** (formerly MetaHuman OS; [architecture guide](/posts/ainekio-os/)), a local-first AI operating system for conversation, long-term memory, perception, and bounded autonomy.
+Ainekio is a personal workbench robot project: a custom `650 g`, 3D-printed twelve-servo quadruped body (`~$85` in parts, [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) paired with **[Ainekio OS](https://github.com/Greg-Aster/ainekio-os)** (formerly MetaHuman OS; [architecture guide](/posts/ainekio-os/)), a local-first AI operating system for conversation, long-term memory, perception, and bounded autonomy.
 
 This site is the project's build journal and technical reference library. It tracks what worked on the bench, what broke on the living-room carpet, and how the physical hardware and persistent software mind fit together.
 
@@ -97,7 +97,7 @@ V1 remains documented in the archive as the baseline that proved out the early b
 | [Ainekio OS Architecture](/posts/ainekio-os/) | Canonical guide to the personal AI operating system: Standing Persona, cognitive graphs, SQLite durability, local/hybrid model routing, and the `02:00` sleep cycle |
 | [Embodied Robot Integration](/posts/metahuman-integration/) | How observations, telemetry, and bounded motion/face/speech intents cross the bridge between Ainekio OS and the physical robot |
 | [Bounded Autonomy Modes](/posts/bounded-autonomy/) | Reactive, Semi Mode, and Full Auto operation, plus the hardware safety boundaries that keep LLMs away from raw servo PWM |
-| [Ainekio V2 Hardware & Wiring](/posts/ainekio-v2/) | `650 g` mechanical build, `35/20/28/38/55 mm` leg linkages, `CD74HC4067` `C4–C15` → `GPIO49` feedback wiring, Wireless Keeper Bridge, and printable STLs |
+| [Ainekio V2 Hardware & Wiring](/posts/ainekio-v2/) | `650 g` mechanical build, `35/20/28/38/55 mm` leg linkages, `CD74HC4067` `C4–C15` → `GPIO49` feedback wiring, and the Wireless Keeper Bridge |
 | [Gait Development & Locomotion](/posts/gait-development/) | Linkage kinematics, closed-loop `Stand`/`Walk`, Freestyle motion library, carpet trials, MuJoCo RL, and `50 Hz` on-chip neural walking |
 | [Gateway, Cockpit HUD & Simulator](/posts/gateway-and-simulator/) | Host gateway, full-viewport Cockpit HUD, optical-flow obstacle range, servo calibration, and MuJoCo hardware twins |
 | [Protocol, Telemetry & Safety](/posts/protocol-and-safety/) | `protocol-v1` framing, command leases, watchdogs, startup slew limiting, and 4th-wire stall protection |

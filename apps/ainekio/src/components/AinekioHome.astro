@@ -53,9 +53,9 @@ const directoryCards = [
   {
     num: '03',
     title: 'Chassis, Shell & Power',
-    description: 'The 650 g 3D-printed shell, fourth-wire modified MG90S servos, GPIO pinouts, rear 2S battery carrier, and downloadable STLs.',
+    description: 'The 650 g 3D-printed shell, fourth-wire modified MG90S servos, GPIO pinouts, and rear 2S Wireless Keeper Bridge.',
     primaryHref: '/posts/ainekio-v2/',
-    primaryLabel: 'V2 Hardware & STLs',
+    primaryLabel: 'V2 Hardware & Wiring',
     secondaryHref: '/archive/?topic=body',
     secondaryLabel: `All ${posts.filter(p => getReading(p).topic === 'body').length} chassis notes`,
     count: posts.filter(p => getReading(p).topic === 'body').length,
@@ -105,7 +105,7 @@ const specs = [
   <section class="home-hero" aria-labelledby="home-title">
     <div class="hero-main">
       <div class="hero-copy">
-        <p class="home-eyebrow">Personal Build Journal · Open-Source Robotics &amp; Local AI</p>
+        <p class="home-eyebrow">Personal Build Journal · Embodied Robotics &amp; Local AI</p>
         <h1 id="home-title">Building Ainekio: a 3D-printed quadruped with a persistent mind</h1>
         <p class="home-intro">
           Ainekio is an ongoing workbench project pairing a custom <strong>650&nbsp;g</strong>, twelve-servo walking robot (<a href="https://github.com/Greg-Aster/Ainekio-bot" target="_blank" rel="noreferrer">Ainekio-bot</a>) with <strong><a href={url('/posts/ainekio-os/')}>Ainekio OS</a></strong> (<a href="https://github.com/Greg-Aster/ainekio-os" target="_blank" rel="noreferrer">ainekio-os</a>)—a local-first AI companion runtime that remembers past days, talks in the room, and reacts when the robot is picked up or nudged.

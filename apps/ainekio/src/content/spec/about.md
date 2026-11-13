@@ -1,6 +1,6 @@
 ---
 title: "About Ainekio"
-description: "Personal build notes and open-source documentation for Ainekio, a 3D-printed 12-servo quadruped robot paired with Ainekio OS for persistent memory, conversation, and local autonomy."
+description: "Personal build notes and technical documentation for Ainekio, a custom 3D-printed 12-servo quadruped robot paired with Ainekio OS for persistent memory, conversation, and local autonomy."
 ---
 
 ## Why I'm building Ainekio
@@ -12,11 +12,11 @@ Ainekio is an experiment in building the middle ground at home for roughly **$85
 1. **A small physical body that knows what its joints are doing** ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)): twelve inexpensive `MG90S` micro servos modified with a fourth potentiometer feedback wire so the onboard `ESP32-P4` microcontroller can verify joint positions, detect leg stalls, and run a trained neural walking policy right on the chip at `50 Hz`.
 2. **A software mind that keeps its own history** ([`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os), formerly MetaHuman OS): a local-first AI runtime that stores episodic memories, maintains a consistent persona across days, consolidates memories overnight, and treats the robot body as one way of being in the room rather than its entire brain.
 
-All CAD parts and physics simulation exports are modeled in Blender and printed on a desktop FDM printer.
+All mechanical parts are modeled in Blender and printed on a desktop FDM printer for the physical prototype (printable CAD/STL files and trained model weights are kept local and omitted from the public repositories).
 
 ## Two repositories, one companion
 
-- **The Body (`Ainekio-bot`)** covers the printable shell and compact four-bar leg STLs, the `ESP32-P4` real-time firmware, wiring diagrams, MuJoCo / JAX reinforcement-learning scripts, and the local Body Control web cockpit used to drive the robot, watch live camera and joint telemetry, and calibrate servos.
+- **The Body (`Ainekio-bot`)** covers the `ESP32-P4` real-time firmware, wiring documentation, RL locomotion training code, and the local Body Control web cockpit used to drive the robot, watch live camera and joint telemetry, and calibrate servos.
 - **The Mind (`ainekio-os`)** runs standalone on a home PC or local server (and connects to the robot over Wi-Fi when the body is powered on). It handles voice transcription and speech synthesis, long-term memory, editable cognitive workflows, and optional delegation to heavier coding or reasoning models when a task calls for more than a fast local model.
 
 ## Two hardware generations

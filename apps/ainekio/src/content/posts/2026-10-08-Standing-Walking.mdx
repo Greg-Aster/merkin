@@ -42,23 +42,21 @@ its feet with its wide cyan LCD face lit and running.
 | Command response & audio | Bench networking checks only | Responds to commands; speaker tone and wake-word capture verified |
 | Display & camera | Unmounted in chassis test | 1.9-inch ST7789 LCD (320×170 landscape) and OV5647 camera upright and active |
 
-### Printed hardware additions in the repository
+### Printed hardware additions on the workbench
 
-The robot repository now tracks the STL sets behind this physical build:
+The physical build brings together three updated part groups:
 
-- **Compact legs:** 35 mm carriers, 20 mm recessed-horn cranks, and 28 mm pickup parts
-  ([October 7 STL set](https://github.com/Greg-Aster/Ainekio-bot/tree/f264161/Slave/hardware/v2-12servo/STL/Red)).
+- **Compact legs:** 35 mm carriers, 20 mm recessed-horn cranks, and 28 mm pickup parts.
 - **Electronics & power packaging:** Wireless bridge, board retainers, battery cradle,
-  and rear power-carrier parts ([October 7 export set](https://github.com/Greg-Aster/Ainekio-bot/tree/cc4326a/Slave/hardware/v2-12servo/STL/Red)).
-- **Display & speaker mounts:** Left/right front-panel braces, LCD carrier
-  ([October 8 LCD support exports](https://github.com/Greg-Aster/Ainekio-bot/tree/7f7b3c2/Slave/hardware/v2-12servo/STL/Red/lcd_carrier_speaker_support)),
-  and the 20×30 speaker housing ([October 8 speaker housing](https://github.com/Greg-Aster/Ainekio-bot/tree/7f7b3c2/Slave/hardware/v2-12servo/STL/Red/speaker%20housing)).
+  and rear power-carrier parts.
+- **Display & speaker mounts:** Left/right front-panel braces, LCD carrier,
+  and the 20×30 speaker housing.
 
 ## 1.9-inch ST7789 face renderer and 59 expressions
 
 The physical robot uses a **XIITIA 1.9-inch ST7789** SPI panel in **320 × 170
 landscape** orientation (wired via SPI despite its PCB pins being silkscreened `SCL`
-and `SDA`; see the [LCD wiring guide](https://github.com/Greg-Aster/Ainekio-bot/blob/dbd15b9/docs/v2-12servo/LCD_FACE.md)).
+and `SDA`; see the [LCD wiring guide](https://github.com/Greg-Aster/Ainekio-bot/blob/dev/docs/v2-12servo/LCD_FACE.md)).
 
 The C firmware face engine drives **59 selectable expressions** at a stepped **15 fps**
 (66 ms frame interval) outside the servo loop, including resting eyes, speaking

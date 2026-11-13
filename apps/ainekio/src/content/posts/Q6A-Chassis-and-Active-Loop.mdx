@@ -29,7 +29,7 @@ In late September 2026, bench work focused on two questions at once: whether a `
 
 <figure className="mx-auto max-w-[48rem]">
   <img src="/posts/ainekio-2026/q6a-communication.svg" width="760" height="940" loading="eager" decoding="async" alt="September 30 communication split study: remote desktop inference connected to a Q6A host keeping the gateway and Environment Bridge local over Wi-Fi to the ESP32-P4 body controller." />
-  <figcaption>September 30, 2026 deployment study. The Bridge–gateway connection stayed local to the Q6A while communicating with the ESP32-P4 over Wi-Fi. <a href="/posts/ainekio-2026/q6a-communication.svg">Open full-size diagram</a> · <a href="https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/docs/BODY_CONTROL_INTEGRATION.md">Integration record</a></figcaption>
+  <figcaption>September 30, 2026 deployment study. The Bridge–gateway connection stayed local to the Q6A while communicating with the ESP32-P4 over Wi-Fi. <a href="/posts/ainekio-2026/q6a-communication.svg">Open full-size diagram</a> · <a href="https://github.com/Greg-Aster/Ainekio-bot/blob/dev/docs/BODY_CONTROL_INTEGRATION.md">Integration record</a></figcaption>
 </figure>
 
 At this stage of the study, direct Wi-Fi connected the `ESP32-P4` and `Q6A` (with USB kept as a bench alternative and ROS 2 evaluated only as an optional bridge). Real-time gait timing remained on the `ESP32-P4` while the Linux host handled camera perception and heavier planning.
@@ -40,7 +40,7 @@ The September 30 CAD revision carved out internal mounting volume for the Q6A bo
 
 <figure className="mx-auto max-w-[48rem]">
   <img src="/posts/ainekio-2026/active-loop.svg" width="760" height="1040" loading="lazy" decoding="async" alt="Comparison between an earlier isolated observe-decide-act turn sequence and the active-loop foundations introduced in late September 2026." />
-  <figcaption>September 30 active-loop architecture snapshot. Solid cyan marked implemented gateway frame handling, in-stride parameter updates, and durable workflow waits; dashed amber marked recognition and IMU loops that were subsequently completed in October. <a href="/posts/ainekio-2026/active-loop.svg">Open full-size diagram</a> · <a href="https://github.com/Greg-Aster/Ainekio-bot/blob/6437b24c0f91273aed160add0e42ac0ddbb5275c/Master/gateway/README.md">Gateway</a> · <a href="https://github.com/Greg-Aster/ainekio-os/blob/c3f56d41dfb396cd68391d12a2910aee8c32870b/docs/technical/MAINTAINED_SURFACE.md">Workflow owners</a></figcaption>
+  <figcaption>September 30 active-loop architecture snapshot. Solid cyan marked implemented gateway frame handling, in-stride parameter updates, and durable workflow waits; dashed amber marked recognition and IMU loops that were subsequently completed in October. <a href="/posts/ainekio-2026/active-loop.svg">Open full-size diagram</a> · <a href="https://github.com/Greg-Aster/Ainekio-bot/blob/dev/Master/gateway/README.md">Gateway</a> · <a href="https://github.com/Greg-Aster/ainekio-os/blob/c3f56d41dfb396cd68391d12a2910aee8c32870b/docs/technical/MAINTAINED_SURFACE.md">Workflow owners</a></figcaption>
 </figure>
 
 Unlike the onboard SBC layout, the software foundations landed in this September 30 push became permanent building blocks of V2 and **[Ainekio OS](/posts/ainekio-os/)**:
@@ -53,4 +53,4 @@ The original eight-servo `ESP32-S3` V1 baseline remained supported alongside V2 
 
 ### Source snapshot (September 30, 2026)
 
-Reviewed September 30 commits: [Ainekio `6437b24`](https://github.com/Greg-Aster/Ainekio-bot/commit/6437b24c0f91273aed160add0e42ac0ddbb5275c) and [Ainekio OS `c3f56d4`](https://github.com/Greg-Aster/ainekio-os/commit/c3f56d41dfb396cd68391d12a2910aee8c32870b).
+Reviewed September 30 snapshots: [Ainekio-bot](https://github.com/Greg-Aster/Ainekio-bot) and [Ainekio OS `c3f56d4`](https://github.com/Greg-Aster/ainekio-os/commit/c3f56d41dfb396cd68391d12a2910aee8c32870b).

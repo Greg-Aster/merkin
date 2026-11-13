@@ -48,7 +48,7 @@ export const GET: APIRoute = async ({ site }) => {
     '',
     `Source: ${origin}`,
     `Index: ${origin}/llms.txt`,
-    'Hardware & Firmware Repository: https://github.com/Greg-Aster/Ainekio-bot',
+    'Firmware & Gateway Repository (CAD/STLs and trained weights omitted): https://github.com/Greg-Aster/Ainekio-bot',
     'Ainekio OS Repository: https://github.com/Greg-Aster/ainekio-os',
     '',
     '---',

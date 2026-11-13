@@ -8,7 +8,7 @@ import type {
 
 export const siteConfig: SiteConfig = {
   title: 'Ainekio',
-  subtitle: 'Open-Source 12-Servo ESP32-P4 Quadruped Robot Companion & Ainekio OS',
+  subtitle: '12-Servo ESP32-P4 Quadruped Robot Companion & Ainekio OS',
   enablePostFooterNav: true,
   lang: 'en',
   themeColor: {
@@ -63,7 +63,7 @@ export const navBarConfig: NavBarConfig = {
 export const profileConfig: ProfileConfig = {
   avatar: '/assets/ainekio/2026-10-12-refresh/render-front.webp',
   name: 'Ainekio',
-  bio: 'Personal workbench log and documentation for an open-source 12-servo quadruped robot and Ainekio OS—its local-first software mind for voice, memory, and personality.',
+  bio: 'Personal workbench log and technical documentation for a custom 12-servo quadruped robot and Ainekio OS—its local-first software mind for voice, memory, and personality.',
   links: [
     {
       name: 'Ainekio-bot',
