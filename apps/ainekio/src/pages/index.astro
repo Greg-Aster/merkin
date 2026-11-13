@@ -1,9 +1,38 @@
 ---
 import AinekioHome from '../components/AinekioHome.astro'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
+import { getVideoMetaBySrc, REPO_URLS, toVideoObjectJsonLd } from '../lib/seo-media'
 
 const description =
-  'Personal build journal and open-source documentation for Ainekio, a 3D-printed 12-servo quadruped robot companion paired with Ainekio OS for voice conversation, persistent memory, and local autonomy.'
+  'Open-source build journal and technical specification for Ainekio, a 650 g 3D-printed 12-servo ESP32-P4 quadruped robot companion running an on-chip neural gait and paired with Ainekio OS for voice conversation, persistent memory, and local autonomy.'
+
+const siteOrigin = Astro.site ?? new URL('https://ainek.io')
+const featuredVideo = getVideoMetaBySrc('/gallery/ainekio-v2-neural-walk-first-run.mp4')
+
+const homeJsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Ainekio',
+    alternateName: ['Ainekio Quadruped Robot', 'Ainekio OS'],
+    url: siteOrigin.href,
+    description,
+    inLanguage: 'en',
+    sameAs: [...REPO_URLS],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareSourceCode',
+    name: 'Ainekio Robot Hardware, ESP32-P4 Firmware & Ainekio OS',
+    description:
+      'Open-source 3D-printed 12-servo quadruped hardware, ESP32-P4 firmware, closed-loop 4-bar MuJoCo MJCF model, 107.8 KB int8 RL gait policy, and Ainekio OS local-first cognitive runtime.',
+    url: siteOrigin.href,
+    codeRepository: [...REPO_URLS],
+    programmingLanguage: ['C', 'Python', 'TypeScript'],
+    runtimePlatform: ['ESP-IDF (ESP32-P4)', 'Python 3 / MuJoCo / JAX', 'Node.js / LangGraph'],
+  },
+  ...(featuredVideo ? [toVideoObjectJsonLd(featuredVideo, siteOrigin)] : []),
+]
 ---
 
 <MainGridLayout description={description} homeLayout="portal" oneColumn={true}>
@@ -11,14 +40,7 @@ const description =
     is:inline
     slot="head"
     type="application/ld+json"
-    set:html={JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: 'Ainekio',
-      url: Astro.site,
-      description,
-      inLanguage: 'en',
-    })}
+    set:html={JSON.stringify(homeJsonLd)}
   />
   <AinekioHome />
 </MainGridLayout>

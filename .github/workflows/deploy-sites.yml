@@ -67,6 +67,7 @@ jobs:
               - "apps/ainekio/**"
               - "packages/blog-core/**"
               - "scripts/deploy-pages-with-retry.sh"
+              - "scripts/ping-indexnow.mjs"
             temporal:
               - "Temporal-Flow/**"
               - "packages/blog-core/**"
@@ -158,6 +159,9 @@ jobs:
           SITE_URL: https://ainek.io
           SITE_BASE: /
         run: pnpm deploy:ainekio
+
+      - name: Notify IndexNow search engines
+        run: node scripts/ping-indexnow.mjs apps/ainekio/dist https://ainek.io a17ec10b0720261113f49685c4067a12
 
   deploy-temporal:
     name: Deploy Temporal-Flow

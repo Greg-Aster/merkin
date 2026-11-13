@@ -9,6 +9,7 @@ import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 import { licenseConfig, profileConfig, siteConfig } from '../../config/config'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
 import { getReading, validateReadingPaths, topics, generations, kinds } from '../../lib/reading'
+import { extractPostVideos, REPO_URLS, toVideoObjectJsonLd } from '../../lib/seo-media'
 import { getPageSocialImage } from '../../lib/social-images'
 import ShareBar from '../../components/ShareBar.astro'
 
@@ -35,6 +36,8 @@ const reading = getReading(post)
 const topic = topics[reading.topic]
 const topicUrl = `/archive/?topic=${reading.topic}`
 const socialImage = await getPageSocialImage({ post })
+const siteOrigin = Astro.site ?? new URL('https://ainek.io')
+const postVideos = extractPostVideos(post.body || '')
 const jsonLd = [
   {
     '@context': 'https://schema.org',
@@ -42,19 +45,20 @@ const jsonLd = [
     headline: post.data.title,
     description: post.data.description,
     keywords: post.data.tags,
-    image: new URL(socialImage.src, Astro.site).href,
+    image: new URL(socialImage.src, siteOrigin).href,
     mainEntityOfPage: Astro.url.href,
     datePublished: formatDateToYYYYMMDD(post.data.published),
     ...(post.data.updated ? { dateModified: formatDateToYYYYMMDD(post.data.updated) } : {}),
-    author: { '@type': 'Person', name: profileConfig.name, url: Astro.site },
+    author: { '@type': 'Person', name: profileConfig.name, url: siteOrigin.href, sameAs: [...REPO_URLS] },
     inLanguage: (post.data.lang || siteConfig.lang).replace('_', '-'),
+    ...(postVideos.length > 0 ? { video: postVideos.map(v => toVideoObjectJsonLd(v, siteOrigin)) } : {}),
   },
   {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Ainekio', item: new URL(url('/'), Astro.site).href },
-      { '@type': 'ListItem', position: 2, name: topic.title, item: new URL(url(topicUrl), Astro.site).href },
+      { '@type': 'ListItem', position: 1, name: 'Ainekio', item: new URL(url('/'), siteOrigin).href },
+      { '@type': 'ListItem', position: 2, name: topic.title, item: new URL(url(topicUrl), siteOrigin).href },
       { '@type': 'ListItem', position: 3, name: post.data.title, item: Astro.url.href },
     ],
   },

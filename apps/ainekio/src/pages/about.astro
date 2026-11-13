@@ -20,6 +20,27 @@ const quickFacts = [
 ---
 
 <MainGridLayout title="About Ainekio — Personal Robot Build Log & Open-Source Repositories" description={about.data.description} headings={headings} oneColumn={true}>
+  <script
+    is:inline
+    slot="head"
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'AboutPage',
+      name: 'About Ainekio',
+      description: about.data.description,
+      url: Astro.url.href,
+      mainEntity: {
+        '@type': 'SoftwareSourceCode',
+        name: 'Ainekio Quadruped Companion & Ainekio OS',
+        url: (Astro.site ?? new URL('https://ainek.io')).href,
+        codeRepository: [
+          'https://github.com/Greg-Aster/Ainekio-bot',
+          'https://github.com/Greg-Aster/ainekio-os',
+        ],
+      },
+    })}
+  />
   <div class="about-shell">
     <section class="card-base about-hero">
       <div class="about-hero-copy">

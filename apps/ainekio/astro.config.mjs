@@ -63,33 +63,117 @@ if (explicitSiteUrl) {
 
 const htmlMinifierDefaults = CompressDefaults.HTML['html-minifier-terser']
 
-function loadPostLastmodMap(postsDir) {
+const galleryItems = JSON.parse(
+  fs.readFileSync(join(__dirname, 'src/data/gallery.json'), 'utf8'),
+)
+const postVideoSupplement = JSON.parse(
+  fs.readFileSync(join(__dirname, 'src/data/post-videos.json'), 'utf8'),
+)
+
+const videoMetaBySrc = new Map()
+for (const item of galleryItems) {
+  if (item.src && item.poster) {
+    videoMetaBySrc.set(item.src, {
+      src: item.src,
+      poster: item.poster,
+      title: item.title,
+      caption: item.caption,
+      date: item.date || '2026-11-06',
+      duration: Math.max(1, Math.round(item.duration || 1)),
+    })
+  }
+}
+for (const item of postVideoSupplement) {
+  if (!videoMetaBySrc.has(item.src)) {
+    videoMetaBySrc.set(item.src, {
+      ...item,
+      duration: Math.max(1, Math.round(item.duration || 1)),
+    })
+  }
+}
+
+function toSitemapVideo(meta, origin) {
+  return {
+    thumbnail_loc: new URL(meta.poster, origin).href,
+    title: meta.title,
+    description: meta.caption,
+    content_loc: new URL(meta.src, origin).href,
+    duration: meta.duration,
+    publication_date: `${meta.date}T00:00:00Z`,
+  }
+}
+
+function loadPostSeoMap(postsDir, origin) {
   const map = new Map()
+  let maxTimestamp = new Date('2026-11-06T00:00:00.000Z').getTime()
+
   function walk(dir, prefix = '') {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       if (entry.isDirectory()) {
         walk(join(dir, entry.name), `${prefix}${entry.name}/`)
       } else if (/\.(md|mdx)$/.test(entry.name)) {
         const raw = fs.readFileSync(join(dir, entry.name), 'utf8')
-        const fm = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] || ''
+        const fmMatch = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+        const fm = fmMatch?.[1] || ''
         if (/^draft:\s*true\b/m.test(fm)) continue
+        const body = fmMatch ? raw.slice(fmMatch[0].length) : raw
+        const title = (fm.match(/^title:\s*([^\r\n]+)/m)?.[1] || '').trim().replace(/^['"]|['"]$/g, '')
+        const cover = (fm.match(/^image:\s*([^\r\n]+)/m)?.[1] || '').trim().replace(/^['"]|['"]$/g, '')
         const updated = fm.match(/^updated:\s*([^\r\n]+)/m)?.[1]?.trim()
         const published = fm.match(/^published:\s*([^\r\n]+)/m)?.[1]?.trim()
         const slug = `${prefix}${entry.name.replace(/\.(md|mdx)$/, '')}`.toLowerCase()
         const dateStr = (updated || published || '2026-11-06').replace(/^['"]|['"]$/g, '')
         const parsed = new Date(dateStr)
-        if (!Number.isNaN(parsed.getTime())) {
-          map.set(`/posts/${slug}/`, parsed.toISOString())
+
+        const videos = []
+        const seenVideos = new Set()
+        const sourceRe = /<source\b[^>]*\bsrc=["']([^"']+\.mp4)["'][^>]*>/gi
+        let m
+        while ((m = sourceRe.exec(body)) !== null) {
+          if (!seenVideos.has(m[1]) && videoMetaBySrc.has(m[1])) {
+            seenVideos.add(m[1])
+            videos.push(toSitemapVideo(videoMetaBySrc.get(m[1]), origin))
+          }
         }
+
+        const images = []
+        if (cover && cover.startsWith('/')) {
+          images.push({
+            url: new URL(cover, origin).href,
+            ...(title ? { title } : {}),
+          })
+        }
+
+        const lastmod = !Number.isNaN(parsed.getTime()) ? parsed.toISOString() : undefined
+        if (!Number.isNaN(parsed.getTime()) && parsed.getTime() > maxTimestamp) {
+          maxTimestamp = parsed.getTime()
+        }
+
+        map.set(`/posts/${slug}/`, { lastmod, videos, images })
       }
     }
   }
   walk(postsDir)
-  return map
+  return { map, latestLastmod: new Date(maxTimestamp).toISOString() }
 }
 
-const postLastmodMap = loadPostLastmodMap(join(__dirname, 'src/content/posts'))
-const defaultLastmod = new Date('2026-11-06T00:00:00.000Z').toISOString()
+const { map: postSeoMap, latestLastmod } = loadPostSeoMap(
+  join(__dirname, 'src/content/posts'),
+  siteUrl,
+)
+const galleryVideos = galleryItems
+  .filter(item => item.src && videoMetaBySrc.has(item.src))
+  .map(item => toSitemapVideo(videoMetaBySrc.get(item.src), siteUrl))
+const galleryImages = galleryItems
+  .filter(item => Array.isArray(item.variants) && item.variants.length > 0)
+  .map(item => ({
+    url: new URL(item.variants[item.variants.length - 1].src, siteUrl).href,
+    title: item.title,
+    caption: item.caption,
+  }))
+const homeFeaturedVideo = videoMetaBySrc.has('/gallery/ainekio-v2-neural-walk-first-run.mp4')
+  ? [toSitemapVideo(videoMetaBySrc.get('/gallery/ainekio-v2-neural-walk-first-run.mp4'), siteUrl)]
+  : []
 
 export default defineConfig({
   site: siteUrl,
@@ -115,15 +199,30 @@ export default defineConfig({
           pathname.startsWith('/social/') ||
           pathname.startsWith('/archive/tag/') ||
           pathname.startsWith('/archive/category/') ||
-          pathname === '/rss.xml'
+          pathname === '/rss.xml' ||
+          pathname === '/llms.txt' ||
+          pathname === '/llms-full.txt'
         )
       },
       serialize: item => {
         const { pathname } = new URL(item.url)
         const normalized = pathname.toLowerCase()
+        const postSeo = postSeoMap.get(normalized)
+
+        let videos = postSeo?.videos
+        let images = postSeo?.images
+        if (normalized === '/') {
+          videos = homeFeaturedVideo
+        } else if (normalized === '/gallery/') {
+          videos = galleryVideos
+          images = galleryImages
+        }
+
         return {
           ...item,
-          lastmod: postLastmodMap.get(normalized) || defaultLastmod,
+          lastmod: postSeo?.lastmod || latestLastmod,
+          ...(videos && videos.length > 0 ? { video: videos } : {}),
+          ...(images && images.length > 0 ? { img: images } : {}),
         }
       },
     }),
