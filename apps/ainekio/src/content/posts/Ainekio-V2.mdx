@@ -88,9 +88,9 @@ Earlier design studies tested heavy external USB-PD power banks (`Anker` 10,000 
 2. **Step-down regulation**: A `Mini560` `5 V / 5 A` synchronous buck converter steps the `2S` pack down to a regulated `5 V` rail capable of sustaining twelve-servo standing and walking loads.
 3. **Onboard USB-C charging & snap-in PCB clips**: A `HiLetgo` `2S` USB-C boost charger board charges the `2S` pack directly from standard `5 V` USB-C input, while dedicated printed clips retain the `ESP32-P4-WIFI6`, `PCA9685`, `HiLetgo` charger, and `LSM6DS3` gyro carrier securely during dynamic walking bouts.
 
-## CAD & hardware fabrication notes
+## Repository & non-commercial license
 
-All V2 structural parts—including the recessed `1.9"` LCD bezel and wireless spacers, lower-jaw `OV5647` camera mount, battery-mounted Wireless Keeper Bridge, snap-in PCB clips, shimmed upper servo brackets, four-bar leg links, curved rocking soles, and the `140 × 110 mm` bench calibration stand—are modeled in Blender and printed on a desktop FDM printer in PLA/PETG. Printable CAD/STL files and trained locomotion weights are kept private to the workbench build rather than distributed for replication.
+All V2 structural parts—including the recessed `1.9"` LCD bezel and wireless spacers, lower-jaw `OV5647` camera mount, battery-mounted Wireless Keeper Bridge, snap-in PCB clips, shimmed upper servo brackets, four-bar leg links, curved rocking soles, and the `140 × 110 mm` bench calibration stand—are modeled in Blender and printed on a desktop FDM printer in PLA/PETG. Firmware, gateway code, CAD/STL files, and trained model assets live in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) for non-commercial reference and research (**PolyForm Noncommercial 1.0.0** for software; **CC BY-NC-SA 4.0** for hardware CAD and trained weights).
 
 ## Design evolution from V1 to V2
 
