@@ -5,8 +5,8 @@ import ShareBar from '../components/ShareBar.astro'
 import gallery from '../data/gallery.json'
 import { url } from '../utils/url-utils'
 
-const galleryTitle = 'Ainekio Robot Gallery — Workbench Photos, Walking Videos, Wiring & CAD'
-const galleryDescription = 'Explore Ainekio in photos, videos, and diagrams: the 650 g 12-servo V2 prototype, carpet walking footage, MuJoCo/MJX simulation rollouts, 59 LCD expressions, and ESP32-P4 wiring diagrams.'
+const galleryTitle = 'Ainekio Robot Gallery — Photos, Walking Videos, Wiring & CAD'
+const galleryDescription = 'Photos, videos, and hardware diagrams of Ainekio: the 650 g 12-servo V2 quadruped, carpet walking footage, MuJoCo/MJX simulation rollouts, 59 LCD expressions, and ESP32-P4 wiring diagrams.'
 const galleryJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
@@ -52,9 +52,9 @@ const labelForKind = (kind: string) =>
     <header class="gallery-hero card-base">
       <div class="gallery-hero-top">
         <div>
-          <p class="eyebrow">Visual reference &amp; media library · {gallery.length} items</p>
-          <h1>Meet the robot</h1>
-          <p class="gallery-lead">Workbench photos, onboard camera footage from physical carpet trials, DAgger-distilled on-chip ESP32-P4 neural gait rollouts, 59 LCD facial expressions, and complete V2 wiring diagrams.</p>
+          <p class="eyebrow">Media library · {gallery.length} items</p>
+          <h1>Photos, video &amp; hardware diagrams</h1>
+          <p class="gallery-lead">Hardware photos, onboard camera footage from physical carpet tests, DAgger-distilled on-chip ESP32-P4 neural gait rollouts, 59 LCD facial expressions, and V2 wiring diagrams.</p>
         </div>
       </div>
 

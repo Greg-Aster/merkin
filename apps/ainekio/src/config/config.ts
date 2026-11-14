@@ -74,7 +74,7 @@ export const navBarConfig: NavBarConfig = {
 export const profileConfig: ProfileConfig = {
   avatar: '/assets/ainekio/2026-10-12-refresh/render-front.webp',
   name: 'Ainekio',
-  bio: 'Personal workbench log and technical documentation for a custom 12-servo quadruped robot and Ainekio OS—its local-first software mind for voice, memory, and personality.',
+  bio: 'Technical documentation and progress notes for Ainekio, a custom 12-servo ESP32-P4 quadruped robot paired with Ainekio OS.',
   links: [
     {
       name: 'Ainekio-bot',
