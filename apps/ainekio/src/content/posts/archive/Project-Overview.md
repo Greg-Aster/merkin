@@ -1,8 +1,8 @@
 ---
 title: "V1: Original Robot Familiar Introduction"
 published: 2026-07-04
-description: "The original project introduction, its ambitions, MetaHuman brain, firmware boundary, and Sesame-derived body."
-image: "/posts/ainekio/wizard-lab-banner.webp"
+description: "The original project introduction, its ambitions, MetaHuman brain, firmware boundary, and eight-servo body."
+image: "/posts/ainekio-2026/vision-loop.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio"
 authorBio: "Robot familiar project"
@@ -19,12 +19,12 @@ reading:
   generation: v1
   kind: original
   next: robot-familiar-parts-overview
-  related: ["body-design-and-hardware", "controller-firmware"]
+  related: ["ainekio-v1", "body-design-and-hardware", "controller-firmware"]
 ---
 
-> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1AVtNyFN7AG5ymLqshQI-77jO4nfG0yev8FUABZ8YE9E/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
+> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1AVtNyFN7AG5ymLqshQI-77jO4nfG0yev8FUABZ8YE9E/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [Ainekio V1 Systems Guide](/posts/ainekio-v1/) · [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
 
-> The browser simulator described here was subsequently unsuccessful and retired. Its intermediate results and plans are preserved as history.
+> **Later project updates:** MetaHuman OS is now **[Ainekio OS](/posts/ainekio-os/)** (`Greg-Aster/ainekio-os`), and the browser simulator mentioned here was retired after V1 hardware bring-up. See the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)** for the completed eight-servo V1 architecture, or **[System Overview](/posts/project-overview/)** for the active V2 and upcoming V3 robots.
 
 ---
 

@@ -52,6 +52,17 @@ export const siteConfig: SiteConfig = {
 export const navBarConfig: NavBarConfig = {
   links: [
     { name: 'Overview', url: '/posts/project-overview/' },
+    {
+      name: 'V1 · V2 · V3',
+      url: '/#generations',
+      dropdown: [
+        { name: 'All 3 Generations', url: '/#generations' },
+        { name: 'V1 · 8-Servo S3 Guide', url: '/posts/ainekio-v1/' },
+        { name: 'V2 · 12-Servo P4 (Active)', url: '/posts/ainekio-v2/' },
+        { name: 'V3 · DS3235 & Linux PC', url: '/posts/ainekio-v3-preview/' },
+        { name: 'V1 vs. V2 Comparison', url: '/posts/v1-v2-comparison/' },
+      ],
+    },
     { name: 'Ainekio OS', url: '/posts/ainekio-os/' },
     { name: 'System Reference', url: '/archive/?kind=reference' },
     { name: 'Build Journal', url: '/updates/' },

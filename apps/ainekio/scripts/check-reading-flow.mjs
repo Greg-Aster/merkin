@@ -48,7 +48,7 @@ const retiredPaths = [
 for (const { file, html } of articles) {
   assert.match(html, /aria-label="?Breadcrumb/, `${file}: reader needs topic context`)
   assert.match(html, /data-post-date=/, `${file}: preserve the observation date`)
-  assert.match(html, /V1|V2/, `${file}: identify the robot version`)
+  assert.match(html, /V1|V2|V3/, `${file}: identify the robot version`)
   const next = html.match(/<a\b[^>]*data-reading-next[^>]*>/)?.[0]
   if (next) {
     const destination = attribute(next, 'href')

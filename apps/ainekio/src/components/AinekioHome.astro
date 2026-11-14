@@ -98,6 +98,51 @@ const specs = [
   { label: 'Face & senses', value: '1.9" LCD (59 faces) · Cam · IMU' },
   { label: 'Companion mind', value: 'Ainekio OS · Local memory & voice' },
 ]
+
+const generationCards = [
+  {
+    id: 'v1',
+    badge: 'V1 · Summer 2026 Baseline',
+    tone: 'v1',
+    title: 'Ainekio V1: 8-Servo ESP32-S3 Quadruped',
+    image: '/posts/ainekio-v1/v1-cad-three-quarter.webp',
+    imageAlt: 'Blender CAD render of Ainekio V1 showing the eight-servo Frame7/Frame8 chassis, 0.96-inch OLED and camera module, dual flank 2S battery packs, and ESP32-S3 electronics.',
+    specLine: 'ESP32-S3 · 8× MG90S · 0.96" OLED (52 faces) · OV3660',
+    description: 'Custom 8-DOF spider-stance quadruped—modeled in its own dedicated Blender CAD scene—that first proved out room voice, vision, 38 .amot motions, and the protocol-v1 Ainekio OS loop.',
+    primaryHref: '/posts/ainekio-v1/',
+    primaryLabel: 'V1 Systems Guide',
+    secondaryHref: '/posts/v1-original-posts/',
+    secondaryLabel: 'July 2026 Archive',
+  },
+  {
+    id: 'v2',
+    badge: 'V2 · Active Floor Robot',
+    tone: 'v2',
+    title: 'Ainekio V2: 650 g 12-Servo ESP32-P4 Body',
+    image: '/gallery/ainekio-v2-physical-three-quarter-960.webp',
+    imageAlt: 'Physical 650 g twelve-servo Ainekio V2 quadruped standing on carpet in its red and black 3D-printed shell with four-bar legs and 4th-wire servo feedback harness.',
+    specLine: 'ESP32-P4 · 12× 4th-wire servos · 50 Hz L2 gait · 1.9" LCD',
+    description: 'Clean-sheet ~$85 rebuild adding hip roll, compact four-bar linkages, potentiometer shaft feedback, a 208 Hz IMU, 59 color LCD expressions, WakeNet9s audio, and untethered 50 Hz on-chip neural walking.',
+    primaryHref: '/posts/ainekio-v2/',
+    primaryLabel: 'V2 Hardware Guide',
+    secondaryHref: '/posts/what-ainekio-can-do/',
+    secondaryLabel: 'What It Can Do',
+  },
+  {
+    id: 'v3',
+    badge: 'V3 · In Development (CAD)',
+    tone: 'v3',
+    title: 'Ainekio V3: ~1.7× DS3235 & Linux PC Face',
+    image: '/posts/ainekio-v3/v3-vs-v2-front-scale.webp',
+    imageAlt: 'Blender CAD comparison of the ~1.7x larger shelled Ainekio V3 quadruped with its 5.0-inch 1280x720 touch face and DS3235 four-bar legs standing beside Ainekio V2.',
+    specLine: 'Waterproof DS3235 · 5.0" HD touch face · Linux SBC + P4',
+    description: 'Faster, weather-resistant ~1.7× chassis carrying a Wi-Fi/Bluetooth Linux SBC + ESP32-P4 inside the body—letting you switch Ainekio’s 5.0" touch face into a live Linux desktop with mouse & keyboard.',
+    primaryHref: '/posts/ainekio-v3-preview/',
+    primaryLabel: 'V3 CAD & PC Preview',
+    secondaryHref: '/archive/?generation=v3',
+    secondaryLabel: 'V3 Filter',
+  },
+]
 ---
 
 <div class="ainekio-home">
@@ -151,7 +196,39 @@ const specs = [
     </div>
   </section>
 
-  <!-- ZONE 2: DARK STUDIO MEDIA STAGE (VIDEO + BALANCED 2x2 VISUAL GRID) -->
+  <!-- ZONE 2: THREE ROBOT GENERATIONS (V1 · V2 · V3) -->
+  <section id="generations" class="home-generations" aria-labelledby="home-generations-title">
+    <div class="open-section-header">
+      <div>
+        <p class="home-eyebrow">Hardware &amp; Compute Lineage</p>
+        <h2 id="home-generations-title">Three robot generations: V1 · V2 · V3</h2>
+      </div>
+      <a class="section-link" href={url('/posts/v1-v2-comparison/')}>Side-by-side V1 vs. V2 specs →</a>
+    </div>
+
+    <div class="generations-grid">
+      {generationCards.map(gen => (
+        <article class:list={['gen-card', `is-${gen.tone}`]}>
+          <a class="gen-thumb" href={url(gen.primaryHref)} tabindex="-1" aria-hidden="true">
+            <img src={url(gen.image)} alt={gen.imageAlt} loading="lazy" decoding="async" />
+          </a>
+          <div class="gen-body">
+            <span class:list={['gen-badge', `is-${gen.tone}`]}>{gen.badge}</span>
+            <h3><a href={url(gen.primaryHref)}>{gen.title}</a></h3>
+            <p class="gen-specs">{gen.specLine}</p>
+            <p class="gen-desc">{gen.description}</p>
+            <div class="directory-links">
+              <a class="directory-primary" href={url(gen.primaryHref)}>{gen.primaryLabel}&nbsp;→</a>
+              <span class="directory-dot" aria-hidden="true">·</span>
+              <a class="directory-secondary" href={url(gen.secondaryHref)}>{gen.secondaryLabel}</a>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- ZONE 3: DARK STUDIO MEDIA STAGE (VIDEO + BALANCED 2x2 VISUAL GRID) -->
   <section class="home-stage" aria-labelledby="home-stage-title">
     <div class="stage-header">
       <div>
@@ -259,27 +336,18 @@ const specs = [
     </ol>
   </section>
 
-  <!-- ZONE 5: HISTORICAL V1 FOOTNOTE & FULL ARCHIVE BAR -->
-  <footer class="home-origins" aria-labelledby="home-original-title">
-    <div class="origins-card">
-      <img
-        src={url('/posts/ainekio/wizard-lab-banner.webp')}
-        alt="Illustration from the original summer 2026 eight-servo Ainekio V1 concept notes"
-        loading="lazy"
-        decoding="async"
-      />
-      <div class="origins-copy">
-        <p class="home-eyebrow">Where the project started (Summer 2026)</p>
-        <h2 id="home-original-title">Looking for the original eight-servo V1 prototype?</h2>
-        <p>
-          Before the twelve-servo ESP32-P4 rebuild, Ainekio started as a simpler eight-servo ESP32-S3 frame with an OLED screen. Those early parts lists, wiring notes, and lessons learned are kept intact in the archive.
-        </p>
-        <div id="article-library" class="origins-links">
-          <a href={url('/posts/v1-original-posts/')}>Original V1 build archive →</a>
-          <a href={url('/archive/')}>Search &amp; filter all {posts.length} articles →</a>
-          <a href={url('/about/')}>About the builder &amp; GitHub repos →</a>
-        </div>
-      </div>
+  <!-- ZONE 6: FULL ARTICLE LIBRARY & ARCHIVE FOOTER BAR -->
+  <footer id="article-library" class="home-library-bar" aria-label="Full documentation archive and project links">
+    <div class="library-bar-copy">
+      <p class="home-eyebrow">Complete Documentation &amp; Source Archive</p>
+      <p class="library-bar-text">
+        Filter all <strong>{posts.length}</strong> reference guides, dated bench logs, and preserved July 2026 V1 working documents by subsystem or robot generation.
+      </p>
+    </div>
+    <div class="library-bar-links">
+      <a class="home-primary-link" href={url('/archive/')}>Search &amp; filter all {posts.length} articles →</a>
+      <a class="home-secondary-link" href={url('/posts/v1-original-posts/')}>Original V1 archive →</a>
+      <a class="home-secondary-link" href={url('/about/')}>About &amp; GitHub repos →</a>
     </div>
   </footer>
 </div>
@@ -687,35 +755,118 @@ const specs = [
     overflow: hidden;
   }
 
-  /* ZONE 5: COMPACT HISTORICAL ARCHIVE FOOTNOTE */
-  .origins-card {
+  /* ZONE 2: THREE ROBOT GENERATIONS (V1 · V2 · V3) */
+  .generations-grid {
     display: grid;
-    grid-template-columns: 9.5rem minmax(0, 1fr);
-    gap: 1.15rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+  .gen-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.7rem;
+    overflow: hidden;
+    background: var(--card-bg);
+    border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+    min-width: 0;
+  }
+  .gen-card.is-v2 {
+    border-color: color-mix(in srgb, var(--primary) 48%, transparent);
+    box-shadow: 0 12px 28px -20px color-mix(in srgb, var(--primary) 50%, transparent);
+  }
+  .gen-card.is-v3 {
+    border-color: rgb(245 158 11 / 0.38);
+  }
+  .gen-thumb {
+    display: block;
+    background: #0a1218;
+    border-bottom: 1px solid rgb(255 255 255 / 0.08);
+    overflow: hidden;
+  }
+  .gen-thumb img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+  }
+  .gen-card:hover .gen-thumb img { transform: scale(1.02); }
+  .gen-body {
+    padding: 0.95rem 1.15rem 1.05rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+  }
+  .gen-badge {
+    align-self: flex-start;
+    font-size: 0.66rem;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    margin-bottom: 0.45rem;
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
+    color: var(--primary);
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+  .gen-badge.is-v1 {
+    background: rgb(148 163 184 / 0.14);
+    color: #cbd5e1;
+    border-color: rgb(148 163 184 / 0.32);
+  }
+  .gen-badge.is-v3 {
+    background: rgb(245 158 11 / 0.15);
+    color: #fcd34d;
+    border-color: rgb(245 158 11 / 0.38);
+  }
+  .gen-body h3 a { color: var(--text-color); }
+  .gen-body h3 a:hover { color: var(--primary); }
+  .gen-specs {
+    margin-top: 0.32rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.73rem;
+    font-weight: 650;
+    color: var(--primary);
+  }
+  .gen-card.is-v3 .gen-specs { color: #fcd34d; }
+  .gen-desc {
+    margin: 0.45rem 0 0.85rem;
+    font-size: 0.85rem;
+    line-height: 1.54;
+    color: color-mix(in srgb, var(--text-color) 84%, transparent);
+    flex-grow: 1;
+  }
+
+  /* ZONE 6: COMPACT ARCHIVE & REPO FOOTER BAR */
+  .home-library-bar {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    padding: 0.95rem 1.2rem;
+    justify-content: space-between;
+    gap: 0.85rem 1.5rem;
+    padding: 1.05rem 1.35rem;
     border-radius: var(--radius-large);
     border: 1px dashed color-mix(in srgb, var(--primary) 32%, transparent);
-    background: color-mix(in srgb, var(--card-bg) 72%, rgb(0 0 0 / 0.25));
+    background: color-mix(in srgb, var(--card-bg) 78%, rgb(0 0 0 / 0.22));
   }
-  .origins-card img { width: 100%; aspect-ratio: 16 / 11; object-fit: cover; border-radius: 0.45rem; opacity: 0.92; }
-  .origins-copy h2 { font-size: 1.1rem; margin: 0.18rem 0 0.28rem; }
-  .origins-copy p:not(.home-eyebrow) { font-size: 0.85rem; color: var(--text-color-muted); }
-  .origins-links { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; margin-top: 0.5rem; font-size: 0.84rem; font-weight: 680; }
+  .library-bar-copy { min-width: 0; flex: 1 1 24rem; }
+  .library-bar-text { margin-top: 0.22rem; font-size: 0.88rem; color: var(--text-color-muted); }
+  .library-bar-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
-  section[id], nav[id], div[id] { scroll-margin-top: 6rem; }
+  section[id], nav[id], div[id], footer[id] { scroll-margin-top: 6rem; }
 
   @media (max-width: 980px) {
-    .hero-main, .stage-grid, .logbook-grid { grid-template-columns: 1fr; }
+    .hero-main, .stage-grid, .logbook-grid, .generations-grid { grid-template-columns: 1fr; }
     .directory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   @media (max-width: 640px) {
     .ainekio-home { gap: 1.25rem; }
-    .hero-specs, .directory-grid, .origins-card { grid-template-columns: 1fr; }
+    .hero-specs, .directory-grid { grid-template-columns: 1fr; }
     .stage-tile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
     .logbook-card { grid-template-columns: 1fr; gap: 0.55rem; }
     .logbook-thumb img { aspect-ratio: 16 / 9; max-height: 10.5rem; }
-    .origins-card img { max-height: 10rem; }
   }
 </style>

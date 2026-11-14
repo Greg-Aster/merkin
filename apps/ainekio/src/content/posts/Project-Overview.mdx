@@ -1,8 +1,8 @@
 ---
 title: "Ainekio: 12-Servo ESP32-P4 Quadruped Robot & Ainekio OS Overview"
 published: 2026-08-27T09:45:00-07:00
-updated: 2026-11-12
-description: "Start-here overview and architecture tour for Ainekio, a custom 650 g 3D-printed 12-servo ESP32-P4 quadruped robot (~$85 BOM) paired with Ainekio OS."
+updated: 2026-11-13
+description: "Start-here overview and architecture tour for Ainekio, a custom 650 g 3D-printed 12-servo ESP32-P4 quadruped robot (~$85 BOM) paired with Ainekio OS—across V1, V2, and upcoming V3."
 image: "/assets/ainekio/2026-10-12-refresh/render-overview.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Greg the Mechanic"
@@ -67,18 +67,18 @@ The system is split across three cooperating layers so hard real-time motor cont
 - Routes specialist cognitive roles—intent classification, robot action selection, vision grounding, outward persona speech, fast physical reflexes, memory curation, and optional cloud/CLI coding delegates—across local `llama.cpp` / Ollama models, local or LAN-shared Whisper speech-to-text, and Kokoro or Piper text-to-speech.
 - Executes inspectable node-based cognitive workflows backed by crash-safe SQLite checkpoints so multi-step physical tasks survive movement waits or brief disconnects without repeating actions twice.
 
-## V1 and V2 hardware at a glance
+## V1, V2, and V3 hardware generations at a glance
 
-| Feature | V1 (Eight-Servo Baseline) | V2 (Twelve-Servo Closed-Loop Body) |
-| --- | --- | --- |
-| **Actuators** | 8× `MG90S` (2 per leg, open-loop PWM) | 12× `MG90S` (3 per leg, 4th-wire analog feedback on `CD74HC4067` `C4–C15` → `GPIO49`) |
-| **Controller** | Freenove `ESP32-S3-WROOM CAM` (`N16R8`) | `Waveshare ESP32-P4-WIFI6` + `ESP32-C6` + `PCA9685` |
-| **Mechanics** | Open Sesame-derived frame, planar legs | Enclosed shell (`650 g`), hip roll + `35/20/28/38/55 mm` four-bar linkage legs |
-| **Display & Camera** | `0.96"` `SSD1306` OLED + `OV3660` | `1.9"` `ST7789` color LCD (59 expressions) + chin-mounted `OV5647` MIPI-CSI |
-| **Inertial & Audio** | External `INMP441` + `MAX98357A`, no IMU | `LSM6DS3` `208 Hz` IMU + onboard `ES8311` / `NS4150B` + `WakeNet9s` |
-| **Locomotion** | 38 fixed keyframe sequences | On-chip `50 Hz` `107.8 KB` neural gait, closed-loop `Stand`/`Walk`, 349-motion Freestyle library, MuJoCo RL |
+| Feature | [V1 · Eight-Servo Baseline](/posts/ainekio-v1/) | [V2 · Active Closed-Loop Body](/posts/ainekio-v2/) | [V3 · Mobile Linux Companion (In Dev)](/posts/ainekio-v3-preview/) |
+| --- | --- | --- | --- |
+| **Actuators** | 8× `MG90S` (2 per leg, open-loop PWM) | 12× `MG90S` (3 per leg, 4th-wire analog feedback on `CD74HC4067` → `GPIO49`) | 12× waterproof **`DS3235`** standard servos (`~35 kg·cm` class, `25T` metal horns) |
+| **Compute** | Freenove `ESP32-S3-WROOM CAM` (`N16R8`) + host PC | `Waveshare ESP32-P4-WIFI6` + `ESP32-C6` + `PCA9685` + host PC/gateway | **Onboard Wi-Fi/Bluetooth Linux SBC** + **`ESP32-P4-WIFI6`** inside the shell (no external PC needed) |
+| **Mechanics** | Custom `Frame7`/`Frame8` chassis (`177.5 × 194.1 × 88.9 mm` CAD), planar 2-DOF legs | Enclosed shell (`650 g`, `245.9 × 182.8 × 109.1 mm`), `35/20/28/38/55 mm` four-bar legs | ~1.7× weather-resistant louvered shell (`337.9 × 200.2 × 176.8 mm`), `60.9/34.8/66.1/110 mm` bearing four-bar legs |
+| **Face & Camera** | `0.96"` `SSD1306` OLED (52 faces) + `OV3660` (`XGA`) | `1.9"` `ST7789` color LCD (59 faces) + chin `OV5647` CSI | **`5.0"` `1280×720` capacitive touch face** (companion expressions **or live Linux desktop PC**) + brow `OV5647` CSI |
+| **Power & Sensors** | `2S` `1000 mAh` Li-ion + dual `MINI560` bucks; `INMP441` + `vadnet1_medium`, no IMU | Rear `2S` Li-ion Keeper Bridge; `208 Hz` `LSM6DS3` IMU + `ES8311` + `WakeNet9s` | Internal **`4× 21700` (`2S2P`)** cradle + `40 A` BMS + `14 AWG` busbar + `LSM6DS3` IMU |
+| **Locomotion** | 38 `.amot` keyframe clips + `motion_plan_v1` | On-chip `50 Hz` `107.8 KB` neural gait, closed-loop `Stand`/`Walk`, 349-motion Freestyle library, MuJoCo RL | Higher-speed indoor/outdoor trotting & desktop screen-tilting poses (CAD-to-MJX pipeline) |
 
-V1 remains documented in the archive as the baseline that proved out the early bridge and firmware architecture. See the [V1 vs. V2 comparison](/posts/v1-v2-comparison/) for side-by-side specs.
+See the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)**, the **[V1 vs. V2 Comparison](/posts/v1-v2-comparison/)**, and the **[Ainekio V3 Preview](/posts/ainekio-v3-preview/)** for full details on each generation.
 
 ## How a spoken request becomes physical motion
 
@@ -103,8 +103,10 @@ V1 remains documented in the archive as the baseline that proved out the early b
 | [Protocol, Telemetry & Safety](/posts/protocol-and-safety/) | `protocol-v1` framing, command leases, watchdogs, startup slew limiting, and 4th-wire stall protection |
 | [Camera & Face Display](/posts/vision-loop/) | `1.9"` `ST7789` LCD (59 expressions), chin-mounted `OV5647` camera, optical-flow obstacle range, object tracking, and depth odometry |
 | [Listening & Speech](/posts/voice-loop/) | Onboard `ES8311` / `NS4150B` audio, `WakeNet9s` wake word, Whisper STT, Kokoro/Piper TTS, and self-speech suppression |
+| [Ainekio V1 Systems Guide](/posts/ainekio-v1/) | Complete technical walkthrough of the original 8-servo `ESP32-S3` quadruped: dedicated `'v1 -'` Blender CAD scene, dual-buck `2S` power, 38 `.amot` motions, 52 OLED expressions, and `protocol-v1` loop |
 | [V1 vs. V2 Comparison](/posts/v1-v2-comparison/) | Side-by-side mechanical, electrical, and control comparison of the 8-servo `ESP32-S3` V1 and 12-servo `ESP32-P4` V2 |
-| [Original V1 Build Notes](/posts/v1-original-posts/) | Preserved July–September 2026 design notes, `ESP32-S3` pin maps, and early virtual-bridge experiments |
+| [Ainekio V3 Preview (In Development)](/posts/ainekio-v3-preview/) | Shelled Blender CAD and systems preview for the ~1.7× larger, weather-resistant `DS3235` V3 quadruped with a `5.0"` `1280×720` touch face and onboard Wi-Fi/Bluetooth Linux SBC desktop |
+| [Original V1 Build Notes](/posts/v1-original-posts/) | Preserved July 2026 Google Docs design notes, early parts lists, and virtual-bridge experiments |
 
 For chronological bench experiments, CAD iterations, and walking videos, browse the [Field Updates](/updates/) journal.
 

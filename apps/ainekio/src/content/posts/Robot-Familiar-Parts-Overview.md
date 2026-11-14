@@ -2,7 +2,7 @@
 title: "V1: Original Parts Overview"
 published: 2026-07-10
 description: "The original eight-servo parts, power, wiring, fitment, and shopping-list document."
-image: "/posts/ainekio/kaiju-ride-square.webp"
+image: "/posts/ainekio-2026/body-design.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio"
 authorBio: "Robot familiar project"
@@ -19,12 +19,12 @@ reading:
   generation: v1
   kind: original
   next: discussion
-  related: ["body-design-and-hardware", "controller-firmware"]
+  related: ["ainekio-v1", "body-design-and-hardware", "controller-firmware"]
 ---
 
-> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1wz0kyqttPK3HHL0P0_9lLtRW_B87U5u4kEt-UhttHFA/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
+> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1wz0kyqttPK3HHL0P0_9lLtRW_B87U5u4kEt-UhttHFA/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [Ainekio V1 Systems Guide](/posts/ainekio-v1/) · [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
 
-> **Later V1 correction:** the built robot used a 1000 mAh pack, not the proposed 2600 mAh pack. GPIO33–37 belong to octal PSRAM on the delivered N16R8; the provisional GPIO33/34 assignments below were superseded. Use the [V1 hardware guide](/posts/body-design-and-hardware/) and [maintained S3 pin map](https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/firmware/esp32s3/components/ainekio_platform/include/ainekio/platform/pin_map.h) for the later build record.
+> **Later V1 build updates:** The finished V1 robot used 100% custom CAD meshes and custom ESP-IDF C11 firmware (retaining zero external code or meshes), a **Sea Jump `2S` `1000 mAh` (`2× 14500`) Li-ion pack** (replacing the bulky `2600 mAh` `18650` proposal), an **`OV3660`** sensor rather than `OV2640`, telemetry-only battery ADC monitoring (`GPIO3`), and `GPIO47/48` in place of `GPIO33/34` (`GPIO33–37` belong to octal PSRAM on the `N16R8`). See the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)**, [V1 Body & Hardware](/posts/body-design-and-hardware/), and [maintained S3 pin map](https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/firmware/esp32s3/components/ainekio_platform/include/ainekio/platform/pin_map.h).
 
 ---
 

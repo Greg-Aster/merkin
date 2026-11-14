@@ -24,10 +24,10 @@ reading:
   generation: v1
   kind: original
   next: archive/motion-systems
-  related: ["body-design-and-hardware", "controller-firmware"]
+  related: ["ainekio-v1", "body-design-and-hardware", "controller-firmware"]
 ---
 
-> [Read the complete original Google document below](#original-document-text) · [All original eight-servo posts](/posts/v1-original-posts/).
+> [Read the complete original Google document below](#original-document-text) · [Ainekio V1 Systems Guide](/posts/ainekio-v1/) · [All original eight-servo posts](/posts/v1-original-posts/).
 
 
 **Historical notes, July 2026.** Ainekio is a robot project connected to

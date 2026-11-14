@@ -2,7 +2,7 @@
 title: "V1: Original Design Discussion"
 published: 2026-07-07
 description: "Original design deliberations: controller alternatives, power, communications, fitment, and early Generation 2 candidates."
-image: "/posts/ainekio/kaiju-battle-banner.webp"
+image: "/posts/ainekio-2026/protocol-safety.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio"
 authorBio: "Robot familiar project"
@@ -19,12 +19,12 @@ reading:
   generation: v1
   kind: original
   next: firmware
-  related: ["body-design-and-hardware", "controller-firmware"]
+  related: ["ainekio-v1", "body-design-and-hardware", "controller-firmware"]
 ---
 
-> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1W6tBv69McloKX-0O9Lbr3ebVgXQyvL2sXHQsEvOILTo/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
+> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1W6tBv69McloKX-0O9Lbr3ebVgXQyvL2sXHQsEvOILTo/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [Ainekio V1 Systems Guide](/posts/ainekio-v1/) · [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
 
-> **Later V1 correction:** the built robot used a 1000 mAh pack, not the proposed 2600 mAh pack. GPIO33–37 belong to octal PSRAM on the delivered N16R8; the provisional GPIO33/34 assignments below were superseded. Use the [V1 hardware guide](/posts/body-design-and-hardware/) and [maintained S3 pin map](https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/firmware/esp32s3/components/ainekio_platform/include/ainekio/platform/pin_map.h) for the later build record.
+> **Later V1 build updates:** The finished V1 robot used a **Sea Jump `2S` `1000 mAh` Li-ion pack** (not `2600 mAh`), an **`OV3660`** camera, telemetry-only battery alerts on `GPIO3`, and `GPIO47/48` in place of `GPIO33/34` (`GPIO33–37` are reserved by `8 MiB` octal PSRAM on the `N16R8`). MetaHuman OS is now **[Ainekio OS](/posts/ainekio-os/)**. See the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)** and [V1 Body & Hardware](/posts/body-design-and-hardware/).
 
 ---
 

@@ -2,20 +2,20 @@ import { z } from 'astro:content'
 
 export const topicIds = ['overview', 'legs', 'body', 'control', 'perception', 'metahuman', 'v1'] as const
 export const topics = {
-  overview: { title: 'Understanding Ainekio', description: 'The project, its two robot designs, and how the systems fit together.', reference: 'project-overview' },
+  overview: { title: 'Understanding Ainekio', description: 'The project, its three robot generations (V1, V2 & V3), and how the systems fit together.', reference: 'project-overview' },
   legs: { title: 'Legs & gait', description: 'Linkage geometry, printed prototypes, movement ranges, and walking experiments.', reference: 'gait-development' },
   body: { title: 'Chassis, shell & power', description: 'Parts, packaging, weight, battery choices, and the evolving assembly.', reference: 'ainekio-v2' },
   control: { title: 'Firmware & connections', description: 'Body control, commands, safety, wired and wireless links.', reference: 'protocol-and-safety' },
   perception: { title: 'Vision, face & voice', description: 'Camera observations, target tracking, display, listening, and speech.', reference: 'vision-loop' },
   metahuman: { title: 'Ainekio OS (The Mind)', description: 'Local-first companion software for persistent memory, conversation, nightly consolidation, and robot reflexes.', reference: 'ainekio-os' },
-  v1: { title: 'Original eight-servo robot', description: 'The original documents, alternatives considered, and later V1 build reference.', reference: 'body-design-and-hardware' },
+  v1: { title: 'Ainekio V1 (8-servo S3)', description: 'The eight-servo ESP32-S3 systems guide, dedicated Blender CAD scene, firmware, and preserved July 2026 archive.', reference: 'ainekio-v1' },
 } satisfies Record<typeof topicIds[number], { title: string; description: string; reference: string }>
-export const generations = { v1: 'V1 · 8 servos', v2: 'V2 · 12 servos', both: 'V1 + V2' }
+export const generations = { v1: 'V1 · 8 servos', v2: 'V2 · 12 servos', v3: 'V3 · DS3235 (In Dev)', both: 'V1 + V2' }
 export const kinds = { journal: 'Dated experiment', reference: 'Build reference', original: 'Original document' }
 
 export const readingSchema = z.object({
   topic: z.enum(topicIds),
-  generation: z.enum(['v1', 'v2', 'both']),
+  generation: z.enum(['v1', 'v2', 'v3', 'both']),
   kind: z.enum(['journal', 'reference', 'original']),
   next: z.string().min(1).optional(),
   related: z.array(z.string().min(1)).default([]),

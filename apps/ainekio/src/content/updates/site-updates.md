@@ -10,12 +10,12 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "Untethered 50 Hz neural walking on the ESP32-P4, live Cockpit HUD, and Ainekio OS active"
-  location: "650 g 12-servo V2 quadruped · Ainekio OS"
-  updated: 2026-11-11
-  mileage: "107.8 KB on-chip neural gait · 59 LCD expressions · local + hybrid AI mind"
-  section: "On-chip neural gait distillation, rear battery carrier refinements, and Ainekio OS consolidation"
-  nextStop: "Test longer untethered floor walks across room transitions combining on-chip neural locomotion, live camera obstacle estimates, and Ainekio OS voice interaction."
+  status: "Untethered 50 Hz neural walking on V2, V3 Linux-PC shell in Blender CAD, and Ainekio OS active"
+  location: "650 g V2 floor robot · V3 CAD bench · Ainekio OS"
+  updated: 2026-11-13
+  mileage: "107.8 KB on-chip V2 gait · V3 5.0\" Linux desktop face in CAD · local + hybrid AI mind"
+  section: "On-chip neural gait distillation, shelled V3 DS3235 + Linux SBC CAD layout, and V1–V3 documentation"
+  nextStop: "Run longer untethered V2 floor walks across room transitions while bench-testing the single-corner DS3235 linkage and 5.0-inch DSI Linux desktop stack for Ainekio V3."
   note: "Walking no longer depends on streaming joint targets over Wi-Fi: two rounds of DAgger distillation compressed the 50 Hz walking network by ~80% (547 KB down to 107.8 KB int8) so it runs directly inside the ESP32-P4's 128 KB L2 cache. Alongside 30 updated shell and rear battery-carrier STLs and a unified live camera Cockpit HUD, the companion software mind is now published openly as Ainekio OS."
   areas:
     - label: "Body & firmware"

@@ -14,7 +14,7 @@ timelineYear: 2026
 timelineEra: "work-in-progress"
 timelineLocation: "Robot body"
 showImageOnPost: true
-tags: [Ainekio, Robot, Motion Systems, Sesame, Raspberry Pi, MetaHuman OS]
+tags: [Ainekio, Robot, Motion Systems, Raspberry Pi, MetaHuman OS]
 category: "V1 Originals"
 draft: false
 archive: true
@@ -24,32 +24,27 @@ reading:
   generation: v1
   kind: original
   next: archive/broad-strokes
-  related: ["body-design-and-hardware", "controller-firmware"]
+  related: ["ainekio-v1", "body-design-and-hardware", "controller-firmware"]
 ---
 
-> [Read the complete original Google document below](#original-document-text) · [All original eight-servo posts](/posts/v1-original-posts/).
+> [Read the complete original Google document below](#original-document-text) · [Ainekio V1 Systems Guide](/posts/ainekio-v1/) · [All original eight-servo posts](/posts/v1-original-posts/).
 
 
 Before Ainekio’s physical robot was tested, the project tried connecting
-MetaHuman OS to a simulated body in a browser. MetaHuman supplies conversation
+MetaHuman OS (now **[Ainekio OS](/posts/ainekio-os/)**) to a simulated body in a browser. MetaHuman supplies conversation
 and decisions; the simulator was meant to provide a place to try movement
 requests before driving real joint motors.
 
-**The simulator was unsuccessful and has been completely retired.** It is
-outside the current robot system and the V2 plan. This page preserves the July
-design, reported intermediate results, and later simulator approach as history.
-It does not provide instructions for a supported development tool.
+**The early browser simulator was unsuccessful and has been completely retired.**
+This page preserves the July 2026 design and intermediate notes as history.
 
-The current system uses an ESP32-S3 controller on the physical V1 robot.
-Read [controller firmware](/posts/controller-firmware/),
-[gateway and dashboard](/posts/gateway-and-simulator/), or the
-[V2 roadmap](/posts/ainekio-v2/) for maintained work.
+For the physical robots that replaced it, read the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)** (`ESP32-S3`, 8 servos), **[Ainekio V2 Hardware](/posts/ainekio-v2/)** (`ESP32-P4`, 12 feedback servos + MuJoCo MJX hardware twins in [Gateway & Simulator](/posts/gateway-and-simulator/)), or the **[Ainekio V3 Preview](/posts/ainekio-v3-preview/)**.
 
 ## What it attempted
 
-The experiment used the browser simulator from Sesame, the robot project that
-also supplied the starting mechanical design for Ainekio V1. A named request
-such as “wave” was supposed to run the corresponding prepared motion.
+The July experiment tested an external browser simulator before Ainekio V1's
+custom CAD chassis and ESP-IDF firmware were built. A named request such as
+“wave” was supposed to run the corresponding prepared motion.
 
 **Environment Mode** was MetaHuman’s workflow for choosing an action. A Python
 **adapter** translated that action into the simulator’s commands. A **shim**,

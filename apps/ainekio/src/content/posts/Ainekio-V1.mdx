@@ -1,0 +1,152 @@
+---
+title: "Ainekio V1: Eight-Servo ESP32-S3 Quadruped Systems Guide"
+published: 2026-08-31
+updated: 2026-11-13
+description: "Complete technical systems guide to Ainekio V1: the 8-servo ESP32-S3 quadruped that proved out Ainekio's embodied voice, vision, 52 OLED expressions, 38 .amot motions, protocol-v1 WebSocket bridge, and Ainekio OS loop—plus its dedicated Blender CAD scene."
+image: "/posts/ainekio-v1/v1-cad-three-quarter.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V1, ESP32-S3, Hardware, Firmware, Blender, CAD, Quadruped, Ainekio OS]
+category: "Physical Robot"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: v1
+  generation: v1
+  kind: reference
+  next: body-design-and-hardware
+  related: ["body-design-and-hardware", "controller-firmware", "v1-original-posts", "v1-v2-comparison", "ainekio-v2"]
+---
+
+> **Where V1 fits in the Ainekio lineage:** **Ainekio V1** (Summer 2026) is the original eight-servo `ESP32-S3` quadruped that first brought **[Ainekio OS](/posts/ainekio-os/)** into a physical room—walking, speaking, listening, seeing, and making faces over Wi-Fi. Its mechanical and sensing lessons led directly to the `650 g` twelve-servo closed-loop **[Ainekio V2](/posts/ainekio-v2/)** (active today) and the upcoming ~1.7× `DS3235` + onboard Linux PC **[Ainekio V3](/posts/ainekio-v3-preview/)**. In [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot), V1 (`v1-8servo`) remains a documented, first-class `protocol-v1` body alongside V2.
+
+Before twelve-servo four-bar linkages, fourth-wire potentiometer feedback, or on-chip neural walking existed on the workbench, **Ainekio V1** answered the foundational engineering question of the project: *can a compact, 3D-printed sub-$100 hobby quadruped carry enough onboard vision, audio, face expression, and deterministic safety firmware to act as a genuine embodied body for a persistent local AI mind?*
+
+Because the early July–August 2026 V1 notes were written incrementally while parts were still arriving ([Original V1 Build Journal](/posts/v1-original-posts/)), this guide brings **all of Ainekio V1's mechanical, CAD, electrical, firmware, perception, motion, and gateway systems together in one place** so you can see exactly how the eight-servo robot works end to end.
+
+---
+
+## 1. System architecture at a glance
+
+Ainekio V1 splits responsibility cleanly across three layers so servo pulse generation and emergency stop handling on the microcontroller never block on Wi-Fi round trips or language-model inference:
+
+| Layer | V1 Hardware / Runtime | Core Responsibilities |
+| --- | --- | --- |
+| **1. Onboard Body (`Slave/firmware/esp32s3`)** | **Freenove `ESP32-S3-WROOM CAM`** (`FNK0085`, `N16R8`: dual-core `160 MHz` Xtensa LX7, `16 MiB` flash, `8 MiB` octal PSRAM) running **ESP-IDF v5.5.4** + portable C11 `ainekio_core` | Drives 8× `MG90S` servos (`50 Hz`), renders **52 expressions** on the `0.96"` `SSD1306` OLED, captures correlated `OV3660` `XGA` (`1024×768`) stills, runs `16 kHz` `INMP441` mic + Espressif **`vadnet1_medium`** neural VAD + `MAX98357A` `8 Ω 2 W` speaker playback, monitors `2S` battery ADC, and enforces local leases/watchdogs |
+| **2. Host Gateway (`Master/gateway`)** | Node.js `protocol-v1` control-plane server on LAN PC | Authenticates the `v1-8servo` body over a single multiplexed WebSocket (`JSON` text + binary `0x01` PCM audio + `0x02`/`0x03` JPEG frames), assigns connection epochs and command sequence IDs, tracks acks/completions, and serves operator telemetry |
+| **3. Companion Mind ([Ainekio OS](/posts/ainekio-os/))** | `Greg-Aster/ainekio-os` (originally MetaHuman OS during V1 bring-up) | Transcribes room speech (Whisper), grounds camera frames, maintains persistent episodic memory and Standing Persona identity across days, and emits bounded semantic intents (`walk`, `wave`, `face`, `say`, or `motion_plan_v1` keyframe sequences) |
+
+---
+
+## 2. Mechanical design: physical August-2026 build & dedicated Blender CAD scene
+
+Mechanically, V1 is a **custom eight-degree-of-freedom (`4 legs × 2 DOF`) spider-stance quadruped** modeled and iteratively refined across `FrameV1` → `Frame6` → `Frame7` → `Frame8` (`Bottom-Housing1`, `oled-box1`, `Board-hold1..3`, `R2V10` upper brackets, and serrated lower legs) in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot).
+
+Alongside the physical August 2026 floor prototype, V1 now has a **dedicated, fully modeled Blender CAD scene (`Scene 'v1 -'`, `177.45 × 194.09 × 88.91 mm` standing envelope)** in the project's multi-generation CAD file—reconstructing the complete chassis, `R2V10` trussed upper leg brackets, serrated lower legs, front OLED + camera face housing, and a cleaned-up internal electronics and dual-battery layout:
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <figure>
+    <img src="/posts/ainekio-v1/v1-cad-three-quarter.webp" alt="Three-quarter Blender CAD render of Ainekio V1 showing the Frame7 bottom chassis, floated Frame8 top cap, front 0.96-inch OLED and camera module, dual flank 2S 14500 battery packs, Freenove ESP32-S3-WROOM CAM, PCA9685 header deck, and eight MG90S spider-stance legs." width="1280" height="800" loading="lazy" />
+    <figcaption>Dedicated Blender `'v1 -'` CAD scene (`177.5 × 194.1 × 88.9 mm` stance): `Frame7` bottom chassis (`122 × 92 × 21.3 mm`), floated `Frame8` enclosure cap (`110 × 78 × 48 mm`), front `0.96"` OLED + camera face bezel, and 8× `MG90S` 2-DOF legs.</figcaption>
+  </figure>
+  <figure>
+    <img src="/posts/ainekio-v1/v1-cad-top-electronics.webp" alt="Orthographic top-down Blender CAD render of Ainekio V1 showing internal board placement, dual flank 2S 1000 mAh battery packs, Freenove ESP32-S3 CAM, PCA9685 servo header deck, Mini560 buck converter, and HiLetgo 2S USB-C charger." width="1280" height="960" loading="lazy" />
+    <figcaption>Top-down V1 CAD deck layout: central `Freenove ESP32-S3-WROOM CAM` and `PCA9685` distribution header flanked by symmetrical `2S` `14500` (`1000 mAh`) battery bays, `Mini560` `5 V / 5 A` buck converter, and `HiLetgo 2S` USB-C boost charger with printed retention clips.</figcaption>
+  </figure>
+</div>
+
+### How V1's 2-DOF legs move (and why turns are open-loop)
+
+Each corner leg carries two `MG90S` micro servos without lateral hip-roll abduction:
+
+1. **Hip yaw / horizontal sweep (`R1` front-right, `R2` rear-right, `L1` front-left, `L2` rear-left):** Mounted inside the four corners of the central chassis (`±48.35 mm` X, `±38.50 mm` Y in CAD), sweeping the upper `R2V10` trussed bracket forward and aft in the horizontal plane.
+2. **Knee pitch / vertical lift (`R4` front-right, `R3` rear-right, `L3` rear-left, `L4` front-left):** Mounted outboard (`±72.21 mm` X, `±80.75 mm` Y), folding the curved, serrated lower leg vertically to lift or plant the foot.
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <figure>
+    <img src="/gallery/20260827_093250-960.webp" alt="Physical August 2026 Ainekio V1 prototype standing on carpet with red printed frame, black servo brackets, front OLED and camera box, and exposed jumper harness." width="911" height="1214" loading="lazy" />
+    <figcaption>The physical August 2026 V1 prototype on carpet during stance and walking bring-up.</figcaption>
+  </figure>
+  <figure>
+    <img src="/gallery/20260827_093200-960.webp" alt="Top-down workbench photo of the physical August 2026 Ainekio V1 eight-servo chassis showing the Freenove ESP32-S3 board and direct servo wiring." width="960" height="720" loading="lazy" />
+    <figcaption>Top-down view of the physical August 2026 prototype (`direct MCPWM` wiring on the `ESP32-S3` before the CAD scene's cleaner dual-flank battery & `PCA9685` header packaging).</figcaption>
+  </figure>
+</div>
+
+<figure className="my-6">
+  <video controls playsinline preload="metadata" width="1280" height="720" poster="/gallery/floor-test-poster.webp">
+    <source src="/gallery/floor-test.mp4" type="video/mp4" />
+    <a href="/gallery/floor-test.mp4">Download V1 floor walking test video (MP4)</a>
+  </video>
+  <figcaption>August 31, 2026 floor test: the physical eight-servo V1 prototype executing open-loop walking and stance adjustments on carpet.</figcaption>
+</figure>
+
+> **Prototype build vs. refined `'v1 -'` CAD scene:** On the original August 2026 physical build (above), all eight `MG90S` signal leads plugged straight into `ESP32-S3` `MCPWM` GPIOs over a hand-wired `5 V` bus, powered by a single `2S` `1000 mAh` pack tucked into the frame cavity. The dedicated Blender `'v1 -'` CAD scene formalizes V1's mechanical envelope (`Frame7` + `Frame8` cap + front `OLED/B0066` carrier) while adding printed board retainers, symmetric left/right `2S` `14500` battery bays, and a central `PCA9685` servo header deck for clean harness routing.
+
+---
+
+## 3. Electrical architecture & dual-buck `2S` power isolation
+
+Hobby micro servos draw sharp current spikes whenever four legs reverse direction simultaneously. If those spikes share a `5 V` regulator with an `ESP32-S3` running Wi-Fi and camera DMA, the microcontroller browns out mid-stride. V1 solved this early with **split dual-buck `2S` regulation** on a common ground reference:
+
+| Power / Compute Element | Documented V1 Specification | Engineering Role |
+| --- | --- | --- |
+| **Battery pack** | **Sea Jump `2S` (`7.4 V` nominal / `8.4 V` full), `1000 mAh` `10C` Li-ion** (`2× 14500` cells, `SM-3P` plug; dual flank bays modeled in `'v1 -'` CAD) | Replaced an earlier July `2600 mAh` `18650` proposal that proved too bulky for the compact V1 frame |
+| **Onboard USB-C charging** | **`HiLetgo 2S` USB-C boost Li-ion charger** + inline **`KCD1`** master power rocker switch | Charges the `2S` pack from standard `5 V` USB-C while master switch isolates load rails during charging/flashing |
+| **Buck #1 (Servo power rail)** | **`MINI560 PRO` `5 V / 5 A` synchronous step-down buck** + **`1000 µF`** bulk electrolytic capacitor | Dedicated high-current `5 V` rail for all 8× `MG90S` servos; firmware never switches this power rail, keeping logic brownout-free |
+| **Buck #2 (Logic & audio rail)** | **Second `MINI560 PRO` `5 V / 5 A` buck converter** | Clean `5 V` feed into the `Freenove ESP32-S3` `5V` pin and the `MAX98357A` Class-D speaker amplifier |
+| **Battery telemetry (`GPIO3`)** | **`100 kΩ` / `47 kΩ` voltage divider** into `ADC1` (`GPIO3`) | Continuous pack voltage telemetry with 3-tier warnings: **`7.2 V`** low warning, **`7.0 V`** motion refusal (`low_battery`), **`6.8 V`** critical alert (telemetry-only—an early July deep-sleep auto-cutoff idea was intentionally retired in favor of inline BMS + master switch protection) |
+
+---
+
+## 4. `ESP32-S3` firmware, GPIO map, 38 `.amot` motions & 52 OLED faces
+
+V1's onboard firmware (`Slave/firmware/esp32s3`, C11 on **ESP-IDF v5.5.4**) separates hardware-agnostic behavior (`Slave/software/core`) from board drivers (`ainekio_platform`) across a custom `16 MiB` flash layout: **dual `3 MiB` `ota_0`/`ota_1` slots** (automatic rollback unless a new image completes gateway authentication), a **`9.375 MiB` `LittleFS` asset partition** (`/assets` storing motions and OLED faces), and a **`512 KiB` `SPIFFS` neural model partition** (`/srmodels` storing Espressif's **`vadnet1_medium`** voice-activity network).
+
+### Complete V1 `ESP32-S3 N16R8` GPIO & bus map
+
+Because the delivered `N16R8` module uses **octal PSRAM at `80 MHz`**, **`GPIO33–37` are reserved internally**—forcing V1's firmware (`pin_map.h`) to reject early July `GPIO33/34` drafts and remap `R4/R3` to `GPIO47/48`:
+
+| V1 Peripheral / Bus | Assigned `ESP32-S3` GPIOs | Implementation Notes |
+| --- | --- | --- |
+| **Hip sweep servos (`R1, R2, L1, L2`)** | `GPIO1`, `GPIO2`, `GPIO14`, `GPIO21` | Hardware `MCPWM` (`50 Hz`, `732–2500 µs` pulse span, `1500 µs` = `90°` neutral; staggered `20 ms` attach order) |
+| **Knee lift servos (`R4, R3, L3, L4`)** | `GPIO47`, `GPIO48`, `GPIO45`, `GPIO46` | Remapped off `GPIO33/34`; uses `MCPWM` so servo timers never collide with camera `LEDC` `XCLK` |
+| **`0.96"` `SSD1306` OLED (`128×64` I2C)** | `SDA = GPIO0`, `SCL = GPIO43` (`0x3C`) | `GPIO43` is `UART0 TX` at reset; firmware hands `GPIO43` cleanly over to I2C `400 kHz` after boot (falling back to serial log if `0x3C` is absent) |
+| **`OV3660` DVP parallel camera** | `XCLK 15`, `SIOD 4`, `SIOC 5`, `D0–D7: 11, 9, 8, 10, 12, 18, 17, 16`, `VSYNC 6`, `HREF 7`, `PCLK 13` | Delivered boards shipped with **`OV3660`** (superseding early `OV2640` docs); captures `XGA` (`1024×768`) JPEG `q=10` with manual `72`-line (`~1/60 s`) indoor exposure |
+| **Full-duplex `16 kHz` I2S audio** | `BCLK = GPIO41`, `WS = GPIO42`, `INMP441 DIN = GPIO19`, `MAX98357A DOUT = GPIO20` | `GPIO19/20` trade native USB-OTG `D-/D+` for clean I2S audio while keeping the board's separate `CH343` UART USB-C port active for flashing |
+| **microSD black-box logs (`SD_MMC`)** | `CMD = GPIO38`, `CLK = GPIO39`, `DAT0 = GPIO40` | 1-bit `SD_MMC` rolling CRC-checked diagnostic log files (gracefully skipped when no card is inserted) |
+| **`2S` Battery ADC & Octal PSRAM** | `ADC = GPIO3` · `PSRAM = GPIO33–37` (reserved) | `8 MiB` PSRAM holds camera framebuffers, PCM audio rings, and motion queues |
+
+### 38 `.amot` motions, `motion_plan_v1`, and 52 OLED expressions
+
+- **38 binary `.amot` motion clips in LittleFS:** V1 stores **3 postures** (`stand`, `rest`, `sit`), **5 continuous gaits** (`walk_forward`, `walk_backward`, `turn_left`, `turn_right`, `walk`), **8 timed open-loop scrub turns** (`turn_left_45/90/180`, `turn_right_45/90/180`, `turn_around`), and **22 expressive emotes and dances** (`wave`, `bow`, `curious`, `happy`, `sad`, `no`, `point`, `stretch`, `pushup`, `swim`, `freaky`, `worm`, `shake`, `shrug`, `dead`, `crab`, `idle`, `dance`, `moonwalk`, `kick`, `macarena`, and `salsa`).
+- **Custom multi-pose choreography (`motion_plan_v1`):** Beyond fixed `.amot` files, Ainekio OS can synthesize bounded **1-to-32 keyframe** 8-joint sequences (`120–5000 ms` per step, total duration `≤ 20 s`) that pass through the exact same per-servo trim (`±30°`), min/max travel clamp, and instant `stop` preemption in `ainekio_core`.
+- **52 `128×64` OLED expressions + idle blink & speech mouth overlay:** LittleFS carries **52 `1024`-byte monochrome bitmaps** covering core emotions and companion states (`thinking`, `listening`, `speaking`, `curious`, `alert`, `sleepy`, `proud`, `confused`, `excited`, `shy`, and more), layered with automatic idle blinking every `3.6–6.0 s` and an animated `talk` mouth overlay synchronized to TTS playback bursts.
+
+---
+
+## 5. Single-socket `protocol-v1` loop & how V1 shaped V2 and V3
+
+When V1 powers on (after initial WPA2 provisioning via its `Ainekio-Setup` `192.168.4.1` SoftAP portal), it opens a single authenticated **`protocol-v1` WebSocket** to `Master/gateway`:
+
+1. **Voice up (`0x01` binary PCM):** The `INMP441` mic streams `16 kHz` 16-bit mono PCM segmented on-chip by Espressif's **`vadnet1_medium`** neural VAD (with a `200 ms` pre-roll buffer in PSRAM; a `microWakeWord` TFLite Micro scaffold was also compiled in, though production wake-word listening waited for V2's `ESP32-P4` `WakeNet9s`).
+2. **Intent & speech down:** Ainekio OS transcribes the utterance, updates episodic memory, streams paced TTS audio frames back down to the `MAX98357A` speaker (triggering the OLED `talk` overlay), and dispatches checked motion/face commands.
+3. **Correlated post-action vision (`0x02` JPEG before `done`):** After any movement finishes settling, V1 snaps a sharp `1/60 s` `XGA` (`1024×768`) `OV3660` still and transmits the correlated JPEG **before** sending the command's final `done` receipt—letting Ainekio OS visually inspect where the robot actually ended up.
+
+### What V1 proved—and why V2 and V3 came next
+
+V1 proved the entire **body ↔ gateway ↔ Ainekio OS** architecture in real rooms, and its physical limitations directly defined the next two generations:
+
+- **Why [Ainekio V2](/posts/ainekio-v2/) was built (Active 12-Servo Closed-Loop Body):** Two-DOF open-loop legs could not step sideways, balance dynamically in roll, or tell when a foot caught on thick carpet (`45°/90°/180°` turns varied with floor friction). V2 added lateral hip roll (`12` servos), compact `35/20/28/38/55 mm` four-bar linkages, **4th-wire potentiometer feedback** (`CD74HC4067` → `ESP32-P4`), a `208 Hz` `LSM6DS3` IMU, a `1.9"` color LCD (**59 expressions**), active `WakeNet9s` wake-word audio, and an **on-chip `50 Hz` `107.8 KB` L2-cached neural gait** in a `650 g` shell ([V1 vs. V2 Comparison](/posts/v1-v2-comparison/)).
+- **Why [Ainekio V3](/posts/ainekio-v3-preview/) is now in CAD (~1.7× `DS3235` + Mobile Linux PC):** Scaling up ~1.7× with waterproof **`DS3235`** standard servos and `2S2P` `21700` power lets V3 carry **both** an `ESP32-P4` motor controller and an **onboard Wi-Fi/Bluetooth Linux SBC** inside a weather-resistant shell—driving a **`5.0"` `1280×720` capacitive touchscreen face** that doubles as a live Linux desktop PC with a mouse and keyboard.
+
+### Deeper V1 archive & engineering references
+
+- **[V1 Eight-Servo Body & Hardware Reference](/posts/body-design-and-hardware/)** — Detailed bill of materials, `Frame8` / CAD mechanical notes, and dual-buck power wiring.
+- **[V1 ESP32-S3 Controller Firmware](/posts/controller-firmware/)** — Portable C11 `ainekio_core` lifecycle, `MCPWM` timing, OTA rollback, and SoftAP provisioning details.
+- **[V1 vs. V2 Side-by-Side Comparison](/posts/v1-v2-comparison/)** — Joint excursion tables, compute comparison, and downloadable `.amot` range CSVs.
+- **[Original V1 Build Journal (July 2026 Google Docs Archive)](/posts/v1-original-posts/)** — The preserved early design discussions, parts lists, and virtual-bridge experiments from before hardware arrived.

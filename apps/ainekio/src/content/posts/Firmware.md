@@ -2,7 +2,7 @@
 title: "V1: Original Firmware Notes"
 published: 2026-07-15
 description: "The July ESP32-S3 firmware record: eight servo outputs, startup, safety, media, and build steps."
-image: "/posts/ainekio/kaiju-ride-square.webp"
+image: "/posts/ainekio-2026/controller-firmware.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio"
 authorBio: "Robot familiar project"
@@ -19,12 +19,12 @@ reading:
   generation: v1
   kind: original
   next: software
-  related: ["body-design-and-hardware", "controller-firmware"]
+  related: ["ainekio-v1", "body-design-and-hardware", "controller-firmware"]
 ---
 
-> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1lc4L2lCaWBcMhWY4lfOYCHUTjKad6MjmrFsp2GbDA4Y/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
+> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1lc4L2lCaWBcMhWY4lfOYCHUTjKad6MjmrFsp2GbDA4Y/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [Ainekio V1 Systems Guide](/posts/ainekio-v1/) · [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
 
-> **Later V1 correction:** the built robot used a 1000 mAh pack, not the proposed 2600 mAh pack. GPIO33–37 belong to octal PSRAM on the delivered N16R8; the provisional GPIO33/34 assignments below were superseded. Use the [V1 hardware guide](/posts/body-design-and-hardware/) and [maintained S3 pin map](https://github.com/Greg-Aster/Ainekio-bot/blob/main/Slave/firmware/esp32s3/components/ainekio_platform/include/ainekio/platform/pin_map.h) for the later build record.
+> **Later V1 firmware updates:** On the completed V1 build, delivered boards used an **`OV3660`** sensor (`XGA` `1024×768` manual `1/60 s` exposure), LittleFS expanded to **38 `.amot` motions** and **52 `SSD1306` OLED expressions**, `GPIO33–37` octal PSRAM moved knee servos `R4/R3` onto `GPIO47/48`, and battery monitoring (`GPIO3`) used telemetry-only alerts (`7.2 V / 7.0 V / 6.8 V`) rather than deep sleep. See the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)** and [V1 ESP32-S3 Firmware Reference](/posts/controller-firmware/).
 
 ---
 

@@ -24,6 +24,8 @@ const referencePriority: Record<string, number> = {
   'metahuman-integration': 11,
   'bounded-autonomy': 12,
   'v1-v2-comparison': 13,
+  'ainekio-v3-preview': 14,
+  'ainekio-v1': 15,
   'v1-original-posts': 90,
   'body-design-and-hardware': 91,
   'controller-firmware': 92,
@@ -69,7 +71,7 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
 
     <form class="library-filters" method="get" data-library-filters aria-label="Filter articles">
       <label>Subsystem / topic<select name="topic"><option value="">All topics</option>{Object.entries(topics).map(([id,topic]) => <option value={id}>{topic.title}</option>)}</select></label>
-      <label>Robot version<select name="generation"><option value="">All versions</option><option value="v2">Current V2 · 12 servos</option><option value="both">Cross-version guides</option><option value="v1">Historical V1 · 8 servos</option></select></label>
+      <label>Robot version<select name="generation"><option value="">All versions</option><option value="v2">Current V2 · 12 servos</option><option value="v3">In development V3 · DS3235</option><option value="both">Cross-version guides</option><option value="v1">Historical V1 · 8 servos</option></select></label>
       <label>Document type<select name="kind"><option value="">All documents</option>{Object.entries(kinds).map(([id,label]) => <option value={id}>{label}</option>)}</select></label>
       <label class="library-query">Search title or summary<input name="q" type="search" placeholder="Linkage, battery, LCD, memory…" autocomplete="off" /></label>
       <div class="library-buttons"><button type="submit">Apply</button><button type="reset">Reset</button></div>

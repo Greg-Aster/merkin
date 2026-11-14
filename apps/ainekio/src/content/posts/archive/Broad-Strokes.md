@@ -2,7 +2,7 @@
 title: "V1: Broad Strokes — July Status"
 published: 2026-07-07
 description: "The original July 10 progress snapshot and reading map, preserved as an early project record."
-image: "/posts/ainekio/city-battle-banner.webp"
+image: "/posts/ainekio-2026/current-status.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio"
 authorBio: "Robot familiar project"
@@ -18,13 +18,13 @@ reading:
   topic: v1
   generation: v1
   kind: original
-  next: body-design-and-hardware
-  related: ["body-design-and-hardware", "controller-firmware"]
+  next: ainekio-v1
+  related: ["ainekio-v1", "body-design-and-hardware", "controller-firmware"]
 ---
 
-> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1uv5FAk8vwUOn8M2ttY6TtQT92P0Z5SP95sxKeCuTWRM/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
+> **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1uv5FAk8vwUOn8M2ttY6TtQT92P0Z5SP95sxKeCuTWRM/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [Ainekio V1 Systems Guide](/posts/ainekio-v1/) · [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
 
-> The browser simulator described here was subsequently unsuccessful and retired. Its intermediate results and plans are preserved as history.
+> **Later project updates:** The browser simulator described here was retired once physical V1 hardware came online. See the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)** for how the completed eight-servo V1 robot operated.
 
 ---
 
