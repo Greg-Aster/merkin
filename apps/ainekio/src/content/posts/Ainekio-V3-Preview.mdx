@@ -1,14 +1,14 @@
 ---
-title: "Ainekio V3 (In Development): 1.7× Scale Frame, DS3235 Servos & Mobile Linux PC Face"
+title: "Ainekio V3 (In Development): Armored DS3235 Quadruped, 2.8\" Vault Screen & Onboard Linux SBC"
 published: 2026-11-13
-updated: 2026-11-13
-description: "Updated Blender CAD and systems preview for Ainekio V3: a ~1.7× larger, weather-resistant DS3235 quadruped with an enclosed shell, 5.0-inch 1280×720 DSI touch face, and an onboard Wi-Fi/Bluetooth Linux SBC + ESP32-P4 brain that turns the robot's face into a live desktop PC."
-image: "/posts/ainekio-v3/v3-vs-v2-front-scale.webp"
+updated: 2026-11-16
+description: "Active Blender CAD reference for Ainekio V3 (v3-2.blend): a 440.8 × 234.4 × 307.8 mm heavy-equipment armored quadruped with 12 waterproof DS3235 servos, 87.7/40/93.6/158.4 mm shrouded four-bar legs, recessed 2.8-inch MSP2807 vault display, 4× 21700 battery pack, and onboard Radxa Q6A Linux SBC + ESP32-P4."
+image: "/posts/ainekio-v3/v3-armored-three-quarter.webp"
 authorName: "Ainekio Project"
 showImageOnPost: true
 showToc: true
 tags: [Ainekio, V3, Hardware, Blender, CAD, DS3235, Linux, SBC, ESP32-P4, Ainekio OS, Quadruped]
-category: "Hardware"
+category: "Physical Robot"
 draft: false
 lang: "en"
 contentFormat: "report"
@@ -17,97 +17,118 @@ reading:
   generation: v3
   kind: reference
   next: ainekio-v2
-  related: ["ainekio-v2", "ainekio-v1", "v1-v2-comparison", "q6a-chassis-and-active-loop", "ainekio-os"]
+  related: ["ainekio-v2", "ainekio-v1", "2026-11-16-cockpit-stream-jam-fuse-and-v3-armor", "q6a-chassis-and-active-loop", "ainekio-os"]
 ---
 
-> **Workbench status — In Development / Active CAD:** The `650 g` twelve-servo **[Ainekio V2](/posts/ainekio-v2/)** remains the active physical robot walking untethered on the floor today, following the original eight-servo **[Ainekio V1](/posts/ainekio-v1/)**. **Ainekio V3** is now taking full shape in Blender with its exterior carapace shell, internal electronics trays, `5.0"` HD touchscreen face, waterproof **`DS3235`** four-bar legs, and onboard Linux SBC + `ESP32-P4` compute bay packaged inside a tightened `337.9 × 200.2 × 176.8 mm` chassis.
+> **Workbench status — Active CAD (`v3-2.blend`, updated November 16, 2026):** The `650 g` twelve-servo **[Ainekio V2](/posts/ainekio-v2/)** remains the active physical robot walking untethered on the floor today, following the original eight-servo **[Ainekio V1](/posts/ainekio-v1/)**. **Ainekio V3** has progressed in Blender from an initial open-leg sketch into a complete, watertight **`293`-mesh industrial armored assembly** (`440.83 × 234.40 × 307.81 mm` body/ROPS envelope; `381.42 mm` with strobe beacon and whip antenna) verified with zero static or dynamic `BVHTree` mesh collisions across all boards, bearings, harnesses, and swing poses.
 
-After getting the `650 g` micro-servo V2 quadruped walking untethered on its on-chip `50 Hz` `ESP32-P4` neural gait, two physical ceilings of a `~2 kg·cm` `MG90S` micro-chassis became clear:
+Getting the `650 g` micro-servo V2 robot walking untethered on its on-chip `50 Hz` `ESP32-P4` neural gait exposed two clear physical limits of a `~2 kg·cm` `MG90S` micro-chassis:
 
-1. **Speed, terrain clearance, and weather exposure:** Micro-scale `55 mm` lower legs and unsealed hobby micro servos work well indoors, but they limit stride speed, ground clearance, and damp or outdoor operation.
-2. **Reliance on an external computer:** During the September [Radxa Dragon Q6A chassis study](/posts/q6a-chassis-and-active-loop/), carrying an onboard Linux single-board computer plus heavier battery cells pushed V2 past what twelve `MG90S` servos could comfortably stand up and walk with—leaving the Body Control gateway and **[Ainekio OS](/posts/ainekio-os/)** cognitive stack on an intermediate host machine over Wi-Fi.
+1. **Ground clearance, actuator torque, and outdoor exposure:** Micro-scale `55 mm` lower legs and unsealed hobby micro servos work well indoors on rugs and hardwood, but they restrict stride speed, rough-ground clearance, and damp or dusty outdoor operation.
+2. **Offboard host dependency:** During the September [Radxa Dragon Q6A chassis study](/posts/q6a-chassis-and-active-loop/), carrying an onboard Linux single-board computer plus high-capacity cells pushed V2 past what twelve `MG90S` servos could lift cleanly—keeping **[Body Control](/posts/ainekio-cockpit/)** and **[Ainekio OS](/posts/ainekio-os/)** on an external computer over Wi-Fi.
 
-**Ainekio V3** removes both bottlenecks at once. By scaling the quadruped to roughly **`1.7×` V2's dimensions** around twelve waterproof **`DSSERVO DS3235`** standard metal-gear servos and housing **both an `ESP32-P4` real-time controller and a full Wi-Fi/Bluetooth Linux SBC directly inside the chassis**, V3 eliminates the intermediate PC—and turns the robot itself into a **walking, local-AI personal computer** whose `5.0"` HD touchscreen face can switch straight into a live Linux desktop.
+**Ainekio V3** addresses both limits simultaneously by stepping up to **twelve waterproof `DSSERVO DS3235` (`~35 kg·cm` class) standard aluminum-case servos** (`~15×` V2's stall torque), scaling the four-bar leg linkages to **`87.65 / 40.00 / 93.55 / 158.40 mm`** (`131.3 mm` belly skid ground clearance), and packaging **both an `ESP32-P4-WIFI6` real-time motor controller and an onboard `Radxa Dragon Q6A` Linux SBC + `4× 21700` battery pack** inside a modular heavy-equipment shell.
+
+![1:1 orthographic Blender CAD scale comparison between the 650 g Ainekio V2 micro-quadruped and the heavy-equipment armored Ainekio V3](/posts/ainekio-v3/v3-armored-vs-v2-scale.webp)
 
 ---
 
-## 1. Updated V3 CAD progress: tightened wheelbase, exterior carapace, and `5.0"` touch face
+## 1. November 16 heavy-equipment armored CAD revision: ROPS frame, radiators & `271.5 mm` wheelbase
 
-Since the initial open-rail frame layout, the `V3` Blender scene has progressed into a compact, fully shelled assembly (`271` modeled meshes). Tightening the central side rails down to **`112.0 mm`** brought the fore-aft shoulder wheelbase in from `302.0 mm` to **`221.5 mm`** (`FL/FR X = +118.5 mm`, `RL/RR X = -103.0 mm`) and narrowed lateral hip-roll spacing from `110.0 mm` to **`94.4 mm`**—giving V3 a much stiffer, punchier torso proportion while still fitting the full dual-board compute stack and four `21700` battery cells inside:
+Between November 13 and November 16, the V3 CAD assembly (`scene="V3"` in `Slave/hardware/v2-12servo/v3-2.blend`) was redesigned into a fully enclosed, multi-panel industrial shell modeled as watertight chamfered solids (`nm = 0` non-manifold edges, `bd = 0` open boundary edges) ready for 3D-printed sub-assemblies:
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
   <figure>
-    <img src="/posts/ainekio-v3/v3-chassis-three-quarter.webp" alt="Three-quarter Blender CAD view of the shelled Ainekio V3 quadruped with its 5.0-inch touchscreen face, red louvered carapace, cheek guards, and DS3235 trussed four-bar legs standing beside Ainekio V2." width="1280" height="800" loading="lazy" />
-    <figcaption>Three-quarter CAD comparison: the newly shelled V3 (`337.9 × 200.2 × 176.8 mm` standing envelope) with its `5.0"` `1280×720` DSI touch face, brow camera visor, cheek guards, and shoulder side protectors beside the `650 g` V2 robot.</figcaption>
+    <img src="/posts/ainekio-v3/v3-armored-three-quarter.webp" alt="Front-right three-quarter Blender CAD render of Ainekio V3 showing the safety-yellow and cast-gunmetal industrial shell, swept ROPS bull-bar, recessed 2.8-inch MSP2807 display, worklights, and shrouded DS3235 crawler legs." width="1440" height="900" loading="lazy" />
+    <figcaption>Front-right three-quarter CAD view: swept ROPS bull-bar &amp; dorsal roll frame, 4-bolt cast-gunmetal display vault, dual brow camera pods, quad LED worklights/foglights, lower chin skid with curved D-ring tow shackle, and cam-contoured thigh/shin shells.</figcaption>
   </figure>
   <figure>
-    <img src="/posts/ainekio-v3/v3-vs-v2-top-layout.webp" alt="Top-down orthographic Blender view comparing the shelled Ainekio V2 footprint at top against the shelled Ainekio V3 quadruped with cooling roof louvers at bottom." width="1280" height="960" loading="lazy" />
-    <figcaption>Top-down footprint comparison: V2 (`245.9 × 182.8 mm`, top) versus V3's tightened `337.9 × 200.2 mm` stance (bottom), showing the central carapace roof louvers positioned directly above the internal SBC heatsink.</figcaption>
+    <img src="/posts/ainekio-v3/v3-armored-rear-quarter.webp" alt="Rear-left three-quarter Blender CAD render of Ainekio V3 showing the 9-slat tail radiator, 4-ribbed rear cargo trunk, dorsal radiator core with grab handles, amber strobe beacon and whip antenna, and twin parallel rear thigh struts." width="1440" height="900" loading="lazy" />
+    <figcaption>Rear-left three-quarter CAD view: sculpted 9-slat rear radiator exhaust tunnel, 4-ribbed rear cargo trunk, 7-slat dorsal SBC radiator core with twin grab handles, amber strobe beacon &amp; whip antenna, and twin parallel rear thigh struts.</figcaption>
   </figure>
 </div>
 
-| Parameter | Ainekio V2 (Active Physical Robot) | Ainekio V3 (In Development · Updated CAD) |
-| --- | --- | --- |
-| **Status** | Built, calibrated, walking untethered | Shelled Blender CAD assembly & hardware selection |
-| **Standing envelope** | `245.85 × 182.79 × 109.06 mm` (`650 g`) | **`337.93 × 200.22 × 176.75 mm`** (`~1.7×` V2 scale, `140.0 mm` shoulder Z) |
-| **Shoulder wheelbase & hip track** | Compact micro-frame spacing | **`221.5 mm`** fore-aft (`+118.5 / -103.0 mm` X) · **`94.4 mm`** lateral hip-roll spacing |
-| **Actuators (12 DOF, 3 per leg)** | 12× modified `MG90S` micro servos (`~2 kg·cm`, unsealed) | 12× **`DSSERVO DS3235`** waterproof standard servos (`~35 kg·cm` class, CNC aluminum center shell, `25T` clamping horns) |
-| **Four-bar leg linkage** | `35 mm` carrier · `20 mm` crank · `38 mm` rod · `55 mm` lower leg | **`1.74×` trussed geometry:** `60.9 mm` carrier · `34.8 mm` flanged crank · `66.1 mm` curved rod · `110.0 mm` lower leg |
-| **Joint bearings** | Printed / bushing micro-pivots | Flanged **`F688ZZ`** (`8×16×5 mm`) shoulder counter-pivots + dual **`683ZZ`** (`3×7×3 mm`) ball bearings at knee & rod joints |
-| **Face display & front camera** | `1.9"` `ST7789` SPI LCD (`320×170`, non-touch) + chin `OV5647` | **`5.0"` `Waveshare 5-DSI-TOUCH-A`** (`1280×720` IPS capacitive touch face) + brow **`Arducam B0066 (OV5647 CSI)`** |
-| **Exterior weather shell** | Indoor workbench / dry floor shell | Faceted carapace roof with heatsink louvers, front camera visor, cheek guards, rear arch & 4× shoulder side protectors |
-| **Battery & power rail** | Rear `2S` pack on Wireless Keeper Bridge + `5 V / 5 A` buck | Lower-floor **`4× 21700` (`2S2P`)** cradle + `40 A` balanced `2S` BMS + `14 AWG` busbar `PCA9685` + `Mini560` `5 V` buck + `HiLetgo 2S` USB-C charger |
-| **Compute & OS role** | Onboard `ESP32-P4` (`50 Hz` gait) + external host PC over Wi-Fi | **Onboard Linux SBC (Wi-Fi + Bluetooth)** + **`ESP32-P4-WIFI6`** inside the chassis — autonomous robot **and** mobile Linux desktop PC |
-
----
-
-## 2. Turning Ainekio's face into a Linux desktop: a smarter, mobile alternative to PCs, laptops & phones
-
-Putting a full **Linux single-board computer with onboard Wi-Fi and Bluetooth** inside the V3 chassis does much more than cut the Wi-Fi umbilical to an external gateway PC—it changes what kind of machine Ainekio is.
-
-In the updated V3 front assembly, Ainekio's face is a **`5.0-inch` `Waveshare 5-DSI-TOUCH-A` capacitive touchscreen** (`1280 × 720` HD IPS active area measuring `110.3 × 62.3 mm`, `126.9 × 70.7 mm` cover glass) driven directly over MIPI-DSI by the onboard Linux SBC, framed by a protective brow visor housing the `OV5647` CSI camera.
-
-Because the robot carries a real multi-core Linux operating system, Wi-Fi, Bluetooth, local storage, and rear physical I/O ports wherever it walks, **V3 has the potential to compete directly with personal computers, laptops, and phones—while being smarter, embodied, and physically mobile**:
-
-- **Face-to-desktop mode on demand:** In everyday companion mode, the `5.0"` `1280×720` display renders Ainekio's animated expressions, status overlays, and direct touch controls. Whenever you want to sit down and work, **you can switch Ainekio's face straight into a full Linux desktop, pull out a Bluetooth (or USB) mouse and keyboard, and get to work**.
-- **Full workstation software, zero laptop bag:** Because it runs standard mainline/arm64 Linux rather than a locked-down phone OS or microcontroller loop, the robot natively runs a desktop browser, terminal, VS Code / coding toolchains, SSH, Git, media apps, and the entire **[Ainekio OS](/posts/ainekio-os/)** cognitive + memory runtime locally on its own battery.
-- **Rear port bulkhead & dockable desktop expansion:** As shown in the cutaway below, the SBC's physical ports (USB-A, Gigabit Ethernet, USB-C, and HDMI/DisplayPort output on the modeled `Radxa Dragon Q6A` reference board) face the rear carapace arch—meaning V3 can either stand on your desk as its own self-tilting `5.0"` all-in-one cyberdeck screen, or plug into an external monitor when docked while keeping your persistent AI mind, files, and workspace inside one walking body.
-- **Smarter than a static screen:** Unlike a phone or laptop that sits inert on a table when closed, your computer can physically walk into the next room, tilt its own `5.0"` screen up toward you on its 12-DOF legs for an ergonomic viewing angle, watch its surroundings, remember what you were working on yesterday, and react in the room.
-
----
-
-## 3. Internal cutaway: packaging the Linux SBC, `ESP32-P4`, and `2S2P` `21700` cradle
-
-To make that mobile Linux workstation viable without sacrificing hard real-time motor safety, V3 splits its internal `112 mm` bay into stacked modular trays (`Lower Floor & Battery Cradle`, `Front Tray`, and `Rear Tray`):
-
 <figure className="my-6">
-  <img src="/posts/ainekio-v3/v3-interior-cutaway-q6a.webp" alt="Dual rear and front cutaway Blender CAD renders of Ainekio V3 with the upper carapace hidden, revealing the onboard Radxa Dragon Q6A Linux SBC with Armor 7056A heatsink, ESP32-P4-WIFI6, PCA9685, 2S2P 21700 battery cradle, and 5.0-inch DSI touch display." width="1280" height="556" loading="lazy" />
-  <figcaption>Rear (left) and front (right) CAD cutaways with the upper carapace hidden: the `Radxa Dragon Q6A` SBC (`88.7 × 58.6 mm`) and `Armor 7056A` heatsink sit in the upper deck above the `4× 21700` (`2S2P`) floor cradle, while the front tray carries the `ESP32-P4-WIFI6`, `14 AWG` busbar `PCA9685`, and `5.0"` `Waveshare` DSI touch display.</figcaption>
+  <img src="/posts/ainekio-v3/v3-armored-side-elevation.webp" alt="Orthographic right-side elevation of Ainekio V3 showing the 440.8 mm length, 271.5 mm shoulder wheelbase, 131.3 mm belly clearance, and 87.7 / 40.0 / 93.6 / 158.4 mm four-bar stance on sloped split-toe crawler feet." width="1440" height="900" loading="lazy" />
+  <figcaption>Orthographic right-side profile: <code>440.83 mm</code> total length, <code>271.50 mm</code> fore-aft shoulder wheelbase (<code>FL/FR X = +143.5 mm</code>, <code>RL/RR X = -128.0 mm</code>), <code>131.31 mm</code> under-belly skid clearance, and <code>60°</code>-sloped V-split-toe crawler feet seated flat on the ground datum.</figcaption>
 </figure>
 
-- **Onboard Linux SBC deck (upper bay):** Modeled around the **`Radxa Dragon Q6A`** (`88.69 × 58.61 mm` footprint with the **`Radxa Armor 7056A`** passive/active heatsink block seated directly beneath the louvered carapace roof; exact SBC selection remains open while bench testing continues). Owns Linux desktop rendering on the `5.0"` DSI touch panel, Wi-Fi & Bluetooth peripherals, CSI vision pipelines, Body Control, and Ainekio OS cognition.
-- **Hard real-time motor & sensor tier (`ESP32-P4-WIFI6` front tray):** Isolated from Linux desktop CPU load or scheduling jitter, the `ESP32-P4` handles `50 Hz` neural locomotion, 12-channel `PCA9685` PWM generation (`14 AWG` high-current power busbar), 4th-wire potentiometer feedback (`CD74HC4067`), and `208 Hz` `GY-LSM6DS3` 6-axis IMU attitude leveling and stall protection.
-- **Low-CG `2S2P` `21700` battery floor cradle:** Four `21700` Li-ion cells (`2S2P`) sit flat in the `107.6 × 107.0 × 30.0 mm` lower floor tray between the hips to keep center of gravity low, backed by a `40 A` balanced `2S` BMS, dedicated `Mini560` `5 V` logic regulation, onboard `HiLetgo 2S` USB-C charging, and a `19 × 12 mm` rear master rocker switch.
+| Parameter | Ainekio V2 (Active Floor Robot) | Ainekio V3 (`v3-2.blend` · Nov 16 Armored CAD) |
+| :--- | :--- | :--- |
+| **Workbench status** | Built, calibrated, walking untethered (`650 g`) | Watertight `293`-mesh Blender CAD (`~1.85–2.1 kg` target class) |
+| **Standing envelope (`L × W × H`)** | `245.85 × 182.79 × 109.06 mm` | **`440.83 × 234.40 × 307.81 mm`** body/ROPS (`381.42 mm` w/ strobe & whip antenna) |
+| **Wheelbase, track & clearance** | `173.43 mm` wheelbase · `63.50 mm` lateral | **`271.50 mm`** wheelbase (`+143.5 / -128.0 mm`) · **`94.40 mm`** hip track · **`131.31 mm`** belly clearance |
+| **Actuators (12 DOF, 3 per leg)** | 12× modified `MG90S` (`~2.2 kg·cm`, unsealed) | 12× waterproof **`DSSERVO DS3235 / DS3225 PRO`** (`~35 kg·cm` class, CNC aluminum middle shell, `25T` clamping aluminum horns) |
+| **Four-bar leg linkage** | `35.0 mm` carrier · `20.0 mm` crank · `28.0 mm` pickup · `38.0 mm` rod · `55.0 mm` lower leg | **`1.44×` hybrid-scaled trussed geometry:** **`87.65 mm`** carrier · **`40.00 mm`** flanged crank · **`56.00 mm`** rocker (`1.40×` ratio) · **`93.55 mm`** curved rod · **`158.40 mm`** lower leg |
+| **Joint bearings & hardware** | Printed / bushing micro-pivots | Flanged **`F688ZZ`** (`8×16×5 mm`) shoulder counter-pivots + **`683ZZ`** (`3×7×3 mm`) ball bearings + `0.2 mm` inner-race shims at knee & coupler pivots |
+| **Front display & vision** | `1.9"` `ST7789` SPI LCD (`320×170`) + chin `OV5647` | Recessed **`2.8"` `MSP2807` (`ILI9341` `240×320` SPI TFT)** inside 4-bolt Cast Gunmetal Vault Bezel + **`Arducam B0066` (`OV5647` CSI)** in dual brow pods |
+| **Exterior & leg armor** | Indoor red/black printed carapace | Swept **ROPS bull-bar**, side sponsons w/ hazard grilles, 7-slat dorsal & 9-slat rear radiators, cargo trunk, 3-ring hip drums, cam thigh shells, twin rear struts, shin/knee drums & split-toe crawler feet |
+| **Power & charging** | Rear `2S` pack + `Mini560` `5 V / 5 A` buck | Belly **`4× 21700` (`2S2P`)** pack w/ latched side doors + `14 AWG` copper-busbar `PCA9685` + `Mini560` `5 V` logic buck + rear-accessible `HiLetgo 2S` USB-C charger |
+| **Onboard compute** | `ESP32-P4-WIFI6` + offboard PC over Wi-Fi | Stacked **`Radxa Dragon Q6A` Linux SBC** (`+ Armor 7056A` heatsink) + **`ESP32-P4-WIFI6`** + `CD74HC4067` + `GY-LSM6DS3` inside the hull |
 
 ---
 
-## 4. Waterproof `DS3235` actuators and `1.74×` bearing-supported legs
+## 2. Armored front fascia: recessed `2.8"` `MSP2807` vault display, ROPS bull-bar & dual brow pods
 
-Carrying an onboard Linux PC, a `5.0"` glass touch display, an enclosed weather shell, and four `21700` cells requires a completely different actuator class than V2's `MG90S` micro servos. V3 uses twelve **`DSSERVO DS3235`** waterproof standard servos (`40 × 20 × ~40 mm`):
+In the initial November 13 concept (preserved in Section 5 below), V3 wore an exposed `5.0"` glass tablet across its nose. Mechanical collision and field-durability checks quickly showed that an exposed `127 × 71 mm` glass face sits directly in the strike zone of stairs, brush, and nose-first tumbles.
 
-1. **High-torque `2S` direct headroom:** Rated for `7.4–8.4 V` (`2S`) operation with CNC aluminum middle heatsinks, metal gear trains, and `25T` clamping aluminum horns, `DS3235` actuators provide the torque and speed authority needed for brisk indoor/outdoor trotting and ergonomic desktop screen-tilting poses without thermal sag.
-2. **Weather-resistant sealing:** Sealed case seams, rubber grommet wire exits, and printed shoulder side protectors (`28.2 × 19.7 × 58.4 mm`) shield the actuators and harnesses from damp ground and outdoor dust.
-3. **Ball-bearing joint stiffness:** Every hip-roll pod opposes its `25T` servo horn with a flanged **`F688ZZ`** (`8×16×5 mm`) ball bearing on the shoulder axis, while the pocket-trussed **`1.74×`** four-bar linkage (`60.9 mm` carrier, `34.8 mm` flanged crank, `66.1 mm` curved coupler rod, and `110.0 mm` lower leg) rides on dual **`683ZZ`** (`3×7×3 mm`) ball bearings at the knee and coupler pivots.
+Today's `v3-2.blend` front assembly splits the fascia into **14 bolted structural and armor panels** protected behind a tubular **Swept ROPS Bull-Bar**:
 
 <figure className="my-6">
-  <img src="/posts/ainekio-v3/v3-ds3235-leg-linkage.webp" alt="Close-up Blender CAD view of the Ainekio V3 front-right DS3235 shoulder assembly and trussed 60.9 / 34.8 / 66.1 / 110 mm four-bar leg linkage." width="1280" height="960" loading="lazy" />
-  <figcaption>V3 front-right leg module in Blender: three waterproof `DS3235` servos with `25T` clamping metal horns driving the `1.74×`-scaled trussed four-bar linkage (`60.9 mm` carrier, `34.8 mm` flanged crank, `66.1 mm` curved coupler rod, and `110.0 mm` lower leg) on `F688ZZ` and dual `683ZZ` ball bearings.</figcaption>
+  <img src="/posts/ainekio-v3/v3-armored-leg-face-detail.webp" alt="Close-up Blender CAD render of Ainekio V3's 14-piece armored front fascia, recessed 2.8-inch MSP2807 TFT display, swept ROPS bull-bar, dual brow camera pods, LED worklights, tow shackle, and DS3235 leg armor." width="1440" height="900" loading="lazy" />
+  <figcaption>Close-up of the redesigned 14-panel front vault and front-right leg module: recessed <code>2.8"</code> <code>MSP2807</code> display behind the 4-bolt cast-gunmetal bezel and ROPS bull-bar, symmetric <code>Arducam B0066</code> brow camera pods, 3×4 main LED worklight pods, 2×4 lower foglight pods, and curved D-ring tow shackle.</figcaption>
 </figure>
+
+- **Recessed `2.8"` `MSP2807` (`ILI9341` SPI TFT) vault face:** Seats an `86.0 × 50.0 mm` `MSP2807` PCB (`57.6 × 43.2 mm` TFT active area, 4× Ø`3.2 mm` M3 mounts on `76.08 × 44.00 mm` pitch) behind a **4-bolt Cast Gunmetal Widescreen Smoked-Glass Bezel** (`77.2 × 36.6 mm` outer frame, `52.6 × 28.4 mm` widescreen aperture), wired directly to the `ESP32-P4` high-speed SPI bus (`SCK→GPIO20, SDI→GPIO21, CS→GPIO22, DC→GPIO23, RESET→GPIO26`) so procedural expressions render instantaneously at boot even while Linux is starting up or sleeping.
+- **Onboard Linux PC & rear bulkhead docking preserved:** Moving the nose face to a recessed vault screen keeps the **`Radxa Dragon Q6A` Linux SBC** safely inside the upper dorsal bay—running the full **[Ainekio OS](/posts/ainekio-os/)** mind, Body Control gateway, Wi-Fi/Bluetooth peripherals, and local coding/terminal workflows onboard, with physical USB/Ethernet/HDMI/USB-C ports accessible through the rear bay for single-cable desktop monitor docking.
+- **Vision, illumination & recovery hardware:** Above the bezel sit symmetric Left and Right **Brow Camera Pods** housing the **`Arducam B0066` (`OV5647` MIPI-CSI)** sensor and routed polyimide flex ribbon; flanking the vault are dual **Main Worklight Pods**, dual **Lower Foglight Pods**, sloped cheek/chin armor plates, and a **Lower Chin Skid with Curved D-Ring Tow Shackle**.
+
+---
+
+## 3. Internal cutaway: stacked `Radxa Dragon Q6A`, `ESP32-P4`, `14 AWG` busbar `PCA9685` & `4× 21700` belly pack
+
+Hiding the dorsal radiator core, ROPS frame, right side sponson, and rear cargo trunk reveals how V3 separates Linux compute, hard real-time `50 Hz` motor control, and high-current `2S` power inside its `164 mm`-wide hull:
+
+<figure className="my-6">
+  <img src="/posts/ainekio-v3/v3-armored-interior-cutaway.webp" alt="Internal cutaway Blender CAD render of Ainekio V3 showing the Radxa Dragon Q6A SBC with Armor 7056A heatsink, four green 21700 battery cells in the belly hull, ESP32-P4-WIFI6, 14 AWG copper-busbar PCA9685, and blue-anodized DS3235 servos." width="1440" height="900" loading="lazy" />
+  <figcaption>Internal packaging cutaway in <code>v3-2.blend</code>: the <code>Radxa Dragon Q6A</code> SBC and <code>Armor 7056A</code> heatsink sit directly beneath the 7-slat dorsal radiator core above four <code>21700</code> (<code>2S2P</code>) Li-ion cells, while the forward electronics deck carries the <code>ESP32-P4-WIFI6</code> and <code>14 AWG</code> bare-copper-busbar <code>PCA9685</code>.</figcaption>
+</figure>
+
+- **Upper dorsal Linux compute bay:** Houses the **`Radxa Dragon Q6A`** (`88.69 × 58.61 mm`) topped with the **`Radxa Armor 7056A`** CNC aluminum heatsink exhausting straight through the **7-slat Dorsal Radiator Core** and **9-slat Rear Tail Radiator**.
+- **Forward real-time motor & feedback deck:** Places the **`Waveshare ESP32-P4-WIFI6`** (`72.4 × 21.0 mm`) beside an **`Adafruit PCA9685`** reinforced on its underside with dual **`52.0 × 1.5 mm` bare `14 AWG` solid-copper `V+` and `GND` busbars** to feed peak `12× DS3235` current without PCB trace voltage drop. Rearward sit the **`HiLetgo CD74HC4067`** 16-channel 4th-wire feedback multiplexer and **`GY-LSM6DS3`** `208 Hz` IMU near the chassis center of rotation.
+- **Low-CG `4× 21700` (`2S2P`) lower belly hull:** Four `21700` cells (`Ø21.4 × 70.15 mm` each: `Cell 1A/1B` `S1`, `Cell 2A/2B` `S2`) sit transversely along the lowest floor datum (`Z = 156.0 mm` world / right between the front and rear hip brackets) behind latched side service doors, paired with a dedicated **`Mini560` `5 V` logic buck** and rear-tunnel **`HiLetgo 2S` USB-C boost charger**.
+
+---
+
+## 4. Shrouded `1.44×` `DS3235` excavator legs & `Part_003` housing clearance audit
+
+Rather than uniformly scaling fastness holes and bearing pockets (which would distort M3 threads and servo splines), V3 uses **piecewise-rigid `1.44×` linkage scaling**—stretching link lengths for stride and `131.3 mm` ground clearance while holding every **`25T` aluminum clamping horn**, **`F688ZZ`** (`8×16×5 mm`) shoulder counter-bearing, **`683ZZ`** (`3×7×3 mm`) linkage bearing, `0.2 mm` inner-race shim, and `M2.6` / `M3` fastener bore at exact 1:1 hardware tolerances:
+
+1. **Preserved `1.400` crank-to-rocker leverage:** `87.65 mm` trussed carrier (`Part_023`), `40.00 mm` flanged crank (`Part_009`), `56.00 mm` lower-leg pickup rocker (`56 / 40 = 1.400`), `93.55 mm` curved trussed coupler rod (`Part_026`), and `158.40 mm` trussed lower leg (`Part_027`).
+2. **20-piece sculpted leg armor (`5` parts × `4` legs):** Each corner wraps its structural truss in a **3-Ring Stepped Planetary Hip Drum** (`Ø56.4 / 49.6 / 37.0 mm`), **Cam-Contoured Thigh Shell**, **Twin Parallel Rear Thigh Actuator Struts** (guarding the `93.55 mm` coupler rod), **Contoured Shin Shell & Ø`31.6 mm` Knee Drum**, and a **`60°`-Sloped V-Split-Toe Crawler Foot** (`52 × 40 mm` grouser sole)—verified collision-free across `±22°` hip roll and `±18°` carrier/crank swing envelopes.
+3. **6-DOF `Part_003` hip-bracket swept-volume audit:** Prior to finalizing the V3 shoulder pods (`|OC| = 28.32 mm` carrier-to-crank shaft spacing with `6.50 mm` built-in axial plane stagger), a dedicated CAD clearance study caught and resolved three physical assembly blockers before printing: adding relief slots for the `18.3 × 6.8 × 4.5 mm` waterproof servo wire grommet during insertion, clearing a `0.185 mm` inner bolt-head interference on `25T` clamping horns, and upgrading the shoulder counter-pivot from `683ZZ` to a flanged **`F688ZZ`**.
+
+---
+
+## 5. Design evolution: November 13 crimson concept → November 16 industrial armor
+
+For historical continuity in the build log, these renders show the initial November 13 V3 packaging study (`337.9 × 200.2 × 176.8 mm`, unshrouded `60.9 / 34.8 / 66.1 / 110.0 mm` legs, and exposed `5.0"` DSI nose panel) that preceded the November 16 heavy-equipment armored revision:
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <figure>
+    <img src="/posts/ainekio-v3/v3-chassis-three-quarter.webp" alt="Earlier November 13 Blender CAD concept of Ainekio V3 with crimson carapace plates, exposed 5.0-inch nose screen, and unshrouded red four-bar legs." width="1280" height="800" loading="lazy" />
+    <figcaption>November 13 early V3 packaging study: crimson louvered roof, exposed <code>5.0"</code> nose screen, and unshrouded <code>110 mm</code> lower legs prior to the ROPS vault and <code>158.4 mm</code> crawler-leg upgrade.</figcaption>
+  </figure>
+  <figure>
+    <img src="/posts/ainekio-v3/v3-ds3235-leg-linkage.webp" alt="Close-up of the underlying bare DS3235 shoulder pod and trussed four-bar linkage before exterior thigh, shin, and crawler-foot armor shells were added." width="1280" height="960" loading="lazy" />
+    <figcaption>Bare <code>DS3235</code> shoulder pod and four-bar truss geometry underneath V3's new planetary hip drums, cam thigh shells, and twin rear struts.</figcaption>
+  </figure>
+</div>
 
 ---
 
 ## Next steps on the V3 bench
 
-1. **Bench-test the `5.0"` DSI touch display + onboard Linux SBC thermal envelope** under combined Linux desktop usage, CSI camera inference, and Ainekio OS voice/memory workloads inside the louvered carapace.
-2. **Validate a single `DS3235` + trussed four-bar corner module** for joint backlash, 4th-wire feedback linearity, peak `2S` current draw, and unloaded foot-swing velocity before printing all four legs.
-3. **Export the shelled `337.9 mm` V3 Blender assembly to MuJoCo MJCF** using the CAD-to-MJX pipeline built for V2 ([Gait Development](/posts/gait-development/)) to train higher-speed trotting and screen-posing policies ahead of full chassis assembly.
+1. **Single-corner `DS3235` + `87.65 / 40.0 / 93.55 / 158.4 mm` test print:** Print one complete front-left corner (`Part_003` lightened hip bracket, trussed links, planetary hip drum, thigh/shin shells, and split-toe crawler foot) to measure `F688ZZ`/`683ZZ` bearing press fits, 4th-wire wiper linearity, and unloaded foot-swing speed on `2S` (`8.4 V`).
+2. **`MSP2807` `2.8"` SPI vault bezel & `Radxa Dragon Q6A` thermal bench test:** Verify `ESP32-P4` SPI face rendering inside the smoked-glass vault aperture alongside sustained `Radxa Q6A` + `Armor 7056A` temperatures under the 7-slat dorsal radiator core.
+3. **Full-CAD V3 Blender → MuJoCo MJCF export:** Export the `293`-mesh `v3-2.blend` assembly into MuJoCo MJX to train V3 `50 Hz` trotting, snag-clearance, and System 3 presence policies ahead of full 4-leg assembly.

@@ -10,24 +10,30 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "Untethered 50 Hz neural walking on V2, V3 Linux-PC shell in Blender CAD, and Ainekio OS active"
-  location: "650 g V2 floor robot · V3 CAD bench · Ainekio OS"
-  updated: 2026-11-13
-  mileage: "107.8 KB on-chip V2 gait · V3 5.0\" Linux desktop face in CAD · local + hybrid AI mind"
-  section: "On-chip neural gait distillation, shelled V3 DS3235 + Linux SBC CAD layout, and V1–V3 documentation"
-  nextStop: "Run longer untethered V2 floor walks across room transitions while bench-testing the single-corner DS3235 linkage and 5.0-inch DSI Linux desktop stack for Ainekio V3."
-  note: "Walking no longer depends on streaming joint targets over Wi-Fi: two rounds of DAgger distillation compressed the 50 Hz walking network by ~80% (547 KB down to 107.8 KB int8) so it runs directly inside the ESP32-P4's 128 KB L2 cache. Alongside 30 updated shell and rear battery-carrier STLs and a unified live camera Cockpit HUD, the companion software mind is now published openly as Ainekio OS."
+  status: "3-system neural motion, per-joint jam thermal fuse & Cockpit live stream on V2; industrial armored V3 in Blender CAD"
+  location: "650 g V2 floor robot · V3 Armored CAD (v3-2.blend) · Ainekio OS"
+  updated: 2026-11-16
+  mileage: "MicroDuck v19 + NeuralPose + 20 Hz Presence · I²t jam fuse · 440.8 mm Armored V3 CAD"
+  section: "Cockpit live Ainekio OS stream, 3-tier servo jam & thermal protection, System 3 Living Presence, single-hop embodied curiosity, and V3 heavy-equipment CAD"
+  nextStop: "Validate MicroDuck v19-snag-p4 and NeuralPose v3-jam-compliant on physical V2 floor runs while printing the first single-corner DS3235 + 87.7/40/93.6/158.4 mm shrouded leg assembly for Ainekio V3."
+  note: "V2 now coordinates three specialized neural controllers—on-chip 50 Hz L2-cached MicroDuck v18/v19 locomotion (with ESP32-P4 RISC-V PIE vector fixes and swing-foot snag clearance), 50 Hz delay-tolerant NeuralPose over a 1,812-example Freestyle curriculum, and a 20 Hz System 3 Living Presence policy—protected by a 280 ms recoil, 1.8 s reverse unsnag, and 8–10 s per-joint I²t thermal fuse. In parallel, Ainekio Cockpit streams live Ainekio OS thoughts and voice transcripts directly over the camera HUD, and Ainekio V3 has been redesigned into a watertight 293-mesh heavy-equipment armored quadruped in Blender."
   areas:
-    - label: "Body & firmware"
-      status: "650 g 12-servo V2 frame with on-chip 50 Hz neural gait"
-      detail: "Waveshare ESP32-P4-WIFI6 running the 107.8 KB int8 walking policy on Core 1, 12 modified MG90S servos with 4th-wire pot feedback via PCA9685 and CD74HC4067, 208 Hz LSM6DS3 IMU, 1.9\" ST7789 LCD (59 expressions), chin-mounted OV5647 camera, wake-word audio, and updated rear 2S Keeper Bridge STLs."
-    - label: "Locomotion & controls"
-      status: "L2-cached MicroDuck policy, floor-seam RL trials & Cockpit HUD"
-      detail: "Hardware-twin reinforcement learning across wood/carpet seams and simulated rail sag (+0.213 m/s forward, -0.179 m/s reverse, ±60.9°/s yaw turns), 489-trajectory Freestyle fault-recovery dataset returning cleanly to Stand, and a single-screen camera Cockpit HUD with optical-flow obstacle range."
+    - label: "Body, safety & V3 CAD"
+      status: "650 g V2 w/ per-joint I²t jam fuse & 440.8 mm armored V3 CAD"
+      detail: "V2 adds full-span [1..4094] ADC jam sensing, 800 ms deadlock-bounded arrival waits, selective single-channel PCA9685 thermal cutoff (8–10 s above 7° deadband while 11 healthy servos hold stance), RISC-V PIE build fixes, and 17 updated Red STLs. V3 (v3-2.blend) packages 12 waterproof DS3235 servos, 87.7/40/93.6/158.4 mm shrouded crawler legs, a recessed 2.8\" MSP2807 vault display, Radxa Q6A SBC, ESP32-P4, and 4× 21700 cells."
+    - label: "3-system neural & Cockpit"
+      status: "MicroDuck v18/v19, 50 Hz NeuralPose, 20 Hz Presence & Cockpit stream"
+      detail: "MicroDuck v18 (+1.3246 10-scenario score, 0 falls) and v19-snag-p4 pair with 1.8 s reverse unsnag; System 2 runs 1,812-row Freestyle + 280 ms recoil; System 3 drives 20 Hz speech-RMS gestures & chatter-relief trims while staying silent during VAD. Cockpit adds Tap-to-Talk, 10 instant toggles, and a live 7-graph Ainekio OS stream overlay."
     - label: "Ainekio OS (The Mind)"
-      status: "Local-first companion mind with persistent memory & hybrid voice"
-      detail: "Published as Greg-Aster/ainekio-os (formerly MetaHuman OS): persistent Standing Persona, SQLite episodic memory and durable workflows, 47 visual cognitive graphs, nightly 02:00 memory consolidation, local/LAN Whisper and Kokoro voice routing, and varied conversational reactions to physical tips and stalls."
+      status: "8-sector Embodied Curiosity, ExecutionStore v2 & VRAM-aware voice"
+      detail: "Single-hop System 1 / System 2 Embodied Curiosity driven by 8×45° spatial sectors, MoGe-2 8×8 (<0.30 m) forward corridor braking, durable Body Control Text Out across 7 graphs, synchronous JsonPlus checkpointer, pre-warmed GeminiAcpServer (gemini-4-hydrogen-low), and CUDA↔CPU auto-switching Kokoro TTS."
 entries:
+  - title: "Cockpit live stream, 3-system neural motion, per-joint I²t jam fuse, and V3 armored CAD"
+    date: 2026-11-16
+    location: "Ainekio Cockpit, V2 firmware/RL, Ainekio OS, and Blender V3"
+    mileage: "3 neural controllers · 8–10 s I²t thermal fuse · 293-mesh V3 armored CAD"
+    summary: "Adding a translucent 7-graph Ainekio OS live stream and Tap-to-Talk to Cockpit, expanding motor control into System 1 (MicroDuck v18/v19 + RISC-V PIE fixes), System 2 (NeuralPose + 1,812-example Freestyle), and System 3 (20 Hz Living Presence), building a 3-tier jam & per-joint I²t thermal fuse, adding 8-sector single-hop Embodied Curiosity, and redesigning V3 into a heavy-equipment armored DS3235 quadruped in Blender."
+    url: "/posts/2026-11-16-cockpit-stream-jam-fuse-and-v3-armor/"
   - title: "On-chip ESP32-P4 neural walking, Cockpit HUD, and Ainekio OS"
     date: 2026-11-11
     location: "V2 ESP32-P4 quadruped, Body Control Cockpit, and Ainekio OS"

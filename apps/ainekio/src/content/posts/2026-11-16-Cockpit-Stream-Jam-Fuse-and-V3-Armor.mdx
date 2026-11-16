@@ -1,0 +1,100 @@
+---
+title: "Cockpit Live Stream, 3-System Neural Motion, Per-Joint Jam Fuse & V3 Armored CAD"
+published: 2026-11-16T11:30:00-08:00
+updated: 2026-11-16
+description: "November 12–16 workbench milestone: Ainekio Cockpit's live Ainekio OS stream overlay and Tap-to-Talk, MicroDuck v18/v19-snag-p4 + RISC-V PIE fixes + 20 Hz System 3 Living Presence, per-joint I²t thermal jam protection, single-hop embodied curiosity, and the heavy-equipment armored V3 CAD redesign."
+image: "/posts/ainekio-v3/v3-armored-three-quarter.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, V3, Cockpit, Neural Gait, Jam Protection, Living Presence, Ainekio OS, Blender, DS3235]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: overview
+  generation: v2
+  kind: journal
+  next: project-overview
+  related: ["ainekio-cockpit", "three-system-neural-architecture", "jam-protection-and-thermal-safety", "ainekio-v3-preview", "ainekio-os"]
+---
+
+Between November 12 and November 16, work across [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot), [`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os), and the active Blender `V3` scene (`v3-2.blend`) closed out five major engineering tracks:
+
+1. **[Ainekio Cockpit](/posts/ainekio-cockpit/)** gained one-tap **`Tap to Talk`** wake-word bypass, 10 immediate-apply runtime toggles, and a translucent **live Ainekio OS message stream** fed by a durable `Body Control Text Out` node across 7 cognitive graphs.
+2. **[Three-System Neural Motion](/posts/three-system-neural-architecture/)** expanded beyond walking (`MicroDuck v18` System-ID & `v19-snag-p4` swing-foot snag reflex + `ESP32-P4` RISC-V PIE coprocessor fixes) to include `50 Hz` delay-tolerant `NeuralPose` (`1,812`-example Freestyle curriculum) and **`20 Hz` System 3 Autonomic Living Presence** (`56 KB` `int8`, `99.69%` expression accuracy).
+3. **[Recovery-First Jam Protection & Per-Joint `I²t` Winding Fuse](/posts/jam-protection-and-thermal-safety/)** replaced fragile LLM stall re-prompting with deterministic `280 ms` pose recoil, `1.8 s` reverse walking unsnag, `800 ms` deadlock-bounded arrival waits, and an `8–10 s` per-joint `PCA9685` thermal cutoff that leaves the 11 healthy servos holding the robot upright.
+4. **[Ainekio OS](/posts/ainekio-os/)** added **8-sector single-hop Embodied Curiosity**, `MoGe-2` `8×8` `< 0.30 m` forward corridor braking, `ExecutionStore` v2 fast synchronous `JsonPlus` checkpointing, pre-warmed `GeminiAcpServer` (`gemini-4-hydrogen-low`), and VRAM-aware `Kokoro` CUDA↔CPU auto-switching during GPU training runs.
+5. **[Ainekio V3](/posts/ainekio-v3-preview/)** underwent a full heavy-equipment industrial CAD redesign in Blender (`440.8 × 234.4 × 307.8 mm` ROPS body / `381.4 mm` with whip antenna), pairing `12×` waterproof `DS3235` servos and shrouded `87.7 / 40.0 / 93.6 / 158.4 mm` excavator legs with a recessed `2.8"` `MSP2807` vault screen, `Radxa Dragon Q6A` SBC, `ESP32-P4`, and `4× 21700` belly pack.
+
+---
+
+## 1. Ainekio Cockpit HUD & durable 7-graph live text stream
+
+Operating the physical robot while watching what Ainekio OS hears, thinks, and delegates no longer requires switching tabs between Body Control and the Ainekio OS web workbench:
+
+![Ainekio Cockpit HUD and durable Ainekio OS text-stream pipeline](/posts/2026-11-16-progress/cockpit-hud-architecture.webp)
+
+- **Durable `Body Control Text Out` projection (`ainekio-os`):** Repurposed `environment_send_text` (`alias: body_control_text_out`) into an `any-input` projection node wired into `environment-conversation-mode`, `agent-mode`, `dual-mode`, `emulation-mode`, `big-brother-response-mode`, `big-brother-tool-mode`, and `robot-wake-up-mode`. Messages stream through `ExecutionStore` v2's outbox (`environment_text_stream`) without acquiring a physical `bodyLease`.
+- **Translucent `#cockpit-stream-panel` + `Tap to Talk`:** `EnvironmentAdapter` merges live Whisper voice transcripts (`voice:<utteranceId>`), cognitive graph responses, and Big Brother outputs into an 80-message deduplicated HUD feed (`POST /api/metahuman-stream`), alongside one-tap `Tap to Talk` (`gate: "open"` → `Done · Send` WAV flush) and 10 instant Cockpit settings toggles. See the full [Ainekio Cockpit guide](/posts/ainekio-cockpit/).
+
+---
+
+## 2. Three-system neural stack (`v18` Sys-ID, `v19` snag plant, `NeuralPose` & System 3 Presence)
+
+Three untethered November 12 floor runs on `ainekio-p4-e6ebe5` (`220 MB` of `50 Hz` telemetry) directly drove the next two on-chip `MicroDuck` generations, an ESP-IDF RISC-V vector build patch, and a third neural controller dedicated to conversational body language:
+
+![Three-System Neural Motion Architecture and ESP32-P4 RISC-V PIE build patch](/posts/2026-11-16-progress/three-system-neural-stack.webp)
+
+- **`microduck-v18-p4` & `microduck-v19-snag-p4`:** Modeling measured `-19.1°` `J3` shoulder compliance and `41–45%` `RL` gain sag lifted the 10-scenario composite score from `-1.2871` (`1` fall) to **`+1.3246` (`0` falls)** (`+69.5%` weak-RL speed, `+79.7%` over `14–17 mm` cables). `v19-snag-p4` adds a `500 Hz` unilateral `22–27 mm` swing-foot snag wrench (`28%` episode probability) so the `107.84 KiB` L2-cached policy reflexively high-steps over cords and rug lips.
+- **`ESP32-P4` RISC-V PIE Coprocessor Patch (`idf_pie_coproc.cmake`):** Fixes `esp.lp.setup` hardware-loop interrupt PC corruption (`cpair = 99`), lazy FreeRTOS `CSR 0x7f2` ownership, and omitted `q3` / swapped `SAR` / 8-byte `RV_PIE_XACC` context-frame bugs inside `${CMAKE_BINARY_DIR}/ainekio-idf` with zero SDK mutation.
+- **System 2 (`NeuralPose` + `1,812`-row Freestyle) & System 3 (`20 Hz` Living Presence):** `freestyle_curriculum.py` unified `1,812` motion and recovery examples (adding unloaded rear-leg `sit_brace_enter/exit` for seated two-paw poses) behind `neural-pose-v2-delay` (`0.52°–1.33°` MAE @ `180 ms` Wi-Fi delay) and `v3-jam-compliant`. Between commands, **`ainekio-presence-v1`** (`56,094` params / `56 KB` `int8`, `99.69%` expression accuracy) drives `±8 mm` speech-RMS body motion and `±1.8 mm` stance chatter-relief trims while staying **100% silent during microphone VAD capture**. Full details in [Three-System Neural Motion Architecture](/posts/three-system-neural-architecture/).
+
+---
+
+## 3. 3-tier recovery-first jam protection & per-joint `I²t` winding thermal fuse
+
+After diagnosing a `~156 s` bench stall on `rear_left_shoulder` (`3.5–4.25 W` / `~2.5–2.8 °C/s` winding rise), jam handling was rebuilt from end to end around non-collapsing hardware and closed-loop reflexes:
+
+![3-Tier Jam Protection and Per-Joint I²t Winding Thermal Fuse](/posts/2026-11-16-progress/jam-protection-and-thermal-fuse.webp)
+
+- **`280 ms` pose recoil & `1.8 s` walking reverse unsnag:** `NeuralPose` backs obstructed joints `2.0°` onto the four-bar manifold after `14` ticks (`280 ms`) and runs an automatic `0.85 s` Return-to-Stand if a final pose jams; walking controllers on both P4 C firmware and the Host Gateway execute a `1.8 s` `-0.45 m/s` reverse unsnag (`5.5 s` Ainekio OS goal window).
+- **Full-span `[1..4094]` ADC extrapolation, `800 ms` deadlock bounds & `8–10 s` `I²t` cutoff:** Extrapolates 3-point `CD74HC4067` curves to catch extreme end-stop jams, bounds all four firmware arrival-wait paths (`800 ms`, `STAND_MAX_REPLANS = 2`), and integrates locked-rotor heat above a `7.0°` deadband (`0.0` heat forever under normal standing sag)—cutting `PCA9685 LEDn_OFF_H = 0x10` **only on the jammed servo** at `8–10 s` so the 11 healthy servos hold stance. Verified across 5 hardware-in-the-loop suites in `tests/test_p4_jam_and_thermal.py`; see [Jam Protection & Winding Thermal Fuse](/posts/jam-protection-and-thermal-safety/).
+
+---
+
+## 4. Ainekio OS embodied curiosity, `ExecutionStore` v2 & V2 STL refinements
+
+Alongside the robot runtime changes, six commits (`2cdd0674` → `95658151`) and today's bridge updates landed in **[Ainekio OS](/posts/ainekio-os/)**:
+
+- **System 1 / System 2 Embodied Curiosity (`embodied-curiosity.ts`):** Consumes `Master/gateway`'s 8-sector `SpatialCuriosity` map (`8 × 45°` IMU yaw sectors, `YOLOE` objects, `freeFloorMeters`) to run a **single-hop System 1 physical instinct** (`precomputedEnvironmentPlan` bypassing Intent/Task LLM hops) and escalates visual discoveries to **System 2** (`environment.curiosity-escalation`) for episodic memory, Desire updates, and speech.
+- **`MoGe-2` `8×8` `< 0.30 m` corridor brake & retired `robotCommand` shim:** `summarizeDepthSpatialClearance()` halts forward distance goals immediately when center corridor clearance drops below `0.30 m`, and legacy `robotCommand` catalogs were retired in favor of unified `move` (`locomotionGoal`), `requestMotion`, and `stop` (`detach: true` supported for full PWM release).
+- **Runtime speedups & VRAM-aware `Kokoro` TTS:** `ExecutionStore` v2 replaced async LangChain serialization with synchronous `JsonPlus` + prepared-statement caching; `GeminiAcpServer` (`gemini-4-hydrogen-low` default) pre-warms its 2-session pool on startup and purges closed session artifacts; and `kokoro_server.py` checks `nvidia-smi` (`< 2560 MiB` free VRAM or active LoRA/RL training processes) to switch dynamically between CUDA and CPU ONNX sessions.
+- **Repository consolidation, licensing & 17 V2 Red STLs:** Retired `2.1M` lines of legacy `Emulator`/`Sesame` code, published CAD and model weights in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) under `PolyForm Noncommercial 1.0.0` (code/weights) and `CC BY-NC-SA 4.0` (hardware/docs), and exported **17 updated V2 Red STLs** (`Slave/hardware/v2-12servo/STL/Red/`: `38 mm` styled rods, `35 mm` `4.9 mm` outside-horn plain-bore carriers, carapace side protectors, `Mini560`/charger retainers, compact front panel, and `MG90S` lower housing).
+
+---
+
+## 5. Ainekio V3 progress in Blender: heavy-equipment industrial armor, `2.8"` vault screen & `1.44×` `DS3235` legs
+
+In parallel with V2 floor work, **Ainekio V3** (`scene="V3"` in `v3-2.blend`, `293` visible meshes, watertight chamfered solids with `0` static/dynamic `BVHTree` overlaps) evolved from the November 13 open-leg sketch into a complete, fully shrouded heavy-equipment quadruped (`440.83 × 234.40 × 307.81 mm` ROPS body envelope; `381.42 mm` overall height with amber strobe beacon and whip antenna):
+
+![1:1 orthographic scale comparison of the 650 g Ainekio V2 quadruped beside the armored Ainekio V3 CAD assembly](/posts/ainekio-v3/v3-armored-vs-v2-scale.webp)
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <figure>
+    <img src="/posts/ainekio-v3/v3-armored-leg-face-detail.webp" alt="Close-up Blender CAD render of Ainekio V3's recessed 2.8-inch MSP2807 chest/face display inside a 4-bolt cast-gunmetal bezel, swept ROPS bull-bar, dual brow camera pods, LED worklights, tow shackle, and cam-contoured DS3235 leg armor." width="1440" height="900" loading="lazy" />
+    <figcaption>Armored front fascia &amp; leg detail: recessed <code>2.8"</code> <code>MSP2807</code> (<code>ILI9341</code> SPI TFT) inside a 4-bolt cast-gunmetal bezel behind the swept ROPS bull-bar, dual <code>Arducam B0066</code> brow pods, quad LED worklights/foglights, curved D-ring tow shackle, and <code>DS3235</code> leg armor.</figcaption>
+  </figure>
+  <figure>
+    <img src="/posts/ainekio-v3/v3-armored-interior-cutaway.webp" alt="Cutaway Blender CAD render of Ainekio V3 with upper armor hidden, showing the Radxa Dragon Q6A SBC with Armor 7056A heatsink, 4x 21700 battery pack, ESP32-P4-WIFI6, 14 AWG busbar PCA9685, and blue-anodized DSSERVO DS3235 actuators." width="1440" height="900" loading="lazy" />
+    <figcaption>Internal dual-compute &amp; power cutaway: stacked <code>Radxa Dragon Q6A</code> Linux SBC + <code>Armor 7056A</code> heatsink over <code>4× 21700</code> (<code>2S2P</code>) cells, forward <code>ESP32-P4-WIFI6</code> + <code>14 AWG</code> copper-busbar <code>PCA9685</code>, and 12 waterproof <code>DS3235</code> actuators.</figcaption>
+  </figure>
+</div>
+
+- **Protected `2.8"` `MSP2807` front vault screen + dockable Linux SBC:** Replaces the vulnerable exposed `5.0"` glass face from the early concept with a recessed **`2.8"` `MSP2807` (`240×320` `ILI9341` SPI TFT, `86 × 50 mm` PCB)** behind a 4-bolt Cast Gunmetal bezel and ROPS bull-bar (`SCK→GPIO20, SDI→GPIO21, CS→GPIO22, DC→GPIO23, RESET→GPIO26`), while keeping the onboard **`Radxa Dragon Q6A` Linux SBC** (`+ Wi-Fi / Bluetooth` and rear HDMI/USB-C bulkhead ports under the 9-slat tail radiator) for autonomous onboard Ainekio OS cognition and external monitor docking.
+- **Scaled `87.65 / 40.0 / 93.55 / 158.4 mm` shrouded `DS3235` legs (`131.3 mm` belly clearance):** Widens shoulder wheelbase to `271.5 mm` (`+143.5 / -128.0 mm` X) and armors all four legs with `3-Ring Stepped Planetary Hip Drums`, `Cam Contoured Thigh Shells`, `Twin Parallel Rear Thigh Struts`, `Contoured Shin & Ø31.6 mm Knee Drums`, and `60°-Sloped V-Split-Toe Crawler Feet`.
+
+See the updated **[Ainekio V3 CAD & Hardware Reference](/posts/ainekio-v3-preview/)** for all six views and complete mechanical dimensions.

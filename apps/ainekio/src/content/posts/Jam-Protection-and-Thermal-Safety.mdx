@@ -1,0 +1,100 @@
+---
+title: "Recovery-First Jam Protection & Per-Joint I²t Servo Winding Thermal Fuse"
+published: 2026-11-16T10:00:00-08:00
+updated: 2026-11-16
+description: "How Ainekio V2 prevents micro-servo burnout without collapsing on healthy legs: 280 ms NeuralPose manifold recoil, 1.8 s on-chip & host reverse unsnag, full-span [1..4094] ADC stall detection, deadlock-bounded arrival waits, and an 8–10 s per-joint I²t thermal fuse."
+image: "/posts/2026-11-16-progress/jam-protection-and-thermal-fuse.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, Safety, Servo Feedback, Jam Protection, Thermal Fuse, ESP32-P4, PCA9685, Firmware, NeuralPose]
+category: "Robot Runtime"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: control
+  generation: v2
+  kind: reference
+  next: gateway-and-simulator
+  related: ["three-system-neural-architecture", "ainekio-cockpit", "ainekio-v2", "2026-11-16-cockpit-stream-jam-fuse-and-v3-armor"]
+---
+
+At `5.0 V`, a stalled `MG90S` micro servo draws `700–850 mA` (`3.5–4.25 W`) into a tiny brushed coreless/iron-core rotor with almost zero thermal mass—driving an adiabatic copper-winding temperature rise of **`~2.5–2.8 °C/s`**. During bench testing, a single blocked joint (`rear_left_shoulder`) pushed against a mechanical stop outside its nominal `[500, 2800] µs` interior calibration span while waiting on an unbounded arrival checkpoint, cooking the winding over `~156 s`. Conversely, cutting global `PCA9685 OE` power the instant any foot brushes a chair leg would make the robot collapse onto its belly on every minor snag.
+
+To solve both problems without relying on slow, multi-second LLM re-prompting loops, Ainekio V2 now runs a **deterministic 3-tier closed-loop jam & thermal protection stack** spanning `NeuralPose`, the Host Gateway, **Ainekio OS**, and `ESP32-P4` C firmware (`body.c`, `servo_feedback_position.c`, and `servo_feedback_model.c`).
+
+---
+
+## 1. Tier 1: Sub-second pose recoil (`280 ms`) & autonomous walking unsnag (`1.8 s`)
+
+Most physical obstructions clear cleanly as soon as the controller stops pushing into them:
+
+### Tier 1A — System 2 (`NeuralPose`) `280 ms` manifold recoil & `0.85 s` Return-to-Ready
+
+In `experiments/freestyle/neural_pose/executor.py`, `_detect_stalled_recoils()` monitors usable 4th-wire potentiometer feedback on every `50 Hz` (`20 ms`) tick:
+
+1. **Immediate `2.0°` backoff (`0.28 s`):** When `|target_deg - filtered_model_deg| ≥ 10.0°` (`STALL_ERROR_DEG`) and directional velocity toward the target is `< 6.0 deg/s` (`STALL_VELOCITY_DEG_S`) for **`14` consecutive ticks (`280 ms`)**, the executor immediately recoils the obstructed joint **`2.0°` off the stop** (`val - 2.0° * sign_dir`), projects the updated angles onto the exact closed four-bar manifold (`manifold.project_angles_deg()`), and logs a `joint_recoil` event.
+2. **Non-freezing choreography continuation:** Recoiled static targets are propagated forward into subsequent `pose_goal` and `oscillate_goal` segments so the remaining 11 unobstructed joints finish the gesture normally.
+3. **Automatic `0.85 s` Return-to-Ready:** If the final holding posture of a non-`stand` program experienced a jam (`final_posture_jammed`), the executor automatically runs a smooth **`0.85 s` Return-to-Ready (`STAND_ANGLES_DEG`)** trajectory before locking hold. The earlier slow `Bridge.event` path that re-prompted the `0.8B` Freestyle LLM on every stall has been retired.
+
+### Tier 1B — System 1 (`MicroDuck` & Host Gait) `1.8 s` reverse unsnag
+
+When a foot hooks under a power cord or raised rug transition during forward walking (`cmd_twist[0] > 0.05 m/s`), both locomotion owners execute a symmetric **autonomous reverse-unsnag reflex**:
+
+- **On-chip `ESP32-P4` (`Slave/firmware/esp32p4-wifi6/main/body.c`):** Integrates per-joint snag duration whenever `|err_cd| > 1400.0 cd` (`14.0°`) and `vel_toward < 1000.0 cd/s` (`10.0 deg/s`). At **`1.8 s`** (`MICRODUCK_SNAG_WINDOW_US`), firmware overrides `cmd_twist` to **`[-0.45, 0.0, 0.0]`** at full stride scale (`xy_scale ≥ 1.0`) for **`1.8 s`** (`MICRODUCK_UNSNAG_DURATION_US`), backing the foot clear before resuming forward walking (`2.5 s` cooldown).
+- **Host neural gait (`Master/gateway/server/service.py`):** Triggers the same `(-0.45, 0.0, 0.0)` `1.8 s` reverse maneuver (`neural_gait_unsnag`) on either 4th-wire joint lag (`≥ 14.0°` at `< 10.0 deg/s`) **or** zero visual/ground-plane odometry progress (`disp < 0.025 m` over `1.8 s` while `lag ≥ 10.0°` or `stalled_joints != 0`).
+- **Ainekio OS goal alignment (`active-task.ts`):** `trackLocomotionProgress()` widened its cognitive stall threshold from `3.0 s` to **`5.5 s`** (`stalledSamples ≥ 4 && elapsedMs ≥ 5,500`) so the `1.8 s` snag detection + `1.8 s` reverse unsnag + forward re-attempt (~`4.5 s`) finishes cleanly before Goal Review flags a blocked path.
+
+---
+
+## 2. Tier 2: Full-span `[1..4094]` ADC jam measurement & deadlock elimination
+
+Audit of the `156 s` bench stall exposed two firmware blind spots: ADC values outside the `[500, 2800] µs` interior calibration points were ignored as out-of-range, and four arrival-wait loops could block indefinitely if a limb never reached its landmark. Both are now closed:
+
+- **Full-span ADC extrapolation (`servo_feedback_position.c`):** `jam_measurement()` linearly extrapolates each joint's 3-point `CD74HC4067` NVS curve across the entire non-railed 12-bit ADC span (`raw ∈ [1..4094]`), catching hard mechanical jams near `0°` and `180°` while rejecting true open/short wire faults (`0` or `4095`).
+- **Oscillating `50 Hz` target peak unlock:** `ainekio_p4_feedback_stalled()` enforces `deadband_us = max(tolerance_us, 80.0 µs)`, resets its timer on genuine slewing (`vel_toward ≥ 80.0 µs/s`), and tracks `last_target_us` (`shift_us = max(progress_us, 25.0 µs)`) so cyclic `50 Hz` `walk_target` / `MicroDuck` / `NeuralPose` streams cannot hide a pinned shaft behind shifting targets.
+- **Four firmware arrival deadlocks bounded (`body.c`):**
+  1. `MOTION_FREESTYLE` single-frame arrival waits are bounded at **`800 ms`** (`ARRIVAL_WAIT_TIMEOUT_US = 800,000`), clamping blocked channels to their measured pose on timeout.
+  2. `MOTION_CLIP` cubic-spline checkpoints are bounded at **`800 ms`**.
+  3. `Stand` posture checkpoints are bounded at **`800 ms`** with **`STAND_MAX_REPLANS = 2`**, eliminating infinite `stand_hold_recover()` replan loops against an obstacle.
+  4. Inactivity `lay_down` (`release_on_complete`) is guaranteed to reach `ainekio_pca_idle()` (`PCA9685 OE = 1`) even if a leg is obstructed during rest entry.
+
+---
+
+## 3. Tier 3: Per-joint `I²t` winding thermal fuse & selective `PCA9685` cutoff
+
+If an external clamp or wedged limb keeps a servo stalled past Tier 1 and Tier 2, `Slave/firmware/esp32p4-wifi6/main/servo_feedback_model.c` protects the motor copper directly using a per-joint **`I²t` thermal accumulator**:
+
+```text
+Constants:
+  DEADBAND      = 7.0°       # Normal standing gravity sag generates ZERO heat forever
+  SLEW          = 12.0 deg/s # Moving shafts do not accumulate locked-rotor heat
+  FULL_SPAN     = 11.0°      # 18.0° stalled error = 1.0× nominal stall dissipation
+  MAX_DUTY      = 1.25       # Caps extreme angular error at 1.25² = 1.56× heating rate
+  TRIP_SECONDS  = 9.0 s      # Trips in 8.0–10.0 s under hard rotor lock
+  COOL_SECONDS  = 12.0 s     # Linear cool-down retaining thermal memory across re-jams
+  REARM_LOAD    = 0.35       # Channel stays masked (0 µs) until cooled below 35%
+```
+
+When `thermal_load[j]` reaches `1.0`:
+
+1. **Selective single-channel cutoff (no belly-flop collapse):** `handle_thermal_cutoff()` latches `thermal_cutoff_mask |= (1U << j)` and writes `pulses[ch] = 0` (`PCA9685` register `LEDn_OFF_H = 0x10`) **only on the tripped servo channel**—leaving `PCA9685 OE` active so the **11 healthy servos continue holding the robot's stance**.
+2. **Immediate wire & workflow cancellation:** Firmware terminates the active motion (`ESP_ERR_INVALID_STATE`) and emits `{"t":"event","name":"servo_stall","joint_mask":...,"outputs_released":true}`. On receipt, `GatewayConnection._abort_pending_motion_on_stall()` and `EnvironmentAdapter._await_motion_with_stall_abort()` immediately cancel pending motion futures and Freestyle jobs, while Ainekio OS also supports explicit `stop` with `detach: true` for full PWM disarm on operator command.
+3. **Cooldown & smooth re-seeding:** Masked channels remain at `0 µs` across new commands until `thermal_load[j] < 0.35`, then `seed_zero_channels()` re-seeds the joint from its live 4th-wire shaft reading so re-engagement never snaps abruptly.
+
+---
+
+## 4. Hardware-in-the-loop C + Python verification (`test_p4_jam_and_thermal.py`)
+
+The 614-line integration harness `tests/test_p4_jam_and_thermal.py` compiles production `body.c`, `pca9685.c`, and `servo_feedback_*.c` into a native shared library wired to a simulated `I2C` `PCA9685` register bank and 12-bit `CD74HC4067` ADC, verifying five end-to-end invariants:
+
+| Test Suite | Simulated Condition | Verified Hardware & Register Outcome |
+| :--- | :--- | :--- |
+| **Suite 1A · Standing Gravity Sag** | `60 s` continuous `Stand` hold at `6.5°` steady load sag | `thermal_load == 0.0`, **`0` false trips** |
+| **Suite 1B · `50 Hz` Neural Streaming** | `60 s` cyclic `50 Hz` `walk_target` foot offsets | High-water peak tracking unlocks cleanly; **`0` false trips** |
+| **Suite 2 & 3 · Hard End-Stop Lock** | Joint `0` pinned against stop outside `[500, 2800] µs` | Trips in **`8,000–10,000 ms`**, sets `LED0_OFF_H = 0x10`, keeps **`ch 1..11` live**, emits schema-valid `outputs_released: true` |
+| **Suite 4A–4C · Deadlock Bounds** | Blocked Freestyle frame, blocked `Stand`, blocked `lay_down` | Freestyle settles at `800 ms`; `Stand` caps at `2` replans; `lay_down` reaches `PCA9685 OE = 1` |
+| **Suite 5 · On-Chip MicroDuck Snag** | Forward twist (`> 0.05 m/s`) with `> 14°` swing snag | Detects snag in `1.76–1.90 s` and drives `-0.45 m/s` reverse unsnag for `1.78–1.84 s` |

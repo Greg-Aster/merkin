@@ -1,8 +1,8 @@
 ---
 title: "Robot Host Gateway, Cockpit HUD, Body Control & MuJoCo Hardware Twins"
 published: 2026-08-27T08:45:00-07:00
-updated: 2026-11-12
-description: "How Ainekio's host gateway, full-viewport Cockpit HUD, Body Control workbench, and 4,096-environment MuJoCo hardware-twin simulator manage robot sessions, optical-flow obstacle range, servo calibration, and neural gaits."
+updated: 2026-11-16
+description: "How Ainekio's host gateway, Body Control workbench, full-viewport Cockpit HUD, and 4,096-environment MuJoCo hardware-twin simulator manage robot sessions, live Ainekio OS streams, servo calibration, and neural gaits."
 image: "/assets/ainekio/v2/gateway-simulator-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Greg the Mechanic"
@@ -18,9 +18,11 @@ reading:
   topic: control
   generation: both
   kind: reference
-  next: ainekio-os
-  related: ["protocol-and-safety", "gait-development", "metahuman-integration", "vision-loop"]
+  next: ainekio-cockpit
+  related: ["ainekio-cockpit", "jam-protection-and-thermal-safety", "protocol-and-safety", "three-system-neural-architecture"]
 ---
+
+> **Dedicated Cockpit HUD Guide:** For a complete tour of **Ainekio Cockpit** (`#cockpit-section`)—including one-tap **`Tap to Talk`**, the translucent **7-graph Ainekio OS live stream** (`POST /api/metahuman-stream`), 10 immediate-apply runtime switches, and the 2D vector joystick—see **[Ainekio Cockpit: Full-Screen Camera HUD, Tap-to-Talk & Live Stream](/posts/ainekio-cockpit/)**.
 
 Three connected subsystems in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) sit between the physical `ESP32-P4` V2 robot (or V1 `ESP32-S3` baseline) and **[Ainekio OS](/posts/ainekio-os/)** ([embodied integration](/posts/metahuman-integration/)), giving both a real-time session owner and a workbench for calibration, teleoperation, and physics simulation:
 

@@ -81,6 +81,7 @@ const journalChain = [
   '2026-11-01-neural-walking',
   '2026-11-06-carpet-trials-rl-and-big-brother',
   '2026-11-11-on-chip-neural-gait-and-ainekio-os',
+  '2026-11-16-cockpit-stream-jam-fuse-and-v3-armor',
   'project-overview',
 ]
 
@@ -106,4 +107,4 @@ for (const name of ['topic', 'generation', 'kind', 'q']) assert.match(library, n
 const updatesHtml = page('updates')
 assert.ok(links(updatesHtml).includes(route('project-overview')), 'System overview must be reachable from the journal')
 
-console.log(`Reading flow checks passed: ${articles.length} articles, unbroken 17-milestone journal sequence, original V1 sources, and library coverage.`)
+console.log(`Reading flow checks passed: ${articles.length} articles, unbroken 18-milestone journal sequence, original V1 sources, and library coverage.`)

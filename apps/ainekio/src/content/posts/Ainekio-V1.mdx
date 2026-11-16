@@ -1,9 +1,9 @@
 ---
 title: "Ainekio V1: Eight-Servo ESP32-S3 Quadruped Systems Guide"
 published: 2026-08-31
-updated: 2026-11-13
-description: "Complete technical systems guide to Ainekio V1: the 8-servo ESP32-S3 quadruped that proved out Ainekio's embodied voice, vision, 52 OLED expressions, 38 .amot motions, protocol-v1 WebSocket bridge, and Ainekio OS loop—plus its dedicated Blender CAD scene."
-image: "/posts/ainekio-v1/v1-cad-three-quarter.webp"
+updated: 2026-11-16
+description: "Complete technical systems guide to Ainekio V1: physical 8-servo ESP32-S3 quadruped photos, dedicated Blender CAD scene, embodied voice, vision, 52 OLED expressions, 38 .amot motions, and protocol-v1 Ainekio OS loop."
+image: "/posts/ainekio-v1/ainekio-v1-physical.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Greg the Mechanic"
 authorBio: "Builder of Ainekio & Ainekio OS"
@@ -45,6 +45,11 @@ Ainekio V1 splits responsibility cleanly across three layers so servo pulse gene
 ## 2. Mechanical design: physical August-2026 build & dedicated Blender CAD scene
 
 Mechanically, V1 is a **custom eight-degree-of-freedom (`4 legs × 2 DOF`) spider-stance quadruped** modeled and iteratively refined across `FrameV1` → `Frame6` → `Frame7` → `Frame8` (`Bottom-Housing1`, `oled-box1`, `Board-hold1..3`, `R2V10` upper brackets, and serrated lower legs) in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot).
+
+<figure className="my-6">
+  <img src="/posts/ainekio-v1/ainekio-v1-physical.webp" alt="Physical Ainekio V1 eight-servo ESP32-S3 quadruped standing on carpet with glowing blue 0.96-inch SSD1306 OLED eyes, red front camera/OLED housing, black R2V10 upper brackets, and cyan serrated 2-DOF MG90S legs." width="1200" height="800" loading="lazy" />
+  <figcaption>Physical Summer 2026 Ainekio V1 prototype on carpet: red front bezel housing the <code>0.96"</code> <code>SSD1306</code> OLED eyes and <code>OV3660</code> camera, black <code>R2V10</code> upper brackets, and cyan serrated 2-DOF <code>MG90S</code> legs.</figcaption>
+</figure>
 
 Alongside the physical August 2026 floor prototype, V1 now has a **dedicated, fully modeled Blender CAD scene (`Scene 'v1 -'`, `177.45 × 194.09 × 88.91 mm` standing envelope)** in the project's multi-generation CAD file—reconstructing the complete chassis, `R2V10` trussed upper leg brackets, serrated lower legs, front OLED + camera face housing, and a cleaned-up internal electronics and dual-battery layout:
 

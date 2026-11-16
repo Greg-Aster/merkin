@@ -26,9 +26,9 @@ const galleryJsonLd = {
 const groups = [
   { id: 'photos', shortLabel: 'Workbench photos', title: 'From the workbench', intro: 'Photographs of the physical build: the 12-servo V2 feedback rebuild, single-leg linkage prototypes, and the earlier 8-servo V1 robot.', kinds: ['photo'] },
   { id: 'videos', shortLabel: 'Floor videos', title: 'The physical robot on video', intro: 'Onboard OV5647 camera footage from November carpet walking trials, plus floor and bench tests.', kinds: ['physical-video'] },
-  { id: 'animation', shortLabel: 'Sim & RL studies', title: 'Simulation, neural gait & motion studies', intro: 'MuJoCo quadruped RL baselines (stock Pupper V3), C-gait imitation policy comparisons, and Blender motion studies.', kinds: ['animation'] },
+  { id: 'animation', shortLabel: 'Sim & RL studies', title: 'Simulation, neural gait & motion studies', intro: 'Hardware-twin MuJoCo quadruped RL rollouts (MicroDuck v17/v18 System-ID), C-gait imitation policy comparisons, and Blender motion studies.', kinds: ['animation'] },
   { id: 'diagrams', shortLabel: 'Wiring & LCD faces', title: 'V2 hardware, wiring & LCD expressions', intro: 'Pinouts, PCA9685 PWM and CD74HC4067 4th-wire feedback wiring diagrams, and the 59-expression ST7789 LCD contact sheet.', kinds: ['diagram'] },
-  { id: 'design', shortLabel: 'CAD & MJCF', title: 'CAD & MuJoCo MJCF models', intro: 'The November 5 full-CAD MuJoCo MJCF model (0.650 kg, four-bar equality constraints) and earlier Blender assembly studies.', kinds: ['design'] },
+  { id: 'design', shortLabel: 'CAD & MJCF', title: 'CAD & MuJoCo MJCF models', intro: 'The November 16 armored Ainekio V3 Blender CAD assembly (v3-2.blend), the full-CAD V2 MuJoCo MJCF model (0.650 kg), and earlier assembly studies.', kinds: ['design'] },
 ].map(group => ({
   ...group,
   items: gallery.filter(item => group.kinds.includes(item.kind)),
@@ -61,7 +61,7 @@ const labelForKind = (kind: string) =>
       <div class="gallery-meta-row">
         <p class="gallery-milestone">
           <strong>Latest milestone:</strong>
-          <a href={url('/posts/2026-11-11-on-chip-neural-gait-and-ainekio-os/')}>Nov 11 on-chip ESP32-P4 neural gait, Cockpit HUD &amp; Ainekio OS →</a>
+          <a href={url('/posts/2026-11-16-cockpit-stream-jam-fuse-and-v3-armor/')}>Nov 16 Cockpit live stream, 3-system neural motion, I²t jam fuse &amp; V3 armored CAD →</a>
         </p>
         <ShareBar title={galleryTitle} description={galleryDescription} url={Astro.url.href} />
       </div>

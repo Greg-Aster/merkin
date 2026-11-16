@@ -1,8 +1,8 @@
 ---
 title: "Quadruped Robot Control Protocol: Framing, Leases, Watchdogs & 4th-Wire Safety Bounds"
 published: 2026-08-27T09:00:00-07:00
-updated: 2026-11-12
-description: "How protocol-v1 frames binary media and JSON control messages between the host gateway and ESP32-P4 firmware, enforces command leases, startup slew limiting, Cartesian workspace projection, and 4th-wire stall protection."
+updated: 2026-11-16
+description: "How protocol-v1 frames binary media and JSON control messages between the host gateway and ESP32-P4 firmware, enforces command leases, startup slew limiting, Cartesian workspace projection, and 3-tier jam & per-joint I²t thermal protection."
 image: "/assets/ainekio/v2/protocol-safety-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Greg the Mechanic"
@@ -18,9 +18,11 @@ reading:
   topic: control
   generation: both
   kind: reference
-  next: gateway-and-simulator
-  related: ["ainekio-v2", "gait-development", "ainekio-os", "metahuman-integration"]
+  next: jam-protection-and-thermal-safety
+  related: ["jam-protection-and-thermal-safety", "ainekio-cockpit", "ainekio-v2", "ainekio-os"]
 ---
+
+> **Deep-Dive Jam & Thermal Reference:** For the complete **3-tier closed-loop jam & winding protection stack** (`280 ms` `NeuralPose` manifold recoil, `1.8 s` autonomous reverse unsnag, `[1..4094]` full-span ADC jam sensing, `800 ms` deadlock bounds, and the `8–10 s` per-joint `I²t` `PCA9685` cutoff), see **[Recovery-First Jam Protection & Per-Joint I²t Winding Fuse](/posts/jam-protection-and-thermal-safety/)**.
 
 Ainekio's onboard microcontroller (`ESP32-P4` on V2, `ESP32-S3` on V1; [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) and **[Ainekio OS](/posts/ainekio-os/)** communicate across a strict wire and safety boundary called **`protocol-v1`**. Language models never write raw PWM duty cycles to servo pins; cognition proposes high-level postures, bounded velocity twists, or structured target programs, and onboard C firmware enforces calibration, linkage geometry, slew limits, shaft arrival, and emergency stop rules.
 

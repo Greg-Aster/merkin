@@ -1,8 +1,8 @@
 ---
 title: "Ainekio V2 Hardware: 3D-Printed 12-Servo ESP32-P4 Quadruped, 4th-Wire MG90S Feedback & Pinout"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-11-12
-description: "Complete V2 hardware reference: 650 g 12-servo closed-loop chassis, 35/20/28/38/55 mm leg linkages, on-chip 107.8 KB L2-cached ESP32-P4 neural gait, PCA9685 and CD74HC4067 (C4–C15 → GPIO49) wiring diagrams, and the Wireless Keeper Bridge."
+updated: 2026-11-16
+description: "Complete V2 hardware reference: 650 g 12-servo closed-loop chassis, 35/20/28/38/55 mm leg linkages, on-chip 107.8 KB L2-cached ESP32-P4 neural gait, per-joint I²t thermal fuse, PCA9685 and CD74HC4067 (C4–C15 → GPIO49) wiring diagrams, and STL archives."
 image: "/assets/ainekio/2026-10-12-refresh/blender-front.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Greg the Mechanic"
@@ -19,7 +19,7 @@ reading:
   generation: v2
   kind: reference
   next: protocol-and-safety
-  related: ["gait-development", "ainekio-os", "v1-v2-comparison", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
+  related: ["jam-protection-and-thermal-safety", "three-system-neural-architecture", "ainekio-v3-preview", "2026-11-16-cockpit-stream-jam-fuse-and-v3-armor"]
 ---
 
 Ainekio V2 ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) is a `650 g`, twelve-servo, closed-loop quadruped body built around the **Waveshare ESP32-P4-WIFI6**. Where the eight-servo V1 prototype moved each leg in a single plane with two open-loop motors, V2 adds a third actuator per leg for lateral hip roll (`±h`), a compact four-bar linkage for upper-carrier (`alpha`) and knee (`theta`) actuation with curved rocking soles, 4th-wire potentiometer feedback on all twelve joints, a `208 Hz` inertial measurement unit, on-chip `50 Hz` Core 1 neural gait execution inside the `ESP32-P4`'s `128 KB` L2 cache, and a modular **Wireless Keeper Bridge** `2S` power carrier.
@@ -90,7 +90,7 @@ Earlier design studies tested heavy external USB-PD power banks (`Anker` 10,000 
 
 ## CAD, 3D printing & repository
 
-All V2 structural parts—including the recessed `1.9"` LCD bezel and wireless spacers, lower-jaw `OV5647` camera mount, battery-mounted Wireless Keeper Bridge, snap-in PCB clips, shimmed upper servo brackets, four-bar leg links, curved rocking soles, and the `140 × 110 mm` bench calibration stand—are modeled in Blender and printed on a desktop FDM printer in PLA/PETG. Firmware, gateway code, CAD/STL files, and trained model assets live in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot).
+All V2 structural parts—including the recessed `1.9"` LCD bezel and wireless spacers, lower-jaw `OV5647` camera mount, battery-mounted Wireless Keeper Bridge, snap-in PCB clips, shimmed upper servo brackets, `35 mm` `4.9 mm` outside-horn plain-bore carriers, `38 mm` styled coupler rods, carapace side protectors, curved rocking soles, and the `140 × 110 mm` bench calibration stand—are modeled in Blender and printed on a desktop FDM printer in PLA/PETG. Firmware, gateway code, printable STLs (`Slave/hardware/v2-12servo/STL/`), and trained model assets live in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot).
 
 ## Design evolution from V1 to V2
 
@@ -109,6 +109,7 @@ All V2 structural parts—including the recessed `1.9"` LCD bezel and wireless s
 
 For photographs, CAD diffs, and bench measurements from each stage of the V2 mechanical build, follow the dated journal milestones:
 
+- **[Nov 16, 2026 — Per-joint I²t jam fuse, 3-system neural motion, 17 refined V2 STLs, and V3 armored CAD](/posts/2026-11-16-cockpit-stream-jam-fuse-and-v3-armor/)**: Selective `PCA9685` winding thermal cutoff, `MicroDuck v18/v19-snag-p4` + RISC-V PIE fixes, 17 updated V2 STLs, and the `440.8 mm` armored V3 CAD assembly.
 - **[Nov 11, 2026 — On-chip 107.8 KB P4 neural gait, Wireless Keeper Bridge, and 30 Red shell/bezel STLs](/posts/2026-11-11-on-chip-neural-gait-and-ainekio-os/)**: Core 1 `50 Hz` L2-cached MicroDuck inference, physical hardwood & seam bouts, and 30 updated Red STLs.
 - **[Nov 6, 2026 — Carpet trials, Pupper V3 / MJX simulation, and hardware diagrams](/posts/2026-11-06-carpet-trials-rl-and-big-brother/)**: Physical carpet walking trials, full-CAD Blender-to-MuJoCo MJCF export, and finalized wiring diagrams.
 - **[Nov 1, 2026 — Completed body prototype and neural walking](/posts/2026-11-01-neural-walking/)**: Finalized face panels, LCD carrier, servo covers, and 12-part STL package.

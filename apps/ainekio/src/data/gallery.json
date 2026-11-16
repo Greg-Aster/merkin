@@ -1,5 +1,112 @@
 [
   {
+    "id": "v3-armored-three-quarter",
+    "kind": "design",
+    "title": "Ainekio V3 heavy-equipment armored CAD (front three-quarter)",
+    "caption": "November 16 Blender CAD (v3-2.blend, 293 visible meshes): 440.8 × 234.4 × 307.8 mm ROPS body (381.4 mm with whip antenna), recessed 2.8-inch MSP2807 vault display, dual brow camera pods, LED worklights, and 12 waterproof DS3235 crawler legs.",
+    "date": "2026-11-16",
+    "sourceFile": "v3_hero_three_quarter.png",
+    "sourceBytes": 1575331,
+    "sourceSha256": "2e2389d804b21e77bbeb5500b3e740464bb5e5d3d300ce2a8492bc3b15f259fa",
+    "variants": [
+      {
+        "src": "/gallery/v3-armored-three-quarter-480.webp",
+        "width": 480,
+        "height": 300,
+        "bytes": 10800
+      },
+      {
+        "src": "/gallery/v3-armored-three-quarter-960.webp",
+        "width": 960,
+        "height": 600,
+        "bytes": 32428
+      },
+      {
+        "src": "/gallery/v3-armored-three-quarter-1600.webp",
+        "width": 1600,
+        "height": 1000,
+        "bytes": 64088
+      }
+    ]
+  },
+  {
+    "id": "v3-armored-interior-cutaway",
+    "kind": "design",
+    "title": "Ainekio V3 internal cutaway: Radxa Q6A, ESP32-P4 & 4× 21700 bay",
+    "caption": "Cutaway CAD render with upper dorsal armor hidden, revealing the Radxa Dragon Q6A Linux SBC + Armor 7056A heatsink above four 21700 (2S2P) cells, ESP32-P4-WIFI6, 14 AWG copper-busbar PCA9685, and blue-anodized DS3235 actuators.",
+    "date": "2026-11-16",
+    "sourceFile": "v3_interior_cutaway.png",
+    "sourceBytes": 1625352,
+    "sourceSha256": "afc8f1961339258abdf8270ec35718014328355a520d34982742d5096c3d2b39",
+    "variants": [
+      {
+        "src": "/gallery/v3-armored-interior-cutaway-480.webp",
+        "width": 480,
+        "height": 300,
+        "bytes": 12804
+      },
+      {
+        "src": "/gallery/v3-armored-interior-cutaway-960.webp",
+        "width": 960,
+        "height": 600,
+        "bytes": 36928
+      },
+      {
+        "src": "/gallery/v3-armored-interior-cutaway-1600.webp",
+        "width": 1600,
+        "height": 1000,
+        "bytes": 71972
+      }
+    ]
+  },
+  {
+    "id": "microduck-v18-sysid",
+    "kind": "animation",
+    "title": "MicroDuck v18-p4 System-ID evaluation (107.8 KB int8)",
+    "caption": "November 12 System-ID repair trained from physical V2 floor traces (-19.1° J3 compliance & weak RL gain): +1.3246 10-scenario composite score, 0 falls, +69.5% weak-RL speed, and +79.7% faster 14–17 mm cable traversal.",
+    "date": "2026-11-12",
+    "sourceFile": "microduck_v18_p4_replay.mp4",
+    "sourceBytes": 2863394,
+    "sourceSha256": "2999e300227d7e18f0117238e41d33ae46c281fff178bf45e2b5d42160b67319",
+    "src": "/gallery/microduck-v18-sysid.mp4",
+    "bytes": 1950718,
+    "width": 960,
+    "height": 540,
+    "duration": 22.08,
+    "poster": "/gallery/microduck-v18-sysid-poster.webp",
+    "posterBytes": 27070
+  },
+  {
+    "id": "ainekio-v1-physical",
+    "kind": "photo",
+    "title": "Physical Ainekio V1 eight-servo ESP32-S3 quadruped on carpet",
+    "caption": "Summer 2026 baseline robot on living-room carpet showing its glowing 0.96-inch SSD1306 OLED eyes, chin OV3660 camera, Frame7/Frame8 chassis, and cyan serrated 2-DOF MG90S legs.",
+    "date": "2026-08-31",
+    "sourceFile": "ainekio-v1-physical.jpg",
+    "sourceBytes": 165928,
+    "sourceSha256": "dd6ece4e207e3422187b5c727256cfe0839f902f091d25213ef6314d71dbcf79",
+    "variants": [
+      {
+        "src": "/gallery/ainekio-v1-physical-480.webp",
+        "width": 480,
+        "height": 320,
+        "bytes": 37480
+      },
+      {
+        "src": "/gallery/ainekio-v1-physical-960.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 82212
+      },
+      {
+        "src": "/gallery/ainekio-v1-physical-1200.webp",
+        "width": 1200,
+        "height": 800,
+        "bytes": 105882
+      }
+    ]
+  },
+  {
     "id": "ainekio-v2-neural-walk-first-run",
     "kind": "physical-video",
     "title": "First real-life neural network walking run",
@@ -207,23 +314,6 @@
     "duration": 41.52,
     "poster": "/gallery/carpet-trial-20261102-poster.webp",
     "posterBytes": 57358
-  },
-  {
-    "id": "pupper-v3-mujoco-baseline",
-    "kind": "animation",
-    "title": "Stock Pupper V3 MuJoCo RL baseline",
-    "caption": "November 5 reference simulation: the upstream Pupper V3 policy walking +1.68 m forward in MuJoCo as the verified quadruped RL baseline before transferring to the Ainekio MJX four-bar model.",
-    "date": "2026-11-05",
-    "sourceFile": "stock-pupper-v3-forward.mp4",
-    "sourceBytes": 5332738,
-    "sourceSha256": "6525282b01f4dfe67e1e1fd2ce49ef7304d509bb8bc558dfd908fb6fd3faaff6",
-    "src": "/gallery/pupper-v3-mujoco-baseline.mp4",
-    "bytes": 1266829,
-    "width": 1280,
-    "height": 720,
-    "duration": 22.033333,
-    "poster": "/gallery/pupper-v3-mujoco-baseline-poster.webp",
-    "posterBytes": 6892
   },
   {
     "id": "ainekio-mjcf-preview",

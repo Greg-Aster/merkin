@@ -1,8 +1,8 @@
 ---
 title: "Quadruped Gait Development: On-Chip ESP32-P4 Neural Gait, Four-Bar Kinematics & MuJoCo MJX RL"
 published: 2026-09-15
-updated: 2026-11-12
-description: "Complete locomotion reference for Ainekio: V2 four-bar linkage kinematics, closed-loop Stand and Walk, the 349-motion Freestyle library, imitation carpet trials, MuJoCo MJX reinforcement learning, and on-chip 50 Hz 107.8 KB ESP32-P4 MicroDuck walking."
+updated: 2026-11-16
+description: "Complete locomotion reference for Ainekio: V2 four-bar linkage kinematics, closed-loop Stand and Walk, the 1,812-example Freestyle curriculum, MuJoCo MJX RL, and the 3-system neural stack (on-chip MicroDuck v18/v19, 50 Hz NeuralPose, and 20 Hz Living Presence)."
 image: "/assets/ainekio/2026-10-12-refresh/blender-side.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Greg the Mechanic"
@@ -18,9 +18,11 @@ reading:
   topic: legs
   generation: both
   kind: reference
-  next: protocol-and-safety
-  related: ["ainekio-v2", "2026-11-11-on-chip-neural-gait-and-ainekio-os", "2026-11-06-carpet-trials-rl-and-big-brother", "2026-11-01-neural-walking"]
+  next: three-system-neural-architecture
+  related: ["three-system-neural-architecture", "ainekio-v2", "2026-11-16-cockpit-stream-jam-fuse-and-v3-armor", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
 ---
+
+> **Latest Neural Motion Reference:** For the complete November 16 architecture covering **System 1** (`MicroDuck v18` System-ID & `v19-snag-p4` swing-foot snag plant + `ESP32-P4` RISC-V PIE vector fixes), **System 2** (`50 Hz` `NeuralPose` + `1,812`-example Freestyle curriculum), and **System 3** (`20 Hz` Autonomic Living Presence), see **[Three-System Neural Motion Stack](/posts/three-system-neural-architecture/)**.
 
 Ainekio's locomotion stack ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) has grown from eight open-loop servo channels playing fixed keyframe tables on V1 to a twelve-servo, closed-loop kinematic and **on-chip neural walking architecture** on V2:
 
