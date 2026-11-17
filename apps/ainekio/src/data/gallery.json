@@ -6,26 +6,26 @@
     "caption": "November 16 Blender CAD (v3-2.blend, 293 visible meshes): 440.8 × 234.4 × 307.8 mm ROPS body (381.4 mm with whip antenna), recessed 2.8-inch MSP2807 vault display, dual brow camera pods, LED worklights, and 12 waterproof DS3235 crawler legs.",
     "date": "2026-11-16",
     "sourceFile": "v3_hero_three_quarter.png",
-    "sourceBytes": 1575331,
-    "sourceSha256": "2e2389d804b21e77bbeb5500b3e740464bb5e5d3d300ce2a8492bc3b15f259fa",
+    "sourceBytes": 1583732,
+    "sourceSha256": "e2e2cef5973ab88e91758057120f726d7b32bffe19d7c93245567f60edab5659",
     "variants": [
       {
         "src": "/gallery/v3-armored-three-quarter-480.webp",
         "width": 480,
         "height": 300,
-        "bytes": 10800
+        "bytes": 10720
       },
       {
         "src": "/gallery/v3-armored-three-quarter-960.webp",
         "width": 960,
         "height": 600,
-        "bytes": 32428
+        "bytes": 33058
       },
       {
         "src": "/gallery/v3-armored-three-quarter-1600.webp",
         "width": 1600,
         "height": 1000,
-        "bytes": 64088
+        "bytes": 66952
       }
     ]
   },
@@ -36,26 +36,26 @@
     "caption": "Cutaway CAD render with upper dorsal armor hidden, revealing the Radxa Dragon Q6A Linux SBC + Armor 7056A heatsink above four 21700 (2S2P) cells, ESP32-P4-WIFI6, 14 AWG copper-busbar PCA9685, and blue-anodized DS3235 actuators.",
     "date": "2026-11-16",
     "sourceFile": "v3_interior_cutaway.png",
-    "sourceBytes": 1625352,
-    "sourceSha256": "afc8f1961339258abdf8270ec35718014328355a520d34982742d5096c3d2b39",
+    "sourceBytes": 1586000,
+    "sourceSha256": "d9e9856f95f6da190cb9d033d74059296e8a04f4bb44ce5ba753a43050da3134",
     "variants": [
       {
         "src": "/gallery/v3-armored-interior-cutaway-480.webp",
         "width": 480,
         "height": 300,
-        "bytes": 12804
+        "bytes": 11608
       },
       {
         "src": "/gallery/v3-armored-interior-cutaway-960.webp",
         "width": 960,
         "height": 600,
-        "bytes": 36928
+        "bytes": 34296
       },
       {
         "src": "/gallery/v3-armored-interior-cutaway-1600.webp",
         "width": 1600,
         "height": 1000,
-        "bytes": 71972
+        "bytes": 68766
       }
     ]
   },
