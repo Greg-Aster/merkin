@@ -60,6 +60,112 @@
     ]
   },
   {
+    "id": "v1-blender-three-quarter",
+    "kind": "design",
+    "title": "Ainekio V1 in Blender ('v1 -' scene): 8-servo chassis & 43-wire harness",
+    "caption": "Three-quarter Blender CAD view of the eight-servo ESP32-S3 Ainekio V1 quadruped showing its Frame7 chassis, R2V10 trussed upper leg brackets, serrated 2-DOF lower legs, ventilated dual 2S 14500 battery guards, 43-wire internal harness, and front 0.96-inch SSD1306 OLED + Arducam B0066 face housing.",
+    "date": "2026-11-17",
+    "sourceFile": "v1_clean_three_quarter.png",
+    "sourceBytes": 402845,
+    "sourceSha256": "4a6251751807b5ac50bd2ef214e47280d460c5a66b0ee34ea459f7695b505b05",
+    "variants": [
+      {
+        "src": "/gallery/v1-blender-three-quarter-480.webp",
+        "width": 480,
+        "height": 300,
+        "bytes": 6854
+      },
+      {
+        "src": "/gallery/v1-blender-three-quarter-960.webp",
+        "width": 960,
+        "height": 600,
+        "bytes": 25562
+      },
+      {
+        "src": "/gallery/v1-blender-three-quarter-1600.webp",
+        "width": 1600,
+        "height": 1000,
+        "bytes": 53698
+      }
+    ]
+  },
+  {
+    "id": "v1-blender-workspace",
+    "kind": "design",
+    "title": "Ainekio V1 Blender workspace: open electronics bay & detached Frame8 cap",
+    "caption": "Blender 'v1 -' workspace staging with the Frame8 top enclosure cap parked beside the wired Frame7 body, exposing the Freenove ESP32-S3-WROOM CAM, Adafruit PCA9685 servo header, Mini560 5V/5A buck, and HiLetgo 2S USB-C boost charger.",
+    "date": "2026-11-17",
+    "sourceFile": "v1_clean_workspace.png",
+    "sourceBytes": 273955,
+    "sourceSha256": "810ca7ea6494549e69cd3bdb14363fbf523dfb6b188e07b59e11b714a7e6beb1",
+    "variants": [
+      {
+        "src": "/gallery/v1-blender-workspace-480.webp",
+        "width": 480,
+        "height": 300,
+        "bytes": 5182
+      },
+      {
+        "src": "/gallery/v1-blender-workspace-960.webp",
+        "width": 960,
+        "height": 600,
+        "bytes": 21072
+      },
+      {
+        "src": "/gallery/v1-blender-workspace-1600.webp",
+        "width": 1600,
+        "height": 1000,
+        "bytes": 45422
+      }
+    ]
+  },
+  {
+    "id": "v1-blender-top-electronics",
+    "kind": "design",
+    "title": "Ainekio V1 top orthographic deck in Blender: ESP32-S3, PCA9685 & dual 2S routing",
+    "caption": "Orthographic top-down Blender CAD deck of Ainekio V1 showing symmetrical left and right 2S 1000 mAh (14500) battery bays, servo lead routing along all four R2V10 brackets, central ESP32-S3 + PCA9685 distribution deck, and rear dual-buck power regulation.",
+    "date": "2026-11-17",
+    "sourceFile": "v1_clean_top_electronics.png",
+    "sourceBytes": 407020,
+    "sourceSha256": "fb2f84fb45e53821f7141eeff525126e22c8de145bb09ea24679069da07cf8c1",
+    "variants": [
+      {
+        "src": "/gallery/v1-blender-top-electronics-480.webp",
+        "width": 480,
+        "height": 300,
+        "bytes": 7448
+      },
+      {
+        "src": "/gallery/v1-blender-top-electronics-960.webp",
+        "width": 960,
+        "height": 600,
+        "bytes": 19366
+      },
+      {
+        "src": "/gallery/v1-blender-top-electronics-1600.webp",
+        "width": 1600,
+        "height": 1000,
+        "bytes": 37570
+      }
+    ]
+  },
+  {
+    "id": "v3-gaits-and-motions-2x-standard",
+    "kind": "animation",
+    "title": "Why robot motions don't translate: V2's 47-motion library replayed on V3 (2×)",
+    "caption": "An example of why robot motions do not translate across bodies and each robot needs to learn its own motions: replaying Ainekio V2's 47 analytical gaits and gestures onto the 1.44× longer-legged, heavier V3 chassis produces foot slip, pitch oscillation, and geometry mismatches—illustrating why each generation must learn policies tailored to its own mass and kinematics.",
+    "date": "2026-11-17",
+    "sourceFile": "v3-gaits-and-motions-2x-standard.mp4",
+    "sourceBytes": 18348452,
+    "sourceSha256": "c21a8e9aa0db3eac5e1911ca1088a1654c00d0cc872a530755f35f3e3fb79492",
+    "src": "/gallery/v3-gaits-and-motions-2x-standard.mp4",
+    "poster": "/gallery/v3-gaits-and-motions-2x-standard-poster.webp",
+    "bytes": 18348452,
+    "width": 1280,
+    "height": 720,
+    "duration": 384.133333
+  },
+  {
     "id": "microduck-v18-sysid",
     "kind": "animation",
     "title": "MicroDuck v18-p4 System-ID evaluation (107.8 KB int8)",

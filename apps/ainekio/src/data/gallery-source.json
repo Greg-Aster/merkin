@@ -16,6 +16,39 @@
     "date": "2026-11-16"
   },
   {
+    "id": "v1-blender-three-quarter",
+    "kind": "design",
+    "source": "media-originals/cad/v1_clean_three_quarter.png",
+    "title": "Ainekio V1 in Blender ('v1 -' scene): 8-servo chassis & 43-wire harness",
+    "caption": "Three-quarter Blender CAD view of the eight-servo ESP32-S3 Ainekio V1 quadruped showing its Frame7 chassis, R2V10 trussed upper leg brackets, serrated 2-DOF lower legs, ventilated dual 2S 14500 battery guards, 43-wire internal harness, and front 0.96-inch SSD1306 OLED + Arducam B0066 face housing.",
+    "date": "2026-11-17"
+  },
+  {
+    "id": "v1-blender-workspace",
+    "kind": "design",
+    "source": "media-originals/cad/v1_clean_workspace.png",
+    "title": "Ainekio V1 Blender workspace: open electronics bay & detached Frame8 cap",
+    "caption": "Blender 'v1 -' workspace staging with the Frame8 top enclosure cap parked beside the wired Frame7 body, exposing the Freenove ESP32-S3-WROOM CAM, Adafruit PCA9685 servo header, Mini560 5V/5A buck, and HiLetgo 2S USB-C boost charger.",
+    "date": "2026-11-17"
+  },
+  {
+    "id": "v1-blender-top-electronics",
+    "kind": "design",
+    "source": "media-originals/cad/v1_clean_top_electronics.png",
+    "title": "Ainekio V1 top orthographic deck in Blender: ESP32-S3, PCA9685 & dual 2S routing",
+    "caption": "Orthographic top-down Blender CAD deck of Ainekio V1 showing symmetrical left and right 2S 1000 mAh (14500) battery bays, servo lead routing along all four R2V10 brackets, central ESP32-S3 + PCA9685 distribution deck, and rear dual-buck power regulation.",
+    "date": "2026-11-17"
+  },
+  {
+    "id": "v3-gaits-and-motions-2x-standard",
+    "kind": "animation",
+    "source": "public/gallery/v3-gaits-and-motions-2x-standard.mp4",
+    "title": "Why robot motions don't translate: V2's 47-motion library replayed on V3 (2×)",
+    "caption": "An example of why robot motions do not translate across bodies and each robot needs to learn its own motions: replaying Ainekio V2's 47 analytical gaits and gestures onto the 1.44× longer-legged, heavier V3 chassis produces foot slip, pitch oscillation, and geometry mismatches—illustrating why each generation must learn policies tailored to its own mass and kinematics.",
+    "date": "2026-11-17",
+    "posterTime": 5
+  },
+  {
     "id": "microduck-v18-sysid",
     "kind": "animation",
     "source": "media-originals/training/microduck_v18_p4_replay.mp4",

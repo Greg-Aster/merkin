@@ -26,9 +26,9 @@ const galleryJsonLd = {
 const groups = [
   { id: 'photos', shortLabel: 'Workbench photos', title: 'From the workbench', intro: 'Photographs of the physical build: the 12-servo V2 feedback rebuild, single-leg linkage prototypes, and the earlier 8-servo V1 robot.', kinds: ['photo'] },
   { id: 'videos', shortLabel: 'Floor videos', title: 'The physical robot on video', intro: 'Onboard OV5647 camera footage from November carpet walking trials, plus floor and bench tests.', kinds: ['physical-video'] },
-  { id: 'animation', shortLabel: 'Sim & RL studies', title: 'Simulation, neural gait & motion studies', intro: 'Hardware-twin MuJoCo quadruped RL rollouts (MicroDuck v17/v18 System-ID), C-gait imitation policy comparisons, and Blender motion studies.', kinds: ['animation'] },
+  { id: 'animation', shortLabel: 'Sim & RL studies', title: 'Simulation, neural gait & motion studies', intro: 'Cross-morphology V3 motion-transfer rollouts showing why each robot body must learn its own motions, MuJoCo quadruped RL rollouts (MicroDuck v17/v18 System-ID), and C-gait imitation policy comparisons.', kinds: ['animation'] },
   { id: 'diagrams', shortLabel: 'Wiring & LCD faces', title: 'V2 hardware, wiring & LCD expressions', intro: 'Pinouts, PCA9685 PWM and CD74HC4067 4th-wire feedback wiring diagrams, and the 59-expression ST7789 LCD contact sheet.', kinds: ['diagram'] },
-  { id: 'design', shortLabel: 'CAD & MJCF', title: 'CAD & MuJoCo MJCF models', intro: 'The November 16 armored Ainekio V3 Blender CAD assembly (v3-2.blend), the full-CAD V2 MuJoCo MJCF model (0.650 kg), and earlier assembly studies.', kinds: ['design'] },
+  { id: 'design', shortLabel: 'CAD & MJCF', title: 'CAD & MuJoCo MJCF models', intro: 'Blender CAD assemblies across all three generations—armored Ainekio V3 (Scene \'V3\'), the 8-servo Ainekio V1 workspace & 43-wire harness (Scene \'v1 -\'), and the full-CAD 650 g Ainekio V2 & MuJoCo MJCF models.', kinds: ['design'] },
 ].map(group => ({
   ...group,
   items: gallery.filter(item => group.kinds.includes(item.kind)),
