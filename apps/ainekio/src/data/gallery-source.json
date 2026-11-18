@@ -66,6 +66,33 @@
     "date": "2026-08-31"
   },
   {
+    "id": "v2-shake-and-greet-test",
+    "kind": "physical-video",
+    "source": "public/gallery/v2-shake-and-greet-test.mp4",
+    "title": "Capability check: wake-up stretch, physical shake reflex & snarky remark",
+    "caption": "End-to-end IMU reflex and Ainekio OS continuity test on carpet: Ainekio boots, stretches, converses, gets picked up and shaken mid-turn—firing an immediate snarky vocal and LCD reaction via fast-body-event-mode—and resumes friendly interaction afterward.",
+    "date": "2026-11-17",
+    "posterTime": 75
+  },
+  {
+    "id": "v2-jam-protection-test",
+    "kind": "physical-video",
+    "source": "public/gallery/v2-jam-protection-test.mp4",
+    "title": "Capability check: boot, greet, stretch & 4th-wire jam/fault detection",
+    "caption": "Startup and closed-loop fault-awareness check on V2: Ainekio boots, rises to Stand, greets and observes the room, hits a stalled joint during its stretch, detects the shaft tracking error via 4th-wire potentiometer feedback, protects the winding, and asks for help.",
+    "date": "2026-11-17",
+    "posterTime": 18
+  },
+  {
+    "id": "v2-basic-motion-test",
+    "kind": "physical-video",
+    "source": "public/gallery/v2-basic-motion-test.mp4",
+    "title": "Capability check: voice prompt, thinking face & physical gesture response",
+    "caption": "Basic V2 conversational motion turn on living-room carpet: Ainekio listens to a spoken prompt, shifts to its animated thinking expression while Ainekio OS selects an action, executes a coordinated body gesture, and delivers its spoken reply.",
+    "date": "2026-11-17",
+    "posterTime": 8
+  },
+  {
     "id": "ainekio-v2-neural-walk-first-run",
     "kind": "physical-video",
     "source": "media-originals/ainekio-v2-neural-walk-first-run.mp4",
